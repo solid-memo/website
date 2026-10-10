@@ -1,0 +1,638 @@
+@base <https://solid-memo.com/decks/english-and-british-monarchs/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "English and British monarchs"@en ,
+                  "Englands och Storbritanniens monarker"@sv ,
+                  "잉글랜드와 영국의 군주"@ko ,
+                  "Englische und britische Monarchen"@de ,
+                  "Monarcas de Inglaterra y del Reino Unido"@es ,
+                  "Monarques d’Angleterre et du Royaume-Uni"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The 42 monarchs of England from William I (1066), of Great Britain from 1707 and of the United Kingdom from 1801, to Charles III. Front: the monarch's regnal name in English and Swedish; back: the years of the reign, counted from accession rather than coronation, with both periods for the two kings who reigned twice (a single year means the whole reign fell within that year); a note gives the royal house. Disputed claimants (Empress Matilda, Lady Jane Grey) are not counted, William III and Mary II have a card each, and there was no monarch during the Interregnum of 1649–1660. Based on Wikidata and the 1911 Encyclopædia Britannica (public domain), and checked against the Royal Household's website (royal.uk) and Wikipedia."@en ,
+                        "De 42 monarkerna i England från Vilhelm I (1066), i Storbritannien från 1707 och i Förenade kungariket från 1801, fram till Charles III. Framsida: monarkens regentnamn på engelska och svenska; baksida: regeringsåren, räknade från trontillträdet och inte från kröningen, med båda perioderna för de två kungar som regerade två gånger (ett enda årtal betyder att hela regeringstiden föll inom det året); en anteckning anger kungahuset. Omstridda tronpretendenter (kejsarinnan Matilda, Jane Grey) räknas inte, Vilhelm III och Maria II har ett kort var, och under interregnumet 1649–1660 fanns ingen monark. Uppgifterna bygger på Wikidata och 1911 års upplaga av Encyclopædia Britannica (fri från upphovsrätt) och är kontrollerade mot det brittiska kungahusets webbplats (royal.uk) och Wikipedia."@sv ,
+                        "윌리엄 1세(1066)부터의 잉글랜드, 1707년부터의 그레이트브리튼, 1801년부터의 연합왕국의 군주 42명, 찰스 3세까지. 앞면: 영어와 스웨덴어로 된 군주의 재위명; 뒷면: 대관식이 아니라 즉위부터 센 재위 연도, 두 번 재위한 두 왕은 두 기간 모두(연도가 하나뿐이면 재위 전체가 그해 안에 있었다는 뜻); 메모에 왕가가 나온다. 논란이 있는 왕위 주장자(마틸다 황후, 제인 그레이)는 세지 않았고, 윌리엄 3세와 메리 2세는 각각 카드가 있으며, 1649–1660년 공위 시대에는 군주가 없었다. Wikidata와 1911년판 Encyclopædia Britannica(퍼블릭 도메인)를 바탕으로 하고 영국 왕실 웹사이트(royal.uk)와 위키백과로 확인했다."@ko ,
+                        "Die 42 Monarchen von England ab Wilhelm I. (1066), von Großbritannien ab 1707 und vom Vereinigten Königreich ab 1801 bis Charles III. Vorderseite: der Herrschername des Monarchen auf Englisch und Schwedisch; Rückseite: die Regierungsjahre, gezählt ab der Thronbesteigung, nicht ab der Krönung, mit beiden Zeiträumen für die zwei Könige, die zweimal regierten (eine einzelne Jahreszahl bedeutet, dass die ganze Regierungszeit in dieses Jahr fiel); eine Anmerkung nennt das Königshaus. Umstrittene Thronanwärter (Kaiserin Matilda, Jane Grey) werden nicht gezählt, Wilhelm III. und Maria II. haben je eine Karte, und während des Interregnums 1649–1660 gab es keinen Monarchen. Beruht auf Wikidata und der Encyclopædia Britannica von 1911 (gemeinfrei) und ist mit der Website des britischen Königshauses (royal.uk) und Wikipedia abgeglichen."@de ,
+                        "Los 42 monarcas de Inglaterra desde Guillermo I (1066), de Gran Bretaña desde 1707 y del Reino Unido desde 1801, hasta Carlos III. Anverso: el nombre de reinado del monarca en inglés y en sueco; reverso: los años del reinado, contados desde la subida al trono y no desde la coronación, con los dos periodos para los dos reyes que reinaron dos veces (un solo año significa que todo el reinado transcurrió dentro de ese año); una nota indica la casa real. No se cuentan los pretendientes al trono en disputa (la emperatriz Matilde, Juana Grey), Guillermo III y María II tienen una tarjeta cada uno, y durante el interregno de 1649 a 1660 no hubo monarca. Basado en Wikidata y en la Encyclopædia Britannica de 1911 (de dominio público), y comprobado con el sitio web de la Casa Real británica (royal.uk) y con Wikipedia."@es ,
+                        "Les 42 monarques d’Angleterre depuis Guillaume Ier (1066), de Grande-Bretagne depuis 1707 et du Royaume-Uni depuis 1801, jusqu’à Charles III. Recto : le nom de règne du monarque en anglais et en suédois ; verso : les années du règne, comptées à partir de l’accession au trône et non du couronnement, avec les deux périodes pour les deux rois qui ont régné deux fois (une seule année signifie que tout le règne s’est déroulé au cours de cette année) ; une note indique la maison royale. Les prétendants contestés (l’emperesse Mathilde, Jeanne Grey) ne sont pas comptés, Guillaume III et Marie II ont chacun une carte, et il n’y a pas eu de monarque pendant l’interrègne de 1649 à 1660. D’après Wikidata et l’Encyclopædia Britannica de 1911 (domaine public), et vérifié sur le site web de la maison royale britannique (royal.uk) et sur Wikipédia."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q18810062> ,
+                        <https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:history ;
+    dcat:keyword "English monarchs"@en ,
+                 "British monarchs"@en ,
+                 "kings and queens of England"@en ,
+                 "royal houses"@en ,
+                 "British history"@en ,
+                 "engelska monarker"@sv ,
+                 "brittiska monarker"@sv ,
+                 "Englands kungar och drottningar"@sv ,
+                 "kungahus"@sv ,
+                 "brittisk historia"@sv ,
+                 "잉글랜드 군주"@ko ,
+                 "영국 군주"@ko ,
+                 "잉글랜드 왕과 여왕"@ko ,
+                 "왕가"@ko ,
+                 "영국 역사"@ko ,
+                 "englische Monarchen"@de ,
+                 "britische Monarchen"@de ,
+                 "Könige und Königinnen von England"@de ,
+                 "Königshäuser"@de ,
+                 "britische Geschichte"@de ,
+                 "monarcas ingleses"@es ,
+                 "monarcas británicos"@es ,
+                 "reyes y reinas de Inglaterra"@es ,
+                 "casas reales"@es ,
+                 "historia británica"@es ,
+                 "monarques anglais"@fr ,
+                 "monarques britanniques"@fr ,
+                 "rois et reines d’Angleterre"@fr ,
+                 "maisons royales"@fr ,
+                 "histoire britannique"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/english-and-british-monarchs/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/english-and-british-monarchs/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#english-and-british-monarchs> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#english-and-british-monarchs> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q18810062> ,
+              <https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica> ,
+              <https://www.royal.uk/kings-and-queens-1066> ,
+              <https://en.wikipedia.org/wiki/List_of_English_monarchs> ,
+              <https://sv.wikipedia.org/wiki/Henrik_VIII_av_England> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ,
+                       <#review-7> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators). Every query, URL and command run is listed under queries; the raw responses were saved in the research scratch directory."@en ,
+                 "Offices: the Wikidata API (query 1) found the four items for the offices the deck covers: Monarch of England (Q18810062), Monarch of Great Britain (Q110324075, 1707–1800), monarch of the United Kingdom of Great Britain and Ireland (Q111722535, 1801–1927) and Monarch of the United Kingdom (Q9134365, since 1927)."@en ,
+                 "Selection and reign years: query 2 listed every non-deprecated position-held (P39) statement for the four offices with its start and end times. The query's filter, a start time in 1066 or later (FILTER(YEAR(?start) >= 1066)), returns 44 people: Harold Godwinson (Q159597), whose statement starts on 6 January 1066 (Julian; the endpoint shows 1066-01-11 after converting to Gregorian), and the 43 holders whose first statement starts on or after William I's accession on 25 December 1066 (Julian). Harold, the last king before the Norman Conquest, was then removed by hand, because the deck starts with the Norman Conquest; the Anglo-Saxon and Danish kings before him are already outside the filter. That left 43 people. Lady Jane Grey (Q162356), who has a P39 statement for July 1553, was left out as a disputed claimant (see the selection), leaving 42 cards. The statements of one person under successive offices were joined into one reign (Anne: England 1702–1707 and Great Britain 1707–1714; George III: Great Britain 1760–1801 and the United Kingdom 1801–1820; George V: 1910–1927 and 1927–1936). Reigns interrupted by another monarch keep both periods (Henry VI, Edward IV). The back gives the years only, start–end with an en dash; a reign that began and ended in the same year is a single year (Edward V, Edward VIII), and the description says so, since in the back-to-front direction \"1483\" and \"1936\" are years in which other monarchs also reigned; the reigning monarch's back is open-ended (\"2022–\")."@en ,
+                 "Calendar: Wikidata stores most dates before the British calendar change of 1752 in the Julian calendar (calendar model Q1985786), and the SPARQL endpoint (queries 2 and 23) returns every date converted to the proleptic Gregorian calendar, e.g. William I's start time, stored as 25 December 1066 (Julian), comes back as 1066-12-31. The first version of the dossier quoted the converted dates; in quality-control round 4 every date in the cards' Wikidata evidence was replaced by the value as stored, with its calendar model (Julian or Gregorian), from a fresh wbgetentities download (query 20). No year on any card changes. Some of Wikidata's dates around 1700 are stored as Gregorian although they are the Old Style days (e.g. William III, 28 December 1694); they are quoted as stored."@en ,
+                 "Reign convention: a reign is counted from accession, the moment the previous monarch died, abdicated or was deposed (the Royal Household's accession page: \"A new Sovereign succeeds to the throne as soon as his or her predecessor dies\"), not from coronation; so Edward V and Edward VIII, who were never crowned, are counted. The convention changes the start year of many reigns (Elizabeth II, for example, acceded on 6 February 1952 and was crowned in 1953); for William I, who came to the throne by conquest, Wikidata's statement starts on 25 December 1066 (Julian), the day of his coronation (the 1911 Britannica), so the year is 1066 either way. Charles II's reign is given from the Restoration in 1660, as Wikidata does (start time 29 May 1660, Julian) and the Royal Household and Wikipedia confirm, with a note that he had taken the title of king on his father's execution in 1649 (the 1911 Britannica)."@en ,
+                 "Names: the English front is the regnal name: the Wikidata English or multilingual (\"mul\") label or alias of the person, or that label with the territorial suffix (\"of England\", \"of Great Britain\") removed (query 4; e.g. the mul label \"Henry VIII\", the en label \"John of England\" shortened to \"John\"); the Royal Household's page headings and the English Wikipedia lists write the names the same way (verification). The Swedish front is the established Swedish form: the Wikidata Swedish label or alias with the territorial suffix (\"av England\", \"av Storbritannien\") removed, e.g. \"Henrik VIII av England\" (with the alias \"Henrik VIII\"), \"Vilhelm I av England\" (alias), \"Johan av England\", \"Stefan av Blois\", \"Anna av Storbritannien\", \"Viktoria av Storbritannien\". The Swedish forms translate the given name as Swedish has long done for historical monarchs (Vilhelm, Henrik, Rikard, Johan, Edvard, Maria, Elisabet, Jakob, Karl, Anna, Georg, Viktoria) but keep \"Elizabeth II\" and \"Charles III\" untranslated: that is how the Wikidata Swedish labels and the Swedish Wikipedia articles write them (\"Elizabeth II av Storbritannien\", \"Charles III av Storbritannien\"). Each Swedish form was checked against the first sentence of the person's Swedish Wikipedia article (query 13), which is quoted in the card's evidence. Nationalencyklopedin and Språkrådet could not be read from the research environment (query 15)."@en ,
+                 "Royal houses (the back note): the house is the Wikidata P53 (family) of the monarch (query 3), named by the house item's English label and, in Swedish, its Swedish label (query 5: Normandiska ätten, Huset Plantagenet, Huset Lancaster, Huset York, Huset Tudor, Huset Stuart, Huset Nassau-Oranien, Huset Hannover, Huset Windsor). For James I, Charles II, James II, Mary II and Anne Wikidata's P53 is Q3973466 \"House of Stewart di Darnley\", which Wikidata has as part of (P361) the House of Stuart (Q179840), Charles I's P53; the notes give the House of Stuart, and the builder checked both statements. Where Wikidata gives several houses (Henry II: Plantagenet, Normandy and Angevins; Henry IV: Lancaster and Plantagenet; Elizabeth II: Windsor, preferred, besides Saxe-Coburg and Gotha and the British royal family; Charles III: Windsor and Glücksburg), the note gives the one the monarch shares with the neighbouring monarchs, or the preferred one; George V's note gives both of his, with Wikidata's 1917 qualifiers. Stephen is of the House of Blois and William III of the House of Orange-Nassau (Wikidata P53). \"Huset Sachsen-Coburg-Gotha\" is the Wikidata Swedish label \"Sachsen-Coburg-Gotha\" (Q1753846) with \"Huset\" prefixed, as in the other Swedish house labels, and is also the Swedish Wikipedia's usage (the category \"Huset Sachsen-Coburg-Gotha\" on the article on Edvard VII). \"Huset Blois\" is the compiler's rendering in the same pattern (Q1590002 has no Swedish label), confirmed by Swedish Wikipedia usage (query 14). The Royal Household's house pages and the English Wikipedia lists' sections were consulted to confirm the houses (verification only). Where the Wikidata P53 value is the house the note names, the builder checked it."@en ,
+                 "Cross-check against the Royal Household: the royal.uk sitemap (query 7) gave the URLs of the history pages; the list \"Kings and Queens from 1066\" and the page of each monarch and house were downloaded (queries 8 and 9). The heading of each monarch's page (e.g. \"Henry VI (r.1422-1461 and 1470-1471)\") was compared by the dossier script with the card's back: the headings of the 39 monarch pages (William III and Mary II share one) agree with the 40 cards' years. For Elizabeth II and Charles III, which have no such heading, the accession page (6 February 1952), the news items of 8 September 2022 and the Court Circular of 1 October 2026 (\"The King and Queen this evening received …\") were read; the last confirms that Charles III was still reigning shortly before the deck was made."@en ,
+                 "Independent cross-check: the English Wikipedia lists of English and of British monarchs (query 10) give exact accession and end dates for every card; rows.py printed the name and reign cell of every row, and every card's years agree with them. These lists cite the Royal Household among other references, so they are not wholly independent of it; Britannica and Historic Royal Palaces, the intended independent references, refused the research environment's requests (HTTP 403, query 15). Wikidata's statements, the content source, agree with them except as recorded in quality control (William III's own statement starts in 1694, Stephen's reign is split in two, Mary I's start day)."@en ,
+                 "Notes: each back note starts with the royal house and, where it helps the learner, adds a short fact in the compiler's own words. Every such fact comes from a content source: from Wikidata (nicknames as aliases, e.g. \"William Rufus\"/\"Vilhelm Rufus\", \"Richard the Lionheart\"/\"Rikard Lejonhjärta\", \"John I Lackland\"/\"Johan utan land\", \"William of Orange\", \"James VII of Scotland\"/\"Jakob VII av Skottland\"; P39 qualifiers for joint reigns (P1706) and abdications (P1534) and for successors; deaths (P1196, P509, P570); the items Lady Jane Grey Q162356, Empress Matilda Q150872, Magna Carta Q12519, Battle of Bosworth Field Q222013, Princes in the Tower Q648580, Interregnum Q2558636, Stuart Restoration Q846848, Glorious Revolution Q189508, Acts of Union 1707 Q193515, Regency era Q25861 and House of Windsor Q81589; the first and last monarch of a house from the P53 statements, and the longest reign from the P39 statements, query 22; James I as the first holder of both the English and the Scottish crown, query 23), or, where Wikidata does not state it, from the 1911 Encyclopædia Britannica on Wikisource (query 21; the facts are listed in that source's usedFor). Each is quoted in the card's evidence. The Royal Household and Wikipedia were consulted to confirm them and supplied none. In quality-control round 4 the facts that neither content source states were removed or reworded: Edward V and Edward VIII never crowned (removed), the Royal Household grouping William III with the Stuarts (removed), Charles II's regnal years officially counted from 1649 (now: he took the title of king in 1649), Richard I and John as Angevin kings (now: Henry II counted among the Angevins, from his father's county of Anjou), Richard II \"deposed\" (now: forced to give up the throne, as Wikidata's abdication and the 1911 Britannica have it) and James II \"deposed\" (now: lost the throne in the Glorious Revolution)."@en ,
+                 "Study direction: every back is unique (the builder checked this), and asking for the monarch from the reign years makes sense, so the deck is bidirectional."@en ,
+                 "The dossier was written by a script (build_dossier.py) from the saved responses and a hand-written table of the cards (cards_data.py), so that every quoted Wikidata value, royal.uk heading and Swedish Wikipedia sentence is copied from the saved data and asserted to be verbatim; the builder then ran its Wikidata checks against live Wikidata (query 17)."@en ,
+                 "Helper scripts: the research used small Python scripts in the research scratch directory, which are not published with the deck; what each did: wd.py ran Wikidata API searches, SPARQL queries (POST to https://query.wikidata.org/sparql, retrying on HTTP 429/5xx) and entity downloads and saved the JSON responses; sitemap.py downloaded the three royal.uk sitemap pages and printed the URLs whose path names a monarch, a house or the history pages; royal.py downloaded royal.uk pages, saved the HTML and reduced the <main> element to plain text (scripts and styles removed, tags stripped, whitespace collapsed); wiki.py fetched Wikipedia articles through the MediaWiki API (revision id, wikitext and plain-text introduction); rows.py printed the section headings and the name-and-reign cell of every table row in the two English Wikipedia lists' wikitext, with references and footnote templates removed; cards_data.py is the hand-written table of the cards (fronts, backs, notes, which page and row each card's evidence quotes), and build_dossier.py assembled the dossier from it and the saved responses, asserting that every quoted value occurs verbatim in the saved data. Split P39 statements of one person were merged by hand in cards_data.py, as step 2 describes. In quality-control round 3 the name part of each card's Wikidata evidence was rewritten from a fresh wbgetentities download (query 18) by a further script, which states which label or alias the card text is, or which one it shortens. In quality-control round 4: fetch.py downloaded the full entities (wbgetentities: labels, aliases, descriptions, claims) of the 42 monarchs and of the house, office and event items; show.py printed selected statements with their qualifiers, times as stored and calendar models; search.py ran wbsearchentities and label lookups; ws.py fetched 1911 Britannica articles from Wikisource (parse API: revision id and rendered text, tags stripped) and grep.py printed passages from them; patch4.py rewrote the dossier, asserting that every 1911 Britannica quotation occurs verbatim in the saved text and generating the Wikidata dates from the saved entities."@en ,
+                 "Selection: All monarchs of England from William I (1066) to the union with Scotland, of Great Britain from 1707 and of the United Kingdom from 1801 to the present, Charles III: the holders of the four Wikidata offices from 1066, 42 people with a card each. The deck starts at 1066 because the brief is the post-Conquest monarchy (the Anglo-Saxon and Danish kings, Harold Godwinson and Edgar Ætheling are left out). Left out as disputed claimants, whom the English Wikipedia lists under \"Disputed claimant\": Empress Matilda (in 1141; the Royal Household treats her with Stephen, 1135–1154, and Wikidata has no office statement for her), Louis of France (1216–1217) and Lady Jane Grey (proclaimed 10 July 1553, deposed 19 July; the Royal Household lists her, \"Lady Jane Grey (r. 10-19 July 1553)\", and says \"six if Lady Jane Grey is included\" of the Tudors, Wikidata has an office statement for her, but the English Wikipedia lists her as a disputed claimant, and her nine days are not counted as a reign in this deck): she is mentioned in the note on Mary I. William III and Mary II, joint monarchs from 1689, have a card each with their own years (1689–1702 and 1689–1694), as the Royal Household gives them. The Interregnum (1649–1660, the Commonwealth and the Protectorate of Oliver and Richard Cromwell) had no monarch and has no card; it is mentioned in the notes on Charles I and Charles II. Edward V (1483) and Edward VIII (1936), who reigned but were never crowned, are included, since a reign is counted from accession. The monarchs of Scotland before 1603 and of Ireland are not included, except as the same people (James I, also James VI of Scotland). Charles III's reign is open-ended, as of 4 October 2026."@en ,
+                 "Licensing: The deck is CC0 1.0 like most of the library. Its content sources are Wikidata, whose structured data is CC0, and the 1911 Encyclopædia Britannica as transcribed on Wikisource, which is in the public domain in the United States (published before 1931). Everything on the cards comes from these two or is the compiler's own documented decision: the selection of monarchs (the holders of the four Wikidata offices from 1066, less the disputed claimants named in the selection), the reign years (P39 start and end times; Stephen's two statements joined into one reign because Matilda is not counted; William III's 1689 start from Wikidata's statement for Mary II, together with William III, and his Wikidata descriptions), the English and Swedish names, the royal houses and their Swedish names (Wikidata P53 and labels; the House of Stuart of James I, Charles II, James II, Mary II and Anne because their Wikidata house, Stewart of Darnley, is part of the House of Stuart; \"Huset Blois\" and \"Huset Sachsen-Coburg-Gotha\" the compiler's renderings in the pattern of the Wikidata Swedish house labels), and the facts in the notes (Wikidata statements and items, the first and last of a house and the longest reign computed from them, and the facts listed in the 1911 Britannica's usedFor). From the 1911 Britannica only facts were taken, restated in the compiler's words, with no text copied; it is credited all the same. The Royal Household's website (royal.uk, © Crown Copyright, no open licence, so all rights reserved), the English Wikipedia and the Swedish Wikipedia (CC BY-SA 4.0) are verification sources only: they were consulted to confirm the facts the content sources gave and supplied no fact, text, table or selection. Until quality-control round 4 some note facts and the Stuart houses had been taken from royal.uk and the English Wikipedia; round 4 re-sourced each of them to Wikidata or the 1911 Britannica and removed the ones neither states. The selection is the complete set of the office holders, which coincides with any full list of English and British monarchs because it is the complete set, not a choice taken from a list. Quotations in the provenance report's evidence are not part of the CC0 deck: they remain under their sources' terms (Wikipedia text CC BY-SA 4.0, by Wikipedia contributors, each linked to the quoted revision; the Royal Household's text © Crown Copyright, all rights reserved; the 1911 Britannica public domain in the United States) and are short quotations given only to make the verification checkable."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every card's reign against Wikidata's P39 statements, the Royal Household's page headings and the English Wikipedia lists; the Swedish names against Wikidata labels and the Swedish Wikipedia; the houses against the Royal Household's house pages, Wikidata P53 and the English Wikipedia; the contested cases."@en ;
+    rdfs:comment "Scope: All 42 cards, the sources and the deck metadata."@en ,
+                 "Outcome: The Royal Household's headings and the English Wikipedia lists agree on the years of all 42 reigns, and the Swedish Wikipedia introductions agree wherever they give the years; Wikidata agrees except for William III's start (1694 for 1689) and the split of Stephen's reign, where the cards follow the better sources and no check depends on the Wikidata value. The contested cases were decided as the selection explains (Matilda, Louis and Lady Jane Grey left out; William III and Mary II a card each; no card for the Interregnum; Edward V and Edward VIII counted from accession). The brief's Swedish \"Karl III\" was replaced by the established \"Charles III\". Builder checks cover every front in both languages, every office and most houses."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 42 cards: every reign against a live Wikidata SPARQL query of the P39 statements of the four offices, an independent web list of reign years and the Royal Household's pages; the notes; recency of Charles III's reign (Court Circular of 1 October 2026); the Swedish names against Wikidata."@en ,
+                 "Outcome: No factual errors; the count of 42 and the coverage hold, and the round-0 resolutions (William III 1689–1702, Stephen as one reign, Mary I after Lady Jane Grey, Charles III in Swedish) were confirmed. One warning on William III's house and one suggestion on single-year backs in the back-to-front direction; both applied after checking the Royal Household's Stuart page (query 19)."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 42 cards plus the title, description and keywords in English and Swedish; the language tags in the dossier and the built deck; the Swedish names against Wikidata labels and the Swedish Wikipedia."@en ,
+                 "Outcome: No errors: the Swedish names, house names and notes are established Swedish forms, every card text is tagged (en, sv, zxx) and every back is unique. Two wording suggestions applied; the untagged keywords are a limitation of the builder, outside this deck."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 42 cards' evidence and checks; the four sources' licences (re-fetched); the licensing statement, method and queries; the quoted royal.uk, Wikipedia and Wikidata values against the cited locators."@en ,
+                 "Outcome: No licence violation: the CC0 deck's content source is CC0 Wikidata and nothing was copied from the other sources. But the licensing statement claimed every card fact came from Wikidata, which is not so for the Stuart house of five monarchs, William III's 1689 start, Stephen's single reign and facts in the notes; it was rewritten. The royal.uk licence evidence now quotes the © Crown Copyright footer, the Swedish house-name method is corrected, the Wikidata evidence of every card now says exactly which label or alias the card text is or shortens (fresh download, query 18), and the helper scripts are described. Two suggestions declined or partly applied as recorded."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 42 cards (all changed in round 3) against royal.uk's list, live Wikidata labels, P39 and P53 statements and the Swedish house labels; the licensing statement, sources and method against the builder's licence policy; the .ttl and .md against the dossier."@en ,
+                 "Outcome: One error: royal.uk (all rights reserved) and the English Wikipedia (CC BY-SA), both verification sources, had supplied facts to the CC0 deck (the Stuart house of five monarchs, William III's 1689 start, Stephen's single reign, facts in the notes), which the licence policy forbids. Fixed by re-sourcing every such fact to Wikidata or to a new public-domain content source, the 1911 Encyclopædia Britannica on Wikisource, and by removing or rewording the few that neither states; the deck stays CC0. One warning: the Wikidata dates quoted in the evidence were the SPARQL endpoint's Gregorian conversions; every date is now quoted as stored, with its calendar model, and the round-0 William I finding is corrected. Both suggestions applied (George V's house note; \"interregnumet\")."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 42 cards (all changed in round 4) against royal.uk's list, live Wikidata P39 statements and Swedish labels, and six 1911 Britannica quotations re-fetched from Wikisource; the method against the queries it cites; the licensing decision; the .ttl and .md against the dossier."@en ,
+                 "Outcome: No card errors; all of round 4's fixes confirmed. One documentation warning: the method said a filter of \"1066 or later\" gave 43 people, but that filter also returns Harold Godwinson (44 people), who had been removed by hand. Fixed by rewording the method step to describe what was actually done."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 42 cards: reign years against a live Wikidata P39 query, Swedish names and house names against Wikidata sv labels and sv.wikipedia titles, notes, language tags, description and study direction; the count stated in round 5's method fix."@en ,
+                 "Outcome: No factual or language errors; the deck was judged ready to release. One optional Swedish style suggestion (consistent wording of the two abdication notes) was applied."@en .
+
+<#review-7>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/wiki/Q18810062>
+    dcterms:title "Wikidata: the holders of the offices Monarch of England (Q18810062), Monarch of Great Britain (Q110324075), monarch of the United Kingdom of Great Britain and Ireland (Q111722535) and Monarch of the United Kingdom (Q9134365), their position-held statements (P39) with start and end times and qualifiers, their royal houses (P53), their English and Swedish labels, aliases and descriptions, and the items for the houses and the events named in the notes" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica>
+    dcterms:title "Encyclopædia Britannica, 11th edition (1910–1911), as transcribed on Wikisource: the articles \"William I., King of England\", \"William II., King of England\", \"Stephen, King of England\", \"Henry II. of England\", \"Richard I.\", \"John of England\", \"Edward II.\", \"Richard II.\", \"Henry VI. of England\", \"Edward V.\", \"Richard III.\", \"Grey, Lady Jane\", \"James I. of Great Britain and Ireland\", \"Charles II. (King of England)\", \"James II. of Great Britain and Ireland\", \"William III., King of England\" and \"George IV.\"" ;
+    dcterms:creator "Encyclopædia Britannica, 11th edition (article authors including Henry William Carless Davis and Charles Lethbridge Kingsford); transcribed by Wikisource contributors" ;
+    rdfs:comment "https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica (revision 15967975), licence notice: \"This work is in the public domain in the United States because it was published before January 1, 1931. This work may be in the public domain in countries and areas with longer native copyright terms that apply the rule of the shorter term to foreign works.\" The site footer's CC BY-SA licence covers Wikisource's own text, not the transcribed 1911 work. Only facts were taken from it, restated in the compiler's words; no text was copied into the deck."@en .
+
+<https://www.royal.uk/kings-and-queens-1066>
+    dcterms:title "The Royal Family (royal.uk): Kings and Queens from 1066, the pages on each monarch and royal house, the Interregnum, accession, and the Court Circular" ;
+    dcterms:creator "The Royal Household" ;
+    rdfs:comment "https://www.royal.uk/about-site — the footer of every page reads \"The Royal Household © Crown Copyright\"; the about page grants only linking (\"You do not have to ask permission to link directly to pages hosted on this site.\"); no open licence (such as the Open Government Licence) is offered for the text (https://www.royal.uk/terms-and-conditions and https://www.royal.uk/copyright answer HTTP 404), so all rights are reserved. Verification only."@en .
+
+<https://en.wikipedia.org/wiki/List_of_English_monarchs>
+    dcterms:title "English Wikipedia: List of English monarchs, List of British monarchs and Charles II of England" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights (\"Creative Commons Attribution-ShareAlike 4.0 International License\"); the footer of the list reads \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\"."@en .
+
+<https://sv.wikipedia.org/wiki/Henrik_VIII_av_England>
+    dcterms:title "Svenskspråkiga Wikipedia: artiklarna om monarkerna (Vilhelm Erövraren … Charles III av Storbritannien), inledningarna" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Swedish Wikipedia article (e.g. https://sv.wikipedia.org/wiki/Henrik_VIII_av_England): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<#william-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "William I"@en ,
+                     "Vilhelm I"@sv ;
+    solid-memo:back "1066–1087"@zxx ;
+    solid-memo:backNote "House of Normandy. William the Conqueror; crowned on Christmas Day 1066."@en ,
+                        "Normandiska ätten. Vilhelm Erövraren; krönt på juldagen 1066."@sv .
+
+<#william-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "William II"@en ,
+                     "Vilhelm II"@sv ;
+    solid-memo:back "1087–1100"@zxx ;
+    solid-memo:backNote "House of Normandy. Known as William Rufus."@en ,
+                        "Normandiska ätten. Kallad Vilhelm Rufus."@sv .
+
+<#henry-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Henry I"@en ,
+                     "Henrik I"@sv ;
+    solid-memo:back "1100–1135"@zxx ;
+    solid-memo:backNote "House of Normandy."@en ,
+                        "Normandiska ätten."@sv .
+
+<#stephen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stephen"@en ,
+                     "Stefan"@sv ;
+    solid-memo:back "1135–1154"@zxx ;
+    solid-memo:backNote "House of Blois. His cousin Empress Matilda fought him for the throne but is not counted as a monarch."@en ,
+                        "Huset Blois. Hans kusin kejsarinnan Matilda stred om tronen men räknas inte som monark."@sv .
+
+<#henry-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Henry II"@en ,
+                     "Henrik II"@sv ;
+    solid-memo:back "1154–1189"@zxx ;
+    solid-memo:backNote "House of Plantagenet. The first Plantagenet king; also counted among the Angevins, from his father's county of Anjou."@en ,
+                        "Huset Plantagenet. Den förste kungen av huset Plantagenet; räknas också till de angevinska kungarna, efter faderns grevskap Anjou."@sv .
+
+<#richard-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Richard I"@en ,
+                     "Rikard I"@sv ;
+    solid-memo:back "1189–1199"@zxx ;
+    solid-memo:backNote "House of Plantagenet. Richard the Lionheart."@en ,
+                        "Huset Plantagenet. Rikard Lejonhjärta."@sv .
+
+<#john>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "John"@en ,
+                     "Johan"@sv ;
+    solid-memo:back "1199–1216"@zxx ;
+    solid-memo:backNote "House of Plantagenet. John Lackland; agreed to Magna Carta in 1215."@en ,
+                        "Huset Plantagenet. Johan utan land; gick med på Magna Charta 1215."@sv .
+
+<#henry-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Henry III"@en ,
+                     "Henrik III"@sv ;
+    solid-memo:back "1216–1272"@zxx ;
+    solid-memo:backNote "House of Plantagenet."@en ,
+                        "Huset Plantagenet."@sv .
+
+<#edward-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Edward I"@en ,
+                     "Edvard I"@sv ;
+    solid-memo:back "1272–1307"@zxx ;
+    solid-memo:backNote "House of Plantagenet."@en ,
+                        "Huset Plantagenet."@sv .
+
+<#edward-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Edward II"@en ,
+                     "Edvard II"@sv ;
+    solid-memo:back "1307–1327"@zxx ;
+    solid-memo:backNote "House of Plantagenet. Forced to give up the throne in 1327."@en ,
+                        "Huset Plantagenet. Tvingades avstå tronen 1327."@sv .
+
+<#edward-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Edward III"@en ,
+                     "Edvard III"@sv ;
+    solid-memo:back "1327–1377"@zxx ;
+    solid-memo:backNote "House of Plantagenet."@en ,
+                        "Huset Plantagenet."@sv .
+
+<#richard-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Richard II"@en ,
+                     "Rikard II"@sv ;
+    solid-memo:back "1377–1399"@zxx ;
+    solid-memo:backNote "House of Plantagenet. Forced to give up the throne to Henry IV in 1399."@en ,
+                        "Huset Plantagenet. Tvingades avstå tronen till Henrik IV 1399."@sv .
+
+<#henry-iv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Henry IV"@en ,
+                     "Henrik IV"@sv ;
+    solid-memo:back "1399–1413"@zxx ;
+    solid-memo:backNote "House of Lancaster."@en ,
+                        "Huset Lancaster."@sv .
+
+<#henry-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Henry V"@en ,
+                     "Henrik V"@sv ;
+    solid-memo:back "1413–1422"@zxx ;
+    solid-memo:backNote "House of Lancaster."@en ,
+                        "Huset Lancaster."@sv .
+
+<#henry-vi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Henry VI"@en ,
+                     "Henrik VI"@sv ;
+    solid-memo:back "1422–1461, 1470–1471"@zxx ;
+    solid-memo:backNote "House of Lancaster. Deposed by Edward IV in 1461 and briefly restored in 1470–1471."@en ,
+                        "Huset Lancaster. Avsatt av Edvard IV 1461 och kortvarigt återinsatt 1470–1471."@sv .
+
+<#edward-iv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Edward IV"@en ,
+                     "Edvard IV"@sv ;
+    solid-memo:back "1461–1470, 1471–1483"@zxx ;
+    solid-memo:backNote "House of York. Two reigns, separated by the restoration of Henry VI in 1470–1471."@en ,
+                        "Huset York. Två regeringsperioder, åtskilda av Henrik VI:s återinsättning 1470–1471."@sv .
+
+<#edward-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Edward V"@en ,
+                     "Edvard V"@sv ;
+    solid-memo:back "1483"@zxx ;
+    solid-memo:backNote "House of York. Reigned from April to June 1483; one of the Princes in the Tower."@en ,
+                        "Huset York. Regerade april–juni 1483; en av prinsarna i Towern."@sv .
+
+<#richard-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Richard III"@en ,
+                     "Rikard III"@sv ;
+    solid-memo:back "1483–1485"@zxx ;
+    solid-memo:backNote "House of York. Killed at the Battle of Bosworth in 1485."@en ,
+                        "Huset York. Stupade i slaget vid Bosworth 1485."@sv .
+
+<#henry-vii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Henry VII"@en ,
+                     "Henrik VII"@sv ;
+    solid-memo:back "1485–1509"@zxx ;
+    solid-memo:backNote "House of Tudor. The first Tudor monarch."@en ,
+                        "Huset Tudor. Den förste monarken av huset Tudor."@sv .
+
+<#henry-viii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Henry VIII"@en ,
+                     "Henrik VIII"@sv ;
+    solid-memo:back "1509–1547"@zxx ;
+    solid-memo:backNote "House of Tudor."@en ,
+                        "Huset Tudor."@sv .
+
+<#edward-vi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Edward VI"@en ,
+                     "Edvard VI"@sv ;
+    solid-memo:back "1547–1553"@zxx ;
+    solid-memo:backNote "House of Tudor."@en ,
+                        "Huset Tudor."@sv .
+
+<#mary-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mary I"@en ,
+                     "Maria I"@sv ;
+    solid-memo:back "1553–1558"@zxx ;
+    solid-memo:backNote "House of Tudor. Lady Jane Grey, proclaimed queen for nine days in July 1553, is not counted in this deck."@en ,
+                        "Huset Tudor. Jane Grey, som utropades till drottning i nio dagar i juli 1553, räknas inte i den här kortleken."@sv .
+
+<#elizabeth-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Elizabeth I"@en ,
+                     "Elisabet I"@sv ;
+    solid-memo:back "1558–1603"@zxx ;
+    solid-memo:backNote "House of Tudor. The last Tudor monarch."@en ,
+                        "Huset Tudor. Den sista monarken av huset Tudor."@sv .
+
+<#james-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "James I"@en ,
+                     "Jakob I"@sv ;
+    solid-memo:back "1603–1625"@zxx ;
+    solid-memo:backNote "House of Stuart. Also King of Scots as James VI from 1567; the first monarch of both England and Scotland."@en ,
+                        "Huset Stuart. Även kung av Skottland som Jakob VI från 1567; den förste monarken över både England och Skottland."@sv .
+
+<#charles-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles I"@en ,
+                     "Karl I"@sv ;
+    solid-memo:back "1625–1649"@zxx ;
+    solid-memo:backNote "House of Stuart. Executed in 1649; England had no monarch until 1660 (the Interregnum)."@en ,
+                        "Huset Stuart. Avrättad 1649; England saknade monark fram till 1660 (interregnum)."@sv .
+
+<#charles-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles II"@en ,
+                     "Karl II"@sv ;
+    solid-memo:back "1660–1685"@zxx ;
+    solid-memo:backNote "House of Stuart. Restored in 1660; he had taken the title of king on his father's execution in 1649."@en ,
+                        "Huset Stuart. Återinsatt 1660; han hade antagit kungatiteln vid faderns avrättning 1649."@sv .
+
+<#james-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "James II"@en ,
+                     "Jakob II"@sv ;
+    solid-memo:back "1685–1688"@zxx ;
+    solid-memo:backNote "House of Stuart. Also James VII of Scotland; lost the throne in the Glorious Revolution of 1688."@en ,
+                        "Huset Stuart. Även Jakob VII av Skottland; förlorade tronen i den ärorika revolutionen 1688."@sv .
+
+<#william-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "William III"@en ,
+                     "Vilhelm III"@sv ;
+    solid-memo:back "1689–1702"@zxx ;
+    solid-memo:backNote "House of Orange-Nassau. William of Orange; reigned jointly with his wife Mary II until her death in 1694, then alone."@en ,
+                        "Huset Nassau-Oranien. Vilhelm av Oranien; regerade tillsammans med sin hustru Maria II till hennes död 1694, sedan ensam."@sv .
+
+<#mary-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mary II"@en ,
+                     "Maria II"@sv ;
+    solid-memo:back "1689–1694"@zxx ;
+    solid-memo:backNote "House of Stuart. Reigned jointly with her husband William III."@en ,
+                        "Huset Stuart. Regerade tillsammans med sin make Vilhelm III."@sv .
+
+<#anne>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Anne"@en ,
+                     "Anna"@sv ;
+    solid-memo:back "1702–1714"@zxx ;
+    solid-memo:backNote "House of Stuart. Queen of England and of Scotland, and from the union of 1707 the first monarch of Great Britain; the last Stuart monarch."@en ,
+                        "Huset Stuart. Drottning av England och av Skottland och från unionen 1707 Storbritanniens första monark; den sista monarken av huset Stuart."@sv .
+
+<#george-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "George I"@en ,
+                     "Georg I"@sv ;
+    solid-memo:back "1714–1727"@zxx ;
+    solid-memo:backNote "House of Hanover. The first Hanoverian monarch."@en ,
+                        "Huset Hannover. Den förste monarken av huset Hannover."@sv .
+
+<#george-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "George II"@en ,
+                     "Georg II"@sv ;
+    solid-memo:back "1727–1760"@zxx ;
+    solid-memo:backNote "House of Hanover."@en ,
+                        "Huset Hannover."@sv .
+
+<#george-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "George III"@en ,
+                     "Georg III"@sv ;
+    solid-memo:back "1760–1820"@zxx ;
+    solid-memo:backNote "House of Hanover. King of Great Britain, and from 1801 of the United Kingdom."@en ,
+                        "Huset Hannover. Kung av Storbritannien och från 1801 av Förenade kungariket."@sv .
+
+<#george-iv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "George IV"@en ,
+                     "Georg IV"@sv ;
+    solid-memo:back "1820–1830"@zxx ;
+    solid-memo:backNote "House of Hanover. Prince Regent from 1811."@en ,
+                        "Huset Hannover. Prinsregent från 1811."@sv .
+
+<#william-iv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "William IV"@en ,
+                     "Vilhelm IV"@sv ;
+    solid-memo:back "1830–1837"@zxx ;
+    solid-memo:backNote "House of Hanover."@en ,
+                        "Huset Hannover."@sv .
+
+<#victoria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Victoria"@en ,
+                     "Viktoria"@sv ;
+    solid-memo:back "1837–1901"@zxx ;
+    solid-memo:backNote "House of Hanover. The last Hanoverian monarch."@en ,
+                        "Huset Hannover. Den sista monarken av huset Hannover."@sv .
+
+<#edward-vii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Edward VII"@en ,
+                     "Edvard VII"@sv ;
+    solid-memo:back "1901–1910"@zxx ;
+    solid-memo:backNote "House of Saxe-Coburg and Gotha."@en ,
+                        "Huset Sachsen-Coburg-Gotha."@sv .
+
+<#george-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "George V"@en ,
+                     "Georg V"@sv ;
+    solid-memo:back "1910–1936"@zxx ;
+    solid-memo:backNote "House of Saxe-Coburg and Gotha, which he renamed the House of Windsor in 1917."@en ,
+                        "Huset Sachsen-Coburg-Gotha, som han 1917 bytte namn på till huset Windsor."@sv .
+
+<#edward-viii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Edward VIII"@en ,
+                     "Edvard VIII"@sv ;
+    solid-memo:back "1936"@zxx ;
+    solid-memo:backNote "House of Windsor. Reigned from January to December 1936 and abdicated."@en ,
+                        "Huset Windsor. Regerade januari–december 1936 och abdikerade."@sv .
+
+<#george-vi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "George VI"@en ,
+                     "Georg VI"@sv ;
+    solid-memo:back "1936–1952"@zxx ;
+    solid-memo:backNote "House of Windsor."@en ,
+                        "Huset Windsor."@sv .
+
+<#elizabeth-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Elizabeth II"@en ,
+                     "Elizabeth II"@sv ;
+    solid-memo:back "1952–2022"@zxx ;
+    solid-memo:backNote "House of Windsor. The longest-reigning British monarch."@en ,
+                        "Huset Windsor. Den brittiska monark som regerat längst."@sv .
+
+<#charles-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles III"@en ,
+                     "Charles III"@sv ;
+    solid-memo:back "2022–"@zxx ;
+    solid-memo:backNote "House of Windsor. The reigning king (as of October 2026)."@en ,
+                        "Huset Windsor. Regerande kung (oktober 2026)."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

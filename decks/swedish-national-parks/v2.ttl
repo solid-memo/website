@@ -1,0 +1,553 @@
+@base <https://solid-memo.com/decks/swedish-national-parks/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "National parks of Sweden"@en ,
+                  "Sveriges nationalparker"@sv ,
+                  "스웨덴의 국립공원"@ko ,
+                  "Nationalparks in Schweden"@de ,
+                  "Parques nacionales de Suecia"@es ,
+                  "Parcs nationaux de Suède"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "All 31 national parks of Sweden as of 4 October 2026, from the nine created in 1909 to Nämdöskärgården (2025). Front: the park's name in English, or its official Swedish name; back: the county (län) it lies in, with the year it was established in a note. Tiveden lies in two counties and Färnebofjärden in four. The list and the Swedish names are those of the National Parks Ordinance (1987:938); the counties and years come from Naturvårdsverket's register of protected areas and Wikidata, checked against Sveriges nationalparker."@en ,
+                        "Sveriges alla 31 nationalparker per den 4 oktober 2026, från de nio som bildades 1909 till Nämdöskärgården (2025). Framsida: parkens namn på engelska eller dess officiella svenska namn; baksida: länet den ligger i, med året den bildades i en anteckning. Tiveden ligger i två län och Färnebofjärden i fyra. Förteckningen och de svenska namnen är hämtade ur nationalparksförordningen (1987:938); länen och åren kommer från Naturvårdsverkets naturvårdsregister och Wikidata och har kontrollerats mot Sveriges nationalparker."@sv ,
+                        "2026년 10월 4일 기준 스웨덴의 국립공원 31곳 전부로, 1909년에 지정된 아홉 곳부터 Nämdöskärgården(2025)까지입니다. 앞면: 공원의 영어 이름 또는 공식 스웨덴어 이름; 뒷면: 공원이 있는 주(län)와, 메모에 지정 연도. Tiveden은 두 주에, Färnebofjärden은 네 주에 걸쳐 있습니다. 목록과 스웨덴어 이름은 국립공원령(1987:938)을 따르고, 주와 연도는 Naturvårdsverket의 보호 지역 등록부와 위키데이터에서 가져와 Sveriges nationalparker로 확인했습니다."@ko ,
+                        "Alle 31 Nationalparks Schwedens, Stand 4. Oktober 2026, von den neun im Jahr 1909 gegründeten bis Nämdöskärgården (2025). Vorderseite: der Name des Parks auf Englisch oder sein offizieller schwedischer Name; Rückseite: die Provinz (län), in der er liegt, mit seinem Gründungsjahr in einer Anmerkung. Tiveden liegt in zwei Provinzen und Färnebofjärden in vier. Die Liste und die schwedischen Namen sind die der Nationalparkverordnung (1987:938); die Provinzen und Jahre stammen aus dem Schutzgebietsregister von Naturvårdsverket und aus Wikidata, abgeglichen mit Sveriges nationalparker."@de ,
+                        "Los 31 parques nacionales de Suecia a 4 de octubre de 2026, desde los nueve creados en 1909 hasta Nämdöskärgården (2025). Anverso: el nombre del parque en inglés o su nombre oficial en sueco; reverso: la provincia (län) en la que se encuentra, con el año de su creación en una nota. Tiveden está en dos provincias y Färnebofjärden en cuatro. La lista y los nombres suecos son los de la Ordenanza de Parques Nacionales (1987:938); las provincias y los años proceden del registro de espacios protegidos de Naturvårdsverket y de Wikidata, comprobados con Sveriges nationalparker."@es ,
+                        "Les 31 parcs nationaux de Suède au 4 octobre 2026, des neuf créés en 1909 à Nämdöskärgården (2025). Recto : le nom du parc en anglais, ou son nom suédois officiel ; verso : le comté (län) où il se trouve, avec son année de création dans une note. Tiveden s’étend sur deux comtés et Färnebofjärden sur quatre. La liste et les noms suédois sont ceux de l’ordonnance sur les parcs nationaux (1987:938) ; les comtés et les années proviennent du registre des aires protégées de Naturvårdsverket et de Wikidata, vérifiés avec Sveriges nationalparker."@fr ;
+    prov:wasDerivedFrom <https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/nationalparksforordning-1987938_sfs-1987-938/> ,
+                        <https://geodata.naturvardsverket.se/naturvardsregistret/rest/v3> ,
+                        <https://www.wikidata.org/wiki/Q108051174> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ,
+               topic:biology ;
+    dcat:keyword "national parks"@en ,
+                 "Sweden"@en ,
+                 "counties of Sweden"@en ,
+                 "nature conservation"@en ,
+                 "protected areas"@en ,
+                 "nationalparker"@sv ,
+                 "Sverige"@sv ,
+                 "Sveriges län"@sv ,
+                 "naturvård"@sv ,
+                 "skyddad natur"@sv ,
+                 "국립공원"@ko ,
+                 "스웨덴"@ko ,
+                 "스웨덴의 주"@ko ,
+                 "자연 보호"@ko ,
+                 "보호 지역"@ko ,
+                 "Nationalparks"@de ,
+                 "Schweden"@de ,
+                 "Provinzen Schwedens"@de ,
+                 "Naturschutz"@de ,
+                 "Schutzgebiete"@de ,
+                 "parques nacionales"@es ,
+                 "Suecia"@es ,
+                 "provincias de Suecia"@es ,
+                 "conservación de la naturaleza"@es ,
+                 "espacios protegidos"@es ,
+                 "parcs nationaux"@fr ,
+                 "Suède"@fr ,
+                 "comtés de Suède"@fr ,
+                 "protection de la nature"@fr ,
+                 "aires protégées"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/swedish-national-parks/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/swedish-national-parks/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#swedish-national-parks> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#swedish-national-parks> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/nationalparksforordning-1987938_sfs-1987-938/> ,
+              <https://geodata.naturvardsverket.se/naturvardsregistret/rest/v3> ,
+              <https://www.wikidata.org/wiki/Q108051174> ,
+              <https://www.sverigesnationalparker.se/sv/upptack-nationalparkerna> ,
+              <https://www.naturvardsverket.se/amnesomraden/skyddad-natur/sa-bildas-skyddade-omraden/nya-och-utvidgade-nationalparker/> ,
+              <https://www.lansstyrelsen.se/gotland/besoksmal/nationalparker/bastetrask---sveriges-nasta-nationalpark.html> ,
+              <https://sv.wikipedia.org/w/api.php> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. The list of parks: Nationalparksförordning (1987:938), the government ordinance that names Sweden's national parks, was downloaded from the Riksdag's statute database (query 13). Its 1 § lists 31 parks, numbered 1 (Vadvetjåkka) to 31 (Nämdöskärgården, added by SFS 2025:721); the page states the text as amended up to SFS 2025:749. The 31 names in 1 § are the deck's selection and its Swedish fronts, written exactly as the ordinance writes them (\"Sareks nationalpark\", \"Stora Sjöfallets (Stuor Muorkke) nationalpark\"). Its 3 § says which county administrative board manages the parts of Tiveden and Färnebofjärden that lie in other counties. The cards are in the ordinance's order."@en ,
+                 "2. Wikidata: query 1 fetched every item in Sweden (P17 Q34) that is an instance of national park (Q46169) or a subclass, with its inception (P571). It returned 32 items: the 31 parks of the ordinance and Kungliga nationalstadsparken (Royal National City Park, Q1796166), an instance of national urban park (Q10594812), a different protection form, which was left out. Query 4 fetched each park's Naturvårdsregistret ID (P3613). Query 2 fetched the parks' location statements (P131, P276, P706): every park has P131 statements for its municipalities (Nämdöskärgården only for its county). Query 3 looked for any statement that links items to Sweden's provinces (landskap, Q193556); the parks have none apart from Kosterhavet's P276 Bohuslän, so no CC0 source gives the provinces (see step 7). Query 5 fetched the county (an instance of Q200547) of every municipality the parks are in, with the county's English and Swedish labels; query 6 (the Wikidata API) fetched the parks' English, Swedish and mul labels and aliases."@en ,
+                 "3. Naturvårdsregistret: for each park the current record was fetched from Naturvårdsverket's REST API (query 7, https://geodata.naturvardsverket.se/naturvardsregistret/rest/v3/omrade/<P3613 ID>/Gällande), which gives the name, the protection type (\"Nationalpark\" for all 31), the county (lanAsText), the municipalities (kommunerAsText) and the original decision date (ursprBeslutsdatum, milliseconds since 1970 at Swedish midnight, converted to a date). The terms of the data (CC0) were read in Naturvårdsverket's description of the register's open data (query 8)."@en ,
+                 "4. Sveriges nationalparker: Naturvårdsverket's national-park site was fetched (query 9): its list page says \"Sveriges 31 nationalparker\" and links 31 park pages, the same 31 parks as the ordinance. Each park page was downloaded and the facts at its top extracted (\"Bildades 1909\" or \"Bildad 1918\"; \"Län Norrbotten\", or several counties). Its English list of parks (https://www.sverigesnationalparker.se/en/parks) gives the English names (\"Sarek National Park\", \"Haparanda Skärgård National Park\"). (The address https://www.naturvardsverket.se/amnesomraden/skyddad-natur/nationalparker/ answered 404 and was not used.)"@en ,
+                 "5. Swedish Wikipedia: the article linked from each park's Wikidata item was fetched with its revision id through the MediaWiki API (query 10), and the infobox field \"inrättad\" (year established) read where the article has it (27 of 31)."@en ,
+                 "6. Cut-off: Naturvårdsverket's page on new national parks (reviewed 30 April 2026) and Länsstyrelsen Gotland's page on the proposed Bästeträsk national park (latest news 2026-01-13) were read (queries 11 and 11b): Nämdöskärgården (2025) is the 31st and newest park, and Bästeträsk, proposed in August 2025, has not been decided. A web search for national parks created in 2026 found nothing else."@en ,
+                 "7. Card text. Front, Swedish: the name in the ordinance. Front, English: the compiler's own convention, the park's base name as in the ordinance's Swedish name (without the genitive -s and without \"nationalpark\") followed by \"National Park\" (\"Sareks nationalpark\" → \"Sarek National Park\"). For 24 parks this equals the Wikidata English label, which the builder checked; all 31 were confirmed against the English list of Sveriges nationalparker. For the three parks whose names include a Sami name, the ordinance's brackets are kept (\"Muddus (Muttos) National Park\"), where the site writes a slash (\"Muddus/Muttos National Park\"), so that both languages give the same name. For four parks the Wikidata English label is a translation or another word order (\"Haparanda Archipelago National Park\", \"Blå Jungfrun national park\", \"National Park Åsnen\", \"Nämdö archipelago national park\"); their fronts keep the Swedish base name like the others, as Sveriges nationalparker's English list does. Back: the county or counties the park lies in, as Naturvårdsregistret, Wikidata (the counties of the parks' municipalities) and Sveriges nationalparker give them; for the two parks in several counties, the counties are listed in Swedish alphabetical order (\"Västra Götaland and Örebro counties\" / \"Västra Götalands och Örebro län\"). The English and Swedish county names are the Wikidata labels of the county items (\"Skåne County\" / \"Skåne län\"), as in the deck sweden-counties-and-provinces. The brief asked for the province (landskap) instead; the provinces are not recorded for the parks by the ordinance, Naturvårdsregistret, Sveriges nationalparker or Wikidata, and several parks' provinces would have had to be inferred from maps or taken from Wikipedia, so the deck gives the counties, which every official source states. Note: \"Established <year>\" / \"Bildad <year>\", the year Sveriges nationalparker gives, equal to the year of Wikidata's P571; for Nämdöskärgården the note adds that it is the 31st park."@en ,
+                 "8. Cross-checks: a script (<scratch>/make_dossier.py) built the cards from the downloaded files and stopped on any disagreement: every name in 1 § had to match the card; the Naturvårdsregistret record had to belong to the Wikidata item (P3613); the set of counties of the Wikidata municipalities had to equal the card's counties; the year on Sveriges nationalparker had to equal the Wikidata P571 year. All 31 cards passed. The county on Naturvårdsregistret and on Sveriges nationalparker, the 3 § text and the Wikipedia year were compared by reading; the differences are in quality-control round 0. The builder ran each card's Wikidata checks against live Wikidata: the park's Naturvårdsregistret ID, inception year and municipalities, each municipality's county, the English and Swedish labels of each county, and the park's English and Swedish label or alias where it equals the card's name."@en ,
+                 "Selection: Every national park of Sweden as of 4 October 2026: the 31 parks listed in 1 § of Nationalparksförordning (1987:938) as amended up to SFS 2025:749, the same 31 that Sveriges nationalparker, Naturvårdsregistret and Wikidata give. The newest is Nämdöskärgården (2025). Left out: Kungliga nationalstadsparken (the Royal National City Park in Stockholm), a national urban park, a different form of protection, not a national park; proposed parks not yet decided (Bästeträsk on Gotland, proposed in August 2025 and still with the government); nature reserves and other protected areas; and the parks' provinces (landskap), which no official source records for them (see method step 7). Extensions of parks after their creation (such as Tiveden's in 2017) do not change the year in the note, which is the year the park was established."@en ,
+                 "Licensing: The content sources are Nationalparksförordning (1987:938), a Swedish statute and so free of copyright under 9 § of the Swedish Copyright Act, which gives the list of parks and their Swedish names; Naturvårdsregistret, whose open data Naturvårdsverket publishes under CC0, which gives the counties and dates; and Wikidata (CC0), which gives the years, the municipalities and counties and the county names. The deck is therefore CC0 1.0 like the rest of the library. Sveriges nationalparker and Naturvårdsverket's page on new parks (no licence stated), Länsstyrelsen Gotland (all rights reserved) and the Swedish Wikipedia (CC BY-SA 4.0) were used for verification only: they confirmed facts that the content sources gave, and no wording or selection was taken from them. The English park names are the compiler's convention (the ordinance's base name plus \"National Park\"), which matches the Wikidata English label for 24 parks and was confirmed against the English list of Sveriges nationalparker; a park's name is a fact (a proper name), and \"<name> National Park\" is the form any translation takes, so no protected expression is copied. The notes are the compiler's own wording."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: the list of parks against the ordinance, Sveriges nationalparker, Naturvårdsregistret and Wikidata; every county against Naturvårdsregistret, Wikidata's municipalities and Sveriges nationalparker; every year against Sveriges nationalparker, Wikidata, Naturvårdsregistret and the Swedish Wikipedia; the names against the ordinance, the site and Wikidata labels; the cut-off against Naturvårdsverket and Länsstyrelsen Gotland."@en ;
+    rdfs:comment "Scope: All 31 cards, the sources and the deck metadata."@en ,
+                 "Outcome: The ordinance, Sveriges nationalparker, Naturvårdsregistret and Wikidata agree on the same 31 parks, and the counties agree for every park. The years agree in all sources except Naturvårdsregistret's decision date for Haparanda skärgård (1994, the park dates from 1995). The other differences are in name forms, in the exact dates (decision or entry into force), in Naturvårdsregistret naming only the managing county for the two parks in several counties, and in which municipalities Wikidata lists; none changes a card. No Wikidata check had to be skipped, but several Wikidata labels differ from the official names and are therefore not used as checks. The brief's province (landskap) back was replaced by the county."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 31 cards and the description: the list against the ordinance (1 § and 3 §), every year and county against the 31 pages of Sveriges nationalparker and an independent Wikidata query, the cut-off against Naturvårdsverket and Länsstyrelsen Gotland, and the English Wikipedia list."@en ,
+                 "Outcome: All 31 cards are correct as of 2026-10-04; the ordinance, Sveriges nationalparker and Wikidata agree with every card, and the description's claims and the cut-off hold. One warning (the county back instead of the brief's province) and one suggestion (English Wikipedia's wrong year for Store Mosse); neither changes a card."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 31 cards' Swedish and English fronts against the ordinance and the English list, the Sami names, the county backs, the notes, the language tags of the built deck, the title, description and keywords, and the study direction."@en ,
+                 "Outcome: No errors in language, translation or tags: the Swedish fronts equal the ordinance's names, the English fronts the site's English list (with the documented brackets), the county names and notes are idiomatic, every card text is tagged en or sv, and frontToBack is right because backs repeat. One suggestion to make the Swedish description less stiff, applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence and licence evidence, the compliance of the CC0 deck licence, spot checks of the evidence locators (13 park pages, 10 Naturvårdsregistret records, Wikidata for 14 parks, 8 Swedish Wikipedia revisions), the recorded queries and the method."@en ,
+                 "Outcome: All recorded licences are correct and the CC0 licence complies, since the content sources are a statute, Naturvårdsregistret (CC0) and Wikidata (CC0). Two warnings were confirmed and fixed: the description of the English fronts contradicted the \"Nothing copied\" of the verification-only site, and Haparanda skärgård's Wikidata inception was given as a full date where Wikidata has only the year. Four documentation suggestions: three applied, one declined."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 12 cards (haparanda-skargard, changed in round 3, and every third card: vadvetjakka, sarek, pieljekaise, hamra, norra-kvill, dalby-soderskog, skuleskogen, djuro, tresticklan, fulufjallet, namdoskargarden) against live Wikidata, the Naturvårdsregistret records, the ordinance as amended up to SFS 2025:749, the park pages and English list of Sveriges nationalparker; the round-3 fixes; the deck metadata and the built deck."@en ,
+                 "Outcome: Every sampled county, year and Swedish and English name matches the sources, the round-3 fixes are present, the site still says \"Sveriges 31 nationalparker\", and the metadata and licence are in order. One suggestion, confirmed and applied: some sv label checks pass only through a Wikidata alias that the evidence did not mention."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/nationalparksforordning-1987938_sfs-1987-938/>
+    dcterms:title "Nationalparksförordning (1987:938), as amended up to SFS 2025:749 (Svensk författningssamling, published by Sveriges riksdag)" ;
+    dcterms:creator "Sveriges regering (Klimat- och näringslivsdepartementet); published by Sveriges riksdag" ;
+    rdfs:comment "A Swedish statute (författning), which is not protected by copyright: lag (1960:729) om upphovsrätt till litterära och konstnärliga verk, 9 § (https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1960729-om-upphovsratt-till-litterara-och_sfs-1960-729/): \"Upphovsrätt gäller inte till 1. författningar, 2. beslut av myndigheter, 3. yttranden av svenska myndigheter och 4. officiella översättningar av sådant som avses i 1-3.\""@en .
+
+<https://geodata.naturvardsverket.se/naturvardsregistret/rest/v3>
+    dcterms:title "Naturvårdsregistret (Naturvårdsverket's register of protected areas), REST API v3: the current (Gällande) record of each national park" ;
+    dcterms:creator "Naturvårdsverket (Swedish Environmental Protection Agency) and the county administrative boards" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "\"Naturvårdsregistret – Beskrivning av öppna data och tillhörande tjänster\", utgåva 1.2, 2025-10-23 (https://geodata.naturvardsverket.se/nedladdning/naturvardsregistret/Naturvardsregistret_beskrivning_av_oppna_data.pdf), 1.5 Villkor för användning: \"Data publiceras enligt licenstypen CC0 vilket betyder att data kan användas utan begränsningar.\" The same document lists https://geodata.naturvardsverket.se/naturvardsregistret/rest/v3 under 1.6.7 REST-tjänster."@en .
+
+<https://www.wikidata.org/wiki/Q108051174>
+    dcterms:title "Wikidata: the national parks of Sweden (instances of national park (Q46169) or its Swedish subclass Q108051174 with country Sweden), with their Naturvårdsregistret ID (P3613), inception (P571), location (P131) and labels, and the counties of their municipalities" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.sverigesnationalparker.se/sv/upptack-nationalparkerna>
+    dcterms:title "Sveriges nationalparker (sverigesnationalparker.se): Upptäck nationalparkerna, the page of each park, and the English list of parks" ;
+    dcterms:creator "Naturvårdsverket" ;
+    rdfs:comment "The site (\"En webbplats från Naturvårdsverket\") states no licence for its texts: its footer links only Kontakt, Sveriges nationalparker i sociala medier, Tillgänglighet and Andra språk, and Naturvårdsverket's own about-the-site page (https://www.naturvardsverket.se/om-oss/om-webbplatsen/) has no copyright or licence statement. Naturvårdsverket's data policy of 2017-06-08 (https://naturvardsverket.se/4ac2d5/contentassets/14115e53b8c8491f8a85413fff263188/policy-naturvardsverket-datainformation-2017-06-08.pdf) says \"Rapporter, bilder, filmer och ljudklipp ska licensieras med CC-by licens. Övriga data ska licensieras med CC0.\" but does not name web texts, so the site is treated as having no known licence and used for verification only."@en .
+
+<https://www.naturvardsverket.se/amnesomraden/skyddad-natur/sa-bildas-skyddade-omraden/nya-och-utvidgade-nationalparker/>
+    dcterms:title "Nya och utvidgade nationalparker (naturvardsverket.se, reviewed 30 April 2026)" ;
+    dcterms:creator "Naturvårdsverket" ;
+    rdfs:comment "No licence stated on the page or on https://www.naturvardsverket.se/om-oss/om-webbplatsen/; Naturvårdsverket's data policy of 2017-06-08 licenses reports, images, films and audio clips CC BY and other data CC0 but does not name web texts. Used for verification only."@en .
+
+<https://www.lansstyrelsen.se/gotland/besoksmal/nationalparker/bastetrask---sveriges-nasta-nationalpark.html>
+    dcterms:title "Bästeträsk – Sveriges nästa nationalpark (Länsstyrelsen Gotland)" ;
+    dcterms:creator "Länsstyrelsen i Gotlands län" ;
+    rdfs:comment "https://www.lansstyrelsen.se/gotland/om-oss/om-webbplatsen.html: \"Länsstyrelsernas webbplatser innehåller texter, kartor, bilder, ljud och illustrationer som är upphovsrättsskyddade och får inte användas utan tillstånd.\" (the same statement appears on every county board's about-the-site page)"@en .
+
+<https://sv.wikipedia.org/w/api.php>
+    dcterms:title "Swedish Wikipedia: the articles on the national parks (wikitext by revision, MediaWiki API)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/Sarek, page footer: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<#vadvetjakka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vadvetjåkka National Park"@en ,
+                     "Vadvetjåkka nationalpark"@sv ;
+    solid-memo:back "Norrbotten County"@en ,
+                    "Norrbottens län"@sv ;
+    solid-memo:backNote "Established 1920"@en ,
+                        "Bildad 1920"@sv .
+
+<#abisko>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Abisko National Park"@en ,
+                     "Abisko nationalpark"@sv ;
+    solid-memo:back "Norrbotten County"@en ,
+                    "Norrbottens län"@sv ;
+    solid-memo:backNote "Established 1909"@en ,
+                        "Bildad 1909"@sv .
+
+<#stora-sjofallet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stora Sjöfallet (Stuor Muorkke) National Park"@en ,
+                     "Stora Sjöfallets (Stuor Muorkke) nationalpark"@sv ;
+    solid-memo:back "Norrbotten County"@en ,
+                    "Norrbottens län"@sv ;
+    solid-memo:backNote "Established 1909"@en ,
+                        "Bildad 1909"@sv .
+
+<#sarek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sarek National Park"@en ,
+                     "Sareks nationalpark"@sv ;
+    solid-memo:back "Norrbotten County"@en ,
+                    "Norrbottens län"@sv ;
+    solid-memo:backNote "Established 1909"@en ,
+                        "Bildad 1909"@sv .
+
+<#padjelanta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Padjelanta (Badjelánnda) National Park"@en ,
+                     "Padjelanta (Badjelánnda) nationalpark"@sv ;
+    solid-memo:back "Norrbotten County"@en ,
+                    "Norrbottens län"@sv ;
+    solid-memo:backNote "Established 1962"@en ,
+                        "Bildad 1962"@sv .
+
+<#muddus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Muddus (Muttos) National Park"@en ,
+                     "Muddus (Muttos) nationalpark"@sv ;
+    solid-memo:back "Norrbotten County"@en ,
+                    "Norrbottens län"@sv ;
+    solid-memo:backNote "Established 1942"@en ,
+                        "Bildad 1942"@sv .
+
+<#pieljekaise>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pieljekaise National Park"@en ,
+                     "Pieljekaise nationalpark"@sv ;
+    solid-memo:back "Norrbotten County"@en ,
+                    "Norrbottens län"@sv ;
+    solid-memo:backNote "Established 1909"@en ,
+                        "Bildad 1909"@sv .
+
+<#sonfjallet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sonfjället National Park"@en ,
+                     "Sonfjällets nationalpark"@sv ;
+    solid-memo:back "Jämtland County"@en ,
+                    "Jämtlands län"@sv ;
+    solid-memo:backNote "Established 1909"@en ,
+                        "Bildad 1909"@sv .
+
+<#tofsingdalen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Töfsingdalen National Park"@en ,
+                     "Töfsingdalens nationalpark"@sv ;
+    solid-memo:back "Dalarna County"@en ,
+                    "Dalarnas län"@sv ;
+    solid-memo:backNote "Established 1930"@en ,
+                        "Bildad 1930"@sv .
+
+<#hamra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hamra National Park"@en ,
+                     "Hamra nationalpark"@sv ;
+    solid-memo:back "Gävleborg County"@en ,
+                    "Gävleborgs län"@sv ;
+    solid-memo:backNote "Established 1909"@en ,
+                        "Bildad 1909"@sv .
+
+<#garphyttan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Garphyttan National Park"@en ,
+                     "Garphyttans nationalpark"@sv ;
+    solid-memo:back "Örebro County"@en ,
+                    "Örebro län"@sv ;
+    solid-memo:backNote "Established 1909"@en ,
+                        "Bildad 1909"@sv .
+
+<#angso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ängsö National Park"@en ,
+                     "Ängsö nationalpark"@sv ;
+    solid-memo:back "Stockholm County"@en ,
+                    "Stockholms län"@sv ;
+    solid-memo:backNote "Established 1909"@en ,
+                        "Bildad 1909"@sv .
+
+<#norra-kvill>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norra Kvill National Park"@en ,
+                     "Norra Kvills nationalpark"@sv ;
+    solid-memo:back "Kalmar County"@en ,
+                    "Kalmar län"@sv ;
+    solid-memo:backNote "Established 1927"@en ,
+                        "Bildad 1927"@sv .
+
+<#gotska-sandon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gotska Sandön National Park"@en ,
+                     "Gotska Sandöns nationalpark"@sv ;
+    solid-memo:back "Gotland County"@en ,
+                    "Gotlands län"@sv ;
+    solid-memo:backNote "Established 1909"@en ,
+                        "Bildad 1909"@sv .
+
+<#bla-jungfrun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Blå Jungfrun National Park"@en ,
+                     "Blå Jungfruns nationalpark"@sv ;
+    solid-memo:back "Kalmar County"@en ,
+                    "Kalmar län"@sv ;
+    solid-memo:backNote "Established 1926"@en ,
+                        "Bildad 1926"@sv .
+
+<#dalby-soderskog>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dalby Söderskog National Park"@en ,
+                     "Dalby Söderskogs nationalpark"@sv ;
+    solid-memo:back "Skåne County"@en ,
+                    "Skåne län"@sv ;
+    solid-memo:backNote "Established 1918"@en ,
+                        "Bildad 1918"@sv .
+
+<#store-mosse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Store Mosse National Park"@en ,
+                     "Store Mosse nationalpark"@sv ;
+    solid-memo:back "Jönköping County"@en ,
+                    "Jönköpings län"@sv ;
+    solid-memo:backNote "Established 1982"@en ,
+                        "Bildad 1982"@sv .
+
+<#tiveden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tiveden National Park"@en ,
+                     "Tivedens nationalpark"@sv ;
+    solid-memo:back "Västra Götaland and Örebro counties"@en ,
+                    "Västra Götalands och Örebro län"@sv ;
+    solid-memo:backNote "Established 1983"@en ,
+                        "Bildad 1983"@sv .
+
+<#skuleskogen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Skuleskogen National Park"@en ,
+                     "Skuleskogens nationalpark"@sv ;
+    solid-memo:back "Västernorrland County"@en ,
+                    "Västernorrlands län"@sv ;
+    solid-memo:backNote "Established 1984"@en ,
+                        "Bildad 1984"@sv .
+
+<#stenshuvud>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stenshuvud National Park"@en ,
+                     "Stenshuvuds nationalpark"@sv ;
+    solid-memo:back "Skåne County"@en ,
+                    "Skåne län"@sv ;
+    solid-memo:backNote "Established 1986"@en ,
+                        "Bildad 1986"@sv .
+
+<#bjornlandet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Björnlandet National Park"@en ,
+                     "Björnlandets nationalpark"@sv ;
+    solid-memo:back "Västerbotten County"@en ,
+                    "Västerbottens län"@sv ;
+    solid-memo:backNote "Established 1991"@en ,
+                        "Bildad 1991"@sv .
+
+<#djuro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Djurö National Park"@en ,
+                     "Djurö nationalpark"@sv ;
+    solid-memo:back "Västra Götaland County"@en ,
+                    "Västra Götalands län"@sv ;
+    solid-memo:backNote "Established 1991"@en ,
+                        "Bildad 1991"@sv .
+
+<#tyresta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tyresta National Park"@en ,
+                     "Tyresta nationalpark"@sv ;
+    solid-memo:back "Stockholm County"@en ,
+                    "Stockholms län"@sv ;
+    solid-memo:backNote "Established 1993"@en ,
+                        "Bildad 1993"@sv .
+
+<#haparanda-skargard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Haparanda Skärgård National Park"@en ,
+                     "Haparanda skärgårds nationalpark"@sv ;
+    solid-memo:back "Norrbotten County"@en ,
+                    "Norrbottens län"@sv ;
+    solid-memo:backNote "Established 1995"@en ,
+                        "Bildad 1995"@sv .
+
+<#tresticklan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tresticklan National Park"@en ,
+                     "Tresticklans nationalpark"@sv ;
+    solid-memo:back "Västra Götaland County"@en ,
+                    "Västra Götalands län"@sv ;
+    solid-memo:backNote "Established 1996"@en ,
+                        "Bildad 1996"@sv .
+
+<#farnebofjarden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Färnebofjärden National Park"@en ,
+                     "Färnebofjärdens nationalpark"@sv ;
+    solid-memo:back "Dalarna, Gävleborg, Uppsala and Västmanland counties"@en ,
+                    "Dalarnas, Gävleborgs, Uppsala och Västmanlands län"@sv ;
+    solid-memo:backNote "Established 1998"@en ,
+                        "Bildad 1998"@sv .
+
+<#soderasen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Söderåsen National Park"@en ,
+                     "Söderåsens nationalpark"@sv ;
+    solid-memo:back "Skåne County"@en ,
+                    "Skåne län"@sv ;
+    solid-memo:backNote "Established 2001"@en ,
+                        "Bildad 2001"@sv .
+
+<#fulufjallet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fulufjället National Park"@en ,
+                     "Fulufjällets nationalpark"@sv ;
+    solid-memo:back "Dalarna County"@en ,
+                    "Dalarnas län"@sv ;
+    solid-memo:backNote "Established 2002"@en ,
+                        "Bildad 2002"@sv .
+
+<#kosterhavet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kosterhavet National Park"@en ,
+                     "Kosterhavets nationalpark"@sv ;
+    solid-memo:back "Västra Götaland County"@en ,
+                    "Västra Götalands län"@sv ;
+    solid-memo:backNote "Established 2009"@en ,
+                        "Bildad 2009"@sv .
+
+<#asnen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Åsnen National Park"@en ,
+                     "Åsnens nationalpark"@sv ;
+    solid-memo:back "Kronoberg County"@en ,
+                    "Kronobergs län"@sv ;
+    solid-memo:backNote "Established 2018"@en ,
+                        "Bildad 2018"@sv .
+
+<#namdoskargarden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nämdöskärgården National Park"@en ,
+                     "Nämdöskärgårdens nationalpark"@sv ;
+    solid-memo:back "Stockholm County"@en ,
+                    "Stockholms län"@sv ;
+    solid-memo:backNote "Established 2025; Sweden's 31st national park"@en ,
+                        "Bildad 2025; Sveriges 31:a nationalpark"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

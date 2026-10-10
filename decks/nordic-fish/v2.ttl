@@ -1,0 +1,690 @@
+@base <https://solid-memo.com/decks/nordic-fish/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Nordic fish"@en ,
+                  "Nordiska fiskar"@sv ,
+                  "북유럽의 물고기"@ko ,
+                  "Nordische Fische"@de ,
+                  "Peces nórdicos"@es ,
+                  "Poissons nordiques"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "55 fish species of Swedish and Nordic fresh and coastal waters: salmon and trout, pike, perch and zander, carp-like fishes, cod fishes, herring and sprat, flatfish, a shark, a ray, a lamprey and others. Front: the English and the Swedish name; back: the scientific name. Scientific and Swedish names follow Dyntaxa (SLU Artdatabanken), English names Wikidata (one from Dyntaxa). Data from Wikidata and Dyntaxa, checked against Eschmeyer's Catalog of Fishes and FishBase."@en ,
+                        "55 fiskarter i svenska och nordiska sötvatten och kustvatten: lax och öring, gädda, abborre och gös, karpfiskar, torskfiskar, sill och skarpsill, plattfiskar, en haj, en rocka, ett nejonöga och andra. Framsida: det engelska och det svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och svenska namn följer Dyntaxa (SLU Artdatabanken), engelska namn Wikidata (ett från Dyntaxa). Uppgifterna kommer från Wikidata och Dyntaxa och har kontrollerats mot Eschmeyer's Catalog of Fishes och FishBase."@sv ,
+                        "스웨덴과 북유럽의 민물과 연안에 사는 어류 55종: 연어와 송어, 강꼬치고기, 퍼치와 잔더, 잉어류, 대구류, 청어와 스프랫, 가자미류, 상어 한 종, 가오리 한 종, 칠성장어 한 종 등. 앞면: 영어 이름과 스웨덴어 이름, 뒷면: 학명. 학명과 스웨덴어 이름은 Dyntaxa(SLU Artdatabanken)를, 영어 이름은 Wikidata를 따른다(하나는 Dyntaxa에서 가져왔다). 데이터는 Wikidata와 Dyntaxa에서 가져왔으며 Eschmeyer's Catalog of Fishes 및 FishBase와 대조해 확인했다."@ko ,
+                        "55 Fischarten der schwedischen und nordischen Süß- und Küstengewässer: Lachs und Forelle, Hecht, Barsch und Zander, Karpfenfische, Dorschartige, Hering und Sprotte, Plattfische, ein Hai, ein Rochen, ein Neunauge und andere. Vorderseite: der englische und der schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und schwedische Namen folgen Dyntaxa (SLU Artdatabanken), englische Namen Wikidata (einer stammt aus Dyntaxa). Daten aus Wikidata und Dyntaxa, geprüft anhand von Eschmeyer's Catalog of Fishes und FishBase."@de ,
+                        "55 especies de peces de las aguas dulces y costeras de Suecia y los países nórdicos: salmón y trucha, lucio, perca y lucioperca, ciprínidos, gádidos, arenque y espadín, peces planos, un tiburón, una raya, una lamprea y otros. Anverso: el nombre en inglés y en sueco; reverso: el nombre científico. Los nombres científicos y suecos siguen Dyntaxa (SLU Artdatabanken), y los ingleses, Wikidata (uno procede de Dyntaxa). Datos de Wikidata y Dyntaxa, comprobados con Eschmeyer's Catalog of Fishes y FishBase."@es ,
+                        "55 espèces de poissons des eaux douces et côtières de Suède et des pays nordiques : saumon et truite, brochet, perche et sandre, cyprinidés, gadidés, hareng et sprat, poissons plats, un requin, une raie, une lamproie et d’autres. Recto : le nom anglais et le nom suédois ; verso : le nom scientifique. Les noms scientifiques et suédois suivent Dyntaxa (SLU Artdatabanken), les noms anglais Wikidata (l’un d’eux vient de Dyntaxa). Données de Wikidata et de Dyntaxa, vérifiées avec Eschmeyer's Catalog of Fishes et FishBase."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://doi.org/10.15468/j43wfc> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:biology ;
+    dcat:keyword "fish"@en ,
+                 "zoology"@en ,
+                 "scientific names"@en ,
+                 "animal names"@en ,
+                 "Nordic countries"@en ,
+                 "fiskar"@sv ,
+                 "zoologi"@sv ,
+                 "vetenskapliga namn"@sv ,
+                 "djurnamn"@sv ,
+                 "Norden"@sv ,
+                 "물고기"@ko ,
+                 "동물학"@ko ,
+                 "학명"@ko ,
+                 "동물 이름"@ko ,
+                 "북유럽"@ko ,
+                 "Fische"@de ,
+                 "Zoologie"@de ,
+                 "wissenschaftliche Namen"@de ,
+                 "Tiernamen"@de ,
+                 "Nordeuropa"@de ,
+                 "peces"@es ,
+                 "zoología"@es ,
+                 "nombres científicos"@es ,
+                 "nombres de animales"@es ,
+                 "países nórdicos"@es ,
+                 "poissons"@fr ,
+                 "zoologie"@fr ,
+                 "noms scientifiques"@fr ,
+                 "noms d’animaux"@fr ,
+                 "pays nordiques"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/nordic-fish/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/nordic-fish/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#nordic-fish> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#nordic-fish> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://doi.org/10.15468/j43wfc> ,
+              <https://researcharchive.calacademy.org/research/ichthyology/catalog/fishcatmain.asp> ,
+              <https://www.fishbase.se/> ,
+              <https://sv.wikipedia.org/wiki/Sill> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (scripted lookups in Eschmeyer's Catalog of Fishes and FishBase, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Scope and authority. The library editor asked for about 50 fish species of Swedish and Nordic fresh and coastal waters, the common name (English and Swedish) on the front and the scientific name on the back, with one stated authority for accepted names. Dyntaxa, the Swedish taxonomic database of SLU Artdatabanken, published on GBIF under CC0 (dataset publication date 2026-09-29), was chosen as the single authority for both the scientific names and the Swedish names, so that the two always refer to the same taxon concept. Eschmeyer's Catalog of Fishes (online version updated 21 Sep. 2026) and FishBase (version 06/2026) were used to verify, not as sources of card content, because neither allows reuse in an open deck."@en ,
+                 "Candidate list. The authoring agent wrote down 126 candidate names from general knowledge of the Nordic fish fauna (salmonids and whitefish, pike, perch and other percids, carp-like fishes, catfish, sculpins, sticklebacks, loaches, lampreys, cod fishes, herrings, mackerels, flatfish, sharks, rays and other marine fishes), including older or alternative names (for example Stizostedion lucioperca, Aspius aspius, Psetta maxima, Abramis ballerus, Triglopsis quadricornis, Coregonus lavaretus, Salvelinus umbla) to see how the sources treat them. No published list was copied."@en ,
+                 "Dyntaxa (content source and authority). Each candidate name was looked up in the Dyntaxa checklist on GBIF (species search restricted to the dataset, exact canonical name); for every matching record its vernacular names (with GBIF's 'preferred' flag, which marks Dyntaxa's recommended Swedish name), and for accepted records its synonyms and its Swedish distribution record (status, establishment means, threat status) were fetched (script dyntaxa.py, queries below). Where a name was a Dyntaxa synonym, the accepted name was looked up as well (Gymnocephalus cernuus for Gymnocephalus cernua); Platichthys solemdali was looked up after the flounder's record showed a split. A Dyntaxa evidence locator on a card names the GBIF species record (https://api.gbif.org/v1/species/<key>); what its 'says' reports comes from that record and its sub-endpoints /vernacularNames (the Swedish names and the preferred flag), /synonyms and /distributions (status and establishment means in Sweden), which the script fetched."@en ,
+                 "Wikidata (content source). One SPARQL query (the first query below) fetched, for every candidate name (and Gymnocephalus cernuus, Dyntaxa's accepted name for the ruffe), the items with that taxon name (P225), their rank, English and Swedish labels and aliases, Dyntaxa ID (P1939) and the names of their taxon synonyms (P1420). A second query did the same for the final names plus the two older names whose Wikidata items carry the labels (Aspius aspius, Gymnocephalus cernua). Further queries fetched the taxon-synonym links between paired items, the Baltic herring item and the Platichthys solemdali item."@en ,
+                 "Selection. The candidates were filtered by the criteria in the selection section and cut by editorial judgement to the species best known to Nordic anglers, fish buyers and naturalists; exclusions and reasons are listed there."@en ,
+                 "Card text. Back: Dyntaxa's accepted scientific name, tagged as Latin; for every card it is also the taxon name (P225) of a Wikidata item. Swedish front: Dyntaxa's preferred Swedish vernacular name, exactly as Dyntaxa writes it (lower case). English front: an English label or alias of the species' Wikidata item, chosen by these rules: (a) the item's English label when it is a common name of the species (39 cards, including the three-spined stickleback after review round 3); (b) where the label is also a name of a wider group or another species, or a longer form, the alias that is FishBase's main English name: northern pike (label 'pike', also the genus Esox), saithe (label 'pollock', close to 'Atlantic pollock', Wikidata's name for the pollack) and rudd (label 'common rudd'); (c) where the label is the scientific name, the alias that is FishBase's main English name (vendace, roach, common carp, gudgeon, Atlantic cod, Atlantic herring, European plaice, Atlantic halibut, lumpfish, round goby), except where the compiler chose another alias: brown trout (FishBase 'Sea trout', which also names the sea-run form) and monkfish (FishBase 'Angler', not a Wikidata name; 'monkfish' is the trade name, with 'anglerfish' in the note). Fronts are written in lower case except proper nouns and words derived from them (Atlantic, Arctic, European); for the spurdog Wikidata has no such name ('spiny dogfish shark', alias 'Spiny dogfish') and the card uses Dyntaxa's English name 'Spurdog'. Where Wikidata has two items for one species (the ruffe and the asp), the label check is on the item with the labels and the taxon-name check on the item with Dyntaxa's name. No Swedish front was translated by the agent; the Swedish notes were written by the agent."@en ,
+                 "Notes. Back notes give former scientific names where the change is recent enough to be met in books and on menus (zander: Stizostedion; asp: Aspius; turbot: Psetta), each supported by a Wikidata taxon-synonym link (P1420) and, for the asp and the turbot, Dyntaxa's synonyms; the ruffe's other spelling (Gymnocephalus cernua, used by the Catalog of Fishes and FishBase, the taxon name of Wikidata's labelled item, listed by Dyntaxa as a synonym); other Swedish names from Dyntaxa's non-preferred names and Wikidata's Swedish labels and aliases (fjällröding, bergtunga, sjötunga, horngädda); other English names from Wikidata's aliases (coalfish, lumpsucker, spiny dogfish, anglerfish); the Swedish name of Baltic herring (Wikidata item Q10826808, Clupea harengus membras: en 'Baltic herring', sv 'strömming'; Dyntaxa lists 'strömming' as another Swedish name of Clupea harengus; the note's 'most of the Baltic' was checked against Swedish Wikipedia's article Sill, verification only); for the flounder, the Baltic flounder Platichthys solemdali described in 2018 (English name from Wikidata's alias of Q55713149), which Dyntaxa accepts and to which it also gives 'skrubbskädda' as another Swedish name, so the flounder card has a front note that narrows the front; and, for the bleak and the vendace, that Dyntaxa gives 'löja' to both (preferred for the bleak, another name of the vendace). The note 'Non-native in Sweden.' / 'Främmande art i Sverige.' marks the three species whose Dyntaxa distribution record has establishment means INTRODUCED (brook trout, common carp, round goby); FishBase's distribution text (verification) gives their native ranges in North America and the Black, Caspian and Aral Sea basins."@en ,
+                 "Verification with Eschmeyer's Catalog of Fishes. For every card the Catalog's species query (fishcatget.asp?tbl=species&genus=…&species=…) was fetched and its 'Current status' lines extracted (script cof.py): every scientific name on the cards is 'Valid as' that name, except the ruffe, which the Catalog spells Gymnocephalus cernua (see quality control). The pages of the older names were fetched too."@en ,
+                 "Verification with FishBase. For every card the FishBase species summary page and its common-names list were fetched (scripts fishbase.py and fbnames.py). Every English front is among FishBase's English common names of the species and every Swedish front among its Swedish common names; FishBase's main English name differs from the card's for 10 cards (recorded in quality control)."@en ,
+                 "Ambiguity check. A SPARQL query (<scratch>/ambig.rq, posted by <scratch>/ambig.py; below) looked for every Wikidata taxon carrying a card's English or Swedish front (in lower case, capitalised or title case) as a label or alias. The script fbnames.py also checked whether FishBase gives a card's English name for another species in the deck. After review, the script <scratch>/qc1/svambig.py checked every card's Swedish front against all Swedish names (preferred and other) of the other deck species' Dyntaxa records and Platichthys solemdali: 'löja' (also the vendace) and 'skrubbskädda' (also Platichthys solemdali) are shared, and both cards say so. When review round 3 changed the stickleback front to 'three-spined stickleback', the query was re-run for that front (<scratch>/qc4/ambig4.rq): it matches only Gasterosteus aculeatus and its nominate subspecies G. a. aculeatus. The findings are under quality control; apart from the flounder's front (given a front note), none was judged to make a front ambiguous in a deck of Nordic fish."@en ,
+                 "Machine checks. Every card has a Wikidata check of the taxon name (P225); 54 cards also check that the item's Dyntaxa ID (P1939) is the Dyntaxa taxon used, and cards check their English and Swedish fronts as a label or alias wherever Wikidata has that text in exactly the card's letter case (45 English and 40 Swedish fronts). The notes are checked where they rest on Wikidata (taxon synonyms, aliases, the Baltic herring and Platichthys solemdali items). The builder ran all checks against live Wikidata on every build."@en ,
+                 "Selection: The deck has 55 fish species of Swedish and Nordic waters: 31 of fresh water or that spawn in it (6 salmonids, smelt, pike, 3 percids, burbot, eel, 11 carp-like fishes, wels catfish, bullhead, 2 sticklebacks, 2 loaches and the river lamprey) and 24 of the sea and coast (5 cod fishes, herring, sprat, Atlantic mackerel, Atlantic horse mackerel, garfish, 7 flatfish, lumpfish, eelpout, wolffish, monkfish, spurdog, thornback ray and round goby). Inclusion criteria: (1) an accepted taxon in Dyntaxa with a preferred Swedish vernacular name; (2) Dyntaxa's distribution status in Sweden PRESENT (native, or introduced and established); (3) a Wikidata item with Dyntaxa's name as taxon name and an English name of the species in its labels or aliases (or, for the spurdog, in Dyntaxa); (4) 'Valid as' in Eschmeyer's Catalog of Fishes (the ruffe in its other spelling); (5) familiarity to a Nordic beginner, which decided the final cut. Introduced species are included when Dyntaxa lists them as present: brook trout, common carp and round goby. Left out after research: the whitefish (sik), because the species concept is unsettled: Dyntaxa's 'sik' is Coregonus maraena and it marks Coregonus lavaretus as absent from Sweden, while Wikidata's item labelled 'sik' is Coregonus lavaretus and its Coregonus maraena item is labelled 'Älvsik', so the card would have no one right answer across sources; rainbow trout (regnbåge), Atlantic bluefin tuna (blåfenad tonfisk), capelin (lodda), basking shark and others whose Dyntaxa status in Sweden is IRREGULAR; Greenland halibut and Coregonus lavaretus (ABSENT); the pollack (lyrtorsk), because Wikidata's only English name for it is 'Atlantic pollock', easily confused with the saithe's American name; the European hake, whose Wikidata items are split (one has the Swedish label, another the English); the shorthorn sculpin (rötsimpa), which has no English name in Wikidata; and white bream, common dace, vimba, fourhorn sculpin, brill, greater weever, black goby, ballan wrasse, Prussian carp, the brook and sea lampreys and other marine species, only to keep the deck near the requested size. Taxonomy follows Dyntaxa throughout: Leuciscus aspius (not Aspius aspius), Sander lucioperca (not Stizostedion), Scophthalmus maximus (not Psetta maxima), Gymnocephalus cernuus (the Catalog of Fishes and FishBase: Gymnocephalus cernua), and Platichthys flesus in the narrow sense, without the Baltic flounder Platichthys solemdali. Subspecies and forms (sea trout, Baltic herring) are not separate cards."@en ,
+                 "Licensing: The deck is released under CC0 1.0 because all of its content sources are CC0: Wikidata (structured data) for the taxon names, the English names, the Wikidata checks and the alternative names in the notes, and Dyntaxa (SLU Artdatabanken, published on GBIF under CC0 1.0) for the accepted scientific names, every Swedish name, the status of each species in Sweden, the synonyms behind the former-name notes and the English name 'spurdog'. Eschmeyer's Catalog of Fishes (California Academy of Sciences, all rights reserved) and FishBase (CC BY-NC 4.0, recorded as all rights reserved because a non-commercial licence does not allow reuse here) were used for verification only, as was Swedish Wikipedia's article Sill (CC BY-SA 4.0), consulted only to check the extent of the name strömming in the herring note: they confirmed facts the content sources gave (that a scientific name is valid, that a name is a common name of the species, a species' native range), no text, list or selection was taken from them, and the short phrases quoted in the evidence are citations; the note's wording is the compiler's own. The selection of species and the wording of the notes are the compiler's own. Quotations in the provenance report's evidence remain under their sources' licences and are not part of the CC0 deck."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources and machine checks: every card's scientific, English and Swedish names compared across Dyntaxa (GBIF), Wikidata, Eschmeyer's Catalog of Fishes and FishBase; fronts checked for ambiguity against Wikidata taxa and FishBase's names of the other deck species."@en ;
+    rdfs:comment "Scope: All 55 cards and the candidates left out."@en ,
+                 "Outcome: All 55 scientific names are Dyntaxa's accepted names and the taxon name (P225) of a Wikidata item; 54 of those items have Dyntaxa's taxon as their Dyntaxa ID. The Catalog of Fishes gives every name as valid except the ruffe's spelling. Every English and Swedish front is among FishBase's common names of the species. Wikidata differs from the cards in letter case or in the name chosen for 10 English and 15 Swedish fronts: those label checks are left out and recorded below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 55 cards, re-checked against WoRMS and Dyntaxa (via GBIF) queried independently, and all 211 Wikidata checks."@en ,
+                 "Outcome: No card was found wrong; every scientific name is accepted in Dyntaxa and WoRMS (except the ruffe's spelling), every Swedish front is Dyntaxa's preferred name, and the counts and non-native notes are right. Three warnings (the ruffe note, 'skrubbskädda' shared with Platichthys solemdali, 'löja' shared with the vendace) and three suggestions. All six were verified against live sources and all but part of the monkfish suggestion applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 55 cards, title, description, keywords and language tags in the built deck."@en ,
+                 "Outcome: No errors: every Swedish front is Dyntaxa's preferred name, tags are correct (en/sv fronts, la backs), letter case and note patterns are consistent and bidirectional study works. Four optional suggestions, all applied (two together with round 1)."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Sources and licences, the method, queries and selection, and the evidence of all 55 cards (Wikidata for all, Dyntaxa, Catalog of Fishes and FishBase sampled)."@en ,
+                 "Outcome: Licensing is sound (Wikidata and Dyntaxa CC0 content; Catalog of Fishes and FishBase verification only). One warning: the stated rule for English fronts ('the one most used in Europe') could not be reproduced and was not followed for 'threespine stickleback'. Six suggestions on attribution, locators and documentation. The warning and five suggestions were applied; the FishBase licence change is outside this deck."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 6 cards changed in rounds 1–3 (ruffe, european-flounder, bleak, vendace, atlantic-herring, threespine-stickleback) and every third card (1, 4, 7, … 55): 22 cards against live Wikidata, Dyntaxa via GBIF, the Catalog of Fishes and FishBase; the description, keywords, method, licensing and validation."@en ,
+                 "Outcome: No errors or warnings: every Wikidata check passes, Dyntaxa names and statuses, Catalog of Fishes validity and FishBase names match the evidence, and every fix from rounds 1–3 is present. One suggestion: the ambiguity query had not been re-run for the front adopted in round 3. It has now been run and recorded."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 55 cards against live Dyntaxa via GBIF (accepted name, taxonomic status, Swedish names and Swedish distribution), plus language tags, Swedish usage, description, keywords, study direction and the fixes claimed in rounds 1–4."@en ,
+                 "Outcome: No errors or warnings: every back is Dyntaxa's accepted name, every Swedish front its preferred name, every species is present in Sweden, and the three non-native notes match Dyntaxa's INTRODUCED status. Two optional style suggestions: one was applied (the English back notes giving another Swedish name now share one pattern), the other was declined (the stickleback fronts keep the forms Wikidata uses as labels)."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (fetched with the MediaWiki API, action=parse) — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://doi.org/10.15468/j43wfc>
+    dcterms:title "Dyntaxa. Svensk taxonomisk databas (via GBIF)" ;
+    dcterms:creator "SLU Artdatabanken (Backlund M)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://api.gbif.org/v1/dataset/de8934f4-a136-481c-a87a-b0b202b80a31 — the dataset's metadata: \"license\":\"http://creativecommons.org/publicdomain/zero/1.0/legalcode\" (publication date 2026-09-29); DOI 10.15468/j43wfc, citation \"Backlund M (2026). Dyntaxa. Svensk taxonomisk databas. SLU Artdatabanken. Checklist dataset https://doi.org/10.15468/j43wfc accessed via GBIF.org on 2026-10-04.\""@en .
+
+<https://researcharchive.calacademy.org/research/ichthyology/catalog/fishcatmain.asp>
+    dcterms:title "Eschmeyer's Catalog of Fishes (online version, updated 21 Sep. 2026)" ;
+    dcterms:creator "Fricke R, Eschmeyer W N, Van der Laan R (editors), California Academy of Sciences" ;
+    rdfs:comment "The Catalog's pages state no licence. The California Academy of Sciences' terms of use (https://www.calacademy.org/terms-of-use) say the Academy content is \"owned by Academy and/or its licensors\" and \"Users may not sell, license, distribute, copy, modify, ... or otherwise make unauthorized use of the Academy Content\". Used for verification only."@en .
+
+<https://www.fishbase.se/>
+    dcterms:title "FishBase (version 06/2026)" ;
+    dcterms:creator "Froese R, Pauly D (editors)" ;
+    rdfs:comment "https://www.fishbase.se/summary/citation.php — \"This work is licensed under Attribution-NonCommercial 4.0 International. You are welcome to include text, numbers and maps from FishBase in your own web sites for non-commercial use\"; citation \"Froese, R. and D. Pauly. Editors. 2026.FishBase. World Wide Web electronic publication. www.fishbase.org, ( 06/2026 )\". A non-commercial licence does not allow reuse in a CC0 deck and the builder has no identifier for CC BY-NC, so the source is recorded as all rights reserved: verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Sill>
+    dcterms:title "Wikipedia på svenska: Sill" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=rightsinfo&format=json — \"rightsinfo\":{\"url\":\"https://creativecommons.org/licenses/by-sa/4.0/deed.sv\",\"text\":\"Creative Commons Attribution-Share Alike 4.0\"}. Used for verification only."@en .
+
+<#atlantic-salmon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atlantic salmon"@en ,
+                     "lax"@sv ;
+    solid-memo:back "Salmo salar"@la .
+
+<#brown-trout>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "brown trout"@en ,
+                     "öring"@sv ;
+    solid-memo:back "Salmo trutta"@la .
+
+<#arctic-char>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Arctic char"@en ,
+                     "röding"@sv ;
+    solid-memo:back "Salvelinus alpinus"@la ;
+    solid-memo:backNote "Also called fjällröding in Swedish."@en ,
+                        "Kallas också fjällröding."@sv .
+
+<#brook-trout>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "brook trout"@en ,
+                     "bäckröding"@sv ;
+    solid-memo:back "Salvelinus fontinalis"@la ;
+    solid-memo:backNote "Non-native in Sweden."@en ,
+                        "Främmande art i Sverige."@sv .
+
+<#grayling>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "grayling"@en ,
+                     "harr"@sv ;
+    solid-memo:back "Thymallus thymallus"@la .
+
+<#vendace>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vendace"@en ,
+                     "siklöja"@sv ;
+    solid-memo:back "Coregonus albula"@la ;
+    solid-memo:backNote "Also called löja in Swedish."@en ,
+                        "Kallas också löja."@sv .
+
+<#european-smelt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European smelt"@en ,
+                     "nors"@sv ;
+    solid-memo:back "Osmerus eperlanus"@la .
+
+<#northern-pike>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "northern pike"@en ,
+                     "gädda"@sv ;
+    solid-memo:back "Esox lucius"@la .
+
+<#european-perch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European perch"@en ,
+                     "abborre"@sv ;
+    solid-memo:back "Perca fluviatilis"@la .
+
+<#zander>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "zander"@en ,
+                     "gös"@sv ;
+    solid-memo:back "Sander lucioperca"@la ;
+    solid-memo:backNote "Formerly Stizostedion lucioperca."@en ,
+                        "Tidigare namn: Stizostedion lucioperca."@sv .
+
+<#ruffe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ruffe"@en ,
+                     "gärs"@sv ;
+    solid-memo:back "Gymnocephalus cernuus"@la ;
+    solid-memo:backNote "Dyntaxa's spelling; the Catalog of Fishes and FishBase write Gymnocephalus cernua."@en ,
+                        "Dyntaxas stavning; Catalog of Fishes och FishBase skriver Gymnocephalus cernua."@sv .
+
+<#burbot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "burbot"@en ,
+                     "lake"@sv ;
+    solid-memo:back "Lota lota"@la .
+
+<#european-eel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European eel"@en ,
+                     "ål"@sv ;
+    solid-memo:back "Anguilla anguilla"@la .
+
+<#common-bream>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "common bream"@en ,
+                     "braxen"@sv ;
+    solid-memo:back "Abramis brama"@la .
+
+<#roach>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "roach"@en ,
+                     "mört"@sv ;
+    solid-memo:back "Rutilus rutilus"@la .
+
+<#rudd>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "rudd"@en ,
+                     "sarv"@sv ;
+    solid-memo:back "Scardinius erythrophthalmus"@la .
+
+<#ide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ide"@en ,
+                     "id"@sv ;
+    solid-memo:back "Leuciscus idus"@la .
+
+<#asp>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "asp"@en ,
+                     "asp"@sv ;
+    solid-memo:back "Leuciscus aspius"@la ;
+    solid-memo:backNote "Formerly Aspius aspius."@en ,
+                        "Tidigare namn: Aspius aspius."@sv .
+
+<#tench>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tench"@en ,
+                     "sutare"@sv ;
+    solid-memo:back "Tinca tinca"@la .
+
+<#crucian-carp>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "crucian carp"@en ,
+                     "ruda"@sv ;
+    solid-memo:back "Carassius carassius"@la .
+
+<#common-carp>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "common carp"@en ,
+                     "karp"@sv ;
+    solid-memo:back "Cyprinus carpio"@la ;
+    solid-memo:backNote "Non-native in Sweden."@en ,
+                        "Främmande art i Sverige."@sv .
+
+<#bleak>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "bleak"@en ,
+                     "löja"@sv ;
+    solid-memo:back "Alburnus alburnus"@la ;
+    solid-memo:backNote "Swedish löja can also mean the vendace (siklöja)."@en ,
+                        "Löja kan också syfta på siklöja."@sv .
+
+<#common-minnow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "common minnow"@en ,
+                     "elritsa"@sv ;
+    solid-memo:back "Phoxinus phoxinus"@la .
+
+<#gudgeon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "gudgeon"@en ,
+                     "sandkrypare"@sv ;
+    solid-memo:back "Gobio gobio"@la .
+
+<#wels-catfish>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "wels catfish"@en ,
+                     "mal"@sv ;
+    solid-memo:back "Silurus glanis"@la .
+
+<#european-bullhead>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European bullhead"@en ,
+                     "stensimpa"@sv ;
+    solid-memo:back "Cottus gobio"@la .
+
+<#threespine-stickleback>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "three-spined stickleback"@en ,
+                     "storspigg"@sv ;
+    solid-memo:back "Gasterosteus aculeatus"@la .
+
+<#ninespine-stickleback>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ninespine stickleback"@en ,
+                     "småspigg"@sv ;
+    solid-memo:back "Pungitius pungitius"@la .
+
+<#stone-loach>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "stone loach"@en ,
+                     "grönling"@sv ;
+    solid-memo:back "Barbatula barbatula"@la .
+
+<#spined-loach>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "spined loach"@en ,
+                     "nissöga"@sv ;
+    solid-memo:back "Cobitis taenia"@la .
+
+<#river-lamprey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European river lamprey"@en ,
+                     "flodnejonöga"@sv ;
+    solid-memo:back "Lampetra fluviatilis"@la .
+
+<#atlantic-cod>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atlantic cod"@en ,
+                     "torsk"@sv ;
+    solid-memo:back "Gadus morhua"@la .
+
+<#haddock>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "haddock"@en ,
+                     "kolja"@sv ;
+    solid-memo:back "Melanogrammus aeglefinus"@la .
+
+<#saithe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "saithe"@en ,
+                     "gråsej"@sv ;
+    solid-memo:back "Pollachius virens"@la ;
+    solid-memo:backNote "Also called coalfish."@en ,
+                        "På engelska även coalfish."@sv .
+
+<#whiting>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "whiting"@en ,
+                     "vitling"@sv ;
+    solid-memo:back "Merlangius merlangus"@la .
+
+<#common-ling>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "common ling"@en ,
+                     "långa"@sv ;
+    solid-memo:back "Molva molva"@la .
+
+<#atlantic-herring>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atlantic herring"@en ,
+                     "sill"@sv ;
+    solid-memo:back "Clupea harengus"@la ;
+    solid-memo:backNote "Herring from most of the Baltic is called strömming in Swedish."@en ,
+                        "Sill från större delen av Östersjön kallas strömming."@sv .
+
+<#european-sprat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European sprat"@en ,
+                     "skarpsill"@sv ;
+    solid-memo:back "Sprattus sprattus"@la .
+
+<#atlantic-mackerel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atlantic mackerel"@en ,
+                     "makrill"@sv ;
+    solid-memo:back "Scomber scombrus"@la .
+
+<#horse-mackerel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atlantic horse mackerel"@en ,
+                     "taggmakrill"@sv ;
+    solid-memo:back "Trachurus trachurus"@la .
+
+<#garfish>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "garfish"@en ,
+                     "näbbgädda"@sv ;
+    solid-memo:back "Belone belone"@la ;
+    solid-memo:backNote "Also called horngädda in Swedish."@en ,
+                        "Kallas också horngädda."@sv .
+
+<#european-plaice>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European plaice"@en ,
+                     "rödspätta"@sv ;
+    solid-memo:back "Pleuronectes platessa"@la .
+
+<#european-flounder>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European flounder"@en ,
+                     "skrubbskädda"@sv ;
+    solid-memo:frontNote "in the narrow sense, not the Baltic flounder"@en ,
+                         "i snäv mening, inte östersjöskrubbskädda"@sv ;
+    solid-memo:back "Platichthys flesus"@la ;
+    solid-memo:backNote "Not to be confused with the Baltic flounder, Platichthys solemdali, described in 2018."@en ,
+                        "Förväxla inte med östersjöskrubbskädda, Platichthys solemdali, beskriven 2018 och ibland också kallad skrubbskädda."@sv .
+
+<#turbot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "turbot"@en ,
+                     "piggvar"@sv ;
+    solid-memo:back "Scophthalmus maximus"@la ;
+    solid-memo:backNote "Formerly Psetta maxima."@en ,
+                        "Tidigare namn: Psetta maxima."@sv .
+
+<#common-sole>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "common sole"@en ,
+                     "tunga"@sv ;
+    solid-memo:back "Solea solea"@la ;
+    solid-memo:backNote "Also called sjötunga in Swedish."@en ,
+                        "Kallas också sjötunga."@sv .
+
+<#common-dab>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "common dab"@en ,
+                     "sandskädda"@sv ;
+    solid-memo:back "Limanda limanda"@la .
+
+<#lemon-sole>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lemon sole"@en ,
+                     "bergskädda"@sv ;
+    solid-memo:back "Microstomus kitt"@la ;
+    solid-memo:backNote "Also called bergtunga in Swedish."@en ,
+                        "Kallas också bergtunga."@sv .
+
+<#atlantic-halibut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atlantic halibut"@en ,
+                     "hälleflundra"@sv ;
+    solid-memo:back "Hippoglossus hippoglossus"@la .
+
+<#lumpfish>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lumpfish"@en ,
+                     "sjurygg"@sv ;
+    solid-memo:back "Cyclopterus lumpus"@la ;
+    solid-memo:backNote "Also called lumpsucker."@en ,
+                        "På engelska även lumpsucker."@sv .
+
+<#viviparous-eelpout>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "viviparous eelpout"@en ,
+                     "tånglake"@sv ;
+    solid-memo:back "Zoarces viviparus"@la .
+
+<#atlantic-wolffish>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atlantic wolffish"@en ,
+                     "havskatt"@sv ;
+    solid-memo:back "Anarhichas lupus"@la .
+
+<#monkfish>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "monkfish"@en ,
+                     "marulk"@sv ;
+    solid-memo:back "Lophius piscatorius"@la ;
+    solid-memo:backNote "Also called anglerfish."@en ,
+                        "På engelska även anglerfish."@sv .
+
+<#spurdog>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "spurdog"@en ,
+                     "pigghaj"@sv ;
+    solid-memo:back "Squalus acanthias"@la ;
+    solid-memo:backNote "Also called spiny dogfish."@en ,
+                        "På engelska även spiny dogfish."@sv .
+
+<#thornback-ray>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "thornback ray"@en ,
+                     "knaggrocka"@sv ;
+    solid-memo:back "Raja clavata"@la .
+
+<#round-goby>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "round goby"@en ,
+                     "svartmunnad smörbult"@sv ;
+    solid-memo:back "Neogobius melanostomus"@la ;
+    solid-memo:backNote "Non-native in Sweden."@en ,
+                        "Främmande art i Sverige."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

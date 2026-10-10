@@ -1,0 +1,646 @@
+@base <https://solid-memo.com/decks/morse-code/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "International Morse code"@en ,
+                  "Internationella morsealfabetet"@sv ,
+                  "국제 모스 부호"@ko ,
+                  "Internationaler Morsecode"@de ,
+                  "Código morse internacional"@es ,
+                  "Code Morse international"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The International Morse code of Recommendation ITU-R M.1677-1 (the 26 letters A–Z and É, the digits 0–9 and 13 of its 14 punctuation marks and signs; × is sent as X), plus the distress signal SOS from the International Regulations for Preventing Collisions at Sea: 51 cards in all. Front: the character; back: its code, written with · for a dot and − for a dash; studied in both directions. Å, Ä and Ö are not in the current ITU recommendation and are left out. The codes come from Wikidata and the US edition of the International Code of Signals (Pub. 102), checked against the ITU recommendation and Wikipedia."@en ,
+                        "Det internationella morsealfabetet enligt rekommendationen ITU-R M.1677-1 (de 26 bokstäverna A–Z och É, siffrorna 0–9 och 13 av dess 14 skiljetecken och symboler; × sänds som X) samt nödsignalen SOS från de internationella sjövägsreglerna, sammanlagt 51 kort. Framsida: tecknet; baksida: dess kod, skriven med · för en kort och − för en lång signal; kortleken övas åt båda hållen. Å, Ä och Ö ingår inte i den gällande ITU-rekommendationen och har utelämnats. Koderna är hämtade från Wikidata och den amerikanska utgåvan av International Code of Signals (Pub. 102) och kontrollerade mot ITU-rekommendationen och Wikipedia."@sv ,
+                        "권고 ITU-R M.1677-1의 국제 모스 부호(문자 A–Z 26자와 É, 숫자 0–9, 14개 문장 부호와 기호 중 13개, ×는 X로 보낸다)에 국제해상충돌예방규칙의 조난 신호 SOS를 더한 카드 51장. 앞면: 문자, 뒷면: 점은 ·, 선은 −로 적은 부호. 양방향으로 학습한다. Å, Ä, Ö는 현행 ITU 권고에 없어 제외했다. 부호는 Wikidata와 미국판 국제신호서(Pub. 102)에서 가져왔으며, ITU 권고 및 위키백과와 대조해 확인했다."@ko ,
+                        "Der internationale Morsecode nach der Empfehlung ITU-R M.1677-1 (die 26 Buchstaben A–Z und É, die Ziffern 0–9 und 13 ihrer 14 Satz- und Sonderzeichen; × wird als X gesendet) sowie das Notsignal SOS aus den Internationalen Regeln zur Verhütung von Zusammenstößen auf See: insgesamt 51 Karten. Vorderseite: das Zeichen; Rückseite: sein Code, geschrieben mit · für einen Punkt und − für einen Strich; in beide Richtungen gelernt. Å, Ä und Ö stehen nicht in der aktuellen ITU-Empfehlung und fehlen deshalb. Die Codes stammen aus Wikidata und der US-amerikanischen Ausgabe des Internationalen Signalbuchs (Pub. 102), geprüft anhand der ITU-Empfehlung und der Wikipedia."@de ,
+                        "El código morse internacional de la Recomendación UIT-R M.1677-1 (las 26 letras A–Z y la É, las cifras 0–9 y 13 de sus 14 signos de puntuación y símbolos; × se transmite como X), más la señal de socorro SOS del Reglamento Internacional para Prevenir los Abordajes: 51 tarjetas en total. Anverso: el carácter; reverso: su código, escrito con · para el punto y − para la raya; se estudia en ambos sentidos. Å, Ä y Ö no figuran en la recomendación vigente de la UIT y se han dejado fuera. Los códigos proceden de Wikidata y de la edición estadounidense del Código Internacional de Señales (Pub. 102), comprobados con la recomendación de la UIT y Wikipedia."@es ,
+                        "Le code Morse international de la Recommandation UIT-R M.1677-1 (les 26 lettres A–Z et É, les chiffres 0–9 et 13 de ses 14 signes de ponctuation et symboles ; × est transmis comme X), plus le signal de détresse SOS du Règlement international pour prévenir les abordages en mer : 51 cartes en tout. Recto : le caractère ; verso : son code, écrit avec · pour un point et − pour un trait ; étudié dans les deux sens. Å, Ä et Ö ne figurent pas dans la recommandation actuelle de l’UIT et sont laissés de côté. Les codes proviennent de Wikidata et de l’édition américaine du Code international des signaux (Pub. 102), vérifiés avec la recommandation de l’UIT et Wikipédia."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Property:P3295> ,
+                        <https://archive.org/details/pub-102> ,
+                        <https://www.ecfr.gov/current/title-33/chapter-I/subchapter-E/part-87/section-87.01> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ,
+               topic:languages ;
+    dcat:keyword "Morse code"@en ,
+                 "telegraphy"@en ,
+                 "SOS"@en ,
+                 "amateur radio"@en ,
+                 "ITU"@en ,
+                 "morsealfabetet"@sv ,
+                 "telegrafi"@sv ,
+                 "SOS"@sv ,
+                 "amatörradio"@sv ,
+                 "ITU"@sv ,
+                 "모스 부호"@ko ,
+                 "전신"@ko ,
+                 "SOS"@ko ,
+                 "아마추어 무선"@ko ,
+                 "ITU"@ko ,
+                 "Morsecode"@de ,
+                 "Morsealphabet"@de ,
+                 "Telegrafie"@de ,
+                 "SOS"@de ,
+                 "Amateurfunk"@de ,
+                 "ITU"@de ,
+                 "código morse"@es ,
+                 "telegrafía"@es ,
+                 "SOS"@es ,
+                 "radioafición"@es ,
+                 "UIT"@es ,
+                 "code Morse"@fr ,
+                 "télégraphie"@fr ,
+                 "SOS"@fr ,
+                 "radioamateur"@fr ,
+                 "UIT"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/morse-code/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/morse-code/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#morse-code> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#morse-code> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Property:P3295> ,
+              <https://archive.org/details/pub-102> ,
+              <https://www.ecfr.gov/current/title-33/chapter-I/subchapter-E/part-87/section-87.01> ,
+              <https://www.itu.int/rec/R-REC-M.1677-1-200910-I/en> ,
+              <https://en.wikipedia.org/wiki/Morse_code> ,
+              <https://en.wikipedia.org/wiki/SOS> ,
+              <https://sv.wikipedia.org/wiki/Morsealfabetet> ,
+              <https://sv.wikipedia.org/wiki/SOS> ,
+              <https://sv.wikipedia.org/wiki/Parentes> ,
+              <https://sv.wikipedia.org/wiki/Citattecken> ,
+              <https://sv.wikipedia.org/wiki/Sj%C3%B6v%C3%A4gsreglerna> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (a cross-checking script over three or four independent readings of every code, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. The standard: Recommendation ITU-R M.1677-1 (10/2009), International Morse code, was downloaded from the ITU (query 5); the recommendation's page gave \"Status : In force (Main)\" on 2026-10-04, so it is still the current version. Its text was extracted with pypdf (query 6). Annex 1, Part I, 1.1 defines the written characters: the letters a–z and \"accented e\" (1.1.1), the figures 1–0 (1.1.2) and, in 1.1.3, 13 punctuation marks and signs with a written sign (full stop, comma, colon, question mark, apostrophe, hyphen, fraction bar, left and right bracket, inverted commas, double hyphen, cross and commercial at), the multiplication sign × (the same signal as the letter X, which 3.2.1 says to send for it) and six procedural signals without a written sign (understood, error, invitation to transmit, wait, end of work, starting signal). The recommendation is © ITU, all rights reserved, so it is used for verification only: the deck takes no text from it."@en ,
+                 "2. Wikidata (content): every statement of P3295 (code) whose value consists of dots and dashes was fetched with query 1; those with the qualifier P3294 (encoding) Morse code (Q79897) cover all 26 letters, the 10 digits, É, 12 of the 13 ITU punctuation marks (the full stop item Q172008 has no code statement), and a number of non-ITU characters (Ä, Ö, À, Ü, &, !, ;, $, _ and others). The items of the cards, and of SOS (Q214266), distress signal (Q2355426) and prosign for Morse code (Q7250609), were then fetched in full with wbgetentities (query 2, fetch_entities.py), keeping the raw responses (entities.json): the code statements with their qualifiers and ranks, and the English, Swedish and multilingual (mul) labels and aliases. SOS has no code statement; its English aliases include the code \"· · · – – – · · ·\". A later query (query 15) listed every item that shares the code of the cards with back notes: the × item (Q1900125, en label \"×\", sv label \"multiplikationstecken\") has −··− and the en dash item (Q13219273, en label \"–\", sv label \"vanligt tankstreck\") has −····−, both with encoding Morse code; no item for a division sign, a subtraction or minus sign or a fraction bar has a code, so the notes do not name them."@en ,
+                 "3. Pub. 102 (content): the US edition of the International Code of Signals, 1969 edition revised 2003, prepared and published by the National Imagery and Mapping Agency, a work of the US Government with no copyright claimed. The official current download from NGA and the US Coast Guard's copy answered 403 to the research environment (query 7), so the scan on archive.org was used (query 8): the archive.org OCR text cannot read the dots and dashes, so the pages were rendered as images with pypdfium2 (render.py, query 9) and read by eye. Page 17 (Chapter 1, Section 10, Morse symbols) gives the code of the 26 letters, the 10 numerals and the procedure signals AR, AS and AAA; page 20 gives their meanings (AAA \"Full stop or decimal point\", AR \"Ending signal or End of Transmission or signal\", K \"Invitation to transmit\"); page 139 (Chapter 4, Section 1, Distress signals, from the International Regulations for Preventing Collisions at Sea 1972) gives SOS as the group • • • – – – • • •. The page-17 table and the SOS group were transcribed by hand into verify.py (query 12)."@en ,
+                 "4. 33 CFR 87.01 (content): the US Inland Navigation Rules' Annex IV, distress signals, was fetched from the eCFR versioner API (query 10; the renderer address and the date-less request failed, see the queries): paragraph (d) gives SOS as \". . . - - - . . .\"."@en ,
+                 "5. English Wikipedia (verification): the article \"Morse code\" and the article \"SOS\" were fetched as wikitext with their revision ids (query 11, fetch_wiki.py). The table under Characters and prosigns gives each character's code as a {{morse|dot|dash…}} template; the article states that É is the only accented character of the ITU standard and lists Å, Ä, Ö and others under diacritics and non-Latin extensions."@en ,
+                 "6. Cross-check (verify.py, query 12): the script parses four independent readings of each card's code — the ITU text (letters and figures by tokens, punctuation by the line ending \"[sign] code\"), the hand transcription of Pub. 102, the Wikidata code statements with encoding Morse code (non-deprecated), and the English Wikipedia table — converts every notation (\". −\" in the ITU text, \"• –\" in Pub. 102, \".-\" in Wikidata, \"· · · – – –\" in the SOS alias, dot/dash in the Wikipedia templates) to the deck's notation and fails on any disagreement. It also checks that no two cards share a code (which bidirectional study requires), that no two fronts are the same, that every code uses only the two signs of the notation, and that every ITU character with a written sign has a card except ×. All 51 cards agree in every source that has them: ITU, Pub. 102, Wikidata and Wikipedia for the 36 letters and digits; ITU, Wikidata and Wikipedia for É and 12 punctuation marks; ITU, Pub. 102 (AAA) and Wikipedia for the full stop; Pub. 102, 33 CFR 87.01, Wikidata (alias) and Wikipedia for SOS. The script wrote its readings to readings.json, and the evidence of every card was generated from them by make_dossier.py (query 13), not typed by hand. The scripts are not published with the deck; the rules above are what they do."@en ,
+                 "7. Notation: the deck writes a dot as · (U+00B7 MIDDLE DOT) and a dash as − (U+2212 MINUS SIGN), with no spaces between the elements of a character. This keeps the code of the full stop (·−·−·−) and of the hyphen (−····−) distinct from the characters themselves, which the ASCII notation \".-\" would not. The ITU prints the dot as a full stop and the dash as a minus sign with spaces between them, Pub. 102 as • and –; the elements are the same."@en ,
+                 "8. Swedish text: the cards' codes and characters have no language (zxx). The front notes of the 13 punctuation cards name the mark in English and Swedish: the English and Swedish Wikidata labels where the item has them (full stop/punkt, comma/kommatecken, colon/kolon, question mark/frågetecken, apostrophe/apostrof, hyphen/bindestreck, slash/snedstreck, equals sign/likhetstecken, plus sign/plustecken, at sign/snabel-a), and for the parentheses and the quotation mark, whose Unicode-character items have no Swedish label, \"vänsterparentes\", \"högerparentes\" (Swedish Wikipedia, Parentes) and \"citattecken\" (Swedish Wikipedia, Citattecken). The front of the SOS card reads \"SOS (distress signal)\" / \"SOS (nödsignal)\" (Swedish Wikipedia, SOS: \"den internationella nödsignalen i morsekod\"). The back notes are the compiler's own wording of facts stated in the content sources: × and the dash share the codes of X and the hyphen (Wikidata, with the sv labels \"multiplikationstecken\" and \"vanligt tankstreck\"), K is the invitation to transmit and the signal of + the ending signal AR (Pub. 102), and SOS is the distress signal of the International Regulations for Preventing Collisions at Sea, sent as one group (Pub. 102, 33 CFR 87.01). The ITU recommendation and Wikipedia only confirmed them. The Swedish name of those regulations, \"de internationella sjövägsreglerna\", was checked on Swedish Wikipedia (Sjövägsreglerna, query 16)."@en ,
+                 "9. Machine checks by the builder against live Wikidata: for every card with a code statement, that the item has P3295 with the card's code in Wikidata's notation (\".-\" for ·−) and that it is the right character (its English or multilingual label or alias is the character; for the punctuation marks also its English and Swedish names). The builder's checks cannot see the P3294 qualifier; that it is Morse code (Q79897) for each of these values was checked in queries 1 and 2. For SOS: that Q214266 is an instance of prosign for Morse code (Q7250609) and of distress signal (Q2355426) and has the alias \"· · · – – – · · ·\" (a free-text alias, the only place Wikidata gives the code of SOS); for the notes of X and the hyphen, that Q1900125 (×) and Q13219273 (en dash) have the same P3295 code. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "10. Excluded after research: Å, Ä and Ö. Wikidata gives Ä ·−·− and Ö −−−· (and À ·−−·− but no code for Å), Wikipedia lists all three among the non-ITU extensions, and the Swedish Wikipedia says they were not in the original alphabet and \"senare har fått sina speciella kombinationer\"; the same article also says that the code of Å was created at the International Telegraph Conference in Paris in 1865 (\"Det var där koden för vårt svenska Å föddes\"), the ITU's founding conference. None of them is in the current recommendation, ITU-R M.1677-1, and no current ITU or official Swedish source defining them was found (a web search, query 14, found only amateur and private pages), so they are left out (see Selection)."@en ,
+                 "Selection: Every written character except × of the International Morse code in Recommendation ITU-R M.1677-1, Annex 1, Part I, 1.1, the standard in force on 4 October 2026: the 26 letters A–Z, the accented letter É (the only one the ITU defines), the 10 digits 0–9 and the 13 punctuation marks and signs . , : ? ' - / ( ) \" = + @; and the distress signal SOS, which is not in the ITU recommendation but is the Morse distress signal of the International Regulations for Preventing Collisions at Sea (Pub. 102) and of the US Inland Navigation Rules (33 CFR 87.01). 51 cards. Letters are shown in upper case (the code has no case). Left out: the multiplication sign ×, which the ITU sends with the signal of the letter X (named in the note of X instead); the six procedural signals without a written sign (understood, error, invitation to transmit, wait, end of work and the starting signal), because the deck asks for a character's code and \"invitation to transmit\" is the letter K (named in K's note); characters not in the current ITU recommendation, such as the national extensions Å, Ä, Ö, Ü, À and Ñ (Å's code dates from the Paris telegraph conference of 1865, but it is not in ITU-R M.1677-1 and no current official source defines Å, Ä and Ö for Swedish) and some of which share a code with each other (À and Å), and non-ITU punctuation such as ! & ; $ _ ; American Morse and other historical codes; and Q codes and abbreviations such as CQ."@en ,
+                 "Licensing: The deck is CC0 1.0. Its codes come from Wikidata (CC0) and from two works of the US Government that are not protected by copyright: Pub. 102, the US edition of the International Code of Signals (\"No copyright claimed under Title 17 U.S.C.\"), and the regulation 33 CFR 87.01. The back notes rest on these content sources as well: × and the dash share the codes of X and the hyphen (Wikidata), K is the invitation to transmit and the signal of + is the ending signal AR (Pub. 102), and SOS is the distress signal of the collision regulations, sent as one group (Pub. 102 and 33 CFR 87.01). The selection of the letters, figures and punctuation marks follows the list in Recommendation ITU-R M.1677-1, Annex 1, Part I, 1.1: the deck takes every written character the recommendation defines (except ×, which shares the signal of X). Taking all the characters a standard defines is a complete, non-creative enumeration with no originality of selection, and which characters a standard defines is a fact; neither Wikidata nor Pub. 102 identifies this set on its own. Adding SOS and leaving out × and the procedural signals is the compiler's own choice. The notation, the front notes (English and Swedish names of the marks, from Wikidata labels or common Swedish words checked on Swedish Wikipedia) and the back notes are the compiler's own wording. Recommendation ITU-R M.1677-1 (© ITU, all rights reserved) and the English and Swedish Wikipedia articles (CC BY-SA 4.0) were used for verification only: they confirmed the codes and notes that the cards have from the content sources and the deck's statements of scope (the code of a character is a fact, not protected by copyright), and no text, table, layout or note was copied from them."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks and sources: every code read from three or four independent sources (ITU, Pub. 102, Wikidata, English Wikipedia; 33 CFR 87.01 for SOS) and compared by verify.py; uniqueness of every code and front; that every written ITU character has a card; licences of every source; the Wikidata checks against live Wikidata."@en ;
+    rdfs:comment "Scope: All 51 cards, the sources and the deck metadata."@en ,
+                 "Outcome: All 51 cards agree in every source that has them, no two codes or fronts are the same, and every written ITU character except × has a card. No Wikidata check was skipped and no source disagrees with another. Findings concern the scope of the sources and two parsing slips in the script, none a card."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 51 cards: every code re-derived from the ITU-R M.1677-1 PDF, SOS from Pub. 102, the notes against the ITU text, and every Wikidata check run against live Wikidata."@en ,
+                 "Outcome: No factual errors: all 51 codes match the ITU recommendation (SOS matches Pub. 102 and 33 CFR 87.01), every Wikidata check passes, the notes are accurate and the counts and coverage agree with the description. Two optional suggestions: the SOS code check rests on a free-text alias, and the Swedish equals-sign note contains an English term. Both are resolved."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 51 cards, the title, the description and the keywords: language tags, Swedish names and idiom, uniqueness for bidirectional study."@en ,
+                 "Outcome: The tags are sound (zxx for every character and code, en and sv for the SOS front and the notes), the Swedish names match Wikidata sv labels and Swedish Wikipedia, and fronts and backs are unique. One warning, that the description put SOS inside the ITU code, and two suggestions (an English term in the Swedish equals-sign note, \"Code\" capitalised in the title) were all fixed."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence page, the cited revisions, evidence spot checks on 20 cards (A, B, C, K, X, É, the 13 punctuation marks and SOS), attribution in the built deck, the method, queries and licensing text."@en ,
+                 "Outcome: Licences, revisions and quotes are recorded correctly and attribution is complete. The main problem was that back notes on nine cards stated facts given only by verification sources (the ITU recommendation and Wikipedia), which made the licensing text untrue. Each note now rests on a content source or was removed, and the licensing text and the ITU's usedFor say exactly how the sources were used, including that the punctuation set follows the ITU's list. The documentation slips (four readings, the elided query, the scratch paths, the history of Å) are fixed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 10 cards changed in round 3, every third card (A, D, G, J, M, P, S, V, Y, 1, 4, 7, 0, comma, apostrophe, left parenthesis, equals sign, SOS), the deck metadata and the documentation; 24 cards in all, checked against the ITU PDF, live Wikidata, the eCFR, the archive.org record of Pub. 102 and the cited Swedish Wikipedia revisions, plus a run of the validators."@en ,
+                 "Outcome: No errors or warnings: every code, Wikidata check, quote and licence statement was confirmed, and the round-3 fixes are all in place. Three documentation suggestions were checked against the ITU PDF (fetched again today) and applied: the description and selection now say that × is the one ITU sign left out, round 0 notes that the quotation-marks note was later removed, and the ITU's usedFor names the hyphen note."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 51 cards, the deck metadata and the documentation: every code compared with the ITU-R M.1677-1 PDF (fetched again today, Annex 1, 1.1.1–1.1.3), the back notes, language tags, Swedish notes, description, keywords, topics, study direction and the round-4 fixes."@en ,
+                 "Outcome: No errors: all 51 codes match the ITU text, the back notes are confirmed by it, no two cards share a back, and the round-4 fixes are in place. One optional language suggestion was applied: the hyphen card's Swedish back note now uses the definite form, like the other Swedish notes."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/wiki/Property:P3295>
+    dcterms:title "Wikidata: the Morse code (P3295 code, with P3294 encoding Q79897) of each character's item, and the item SOS (Q214266)" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://archive.org/details/pub-102>
+    dcterms:title "Pub. 102, International Code of Signals, United States Edition, 1969 (Revised 2003)" ;
+    dcterms:creator "National Imagery and Mapping Agency (now the National Geospatial-Intelligence Agency), United States Government" ;
+    rdfs:comment "Title page of the publication (page image of the archive.org scan): \"© COPYRIGHT 2003 BY THE UNITED STATES GOVERNMENT NO COPYRIGHT CLAIMED UNDER TITLE 17 U.S.C.\"; a work of the United States Government, 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The archive.org item's metadata (https://archive.org/metadata/pub-102) gives licenseurl https://creativecommons.org/publicdomain/mark/1.0/."@en .
+
+<https://www.ecfr.gov/current/title-33/chapter-I/subchapter-E/part-87/section-87.01>
+    dcterms:title "33 CFR 87.01 Need of assistance (Inland Navigation Rules, Annex IV: Distress signals), Electronic Code of Federal Regulations" ;
+    dcterms:creator "United States Coast Guard; Office of the Federal Register, National Archives and Records Administration" ;
+    rdfs:comment "A regulation of the United States Government, a work of the United States Government: 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". eCFR states no other licence for the text."@en .
+
+<https://www.itu.int/rec/R-REC-M.1677-1-200910-I/en>
+    dcterms:title "Recommendation ITU-R M.1677-1 (10/2009): International Morse code" ;
+    dcterms:creator "International Telecommunication Union, Radiocommunication Sector (ITU-R)" ;
+    rdfs:comment "The PDF (https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf), p. ii: \"© ITU 2009 All rights reserved. No part of this publication may be reproduced, by any means whatsoever, without written permission of ITU.\" ITU's terms of use (https://www.itu.int/en/about/Pages/terms-of-use.aspx): \"You may not modify, reproduce, distribute, sell, transmit, create derivative works or use the content for any commercial purpose without obtaining prior written permission from ITU.\" Free to download, not openly licensed: verification only."@en .
+
+<https://en.wikipedia.org/wiki/Morse_code>
+    dcterms:title "English Wikipedia: Morse code" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\""@en .
+
+<https://en.wikipedia.org/wiki/SOS>
+    dcterms:title "English Wikipedia: SOS" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Wikipedia's text licence, as in the footer of every article (e.g. https://en.wikipedia.org/wiki/Morse_code): \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\""@en .
+
+<https://sv.wikipedia.org/wiki/Morsealfabetet>
+    dcterms:title "Svenskspråkiga Wikipedia: Morsealfabetet" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://sv.wikipedia.org/wiki/SOS>
+    dcterms:title "Svenskspråkiga Wikipedia: SOS" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Wikipedia's text licence, as in the footer of every Swedish article (e.g. https://sv.wikipedia.org/wiki/Morsealfabetet): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://sv.wikipedia.org/wiki/Parentes>
+    dcterms:title "Svenskspråkiga Wikipedia: Parentes" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Wikipedia's text licence, as in the footer of every Swedish article (e.g. https://sv.wikipedia.org/wiki/Morsealfabetet): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://sv.wikipedia.org/wiki/Citattecken>
+    dcterms:title "Svenskspråkiga Wikipedia: Citattecken" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Wikipedia's text licence, as in the footer of every Swedish article (e.g. https://sv.wikipedia.org/wiki/Morsealfabetet): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://sv.wikipedia.org/wiki/Sj%C3%B6v%C3%A4gsreglerna>
+    dcterms:title "Svenskspråkiga Wikipedia: Sjövägsreglerna" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Wikipedia's text licence, as in the footer of every Swedish article (e.g. https://sv.wikipedia.org/wiki/Morsealfabetet): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<#letter-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A"@zxx ;
+    solid-memo:back "·−"@zxx .
+
+<#letter-b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "B"@zxx ;
+    solid-memo:back "−···"@zxx .
+
+<#letter-c>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "C"@zxx ;
+    solid-memo:back "−·−·"@zxx .
+
+<#letter-d>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "D"@zxx ;
+    solid-memo:back "−··"@zxx .
+
+<#letter-e>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "E"@zxx ;
+    solid-memo:back "·"@zxx .
+
+<#letter-f>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "F"@zxx ;
+    solid-memo:back "··−·"@zxx .
+
+<#letter-g>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "G"@zxx ;
+    solid-memo:back "−−·"@zxx .
+
+<#letter-h>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "H"@zxx ;
+    solid-memo:back "····"@zxx .
+
+<#letter-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "I"@zxx ;
+    solid-memo:back "··"@zxx .
+
+<#letter-j>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "J"@zxx ;
+    solid-memo:back "·−−−"@zxx .
+
+<#letter-k>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "K"@zxx ;
+    solid-memo:back "−·−"@zxx ;
+    solid-memo:backNote "Also the signal “invitation to transmit”"@en ,
+                        "Även signalen ”uppmaning att sända”"@sv .
+
+<#letter-l>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "L"@zxx ;
+    solid-memo:back "·−··"@zxx .
+
+<#letter-m>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "M"@zxx ;
+    solid-memo:back "−−"@zxx .
+
+<#letter-n>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "N"@zxx ;
+    solid-memo:back "−·"@zxx .
+
+<#letter-o>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "O"@zxx ;
+    solid-memo:back "−−−"@zxx .
+
+<#letter-p>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "P"@zxx ;
+    solid-memo:back "·−−·"@zxx .
+
+<#letter-q>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Q"@zxx ;
+    solid-memo:back "−−·−"@zxx .
+
+<#letter-r>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "R"@zxx ;
+    solid-memo:back "·−·"@zxx .
+
+<#letter-s>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "S"@zxx ;
+    solid-memo:back "···"@zxx .
+
+<#letter-t>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "T"@zxx ;
+    solid-memo:back "−"@zxx .
+
+<#letter-u>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "U"@zxx ;
+    solid-memo:back "··−"@zxx .
+
+<#letter-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "V"@zxx ;
+    solid-memo:back "···−"@zxx .
+
+<#letter-w>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "W"@zxx ;
+    solid-memo:back "·−−"@zxx .
+
+<#letter-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "X"@zxx ;
+    solid-memo:back "−··−"@zxx ;
+    solid-memo:backNote "Also sent for the multiplication sign ×"@en ,
+                        "Sänds även för multiplikationstecknet ×"@sv .
+
+<#letter-y>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Y"@zxx ;
+    solid-memo:back "−·−−"@zxx .
+
+<#letter-z>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Z"@zxx ;
+    solid-memo:back "−−··"@zxx .
+
+<#letter-e-acute>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "É"@zxx ;
+    solid-memo:back "··−··"@zxx .
+
+<#digit-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1"@zxx ;
+    solid-memo:back "·−−−−"@zxx .
+
+<#digit-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2"@zxx ;
+    solid-memo:back "··−−−"@zxx .
+
+<#digit-3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "3"@zxx ;
+    solid-memo:back "···−−"@zxx .
+
+<#digit-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "4"@zxx ;
+    solid-memo:back "····−"@zxx .
+
+<#digit-5>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "5"@zxx ;
+    solid-memo:back "·····"@zxx .
+
+<#digit-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "6"@zxx ;
+    solid-memo:back "−····"@zxx .
+
+<#digit-7>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "7"@zxx ;
+    solid-memo:back "−−···"@zxx .
+
+<#digit-8>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "8"@zxx ;
+    solid-memo:back "−−−··"@zxx .
+
+<#digit-9>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "9"@zxx ;
+    solid-memo:back "−−−−·"@zxx .
+
+<#digit-0>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "0"@zxx ;
+    solid-memo:back "−−−−−"@zxx .
+
+<#full-stop>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "."@zxx ;
+    solid-memo:frontNote "Full stop"@en ,
+                         "Punkt"@sv ;
+    solid-memo:back "·−·−·−"@zxx .
+
+<#comma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front ","@zxx ;
+    solid-memo:frontNote "Comma"@en ,
+                         "Kommatecken"@sv ;
+    solid-memo:back "−−··−−"@zxx .
+
+<#colon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front ":"@zxx ;
+    solid-memo:frontNote "Colon"@en ,
+                         "Kolon"@sv ;
+    solid-memo:back "−−−···"@zxx .
+
+<#question-mark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "?"@zxx ;
+    solid-memo:frontNote "Question mark"@en ,
+                         "Frågetecken"@sv ;
+    solid-memo:back "··−−··"@zxx .
+
+<#apostrophe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "'"@zxx ;
+    solid-memo:frontNote "Apostrophe"@en ,
+                         "Apostrof"@sv ;
+    solid-memo:back "·−−−−·"@zxx .
+
+<#hyphen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "-"@zxx ;
+    solid-memo:frontNote "Hyphen"@en ,
+                         "Bindestreck"@sv ;
+    solid-memo:back "−····−"@zxx ;
+    solid-memo:backNote "Also the dash (–)"@en ,
+                        "Även tankstrecket (–)"@sv .
+
+<#slash>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "/"@zxx ;
+    solid-memo:frontNote "Slash"@en ,
+                         "Snedstreck"@sv ;
+    solid-memo:back "−··−·"@zxx .
+
+<#left-parenthesis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "("@zxx ;
+    solid-memo:frontNote "Left parenthesis"@en ,
+                         "Vänsterparentes"@sv ;
+    solid-memo:back "−·−−·"@zxx .
+
+<#right-parenthesis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front ")"@zxx ;
+    solid-memo:frontNote "Right parenthesis"@en ,
+                         "Högerparentes"@sv ;
+    solid-memo:back "−·−−·−"@zxx .
+
+<#quotation-marks>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "\""@zxx ;
+    solid-memo:frontNote "Quotation marks"@en ,
+                         "Citattecken"@sv ;
+    solid-memo:back "·−··−·"@zxx .
+
+<#equals-sign>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "="@zxx ;
+    solid-memo:frontNote "Equals sign"@en ,
+                         "Likhetstecken"@sv ;
+    solid-memo:back "−···−"@zxx .
+
+<#plus-sign>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "+"@zxx ;
+    solid-memo:frontNote "Plus sign"@en ,
+                         "Plustecken"@sv ;
+    solid-memo:back "·−·−·"@zxx ;
+    solid-memo:backNote "Also the ending signal AR"@en ,
+                        "Även slutsignalen AR"@sv .
+
+<#at-sign>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "@"@zxx ;
+    solid-memo:frontNote "At sign"@en ,
+                         "Snabel-a"@sv ;
+    solid-memo:back "·−−·−·"@zxx .
+
+<#sos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SOS (distress signal)"@en ,
+                     "SOS (nödsignal)"@sv ;
+    solid-memo:back "···−−−···"@zxx ;
+    solid-memo:backNote "The distress signal of the International Regulations for Preventing Collisions at Sea, sent as one group"@en ,
+                        "Nödsignalen i de internationella sjövägsreglerna, sänd som en enda grupp"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

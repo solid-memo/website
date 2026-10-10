@@ -1,0 +1,613 @@
+@base <https://solid-memo.com/decks/nordic-trees/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Nordic trees"@en ,
+                  "Nordiska träd"@sv ,
+                  "북유럽의 나무"@ko ,
+                  "Nordische Bäume"@de ,
+                  "Árboles nórdicos"@es ,
+                  "Arbres nordiques"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "46 trees and shrubs that grow wild in Sweden and the Nordic countries or are widely planted there: conifers such as spruce, pine, juniper, yew and larches, and broadleaves such as birches, alders, aspen, oaks, beech, ash, elms, limes, maples, rowan, cherries and willows. Front: the English name and the Swedish name; back: the scientific name, as accepted by Dyntaxa, the Swedish taxonomic database (September 2026), with a note where another checklist uses a different name. Names from Dyntaxa and Wikidata, checked against Kew's World Checklist of Vascular Plants and Wikipedia."@en ,
+                        "46 träd och buskar som växer vilt i Sverige och Norden eller ofta planteras där: barrträd som gran, tall, en (enbuske), idegran och lärkar, och lövträd som björkar, alar, asp, ekar, bok, ask, almar, lindar, lönnar, rönn, körsbär och pilar. Framsida: det engelska och det svenska namnet; baksida: det vetenskapliga namnet, så som det godtas i Dyntaxa, Sveriges taxonomiska databas (september 2026), med en anteckning där en annan checklista använder ett annat namn. Namnen kommer från Dyntaxa och Wikidata och är kontrollerade mot Kews World Checklist of Vascular Plants och Wikipedia."@sv ,
+                        "스웨덴과 북유럽 나라들에서 자생하거나 널리 심는 나무와 관목 46종입니다. 가문비나무, 소나무, 노간주나무, 주목, 낙엽송 같은 침엽수와 자작나무, 오리나무, 사시나무, 참나무, 너도밤나무, 물푸레나무, 느릅나무, 피나무, 단풍나무, 마가목, 벚나무, 버드나무 같은 활엽수가 있습니다. 앞면: 영어 이름과 스웨덴어 이름, 뒷면: 스웨덴 분류학 데이터베이스 Dyntaxa(2026년 9월)가 인정하는 학명. 다른 점검 목록이 다른 이름을 쓰는 경우 메모가 있습니다. 이름은 Dyntaxa와 위키데이터에서 가져왔고, 큐 왕립식물원의 World Checklist of Vascular Plants와 위키백과로 확인했습니다."@ko ,
+                        "46 Bäume und Sträucher, die in Schweden und den nordischen Ländern wild wachsen oder dort weit verbreitet gepflanzt werden: Nadelbäume wie Fichte, Kiefer, Wacholder, Eibe und Lärchen und Laubbäume wie Birken, Erlen, Zitterpappel, Eichen, Buche, Esche, Ulmen, Linden, Ahorne, Eberesche, Kirschen und Weiden. Vorderseite: der englische und der schwedische Name; Rückseite: der wissenschaftliche Name, wie ihn Dyntaxa, die schwedische taxonomische Datenbank, anerkennt (September 2026), mit einer Anmerkung, wo eine andere Checkliste einen anderen Namen verwendet. Namen aus Dyntaxa und Wikidata, geprüft anhand der World Checklist of Vascular Plants von Kew und der Wikipedia."@de ,
+                        "46 árboles y arbustos que crecen silvestres en Suecia y los países nórdicos o que se plantan mucho allí: coníferas como la pícea, el pino, el enebro, el tejo y los alerces, y frondosas como los abedules, los alisos, el álamo temblón, los robles, el haya, el fresno, los olmos, los tilos, los arces, el serbal, los cerezos y los sauces. Anverso: el nombre en inglés y el nombre en sueco; reverso: el nombre científico, tal como lo acepta Dyntaxa, la base de datos taxonómica sueca (septiembre de 2026), con una nota cuando otra lista de referencia usa otro nombre. Nombres de Dyntaxa y Wikidata, comprobados con la World Checklist of Vascular Plants de Kew y con Wikipedia."@es ,
+                        "46 arbres et arbustes qui poussent à l’état sauvage en Suède et dans les pays nordiques ou qui y sont largement plantés : des conifères comme l’épicéa, le pin, le genévrier, l’if et les mélèzes, et des feuillus comme les bouleaux, les aulnes, le tremble, les chênes, le hêtre, le frêne, les ormes, les tilleuls, les érables, le sorbier des oiseleurs, les cerisiers et les saules. Recto : le nom anglais et le nom suédois ; verso : le nom scientifique, tel que l’accepte Dyntaxa, la base de données taxonomique suédoise (septembre 2026), avec une note lorsqu’une autre liste de référence emploie un autre nom. Noms tirés de Dyntaxa et de Wikidata, vérifiés dans la World Checklist of Vascular Plants de Kew et dans Wikipédia."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://doi.org/10.15468/j43wfc> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:biology ;
+    dcat:keyword "trees"@en ,
+                 "shrubs"@en ,
+                 "botany"@en ,
+                 "scientific names"@en ,
+                 "Nordic countries"@en ,
+                 "träd"@sv ,
+                 "buskar"@sv ,
+                 "botanik"@sv ,
+                 "vetenskapliga namn"@sv ,
+                 "Norden"@sv ,
+                 "나무"@ko ,
+                 "관목"@ko ,
+                 "식물학"@ko ,
+                 "학명"@ko ,
+                 "북유럽"@ko ,
+                 "Bäume"@de ,
+                 "Sträucher"@de ,
+                 "Botanik"@de ,
+                 "wissenschaftliche Namen"@de ,
+                 "nordische Länder"@de ,
+                 "árboles"@es ,
+                 "arbustos"@es ,
+                 "botánica"@es ,
+                 "nombres científicos"@es ,
+                 "países nórdicos"@es ,
+                 "arbres"@fr ,
+                 "arbustes"@fr ,
+                 "botanique"@fr ,
+                 "noms scientifiques"@fr ,
+                 "pays nordiques"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/nordic-trees/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/nordic-trees/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#nordic-trees> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#nordic-trees> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://doi.org/10.15468/j43wfc> ,
+              <https://doi.org/10.15468/6h8ucr> ,
+              <https://en.wikipedia.org/wiki/Main_Page> ,
+              <https://sv.wikipedia.org/wiki/Portal:Huvudsida> ,
+              <https://doi.org/10.48580/dgz5n> ,
+              <https://doi.org/10.15468/39omei> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Authority. The library editor asked for about 45 Nordic trees and large shrubs with the scientific name on the back, one stated authority for accepted names, and notes on recent name changes. Dyntaxa, the Swedish taxonomic database kept by SLU Artdatabanken, was chosen as the single authority for the scientific name and the Swedish name, because it is the reference for Swedish names and is published under CC0 (on GBIF, dataset version 2026-09-29). Kew's World Checklist of Vascular Plants (WCVP, the data behind Plants of the World Online) was used as the independent international check. Plants of the World Online itself and its terms page answered HTTP 403 to the research environment, so WCVP was read through its GBIF copy (dataset version 2026-06-04, CC BY 4.0). Den virtuella floran (Naturhistoriska riksmuseet, linnaeus.nrm.se) could not be reached (connection refused on https, 404 on http) and SAOL at svenska.se only returns a JavaScript application to a script, so neither was used (the SAOL request, one per Swedish front, is among the queries; it returned only the application page, so no headword was found and nothing was used). The USDA PLANTS database (a US federal, public-domain source) was tried for English names through its profile API; it too returned only a JavaScript application page, so nothing was used; the Swedish names rest on Dyntaxa, checked against Wikidata and the Swedish Wikipedia."@en ,
+                 "Candidates. The authoring agent wrote down 77 candidate scientific names of trees and large shrubs that grow wild in the Nordic countries or are commonly planted there (forestry, parks, hedges), from general knowledge, together with the newer and older names it expected to meet (Scandosorbus intermedia, Hedlundia hybrida, Torminalis glaberrima, Salix euxina, Padus avium, Tilia × vulgaris …) to see how each source treats them (file candidates.txt)."@en ,
+                 "Wikidata (content source). One SPARQL query (the first query below) fetched, for every candidate name, the items with that taxon name (P225), their taxon rank (P105), English and Swedish labels and aliases, Dyntaxa ID (P1939) and POWO ID (P5037). For the 46 species kept, the entity API (wbgetentities, labels, aliases, claims and sitelinks in en, sv and mul) was then read for the exact label and alias strings, the P225 and P1939 statements and the English and Swedish Wikipedia sitelinks (script fetch_wiki.py)."@en ,
+                 "Dyntaxa (content source, authority). A first pass used GBIF's full-text species search restricted to the Dyntaxa dataset (script fetch.py); it missed some exact names among many subspecies and cultivar records, so the second pass (script fetch_dyntaxa.py) looked each candidate up by exact name in the dataset (GBIF /species?datasetKey=…&name=…, falling back to the search) and kept only records whose canonical name equals the candidate. For each record it fetched the vernacular names with GBIF's 'preferred' flag (languages swe and eng) and, for accepted records, the synonyms. Every one of the 46 species has exactly one ACCEPTED record of rank SPECIES under the card's name (Tilia ×europaea was found under its canonical form 'Tilia europaea')."@en ,
+                 "WCVP (verification). Each candidate name was looked up the same way in the WCVP dataset on GBIF (script fetch_wcvp.py). For each card the WCVP record with exactly Dyntaxa's scientific name including the author was compared: 45 are ACCEPTED in WCVP under the same name and author; Sorbus intermedia (Ehrh.) Pers. is a SYNONYM of Hedlundia intermedia in WCVP. Other candidates where the two checklists differ were left out (see the selection)."@en ,
+                 "Wikipedia (verification). The introductions of the English and Swedish articles linked from each Wikidata item were fetched with the MediaWiki API (TextExtracts, plain text, with the revision id; script fetch_wiki.py), and the sentence naming the card's English or Swedish name was picked by script (sentences.py; two English sentences that the simple splitter cut at an abbreviation were taken whole by hand from the same saved extract). Each quote is in the card's evidence with a link to its revision."@en ,
+                 "Card text. Back: Dyntaxa's accepted scientific name without author, tagged as Latin; it is also the Wikidata taxon name (P225) for 45 cards (for the hybrid lime Wikidata writes 'Tilia × europaea' with a space; the card follows Dyntaxa and WCVP, 'Tilia ×europaea', the form the botanical Code recommends, and the note gives the spaced form). Swedish front: Dyntaxa's preferred Swedish name, in lower case, for 45 cards; for Larix decidua Dyntaxa's preferred name is just 'lärk', which would not tell it from Siberian larch in the same deck, so the card uses Dyntaxa's other name 'europeisk lärk' (also a Wikidata alias and in the Swedish Wikipedia's first sentence) and says so in a note. English front: a name that identifies the species, chosen among the English names in Wikidata (label or alias) and Dyntaxa, written in sentence case (capital first letter, proper names such as Norway, Scots, Sitka, Douglas and Swedish capitalised), and confirmed in the English Wikipedia introduction. Generic names were avoided where they would be ambiguous (European aspen rather than aspen, European elder rather than elder, Sycamore maple rather than sycamore, which in North America is a plane tree). Two English fronts are not a label or alias under Wikidata's plain 'en' language code nor a Dyntaxa English name, but are Wikidata taxon common names (P1843), a CC0 source: 'European white elm' for Ulmus laevis (P1843 'European White Elm'@en) and 'Sycamore maple' for Acer pseudoplatanus ('Sycamore maple' is only an en-us alias and a P1843 value, 'sycamore maple'@en). One English front rests on the compiler's general knowledge: for Ulmus minor the CC0 sources give only 'Small-leaved elm' (which would read like Small-leaved lime, another card), and the card gives 'Field elm', one of the species' established English names, confirmed in the English Wikipedia introduction and in the vernacular names the GBIF Backbone Taxonomy collects (Catalogue of Life, IUCN Red List and others; the public-domain GRIN Taxonomy has 'European field elm'). In the first draft only the Wikidata labels and aliases were compared, so these three were all recorded as having no CC0 source; quality-control round 1 found the taxon common names (see licensing). No Swedish text was translated by the agent: every Swedish front is a Dyntaxa name."@en ,
+                 "Notes. A back note, in the compiler's own words, was written where it helps: the short Swedish names ek, lind, lönn and alm (other Swedish names in Dyntaxa, Wikidata sv labels or aliases; the Swedish Wikipedia confirms them), the other Swedish names fågelbär, skogsolvon and enbuske (Dyntaxa or Wikidata, and the Swedish Wikipedia), the British name sycamore (Wikidata en and en-gb aliases and taxon common names; the GBIF Backbone's UK Species Inventory name; English Wikipedia), the hybrid lime and its synonym Tilia ×vulgaris (Dyntaxa synonyms and English Wikipedia), the former name Rhamnus frangula (Dyntaxa synonym; the Swedish Wikipedia still uses it), the placement of the Swedish whitebeam in Hedlundia by WCVP and the Catalogue of Life (the name Hedlundia intermedia is a separate Wikidata item; the placement is a single fact, stated with attribution to the two checklists) and the Dyntaxa main name lärk. Words cited in the notes are in quotation marks, “ ” in English and ” ” in Swedish (Språkrådet's Svenska skrivregler)."@en ,
+                 "Cross-checks and machine checks. The generator script (gen.py) builds every card's evidence from the saved raw responses and asserts that each card has exactly one accepted Dyntaxa species record, exactly one WCVP record with the same name and author, and that each quoted Wikipedia sentence occurs verbatim in the saved extract. It adds a Wikidata check of the taxon name (P225) wherever it equals the card's back (45 cards), of the Dyntaxa ID (P1939) wherever it equals the Dyntaxa taxon id (45 cards), and of the English and Swedish names as label or alias wherever Wikidata has the card's text in exactly its letter case; the builder ran them against live Wikidata on every build. Differences in letter case only (many Wikidata English names are lower case and many Swedish labels start with a capital) are listed under quality control."@en ,
+                 "Quality-control round 1. The deck's scope was widened from 'trees and large shrubs' to 'trees and shrubs', because dwarf birch (Betula nana) is a low shrub; the notes were put in quotation marks and the 'everyday' wording of four notes neutralised; the juniper card got a note on 'enbuske'; Wikidata taxon common names and aliases, the Catalogue of Life and the GBIF Backbone Taxonomy's vernacular names were added as evidence, with new Wikidata checks; the queries of round 1 are listed among the queries."@en ,
+                 "Scripts. The helper scripts named here (fetch.py, fetch_dyntaxa.py, fetch_wcvp.py, fetch_wiki.py, sentences.py, gen.py, saol.py, usda.py) are not published; this method describes what each did, and the queries list gives every URL template and query they sent."@en ,
+                 "Selection: The deck has 46 species of trees and shrubs that are native to Sweden and the other Nordic countries or widely planted there: the main forest trees (Norway spruce, Scots pine, silver and downy birch, aspen, alders), the broadleaved trees of the south (oaks, beech, hornbeam, ash, elms, limes, maples, wild cherry, crab apple, Swedish whitebeam), common trees and shrubs of woods, hedges and shores (hazel, rowan, bird cherry, blackthorn, hawthorn, alder buckthorn, goat, white and bay willow, juniper, yew, elder, holly, guelder rose, and dwarf birch, a low shrub of the mountains and bogs, kept as one of the most characteristic woody plants of the Nordic fells; the deck's scope was widened from 'trees and large shrubs' to 'trees and shrubs' for it in quality-control round 1) and the most planted non-native trees (European and Siberian larch, lodgepole pine, Sitka spruce, Douglas fir, white poplar, horse chestnut, common lime, sycamore maple). Inclusion criteria: (1) an ACCEPTED species (or, for the common lime, nothospecies) in Dyntaxa under the card's name; (2) the same name and author in Kew's WCVP, accepted or with the difference stated in a note; (3) a Wikidata item with that taxon name and the Swedish name as label or alias (letter case aside); (4) an English name that identifies the species. The candidates were drafted by the authoring agent from general knowledge (no published list was copied) and cut to 46 by the agent's judgement of how familiar a tree is in the Nordic countries. Left out because of naming or taxonomy: Salix fragilis/knäckepil (Dyntaxa now gives knäckepil as Salix euxina and Salix ×fragilis as grönpil, the English 'crack willow' covers both, and the Wikidata item 'Salix fragilis' mixes them); Sorbus hybrida/finnoxel and Sorbus torminalis/tyskoxel (Dyntaxa keeps them in Sorbus, WCVP has Hedlundia hybrida and Aria torminalis, and Wikidata has separate items for the new names); Sorbus aria (WCVP: a synonym of Aria edulis; rare in the Nordic countries); Picea glauca (WCVP: a synonym of Picea laxa); Hippophae rhamnoides/havtorn (Dyntaxa spells the accepted name Hippophaë rhamnoides, WCVP and Wikidata Hippophae: the back would differ between sources); Salix cinerea (Dyntaxa separates the species from an aggregate of the same name); Tilia × vulgaris and Ulmus × hollandica (no Dyntaxa species record under that name; T. ×vulgaris is a Dyntaxa synonym of T. ×europaea). Left out only to keep the deck near the requested size: Rhamnus cathartica, Euonymus europaeus, Prunus cerasus, Salix viminalis, Populus nigra, Pinus mugo, Pinus cembra, Abies alba, Abies sibirica, Abies lasiocarpa, Larix kaempferi, Thuja plicata, Myrica gale. Genera (Cotoneaster), subspecies (e.g. mountain birch, Betula pubescens subsp. czerepanovii), cultivars and aggregates are not included."@en ,
+                 "Licensing: The deck is released under CC0 1.0. Its content comes from two CC0 sources: Wikidata (structured data released under CC0) for the item behind every card, its taxon name, its English and Swedish labels and aliases and its taxon common names (P1843), and Dyntaxa (published by SLU Artdatabanken on GBIF under CC0 1.0) for the accepted scientific names, the Swedish names, English names and the synonyms in the notes. Every scientific and Swedish name on the cards is present verbatim in Dyntaxa; 45 English names are a Wikidata label, alias or taxon common name or a Dyntaxa English name, in some cases in different letter case. The one exception is 'Field elm' (Ulmus minor), which is in no CC0 or public-domain source the research found: it rests on the compiler's general knowledge and is one of the established common names of the species (a short name, not copyrightable expression), chosen so that it identifies the species without clashing with another card, and confirmed in the English Wikipedia and the GBIF Backbone Taxonomy's vernacular names. The note that Kew's WCVP and the Catalogue of Life place the Swedish whitebeam in Hedlundia is a single fact about those checklists, stated with attribution to them in the compiler's own words; the CC0 Wikidata item for the name Hedlundia intermedia supports the name itself. Kew's World Checklist of Vascular Plants, the Catalogue of Life and the GBIF Backbone Taxonomy (CC BY 4.0) and the English and Swedish Wikipedia (CC BY-SA 4.0) were used for verification only: they confirmed names and facts, and no text, list or selection was copied from them (the notes are the compiler's own wording). The selection of species is the authoring agent's own. All verification sources are still credited in the deck's provenance and in the provenance report."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources and machine checks: every card's scientific, Swedish and English names compared across Dyntaxa, WCVP, Wikidata and the English and Swedish Wikipedia."@en ;
+    rdfs:comment "Scope: All 46 cards and the candidates left out."@en ,
+                 "Outcome: All 46 scientific names are Dyntaxa's accepted name; 45 are accepted in WCVP under the same name and author (Sorbus intermedia is a WCVP synonym of Hedlundia intermedia, noted on the card). 45 equal the Wikidata taxon name (P225) and 45 items carry the card's Dyntaxa taxon id (P1939): both checked by the builder. All Swedish fronts are Dyntaxa names and appear in the first sentences of the Swedish Wikipedia articles; 43 English fronts are a Wikidata label or alias or a Dyntaxa English name (letter case aside) and all 46 appear in the English Wikipedia introduction. Differences between the sources are recorded below; candidates whose name differs between the sources in a way a card could not explain were left out (see the selection)."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 46 cards, the description and the selection, re-checked against the Catalogue of Life, the GBIF Backbone Taxonomy, Dyntaxa and WCVP on GBIF, Wikidata and Wikipedia."@en ,
+                 "Outcome: Every card's fact was confirmed; the only problem was scope: dwarf birch is a low shrub, not a tree or a large shrub as the description said. The scope is now 'trees and shrubs'. The suggestion on the Hedlundia note was applied, citing the Catalogue of Life."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 46 cards, the title, the description and the keywords, with their language tags."@en ,
+                 "Outcome: No errors. The ambiguous Swedish 'en' got a note and a clarification in the Swedish description, and the Swedish notes now quote cited words with ” ”. The untagged keywords are a builder-level matter outside the dossier."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 46 cards' evidence, every source and licence page, the method, queries and licensing, and the scratch directory of the research."@en ,
+                 "Outcome: The review was right that Wikidata's taxon common names give CC0 support for two of the three English names recorded as having none; the method, licensing and evidence were corrected, with new Wikidata checks. The notes resting only on verification sources now have CC0 support or are stated as attributed facts, and the queries list is complete."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 22 cards: the 12 changed in round 3 plus every third card in dossier order, against Dyntaxa (via GBIF), WCVP, the GBIF Backbone, the cited Wikipedia revisions and live Wikidata; the description, method and quality-control log."@en ,
+                 "Outcome: No errors found; the cards checked are correct. Three suggestions, all verified and applied: a comma in the Swedish description, matching English and Swedish sycamore notes, and a precise statement that 'Sycamore maple' is a Wikidata en-us alias (not under the plain 'en' code)."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata: the items of the 46 species (taxon name P225, taxon common name P1843, Dyntaxa ID P1939, English and Swedish labels and aliases) and the item of Hedlundia intermedia" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://doi.org/10.15468/j43wfc>
+    dcterms:title "Dyntaxa. Svensk taxonomisk databas (via GBIF, dataset version of 2026-09-29)" ;
+    dcterms:creator "SLU Artdatabanken (Backlund M)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://api.gbif.org/v1/dataset/de8934f4-a136-481c-a87a-b0b202b80a31 — the dataset's metadata: \"license\":\"http://creativecommons.org/publicdomain/zero/1.0/legalcode\" (publication date 2026-09-29); citation \"Backlund M (2026). Dyntaxa. Svensk taxonomisk databas. SLU Artdatabanken. Checklist dataset https://doi.org/10.15468/j43wfc accessed via GBIF.org on 2026-10-04.\""@en .
+
+<https://doi.org/10.15468/6h8ucr>
+    dcterms:title "The World Checklist of Vascular Plants (WCVP), the checklist behind Plants of the World Online (via GBIF, dataset version of 2026-06-04)" ;
+    dcterms:creator "Royal Botanic Gardens, Kew (Govaerts R)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://api.gbif.org/v1/dataset/f382f0ce-323a-4091-bb9f-add557f3a9a2 — the dataset's metadata: \"license\":\"http://creativecommons.org/licenses/by/4.0/legalcode\"; citation \"Govaerts R (2026). The World Checklist of Vascular Plants (WCVP). Royal Botanic Gardens, Kew. Checklist dataset https://doi.org/10.15468/6h8ucr accessed via GBIF.org on 2026-10-04.\" Plants of the World Online itself (https://powo.science.kew.org/terms-and-conditions and its API) answered HTTP 403 to the research environment, so its own terms page could not be read; the same Kew checklist was consulted through GBIF instead."@en .
+
+<https://en.wikipedia.org/wiki/Main_Page>
+    dcterms:title "English Wikipedia: the articles on the 46 species, introductions" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights — \"Permission is granted to copy, distribute and/or modify Wikipedia's text under the terms of the Creative Commons Attribution-ShareAlike 4.0 International License\""@en .
+
+<https://sv.wikipedia.org/wiki/Portal:Huvudsida>
+    dcterms:title "Svenskspråkiga Wikipedia: artiklarna om de 46 arterna, inledningarna" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Swedish Wikipedia article (e.g. https://sv.wikipedia.org/wiki/Gran): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://doi.org/10.48580/dgz5n>
+    dcterms:title "Catalogue of Life, latest release (ChecklistBank dataset 3LR, version 2026-09-11, COL26.9)" ;
+    dcterms:creator "Catalogue of Life Foundation (Bánki O, Roskov Y, Döring M et al.)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://api.checklistbank.org/dataset/3LR — the release's metadata: \"license\":\"cc by\", version 2026-09-11, alias COL26.9, DOI 10.48580/dgz5n, citation \"Bánki, O., Roskov, Y., Döring, M., … (2026). Catalogue of Life (Version 2026-09-11). Catalogue of Life Foundation, Amsterdam, Netherlands. https://doi.org/10.48580/dgz5n\". The Catalogue of Life's own licensing page (https://www.catalogueoflife.org/about/licensing) answered HTTP 403 to the research environment."@en .
+
+<https://doi.org/10.15468/39omei>
+    dcterms:title "GBIF Backbone Taxonomy: the vernacular names it aggregates from other checklists (Catalogue of Life, GRIN Taxonomy, ITIS, IUCN Red List and others)" ;
+    dcterms:creator "GBIF Secretariat" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://api.gbif.org/v1/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c — the dataset's metadata: \"license\":\"http://creativecommons.org/licenses/by/4.0/legalcode\"; citation \"GBIF Secretariat (2023). GBIF Backbone Taxonomy. Checklist dataset https://doi.org/10.15468/39omei accessed via GBIF.org on 2026-10-04.\""@en .
+
+<#norway-spruce>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norway spruce"@en ,
+                     "gran"@sv ;
+    solid-memo:back "Picea abies"@la .
+
+<#scots-pine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scots pine"@en ,
+                     "tall"@sv ;
+    solid-memo:back "Pinus sylvestris"@la .
+
+<#silver-birch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Silver birch"@en ,
+                     "vårtbjörk"@sv ;
+    solid-memo:back "Betula pendula"@la .
+
+<#downy-birch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Downy birch"@en ,
+                     "glasbjörk"@sv ;
+    solid-memo:back "Betula pubescens"@la .
+
+<#dwarf-birch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dwarf birch"@en ,
+                     "dvärgbjörk"@sv ;
+    solid-memo:back "Betula nana"@la .
+
+<#common-alder>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common alder"@en ,
+                     "klibbal"@sv ;
+    solid-memo:back "Alnus glutinosa"@la .
+
+<#grey-alder>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Grey alder"@en ,
+                     "gråal"@sv ;
+    solid-memo:back "Alnus incana"@la .
+
+<#european-aspen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European aspen"@en ,
+                     "asp"@sv ;
+    solid-memo:back "Populus tremula"@la .
+
+<#white-poplar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "White poplar"@en ,
+                     "silverpoppel"@sv ;
+    solid-memo:back "Populus alba"@la .
+
+<#pedunculate-oak>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pedunculate oak"@en ,
+                     "skogsek"@sv ;
+    solid-memo:back "Quercus robur"@la ;
+    solid-memo:backNote "Also called simply “ek” in Swedish."@en ,
+                        "Kallas även bara ”ek”."@sv .
+
+<#sessile-oak>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sessile oak"@en ,
+                     "bergek"@sv ;
+    solid-memo:back "Quercus petraea"@la .
+
+<#european-beech>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European beech"@en ,
+                     "bok"@sv ;
+    solid-memo:back "Fagus sylvatica"@la .
+
+<#european-hornbeam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European hornbeam"@en ,
+                     "avenbok"@sv ;
+    solid-memo:back "Carpinus betulus"@la .
+
+<#common-hazel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common hazel"@en ,
+                     "hassel"@sv ;
+    solid-memo:back "Corylus avellana"@la .
+
+<#european-ash>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European ash"@en ,
+                     "ask"@sv ;
+    solid-memo:back "Fraxinus excelsior"@la .
+
+<#wych-elm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wych elm"@en ,
+                     "skogsalm"@sv ;
+    solid-memo:back "Ulmus glabra"@la ;
+    solid-memo:backNote "Also called simply “alm” in Swedish."@en ,
+                        "Kallas även bara ”alm”."@sv .
+
+<#european-white-elm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European white elm"@en ,
+                     "vresalm"@sv ;
+    solid-memo:back "Ulmus laevis"@la .
+
+<#field-elm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Field elm"@en ,
+                     "lundalm"@sv ;
+    solid-memo:back "Ulmus minor"@la .
+
+<#small-leaved-lime>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Small-leaved lime"@en ,
+                     "skogslind"@sv ;
+    solid-memo:back "Tilia cordata"@la ;
+    solid-memo:backNote "Also called simply “lind” in Swedish."@en ,
+                        "Kallas även bara ”lind”."@sv .
+
+<#large-leaved-lime>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Large-leaved lime"@en ,
+                     "bohuslind"@sv ;
+    solid-memo:back "Tilia platyphyllos"@la .
+
+<#common-lime>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common lime"@en ,
+                     "parklind"@sv ;
+    solid-memo:back "Tilia ×europaea"@la ;
+    solid-memo:backNote "A hybrid of small-leaved and large-leaved lime, also written Tilia × europaea; Dyntaxa lists Tilia ×vulgaris as a synonym."@en ,
+                        "En hybrid mellan skogslind och bohuslind, skrivs även Tilia × europaea; Dyntaxa anger Tilia ×vulgaris som synonym."@sv .
+
+<#norway-maple>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norway maple"@en ,
+                     "skogslönn"@sv ;
+    solid-memo:back "Acer platanoides"@la ;
+    solid-memo:backNote "Also called simply “lönn” in Swedish."@en ,
+                        "Kallas även bara ”lönn”."@sv .
+
+<#sycamore-maple>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sycamore maple"@en ,
+                     "tysklönn"@sv ;
+    solid-memo:back "Acer pseudoplatanus"@la ;
+    solid-memo:backNote "Called simply “sycamore” in the British Isles."@en ,
+                        "Kallas på Brittiska öarna bara ”sycamore”."@sv .
+
+<#field-maple>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Field maple"@en ,
+                     "naverlönn"@sv ;
+    solid-memo:back "Acer campestre"@la .
+
+<#horse-chestnut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Horse chestnut"@en ,
+                     "hästkastanj"@sv ;
+    solid-memo:back "Aesculus hippocastanum"@la .
+
+<#rowan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rowan"@en ,
+                     "rönn"@sv ;
+    solid-memo:back "Sorbus aucuparia"@la .
+
+<#swedish-whitebeam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Swedish whitebeam"@en ,
+                     "oxel"@sv ;
+    solid-memo:back "Sorbus intermedia"@la ;
+    solid-memo:backNote "The name Dyntaxa accepts; Kew's World Checklist of Vascular Plants and the Catalogue of Life place it in Hedlundia, as Hedlundia intermedia."@en ,
+                        "Namnet som Dyntaxa godtar; Kews World Checklist of Vascular Plants och Catalogue of Life för arten till släktet Hedlundia, som Hedlundia intermedia."@sv .
+
+<#european-crab-apple>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European crab apple"@en ,
+                     "vildapel"@sv ;
+    solid-memo:back "Malus sylvestris"@la .
+
+<#bird-cherry>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bird cherry"@en ,
+                     "hägg"@sv ;
+    solid-memo:back "Prunus padus"@la .
+
+<#wild-cherry>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wild cherry"@en ,
+                     "sötkörsbär"@sv ;
+    solid-memo:back "Prunus avium"@la ;
+    solid-memo:backNote "Also called “fågelbär” in Swedish."@en ,
+                        "Kallas även ”fågelbär”."@sv .
+
+<#blackthorn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Blackthorn"@en ,
+                     "slån"@sv ;
+    solid-memo:back "Prunus spinosa"@la .
+
+<#common-hawthorn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common hawthorn"@en ,
+                     "trubbhagtorn"@sv ;
+    solid-memo:back "Crataegus monogyna"@la .
+
+<#alder-buckthorn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alder buckthorn"@en ,
+                     "brakved"@sv ;
+    solid-memo:back "Frangula alnus"@la ;
+    solid-memo:backNote "Formerly Rhamnus frangula."@en ,
+                        "Tidigare Rhamnus frangula."@sv .
+
+<#goat-willow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Goat willow"@en ,
+                     "sälg"@sv ;
+    solid-memo:back "Salix caprea"@la .
+
+<#white-willow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "White willow"@en ,
+                     "vitpil"@sv ;
+    solid-memo:back "Salix alba"@la .
+
+<#bay-willow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bay willow"@en ,
+                     "jolster"@sv ;
+    solid-memo:back "Salix pentandra"@la .
+
+<#common-juniper>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common juniper"@en ,
+                     "en"@sv ;
+    solid-memo:back "Juniperus communis"@la ;
+    solid-memo:backNote "The Swedish name “en” means this plant; it is also called “enbuske”."@en ,
+                        "Kallas även ”enbuske”."@sv .
+
+<#european-yew>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European yew"@en ,
+                     "idegran"@sv ;
+    solid-memo:back "Taxus baccata"@la .
+
+<#european-larch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European larch"@en ,
+                     "europeisk lärk"@sv ;
+    solid-memo:back "Larix decidua"@la ;
+    solid-memo:backNote "Dyntaxa's main Swedish name is just “lärk”; “europeisk lärk” tells it apart from the other larches."@en ,
+                        "Dyntaxas huvudnamn är bara ”lärk”; ”europeisk lärk” skiljer den från andra lärkar."@sv .
+
+<#siberian-larch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Siberian larch"@en ,
+                     "sibirisk lärk"@sv ;
+    solid-memo:back "Larix sibirica"@la .
+
+<#lodgepole-pine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lodgepole pine"@en ,
+                     "contortatall"@sv ;
+    solid-memo:back "Pinus contorta"@la .
+
+<#sitka-spruce>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sitka spruce"@en ,
+                     "sitkagran"@sv ;
+    solid-memo:back "Picea sitchensis"@la .
+
+<#douglas-fir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Douglas fir"@en ,
+                     "douglasgran"@sv ;
+    solid-memo:back "Pseudotsuga menziesii"@la .
+
+<#european-elder>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European elder"@en ,
+                     "fläder"@sv ;
+    solid-memo:back "Sambucus nigra"@la .
+
+<#european-holly>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European holly"@en ,
+                     "järnek"@sv ;
+    solid-memo:back "Ilex aquifolium"@la .
+
+<#guelder-rose>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guelder rose"@en ,
+                     "olvon"@sv ;
+    solid-memo:back "Viburnum opulus"@la ;
+    solid-memo:backNote "Also called “skogsolvon” in Swedish."@en ,
+                        "Kallas även ”skogsolvon”."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

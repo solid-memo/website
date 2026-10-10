@@ -1,0 +1,743 @@
+@base <https://solid-memo.com/decks/solar-system/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "The Solar System"@en ,
+                  "Solsystemet"@sv ,
+                  "태양계"@ko ,
+                  "Das Sonnensystem"@de ,
+                  "El sistema solar"@es ,
+                  "Le Système solaire"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "52 cards on stable facts about the Solar System: the eight planets in order from the Sun, the five dwarf planets the IAU recognises and where they orbit, the largest moon of each planet that has moons, which planet (or, for Charon, dwarf planet) 16 well-known moons orbit, and undisputed superlatives such as the largest, hottest and densest planet. Front: a question or description, e.g. \"4th planet from the Sun\"; back: the planet, moon or place in English and Swedish, with a note where it helps. Facts from NASA Science and Wikidata, checked against JPL's Solar System Dynamics tables, the IAU and the Swedish Wikipedia."@en ,
+                        "52 kort med beständiga fakta om solsystemet: de åtta planeterna i ordning från solen, de fem dvärgplaneter som IAU erkänner och var de kretsar, den största månen hos varje planet som har månar, vilken planet (för Charon dvärgplanet) 16 välkända månar kretsar kring och obestridda fakta om vilken planet som är störst, hetast, tätast och så vidare. Framsida: en fråga eller beskrivning, t.ex. ”Fjärde planeten från solen”; baksida: planeten, månen eller platsen på engelska och svenska, med en anteckning där den hjälper. Uppgifterna kommer från NASA Science och Wikidata och är kontrollerade mot JPL:s tabeller (Solar System Dynamics), IAU och den svenskspråkiga Wikipedia."@sv ,
+                        "태양계에 관한 변하지 않는 사실을 담은 카드 52장입니다. 태양에서 가까운 순서대로 여덟 행성, IAU가 인정하는 왜행성 다섯 개와 그 공전 위치, 위성이 있는 각 행성의 가장 큰 위성, 잘 알려진 위성 16개가 도는 행성(카론은 왜행성), 그리고 가장 큰 행성, 가장 뜨거운 행성, 가장 밀도가 높은 행성처럼 논란이 없는 최상급 사실이 있습니다. 앞면: 질문이나 설명(예: “태양에서 네 번째 행성”), 뒷면: 영어와 스웨덴어로 된 행성, 위성 또는 장소와, 도움이 되는 곳에는 메모. 사실은 NASA Science와 Wikidata에서 가져왔고 JPL의 Solar System Dynamics 표, IAU, 스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "52 Karten mit beständigen Fakten über das Sonnensystem: die acht Planeten in ihrer Reihenfolge von der Sonne aus, die fünf von der IAU anerkannten Zwergplaneten und wo sie kreisen, der größte Mond jedes Planeten, der Monde hat, welchen Planeten (oder, bei Charon, Zwergplaneten) 16 bekannte Monde umkreisen, und unbestrittene Superlative wie der größte, heißeste und dichteste Planet. Vorderseite: eine Frage oder Beschreibung, z. B. „4. Planet von der Sonne“; Rückseite: der Planet, der Mond oder der Ort auf Englisch und Schwedisch, mit einer Anmerkung, wo sie hilft. Fakten von NASA Science und Wikidata, abgeglichen mit den Tabellen von JPL Solar System Dynamics, der IAU und der schwedischsprachigen Wikipedia."@de ,
+                        "52 tarjetas con datos estables sobre el sistema solar: los ocho planetas en orden desde el Sol, los cinco planetas enanos que reconoce la UAI y dónde orbitan, la luna más grande de cada planeta que tiene lunas, alrededor de qué planeta (o, en el caso de Caronte, planeta enano) orbitan 16 lunas conocidas, y superlativos indiscutibles como el planeta más grande, el más caliente y el más denso. Anverso: una pregunta o descripción, p. ej. «4.º planeta desde el Sol»; reverso: el planeta, la luna o el lugar en inglés y en sueco, con una nota cuando ayuda. Datos de NASA Science y Wikidata, comprobados con las tablas de Solar System Dynamics del JPL, la UAI y la Wikipedia en sueco."@es ,
+                        "52 cartes sur des faits établis du Système solaire : les huit planètes dans l’ordre à partir du Soleil, les cinq planètes naines reconnues par l’UAI et l’endroit où elles orbitent, la plus grande lune de chaque planète qui a des lunes, autour de quelle planète (ou, pour Charon, de quelle planète naine) orbitent 16 lunes bien connues, et des superlatifs incontestés comme la planète la plus grande, la plus chaude et la plus dense. Recto : une question ou une description, par exemple « 4e planète à partir du Soleil » ; verso : la planète, la lune ou le lieu en anglais et en suédois, avec une note quand elle aide. Faits issus de NASA Science et de Wikidata, vérifiés avec les tables Solar System Dynamics du JPL, l’UAI et la Wikipédia en suédois."@fr ;
+    prov:wasDerivedFrom <https://science.nasa.gov/solar-system/> ,
+                        <https://www.wikidata.org/wiki/Q544> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:astronomy ;
+    dcat:keyword "Solar System"@en ,
+                 "planets"@en ,
+                 "dwarf planets"@en ,
+                 "moons"@en ,
+                 "astronomy"@en ,
+                 "solsystemet"@sv ,
+                 "planeter"@sv ,
+                 "dvärgplaneter"@sv ,
+                 "månar"@sv ,
+                 "astronomi"@sv ,
+                 "태양계"@ko ,
+                 "행성"@ko ,
+                 "왜행성"@ko ,
+                 "위성"@ko ,
+                 "천문학"@ko ,
+                 "Sonnensystem"@de ,
+                 "Planeten"@de ,
+                 "Zwergplaneten"@de ,
+                 "Monde"@de ,
+                 "Astronomie"@de ,
+                 "sistema solar"@es ,
+                 "planetas"@es ,
+                 "planetas enanos"@es ,
+                 "lunas"@es ,
+                 "astronomía"@es ,
+                 "système solaire"@fr ,
+                 "planètes"@fr ,
+                 "planètes naines"@fr ,
+                 "lunes"@fr ,
+                 "astronomie"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/solar-system/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/solar-system/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#solar-system> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#solar-system> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://science.nasa.gov/solar-system/> ,
+              <https://www.wikidata.org/wiki/Q544> ,
+              <https://ssd.jpl.nasa.gov/> ,
+              <https://iauarchive.eso.org/public/themes/naming/> ,
+              <https://sv.wikipedia.org/wiki/Solsystemet> ,
+              <https://en.wikipedia.org/wiki/Earth> ,
+              <https://www.nrm.se/download/18.636b2f018bcc1c55443e5/1742282370283/Solsystemets%20himlakroppar%20-%20faktakort%20f%C3%B6r%20utskrift.pdf> ,
+              <https://news.agu.org/press-release/jupiters-great-red-spot-reborn-1800s/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ,
+                       <#review-7> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Scope: the editor's brief asked for about 50 cards of stable, unambiguous Solar System facts: the planets in order, the IAU's dwarf planets and where they orbit, the largest moon of each planet that has moons, notable moons and their planets, and undisputed superlatives, avoiding moon counts, varying distances and anything recently revised."@en ,
+                 "NASA pages: the script fetch_nasa.py (query 6) downloaded 37 pages of NASA Science (science.nasa.gov) and the NASA media usage guidelines, saved the HTML and a plain-text rendering, and the texts were searched for the sentences each card needed (planet order, \"largest\", \"smallest\", \"hottest\", \"densest\", \"least dense\", \"shortest day\", \"sideways\", \"retrograde\", \"largest moon\", \"only moon\", \"volcanically active\", \"Kuiper Belt\", \"asteroid belt\"; query 7 and the moon-page search, query 8). NASA's Planets page and Dwarf Planets page fetched today still list eight planets and \"five officially recognized dwarf planets\", which is the recency check for the dwarf planets (a 2025 candidate such as 2017 OF201 is not recognised by the IAU)."@en ,
+                 "Wikidata: a first label-based query (query 1) timed out (HTTP 504). Query 2 listed the natural satellites of Earth, Mars, Jupiter, Saturn, Uranus, Neptune and Pluto (items with P397 parent astronomical body, at least 40 sitelinks) with English and Swedish labels; query 3 the labels and classes of the Sun and planets; query 4 the items that are instances of dwarf planet (Q2199), which include non-IAU bodies such as Sedna and lack Makemake as a truthy value; Makemake's item (Q604) was found with the search API (query 5). The script entities.py (query 9) fetched the labels and aliases in English, Swedish and mul, and the statements P31, P361, P397, P2054, P2120, P2146, P2147, P2386 and others, for all the items; search.py (query 10) found the items of the Kuiper Belt, the asteroid belt, the Great Red Spot and the scattered disc."@en ,
+                 "Selection of the cards from the brief: the eight planets in order (fronts \"1st planet from the Sun\" … / \"Första planeten från solen\" …); the five dwarf planets the IAU recognises, each with where it orbits, plus Ceres as the only dwarf planet in the inner Solar System; the largest moon of each of the six planets with moons (Mercury and Venus have none); the parent of 16 well-known moons (the four Galilean moons, Titan, Enceladus, Mimas, Iapetus, Triton, Phobos, Deimos, Titania, Oberon, Miranda, Ariel, and Charon of the dwarf planet Pluto); and 16 superlatives and features that NASA states outright and that JPL's tables, Wikidata or the Swedish Wikipedia confirm."@en ,
+                 "Cross-check against JPL: the Planetary Physical Parameters and Planetary Satellite Physical Parameters pages (query 11) were saved and read: the planets' sidereal orbital periods increase in the order of the cards, Jupiter has the largest and Mercury the smallest mean radius, Earth the highest (5.5134 g/cm³) and Saturn the lowest (0.6871) bulk density, Jupiter the shortest (0.41354 d) and Venus the longest (−243.018 d) sidereal rotation; the dwarf-planet table lists exactly Ceres, Pluto, Eris, Makemake and Haumea; the satellite table gives each moon under its planet and confirms the largest moon of each planet (Phobos 11.08 km > Deimos 6.2 km; Titania 788.9 km > Oberon 761.4 km; Ganymede 2631.20 km, the largest of all, then Titan 2574.76 km)."@en ,
+                 "Cross-check against the IAU: the current www.iau.org no longer serves the public theme pages (HTTP 404), so the archived pages on iauarchive.eso.org were fetched (query 12): \"Naming of Astronomical Objects\" lists the five dwarf planets and says all but Ceres orbit beyond Neptune; \"Pluto and the Developing Landscape of Our Solar System\" says New Horizons showed Pluto's diameter to be larger than Eris's."@en ,
+                 "Swedish text: the Swedish names are the Wikidata Swedish labels (Merkurius, jorden, Saturnus, Neptunus, månen, Ganymedes, Japetus, Stora röda fläcken, Kuiperbältet …). The script svwiki.py (query 13) took each item's Swedish Wikipedia sitelink and fetched the article's introduction and current revision id through the MediaWiki API; every card's Swedish name was found in the introduction, which is quoted, with its revision, in the evidence. The Swedish names jorden and månen are written in lower case, as the Wikidata labels and Swedish usage have them; the Swedish Museum of Natural History's fact cards for schools (query 14) were read as a check of that usage (\"Jorden är den tredje planeten från solen.\"). Card fronts and notes are the compiler's own Swedish. The Swedish term \"den spridda skivan\" in the note of dwarf-planet-eris is the compiler's translation of \"scattered disc\": Wikidata has no Swedish label for it (Q180380's sv label is the English \"Scattered disc\"), and the term is used in the Swedish Wikipedia's Pluto article (revision 59725969: \"Objekt i den spridda skivan, en dynamiskt instabil region som överlappar Kuiperbältet …\"); the note gives the Swedish term alone, without an English gloss (since quality-control round 6)."@en ,
+                 "Wording: every front, back and note is the compiler's own wording of facts from the sources; no sentence is copied. The evidence quotes are short quotations of what each source says, given only so the verification can be repeated. The script make_dossier.py checks that every NASA, Swedish Wikipedia, IAU and museum quote occurs verbatim (whitespace normalised) in the text saved from the source today, and stops if one does not."@en ,
+                 "Helper scripts (kept in the compiler's working directory, not published; what each does): fetch_nasa.py GETs each URL with the User-Agent above, saves the HTML, removes script/style/noscript elements, turns </p>, </li>, </div>, </tr>, </h…> and <br> into line breaks, strips the other tags, unescapes HTML entities and collapses runs of spaces to save a .txt rendering; sparql.py POSTs a query file to https://query.wikidata.org/sparql (retrying on HTTP 429) and saves the JSON results; entities.py calls wbgetentities (query 9) and prints the labels, aliases and the listed statements; search.py calls wbsearchentities and then wbgetentities for each term (query 10); grep_moons.py applies the pattern in query 8 to the saved NASA moon pages; svwiki.py resolves each item's svwiki sitelink and calls the MediaWiki API with prop=extracts|revisions, exintro=1, explaintext=1 (query 13); make_dossier.py writes the dossier and, before writing, asserts for every NASA, IAU, museum and Swedish Wikipedia quote that the quote with all runs of whitespace replaced by one space is a substring of the saved source text normalised the same way. Evidence added in quality-control round 1 and later was checked against the sources fetched in that round (queries 17–20) in the same way, by hand and with grep."@en ,
+                 "Machine checks: for every card the builder checked against live Wikidata the English and Swedish labels of the answer and of the bodies named on the front, the parent body (P397) of every moon and planet, and where Wikidata has it a value behind the fact (P31 dwarf planet for Ceres, Pluto, Haumea and Eris, P361 scattered disc of Eris, P2054 Earth's density, P2147 the rotation periods of Jupiter and Venus, P2146 Triton's negative orbital period, P2076 the temperatures of Venus (464 °C mean) and Mercury (700 K maximum) behind hottest-planet, the English alias \"Red Planet\" of Mars). Checks were skipped, and the reason recorded in quality control, where Wikidata disagrees with better sources or has no label equal to the card's text. The deck was then validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts)."@en ,
+                 "Excluded: after checking, a card on the largest dwarf planet (the sources disagree on Pluto versus Eris, see quality control); by design, without further research, any number of moons, ring or distance figure (changing or varying), the coldest planet (the answer depends on whether the lowest recorded or the mean temperature is meant) and the largest volcano (a superlative not all sources make in the same terms); and, after checking, the planet with the longest day, which is ambiguous (Venus has the longest rotation, Mercury the longest solar day, 176 Earth days, NASA Mercury facts) — the card asks instead which planet takes longest to rotate once on its axis."@en ,
+                 "Selection: Stable facts about the Solar System as of 4 October 2026: the eight planets in order from the Sun; the five dwarf planets recognised by the IAU (Ceres, Pluto, Haumea, Makemake, Eris) and where each orbits, plus Ceres as the only dwarf planet in the inner Solar System; the largest moon of each of the six planets that have moons (Earth, Mars, Jupiter, Saturn, Uranus, Neptune); the planet (or for Charon the dwarf planet) of 16 well-known moons; and 16 superlatives and features that NASA states and an independent source confirms. Left out: moon counts, distances, temperatures as numbers on the front and other values that change with new discoveries or vary by definition; superlatives on which sources disagree (largest dwarf planet, coldest planet, largest volcano) or that are ambiguous (longest day); candidate dwarf planets the IAU has not recognised (Sedna, Quaoar, Gonggong, Orcus, 2017 OF201); and lesser moons. Where an answer has a caveat (Eris's location, Venus's rotation, the Swedish spelling Japetus/Iapetus) a back note states it."@en ,
+                 "Licensing: The deck's content sources are NASA Science, whose text as a work of the US federal government is not protected by copyright in the United States and which NASA's media usage guidelines allow to be used with acknowledgement, and Wikidata, whose structured data is CC0. Everything in the cards — the facts, the selection of items (made by the compiler from the editor's brief: the eight planets, the five IAU dwarf planets, the largest moon of each planet with moons, well-known moons and undisputed superlatives) and the English and Swedish wording — comes from these two sources or is the compiler's own, so the deck can be CC0 1.0 like the rest of the library; NASA and Wikidata are attributed in the deck (prov:wasDerivedFrom) and in the provenance report all the same. JPL's Solar System Dynamics pages (no licence stated), the IAU's pages (CC BY 4.0), the Swedish and English Wikipedia (CC BY-SA 4.0) and the Swedish Museum of Natural History's fact cards (no licence stated) were used for verification only: they confirmed facts and Swedish usage, and no text, table or selection was copied from them; facts are not copyrightable. Quotations in the provenance report's evidence are not part of the CC0 deck: they remain under their sources' terms (Wikipedia text CC BY-SA 4.0 by Wikipedia contributors, each linked to the quoted revision; IAU text CC BY 4.0 by the International Astronomical Union; the museum's text and JPL's tables under their owners' rights) and are short quotations given only to make the verification checkable."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every card's fact against NASA and a second source (JPL's tables, the IAU, the Swedish or English Wikipedia, Wikidata statements); the Swedish names against Wikidata labels, the Swedish Wikipedia and the Swedish Museum of Natural History; recency of the dwarf-planet list."@en ;
+    rdfs:comment "Scope: All 52 cards, the sources and the deck metadata."@en ,
+                 "Outcome: NASA, JPL, the IAU and Wikidata agree on every fact in the cards; where Wikidata disagrees with NASA and JPL (Saturn's density) or lacks a truthy value or a matching label (Makemake's class, the numbered English labels of Haumea and Makemake, the title-case Swedish label of the asteroid belt), the card follows the better sources and the check is not made. Two planned cards were changed or dropped because sources disagree or the question was ambiguous (largest dwarf planet; longest day), and Eris's back was made neutral. Every quote in the evidence was checked by script against the text saved today. The builder's checks cover the labels on every card, every moon's parent body and the Wikidata values behind six of the superlatives. [Correction from quality-control round 3: the claim that NASA, JPL, the IAU and Wikidata agree on every fact overstated the evidence. JPL and the IAU do not address the hottest planet, Io's volcanism, the Great Red Spot or surface water, and at this round the second sources of hottest-planet and most-volcanic-body did not state the fact; both were given real second sources in round 3. The order of the planets was checked against JPL's table of sidereal orbital periods, not by Wikidata checks. Since round 3 the value checks also cover hottest-planet (P2076 of Venus and Mercury).]"@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 52 cards and the deck description, against JPL Solar System Dynamics, NASA's Pluto facts and the 2024 AGU/GRL work on the Great Red Spot; the builder's Wikidata checks re-run."@en ,
+                 "Outcome: No card had a wrong answer. One warning (the Great Red Spot note stated an age that a 2024 study contradicts) and four suggestions; four were applied, one (Wikidata checks encoding the planet order) was declined with the order documented as checked against JPL."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 52 cards in English and Swedish, the deck title, description and keywords, and the language tags in the built Turtle."@en ,
+                 "Outcome: Language tags and Swedish names were found correct. One warning (a missing preposed article in the Swedish description) and three suggestions on calqued Swedish phrasing; all four applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 52 cards' evidence (NASA, IAU and museum quotes against fresh fetches, Swedish Wikipedia quotes against the cited revisions), every source's licence page, and the documentation."@en ,
+                 "Outcome: The CC0 licence decision and the licence evidence were confirmed. Two warnings (second sources that did not state the fact for most-volcanic-body and hottest-planet, and the round-0 summary overstating the cross-checks) and three documentation suggestions; all applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 6 cards changed in rounds 1–3 plus every third card (22 cards), the metadata, the licence decision and the quality-control log."@en ,
+                 "Outcome: All checked facts, quotes and Wikidata values were confirmed and the round-3 fixes found in place. One documentation warning (the P2076 checks added in round 3 were not described in the method, the Wikidata source or round 0) and two wording suggestions; all three verified against the dossier and applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: hottest-planet (changed in round 4) plus every third card from the 2nd onwards (18 cards), the metadata, the licence decision and the quality-control log."@en ,
+                 "Outcome: All checked facts, quotes, Wikidata values and the round-4 fixes were confirmed; the builder check and validate_sources.ts passed. One suggestion about misleading evidence wording, verified against JPL and applied."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: all 52 cards, the metadata, the licence decision and the quality-control log."@en ,
+                 "Outcome: No errors or warnings; all facts, the card count (52) and the round-5 fix were confirmed. One suggestion on the Swedish back note of dwarf-planet-eris, applied."@en .
+
+<#review-7>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://science.nasa.gov/solar-system/>
+    dcterms:title "NASA Science: Solar System pages (Planets; Dwarf Planets; the facts pages of the eight planets, of Ceres and Pluto and the pages on Eris, Haumea and Makemake; Earth's Moon facts; the moon pages of Mars, Jupiter, Saturn, Uranus, Neptune and Pluto)" ;
+    dcterms:creator "National Aeronautics and Space Administration (NASA)" ;
+    rdfs:comment "NASA Images and Media Usage Guidelines, https://www.nasa.gov/nasa-brand-center/images-and-media/: \"NASA content – images, audio, video, and media files used in the rendition of 3-dimensional models, such as texture maps and polygon data in any format – generally are not subject to copyright in the United States.\" and \"NASA should be acknowledged as the source of the material.\" The guidelines name media rather than text; the pages' text is a work of the United States federal government, which has no copyright protection in the United States (17 U.S.C. § 105), and none of the text used was marked as third-party copyrighted. Only facts are taken, restated in the compiler's own words, and NASA is acknowledged in the deck and the report."@en .
+
+<https://www.wikidata.org/wiki/Q544>
+    dcterms:title "Wikidata: the items of the planets, dwarf planets and moons (Q308 Mercury … Q332 Neptune, Q596 Ceres, Q339 Pluto, Q601 Haumea, Q604 Makemake, Q611 Eris, Q405 the Moon and the moons), the Kuiper Belt (Q427), the asteroid belt (Q2179) and the Great Red Spot (Q194256): labels, aliases and statements" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://ssd.jpl.nasa.gov/>
+    dcterms:title "JPL Solar System Dynamics: Planetary Physical Parameters and Planetary Satellite Physical Parameters" ;
+    dcterms:creator "Jet Propulsion Laboratory, California Institute of Technology (Solar System Dynamics group)" ;
+    rdfs:comment "The SSD pages (https://ssd.jpl.nasa.gov/planets/phys_par.html, https://ssd.jpl.nasa.gov/sats/phys_par/) state no licence for their text or tables; their footer links only an \"Image Policy\", https://www.jpl.nasa.gov/jpl-image-use-policy/, which covers images and video: \"images and video on JPL public web sites may be used for any purpose without prior permission\" and \"Caltech makes no representations or warranties with respect to ownership of copyrights in the images\" (the policy page refused the command-line client with HTTP 403; these sentences were read through a web-fetch tool). JPL is run for NASA by Caltech, so its pages are not automatically US government works. Verification only."@en .
+
+<https://iauarchive.eso.org/public/themes/naming/>
+    dcterms:title "International Astronomical Union: \"Naming of Astronomical Objects\" (https://iauarchive.eso.org/public/themes/naming/) and \"Pluto and the Developing Landscape of Our Solar System\" (https://iauarchive.eso.org/public/themes/pluto/) (IAU archive site)" ;
+    dcterms:creator "International Astronomical Union" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://iauarchive.eso.org/copyright/ — \"The images, videos and web texts on iau.org are released under the Creative Commons Attribution 4.0 International license and may on a non-exclusive basis be reproduced without fee, on the conditions outlined below.\" The current www.iau.org, whose theme pages answered 404 today, shows only \"© 2025 International Astronomical Union (IAU)\" in its footer, so the archive copies of the pages were read. Verification only, so the attribution requirement does not reach the deck; the IAU is named in the report."@en .
+
+<https://sv.wikipedia.org/wiki/Solsystemet>
+    dcterms:title "Svenskspråkiga Wikipedia: artiklarna om planeterna, dvärgplaneterna, månarna, Stora röda fläcken, Kuiperbältet och Asteroidbältet (inledningarna; för Venus även brödtexten)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Swedish Wikipedia article (seen today on https://sv.wikipedia.org/wiki/Jupiter): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://en.wikipedia.org/wiki/Earth>
+    dcterms:title "English Wikipedia: \"Earth\", introduction" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights — \"Permission is granted to copy, distribute and/or modify Wikipedia's text under the terms of the Creative Commons Attribution-ShareAlike 4.0 International License\""@en .
+
+<https://www.nrm.se/download/18.636b2f018bcc1c55443e5/1742282370283/Solsystemets%20himlakroppar%20-%20faktakort%20f%C3%B6r%20utskrift.pdf>
+    dcterms:title "Naturhistoriska riksmuseet: Solsystemets himlakroppar – faktakort för utskrift (PDF)" ;
+    dcterms:creator "Naturhistoriska riksmuseet (Swedish Museum of Natural History)" ;
+    rdfs:comment "Neither the PDF nor the museum's home page (https://www.nrm.se/, fetched today) states a licence or copyright terms. Verification only."@en .
+
+<https://news.agu.org/press-release/jupiters-great-red-spot-reborn-1800s/>
+    dcterms:title "AGU Newsroom: \"Jupiter's Great Red Spot is not the same one Cassini observed in 1600s\" (press release, 17 June 2024, on Sánchez-Lavega et al., Geophysical Research Letters 2024)" ;
+    dcterms:creator "American Geophysical Union (AGU)" ;
+    rdfs:comment "Footer of the press release page, fetched today: \"© 2026. American Geophysical Union | All rights reserved\". No other licence is stated for the text. Verification only."@en .
+
+<#planet-first>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1st planet from the Sun"@en ,
+                     "Första planeten från solen"@sv ;
+    solid-memo:back "Mercury"@en ,
+                    "Merkurius"@sv .
+
+<#planet-second>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2nd planet from the Sun"@en ,
+                     "Andra planeten från solen"@sv ;
+    solid-memo:back "Venus"@en ,
+                    "Venus"@sv .
+
+<#planet-third>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "3rd planet from the Sun"@en ,
+                     "Tredje planeten från solen"@sv ;
+    solid-memo:back "Earth"@en ,
+                    "jorden"@sv .
+
+<#planet-fourth>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "4th planet from the Sun"@en ,
+                     "Fjärde planeten från solen"@sv ;
+    solid-memo:back "Mars"@en ,
+                    "Mars"@sv .
+
+<#planet-fifth>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "5th planet from the Sun"@en ,
+                     "Femte planeten från solen"@sv ;
+    solid-memo:back "Jupiter"@en ,
+                    "Jupiter"@sv .
+
+<#planet-sixth>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "6th planet from the Sun"@en ,
+                     "Sjätte planeten från solen"@sv ;
+    solid-memo:back "Saturn"@en ,
+                    "Saturnus"@sv .
+
+<#planet-seventh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "7th planet from the Sun"@en ,
+                     "Sjunde planeten från solen"@sv ;
+    solid-memo:back "Uranus"@en ,
+                    "Uranus"@sv .
+
+<#planet-eighth>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "8th planet from the Sun"@en ,
+                     "Åttonde planeten från solen"@sv ;
+    solid-memo:back "Neptune"@en ,
+                    "Neptunus"@sv .
+
+<#dwarf-planet-ceres>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Where does the dwarf planet Ceres orbit?"@en ,
+                     "Var kretsar dvärgplaneten Ceres?"@sv ;
+    solid-memo:back "In the asteroid belt, between Mars and Jupiter"@en ,
+                    "I asteroidbältet, mellan Mars och Jupiter"@sv .
+
+<#dwarf-planet-pluto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Where does the dwarf planet Pluto orbit?"@en ,
+                     "Var kretsar dvärgplaneten Pluto?"@sv ;
+    solid-memo:back "In the Kuiper Belt, beyond Neptune"@en ,
+                    "I Kuiperbältet, bortom Neptunus"@sv ;
+    solid-memo:backNote "Its elongated orbit sometimes brings it closer to the Sun than Neptune, most recently in 1979–1999."@en ,
+                        "Den långsträckta banan för den ibland närmare solen än Neptunus, senast 1979–1999."@sv .
+
+<#dwarf-planet-haumea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Where does the dwarf planet Haumea orbit?"@en ,
+                     "Var kretsar dvärgplaneten Haumea?"@sv ;
+    solid-memo:back "In the Kuiper Belt, beyond Neptune"@en ,
+                    "I Kuiperbältet, bortom Neptunus"@sv .
+
+<#dwarf-planet-makemake>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Where does the dwarf planet Makemake orbit?"@en ,
+                     "Var kretsar dvärgplaneten Makemake?"@sv ;
+    solid-memo:back "In the Kuiper Belt, beyond Neptune"@en ,
+                    "I Kuiperbältet, bortom Neptunus"@sv .
+
+<#dwarf-planet-eris>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Where does the dwarf planet Eris orbit?"@en ,
+                     "Var kretsar dvärgplaneten Eris?"@sv ;
+    solid-memo:back "Beyond Neptune"@en ,
+                    "Bortom Neptunus"@sv ;
+    solid-memo:backNote "On a long, steeply tilted orbit reaching far beyond the Kuiper Belt; NASA counts it among the Kuiper Belt objects, others place it in the scattered disc."@en ,
+                        "I en lång, kraftigt lutande bana som når långt bortom Kuiperbältet; NASA räknar den till Kuiperbältets objekt, andra till den spridda skivan."@sv .
+
+<#only-dwarf-planet-inner-solar-system>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The only dwarf planet in the inner Solar System"@en ,
+                     "Den enda dvärgplaneten i det inre solsystemet"@sv ;
+    solid-memo:back "Ceres"@en ,
+                    "Ceres"@sv .
+
+<#earth-moon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Earth's natural satellite"@en ,
+                     "Jordens naturliga satellit"@sv ;
+    solid-memo:back "the Moon"@en ,
+                    "månen"@sv ;
+    solid-memo:backNote "Earth's only natural satellite; Luna in Latin."@en ,
+                        "Jordens enda naturliga satellit; Luna på latin."@sv .
+
+<#largest-moon-mars>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Largest moon of Mars"@en ,
+                     "Mars största måne"@sv ;
+    solid-memo:back "Phobos"@en ,
+                    "Phobos"@sv ;
+    solid-memo:backNote "Mars has two moons; the other is Deimos."@en ,
+                        "Mars har två månar; den andra är Deimos."@sv .
+
+<#largest-moon-jupiter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Largest moon of Jupiter"@en ,
+                     "Jupiters största måne"@sv ;
+    solid-memo:back "Ganymede"@en ,
+                    "Ganymedes"@sv .
+
+<#largest-moon-saturn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Largest moon of Saturn"@en ,
+                     "Saturnus största måne"@sv ;
+    solid-memo:back "Titan"@en ,
+                    "Titan"@sv .
+
+<#largest-moon-uranus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Largest moon of Uranus"@en ,
+                     "Uranus största måne"@sv ;
+    solid-memo:back "Titania"@en ,
+                    "Titania"@sv .
+
+<#largest-moon-neptune>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Largest moon of Neptune"@en ,
+                     "Neptunus största måne"@sv ;
+    solid-memo:back "Triton"@en ,
+                    "Triton"@sv .
+
+<#moon-io>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Io orbit?"@en ,
+                     "Vilken planet kretsar Io kring?"@sv ;
+    solid-memo:back "Jupiter"@en ,
+                    "Jupiter"@sv .
+
+<#moon-europa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Europa orbit?"@en ,
+                     "Vilken planet kretsar Europa kring?"@sv ;
+    solid-memo:back "Jupiter"@en ,
+                    "Jupiter"@sv .
+
+<#moon-ganymede>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Ganymede orbit?"@en ,
+                     "Vilken planet kretsar Ganymedes kring?"@sv ;
+    solid-memo:back "Jupiter"@en ,
+                    "Jupiter"@sv .
+
+<#moon-callisto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Callisto orbit?"@en ,
+                     "Vilken planet kretsar Callisto kring?"@sv ;
+    solid-memo:back "Jupiter"@en ,
+                    "Jupiter"@sv .
+
+<#moon-titan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Titan orbit?"@en ,
+                     "Vilken planet kretsar Titan kring?"@sv ;
+    solid-memo:back "Saturn"@en ,
+                    "Saturnus"@sv .
+
+<#moon-enceladus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Enceladus orbit?"@en ,
+                     "Vilken planet kretsar Enceladus kring?"@sv ;
+    solid-memo:back "Saturn"@en ,
+                    "Saturnus"@sv .
+
+<#moon-mimas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Mimas orbit?"@en ,
+                     "Vilken planet kretsar Mimas kring?"@sv ;
+    solid-memo:back "Saturn"@en ,
+                    "Saturnus"@sv .
+
+<#moon-iapetus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Iapetus orbit?"@en ,
+                     "Vilken planet kretsar Japetus kring?"@sv ;
+    solid-memo:back "Saturn"@en ,
+                    "Saturnus"@sv ;
+    solid-memo:backNote "Swedish texts spell the moon both Japetus and Iapetus."@en ,
+                        "Månen stavas både Japetus och Iapetus i svenska texter."@sv .
+
+<#moon-triton>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Triton orbit?"@en ,
+                     "Vilken planet kretsar Triton kring?"@sv ;
+    solid-memo:back "Neptune"@en ,
+                    "Neptunus"@sv .
+
+<#moon-phobos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Phobos orbit?"@en ,
+                     "Vilken planet kretsar Phobos kring?"@sv ;
+    solid-memo:back "Mars"@en ,
+                    "Mars"@sv .
+
+<#moon-deimos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Deimos orbit?"@en ,
+                     "Vilken planet kretsar Deimos kring?"@sv ;
+    solid-memo:back "Mars"@en ,
+                    "Mars"@sv .
+
+<#moon-titania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Titania orbit?"@en ,
+                     "Vilken planet kretsar Titania kring?"@sv ;
+    solid-memo:back "Uranus"@en ,
+                    "Uranus"@sv .
+
+<#moon-oberon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Oberon orbit?"@en ,
+                     "Vilken planet kretsar Oberon kring?"@sv ;
+    solid-memo:back "Uranus"@en ,
+                    "Uranus"@sv .
+
+<#moon-miranda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Miranda orbit?"@en ,
+                     "Vilken planet kretsar Miranda kring?"@sv ;
+    solid-memo:back "Uranus"@en ,
+                    "Uranus"@sv .
+
+<#moon-ariel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which planet does Ariel orbit?"@en ,
+                     "Vilken planet kretsar Ariel kring?"@sv ;
+    solid-memo:back "Uranus"@en ,
+                    "Uranus"@sv .
+
+<#moon-charon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which dwarf planet does Charon orbit?"@en ,
+                     "Vilken dvärgplanet kretsar Charon kring?"@sv ;
+    solid-memo:back "Pluto"@en ,
+                    "Pluto"@sv ;
+    solid-memo:backNote "Pluto's largest moon, about half Pluto's size."@en ,
+                        "Plutos största måne, ungefär hälften så stor som Pluto."@sv .
+
+<#largest-planet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Largest planet in the Solar System"@en ,
+                     "Solsystemets största planet"@sv ;
+    solid-memo:back "Jupiter"@en ,
+                    "Jupiter"@sv .
+
+<#smallest-planet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Smallest planet in the Solar System"@en ,
+                     "Solsystemets minsta planet"@sv ;
+    solid-memo:back "Mercury"@en ,
+                    "Merkurius"@sv .
+
+<#hottest-planet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hottest planet in the Solar System"@en ,
+                     "Solsystemets hetaste planet"@sv ;
+    solid-memo:back "Venus"@en ,
+                    "Venus"@sv ;
+    solid-memo:backNote "Hotter than Mercury, which is closer to the Sun: Venus's thick atmosphere traps the heat (about 467 °C at the surface)."@en ,
+                        "Hetare än Merkurius, som ligger närmare solen: den täta atmosfären håller kvar värmen (cirka 467 °C vid ytan)."@sv .
+
+<#densest-planet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Densest planet in the Solar System"@en ,
+                     "Solsystemets tätaste planet"@sv ;
+    solid-memo:back "Earth"@en ,
+                    "jorden"@sv ;
+    solid-memo:backNote "About 5.5 g/cm³; Mercury is a close second."@en ,
+                        "Cirka 5,5 g/cm³; Merkurius är en knapp tvåa."@sv .
+
+<#least-dense-planet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Least dense planet in the Solar System"@en ,
+                     "Planeten med lägst täthet i solsystemet"@sv ;
+    solid-memo:back "Saturn"@en ,
+                    "Saturnus"@sv ;
+    solid-memo:backNote "About 0.69 g/cm³, less than the density of water."@en ,
+                        "Cirka 0,69 g/cm³, lägre än vattnets täthet."@sv .
+
+<#shortest-day>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planet with the shortest day (fastest rotation)"@en ,
+                     "Planeten med kortast dygn (snabbast rotation)"@sv ;
+    solid-memo:back "Jupiter"@en ,
+                    "Jupiter"@sv ;
+    solid-memo:backNote "One rotation takes just under 10 hours."@en ,
+                        "Ett varv runt axeln tar knappt 10 timmar."@sv .
+
+<#slowest-rotation>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planet that takes longest to rotate once on its axis"@en ,
+                     "Planeten som tar längst tid på sig att rotera ett varv kring sin axel"@sv ;
+    solid-memo:back "Venus"@en ,
+                    "Venus"@sv ;
+    solid-memo:backNote "About 243 Earth days, longer than its year of about 225 days; it rotates backwards."@en ,
+                        "Cirka 243 jorddygn, längre än dess år på cirka 225 dygn; den roterar baklänges."@sv .
+
+<#sideways-planet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planet that rotates on its side"@en ,
+                     "Planeten som roterar liggande på sidan"@sv ;
+    solid-memo:back "Uranus"@en ,
+                    "Uranus"@sv ;
+    solid-memo:backNote "Its axis is tilted about 98°, almost in the plane of its orbit."@en ,
+                        "Axeln lutar cirka 98°, nästan i banplanet."@sv .
+
+<#great-red-spot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planet with the Great Red Spot"@en ,
+                     "Planeten med Stora röda fläcken"@sv ;
+    solid-memo:back "Jupiter"@en ,
+                    "Jupiter"@sv ;
+    solid-memo:backNote "A giant storm larger than Earth."@en ,
+                        "En jättestorm, större än jorden."@sv .
+
+<#red-planet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planet called “the Red Planet”"@en ,
+                     "Planeten som kallas ”den röda planeten”"@sv ;
+    solid-memo:back "Mars"@en ,
+                    "Mars"@sv ;
+    solid-memo:backNote "Iron minerals in its dust and rocks rust and make the surface look red."@en ,
+                        "Järnmineral i stoftet och stenarna rostar och får ytan att se röd ut."@sv .
+
+<#liquid-water-surface>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The only planet with liquid water on its surface"@en ,
+                     "Den enda planeten med flytande vatten på ytan"@sv ;
+    solid-memo:back "Earth"@en ,
+                    "jorden"@sv .
+
+<#largest-rocky-planet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Largest of the four rocky (terrestrial) planets"@en ,
+                     "Den största av de fyra stenplaneterna"@sv ;
+    solid-memo:back "Earth"@en ,
+                    "jorden"@sv .
+
+<#largest-moon-solar-system>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Largest moon in the Solar System"@en ,
+                     "Solsystemets största måne"@sv ;
+    solid-memo:back "Ganymede"@en ,
+                    "Ganymedes"@sv ;
+    solid-memo:backNote "Jupiter's largest moon, bigger than the planet Mercury."@en ,
+                        "Jupiters största måne, större än planeten Merkurius."@sv .
+
+<#moon-thick-atmosphere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The only moon with a thick atmosphere"@en ,
+                     "Den enda månen med en tät atmosfär"@sv ;
+    solid-memo:back "Titan"@en ,
+                    "Titan"@sv ;
+    solid-memo:backNote "Saturn's largest moon."@en ,
+                        "Saturnus största måne."@sv .
+
+<#most-volcanic-body>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The most volcanically active body in the Solar System"@en ,
+                     "Solsystemets mest vulkaniskt aktiva himlakropp"@sv ;
+    solid-memo:back "Io"@en ,
+                    "Io"@sv ;
+    solid-memo:backNote "A moon of Jupiter, with hundreds of volcanoes."@en ,
+                        "En av Jupiters månar, med hundratals vulkaner."@sv .
+
+<#retrograde-large-moon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The only large moon that orbits opposite to its planet's rotation (retrograde orbit)"@en ,
+                     "Den enda stora månen som kretsar i motsatt riktning mot planetens rotation (retrograd bana)"@sv ;
+    solid-memo:back "Triton"@en ,
+                    "Triton"@sv ;
+    solid-memo:backNote "Neptune's largest moon, probably a captured Kuiper Belt object."@en ,
+                        "Neptunus största måne, troligen ett infångat objekt från Kuiperbältet."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

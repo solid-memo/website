@@ -1,0 +1,875 @@
+@base <https://solid-memo.com/decks/shakespeare-plays/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Shakespeare: characters and their plays"@en ,
+                  "Shakespeare: rollfigurer och deras pjäser"@sv ,
+                  "셰익스피어: 등장인물과 작품"@ko ,
+                  "Shakespeare: Figuren und ihre Stücke"@de ,
+                  "Shakespeare: personajes y sus obras"@es ,
+                  "Shakespeare : personnages et leurs pièces"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "60 characters from 28 of Shakespeare's plays (tragedies, comedies, romances and two histories), each of whom appears in only one play. Front: the character's name in English and in Swedish (where Swedish has an established form of its own, such as Ofelia, Jago or Botten, that form; otherwise the original name); back: the play, by its English and Swedish title, with a short note on who the character is. Characters whose name is in the play's title are left out. Built from the play texts (Project Gutenberg) and Wikidata, with the Swedish names checked against C. A. Hagberg's translation, and cross-checked against the Folger Shakespeare."@en ,
+                        "60 rollfigurer ur 28 av Shakespeares pjäser (tragedier, komedier, sagospel och två krönikespel), som var och en förekommer i bara en pjäs. Framsida: rollfigurens namn på engelska och svenska (den etablerade svenska formen där en sådan finns, som Ofelia, Jago eller Botten, annars originalnamnet); baksida: pjäsen med dess engelska och svenska titel och en kort anteckning om vem rollfiguren är. Rollfigurer vars namn står i pjäsens titel ingår inte. Uppgifterna kommer från pjästexterna (Project Gutenberg) och Wikidata. De svenska namnen har kontrollerats mot C. A. Hagbergs översättning och allt har jämförts med Folger Shakespeare."@sv ,
+                        "셰익스피어 희곡 28편(비극, 희극, 로맨스극, 사극 2편)에 나오는 등장인물 60명. 모두 한 작품에만 나오는 인물이다. 앞면: 영어와 스웨덴어로 된 인물 이름(Ofelia, Jago, Botten처럼 스웨덴어에 고유한 정착된 형태가 있으면 그 형태, 없으면 원래 이름). 뒷면: 영어와 스웨덴어 제목으로 적은 작품, 그리고 인물이 누구인지 알려 주는 짧은 메모. 이름이 작품 제목에 들어 있는 인물은 제외했다. 희곡 원문(Project Gutenberg)과 Wikidata를 바탕으로 만들었고, 스웨덴어 이름은 C. A. Hagberg의 번역으로 확인했으며, Folger Shakespeare와 대조했다."@ko ,
+                        "60 Figuren aus 28 von Shakespeares Stücken (Tragödien, Komödien, Romanzen und zwei Historiendramen), die jeweils nur in einem Stück vorkommen. Vorderseite: der Name der Figur auf Englisch und auf Schwedisch (wo das Schwedische eine eigene etablierte Form hat, etwa Ofelia, Jago oder Botten, diese Form, sonst der Originalname); Rückseite: das Stück mit seinem englischen und schwedischen Titel und einer kurzen Anmerkung dazu, wer die Figur ist. Figuren, deren Name im Titel des Stücks steht, fehlen. Erstellt aus den Texten der Stücke (Project Gutenberg) und Wikidata, die schwedischen Namen abgeglichen mit der Übersetzung von C. A. Hagberg und alles gegengeprüft mit Folger Shakespeare."@de ,
+                        "60 personajes de 28 obras de Shakespeare (tragedias, comedias, romances y dos dramas históricos), cada uno de los cuales aparece en una sola obra. Anverso: el nombre del personaje en inglés y en sueco (donde el sueco tiene una forma establecida propia, como Ofelia, Jago o Botten, esa forma; si no, el nombre original); reverso: la obra, con su título en inglés y en sueco, y una nota breve sobre quién es el personaje. Se excluyen los personajes cuyo nombre figura en el título de la obra. Elaborado a partir de los textos de las obras (Project Gutenberg) y de Wikidata, con los nombres suecos comprobados con la traducción de C. A. Hagberg, y contrastado con el Folger Shakespeare."@es ,
+                        "60 personnages de 28 pièces de Shakespeare (tragédies, comédies, romances et deux pièces historiques), qui n’apparaissent chacun que dans une seule pièce. Recto : le nom du personnage en anglais et en suédois (la forme suédoise établie lorsqu’elle existe, comme Ofelia, Jago ou Botten, sinon le nom original) ; verso : la pièce, avec son titre anglais et suédois, et une courte note sur qui est le personnage. Les personnages dont le nom figure dans le titre de la pièce sont exclus. Établi à partir des textes des pièces (Project Gutenberg) et de Wikidata, avec les noms suédois vérifiés dans la traduction de C. A. Hagberg, et recoupé avec le Folger Shakespeare."@fr ;
+    prov:wasDerivedFrom <https://www.gutenberg.org/ebooks/100> ,
+                        <https://www.wikidata.org/wiki/Q692> ,
+                        <https://runeberg.org/hagberg/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:literature ;
+    dcat:keyword "Shakespeare"@en ,
+                 "plays"@en ,
+                 "characters"@en ,
+                 "English literature"@en ,
+                 "drama"@en ,
+                 "pjäser"@sv ,
+                 "rollfigurer"@sv ,
+                 "engelsk litteratur"@sv ,
+                 "dramatik"@sv ,
+                 "teater"@sv ,
+                 "Shakespeare"@sv ,
+                 "셰익스피어"@ko ,
+                 "희곡"@ko ,
+                 "등장인물"@ko ,
+                 "영문학"@ko ,
+                 "연극"@ko ,
+                 "Shakespeare"@de ,
+                 "Theaterstücke"@de ,
+                 "Figuren"@de ,
+                 "englische Literatur"@de ,
+                 "Drama"@de ,
+                 "Shakespeare"@es ,
+                 "obras de teatro"@es ,
+                 "personajes"@es ,
+                 "literatura inglesa"@es ,
+                 "drama"@es ,
+                 "Shakespeare"@fr ,
+                 "pièces de théâtre"@fr ,
+                 "personnages"@fr ,
+                 "littérature anglaise"@fr ,
+                 "théâtre"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/shakespeare-plays/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/shakespeare-plays/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#shakespeare-plays> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#shakespeare-plays> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.gutenberg.org/ebooks/100> ,
+              <https://www.wikidata.org/wiki/Q692> ,
+              <https://runeberg.org/hagberg/> ,
+              <https://www.folgerdigitaltexts.org/> ,
+              <https://sv.wikipedia.org/> ,
+              <https://libris.kb.se/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "The play texts: Project Gutenberg's Complete Works of William Shakespeare (eBook #100, updated 2025-08-24) was downloaded as plain text (query 1). The script split_plays.py (query 2) split it into its 38 plays using the table of contents (the six poem collections were set aside) and, for each play, extracted the Dramatis Personæ list (36 plays have one; King Richard the Second and The Two Noble Kinsmen have none) and every speech prefix (a line in capitals ending with a full stop)."@en ,
+                 "Candidates: a list of 145 well-known leads and supporting roles (146 lines, Shylock twice; recorded verbatim with query 3) was drawn up by the compiler and run through where.py (query 3), which lists for each name every play whose Dramatis Personæ or speech prefixes name it, and every other play whose text merely mentions it. A name qualified only if exactly one play has it as a character. This removed, among others, Claudius (also in Julius Caesar), Edmund (King Lear and three histories), Emilia (four plays), Helena (All's Well and A Midsummer Night's Dream), Demetrius (three plays), Theseus and Hippolyta (also in The Two Noble Kinsmen), Portia (also in Julius Caesar), Antonio and Sebastian (several plays), Angelo and Mariana (two plays each), Valentine (three plays), Brutus (also in Coriolanus), Caius, Pompey, and Falstaff's company (Bardolph, Pistol, Nym, Mistress Quickly, Shallow)."@en ,
+                 "Independent check against the Folger edition: fetch_folger.py (query 4) downloaded the character list of all 38 Folger plays (https://www.folgerdigitaltexts.org/<play>/charText/), and verify.py (query 5) required, for every card, that the Gutenberg check and the Folger check both give the card's play and no other (Folger's CamelCase ids such as DromioOfSyracuse were split into words; Folger lists Puck as Robin Goodfellow). This removed Petruchio, whom Folger also lists as a minor speaking character in Romeo and Juliet. The final 60 cards pass both checks; verify.json records the result for each."@en ,
+                 "Every other occurrence of a card's name in the other plays was read (query 6): all are mentions, not characters (e.g. \"wise Laertes' son\" for Ulysses in Titus Andronicus, \"Sir Pandarus of Troy\" in The Merry Wives of Windsor, the dead Cassius recalled in Antony and Cleopatra, \"Lucio\" in the list of guests Capulet invites in Romeo and Juliet), or, for Bottom and Sly, the ordinary English words."@en ,
+                 "Wikidata: queries 7 and 8 listed Shakespeare's works (P50 Q692) with their English and Swedish labels and the characters linked to them by P1441 (present in work); query 9 fetched the labels, aliases and sitelinks of the 28 plays; queries 10 and 11 looked for items for the characters that query 7 did not find (also through the plays' P674); query 12 fetched the labels, aliases and P1441 values of the character items found (47 of them are linked to the card's play and used; the item found for Aaron has no P1441 and is not used); query 13 the death date of Shakespeare. The English and Swedish titles on the backs are the Wikidata labels of the play items."@en ,
+                 "Swedish titles: each Swedish label was compared with the title of the play's Swedish Wikipedia article and its introduction (query 14) and with Swedish editions in LIBRIS (query 15). They agree for all 28 plays kept. LIBRIS found no edition with the exact titles Henrik V, Henrik VIII or Två ungherrar i Verona (Hagberg's titles are Konung Henrik den femte, Konung Henrik den åttonde and Två ungherrar från Verona); for these the Swedish Wikipedia article title, which is also the Wikidata label, was used. Pericles was left out because its Swedish title is not settled: Wikidata has \"Perikles\" (as the 1986 Swedish edition), Swedish Wikipedia \"Pericles\" (as the 1931 edition's \"Sagospelet Pericles\")."@en ,
+                 "Swedish names: the front gives the name as Swedish writes it today. For most characters this is the original name. Where Swedish has a form of its own it was taken from a content source and checked against Swedish Wikipedia (query 16, counts of each variant; query 17, the quoted sentences): Ofelia (Wikidata sv label; Swedish Wikipedia 15 times, \"Ophelia\" 0), Jago (Hagberg; Swedish Wikipedia 32 times, \"Iago\" 0), Botten (Hagberg; Swedish Wikipedia 11 times; the Wikidata sv label is \"Botten Vävare\"), Benedict (Hagberg; Swedish Wikipedia 13 times, \"Benedick\" 0, but also \"Benedikt\" twice: the majority form, which is also Hagberg's, was kept, as for Rosalind/Rosalinda), Kardinal Wolsey (Hagberg's \"Kardinal WOLSEY\"; Swedish Wikipedia \"kardinal Wolseys\", the second sentence naming \"kardinal Wolseys\", chosen in quality-control round 1 because the first misplaces Wolsey's farewell speech; recorded as \"|2\" in svquotes.txt) and Christopher Sluger (Hagberg's \"CHRISTOPHER SLUGER\"; Swedish Wikipedia \"fyllot Sluger\" once, and \"Sly\" only in the link \"[[Sly (opera)|Sly]]\", which query 16 counts as 2, not for the character; adopted in quality-control round 2, the first draft had \"Christopher Sly\"). Hagberg's 1847–1851 translation (the classic Swedish one, read in Projekt Runeberg's edition, query 18) adapts other names too (Rosalinda, Orsinio, Jachimo, Jessika, Anna Page, Surkart for Dogberry), but the Swedish Wikipedia uses the original names for these (Swedish Wikipedia, following modern translations such as Göran O. Eriksson's), so the cards do too and the evidence records Hagberg's form (the Dogberry note also gives Surkart, which the article mentions). Other characters whose names Swedish translations render as Swedish words were left out (Sir Toby Belch, Hagberg's \"Tobias Raap\", Swedish Wikipedia's \"Tobias Rap\"; Sir Andrew Aguecheek, \"Andreas Blek av Nosen\"; Touchstone, \"Proba\"; Peter Quince, \"Qvitten\"/\"Kvitten\"): these forms come from particular translations and are not in Wikidata, and among translated names (as opposed to spellings) the deck keeps only Botten, which Hagberg, the Swedish Wikipedia and Wikidata's Swedish label all support, and Sluger, Hagberg's form, which the Swedish Wikipedia uses."@en ,
+                 "Every card's character was found in Hagberg's cast list (\"Personer\") of the same play (query 18; fetch_hagberg.py saved the cast-list pages, evidence_table.py found the line), which also confirms that the Swedish translation has the character in that play."@en ,
+                 "Back notes: each card has a short note on who the character is, written by the compiler from the character's description in the Gutenberg Dramatis Personæ (e.g. \"BANQUO, General in the King's Army\", \"TYBALT, nephew to Lady Capulet\"), translated into Swedish by the compiler and compared with Hagberg's description of the same character. Quality-control round 3 compared every Swedish note with the Swedish Wikipedia article on the play (CC BY-SA, verification only; script svoverlap.py, query 20): three notes matched its cast-list wording (Thersites \"En vanskapt och hånfull grek\", Rosalind \"dotter till den äldre hertigen\", Apemantus \"vresig filosof\") and were reworded from the Gutenberg and Hagberg lines (\"En missbildad och grovkäftad grek\", \"Dotter till den landsförvisade hertigen\", \"En butter filosof\"). The overlaps left are three or four words of a literal translation of the same English cast-list line, which any translation would share: \"Kung av Skottland\" (Duncan), \"Lears yngsta dotter\" (Cordelia), \"förälskad i Lysander\" (Hermia), \"Hertig av Illyrien\" (Orsino), \"Kung av Sicilien\" (Leontes), \"dotter, förälskad i Fenton\" (Anne Page), \"de två ungherrarna\" (Proteus, from the play's title) and the twins' names (Dromio). Five notes add a fact from the play text that the cast list does not give: Tybalt is Lady Capulet's (Fru Capulets) brother's son (\"Tybalt, my cousin! O my brother’s child!\", Act III, Scene 1; Hagberg's \"systerson\" is not followed); Wolsey, who has no description in the cast list, is the King's favourite who falls from power (Act III, Scene 2: \"Farewell? A long farewell to all my greatness!\"); Laertes is Ophelia's brother and Ophelia his sister (both are Polonius's children in the cast list); Lucio is Claudio's friend (he goes to Isabella on Claudio's behalf; Swedish Wikipedia: \"Claudios vän Lucio\"); Bottom's first name Nick (\"Nick Bottom, the weaver\" in Act I, Scene 2). English forms of address in the notes are translated as \"Fru\" (Mistress Page \"Fru Page\", Lady Capulet \"Fru Capulet\"; quality-control round 5), since Swedish Wikipedia gives no Swedish form for Lady Capulet and Hagberg's \"grefvinnan\" is a 19th-century rank not in the English. Kinship words were translated neutrally where English does not say which side: nephew is \"nevö\" (Benvolio), niece \"niece\" (Beatrice: the play never says whose daughter she is, so Hagberg's \"brorsdotter\" is not followed), uncle \"onkel\"."@en ,
+                 "Machine checks: for every card the builder checked against live Wikidata the English and Swedish labels of the play item (the back). For the 47 cards whose character has a Wikidata item linked to the play, it also checks that the item's P1441 (present in work) includes the play, and the item's English label or alias equal to the front, and its Swedish label (or multilingual label) where it equals the Swedish front. Labels not checked, and why: King Duncan (Q15698348, label \"King Duncan\", no alias \"Duncan\"), Botten (sv label \"Botten Vävare\"), Pandarus (sv label \"Pandaros\", the Homeric form, on an item that is also the figure of the Iliad), and characters with no Swedish label. The deck was then validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts)."@en ,
+                 "Selection: 60 characters from 28 plays: the tragedies Hamlet, Macbeth, Othello, Romeo and Juliet, King Lear, Julius Caesar, Antony and Cleopatra, Coriolanus, Titus Andronicus, Timon of Athens and Troilus and Cressida; the comedies A Midsummer Night's Dream, The Merchant of Venice, Twelfth Night, Much Ado About Nothing, As You Like It, The Taming of the Shrew, Measure for Measure, All's Well That Ends Well, The Comedy of Errors, The Merry Wives of Windsor, Love's Labour's Lost and The Two Gentlemen of Verona; the romances The Tempest, The Winter's Tale and Cymbeline; and the histories Henry V and Henry VIII. Between one and five characters per play, more for the most read plays. A character is included only if (1) exactly one of the 38 plays in the Gutenberg Complete Works has a character of that name, in its cast list or speech prefixes, and the Folger edition agrees; (2) the name is not in the play's title (so no Hamlet, Macbeth, Lady Macbeth, Romeo, Juliet, Lear, Othello, Julius Caesar, Antony, Cleopatra, Coriolanus, Cymbeline, Titus, Troilus, Cressida or Timon; Shylock is kept, since the title is The Merchant of Venice); (3) the character is a lead or a well-known supporting role; (4) the name has one form in current Swedish writing, taken to be the form the Swedish Wikipedia article on the play uses: a Swedish form of its own (Ofelia, Jago, Botten, Benedict, Kardinal Wolsey, Christopher Sluger) or the original name; a form found only in Hagberg's 19th-century translation (Rosalinda, Surkart for Dogberry) does not count, and the back note mentions it where the article does. Left out: characters who recur in several plays (Falstaff, Mistress Quickly, Bardolph, Pistol, Nym, Shallow) or share a name with a character of another play (see the method); the history plays King John, Richard II, Richard III and Henry IV and VI, whose Swedish titles are not settled (Wikidata has Rickard II and Rikard III, Swedish Wikipedia Richard II, Richard III and Kung John against Wikidata's Kung Johan; Henry IV, Part 2 has no Swedish label) and whose figures often recur; Pericles, whose Swedish title is not settled (Perikles or Pericles); The Two Noble Kinsmen (co-written with John Fletcher, not in the First Folio, and with no Swedish title of its own); Edward III, which the Gutenberg Complete Works does not include. Characters whose speech prefix or cast-list name is not their name (Feste is \"Clown\" in the Gutenberg cast list) or who never appear on stage (Sycorax, Yorick) were also left out. Isabella (Measure for Measure) was left out because Hagberg's Swedish translation calls the Queen of France in Henry V Isabella as well."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content sources are all in the public domain or CC0: the play texts (Shakespeare died in 1616; Project Gutenberg's eBook #100, whose text Project Gutenberg itself says is unrestricted once its licence and trademark are stripped, and nothing of Project Gutenberg's own, neither file nor trademark, is reused); Wikidata (CC0), for the English and Swedish play titles and the Swedish form Ofelia; and C. A. Hagberg's Swedish translation (Hagberg died in 1864; Projekt Runeberg's edition carries no copyright warning), for the Swedish forms Jago, Botten, Benedict, Kardinal Wolsey and Christopher Sluger. The selection of characters is the compiler's own, made by the criteria in the selection and checked mechanically against the play texts; it was not taken from any list. The back notes are the compiler's own wording of the characters' descriptions in the public-domain cast lists. The Folger Digital Texts (CC BY-NC 3.0), the Swedish Wikipedia (CC BY-SA 4.0) and LIBRIS (terms not readable, recorded as unknown) were used for verification only: they confirmed facts the content sources gave (that a character is in a play and in no other, how Swedish writes a name today, the Swedish titles of editions) and no list or selection was taken from them; three Swedish back notes found to match the Swedish Wikipedia's cast-list wording were reworded (quality-control round 3), and the remaining few-word overlaps are literal translations of the same public-domain cast-list lines; a name or title as such is a fact, not protected expression. Quotations in the provenance report's evidence remain under their sources' licences and are not part of the CC0 deck."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every card's character against the cast lists and speech prefixes of all 38 Gutenberg plays and the character lists of all 38 Folger plays; the Swedish names against Wikidata, Hagberg's translation and the Swedish Wikipedia; the Swedish titles against Wikidata, the Swedish Wikipedia and LIBRIS."@en ;
+    rdfs:comment "Scope: All 60 cards, the sources and the deck metadata."@en ,
+                 "Outcome: All 60 characters are characters of exactly one play in both the Gutenberg and the Folger texts, and every one is in Hagberg's cast list of the same play. The English and Swedish play titles are the Wikidata labels and agree with the Swedish Wikipedia; the builder's Wikidata checks cover the back of every card and, for the 47 characters with a Wikidata item, the character's link to the play and its labels. No Wikidata check was skipped because Wikidata disagreed with a better source; label checks were left out only where the card deliberately uses another form (listed below). One candidate failed the Folger check and several were dropped for unsettled Swedish names or titles."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 60 cards: every character re-checked against the character lists of all 38 Folger plays (fetched live by the review), the play labels against live Wikidata, and every back note against the Dramatis Personæ and Hagberg's cast lists."@en ,
+                 "Outcome: No wrong card. The review's own scan of the Folger lists found every character in exactly one play, the play on the card's back; the Wikidata labels of all 28 plays agree with the backs; the builder's 235 checks pass. Two warnings (the Swedish Bottom note used the English name; the Dromio evidence said 39 plays) and three suggestions. Three findings were fixed and two suggestions declined."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 60 cards in both languages, the title, the description and the keywords, and the language tags of the built deck."@en ,
+                 "Outcome: All card text is tagged @en/@sv; the 28 Swedish titles match the Wikidata sv labels and the Swedish Wikipedia. Two warnings: the Swedish Bottom note used the English name, and Christopher Sly kept the English name although Swedish Wikipedia uses Hagberg's \"Sluger\", the same reasoning the deck used for Jago, Botten and Benedict. Seven suggestions. Eight findings were fixed; the untagged keywords come from the builder and need no change to the dossier."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 60 cards' note wording against the sources; every source's licence page fetched by the review; spot checks of 12 Hagberg pages, 9 Swedish Wikipedia revision quotes, 6 name-variant counts, 10 Wikidata items and the Folger word counts; the method and queries for reproducibility."@en ,
+                 "Outcome: No licensing error: every recorded licence is right and CC0 suits the content sources. But three Swedish notes matched the Swedish Wikipedia's cast-list wording (CC BY-SA, verification only), contradicting the dossier's \"nothing copied\", and the inputs of several scripts (the candidate list above all) were not recorded. All six findings were fixed: the three notes reworded and every Swedish note re-compared with the articles, the inputs recorded verbatim, the Hagberg edition described consistently and the query records corrected."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 29 of 60 cards: the 11 changed in round 3's fixes and every third card, against Gutenberg eBook #100, Hagberg's cast lists on Projekt Runeberg, the Swedish Wikipedia revisions and the Folger character lists; the round-3 fixes; the builder's live Wikidata checks (60 cards, 235 checks)."@en ,
+                 "Outcome: No factual error; the round-3 fixes were all confirmed. Two documentation warnings and two suggestions, all verified against the saved Swedish Wikipedia revisions and Folger lists and all fixed: the \"Benedikt\" variant is now counted and recorded, the Sluger and Wolsey quotes are reproducible from the recorded queries, the Dromio evidence names both twins, and the round-0 Rosalind entry points to round 2."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: all 60 cards, against Gutenberg eBook #100, the Folger character lists and the builder's live Wikidata checks (60 cards, 235 checks); the round-4 fixes."@en ,
+                 "Outcome: No factual or language error; the round-4 fixes were confirmed. Two Swedish style suggestions, both applied: the Rosalind note no longer contains the English \"(Duke Senior)\", and Tybalt's note uses \"Fru Capulet\", consistent with \"Fru Page\" in Anne Page's note."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.gutenberg.org/ebooks/100>
+    dcterms:title "The Complete Works of William Shakespeare (Project Gutenberg eBook #100, most recently updated August 24, 2025)" ;
+    dcterms:creator "William Shakespeare; transcription by Project Gutenberg volunteers" ;
+    rdfs:comment "https://www.gutenberg.org/policy/license.html — \"Such a Project Gutenberg ebook is made out of two parts: the book text not restricted by U.S. copyright law and the non public domain Project Gutenberg trademark and license. If you strip the Project Gutenberg license and all references to Project Gutenberg from the text, you are left with a text unrestricted by U.S. intellectual property law. You can do anything you want with that text in the United States and most of the rest of the world.\" https://www.gutenberg.org/policy/permission.html — \"The vast majority of Project Gutenberg eBooks are in the public domain in the US. This means that nobody can grant, or withhold, permission to do with this item as you please.\" Shakespeare died in 1616 (Wikidata Q692, P570 1616-05-03), so the plays are in the public domain everywhere. The deck redistributes no Project Gutenberg file and does not use the Project Gutenberg trademark: it takes only names and facts from the play texts, and the eBook is credited as a source."@en .
+
+<https://www.wikidata.org/wiki/Q692>
+    dcterms:title "Wikidata: the plays of William Shakespeare (Q692) and their characters (P1441 present in work), with English and Swedish labels" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://runeberg.org/hagberg/>
+    dcterms:title "Shakspeare's dramatiska arbeten, öfversatta af Carl August Hagberg (first published 1847–1851), Projekt Runeberg's electronic edition, based on the 2nd edition (Lund 1861) and the 3rd (Lund 1879): the \"Personer\" (cast) lists" ;
+    dcterms:creator "William Shakespeare; translated by Carl August Hagberg (1810–1864); electronic edition by Projekt Runeberg" ;
+    rdfs:comment "Hagberg died in 1864 (Wikidata Q346056, \"Swedish linguist and translator (1810–1864)\", P570 1864-01-08, query 13), so his translation has been in the public domain for well over 70 years. Projekt Runeberg, https://runeberg.org/admin/copyright.html — \"When 70 full years have passed after the death of an author, all his works enter the public domain.\" and \"When one of Project Runeberg's editions is covered by copyright, a text of warning appears at the top of each page together with the copyright symbol\"; the Hagberg pages carry no such warning."@en .
+
+<https://www.folgerdigitaltexts.org/>
+    dcterms:title "Folger Digital Texts: character lists of the plays (charText, words spoken per character)" ;
+    dcterms:creator "Folger Shakespeare Library (Barbara Mowat, Paul Werstine and others, editors)" ;
+    rdfs:comment "https://www.folger.edu/copyright-policy/ — \"The texts of Shakespeare’s works found on this site are from the Folger Digital Texts collection. Folger Digital Texts is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported license.\" A non-commercial licence does not allow reuse in a CC0 deck, and the builder has no identifier for CC BY-NC, so the source is recorded as all-rights-reserved: verification only."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenskspråkiga Wikipedia: the articles on the plays (Hamlet, Othello, En midsommarnattsdröm, Mycket väsen för ingenting, Som ni behagar, Cymbeline, Trettondagsafton (pjäs), Muntra fruarna i Windsor, Henrik VIII (pjäs), Lika för lika, Köpmannen i Venedig and others)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://sv.wikipedia.org/wiki/Hamlet (fetched 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://libris.kb.se/>
+    dcterms:title "LIBRIS, the Swedish union catalogue: Swedish-language editions of the plays" ;
+    dcterms:creator "Kungliga biblioteket (National Library of Sweden)" ;
+    rdfs:comment "The terms page https://www.kb.se/samverkan-och-utveckling/libris/att-anvanda-librisdata.html could not be read from the research environment on 2026-10-04 (a bot-protection page answered instead), so the licence is recorded as unknown and LIBRIS is used for verification only; only catalogue facts (titles and years of Swedish editions) were consulted."@en .
+
+<#ophelia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ophelia"@en ,
+                     "Ofelia"@sv ;
+    solid-memo:back "Hamlet"@en ,
+                    "Hamlet"@sv ;
+    solid-memo:backNote "Polonius's daughter, Laertes's sister."@en ,
+                        "Polonius dotter, Laertes syster."@sv .
+
+<#polonius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Polonius"@en ,
+                     "Polonius"@sv ;
+    solid-memo:back "Hamlet"@en ,
+                    "Hamlet"@sv ;
+    solid-memo:backNote "Lord Chamberlain; father of Laertes and Ophelia."@en ,
+                        "Kammarherre; far till Laertes och Ofelia."@sv .
+
+<#horatio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Horatio"@en ,
+                     "Horatio"@sv ;
+    solid-memo:back "Hamlet"@en ,
+                    "Hamlet"@sv ;
+    solid-memo:backNote "Hamlet's friend."@en ,
+                        "Hamlets vän."@sv .
+
+<#laertes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Laertes"@en ,
+                     "Laertes"@sv ;
+    solid-memo:back "Hamlet"@en ,
+                    "Hamlet"@sv ;
+    solid-memo:backNote "Polonius's son, Ophelia's brother."@en ,
+                        "Polonius son, Ofelias bror."@sv .
+
+<#banquo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Banquo"@en ,
+                     "Banquo"@sv ;
+    solid-memo:back "Macbeth"@en ,
+                    "Macbeth"@sv ;
+    solid-memo:backNote "A general in King Duncan's army, like Macbeth."@en ,
+                        "General i kung Duncans här, liksom Macbeth."@sv .
+
+<#macduff>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Macduff"@en ,
+                     "Macduff"@sv ;
+    solid-memo:back "Macbeth"@en ,
+                    "Macbeth"@sv ;
+    solid-memo:backNote "A Scottish nobleman."@en ,
+                        "En skotsk adelsman."@sv .
+
+<#duncan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Duncan"@en ,
+                     "Duncan"@sv ;
+    solid-memo:back "Macbeth"@en ,
+                    "Macbeth"@sv ;
+    solid-memo:backNote "King of Scotland."@en ,
+                        "Kung av Skottland."@sv .
+
+<#iago>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iago"@en ,
+                     "Jago"@sv ;
+    solid-memo:back "Othello"@en ,
+                    "Othello"@sv ;
+    solid-memo:backNote "Othello's ensign (\"ancient\")."@en ,
+                        "Othellos fänrik."@sv .
+
+<#desdemona>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Desdemona"@en ,
+                     "Desdemona"@sv ;
+    solid-memo:back "Othello"@en ,
+                    "Othello"@sv ;
+    solid-memo:backNote "Brabantio's daughter, Othello's wife."@en ,
+                        "Brabantios dotter, Othellos hustru."@sv .
+
+<#cassio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cassio"@en ,
+                     "Cassio"@sv ;
+    solid-memo:back "Othello"@en ,
+                    "Othello"@sv ;
+    solid-memo:backNote "Othello's lieutenant."@en ,
+                        "Othellos löjtnant."@sv .
+
+<#mercutio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mercutio"@en ,
+                     "Mercutio"@sv ;
+    solid-memo:back "Romeo and Juliet"@en ,
+                    "Romeo och Julia"@sv ;
+    solid-memo:backNote "A kinsman of Prince Escalus and Romeo's friend."@en ,
+                        "Släkt med fursten Escalus och Romeos vän."@sv .
+
+<#tybalt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tybalt"@en ,
+                     "Tybalt"@sv ;
+    solid-memo:back "Romeo and Juliet"@en ,
+                    "Romeo och Julia"@sv ;
+    solid-memo:backNote "Lady Capulet's nephew (her brother's son)."@en ,
+                        "Fru Capulets brorson."@sv .
+
+<#benvolio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Benvolio"@en ,
+                     "Benvolio"@sv ;
+    solid-memo:back "Romeo and Juliet"@en ,
+                    "Romeo och Julia"@sv ;
+    solid-memo:backNote "Montague's nephew and Romeo's friend."@en ,
+                        "Montagues nevö och Romeos vän."@sv .
+
+<#cordelia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cordelia"@en ,
+                     "Cordelia"@sv ;
+    solid-memo:back "King Lear"@en ,
+                    "Kung Lear"@sv ;
+    solid-memo:backNote "Lear's youngest daughter."@en ,
+                        "Lears yngsta dotter."@sv .
+
+<#goneril>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Goneril"@en ,
+                     "Goneril"@sv ;
+    solid-memo:back "King Lear"@en ,
+                    "Kung Lear"@sv ;
+    solid-memo:backNote "Lear's eldest daughter."@en ,
+                        "Lears äldsta dotter."@sv .
+
+<#regan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Regan"@en ,
+                     "Regan"@sv ;
+    solid-memo:back "King Lear"@en ,
+                    "Kung Lear"@sv ;
+    solid-memo:backNote "Lear's second daughter."@en ,
+                        "Lears näst äldsta dotter."@sv .
+
+<#puck>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Puck"@en ,
+                     "Puck"@sv ;
+    solid-memo:back "A Midsummer Night's Dream"@en ,
+                    "En midsommarnattsdröm"@sv ;
+    solid-memo:backNote "A fairy, also called Robin Goodfellow."@en ,
+                        "Ett älvväsen, även kallat Robin Goodfellow."@sv .
+
+<#oberon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oberon"@en ,
+                     "Oberon"@sv ;
+    solid-memo:back "A Midsummer Night's Dream"@en ,
+                    "En midsommarnattsdröm"@sv ;
+    solid-memo:backNote "King of the Fairies."@en ,
+                        "Älvornas kung."@sv .
+
+<#titania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Titania"@en ,
+                     "Titania"@sv ;
+    solid-memo:back "A Midsummer Night's Dream"@en ,
+                    "En midsommarnattsdröm"@sv ;
+    solid-memo:backNote "Queen of the Fairies."@en ,
+                        "Älvornas drottning."@sv .
+
+<#bottom>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bottom"@en ,
+                     "Botten"@sv ;
+    solid-memo:back "A Midsummer Night's Dream"@en ,
+                    "En midsommarnattsdröm"@sv ;
+    solid-memo:backNote "Nick Bottom, a weaver."@en ,
+                        "Vävaren Botten (Nick Bottom i originalet)."@sv .
+
+<#hermia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hermia"@en ,
+                     "Hermia"@sv ;
+    solid-memo:back "A Midsummer Night's Dream"@en ,
+                    "En midsommarnattsdröm"@sv ;
+    solid-memo:backNote "Egeus's daughter, in love with Lysander."@en ,
+                        "Egeus dotter, förälskad i Lysander."@sv .
+
+<#shylock>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Shylock"@en ,
+                     "Shylock"@sv ;
+    solid-memo:back "The Merchant of Venice"@en ,
+                    "Köpmannen i Venedig"@sv ;
+    solid-memo:backNote "A rich Jew of Venice, Jessica's father."@en ,
+                        "En rik jude i Venedig, Jessicas far."@sv .
+
+<#bassanio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bassanio"@en ,
+                     "Bassanio"@sv ;
+    solid-memo:back "The Merchant of Venice"@en ,
+                    "Köpmannen i Venedig"@sv ;
+    solid-memo:backNote "Antonio's friend and Portia's suitor."@en ,
+                        "Antonios vän och Portias friare."@sv .
+
+<#jessica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jessica"@en ,
+                     "Jessica"@sv ;
+    solid-memo:back "The Merchant of Venice"@en ,
+                    "Köpmannen i Venedig"@sv ;
+    solid-memo:backNote "Shylock's daughter."@en ,
+                        "Shylocks dotter."@sv .
+
+<#nerissa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nerissa"@en ,
+                     "Nerissa"@sv ;
+    solid-memo:back "The Merchant of Venice"@en ,
+                    "Köpmannen i Venedig"@sv ;
+    solid-memo:backNote "Portia's waiting-woman."@en ,
+                        "Portias kammarjungfru."@sv .
+
+<#prospero>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Prospero"@en ,
+                     "Prospero"@sv ;
+    solid-memo:back "The Tempest"@en ,
+                    "Stormen"@sv ;
+    solid-memo:backNote "The rightful Duke of Milan."@en ,
+                        "Den rättmätige hertigen av Milano."@sv .
+
+<#miranda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Miranda"@en ,
+                     "Miranda"@sv ;
+    solid-memo:back "The Tempest"@en ,
+                    "Stormen"@sv ;
+    solid-memo:backNote "Prospero's daughter."@en ,
+                        "Prosperos dotter."@sv .
+
+<#caliban>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Caliban"@en ,
+                     "Caliban"@sv ;
+    solid-memo:back "The Tempest"@en ,
+                    "Stormen"@sv ;
+    solid-memo:backNote "\"A savage and deformed slave\" on Prospero's island."@en ,
+                        "En vild och vanskapt slav på Prosperos ö."@sv .
+
+<#ariel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ariel"@en ,
+                     "Ariel"@sv ;
+    solid-memo:back "The Tempest"@en ,
+                    "Stormen"@sv ;
+    solid-memo:backNote "An airy spirit."@en ,
+                        "En luftens ande."@sv .
+
+<#malvolio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malvolio"@en ,
+                     "Malvolio"@sv ;
+    solid-memo:back "Twelfth Night"@en ,
+                    "Trettondagsafton"@sv ;
+    solid-memo:backNote "Olivia's steward."@en ,
+                        "Olivias hovmästare."@sv .
+
+<#viola>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Viola"@en ,
+                     "Viola"@sv ;
+    solid-memo:back "Twelfth Night"@en ,
+                    "Trettondagsafton"@sv ;
+    solid-memo:backNote "Sebastian's twin sister, in love with the Duke."@en ,
+                        "Sebastians tvillingsyster, förälskad i hertigen."@sv .
+
+<#orsino>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Orsino"@en ,
+                     "Orsino"@sv ;
+    solid-memo:back "Twelfth Night"@en ,
+                    "Trettondagsafton"@sv ;
+    solid-memo:backNote "Duke of Illyria."@en ,
+                        "Hertig av Illyrien."@sv .
+
+<#beatrice>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Beatrice"@en ,
+                     "Beatrice"@sv ;
+    solid-memo:back "Much Ado About Nothing"@en ,
+                    "Mycket väsen för ingenting"@sv ;
+    solid-memo:backNote "Leonato's niece."@en ,
+                        "Leonatos niece."@sv .
+
+<#benedick>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Benedick"@en ,
+                     "Benedict"@sv ;
+    solid-memo:back "Much Ado About Nothing"@en ,
+                    "Mycket väsen för ingenting"@sv ;
+    solid-memo:backNote "A young lord of Padua."@en ,
+                        "En ung adelsman från Padua."@sv .
+
+<#dogberry>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dogberry"@en ,
+                     "Dogberry"@sv ;
+    solid-memo:back "Much Ado About Nothing"@en ,
+                    "Mycket väsen för ingenting"@sv ;
+    solid-memo:backNote "A constable."@en ,
+                        "En konstapel (Surkart i Hagbergs översättning)."@sv .
+
+<#rosalind>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rosalind"@en ,
+                     "Rosalind"@sv ;
+    solid-memo:back "As You Like It"@en ,
+                    "Som ni behagar"@sv ;
+    solid-memo:backNote "Daughter of Duke Senior, who lives in exile."@en ,
+                        "Dotter till den landsförvisade hertigen."@sv .
+
+<#orlando>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Orlando"@en ,
+                     "Orlando"@sv ;
+    solid-memo:back "As You Like It"@en ,
+                    "Som ni behagar"@sv ;
+    solid-memo:backNote "Youngest son of Sir Rowland de Boys."@en ,
+                        "Yngste son till Sir Rowland de Boys."@sv .
+
+<#christopher-sly>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christopher Sly"@en ,
+                     "Christopher Sluger"@sv ;
+    solid-memo:back "The Taming of the Shrew"@en ,
+                    "Så tuktas en argbigga"@sv ;
+    solid-memo:backNote "A tinker, in the Induction (the opening frame scenes)."@en ,
+                        "En kittelflickare, i inledningen (ramberättelsen); Christopher Sly i originalet."@sv .
+
+<#lucio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lucio"@en ,
+                     "Lucio"@sv ;
+    solid-memo:back "Measure for Measure"@en ,
+                    "Lika för lika"@sv ;
+    solid-memo:backNote "\"A fantastic\": a frivolous friend of Claudio."@en ,
+                        "En lättsinnig vän till Claudio."@sv .
+
+<#leontes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Leontes"@en ,
+                     "Leontes"@sv ;
+    solid-memo:back "The Winter's Tale"@en ,
+                    "En vintersaga"@sv ;
+    solid-memo:backNote "King of Sicilia."@en ,
+                        "Kung av Sicilien."@sv .
+
+<#hermione>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hermione"@en ,
+                     "Hermione"@sv ;
+    solid-memo:back "The Winter's Tale"@en ,
+                    "En vintersaga"@sv ;
+    solid-memo:backNote "Leontes's queen."@en ,
+                        "Leontes drottning."@sv .
+
+<#perdita>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Perdita"@en ,
+                     "Perdita"@sv ;
+    solid-memo:back "The Winter's Tale"@en ,
+                    "En vintersaga"@sv ;
+    solid-memo:backNote "Daughter of Leontes and Hermione."@en ,
+                        "Dotter till Leontes och Hermione."@sv .
+
+<#autolycus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Autolycus"@en ,
+                     "Autolycus"@sv ;
+    solid-memo:back "The Winter's Tale"@en ,
+                    "En vintersaga"@sv ;
+    solid-memo:backNote "A rogue."@en ,
+                        "En skälm."@sv .
+
+<#cassius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cassius"@en ,
+                     "Cassius"@sv ;
+    solid-memo:back "Julius Caesar"@en ,
+                    "Julius Caesar"@sv ;
+    solid-memo:backNote "A conspirator against Caesar."@en ,
+                        "En av de sammansvurna mot Caesar."@sv .
+
+<#enobarbus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Enobarbus"@en ,
+                     "Enobarbus"@sv ;
+    solid-memo:back "Antony and Cleopatra"@en ,
+                    "Antonius och Cleopatra"@sv ;
+    solid-memo:backNote "Domitius Enobarbus, Antony's friend."@en ,
+                        "Domitius Enobarbus, Antonius vän."@sv .
+
+<#volumnia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Volumnia"@en ,
+                     "Volumnia"@sv ;
+    solid-memo:back "Coriolanus"@en ,
+                    "Coriolanus"@sv ;
+    solid-memo:backNote "Coriolanus's mother."@en ,
+                        "Coriolanus mor."@sv .
+
+<#imogen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Imogen"@en ,
+                     "Imogen"@sv ;
+    solid-memo:back "Cymbeline"@en ,
+                    "Cymbeline"@sv ;
+    solid-memo:backNote "Cymbeline's daughter."@en ,
+                        "Cymbelines dotter."@sv .
+
+<#iachimo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iachimo"@en ,
+                     "Iachimo"@sv ;
+    solid-memo:back "Cymbeline"@en ,
+                    "Cymbeline"@sv ;
+    solid-memo:backNote "An Italian, friend to Philario."@en ,
+                        "En italienare, vän till Philario."@sv .
+
+<#aaron>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aaron"@en ,
+                     "Aaron"@sv ;
+    solid-memo:back "Titus Andronicus"@en ,
+                    "Titus Andronicus"@sv ;
+    solid-memo:backNote "A Moor, Tamora's lover."@en ,
+                        "En morisk man, Tamoras älskare."@sv .
+
+<#tamora>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tamora"@en ,
+                     "Tamora"@sv ;
+    solid-memo:back "Titus Andronicus"@en ,
+                    "Titus Andronicus"@sv ;
+    solid-memo:backNote "Queen of the Goths."@en ,
+                        "Goternas drottning."@sv .
+
+<#thersites>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thersites"@en ,
+                     "Thersites"@sv ;
+    solid-memo:back "Troilus and Cressida"@en ,
+                    "Troilus och Cressida"@sv ;
+    solid-memo:backNote "A deformed and scurrilous Greek."@en ,
+                        "En missbildad och grovkäftad grek."@sv .
+
+<#pandarus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pandarus"@en ,
+                     "Pandarus"@sv ;
+    solid-memo:back "Troilus and Cressida"@en ,
+                    "Troilus och Cressida"@sv ;
+    solid-memo:backNote "Cressida's uncle."@en ,
+                        "Cressidas onkel."@sv .
+
+<#apemantus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Apemantus"@en ,
+                     "Apemantus"@sv ;
+    solid-memo:back "Timon of Athens"@en ,
+                    "Timon av Aten"@sv ;
+    solid-memo:backNote "A churlish philosopher."@en ,
+                        "En butter filosof."@sv .
+
+<#parolles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Parolles"@en ,
+                     "Parolles"@sv ;
+    solid-memo:back "All's Well That Ends Well"@en ,
+                    "Slutet gott, allting gott"@sv ;
+    solid-memo:backNote "A follower of Bertram."@en ,
+                        "Bertrams följeslagare."@sv .
+
+<#dromio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dromio"@en ,
+                     "Dromio"@sv ;
+    solid-memo:back "The Comedy of Errors"@en ,
+                    "Förvillelser"@sv ;
+    solid-memo:backNote "Twin servants: Dromio of Ephesus and Dromio of Syracuse."@en ,
+                        "Tvillingtjänare: Dromio från Efesos och Dromio från Syrakusa."@sv .
+
+<#anne-page>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Anne Page"@en ,
+                     "Anne Page"@sv ;
+    solid-memo:back "The Merry Wives of Windsor"@en ,
+                    "Muntra fruarna i Windsor"@sv ;
+    solid-memo:backNote "Mistress Page's daughter, in love with Fenton."@en ,
+                        "Fru Pages dotter, förälskad i Fenton."@sv .
+
+<#holofernes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Holofernes"@en ,
+                     "Holofernes"@sv ;
+    solid-memo:back "Love's Labour's Lost"@en ,
+                    "Kärt besvär förgäves"@sv ;
+    solid-memo:backNote "A schoolmaster."@en ,
+                        "En skolmästare."@sv .
+
+<#proteus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Proteus"@en ,
+                     "Proteus"@sv ;
+    solid-memo:back "The Two Gentlemen of Verona"@en ,
+                    "Två ungherrar i Verona"@sv ;
+    solid-memo:backNote "One of the two gentlemen of the title."@en ,
+                        "En av de två ungherrarna i titeln."@sv .
+
+<#fluellen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fluellen"@en ,
+                     "Fluellen"@sv ;
+    solid-memo:back "Henry V"@en ,
+                    "Henrik V"@sv ;
+    solid-memo:backNote "An officer in King Henry's army."@en ,
+                        "Officer i kung Henriks här."@sv .
+
+<#wolsey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cardinal Wolsey"@en ,
+                     "Kardinal Wolsey"@sv ;
+    solid-memo:back "Henry VIII"@en ,
+                    "Henrik VIII"@sv ;
+    solid-memo:backNote "The King's powerful favourite, who falls from power."@en ,
+                        "Kungens mäktige gunstling, som faller från makten."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

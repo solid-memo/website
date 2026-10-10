@@ -44,8 +44,10 @@ publisher still in the index:
 - **Title and description** are language-tagged, one per language, one
   of them English (the library's curation policy, so that anyone who
   reads English can read every deck). **Keywords** are tagged too,
-  several per language, in English and Swedish, and in Korean on a deck
-  that adds them; the app shows only the reader's
+  several per language. Title, description and keywords come in every
+  language the app speaks (English, Swedish, Korean, German, Spanish and
+  French): when the app gains a language, every deck gets a version that
+  adds it. The app shows only the reader's keywords
   ([i18n.md](i18n.md#which-language)). **Topics** are `dcat:theme`s from
   [`ns/vocab/topics.ttl`](../ns/vocab/topics.ttl), next to the EU data
   theme `EDUC`; **languages** are EU authority-table IRIs described in

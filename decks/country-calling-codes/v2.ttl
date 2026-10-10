@@ -1,0 +1,1778 @@
+@base <https://solid-memo.com/decks/country-calling-codes/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Country calling codes"@en ,
+                  "Internationella landsnummer"@sv ,
+                  "국제 전화 국가 번호"@ko ,
+                  "Ländervorwahlen"@de ,
+                  "Prefijos telefónicos internacionales"@es ,
+                  "Indicatifs téléphoniques internationaux"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The international telephone country calling code of each of the 193 UN member states: 193 cards with the country on the front, in English and Swedish, and its code on the back, such as Sweden → +46, studied from country to code. Codes shared by several countries are explained on the card: +1 for the 13 UN members in the North American Numbering Plan, with the Caribbean states' area codes, and +7 for Russia and Kazakhstan. Compiled from Wikidata and checked against the ITU's list of assigned E.164 country codes and its amendments up to 1 October 2026."@en ,
+                        "Det internationella landsnumret för telefonsamtal till vart och ett av FN:s 193 medlemsländer: 193 kort med landet på framsidan, på engelska och svenska, och dess landsnummer på baksidan, till exempel Sverige → +46, att öva från land till nummer. Landsnummer som flera länder delar förklaras på kortet: +1 för de 13 FN-länderna i den nordamerikanska nummerplanen, med de karibiska staternas riktnummer, och +7 för Ryssland och Kazakstan. Sammanställd från Wikidata och kontrollerad mot ITU:s förteckning över tilldelade landsnummer enligt E.164 och dess tillägg till och med den 1 oktober 2026."@sv ,
+                        "유엔 193개 회원국 각각의 국제 전화 국가 번호입니다. 카드 193장으로, 앞면에 영어와 스웨덴어로 된 나라 이름, 뒷면에 그 나라의 국가 번호가 있으며(예: 스웨덴 → +46) 나라에서 번호 방향으로 학습합니다. 여러 나라가 함께 쓰는 번호는 카드에 설명되어 있습니다. +1은 북아메리카 번호 계획에 속한 유엔 회원국 13개국의 번호로 카리브해 국가들의 지역 번호가 함께 나오고, +7은 러시아와 카자흐스탄의 번호입니다. Wikidata에서 모았고, 할당된 E.164 국가 번호에 관한 ITU의 목록과 2026년 10월 1일까지의 개정 사항으로 확인했습니다."@ko ,
+                        "Die internationale Telefonvorwahl jedes der 193 UN-Mitgliedstaaten: 193 Karten mit dem Land auf der Vorderseite, auf Englisch und Schwedisch, und seiner Vorwahl auf der Rückseite, z. B. Schweden → +46, gelernt vom Land zur Vorwahl. Vorwahlen, die sich mehrere Länder teilen, werden auf der Karte erklärt: +1 für die 13 UN-Mitglieder im Nordamerikanischen Nummerierungsplan, mit den Bereichsvorwahlen der karibischen Staaten, und +7 für Russland und Kasachstan. Zusammengestellt aus Wikidata und abgeglichen mit der ITU-Liste der vergebenen E.164-Ländervorwahlen und ihren Änderungen bis zum 1. Oktober 2026."@de ,
+                        "El prefijo telefónico internacional de cada uno de los 193 Estados miembros de la ONU: 193 tarjetas con el país en el anverso, en inglés y en sueco, y su prefijo en el reverso, por ejemplo Suecia → +46, para estudiar del país al prefijo. Los prefijos que comparten varios países se explican en la tarjeta: +1 para los 13 miembros de la ONU del Plan de Numeración Norteamericano, con los códigos de área de los Estados caribeños, y +7 para Rusia y Kazajistán. Recopilado a partir de Wikidata y comprobado con la lista de la UIT de los indicativos de país E.164 asignados y sus modificaciones hasta el 1 de octubre de 2026."@es ,
+                        "L’indicatif téléphonique international de chacun des 193 États membres de l’ONU : 193 cartes avec le pays au recto, en anglais et en suédois, et son indicatif au verso, par exemple Suède → +46, à étudier du pays vers l’indicatif. Les indicatifs partagés par plusieurs pays sont expliqués sur la carte : +1 pour les 13 membres de l’ONU du plan de numérotation nord-américain, avec les indicatifs régionaux des États des Caraïbes, et +7 pour la Russie et le Kazakhstan. Compilé à partir de Wikidata et vérifié avec la liste de l’UIT des indicatifs de pays E.164 attribués et ses amendements jusqu’au 1er octobre 2026."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ,
+               topic:computing ;
+    dcat:keyword "country calling codes"@en ,
+                 "telephone numbers"@en ,
+                 "E.164"@en ,
+                 "ITU"@en ,
+                 "countries"@en ,
+                 "landsnummer"@sv ,
+                 "telefonnummer"@sv ,
+                 "E.164"@sv ,
+                 "ITU"@sv ,
+                 "länder"@sv ,
+                 "국가 번호"@ko ,
+                 "전화번호"@ko ,
+                 "E.164"@ko ,
+                 "ITU"@ko ,
+                 "나라"@ko ,
+                 "Ländervorwahlen"@de ,
+                 "Telefonnummern"@de ,
+                 "E.164"@de ,
+                 "ITU"@de ,
+                 "Länder"@de ,
+                 "prefijos telefónicos"@es ,
+                 "números de teléfono"@es ,
+                 "E.164"@es ,
+                 "UIT"@es ,
+                 "países"@es ,
+                 "indicatifs téléphoniques"@fr ,
+                 "numéros de téléphone"@fr ,
+                 "E.164"@fr ,
+                 "UIT"@fr ,
+                 "pays"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/country-calling-codes/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/country-calling-codes/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#country-calling-codes> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#country-calling-codes> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-E.164D-2016-PDF-E.pdf> ,
+              <https://www.itu.int/itu-t/bulletin> ,
+              <https://reports.nanpa.com/public/npa_report.csv> ,
+              <https://www.un.org/en/about-us/member-states> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (the ITU's list of assigned country codes and all its amendments, NANPA's area-code database, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection and fronts: the deck covers the same 193 states, with the same Wikidata items and the same English and Swedish fronts, as the library's country-code-top-level-domains deck (whose fronts come from the world-currencies deck): the states that are members (P463) of the United Nations (Q1065) in Wikidata, less ten historical predecessor items, with Denmark (Q35) and the Netherlands (Q55) for the Kingdoms of Denmark (Q756617) and the Netherlands (Q29999). states.py read that dossier's cards: the id, the front, the front's Wikidata label checks and the state's item. The selection was confirmed afresh on 2026-10-04 against the UN's Member States page: match_un.py matched its 193 names one to one with the 193 cards (by normalised English name, 27 of them through a hand-written table of UN name forms such as \"Viet Nam\", \"Türkiye\" and \"Naoero\", the table listed under queries)."@en ,
+                 "English and Swedish names: the Wikidata English and Swedish labels or aliases, as in the country-code-top-level-domains deck: Wikidata's common English short names (so Czech Republic, Ivory Coast, Cape Verde, Turkey rather than the UN's Czechia, Côte d'Ivoire, Cabo Verde, Türkiye) and the established Swedish names (Sverige, Storbritannien, USA, Kongo-Kinshasa, Elfenbenskusten, Östtimor …). China's English front is the short name \"China\" (Wikidata's English label is \"People's Republic of China\"), and Eswatini's Swedish front is the Swedish alias \"Eswatini\". Every front is checked against live Wikidata as a label or alias by the builder, except the English \"China\"; a Wikidata API lookup on 2026-10-04 (wbgetentities, labels and aliases in en and sv) showed that every other front is the item's label and Eswatini's Swedish front the only alias, and each card's evidence says which."@en ,
+                 "Codes: query 1 asked Wikidata for every P474 (country calling code) statement of the 195 items (the 193 states and the two Kingdoms) with its rank, start and end time and all qualifiers (run 2026-10-04). The card's code is the state's P474 value of best rank without an end time. Wikidata writes the codes with a plus sign (\"+46\"); for the eleven Caribbean members of the North American Numbering Plan it gives the country code 1 followed by the three-digit area code (\"+1268\" for Antigua and Barbuda; three values for the Dominican Republic), so for these the card's code is +1 and the area code goes into the back note. Every state has exactly one country code this way. Further values, all left out of the cards, are recorded in round 0: Kazakhstan's +997 (deprecated rank), Turkey's +36 (end time 1968), San Marino's +390549 (normal rank, beside +378 of preferred rank), the Netherlands item's +599 (applies to part Caribbean Netherlands) and the Kingdom of Denmark's +298 and +299 (Faroe Islands, Greenland)."@en ,
+                 "Cross-check against the ITU: the List of Recommendation ITU-T E.164 assigned country codes (position on 15 December 2016, Annex to Operational Bulletin No. 1114), the latest consolidated edition, was downloaded, its text extracted with pypdf (pdf2txt.py) and its numerical-order list parsed (parse_itu.py): 334 rows. match.py derived each card's country code from Wikidata and looked up the rows with that code; gen_cards.py took the row naming the state (by a hand-written table where several rows share the code: 1, 7 and 39) and stops if there is none. Every card's code is in the ITU list against the state. The list is kept up to date by numbered amendments in the ITU Operational Bulletin, so every bulletin from No. 1115 (1 January 2017) to No. 1349 (1 October 2026, the latest on 2026-10-04) was downloaded (fetch_all_obs.py, fetch_obs.sh, fetch_missing.sh; 235 bulletins) and scan_amendments.py extracted the amendment section from each: amendments No. 1 to 49 were all found. Only five codes appear in them as list rows: 888 (humanitarian purposes, then spare), 878 (made spare), 883 (renamed IoT/M2M), 970 (State of Palestine) and 997 (reserved for Kazakhstan in Amendment 22, Bulletin No. 1225 of 1 August 2021, and returned to spare in Amendment 48, Bulletin No. 1341 of 1 June 2026); all the other entries concern network identification codes under the shared codes 881, 882, 883 and 991. None changes the code of any of the 193 states. Names in the list were not amended (it still says, for example, \"Swaziland (Kingdom of)\" and \"The Former Yugoslav Republic of Macedonia\"); the cards use the current names."@en ,
+                 "Kazakhstan: Bulletin No. 1341 (1 June 2026) carries a joint communication of Kazakhstan and the Russian Federation (both \"country code +7\") on an intergovernmental agreement on the joint use of numbering zone 7, in force since 3 December 2025, and a note from TSB that \"the previously reserved country code “997” for Kazakhstan (Republic of), is returned to spare\". So Kazakhstan's code is +7, shared with Russia, as Wikidata gives it (+7 normal rank, +997 deprecated). The back note says that Kazakhstan has kept +7 instead of moving to +997, which both sources support; it does not date the change, since Wikidata's +997 statement (start 2023, end 2025) and the ITU's dates (reserved 2021, returned to spare 2026) differ."@en ,
+                 "North American Numbering Plan: NANPA's NPA database (npa_report.csv, file date 10/04/2026) was downloaded and nanpa.py listed the in-service area codes (IN_SERVICE Y) per COUNTRY. Every area code Wikidata gives for a Caribbean NANP state is an in-service area code of that country at NANPA (gen_cards.py stops otherwise). NANPA also lists 658 for Jamaica (in service since 30 April 2019), which Wikidata does not give; Jamaica's note therefore says \"area code 876, among others\". NANPA lists 398 in-service area codes with country US and 58 with country CANADA; their note names no area code. That +1 is also used by several territories comes from Wikidata (query 2: 12 non-member items with a P474 value beginning \"+1\", such as Puerto Rico, Guam and Bermuda) and is confirmed by the ITU list's rows for code 1."@en ,
+                 "Backs: the code written as it is dialled from abroad, a plus sign followed by the digits (\"+46\"), as Wikidata and the ITU write it (the ITU list gives the digits, in the bulletins with \"+\"). A code is text in no language, so the back is tagged zxx. Because +1 belongs to 13 states and +7 to two, the backs are not unique and the deck is studied from country to code only (frontToBack)."@en ,
+                 "Back notes, in the compiler's own words, only on the shared codes: the eleven Caribbean NANP states (+1 is shared by the countries and territories of the North American Numbering Plan; the state's area code or codes from Wikidata), the United States and Canada (the members of the plan), Russia and Kazakhstan (shared +7; Kazakhstan kept +7 instead of moving to +997). The Swedish notes were written by the compiler: \"riktnummer\" is the Wikidata Swedish label of area code (Q11480109) and \"landsnummer\" that of P474; the North American Numbering Plan item (Q13562566) has no Swedish label, so the note describes it as \"den nordamerikanska nummerplanen (NANP)\"."@en ,
+                 "Machine checks: every card carried Wikidata checks that the builder ran against live Wikidata: the state's English and Swedish label or alias (the front), and that its P474 includes the card's value (for the Caribbean NANP states the value with the area code, e.g. \"+1268\", which the back note relies on); for the Netherlands and Denmark also the Kingdom's P474 (+31, +45); Russia's and Kazakhstan's cards check each other's +7, and the United States card checks Puerto Rico's \"+1787\". Every card's evidence quotes Wikidata, the ITU list row, the result of the amendment scan and the UN page for that state (and NANPA for the NANP states), generated from the downloaded files by gen_cards.py; assemble.py added the notes."@en ,
+                 "Helper scripts (Python 3 or sh, run in a scratch directory; their logic in full): states.py read the country-code-top-level-domains dossier and kept for each card its id, front, label checks and the items of its P297/P78 checks (the state, and for Denmark and the Netherlands also the Kingdom). make_q1.py wrote query 1 with those 195 items. pdf2txt.py wrote the text of each page of a PDF with pypdf (uv run --with pypdf). parse_itu.py kept, on the pages headed \"numerical order\", every line (after the page marker) that starts with one to three digits and a space, as (code, name, trailing note letters). match.py took, per state, the P474 values of best rank that are not deprecated and have no end time, mapped \"+1\" plus three digits to code 1 and any other value to its digits, asserted one code per state and listed the ITU rows with it. match_un.py took the text of every <h2> on the UN page after the first and matched it to a card by the table or by the English front with accents removed and all but a–z dropped, lower case. nanpa.py read npa_report.csv (after its first line, the file date) and grouped the NPA_ID of the rows with IN_SERVICE \"Y\" by COUNTRY. fetch_all_obs.py fetched https://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-OB.<n>-<year>-OAS-PDF-E.pdf for n = 1115…1340, trying the expected year and its neighbours, one request per second; five bulletins (1143, 1144, 1168, 1232, 1239) are published as T-SP-OB.<n>-<year>-PDF-E.pdf and were fetched with fetch_missing.sh; probe.sh <n> <year> requested T-SP-OB.<n>-<year>- with each of the suffixes OAS-PDF-E.pdf, PDF-E.pdf, OAS-DOC-E.docx, OAS-MSW-E.docx, OAS-MSW-E.doc, OAS-ZPF-E.zip and ZPF-E.zip and printed the HTTP status, which is how the PDF-E.pdf name of those five was found. fetch_obs.sh <n> … fetched T-SP-OB.<n>-<year>-OAS-PDF-E.pdf trying the year 2026 and then 2025, and fetched 1321 and 1341–1349 (1350 does not exist yet). scan_amendments.py found in each bulletin the heading \"List of … E.164 assigned Country Codes\" followed within 600 characters by \"Amendment No.\", took the text up to the next list heading, and printed its lines other than those on the network codes of 881/882/883; the code rows in all 49 amendments were then listed with grep (queries). gen_cards.py wrote each card (front, back \"+\" and the code, the Wikidata, ITU, amendment, NANPA and UN evidence, and the checks) and assemble.py added the notes and the documentation."@en ,
+                 "Excluded: territories and states that are not UN members, even where they have their own code (e.g. Kosovo +383, Palestine +970, Taiwan +886, the Holy See, Greenland +299, Puerto Rico); codes for global services and international networks (+800, +808, +870, +881, +882, +883, +888, +979 …); historical codes (Turkey's +36 in Wikidata, Kazakhstan's +997, Yugoslav and Soviet codes); and the routes by which some states can also be reached through a neighbour's numbering plan (San Marino through Italy's +39 0549, which Wikidata also lists). Area codes of the United States and Canada are not given."@en ,
+                 "Selection: All 193 member states of the United Nations, one card each, the same states as the library's country-code-top-level-domains deck (members of Q1065 in Wikidata, less ten historical predecessor items; Denmark and the Netherlands for the two Kingdoms), confirmed against the UN's Member States page on 2026-10-04. Each card gives the state's international country calling code as recorded in Wikidata (P474, best rank, no end time) and confirmed by the ITU's list of E.164 assigned country codes (position on 15 December 2016) as amended up to Operational Bulletin No. 1349 of 1 October 2026; for the Caribbean members of the North American Numbering Plan the code is +1, and their area codes are in the back notes. Shared codes are explained in back notes (+1, +7). Left out: territories and non-member states, codes for global services and international networks, historical codes, and the area codes of the United States and Canada."@en ,
+                 "Licensing: The deck is CC0 1.0. Its only content source is Wikidata, whose structured data is CC0: the selection of states, each state's code, the area codes and the territories in the notes, and the English and Swedish names come from it (China's English short name and the notes are the compiler's own wording of facts). The ITU's list of assigned country codes and its Operational Bulletins (ITU terms of use: no reproduction or derivative works without permission), NANPA's NPA database (all rights reserved) and the UN Member States page (personal non-commercial use only) were used only to verify facts that Wikidata gave: no list, selection or running text was copied from them, and the selection of states follows Wikidata, not their lists. The evidence in the provenance report quotes each of them briefly, one entry at a time, as citations for verification; read as a whole, the evidence column thus cites the ITU's row for every state and the UN's name for every state. These are factual names and codes given as citations, and the cards contain none of them except the code itself. Which code is assigned to a country is a fact and not protected by copyright, so verifying it against these sources puts no conditions on the deck."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine and source checks: every card's code compared between Wikidata (P474), the ITU's 2016 list and all 49 amendments since; the NANP area codes against NANPA's database; the selection against the UN Member States page; Wikidata checks run by the builder."@en ;
+    rdfs:comment "Scope: All 193 cards."@en ,
+                 "Outcome: For all 193 states Wikidata's best-rank P474 values without an end time give exactly one country code, and the ITU list has a row with that code for the state; none of the 49 amendments since 2016 changes any of these codes. All Wikidata area codes of the Caribbean NANP states are in service at NANPA. The UN page lists the same 193 states. The findings below record where Wikidata holds further values or disagrees with the ITU, and how the cards deal with them."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 193 cards, the description and the back notes, re-checked against Google's libphonenumber metadata, ITU Operational Bulletin No. 1341 and live Wikidata."@en ,
+                 "Outcome: All 193 codes match libphonenumber's country codes, and every Caribbean area code in the notes matches its NANP leading digits; Kazakhstan on +7 confirmed by Bulletin No. 1341; all P474 checks pass. No factual errors; one wording suggestion on the description, applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 193 cards, the title, description and keywords, in English and Swedish, and the language tags in the built deck."@en ,
+                 "Outcome: Tags, fronts, Swedish names, title, keywords and description found correct. One warning and one suggestion on the wording of the NANP notes, both applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence and attribution, the licensing statement, the method, selection and queries, and every card's evidence against the downloaded files and live Wikidata."@en ,
+                 "Outcome: Licensing, attribution and the evidence of all 193 cards found sound; no errors or warnings. Three documentation suggestions, all applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 193 cards re-checked against live Wikidata (P297, P474, en/sv labels and aliases), Google's libphonenumber, the ITU's 2016 E.164 list and Operational Bulletin No. 1341; the built deck, validators, method template, description, keywords, licensing and the fixes claimed in rounds 1–3."@en ,
+                 "Outcome: No errors or warnings; the fixes of rounds 1–3 were confirmed in the dossier. One cosmetic suggestion on card order, applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 193 cards (codes, fronts, Swedish names, language tags, notes), the title, description, keywords and study direction, live Wikidata labels for a sample of states, ITU Operational Bulletin No. 1341, and the fixes of rounds 1–4."@en ,
+                 "Outcome: No errors or warnings; every code, name and note found correct and the fixes of rounds 1–4 confirmed. One suggestion on consistent wording of the NANP notes, applied."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (fetched 2026-10-04) — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-E.164D-2016-PDF-E.pdf>
+    dcterms:title "List of Recommendation ITU-T E.164 assigned country codes (position on 15 December 2016), Annex to ITU Operational Bulletin No. 1114" ;
+    dcterms:creator "International Telecommunication Union (ITU), Telecommunication Standardization Bureau" ;
+    rdfs:comment "The PDF states no licence. ITU's terms of use (https://www.itu.int/en/about/Pages/terms-of-use.aspx, fetched 2026-10-04): \"ITU grants you permission to download, copy and use content for personal, educational, or non-commercial purposes provided that you acknowledge the source and maintain all copyright and other proprietary notices. You may not modify, reproduce, distribute, sell, transmit, create derivative works or use the content for any commercial purpose without obtaining prior written permission from ITU.\" Not an open licence: used for verification only."@en .
+
+<https://www.itu.int/itu-t/bulletin>
+    dcterms:title "ITU Operational Bulletin, Nos. 1115–1349 (1 January 2017 to 1 October 2026): the amendments No. 1–49 to the list of E.164 assigned country codes and the notes from TSB on the international numbering plan" ;
+    dcterms:creator "International Telecommunication Union (ITU), Telecommunication Standardization Bureau" ;
+    rdfs:comment "The bulletins state no licence. ITU's terms of use (https://www.itu.int/en/about/Pages/terms-of-use.aspx, fetched 2026-10-04): \"You may not modify, reproduce, distribute, sell, transmit, create derivative works or use the content for any commercial purpose without obtaining prior written permission from ITU.\" Used for verification only."@en .
+
+<https://reports.nanpa.com/public/npa_report.csv>
+    dcterms:title "NPA database (npa_report.csv, file date 10/04/2026)" ;
+    dcterms:creator "North American Numbering Plan Administrator (NANPA), acting as a contractor to the US Federal Communications Commission" ;
+    rdfs:comment "The file states no licence. The NANPA website (https://nanpa.com/privacy_policy, fetched 2026-10-04) carries \"Copyright © 2024 North American Numbering Plan Administrator All Rights Reserved.\" Used for verification only."@en .
+
+<https://www.un.org/en/about-us/member-states>
+    dcterms:title "Member States" ;
+    dcterms:creator "United Nations" ;
+    rdfs:comment "https://www.un.org/en/about-us/terms-of-use (fetched 2026-10-04) — \"The United Nations grants permission to Users to visit the Site and to download and copy the information, documents and materials (collectively, “Materials”) from the Site for the User’s personal, non-commercial use, without any right to resell or redistribute them or to compile or create derivative works therefrom\". Used for verification only."@en .
+
+<#afghanistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Afghanistan"@en ,
+                     "Afghanistan"@sv ;
+    solid-memo:back "+93"@zxx .
+
+<#albania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Albania"@en ,
+                     "Albanien"@sv ;
+    solid-memo:back "+355"@zxx .
+
+<#algeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Algeria"@en ,
+                     "Algeriet"@sv ;
+    solid-memo:back "+213"@zxx .
+
+<#andorra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Andorra"@en ,
+                     "Andorra"@sv ;
+    solid-memo:back "+376"@zxx .
+
+<#angola>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Angola"@en ,
+                     "Angola"@sv ;
+    solid-memo:back "+244"@zxx .
+
+<#antigua-and-barbuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Antigua and Barbuda"@en ,
+                     "Antigua och Barbuda"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area code 268."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 268."@sv .
+
+<#argentina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Argentina"@en ,
+                     "Argentina"@sv ;
+    solid-memo:back "+54"@zxx .
+
+<#armenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Armenia"@en ,
+                     "Armenien"@sv ;
+    solid-memo:back "+374"@zxx .
+
+<#australia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Australia"@en ,
+                     "Australien"@sv ;
+    solid-memo:back "+61"@zxx .
+
+<#austria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Austria"@en ,
+                     "Österrike"@sv ;
+    solid-memo:back "+43"@zxx .
+
+<#azerbaijan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Azerbaijan"@en ,
+                     "Azerbajdzjan"@sv ;
+    solid-memo:back "+994"@zxx .
+
+<#bahrain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bahrain"@en ,
+                     "Bahrain"@sv ;
+    solid-memo:back "+973"@zxx .
+
+<#bangladesh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bangladesh"@en ,
+                     "Bangladesh"@sv ;
+    solid-memo:back "+880"@zxx .
+
+<#barbados>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Barbados"@en ,
+                     "Barbados"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area code 246."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 246."@sv .
+
+<#belarus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belarus"@en ,
+                     "Belarus"@sv ;
+    solid-memo:back "+375"@zxx .
+
+<#belgium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belgium"@en ,
+                     "Belgien"@sv ;
+    solid-memo:back "+32"@zxx .
+
+<#belize>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belize"@en ,
+                     "Belize"@sv ;
+    solid-memo:back "+501"@zxx .
+
+<#benin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Benin"@en ,
+                     "Benin"@sv ;
+    solid-memo:back "+229"@zxx .
+
+<#bhutan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bhutan"@en ,
+                     "Bhutan"@sv ;
+    solid-memo:back "+975"@zxx .
+
+<#bolivia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bolivia"@en ,
+                     "Bolivia"@sv ;
+    solid-memo:back "+591"@zxx .
+
+<#bosnia-and-herzegovina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bosnia and Herzegovina"@en ,
+                     "Bosnien och Hercegovina"@sv ;
+    solid-memo:back "+387"@zxx .
+
+<#botswana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Botswana"@en ,
+                     "Botswana"@sv ;
+    solid-memo:back "+267"@zxx .
+
+<#brazil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brazil"@en ,
+                     "Brasilien"@sv ;
+    solid-memo:back "+55"@zxx .
+
+<#brunei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brunei"@en ,
+                     "Brunei"@sv ;
+    solid-memo:back "+673"@zxx .
+
+<#bulgaria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bulgaria"@en ,
+                     "Bulgarien"@sv ;
+    solid-memo:back "+359"@zxx .
+
+<#burkina-faso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Burkina Faso"@en ,
+                     "Burkina Faso"@sv ;
+    solid-memo:back "+226"@zxx .
+
+<#burundi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Burundi"@en ,
+                     "Burundi"@sv ;
+    solid-memo:back "+257"@zxx .
+
+<#cambodia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cambodia"@en ,
+                     "Kambodja"@sv ;
+    solid-memo:back "+855"@zxx .
+
+<#cameroon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cameroon"@en ,
+                     "Kamerun"@sv ;
+    solid-memo:back "+237"@zxx .
+
+<#canada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Canada"@en ,
+                     "Kanada"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP): the United States, Canada, eleven Caribbean states and several territories."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP): USA, Kanada, elva karibiska stater och flera territorier."@sv .
+
+<#cape-verde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cape Verde"@en ,
+                     "Kap Verde"@sv ;
+    solid-memo:back "+238"@zxx .
+
+<#central-african-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Central African Republic"@en ,
+                     "Centralafrikanska republiken"@sv ;
+    solid-memo:back "+236"@zxx .
+
+<#chad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chad"@en ,
+                     "Tchad"@sv ;
+    solid-memo:back "+235"@zxx .
+
+<#chile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chile"@en ,
+                     "Chile"@sv ;
+    solid-memo:back "+56"@zxx .
+
+<#china>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "China"@en ,
+                     "Kina"@sv ;
+    solid-memo:back "+86"@zxx .
+
+<#colombia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Colombia"@en ,
+                     "Colombia"@sv ;
+    solid-memo:back "+57"@zxx .
+
+<#comoros>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Comoros"@en ,
+                     "Komorerna"@sv ;
+    solid-memo:back "+269"@zxx .
+
+<#costa-rica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Costa Rica"@en ,
+                     "Costa Rica"@sv ;
+    solid-memo:back "+506"@zxx .
+
+<#croatia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Croatia"@en ,
+                     "Kroatien"@sv ;
+    solid-memo:back "+385"@zxx .
+
+<#cuba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cuba"@en ,
+                     "Kuba"@sv ;
+    solid-memo:back "+53"@zxx .
+
+<#cyprus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cyprus"@en ,
+                     "Cypern"@sv ;
+    solid-memo:back "+357"@zxx .
+
+<#czech-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Czech Republic"@en ,
+                     "Tjeckien"@sv ;
+    solid-memo:back "+420"@zxx .
+
+<#democratic-republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Democratic Republic of the Congo"@en ,
+                     "Kongo-Kinshasa"@sv ;
+    solid-memo:back "+243"@zxx .
+
+<#denmark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Denmark"@en ,
+                     "Danmark"@sv ;
+    solid-memo:back "+45"@zxx .
+
+<#djibouti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Djibouti"@en ,
+                     "Djibouti"@sv ;
+    solid-memo:back "+253"@zxx .
+
+<#dominica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dominica"@en ,
+                     "Dominica"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area code 767."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 767."@sv .
+
+<#dominican-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dominican Republic"@en ,
+                     "Dominikanska republiken"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area codes 809, 829 and 849."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 809, 829 och 849."@sv .
+
+<#ecuador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ecuador"@en ,
+                     "Ecuador"@sv ;
+    solid-memo:back "+593"@zxx .
+
+<#egypt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Egypt"@en ,
+                     "Egypten"@sv ;
+    solid-memo:back "+20"@zxx .
+
+<#el-salvador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "El Salvador"@en ,
+                     "El Salvador"@sv ;
+    solid-memo:back "+503"@zxx .
+
+<#equatorial-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Equatorial Guinea"@en ,
+                     "Ekvatorialguinea"@sv ;
+    solid-memo:back "+240"@zxx .
+
+<#eritrea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eritrea"@en ,
+                     "Eritrea"@sv ;
+    solid-memo:back "+291"@zxx .
+
+<#estonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Estonia"@en ,
+                     "Estland"@sv ;
+    solid-memo:back "+372"@zxx .
+
+<#eswatini>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eswatini"@en ,
+                     "Eswatini"@sv ;
+    solid-memo:back "+268"@zxx .
+
+<#ethiopia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ethiopia"@en ,
+                     "Etiopien"@sv ;
+    solid-memo:back "+251"@zxx .
+
+<#federated-states-of-micronesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Federated States of Micronesia"@en ,
+                     "Mikronesiska federationen"@sv ;
+    solid-memo:back "+691"@zxx .
+
+<#fiji>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fiji"@en ,
+                     "Fiji"@sv ;
+    solid-memo:back "+679"@zxx .
+
+<#finland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Finland"@en ,
+                     "Finland"@sv ;
+    solid-memo:back "+358"@zxx .
+
+<#france>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "France"@en ,
+                     "Frankrike"@sv ;
+    solid-memo:back "+33"@zxx .
+
+<#gabon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gabon"@en ,
+                     "Gabon"@sv ;
+    solid-memo:back "+241"@zxx .
+
+<#georgia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Georgia"@en ,
+                     "Georgien"@sv ;
+    solid-memo:back "+995"@zxx .
+
+<#germany>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany"@en ,
+                     "Tyskland"@sv ;
+    solid-memo:back "+49"@zxx .
+
+<#ghana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ghana"@en ,
+                     "Ghana"@sv ;
+    solid-memo:back "+233"@zxx .
+
+<#greece>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Greece"@en ,
+                     "Grekland"@sv ;
+    solid-memo:back "+30"@zxx .
+
+<#grenada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Grenada"@en ,
+                     "Grenada"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area code 473."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 473."@sv .
+
+<#guatemala>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guatemala"@en ,
+                     "Guatemala"@sv ;
+    solid-memo:back "+502"@zxx .
+
+<#guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guinea"@en ,
+                     "Guinea"@sv ;
+    solid-memo:back "+224"@zxx .
+
+<#guinea-bissau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guinea-Bissau"@en ,
+                     "Guinea-Bissau"@sv ;
+    solid-memo:back "+245"@zxx .
+
+<#guyana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guyana"@en ,
+                     "Guyana"@sv ;
+    solid-memo:back "+592"@zxx .
+
+<#haiti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Haiti"@en ,
+                     "Haiti"@sv ;
+    solid-memo:back "+509"@zxx .
+
+<#honduras>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Honduras"@en ,
+                     "Honduras"@sv ;
+    solid-memo:back "+504"@zxx .
+
+<#hungary>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hungary"@en ,
+                     "Ungern"@sv ;
+    solid-memo:back "+36"@zxx .
+
+<#iceland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iceland"@en ,
+                     "Island"@sv ;
+    solid-memo:back "+354"@zxx .
+
+<#india>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "India"@en ,
+                     "Indien"@sv ;
+    solid-memo:back "+91"@zxx .
+
+<#indonesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Indonesia"@en ,
+                     "Indonesien"@sv ;
+    solid-memo:back "+62"@zxx .
+
+<#iran>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iran"@en ,
+                     "Iran"@sv ;
+    solid-memo:back "+98"@zxx .
+
+<#iraq>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iraq"@en ,
+                     "Irak"@sv ;
+    solid-memo:back "+964"@zxx .
+
+<#ireland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ireland"@en ,
+                     "Irland"@sv ;
+    solid-memo:back "+353"@zxx .
+
+<#israel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Israel"@en ,
+                     "Israel"@sv ;
+    solid-memo:back "+972"@zxx .
+
+<#italy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Italy"@en ,
+                     "Italien"@sv ;
+    solid-memo:back "+39"@zxx .
+
+<#ivory-coast>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ivory Coast"@en ,
+                     "Elfenbenskusten"@sv ;
+    solid-memo:back "+225"@zxx .
+
+<#jamaica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jamaica"@en ,
+                     "Jamaica"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); Jamaica's area codes include 876."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); bland annat riktnummer 876."@sv .
+
+<#japan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Japan"@en ,
+                     "Japan"@sv ;
+    solid-memo:back "+81"@zxx .
+
+<#jordan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jordan"@en ,
+                     "Jordanien"@sv ;
+    solid-memo:back "+962"@zxx .
+
+<#kazakhstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kazakhstan"@en ,
+                     "Kazakstan"@sv ;
+    solid-memo:back "+7"@zxx ;
+    solid-memo:backNote "Shared with Russia; Kazakhstan has kept +7 instead of moving to +997."@en ,
+                        "Delas med Ryssland; Kazakstan har behållit +7 i stället för att gå över till +997."@sv .
+
+<#kenya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kenya"@en ,
+                     "Kenya"@sv ;
+    solid-memo:back "+254"@zxx .
+
+<#kiribati>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kiribati"@en ,
+                     "Kiribati"@sv ;
+    solid-memo:back "+686"@zxx .
+
+<#kuwait>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kuwait"@en ,
+                     "Kuwait"@sv ;
+    solid-memo:back "+965"@zxx .
+
+<#kyrgyzstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kyrgyzstan"@en ,
+                     "Kirgizistan"@sv ;
+    solid-memo:back "+996"@zxx .
+
+<#laos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Laos"@en ,
+                     "Laos"@sv ;
+    solid-memo:back "+856"@zxx .
+
+<#latvia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Latvia"@en ,
+                     "Lettland"@sv ;
+    solid-memo:back "+371"@zxx .
+
+<#lebanon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lebanon"@en ,
+                     "Libanon"@sv ;
+    solid-memo:back "+961"@zxx .
+
+<#lesotho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lesotho"@en ,
+                     "Lesotho"@sv ;
+    solid-memo:back "+266"@zxx .
+
+<#liberia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Liberia"@en ,
+                     "Liberia"@sv ;
+    solid-memo:back "+231"@zxx .
+
+<#libya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Libya"@en ,
+                     "Libyen"@sv ;
+    solid-memo:back "+218"@zxx .
+
+<#liechtenstein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Liechtenstein"@en ,
+                     "Liechtenstein"@sv ;
+    solid-memo:back "+423"@zxx .
+
+<#lithuania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lithuania"@en ,
+                     "Litauen"@sv ;
+    solid-memo:back "+370"@zxx .
+
+<#luxembourg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Luxembourg"@en ,
+                     "Luxemburg"@sv ;
+    solid-memo:back "+352"@zxx .
+
+<#madagascar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Madagascar"@en ,
+                     "Madagaskar"@sv ;
+    solid-memo:back "+261"@zxx .
+
+<#malawi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malawi"@en ,
+                     "Malawi"@sv ;
+    solid-memo:back "+265"@zxx .
+
+<#malaysia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malaysia"@en ,
+                     "Malaysia"@sv ;
+    solid-memo:back "+60"@zxx .
+
+<#maldives>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Maldives"@en ,
+                     "Maldiverna"@sv ;
+    solid-memo:back "+960"@zxx .
+
+<#mali>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mali"@en ,
+                     "Mali"@sv ;
+    solid-memo:back "+223"@zxx .
+
+<#malta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malta"@en ,
+                     "Malta"@sv ;
+    solid-memo:back "+356"@zxx .
+
+<#marshall-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Marshall Islands"@en ,
+                     "Marshallöarna"@sv ;
+    solid-memo:back "+692"@zxx .
+
+<#mauritania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mauritania"@en ,
+                     "Mauretanien"@sv ;
+    solid-memo:back "+222"@zxx .
+
+<#mauritius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mauritius"@en ,
+                     "Mauritius"@sv ;
+    solid-memo:back "+230"@zxx .
+
+<#mexico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mexico"@en ,
+                     "Mexiko"@sv ;
+    solid-memo:back "+52"@zxx .
+
+<#moldova>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Moldova"@en ,
+                     "Moldavien"@sv ;
+    solid-memo:back "+373"@zxx .
+
+<#monaco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Monaco"@en ,
+                     "Monaco"@sv ;
+    solid-memo:back "+377"@zxx .
+
+<#mongolia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mongolia"@en ,
+                     "Mongoliet"@sv ;
+    solid-memo:back "+976"@zxx .
+
+<#montenegro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Montenegro"@en ,
+                     "Montenegro"@sv ;
+    solid-memo:back "+382"@zxx .
+
+<#morocco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Morocco"@en ,
+                     "Marocko"@sv ;
+    solid-memo:back "+212"@zxx .
+
+<#mozambique>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mozambique"@en ,
+                     "Moçambique"@sv ;
+    solid-memo:back "+258"@zxx .
+
+<#myanmar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Myanmar"@en ,
+                     "Myanmar"@sv ;
+    solid-memo:back "+95"@zxx .
+
+<#namibia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Namibia"@en ,
+                     "Namibia"@sv ;
+    solid-memo:back "+264"@zxx .
+
+<#nauru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nauru"@en ,
+                     "Nauru"@sv ;
+    solid-memo:back "+674"@zxx .
+
+<#nepal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nepal"@en ,
+                     "Nepal"@sv ;
+    solid-memo:back "+977"@zxx .
+
+<#netherlands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Netherlands"@en ,
+                     "Nederländerna"@sv ;
+    solid-memo:back "+31"@zxx .
+
+<#new-zealand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "New Zealand"@en ,
+                     "Nya Zeeland"@sv ;
+    solid-memo:back "+64"@zxx .
+
+<#nicaragua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nicaragua"@en ,
+                     "Nicaragua"@sv ;
+    solid-memo:back "+505"@zxx .
+
+<#niger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Niger"@en ,
+                     "Niger"@sv ;
+    solid-memo:back "+227"@zxx .
+
+<#nigeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nigeria"@en ,
+                     "Nigeria"@sv ;
+    solid-memo:back "+234"@zxx .
+
+<#north-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "North Korea"@en ,
+                     "Nordkorea"@sv ;
+    solid-memo:back "+850"@zxx .
+
+<#north-macedonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "North Macedonia"@en ,
+                     "Nordmakedonien"@sv ;
+    solid-memo:back "+389"@zxx .
+
+<#norway>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norway"@en ,
+                     "Norge"@sv ;
+    solid-memo:back "+47"@zxx .
+
+<#oman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oman"@en ,
+                     "Oman"@sv ;
+    solid-memo:back "+968"@zxx .
+
+<#pakistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pakistan"@en ,
+                     "Pakistan"@sv ;
+    solid-memo:back "+92"@zxx .
+
+<#palau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Palau"@en ,
+                     "Palau"@sv ;
+    solid-memo:back "+680"@zxx .
+
+<#panama>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Panama"@en ,
+                     "Panama"@sv ;
+    solid-memo:back "+507"@zxx .
+
+<#papua-new-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Papua New Guinea"@en ,
+                     "Papua Nya Guinea"@sv ;
+    solid-memo:back "+675"@zxx .
+
+<#paraguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Paraguay"@en ,
+                     "Paraguay"@sv ;
+    solid-memo:back "+595"@zxx .
+
+<#peru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Peru"@en ,
+                     "Peru"@sv ;
+    solid-memo:back "+51"@zxx .
+
+<#philippines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Philippines"@en ,
+                     "Filippinerna"@sv ;
+    solid-memo:back "+63"@zxx .
+
+<#poland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Poland"@en ,
+                     "Polen"@sv ;
+    solid-memo:back "+48"@zxx .
+
+<#portugal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Portugal"@en ,
+                     "Portugal"@sv ;
+    solid-memo:back "+351"@zxx .
+
+<#qatar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Qatar"@en ,
+                     "Qatar"@sv ;
+    solid-memo:back "+974"@zxx .
+
+<#republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Republic of the Congo"@en ,
+                     "Kongo-Brazzaville"@sv ;
+    solid-memo:back "+242"@zxx .
+
+<#romania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Romania"@en ,
+                     "Rumänien"@sv ;
+    solid-memo:back "+40"@zxx .
+
+<#russia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Russia"@en ,
+                     "Ryssland"@sv ;
+    solid-memo:back "+7"@zxx ;
+    solid-memo:backNote "Shared with Kazakhstan."@en ,
+                        "Delas med Kazakstan."@sv .
+
+<#rwanda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rwanda"@en ,
+                     "Rwanda"@sv ;
+    solid-memo:back "+250"@zxx .
+
+<#saint-kitts-and-nevis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saint Kitts and Nevis"@en ,
+                     "Saint Kitts och Nevis"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area code 869."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 869."@sv .
+
+<#saint-lucia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saint Lucia"@en ,
+                     "Saint Lucia"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area code 758."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 758."@sv .
+
+<#saint-vincent-and-the-grenadines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saint Vincent and the Grenadines"@en ,
+                     "Saint Vincent och Grenadinerna"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area code 784."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 784."@sv .
+
+<#samoa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Samoa"@en ,
+                     "Samoa"@sv ;
+    solid-memo:back "+685"@zxx .
+
+<#san-marino>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "San Marino"@en ,
+                     "San Marino"@sv ;
+    solid-memo:back "+378"@zxx .
+
+<#sao-tome-and-principe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "São Tomé and Príncipe"@en ,
+                     "São Tomé och Príncipe"@sv ;
+    solid-memo:back "+239"@zxx .
+
+<#saudi-arabia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saudi Arabia"@en ,
+                     "Saudiarabien"@sv ;
+    solid-memo:back "+966"@zxx .
+
+<#senegal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Senegal"@en ,
+                     "Senegal"@sv ;
+    solid-memo:back "+221"@zxx .
+
+<#serbia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Serbia"@en ,
+                     "Serbien"@sv ;
+    solid-memo:back "+381"@zxx .
+
+<#seychelles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Seychelles"@en ,
+                     "Seychellerna"@sv ;
+    solid-memo:back "+248"@zxx .
+
+<#sierra-leone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sierra Leone"@en ,
+                     "Sierra Leone"@sv ;
+    solid-memo:back "+232"@zxx .
+
+<#singapore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Singapore"@en ,
+                     "Singapore"@sv ;
+    solid-memo:back "+65"@zxx .
+
+<#slovakia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Slovakia"@en ,
+                     "Slovakien"@sv ;
+    solid-memo:back "+421"@zxx .
+
+<#slovenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Slovenia"@en ,
+                     "Slovenien"@sv ;
+    solid-memo:back "+386"@zxx .
+
+<#solomon-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Solomon Islands"@en ,
+                     "Salomonöarna"@sv ;
+    solid-memo:back "+677"@zxx .
+
+<#somalia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Somalia"@en ,
+                     "Somalia"@sv ;
+    solid-memo:back "+252"@zxx .
+
+<#south-africa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Africa"@en ,
+                     "Sydafrika"@sv ;
+    solid-memo:back "+27"@zxx .
+
+<#south-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Korea"@en ,
+                     "Sydkorea"@sv ;
+    solid-memo:back "+82"@zxx .
+
+<#south-sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Sudan"@en ,
+                     "Sydsudan"@sv ;
+    solid-memo:back "+211"@zxx .
+
+<#spain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Spain"@en ,
+                     "Spanien"@sv ;
+    solid-memo:back "+34"@zxx .
+
+<#sri-lanka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sri Lanka"@en ,
+                     "Sri Lanka"@sv ;
+    solid-memo:back "+94"@zxx .
+
+<#sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sudan"@en ,
+                     "Sudan"@sv ;
+    solid-memo:back "+249"@zxx .
+
+<#suriname>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Suriname"@en ,
+                     "Surinam"@sv ;
+    solid-memo:back "+597"@zxx .
+
+<#sweden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sweden"@en ,
+                     "Sverige"@sv ;
+    solid-memo:back "+46"@zxx .
+
+<#switzerland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Switzerland"@en ,
+                     "Schweiz"@sv ;
+    solid-memo:back "+41"@zxx .
+
+<#syria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Syria"@en ,
+                     "Syrien"@sv ;
+    solid-memo:back "+963"@zxx .
+
+<#tajikistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tajikistan"@en ,
+                     "Tadzjikistan"@sv ;
+    solid-memo:back "+992"@zxx .
+
+<#tanzania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tanzania"@en ,
+                     "Tanzania"@sv ;
+    solid-memo:back "+255"@zxx .
+
+<#thailand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thailand"@en ,
+                     "Thailand"@sv ;
+    solid-memo:back "+66"@zxx .
+
+<#the-bahamas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Bahamas"@en ,
+                     "Bahamas"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area code 242."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 242."@sv .
+
+<#the-gambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Gambia"@en ,
+                     "Gambia"@sv ;
+    solid-memo:back "+220"@zxx .
+
+<#timor-leste>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Timor-Leste"@en ,
+                     "Östtimor"@sv ;
+    solid-memo:back "+670"@zxx .
+
+<#togo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Togo"@en ,
+                     "Togo"@sv ;
+    solid-memo:back "+228"@zxx .
+
+<#tonga>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tonga"@en ,
+                     "Tonga"@sv ;
+    solid-memo:back "+676"@zxx .
+
+<#trinidad-and-tobago>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Trinidad and Tobago"@en ,
+                     "Trinidad och Tobago"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP); area code 868."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP); riktnummer 868."@sv .
+
+<#tunisia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tunisia"@en ,
+                     "Tunisien"@sv ;
+    solid-memo:back "+216"@zxx .
+
+<#turkey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Turkey"@en ,
+                     "Turkiet"@sv ;
+    solid-memo:back "+90"@zxx .
+
+<#turkmenistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Turkmenistan"@en ,
+                     "Turkmenistan"@sv ;
+    solid-memo:back "+993"@zxx .
+
+<#tuvalu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tuvalu"@en ,
+                     "Tuvalu"@sv ;
+    solid-memo:back "+688"@zxx .
+
+<#uganda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uganda"@en ,
+                     "Uganda"@sv ;
+    solid-memo:back "+256"@zxx .
+
+<#ukraine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ukraine"@en ,
+                     "Ukraina"@sv ;
+    solid-memo:back "+380"@zxx .
+
+<#united-arab-emirates>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Arab Emirates"@en ,
+                     "Förenade arabemiraten"@sv ;
+    solid-memo:back "+971"@zxx .
+
+<#united-kingdom>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Kingdom"@en ,
+                     "Storbritannien"@sv ;
+    solid-memo:back "+44"@zxx .
+
+<#united-states>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United States"@en ,
+                     "USA"@sv ;
+    solid-memo:back "+1"@zxx ;
+    solid-memo:backNote "+1 is shared by the countries and territories of the North American Numbering Plan (NANP): the United States, Canada, eleven Caribbean states and several territories."@en ,
+                        "+1 delas av länderna och territorierna i den nordamerikanska nummerplanen (NANP): USA, Kanada, elva karibiska stater och flera territorier."@sv .
+
+<#uruguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uruguay"@en ,
+                     "Uruguay"@sv ;
+    solid-memo:back "+598"@zxx .
+
+<#uzbekistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uzbekistan"@en ,
+                     "Uzbekistan"@sv ;
+    solid-memo:back "+998"@zxx .
+
+<#vanuatu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vanuatu"@en ,
+                     "Vanuatu"@sv ;
+    solid-memo:back "+678"@zxx .
+
+<#venezuela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Venezuela"@en ,
+                     "Venezuela"@sv ;
+    solid-memo:back "+58"@zxx .
+
+<#vietnam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vietnam"@en ,
+                     "Vietnam"@sv ;
+    solid-memo:back "+84"@zxx .
+
+<#yemen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Yemen"@en ,
+                     "Jemen"@sv ;
+    solid-memo:back "+967"@zxx .
+
+<#zambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Zambia"@en ,
+                     "Zambia"@sv ;
+    solid-memo:back "+260"@zxx .
+
+<#zimbabwe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Zimbabwe"@en ,
+                     "Zimbabwe"@sv ;
+    solid-memo:back "+263"@zxx .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

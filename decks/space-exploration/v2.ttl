@@ -1,0 +1,624 @@
+@base <https://solid-memo.com/decks/space-exploration/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Milestones of Space Exploration"@en ,
+                  "Milstolpar i utforskningen av rymden"@sv ,
+                  "우주 탐사의 이정표"@ko ,
+                  "Meilensteine der Raumfahrt"@de ,
+                  "Hitos de la exploración espacial"@es ,
+                  "Grandes étapes de l’exploration spatiale"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "48 milestones of space exploration, from Sputnik 1, the first artificial satellite (1957), to Artemis II, the first crewed flight of the Artemis programme (2026), as of 4 October 2026. Front: the milestone, almost always an undisputed first, with the mission that achieved it, e.g. \"First crewed landing on the Moon (Apollo 11)\"; back: the year of the event itself (for a flyby or landing, not the launch year, which a note gives when it differs). Taken from Wikidata and NASA and checked against the Swedish Wikipedia."@en ,
+                        "48 milstolpar i utforskningen av rymden, från Sputnik 1, den första konstgjorda satelliten (1957), till Artemis II, Artemisprogrammets första bemannade färd (2026), per den 4 oktober 2026. Framsida: milstolpen – nästan alltid något som obestridligen gjordes för första gången – med uppdraget som genomförde den, t.ex. ”Första bemannade månlandningen (Apollo 11)”; baksida: året då själva händelsen inträffade (för en förbiflygning eller landning inte uppskjutningsåret, som en anteckning anger när det skiljer sig). Uppgifterna är hämtade från Wikidata och NASA och kontrollerade mot svenskspråkiga Wikipedia."@sv ,
+                        "최초의 인공위성 스푸트니크 1호(1957년)부터 아르테미스 계획의 첫 유인 비행 아르테미스 2호(2026년)까지, 2026년 10월 4일 기준 우주 탐사의 이정표 48개입니다. 앞면에는 이정표(거의 언제나 논란의 여지가 없는 최초)와 이를 이룬 임무가 있고(예: “First crewed landing on the Moon (Apollo 11)”), 뒷면에는 사건 자체가 일어난 연도가 있습니다(근접 비행이나 착륙은 발사 연도가 아니며, 발사 연도가 다르면 메모에 있음). 위키데이터와 NASA에서 가져와 스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "48 Meilensteine der Erforschung des Weltraums, von Sputnik 1, dem ersten künstlichen Satelliten (1957), bis Artemis II, dem ersten bemannten Flug des Artemis-Programms (2026), Stand 4. Oktober 2026. Vorderseite: der Meilenstein, fast immer ein unbestrittenes erstes Mal, mit der Mission, die ihn erreicht hat, z. B. „First crewed landing on the Moon (Apollo 11)“; Rückseite: das Jahr des Ereignisses selbst (bei einem Vorbeiflug oder einer Landung nicht das Startjahr, das eine Anmerkung nennt, wenn es abweicht). Aus Wikidata und von der NASA übernommen und an der schwedischsprachigen Wikipedia geprüft."@de ,
+                        "48 hitos de la exploración espacial, desde el Sputnik 1, el primer satélite artificial (1957), hasta Artemis II, el primer vuelo tripulado del programa Artemis (2026), a 4 de octubre de 2026. Anverso: el hito, casi siempre un primer logro indiscutible, con la misión que lo consiguió, p. ej. «First crewed landing on the Moon (Apollo 11)»; reverso: el año del propio acontecimiento (en un sobrevuelo o un aterrizaje, no el año del lanzamiento, que una nota indica cuando es distinto). Tomado de Wikidata y la NASA y comprobado con la Wikipedia en sueco."@es ,
+                        "48 grandes étapes de l’exploration spatiale, de Spoutnik 1, le premier satellite artificiel (1957), à Artemis II, le premier vol habité du programme Artemis (2026), au 4 octobre 2026. Recto : l’étape, presque toujours une première incontestée, avec la mission qui l’a accomplie, p. ex. « First crewed landing on the Moon (Apollo 11) » ; verso : l’année de l’événement lui-même (pour un survol ou un atterrissage, pas l’année du lancement, qu’une note donne quand elle diffère). Tiré de Wikidata et de la NASA et vérifié dans la Wikipédia en suédois."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q80811> ,
+                        <https://www.nasa.gov/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:astronomy ,
+               topic:history ;
+    dcat:keyword "space exploration"@en ,
+                 "spaceflight"@en ,
+                 "space race"@en ,
+                 "astronautics"@en ,
+                 "NASA"@en ,
+                 "rymdfart"@sv ,
+                 "utforskningen av rymden"@sv ,
+                 "rymdkapplöpningen"@sv ,
+                 "astronautik"@sv ,
+                 "NASA"@sv ,
+                 "우주 탐사"@ko ,
+                 "우주 비행"@ko ,
+                 "우주 경쟁"@ko ,
+                 "우주 항공학"@ko ,
+                 "NASA"@ko ,
+                 "Raumfahrt"@de ,
+                 "Weltraumforschung"@de ,
+                 "Wettlauf ins All"@de ,
+                 "Astronautik"@de ,
+                 "NASA"@de ,
+                 "exploración espacial"@es ,
+                 "vuelo espacial"@es ,
+                 "carrera espacial"@es ,
+                 "astronáutica"@es ,
+                 "NASA"@es ,
+                 "exploration spatiale"@fr ,
+                 "vol spatial"@fr ,
+                 "course à l’espace"@fr ,
+                 "astronautique"@fr ,
+                 "NASA"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/space-exploration/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/space-exploration/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#space-exploration> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#space-exploration> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q80811> ,
+              <https://www.nasa.gov/> ,
+              <https://sv.wikipedia.org/wiki/Sputnik_1> ,
+              <https://www.eso.org/public/news/eso1907/> ,
+              <https://english.cas.cn/newsroom/news--archives/2024/cas-in-media/202406/t20240625_1129633.shtml> ,
+              <https://apod.nasa.gov/apod/astropix.html> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Candidate milestones: a list of about 65 well-known milestones of space exploration (the ones the library editor's brief named, plus further firsts in human spaceflight, lunar and planetary exploration) was drawn up from general knowledge and then narrowed to firsts whose definition is not disputed (see Selection). Each candidate's Wikidata item was found with the Wikidata search API (query 2, wbsearchentities, one request per name) and confirmed by its label and description."@en ,
+                 "2. Wikidata (content): query 1 fetched for every candidate item the English and Swedish labels, the Swedish Wikipedia article title and the dated statements P619 (UTC date of spacecraft launch), P620 (time of spacecraft landing), P621, P580, P582, P585, P571, P576 and P569; query 3 fetched the dated P793 (significant event) statements (flybys, orbit insertions, landings, extravehicular activities, maiden flight, impact), which hold the date of most robotic milestones; query 4 fetched all English, Swedish and mul labels and aliases of the people and of the items whose names differ between the languages; query 5 the Mir space station item (Q48604) and the item for the first image of a black hole (Q63105182). Query 6 fetched the COSPAR identifiers (P247) used for step 3."@en ,
+                 "3. NASA (content): the NSSDCA Master Catalog pages of the spacecraft (query 7, by COSPAR id) answered with an error page (\"An error has occurred\") for most non-US spacecraft and for Explorer 1, Hubble, Galileo, Zarya and Huygens on the day of research and were therefore not used as evidence; the NSSDCA \"Chronology of Lunar and Planetary Exploration\" (query 8) lists launches only. The NASA pages used instead (queries 11–15, fetched with <scratch>/fetch_pages.py, which saves each page's HTML and its plain text with tags, scripts and styles removed) are the mission pages of nasa.gov and science.nasa.gov, NASA History articles, the NSSDCA \"Soviet Missions to the Moon\" page and NASA Science's \"Deep Space Robotic Firsts\" list, a NASA Science resource page and the NASA Technical Publication \"Lunar Surface Data Book\" (query 22) (https://science.nasa.gov/deep-space-exploration/, compiled from Asif Siddiqi's \"Beyond Earth\", NASA History Program Office, 2018). The sentence or table row that states the milestone and its date was extracted from each page's text with <scratch>/greps2.py and <scratch>/greps.sh (query 16; both split the saved text into sentences and print those matching a regular expression, greps.sh by calling <scratch>/grep.py) and is quoted in the card's evidence."@en ,
+                 "4. Recent milestones: Artemis II was checked against live sources on the day of research (web search, query 17, and the NASA mission page): it launched on 1 April 2026 and splashed down on 10 April 2026 (local time; 11 April UTC in Wikidata and the Swedish Wikipedia), so it is in the deck. The 2024 milestones (Chang'e 6, Polaris Dawn) were confirmed from NASA pages, Wikidata and, for Chang'e 6, Xinhua's report of 25 June 2024 as republished by the Chinese Academy of Sciences. Nothing planned but not yet flown on 4 October 2026 is included."@en ,
+                 "5. Independent check and Swedish: the introductions (query 9) and, where needed, full texts (query 10) of the Swedish Wikipedia articles on every mission and person were fetched through the MediaWiki API with their revision ids; each card's year, the milestone and the Swedish names were compared with them by reading. Swedish names follow the Wikidata sv labels, which equal the Swedish Wikipedia article titles apart from disambiguation such as \"Zarja (ISS)\" (Jurij Gagarin, Valentina Teresjkova, Aleksej Leonov, Svetlana Savitskaja, Lajka, Voschod 2, Saljut 1, Lunochod 1, Zarja, Sojuz T-12, James Webb-teleskopet); two cards use an sv alias instead, so that one form is used throughout: \"Hubbleteleskopet\" (the article title; the sv label is \"Rymdteleskopet Hubble\"), in the style of \"James Webb-teleskopet\", and \"Bruce McCandless II\" (the sv label is \"Bruce McCandless\"), the same form as in English. The front of the Apollo–Soyuz card uses the short form \"Apollo–Sojuz\" rather than the label \"Apollo-Sojuz-testprojektet\"; the Swedish fronts use the terms of those articles (rymdpromenad, förbiflygning, omloppsbana, rymdstation, månens baksida, rymdfärja). Two further checks are verification only: ESO's press release eso1907 for the first image of a black hole, and Xinhua's report on Chang'e 6 as republished by the Chinese Academy of Sciences. Two APOD explanations (Luna 9, Chang'e 4) were read as verification only."@en ,
+                 "6. Cards: the front names the milestone in the compiler's own words, in English and Swedish, with the mission (and for crewed firsts the person) that achieved it, e.g. \"First crewed landing on the Moon (Apollo 11)\"; the back is the year in which the milestone itself happened (text in no language, zxx): for a flyby, orbit insertion or landing that is the year of the encounter, not of the launch. Where the launch was in an earlier year, a back note gives the launch year (\"Launched in 1972.\"), to keep the two apart; a few other notes give context (Artemis II's dates, the 2017 observations behind the black-hole image, when Voyager 1's crossing was announced). Dates in different time zones (Explorer 1: 31 January local time, 1 February UTC; Galileo: 7/8 December; Voyager 2 at Neptune: 24/25 August; Luna 2: 13 September UT, 14 September Moscow time; Artemis II's splashdown: 10/11 April) never change the year. Study direction front to back only, because several milestones share a year."@en ,
+                 "7. Machine checks: for every card whose year is a Wikidata statement of the event itself (the launch of a crewed flight, a station or a telescope; a landing, P620; the start of Expedition 1 and Apollo–Soyuz, P580; the publication of the black-hole image, P577) the builder checked that year against live Wikidata, and it checks the launch year given in a back note (P619), as well as the launch year (P619) of the robotic cards whose launch was in the same year as the milestone and the English and Swedish names of people and transliterated missions (labels or aliases). The dates of flybys, orbit insertions and other P793 events are qualifiers, which the builder cannot reach; they rest on query 3 and the NASA and Swedish Wikipedia evidence. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "8. Helper scripts (in the scratch directory, not published; the rules here are what they do): search.py sends one wbsearchentities request per candidate name (query 2); nssdca.py fetches the NSSDCA Master Catalog page of each COSPAR id (query 7); svwiki.py fetches the introductions and current revision ids of the Swedish Wikipedia articles in batches of 15 (query 9); svfull.py fetches the full plain text of the named articles and prints the sentences matching the given regular expression (query 10); fetch_pages.py, grep.py, greps2.py and greps.sh are described in step 3. The query numbers in card evidence refer to the list of queries; the COSPAR query is number 6 although its files are named q2.rq/q2.csv, after the order in which they were written."@en ,
+                 "Selection: 48 milestones of space exploration from 1957 to 2026, as of 4 October 2026, each a first (or, for the Voyager probes, Mir, Zarya, Hubble and the James Webb Space Telescope, a launch) whose definition is not disputed and whose year all sources agree on. Included: the first satellites (Sputnik 1, Sputnik 2 with Laika, the first US satellite), the firsts of crewed spaceflight (first human, woman, spacewalk, untethered spacewalk, spacewalk by a woman, docking, lunar orbit, Moon landing, space station, international docking, orbital Space Shuttle flight, ISS resident crew, China's first crewed flight, first commercial spacewalk, the first crewed Artemis flight), the firsts of robotic exploration of the Moon, Venus, Mars, Jupiter, Saturn, Neptune, Pluto, Titan, an asteroid and a comet, Voyager 1's entry into interstellar space, the first flight on another planet, the first asteroid-deflection test and the first image of a black hole (a ground-based observation, included because the library editor's brief asked for it). Left out because the definition of the first is disputed or the sources disagree: the first landing on Mars (Mars 3 in 1971, which fell silent after seconds, or Viking 1 in 1976), the first soft landing on the Moon (NASA's list of firsts gives Luna 9 a \"survivable landing\" and Surveyor 1 the first \"soft-landing\"; the Luna 9 card is therefore about the first photographs from the surface), the first commercial Moon landing, the first space tourist and the first landing of an orbital rocket booster. Left out to keep the deck near the requested size: other national firsts (the first American woman in space, the first US space station), the first flyby of Uranus, the first orbiters of the Moon, Saturn and Mercury, the first asteroid sample return and further missions. The Huygens card is limited to what the sources state (the first landing on Titan); the wider claim that it was the first landing on any moon other than ours was found only in the English Wikipedia and is not on the card."@en ,
+                 "Licensing: The content sources are Wikidata (CC0) and NASA's websites (nasa.gov and science.nasa.gov: NASA content is generally not subject to copyright in the United States, and US government works are not protected, 17 U.S.C. § 105), so the deck is CC0 1.0. The milestones' facts and years and the English and Swedish names on the cards come from these two sources (the Swedish names are Wikidata sv labels or aliases, except the short form Apollo–Sojuz); the selection is the compiler's own (method step 1); the fronts and notes are the compiler's own wording and no NASA text was copied. The Swedish Wikipedia (CC BY-SA 4.0), ESO's press release (CC BY 4.0, used for verification only so that the deck stays CC0), Xinhua's report as republished by the Chinese Academy of Sciences (all rights reserved) and the Astronomy Picture of the Day explanations (written by its editors; their licence was not established, so treated as all rights reserved) were used for verification only: they confirmed facts the content sources gave, and no wording or selection was taken from them. For one card, Chang'e 6, the word \"first\" is stated only by a verification source (Xinhua); NASA's Lunar Surface Data Book gives the facts it rests on (the return of the far-side samples on 25 June 2024, and Chang'e 4 in 2019 as the first landing on the far side). Facts are not copyrightable, so this does not affect the licence. NASA's list of robotic firsts, compiled from Siddiqi's \"Beyond Earth\", was used for dates and for which mission was first; the deck's selection, which mixes crewed and robotic milestones and leaves most of that list out, is the compiler's own. ESA's website, whose terms reserve all rights, was not used."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every card's milestone and year against Wikidata, NASA and the Swedish Wikipedia (and ESO, the Chinese Academy of Sciences and APOD where named); recency of the 2024–2026 milestones; the definitions of the firsts; the Swedish names against Wikidata sv labels and the Swedish Wikipedia."@en ;
+    rdfs:comment "Scope: All 48 cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, NASA and the Swedish Wikipedia agree on the year of every milestone on the cards. The disagreements found are in exact dates (time zones, typing errors on NASA pages), in one Wikidata launch date and in which mission some NASA pages credit with a first; none changes a year on a card. Candidate firsts whose definition the sources dispute were left out or reworded. One Wikidata check was not added because Wikidata's value is wrong (Pioneer 10's launch date); no other check was skipped."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 48 cards; 9 re-checked against live Wikidata, the rest against established mission dates."@en ,
+                 "Outcome: Every year on a back is correct. Two cards lacked the launch-year note that the description promises, one front was ambiguous, and two suggestions concerned a note and missing Wikidata year checks. All were verified against live Wikidata (query 24) and applied, except a year check on Pioneer 10, whose Wikidata launch date is wrong."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 48 cards in the dossier and the built deck, plus the title, description and keywords."@en ,
+                 "Outcome: Language tags, study direction, description length and keywords are correct. Three warnings on Swedish wording (inconsistent telescope names, an unidiomatic verb, a calque in the description) and two suggestions on Swedish phrasing and a name form; all were applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 48 cards for source structure, about 26 against live pages; every licence page; the method, queries and licensing text."@en ,
+                 "Outcome: The source licences and the deck's CC0 licence were confirmed. Two cards' firsts rested on verification sources; a NASA content source was found for Luna 9, and for Chang'e 6 a NASA source for the facts, with the remaining reliance on the verification source stated openly. The Xinhua creator, three wrong locators and the documentation suggestions were all fixed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 48 cards: the cards changed in rounds 1–3 and an every-third-card sample, against live Wikidata, NASA, ESO and the Swedish Wikipedia; the method, licensing, description, keywords and the built deck."@en ,
+                 "Outcome: No errors or warnings. Every Wikidata check, NASA quote, Swedish Wikipedia revision and quote, language tag and every fix claimed in rounds 1–3 was confirmed. One optional suggestion, that the Artemis II evidence should say the stray Wikidata launch date has deprecated rank, was verified against live Wikidata (wbgetclaims Q16947045 P619, query 25) and applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/wiki/Q80811>
+    dcterms:title "Wikidata: the items of the missions, spacecraft and people on the cards, with their launch, landing, start and publication dates, dated significant events (P793) and English and Swedish labels" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.nasa.gov/>
+    dcterms:title "NASA: mission pages, NASA History articles, NASA Science resource pages and the \"Deep Space Robotic Firsts\" list on nasa.gov, science.nasa.gov and nssdc.gsfc.nasa.gov, and the NASA Technical Publication \"Lunar Surface Data Book\" (NASA/TP-20250002845)" ;
+    dcterms:creator "National Aeronautics and Space Administration (NASA)" ;
+    rdfs:comment "https://www.nasa.gov/nasa-brand-center/images-and-media/ — \"NASA content – images, audio, video, and media files used in the rendition of 3-dimensional models, such as texture maps and polygon data in any format – generally are not subject to copyright in the United States.\"; works of the United States Government: 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105), \"Copyright protection under this title is not available for any work of the United States Government\". Only facts were taken, no text copied. The media guidelines quoted above cover NASA's images and media files; the basis for the text is 17 U.S.C. § 105, which covers works of federal employees, and some pages (and Siddiqi's \"Beyond Earth\", the basis of the list of firsts) are contractor or academic work. Only facts (dates, which mission was first) are taken from NASA pages; facts are not copyrightable, so the deck is CC0 regardless of whether an individual page is a federal work."@en .
+
+<https://sv.wikipedia.org/wiki/Sputnik_1>
+    dcterms:title "Svenskspråkiga Wikipedia: the articles on the missions and people on the cards" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the articles: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://www.eso.org/public/news/eso1907/>
+    dcterms:title "ESO press release eso1907: Astronomers Capture First Image of a Black Hole" ;
+    dcterms:creator "European Southern Observatory (ESO)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://www.eso.org/public/copyright/ — \"the texts of press releases, announcements, pictures of the week, blog posts and captions, are licensed under a Creative Commons Attribution 4.0 International License\". Used for verification only, so the deck stays CC0."@en .
+
+<https://english.cas.cn/newsroom/news--archives/2024/cas-in-media/202406/t20240625_1129633.shtml>
+    dcterms:title "China's Chang'e-6 Brings Back First Samples from Moon's Far Side to Earth (CAS in Media, 25 June 2024)" ;
+    dcterms:creator "Xinhua News Agency (republished by the Chinese Academy of Sciences)" ;
+    rdfs:comment "Footer of the page: \"Copyright © 2002 - Chinese Academy of Sciences\"; no licence offered. Verification only."@en .
+
+<https://apod.nasa.gov/apod/astropix.html>
+    dcterms:title "Astronomy Picture of the Day (APOD), apod.nasa.gov, whose pages redirect to their republication on science.nasa.gov" ;
+    dcterms:creator "Robert Nemiroff and Jerry Bonnell (APOD editors)" ;
+    rdfs:comment "The APOD explanations are written by the site's editors, who are credited on each page (\"Authors & editors: Robert Nemiroff (MTU) & Jerry Bonnell (UMCP)\" on the Chang'e 4 page); no licence for the text was established, so it is treated as not reusable. Verification only."@en .
+
+<#sputnik-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First artificial satellite (Sputnik 1)"@en ,
+                     "Första konstgjorda satelliten (Sputnik 1)"@sv ;
+    solid-memo:back "1957"@zxx .
+
+<#sputnik-2-laika>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First animal to orbit the Earth (the dog Laika, Sputnik 2)"@en ,
+                     "Första djuret i omloppsbana runt jorden (hunden Lajka, Sputnik 2)"@sv ;
+    solid-memo:back "1957"@zxx .
+
+<#explorer-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First US satellite (Explorer 1)"@en ,
+                     "Första amerikanska satelliten (Explorer 1)"@sv ;
+    solid-memo:back "1958"@zxx .
+
+<#luna-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First spacecraft to impact the Moon (Luna 2)"@en ,
+                     "Första rymdfarkosten som kraschlandade på månen (Luna 2)"@sv ;
+    solid-memo:back "1959"@zxx .
+
+<#luna-3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First photographs of the far side of the Moon (Luna 3)"@en ,
+                     "Första fotografierna av månens baksida (Luna 3)"@sv ;
+    solid-memo:back "1959"@zxx .
+
+<#vostok-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First human in space (Yuri Gagarin, Vostok 1)"@en ,
+                     "Första människan i rymden (Jurij Gagarin, Vostok 1)"@sv ;
+    solid-memo:back "1961"@zxx .
+
+<#mariner-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First successful flyby of another planet (Mariner 2, Venus)"@en ,
+                     "Första lyckade förbiflygningen av en annan planet (Mariner 2, Venus)"@sv ;
+    solid-memo:back "1962"@zxx .
+
+<#vostok-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First woman in space (Valentina Tereshkova, Vostok 6)"@en ,
+                     "Första kvinnan i rymden (Valentina Teresjkova, Vostok 6)"@sv ;
+    solid-memo:back "1963"@zxx .
+
+<#voskhod-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First spacewalk (Alexey Leonov, Voskhod 2)"@en ,
+                     "Första rymdpromenaden (Aleksej Leonov, Voschod 2)"@sv ;
+    solid-memo:back "1965"@zxx .
+
+<#mariner-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First successful flyby of Mars (Mariner 4)"@en ,
+                     "Första lyckade förbiflygningen av Mars (Mariner 4)"@sv ;
+    solid-memo:back "1965"@zxx ;
+    solid-memo:backNote "Launched in 1964."@en ,
+                        "Uppskjuten 1964."@sv .
+
+<#gemini-8>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First docking of two spacecraft in orbit (Gemini 8)"@en ,
+                     "Första dockningen mellan två rymdfarkoster i omloppsbana (Gemini 8)"@sv ;
+    solid-memo:back "1966"@zxx .
+
+<#luna-9>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First photographs from the surface of the Moon (Luna 9)"@en ,
+                     "Första fotografierna från månens yta (Luna 9)"@sv ;
+    solid-memo:back "1966"@zxx .
+
+<#apollo-8>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First crewed flight to orbit the Moon (Apollo 8)"@en ,
+                     "Första bemannade färden i omloppsbana runt månen (Apollo 8)"@sv ;
+    solid-memo:back "1968"@zxx .
+
+<#apollo-11>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First crewed landing on the Moon (Apollo 11)"@en ,
+                     "Första bemannade månlandningen (Apollo 11)"@sv ;
+    solid-memo:back "1969"@zxx .
+
+<#luna-16>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First robotic return of lunar samples to Earth (Luna 16)"@en ,
+                     "Första månproverna som en obemannad rymdsond förde till jorden (Luna 16)"@sv ;
+    solid-memo:back "1970"@zxx .
+
+<#lunokhod-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First wheeled vehicle on the Moon (Lunokhod 1)"@en ,
+                     "Första hjulfordonet på månen (Lunochod 1)"@sv ;
+    solid-memo:back "1970"@zxx .
+
+<#venera-7>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First transmission from the surface of another planet (Venera 7, Venus)"@en ,
+                     "Första sändningen från ytan på en annan planet (Venera 7, Venus)"@sv ;
+    solid-memo:back "1970"@zxx .
+
+<#salyut-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First space station (Salyut 1)"@en ,
+                     "Första rymdstationen (Saljut 1)"@sv ;
+    solid-memo:back "1971"@zxx .
+
+<#mariner-9>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First spacecraft to orbit another planet (Mariner 9, Mars)"@en ,
+                     "Första rymdfarkosten i omloppsbana runt en annan planet (Mariner 9, Mars)"@sv ;
+    solid-memo:back "1971"@zxx .
+
+<#pioneer-10>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First flyby of Jupiter (Pioneer 10)"@en ,
+                     "Första förbiflygningen av Jupiter (Pioneer 10)"@sv ;
+    solid-memo:back "1973"@zxx ;
+    solid-memo:backNote "Launched in 1972."@en ,
+                        "Uppskjuten 1972."@sv .
+
+<#apollo-soyuz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First docking of a US and a Soviet spacecraft (Apollo–Soyuz)"@en ,
+                     "Första dockningen mellan en amerikansk och en sovjetisk rymdfarkost (Apollo–Sojuz)"@sv ;
+    solid-memo:back "1975"@zxx .
+
+<#venera-9>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First photographs from the surface of another planet (Venera 9, Venus)"@en ,
+                     "Första fotografierna från ytan på en annan planet (Venera 9, Venus)"@sv ;
+    solid-memo:back "1975"@zxx .
+
+<#voyager-launches>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Launch of Voyager 1 and Voyager 2"@en ,
+                     "Uppskjutningen av Voyager 1 och Voyager 2"@sv ;
+    solid-memo:back "1977"@zxx .
+
+<#pioneer-11>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First flyby of Saturn (Pioneer 11)"@en ,
+                     "Första förbiflygningen av Saturnus (Pioneer 11)"@sv ;
+    solid-memo:back "1979"@zxx ;
+    solid-memo:backNote "Launched in 1973."@en ,
+                        "Uppskjuten 1973."@sv .
+
+<#sts-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First orbital flight of the Space Shuttle (STS-1, Columbia)"@en ,
+                     "Rymdfärjans första färd i omloppsbana (STS-1, Columbia)"@sv ;
+    solid-memo:back "1981"@zxx .
+
+<#sts-41-b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First untethered spacewalk (Bruce McCandless II, STS-41-B)"@en ,
+                     "Första rymdpromenaden utan säkerhetslina (Bruce McCandless II, STS-41-B)"@sv ;
+    solid-memo:back "1984"@zxx .
+
+<#savitskaya-spacewalk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First spacewalk by a woman (Svetlana Savitskaya, Salyut 7)"@en ,
+                     "Första kvinnan att göra en rymdpromenad (Svetlana Savitskaja, Saljut 7)"@sv ;
+    solid-memo:back "1984"@zxx .
+
+<#mir-core-module>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Launch of the first module of the Mir space station"@en ,
+                     "Uppskjutningen av rymdstationen Mirs första modul"@sv ;
+    solid-memo:back "1986"@zxx .
+
+<#voyager-2-neptune>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First flyby of Neptune (Voyager 2)"@en ,
+                     "Första förbiflygningen av Neptunus (Voyager 2)"@sv ;
+    solid-memo:back "1989"@zxx ;
+    solid-memo:backNote "Launched in 1977."@en ,
+                        "Uppskjuten 1977."@sv .
+
+<#hubble-launch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Launch of the Hubble Space Telescope (STS-31)"@en ,
+                     "Uppskjutningen av Hubbleteleskopet (STS-31)"@sv ;
+    solid-memo:back "1990"@zxx .
+
+<#galileo-jupiter-orbit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First spacecraft to orbit Jupiter (Galileo)"@en ,
+                     "Första rymdfarkosten i omloppsbana runt Jupiter (Galileo)"@sv ;
+    solid-memo:back "1995"@zxx ;
+    solid-memo:backNote "Launched in 1989."@en ,
+                        "Uppskjuten 1989."@sv .
+
+<#sojourner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First wheeled vehicle on Mars (Sojourner, Mars Pathfinder)"@en ,
+                     "Första hjulfordonet på Mars (Sojourner, Mars Pathfinder)"@sv ;
+    solid-memo:back "1997"@zxx ;
+    solid-memo:backNote "Launched in 1996."@en ,
+                        "Uppskjuten 1996."@sv .
+
+<#zarya-launch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Launch of Zarya, the first module of the International Space Station"@en ,
+                     "Uppskjutningen av Zarja, Internationella rymdstationens första modul"@sv ;
+    solid-memo:back "1998"@zxx .
+
+<#expedition-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First resident crew of the International Space Station (Expedition 1)"@en ,
+                     "Första fasta besättningen på Internationella rymdstationen (Expedition 1)"@sv ;
+    solid-memo:back "2000"@zxx .
+
+<#near-shoemaker>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First landing on an asteroid (NEAR Shoemaker, Eros)"@en ,
+                     "Första landningen på en asteroid (NEAR Shoemaker, Eros)"@sv ;
+    solid-memo:back "2001"@zxx ;
+    solid-memo:backNote "Launched in 1996."@en ,
+                        "Uppskjuten 1996."@sv .
+
+<#shenzhou-5>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "China's first crewed spaceflight (Yang Liwei, Shenzhou 5)"@en ,
+                     "Kinas första bemannade rymdfärd (Yang Liwei, Shenzhou 5)"@sv ;
+    solid-memo:back "2003"@zxx .
+
+<#huygens>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First landing on Saturn's moon Titan (Huygens)"@en ,
+                     "Första landningen på Saturnus måne Titan (Huygens)"@sv ;
+    solid-memo:back "2005"@zxx ;
+    solid-memo:backNote "Launched in 1997."@en ,
+                        "Uppskjuten 1997."@sv .
+
+<#voyager-1-interstellar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First spacecraft to reach interstellar space (Voyager 1)"@en ,
+                     "Första rymdfarkosten att nå den interstellära rymden (Voyager 1)"@sv ;
+    solid-memo:back "2012"@zxx ;
+    solid-memo:backNote "Launched in 1977; the crossing was announced in 2013."@en ,
+                        "Uppskjuten 1977; passagen tillkännagavs 2013."@sv .
+
+<#philae>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First landing on a comet (Philae, Rosetta)"@en ,
+                     "Första landningen på en komet (Philae, Rosetta)"@sv ;
+    solid-memo:back "2014"@zxx ;
+    solid-memo:backNote "Launched in 2004."@en ,
+                        "Uppskjuten 2004."@sv .
+
+<#new-horizons-pluto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First flyby of Pluto (New Horizons)"@en ,
+                     "Första förbiflygningen av Pluto (New Horizons)"@sv ;
+    solid-memo:back "2015"@zxx ;
+    solid-memo:backNote "Launched in 2006."@en ,
+                        "Uppskjuten 2006."@sv .
+
+<#change-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First landing on the far side of the Moon (Chang'e 4)"@en ,
+                     "Första landningen på månens baksida (Chang'e 4)"@sv ;
+    solid-memo:back "2019"@zxx ;
+    solid-memo:backNote "Launched in 2018."@en ,
+                        "Uppskjuten 2018."@sv .
+
+<#black-hole-image>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Publication of the first image of a black hole (Event Horizon Telescope, M87*)"@en ,
+                     "Publiceringen av den första bilden av ett svart hål (Event Horizon Telescope, M87*)"@sv ;
+    solid-memo:back "2019"@zxx ;
+    solid-memo:backNote "Made from observations in 2017; the black hole is in the galaxy M87."@en ,
+                        "Bilden bygger på observationer från 2017; det svarta hålet finns i galaxen M87."@sv .
+
+<#jwst-launch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Launch of the James Webb Space Telescope"@en ,
+                     "Uppskjutningen av James Webb-teleskopet"@sv ;
+    solid-memo:back "2021"@zxx .
+
+<#ingenuity>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First powered, controlled flight on another planet (Ingenuity, Mars)"@en ,
+                     "Första motordrivna, styrda flygningen på en annan planet (Ingenuity, Mars)"@sv ;
+    solid-memo:back "2021"@zxx ;
+    solid-memo:backNote "Launched in 2020."@en ,
+                        "Uppskjuten 2020."@sv .
+
+<#dart-impact>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First test of changing an asteroid's orbit by impact (DART)"@en ,
+                     "Första testet av att ändra en asteroids bana genom en kollision (DART)"@sv ;
+    solid-memo:back "2022"@zxx ;
+    solid-memo:backNote "Launched in 2021."@en ,
+                        "Uppskjuten 2021."@sv .
+
+<#polaris-dawn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First commercial spacewalk (Polaris Dawn)"@en ,
+                     "Första kommersiella rymdpromenaden (Polaris Dawn)"@sv ;
+    solid-memo:back "2024"@zxx .
+
+<#change-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First samples brought to Earth from the far side of the Moon (Chang'e 6)"@en ,
+                     "Första proverna som förts till jorden från månens baksida (Chang'e 6)"@sv ;
+    solid-memo:back "2024"@zxx .
+
+<#artemis-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First crewed flight of the Artemis programme (Artemis II)"@en ,
+                     "Artemisprogrammets första bemannade färd (Artemis II)"@sv ;
+    solid-memo:back "2026"@zxx ;
+    solid-memo:backNote "A crewed flight around the Moon, 1–10 April 2026 (US time)."@en ,
+                        "En bemannad färd runt månen 1–10 april 2026 (amerikansk tid)."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

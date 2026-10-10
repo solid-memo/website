@@ -1,0 +1,533 @@
+@base <https://solid-memo.com/decks/http-status-codes/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "HTTP status codes"@en ,
+                  "HTTP-statuskoder"@sv ,
+                  "HTTP 상태 코드"@ko ,
+                  "HTTP-Statuscodes"@de ,
+                  "Códigos de estado HTTP"@es ,
+                  "Codes de statut HTTP"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Every HTTP status code and its reason phrase. The list follows MDN's HTTP response status codes reference; the codes and names themselves are defined by the IETF and recorded in the IANA HTTP Status Code Registry."@en ,
+                        "Varje HTTP-statuskod och dess statusfras. Listan följer MDN:s referens över HTTP-statuskoder; koderna och fraserna definieras av IETF och förs in i IANA:s register över HTTP-statuskoder. Statusfraserna står på engelska, så som de skrivs i HTTP."@sv ,
+                        "모든 HTTP 상태 코드와 그 사유 구문. 목록은 MDN의 HTTP 응답 상태 코드 문서를 따르며, 코드와 이름 자체는 IETF가 정의하고 IANA HTTP Status Code Registry에 기록되어 있다."@ko ,
+                        "Jeder HTTP-Statuscode und sein Statustext. Die Liste folgt der MDN-Referenz zu den HTTP-Antwortstatuscodes; die Codes und Bezeichnungen selbst legt die IETF fest, und sie sind in der IANA HTTP Status Code Registry verzeichnet."@de ,
+                        "Cada código de estado HTTP y su frase de estado. La lista sigue la referencia de códigos de estado de respuesta HTTP de MDN; los códigos y sus nombres los define el IETF y se recogen en el IANA HTTP Status Code Registry."@es ,
+                        "Chaque code de statut HTTP et son intitulé. La liste suit la référence des codes de statut de réponse HTTP de MDN ; les codes et leurs intitulés sont définis par l’IETF et consignés dans l’IANA HTTP Status Code Registry."@fr ;
+    prov:wasDerivedFrom <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status> ,
+                        <https://www.iana.org/assignments/http-status-codes> ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-04T04:34:28.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "HTTP"@en ,
+                 "status codes"@en ,
+                 "web"@en ,
+                 "HTTP"@sv ,
+                 "statuskoder"@sv ,
+                 "webb"@sv ,
+                 "HTTP"@ko ,
+                 "상태 코드"@ko ,
+                 "HTTP 상태 코드"@ko ,
+                 "웹"@ko ,
+                 "HTTP"@de ,
+                 "Statuscodes"@de ,
+                 "HTTP-Statuscodes"@de ,
+                 "Web"@de ,
+                 "HTTP"@es ,
+                 "códigos de estado"@es ,
+                 "códigos HTTP"@es ,
+                 "web"@es ,
+                 "HTTP"@fr ,
+                 "codes de statut"@fr ,
+                 "codes HTTP"@fr ,
+                 "web"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/http-status-codes/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/http-status-codes/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#http-status-codes> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#http-status-codes> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status>
+    dcterms:title "HTTP response status codes" ;
+    dcterms:creator "Mozilla Contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> .
+
+<https://www.iana.org/assignments/http-status-codes>
+    dcterms:title "Hypertext Transfer Protocol (HTTP) Status Code Registry" ;
+    dcterms:creator "Internet Assigned Numbers Authority" .
+
+<#100-continue>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Continue"@en ;
+    solid-memo:front "100" .
+
+<#101-switching-protocols>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Switching Protocols"@en ;
+    solid-memo:front "101" .
+
+<#102-processing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Processing"@en ;
+    solid-memo:front "102" .
+
+<#103-early-hints>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Early Hints"@en ;
+    solid-memo:front "103" .
+
+<#200-ok>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "OK"@en ;
+    solid-memo:front "200" .
+
+<#201-created>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Created"@en ;
+    solid-memo:front "201" .
+
+<#202-accepted>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Accepted"@en ;
+    solid-memo:front "202" .
+
+<#203-non-authoritative-information>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Non-Authoritative Information"@en ;
+    solid-memo:front "203" .
+
+<#204-no-content>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "No Content"@en ;
+    solid-memo:front "204" .
+
+<#205-reset-content>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Reset Content"@en ;
+    solid-memo:front "205" .
+
+<#206-partial-content>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Partial Content"@en ;
+    solid-memo:front "206" .
+
+<#207-multi-status>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Multi-Status"@en ;
+    solid-memo:front "207" .
+
+<#208-already-reported>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Already Reported"@en ;
+    solid-memo:front "208" .
+
+<#226-im-used>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "IM Used"@en ;
+    solid-memo:front "226" .
+
+<#300-multiple-choices>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Multiple Choices"@en ;
+    solid-memo:front "300" .
+
+<#301-moved-permanently>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Moved Permanently"@en ;
+    solid-memo:front "301" .
+
+<#302-found>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Found"@en ;
+    solid-memo:front "302" .
+
+<#303-see-other>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "See Other"@en ;
+    solid-memo:front "303" .
+
+<#304-not-modified>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Modified"@en ;
+    solid-memo:front "304" .
+
+<#305-use-proxy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Use Proxy"@en ;
+    solid-memo:front "305" .
+
+<#306-unused>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unused"@en ;
+    solid-memo:front "306" .
+
+<#307-temporary-redirect>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Temporary Redirect"@en ;
+    solid-memo:front "307" .
+
+<#308-permanent-redirect>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Permanent Redirect"@en ;
+    solid-memo:front "308" .
+
+<#400-bad-request>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Bad Request"@en ;
+    solid-memo:front "400" .
+
+<#401-unauthorized>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unauthorized"@en ;
+    solid-memo:front "401" .
+
+<#402-payment-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Payment Required"@en ;
+    solid-memo:front "402" .
+
+<#403-forbidden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Forbidden"@en ;
+    solid-memo:front "403" .
+
+<#404-not-found>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Found"@en ;
+    solid-memo:front "404" .
+
+<#405-method-not-allowed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Method Not Allowed"@en ;
+    solid-memo:front "405" .
+
+<#406-not-acceptable>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Acceptable"@en ;
+    solid-memo:front "406" .
+
+<#407-proxy-authentication-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Proxy Authentication Required"@en ;
+    solid-memo:front "407" .
+
+<#408-request-timeout>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Request Timeout"@en ;
+    solid-memo:front "408" .
+
+<#409-conflict>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Conflict"@en ;
+    solid-memo:front "409" .
+
+<#410-gone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Gone"@en ;
+    solid-memo:front "410" .
+
+<#411-length-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Length Required"@en ;
+    solid-memo:front "411" .
+
+<#412-precondition-failed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Precondition Failed"@en ;
+    solid-memo:front "412" .
+
+<#413-content-too-large>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Content Too Large"@en ;
+    solid-memo:front "413" .
+
+<#414-uri-too-long>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "URI Too Long"@en ;
+    solid-memo:front "414" .
+
+<#415-unsupported-media-type>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unsupported Media Type"@en ;
+    solid-memo:front "415" .
+
+<#416-range-not-satisfiable>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Range Not Satisfiable"@en ;
+    solid-memo:front "416" .
+
+<#417-expectation-failed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Expectation Failed"@en ;
+    solid-memo:front "417" .
+
+<#418-i-am-a-teapot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "I'm a teapot"@en ;
+    solid-memo:front "418" .
+
+<#421-misdirected-request>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Misdirected Request"@en ;
+    solid-memo:front "421" .
+
+<#422-unprocessable-content>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unprocessable Content"@en ;
+    solid-memo:front "422" .
+
+<#423-locked>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Locked"@en ;
+    solid-memo:front "423" .
+
+<#424-failed-dependency>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Failed Dependency"@en ;
+    solid-memo:front "424" .
+
+<#425-too-early>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Too Early"@en ;
+    solid-memo:front "425" .
+
+<#426-upgrade-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Upgrade Required"@en ;
+    solid-memo:front "426" .
+
+<#428-precondition-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Precondition Required"@en ;
+    solid-memo:front "428" .
+
+<#429-too-many-requests>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Too Many Requests"@en ;
+    solid-memo:front "429" .
+
+<#431-request-header-fields-too-large>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Request Header Fields Too Large"@en ;
+    solid-memo:front "431" .
+
+<#451-unavailable-for-legal-reasons>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unavailable For Legal Reasons"@en ;
+    solid-memo:front "451" .
+
+<#500-internal-server-error>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Internal Server Error"@en ;
+    solid-memo:front "500" .
+
+<#501-not-implemented>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Implemented"@en ;
+    solid-memo:front "501" .
+
+<#502-bad-gateway>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Bad Gateway"@en ;
+    solid-memo:front "502" .
+
+<#503-service-unavailable>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Service Unavailable"@en ;
+    solid-memo:front "503" .
+
+<#504-gateway-timeout>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Gateway Timeout"@en ;
+    solid-memo:front "504" .
+
+<#505-http-version-not-supported>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "HTTP Version Not Supported"@en ;
+    solid-memo:front "505" .
+
+<#506-variant-also-negotiates>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Variant Also Negotiates"@en ;
+    solid-memo:front "506" .
+
+<#507-insufficient-storage>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Insufficient Storage"@en ;
+    solid-memo:front "507" .
+
+<#508-loop-detected>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Loop Detected"@en ;
+    solid-memo:front "508" .
+
+<#510-not-extended>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Extended"@en ;
+    solid-memo:front "510" .
+
+<#511-network-authentication-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Network Authentication Required"@en ;
+    solid-memo:front "511" .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

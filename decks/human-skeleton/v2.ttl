@@ -1,0 +1,762 @@
+@base <https://solid-memo.com/decks/human-skeleton/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Bones of the human skeleton"@en ,
+                  "Människans skelettben"@sv ,
+                  "인체의 뼈"@ko ,
+                  "Knochen des menschlichen Skeletts"@de ,
+                  "Huesos del esqueleto humano"@es ,
+                  "Os du squelette humain"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "54 bones and bone groups of the human skeleton, from the skull to the foot. Front: the bone's everyday or anatomical name in English and Swedish; back: its Latin name in Terminologia Anatomica (TA98). Compiled from Wikidata, Svensk MeSH and the U.S. National Cancer Institute's SEER Training Modules, the Latin checked against TA98."@en ,
+                        "54 ben och bengrupper i människans skelett, från skallen till foten. Framsida: benets vardagliga eller anatomiska namn på engelska och svenska; baksida: dess latinska namn enligt Terminologia Anatomica (TA98). Sammanställd från Wikidata, Svensk MeSH och amerikanska National Cancer Institutes SEER Training Modules, med latinet kontrollerat mot TA98."@sv ,
+                        "머리뼈부터 발까지, 인체 골격의 뼈와 뼈 무리 54개입니다. 앞면은 영어와 스웨덴어로 된 뼈의 일상적 이름이나 해부학 이름, 뒷면은 Terminologia Anatomica(TA98)의 라틴어 이름입니다. Wikidata, Svensk MeSH, 미국 국립암연구소(National Cancer Institute)의 SEER Training Modules로 엮었고, 라틴어는 TA98로 확인했습니다."@ko ,
+                        "54 Knochen und Knochengruppen des menschlichen Skeletts, vom Schädel bis zum Fuß. Vorderseite: der alltägliche oder anatomische Name des Knochens auf Englisch und Schwedisch; Rückseite: sein lateinischer Name nach der Terminologia Anatomica (TA98). Zusammengestellt aus Wikidata, Svensk MeSH und den SEER Training Modules des US-amerikanischen National Cancer Institute, die lateinischen Namen mit der TA98 abgeglichen."@de ,
+                        "54 huesos y grupos de huesos del esqueleto humano, del cráneo al pie. Anverso: el nombre común o anatómico del hueso en inglés y sueco; reverso: su nombre latino en la Terminologia Anatomica (TA98). Recopilado de Wikidata, Svensk MeSH y los SEER Training Modules del Instituto Nacional del Cáncer de Estados Unidos, y el latín cotejado con la TA98."@es ,
+                        "54 os et groupes d’os du squelette humain, du crâne au pied. Recto : le nom courant ou anatomique de l’os en anglais et en suédois ; verso : son nom latin dans la Terminologia Anatomica (TA98). Compilé à partir de Wikidata, de Svensk MeSH et des SEER Training Modules du National Cancer Institute américain, le latin vérifié d’après la TA98."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://mesh.kib.ki.se/> ,
+                        <https://training.seer.cancer.gov/anatomy/skeletal/divisions/axial.html> ,
+                        <https://training.seer.cancer.gov/anatomy/skeletal/divisions/appendicular.html> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:biology ;
+    dcat:keyword "anatomy"@en ,
+                 "bones"@en ,
+                 "human skeleton"@en ,
+                 "Latin"@en ,
+                 "Terminologia Anatomica"@en ,
+                 "anatomi"@sv ,
+                 "skelettben"@sv ,
+                 "skelett"@sv ,
+                 "latin"@sv ,
+                 "Terminologia Anatomica"@sv ,
+                 "해부학"@ko ,
+                 "뼈"@ko ,
+                 "인체 골격"@ko ,
+                 "라틴어"@ko ,
+                 "Terminologia Anatomica"@ko ,
+                 "Anatomie"@de ,
+                 "Knochen"@de ,
+                 "menschliches Skelett"@de ,
+                 "Latein"@de ,
+                 "Terminologia Anatomica"@de ,
+                 "anatomía"@es ,
+                 "huesos"@es ,
+                 "esqueleto humano"@es ,
+                 "latín"@es ,
+                 "Terminologia Anatomica"@es ,
+                 "anatomie"@fr ,
+                 "os"@fr ,
+                 "squelette humain"@fr ,
+                 "latin"@fr ,
+                 "Terminologia Anatomica"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/human-skeleton/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/human-skeleton/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#human-skeleton> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#human-skeleton> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://mesh.kib.ki.se/> ,
+              <https://training.seer.cancer.gov/anatomy/skeletal/divisions/axial.html> ,
+              <https://training.seer.cancer.gov/anatomy/skeletal/divisions/appendicular.html> ,
+              <https://ifaa.unifr.ch/> ,
+              <https://sv.wikipedia.org/> ,
+              <https://en.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators). Every value below was fetched on 2026-10-04; the exact queries and the code run on the downloads are listed in the dossier's Queries. The raw responses and the authoring scripts were kept only in the authoring session's temporary working directory and are not preserved; rerunning the listed queries reproduces the data, though the live sources may have changed since."@en ,
+                 "Candidate list. The two SEER Training Module pages (U.S. National Cancer Institute, public domain) list the bones of the axial and appendicular skeleton. Their entries (cranial and facial bones, auditory ossicles, hyoid, vertebrae, sacrum, coccyx, sternum, ribs, clavicle, scapula, arm and leg bones, carpals, metacarpals, phalanges, hip bones, tarsals, metatarsals) were the starting list. It was extended with well-known bones and groups below that level: the atlas and axis, the auditory ossicles as a group, the vertebral column and the pelvis, the parts of the hip bone (ilium, ischium, pubis) and individual carpal and tarsal bones."@en ,
+                 "Wikidata. A SPARQL query looked up the Wikidata item of each candidate by English label, requiring a Terminologia Anatomica 98 ID (P1323); items it missed were found with wbsearchentities, choosing the item about the human bone (e.g. Q5283631 human mandible, Q9604 human skull, not the general Q16370 or Q13147). wbgetentities then fetched every item's en, sv and la labels and aliases and its P1323 statements."@en ,
+                 "Latin names (back). For each item, the TA98 entity page for its P1323 code was fetched from the TA98 online edition (ifaa.unifr.ch) and parsed for the Latin preferred term, Latin official synonym, English equivalent and English synonym. The card's Latin text follows TA98's naming: it is the TA98 Latin preferred term for the item's code, so TA98 decides which Latin form is on the back where several exist (Femur rather than Os femoris, Ossa metacarpi rather than Ossa metacarpalia). A single standardised anatomical term is a fact, not protected expression, so TA98 (all rights reserved) is listed as a verification source; no definitions, lists or other text were taken from it. Bracketed numbering in TA98 terms (e.g. \"vertebrae cervicales [C I - C VII]\", \"atlas [C I]\") is left out. TA98 prints the terms in lower case online; the cards capitalise the first letter, as the library brief does (\"Femur\"). Where TA98 gives two Latin terms (femur / os femoris, ossa carpi / ossa carpalia, os ilium / ilium) the preferred one is used. The same term is in Wikidata as a la label or alias for 44 of the 54 cards; for the other ten the Wikidata la label is missing (the skull), a synonym, a region name or malformed (see Quality control), and the term was confirmed in a second open source where one exists (a Wikidata en label or alias, a Wikidata sv alias, or a Svensk MeSH synonym or English entry term). For Ossa metacarpi and Ossa metatarsi no open source consulted has the exact preferred term (they give the TA98 official synonyms ossa metacarpalia and ossa metatarsalia, or the region names Metacarpus and Metatarsus), so these two backs rest on TA98 alone."@en ,
+                 "English names (front). Where English has an everyday name for the bone (thigh bone, kneecap, shinbone, calf bone, heel bone, collarbone, shoulder blade, breastbone, tailbone, backbone, cheekbone, upper jaw, lower jaw, hammer, anvil, stirrup), the front uses it; otherwise the English anatomical name (frontal bone, hip bone, scaphoid bone ...). Every English name is a Wikidata en label or alias except three (stirrup, and the plurals auditory ossicles and carpal bones), and each was cross-checked against the TA98 English equivalent or synonym, MeSH, the SEER list or the English Wikipedia introduction. \"Stirrup\" is common English vocabulary for the stapes; no open content source consulted lists it (Wikidata has only \"stapes bone\", Svensk MeSH no English synonym), and it rests on the English Wikipedia (verification). For six bones (humerus, radius, ulna, vomer, talus, pelvis) the established English name is the Latin name itself; these cards are kept for their Swedish names (review round 2 considered \"Ankle bone\" for the talus and \"Upper arm bone\" for the humerus and kept the anatomical names; see Quality control). The atlas and axis are given descriptively (first and second cervical vertebra), since their English names are also the Latin ones."@en ,
+                 "Swedish names (front). The Swedish name is the Wikidata sv label or alias when it agrees with the Svensk MeSH 2026 term or synonym (Karolinska Institutets Universitetsbibliotek, CC0), compared case-insensitively. Where the two disagree or one is missing, the name was chosen from the open sources and confirmed in the Swedish Wikipedia (verification): skalle (MeSH), underkäke (MeSH), plogben (MeSH synonym), ärtben (MeSH), sittben (MeSH), första/andra halskotan (MeSH), handlovens båtben (MeSH), fotens båtben (MeSH synonym \"Båtben i foten\", sv.wikipedia \"Fotens båtben\"), tårben, hakben, mellanhandsben, fotrotsben and tärningsben (Wikidata), bröstkotor and ländkotor (Svensk MeSH plurals of the Wikidata singulars). Swedish names are written in lower case as common nouns; the three ear ossicles are given in the definite form (hammaren, städet, stigbygeln) as Wikidata, Svensk MeSH for städet and the Swedish Wikipedia name them, since the indefinite forms name tools; the other bones are in the indefinite form as in the brief (lårben), except the atlas and axis, which are named with an ordinal and so take the definite form, as Svensk MeSH and the Swedish Wikipedia do (första halskotan, andra halskotan). Groups are in the plural (halskotor, revben, handlovsben)."@en ,
+                 "Back notes. A short note on each card says where the bone is or how it is also called, in plain wording written for the deck. Each fact in a note was checked against a Svensk MeSH scope note (KIB's Swedish, or NLM's English one in the same download) where one states it, against the Swedish or English Wikipedia, or against the SEER count, and the supporting sentence is quoted in the card's evidence (for the notes of the atlas, axis, sacrum, maxilla, mandible, vomer, ethmoid, hyoid, lunate, hamate, femur, metacarpal, tarsal and metatarsal cards these quotes were added in review rounds 1-4). Counts that vary between people or sources (the number of bones in the pelvis, the number of fused coccygeal vertebrae) were left out, and the rib note says \"most people\". Where the sources disagree on a note's fact (the English Wikipedia puts the metatarsals in the midfoot, its Tarsus article and anatomy teaching put them in the forefoot), the note avoids the disputed term."@en ,
+                 "Cross-check. A script (gen.py, run in the authoring session's temporary working directory and not preserved) built each card's evidence from the saved raw data only: the Wikidata labels and P1323 values, the TA98 fields, the Svensk MeSH terms and synonyms, the SEER list item and the Wikipedia quote, asserting that each quoted text occurs in the saved page. For each card it added Wikidata checks for the P1323 code and for every en, sv and la label or alias that equals the card's text apart from capitalisation, using Wikidata's own spelling; every side that has no such label was logged as a finding in round 0 with how it was resolved. The builder re-ran all checks against live Wikidata. After the review rounds, the added evidence was written by a second script (also not preserved) that asserted every new quote against the saved Svensk MeSH tables and Wikipedia texts in the same way."@en ,
+                 "Uniqueness. Every front is unique in English and in Swedish and every Latin back is unique, so the deck is studied in both directions. Where Swedish uses one name for two bones (båtben for both the scaphoid of the wrist and the navicular of the foot), the fronts are qualified as Svensk MeSH and the Swedish Wikipedia do (handlovens båtben, fotens båtben)."@en ,
+                 "Selection: 54 cards: the bones and bone groups that the SEER Training Module lists of the axial and appendicular skeleton name (except the phalanges and the palatine bone and inferior nasal concha, see below), plus the atlas, axis, auditory ossicles as a group, vertebral column, pelvis, the three parts of the hip bone, four carpal bones (scaphoid, lunate, pisiform, hamate) and four tarsal bones (talus, calcaneus, navicular, cuboid). A bone was included only if it has a TA98 code, a TA98 Latin preferred term, an English name and a Swedish name confirmed in two sources. Left out: the phalanges, because TA98 gives the same Latin term (ossa digitorum, phalanges) for the fingers and the toes, so the back would not identify one card; the palatine bone, because the Swedish \"gomben\" is in Svensk MeSH only as a synonym of the hard palate, not the bone; the inferior nasal concha (Swedish only in the plural group \"näsmusslor\" in MeSH, no Wikidata sv label); the capitate, triquetrum, trapezium and trapezoid, whose Swedish names vary between sources (Wikidata gives Latin or \"lilla mångkantiga benet\", the Swedish Wikipedia \"huvudbenet\", \"pyramidbenet\", \"trapetsbenet\", \"trapetslika benet\", MeSH Latin); the three cuneiform bones, whose names differ only by medial, intermediate and lateral and which Svensk MeSH has only as the group \"Kilformade ben\"; the rib cage (TA98 cavea thoracis has no Latin label in Wikidata or Swedish synonym in MeSH to confirm it); and sesamoid bones other than the kneecap and the pisiform, whose number varies between people. Individual ribs, vertebrae by number and the bones' parts (processes, heads, sutures) are out of scope."@en ,
+                 "Licensing: The deck is CC0-1.0. Its content comes from three open sources: Wikidata (CC0: labels, aliases and TA98 IDs), Svensk MeSH (CC0, Karolinska Institutets Universitetsbibliotek: Swedish names and Swedish scope notes; NLM's English MeSH data in the same download, which NLM provides freely with acknowledgement, only identified concepts and confirmed facts) and the SEER Training Modules of the U.S. National Cancer Institute (free of copyright: the list of bones the selection starts from). Terminologia Anatomica (all rights reserved) sets the naming convention of the backs: each Latin back is the TA98 preferred term for the bone's code. That is a single standardised name, a fact rather than protected expression; for 44 cards the same term is also a Wikidata la label or alias, for most of the others it is in another open source, and Ossa metacarpi and Ossa metatarsi rest on TA98 alone (see Method). No definitions, descriptions, lists or selections were taken from TA98. The Swedish and English Wikipedia (CC BY-SA 4.0) were used to verify names and the facts in the back notes; no text or selection was taken from them. The back notes state short facts in plain wording; where a phrase matches a source (e.g. \"kroppens minsta ben\", \"the eight small bones of the wrist\") it is a minimal factual statement, not protected expression, and where a note follows a Svensk MeSH scope note (\"Mellanfotens fem långa ben\") that source is CC0 and cited. Attribution, though not required by CC0, is given in the deck (prov:wasDerivedFrom) and in the provenance report: Karolinska Institutets Bibliotek for the Swedish MeSH translation and the U.S. National Library of Medicine for MeSH, as the Svensk MeSH readme and NLM's terms ask, without implying NLM's endorsement."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Source cross-check and Wikidata machine checks"@en ;
+    rdfs:comment "Scope: All 54 cards, every side."@en ,
+                 "Outcome: Every card has evidence from Wikidata (content), the TA98 entity page (verification) and at least one of Svensk MeSH, SEER and the Swedish or English Wikipedia. 191 Wikidata checks (194 after the three added in review round 3, 196 after the two added in round 4): the TA98 ID (P1323) of 53 items and every en, sv and la label or alias that equals the card's text apart from case. The 24 card sides with no such Wikidata label are listed below with how they were resolved; the Latin always follows TA98's preferred term, never a disagreeing Wikidata label. Further discrepancies between the sources, and conventions chosen, follow. Not yet reviewed by a human subject expert."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 54 cards: Latin backs against the TA98 entity pages, TA98 codes against P1323, the selection against the SEER lists, fronts and back notes."@en ,
+                 "Outcome: The review fetched the TA98 page of every card and found every Latin back equal to the TA98 Latin preferred term (bracketed numbering left out on purpose), the TA98 codes equal to P1323, the builder's 191 Wikidata checks passing and the selection matching SEER. One error (metatarsals called midfoot bones), two warnings (tarsal note \"rear foot\"; mandible called the skull's movable bone although the ear ossicles, skull bones in TA98 and SEER, also move) and two wording suggestions (vomer; lunate and hamate rows). All five were verified and fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 54 cards in English, Swedish and Latin; title, description and keywords."@en ,
+                 "Outcome: No errors: language tags, Swedish names (backed by Svensk MeSH, Wikidata and sv.wikipedia), English sentence case, Latin TA98 terms and the bidirectional uniqueness all correct. Five suggestions: three applied (maxilla Swedish gender agreement, ethmoid English note, the ambiguous keyword \"ben\"), the definite ear-bone names kept as documented, and the Latin-identical English fronts kept."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 54 cards' evidence and checks; every source's licence evidence, the method, queries and licensing text."@en ,
+                 "Outcome: No licence errors: every licence quote matched its source, the content sources (Wikidata, Svensk MeSH, NCI SEER) allow a CC0 deck, and attribution is complete; all Wikidata 'says' and sampled TA98, MeSH, SEER and Wikipedia quotes matched. Three warnings (TA98's real role in the Latin backs; back-note facts without content-source evidence; reproducibility) and five suggestions; all applied except where noted."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final re-check (loop 1): the 15 cards changed in the last fix, every third card, metadata, licence decision and documentation"@en ;
+    rdfs:comment "Scope: 27 cards (the 15 changed in round 3 plus every third card), metadata, licence decision and documentation."@en ,
+                 "Outcome: No errors in the cards: TA98, Wikipedia, Svensk MeSH, SEER, licence quotes and live Wikidata all matched, and the build and validator passed. One documentation warning and two suggestions; all three verified against live Wikidata and the English Wikipedia and applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final re-check (loop 2): the 3 cards changed in the last fix (atlas, axis, metacarpal-bones), every third card (1st, 4th, ... 52nd), metadata, licence decision and documentation"@en ;
+    rdfs:comment "Scope: 21 cards (atlas, axis, metacarpal-bones plus every third card), metadata, licence decision and documentation."@en ,
+                 "Outcome: No errors: TA98, Wikidata (all 196 checks), Wikipedia quotes and revisions, Svensk MeSH, SEER, licence quotes, Swedish and English wording, metadata and the quality-control log all matched. One warning: the hip-bone back note had no quoted source for its fact, contrary to the Method; verified and fixed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://mesh.kib.ki.se/>
+    dcterms:title "Svensk MeSH 2026 (Swedish translation of Medical Subject Headings)" ;
+    dcterms:creator "Karolinska Institutets Universitetsbibliotek (Swedish translation); U.S. National Library of Medicine (MeSH)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://mesh.kib.ki.se/info/om-webbplatsen — \"Licensen som tillhandahålls av KIB är också gratis och berättigar till att använda en kopia av de tabeller som gränssnittet är baserat på. Data distribueras under CC0. Ange Karolinska Institutets Bibliotek som upphovsman.\" The readme in the download says the same and that NLM is to be credited for MeSH and KIB for the translation. The same page continues: \"Själva MeSH-vokabulären produceras av NLM (the National Library of Medicine). All användning av MeSH® är föremål för de restriktioner som anges i NLM:s villkor för användning av MeSH\". NLM's terms, https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html (fetched 2026-10-04): \"NLM freely provides MeSH data. Use of MeSH Translation (MTMS) files is not covered under the NLM Terms and Conditions for MeSH data.\" and users agree to \"acknowledge NLM as the source of the data in a clear and conspicuous manner, not indicate or imply that NLM has endorsed its products/services/applications.\" The Swedish terms and Swedish scope notes (KIB's translation, CC0) are the content used; NLM's English headings, entry terms and scope notes in the same download only identified concepts and served as evidence for facts, with no wording taken. NLM is credited as the creator of MeSH and nothing implies its endorsement."@en .
+
+<https://training.seer.cancer.gov/anatomy/skeletal/divisions/axial.html>
+    dcterms:title "SEER Training Modules: Axial Skeleton (80 bones)" ;
+    dcterms:creator "U.S. National Institutes of Health, National Cancer Institute" ;
+    rdfs:comment "https://www.cancer.gov/policies/copyright-reuse — \"Unless otherwise indicated, all text within National Cancer Institute (NCI) products is free of copyright and may be reused without our permission.\""@en .
+
+<https://training.seer.cancer.gov/anatomy/skeletal/divisions/appendicular.html>
+    dcterms:title "SEER Training Modules: Appendicular Skeleton (126 bones)" ;
+    dcterms:creator "U.S. National Institutes of Health, National Cancer Institute" ;
+    rdfs:comment "https://www.cancer.gov/policies/copyright-reuse — \"Unless otherwise indicated, all text within National Cancer Institute (NCI) products is free of copyright and may be reused without our permission.\""@en .
+
+<https://ifaa.unifr.ch/>
+    dcterms:title "Terminologia Anatomica (TA98), online entity pages" ;
+    dcterms:creator "Federative International Programme on Anatomical Terminologies (FIPAT), hosted by the University of Fribourg" ;
+    rdfs:comment "Footer of every TA98 entity page fetched, e.g. https://ifaa.unifr.ch/Public/EntryPage/TA98%20Tree/Entity%20TA98%20EN/02.5.04.001%20Entity%20TA98%20EN.htm — \"FEDERATIVE INTERNATIONAL PROGRAM ON ANATOMICAL TERMINOLOGIES All rights reserved, see http://www.unifr.ch/ifaa\"."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenska Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://sv.wikipedia.org/wiki/L%C3%A5rben — \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<https://en.wikipedia.org/>
+    dcterms:title "English Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://en.wikipedia.org/wiki/Femur — \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\"."@en .
+
+<#skull>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Skull"@en ,
+                     "skalle"@sv ;
+    solid-memo:back "Cranium"@la ;
+    solid-memo:backNote "The bones of the head as a whole."@en ,
+                        "Huvudets ben som helhet."@sv .
+
+<#frontal-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frontal bone"@en ,
+                     "pannben"@sv ;
+    solid-memo:back "Os frontale"@la ;
+    solid-memo:backNote "The forehead."@en ,
+                        "Pannan."@sv .
+
+<#parietal-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Parietal bone"@en ,
+                     "hjässben"@sv ;
+    solid-memo:back "Os parietale"@la ;
+    solid-memo:backNote "Roof and sides of the skull; one on each side."@en ,
+                        "Skallens tak och sidor; ett på varje sida."@sv .
+
+<#occipital-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Occipital bone"@en ,
+                     "nackben"@sv ;
+    solid-memo:back "Os occipitale"@la ;
+    solid-memo:backNote "Back and base of the skull."@en ,
+                        "Skallens bakre, nedre del."@sv .
+
+<#temporal-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Temporal bone"@en ,
+                     "tinningben"@sv ;
+    solid-memo:back "Os temporale"@la ;
+    solid-memo:backNote "Side of the skull, around the ear; one on each side."@en ,
+                        "Skallens sida, runt örat; ett på varje sida."@sv .
+
+<#sphenoid-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sphenoid bone"@en ,
+                     "kilben"@sv ;
+    solid-memo:back "Os sphenoidale"@la ;
+    solid-memo:backNote "Middle of the skull base."@en ,
+                        "Mitt i skallbasen."@sv .
+
+<#ethmoid-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ethmoid bone"@en ,
+                     "silben"@sv ;
+    solid-memo:back "Os ethmoidale"@la ;
+    solid-memo:backNote "Between the eye sockets; separates the nasal cavity from the cranial cavity."@en ,
+                        "Mellan ögonhålorna; skiljer näshålan från hjärnhålan."@sv .
+
+<#nasal-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nasal bone"@en ,
+                     "näsben"@sv ;
+    solid-memo:back "Os nasale"@la ;
+    solid-memo:backNote "Upper part of the bridge of the nose; one on each side."@en ,
+                        "Näsryggens övre del; ett på varje sida."@sv .
+
+<#zygomatic-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cheekbone"@en ,
+                     "okben"@sv ;
+    solid-memo:back "Os zygomaticum"@la ;
+    solid-memo:backNote "Also called the zygomatic bone; one on each side."@en ,
+                        "Kallas också kindben; ett på varje sida."@sv .
+
+<#lacrimal-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lacrimal bone"@en ,
+                     "tårben"@sv ;
+    solid-memo:back "Os lacrimale"@la ;
+    solid-memo:backNote "Front of the inner wall of the eye socket; one on each side."@en ,
+                        "Främre delen av ögonhålans inre vägg; ett på varje sida."@sv .
+
+<#maxilla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Upper jaw"@en ,
+                     "överkäke"@sv ;
+    solid-memo:back "Maxilla"@la ;
+    solid-memo:backNote "Two bones, one on each side; they hold the upper teeth."@en ,
+                        "Två ben, ett på varje sida; i dem sitter de övre tänderna."@sv .
+
+<#mandible>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lower jaw"@en ,
+                     "underkäke"@sv ;
+    solid-memo:back "Mandibula"@la ;
+    solid-memo:backNote "Moves at the jaw joint; holds the lower teeth."@en ,
+                        "Rör sig i käkleden; här sitter de nedre tänderna."@sv .
+
+<#vomer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vomer"@en ,
+                     "plogben"@sv ;
+    solid-memo:back "Vomer"@la ;
+    solid-memo:backNote "Lower back part of the nasal septum."@en ,
+                        "Nedre, bakre delen av nässkiljeväggen."@sv .
+
+<#hyoid-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hyoid bone"@en ,
+                     "tungben"@sv ;
+    solid-memo:back "Os hyoideum"@la ;
+    solid-memo:backNote "In the neck; it carries the root of the tongue and touches no other bone."@en ,
+                        "I halsen; det bär tungroten och ledar inte mot något annat ben."@sv .
+
+<#malleus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hammer"@en ,
+                     "hammaren"@sv ;
+    solid-memo:back "Malleus"@la ;
+    solid-memo:backNote "Ear ossicle attached to the eardrum."@en ,
+                        "Hörselben som sitter fast i trumhinnan."@sv .
+
+<#incus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Anvil"@en ,
+                     "städet"@sv ;
+    solid-memo:back "Incus"@la ;
+    solid-memo:backNote "Middle ear ossicle between the hammer and the stirrup."@en ,
+                        "Hörselbenet mellan hammaren och stigbygeln."@sv .
+
+<#stapes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stirrup"@en ,
+                     "stigbygeln"@sv ;
+    solid-memo:back "Stapes"@la ;
+    solid-memo:backNote "Ear ossicle; the smallest bone in the body."@en ,
+                        "Hörselben; kroppens minsta ben."@sv .
+
+<#auditory-ossicles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Auditory ossicles"@en ,
+                     "hörselben"@sv ;
+    solid-memo:back "Ossicula auditus"@la ;
+    solid-memo:backNote "The three small bones of the middle ear."@en ,
+                        "Mellanörats tre små ben."@sv .
+
+<#vertebral-column>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Backbone"@en ,
+                     "ryggrad"@sv ;
+    solid-memo:back "Columna vertebralis"@la ;
+    solid-memo:backNote "Also called the spine or vertebral column."@en ,
+                        "Kallas också kotpelare."@sv .
+
+<#cervical-vertebrae>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cervical vertebrae"@en ,
+                     "halskotor"@sv ;
+    solid-memo:back "Vertebrae cervicales"@la ;
+    solid-memo:backNote "The seven vertebrae of the neck."@en ,
+                        "Halsens sju kotor."@sv .
+
+<#thoracic-vertebrae>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thoracic vertebrae"@en ,
+                     "bröstkotor"@sv ;
+    solid-memo:back "Vertebrae thoracicae"@la ;
+    solid-memo:backNote "The twelve vertebrae that the ribs join."@en ,
+                        "De tolv kotor som revbenen ledar mot."@sv .
+
+<#lumbar-vertebrae>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lumbar vertebrae"@en ,
+                     "ländkotor"@sv ;
+    solid-memo:back "Vertebrae lumbales"@la ;
+    solid-memo:backNote "The five vertebrae of the lower back."@en ,
+                        "Ländryggens fem kotor."@sv .
+
+<#atlas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First cervical vertebra"@en ,
+                     "första halskotan"@sv ;
+    solid-memo:back "Atlas"@la ;
+    solid-memo:backNote "It carries the skull."@en ,
+                        "Kallas också ringkotan; den bär upp skallen."@sv .
+
+<#axis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Second cervical vertebra"@en ,
+                     "andra halskotan"@sv ;
+    solid-memo:back "Axis"@la ;
+    solid-memo:backNote "The atlas turns around its peg, the dens."@en ,
+                        "Kallas också tappkotan; ringkotan vrider sig kring dess tapp (dens)."@sv .
+
+<#sacrum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sacrum"@en ,
+                     "korsben"@sv ;
+    solid-memo:back "Os sacrum"@la ;
+    solid-memo:backNote "Fused vertebrae at the back of the pelvis."@en ,
+                        "Sammanvuxna kotor i bäckenets bakre vägg."@sv .
+
+<#coccyx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tailbone"@en ,
+                     "svansben"@sv ;
+    solid-memo:back "Os coccygis"@la ;
+    solid-memo:backNote "The lowest end of the spine."@en ,
+                        "Ryggradens nedersta del."@sv .
+
+<#sternum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Breastbone"@en ,
+                     "bröstben"@sv ;
+    solid-memo:back "Sternum"@la ;
+    solid-memo:backNote "Front of the chest."@en ,
+                        "Mitt fram på bröstkorgen."@sv .
+
+<#ribs>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ribs"@en ,
+                     "revben"@sv ;
+    solid-memo:back "Costae"@la ;
+    solid-memo:backNote "Most people have twelve pairs."@en ,
+                        "De flesta människor har tolv par."@sv .
+
+<#clavicle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Collarbone"@en ,
+                     "nyckelben"@sv ;
+    solid-memo:back "Clavicula"@la ;
+    solid-memo:backNote "Between the breastbone and the shoulder blade."@en ,
+                        "Mellan bröstbenet och skulderbladet."@sv .
+
+<#scapula>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Shoulder blade"@en ,
+                     "skulderblad"@sv ;
+    solid-memo:back "Scapula"@la ;
+    solid-memo:backNote "On the back of the rib cage."@en ,
+                        "På bröstkorgens baksida."@sv .
+
+<#humerus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Humerus"@en ,
+                     "överarmsben"@sv ;
+    solid-memo:back "Humerus"@la ;
+    solid-memo:backNote "The upper arm, from shoulder to elbow."@en ,
+                        "Överarmen, från axeln till armbågen."@sv .
+
+<#radius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Radius"@en ,
+                     "strålben"@sv ;
+    solid-memo:back "Radius"@la ;
+    solid-memo:backNote "Forearm, on the thumb side."@en ,
+                        "Underarmen, på tumsidan."@sv .
+
+<#ulna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ulna"@en ,
+                     "armbågsben"@sv ;
+    solid-memo:back "Ulna"@la ;
+    solid-memo:backNote "Forearm, on the little-finger side."@en ,
+                        "Underarmen, på lillfingersidan."@sv .
+
+<#carpal-bones>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Carpal bones"@en ,
+                     "handlovsben"@sv ;
+    solid-memo:back "Ossa carpi"@la ;
+    solid-memo:backNote "The eight small bones of the wrist."@en ,
+                        "Handlovens åtta små ben."@sv .
+
+<#metacarpal-bones>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Metacarpal bones"@en ,
+                     "mellanhandsben"@sv ;
+    solid-memo:back "Ossa metacarpi"@la ;
+    solid-memo:backNote "The five bones of the palm."@en ,
+                        "Mellanhandens fem ben."@sv .
+
+<#scaphoid-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scaphoid bone"@en ,
+                     "handlovens båtben"@sv ;
+    solid-memo:back "Os scaphoideum"@la ;
+    solid-memo:backNote "Wrist, on the thumb side."@en ,
+                        "Handloven, på tumsidan."@sv .
+
+<#lunate-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lunate bone"@en ,
+                     "månben"@sv ;
+    solid-memo:back "Os lunatum"@la ;
+    solid-memo:backNote "Wrist, in the row nearest the forearm, next to the scaphoid."@en ,
+                        "Handloven, i raden närmast underarmen, bredvid båtbenet."@sv .
+
+<#pisiform-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pisiform bone"@en ,
+                     "ärtben"@sv ;
+    solid-memo:back "Os pisiforme"@la ;
+    solid-memo:backNote "Wrist; a small sesamoid bone on the little-finger side."@en ,
+                        "Handloven; ett litet sesamben på lillfingersidan."@sv .
+
+<#hamate-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hamate bone"@en ,
+                     "hakben"@sv ;
+    solid-memo:back "Os hamatum"@la ;
+    solid-memo:backNote "Wrist, in the row nearest the fingers; it has a hook."@en ,
+                        "Handloven, i raden närmast fingrarna; det har en krok."@sv .
+
+<#hip-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hip bone"@en ,
+                     "höftben"@sv ;
+    solid-memo:back "Os coxae"@la ;
+    solid-memo:backNote "The ilium, ischium and pubis grown together; one on each side."@en ,
+                        "Tarmbenet, sittbenet och blygdbenet sammanvuxna; ett på varje sida."@sv .
+
+<#ilium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ilium"@en ,
+                     "tarmben"@sv ;
+    solid-memo:back "Os ilium"@la ;
+    solid-memo:backNote "Upper part of the hip bone."@en ,
+                        "Höftbenets övre del."@sv .
+
+<#ischium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ischium"@en ,
+                     "sittben"@sv ;
+    solid-memo:back "Os ischii"@la ;
+    solid-memo:backNote "Lower back part of the hip bone."@en ,
+                        "Höftbenets nedre, bakre del."@sv .
+
+<#pubis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pubic bone"@en ,
+                     "blygdben"@sv ;
+    solid-memo:back "Os pubis"@la ;
+    solid-memo:backNote "Lower front part of the hip bone."@en ,
+                        "Höftbenets nedre, främre del."@sv .
+
+<#pelvis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pelvis"@en ,
+                     "bäcken"@sv ;
+    solid-memo:back "Pelvis"@la ;
+    solid-memo:backNote "The bony ring between the spine and the thigh bones."@en ,
+                        "Benringen mellan ryggraden och lårbenen."@sv .
+
+<#femur>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thigh bone"@en ,
+                     "lårben"@sv ;
+    solid-memo:back "Femur"@la ;
+    solid-memo:backNote "The longest bone in the body."@en ,
+                        "Kroppens längsta ben."@sv .
+
+<#patella>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kneecap"@en ,
+                     "knäskål"@sv ;
+    solid-memo:back "Patella"@la ;
+    solid-memo:backNote "Front of the knee; the body's largest sesamoid bone."@en ,
+                        "Knäts framsida; kroppens största sesamben."@sv .
+
+<#tibia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Shinbone"@en ,
+                     "skenben"@sv ;
+    solid-memo:back "Tibia"@la ;
+    solid-memo:backNote "The larger of the two lower-leg bones."@en ,
+                        "Det större av underbenets två ben."@sv .
+
+<#fibula>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Calf bone"@en ,
+                     "vadben"@sv ;
+    solid-memo:back "Fibula"@la ;
+    solid-memo:backNote "The slender outer bone of the lower leg."@en ,
+                        "Underbenets smala, yttre ben."@sv .
+
+<#tarsal-bones>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tarsal bones"@en ,
+                     "fotrotsben"@sv ;
+    solid-memo:back "Ossa tarsi"@la ;
+    solid-memo:backNote "The seven bones of the hindfoot and midfoot."@en ,
+                        "Fotrotens sju ben."@sv .
+
+<#metatarsal-bones>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Metatarsal bones"@en ,
+                     "mellanfotsben"@sv ;
+    solid-memo:back "Ossa metatarsi"@la ;
+    solid-memo:backNote "The five long bones between the tarsal bones and the toes."@en ,
+                        "Mellanfotens fem långa ben."@sv .
+
+<#talus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Talus"@en ,
+                     "språngben"@sv ;
+    solid-memo:back "Talus"@la ;
+    solid-memo:backNote "Ankle; it carries the shinbone."@en ,
+                        "Fotleden; det bär skenbenet."@sv .
+
+<#calcaneus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Heel bone"@en ,
+                     "hälben"@sv ;
+    solid-memo:back "Calcaneus"@la ;
+    solid-memo:backNote "The largest tarsal bone; it forms the heel."@en ,
+                        "Det största fotrotsbenet; det bildar hälen."@sv .
+
+<#navicular-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Navicular bone"@en ,
+                     "fotens båtben"@sv ;
+    solid-memo:back "Os naviculare"@la ;
+    solid-memo:backNote "Inner side of the foot, in front of the talus."@en ,
+                        "Fotens insida, framför språngbenet."@sv .
+
+<#cuboid-bone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cuboid bone"@en ,
+                     "tärningsben"@sv ;
+    solid-memo:back "Os cuboideum"@la ;
+    solid-memo:backNote "Tarsal bone on the outer side of the foot."@en ,
+                        "Fotrotsben på fotens utsida."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

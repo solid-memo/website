@@ -1,0 +1,753 @@
+@base <https://solid-memo.com/decks/unix-shell-commands/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Unix shell commands"@en ,
+                  "Unix-skalkommandon"@sv ,
+                  "Unix 셸 명령어"@ko ,
+                  "Unix-Shell-Befehle"@de ,
+                  "Comandos de la shell de Unix"@es ,
+                  "Commandes du shell Unix"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "55 everyday Unix and Linux shell commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <file> or <dir>. Covers moving around the directory tree, files and directories, viewing and searching files (grep, find), permissions, processes and jobs, tar archives, pipes and redirection, disk usage and networking basics. POSIX commands and options are preferred; notes say where a command is GNU, XSI or Linux-specific. Every command was run with dash and bash on Linux (uutils and GNU coreutils) and checked against the POSIX.1-2024 specification and the GNU manuals."@en ,
+                        "55 vardagliga skalkommandon för Unix och Linux: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <file> eller <dir>. Omfattar förflyttning i katalogträdet, filer och kataloger, att visa och söka i filer (grep, find), rättigheter, processer och jobb, tar-arkiv, rör (pipes) och omdirigering, diskanvändning och grundläggande nätverkskommandon. POSIX-kommandon och POSIX-flaggor föredras; anteckningar talar om när ett kommando är specifikt för GNU, XSI eller Linux. Varje kommando har körts med dash och bash på Linux (uutils och GNU coreutils) och kontrollerats mot specifikationen POSIX.1-2024 och GNU:s handböcker."@sv ,
+                        "날마다 쓰는 Unix·Linux 셸 명령어 55개입니다. 앞면은 할 일을 영어와 스웨덴어의 쉬운 말로 설명하고, 뒷면은 그 일을 하는 명령어로, <file>이나 <dir> 같은 자리 표시자가 들어 있습니다. 디렉터리 트리 이동, 파일과 디렉터리, 파일 보기와 검색(grep, find), 권한, 프로세스와 작업, tar 아카이브, 파이프와 리디렉션, 디스크 사용량, 네트워크 기초를 다룹니다. POSIX 명령어와 옵션을 우선하며, 명령어가 GNU, XSI 또는 Linux 전용이면 메모로 알려 줍니다. 모든 명령어는 Linux에서 dash와 bash(uutils와 GNU coreutils)로 실행해 보았고, POSIX.1-2024 명세와 GNU 매뉴얼로 확인했습니다."@ko ,
+                        "55 alltägliche Shell-Befehle für Unix und Linux: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten auf Englisch und Schwedisch, die Rückseite ist der Befehl, der sie erledigt, mit Platzhaltern wie <file> oder <dir>. Behandelt werden das Bewegen im Verzeichnisbaum, Dateien und Verzeichnisse, das Anzeigen und Durchsuchen von Dateien (grep, find), Berechtigungen, Prozesse und Jobs, tar-Archive, Pipes und Umleitung, Speicherplatzbelegung und Netzwerkgrundlagen. POSIX-Befehle und -Optionen werden bevorzugt; Anmerkungen sagen, wo ein Befehl GNU-, XSI- oder Linux-spezifisch ist. Jeder Befehl wurde mit dash und bash unter Linux (uutils und GNU coreutils) ausgeführt und anhand der Spezifikation POSIX.1-2024 und der GNU-Handbücher geprüft."@de ,
+                        "55 comandos cotidianos de la shell de Unix y Linux: el anverso describe una tarea con palabras sencillas en inglés y en sueco, el reverso es el comando que la realiza, con marcadores de posición como <file> o <dir>. Abarca moverse por el árbol de directorios, archivos y directorios, ver archivos y buscar en ellos (grep, find), permisos, procesos y trabajos, archivos tar, tuberías y redirección, uso del disco y nociones básicas de redes. Se prefieren los comandos y opciones POSIX; las notas indican cuándo un comando es propio de GNU, XSI o Linux. Cada comando se ejecutó con dash y bash en Linux (uutils y GNU coreutils) y se comprobó con la especificación POSIX.1-2024 y los manuales de GNU."@es ,
+                        "55 commandes du shell Unix et Linux de tous les jours : le recto décrit une tâche en mots simples en anglais et en suédois, le verso est la commande qui l’accomplit, avec des marqueurs comme <file> ou <dir>. Le paquet couvre les déplacements dans l’arborescence des répertoires, les fichiers et répertoires, l’affichage et la recherche dans les fichiers (grep, find), les droits, les processus et les tâches, les archives tar, les tubes et la redirection, l’utilisation du disque et les bases du réseau. Les commandes et options POSIX sont privilégiées ; des notes indiquent quand une commande est propre à GNU, à XSI ou à Linux. Chaque commande a été exécutée avec dash et bash sous Linux (uutils et GNU coreutils) et vérifiée dans la spécification POSIX.1-2024 et les manuels GNU."@fr ;
+    prov:wasDerivedFrom <#test-runs> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "Unix"@en ,
+                 "Linux"@en ,
+                 "shell"@en ,
+                 "command line"@en ,
+                 "POSIX"@en ,
+                 "terminal"@en ,
+                 "skal"@sv ,
+                 "kommandorad"@sv ,
+                 "skalkommandon"@sv ,
+                 "kommandotolk"@sv ,
+                 "Unix"@sv ,
+                 "Linux"@sv ,
+                 "POSIX"@sv ,
+                 "terminal"@sv ,
+                 "Unix"@ko ,
+                 "Linux"@ko ,
+                 "셸"@ko ,
+                 "명령줄"@ko ,
+                 "POSIX"@ko ,
+                 "터미널"@ko ,
+                 "Unix"@de ,
+                 "Linux"@de ,
+                 "Shell"@de ,
+                 "Kommandozeile"@de ,
+                 "POSIX"@de ,
+                 "Terminal"@de ,
+                 "Unix"@es ,
+                 "Linux"@es ,
+                 "shell"@es ,
+                 "línea de comandos"@es ,
+                 "POSIX"@es ,
+                 "terminal"@es ,
+                 "Unix"@fr ,
+                 "Linux"@fr ,
+                 "shell"@fr ,
+                 "ligne de commande"@fr ,
+                 "POSIX"@fr ,
+                 "terminal"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/unix-shell-commands/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#unix-shell-commands> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#unix-shell-commands> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://www.gnu.org/licenses/fdl-1.3.html>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <#test-runs> ,
+              <https://pubs.opengroup.org/onlinepubs/9799919799/> ,
+              <https://www.gnu.org/software/coreutils/manual/coreutils.html> ,
+              <https://www.gnu.org/software/grep/manual/grep.html> ,
+              <https://www.gnu.org/software/tar/manual/tar.html> ,
+              <https://www.gnu.org/software/bash/manual/bash.html> ,
+              <https://curl.se/docs/manpage.html> ,
+              <https://man.openbsd.org/ssh.1> ,
+              <https://man7.org/linux/man-pages/man8/ping.8.html> ,
+              <https://translationproject.org/latest/coreutils/sv.po> ,
+              <https://sv.wikipedia.org/wiki/Standard_error> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (a test run of every command in a throwaway directory, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidate tasks: the authoring agent drew up its own working list of roughly 70 everyday shell tasks in the areas the library editor asked for (moving between directories, files and directories, viewing files, searching with grep and find, permissions, processes, tar archives, pipes and redirection, disk usage, networking basics), then cut it to 55. The working list itself was not saved; what was left out is recorded by kind under Selection, together with the four tasks that were tested and then dropped. The list was not taken from any published list, cheat sheet or manual."@en ,
+                 "Portability: for each task the deck uses the POSIX.1-2024 utility and option where one exists (checked on the utility's page of the specification, pubs.opengroup.org/onlinepubs/9799919799/utilities/<name>.html, and chapter 2 of the Shell and Utilities volume for redirection, pipelines, background lists and the tilde). Where the usual answer is not POSIX the card keeps the usual answer and its note says so: grep -r (GNU), df -h and du -sh (-h is GNU; POSIX has -k), tar (not in POSIX.1-2024, which has pax; GNU tar options), ping (iputils), curl and ssh/scp (not POSIX utilities). Where the answer is POSIX but in the XSI option group the note says that too (ps -ef, kill -9, with the non-XSI kill -s KILL). Synonyms are named in notes rather than given cards of their own (ls -A, cd ~, rm -R, cp -r, kill -s KILL, tar -xf, bash's &>)."@en ,
+                 "Notation on the back: the exact command as typed, text in no language (tagged zxx), with placeholders in angle brackets for what the user supplies (<file>, <dir>, <path>, <source>, <target>, <old>, <new>, <link>, <pattern>, <command>, <command1>, <command2>, <user>, <host>, <pid>, <archive>, <url>, <file1>, <file2>), as in the git-commands deck. Placeholders are English words because they stand for what is typed; the fronts explain them in both languages. Where the task names a concrete value (20 lines, 4 echo requests, .txt, the octal mode 644) the back uses that value. The published Markdown report shows these placeholders as typed only when read as raw Markdown or in a viewer that keeps unknown tags: GitHub's renderer drops text such as <file> as an unknown HTML tag. The dossier (JSON) and the deck (Turtle) hold them intact."@en ,
+                 "Test runs (the content source): the script run-shell-commands.sh (reproduced verbatim in the dossier's Queries) creates a fresh work directory inside the scratch directory, sets HOME to a directory inside it, TZ=UTC, LC_ALL=C.UTF-8 and umask 022, and for every card runs the command with its placeholders filled in followed by commands that show its effect (pwd, ls, find, cat, wc, ls -l, ps, wait status, and so on); a final section 'CARD notes-checks' runs the behaviours named in notes. It was run on 2026-10-04 on Ubuntu 26.04 LTS (Linux 6.18 under WSL2) twice by sc-run.py: run 1 with dash (the system's /bin/sh) and the default PATH, where most coreutils are uutils coreutils 0.8.0 (Ubuntu 26.04's default) and rm, cp, mv and df are GNU coreutils 9.7; run 2 with bash 5.3.9 and a directory of links to the GNU coreutils 9.7 binaries (/usr/bin/gnu*) first in PATH, so that every coreutils command was GNU's. Other programs: GNU grep 3.12, GNU findutils 4.10.0, GNU tar 1.35, gzip 1.14, GNU diffutils 3.12, procps-ng 4.0.4 (ps, kill), iputils ping 20250605, curl 8.18.0, OpenSSH 10.2p1. The versions were recorded with env.py and env2.py and with dpkg-query. On Ubuntu 26.04 the package named 'coreutils' (9.5-1ubuntu2+0.0.0~ubuntu25) is a transitional package that installs uutils (rust-coreutils 0.8.0); the GNU binaries (/usr/bin/gnu*) come from the package gnu-coreutils 9.7-3ubuntu2.1. The two outputs differ only in the work-directory path, process IDs, ping times, process counts and the wording of some error messages (uutils versus GNU); every command had the same effect in both. Both full outputs are reproduced in the dossier's Queries, and every card's evidence cites its section (\"CARD <id>\")."@en ,
+                 "Job control: jobs and fg need an interactive shell with a terminal (in the non-interactive test script dash answered \"can't access tty; job control turned off\" and fg failed, see Quality control), so jobs-pty.py runs dash -i and bash -i in a pseudo-terminal and types sleep 3 &, jobs, fg and jobs into each; its output is in the dossier's Queries."@en ,
+                 "Networking: ping -c 4 was run against the loopback address 127.0.0.1. curl -O and curl -o downloaded https://raw.githubusercontent.com/curl/curl/master/COPYING (gnu.org did not answer reliably from the research environment). No SSH server was available, so ssh and scp were verified as far as possible without one: ssh -G alice@example.org (prints the configuration ssh would use: user alice, hostname example.org, port 22, without connecting), and ssh and scp with -v against github.com as user git, with the user's own SSH configuration, keys and known_hosts kept out (-F /dev/null, BatchMode, PubkeyAuthentication=no, a known_hosts file in the scratch directory); the debug output shows 'Authenticating to github.com:22 as 'git'' and the server's 'Permission denied (publickey)', i.e. the command lines are parsed as a login as <user> on <host>, and for scp that the remote side is reached over SSH. A completed login and file transfer were not observed."@en ,
+                 "Cross-check (verification sources): for every card the matching page of POSIX.1-2024 (fetched with fetch_posix.py and converted to text) or, for commands and options outside POSIX, the GNU coreutils, grep or tar manual, the Bash Reference Manual, the curl man page, the OpenSSH ssh(1) and scp(1) pages or the iputils ping(8) page (fetched with fetch_more.py) was read at the option used; the passages were printed with posix-opts.py, gnu-opts.py, more-opts.py and px.py (all reproduced in the dossier's Queries with the command lines used), and each card's evidence records what the source says. Observed behaviour and documented behaviour agreed for every card. The licence statements were printed with lic.py."@en ,
+                 "Swedish text: the Swedish fronts and notes were written by the authoring agent in its own words, using the technical terms of the GNU tools' own Swedish translations (coreutils, grep, tar, findutils and bash sv.po from the Translation Project, searched with po.py for the English message strings; e.g. 'current directory' -> 'aktuell katalog', 'make parent directories as needed' -> 'skapa föräldrakataloger vid behov', 'use a long listing format' -> 'använd långt listningsformat', 'sort by time, newest first' -> 'sortera efter tid, nyast först', 'ignore case distinctions' -> 'skilj ej på gemener och versaler', 'Move job to the foreground' -> 'Flytta ett jobb till förgrunden', 'invalid process id' -> 'ogiltigt process-id', standard error -> 'standard fel', which quality-control round 2 (the language review) replaced by 'standard error (stderr)' after the Swedish Wikipedia article Standard error). Commands and placeholders are kept as typed. Swedish conventions: lower-case common nouns, 'Ctrl' and program names as written."@en ,
+                 "Ambiguity checks: each front states the scope (current directory, recursively, every depth, the whole file), the count (20 lines, 4 requests), whether files are replaced or appended to, and which way a copy goes, so that one command answers it; where an exact synonym exists it is named in the note. Pairs that look alike were made distinct on purpose: ls -a versus ls -l versus ls -lt; mkdir versus mkdir -p; rmdir versus rm -r; rm versus rm -r; cp versus cp -R; grep, -i, -v, -n, -r; > versus >> versus 2> versus > <file> 2>&1; kill versus kill -9; tar -czf versus -xzf. The study direction is front to back only (many backs are short commands that a reverse card could not phrase uniquely), so the builder's uniqueness check applies to the fronts, and every front is unique in both languages."@en ,
+                 "Everything was then written into the dossier, built with the builder and validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts unix-shell-commands). There are no Wikidata checks: no card's fact or wording is a Wikidata statement or label."@en ,
+                 "Selection: 55 tasks that come up in everyday work in a Unix or Linux shell: moving around (pwd, cd to home, to the parent, back to the previous directory), listing (ls -a, -l, -lt), files and directories (mkdir, mkdir -p, rmdir, rm, rm -r, cp, cp -R, mv, touch, ln -s), viewing (cat, head, tail, tail -f, wc -l, diff, sort), searching (grep and its -i, -v, -n and -r options; find by name and by type), permissions and ownership (chmod +x, chmod 644, chown), processes and jobs (ps -ef, kill, kill -9, &, jobs, fg), tar archives (create and extract gzip-compressed), pipes and redirection (>, >>, 2>, > file 2>&1, |, tee), disk usage (df -h, du -sh), networking (ping -c, curl -O, ssh, scp) and man. Left out: interactive programs whose use is not a command line (editors, less and more, top); commands without a single canonical answer for the task (downloading a file without naming the tool, where curl and wget both answer; finding where a command lives, where command -v, type and which compete; paging a file, where less and more compete); options whose exact behaviour differs widely between implementations (find -size with M suffixes, sed -i, ls --color); shell-specific features beyond what notes mention (history, aliases, brace expansion); administration commands that need root (useradd, mount, systemctl) and package managers, which differ by distribution. Four tasks were tested in the first draft but dropped to keep the deck near 50 cards: grep -c, chmod go-w, chown <user>:<group> and tar -tzf. Each remaining card is atomic: one command, one option set."@en ,
+                 "Licensing: The deck is CC0 1.0. Its only content source is the authoring agent's own test runs of the commands on Ubuntu 26.04, whose scripts and output are reproduced in the provenance report; the scripts and the agent's annotations are dedicated to the public domain with the deck, while the program messages quoted in the output remain their programs' and are reproduced only as a factual record, none of them in the deck. Which command line performs a task is a fact about a program's behaviour and interface, and observing it copies nothing from the programs' code or documentation. The fronts, notes and the selection of tasks are the authoring agent's own wording and choice. The POSIX.1-2024 specification (all rights reserved by the IEEE and The Open Group), the GNU coreutils, grep and tar manuals and the Bash Reference Manual (GFDL 1.3), the curl man page (curl licence, notice required), the OpenSSH and iputils manual pages (BSD-style terms) and the GNU tools' Swedish translations (GPL) were all used as verification sources only: they confirmed that each command and option does what the front says, which options are POSIX, XSI or GNU, and which Swedish technical terms the tools use, and no sentence, example or list was copied from them (single technical terms such as 'aktuell katalog' or 'föräldrakatalog' are ordinary Swedish vocabulary, not protected expression). Command names, option letters and the shell's operators are the programs' interface and are needed to state the fact at all. No cheat sheet or third-party tutorial was consulted. No source's licence therefore requires attribution or share-alike, though every source is credited in the deck and the provenance report."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Every command run in a throwaway directory with dash (uutils/GNU coreutils mix) and with bash (GNU coreutils 9.7), jobs and fg in a pseudo-terminal; every command and option checked against POSIX.1-2024 or, outside POSIX, the GNU manuals and the curl, OpenSSH and iputils manual pages; fronts checked for a single canonical answer; Swedish terms checked against the GNU tools' Swedish translations; builder and validator checks."@en ;
+    rdfs:comment "Scope: All 55 cards, and the synonyms and behaviours named in the notes."@en ,
+                 "Outcome: All 55 commands ran and had the effect the front describes in both runs, except that ssh and scp could be followed only up to authentication (no SSH server available; see the finding). Commands expected to fail did (mkdir without -p on a missing parent, rmdir on a non-empty directory, rm and cp on a directory without -r/-R, grep on a directory without -r, running a script before chmod +x, chown to root as an ordinary user, kill on a process ignoring SIGTERM). Every command and option is documented with the behaviour on the card. No Wikidata checks: no card's content is a Wikidata statement or label. The findings record the problems met while writing the tests and the decisions about portable versus usual forms."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 55 cards, against the POSIX.1-2024 utility pages, the GNU df man page and the review's own tests in dash and bash."@en ,
+                 "Outcome: No wrong command was found. Two warnings (df-h's 'every mounted file system' and ln-symbolic's 'same order as cp' note) and three suggestions were all confirmed by the authoring agent's re-tests (qc1-tests.sh, in the dossier's Queries) and the sources, and all five were applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 55 cards, the title, the description and the keywords."@en ,
+                 "Outcome: Language tags were found correct throughout (fronts and notes en + sv, backs zxx). One error (the split compound 'standard fel'), three warnings and six suggestions about the Swedish were checked; all were applied. The untagged dcat:keyword literals are written so by the builder for every deck and are outside this deck's dossier."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Licensing and attribution of all 10 sources; evidence of about 25 cards spot-checked against live sources and the downloaded copies; the documentation."@en ,
+                 "Outcome: The CC0 licence was confirmed sound and every 'says' that was sampled was accurate. One warning (placeholders lost when GitHub renders the report) and four suggestions about the record were handled: the version record, the outputs of the passage-printing scripts and the rm-recursive wording were improved, and the method now says plainly that the working list of candidates was not saved."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 13 cards changed after rounds 1-3 and every third card (27 cards checked), the metadata, the description, the licence decision and the documentation."@en ,
+                 "Outcome: The review confirmed every fix of rounds 1-3 and found no factual, language or language-tag errors in the cards. One documentation error (fixes attributed to the wrong review round) was fixed, and the suggestion to say in the ps-ef note that ps itself is XSI was applied after checking the live POSIX page."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<#test-runs>
+    dcterms:title "Test runs of every command with dash 0.5.12 and bash 5.3.9 on Ubuntu 26.04 (uutils coreutils 0.8.0 and GNU coreutils 9.7) in a throwaway directory" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Written for this deck: the test scripts and their recorded output are recorded verbatim in the deck's original provenance report. The scripts and the authoring agent's annotations are dedicated to the public domain under CC0 1.0. The program messages quoted in the recorded output (error messages of ls, rm, cp, mkdir, chown, the text of the curl licence file and of the ls manual page that the tests printed, and so on) belong to those programs and are reproduced only as a factual record of what the programs printed; the deck itself contains none of them. Running a program and recording which command lines it accepts and what they do copies none of its code or documentation."@en .
+
+<https://pubs.opengroup.org/onlinepubs/9799919799/>
+    dcterms:title "The Open Group Base Specifications Issue 8 (IEEE Std 1003.1-2024, POSIX.1-2024): the Shell and Utilities volume (utility pages and chapter 2, Shell Command Language) and <signal.h>" ;
+    dcterms:creator "IEEE and The Open Group" ;
+    rdfs:comment "Footer of every page, e.g. https://pubs.opengroup.org/onlinepubs/9799919799/utilities/ls.html (fetched 2026-10-04): \"Copyright © 2001-2024 The IEEE and The Open Group, All Rights Reserved\". Verification only."@en .
+
+<https://www.gnu.org/software/coreutils/manual/coreutils.html>
+    dcterms:title "GNU Coreutils manual (for version 9.12)" ;
+    dcterms:creator "Free Software Foundation (David MacKenzie, Jim Meyering and others)" ;
+    dcterms:license <https://www.gnu.org/licenses/fdl-1.3.html> ;
+    rdfs:comment "Title page of the manual (fetched 2026-10-04): \"Copyright © 1994–2026 Free Software Foundation, Inc. Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free Software Foundation; with no Invariant Sections, with no Front-Cover Texts, and with no Back-Cover Texts.\" GFDL documentation is verification only under the library's policy."@en .
+
+<https://www.gnu.org/software/grep/manual/grep.html>
+    dcterms:title "GNU Grep manual (for version 3.12)" ;
+    dcterms:creator "Free Software Foundation" ;
+    dcterms:license <https://www.gnu.org/licenses/fdl-1.3.html> ;
+    rdfs:comment "Title page of the manual (fetched 2026-10-04): \"Copyright © 1999–2002, 2005, 2008–2025 Free Software Foundation, Inc. Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free Software Foundation; with no Invariant Sections, with no Front-Cover Texts, and with no Back-Cover Texts.\" Verification only."@en .
+
+<https://www.gnu.org/software/tar/manual/tar.html>
+    dcterms:title "GNU tar manual (for version 1.35.90, 11 June 2026)" ;
+    dcterms:creator "Free Software Foundation" ;
+    dcterms:license <https://www.gnu.org/licenses/fdl-1.3.html> ;
+    rdfs:comment "Title page of the manual (fetched 2026-10-04): \"Copyright © 1992, 1994–1997, 1999–2001, 2003–2017, 2021–2026 Free Software Foundation, Inc. Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free Software Foundation; with the Invariant Sections being “GNU General Public License”, with the Front-Cover Texts being “A GNU Manual”, ...\" Verification only."@en .
+
+<https://www.gnu.org/software/bash/manual/bash.html>
+    dcterms:title "Bash Reference Manual (Edition 5.3, 18 May 2025)" ;
+    dcterms:creator "Free Software Foundation (Chet Ramey and Brian Fox)" ;
+    dcterms:license <https://www.gnu.org/licenses/fdl-1.3.html> ;
+    rdfs:comment "Notice at the head of the manual's HTML source (fetched 2026-10-04): \"Copyright © 1988-2025 Free Software Foundation, Inc. Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.\" Verification only."@en .
+
+<https://curl.se/docs/manpage.html>
+    dcterms:title "curl man page (curl.se/docs/manpage.html, describing curl 8.23.0)" ;
+    dcterms:creator "Daniel Stenberg and the curl contributors" ;
+    rdfs:comment "Licence: the curl licence, an MIT/X-style licence, recorded as \"unknown\" only because the builder has no licence id for it. https://curl.se/docs/copyright.html (fetched 2026-10-04): \"Copyright (c) 1996 - 2026, Daniel Stenberg, daniel@haxx.se, and many contributors, see the THANKS file. All rights reserved. Permission to use, copy, modify, and distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.\" Because the licence requires its notice, the page is used for verification only: nothing is copied from it."@en .
+
+<https://man.openbsd.org/ssh.1>
+    dcterms:title "OpenSSH manual pages ssh(1) and scp(1) (man.openbsd.org, OpenBSD-current)" ;
+    dcterms:creator "The OpenBSD and OpenSSH projects" ;
+    rdfs:comment "The manual pages carry no licence on the web page; OpenSSH's licence file https://raw.githubusercontent.com/openssh/openssh-portable/master/LICENCE (fetched 2026-10-04) gives BSD-style terms for its parts, beginning with Tatu Ylonen's: \"As far as I am concerned, the code I have written for this software can be used freely for any purpose. Any derived versions of this software must be clearly marked as such\". Recorded as \"unknown\" because the builder has no licence id for these terms; verification only, nothing copied. The scp page is https://man.openbsd.org/scp.1."@en .
+
+<https://man7.org/linux/man-pages/man8/ping.8.html>
+    dcterms:title "ping(8) manual page of iputils (man7.org, from the iputils repository of 2026-07-16)" ;
+    dcterms:creator "The iputils project" ;
+    rdfs:comment "The page states no licence; iputils' licence file https://raw.githubusercontent.com/iputils/iputils/master/LICENSE (fetched 2026-10-04) says \"ping: BSD-3-Clause\". Recorded as \"unknown\" because the builder has no id for BSD-3-Clause; verification only, nothing copied."@en .
+
+<https://translationproject.org/latest/coreutils/sv.po>
+    dcterms:title "Swedish translations (sv.po) of GNU coreutils, grep, tar, findutils and bash, latest versions at the Translation Project" ;
+    dcterms:creator "Göran Uddeborg, Anders Jonsson, Daniel Nylander and other Swedish translators; Free Software Foundation" ;
+    rdfs:comment "Header of each file, e.g. https://translationproject.org/latest/coreutils/sv.po (fetched 2026-10-04): \"This file is distributed under the same license as the coreutils package.\" (likewise for grep, tar, findutils and bash; the others are at https://translationproject.org/latest/<package>/sv.po). The packages are under the GNU GPL, for which the builder has an id only for version 2; recorded as \"unknown\", verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Standard_error>
+    dcterms:title "Standard error and Kommandotolk (Swedish Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of https://sv.wikipedia.org/wiki/Standard_error (fetched 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<#pwd>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Print the full path of the directory you are in"@en ,
+                     "Skriv ut den fullständiga sökvägen till katalogen du står i"@sv ;
+    solid-memo:back "pwd"@zxx .
+
+<#cd-home>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Go to your home directory"@en ,
+                     "Gå till din hemkatalog"@sv ;
+    solid-memo:back "cd"@zxx ;
+    solid-memo:backNote "cd ~ does the same: the shell replaces ~ with your home directory."@en ,
+                        "cd ~ gör samma sak: skalet ersätter ~ med din hemkatalog."@sv .
+
+<#cd-parent>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move up to the parent of the current directory"@en ,
+                     "Gå upp till den aktuella katalogens föräldrakatalog"@sv ;
+    solid-memo:back "cd .."@zxx .
+
+<#cd-previous>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Go back to the directory you were in before the last change of directory"@en ,
+                     "Gå tillbaka till katalogen du var i före det senaste katalogbytet"@sv ;
+    solid-memo:back "cd -"@zxx ;
+    solid-memo:backNote "cd - also prints the directory it changes to."@en ,
+                        "cd - skriver också ut katalogen som den byter till."@sv .
+
+<#ls-all>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List all files in the current directory, including hidden ones"@en ,
+                     "Lista alla filer i aktuell katalog, även dolda"@sv ;
+    solid-memo:back "ls -a"@zxx ;
+    solid-memo:backNote "Hidden files are those whose names begin with a dot. ls -A shows them too but leaves out the entries . and .."@en ,
+                        "Dolda filer är de vars namn börjar med punkt. ls -A visar dem också men utelämnar posterna . och .."@sv .
+
+<#ls-long>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List the files in the current directory in long format, with permissions, owner, size and modification time"@en ,
+                     "Lista filerna i aktuell katalog i långt format, med rättigheter, ägare, storlek och ändringstid"@sv ;
+    solid-memo:back "ls -l"@zxx .
+
+<#ls-time>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List the files in the current directory in long format, most recently modified first"@en ,
+                     "Lista filerna i aktuell katalog i långt format, de senast ändrade först"@sv ;
+    solid-memo:back "ls -lt"@zxx .
+
+<#mkdir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create a new directory"@en ,
+                     "Skapa en ny katalog"@sv ;
+    solid-memo:back "mkdir <dir>"@zxx .
+
+<#mkdir-parents>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create a directory, along with any parent directories in its path that do not exist yet"@en ,
+                     "Skapa en katalog, tillsammans med de föräldrakataloger i sökvägen som inte finns ännu"@sv ;
+    solid-memo:back "mkdir -p <path>"@zxx ;
+    solid-memo:backNote "Without -p, mkdir fails when a parent directory is missing."@en ,
+                        "Utan -p misslyckas mkdir när en föräldrakatalog saknas."@sv .
+
+<#rmdir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Remove an empty directory"@en ,
+                     "Ta bort en tom katalog"@sv ;
+    solid-memo:back "rmdir <dir>"@zxx ;
+    solid-memo:backNote "rmdir refuses to remove a directory that is not empty."@en ,
+                        "rmdir vägrar ta bort en katalog som inte är tom."@sv .
+
+<#rm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete a file"@en ,
+                     "Ta bort en fil"@sv ;
+    solid-memo:back "rm <file>"@zxx .
+
+<#rm-recursive>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete a directory together with everything in it"@en ,
+                     "Ta bort en katalog tillsammans med allt dess innehåll"@sv ;
+    solid-memo:back "rm -r <dir>"@zxx ;
+    solid-memo:backNote "-R is the same. rm -rf also skips the prompt for write-protected files and stays silent about missing names; use it with care."@en ,
+                        "-R är detsamma. rm -rf hoppar dessutom över frågan för skrivskyddade filer och tiger om namn som saknas; använd det med försiktighet."@sv .
+
+<#cp>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Copy a file"@en ,
+                     "Kopiera en fil"@sv ;
+    solid-memo:back "cp <source> <target>"@zxx .
+
+<#cp-recursive>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Copy a directory together with everything in it"@en ,
+                     "Kopiera en katalog tillsammans med allt dess innehåll"@sv ;
+    solid-memo:back "cp -R <source> <target>"@zxx ;
+    solid-memo:backNote "POSIX specifies -R; GNU cp also accepts -r, as BSD systems historically did."@en ,
+                        "POSIX anger -R; GNU:s cp godtar också -r, liksom BSD-system traditionellt har gjort."@sv .
+
+<#mv-rename>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rename a file"@en ,
+                     "Byt namn på en fil"@sv ;
+    solid-memo:back "mv <old> <new>"@zxx ;
+    solid-memo:backNote "If <new> is an existing directory, the file is moved into it instead."@en ,
+                        "Om <new> är en befintlig katalog flyttas filen in i den i stället."@sv .
+
+<#touch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create an empty file, or update the timestamps of a file that already exists"@en ,
+                     "Skapa en tom fil, eller uppdatera tidsstämplarna för en fil som redan finns"@sv ;
+    solid-memo:back "touch <file>"@zxx .
+
+<#ln-symbolic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create a symbolic link that points to a file"@en ,
+                     "Skapa en symbolisk länk som pekar på en fil"@sv ;
+    solid-memo:back "ln -s <target> <link>"@zxx ;
+    solid-memo:backNote "First what the link points to, then the name of the new link. A relative target is resolved from the link's directory, not from the current one."@en ,
+                        "Först det länken pekar på, sedan namnet på den nya länken. Ett relativt mål tolkas från länkens katalog, inte från den aktuella."@sv .
+
+<#cat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Print the whole contents of a file to the terminal"@en ,
+                     "Skriv ut hela innehållet i en fil i terminalen"@sv ;
+    solid-memo:back "cat <file>"@zxx .
+
+<#head-20>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the first 20 lines of a file"@en ,
+                     "Visa de 20 första raderna i en fil"@sv ;
+    solid-memo:back "head -n 20 <file>"@zxx ;
+    solid-memo:backNote "Without -n, head shows the first 10 lines."@en ,
+                        "Utan -n visar head de 10 första raderna."@sv .
+
+<#tail-20>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the last 20 lines of a file"@en ,
+                     "Visa de 20 sista raderna i en fil"@sv ;
+    solid-memo:back "tail -n 20 <file>"@zxx ;
+    solid-memo:backNote "Without -n, tail shows the last 10 lines."@en ,
+                        "Utan -n visar tail de 10 sista raderna."@sv .
+
+<#tail-follow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the end of a file and keep printing new lines as they are added to it"@en ,
+                     "Visa slutet av en fil och fortsätt skriva ut nya rader när de läggs till"@sv ;
+    solid-memo:back "tail -f <file>"@zxx .
+
+<#wc-lines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Count the lines in a file"@en ,
+                     "Räkna raderna i en fil"@sv ;
+    solid-memo:back "wc -l <file>"@zxx ;
+    solid-memo:backNote "Strictly, wc -l counts newline characters, so a last line without a newline is not counted."@en ,
+                        "Strikt taget räknar wc -l radbrytningstecken, så en sista rad utan radbrytning räknas inte."@sv .
+
+<#diff>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the line-by-line differences between two files"@en ,
+                     "Visa skillnaderna rad för rad mellan två filer"@sv ;
+    solid-memo:back "diff <file1> <file2>"@zxx .
+
+<#sort>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Print the lines of a file in sorted order"@en ,
+                     "Skriv ut raderna i en fil i sorterad ordning"@sv ;
+    solid-memo:back "sort <file>"@zxx .
+
+<#grep>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Print the lines of a file that match a pattern"@en ,
+                     "Skriv ut de rader i en fil som matchar ett mönster"@sv ;
+    solid-memo:back "grep <pattern> <file>"@zxx ;
+    solid-memo:backNote "The pattern is a basic regular expression; quote it if it contains spaces or special characters."@en ,
+                        "Mönstret är ett grundläggande reguljärt uttryck; sätt det inom citattecken om det innehåller blanksteg eller specialtecken."@sv .
+
+<#grep-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Print the lines of a file that match a pattern, ignoring the difference between upper and lower case"@en ,
+                     "Skriv ut de rader i en fil som matchar ett mönster, utan att skilja på versaler och gemener"@sv ;
+    solid-memo:back "grep -i <pattern> <file>"@zxx .
+
+<#grep-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Print the lines of a file that do not match a pattern"@en ,
+                     "Skriv ut de rader i en fil som inte matchar ett mönster"@sv ;
+    solid-memo:back "grep -v <pattern> <file>"@zxx .
+
+<#grep-n>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Print the lines of a file that match a pattern, each preceded by its line number"@en ,
+                     "Skriv ut de rader i en fil som matchar ett mönster, var och en med sitt radnummer först"@sv ;
+    solid-memo:back "grep -n <pattern> <file>"@zxx .
+
+<#grep-r>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Search all files in a directory and its subdirectories, recursively, for a pattern"@en ,
+                     "Sök rekursivt efter ett mönster i alla filer i en katalog och dess underkataloger"@sv ;
+    solid-memo:back "grep -r <pattern> <dir>"@zxx ;
+    solid-memo:backNote "Not in POSIX (GNU grep has it). A portable equivalent: find <dir> -type f -exec grep <pattern> /dev/null {} +"@en ,
+                        "Finns inte i POSIX (GNU grep har den). Portabel motsvarighet: find <dir> -type f -exec grep <pattern> /dev/null {} +"@sv .
+
+<#find-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Find all files whose names end in .txt in the current directory and all its subdirectories"@en ,
+                     "Hitta alla filer vars namn slutar på .txt i aktuell katalog och alla dess underkataloger"@sv ;
+    solid-memo:back "find . -name '*.txt'"@zxx ;
+    solid-memo:backNote "Quote the pattern so that find, not the shell, matches it: an unquoted *.txt is replaced by matching names in the current directory before find runs."@en ,
+                        "Sätt mönstret inom citattecken så att find och inte skalet matchar det: utan citattecken ersätts *.txt av matchande namn i aktuell katalog innan find körs."@sv .
+
+<#find-dirs>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List the current directory and all directories below it, at every depth"@en ,
+                     "Lista aktuell katalog och alla kataloger under den, på alla nivåer"@sv ;
+    solid-memo:back "find . -type d"@zxx ;
+    solid-memo:backNote "The current directory comes first in the list, written as a dot."@en ,
+                        "Den aktuella katalogen kommer först i listan, skriven som en punkt."@sv .
+
+<#chmod-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Make a file executable"@en ,
+                     "Gör en fil körbar"@sv ;
+    solid-memo:back "chmod +x <file>"@zxx ;
+    solid-memo:backNote "Without u, g, o or a, chmod leaves out the bits your umask masks; chmod a+x gives everyone execute permission regardless."@en ,
+                        "Utan u, g, o eller a hoppar chmod över de bitar som din umask maskerar; chmod a+x ger alla körrättighet oavsett umask."@sv .
+
+<#chmod-644>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Using an octal number, give a file read and write permission for its owner and read-only permission for everyone else"@en ,
+                     "Använd ett oktalt tal för att ge en fil läs- och skrivrättighet för ägaren och enbart läsrättighet för alla andra"@sv ;
+    solid-memo:back "chmod 644 <file>"@zxx ;
+    solid-memo:backNote "The digits are for owner, group and others; 6 = read (4) + write (2), 4 = read."@en ,
+                        "Siffrorna gäller ägare, grupp och övriga; 6 = läsa (4) + skriva (2), 4 = läsa."@sv .
+
+<#chown>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Change the owner of a file"@en ,
+                     "Byt ägare på en fil"@sv ;
+    solid-memo:back "chown <user> <file>"@zxx ;
+    solid-memo:backNote "Giving a file to another user usually requires superuser (root) privileges."@en ,
+                        "Att ge en fil till en annan användare kräver oftast superanvändarbehörighet (root)."@sv .
+
+<#ps-ef>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List every process running on the system, in full format"@en ,
+                     "Lista alla processer som körs på systemet, i fullständigt format"@sv ;
+    solid-memo:back "ps -ef"@zxx ;
+    solid-memo:backNote "ps itself, like -e and -f, is in POSIX's XSI option group. The BSD-style ps aux gives a similar list; the procps ps on Linux accepts both."@en ,
+                        "ps självt hör, liksom -e och -f, till POSIX:s XSI-tillägg. Den BSD-liknande formen ps aux ger en liknande lista; procps ps på Linux godtar båda."@sv .
+
+<#kill>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ask a process to terminate, given its process ID"@en ,
+                     "Be en process att avsluta sig, med hjälp av dess process-id"@sv ;
+    solid-memo:back "kill <pid>"@zxx ;
+    solid-memo:backNote "Sends SIGTERM, which a process can catch or ignore."@en ,
+                        "Skickar SIGTERM, som en process kan fånga eller ignorera."@sv .
+
+<#kill-9>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Force a process to stop immediately with a signal it cannot catch or ignore, given its process ID"@en ,
+                     "Tvinga en process att avslutas omedelbart med en signal som den inte kan fånga eller ignorera, med hjälp av dess process-id"@sv ;
+    solid-memo:back "kill -9 <pid>"@zxx ;
+    solid-memo:backNote "9 is SIGKILL. The numeric form is an XSI option; kill -s KILL <pid> does the same on every POSIX system."@en ,
+                        "9 är SIGKILL. Den numeriska formen är ett XSI-tillägg; kill -s KILL <pid> gör samma sak på alla POSIX-system."@sv .
+
+<#background>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start a command in the background, so that the shell is ready for the next command at once"@en ,
+                     "Starta ett kommando i bakgrunden, så att skalet genast är redo för nästa kommando"@sv ;
+    solid-memo:back "<command> &"@zxx .
+
+<#jobs>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List the background jobs started from the current shell"@en ,
+                     "Lista bakgrundsjobben som startats från det aktuella skalet"@sv ;
+    solid-memo:back "jobs"@zxx .
+
+<#fg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bring the most recent background job back to the foreground"@en ,
+                     "Ta tillbaka det senaste bakgrundsjobbet till förgrunden"@sv ;
+    solid-memo:back "fg"@zxx .
+
+<#tar-create>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pack a directory into a gzip-compressed tar archive"@en ,
+                     "Packa ihop en katalog till ett gzip-komprimerat tar-arkiv"@sv ;
+    solid-memo:back "tar -czf <archive>.tar.gz <dir>"@zxx ;
+    solid-memo:backNote "c = create, z = gzip, f = archive file name, which must follow straight after. tar is not in POSIX (which specifies pax); these are GNU tar's options."@en ,
+                        "c = skapa, z = gzip, f = arkivets filnamn, som måste följa direkt efter. tar finns inte i POSIX (som anger pax); flaggorna är GNU tar:s."@sv .
+
+<#tar-extract>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Unpack a gzip-compressed tar archive into the current directory"@en ,
+                     "Packa upp ett gzip-komprimerat tar-arkiv i aktuell katalog"@sv ;
+    solid-memo:back "tar -xzf <archive>.tar.gz"@zxx ;
+    solid-memo:backNote "GNU tar recognizes the compression by itself when reading, so tar -xf <archive>.tar.gz works too."@en ,
+                        "GNU tar känner själv igen komprimeringen vid läsning, så tar -xf <archive>.tar.gz fungerar också."@sv .
+
+<#redirect-out>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Write a command's output to a file, replacing whatever the file contained"@en ,
+                     "Skriv ett kommandos utdata till en fil och ersätt det som fanns i filen"@sv ;
+    solid-memo:back "<command> > <file>"@zxx .
+
+<#redirect-append>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Add a command's output to the end of a file"@en ,
+                     "Lägg till ett kommandos utdata i slutet av en fil"@sv ;
+    solid-memo:back "<command> >> <file>"@zxx .
+
+<#redirect-stderr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Write a command's error messages to a file"@en ,
+                     "Skriv ett kommandos felmeddelanden till en fil"@sv ;
+    solid-memo:back "<command> 2> <file>"@zxx ;
+    solid-memo:backNote "2 is file descriptor 2, standard error (stderr)."@en ,
+                        "2 är fildeskriptor 2, standard error (stderr)."@sv .
+
+<#redirect-both>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Write both a command's output and its error messages to the same file"@en ,
+                     "Skriv både ett kommandos utdata och dess felmeddelanden till samma fil"@sv ;
+    solid-memo:back "<command> > <file> 2>&1"@zxx ;
+    solid-memo:backNote "Order matters: 2>&1 must come after > <file>. Bash also accepts &> <file>, which is not POSIX: dash runs the command in the background and leaves the file empty."@en ,
+                        "Ordningen spelar roll: 2>&1 måste stå efter > <file>. Bash godtar också &> <file>, som inte är POSIX: dash kör då kommandot i bakgrunden och lämnar filen tom."@sv .
+
+<#pipe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Use one command's output as the input of another command"@en ,
+                     "Använd ett kommandos utdata som indata till ett annat kommando"@sv ;
+    solid-memo:back "<command1> | <command2>"@zxx .
+
+<#tee>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show a command's output on the screen and save it to a file at the same time"@en ,
+                     "Visa ett kommandos utdata på skärmen och spara det i en fil samtidigt"@sv ;
+    solid-memo:back "<command> | tee <file>"@zxx ;
+    solid-memo:backNote "tee -a appends to the file instead of replacing its contents."@en ,
+                        "tee -a lägger till i filen i stället för att ersätta innehållet."@sv .
+
+<#df-h>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the size, used and free space of the mounted file systems, in human-readable units"@en ,
+                     "Visa storlek, använt och ledigt utrymme för de monterade filsystemen, i lättlästa enheter"@sv ;
+    solid-memo:back "df -h"@zxx ;
+    solid-memo:backNote "-h is not in POSIX (GNU df has it), and df itself is in POSIX's XSI option group, with -k (1024-byte units) and -P (portable output format). GNU df leaves out pseudo file systems such as /proc unless -a is given."@en ,
+                        "-h finns inte i POSIX (GNU df har den), och df hör självt till POSIX:s XSI-tillägg, med -k (enheter om 1024 byte) och -P (portabelt utdataformat). GNU df utelämnar pseudofilsystem som /proc om inte -a anges."@sv .
+
+<#du-sh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the total disk space used by a directory, in human-readable units"@en ,
+                     "Visa det totala diskutrymme som en katalog använder, i lättlästa enheter"@sv ;
+    solid-memo:back "du -sh <dir>"@zxx ;
+    solid-memo:backNote "-s gives one total; -h is not in POSIX (GNU du has it). Portable: du -sk <dir> gives the total in kibibytes."@en ,
+                        "-s ger en enda summa; -h finns inte i POSIX (GNU du har den). Portabelt: du -sk <dir> ger summan i kibibyte."@sv .
+
+<#ping>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Check whether a host answers on the network, sending exactly 4 echo requests"@en ,
+                     "Kontrollera om en värd svarar i nätverket genom att skicka exakt 4 ekoförfrågningar"@sv ;
+    solid-memo:back "ping -c 4 <host>"@zxx ;
+    solid-memo:backNote "ping is not a POSIX utility; this is the Linux (iputils) ping."@en ,
+                        "ping är inget POSIX-verktyg; detta är Linux-varianten (iputils)."@sv .
+
+<#curl-o>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Download a file with curl into the current directory, keeping the file name from the URL"@en ,
+                     "Ladda ned en fil med curl till aktuell katalog och behåll filnamnet från URL:en"@sv ;
+    solid-memo:back "curl -O <url>"@zxx ;
+    solid-memo:backNote "Capital O. Without it curl writes the data to the terminal; lower-case -o <file> saves it under a name you choose."@en ,
+                        "Versalt O. Utan flaggan skriver curl data till terminalen; gement -o <file> sparar under ett namn du väljer."@sv .
+
+<#ssh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Log in to a remote machine over SSH as a given user"@en ,
+                     "Logga in på en fjärrdator via SSH som en viss användare"@sv ;
+    solid-memo:back "ssh <user>@<host>"@zxx .
+
+<#scp>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Copy a local file to a directory on a remote machine with scp (secure copy over SSH)"@en ,
+                     "Kopiera en lokal fil till en katalog på en fjärrdator med scp (säker kopiering över SSH)"@sv ;
+    solid-memo:back "scp <file> <user>@<host>:<dir>"@zxx ;
+    solid-memo:backNote "Mind the colon after the host: without it, scp makes a local copy named <user>@<host>."@en ,
+                        "Glöm inte kolonet efter värden: utan det gör scp en lokal kopia med namnet <user>@<host>."@sv .
+
+<#man>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the manual page of a command"@en ,
+                     "Visa manualsidan för ett kommando"@sv ;
+    solid-memo:back "man <command>"@zxx .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

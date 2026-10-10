@@ -1,0 +1,1998 @@
+@base <https://solid-memo.com/decks/world-currencies/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "World currencies"@en ,
+                  "Världens valutor"@sv ,
+                  "세계의 통화"@ko ,
+                  "Währungen der Welt"@de ,
+                  "Monedas del mundo"@es ,
+                  "Monnaies du monde"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The currency of each of the 193 UN member states, with its ISO 4217 code: 193 cards with a country on the front and its currency on the back, in English and Swedish, such as Sweden → Swedish krona (SEK). Compiled from Wikidata and checked against the ISO 4217 lists of the maintenance agency SIX and the EU Interinstitutional Style Guide."@en ,
+                        "Valutan i vart och ett av FN:s 193 medlemsländer, med sin ISO 4217-kod: 193 kort med ett land på framsidan och dess valuta på baksidan, på engelska och svenska, till exempel Sverige → svensk krona (SEK). Sammanställd från Wikidata och kontrollerad mot ISO 4217-listorna från förvaltaren SIX och EU:s interinstitutionella publikationshandbok."@sv ,
+                        "유엔 회원국 193개국 각각의 통화와 ISO 4217 코드입니다. 카드 193장의 앞면에는 나라가, 뒷면에는 그 나라의 통화가 영어와 스웨덴어로 있습니다(예: Sweden → Swedish krona (SEK)). 위키데이터에서 모아 관리 기관 SIX의 ISO 4217 목록과 EU 기관 간 스타일 가이드로 확인했습니다."@ko ,
+                        "Die Währung jedes der 193 UN-Mitgliedstaaten, mit ihrem ISO-4217-Code: 193 Karten mit einem Land auf der Vorderseite und seiner Währung auf der Rückseite, auf Englisch und Schwedisch, etwa Sweden → Swedish krona (SEK). Aus Wikidata zusammengestellt und geprüft an den ISO-4217-Listen der Registrierungsstelle SIX und an den Interinstitutionellen Regeln für Veröffentlichungen der EU."@de ,
+                        "La moneda de cada uno de los 193 Estados miembros de la ONU, con su código ISO 4217: 193 tarjetas con un país en el anverso y su moneda en el reverso, en inglés y sueco, como Sweden → Swedish krona (SEK). Recopilado de Wikidata y comprobado con las listas ISO 4217 de la agencia de mantenimiento SIX y el Libro de estilo interinstitucional de la UE."@es ,
+                        "La monnaie de chacun des 193 États membres de l’ONU, avec son code ISO 4217 : 193 cartes avec un pays au recto et sa monnaie au verso, en anglais et en suédois, comme Sweden → Swedish krona (SEK). Compilé à partir de Wikidata et vérifié dans les listes ISO 4217 de l’agence de maintenance SIX et le Code de rédaction interinstitutionnel de l’UE."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ,
+               topic:economics ;
+    dcat:keyword "currencies"@en ,
+                 "ISO 4217"@en ,
+                 "countries"@en ,
+                 "money"@en ,
+                 "geography"@en ,
+                 "valutor"@sv ,
+                 "valutakoder"@sv ,
+                 "länder"@sv ,
+                 "pengar"@sv ,
+                 "geografi"@sv ,
+                 "ISO 4217"@sv ,
+                 "통화"@ko ,
+                 "ISO 4217"@ko ,
+                 "나라"@ko ,
+                 "돈"@ko ,
+                 "지리"@ko ,
+                 "Währungen"@de ,
+                 "ISO 4217"@de ,
+                 "Länder"@de ,
+                 "Geld"@de ,
+                 "Geografie"@de ,
+                 "monedas"@es ,
+                 "ISO 4217"@es ,
+                 "países"@es ,
+                 "dinero"@es ,
+                 "geografía"@es ,
+                 "divisas"@es ,
+                 "monnaies"@fr ,
+                 "ISO 4217"@fr ,
+                 "pays"@fr ,
+                 "argent"@fr ,
+                 "géographie"@fr ,
+                 "devises"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/world-currencies/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/world-currencies/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#world-currencies> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#world-currencies> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://www.six-group.com/en/products-services/financial-information/market-reference-data/data-standards.html> ,
+              <https://style-guide.europa.eu/sv/content/-/isg/topic?identifier=annex-a5-list-countries-territories-currencies> ,
+              <https://www.un.org/en/about-us/member-states> ,
+              <https://sv.wikipedia.org/> ,
+              <https://www.rbz.co.zw/documents/mps/2025/MPS_7_August_2025.pdf> ,
+              <https://cbl.org.lr/sites/default/files/documents/financialreport2007_1.pdf> ,
+              <https://bancocentral.tl/currency/co_in_c/> ,
+              <https://el-salvador.justia.com/nacionales/leyes/ley-de-integracion-monetaria/gdoc/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (the downloaded reference lists, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection: the Wikidata SPARQL endpoint was asked for every item that is a member (P463) of the United Nations (Q1065) with no end time on that statement (query 1). It returned 203 items; ten are historical predecessor states still tagged as members (Islamic State of Afghanistan, Republic of Afghanistan, Kingdom of Laos, Kingdom of Nepal, Mongolian People's Republic, People's Republic of Mozambique, Republic of the Congo (Léopoldville), Somali Democratic Republic, Third Hellenic Republic, realm of the United Kingdom) and were dropped. The rule: an item without an ISO 3166-1 alpha-2 code (P297) is not a current state. None of the ten has one, while of the other 193 member items only the Kingdom of Denmark (Q756617) lacks one, and it is represented by Denmark (Q35, DK) as described next (query 4); eight of the ten also have a dissolved date (P576), the Third Hellenic Republic and the realm of the United Kingdom have none. Wikidata records the Kingdom of Denmark (Q756617) and the Kingdom of the Netherlands (Q29999) as the members; the cards use Denmark (Q35) and the Netherlands (Q55), the countries whose currency is asked for. The resulting 193 states were compared with the 193 names on the UN's Member States page; they match one to one."@en ,
+                 "Currencies: for the 193 items, Wikidata was asked for every currency (P38) statement that is not deprecated and has no end time, with each currency's ISO 4217 code (P498) and its English, Swedish and multilingual labels and aliases (query 3); the states' own labels and aliases and ISO 3166-1 alpha-2 codes (P297) came from query 2."@en ,
+                 "Cross-checks: the ISO 4217 List One (XML, published 2026-09-17) was downloaded from SIX, the ISO 4217 maintenance agency, and fund codes (IsFund) were set aside. The English and Swedish versions of Annex A5 of the EU Interinstitutional Style Guide (list of countries, territories and currencies) were downloaded and parsed with a short Python script: in each table row of nine or more cells the third cell is the ISO 3166 code, the seventh the currency name and the eighth its ISO 4217 code, and a following three-cell row (name, code, subunit) adds a second currency to the same country; the rows were matched to the states by that ISO 3166 code (EL for Greece and UK for the United Kingdom in EU usage; the Netherlands, whose Wikidata item Q55 has no P297, by hand as NL). SIX entities were matched by name, seven by hand (both Congos are told apart by the code, plus Iran, Moldova, the two Koreas, Micronesia and Venezuela, which ISO writes in its long forms). A card's currency had to be in all three: the Wikidata P38 values, the SIX List One entry for the state and the EU Annex A5 row. For 173 states all three give exactly one currency, with the same code. For 13 more (Chile, Cyprus, France, Ghana, Ireland, Kiribati, Liberia, Lithuania, the Marshall Islands, the Netherlands, Timor-Leste, Tuvalu, Zimbabwe) ISO 4217 and the EU guide give exactly one and Wikidata's P38 includes it among further values (see quality control). For the remaining seven ISO 4217 lists two codes (next paragraph)."@en ,
+                 "Countries with more than one currency: where ISO 4217 lists two currencies for a state (Bhutan, El Salvador, Haiti, Lesotho, Namibia, Panama), the card gives the state's own currency and its backNote names the other. The one exception is El Salvador, whose colón the EU style guide describes as \"almost no longer used\" but still official; that card gives the US dollar, legal tender since the Ley de Integración Monetaria entered into force on 1 January 2001 (Wikidata P580 qualifier, confirmed by the law's Arts. 3 and 25). Venezuela has two ISO codes for the same bolívar soberano (VES and VED); the card gives VES, the code the EU style guide and Wikidata use, and its backNote names VED. For the Netherlands the card gives the euro and the backNote names the currencies of the Caribbean parts of the Kingdom; for France it gives the euro and notes the CFP franc of the French Pacific territories. Where Wikidata lists further currencies that neither ISO 4217 nor the EU style guide lists for the state (see quality control), the card follows ISO 4217 and the EU style guide. Where ISO 4217 lists a single currency but another is also legal tender or in use, the card gives the ISO 4217 currency and a back note names the other, confirmed by the central bank: the US dollar in Liberia (Central Bank of Liberia) and in Zimbabwe's multi-currency system (Reserve Bank of Zimbabwe), and Timor-Leste's own centavo coins beside the US dollar (Banco Central de Timor-Leste). The South African rand in Eswatini, and the Kiribati and Tuvalu coins beside the Australian dollar, are not noted (see quality control round 1)."@en ,
+                 "Recent changes the brief asked to watch were checked against SIX: Bulgaria's euro from 1 January 2026 (Amendment 180; BGN in List Three with withdrawal 2026-01), Croatia's euro (HRK withdrawn 2023-01), Sierra Leone's new leone SLE (old SLL withdrawn 2023-12), Zimbabwe Gold ZWG (ZWL withdrawn 2024-09) and Venezuela's VES. Each is current in List One, the EU style guide and Wikidata, and the back notes for Bulgaria, Croatia, Sierra Leone and Zimbabwe say what was replaced."@en ,
+                 "English wording: the front is the state's Wikidata English label, except China (the label is the long form \"People's Republic of China\"). These labels are the common English short names, so some differ from the forms the UN uses (Czech Republic for Czechia, Ivory Coast for Côte d'Ivoire, Cape Verde for Cabo Verde, Turkey for Türkiye); the deck keeps the common names, which every English reader recognises. The back is the currency's English name followed by its ISO code in parentheses, e.g. \"Swedish krona (SEK)\". The name is the Wikidata English label or one of its English aliases, preferring the form with the nationality adjective (e.g. alias \"Afghan afghani\" over label \"afghani\"); nine names are the author's own wording because the label is outdated or malformed and no alias fits: Argentine peso (label \"Argentine convertible peso\"), Guatemalan quetzal, Haitian gourde, South Korean won, Peruvian sol (label \"Nuevo sol\"), Venezuelan bolívar (label \"sovereign bolivar\"), Vanuatu vatu (label \"Vanuatu vatus\"), Yemeni rial and Zambian kwacha (labels capitalise the unit). Zimbabwe's currency is given by its official name, Zimbabwe Gold (a fact; Wikidata's label is \"Zimbabwe ZiG\" and its alias \"Zimbabwean gold\"), which SIX List One and the EU guide confirm."@en ,
+                 "Swedish wording: the front is the state's Wikidata Swedish label, except Eswatini, whose label is still \"Swaziland\" (the Wikidata alias \"Eswatini\" is used). The currency name is the Wikidata Swedish label written in lower case, as Swedish writes currency names; 114 names match a Wikidata Swedish label or alias except for the initial capital. The Swedish labels are not uniform (bare units such as forint and rand, adjective + unit such as nigeriansk naira, compounds such as fijidollar), and the deck keeps them as Wikidata gives them, since each is an established Swedish form (the compounds are also the sv.wikipedia article titles) and no single Swedish convention covers all currencies. Where the label is missing or non-standard the author wrote the Swedish name, using the standard pattern of a lower-case nationality adjective and the unit's name, and then checked each form against the EU guide's Swedish list to make sure it is in established use: georgisk lari (label \"Georgiska lari\"), ghanansk cedi (label \"Ghana Cedi\"), guineansk franc and komorisk franc (labels \"Guinesisk\", \"Komoransk\"), maldivisk rufiyaa (label \"Rufiyah\"), nepalesisk rupie and pakistansk rupie (labels use the English spelling \"rupee\"; rupie as in the Wikidata alias \"Indisk rupie\"), centralafrikansk CFA-franc and västafrikansk CFA-franc (labels \"Centralafrikansk CFA Franc\" and \"CFA Franc\"; the West African franc needs its qualifier to be told apart), venezuelansk bolívar (no Swedish label) and zimbabwiskt guld (no Swedish label; the author's literal translation of the official name Zimbabwe Gold, zimbabwisk + guld in the neuter). All but västafrikansk CFA-franc occur in the EU guide's Swedish list (as \"venezuelansk bolívar soberano\" for the bolívar); these are short names of facts, and no list was taken from the guide. Two Swedish names were changed in review round 2: tongansk paʻanga (the Wikidata label writes an ASCII apostrophe; the ʻokina is used as in the English label and on sv.wikipedia), and dobra (the bare unit, as on sv.wikipedia, instead of the label \"Saotomeansk Dobra\"). The US dollar is \"amerikansk dollar\" (a Wikidata alias; the label is the plural-looking \"amerikanska dollar\"), the euro is \"euro\" (Wikidata's multilingual label). The ISO code is the same in both languages."@en ,
+                 "Machine checks: every card carried Wikidata checks that the builder ran against live Wikidata: the state's P38 includes the card's currency item, the currency's P498 is the card's code, and, wherever the card text is a Wikidata label or alias, that the English or Swedish text is one. 1011 checks in all, 624 of them on labels. Every card also has evidence entries quoting what Wikidata, SIX List One and the EU Annex A5 row say for that state, generated from the downloaded files; evidence added in the review rounds was written by hand from the pages cited."@en ,
+                 "Excluded: states that are not UN members (e.g. Kosovo, Taiwan, the Holy See, Palestine), dependent territories, fund codes and units of account (e.g. CLF, BOV, MXV, CHE, CHW, USN, UYI, UYW), cryptocurrencies, and currencies Wikidata lists but ISO 4217 does not list for the state."@en ,
+                 "Selection: All 193 member states of the United Nations, one card each, as recorded in Wikidata (member of Q1065 with no end time, and with an ISO 3166-1 alpha-2 code) and confirmed against the UN's Member States page; Denmark and the Netherlands stand for their Kingdoms. Each card gives the currency the state officially uses today according to ISO 4217 List One as published on 2026-09-17, confirmed by Wikidata and the EU Interinstitutional Style Guide. Where ISO 4217 lists two currencies, the state's own currency is given and the other is named in a back note (El Salvador, whose own colón is almost no longer used, gets the US dollar). Where ISO 4217 lists one currency but another is also legal tender or in use (Liberia, Zimbabwe, Timor-Leste's own coins), the card gives ISO 4217's single listing and a back note names the other. Left out: non-member states and territories, fund codes and units of account, cryptocurrencies, and currencies that Wikidata lists but ISO 4217 does not assign to the state."@en ,
+                 "Licensing: The deck is CC0 1.0. Its only content source is Wikidata, whose structured data is CC0: the selection of states, the currency of each, the ISO codes and the English and Swedish names come from it, and where its labels were missing, outdated or malformed the wording is the author's own (currency names are facts; Zimbabwe Gold is the currency's official name). SIX's ISO 4217 lists (all rights reserved), the EU Interinstitutional Style Guide (CC BY 4.0), sv.wikipedia (CC BY-SA 4.0), the UN Member States page (personal non-commercial use only) and the pages of the central banks of Liberia, Zimbabwe and Timor-Leste and Justia's copy of El Salvador's Ley de Integración Monetaria (all rights reserved or no licence stated) were used only to verify facts that Wikidata gave and to confirm that the author's Swedish forms are in established use: no list, selection or running text was copied from them, and the selection of states follows Wikidata, not their lists. The evidence in the provenance report quotes each source briefly, one state's entry at a time, as citations for verification. Facts such as which currency a state uses, its code and its name are not protected by copyright, so verifying them against these sources puts no conditions on the deck; the EU guide and sv.wikipedia are nonetheless acknowledged as sources."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine and source checks: every card's currency and code compared across Wikidata, ISO 4217 List One (SIX) and the EU style guide's Annex A5; Wikidata checks run by the builder."@en ;
+    rdfs:comment "Scope: All 193 cards."@en ,
+                 "Outcome: For 185 of the 193 states Wikidata, SIX and the EU guide agree on a single currency and code. The other eight (Bhutan, El Salvador, Haiti, Lesotho, Namibia, Panama, Venezuela, the Netherlands) have a second currency or code in one of the sources and are handled by the stated rule with a back note. The builder's 1004 Wikidata checks (618 on labels) pass. Discrepancies where Wikidata disagrees with ISO 4217 and the EU guide are listed below; in each the card follows ISO 4217 and the EU guide, and no Wikidata check was written for the disputed value. [Correction from QC round 1: the first sentence overstated the agreement. For 173 states all three sources give exactly one and the same code; for 13 more ISO 4217 and the EU guide give one code and Wikidata's P38 includes it among further values; ISO 4217 lists two codes for the other seven. The Method states the corrected figures.]"@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 193 cards: every card's ISO 4217 code against a fresh download of List One, the back notes on recent changes against List Three and Amendment 180, and the builder's live Wikidata checks."@en ,
+                 "Outcome: The review found no wrong answers: every code is the current ISO 4217 code for its state, the back notes on Bulgaria, Croatia, Sierra Leone, Zimbabwe and Venezuela are accurate, and all Wikidata checks pass. It found two multi-currency states without a back note (Zimbabwe, Liberia), an overstated agreement count in the round-0 summary and the Method, an inaccurate France note, and suggested optional notes for Eswatini, Timor-Leste, Kiribati and Tuvalu. Zimbabwe, Liberia, the count, France and Timor-Leste were fixed; the others were declined."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 193 cards, front and back in English and Swedish, the back notes, title, description, keywords and the language tags in the built deck."@en ,
+                 "Outcome: The review found the language in good shape: all text is tagged correctly, Swedish currency names are lower case and the Swedish country names are the established forms. It raised one warning (an ASCII apostrophe in the Swedish Tonga name) and seven suggestions. Tonga, São Tomé and Príncipe, the Bulgaria and Croatia notes and the El Salvador note were changed, and the conventions for English fronts and Swedish currency names are now stated in the Method; the Paraguay accent, the Turkmenistan name and the alignment of the Swedish dollar compounds were declined."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 193 cards' wording against Wikidata and the EU Swedish table; every source's licence page; the recorded queries against the query files; SIX and EU downloads re-fetched and compared; the Method's reproducibility."@en ,
+                 "Outcome: The review found the provenance record honest and checkable (licence quotes verbatim, downloads byte-identical, queries as run), but the dossier said that the Zimbabwe names and ten Swedish names came from verification-only sources, contradicting the CC0 licensing paragraph; it also asked to record the EU guide's licence as CC BY 4.0, and suggested notes on the SIX quotations, the SIX URL and downloads, and reproducibility. All were addressed by rewording the Method and licensing to say what was done, correcting the source records and adding the missing rules and commands; the deck stays CC0."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final re-check (loop 1): changed cards, every third card, metadata, licensing and documentation"@en ;
+    rdfs:comment "Scope: 74 cards (the 10 cards changed in round 3 and every third card), metadata, licensing and the QC log; builder check (193 cards, 1011 live Wikidata checks), validator and byte-identical rebuild of the outputs."@en ,
+                 "Outcome: The review found the deck correct and made two suggestions: a second source for the year in the El Salvador note, and a stale phrase in the round-0 log about the EU guide's Swedish list. Both were verified and fixed; no card text changed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.six-group.com/en/products-services/financial-information/market-reference-data/data-standards.html>
+    dcterms:title "ISO 4217 currency code lists: List One (current, published 2026-09-17), List Three (historic) and Amendment 180" ;
+    dcterms:creator "SIX Financial Information AG, Secretariat of the ISO 4217 Maintenance Agency" ;
+    rdfs:comment "https://www.six-group.com/en/services/legal/terms-and-conditions/terms-of-use.html — \"The entire content of the SIX website is protected by copyright law. Consequently, presentations, brochures, flyers, graphics, texts, designs, charts, etc., may not be reproduced or reused in any way or used for commercial purposes.\" Used for verification only: the codes and currency assignments were checked against it; no list was taken from it. The per-card evidence cites the single List One entry for that state as a short factual quotation."@en .
+
+<https://style-guide.europa.eu/sv/content/-/isg/topic?identifier=annex-a5-list-countries-territories-currencies>
+    dcterms:title "Interinstitutional Style Guide, Annex A5: List of countries, territories and currencies (English and Swedish versions)" ;
+    dcterms:creator "Publications Office of the European Union" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://op.europa.eu/en/web/about-us/legal-notices/publications-office-of-the-european-union-copyright — \"The editorial content of this website, which is owned by the EU, is licensed under the Creative Commons Attribution 4.0 International licence.\" … \"You can reuse it provided you acknowledge the source and indicate any changes you have made.\" The Swedish PDF edition of the guide (ISG_sv_4web.pdf, last updated 30.9.2026) says \"© Europeiska unionen, 2026 … Kopiering tillåten med angivande av källan.\" The guide is used for verification only, so its licence puts no condition on the deck; it is acknowledged here and in the deck's sources all the same."@en .
+
+<https://www.un.org/en/about-us/member-states>
+    dcterms:title "Member States" ;
+    dcterms:creator "United Nations" ;
+    rdfs:comment "https://www.un.org/en/about-us/terms-of-use — \"The United Nations grants permission to Users to visit the Site and to download and copy the information, documents and materials (collectively, \"Materials\") from the Site for the User's personal, non-commercial use, without any right to resell or redistribute them or to compile or create derivative works therefrom\". Used for verification only."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenskspråkiga Wikipedia (articles Paʻanga, Dobra (valuta), Guarani (valuta))" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer of https://sv.wikipedia.org/wiki/Pa%CA%BBanga — \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\" Used for verification only: no text or selection was taken from it."@en .
+
+<https://www.rbz.co.zw/documents/mps/2025/MPS_7_August_2025.pdf>
+    dcterms:title "Mid-Term Monetary Policy Statement, 7 August 2025" ;
+    dcterms:creator "Reserve Bank of Zimbabwe" ;
+    rdfs:comment "https://www.rbz.co.zw/index.php/monetary-policy/monetary-policy-statements — no licence, copyright notice or terms of use was found on the RBZ pages and documents fetched, so the licence is recorded as unknown and the statement is used for verification only."@en .
+
+<https://cbl.org.lr/sites/default/files/documents/financialreport2007_1.pdf>
+    dcterms:title "Central Bank of Liberia: Annual financial statements for the year ended 31 December 2007; CBL Perspective on the House of Representatives Bill to Amend Part V Section 19 of the CBL Act of 1999 (31 August 2017)" ;
+    dcterms:creator "Central Bank of Liberia" ;
+    rdfs:comment "https://www.cbl.org.lr/ — page footer: \"Copyright © All Rights Reserved.\" Used for verification only."@en .
+
+<https://bancocentral.tl/currency/co_in_c/>
+    dcterms:title "Coins in Circulation" ;
+    dcterms:creator "Banco Central de Timor-Leste" ;
+    rdfs:comment "https://bancocentral.tl/en/go/coins-in-circulation — page footer: \"© 2026 Banco Central de Timor-Leste\" (no open licence stated). Used for verification only."@en .
+
+<https://el-salvador.justia.com/nacionales/leyes/ley-de-integracion-monetaria/gdoc/>
+    dcterms:title "Ley de Integración Monetaria (Decreto Legislativo Nº 201 of 30 November 2000, Diario Oficial Nº 241, Tomo 349, 22 December 2000), text as published by Justia El Salvador" ;
+    dcterms:creator "Asamblea Legislativa de la República de El Salvador" ;
+    rdfs:comment "https://el-salvador.justia.com/nacionales/leyes/ley-de-integracion-monetaria/gdoc/ — page footer: \"© 2026 Justia\"; the linked terms page https://www.justia.com/terms-of-service/ refused the request (HTTP 403), so no licence for the hosted text was found. Used for verification only."@en .
+
+<#afghanistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Afghanistan"@en ,
+                     "Afghanistan"@sv ;
+    solid-memo:back "Afghan afghani (AFN)"@en ,
+                    "afghani (AFN)"@sv .
+
+<#albania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Albania"@en ,
+                     "Albanien"@sv ;
+    solid-memo:back "Albanian lek (ALL)"@en ,
+                    "lek (ALL)"@sv .
+
+<#algeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Algeria"@en ,
+                     "Algeriet"@sv ;
+    solid-memo:back "Algerian dinar (DZD)"@en ,
+                    "algerisk dinar (DZD)"@sv .
+
+<#andorra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Andorra"@en ,
+                     "Andorra"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#angola>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Angola"@en ,
+                     "Angola"@sv ;
+    solid-memo:back "Angolan kwanza (AOA)"@en ,
+                    "kwanza (AOA)"@sv .
+
+<#antigua-and-barbuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Antigua and Barbuda"@en ,
+                     "Antigua och Barbuda"@sv ;
+    solid-memo:back "Eastern Caribbean dollar (XCD)"@en ,
+                    "östkaribisk dollar (XCD)"@sv .
+
+<#argentina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Argentina"@en ,
+                     "Argentina"@sv ;
+    solid-memo:back "Argentine peso (ARS)"@en ,
+                    "argentinsk peso (ARS)"@sv .
+
+<#armenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Armenia"@en ,
+                     "Armenien"@sv ;
+    solid-memo:back "Armenian dram (AMD)"@en ,
+                    "dram (AMD)"@sv .
+
+<#australia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Australia"@en ,
+                     "Australien"@sv ;
+    solid-memo:back "Australian dollar (AUD)"@en ,
+                    "australisk dollar (AUD)"@sv .
+
+<#austria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Austria"@en ,
+                     "Österrike"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#azerbaijan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Azerbaijan"@en ,
+                     "Azerbajdzjan"@sv ;
+    solid-memo:back "Azerbaijani manat (AZN)"@en ,
+                    "azerbajdzjansk manat (AZN)"@sv .
+
+<#bahrain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bahrain"@en ,
+                     "Bahrain"@sv ;
+    solid-memo:back "Bahraini dinar (BHD)"@en ,
+                    "bahrainsk dinar (BHD)"@sv .
+
+<#bangladesh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bangladesh"@en ,
+                     "Bangladesh"@sv ;
+    solid-memo:back "Bangladeshi taka (BDT)"@en ,
+                    "taka (BDT)"@sv .
+
+<#barbados>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Barbados"@en ,
+                     "Barbados"@sv ;
+    solid-memo:back "Barbadian dollar (BBD)"@en ,
+                    "barbadisk dollar (BBD)"@sv .
+
+<#belarus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belarus"@en ,
+                     "Belarus"@sv ;
+    solid-memo:back "Belarusian ruble (BYN)"@en ,
+                    "belarusisk rubel (BYN)"@sv .
+
+<#belgium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belgium"@en ,
+                     "Belgien"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#belize>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belize"@en ,
+                     "Belize"@sv ;
+    solid-memo:back "Belize dollar (BZD)"@en ,
+                    "belizisk dollar (BZD)"@sv .
+
+<#benin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Benin"@en ,
+                     "Benin"@sv ;
+    solid-memo:back "West African CFA franc (XOF)"@en ,
+                    "västafrikansk CFA-franc (XOF)"@sv .
+
+<#bhutan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bhutan"@en ,
+                     "Bhutan"@sv ;
+    solid-memo:back "Bhutanese ngultrum (BTN)"@en ,
+                    "ngultrum (BTN)"@sv ;
+    solid-memo:backNote "ISO 4217 also lists the Indian rupee (INR) for Bhutan; the card gives Bhutan's own currency."@en ,
+                        "ISO 4217 listar även indisk rupie (INR) för Bhutan; kortet anger Bhutans egen valuta."@sv .
+
+<#bolivia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bolivia"@en ,
+                     "Bolivia"@sv ;
+    solid-memo:back "Bolivian boliviano (BOB)"@en ,
+                    "boliviano (BOB)"@sv .
+
+<#bosnia-and-herzegovina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bosnia and Herzegovina"@en ,
+                     "Bosnien och Hercegovina"@sv ;
+    solid-memo:back "convertible mark (BAM)"@en ,
+                    "konvertibel mark (BAM)"@sv .
+
+<#botswana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Botswana"@en ,
+                     "Botswana"@sv ;
+    solid-memo:back "Botswana pula (BWP)"@en ,
+                    "pula (BWP)"@sv .
+
+<#brazil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brazil"@en ,
+                     "Brasilien"@sv ;
+    solid-memo:back "Brazilian real (BRL)"@en ,
+                    "real (BRL)"@sv .
+
+<#brunei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brunei"@en ,
+                     "Brunei"@sv ;
+    solid-memo:back "Brunei dollar (BND)"@en ,
+                    "bruneisk dollar (BND)"@sv .
+
+<#bulgaria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bulgaria"@en ,
+                     "Bulgarien"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv ;
+    solid-memo:backNote "Since 1 January 2026, replacing the Bulgarian lev (BGN)."@en ,
+                        "Sedan den 1 januari 2026, då euron ersatte bulgarisk lev (BGN)."@sv .
+
+<#burkina-faso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Burkina Faso"@en ,
+                     "Burkina Faso"@sv ;
+    solid-memo:back "West African CFA franc (XOF)"@en ,
+                    "västafrikansk CFA-franc (XOF)"@sv .
+
+<#burundi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Burundi"@en ,
+                     "Burundi"@sv ;
+    solid-memo:back "Burundian franc (BIF)"@en ,
+                    "burundisk franc (BIF)"@sv .
+
+<#cambodia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cambodia"@en ,
+                     "Kambodja"@sv ;
+    solid-memo:back "Cambodian riel (KHR)"@en ,
+                    "kambodjansk riel (KHR)"@sv .
+
+<#cameroon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cameroon"@en ,
+                     "Kamerun"@sv ;
+    solid-memo:back "Central African CFA franc (XAF)"@en ,
+                    "centralafrikansk CFA-franc (XAF)"@sv .
+
+<#canada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Canada"@en ,
+                     "Kanada"@sv ;
+    solid-memo:back "Canadian dollar (CAD)"@en ,
+                    "kanadensisk dollar (CAD)"@sv .
+
+<#cape-verde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cape Verde"@en ,
+                     "Kap Verde"@sv ;
+    solid-memo:back "Cape Verdean escudo (CVE)"@en ,
+                    "kapverdisk escudo (CVE)"@sv .
+
+<#central-african-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Central African Republic"@en ,
+                     "Centralafrikanska republiken"@sv ;
+    solid-memo:back "Central African CFA franc (XAF)"@en ,
+                    "centralafrikansk CFA-franc (XAF)"@sv .
+
+<#chad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chad"@en ,
+                     "Tchad"@sv ;
+    solid-memo:back "Central African CFA franc (XAF)"@en ,
+                    "centralafrikansk CFA-franc (XAF)"@sv .
+
+<#chile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chile"@en ,
+                     "Chile"@sv ;
+    solid-memo:back "Chilean peso (CLP)"@en ,
+                    "chilensk peso (CLP)"@sv .
+
+<#china>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "China"@en ,
+                     "Kina"@sv ;
+    solid-memo:back "renminbi (CNY)"@en ,
+                    "renminbi (CNY)"@sv ;
+    solid-memo:backNote "Its unit is called the yuan; ISO 4217 names the currency Yuan Renminbi."@en ,
+                        "Enheten kallas yuan; ISO 4217 kallar valutan Yuan Renminbi."@sv .
+
+<#colombia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Colombia"@en ,
+                     "Colombia"@sv ;
+    solid-memo:back "Colombian peso (COP)"@en ,
+                    "colombiansk peso (COP)"@sv .
+
+<#comoros>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Comoros"@en ,
+                     "Komorerna"@sv ;
+    solid-memo:back "Comorian franc (KMF)"@en ,
+                    "komorisk franc (KMF)"@sv .
+
+<#costa-rica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Costa Rica"@en ,
+                     "Costa Rica"@sv ;
+    solid-memo:back "Costa Rican colón (CRC)"@en ,
+                    "costaricansk colón (CRC)"@sv .
+
+<#croatia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Croatia"@en ,
+                     "Kroatien"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv ;
+    solid-memo:backNote "Since 1 January 2023, replacing the Croatian kuna (HRK)."@en ,
+                        "Sedan den 1 januari 2023, då euron ersatte kroatisk kuna (HRK)."@sv .
+
+<#cuba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cuba"@en ,
+                     "Kuba"@sv ;
+    solid-memo:back "Cuban peso (CUP)"@en ,
+                    "kubansk peso (CUP)"@sv .
+
+<#cyprus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cyprus"@en ,
+                     "Cypern"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#czech-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Czech Republic"@en ,
+                     "Tjeckien"@sv ;
+    solid-memo:back "Czech koruna (CZK)"@en ,
+                    "tjeckisk krona (CZK)"@sv .
+
+<#democratic-republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Democratic Republic of the Congo"@en ,
+                     "Kongo-Kinshasa"@sv ;
+    solid-memo:back "Congolese franc (CDF)"@en ,
+                    "kongolesisk franc (CDF)"@sv .
+
+<#denmark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Denmark"@en ,
+                     "Danmark"@sv ;
+    solid-memo:back "Danish krone (DKK)"@en ,
+                    "dansk krona (DKK)"@sv .
+
+<#djibouti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Djibouti"@en ,
+                     "Djibouti"@sv ;
+    solid-memo:back "Djiboutian franc (DJF)"@en ,
+                    "djiboutisk franc (DJF)"@sv .
+
+<#dominica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dominica"@en ,
+                     "Dominica"@sv ;
+    solid-memo:back "Eastern Caribbean dollar (XCD)"@en ,
+                    "östkaribisk dollar (XCD)"@sv .
+
+<#dominican-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dominican Republic"@en ,
+                     "Dominikanska republiken"@sv ;
+    solid-memo:back "Dominican peso (DOP)"@en ,
+                    "dominikansk peso (DOP)"@sv .
+
+<#ecuador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ecuador"@en ,
+                     "Ecuador"@sv ;
+    solid-memo:back "United States dollar (USD)"@en ,
+                    "amerikansk dollar (USD)"@sv .
+
+<#egypt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Egypt"@en ,
+                     "Egypten"@sv ;
+    solid-memo:back "Egyptian pound (EGP)"@en ,
+                    "egyptiskt pund (EGP)"@sv .
+
+<#el-salvador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "El Salvador"@en ,
+                     "El Salvador"@sv ;
+    solid-memo:back "United States dollar (USD)"@en ,
+                    "amerikansk dollar (USD)"@sv ;
+    solid-memo:backNote "In use since 2001. The Salvadoran colón (SVC) is still official and listed by ISO 4217, but almost no longer used."@en ,
+                        "Används sedan 2001. Salvadoransk colón (SVC) är fortfarande officiell och listas i ISO 4217, men används knappt längre."@sv .
+
+<#equatorial-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Equatorial Guinea"@en ,
+                     "Ekvatorialguinea"@sv ;
+    solid-memo:back "Central African CFA franc (XAF)"@en ,
+                    "centralafrikansk CFA-franc (XAF)"@sv .
+
+<#eritrea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eritrea"@en ,
+                     "Eritrea"@sv ;
+    solid-memo:back "Eritrean nakfa (ERN)"@en ,
+                    "nakfa (ERN)"@sv .
+
+<#estonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Estonia"@en ,
+                     "Estland"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#eswatini>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eswatini"@en ,
+                     "Eswatini"@sv ;
+    solid-memo:back "Swazi lilangeni (SZL)"@en ,
+                    "swazisk lilangeni (SZL)"@sv .
+
+<#ethiopia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ethiopia"@en ,
+                     "Etiopien"@sv ;
+    solid-memo:back "Ethiopian birr (ETB)"@en ,
+                    "etiopisk birr (ETB)"@sv .
+
+<#federated-states-of-micronesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Federated States of Micronesia"@en ,
+                     "Mikronesiska federationen"@sv ;
+    solid-memo:back "United States dollar (USD)"@en ,
+                    "amerikansk dollar (USD)"@sv .
+
+<#fiji>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fiji"@en ,
+                     "Fiji"@sv ;
+    solid-memo:back "Fijian dollar (FJD)"@en ,
+                    "fijidollar (FJD)"@sv .
+
+<#finland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Finland"@en ,
+                     "Finland"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#france>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "France"@en ,
+                     "Frankrike"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv ;
+    solid-memo:backNote "France's Pacific territories (French Polynesia, New Caledonia, Wallis and Futuna) use the CFP franc (XPF)."@en ,
+                        "Frankrikes territorier i Stilla havet (Franska Polynesien, Nya Kaledonien, Wallis- och Futunaöarna) använder CFP-franc (XPF)."@sv .
+
+<#gabon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gabon"@en ,
+                     "Gabon"@sv ;
+    solid-memo:back "Central African CFA franc (XAF)"@en ,
+                    "centralafrikansk CFA-franc (XAF)"@sv .
+
+<#georgia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Georgia"@en ,
+                     "Georgien"@sv ;
+    solid-memo:back "Georgian lari (GEL)"@en ,
+                    "georgisk lari (GEL)"@sv .
+
+<#germany>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany"@en ,
+                     "Tyskland"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#ghana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ghana"@en ,
+                     "Ghana"@sv ;
+    solid-memo:back "Ghana cedi (GHS)"@en ,
+                    "ghanansk cedi (GHS)"@sv .
+
+<#greece>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Greece"@en ,
+                     "Grekland"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#grenada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Grenada"@en ,
+                     "Grenada"@sv ;
+    solid-memo:back "Eastern Caribbean dollar (XCD)"@en ,
+                    "östkaribisk dollar (XCD)"@sv .
+
+<#guatemala>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guatemala"@en ,
+                     "Guatemala"@sv ;
+    solid-memo:back "Guatemalan quetzal (GTQ)"@en ,
+                    "quetzal (GTQ)"@sv .
+
+<#guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guinea"@en ,
+                     "Guinea"@sv ;
+    solid-memo:back "Guinean franc (GNF)"@en ,
+                    "guineansk franc (GNF)"@sv .
+
+<#guinea-bissau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guinea-Bissau"@en ,
+                     "Guinea-Bissau"@sv ;
+    solid-memo:back "West African CFA franc (XOF)"@en ,
+                    "västafrikansk CFA-franc (XOF)"@sv .
+
+<#guyana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guyana"@en ,
+                     "Guyana"@sv ;
+    solid-memo:back "Guyanese dollar (GYD)"@en ,
+                    "guyansk dollar (GYD)"@sv .
+
+<#haiti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Haiti"@en ,
+                     "Haiti"@sv ;
+    solid-memo:back "Haitian gourde (HTG)"@en ,
+                    "gourde (HTG)"@sv ;
+    solid-memo:backNote "ISO 4217 also lists the US dollar (USD) for Haiti; the card gives Haiti's own currency."@en ,
+                        "ISO 4217 listar även amerikansk dollar (USD) för Haiti; kortet anger Haitis egen valuta."@sv .
+
+<#honduras>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Honduras"@en ,
+                     "Honduras"@sv ;
+    solid-memo:back "Honduran lempira (HNL)"@en ,
+                    "lempira (HNL)"@sv .
+
+<#hungary>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hungary"@en ,
+                     "Ungern"@sv ;
+    solid-memo:back "Hungarian forint (HUF)"@en ,
+                    "forint (HUF)"@sv .
+
+<#iceland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iceland"@en ,
+                     "Island"@sv ;
+    solid-memo:back "Icelandic króna (ISK)"@en ,
+                    "isländsk krona (ISK)"@sv .
+
+<#india>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "India"@en ,
+                     "Indien"@sv ;
+    solid-memo:back "Indian rupee (INR)"@en ,
+                    "indisk rupie (INR)"@sv .
+
+<#indonesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Indonesia"@en ,
+                     "Indonesien"@sv ;
+    solid-memo:back "Indonesian rupiah (IDR)"@en ,
+                    "rupiah (IDR)"@sv .
+
+<#iran>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iran"@en ,
+                     "Iran"@sv ;
+    solid-memo:back "Iranian rial (IRR)"@en ,
+                    "iransk rial (IRR)"@sv .
+
+<#iraq>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iraq"@en ,
+                     "Irak"@sv ;
+    solid-memo:back "Iraqi dinar (IQD)"@en ,
+                    "irakisk dinar (IQD)"@sv .
+
+<#ireland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ireland"@en ,
+                     "Irland"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#israel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Israel"@en ,
+                     "Israel"@sv ;
+    solid-memo:back "Israeli new shekel (ILS)"@en ,
+                    "shekel (ILS)"@sv .
+
+<#italy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Italy"@en ,
+                     "Italien"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#ivory-coast>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ivory Coast"@en ,
+                     "Elfenbenskusten"@sv ;
+    solid-memo:back "West African CFA franc (XOF)"@en ,
+                    "västafrikansk CFA-franc (XOF)"@sv .
+
+<#jamaica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jamaica"@en ,
+                     "Jamaica"@sv ;
+    solid-memo:back "Jamaican dollar (JMD)"@en ,
+                    "jamaicansk dollar (JMD)"@sv .
+
+<#japan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Japan"@en ,
+                     "Japan"@sv ;
+    solid-memo:back "Japanese yen (JPY)"@en ,
+                    "yen (JPY)"@sv .
+
+<#jordan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jordan"@en ,
+                     "Jordanien"@sv ;
+    solid-memo:back "Jordanian dinar (JOD)"@en ,
+                    "jordansk dinar (JOD)"@sv .
+
+<#kazakhstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kazakhstan"@en ,
+                     "Kazakstan"@sv ;
+    solid-memo:back "Kazakhstani tenge (KZT)"@en ,
+                    "kazakstansk tenge (KZT)"@sv .
+
+<#kenya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kenya"@en ,
+                     "Kenya"@sv ;
+    solid-memo:back "Kenyan shilling (KES)"@en ,
+                    "kenyansk shilling (KES)"@sv .
+
+<#kiribati>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kiribati"@en ,
+                     "Kiribati"@sv ;
+    solid-memo:back "Australian dollar (AUD)"@en ,
+                    "australisk dollar (AUD)"@sv .
+
+<#kuwait>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kuwait"@en ,
+                     "Kuwait"@sv ;
+    solid-memo:back "Kuwaiti dinar (KWD)"@en ,
+                    "kuwaitisk dinar (KWD)"@sv .
+
+<#kyrgyzstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kyrgyzstan"@en ,
+                     "Kirgizistan"@sv ;
+    solid-memo:back "Kyrgyz som (KGS)"@en ,
+                    "kirgizistansk som (KGS)"@sv .
+
+<#laos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Laos"@en ,
+                     "Laos"@sv ;
+    solid-memo:back "Lao kip (LAK)"@en ,
+                    "laotisk kip (LAK)"@sv .
+
+<#latvia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Latvia"@en ,
+                     "Lettland"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#lebanon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lebanon"@en ,
+                     "Libanon"@sv ;
+    solid-memo:back "Lebanese pound (LBP)"@en ,
+                    "libanesiskt pund (LBP)"@sv .
+
+<#lesotho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lesotho"@en ,
+                     "Lesotho"@sv ;
+    solid-memo:back "Lesotho loti (LSL)"@en ,
+                    "lesothisk loti (LSL)"@sv ;
+    solid-memo:backNote "ISO 4217 also lists the South African rand (ZAR) for Lesotho; the card gives Lesotho's own currency."@en ,
+                        "ISO 4217 listar även sydafrikansk rand (ZAR) för Lesotho; kortet anger Lesothos egen valuta."@sv .
+
+<#liberia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Liberia"@en ,
+                     "Liberia"@sv ;
+    solid-memo:back "Liberian dollar (LRD)"@en ,
+                    "liberiansk dollar (LRD)"@sv ;
+    solid-memo:backNote "The US dollar is also legal tender in Liberia (a dual-currency system); the card gives Liberia's own currency."@en ,
+                        "Även amerikansk dollar är lagligt betalningsmedel i Liberia (ett system med två valutor); kortet anger landets egen valuta."@sv .
+
+<#libya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Libya"@en ,
+                     "Libyen"@sv ;
+    solid-memo:back "Libyan dinar (LYD)"@en ,
+                    "libysk dinar (LYD)"@sv .
+
+<#liechtenstein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Liechtenstein"@en ,
+                     "Liechtenstein"@sv ;
+    solid-memo:back "Swiss franc (CHF)"@en ,
+                    "schweizisk franc (CHF)"@sv .
+
+<#lithuania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lithuania"@en ,
+                     "Litauen"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#luxembourg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Luxembourg"@en ,
+                     "Luxemburg"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#madagascar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Madagascar"@en ,
+                     "Madagaskar"@sv ;
+    solid-memo:back "Malagasy ariary (MGA)"@en ,
+                    "madagaskisk ariary (MGA)"@sv .
+
+<#malawi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malawi"@en ,
+                     "Malawi"@sv ;
+    solid-memo:back "Malawian kwacha (MWK)"@en ,
+                    "malawisk kwacha (MWK)"@sv .
+
+<#malaysia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malaysia"@en ,
+                     "Malaysia"@sv ;
+    solid-memo:back "Malaysian ringgit (MYR)"@en ,
+                    "malaysisk ringgit (MYR)"@sv .
+
+<#maldives>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Maldives"@en ,
+                     "Maldiverna"@sv ;
+    solid-memo:back "Maldivian rufiyaa (MVR)"@en ,
+                    "maldivisk rufiyaa (MVR)"@sv .
+
+<#mali>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mali"@en ,
+                     "Mali"@sv ;
+    solid-memo:back "West African CFA franc (XOF)"@en ,
+                    "västafrikansk CFA-franc (XOF)"@sv .
+
+<#malta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malta"@en ,
+                     "Malta"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#marshall-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Marshall Islands"@en ,
+                     "Marshallöarna"@sv ;
+    solid-memo:back "United States dollar (USD)"@en ,
+                    "amerikansk dollar (USD)"@sv .
+
+<#mauritania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mauritania"@en ,
+                     "Mauretanien"@sv ;
+    solid-memo:back "Mauritanian ouguiya (MRU)"@en ,
+                    "mauretansk ouguiya (MRU)"@sv .
+
+<#mauritius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mauritius"@en ,
+                     "Mauritius"@sv ;
+    solid-memo:back "Mauritian rupee (MUR)"@en ,
+                    "mauritisk rupie (MUR)"@sv .
+
+<#mexico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mexico"@en ,
+                     "Mexiko"@sv ;
+    solid-memo:back "Mexican peso (MXN)"@en ,
+                    "mexikansk peso (MXN)"@sv .
+
+<#moldova>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Moldova"@en ,
+                     "Moldavien"@sv ;
+    solid-memo:back "Moldovan leu (MDL)"@en ,
+                    "moldavisk leu (MDL)"@sv .
+
+<#monaco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Monaco"@en ,
+                     "Monaco"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#mongolia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mongolia"@en ,
+                     "Mongoliet"@sv ;
+    solid-memo:back "Mongolian tögrög (MNT)"@en ,
+                    "mongolisk tögrög (MNT)"@sv .
+
+<#montenegro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Montenegro"@en ,
+                     "Montenegro"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#morocco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Morocco"@en ,
+                     "Marocko"@sv ;
+    solid-memo:back "Moroccan dirham (MAD)"@en ,
+                    "marockansk dirham (MAD)"@sv .
+
+<#mozambique>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mozambique"@en ,
+                     "Moçambique"@sv ;
+    solid-memo:back "Mozambican metical (MZN)"@en ,
+                    "moçambikisk metical (MZN)"@sv .
+
+<#myanmar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Myanmar"@en ,
+                     "Myanmar"@sv ;
+    solid-memo:back "Myanmar kyat (MMK)"@en ,
+                    "burmesisk kyat (MMK)"@sv .
+
+<#namibia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Namibia"@en ,
+                     "Namibia"@sv ;
+    solid-memo:back "Namibian dollar (NAD)"@en ,
+                    "namibisk dollar (NAD)"@sv ;
+    solid-memo:backNote "ISO 4217 also lists the South African rand (ZAR) for Namibia; the card gives Namibia's own currency."@en ,
+                        "ISO 4217 listar även sydafrikansk rand (ZAR) för Namibia; kortet anger Namibias egen valuta."@sv .
+
+<#nauru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nauru"@en ,
+                     "Nauru"@sv ;
+    solid-memo:back "Australian dollar (AUD)"@en ,
+                    "australisk dollar (AUD)"@sv .
+
+<#nepal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nepal"@en ,
+                     "Nepal"@sv ;
+    solid-memo:back "Nepalese rupee (NPR)"@en ,
+                    "nepalesisk rupie (NPR)"@sv .
+
+<#netherlands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Netherlands"@en ,
+                     "Nederländerna"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv ;
+    solid-memo:backNote "For the European Netherlands; the Caribbean parts of the Kingdom use the US dollar, the Aruban florin and the Caribbean guilder."@en ,
+                        "Gäller den europeiska delen; de karibiska delarna av kungariket använder amerikansk dollar, arubansk florin och karibisk gulden."@sv .
+
+<#new-zealand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "New Zealand"@en ,
+                     "Nya Zeeland"@sv ;
+    solid-memo:back "New Zealand dollar (NZD)"@en ,
+                    "nyzeeländsk dollar (NZD)"@sv .
+
+<#nicaragua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nicaragua"@en ,
+                     "Nicaragua"@sv ;
+    solid-memo:back "Nicaraguan córdoba (NIO)"@en ,
+                    "nicaraguansk córdoba (NIO)"@sv .
+
+<#niger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Niger"@en ,
+                     "Niger"@sv ;
+    solid-memo:back "West African CFA franc (XOF)"@en ,
+                    "västafrikansk CFA-franc (XOF)"@sv .
+
+<#nigeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nigeria"@en ,
+                     "Nigeria"@sv ;
+    solid-memo:back "Nigerian naira (NGN)"@en ,
+                    "nigeriansk naira (NGN)"@sv .
+
+<#north-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "North Korea"@en ,
+                     "Nordkorea"@sv ;
+    solid-memo:back "North Korean won (KPW)"@en ,
+                    "nordkoreansk won (KPW)"@sv .
+
+<#north-macedonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "North Macedonia"@en ,
+                     "Nordmakedonien"@sv ;
+    solid-memo:back "Macedonian denar (MKD)"@en ,
+                    "makedonisk denar (MKD)"@sv .
+
+<#norway>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norway"@en ,
+                     "Norge"@sv ;
+    solid-memo:back "Norwegian krone (NOK)"@en ,
+                    "norsk krona (NOK)"@sv .
+
+<#oman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oman"@en ,
+                     "Oman"@sv ;
+    solid-memo:back "Omani rial (OMR)"@en ,
+                    "omansk rial (OMR)"@sv .
+
+<#pakistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pakistan"@en ,
+                     "Pakistan"@sv ;
+    solid-memo:back "Pakistani rupee (PKR)"@en ,
+                    "pakistansk rupie (PKR)"@sv .
+
+<#palau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Palau"@en ,
+                     "Palau"@sv ;
+    solid-memo:back "United States dollar (USD)"@en ,
+                    "amerikansk dollar (USD)"@sv .
+
+<#panama>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Panama"@en ,
+                     "Panama"@sv ;
+    solid-memo:back "Panamanian balboa (PAB)"@en ,
+                    "panamansk balboa (PAB)"@sv ;
+    solid-memo:backNote "ISO 4217 also lists the US dollar (USD) for Panama; the card gives Panama's own currency."@en ,
+                        "ISO 4217 listar även amerikansk dollar (USD) för Panama; kortet anger Panamas egen valuta."@sv .
+
+<#papua-new-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Papua New Guinea"@en ,
+                     "Papua Nya Guinea"@sv ;
+    solid-memo:back "Papua New Guinean kina (PGK)"@en ,
+                    "papuansk kina (PGK)"@sv .
+
+<#paraguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Paraguay"@en ,
+                     "Paraguay"@sv ;
+    solid-memo:back "Paraguayan guaraní (PYG)"@en ,
+                    "guarani (PYG)"@sv .
+
+<#peru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Peru"@en ,
+                     "Peru"@sv ;
+    solid-memo:back "Peruvian sol (PEN)"@en ,
+                    "peruansk sol (PEN)"@sv .
+
+<#philippines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Philippines"@en ,
+                     "Filippinerna"@sv ;
+    solid-memo:back "Philippine peso (PHP)"@en ,
+                    "filippinsk peso (PHP)"@sv .
+
+<#poland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Poland"@en ,
+                     "Polen"@sv ;
+    solid-memo:back "Polish złoty (PLN)"@en ,
+                    "złoty (PLN)"@sv .
+
+<#portugal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Portugal"@en ,
+                     "Portugal"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#qatar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Qatar"@en ,
+                     "Qatar"@sv ;
+    solid-memo:back "Qatari riyal (QAR)"@en ,
+                    "qatarisk rial (QAR)"@sv .
+
+<#republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Republic of the Congo"@en ,
+                     "Kongo-Brazzaville"@sv ;
+    solid-memo:back "Central African CFA franc (XAF)"@en ,
+                    "centralafrikansk CFA-franc (XAF)"@sv .
+
+<#romania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Romania"@en ,
+                     "Rumänien"@sv ;
+    solid-memo:back "Romanian leu (RON)"@en ,
+                    "rumänsk leu (RON)"@sv .
+
+<#russia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Russia"@en ,
+                     "Ryssland"@sv ;
+    solid-memo:back "Russian ruble (RUB)"@en ,
+                    "rysk rubel (RUB)"@sv .
+
+<#rwanda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rwanda"@en ,
+                     "Rwanda"@sv ;
+    solid-memo:back "Rwandan franc (RWF)"@en ,
+                    "rwandisk franc (RWF)"@sv .
+
+<#saint-kitts-and-nevis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saint Kitts and Nevis"@en ,
+                     "Saint Kitts och Nevis"@sv ;
+    solid-memo:back "Eastern Caribbean dollar (XCD)"@en ,
+                    "östkaribisk dollar (XCD)"@sv .
+
+<#saint-lucia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saint Lucia"@en ,
+                     "Saint Lucia"@sv ;
+    solid-memo:back "Eastern Caribbean dollar (XCD)"@en ,
+                    "östkaribisk dollar (XCD)"@sv .
+
+<#saint-vincent-and-the-grenadines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saint Vincent and the Grenadines"@en ,
+                     "Saint Vincent och Grenadinerna"@sv ;
+    solid-memo:back "Eastern Caribbean dollar (XCD)"@en ,
+                    "östkaribisk dollar (XCD)"@sv .
+
+<#samoa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Samoa"@en ,
+                     "Samoa"@sv ;
+    solid-memo:back "Samoan tālā (WST)"@en ,
+                    "samoansk tala (WST)"@sv .
+
+<#san-marino>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "San Marino"@en ,
+                     "San Marino"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#saudi-arabia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saudi Arabia"@en ,
+                     "Saudiarabien"@sv ;
+    solid-memo:back "Saudi riyal (SAR)"@en ,
+                    "saudiarabisk rial (SAR)"@sv .
+
+<#senegal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Senegal"@en ,
+                     "Senegal"@sv ;
+    solid-memo:back "West African CFA franc (XOF)"@en ,
+                    "västafrikansk CFA-franc (XOF)"@sv .
+
+<#serbia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Serbia"@en ,
+                     "Serbien"@sv ;
+    solid-memo:back "Serbian dinar (RSD)"@en ,
+                    "serbisk dinar (RSD)"@sv .
+
+<#seychelles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Seychelles"@en ,
+                     "Seychellerna"@sv ;
+    solid-memo:back "Seychellois rupee (SCR)"@en ,
+                    "seychellisk rupie (SCR)"@sv .
+
+<#sierra-leone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sierra Leone"@en ,
+                     "Sierra Leone"@sv ;
+    solid-memo:back "Sierra Leonean leone (SLE)"@en ,
+                    "sierraleonsk leone (SLE)"@sv ;
+    solid-memo:backNote "The new leone (SLE) replaced the old leone (SLL), which ISO 4217 withdrew in December 2023."@en ,
+                        "Den nya leonen (SLE) ersatte den gamla leonen (SLL), som ISO 4217 strök i december 2023."@sv .
+
+<#singapore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Singapore"@en ,
+                     "Singapore"@sv ;
+    solid-memo:back "Singapore dollar (SGD)"@en ,
+                    "singaporiansk dollar (SGD)"@sv .
+
+<#slovakia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Slovakia"@en ,
+                     "Slovakien"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#slovenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Slovenia"@en ,
+                     "Slovenien"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#solomon-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Solomon Islands"@en ,
+                     "Salomonöarna"@sv ;
+    solid-memo:back "Solomon Islands dollar (SBD)"@en ,
+                    "salomondollar (SBD)"@sv .
+
+<#somalia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Somalia"@en ,
+                     "Somalia"@sv ;
+    solid-memo:back "Somali shilling (SOS)"@en ,
+                    "somalisk shilling (SOS)"@sv .
+
+<#south-africa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Africa"@en ,
+                     "Sydafrika"@sv ;
+    solid-memo:back "South African rand (ZAR)"@en ,
+                    "rand (ZAR)"@sv .
+
+<#south-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Korea"@en ,
+                     "Sydkorea"@sv ;
+    solid-memo:back "South Korean won (KRW)"@en ,
+                    "sydkoreansk won (KRW)"@sv .
+
+<#south-sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Sudan"@en ,
+                     "Sydsudan"@sv ;
+    solid-memo:back "South Sudanese pound (SSP)"@en ,
+                    "sydsudanesiskt pund (SSP)"@sv .
+
+<#spain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Spain"@en ,
+                     "Spanien"@sv ;
+    solid-memo:back "euro (EUR)"@en ,
+                    "euro (EUR)"@sv .
+
+<#sri-lanka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sri Lanka"@en ,
+                     "Sri Lanka"@sv ;
+    solid-memo:back "Sri Lankan rupee (LKR)"@en ,
+                    "lankesisk rupie (LKR)"@sv .
+
+<#sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sudan"@en ,
+                     "Sudan"@sv ;
+    solid-memo:back "Sudanese pound (SDG)"@en ,
+                    "sudanesiskt pund (SDG)"@sv .
+
+<#suriname>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Suriname"@en ,
+                     "Surinam"@sv ;
+    solid-memo:back "Surinamese dollar (SRD)"@en ,
+                    "surinamesisk dollar (SRD)"@sv .
+
+<#sweden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sweden"@en ,
+                     "Sverige"@sv ;
+    solid-memo:back "Swedish krona (SEK)"@en ,
+                    "svensk krona (SEK)"@sv .
+
+<#switzerland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Switzerland"@en ,
+                     "Schweiz"@sv ;
+    solid-memo:back "Swiss franc (CHF)"@en ,
+                    "schweizisk franc (CHF)"@sv .
+
+<#syria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Syria"@en ,
+                     "Syrien"@sv ;
+    solid-memo:back "Syrian pound (SYP)"@en ,
+                    "syriskt pund (SYP)"@sv .
+
+<#sao-tome-and-principe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "São Tomé and Príncipe"@en ,
+                     "São Tomé och Príncipe"@sv ;
+    solid-memo:back "São Tomé and Príncipe dobra (STN)"@en ,
+                    "dobra (STN)"@sv .
+
+<#tajikistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tajikistan"@en ,
+                     "Tadzjikistan"@sv ;
+    solid-memo:back "Tajikistani somoni (TJS)"@en ,
+                    "tadzjikistansk somoni (TJS)"@sv .
+
+<#tanzania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tanzania"@en ,
+                     "Tanzania"@sv ;
+    solid-memo:back "Tanzanian shilling (TZS)"@en ,
+                    "tanzanisk shilling (TZS)"@sv .
+
+<#thailand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thailand"@en ,
+                     "Thailand"@sv ;
+    solid-memo:back "Thai baht (THB)"@en ,
+                    "baht (THB)"@sv .
+
+<#the-bahamas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Bahamas"@en ,
+                     "Bahamas"@sv ;
+    solid-memo:back "Bahamian dollar (BSD)"@en ,
+                    "bahamansk dollar (BSD)"@sv .
+
+<#the-gambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Gambia"@en ,
+                     "Gambia"@sv ;
+    solid-memo:back "Gambian dalasi (GMD)"@en ,
+                    "dalasi (GMD)"@sv .
+
+<#timor-leste>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Timor-Leste"@en ,
+                     "Östtimor"@sv ;
+    solid-memo:back "United States dollar (USD)"@en ,
+                    "amerikansk dollar (USD)"@sv ;
+    solid-memo:backNote "Timor-Leste also issues its own centavo coins, equal in value to US cents."@en ,
+                        "Östtimor ger också ut egna centavomynt, värda lika mycket som amerikanska cent."@sv .
+
+<#togo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Togo"@en ,
+                     "Togo"@sv ;
+    solid-memo:back "West African CFA franc (XOF)"@en ,
+                    "västafrikansk CFA-franc (XOF)"@sv .
+
+<#tonga>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tonga"@en ,
+                     "Tonga"@sv ;
+    solid-memo:back "Tongan paʻanga (TOP)"@en ,
+                    "tongansk paʻanga (TOP)"@sv .
+
+<#trinidad-and-tobago>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Trinidad and Tobago"@en ,
+                     "Trinidad och Tobago"@sv ;
+    solid-memo:back "Trinidad and Tobago dollar (TTD)"@en ,
+                    "trinidaddollar (TTD)"@sv .
+
+<#tunisia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tunisia"@en ,
+                     "Tunisien"@sv ;
+    solid-memo:back "Tunisian dinar (TND)"@en ,
+                    "tunisisk dinar (TND)"@sv .
+
+<#turkey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Turkey"@en ,
+                     "Turkiet"@sv ;
+    solid-memo:back "Turkish lira (TRY)"@en ,
+                    "turkisk lira (TRY)"@sv .
+
+<#turkmenistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Turkmenistan"@en ,
+                     "Turkmenistan"@sv ;
+    solid-memo:back "Turkmenistan new manat (TMT)"@en ,
+                    "turkmenistansk manat (TMT)"@sv .
+
+<#tuvalu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tuvalu"@en ,
+                     "Tuvalu"@sv ;
+    solid-memo:back "Australian dollar (AUD)"@en ,
+                    "australisk dollar (AUD)"@sv .
+
+<#uganda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uganda"@en ,
+                     "Uganda"@sv ;
+    solid-memo:back "Ugandan shilling (UGX)"@en ,
+                    "ugandisk shilling (UGX)"@sv .
+
+<#ukraine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ukraine"@en ,
+                     "Ukraina"@sv ;
+    solid-memo:back "Ukrainian hryvnia (UAH)"@en ,
+                    "hryvnja (UAH)"@sv .
+
+<#united-arab-emirates>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Arab Emirates"@en ,
+                     "Förenade arabemiraten"@sv ;
+    solid-memo:back "United Arab Emirates dirham (AED)"@en ,
+                    "emiratisk dirham (AED)"@sv .
+
+<#united-kingdom>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Kingdom"@en ,
+                     "Storbritannien"@sv ;
+    solid-memo:back "pound sterling (GBP)"@en ,
+                    "brittiskt pund (GBP)"@sv .
+
+<#united-states>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United States"@en ,
+                     "USA"@sv ;
+    solid-memo:back "United States dollar (USD)"@en ,
+                    "amerikansk dollar (USD)"@sv .
+
+<#uruguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uruguay"@en ,
+                     "Uruguay"@sv ;
+    solid-memo:back "Uruguayan peso (UYU)"@en ,
+                    "uruguayansk peso (UYU)"@sv .
+
+<#uzbekistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uzbekistan"@en ,
+                     "Uzbekistan"@sv ;
+    solid-memo:back "Uzbek som (UZS)"@en ,
+                    "uzbekistansk som (UZS)"@sv .
+
+<#vanuatu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vanuatu"@en ,
+                     "Vanuatu"@sv ;
+    solid-memo:back "Vanuatu vatu (VUV)"@en ,
+                    "vanuatisk vatu (VUV)"@sv .
+
+<#venezuela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Venezuela"@en ,
+                     "Venezuela"@sv ;
+    solid-memo:back "Venezuelan bolívar (VES)"@en ,
+                    "venezuelansk bolívar (VES)"@sv ;
+    solid-memo:backNote "ISO 4217 also lists a second code, VED, for the bolívar soberano; Wikidata and the EU style guide give VES."@en ,
+                        "ISO 4217 listar även en andra kod, VED, för bolívar soberano; Wikidata och EU:s publikationshandbok anger VES."@sv .
+
+<#vietnam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vietnam"@en ,
+                     "Vietnam"@sv ;
+    solid-memo:back "Vietnamese đồng (VND)"@en ,
+                    "vietnamesisk dong (VND)"@sv .
+
+<#yemen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Yemen"@en ,
+                     "Jemen"@sv ;
+    solid-memo:back "Yemeni rial (YER)"@en ,
+                    "jemenitisk rial (YER)"@sv .
+
+<#zambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Zambia"@en ,
+                     "Zambia"@sv ;
+    solid-memo:back "Zambian kwacha (ZMW)"@en ,
+                    "zambisk kwacha (ZMW)"@sv .
+
+<#zimbabwe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Zimbabwe"@en ,
+                     "Zimbabwe"@sv ;
+    solid-memo:back "Zimbabwe Gold (ZWG)"@en ,
+                    "zimbabwiskt guld (ZWG)"@sv ;
+    solid-memo:backNote "Introduced in 2024 as ZiG, replacing the Zimbabwe dollar (ZWL), which ISO 4217 withdrew in September 2024. Zimbabwe has a multi-currency system in which the US dollar is also used."@en ,
+                        "Infördes 2024 som ZiG och ersatte zimbabwisk dollar (ZWL), som ISO 4217 strök i september 2024. Zimbabwe har ett flervalutasystem där även amerikansk dollar används."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

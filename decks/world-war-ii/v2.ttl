@@ -1,0 +1,688 @@
+@base <https://solid-memo.com/decks/world-war-ii/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Second World War dates"@en ,
+                  "Datum under andra världskriget"@sv ,
+                  "제2차 세계 대전 날짜"@ko ,
+                  "Daten des Zweiten Weltkriegs"@de ,
+                  "Fechas de la Segunda Guerra Mundial"@es ,
+                  "Dates de la Seconde Guerre mondiale"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "47 key events of the Second World War, from the Marco Polo Bridge incident in 1937 to Japan's surrender on 2 September 1945, spread across Europe, the Nordic countries, the Atlantic, North Africa, Asia and the Pacific. The front describes the event in English and Swedish; the back gives its date as day, month and year, e.g. “1 September 1939”. Only events with an undisputed single-day date are included, such as the start of a battle, a declaration of war, a signature or a surrender. Dates from Wikidata, checked against Store norske leksikon, the Imperial War Museums, the US Office of the Historian and Liberation Route Europe."@en ,
+                        "47 viktiga händelser under andra världskriget, från Marco Polo-broincidenten 1937 till Japans kapitulation den 2 september 1945, spridda över Europa, Norden, Atlanten, Nordafrika, Asien och Stilla havet. Framsidan beskriver händelsen på engelska och svenska; baksidan ger datumet som dag, månad och år, t.ex. ”1 september 1939”. Bara händelser med ett odiskutabelt datum finns med, till exempel början på ett slag, en krigsförklaring, en underskrift eller en kapitulation. Datumen kommer från Wikidata och är kontrollerade mot Store norske leksikon, Imperial War Museums, det amerikanska utrikesdepartementets historiska avdelning (Office of the Historian) och Liberation Route Europe."@sv ,
+                        "1937년 루거우차오 사건부터 1945년 9월 2일 일본의 항복까지, 유럽, 북유럽, 대서양, 북아프리카, 아시아, 태평양에 걸친 제2차 세계 대전의 주요 사건 47개입니다. 앞면은 사건을 영어와 스웨덴어로 설명하고, 뒷면은 날짜를 “1 September 1939”처럼 일, 월, 연도로 제시합니다. 전투의 시작, 선전 포고, 서명, 항복처럼 하루로 이견 없이 정해지는 날짜가 있는 사건만 담았습니다. 날짜는 위키데이터에서 가져와 Store norske leksikon, Imperial War Museums, 미국 Office of the Historian, Liberation Route Europe으로 확인했습니다."@ko ,
+                        "47 wichtige Ereignisse des Zweiten Weltkriegs, vom Zwischenfall an der Marco-Polo-Brücke 1937 bis zur Kapitulation Japans am 2. September 1945, verteilt über Europa, die nordischen Länder, den Atlantik, Nordafrika, Asien und den Pazifik. Die Vorderseite beschreibt das Ereignis auf Englisch und Schwedisch; die Rückseite gibt sein Datum als Tag, Monat und Jahr an, z. B. „1 September 1939“. Aufgenommen sind nur Ereignisse mit einem unbestrittenen Datum an einem einzigen Tag, etwa der Beginn einer Schlacht, eine Kriegserklärung, eine Unterzeichnung oder eine Kapitulation. Daten aus Wikidata, abgeglichen mit Store norske leksikon, den Imperial War Museums, dem US-amerikanischen Office of the Historian und Liberation Route Europe."@de ,
+                        "47 acontecimientos clave de la Segunda Guerra Mundial, desde el incidente del puente de Marco Polo en 1937 hasta la rendición de Japón el 2 de septiembre de 1945, repartidos por Europa, los países nórdicos, el Atlántico, el norte de África, Asia y el Pacífico. El anverso describe el acontecimiento en inglés y sueco; el reverso da su fecha como día, mes y año, p. ej., «1 September 1939». Solo se incluyen acontecimientos con una fecha indiscutida de un solo día, como el inicio de una batalla, una declaración de guerra, una firma o una rendición. Fechas de Wikidata, comprobadas con Store norske leksikon, los Imperial War Museums, la Office of the Historian estadounidense y Liberation Route Europe."@es ,
+                        "47 événements clés de la Seconde Guerre mondiale, de l’incident du pont Marco-Polo en 1937 à la capitulation du Japon le 2 septembre 1945, répartis entre l’Europe, les pays nordiques, l’Atlantique, l’Afrique du Nord, l’Asie et le Pacifique. Le recto décrit l’événement en anglais et en suédois ; le verso donne sa date sous forme de jour, mois et année, par ex. « 1 September 1939 ». Seuls figurent les événements dont la date, un seul jour, est incontestée, comme le début d’une bataille, une déclaration de guerre, une signature ou une capitulation. Dates issues de Wikidata, vérifiées avec le Store norske leksikon, les Imperial War Museums, l’Office of the Historian américain et Liberation Route Europe."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:history ;
+    dcat:keyword "Second World War"@en ,
+                 "World War II"@en ,
+                 "history"@en ,
+                 "dates"@en ,
+                 "20th century"@en ,
+                 "andra världskriget"@sv ,
+                 "världskrig"@sv ,
+                 "historia"@sv ,
+                 "datum"@sv ,
+                 "1900-talet"@sv ,
+                 "제2차 세계 대전"@ko ,
+                 "2차 대전"@ko ,
+                 "역사"@ko ,
+                 "날짜"@ko ,
+                 "20세기"@ko ,
+                 "Zweiter Weltkrieg"@de ,
+                 "2. Weltkrieg"@de ,
+                 "Geschichte"@de ,
+                 "Daten"@de ,
+                 "20. Jahrhundert"@de ,
+                 "Segunda Guerra Mundial"@es ,
+                 "II Guerra Mundial"@es ,
+                 "historia"@es ,
+                 "fechas"@es ,
+                 "siglo XX"@es ,
+                 "Seconde Guerre mondiale"@fr ,
+                 "Deuxième Guerre mondiale"@fr ,
+                 "histoire"@fr ,
+                 "dates"@fr ,
+                 "XXe siècle"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/world-war-ii/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/world-war-ii/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#world-war-ii> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#world-war-ii> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://snl.no/> ,
+              <https://snl.no/andre_verdenskrig_-_viktige_hendelser> ,
+              <https://history.state.gov/milestones/1937-1945/pearl-harbor> ,
+              <https://www.iwm.org.uk/history> ,
+              <https://www.liberationroute.com/en/stories/416/the-armistice-in-cassibile> ,
+              <https://encyclopedia.ushmm.org/content/en/article/tunisia-campaign> ,
+              <https://en.wikipedia.org/wiki/Continuation_War> ,
+              <https://sv.wikipedia.org/wiki/Landstigningen_i_Normandie> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ,
+                       <#review-7> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (a script extracting dated sentences from Store norske leksikon, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidates: from its own general knowledge, the authoring agent drew up 118 search strings for widely taught events of the Second World War, deliberately covering every theatre (Europe, the Nordic countries, the Atlantic, the Mediterranean and North Africa, China, South-East Asia and the Pacific) and including the Holocaust. No published list or timeline was copied. Each string was looked up with the Wikidata wbsearchentities API (queries 1 and 2, script <scratch>/search.py) and the item for the event picked by hand from the hits and their descriptions."@en ,
+                 "Dates and labels: one SPARQL query (query 3) returned, for about 100 candidate items, their English and Swedish labels and every P585 point in time, P580 start time, P582 end time, P571 inception and P576 dissolution date with its precision and rank. The raw CSV was saved and read item by item (script <scratch>/show.py). Only day-precision values (precision 11) of normal or preferred rank were used; a deprecated value (Victory in Europe Day's P585) was not."@en ,
+                 "Choosing the event and its date: for each card the moment named on the front is exactly the one Wikidata dates: the start (P580) of an invasion, battle or operation, the end (P582) where the front names a surrender or the end of an evacuation, and the point in time (P585) of a signature, declaration, conference or bombing. Where one item's dates could be read two ways the front was worded to name the moment that the date belongs to (the last German troops at Stalingrad, the German garrison of Paris, Italy's secret signature at Cassibile, the signature of the Moscow Armistice). The machine checks compare the full date (\"1939-09-01T00:00:00Z\"), not only the year, against live Wikidata."@en ,
+                 "Independent check: every card's date was checked against at least one authority independent of Wikidata. For most cards this is Store norske leksikon (SNL), the Norwegian national encyclopedia whose articles are written by named subject experts: for each card the SNL search API (https://snl.no/api/v1/search) was queried with one to four Norwegian search strings (queries 4, 5 and 7), the article JSON of the top hits fetched (https://snl.no/<article>.json) and the sentences that contain the card's day and month in Norwegian form (\"1. september\") together with its year extracted by the script <scratch>/snl.py. SNL's chronological table \"andre verdenskrig – viktige hendelser\" turned up among the hits and was read row by row. Where SNL gave no date for the event, the Imperial War Museums (El Alamein, Tunisia, Okinawa), the US Department of State's Office of the Historian (Marco Polo Bridge, also Tripartite Pact and Pearl Harbor) and Liberation Route Europe (Cassibile, Paris) were consulted (query 8; pages saved with curl and their sentences extracted with <scratch>/grep.py). The verbatim sentence or table row is in each card's evidence, Norwegian quotes with an English gloss in brackets. The US National WWII Museum's timeline was also tried: its URL answered 404 and it was not used; the US Army Center of Military History answered 403 and the US Naval History and Heritage Command failed certificate verification (both listed under query 8), so neither was used. After the first review round, the Axis surrender in Tunisia was also checked against the United States Holocaust Memorial Museum's Holocaust Encyclopedia, the Continuation War's start and the Okinawa landings against English Wikipedia, and the Swedish names \"Dagen D\", \"andra slaget vid el-Alamein\" and \"mellanfreden i Moskva\" against Swedish Wikipedia (query 11; all verification only)."@en ,
+                 "Swedish text: every front is the deck's own wording of the event in English and in Swedish, written by the authoring agent in Swedish conventions (sentence case, lower-case month names on the back: \"1 september 1939\"). Swedish names of events, places and ships were taken from Wikidata's sv labels (queries 3 and 6): vinterkriget, Moskvafreden, Operation Weserübung, Operation Dynamo, Dunkerque, Blitzen, Operation Barbarossa, Belägringen av Leningrad, Wannseekonferensen, Slaget vid Río de la Plata, Admiral Graf Spee, Bismarck, Operation Torch, Upproret i Warszawas getto, Slaget vid Kursk, Warszawaupproret, Ardenneroffensiven, Jaltakonferensen, Marco Polo-broincidenten, Molotov–Ribbentrop-pakten, Mellanfreden i Moskva, fortsättningskriget; each one used on a front has a label check (\"mellanfreden i Moskva\" is written in lower case in running text, as Swedish writes the names of treaties, and \"Fortsättningskriget\" is capitalised only because it opens the sentence). Other names follow the sv labels of the places (Warszawa, Normandie, Jugoslavien, Grekland, Tunisien, Storbritannien, Sovjetunionen) and the Swedish label of Victory in Europe Day (Q622365, \"Segerdagen i Europa\"; Swedish writes the names of holidays in lower case, and \"Segerdagen\" is capitalised in the Reims card's note only because it opens the sentence). \"el-Alamein\" follows the sv label of the battle item (Q153376, \"Slaget vid el-Alamein\"); \"Andra slaget vid el-Alamein\" follows Swedish Wikipedia (\"Slaget vid el-Alamein, eller mer korrekt andra slaget vid el-Alamein\"), and \"Dagen D\" is the established Swedish name for 6 June 1944 per Swedish Wikipedia (\"Landstigningarna inleddes tisdagen den 6 juni 1944 (Dagen D)\"). Pact names that are common nouns in Swedish running text are written in lower case (\"tremaktspakten\"), so they carry no label check."@en ,
+                 "Back convention: the date is written out as day, month name and year in each language (\"1 September 1939\" / \"1 september 1939\"), the form used in both English and Swedish reference works. Dates are the local dates of the place where the event happened, as Wikidata and the checking sources give them."@en ,
+                 "Notes: a backNote is added only where a related date is easily confused with the card's (the main surrender at Stalingrad on 31 January, the Winter War fighting ending on 13 March, the announcement of the Italian armistice on 8 September, VE Day on 8 May, the start of the Dunkirk evacuation) or gives brief context; every note's content is in the card's evidence."@en ,
+                 "Build and validation: the dossier JSON was generated from the saved query results by <scratch>/make_dossier.py (the Wikidata evidence texts are generated from the query 3 CSV; the other evidence texts were copied from the script output into <scratch>/cards.py), built with the deck builder, which re-ran every Wikidata check (the full date of every card and the labels used) against live Wikidata, and validated with node packages/deck-library/scripts/validate_sources.ts world-war-ii (the app's SHACL shapes and DCAT-AP)."@en ,
+                 "Selection: Included: 47 widely taught events of the Second World War whose date is a single day that Wikidata and an independent authority agree on: the start of an invasion, battle or operation, a declaration of war, the signature of a pact, armistice or surrender, a conference's opening, a bombing, a landing. The set covers the war's whole span (from the Marco Polo Bridge incident of 7 July 1937, which began the war between Japan and China, to Japan's signature of surrender on 2 September 1945) and all theatres: Europe (including the Holocaust), the Nordic countries (the Winter War, the Moscow Peace Treaty, Operation Weserübung, Norway's capitulation, the Continuation War, the Moscow Armistice), the Atlantic (the River Plate, the Bismarck), North Africa (El Alamein, Operation Torch, the surrender in Tunisia) and Asia and the Pacific. Left out because the sources give different dates or the start of the event is defined differently: the Battle of Midway (Wikidata 4–7 June, SNL 3–6 June 1942), the Battle of Britain (Wikidata from 10 July, SNL from 10 August 1940), the Atlantic Charter (Wikidata 14 August, SNL 12 August 1941), the Allied invasion of Sicily (Wikidata 9 July, SNL 10 July 1943), the Battle of Iwo Jima (Wikidata's start is 8 February 1945, while the authoring agent knew the main landings to be usually dated 19 February; left out without further research), the Lapland War, the Battle of the Coral Sea, the Battle of Leyte Gulf and the Battle of Berlin (left out without further research because, to the authoring agent's knowledge, accounts define their start differently), the Liberation of Paris as a whole (SNL dates it 24 August; the card is instead the garrison's surrender on 25 August), Victory in Europe Day as a card of its own (its Wikidata date is deprecated; it is in the note of the Reims card), Italy's declaration of war on France and Britain (the only Wikidata item found was the Italian invasion of France, a different event), the Lend-Lease Act and the British occupation of Iceland (no date in Wikidata). Further candidates (among them Mers-el-Kébir, Taranto, the Tehran Conference, Operation Bagration, the fall of Hong Kong, the bombing of Darwin, the Doolittle Raid, the Potsdam Declaration and the Hirohito broadcast) were left out only to keep the deck at about 45 cards and balanced between theatres. The deck stops at 2 September 1945; nothing in it depends on events after that date."@en ,
+                 "Licensing: The only content source is Wikidata, whose structured data is CC0: the dates and the Swedish and English names of events, ships and places used on the cards come from it, so the deck is CC0 1.0 like the rest of the library. Store norske leksikon (articles marked begrenset gjenbruk, all rights reserved, and a few marked CC BY-SA 3.0), the Imperial War Museums and Liberation Route Europe (all rights reserved) and the US Department of State's Office of the Historian (a US government work, not under copyright in the US) were used for verification only: they confirmed dates that Wikidata gave, and short quotations of them appear only in the provenance report as evidence. No table or selection was copied from them, and no wording beyond bare factual statements: some fronts resemble rows of SNL's timeline (for example \"The Norwegian forces in Norway capitulate\" and the row \"De gjenværende norske styrkene i Norge kapitulerer\") because both state the same bare fact in the usual way, and such minimal factual statements are not protected expression; the selection of events was made by the authoring agent from general knowledge before any of them was consulted. The fronts and notes are the compiler's own wording of facts. Added after the first review round, for verification only as well: the United States Holocaust Memorial Museum's Holocaust Encyclopedia (all rights reserved) and English and Swedish Wikipedia (CC BY-SA 4.0); from Swedish Wikipedia only the bare Swedish names \"Dagen D\", \"andra slaget vid el-Alamein\" and \"mellanfreden i Moskva\" were confirmed, which are not protected expression, so the deck stays CC0."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every card's date against Wikidata (full date, day precision) and against an independent authority (Store norske leksikon, the Imperial War Museums, the US Office of the Historian or Liberation Route Europe); the Swedish names against Wikidata sv labels."@en ;
+    rdfs:comment "Scope: All 47 cards, the candidates left out, the sources and the deck metadata."@en ,
+                 "Outcome: For all 47 cards Wikidata's date and the independent source agree on the day of the moment named on the front. Where sources differed on a related moment (the main versus the final surrender at Stalingrad, the entry of French troops into Paris versus the German surrender, the Italian armistice's signature versus its announcement, the signature versus the effect of the Moscow treaties, Reims versus VE Day) the front names the moment and a note gives the other date. Candidates whose dates differ between the sources were left out. No Wikidata check was skipped."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 47 cards, the description and selection; every Wikidata check re-run live."@en ,
+                 "Outcome: No card had a wrong date. Two warnings (a misleading SNL sentence cited for the Continuation War, and a description narrower than the deck) and three suggestions. The evidence of the Continuation War card now flags the inaccurate half of the SNL sentence and adds English and Swedish Wikipedia; the description was reworded; the Okinawa front now names the main island; the Reims check is described as what it tests. The note on the night-time signing of the Molotov–Ribbentrop Pact was declined."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 47 cards, title, description and keywords; event names against live Wikidata sv labels."@en ,
+                 "Outcome: Language tagging was clean. A gender agreement error in the Swedish description and a non-established Swedish name on the Moscow Armistice card were fixed; the vague \"a declaration\" was replaced by \"a declaration of war\"."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence and terms page, every quote in the evidence, every Wikidata check, the queries and the method."@en ,
+                 "Outcome: The CC0 licensing holds and every quote was verbatim. The Tunisia card gained a source that states the surrender; the licensing text now explains the resemblance of some fronts to SNL's timeline; the Swedish names \"Dagen D\" and \"andra slaget vid el-Alamein\" are sourced; the reference to the brief, the query records and the machine-check wording were tidied. Splitting query 8–10 by source was declined."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 7 cards changed in rounds 1–3 and every third card (22 cards), all 93 Wikidata checks (54 on dated statements, 39 on labels) against live Wikidata, the quotes added in rounds 1–3, the deck metadata and the quality-control log."@en ,
+                 "Outcome: No wrong dates or errors; every fix claimed in rounds 1–3 was confirmed. The selection text no longer mentions an unpublished brief, the method explains the capital in \"Segerdagen\", and the Moscow Armistice evidence notes that Swedish Wikipedia's infobox gives 12 September against its own text."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The card changed in round 4 (moscow-armistice) and every third card (16 cards): their Wikidata checks against live Wikidata, the cited SNL and Swedish Wikipedia passages, the Swedish text and language tags, the deck metadata and the quality-control log."@en ,
+                 "Outcome: No wrong dates, language mistakes or tag problems; every fix claimed in round 4 was confirmed in the dossier and the built files. The only finding was a wrong check count in round 4's scope, now corrected."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 47 cards (fronts, backs, notes, evidence and Swedish text), the language tags, the deck metadata, the method's first paragraph, round 5's fix and the built .ttl and .md files."@en ,
+                 "Outcome: No errors or warnings: every date matches the established date for the event, each front has one right answer and the Swedish is idiomatic and consistent. Two optional suggestions were both applied: a note on the date line for Pearl Harbor and smoother Swedish in the Auschwitz note."@en .
+
+<#review-7>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (fetched 2026-10-04): “All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.”"@en .
+
+<https://snl.no/>
+    dcterms:title "Store norske leksikon (articles)" ;
+    dcterms:creator "Store norske leksikon and the named authors of each article" ;
+    rdfs:comment "Each article carries its own licence. https://snl.no/.licenses/restricted (fetched 2026-10-04): “Hvis en artikkel i Store norske leksikon er merket med begrenset gjenbruk, kan du ikke gjenbruke, republisere eller bygge videre på artikkelen uten at du først har fått opphavspersonens tillatelse.” and “NB: Du har fremdeles lov til å lenke til og sitere utdrag fra artikler merket med begrenset gjenbruk uten å spørre opphavspersonen.” A few of the articles consulted are marked fri gjenbruk (CC BY-SA 3.0, https://snl.no/.licenses/free); most are begrenset gjenbruk, so the source is recorded under the stricter terms and used for verification only."@en .
+
+<https://snl.no/andre_verdenskrig_-_viktige_hendelser>
+    dcterms:title "andre verdenskrig – viktige hendelser (Store norske leksikon)" ;
+    dcterms:creator "Store norske leksikon (2005–2007)" ;
+    rdfs:comment "The article JSON (https://snl.no/andre_verdenskrig_-_viktige_hendelser.json, fetched 2026-10-04) gives \"license_name\": \"begrenset\" (restricted reuse); https://snl.no/.licenses/restricted: “Hvis en artikkel i Store norske leksikon er merket med begrenset gjenbruk, kan du ikke gjenbruke, republisere eller bygge videre på artikkelen uten at du først har fått opphavspersonens tillatelse.” Verification only."@en .
+
+<https://history.state.gov/milestones/1937-1945/pearl-harbor>
+    dcterms:title "Milestones: 1937–1945 — Japan, China, the United States and the Road to Pearl Harbor, 1937–41" ;
+    dcterms:creator "Office of the Historian, U.S. Department of State" ;
+    rdfs:comment "A work of the United States Government (the page footer reads “Office of the Historian, Shared Knowledge Services, Bureau of Administration United States Department of State”): 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): “Copyright protection under this title is not available for any work of the United States Government”. The Department's copyright page (https://www.state.gov/copyright-information/) answered 403 to the research environment. Used for verification only, so the deck does not depend on this assessment."@en .
+
+<https://www.iwm.org.uk/history>
+    dcterms:title "Imperial War Museums: history articles" ;
+    dcterms:creator "Imperial War Museums" ;
+    rdfs:comment "https://www.iwm.org.uk/corporate/terms-of-use (fetched 2026-10-04): “Please note that the intellectual property rights in all 'Content' (including images, editorial or descriptive text, footage or any other media) featured within our websites (www.iwm.org.uk and all sub-domains) and selected social media platforms, is owned by IWM and other copyright owners as specified wherever possible.” Footer: “© Imperial War Museums 2026”. Verification only."@en .
+
+<https://www.liberationroute.com/en/stories/416/the-armistice-in-cassibile>
+    dcterms:title "Liberation Route Europe: stories “The armistice in Cassibile” and “Liberation of Paris”" ;
+    dcterms:creator "Liberation Route Europe Foundation" ;
+    rdfs:comment "Footer of the story pages (fetched 2026-10-04): “© 2026 · LRE Foundation”; no licence is offered. Verification only."@en .
+
+<https://encyclopedia.ushmm.org/content/en/article/tunisia-campaign>
+    dcterms:title "Holocaust Encyclopedia: “Tunisia Campaign” (United States Holocaust Memorial Museum)" ;
+    dcterms:creator "United States Holocaust Memorial Museum" ;
+    rdfs:comment "https://www.ushmm.org/information/about-the-museum/terms-of-use (fetched 2026-10-04): “It is ultimately your obligation to determine and satisfy copyright or other use restrictions when accessing, publishing, or otherwise using Content.” and “Please note that some uses of Content require written permission from the Museum before use.” No open licence is offered for the encyclopedia text. Verification only."@en .
+
+<https://en.wikipedia.org/wiki/Continuation_War>
+    dcterms:title "English Wikipedia: articles “Continuation War” and “Battle of Okinawa”" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer (fetched 2026-10-04): “Text is available under the Creative Commons Attribution-ShareAlike 4.0 License; additional terms may apply.” https://en.wikipedia.org/wiki/Wikipedia:Copyrights: “Most of Wikipedia's text and many of its images are co-licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) and the GNU Free Documentation License (GFDL)”. Verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Landstigningen_i_Normandie>
+    dcterms:title "Swedish Wikipedia: articles “Landstigningen i Normandie”, “Slaget vid el-Alamein”, “Mellanfreden i Moskva” and “Fortsättningskriget”" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer (fetched 2026-10-04): “Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.” Verification only."@en .
+
+<#marco-polo-bridge-incident>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Marco Polo Bridge incident: fighting between Japan and China begins"@en ,
+                     "Marco Polo-broincidenten: striderna mellan Japan och Kina börjar"@sv ;
+    solid-memo:back "7 July 1937"@en ,
+                    "7 juli 1937"@sv ;
+    solid-memo:backNote "Start of the Second Sino-Japanese War, the war in Asia that merged into the Second World War"@en ,
+                        "Början på andra kinesisk-japanska kriget, kriget i Asien som blev en del av andra världskriget"@sv .
+
+<#molotov-ribbentrop-pact>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany and the Soviet Union sign the Molotov–Ribbentrop Pact"@en ,
+                     "Tyskland och Sovjetunionen undertecknar Molotov–Ribbentrop-pakten"@sv ;
+    solid-memo:back "23 August 1939"@en ,
+                    "23 augusti 1939"@sv .
+
+<#germany-invades-poland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany invades Poland"@en ,
+                     "Tyskland invaderar Polen"@sv ;
+    solid-memo:back "1 September 1939"@en ,
+                    "1 september 1939"@sv .
+
+<#britain-and-france-declare-war>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The United Kingdom and France declare war on Germany"@en ,
+                     "Storbritannien och Frankrike förklarar Tyskland krig"@sv ;
+    solid-memo:back "3 September 1939"@en ,
+                    "3 september 1939"@sv .
+
+<#soviet-union-invades-poland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Soviet Union invades eastern Poland"@en ,
+                     "Sovjetunionen invaderar östra Polen"@sv ;
+    solid-memo:back "17 September 1939"@en ,
+                    "17 september 1939"@sv .
+
+<#winter-war-begins>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Soviet Union attacks Finland: the Winter War begins"@en ,
+                     "Sovjetunionen anfaller Finland: vinterkriget börjar"@sv ;
+    solid-memo:back "30 November 1939"@en ,
+                    "30 november 1939"@sv .
+
+<#battle-of-the-river-plate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of the River Plate: British cruisers engage the Admiral Graf Spee"@en ,
+                     "Slaget vid Río de la Plata: brittiska kryssare möter Admiral Graf Spee"@sv ;
+    solid-memo:back "13 December 1939"@en ,
+                    "13 december 1939"@sv .
+
+<#moscow-peace-treaty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Finland and the Soviet Union sign the Moscow Peace Treaty, ending the Winter War"@en ,
+                     "Finland och Sovjetunionen undertecknar Moskvafreden, som avslutar vinterkriget"@sv ;
+    solid-memo:back "12 March 1940"@en ,
+                    "12 mars 1940"@sv ;
+    solid-memo:backNote "The fighting stopped on 13 March"@en ,
+                        "Striderna upphörde den 13 mars"@sv .
+
+<#operation-weserubung>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany invades Denmark and Norway (Operation Weserübung)"@en ,
+                     "Tyskland anfaller Danmark och Norge (Operation Weserübung)"@sv ;
+    solid-memo:back "9 April 1940"@en ,
+                    "9 april 1940"@sv .
+
+<#germany-attacks-western-europe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany attacks the Netherlands, Belgium, Luxembourg and France"@en ,
+                     "Tyskland anfaller Nederländerna, Belgien, Luxemburg och Frankrike"@sv ;
+    solid-memo:back "10 May 1940"@en ,
+                    "10 maj 1940"@sv ;
+    solid-memo:backNote "The same day Winston Churchill became British prime minister"@en ,
+                        "Samma dag blev Winston Churchill brittisk premiärminister"@sv .
+
+<#dunkirk-evacuation-ends>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The evacuation of Allied troops from Dunkirk ends"@en ,
+                     "Evakueringen av allierade trupper från Dunkerque avslutas"@sv ;
+    solid-memo:back "4 June 1940"@en ,
+                    "4 juni 1940"@sv ;
+    solid-memo:backNote "Operation Dynamo, begun on 26 May"@en ,
+                        "Operation Dynamo, som inleddes den 26 maj"@sv .
+
+<#norway-capitulates>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Norwegian forces in Norway capitulate"@en ,
+                     "De norska styrkorna i Norge kapitulerar"@sv ;
+    solid-memo:back "10 June 1940"@en ,
+                    "10 juni 1940"@sv ;
+    solid-memo:backNote "The king and the government had left for Britain on 7 June"@en ,
+                        "Kungen och regeringen hade lämnat landet för Storbritannien den 7 juni"@sv .
+
+<#france-signs-armistice>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "France signs an armistice with Germany at Compiègne"@en ,
+                     "Frankrike undertecknar ett vapenstillestånd med Tyskland i Compiègne"@sv ;
+    solid-memo:back "22 June 1940"@en ,
+                    "22 juni 1940"@sv .
+
+<#blitz-begins>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Blitz begins: German bombers start their sustained attacks on London"@en ,
+                     "Blitzen börjar: tyska bombplan inleder sina ihållande anfall mot London"@sv ;
+    solid-memo:back "7 September 1940"@en ,
+                    "7 september 1940"@sv .
+
+<#tripartite-pact>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany, Italy and Japan sign the Tripartite Pact"@en ,
+                     "Tyskland, Italien och Japan undertecknar tremaktspakten"@sv ;
+    solid-memo:back "27 September 1940"@en ,
+                    "27 september 1940"@sv .
+
+<#germany-invades-yugoslavia-and-greece>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany invades Yugoslavia and Greece"@en ,
+                     "Tyskland invaderar Jugoslavien och Grekland"@sv ;
+    solid-memo:back "6 April 1941"@en ,
+                    "6 april 1941"@sv .
+
+<#bismarck-sunk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The German battleship Bismarck is sunk"@en ,
+                     "Det tyska slagskeppet Bismarck sänks"@sv ;
+    solid-memo:back "27 May 1941"@en ,
+                    "27 maj 1941"@sv .
+
+<#operation-barbarossa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany invades the Soviet Union (Operation Barbarossa)"@en ,
+                     "Tyskland anfaller Sovjetunionen (Operation Barbarossa)"@sv ;
+    solid-memo:back "22 June 1941"@en ,
+                    "22 juni 1941"@sv .
+
+<#continuation-war-begins>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Continuation War between Finland and the Soviet Union begins"@en ,
+                     "Fortsättningskriget mellan Finland och Sovjetunionen börjar"@sv ;
+    solid-memo:back "25 June 1941"@en ,
+                    "25 juni 1941"@sv ;
+    solid-memo:backNote "After Soviet air raids on Finland that day, three days after Germany attacked the Soviet Union"@en ,
+                        "Efter sovjetiska flyganfall mot Finland samma dag, tre dagar efter Tysklands anfall på Sovjetunionen"@sv .
+
+<#siege-of-leningrad-begins>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The siege of Leningrad begins"@en ,
+                     "Belägringen av Leningrad börjar"@sv ;
+    solid-memo:back "8 September 1941"@en ,
+                    "8 september 1941"@sv .
+
+<#attack-on-pearl-harbor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Japan attacks the US fleet at Pearl Harbor"@en ,
+                     "Japan anfaller den amerikanska flottan i Pearl Harbor"@sv ;
+    solid-memo:back "7 December 1941"@en ,
+                    "7 december 1941"@sv ;
+    solid-memo:backNote "Local time in Hawaii; it was already 8 December in Japan"@en ,
+                        "Lokal tid på Hawaii; i Japan var det redan den 8 december"@sv .
+
+<#germany-declares-war-on-the-united-states>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany declares war on the United States"@en ,
+                     "Tyskland förklarar USA krig"@sv ;
+    solid-memo:back "11 December 1941"@en ,
+                    "11 december 1941"@sv .
+
+<#wannsee-conference>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wannsee Conference: Nazi officials coordinate the murder of Europe's Jews"@en ,
+                     "Wannseekonferensen: nazistiska ämbetsmän samordnar mordet på Europas judar"@sv ;
+    solid-memo:back "20 January 1942"@en ,
+                    "20 januari 1942"@sv .
+
+<#fall-of-singapore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The British forces in Singapore surrender to Japan"@en ,
+                     "De brittiska styrkorna i Singapore kapitulerar för Japan"@sv ;
+    solid-memo:back "15 February 1942"@en ,
+                    "15 februari 1942"@sv .
+
+<#fall-of-bataan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The US and Filipino forces on Bataan surrender to Japan"@en ,
+                     "De amerikanska och filippinska styrkorna på Bataan kapitulerar för Japan"@sv ;
+    solid-memo:back "9 April 1942"@en ,
+                    "9 april 1942"@sv .
+
+<#guadalcanal-landings>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "US forces land on Guadalcanal"@en ,
+                     "Amerikanska styrkor landstiger på Guadalcanal"@sv ;
+    solid-memo:back "7 August 1942"@en ,
+                    "7 augusti 1942"@sv .
+
+<#second-battle-of-el-alamein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Second Battle of El Alamein begins"@en ,
+                     "Andra slaget vid el-Alamein börjar"@sv ;
+    solid-memo:back "23 October 1942"@en ,
+                    "23 oktober 1942"@sv .
+
+<#operation-torch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Allied landings in Morocco and Algeria (Operation Torch)"@en ,
+                     "De allierade landstiger i Marocko och Algeriet (Operation Torch)"@sv ;
+    solid-memo:back "8 November 1942"@en ,
+                    "8 november 1942"@sv .
+
+<#stalingrad-surrender>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The last German troops at Stalingrad surrender"@en ,
+                     "De sista tyska trupperna i Stalingrad kapitulerar"@sv ;
+    solid-memo:back "2 February 1943"@en ,
+                    "2 februari 1943"@sv ;
+    solid-memo:backNote "The main German force had surrendered on 31 January"@en ,
+                        "Huvuddelen av de tyska styrkorna hade kapitulerat den 31 januari"@sv .
+
+<#warsaw-ghetto-uprising>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Warsaw Ghetto Uprising begins"@en ,
+                     "Upproret i Warszawas getto börjar"@sv ;
+    solid-memo:back "19 April 1943"@en ,
+                    "19 april 1943"@sv .
+
+<#axis-surrender-in-tunisia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Axis forces in Tunisia surrender, ending the fighting in North Africa"@en ,
+                     "Axelmakternas styrkor i Tunisien kapitulerar och striderna i Nordafrika upphör"@sv ;
+    solid-memo:back "13 May 1943"@en ,
+                    "13 maj 1943"@sv .
+
+<#battle-of-kursk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Battle of Kursk begins"@en ,
+                     "Slaget vid Kursk börjar"@sv ;
+    solid-memo:back "5 July 1943"@en ,
+                    "5 juli 1943"@sv .
+
+<#armistice-of-cassibile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Italy secretly signs an armistice with the Allies at Cassibile"@en ,
+                     "Italien undertecknar i hemlighet ett vapenstillestånd med de allierade i Cassibile"@sv ;
+    solid-memo:back "3 September 1943"@en ,
+                    "3 september 1943"@sv ;
+    solid-memo:backNote "Made public on 8 September"@en ,
+                        "Offentliggjordes den 8 september"@sv .
+
+<#d-day>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "D-Day: the Allied landings in Normandy"@en ,
+                     "Dagen D: de allierades landstigning i Normandie"@sv ;
+    solid-memo:back "6 June 1944"@en ,
+                    "6 juni 1944"@sv .
+
+<#july-20-plot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Claus von Stauffenberg's bomb attack on Hitler fails"@en ,
+                     "Claus von Stauffenbergs bombattentat mot Hitler misslyckas"@sv ;
+    solid-memo:back "20 July 1944"@en ,
+                    "20 juli 1944"@sv .
+
+<#warsaw-uprising>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Warsaw Uprising begins"@en ,
+                     "Warszawaupproret börjar"@sv ;
+    solid-memo:back "1 August 1944"@en ,
+                    "1 augusti 1944"@sv .
+
+<#liberation-of-paris>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The German garrison in Paris surrenders"@en ,
+                     "Den tyska garnisonen i Paris kapitulerar"@sv ;
+    solid-memo:back "25 August 1944"@en ,
+                    "25 augusti 1944"@sv ;
+    solid-memo:backNote "French troops had reached the city centre on the evening of 24 August"@en ,
+                        "Franska trupper hade nått stadens centrum kvällen den 24 augusti"@sv .
+
+<#moscow-armistice>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Finland and the Soviet Union sign the Moscow Armistice"@en ,
+                     "Finland och Sovjetunionen undertecknar mellanfreden i Moskva"@sv ;
+    solid-memo:back "19 September 1944"@en ,
+                    "19 september 1944"@sv ;
+    solid-memo:backNote "A ceasefire had been in force since early September"@en ,
+                        "Vapenvila hade rått sedan början av september"@sv .
+
+<#battle-of-the-bulge>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany launches the Ardennes offensive (the Battle of the Bulge)"@en ,
+                     "Tyskland inleder Ardenneroffensiven"@sv ;
+    solid-memo:back "16 December 1944"@en ,
+                    "16 december 1944"@sv .
+
+<#liberation-of-auschwitz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Soviet troops liberate Auschwitz"@en ,
+                     "Sovjetiska trupper befriar Auschwitz"@sv ;
+    solid-memo:back "27 January 1945"@en ,
+                    "27 januari 1945"@sv ;
+    solid-memo:backNote "Now International Holocaust Remembrance Day"@en ,
+                        "Numera internationell minnesdag för Förintelsens offer"@sv .
+
+<#yalta-conference>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Yalta Conference opens"@en ,
+                     "Jaltakonferensen inleds"@sv ;
+    solid-memo:back "4 February 1945"@en ,
+                    "4 februari 1945"@sv .
+
+<#battle-of-okinawa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "US forces land on the main island of Okinawa"@en ,
+                     "Amerikanska styrkor landstiger på Okinawas huvudö"@sv ;
+    solid-memo:back "1 April 1945"@en ,
+                    "1 april 1945"@sv ;
+    solid-memo:backNote "US troops had landed on nearby islands from 26 March"@en ,
+                        "Amerikanska trupper hade landstigit på närliggande öar från den 26 mars"@sv .
+
+<#death-of-hitler>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Adolf Hitler commits suicide"@en ,
+                     "Adolf Hitler begår självmord"@sv ;
+    solid-memo:back "30 April 1945"@en ,
+                    "30 april 1945"@sv .
+
+<#germany-surrenders-at-reims>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany signs its unconditional surrender at Reims"@en ,
+                     "Tyskland undertecknar sin villkorslösa kapitulation i Reims"@sv ;
+    solid-memo:back "7 May 1945"@en ,
+                    "7 maj 1945"@sv ;
+    solid-memo:backNote "Victory in Europe Day followed on 8 May"@en ,
+                        "Segerdagen i Europa följde den 8 maj"@sv .
+
+<#atomic-bombing-of-hiroshima>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The United States drops an atomic bomb on Hiroshima"@en ,
+                     "USA fäller en atombomb över Hiroshima"@sv ;
+    solid-memo:back "6 August 1945"@en ,
+                    "6 augusti 1945"@sv .
+
+<#atomic-bombing-of-nagasaki>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The United States drops an atomic bomb on Nagasaki"@en ,
+                     "USA fäller en atombomb över Nagasaki"@sv ;
+    solid-memo:back "9 August 1945"@en ,
+                    "9 augusti 1945"@sv .
+
+<#japan-signs-surrender>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Japan signs its surrender aboard USS Missouri"@en ,
+                     "Japan undertecknar sin kapitulation ombord på USS Missouri"@sv ;
+    solid-memo:back "2 September 1945"@en ,
+                    "2 september 1945"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

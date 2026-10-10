@@ -1,0 +1,901 @@
+@base <https://solid-memo.com/decks/physical-constants/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Physical constants"@en ,
+                  "Fysikaliska konstanter"@sv ,
+                  "물리 상수"@ko ,
+                  "Physikalische Konstanten"@de ,
+                  "Constantes físicas"@es ,
+                  "Constantes physiques"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:description "35 fundamental physical constants in 70 cards: the seven exact defining constants of the SI, constants derived exactly from them, and measured constants of electromagnetism, atomic physics and gravitation, including the Planck units. For each constant one card asks for its standard symbol and one for its value (with unit where it has one). Values are exact where the SI makes them exact; otherwise they are the CODATA 2022 recommended values rounded to 5 significant figures and marked ≈. Values use a decimal point, as in CODATA's tables, and digits grouped in threes; the Swedish notes follow Swedish practice with a decimal comma. Compiled from the CODATA 2022 report (arXiv), the BIPM SI Brochure, Swedac's regulations on units (STAFS 2009:26) and Wikidata, and checked against NIST's CODATA tables."@en ,
+                        "35 fundamentala fysikaliska konstanter i 70 kort: SI:s sju exakta definierande konstanter, konstanter som exakt härleds ur dem och uppmätta konstanter inom elektromagnetism, atomfysik och gravitation, bland dem Planckenheterna. För varje konstant frågar ett kort efter dess vedertagna beteckning och ett efter dess värde (med enhet där den har en). Värdena är exakta där SI gör dem exakta; i övriga fall är de CODATA:s rekommenderade värden från 2022, avrundade till 5 värdesiffror och markerade med ≈. Värdena skrivs med decimalpunkt, som i CODATA:s tabeller, och siffrorna grupperade tre och tre; de svenska anteckningarna följer svensk skrivsed med decimalkomma. Sammanställd ur CODATA:s rapport från 2022 (arXiv), BIPM:s SI-broschyr, Swedacs föreskrifter om måttenheter (STAFS 2009:26) och Wikidata, och kontrollerad mot NIST:s CODATA-tabeller."@sv ,
+                        "기본 물리 상수 35개를 카드 70장에 담았습니다. SI의 정확한 정의 상수 7개, 이들로부터 정확히 유도되는 상수, 그리고 플랑크 단위를 포함한 전자기학·원자물리학·중력의 측정 상수입니다. 상수마다 카드 한 장은 표준 기호를, 다른 한 장은 값(단위가 있으면 단위와 함께)을 묻습니다. SI가 정확하게 정한 값은 정확한 값이고, 나머지는 CODATA 2022 권장값을 유효숫자 5자리로 반올림해 ≈로 표시했습니다. 값은 CODATA 표처럼 소수점을 쓰고 숫자를 세 자리씩 묶었으며, 스웨덴어 메모는 스웨덴 관례에 따라 소수점 대신 쉼표를 씁니다. CODATA 2022 보고서(arXiv), BIPM의 SI 브로슈어, Swedac의 단위 규정(STAFS 2009:26), Wikidata를 바탕으로 엮었고 NIST의 CODATA 표로 확인했습니다."@ko ,
+                        "35 fundamentale physikalische Konstanten in 70 Karten: die sieben exakten definierenden Konstanten des SI, exakt daraus abgeleitete Konstanten und gemessene Konstanten aus Elektromagnetismus, Atomphysik und Gravitation, darunter die Planck-Einheiten. Zu jeder Konstante fragt eine Karte nach ihrem üblichen Formelzeichen und eine nach ihrem Wert (mit Einheit, wo sie eine hat). Die Werte sind exakt, wo das SI sie exakt festlegt; sonst sind es die von CODATA 2022 empfohlenen Werte, auf 5 signifikante Stellen gerundet und mit ≈ markiert. Die Werte stehen mit Dezimalpunkt, wie in den Tabellen von CODATA, und mit Ziffern in Dreiergruppen; die schwedischen Notizen folgen dem schwedischen Brauch mit Dezimalkomma. Zusammengestellt aus dem CODATA-Bericht 2022 (arXiv), der SI-Broschüre des BIPM, den Vorschriften von Swedac über Maßeinheiten (STAFS 2009:26) und Wikidata, geprüft anhand der CODATA-Tabellen des NIST."@de ,
+                        "35 constantes físicas fundamentales en 70 tarjetas: las siete constantes definitorias exactas del SI, constantes derivadas exactamente de ellas y constantes medidas del electromagnetismo, la física atómica y la gravitación, entre ellas las unidades de Planck. Para cada constante, una tarjeta pregunta por su símbolo habitual y otra por su valor (con unidad cuando la tiene). Los valores son exactos donde el SI los fija como exactos; en los demás casos son los valores recomendados por CODATA 2022, redondeados a 5 cifras significativas y marcados con ≈. Los valores usan punto decimal, como en las tablas de CODATA, y cifras agrupadas de tres en tres; las notas en sueco siguen el uso sueco, con coma decimal. Compilado a partir del informe CODATA 2022 (arXiv), el folleto del SI del BIPM, el reglamento de Swedac sobre unidades de medida (STAFS 2009:26) y Wikidata, y comprobado en las tablas CODATA del NIST."@es ,
+                        "35 constantes physiques fondamentales en 70 cartes : les sept constantes exactes qui définissent le SI, des constantes qui en découlent exactement et des constantes mesurées de l’électromagnétisme, de la physique atomique et de la gravitation, dont les unités de Planck. Pour chaque constante, une carte demande son symbole usuel et une autre sa valeur (avec son unité quand elle en a une). Les valeurs sont exactes là où le SI les fixe exactement ; sinon, ce sont les valeurs recommandées par CODATA 2022, arrondies à 5 chiffres significatifs et signalées par ≈. Les valeurs s’écrivent avec un point décimal, comme dans les tables de CODATA, et les chiffres groupés par trois ; les notes en suédois suivent l’usage suédois, avec une virgule décimale. Établi à partir du rapport CODATA 2022 (arXiv), de la brochure sur le SI du BIPM, du règlement de Swedac sur les unités de mesure (STAFS 2009:26) et de Wikidata, et vérifié sur les tables CODATA du NIST."@fr ;
+    prov:wasDerivedFrom <https://arxiv.org/abs/2409.03787> ,
+                        <https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf> ,
+                        <https://regelverk.swedac.se/foreskrifter/swedac/stafs-2009-26-konsol.pdf> ,
+                        <https://www.wikidata.org/wiki/Property:P1645> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:physics ,
+               topic:science ;
+    dcat:keyword "physical constants"@en ,
+                 "CODATA"@en ,
+                 "SI defining constants"@en ,
+                 "physics"@en ,
+                 "Planck units"@en ,
+                 "fysikaliska konstanter"@sv ,
+                 "naturkonstanter"@sv ,
+                 "definierande konstanter"@sv ,
+                 "fysik"@sv ,
+                 "Planckenheter"@sv ,
+                 "CODATA"@sv ,
+                 "물리 상수"@ko ,
+                 "CODATA"@ko ,
+                 "SI 정의 상수"@ko ,
+                 "물리학"@ko ,
+                 "플랑크 단위"@ko ,
+                 "physikalische Konstanten"@de ,
+                 "Naturkonstanten"@de ,
+                 "CODATA"@de ,
+                 "definierende Konstanten"@de ,
+                 "Physik"@de ,
+                 "Planck-Einheiten"@de ,
+                 "constantes físicas"@es ,
+                 "CODATA"@es ,
+                 "constantes definitorias del SI"@es ,
+                 "física"@es ,
+                 "unidades de Planck"@es ,
+                 "constantes physiques"@fr ,
+                 "CODATA"@fr ,
+                 "constantes définissant le SI"@fr ,
+                 "physique"@fr ,
+                 "unités de Planck"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/physical-constants/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/physical-constants/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#physical-constants> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#physical-constants> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://arxiv.org/abs/2409.03787> ,
+              <https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf> ,
+              <https://regelverk.swedac.se/foreskrifter/swedac/stafs-2009-26-konsol.pdf> ,
+              <https://www.wikidata.org/wiki/Property:P1645> ,
+              <https://physics.nist.gov/cuu/Constants/Table/allascii.txt> ,
+              <https://physics.nist.gov/cuu/pdf/RevModPhys.97.025002.pdf> ,
+              <https://sv.wikipedia.org/wiki/Fysikalisk_konstant> ,
+              <https://www.ne.se/uppslagsverk/encyklopedi/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ,
+                       <#review-7> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Which CODATA release. Downloaded NIST's constants home page and version history (Queries) on 2026-10-04. The version history says the 2022 CODATA values are \"the latest CODATA values available\" (Version 9.0, 9 May 2024), and the home page announces the 2026 adjustment, for which data must be published before 31 December 2026. So the 2022 values (published in Reviews of Modern Physics on 30 April 2025) are the current recommended values on 2026-10-04."@en ,
+                 "Licences. The brief named NIST's CODATA pages as a public-domain content source. NIST's licensing statement says the Secretary of Commerce may secure copyright in Standard Reference Data, and the constants database is NIST Standard Reference Database 121, so it was used for verification only. The CODATA 2022 report itself is on arXiv (2409.03787v1) under CC BY 4.0 and was used as the content source for values, symbols and English names; the BIPM SI Brochure (CC BY 4.0) for the seven defining constants. The published article (APS) carries no open licence and was used only to check that the preprint's table matches it. This makes the deck CC BY 4.0 (see Licensing)."@en ,
+                 "Values. Extracted the text of the arXiv PDF with pypdf and read Table XXXIII (PDF pp. 51–55); downloaded NIST's complete ASCII listing (allascii.txt). values.py parses allascii.txt; crosscheck.py found the full digits of 33 of the 35 values in both the arXiv text and the published article's text; the two missing ones, the caesium frequency and the luminous efficacy Kcd, are not in CODATA's tables (a hit for 683 was only part of another number, the neutron-electron mass ratio 1838.683 662 00, so it does not count). The seven defining constants (exact) come from BIPM Table 1 and STAFS 2009:26 bilaga 1.1, which agree with each other and with NIST digit for digit; five of them are also in arXiv Table XXXIII."@en ,
+                 "Rounding convention. Exact values of the seven defining constants are given in full. All other values are rounded to 5 significant figures (round half to even, computed with Python's decimal module from NIST's full digits) and marked with ≈: both the measured constants (whose standard uncertainty is far below the fifth significant figure; the largest relative uncertainty, that of G, is 2.2 × 10⁻⁵) and the constants that are exact since 2019 but have long or endless decimal expansions (ħ, R, F, σ, b, c₁, c₂; CODATA truncates them with \"...\"; R and F terminate, after 15 and 18 significant digits, the other five never end). Each value card's note says which kind it is. Number format follows the SI Brochure (Section 5.4.4): digits in groups of three separated by a space on both sides of the decimal marker, but no space when there are only four digits; the decimal marker is the point, as in the English SI Brochure and CODATA, since the value is written once for all languages (tag zxx). Powers of ten and unit exponents use Unicode superscripts (× 10⁻³⁴, m s⁻¹); units are written as in CODATA's tables with a space between unit symbols (J mol⁻¹ K⁻¹), except that the Planck constant's unit is J s as in the SI Brochure and STAFS (CODATA 2022 writes J Hz⁻¹; the note says so)."@en ,
+                 "Symbols. Symbols follow CODATA Table XXXIII and BIPM Table 1, in Unicode: ħ (U+0127), μ (U+03BC), ε (U+03B5), Δ (U+0394), subscript digits (μ₀, ε₀, Z₀, a₀, c₁, c₂) and subscript letters where Unicode has them (mₑ, mₚ, mₙ, mᵤ, rₑ, μₑ). Unicode has no subscript capital letters and no subscript c, d or C, nor a subscript ∞, so ΔνCs, NA, Kcd, λC, μB, μN, lP, mP, tP, TP and R∞ are written with the subscript on the line, and the card's note says which part is the subscript (e.g. \"N with subscript A\"). The Boltzmann constant's symbol is k, as in CODATA and BIPM Table 1; its note says it is also written kB (as in the SI Brochure's Appendix 1 and Swedish Wikipedia)."@en ,
+                 "Selection. Started from the brief (about 35 constants: the seven defining constants plus well-known derived and measured constants) and CODATA Table XXXIII. Kept every constant whose English name is CODATA's and whose Swedish name could be confirmed in at least one Swedish source beyond our own translation (see step 9). One exception: the proton-electron mass ratio, whose Swedish name \"kvoten mellan protonens och elektronens massor\" is our own descriptive translation (Swedish Wikipedia full-text searches for it and for other phrasings found nothing, and Wikidata Q2912520 has no Swedish label); it was kept because the ratio itself is well attested in Swedish (Swedish Wikipedia, Proton and Elektron: \"1836,15 gånger elektronens massa\") and the name only describes it. The first and second radiation constants rest on a single Swedish attestation each (see Selection). See Selection for the list and what was left out."@en ,
+                 "English names: CODATA's names from arXiv Table XXXIII and NIST's listing, and BIPM's for the defining constants (\"Hyperfine transition frequency of Cs-133\" is NIST's name and a Wikidata alias; BIPM says \"hyperfine transition frequency of Cs\"). Two deliberate departures: \"Electron Compton wavelength\" (Wikidata's label) instead of CODATA's bare \"Compton wavelength\", because CODATA also lists Compton wavelengths of other particles; and the luminous efficacy is named in full (\"... of monochromatic radiation of frequency 540 × 10¹² Hz\") as in the BIPM text and Wikidata, because \"luminous efficacy\" alone is a general quantity, not a constant."@en ,
+                 "Swedish names. For the seven defining constants: STAFS 2009:26 bilaga 1.1, Swedish law's definitions of the base units (cesiumfrekvensen, ljusets hastighet i vakuum, Plancks konstant, elementarladdningen, Boltzmanns konstant, Avogadros konstant, ljusutbytet för monokromatisk strålning med frekvensen 540 × 10¹² Hz). For the others: the Swedish Wikidata label where one exists and matches Swedish usage (SPARQL queries in the dossier's Queries), otherwise our own translation of the CODATA name. Every Swedish name was then checked against Swedish Wikipedia (article titles and leads fetched with the MediaWiki API, full-text search for names without an article, and the table in Fysikalisk konstant) and against Nationalencyklopedin's free article introductions (fetched by headword; ne_fetch.py in the dossier's Queries). Each card's evidence quotes what those pages say. Names of quantities that are commonly used in the definite form in Swedish are given in the definite form, as NE and Swedish Wikipedia use them (gravitationskonstanten, Bohrradien, Plancklängden)."@en ,
+                 "Card text. Front \"<name>: symbol\" / \"<namn>: beteckning\" (STAFS's and NE's word for a symbol) and \"<name>: value\" / \"<namn>: värde\"; back in no language (zxx): the symbol, or the value with its unit (the fine-structure constant and the proton-electron mass ratio are dimensionless and have none). Notes: on value cards, whether the value is exact or rounded and why (BIPM Table 1 and its statement that the defining constants have no uncertainty; arXiv Table XXXIII's \"exact\" with \"...\" for the derived constants; arXiv p. 62: the 2019 SI \"made important physicochemical constants such as the molar gas constant R, Faraday constant F, and Stefan-Boltzmann constant σ exactly known\"), plus a few facts that help learning, each from a content source: the years since which c, Δν_Cs and Kcd have had fixed values, 1983, 1967 and 1979 (BIPM Appendix 1: Resolution 1 of the 24th CGPM, 2011, PDF pp. 76 and 78, and the abrogation list in Resolution 1 of the 26th CGPM, 2018, PDF p. 85), μ₀ before 2019 (BIPM Section 2.3.1), α⁻¹ ≈ 137.04 (arXiv Table XXXIII, inverse fine-structure constant 137.035 999 177), 1 u = m(¹²C)/12 (arXiv Table XXXIII and its footnotes), λₘₐₓ = b/T (arXiv Table XXXIII: \"Wien displacement law constants b = λmaxT\"), kB as another symbol for k (BIPM Appendix 1), CODATA's unit J Hz⁻¹ for h (arXiv Table XXXIII), ħ read \"h-bar\" / \"h-streck\" (Wikidata aliases of Q2115969). On symbol cards, notes only where a subscript cannot be written in Unicode, for ħ, and for k (also written kB)."@en ,
+                 "Cross-checks. Every value was checked against NIST's listing (all 35) and, for the 28 non-defining constants, against the published article's Table XXXIII; every defining constant against both BIPM and STAFS. The builder's Wikidata checks confirm, for each constant, the item's NIST/CODATA ID (P1645), its English (and, where Wikidata's wording is the card's, Swedish) label or alias, and its numerical value (P1181) where Wikidata holds the CODATA 2022 or exact value. Where Wikidata disagrees with CODATA 2022 the check was left out and the discrepancy recorded (Quality control, round 0)."@en ,
+                 "The dossier was assembled by a script (make_dossier.py, in the dossier's Queries) from a hand-written file with the metadata and documentation, the card table in the script (names, symbols, units, notes and the Swedish evidence quotes, typed from the pages as fetched) and the downloaded sources: the arXiv, APS and NIST evidence of each card quotes the line of the source's text layer that holds the value's digits, and the Wikidata evidence quotes the labels, IDs and values returned by the SPARQL query q3."@en ,
+                 "Review rounds 1-6 (Quality control) corrected notes (R and F terminate; TP also contains k; c, Δν_Cs and Kcd have had fixed values since 1983, 1967 and 1979, not 2019; the four Planck-unit notes say the value is measured, through G; the Wien note says b gives λₘₐₓ), added notes and evidence (R∞, kB, λₘₐₓ; BIPM evidence for the three years), fixed a Swedish Wikipedia locator, restored NE's pronunciation brackets in two quotes, corrected the attribution of the BIPM evidence to the 24th CGPM (2011) resolution, documented the Selection reasoning (Hartree energy, c₁ and c₂, the overlap with Swedish Wikipedia's table) inlined the helper scripts in the dossier's Queries and corrected the Faraday constant's digit count in Selection and Method (18 significant digits, not 19). The fixes were applied by editing the dossier directly (round 5 with fix_round5.py, round 6 with fix_round6.py, both in the dossier's Queries); make_dossier.py was not rerun."@en ,
+                 "Selection: 35 constants, two cards each: (a) the seven defining constants of the SI (caesium hyperfine frequency, speed of light in vacuum, Planck constant, elementary charge, Boltzmann constant, Avogadro constant, luminous efficacy Kcd); (b) seven constants that have been exact since 2019 as combinations of the defining constants and are written rounded (five of them have endless decimals; R and F terminate, but after 15 and 18 significant digits): reduced Planck constant, molar gas constant, Faraday constant, Stefan-Boltzmann constant, Wien wavelength displacement law constant, first and second radiation constants; (c) 21 measured constants: Newtonian constant of gravitation, vacuum magnetic permeability, vacuum electric permittivity, characteristic impedance of vacuum, fine-structure constant, Rydberg constant, Bohr radius, electron Compton wavelength, classical electron radius, electron, proton and neutron mass, atomic mass constant, proton-electron mass ratio, Bohr magneton, nuclear magneton, electron magnetic moment, and the Planck length, mass, time and temperature. Left out: the Josephson constant, von Klitzing constant, magnetic flux quantum and conductance quantum, because no Swedish source confirming a Swedish name was found (Swedish Wikipedia full-text search for \"flödeskvantum\", \"Josephsonkonstanten\" and \"von Klitzings konstant\" returned no hits, and NE has no article under the names tried); the Hartree energy, for scope: it is the atomic unit of energy (Swedish Wikipedia's article Hartree treats it as \"en enhet för energi på atomnivå\"), and units are left out (see below). An earlier version of this text gave a missing Swedish name as the reason; that was wrong, since Swedish Wikipedia's table in Fysikalisk konstant names it \"Hartree-energi\" (a red link). The Swedish names of the first and second radiation constants (c₁, c₂) rest on the same kind of evidence: one row each in that table, red links without an article (MediaWiki API, 2026-10-04), so they are the weakest-attested Swedish names in the deck; they were kept because they are the companions of σ and b in the radiation laws; the standard acceleration of gravity (9.806 65 m s⁻²) and the standard atmosphere (101 325 Pa), which CODATA lists as adopted conventional values, not fundamental constants; the electron volt, the unified atomic mass unit and the Hartree energy as units (the atomic mass constant mᵤ = 1 u is included); the inverse fine-structure constant as a separate card (it is in the α note); the many particle-specific constants (muon, tau, deuteron, helion, magnetic-moment ratios, g-factors) and the proton charge radius, whose value has changed notably between adjustments. The cut-off is the 2022 adjustment: the 2026 CODATA adjustment had not been published on 2026-10-04. Where the list comes from: the brief asked for about 35 well-known constants, the seven SI defining constants first; the rest were chosen from CODATA's Table XXXIII (arXiv, CC BY 4.0), which groups the constants as universal, electromagnetic, atomic and nuclear, and physicochemical: from the universal and physicochemical groups the constants that are exact since 2019, the Planck units and G; from the electromagnetic and atomic groups the constants of the electron, proton and neutron and the magnetons; then filtered by the Swedish-name rule. Overlap with Swedish Wikipedia's table: 28 of the 35 constants are also rows of the 34-row table \"Lista över fysikaliska konstanter\" in Fysikalisk konstant, because both are lists of the best-known CODATA constants (that table itself cites CODATA 1998). The deck has 7 constants the table lacks (ΔνCs, Kcd, b, λC, rₑ, mₚ/mₑ, TP) and leaves out 6 of its rows (Hartree energy, g-factor of the free electron, proton magnetic moment, proton gyromagnetic ratio, the shielded proton moment ratio and the shielded proton gyromagnetic ratio); its order, grouping, names, symbols and values are not the table's. The table was read only to confirm Swedish names (see Licensing)."@en ,
+                 "Licensing: The deck is CC BY 4.0. Its content sources are the CODATA 2022 report on arXiv (2409.03787v1, CC BY 4.0), the BIPM SI Brochure (CC BY 4.0), Swedac's STAFS 2009:26 (a Swedish statute, not protected by copyright under 9 § upphovsrättslagen) and Wikidata (CC0). The two CC BY sources require attribution, which the deck gives (prov:wasDerivedFrom with their titles, creators and licence) together with the provenance report, and a statement of changes: the deck selects 35 of CODATA's constants and the seven defining constants, rounds most values to 5 significant figures, rewrites units in Unicode and adds Swedish names; cards are our own wording. CC BY 4.0 for the deck is compatible with both and with the public-domain and CC0 sources. NIST's CODATA database (NIST Standard Reference Database 121) was not used as a content source although the brief suggested it: NIST says that copyright may be secured in Standard Reference Data, and no page of the database says it is in the public domain, so it was consulted only to verify values (facts, which are not copyrightable); likewise the published Reviews of Modern Physics article (APS, no open licence). Swedish Wikipedia (CC BY-SA 4.0) and Nationalencyklopedin (all rights reserved) were used only to verify that the Swedish names are in use; no text, list or selection was taken from them. Swedish Wikipedia's table \"Lista över fysikaliska konstanter\" shares 28 of the deck's 35 constants; Selection explains why: both list the best-known CODATA constants, the deck's list follows the brief and CODATA's Table XXXIII and the Swedish-name rule, adds 7 constants the table lacks and leaves out 6 of its rows, and takes none of its order, wording or values. A choice of the standard constants of a field is the obvious one rather than an original selection, so the table is a verification source, not a content source, and the deck is not CC BY-SA. The selection is our own, following the library editor's brief and CODATA's table. All sources are credited in the deck and in the provenance report. Quotations in the evidence (from NE, the APS article, NIST's listing and Swedish Wikipedia) are short verbatim quotations that document the verification, made under the right of quotation (22 § upphovsrättslagen) and, for NE, on the terms NE states for quoting its encyclopedia texts (verbatim, with NE named as the source); they are not part of the deck and are not covered by its CC BY 4.0 licence."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Source agreement and machine checks: every value against arXiv/CODATA 2022, NIST and (defining constants) BIPM and STAFS; every Swedish name against Swedish Wikipedia and NE; the builder's Wikidata checks."@en ;
+    rdfs:comment "Scope: All 70 cards; the licences of all sources."@en ,
+                 "Outcome: 102 Wikidata checks pass (2026-10-04): the NIST/CODATA ID (P1645) of all 35 items; the English label or alias of 33 (all but the vacuum magnetic permeability and the proton-electron mass ratio, whose CODATA names Wikidata lacks); the Swedish label or alias of 12 where Wikidata's wording is the card's (Plancks konstant, Boltzmanns konstant, Diracs konstant, h-streck, allmänna gaskonstanten, Faradays konstant, Stefan–Boltzmanns konstant, gravitationskonstanten, magnetiska konstanten, elektriska konstanten, finstrukturkonstanten, Bohrmagnetonen); and the numerical value (P1181) of 22 constants where Wikidata holds the exact or CODATA 2022 value. All 35 values agree digit for digit between NIST's listing and the content sources (arXiv Table XXXIII for 33 values (all but the caesium frequency and Kcd), BIPM Table 1 and STAFS for the seven defining constants), and the 28 non-defining values also with the published article. Discrepancies and decisions are listed as findings; no Wikidata check was dropped to make the build pass other than those listed."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 70 cards: every value against NIST's live CODATA 2022 listing (re-rounded independently), every symbol, the notes, Selection and Method."@en ,
+                 "Outcome: All 35 values and 35 symbols were confirmed. Three errors in notes: the R and F notes claimed endless decimals, but NA·k and NA·e are products of terminating decimals and terminate (8.314 462 618 153 24 and 96 485.332 123 310 018 4, the values the deck's own Wikidata checks expect); the same claim was in Selection and Method; and the Planck temperature note omitted k. Two suggestions: plain-letter subscripts (mP vs mₚ, NA) and the alternative symbol kB. Verified each finding with exact fractions and the sources; fixed the errors and accepted the kB note."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 70 cards, title, description, keywords and the built TTL: language tags, Swedish idiom and names, symbol notation."@en ,
+                 "Outcome: Tags are correct throughout (fronts en+sv, backs zxx). One error (Planck temperature note, also round 1), one warning (R∞ lacked the subscript note the deck's convention requires) and suggestions on the Swedish description, the Wien note, the mass-ratio name and the decimal comma. All verified and applied except the builder-level keyword tagging, which is outside the dossier."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 70 cards' wording against the sources; every source's licence page; about 30 constants' evidence fetched live; Selection, Licensing, Method and Queries."@en ,
+                 "Outcome: The licensing (CC BY 4.0 from arXiv and BIPM, with NIST, APS, Swedish Wikipedia and NE as verification only) was confirmed. One error (Planck temperature note, also rounds 1 and 2) and five warnings: the Hartree energy exclusion reason was untrue and inconsistent with c₁ and c₂; the Swedish mass-ratio name is unattested; the overlap with Swedish Wikipedia's table was not argued; helper scripts were not recorded; method steps were numbered twice. All verified and fixed, and the four suggestions (quotation statement, NIST licence, BIPM DOI, NE locators) applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 26 cards changed in round 3 plus every third card (44 cards); metadata, description, licensing and documentation; all 28 rounded values recomputed from NIST allascii.txt; NE, Swedish Wikipedia and Wikidata evidence re-fetched; builder check and validator run."@en ,
+                 "Outcome: No errors: facts, Swedish names and language tags held, and every fix claimed in rounds 1–3 was confirmed. Two warnings (the '(since 2019)' on c, Δν_Cs and Kcd, whose values have been fixed since 1983, 1967 and 1979; a wrong Swedish Wikipedia section locator) and three suggestions (Wien note wording, Planck-unit notes not saying 'measured', NE quotes missing the pronunciation bracket). All five verified against the downloaded SI Brochure, the live Swedish Wikipedia wikitext and the saved NE pages, and fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 11 cards changed in round 4 plus every third card (33 cards); values against NIST allascii.txt and the downloaded SI Brochure; description, method and licensing; builder check and validator run."@en ,
+                 "Outcome: Values, symbols, rounding and language tags held. Two errors in the round 4 fixes: the new BIPM evidence on c, Δν_Cs and Kcd (and the Method step) named Resolution 1 of the 26th CGPM (2018), but PDF pp. 76-78 are Resolution 1 of the 24th CGPM (2011); and the four Planck-unit notes had lost the capital in 'Planck unit' / 'Planckenhet'. Both verified in the downloaded SI Brochure and the dossier and fixed; the 26th CGPM's own abrogation list (PDF p. 85) was added as evidence for the three years. The two suggestions (Method's last step not covering round 4; 'value with unit' for two dimensionless constants) were also applied."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 70 cards (35 constants): every value against NIST CODATA 2022 allascii.txt, symbols, notes, language tags, Swedish wording, description, Selection and Method."@en ,
+                 "Outcome: No card had a wrong fact. The one finding was in the provenance text: Selection and Method said the exact Faraday constant terminates after 19 significant digits; it is 18. Verified and fixed; no card changed."@en .
+
+<#review-7>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://arxiv.org/abs/2409.03787>
+    dcterms:title "CODATA Recommended Values of the Fundamental Physical Constants: 2022 (arXiv:2409.03787v1, dated 9 September 2024)" ;
+    dcterms:creator "Peter J. Mohr, David B. Newell, Barry N. Taylor and Eite Tiesinga, for the CODATA Task Group on Fundamental Constants" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "arXiv abstract page https://arxiv.org/abs/2409.03787 (downloaded 2026-10-04): the article's licence link, titled \"Rights to this article\", is http://creativecommons.org/licenses/by/4.0/ (shown with the CC BY 4.0 icon). The submission history lists one version, v1."@en .
+
+<https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf>
+    dcterms:title "The International System of Units (SI), 9th edition 2019, V4.01 June 2026 (SI Brochure), DOI 10.59161/AUEZ1291" ;
+    dcterms:creator "Bureau International des Poids et Mesures (BIPM)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "Copyright statement on page 2 of the PDF (downloaded 2026-10-04): \"The SI Brochure is distributed under the terms of the Creative Commons Attribution 4.0 International License (http://creativecommons.org/licenses/by/4.0/), which permits unrestricted use, distribution, and reproduction in any medium, provided you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons license, and indicate if changes were made.\""@en .
+
+<https://regelverk.swedac.se/foreskrifter/swedac/stafs-2009-26-konsol.pdf>
+    dcterms:title "Styrelsen för ackreditering och teknisk kontrolls föreskrifter (STAFS 2009:26) om måttenheter, konsoliderad version t.o.m. STAFS 2020:2" ;
+    dcterms:creator "Swedac (Styrelsen för ackreditering och teknisk kontroll)" ;
+    rdfs:comment "A Swedish statute (författning). Lag (1960:729) om upphovsrätt till litterära och konstnärliga verk, 9 § (https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1960729-om-upphovsratt-till-litterara-och_sfs-1960-729/, downloaded 2026-10-04): \"Upphovsrätt gäller inte till 1. författningar, 2. beslut av myndigheter, 3. yttranden av svenska myndigheter och 4. officiella översättningar av sådant som avses i 1-3.\""@en .
+
+<https://www.wikidata.org/wiki/Property:P1645>
+    dcterms:title "Wikidata: items for the physical constants with a NIST/CODATA ID (P1645)" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Wikidata:Licensing (https://www.wikidata.org/wiki/Wikidata:Licensing, raw text fetched 2026-10-04): \"All data in Wikidata has a CC0 license.\""@en .
+
+<https://physics.nist.gov/cuu/Constants/Table/allascii.txt>
+    dcterms:title "Fundamental Physical Constants — Complete Listing, 2022 CODATA adjustment (NIST Standard Reference Database 121, allascii.txt)" ;
+    dcterms:creator "Eite Tiesinga, Peter J. Mohr, David B. Newell and Barry N. Taylor; database developed by J. Baker, M. Douma and S. Kotochigova; National Institute of Standards and Technology (NIST)" ;
+    rdfs:comment "The site footer says \"NIST Standard Reference Database 121. Last Update to Data Content: May 2024.\" (https://physics.nist.gov/cuu/Constants/index.html). NIST's Copyright, Fair Use, and Licensing Statements for SRD, Data, Software, and Technical Series Publications (https://www.nist.gov/open/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications, downloaded 2026-10-04): \"The Standard Reference Data Act, 15 U.S.C. § 290e, empowers the Secretary of Commerce to secure copyright on behalf of the United States in Standard Reference Data (SRD) prepared by NIST.\" NIST's data catalogue record for SRD 121 (data.nist.gov, ark:/88434/mds00wv3dr) names https://www.nist.gov/open/license, which is that page. No page of the database states that it is in the public domain, so the database is treated as a protected compilation: verification only. The same statement says that SRD data products should include: \"Copyright protection on this compilation of data has been secured by the Secretary of the U.S. Department of Commerce on behalf of the United States in the United States and all countries that are parties to the Universal Copyright Convention, pursuant to Section 290(e) of Title 15 of the United States Code.\" and \"©Copyright [©YEAR] by the U.S. Secretary of Commerce on behalf of the United States of America. All rights reserved.\" Recorded as all rights reserved."@en .
+
+<https://physics.nist.gov/cuu/pdf/RevModPhys.97.025002.pdf>
+    dcterms:title "CODATA recommended values of the fundamental physical constants: 2022, Reviews of Modern Physics 97, 025002 (published 30 April 2025), DOI 10.1103/RevModPhys.97.025002 (copy hosted by NIST)" ;
+    dcterms:creator "Peter J. Mohr, David B. Newell, Barry N. Taylor and Eite Tiesinga; published by the American Physical Society" ;
+    rdfs:comment "The PDF's first page reads \"REVIEWS OF MODERN PHYSICS, VOLUME 97, APRIL–JUNE 2025 ... Published by the American Physical Society\" and carries no open-licence statement (text searched for \"copyright\", \"creative commons\" and \"©\" on 2026-10-04). Treated as all rights reserved: verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Fysikalisk_konstant>
+    dcterms:title "Swedish Wikipedia: Fysikalisk konstant and the articles on the individual constants" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Swedish Wikipedia's site rights (https://sv.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=rightsinfo&format=json, fetched 2026-10-04): {\"url\":\"https://creativecommons.org/licenses/by-sa/4.0/deed.sv\",\"text\":\"Creative Commons Attribution-Share Alike 4.0\"}"@en .
+
+<https://www.ne.se/uppslagsverk/encyklopedi/>
+    dcterms:title "Nationalencyklopedin (NE), uppslagsverket: free introductions of the articles on the constants" ;
+    dcterms:creator "NE Nationalencyklopedin AB" ;
+    rdfs:comment "NE's copyright page (https://ne.se/info/hj%c3%a4lp/upphovsratt, fetched 2026-10-04): \"Nästan allt material på NE.se omfattas av upphovsrättslagen. [...] Ingen kopiering får göras utan tillstånd. [...] För texter från uppslagsverket har NE valt att inte strikt följa upphovsrättslagen. Det innebär att det är fritt att citera dem i delar eller i sin helhet, på webbsidor eller i tryckt form, i icke-kommersiellt syfte. Detta under förutsättning att NE, och i förekommande fall skribenten, anges som källa, att citaten är ordagranna och att ingen utomstående kan gå in och ändra i texten.\" Verification only; the short quotations in the evidence are verbatim, name NE as the source and are not part of the deck (see Licensing)."@en .
+
+<#caesium-frequency-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hyperfine transition frequency of Cs-133: symbol"@en ,
+                     "Cesiumfrekvensen: beteckning"@sv ;
+    solid-memo:back "ΔνCs"@zxx ;
+    solid-memo:backNote "Δν with subscript Cs."@en ,
+                        "Δν med nedsänkt Cs."@sv .
+
+<#caesium-frequency-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hyperfine transition frequency of Cs-133: value"@en ,
+                     "Cesiumfrekvensen: värde"@sv ;
+    solid-memo:back "9 192 631 770 Hz"@zxx ;
+    solid-memo:backNote "Exact: one of the seven defining constants of the SI (as revised in 2019); its value has been fixed since 1967."@en ,
+                        "Exakt: en av SI:s sju definierande konstanter (enligt 2019 års revision); värdet har varit fastställt sedan 1967."@sv .
+
+<#speed-of-light-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Speed of light in vacuum: symbol"@en ,
+                     "Ljusets hastighet i vakuum: beteckning"@sv ;
+    solid-memo:back "c"@zxx .
+
+<#speed-of-light-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Speed of light in vacuum: value"@en ,
+                     "Ljusets hastighet i vakuum: värde"@sv ;
+    solid-memo:back "299 792 458 m s⁻¹"@zxx ;
+    solid-memo:backNote "Exact: one of the seven defining constants of the SI (as revised in 2019); its value has been fixed since 1983."@en ,
+                        "Exakt: en av SI:s sju definierande konstanter (enligt 2019 års revision); värdet har varit fastställt sedan 1983."@sv .
+
+<#planck-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck constant: symbol"@en ,
+                     "Plancks konstant: beteckning"@sv ;
+    solid-memo:back "h"@zxx .
+
+<#planck-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck constant: value"@en ,
+                     "Plancks konstant: värde"@sv ;
+    solid-memo:back "6.626 070 15 × 10⁻³⁴ J s"@zxx ;
+    solid-memo:backNote "Exact: one of the seven defining constants of the SI (since 2019). CODATA 2022 writes the unit as J Hz⁻¹, the same as J s."@en ,
+                        "Exakt: en av SI:s sju definierande konstanter (sedan 2019). CODATA 2022 skriver enheten som J Hz⁻¹, vilket är detsamma som J s."@sv .
+
+<#elementary-charge-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Elementary charge: symbol"@en ,
+                     "Elementarladdningen: beteckning"@sv ;
+    solid-memo:back "e"@zxx .
+
+<#elementary-charge-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Elementary charge: value"@en ,
+                     "Elementarladdningen: värde"@sv ;
+    solid-memo:back "1.602 176 634 × 10⁻¹⁹ C"@zxx ;
+    solid-memo:backNote "Exact: one of the seven defining constants of the SI (since 2019)."@en ,
+                        "Exakt: en av SI:s sju definierande konstanter (sedan 2019)."@sv .
+
+<#boltzmann-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Boltzmann constant: symbol"@en ,
+                     "Boltzmanns konstant: beteckning"@sv ;
+    solid-memo:back "k"@zxx ;
+    solid-memo:backNote "Also written kB (k with subscript B)."@en ,
+                        "Skrivs även kB (k med nedsänkt B)."@sv .
+
+<#boltzmann-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Boltzmann constant: value"@en ,
+                     "Boltzmanns konstant: värde"@sv ;
+    solid-memo:back "1.380 649 × 10⁻²³ J K⁻¹"@zxx ;
+    solid-memo:backNote "Exact: one of the seven defining constants of the SI (since 2019)."@en ,
+                        "Exakt: en av SI:s sju definierande konstanter (sedan 2019)."@sv .
+
+<#avogadro-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Avogadro constant: symbol"@en ,
+                     "Avogadros konstant: beteckning"@sv ;
+    solid-memo:back "NA"@zxx ;
+    solid-memo:backNote "N with subscript A."@en ,
+                        "N med nedsänkt A."@sv .
+
+<#avogadro-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Avogadro constant: value"@en ,
+                     "Avogadros konstant: värde"@sv ;
+    solid-memo:back "6.022 140 76 × 10²³ mol⁻¹"@zxx ;
+    solid-memo:backNote "Exact: one of the seven defining constants of the SI (since 2019)."@en ,
+                        "Exakt: en av SI:s sju definierande konstanter (sedan 2019)."@sv .
+
+<#luminous-efficacy-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Luminous efficacy of monochromatic radiation of frequency 540 × 10¹² Hz: symbol"@en ,
+                     "Ljusutbytet för monokromatisk strålning med frekvensen 540 × 10¹² Hz: beteckning"@sv ;
+    solid-memo:back "Kcd"@zxx ;
+    solid-memo:backNote "K with subscript cd."@en ,
+                        "K med nedsänkt cd."@sv .
+
+<#luminous-efficacy-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Luminous efficacy of monochromatic radiation of frequency 540 × 10¹² Hz: value"@en ,
+                     "Ljusutbytet för monokromatisk strålning med frekvensen 540 × 10¹² Hz: värde"@sv ;
+    solid-memo:back "683 lm W⁻¹"@zxx ;
+    solid-memo:backNote "Exact: one of the seven defining constants of the SI (as revised in 2019); its value has been fixed since 1979."@en ,
+                        "Exakt: en av SI:s sju definierande konstanter (enligt 2019 års revision); värdet har varit fastställt sedan 1979."@sv .
+
+<#reduced-planck-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Reduced Planck constant: symbol"@en ,
+                     "Reducerade Plancks konstant (Diracs konstant): beteckning"@sv ;
+    solid-memo:back "ħ"@zxx ;
+    solid-memo:backNote "Read “h-bar”: ħ = h/2π."@en ,
+                        "Utläses ”h-streck”: ħ = h/2π."@sv .
+
+<#reduced-planck-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Reduced Planck constant: value"@en ,
+                     "Reducerade Plancks konstant (Diracs konstant): värde"@sv ;
+    solid-memo:back "≈ 1.0546 × 10⁻³⁴ J s"@zxx ;
+    solid-memo:backNote "Exact, as the Planck constant divided by 2π (since 2019), but its decimals never end; rounded to 5 significant figures."@en ,
+                        "Exakt, som Plancks konstant delad med 2π (sedan 2019), men decimalerna tar aldrig slut; avrundat till 5 värdesiffror."@sv .
+
+<#molar-gas-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Molar gas constant: symbol"@en ,
+                     "Allmänna gaskonstanten: beteckning"@sv ;
+    solid-memo:back "R"@zxx .
+
+<#molar-gas-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Molar gas constant: value"@en ,
+                     "Allmänna gaskonstanten: värde"@sv ;
+    solid-memo:back "≈ 8.3145 J mol⁻¹ K⁻¹"@zxx ;
+    solid-memo:backNote "Exact since 2019, as the product of the Avogadro and Boltzmann constants (8.314 462 618 153 24 J mol⁻¹ K⁻¹); rounded to 5 significant figures."@en ,
+                        "Exakt sedan 2019, som produkten av Avogadros och Boltzmanns konstanter (8,314 462 618 153 24 J mol⁻¹ K⁻¹); avrundat till 5 värdesiffror."@sv .
+
+<#faraday-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Faraday constant: symbol"@en ,
+                     "Faradays konstant: beteckning"@sv ;
+    solid-memo:back "F"@zxx .
+
+<#faraday-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Faraday constant: value"@en ,
+                     "Faradays konstant: värde"@sv ;
+    solid-memo:back "≈ 96 485 C mol⁻¹"@zxx ;
+    solid-memo:backNote "Exact since 2019, as the product of the Avogadro constant and the elementary charge (96 485.332 123 310 018 4 C mol⁻¹); rounded to 5 significant figures."@en ,
+                        "Exakt sedan 2019, som produkten av Avogadros konstant och elementarladdningen (96 485,332 123 310 018 4 C mol⁻¹); avrundat till 5 värdesiffror."@sv .
+
+<#stefan-boltzmann-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stefan-Boltzmann constant: symbol"@en ,
+                     "Stefan–Boltzmanns konstant: beteckning"@sv ;
+    solid-memo:back "σ"@zxx .
+
+<#stefan-boltzmann-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stefan-Boltzmann constant: value"@en ,
+                     "Stefan–Boltzmanns konstant: värde"@sv ;
+    solid-memo:back "≈ 5.6704 × 10⁻⁸ W m⁻² K⁻⁴"@zxx ;
+    solid-memo:backNote "Exact, as a combination of defining constants (since 2019), but its decimals never end; rounded to 5 significant figures."@en ,
+                        "Exakt, som en kombination av definierande konstanter (sedan 2019), men decimalerna tar aldrig slut; avrundat till 5 värdesiffror."@sv .
+
+<#wien-displacement-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wien wavelength displacement law constant: symbol"@en ,
+                     "Wiens förskjutningskonstant: beteckning"@sv ;
+    solid-memo:back "b"@zxx .
+
+<#wien-displacement-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wien wavelength displacement law constant: value"@en ,
+                     "Wiens förskjutningskonstant: värde"@sv ;
+    solid-memo:back "≈ 2.8978 × 10⁻³ m K"@zxx ;
+    solid-memo:backNote "Exact, as a combination of defining constants (since 2019), but its decimals never end; rounded to 5 significant figures. It gives the wavelength at which a black body radiates most strongly: λₘₐₓ = b/T."@en ,
+                        "Exakt, som en kombination av definierande konstanter (sedan 2019), men decimalerna tar aldrig slut; avrundat till 5 värdesiffror. Den ger våglängden där en svartkroppsstrålare strålar som starkast: λₘₐₓ = b/T."@sv .
+
+<#first-radiation-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First radiation constant: symbol"@en ,
+                     "Första strålningskonstanten: beteckning"@sv ;
+    solid-memo:back "c₁"@zxx .
+
+<#first-radiation-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First radiation constant: value"@en ,
+                     "Första strålningskonstanten: värde"@sv ;
+    solid-memo:back "≈ 3.7418 × 10⁻¹⁶ W m²"@zxx ;
+    solid-memo:backNote "Exact, as 2π times the Planck constant times the speed of light squared (since 2019), but its decimals never end; rounded to 5 significant figures."@en ,
+                        "Exakt, som 2π gånger Plancks konstant gånger ljushastigheten i kvadrat (sedan 2019), men decimalerna tar aldrig slut; avrundat till 5 värdesiffror."@sv .
+
+<#second-radiation-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Second radiation constant: symbol"@en ,
+                     "Andra strålningskonstanten: beteckning"@sv ;
+    solid-memo:back "c₂"@zxx .
+
+<#second-radiation-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Second radiation constant: value"@en ,
+                     "Andra strålningskonstanten: värde"@sv ;
+    solid-memo:back "≈ 1.4388 × 10⁻² m K"@zxx ;
+    solid-memo:backNote "Exact, as hc/k (since 2019), but its decimals never end; rounded to 5 significant figures."@en ,
+                        "Exakt, som hc/k (sedan 2019), men decimalerna tar aldrig slut; avrundat till 5 värdesiffror."@sv .
+
+<#gravitational-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Newtonian constant of gravitation: symbol"@en ,
+                     "Gravitationskonstanten: beteckning"@sv ;
+    solid-memo:back "G"@zxx .
+
+<#gravitational-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Newtonian constant of gravitation: value"@en ,
+                     "Gravitationskonstanten: värde"@sv ;
+    solid-memo:back "≈ 6.6743 × 10⁻¹¹ m³ kg⁻¹ s⁻²"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#vacuum-magnetic-permeability-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vacuum magnetic permeability: symbol"@en ,
+                     "Magnetiska konstanten: beteckning"@sv ;
+    solid-memo:back "μ₀"@zxx .
+
+<#vacuum-magnetic-permeability-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vacuum magnetic permeability: value"@en ,
+                     "Magnetiska konstanten: värde"@sv ;
+    solid-memo:back "≈ 1.2566 × 10⁻⁶ N A⁻²"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures. Before the 2019 revision of the SI it was exactly 4π × 10⁻⁷ N A⁻²."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror. Före 2019 års revision av SI var den exakt 4π × 10⁻⁷ N A⁻²."@sv .
+
+<#vacuum-electric-permittivity-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vacuum electric permittivity: symbol"@en ,
+                     "Elektriska konstanten: beteckning"@sv ;
+    solid-memo:back "ε₀"@zxx .
+
+<#vacuum-electric-permittivity-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vacuum electric permittivity: value"@en ,
+                     "Elektriska konstanten: värde"@sv ;
+    solid-memo:back "≈ 8.8542 × 10⁻¹² F m⁻¹"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#impedance-of-vacuum-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Characteristic impedance of vacuum: symbol"@en ,
+                     "Vågimpedansen i vakuum: beteckning"@sv ;
+    solid-memo:back "Z₀"@zxx .
+
+<#impedance-of-vacuum-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Characteristic impedance of vacuum: value"@en ,
+                     "Vågimpedansen i vakuum: värde"@sv ;
+    solid-memo:back "≈ 376.73 Ω"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#fine-structure-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fine-structure constant: symbol"@en ,
+                     "Finstrukturkonstanten: beteckning"@sv ;
+    solid-memo:back "α"@zxx .
+
+<#fine-structure-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fine-structure constant: value"@en ,
+                     "Finstrukturkonstanten: värde"@sv ;
+    solid-memo:back "≈ 7.2974 × 10⁻³"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures. Dimensionless; α⁻¹ ≈ 137.04."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror. Dimensionslös; α⁻¹ ≈ 137,04."@sv .
+
+<#rydberg-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rydberg constant: symbol"@en ,
+                     "Rydbergs konstant: beteckning"@sv ;
+    solid-memo:back "R∞"@zxx ;
+    solid-memo:backNote "R with subscript ∞."@en ,
+                        "R med nedsänkt ∞."@sv .
+
+<#rydberg-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rydberg constant: value"@en ,
+                     "Rydbergs konstant: värde"@sv ;
+    solid-memo:back "≈ 1.0974 × 10⁷ m⁻¹"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#bohr-radius-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bohr radius: symbol"@en ,
+                     "Bohrradien: beteckning"@sv ;
+    solid-memo:back "a₀"@zxx .
+
+<#bohr-radius-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bohr radius: value"@en ,
+                     "Bohrradien: värde"@sv ;
+    solid-memo:back "≈ 5.2918 × 10⁻¹¹ m"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#compton-wavelength-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Electron Compton wavelength: symbol"@en ,
+                     "Elektronens Comptonvåglängd: beteckning"@sv ;
+    solid-memo:back "λC"@zxx ;
+    solid-memo:backNote "λ with subscript C."@en ,
+                        "λ med nedsänkt C."@sv .
+
+<#compton-wavelength-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Electron Compton wavelength: value"@en ,
+                     "Elektronens Comptonvåglängd: värde"@sv ;
+    solid-memo:back "≈ 2.4263 × 10⁻¹² m"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#classical-electron-radius-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Classical electron radius: symbol"@en ,
+                     "Klassiska elektronradien: beteckning"@sv ;
+    solid-memo:back "rₑ"@zxx .
+
+<#classical-electron-radius-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Classical electron radius: value"@en ,
+                     "Klassiska elektronradien: värde"@sv ;
+    solid-memo:back "≈ 2.8179 × 10⁻¹⁵ m"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#electron-mass-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Electron mass: symbol"@en ,
+                     "Elektronens massa: beteckning"@sv ;
+    solid-memo:back "mₑ"@zxx .
+
+<#electron-mass-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Electron mass: value"@en ,
+                     "Elektronens massa: värde"@sv ;
+    solid-memo:back "≈ 9.1094 × 10⁻³¹ kg"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#proton-mass-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Proton mass: symbol"@en ,
+                     "Protonens massa: beteckning"@sv ;
+    solid-memo:back "mₚ"@zxx .
+
+<#proton-mass-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Proton mass: value"@en ,
+                     "Protonens massa: värde"@sv ;
+    solid-memo:back "≈ 1.6726 × 10⁻²⁷ kg"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#neutron-mass-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Neutron mass: symbol"@en ,
+                     "Neutronens massa: beteckning"@sv ;
+    solid-memo:back "mₙ"@zxx .
+
+<#neutron-mass-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Neutron mass: value"@en ,
+                     "Neutronens massa: värde"@sv ;
+    solid-memo:back "≈ 1.6749 × 10⁻²⁷ kg"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#atomic-mass-constant-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atomic mass constant: symbol"@en ,
+                     "Atomära masskonstanten: beteckning"@sv ;
+    solid-memo:back "mᵤ"@zxx .
+
+<#atomic-mass-constant-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atomic mass constant: value"@en ,
+                     "Atomära masskonstanten: värde"@sv ;
+    solid-memo:back "≈ 1.6605 × 10⁻²⁷ kg"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures. Equal to 1 u, one twelfth of the mass of a carbon-12 atom."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror. Lika med 1 u, en tolftedel av massan hos en kol-12-atom."@sv .
+
+<#proton-electron-mass-ratio-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Proton-electron mass ratio: symbol"@en ,
+                     "Kvoten mellan protonens och elektronens massor: beteckning"@sv ;
+    solid-memo:back "mₚ/mₑ"@zxx .
+
+<#proton-electron-mass-ratio-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Proton-electron mass ratio: value"@en ,
+                     "Kvoten mellan protonens och elektronens massor: värde"@sv ;
+    solid-memo:back "≈ 1836.2"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures. Dimensionless."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror. Dimensionslös."@sv .
+
+<#bohr-magneton-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bohr magneton: symbol"@en ,
+                     "Bohrmagnetonen: beteckning"@sv ;
+    solid-memo:back "μB"@zxx ;
+    solid-memo:backNote "μ with subscript B."@en ,
+                        "μ med nedsänkt B."@sv .
+
+<#bohr-magneton-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bohr magneton: value"@en ,
+                     "Bohrmagnetonen: värde"@sv ;
+    solid-memo:back "≈ 9.2740 × 10⁻²⁴ J T⁻¹"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#nuclear-magneton-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nuclear magneton: symbol"@en ,
+                     "Kärnmagnetonen: beteckning"@sv ;
+    solid-memo:back "μN"@zxx ;
+    solid-memo:backNote "μ with subscript N."@en ,
+                        "μ med nedsänkt N."@sv .
+
+<#nuclear-magneton-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nuclear magneton: value"@en ,
+                     "Kärnmagnetonen: värde"@sv ;
+    solid-memo:back "≈ 5.0508 × 10⁻²⁷ J T⁻¹"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#electron-magnetic-moment-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Electron magnetic moment: symbol"@en ,
+                     "Elektronens magnetiska moment: beteckning"@sv ;
+    solid-memo:back "μₑ"@zxx .
+
+<#electron-magnetic-moment-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Electron magnetic moment: value"@en ,
+                     "Elektronens magnetiska moment: värde"@sv ;
+    solid-memo:back "≈ −9.2848 × 10⁻²⁴ J T⁻¹"@zxx ;
+    solid-memo:backNote "Measured, not exact: CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt: värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#planck-length-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck length: symbol"@en ,
+                     "Plancklängden: beteckning"@sv ;
+    solid-memo:back "lP"@zxx ;
+    solid-memo:backNote "l with subscript P."@en ,
+                        "l med nedsänkt P."@sv .
+
+<#planck-length-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck length: value"@en ,
+                     "Plancklängden: värde"@sv ;
+    solid-memo:back "≈ 1.6163 × 10⁻³⁵ m"@zxx ;
+    solid-memo:backNote "Measured, not exact (through G): a Planck unit, built from G, ħ and c. CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt (genom G): en Planckenhet, bildad av G, ħ och c. Värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#planck-mass-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck mass: symbol"@en ,
+                     "Planckmassan: beteckning"@sv ;
+    solid-memo:back "mP"@zxx ;
+    solid-memo:backNote "m with subscript P (capital P, unlike the proton mass mₚ)."@en ,
+                        "m med nedsänkt P (stort P, till skillnad från protonens massa mₚ)."@sv .
+
+<#planck-mass-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck mass: value"@en ,
+                     "Planckmassan: värde"@sv ;
+    solid-memo:back "≈ 2.1764 × 10⁻⁸ kg"@zxx ;
+    solid-memo:backNote "Measured, not exact (through G): a Planck unit, built from G, ħ and c. CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt (genom G): en Planckenhet, bildad av G, ħ och c. Värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#planck-time-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck time: symbol"@en ,
+                     "Plancktiden: beteckning"@sv ;
+    solid-memo:back "tP"@zxx ;
+    solid-memo:backNote "t with subscript P."@en ,
+                        "t med nedsänkt P."@sv .
+
+<#planck-time-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck time: value"@en ,
+                     "Plancktiden: värde"@sv ;
+    solid-memo:back "≈ 5.3912 × 10⁻⁴⁴ s"@zxx ;
+    solid-memo:backNote "Measured, not exact (through G): a Planck unit, built from G, ħ and c. CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt (genom G): en Planckenhet, bildad av G, ħ och c. Värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#planck-temperature-symbol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck temperature: symbol"@en ,
+                     "Plancktemperaturen: beteckning"@sv ;
+    solid-memo:back "TP"@zxx ;
+    solid-memo:backNote "T with subscript P."@en ,
+                        "T med nedsänkt P."@sv .
+
+<#planck-temperature-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Planck temperature: value"@en ,
+                     "Plancktemperaturen: värde"@sv ;
+    solid-memo:back "≈ 1.4168 × 10³² K"@zxx ;
+    solid-memo:backNote "Measured, not exact (through G): a Planck unit, built from G, ħ, c and k. CODATA 2022 value, rounded to 5 significant figures."@en ,
+                        "Uppmätt, inte exakt (genom G): en Planckenhet, bildad av G, ħ, c och k. Värde enligt CODATA 2022, avrundat till 5 värdesiffror."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

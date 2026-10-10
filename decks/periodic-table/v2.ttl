@@ -1,0 +1,1033 @@
+@base <https://solid-memo.com/decks/periodic-table/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Periodic table"@en ,
+                  "Periodiska systemet"@sv ,
+                  "주기율표"@ko ,
+                  "Periodensystem"@de ,
+                  "Tabla periódica"@es ,
+                  "Tableau périodique"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Every chemical element by symbol, named in English and Swedish. Compiled from Wikipedia's List of chemical elements; the names and symbols themselves are standardised by IUPAC, the Swedish names taken from Wikidata."@en ,
+                        "Varje grundämne efter sin kemiska beteckning, med namnet på engelska och svenska. Sammanställd från Wikipedias lista över grundämnen; namnen och beteckningarna standardiseras av IUPAC, och de svenska namnen är hämtade från Wikidata."@sv ,
+                        "모든 화학 원소를 원소 기호별로, 영어와 스웨덴어 이름과 함께 담았습니다. 위키백과의 화학 원소 목록(List of chemical elements)을 바탕으로 만들었고, 이름과 기호 자체는 IUPAC이 표준화한 것이며 스웨덴어 이름은 Wikidata에서 가져왔습니다."@ko ,
+                        "Jedes chemische Element nach seinem Symbol, mit dem Namen auf Englisch und Schwedisch. Zusammengestellt aus der Liste der chemischen Elemente der Wikipedia (List of chemical elements); die Namen und Symbole selbst sind von der IUPAC standardisiert, die schwedischen Namen stammen aus Wikidata."@de ,
+                        "Todos los elementos químicos por su símbolo, con el nombre en inglés y en sueco. Recopilado a partir de la lista de elementos químicos de Wikipedia (List of chemical elements); los nombres y símbolos en sí están normalizados por la IUPAC, y los nombres suecos proceden de Wikidata."@es ,
+                        "Chaque élément chimique par son symbole, avec son nom en anglais et en suédois. Compilé à partir de la liste des éléments chimiques de Wikipédia (List of chemical elements) ; les noms et symboles eux-mêmes sont normalisés par l’UICPA, les noms suédois étant tirés de Wikidata."@fr ;
+    prov:wasDerivedFrom <https://en.wikipedia.org/wiki/List_of_chemical_elements> ,
+                        <https://iupac.org/what-we-do/periodic-table-of-elements/> ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-04T04:34:28.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:chemistry ;
+    dcat:keyword "chemical elements"@en ,
+                 "chemistry"@en ,
+                 "periodic table"@en ,
+                 "grundämnen"@sv ,
+                 "kemi"@sv ,
+                 "periodiska systemet"@sv ,
+                 "화학 원소"@ko ,
+                 "화학"@ko ,
+                 "주기율표"@ko ,
+                 "chemische Elemente"@de ,
+                 "Chemie"@de ,
+                 "Periodensystem"@de ,
+                 "elementos químicos"@es ,
+                 "química"@es ,
+                 "tabla periódica"@es ,
+                 "éléments chimiques"@fr ,
+                 "chimie"@fr ,
+                 "tableau périodique"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/periodic-table/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/periodic-table/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#periodic-table> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#periodic-table> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://en.wikipedia.org/wiki/List_of_chemical_elements>
+    dcterms:title "List of chemical elements" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+
+<https://iupac.org/what-we-do/periodic-table-of-elements/>
+    dcterms:title "IUPAC Periodic Table of the Elements" ;
+    dcterms:creator "International Union of Pure and Applied Chemistry" .
+
+<#hydrogen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Hydrogen"@en ,
+                    "Väte"@sv ;
+    solid-memo:front "H" .
+
+<#helium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Helium"@en ,
+                    "Helium"@sv ;
+    solid-memo:front "He" .
+
+<#lithium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Lithium"@en ,
+                    "Litium"@sv ;
+    solid-memo:front "Li" .
+
+<#beryllium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Beryllium"@en ,
+                    "Beryllium"@sv ;
+    solid-memo:front "Be" .
+
+<#boron>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Boron"@en ,
+                    "Bor"@sv ;
+    solid-memo:front "B" .
+
+<#carbon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Carbon"@en ,
+                    "Kol"@sv ;
+    solid-memo:front "C" .
+
+<#nitrogen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Nitrogen"@en ,
+                    "Kväve"@sv ;
+    solid-memo:front "N" .
+
+<#oxygen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Oxygen"@en ,
+                    "Syre"@sv ;
+    solid-memo:front "O" .
+
+<#fluorine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Fluorine"@en ,
+                    "Fluor"@sv ;
+    solid-memo:front "F" .
+
+<#neon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Neon"@en ,
+                    "Neon"@sv ;
+    solid-memo:front "Ne" .
+
+<#sodium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Sodium"@en ,
+                    "Natrium"@sv ;
+    solid-memo:front "Na" .
+
+<#magnesium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Magnesium"@en ,
+                    "Magnesium"@sv ;
+    solid-memo:front "Mg" .
+
+<#aluminium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Aluminium"@en ,
+                    "Aluminium"@sv ;
+    solid-memo:front "Al" .
+
+<#silicon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Silicon"@en ,
+                    "Kisel"@sv ;
+    solid-memo:front "Si" .
+
+<#phosphorus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Phosphorus"@en ,
+                    "Fosfor"@sv ;
+    solid-memo:front "P" .
+
+<#sulfur>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Sulfur"@en ,
+                    "Svavel"@sv ;
+    solid-memo:front "S" .
+
+<#chlorine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Chlorine"@en ,
+                    "Klor"@sv ;
+    solid-memo:front "Cl" .
+
+<#argon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Argon"@en ,
+                    "Argon"@sv ;
+    solid-memo:front "Ar" .
+
+<#potassium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Potassium"@en ,
+                    "Kalium"@sv ;
+    solid-memo:front "K" .
+
+<#calcium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Calcium"@en ,
+                    "Kalcium"@sv ;
+    solid-memo:front "Ca" .
+
+<#scandium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Scandium"@en ,
+                    "Skandium"@sv ;
+    solid-memo:front "Sc" .
+
+<#titanium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Titanium"@en ,
+                    "Titan"@sv ;
+    solid-memo:front "Ti" .
+
+<#vanadium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Vanadium"@en ,
+                    "Vanadin"@sv ;
+    solid-memo:front "V" .
+
+<#chromium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Chromium"@en ,
+                    "Krom"@sv ;
+    solid-memo:front "Cr" .
+
+<#manganese>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Manganese"@en ,
+                    "Mangan"@sv ;
+    solid-memo:front "Mn" .
+
+<#iron>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Iron"@en ,
+                    "Järn"@sv ;
+    solid-memo:front "Fe" .
+
+<#cobalt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Cobalt"@en ,
+                    "Kobolt"@sv ;
+    solid-memo:front "Co" .
+
+<#nickel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Nickel"@en ,
+                    "Nickel"@sv ;
+    solid-memo:front "Ni" .
+
+<#copper>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Copper"@en ,
+                    "Koppar"@sv ;
+    solid-memo:front "Cu" .
+
+<#zinc>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Zinc"@en ,
+                    "Zink"@sv ;
+    solid-memo:front "Zn" .
+
+<#gallium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Gallium"@en ,
+                    "Gallium"@sv ;
+    solid-memo:front "Ga" .
+
+<#germanium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Germanium"@en ,
+                    "Germanium"@sv ;
+    solid-memo:front "Ge" .
+
+<#arsenic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Arsenic"@en ,
+                    "Arsenik"@sv ;
+    solid-memo:front "As" .
+
+<#selenium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Selenium"@en ,
+                    "Selen"@sv ;
+    solid-memo:front "Se" .
+
+<#bromine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Bromine"@en ,
+                    "Brom"@sv ;
+    solid-memo:front "Br" .
+
+<#krypton>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Krypton"@en ,
+                    "Krypton"@sv ;
+    solid-memo:front "Kr" .
+
+<#rubidium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Rubidium"@en ,
+                    "Rubidium"@sv ;
+    solid-memo:front "Rb" .
+
+<#strontium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Strontium"@en ,
+                    "Strontium"@sv ;
+    solid-memo:front "Sr" .
+
+<#yttrium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Yttrium"@en ,
+                    "Yttrium"@sv ;
+    solid-memo:front "Y" .
+
+<#zirconium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Zirconium"@en ,
+                    "Zirkonium"@sv ;
+    solid-memo:front "Zr" .
+
+<#niobium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Niobium"@en ,
+                    "Niob"@sv ;
+    solid-memo:front "Nb" .
+
+<#molybdenum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Molybdenum"@en ,
+                    "Molybden"@sv ;
+    solid-memo:front "Mo" .
+
+<#technetium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Technetium"@en ,
+                    "Teknetium"@sv ;
+    solid-memo:front "Tc" .
+
+<#ruthenium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Ruthenium"@en ,
+                    "Rutenium"@sv ;
+    solid-memo:front "Ru" .
+
+<#rhodium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Rhodium"@en ,
+                    "Rodium"@sv ;
+    solid-memo:front "Rh" .
+
+<#palladium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Palladium"@en ,
+                    "Palladium"@sv ;
+    solid-memo:front "Pd" .
+
+<#silver>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Silver"@en ,
+                    "Silver"@sv ;
+    solid-memo:front "Ag" .
+
+<#cadmium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Cadmium"@en ,
+                    "Kadmium"@sv ;
+    solid-memo:front "Cd" .
+
+<#indium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Indium"@en ,
+                    "Indium"@sv ;
+    solid-memo:front "In" .
+
+<#tin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Tin"@en ,
+                    "Tenn"@sv ;
+    solid-memo:front "Sn" .
+
+<#antimony>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Antimony"@en ,
+                    "Antimon"@sv ;
+    solid-memo:front "Sb" .
+
+<#tellurium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Tellurium"@en ,
+                    "Tellur"@sv ;
+    solid-memo:front "Te" .
+
+<#iodine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Iodine"@en ,
+                    "Jod"@sv ;
+    solid-memo:front "I" .
+
+<#xenon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Xenon"@en ,
+                    "Xenon"@sv ;
+    solid-memo:front "Xe" .
+
+<#caesium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Caesium"@en ,
+                    "Cesium"@sv ;
+    solid-memo:front "Cs" .
+
+<#barium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Barium"@en ,
+                    "Barium"@sv ;
+    solid-memo:front "Ba" .
+
+<#lanthanum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Lanthanum"@en ,
+                    "Lantan"@sv ;
+    solid-memo:front "La" .
+
+<#cerium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Cerium"@en ,
+                    "Cerium"@sv ;
+    solid-memo:front "Ce" .
+
+<#praseodymium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Praseodymium"@en ,
+                    "Praseodym"@sv ;
+    solid-memo:front "Pr" .
+
+<#neodymium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Neodymium"@en ,
+                    "Neodym"@sv ;
+    solid-memo:front "Nd" .
+
+<#promethium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Promethium"@en ,
+                    "Prometium"@sv ;
+    solid-memo:front "Pm" .
+
+<#samarium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Samarium"@en ,
+                    "Samarium"@sv ;
+    solid-memo:front "Sm" .
+
+<#europium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Europium"@en ,
+                    "Europium"@sv ;
+    solid-memo:front "Eu" .
+
+<#gadolinium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Gadolinium"@en ,
+                    "Gadolinium"@sv ;
+    solid-memo:front "Gd" .
+
+<#terbium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Terbium"@en ,
+                    "Terbium"@sv ;
+    solid-memo:front "Tb" .
+
+<#dysprosium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Dysprosium"@en ,
+                    "Dysprosium"@sv ;
+    solid-memo:front "Dy" .
+
+<#holmium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Holmium"@en ,
+                    "Holmium"@sv ;
+    solid-memo:front "Ho" .
+
+<#erbium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Erbium"@en ,
+                    "Erbium"@sv ;
+    solid-memo:front "Er" .
+
+<#thulium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Thulium"@en ,
+                    "Tulium"@sv ;
+    solid-memo:front "Tm" .
+
+<#ytterbium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Ytterbium"@en ,
+                    "Ytterbium"@sv ;
+    solid-memo:front "Yb" .
+
+<#lutetium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Lutetium"@en ,
+                    "Lutetium"@sv ;
+    solid-memo:front "Lu" .
+
+<#hafnium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Hafnium"@en ,
+                    "Hafnium"@sv ;
+    solid-memo:front "Hf" .
+
+<#tantalum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Tantalum"@en ,
+                    "Tantal"@sv ;
+    solid-memo:front "Ta" .
+
+<#tungsten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Tungsten"@en ,
+                    "Volfram"@sv ;
+    solid-memo:front "W" .
+
+<#rhenium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Rhenium"@en ,
+                    "Rhenium"@sv ;
+    solid-memo:front "Re" .
+
+<#osmium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Osmium"@en ,
+                    "Osmium"@sv ;
+    solid-memo:front "Os" .
+
+<#iridium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Iridium"@en ,
+                    "Iridium"@sv ;
+    solid-memo:front "Ir" .
+
+<#platinum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Platinum"@en ,
+                    "Platina"@sv ;
+    solid-memo:front "Pt" .
+
+<#gold>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Gold"@en ,
+                    "Guld"@sv ;
+    solid-memo:front "Au" .
+
+<#mercury>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Mercury"@en ,
+                    "Kvicksilver"@sv ;
+    solid-memo:front "Hg" .
+
+<#thallium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Thallium"@en ,
+                    "Tallium"@sv ;
+    solid-memo:front "Tl" .
+
+<#lead>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Lead"@en ,
+                    "Bly"@sv ;
+    solid-memo:front "Pb" .
+
+<#bismuth>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Bismuth"@en ,
+                    "Vismut"@sv ;
+    solid-memo:front "Bi" .
+
+<#polonium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Polonium"@en ,
+                    "Polonium"@sv ;
+    solid-memo:front "Po" .
+
+<#astatine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Astatine"@en ,
+                    "Astat"@sv ;
+    solid-memo:front "At" .
+
+<#radon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Radon"@en ,
+                    "Radon"@sv ;
+    solid-memo:front "Rn" .
+
+<#francium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Francium"@en ,
+                    "Francium"@sv ;
+    solid-memo:front "Fr" .
+
+<#radium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Radium"@en ,
+                    "Radium"@sv ;
+    solid-memo:front "Ra" .
+
+<#actinium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Actinium"@en ,
+                    "Aktinium"@sv ;
+    solid-memo:front "Ac" .
+
+<#thorium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Thorium"@en ,
+                    "Torium"@sv ;
+    solid-memo:front "Th" .
+
+<#protactinium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Protactinium"@en ,
+                    "Protaktinium"@sv ;
+    solid-memo:front "Pa" .
+
+<#uranium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Uranium"@en ,
+                    "Uran"@sv ;
+    solid-memo:front "U" .
+
+<#neptunium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Neptunium"@en ,
+                    "Neptunium"@sv ;
+    solid-memo:front "Np" .
+
+<#plutonium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Plutonium"@en ,
+                    "Plutonium"@sv ;
+    solid-memo:front "Pu" .
+
+<#americium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Americium"@en ,
+                    "Americium"@sv ;
+    solid-memo:front "Am" .
+
+<#curium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Curium"@en ,
+                    "Curium"@sv ;
+    solid-memo:front "Cm" .
+
+<#berkelium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Berkelium"@en ,
+                    "Berkelium"@sv ;
+    solid-memo:front "Bk" .
+
+<#californium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Californium"@en ,
+                    "Californium"@sv ;
+    solid-memo:front "Cf" .
+
+<#einsteinium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Einsteinium"@en ,
+                    "Einsteinium"@sv ;
+    solid-memo:front "Es" .
+
+<#fermium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Fermium"@en ,
+                    "Fermium"@sv ;
+    solid-memo:front "Fm" .
+
+<#mendelevium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Mendelevium"@en ,
+                    "Mendelevium"@sv ;
+    solid-memo:front "Md" .
+
+<#nobelium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Nobelium"@en ,
+                    "Nobelium"@sv ;
+    solid-memo:front "No" .
+
+<#lawrencium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Lawrencium"@en ,
+                    "Lawrencium"@sv ;
+    solid-memo:front "Lr" .
+
+<#rutherfordium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Rutherfordium"@en ,
+                    "Rutherfordium"@sv ;
+    solid-memo:front "Rf" .
+
+<#dubnium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Dubnium"@en ,
+                    "Dubnium"@sv ;
+    solid-memo:front "Db" .
+
+<#seaborgium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Seaborgium"@en ,
+                    "Seaborgium"@sv ;
+    solid-memo:front "Sg" .
+
+<#bohrium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Bohrium"@en ,
+                    "Bohrium"@sv ;
+    solid-memo:front "Bh" .
+
+<#hassium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Hassium"@en ,
+                    "Hassium"@sv ;
+    solid-memo:front "Hs" .
+
+<#meitnerium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Meitnerium"@en ,
+                    "Meitnerium"@sv ;
+    solid-memo:front "Mt" .
+
+<#darmstadtium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Darmstadtium"@en ,
+                    "Darmstadtium"@sv ;
+    solid-memo:front "Ds" .
+
+<#roentgenium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Roentgenium"@en ,
+                    "Röntgenium"@sv ;
+    solid-memo:front "Rg" .
+
+<#copernicium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Copernicium"@en ,
+                    "Copernicium"@sv ;
+    solid-memo:front "Cn" .
+
+<#nihonium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Nihonium"@en ,
+                    "Nihonium"@sv ;
+    solid-memo:front "Nh" .
+
+<#flerovium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Flerovium"@en ,
+                    "Flerovium"@sv ;
+    solid-memo:front "Fl" .
+
+<#moscovium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Moscovium"@en ,
+                    "Moskovium"@sv ;
+    solid-memo:front "Mc" .
+
+<#livermorium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Livermorium"@en ,
+                    "Livermorium"@sv ;
+    solid-memo:front "Lv" .
+
+<#tennessine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Tennessine"@en ,
+                    "Tenness"@sv ;
+    solid-memo:front "Ts" .
+
+<#oganesson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:back "Oganesson"@en ,
+                    "Oganesson"@sv ;
+    solid-memo:front "Og" .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
