@@ -42,9 +42,6 @@ export interface Diagnostics {
   unexpectedDialogs: string[];
 }
 
-/** A 1×1 picture for the language selector's flags, which come from flagcdn.com. */
-const FLAG = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>';
-
 const seedOf = (title: string) => {
   const given = Number(process.env.JOURNEY_SEED);
   if (Number.isInteger(given) && given > 0) return given;
@@ -103,7 +100,6 @@ export const test = base.extend<Fixtures>({
       await context.route("**/*", (route) => {
         const url = new URL(route.request().url());
         if (url.hostname === "127.0.0.1") return route.fallback();
-        if (url.hostname === "flagcdn.com") return route.fulfill({ contentType: "image/svg+xml", body: FLAG });
         found.blockedRequests.push(url.href);
         return route.abort("blockedbyclient");
       });

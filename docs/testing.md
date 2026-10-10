@@ -249,7 +249,7 @@ The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
 replays it). The browser's time zone is one where it is about noon, far
 from the day boundary. Requests to any host other than 127.0.0.1 fail
-the journey (the language selector's flags are stubbed). A journey
+the journey. A journey
 never asserts which card a shuffled queue shows, only how many there
 are.
 

@@ -186,12 +186,12 @@ describe("AppShell", () => {
   it("switches language, and keeps the choice", async () => {
     const useCases = makeUseCases();
     renderApp(useCases);
-    fireEvent.click(await screen.findByRole("button", { name: "Svenska" }));
+    fireEvent.input(await screen.findByRole("combobox", { name: "Language" }), { target: { value: "sv" } });
     expect(useCases.chooseLanguage).toHaveBeenCalledWith("sv");
     expect(await screen.findByText(/Skapad av/)).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("sv");
     await waitFor(() => expect(document.title).toBe("Logga in – Solid Memo"));
-    fireEvent.click(screen.getByRole("button", { name: "English" }));
+    fireEvent.input(screen.getByRole("combobox", { name: "Språk" }), { target: { value: "en" } });
     expect(await screen.findByText(/Created by/)).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("en");
   });
@@ -288,7 +288,7 @@ describe("AppShell", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Solid Memo" })).toBeInTheDocument();
     // The theme and language choices make the banner; the onboarding is the main content.
     const banner = screen.getByRole("banner");
-    expect(within(banner).getByRole("button", { name: "English" })).toBeInTheDocument();
+    expect(within(banner).getByRole("combobox", { name: "Language" })).toBeInTheDocument();
     expect(within(screen.getByRole("main")).getByRole("heading", { name: "Set up your Solid Pod" })).toBeInTheDocument();
     await waitFor(() => expect(document.title).toBe("Log in – Solid Memo"));
   });
@@ -434,7 +434,7 @@ describe("AppShell", () => {
     const logOut = await screen.findByRole("button", { name: "Log out" });
     const banner = screen.getByRole("banner");
     expect(banner).toContainElement(logOut);
-    expect(within(banner).getByRole("button", { name: "English" })).toBeInTheDocument();
+    expect(within(banner).getByRole("combobox", { name: "Language" })).toBeInTheDocument();
     expect(
       within(screen.getByRole("main")).getByText("Loading your Solid Memo instances", { exact: false }),
     ).toBeInTheDocument();

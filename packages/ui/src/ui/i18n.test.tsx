@@ -97,6 +97,15 @@ describe("createI18n", () => {
     expect(createI18n("en").t("common.cardCount")).toBe("{count} cards");
   });
 
+  it("writes numbers as the language writes them, and text as it is", () => {
+    expect(createI18n("en").t("common.cardCount", { count: 3010 })).toBe("3,010 cards");
+    expect(createI18n("sv").t("common.cardCount", { count: 3010 })).toBe("3\u00a0010 kort");
+    expect(createI18n("en").t("instanceUpdate.count", { done: 1500, count: 2500 })).toBe("1,500 of 2,500 documents");
+    expect(createI18n("en").t("footer.version", { version: "2026" })).toBe("Version 2026");
+    render(<>{createI18n("en").tx("common.cardCount", { count: 3010 })}</>);
+    expect(document.body).toHaveTextContent("3,010 cards");
+  });
+
   it("speaks Swedish when asked", () => {
     expect(createI18n("sv").t("language.label")).toBe("Språk");
   });

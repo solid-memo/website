@@ -37,7 +37,7 @@ describe("markdownHints", () => {
   it("words every problem markdownProblems names", () => {
     const hint = (text: string, rule = PROSE) => markdownHints(text, rule, t);
     expect(hint(`a${"b".repeat(MAX_CHARS)}`)).toEqual([
-      `Too long to read as Markdown (${MAX_CHARS + 1} characters): it shows as plain text.`,
+      `Too long to read as Markdown (${(MAX_CHARS + 1).toLocaleString("en")} characters): it shows as plain text.`,
     ]);
     expect(hint(`a ${"*_".repeat(MAX_DELIMITERS)}`)).toEqual([
       "Too complex to read as Markdown: it shows as plain text.",

@@ -20,9 +20,9 @@ export class Chrome extends Screen {
     return this.page.getByRole("navigation", { name: this.t("workspace.developerTools") });
   }
 
-  /** The masthead's language buttons ("English", "Svenska"): its group, not the one in Preferences. */
+  /** The language list above the masthead, not the choice in Preferences. */
   get languageSelector(): Locator {
-    return this.page.getByRole("banner").getByRole("group", { name: this.t("language.label") });
+    return this.page.getByRole("banner").getByRole("combobox", { name: this.t("language.label") });
   }
 
   async expectLoggedInAs(webId: string): Promise<void> {
@@ -69,16 +69,16 @@ export class Chrome extends Screen {
   }
 
   /**
-   * Switches the app's language with the masthead's selector; the page
-   * objects' text follows. The selector's own name changes with it
-   * ("Language", "Språk"), so the button is found by its name alone.
+   * Switches the app's language with the list above the masthead, choosing
+   * the language by its name in itself; the page objects' text follows,
+   * the list's own name ("Language", "Språk") with it.
    */
   async switchLanguage(locale: Locale): Promise<void> {
     const name = { en: "English", sv: "Svenska", ko: "한국어" }[locale];
     await this.intent(`Switch the language to ${name}`, async () => {
-      await this.page.getByRole("banner").getByRole("button", { name, exact: true }).click();
+      await this.languageSelector.selectOption({ label: name });
       this.app.locale = locale;
-      await expect(this.languageSelector.getByRole("button", { name, exact: true })).toHaveAttribute("aria-pressed", "true");
+      await expect(this.languageSelector).toHaveValue(locale);
     });
   }
 
