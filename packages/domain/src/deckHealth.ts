@@ -86,7 +86,7 @@ const MARKDOWN_PARTS: readonly { part: CardTextPart; rule: (card: CardContent) =
  * its cards and reviews documents whole.
  */
 export function deckReport(report: ValidationReport, deck: Deck): ValidationReport {
-  const own = new Set([deck.url, distributionUrlOf(deck.url), ...deck.authors.map((author) => agentUrlOf(deck.url, author))]);
+  const own = ownSubjectUrls(deck);
   const catalog = documentUrlOf(deck.url);
   const documents = report.documents.flatMap((document) =>
     document.url === catalog
@@ -96,6 +96,36 @@ export function deckReport(report: ValidationReport, deck: Deck): ValidationRepo
         : [],
   );
   return summarize(report.instanceUrl, documents);
+}
+
+/** The deck's subjects in the catalog: its entry, its distribution and its authors' agent nodes. */
+function ownSubjectUrls(deck: Deck): Set<string> {
+  return new Set([deck.url, distributionUrlOf(deck.url), ...deck.authors.map((author) => agentUrlOf(deck.url, author))]);
+}
+
+/**
+ * The instance's check (`report`) with its part about one deck (as
+ * deckReport takes it) in place of what a later check of the deck
+ * found (`part`), so a deck checked again is held, or let go, by what
+ * that check found, without the whole instance being checked again.
+ * Each document of `part` takes the place of the same one in `report`,
+ * where it was: the catalog only in the deck's subjects (an unchanged
+ * catalog comes back with none, its own all conforming). A document
+ * `part` does not hold stays as it was; one `report` did not hold (a
+ * deck made since it was made) comes at the end.
+ */
+export function withDeckReport(report: ValidationReport, deck: Deck, part: ValidationReport): ValidationReport {
+  const own = ownSubjectUrls(deck);
+  const catalog = documentUrlOf(deck.url);
+  const fresh = new Map(part.documents.map((document) => [document.url, document]));
+  const documents = report.documents.map((document) => {
+    const update = fresh.get(document.url);
+    if (update === undefined) return document;
+    if (update.url !== catalog) return update;
+    return { ...update, subjects: [...document.subjects.filter((subject) => !own.has(subject.url)), ...update.subjects] };
+  });
+  const known = new Set(report.documents.map((document) => document.url));
+  return summarize(report.instanceUrl, [...documents, ...part.documents.filter((document) => !known.has(document.url))]);
 }
 
 /**

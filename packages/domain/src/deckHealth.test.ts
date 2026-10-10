@@ -11,6 +11,7 @@ import {
   duplicateCardsOf,
   healthProblemCount,
   unstatedSides,
+  withDeckReport,
   type DeckTextCheck,
 } from "./deckHealth";
 import { summarize, type DocumentReport, type Violation } from "./validation";
@@ -81,6 +82,53 @@ describe("deckReport", () => {
     ]);
     expect(scoped.violationCount).toBe(4);
     expect(scoped.instanceUrl).toBe("https://pod.example/a/");
+  });
+});
+
+describe("withDeckReport", () => {
+  const OTHER = "https://pod.example/a/decks/other.ttl";
+  const report = summarize("https://pod.example/a/", [
+    document(CATALOG, [checked(deck.url), checked(`${CATALOG}#deck-2`)]),
+    document(CARDS, [checked(`${CARDS}#c1`)]),
+    document(REVIEWS, [checked(`${REVIEWS}#c1`)]),
+    document(OTHER, [checked(`${OTHER}#c1`)]),
+  ]);
+
+  it("puts what a later check of the deck found in place of what the instance's check found of it, where it was", () => {
+    const part = summarize("https://pod.example/a/", [
+      document(CATALOG, [checked(deck.url, [])]),
+      document(CARDS, []),
+      document(REVIEWS, [checked(`${REVIEWS}#c1`, [])]),
+    ]);
+    const merged = withDeckReport(report, deck, part);
+    expect(merged.documents.map((each) => [each.url, each.subjects.map((subject) => subject.url)])).toEqual([
+      [CATALOG, [`${CATALOG}#deck-2`, deck.url]],
+      [CARDS, []],
+      [REVIEWS, [`${REVIEWS}#c1`]],
+      [OTHER, [`${OTHER}#c1`]],
+    ]);
+    expect(merged.violationCount).toBe(2);
+    expect(deckReport(merged, deck).conforms).toBe(true);
+  });
+
+  it("drops the deck's results in the catalog when the later check found it unchanged, so with no subjects", () => {
+    const part = summarize("https://pod.example/a/", [document(CATALOG, []), document(CARDS, []), document(REVIEWS, [])]);
+    const merged = withDeckReport(report, deck, part);
+    expect(merged.documents.map((each) => [each.url, each.subjects.map((subject) => subject.url)])).toEqual([
+      [CATALOG, [`${CATALOG}#deck-2`]],
+      [CARDS, []],
+      [REVIEWS, []],
+      [OTHER, [`${OTHER}#c1`]],
+    ]);
+  });
+
+  it("keeps a document the later check did not hold, and adds at the end one the instance's check had not", () => {
+    const NEW = "https://pod.example/a/decks/new.ttl";
+    const part = summarize("https://pod.example/a/", [document(NEW, [checked(`${NEW}#c1`)])]);
+    const merged = withDeckReport(report, deck, part);
+    expect(merged.documents.map((each) => each.url)).toEqual([CATALOG, CARDS, REVIEWS, OTHER, NEW]);
+    expect(merged.documents[0]).toEqual(report.documents[0]);
+    expect(merged.violationCount).toBe(report.violationCount + 1);
   });
 });
 

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
-import { healthProblemCount } from "@solid-memo/domain/deckHealth";
+import { healthProblemCount, withDeckReport } from "@solid-memo/domain/deckHealth";
+import type { ValidationReport } from "@solid-memo/domain/validation";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { deckTextCheck } from "@solid-memo/ui/markdownCache";
 
@@ -12,12 +13,22 @@ import { deckTextCheck } from "@solid-memo/ui/markdownCache";
  * reads that afresh, reads this afresh too; with the cards document, so
  * an upgraded deck is checked anew. A badge does not check it again on
  * its own (as the instance's check is not): a repair, "Check again"
- * and opening the deck's health do.
+ * and opening the deck's health do. What it finds is put in the
+ * instance's check too (withDeckReport), which holds the deck
+ * (useDataCheck): a deck found mended is let go, and one found broken
+ * is held, without the whole instance being checked again. Only a check
+ * still current is put there: one cancelled as the deck is checked
+ * anew (a repair, say) read the pod before, and would hold a deck mended.
  */
-export function deckHealthQuery(useCases: UseCases, instanceUrl: string, deck: Deck) {
+export function deckHealthQuery(useCases: UseCases, queryClient: QueryClient, instanceUrl: string, deck: Deck) {
   return {
     queryKey: ["validation", instanceUrl, "deck", deck.url, deck.cardsDocumentUrl],
-    queryFn: () => useCases.checkDeck(instanceUrl, deck, deckTextCheck()),
+    queryFn: async ({ signal }: { signal: AbortSignal }) => {
+      const health = await useCases.checkDeck(instanceUrl, deck, deckTextCheck());
+      if (signal.aborted) return health;
+      queryClient.setQueryData<ValidationReport>(["validation", instanceUrl], (report) => report && withDeckReport(report, deck, health.report));
+      return health;
+    },
     staleTime: Infinity,
   };
 }
@@ -62,7 +73,7 @@ export function HealthBadge({
 }) {
   const { t, readerText } = useI18n();
   const [ref, seen] = useSeen<HTMLSpanElement>();
-  const query = useQuery({ ...deckHealthQuery(useCases, instanceUrl, deck), enabled: seen });
+  const query = useQuery({ ...deckHealthQuery(useCases, useQueryClient(), instanceUrl, deck), enabled: seen });
   const count = query.data === undefined ? undefined : healthProblemCount(query.data);
   return (
     <span ref={ref}>
