@@ -1336,7 +1336,60 @@
     "byDeck": "By deck",
     "deck": "Deck",
     "lastStudied": "Last studied",
-    "removedDeck": "A removed deck"
+    "removedDeck": "A removed deck",
+    "pointAtMonth": "Point at a month to see how well it was remembered, or open the table below.",
+    "pointAtDayAhead": "Point at a day to see what falls due, or open the table below.",
+    "progress": "Progress",
+    "introducedOverTime": "Cards introduced over time",
+    "introducedNote": "A running total of the cards seen for the first time in the last 12 months, a card studied both ways counted once each way, removed decks and retired cards included.",
+    "introducedLabel": "A line rising, day by day, with every card seen for the first time.",
+    "introducedDetail": {
+      "one": "{date}: {count} introduced in all.",
+      "other": "{date}: {count} introduced in all."
+    },
+    "introducedTotal": "Introduced in all",
+    "recallByMonth": "Recall by month",
+    "recallLabel": "The share of reviews remembered each month, from 0 to 100%: young cards as a dashed line, mature cards as a solid one.",
+    "recallNote": "Of each month's reviews, the share remembered. Young: reviewed at an interval under 21 days; mature: 21 days or more.",
+    "recallDetail": "{month}: young cards {young}, mature cards {mature}.",
+    "recallShare": {
+      "one": "{percent} of {count} review",
+      "other": "{percent} of {count} reviews"
+    },
+    "noReviewsThen": "no reviews",
+    "month": "Month",
+    "youngShort": "Young",
+    "matureShort": "Mature",
+    "progressHeading": "Where your cards stand",
+    "progressLoading": "Loading your cards' progress…",
+    "progressUnavailable": "Your cards' progress cannot be read just now.",
+    "maturity": "Card maturity",
+    "maturityHint": "New: not reviewed yet. Young: reviewed at an interval under 21 days. Mature: 21 days or more. A card studied both ways counts once each way.",
+    "maturityLabel": "{new}, {young} and {mature}.",
+    "maturityNew": {
+      "one": "{count} new",
+      "other": "{count} new"
+    },
+    "maturityYoung": {
+      "one": "{count} young",
+      "other": "{count} young"
+    },
+    "maturityMature": {
+      "one": "{count} mature",
+      "other": "{count} mature"
+    },
+    "maturityByDeck": "Maturity by deck",
+    "forecast": "Reviews due, the next {count} days",
+    "forecastLabel": "Reviews due on each of the next {count} days, today's including every overdue one.",
+    "forecastNote": "Counted without your daily review limit, which may move some to a later day.",
+    "dueDetail": "{date}: {reviews} due.",
+    "dueTodayDetail": "{date}, today: {reviews} due, overdue ones included.",
+    "nothingDue": "No reviews due in the next {count} days.",
+    "reviewCount": {
+      "one": "{count} review",
+      "other": "{count} reviews"
+    },
+    "due": "Due"
   },
   "zoomableImage": {
     "enlarge": "Enlarge picture",

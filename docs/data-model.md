@@ -828,7 +828,11 @@ own pod, as a draft, before publishing it
 
 Every grade given in study is kept, so statistics can be computed
 ([statistics.ts](../packages/domain/src/statistics.ts)): activity by
-study day, streaks, and how well reviews were remembered. Once a day has
+study day, streaks, how well reviews were remembered, in all and month
+by month (`monthlyRetention`), and the running total of prompts
+introduced (`introducedOverTime`). How many prompts are new, young and
+mature, and the reviews due ahead, are not from the log but from the
+review states ([srs.md](srs.md#where-cards-stand)). Once a day has
 answers, a slim strip above the deck list (where a session usually
 ends) says what the day came to (`todayOf`), led by the streak (with the record to beat,
 or a new record cheered), then a word of praise and the day's numbers.

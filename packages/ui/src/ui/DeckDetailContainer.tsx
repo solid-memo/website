@@ -72,6 +72,7 @@ export function DeckDetailContainer({
         queryKey: ["studyQueue", deck.url],
       });
       await queryClient.invalidateQueries({ queryKey: ["statistics", instance.url] });
+      await queryClient.invalidateQueries({ queryKey: ["cardProgress", instance.url] });
     },
   });
 

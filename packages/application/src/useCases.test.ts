@@ -2556,6 +2556,67 @@ describe("the instance digest", () => {
     });
   });
 
+  it("tells how far along every deck's prompts are and what each has due, at its pace, and keeps its schedule", async () => {
+    const { deps, useCases, stored, digestRepository } = setup();
+    const other: Deck = {
+      ...deck,
+      id: "deck-2",
+      url: `${instance.url}catalog.ttl#deck-2`,
+      direction: "bidirectional",
+      maxReviewsPerDay: 0,
+    };
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, other]);
+    const report = await useCases.getCardProgress(instance.url, now);
+    expect(report.today).toBe("2026-09-28");
+    expect(report.decks.map((one) => ({ deck: one.deck, progress: one.progress }))).toEqual([
+      { deck, progress: { new: 1, young: 1, mature: 0 } },
+      { deck: other, progress: { new: 3, young: 1, mature: 0 } },
+    ]);
+    const [own, paced] = report.decks.map((one) => one.forecast);
+    expect(own).toHaveLength(30);
+    expect(own![0]).toEqual({ studyDay: "2026-09-28", due: 1, reviews: 1 });
+    expect(own!.slice(1).every(({ due }) => due === 0)).toBe(true);
+    expect(paced![0]).toEqual({ studyDay: "2026-09-28", due: 1, reviews: 0 });
+    expect(deps.deckRepository.readCardsSince).toHaveBeenCalledWith(deck, undefined);
+    expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(other, undefined);
+    await vi.waitFor(() => expect(Object.keys(stored()!.schedules)).toEqual([deck.url, other.url]));
+    expect(digestRepository.updateDigest).toHaveBeenCalledTimes(2);
+  });
+
+  it("tells how far along one deck's prompts are, without listing the decks", async () => {
+    const { deps, useCases } = setup();
+    const report = await useCases.getCardProgress(instance.url, now, { deck });
+    expect(report.decks.map((one) => ({ deck: one.deck, progress: one.progress }))).toEqual([
+      { deck, progress: { new: 1, young: 1, mature: 0 } },
+    ]);
+    expect(deps.deckRepository.listDecks).not.toHaveBeenCalled();
+  });
+
+  it("forecasts from the digest's schedule while it is of the documents as they are, for the progress too", async () => {
+    const schedule = {
+      direction: deck.direction,
+      dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
+      dueByDay: { "2026-09-30": 7 },
+      unreviewed: 0,
+      studyDay: "2026-09-28",
+      reviewedOnDay: 0,
+      introducedOnDay: 0,
+    };
+    const { useCases, digestRepository } = setup({
+      receipts: {},
+      schedules: { [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule } },
+    });
+    const report = await useCases.getCardProgress(instance.url, now, { deck });
+    expect(report.decks[0]!.forecast[2]).toEqual({ studyDay: "2026-09-30", due: 7, reviews: 7 });
+    expect(digestRepository.updateDigest).not.toHaveBeenCalled();
+  });
+
+  it("refuses a read without a version that says unchanged, for the progress too", async () => {
+    const { deps, useCases } = setup();
+    deps.reviewStateRepository.readReviewStatesSince = vi.fn(async () => ({ unchanged: true as const }));
+    await expect(useCases.getCardProgress(instance.url, now, { deck })).rejects.toThrow("came back unchanged");
+  });
+
   it("plans the format update without reading again documents with nothing outdated, and writes no digest", async () => {
     const { deps, useCases, digestRepository } = setup(await learned());
     const plan = await useCases.planMigration(instance.url);

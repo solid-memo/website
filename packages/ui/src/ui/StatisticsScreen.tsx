@@ -1,13 +1,14 @@
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Statistics } from "@solid-memo/domain/statistics";
 import { useI18n } from "./i18n";
-import { ActivityCalendar, RecallTile, StatTile } from "./StatisticsCharts";
+import { ActivityCalendar, IntroducedChart, RecallChart, RecallTile, StatTile } from "./StatisticsCharts";
 import { ReaderText } from "./ReaderText";
 
 /**
  * The instance's study statistics: totals and streaks, the activity of
- * the last half year, how well reviews were remembered, and each deck's
- * share. A deck that has since been removed is named as such.
+ * the last year, the cards introduced over it, how well reviews were
+ * remembered, in all and month by month, and each deck's share. A deck
+ * that has since been removed is named as such.
  */
 export function StatisticsScreen({ statistics, decks }: { statistics: Statistics; decks: readonly Deck[] }) {
   const { t, formatDate } = useI18n();
@@ -31,11 +32,14 @@ export function StatisticsScreen({ statistics, decks }: { statistics: Statistics
             <StatTile label={t("statistics.longestStreak")} value={t("statistics.dayCount", { count: streaks.longest })} />
           </div>
           <ActivityCalendar days={statistics.days} today={statistics.today} />
+          <h3>{t("statistics.progress")}</h3>
+          <IntroducedChart days={statistics.days} today={statistics.today} />
           <h3>{t("statistics.remembered")}</h3>
           <div class="stat-tiles">
             <RecallTile label={t("statistics.young")} recall={retention.young} />
             <RecallTile label={t("statistics.mature")} recall={retention.mature} />
           </div>
+          {retention.young.reviews + retention.mature.reviews > 0 && <RecallChart months={statistics.months} />}
           <h3>{t("statistics.byDeck")}</h3>
           <table class="deck-statistics">
             <thead>

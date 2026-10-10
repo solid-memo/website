@@ -1333,7 +1333,60 @@
     "byDeck": "Per kortlek",
     "deck": "Kortlek",
     "lastStudied": "Senast studerad",
-    "removedDeck": "En borttagen kortlek"
+    "removedDeck": "En borttagen kortlek",
+    "pointAtMonth": "Peka på en månad för att se hur mycket du mindes då, eller öppna tabellen nedan.",
+    "pointAtDayAhead": "Peka på en dag för att se vad som ska repeteras, eller öppna tabellen nedan.",
+    "progress": "Framsteg",
+    "introducedOverTime": "Introducerade kort över tid",
+    "introducedNote": "En löpande summa av korten du sett för första gången de senaste 12 månaderna, där ett kort som studeras åt båda hållen räknas en gång per håll, borttagna kortlekar och kort som tagits ur bruk medräknade.",
+    "introducedLabel": "En linje som stiger, dag för dag, med varje kort som ses för första gången.",
+    "introducedDetail": {
+      "one": "{date}: {count} introducerat totalt.",
+      "other": "{date}: {count} introducerade totalt."
+    },
+    "introducedTotal": "Introducerade totalt",
+    "recallByMonth": "Ihågkomna per månad",
+    "recallLabel": "Andelen repetitioner du mindes varje månad, från 0 till 100 %: unga kort som en streckad linje, mogna kort som en hel.",
+    "recallNote": "Andelen av varje månads repetitioner som du mindes. Unga: repeterade med ett intervall under 21 dagar; mogna: 21 dagar eller mer.",
+    "recallDetail": "{month}: unga kort {young}, mogna kort {mature}.",
+    "recallShare": {
+      "one": "{percent} av {count} repetition",
+      "other": "{percent} av {count} repetitioner"
+    },
+    "noReviewsThen": "inga repetitioner",
+    "month": "Månad",
+    "youngShort": "Unga",
+    "matureShort": "Mogna",
+    "progressHeading": "Så ligger dina kort till",
+    "progressLoading": "Läser in hur dina kort ligger till…",
+    "progressUnavailable": "Det går inte att läsa hur dina kort ligger till just nu.",
+    "maturity": "Kortens mognad",
+    "maturityHint": "Nya: inte repeterade än. Unga: repeterade med ett intervall under 21 dagar. Mogna: 21 dagar eller mer. Ett kort som studeras åt båda hållen räknas en gång per håll.",
+    "maturityLabel": "{new}, {young} och {mature}.",
+    "maturityNew": {
+      "one": "{count} nytt",
+      "other": "{count} nya"
+    },
+    "maturityYoung": {
+      "one": "{count} ungt",
+      "other": "{count} unga"
+    },
+    "maturityMature": {
+      "one": "{count} moget",
+      "other": "{count} mogna"
+    },
+    "maturityByDeck": "Mognad per kortlek",
+    "forecast": "Repetitioner, de kommande {count} dagarna",
+    "forecastLabel": "Repetitioner att göra var och en av de kommande {count} dagarna, dagens med alla försenade.",
+    "forecastNote": "Räknade utan din dagliga gräns för repetitioner, som kan flytta några till en senare dag.",
+    "dueDetail": "{date}: {reviews} att göra.",
+    "dueTodayDetail": "{date}, i dag: {reviews} att göra, försenade medräknade.",
+    "nothingDue": "Inga repetitioner att göra de kommande {count} dagarna.",
+    "reviewCount": {
+      "one": "{count} repetition",
+      "other": "{count} repetitioner"
+    },
+    "due": "Att göra"
   },
   "zoomableImage": {
     "enlarge": "Förstora bilden",

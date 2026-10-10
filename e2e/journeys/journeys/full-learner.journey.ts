@@ -151,6 +151,13 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
         { name: deckA, answers: answeredA, lastStudied: "today" },
         { name: deckB, answers: answeredB, lastStudied: "today" },
       ],
+      // Two front→back decks of two cards make four prompts, every one
+      // answered once, so young (an interval of a day) and none left new.
+      maturity: { new: 4 - answers, young: answers, mature: 0 },
+      maturityByDeck: [
+        { name: deckA, new: 2 - answeredA, young: answeredA, mature: 0 },
+        { name: deckB, new: 2 - answeredB, young: answeredB, mature: 0 },
+      ],
     });
   });
 
