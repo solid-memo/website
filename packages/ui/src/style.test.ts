@@ -57,19 +57,10 @@ describe("focus styles", () => {
     expect(style.outlineColor).toBe("transparent");
   });
 
-  it("fades the other language's flag, not its button, and shows it in full when focused", () => {
-    document.body.innerHTML = `
-      <div class="language-selector">
-        <button aria-pressed="true"><img alt="en"></button>
-        <button aria-pressed="false"><img alt="sv"></button>
-      </div>`;
-    const [current, other] = document.querySelectorAll("button");
-    expect(getComputedStyle(other).opacity).not.toBe("0.45");
-    expect(getComputedStyle(current.querySelector("img")!).opacity).not.toBe("0.45");
-    expect(getComputedStyle(other.querySelector("img")!).opacity).toBe("0.45");
-    other.focus();
-    // The test DOM's cascade skips a focused ancestor, so read the rules the flag now matches.
-    expect(lastMatching(other.querySelector("img")!, "opacity")).toBe("1");
+  it("rings the focused language list in the primary colour", () => {
+    const style = focused(`<label class="language-selector"><select><option>en</option></select></label>`, "select");
+    expect(style.outlineStyle).toBe("solid");
+    expect(style.outlineColor).toBe("#2c6b3d");
   });
 
   it("fades a busy button, but shows it in full with its ring when focused", () => {

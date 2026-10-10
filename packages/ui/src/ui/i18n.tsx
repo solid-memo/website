@@ -150,6 +150,7 @@ function writtenTag(tag: string): string {
 
 export function createI18n(locale: Locale): I18n {
   const plurals = new Intl.PluralRules(locale);
+  const numbers = new Intl.NumberFormat(locale);
   const languageNames = new Intl.DisplayNames(locale, { type: "language" });
 
   /** A language's name in this language ("engelska"); a tag Intl cannot read, as itself. */
@@ -168,16 +169,21 @@ export function createI18n(locale: Locale): I18n {
     return typeof count === "number" ? message[plurals.select(count)]! : message.other;
   }
 
+  /** A placeholder's value as the message shows it: a number as this language writes one ("1,000", "1 000"). */
+  function filled<T>(value: T): T | string {
+    return typeof value === "number" ? numbers.format(value) : value;
+  }
+
   const t: I18n["t"] = (key, vars = {}) =>
     template(key, vars.count).replace(PLACEHOLDER, (whole, name: string) =>
-      name in vars ? String(vars[name]) : whole,
+      name in vars ? String(filled(vars[name])) : whole,
     );
 
   const tx: I18n["tx"] = (key, vars) => {
     const pieces = template(key, vars.count).split(PLACEHOLDER);
     // split() puts each placeholder's name at the odd indexes.
     return pieces.map((piece, index) =>
-      index % 2 === 0 ? piece : <Fragment key={index}>{piece in vars ? vars[piece] : `{${piece}}`}</Fragment>,
+      index % 2 === 0 ? piece : <Fragment key={index}>{piece in vars ? filled(vars[piece]) : `{${piece}}`}</Fragment>,
     );
   };
 

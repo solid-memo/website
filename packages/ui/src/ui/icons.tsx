@@ -183,6 +183,16 @@ export function MoonIcon() {
   );
 }
 
+/** A globe: the app's language, found by its shape whichever language is spoken. */
+export function GlobeIcon() {
+  return (
+    <Icon>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+    </Icon>
+  );
+}
+
 /** An arrow out of a box: the link opens in a new tab. Decorative; the link says so in words. */
 export function ExternalIcon() {
   return (

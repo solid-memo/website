@@ -4,23 +4,20 @@ import { I18nProvider } from "./i18n";
 import { LanguageSelector } from "./LanguageSelector";
 
 describe("LanguageSelector", () => {
-  it("names each language in itself and marks the one spoken", () => {
+  it("names each language in itself and chooses the one spoken", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <LanguageSelector />
       </I18nProvider>,
     );
-    expect(screen.getByRole("group", { name: "Språk" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Svenska" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("button", { name: "한국어" })).toHaveAttribute("aria-pressed", "false");
-  });
-
-  it("shows each language's flag", () => {
-    render(<LanguageSelector />);
-    expect(screen.getByRole("img", { name: "Svenska" })).toHaveAttribute("src", "https://flagcdn.com/se.svg");
-    expect(screen.getByRole("img", { name: "English" })).toHaveAttribute("src", "https://flagcdn.com/gb.svg");
-    expect(screen.getByRole("img", { name: "한국어" })).toHaveAttribute("src", "https://flagcdn.com/kr.svg");
+    const list = screen.getByRole("combobox", { name: "Språk" });
+    expect(list).toHaveValue("sv");
+    expect(screen.getAllByRole("option").map((option) => [option.textContent, option.getAttribute("lang")])).toEqual([
+      ["English", "en"],
+      ["Svenska", "sv"],
+      ["한국어", "ko"],
+    ]);
+    expect(screen.getByRole("option", { name: "Svenska" })).toHaveProperty("selected", true);
   });
 
   it("chooses a language", () => {
@@ -30,9 +27,10 @@ describe("LanguageSelector", () => {
         <LanguageSelector />
       </I18nProvider>,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Svenska" }));
+    const list = screen.getByRole("combobox", { name: "Language" });
+    fireEvent.input(list, { target: { value: "sv" } });
     expect(onChoose).toHaveBeenCalledWith("sv");
-    fireEvent.click(screen.getByRole("button", { name: "한국어" }));
+    fireEvent.input(list, { target: { value: "ko" } });
     expect(onChoose).toHaveBeenCalledWith("ko");
   });
 });
