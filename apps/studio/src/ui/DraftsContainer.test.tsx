@@ -6,7 +6,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
-import { DraftsContainer, draftsKey, HomeDraftsContainer } from "./DraftsContainer";
+import { DraftsContainer, draftsKey } from "./DraftsContainer";
 import { draftKey } from "./draftEditor";
 import { courseDraft, instanceA, invalidReport, makeDeck } from "../test/fixtures";
 
@@ -126,41 +126,6 @@ describe("DraftsContainer", () => {
   it("says why the decks could not be read", async () => {
     const useCases = makeUseCasesFake({ listDeckTree: vi.fn(async () => Promise.reject(new AppError("cannotCheck"))) });
     renderContainer(useCases);
-    expect(await screen.findByText("Solid Memo could not check your Pod. Check your connection and try again.")).toBeInTheDocument();
-  });
-});
-
-describe("HomeDraftsContainer", () => {
-  function renderPanel(useCases: UseCases) {
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <QueryClientProvider client={queryClient}>
-        <HomeDraftsContainer useCases={useCases} instance={instanceA} draftsHref="#/drafts" releasesHref="#/releases" draftHref={(draft) => `#/draft/${draft.name}`} />
-      </QueryClientProvider>,
-    );
-  }
-
-  it("lists the drafts, each with its kind and version, and links to them", async () => {
-    renderPanel(
-      makeUseCasesFake({
-        listReleaseDrafts: vi.fn(async () => [solid, { ...solid, url: "x", name: "deck", title: {}, course: false, version: 3 }, { ...solid, url: "y", readable: false }]),
-      }),
-    );
-    expect(await screen.findByText("Course, version 1")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Solid" })).toHaveAttribute("href", "#/draft/solid");
-    expect(screen.getByRole("link", { name: "Untitled (deck)" })).toHaveAttribute("href", "#/draft/deck");
-    expect(screen.getByText("Deck, version 3")).toBeInTheDocument();
-    expect(screen.getByText("Cannot be read, version 1")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Drafts of releases" })).toHaveAttribute("href", "#/drafts");
-  });
-
-  it("says there are none, or why they could not be read", async () => {
-    renderPanel(makeUseCasesFake());
-    expect(await screen.findByText("This instance has no drafts yet.")).toBeInTheDocument();
-  });
-
-  it("says why they could not be read", async () => {
-    renderPanel(makeUseCasesFake({ listReleaseDrafts: vi.fn(async () => Promise.reject(new AppError("cannotCheck"))) }));
     expect(await screen.findByText("Solid Memo could not check your Pod. Check your connection and try again.")).toBeInTheDocument();
   });
 });

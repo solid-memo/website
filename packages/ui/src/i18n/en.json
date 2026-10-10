@@ -1410,7 +1410,46 @@
       "saving": "Saving the draft…",
       "saved": "Draft saved",
       "failed": "Last change not saved",
-      "close": "Close"
+      "close": "Close",
+      "sidebar": "Sidebar",
+      "nav": "Studio",
+      "section": {
+        "decks": "Decks",
+        "groups": "Groups",
+        "drafts": "Drafts",
+        "releases": "Releases",
+        "health": "Health",
+        "library": "Library copies",
+        "transfer": "Import and export",
+        "instance": "Name and catalogue"
+      },
+      "problems": {
+        "one": "{count} problem",
+        "other": "{count} problems"
+      },
+      "filter": "Filter decks and drafts",
+      "deckList": "Decks",
+      "draftList": "Drafts",
+      "noDecks": "No decks.",
+      "noDrafts": "No drafts.",
+      "version": "v{version}",
+      "switchInstance": "Switch instance: {instance}",
+      "allInstances": "All instances"
+    },
+    "tabs": {
+      "deck": "Deck",
+      "draft": "Draft",
+      "cards": "Cards",
+      "schedule": "Schedule",
+      "health": "Health",
+      "about": "About",
+      "export": "Export",
+      "overview": "Overview",
+      "check": "Check",
+      "preview": "Preview",
+      "trial": "Trial",
+      "diff": "Changes",
+      "release": "Release"
     },
     "keys": {
       "button": "? Keys",
@@ -1422,7 +1461,7 @@
       },
       "help": "Show these shortcuts",
       "filter": "Go to the screen's search or filter",
-      "nextRegion": "Go to the next region: header, main content, status bar",
+      "nextRegion": "Go to the next region: header, sidebar, main content, status bar",
       "previousRegion": "Go to the previous region",
       "go": {
         "decks": "Go to the decks",
@@ -1434,6 +1473,10 @@
         "transfer": "Go to import and export",
         "instances": "Go to the instances"
       },
+      "toggleSidebar": "Show or hide the sidebar",
+      "previousTab": "Go to the previous tab of the deck or draft",
+      "nextTab": "Go to the next tab of the deck or draft",
+      "tab": "Go to a tab of the deck or draft by its number",
       "down": "Next card",
       "up": "Previous card",
       "select": "Select the card",
@@ -1444,8 +1487,6 @@
       "caption": "The decks of {instance}",
       "loading": "Loading decks…",
       "empty": "No decks yet: create or import them in {app}.",
-      "groupsLink": "Arrange groups",
-      "instanceLink": "Name and catalogue",
       "filter": "Filter by name or group",
       "shown": {
         "one": "{shown} of {count} deck",
@@ -1476,11 +1517,7 @@
         "unreadable": "Unreadable",
         "from": "From {host}"
       },
-      "healthLink": "Health",
-      "libraryLink": "Library copies",
-      "healthOf": "in {deck}",
-      "transferLink": "Import and export",
-      "draftsLink": "Drafts"
+      "healthOf": "in {deck}"
     },
     "bulk": {
       "label": "Selected decks",
@@ -1600,10 +1637,7 @@
       "lapsesSince": "Lapses count the card's wrong answers since {month}, the month of the deck's first answer in the log.",
       "lapsesNone": "Lapses count the card's wrong answers: none are logged yet.",
       "lapsesLoading": "Reading the answer log for the lapses…",
-      "lapsesFailed": "The answer log could not be read, so the lapses are not known.",
-      "scheduleLink": "Schedule, lapses and leeches",
-      "healthLink": "Health",
-      "exportLink": "Export"
+      "lapsesFailed": "The answer log could not be read, so the lapses are not known."
     },
     "card": {
       "heading": "Card: {card}",
@@ -2133,7 +2167,6 @@
       },
       "untitled": "Untitled ({name})",
       "summary": "{kind}, version {version}",
-      "manage": "Drafts of releases",
       "delete": "Delete",
       "deleteDraft": "Delete the draft {draft}, version {version}",
       "deleteConfirm": "Delete the draft {draft}, version {version}? This cannot be undone.",
@@ -2165,12 +2198,7 @@
       "problemsCount": {
         "one": "The release check finds {count} problem.",
         "other": "The release check finds {count} problems."
-      },
-      "problemsLink": "See the release check",
-      "previewLink": "Preview the listing",
-      "trialLink": "Try it out",
-      "diffLink": "Compare with the previous version",
-      "releaseLink": "Release metadata and provenance"
+      }
     },
     "outline": {
       "empty": "No chapters yet.",
@@ -2228,7 +2256,6 @@
       "crumb": "Cards",
       "heading": "Cards of {draft}",
       "headingCourse": "Questions of {draft}",
-      "overview": "The draft's overview",
       "filter": "Show",
       "all": "All cards",
       "filters": {
@@ -2332,7 +2359,6 @@
         "one": "The shapes find {count} problem, among those above.",
         "other": "The shapes find {count} problems, among those above."
       },
-      "previewLink": "Preview the listing",
       "release": "This release",
       "distractor": "Wrong option {id}",
       "badge": {
@@ -2349,8 +2375,7 @@
         "step": "a step",
         "distractor": "a wrong option"
       },
-      "profile": "{profile}: {message}",
-      "trialLink": "Try it out"
+      "profile": "{profile}: {message}"
     },
     "field": {
       "title": "Title",

@@ -1410,7 +1410,46 @@
       "saving": "Sparar utkastet…",
       "saved": "Utkastet är sparat",
       "failed": "Senaste ändringen sparades inte",
-      "close": "Stäng"
+      "close": "Stäng",
+      "sidebar": "Sidofält",
+      "nav": "Studio",
+      "section": {
+        "decks": "Kortlekar",
+        "groups": "Grupper",
+        "drafts": "Utkast",
+        "releases": "Utgåvor",
+        "health": "Hälsa",
+        "library": "Kopior från biblioteket",
+        "transfer": "Importera och exportera",
+        "instance": "Namn och katalog"
+      },
+      "problems": {
+        "one": "{count} problem",
+        "other": "{count} problem"
+      },
+      "filter": "Filtrera kortlekar och utkast",
+      "deckList": "Kortlekar",
+      "draftList": "Utkast",
+      "noDecks": "Inga kortlekar.",
+      "noDrafts": "Inga utkast.",
+      "version": "v{version}",
+      "switchInstance": "Byt instans: {instance}",
+      "allInstances": "Alla instanser"
+    },
+    "tabs": {
+      "deck": "Kortlek",
+      "draft": "Utkast",
+      "cards": "Kort",
+      "schedule": "Schema",
+      "health": "Hälsa",
+      "about": "Om",
+      "export": "Exportera",
+      "overview": "Översikt",
+      "check": "Kontroll",
+      "preview": "Förhandsvisning",
+      "trial": "Provkörning",
+      "diff": "Ändringar",
+      "release": "Utgåva"
     },
     "keys": {
       "button": "? Tangenter",
@@ -1422,7 +1461,7 @@
       },
       "help": "Visa kortkommandona",
       "filter": "Gå till skärmens sökning eller filter",
-      "nextRegion": "Gå till nästa område: sidhuvud, huvudinnehåll, statusfält",
+      "nextRegion": "Gå till nästa område: sidhuvud, sidofält, huvudinnehåll, statusfält",
       "previousRegion": "Gå till föregående område",
       "go": {
         "decks": "Gå till kortlekarna",
@@ -1434,6 +1473,10 @@
         "transfer": "Gå till import och export",
         "instances": "Gå till instanserna"
       },
+      "toggleSidebar": "Visa eller dölj sidofältet",
+      "previousTab": "Gå till kortlekens eller utkastets föregående flik",
+      "nextTab": "Gå till kortlekens eller utkastets nästa flik",
+      "tab": "Gå till en flik i kortleken eller utkastet efter dess nummer",
       "down": "Nästa kort",
       "up": "Föregående kort",
       "select": "Välj kortet",
@@ -1444,8 +1487,6 @@
       "caption": "Kortlekarna i {instance}",
       "loading": "Läser in kortlekar…",
       "empty": "Inga kortlekar än: skapa eller importera dem i {app}.",
-      "groupsLink": "Ordna grupper",
-      "instanceLink": "Namn och katalog",
       "filter": "Filtrera på namn eller grupp",
       "shown": {
         "one": "{shown} av {count} kortlek",
@@ -1476,11 +1517,7 @@
         "unreadable": "Oläslig",
         "from": "Från {host}"
       },
-      "healthLink": "Hälsa",
-      "libraryLink": "Kopior från biblioteket",
-      "healthOf": "i {deck}",
-      "transferLink": "Importera och exportera",
-      "draftsLink": "Utkast"
+      "healthOf": "i {deck}"
     },
     "bulk": {
       "label": "Valda kortlekar",
@@ -1600,10 +1637,7 @@
       "lapsesSince": "Missar räknar kortets felaktiga svar sedan {month}, månaden för kortlekens första svar i loggen.",
       "lapsesNone": "Missar räknar kortets felaktiga svar: inga är loggade än.",
       "lapsesLoading": "Läser svarsloggen för missarna…",
-      "lapsesFailed": "Svarsloggen kunde inte läsas, så missarna är okända.",
-      "scheduleLink": "Schema, missar och blodiglar",
-      "healthLink": "Hälsa",
-      "exportLink": "Exportera"
+      "lapsesFailed": "Svarsloggen kunde inte läsas, så missarna är okända."
     },
     "card": {
       "heading": "Kort: {card}",
@@ -2133,7 +2167,6 @@
       },
       "untitled": "Namnlöst ({name})",
       "summary": "{kind}, version {version}",
-      "manage": "Utkast till utgåvor",
       "delete": "Ta bort",
       "deleteDraft": "Ta bort utkastet {draft}, version {version}",
       "deleteConfirm": "Ta bort utkastet {draft}, version {version}? Det går inte att ångra.",
@@ -2165,12 +2198,7 @@
       "problemsCount": {
         "one": "Utgåvekontrollen hittar {count} problem.",
         "other": "Utgåvekontrollen hittar {count} problem."
-      },
-      "problemsLink": "Se utgåvekontrollen",
-      "previewLink": "Förhandsvisa listningen",
-      "trialLink": "Prova",
-      "diffLink": "Jämför med föregående version",
-      "releaseLink": "Utgåvans metadata och proveniens"
+      }
     },
     "outline": {
       "empty": "Inga kapitel än.",
@@ -2228,7 +2256,6 @@
       "crumb": "Kort",
       "heading": "Kort i {draft}",
       "headingCourse": "Frågor i {draft}",
-      "overview": "Utkastets översikt",
       "filter": "Visa",
       "all": "Alla kort",
       "filters": {
@@ -2332,7 +2359,6 @@
         "one": "Formerna hittar {count} problem, bland dem ovan.",
         "other": "Formerna hittar {count} problem, bland dem ovan."
       },
-      "previewLink": "Förhandsvisa listningen",
       "release": "Den här utgåvan",
       "distractor": "Felaktigt alternativ {id}",
       "badge": {
@@ -2349,8 +2375,7 @@
         "step": "ett steg",
         "distractor": "ett felaktigt alternativ"
       },
-      "profile": "{profile}: {message}",
-      "trialLink": "Prova"
+      "profile": "{profile}: {message}"
     },
     "field": {
       "title": "Titel",

@@ -96,8 +96,8 @@ function doneKey(edit: CardEdit) {
  * read, or when it cannot be, `lapsesFailed`) count its wrong answers
  * since the month of the deck's first answer in the log, which a line
  * above the table names.
- * Links go to the deck's schedule (`scheduleHref`), its health
- * (`healthHref`) and its export (`exportHref`).
+ * While the deck may not be changed, a line says why, with a link to
+ * its health (`healthHref`).
  */
 export function CardWorkbenchScreen({
   deck,
@@ -107,9 +107,7 @@ export function CardWorkbenchScreen({
   languages,
   lapses,
   lapsesFailed,
-  scheduleHref,
   healthHref,
-  exportHref,
   query,
   onQuery,
   cardHref,
@@ -142,12 +140,8 @@ export function CardWorkbenchScreen({
   lapses: LapseIndex | undefined;
   /** The answer log could not be read. */
   lapsesFailed: boolean;
-  /** The deck's schedule screen. */
-  scheduleHref: string;
-  /** The deck's health. */
+  /** The deck's health, where data set aside is repaired. */
   healthHref: string;
-  /** The deck, ticked to export as a file. */
-  exportHref: string;
   query: CardQuery;
   onQuery: (query: CardQuery) => void;
   cardHref: (card: Card) => string;
@@ -267,8 +261,6 @@ export function CardWorkbenchScreen({
       <header>
         <h2>{tx("studio.cards.heading", { deck: <ReaderText text={deck.title} /> })}</h2>
         {course && <span class="studio-badge">{t("studio.decks.badge.course")}</span>}
-        <a href={scheduleHref}>{t("studio.cards.scheduleLink")}</a> <a href={healthHref}>{t("studio.cards.healthLink")}</a>{" "}
-        <a href={exportHref}>{t("studio.cards.exportLink")}</a>
       </header>
       {course && <p class="hint">{t("studio.cards.courseHint")}</p>}
       <ReadOnlyNotice reason={readOnly} subject="deck" healthHref={healthHref} />

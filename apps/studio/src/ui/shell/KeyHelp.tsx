@@ -1,9 +1,12 @@
 import { Fragment } from "preact";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Dialog } from "./Dialog";
-import { SHORTCUTS, type ShortcutScope } from "./shortcuts";
+import { SHORTCUTS, type ShortcutId, type ShortcutScope } from "./shortcuts";
 
 const SCOPES: readonly ShortcutScope[] = ["studio", "cards"];
+
+/** What a shortcut does, as the key help says it: the nine tabs' keys as one. */
+const aboutOf = (id: ShortcutId) => (id.startsWith("tab.") ? "tab" : (id as Exclude<ShortcutId, `tab.${number}`>));
 
 /** Every shortcut of the Studio, by where it works, in a dialog (`?`). */
 export function KeyHelp({ onClose }: { onClose: () => void }) {
@@ -15,12 +18,12 @@ export function KeyHelp({ onClose }: { onClose: () => void }) {
         <section key={scope}>
           <h3>{t(`studio.keys.scope.${scope}`)}</h3>
           <dl class="studio-keymap">
-            {SHORTCUTS.filter((shortcut) => shortcut.scope === scope).map((shortcut) => (
+            {SHORTCUTS.filter((shortcut) => shortcut.scope === scope && shortcut.help !== null).map((shortcut) => (
               <Fragment key={shortcut.id}>
                 <dt>
-                  <Keys keys={shortcut.keys} />
+                  <Keys keys={shortcut.help ?? shortcut.keys} />
                 </dt>
-                <dd>{t(`studio.keys.${shortcut.id}`)}</dd>
+                <dd>{t(`studio.keys.${aboutOf(shortcut.id)}`)}</dd>
               </Fragment>
             ))}
           </dl>

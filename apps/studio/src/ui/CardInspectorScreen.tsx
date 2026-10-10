@@ -3,6 +3,7 @@ import type { Card } from "@solid-memo/domain/deck";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { CARD_TABS, type CardTab } from "./router";
+import { ContextTabs } from "./shell/ContextTabs";
 
 /**
  * How a card stands to the release its deck was copied from:
@@ -58,24 +59,16 @@ export function CardInspectorScreen({
           {t("studio.card.releaseChanged")}
         </p>
       )}
-      <nav class="studio-tabs" aria-label={t("studio.card.tabs")}>
-        <ul>
-          {CARD_TABS.map((each) => (
-            <li key={each}>
-              <a
-                href={tabHref(each)}
-                aria-current={each === tab ? "page" : undefined}
-                onClick={(event) => {
-                  event.preventDefault();
-                  onTab(each);
-                }}
-              >
-                {each === "distractors" ? t("studio.card.tab.distractors", { count }) : t(`studio.card.tab.${each}`)}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <ContextTabs
+        label={t("studio.card.tabs")}
+        tabs={CARD_TABS.map((each) => ({
+          key: each,
+          href: tabHref(each),
+          label: each === "distractors" ? t("studio.card.tab.distractors", { count }) : t(`studio.card.tab.${each}`),
+          current: each === tab,
+        }))}
+        onFollow={onTab}
+      />
       <div class="studio-tab-panel">{children}</div>
       <p class="hint">
         <a href={appHref}>{t("studio.card.openInApp")}</a>

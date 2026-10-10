@@ -53,11 +53,10 @@ export class DraftEditor extends Screen {
     });
   }
 
-  /** Opens the release's metadata and provenance from the draft's overview, reached by the trail. */
-  async openRelease(draft: string): Promise<void> {
+  /** Opens the release's metadata and provenance from the draft's tabs. */
+  async openRelease(): Promise<void> {
     await this.intent("Open the release's metadata and provenance", async () => {
-      await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
-      await this.page.getByRole("link", { name: this.t("studio.draft.releaseLink") }).click();
+      await this.app.chrome.studioTab("draft", "release");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.release.heading") })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.release.crumb");
     });
@@ -164,11 +163,10 @@ export class DraftEditor extends Screen {
     });
   }
 
-  /** Opens the comparison with the release the draft follows, from its overview, reached by the trail. */
-  async openDiff(draft: string): Promise<void> {
+  /** Opens the comparison with the release the draft follows, from its tabs. */
+  async openDiff(): Promise<void> {
     await this.intent("Compare the draft with the previous version", async () => {
-      await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
-      await this.page.getByRole("link", { name: this.t("studio.draft.diffLink") }).click();
+      await this.app.chrome.studioTab("draft", "diff");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.diff.heading") })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.diff.crumb");
       await expect(this.page.getByText(this.t("studio.diff.comparing"))).toHaveCount(0);
@@ -333,11 +331,10 @@ export class DraftEditor extends Screen {
     });
   }
 
-  /** Opens the draft's release check from its overview, reached by the trail. */
-  async openCheck(draft: string): Promise<void> {
+  /** Opens the draft's release check from its tabs. */
+  async openCheck(): Promise<void> {
     await this.intent("Open the release check", async () => {
-      await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
-      await this.page.getByRole("link", { name: this.t("studio.draft.problemsLink") }).click();
+      await this.app.chrome.studioTab("draft", "check");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.check.heading") })).toBeVisible();
       await expect(this.page.getByRole("status").filter({ hasText: this.t("studio.check.checking") })).toHaveCount(0);
     });
@@ -387,10 +384,10 @@ export class DraftEditor extends Screen {
     });
   }
 
-  /** Opens the listing preview from the release check: the draft's row and page in the library, a picture of them. */
+  /** Opens the listing preview from the draft's tabs: the draft's row and page in the library, a picture of them. */
   async openPreview(draft: string): Promise<void> {
     await this.intent("Preview the listing", async () => {
-      await this.page.getByRole("link", { name: this.t("studio.check.previewLink") }).click();
+      await this.app.chrome.studioTab("draft", "preview");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.preview.heading") })).toBeVisible();
       const row = this.page.getByRole("region", { name: this.t("studio.preview.row"), exact: true });
       const page = this.page.getByRole("region", { name: this.t("studio.preview.page"), exact: true });

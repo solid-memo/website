@@ -15,6 +15,10 @@ export type ShortcutId =
   | "nextRegion"
   | "previousRegion"
   | `go.${Section}`
+  | "toggleSidebar"
+  | "previousTab"
+  | "nextTab"
+  | `tab.${number}`
   | "down"
   | "up"
   | "select"
@@ -23,13 +27,16 @@ export type ShortcutId =
 /**
  * A shortcut: its keys as `keyOf` names them, a chord's one after the
  * other with a space between ("g d"). Those that `whileTyping` work
- * from a field the user types in too; the others leave it its keys.
+ * from a field the user types in too; the others leave it its keys. The
+ * key help shows its keys as `help` says when it says (one entry for
+ * several shortcuts), and leaves it out when that is null.
  */
 export interface Shortcut {
   id: ShortcutId;
   keys: string;
   scope: ShortcutScope;
   whileTyping?: true;
+  help?: string | null;
 }
 
 const GO_KEYS: Record<Section, string> = {
@@ -50,6 +57,11 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "nextRegion", keys: "F6", scope: "studio", whileTyping: true },
   { id: "previousRegion", keys: "Shift+F6", scope: "studio", whileTyping: true },
   ...Object.entries(GO_KEYS).map(([section, key]): Shortcut => ({ id: `go.${section as Section}`, keys: `g ${key}`, scope: "studio" })),
+  { id: "toggleSidebar", keys: "Ctrl+b", scope: "studio" },
+  { id: "previousTab", keys: "[", scope: "studio" },
+  { id: "nextTab", keys: "]", scope: "studio" },
+  // The key help lists the nine as one.
+  ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n): Shortcut => ({ id: `tab.${n}`, keys: String(n), scope: "studio", help: n === 1 ? "1–9" : null })),
   { id: "down", keys: "j", scope: "cards" },
   { id: "up", keys: "k", scope: "cards" },
   { id: "select", keys: "x", scope: "cards" },

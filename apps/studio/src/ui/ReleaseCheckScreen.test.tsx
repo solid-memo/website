@@ -11,8 +11,6 @@ const at = (id: string) => `${DRAFT_URL}#${id}`;
 const links = {
   policyHref: (policy: CheckPolicy) => `#/check/${policy}`,
   targetHref: (target: ProblemTarget) => `#/${Object.values(target).join("/")}`,
-  previewHref: "#/preview",
-  trialHref: "#/trial",
 };
 const notAsked: ShapesState = { asked: false, running: false, stale: false, problems: undefined, error: null };
 
@@ -49,7 +47,6 @@ describe("ReleaseCheckScreen", () => {
     expect(screen.getByText(/held to the rules of its data/)).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("No problems found.");
     expect(screen.queryByRole("heading", { name: "Errors" })).toBeNull();
-    expect(screen.getByRole("link", { name: "Preview the listing" })).toHaveAttribute("href", "#/preview");
   });
 
   it("lists every problem by severity, then by what it is in, each linking to its place in the editors", () => {

@@ -51,14 +51,11 @@ export function DeckTableContainer({
   view,
   onView,
   appHref,
-  groupsHref,
-  instanceHref,
   healthHref,
   libraryHref,
   transferHref,
   deckHref,
   cardsHref,
-  draftsHref,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -66,12 +63,9 @@ export function DeckTableContainer({
   onView: (view: DeckTableView) => void;
   /** Solid Memo, open at the instance's decks. */
   appHref: string;
-  groupsHref: string;
-  /** The instance's name and catalogue. */
-  instanceHref: string;
   /** The health of a deck, or (none named) of the instance. */
   healthHref: (deck?: Deck) => string;
-  /** The instance's copies of library releases. */
+  /** The instance's copies of library releases, where a copy is upgraded. */
   libraryHref: string;
   /** Import and export, these decks ticked to export. */
   transferHref: (decks: readonly Deck[]) => string;
@@ -79,8 +73,6 @@ export function DeckTableContainer({
   deckHref: (deck: Deck) => string;
   /** A deck's cards, in the card workbench. */
   cardsHref: (deck: Deck) => string;
-  /** The instance's drafts of releases. */
-  draftsHref: string;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -198,14 +190,10 @@ export function DeckTableContainer({
       deckHref={deckHref}
       cardsHref={cardsHref}
       appHref={appHref}
-      groupsHref={groupsHref}
-      instanceHref={instanceHref}
       healthHref={healthHref()}
       // Checked only as its row comes into view; quiet when all is well.
       healthBadge={(deck) => <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={healthHref(deck)} quiet />}
-      libraryHref={libraryHref}
       transferHref={transferHref}
-      draftsHref={draftsHref}
       // A copy only, looked up as its row comes into view; nothing while it is up to date.
       updateBadge={(deck) =>
         deck.sourceUrl === undefined ? null : <UpdateBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={libraryHref} />

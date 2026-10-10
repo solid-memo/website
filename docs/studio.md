@@ -78,19 +78,57 @@ The Studio is a workspace for authors, not a column to read
 ([`shell/StudioShell.tsx`](../apps/studio/src/ui/shell/StudioShell.tsx)).
 It takes the whole window, and the window does not scroll:
 
-- **The header** is one row: the masthead (the Studio's name, who is
-  signed in, Log out), the theme and the languages, and the link back
-  to Solid Memo. It wraps on a narrow screen.
-- **The main content**, under it, scrolls on its own: the trail, then
-  the screen. A table's header row stays in sight as it scrolls, and a
-  table too wide for it scrolls it sideways; on a narrow screen (48rem
-  or less) such a table scrolls sideways in its own box.
+- **The header** is one row: the sidebar's button, the masthead (the
+  Studio's name, who is signed in, Log out), the open instance, the
+  theme and the languages, and the link back to Solid Memo. On a narrow
+  screen (48rem or less) it is two: the button, the name and Log out,
+  then the rest; who is signed in is left out there.
+- **The open instance**, for a user with several, is a menu
+  ([`shell/InstanceSwitcher.tsx`](../apps/studio/src/ui/shell/InstanceSwitcher.tsx)):
+  each other instance, at its decks, and All instances, the picker.
+- **The sidebar**, beside the main content while an instance is open
+  ([`shell/StudioSidebar.tsx`](../apps/studio/src/ui/shell/StudioSidebar.tsx),
+  a navigation named Studio), links to the instance's sections: Decks
+  (Home), Groups, Drafts, Releases, Health, Library copies, Import and
+  export, and Name and catalogue. The one shown is marked
+  (`aria-current`); beside Health, the number of problems the instance's
+  check found, once a screen has made it (the sidebar makes none). Under
+  them, the instance's decks, each at its cards, and its drafts, each at
+  its overview with its version, the deck or draft shown marked, both
+  kept to those whose name holds the filter above them, case and
+  accents aside. They are the screens' own queries, so a deck or draft
+  made, renamed or deleted shows there too. Its button in the header, or
+  Ctrl+B, hides it, and the main content takes its room; the device
+  remembers. On a narrow screen it is a drawer over the page, closed
+  until its button opens it, and closed again by a link followed in it,
+  a press outside it, or Escape.
+- **The main content**, beside it, scrolls on its own: the trail, the
+  tabs of the deck or draft shown, then the screen. A table's header
+  row stays in sight as it scrolls, and a table too wide for it scrolls
+  it sideways; on a narrow screen such a table scrolls sideways in its
+  own box.
 - **The status bar**, at the foot, beside the site's footer, names the
   open instance, says on a draft's screens whether the draft is saved
   ("Saving the draft…", then "Draft saved", or "Last change not saved"
   when its write failed or the draft refused it;
   [below](#how-edits-are-saved)), switches the density, and shows the
   keys (**? Keys**).
+
+**Tabs.** A deck's screens have the deck's tabs, under the trail
+([`shell/ContextTabs.tsx`](../apps/studio/src/ui/shell/ContextTabs.tsx),
+a navigation named Deck): Cards (a card in the inspector among them),
+Schedule, Health, About, and Export, which opens import and export with
+the deck ticked. A draft's screens have the draft's (named Draft):
+Overview (its chapters and steps among them), Cards (its questions among
+them), Check, Preview, Trial, Changes (only for a draft that follows a
+release) and Release. The one shown is marked (`aria-current`). Which
+tabs a route has, and which is shown, is worked out from the route
+alone ([`shell/workspaceLayout.ts`](../apps/studio/src/ui/shell/workspaceLayout.ts)).
+The card inspector's tabs and the release check's policies are tabs of
+the same kind.
+
+The sidebar and the tabs are links: each is a Back stop. Hiding the
+sidebar, or opening the drawer, is not.
 
 Its look is calm: headings in the body's type, sections flat with a
 thin border, and no tilt, stamp or pop as a screen comes in. Its
@@ -114,15 +152,18 @@ and its keymap is data
 | --- | --- | --- |
 | `?` | anywhere | list every key, in a dialog; **? Keys** in the status bar does too |
 | `/` | anywhere | go to the screen's search or filter: Home's, the workbench's, a draft's cards' |
-| F6, Shift+F6 | anywhere, a field too | go to the next region, or the one before: the header, the main content, the status bar |
+| F6, Shift+F6 | anywhere, a field too | go to the next region, or the one before: the header, the sidebar (while it is shown), the main content, the status bar |
 | `g d`, `g g`, `g r`, `g p`, `g h`, `g l`, `g t` | with an instance open | go to its decks (Home), groups, drafts, releases, health, library copies, or import and export |
 | `g i` | anywhere | go to the instances |
+| Ctrl+B | with an instance open | show or hide the sidebar; on a narrow screen, open or close the drawer |
+| `]`, `[` | a deck's or a draft's screens | go to the next tab, or the one before, round from either end |
+| `1` … `9` | a deck's or a draft's screens, but the trial | go to the tab of that number; in the trial they are the learner's, a grade or an option |
 | `j`, `k`, `x`, Enter | the card workbench | the next card, the one before, select it, open it ([below](#card-workbench)) |
 
 A pair such as `g d` is pressed one key after the other, the second
 within 1.5 seconds; a key held down counts once, so a held `g` is not
-`g g`. A `g` chord goes where a link would, and is a Back stop as a
-link is, except to the page already shown. While the user types in a field (a text, a search,
+`g g`. A `g` chord, and a tab's key, goes where a link would, and is a
+Back stop as a link is, except to the page already shown. While the user types in a field (a text, a search,
 a list to choose from), the field keeps its keys, F6 and Shift+F6
 aside. A key goes first to what has the focus, which may take it (a
 menu's arrows, say); then to the screen's own keys (`useScreenKeys`),
@@ -271,13 +312,9 @@ every copy (`listLibraryUpdates`), and for a copy from a link its
 creator's catalogue. A copy up to date, or one whose newer releases
 cannot be known, gets no badge.
 
-Above the table are links to the [Groups](#groups) screen, to the
-instance's [name and catalogue](#the-instance), to its
-[health](#health), to its [library copies](#library-copies), to
-[import and export](#import-and-export) and to its [drafts](#drafts);
-with no decks yet, the name and catalogue, import and export, and the
-drafts are still there. Below the table, Home lists the instance's
-drafts, each with its kind and version, and links to them.
+The instance's other sections, and its drafts, are in the
+[sidebar](#layout); with no decks yet, Home says to make or import them
+in Solid Memo.
 
 The table starts in the order the user arranged the decks. A column's
 name sorts by it, then the other way, then back to that order; the
@@ -369,9 +406,9 @@ so far, so a line above the table names the month of the deck's first
 answer in it: "since March 2025". The workbench reads the whole log once (`loadAnswerLog`). While
 it is read, the cards show without their lapses, and a query that needs
 them (`state=leech`, `sort=lapses`) waits. When it cannot be read, the
-line says so, and such a query shows why. The header links to the
-deck's [schedule](#a-decks-schedule), its [health](#health) and its
-export ([import and export](#import-and-export), the deck ticked).
+line says so, and such a query shows why. The deck's tabs go to its
+[schedule](#a-decks-schedule), its [health](#health) and its export
+([import and export](#import-and-export), the deck ticked).
 
 A card opens in the [card inspector](#card-inspector). The
 workbench reads the cards and the review states with the same queries
@@ -941,7 +978,7 @@ confirms. Where and how a draft is kept is in
 the private type index alone.
 
 Each draft that can be read links to its [overview](#a-drafts-overview),
-on this screen and on Home.
+on this screen and in the sidebar.
 
 A new draft starts from
 
@@ -1086,8 +1123,9 @@ saved as they are typed. For a course, it shows the outline, adds a
 chapter (its title, and its id), and lists the chapters retired, to
 restore. It counts the draft's cards, with a link to their table; a
 deck's cards are added here. It counts the problems the release check
-finds (for a pod, the shapes left out), and links to the check, the
-listing preview and the release's metadata and provenance.
+finds (for a pod, the shapes left out); the draft's tabs go to the
+check itself, the listing preview and the release's metadata and
+provenance.
 
 ### The outline
 
@@ -1303,8 +1341,7 @@ The trial
 ([`TrialContainer`](../apps/studio/src/ui/TrialContainer.tsx)) plays the
 draft as learners will play the release it will be: a course with Solid
 Memo's own course screens (its page, a chapter's steps, its final
-review), a deck with Solid Memo's study. The draft's overview and its
-release check link to it ("Try it out").
+review), a deck with Solid Memo's study. It is the draft's Trial tab.
 
 It is played in a sandbox, so nothing done in it reaches the user's
 pod. The use case is `openTrial(draft, instanceUrl)`
@@ -1376,9 +1413,9 @@ page, forgets it.
 
 The release diff
 ([`ReleaseDiffContainer`](../apps/studio/src/ui/ReleaseDiffContainer.tsx))
-compares a draft with the release it follows (its `dcat:prev`). The
-draft's overview links to it ("Compare with the previous version") when
-there is one. A draft of a first version follows none, and the screen
+compares a draft with the release it follows (its `dcat:prev`). It is
+the draft's Changes tab, which a draft has when there is one. A draft
+of a first version follows none, and the screen (still at its address)
 says so. The use case is `diffReleaseDraft(draft)`
 ([releaseDrafts.ts](../packages/application/src/releaseDrafts.ts)).
 It reads the release once, as the release check does, and fails when
@@ -1425,8 +1462,8 @@ included.
 The release screen
 ([`ReleaseMetadataContainer`](../apps/studio/src/ui/ReleaseMetadataContainer.tsx))
 edits what a draft's release says of itself beyond its listing, who
-made it and how, and what it was made from. The draft's overview links
-to it ("Release metadata and provenance"). It writes the release as the
+made it and how, and what it was made from. It is the draft's Release
+tab. It writes the release as the
 library's releases are written
 ([deck-library.md](deck-library.md#provenance)). Each change is a
 `DraftChange`, saved as the other screens save theirs
@@ -1616,8 +1653,8 @@ its catalogue links them. Each has its address, named by it ("capitals,
 version 2") when it is named as releases are, a link to copy, who can
 read it (everyone, or only its owner, with **Make it public**), and
 **Start the next version**, which makes a draft of it and opens it. It
-changes no release. Home's drafts panel and the drafts screen link to
-it ("Published releases"). A learner adds a release in Solid Memo by
+changes no release. The sidebar and the drafts screen link to it
+("Published releases" there). A learner adds a release in Solid Memo by
 the link copied here ([deck-library.md](deck-library.md#from-a-link)).
 
 ## Data set aside

@@ -58,12 +58,9 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * table's order, one action at a time: a deck the filter hides stays
  * selected, but is left alone until shown again. A deck's name opens
  * what it says of itself (`deckHref`), its number of cards its cards in
- * the Studio's card workbench (`cardsHref`). The header links to the
- * groups, to the instance's name and catalogue (`instanceHref`), to
- * its health (`healthHref`), to its copies of library releases
- * (`libraryHref`), to import and export (`transferHref`, which the
- * bulk actions' Export opens with the selected decks ticked) and to its
- * drafts of releases (`draftsHref`); each deck's name has its health beside it
+ * the Studio's card workbench (`cardsHref`); the bulk actions' Export
+ * opens import and export with the selected decks ticked
+ * (`transferHref`). Each deck's name has its health beside it
  * (`healthBadge`), and for a library copy whether a newer release is out
  * (`updateBadge`). Only a deck that may be changed (`selectable`) can be
  * selected: none while the instance's data is being checked, and none
@@ -83,13 +80,9 @@ export function DeckTableScreen({
   deckHref,
   cardsHref,
   appHref,
-  groupsHref,
-  instanceHref,
   healthHref,
   healthBadge,
-  libraryHref,
   transferHref,
-  draftsHref,
   updateBadge,
   onMove,
   onPace,
@@ -117,20 +110,12 @@ export function DeckTableScreen({
   cardsHref: (deck: Deck) => string;
   /** Solid Memo, open at the instance's decks. */
   appHref: string;
-  /** The Groups screen. */
-  groupsHref: string;
-  /** The instance's name and catalogue. */
-  instanceHref: string;
   /** The instance's health. */
   healthHref: string;
   /** A deck's health, as a badge beside its name. */
   healthBadge: (deck: Deck) => ComponentChildren;
-  /** The instance's copies of library releases. */
-  libraryHref: string;
   /** Import and export, these decks ticked to export. */
   transferHref: (decks: readonly Deck[]) => string;
-  /** The instance's drafts of releases. */
-  draftsHref: string;
   /** Whether the library has a newer release of a deck, as a badge beside its name. */
   updateBadge: (deck: Deck) => ComponentChildren;
   /** Each resolves to whether it was done (the container says why not, through `error`). */
@@ -151,8 +136,6 @@ export function DeckTableScreen({
       <section>
         <header>
           <h2>{t("studio.decks.heading")}</h2>
-          <a href={instanceHref}>{t("studio.decks.instanceLink")}</a> <a href={transferHref([])}>{t("studio.decks.transferLink")}</a>{" "}
-          <a href={draftsHref}>{t("studio.decks.draftsLink")}</a>
         </header>
         <p class="hint">{tx("studio.decks.empty", { app: <a href={appHref}>{t("app.documentTitle")}</a> })}</p>
       </section>
@@ -203,9 +186,6 @@ export function DeckTableScreen({
     <section>
       <header>
         <h2>{t("studio.decks.heading")}</h2>
-        <a href={groupsHref}>{t("studio.decks.groupsLink")}</a> <a href={instanceHref}>{t("studio.decks.instanceLink")}</a>{" "}
-        <a href={healthHref}>{t("studio.decks.healthLink")}</a> <a href={libraryHref}>{t("studio.decks.libraryLink")}</a>{" "}
-        <a href={transferHref([])}>{t("studio.decks.transferLink")}</a> <a href={draftsHref}>{t("studio.decks.draftsLink")}</a>
       </header>
       <label class="studio-filter">
         {t("studio.decks.filter")}

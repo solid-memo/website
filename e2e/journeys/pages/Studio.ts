@@ -16,11 +16,17 @@ import { cellOf } from "./tables.ts";
  * instance's health, its library copies, a deck's about screen (its
  * authors and licence), the instance's name and catalogue, a deck
  * exported to a file and imported from it, the instance's drafts of
- * releases (made, the next version of a release among them, listed on
- * Home and deleted), the releases it published, and its way back to
- * Solid Memo.
+ * releases (made, the next version of a release among them, listed in
+ * the sidebar and deleted), the releases it published, and its way back
+ * to Solid Memo. Its sections are reached from its sidebar, a deck's or
+ * a draft's screens from their tabs.
  */
 export class Studio extends Screen {
+  /** The card inspector's tabs: the card's content, wrong options, schedule and history. */
+  private get cardTabs(): Locator {
+    return this.page.getByRole("navigation", { name: this.t("studio.card.tabs"), exact: true });
+  }
+
   /** Home's table of the instance's decks ("The decks of {instance}"). */
   decks(instance: string): Locator {
     return this.page.getByRole("table", { name: this.t("studio.decks.caption", { instance }) });
@@ -111,10 +117,10 @@ export class Studio extends Screen {
     });
   }
 
-  /** Follows Home's link to the Groups screen, which arranges the decks as Solid Memo's list does (app.groups). */
+  /** Follows the sidebar's Groups, the screen that arranges the decks as Solid Memo's list does (app.groups). */
   async openGroups(): Promise<void> {
     await this.intent("Open the Groups screen", async () => {
-      await this.page.getByRole("link", { name: this.t("studio.decks.groupsLink") }).click();
+      await this.app.chrome.studioSection("groups");
       await expect(this.page.getByRole("heading", { name: this.t("studio.groups.heading"), level: 2 })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("breadcrumbs.groups");
     });
@@ -219,13 +225,13 @@ export class Studio extends Screen {
   }
 
   /**
-   * Follows Home's link to import and export, picks the file, sees what
+   * Follows the sidebar's import and export, picks the file, sees what
    * it holds (its deck, its cards and its progress), and imports it with
    * its progress: the deck it made is linked.
    */
   async importFile(instance: string, path: string, deck: string, cards: number, states: number): Promise<void> {
     await this.intent(`Import ${deck} from its file`, async () => {
-      await this.page.getByRole("link", { name: this.t("studio.decks.transferLink"), exact: true }).click();
+      await this.app.chrome.studioSection("transfer");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.transfer.heading", { instance }) })).toBeVisible();
       const chooser = this.page.waitForEvent("filechooser");
       await this.page.getByRole("button", { name: this.t("studio.transfer.choose") }).click();
@@ -245,20 +251,19 @@ export class Studio extends Screen {
     return this.page.getByRole("table", { name: this.t("studio.drafts.caption", { instance }) });
   }
 
-  /** Follows Home's link to the instance's drafts of releases. */
+  /** Follows the sidebar's link to the instance's drafts of releases. */
   async openDrafts(instance: string): Promise<void> {
     await this.intent("Open the instance's drafts", async () => {
-      await this.page.getByRole("link", { name: this.t("studio.decks.draftsLink"), exact: true }).click();
+      await this.app.chrome.studioSection("drafts");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.drafts.heading", { instance }) })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.drafts.crumb");
     });
   }
 
-  /** Opens the releases the instance published, from Home's drafts panel, reached by the trail. */
+  /** Opens the releases the instance published, from the sidebar. */
   async openReleases(instance: string): Promise<void> {
     await this.intent("Open the instance's releases", async () => {
-      await this.app.chrome.breadcrumb("breadcrumbs.decks");
-      await this.page.getByRole("link", { name: this.t("studio.releases.link"), exact: true }).click();
+      await this.app.chrome.studioSection("releases");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.releases.heading", { instance }) })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.releases.crumb");
     });
@@ -327,16 +332,16 @@ export class Studio extends Screen {
     });
   }
 
-  /** Home lists the drafts, each with its kind and version. */
-  async expectHomeDrafts(drafts: { name: string; kind: "deck" | "course" }[]): Promise<void> {
-    await this.intent("See the drafts on Home", async () => {
-      const panel = this.page.getByRole("region", { name: this.t("studio.drafts.list") });
-      for (const { name, kind } of drafts) {
-        await expect(panel.getByRole("listitem").filter({ hasText: name })).toContainText(
-          this.t("studio.drafts.summary", { kind: this.t(`studio.drafts.kind.${kind}`), version: 1 }),
+  /** The sidebar lists the drafts, these alone, each at version 1. */
+  async expectSidebarDrafts(drafts: string[]): Promise<void> {
+    await this.intent("See the drafts in the sidebar", async () => {
+      const list = this.app.chrome.studioSidebar.getByRole("list", { name: this.t("studio.shell.draftList"), exact: true });
+      for (const name of drafts) {
+        await expect(list.getByRole("listitem").filter({ has: this.page.getByRole("link", { name, exact: true }) })).toContainText(
+          this.t("studio.shell.version", { version: 1 }),
         );
       }
-      await expect(panel.getByRole("listitem")).toHaveCount(drafts.length);
+      await expect(list.getByRole("listitem")).toHaveCount(drafts.length);
     });
   }
 
@@ -476,15 +481,10 @@ export class Studio extends Screen {
     });
   }
 
-  /**
-   * Follows the trail from a card to its deck's cards, then the
-   * workbench's link to the deck's health, whose line counts its
-   * problems.
-   */
+  /** Follows the deck's tab of its health, from any of its screens, whose line counts its problems. */
   async openDeckHealth(deck: string, problems: number): Promise<void> {
     await this.intent(`Open the health of ${deck}`, async () => {
-      await this.page.getByRole("navigation", { name: this.t("breadcrumbs.label") }).getByRole("link", { name: this.t("studio.cards.crumb", { deck }) }).click();
-      await this.page.getByRole("link", { name: this.t("studio.cards.healthLink"), exact: true }).click();
+      await this.app.chrome.studioTab("deck", "health");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.health.deckHeading", { deck }) })).toBeVisible();
       await expect(this.page).toHaveURL(/#\/studio\/health\?instance=.*&deck=/);
       await expect(this.page.getByRole("status").filter({ hasText: /\S/ })).toHaveText(
@@ -516,10 +516,10 @@ export class Studio extends Screen {
     });
   }
 
-  /** Follows Home's link to the instance's health: every deck is listed, these with no problems. */
+  /** Follows the sidebar's link to the instance's health: every deck is listed, these with no problems. */
   async openInstanceHealth(instance: string, healthy: string[]): Promise<void> {
     await this.intent("Open the instance's health", async () => {
-      await this.page.getByRole("link", { name: this.t("studio.decks.healthLink"), exact: true }).click();
+      await this.app.chrome.studioSection("health");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.health.heading", { instance }) })).toBeVisible();
       const decks = this.page.getByRole("region", { name: this.t("studio.health.decksHeading") });
       for (const deck of healthy) {
@@ -531,13 +531,13 @@ export class Studio extends Screen {
   }
 
   /**
-   * Follows Home's link to the instance's library copies: the deck is
+   * Follows the sidebar's link to the instance's library copies: the deck is
    * listed there, copied from the library's current release, so up to
    * date, with nothing to update.
    */
   async openLibraryCopies(instance: string, deck: string): Promise<void> {
     await this.intent("Open the instance's library copies", async () => {
-      await this.page.getByRole("link", { name: this.t("studio.decks.libraryLink"), exact: true }).click();
+      await this.app.chrome.studioSection("library");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.library.heading", { instance }) })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.library.crumb");
       const table = this.page.getByRole("table", { name: this.t("studio.library.caption", { instance }) });
@@ -550,7 +550,7 @@ export class Studio extends Screen {
   /** Follows the inspector's tab of the card's wrong options, which the URL holds. */
   async openWrongOptions(count: number): Promise<void> {
     await this.intent("Open the card's wrong options", async () => {
-      await this.page.getByRole("link", { name: this.t("studio.card.tab.distractors", { count }) }).click();
+      await this.cardTabs.getByRole("link", { name: this.t("studio.card.tab.distractors", { count }) }).click();
       await expect(this.page).toHaveURL(/[?&]tab=distractors/);
       await expect(this.wrongOptions).toBeVisible();
     });
@@ -589,7 +589,7 @@ export class Studio extends Screen {
   /** Follows the inspector's tab of the card's schedule, which the URL holds: the card was studied front to back. */
   async openSchedule(): Promise<void> {
     await this.intent("Open the card's schedule", async () => {
-      await this.page.getByRole("link", { name: this.t("studio.card.tab.schedule") }).click();
+      await this.cardTabs.getByRole("link", { name: this.t("studio.card.tab.schedule"), exact: true }).click();
       await expect(this.page).toHaveURL(/[?&]tab=schedule/);
       await expect(this.scheduleOf("frontToBack").getByRole("term")).toHaveText([
         this.t("studio.schedule.due"),
@@ -605,7 +605,7 @@ export class Studio extends Screen {
   /** Follows the inspector's tab of the card's history: its answers, newest first, each with its grade and how it was given. */
   async openHistory(answers: { grade: string; mode: "recall" | "multiple-choice" }[]): Promise<void> {
     await this.intent("Open the card's history", async () => {
-      await this.page.getByRole("link", { name: this.t("studio.card.tab.history") }).click();
+      await this.cardTabs.getByRole("link", { name: this.t("studio.card.tab.history"), exact: true }).click();
       await expect(this.page).toHaveURL(/[?&]tab=history/);
       const table = this.page.getByRole("table", { name: this.t("studio.history.caption") });
       const rows = table.getByRole("row").filter({ has: this.page.getByRole("cell") });
@@ -618,13 +618,13 @@ export class Studio extends Screen {
   }
 
   /**
-   * Follows the workbench's link to the deck's schedule: its tiles count
+   * Follows the deck's tab of its schedule: its tiles count
    * the reviews today and in the week to come, and the cards studied; it
    * names no leech.
    */
   async openDeckSchedule(deck: string, expected: { today: number; week: number; studied: number }): Promise<void> {
     await this.intent(`Open the schedule of ${deck}`, async () => {
-      await this.page.getByRole("link", { name: this.t("studio.cards.scheduleLink") }).click();
+      await this.app.chrome.studioTab("deck", "schedule");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.insight.heading", { deck }) })).toBeVisible();
       await expect(this.page).toHaveURL(/#\/studio\/schedule\?deck=/);
       const tile = (label: string) => this.page.getByRole("group", { name: label, exact: true }).getByRole("strong");
@@ -700,10 +700,10 @@ export class Studio extends Screen {
     });
   }
 
-  /** Follows Home's link to the instance's name and catalogue. */
+  /** Follows the sidebar's link to the instance's name and catalogue. */
   async openInstance(instance: string): Promise<void> {
     await this.intent("Open the instance's name and catalogue", async () => {
-      await this.page.getByRole("link", { name: this.t("studio.decks.instanceLink") }).click();
+      await this.app.chrome.studioSection("instance");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.instance.heading", { instance }) })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.instance.crumb");
     });

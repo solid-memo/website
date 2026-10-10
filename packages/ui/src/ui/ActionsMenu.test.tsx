@@ -51,6 +51,19 @@ describe("ActionsMenu", () => {
     expect(menu()).toBeNull();
   });
 
+  it("shows a text in place of its icon, when given one, which its name holds", () => {
+    render(
+      <ActionsMenu label="Switch instance: Deck set A" text="Deck set A" buttonClass="switcher" open={false} onOpen={() => undefined} onClose={() => undefined}>
+        <MenuLink href="#/elsewhere">Deck set B</MenuLink>
+      </ActionsMenu>,
+    );
+    const button = screen.getByRole("button", { name: "Switch instance: Deck set A" });
+    expect(button).toHaveTextContent("Deck set A");
+    expect(button).toHaveClass("switcher");
+    expect(button).not.toHaveClass("icon");
+    expect(button.querySelector("svg")).toBeNull();
+  });
+
   it("opens on a press, named by its button and laid over the page, on its first item", () => {
     const { button } = renderMenu();
     fireEvent.click(button);

@@ -19,21 +19,12 @@ import { NewQuestionForm } from "./NewQuestionForm";
 export interface DraftLinks {
   draftsHref: string;
   healthHref: string;
-  overviewHref: string;
   cardsHref: string;
   chapterHref: (chapter: string) => string;
   stepHref: (step: string) => string;
   questionHref: (card: string) => string;
   /** The draft's release check, for a pod. */
   checkHref: string;
-  /** The draft as the library will list it. */
-  previewHref: string;
-  /** The draft played in a sandbox. */
-  trialHref: string;
-  /** The draft against the release it follows. */
-  diffHref: string;
-  /** What the release says of itself beyond its listing, how it was made and from what. */
-  releaseHref: string;
 }
 
 /** The release check of the draft as the overview counts it: its problems, undefined while it runs, or why it did not. */
@@ -54,8 +45,8 @@ export function textOrNull(text: LangText): LangText | null {
  * title, and its id as the id assistant suggests it), and its chapters
  * retired, to restore. Its cards are counted, with a link to their table;
  * a deck's are added here. The release check (for a pod) counts its
- * problems, each chapter's and step's beside it in the outline, and
- * links to the check and the listing preview. A draft released is
+ * problems, each chapter's and step's beside it in the outline (the
+ * draft's tabs go to the check itself). A draft released is
  * shown, frozen. Opened at a field (`field`, from the release check),
  * that field is where the user arrives.
  */
@@ -114,9 +105,6 @@ export function DraftOverviewScreen({
             arrival={field === "description"}
             onSave={(text) => onEdit([{ kind: "setMeta", meta: { description: textOrNull(text) } }], { debounce: true })}
           />
-          <p>
-            <a href={links.releaseHref}>{t("studio.draft.releaseLink")}</a>
-          </p>
         </section>
         {draft.course && (
           <section aria-labelledby="draft-outline-heading">
@@ -168,16 +156,6 @@ export function DraftOverviewScreen({
           ) : (
             <p>{check.problems.length === 0 ? t("studio.draft.problemsNone") : t("studio.draft.problemsCount", { count: check.problems.length })}</p>
           )}
-          <p>
-            <a href={links.checkHref}>{t("studio.draft.problemsLink")}</a> · <a href={links.previewHref}>{t("studio.draft.previewLink")}</a> ·{" "}
-            <a href={links.trialHref}>{t("studio.draft.trialLink")}</a>
-            {draft.root.prev !== undefined && (
-              <>
-                {" · "}
-                <a href={links.diffHref}>{t("studio.draft.diffLink")}</a>
-              </>
-            )}
-          </p>
         </section>
       </DraftScope>
     </section>

@@ -41,13 +41,9 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
       deckHref={(deck) => `#/deck?deck=${deck.id}`}
       cardsHref={(deck) => `#/browse?deck=${deck.id}`}
       appHref="#/decks"
-      groupsHref="#/groups?instance=a"
-      instanceHref="#/instance?instance=a"
       healthHref="#/health?instance=a"
       transferHref={(decks) => `#/transfer?${decks.map((deck) => `deck=${deck.id}`).join("&")}`}
-      draftsHref="#/drafts?instance=a"
       healthBadge={() => null}
-      libraryHref="#/library?instance=a"
       updateBadge={() => null}
       onMove={async () => true}
       onPace={async () => true}
@@ -111,27 +107,22 @@ describe("DeckTableScreen", () => {
       "September 21, 2026",
       "–Could not be read",
     ]);
-    expect(screen.getByRole("link", { name: "Arrange groups" })).toHaveAttribute("href", "#/groups?instance=a");
-    expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", "#/instance?instance=a");
   });
 
-  it("links to the instance's health, and puts each deck's beside its name", () => {
+  it("puts each deck's health beside its name", () => {
     render(<Harness healthBadge={(deck) => <a href={`#/health?deck=${deck.id}`}>Health of {deck.id}</a>} />);
-    expect(screen.getByRole("link", { name: "Health" })).toHaveAttribute("href", "#/health?instance=a");
     const kanjiRow = within(table()).getAllByRole("rowheader")[0]!;
     expect(within(kanjiRow).getByRole("link", { name: "Health of deck-1" })).toHaveAttribute("href", "#/health?deck=deck-1");
   });
 
-  it("links to the instance's library copies, and puts a deck's update beside its name", () => {
+  it("puts a deck's update beside its name", () => {
     render(<Harness updateBadge={(deck) => (deck.url === kanji.url ? <a href="#/library?instance=a">Release 2 out</a> : null)} />);
-    expect(screen.getByRole("link", { name: "Library copies" })).toHaveAttribute("href", "#/library?instance=a");
     const kanjiRow = within(table()).getAllByRole("rowheader")[0]!;
     expect(within(kanjiRow).getByRole("link", { name: "Release 2 out" })).toHaveAttribute("href", "#/library?instance=a");
   });
 
-  it("links to import and export, and exports the selected decks there", () => {
+  it("exports the selected decks in import and export", () => {
     render(<Harness />);
-    expect(screen.getByRole("link", { name: "Import and export" })).toHaveAttribute("href", "#/transfer?");
     select("Verbs");
     select("Kanji N5");
     const bulk = screen.getByRole("group", { name: "Selected decks" });
@@ -334,8 +325,6 @@ describe("DeckTableScreen", () => {
     render(<Harness rows={[]} />);
     expect(screen.queryByRole("table")).toBeNull();
     expect(screen.getByRole("link", { name: "Solid Memo" })).toHaveAttribute("href", "#/decks");
-    expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", "#/instance?instance=a");
-    expect(screen.getByRole("link", { name: "Import and export" })).toHaveAttribute("href", "#/transfer?");
   });
 
   it("names a deck in the reader's language, in Swedish", () => {

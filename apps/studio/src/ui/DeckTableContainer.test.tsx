@@ -26,14 +26,11 @@ function renderContainer(useCases: UseCases) {
         view={{ filter: "" }}
         onView={() => undefined}
         appHref="#/decks"
-        groupsHref="#/groups"
-        instanceHref="#/instance"
         healthHref={(deck) => (deck === undefined ? "#/health" : `#/health?deck=${deck.id}`)}
         libraryHref="#/library"
         transferHref={() => "#/transfer"}
         deckHref={(deck) => `#/deck?deck=${deck.id}`}
         cardsHref={(deck) => `#/browse?deck=${deck.id}`}
-        draftsHref="#/drafts"
       />
     </QueryClientProvider>,
   );

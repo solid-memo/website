@@ -139,14 +139,9 @@ export function courseDraft(): ReleaseDraft {
 export const draftLinks = {
   draftsHref: "#/drafts",
   healthHref: "#/health",
-  overviewHref: "#/draft",
   cardsHref: "#/draft-cards",
   chapterHref: (chapter: string) => `#/chapter/${chapter}`,
   stepHref: (step: string) => `#/step/${step}`,
   questionHref: (card: string) => `#/question/${card}`,
   checkHref: "#/check",
-  previewHref: "#/preview",
-  trialHref: "#/trial",
-  diffHref: "#/diff",
-  releaseHref: "#/release",
 };

@@ -7,11 +7,10 @@ import { Screen } from "./Screen.ts";
  * in the page, with the trial's controls above it.
  */
 export class Trial extends Screen {
-  /** Opens the trial from the draft's overview, reached by the trail: the course's page, ready to start. */
+  /** Opens the trial from the draft's tabs: the course's page, ready to start. */
   async open(draft: string): Promise<void> {
     await this.intent(`Try out ${draft}`, async () => {
-      await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
-      await this.page.getByRole("link", { name: this.t("studio.draft.trialLink") }).click();
+      await this.app.chrome.studioTab("draft", "trial");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.trial.heading") })).toBeVisible();
       await expect(this.page.getByRole("heading", { level: 3, name: this.t("studio.trial.controls") })).toBeVisible();
       await expect(this.page.getByRole("heading", { level: 2, name: draft, exact: true })).toBeVisible();
