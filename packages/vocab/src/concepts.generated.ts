@@ -262,6 +262,18 @@ export const TOPICS = {
       broader: "https://solid-memo.com/ns/vocab/topics.ttl#languages",
     },
     {
+      iri: "https://solid-memo.com/ns/vocab/topics.ttl#japanese",
+      label: { en: "Japanese", de: "Japanisch", es: "Japonés", fr: "Japonais", ko: "일본어", sv: "Japanska" },
+      definition: { en: "The Japanese language.", de: "Die japanische Sprache.", es: "El idioma japonés.", fr: "La langue japonaise.", ko: "일본어.", sv: "Det japanska språket." },
+      broader: "https://solid-memo.com/ns/vocab/topics.ttl#languages",
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/topics.ttl#english",
+      label: { en: "English", de: "Englisch", es: "Inglés", fr: "Anglais", ko: "영어", sv: "Engelska" },
+      definition: { en: "The English language.", de: "Die englische Sprache.", es: "El idioma inglés.", fr: "La langue anglaise.", ko: "영어.", sv: "Det engelska språket." },
+      broader: "https://solid-memo.com/ns/vocab/topics.ttl#languages",
+    },
+    {
       iri: "https://solid-memo.com/ns/vocab/topics.ttl#physics",
       label: { en: "Physics", de: "Physik", es: "Física", fr: "Physique", ko: "물리학", sv: "Fysik" },
       definition: { en: "Matter, energy, forces and their units.", de: "Materie, Energie, Kräfte und ihre Einheiten.", es: "Materia, energía, fuerzas y sus unidades.", fr: "Matière, énergie, forces et leurs unités.", ko: "물질, 에너지, 힘과 그 단위.", sv: "Materia, energi, krafter och deras enheter." },
@@ -341,5 +353,6 @@ export const EU_LANGUAGES: readonly ReferenceConcept[] = [
   { iri: "http://publications.europa.eu/resource/authority/language/DEU", code: "DEU", label: "German" },
   { iri: "http://publications.europa.eu/resource/authority/language/FIN", code: "FIN", label: "Finnish" },
   { iri: "http://publications.europa.eu/resource/authority/language/POR", code: "POR", label: "Portuguese" },
+  { iri: "http://publications.europa.eu/resource/authority/language/JPN", code: "JPN", label: "Japanese" },
   { iri: "http://publications.europa.eu/resource/authority/language/KOR", code: "KOR", label: "Korean" },
 ];

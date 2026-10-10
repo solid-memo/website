@@ -84,6 +84,12 @@
     skos:prefLabel "Portuguese"@en ;
     skos:inScheme <http://publications.europa.eu/resource/authority/language> .
 
+<http://publications.europa.eu/resource/authority/language/JPN>
+    a skos:Concept ,
+      dcterms:LinguisticSystem ;
+    skos:prefLabel "Japanese"@en ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
 <http://publications.europa.eu/resource/authority/language/KOR>
     a skos:Concept ,
       dcterms:LinguisticSystem ;

@@ -1,0 +1,1773 @@
+@base <https://solid-memo.com/decks/korean-basics/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Basic Korean"@en ,
+                  "Grundläggande koreanska"@sv ,
+                  "기초 한국어"@ko ,
+                  "Koreanisch für Anfänger"@de ,
+                  "Coreano básico"@es ,
+                  "Coréen de base"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "125 basic Korean words and phrases for beginners: the numbers 0–20, the tens and 100, the days of the week, the months, eight colours, family members, greetings and polite phrases, everyday nouns, nine adjectives, 14 verbs, and 있다 and 없다 (to exist or have, and not to). The front shows the Korean word in Hangul, without romanization: verbs and adjectives in their dictionary form in -다, greetings and polite phrases in their standard polite form, with the informal 안녕 beside them, numbers in the Sino-Korean system (일, 이, 삼), with the native Korean number in a note. The back gives its meaning in English, Swedish, German, Spanish and French, or the digits for a number. Words from Wikidata's lexemes and items and the US Foreign Service Institute's Korean Basic Course (public domain); meanings from Wikidata where it has them and otherwise the authors' own, written with the help of AI; all checked against English Wiktionary."@en ,
+                        "125 grundläggande koreanska ord och fraser för nybörjare: talen 0–20, tiotalen och 100, veckodagarna, månaderna, åtta färger, familjemedlemmar, hälsningar och artighetsfraser, vardagliga substantiv, nio adjektiv, 14 verb samt 있다 och 없다 (att finnas eller ha, och motsatsen). Framsidan visar det koreanska ordet med hangul, utan latinsk transkription: verb och adjektiv i grundform på -다, hälsningar och artighetsfraser i sin vanliga artiga form, med det vardagliga 안녕 bredvid, tal i det sinokoreanska systemet (일, 이, 삼) med det inhemska koreanska räkneordet i en anteckning. Baksidan ger betydelsen på engelska, svenska, tyska, spanska och franska, eller siffrorna för ett tal. Ord från Wikidatas lexem och objekt och amerikanska Foreign Service Institutes Korean Basic Course (fri från upphovsrätt); betydelser från Wikidata där sådana finns och annars författarnas egna, skrivna med hjälp av AI; allt kontrollerat mot engelska Wiktionary."@sv ,
+                        "초보자를 위한 기초 한국어 단어와 표현 125개로, 0–20의 수, 십 단위 수와 100, 요일, 달, 색 여덟 가지, 가족 구성원, 인사와 예의 표현, 일상 명사, 형용사 아홉 개, 동사 14개, 그리고 ‘있다’와 ‘없다’가 있습니다. 앞면에는 로마자 표기 없이 한글로 쓴 한국어 단어가 있습니다. 동사와 형용사는 ‘-다’로 끝나는 기본형, 인사와 예의 표현은 표준 존댓말(반말 ‘안녕’ 하나 포함), 수는 한자어 수(일, 이, 삼)이며 고유어 수는 메모에 있습니다. 뒷면에는 영어, 스웨덴어, 독일어, 스페인어, 프랑스어 뜻이나 수의 경우 숫자가 있습니다. 단어는 위키데이터의 렉심과 항목, 미국 국무부 외교연수원(Foreign Service Institute)의 Korean Basic Course(퍼블릭 도메인)에서 가져왔고, 뜻은 위키데이터에 있으면 위키데이터에서, 없으면 저자들이 AI의 도움을 받아 직접 썼으며, 모두 영어 위키낱말사전에서 확인했습니다."@ko ,
+                        "125 grundlegende koreanische Wörter und Wendungen für Anfänger: die Zahlen 0–20, die Zehner und 100, die Wochentage, die Monate, acht Farben, Familienmitglieder, Grüße und Höflichkeitsformeln, Alltagssubstantive, neun Adjektive, 14 Verben sowie 있다 und 없다 (vorhanden sein oder haben, und das Gegenteil). Die Vorderseite zeigt das koreanische Wort in Hangul, ohne Umschrift: Verben und Adjektive in der Grundform auf -다, Grüße und Höflichkeitsformeln in ihrer üblichen höflichen Form, dazu das umgangssprachliche 안녕, Zahlen im sinokoreanischen System (일, 이, 삼), das einheimisch-koreanische Zahlwort in einer Anmerkung. Die Rückseite gibt die Bedeutung auf Englisch, Schwedisch, Deutsch, Spanisch und Französisch an, bei einer Zahl die Ziffern. Wörter aus den Lexemen und Datenobjekten von Wikidata und dem Korean Basic Course des US Foreign Service Institute (gemeinfrei); Bedeutungen aus Wikidata, wo es sie gibt, sonst von den Autoren selbst, mit Hilfe von KI geschrieben; alles abgeglichen mit dem englischen Wiktionary."@de ,
+                        "125 palabras y frases básicas en coreano para principiantes: los números del 0 al 20, las decenas y el 100, los días de la semana, los meses, ocho colores, miembros de la familia, saludos y frases de cortesía, sustantivos cotidianos, nueve adjetivos, 14 verbos, y 있다 y 없다 (haber o tener, y lo contrario). El anverso muestra la palabra coreana en hangul, sin romanización: verbos y adjetivos en su forma de diccionario en -다, saludos y frases de cortesía en su forma cortés habitual, junto al informal 안녕, números en el sistema sinocoreano (일, 이, 삼), con el numeral coreano nativo en una nota. El reverso da su significado en inglés, sueco, alemán, español y francés, o las cifras en el caso de un número. Palabras de los lexemas y elementos de Wikidata y del Korean Basic Course del Foreign Service Institute de EE. UU. (de dominio público); significados de Wikidata cuando los tiene y, si no, de los propios autores, escritos con ayuda de IA; todo comprobado con el Wikcionario en inglés."@es ,
+                        "125 mots et expressions de base en coréen pour débutants : les nombres de 0 à 20, les dizaines et 100, les jours de la semaine, les mois, huit couleurs, les membres de la famille, salutations et formules de politesse, noms courants, neuf adjectifs, 14 verbes, et 있다 et 없다 (exister ou avoir, et le contraire). Le recto montre le mot coréen en hangeul, sans romanisation : verbes et adjectifs à la forme du dictionnaire en -다, salutations et formules de politesse dans leur forme polie usuelle, avec le familier 안녕, nombres dans le système sino-coréen (일, 이, 삼), avec le nombre coréen natif dans une note. Le verso donne son sens en anglais, en suédois, en allemand, en espagnol et en français, ou les chiffres pour un nombre. Mots tirés des lexèmes et éléments de Wikidata et du Korean Basic Course du Foreign Service Institute des États-Unis (domaine public) ; sens tirés de Wikidata quand il les a et sinon rédigés par les auteurs avec l'aide de l'IA ; le tout vérifié dans le Wiktionnaire anglais."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://archive.org/details/Fsi-KoreanBasicCourse-StudentText> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:korean ;
+    dcat:keyword "Korean"@en ,
+                 "vocabulary"@en ,
+                 "beginners"@en ,
+                 "phrases"@en ,
+                 "koreanska"@sv ,
+                 "ordförråd"@sv ,
+                 "nybörjare"@sv ,
+                 "fraser"@sv ,
+                 "한국어"@ko ,
+                 "어휘"@ko ,
+                 "초보자"@ko ,
+                 "표현"@ko ,
+                 "Koreanisch"@de ,
+                 "Wortschatz"@de ,
+                 "Anfänger"@de ,
+                 "Redewendungen"@de ,
+                 "coreano"@es ,
+                 "vocabulario"@es ,
+                 "principiantes"@es ,
+                 "frases"@es ,
+                 "coréen"@fr ,
+                 "vocabulaire"@fr ,
+                 "débutants"@fr ,
+                 "expressions"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#korean-basics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#korean-basics> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review round below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://archive.org/details/Fsi-KoreanBasicCourse-StudentText> ,
+              <https://en.wiktionary.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review round and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled. The dossier's per-card evidence and Wikidata checks, its numbered queries and API calls (its Queries section), the scripts that ran them and its log of discrepancies are not part of this release; where the text refers to them, to the dossier or to findings listed below, it means that record. The builder is the script that built the deck from the dossier's card list and ran its Wikidata checks. The deck was compiled by an AI agent working for Anton Wiklund; the research, the writing of the cards and the four review rounds below (the compiling agent's own round 0 and three independent reviews, each done by a separate AI agent) were done by AI agents and by machines, and no person has reviewed the cards."@en ,
+                 "The cards were checked by machine (live Wikidata, English Wiktionary's definitions and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Word list. A list of 125 words and phrases for a first Korean course was drawn up by the AI agent (not taken from a list) from the library editor's brief (numbers 0–20, the tens and 100; days; months; eight colours; eight family members; about twelve greetings and polite phrases; everyday nouns, adjectives and verbs), choosing the most basic, standard word for each concept and following the library's other basics decks where the languages allow. No frequency list, textbook word list or dictionary list was copied; the library's Korean noun, adjective and verb decks were read only for their conventions (dictionary forms in -다, Hangul only, card ids) and for the licences of their sources."@en ,
+                 "Numbers. Korean has two sets of numbers. The cards use the Sino-Korean numbers (영, 일, 이, 삼 … 십, 이십 … 백), because only they run without a gap from 0 to 100 (the native numbers have no everyday words for 0 and 100), and because they are the ones used in the deck's own months (일월 … 십이월) as well as for dates, money, telephone numbers and minutes. Each card's note gives the native Korean number (하나, 둘, 셋 … 열, 스물 … 아흔) from Wikidata's numeral lexemes (L701012, L992182 …) and the Korean aliases of the number items (열하나 … 열아홉 for 11–19), which the FSI course confirms (its glossary marks each numeral Num Ch or Num K); 100 has no note. The notes on 1–4 also give the short form of the native number before a counter (한, 두, 세, 네), from the FSI course's Unit 4 grammar note 6 (\"When the numbers of Korean origin are used as modifiers, the final sounds of the first four are dropped, thus making hana 'one' han, tul 'two' tu, ses 'three' se, nes 'four' ne\"); the course gives no such form for 20 (스무), so its card has none."@en ,
+                 "Wikidata lexemes. SPARQL query 1 fetched every Korean lexeme (language Q9176) whose lemma is one of 201 candidate forms (the cards, the native numbers and alternatives such as 엄마, 형, 년, 늙다), with its lexical category, senses, English and Korean glosses and sense items (P5137); query 1b added 48 more forms. They found lexemes for the numbers 1–10, the tens and 100 (none for 영 or 십일–십구, whose cards cite items only), the days, months, 네, 아니요, 안녕, 안녕하다, 괜찮다, 사람, 여자, 개, 고양이, 물, 학교, 우유, 길, 좋다, 없다, 있다, 하다, 가다, 먹다, 마시다, 보다 and 알다; the lexeme search (API calls 2) found none for 집, 책, 빵 or 사과, and most everyday Korean nouns, verbs and adjectives have no lexeme. The full JSON of the 82 lexemes used was fetched with API calls 3. The English sense glosses of 먹다 (L17), 마시다 (L154), 가다 (L204), 하다 (L226), 알다 (L148) and 보다 (L132, \"see; look at\") give those cards' English backs (the gloss without its explanation in brackets). Query 7 looked for lexemes in other languages whose senses translate (P5972) one of these Korean senses: it found five (English see, watch and notice, an Akkadian word for water and Czech škola), none in the deck's other languages but English, whose glosses agree with the cards."@en ,
+                 "Wikidata items. The items linked from the senses and items found with the item search in Korean and English (API calls 6) and by Korean label (query 8) were fetched with API calls 5 (labels and aliases in ko, en, sv, de, es, fr and mul). They give the Korean word for numbers (as aliases), days, colours, family members and everyday things, and the English, Swedish, German, Spanish and French names of days, months, colours, family members and things, the mul digit label of each number, and the greetings thank you (Q19279214: 감사합니다, alias 고맙습니다), yes (Q6452715), no (Q1814990) and telephone hello (Q12835706: 여보세요)."@en ,
+                 "The FSI course. The Internet Archive was searched for public-domain US Government Korean courses (call 9). It found the Foreign Service Institute's Korean Basic Course, Volume 1 (B. Nam Park, 1968), whose OCR text and scanned pages were downloaded (calls 10 and 11). The OCR text has the romanized Korean and the English but no Hangul, so the pages of the Korean-English Glossary (pp. 488–550) were fetched as images from the Internet Archive's page server and read directly; each glossary entry gives the word in FSI's transcription, in Hangul and in English with the unit where it occurs. The glossary is the content source for the Hangul and the meaning of the verbs and adjectives that have no lexeme (크다, 작다, 나쁘다, 많다, 비싸다, 춥다, 덥다, 오다, 자다, 사다, 읽다, 쓰다, 말하다, 살다, 좋아하다, and the meaning of 맛있다, for which it gives the phrase 맛이 있다), for the Hangul of the polite phrases it prints (the formal 안녕하십니까, 안녕히 가십시오 and 안녕히 계십시오, given in the notes, and 감사합니다, 고맙습니다, 미안합니다, 실례합니다, 괜찮습니다, 여보세요, 네, 아니요) and for 아이; it confirms most other words. The sense \"to have\" of 있다 is from the glossary (p. 503: Yələ kaci ka issɨmnita. 여러 가지가 있습니다. \"[We] have several kinds.\") and Unit 2's grammar notes (a nominal + i/ka + issɨmnita after a personal noun \"occurs to express that the personal noun has or possesses the nominal\": Na nɨn chæk i issɨmnita. 'I have a book.'). The OCR text was searched with grep for the notes on dialogues and the drills (call 12): Unit 1's notes on the greetings, Unit 4's Informal Polite Speech and its drill Annyəng-hase yo?, Unit 16's 공 in a telephone number and its Annyənghi kyese yo. Five fronts are not printed as they stand by any content source, and were obtained as follows. 안녕하세요: FSI prints only the formal 안녕하십니까 in Hangul and the -세요 form romanized (Unit 4 drill R, Annyəng-hase yo?); the Hangul is the authors' transcription. 안녕히 계세요: likewise from FSI's romanized Annyənghi kyese yo. (Unit 16) beside its Hangul 안녕히 계십시오. 안녕히 가세요: FSI has neither its Hangul nor its romanization; it is the authors' formation of FSI's 안녕히 가십시오 with the -세요 ending of the course's drills (kase yo), so only a verification source, English Wiktionary (\"goodbye\"), attests the form itself. 맛있다: FSI's glossary (p. 523) gives the phrase 맛이 있다 (mas i iss-ta, printed 맛이있다), and Wikidata has no lexeme; the one-word 맛있다 is the standard spelling, written by the authors and checked against English Wiktionary. 초록색: the authors' compound of the Korean label 초록 of green (Q3133) and 색 'colour' (the Korean label of Q1075; FSI sæk \"color\"), checked against English Wiktionary. These are facts of the language, so they do not affect the licence."@en ,
+                 "Writing the cards. The front is the Korean word in Hangul only, with no romanization or hanja: nouns in their bare form, verbs and adjectives in the dictionary form in -다 (the form of the lexeme lemma and of FSI's glossary), days and months as words (월요일, 일월), colours as nouns in -색 (빨간색), and the greetings and polite phrases in the standard polite forms of today: the informal polite -세요 forms 안녕하세요, 안녕히 가세요 and 안녕히 계세요, and the formal polite 감사합니다, 고맙습니다, 미안합니다, 실례합니다 and 괜찮습니다. The back gives one text per language: the English, Swedish, German, Spanish and French meaning, or the digits for a number, tagged zxx (text in no language). Where a Wikidata item's label or alias is the everyday word, or a Korean lexeme's English sense gloss gives the meaning, the back uses it (317 of the 480 backs in the five languages are, wholly or in part, a Wikidata label, alias or gloss); the backs keep the deck's typographic apostrophe (aujourd’hui) and capitalize German colour nouns (Schwarz) where the label differs only in that; otherwise the meaning is the authors' own rendering, written with the help of AI, from the English gloss of the lexeme or of FSI's glossary, and checked in English Wiktionary. A Korean verb or adjective is rendered as a verb in every language (to be big, att vara stor, groß sein, ser grande, être grand), since Korean adjectives are verbs. Where one word in another language does not cover the Korean, two are given (집: house, home; 길: road, way; 밥: cooked rice, meal), and the greetings for leaving say who is leaving. Swedish writes days and months in lower case. Every text is tagged with its language: the front ko, the backs and notes en, sv, de, es and fr, digits zxx."@en ,
+                 "Card ids are the letter-by-letter Revised Romanization of the Hangul, syllable by syllable and without hyphens or sound changes (사람 saram, 좋다 jotda, 좋아하다 jotahada, 실례합니다 silryehapnida, 안녕하세요 annyeonghaseyo, 감사합니다 gamsahapnida), the rule of the library's Korean decks; they are addresses, not shown as text."@en ,
+                 "Notes. A short note, in all five languages, was added where it helps a beginner and a content source confirms it: the native Korean number on every number from 1 to 90; 공 for zero (FSI: kong \"zero\", and 3-6503 read sam e yuk o kong sam); other words spelt like 일 (work, and day in dates), 이 (this, tooth) and 팔 (arm), from FSI's glossary and the lexemes L744807, L131 and L328; the digit form of each month (1월 …, the Korean labels of the month items) and why 유월 and 시월 drop a letter (the forms are Wikidata aliases and lexeme lemmas; the explanation is the authors'); other names for six colours (빨강, 파랑, 초록, 녹색, 노랑, 검정, 까만색, 하얀색: Wikidata labels and aliases and FSI); 엄마 and 아빠 (Wikidata aliases, FSI); 부인 for someone else's wife (FSI: puin \"lady, your wife\"); the more formal forms of the greetings and their literal sense, “go in peace”, “stay in peace” (FSI: annyəng \"peace\", annyənghi \"peacefully\", kasipsiyo, kyesipsiyo); the uses of 안녕 (meeting and parting: the lexeme's gloss; that it is informal, among friends, is the authors' own knowledge, confirmed only by English Wiktionary), 실례합니다, 여보세요, 네 and 아니요 (FSI's notes on dialogues); 미안합니다 also acknowledging that someone has gone to trouble for you (the authors' modern wording of FSI's Unit 1 note 21, which says it also expresses \"thanks immediately upon receiving something\", a 1968 usage stated too broadly for today); 괜찮습니다 as the answer to an apology (FSI note 28) and as a polite \"no, thank you\" (the authors' addition, within FSI's gloss \"That's OK\"); 감사합니다 and 고맙습니다 interchangeable (FSI Unit 2 note 8-18, \"freely interchangeable\"), with the authors' addition that 감사합니다 is a little more formal; the short forms 한, 두, 세, 네 before a counter (FSI Unit 4 grammar note 6); 사과 also meaning apology (item Q13197791); 어린이 beside 아이 (the label of Q7569); 키가 크다, 나이가 많다, 차다 beside 춥다 and 뜨겁다 beside 덥다 (FSI); the other senses of 쓰다 (FSI); and 춥다 and 덥다 of the weather or of how one feels (FSI chup-ta \"is cold\", təp-ta \"is hot\", with 차다 and 뜨겁다 for things). Notes are the authors' own wording."@en ,
+                 "Cross-checking. Every Korean front, and every word of the Swedish, German, Spanish and French backs, was looked up in English Wiktionary's definitions (calls 13, the REST API, the section of that language), and the card's English meaning looked for in the definitions. All 125 fronts have a Korean entry (a phrase in -합니다 or -습니다 under its dictionary form), and 124 have the card's meaning in a definition; the one that has not, 실례합니다, is defined by its literal sense, \"to be rude\", which the note gives. 452 of the 452 words of the other backs have an entry in their language, 433 with the English meaning; the other 19 were read one by one by the agent and agree (inflected forms such as kallt and varmt, near-synonyms such as zahlreich and numeroso, phrases such as ingen fara looked up by one word, and a Wiktionary page that did not render). Wiktionary also confirms that 아니오, the Korean label of Wikidata's no (Q1814990), is a misspelling of 아니요."@en ,
+                 "Dictionaries not used. The library's Korean decks took their meanings from the Basic Korean Dictionary (krdict, CC BY-SA 2.0 KR) and their ranking from the National Institute of Korean Language's frequency survey (Korea Open Government Licence type 1, attribution). Neither licence allows content in a CC0 deck, so neither was consulted, nor the Standard Korean Language Dictionary; Korean Wiktionary and Folkets lexikon were not consulted either. English Wiktionary, whose licence allows automated use, verified the cards. The FSI course's Volume 2 was downloaded but not used."@en ,
+                 "Machine checks. The dossier's Wikidata checks (562 checks on 105 cards, against 96 items and 82 lexemes: the Korean label or alias of each linked item that matches the front, or for a month the digit label in its note; the English, Swedish, German, Spanish and French labels or aliases that match the back, wholly or in part; the mul digit label of each number; the Korean aliases and native numeral lexemes behind the number notes; the labels and lemmas behind the other notes; the head of the lexeme's English sense gloss behind six English backs; and the lemma of every cited lexeme; where Wikidata's text differs from the card's only in case or apostrophe style, as Schwarz beside the label schwarz and the card's aujourd’hui, with a typographic apostrophe, beside the label aujourd'hui, the check quotes Wikidata's text exactly) are re-run against live Wikidata by the builder on every build. Where a label does not match the card, no check was added and the difference is listed in the dossier's discrepancies (for example the item labels 남성, 여성, 어린이, 명칭 and 도로 beside the aliases 남자, 여자, 이름 and 길; 초록 for 초록색; the Swedish labels förälders far and förälders mor). The 20 cards that cite no Wikidata entity (16 verbs and adjectives and four polite phrases) rest on the FSI course. The built deck was validated with the library checker (the app's SHACL shapes, DCAT-AP and the library's rules)."@en ,
+                 "Excluded: brother and sister, since Korean names them by age and by the speaker's sex (형, 오빠, 누나, 언니, 동생; FSI glosses them so), so husband and wife take their places; 책상 (FSI: table, desk) and 싸다 (cheap, but also to wrap), to keep one sense per card; 처음 뵙겠습니다, 죄송합니다 and the copula 이다, for which no CC0 or public-domain source gives the modern form or which are grammar rather than vocabulary; old and new (늙다 for people, 오래되다 for things; 새 is a determiner) and warm, which have no single basic word; day, night, week and year (날, 밤, 주, 해, 년), which are bound nouns or spelt like other words (밤 also chestnut, 해 also sun); the native numbers as cards (they are in the notes); and the colour adjectives 빨갛다, 파랗다, 노랗다, 까맣다 and 하얗다, since the colours are nouns in -색 on the cards."@en ,
+                 "Selection: 125 cards: the cardinal numbers 0–20, the tens 30–90 and 100, in the Sino-Korean system (29); the seven days of the week; the twelve months; eight colours (빨간색, 파란색, 초록색, 노란색, 검은색, 흰색, 회색, 갈색); eight family members (어머니, 아버지, 아들, 딸, 할아버지, 할머니, 남편, 아내); twelve greetings and polite phrases (안녕하세요, 안녕, 안녕히 가세요, 안녕히 계세요, 감사합니다, 고맙습니다, 미안합니다, 실례합니다, 괜찮습니다, 여보세요, 네, 아니요); 24 everyday nouns (사람, 남자, 여자, 아이, 친구, 이름, 집, 학교, 물, 밥, 빵, 우유, 사과, 책, 의자, 문, 창문, 개, 고양이, 길, 돈, 손, 오늘, 내일); nine adjectives (크다, 작다, 좋다, 나쁘다, 많다, 비싸다, 춥다, 덥다, 맛있다); 있다 and 없다 (to be there, to exist, to have, and their negation; 없다 is an adjective in Korean grammar and 있다 both a verb and an adjective, so they are counted apart); and 14 verbs (하다, 가다, 오다, 먹다, 마시다, 보다, 자다, 사다, 읽다, 쓰다, 말하다, 살다, 알다, 좋아하다). The list was chosen by the deck's authors for a first course, not copied from any frequency list, textbook or dictionary. The deck is studied front to back only: some backs are the same in a language (감사합니다 and 고맙습니다 are both thank you), so the reverse direction would be ambiguous."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from two sources whose terms allow any reuse: Wikidata's lexemes and items (CC0 1.0: Korean lemmas, labels and aliases, glosses, and the English, Swedish, German, Spanish and French labels) and the Foreign Service Institute's Korean Basic Course, Volume 1 (1968), a work of the United States Government with no copyright protection under 17 U.S.C. § 105 (the Hangul and meaning of the verbs, adjectives and polite phrases without a Wikidata entry, and the facts behind most notes). Section 105 applies in the United States; what the deck takes from the course is the Korean form and English meaning of single words and standard phrases and such facts of usage, which are not protectable expression anywhere, so the deck's CC0 dedication does not depend on § 105 applying outside the US. The selection of words is the authors' own. The meanings not taken from Wikidata are the authors' own renderings, written with the help of AI. Fourteen of their English backs are word for word in one of English Wiktionary's definitions of the Korean word (person, to be big, to be small, to be good, to be bad, to be hot, to come, to sleep, to buy, to read, to write, to live, to like, I’m sorry) and several others are close (goodbye, hello on the telephone, cooked rice, to be many, to be expensive, to be cold, to be delicious, to speak, to be somewhere, to exist, to have); each of them follows the public-domain gloss of the FSI course (salam \"person\", khɨ-ta \"is big\", cak-ta \"is small\", coh-ta \"is good\", nappɨta \"is bad\", təp-ta \"is hot\", o-ta \"comes\", ca-ta \"sleeps\", sa-ta \"buys\", ilk-ta \"reads\", ssɨ-ta \"writes\", sa(l)-ta \"lives\", cohaha-ta \"likes\", Mianhamnita \"I'm sorry\"; for the close ones, among others, ka-ta \"goes\" with annyənghi \"peacefully\", Yəpose yo \"Hello there!\", pap \"rice (cooked), meal\", iss-ta \"exists, is\" and \"have\"), rendered in the deck's to-form; #bap and #manda are also close to the library's Korean noun and adjective decks (CC BY-SA), whose meanings were not used, and follow FSI too (pap \"rice (cooked), meal\", manh-ta \"is plenty, are many\"). They are the same short stock glosses that English Wiktionary gives, but single words and fixed greetings such as \"thank you\" or \"hej då\" are facts of usage, not protectable expression, so this does not carry Wiktionary's licence into the deck; no definition, example or list was taken from it. English Wiktionary (CC BY-SA 4.0) was used for verification only. So no source requires attribution or share-alike for the deck, although all are credited in its provenance. Quotations from English Wiktionary in the dossier are © Wiktionary contributors, CC BY-SA 4.0, and are not covered by the deck's CC0 dedication; quotations from the FSI course are in the public domain; Wikidata data is CC0."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks"@en ;
+    rdfs:comment "Scope: All 125 cards: every Korean form, meaning in the five back languages and note against the content sources (Wikidata, the FSI course) and English Wiktionary; the licence evidence of the three sources; a re-run of the builder's Wikidata checks against live Wikidata on 10 October 2026; the library checker. Done by the AI agent that compiled the deck and by machines; not a human review."@en ,
+                 "Outcome: Every card has evidence from a content source: 105 cards cite Wikidata and the other 20 the FSI course, which also confirms most of the 105. English Wiktionary has every front and every word of the other backs. The re-run of the Wikidata checks covered every card that cites Wikidata: 562 checks on 105 cards, against 96 items and 82 lexemes; they all pass. The library checker reports the deck valid. Discrepancies between the sources (Wikidata's label 아니오 for no, FSI's older spelling 설흔 for 서른, FSI's formal greetings beside today's -세요 forms, item labels that are not the everyday word) and how they were resolved are listed in the dossier."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 125 cards (every front, every back in the five languages and every note) against live Wikidata (every cited item and lexeme fetched again, every Wikidata check in the dossier re-run, and a SPARQL query for Korean lexemes of the words the record says have none), the FSI course's Volume 1 (the OCR text of the notes cited and the scanned glossary pages) and the library's other basics decks. Done by an AI agent working independently of the compiling agent; not a human review."@en ,
+                 "Outcome: No errors: the numbers, days, months, colours, family words and nouns and their meanings were found correct, every Wikidata check passed, and the words said to have no Korean lexeme have none. Two warnings, both applied: the evidence for 있다 “to have” cited the wrong page and a different expression (가져 있다, “to be holding”), and now cites FSI p. 503 (여러 가지가 있습니다, “[We] have several kinds”) and Unit 2's grammar note on possession (“I have a book”); for 맛있다 the record now says that FSI gives the phrase 맛이 있다 and that the one-word spelling is the authors', checked against English Wiktionary. Suggestions applied: the Swedish, German, Spanish and French backs of 춥다 and 덥다 now cover feeling cold or hot as well as the weather (att frysa, frieren, tener frío, avoir froid and their counterparts), and the Swedish and German notes were clarified; the note on 미안합니다, which reflected FSI's 1968 usage, was softened; the note on 괜찮습니다 adds the polite “no, thank you”; the notes on 감사합니다 and 고맙습니다 add, as the authors' own addition, that 감사합니다 is a little more formal; the descriptions and the selection no longer count 있다 and 없다 among the verbs (없다 is an adjective in Korean grammar) and name them apart; the German notes on the two goodbyes use the polite Sie; the English backs of 먹다, 마시다, 가다, 하다, 알다 and 보다 are credited to their lexemes' Wikidata glosses, which the builder now checks; the Wikidata checks quote the label exactly where it differs from the card only in apostrophe style (aujourd'hui) or case; and the notes on 1–4 give the forms 한, 두, 세, 네 before a counter, from FSI's Unit 4 grammar note 6. Declined: the form 스무 for 20, since no CC0 or public-domain source found gives it (FSI says the other numbers do not change); and crediting the back of 안녕 to the gloss of L747234, which describes the greeting (“friendly greeting both in meeting and in parting”) rather than rendering it; the note's meeting-and-parting fact is credited to that gloss."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 125 cards, line by line (the Korean front, the five backs and the five notes), and the deck's titles, descriptions and keywords in all six languages, the language tags and the study direction, compared with the library's basics decks and Korean decks, the FSI course's notes as quoted in the dossier and live Wikidata. Done by an AI agent working independently of the compiling agent; not a human review."@en ,
+                 "Outcome: No errors: the Korean spelling and spacing, the tags (ko, zxx and one tag per back and note), the ids and the counts were found correct. Four warnings, all applied: the descriptions in all six languages now say that the polite phrases are in their standard polite form, with the informal 안녕, rather than that all greetings are; the backs of 많다 now read viel sein, zahlreich sein; ser numeroso, haber mucho; être nombreux, être en grande quantité (a verb phrase in the être pattern of the other French backs, in place of the reviewer's “(il y en a) beaucoup”); the note on 미안합니다 was softened, as in review 1; and the Swedish and German notes on 춥다 and 덥다 were rewritten (när man fryser, när man själv är varm, wenn einem kalt ist, wenn einem heiß ist). Suggestions applied: the Swedish backs att vara kallt (om vädret), att frysa and att vara varmt (om vädret), att vara varm; 없다 as not to be (somewhere), not to exist; not to have, with the same change in Swedish, Spanish and French; the German notes on the goodbyes in the polite Sie; the note on 괜찮습니다 now gives the answer to an apology and the polite “no, thank you”, and no longer the answer to thanks; the Spanish back of 여보세요 aló, diga (al teléfono), since aló alone is Latin American; slutkonsonant in the Swedish notes on 유월 and 시월; the note on 감사합니다 being a little more formal; je suis désolé(e); marron, brun for brown in French (the alias and the label of Q47071); the English notes in double quotation marks, as the template decks write them; the Korean description's 미국 국무부 외교연수원 and 위키낱말사전에서 확인했습니다; and 일 meaning “day” in dates (3일). Declined: none."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 125 cards against the dossier, the working files and live sources: the licence evidence of the three sources (Wikidata:Licensing, the English Wiktionary footer, the Internet Archive metadata, the FSI title page and preface, 17 U.S.C. § 105), a live re-run of the Wikidata checks and of the claims that words have no Korean lexeme, every FSI-only gloss and greeting form in the OCR text, the Wiktionary cross-check counts, the AI-written English backs against English Wiktionary and the library's CC BY-SA Korean decks, the card ids against the library's Korean decks, the metadata against the template decks, and the attribution and review wording. Done by an AI agent working independently of the compiling agent; not a human review."@en ,
+                 "Outcome: The CC0 decision, the three source records, the attribution comments and the metadata were found correct, and nothing in the record claims that a person reviewed the deck. Four warnings, all applied: the ids of 좋아하다 and 실례합니다 broke the library's letter-by-letter rule and are now #jotahada and #silryehapnida (as korean-verbs has jotahada, nolrada and dalrida); the record called FSI or Wikidata the source of five fronts that neither prints as they stand, and now says how 안녕하세요, 안녕히 가세요, 안녕히 계세요, 맛있다 and 초록색 were obtained, and that FSI's glossary gives the formal greetings; and “by hand” was replaced by the agent's work, since no person took part. Suggestions applied: the AI-written English backs that match English Wiktionary are named in its source record and in the licensing paragraph, with the FSI glosses they follow (the backs of 보다, 먹다 and four other verbs are now credited to Wikidata's lexeme glosses instead, see review 1); the FSI record's creator names its editor, Augustus A. Koski; the lexeme paragraph says the lexemes cover 1–10, the tens and 100, not 0 or 11–19; the check on 오늘 quotes Wikidata's aujourd'hui exactly; the dossier's list of Wiktionary misses is now generated from the cross-check results (it had left out sv mat and counted de da once); and the register of 안녕 is given as the authors' knowledge, confirmed only by English Wiktionary. Declined: none."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata (Korean lexemes and items)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Content: Korean lemmas, labels and aliases, glosses, and the labels in English, Swedish, German, Spanish and French and the digit labels. https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://archive.org/details/Fsi-KoreanBasicCourse-StudentText>
+    dcterms:title "Korean Basic Course, Volume 1 (Foreign Service Institute, 1968), as scanned on the Internet Archive" ;
+    dcterms:creator "B. Nam Park; edited by Augustus A. Koski; Foreign Service Institute, U.S. Department of State" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "Content: the Hangul and English meaning of verbs, adjectives and polite phrases, and the facts behind most notes, from the Korean-English Glossary (pp. 488–550, read in the scanned pages) and the notes on dialogues. A work of the United States Government: the title page reads \"B. Nam Park … Foreign Service Institute, Washington, D.C. 1968\" and \"For sale by the Superintendent of Documents, U.S. Government Printing Office\", and the preface says \"B. Nam Park, supervisor of Korean language instruction at FSI, is the principal author of the text\" and that the course was prepared with FSI's staff and the financial assistance of the U.S. Office of Education. 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The Internet Archive item's metadata (https://archive.org/metadata/Fsi-KoreanBasicCourse-StudentText) gives licenseurl \"http://creativecommons.org/licenses/publicdomain/\". Recorded here with the Public Domain Mark: free of known copyright."@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (Korean, Swedish, German, Spanish and French entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Verification only; no content was taken from it. Fourteen of the authors' English backs are word for word in one of its definitions of the Korean word (#saram, #keuda, #jakda, #jotda, #nappeuda, #deopda, #oda, #jada, #sada, #ikda, #sseuda, #salda, #jotahada, #mianhapnida) and ten are close (#annyeonghigaseyo, #annyeonghigyeseyo, #yeoboseyo, #bap, #manda, #bissada, #chupda, #matitda, #malhada, #itda); all follow the FSI course's public-domain glosses and are stock glosses, not taken from Wiktionary. https://en.wiktionary.org/wiki/사람 — page footer: \"Definitions and other text are available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.\", linking to https://creativecommons.org/licenses/by-sa/4.0/."@en .
+
+<#yeong>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "영"@ko ;
+    solid-memo:back "0"@zxx ;
+    solid-memo:backNote "Also 공, as when reading out a telephone number."@en ,
+                        "Även 공, till exempel när man läser upp ett telefonnummer."@sv ,
+                        "Auch 공, etwa beim Ansagen einer Telefonnummer."@de ,
+                        "También 공, por ejemplo al decir un número de teléfono."@es ,
+                        "Aussi 공, par exemple pour dicter un numéro de téléphone."@fr .
+
+<#il>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "일"@ko ;
+    solid-memo:back "1"@zxx ;
+    solid-memo:backNote "Native Korean number: 하나. Before a counter: 한. 일 also means “work”, and “day” in dates (3일)."@en ,
+                        "Inhemskt koreanskt räkneord: 하나. Före en klassificerare: 한. 일 betyder också ”arbete”, och ”dag” i datum (3일)."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 하나. Vor einem Zählwort: 한. 일 bedeutet auch „Arbeit“ und in Datumsangaben „Tag“ (3일)."@de ,
+                        "Numeral coreano nativo: 하나. Ante un clasificador: 한. 일 también significa «trabajo», y «día» en las fechas (3일)."@es ,
+                        "Nombre coréen natif : 하나. Devant un classificateur : 한. 일 signifie aussi « travail », et « jour » dans les dates (3일)."@fr .
+
+<#i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "이"@ko ;
+    solid-memo:back "2"@zxx ;
+    solid-memo:backNote "Native Korean number: 둘. Before a counter: 두. 이 also means “this” and “tooth”."@en ,
+                        "Inhemskt koreanskt räkneord: 둘. Före en klassificerare: 두. 이 betyder också ”den här” och ”tand”."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 둘. Vor einem Zählwort: 두. 이 bedeutet auch „dieser“ und „Zahn“."@de ,
+                        "Numeral coreano nativo: 둘. Ante un clasificador: 두. 이 también significa «este» y «diente»."@es ,
+                        "Nombre coréen natif : 둘. Devant un classificateur : 두. 이 signifie aussi « ce » et « dent »."@fr .
+
+<#sam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "삼"@ko ;
+    solid-memo:back "3"@zxx ;
+    solid-memo:backNote "Native Korean number: 셋. Before a counter: 세."@en ,
+                        "Inhemskt koreanskt räkneord: 셋. Före en klassificerare: 세."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 셋. Vor einem Zählwort: 세."@de ,
+                        "Numeral coreano nativo: 셋. Ante un clasificador: 세."@es ,
+                        "Nombre coréen natif : 셋. Devant un classificateur : 세."@fr .
+
+<#sa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "사"@ko ;
+    solid-memo:back "4"@zxx ;
+    solid-memo:backNote "Native Korean number: 넷. Before a counter: 네."@en ,
+                        "Inhemskt koreanskt räkneord: 넷. Före en klassificerare: 네."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 넷. Vor einem Zählwort: 네."@de ,
+                        "Numeral coreano nativo: 넷. Ante un clasificador: 네."@es ,
+                        "Nombre coréen natif : 넷. Devant un classificateur : 네."@fr .
+
+<#o>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "오"@ko ;
+    solid-memo:back "5"@zxx ;
+    solid-memo:backNote "Native Korean number: 다섯."@en ,
+                        "Inhemskt koreanskt räkneord: 다섯."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 다섯."@de ,
+                        "Numeral coreano nativo: 다섯."@es ,
+                        "Nombre coréen natif : 다섯."@fr .
+
+<#yuk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "육"@ko ;
+    solid-memo:back "6"@zxx ;
+    solid-memo:backNote "Native Korean number: 여섯."@en ,
+                        "Inhemskt koreanskt räkneord: 여섯."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 여섯."@de ,
+                        "Numeral coreano nativo: 여섯."@es ,
+                        "Nombre coréen natif : 여섯."@fr .
+
+<#chil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "칠"@ko ;
+    solid-memo:back "7"@zxx ;
+    solid-memo:backNote "Native Korean number: 일곱."@en ,
+                        "Inhemskt koreanskt räkneord: 일곱."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 일곱."@de ,
+                        "Numeral coreano nativo: 일곱."@es ,
+                        "Nombre coréen natif : 일곱."@fr .
+
+<#pal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "팔"@ko ;
+    solid-memo:back "8"@zxx ;
+    solid-memo:backNote "Native Korean number: 여덟. 팔 also means “arm”."@en ,
+                        "Inhemskt koreanskt räkneord: 여덟. 팔 betyder också ”arm”."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 여덟. 팔 bedeutet auch „Arm“."@de ,
+                        "Numeral coreano nativo: 여덟. 팔 también significa «brazo»."@es ,
+                        "Nombre coréen natif : 여덟. 팔 signifie aussi « bras »."@fr .
+
+<#gu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "구"@ko ;
+    solid-memo:back "9"@zxx ;
+    solid-memo:backNote "Native Korean number: 아홉."@en ,
+                        "Inhemskt koreanskt räkneord: 아홉."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 아홉."@de ,
+                        "Numeral coreano nativo: 아홉."@es ,
+                        "Nombre coréen natif : 아홉."@fr .
+
+<#sip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십"@ko ;
+    solid-memo:back "10"@zxx ;
+    solid-memo:backNote "Native Korean number: 열."@en ,
+                        "Inhemskt koreanskt räkneord: 열."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열."@de ,
+                        "Numeral coreano nativo: 열."@es ,
+                        "Nombre coréen natif : 열."@fr .
+
+<#sipil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십일"@ko ;
+    solid-memo:back "11"@zxx ;
+    solid-memo:backNote "Native Korean number: 열하나."@en ,
+                        "Inhemskt koreanskt räkneord: 열하나."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열하나."@de ,
+                        "Numeral coreano nativo: 열하나."@es ,
+                        "Nombre coréen natif : 열하나."@fr .
+
+<#sipi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십이"@ko ;
+    solid-memo:back "12"@zxx ;
+    solid-memo:backNote "Native Korean number: 열둘."@en ,
+                        "Inhemskt koreanskt räkneord: 열둘."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열둘."@de ,
+                        "Numeral coreano nativo: 열둘."@es ,
+                        "Nombre coréen natif : 열둘."@fr .
+
+<#sipsam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십삼"@ko ;
+    solid-memo:back "13"@zxx ;
+    solid-memo:backNote "Native Korean number: 열셋."@en ,
+                        "Inhemskt koreanskt räkneord: 열셋."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열셋."@de ,
+                        "Numeral coreano nativo: 열셋."@es ,
+                        "Nombre coréen natif : 열셋."@fr .
+
+<#sipsa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십사"@ko ;
+    solid-memo:back "14"@zxx ;
+    solid-memo:backNote "Native Korean number: 열넷."@en ,
+                        "Inhemskt koreanskt räkneord: 열넷."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열넷."@de ,
+                        "Numeral coreano nativo: 열넷."@es ,
+                        "Nombre coréen natif : 열넷."@fr .
+
+<#sipo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십오"@ko ;
+    solid-memo:back "15"@zxx ;
+    solid-memo:backNote "Native Korean number: 열다섯."@en ,
+                        "Inhemskt koreanskt räkneord: 열다섯."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열다섯."@de ,
+                        "Numeral coreano nativo: 열다섯."@es ,
+                        "Nombre coréen natif : 열다섯."@fr .
+
+<#sipyuk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십육"@ko ;
+    solid-memo:back "16"@zxx ;
+    solid-memo:backNote "Native Korean number: 열여섯."@en ,
+                        "Inhemskt koreanskt räkneord: 열여섯."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열여섯."@de ,
+                        "Numeral coreano nativo: 열여섯."@es ,
+                        "Nombre coréen natif : 열여섯."@fr .
+
+<#sipchil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십칠"@ko ;
+    solid-memo:back "17"@zxx ;
+    solid-memo:backNote "Native Korean number: 열일곱."@en ,
+                        "Inhemskt koreanskt räkneord: 열일곱."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열일곱."@de ,
+                        "Numeral coreano nativo: 열일곱."@es ,
+                        "Nombre coréen natif : 열일곱."@fr .
+
+<#sippal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십팔"@ko ;
+    solid-memo:back "18"@zxx ;
+    solid-memo:backNote "Native Korean number: 열여덟."@en ,
+                        "Inhemskt koreanskt räkneord: 열여덟."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열여덟."@de ,
+                        "Numeral coreano nativo: 열여덟."@es ,
+                        "Nombre coréen natif : 열여덟."@fr .
+
+<#sipgu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십구"@ko ;
+    solid-memo:back "19"@zxx ;
+    solid-memo:backNote "Native Korean number: 열아홉."@en ,
+                        "Inhemskt koreanskt räkneord: 열아홉."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 열아홉."@de ,
+                        "Numeral coreano nativo: 열아홉."@es ,
+                        "Nombre coréen natif : 열아홉."@fr .
+
+<#isip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "이십"@ko ;
+    solid-memo:back "20"@zxx ;
+    solid-memo:backNote "Native Korean number: 스물."@en ,
+                        "Inhemskt koreanskt räkneord: 스물."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 스물."@de ,
+                        "Numeral coreano nativo: 스물."@es ,
+                        "Nombre coréen natif : 스물."@fr .
+
+<#samsip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "삼십"@ko ;
+    solid-memo:back "30"@zxx ;
+    solid-memo:backNote "Native Korean number: 서른."@en ,
+                        "Inhemskt koreanskt räkneord: 서른."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 서른."@de ,
+                        "Numeral coreano nativo: 서른."@es ,
+                        "Nombre coréen natif : 서른."@fr .
+
+<#sasip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "사십"@ko ;
+    solid-memo:back "40"@zxx ;
+    solid-memo:backNote "Native Korean number: 마흔."@en ,
+                        "Inhemskt koreanskt räkneord: 마흔."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 마흔."@de ,
+                        "Numeral coreano nativo: 마흔."@es ,
+                        "Nombre coréen natif : 마흔."@fr .
+
+<#osip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "오십"@ko ;
+    solid-memo:back "50"@zxx ;
+    solid-memo:backNote "Native Korean number: 쉰."@en ,
+                        "Inhemskt koreanskt räkneord: 쉰."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 쉰."@de ,
+                        "Numeral coreano nativo: 쉰."@es ,
+                        "Nombre coréen natif : 쉰."@fr .
+
+<#yuksip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "육십"@ko ;
+    solid-memo:back "60"@zxx ;
+    solid-memo:backNote "Native Korean number: 예순."@en ,
+                        "Inhemskt koreanskt räkneord: 예순."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 예순."@de ,
+                        "Numeral coreano nativo: 예순."@es ,
+                        "Nombre coréen natif : 예순."@fr .
+
+<#chilsip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "칠십"@ko ;
+    solid-memo:back "70"@zxx ;
+    solid-memo:backNote "Native Korean number: 일흔."@en ,
+                        "Inhemskt koreanskt räkneord: 일흔."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 일흔."@de ,
+                        "Numeral coreano nativo: 일흔."@es ,
+                        "Nombre coréen natif : 일흔."@fr .
+
+<#palsip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "팔십"@ko ;
+    solid-memo:back "80"@zxx ;
+    solid-memo:backNote "Native Korean number: 여든."@en ,
+                        "Inhemskt koreanskt räkneord: 여든."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 여든."@de ,
+                        "Numeral coreano nativo: 여든."@es ,
+                        "Nombre coréen natif : 여든."@fr .
+
+<#gusip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "구십"@ko ;
+    solid-memo:back "90"@zxx ;
+    solid-memo:backNote "Native Korean number: 아흔."@en ,
+                        "Inhemskt koreanskt räkneord: 아흔."@sv ,
+                        "Einheimisch-koreanisches Zahlwort: 아흔."@de ,
+                        "Numeral coreano nativo: 아흔."@es ,
+                        "Nombre coréen natif : 아흔."@fr .
+
+<#baek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "백"@ko ;
+    solid-memo:back "100"@zxx .
+
+<#wolyoil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "월요일"@ko ;
+    solid-memo:back "Monday"@en ,
+                    "måndag"@sv ,
+                    "Montag"@de ,
+                    "lunes"@es ,
+                    "lundi"@fr .
+
+<#hwayoil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "화요일"@ko ;
+    solid-memo:back "Tuesday"@en ,
+                    "tisdag"@sv ,
+                    "Dienstag"@de ,
+                    "martes"@es ,
+                    "mardi"@fr .
+
+<#suyoil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "수요일"@ko ;
+    solid-memo:back "Wednesday"@en ,
+                    "onsdag"@sv ,
+                    "Mittwoch"@de ,
+                    "miércoles"@es ,
+                    "mercredi"@fr .
+
+<#mokyoil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "목요일"@ko ;
+    solid-memo:back "Thursday"@en ,
+                    "torsdag"@sv ,
+                    "Donnerstag"@de ,
+                    "jueves"@es ,
+                    "jeudi"@fr .
+
+<#geumyoil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "금요일"@ko ;
+    solid-memo:back "Friday"@en ,
+                    "fredag"@sv ,
+                    "Freitag"@de ,
+                    "viernes"@es ,
+                    "vendredi"@fr .
+
+<#toyoil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "토요일"@ko ;
+    solid-memo:back "Saturday"@en ,
+                    "lördag"@sv ,
+                    "Samstag"@de ,
+                    "sábado"@es ,
+                    "samedi"@fr .
+
+<#ilyoil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "일요일"@ko ;
+    solid-memo:back "Sunday"@en ,
+                    "söndag"@sv ,
+                    "Sonntag"@de ,
+                    "domingo"@es ,
+                    "dimanche"@fr .
+
+<#ilwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "일월"@ko ;
+    solid-memo:back "January"@en ,
+                    "januari"@sv ,
+                    "Januar"@de ,
+                    "enero"@es ,
+                    "janvier"@fr ;
+    solid-memo:backNote "Usually written 1월."@en ,
+                        "Skrivs oftast 1월."@sv ,
+                        "Meist 1월 geschrieben."@de ,
+                        "Se suele escribir 1월."@es ,
+                        "S’écrit le plus souvent 1월."@fr .
+
+<#iwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "이월"@ko ;
+    solid-memo:back "February"@en ,
+                    "februari"@sv ,
+                    "Februar"@de ,
+                    "febrero"@es ,
+                    "février"@fr ;
+    solid-memo:backNote "Usually written 2월."@en ,
+                        "Skrivs oftast 2월."@sv ,
+                        "Meist 2월 geschrieben."@de ,
+                        "Se suele escribir 2월."@es ,
+                        "S’écrit le plus souvent 2월."@fr .
+
+<#samwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "삼월"@ko ;
+    solid-memo:back "March"@en ,
+                    "mars"@sv ,
+                    "März"@de ,
+                    "marzo"@es ,
+                    "mars"@fr ;
+    solid-memo:backNote "Usually written 3월."@en ,
+                        "Skrivs oftast 3월."@sv ,
+                        "Meist 3월 geschrieben."@de ,
+                        "Se suele escribir 3월."@es ,
+                        "S’écrit le plus souvent 3월."@fr .
+
+<#sawol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "사월"@ko ;
+    solid-memo:back "April"@en ,
+                    "april"@sv ,
+                    "April"@de ,
+                    "abril"@es ,
+                    "avril"@fr ;
+    solid-memo:backNote "Usually written 4월."@en ,
+                        "Skrivs oftast 4월."@sv ,
+                        "Meist 4월 geschrieben."@de ,
+                        "Se suele escribir 4월."@es ,
+                        "S’écrit le plus souvent 4월."@fr .
+
+<#owol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "오월"@ko ;
+    solid-memo:back "May"@en ,
+                    "maj"@sv ,
+                    "Mai"@de ,
+                    "mayo"@es ,
+                    "mai"@fr ;
+    solid-memo:backNote "Usually written 5월."@en ,
+                        "Skrivs oftast 5월."@sv ,
+                        "Meist 5월 geschrieben."@de ,
+                        "Se suele escribir 5월."@es ,
+                        "S’écrit le plus souvent 5월."@fr .
+
+<#yuwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "유월"@ko ;
+    solid-memo:back "June"@en ,
+                    "juni"@sv ,
+                    "Juni"@de ,
+                    "junio"@es ,
+                    "juin"@fr ;
+    solid-memo:backNote "Usually written 6월. Not 육월: 육 drops its final ㄱ."@en ,
+                        "Skrivs oftast 6월. Inte 육월: 육 tappar sin slutkonsonant ㄱ."@sv ,
+                        "Meist 6월 geschrieben. Nicht 육월: 육 verliert sein auslautendes ㄱ."@de ,
+                        "Se suele escribir 6월. No 육월: 육 pierde su ㄱ final."@es ,
+                        "S’écrit le plus souvent 6월. Pas 육월 : 육 perd son ㄱ final."@fr .
+
+<#chilwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "칠월"@ko ;
+    solid-memo:back "July"@en ,
+                    "juli"@sv ,
+                    "Juli"@de ,
+                    "julio"@es ,
+                    "juillet"@fr ;
+    solid-memo:backNote "Usually written 7월."@en ,
+                        "Skrivs oftast 7월."@sv ,
+                        "Meist 7월 geschrieben."@de ,
+                        "Se suele escribir 7월."@es ,
+                        "S’écrit le plus souvent 7월."@fr .
+
+<#palwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "팔월"@ko ;
+    solid-memo:back "August"@en ,
+                    "augusti"@sv ,
+                    "August"@de ,
+                    "agosto"@es ,
+                    "août"@fr ;
+    solid-memo:backNote "Usually written 8월."@en ,
+                        "Skrivs oftast 8월."@sv ,
+                        "Meist 8월 geschrieben."@de ,
+                        "Se suele escribir 8월."@es ,
+                        "S’écrit le plus souvent 8월."@fr .
+
+<#guwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "구월"@ko ;
+    solid-memo:back "September"@en ,
+                    "september"@sv ,
+                    "September"@de ,
+                    "septiembre"@es ,
+                    "septembre"@fr ;
+    solid-memo:backNote "Usually written 9월."@en ,
+                        "Skrivs oftast 9월."@sv ,
+                        "Meist 9월 geschrieben."@de ,
+                        "Se suele escribir 9월."@es ,
+                        "S’écrit le plus souvent 9월."@fr .
+
+<#siwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "시월"@ko ;
+    solid-memo:back "October"@en ,
+                    "oktober"@sv ,
+                    "Oktober"@de ,
+                    "octubre"@es ,
+                    "octobre"@fr ;
+    solid-memo:backNote "Usually written 10월. Not 십월: 십 drops its final ㅂ."@en ,
+                        "Skrivs oftast 10월. Inte 십월: 십 tappar sin slutkonsonant ㅂ."@sv ,
+                        "Meist 10월 geschrieben. Nicht 십월: 십 verliert sein auslautendes ㅂ."@de ,
+                        "Se suele escribir 10월. No 십월: 십 pierde su ㅂ final."@es ,
+                        "S’écrit le plus souvent 10월. Pas 십월 : 십 perd son ㅂ final."@fr .
+
+<#sipilwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십일월"@ko ;
+    solid-memo:back "November"@en ,
+                    "november"@sv ,
+                    "November"@de ,
+                    "noviembre"@es ,
+                    "novembre"@fr ;
+    solid-memo:backNote "Usually written 11월."@en ,
+                        "Skrivs oftast 11월."@sv ,
+                        "Meist 11월 geschrieben."@de ,
+                        "Se suele escribir 11월."@es ,
+                        "S’écrit le plus souvent 11월."@fr .
+
+<#sipiwol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "십이월"@ko ;
+    solid-memo:back "December"@en ,
+                    "december"@sv ,
+                    "Dezember"@de ,
+                    "diciembre"@es ,
+                    "décembre"@fr ;
+    solid-memo:backNote "Usually written 12월."@en ,
+                        "Skrivs oftast 12월."@sv ,
+                        "Meist 12월 geschrieben."@de ,
+                        "Se suele escribir 12월."@es ,
+                        "S’écrit le plus souvent 12월."@fr .
+
+<#ppalgansaek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "빨간색"@ko ;
+    solid-memo:back "red"@en ,
+                    "röd"@sv ,
+                    "Rot"@de ,
+                    "rojo"@es ,
+                    "rouge"@fr ;
+    solid-memo:backNote "Also 빨강."@en ,
+                        "Även 빨강."@sv ,
+                        "Auch 빨강."@de ,
+                        "También 빨강."@es ,
+                        "Aussi 빨강."@fr .
+
+<#paransaek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "파란색"@ko ;
+    solid-memo:back "blue"@en ,
+                    "blå"@sv ,
+                    "Blau"@de ,
+                    "azul"@es ,
+                    "bleu"@fr ;
+    solid-memo:backNote "Also 파랑."@en ,
+                        "Även 파랑."@sv ,
+                        "Auch 파랑."@de ,
+                        "También 파랑."@es ,
+                        "Aussi 파랑."@fr .
+
+<#choroksaek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "초록색"@ko ;
+    solid-memo:back "green"@en ,
+                    "grön"@sv ,
+                    "Grün"@de ,
+                    "verde"@es ,
+                    "vert"@fr ;
+    solid-memo:backNote "Also 초록 or 녹색."@en ,
+                        "Även 초록 eller 녹색."@sv ,
+                        "Auch 초록 oder 녹색."@de ,
+                        "También 초록 o 녹색."@es ,
+                        "Aussi 초록 ou 녹색."@fr .
+
+<#noransaek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "노란색"@ko ;
+    solid-memo:back "yellow"@en ,
+                    "gul"@sv ,
+                    "Gelb"@de ,
+                    "amarillo"@es ,
+                    "jaune"@fr ;
+    solid-memo:backNote "Also 노랑."@en ,
+                        "Även 노랑."@sv ,
+                        "Auch 노랑."@de ,
+                        "También 노랑."@es ,
+                        "Aussi 노랑."@fr .
+
+<#geomeunsaek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "검은색"@ko ;
+    solid-memo:back "black"@en ,
+                    "svart"@sv ,
+                    "Schwarz"@de ,
+                    "negro"@es ,
+                    "noir"@fr ;
+    solid-memo:backNote "Also 검정 or 까만색."@en ,
+                        "Även 검정 eller 까만색."@sv ,
+                        "Auch 검정 oder 까만색."@de ,
+                        "También 검정 o 까만색."@es ,
+                        "Aussi 검정 ou 까만색."@fr .
+
+<#huinsaek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "흰색"@ko ;
+    solid-memo:back "white"@en ,
+                    "vit"@sv ,
+                    "Weiß"@de ,
+                    "blanco"@es ,
+                    "blanc"@fr ;
+    solid-memo:backNote "Also 하얀색."@en ,
+                        "Även 하얀색."@sv ,
+                        "Auch 하얀색."@de ,
+                        "También 하얀색."@es ,
+                        "Aussi 하얀색."@fr .
+
+<#hoesaek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "회색"@ko ;
+    solid-memo:back "grey"@en ,
+                    "grå"@sv ,
+                    "Grau"@de ,
+                    "gris"@es ,
+                    "gris"@fr .
+
+<#galsaek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "갈색"@ko ;
+    solid-memo:back "brown"@en ,
+                    "brun"@sv ,
+                    "Braun"@de ,
+                    "marrón"@es ,
+                    "marron, brun"@fr .
+
+<#eomeoni>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "어머니"@ko ;
+    solid-memo:back "mother"@en ,
+                    "mor"@sv ,
+                    "Mutter"@de ,
+                    "madre"@es ,
+                    "mère"@fr ;
+    solid-memo:backNote "Informal: 엄마."@en ,
+                        "Vardagligt: 엄마."@sv ,
+                        "Umgangssprachlich: 엄마."@de ,
+                        "Coloquial: 엄마."@es ,
+                        "Familier : 엄마."@fr .
+
+<#abeoji>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "아버지"@ko ;
+    solid-memo:back "father"@en ,
+                    "far"@sv ,
+                    "Vater"@de ,
+                    "padre"@es ,
+                    "père"@fr ;
+    solid-memo:backNote "Informal: 아빠."@en ,
+                        "Vardagligt: 아빠."@sv ,
+                        "Umgangssprachlich: 아빠."@de ,
+                        "Coloquial: 아빠."@es ,
+                        "Familier : 아빠."@fr .
+
+<#adeul>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "아들"@ko ;
+    solid-memo:back "son"@en ,
+                    "son"@sv ,
+                    "Sohn"@de ,
+                    "hijo"@es ,
+                    "fils"@fr .
+
+<#ttal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "딸"@ko ;
+    solid-memo:back "daughter"@en ,
+                    "dotter"@sv ,
+                    "Tochter"@de ,
+                    "hija"@es ,
+                    "fille"@fr .
+
+<#halabeoji>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "할아버지"@ko ;
+    solid-memo:back "grandfather"@en ,
+                    "farfar eller morfar"@sv ,
+                    "Großvater"@de ,
+                    "abuelo"@es ,
+                    "grand-père"@fr .
+
+<#halmeoni>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "할머니"@ko ;
+    solid-memo:back "grandmother"@en ,
+                    "farmor eller mormor"@sv ,
+                    "Großmutter"@de ,
+                    "abuela"@es ,
+                    "grand-mère"@fr .
+
+<#nampyeon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "남편"@ko ;
+    solid-memo:back "husband"@en ,
+                    "man, make"@sv ,
+                    "Ehemann"@de ,
+                    "marido, esposo"@es ,
+                    "mari"@fr .
+
+<#anae>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "아내"@ko ;
+    solid-memo:back "wife"@en ,
+                    "fru, maka"@sv ,
+                    "Ehefrau"@de ,
+                    "esposa"@es ,
+                    "femme, épouse"@fr ;
+    solid-memo:backNote "Someone else’s wife is 부인."@en ,
+                        "Någon annans fru kallas 부인."@sv ,
+                        "Die Ehefrau eines anderen heißt 부인."@de ,
+                        "La esposa de otra persona es 부인."@es ,
+                        "L’épouse de quelqu’un d’autre se dit 부인."@fr .
+
+<#annyeonghaseyo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "안녕하세요"@ko ;
+    solid-memo:back "hello"@en ,
+                    "hej"@sv ,
+                    "hallo, guten Tag"@de ,
+                    "hola"@es ,
+                    "bonjour"@fr ;
+    solid-memo:backNote "Used at any time of day. More formal: 안녕하십니까."@en ,
+                        "Används när som helst på dagen. Mer formellt: 안녕하십니까."@sv ,
+                        "Zu jeder Tageszeit. Förmlicher: 안녕하십니까."@de ,
+                        "Se usa a cualquier hora del día. Más formal: 안녕하십니까."@es ,
+                        "S’emploie à toute heure. Plus formel : 안녕하십니까."@fr .
+
+<#annyeong>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "안녕"@ko ;
+    solid-memo:back "hi, bye"@en ,
+                    "hej, hej då"@sv ,
+                    "hallo, tschüss"@de ,
+                    "hola, adiós"@es ,
+                    "salut"@fr ;
+    solid-memo:backNote "Informal, among friends: both when meeting and when parting."@en ,
+                        "Vardagligt, bland vänner; både när man ses och när man skiljs."@sv ,
+                        "Umgangssprachlich, unter Freunden; zur Begrüßung und zum Abschied."@de ,
+                        "Informal, entre amigos; al encontrarse y al despedirse."@es ,
+                        "Familier, entre amis ; pour se saluer comme pour se quitter."@fr .
+
+<#annyeonghigaseyo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "안녕히 가세요"@ko ;
+    solid-memo:back "goodbye (to someone leaving)"@en ,
+                    "hej då (till den som går)"@sv ,
+                    "auf Wiedersehen (zu jemandem, der geht)"@de ,
+                    "adiós (a quien se va)"@es ,
+                    "au revoir (à quelqu’un qui part)"@fr ;
+    solid-memo:backNote "Literally “go in peace”. More formal: 안녕히 가십시오."@en ,
+                        "Ordagrant ”gå i frid”. Mer formellt: 안녕히 가십시오."@sv ,
+                        "Wörtlich „gehen Sie in Frieden“. Förmlicher: 안녕히 가십시오."@de ,
+                        "Literalmente «vaya en paz». Más formal: 안녕히 가십시오."@es ,
+                        "Littéralement « allez en paix ». Plus formel : 안녕히 가십시오."@fr .
+
+<#annyeonghigyeseyo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "안녕히 계세요"@ko ;
+    solid-memo:back "goodbye (to someone staying)"@en ,
+                    "hej då (till den som stannar)"@sv ,
+                    "auf Wiedersehen (zu jemandem, der bleibt)"@de ,
+                    "adiós (a quien se queda)"@es ,
+                    "au revoir (à quelqu’un qui reste)"@fr ;
+    solid-memo:backNote "Said by the one leaving. Literally “stay in peace”. More formal: 안녕히 계십시오."@en ,
+                        "Sägs av den som går. Ordagrant ”stanna i frid”. Mer formellt: 안녕히 계십시오."@sv ,
+                        "Sagt der, der geht. Wörtlich „bleiben Sie in Frieden“. Förmlicher: 안녕히 계십시오."@de ,
+                        "Lo dice quien se va. Literalmente «quédese en paz». Más formal: 안녕히 계십시오."@es ,
+                        "Se dit par celui qui part. Littéralement « restez en paix ». Plus formel : 안녕히 계십시오."@fr .
+
+<#gamsahapnida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "감사합니다"@ko ;
+    solid-memo:back "thank you"@en ,
+                    "tack"@sv ,
+                    "danke"@de ,
+                    "gracias"@es ,
+                    "merci"@fr ;
+    solid-memo:backNote "Interchangeable with 고맙습니다; 감사합니다 is a little more formal."@en ,
+                        "Utbytbart mot 고맙습니다; 감사합니다 är lite mer formellt."@sv ,
+                        "Gleichbedeutend mit 고맙습니다; 감사합니다 ist etwas förmlicher."@de ,
+                        "Equivale a 고맙습니다; 감사합니다 es algo más formal."@es ,
+                        "Interchangeable avec 고맙습니다 ; 감사합니다 est un peu plus formel."@fr .
+
+<#gomapseupnida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "고맙습니다"@ko ;
+    solid-memo:back "thank you"@en ,
+                    "tack"@sv ,
+                    "danke"@de ,
+                    "gracias"@es ,
+                    "merci"@fr ;
+    solid-memo:backNote "Interchangeable with 감사합니다, which is a little more formal."@en ,
+                        "Utbytbart mot 감사합니다, som är lite mer formellt."@sv ,
+                        "Gleichbedeutend mit 감사합니다, das etwas förmlicher ist."@de ,
+                        "Equivale a 감사합니다, que es algo más formal."@es ,
+                        "Interchangeable avec 감사합니다, un peu plus formel."@fr .
+
+<#mianhapnida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "미안합니다"@ko ;
+    solid-memo:back "I’m sorry"@en ,
+                    "förlåt"@sv ,
+                    "es tut mir leid"@de ,
+                    "lo siento"@es ,
+                    "je suis désolé(e)"@fr ;
+    solid-memo:backNote "Also said, with a sense of thanks, when someone has gone to trouble for you."@en ,
+                        "Sägs också, som ett slags tack, när någon har besvärat sig för ens skull."@sv ,
+                        "Auch, mit einem Unterton von Dank, wenn sich jemand für einen Mühe gemacht hat."@de ,
+                        "También, con un matiz de agradecimiento, cuando alguien se ha tomado una molestia por uno."@es ,
+                        "Se dit aussi, avec une nuance de remerciement, quand quelqu’un s’est donné de la peine pour vous."@fr .
+
+<#silryehapnida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "실례합니다"@ko ;
+    solid-memo:back "excuse me"@en ,
+                    "ursäkta"@sv ,
+                    "entschuldigen Sie"@de ,
+                    "disculpe"@es ,
+                    "excusez-moi"@fr ;
+    solid-memo:backNote "Literally “I am being rude”; said when interrupting or leaving."@en ,
+                        "Ordagrant ”jag är oartig”; sägs när man avbryter eller går."@sv ,
+                        "Wörtlich „ich bin unhöflich“; beim Unterbrechen oder Gehen."@de ,
+                        "Literalmente «cometo una descortesía»; al interrumpir o al irse."@es ,
+                        "Littéralement « je commets une impolitesse » ; en interrompant ou en partant."@fr .
+
+<#gwaenchanseupnida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "괜찮습니다"@ko ;
+    solid-memo:back "it’s all right"@en ,
+                    "det är okej, ingen fara"@sv ,
+                    "schon gut"@de ,
+                    "no pasa nada"@es ,
+                    "ce n’est rien"@fr ;
+    solid-memo:backNote "The answer to an apology: “that’s all right”; also a polite “no, thank you” when declining an offer."@en ,
+                        "Svaret på en ursäkt: ”det gör inget”; också ett artigt ”nej tack” när man tackar nej till något."@sv ,
+                        "Die Antwort auf eine Entschuldigung: „schon gut“; auch ein höfliches „nein, danke“, wenn man etwas ablehnt."@de ,
+                        "La respuesta a una disculpa: «no pasa nada»; también un «no, gracias» cortés al rechazar algo."@es ,
+                        "La réponse à des excuses : « ce n’est rien » ; aussi un « non merci » poli pour refuser quelque chose."@fr .
+
+<#yeoboseyo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "여보세요"@ko ;
+    solid-memo:back "hello (on the phone)"@en ,
+                    "hallå (i telefon)"@sv ,
+                    "hallo (am Telefon)"@de ,
+                    "aló, diga (al teléfono)"@es ,
+                    "allô"@fr ;
+    solid-memo:backNote "Also to call someone’s attention: “excuse me!”."@en ,
+                        "Även för att påkalla någons uppmärksamhet: ”ursäkta!”."@sv ,
+                        "Auch, um jemanden anzusprechen: „Hallo, Sie!“."@de ,
+                        "También para llamar la atención de alguien: «¡oiga!»."@es ,
+                        "Aussi pour attirer l’attention de quelqu’un : « s’il vous plaît ! »."@fr .
+
+<#ne>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "네"@ko ;
+    solid-memo:back "yes"@en ,
+                    "ja"@sv ,
+                    "ja"@de ,
+                    "sí"@es ,
+                    "oui"@fr ;
+    solid-memo:backNote "It agrees with what was asked, so after a negative question it can mean “no”."@en ,
+                        "Det bekräftar frågan, så efter en nekande fråga kan det betyda ”nej”."@sv ,
+                        "Es bestätigt die Frage, nach einer verneinten Frage kann es also „nein“ bedeuten."@de ,
+                        "Confirma lo preguntado, así que tras una pregunta negativa puede significar «no»."@es ,
+                        "Il confirme ce qui est demandé : après une question négative, il peut signifier « non »."@fr .
+
+<#aniyo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "아니요"@ko ;
+    solid-memo:back "no"@en ,
+                    "nej"@sv ,
+                    "nein"@de ,
+                    "no"@es ,
+                    "non"@fr ;
+    solid-memo:backNote "It denies what was asked, so after a negative question it can mean “yes”."@en ,
+                        "Det förnekar frågan, så efter en nekande fråga kan det betyda ”jo”."@sv ,
+                        "Es verneint die Frage, nach einer verneinten Frage kann es also „doch“ bedeuten."@de ,
+                        "Niega lo preguntado, así que tras una pregunta negativa puede significar «sí»."@es ,
+                        "Il nie ce qui est demandé : après une question négative, il peut signifier « si »."@fr .
+
+<#saram>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "사람"@ko ;
+    solid-memo:back "person"@en ,
+                    "människa, person"@sv ,
+                    "Mensch, Person"@de ,
+                    "persona"@es ,
+                    "personne"@fr .
+
+<#namja>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "남자"@ko ;
+    solid-memo:back "man"@en ,
+                    "man"@sv ,
+                    "Mann"@de ,
+                    "hombre"@es ,
+                    "homme"@fr .
+
+<#yeoja>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "여자"@ko ;
+    solid-memo:back "woman"@en ,
+                    "kvinna"@sv ,
+                    "Frau"@de ,
+                    "mujer"@es ,
+                    "femme"@fr .
+
+<#ai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "아이"@ko ;
+    solid-memo:back "child"@en ,
+                    "barn"@sv ,
+                    "Kind"@de ,
+                    "niño, niña"@es ,
+                    "enfant"@fr ;
+    solid-memo:backNote "Also 어린이."@en ,
+                        "Även 어린이."@sv ,
+                        "Auch 어린이."@de ,
+                        "También 어린이."@es ,
+                        "Aussi 어린이."@fr .
+
+<#chingu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "친구"@ko ;
+    solid-memo:back "friend"@en ,
+                    "vän"@sv ,
+                    "Freund"@de ,
+                    "amigo"@es ,
+                    "ami"@fr .
+
+<#ireum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "이름"@ko ;
+    solid-memo:back "name"@en ,
+                    "namn"@sv ,
+                    "Name"@de ,
+                    "nombre"@es ,
+                    "nom"@fr .
+
+<#jip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "집"@ko ;
+    solid-memo:back "house, home"@en ,
+                    "hus, hem"@sv ,
+                    "Haus, Zuhause"@de ,
+                    "casa"@es ,
+                    "maison"@fr .
+
+<#hakgyo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "학교"@ko ;
+    solid-memo:back "school"@en ,
+                    "skola"@sv ,
+                    "Schule"@de ,
+                    "escuela"@es ,
+                    "école"@fr .
+
+<#mul>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "물"@ko ;
+    solid-memo:back "water"@en ,
+                    "vatten"@sv ,
+                    "Wasser"@de ,
+                    "agua"@es ,
+                    "eau"@fr .
+
+<#bap>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "밥"@ko ;
+    solid-memo:back "cooked rice, meal"@en ,
+                    "kokt ris, mat"@sv ,
+                    "gekochter Reis, Essen"@de ,
+                    "arroz cocido, comida"@es ,
+                    "riz cuit, repas"@fr .
+
+<#ppang>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "빵"@ko ;
+    solid-memo:back "bread"@en ,
+                    "bröd"@sv ,
+                    "Brot"@de ,
+                    "pan"@es ,
+                    "pain"@fr .
+
+<#uyu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "우유"@ko ;
+    solid-memo:back "milk"@en ,
+                    "mjölk"@sv ,
+                    "Milch"@de ,
+                    "leche"@es ,
+                    "lait"@fr .
+
+<#sagwa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "사과"@ko ;
+    solid-memo:back "apple"@en ,
+                    "äpple"@sv ,
+                    "Apfel"@de ,
+                    "manzana"@es ,
+                    "pomme"@fr ;
+    solid-memo:backNote "사과 also means “apology”."@en ,
+                        "사과 betyder också ”ursäkt”."@sv ,
+                        "사과 bedeutet auch „Entschuldigung“."@de ,
+                        "사과 también significa «disculpa»."@es ,
+                        "사과 signifie aussi « excuses »."@fr .
+
+<#chaek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "책"@ko ;
+    solid-memo:back "book"@en ,
+                    "bok"@sv ,
+                    "Buch"@de ,
+                    "libro"@es ,
+                    "livre"@fr .
+
+<#uija>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "의자"@ko ;
+    solid-memo:back "chair"@en ,
+                    "stol"@sv ,
+                    "Stuhl"@de ,
+                    "silla"@es ,
+                    "chaise"@fr .
+
+<#mun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "문"@ko ;
+    solid-memo:back "door"@en ,
+                    "dörr"@sv ,
+                    "Tür"@de ,
+                    "puerta"@es ,
+                    "porte"@fr .
+
+<#changmun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "창문"@ko ;
+    solid-memo:back "window"@en ,
+                    "fönster"@sv ,
+                    "Fenster"@de ,
+                    "ventana"@es ,
+                    "fenêtre"@fr .
+
+<#gae>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "개"@ko ;
+    solid-memo:back "dog"@en ,
+                    "hund"@sv ,
+                    "Hund"@de ,
+                    "perro"@es ,
+                    "chien"@fr .
+
+<#goyangi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "고양이"@ko ;
+    solid-memo:back "cat"@en ,
+                    "katt"@sv ,
+                    "Katze"@de ,
+                    "gato"@es ,
+                    "chat"@fr .
+
+<#gil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "길"@ko ;
+    solid-memo:back "road, way"@en ,
+                    "väg"@sv ,
+                    "Weg, Straße"@de ,
+                    "camino"@es ,
+                    "chemin, route"@fr .
+
+<#don>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "돈"@ko ;
+    solid-memo:back "money"@en ,
+                    "pengar"@sv ,
+                    "Geld"@de ,
+                    "dinero"@es ,
+                    "argent"@fr .
+
+<#son>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "손"@ko ;
+    solid-memo:back "hand"@en ,
+                    "hand"@sv ,
+                    "Hand"@de ,
+                    "mano"@es ,
+                    "main"@fr .
+
+<#oneul>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "오늘"@ko ;
+    solid-memo:back "today"@en ,
+                    "idag"@sv ,
+                    "heute"@de ,
+                    "hoy"@es ,
+                    "aujourd’hui"@fr .
+
+<#naeil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "내일"@ko ;
+    solid-memo:back "tomorrow"@en ,
+                    "imorgon"@sv ,
+                    "morgen"@de ,
+                    "mañana"@es ,
+                    "demain"@fr .
+
+<#keuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "크다"@ko ;
+    solid-memo:back "to be big"@en ,
+                    "att vara stor"@sv ,
+                    "groß sein"@de ,
+                    "ser grande"@es ,
+                    "être grand"@fr ;
+    solid-memo:backNote "Of people also “to be tall”: 키가 크다."@en ,
+                        "Om personer även ”att vara lång”: 키가 크다."@sv ,
+                        "Bei Menschen auch „groß gewachsen sein“: 키가 크다."@de ,
+                        "De personas también «ser alto»: 키가 크다."@es ,
+                        "Pour une personne aussi « être grand de taille » : 키가 크다."@fr .
+
+<#jakda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "작다"@ko ;
+    solid-memo:back "to be small"@en ,
+                    "att vara liten"@sv ,
+                    "klein sein"@de ,
+                    "ser pequeño"@es ,
+                    "être petit"@fr .
+
+<#jotda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "좋다"@ko ;
+    solid-memo:back "to be good"@en ,
+                    "att vara bra"@sv ,
+                    "gut sein"@de ,
+                    "ser bueno"@es ,
+                    "être bon"@fr .
+
+<#nappeuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "나쁘다"@ko ;
+    solid-memo:back "to be bad"@en ,
+                    "att vara dålig"@sv ,
+                    "schlecht sein"@de ,
+                    "ser malo"@es ,
+                    "être mauvais"@fr .
+
+<#manda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "많다"@ko ;
+    solid-memo:back "to be many, to be a lot"@en ,
+                    "att vara många, att vara mycket"@sv ,
+                    "viel sein, zahlreich sein"@de ,
+                    "ser numeroso, haber mucho"@es ,
+                    "être nombreux, être en grande quantité"@fr ;
+    solid-memo:backNote "나이가 많다: “to be old” (of a person)."@en ,
+                        "나이가 많다: ”att vara gammal” (om en person)."@sv ,
+                        "나이가 많다: „alt sein“ (von einem Menschen)."@de ,
+                        "나이가 많다: «ser mayor» (de una persona)."@es ,
+                        "나이가 많다 : « être âgé » (d’une personne)."@fr .
+
+<#bissada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "비싸다"@ko ;
+    solid-memo:back "to be expensive"@en ,
+                    "att vara dyr"@sv ,
+                    "teuer sein"@de ,
+                    "ser caro"@es ,
+                    "être cher"@fr .
+
+<#chupda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "춥다"@ko ;
+    solid-memo:back "to be cold"@en ,
+                    "att vara kallt (om vädret), att frysa"@sv ,
+                    "kalt sein, frieren"@de ,
+                    "hacer frío, tener frío"@es ,
+                    "faire froid, avoir froid"@fr ;
+    solid-memo:backNote "Of the weather or how one feels; cold to the touch is 차다."@en ,
+                        "Om vädret eller när man fryser; kall att ta på är 차다."@sv ,
+                        "Vom Wetter oder wenn einem kalt ist; kalt beim Anfassen ist 차다."@de ,
+                        "Del tiempo o de tener frío; frío al tacto es 차다."@es ,
+                        "Du temps ou de la sensation de froid ; froid au toucher se dit 차다."@fr .
+
+<#deopda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "덥다"@ko ;
+    solid-memo:back "to be hot"@en ,
+                    "att vara varmt (om vädret), att vara varm"@sv ,
+                    "heiß sein"@de ,
+                    "hacer calor, tener calor"@es ,
+                    "faire chaud, avoir chaud"@fr ;
+    solid-memo:backNote "Of the weather or how one feels; hot to the touch is 뜨겁다."@en ,
+                        "Om vädret eller när man själv är varm; het att ta på är 뜨겁다."@sv ,
+                        "Vom Wetter oder wenn einem heiß ist; heiß beim Anfassen ist 뜨겁다."@de ,
+                        "Del tiempo o de tener calor; caliente al tacto es 뜨겁다."@es ,
+                        "Du temps ou de la sensation de chaleur ; chaud au toucher se dit 뜨겁다."@fr .
+
+<#matitda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "맛있다"@ko ;
+    solid-memo:back "to be tasty, to be delicious"@en ,
+                    "att vara god (om mat)"@sv ,
+                    "lecker sein"@de ,
+                    "estar rico"@es ,
+                    "être délicieux"@fr .
+
+<#itda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "있다"@ko ;
+    solid-memo:back "to be (somewhere), to exist; to have"@en ,
+                    "att finnas, att vara (någonstans); att ha"@sv ,
+                    "da sein, existieren; haben"@de ,
+                    "estar, haber; tener"@es ,
+                    "être (quelque part), exister ; avoir"@fr .
+
+<#eopda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "없다"@ko ;
+    solid-memo:back "not to be (somewhere), not to exist; not to have"@en ,
+                    "att inte vara (någonstans), att inte finnas; att inte ha"@sv ,
+                    "nicht da sein; nicht haben"@de ,
+                    "no estar, no haber; no tener"@es ,
+                    "ne pas être (quelque part), ne pas exister ; ne pas avoir"@fr .
+
+<#hada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "하다"@ko ;
+    solid-memo:back "to do"@en ,
+                    "att göra"@sv ,
+                    "tun, machen"@de ,
+                    "hacer"@es ,
+                    "faire"@fr .
+
+<#gada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "가다"@ko ;
+    solid-memo:back "to go"@en ,
+                    "att gå, att åka"@sv ,
+                    "gehen, fahren"@de ,
+                    "ir"@es ,
+                    "aller"@fr .
+
+<#oda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "오다"@ko ;
+    solid-memo:back "to come"@en ,
+                    "att komma"@sv ,
+                    "kommen"@de ,
+                    "venir"@es ,
+                    "venir"@fr .
+
+<#meokda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "먹다"@ko ;
+    solid-memo:back "to eat"@en ,
+                    "att äta"@sv ,
+                    "essen"@de ,
+                    "comer"@es ,
+                    "manger"@fr .
+
+<#masida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "마시다"@ko ;
+    solid-memo:back "to drink"@en ,
+                    "att dricka"@sv ,
+                    "trinken"@de ,
+                    "beber"@es ,
+                    "boire"@fr .
+
+<#boda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "보다"@ko ;
+    solid-memo:back "to see, to look at"@en ,
+                    "att se, att titta på"@sv ,
+                    "sehen, ansehen"@de ,
+                    "ver, mirar"@es ,
+                    "voir, regarder"@fr .
+
+<#jada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "자다"@ko ;
+    solid-memo:back "to sleep"@en ,
+                    "att sova"@sv ,
+                    "schlafen"@de ,
+                    "dormir"@es ,
+                    "dormir"@fr .
+
+<#sada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "사다"@ko ;
+    solid-memo:back "to buy"@en ,
+                    "att köpa"@sv ,
+                    "kaufen"@de ,
+                    "comprar"@es ,
+                    "acheter"@fr .
+
+<#ikda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "읽다"@ko ;
+    solid-memo:back "to read"@en ,
+                    "att läsa"@sv ,
+                    "lesen"@de ,
+                    "leer"@es ,
+                    "lire"@fr .
+
+<#sseuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "쓰다"@ko ;
+    solid-memo:back "to write"@en ,
+                    "att skriva"@sv ,
+                    "schreiben"@de ,
+                    "escribir"@es ,
+                    "écrire"@fr ;
+    solid-memo:backNote "Also “to use”; and another 쓰다 means “to be bitter”."@en ,
+                        "Även ”att använda”; ett annat 쓰다 betyder ”att vara besk”."@sv ,
+                        "Auch „benutzen“; ein anderes 쓰다 bedeutet „bitter sein“."@de ,
+                        "También «usar»; otro 쓰다 significa «ser amargo»."@es ,
+                        "Aussi « utiliser » ; un autre 쓰다 signifie « être amer »."@fr .
+
+<#malhada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "말하다"@ko ;
+    solid-memo:back "to speak, to say"@en ,
+                    "att tala, att säga"@sv ,
+                    "sprechen, sagen"@de ,
+                    "hablar, decir"@es ,
+                    "parler, dire"@fr .
+
+<#salda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "살다"@ko ;
+    solid-memo:back "to live"@en ,
+                    "att leva, att bo"@sv ,
+                    "leben, wohnen"@de ,
+                    "vivir"@es ,
+                    "vivre, habiter"@fr .
+
+<#alda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "알다"@ko ;
+    solid-memo:back "to know"@en ,
+                    "att veta, att känna till"@sv ,
+                    "wissen, kennen"@de ,
+                    "saber, conocer"@es ,
+                    "savoir, connaître"@fr .
+
+<#jotahada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "좋아하다"@ko ;
+    solid-memo:back "to like"@en ,
+                    "att tycka om"@sv ,
+                    "mögen"@de ,
+                    "gustarle a uno"@es ,
+                    "aimer"@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

@@ -17,7 +17,7 @@
 # history note when it arrived.
 <>
     a skos:ConceptScheme ;
-    owl:versionInfo "1.9" ;
+    owl:versionInfo "1.10" ;
     skos:changeNote "1.0: languages, swedish, geography, computing, science, chemistry." ,
                     "1.1: art." ,
                     "1.2: labour-market." ,
@@ -27,7 +27,8 @@
                     "1.6: film, finnish, italian, portuguese." ,
                     "1.7: linked-data." ,
                     "1.8: korean; every topic named and defined in Korean as well." ,
-                    "1.9: every topic named and defined in German, Spanish and French as well." ;
+                    "1.9: every topic named and defined in German, Spanish and French as well." ,
+                    "1.10: japanese, english." ;
     dcterms:title "Solid Memo topics"@en ,
                   "Solid Memo-ämnen"@sv ,
                   "Solid Memo 주제"@ko ,
@@ -80,7 +81,9 @@ topic:languages
                   topic:italian ,
                   topic:finnish ,
                   topic:portuguese ,
-                  topic:korean ;
+                  topic:korean ,
+                  topic:japanese ,
+                  topic:english ;
     skos:historyNote "Since 1.0." .
 
 topic:swedish
@@ -393,6 +396,42 @@ topic:korean
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.8." .
+
+topic:japanese
+    a skos:Concept ;
+    skos:prefLabel "Japanese"@en ,
+                   "Japanska"@sv ,
+                   "일본어"@ko ,
+                   "Japanisch"@de ,
+                   "Japonés"@es ,
+                   "Japonais"@fr ;
+    skos:definition "The Japanese language."@en ,
+                    "Det japanska språket."@sv ,
+                    "일본어."@ko ,
+                    "Die japanische Sprache."@de ,
+                    "El idioma japonés."@es ,
+                    "La langue japonaise."@fr ;
+    skos:inScheme <> ;
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.10." .
+
+topic:english
+    a skos:Concept ;
+    skos:prefLabel "English"@en ,
+                   "Engelska"@sv ,
+                   "영어"@ko ,
+                   "Englisch"@de ,
+                   "Inglés"@es ,
+                   "Anglais"@fr ;
+    skos:definition "The English language."@en ,
+                    "Det engelska språket."@sv ,
+                    "영어."@ko ,
+                    "Die englische Sprache."@de ,
+                    "El idioma inglés."@es ,
+                    "La langue anglaise."@fr ;
+    skos:inScheme <> ;
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.10." .
 
 topic:physics
     a skos:Concept ;
