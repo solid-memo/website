@@ -87,13 +87,10 @@ instance's (the same `prov:wasDerivedFrom`) says so: it is added beside
 that deck, as a deck of its own with its own progress, never merged
 into it card by card, and the user may untick it. The form also says
 that the instance keeps its own preferences: the guest's are not
-carried over. Nor is the guest's digest, which is this browser's, nor
-are the drafts of releases a guest wrote in the [Studio](studio.md#drafts):
-they are deleted with the guest's instance. When the guest wrote any,
-the form says how many, and that they go: to keep them, the user goes
-back and leaves the study in the browser for now. Only moving the
-guest's study in, offered when the user has no instance yet (below), keeps its drafts,
-as it copies the instance whole.
+carried over. Nor is the guest's digest, which is this browser's. The
+drafts of releases the guest wrote in the [Studio](studio.md#drafts)
+are copied too: when the guest wrote any, the form says how many, and
+under what names they are copied (step **drafts**, below).
 
 It runs these steps:
 
@@ -156,10 +153,21 @@ It runs these steps:
    level anew). An empty group the guest made comes along empty. With
    no group, nothing is written, and the decks added are listed after
    the instance's, as new decks are.
-4. **verify:** the guest's instance must still list the same
+4. **drafts:** each draft the guest's catalogue links is copied to the
+   instance (`copyReleaseDraft`): read whole, every subject of it moved
+   to its place in the instance (`drafts/<name>/v<N>/`), at its
+   version, under its name, or, when the instance has a draft of that
+   name and version, the next free one (`<name>-2`, …). It is written
+   as a new draft is ([data-model.md](data-model.md#drafts-and-releases)):
+   each document only where none is, then the link on the catalogue,
+   with `If-Match`. A draft whose link cannot be written is taken back,
+   so none is left that the catalogue does not link, and none of the
+   instance's is ever written over. A copy that would still name the
+   guest's pod is not written (`guestUrlsLeft`).
+5. **verify:** the guest's instance must still list the same
    resources, each at the version noted in **read**
    (`guestStudyChanged`).
-5. **tidy:** delete the guest's instance as any instance is deleted
+6. **tidy:** delete the guest's instance as any instance is deleted
    ([data-model.md](data-model.md#discovery-chain)), and the whole
    guest pod once no instance is left. A failure to delete it only
    means `tidied: false`: the study is in the instance, and the notes
@@ -168,15 +176,18 @@ It runs these steps:
 A failure at any step leaves the instance valid: every deck it reports
 added (`added`) is whole, its documents, its entry and, unless the
 failure was in adding them, its answers; nothing else of the guest's was
-written but the groups, when it failed after **arrange**, and a deck's
+written but the groups, when it failed after **arrange**, the drafts
+it reports copied (`copied`), each whole, and a deck's
 document whose deletion failed, which nothing names. The guest's study
-is as it was, and the user is told which decks are in the instance now.
+is as it was, and the user is told which decks are in the instance now,
+and which drafts, each with the name it has there.
 Trying again adds what is not there yet: as each deck is added, and
 each group about to be, the update journal of this browser notes it
 (`GuestMergeNote`: the new deck or group, and what it was made from:
 for a deck, the guest's catalog entry and the versions of the guest's
 documents it was read at; for a group, the whole arrangement of the
-guest's groups around the decks added). The next run finds a deck
+guest's groups around the decks added; for a draft, the versions of
+its documents). The next run finds a deck
 whose entry and documents are as noted in the instance and adds only
 its answers again, which changes nothing that is there (the same
 entries, the same triples), and makes each group, when the arrangement
@@ -188,7 +199,10 @@ where the browser kept no note (the journal is best effort); its
 answers are then entries of their own, their ids naming the new deck,
 so no entry of the log names two decks. Groups arranged otherwise than
 noted (a deck added anew among them) are made anew, holding the decks
-added, and the ones made before stay, without them. The notes are
+added, and the ones made before stay, without them. A draft noted, at
+the same versions, whose copy the instance still links, is not copied
+again; one the guest changed since, or whose copy is gone, is copied
+anew, under the next free name. The notes are
 forgotten once a merge has deleted the guest's study; a study
 discarded instead leaves them in the browser, where they do no harm: a
 later guest's decks have new URLs, which no note names.

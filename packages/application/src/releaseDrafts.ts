@@ -1,5 +1,6 @@
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
+import { isGuestUrl, mentionsGuest } from "@solid-memo/domain/guest";
 import { DECK_FILE_ACCEPT, deckFileFormatOf } from "@solid-memo/domain/deckFile";
 import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { deckToDraft } from "@solid-memo/domain/release/deckToDraft";
@@ -32,7 +33,7 @@ import {
 } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseModel } from "@solid-memo/domain/release/releaseModel";
 import { releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
-import { releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
+import { rebaseDraft, releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import type { DeckLibrary, DeckRepository, FileExchange, ReleaseDraftRepository, ShapeValidator } from "./ports";
 
@@ -89,6 +90,17 @@ export interface ReleaseDraftUseCases {
    * picked. A name taken meanwhile, elsewhere, gives the next one.
    */
   createReleaseDraft(instanceUrl: string, from: NewDraft): Promise<CreatedDraft | null>;
+  /**
+   * A copy of the draft at `draftUrl`, another instance's, in this one
+   * (a guest's draft, as the guest's study is added to an instance):
+   * every subject of it moved to its place here, at its version, under
+   * its name, or the next one none of the instance's drafts of that
+   * version has. No draft is overwritten, nor any left half written
+   * (the repository's create); the draft copied stays as it is. A
+   * guest's draft whose copy would still name the guest's pod is not
+   * written (guestUrlsLeft).
+   */
+  copyReleaseDraft(draftUrl: string, instanceUrl: string): Promise<ReleaseDraftSummary>;
   /**
    * The draft as its documents say now, with what the releases before it
    * published (`published`), read from the release it follows. A release
@@ -353,6 +365,18 @@ export function createReleaseDraftUseCases({
           };
         }
       }
+    },
+
+    async copyReleaseDraft(draftUrl, instanceUrl) {
+      const { draft } = await releaseDraftRepository.read(draftUrl);
+      // A draft is read only at a draft's place; its copy is named as it is, not after its title.
+      const { name, version } = draftPlaceOf(draftUrl)!;
+      return create(instanceUrl, { title: {}, name, version }, (url) => {
+        const copy = rebaseDraft(draft, url);
+        // A guest's pod goes once the guest's study is kept: a copy names nothing in it.
+        if (isGuestUrl(draftUrl) && mentionsGuest(copy)) throw new AppError("guestUrlsLeft", { url });
+        return copy;
+      });
     },
 
     async getReleaseDraft(draftUrl) {

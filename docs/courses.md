@@ -313,7 +313,7 @@ A course is written as any library deck is
 ([deck-library.md](deck-library.md#publishing-a-new-version)), with
 these additions. The Studio writes a course in a draft in the pod the
 same way, and suggests its ids so
-([studio.md](studio.md#writing-a-draft)).
+([studio.md](studio.md#ids)).
 
 1. Type the release `schema:Course` too, and set
    `sm:studyDirection sm:frontToBack`.
@@ -374,7 +374,9 @@ keep them:
   the new one gets a new id (`<question>-d4`, …).
 - **The order still reads from the ids**: in a step that asks a kept
   card beside new ones, name the new ones so the ids sort in the order
-  the step asks them.
+  the step asks them. The Studio's id assistant names a new question
+  so, after the last or before the one chosen
+  ([studio.md](studio.md#ids)).
 
 Each learner's deck follows the release it was copied or
 last upgraded to, and its outline with it. An upgrade is offered on

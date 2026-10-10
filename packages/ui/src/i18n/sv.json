@@ -899,9 +899,9 @@
     "noDecks": "Dina studier har inga kortlekar att lägga till.",
     "sameRelease": "{name} har redan den här kortleken från samma utgåva i biblioteket. Den läggs till bredvid som en egen kortlek, med egna framsteg, och slås inte ihop med den: avmarkera den för att låta bli.",
     "leftOut": "En kortlek du låter bli sparas inte: den försvinner med resten av dina studier i den här webbläsaren.",
-    "draftsDeleted": {
-      "one": "Du skrev {count} utkast i Studio som gäst. Utkast läggs inte till: det raderas med resten av dina studier i den här webbläsaren. Gå tillbaka och låt dina studier ligga kvar här så länge om du vill behålla det.",
-      "other": "Du skrev {count} utkast i Studio som gäst. Utkast läggs inte till: de raderas med resten av dina studier i den här webbläsaren. Gå tillbaka och låt dina studier ligga kvar här så länge om du vill behålla dem."
+    "draftsCopied": {
+      "one": "Du skrev {count} utkast i Studio som gäst. Det kopieras också till {name}, under sitt eget namn, eller, om {name} har ett utkast med samma namn och version, nästa lediga (”-2”, ”-3”…).",
+      "other": "Du skrev {count} utkast i Studio som gäst. De kopieras också till {name}, vart och ett under sitt eget namn, eller, om {name} har ett utkast med samma namn och version, nästa lediga (”-2”, ”-3”…)."
     },
     "chooseDeck": "Välj minst en kortlek att lägga till, eller släng dina studier i stället.",
     "addStart": "Lägg till i {name}",
@@ -912,6 +912,7 @@
       "read": "Läser och kontrollerar dina studier",
       "decks": "Lägger till dina kortlekar",
       "arrange": "Grupperar dina kortlekar",
+      "drafts": "Kopierar dina utkast",
       "verify": "Kontrollerar att inget ändrats under tiden",
       "tidy": "Tar bort dem från den här webbläsaren"
     },
@@ -921,6 +922,11 @@
       "one": "Den här kortleken finns nu i {name}, hel:",
       "other": "De här kortlekarna finns nu i {name}, hela:"
     },
+    "keptDrafts": {
+      "one": "Det här utkastet finns nu i {name}, helt:",
+      "other": "De här utkasten finns nu i {name}, hela:"
+    },
+    "keptDraftName": "(”{name}”, version {version})",
     "nothingAdded": "Inget lades till i {name}.",
     "stillHereRetry": "Dina studier finns kvar i den här webbläsaren. Försöker du igen läggs det till som ännu inte finns i {name}.",
     "added": "Dina studier finns i {name} nu.",
@@ -2167,6 +2173,11 @@
       },
       "addQuestion": "Lägg till frågan",
       "questionEmpty": "Skriv framsidan och baksidan.",
+      "askedWhere": "Ställ den",
+      "askedLast": "Efter den sista frågan",
+      "askedBefore": "Före ”{name}”",
+      "noIdBetween": "Assistenten hittar inget id som sorteras där: skriv ett som gör det.",
+      "notAskedThere": "Det här id:t sorteras inte där, så frågan skulle inte ställas där ”Ställ den” säger: skriv ett som gör det.",
       "retire": "Ta ur bruk",
       "restore": "Återställ",
       "delete": "Ta bort",

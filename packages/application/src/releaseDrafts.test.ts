@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
+import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { draftSummaryOf, draftUrlOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { applyDraftChanges, blankDraft, type DraftChange, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
@@ -177,6 +178,28 @@ describe("createReleaseDraft", () => {
     repository.create.mockRejectedValueOnce(new Error("offline"));
     await expect(useCases.createReleaseDraft(INSTANCE, { kind: "blankDeck", title: { en: "Capitals" } })).rejects.toThrow("offline");
     expect(repository.create).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("copyReleaseDraft", () => {
+  it("copies another instance's draft here, every subject moved, under its name or the next free one of its version", async () => {
+    const guest = draftUrlOf("https://guest.example/solid-memo/main/", "solid", 2);
+    const stored = rebaseDraft(courseDraft(), guest);
+    const { useCases, repository, created } = setUp({ stored, drafts: [summary("solid", 2), summary("solid-2", 1)] });
+    await expect(useCases.copyReleaseDraft(guest, INSTANCE)).resolves.toMatchObject({ name: "solid-2", version: 2, instanceUrl: INSTANCE });
+    expect(repository.read).toHaveBeenCalledWith(guest);
+    expect(created()).toEqual(rebaseDraft(stored, draftUrlOf(INSTANCE, "solid-2", 2)));
+    expect(JSON.stringify(created())).not.toContain("guest.example");
+  });
+
+  it("writes nothing of a guest's draft whose copy would still name the guest's pod", async () => {
+    const guest = draftUrlOf(GUEST_INSTANCE_URL, "solid", 1);
+    const moved = rebaseDraft(courseDraft(), guest);
+    const { useCases, repository } = setUp({ stored: moved });
+    await expect(useCases.copyReleaseDraft(guest, INSTANCE)).resolves.toMatchObject({ name: "solid" });
+    repository.read.mockResolvedValueOnce({ draft: { ...moved, root: { ...moved.root, prev: `${GUEST_INSTANCE_URL}releases/solid/v1.ttl` } }, version: "v1" });
+    await expect(useCases.copyReleaseDraft(guest, INSTANCE)).rejects.toMatchObject({ code: "guestUrlsLeft", vars: { url: draftUrlOf(INSTANCE, "solid", 1) } });
+    expect(repository.create).toHaveBeenCalledOnce();
   });
 });
 

@@ -161,6 +161,9 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     resetCards: vi.fn(async (_instanceUrl, _deck, ids) => ids.length),
     listReleaseDrafts: vi.fn(async () => []),
     createReleaseDraft: vi.fn(async () => null),
+    copyReleaseDraft: vi.fn(async () => {
+      throw new Error("copyReleaseDraft fake not configured");
+    }),
     getReleaseDraft: vi.fn(async () => {
       throw new Error("getReleaseDraft fake not configured");
     }),
