@@ -2,6 +2,7 @@ import { useState } from "preact/hooks";
 import type { TransferMode } from "@solid-memo/domain/cardTransfer";
 import type { Deck } from "@solid-memo/domain/deck";
 import { useI18n } from "@solid-memo/ui/i18n";
+import { Dialog } from "./shell/Dialog";
 
 /** A move or copy of the selected cards, as the user chose it. */
 export interface CardTransfer {
@@ -15,7 +16,8 @@ export interface CardTransfer {
  * user picks the deck (`decks`, the instance's others) and whether the
  * cards keep their progress (they do to start with), told what becomes
  * of their history, then confirms (`onConfirm`). With no other deck,
- * it says so.
+ * it says so. It is a modal dialog (Dialog): Cancel, Escape or Close
+ * leaves it (`onCancel`).
  */
 export function TransferCardsDialog({
   mode,
@@ -41,42 +43,46 @@ export function TransferCardsDialog({
       {t("studio.bulk.cancel")}
     </button>
   );
+  const heading = t(`studio.cardBulk.transfer.heading.${mode}`);
   if (decks.length === 0) {
     return (
-      <div>
+      <Dialog heading={heading} onClose={onCancel}>
         <p>{t("studio.cardBulk.transfer.noDeck")}</p>
         <p class="actions">{cancel}</p>
-      </div>
+      </Dialog>
     );
   }
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        onConfirm({ to: decks.find((deck) => deck.url === deckUrl)!, mode, keepProgress });
-      }}
-    >
-      <label>
-        {t("studio.cardBulk.transfer.deck")}
-        <select value={deckUrl} onChange={(event) => setDeckUrl(event.currentTarget.value)}>
-          {decks.map((deck) => (
-            <option key={deck.url} value={deck.url}>
-              {readerText(deck.title)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label class="studio-check">
-        <input type="checkbox" checked={keepProgress} onChange={(event) => setKeepProgress(event.currentTarget.checked)} />
-        {t("studio.cardBulk.transfer.keepProgress")}
-      </label>
-      <p class="hint">{t(`studio.cardBulk.transfer.${mode}Hint`)}</p>
-      <p class="actions">
-        <button type="submit" class="primary" disabled={busy}>
-          {t(`studio.cardBulk.transfer.${mode}`, { count })}
-        </button>
-        {cancel}
-      </p>
-    </form>
+    <Dialog heading={heading} onClose={onCancel}>
+      <form
+        aria-label={heading}
+        onSubmit={(event) => {
+          event.preventDefault();
+          onConfirm({ to: decks.find((deck) => deck.url === deckUrl)!, mode, keepProgress });
+        }}
+      >
+        <label>
+          {t("studio.cardBulk.transfer.deck")}
+          <select autoFocus value={deckUrl} onChange={(event) => setDeckUrl(event.currentTarget.value)}>
+            {decks.map((deck) => (
+              <option key={deck.url} value={deck.url}>
+                {readerText(deck.title)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label class="studio-check">
+          <input type="checkbox" checked={keepProgress} onChange={(event) => setKeepProgress(event.currentTarget.checked)} />
+          {t("studio.cardBulk.transfer.keepProgress")}
+        </label>
+        <p class="hint">{t(`studio.cardBulk.transfer.${mode}Hint`)}</p>
+        <p class="actions">
+          <button type="submit" class="primary" disabled={busy}>
+            {t(`studio.cardBulk.transfer.${mode}`, { count })}
+          </button>
+          {cancel}
+        </p>
+      </form>
+    </Dialog>
   );
 }

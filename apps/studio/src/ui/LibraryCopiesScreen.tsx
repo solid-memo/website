@@ -12,6 +12,7 @@ import { describeChanges, historyKept } from "@solid-memo/ui/LibraryUpgradeNotic
 import { LoadingDots } from "@solid-memo/ui/Loading";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { ReadOnlyNotice } from "./ReadOnly";
+import { BulkBar } from "./shell/BulkBar";
 import { DataTable } from "./shell/DataTable";
 import { NO_SELECTION, type Selection } from "./shell/tableModel";
 
@@ -126,19 +127,6 @@ export function LibraryCopiesScreen({
       </header>
       <p class="hint">{t("studio.library.intro")}</p>
       <ReadOnlyNotice reason={readOnly} subject="decks" healthHref={healthHref} />
-      {selected.length > 0 && !busy && (
-        <div class="edit-actions">
-          <button
-            class="primary"
-            onClick={() => {
-              setChosen(NO_SELECTION);
-              onUpgrade(selected);
-            }}
-          >
-            {t("studio.library.upgrade", { count: selected.length })}
-          </button>
-        </div>
-      )}
       {running !== null && (
         <>
           <p>
@@ -205,6 +193,24 @@ export function LibraryCopiesScreen({
         current={current}
         onCursor={(row) => onCursor(row.copy.deck)}
       />
+      {/* While copies are upgraded, none is selected. */}
+      <BulkBar
+        label={t("studio.library.bulk")}
+        count={selected.length}
+        said={t("studio.library.selected", { count: selected.length })}
+        onClear={() => setChosen(NO_SELECTION)}
+      >
+        <button
+          type="button"
+          class="primary"
+          onClick={() => {
+            setChosen(NO_SELECTION);
+            onUpgrade(selected);
+          }}
+        >
+          {t("studio.library.upgrade", { count: selected.length })}
+        </button>
+      </BulkBar>
     </section>
   );
 }

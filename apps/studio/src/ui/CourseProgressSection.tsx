@@ -4,6 +4,7 @@ import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
+import { useConfirm } from "./shell/ConfirmDialog";
 
 /**
  * A course's chapters as the learner stands in them (courseProgress):
@@ -26,6 +27,7 @@ export function CourseProgressSection({
   onEdit: (edit: CompletedChaptersEdit) => void;
 }) {
   const { t, readerText } = useI18n();
+  const { ask, dialog } = useConfirm();
 
   if (course === undefined) {
     return (
@@ -82,13 +84,19 @@ export function CourseProgressSection({
           type="button"
           class="danger"
           disabled={busy}
-          onClick={() => {
-            if (window.confirm(t("studio.about.restartConfirm"))) onEdit({ kind: "restart" });
-          }}
+          onClick={() =>
+            ask({
+              heading: t("studio.confirm.restartCourse"),
+              text: t("studio.about.restartConfirm"),
+              action: t("studio.about.restart"),
+              onConfirm: () => onEdit({ kind: "restart" }),
+            })
+          }
         >
           {t("studio.about.restart")}
         </button>
       )}
+      {dialog}
     </section>
   );
 }

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -7,8 +7,7 @@ import type { ReviewState } from "@solid-memo/domain/review";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { CardScheduleContainer, directionSchedules } from "./CardScheduleContainer";
 import { instanceA, makeCard, makeDeck } from "../test/fixtures";
-
-afterEach(() => vi.unstubAllGlobals());
+import { answer } from "../test/dialogs";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const card = makeCard(deck, "water");
@@ -73,7 +72,6 @@ describe("CardScheduleContainer", () => {
   });
 
   it("forgets the card in one direction once the user confirms", async () => {
-    vi.stubGlobal("confirm", () => true);
     let states = [state];
     const useCases = makeUseCasesFake({
       listDeckReviewStates: vi.fn(async () => states),
@@ -84,6 +82,7 @@ describe("CardScheduleContainer", () => {
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Forget progress" }));
+    answer("Forget the card's progress", "Forget progress");
     expect(await screen.findByText("Forgot the card's progress in the direction “Front → back”.")).toBeInTheDocument();
     expect(useCases.resetCards).toHaveBeenCalledWith(instanceA.url, deck, ["water"], "front-to-back");
     expect(await screen.findByText("Not studied this way yet: the card is new.")).toBeInTheDocument();

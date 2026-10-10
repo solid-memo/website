@@ -108,91 +108,94 @@ export function QuestionEditorScreen({
         </p>
       </header>
       <DraftStatus editor={status} />
-      <DraftScope readOnly={readOnly} draftsHref={links.draftsHref} healthHref={links.healthHref}>
-        {draft.course && (
-          <label>
-            {t("studio.question.place")}
-            <select value={placeValue(place)} onChange={(event) => onEdit([{ kind: "moveQuestion", card, place: placeFrom(event.currentTarget.value) }])}>
-              <option value="">{t("studio.question.nowhere")}</option>
-              {outline.map(({ chapter, steps }) => {
-                const title = chapter.data.title === undefined ? chapter.id : readerText(chapter.data.title);
-                return [
-                  ...steps.map((step, index) => (
-                    <option key={step.id} value={placeValue({ kind: "step", step: step.id })}>
-                      {t("studio.question.atStep", { chapter: title, step: index + 1 })}
-                    </option>
-                  )),
-                  <option key={`review ${chapter.id}`} value={placeValue({ kind: "review", chapter: chapter.id })}>
-                    {t("studio.question.atReview", { chapter: title })}
-                  </option>,
-                ];
-              })}
-            </select>
-          </label>
-        )}
+      {/* On a wide screen, the preview beside the form. */}
+      <div class="studio-editor">
+        <DraftScope readOnly={readOnly} draftsHref={links.draftsHref} healthHref={links.healthHref}>
+          {draft.course && (
+            <label>
+              {t("studio.question.place")}
+              <select value={placeValue(place)} onChange={(event) => onEdit([{ kind: "moveQuestion", card, place: placeFrom(event.currentTarget.value) }])}>
+                <option value="">{t("studio.question.nowhere")}</option>
+                {outline.map(({ chapter, steps }) => {
+                  const title = chapter.data.title === undefined ? chapter.id : readerText(chapter.data.title);
+                  return [
+                    ...steps.map((step, index) => (
+                      <option key={step.id} value={placeValue({ kind: "step", step: step.id })}>
+                        {t("studio.question.atStep", { chapter: title, step: index + 1 })}
+                      </option>
+                    )),
+                    <option key={`review ${chapter.id}`} value={placeValue({ kind: "review", chapter: chapter.id })}>
+                      {t("studio.question.atReview", { chapter: title })}
+                    </option>,
+                  ];
+                })}
+              </select>
+            </label>
+          )}
 
-        <form class="card-edit" onSubmit={save}>
-          <CardContentFields
-            draft={form}
-            saved={saved.content}
+          <form class="card-edit" onSubmit={save}>
+            <CardContentFields
+              draft={form}
+              saved={saved.content}
+              busy={false}
+              invalid={invalid}
+              suggestions={{ front: [], back: [], own: [] }}
+              {...(field === undefined || field === "distractors" || field.startsWith("distractor:") ? {} : { arrival: field as CardTextPart })}
+              onChange={(next) => {
+                if (invalid?.entry !== undefined) setInvalid(null);
+                setForm(next);
+              }}
+            />
+            <CardFieldsErrorMessage invalid={invalid} />
+            <button type="submit" class="primary">
+              {t("card.saveButton")}
+            </button>
+          </form>
+
+          <div id="question-distractors" tabIndex={-1} data-arrival={field === "distractors" || undefined}>
+          <DistractorFields
+            cardId={card}
+            distractors={saved.content.distractors ?? []}
+            published={new Set(Object.keys(draft.published.ids))}
+            back={saved.content.back}
+            textFormat={saved.content.textFormat}
+            busy={held}
+            suggestions={[]}
+            {...(field?.startsWith("distractor:") === true ? { arrival: field.slice("distractor:".length) } : {})}
+            onChange={(next) => Promise.resolve(onEdit(distractorChanges(draft, card, next)) === null)}
+          />
+          </div>
+
+          <LifeActions
+            of="card"
+            id={card}
+            name={name}
+            retired={saved.retired}
+            published={isPublished(draft, card)}
+            onEdit={(change) => onEdit([change])}
+            onDeleted={onDeleted}
+          />
+        </DraftScope>
+
+        <section aria-labelledby="question-preview-heading" class="course-player">
+          <h3 id="question-preview-heading">{t("studio.question.preview")}</h3>
+          <CourseQuestion
+            key={round}
+            card={shown}
+            choices={choices}
+            answer={answer}
+            focusQuestion={false}
             busy={false}
-            invalid={invalid}
-            suggestions={{ front: [], back: [], own: [] }}
-            {...(field === undefined || field === "distractors" || field.startsWith("distractor:") ? {} : { arrival: field as CardTextPart })}
-            onChange={(next) => {
-              if (invalid?.entry !== undefined) setInvalid(null);
-              setForm(next);
+            error={null}
+            nextLabel={t("studio.question.again")}
+            onCheck={(choice: Choice) => setAnswer({ choice, effect: "none" })}
+            onNext={() => {
+              setAnswer(null);
+              setRound(round + 1);
             }}
           />
-          <CardFieldsErrorMessage invalid={invalid} />
-          <button type="submit" class="primary">
-            {t("card.saveButton")}
-          </button>
-        </form>
-
-        <div id="question-distractors" tabIndex={-1} data-arrival={field === "distractors" || undefined}>
-        <DistractorFields
-          cardId={card}
-          distractors={saved.content.distractors ?? []}
-          published={new Set(Object.keys(draft.published.ids))}
-          back={saved.content.back}
-          textFormat={saved.content.textFormat}
-          busy={held}
-          suggestions={[]}
-          {...(field?.startsWith("distractor:") === true ? { arrival: field.slice("distractor:".length) } : {})}
-          onChange={(next) => Promise.resolve(onEdit(distractorChanges(draft, card, next)) === null)}
-        />
-        </div>
-
-        <LifeActions
-          of="card"
-          id={card}
-          name={name}
-          retired={saved.retired}
-          published={isPublished(draft, card)}
-          onEdit={(change) => onEdit([change])}
-          onDeleted={onDeleted}
-        />
-      </DraftScope>
-
-      <section aria-labelledby="question-preview-heading" class="course-player">
-        <h3 id="question-preview-heading">{t("studio.question.preview")}</h3>
-        <CourseQuestion
-          key={round}
-          card={shown}
-          choices={choices}
-          answer={answer}
-          focusQuestion={false}
-          busy={false}
-          error={null}
-          nextLabel={t("studio.question.again")}
-          onCheck={(choice: Choice) => setAnswer({ choice, effect: "none" })}
-          onNext={() => {
-            setAnswer(null);
-            setRound(round + 1);
-          }}
-        />
-      </section>
+        </section>
+      </div>
     </section>
   );
 }

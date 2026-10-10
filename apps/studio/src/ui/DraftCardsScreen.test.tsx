@@ -175,7 +175,7 @@ describe("DraftCardsScreen", () => {
     const { onEdit, onOpen } = renderScreen(draft);
     expect(screen.getByText("0 cards selected")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "Select every card on this page" }));
-    expect(screen.getByText("2 cards selected")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Selected cards" })).toHaveTextContent("2 cards selected");
     fireEvent.click(screen.getByRole("button", { name: "Retire 1 card" }));
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "retire", of: "card", id: "q-pods-1a" }]);
     fireEvent.click(screen.getByRole("button", { name: "Restore 1 card" }));

@@ -9,6 +9,7 @@ import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { DeckAboutContainer } from "./DeckAboutContainer";
 import { choose } from "../test/choose";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
+import { answer, dialog } from "../test/dialogs";
 
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 const BY = "https://creativecommons.org/licenses/by/4.0/";
@@ -184,8 +185,6 @@ describe("DeckAboutContainer", () => {
   });
 
   it("shows a course's progress: marks a chapter not done, and restarts the course once confirmed", async () => {
-    const confirm = vi.fn().mockReturnValueOnce(false).mockReturnValue(true);
-    vi.stubGlobal("confirm", confirm);
     const course = makeCourse(["q-1"], [CH1]);
     const useCases = makeUseCasesFake({
       listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
@@ -203,11 +202,13 @@ describe("DeckAboutContainer", () => {
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", courseDeck.url] });
 
     fireEvent.click(within(section).getByRole("button", { name: "Restart the course" }));
-    expect(confirm).toHaveBeenCalledWith(
+    expect(dialog("Restart the course")).toHaveTextContent(
       "Restart the course? Every chapter is marked not done, so the first one opens again. Your answers and your progress on the cards stay.",
     );
+    answer("Restart the course", "Cancel");
     expect(useCases.setCompletedChapters).toHaveBeenCalledTimes(1);
     fireEvent.click(within(section).getByRole("button", { name: "Restart the course" }));
+    answer("Restart the course", "Restart the course");
     await waitFor(() => expect(useCases.setCompletedChapters).toHaveBeenLastCalledWith(course.deck, { kind: "restart" }));
   });
 

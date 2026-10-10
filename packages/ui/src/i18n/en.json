@@ -1490,7 +1490,8 @@
       "open": "Open the row",
       "extendDown": "Select the row and the next one too",
       "extendUp": "Select the row and the one before too",
-      "clear": "Clear the selection"
+      "clear": "Clear the selection",
+      "bulk": "Open the actions of the selected rows"
     },
     "dock": {
       "label": "Panel",
@@ -1618,7 +1619,16 @@
         "other": "Deleted {count} decks."
       },
       "export": "Export",
-      "moveSetAside": "The arrangement of these decks has invalid data, so decks cannot be moved into groups until it is repaired."
+      "moveSetAside": "The arrangement of these decks has invalid data, so decks cannot be moved into groups until it is repaired.",
+      "groups": {
+        "edit": "Edit",
+        "editCards": "Edit the selected cards",
+        "editDecks": "Edit the selected decks",
+        "schedule": "Schedule",
+        "scheduleCards": "Schedule the selected cards",
+        "transfer": "Move or copy",
+        "transferCards": "Move or copy the selected cards"
+      }
     },
     "groups": {
       "heading": "Groups"
@@ -1667,12 +1677,11 @@
         "one": "{shown} of {count} card",
         "other": "{shown} of {count} cards"
       },
-      "keys": "Keys: {j} and {k} move between the cards, {x} selects one, {enter} opens it, {shiftJ} and {shiftK} select the next one or the one before too, and {escape} clears the selection.",
+      "keys": "Keys: {j} and {k} move between the cards, {x} selects one, {enter} opens it, {shiftJ} and {shiftK} select the next one or the one before too, {escape} clears the selection, and {dot} opens the actions of the selected cards.",
       "selected": {
         "one": "{count} card selected",
         "other": "{count} cards selected"
       },
-      "clear": "Clear selection",
       "noMatch": "No card matches.",
       "caption": "The cards of {deck}",
       "select": "Select",
@@ -1728,7 +1737,20 @@
         "save": "Save",
         "discard": "Discard",
         "stay": "Stay"
-      }
+      },
+      "cancel": "Cancel",
+      "deleteCards": "Delete the selected cards",
+      "forgetCards": "Forget the selected cards' progress",
+      "deleteDecks": "Delete the selected decks",
+      "forgetDirection": "Forget the card's progress",
+      "restartCourse": "Restart the course",
+      "deleteDraft": "Delete the draft",
+      "deletePart": {
+        "chapter": "Delete the chapter",
+        "step": "Delete the step",
+        "card": "Delete the card"
+      },
+      "removeData": "Remove it from your pod"
     },
     "schedule": {
       "loading": "Loading the schedule…",
@@ -1958,6 +1980,10 @@
         "present": {
           "one": "{count} card was there already.",
           "other": "{count} cards were there already."
+        },
+        "heading": {
+          "move": "Move cards to another deck",
+          "copy": "Copy cards to another deck"
         }
       }
     },
@@ -2137,7 +2163,12 @@
       "badgeOf": "for {deck}",
       "newerUnknown": "Not known: no public catalogue of its creator lists it",
       "peek": "Move to a copy's row ({j}, {k}) to see what upgrading it would change.",
-      "plan": "Upgrade"
+      "plan": "Upgrade",
+      "bulk": "Selected copies",
+      "selected": {
+        "one": "{count} copy selected",
+        "other": "{count} copies selected"
+      }
     },
     "transfer": {
       "crumb": "Import and export",

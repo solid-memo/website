@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -10,8 +10,7 @@ import { deckTextCheck } from "@solid-memo/ui/markdownCache";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { HealthContainer } from "./HealthContainer";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
-
-afterEach(() => vi.unstubAllGlobals());
+import { answer, dialog } from "../test/dialogs";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 /** A check of the deck's documents that finds nothing: its catalog, cards and reviews come back with no subjects, unchanged or conforming. */
@@ -65,16 +64,15 @@ describe("HealthContainer", () => {
   });
 
   it("removes a subject no repair covers once the user confirms", async () => {
-    const confirm = vi.fn(() => false);
-    vi.stubGlobal("confirm", confirm);
     const useCases = makeUseCasesFake({ planRepair: vi.fn(() => plan) });
     renderContainer(useCases, deck);
     const remove = await screen.findByRole("button", { name: `Remove ${plan.unrepairable[0]!.subjectUrl}` });
     fireEvent.click(remove);
-    expect(confirm).toHaveBeenCalledWith(`Remove <${plan.unrepairable[0]!.subjectUrl}> from your pod? This cannot be undone.`);
+    expect(dialog("Remove it from your pod")).toHaveTextContent(`Remove <${plan.unrepairable[0]!.subjectUrl}> from your pod? This cannot be undone.`);
+    answer("Remove it from your pod", "Cancel");
     expect(useCases.applyRepairs).not.toHaveBeenCalled();
-    confirm.mockReturnValue(true);
     fireEvent.click(remove);
+    answer("Remove it from your pod", "Remove");
     await waitFor(() =>
       expect(useCases.applyRepairs).toHaveBeenCalledWith([
         { kind: "remove-subject", documentUrl: deck.cardsDocumentUrl, subjectUrl: plan.unrepairable[0]!.subjectUrl, version: 1 },

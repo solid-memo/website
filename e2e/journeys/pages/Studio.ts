@@ -169,7 +169,7 @@ export class Studio extends Screen {
   /** Gives the selected decks their own number of new cards per day. */
   async setNewCardsPerDay(count: number, decks: number): Promise<void> {
     await this.intent(`Set the selected decks' new cards per day to ${count}`, async () => {
-      await this.bulk.getByRole("button", { name: this.t("studio.bulk.pace"), exact: true }).click();
+      await this.pickBulk(this.bulk, "studio.bulk.groups.editDecks", "studio.bulk.pace");
       await this.bulk.getByRole("spinbutton", { name: this.t("studio.bulk.newCardsPerDay") }).fill(String(count));
       await this.bulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
       await this.expectStatus(this.t("studio.bulk.paced", { count: decks }));
@@ -179,7 +179,7 @@ export class Studio extends Screen {
   /** Moves the selected decks out of their groups, to the top level. */
   async moveToTopLevel(decks: number): Promise<void> {
     await this.intent("Move the selected decks to the top level", async () => {
-      await this.bulk.getByRole("button", { name: this.t("studio.bulk.move"), exact: true }).click();
+      await this.pickBulk(this.bulk, "studio.bulk.groups.editDecks", "studio.bulk.move");
       await this.bulk.getByRole("combobox", { name: this.t("studio.bulk.group") }).selectOption("");
       await this.bulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
       await this.expectStatus(this.t("studio.bulk.moved", { count: decks, group: this.t("studio.bulk.topLevel") }));
@@ -190,8 +190,8 @@ export class Studio extends Screen {
   async deleteSelected(instance: string, decks: string[]): Promise<void> {
     await this.intent(`Delete ${decks.join(", ")}`, async () => {
       const names = decks.map((deck) => `“${deck}”`).join(", ");
-      this.app.expectDialog(this.tp("studio.bulk.removeConfirm", { count: decks.length, names }));
       await this.bulk.getByRole("button", { name: this.t("studio.bulk.remove"), exact: true }).click();
+      await this.confirm("studio.confirm.deleteDecks", this.tp("studio.bulk.removeConfirm", { count: decks.length, names }), "studio.bulk.remove");
       await this.expectStatus(this.t("studio.bulk.removed", { count: decks.length }));
       for (const deck of decks) await expect(this.row(instance, deck)).toHaveCount(0);
     });
@@ -333,8 +333,8 @@ export class Studio extends Screen {
   /** Deletes a draft, confirming the question that names it; its row goes. */
   async deleteDraft(instance: string, name: string): Promise<void> {
     await this.intent(`Delete the draft ${name}`, async () => {
-      this.app.expectDialog(this.tp("studio.drafts.deleteConfirm", { draft: name, version: 1 }));
       await this.page.getByRole("button", { name: this.t("studio.drafts.deleteDraft", { draft: name, version: 1 }) }).click();
+      await this.confirm("studio.confirm.deleteDraft", this.tp("studio.drafts.deleteConfirm", { draft: name, version: 1 }), "studio.drafts.delete");
       await this.expectStatus(this.t("studio.drafts.deleted", { draft: name, version: 1 }));
       await expect(this.drafts(instance).getByRole("rowheader", { name, exact: true })).toHaveCount(0);
     });
@@ -407,7 +407,7 @@ export class Studio extends Screen {
    */
   async selectCardsWithKeys(deck: string, count: number): Promise<void> {
     await this.intent(`Select ${count} cards with the keyboard`, async () => {
-      await expect(this.page.getByText(this.t("studio.cards.keys", { j: "j", k: "k", x: "x", enter: "Enter", shiftJ: "Shift+J", shiftK: "Shift+K", escape: "Escape" }))).toBeVisible();
+      await expect(this.page.getByText(this.t("studio.cards.keys", { j: "j", k: "k", x: "x", enter: "Enter", shiftJ: "Shift+J", shiftK: "Shift+K", escape: "Escape", dot: "." }))).toBeVisible();
       await this.page.keyboard.press("j");
       await expect(this.cards(deck).getByRole("rowheader").first().getByRole("link")).toBeFocused();
       for (let index = 0; index < count; index++) {
@@ -425,7 +425,7 @@ export class Studio extends Screen {
    */
   async findAndReplace(find: string, replace: string, changes: number): Promise<void> {
     await this.intent(`Replace ${find} with ${replace} in the selected cards`, async () => {
-      await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.findReplace") }).click();
+      await this.pickBulk(this.cardBulk, "studio.bulk.groups.editCards", "studio.cardBulk.findReplace");
       const form = this.page.getByRole("form", { name: this.t("studio.cardBulk.findReplace") });
       await form.getByRole("textbox", { name: this.t("studio.cardBulk.find") }).fill(find);
       await form.getByRole("textbox", { name: this.t("studio.cardBulk.replaceWith") }).fill(replace);
@@ -647,8 +647,8 @@ export class Studio extends Screen {
   /** Forgets the card's progress front to back, confirming: it is new that way. */
   async forgetProgress(): Promise<void> {
     await this.intent("Forget the card's progress front to back", async () => {
-      this.app.expectDialog(this.tp("studio.schedule.resetConfirm"));
       await this.scheduleOf("frontToBack").getByRole("button", { name: this.t("studio.schedule.reset") }).click();
+      await this.confirm("studio.confirm.forgetDirection", this.tp("studio.schedule.resetConfirm"), "studio.schedule.reset");
       await this.expectStatus(this.t("studio.schedule.done.reset", { direction: this.t("common.direction.frontToBack") }));
       await expect(this.scheduleOf("frontToBack").getByText(this.t("studio.schedule.new"))).toBeVisible();
     });
@@ -657,7 +657,7 @@ export class Studio extends Screen {
   /** Sets the selected cards due today, the day the form offers; the status line counts those studied. */
   async rescheduleSelectedToday(count: number): Promise<void> {
     await this.intent("Set the selected cards due today", async () => {
-      await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.reschedule") }).click();
+      await this.pickBulk(this.cardBulk, "studio.bulk.groups.scheduleCards", "studio.cardBulk.reschedule");
       await expect(this.cardBulk.getByLabel(this.t("studio.cardBulk.dueLabel"))).not.toHaveValue("");
       await this.cardBulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
       await expect(this.page.getByRole("status").filter({ hasText: this.tp("studio.cardBulk.done.reschedule", { count }) })).toHaveCount(1);
@@ -671,7 +671,7 @@ export class Studio extends Screen {
    */
   async moveSelectedCards(deck: string, to: string, count: number, left: string[]): Promise<void> {
     await this.intent(`Move the selected cards to ${to}`, async () => {
-      await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.moveTo") }).click();
+      await this.pickBulk(this.cardBulk, "studio.bulk.groups.transferCards", "studio.cardBulk.moveTo");
       await this.cardBulk.getByRole("combobox", { name: this.t("studio.cardBulk.transfer.deck") }).selectOption({ label: to });
       await expect(this.cardBulk.getByRole("checkbox", { name: this.t("studio.cardBulk.transfer.keepProgress") })).toBeChecked();
       await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.transfer.move", { count }) }).click();
@@ -755,6 +755,20 @@ export class Studio extends Screen {
   /** What can be done with the selected decks. */
   private get bulk(): Locator {
     return this.page.getByRole("group", { name: this.t("studio.bulk.label") });
+  }
+
+  /** Chooses an action of the selection's bar from its menu: the menu's button, then the item. */
+  private async pickBulk(bar: Locator, menu: string, item: string): Promise<void> {
+    await bar.getByRole("button", { name: this.t(menu), exact: true }).click();
+    await this.page.getByRole("menu", { name: this.t(menu), exact: true }).getByRole("menuitem", { name: this.t(item), exact: true }).click();
+  }
+
+  /** Answers the Studio's question (its dialog, by its heading), which says `question`, with its action. */
+  private async confirm(heading: string, question: RegExp, action: string): Promise<void> {
+    const dialog = this.page.getByRole("dialog", { name: this.t(heading), exact: true });
+    await expect(dialog.getByText(question)).toBeVisible();
+    await dialog.getByRole("button", { name: this.t(action), exact: true }).click();
+    await expect(dialog).toHaveCount(0);
   }
 
   /** Home's status line (visually hidden) says this. */

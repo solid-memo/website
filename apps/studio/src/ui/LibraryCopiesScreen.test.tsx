@@ -151,6 +151,12 @@ describe("LibraryCopiesScreen", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck that can be updated" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck that can be updated" }));
     expect(screen.queryByRole("button", { name: /Update/ })).toBeNull();
+    // The bar of the copies selected counts them, and clears them.
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select My capitals" }));
+    const bar = screen.getByRole("group", { name: "Selected copies" });
+    expect(bar).toHaveTextContent("1 copy selected");
+    fireEvent.click(within(bar).getByRole("button", { name: "Clear selection" }));
+    expect(screen.getByRole("checkbox", { name: "Select My capitals" })).not.toBeChecked();
   });
 
   it("offers only the copies that may be changed, saying why the others are not", () => {
@@ -179,7 +185,7 @@ describe("LibraryCopiesScreen", () => {
       { deck: broken, plan, outcome: { ok: false, step: "reviews", error: new Error("boom"), changed: true } },
     ];
     renderScreen({ results });
-    const items = within(screen.getByRole("status")).getAllByRole("listitem");
+    const items = within(screen.getAllByRole("status")[0]!).getAllByRole("listitem");
     expect(items[0]).toHaveTextContent("Capitals: updated to release 2.");
     expect(items[1]).toHaveTextContent(/^My capitals: the update failed while moving the deck to the new release: .*Your deck was not changed\.$/);
     expect(items[2]).toHaveTextContent(/^Broken capitals: the update failed while dropping the review states of removed cards: .*Part of the new release may be in your deck already, which you can study as it is\. Update it again to finish\.$/);

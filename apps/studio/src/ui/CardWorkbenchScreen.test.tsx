@@ -6,6 +6,7 @@ import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import { DEFAULT_CARD_QUERY, type CardQuery, type CardRow } from "@solid-memo/domain/cardQuery";
 import { CardWorkbenchScreen } from "./CardWorkbenchScreen";
 import { choose } from "../test/choose";
+import { answer, pick } from "../test/dialogs";
 import { makeCard, makeDeck } from "../test/fixtures";
 import { WithKeys } from "../test/keys";
 
@@ -117,7 +118,7 @@ describe("CardWorkbenchScreen", () => {
     );
     expect(screen.getByText("3 of 4 cards")).toBeInTheDocument();
     expect(screen.getByText(/move between the cards/)).toHaveTextContent(
-      "Keys: j and k move between the cards, x selects one, Enter opens it, Shift+J and Shift+K select the next one or the one before too, and Escape clears the selection.",
+      "Keys: j and k move between the cards, x selects one, Enter opens it, Shift+J and Shift+K select the next one or the one before too, Escape clears the selection, and . opens the actions of the selected cards.",
     );
     expect(screen.queryByText("Course")).toBeNull();
   });
@@ -291,7 +292,6 @@ describe("CardWorkbenchScreen", () => {
   });
 
   it("edits the selected cards the query keeps, deleted ones leaving the selection", async () => {
-    vi.stubGlobal("confirm", () => true);
     const onEdit = vi.fn(async () => true);
     render(<Harness onEdit={onEdit} />);
     expect(screen.queryByRole("group", { name: "Selected cards" })).not.toBeInTheDocument();
@@ -302,8 +302,20 @@ describe("CardWorkbenchScreen", () => {
     // In the table's order.
     expect(onEdit).toHaveBeenCalledWith(["water", "tree"], { kind: "retire" }, expect.objectContaining({ inverse: expect.anything() }));
     fireEvent.click(within(bulk).getByRole("button", { name: "Delete" }));
+    answer("Delete the selected cards", "Delete");
     await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"));
-    vi.unstubAllGlobals();
+    expect(screen.queryByRole("group", { name: "Selected cards" })).not.toBeInTheDocument();
+  });
+
+  it("opens the bar's first menu with ., while cards are selected", () => {
+    render(<Harness />);
+    const heading = screen.getByRole("heading", { level: 2 });
+    key(heading, ".");
+    expect(screen.queryByRole("menu")).toBeNull();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
+    key(document.body, ".");
+    expect(screen.getByRole("menu", { name: "Edit the selected cards" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Write in Markdown" })).toHaveFocus();
   });
 
   it("offers no edit while the deck may not be changed, saying why, the cards still found and selected", () => {
@@ -312,19 +324,22 @@ describe("CardWorkbenchScreen", () => {
     expect(screen.getByText(/This deck has invalid data, so it is set aside/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
     fireEvent.click(screen.getByRole("checkbox", { name: "Select 水" }));
-    expect(screen.getByText("1 card selected")).toBeInTheDocument();
-    expect(screen.queryByRole("group", { name: "Selected cards" })).toBeNull();
+    const bulk = screen.getByRole("group", { name: "Selected cards" });
+    expect(bulk).toHaveTextContent("1 card selected");
+    expect(within(bulk).getAllByRole("button").map((button) => button.textContent)).toEqual(["Clear selection"]);
+    // Nothing to open.
+    key(document.body, ".");
+    expect(document.body).toHaveFocus();
     expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
   });
 
   it("forgets or reschedules the selected cards' progress, and says what it did", () => {
-    vi.stubGlobal("confirm", () => true);
     const onReviewEdit = vi.fn(async () => true);
     const { rerender } = render(<Harness onReviewEdit={onReviewEdit} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
-    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Forget progress" }));
+    pick("Schedule the selected cards", "Forget progress");
+    answer("Forget the selected cards' progress", "Forget progress");
     expect(onReviewEdit).toHaveBeenCalledWith(["tree"], { kind: "reset" });
-    vi.unstubAllGlobals();
     rerender(<Harness reviewDone={{ edit: { kind: "reset" }, count: 2 }} />);
     expect(screen.getByText("Forgot the progress of 2 cards.")).toBeInTheDocument();
     rerender(<Harness reviewDone={{ edit: { kind: "reschedule", due: "2026-10-20" }, count: 1 }} />);
@@ -337,13 +352,12 @@ describe("CardWorkbenchScreen", () => {
     const onTransfer = vi.fn(async () => true);
     const { rerender } = render(<Harness onTransfer={onTransfer} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
-    const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
-    fireEvent.click(bulk().getByRole("button", { name: "Copy to deck…" }));
+    pick("Move or copy the selected cards", "Copy to deck…");
     fireEvent.click(screen.getByRole("button", { name: "Copy 1 card" }));
     expect(onTransfer).toHaveBeenCalledWith(["tree"], { to: nouns, mode: "copy", keepProgress: true });
     await waitFor(() => expect(screen.queryByRole("button", { name: "Copy 1 card" })).toBeNull());
     expect(screen.getAllByRole("status")[0]).toHaveTextContent("1 card selected");
-    fireEvent.click(bulk().getByRole("button", { name: "Move to deck…" }));
+    pick("Move or copy the selected cards", "Move to deck…");
     fireEvent.click(screen.getByRole("button", { name: "Move 1 card" }));
     await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"));
 
@@ -364,21 +378,20 @@ describe("CardWorkbenchScreen", () => {
     const onTransfer = vi.fn(async () => false);
     render(<Harness onTransfer={onTransfer} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
-    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Move to deck…" }));
+    pick("Move or copy the selected cards", "Move to deck…");
     fireEvent.click(screen.getByRole("button", { name: "Move 1 card" }));
     await waitFor(() => expect(onTransfer).toHaveBeenCalled());
     expect(screen.getAllByRole("status")[0]).toHaveTextContent("1 card selected");
   });
 
   it("keeps the selection when a deletion fails", async () => {
-    vi.stubGlobal("confirm", () => true);
     const onEdit = vi.fn(async () => false);
     render(<Harness onEdit={onEdit} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
     fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Delete" }));
+    answer("Delete the selected cards", "Delete");
     await waitFor(() => expect(onEdit).toHaveBeenCalled());
     expect(screen.getAllByRole("status")[0]).toHaveTextContent("1 card selected");
-    vi.unstubAllGlobals();
   });
 
   it("says what the last edit did, and undoes it", () => {

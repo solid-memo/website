@@ -1,10 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { DraftsScreen } from "./DraftsScreen";
 import { choose } from "../test/choose";
 import { screenCommands, WithCommands } from "../test/commands";
 import { instanceA, makeDeck } from "../test/fixtures";
+import { answer, dialog } from "../test/dialogs";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -50,7 +51,6 @@ function renderScreen(overrides: Partial<Props> = {}) {
 }
 
 beforeEach(() => localStorage.clear());
-afterEach(() => vi.unstubAllGlobals());
 
 describe("DraftsScreen", () => {
   it("goes to the new draft's form from the palette, while a draft can be made", () => {
@@ -147,16 +147,15 @@ describe("DraftsScreen", () => {
   });
 
   it("deletes a draft once the user confirms, and says so", () => {
-    const confirm = vi.fn(() => false);
-    vi.stubGlobal("confirm", confirm);
     const solid = draft("solid");
     const { onDelete } = renderScreen({ drafts: [solid], deleted: draft("old", { title: {} }) });
     const button = screen.getByRole("button", { name: "Delete the draft Solid, version 1" });
     fireEvent.click(button);
-    expect(confirm).toHaveBeenCalledWith("Delete the draft Solid, version 1? This cannot be undone.");
+    expect(dialog("Delete the draft")).toHaveTextContent("Delete the draft Solid, version 1? This cannot be undone.");
+    answer("Delete the draft", "Cancel");
     expect(onDelete).not.toHaveBeenCalled();
-    confirm.mockReturnValue(true);
     fireEvent.click(button);
+    answer("Delete the draft", "Delete");
     expect(onDelete).toHaveBeenCalledWith(solid);
     expect(screen.getByText("Deleted the draft Untitled (old), version 1.")).toBeInTheDocument();
   });

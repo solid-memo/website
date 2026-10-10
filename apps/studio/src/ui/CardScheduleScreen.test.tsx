@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { CardScheduleScreen } from "./CardScheduleScreen";
+import { answer, dialog } from "../test/dialogs";
 
 const state: ReviewState = {
   cardId: "water",
@@ -36,8 +37,6 @@ function renderScreen(overrides: Partial<Parameters<typeof CardScheduleScreen>[0
 const instant = (iso: string) => new Date(iso).toLocaleString("en", { dateStyle: "long", timeStyle: "short" });
 
 const direction = (name: string) => within(screen.getByRole("region", { name }));
-
-afterEach(() => vi.unstubAllGlobals());
 
 describe("CardScheduleScreen", () => {
   it("shows the card's state in each direction, and says when it has none", () => {
@@ -74,15 +73,16 @@ describe("CardScheduleScreen", () => {
   });
 
   it("forgets the progress once the user confirms", () => {
-    const confirm = vi.fn(() => false);
-    vi.stubGlobal("confirm", confirm);
     const { onReset } = renderScreen();
     const forget = direction("Front → back").getByRole("button", { name: "Forget progress" });
     fireEvent.click(forget);
-    expect(confirm).toHaveBeenCalledWith("Forget the card's progress this way? It becomes new again. Its answers stay in the history.");
+    expect(dialog("Forget the card's progress")).toHaveTextContent(
+      "Forget the card's progress this way? It becomes new again. Its answers stay in the history.",
+    );
+    answer("Forget the card's progress", "Cancel");
     expect(onReset).not.toHaveBeenCalled();
-    confirm.mockReturnValue(true);
     fireEvent.click(forget);
+    answer("Forget the card's progress", "Forget progress");
     expect(onReset).toHaveBeenCalledWith("front-to-back");
   });
 

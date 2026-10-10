@@ -20,6 +20,7 @@ import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { DeckBulkActions, type MoveLock } from "./DeckBulkActions";
 import { ReadOnlyNotice } from "./ReadOnly";
 import { useActivityLog } from "./shell/activity";
+import { BulkBar } from "./shell/BulkBar";
 import { DataTable, type Column } from "./shell/DataTable";
 import { NO_SELECTION, type Selection } from "./shell/tableModel";
 import { HOME_VIEWS, inView, type HomeView } from "./shell/views";
@@ -237,36 +238,20 @@ export function DeckTableScreen({
           </button>
         ))}
       </div>
-      <label class="studio-filter">
-        {t("studio.decks.filter")}
-        <input
-          type="search"
-          aria-keyshortcuts="/"
-          value={view.filter}
-          onInput={(event) => onView({ ...view, filter: event.currentTarget.value })}
-        />
-      </label>
-      {(view.filter.trim() !== "" || shownView !== "all") && (
-        <p class="hint">{t("studio.decks.shown", { shown: shown.length, count: rows.length })}</p>
-      )}
-      {count > 0 && (
-        <DeckBulkActions
-          selected={selected}
-          groups={groups}
-          moveLocked={moveLocked}
-          busy={busy}
-          exportHref={transferHref(selected)}
-          onMove={(parent) => {
-            const group = groups.find((entry) => entry.group.url === parent)?.group ?? null;
-            const name = group === null ? t("studio.bulk.topLevel") : readerText(group.title);
-            return bulk(onMove(selected, group), t("studio.bulk.moved", { count, group: name }));
-          }}
-          onPace={(change) => bulk(onPace(selected, change), t("studio.bulk.paced", { count }))}
-          onDirection={(direction) => bulk(onDirection(selected, direction), t("studio.bulk.directed", { count }))}
-          onRemove={() => bulk(onRemove(selected), t("studio.bulk.removed", { count }), true)}
-          onClear={() => setChosen(NO_SELECTION)}
-        />
-      )}
+      <div class="studio-filters">
+        <label class="studio-filter">
+          {t("studio.decks.filter")}
+          <input
+            type="search"
+            aria-keyshortcuts="/"
+            value={view.filter}
+            onInput={(event) => onView({ ...view, filter: event.currentTarget.value })}
+          />
+        </label>
+        {(view.filter.trim() !== "" || shownView !== "all") && (
+          <p class="hint">{t("studio.decks.shown", { shown: shown.length, count: rows.length })}</p>
+        )}
+      </div>
       <p class="visually-hidden" role="status">
         {announcement}
       </p>
@@ -320,6 +305,23 @@ export function DeckTableScreen({
           onOpen={({ deck }) => onOpen(deck)}
         />
       )}
+      <BulkBar label={t("studio.bulk.label")} count={count} said={t("studio.bulk.selected", { count })} onClear={() => setChosen(NO_SELECTION)}>
+        <DeckBulkActions
+          selected={selected}
+          groups={groups}
+          moveLocked={moveLocked}
+          busy={busy}
+          exportHref={transferHref(selected)}
+          onMove={(parent) => {
+            const group = groups.find((entry) => entry.group.url === parent)?.group ?? null;
+            const name = group === null ? t("studio.bulk.topLevel") : readerText(group.title);
+            return bulk(onMove(selected, group), t("studio.bulk.moved", { count, group: name }));
+          }}
+          onPace={(change) => bulk(onPace(selected, change), t("studio.bulk.paced", { count }))}
+          onDirection={(direction) => bulk(onDirection(selected, direction), t("studio.bulk.directed", { count }))}
+          onRemove={() => bulk(onRemove(selected), t("studio.bulk.removed", { count }), true)}
+        />
+      </BulkBar>
     </section>
   );
 }

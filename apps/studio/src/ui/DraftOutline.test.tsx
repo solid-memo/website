@@ -4,6 +4,7 @@ import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problem
 import { applyDraftChanges, type DraftChange, type DraftRefusal, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { DraftOutline } from "./DraftOutline";
 import { courseDraft } from "../test/fixtures";
+import { answer, dialog } from "../test/dialogs";
 
 type Edit = (changes: DraftChange[]) => DraftRefusal | null;
 
@@ -122,7 +123,6 @@ describe("DraftOutline", () => {
   });
 
   it("retires a chapter or step, and deletes one never published once the user confirms", () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
     const onEdit = vi.fn<Edit>().mockReturnValueOnce(null).mockReturnValueOnce({ refused: "missing", id: "ch-apps" }).mockReturnValue(null);
     renderOutline(courseDraft(), { onEdit });
     openMenu("Apps");
@@ -135,19 +135,19 @@ describe("DraftOutline", () => {
     expect(status()).toHaveTextContent("Retired Apps.");
     openMenu("Step 1.2");
     fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }));
-    expect(confirm).toHaveBeenCalledWith("Delete Step 1.2? Its questions stay, asked nowhere.");
+    expect(dialog("Delete the step")).toHaveTextContent("Delete Step 1.2? Its questions stay, asked nowhere.");
+    answer("Delete the step", "Delete");
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "delete", of: "step", id: "ch-pods-2" }]);
     expect(status()).toHaveTextContent("Deleted Step 1.2.");
     // A delete refused says nothing.
     onEdit.mockReturnValueOnce({ refused: "missing", id: "ch-pods-1" });
     openMenu("Step 1.1");
     fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }));
+    answer("Delete the step", "Delete");
     expect(status()).toHaveTextContent("Deleted Step 1.2.");
-    vi.unstubAllGlobals();
   });
 
   it("deletes nothing the user does not confirm, nor what an earlier release published", () => {
-    vi.stubGlobal("confirm", vi.fn(() => false));
     const draft = { ...courseDraft(), published: { ids: { "ch-apps": "chapter" as const }, activities: [] } };
     const onEdit = vi.fn<Edit>(() => ({ refused: "missing", id: "x" }));
     renderOutline(draft, { onEdit });
@@ -156,12 +156,12 @@ describe("DraftOutline", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }));
     openMenu("Pods");
     fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }));
+    answer("Delete the chapter", "Cancel");
     expect(onEdit).not.toHaveBeenCalled();
     // A move the draft refuses says nothing.
     openMenu("Pods");
     fireEvent.click(screen.getByRole("menuitem", { name: "Move down" }));
     expect(status()).toHaveTextContent("");
-    vi.unstubAllGlobals();
   });
 
   it("changes nothing while the draft is held", () => {

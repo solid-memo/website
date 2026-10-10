@@ -26,6 +26,7 @@ import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
 import { ReadOnlyNotice } from "./ReadOnly";
 import type { CardTransfer } from "./TransferCardsDialog";
 import { useActivity } from "./shell/activity";
+import { BulkBar } from "./shell/BulkBar";
 import { DataTable, type Column } from "./shell/DataTable";
 import { Keys } from "./shell/KeyHelp";
 import { nextSort, NO_SELECTION, toggled, type Selection } from "./shell/tableModel";
@@ -74,7 +75,8 @@ function doneKey(edit: CardEdit) {
  * end of the page the card on the page beyond it.
  *
  * The selected cards the query keeps (on any page; one it hides stays
- * selected, but is left alone) can be edited at once (CardBulkActions):
+ * selected, but is left alone) can be edited at once, from the bar under
+ * the table (BulkBar, CardBulkActions; `.` opens its first menu):
  * each edit is planned on them (`plan`) and made (`onEdit`), then the
  * status line says what it did, with a way to undo it (`lastEdit`,
  * `onUndo`) until the next edit, or until the page is left. Deleted
@@ -91,8 +93,8 @@ function doneKey(edit: CardEdit) {
  *
  * Each card's lapses (`lapses`, from the answer log; a dash while it is
  * read, or when it cannot be, `lapsesFailed`) count its wrong answers
- * since the month of the deck's first answer in the log, which a line
- * above the table names.
+ * since the month of the deck's first answer in the log, which the row
+ * of filters names at its end.
  * While the deck may not be changed, a line says why, with a link to
  * its health (`healthHref`).
  */
@@ -322,59 +324,17 @@ export function CardWorkbenchScreen({
               (size) => filter({ size: Number(size) as CardPageSize }),
               CARD_PAGE_SIZES.map((size) => [String(size), String(size)]),
             )}
+            <p class="hint">{t("studio.cards.shown", { shown: rows.length, count: total })}</p>
+            <p class="hint">
+              {lapsesFailed
+                ? t("studio.cards.lapsesFailed")
+                : lapses === undefined
+                  ? t("studio.cards.lapsesLoading")
+                  : lapses.since === null
+                    ? t("studio.cards.lapsesNone")
+                    : t("studio.cards.lapsesSince", { month: formatMonth(lapses.since) })}
+            </p>
           </div>
-          <p class="hint">{t("studio.cards.shown", { shown: rows.length, count: total })}</p>
-          <p class="hint">
-            {lapsesFailed
-              ? t("studio.cards.lapsesFailed")
-              : lapses === undefined
-                ? t("studio.cards.lapsesLoading")
-                : lapses.since === null
-                  ? t("studio.cards.lapsesNone")
-                  : t("studio.cards.lapsesSince", { month: formatMonth(lapses.since) })}
-          </p>
-          <p class="hint studio-keys">
-            {tx("studio.cards.keys", {
-              j: <kbd>j</kbd>,
-              k: <kbd>k</kbd>,
-              x: <kbd>x</kbd>,
-              enter: <kbd>Enter</kbd>,
-              shiftJ: <Keys keys="Shift+J" />,
-              shiftK: <Keys keys="Shift+K" />,
-              escape: <kbd>Escape</kbd>,
-            })}
-          </p>
-          <div class="studio-selection">
-            <p role="status">{t("studio.cards.selected", { count })}</p>
-            {count > 0 && (
-              <button type="button" onClick={() => setChosen(NO_SELECTION)}>
-                {t("studio.cards.clear")}
-              </button>
-            )}
-          </div>
-          {selected.length > 0 && readOnly === null && (
-            <CardBulkActions
-              cards={selected}
-              languages={languages}
-              busy={busy}
-              plan={planSelected}
-              onEdit={(edit, planned) =>
-                onEdit(ids, edit, planned).then((ok) => {
-                  if (ok && edit.kind === "remove") unselect(selected);
-                  return ok;
-                })
-              }
-              today={today}
-              onReviewEdit={(edit) => onReviewEdit(ids, edit)}
-              decks={decks}
-              onTransfer={(transfer) =>
-                onTransfer(ids, transfer).then((ok) => {
-                  if (ok && transfer.mode === "move") unselect(selected);
-                  return ok;
-                })
-              }
-            />
-          )}
           {rows.length === 0 ? (
             <p>{t("studio.cards.noMatch")}</p>
           ) : (
@@ -430,6 +390,43 @@ export function CardWorkbenchScreen({
               )}
             </>
           )}
+          <BulkBar label={t("studio.cardBulk.label")} count={count} said={t("studio.cards.selected", { count })} onClear={() => setChosen(NO_SELECTION)}>
+            {selected.length > 0 && readOnly === null && (
+              <CardBulkActions
+                cards={selected}
+                languages={languages}
+                busy={busy}
+                plan={planSelected}
+                onEdit={(edit, planned) =>
+                  onEdit(ids, edit, planned).then((ok) => {
+                    if (ok && edit.kind === "remove") unselect(selected);
+                    return ok;
+                  })
+                }
+                today={today}
+                onReviewEdit={(edit) => onReviewEdit(ids, edit)}
+                decks={decks}
+                onTransfer={(transfer) =>
+                  onTransfer(ids, transfer).then((ok) => {
+                    if (ok && transfer.mode === "move") unselect(selected);
+                    return ok;
+                  })
+                }
+              />
+            )}
+          </BulkBar>
+          <p class="hint studio-keys">
+            {tx("studio.cards.keys", {
+              j: <kbd>j</kbd>,
+              k: <kbd>k</kbd>,
+              x: <kbd>x</kbd>,
+              enter: <kbd>Enter</kbd>,
+              shiftJ: <Keys keys="Shift+J" />,
+              shiftK: <Keys keys="Shift+K" />,
+              escape: <kbd>Escape</kbd>,
+              dot: <kbd>.</kbd>,
+            })}
+          </p>
         </>
       )}
     </section>

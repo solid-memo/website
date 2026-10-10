@@ -18,6 +18,7 @@ import { useFlip } from "@solid-memo/ui/deckTree/useFlip";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { MoveItems } from "@solid-memo/ui/MoveItems";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
+import { useConfirm } from "./shell/ConfirmDialog";
 
 /** A course's outline: its chapters at the top, its steps in a chapter, and no new groups. */
 export const OUTLINE_RULES: DropRules = {
@@ -70,6 +71,7 @@ export function DraftOutline({
   onEdit: (changes: DraftChange[]) => DraftRefusal | null;
 }) {
   const { t, readerText } = useI18n();
+  const { ask, dialog } = useConfirm();
   const badge = (id: string, name: string) => {
     const found = problems.get(id);
     return found === undefined ? null : <ProblemBadge count={found.length} name={name} href={badgeHref?.(found[0]!) ?? checkHref} />;
@@ -141,11 +143,16 @@ export function DraftOutline({
         <MenuItem
           danger
           disabled={readOnly || isPublished(draft, id)}
-          onSelect={() => {
-            if (window.confirm(t(`studio.draftEdit.deleteConfirm.${of}`, { name }))) {
-              if (onEdit([{ kind: "delete", of, id }]) === null) setAnnouncement(t("studio.outline.deleted", { name }));
-            }
-          }}
+          onSelect={() =>
+            ask({
+              heading: t(`studio.confirm.deletePart.${of}`),
+              text: t(`studio.draftEdit.deleteConfirm.${of}`, { name }),
+              action: t("studio.draftEdit.delete"),
+              onConfirm: () => {
+                if (onEdit([{ kind: "delete", of, id }]) === null) setAnnouncement(t("studio.outline.deleted", { name }));
+              },
+            })
+          }
         >
           {t("studio.draftEdit.delete")}
         </MenuItem>
@@ -260,6 +267,7 @@ export function DraftOutline({
       <p class="visually-hidden" role="status">
         {announcement}
       </p>
+      {dialog}
     </div>
   );
 }

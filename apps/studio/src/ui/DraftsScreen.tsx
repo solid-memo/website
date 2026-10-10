@@ -11,6 +11,7 @@ import { draftOf, LangTextField, rememberLanguages, textOfDraft, useMissingLangu
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import { ReadOnlyScope } from "./ReadOnly";
 import { useActivity } from "./shell/activity";
+import { useConfirm } from "./shell/ConfirmDialog";
 import { useScreenCommands } from "./shell/useScreenCommands";
 
 /** What a new draft starts from, as the form offers it. */
@@ -77,6 +78,7 @@ export function DraftsScreen({
   const [deckUrl, setDeckUrl] = useState(decks[0]?.url ?? "");
   const [releaseUrl, setReleaseUrl] = useState("");
   const { missing, ask, clear } = useMissingLanguage("draft-name");
+  const confirm = useConfirm();
   const formRef = useRef<HTMLFormElement>(null);
   // From the palette: the form's first field, what to start from, while a draft can be made.
   useScreenCommands(
@@ -255,9 +257,14 @@ export function DraftsScreen({
                           type="button"
                           aria-label={t("studio.drafts.deleteDraft", { draft: nameOf(draft), version: draft.version })}
                           disabled={deleting !== null}
-                          onClick={() => {
-                            if (window.confirm(t("studio.drafts.deleteConfirm", { draft: nameOf(draft), version: draft.version }))) onDelete(draft);
-                          }}
+                          onClick={() =>
+                            confirm.ask({
+                              heading: t("studio.confirm.deleteDraft"),
+                              text: t("studio.drafts.deleteConfirm", { draft: nameOf(draft), version: draft.version }),
+                              action: t("studio.drafts.delete"),
+                              onConfirm: () => onDelete(draft),
+                            })
+                          }
                         >
                           {t("studio.drafts.delete")}
                         </button>
@@ -274,6 +281,7 @@ export function DraftsScreen({
               : deleted !== null && t("studio.drafts.deleted", { draft: nameOf(deleted), version: deleted.version })}
           </p>
           <ErrorMessage error={deleteError} />
+          {confirm.dialog}
         </section>
       </ReadOnlyScope>
     </section>

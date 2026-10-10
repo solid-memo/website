@@ -41,6 +41,7 @@ describe("the Studio's keymap", () => {
     expect(shortcutOf("Enter", "cards")).toBe("open");
     expect(shortcutOf(press("J", { shiftKey: true }), "cards")).toBe("extendDown");
     expect(shortcutOf(press("Escape"), "cards")).toBe("clear");
+    expect(shortcutOf(".", "cards")).toBe("bulk");
     expect(shortcutOf("j", "studio")).toBeNull();
     expect(shortcutOf("Ctrl+j", "cards")).toBeNull();
   });

@@ -321,8 +321,12 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
   [languages.ts](../e2e/journeys/pages/languages.ts)).
 - **Flows** ([flows/](../e2e/journeys/flows/)): the steps many journeys
   share, such as logging in.
-- **Dialogs**: a step that expects a `confirm` names it with
-  `app.expectDialog(pattern)`; any other dialog fails the journey.
+- **Dialogs**: a step that expects the browser's `confirm` (Solid
+  Memo's) names it with `app.expectDialog(pattern)`; any other such
+  dialog fails the journey. The Studio asks in a dialog of its own
+  (`ConfirmDialog`), which a step answers as a user does, by its
+  heading and its button; so do its component tests
+  ([test/dialogs.ts](../apps/studio/src/test/dialogs.ts)).
 - **One after another**: a journey that needs what another made is in
   its file, after it, and the file runs in turn (`mode: "serial"`): the
   course the Studio journey publishes is added from its link by the next
