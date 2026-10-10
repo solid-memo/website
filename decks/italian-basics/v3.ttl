@@ -1,0 +1,1976 @@
+@base <https://solid-memo.com/decks/italian-basics/v3.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Basic Italian"@en ,
+                  "Grundläggande italienska"@sv ,
+                  "기초 이탈리아어"@ko ,
+                  "Italienisch für Anfänger"@de ,
+                  "Italiano básico"@es ,
+                  "Italien de base"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "120 Italian words and phrases for beginners: numbers 0–20, the tens and 100, the days of the week, the months, eight colours, ten family members, ten greetings and polite phrases, yes and no, 20 everyday nouns, six adjectives and 16 verbs. The front shows the Italian word, nouns with their definite article (il libro, lo zio, la casa; l' with the gender added: l'acqua (f.)); the back gives the meaning in English and Swedish, and also in Korean, German, Spanish and French (translated with the help of AI from the English and Swedish meanings), or the digits for a number. Notes give genders, plurals and feminine forms. From Wikidata's lexemes and the US Foreign Service Institute's Italian Programmed Course (public domain), checked against Italian, English and Swedish Wiktionary and Folkets lexikon."@en ,
+                        "120 italienska ord och fraser för nybörjare: talen 0–20, tiotalen och 100, veckodagarna, månaderna, åtta färger, tio familjemedlemmar, tio hälsningar och artighetsfraser, ja och nej, 20 vardagliga substantiv, sex adjektiv och 16 verb. Framsidan visar det italienska ordet, substantiv med bestämd artikel (il libro, lo zio, la casa; l' med genus angivet: l'acqua (f.)); baksidan ger betydelsen på engelska och svenska, och även på koreanska, tyska, spanska och franska (översatt med hjälp av AI från de engelska och svenska betydelserna), eller siffrorna för ett tal. Anteckningar anger genus, plural och femininformer. Från Wikidatas lexem och amerikanska Foreign Service Institutes Italian Programmed Course (fri från upphovsrätt), kontrollerat mot italienska, engelska och svenska Wiktionary och Folkets lexikon."@sv ,
+                        "초보자를 위한 이탈리아어 단어와 표현 120개입니다. 0–20의 수, 십 단위와 100, 요일, 달, 색 여덟 가지, 가족을 나타내는 말 열 개, 인사와 예의 표현 열 개, 예와 아니요, 일상 명사 20개, 형용사 여섯 개, 동사 16개가 있습니다. 앞면에는 이탈리아어 단어가 있고, 명사는 정관사와 함께 씁니다(il libro, lo zio, la casa; l'에는 성을 덧붙임: l'acqua (f.)). 뒷면에는 영어와 스웨덴어 뜻과 함께 한국어, 독일어, 스페인어, 프랑스어 뜻(영어와 스웨덴어 뜻을 바탕으로 AI의 도움을 받아 번역함)이, 수라면 숫자가 있습니다. 메모에는 성, 복수형, 여성형이 있습니다. 위키데이터의 어휘소와 미국 외교연수원(Foreign Service Institute)의 Italian Programmed Course(퍼블릭 도메인)에서 가져왔고, 이탈리아어·영어·스웨덴어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
+                        "120 italienische Wörter und Wendungen für Anfänger: die Zahlen 0–20, die Zehner und 100, die Wochentage, die Monate, acht Farben, zehn Familienmitglieder, zehn Grüße und Höflichkeitsformeln, ja und nein, 20 Alltagssubstantive, sechs Adjektive und 16 Verben. Die Vorderseite zeigt das italienische Wort, Substantive mit bestimmtem Artikel (il libro, lo zio, la casa; bei l' mit Angabe des Geschlechts: l'acqua (f.)); die Rückseite gibt die Bedeutung auf Englisch und Schwedisch und außerdem auf Koreanisch, Deutsch, Spanisch und Französisch (mithilfe von KI aus den englischen und schwedischen Bedeutungen übersetzt) oder bei einer Zahl die Ziffern. Anmerkungen nennen Geschlecht, Plural und weibliche Formen. Aus den Lexemen von Wikidata und dem Italian Programmed Course des US-amerikanischen Foreign Service Institute (gemeinfrei), geprüft am italienischen, englischen und schwedischen Wiktionary und an Folkets lexikon."@de ,
+                        "120 palabras y frases en italiano para principiantes: los números del 0 al 20, las decenas y el 100, los días de la semana, los meses, ocho colores, diez miembros de la familia, diez saludos y fórmulas de cortesía, sí y no, 20 sustantivos cotidianos, seis adjetivos y 16 verbos. El anverso muestra la palabra italiana, los sustantivos con su artículo determinado (il libro, lo zio, la casa; con l' se añade el género: l'acqua (f.)); el reverso da el significado en inglés y sueco, y también en coreano, alemán, español y francés (traducido con ayuda de IA a partir de los significados en inglés y sueco), o las cifras en el caso de un número. Las notas indican el género, el plural y las formas femeninas. De los lexemas de Wikidata y del Italian Programmed Course del Foreign Service Institute de Estados Unidos (de dominio público), comprobado con el Wikcionario en italiano, inglés y sueco y con Folkets lexikon."@es ,
+                        "120 mots et expressions italiens pour débutants : les nombres de 0 à 20, les dizaines et 100, les jours de la semaine, les mois, huit couleurs, dix membres de la famille, dix salutations et formules de politesse, oui et non, 20 noms courants, six adjectifs et 16 verbes. Le recto montre le mot italien, les noms avec leur article défini (il libro, lo zio, la casa ; l' avec le genre indiqué : l'acqua (f.)) ; le verso donne le sens en anglais et en suédois, et aussi en coréen, en allemand, en espagnol et en français (traduit avec l’aide de l’IA à partir des sens anglais et suédois), ou les chiffres pour un nombre. Les notes indiquent le genre, le pluriel et les formes féminines. Issu des lexèmes de Wikidata et de l’Italian Programmed Course du Foreign Service Institute des États-Unis (domaine public), vérifié dans les Wiktionnaires italien, anglais et suédois et dans Folkets lexikon."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://archive.org/details/Fsi-ItalianProgrammedCourse-Text> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:italian ;
+    dcat:keyword "Italian"@en ,
+                 "vocabulary"@en ,
+                 "beginners"@en ,
+                 "phrases"@en ,
+                 "italienska"@sv ,
+                 "ordförråd"@sv ,
+                 "nybörjare"@sv ,
+                 "fraser"@sv ,
+                 "이탈리아어"@ko ,
+                 "어휘"@ko ,
+                 "초보자"@ko ,
+                 "표현"@ko ,
+                 "Italienisch"@de ,
+                 "Wortschatz"@de ,
+                 "Anfänger"@de ,
+                 "Redewendungen"@de ,
+                 "italiano"@es ,
+                 "vocabulario"@es ,
+                 "principiantes"@es ,
+                 "frases"@es ,
+                 "italien"@fr ,
+                 "vocabulaire"@fr ,
+                 "débutants"@fr ,
+                 "expressions"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/ITA> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/italian-basics/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/italian-basics/v2.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each card's meaning, and its note, in Korean, German, Spanish and French as well as English and Swedish; no word was added, removed or changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#italian-basics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#italian-basics> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/2.5/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://archive.org/details/Fsi-ItalianProgrammedCourse-Text> ,
+              <https://it.wiktionary.org/> ,
+              <https://en.wiktionary.org/> ,
+              <https://sv.wiktionary.org/> ,
+              <https://folkets-lexikon.csc.kth.se/folkets/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ,
+                       <#review-7> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Word list. A candidate list of 120 words and phrases for a first Italian course was drawn up by hand from the brief's categories (numbers 0–20, the tens and 100; days; months; colours; family; greetings and polite phrases; everyday nouns; adjectives; verbs), choosing the most basic word for each concept and following the authored French deck where the languages allow. The family has ten members, uncle and aunt included, so that lo (lo zio) appears on a card. No frequency list or textbook word list was copied."@en ,
+                 "Wikidata lexemes. SPARQL query 1 fetched every Italian lexeme (language Q652) whose lemma is a candidate (plus buon giorno, buona sera, buona notte, per piacere, scusa, arancio and tavolo, looked at as alternatives), with its category, gender (P5185), senses, English and Italian glosses and sense items (P5137). Four candidates were not found: buonasera, a presto, per favore and scusi. The lexeme search (API calls 2) found no lexeme for buonasera, buona sera, a presto, per favore, per piacere, mi scusi or buon giorno; it found the verb scusare (L1206184), whose form F44 is scusi (third person singular, present imperative). The full JSON of all lexemes found was fetched with API calls 3. For each word the lexeme of the card's part of speech was chosen (numeral for numbers, noun for nouns, days and months, adjective for colours and adjectives, verb for verbs, interjection or adverb for the greetings, sì and no)."@en ,
+                 "Wikidata items. The items linked from the chosen senses (P5137), plus four items found with the item search (API calls 5: 17 Q40118, good evening Q19279366, goodbye Q2506912, thank you Q19279214), were fetched with API calls 4 (labels and aliases in it, en, sv and mul). They gave the English and Swedish names of days, months, colours, family members, greetings and everyday things and the digit labels of the numbers. For colours the adjective lexeme gives the front and the feminine form, and the noun lexeme of the same colour links the item (most adjective lexemes have no senses). The labels of the grammatical items used in the lexemes (categories, genders, form features) were fetched with API call 6."@en ,
+                 "Phrases from the FSI course. For the phrases with no Wikidata lexeme, the Internet Archive was searched for public-domain Foreign Service Institute Italian courses (call 8). The two searches found the Italian (Programmed) Course, Volume I (1976), with a public-domain licence, one audio lesson of the FSI Italian FAST course, and other items that were not used (lending-library scans titled \"Italian : programmed\" and an ERIC Post Language Program course of unknown status). The OCR text of the Programmed Course was downloaded (call 9) and searched with grep (call 10); passages were then read in context by line range. The course gives buon giorno and buona sera (Recapitulation, Greetings), per favore and per piacere (Unit XXII), arrivederci and arrivederLa (Unit XXII), come sta? (Unit XVII), prego (Unit XXIV), scusi (Unit XXIV), the word for thank you (Unit XVII; written g in the course's abbreviations) and si/no (Unit VIII). It has no ciao, buonanotte or a presto. A presto (see you soon), on the first word list, has neither a Wikidata lexeme nor a public-domain source and was replaced by come sta? (how are you?), which the course teaches. The quotations from the course give its text with OCR errors and spacing normalised (for example \"bsne\" read as bene); where that matters the evidence says so."@en ,
+                 "Writing the cards. The front is the Italian word as in the lexeme's lemma (or the FSI phrase), lower case. Nouns are preceded by the definite article that shows their gender: il and lo (before z, s + consonant, gn and ps) for masculine nouns, la for feminine ones; before a vowel the article is written l' and the gender is added in brackets, m. or f. (l'acqua (f.), l'uomo (m.), l'amico (m.)); the apostrophe is the straight ASCII apostrophe. Days and months are given without an article and in lower case, as Italian writes them, with their gender in a note. Colours and adjectives are given in the masculine singular with the feminine in a note; verbs in the infinitive. Greetings are given in their one-word spelling where Wikidata has that lemma (buongiorno, buonanotte) and, for buonasera, as the FSI course's buona sera written as one word in the same way as Wikidata's lemmas buongiorno (L1165742) and buonanotte (L1165741), a spelling that Italian and English Wiktionary only confirm; the two-word spellings (buon giorno, buona sera, buona notte, as the FSI course writes them) are named in the notes. The back is our own short English and Swedish rendering of the main sense: for nouns the bare noun, for verbs the infinitive (English \"to …\", Swedish \"att …\"), for numbers the digits (tagged zxx, as digits are in no language). English and Swedish follow the Wikidata labels where an item exists and has them; otherwise they are the usual equivalents, chosen by the authors and checked in English Wiktionary, Folkets lexikon and Swedish Wiktionary. Where a word has two everyday equivalents both are given (buongiorno: good morning, good day; ciao: hi, bye; città: city, town; andare: gå, åka; parlare: tala, prata). Rule for text not given by a content source: English and Swedish equivalents and the facts behind the notes come from the authors' own knowledge of the languages, are worded by the authors and are only confirmed in the verification sources; such single words and short facts of usage count as the authors' own content. Per favore is snälla, the usual Swedish word in a spoken request (Folkets lexikon gives it for the interjection please); the Swedish note adds that a spoken Swedish request often ends with tack."@en ,
+                 "Notes. A short note was added where it helps a beginner and is confirmed by a source: the gender of each day and month (domenica is the only feminine day); the feminine of each colour and adjective (blu invariable, verde, grande and arancione the same in the feminine; buon before most masculine nouns); the plural, with its article (i, gli, le), of every countable noun, from the lexeme's forms and the Wiktionary head lines (irregular: gli uomini, le mani, le città unchanged; i fratelli also meaning brothers and sisters, i figli children, i nonni grandparents); mano being feminine; lo before z, s + consonant, gn and ps; l'amica; uno also being the article before z, s + consonant, gn and ps, and sei also meaning you are (each with a front note \"number\"); the formal and informal forms (arrivederLa, come stai?, scusa), per piacere, prego to let someone go ahead, non before a verb, and the Swedish gå/åka distinction. Notes are our own wording."@en ,
+                 "Cross-checking. Every Italian word was looked up in Italian Wiktionary (calls 12), except come sta?, which has no page there, and no, whose entry gives only marginal senses (English Wiktionary, Wikidata and the FSI course check those two): spelling, part of speech, the gender mark on the head line against the article on the card, the plural, and the first relevant definition (quoted in each card's evidence). Every English meaning was checked against the Italian section of English Wiktionary (calls 13, REST definition API), and for nouns, adjectives, days and months the Italian head template in the page's wikitext (gender, plural, inflection). Every Swedish word was checked in Folkets lexikon (call 15), English → Swedish, or Swedish → English when the first direction had no match, and, where a page with an Italian section exists, in Swedish Wiktionary (calls 14). A Python script built the evidence lines from the responses saved during authoring, so each quote is what the source returned, with wiki markup removed; quotations longer than 160 characters are cut and marked with \"…\". The raw responses and scripts were working files and are not published."@en ,
+                 "Dictionaries not used. The brief suggested Treccani or the Accademia della Crusca for checking the Italian. Treccani's terms (https://www.treccani.it/footer/termine-condizioni/, read before any dictionary page) state: \"Ai sensi dell'art. 4 della Direttiva UE 2019/790, si comunica che l'uso di tutti i contenuti presenti sul portale www.treccani.it per attività di text e data mining è espressamente vietato senza preventiva autorizzazione scritta del titolare dei diritti.\" Treccani was therefore not consulted at all; its home page (https://www.treccani.it/) was fetched only to find the link to these terms. The Accademia della Crusca publishes no general dictionary to check words against; only its home page (https://accademiadellacrusca.it/) was fetched, which shows \"© 2019 Accademia della Crusca\" and no licence, and it was not used. Italian Wiktionary and English Wiktionary, whose licences allow automated use, verify every Italian form and gender instead."@en ,
+                 "Machine checks. The dossier's Wikidata checks (the Italian, English and Swedish label or alias of each linked item that matches the card's text, and the mul digit label of each number: 251 checks on 98 items) are re-run against live Wikidata by the builder on every build. Wikidata lexemes cannot be checked by the builder (it checks items only); the lexeme facts in the evidence were read from the API responses of 4 October 2026. The built deck was validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts)."@en ,
+                 "Excluded: a presto (no open source, see step 5), words with two equally common forms or meanings that a single card cannot separate (il tavolo and la tavola, both table; la strada and la via, both street; azzurro beside blu; marrone and castano for brown), the formal/informal pronouns tu and Lei (which need grammar, not a flashcard; they appear only in notes), the year (anno and annata), and conoscere/sapere (both to know)."@en ,
+                 "Selection: 120 cards: the cardinal numbers 0–20, the tens 30–90 and 100 (29); the seven days of the week; the twelve months; eight colours (red, blue, green, yellow, black, white, grey, orange); ten family members (mother, father, brother, sister, son, daughter, grandfather, grandmother, uncle, aunt); ten greetings and polite phrases (buongiorno, buonasera, buonanotte, ciao, arrivederci, come sta?, grazie, per favore, prego, scusi) and yes and no (sì, no); 20 everyday nouns (house, water, bread, milk, apple, book, chair, door, window, dog, cat, city, school, man, woman, friend, hand, day, night, week); six common adjectives (grande, piccolo, buono, cattivo, nuovo, vecchio); and 16 common verbs in the infinitive (essere, avere, andare, fare, venire, parlare, mangiare, bere, amare, volere, potere, vedere, leggere, scrivere, dormire, lavorare). The list was chosen by the deck's authors for a first course, not copied from any frequency list or textbook. Every word has a Wikidata lexeme except buonasera, come sta? and per favore, which come from the public-domain FSI course. Left out: a presto (no open source; come sta? took its place), table and street (two everyday words each: tavolo/tavola, strada/via), brown (marrone, castano) and the light blue azzurro, the pronouns tu and Lei, the pair anno/annata, and conoscere/sapere. Nouns are given with the definite article (il, lo, la); before a vowel the elided l' is followed by the gender, (m.) or (f.); the notes give the plural with its article (i, gli, le) for every countable noun. Colours and adjectives are given in the masculine singular, with the feminine in a note. Days and months are given without an article and in lower case, as Italian writes them; their gender is in a note on every day and month card. Greetings are written as one word (buongiorno, buonasera, buonanotte), with the two-word spelling in the note."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from two sources whose terms allow any reuse: Wikidata's lexemes and items (CC0 1.0: Italian lemmas, genders, forms, glosses and Italian, English and Swedish labels) and the Foreign Service Institute's Italian (Programmed) Course, Volume I (1976), a work of the United States Government with no copyright protection under 17 U.S.C. § 105 (three phrases with their meaning, the facts in four notes, and a check of eight more cards). The selection of words is the authors' own. The English and Swedish renderings not taken from Wikidata are the usual equivalents chosen by the authors; several of them are the same short stock glosses that English Wiktionary, Swedish Wiktionary or Folkets lexikon give, as the source records say. Single words and fixed greetings such as \"good morning\" or \"ingen orsak\" are facts of usage, not protectable expression, so this does not carry those sources' licences into the deck; no definition, example, comment or list was taken from them. The rule applied throughout: English and Swedish equivalents and the facts in the notes not given by a content source are the authors' own knowledge, worded by them and only confirmed in a verification source. Italian Wiktionary, English Wiktionary and Swedish Wiktionary (CC BY-SA 4.0) and Folkets lexikon (CC BY-SA 2.5) were used for verification only. Treccani was not used, because its terms forbid text and data mining, and the Accademia della Crusca was not used (method, step 9). So no source requires attribution or share-alike for the deck, although all are credited in its provenance. The quotations in the provenance report are not covered by the deck's CC0 dedication or the repository's MIT licence: quotations from the three Wiktionaries are © their contributors, CC BY-SA 4.0; quotations from Folkets lexikon are CC BY-SA 2.5; quotations from the FSI course are in the public domain; Wikidata data is CC0."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks"@en ;
+    rdfs:comment "Scope: All 120 cards: every Italian form, gender, plural, English and Swedish meaning and note against the content sources and the verification sources; the builder's Wikidata checks."@en ,
+                 "Outcome: Every card has evidence from a content source (Wikidata, or the FSI course for buonasera, come sta? and per favore) and at least two verification sources. Italian Wiktionary agrees with the spelling of every Italian word on the cards except the phrase come sta?, which it has no page for (English Wiktionary does); the gender shown on every noun, day and month card agrees with the Wikidata lexeme (or its forms), Italian Wiktionary and the English Wiktionary head template. English Wiktionary confirms every English back; Folkets lexikon, Swedish Wiktionary or a Swedish Wikidata label confirms every Swedish back. The builder's Wikidata checks cover the Italian, English and Swedish labels or aliases of 97 linked items (249 checks), including the digit label of every number; they all pass. Discrepancies between sources and how they were resolved are listed below. No review round has been run yet."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 120 cards, the description and selection; live Wikidata, Folkets lexikon and validate_sources re-run."@en ,
+                 "Outcome: No outright factual errors. Two warnings (the Swedish for please; the incomplete rule for uno as an article) and three suggestions (the same gap in the note on lo; home for casa; sì and no counted among the greetings) were verified against the sources and all applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 120 cards, the title, description and keywords against the built TTL; language tags, Swedish idiom and conventions."@en ,
+                 "Outcome: Language tags all correct and no wrong card. Two warnings (the ambiguous Swedish note on no; vänligen for please) and three wording suggestions (come sta?, buonasera, prego) were checked and all applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Licences and licence evidence of all sources, the CC0 deck licence, method, queries, licensing paragraph and the evidence of 30 cards spot-checked against live sources."@en ,
+                 "Outcome: The CC0 deck licence and every source licence were confirmed. Two warnings (the record of where buonasera's one-word spelling comes from; missing evidence for cattivo's elak) and three suggestions (Folkets' description of uncle; the FSI card count; a garbled English Wiktionary quote) were verified and all applied; the same garbled-quote artefact was found and fixed on buono and fare."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 12 cards changed in rounds 1–3, every third other card (51 cards in all), the deck metadata, the method, the licensing paragraph and the quality-control log, against live Wikidata, English Wiktionary, Folkets lexikon and the FSI course text."@en ,
+                 "Outcome: Every fix claimed in rounds 1–3 was confirmed in the dossier, and the sampled labels, lexeme facts and language tags matched the live sources. One suggestion, that the newly added meanings home (casa) and make (fare) also be cited from Wikidata, was verified and applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 120 cards, the deck metadata (title, description, keywords, study direction), the method, the licensing paragraph and the fixes logged in rounds 1–4."@en ,
+                 "Outcome: All 120 cards were found correct, with correct language tags and idiomatic Swedish, and every fix from rounds 1–4 was confirmed in the dossier. One optional suggestion, on the Swedish note of per favore, was checked and applied."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<#review-7>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 3: meanings and notes in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: every card’s back and note, the word’s meaning,, translated by AI agents from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with the version before, which found the new texts, the description, the languages and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: every back and note is in Korean, German, Spanish and French as well; the fronts, the English and Swedish meanings and the sources are unchanged."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata (Italian lexemes and items)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (read with action=raw) — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under [https://creativecommons.org/publicdomain/zero/1.0/ Creative Commons Zero].\""@en .
+
+<https://archive.org/details/Fsi-ItalianProgrammedCourse-Text>
+    dcterms:title "Italian (Programmed Course), Volume I (Foreign Service Institute Basic Course Series), student text as scanned on the Internet Archive" ;
+    dcterms:creator "Stephen Zappala; edited by Augustus A. Koski and Marianne Lehr Adams; Foreign Service Institute, U.S. Department of State (1976)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "A work of the United States Government: the title pages read \"DEPARTMENT OF STATE\", \"FOREIGN SERVICE INSTITUTE WASHINGTON, D.C. 1976\" and \"FOREIGN SERVICE INSTITUTE BASIC COURSE SERIES\", the preface is signed by the Dean of the FSI School of Language Studies (\"James R. Frith, Dean, School of Language Studies, Foreign Service Institute, Department of State\"; the OCR text reads \"JSmes R. Frith\"), and the last line of the volume is the imprint \"U S GOVERNMENT PRINTING OFFICE 1976\". 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The Internet Archive item's metadata (https://archive.org/metadata/Fsi-ItalianProgrammedCourse-Text) gives licenseurl \"http://creativecommons.org/licenses/publicdomain/\". Recorded here with the Public Domain Mark: free of known copyright."@en .
+
+<https://it.wiktionary.org/>
+    dcterms:title "Wikizionario (Italian Wiktionary), Italian entries" ;
+    dcterms:creator "Wikizionario contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://it.wiktionary.org/wiki/casa — page footer: \"Il testo è disponibile secondo la licenza Creative Commons Attribuzione-Condividi allo stesso modo; possono applicarsi condizioni ulteriori.\", linking to https://creativecommons.org/licenses/by-sa/4.0/deed.it."@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (Italian entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wiktionary.org/wiki/casa — page footer: \"Definitions and other text are available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.\", linking to https://creativecommons.org/licenses/by-sa/4.0/."@en .
+
+<https://sv.wiktionary.org/>
+    dcterms:title "Swedish Wiktionary (Italian entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wiktionary.org/wiki/casa — page footer: \"Text är tillgänglig under licensen Creative Commons Erkännande-Dela Lika; ytterligare villkor kan gälla.\", linking to https://creativecommons.org/licenses/by-sa/4.0/deed.sv."@en .
+
+<https://folkets-lexikon.csc.kth.se/folkets/>
+    dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
+    dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
+    rdfs:comment "https://folkets-lexikon.csc.kth.se/folkets/om.html — \"Både engelsk-svenska lexikonet och svensk-engelska lexikonet kan laddas ner i ett eget XML-format under Distributed Creative Commons Attribution-Share Alike 2.5 Generic license.\""@en .
+
+<#zero>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "zero"@it ;
+    solid-memo:back "0"@zxx .
+
+<#uno>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "uno"@it ;
+    solid-memo:frontNote "number"@en ,
+                         "tal"@sv ,
+                         "수"@ko ,
+                         "Zahl"@de ,
+                         "número"@es ,
+                         "nombre"@fr ;
+    solid-memo:back "1"@zxx ;
+    solid-memo:backNote "Also the indefinite article (a, an) before z, s + consonant, gn and ps: uno zio; before most other masculine nouns: un."@en ,
+                        "Också obestämd artikel (en, ett) före z, s + konsonant, gn och ps: uno zio; före de flesta andra maskulina substantiv: un."@sv ,
+                        "z, s + 자음, gn, ps 앞에서는 부정관사(‘한, 어떤’)이기도 해요: uno zio. 그 밖의 대부분의 남성 명사 앞에서는 un."@ko ,
+                        "Auch der unbestimmte Artikel (ein) vor z, s + Konsonant, gn und ps: uno zio; vor den meisten anderen maskulinen Substantiven: un."@de ,
+                        "También el artículo indeterminado (un) delante de z, s + consonante, gn y ps: uno zio; delante de la mayoría de los demás sustantivos masculinos: un."@es ,
+                        "Aussi l’article indéfini (un) devant z, s + consonne, gn et ps : uno zio ; devant la plupart des autres noms masculins : un."@fr .
+
+<#due>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "due"@it ;
+    solid-memo:back "2"@zxx .
+
+<#tre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tre"@it ;
+    solid-memo:back "3"@zxx .
+
+<#quattro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "quattro"@it ;
+    solid-memo:back "4"@zxx .
+
+<#cinque>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cinque"@it ;
+    solid-memo:back "5"@zxx .
+
+<#sei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sei"@it ;
+    solid-memo:frontNote "number"@en ,
+                         "tal"@sv ,
+                         "수"@ko ,
+                         "Zahl"@de ,
+                         "número"@es ,
+                         "nombre"@fr ;
+    solid-memo:back "6"@zxx ;
+    solid-memo:backNote "Sei is also a form of essere: (tu) sei, you are."@en ,
+                        "Sei är också en form av essere: (tu) sei, du är."@sv ,
+                        "sei는 essere의 활용형이기도 해요: (tu) sei, 너는 ~이야."@ko ,
+                        "Sei ist auch eine Form von essere: (tu) sei, du bist."@de ,
+                        "Sei es también una forma de essere: (tu) sei, tú eres."@es ,
+                        "Sei est aussi une forme d’essere : (tu) sei, tu es."@fr .
+
+<#sette>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sette"@it ;
+    solid-memo:back "7"@zxx .
+
+<#otto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "otto"@it ;
+    solid-memo:back "8"@zxx .
+
+<#nove>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nove"@it ;
+    solid-memo:back "9"@zxx .
+
+<#dieci>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dieci"@it ;
+    solid-memo:back "10"@zxx .
+
+<#undici>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "undici"@it ;
+    solid-memo:back "11"@zxx .
+
+<#dodici>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dodici"@it ;
+    solid-memo:back "12"@zxx .
+
+<#tredici>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tredici"@it ;
+    solid-memo:back "13"@zxx .
+
+<#quattordici>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "quattordici"@it ;
+    solid-memo:back "14"@zxx .
+
+<#quindici>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "quindici"@it ;
+    solid-memo:back "15"@zxx .
+
+<#sedici>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sedici"@it ;
+    solid-memo:back "16"@zxx .
+
+<#diciassette>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "diciassette"@it ;
+    solid-memo:back "17"@zxx .
+
+<#diciotto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "diciotto"@it ;
+    solid-memo:back "18"@zxx .
+
+<#diciannove>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "diciannove"@it ;
+    solid-memo:back "19"@zxx .
+
+<#venti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "venti"@it ;
+    solid-memo:back "20"@zxx .
+
+<#trenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "trenta"@it ;
+    solid-memo:back "30"@zxx .
+
+<#quaranta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "quaranta"@it ;
+    solid-memo:back "40"@zxx .
+
+<#cinquanta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cinquanta"@it ;
+    solid-memo:back "50"@zxx .
+
+<#sessanta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sessanta"@it ;
+    solid-memo:back "60"@zxx .
+
+<#settanta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "settanta"@it ;
+    solid-memo:back "70"@zxx .
+
+<#ottanta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ottanta"@it ;
+    solid-memo:back "80"@zxx .
+
+<#novanta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "novanta"@it ;
+    solid-memo:back "90"@zxx .
+
+<#cento>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cento"@it ;
+    solid-memo:back "100"@zxx .
+
+<#lunedi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lunedì"@it ;
+    solid-memo:back "Monday"@en ,
+                    "måndag"@sv ,
+                    "월요일"@ko ,
+                    "Montag"@de ,
+                    "lunes"@es ,
+                    "lundi"@fr ;
+    solid-memo:backNote "Masculine, like every day except domenica; written in lower case."@en ,
+                        "Maskulinum, som alla veckodagar utom domenica; skrivs med liten bokstav."@sv ,
+                        "domenica를 제외한 모든 요일처럼 남성 명사이고, 소문자로 써요."@ko ,
+                        "Maskulinum wie alle Wochentage außer domenica; kleingeschrieben."@de ,
+                        "Masculino, como todos los días salvo domenica; se escribe con minúscula."@es ,
+                        "Masculin, comme tous les jours sauf domenica ; s’écrit avec une minuscule."@fr .
+
+<#martedi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "martedì"@it ;
+    solid-memo:back "Tuesday"@en ,
+                    "tisdag"@sv ,
+                    "화요일"@ko ,
+                    "Dienstag"@de ,
+                    "martes"@es ,
+                    "mardi"@fr ;
+    solid-memo:backNote "Masculine, like every day except domenica; written in lower case."@en ,
+                        "Maskulinum, som alla veckodagar utom domenica; skrivs med liten bokstav."@sv ,
+                        "domenica를 제외한 모든 요일처럼 남성 명사이고, 소문자로 써요."@ko ,
+                        "Maskulinum wie alle Wochentage außer domenica; kleingeschrieben."@de ,
+                        "Masculino, como todos los días salvo domenica; se escribe con minúscula."@es ,
+                        "Masculin, comme tous les jours sauf domenica ; s’écrit avec une minuscule."@fr .
+
+<#mercoledi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mercoledì"@it ;
+    solid-memo:back "Wednesday"@en ,
+                    "onsdag"@sv ,
+                    "수요일"@ko ,
+                    "Mittwoch"@de ,
+                    "miércoles"@es ,
+                    "mercredi"@fr ;
+    solid-memo:backNote "Masculine, like every day except domenica; written in lower case."@en ,
+                        "Maskulinum, som alla veckodagar utom domenica; skrivs med liten bokstav."@sv ,
+                        "domenica를 제외한 모든 요일처럼 남성 명사이고, 소문자로 써요."@ko ,
+                        "Maskulinum wie alle Wochentage außer domenica; kleingeschrieben."@de ,
+                        "Masculino, como todos los días salvo domenica; se escribe con minúscula."@es ,
+                        "Masculin, comme tous les jours sauf domenica ; s’écrit avec une minuscule."@fr .
+
+<#giovedi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "giovedì"@it ;
+    solid-memo:back "Thursday"@en ,
+                    "torsdag"@sv ,
+                    "목요일"@ko ,
+                    "Donnerstag"@de ,
+                    "jueves"@es ,
+                    "jeudi"@fr ;
+    solid-memo:backNote "Masculine, like every day except domenica; written in lower case."@en ,
+                        "Maskulinum, som alla veckodagar utom domenica; skrivs med liten bokstav."@sv ,
+                        "domenica를 제외한 모든 요일처럼 남성 명사이고, 소문자로 써요."@ko ,
+                        "Maskulinum wie alle Wochentage außer domenica; kleingeschrieben."@de ,
+                        "Masculino, como todos los días salvo domenica; se escribe con minúscula."@es ,
+                        "Masculin, comme tous les jours sauf domenica ; s’écrit avec une minuscule."@fr .
+
+<#venerdi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "venerdì"@it ;
+    solid-memo:back "Friday"@en ,
+                    "fredag"@sv ,
+                    "금요일"@ko ,
+                    "Freitag"@de ,
+                    "viernes"@es ,
+                    "vendredi"@fr ;
+    solid-memo:backNote "Masculine, like every day except domenica; written in lower case."@en ,
+                        "Maskulinum, som alla veckodagar utom domenica; skrivs med liten bokstav."@sv ,
+                        "domenica를 제외한 모든 요일처럼 남성 명사이고, 소문자로 써요."@ko ,
+                        "Maskulinum wie alle Wochentage außer domenica; kleingeschrieben."@de ,
+                        "Masculino, como todos los días salvo domenica; se escribe con minúscula."@es ,
+                        "Masculin, comme tous les jours sauf domenica ; s’écrit avec une minuscule."@fr .
+
+<#sabato>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sabato"@it ;
+    solid-memo:back "Saturday"@en ,
+                    "lördag"@sv ,
+                    "토요일"@ko ,
+                    "Samstag"@de ,
+                    "sábado"@es ,
+                    "samedi"@fr ;
+    solid-memo:backNote "Masculine, like every day except domenica; written in lower case."@en ,
+                        "Maskulinum, som alla veckodagar utom domenica; skrivs med liten bokstav."@sv ,
+                        "domenica를 제외한 모든 요일처럼 남성 명사이고, 소문자로 써요."@ko ,
+                        "Maskulinum wie alle Wochentage außer domenica; kleingeschrieben."@de ,
+                        "Masculino, como todos los días salvo domenica; se escribe con minúscula."@es ,
+                        "Masculin, comme tous les jours sauf domenica ; s’écrit avec une minuscule."@fr .
+
+<#domenica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "domenica"@it ;
+    solid-memo:back "Sunday"@en ,
+                    "söndag"@sv ,
+                    "일요일"@ko ,
+                    "Sonntag"@de ,
+                    "domingo"@es ,
+                    "dimanche"@fr ;
+    solid-memo:backNote "Feminine, the only feminine day of the week; written in lower case."@en ,
+                        "Femininum, den enda feminina veckodagen; skrivs med liten bokstav."@sv ,
+                        "여성 명사이며, 요일 중 유일하게 여성이에요. 소문자로 써요."@ko ,
+                        "Femininum, der einzige weibliche Wochentag; kleingeschrieben."@de ,
+                        "Femenino, el único día femenino de la semana; se escribe con minúscula."@es ,
+                        "Féminin, le seul jour féminin de la semaine ; s’écrit avec une minuscule."@fr .
+
+<#gennaio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "gennaio"@it ;
+    solid-memo:back "January"@en ,
+                    "januari"@sv ,
+                    "1월"@ko ,
+                    "Januar"@de ,
+                    "enero"@es ,
+                    "janvier"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#febbraio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "febbraio"@it ;
+    solid-memo:back "February"@en ,
+                    "februari"@sv ,
+                    "2월"@ko ,
+                    "Februar"@de ,
+                    "febrero"@es ,
+                    "février"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#marzo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "marzo"@it ;
+    solid-memo:back "March"@en ,
+                    "mars"@sv ,
+                    "3월"@ko ,
+                    "März"@de ,
+                    "marzo"@es ,
+                    "mars"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#aprile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "aprile"@it ;
+    solid-memo:back "April"@en ,
+                    "april"@sv ,
+                    "4월"@ko ,
+                    "April"@de ,
+                    "abril"@es ,
+                    "avril"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#maggio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "maggio"@it ;
+    solid-memo:back "May"@en ,
+                    "maj"@sv ,
+                    "5월"@ko ,
+                    "Mai"@de ,
+                    "mayo"@es ,
+                    "mai"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#giugno>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "giugno"@it ;
+    solid-memo:back "June"@en ,
+                    "juni"@sv ,
+                    "6월"@ko ,
+                    "Juni"@de ,
+                    "junio"@es ,
+                    "juin"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#luglio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "luglio"@it ;
+    solid-memo:back "July"@en ,
+                    "juli"@sv ,
+                    "7월"@ko ,
+                    "Juli"@de ,
+                    "julio"@es ,
+                    "juillet"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#agosto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "agosto"@it ;
+    solid-memo:back "August"@en ,
+                    "augusti"@sv ,
+                    "8월"@ko ,
+                    "August"@de ,
+                    "agosto"@es ,
+                    "août"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#settembre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "settembre"@it ;
+    solid-memo:back "September"@en ,
+                    "september"@sv ,
+                    "9월"@ko ,
+                    "September"@de ,
+                    "septiembre"@es ,
+                    "septembre"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#ottobre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ottobre"@it ;
+    solid-memo:back "October"@en ,
+                    "oktober"@sv ,
+                    "10월"@ko ,
+                    "Oktober"@de ,
+                    "octubre"@es ,
+                    "octobre"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#novembre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "novembre"@it ;
+    solid-memo:back "November"@en ,
+                    "november"@sv ,
+                    "11월"@ko ,
+                    "November"@de ,
+                    "noviembre"@es ,
+                    "novembre"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#dicembre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dicembre"@it ;
+    solid-memo:back "December"@en ,
+                    "december"@sv ,
+                    "12월"@ko ,
+                    "Dezember"@de ,
+                    "diciembre"@es ,
+                    "décembre"@fr ;
+    solid-memo:backNote "Masculine and written in lower case."@en ,
+                        "Maskulinum och skrivs med liten bokstav."@sv ,
+                        "남성 명사이며 소문자로 써요."@ko ,
+                        "Maskulinum und kleingeschrieben."@de ,
+                        "Masculino y se escribe con minúscula."@es ,
+                        "Masculin et s’écrit avec une minuscule."@fr .
+
+<#rosso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "rosso"@it ;
+    solid-memo:back "red"@en ,
+                    "röd"@sv ,
+                    "빨간색"@ko ,
+                    "rot"@de ,
+                    "rojo"@es ,
+                    "rouge"@fr ;
+    solid-memo:backNote "Feminine: rossa."@en ,
+                        "Femininum: rossa."@sv ,
+                        "여성형: rossa."@ko ,
+                        "Femininum: rossa."@de ,
+                        "Femenino: rossa."@es ,
+                        "Féminin : rossa."@fr .
+
+<#blu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "blu"@it ;
+    solid-memo:back "blue"@en ,
+                    "blå"@sv ,
+                    "파란색"@ko ,
+                    "blau"@de ,
+                    "azul"@es ,
+                    "bleu"@fr ;
+    solid-memo:backNote "Invariable: the same in the feminine and the plural."@en ,
+                        "Oböjligt: samma form i femininum och plural."@sv ,
+                        "형태가 바뀌지 않아요: 여성형과 복수형도 같아요."@ko ,
+                        "Unveränderlich: im Femininum und im Plural gleich."@de ,
+                        "Invariable: igual en femenino y en plural."@es ,
+                        "Invariable : identique au féminin et au pluriel."@fr .
+
+<#verde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "verde"@it ;
+    solid-memo:back "green"@en ,
+                    "grön"@sv ,
+                    "초록색"@ko ,
+                    "grün"@de ,
+                    "verde"@es ,
+                    "vert"@fr ;
+    solid-memo:backNote "Same form in the feminine: verde."@en ,
+                        "Samma form i femininum: verde."@sv ,
+                        "여성형도 같아요: verde."@ko ,
+                        "Im Femininum gleich: verde."@de ,
+                        "Misma forma en femenino: verde."@es ,
+                        "Même forme au féminin : verde."@fr .
+
+<#giallo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "giallo"@it ;
+    solid-memo:back "yellow"@en ,
+                    "gul"@sv ,
+                    "노란색"@ko ,
+                    "gelb"@de ,
+                    "amarillo"@es ,
+                    "jaune"@fr ;
+    solid-memo:backNote "Feminine: gialla."@en ,
+                        "Femininum: gialla."@sv ,
+                        "여성형: gialla."@ko ,
+                        "Femininum: gialla."@de ,
+                        "Femenino: gialla."@es ,
+                        "Féminin : gialla."@fr .
+
+<#nero>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nero"@it ;
+    solid-memo:back "black"@en ,
+                    "svart"@sv ,
+                    "검은색"@ko ,
+                    "schwarz"@de ,
+                    "negro"@es ,
+                    "noir"@fr ;
+    solid-memo:backNote "Feminine: nera."@en ,
+                        "Femininum: nera."@sv ,
+                        "여성형: nera."@ko ,
+                        "Femininum: nera."@de ,
+                        "Femenino: nera."@es ,
+                        "Féminin : nera."@fr .
+
+<#bianco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "bianco"@it ;
+    solid-memo:back "white"@en ,
+                    "vit"@sv ,
+                    "흰색"@ko ,
+                    "weiß"@de ,
+                    "blanco"@es ,
+                    "blanc"@fr ;
+    solid-memo:backNote "Feminine: bianca."@en ,
+                        "Femininum: bianca."@sv ,
+                        "여성형: bianca."@ko ,
+                        "Femininum: bianca."@de ,
+                        "Femenino: bianca."@es ,
+                        "Féminin : bianca."@fr .
+
+<#grigio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "grigio"@it ;
+    solid-memo:back "grey"@en ,
+                    "grå"@sv ,
+                    "회색"@ko ,
+                    "grau"@de ,
+                    "gris"@es ,
+                    "gris"@fr ;
+    solid-memo:backNote "Feminine: grigia."@en ,
+                        "Femininum: grigia."@sv ,
+                        "여성형: grigia."@ko ,
+                        "Femininum: grigia."@de ,
+                        "Femenino: grigia."@es ,
+                        "Féminin : grigia."@fr .
+
+<#arancione>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "arancione"@it ;
+    solid-memo:back "orange"@en ,
+                    "orange"@sv ,
+                    "주황색"@ko ,
+                    "orange"@de ,
+                    "naranja"@es ,
+                    "orange"@fr ;
+    solid-memo:backNote "Same form in the feminine: arancione."@en ,
+                        "Samma form i femininum: arancione."@sv ,
+                        "여성형도 같아요: arancione."@ko ,
+                        "Im Femininum gleich: arancione."@de ,
+                        "Misma forma en femenino: arancione."@es ,
+                        "Même forme au féminin : arancione."@fr .
+
+<#madre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la madre"@it ;
+    solid-memo:back "mother"@en ,
+                    "mor"@sv ,
+                    "어머니"@ko ,
+                    "Mutter"@de ,
+                    "madre"@es ,
+                    "mère"@fr ;
+    solid-memo:backNote "Plural: le madri."@en ,
+                        "Plural: le madri."@sv ,
+                        "복수형: le madri."@ko ,
+                        "Plural: le madri."@de ,
+                        "Plural: le madri."@es ,
+                        "Pluriel : le madri."@fr .
+
+<#padre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il padre"@it ;
+    solid-memo:back "father"@en ,
+                    "far"@sv ,
+                    "아버지"@ko ,
+                    "Vater"@de ,
+                    "padre"@es ,
+                    "père"@fr ;
+    solid-memo:backNote "Plural: i padri."@en ,
+                        "Plural: i padri."@sv ,
+                        "복수형: i padri."@ko ,
+                        "Plural: i padri."@de ,
+                        "Plural: i padri."@es ,
+                        "Pluriel : i padri."@fr .
+
+<#fratello>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il fratello"@it ;
+    solid-memo:back "brother"@en ,
+                    "bror"@sv ,
+                    "형제"@ko ,
+                    "Bruder"@de ,
+                    "hermano"@es ,
+                    "frère"@fr ;
+    solid-memo:backNote "Plural: i fratelli, which also means brothers and sisters."@en ,
+                        "Plural: i fratelli, som också betyder syskon."@sv ,
+                        "복수형: i fratelli. 형제자매라는 뜻도 있어요."@ko ,
+                        "Plural: i fratelli, was auch Geschwister bedeutet."@de ,
+                        "Plural: i fratelli, que también significa hermanos y hermanas."@es ,
+                        "Pluriel : i fratelli, qui signifie aussi frères et sœurs."@fr .
+
+<#sorella>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la sorella"@it ;
+    solid-memo:back "sister"@en ,
+                    "syster"@sv ,
+                    "자매"@ko ,
+                    "Schwester"@de ,
+                    "hermana"@es ,
+                    "sœur"@fr ;
+    solid-memo:backNote "Plural: le sorelle."@en ,
+                        "Plural: le sorelle."@sv ,
+                        "복수형: le sorelle."@ko ,
+                        "Plural: le sorelle."@de ,
+                        "Plural: le sorelle."@es ,
+                        "Pluriel : le sorelle."@fr .
+
+<#figlio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il figlio"@it ;
+    solid-memo:back "son"@en ,
+                    "son"@sv ,
+                    "아들"@ko ,
+                    "Sohn"@de ,
+                    "hijo"@es ,
+                    "fils"@fr ;
+    solid-memo:backNote "Plural: i figli, which also means children (sons and daughters)."@en ,
+                        "Plural: i figli, som också betyder barn (söner och döttrar)."@sv ,
+                        "복수형: i figli. 자녀(아들과 딸)라는 뜻도 있어요."@ko ,
+                        "Plural: i figli, was auch Kinder (Söhne und Töchter) bedeutet."@de ,
+                        "Plural: i figli, que también significa hijos (hijos e hijas)."@es ,
+                        "Pluriel : i figli, qui signifie aussi enfants (fils et filles)."@fr .
+
+<#figlia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la figlia"@it ;
+    solid-memo:back "daughter"@en ,
+                    "dotter"@sv ,
+                    "딸"@ko ,
+                    "Tochter"@de ,
+                    "hija"@es ,
+                    "fille"@fr ;
+    solid-memo:backNote "Plural: le figlie."@en ,
+                        "Plural: le figlie."@sv ,
+                        "복수형: le figlie."@ko ,
+                        "Plural: le figlie."@de ,
+                        "Plural: le figlie."@es ,
+                        "Pluriel : le figlie."@fr .
+
+<#nonno>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il nonno"@it ;
+    solid-memo:back "grandfather"@en ,
+                    "farfar, morfar"@sv ,
+                    "할아버지"@ko ,
+                    "Großvater"@de ,
+                    "abuelo"@es ,
+                    "grand-père"@fr ;
+    solid-memo:backNote "Plural: i nonni, which also means grandparents."@en ,
+                        "Plural: i nonni, som också betyder far- och morföräldrar."@sv ,
+                        "복수형: i nonni. 조부모라는 뜻도 있어요."@ko ,
+                        "Plural: i nonni, was auch Großeltern bedeutet."@de ,
+                        "Plural: i nonni, que también significa abuelos (abuelo y abuela)."@es ,
+                        "Pluriel : i nonni, qui signifie aussi grands-parents."@fr .
+
+<#nonna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la nonna"@it ;
+    solid-memo:back "grandmother"@en ,
+                    "farmor, mormor"@sv ,
+                    "할머니"@ko ,
+                    "Großmutter"@de ,
+                    "abuela"@es ,
+                    "grand-mère"@fr ;
+    solid-memo:backNote "Plural: le nonne."@en ,
+                        "Plural: le nonne."@sv ,
+                        "복수형: le nonne."@ko ,
+                        "Plural: le nonne."@de ,
+                        "Plural: le nonne."@es ,
+                        "Pluriel : le nonne."@fr .
+
+<#zio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lo zio"@it ;
+    solid-memo:back "uncle"@en ,
+                    "farbror, morbror"@sv ,
+                    "삼촌, 외삼촌"@ko ,
+                    "Onkel"@de ,
+                    "tío"@es ,
+                    "oncle"@fr ;
+    solid-memo:backNote "Lo before z, s + consonant, gn and ps (l' before a vowel). Plural: gli zii."@en ,
+                        "Lo före z, s + konsonant, gn och ps (l' före vokal). Plural: gli zii."@sv ,
+                        "z, s + 자음, gn, ps 앞에서는 lo를 써요(모음 앞에서는 l'). 복수형: gli zii."@ko ,
+                        "Lo vor z, s + Konsonant, gn und ps (l' vor einem Vokal). Plural: gli zii."@de ,
+                        "Lo delante de z, s + consonante, gn y ps (l' delante de vocal). Plural: gli zii."@es ,
+                        "Lo devant z, s + consonne, gn et ps (l' devant une voyelle). Pluriel : gli zii."@fr .
+
+<#zia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la zia"@it ;
+    solid-memo:back "aunt"@en ,
+                    "faster, moster"@sv ,
+                    "고모, 이모"@ko ,
+                    "Tante"@de ,
+                    "tía"@es ,
+                    "tante"@fr ;
+    solid-memo:backNote "Plural: le zie."@en ,
+                        "Plural: le zie."@sv ,
+                        "복수형: le zie."@ko ,
+                        "Plural: le zie."@de ,
+                        "Plural: le zie."@es ,
+                        "Pluriel : le zie."@fr .
+
+<#buongiorno>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "buongiorno"@it ;
+    solid-memo:back "good morning, good day"@en ,
+                    "god morgon, goddag"@sv ,
+                    "좋은 아침, 안녕하세요"@ko ,
+                    "guten Morgen, guten Tag"@de ,
+                    "buenos días"@es ,
+                    "bonjour"@fr ;
+    solid-memo:backNote "Said by day, when meeting or leaving someone; also written buon giorno. In the evening: buonasera."@en ,
+                        "Sägs dagtid, när man träffar eller lämnar någon; skrivs också buon giorno. På kvällen: buonasera."@sv ,
+                        "낮에 누군가를 만나거나 헤어질 때 해요. buon giorno로도 써요. 저녁에는 buonasera."@ko ,
+                        "Wird tagsüber beim Begrüßen oder Verabschieden gesagt; auch buon giorno geschrieben. Am Abend: buonasera."@de ,
+                        "Se dice de día, al encontrarse con alguien o al despedirse; también se escribe buon giorno. Por la noche: buonasera."@es ,
+                        "Se dit dans la journée, en retrouvant ou en quittant quelqu’un ; s’écrit aussi buon giorno. Le soir : buonasera."@fr .
+
+<#buonasera>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "buonasera"@it ;
+    solid-memo:back "good evening"@en ,
+                    "god kväll"@sv ,
+                    "안녕하세요(저녁 인사)"@ko ,
+                    "guten Abend"@de ,
+                    "buenas tardes"@es ,
+                    "bonsoir"@fr ;
+    solid-memo:backNote "Said in the evening or late afternoon, when meeting or leaving someone; also written buona sera."@en ,
+                        "Sägs på kvällen eller sena eftermiddagen, när man träffar eller lämnar någon; skrivs också buona sera."@sv ,
+                        "저녁이나 늦은 오후에 누군가를 만나거나 헤어질 때 해요. buona sera로도 써요."@ko ,
+                        "Wird am Abend oder späten Nachmittag beim Begrüßen oder Verabschieden gesagt; auch buona sera geschrieben."@de ,
+                        "Se dice por la noche o a última hora de la tarde, al encontrarse con alguien o al despedirse; también se escribe buona sera."@es ,
+                        "Se dit le soir ou en fin d’après-midi, en retrouvant ou en quittant quelqu’un ; s’écrit aussi buona sera."@fr .
+
+<#buonanotte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "buonanotte"@it ;
+    solid-memo:back "good night"@en ,
+                    "god natt"@sv ,
+                    "안녕히 주무세요"@ko ,
+                    "gute Nacht"@de ,
+                    "buenas noches"@es ,
+                    "bonne nuit"@fr ;
+    solid-memo:backNote "Said when parting for the night or before going to bed; also written buona notte."@en ,
+                        "Sägs när man skiljs för natten eller går och lägger sig; skrivs också buona notte."@sv ,
+                        "밤에 헤어질 때나 자러 가기 전에 해요. buona notte로도 써요."@ko ,
+                        "Wird beim Abschied für die Nacht oder vor dem Schlafengehen gesagt; auch buona notte geschrieben."@de ,
+                        "Se dice al despedirse por la noche o antes de irse a dormir; también se escribe buona notte."@es ,
+                        "Se dit en se quittant pour la nuit ou avant d’aller se coucher ; s’écrit aussi buona notte."@fr .
+
+<#ciao>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ciao"@it ;
+    solid-memo:back "hi, bye"@en ,
+                    "hej, hej då"@sv ,
+                    "안녕, 잘 가"@ko ,
+                    "hallo, tschüss"@de ,
+                    "hola, adiós"@es ,
+                    "salut, au revoir"@fr ;
+    solid-memo:backNote "Informal; said both when meeting and when leaving."@en ,
+                        "Informellt; sägs både när man träffas och när man skiljs."@sv ,
+                        "친근한 말이에요. 만날 때와 헤어질 때 모두 써요."@ko ,
+                        "Informell; wird beim Begrüßen und beim Verabschieden gesagt."@de ,
+                        "Informal; se dice tanto al encontrarse como al despedirse."@es ,
+                        "Familier ; se dit aussi bien en arrivant qu’en partant."@fr .
+
+<#arrivederci>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "arrivederci"@it ;
+    solid-memo:back "goodbye"@en ,
+                    "adjö, hej då"@sv ,
+                    "안녕히 가세요"@ko ,
+                    "auf Wiedersehen"@de ,
+                    "adiós"@es ,
+                    "au revoir"@fr ;
+    solid-memo:backNote "Formally to one person: arrivederLa."@en ,
+                        "Formellt till en person: arrivederLa."@sv ,
+                        "한 사람에게 격식을 차려 말할 때: arrivederLa."@ko ,
+                        "Förmlich zu einer Person: arrivederLa."@de ,
+                        "De manera formal, a una persona: arrivederLa."@es ,
+                        "Formellement, à une personne : arrivederLa."@fr .
+
+<#come-sta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "come sta?"@it ;
+    solid-memo:back "how are you?"@en ,
+                    "hur mår du?"@sv ,
+                    "어떻게 지내세요?"@ko ,
+                    "wie geht es Ihnen?"@de ,
+                    "¿cómo está?"@es ,
+                    "comment allez-vous ?"@fr ;
+    solid-memo:backNote "Polite, to someone you call Lei; to someone you call tu: come stai?"@en ,
+                        "Artigt, till någon man säger Lei till (där svenskan oftast ändå säger du); till någon man säger tu till: come stai?"@sv ,
+                        "Lei라고 부르는 사람에게 쓰는 공손한 말이에요. tu라고 부르는 사람에게는 come stai?"@ko ,
+                        "Höflich, zu jemandem, den du mit Lei ansprichst; zu jemandem, den du mit tu ansprichst: come stai?"@de ,
+                        "Formal, a alguien a quien tratas de Lei; a alguien a quien tratas de tu: come stai?"@es ,
+                        "Forme polie, à quelqu’un à qui vous dites Lei ; à quelqu’un à qui vous dites tu : come stai?"@fr .
+
+<#grazie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "grazie"@it ;
+    solid-memo:back "thank you"@en ,
+                    "tack"@sv ,
+                    "감사합니다"@ko ,
+                    "danke"@de ,
+                    "gracias"@es ,
+                    "merci"@fr .
+
+<#per-favore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "per favore"@it ;
+    solid-memo:back "please"@en ,
+                    "snälla"@sv ,
+                    "부탁합니다"@ko ,
+                    "bitte"@de ,
+                    "por favor"@es ,
+                    "s’il vous plaît"@fr ;
+    solid-memo:backNote "Also per piacere, with the same meaning."@en ,
+                        "Också per piacere, med samma betydelse. I talad svenska avslutas en begäran ofta med tack."@sv ,
+                        "같은 뜻으로 per piacere도 써요."@ko ,
+                        "Auch per piacere, mit derselben Bedeutung."@de ,
+                        "También per piacere, con el mismo significado."@es ,
+                        "Aussi per piacere, avec le même sens."@fr .
+
+<#prego>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "prego"@it ;
+    solid-memo:back "you're welcome"@en ,
+                    "ingen orsak"@sv ,
+                    "천만에요"@ko ,
+                    "gern geschehen"@de ,
+                    "de nada"@es ,
+                    "de rien"@fr ;
+    solid-memo:backNote "The reply to grazie. Also said to let someone go ahead or help themselves (after you, go ahead)."@en ,
+                        "Svaret på grazie. Sägs också när man låter någon gå före eller ta för sig (varsågod)."@sv ,
+                        "grazie에 대한 대답이에요. 누군가에게 먼저 하라고 하거나 마음껏 들라고 할 때도 써요(먼저 하세요, 어서 드세요)."@ko ,
+                        "Die Antwort auf grazie. Wird auch gesagt, um jemandem den Vortritt zu lassen oder ihn zum Zugreifen einzuladen (nach Ihnen, bitte schön)."@de ,
+                        "La respuesta a grazie. También se dice para ceder el paso a alguien o invitarle a servirse (pase, adelante)."@es ,
+                        "La réponse à grazie. Se dit aussi pour laisser passer quelqu’un ou l’inviter à se servir (après vous, je vous en prie)."@fr .
+
+<#scusi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "scusi"@it ;
+    solid-memo:back "excuse me"@en ,
+                    "ursäkta"@sv ,
+                    "실례합니다"@ko ,
+                    "Entschuldigung"@de ,
+                    "disculpe"@es ,
+                    "excusez-moi"@fr ;
+    solid-memo:backNote "Polite, to someone you call Lei; to someone you call tu: scusa."@en ,
+                        "Artigt, till någon man säger Lei till; till någon man säger tu till: scusa."@sv ,
+                        "Lei라고 부르는 사람에게 쓰는 공손한 말이에요. tu라고 부르는 사람에게는 scusa."@ko ,
+                        "Höflich, zu jemandem, den du mit Lei ansprichst; zu jemandem, den du mit tu ansprichst: scusa."@de ,
+                        "Formal, a alguien a quien tratas de Lei; a alguien a quien tratas de tu: scusa."@es ,
+                        "Forme polie, à quelqu’un à qui vous dites Lei ; à quelqu’un à qui vous dites tu : scusa."@fr .
+
+<#si>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sì"@it ;
+    solid-memo:back "yes"@en ,
+                    "ja"@sv ,
+                    "네"@ko ,
+                    "ja"@de ,
+                    "sí"@es ,
+                    "oui"@fr .
+
+<#no>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "no"@it ;
+    solid-memo:back "no"@en ,
+                    "nej"@sv ,
+                    "아니요"@ko ,
+                    "nein"@de ,
+                    "no"@es ,
+                    "non"@fr ;
+    solid-memo:backNote "Before a verb, ‘not’ is non: non parlo, I don't speak."@en ,
+                        "Före ett verb blir ”inte” non: non parlo, jag talar inte."@sv ,
+                        "동사 앞에서 부정 ‘~지 않다’는 non이에요: non parlo, 저는 말하지 않아요."@ko ,
+                        "Vor einem Verb heißt „nicht“ non: non parlo, ich spreche nicht."@de ,
+                        "Delante de un verbo, «no» es non: non parlo, no hablo."@es ,
+                        "Devant un verbe, « ne… pas » se dit non : non parlo, je ne parle pas."@fr .
+
+<#casa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la casa"@it ;
+    solid-memo:back "house, home"@en ,
+                    "hus, hem"@sv ,
+                    "집, 가정"@ko ,
+                    "Haus, Zuhause"@de ,
+                    "casa, hogar"@es ,
+                    "maison, foyer"@fr ;
+    solid-memo:backNote "Plural: le case."@en ,
+                        "Plural: le case."@sv ,
+                        "복수형: le case."@ko ,
+                        "Plural: le case."@de ,
+                        "Plural: le case."@es ,
+                        "Pluriel : le case."@fr .
+
+<#acqua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "l'acqua (f.)"@it ;
+    solid-memo:back "water"@en ,
+                    "vatten"@sv ,
+                    "물"@ko ,
+                    "Wasser"@de ,
+                    "agua"@es ,
+                    "eau"@fr .
+
+<#pane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il pane"@it ;
+    solid-memo:back "bread"@en ,
+                    "bröd"@sv ,
+                    "빵"@ko ,
+                    "Brot"@de ,
+                    "pan"@es ,
+                    "pain"@fr .
+
+<#latte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il latte"@it ;
+    solid-memo:back "milk"@en ,
+                    "mjölk"@sv ,
+                    "우유"@ko ,
+                    "Milch"@de ,
+                    "leche"@es ,
+                    "lait"@fr .
+
+<#mela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la mela"@it ;
+    solid-memo:back "apple"@en ,
+                    "äpple"@sv ,
+                    "사과"@ko ,
+                    "Apfel"@de ,
+                    "manzana"@es ,
+                    "pomme"@fr ;
+    solid-memo:backNote "Plural: le mele."@en ,
+                        "Plural: le mele."@sv ,
+                        "복수형: le mele."@ko ,
+                        "Plural: le mele."@de ,
+                        "Plural: le mele."@es ,
+                        "Pluriel : le mele."@fr .
+
+<#libro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il libro"@it ;
+    solid-memo:back "book"@en ,
+                    "bok"@sv ,
+                    "책"@ko ,
+                    "Buch"@de ,
+                    "libro"@es ,
+                    "livre"@fr ;
+    solid-memo:backNote "Plural: i libri."@en ,
+                        "Plural: i libri."@sv ,
+                        "복수형: i libri."@ko ,
+                        "Plural: i libri."@de ,
+                        "Plural: i libri."@es ,
+                        "Pluriel : i libri."@fr .
+
+<#sedia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la sedia"@it ;
+    solid-memo:back "chair"@en ,
+                    "stol"@sv ,
+                    "의자"@ko ,
+                    "Stuhl"@de ,
+                    "silla"@es ,
+                    "chaise"@fr ;
+    solid-memo:backNote "Plural: le sedie."@en ,
+                        "Plural: le sedie."@sv ,
+                        "복수형: le sedie."@ko ,
+                        "Plural: le sedie."@de ,
+                        "Plural: le sedie."@es ,
+                        "Pluriel : le sedie."@fr .
+
+<#porta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la porta"@it ;
+    solid-memo:back "door"@en ,
+                    "dörr"@sv ,
+                    "문"@ko ,
+                    "Tür"@de ,
+                    "puerta"@es ,
+                    "porte"@fr ;
+    solid-memo:backNote "Plural: le porte."@en ,
+                        "Plural: le porte."@sv ,
+                        "복수형: le porte."@ko ,
+                        "Plural: le porte."@de ,
+                        "Plural: le porte."@es ,
+                        "Pluriel : le porte."@fr .
+
+<#finestra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la finestra"@it ;
+    solid-memo:back "window"@en ,
+                    "fönster"@sv ,
+                    "창문"@ko ,
+                    "Fenster"@de ,
+                    "ventana"@es ,
+                    "fenêtre"@fr ;
+    solid-memo:backNote "Plural: le finestre."@en ,
+                        "Plural: le finestre."@sv ,
+                        "복수형: le finestre."@ko ,
+                        "Plural: le finestre."@de ,
+                        "Plural: le finestre."@es ,
+                        "Pluriel : le finestre."@fr .
+
+<#cane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il cane"@it ;
+    solid-memo:back "dog"@en ,
+                    "hund"@sv ,
+                    "개"@ko ,
+                    "Hund"@de ,
+                    "perro"@es ,
+                    "chien"@fr ;
+    solid-memo:backNote "Plural: i cani."@en ,
+                        "Plural: i cani."@sv ,
+                        "복수형: i cani."@ko ,
+                        "Plural: i cani."@de ,
+                        "Plural: i cani."@es ,
+                        "Pluriel : i cani."@fr .
+
+<#gatto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il gatto"@it ;
+    solid-memo:back "cat"@en ,
+                    "katt"@sv ,
+                    "고양이"@ko ,
+                    "Katze"@de ,
+                    "gato"@es ,
+                    "chat"@fr ;
+    solid-memo:backNote "Plural: i gatti."@en ,
+                        "Plural: i gatti."@sv ,
+                        "복수형: i gatti."@ko ,
+                        "Plural: i gatti."@de ,
+                        "Plural: i gatti."@es ,
+                        "Pluriel : i gatti."@fr .
+
+<#citta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la città"@it ;
+    solid-memo:back "city, town"@en ,
+                    "stad"@sv ,
+                    "도시"@ko ,
+                    "Stadt"@de ,
+                    "ciudad"@es ,
+                    "ville"@fr ;
+    solid-memo:backNote "Plural: le città (unchanged)."@en ,
+                        "Plural: le città (oförändrat)."@sv ,
+                        "복수형: le città (형태가 바뀌지 않아요)."@ko ,
+                        "Plural: le città (unverändert)."@de ,
+                        "Plural: le città (invariable)."@es ,
+                        "Pluriel : le città (invariable)."@fr .
+
+<#scuola>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la scuola"@it ;
+    solid-memo:back "school"@en ,
+                    "skola"@sv ,
+                    "학교"@ko ,
+                    "Schule"@de ,
+                    "escuela"@es ,
+                    "école"@fr ;
+    solid-memo:backNote "Plural: le scuole."@en ,
+                        "Plural: le scuole."@sv ,
+                        "복수형: le scuole."@ko ,
+                        "Plural: le scuole."@de ,
+                        "Plural: le scuole."@es ,
+                        "Pluriel : le scuole."@fr .
+
+<#uomo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "l'uomo (m.)"@it ;
+    solid-memo:back "man"@en ,
+                    "man"@sv ,
+                    "남자"@ko ,
+                    "Mann"@de ,
+                    "hombre"@es ,
+                    "homme"@fr ;
+    solid-memo:backNote "Irregular plural: gli uomini. Also a human being in general."@en ,
+                        "Oregelbunden plural: gli uomini. Också människa i allmänhet."@sv ,
+                        "불규칙 복수형: gli uomini. 사람 일반을 뜻하기도 해요."@ko ,
+                        "Unregelmäßiger Plural: gli uomini. Auch der Mensch im Allgemeinen."@de ,
+                        "Plural irregular: gli uomini. También el ser humano en general."@es ,
+                        "Pluriel irrégulier : gli uomini. Désigne aussi l’être humain en général."@fr .
+
+<#donna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la donna"@it ;
+    solid-memo:back "woman"@en ,
+                    "kvinna"@sv ,
+                    "여자"@ko ,
+                    "Frau"@de ,
+                    "mujer"@es ,
+                    "femme"@fr ;
+    solid-memo:backNote "Plural: le donne."@en ,
+                        "Plural: le donne."@sv ,
+                        "복수형: le donne."@ko ,
+                        "Plural: le donne."@de ,
+                        "Plural: le donne."@es ,
+                        "Pluriel : le donne."@fr .
+
+<#amico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "l'amico (m.)"@it ;
+    solid-memo:back "friend"@en ,
+                    "vän"@sv ,
+                    "친구"@ko ,
+                    "Freund"@de ,
+                    "amigo"@es ,
+                    "ami"@fr ;
+    solid-memo:backNote "Plural: gli amici. A female friend is l'amica (f.), plural le amiche."@en ,
+                        "Plural: gli amici. En kvinnlig vän är l'amica (f.), plural le amiche."@sv ,
+                        "복수형: gli amici. 여성인 친구는 l'amica (f.), 복수형은 le amiche예요."@ko ,
+                        "Plural: gli amici. Eine Freundin ist l'amica (f.), Plural le amiche."@de ,
+                        "Plural: gli amici. Una amiga es l'amica (f.), plural le amiche."@es ,
+                        "Pluriel : gli amici. Une amie se dit l'amica (f.), pluriel le amiche."@fr .
+
+<#mano>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la mano"@it ;
+    solid-memo:back "hand"@en ,
+                    "hand"@sv ,
+                    "손"@ko ,
+                    "Hand"@de ,
+                    "mano"@es ,
+                    "main"@fr ;
+    solid-memo:backNote "Feminine although it ends in -o. Plural: le mani."@en ,
+                        "Femininum fast det slutar på -o. Plural: le mani."@sv ,
+                        "-o로 끝나지만 여성 명사예요. 복수형: le mani."@ko ,
+                        "Femininum, obwohl es auf -o endet. Plural: le mani."@de ,
+                        "Femenino aunque termina en -o. Plural: le mani."@es ,
+                        "Féminin bien qu’il se termine en -o. Pluriel : le mani."@fr .
+
+<#giorno>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "il giorno"@it ;
+    solid-memo:back "day"@en ,
+                    "dag"@sv ,
+                    "날"@ko ,
+                    "Tag"@de ,
+                    "día"@es ,
+                    "jour"@fr ;
+    solid-memo:backNote "Plural: i giorni."@en ,
+                        "Plural: i giorni."@sv ,
+                        "복수형: i giorni."@ko ,
+                        "Plural: i giorni."@de ,
+                        "Plural: i giorni."@es ,
+                        "Pluriel : i giorni."@fr .
+
+<#notte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la notte"@it ;
+    solid-memo:back "night"@en ,
+                    "natt"@sv ,
+                    "밤"@ko ,
+                    "Nacht"@de ,
+                    "noche"@es ,
+                    "nuit"@fr ;
+    solid-memo:backNote "Plural: le notti."@en ,
+                        "Plural: le notti."@sv ,
+                        "복수형: le notti."@ko ,
+                        "Plural: le notti."@de ,
+                        "Plural: le notti."@es ,
+                        "Pluriel : le notti."@fr .
+
+<#settimana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la settimana"@it ;
+    solid-memo:back "week"@en ,
+                    "vecka"@sv ,
+                    "일주일"@ko ,
+                    "Woche"@de ,
+                    "semana"@es ,
+                    "semaine"@fr ;
+    solid-memo:backNote "Plural: le settimane."@en ,
+                        "Plural: le settimane."@sv ,
+                        "복수형: le settimane."@ko ,
+                        "Plural: le settimane."@de ,
+                        "Plural: le settimane."@es ,
+                        "Pluriel : le settimane."@fr .
+
+<#grande>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "grande"@it ;
+    solid-memo:back "big, large"@en ,
+                    "stor"@sv ,
+                    "큰, 커다란"@ko ,
+                    "groß"@de ,
+                    "grande"@es ,
+                    "grand"@fr ;
+    solid-memo:backNote "Same form in the feminine: grande."@en ,
+                        "Samma form i femininum: grande."@sv ,
+                        "여성형도 같아요: grande."@ko ,
+                        "Im Femininum gleich: grande."@de ,
+                        "Misma forma en femenino: grande."@es ,
+                        "Même forme au féminin : grande."@fr .
+
+<#piccolo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "piccolo"@it ;
+    solid-memo:back "small, little"@en ,
+                    "liten"@sv ,
+                    "작은"@ko ,
+                    "klein"@de ,
+                    "pequeño"@es ,
+                    "petit"@fr ;
+    solid-memo:backNote "Feminine: piccola."@en ,
+                        "Femininum: piccola."@sv ,
+                        "여성형: piccola."@ko ,
+                        "Femininum: piccola."@de ,
+                        "Femenino: piccola."@es ,
+                        "Féminin : piccola."@fr .
+
+<#buono>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "buono"@it ;
+    solid-memo:back "good"@en ,
+                    "bra, god"@sv ,
+                    "좋은"@ko ,
+                    "gut"@de ,
+                    "bueno"@es ,
+                    "bon"@fr ;
+    solid-memo:backNote "Feminine: buona. Before most masculine nouns shortened to buon: buon giorno."@en ,
+                        "Femininum: buona. Före de flesta maskulina substantiv förkortat till buon: buon giorno."@sv ,
+                        "여성형: buona. 대부분의 남성 명사 앞에서는 buon으로 줄여요: buon giorno."@ko ,
+                        "Femininum: buona. Vor den meisten maskulinen Substantiven zu buon verkürzt: buon giorno."@de ,
+                        "Femenino: buona. Delante de la mayoría de los sustantivos masculinos se acorta a buon: buon giorno."@es ,
+                        "Féminin : buona. Devant la plupart des noms masculins, abrégé en buon : buon giorno."@fr .
+
+<#cattivo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cattivo"@it ;
+    solid-memo:back "bad, wicked"@en ,
+                    "dålig, elak"@sv ,
+                    "나쁜, 못된"@ko ,
+                    "schlecht, böse"@de ,
+                    "malo, malvado"@es ,
+                    "mauvais, méchant"@fr ;
+    solid-memo:backNote "Feminine: cattiva."@en ,
+                        "Femininum: cattiva."@sv ,
+                        "여성형: cattiva."@ko ,
+                        "Femininum: cattiva."@de ,
+                        "Femenino: cattiva."@es ,
+                        "Féminin : cattiva."@fr .
+
+<#nuovo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nuovo"@it ;
+    solid-memo:back "new"@en ,
+                    "ny"@sv ,
+                    "새로운"@ko ,
+                    "neu"@de ,
+                    "nuevo"@es ,
+                    "nouveau"@fr ;
+    solid-memo:backNote "Feminine: nuova."@en ,
+                        "Femininum: nuova."@sv ,
+                        "여성형: nuova."@ko ,
+                        "Femininum: nuova."@de ,
+                        "Femenino: nuova."@es ,
+                        "Féminin : nuova."@fr .
+
+<#vecchio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vecchio"@it ;
+    solid-memo:back "old"@en ,
+                    "gammal"@sv ,
+                    "오래된, 늙은"@ko ,
+                    "alt"@de ,
+                    "viejo"@es ,
+                    "vieux"@fr ;
+    solid-memo:backNote "Feminine: vecchia."@en ,
+                        "Femininum: vecchia."@sv ,
+                        "여성형: vecchia."@ko ,
+                        "Femininum: vecchia."@de ,
+                        "Femenino: vecchia."@es ,
+                        "Féminin : vecchia."@fr .
+
+<#essere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "essere"@it ;
+    solid-memo:back "to be"@en ,
+                    "att vara"@sv ,
+                    "이다, 있다"@ko ,
+                    "sein"@de ,
+                    "ser, estar"@es ,
+                    "être"@fr .
+
+<#avere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "avere"@it ;
+    solid-memo:back "to have"@en ,
+                    "att ha"@sv ,
+                    "가지다"@ko ,
+                    "haben"@de ,
+                    "tener"@es ,
+                    "avoir"@fr .
+
+<#andare>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "andare"@it ;
+    solid-memo:back "to go"@en ,
+                    "att gå, att åka"@sv ,
+                    "가다"@ko ,
+                    "gehen, fahren"@de ,
+                    "ir"@es ,
+                    "aller"@fr ;
+    solid-memo:backNote "In Swedish, gå is on foot and åka by vehicle."@en ,
+                        "På svenska är gå till fots och åka med fordon."@sv ,
+                        "스웨덴어에서 gå는 걸어서 가는 것이고, åka는 탈것을 타고 가는 거예요."@ko ,
+                        "Im Schwedischen ist gå zu Fuß und åka mit einem Fahrzeug."@de ,
+                        "En sueco, gå es a pie y åka en un vehículo."@es ,
+                        "En suédois, gå se dit à pied et åka en véhicule."@fr .
+
+<#fare>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "fare"@it ;
+    solid-memo:back "to do, to make"@en ,
+                    "att göra"@sv ,
+                    "하다, 만들다"@ko ,
+                    "tun, machen"@de ,
+                    "hacer"@es ,
+                    "faire"@fr .
+
+<#venire>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "venire"@it ;
+    solid-memo:back "to come"@en ,
+                    "att komma"@sv ,
+                    "오다"@ko ,
+                    "kommen"@de ,
+                    "venir"@es ,
+                    "venir"@fr .
+
+<#parlare>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "parlare"@it ;
+    solid-memo:back "to speak, to talk"@en ,
+                    "att tala, att prata"@sv ,
+                    "말하다, 이야기하다"@ko ,
+                    "sprechen, reden"@de ,
+                    "hablar, conversar"@es ,
+                    "parler, discuter"@fr .
+
+<#mangiare>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mangiare"@it ;
+    solid-memo:back "to eat"@en ,
+                    "att äta"@sv ,
+                    "먹다"@ko ,
+                    "essen"@de ,
+                    "comer"@es ,
+                    "manger"@fr .
+
+<#bere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "bere"@it ;
+    solid-memo:back "to drink"@en ,
+                    "att dricka"@sv ,
+                    "마시다"@ko ,
+                    "trinken"@de ,
+                    "beber"@es ,
+                    "boire"@fr .
+
+<#amare>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "amare"@it ;
+    solid-memo:back "to love"@en ,
+                    "att älska"@sv ,
+                    "사랑하다"@ko ,
+                    "lieben"@de ,
+                    "amar"@es ,
+                    "aimer"@fr .
+
+<#volere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "volere"@it ;
+    solid-memo:back "to want"@en ,
+                    "att vilja"@sv ,
+                    "원하다"@ko ,
+                    "wollen"@de ,
+                    "querer"@es ,
+                    "vouloir"@fr .
+
+<#potere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "potere"@it ;
+    solid-memo:back "to be able to"@en ,
+                    "att kunna"@sv ,
+                    "할 수 있다"@ko ,
+                    "können"@de ,
+                    "poder"@es ,
+                    "pouvoir"@fr .
+
+<#vedere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vedere"@it ;
+    solid-memo:back "to see"@en ,
+                    "att se"@sv ,
+                    "보다"@ko ,
+                    "sehen"@de ,
+                    "ver"@es ,
+                    "voir"@fr .
+
+<#leggere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "leggere"@it ;
+    solid-memo:back "to read"@en ,
+                    "att läsa"@sv ,
+                    "읽다"@ko ,
+                    "lesen"@de ,
+                    "leer"@es ,
+                    "lire"@fr .
+
+<#scrivere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "scrivere"@it ;
+    solid-memo:back "to write"@en ,
+                    "att skriva"@sv ,
+                    "쓰다"@ko ,
+                    "schreiben"@de ,
+                    "escribir"@es ,
+                    "écrire"@fr .
+
+<#dormire>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dormire"@it ;
+    solid-memo:back "to sleep"@en ,
+                    "att sova"@sv ,
+                    "자다"@ko ,
+                    "schlafen"@de ,
+                    "dormir"@es ,
+                    "dormir"@fr .
+
+<#lavorare>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lavorare"@it ;
+    solid-memo:back "to work"@en ,
+                    "att arbeta"@sv ,
+                    "일하다"@ko ,
+                    "arbeiten"@de ,
+                    "trabajar"@es ,
+                    "travailler"@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

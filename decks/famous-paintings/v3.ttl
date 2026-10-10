@@ -1,0 +1,1930 @@
+@base <https://solid-memo.com/decks/famous-paintings/v3.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Famous paintings"@en ,
+                  "Berömda målningar"@sv ,
+                  "유명한 그림"@ko ,
+                  "Berühmte Gemälde"@de ,
+                  "Pinturas famosas"@es ,
+                  "Peintures célèbres"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "150 of the world's most famous paintings, ranked by how many Wikipedias have an article about them: the painting on the front, its title, painter and date on the back, in English, Swedish, Korean, German, Spanish and French. Only paintings long out of copyright are included. Titles, painters and dates from Wikidata, a title as that language's Wikipedia gives it where Wikidata's label is missing or differs; the pictures are public-domain reproductions on Wikimedia Commons, shown from there."@en ,
+                        "150 av världens mest berömda målningar, rangordnade efter hur många Wikipedior som har en artikel om dem: målningen på framsidan, dess titel, målare och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Bara målningar vars upphovsrätt sedan länge har gått ut finns med. Titlar, målare och dateringar från Wikidata, en titel som det språkets Wikipedia skriver den där Wikidatas etikett saknas eller skiljer sig; bilderna är reproduktioner i allmän egendom på Wikimedia Commons och visas därifrån."@sv ,
+                        "위키백과 몇 개 언어판에 문서가 있는지로 순위를 매긴 세계에서 가장 유명한 그림 150점입니다. 앞면에는 그림, 뒷면에는 제목, 화가, 제작 시기가 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 있습니다. 저작권이 만료된 지 오래된 그림만 들어 있습니다. 제목, 화가, 제작 시기는 위키데이터에서 가져왔고, 위키데이터의 레이블이 없거나 다른 제목은 그 언어 위키백과의 제목을 따랐으며, 그림은 위키미디어 공용에 있는 퍼블릭 도메인 복제본을 그곳에서 불러와 보여 줍니다."@ko ,
+                        "150 der berühmtesten Gemälde der Welt, geordnet danach, wie viele Wikipedias einen Artikel über sie haben: das Gemälde auf der Vorderseite, sein Titel, Maler und Entstehungsdatum auf der Rückseite, auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch. Nur Gemälde, deren Urheberrecht längst abgelaufen ist, sind dabei. Titel, Maler und Datierungen aus Wikidata, ein Titel so, wie ihn die Wikipedia der jeweiligen Sprache nennt, wo die Bezeichnung in Wikidata fehlt oder abweicht; die Bilder sind gemeinfreie Reproduktionen auf Wikimedia Commons und werden von dort angezeigt."@de ,
+                        "150 de las pinturas más famosas del mundo, ordenadas por cuántas Wikipedias tienen un artículo sobre ellas: la pintura en el anverso, y su título, pintor y fecha en el reverso, en inglés, sueco, coreano, alemán, español y francés. Solo se incluyen pinturas cuyos derechos de autor expiraron hace mucho. Títulos, pintores y fechas de Wikidata, con el título que da la Wikipedia de cada idioma cuando la etiqueta de Wikidata falta o difiere; las imágenes son reproducciones de dominio público en Wikimedia Commons y se muestran desde allí."@es ,
+                        "150 des peintures les plus célèbres au monde, classées selon le nombre de Wikipédias qui leur consacrent un article : la peinture au recto, son titre, son peintre et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Seules les peintures depuis longtemps tombées dans le domaine public sont incluses. Titres, peintres et dates de Wikidata, le titre étant celui de la Wikipédia de chaque langue là où le libellé de Wikidata manque ou diffère ; les images sont des reproductions du domaine public sur Wikimedia Commons, affichées depuis ce site."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://commons.wikimedia.org/> ;
+    prov:wasGeneratedBy <#generation> ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:art ;
+    dcat:keyword "art"@en ,
+                 "art history"@en ,
+                 "paintings"@en ,
+                 "konst"@sv ,
+                 "konsthistoria"@sv ,
+                 "målningar"@sv ,
+                 "미술"@ko ,
+                 "미술사"@ko ,
+                 "그림"@ko ,
+                 "회화"@ko ,
+                 "Kunst"@de ,
+                 "Kunstgeschichte"@de ,
+                 "Gemälde"@de ,
+                 "arte"@es ,
+                 "historia del arte"@es ,
+                 "pinturas"@es ,
+                 "cuadros"@es ,
+                 "art"@fr ,
+                 "histoire de l’art"@fr ,
+                 "peintures"@fr ,
+                 "tableaux"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/famous-paintings/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/famous-paintings/v2.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each back, the painting's title, painter and date, in Swedish, Korean, German, Spanish and French as well as English; no picture or card was added or removed. The English back of A Philosopher Lecturing on the Orrery no longer calls the philosopher a journalist, a vandalised Wikidata label." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#famous-paintings> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#famous-paintings> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was produced (W3C PROV-O). Re-run the command below to regenerate it.
+<#generation>
+    a prov:Activity ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ;
+    prov:endedAtTime "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://commons.wikimedia.org/> ;
+    prov:wasAssociatedWith <https://github.com/antwika/solid-memo/blob/76808f3908ad008b2562beae2a28354cfa4ca518/packages/deck-library/scripts/generate_deck_of_famous_paintings.py> ;
+    rdfs:comment "python3 packages/deck-library/scripts/generate_deck_of_famous_paintings.py -o decks/famous-paintings.ttl --creator 'Anton Wiklund <antonwiklund91@gmail.com>'" .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 3: backs in Swedish, Korean, German, Spanish and French"@en ;
+    rdfs:comment "Scope: every card’s back, its title, painter and date, in Swedish, Korean, German, Spanish and French: titles and painters from each painting’s and painter’s Wikidata labels in that language where they were right, checked by AI agents against the English back and the language’s Wikipedia, and otherwise the title or name that language’s Wikipedia uses (111 of the 750 new titles, mostly where Wikidata had no label or a vandalised or less used one); dates written in each language from the Wikidata date and its precision; the release compared by a script with version 2, which found the new backs, the description, the languages and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: every one of the 150 backs is in Swedish, Korean, German, Spanish and French as well; one English back was corrected: A Philosopher Lecturing on the Orrery, which version 2 had as “A Journalist Lecturing on the Orrery” from a vandalised Wikidata label (every other language’s label and the painting’s Wikipedia articles say philosopher); no card was added or removed."@en .
+
+<https://github.com/antwika/solid-memo/blob/76808f3908ad008b2562beae2a28354cfa4ca518/packages/deck-library/scripts/generate_deck_of_famous_paintings.py>
+    a prov:SoftwareAgent ;
+    dcterms:title "generate_deck_of_famous_paintings.py" .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+
+<https://commons.wikimedia.org/>
+    dcterms:title "Wikimedia Commons (public-domain reproductions of the paintings)" ;
+    dcterms:creator "Wikimedia Commons contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<#q12418>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/1280px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg> ;
+    solid-memo:back "Mona Lisa — Leonardo da Vinci, 1500s"@en ,
+                    "Mona Lisa — Leonardo da Vinci, 1500–1509"@sv ,
+                    "모나리자 — 레오나르도 다 빈치, 1500–1509년"@ko ,
+                    "Mona Lisa — Leonardo da Vinci, 1500–1509"@de ,
+                    "La Gioconda — Leonardo da Vinci, 1500–1509"@es ,
+                    "La Joconde — Léonard de Vinci, 1500–1509"@fr .
+
+<#q45585>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Starry Night — Vincent van Gogh, 1889"@en ,
+                    "Stjärnenatt — Vincent van Gogh, 1889"@sv ,
+                    "별이 빛나는 밤 — 빈센트 반 고흐, 1889년"@ko ,
+                    "Sternennacht — Vincent van Gogh, 1889"@de ,
+                    "La noche estrellada — Vincent van Gogh, 1889"@es ,
+                    "La Nuit étoilée — Vincent van Gogh, 1889"@fr .
+
+<#q185372>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/1280px-1665_Girl_with_a_Pearl_Earring.jpg> ;
+    solid-memo:back "Girl with a Pearl Earring — Johannes Vermeer, 1665"@en ,
+                    "Flicka med pärlörhänge — Johannes Vermeer, 1665"@sv ,
+                    "진주 귀고리를 한 소녀 — 요하네스 페르메이르, 1665년"@ko ,
+                    "Das Mädchen mit dem Perlenohrring — Jan Vermeer, 1665"@de ,
+                    "La joven de la perla — Johannes Vermeer, 1665"@es ,
+                    "La Jeune Fille à la perle — Johannes Vermeer, 1665"@fr .
+
+<#q29530>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/La_Libert%C3%A9_guidant_le_peuple_-_Eug%C3%A8ne_Delacroix_-_Mus%C3%A9e_du_Louvre_Peintures_RF_129_-_apr%C3%A8s_restauration_2024.jpg/1280px-La_Libert%C3%A9_guidant_le_peuple_-_Eug%C3%A8ne_Delacroix_-_Mus%C3%A9e_du_Louvre_Peintures_RF_129_-_apr%C3%A8s_restauration_2024.jpg> ;
+    solid-memo:back "Liberty Leading the People — Eugène Delacroix, 1830"@en ,
+                    "Friheten på barrikaderna — Eugène Delacroix, 1830"@sv ,
+                    "민중을 이끄는 자유의 여신 — 외젠 들라크루아, 1830년"@ko ,
+                    "Die Freiheit führt das Volk — Eugène Delacroix, 1830"@de ,
+                    "La Libertad guiando al pueblo — Eugène Delacroix, 1830"@es ,
+                    "La Liberté guidant le peuple — Eugène Delacroix, 1830"@fr .
+
+<#q219831>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/La_ronda_de_noche%2C_por_Rembrandt_van_Rijn.jpg/1280px-La_ronda_de_noche%2C_por_Rembrandt_van_Rijn.jpg> ;
+    solid-memo:back "The Night Watch — Rembrandt, 1642"@en ,
+                    "Nattvakten — Rembrandt, 1642"@sv ,
+                    "야경 — 렘브란트, 1642년"@ko ,
+                    "Die Nachtwache — Rembrandt van Rijn, 1642"@de ,
+                    "La ronda de noche — Rembrandt, 1642"@es ,
+                    "La Ronde de nuit — Rembrandt, 1642"@fr .
+
+<#q151047>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1280px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg> ;
+    solid-memo:back "The Birth of Venus — Sandro Botticelli, 1478"@en ,
+                    "Venus födelse — Sandro Botticelli, 1478"@sv ,
+                    "비너스의 탄생 — 산드로 보티첼리, 1478년"@ko ,
+                    "Die Geburt der Venus — Sandro Botticelli, 1478"@de ,
+                    "El nacimiento de Venus — Sandro Botticelli, 1478"@es ,
+                    "La Naissance de Vénus — Sandro Botticelli, 1478"@fr .
+
+<#q208758>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg/1280px-Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg> ;
+    solid-memo:back "Las Meninas — Diego Velázquez, 1656"@en ,
+                    "Hovdamerna — Diego Velázquez, 1656"@sv ,
+                    "시녀들 — 디에고 벨라스케스, 1656년"@ko ,
+                    "Las Meninas — Diego Velázquez, 1656"@de ,
+                    "Las Meninas — Diego Velázquez, 1656"@es ,
+                    "Les Ménines — Diego Vélasquez, 1656"@fr .
+
+<#q154469>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/De_aardappeleters_-_s0005V1962_-_Van_Gogh_Museum.jpg/1280px-De_aardappeleters_-_s0005V1962_-_Van_Gogh_Museum.jpg> ;
+    solid-memo:back "The Potato Eaters — Vincent van Gogh, 1885"@en ,
+                    "Potatisätarna — Vincent van Gogh, 1885"@sv ,
+                    "감자 먹는 사람들 — 빈센트 반 고흐, 1885년"@ko ,
+                    "Die Kartoffelesser — Vincent van Gogh, 1885"@de ,
+                    "Los comedores de patatas — Vincent van Gogh, 1885"@es ,
+                    "Les Mangeurs de pommes de terre — Vincent van Gogh, 1885"@fr .
+
+<#q328523>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/5/59/Monet_-_Impression%2C_Sunrise.jpg/1280px-Monet_-_Impression%2C_Sunrise.jpg> ;
+    solid-memo:back "Impression, Sunrise — Claude Monet, 1872"@en ,
+                    "Impression. Soluppgång — Claude Monet, 1872"@sv ,
+                    "인상, 해돋이 — 클로드 모네, 1872년"@ko ,
+                    "Impression, Sonnenaufgang — Claude Monet, 1872"@de ,
+                    "Impresión, sol naciente — Claude Monet, 1872"@es ,
+                    "Impression, soleil levant — Claude Monet, 1872"@fr .
+
+<#q698487>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/1280px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg> ;
+    solid-memo:back "The Kiss — Gustav Klimt, 1907"@en ,
+                    "Kyssen — Gustav Klimt, 1907"@sv ,
+                    "키스 — 구스타프 클림트, 1907년"@ko ,
+                    "Der Kuss — Gustav Klimt, 1907"@de ,
+                    "El beso — Gustav Klimt, 1907"@es ,
+                    "Le Baiser — Gustav Klimt, 1907"@fr .
+
+<#q474338>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Lady_with_an_Ermine_-_Leonardo_da_Vinci_-_Google_Art_Project.jpg/1280px-Lady_with_an_Ermine_-_Leonardo_da_Vinci_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Lady with an Ermine — Leonardo da Vinci, 1490"@en ,
+                    "Damen med hermelinen — Leonardo da Vinci, 1490"@sv ,
+                    "흰 족제비를 안은 여인 — 레오나르도 다 빈치, 1490년"@ko ,
+                    "Dame mit dem Hermelin — Leonardo da Vinci, 1490"@de ,
+                    "La dama del armiño — Leonardo da Vinci, 1490"@es ,
+                    "La Dame à l'hermine — Léonard de Vinci, 1490"@fr .
+
+<#q321303>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution_2.jpg/1280px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution_2.jpg> ;
+    solid-memo:back "The Garden of Earthly Delights — Hieronymus Bosch"@en ,
+                    "Lustarnas trädgård — Hieronymus Bosch"@sv ,
+                    "세속적인 쾌락의 정원 — 히에로니무스 보스"@ko ,
+                    "Der Garten der Lüste — Hieronymus Bosch"@de ,
+                    "El jardín de las delicias — El Bosco"@es ,
+                    "Le Jardin des délices — Jérôme Bosch"@fr .
+
+<#q311243>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/Friedrich%2C_Caspar_David_-_Wanderer_%C3%BCber_dem_Nebelmeer.jpg/1280px-Friedrich%2C_Caspar_David_-_Wanderer_%C3%BCber_dem_Nebelmeer.jpg> ;
+    solid-memo:back "Wanderer above the Sea of Fog — Caspar David Friedrich, 1818"@en ,
+                    "Vandraren över dimhavet — Caspar David Friedrich, 1818"@sv ,
+                    "안개 바다 위의 방랑자 — 카스파르 다비트 프리드리히, 1818년"@ko ,
+                    "Wanderer über dem Nebelmeer — Caspar David Friedrich, 1818"@de ,
+                    "El caminante sobre el mar de nubes — Caspar David Friedrich, 1818"@es ,
+                    "Le Voyageur contemplant une mer de nuages — Caspar David Friedrich, 1818"@fr .
+
+<#q212616>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/JEAN_LOUIS_TH%C3%89ODORE_G%C3%89RICAULT_-_La_Balsa_de_la_Medusa_%28Museo_del_Louvre%2C_1818-19%29.jpg/1280px-JEAN_LOUIS_TH%C3%89ODORE_G%C3%89RICAULT_-_La_Balsa_de_la_Medusa_%28Museo_del_Louvre%2C_1818-19%29.jpg> ;
+    solid-memo:back "The Raft of the Medusa — Théodore Géricault, 1819"@en ,
+                    "Medusas flotte — Théodore Géricault, 1819"@sv ,
+                    "메두사호의 뗏목 — 테오도르 제리코, 1819년"@ko ,
+                    "Das Floß der Medusa — Théodore Géricault, 1819"@de ,
+                    "La balsa de la Medusa — Théodore Géricault, 1819"@es ,
+                    "Le Radeau de la Méduse — Théodore Géricault, 1819"@fr .
+
+<#q478271>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Ilja_Jefimowitsch_Repin_-_Reply_of_the_Zaporozhian_Cossacks_-_Yorck.jpg/1280px-Ilja_Jefimowitsch_Repin_-_Reply_of_the_Zaporozhian_Cossacks_-_Yorck.jpg> ;
+    solid-memo:back "Reply of the Zaporozhian Cossacks — Ilya Repin, 1890s"@en ,
+                    "Zaporogkosacker skriver brev till den turkiske sultanen — Ilja Repin, 1890-talet"@sv ,
+                    "자포로자 코사크의 답변 — 일리야 레핀, 1890년대"@ko ,
+                    "Die Saporoger Kosaken schreiben dem türkischen Sultan einen Brief — Ilja Repin, 1890er-Jahre"@de ,
+                    "Cosacos zaporogos escribiendo una carta al Sultán — Iliá Repin, década de 1890"@es ,
+                    "Les Cosaques zaporogues écrivant une lettre au sultan de Turquie — Ilia Répine, années 1890"@fr .
+
+<#q661378>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Rembrandt_-_The_Anatomy_Lesson_of_Dr_Nicolaes_Tulp.jpg/1280px-Rembrandt_-_The_Anatomy_Lesson_of_Dr_Nicolaes_Tulp.jpg> ;
+    solid-memo:back "The Anatomy Lesson of Dr. Nicolaes Tulp — Rembrandt, 1632"@en ,
+                    "Doktor Nicolaes Tulps anatomilektion — Rembrandt, 1632"@sv ,
+                    "니콜라스 튈프 박사의 해부학 수업 — 렘브란트, 1632년"@ko ,
+                    "Die Anatomie des Dr. Tulp — Rembrandt van Rijn, 1632"@de ,
+                    "Lección de anatomía del Dr. Nicolaes Tulp — Rembrandt, 1632"@es ,
+                    "La Leçon d'anatomie du docteur Tulp — Rembrandt, 1632"@fr .
+
+<#q1091086>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Francisco_de_Goya_y_Lucientes_-_Los_fusilamientos_del_tres_de_mayo_-_1814.jpg/1280px-Francisco_de_Goya_y_Lucientes_-_Los_fusilamientos_del_tres_de_mayo_-_1814.jpg> ;
+    solid-memo:back "The Third of May 1808 — Francisco Goya, 1814"@en ,
+                    "Den tredje maj 1808 — Francisco de Goya, 1814"@sv ,
+                    "1808년 5월 3일 — 프란시스코 데 고야, 1814년"@ko ,
+                    "Die Erschießung der Aufständischen — Francisco de Goya, 1814"@de ,
+                    "El tres de mayo de 1808 en Madrid — Francisco de Goya, 1814"@es ,
+                    "Tres de mayo — Francisco de Goya, 1814"@fr .
+
+<#q152509>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Edouard_Manet_-_Luncheon_on_the_Grass_-_Google_Art_Project.jpg/1280px-Edouard_Manet_-_Luncheon_on_the_Grass_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Luncheon on the Grass — Édouard Manet, 1863"@en ,
+                    "Frukost i det gröna — Édouard Manet, 1863"@sv ,
+                    "풀밭 위의 점심 식사 — 에두아르 마네, 1863년"@ko ,
+                    "Das Frühstück im Grünen — Édouard Manet, 1863"@de ,
+                    "Almuerzo sobre la hierba — Édouard Manet, 1863"@es ,
+                    "Le Déjeuner sur l'herbe — Édouard Manet, 1863"@fr .
+
+<#q464782>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/Grant_Wood_-_American_Gothic_%281930%29.jpg/1280px-Grant_Wood_-_American_Gothic_%281930%29.jpg> ;
+    solid-memo:back "American Gothic — Grant Wood, 1930"@en ,
+                    "American Gothic — Grant Wood, 1930"@sv ,
+                    "아메리칸 고딕 — 그랜트 우드, 1930년"@ko ,
+                    "American Gothic — Grant Wood, 1930"@de ,
+                    "American Gothic — Grant Wood, 1930"@es ,
+                    "American Gothic — Grant Wood, 1930"@fr .
+
+<#q683274>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Renoir%2C_Pierre-Auguste_-_Dance_at_Le_Moulin_de_la_Galette%2C_1876.jpg/1280px-Renoir%2C_Pierre-Auguste_-_Dance_at_Le_Moulin_de_la_Galette%2C_1876.jpg> ;
+    solid-memo:back "Bal du moulin de la Galette — Pierre-Auguste Renoir, 1876"@en ,
+                    "Bal du moulin de la Galette — Auguste Renoir, 1876"@sv ,
+                    "물랭 드 라 갈레트의 무도회 — 오귀스트 르누아르, 1876년"@ko ,
+                    "Bal du moulin de la Galette — Pierre-Auguste Renoir, 1876"@de ,
+                    "Baile en el Moulin de la Galette — Pierre-Auguste Renoir, 1876"@es ,
+                    "Bal du moulin de la Galette — Auguste Renoir, 1876"@fr .
+
+<#q167605>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg/1280px-Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Milkmaid — Johannes Vermeer, 1660"@en ,
+                    "Kökspiga som häller upp mjölk — Johannes Vermeer, 1660"@sv ,
+                    "우유 따르는 여인 — 요하네스 페르메이르, 1660년"@ko ,
+                    "Dienstmagd mit Milchkrug — Jan Vermeer, 1660"@de ,
+                    "La lechera — Johannes Vermeer, 1660"@es ,
+                    "La Laitière — Johannes Vermeer, 1660"@fr .
+
+<#q2282256>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Irises-Vincent_van_Gogh.jpg/1280px-Irises-Vincent_van_Gogh.jpg> ;
+    solid-memo:back "Irises — Vincent van Gogh, 1889"@en ,
+                    "Irisar — Vincent van Gogh, 1889"@sv ,
+                    "붓꽃 — 빈센트 반 고흐, 1889년"@ko ,
+                    "Schwertlilien — Vincent van Gogh, 1889"@de ,
+                    "Lirios — Vincent van Gogh, 1889"@es ,
+                    "Iris — Vincent van Gogh, 1889"@fr .
+
+<#q634122>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/Korenveld_met_kraaien_-_s0149V1962_-_Van_Gogh_Museum.jpg/1280px-Korenveld_met_kraaien_-_s0149V1962_-_Van_Gogh_Museum.jpg> ;
+    solid-memo:back "Wheatfield with Crows — Vincent van Gogh, 1890"@en ,
+                    "Vetefält med kråkor — Vincent van Gogh, 1890"@sv ,
+                    "까마귀가 나는 밀밭 — 빈센트 반 고흐, 1890년"@ko ,
+                    "Krähen über Weizenfeld — Vincent van Gogh, 1890"@de ,
+                    "Trigal con cuervos — Vincent van Gogh, 1890"@es ,
+                    "Champ de blé aux corbeaux — Vincent van Gogh, 1890"@fr .
+
+<#q220859>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Van_Eyck_-_Arnolfini_Portrait.jpg/1280px-Van_Eyck_-_Arnolfini_Portrait.jpg> ;
+    solid-memo:back "Arnolfini Portrait — Jan van Eyck, 1434"@en ,
+                    "Makarna Arnolfinis trolovning — Jan van Eyck, 1434"@sv ,
+                    "아르놀피니 부부의 초상 — 얀 반 에이크, 1434년"@ko ,
+                    "Arnolfini-Hochzeit — Jan van Eyck, 1434"@de ,
+                    "El matrimonio Arnolfini — Jan van Eyck, 1434"@es ,
+                    "Les Époux Arnolfini — Jan van Eyck, 1434"@fr .
+
+<#q549847>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg/1280px-Sandro_Botticelli_-_La_Primavera_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Primavera — Sandro Botticelli, 1480s"@en ,
+                    "Primavera — Sandro Botticelli, 1480-talet"@sv ,
+                    "봄 — 산드로 보티첼리, 1480년대"@ko ,
+                    "Primavera — Sandro Botticelli, 1480er-Jahre"@de ,
+                    "La primavera — Sandro Botticelli, década de 1480"@es ,
+                    "Le Printemps — Sandro Botticelli, années 1480"@fr .
+
+<#q476458>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Le_Serment_des_Horaces_-_Jacques-Louis_David_-_Mus%C3%A9e_du_Louvre_Peintures_INV_3692_%3B_MR_1432.jpg/1280px-Le_Serment_des_Horaces_-_Jacques-Louis_David_-_Mus%C3%A9e_du_Louvre_Peintures_INV_3692_%3B_MR_1432.jpg> ;
+    solid-memo:back "The Oath of the Horatii — Jacques-Louis David, 1784"@en ,
+                    "Horatiernas ed — Jacques-Louis David, 1784"@sv ,
+                    "호라티우스 형제의 맹세 — 자크루이 다비드, 1784년"@ko ,
+                    "Der Schwur der Horatier — Jacques-Louis David, 1784"@de ,
+                    "Juramento de los Horacios — Jacques-Louis David, 1784"@es ,
+                    "Le Serment des Horaces — Jacques-Louis David, 1784"@fr .
+
+<#q1025704>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Van_Gogh_-_Terrace_of_a_Caf%C3%A9_at_Night_%28Place_du_Forum%29_1888.jpg/1280px-Van_Gogh_-_Terrace_of_a_Caf%C3%A9_at_Night_%28Place_du_Forum%29_1888.jpg> ;
+    solid-memo:back "Café Terrace at Night — Vincent van Gogh, 1888"@en ,
+                    "Trottoarkaféet — Vincent van Gogh, 1888"@sv ,
+                    "밤의 카페 테라스 — 빈센트 반 고흐, 1888년"@ko ,
+                    "Caféterrasse am Abend — Vincent van Gogh, 1888"@de ,
+                    "Terraza de café por la noche — Vincent van Gogh, 1888"@es ,
+                    "Terrasse du café le soir — Vincent van Gogh, 1888"@fr .
+
+<#q636537>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Jacques-Louis_David_-_Marat_assassinated_-_Google_Art_Project_2.jpg/1280px-Jacques-Louis_David_-_Marat_assassinated_-_Google_Art_Project_2.jpg> ;
+    solid-memo:back "The Death of Marat — Jacques-Louis David, 1793"@en ,
+                    "Marats död — Jacques-Louis David, 1793"@sv ,
+                    "마라의 죽음 — 자크루이 다비드, 1793년"@ko ,
+                    "Der Tod des Marat — Jacques-Louis David, 1793"@de ,
+                    "La muerte de Marat — Jacques-Louis David, 1793"@es ,
+                    "Marat assassiné — Jacques-Louis David, 1793"@fr .
+
+<#q1267893>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Ginevra_de%27_Benci_-_National_Gallery_of_Art.jpg/1280px-Ginevra_de%27_Benci_-_National_Gallery_of_Art.jpg> ;
+    solid-memo:back "Ginevra de' Benci — Leonardo da Vinci, 1470s"@en ,
+                    "Ginevra de' Benci — Leonardo da Vinci, 1470-talet"@sv ,
+                    "지네브라 데 벤치 — 레오나르도 다 빈치, 1470년대"@ko ,
+                    "Bildnis der Ginevra de’ Benci — Leonardo da Vinci, 1470er-Jahre"@de ,
+                    "Retrato de Ginebra de Benci — Leonardo da Vinci, década de 1470"@es ,
+                    "Portrait de Ginevra de' Benci — Léonard de Vinci, années 1470"@fr .
+
+<#q523974>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Johannes_Vermeer_-_View_of_Delft_-_92_-_Mauritshuis.jpg/1280px-Johannes_Vermeer_-_View_of_Delft_-_92_-_Mauritshuis.jpg> ;
+    solid-memo:back "View of Delft — Johannes Vermeer, 1660s"@en ,
+                    "Vy över Delft — Johannes Vermeer, 1660-talet"@sv ,
+                    "델프트 풍경 — 요하네스 페르메이르, 1660년대"@ko ,
+                    "Ansicht von Delft — Jan Vermeer, 1660er-Jahre"@de ,
+                    "Vista de Delft — Johannes Vermeer, década de 1660"@es ,
+                    "Vue de Delft — Johannes Vermeer, années 1660"@fr .
+
+<#q734834>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://upload.wikimedia.org/wikipedia/commons/1/1d/Ghent_Altarpiece_by_Jan_van_Eyck_ALL.jpg> ;
+    solid-memo:back "Ghent Altarpiece — Hubert van Eyck and Jan van Eyck, 1432"@en ,
+                    "Gentaltaret — Hubert van Eyck och Jan van Eyck, 1432"@sv ,
+                    "헨트 제단화 — 후베르트 반 에이크와 얀 반 에이크, 1432년"@ko ,
+                    "Genter Altar — Hubert van Eyck und Jan van Eyck, 1432"@de ,
+                    "Políptico de Gante — Hubert van Eyck y Jan van Eyck, 1432"@es ,
+                    "L'Agneau mystique — Hubert van Eyck et Jan van Eyck, 1432"@fr .
+
+<#q500985>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg/1280px-Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Hunters in the Snow — Pieter Brueghel the Elder, 1565"@en ,
+                    "Jägarna i snön — Pieter Bruegel d.ä., 1565"@sv ,
+                    "눈 속의 사냥꾼 — 대 피터르 브뤼헐, 1565년"@ko ,
+                    "Die Jäger im Schnee — Pieter Bruegel der Ältere, 1565"@de ,
+                    "Los cazadores en la nieve — Pieter Brueghel el Viejo, 1565"@es ,
+                    "Chasseurs dans la neige — Pieter Brueghel l'Ancien, 1565"@fr .
+
+<#q563727>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Sainte_Anne_Leonard.jpg/1280px-Sainte_Anne_Leonard.jpg> ;
+    solid-memo:back "The Virgin and Child with Saint Anne — Leonardo da Vinci"@en ,
+                    "Anna själv tredje — Leonardo da Vinci"@sv ,
+                    "성 안나와 성 모자 — 레오나르도 다 빈치"@ko ,
+                    "Anna selbdritt — Leonardo da Vinci"@de ,
+                    "La Virgen, el Niño Jesús y Santa Ana — Leonardo da Vinci"@es ,
+                    "La Vierge, l'Enfant Jésus et sainte Anne — Léonard de Vinci"@fr .
+
+<#q1133420>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Velazquez-The_Surrender_of_Breda.jpg/1280px-Velazquez-The_Surrender_of_Breda.jpg> ;
+    solid-memo:back "The Surrender of Breda — Diego Velázquez, 1634"@en ,
+                    "Bredas kapitulation — Diego Velázquez, 1634"@sv ,
+                    "브레다의 항복 — 디에고 벨라스케스, 1634년"@ko ,
+                    "Die Übergabe von Breda — Diego Velázquez, 1634"@de ,
+                    "La rendición de Breda — Diego Velázquez, 1634"@es ,
+                    "La Reddition de Bréda — Diego Vélasquez, 1634"@fr .
+
+<#q1231009>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Le_Sacre_de_Napol%C3%A9on_-_Jacques-Louis_David_-_Mus%C3%A9e_du_Louvre_Peintures_INV_3699_%3B_MR_1437.jpg/1280px-Le_Sacre_de_Napol%C3%A9on_-_Jacques-Louis_David_-_Mus%C3%A9e_du_Louvre_Peintures_INV_3699_%3B_MR_1437.jpg> ;
+    solid-memo:back "The Coronation of Napoleon — Jacques-Louis David, 1807"@en ,
+                    "Napoleons kröning — Jacques-Louis David, 1807"@sv ,
+                    "나폴레옹 1세의 대관식 — 자크루이 다비드, 1807년"@ko ,
+                    "Le Sacre de Napoléon — Jacques-Louis David, 1807"@de ,
+                    "La coronación de Napoleón — Jacques-Louis David, 1807"@es ,
+                    "Le Sacre de Napoléon — Jacques-Louis David, 1807"@fr .
+
+<#q674846>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Vincent_Willem_van_Gogh_076.jpg/1280px-Vincent_Willem_van_Gogh_076.jpg> ;
+    solid-memo:back "The Night Café — Vincent van Gogh, 1888"@en ,
+                    "Nattcaféet — Vincent van Gogh, 1888"@sv ,
+                    "밤의 카페 — 빈센트 반 고흐, 1888년"@ko ,
+                    "Das Nachtcafé — Vincent van Gogh, 1888"@de ,
+                    "El café de noche — Vincent van Gogh, 1888"@es ,
+                    "Le Café de nuit — Vincent van Gogh, 1888"@fr .
+
+<#q604761>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Thomas_Gainsborough_-_The_Blue_Boy_%28c._1770%29.jpg/1280px-Thomas_Gainsborough_-_The_Blue_Boy_%28c._1770%29.jpg> ;
+    solid-memo:back "The Blue Boy — Thomas Gainsborough, 1770"@en ,
+                    "Den blå pojken — Thomas Gainsborough, 1770"@sv ,
+                    "파란 옷을 입은 소년 — 토머스 게인즈버러, 1770년"@ko ,
+                    "The Blue Boy — Thomas Gainsborough, 1770"@de ,
+                    "El joven azul — Thomas Gainsborough, 1770"@es ,
+                    "L'Enfant bleu — Thomas Gainsborough, 1770"@fr .
+
+<#q328079>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Raphael_-_The_Sistine_Madonna_-_Google_Arts_%26_Culture.jpg/1280px-Raphael_-_The_Sistine_Madonna_-_Google_Arts_%26_Culture.jpg> ;
+    solid-memo:back "Sistine Madonna — Raphael, 1510s"@en ,
+                    "Sixtinska madonnan — Rafael, 1510-talet"@sv ,
+                    "시스티나 마돈나 — 라파엘로 산치오, 1510년대"@ko ,
+                    "Sixtinische Madonna — Raffael, 1510er-Jahre"@de ,
+                    "Madonna Sixtina — Rafael Sanzio, década de 1510"@es ,
+                    "La Madone Sixtine — Raphaël, années 1510"@fr .
+
+<#q533619>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Pieter_Bruegel_%28der_%C3%84ltere%29_%28ca._1525_-_1569%29_-_Die_niederl%C3%A4ndischen_Sprichw%C3%B6rter_-_1720_-_Gem%C3%A4ldegalerie.jpg/1280px-Pieter_Bruegel_%28der_%C3%84ltere%29_%28ca._1525_-_1569%29_-_Die_niederl%C3%A4ndischen_Sprichw%C3%B6rter_-_1720_-_Gem%C3%A4ldegalerie.jpg> ;
+    solid-memo:back "Netherlandish Proverbs — Pieter Brueghel the Elder, 1551"@en ,
+                    "Nederländska ordspråk — Pieter Bruegel d.ä., 1551"@sv ,
+                    "네덜란드 속담 — 대 피터르 브뤼헐, 1551년"@ko ,
+                    "Die niederländischen Sprichwörter — Pieter Bruegel der Ältere, 1551"@de ,
+                    "Los proverbios flamencos — Pieter Brueghel el Viejo, 1551"@es ,
+                    "Les Proverbes flamands — Pieter Brueghel l'Ancien, 1551"@fr .
+
+<#q1142058>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Leonardo%2C_Madonna_Benois.JPG/1280px-Leonardo%2C_Madonna_Benois.JPG> ;
+    solid-memo:back "Benois Madonna — Leonardo da Vinci"@en ,
+                    "Benoismadonnan — Leonardo da Vinci"@sv ,
+                    "베누아 마돈나 — 레오나르도 다 빈치"@ko ,
+                    "Madonna Benois — Leonardo da Vinci"@de ,
+                    "Madona Benois — Leonardo da Vinci"@es ,
+                    "Madonna Benois — Léonard de Vinci"@fr .
+
+<#q1464531>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Vincent_van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Vincent_van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Starry Night Over the Rhone — Vincent van Gogh, 1888"@en ,
+                    "Stjärnenatt över Rhône — Vincent van Gogh, 1888"@sv ,
+                    "론강의 별이 빛나는 밤 — 빈센트 반 고흐, 1888년"@ko ,
+                    "Sternennacht über der Rhone — Vincent van Gogh, 1888"@de ,
+                    "Noche estrellada sobre el Ródano — Vincent van Gogh, 1888"@es ,
+                    "La Nuit étoilée — Vincent van Gogh, 1888"@fr .
+
+<#q1150997>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Francisco_de_Goya%2C_Saturno_devorando_a_su_hijo_%281819-1823%29.jpg/1280px-Francisco_de_Goya%2C_Saturno_devorando_a_su_hijo_%281819-1823%29.jpg> ;
+    solid-memo:back "Saturn Devouring His Son — Francisco Goya, 1819"@en ,
+                    "Saturnus slukar sin son — Francisco de Goya, 1819"@sv ,
+                    "자식을 잡아먹는 사투르누스 — 프란시스코 데 고야, 1819년"@ko ,
+                    "Saturn verschlingt seinen Sohn — Francisco de Goya, 1819"@de ,
+                    "Saturno devorando a su hijo — Francisco de Goya, 1819"@es ,
+                    "Saturne dévorant un de ses fils — Francisco de Goya, 1819"@fr .
+
+<#q2200610>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Vincent_van_Gogh_-_The_yellow_house_%28%27The_street%27%29.jpg/1280px-Vincent_van_Gogh_-_The_yellow_house_%28%27The_street%27%29.jpg> ;
+    solid-memo:back "The Yellow House — Vincent van Gogh, 1888"@en ,
+                    "Gula huset — Vincent van Gogh, 1888"@sv ,
+                    "노란 집 — 빈센트 반 고흐, 1888년"@ko ,
+                    "Das gelbe Haus — Vincent van Gogh, 1888"@de ,
+                    "La Casa Amarilla — Vincent van Gogh, 1888"@es ,
+                    "La Maison jaune — Vincent van Gogh, 1888"@fr .
+
+<#q1926628>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/Vincent_van_Gogh_-_Red_Vineyard_at_Arles_%281888%29.jpg/1280px-Vincent_van_Gogh_-_Red_Vineyard_at_Arles_%281888%29.jpg> ;
+    solid-memo:back "The Red Vineyard — Vincent van Gogh, 1888"@en ,
+                    "Den röda vingården — Vincent van Gogh, 1888"@sv ,
+                    "아를의 붉은 포도밭 — 빈센트 반 고흐, 1888년"@ko ,
+                    "Roter Weinberg — Vincent van Gogh, 1888"@de ,
+                    "El viñedo rojo — Vincent van Gogh, 1888"@es ,
+                    "La Vigne rouge — Vincent van Gogh, 1888"@fr .
+
+<#q1213917>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Vincent_van_Gogh_-_The_Church_in_Auvers-sur-Oise%2C_View_from_the_Chevet_-_Google_Art_Project.jpg/1280px-Vincent_van_Gogh_-_The_Church_in_Auvers-sur-Oise%2C_View_from_the_Chevet_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Church at Auvers — Vincent van Gogh, 1890"@en ,
+                    "Kyrkan i Auvers — Vincent van Gogh, 1890"@sv ,
+                    "오베르의 교회 — 빈센트 반 고흐, 1890년"@ko ,
+                    "Die Kirche von Auvers — Vincent van Gogh, 1890"@de ,
+                    "La iglesia de Auvers-sur-Oise — Vincent van Gogh, 1890"@es ,
+                    "L'Église d'Auvers-sur-Oise — Vincent van Gogh, 1890"@fr .
+
+<#q175628>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Ilya_Repin_-_Barge_Haulers_on_the_Volga_-_Google_Art_Project.jpg/1280px-Ilya_Repin_-_Barge_Haulers_on_the_Volga_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Barge Haulers on the Volga — Ilya Repin, 1870"@en ,
+                    "Pråmdragarna på Volga — Ilja Repin, 1870"@sv ,
+                    "볼가강에서 배를 끄는 인부들 — 일리야 레핀, 1870년"@ko ,
+                    "Die Wolgatreidler — Ilja Repin, 1870"@de ,
+                    "Los sirgadores del Volga — Iliá Repin, 1870"@es ,
+                    "Les Bateliers de la Volga — Ilia Répine, 1870"@fr .
+
+<#q1070896>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg/1280px-Hovhannes_Aivazovsky_-_The_Ninth_Wave_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Ninth Wave — Ivan Aivazovsky, 1850"@en ,
+                    "Nionde vågen — Ivan Ajvazovskij, 1850"@sv ,
+                    "아홉번째 파도 — 이반 아이바좁스키, 1850년"@ko ,
+                    "Die neunte Welle — Iwan Aiwasowski, 1850"@de ,
+                    "Novena ola — Iván Aivazovski, 1850"@es ,
+                    "La Neuvième Vague — Ivan Aïvazovski, 1850"@fr .
+
+<#q1044742>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg/1280px-A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg> ;
+    solid-memo:back "A Sunday Afternoon on the Island of La Grande Jatte — Georges Seurat, 1884"@en ,
+                    "En söndagseftermiddag på ön La Grande Jatte — Georges Seurat, 1884"@sv ,
+                    "그랑드자트섬의 일요일 오후 — 조르주 쇠라, 1884년"@ko ,
+                    "Ein Sonntagnachmittag auf der Insel La Grande Jatte — Georges Seurat, 1884"@de ,
+                    "Tarde de domingo en la isla de la Grande Jatte — Georges Seurat, 1884"@es ,
+                    "Un dimanche après-midi à l'île de la Grande Jatte — Georges Seurat, 1884"@fr .
+
+<#q783215>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Leonardo_da_Vinci_-_Saint_John_the_Baptist_C2RMF_retouched.jpg/1280px-Leonardo_da_Vinci_-_Saint_John_the_Baptist_C2RMF_retouched.jpg> ;
+    solid-memo:back "Saint John the Baptist — Leonardo da Vinci, 1510s"@en ,
+                    "Johannes Döparen — Leonardo da Vinci, 1510-talet"@sv ,
+                    "세례자 요한 — 레오나르도 다 빈치, 1510년대"@ko ,
+                    "Johannes der Täufer — Leonardo da Vinci, 1510er-Jahre"@de ,
+                    "San Juan Bautista — Leonardo da Vinci, década de 1510"@es ,
+                    "Saint Jean-Baptiste — Léonard de Vinci, années 1510"@fr .
+
+<#q656434>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/La_Belle_Ferroni%C3%A8re_-_Google_Arts.jpg/1280px-La_Belle_Ferroni%C3%A8re_-_Google_Arts.jpg> ;
+    solid-memo:back "La Belle Ferronnière — Leonardo da Vinci, 1495"@en ,
+                    "Porträtt av en kvinna — Leonardo da Vinci, 1495"@sv ,
+                    "라 벨 페로니에르 — 레오나르도 다 빈치, 1495년"@ko ,
+                    "La Belle Ferronnière — Leonardo da Vinci, 1495"@de ,
+                    "La Belle Ferronière — Leonardo da Vinci, 1495"@es ,
+                    "La Belle Ferronnière — Léonard de Vinci, 1495"@fr .
+
+<#q930137>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/Giorgione_-_Das_Gewitter.jpg/1280px-Giorgione_-_Das_Gewitter.jpg> ;
+    solid-memo:back "The Tempest — Giorgione, 1500s"@en ,
+                    "Stormen — Giorgione, 1500–1509"@sv ,
+                    "폭풍 — 조르조네, 1500–1509년"@ko ,
+                    "Das Gewitter — Giorgione, 1500–1509"@de ,
+                    "La tempestad — Giorgione, 1500–1509"@es ,
+                    "La Tempête — Giorgione, 1500–1509"@fr .
+
+<#q354396>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Gustav_Klimt%2C_1907%2C_Adele_Bloch-Bauer_I%2C_Neue_Galerie_New_York.jpg/1280px-Gustav_Klimt%2C_1907%2C_Adele_Bloch-Bauer_I%2C_Neue_Galerie_New_York.jpg> ;
+    solid-memo:back "Portrait of Adele Bloch-Bauer I — Gustav Klimt, 1907"@en ,
+                    "Porträtt av Adele Bloch-Bauer I — Gustav Klimt, 1907"@sv ,
+                    "아델레 블로흐-바우어의 초상 I — 구스타프 클림트, 1907년"@ko ,
+                    "Adele Bloch-Bauer I — Gustav Klimt, 1907"@de ,
+                    "Retrato de Adele Bloch-Bauer I — Gustav Klimt, 1907"@es ,
+                    "Portrait d'Adele Bloch-Bauer I — Gustav Klimt, 1907"@fr .
+
+<#q1978815>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/La_grande_odalisque_-_Jean-Auguste_Dominique_Ingres_-_Mus%C3%A9e_du_Louvre_Peintures_RF_1158.jpg/1280px-La_grande_odalisque_-_Jean-Auguste_Dominique_Ingres_-_Mus%C3%A9e_du_Louvre_Peintures_RF_1158.jpg> ;
+    solid-memo:back "Grande Odalisque — Jean-Auguste-Dominique Ingres, 1814"@en ,
+                    "Den stora odalisken — Jean-Auguste-Dominique Ingres, 1814"@sv ,
+                    "그랑드 오달리스크 — 장오귀스트도미니크 앵그르, 1814년"@ko ,
+                    "Die große Odaliske — Jean-Auguste-Dominique Ingres, 1814"@de ,
+                    "La gran odalisca — Jean-Auguste-Dominique Ingres, 1814"@es ,
+                    "La Grande Odalisque — Jean-Auguste-Dominique Ingres, 1814"@fr .
+
+<#q2629559>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Fragonard%2C_The_Swing.jpg/1280px-Fragonard%2C_The_Swing.jpg> ;
+    solid-memo:back "The Swing — Jean-Honoré Fragonard, 1760s"@en ,
+                    "Gungan — Jean-Honoré Fragonard, 1760-talet"@sv ,
+                    "그네 — 장오노레 프라고나르, 1760년대"@ko ,
+                    "Die Schaukel — Jean-Honoré Fragonard, 1760er-Jahre"@de ,
+                    "El columpio — Jean-Honoré Fragonard, década de 1760"@es ,
+                    "Les Hasards heureux de l'escarpolette — Jean-Honoré Fragonard, années 1760"@fr .
+
+<#q1212937>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Hans_Holbein_the_Younger_-_The_Ambassadors_-_Google_Art_Project.jpg/1280px-Hans_Holbein_the_Younger_-_The_Ambassadors_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Ambassadors — Hans Holbein the Younger, 1533"@en ,
+                    "Ambassadörerna — Hans Holbein den yngre, 1533"@sv ,
+                    "대사들 — 소 한스 홀바인, 1533년"@ko ,
+                    "Die Gesandten — Hans Holbein der Jüngere, 1533"@de ,
+                    "Los embajadores — Hans Holbein el Joven, 1533"@es ,
+                    "Les Ambassadeurs — Hans Holbein le Jeune, 1533"@fr .
+
+<#q540488>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Gustave_Courbet_-_A_Burial_at_Ornans_-_Google_Art_Project.jpg/1280px-Gustave_Courbet_-_A_Burial_at_Ornans_-_Google_Art_Project.jpg> ;
+    solid-memo:back "A Burial at Ornans — Gustave Courbet"@en ,
+                    "Begravning i Ornans — Gustave Courbet"@sv ,
+                    "오르낭의 매장 — 귀스타브 쿠르베"@ko ,
+                    "Ein Begräbnis in Ornans — Gustave Courbet"@de ,
+                    "Entierro en Ornans — Gustave Courbet"@es ,
+                    "Un enterrement à Ornans — Gustave Courbet"@fr .
+
+<#q4195595>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Iv%C3%A1n_el_Terrible_y_su_hijo%2C_por_Ili%C3%A1_Repin.jpg/1280px-Iv%C3%A1n_el_Terrible_y_su_hijo%2C_por_Ili%C3%A1_Repin.jpg> ;
+    solid-memo:back "Ivan the Terrible and his son Ivan on November 16, 1581 — Ilya Repin, 1883"@en ,
+                    "Ivan den förskräcklige mördar sin son — Ilja Repin, 1883"@sv ,
+                    "이반 뇌제와 그의 아들 이반 — 일리야 레핀, 1883년"@ko ,
+                    "Iwan der Schreckliche und sein Sohn — Ilja Repin, 1883"@de ,
+                    "Iván el Terrible y su hijo — Iliá Repin, 1883"@es ,
+                    "Ivan le Terrible tue son fils — Ilia Répine, 1883"@fr .
+
+<#q544315>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/Johannes_Vermeer_-_The_Astronomer_-_1668.jpg/1280px-Johannes_Vermeer_-_The_Astronomer_-_1668.jpg> ;
+    solid-memo:back "The Astronomer — Johannes Vermeer, 1664"@en ,
+                    "Astronomen — Johannes Vermeer, 1664"@sv ,
+                    "천문학자 — 요하네스 페르메이르, 1664년"@ko ,
+                    "Der Astronom — Jan Vermeer, 1664"@de ,
+                    "El astrónomo — Johannes Vermeer, 1664"@es ,
+                    "L'Astronome — Johannes Vermeer, 1664"@fr .
+
+<#q890678>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Gauguin_-_Where_Do_We_Come_From%3F_What_Are_We%3F_Where_Are_We_Going%3F_%281897-98%29.jpg/1280px-Gauguin_-_Where_Do_We_Come_From%3F_What_Are_We%3F_Where_Are_We_Going%3F_%281897-98%29.jpg> ;
+    solid-memo:back "Where Do We Come From? What Are We? Where Are We Going? — Paul Gauguin, 1890s"@en ,
+                    "Varifrån kommer vi? Vad är vi? Vart går vi? — Paul Gauguin, 1890-talet"@sv ,
+                    "우리는 어디서 왔고, 우리는 무엇이며, 우리는 어디로 가는가 — 폴 고갱, 1890년대"@ko ,
+                    "Woher kommen wir? Wer sind wir? Wohin gehen wir? — Paul Gauguin, 1890er-Jahre"@de ,
+                    "¿De dónde venimos? ¿Quiénes somos? ¿Adónde vamos? — Paul Gauguin, década de 1890"@es ,
+                    "D'où venons-nous ? Que sommes-nous ? Où allons-nous ? — Paul Gauguin, années 1890"@fr .
+
+<#q546297>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Lamentaci%C3%B3n_sobre_Cristo_muerto%2C_por_Andrea_Mantegna.jpg/1280px-Lamentaci%C3%B3n_sobre_Cristo_muerto%2C_por_Andrea_Mantegna.jpg> ;
+    solid-memo:back "Lamentation of Christ — Andrea Mantegna, 1483"@en ,
+                    "Kristi begråtande — Andrea Mantegna, 1483"@sv ,
+                    "그리스도에 대한 애도 — 안드레아 만테냐, 1483년"@ko ,
+                    "Beweinung Christi — Andrea Mantegna, 1483"@de ,
+                    "Lamentación sobre Cristo muerto — Andrea Mantegna, 1483"@es ,
+                    "La Lamentation sur le Christ mort — Andrea Mantegna, 1483"@fr .
+
+<#q500951>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Paul_Gauguin_-_The_Yellow_Christ_%28Le_Christ_jaune%29_1889.jpg/1280px-Paul_Gauguin_-_The_Yellow_Christ_%28Le_Christ_jaune%29_1889.jpg> ;
+    solid-memo:back "The Yellow Christ — Paul Gauguin, 1889"@en ,
+                    "Den gule Kristus — Paul Gauguin, 1889"@sv ,
+                    "황색의 그리스도 — 폴 고갱, 1889년"@ko ,
+                    "Der gelbe Christus — Paul Gauguin, 1889"@de ,
+                    "El Cristo amarillo — Paul Gauguin, 1889"@es ,
+                    "Le Christ jaune — Paul Gauguin, 1889"@fr .
+
+<#q588695>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Jan_Vermeer_-_The_Art_of_Painting_-_Google_Art_Project.jpg/1280px-Jan_Vermeer_-_The_Art_of_Painting_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Art of Painting — Johannes Vermeer, 1660s"@en ,
+                    "Målarkonsten — Johannes Vermeer, 1660-talet"@sv ,
+                    "회화의 기술 — 요하네스 페르메이르, 1660년대"@ko ,
+                    "Die Malkunst — Jan Vermeer, 1660er-Jahre"@de ,
+                    "El arte de la pintura — Johannes Vermeer, década de 1660"@es ,
+                    "L'Art de la peinture — Johannes Vermeer, années 1660"@fr .
+
+<#q766782>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Rembrandt_Harmensz._van_Rijn_-_Portret_van_een_paar_als_oudtestamentische_figuren%2C_genaamd_%27Het_Joodse_bruidje%27_-_Google_Art_Project.jpg/1280px-Rembrandt_Harmensz._van_Rijn_-_Portret_van_een_paar_als_oudtestamentische_figuren%2C_genaamd_%27Het_Joodse_bruidje%27_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Jewish Bride — Rembrandt, 1660s"@en ,
+                    "Judebruden — Rembrandt, 1660-talet"@sv ,
+                    "유대인 신부 — 렘브란트, 1660년대"@ko ,
+                    "Die Judenbraut — Rembrandt van Rijn, 1660er-Jahre"@de ,
+                    "La novia judía — Rembrandt, década de 1660"@es ,
+                    "La Fiancée juive — Rembrandt, années 1660"@fr .
+
+<#q2246489>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Rembrandt_Christ_in_the_Storm_on_the_Lake_of_Galilee.jpg/1280px-Rembrandt_Christ_in_the_Storm_on_the_Lake_of_Galilee.jpg> ;
+    solid-memo:back "The Storm on the Sea of Galilee — Rembrandt, 1633"@en ,
+                    "Stormen på Genesarets sjö — Rembrandt, 1633"@sv ,
+                    "갈릴래아 호수의 폭풍 — 렘브란트, 1633년"@ko ,
+                    "Christus im Sturm auf dem See Genezareth — Rembrandt van Rijn, 1633"@de ,
+                    "La tormenta en el mar de Galilea — Rembrandt, 1633"@es ,
+                    "Le Christ dans la tempête sur la mer de Galilée — Rembrandt, 1633"@fr .
+
+<#q1217213>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Annunciation_%28Leonardo%29_%28cropped%29.jpg/1280px-Annunciation_%28Leonardo%29_%28cropped%29.jpg> ;
+    solid-memo:back "Annunciation — Leonardo da Vinci, 1472"@en ,
+                    "Bebådelsen — Leonardo da Vinci, 1472"@sv ,
+                    "수태고지 — 레오나르도 다 빈치, 1472년"@ko ,
+                    "Die Verkündigung — Leonardo da Vinci, 1472"@de ,
+                    "Anunciación — Leonardo da Vinci, 1472"@es ,
+                    "L'Annonciation — Léonard de Vinci, 1472"@fr .
+
+<#q185255>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Les_Noces_de_Cana_-_Paolo_Veronese_-_Mus%C3%A9e_du_Louvre_Peintures_INV_142_%3B_MR_384.jpg/1280px-Les_Noces_de_Cana_-_Paolo_Veronese_-_Mus%C3%A9e_du_Louvre_Peintures_INV_142_%3B_MR_384.jpg> ;
+    solid-memo:back "The Wedding at Cana — Paolo Veronese, 1560s"@en ,
+                    "Bröllopet i Kana — Paolo Veronese, 1560-talet"@sv ,
+                    "가나의 혼인 잔치 — 파올로 베로네세, 1560년대"@ko ,
+                    "Die Hochzeit zu Kana — Paolo Veronese, 1560er-Jahre"@de ,
+                    "Las bodas de Caná — Paolo Veronese, década de 1560"@es ,
+                    "Les Noces de Cana — Paul Véronèse, années 1560"@fr .
+
+<#q644856>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/The_Triumph_of_Death_by_Pieter_Bruegel_the_Elder.jpg/1280px-The_Triumph_of_Death_by_Pieter_Bruegel_the_Elder.jpg> ;
+    solid-memo:back "The Triumph of Death — Pieter Brueghel the Elder, 1562"@en ,
+                    "Dödens triumf — Pieter Bruegel d.ä., 1562"@sv ,
+                    "죽음의 승리 — 대 피터르 브뤼헐, 1562년"@ko ,
+                    "Der Triumph des Todes — Pieter Bruegel der Ältere, 1562"@de ,
+                    "El triunfo de la Muerte — Pieter Brueghel el Viejo, 1562"@es ,
+                    "Le Triomphe de la Mort — Pieter Brueghel l'Ancien, 1562"@fr .
+
+<#q3869871>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Paul_Gauguin%2C_Nafea_Faa_Ipoipo%3F_%28When_Will_You_Marry%3F%29_1892%2C_oil_on_canvas%2C_101_x_77_cm.jpg/1280px-Paul_Gauguin%2C_Nafea_Faa_Ipoipo%3F_%28When_Will_You_Marry%3F%29_1892%2C_oil_on_canvas%2C_101_x_77_cm.jpg> ;
+    solid-memo:back "When Will You Marry? — Paul Gauguin, 1892"@en ,
+                    "När ska du gifta dig? — Paul Gauguin, 1892"@sv ,
+                    "언제 결혼하니? — 폴 고갱, 1892년"@ko ,
+                    "Nafea faa ipoipo — Paul Gauguin, 1892"@de ,
+                    "¿Cuándo te casas? — Paul Gauguin, 1892"@es ,
+                    "Quand te maries-tu ? — Paul Gauguin, 1892"@fr .
+
+<#q687182>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Whistlers_Mother_high_res.jpg/1280px-Whistlers_Mother_high_res.jpg> ;
+    solid-memo:back "Whistler's Mother — James McNeill Whistler, 1871"@en ,
+                    "Arrangemang i grått och svart nr 1: Konstnärens moder — James McNeill Whistler, 1871"@sv ,
+                    "휘슬러의 어머니 — 제임스 맥닐 휘슬러, 1871년"@ko ,
+                    "Arrangement in Grau und Schwarz: Porträt der Mutter des Künstlers — James McNeill Whistler, 1871"@de ,
+                    "Retrato de la madre del artista — James McNeill Whistler, 1871"@es ,
+                    "Arrangement en gris et noir n° 1 — James Abbott McNeill Whistler, 1871"@fr .
+
+<#q275349>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Diego_Vel%C3%A1zquez_-_Rokeby_Venus.jpg/1280px-Diego_Vel%C3%A1zquez_-_Rokeby_Venus.jpg> ;
+    solid-memo:back "Rokeby Venus — Diego Velázquez, 1644"@en ,
+                    "Venus med spegel — Diego Velázquez, 1644"@sv ,
+                    "로크비 비너스 — 디에고 벨라스케스, 1644년"@ko ,
+                    "Venus vor dem Spiegel — Diego Velázquez, 1644"@de ,
+                    "Venus del espejo — Diego Velázquez, 1644"@es ,
+                    "Vénus à son miroir — Diego Vélasquez, 1644"@fr .
+
+<#q14866847>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/Sunset_at_Montmajour_1888_Van_Gogh.jpg/1280px-Sunset_at_Montmajour_1888_Van_Gogh.jpg> ;
+    solid-memo:back "Sunset at Montmajour — Vincent van Gogh, 1888"@en ,
+                    "Solnedgång i Montmajour — Vincent van Gogh, 1888"@sv ,
+                    "몽마주르의 일몰 — 빈센트 반 고흐, 1888년"@ko ,
+                    "Sonnenuntergang bei Montmajour — Vincent van Gogh, 1888"@de ,
+                    "Puesta del sol en Montmajour — Vincent van Gogh, 1888"@es ,
+                    "Coucher de soleil à Montmajour — Vincent van Gogh, 1888"@fr .
+
+<#q586035>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Johannes_Vermeer_-_Gezicht_op_huizen_in_Delft%2C_bekend_als_%27Het_straatje%27_-_Google_Art_Project.jpg/1280px-Johannes_Vermeer_-_Gezicht_op_huizen_in_Delft%2C_bekend_als_%27Het_straatje%27_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Little Street — Johannes Vermeer, 1658"@en ,
+                    "Den lilla gatan — Johannes Vermeer, 1658"@sv ,
+                    "작은 거리 — 요하네스 페르메이르, 1658년"@ko ,
+                    "Straße in Delft — Jan Vermeer, 1658"@de ,
+                    "La callejuela — Johannes Vermeer, 1658"@es ,
+                    "La Ruelle — Johannes Vermeer, 1658"@fr .
+
+<#q512755>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/9/93/Rembrandt_Harmensz_van_Rijn_-_Return_of_the_Prodigal_Son_-_Google_Art_Project.jpg/1280px-Rembrandt_Harmensz_van_Rijn_-_Return_of_the_Prodigal_Son_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Return of the Prodigal Son — Rembrandt, 1665"@en ,
+                    "Den förlorade sonens återkomst — Rembrandt, 1665"@sv ,
+                    "돌아온 탕자 — 렘브란트, 1665년"@ko ,
+                    "Die Rückkehr des verlorenen Sohnes — Rembrandt van Rijn, 1665"@de ,
+                    "El retorno del hijo pródigo — Rembrandt, 1665"@es ,
+                    "Le Retour du fils prodigue — Rembrandt, 1665"@fr .
+
+<#q2666439>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/Shishkin%2C_Ivan_-_Morning_in_a_Pine_Forest.jpg/1280px-Shishkin%2C_Ivan_-_Morning_in_a_Pine_Forest.jpg> ;
+    solid-memo:back "Morning in a Pine Forest — Ivan Shishkin and Konstantin Savitsky, 1889"@en ,
+                    "Morgon i en tallskog — Ivan Sjisjkin och Konstantin Savitskij, 1889"@sv ,
+                    "소나무 숲의 아침 — 이반 시시킨과 콘스탄틴 사비츠키, 1889년"@ko ,
+                    "Morgen im Kiefernwald — Iwan Schischkin und Konstantin Sawizki, 1889"@de ,
+                    "Mañana en un bosque de pinos — Iván Shishkin y Konstantín Savitski, 1889"@es ,
+                    "Un matin dans une forêt de pins — Ivan Chichkine et Konstantin Savitski, 1889"@fr .
+
+<#q698015>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/LEONARDO-DA-VINCI_-_MADONNA-MIT-DER-NELKE-7779_917154_BSTGS.jpg/1280px-LEONARDO-DA-VINCI_-_MADONNA-MIT-DER-NELKE-7779_917154_BSTGS.jpg> ;
+    solid-memo:back "Madonna of the Carnation — Leonardo da Vinci, 1475"@en ,
+                    "Madonnan med nejlikan — Leonardo da Vinci, 1475"@sv ,
+                    "카네이션의 성모 — 레오나르도 다 빈치, 1475년"@ko ,
+                    "Madonna mit der Nelke — Leonardo da Vinci, 1475"@de ,
+                    "Virgen del clavel — Leonardo da Vinci, 1475"@es ,
+                    "La Madone à l'œillet — Léonard de Vinci, 1475"@fr .
+
+<#q920030>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/La_familia_de_Carlos_IV%2C_por_Francisco_de_Goya.jpg/1280px-La_familia_de_Carlos_IV%2C_por_Francisco_de_Goya.jpg> ;
+    solid-memo:back "Charles IV of Spain and His Family — Francisco Goya, 1800"@en ,
+                    "Karl IV:s familj — Francisco de Goya, 1800"@sv ,
+                    "카를로스 4세의 가족 — 프란시스코 데 고야, 1800년"@ko ,
+                    "Die Familie Karls IV. — Francisco de Goya, 1800"@de ,
+                    "La familia de Carlos IV — Francisco de Goya, 1800"@es ,
+                    "La Famille de Charles IV — Francisco de Goya, 1800"@fr .
+
+<#q1239950>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Edgar_Degas_-_In_a_Caf%C3%A9_-_Google_Art_Project_2.jpg/1280px-Edgar_Degas_-_In_a_Caf%C3%A9_-_Google_Art_Project_2.jpg> ;
+    solid-memo:back "L'Absinthe — Edgar Degas, 1875"@en ,
+                    "Absinten — Edgar Degas, 1875"@sv ,
+                    "압생트 — 에드가 드가, 1875년"@ko ,
+                    "Der Absinth — Edgar Degas, 1875"@de ,
+                    "El ajenjo — Edgar Degas, 1875"@es ,
+                    "L'Absinthe — Edgar Degas, 1875"@fr .
+
+<#q1192570>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Bruegel%2C_Pieter_%28I%29_-_Blind_leading_the_blind_Google_Art_Project.jpeg/1280px-Bruegel%2C_Pieter_%28I%29_-_Blind_leading_the_blind_Google_Art_Project.jpeg> ;
+    solid-memo:back "The Blind Leading the Blind — Pieter Brueghel the Elder, 1568"@en ,
+                    "Liknelsen om de blinda — Pieter Bruegel d.ä., 1568"@sv ,
+                    "장님을 이끄는 장님 — 대 피터르 브뤼헐, 1568년"@ko ,
+                    "Der Blindensturz — Pieter Bruegel der Ältere, 1568"@de ,
+                    "La parábola de los ciegos — Pieter Brueghel el Viejo, 1568"@es ,
+                    "La Parabole des aveugles — Pieter Brueghel l'Ancien, 1568"@fr .
+
+<#q1059211>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Verrocchio_and_Leonardo%2C_Baptism_of_Christ%2C_c1470-75%2C_Uffizi.jpg/1280px-Verrocchio_and_Leonardo%2C_Baptism_of_Christ%2C_c1470-75%2C_Uffizi.jpg> ;
+    solid-memo:back "The Baptism of Christ — Andrea del Verrocchio and Leonardo da Vinci, 1472"@en ,
+                    "Jesu dop — Andrea del Verrocchio och Leonardo da Vinci, 1472"@sv ,
+                    "그리스도의 세례 — 안드레아 델 베로키오와 레오나르도 다 빈치, 1472년"@ko ,
+                    "Taufe Christi — Andrea del Verrocchio und Leonardo da Vinci, 1472"@de ,
+                    "Bautismo de Cristo — Andrea del Verrocchio y Leonardo da Vinci, 1472"@es ,
+                    "Le Baptême du Christ — Andrea del Verrocchio et Léonard de Vinci, 1472"@fr .
+
+<#q2727560>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/La_decapitaci%C3%B3n_de_San_Juan_Bautista%2C_por_Caravaggio.jpg/1280px-La_decapitaci%C3%B3n_de_San_Juan_Bautista%2C_por_Caravaggio.jpg> ;
+    solid-memo:back "The Beheading of Saint John the Baptist — Caravaggio, 1608"@en ,
+                    "Johannes Döparens halshuggning — Caravaggio, 1608"@sv ,
+                    "세례자 요한의 참수 — 카라바조, 1608년"@ko ,
+                    "Die Enthauptung Johannes des Täufers — Caravaggio, 1608"@de ,
+                    "La decapitación de San Juan Bautista — Caravaggio, 1608"@es ,
+                    "La Décollation de saint Jean-Baptiste — Le Caravage, 1608"@fr .
+
+<#q984058>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Velazquez-las_hilanderas.jpg/1280px-Velazquez-las_hilanderas.jpg> ;
+    solid-memo:back "Las Hilanderas — Diego Velázquez"@en ,
+                    "Spinnerskorna — Diego Velázquez"@sv ,
+                    "실 잣는 여인들 — 디에고 벨라스케스"@ko ,
+                    "Die Spinnerinnen — Diego Velázquez"@de ,
+                    "Las hilanderas — Diego Velázquez"@es ,
+                    "Les Fileuses — Diego Vélasquez"@fr .
+
+<#q1327676>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Leonardo_da_Vinci_attributed_-_Madonna_Litta.jpg/1280px-Leonardo_da_Vinci_attributed_-_Madonna_Litta.jpg> ;
+    solid-memo:back "Madonna Litta — Leonardo da Vinci, 1490"@en ,
+                    "Littamadonnan — Leonardo da Vinci, 1490"@sv ,
+                    "마돈나 리타 — 레오나르도 다 빈치, 1490년"@ko ,
+                    "Madonna Litta — Leonardo da Vinci, 1490"@de ,
+                    "Madonna Litta — Leonardo da Vinci, 1490"@es ,
+                    "Madone Litta — Léonard de Vinci, 1490"@fr .
+
+<#q1133821>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/La_Mort_de_Sardanapale_-_Eug%C3%A8ne_Delacroix_-_Mus%C3%A9e_du_Louvre_Peintures_RF_2346.jpg/1280px-La_Mort_de_Sardanapale_-_Eug%C3%A8ne_Delacroix_-_Mus%C3%A9e_du_Louvre_Peintures_RF_2346.jpg> ;
+    solid-memo:back "Death of Sardanapalus — Eugène Delacroix, 1827"@en ,
+                    "Sardanapals död — Eugène Delacroix, 1827"@sv ,
+                    "사르다나팔루스의 죽음 — 외젠 들라크루아, 1827년"@ko ,
+                    "Der Tod des Sardanapal — Eugène Delacroix, 1827"@de ,
+                    "La muerte de Sardanápalo — Eugène Delacroix, 1827"@es ,
+                    "La Mort de Sardanapale — Eugène Delacroix, 1827"@fr .
+
+<#q1167178>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Courbet_LAtelier_du_peintre.jpg/1280px-Courbet_LAtelier_du_peintre.jpg> ;
+    solid-memo:back "The Painter's Studio — Gustave Courbet, 1855"@en ,
+                    "Ateljén — Gustave Courbet, 1855"@sv ,
+                    "화가의 아틀리에 — 귀스타브 쿠르베, 1855년"@ko ,
+                    "Das Atelier des Künstlers — Gustave Courbet, 1855"@de ,
+                    "El taller del pintor — Gustave Courbet, 1855"@es ,
+                    "L'Atelier du peintre — Gustave Courbet, 1855"@fr .
+
+<#q1167907>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Pierre-Auguste_Renoir_-_Luncheon_of_the_Boating_Party_-_Google_Art_Project.jpg/1280px-Pierre-Auguste_Renoir_-_Luncheon_of_the_Boating_Party_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Luncheon of the Boating Party — Pierre-Auguste Renoir, 1880s"@en ,
+                    "Roddarnas frukost — Auguste Renoir, 1880-talet"@sv ,
+                    "뱃놀이 일행의 점심 — 오귀스트 르누아르, 1880년대"@ko ,
+                    "Das Frühstück der Ruderer — Pierre-Auguste Renoir, 1880er-Jahre"@de ,
+                    "El almuerzo de los remeros — Pierre-Auguste Renoir, década de 1880"@es ,
+                    "Le Déjeuner des canotiers — Auguste Renoir, années 1880"@fr .
+
+<#q2366825>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/John_Constable_-_The_Hay_Wain_%281821%29.jpg/1280px-John_Constable_-_The_Hay_Wain_%281821%29.jpg> ;
+    solid-memo:back "The Hay Wain — John Constable, 1821"@en ,
+                    "Höskrindan — John Constable, 1821"@sv ,
+                    "건초 마차 — 존 컨스터블, 1821년"@ko ,
+                    "The Hay Wain — John Constable, 1821"@de ,
+                    "La carreta de heno — John Constable, 1821"@es ,
+                    "La Charrette de foin — John Constable, 1821"@fr .
+
+<#q1651874>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Wright_of_Derby%2C_The_Orrery.jpg/1280px-Wright_of_Derby%2C_The_Orrery.jpg> ;
+    solid-memo:back "A Philosopher Lecturing on the Orrery — Joseph Wright of Derby, 1766"@en ,
+                    "A Philosopher Lecturing on the Orrery — Joseph Wright of Derby, 1766"@sv ,
+                    "태양계 모형을 강의하는 철학자 — 조지프 라이트, 1766년"@ko ,
+                    "Ein Philosoph hält einen Vortrag über das Planetensystem — Joseph Wright of Derby, 1766"@de ,
+                    "Un filósofo da una lección sobre el planetario de mesa — Joseph Wright of Derby, 1766"@es ,
+                    "Philosophe faisant un exposé sur le planétaire — Joseph Wright of Derby, 1766"@fr .
+
+<#q2293905>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Caravaggio_-_Medusa_-_Google_Art_Project.jpg/1280px-Caravaggio_-_Medusa_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Medusa — Caravaggio, 1597"@en ,
+                    "Medusas huvud — Caravaggio, 1597"@sv ,
+                    "메두사 — 카라바조, 1597년"@ko ,
+                    "Haupt der Medusa — Caravaggio, 1597"@de ,
+                    "Cabeza de Medusa — Caravaggio, 1597"@es ,
+                    "Méduse — Le Caravage, 1597"@fr .
+
+<#q603751>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project.jpg/1280px-Pieter_Bruegel_the_Elder_-_Peasant_Wedding_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Peasant Wedding — Pieter Brueghel the Elder, 1568"@en ,
+                    "Bondbröllop — Pieter Bruegel d.ä., 1568"@sv ,
+                    "농부의 결혼식 — 대 피터르 브뤼헐, 1568년"@ko ,
+                    "Die Bauernhochzeit — Pieter Bruegel der Ältere, 1568"@de ,
+                    "La boda campesina — Pieter Brueghel el Viejo, 1568"@es ,
+                    "Le Repas de noce — Pieter Brueghel l'Ancien, 1568"@fr .
+
+<#q2629423>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Fragonard%2C_The_Reader.jpg/1280px-Fragonard%2C_The_Reader.jpg> ;
+    solid-memo:back "A Young Girl Reading — Jean-Honoré Fragonard, 1770"@en ,
+                    "Läsande flicka — Jean-Honoré Fragonard, 1770"@sv ,
+                    "책 읽는 소녀 — 장오노레 프라고나르, 1770년"@ko ,
+                    "Die Leserin — Jean-Honoré Fragonard, 1770"@de ,
+                    "La lectora — Jean-Honoré Fragonard, 1770"@es ,
+                    "La Liseuse — Jean-Honoré Fragonard, 1770"@fr .
+
+<#q318947>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Caravaggio_-_Supper_at_Emmaus_-_National_Gallery_London.jpeg/1280px-Caravaggio_-_Supper_at_Emmaus_-_National_Gallery_London.jpeg> ;
+    solid-memo:back "Supper at Emmaus — Caravaggio, 1601"@en ,
+                    "Måltiden i Emmaus — Caravaggio, 1601"@sv ,
+                    "엠마오의 만찬 — 카라바조, 1601년"@ko ,
+                    "Abendmahl in Emmaus — Caravaggio, 1601"@de ,
+                    "Los discípulos de Emaús — Caravaggio, 1601"@es ,
+                    "Le Souper à Emmaüs — Le Caravage, 1601"@fr .
+
+<#q2546309>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/D%C3%BCrer_Alte_Pinakothek.jpg/1280px-D%C3%BCrer_Alte_Pinakothek.jpg> ;
+    solid-memo:back "Self-Portrait with Fur-Trimmed Robe — Albrecht Dürer, 1500"@en ,
+                    "Självporträtt — Albrecht Dürer, 1500"@sv ,
+                    "28세의 자화상 — 알브레히트 뒤러, 1500년"@ko ,
+                    "Selbstbildnis im Pelzrock — Albrecht Dürer, 1500"@de ,
+                    "Autorretrato de Durero — Alberto Durero, 1500"@es ,
+                    "Autoportrait — Albrecht Dürer, 1500"@fr .
+
+<#q94802>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/El_Greco_-_The_Burial_of_the_Count_of_Orgaz.JPG/1280px-El_Greco_-_The_Burial_of_the_Count_of_Orgaz.JPG> ;
+    solid-memo:back "The Burial of the Count of Orgaz — El Greco, 1586"@en ,
+                    "Greve Orgaz begravning — El Greco, 1586"@sv ,
+                    "오르가스 백작의 매장 — 엘 그레코, 1586년"@ko ,
+                    "Begräbnis des Grafen von Orgaz — El Greco, 1586"@de ,
+                    "El entierro del conde de Orgaz — El Greco, 1586"@es ,
+                    "L'Enterrement du comte d'Orgaz — Le Greco, 1586"@fr .
+
+<#q2290433>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Sc%C3%A8ne_des_massacres_de_Scio%2C_Eug%C3%A8ne_Delacroix_-_Mus%C3%A9e_du_Louvre_Peintures_INV_3823_%3B_C3.jpg/1280px-Sc%C3%A8ne_des_massacres_de_Scio%2C_Eug%C3%A8ne_Delacroix_-_Mus%C3%A9e_du_Louvre_Peintures_INV_3823_%3B_C3.jpg> ;
+    solid-memo:back "The Massacre at Chios — Eugène Delacroix, 1824"@en ,
+                    "Blodbadet på Chios — Eugène Delacroix, 1824"@sv ,
+                    "히오스섬의 학살 — 외젠 들라크루아, 1824년"@ko ,
+                    "Das Massaker von Chios — Eugène Delacroix, 1824"@de ,
+                    "La matanza de Quíos — Eugène Delacroix, 1824"@es ,
+                    "Scènes des massacres de Scio — Eugène Delacroix, 1824"@fr .
+
+<#q1122842>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Die_Elster_auf_dem_Galgen.jpg/1280px-Die_Elster_auf_dem_Galgen.jpg> ;
+    solid-memo:back "The Magpie on the Gallows — Pieter Brueghel the Elder, 1568"@en ,
+                    "Skatan på galgen — Pieter Bruegel d.ä., 1568"@sv ,
+                    "교수대 위의 까치 — 대 피터르 브뤼헐, 1568년"@ko ,
+                    "Die Elster auf dem Galgen — Pieter Bruegel der Ältere, 1568"@de ,
+                    "La urraca sobre el cadalso — Pieter Brueghel el Viejo, 1568"@es ,
+                    "La Pie sur le gibet — Pieter Brueghel l'Ancien, 1568"@fr .
+
+<#q2735507>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/Goya_Maja_ubrana2.jpg/1280px-Goya_Maja_ubrana2.jpg> ;
+    solid-memo:back "The Clothed Maja — Francisco Goya, 1800"@en ,
+                    "Den klädda Maja — Francisco de Goya, 1800"@sv ,
+                    "옷 입은 마하 — 프란시스코 데 고야, 1800년"@ko ,
+                    "Die bekleidete Maja — Francisco de Goya, 1800"@de ,
+                    "La maja vestida — Francisco de Goya, 1800"@es ,
+                    "La Maja vêtue — Francisco de Goya, 1800"@fr .
+
+<#q474024>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Caravaggio_-_Cupid_as_Victor_-_Google_Art_Project.jpg/1280px-Caravaggio_-_Cupid_as_Victor_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Amor Vincit Omnia — Caravaggio, 1600s"@en ,
+                    "Kärleken övervinner allt — Caravaggio, 1600–1609"@sv ,
+                    "승리자 아모르 — 카라바조, 1600–1609년"@ko ,
+                    "Amor als Sieger — Caravaggio, 1600–1609"@de ,
+                    "El amor victorioso — Caravaggio, 1600–1609"@es ,
+                    "L'Amour victorieux — Le Caravage, 1600–1609"@fr .
+
+<#q2338404>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/Leonardo_da_Vinci_-_Portrait_of_a_Musician_-_Pinacoteca_Ambrosiana.jpg/1280px-Leonardo_da_Vinci_-_Portrait_of_a_Musician_-_Pinacoteca_Ambrosiana.jpg> ;
+    solid-memo:back "Portrait of a Musician — Leonardo da Vinci, 1485"@en ,
+                    "Porträtt av en musiker — Leonardo da Vinci, 1485"@sv ,
+                    "음악가의 초상 — 레오나르도 다 빈치, 1485년"@ko ,
+                    "Bildnis eines Musikers — Leonardo da Vinci, 1485"@de ,
+                    "Retrato de un músico — Leonardo da Vinci, 1485"@es ,
+                    "Portrait de musicien — Léonard de Vinci, 1485"@fr .
+
+<#q1195035>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/El_Beso_%28Pinacoteca_de_Brera%2C_Mil%C3%A1n%2C_1859%29.jpg/1280px-El_Beso_%28Pinacoteca_de_Brera%2C_Mil%C3%A1n%2C_1859%29.jpg> ;
+    solid-memo:back "The Kiss — Francesco Hayez, 1859"@en ,
+                    "Kyssen — Francesco Hayez, 1859"@sv ,
+                    "키스 — 프란체스코 아예츠, 1859년"@ko ,
+                    "Der Kuss — Francesco Hayez, 1859"@de ,
+                    "El beso — Francesco Hayez, 1859"@es ,
+                    "Le Baiser — Francesco Hayez, 1859"@fr .
+
+<#q2030685>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Raffaello_-_Spozalizio_-_Web_Gallery_of_Art.jpg/1280px-Raffaello_-_Spozalizio_-_Web_Gallery_of_Art.jpg> ;
+    solid-memo:back "The Marriage of the Virgin — Raphael, 1504"@en ,
+                    "Jungfru Marie trolovning — Rafael, 1504"@sv ,
+                    "성모 마리아의 결혼 — 라파엘로 산치오, 1504년"@ko ,
+                    "Vermählung Mariä — Raffael, 1504"@de ,
+                    "Los desposorios de la Virgen — Rafael Sanzio, 1504"@es ,
+                    "Le Mariage de la Vierge — Raphaël, 1504"@fr .
+
+<#q877191>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/Giorgione_-_Three_Philosophers_-_Google_Art_Project.jpg/1280px-Giorgione_-_Three_Philosophers_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Three Philosophers — Giorgione, 1500s"@en ,
+                    "De tre filosoferna — Giorgione, 1500–1509"@sv ,
+                    "세 철학자 — 조르조네, 1500–1509년"@ko ,
+                    "Die drei Philosophen — Giorgione, 1500–1509"@de ,
+                    "Los tres filósofos — Giorgione, 1500–1509"@es ,
+                    "Les Trois Philosophes — Giorgione, 1500–1509"@fr .
+
+<#q334360>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg/1280px-Caspar_David_Friedrich_-_Abtei_im_Eichwald_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Abbey in the Oakwood — Caspar David Friedrich, 1800s"@en ,
+                    "Klostret i ekskogen — Caspar David Friedrich, 1800–1809"@sv ,
+                    "떡갈나무 숲속의 수도원 — 카스파르 다비트 프리드리히, 1800–1809년"@ko ,
+                    "Abtei im Eichwald — Caspar David Friedrich, 1800–1809"@de ,
+                    "Abadía en el robledal — Caspar David Friedrich, 1800–1809"@es ,
+                    "L'Abbaye dans une forêt de chênes — Caspar David Friedrich, 1800–1809"@fr .
+
+<#q775407>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Edouard_Manet_-_The_Balcony_-_Google_Art_Project.jpg/1280px-Edouard_Manet_-_The_Balcony_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Balcony — Édouard Manet, 1868"@en ,
+                    "Balkongen — Édouard Manet, 1868"@sv ,
+                    "발코니 — 에두아르 마네, 1868년"@ko ,
+                    "Der Balkon — Édouard Manet, 1868"@de ,
+                    "El balcón — Édouard Manet, 1868"@es ,
+                    "Le Balcon — Édouard Manet, 1868"@fr .
+
+<#q700251>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Jan_Vermeer_van_Delft_-_Brieflezend_meisje_bij_het_venster_%28ca._1657-59%29.jpg/1280px-Jan_Vermeer_van_Delft_-_Brieflezend_meisje_bij_het_venster_%28ca._1657-59%29.jpg> ;
+    solid-memo:back "Girl Reading a Letter at an Open Window — Johannes Vermeer, 1650s"@en ,
+                    "Ung kvinna som läser ett brev vid ett öppet fönster — Johannes Vermeer, 1650-talet"@sv ,
+                    "열린 창가에서 편지를 읽는 여인 — 요하네스 페르메이르, 1650년대"@ko ,
+                    "Briefleserin am offenen Fenster — Jan Vermeer, 1650er-Jahre"@de ,
+                    "Muchacha leyendo una carta — Johannes Vermeer, década de 1650"@es ,
+                    "La Liseuse à la fenêtre — Johannes Vermeer, années 1650"@fr .
+
+<#q597114>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/Death_of_the_Virgin-Caravaggio_%281606%29.jpg/1280px-Death_of_the_Virgin-Caravaggio_%281606%29.jpg> ;
+    solid-memo:back "Death of the Virgin — Caravaggio, 1600s"@en ,
+                    "Jungfru Marie död — Caravaggio, 1600–1609"@sv ,
+                    "성모의 죽음 — 카라바조, 1600–1609년"@ko ,
+                    "Der Tod Mariens — Caravaggio, 1600–1609"@de ,
+                    "Muerte de la Virgen — Caravaggio, 1600–1609"@es ,
+                    "La Mort de la Vierge — Le Caravage, 1600–1609"@fr .
+
+<#q969367>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Johannes_Vermeer_-_Woman_Holding_a_Balance_-_Google_Art_Project.jpg/1280px-Johannes_Vermeer_-_Woman_Holding_a_Balance_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Woman Holding a Balance — Johannes Vermeer, 1665"@en ,
+                    "Kvinna som håller en balansvåg — Johannes Vermeer, 1665"@sv ,
+                    "저울질을 하는 여인 — 요하네스 페르메이르, 1665년"@ko ,
+                    "Frau mit Waage — Jan Vermeer, 1665"@de ,
+                    "La tasadora de perlas — Johannes Vermeer, 1665"@es ,
+                    "La Femme à la balance — Johannes Vermeer, 1665"@fr .
+
+<#q2354251>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Eug%C3%A8ne_Delacroix_-_The_Barque_of_Dante.jpg/1280px-Eug%C3%A8ne_Delacroix_-_The_Barque_of_Dante.jpg> ;
+    solid-memo:back "The Barque of Dante — Eugène Delacroix, 1822"@en ,
+                    "Dante och Vergilius i underjorden — Eugène Delacroix, 1822"@sv ,
+                    "단테의 배 — 외젠 들라크루아, 1822년"@ko ,
+                    "Die Dantebarke — Eugène Delacroix, 1822"@de ,
+                    "La barca de Dante — Eugène Delacroix, 1822"@es ,
+                    "La Barque de Dante — Eugène Delacroix, 1822"@fr .
+
+<#q2293953>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7d/Venus_and_Mars.jpg/1280px-Venus_and_Mars.jpg> ;
+    solid-memo:back "Venus and Mars — Sandro Botticelli, 1485"@en ,
+                    "Venus och Mars — Sandro Botticelli, 1485"@sv ,
+                    "비너스와 마르스 — 산드로 보티첼리, 1485년"@ko ,
+                    "Venus und Mars — Sandro Botticelli, 1485"@de ,
+                    "Venus y Marte — Sandro Botticelli, 1485"@es ,
+                    "Vénus et Mars — Sandro Botticelli, 1485"@fr .
+
+<#q1217003>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Kramskoy_Portrait_of_a_Woman.jpg/1280px-Kramskoy_Portrait_of_a_Woman.jpg> ;
+    solid-memo:back "Portrait of an Unknown Woman — Ivan Kramskoi, 1883"@en ,
+                    "Porträtt av en okänd kvinna — Ivan Kramskoj, 1883"@sv ,
+                    "미지의 여인 — 이반 크람스코이, 1883년"@ko ,
+                    "Die Unbekannte — Iwan Kramskoi, 1883"@de ,
+                    "Retrato de una desconocida — Iván Kramskói, 1883"@es ,
+                    "L'Inconnue — Ivan Kramskoï, 1883"@fr .
+
+<#q1219263>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/La_Boh%C3%A9mienne_endormie.jpg/1280px-La_Boh%C3%A9mienne_endormie.jpg> ;
+    solid-memo:back "The Sleeping Gypsy — Henri Rousseau, 1897"@en ,
+                    "Sovande zigenerska — Henri Rousseau, 1897"@sv ,
+                    "잠자는 집시 — 앙리 루소, 1897년"@ko ,
+                    "Die schlafende Zigeunerin — Henri Rousseau, 1897"@de ,
+                    "La gitana dormida — Henri Rousseau, 1897"@es ,
+                    "La Bohémienne endormie — Henri Rousseau, 1897"@fr .
+
+<#q2521909>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Karl_Brullov_-_The_Last_Day_of_Pompeii_-_Google_Art_Project.jpg/1280px-Karl_Brullov_-_The_Last_Day_of_Pompeii_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Last Day of Pompeii — Karl Bryullov, 1833"@en ,
+                    "Pompejis sista dag — Karl Brjullov, 1833"@sv ,
+                    "폼페이 최후의 날 — 카를 브률로프, 1833년"@ko ,
+                    "Der letzte Tag von Pompeji — Karl Brjullow, 1833"@de ,
+                    "El último día de Pompeya — Karl Briulov, 1833"@es ,
+                    "Le Dernier Jour de Pompéi — Karl Brioullov, 1833"@fr .
+
+<#q568847>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/El_Descendimiento%2C_by_Rogier_van_der_Weyden%2C_from_Prado_in_Google_Earth.jpg/1280px-El_Descendimiento%2C_by_Rogier_van_der_Weyden%2C_from_Prado_in_Google_Earth.jpg> ;
+    solid-memo:back "The Descent from the Cross — Rogier van der Weyden, 1440s"@en ,
+                    "Korsnedtagningen — Rogier van der Weyden, 1440-talet"@sv ,
+                    "십자가에서 내려지심 — 로히어르 판 데르베이던, 1440년대"@ko ,
+                    "Kreuzabnahme — Rogier van der Weyden, 1440er-Jahre"@de ,
+                    "Descendimiento de la cruz — Rogier van der Weyden, década de 1440"@es ,
+                    "La Descente de croix — Rogier van der Weyden, années 1440"@fr .
+
+<#q194137>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Friedrich%2C_Caspar_David_-_Eismeer.jpg/1280px-Friedrich%2C_Caspar_David_-_Eismeer.jpg> ;
+    solid-memo:back "The Sea of Ice — Caspar David Friedrich, 1820s"@en ,
+                    "Ishavet — Caspar David Friedrich, 1820-talet"@sv ,
+                    "얼음 바다 — 카스파르 다비트 프리드리히, 1820년대"@ko ,
+                    "Das Eismeer — Caspar David Friedrich, 1820er-Jahre"@de ,
+                    "El mar de hielo — Caspar David Friedrich, década de 1820"@es ,
+                    "La Mer de glace — Caspar David Friedrich, années 1820"@fr .
+
+<#q2011510>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Baco%2C_por_Caravaggio.jpg/1280px-Baco%2C_por_Caravaggio.jpg> ;
+    solid-memo:back "Bacchus — Caravaggio, 1593"@en ,
+                    "Bacchus — Caravaggio, 1593"@sv ,
+                    "바쿠스 — 카라바조, 1593년"@ko ,
+                    "Bacchus — Caravaggio, 1593"@de ,
+                    "Baco — Caravaggio, 1593"@es ,
+                    "Bacchus — Le Caravage, 1593"@fr .
+
+<#q1167932>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/Rembrandt-Belsazar.jpg/1280px-Rembrandt-Belsazar.jpg> ;
+    solid-memo:back "Belshazzar's Feast — Rembrandt, 1636"@en ,
+                    "Belsassars gästabud — Rembrandt, 1636"@sv ,
+                    "벨사살의 연회 — 렘브란트, 1636년"@ko ,
+                    "Das Gastmahl des Belsazar — Rembrandt van Rijn, 1636"@de ,
+                    "El festín de Baltasar — Rembrandt, 1636"@es ,
+                    "Le Festin de Balthazar — Rembrandt, 1636"@fr .
+
+<#q2664039>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Sargent_MadameX.jpeg/1280px-Sargent_MadameX.jpeg> ;
+    solid-memo:back "Madame X (Virginie Amélie Avegno Gautreau) — John Singer Sargent, 1884"@en ,
+                    "Madame X — John Singer Sargent, 1884"@sv ,
+                    "마담 X의 초상 — 존 싱어 사전트, 1884년"@ko ,
+                    "Madame X — John Singer Sargent, 1884"@de ,
+                    "Retrato de Madame X — John Singer Sargent, 1884"@es ,
+                    "Madame X — John Singer Sargent, 1884"@fr .
+
+<#q1167796>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/An_Experiment_on_a_Bird_in_an_Air_Pump_by_Joseph_Wright_of_Derby%2C_1768.jpg/1280px-An_Experiment_on_a_Bird_in_an_Air_Pump_by_Joseph_Wright_of_Derby%2C_1768.jpg> ;
+    solid-memo:back "An Experiment on a Bird in the Air Pump — Joseph Wright of Derby, 1768"@en ,
+                    "Ett experiment på en fågel i luftpumpen — Joseph Wright of Derby, 1768"@sv ,
+                    "공기 펌프 속의 새에 대한 실험 — 조지프 라이트, 1768년"@ko ,
+                    "Das Experiment mit dem Vogel in der Luftpumpe — Joseph Wright of Derby, 1768"@de ,
+                    "Experimento con un pájaro en una bomba de aire — Joseph Wright of Derby, 1768"@es ,
+                    "Une expérience sur un oiseau dans une pompe à air — Joseph Wright of Derby, 1768"@fr .
+
+<#q2339059>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Turner_-_Rain%2C_Steam_and_Speed_-_National_Gallery_file.jpg/1280px-Turner_-_Rain%2C_Steam_and_Speed_-_National_Gallery_file.jpg> ;
+    solid-memo:back "Rain, Steam and Speed – The Great Western Railway — J. M. W. Turner, 1843"@en ,
+                    "Regn, ånga och fart – Great Western Railway — William Turner, 1843"@sv ,
+                    "비, 증기, 그리고 속도 – 대서부 철도 — 조지프 말러드 윌리엄 터너, 1843년"@ko ,
+                    "Regen, Dampf und Geschwindigkeit – Die Great Western Railway — William Turner, 1843"@de ,
+                    "Lluvia, vapor y velocidad. El gran ferrocarril del Oeste — Joseph Mallord William Turner, 1843"@es ,
+                    "Pluie, Vapeur et Vitesse — William Turner, 1843"@fr .
+
+<#q2610675>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/The_Fortune_Teller-Caravaggio_%28Louvre%29.jpg/1280px-The_Fortune_Teller-Caravaggio_%28Louvre%29.jpg> ;
+    solid-memo:back "The Fortune Teller — Caravaggio, 1594"@en ,
+                    "Spåkvinnan — Caravaggio, 1594"@sv ,
+                    "점쟁이 — 카라바조, 1594년"@ko ,
+                    "Die Wahrsagerin — Caravaggio, 1594"@de ,
+                    "La buenaventura — Caravaggio, 1594"@es ,
+                    "La Diseuse de bonne aventure — Le Caravage, 1594"@fr .
+
+<#q1368055>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Jean-Fran%C3%A7ois_Millet_-_Des_glaneuses.jpg/1280px-Jean-Fran%C3%A7ois_Millet_-_Des_glaneuses.jpg> ;
+    solid-memo:back "The Gleaners — Jean-François Millet, 1857"@en ,
+                    "Axplockerskor — Jean-François Millet, 1857"@sv ,
+                    "이삭 줍는 여인들 — 장프랑수아 밀레, 1857년"@ko ,
+                    "Die Ährenleserinnen — Jean-François Millet, 1857"@de ,
+                    "Las espigadoras — Jean-François Millet, 1857"@es ,
+                    "Des glaneuses — Jean-François Millet, 1857"@fr .
+
+<#q488825>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Zanobi-Altar.jpg/1280px-Zanobi-Altar.jpg> ;
+    solid-memo:back "Adoration of the Magi — Sandro Botticelli, 1470s"@en ,
+                    "Konungarnas tillbedjan — Sandro Botticelli, 1470-talet"@sv ,
+                    "동방박사의 경배 — 산드로 보티첼리, 1470년대"@ko ,
+                    "Anbetung der Heiligen drei Könige — Sandro Botticelli, 1470er-Jahre"@de ,
+                    "Adoración de los Magos — Sandro Botticelli, década de 1470"@es ,
+                    "L'Adoration des mages — Sandro Botticelli, années 1470"@fr .
+
+<#q2983399>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/El_dos_de_mayo_de_1808_en_Madrid.jpg/1280px-El_dos_de_mayo_de_1808_en_Madrid.jpg> ;
+    solid-memo:back "The Second of May 1808 — Francisco Goya, 1814"@en ,
+                    "Den 2 maj 1808 i Madrid: striden med mamlukerna — Francisco de Goya, 1814"@sv ,
+                    "1808년 5월 2일 — 프란시스코 데 고야, 1814년"@ko ,
+                    "Kampf mit den Mamelucken am 2. Mai 1808 in Madrid — Francisco de Goya, 1814"@de ,
+                    "El dos de mayo de 1808 en Madrid — Francisco de Goya, 1814"@es ,
+                    "Dos de mayo — Francisco de Goya, 1814"@fr .
+
+<#q1652023>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Joseph_Wright_of_Derby_The_Alchemist.jpg/1280px-Joseph_Wright_of_Derby_The_Alchemist.jpg> ;
+    solid-memo:back "The Alchemist Discovering Phosphorus — Joseph Wright of Derby, 1771"@en ,
+                    "Alkemisten som upptäcker fosforn — Joseph Wright of Derby, 1771"@sv ,
+                    "연금술사가 인을 발견하다 — 조지프 라이트, 1771년"@ko ,
+                    "Der Alchemist entdeckt Phosphor — Joseph Wright of Derby, 1771"@de ,
+                    "El alquimista descubriendo el fósforo — Joseph Wright of Derby, 1771"@es ,
+                    "L'Alchimiste découvrant le phosphore — Joseph Wright of Derby, 1771"@fr .
+
+<#q948034>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://upload.wikimedia.org/wikipedia/commons/0/0d/La_velada%2C_por_Rafael.jpg> ;
+    solid-memo:back "La velata — Raphael, 1510s"@en ,
+                    "La Velata — Rafael, 1510-talet"@sv ,
+                    "라 벨라타 — 라파엘로 산치오, 1510년대"@ko ,
+                    "La Velata — Raffael, 1510er-Jahre"@de ,
+                    "La velada — Rafael Sanzio, década de 1510"@es ,
+                    "La Velata — Raphaël, années 1510"@fr .
+
+<#q166937>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/Vermeer%2C_Johannes_-_Woman_reading_a_letter_-_ca._1662-1663.jpg/1280px-Vermeer%2C_Johannes_-_Woman_reading_a_letter_-_ca._1662-1663.jpg> ;
+    solid-memo:back "Woman in Blue Reading a Letter — Johannes Vermeer, 1664"@en ,
+                    "Kvinna i blått som läser ett brev — Johannes Vermeer, 1664"@sv ,
+                    "편지를 읽는 푸른 옷의 여인 — 요하네스 페르메이르, 1664년"@ko ,
+                    "Briefleserin in Blau — Jan Vermeer, 1664"@de ,
+                    "Mujer leyendo una carta — Johannes Vermeer, 1664"@es ,
+                    "La Femme en bleu lisant une lettre — Johannes Vermeer, 1664"@fr .
+
+<#q7536969>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Kop_van_een_skelet_met_brandende_sigaret_-_s0083V1962_-_Van_Gogh_Museum.jpg/1280px-Kop_van_een_skelet_met_brandende_sigaret_-_s0083V1962_-_Van_Gogh_Museum.jpg> ;
+    solid-memo:back "Skull of a Skeleton with Burning Cigarette — Vincent van Gogh, 1884"@en ,
+                    "Dödskalle med cigarett — Vincent van Gogh, 1884"@sv ,
+                    "담배 피는 해골 — 빈센트 반 고흐, 1884년"@ko ,
+                    "Totenschädel mit brennender Zigarette — Vincent van Gogh, 1884"@de ,
+                    "Cráneo con cigarrillo encendido — Vincent van Gogh, 1884"@es ,
+                    "Crâne de squelette fumant une cigarette — Vincent van Gogh, 1884"@fr .
+
+<#q210277>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/%C3%89douard_Manet_-_Music_in_the_Tuileries_Gardens.jpg/1280px-%C3%89douard_Manet_-_Music_in_the_Tuileries_Gardens.jpg> ;
+    solid-memo:back "Music in the Tuileries — Édouard Manet, 1862"@en ,
+                    "Musik i Tuilerieträdgården — Édouard Manet, 1862"@sv ,
+                    "튈르리 정원의 음악회 — 에두아르 마네, 1862년"@ko ,
+                    "Musik im Tuileriengarten — Édouard Manet, 1862"@de ,
+                    "La música en las Tullerías — Édouard Manet, 1862"@es ,
+                    "La Musique aux Tuileries — Édouard Manet, 1862"@fr .
+
+<#q5930190>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/Vincent_van_Gogh_-_Road_with_Cypress_and_Star_-_c._12-15_May_1890.jpg/1280px-Vincent_van_Gogh_-_Road_with_Cypress_and_Star_-_c._12-15_May_1890.jpg> ;
+    solid-memo:back "Road with Cypress and Star — Vincent van Gogh, 1890"@en ,
+                    "Landsväg i Provence på natten — Vincent van Gogh, 1890"@sv ,
+                    "사이프러스와 별이 있는 길 — 빈센트 반 고흐, 1890년"@ko ,
+                    "Landstraße mit Zypresse und Stern — Vincent van Gogh, 1890"@de ,
+                    "Camino rural en la Provenza de noche — Vincent van Gogh, 1890"@es ,
+                    "Route avec un cyprès et une étoile — Vincent van Gogh, 1890"@fr .
+
+<#q2409245>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Petrus_Christus_-_Portrait_of_a_Young_Woman_-_Google_Art_Project.jpg/1280px-Petrus_Christus_-_Portrait_of_a_Young_Woman_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Portrait of a Young Girl — Petrus Christus, 1470"@en ,
+                    "Porträtt av en ung flicka — Petrus Christus, 1470"@sv ,
+                    "젊은 소녀의 초상 — 페트뤼스 크리스튀스, 1470년"@ko ,
+                    "Porträt einer jungen Frau — Petrus Christus, 1470"@de ,
+                    "Retrato de muchacha — Petrus Christus, 1470"@es ,
+                    "Portrait d'une jeune fille — Petrus Christus, 1470"@fr .
+
+<#q2336984>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Johannes_Vermeer_-_Lady_at_the_Virginal_with_a_Gentleman%2C_%27The_Music_Lesson%27_-_Google_Art_Project.jpg/1280px-Johannes_Vermeer_-_Lady_at_the_Virginal_with_a_Gentleman%2C_%27The_Music_Lesson%27_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Music Lesson — Johannes Vermeer, 1662"@en ,
+                    "Musiklektionen — Johannes Vermeer, 1662"@sv ,
+                    "음악 수업 — 요하네스 페르메이르, 1662년"@ko ,
+                    "Die Musikstunde — Jan Vermeer, 1662"@de ,
+                    "La lección de música — Johannes Vermeer, 1662"@es ,
+                    "La Leçon de musique — Johannes Vermeer, 1662"@fr .
+
+<#q405814>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Jheronimus_Bosch_011.jpg/1280px-Jheronimus_Bosch_011.jpg> ;
+    solid-memo:back "Ship of Fools — Hieronymus Bosch, 1500s"@en ,
+                    "Narrskeppet — Hieronymus Bosch, 1500–1509"@sv ,
+                    "바보들의 배 — 히에로니무스 보스, 1500–1509년"@ko ,
+                    "Das Narrenschiff — Hieronymus Bosch, 1500–1509"@de ,
+                    "La nave de los locos — El Bosco, 1500–1509"@es ,
+                    "La Nef des fous — Jérôme Bosch, 1500–1509"@fr .
+
+<#q1169395>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Vermeer_The_Concert.jpg/1280px-Vermeer_The_Concert.jpg> ;
+    solid-memo:back "The Concert — Johannes Vermeer, 1663"@en ,
+                    "Konserten — Johannes Vermeer, 1663"@sv ,
+                    "합주 — 요하네스 페르메이르, 1663년"@ko ,
+                    "Das Konzert — Jan Vermeer, 1663"@de ,
+                    "El concierto — Johannes Vermeer, 1663"@es ,
+                    "Le Concert — Johannes Vermeer, 1663"@fr .
+
+<#q2627056>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/David_with_the_Head_of_Goliath-Caravaggio_%281610%29.jpg/1280px-David_with_the_Head_of_Goliath-Caravaggio_%281610%29.jpg> ;
+    solid-memo:back "David with the Head of Goliath — Caravaggio, 1605"@en ,
+                    "David med Goljats huvud — Caravaggio, 1605"@sv ,
+                    "골리앗의 머리를 든 다윗 — 카라바조, 1605년"@ko ,
+                    "David mit dem Haupt des Goliath — Caravaggio, 1605"@de ,
+                    "David con la cabeza de Goliat — Caravaggio, 1605"@es ,
+                    "David avec la tête de Goliath — Le Caravage, 1605"@fr .
+
+<#q13528770>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://upload.wikimedia.org/wikipedia/commons/5/5f/Van_Gogh_-_Portrait_of_Pere_Tanguy_1887-8.JPG> ;
+    solid-memo:back "Portrait of Père Tanguy — Vincent van Gogh, 1887"@en ,
+                    "Porträtt av Père Tanguy — Vincent van Gogh, 1887"@sv ,
+                    "탕기 영감의 초상 — 빈센트 반 고흐, 1887년"@ko ,
+                    "Bildnis Père Tanguy — Vincent van Gogh, 1887"@de ,
+                    "Retrato de Père Tanguy — Vincent van Gogh, 1887"@es ,
+                    "Le Père Tanguy — Vincent van Gogh, 1887"@fr .
+
+<#q2338417>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Caravaggio_%E2%80%94_The_Martyrdom_of_Saint_Matthew.jpg/1280px-Caravaggio_%E2%80%94_The_Martyrdom_of_Saint_Matthew.jpg> ;
+    solid-memo:back "The Martyrdom of Saint Matthew — Caravaggio, 1600"@en ,
+                    "Matteus martyrium — Caravaggio, 1600"@sv ,
+                    "성 마태오의 순교 — 카라바조, 1600년"@ko ,
+                    "Martyrium des Hl. Matthäus — Caravaggio, 1600"@de ,
+                    "El martirio de San Mateo — Caravaggio, 1600"@es ,
+                    "Le Martyre de saint Matthieu — Le Caravage, 1600"@fr .
+
+<#q685916>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Crucifixion_of_Saint_Peter-Caravaggio_%28c.1600%29.jpg/1280px-Crucifixion_of_Saint_Peter-Caravaggio_%28c.1600%29.jpg> ;
+    solid-memo:back "Crucifixion of Saint Peter — Caravaggio, 1600"@en ,
+                    "Petri korsfästelse — Caravaggio, 1600"@sv ,
+                    "성 베드로의 십자가형 — 카라바조, 1600년"@ko ,
+                    "Die Kreuzigung des Heiligen Petrus — Caravaggio, 1600"@de ,
+                    "Crucifixión de San Pedro — Caravaggio, 1600"@es ,
+                    "Le Crucifiement de saint Pierre — Le Caravage, 1600"@fr .
+
+<#q26220165>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Van_Gogh_-_The_Parsonage_Garden_at_Nuenen.jpg/1280px-Van_Gogh_-_The_Parsonage_Garden_at_Nuenen.jpg> ;
+    solid-memo:back "The Parsonage Garden at Nuenen — Vincent van Gogh, 1884"@en ,
+                    "Prästgårdstäppan i Nuenen på våren — Vincent van Gogh, 1884"@sv ,
+                    "뉘넌의 목사관 정원 — 빈센트 반 고흐, 1884년"@ko ,
+                    "Der Pfarrgarten von Nuenen im Frühjahr — Vincent van Gogh, 1884"@de ,
+                    "Jardín rectoral en Nuenen en primavera — Vincent van Gogh, 1884"@es ,
+                    "Le Jardin du presbytère de Nuenen au printemps — Vincent van Gogh, 1884"@fr .
+
+<#q2247406>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://upload.wikimedia.org/wikipedia/commons/4/4e/Artemisia_Gentileschi_-_Judith_Beheading_Holofernes_-_WGA8563.jpg> ;
+    solid-memo:back "Judith Slaying Holofernes — Artemisia Gentileschi, 1613"@en ,
+                    "Judit och Holofernes — Artemisia Gentileschi, 1613"@sv ,
+                    "홀로페르네스의 목을 베는 유디트 — 아르테미시아 젠틸레스키, 1613년"@ko ,
+                    "Judith enthauptet Holofernes — Artemisia Gentileschi, 1613"@de ,
+                    "Judit decapitando a Holofernes — Artemisia Gentileschi, 1613"@es ,
+                    "Judith décapitant Holopherne — Artemisia Gentileschi, 1613"@fr .
+
+<#q1217288>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Temptation_of_Saint_Anthony.jpg/1280px-Temptation_of_Saint_Anthony.jpg> ;
+    solid-memo:back "Temptation of Saint Anthony — Hieronymus Bosch, 1501"@en ,
+                    "Sankt Antonius frestelser — Hieronymus Bosch, 1501"@sv ,
+                    "성 안토니우스의 유혹 삼면화 — 히에로니무스 보스, 1501년"@ko ,
+                    "Die Versuchung des heiligen Antonius — Hieronymus Bosch, 1501"@de ,
+                    "Tríptico de las Tentaciones de san Antonio — El Bosco, 1501"@es ,
+                    "La Tentation de saint Antoine — Jérôme Bosch, 1501"@fr .
+
+<#q701035>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Das_J%C3%BCngste_Gericht_%28Memling%29.jpg/1280px-Das_J%C3%BCngste_Gericht_%28Memling%29.jpg> ;
+    solid-memo:back "The Last Judgment — Hans Memling, 1467"@en ,
+                    "Den yttersta domen — Hans Memling, 1467"@sv ,
+                    "최후의 심판 — 한스 멤링, 1467년"@ko ,
+                    "Das Jüngste Gericht — Hans Memling, 1467"@de ,
+                    "El Juicio Final — Hans Memling, 1467"@es ,
+                    "Le Jugement dernier — Hans Memling, 1467"@fr .
+
+<#q2035209>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Raffaello_%281483-1520%29_-_La_Madonna_del_Granduca_-_178_-_Galleria_Palatina.jpg/1280px-Raffaello_%281483-1520%29_-_La_Madonna_del_Granduca_-_178_-_Galleria_Palatina.jpg> ;
+    solid-memo:back "Madonna del Granduca — Raphael, 1500s"@en ,
+                    "Madonna del Granduca — Rafael, 1500–1509"@sv ,
+                    "대공의 성모 — 라파엘로 산치오, 1500–1509년"@ko ,
+                    "Madonna del Granduca — Raffael, 1500–1509"@de ,
+                    "Madona del gran duque — Rafael Sanzio, 1500–1509"@es ,
+                    "La Madone du grand-duc — Raphaël, 1500–1509"@fr .
+
+<#q2665048>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/William_Bouguereau_-_Dante_and_Virgile_-_Google_Art_Project_2.jpg/1280px-William_Bouguereau_-_Dante_and_Virgile_-_Google_Art_Project_2.jpg> ;
+    solid-memo:back "Dante and Virgil in Hell — William-Adolphe Bouguereau, 1850"@en ,
+                    "Dante och Vergilius — William Bouguereau, 1850"@sv ,
+                    "단테와 베르길리우스 — 윌리암 아돌프 부그로, 1850년"@ko ,
+                    "Dante und Vergil in der Hölle — William Adolphe Bouguereau, 1850"@de ,
+                    "Dante y Virgilio en el infierno — William-Adolphe Bouguereau, 1850"@es ,
+                    "Dante et Virgile — William Bouguereau, 1850"@fr .
+
+<#q2439462>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Rogier_van_der_Weyden_-_Portrait_of_a_Lady_-_Google_Art_Project.jpg/1280px-Rogier_van_der_Weyden_-_Portrait_of_a_Lady_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Portrait of a Lady — Rogier van der Weyden, 1460"@en ,
+                    "Porträtt av en dam — Rogier van der Weyden, 1460"@sv ,
+                    "여인의 초상 — 로히어르 판 데르베이던, 1460년"@ko ,
+                    "Porträt einer Dame — Rogier van der Weyden, 1460"@de ,
+                    "Retrato de una dama — Rogier van der Weyden, 1460"@es ,
+                    "Portrait d'une dame — Rogier van der Weyden, 1460"@fr .
+
+<#q867403>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Parmigianino_-_Madonna_and_Child_with_Angels%2C_known_as_the_Madonna_with_the_Long_Neck.jpg/1280px-Parmigianino_-_Madonna_and_Child_with_Angels%2C_known_as_the_Madonna_with_the_Long_Neck.jpg> ;
+    solid-memo:back "Madonna with the Long Neck — Parmigianino"@en ,
+                    "Madonnan med den långa halsen — Parmigianino"@sv ,
+                    "목이 긴 성모 — 파르미자니노"@ko ,
+                    "Madonna mit dem langen Hals — Parmigianino"@de ,
+                    "Virgen del cuello largo — Parmigianino"@es ,
+                    "La Vierge au long cou — Parmigianino"@fr .
+
+<#q63692>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Johannes_Vermeer_-_The_Procuress_-_Google_Art_Project.jpg/1280px-Johannes_Vermeer_-_The_Procuress_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Procuress — Johannes Vermeer, 1656"@en ,
+                    "Kopplerskan — Johannes Vermeer, 1656"@sv ,
+                    "뚜쟁이 — 요하네스 페르메이르, 1656년"@ko ,
+                    "Bei der Kupplerin — Jan Vermeer, 1656"@de ,
+                    "La alcahueta — Johannes Vermeer, 1656"@es ,
+                    "L'Entremetteuse — Johannes Vermeer, 1656"@fr .
+
+<#q2304870>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/Hieronymus_Bosch-_The_Seven_Deadly_Sins_and_the_Four_Last_Things.JPG/1280px-Hieronymus_Bosch-_The_Seven_Deadly_Sins_and_the_Four_Last_Things.JPG> ;
+    solid-memo:back "The Seven Deadly Sins and the Four Last Things — Hieronymus Bosch, 1500"@en ,
+                    "De sju dödssynderna — Hieronymus Bosch, 1500"@sv ,
+                    "일곱 가지 대죄와 네 가지 종말 — 히에로니무스 보스, 1500년"@ko ,
+                    "Die sieben Todsünden und vier letzten Dinge — Hieronymus Bosch, 1500"@de ,
+                    "Mesa de los pecados capitales — El Bosco, 1500"@es ,
+                    "Les Sept Péchés capitaux et les Quatre Dernières Étapes humaines — Jérôme Bosch, 1500"@fr .
+
+<#q776175>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Pieter_Bruegel_the_Elder-_The_Harvesters_-_Google_Art_Project.jpg/1280px-Pieter_Bruegel_the_Elder-_The_Harvesters_-_Google_Art_Project.jpg> ;
+    solid-memo:back "The Harvesters — Pieter Brueghel the Elder, 1565"@en ,
+                    "Skördemän — Pieter Bruegel d.ä., 1565"@sv ,
+                    "추수하는 사람들 — 대 피터르 브뤼헐, 1565년"@ko ,
+                    "Die Kornernte — Pieter Bruegel der Ältere, 1565"@de ,
+                    "La cosecha — Pieter Brueghel el Viejo, 1565"@es ,
+                    "La Moisson — Pieter Brueghel l'Ancien, 1565"@fr .
+
+<#q2270938>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Paul_C%C3%A9zanne%2C_French_-_The_Large_Bathers_-_Google_Art_Project.jpg/1280px-Paul_C%C3%A9zanne%2C_French_-_The_Large_Bathers_-_Google_Art_Project.jpg> ;
+    solid-memo:back "Les Grandes Baigneuses — Paul Cézanne, 1900s"@en ,
+                    "De stora baderskorna — Paul Cézanne, 1900–1909"@sv ,
+                    "큰 목욕하는 여인들 — 폴 세잔, 1900–1909년"@ko ,
+                    "Die großen Badenden — Paul Cézanne, 1900–1909"@de ,
+                    "Las grandes bañistas — Paul Cézanne, 1900–1909"@es ,
+                    "Les Grandes Baigneuses — Paul Cézanne, 1900–1909"@fr .
+
+<#q663133>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/Caravaggio_-_The_Cardsharps_%281596-97%29_Kimbell_Art_Museum.jpg/1280px-Caravaggio_-_The_Cardsharps_%281596-97%29_Kimbell_Art_Museum.jpg> ;
+    solid-memo:back "The Cardsharps — Caravaggio, 1590s"@en ,
+                    "Falskspelarna — Caravaggio, 1590-talet"@sv ,
+                    "카드 사기꾼들 — 카라바조, 1590년대"@ko ,
+                    "Die Falschspieler — Caravaggio, 1590er-Jahre"@de ,
+                    "Jugadores de cartas — Caravaggio, década de 1590"@es ,
+                    "Les Tricheurs — Le Caravage, années 1590"@fr .
+
+<#q846213>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-28T21:24:16.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Flaming_June%2C_by_Frederic_Lord_Leighton_%281830-1896%29.jpg/1280px-Flaming_June%2C_by_Frederic_Lord_Leighton_%281830-1896%29.jpg> ;
+    solid-memo:back "Flaming June — Frederic Leighton, 1895"@en ,
+                    "Flaming June — Frederic Leighton, 1895"@sv ,
+                    "불타는 6월 — 프레더릭 레이턴, 1895년"@ko ,
+                    "Flaming June — Frederic Leighton, 1895"@de ,
+                    "Sol ardiente de junio — Frederic Leighton, 1895"@es ,
+                    "June flamboyante — Frederic Leighton, 1895"@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
