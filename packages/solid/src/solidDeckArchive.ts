@@ -85,7 +85,7 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
     },
 
     async readDeckFile(text, format, baseUrl) {
-      const dataset = datasetOf(await parse(text, format, baseUrl));
+      const dataset = datasetOf(await parseDeckFile(text, format, baseUrl));
       const things = getThingAll(dataset);
       for (const thing of things) refuseNewer(thing);
       const typed = (type: string) => things.filter((thing) => getUrlAll(thing, RDF.type).includes(type));
@@ -150,7 +150,7 @@ function refuseNewer(thing: Thing): void {
 }
 
 /** The file's triples, its relative IRIs resolved against `baseUrl`; deckFileUnreadable when it does not parse. */
-function parse(text: string, format: DeckFileFormat, baseUrl: string): Promise<Quad[]> {
+export function parseDeckFile(text: string, format: DeckFileFormat, baseUrl: string): Promise<Quad[]> {
   if (format === "jsonld") refuseRemoteContexts(text);
   const parser = format === "turtle" ? getTurtleParser() : getJsonLdParser();
   return new Promise((resolve, reject) => {

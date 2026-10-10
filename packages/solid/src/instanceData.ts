@@ -1,7 +1,8 @@
-import { getThingAll, getUrlAll, type SolidDataset } from "@inrupt/solid-client";
+import { getThing, getThingAll, getUrlAll, type SolidDataset } from "@inrupt/solid-client";
 import type { InstanceDeletion } from "@solid-memo/domain/instance";
 import {
   cardsContainerOf,
+  catalogNodeUrlOf,
   catalogUrlOf,
   digestUrlOf,
   ensureTrailingSlash,
@@ -11,9 +12,11 @@ import {
   preferencesUrlOf,
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
+import { draftPlaceOf, draftsContainerOf } from "@solid-memo/domain/release/draftLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { deleteContainerIfEmpty, listContainerTree } from "./containers";
 import { deleteIfPresent, getSolidDatasetOrNull } from "./datasets";
+import { deleteDraftResources } from "./solidReleaseDraftRepository";
 import { RDF, SM } from "./vocab";
 
 /**
@@ -27,14 +30,19 @@ import { RDF, SM } from "./vocab";
  *    container only: the catalogue is data, and one naming a document
  *    elsewhere must not lead a delete there;
  * 2. the answer log's months, `history/<YYYY-MM>.ttl`;
- * 3. the preferences, the digest, then the catalogue, which named the
- *    decks' documents, so a delete that fails before it can be retried
- *    (a catalogue the pod serves but that cannot be read is kept, and
- *    with it the decks' documents, which nothing else names);
- * 4. `decks/`, `reviews/` and `history/`, each only if it is then empty;
- * 5. `meta.ttl` last of the documents, so a partly deleted instance still
+ * 3. the drafts the catalogue links (`sm:releaseDraft`), those in the
+ *    instance's `drafts/` only: each draft's documents and its folders,
+ *    as deleting the draft does (deleteDraftResources);
+ * 4. the preferences, the digest, then the catalogue, which named the
+ *    decks' documents and the drafts, so a delete that fails before it
+ *    can be retried (a catalogue the pod serves but that cannot be read
+ *    is kept, and with it the decks' documents and the drafts, which
+ *    nothing else names);
+ * 5. `decks/`, `reviews/`, `history/` and `drafts/`, each only if it is
+ *    then empty;
+ * 6. `meta.ttl` last of the documents, so a partly deleted instance still
  *    attaches by URL;
- * 6. the instance's container, only if it is then empty.
+ * 7. the instance's container, only if it is then empty.
  *
  * A document's access control (its `.acl`) goes with it: the Solid
  * Protocol has the server delete a resource's auxiliary resources with
@@ -56,9 +64,11 @@ export async function deleteInstanceData(
   const months = (await listContainerTree(history, fetch)).filter(
     (url) => monthOfHistoryUrl(container, url) !== null,
   );
+  for (const url of [...new Set(deckDocuments), ...months]) await deleteIfPresent(url, fetch);
+  for (const draft of catalog === UNREADABLE || catalog === null ? [] : draftsOf(catalog, container)) {
+    await deleteDraftResources(draft, fetch);
+  }
   for (const url of [
-    ...new Set(deckDocuments),
-    ...months,
     preferencesUrlOf(container),
     digestUrlOf(container),
     // A catalogue that cannot be read is the one record of the decks' documents, which are kept: so is it.
@@ -66,7 +76,7 @@ export async function deleteInstanceData(
   ]) {
     await deleteIfPresent(url, fetch);
   }
-  for (const subcontainer of [cardsContainerOf(container), reviewsContainerOf(container), history]) {
+  for (const subcontainer of [cardsContainerOf(container), reviewsContainerOf(container), history, draftsContainerOf(container)]) {
     await deleteContainerIfEmpty(subcontainer, fetch);
   }
   await deleteIfPresent(meta, fetch);
@@ -97,6 +107,12 @@ async function readCatalog(
     if (served) return UNREADABLE;
     throw error;
   }
+}
+
+/** The drafts the instance's catalogue links that are in its `drafts/`: a link elsewhere is never followed to a delete. */
+function draftsOf(catalog: SolidDataset, container: string): string[] {
+  const node = getThing(catalog, catalogNodeUrlOf(container));
+  return node === null ? [] : getUrlAll(node, SM.releaseDraft).filter((url) => draftPlaceOf(url)?.instanceUrl === container);
 }
 
 /** The cards and reviews documents every deck of a catalog document names, whether or not the deck fits its shape. */

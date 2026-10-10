@@ -33,6 +33,7 @@ function renderContainer(useCases: UseCases) {
         transferHref={() => "#/transfer"}
         deckHref={(deck) => `#/deck?deck=${deck.id}`}
         cardsHref={(deck) => `#/browse?deck=${deck.id}`}
+        draftsHref="#/drafts"
       />
     </QueryClientProvider>,
   );

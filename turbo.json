@@ -65,6 +65,16 @@
       ],
       "outputLogs": "new-only"
     },
+    "test:roundtrip": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/vitest.shared.ts"
+      ],
+      "dependsOn": [
+        "transit"
+      ],
+      "outputLogs": "new-only"
+    },
     "test:pod": {
       "cache": false,
       "env": [

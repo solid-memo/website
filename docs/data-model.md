@@ -40,7 +40,7 @@ flowchart LR
     W -->|solid:publicTypeIndex| PUB[Public type index]
     PTI -->|solid:TypeRegistration<br/>forClass sm:Instance| I1[Instance container]
     PUB -->|solid:TypeRegistration| I2[Instance container]
-    PTI -.->|"forClass dcat:Catalog, sm:Deck,<br/>sm:Card, sm:ReviewState, sm:Answer"| D1[The instance's data,<br/>for other apps]
+    PTI -.->|"forClass dcat:Catalog, sm:Deck,<br/>sm:Card, sm:ReviewState, sm:Answer,<br/>sm:Deck (the drafts)"| D1[The instance's data,<br/>for other apps]
     PUB -.->|"forClass dcat:Catalog, sm:Deck,<br/>sm:Card"| D1
 ```
 
@@ -61,15 +61,19 @@ flowchart LR
   `catalog.ttl#catalog`), the decks (`sm:Deck`, `solid:instance`
   `catalog.ttl`, the one document that holds every deck subject), the
   cards (`sm:Card`, `solid:instanceContainer` `decks/`), the review
-  states (`sm:ReviewState`, `reviews/`) and the answers (`sm:Answer`,
-  `history/`), each titled with the instance's name. Per the Type
+  states (`sm:ReviewState`, `reviews/`), the answers (`sm:Answer`,
+  `history/`) and the drafts of releases (`sm:Deck` again,
+  `solid:instanceContainer` `drafts/`: a draft's release document is a
+  deck too, told from the instance's decks by where it is), each titled
+  with the instance's name. Per the Type
   Indexes spec, `solid:instance` names the one resource holding the
   class's subjects, and `solid:instanceContainer` a container whose
   documents hold them. The catalogue's, the decks' and the cards'
   registrations go in each index that registers the instance. The
-  review states' and answers' go in the private index only, even for an
-  instance registered publicly: they say what the user studied and how
-  well. Without a private index they are not registered anywhere.
+  review states', answers' and drafts' go in the private index only,
+  even for an instance registered publicly: the first two say what the
+  user studied and how well, and a draft is its author's until it is
+  published. Without a private index they are not registered anywhere.
   They are written when an instance is created, by a
   [format update](migrations.md#the-pod-migration) once it updated every
   document (a failure there leaves the update done), when a guest's study moves
@@ -117,13 +121,15 @@ flowchart LR
   catalogue names them (only those
   below the container: the catalogue is data, and one naming a document
   elsewhere must not lead a delete there), the answer log's months
-  (`history/<YYYY-MM>.ttl`), `preferences.ttl`, `digest.ttl` and
-  `catalog.ttl`, in that order, so a delete that fails before the
-  catalogue goes can be retried and find the decks again (a catalogue
-  the pod serves but that cannot be read, as another app might leave
-  it, is kept, and so are the decks' documents, which nothing else
-  names; the rest goes as ever); then
-  `decks/`, `reviews/` and `history/`, each only if it is then empty;
+  (`history/<YYYY-MM>.ttl`), the drafts the catalogue links, those in
+  the instance's `drafts/` only, as deleting a draft deletes them
+  ([Drafts and releases](#drafts-and-releases)), then `preferences.ttl`,
+  `digest.ttl` and `catalog.ttl`, in that order, so a delete that fails
+  before the catalogue goes can be retried and find the decks and the
+  drafts again (a catalogue the pod serves but that cannot be read, as
+  another app might leave it, is kept, and so are the decks' documents
+  and the drafts, which nothing else names; the rest goes as ever); then
+  `decks/`, `reviews/`, `history/` and `drafts/`, each only if it is then empty;
   then `meta.ttl`, last of the documents, so a half-deleted instance
   still attaches by URL; and the container itself only if it is then
   empty. A document's access control goes with it: the Solid Protocol
@@ -188,6 +194,11 @@ and, in the private type index only:
     solid:forClass sm:Answer ;
     solid:instanceContainer <https://pod.example/solid-memo/main/history/> ;
     dcterms:title "Japanese study" .
+
+<#sm-draft-3d90c6> a solid:TypeRegistration ;
+    solid:forClass sm:Deck ;
+    solid:instanceContainer <https://pod.example/solid-memo/main/drafts/> ;
+    dcterms:title "Japanese study" .
 ```
 
 `meta.ttl` makes a container self-describing: attach-by-URL reads it to
@@ -195,7 +206,8 @@ recover an instance that lost its registration. Deleting an instance
 removes all of its registrations: the `sm:Instance` one by its
 container, each other by the exact IRI it names
 (`<container>catalog.ttl#catalog`, `<container>catalog.ttl`,
-`<container>decks/`, `<container>reviews/`, `<container>history/`),
+`<container>decks/`, `<container>reviews/`, `<container>history/`,
+`<container>drafts/`),
 never by what lies under the container, where another app may have
 registered data of its own. A registration that also registers
 something else keeps it, and loses only the link to the instance's
@@ -227,7 +239,8 @@ data.
 │                        dcat:Distribution (#deck-X-cards) and the
 │                        foaf:Agent nodes of its creators (#agent-…);
 │                        and the deck groups (#group-…), a sm:DeckGroup
-│                        and dcat:Catalog each: sm:formatVersion 1
+│                        and dcat:Catalog each: sm:formatVersion 1;
+│                        on the catalogue, its drafts (sm:releaseDraft)
 ├── decks/<deckId>.ttl    card corpus: one sm:Card per fragment (slow churn),
 │                        sm:front/back text and/or sm:frontImage/backImage
 │                        IRIs, optional sm:frontImageDescription/
@@ -253,6 +266,12 @@ data.
 ├── history/<YYYY-MM>.ttl  the answer log (below): one sm:Answer per grade
 │                        given in study or a course that month,
 │                        appended, never edited; sm:formatVersion 1
+├── drafts/<name>/v<N>/   a draft of a release, linked from the catalogue
+│                        (sm:releaseDraft): release.ttl, its root (the
+│                        draft deck, sm:formatVersion 1), agents, sources
+│                        and how it was made; chapter-<id>.ttl per
+│                        chapter; cards.ttl, the cards no chapter asks
+│                        ([below](#drafts-and-releases))
 └── digest.ttl      derived data (below): a sm:DocumentReceipt per document
                          (#receipt-<path>) and a sm:DeckSchedule per deck
                          (#schedule-<path>), each stamped with the versions
@@ -699,23 +718,70 @@ type-index entries:
 
 ## Drafts and releases
 
-Vocabulary 1.18 and its shapes prepare a creator's releases in the pod
-([vocab.md](vocab.md#drafts-and-releases)). Nothing in the app writes
-them yet:
+Vocabulary 1.18 and its shapes let a creator write a release in their
+own pod, as a draft, before publishing it
+([vocab.md](vocab.md#drafts-and-releases), [studio.md](studio.md#drafts)):
 
+- **A draft is a container** of the instance, `drafts/<name>/v<N>/`
+  (the version it drafts), holding
+  - `release.ttl`: the release's root, the draft deck, which is the
+    document itself (`<>`) as a release is its document, with its
+    agents, its distribution, its sources, how it was made (its
+    `prov:Activity` subjects, licence documents) and the series it
+    describes;
+  - `chapter-<id>.ttl` for each chapter: the chapter, its steps, the
+    cards they and the chapter ask, and those cards' distractors;
+  - `cards.ttl`: the cards no chapter asks (a plain deck's, or questions
+    not yet placed) and their distractors.
+
+  A subject keeps its fragment id in whichever document it is in; it
+  moves with its place (a question moved to another chapter goes to that
+  chapter's document), and what names it names it where it is. A
+  chapter's document left with nothing in it is deleted. Anything else in
+  the container (`isDraftDocumentName` in
+  [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) is
+  another app's, and left alone.
 - **Links on the catalogue.** `sm:releaseDraft` names a draft's release
   document, `sm:publishedRelease` a release published from the
   instance. Like `sm:newcomerCourse` on the library's, they belong to no
   shape, so `CatalogV1` keeps them through every write of the catalogue.
+  Only a link to a draft's place in the same instance is followed.
 - **A draft is checked as a draft.** Its deck, chapters and steps are
   checked against the draft shapes, which do not yet ask what only a
   published release needs; its cards and distractors as anywhere else
-  ([validation.md](validation.md#the-write-check)). A draft names the
-  release it was published as with `sm:releasedAs`, and is then no
-  longer edited.
+  ([validation.md](validation.md#the-write-check)), every write and the
+  instance's check alike. What no shape describes (how the release was
+  made, its sources) is written as it is, and kept through every edit. A
+  draft names the release it was published as with `sm:releasedAs`, and
+  is then no longer edited.
+- **Writes**, as everywhere ([Write discipline](#write-discipline)):
+  making a draft puts each document only where none is
+  (`If-None-Match: *`), the release document first, then links it from
+  the catalogue (`If-Match`, read and made again on a 412). A release
+  document there already means the name is taken: nothing was written,
+  and the Studio tries the next name. Any later failure deletes what was
+  written before it is shown, so no draft is left that the catalogue
+  does not link and deleting the instance would miss. An edit is
+  one write of each document it changes, made only if the document is
+  as it was read (`If-Match`; a new chapter's document, only where none
+  is), and the Studio makes the edit again on the draft as it is when
+  one changed elsewhere, three times in all. An edit is made from the
+  read it names by its version: one made from a read that another edit
+  has overtaken is refused (changedElsewhere), never written over the
+  newer documents. Each document an edit
+  changes is one PUT of it whole, `If-Match`: Community Solid Server's
+  in-memory store cuts text short after a PATCH, and node-solid-server
+  stores a boolean a PATCH inserts as false. A server with no strong
+  ETag gets no `If-Match`, so there an edit made elsewhere meanwhile is
+  written over. Deleting a
+  draft deletes its documents, the release document last, then its
+  container and the ones above it (`drafts/<name>/`, `drafts/`) where
+  they are then empty, then the link.
 - **A release is frozen.** It is written once, at library deck format 6,
   and describes its series and publisher itself
   ([deck-library.md](deck-library.md#a-release-outside-the-library)).
+  A draft is made a release's text (`assemble`) with every subject moved
+  to the release's address, `@base` that address, its release time set.
 
 ## The answer log
 

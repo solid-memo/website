@@ -122,8 +122,8 @@ for (const group of ["apps", "packages", "e2e"]) {
       for (const [statement, specifier] of text.matchAll(IMPORT)) {
         if (specifier!.startsWith(".")) {
           const target = relative(dir, resolve(dir, dirname(file), specifier!));
-          // Every package's vitest.config.ts shares the root's setup.
-          const shared = file === "vitest.config.ts" && specifier === "../../vitest.shared.ts";
+          // Every package's vitest config (vitest.config.ts, and one of a task of its own) shares the root's setup.
+          const shared = /^vitest(\.\w+)?\.config\.ts$/.test(file) && specifier === "../../vitest.shared.ts";
           if (target.startsWith("..") && !shared) problems.push(`${where}: "${specifier}" reaches outside the package.`);
           continue;
         }

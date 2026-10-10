@@ -206,11 +206,14 @@ import type {
   WriteFence,
   Since,
   DeckArchive,
+  DocumentContext,
   FileExchange,
+  ReleaseDraftRepository,
 } from "./ports";
+import { createReleaseDraftUseCases, type ReleaseDraftUseCases } from "./releaseDrafts";
 import { AppError } from "@solid-memo/domain/appError";
 
-export interface UseCases {
+export interface UseCases extends ReleaseDraftUseCases {
   /** The session of a login or an earlier one; else a guest's, when a guest studied on this device; else null. */
   restoreSession(): Promise<EstablishedSession | null>;
   /**
@@ -239,7 +242,8 @@ export interface UseCases {
   /**
    * What adding the guest's study to `target`, an instance the user has,
    * would add (domain/guest.ts GuestMergePlan): the guest's decks, each
-   * with the target's decks from the same library release. Reads only.
+   * with the target's decks from the same library release, and how many
+   * drafts the guest wrote, which are not added. Reads only.
    */
   planGuestMerge(guestInstance: Instance, target: Instance): Promise<GuestMergePlan>;
   /**
@@ -860,6 +864,8 @@ export interface Dependencies {
   deckArchive?: DeckArchive;
   /** Files on the user's device; by default none is saved or opened. */
   fileExchange?: FileExchange;
+  /** The drafts of releases in each instance; by default there are none. */
+  releaseDraftRepository?: ReleaseDraftRepository;
 }
 
 /**
@@ -971,6 +977,21 @@ const NO_DECK_ARCHIVE: DeckArchive = {
   },
 };
 const NO_FILE_EXCHANGE: FileExchange = { save: () => undefined, open: async () => null };
+const noDrafts = async () => {
+  throw new Error("This app keeps no drafts.");
+};
+const NO_DRAFTS: ReleaseDraftRepository = {
+  list: none,
+  documents: none,
+  create: noDrafts,
+  read: noDrafts,
+  readSince: noDrafts,
+  applyChanges: noDrafts,
+  assemble: noDrafts,
+  readRelease: noDrafts,
+  parseRelease: noDrafts,
+  delete: noDrafts,
+};
 const NO_GUEST_POD: GuestPod = {
   exists: async () => false,
   start: async () => {
@@ -1093,6 +1114,7 @@ export function createUseCases({
   guestPod = NO_GUEST_POD,
   deckArchive = NO_DECK_ARCHIVE,
   fileExchange = NO_FILE_EXCHANGE,
+  releaseDraftRepository = NO_DRAFTS,
 }: Dependencies): UseCases {
   const runsElsewhere = fenceMovesElsewhere(updateJournal, writeFence);
 
@@ -1494,18 +1516,35 @@ export function createUseCases({
   }
 
   async function checkInstance(instanceUrl: string): Promise<ValidationReport> {
-    const [decks, digest] = await Promise.all([deckRepository.listDecks(instanceUrl), digestOf(instanceUrl)]);
-    return checkDocuments(instanceUrl, instanceDocumentUrls(instanceUrl, decks), digest);
+    const [decks, drafts, digest] = await Promise.all([
+      deckRepository.listDecks(instanceUrl),
+      releaseDraftRepository.documents(instanceUrl),
+      digestOf(instanceUrl),
+    ]);
+    return checkDocuments(instanceUrl, documentsToCheck(instanceUrl, decks, drafts), digest);
+  }
+
+  /** The instance's documents, then its drafts': each with where it is, which picks its shapes. */
+  function documentsToCheck(instanceUrl: string, decks: readonly Deck[], drafts: readonly string[]): { url: string; context: DocumentContext }[] {
+    return [
+      ...instanceDocumentUrls(instanceUrl, decks).map((url) => ({ url, context: "pod" as const })),
+      ...drafts.map((url) => ({ url, context: "draft" as const })),
+    ];
   }
 
   /** The check of these documents of the instance, each not checked again while still at the version the digest says conformed. */
-  async function checkDocuments(instanceUrl: string, urls: readonly string[], digest: InstanceDigest): Promise<ValidationReport> {
+  async function checkDocuments(
+    instanceUrl: string,
+    urls: readonly { url: string; context: DocumentContext }[],
+    digest: InstanceDigest,
+  ): Promise<ValidationReport> {
     const documents = await Promise.all(
-      urls.map(async (url): Promise<DocumentReport> => {
+      urls.map(async ({ url, context }): Promise<DocumentReport> => {
         const receipt = digest.receipts[url];
         const since = await shapeValidator.validateDocumentSince(
           url,
           receipt?.conformedTo === ruleset ? receipt.version : undefined,
+          context,
         );
         if (since.unchanged) return { url, status: "checked", subjects: [] };
         if (since.version !== null && summarize(instanceUrl, [since.value]).conforms) {
@@ -1522,13 +1561,20 @@ export function createUseCases({
     instanceUrl: string,
     onChecked: (count: number, of: number) => void = () => undefined,
   ): Promise<ValidationReport> {
-    const [decks, months] = await Promise.all([deckRepository.listDecks(instanceUrl), answerLog.months(instanceUrl)]);
-    const urls = [...instanceDocumentUrls(instanceUrl, decks), ...months.map((month) => historyUrlOf(instanceUrl, month))];
+    const [decks, months, drafts] = await Promise.all([
+      deckRepository.listDecks(instanceUrl),
+      answerLog.months(instanceUrl),
+      releaseDraftRepository.documents(instanceUrl),
+    ]);
+    const urls = [
+      ...documentsToCheck(instanceUrl, decks, drafts),
+      ...months.map((month) => ({ url: historyUrlOf(instanceUrl, month), context: "pod" as const })),
+    ];
     let checked = 0;
     onChecked(checked, urls.length);
     const documents = await Promise.all(
-      urls.map(async (url) => {
-        const document = await shapeValidator.validateDocument(url);
+      urls.map(async ({ url, context }) => {
+        const document = await shapeValidator.validateDocument(url, context);
         onChecked(++checked, urls.length);
         return document;
       }),
@@ -1778,6 +1824,7 @@ export function createUseCases({
     };
   }
   return {
+    ...createReleaseDraftUseCases({ releaseDraftRepository, deckRepository, fileExchange, now }),
     async restoreSession() {
       const established = await sessionGateway.restore();
       if (established !== null) return established;
@@ -1890,11 +1937,12 @@ export function createUseCases({
       return { ok: true, instance, tidied };
     },
     async planGuestMerge(guestInstance, target) {
-      const [guestDecks, targetDecks] = await Promise.all([
+      const [guestDecks, targetDecks, drafts] = await Promise.all([
         deckRepository.listDecks(guestInstance.url),
         deckRepository.listDecks(target.url),
+        releaseDraftRepository.list(guestInstance.url),
       ]);
-      return guestMergePlan(guestDecks, targetDecks);
+      return guestMergePlan(guestDecks, targetDecks, drafts.length);
     },
     async mergeGuestStudy(session, guestInstance, target, { skip = [] } = {}, onProgress = () => undefined) {
       const source = ensureTrailingSlash(guestInstance.url);
@@ -2075,7 +2123,11 @@ export function createUseCases({
     async checkDeck(instanceUrl, deck, text) {
       const [report, cards, release] = await Promise.all([
         digestOf(instanceUrl).then((digest) =>
-          checkDocuments(instanceUrl, [catalogUrlOf(instanceUrl), deck.cardsDocumentUrl, deck.reviewsDocumentUrl], digest),
+          checkDocuments(
+            instanceUrl,
+            [catalogUrlOf(instanceUrl), deck.cardsDocumentUrl, deck.reviewsDocumentUrl].map((url) => ({ url, context: "pod" as const })),
+            digest,
+          ),
         ),
         deckRepository.listCards(deck),
         // A release that cannot be read leaves the sides to settle unknown, not the rest of the check.

@@ -120,6 +120,11 @@ export const ERROR_TEMPLATES = {
   guestStorageAborted:
     "This browser refused to save a change to the guest study. Check that it has room to keep data, then try again.",
   addFailed: "Solid Memo could not save to your Pod. Check your connection and try again.",
+  draftGone: "That draft no longer exists. Perhaps it was deleted in another tab or app.",
+  releaseUnreadable: "Solid Memo cannot read a release at {url}. Check the address, and that the release is published there.",
+  notAReleaseFile: "That file does not hold one deck or course release. Choose a release saved as Turtle or JSON-LD.",
+  releaseIdUnsupported:
+    "This release names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. It cannot be made a draft.",
 } as const satisfies Record<string, ErrorTemplate>;
 
 export type ErrorCode = keyof typeof ERROR_TEMPLATES;

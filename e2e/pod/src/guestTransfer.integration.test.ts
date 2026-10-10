@@ -251,6 +251,7 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
         { deck: expect.objectContaining({ url: capitals.url }), sameRelease: [] },
         { deck: expect.objectContaining({ url: guestCourse.url }), sameRelease: [expect.objectContaining({ url: theirCourse.url })] },
       ],
+      drafts: 0,
     });
 
     const outcome = await useCases.mergeGuestStudy(session, guestInstance!, target);

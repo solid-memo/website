@@ -23,7 +23,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       instance: { url: "https://pod.example/solid-memo/main/", name: "My study" },
       tidied: true,
     })),
-    planGuestMerge: vi.fn(async () => ({ decks: [] })),
+    planGuestMerge: vi.fn(async () => ({ decks: [], drafts: 0 })),
     mergeGuestStudy: vi.fn(async (_session, _guest, target) => ({ ok: true as const, instance: target, added: [], tidied: true })),
     loginWithWebId: vi.fn(async () => undefined),
     loginWithProvider: vi.fn(async () => undefined),
@@ -66,7 +66,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     })),
     deleteInstance: vi.fn(async () => ({ keptFolder: null })),
     dataClassRegistrations: vi.fn(async () => ({
-      registrations: (["instance", "catalog", "deck", "card", "reviewState", "answer"] as const).map((dataClass) => ({
+      registrations: (["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const).map((dataClass) => ({
         dataClass,
         index: "private" as const,
         registered: true,
@@ -152,6 +152,15 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     editCards: vi.fn(async (_instanceUrl, _deck, _ids, _edit, previewed) => previewed),
     undoCardEdit: vi.fn(async () => undefined),
     resetCards: vi.fn(async (_instanceUrl, _deck, ids) => ids.length),
+    listReleaseDrafts: vi.fn(async () => []),
+    createReleaseDraft: vi.fn(async () => null),
+    getReleaseDraft: vi.fn(async () => {
+      throw new Error("getReleaseDraft fake not configured");
+    }),
+    editReleaseDraft: vi.fn(async () => {
+      throw new Error("editReleaseDraft fake not configured");
+    }),
+    deleteReleaseDraft: vi.fn(async () => undefined),
     exportDeckFile: vi.fn(async () => undefined),
     openDeckFile: vi.fn(async () => null),
     importDeckFile: vi.fn(async () => {

@@ -31,7 +31,8 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
  * both decks a pace and moves them back to the top level at once. They
  * export one of them as a Turtle file, with their progress, delete it,
  * once the user confirms, and import it again from the file, its card
- * due as before. They rename the instance
+ * due as before. They draft a release of a deck and a blank course,
+ * which Home lists, and delete the course's draft, confirming. They rename the instance
  * and describe its catalogue, under a licence, then pick it, by its new
  * name, from the picker. Among its library copies, the library deck is
  * up to date. They go back to Solid Memo, still logged in, which lists
@@ -43,6 +44,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   const beta = `Beta ${runId}`;
   const group = `Pair ${runId}`;
   const renamed = `Renamed ${runId}`;
+  const course = `Course ${runId}`;
 
   await app.step("01 · Visit the Studio's old address: the Studio's landing page", () => app.studio.visitOldAddress());
   await app.step("02 · Log in from the Studio's landing page: back in the Studio", async () => {
@@ -209,23 +211,38 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
   });
 
-  await app.step("24 · Rename the instance and describe its catalogue", async () => {
+  await app.step("24 · Draft a release of a deck and a blank course; Home lists both; delete one", async () => {
+    await app.studio.openDrafts(instance);
+    await app.studio.draftDeck(instance, alpha);
+    await app.studio.draftCourse(instance, course);
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+    await app.studio.expectHomeDrafts([
+      { name: alpha, kind: "deck" },
+      { name: course, kind: "course" },
+    ]);
+    await app.studio.openDrafts(instance);
+    await app.studio.deleteDraft(instance, course);
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+    await app.studio.expectHomeDrafts([{ name: alpha, kind: "deck" }]);
+  });
+
+  await app.step("25 · Rename the instance and describe its catalogue", async () => {
     await app.studio.openInstance(instance);
     await app.studio.renameInstance(renamed);
     await app.studio.describeCatalog("Decks for the Studio journey.", "CC0 1.0");
   });
 
-  await app.step("25 · Pick the instance, by its new name, from the instance picker", async () => {
+  await app.step("26 · Pick the instance, by its new name, from the instance picker", async () => {
     await app.studio.pickInstance(renamed);
     await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
   });
 
-  await app.step("26 · See the library deck among the library copies, up to date", async () => {
+  await app.step("27 · See the library deck among the library copies, up to date", async () => {
     await app.studio.openLibraryCopies(renamed, BRIGHTEST_STARS.en);
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("27 · Go back to Solid Memo, still logged in", async () => {
+  await app.step("28 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);

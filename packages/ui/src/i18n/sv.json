@@ -885,6 +885,10 @@
     "noDecks": "Dina studier har inga kortlekar att lägga till.",
     "sameRelease": "{name} har redan den här kortleken från samma utgåva i biblioteket. Den läggs till bredvid som en egen kortlek, med egna framsteg, och slås inte ihop med den: avmarkera den för att låta bli.",
     "leftOut": "En kortlek du låter bli sparas inte: den försvinner med resten av dina studier i den här webbläsaren.",
+    "draftsDeleted": {
+      "one": "Du skrev {count} utkast i Studio som gäst. Utkast läggs inte till: det raderas med resten av dina studier i den här webbläsaren. Gå tillbaka och låt dina studier ligga kvar här så länge om du vill behålla det.",
+      "other": "Du skrev {count} utkast i Studio som gäst. Utkast läggs inte till: de raderas med resten av dina studier i den här webbläsaren. Gå tillbaka och låt dina studier ligga kvar här så länge om du vill behålla dem."
+    },
     "chooseDeck": "Välj minst en kortlek att lägga till, eller släng dina studier i stället.",
     "addStart": "Lägg till i {name}",
     "mergeProgressRegion": "Lägger till dina studier",
@@ -992,7 +996,8 @@
       "deck": "Kortlekar",
       "card": "Kort",
       "reviewState": "Repetitionslägen",
-      "answer": "Svar"
+      "answer": "Svar",
+      "draft": "Utkast till utgåvor"
     },
     "index": {
       "private": "privata typindex",
@@ -1244,7 +1249,11 @@
     "noGuestPod": "Det finns inga gäststudier på den här enheten.",
     "guestPodStartFailed": "Gäststudierna på den här enheten gick inte att öppna. Läs in sidan igen och försök på nytt.",
     "guestStorageAborted": "Webbläsaren vägrade spara en ändring i gäststudierna. Kontrollera att den har plats att spara data och försök sedan igen.",
-    "addFailed": "Solid Memo kunde inte spara i din Pod. Kontrollera anslutningen och försök igen."
+    "addFailed": "Solid Memo kunde inte spara i din Pod. Kontrollera anslutningen och försök igen.",
+    "draftGone": "Det utkastet finns inte längre. Det kanske togs bort i en annan flik eller app.",
+    "releaseUnreadable": "Solid Memo kan inte läsa någon utgåva på {url}. Kontrollera adressen och att utgåvan är publicerad där.",
+    "notAReleaseFile": "Den filen innehåller inte en utgåva av en kortlek eller kurs. Välj en utgåva sparad som Turtle eller JSON-LD.",
+    "releaseIdUnsupported": "Utgåvan kallar en del av sig ”#{id}”, som ett utkast inte kan behålla: ett id i ett utkast består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-” och börjar med en bokstav eller siffra. Den kan inte göras till ett utkast."
   },
   "statistics": {
     "heading": "Statistik",
@@ -1339,7 +1348,8 @@
       "healthLink": "Hälsa",
       "libraryLink": "Kopior från biblioteket",
       "healthOf": "i {deck}",
-      "transferLink": "Importera och exportera"
+      "transferLink": "Importera och exportera",
+      "draftsLink": "Utkast"
     },
     "bulk": {
       "label": "Valda kortlekar",
@@ -1944,6 +1954,59 @@
       "catalogue": "Instansens katalog eller en av dess grupper har ogiltiga data, så den är lagd åt sidan: inget kan läggas till i den eller ändras i den förrän den är reparerad. {repair}",
       "repair": "Reparera den på skärmen Hälsa.",
       "repairDecks": "Reparera dem på skärmen Hälsa."
+    },
+    "drafts": {
+      "crumb": "Utkast",
+      "loading": "Läser in utkasten…",
+      "heading": "Utkast till utgåvor i {instance}",
+      "intro": "Ett utkast är en kortlek eller kurs som du skriver här, i din Pod, innan du ger ut den som en utgåva som andra kan lägga till. Det finns bara i den här instansen, och ingen annan ser det.",
+      "new": "Nytt utkast",
+      "from": "Börja från",
+      "start": {
+        "blankDeck": "En tom kortlek",
+        "blankCourse": "En tom kurs",
+        "fromDeck": "En kortlek i den här instansen",
+        "nextVersionOf": "Nästa version av en utgåva",
+        "fromFile": "En utgåva sparad som fil"
+      },
+      "name": "Namn",
+      "deck": "Kortlek",
+      "release": "Utgåvans adress",
+      "releaseHint": "Där utgåvan är publicerad, till exempel en kortlek i biblioteket (https://solid-memo.com/decks/<namn>/v1.ttl) eller en utgåva i en Pod. Utkastet behåller varje kort, kapitel och steg som den gav ut.",
+      "fileHint": "En Turtle- eller JSON-LD-fil med en utgåva av en kortlek eller kurs. Utkastet innehåller den som den är.",
+      "create": "Skapa utkastet",
+      "chooseFile": "Välj en fil och skapa utkastet…",
+      "creating": "Skapar utkastet…",
+      "created": "Skapade utkastet {draft}, version {version}.",
+      "basedOn": "Den här kortleken är en kopia av utgåvan {release}. Dess nästa version behåller det som de som studerar den har lärt sig, så du kanske hellre vill börja på den.",
+      "startNext": "Börja på nästa version av den utgåvan",
+      "list": "Utkast",
+      "none": "Den här instansen har inga utkast än.",
+      "caption": "Utkasten i {instance}",
+      "column": {
+        "name": "Utkast",
+        "kind": "Typ",
+        "version": "Version",
+        "state": "Läge",
+        "actions": "Åtgärder"
+      },
+      "kind": {
+        "deck": "Kortlek",
+        "course": "Kurs"
+      },
+      "state": {
+        "writing": "Skrivs",
+        "released": "Utgiven",
+        "unreadable": "Kan inte läsas"
+      },
+      "untitled": "Namnlöst ({name})",
+      "summary": "{kind}, version {version}",
+      "manage": "Utkast till utgåvor",
+      "delete": "Ta bort",
+      "deleteDraft": "Ta bort utkastet {draft}, version {version}",
+      "deleteConfirm": "Ta bort utkastet {draft}, version {version}? Det går inte att ångra.",
+      "deleting": "Tar bort utkastet {draft}…",
+      "deleted": "Tog bort utkastet {draft}, version {version}."
     }
   }
 }

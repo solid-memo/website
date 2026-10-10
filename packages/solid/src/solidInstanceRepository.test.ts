@@ -119,14 +119,14 @@ describe("getRegistrationOptions", () => {
   });
 });
 
-const ALL = ["instance", "catalog", "deck", "card", "reviewState", "answer"];
+const ALL = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"];
 const SHARED = ["instance", "catalog", "deck", "card"];
-const PRIVATE_ONLY = ["reviewState", "answer"];
+const PRIVATE_ONLY = ["reviewState", "answer", "draft"];
 
 describe("readDataClassRegistrations and registerDataClasses", () => {
   const args = { webId: WEBID, instanceUrl: CONTAINER };
 
-  it("want the instance's data of every class in each index that registers it, review states and answers in the private one only", async () => {
+  it("want the instance's data of every class in each index that registers it, review states, answers and drafts in the private one only", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({ privateIndexUrl: PRIVATE_INDEX, publicIndexUrl: PUBLIC_INDEX });
     vi.mocked(readRegisteredClasses).mockImplementation(async (indexUrl) =>
       indexUrl === PRIVATE_INDEX ? ["instance", "catalog", "answer"] : ["instance", "deck"],
@@ -145,6 +145,7 @@ describe("readDataClassRegistrations and registerDataClasses", () => {
         { dataClass: "card", index: "public", registered: false },
         { dataClass: "reviewState", index: "private", registered: false },
         { dataClass: "answer", index: "private", registered: true },
+        { dataClass: "draft", index: "private", registered: false },
       ],
       privateIndexMissing: false,
       unreadableIndexes: [],
@@ -153,7 +154,7 @@ describe("readDataClassRegistrations and registerDataClasses", () => {
 
     await repository.registerDataClasses({ ...args, title: "Main" });
     expect(vi.mocked(addRegistrations).mock.calls.map((call) => [call[0], call[1]])).toEqual([
-      [PRIVATE_INDEX, { instanceUrl: CONTAINER, title: "Main", classes: ["deck", "card", "reviewState"] }],
+      [PRIVATE_INDEX, { instanceUrl: CONTAINER, title: "Main", classes: ["deck", "card", "reviewState", "draft"] }],
       [PUBLIC_INDEX, { instanceUrl: CONTAINER, title: "Main", classes: ["catalog", "card"] }],
     ]);
   });

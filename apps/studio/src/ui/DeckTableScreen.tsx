@@ -57,8 +57,9 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * the Studio's card workbench (`cardsHref`). The header links to the
  * groups, to the instance's name and catalogue (`instanceHref`), to
  * its health (`healthHref`), to its copies of library releases
- * (`libraryHref`) and to import and export (`transferHref`, which the
- * bulk actions' Export opens with the selected decks ticked); each deck's name has its health beside it
+ * (`libraryHref`), to import and export (`transferHref`, which the
+ * bulk actions' Export opens with the selected decks ticked) and to its
+ * drafts of releases (`draftsHref`); each deck's name has its health beside it
  * (`healthBadge`), and for a library copy whether a newer release is out
  * (`updateBadge`). Only a deck that may be changed (`selectable`) can be
  * selected: none while the instance's data is being checked, and none
@@ -84,6 +85,7 @@ export function DeckTableScreen({
   healthBadge,
   libraryHref,
   transferHref,
+  draftsHref,
   updateBadge,
   onMove,
   onPace,
@@ -123,6 +125,8 @@ export function DeckTableScreen({
   libraryHref: string;
   /** Import and export, these decks ticked to export. */
   transferHref: (decks: readonly Deck[]) => string;
+  /** The instance's drafts of releases. */
+  draftsHref: string;
   /** Whether the library has a newer release of a deck, as a badge beside its name. */
   updateBadge: (deck: Deck) => ComponentChildren;
   /** Each resolves to whether it was done (the container says why not, through `error`). */
@@ -143,7 +147,8 @@ export function DeckTableScreen({
       <section>
         <header>
           <h2>{t("studio.decks.heading")}</h2>
-          <a href={instanceHref}>{t("studio.decks.instanceLink")}</a> <a href={transferHref([])}>{t("studio.decks.transferLink")}</a>
+          <a href={instanceHref}>{t("studio.decks.instanceLink")}</a> <a href={transferHref([])}>{t("studio.decks.transferLink")}</a>{" "}
+          <a href={draftsHref}>{t("studio.decks.draftsLink")}</a>
         </header>
         <p class="hint">{tx("studio.decks.empty", { app: <a href={appHref}>{t("app.documentTitle")}</a> })}</p>
       </section>
@@ -196,7 +201,7 @@ export function DeckTableScreen({
         <h2>{t("studio.decks.heading")}</h2>
         <a href={groupsHref}>{t("studio.decks.groupsLink")}</a> <a href={instanceHref}>{t("studio.decks.instanceLink")}</a>{" "}
         <a href={healthHref}>{t("studio.decks.healthLink")}</a> <a href={libraryHref}>{t("studio.decks.libraryLink")}</a>{" "}
-        <a href={transferHref([])}>{t("studio.decks.transferLink")}</a>
+        <a href={transferHref([])}>{t("studio.decks.transferLink")}</a> <a href={draftsHref}>{t("studio.decks.draftsLink")}</a>
       </header>
       <label class="studio-filter">
         {t("studio.decks.filter")}

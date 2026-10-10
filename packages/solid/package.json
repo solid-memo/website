@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit -p .",
     "test": "vitest run --coverage",
     "test:unit": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:roundtrip": "vitest run --config vitest.roundtrip.config.ts"
   },
   "dependencies": {
     "@inrupt/solid-client": "^4.0.0",

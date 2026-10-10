@@ -533,6 +533,7 @@ function GuestMergeFields({
           </fieldset>
         )}
         <p class="hint">{t("guestOffer.leftOut")}</p>
+        {plan !== undefined && plan.drafts > 0 && <p class="warning">{t("guestOffer.draftsDeleted", { count: plan.drafts })}</p>}
         <ErrorMessage error={noneChosen ? t("guestOffer.chooseDeck") : error} focus={cameWithError} />
         <FormActions start={t("guestOffer.addStart", { name: target.name })} busy={busy} onBack={onBack} />
       </form>

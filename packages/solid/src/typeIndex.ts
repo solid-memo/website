@@ -30,6 +30,7 @@ import {
   historyContainerOf,
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
+import { draftsContainerOf } from "@solid-memo/domain/release/draftLayout";
 
 type Fetch = typeof globalThis.fetch;
 export type TypeIndexKind = "private" | "public";
@@ -275,6 +276,8 @@ const DATA_CLASS_TARGETS: Record<
   card: { forClass: SM.Card, predicate: SOLID.instanceContainer, target: cardsContainerOf, idPrefix: "sm-card" },
   reviewState: { forClass: SM.ReviewState, predicate: SOLID.instanceContainer, target: reviewsContainerOf, idPrefix: "sm-review" },
   answer: { forClass: SM.Answer, predicate: SOLID.instanceContainer, target: historyContainerOf, idPrefix: "sm-answer" },
+  // A draft's release document is an sm:Deck too: the drafts are told from the decks by where they are.
+  draft: { forClass: SM.Deck, predicate: SOLID.instanceContainer, target: draftsContainerOf, idPrefix: "sm-draft" },
 };
 
 /**

@@ -60,11 +60,12 @@ describe("adding a guest's study to an instance", () => {
     const own = deck("deck-g2");
     const theirs = deck("deck-t1", TARGET, { sourceUrl: RELEASE });
     const other = deck("deck-t2", TARGET, { sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" });
-    expect(guestMergePlan([copied, own], [theirs, other, deck("deck-t3", TARGET)])).toEqual({
+    expect(guestMergePlan([copied, own], [theirs, other, deck("deck-t3", TARGET)], 2)).toEqual({
       decks: [
         { deck: copied, sameRelease: [theirs] },
         { deck: own, sameRelease: [] },
       ],
+      drafts: 2,
     });
   });
 
