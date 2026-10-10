@@ -11,10 +11,30 @@ render policy, which may change without touching data.
 ## The dialect
 
 `sm:markdown` is CommonMark 0.31.2 with GitHub Flavored Markdown pipe
-tables, and nothing else: no strikethrough, autolink literals
-(`www.x`), task lists or footnotes, which show as typed. Wider Markdown
-would be a new concept, since it would change how text already written
-reads.
+tables and CJK-friendly emphasis, and nothing else: no strikethrough,
+autolink literals (`www.x`), task lists or footnotes, which show as
+typed. Wider Markdown would be a new concept, since it would change how
+text already written reads.
+
+CJK-friendly emphasis is the
+[markdown-cjk-friendly](https://github.com/tats-u/markdown-cjk-friendly)
+amendment to CommonMark's flanking rules. CommonMark closes `*` or `**`
+after punctuation only when a space or punctuation follows, so in
+Korean, where a particle follows a word directly,
+`**스크립트(script)**라고` and `*‘사과’*를` would keep their asterisks.
+The amendment counts a Chinese, Japanese or Korean character next to
+the delimiter like a space or punctuation, so both are emphasis, as are
+`**強調。**この文` and its like. For text without those characters it
+changes one thing: `a**"b"**c` keeps its asterisks, as in CommonMark,
+but an emoji or other character outside the Basic Multilingual Plane is
+now read as one character, where the parser alone saw the two halves of
+a surrogate pair, neither space nor punctuation. An emoji is a symbol,
+which CommonMark counts as punctuation, so emphasis next to one now
+follows the specification:
+`*😀*a` and `a**😀**b` keep their asterisks, as `*★*a` always did,
+though the app showed them as emphasis before it took this amendment.
+`_` inside a word still never emphasises, in Korean as in English:
+`__사람__들` shows as typed, so use `**사람**들`.
 
 CommonMark has no invalid documents, so nothing is ever refused: what a
 place cannot show is shown as text.
@@ -40,7 +60,9 @@ says what language its prose is in; a code block in `@en` text stays
 
 `@solid-memo/markdown` (`packages/markdown/`) is the only code that
 touches the parser, `mdast-util-from-markdown` with
-`micromark-extension-gfm-table` and `mdast-util-gfm-table`, and only in
+`micromark-extension-gfm-table`, `mdast-util-gfm-table` and
+`micromark-extension-cjk-friendly` (syntax only: its emphasis is
+CommonMark's, so it needs no tree extension), and only in
 `src/parse.ts`. Everything else sees the package's own tree, already
 folded to what the app shows:
 
@@ -305,5 +327,7 @@ in-app editor ([courses.md](courses.md)).
 ## Outside readers
 
 Other Solid apps, and schema.org or DCAT readers of a library, see the
-Markdown source as the literal's value, which is readable by design. An
+Markdown source as the literal's value, which is readable by design.
+A reader with plain CommonMark shows the asterisks of emphasis that
+only the [CJK-friendly rule](#the-dialect) reads. An
 app before 1.15 does too ([migrations.md](migrations.md)).

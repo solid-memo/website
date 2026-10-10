@@ -19,6 +19,7 @@
   "dependencies": {
     "mdast-util-from-markdown": "^2.1.0",
     "mdast-util-gfm-table": "^2.0.0",
+    "micromark-extension-cjk-friendly": "^2.0.2",
     "micromark-extension-gfm-table": "^2.1.2"
   }
 }
