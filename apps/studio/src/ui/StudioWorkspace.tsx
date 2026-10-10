@@ -12,7 +12,6 @@ import { InstancePickerContainer } from "@solid-memo/ui/InstancePickerContainer"
 import { Loading } from "@solid-memo/ui/Loading";
 import { decksHref, deckHref, libraryHref, routeToHash } from "@solid-memo/ui/router";
 import { useScreenFocus } from "@solid-memo/ui/screenFocus";
-import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { useInstanceTheme } from "@solid-memo/ui/theme";
 import { draftCardOf } from "@solid-memo/domain/release/draftOutline";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
@@ -40,14 +39,15 @@ import { ReleaseMetadataContainer } from "./ReleaseMetadataContainer";
 import { ReleasesContainer } from "./ReleasesContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
 import { TrialContainer } from "./TrialContainer";
+import { StudioShell } from "./shell/StudioShell";
 import { crumbsOf } from "./shell/titles";
 import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
 
 /**
- * The signed-in Studio: the site header, with a way back to Solid Memo,
- * then the main content, from the breadcrumbs to the screen the route
- * names, once the instances it needs are read (and, for a deck's
- * screen, the instance's decks; for a card's, the deck's cards).
+ * The signed-in Studio: in its shell (StudioShell), the main content,
+ * from the breadcrumbs to the screen the route names, once the
+ * instances it needs are read (and, for a deck's screen, the instance's
+ * decks; for a card's, the deck's cards).
  */
 export function StudioWorkspace({ useCases, session, banner, children }: WorkspaceProps) {
   const { t, errorText, readerText } = useI18n();
@@ -461,21 +461,13 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   };
 
   return (
-    <>
-      <header class="site-header">
-        {banner}
-        <p class="header-link">
-          <a href={instanceUrl === null ? "#/" : decksHref(instanceUrl)}>{t("studio.backToApp")}</a>
-        </p>
-      </header>
-      <main id={MAIN_ID} tabIndex={-1} class="workspace">
-        {children}
-        {waiting === null && <Breadcrumbs crumbs={crumbs} toHash={studioRouteToHash} />}
-        <div ref={screenRef} class="screen">
-          {waiting ?? screenFor(route!)}
-        </div>
-      </main>
-    </>
+    <StudioShell banner={banner} backHref={instanceUrl === null ? "#/" : decksHref(instanceUrl)} instance={activeInstance} draftUrl={draftUrl}>
+      {children}
+      {waiting === null && <Breadcrumbs crumbs={crumbs} toHash={studioRouteToHash} />}
+      <div ref={screenRef} class="screen">
+        {waiting ?? screenFor(route!)}
+      </div>
+    </StudioShell>
   );
 }
 

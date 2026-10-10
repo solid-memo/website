@@ -118,6 +118,13 @@ imports alone.
 - The Studio is loaded lazily: `apps/web/src/main.tsx` alone imports
   `@solid-memo/studio`, with `import()`, so the Studio stays a chunk of
   its own that learners never download ([studio.md](studio.md)).
+- The site's stylesheet is `ui`'s `src/style.css`, which
+  `apps/web/src/main.tsx` imports. The Studio's own,
+  `apps/studio/src/ui/studio.css`, is imported by its shell alone
+  (`shell/StudioShell.tsx`, a relative import inside the package), so
+  it ships with the Studio's chunk, and every rule in it holds only
+  under `:root[data-surface="studio"]`
+  ([studio.md](studio.md#layout)).
 
 ## Adding a dependency
 

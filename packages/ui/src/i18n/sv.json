@@ -1402,6 +1402,15 @@
     "open": "Öppna i Studio",
     "loading": "Öppnar Studio…",
     "loadFailed": "Studio gick inte att öppna. Ladda om sidan för att försöka igen.",
+    "shell": {
+      "status": "Studions status",
+      "density": "Täthet",
+      "compact": "Kompakt",
+      "comfortable": "Luftig",
+      "saving": "Sparar utkastet…",
+      "saved": "Utkastet är sparat",
+      "failed": "Senaste ändringen sparades inte"
+    },
     "decks": {
       "heading": "Kortlekar",
       "caption": "Kortlekarna i {instance}",

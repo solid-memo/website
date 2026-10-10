@@ -14,6 +14,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 const HTML_SINKS = /\b(?:innerHTML|outerHTML|insertAdjacentHTML|dangerouslySetInnerHTML|createContextualFragment|srcdoc)\b|document\.write/;
 
 let chunks: Rolldown.OutputChunk[];
+let assets: Rolldown.OutputAsset[];
 let html: string;
 
 beforeAll(async () => {
@@ -34,6 +35,7 @@ beforeAll(async () => {
     process.env.NODE_ENV = environment;
   }
   chunks = result.output.filter((item): item is Rolldown.OutputChunk => item.type === "chunk");
+  assets = result.output.filter((item): item is Rolldown.OutputAsset => item.type === "asset");
   const page = result.output.find((item): item is Rolldown.OutputAsset => item.fileName === "index.html")!;
   html = page.source as string;
 }, 120_000);
@@ -58,24 +60,35 @@ describe("the bundle", () => {
 describe("the Studio", () => {
   const isStudio = (id: string) => id.includes("/apps/studio/src/");
   const chunkNamed = (fileName: string) => chunks.find((chunk) => chunk.fileName === fileName)!;
+  const studioChunks = () => chunks.filter((chunk) => Object.keys(chunk.modules).some(isStudio));
+  /** What the page loads up front: its entry, and what that imports, statically. */
+  const upFront = () => {
+    const fileNames = new Set<string>();
+    const visit = (fileName: string) => {
+      if (fileNames.has(fileName)) return;
+      fileNames.add(fileName);
+      chunkNamed(fileName).imports.forEach(visit);
+    };
+    visit(chunks.find((chunk) => chunk.isEntry)!.fileName);
+    return fileNames;
+  };
 
   it("is a chunk of its own, which the page fetches only when a Studio route opens (docs/studio.md)", () => {
-    const studio = chunks.filter((chunk) => Object.keys(chunk.modules).some(isStudio));
+    const studio = studioChunks();
     expect(studio).toHaveLength(1);
     expect(studio[0]!.isDynamicEntry).toBe(true);
     expect(studio[0]!.isEntry).toBe(false);
-    // What the page loads up front: its entry, and what that imports, statically.
-    const upFront = new Set<string>();
-    const visit = (fileName: string) => {
-      if (upFront.has(fileName)) return;
-      upFront.add(fileName);
-      chunkNamed(fileName).imports.forEach(visit);
-    };
-    const entry = chunks.find((chunk) => chunk.isEntry)!;
-    visit(entry.fileName);
-    expect(upFront.has(studio[0]!.fileName)).toBe(false);
-    for (const fileName of upFront) expect(Object.keys(chunkNamed(fileName).modules).filter(isStudio)).toEqual([]);
+    expect(upFront().has(studio[0]!.fileName)).toBe(false);
+    for (const fileName of upFront()) expect(Object.keys(chunkNamed(fileName).modules).filter(isStudio)).toEqual([]);
     expect(html).not.toContain(studio[0]!.fileName);
+  });
+
+  it("brings its stylesheet (studio.css) with its chunk, never up front", () => {
+    const [stylesheet, ...others] = [...studioChunks()[0]!.viteMetadata!.importedCss];
+    expect(others).toEqual([]);
+    expect(assets.find((asset) => asset.fileName === stylesheet)!.source).toContain(":root[data-surface=studio]");
+    for (const fileName of upFront()) expect([...chunkNamed(fileName).viteMetadata!.importedCss]).not.toContain(stylesheet);
+    expect(html).not.toContain(stylesheet);
   });
 });
 

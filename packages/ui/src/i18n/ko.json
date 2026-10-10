@@ -1335,6 +1335,15 @@
     "open": "스튜디오에서 열기",
     "loading": "스튜디오를 여는 중…",
     "loadFailed": "스튜디오를 열 수 없어요. 페이지를 새로고침하고 다시 시도해 주세요.",
+    "shell": {
+      "status": "스튜디오 상태",
+      "density": "밀도",
+      "compact": "조밀하게",
+      "comfortable": "넉넉하게",
+      "saving": "초안 저장 중…",
+      "saved": "초안 저장됨",
+      "failed": "마지막 변경 사항이 저장되지 않음"
+    },
     "decks": {
       "heading": "덱",
       "caption": "{instance}의 덱",

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { createContext } from "preact";
+import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DraftEdit } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -14,6 +15,37 @@ export function draftKey(draftUrl: string): readonly unknown[] {
 /** The queue a write of a draft waits in, after the draft's writes before it, whatever their documents. */
 export function draftScope(draftUrl: string): string {
   return `draft ${draftUrl}`;
+}
+
+/** The writes of a draft, whichever screen made them. */
+function writeKey(draftUrl: string): readonly unknown[] {
+  return ["editReleaseDraft", draftUrl];
+}
+
+/** What a draft's editor tells the Studio's status bar: how many documents of its changes wait to be written, and whether its last change failed. */
+export interface EditorReport {
+  waiting: number;
+  failed: boolean;
+}
+
+/**
+ * Where each of a draft's editors says what it has to report, under its
+ * own key (the editor itself), for the Studio's status bar
+ * (useDraftSaving); none, outside it.
+ */
+export const DraftWaiting = createContext<(editor: object, report: EditorReport) => void>(() => undefined);
+
+/** Whether a draft's changes are all written: some are on their way, the last one failed, or all are saved. */
+export type DraftSaving = "saving" | "failed" | "saved";
+
+/**
+ * Whether the draft's changes are all written, whichever screen made
+ * them: from the writes under way, and the editors' reports through
+ * DraftWaiting (`reports`, all of them together).
+ */
+export function useDraftSaving(draftUrl: string, reports: EditorReport): DraftSaving {
+  if (useIsMutating({ mutationKey: writeKey(draftUrl) }) > 0 || reports.waiting > 0) return "saving";
+  return reports.failed ? "failed" : "saved";
 }
 
 /** How long a draft's text waits after the last keystroke before it is written. */
@@ -81,7 +113,7 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
   const [failure, setFailure] = useState<DraftFailure | null>(null);
   const waiting = useRef(new Map<string, Waiting>());
   const [waitingCount, setWaitingCount] = useState(0);
-  const mutationKey = ["editReleaseDraft", draftUrl];
+  const mutationKey = writeKey(draftUrl);
   const writing = useIsMutating({ mutationKey });
 
   /** Nothing else of the draft is on its way: no write after this one, of any screen, and nothing waiting here. */
@@ -128,6 +160,12 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
 
   // Leaving the screen writes what waits.
   useEffect(() => flushAll, []);
+
+  // The status bar counts what waits here too, and says when the last change failed.
+  const report = useContext(DraftWaiting);
+  const self = useRef({});
+  useEffect(() => report(self.current, { waiting: waitingCount, failed: failure !== null }), [waitingCount, failure]);
+  useEffect(() => () => report(self.current, { waiting: 0, failed: false }), []);
 
   const released = query.data?.root.releasedAs !== undefined;
   const readOnly: DraftReadOnly | null = released ? "released" : check.readOnly();
