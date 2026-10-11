@@ -17,17 +17,17 @@ type ReleaseColumn = "release" | "readers" | "draft";
 
 /**
  * The releases an instance published (docs/studio.md, Releases), as its
- * catalogue links them: each by its address, with a link to copy,
+ * catalog links them: each by its address, with a link to copy,
  * whether anyone can read it (and, if not, a way to try again), the
  * draft it was published from, while the instance has it (`draftOf`),
  * and its next version to start as a draft. A release is never changed here.
  * The table is a DataTable: a column's header sorts it by the column,
- * then the other way, then as the catalogue lists them, Enter opens the
+ * then the other way, then as the catalog lists them, Enter opens the
  * release at the cursor, as its name's link does, and a filter keeps
  * the releases whose name or address holds its text, case and accents
  * aside.
- * Starting a next version writes the catalogue, so it is held while the
- * catalogue may not be written (`hold`).
+ * Starting a next version writes the catalog, so it is held while the
+ * catalog may not be written (`hold`).
  */
 export function ReleasesScreen({
   instance,

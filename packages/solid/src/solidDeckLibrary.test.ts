@@ -47,7 +47,7 @@ beforeEach(() => {
 });
 
 describe("listLibraryDecks", () => {
-  it("reads the decks the index's catalogue lists", async () => {
+  it("reads the decks the index's catalog lists", async () => {
     const index = setThing(
       mockSolidDatasetFrom(INDEX),
       buildThing(createThing({ url: INDEX }))

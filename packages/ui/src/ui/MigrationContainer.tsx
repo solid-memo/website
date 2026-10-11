@@ -26,7 +26,7 @@ export function MigrationContainer({
   instance,
 }: {
   useCases: UseCases;
-  /** Whose pod it is: the publisher of a catalogue the update writes. */
+  /** Whose pod it is: the publisher of a catalog the update writes. */
   session: Session;
   instance: Instance;
 }) {

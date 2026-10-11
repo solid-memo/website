@@ -346,7 +346,7 @@ describe("DeckListScreen", () => {
     expect(screen.getByRole("menu").closest("[data-no-drag]")).not.toBeNull();
   });
 
-  it("moves a deck down past its neighbour, says where, and keeps focus on its menu button", () => {
+  it("moves a deck down past its neighbor, says where, and keeps focus on its menu button", () => {
     const { onEdit } = renderScreen(flat);
     openMenu("Kanji N5");
     fireEvent.click(screen.getByRole("menuitem", { name: "Move down" }));
@@ -748,7 +748,7 @@ describe("DeckListScreen", () => {
 
     it.each([
       [
-        "its neighbours",
+        "its neighbors",
         flat,
         "Kanji N5",
         { readOnly: false, children: [deck(kanji)] },
@@ -1425,7 +1425,7 @@ describe("DeckListScreen dragging", () => {
     expect(dragging()).toBe(false);
     expect(ghost()).toBeNull();
     expect(line().hidden).toBe(true);
-    expect(statusTexts()).toEqual(["Move cancelled: the deck or group stays where it was."]);
+    expect(statusTexts()).toEqual(["Move canceled: the deck or group stays where it was."]);
     touch.up(yOf(2, 44));
     expect(onEdit).not.toHaveBeenCalled();
   });
@@ -1643,7 +1643,7 @@ describe("DeckListScreen dragging while the list changes", () => {
     change({ readOnly: false, children: [deck(kana), deck(verbs)] });
     drop();
     expect(onEdit).not.toHaveBeenCalled();
-    expect(statusTexts()).toEqual(["Move cancelled: the deck or group stays where it was."]);
+    expect(statusTexts()).toEqual(["Move canceled: the deck or group stays where it was."]);
   });
 
   it("gives a new group up, and says so, when the other deck is gone", () => {
@@ -1656,7 +1656,7 @@ describe("DeckListScreen dragging while the list changes", () => {
     change({ readOnly: false, children: [deck(kanji), deck(verbs)] });
     drop();
     expect(onEdit).not.toHaveBeenCalled();
-    expect(statusTexts()).toEqual(["Move cancelled: the deck or group stays where it was."]);
+    expect(statusTexts()).toEqual(["Move canceled: the deck or group stays where it was."]);
     expect(screen.queryByRole("textbox")).toBeNull();
   });
 });

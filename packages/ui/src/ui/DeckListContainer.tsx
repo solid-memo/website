@@ -37,7 +37,7 @@ export function DeckListContainer({
   useCases: UseCases;
   instance: Instance;
   isSetAside?: (deck: Deck) => boolean;
-  /** The catalogue or a deck group is invalid, and the policy sets it aside: the list cannot be rearranged. */
+  /** The catalog or a deck group is invalid, and the policy sets it aside: the list cannot be rearranged. */
   arrangementSetAside?: boolean;
   /** The instance's data is still being checked, under a policy that may set some of it aside: the list cannot be rearranged yet. */
   checking?: boolean;

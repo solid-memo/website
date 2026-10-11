@@ -24,8 +24,8 @@ describe("provenanceOf", () => {
       { iri: `${URL}#revision-2`, used: [], comments: [], carried: false },
     ]);
     expect(sourceDetails).toEqual([
-      { iri: "https://a.example/", title: [text("A")], creator: [], licence: [], comments: [] },
-      { iri: "https://b.example/", title: [], creator: [text("Bo")], licence: [], comments: [] },
+      { iri: "https://a.example/", title: [text("A")], creator: [], license: [], comments: [] },
+      { iri: "https://b.example/", title: [], creator: [text("Bo")], license: [], comments: [] },
     ]);
     expect(provenanceOf(said, [], []).making).toEqual([]);
   });
@@ -45,9 +45,9 @@ describe("provenanceProblems", () => {
       model({
         sources: [iri("https://a.example/"), iri("https://b.example/"), iri("https://c.example/")],
         sourceDetails: [
-          { iri: "https://a.example/", title: [], creator: [], licence: [], comments: [] },
-          { iri: "https://b.example/", title: [text("B")], creator: [text("Bo")], licence: [], comments: [text("The page's footer: CC0.")] },
-          { iri: "https://c.example/", title: [text("C")], creator: [text("Cy")], licence: [iri("https://cc0.example/")], comments: [] },
+          { iri: "https://a.example/", title: [], creator: [], license: [], comments: [] },
+          { iri: "https://b.example/", title: [text("B")], creator: [text("Bo")], license: [], comments: [text("The page's footer: CC0.")] },
+          { iri: "https://c.example/", title: [text("C")], creator: [text("Cy")], license: [iri("https://cc0.example/")], comments: [] },
         ],
       }),
     );
@@ -55,7 +55,7 @@ describe("provenanceProblems", () => {
   });
 
   it("warns of a source the making used that the release is not derived from", () => {
-    const described = { title: [text("D")], creator: [text("Di")], licence: [iri("https://cc0.example/")], comments: [] };
+    const described = { title: [text("D")], creator: [text("Di")], license: [iri("https://cc0.example/")], comments: [] };
     const problems = provenanceProblems(
       model({
         sources: [iri("https://a.example/")],
@@ -70,7 +70,7 @@ describe("provenanceProblems", () => {
   });
 
   it("does not hold what an earlier version's making used to this version's derivation", () => {
-    const described = { title: [text("D")], creator: [text("Di")], licence: [iri("https://cc0.example/")], comments: [] };
+    const described = { title: [text("D")], creator: [text("Di")], license: [iri("https://cc0.example/")], comments: [] };
     const carried = model({
       making: [making([], { used: ["https://d.example/"], carried: true })],
       sourceDetails: [{ iri: "https://d.example/", ...described }],

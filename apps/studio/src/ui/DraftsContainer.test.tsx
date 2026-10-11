@@ -116,14 +116,14 @@ describe("DraftsContainer", () => {
     expect(await screen.findByText("Deleted the draft Solid, version 1.")).toBeInTheDocument();
   });
 
-  it("holds every change while the instance's catalogue is set aside", async () => {
+  it("holds every change while the instance's catalog is set aside", async () => {
     const useCases = makeUseCasesFake({
       getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, invalidDataPolicy: "block-subject" as const })),
-      checkInstance: vi.fn(async () => invalidReport([], { catalogue: true })),
+      checkInstance: vi.fn(async () => invalidReport([], { catalog: true })),
       listReleaseDrafts: vi.fn(async () => [solid]),
     });
     renderContainer(useCases);
-    expect(await screen.findByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(await screen.findByText(/catalog or one of its groups has invalid data/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Delete the draft Solid, version 1" })).toBeDisabled();
   });
 

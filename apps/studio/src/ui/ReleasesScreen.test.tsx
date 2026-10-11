@@ -131,14 +131,14 @@ describe("ReleasesScreen", () => {
     expect(screen.getByRole("button", { name: `Make ${ELSEWHERE} public` })).toBeDisabled();
   });
 
-  it("holds starting a next version while one starts, or the catalogue may not be written", () => {
+  it("holds starting a next version while one starts, or the catalog may not be written", () => {
     renderScreen({ starting: SOLID, startError: "Unreadable." });
     expect(screen.getByText("Starting the next version…")).toBeInTheDocument();
     expect(screen.getByText("Unreadable.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start the next version of solid, version 2" })).toBeDisabled();
   });
 
-  it("says why the catalogue may not be written", () => {
+  it("says why the catalog may not be written", () => {
     renderScreen({ hold: "setAside" });
     expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
     expect(screen.getByRole("button", { name: "Start the next version of solid, version 2" })).toBeDisabled();

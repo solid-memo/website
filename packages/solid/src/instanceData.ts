@@ -26,17 +26,17 @@ import { RDF, SM } from "./vocab";
  * may hold files other apps put there, which are not Solid Memo's to
  * delete. What Solid Memo knows it wrote:
  *
- * 1. every deck's cards and reviews documents, as the catalogue names
+ * 1. every deck's cards and reviews documents, as the catalog names
  *    them (`sm:cardsDocument`, `sm:reviewsDocument`), those below the
- *    container only: the catalogue is data, and one naming a document
+ *    container only: the catalog is data, and one naming a document
  *    elsewhere must not lead a delete there;
  * 2. the answer log's months, `history/<YYYY-MM>.ttl`;
- * 3. the drafts the catalogue links (`sm:releaseDraft`), those in the
+ * 3. the drafts the catalog links (`sm:releaseDraft`), those in the
  *    instance's `drafts/` only: each draft's documents and its folders,
  *    as deleting the draft does (deleteDraftResources);
- * 4. the preferences, the digest, then the catalogue, which named the
+ * 4. the preferences, the digest, then the catalog, which named the
  *    decks' documents and the drafts, so a delete that fails before it
- *    can be retried (a catalogue the pod serves but that cannot be read
+ *    can be retried (a catalog the pod serves but that cannot be read
  *    is kept, and with it the decks' documents and the drafts, which
  *    nothing else names);
  * 5. `decks/`, `reviews/`, `history/` and `drafts/`, each only if it is
@@ -74,7 +74,7 @@ export async function deleteInstanceData(
   for (const url of [
     preferencesUrlOf(container),
     digestUrlOf(container),
-    // A catalogue that cannot be read is the one record of the decks' documents, which are kept: so is it.
+    // A catalog that cannot be read is the one record of the decks' documents, which are kept: so is it.
     ...(catalog === UNREADABLE ? [] : [catalogUrl]),
   ]) {
     await deleteIfPresent(url, fetch);
@@ -91,7 +91,7 @@ export async function deleteInstanceData(
 const UNREADABLE = Symbol("unreadable");
 
 /**
- * The catalogue, read afresh; null when there is none, UNREADABLE when
+ * The catalog, read afresh; null when there is none, UNREADABLE when
  * the pod served it but it could not be read (not Turtle, or not RDF at
  * all). Any other failure throws, so the delete can be tried again.
  */
@@ -114,7 +114,7 @@ async function readCatalog(
   }
 }
 
-/** The drafts the instance's catalogue links that are in its `drafts/`: a link elsewhere is never followed to a delete. */
+/** The drafts the instance's catalog links that are in its `drafts/`: a link elsewhere is never followed to a delete. */
 function draftsOf(catalog: SolidDataset, container: string): string[] {
   const node = getThing(catalog, catalogNodeUrlOf(container));
   return node === null ? [] : getUrlAll(node, SM.releaseDraft).filter((url) => draftPlaceOf(url)?.instanceUrl === container);

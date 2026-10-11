@@ -1,6 +1,6 @@
 import { AppError } from "./appError";
 
-/** Short names of the licences decks commonly carry, by their URL. */
+/** Short names of the licenses decks commonly carry, by their URL. */
 const LICENSE_NAMES: [pattern: RegExp, label: string][] = [
   [/creativecommons\.org\/publicdomain\/zero\/1\.0/, "CC0 1.0"],
   [/creativecommons\.org\/publicdomain\/mark\/1\.0/, "Public Domain Mark 1.0"],
@@ -10,7 +10,7 @@ const LICENSE_NAMES: [pattern: RegExp, label: string][] = [
 ];
 
 /**
- * The licences a deck or a catalogue can be given (dcterms:license), by
+ * The licenses a deck or a catalog can be given (dcterms:license), by
  * their URL: the Creative Commons ones, then the others the library's
  * decks carry. One another app wrote is kept as it is, but never chosen
  * (withProvenance, describedCatalog).
@@ -31,7 +31,7 @@ export const KNOWN_LICENSES: readonly string[] = [
 ];
 
 /**
- * The licence an edit gives: none, one of KNOWN_LICENSES, or the one
+ * The license an edit gives: none, one of KNOWN_LICENSES, or the one
  * it had (`current`), whatever it is; anything else is refused
  * (licenseUnknown).
  */
@@ -41,7 +41,7 @@ export function chosenLicense(license: string | undefined, current: string | und
 }
 
 /**
- * A readable name for a licence URL — "CC0 1.0", "CC BY-SA 4.0" — or
+ * A readable name for a license URL — "CC0 1.0", "CC BY-SA 4.0" — or
  * the URL itself when it is not one of the well-known ones.
  */
 export function licenseLabel(url: string): string {

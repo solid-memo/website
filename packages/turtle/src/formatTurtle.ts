@@ -14,7 +14,7 @@ import { readTurtleTree, type TurtleFile } from "./rdf.ts";
  *
  * `npm run format:turtle` rewrites the files; `npm run format:turtle:check`
  * fails on any that differ. Each package names its own folders on the
- * command line. Formatting parses and re-serialises, which
+ * command line. Formatting parses and re-serializes, which
  * would lose comments, so comment blocks are carried over to the subject
  * they precede — and a file whose comments cannot all be placed that way
  * is refused rather than rewritten.

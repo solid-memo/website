@@ -16,7 +16,7 @@ export interface DataCheck {
   report: ValidationReport | null;
   /** Under "set invalid data aside", a deck with invalid data: read-only until it is repaired. */
   isSetAside: (deck: Deck) => boolean;
-  /** Under "set invalid data aside", the catalogue or a deck group has invalid data: the arrangement is read-only. */
+  /** Under "set invalid data aside", the catalog or a deck group has invalid data: the arrangement is read-only. */
   arrangementSetAside: boolean;
   /**
    * Why nothing may be written to the instance, or (given) to the deck:

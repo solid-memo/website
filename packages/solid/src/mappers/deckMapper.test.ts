@@ -433,7 +433,7 @@ describe("withDistractors", () => {
   });
 });
 
-describe("the catalogue node", () => {
+describe("the catalog node", () => {
   const catalog = {
     title: "Main",
     description: "My decks.",
@@ -470,7 +470,7 @@ describe("the catalogue node", () => {
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([other.url]);
   });
 
-  it("keeps the datasets another app listed through every deck save, removal and catalogue write", () => {
+  it("keeps the datasets another app listed through every deck save, removal and catalog write", () => {
     const FOREIGN = "https://pod.example/recipes/index.ttl#cookbook";
     const LOCAL = `${CATALOG}#their-dataset`;
     let dataset = withCatalog(mockSolidDatasetFrom(CATALOG), CATALOG, catalog);
@@ -505,7 +505,7 @@ describe("the catalogue node", () => {
     // A deck save leaves it…
     dataset = withDeck(dataset, deck);
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toContain(`${CATALOG}#deck-gone`);
-    // …the catalogue, written whole and checked, cannot keep it.
+    // …the catalog, written whole and checked, cannot keep it.
     dataset = withCatalog(dataset, CATALOG, catalog);
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([deck.url, `${CATALOG}#recipes`]);
   });
@@ -519,7 +519,7 @@ describe("the catalogue node", () => {
     expect(toCatalog(withoutAgent, CATALOG)?.publisher.name).toBe(catalog.publisher.webId);
   });
 
-  it("types its licence a licence document, as DCAT-AP asks, and lets go of one it no longer states", () => {
+  it("types its license a license document, as DCAT-AP asks, and lets go of one it no longer states", () => {
     const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
     const BY = "https://creativecommons.org/licenses/by/4.0/";
     const typeOf = (dataset: SolidDataset, url: string) => {
@@ -533,7 +533,7 @@ describe("the catalogue node", () => {
     dataset = withCatalog(dataset, CATALOG, { ...catalog, license: CC0 });
     expect(typeOf(dataset, CC0)).toEqual([DCTERMS.LicenseDocument]);
 
-    // Another licence: the old one goes, having nothing else said of it.
+    // Another license: the old one goes, having nothing else said of it.
     dataset = withCatalog(dataset, CATALOG, { ...catalog, license: BY });
     expect(typeOf(dataset, CC0)).toBeNull();
     expect(typeOf(dataset, BY)).toEqual([DCTERMS.LicenseDocument]);
@@ -584,7 +584,7 @@ describe("the arrangement's triples (deck groups)", () => {
   const other = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2` };
   const GROUP = `${CATALOG}#group-1`;
 
-  /** A catalog document of two decks, the first in a group with a position, the group listed by the catalogue. */
+  /** A catalog document of two decks, the first in a group with a position, the group listed by the catalog. */
   function arranged() {
     let dataset = withCatalog(withDeck(withDeck(mockSolidDatasetFrom(CATALOG), deck), other), CATALOG, catalog);
     dataset = setThing(
@@ -599,7 +599,7 @@ describe("the arrangement's triples (deck groups)", () => {
     return setThing(dataset, buildThing(getThing(dataset, `${CATALOG}#catalog`)!).addIri(DCAT.catalog, GROUP).build());
   }
 
-  it("survive a deck's rewrite (rename, switch, upgrade) and the catalogue's", () => {
+  it("survive a deck's rewrite (rename, switch, upgrade) and the catalog's", () => {
     let dataset = withDeck(arranged(), { ...deck, title: { en: "Renamed" }, formatVersion: 6 });
     dataset = withCatalog(dataset, CATALOG, { ...catalog, title: "Renamed" });
     expect(getInteger(getThing(dataset, deck.url)!, SM.position)).toBe(3);

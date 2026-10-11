@@ -41,7 +41,7 @@ const COURSE = {
  * Back in the workbench they set the other
  * card due today, which Home then counts as due, and move it, with its
  * progress, to the other deck, where Home then counts it. From Home they open a
- * deck's about screen and name its author and licence. On the Groups screen they group
+ * deck's about screen and name its author and license. On the Groups screen they group
  * the two decks, as Solid Memo's deck list would; back on Home, the
  * table shows the group, filters and sorts by what the URL says, gives
  * both decks a pace and moves them back to the top level at once. They
@@ -56,7 +56,7 @@ const COURSE = {
  * and the release no description. They follow each problem to its field,
  * fix it, and see it clear; the shapes find what a release still lacks,
  * and the listing preview shows the course as the library will. They rename the instance
- * and describe its catalogue, under a licence, then pick it, by its new
+ * and describe its catalog, under a license, then pick it, by its new
  * name, from the picker. Among its library copies, the library deck is
  * up to date. They note what Solid Memo's statistics count, then
  * test-play the course they wrote in the Studio's trial, to the end of
@@ -196,15 +196,15 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
   });
 
-  await app.step("17 · Name a deck's author and licence on its about screen", async () => {
+  await app.step("17 · Name a deck's author and license on its about screen", async () => {
     await app.studio.openAbout(instance, beta);
-    await app.studio.setAuthorAndLicence("Ada Lovelace", "CC BY 4.0");
+    await app.studio.setAuthorAndLicense("Ada Lovelace", "CC BY 4.0");
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
   await app.step("18 · Group the two decks on the Groups screen", async () => {
     await app.studio.openGroups();
-    await app.groups.groupWithNeighbour(alpha);
+    await app.groups.groupWithNeighbor(alpha);
     await app.groups.nameGroup(group);
     await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0, group });
@@ -293,7 +293,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("27 · Rename the instance and describe its catalogue", async () => {
+  await app.step("27 · Rename the instance and describe its catalog", async () => {
     await app.studio.openInstance(instance);
     await app.studio.renameInstance(renamed);
     await app.studio.describeCatalog("Decks for the Studio journey.", "CC0 1.0");
@@ -350,7 +350,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     );
   });
 
-  await app.step("34 · Say how the course was made: its author, an attribution, its licence, a source and an AI check; follow the source's warning and fix it", async () => {
+  await app.step("34 · Say how the course was made: its author, an attribution, its license, a source and an AI check; follow the source's warning and fix it", async () => {
     const source = "https://example.org/pods-explained";
     const undescribed = app.t("studio.problem.sourceUndescribed", { missing: app.t("studio.release.detail.creator") });
     await app.chrome.breadcrumb("breadcrumbs.decks");
@@ -359,7 +359,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.draftEditor.openRelease();
     await app.draftEditor.addAuthor("Journey Author");
     await app.draftEditor.attributeWithAi("Journey Author");
-    await app.draftEditor.chooseReleaseLicence("CC0 1.0");
+    await app.draftEditor.chooseReleaseLicense("CC0 1.0");
     await app.draftEditor.addSource(source, "Pods explained", "The page's footer: CC0.");
     await app.draftEditor.recordAiCheck("Facts", "every question", "none wrong");
     await app.draftEditor.openCheck();

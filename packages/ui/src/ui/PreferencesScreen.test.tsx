@@ -130,7 +130,7 @@ describe("PreferencesScreen", () => {
     });
   });
 
-  it("offers what to do with invalid data, labelled from the vocabulary, and saves the choice", () => {
+  it("offers what to do with invalid data, labeled from the vocabulary, and saves the choice", () => {
     const { props, container } = renderScreen();
     const group = screen.getByRole("group", { name: "When data does not conform" });
     expect(group).toContainElement(screen.getByLabelText(/Block the instance/));

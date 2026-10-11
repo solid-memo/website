@@ -130,7 +130,7 @@ describe("LibraryDeckScreen", () => {
     expect(screen.getAllByRole("link", { name: newTab(WIKIPEDIA) })).toHaveLength(1);
 
     expect(fact("Author")).toHaveTextContent("Anton Wiklund");
-    expect(within(fact("Licence")).getByRole("link", { name: newTab("CC0 1.0") }))
+    expect(within(fact("License")).getByRole("link", { name: newTab("CC0 1.0") }))
       .toHaveAttribute("href", CC0);
     expect(fact("Created")).toHaveTextContent("September 22, 2026");
     expect(fact("Updated")).toHaveTextContent("September 27, 2026");
@@ -152,7 +152,7 @@ describe("LibraryDeckScreen", () => {
     expect(screen.getAllByText("Back → front")).toHaveLength(1);
   });
 
-  it("lists each source, linked, with its own authors and licence", () => {
+  it("lists each source, linked, with its own authors and license", () => {
     renderScreen();
     const sources = within(fact("Sources")).getAllByRole("listitem");
     expect(sources).toHaveLength(2);

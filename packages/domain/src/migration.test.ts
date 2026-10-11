@@ -200,7 +200,7 @@ describe("planMigration", () => {
     expect(isPlanEmpty(planMigration({ ...nothingElse, entries: [] }))).toBe(true);
   });
 
-  it("notices an instance without a catalogue", () => {
+  it("notices an instance without a catalog", () => {
     const plan = planMigration({ ...nothingElse, catalog: null, entries: [] });
     expect(plan.catalogMissing).toBe(true);
     expect(isPlanEmpty(plan)).toBe(false);

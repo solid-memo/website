@@ -286,7 +286,7 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
     // The instance's preferences stay; the guest's are not carried over.
     expect((await useCases.getPreferences(target.url)).newCardsPerDay).toBe(7);
     const tree = await useCases.listDeckTree(target.url);
-    // Members without a position come in document order, which a server may serialise as it likes.
+    // Members without a position come in document order, which a server may serialize as it likes.
     const topLevel = tree.children.map((node) => (node.kind === "deck" ? node.deck.url : [node.group.title, node.children.length]));
     expect(topLevel).toHaveLength(3);
     expect(topLevel).toEqual(expect.arrayContaining([mine.url, theirCourse.url, [{ en: "Learning" }, 2]]));

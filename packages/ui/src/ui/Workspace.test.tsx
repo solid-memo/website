@@ -229,7 +229,7 @@ describe("Workspace", () => {
       expect(screen.queryByRole("region", { name: "Data check" })).toBeNull();
     });
 
-    it("keeps the deck list from being rearranged while the catalogue or a deck group is set aside", async () => {
+    it("keeps the deck list from being rearranged while the catalog or a deck group is set aside", async () => {
       const catalog = {
         ...invalid,
         documents: [

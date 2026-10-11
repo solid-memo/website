@@ -1,6 +1,6 @@
 /**
  * Errors the user may see, each named by a code, so the app can show it in
- * the reader's language: the message catalogues hold every code under
+ * the reader's language: the message catalogs hold every code under
  * `errors.<code>` (packages/ui/src/i18n), the English one exactly as here, which
  * a test holds them to. A text says what went wrong in plain words and
  * what to do about it; the values it leaves out — addresses, statuses, a
@@ -36,12 +36,12 @@ export const ERROR_TEMPLATES = {
   dailyLimitInvalid: "A daily limit is a whole number, 0 or more.",
   dueDayInvalid: "“{day}” is not a day. Choose the day the card is due.",
   cardTransferSameDeck: "The cards are in this deck already. Choose another deck.",
-  licenseUnknown: "Choose one of the licences offered.",
+  licenseUnknown: "Choose one of the licenses offered.",
   authorEmpty: "An author needs a name.",
   authorTwice: "{author} is named twice. Name each author once.",
   instanceNameEmpty: "An instance needs a name.",
-  catalogNeedsDescription: "The catalogue needs a description.",
-  noCatalogToUpdate: "This instance has no catalogue yet. Update the instance in Solid Memo first.",
+  catalogNeedsDescription: "The catalog needs a description.",
+  noCatalogToUpdate: "This instance has no catalog yet. Update the instance in Solid Memo first.",
   noMetaToUpdate: "This instance has no description to update. Reload the page and try again.",
   webIdEmpty: "Enter your WebID.",
   webIdInvalidUrl: "That is not a valid URL. A WebID looks like https://you.example/profile/card#me.",

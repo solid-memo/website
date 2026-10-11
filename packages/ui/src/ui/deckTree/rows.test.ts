@@ -26,7 +26,7 @@ const tree: DeckTree = {
 };
 
 describe("flatten", () => {
-  it("lists the rows in reading order, each knowing its depth, parent, groups and neighbour", () => {
+  it("lists the rows in reading order, each knowing its depth, parent, groups and neighbor", () => {
     expect(flatten(tree, new Set())).toEqual([
       { key: "A", kind: "deck", depth: 0, parent: null, ancestors: [], before: null, collapsed: false, last: null },
       { key: "G", kind: "group", depth: 0, parent: null, ancestors: [], before: "A", collapsed: false, last: "E" },

@@ -32,7 +32,7 @@ export interface UpdateProgress {
 /** A document the update brings up to this app's formats: where it is, and what it holds, for the user to tell it. */
 export interface UpdateDocument {
   url: string;
-  /** The instance's record, its preferences, its catalogue of decks, or a deck's cards or review states. */
+  /** The instance's record, its preferences, its catalog of decks, or a deck's cards or review states. */
   holds: "instance" | "preferences" | "catalog" | "cards" | "reviews";
   /** For a deck's cards or review states: the deck's title (the first deck's, for a document decks share). */
   deck?: LangText;

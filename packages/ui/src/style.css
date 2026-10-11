@@ -709,7 +709,7 @@ h2 a:hover {
 }
 
 /* The primary green is too dark to show on the navy masthead, so
-   everything focusable in it rings in the masthead's text colour. */
+   everything focusable in it rings in the masthead's text color. */
 .masthead :focus-visible {
   outline-color: var(--masthead-text);
 }
@@ -809,7 +809,7 @@ textarea:hover:not(:disabled) {
 /*
  * Text fields show focus with their border and ring; the transparent
  * outline is what forced-colors mode draws, since it drops the shadow.
- * Radios and checkboxes have no border to colour, so they keep a solid
+ * Radios and checkboxes have no border to color, so they keep a solid
  * outline like every other control.
  */
 input:not([type="radio"], [type="checkbox"]):focus,
@@ -1363,7 +1363,7 @@ dl.facts .sources {
 }
 
 /* Above the row's link, like the study button, so a press opens the
-   deck's menu rather than the deck; a 44px target, its icon centred.
+   deck's menu rather than the deck; a 44px target, its icon centered.
    It always shows, on every row, so what a deck offers is never
    hidden behind a hover. */
 .deck-list .row-menu {
@@ -1630,7 +1630,7 @@ a[role="menuitem"] {
 /* Dragging rows (ui/deckTree/useDragReorder.ts). A row is a handle: a
    long press on it must not select its text, show a link's callout or
    drag the link the browser's way. The page still pans as usual; a
-   touchmove is cancelled only while a row is lifted. */
+   touchmove is canceled only while a row is lifted. */
 .deck-list>li.deck-row,
 .deck-group-header {
   -webkit-user-select: none;
@@ -1650,7 +1650,7 @@ html.drag-active {
 
 /* The line a drop would land on, indented as deep as the place it
    stands for (as the lists are: 1.25rem to the fifth level, then the
-   rule's .5rem and 2px), and labelled with its group past that. */
+   rule's .5rem and 2px), and labeled with its group past that. */
 .deck-tree {
   position: relative;
 }
@@ -3403,7 +3403,7 @@ p[role="status"]:not(.loading) {
   animation: bounce-in 0.36s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
 }
 
-/* A row's subtext spans its column, so growing it from the centre would
+/* A row's subtext spans its column, so growing it from the center would
    bring the text in from the right; it slides in from the left instead. */
 .deck-list .deck-meta>.hint:not(.study-done),
 .library-deck-meta {
@@ -3910,7 +3910,7 @@ p[role="status"]:not(.loading) {
 
 /* A line chart: the scale's top and 0 to the left, the first and last
    points under it; the strokes keep their width however the plot is
-   stretched, and a point with no neighbour is a dot of its own. */
+   stretched, and a point with no neighbor is a dot of its own. */
 .line-plot {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -4067,8 +4067,8 @@ p[role="status"]:not(.loading) {
   overflow-wrap: anywhere;
 }
 
-/* Forced colours drop backgrounds and recolour strokes: the steps keep
-   apart as empty, hatched and filled, and the marks take the text colour. */
+/* Forced colors drop backgrounds and recolor strokes: the steps keep
+   apart as empty, hatched and filled, and the marks take the text color. */
 @media (forced-colors: active) {
   .maturity-bar,
   .maturity-swatch {

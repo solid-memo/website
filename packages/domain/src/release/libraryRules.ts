@@ -72,7 +72,7 @@ export function metadataProblems(model: ReleaseModel, place: ReleasePlace): Rele
   expect(`${DCAT_NS}previousVersion`, model.previousVersion, previous);
   // The shapes allow a release without a license (published shapes are
   // never edited); the library does not, so a reader knows how a deck may be reused.
-  if (model.licence.length === 0) {
+  if (model.license.length === 0) {
     problems.push(problem(url, { code: "noLicense", params: {} }, { field: `${DCTERMS_NS}license` }));
   }
   return problems;

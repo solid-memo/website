@@ -8,7 +8,7 @@ import { sameText, type LangText } from "./langText";
  * its own, in the order the user put them. The pod states it in the
  * catalog document, every group a dcat:Catalog listing its members and
  * each member's place an `sm:position` within its parent; the root is
- * the instance's catalogue, whose `dcat:catalog` lists the top-level
+ * the instance's catalog, whose `dcat:catalog` lists the top-level
  * groups (its `dcat:dataset` lists every deck, grouped or not).
  *
  * The pod's statements may disagree with a tree (a deck in two groups, a
@@ -44,7 +44,7 @@ export type ParentId = string | null;
 
 /**
  * A place in the tree: in `parent`, right after the sibling `after`, or
- * first when that is null. A place names its neighbour rather than an
+ * first when that is null. A place names its neighbor rather than an
  * index so that it still means the same after other changes.
  */
 export interface Anchor {
@@ -86,7 +86,7 @@ export interface StoredLayout {
   deckPositions: ReadonlyMap<string, number>;
   /** The groups the app can read, in document order. */
   groups: readonly StoredGroup[];
-  /** The catalogue's `dcat:catalog` links, as they are. */
+  /** The catalog's `dcat:catalog` links, as they are. */
   rootGroups: readonly string[];
   /** A group is in a newer format than this app's. */
   readOnly: boolean;
@@ -105,7 +105,7 @@ export interface TreeChanges {
   groupsRetitled: readonly DeckGroup[];
   /** The full new member lists, of the nodes the layout has, of every group whose members changed (each added group's too). */
   members: ReadonlyMap<string, { decks: readonly string[]; groups: readonly string[] }>;
-  /** The catalogue's new `dcat:catalog` list of the groups the layout has, when it changed; a link to a group it cannot read stays beside it. */
+  /** The catalog's new `dcat:catalog` list of the groups the layout has, when it changed; a link to a group it cannot read stays beside it. */
   rootGroups?: readonly string[];
   /** A node's new position within its parent, for each one whose position or parent changed. */
   positions: ReadonlyMap<string, number>;
@@ -385,7 +385,7 @@ function sameMembers(stated: readonly string[], known: ReadonlySet<string>, want
  * What to write so that the pod, which states `stored`, states `after`:
  * the groups to add, remove and rename; the new member lists of each
  * group whose members changed, and of the top level (its groups only:
- * the catalogue lists every deck anyway); and the new position of every
+ * the catalog lists every deck anyway); and the new position of every
  * member of a parent whose order changed, renumbered from 0. Member lists
  * are compared to what the layout states of the nodes it has, so a link
  * to a node that is gone is dropped only as its list is written anyway,

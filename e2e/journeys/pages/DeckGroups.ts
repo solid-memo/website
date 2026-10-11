@@ -1,8 +1,8 @@
 import { expect, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
 
-/** Which neighbour a deck was grouped with, as its actions menu offered. */
-export type Neighbour = "below" | "above";
+/** Which neighbor a deck was grouped with, as its actions menu offered. */
+export type Neighbor = "below" | "above";
 
 /**
  * Deck groups on the Decks screen: the actions menu of each deck and
@@ -24,21 +24,21 @@ export class DeckGroups extends Screen {
   }
 
   /**
-   * Puts the deck in a new group with its neighbour: the one below when
+   * Puts the deck in a new group with its neighbor: the one below when
    * there is one, else the one above. The new group's name field opens.
    */
-  async groupWithNeighbour(deckName: string): Promise<Neighbour> {
-    return this.intent(`Group ${deckName} with its neighbour`, async () => {
+  async groupWithNeighbor(deckName: string): Promise<Neighbor> {
+    return this.intent(`Group ${deckName} with its neighbor`, async () => {
       const menu = await this.openMenu(deckName);
       const below = menu.getByRole("menuitem", { name: this.t("deckList.groupWithNext"), exact: true });
       const above = menu.getByRole("menuitem", { name: this.t("deckList.groupWithPrevious"), exact: true });
-      const neighbour: Neighbour = (await below.getAttribute("aria-disabled")) === "true" ? "above" : "below";
-      const item = neighbour === "below" ? below : above;
+      const neighbor: Neighbor = (await below.getAttribute("aria-disabled")) === "true" ? "above" : "below";
+      const item = neighbor === "below" ? below : above;
       await expect(item).not.toHaveAttribute("aria-disabled", "true");
       await item.click();
       await this.expectStatus(this.tp("deckList.combined", { group: this.t("deckList.newGroupName") }));
       await expect(this.groupNameField).toBeFocused();
-      return neighbour;
+      return neighbor;
     });
   }
 
@@ -54,7 +54,7 @@ export class DeckGroups extends Screen {
   }
 
   /**
-   * Moves the deck (or group) one place down among its neighbours; given
+   * Moves the deck (or group) one place down among its neighbors; given
    * where it should land (inside a group), checks the list says so.
    */
   async moveDown(name: string, to?: { position: number; count: number; group: string }): Promise<void> {

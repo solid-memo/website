@@ -83,7 +83,7 @@ describe("deckToDraft", () => {
     const { draft, basedOn } = deckToDraft(deck, cards, DRAFT, NOW);
     expect(basedOn).toBe("https://solid-memo.com/decks/capitals/v1.ttl");
     expect(draft.root.wasDerivedFrom).toEqual([]);
-    // Its one statement beyond the records types its licence.
+    // Its one statement beyond the records types its license.
     expect(draft.triples).toEqual([
       {
         subject: "https://creativecommons.org/publicdomain/zero/1.0/",

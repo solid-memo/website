@@ -82,15 +82,15 @@ export function makePlan(deck: Deck): LibraryUpgradePlan {
 
 /**
  * The check of instance A, finding a violation in each of these decks'
- * cards documents, and in the catalogue when asked: under "set invalid
+ * cards documents, and in the catalog when asked: under "set invalid
  * data aside", those decks are set aside, and the arrangement with the
- * catalogue.
+ * catalog.
  */
-export function invalidReport(decks: readonly Deck[], { catalogue = false } = {}): ValidationReport {
+export function invalidReport(decks: readonly Deck[], { catalog = false } = {}): ValidationReport {
   const violation = { message: { en: "Less than 1 values" }, severity: "violation" as const, constraint: "MinCount" };
   return {
     instanceUrl: instanceA.url,
-    violationCount: decks.length + (catalogue ? 1 : 0),
+    violationCount: decks.length + (catalog ? 1 : 0),
     conforms: false,
     documents: [
       ...decks.map((deck) => ({
@@ -98,7 +98,7 @@ export function invalidReport(decks: readonly Deck[], { catalogue = false } = {}
         status: "checked" as const,
         subjects: [{ url: `${deck.cardsDocumentUrl}#c1`, status: "checked" as const, shape: "card" as const, version: 5, violations: [violation] }],
       })),
-      ...(catalogue
+      ...(catalog
         ? [
             {
               url: `${instanceA.url}catalog.ttl`,

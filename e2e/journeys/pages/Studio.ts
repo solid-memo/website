@@ -14,7 +14,7 @@ import { cellOf } from "./tables.ts";
  * states, and its moves to another deck), the card inspector (a card's content, its wrong options,
  * its schedule and its history), a deck's schedule, a deck's and the
  * instance's health, its library copies, a deck's about screen (its
- * authors and licence), the instance's name and catalogue, a deck
+ * authors and license), the instance's name and catalog, a deck
  * exported to a file and imported from it, the instance's drafts of
  * releases (made, the next version of a release among them, listed in
  * the sidebar and deleted), the releases it published, and its way back
@@ -694,23 +694,23 @@ export class Studio extends Screen {
     });
   }
 
-  /** Gives the deck one author and a licence (by its name), which the about screen then shows. */
-  async setAuthorAndLicence(author: string, licence: string): Promise<void> {
-    await this.intent(`Name ${author} the author, under ${licence}`, async () => {
+  /** Gives the deck one author and a license (by its name), which the about screen then shows. */
+  async setAuthorAndLicense(author: string, license: string): Promise<void> {
+    await this.intent(`Name ${author} the author, under ${license}`, async () => {
       const section = this.page.getByRole("region", { name: this.t("studio.about.provenance") });
       await section.getByRole("button", { name: this.t("studio.about.editProvenance") }).click();
       await section.getByRole("textbox", { name: this.t("studio.about.author", { number: 1 }) }).fill(author);
-      await section.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: licence });
+      await section.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: license });
       await section.getByRole("button", { name: this.t("studio.about.saveProvenance") }).click();
       await this.expectStatus(this.t("studio.about.saved"));
       await expect(section).toContainText(author);
-      await expect(section.getByRole("link", { name: new RegExp(escapeRegExp(licence)) })).toBeVisible();
+      await expect(section.getByRole("link", { name: new RegExp(escapeRegExp(license)) })).toBeVisible();
     });
   }
 
-  /** Follows the sidebar's link to the instance's name and catalogue. */
+  /** Follows the sidebar's link to the instance's name and catalog. */
   async openInstance(instance: string): Promise<void> {
-    await this.intent("Open the instance's name and catalogue", async () => {
+    await this.intent("Open the instance's name and catalog", async () => {
       await this.app.chrome.studioSection("instance");
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.instance.heading", { instance }) })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.instance.crumb");
@@ -727,11 +727,11 @@ export class Studio extends Screen {
     });
   }
 
-  /** Describes the instance's catalogue and gives it a licence (by its name). */
-  async describeCatalog(description: string, licence: string): Promise<void> {
-    await this.intent(`Describe the catalogue, under ${licence}`, async () => {
+  /** Describes the instance's catalog and gives it a license (by its name). */
+  async describeCatalog(description: string, license: string): Promise<void> {
+    await this.intent(`Describe the catalog, under ${license}`, async () => {
       await this.page.getByLabel(this.t("studio.instance.description"), { exact: true }).fill(description);
-      await this.page.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: licence });
+      await this.page.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: license });
       await this.page.getByRole("button", { name: this.t("studio.instance.saveCatalog") }).click();
       await this.expectStatus(this.t("studio.about.saved"));
     });

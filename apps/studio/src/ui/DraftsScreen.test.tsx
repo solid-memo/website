@@ -166,9 +166,9 @@ describe("DraftsScreen", () => {
     expect(screen.getByText("Deleting the draft Solid…")).toBeInTheDocument();
   });
 
-  it("holds every change while the catalogue may not be changed, saying why", () => {
+  it("holds every change while the catalog may not be changed, saying why", () => {
     renderScreen({ drafts: [draft("solid")], readOnly: "setAside" });
-    expect(screen.getByText(/The instance's catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(screen.getByText(/The instance's catalog or one of its groups has invalid data/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Delete the draft Solid, version 1" })).toBeDisabled();
     expect(screen.getByRole("radio", { name: "A blank deck" })).toBeDisabled();
   });

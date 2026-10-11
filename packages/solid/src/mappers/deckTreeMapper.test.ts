@@ -56,7 +56,7 @@ const ids = (dataset: SolidDataset) =>
   );
 
 describe("toStoredLayout", () => {
-  it("reads the decks in document order with their positions, the groups it can read, and the catalogue's groups", async () => {
+  it("reads the decks in document order with their positions, the groups it can read, and the catalog's groups", async () => {
     const dataset = await document(
       rootTtl("; dcat:catalog <#group-x>, <#group-odd>") +
         deckTtl("a", "; sm:position 1 ") +
@@ -86,13 +86,13 @@ describe("toStoredLayout", () => {
     expect(toStoredLayout(unreadable, CATALOG)).toMatchObject({ groups: [], readOnly: true });
   });
 
-  it("lists no top-level groups without a catalogue", async () => {
+  it("lists no top-level groups without a catalog", async () => {
     expect(toStoredLayout(await document(deckTtl("a")), CATALOG)).toMatchObject({ rootGroups: [], groups: [] });
   });
 });
 
 describe("withTreeChanges", () => {
-  it("writes a new group in its format, published by the catalogue's publisher, listed by the catalogue, its members in order", async () => {
+  it("writes a new group in its format, published by the catalog's publisher, listed by the catalog, its members in order", async () => {
     const dataset = await document(rootTtl() + deckTtl("a") + deckTtl("b") + deckTtl("c"));
     const group = { url: at("group-1"), title: { sv: "Språk" } };
     const { dataset: written, subjects, after } = edited(dataset, { kind: "combine", dragged: at("c"), target: at("a"), group });
@@ -104,7 +104,7 @@ describe("withTreeChanges", () => {
     expect(getUrlAll(thing, DCAT.dataset)).toEqual([at("a"), at("c")]);
     expect(getInteger(thing, SM.position)).toBe(0);
     expect(getUrlAll(getThing(written, ROOT)!, DCAT.catalog)).toEqual([group.url]);
-    // The catalogue still lists every deck.
+    // The catalog still lists every deck.
     expect(getUrlAll(getThing(written, ROOT)!, DCAT.dataset)).toHaveLength(3);
     expect(getInteger(getThing(written, at("c"))!, SM.position)).toBe(1);
     expect(getInteger(getThing(written, at("b"))!, SM.position)).toBe(1);
@@ -145,7 +145,7 @@ describe("withTreeChanges", () => {
     expect(getInteger(getThing(renamed, at("group-x"))!, SM.position)).toBeNull();
   });
 
-  it("keeps a member link to a dataset or catalogue it cannot read, or elsewhere, and drops one to what is gone", async () => {
+  it("keeps a member link to a dataset or catalog it cannot read, or elsewhere, and drops one to what is gone", async () => {
     const dataset = await document(
       rootTtl("; dcat:catalog <#group-x>, <#group-odd>, <#group-bare>, <#gone>, <https://elsewhere.example/c#g>") +
         deckTtl("a") +
@@ -157,7 +157,7 @@ describe("withTreeChanges", () => {
           `; dcat:dataset <#a>, <#broken>, <#gone-deck>, <#group-odd>, <https://elsewhere.example/d#d> ;
            dcat:catalog <#b>, <#group-odd>, <#group-bare>, <#gone-group>`,
         ) +
-        // A deck that does not fit its shape, and groups that do not fit their own, one not even typed a catalogue.
+        // A deck that does not fit its shape, and groups that do not fit their own, one not even typed a catalog.
         `<#broken> a sm:Deck, dcat:Dataset .\n<#group-odd> a sm:DeckGroup, dcat:Catalog ; dcterms:title "Odd"@en .\n` +
         `<#group-bare> a sm:DeckGroup .\n`,
     );
@@ -165,7 +165,7 @@ describe("withTreeChanges", () => {
     const x = getThing(written, at("group-x"))!;
     expect(getUrlAll(x, DCAT.dataset).sort()).toEqual([at("a"), at("broken"), "https://elsewhere.example/d#d"].sort());
     expect(getUrlAll(x, DCAT.catalog)).toEqual([at("group-odd"), at("group-bare")]);
-    // The catalogue's list of groups is left alone until the top level changes.
+    // The catalog's list of groups is left alone until the top level changes.
     expect(getUrlAll(getThing(written, ROOT)!, DCAT.catalog)).toHaveLength(5);
 
     const removed = edited(dataset, { kind: "removeGroup", group: at("group-x") }).dataset;
@@ -201,23 +201,23 @@ describe("withTreeChanges", () => {
     expect(getInteger(getThing(moved.dataset, at("c"))!, SM.position)).toBe(0);
   });
 
-  it("needs the catalogue and its publisher for a new group, and a URL the document does not have yet", async () => {
+  it("needs the catalog and its publisher for a new group, and a URL the document does not have yet", async () => {
     const group = { url: at("group-1"), title: { en: "G" } };
     const combine: DeckTreeEdit = { kind: "combine", dragged: at("b"), target: at("a"), group };
     const withoutPublisher = await document(rootTtl("", "") + deckTtl("a") + deckTtl("b"));
-    expect(() => edited(withoutPublisher, combine)).toThrow("Deck groups need the catalogue");
-    const withoutCatalogue = await document(deckTtl("a") + deckTtl("b"));
-    expect(() => edited(withoutCatalogue, combine)).toThrow("Deck groups need the catalogue");
+    expect(() => edited(withoutPublisher, combine)).toThrow("Deck groups need the catalog");
+    const withoutCatalog = await document(deckTtl("a") + deckTtl("b"));
+    expect(() => edited(withoutCatalog, combine)).toThrow("Deck groups need the catalog");
     const taken = await document(rootTtl() + deckTtl("a") + deckTtl("b") + `<#group-1> dcterms:title "Something else" .\n`);
     expect(() => edited(taken, combine)).toThrow("already in the catalog document");
   });
 
-  it("needs the catalogue only to list a group at the top level", async () => {
+  it("needs the catalog only to list a group at the top level", async () => {
     const dataset = await document(
       deckTtl("a") + deckTtl("b") + groupTtl("group-x", "X", "; dcat:dataset <#a>", "; sm:position 0 "),
     );
     expect(() => edited(dataset, { kind: "move", node: at("group-x"), to: { parent: null, after: at("b") } })).toThrow(
-      "Deck groups need the catalogue",
+      "Deck groups need the catalog",
     );
     // Decks alone are arranged without one, and nothing is checked: a deck's position is no shape's.
     const decks = await document(deckTtl("a") + deckTtl("b"));

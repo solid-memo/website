@@ -268,9 +268,9 @@ describe("the vendored profiles over their fixtures", async () => {
 
   it("report only results about the document's own subjects", async () => {
     const quads = parseTurtle(`<#x> <${DC}title> "x" .`, "https://pod.example/x.ttl");
-    const unlabelled = parseTurtle(`<#y> a <${FOAF}Agent> .`, "https://pod.example/y.ttl");
+    const unlabeled = parseTurtle(`<#y> a <${FOAF}Agent> .`, "https://pod.example/y.ttl");
     await expect(
-      validateProfile("x.ttl", quads, engines["dcat-ap"], unlabelled),
+      validateProfile("x.ttl", quads, engines["dcat-ap"], unlabeled),
     ).resolves.toBeUndefined();
   });
 
@@ -292,7 +292,7 @@ describe("the vendored profiles over their fixtures", async () => {
     );
   });
 
-  it("accept the valid decks, catalogue, deck groups and series, which Solid Memo writes, whatever the title's language", async () => {
+  it("accept the valid decks, catalog, deck groups and series, which Solid Memo writes, whatever the title's language", async () => {
     const fixture = async (path: string) => {
       const { turtle } = (await readTurtleTree(`${ROOT}fixtures`)).find((f) => f.path === path)!;
       return parseTurtle(turtle, `https://pod.example/${path}`);

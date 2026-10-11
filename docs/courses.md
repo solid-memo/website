@@ -213,7 +213,7 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    learner goes elsewhere: a reload or a later visit does not show it
    again. The motion is decoration only, hidden from screen readers,
    and none of it plays when the reader asks for reduced motion.
-5. **Afterwards.** A finished course says so on its page, with a link
+5. **Afterward.** A finished course says so on its page, with a link
    back to the decks. The cards are studied like any deck's, by
    flip-and-grade ([srs.md](srs.md)). A chapter can be retaken at any
    time, as practice: a chapter whose steps are all done opens at its
@@ -232,7 +232,7 @@ a chapter's theory and its questions is `ChapterReviewScreen` and
 ## The course for newcomers
 
 The library's index may name one course as the one to offer someone
-who has no decks yet: `sm:newcomerCourse` on its catalogue, pointing at
+who has no decks yet: `sm:newcomerCourse` on its catalog, pointing at
 the course's series ([deck-library.md](deck-library.md#courses)). The
 app marks that deck `LibraryDeck.forNewcomers`, but only when its
 series is in the index and its current release is a course; anything
@@ -242,7 +242,7 @@ else offers nothing.
   (empty groups do not count), right under the Decks heading, a card
   offers the course: its title, what it is, its card count, "Start the
   course" and a link to its library page (`NewcomerCourseContainer`,
-  `NewcomerCourseOffer`). It is a labelled landmark, not a section with
+  `NewcomerCourseOffer`). It is a labeled landmark, not a section with
   a heading, and takes no focus, but comes next after the heading the
   screen focuses, in reading and Tab order. While the library loads,
   when it cannot be read, or when it names no course, there is no card.

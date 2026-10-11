@@ -73,7 +73,7 @@ describe("createSolidSessionGateway", () => {
       });
     });
 
-    it("stops listening for logins and restores afterwards, even on failure", async () => {
+    it("stops listening for logins and restores afterward, even on failure", async () => {
       vi.mocked(handleIncomingRedirect).mockRejectedValue(new Error("boom"));
       const gateway = createSolidSessionGateway("Test App");
       await expect(gateway.restore()).rejects.toThrow("boom");

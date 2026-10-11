@@ -22,7 +22,7 @@ const second = model({
 });
 
 describe("seriesEntry", () => {
-  it("states the current release's description and the series' releases, summarising the older ones", () => {
+  it("states the current release's description and the series' releases, summarizing the older ones", () => {
     expect(seriesEntry(SERIES, [first, second])).toEqual({
       series: SERIES,
       title: [text("Solid")],
@@ -46,7 +46,7 @@ describe("seriesEntry", () => {
     });
   });
 
-  it("summarises an older release by what it states", () => {
+  it("summarizes an older release by what it states", () => {
     expect(seriesEntry(SERIES, [model(), second]).older[0]).toEqual({ url: RELEASE, title: [], description: [], version: [], issued: [], versionNotes: [] });
   });
 });

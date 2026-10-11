@@ -39,7 +39,7 @@ function pictureBox(image: HTMLImageElement): Box {
 }
 
 /**
- * A box of the given box's shape as large as the viewport allows, centred
+ * A box of the given box's shape as large as the viewport allows, centered
  * in it: the viewport's full width or full height, whichever it reaches
  * first. The viewport is the root's client area, so a scrollbar is not
  * covered. No margin is kept: the page sets no `viewport-fit=cover`, so

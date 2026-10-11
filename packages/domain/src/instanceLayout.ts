@@ -84,7 +84,7 @@ export function digestSubjectOf(instanceUrl: string, kind: "receipt" | "schedule
   return `${digestUrlOf(instanceUrl)}#${kind}-${where.replace(/[^A-Za-z0-9._-]/g, "-")}`;
 }
 
-/** The instance's catalogue: the dcat:Catalog subject of its catalog document. */
+/** The instance's catalog: the dcat:Catalog subject of its catalog document. */
 export function catalogNodeUrlOf(instanceUrl: string): string {
   return `${catalogUrlOf(instanceUrl)}#catalog`;
 }

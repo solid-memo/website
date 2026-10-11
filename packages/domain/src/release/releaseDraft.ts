@@ -19,7 +19,7 @@ import type { ReleaseKind, ReleaseTerm, ReleaseText } from "./releaseModel.ts";
  * release's: the repository keeps the draft in several documents and
  * maps their IRIs to these (draftLayout.ts). What a shape describes is
  * a record of it, at its latest format; every other statement (how the
- * release was made, its sources and licence, the series it describes,
+ * release was made, its sources and license, the series it describes,
  * and what a subject says beyond its shape) is a triple, kept as it is.
  *
  * A draft is changed by DraftChange values (applyDraftChange), each one
@@ -229,7 +229,7 @@ export type DistractorText = Omit<DistractorV1, "deprecated">;
 
 /**
  * A source of the release: its statements (a title, a creator, the
- * evidence for its licence), and whether the release states it is drawn
+ * evidence for its license), and whether the release states it is drawn
  * from it (`prov:wasDerivedFrom`, `derivedFrom`) and how it was made used
  * it (`prov:used` of the activity that generated the release, `used`).
  */
@@ -294,7 +294,7 @@ export type DraftChange =
    * carried from an earlier release still uses; else it is refused.
    */
   | { kind: "setSource"; iri: string; source: DraftSource | null }
-  /** The licence (dcterms:license), typed dcterms:LicenseDocument; null for none. */
+  /** The license (dcterms:license), typed dcterms:LicenseDocument; null for none. */
   | { kind: "setLicense"; license: string | null }
   /**
    * The attribution of how the release was made: "Compiled by <its
@@ -927,17 +927,17 @@ function deleteActivity(draft: ReleaseDraft, id: string): ReleaseDraft | DraftRe
   return { ...draft, triples: triples.filter((triple) => !sources.has(triple.subject) || named(triple.subject)) };
 }
 
-// --- The licence
+// --- The license
 
-/** The statement that types a licence a dcterms:LicenseDocument, as DCAT-AP asks of it. */
+/** The statement that types a license a dcterms:LicenseDocument, as DCAT-AP asks of it. */
 export function licenseType(license: string): DraftTriple {
   return { subject: license, predicate: RDF_TYPE, object: { kind: "iri", value: LICENSE_DOCUMENT } };
 }
 
 /**
- * The draft with its licence set, and typed: the licence it had loses
- * its type when nothing else in the draft names it (a source's licence
- * may), so the release says nothing of a licence it no longer has.
+ * The draft with its license set, and typed: the license it had loses
+ * its type when nothing else in the draft names it (a source's license
+ * may), so the release says nothing of a license it no longer has.
  */
 function setLicense(draft: ReleaseDraft, license: string | null): ReleaseDraft {
   const { license: before, ...root } = draft.root;

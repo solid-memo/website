@@ -352,7 +352,7 @@ describe("library deck records", () => {
     expect(content.description).toEqual({ en: "From Wikipedia." });
   });
 
-  it("carry the licence, version notes and modification time when stated", () => {
+  it("carry the license, version notes and modification time when stated", () => {
     expect(
       libraryDeckFromRecord(
         RELEASE,

@@ -23,7 +23,7 @@ describe("licenseLabel", () => {
 });
 
 describe("KNOWN_LICENSES", () => {
-  it("names each licence it offers, each once", () => {
+  it("names each license it offers, each once", () => {
     for (const url of KNOWN_LICENSES) expect(licenseLabel(url)).not.toBe(url);
     expect(new Set(KNOWN_LICENSES.map(licenseLabel)).size).toBe(KNOWN_LICENSES.length);
   });
@@ -33,7 +33,7 @@ describe("chosenLicense", () => {
   const CC0 = KNOWN_LICENSES[0]!;
   const OWN = "https://example.org/my-terms";
 
-  it("gives none, a known licence, or the one there was", () => {
+  it("gives none, a known license, or the one there was", () => {
     expect(chosenLicense(undefined, OWN)).toBeUndefined();
     expect(chosenLicense(CC0, undefined)).toBe(CC0);
     expect(chosenLicense(OWN, OWN)).toBe(OWN);

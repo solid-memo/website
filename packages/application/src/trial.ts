@@ -38,7 +38,7 @@ export type TrialOpening = { ok: true; trial: Trial } | { ok: false; problems: R
 /**
  * Start a trial of the draft in the sandbox, a draft that can be played
  * (trialProblems): its pod started, an instance made in it as a guest's
- * is (its meta document and its catalogue), its preferences new ones but
+ * is (its meta document and its catalog), its preferences new ones but
  * for the answer scale and the hour the day rolls over, which are the
  * user's (`prefs`), then the draft started as a course, or imported as a
  * deck, as the library's releases are.

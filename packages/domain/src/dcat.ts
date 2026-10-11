@@ -8,7 +8,7 @@ import { english, inEnglish, sameText, shown, type LangText } from "./langText.t
 /** The EU data theme every library deck has: education, culture and sport. */
 export const EDUCATION_THEME = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 
-/** The EU data theme scheme, a theme taxonomy of every catalogue. */
+/** The EU data theme scheme, a theme taxonomy of every catalog. */
 export const DATA_THEME_SCHEME = "http://publications.europa.eu/resource/authority/data-theme";
 
 export const TURTLE_MEDIA_TYPE = "https://www.iana.org/assignments/media-types/text/turtle";
@@ -63,7 +63,7 @@ export function descriptionInFormat4(description: string, title: string): LangTe
 
 /**
  * The description a deck group gets: DCAT-AP asks one of every
- * catalogue, and the user only names a group. In English and Swedish, as
+ * catalog, and the user only names a group. In English and Swedish, as
  * a deck's, the Swedish naming the group by its Swedish name when it has
  * one, both by its English name, else the one shown.
  */

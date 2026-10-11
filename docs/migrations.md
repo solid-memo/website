@@ -92,7 +92,7 @@ the format-6 copy.
 
 [Deck groups](data-model.md#deck-groups) (deck group format 1) need no
 migration: groups are new subjects, and a deck's `sm:position` and the
-catalogue's `dcat:catalog` belong to no shape, so the deck and catalogue
+catalog's `dcat:catalog` belong to no shape, so the deck and catalog
 formats are unchanged.
 
 [Courses](courses.md) (vocabulary 1.14) need no migration and moved no
@@ -220,8 +220,8 @@ a pod is whole without an index
 - **The drafts are new.** Draft deck, chapter and step format 1 are new
   shapes in a new place, a release's draft, so nothing old is in their
   format. `sm:releaseDraft` and `sm:publishedRelease` are written on the
-  catalogue outside `CatalogV1`, as `sm:newcomerCourse` is on the
-  library's, so the catalogue format did not move.
+  catalog outside `CatalogV1`, as `sm:newcomerCourse` is on the
+  library's, so the catalog format did not move.
 - **One full re-check.** New shape files joined the rules, so the rules'
   hash changed: every instance is checked in full once on its next
   opening, and its documents get new receipts. No subject in a pod is
@@ -246,7 +246,7 @@ Rules that hold across versions:
   data, so this version does not save over it. Reload the page…"),
   before anything is sent; and `unlessNewer` refuses the same for the
   writes that change or remove a subject without recording it (a deck's
-  position or completed chapter, a deck group's removal, the catalogue's
+  position or completed chapter, a deck group's removal, the catalog's
   links, a repair, and the removal of a card, a distractor, a review
   state, a deck entry or a day's answers): a subject stamped above every
   version this app writes for its class. This is what keeps a tab opened before a
@@ -330,9 +330,9 @@ flowchart TD
   - the pod applies one PATCH or one PUT whole or not at all, so a
     document whose write fails is as it was, and readable.
 
-  The one constraint between subjects of the update, the catalogue's
+  The one constraint between subjects of the update, the catalog's
   DCAT-AP listing its decks as datasets, which outdated entries are
-  not, holds within one document: a deck's entry and the catalogue are
+  not, holds within one document: a deck's entry and the catalog are
   subjects of the catalog document, written in one edit. No order
   between documents is needed, and nothing ever needs putting back.
 - **Plan first, write nothing.** Opening an instance reads the meta
@@ -356,10 +356,10 @@ flowchart TD
   meanwhile) and writes, in this order: `meta.ttl` (when its format is
   outdated), `preferences.ttl` (likewise), each deck's cards document
   and reviews document (when a card, or a state, is outdated), and last
-  `catalog.ttl` (when a deck entry is outdated or the catalogue is
-  missing: a catalogue is written then, named as the instance's record
+  `catalog.ttl` (when a deck entry is outdated or the catalog is
+  missing: a catalog is written then, named as the instance's record
   names it and published by the signed-in user,
-  [data-model.md](data-model.md#the-catalogue)). The order is the
+  [data-model.md](data-model.md#the-catalog)). The order is the
   reader's convenience, not a need. A document two decks share (another
   app may point two decks at one) is one document of the update, written
   for each deck in turn.
@@ -387,7 +387,7 @@ flowchart TD
 - **What it says.** When every document was updated, the app reads
   everything again and says the data is up to date. Otherwise it lists
   each document left — the instance record, the preferences, the
-  catalogue of the decks, or a deck's cards or review states — with why,
+  catalog of the decks, or a deck's cards or review states — with why,
   and how many it did update; **Try again** runs the update again,
   which plans afresh and writes only what is still outdated. Closed, the
   notice shows what is left.
@@ -399,7 +399,7 @@ flowchart TD
   is left as it is. This is the one write outside the instance: a
   failure there leaves the update done, and **Register what is missing**
   in Preferences adds them later. An update that left a document adds
-  none: a catalogue it could not write would be registered where there
+  none: a catalog it could not write would be registered where there
   is none.
 - **A closed tab.** Each document is updated or as it was at every
   moment, so a tab closed part-way leaves an instance that works as it
@@ -448,7 +448,7 @@ file and shared access, and checks that:
   where the server enforces it, else right after a read of it; the last
   write is one edit of the type index (with `If-Match` where the server
   enforces it), which keeps every triple it had and adds the
-  registrations of the instance's catalogue, decks, cards, review states
+  registrations of the instance's catalog, decks, cards, review states
   and answers; no access control is written, and no resource comes or
   goes: no copy, no backup;
 - the instance is updated, conforms and has nothing left to update, its
@@ -508,7 +508,7 @@ offers to bring the copy up to it (`planLibraryUpgrade` in
 The Studio lists every copy of an instance, and upgrades several in
 turn, each the same way ([studio.md](studio.md#library-copies)). A copy
 of a release added from a link is upgraded the same way too, to the
-newest version its creator's catalogue lists, when it can be read
+newest version its creator's catalog lists, when it can be read
 ([deck-library.md](deck-library.md#from-a-link)).
 
 The plan compares three sets of cards by fragment id — the release the

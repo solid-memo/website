@@ -73,12 +73,12 @@ describe("ReleaseMetadataScreen", () => {
     expect(languageNameOf({ iri: "x", code: "QQQ", label: "Qq" }, () => ({ name: "qqq" }))).toBe("Qq");
   });
 
-  it("chooses the licence, typed by the change, and the publisher among the release's agents or the one it names", () => {
+  it("chooses the license, typed by the change, and the publisher among the release's agents or the one it names", () => {
     const draft = with_(authoredDraft(), { kind: "setMeta", meta: { publisher: "https://index.example/#publisher" } });
     const onEdit = renderScreen(draft);
-    fireEvent.change(screen.getByRole("combobox", { name: "Licence" }), { target: { value: CC0 } });
+    fireEvent.change(screen.getByRole("combobox", { name: "License" }), { target: { value: CC0 } });
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setLicense", license: CC0 }]);
-    fireEvent.change(screen.getByRole("combobox", { name: "Licence" }), { target: { value: "" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "License" }), { target: { value: "" } });
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setLicense", license: null }]);
     const publisher = screen.getByRole("combobox", { name: "Publisher" });
     expect(within(publisher).getByRole("option", { name: "https://index.example/#publisher" })).toBeInTheDocument();
@@ -195,7 +195,7 @@ describe("ReleaseMetadataScreen", () => {
     fireEvent.click(within(sources).getByRole("button", { name: "Edit Source" }));
     const form = within(sources).getByRole("group", { name: "https://source.example/" });
     expect(within(form).getByText("1 more statement of it is kept as it is.")).toBeInTheDocument();
-    expect(within(form).getByRole("textbox", { name: "Evidence for its licence" })).toHaveValue("Footer.");
+    expect(within(form).getByRole("textbox", { name: "Evidence for its license" })).toHaveValue("Footer.");
     fireEvent.input(within(form).getByRole("textbox", { name: "Title" }), { target: { value: "The source" } });
     fireEvent.click(within(form).getByRole("checkbox", { name: "This version's making used it" }));
     fireEvent.click(within(form).getByRole("button", { name: "Save the source" }));
@@ -257,8 +257,8 @@ describe("ReleaseMetadataScreen", () => {
     fireEvent.input(address, { target: { value: "https://new.example" } });
     fireEvent.input(within(add).getByRole("textbox", { name: "Title" }), { target: { value: "New" } });
     fireEvent.input(within(add).getByRole("textbox", { name: "Creator" }), { target: { value: "Di" } });
-    fireEvent.input(within(add).getByRole("textbox", { name: "Licence (its address)" }), { target: { value: CC0 } });
-    fireEvent.input(within(add).getByRole("textbox", { name: "Evidence for its licence" }), { target: { value: "Footer: CC0." } });
+    fireEvent.input(within(add).getByRole("textbox", { name: "License (its address)" }), { target: { value: CC0 } });
+    fireEvent.input(within(add).getByRole("textbox", { name: "Evidence for its license" }), { target: { value: "Footer: CC0." } });
     fireEvent.click(within(add).getByRole("button", { name: "Add the source" }));
     expect(onEdit).toHaveBeenLastCalledWith([
       {
@@ -279,14 +279,14 @@ describe("ReleaseMetadataScreen", () => {
     expect(address).toHaveValue("");
   });
 
-  it("refuses a licence that is not an address, in a new source's form and in one being edited", () => {
+  it("refuses a license that is not an address, in a new source's form and in one being edited", () => {
     const onEdit = renderScreen();
     const add = screen.getByRole("group", { name: "New source" });
     fireEvent.input(within(add).getByLabelText("Address"), { target: { value: "https://new.example/" } });
-    const license = within(add).getByRole("textbox", { name: "Licence (its address)" });
+    const license = within(add).getByRole("textbox", { name: "License (its address)" });
     fireEvent.input(license, { target: { value: "CC BY 4.0" } });
     fireEvent.click(within(add).getByRole("button", { name: "Add the source" }));
-    expect(within(add).getByText("Give the licence's web address, starting with https:// or http://, or leave it empty.")).toBeInTheDocument();
+    expect(within(add).getByText("Give the license's web address, starting with https:// or http://, or leave it empty.")).toBeInTheDocument();
     expect(license).toHaveAttribute("aria-invalid", "true");
     expect(within(add).getByLabelText("Address")).toHaveAttribute("aria-invalid", "false");
     fireEvent.input(license, { target: { value: "" } });
@@ -295,10 +295,10 @@ describe("ReleaseMetadataScreen", () => {
     const sources = screen.getByRole("heading", { name: "Sources" }).closest("section")!;
     fireEvent.click(within(sources).getByRole("button", { name: "Edit Wiki" }));
     const form = within(sources).getByRole("group", { name: "https://wiki.example/" });
-    const edited = within(form).getByRole("textbox", { name: "Licence (its address)" });
+    const edited = within(form).getByRole("textbox", { name: "License (its address)" });
     fireEvent.input(edited, { target: { value: "CC BY 4.0" } });
     fireEvent.click(within(form).getByRole("button", { name: "Save the source" }));
-    expect(within(form).getByText("Give the licence's web address, starting with https:// or http://, or leave it empty.")).toBeInTheDocument();
+    expect(within(form).getByText("Give the license's web address, starting with https:// or http://, or leave it empty.")).toBeInTheDocument();
     expect(edited).toHaveAttribute("aria-invalid", "true");
     expect(onEdit).not.toHaveBeenCalled();
     fireEvent.input(edited, { target: { value: CC0 } });
@@ -467,7 +467,7 @@ describe("ReleaseMetadataScreen, held", () => {
     expect(screen.getByRole("group", { name: "Languages" })).toHaveAttribute("data-arrival", "true");
     cleanup();
     renderScreen(authoredDraft(), { field: "license" });
-    expect(screen.getByRole("combobox", { name: "Licence" }).parentElement).toHaveAttribute("data-arrival", "true");
+    expect(screen.getByRole("combobox", { name: "License" }).parentElement).toHaveAttribute("data-arrival", "true");
     cleanup();
     renderScreen(authoredDraft(), { field: "publisher" });
     expect(screen.getByRole("combobox", { name: "Publisher" })).toHaveAttribute("data-arrival", "true");

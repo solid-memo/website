@@ -92,7 +92,7 @@ export function toDeck(thing: Thing, agentNames: ReadonlyMap<string, string> = n
  * The catalog document with a deck written in this app's format, onto
  * its existing subject when there is one (so unknown triples survive),
  * with its creators' agent nodes and its distribution beside it, and
- * listed by the catalogue. Agents no deck names any more are removed.
+ * listed by the catalog. Agents no deck names any more are removed.
  */
 export function withDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
   let updated = setThing(
@@ -151,9 +151,9 @@ function deckUrlsOf(dataset: SolidDataset): string[] {
 }
 
 /**
- * The catalogue node, when the document has one, with the one deck's
+ * The catalog node, when the document has one, with the one deck's
  * `dcat:dataset` link added or removed. Every other link stays as it is:
- * a dataset another app listed in the catalogue is not this app's to
+ * a dataset another app listed in the catalog is not this app's to
  * drop (docs/data-model.md "Write discipline").
  */
 function withCatalogDataset(dataset: SolidDataset, deckUrl: string, change: "add" | "remove"): SolidDataset {
@@ -166,9 +166,9 @@ function withCatalogDataset(dataset: SolidDataset, deckUrl: string, change: "add
 }
 
 /**
- * The catalogue of a catalog document, its publisher named by the agent
+ * The catalog of a catalog document, its publisher named by the agent
  * node beside it (or by the WebID when there is none); null when the
- * document has no catalogue that fits its shape.
+ * document has no catalog that fits its shape.
  */
 export function toCatalog(dataset: SolidDataset, documentUrl: string): Catalog | null {
   const url = `${documentUrl}#catalog`;
@@ -180,17 +180,17 @@ export function toCatalog(dataset: SolidDataset, documentUrl: string): Catalog |
 }
 
 /**
- * The catalog document with its catalogue written, onto the existing
+ * The catalog document with its catalog written, onto the existing
  * subject when there is one, listing every deck of the document besides
  * the datasets it already lists: one in another document (another app's),
  * one this document describes as a dataset, or one another app described
  * in this document, whatever its class. Only a link to a subject of this
  * document that is no dataset of Solid Memo's (left by a deck removed)
- * goes, as the catalogue could not be written with it. Its publisher is
+ * goes, as the catalog could not be written with it. Its publisher is
  * described beside it.
- * Its licence, when it states one, is typed a dcterms:LicenseDocument,
- * as DCAT-AP asks. A licence it no longer states loses that type, unless
- * the document still names it a licence elsewhere; with nothing else said
+ * Its license, when it states one, is typed a dcterms:LicenseDocument,
+ * as DCAT-AP asks. A license it no longer states loses that type, unless
+ * the document still names it a license elsewhere; with nothing else said
  * of it, it goes.
  */
 export function withCatalog(dataset: SolidDataset, documentUrl: string, catalog: Catalog): SolidDataset {

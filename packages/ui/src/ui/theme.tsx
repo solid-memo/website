@@ -16,7 +16,7 @@ export function browserTheme(): Theme {
 }
 
 /**
- * Shows the page in a theme: the stylesheet's colours follow the root's
+ * Shows the page in a theme: the stylesheet's colors follow the root's
  * data-theme (index.html sets it before the first paint), the browser's
  * chrome follows the theme-color meta tags.
  */

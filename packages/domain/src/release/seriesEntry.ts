@@ -4,7 +4,7 @@ import { subjectsOf, type ReleaseModel, type ReleaseTerm, type ReleaseText } fro
  * What a library's index says of one deck (docs/deck-library.md): a
  * series of its releases, which are its versions too, stating the
  * current release's title, description, themes and keywords; every
- * older release summarised (its title, description, version, issue time
+ * older release summarized (its title, description, version, issue time
  * and notes); the current one described in full but for its cards, a
  * course's chapters, steps and distractors, and the record of how it
  * was made, plus the cards it has in use. The node tooling writes it as
@@ -25,7 +25,7 @@ export interface SeriesEntry {
   cardCount: number;
 }
 
-/** A release before the current one, as the index summarises it. */
+/** A release before the current one, as the index summarizes it. */
 export interface OlderRelease {
   url: string;
   title: ReleaseText[];

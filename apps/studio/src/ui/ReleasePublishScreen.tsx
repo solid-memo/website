@@ -44,7 +44,7 @@ interface Action<T> {
  *   the steps that send it to the library's `decks/` as a pull request.
  *
  * Nothing is published while a change waits to be saved (`saving`), and
- * nothing is published or started while the instance's catalogue may not
+ * nothing is published or started while the instance's catalog may not
  * be written (`hold`).
  */
 export function ReleasePublishScreen({

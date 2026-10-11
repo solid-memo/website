@@ -9,7 +9,7 @@ import { deleteDataset, getSolidDatasetOrNull, readDataset, saveDataset } from "
  */
 const DOC = "https://pod.example/doc.ttl";
 
-function pod({ etag = '"v1"' as string | null, honoursIfNoneMatch = true } = {}) {
+function pod({ etag = '"v1"' as string | null, honorsIfNoneMatch = true } = {}) {
   const gets: { ifNoneMatch: string | null }[] = [];
   const caches: (RequestCache | undefined)[] = [];
   let current = etag;
@@ -29,7 +29,7 @@ function pod({ etag = '"v1"' as string | null, honoursIfNoneMatch = true } = {})
     await held;
     if (!exists) return new Response("", { status: 404 });
     const response =
-      honoursIfNoneMatch && current !== null && headers.get("If-None-Match") === current
+      honorsIfNoneMatch && current !== null && headers.get("If-None-Match") === current
         ? new Response(null, { status: 304, headers: { ETag: current } })
         : new Response(`<#it> <https://example.com/ns#n> "${current?.replaceAll('"', "")}" .`, {
             headers: { "Content-Type": "text/turtle", ...(current === null ? {} : { ETag: current }) },

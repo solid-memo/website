@@ -17,7 +17,7 @@ describe("foreignSubjects", () => {
   it("leaves out what Solid Memo wrote, stamped or not, and what it names as creator, publisher or distribution", () => {
     const alice = "https://alice.example/profile/card#me";
     const dataset = documentOf(
-      // The catalogue, its stamp dropped by another app's rewrite, and its publisher.
+      // The catalog, its stamp dropped by another app's rewrite, and its publisher.
       subject("catalog").addIri(RDF.type, DCAT.Catalog).addUrl(DCTERMS.publisher, alice).addUrl(DCAT.dataset, `${DOC}#recipes`).build(),
       subject(alice).addIri(RDF.type, FOAF_AGENT).build(),
       // Two decks naming the same unstamped agent; one deck's distribution is unstamped too.

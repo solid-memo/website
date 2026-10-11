@@ -109,7 +109,7 @@ export function DeckPreferencesScreen({
   const { missing, ask, clear } = useMissingLanguage("deck-name");
   const renameRef = useRef<HTMLButtonElement>(null);
   const nameRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
-  /** Rename takes the focus once it is back: the renaming was saved or cancelled. */
+  /** Rename takes the focus once it is back: the renaming was saved or canceled. */
   const backToRename = useRef(false);
 
   useLayoutEffect(() => {

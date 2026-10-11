@@ -28,7 +28,7 @@ export function pickShape(
       (d.context === "any" || d.context === context),
   );
   // A subject with a Solid Memo class is checked as that class only: a
-  // deck group is a dcat:Catalog too, but not the catalogue.
+  // deck group is a dcat:Catalog too, but not the catalog.
   const own = (d: ShapeDescriptor) => d.targetClass.startsWith(SM_NS);
   const candidates = matching.some(own) ? matching.filter(own) : matching;
   if (candidates.length === 0) return { kind: "untyped" };

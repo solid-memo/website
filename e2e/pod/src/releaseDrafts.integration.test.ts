@@ -8,7 +8,7 @@
  * compared with the release it follows, the card it retires retired in a
  * learner's copy too, nothing lost; and edited again when a document changed elsewhere, keeping that change;
  * checked as the instance's check checks it; deleted, documents, folders
- * and link. A draft whose link on the catalogue is raced every time is
+ * and link. A draft whose link on the catalog is raced every time is
  * taken back whole. An instance deleted with a draft in it leaves nothing. The
  * course is read with its text made ASCII: an edit of a draft is a
  * PATCH, which Community Solid Server's in-memory store cuts a document
@@ -166,12 +166,12 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     expect(read.cards[0]!.data.front).toEqual({ en: "Q?" });
   });
 
-  it("leaves no draft behind when its link on the catalogue keeps being raced, nor takes another name", { timeout: 120_000 }, async (context) => {
+  it("leaves no draft behind when its link on the catalog keeps being raced, nor takes another name", { timeout: 120_000 }, async (context) => {
     if (!(await preconditionsOf(server)).edits) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
     const { instance } = await seed(server);
     const catalog = `${instance.url}catalog.ttl`;
-    // Another tab makes a draft of its own just before each write of the catalogue: every attempt to link this one is refused.
+    // Another tab makes a draft of its own just before each write of the catalog: every attempt to link this one is refused.
     let raced = 0;
     const racing: typeof globalThis.fetch = async (input, init) => {
       const url = String(input instanceof Request ? input.url : input);

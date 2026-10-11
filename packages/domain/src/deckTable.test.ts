@@ -66,7 +66,7 @@ describe("the deck table's view in the URL", () => {
   });
 
   it("ignores a column it does not know, and any order but descending", () => {
-    expect(deckTableViewFromParams(new URLSearchParams("sort=colour&order=desc&q=x"))).toEqual({ filter: "x" });
+    expect(deckTableViewFromParams(new URLSearchParams("sort=color&order=desc&q=x"))).toEqual({ filter: "x" });
     expect(deckTableViewFromParams(new URLSearchParams("sort=cards&order=up"))).toEqual({
       filter: "",
       sort: { column: "cards", descending: false },

@@ -81,7 +81,7 @@ describe("ReleasePublishScreen", () => {
     expect(publish.run).toHaveBeenCalledWith("https://pod.example/public/solid/v1.ttl");
   });
 
-  it("holds publishing while the check finds errors, a change waits to be saved, or the catalogue may not be written", () => {
+  it("holds publishing while the check finds errors, a change waits to be saved, or the catalog may not be written", () => {
     renderScreen({ errors: 2 });
     expect(screen.getByRole("link", { name: "The release check finds 2 errors. Fix them before you publish." })).toHaveAttribute("href", "#/check");
     fireEvent.click(screen.getByRole("checkbox", { name: /this release will be public/ }));
@@ -119,7 +119,7 @@ describe("ReleasePublishScreen", () => {
     expect(startNext.run).toHaveBeenCalledWith(TARGET);
   });
 
-  it("holds starting the next version while the catalogue may not be written, and says why", () => {
+  it("holds starting the next version while the catalog may not be written, and says why", () => {
     const { startNext } = renderScreen({ draft: released(), isPublic: true, hold: "setAside" });
     expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
     const button = screen.getByRole("button", { name: "Start the next version" });

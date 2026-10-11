@@ -26,7 +26,7 @@ const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
 
 /**
  * The vocabularies a shape's sh:class may come from: Solid Memo's own,
- * and the standard ones whose classes it writes (DCAT catalogues,
+ * and the standard ones whose classes it writes (DCAT catalogs,
  * datasets and distributions; FOAF agents).
  */
 export const CLASS_NAMESPACES = [

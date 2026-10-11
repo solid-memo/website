@@ -20,7 +20,7 @@ export interface ChoiceOption {
  * aria-disabled, so it keeps the focus if saving fails.
  *
  * Once checked (`answered`), the options stay, fixed, each marked in
- * words as well as colour: the right answer, and the one chosen when it
+ * words as well as color: the right answer, and the one chosen when it
  * was not.
  *
  * Options in Markdown (`markdown`, the card's format) show as one line

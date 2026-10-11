@@ -26,7 +26,7 @@ are published with the site, and the app's constants, record types and
 descriptors are generated from them. Readers ignore unknown triples and
 writers never delete triples they don't understand. Every subject
 Solid Memo writes carries `sm:formatVersion`; a subject with neither
-that stamp nor a Solid Memo class, that is not the catalogue and that
+that stamp nor a Solid Memo class, that is not the catalog and that
 no subject of Solid Memo's names as its creator, publisher or
 distribution, is another app's, and so is a review state of another
 scheduler; the data check only warns about them
@@ -67,7 +67,7 @@ flowchart LR
 - **Each class of an instance's data** has a registration of its own,
   so another app finds the kind of data it knows by its class, without
   knowing Solid Memo's layout ([examples below](#registrations)):
-  the catalogue (`dcat:Catalog`, `solid:instance` its subject
+  the catalog (`dcat:Catalog`, `solid:instance` its subject
   `catalog.ttl#catalog`), the decks (`sm:Deck`, `solid:instance`
   `catalog.ttl`, the one document that holds every deck subject), the
   cards (`sm:Card`, `solid:instanceContainer` `decks/`), the review
@@ -78,7 +78,7 @@ flowchart LR
   with the instance's name. Per the Type
   Indexes spec, `solid:instance` names the one resource holding the
   class's subjects, and `solid:instanceContainer` a container whose
-  documents hold them. The catalogue's, the decks' and the cards'
+  documents hold them. The catalog's, the decks' and the cards'
   registrations go in each index that registers the instance. The
   review states', answers' and drafts' go in the private index only,
   even for an instance registered publicly: the first two say what the
@@ -96,7 +96,7 @@ flowchart LR
   editors of the index, and add back what the user removed. Attaching
   an instance by URL writes its `sm:Instance` registration alone, and
   adding a guest's study to an instance writes none: the decks it adds
-  are in the catalogue and the folders the registrations name.
+  are in the catalog and the folders the registrations name.
 - **Writing a type index** reads it, makes the change and saves it with
   `If-Match` the version read; when the index changed meanwhile (412),
   it is read and the change made again, three attempts in all
@@ -120,7 +120,7 @@ flowchart LR
   registration fails, instance creation fails loudly and the created
   container is cleaned up; there is no local fallback. For an instance
   registered publicly, the review states' and answers' registrations
-  are written to the private index afterwards, and a private index that
+  are written to the private index afterward, and a private index that
   refuses them does not fail the creation: they are left for
   **Register what is missing**.
 - **Deleting an instance** deletes what Solid Memo wrote in its
@@ -128,15 +128,15 @@ flowchart LR
   [instanceData.ts](../packages/solid/src/instanceData.ts)), then removes
   its registrations, of every class, from both type indexes (below).
   What it wrote: every deck's cards and reviews documents as the
-  catalogue names them (only those
-  below the container: the catalogue is data, and one naming a document
+  catalog names them (only those
+  below the container: the catalog is data, and one naming a document
   elsewhere must not lead a delete there), the answer log's months
-  (`history/<YYYY-MM>.ttl`), the drafts the catalogue links, those in
+  (`history/<YYYY-MM>.ttl`), the drafts the catalog links, those in
   the instance's `drafts/` only, as deleting a draft deletes them
   ([Drafts and releases](#drafts-and-releases)), then `preferences.ttl`,
   `digest.ttl` and `catalog.ttl`, in that order, so a delete that fails
-  before the catalogue goes can be retried and find the decks and the
-  drafts again (a catalogue the pod serves but that cannot be read, as
+  before the catalog goes can be retried and find the decks and the
+  drafts again (a catalog the pod serves but that cannot be read, as
   another app might leave it, is kept, and so are the decks' documents
   and the drafts, which nothing else names; the rest goes as ever); then
   `decks/`, `reviews/`, `history/` and `drafts/`, each only if it is then empty;
@@ -174,8 +174,8 @@ finds it:
 ```
 
 Beside it, one registration for each class of its data, so other
-applications find each kind without knowing Solid Memo: its catalogue as
-a DCAT catalogue, its decks, and the containers of its cards, review
+applications find each kind without knowing Solid Memo: its catalog as
+a DCAT catalog, its decks, and the containers of its cards, review
 states and answers.
 
 ```turtle
@@ -253,7 +253,7 @@ data.
 │                        foaf:Agent nodes of its creators (#agent-…);
 │                        and the deck groups (#group-…), a sm:DeckGroup
 │                        and dcat:Catalog each: sm:formatVersion 1;
-│                        on the catalogue, its drafts (sm:releaseDraft)
+│                        on the catalog, its drafts (sm:releaseDraft)
 ├── decks/<deckId>.ttl    card corpus: one sm:Card per fragment (slow churn),
 │                        sm:front/back text and/or sm:frontImage/backImage
 │                        IRIs, optional sm:frontImageDescription/
@@ -279,14 +279,14 @@ data.
 ├── history/<YYYY-MM>.ttl  the answer log (below): one sm:Answer per grade
 │                        given in study or a course that month,
 │                        appended, never edited; sm:formatVersion 1
-├── drafts/<name>/v<N>/   a draft of a release, linked from the catalogue
+├── drafts/<name>/v<N>/   a draft of a release, linked from the catalog
 │                        (sm:releaseDraft): release.ttl, its root (the
 │                        draft deck, sm:formatVersion 1), agents, sources
 │                        and how it was made; chapter-<id>.ttl per
 │                        chapter; cards.ttl, the cards no chapter asks
 │                        ([below](#drafts-and-releases))
 ├── releases/<name>/v<N>.ttl  a release published from a draft, linked
-│                        from the catalogue (sm:publishedRelease): one
+│                        from the catalog (sm:publishedRelease): one
 │                        document, readable by everyone, never written
 │                        again (the user may publish elsewhere instead)
 └── digest.ttl      derived data (below): a sm:DocumentReceipt per document
@@ -344,7 +344,7 @@ graph LR
   after it, `#agent-unnamed-5a5e6e` and `#agent-kim-ad54ba`, so that two
   such authors stay two agents; an agent is read by the IRI the deck names, so one
   written under an older rule is still read, and replaced on the deck's
-  next save), licence (`dcterms:license`, a URL),
+  next save), license (`dcterms:license`, a URL),
   topics (`dcat:theme`, concepts of the [topics](vocab.md#concept-schemes)
   scheme) and keywords (`dcat:keyword`: since deck format 6
   language-tagged, several per language; untagged ones saved before
@@ -356,9 +356,9 @@ graph LR
   `prov:wasDerivedFrom` (`dcterms:source` before format 3), wherever
   that release is: it is read, never written. Agents no
   deck names any more are removed with the deck that named them. The
-  Studio edits the authors and the licence (`setDeckProvenance`,
+  Studio edits the authors and the license (`setDeckProvenance`,
   [deckProvenance.ts](../packages/domain/src/deckProvenance.ts)): two
-  authors that would share an agent node are refused, and a licence is
+  authors that would share an agent node are refused, and a license is
   one of `KNOWN_LICENSES` ([license.ts](../packages/domain/src/license.ts))
   or the one the deck has.
 - **Card sides**: each side is text (`sm:front` / `sm:back`, a literal),
@@ -408,7 +408,7 @@ graph LR
 - **Format versions**: every subject the app writes carries
   `sm:formatVersion`, saying which version of its class's
   [shape](shapes.md) it conforms to: instance 1, decks 3 (DCAT),
-  cards 2 (pictures), review states 2, preferences 4; the catalogue,
+  cards 2 (pictures), review states 2, preferences 4; the catalog,
   agent and distribution nodes 1. Readers treat a
   missing version as 1 — data written before the field existed — read
   older versions as they are, and pass a newer stored version through
@@ -503,7 +503,7 @@ write the documents where they are, and change no registration (the
 format update only adds those missing). Another app may keep a link to
 the instance, a deck, a card or a review state.
 
-## The catalogue
+## The catalog
 
 `catalog.ttl#catalog` is a `dcat:Catalog` (shape `CatalogV1`) of the
 instance's decks: a `dcterms:title` (the instance's name), a
@@ -511,17 +511,17 @@ instance's decks: a `dcterms:title` (the instance's name), a
 described in the same document as a `foaf:Agent` with the `foaf:name`
 of their profile), the topics scheme and the EU data themes as
 `dcat:themeTaxonomy`, and a `dcat:dataset` per deck, kept in step as
-decks are added and removed. It may state a licence (`dcterms:license`),
+decks are added and removed. It may state a license (`dcterms:license`),
 which the same document then types a `dcterms:LicenseDocument`, as
-DCAT-AP asks; a licence it no longer states loses that type. Saving a
+DCAT-AP asks; a license it no longer states loses that type. Saving a
 deck adds only that deck's link,
 and removing a deck removes only its own: a dataset another app listed
-in the catalogue stays listed through every deck save, and writing the
-catalogue itself keeps it too, beside every deck of the document. The
-one link the catalogue loses when it is written whole is one to a
+in the catalog stays listed through every deck save, and writing the
+catalog itself keeps it too, beside every deck of the document. The
+one link the catalog loses when it is written whole is one to a
 subject of its own document that is no `dcat:Dataset` (left by a deck
 removed some other way): it would fail DCAT-AP's class check, and the
-catalogue could not be written. A member another app described in the
+catalog could not be written. A member another app described in the
 document keeps its link whatever its class: the check only warns about
 that link ([validation.md](validation.md#data-another-app-wrote)). A dataset in another document is
 described there, so that class check does not hold it to its class
@@ -529,7 +529,7 @@ described there, so that class check does not hold it to its class
 instance listing one stays valid (held against real servers in
 [foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)). It is written when an instance is created,
 and by the [format update](migrations.md) for an instance made before
-there were catalogues. Its registration is written with the instance's
+there were catalogs. Its registration is written with the instance's
 when the instance is created or a guest's study moves into the pod as a
 new instance, and
 by the format update and Preferences when missing
@@ -537,13 +537,13 @@ by the format update and Preferences when missing
 conforms to DCAT-AP (a test holds what the app writes to it).
 
 The instance's name is kept in the meta document's `dcterms:title`,
-the catalogue's `dcterms:title`, and, in each type index, the
+the catalog's `dcterms:title`, and, in each type index, the
 `dcterms:title` of every registration of the instance's data
 ([Discovery chain](#discovery-chain)): its `sm:Instance` registration, which
-names it in the instance list, and those of its catalogue, decks,
+names it in the instance list, and those of its catalog, decks,
 cards, review states and answers. Renaming it in the Studio
 (`renameInstance`, [studio.md](studio.md#the-instance)) writes all of
-them, each document read and written again on a 412. A catalogue
+them, each document read and written again on a 412. A catalog
 description that is the one the old name gave (`defaultCatalogDescription`)
 follows the new name; one the user wrote stays.
 
@@ -560,7 +560,7 @@ accept from the user, is kept as stored.
 The user arranges the deck list into named groups that can nest. A group
 is a subject of `catalog.ttl` beside the decks, a `sm:DeckGroup` and a
 `dcat:Catalog` (shape `DeckGroupV1`), never a `dcat:Dataset`: DCAT
-nests catalogues, and DCAT-AP lets a catalogue list sub-catalogues with
+nests catalogs, and DCAT-AP lets a catalog list sub-catalogs with
 `dcat:catalog` and datasets with `dcat:dataset`. DCAT has no ordered
 membership (`dcat:prev`/`next` are series versions, which the library
 uses as such), so the order is Solid Memo's own `sm:position`.
@@ -573,20 +573,20 @@ uses as such), so the order is Solid Memo's own `sm:position`.
     sm:formatVersion 1 ;
     dcterms:title "Languages"@en ;                   # one name, in the UI's language
     dcterms:description "Deck group: Languages."@en, "Kortleksgrupp: Languages."@sv ;   # generated
-    dcterms:publisher <https://alice.example/profile/card#me> ;   # the catalogue's
+    dcterms:publisher <https://alice.example/profile/card#me> ;   # the catalog's
     dcat:dataset <#deck-a>, <#deck-b> ;
     dcat:catalog <#group-y2> ;
     sm:position 0 .
 <#deck-a> sm:position 0 .
 ```
 
-- **The catalogue still lists every deck** with `dcat:dataset`; a group
-  lists only its own members. The catalogue's `dcat:catalog` lists the
+- **The catalog still lists every deck** with `dcat:dataset`; a group
+  lists only its own members. The catalog's `dcat:catalog` lists the
   top-level groups. An edit writes again only the links to the decks
   and groups the arrangement places: a member link to a dataset or
-  catalogue in another document, or to one the document describes as
+  catalog in another document, or to one the document describes as
   such but the app cannot read, stays as it is.
-- **A deck or group is in one parent**: the catalogue (top level) or one
+- **A deck or group is in one parent**: the catalog (top level) or one
   group. A deck no group lists is at the top level.
 - **Positions count within one parent**, and the decks and groups of a
   parent share one sequence, 0 first. Members sort by position, those
@@ -595,25 +595,25 @@ uses as such), so the order is Solid Memo's own `sm:position`.
   imported decks get none.
 - **An empty group stays** until the user removes it; removing a group
   moves its members, in order, into its place in its parent.
-- `sm:position` on a deck and the catalogue's `dcat:catalog` belong to
+- `sm:position` on a deck and the catalog's `dcat:catalog` belong to
   no shape (`DeckV6` and `CatalogV1` are unchanged), so writing a deck or
-  the catalogue keeps them, and no deck format version was needed.
+  the catalog keeps them, and no deck format version was needed.
 
 What is not one valid tree is read as one, rather than refused. A link
 to nothing, from a group to itself, or of the wrong kind (a
 `dcat:dataset` link to a group, a `dcat:catalog` link to a deck) is
 ignored. A node several parents list goes to the group with the lowest
-URL, except a group the catalogue's `dcat:catalog` lists, which stays at
+URL, except a group the catalog's `dcat:catalog` lists, which stays at
 the top level. A cycle is broken by moving the lowest-URL group in it to
 the top level. A negative position counts as none, and on a tie of
 positions decks come before groups, each kind in document order. A
 group in a format newer than the app's makes the arrangement read-only,
 and so, under the "Set invalid data aside" policy (`sm:blockSubject`,
-the default), does a catalogue or group that does not conform, and so
+the default), does a catalog or group that does not conform, and so
 does every list while that check is still running
 ([validation.md](validation.md#the-invalid-data-policy));
 a group the app cannot read is never edited: its members show at
-the top level, and the catalogue's `dcat:catalog` keeps its link.
+the top level, and the catalog's `dcat:catalog` keeps its link.
 
 **Writing an arrangement.** The screen sends an edit, not a finished
 layout (`DeckTreeEdit` in
@@ -633,13 +633,13 @@ applies it to `catalog.ttl` as the pod holds it then:
   changes nothing sends nothing;
 - **on 412 the edit is applied again** to the document as it is now,
   three attempts in all, so another tab's change is kept, not undone. A
-  move names its neighbour, not an index, and a new group's URL is
+  move names its neighbor, not an index, and a new group's URL is
   minted by the screen (`newDeckGroup`), so an edit means the same on
   the fresh tree and a retried combine is a no-op. An edit that no
   longer fits (its group or node gone) fails with `deckTreeChanged`;
 - **a PATCH, never a whole PUT**: where the pod has no strong ETag, a PUT
   would undo what changed since the read, and a PATCH keeps it;
-- **only the groups written and the catalogue are checked** before the
+- **only the groups written and the catalog are checked** before the
   write (`checkWrite`): a deck's `sm:position` belongs to no shape, and a
   deck that is set aside beside the one moved must not stop the move;
 - **removing a deck** also removes it from every group's `dcat:dataset`,
@@ -746,7 +746,7 @@ own pod, as a draft, before publishing it
   - `release.ttl`: the release's root, the draft deck, which is the
     document itself (`<>`) as a release is its document, with its
     agents, its distribution, its sources, how it was made (its
-    `prov:Activity` subjects, licence documents) and the series it
+    `prov:Activity` subjects, license documents) and the series it
     describes;
   - `chapter-<id>.ttl` for each chapter: the chapter, its steps, the
     cards they and the chapter ask, and those cards' distractors;
@@ -760,12 +760,12 @@ own pod, as a draft, before publishing it
   the container (`isDraftDocumentName` in
   [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) is
   another app's, and left alone.
-- **Links on the catalogue.** `sm:releaseDraft` names a draft's release
+- **Links on the catalog.** `sm:releaseDraft` names a draft's release
   document, `sm:publishedRelease` a release published from the
   instance. Like `sm:newcomerCourse` on the library's, they belong to no
-  shape, so `CatalogV1` keeps them through every write of the catalogue.
+  shape, so `CatalogV1` keeps them through every write of the catalog.
   Only a link to a draft's place in the same instance is followed. A
-  learner's app reads `sm:publishedRelease` in a creator's catalogue,
+  learner's app reads `sm:publishedRelease` in a creator's catalog,
   when the creator shares it, to find newer versions of a release it
   added from a link.
 - **A draft is checked as a draft.** Its deck, chapters and steps are
@@ -776,8 +776,8 @@ own pod, as a draft, before publishing it
   made, its sources) is written as it is, and kept through every edit.
   The Studio's release screen writes these as the library's releases
   state them ([deck-library.md](deck-library.md#provenance)): the
-  licence typed `dcterms:LicenseDocument`, each source's title, creator
-  and licence or the evidence for one, the making's attribution and
+  license typed `dcterms:LicenseDocument`, each source's title, creator
+  and license or the evidence for one, the making's attribution and
   notes (`rdfs:comment`), and its checks, never a human review
   ([studio.md](studio.md#the-releases-metadata-and-provenance)). A
   draft names the release it was published as with `sm:releasedAs`, and
@@ -785,10 +785,10 @@ own pod, as a draft, before publishing it
 - **Writes**, as everywhere ([Write discipline](#write-discipline)):
   making a draft puts each document only where none is
   (`If-None-Match: *`), the release document first, then links it from
-  the catalogue (`If-Match`, read and made again on a 412). A release
+  the catalog (`If-Match`, read and made again on a 412). A release
   document there already means the name is taken: nothing was written,
   and the Studio tries the next name. Any later failure deletes what was
-  written before it is shown, so no draft is left that the catalogue
+  written before it is shown, so no draft is left that the catalog
   does not link and deleting the instance would miss. An edit is
   one write of each document it changes, made only if the document is
   as it was read (`If-Match`; a new chapter's document, only where none
@@ -823,7 +823,7 @@ own pod, as a draft, before publishing it
   readable by everyone: its own ACL, or its ACR, gets public read and
   nothing else, and no folder's access control is changed (a server that
   names the folder's as the document's is left as it is, the release
-  private). Then the catalogue links it (`sm:publishedRelease`, If-Match,
+  private). Then the catalog links it (`sm:publishedRelease`, If-Match,
   read and made again on a 412), and the draft names it
   (`sm:releasedAs`), If-Match on the version the draft was checked and
   assembled at, never on a later one (`changedElsewhere`). A failure
@@ -832,7 +832,7 @@ own pod, as a draft, before publishing it
   written again, nor deleted by the app: deleting the instance keeps it,
   and the folder holding it, since others may have added it by its
   address. It is in no type index: the
-  catalogue's link is how its author's releases are found.
+  catalog's link is how its author's releases are found.
 
 ## The answer log
 
@@ -861,7 +861,7 @@ data, since nothing could rebuild it.
   entry and the card it was given to (either may since be removed; a
   removed deck's answers stay, as a removed deck), the direction, the SM-2
   grade (whichever answer scale gave it), when it was given and the study
-  day it counts towards, fixed then so a later day-boundary change does
+  day it counts toward, fixed then so a later day-boundary change does
   not move it, and the prompt's interval before (absent on its first
   answer, which introduced it) and after. An answer to a
   [course](courses.md) question also says how it was given
@@ -1017,7 +1017,7 @@ removed and imported again comes back at its URLs, and the answers the
 log keeps of it name it again. It takes a fresh id when the instance
 has a deck by that id, or one using a document of that name, or when
 the id or its distribution's (`<id>-cards`) is a subject of the
-catalogue already. An id this app would not give (`deck-…`) takes a
+catalog already. An id this app would not give (`deck-…`) takes a
 fresh one too, so no deck lands on `#catalog`, a group or an agent. Its cards
 keep their ids. Only what Solid Memo knows of the deck and its cards is
 written, as when cards move to another deck: triples another app put
@@ -1033,16 +1033,16 @@ cover it, as they cover a deck made in Solid Memo
 ([Registrations](#registrations)). The writes follow the
 [write discipline](#write-discipline): the cards document is created
 (If-None-Match), the reviews document written, and then the deck's
-entry added to the catalogue, each checked against the shapes.
+entry added to the catalog, each checked against the shapes.
 
 ## UI gaps
 
 What the data model holds that no screen edits yet. Most of it is shown
 in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
 
-- **Edited in the Studio**: a deck's authors and licence, its course
+- **Edited in the Studio**: a deck's authors and license, its course
   progress (a chapter marked not done, the course restarted), the
-  instance's name and the catalogue's description and licence, a
+  instance's name and the catalog's description and license, a
   card's wrong options, edits of many cards at once, a card's review
   state (forgotten, or given a due day), the deck a card is in
   (moved or copied to another), several library copies upgraded at
@@ -1055,9 +1055,9 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   the check of the shapes, in developer mode, and in the Studio as a
   deck's or the instance's health; a draft's release check, and its
   listing as the library will show it.
-- **Not shown**: a catalogue's `dcterms:modified`, which the app keeps
+- **Not shown**: a catalog's `dcterms:modified`, which the app keeps
   but never writes; a library copy's release provenance beyond its
-  authors, licence and sources.
+  authors, license and sources.
 
 ## Write discipline
 
@@ -1105,8 +1105,8 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   is then: [the digest](#the-digest), an edit of the
   [deck groups](#deck-groups), which is read, applied and written again,
   three times in all, before the 412 surfaces, the Studio's edits of
-  metadata (a deck's authors and licence, the instance's name, the
-  catalogue, a course's chapters completed), likewise, and a bulk edit of cards,
+  metadata (a deck's authors and license, the instance's name, the
+  catalog, a course's chapters completed), likewise, and a bulk edit of cards,
   planned again on the cards as they are, three times in all, which
   stops at once when that plan is not the one the user previewed. Weak ETags (`W/"…"`) are never sent in `If-Match`, whose
   comparison is strong; a document the pod gives no ETag, or one saved

@@ -47,7 +47,7 @@ flowchart LR
 - `validateInstance` (application) lists the decks, names every document
   the instance may hold, the [answer log](data-model.md#the-answer-log)'s
   month documents included, and the documents of the
-  [drafts](data-model.md#drafts-and-releases) its catalogue links, and
+  [drafts](data-model.md#drafts-and-releases) its catalog links, and
   asks the `ShapeValidator` port about each, saying where it is: a
   draft's document is checked as a draft's (`"draft"`, below), against
   the draft shapes and without DCAT-AP; `summarize` (domain) counts the
@@ -79,7 +79,7 @@ flowchart LR
   and stored version exactly as the mappers do (`pickShape`); a subject
   with a Solid Memo class is checked against that class's shapes only,
   so a deck group, also a `dcat:Catalog`, is never checked as the
-  catalogue. A subject
+  catalog. A subject
   is then `checked` (with its violations), `newer` (a format this app
   does not know: skipped, reported) or `untyped` (no Solid Memo class:
   listed so strays are visible; a cards document's own subject, which
@@ -113,7 +113,7 @@ checks) and published with the site at `/vendor/`:
 
 | Profile | Shapes | Applies to |
 |---|---|---|
-| `dcat-ap` | [DCAT-AP 3.0.1](https://semiceu.github.io/DCAT-AP/releases/3.0.1/) (SEMIC) | catalogues, decks and deck releases, distributions, agents |
+| `dcat-ap` | [DCAT-AP 3.0.1](https://semiceu.github.io/DCAT-AP/releases/3.0.1/) (SEMIC) | catalogs, decks and deck releases, distributions, agents |
 | `skos` | SkoHub `skos.shacl.ttl` + `skos.bestPractice.shacl.ttl`, for [SKOS](https://www.w3.org/TR/skos-reference/) | the concept schemes in `ns/vocab/` |
 
 - [profiles.ts](../packages/shacl/src/profiles.ts) names each
@@ -129,9 +129,9 @@ checks) and published with the site at `/vendor/`:
   [ns/vocab/external.ttl](../ns/vocab/external.ttl) (the EU authority-table
   entries and media types Solid Memo uses) is loaded next to the data
   being checked. Add a term there before data uses it.
-- A member a catalogue or deck group lists from another document
+- A member a catalog or deck group lists from another document
   (`dcat:dataset`, `dcat:catalog`), such as a dataset another app added
-  to the catalogue, is described in that document, which a check of this
+  to the catalog, is described in that document, which a check of this
   one cannot see. In the browser (`isMemberElsewhere` in
   [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts))
   DCAT-AP's class check on such a link says nothing: neither the data
@@ -144,10 +144,10 @@ checks) and published with the site at `/vendor/`:
   schemes, which are held to SKOS best practice.
 - Fixtures under `packages/vocab/fixtures/profile/<profile>/{valid,invalid}/`
   pin every property DCAT-AP makes mandatory on the classes Solid Memo
-  writes: title and description on a catalogue, dataset and dataset
-  series, a publisher on a catalogue, an access URL on a distribution,
+  writes: title and description on a catalog, dataset and dataset
+  series, a publisher on a catalog, an access URL on a distribution,
   a name on an agent, and the class of `dcterms:source`, `dcat:theme`
-  and `dcterms:language` values, and of the members a catalogue or deck
+  and `dcterms:language` values, and of the members a catalog or deck
   group lists: a deck (`dcat:dataset`) must be a `dcat:Dataset` and a
   group (`dcat:catalog`) a `dcat:Catalog`, so a member the document does
   not describe fails.
@@ -157,7 +157,7 @@ checks) and published with the site at `/vendor/`:
 Per document, its URL and status; per subject, "conforms to deck format
 2", "deck format 3 is newer than this app knows; skipped", "not a Solid
 Memo subject", a subject only DCAT-AP has something to say about (a
-licence, say), "written by another app; Solid Memo only warns about
+license, say), "written by another app; Solid Memo only warns about
 it", or a table of severity, property, message and value (DCAT-AP's
 results marked as such). The summary line says "All 9
 documents conform" or "3 violations in 2 documents". A subject is
@@ -175,7 +175,7 @@ not conform is a preference, `sm:invalidDataPolicy`, a concept of
 | Policy | What the app does |
 |---|---|
 | Block the instance (`sm:blockInstance`) | The workspace waits for the check, then shows the Data check notice with the repair in place of every screen. Preferences and the validation view stay reachable, so the policy can be changed. |
-| Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states do not conform is set aside (`setAsideDecks`): listed as "Set aside", not offered for study, its pages saying so. The catalogue itself or a deck group that does not conform sets the arrangement of the deck list aside (`arrangementSetAside`): the list shows every deck, but cannot be rearranged, nor its groups renamed or deleted, until it is repaired, as a list a [newer version arranged](data-model.md#deck-groups) cannot. Any other subject that does not conform (a deck's agents or distribution, the catalogue's publisher, the preferences, the instance record) sets nothing aside: the notice reports it, and the write check still refuses a write that would leave it not conforming. Everything else works. The notice names the decks set aside, and says when the list cannot be rearranged. |
+| Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states do not conform is set aside (`setAsideDecks`): listed as "Set aside", not offered for study, its pages saying so. The catalog itself or a deck group that does not conform sets the arrangement of the deck list aside (`arrangementSetAside`): the list shows every deck, but cannot be rearranged, nor its groups renamed or deleted, until it is repaired, as a list a [newer version arranged](data-model.md#deck-groups) cannot. Any other subject that does not conform (a deck's agents or distribution, the catalog's publisher, the preferences, the instance record) sets nothing aside: the notice reports it, and the write check still refuses a write that would leave it not conforming. Everything else works. The notice names the decks set aside, and says when the list cannot be rearranged. |
 | Warn only (`sm:warnOnly`) | The notice, and nothing else. |
 
 - **The default is a choice of the app, not of the data.** Preferences
@@ -207,13 +207,13 @@ not conform is a preference, `sm:invalidDataPolicy`, a concept of
 
 ### Data another app wrote
 
-The pod is shared: another app may list a dataset in the catalogue, or
+The pod is shared: another app may list a dataset in the catalog, or
 add its own subjects to a cards document. A subject is Solid Memo's
 when it has a Solid Memo class (`sm:Deck`, `sm:Card`, …), carries
 `sm:formatVersion`, the stamp Solid Memo writes on every subject it
-writes, is the catalogue (`catalog.ttl#catalog`), or is named by one of
+writes, is the catalog (`catalog.ttl#catalog`), or is named by one of
 Solid Memo's subjects as its `dcterms:creator`, `dcterms:publisher` or
-`dcat:distribution`: the catalogue, a deck's agents and its
+`dcat:distribution`: the catalog, a deck's agents and its
 distribution have no Solid Memo class, and they stay Solid Memo's when
 another app's rewrite has dropped their stamp
 ([ownership.ts](../packages/solid/src/ownership.ts)). A review state
@@ -234,21 +234,21 @@ which is about violations, does not, and the repair offers nothing for
 it: a warning is no problem. A subject another app wrote with a Solid
 Memo class is held to that class's shape, as Solid Memo's own are.
 
-A catalogue's or deck group's link to a member another app wrote is
+A catalog's or deck group's link to a member another app wrote is
 that app's data too. When the member is a subject of the same document
 that is not Solid Memo's (a `schema:Dataset`, say, which fails DCAT-AP's
 class check) or a blank node (which fails the shape's `sh:nodeKind
 sh:IRI`), the result about the link is a warning, in the check and in
-the write check alike: the catalogue still conforms, the arrangement
+the write check alike: the catalog still conforms, the arrangement
 stays editable, and no repair unlinks the member. The drop-dangling-members
-repair, and writing the catalogue whole, keep such a link; a link to a
+repair, and writing the catalog whole, keep such a link; a link to a
 subject of the document that nothing describes is still the
-catalogue's own problem.
+catalog's own problem.
 
 ## The write check
 
 Every repository write (a deck, its agents and distribution, the
-catalogue, cards, review states, preferences, the instance record) is
+catalog, cards, review states, preferences, the instance record) is
 checked before it is saved: the subjects the write touches against their
 shapes, and — in a document with DCAT subjects — against DCAT-AP
 (`checkSubjects` in [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts),
@@ -309,13 +309,13 @@ the subject's own stored format:
 | A review state with half an undo snapshot | The snapshot dropped (as the review-state 1 → 2 migration does) |
 | A malformed due day | Recomputed from the last review and the interval |
 | An agent without a name | Named after its IRI |
-| A catalogue or [deck group](data-model.md#deck-groups) listing a deck or group the document does not describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept, and so is every link to another document) |
+| A catalog or [deck group](data-model.md#deck-groups) listing a deck or group the document does not describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept, and so is every link to another document) |
 
 Every other problem is listed with its document linked, to be fixed
 there or removed (after a confirmation). Removing a subject also drops
-the catalogue's and the deck groups' membership links to it
+the catalog's and the deck groups' membership links to it
 (`dcat:dataset`, `dcat:catalog`), and only those: who else names it, a
-deck its creator or the catalogue its publisher, is left as it is. `applyRepairs`
+deck its creator or the catalog its publisher, is left as it is. `applyRepairs`
 ([solidRepairRepository.ts](../packages/solid/src/solidRepairRepository.ts))
 reads each document once, applies its repairs, writes it once, and the
 instance is checked again.

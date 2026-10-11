@@ -155,7 +155,7 @@ describe("simulateLearnerUpgrade", () => {
     expect(upgrade.plan!.retire[0]!.url).toBe("https://learner.solid-memo.invalid/solid-memo/decks/learner.ttl#q-loose");
   });
 
-  it("adds a deck's new cards to a learner's copy, and follows its new title and licence", () => {
+  it("adds a deck's new cards to a learner's copy, and follows its new title and license", () => {
     const deck = { ...deckDraft(), root: { ...deckDraft().root, license: "https://creativecommons.org/licenses/by/4.0/", description: { en: "Words." } } };
     const release = v1(deck);
     const next = nextVersionDraft(release, DRAFT);

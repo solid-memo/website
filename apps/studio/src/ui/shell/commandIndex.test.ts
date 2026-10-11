@@ -54,7 +54,7 @@ describe("the palette's entries", () => {
       ["sections", "Health", hash({ screen: "health", instanceUrl: instanceA.url }), "g h"],
       ["sections", "Library copies", hash({ screen: "library", instanceUrl: instanceA.url }), "g l"],
       ["sections", "Import and export", hash({ screen: "transfer", instanceUrl: instanceA.url }), "g t"],
-      ["sections", "Name and catalogue", hash({ screen: "instance", instanceUrl: instanceA.url }), ""],
+      ["sections", "Name and catalog", hash({ screen: "instance", instanceUrl: instanceA.url }), ""],
       ["sections", "All instances", hash({ screen: "instances" }), "g i"],
       ["instances", "Deck set A", hash({ screen: "home", instanceUrl: instanceA.url }), ""],
       ["instances", "Deck set B", hash({ screen: "home", instanceUrl: instanceB.url }), ""],
@@ -93,10 +93,10 @@ describe("matching what was typed", () => {
   });
 
   it("scores the start of a word, and letters side by side, above letters apart", () => {
-    expect(matchScore("dc", "deck colours")!).toBeGreaterThan(matchScore("dc", "dice")!);
+    expect(matchScore("dc", "deck colors")!).toBeGreaterThan(matchScore("dc", "dice")!);
     expect(matchScore("dec", "decks")!).toBeGreaterThan(matchScore("dec", "dance etc")!);
     // Matched at a later word's start, though the letter came before.
-    expect(matchScore("kc", "kick colours")!).toBeGreaterThan(matchScore("kc", "kick")!);
+    expect(matchScore("kc", "kick colors")!).toBeGreaterThan(matchScore("kc", "kick")!);
     expect(matchScore("ck", "click a k")!).toBeGreaterThan(matchScore("ck", "click")!);
     // Not when the rest would not match after it: "ab" in "xab ax" is the first a's.
     expect(matchScore("ab", "xab ax")).toBe(matchScore("ab", "xab xx"));
@@ -139,7 +139,7 @@ describe("ranking the entries", () => {
     expect(ranked("ch")[0]).toEqual(["commands", ["Check again"]]);
     // Letters apart match too, below those side by side at a word's start.
     expect(ranked("de")).toEqual([
-      ["sections", ["Decks", "Import and export", "Name and catalogue"]],
+      ["sections", ["Decks", "Import and export"]],
       ["instances", ["Deck set A", "Deck set B"]],
       ["tabs", ["Schedule"]],
     ]);
@@ -153,7 +153,7 @@ describe("ranking the entries", () => {
   });
 
   it("stays fast for a few thousand entries, growing with them no faster than they do", () => {
-    const words = ["kanji", "verbs", "water", "fire", "mountain", "river", "capital", "colour"];
+    const words = ["kanji", "verbs", "water", "fire", "mountain", "river", "capital", "color"];
     const entriesOf = (count: number) =>
       Array.from(
         { length: count },

@@ -274,7 +274,7 @@ describe("BrowserScreen deck editing", () => {
     ).toEqual(["front-to-back", "back-to-front", "bidirectional"]);
     expect(screen.getByRole("radio", { name: "Front → back" })).toBeChecked();
     expect(screen.getByRole("group", { name: "Study direction" })).toHaveAccessibleDescription(
-      "Change it any time; what you have learnt each way is kept.",
+      "Change it any time; what you have learned each way is kept.",
     );
 
     fireEvent.click(screen.getByLabelText("Both ways"));

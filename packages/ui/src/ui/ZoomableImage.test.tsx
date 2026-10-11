@@ -75,7 +75,7 @@ describe("ZoomableImage", () => {
     expect(layer()!.parentElement).toBe(document.body);
     expect(copy()).toHaveAttribute("alt", "");
     expect(copy()).toHaveAttribute("src", FLAG);
-    // 200 by 100 in a 1000 by 800 viewport: full width, centred.
+    // 200 by 100 in a 1000 by 800 viewport: full width, centered.
     expect(copy()!.style.left).toBe("0px");
     expect(copy()!.style.top).toBe("150px");
     expect(copy()!.style.width).toBe("1000px");

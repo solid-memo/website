@@ -170,8 +170,8 @@ describe("planLibraryUpgrade", () => {
     expect(planLibraryUpgrade({ deck, cards, from, to: now, releases })?.change).toEqual([
       { ...libraryCard("dk", "Copenhagen"), backNote: { en: "Since 1443." } },
     ]);
-    const labelled = release(2, from.cards.map((card) => (card.id === "dk" ? { ...card, backLabel: { en: "Capital" } } : card)));
-    expect(planLibraryUpgrade({ deck, cards, from, to: labelled, releases })?.change).toEqual([
+    const labeled = release(2, from.cards.map((card) => (card.id === "dk" ? { ...card, backLabel: { en: "Capital" } } : card)));
+    expect(planLibraryUpgrade({ deck, cards, from, to: labeled, releases })?.change).toEqual([
       { ...libraryCard("dk", "Copenhagen"), backLabel: { en: "Capital" } },
     ]);
     const frontNoted = release(2, from.cards.map((card) => (card.id === "dk" ? { ...card, frontNote: { en: "A kingdom." } } : card)));

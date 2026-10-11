@@ -4,7 +4,7 @@ import { DCTERMS, RDF, SM, SM_NS } from "./vocab";
 
 /**
  * The links from a subject of Solid Memo's to the subjects it writes
- * beside it: a deck's creators and distribution, a catalogue's or deck
+ * beside it: a deck's creators and distribution, a catalog's or deck
  * group's publisher.
  */
 const WRITTEN_BESIDE = [DCTERMS.creator, DCTERMS.publisher, "http://www.w3.org/ns/dcat#distribution"];
@@ -12,8 +12,8 @@ const WRITTEN_BESIDE = [DCTERMS.creator, DCTERMS.publisher, "http://www.w3.org/n
 /**
  * The subjects of a document that Solid Memo wrote (see docs/validation.md
  * "Data another app wrote"): those with a Solid Memo class or its format
- * stamp, the catalogue at `#catalog`, and whatever these name as their
- * creator, publisher or distribution — a catalogue, an agent and a
+ * stamp, the catalog at `#catalog`, and whatever these name as their
+ * creator, publisher or distribution — a catalog, an agent and a
  * distribution have no class of Solid Memo's own, and they stay Solid
  * Memo's when another app's rewrite has dropped their stamp. A subject
  * naming another scheduler (any sm:scheduler but the sm:sm2 IRI) is

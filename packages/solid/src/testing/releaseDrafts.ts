@@ -14,7 +14,7 @@ import { createShaclShapeValidator } from "../shaclShapeValidator";
 import { createSolidReleaseDraftRepository } from "../solidReleaseDraftRepository";
 
 /**
- * A pod for the tests of release drafts: an instance with its catalogue
+ * A pod for the tests of release drafts: an instance with its catalog
  * in a pod kept in memory, the deck library's releases read from the
  * repository's decks/, and, when asked, every write checked against the
  * shapes as the app checks it.

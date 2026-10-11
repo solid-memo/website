@@ -1,6 +1,6 @@
 /**
  * Where things are in the deck library (see docs/deck-library.md): the
- * catalogue is decks/index.ttl, each deck a series described there
+ * catalog is decks/index.ttl, each deck a series described there
  * (#<name>), each release a document of its own, decks/<name>/v<n>.ttl.
  */
 

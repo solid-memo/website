@@ -19,7 +19,7 @@ const deckTtl = (id: string) => `<#${id}> a sm:Deck, dcat:Dataset ; sm:formatVer
   sm:cardsDocument <${INSTANCE}decks/${id}.ttl> ; sm:reviewsDocument <${INSTANCE}reviews/${id}.ttl> .
 `;
 
-/** A pod whose instance has a catalogue of decks a, b and c, and whatever else is given. */
+/** A pod whose instance has a catalog of decks a, b and c, and whatever else is given. */
 async function podWith(extra = "") {
   const pod = fakePod();
   await pod.put(
@@ -63,7 +63,7 @@ describe("the deck tree in the pod", () => {
     expect(shape(tree.children)).toEqual(["b", { "group-1": ["c", "a"] }]);
   });
 
-  it("is edited in one checked write of the groups and the catalogue, If-Match the read, and reads back as written", async () => {
+  it("is edited in one checked write of the groups and the catalog, If-Match the read, and reads back as written", async () => {
     const pod = await podWith();
     const checkWrite = vi.fn<WriteCheck>(async () => undefined);
     const repository = repositoryOn(pod.fetch, checkWrite);

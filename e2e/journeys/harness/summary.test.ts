@@ -51,7 +51,7 @@ describe("failingStepPath", () => {
 });
 
 describe("summarize", () => {
-  it("names each failed journey, the step it failed in, its error without colours, and how to replay it", () => {
+  it("names each failed journey, the step it failed in, its error without colors, and how to replay it", () => {
     const markdown = summarize(failing, "journeys-1");
     expect(markdown).toContain("1 passed, 1 failed, 0 flaky, 0 skipped in 62s.");
     expect(markdown).toContain("### ✗ a learner's full journey (full-learner.journey.ts)");

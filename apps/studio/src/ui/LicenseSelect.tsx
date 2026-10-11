@@ -2,7 +2,7 @@ import { KNOWN_LICENSES, licenseLabel } from "@solid-memo/domain/license";
 import { useI18n } from "@solid-memo/ui/i18n";
 
 /**
- * A licence to choose (dcterms:license): none, one of KNOWN_LICENSES,
+ * A license to choose (dcterms:license): none, one of KNOWN_LICENSES,
  * or the one there is (`current`), which another app may have written:
  * it is offered as it is, so keeping it is a choice too. Each is named
  * by licenseLabel; "" is none.
@@ -15,7 +15,7 @@ export function LicenseSelect({
   onChange,
 }: {
   id: string;
-  /** The licence chosen; "" for none. */
+  /** The license chosen; "" for none. */
   value: string;
   current: string | undefined;
   disabled: boolean;

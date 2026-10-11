@@ -19,7 +19,7 @@ versions, each version a `dcat:Dataset` with its cards and a Turtle
 
 | Path under `decks/` | IRI | What |
 |---|---|---|
-| `index.ttl` | `https://solid-memo.com/decks/index.ttl` | The catalogue the app lists, generated from the versions and committed: each deck a series (`index.ttl#<name>`), its current version described in full but for its cards, how it was made and any email, the publisher `index.ttl#solid-memo`, and the [course for newcomers](#courses). |
+| `index.ttl` | `https://solid-memo.com/decks/index.ttl` | The catalog the app lists, generated from the versions and committed: each deck a series (`index.ttl#<name>`), its current version described in full but for its cards, how it was made and any email, the publisher `index.ttl#solid-memo`, and the [course for newcomers](#courses). |
 | `<name>/v<N>.ttl` | `https://solid-memo.com/decks/<name>/v<N>.ttl` | Version `N` of a deck, frozen once published; its cards are fragments of it (`…/v1.ttl#sweden`). |
 
 Nothing else is in `decks/`: no lock file, no sources, no scripts. A
@@ -107,7 +107,7 @@ cards are not: one that should go is retired (`owl:deprecated true`), so
 the learners' decks that follow the course keep their place in it.
 
 The index names at most one course for newcomers:
-`<> sm:newcomerCourse <#name>` on the catalogue, the series of a course
+`<> sm:newcomerCourse <#name>` on the catalog, the series of a course
 the app offers to someone with no decks yet
 ([courses.md](courses.md#the-course-for-newcomers)). It is library
 configuration, not part of any release: `NEWCOMER_COURSE` in
@@ -157,15 +157,15 @@ Each authored deck says how it was made, in
   attribution, "Compiled by Anton Wiklund with the help of AI."@en and
   "Sammanställd av Anton Wiklund med hjälp av AI."@sv; the others say how
   the cards were selected, researched and checked, and on what grounds
-  the deck may carry its licence.
+  the deck may carry its license.
 - The compilation `prov:wasInformedBy` its quality-control rounds,
   `<#review-0>`, `<#review-1>`, …: each a `prov:Activity` whose label
-  names what it looked at (sources and licences, facts, language, …)
+  names what it looked at (sources and licenses, facts, language, …)
   and whose comments give its scope and its outcome. Machine checks (the
   SHACL and DCAT-AP validators, checks against live Wikidata) are named
   as such.
 - Each source has an `rdfs:comment` quoting the evidence for its
-  licence, and says whether the deck took content from it or used it to
+  license, and says whether the deck took content from it or used it to
   verify facts only.
 
 The record is condensed from the working notes kept while a deck was
@@ -173,11 +173,11 @@ compiled; those notes' per-card evidence and queries are not part of
 the library. The few decks that were not researched card by card
 (generated from one source, such as the Swedish word decks and network
 ports, or written directly, such as the capitals) describe their sources
-and licences, some the command that generated them, but have no review
+and licenses, some the command that generated them, but have no review
 rounds. The index leaves the
 record out (every `rdfs:comment`, and the activities but for the
 compilation's type, which DCAT-AP asks for); the app shows the deck's
-sources and licence on its page, and the version file has the rest.
+sources and license on its page, and the version file has the rest.
 
 ## Publishing a new version
 
@@ -247,9 +247,9 @@ a release that says nothing reads exactly as before.
   ([courses.md](courses.md#writing-a-course)). Anywhere else a break
   shows as a rule.
 - **Plain-text habits read otherwise in Markdown**: `<url>` is raw HTML,
-  `&aring;` is "å", `*` and `_` may emphasise, `<ex:title>` is a link.
+  `&aring;` is "å", `*` and `_` may emphasize, `<ex:title>` is a link.
   Write such text as code (`` `git clone <url>` ``).
-- **A published version is never marked afterwards.** A deck takes
+- **A published version is never marked afterward.** A deck takes
   Markdown in its next version; the library upgrade brings the marker
   to the copies ([migrations.md](migrations.md#catching-up-with-the-library)).
 
@@ -296,7 +296,7 @@ what the versions make. Both check:
   to a chapter);
 - a course's outline, by the [course rules](#course-rules);
 - the index's course for newcomers (`newcomerProblems`): at most one, an
-  IRI, a deck of the library (one of the catalogue's `dcat:dataset`s),
+  IRI, a deck of the library (one of the catalog's `dcat:dataset`s),
   whose current release is a `schema:Course`. `buildIndex` writes the
   name even when there is no such deck, so a typo in `NEWCOMER_COURSE`
   is reported, not dropped;
@@ -520,7 +520,7 @@ flowchart LR
 ```
 
 - `toLibraryDecks` ([libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts))
-  reads the catalogue's datasets, each series' current release (through
+  reads the catalog's datasets, each series' current release (through
   the `LibraryDeckSeriesV3` and `LibraryDeckV6` shapes, older formats
   migrated in memory) and its releases, showing the English title and
   description and keeping the other languages, which an import copies
@@ -542,7 +542,7 @@ flowchart LR
   (`matchesQuery` in [domain/search.ts](../packages/domain/src/search.ts)).
   Clicking a row opens the deck's page: description, topics, keywords
   in the reader's language,
-  the release (version, date, notes), authors, licence, dates and
+  the release (version, date, notes), authors, license, dates and
   sources, an import button and "Browse cards" (a read-only, paged list
   fetched from the release document).
 - A deck's page is addressed by its **series** (`&deck=…/index.ttl#name`),
@@ -552,7 +552,7 @@ flowchart LR
 - `importDeck` copies the current release into the instance with **one
   write of the cards document** (all 243 cards of the capitals deck in a
   single PUT), then one write of the catalog, and carries over the
-  description, authors (as agents), licence, topics, keywords and
+  description, authors (as agents), license, topics, keywords and
   direction. The copy says which release it came from with
   `prov:wasDerivedFrom <…/decks/name/vN.ttl>` (`Deck.sourceUrl`). Cards
   keep their library fragment ids (`#sweden`).
@@ -606,7 +606,7 @@ flowchart LR
 - `readReleaseFromLink` reads the document with no index
   (`DeckLibrary.readRelease`, `toStandaloneLibraryDeck` in
   [libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts)):
-  its deck, its cards counted, its creators and licence, and its series
+  its deck, its cards counted, its creators and license, and its series
   with every version the document describes (format 6 describes it in
   the release; a `decks/` release at an older format lists only
   itself). It is read afresh each time, never kept: an address may hold
@@ -634,16 +634,16 @@ flowchart LR
   "From \<host>" badge. Its own release says whether it is a course,
   read once.
 - **Newer versions.** No index lists the versions of a release from a
-  link. The creator's catalogue may: it links what its instance
+  link. The creator's catalog may: it links what its instance
   published (`sm:publishedRelease`, [data-model.md](data-model.md)).
   `DeckLibrary.publishedBeside` looks for it in the folders above the
   release, nearest first, as anyone reads them, and takes the first
-  catalogue that links the release. Each release it links is read, but
+  catalog that links the release. Each release it links is read, but
   those the copy's release lists, which are no newer, and the newest of
   the same series is the copy's upgrade (`listLibraryUpdates`,
   `planLibraryUpgrade`, the Studio's
   [library copies](studio.md#library-copies)). `listLibraryUpdates`
-  reads each release once for all the copies. An instance's catalogue
+  reads each release once for all the copies. An instance's catalog
   is private unless its owner shares it; then whether a newer version is
   out is unknown, and the Studio says so.
 - An upgrade from a link reads releases no index lists. Before it is

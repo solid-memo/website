@@ -272,7 +272,7 @@ describe("buildIndex", () => {
     expect(formatTurtle(index, "https://format.invalid/decks/index.ttl")).toBe(index);
   });
 
-  it("is a catalogue of the decks, published by Solid Memo, classified by the EU themes and the topics", () => {
+  it("is a catalog of the decks, published by Solid Memo, classified by the EU themes and the topics", () => {
     expect(of(INDEX, RDF_TYPE)).toEqual([`${DCAT}Catalog`]);
     expect(of(INDEX, `${DCAT}dataset`)).toEqual([`${INDEX}#capitals`, `${INDEX}#rivers`]);
     expect(of(INDEX, `${DCTERMS}publisher`)).toEqual([`${INDEX}#solid-memo`]);
@@ -626,8 +626,8 @@ describe("validateLibrary", () => {
   it("names a release that breaks SKOS", async () => {
     const skos = "http://www.w3.org/2004/02/skos/core#";
     const turtle = `${CAPITALS[0].turtle}\n<#red> a <${skos}Concept> ; <${skos}prefLabel> "Red"@en , "Crimson"@en .\n`;
-    const labelled = [{ ...CAPITALS[0], turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) }];
-    expect(await validateLibrary(labelled, buildIndex(labelled), validators)).toContainEqual(
+    const labeled = [{ ...CAPITALS[0], turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) }];
+    expect(await validateLibrary(labeled, buildIndex(labeled), validators)).toContainEqual(
       expect.stringMatching(/^decks\/capitals\/v1\.ttl:\n {2}<https:\/\/solid-memo\.com\/decks\/capitals\/v1\.ttl#red> \(http:\/\/www\.w3\.org\/2004\/02\/skos\/core#prefLabel\): Language "en" has been used by 2 values/),
     );
   });

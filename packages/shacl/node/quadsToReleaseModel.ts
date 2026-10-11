@@ -119,7 +119,7 @@ export function quadsToReleaseModel(quads: readonly Quad[], url: string): Releas
     prev: objects(url, `${DCAT_NS}prev`),
     previousVersion: objects(url, `${DCAT_NS}previousVersion`),
     distribution: objects(url, `${DCAT_NS}distribution`),
-    licence: objects(url, `${DCTERMS_NS}license`),
+    license: objects(url, `${DCTERMS_NS}license`),
     sources,
     activities: typed(`${PROV}Activity`).map((iri) => ({ iri, generating: generating.has(iri) })),
     ...provenanceOf(objects, [...generating], sources),

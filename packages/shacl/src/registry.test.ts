@@ -84,7 +84,7 @@ describe("pickShape", () => {
     });
   });
 
-  it("checks a deck group as a deck group, not as the catalogue it also is", () => {
+  it("checks a deck group as a deck group, not as the catalog it also is", () => {
     for (const types of [[SM.DeckGroup, DCAT_CATALOG], [DCAT_CATALOG, SM.DeckGroup]]) {
       expect(pickShape(types, 1, "pod"), types.join(" ")).toEqual({ kind: "shape", descriptor: DECK_GROUP_V1 });
     }

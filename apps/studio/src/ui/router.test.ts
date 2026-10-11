@@ -128,7 +128,7 @@ describe("the Studio's routes", () => {
       "#/studio?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F&q=kanji&sort=due&order=desc",
     );
     expect(studioRouteToHash({ ...routes[1]!, view: { filter: "" } } as StudioRoute)).toBe(studioRouteToHash(routes[1]!));
-    expect(parseStudioHash("#/studio?instance=a&sort=colour")).toEqual({ screen: "home", instanceUrl: "a" });
+    expect(parseStudioHash("#/studio?instance=a&sort=color")).toEqual({ screen: "home", instanceUrl: "a" });
     expect(studioRouteToHash(routes[3]!)).toBe("#/studio/groups?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
   });
 
@@ -238,7 +238,7 @@ describe("the Studio's routes", () => {
       at("draft-cards", { sort: "distractors", order: "desc" }),
     );
     expect(parseStudioHash(at("draft-cards", { sort: "place" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT, sort: { key: "place", descending: false } });
-    expect(parseStudioHash(at("draft-cards", { sort: "colour", order: "desc" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
+    expect(parseStudioHash(at("draft-cards", { sort: "color", order: "desc" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
     expect(isDraftRoute({ screen: "draft", draftUrl: DRAFT })).toBe(true);
     expect(isDraftRoute({ screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" })).toBe(false);
   });

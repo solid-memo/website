@@ -171,7 +171,7 @@ export interface Deck {
   direction: DeckDirection;
   /** Who made the deck (names), when stated. Empty for most own decks. */
   authors: string[];
-  /** URL of the licence the deck's content is offered under, when stated. */
+  /** URL of the license the deck's content is offered under, when stated. */
   license?: string;
   /**
    * A sentence or two about the deck, when stated: what it covers and,

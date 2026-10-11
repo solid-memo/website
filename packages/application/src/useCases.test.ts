@@ -1449,11 +1449,11 @@ describe("createUseCases", () => {
         progress.push(`${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`),
       );
       expect(outcome).toEqual({ updated: UPDATED, failed: [] });
-      // Each document once, in this order: the record, the preferences, each deck's cards and review states, the catalogue last.
+      // Each document once, in this order: the record, the preferences, each deck's cards and review states, the catalog last.
       expect(written).toEqual(UPDATED.map((document) => document.url));
       expect(deps.deckRepository.upgradeCards).toHaveBeenCalledExactlyOnceWith(deck);
       expect(deps.reviewStateRepository.upgradeReviewStates).toHaveBeenCalledExactlyOnceWith(deck);
-      // A catalogue there is not written anew: only the outdated entries are.
+      // A catalog there is not written anew: only the outdated entries are.
       expect(deps.deckRepository.upgradeDecks).toHaveBeenCalledExactlyOnceWith(instance.url, null);
       // Nothing but the documents' own conditional writes: no copy, no check of a copy, no hold of the instance.
       expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
@@ -1550,7 +1550,7 @@ describe("createUseCases", () => {
       expect(await createUseCases(refused).updateInstance(session, instance)).toEqual({ updated: [], failed: [{ ...UPDATED[2], error }] });
     });
 
-    it("updateInstance gives an instance without a catalogue one, named as its record names it, published by the owner", async () => {
+    it("updateInstance gives an instance without a catalog one, named as its record names it, published by the owner", async () => {
       const deps = makeDeps();
       vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(null);
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
@@ -1856,7 +1856,7 @@ describe("createUseCases", () => {
       expect(deps.deckRepository.importDeck).toHaveBeenCalledTimes(2);
     });
 
-    it("listLibraryUpdates finds a newer version of a linked copy in its creator's catalogue, else says it does not know", async () => {
+    it("listLibraryUpdates finds a newer version of a linked copy in its creator's catalog, else says it does not know", async () => {
       const deps = makeDeps();
       const elsewhere = linked(3, { url: "https://bob.example/memo/releases/lakes/v3.ttl", seriesUrl: "https://bob.example/memo/releases/lakes/v1.ttl#series" });
       reading(deps, [linked(1), linked(2), elsewhere]);
@@ -1869,7 +1869,7 @@ describe("createUseCases", () => {
         { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
         { deck: gone, series: null, version: null, newer: false },
       ]);
-      // Each release is read once, however many copies the catalogue serves; none the copied one lists, which is no newer.
+      // Each release is read once, however many copies the catalog serves; none the copied one lists, which is no newer.
       const reads = vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url);
       expect(reads).toEqual([`${RELEASES}v1.ttl`, "https://carol.example/v1.ttl", `${RELEASES}v2.ttl`, elsewhere.url, `${RELEASES}v9.ttl`]);
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue(null);
@@ -1877,7 +1877,7 @@ describe("createUseCases", () => {
         { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },
         { deck: gone, series: null, version: null, newer: false },
       ]);
-      // Two copies the same catalogue serves.
+      // Two copies the same catalog serves.
       const lakes: Deck = { ...deck, url: `${deck.url}-lakes`, sourceUrl: elsewhere.url };
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy, lakes]);
       vi.mocked(deps.deckLibrary.readRelease).mockClear();
@@ -1894,7 +1894,7 @@ describe("createUseCases", () => {
       ]);
     });
 
-    it("planLibraryUpgrade plans a linked copy against the newest version its creator's catalogue lists, and offers nothing when it cannot be read", async () => {
+    it("planLibraryUpgrade plans a linked copy against the newest version its creator's catalog lists, and offers nothing when it cannot be read", async () => {
       const deps = makeDeps();
       reading(deps, [linked(1), linked(2)]);
       const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
@@ -3495,7 +3495,7 @@ describe("library deck upgrade", () => {
       await expect(useCases.refreshStudyDigest(instance.url, deck)).resolves.toBeUndefined();
     });
 
-    it("transferGuestStudy keeps a catalogue-less study as it is, and adds answers still on their way first", async () => {
+    it("transferGuestStudy keeps a catalog-less study as it is, and adds answers still on their way first", async () => {
       const { deps } = guestDeps();
       vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(null);
       const answerLog: AnswerLog = {
@@ -4448,7 +4448,7 @@ describe("metadata", () => {
   const changed = () => new AppError("changedElsewhere", { url: "x" });
 
   describe("setDeckProvenance", () => {
-    it("gives the deck, as its entry says now, its authors and licence", async () => {
+    it("gives the deck, as its entry says now, its authors and license", async () => {
       const deps = makeDeps();
       const now = { ...deck, title: { en: "Renamed elsewhere" } };
       vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(now);
@@ -4488,7 +4488,7 @@ describe("metadata", () => {
   describe("renameInstance", () => {
     const meta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 2 };
 
-    it("writes the new name to the meta document, the catalogue and the type index registrations", async () => {
+    it("writes the new name to the meta document, the catalog and the type index registrations", async () => {
       const deps = makeDeps();
       vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
       vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue({ ...catalog, description: defaultCatalogDescription("Main") });
@@ -4507,7 +4507,7 @@ describe("metadata", () => {
       });
     });
 
-    it("writes only where the name is not yet the new one, and no catalogue there is none of", async () => {
+    it("writes only where the name is not yet the new one, and no catalog there is none of", async () => {
       const deps = makeDeps();
       vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({ ...meta, name: "Languages" });
       vi.mocked(deps.deckRepository.readCatalog).mockResolvedValueOnce({ ...catalog, title: "Languages" }).mockResolvedValueOnce(null);
@@ -4540,12 +4540,12 @@ describe("metadata", () => {
     });
   });
 
-  describe("the catalogue", () => {
+  describe("the catalog", () => {
     it("is read as it is", async () => {
       await expect(createUseCases(makeDeps()).readCatalog(instance.url)).resolves.toEqual(catalog);
     });
 
-    it("gets its description and licence, of the catalogue as it is now, again when it changed meanwhile", async () => {
+    it("gets its description and license, of the catalog as it is now, again when it changed meanwhile", async () => {
       const deps = makeDeps();
       vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(changed());
       const useCases = createUseCases(deps);

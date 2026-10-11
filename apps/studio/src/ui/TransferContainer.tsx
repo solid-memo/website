@@ -20,7 +20,7 @@ import { TransferScreen, type ExportRun } from "./TransferScreen";
  * catalog, so it waits its turn with the other writes of the catalog
  * (catalogScope), and every query of the instance's decks is read afresh
  * after it. It is held until the instance's data check is done, and
- * while the catalogue is set aside (useDataCheck).
+ * while the catalog is set aside (useDataCheck).
  */
 export function TransferContainer({
   useCases,

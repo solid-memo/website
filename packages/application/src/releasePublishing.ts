@@ -33,7 +33,7 @@ export interface ReleasePublishingUseCases {
    * release in a pod is (its rules, Markdown and shapes; an error stops
    * it, releaseHasErrors), made one Turtle document there (assemble),
    * written only where nothing is (releaseTaken), made readable by
-   * everyone and linked from the catalogue; then the draft is marked
+   * everyone and linked from the catalog; then the draft is marked
    * released (`sm:releasedAs`), and no longer changed. The draft is
    * read once, and checked, made a release and marked released as it was
    * then: changed elsewhere since, it is changedElsewhere, before the
@@ -58,7 +58,7 @@ export interface ReleasePublishingUseCases {
    * request to `decks/`. Nothing is checked or written in the pod.
    */
   downloadRelease(draftUrl: string, targetUrl?: string): Promise<SavedRelease>;
-  /** The releases the instance published, as its catalogue links them, each with whether it is public. */
+  /** The releases the instance published, as its catalog links them, each with whether it is public. */
   listPublishedReleases(instanceUrl: string): Promise<PublishedRelease[]>;
 }
 

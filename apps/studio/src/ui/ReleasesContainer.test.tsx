@@ -96,14 +96,14 @@ describe("ReleasesContainer", () => {
     expect(await screen.findByText("Starting the next version…")).toBeInTheDocument();
   });
 
-  it("holds a next version while the instance's catalogue is set aside", async () => {
+  it("holds a next version while the instance's catalog is set aside", async () => {
     const useCases = makeUseCasesFake({
       getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, invalidDataPolicy: "block-subject" as const })),
-      checkInstance: vi.fn(async () => invalidReport([], { catalogue: true })),
+      checkInstance: vi.fn(async () => invalidReport([], { catalog: true })),
       listPublishedReleases: vi.fn(async () => [{ url: SOLID, public: true }]),
     });
     renderContainer(useCases);
-    expect(await screen.findByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(await screen.findByText(/catalog or one of its groups has invalid data/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start the next version of solid, version 1" })).toBeDisabled();
   });
 

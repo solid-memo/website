@@ -20,7 +20,7 @@ const deck: Deck = {
 };
 
 describe("withProvenance", () => {
-  it("replaces the authors, tidied, and the licence", () => {
+  it("replaces the authors, tidied, and the license", () => {
     expect(withProvenance(deck, { authors: ["  Ada  Lovelace ", "Alan Turing<alan@example.org>", " "], license: CC0 })).toEqual({
       ...deck,
       authors: ["Ada  Lovelace", "Alan Turing <alan@example.org>"],
@@ -28,13 +28,13 @@ describe("withProvenance", () => {
     });
   });
 
-  it("removes the licence, and keeps one another app wrote", () => {
+  it("removes the license, and keeps one another app wrote", () => {
     const { license: _, ...without } = deck;
     expect(withProvenance(deck, { authors: [] })).toEqual({ ...without, authors: [] });
     expect(withProvenance(deck, { authors: [], license: OWN })).toEqual({ ...deck, authors: [] });
   });
 
-  it("refuses a licence it does not offer", () => {
+  it("refuses a license it does not offer", () => {
     expect(() => withProvenance({ ...deck, license: BY }, { authors: [], license: OWN })).toThrow(
       new AppError("licenseUnknown", { url: OWN }),
     );

@@ -40,8 +40,8 @@ export function useMakePublic(useCases: UseCases, instanceUrl: string) {
 
 /**
  * Start the next version of a release as a draft of the instance, then
- * `onStarted` with it. It writes the catalogue, so it waits its turn with
- * the catalogue's other writes; the drafts are read afresh after it, and
+ * `onStarted` with it. It writes the catalog, so it waits its turn with
+ * the catalog's other writes; the drafts are read afresh after it, and
  * what was read at the new draft's URL is forgotten.
  */
 export function useStartNextVersion(useCases: UseCases, instanceUrl: string, onStarted: (created: CreatedDraft) => void) {

@@ -31,13 +31,13 @@ vi.mock("./datasets", async (importOriginal) => ({
 
 const DOC = "https://pod.example/solid-memo/a/catalog.ttl";
 
-/** The dataset with a catalogue's link to a blank-node member, `[ a dcat:Dataset ]`, as another app may write one: Solid Memo never does. */
-function withBlankMember(dataset: SolidDataset, catalogue: string, label: string): SolidDataset {
+/** The dataset with a catalog's link to a blank-node member, `[ a dcat:Dataset ]`, as another app may write one: Solid Memo never does. */
+function withBlankMember(dataset: SolidDataset, catalog: string, label: string): SolidDataset {
   const term = (termType: string, value: string) => ({ termType, value });
   const graph = term("DefaultGraph", "");
   const quads = [
     ...toRdfJsDataset(dataset),
-    { subject: term("NamedNode", catalogue), predicate: term("NamedNode", DCAT.dataset), object: term("BlankNode", label), graph },
+    { subject: term("NamedNode", catalog), predicate: term("NamedNode", DCAT.dataset), object: term("BlankNode", label), graph },
     { subject: term("BlankNode", label), predicate: term("NamedNode", RDF.type), object: term("NamedNode", DCAT.Dataset), graph },
   ];
   return fromRdfJsDataset({ [Symbol.iterator]: () => quads[Symbol.iterator]() } as never);
@@ -251,11 +251,11 @@ describe("createShaclShapeValidator", () => {
     ]);
   });
 
-  it("holds a catalogue and its publisher that lost their stamps as Solid Memo's, warning only about its links to another app's members", async () => {
+  it("holds a catalog and its publisher that lost their stamps as Solid Memo's, warning only about its links to another app's members", async () => {
     const alice = "https://alice.example/profile/card#me";
     let dataset = mockSolidDatasetFrom(DOC);
     for (const thing of [
-      // Another app rewrote the catalogue and its publisher without the triples it does not know, sm:formatVersion among them.
+      // Another app rewrote the catalog and its publisher without the triples it does not know, sm:formatVersion among them.
       buildThing(createThing({ url: `${DOC}#catalog` })).addIri(RDF.type, DCAT.Catalog).addUrl(DCTERMS.publisher, alice)
         .addUrl(DCAT.dataset, `${DOC}#recipes`).addUrl(DCAT.dataset, `${DOC}#deck-gone`),
       buildThing(createThing({ url: alice })).addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent"),
@@ -278,7 +278,7 @@ describe("createShaclShapeValidator", () => {
     const members = [
       result("Class", DCAT.dataset, `${DOC}#recipes`),
       result("NodeKind", DCAT.dataset, "theirs"),
-      // A link to nothing the document describes, and one to a blank node another subject names, are the catalogue's own.
+      // A link to nothing the document describes, and one to a blank node another subject names, are the catalog's own.
       result("Class", DCAT.dataset, `${DOC}#deck-gone`),
       result("NodeKind", DCAT.dataset, "elsewhere"),
       result("MinCount", DCAT.dataset),
@@ -448,7 +448,7 @@ describe("createShaclShapeValidator", () => {
       );
     });
 
-    it("holds a catalogue's members of its own document to their class, not those another document describes or another app wrote", async () => {
+    it("holds a catalog's members of its own document to their class, not those another document describes or another app wrote", async () => {
       const written = withCatalog(mockSolidDatasetFrom(DOC), DOC, {
         title: "Main",
         description: "My decks.",

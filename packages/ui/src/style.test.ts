@@ -44,21 +44,21 @@ function lastMatching(element: Element, property: string): string | undefined {
 }
 
 describe("focus styles", () => {
-  it.each(["radio", "checkbox"])("rings a focused %s in the primary colour", (type) => {
+  it.each(["radio", "checkbox"])("rings a focused %s in the primary color", (type) => {
     const style = focused(`<input type="${type}">`, "input");
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("#2c6b3d");
     expect(style.outlineOffset).toBe("2px");
   });
 
-  it("shows a text field's focus with its border, and keeps an outline for forced colours", () => {
+  it("shows a text field's focus with its border, and keeps an outline for forced colors", () => {
     const style = focused(`<input type="text">`, "input");
     expect(style.borderColor).toBe("#2c6b3d");
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("transparent");
   });
 
-  it("rings the focused language list in the primary colour", () => {
+  it("rings the focused language list in the primary color", () => {
     const style = focused(`<label class="language-selector"><select><option>en</option></select></label>`, "select");
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("#2c6b3d");
@@ -78,7 +78,7 @@ describe("focus styles", () => {
     ["the wordmark", `<header class="masthead"><h1><a class="wordmark" href="#/">x</a></h1></header>`, "a"],
     ["the WebID link", `<header class="masthead"><p class="session-line"><a href="https://x">x</a></p></header>`, "a"],
     ["a button", `<header class="masthead"><button>x</button></header>`, "button"],
-  ])("rings %s in the masthead's text colour, which shows on its navy", (_, html, selector) => {
+  ])("rings %s in the masthead's text color, which shows on its navy", (_, html, selector) => {
     expect(focused(html, selector).outlineColor).toBe("#f7f6f1");
   });
 
@@ -88,7 +88,7 @@ describe("focus styles", () => {
     ["a group's menu button", `<div class="deck-group-header"><button class="icon row-menu">x</button></div>`, "button"],
     ["a menu's item", `<div class="actions-menu" role="menu"><button role="menuitem">x</button></div>`, "button"],
     ["a menu's link", `<div class="actions-menu" role="menu"><a role="menuitem" href="#/">x</a></div>`, "a"],
-  ])("rings %s in the primary colour", (_, html, selector) => {
+  ])("rings %s in the primary color", (_, html, selector) => {
     const style = focused(html, selector);
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("#2c6b3d");
@@ -138,7 +138,7 @@ describe("focus styles", () => {
     expect(hovered(item)).toEqual([]);
   });
 
-  it("rings a course question's radio in the primary colour", () => {
+  it("rings a course question's radio in the primary color", () => {
     const style = focused(`<div class="choices"><label class="choice"><input type="radio"></label></div>`, "input");
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("#2c6b3d");
@@ -240,7 +240,7 @@ function tokens(selector: string): Record<string, string> {
   return Object.fromEntries([...block.matchAll(/(--[\w-]+):\s*(#[0-9a-f]{6});/g)].map((m) => [m[1], m[2]]));
 }
 
-/** WCAG's contrast ratio of two #rrggbb colours. */
+/** WCAG's contrast ratio of two #rrggbb colors. */
 function contrast(a: string, b: string): number {
   const luminance = (hex: string) => {
     const [r, g, bl] = [1, 3, 5].map((i) => {

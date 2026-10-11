@@ -617,7 +617,7 @@ describe("readRegisteredClasses", () => {
         registered("deck", SM.Deck, SOLID.instance, `${MAIN}catalog.ttl`),
         registered("card", SM.Card, SOLID.instance, `${MAIN}decks/`),
         // Not the instance's: its answers' container without the slash, another instance's review states,
-        // a catalogue elsewhere in the folder, and a registration that is not one.
+        // a catalog elsewhere in the folder, and a registration that is not one.
         registered("answer", SM.Answer, SOLID.instanceContainer, `${MAIN}history`),
         registered("review", SM.ReviewState, SOLID.instanceContainer, "https://alice.example/solid-memo/b/reviews/"),
         registered("cat", DCAT.Catalog, SOLID.instance, `${MAIN}attachments/index.ttl#catalog`),
@@ -737,7 +737,7 @@ describe("removeInstanceRegistrations", () => {
       .build();
   }
 
-  it("removes every registration of the container under either predicate, and its catalogue's by exact IRI", async () => {
+  it("removes every registration of the container under either predicate, and its catalog's by exact IRI", async () => {
     let dataset = mockSolidDatasetFrom(PRIVATE_INDEX);
     dataset = setThing(
       dataset,
@@ -775,7 +775,7 @@ describe("removeInstanceRegistrations", () => {
         .addIri(SOLID.instance, "https://alice.example/solid-memo/b/catalog.ttl#catalog")
         .build(),
     );
-    // Another app's catalogues in the instance's folder: not the instance's.
+    // Another app's catalogs in the instance's folder: not the instance's.
     dataset = setThing(
       dataset,
       buildThing(createThing({ url: `${PRIVATE_INDEX}#cat-elsewhere` }))
@@ -833,7 +833,7 @@ describe("removeInstanceRegistrations", () => {
     const instShared = getThing(saved as SolidDataset, `${PRIVATE_INDEX}#inst-shared`)!;
     expect(getUrlAll(instShared, SOLID.instanceContainer)).toEqual(["https://alice.example/notes/"]);
     expect(getUrlAll(instShared, SOLID.instance)).toEqual([]);
-    // A registration of another catalogue besides keeps that one only.
+    // A registration of another catalog besides keeps that one only.
     expect(getUrlAll(getThing(saved as SolidDataset, `${PRIVATE_INDEX}#cat-shared`)!, SOLID.instance)).toEqual([
       "https://alice.example/recipes/index.ttl#catalog",
     ]);

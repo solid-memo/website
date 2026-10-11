@@ -11,7 +11,7 @@ import { SM } from "./vocab";
  * The ReleasePublisher over the pod (docs/studio.md, Publishing a
  * release): a release is one Turtle document, written as `assemble`
  * made it, once, where nothing is (If-None-Match: *), then made
- * readable by everyone, then linked from the instance's catalogue
+ * readable by everyone, then linked from the instance's catalog
  * (`sm:publishedRelease`). A release there already that states what
  * this one does, its time of issue aside, is this one, written by a
  * publishing cut short: it is made public and linked as if just written,

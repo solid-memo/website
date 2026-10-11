@@ -15,8 +15,8 @@ import { ReleasePublishScreen, type ReleasePublishLinks } from "./ReleasePublish
  * The release screen's publishing, over the draft as its editor keeps it
  * (`editor`, the metadata's above it): the release check's errors as the
  * draft changes; publishing it (publishRelease), which writes the
- * catalogue, so it waits its turn with the catalogue's other writes, and
- * is held while the catalogue may not be written (useDataCheck); then
+ * catalog, so it waits its turn with the catalog's other writes, and
+ * is held while the catalog may not be written (useDataCheck); then
  * the draft, the drafts and the releases are read afresh, the draft now
  * released. Whether its release is public, making it so again, its next
  * version, and the release saved as a file.

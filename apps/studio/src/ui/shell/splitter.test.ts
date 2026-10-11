@@ -41,7 +41,7 @@ describe("splitterKey", () => {
 });
 
 describe("draggedSize", () => {
-  it("grows as the pointer moves towards the start, and shrinks as it moves away, within the bounds", () => {
+  it("grows as the pointer moves toward the start, and shrinks as it moves away, within the bounds", () => {
     expect(draggedSize(200, 500, 450, size)).toBe(250);
     expect(draggedSize(200, 500, 560, size)).toBe(140);
     expect(draggedSize(200, 500, 0, size)).toBe(300);

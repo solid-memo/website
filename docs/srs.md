@@ -157,7 +157,7 @@ Whether an answer is graded at all depends on the card's state
 - **No daily limit** applies: the learner reached the card in the
   course. A card introduced there still counts as introduced that day,
   so it uses up the deck's new-card budget in study (below).
-- **Afterwards** the cards are studied by flip-and-grade, with the
+- **Afterward** the cards are studied by flip-and-grade, with the
   instance's answer scale.
 
 ## Study days and the queue
@@ -165,7 +165,7 @@ Whether an answer is graded at all depends on the card's state
 Scheduling works in *study days*, not calendar days. `studyDayOf` shifts an
 instant back by `dayBoundaryHour` (default 4) before taking the local date —
 reviewing at 03:00 still counts as yesterday. Timezone caveat: study days are
-device-local; travelling shifts due times by a few hours (accepted for v1).
+device-local; traveling shifts due times by a few hours (accepted for v1).
 
 `buildStudyQueue` produces the day's session from cards + the deck's
 direction + review states + preferences — the instance's, with the
@@ -330,7 +330,7 @@ The day's answers of that deck then leave the
 [answer log](data-model.md#the-answer-log) as well, so the statistics
 match the cards: answers still on their way to the log are added first,
 then removed with the rest.
-"Today" honours the instance's `dayBoundaryHour`, like the queue.
+"Today" honors the instance's `dayBoundaryHour`, like the queue.
 
 The [Studio](studio.md#card-inspector) changes a state outside a review.
 Setting a card's due day (`rescheduleState`, in

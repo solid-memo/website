@@ -73,11 +73,11 @@ const PROFILED_CLASSES = [
   "http://xmlns.com/foaf/0.1/Agent",
 ];
 
-/** The links by which a catalogue or deck group lists its members. */
+/** The links by which a catalog or deck group lists its members. */
 const MEMBER_LINKS: readonly (string | undefined)[] = ["http://www.w3.org/ns/dcat#dataset", "http://www.w3.org/ns/dcat#catalog"];
 
 /**
- * DCAT-AP's class check on a member a catalogue or deck group lists from
+ * DCAT-AP's class check on a member a catalog or deck group lists from
  * another document (a dataset another app added): the member's class is
  * stated where it is described, which this document cannot show, so the
  * check says nothing about it. A member of the same document is still
@@ -93,10 +93,10 @@ function isMemberElsewhere(focusNode: string, violation: Violation): boolean {
 }
 
 /**
- * A result about a catalogue's or deck group's link to a member another
+ * A result about a catalog's or deck group's link to a member another
  * app wrote: a subject of the document that is not Solid Memo's, or a
  * blank node, which Solid Memo never writes. The member is that app's
- * data, and what is wrong with the link is no fault of the catalogue's.
+ * data, and what is wrong with the link is no fault of the catalog's.
  */
 function isForeignMember(
   quads: readonly Quad[],
@@ -134,7 +134,7 @@ function asWarning(violation: Violation): Violation {
  * also checked against the DCAT-AP profile, with the reference data
  * beside it (see docs/validation.md). A subject another app wrote is
  * checked too, but marked `foreign`, its results warnings, and so are
- * the results about a catalogue's link to a member another app wrote.
+ * the results about a catalog's link to a member another app wrote.
  */
 export function createShaclShapeValidator({
   fetch,

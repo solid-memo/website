@@ -9,7 +9,7 @@
  * needs no retry of its own: the fault is the tests' client's.
  *
  * The Fetch standard forbids the header and a browser drops it; undici
- * sends it and honours it, which connections.test.ts checks, so a Node
+ * sends it and honors it, which connections.test.ts checks, so a Node
  * that stops doing so fails there rather than bring the flake back.
  */
 export function closingConnections(send: typeof fetch): typeof fetch {

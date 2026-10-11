@@ -93,7 +93,7 @@ onto a pooled connection the server closed while a long synchronous
 stretch (a big update, on a slow runner) kept it from noticing, and
 then fails it without resending it; a browser resends it, so the app
 needs no retry. The Fetch standard forbids the header, but Node's fetch
-honours it, and `npm test` checks that it still does
+honors it, and `npm test` checks that it still does
 ([connections.test.ts](../e2e/pod/connections.test.ts)).
 
 `SOLID_SERVERS=css-7,nss-5` runs the suite against some only (`all`
@@ -203,7 +203,7 @@ blocking so that the ACR's write gates CI as the ACL's does) says once
 published: the test reads that document, not only the
 release. A second release at the same address is refused, and leaves
 the first as it was. A publishing cut short after the release is
-written (its catalogue link refused once) is finished by publishing
+written (its catalog link refused once) is finished by publishing
 again; deleting the instance then keeps the release and its folder,
 and says so (`keptReleases`). node-solid-server refuses the PATCH
 `@inrupt/solid-client` writes an ACL with, and the Community Solid

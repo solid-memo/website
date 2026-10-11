@@ -39,7 +39,7 @@ describe("reading a document since a version", () => {
     const read = await readDatasetSince(CARDS, version, pod.fetch);
     expect(read).not.toBe(UNCHANGED);
     expect(versionOf(read as object)).toBe(pod.etag(CARDS));
-    // A plain read afterwards revalidates what that read learned.
+    // A plain read afterward revalidates what that read learned.
     await readDataset(CARDS, pod.fetch);
     expect(pod.requests.at(-1)).toMatchObject({ ifNoneMatch: pod.etag(CARDS), status: 304 });
   });

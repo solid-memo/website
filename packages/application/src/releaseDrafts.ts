@@ -81,7 +81,7 @@ export interface DraftDiff {
 export type DraftEdit = { ok: true; draft: ReleaseDraft } | { ok: false; refusal: DraftRefusal };
 
 export interface ReleaseDraftUseCases {
-  /** The instance's drafts, as its catalogue links them. */
+  /** The instance's drafts, as its catalog links them. */
   listReleaseDrafts(instanceUrl: string): Promise<ReleaseDraftSummary[]>;
   /**
    * A new draft in the instance, from `from`, named after its title (or

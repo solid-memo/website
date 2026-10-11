@@ -93,7 +93,7 @@ describe("problemMessage", () => {
 
   it("says what a source or the release's making lacks, in English and Swedish", () => {
     expect(say({ code: "sourceUndescribed", params: { missing: ["title", "creator", "licence"] } })).toBe(
-      "Does not state its title, its creator, its licence or the evidence for one: a source says what it is, whose it is, and on what terms it was used.",
+      "Does not state its title, its creator, its license or the evidence for one: a source says what it is, whose it is, and on what terms it was used.",
     );
     expect(say({ code: "sourceUndescribed", params: { missing: ["licence"] } }, undefined, sv)).toBe(
       "Anger inte sin licens eller belägget för en: en källa säger vad den är, vems den är och på vilka villkor den användes.",

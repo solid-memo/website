@@ -218,7 +218,7 @@ export function createSolidInstanceRepository({
 
 /**
  * The classes of an instance's data that belong in a type index of a
- * kind: Solid Memo's own registration, the catalogue's, the decks' and
+ * kind: Solid Memo's own registration, the catalog's, the decks' and
  * the cards' in each index that registers the instance (`holding`), and
  * the review states' and answers' in the private index only, whatever
  * index registers the instance.

@@ -123,7 +123,7 @@ describe("arrangementSetAside", () => {
   const broken = [{ message: { en: "x" }, severity: "violation" as const, constraint: "MinCount" }];
   const warned = [{ message: { en: "x" }, severity: "warning" as const, constraint: "MinCount" }];
 
-  it("is set aside when the catalogue or a deck group fails", () => {
+  it("is set aside when the catalog or a deck group fails", () => {
     expect(arrangementSetAside(catalog({ url: `${INSTANCE}catalog.ttl#catalog`, status: "checked", shape: "catalog", version: 1, violations: broken }))).toBe(true);
     expect(arrangementSetAside(catalog({ url: `${INSTANCE}catalog.ttl#group-1`, status: "checked", shape: "deckGroup", version: 1, violations: broken }))).toBe(true);
   });

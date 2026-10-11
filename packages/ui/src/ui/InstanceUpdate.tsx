@@ -80,7 +80,7 @@ export function InstanceUpdateProgress({ progress }: { progress: UpdateProgress 
   );
 }
 
-/** A document as the user knows it: the instance's record, its preferences, its catalogue, or a deck's cards or review states. */
+/** A document as the user knows it: the instance's record, its preferences, its catalog, or a deck's cards or review states. */
 export function documentName(document: UpdateDocument, { t, readerText }: Pick<I18n, "t" | "readerText">): string {
   switch (document.holds) {
     case "cards":

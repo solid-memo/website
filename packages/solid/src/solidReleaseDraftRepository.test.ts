@@ -56,7 +56,7 @@ function writes(pod: Awaited<ReturnType<typeof draftPod>>, from = 0) {
 }
 
 describe("create", () => {
-  it("writes each document only where none is, the release document first, then links the draft from the catalogue", async () => {
+  it("writes each document only where none is, the release document first, then links the draft from the catalog", async () => {
     const pod = await draftPod({ checked: true });
     const summary = await pod.repository.create(INSTANCE, course());
     expect(summary).toEqual({ url: DRAFT, instanceUrl: INSTANCE, name: "solid", version: 1, readable: true, title: { en: "Solid" }, course: true });
@@ -81,7 +81,7 @@ describe("create", () => {
     expect(await pod.text(CHAPTER_A)).toContain(`<${DRAFT}>`);
   });
 
-  it("refuses an instance with no catalogue, writing nothing", async () => {
+  it("refuses an instance with no catalog, writing nothing", async () => {
     const pod = await draftPod();
     await pod.put(CATALOG, `<#other> a <http://www.w3.org/ns/dcat#Catalog> .`);
     await expect(pod.repository.create(INSTANCE, course())).rejects.toMatchObject({ code: "noCatalogToUpdate" });
@@ -95,7 +95,7 @@ describe("create", () => {
     expect(writes(pod)).toEqual([`PUT ${DRAFT} If-None-Match`]);
   });
 
-  it("links the draft again when the catalogue changed meanwhile, a few times, and once only", async () => {
+  it("links the draft again when the catalog changed meanwhile, a few times, and once only", async () => {
     const pod = await draftPod();
     pod.failNext("PATCH", CATALOG, 412);
     await pod.repository.create(INSTANCE, blankDraft({ url: DRAFT, course: false, title: { en: "A" }, now: NOW }));
@@ -107,7 +107,7 @@ describe("create", () => {
     });
     const text = await pod.text(CATALOG);
     expect(text.match(/releaseDraft/g)).toHaveLength(1);
-    // The draft no catalogue links is taken back, its containers with it: nothing is left that nothing would delete.
+    // The draft no catalog links is taken back, its containers with it: nothing is left that nothing would delete.
     expect((await pod.urls()).filter((url) => url.startsWith(`${INSTANCE}drafts/b/`))).toEqual([]);
   });
 
@@ -132,14 +132,14 @@ describe("create", () => {
     await expect(pod.repository.create(INSTANCE, course())).rejects.toMatchObject({ code: "changedElsewhere" });
   });
 
-  it("adds no second link to a draft the catalogue links already", async () => {
+  it("adds no second link to a draft the catalog links already", async () => {
     const pod = await draftPod();
     await pod.put(CATALOG, `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}releaseDraft> <${DRAFT}> .`);
     await pod.repository.create(INSTANCE, course());
     expect(writes(pod).filter((write) => write.includes(CATALOG))).toEqual([]);
   });
 
-  it("refuses to link a draft once the catalogue is gone", async () => {
+  it("refuses to link a draft once the catalog is gone", async () => {
     const pod = await draftPod();
     pod.failNext("PUT", DRAFT, null, async () => {
       await pod.local(CATALOG, { method: "DELETE" });
@@ -156,7 +156,7 @@ describe("create", () => {
 });
 
 describe("list and documents", () => {
-  it("follow only the catalogue's links to drafts of the instance, and list one that cannot be read as such", async () => {
+  it("follow only the catalog's links to drafts of the instance, and list one that cannot be read as such", async () => {
     const pod = await draftPod();
     const gone = draftUrlOf(INSTANCE, "gone", 3);
     const empty = draftUrlOf(INSTANCE, "empty", 1);
@@ -180,7 +180,7 @@ describe("list and documents", () => {
     await expect(pod.repository.documents(INSTANCE)).rejects.toThrow();
   });
 
-  it("are none without a catalogue", async () => {
+  it("are none without a catalog", async () => {
     const pod = await draftPod();
     await pod.local(CATALOG, { method: "DELETE" });
     await expect(pod.repository.list(INSTANCE)).resolves.toEqual([]);
@@ -563,7 +563,7 @@ describe("delete", () => {
     await expect(draftDocumentsIn(DRAFT, pod.fetch)).resolves.toEqual([]);
   });
 
-  it("deletes a draft the catalogue no longer links, or that has no catalogue", async () => {
+  it("deletes a draft the catalog no longer links, or that has no catalog", async () => {
     const pod = await draftPod();
     await pod.repository.create(INSTANCE, course());
     const summary = (await pod.repository.list(INSTANCE))[0]!;

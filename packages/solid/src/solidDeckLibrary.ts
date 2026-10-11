@@ -32,7 +32,7 @@ export interface SolidDeckLibraryDeps {
  *
  * A release added from a link (readRelease) is read on its own, afresh
  * each time, with no index: its address may hold anything, now or later,
- * until it is copied. Its creator's catalogue (publishedBeside) is read
+ * until it is copied. Its creator's catalog (publishedBeside) is read
  * as anyone reads it, as the fetch reads everything: no login is sent.
  */
 export function createSolidDeckLibrary({
@@ -77,7 +77,7 @@ export function createSolidDeckLibrary({
 
     async publishedBeside(url) {
       for (const folder of foldersAbove(url)) {
-        // An instance's catalogue is `<instance>catalog.ttl`; one that cannot be read is no answer.
+        // An instance's catalog is `<instance>catalog.ttl`; one that cannot be read is no answer.
         const links = await catalogLinks(folder, SM.publishedRelease, fetch).catch((): string[] => []);
         if (links.includes(url)) return links;
       }

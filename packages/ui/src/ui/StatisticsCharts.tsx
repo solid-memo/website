@@ -312,7 +312,7 @@ export interface LineSeries {
  * One or two lines over evenly spaced points, on one scale from 0 up to
  * `max`. Pointing at a point puts a guide through
  * it and a dot on each line there, and says what it holds; a point of a
- * line with no neighbour is drawn as a dot of its own. With two lines a
+ * line with no neighbor is drawn as a dot of its own. With two lines a
  * legend names them, each by its own stroke.
  */
 function LineChart({

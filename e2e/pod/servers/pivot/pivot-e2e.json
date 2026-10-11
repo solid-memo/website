@@ -1,5 +1,5 @@
 {
-  "comment": "The Community Solid Server 7.2 default configuration (config/default.json: in memory, WAC, root storage) with Pivot's changes as Pivot's own configurations make them (config/dev-http-suffix.json): its HTTP handler, OIDC, memory backend and patching store, its overrides last. The root is initialised empty and open to anyone, as the end-to-end tests need (docs/testing.md).",
+  "comment": "The Community Solid Server 7.2 default configuration (config/default.json: in memory, WAC, root storage) with Pivot's changes as Pivot's own configurations make them (config/dev-http-suffix.json): its HTTP handler, OIDC, memory backend and patching store, its overrides last. The root is initialized empty and open to anyone, as the end-to-end tests need (docs/testing.md).",
   "@context": [
     "https://linkedsoftwaredependencies.org/bundles/npm/@solid/community-server/^7.0.0/components/context.jsonld",
     "https://linkedsoftwaredependencies.org/bundles/npm/@solid/pivot/^1.0.0/components/context.jsonld"

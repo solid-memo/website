@@ -233,7 +233,7 @@ describe("DraftOutline dragging", () => {
     expect(line().hidden).toBe(false);
     expect(line().dataset.label).toBe("in Pods");
     fireEvent.keyDown(window, { key: "Escape" });
-    expect(status()).toHaveTextContent("Move cancelled.");
+    expect(status()).toHaveTextContent("Move canceled.");
     act(() => {
       vi.advanceTimersByTime(600);
     });
@@ -258,6 +258,6 @@ describe("DraftOutline dragging", () => {
     fireEvent.pointerMove(window, at(yOf(3)));
     fireEvent.pointerUp(window, at(yOf(3)));
     expect(onEdit).not.toHaveBeenCalled();
-    expect(status()).toHaveTextContent("Move cancelled.");
+    expect(status()).toHaveTextContent("Move canceled.");
   });
 });

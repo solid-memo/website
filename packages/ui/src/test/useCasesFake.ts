@@ -91,7 +91,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     // As the real one does: keywords tidied, and left off when there are none.
     describeDeck: vi.fn(async (deck, about) => withAbout(deck, about)),
     setDeckPace: vi.fn(async (deck, pace) => ({ ...deck, ...pace })),
-    // As the real one does: authors tidied, the licence one offered.
+    // As the real one does: authors tidied, the license one offered.
     setDeckProvenance: vi.fn(async (deck, provenance) => withProvenance(deck, provenance)),
     setDecksDirection: vi.fn(async (decks: readonly Deck[], direction) => decks.map((deck) => ({ ...deck, direction }))),
     setDecksPace: vi.fn(async (decks: readonly Deck[], pace) => decks.map((deck) => ({ ...deck, ...pace }))),
@@ -216,7 +216,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       description: "My decks.",
       publisher: { webId: `${new URL(instanceUrl).origin}/profile/card#me`, name: "Alice" },
     })),
-    // As the real one does: of the catalogue as it is read.
+    // As the real one does: of the catalog as it is read.
     describeCatalog: vi.fn(async (instanceUrl, about) => describedCatalog((await fake.readCatalog(instanceUrl))!, about)),
     getStudyQueue: vi.fn(async () => ({
       due: [],

@@ -24,7 +24,7 @@ describe("ReadOnlyNotice", () => {
     expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toBeInTheDocument();
     decks.unmount();
     render(<ReadOnlyNotice reason="setAside" subject="catalogue" healthHref="#/health" />);
-    expect(screen.getByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(screen.getByText(/catalog or one of its groups has invalid data/)).toBeInTheDocument();
   });
 
   it.each(["deck", "decks", "catalogue"] as const)("says the whole instance is blocked, whatever the subject (%s), the instance to repair", (subject) => {

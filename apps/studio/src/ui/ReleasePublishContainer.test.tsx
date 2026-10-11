@@ -40,12 +40,12 @@ describe("ReleasePublishContainer", () => {
     expect(await screen.findByRole("link", { name: "The release check finds 2 errors. Fix them before you publish." })).toBeInTheDocument();
   });
 
-  it("holds publishing while the instance's catalogue is set aside", async () => {
+  it("holds publishing while the instance's catalog is set aside", async () => {
     const useCases = makeUseCasesFake({
       getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, invalidDataPolicy: "block-subject" as const })),
-      checkInstance: vi.fn(async () => invalidReport([], { catalogue: true })),
+      checkInstance: vi.fn(async () => invalidReport([], { catalog: true })),
     });
     renderContainer(useCases);
-    expect(await screen.findByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(await screen.findByText(/catalog or one of its groups has invalid data/)).toBeInTheDocument();
   });
 });

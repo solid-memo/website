@@ -78,7 +78,7 @@ interface Read {
 /**
  * The ReleaseDraftRepository over the pod (docs/data-model.md "Drafts"):
  * a draft is the container its release document is in, linked from the
- * instance's catalogue by `sm:releaseDraft`. A draft's documents are
+ * instance's catalog by `sm:releaseDraft`. A draft's documents are
  * read whole, each remembered as read, and an edit of one is written
  * only if it is still as it was (If-Match), one PUT of it whole; an
  * edit is made from the read it names by its version, or refused. What
@@ -103,7 +103,7 @@ export function createSolidReleaseDraftRepository({
   /** Each draft's documents as last read, so an edit is written only if they are still so. */
   const reads = new Map<string, Read>();
 
-  /** The drafts the instance's catalogue links, as their places say: a link anywhere but a draft's place in the instance is not followed. */
+  /** The drafts the instance's catalog links, as their places say: a link anywhere but a draft's place in the instance is not followed. */
   async function linked(instanceUrl: string): Promise<{ url: string; place: { instanceUrl: string; name: string; version: number } }[]> {
     return (await catalogLinks(instanceUrl, SM.releaseDraft, fetch)).flatMap((url) => {
       const place = draftPlaceOf(url);
@@ -195,7 +195,7 @@ export function createSolidReleaseDraftRepository({
         }
         await addCatalogLink(instanceUrl, SM.releaseDraft, draft.url, fetch);
       } catch (error) {
-        // What this draft wrote goes, the release document last: no draft is left that no catalogue links, nor deletes.
+        // What this draft wrote goes, the release document last: no draft is left that no catalog links, nor deletes.
         if (written.length > 0) await deleteDocuments(draft.url, [...written.slice(1).reverse(), draft.url], fetch).catch(() => undefined);
         throw error;
       }

@@ -240,7 +240,7 @@ export function LangTextField({
 
   /**
    * An entry's text and its picker in a row with `control`;
-   * the main one labelled by the field's label, and followed by the hint.
+   * the main one labeled by the field's label, and followed by the hint.
    */
   function entryFields(entry: DraftEntry, entryLabel: string, control: ComponentChildren) {
     const textId = textIdOf(entry);

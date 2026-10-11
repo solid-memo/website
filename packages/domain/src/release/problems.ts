@@ -119,7 +119,7 @@ export type CurationProblem =
   /** A making's comment that states a count the release does not have. */
   | { code: "countDisagrees"; params: { what: CountedThing; stated: number; counted: number } };
 
-/** What a source states of itself: its title, its creator, and its licence or the evidence for one. */
+/** What a source states of itself: its title, its creator, and its license or the evidence for one. */
 export type SourceDetail = "title" | "creator" | "licence";
 
 /** What a making's comments count: chapters, steps, sources and cards in use. */

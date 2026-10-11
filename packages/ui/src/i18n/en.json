@@ -130,7 +130,7 @@
     "addCardButton": "Add card",
     "directionLegend": "Study direction",
     "bidirectionalHint": "Every card is asked both ways, each way scheduled on its own.",
-    "directionHint": "Change it any time; what you have learnt each way is kept.",
+    "directionHint": "Change it any time; what you have learned each way is kept.",
     "empty": "No cards in this deck yet.",
     "allRetired": "Every card in this deck is retired.",
     "pageHint": "Cards {first}–{last} of {total}. Open a card to edit it.",
@@ -451,7 +451,7 @@
     "deckRenamed": "Renamed the deck to \"{name}\".",
     "deckDeleted": "Deleted the deck \"{name}\".",
     "afterGroup": "after {group}",
-    "dragCancelled": "Move cancelled: the deck or group stays where it was.",
+    "dragCancelled": "Move canceled: the deck or group stays where it was.",
     "continueCourse": "Continue course",
     "fromHost": "from {host}",
     "fromLink": "Add from a link"
@@ -622,7 +622,7 @@
     "document": {
       "instance": "The instance record",
       "preferences": "Your preferences",
-      "catalog": "The catalogue of the decks",
+      "catalog": "The catalog of the decks",
       "cards": "The cards of {deck}",
       "reviews": "The review states of {deck}"
     },
@@ -697,7 +697,7 @@
       "one": "Author",
       "other": "Authors"
     },
-    "licence": "Licence",
+    "licence": "License",
     "created": "Created",
     "updated": "Updated",
     "sources": {
@@ -812,7 +812,7 @@
     "howItWorks": "Updating brings each document up to date on its own, where it is, one after another, each in a single write that your Pod makes whole or not at all. Every document can be read throughout, updated or not; one that cannot be updated now is left as it is, and you can try again. Every address stays the same; deck names, card text, directions, your review history and your settings stay as they are, and a deck without a description gets a short one you can change.",
     "listAnd": "{rest} and {last}",
     "instanceRecord": "the instance record",
-    "instanceCatalogue": "the instance's catalogue",
+    "instanceCatalogue": "the instance's catalog",
     "yourPreferences": "your preferences",
     "deckEntries": {
       "one": "{count} deck entry",
@@ -828,13 +828,13 @@
     },
     "countIn": "{what} in {decks}",
     "instanceFormat": "instance format {version}",
-    "catalogueFormat": "a catalogue of each instance's decks, which other apps read as a DCAT catalogue",
+    "catalogueFormat": "a catalog of each instance's decks, which other apps read as a DCAT catalog",
     "preferencesFormat": "preferences format {version}, which records the answer scale, developer mode, what to do with invalid data and the theme",
     "deckFormat": "deck format {version}, which describes decks with the DCAT and SKOS standards, gives every deck a description and lets a deck's title, description and keywords be in any language you state",
     "cardFormat": "card format {version}, which adds pictures on cards, lets a library deck retire a card it no longer uses and lets a card's text be in any language you state",
     "reviewFormat": "review-state format {version}, which keeps each study direction's state and the day's undo snapshot",
     "itemInstanceRecord": "Instance record",
-    "itemCatalogue": "Catalogue of the decks",
+    "itemCatalogue": "Catalog of the decks",
     "itemPreferences": "Preferences",
     "deckEntry": "deck entry",
     "updating": "Updating…",
@@ -845,7 +845,7 @@
     },
     "buttonPreferences": "preferences",
     "buttonInstanceRecord": "the instance record",
-    "buttonCatalogue": "the catalogue"
+    "buttonCatalogue": "the catalog"
   },
   "onboardingFlow": {
     "tryHeading": "Try it right away",
@@ -1027,7 +1027,7 @@
     "loading": "Reading your type indexes…",
     "class": {
       "instance": "This instance (Solid Memo's folder)",
-      "catalog": "Its catalogue of decks",
+      "catalog": "Its catalog of decks",
       "deck": "Decks",
       "card": "Cards",
       "reviewState": "Review states",
@@ -1072,7 +1072,7 @@
       "directDeck": "Study the deck front to back",
       "dropSnapshot": "Drop the review's half-written undo snapshot",
       "recomputeDue": "Recompute the review's due day",
-      "nameAgent": "Name the person or organisation after their address",
+      "nameAgent": "Name the person or organization after their address",
       "dropDanglingMembers": "Drop the links to decks and groups that are gone",
       "removeSubject": "Remove it"
     }
@@ -1227,12 +1227,12 @@
     "dailyLimitInvalid": "A daily limit is a whole number, 0 or more.",
     "dueDayInvalid": "“{day}” is not a day. Choose the day the card is due.",
     "cardTransferSameDeck": "The cards are in this deck already. Choose another deck.",
-    "licenseUnknown": "Choose one of the licences offered.",
+    "licenseUnknown": "Choose one of the licenses offered.",
     "authorEmpty": "An author needs a name.",
     "authorTwice": "{author} is named twice. Name each author once.",
     "instanceNameEmpty": "An instance needs a name.",
-    "catalogNeedsDescription": "The catalogue needs a description.",
-    "noCatalogToUpdate": "This instance has no catalogue yet. Update the instance in Solid Memo first.",
+    "catalogNeedsDescription": "The catalog needs a description.",
+    "noCatalogToUpdate": "This instance has no catalog yet. Update the instance in Solid Memo first.",
     "noMetaToUpdate": "This instance has no description to update. Reload the page and try again.",
     "webIdEmpty": "Enter your WebID.",
     "webIdInvalidUrl": "That is not a valid URL. A WebID looks like https://you.example/profile/card#me.",
@@ -1429,7 +1429,7 @@
         "health": "Health",
         "library": "Library copies",
         "transfer": "Import and export",
-        "instance": "Name and catalogue"
+        "instance": "Name and catalog"
       },
       "problems": {
         "one": "{count} problem",
@@ -2034,7 +2034,7 @@
       }
     },
     "license": {
-      "label": "Licence",
+      "label": "License",
       "none": "None stated"
     },
     "about": {
@@ -2043,15 +2043,15 @@
       "openInApp": "Open this deck in Solid Memo",
       "name": "Name",
       "rename": "Rename",
-      "provenance": "Authors and licence",
-      "noProvenance": "No authors or licence stated.",
-      "editProvenance": "Edit authors and licence",
+      "provenance": "Authors and license",
+      "noProvenance": "No authors or license stated.",
+      "editProvenance": "Edit authors and license",
       "authors": "Authors",
       "authorsHint": "A name, or a name and an email address: Ada Lovelace <ada@example.org>. Leave a line empty to remove it.",
       "author": "Author {number}",
       "removeAuthor": "Remove author {number}",
       "addAuthor": "Add an author",
-      "saveProvenance": "Save authors and licence",
+      "saveProvenance": "Save authors and license",
       "study": "Study",
       "saveStudy": "Save study settings",
       "progress": "Course progress",
@@ -2070,21 +2070,21 @@
       "saved": "Saved."
     },
     "instance": {
-      "crumb": "Name and catalogue",
+      "crumb": "Name and catalog",
       "heading": "Instance: {instance}",
-      "loading": "Loading the catalogue…",
+      "loading": "Loading the catalog…",
       "preferencesLink": "Study preferences in Solid Memo",
       "address": "Address",
       "name": "Name",
       "nameLabel": "Instance name",
-      "nameHint": "Saved in the instance, in its catalogue and in your Pod's lists of data, where other apps find it.",
+      "nameHint": "Saved in the instance, in its catalog and in your Pod's lists of data, where other apps find it.",
       "saveName": "Save name",
-      "catalog": "Catalogue",
-      "noCatalog": "This instance has no catalogue yet. Open it in Solid Memo to update it.",
+      "catalog": "Catalog",
+      "noCatalog": "This instance has no catalog yet. Open it in Solid Memo to update it.",
       "publisher": "Publisher",
       "description": "Description",
-      "licenseHint": "The licence the decks are offered under, for apps that read the catalogue.",
-      "saveCatalog": "Save catalogue"
+      "licenseHint": "The license the decks are offered under, for apps that read the catalog.",
+      "saveCatalog": "Save catalog"
     },
     "health": {
       "crumb": "Health",
@@ -2099,7 +2099,7 @@
       },
       "allWell": "Nothing is wrong with this deck.",
       "dataHeading": "Data check",
-      "dataHint": "The deck's entry in the catalogue and its documents, checked against Solid Memo's shapes.",
+      "dataHint": "The deck's entry in the catalog and its documents, checked against Solid Memo's shapes.",
       "held": "Nothing in this deck can be changed until the data is repaired, so the problems below are named, not linked to their forms. Repair what can be repaired here, and remove what no repair covers.",
       "instanceDataHint": "The instance's documents, checked against Solid Memo's shapes. Documents unchanged since they last passed are not checked again.",
       "deckEntry": "The deck's entry",
@@ -2207,7 +2207,7 @@
       "failed": "{deck}: the update failed while {step}:",
       "badge": "Release {version} out",
       "badgeOf": "for {deck}",
-      "newerUnknown": "Not known: no public catalogue of its creator lists it",
+      "newerUnknown": "Not known: no public catalog of its creator lists it",
       "peek": "Move to a copy's row ({j}, {k}) to see what upgrading it would change.",
       "plan": "Upgrade",
       "bulk": "Selected copies",
@@ -2273,7 +2273,7 @@
       "blocked": "This instance has invalid data, and your preferences keep it closed until it is repaired, so nothing can be changed here. {repair}",
       "deck": "This deck has invalid data, so it is set aside: it is shown here, but nothing in it can be changed until it is repaired. {repair}",
       "decks": "Decks with invalid data are set aside: they cannot be selected or changed until they are repaired. {repair}",
-      "catalogue": "The instance's catalogue or one of its groups has invalid data, so it is set aside: nothing can be added to it or changed in it until it is repaired. {repair}",
+      "catalogue": "The instance's catalog or one of its groups has invalid data, so it is set aside: nothing can be added to it or changed in it until it is repaired. {repair}",
       "repair": "Repair it on the health screen.",
       "repairDecks": "Repair them on the health screen."
     },
@@ -2370,7 +2370,7 @@
       "inChapter": "in {chapter}",
       "afterChapter": "after {chapter}",
       "moved": "Moved.",
-      "dragCancelled": "Move cancelled.",
+      "dragCancelled": "Move canceled.",
       "retired": "Retired {name}.",
       "deleted": "Deleted {name}."
     },
@@ -2545,7 +2545,7 @@
       "title": "Title",
       "description": "Description",
       "publisher": "Publisher",
-      "license": "Licence",
+      "license": "License",
       "version": "Version",
       "inSeries": "Series",
       "isVersionOf": "Series it is a version of",
@@ -2652,7 +2652,7 @@
         "keywords": "keywords",
         "themes": "themes",
         "direction": "study direction",
-        "license": "licence",
+        "license": "license",
         "authors": "authors",
         "languages": "languages",
         "sources": "sources"
@@ -2730,7 +2730,7 @@
       "languages": "Languages",
       "languagesHint": "The languages its content is in, from the EU's table of languages.",
       "languageOther": "{iri} (not in the table)",
-      "licenseHint": "Stated as a licence document, as DCAT-AP asks.",
+      "licenseHint": "Stated as a license document, as DCAT-AP asks.",
       "publisher": "Publisher",
       "publisherNone": "None stated",
       "publisherHint": "Who publishes the release: one of its authors, or the publisher it already names.",
@@ -2752,13 +2752,13 @@
       "makingNotes": "Notes on how it was made",
       "makingNotesHint": "Each paragraph is kept as a note of the release's making: its sources, structure, selection or licensing, say. A count a note states (chapters, steps, sources, or cards in all) is checked against the release.",
       "sources": "Sources",
-      "sourcesHint": "What the release was made from. Each says what it is, whose it is, and on what terms it was used: its licence, or the evidence for one. The Studio shows its address, and never opens it.",
+      "sourcesHint": "What the release was made from. Each says what it is, whose it is, and on what terms it was used: its license, or the evidence for one. The Studio shows its address, and never opens it.",
       "noSources": "No sources yet.",
       "sourceIri": "Address",
       "sourceTitle": "Title",
       "sourceCreator": "Creator",
-      "sourceLicense": "Licence (its address)",
-      "sourceEvidence": "Evidence for its licence",
+      "sourceLicense": "License (its address)",
+      "sourceEvidence": "Evidence for its license",
       "derivedFrom": "The release is derived from it",
       "used": "This version's making used it",
       "usedEarlier": "An earlier version's making used it.",
@@ -2772,7 +2772,7 @@
       "sourceInvalid": "Give the source's web address, starting with https:// or http://.",
       "sourceExists": "The release names this source already.",
       "sourceUnused": "Tick at least one: the release is derived from it, or this version's making used it.",
-      "licenseInvalid": "Give the licence's web address, starting with https:// or http://, or leave it empty.",
+      "licenseInvalid": "Give the license's web address, starting with https:// or http://, or leave it empty.",
       "checks": "Checks",
       "checksHint": "Checks the release had, by machine (the validators, the release check) or by AI. Each is recorded as not a human review: the Studio records no human review.",
       "noChecks": "No checks recorded yet.",
@@ -2796,7 +2796,7 @@
       "detail": {
         "title": "its title",
         "creator": "its creator",
-        "licence": "its licence or the evidence for one"
+        "licence": "its license or the evidence for one"
       },
       "counted": {
         "chapters": "chapters",
@@ -2812,7 +2812,7 @@
     },
     "publish": {
       "heading": "Publish",
-      "intro": "Publishing writes the release in your Pod as one Turtle document, at an address that never changes, and makes it readable by everyone. A release is never changed afterwards: to change it, you draft its next version.",
+      "intro": "Publishing writes the release in your Pod as one Turtle document, at an address that never changes, and makes it readable by everyone. A release is never changed afterward: to change it, you draft its next version.",
       "checking": "Checking the draft…",
       "noErrors": "The release check finds no errors. Publishing checks the release again, against the shapes too.",
       "errors": {

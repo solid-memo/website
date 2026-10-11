@@ -40,7 +40,7 @@ which CommonMark counts as punctuation, so emphasis next to one now
 follows the specification:
 `*😀*a` and `a**😀**b` keep their asterisks, as `*★*a` always did,
 though the app showed them as emphasis before it took this amendment.
-`_` inside a word still never emphasises, in Korean as in English:
+`_` inside a word still never emphasizes, in Korean as in English:
 `__사람__들` shows as typed, so use `**사람**들`.
 
 CommonMark has no invalid documents, so nothing is ever refused: what a
@@ -264,7 +264,7 @@ text is rendered, and none relies on a check of the data.
 | Threat | Rule |
 |---|---|
 | Raw HTML, `<script>`, `<img onerror>` | Text: the tree has no HTML node. |
-| An HTML sink | None. The renderer turns each node into one fixed element with fixed attributes; data only becomes text children, never markup, a class, a style, an id or a handler. No `dangerouslySetInnerHTML`, no sanitiser. |
+| An HTML sink | None. The renderer turns each node into one fixed element with fixed attributes; data only becomes text children, never markup, a class, a style, an id or a handler. No `dangerouslySetInnerHTML`, no sanitizer. |
 | `javascript:`, `data:`, `http:`, `mailto:`, relative and `#/route` links, a URL with a user name or password | Shown as their text: only an absolute `https:` URL without credentials is followed (`liveLink`), so data can neither run script, steer the app, fill in a mail, nor hide its host behind `user@`. (`isLinkableUrl`, for the source links decks state, is unchanged.) |
 | Link spoofing | A followed link opens in a new tab, says so, and when its text is not its own URL, or its host is an international one, the host it leads to follows it in sight: "the spec (solidproject.org)", punycode kept, so `<https://bаnk.example>` with a Cyrillic "а" shows "(xn--bnk-6cd.example)". The link and its host are each isolated (`dir="ltr"`), so a bidi override in the text before them cannot reorder them. |
 | Tracking pictures | Never loaded: alt text only. Pictures belong in `sm:frontImage`/`sm:backImage`, with a description. |
@@ -309,7 +309,7 @@ shows the same problems as hints, never as a block
 | A picture (`image`) | It is never shown, only its alt text. A card shows a picture by `sm:frontImage`/`sm:backImage`, with a description. |
 | A link where none may be (`link`): a card's `front`, `back` and `backLabel` and a distractor's `distractorText` (fields `SIDE` and `OPTION`), an autolink `<ex:title>` or `<http://…>` included | A link there is in the way of the keys that reveal and grade, and of the `<label>` an option sits in; an autolink also loses its angle brackets. Write it as code. |
 | A link the app does not follow (`linkNotFollowed`), in a note, a step's theory or a chapter's description (field `PROSE`) | Only `https:` without a user name or password is followed; any other shows as text. |
-| Link text that reads as an address or a host name other than the link's (`linkHost`) | Misleading text. The named host must be the link's, give or take a `www.`: `[solidproject.org](https://www.solidproject.org/)` is fine, `[bank.example](https://evil.example/)` is not, and neither is `[github.io](https://evil.github.io/)`, for a domain the host is in says nothing of who runs it. The test is by shape, a dotted word ending in letters, so text that reads as a host name but is none counts too: "Node.js", and a file's name such as `package.json`, `v1.ttl` or `README.md`, even as code. Word it otherwise ("npm's documentation of package.json"). This is a check of the data only: the defence against a link that misleads is the host the app shows beside it ([safety](#safety)). |
+| Link text that reads as an address or a host name other than the link's (`linkHost`) | Misleading text. The named host must be the link's, give or take a `www.`: `[solidproject.org](https://www.solidproject.org/)` is fine, `[bank.example](https://evil.example/)` is not, and neither is `[github.io](https://evil.github.io/)`, for a domain the host is in says nothing of who runs it. The test is by shape, a dotted word ending in letters, so text that reads as a host name but is none counts too: "Node.js", and a file's name such as `package.json`, `v1.ttl` or `README.md`, even as code. Word it otherwise ("npm's documentation of package.json"). This is a check of the data only: the defense against a link that misleads is the host the app shows beside it ([safety](#safety)). |
 | A bidi control, zero-width or other hidden character in code or a link (`hiddenControl`) | Code that reads other than it runs ("Trojan Source"); the app shows them as markers. |
 | A character reference outside code (`characterReference`), such as `&aring;` | CommonMark decodes it: it shows as "å". Write it as code, or escape its `&` (`\&aring;`). An unknown name, `&nosuchname;`, is text and passes. |
 | A heading underlined with dashes (`dashHeading`): a line of text with `---` right under it, no blank line between | It reads like a line of text over a thematic break, which it would be with a blank line before the `---`; in a step's theory that break would end a [chunk](#chunks). Leave the blank line, or write the heading with `##`. Underlined with `===`, a heading is no such look-alike, and passes. |

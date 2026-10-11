@@ -29,7 +29,7 @@ export function DataCheckNotice({
   policy: InvalidDataPolicy;
   /** Titles of the decks set aside, under "set invalid data aside". */
   setAside: LangText[];
-  /** The catalogue or a deck group is set aside, under "set invalid data aside": the list cannot be rearranged. */
+  /** The catalog or a deck group is set aside, under "set invalid data aside": the list cannot be rearranged. */
   arrangementSetAside: boolean;
 }) {
   const { t, tx } = useI18n();

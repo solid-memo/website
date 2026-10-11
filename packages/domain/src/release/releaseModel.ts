@@ -93,12 +93,12 @@ export interface ReleaseMaking {
   carried: boolean;
 }
 
-/** What a release states of a source it names: its title, its creator, its licence and its comments (which may quote the evidence for it). */
+/** What a release states of a source it names: its title, its creator, its license and its comments (which may quote the evidence for it). */
 export interface ReleaseSource {
   iri: string;
   title: ReleaseTerm[];
   creator: ReleaseTerm[];
-  licence: ReleaseTerm[];
+  license: ReleaseTerm[];
   comments: ReleaseTerm[];
 }
 
@@ -131,8 +131,8 @@ export interface ReleaseModel {
   prev: ReleaseTerm[];
   previousVersion: ReleaseTerm[];
   distribution: ReleaseTerm[];
-  /** The licence (dcterms:license). */
-  licence: ReleaseTerm[];
+  /** The license (dcterms:license). */
+  license: ReleaseTerm[];
   /** What it was compiled from (prov:wasDerivedFrom). */
   sources: ReleaseTerm[];
   activities: ReleaseActivity[];
@@ -206,7 +206,7 @@ export function emptyReleaseModel(url: string): ReleaseModel {
     prev: [],
     previousVersion: [],
     distribution: [],
-    licence: [],
+    license: [],
     sources: [],
     activities: [],
     making: [],

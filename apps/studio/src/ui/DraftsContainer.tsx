@@ -21,10 +21,10 @@ export function draftsKey(instanceUrl: string): readonly unknown[] {
 /**
  * The drafts screen's data: the instance's drafts (draftsKey) and its
  * decks as the user arranged them (Home's query), to start a draft of
- * one. Making a draft or deleting one writes the catalogue, so it waits
- * its turn with the other writes of the catalogue (catalogScope), and the
+ * one. Making a draft or deleting one writes the catalog, so it waits
+ * its turn with the other writes of the catalog (catalogScope), and the
  * drafts are read afresh after it. Both are held until the instance's
- * data check is done, and while the catalogue is set aside
+ * data check is done, and while the catalog is set aside
  * (useDataCheck). A deleted draft's URL is a new draft's when one of
  * its name is made, so what was read at a draft's URL (draftKey) is
  * forgotten when one is deleted, and when one is made. A draft made is

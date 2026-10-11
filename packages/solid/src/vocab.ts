@@ -38,15 +38,15 @@ export const DCTERMS = {
   source: "http://purl.org/dc/terms/source",
   /** A deck's author: a foaf:Agent node (a "Name <email>" literal before deck format 3). */
   creator: "http://purl.org/dc/terms/creator",
-  /** Who publishes a catalogue or a library deck: a foaf:Agent. */
+  /** Who publishes a catalog or a library deck: a foaf:Agent. */
   publisher: "http://purl.org/dc/terms/publisher",
   /** When a library release was issued. */
   issued: "http://purl.org/dc/terms/issued",
-  /** The licence URL a deck's content is offered under. */
+  /** The license URL a deck's content is offered under. */
   license: "http://purl.org/dc/terms/license",
   /** A deck's blurb: what it covers, where its content came from. */
   description: "http://purl.org/dc/terms/description",
-  /** What a catalogue's licence is, as DCAT-AP asks of it. */
+  /** What a catalog's license is, as DCAT-AP asks of it. */
   LicenseDocument: "http://purl.org/dc/terms/LicenseDocument",
   /** On a deck's cards document itself (`<>`): the deck's catalog entry, whose cards it holds. */
   isPartOf: "http://purl.org/dc/terms/isPartOf",
@@ -70,13 +70,13 @@ export const PROV = {
 } as const;
 
 export const DCAT = {
-  /** A catalogue: an instance's catalog.ttl#catalog, the library index. */
+  /** A catalog: an instance's catalog.ttl#catalog, the library index. */
   Catalog: "http://www.w3.org/ns/dcat#Catalog",
   /** A dataset: in a pod, a deck (SM.Deck). */
   Dataset: "http://www.w3.org/ns/dcat#Dataset",
-  /** A catalogue's datasets: in the library index, the decks' series. */
+  /** A catalog's datasets: in the library index, the decks' series. */
   dataset: "http://www.w3.org/ns/dcat#dataset",
-  /** A catalogue's sub-catalogues: in a pod, the deck groups (SM.DeckGroup) it lists. */
+  /** A catalog's sub-catalogs: in a pod, the deck groups (SM.DeckGroup) it lists. */
   catalog: "http://www.w3.org/ns/dcat#catalog",
   /** A release's version within its deck: "1", "2", … */
   version: "http://www.w3.org/ns/dcat#version",

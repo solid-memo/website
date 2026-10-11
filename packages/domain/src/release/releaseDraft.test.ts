@@ -526,12 +526,12 @@ describe("applyDraftChange", () => {
   });
 });
 
-describe("the licence", () => {
+describe("the license", () => {
   const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
   const BY = "https://creativecommons.org/licenses/by/4.0/";
   const typed = (iri: string) => link(iri, RDF_TYPE, "http://purl.org/dc/terms/LicenseDocument");
 
-  it("is set typed a licence document, once, and the one it replaces loses its type", () => {
+  it("is set typed a license document, once, and the one it replaces loses its type", () => {
     const cc0 = made(courseDraft(), { kind: "setLicense", license: CC0 });
     expect(cc0.root.license).toBe(CC0);
     expect(cc0.triples.filter((triple) => triple.subject === CC0)).toEqual([typed(CC0)]);
@@ -544,7 +544,7 @@ describe("the licence", () => {
     expect(none.triples).toEqual(courseDraft().triples);
   });
 
-  it("keeps the type of a licence a source still names", () => {
+  it("keeps the type of a license a source still names", () => {
     const cc0 = made(courseDraft(), { kind: "setLicense", license: CC0 });
     const named = { ...cc0, triples: [...cc0.triples, link("https://source.example/", "http://purl.org/dc/terms/license", CC0)] };
     expect(made(named, { kind: "setLicense", license: BY }).triples).toContainEqual(typed(CC0));

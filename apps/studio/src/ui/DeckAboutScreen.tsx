@@ -22,7 +22,7 @@ import { ReadOnlyScope } from "./ReadOnly";
 /**
  * What a deck says of itself, and how it is studied, each part with its
  * own form: its name; its description, topics and keywords (Solid Memo's
- * DeckAboutSection); its authors and licence; its direction and pace;
+ * DeckAboutSection); its authors and license; its direction and pace;
  * its card sides whose language is not stated (DeckLanguagesSection);
  * and, for a copy of a course (`course` not null), the learner's
  * progress through it. One status line says what the last save did, and

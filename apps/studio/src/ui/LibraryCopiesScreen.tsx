@@ -60,7 +60,7 @@ const CHANGES = ["add", "change", "retire", "restore", "remove", "kept"] as cons
  * instance's data is being checked, and none set aside, which a line
  * says (`readOnly`), with a link to the health (`healthHref`). A copy of
  * a release added from a link says the host it came from; whether a
- * newer version of it is out is unknown when its creator's catalogue
+ * newer version of it is out is unknown when its creator's catalog
  * cannot be read.
  */
 export function LibraryCopiesScreen({

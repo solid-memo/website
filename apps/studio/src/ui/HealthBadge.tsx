@@ -17,7 +17,7 @@ import { deckTextCheck } from "@solid-memo/ui/markdownCache";
  * instance's check too (withDeckReport), which holds the deck
  * (useDataCheck): a deck found mended is let go, and one found broken
  * is held, without the whole instance being checked again. Only a check
- * still current is put there: one cancelled as the deck is checked
+ * still current is put there: one canceled as the deck is checked
  * anew (a repair, say) read the pod before, and would hold a deck mended.
  */
 export function deckHealthQuery(useCases: UseCases, queryClient: QueryClient, instanceUrl: string, deck: Deck) {

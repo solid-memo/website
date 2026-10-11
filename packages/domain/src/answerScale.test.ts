@@ -9,7 +9,7 @@ import { repeatsInSession } from "./scheduling";
 import { applySm2, INITIAL_SM2_STATE } from "./sm2";
 
 describe("answer scales", () => {
-  it("recognises the known scales only", () => {
+  it("recognizes the known scales only", () => {
     for (const scale of ANSWER_SCALES) expect(isAnswerScale(scale)).toBe(true);
     expect(isAnswerScale("emoji")).toBe(false);
     expect(isAnswerScale(null)).toBe(false);

@@ -10,7 +10,7 @@ const BLANK: SourceForm = { title: "", creator: "", license: "", evidence: "", d
 /**
  * The release's sources (docs/studio.md, The release's metadata and
  * provenance): each by its address, shown as text and never opened, with
- * its title, creator and licence; one at a time opened to edit (what it
+ * its title, creator and license; one at a time opened to edit (what it
  * states, and whether the release is derived from it and its making used
  * it), or removed. A source only an earlier version's making used has
  * nothing of this version's to remove: that making still names it. A
@@ -50,7 +50,7 @@ export function ReleaseSources({ draft, onEdit }: { draft: ReleaseDraft; onEdit:
   );
 }
 
-/** A source as a line: its title (else its address), its address, creator and licence, and how the release uses it. */
+/** A source as a line: its title (else its address), its address, creator and license, and how the release uses it. */
 function SourceSummary({ source, onEdit, onRemove }: { source: SourceView; onEdit: () => void; onRemove: () => void }) {
   const { t } = useI18n();
   const uses = [
@@ -87,7 +87,7 @@ function SourceSummary({ source, onEdit, onRemove }: { source: SourceView; onEdi
   );
 }
 
-/** The fields of a source's form: its texts and licence (its address, checked when saved), and how the release uses it. */
+/** The fields of a source's form: its texts and license (its address, checked when saved), and how the release uses it. */
 function SourceFields({ id, form, licenseInvalid, onChange }: { id: string; form: SourceForm; licenseInvalid: boolean; onChange: (form: SourceForm) => void }) {
   const { t } = useI18n();
   const text = (field: "title" | "creator", label: string) => (

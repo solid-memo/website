@@ -78,7 +78,7 @@ describe("parseMarkdown", () => {
     ]);
   });
 
-  it("reads fenced code with its language, normalised, and indented code without one", () => {
+  it("reads fenced code with its language, normalized, and indented code without one", () => {
     expect(parseMarkdown("```HTTP extra words\nGET / HTTP/1.1\n\nHost: x\n```")).toEqual([
       { type: "code", lang: "http", value: "GET / HTTP/1.1\n\nHost: x" },
     ]);

@@ -105,7 +105,7 @@ describe("the card query in the URL", () => {
   });
 
   it("drops what it does not know, and canonicalizes a language tag", () => {
-    const params = new URLSearchParams("field=colour&state=sleepy&has=wings&sort=size&page=-2&size=7&lang=SV-fi");
+    const params = new URLSearchParams("field=color&state=sleepy&has=wings&sort=size&page=-2&size=7&lang=SV-fi");
     expect(queryFromParams(params)).toEqual({ ...DEFAULT_CARD_QUERY, lang: "sv-fi" });
     expect(queryFromParams(new URLSearchParams("lang=Swedish&page=2.5"))).toEqual(DEFAULT_CARD_QUERY);
   });

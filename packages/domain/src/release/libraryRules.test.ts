@@ -38,7 +38,7 @@ describe("metadataProblems", () => {
     inSeries: [iri(SERIES)],
     isVersionOf: [iri(SERIES)],
     publisher: [iri(PUBLISHER)],
-    licence: [iri(MIT)],
+    license: [iri(MIT)],
   });
 
   it("accepts a release whose metadata is what its place says", () => {
@@ -72,7 +72,7 @@ describe("metadataProblems", () => {
   });
 
   it("names a release that states no license", () => {
-    expect(metadataProblems({ ...fine, licence: [] }, first)).toEqual([
+    expect(metadataProblems({ ...fine, license: [] }, first)).toEqual([
       { severity: "error", subject: RELEASE, code: "noLicense", params: {}, field: "http://purl.org/dc/terms/license" },
     ]);
   });

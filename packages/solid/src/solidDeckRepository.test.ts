@@ -349,12 +349,12 @@ describe("readCatalog and saveCatalog", () => {
     publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
   };
 
-  it("read no catalogue from an instance without a catalog document", async () => {
+  it("read no catalog from an instance without a catalog document", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().readCatalog(INSTANCE)).resolves.toBeNull();
   });
 
-  it("write the catalogue into a new catalog document, and read it back", async () => {
+  it("write the catalog into a new catalog document, and read it back", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().saveCatalog(INSTANCE, catalog);
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
@@ -363,7 +363,7 @@ describe("readCatalog and saveCatalog", () => {
     await expect(makeRepository().readCatalog(INSTANCE)).resolves.toEqual(catalog);
   });
 
-  it("write the catalogue beside the decks of an existing catalog document", async () => {
+  it("write the catalog beside the decks of an existing catalog document", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
     await makeRepository().saveCatalog(INSTANCE, catalog);
     const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
@@ -392,7 +392,7 @@ describe("upgradeDecks", () => {
     return setThing(catalogWithDeck(), current);
   }
 
-  it("rewrites each outdated entry, as read, in this app's format and writes a missing catalogue, in one write of the catalog document", async () => {
+  it("rewrites each outdated entry, as read, in this app's format and writes a missing catalog, in one write of the catalog document", async () => {
     const checkWrite = vi.fn(async () => undefined);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithTwo());
     await expect(makeRepository(checkWrite).upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
@@ -412,8 +412,8 @@ describe("upgradeDecks", () => {
     expect(subjects).not.toContain(`${CATALOG}#deck-2`);
   });
 
-  it("keeps a catalogue the document has, and writes nothing when nothing is outdated", async () => {
-    const withCatalogue = setThing(
+  it("keeps a catalog the document has, and writes nothing when nothing is outdated", async () => {
+    const withCatalog = setThing(
       catalogWithTwo(),
       buildThing(createThing({ url: `${CATALOG}#catalog` }))
         .addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog")
@@ -422,7 +422,7 @@ describe("upgradeDecks", () => {
         .addIri("http://purl.org/dc/terms/publisher", "https://bob.example/profile/card#me")
         .build(),
     );
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(withCatalogue);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(withCatalog);
     await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
     const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
     expect(getStringNoLocale(getThing(saved, `${CATALOG}#catalog`)!, DCTERMS.title)).toBe("Theirs");
@@ -431,7 +431,7 @@ describe("upgradeDecks", () => {
     expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
   });
 
-  it("creates the catalog document for a catalogue alone, and writes nothing where there is neither", async () => {
+  it("creates the catalog document for a catalog alone, and writes nothing where there is neither", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().upgradeDecks(INSTANCE, null)).resolves.toBe(false);
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();

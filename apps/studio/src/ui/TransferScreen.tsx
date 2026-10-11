@@ -25,8 +25,8 @@ export interface ExportRun {
  * user's progress when asked. Import: a file the user picks, what it
  * holds (its deck, its cards, any progress, and what of it was brought
  * up to date or left out), then a new deck of the instance made of it,
- * with its progress when asked. An import adds to the catalogue, so it
- * is held while the catalogue may not be changed (`importReadOnly`); a
+ * with its progress when asked. An import adds to the catalog, so it
+ * is held while the catalog may not be changed (`importReadOnly`); a
  * file can still be read, and every deck exported.
  */
 export function TransferScreen({

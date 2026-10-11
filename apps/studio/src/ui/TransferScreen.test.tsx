@@ -157,9 +157,9 @@ describe("TransferScreen", () => {
     expect(props.onImport).toHaveBeenLastCalledWith(false);
   });
 
-  it("holds the import while the catalogue may not be changed, a file still read", () => {
+  it("holds the import while the catalog may not be changed, a file still read", () => {
     const props = renderScreen({ file, importReadOnly: "setAside" });
-    expect(screen.getByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(screen.getByText(/catalog or one of its groups has invalid data/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Import into Deck set A" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Choose a file…" })).toBeEnabled();
     expect(props.onImport).not.toHaveBeenCalled();

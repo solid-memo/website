@@ -12,7 +12,7 @@ import { Screen } from "./Screen.ts";
  * problems of the release it will be, each a link to what it is about;
  * its listing preview shows it as the library will. A next version is
  * compared with the release it follows. Its release screen says who
- * compiled it and how, under what licence, and from what sources, and
+ * compiled it and how, under what license, and from what sources, and
  * publishes it in the pod, public.
  */
 export class DraftEditor extends Screen {
@@ -116,15 +116,15 @@ export class DraftEditor extends Screen {
     });
   }
 
-  /** Chooses the release's licence, by its name. */
-  async chooseReleaseLicence(licence: string): Promise<void> {
-    await this.intent(`License the release ${licence}`, async () => {
-      await this.page.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: licence });
+  /** Chooses the release's license, by its name. */
+  async chooseReleaseLicense(license: string): Promise<void> {
+    await this.intent(`License the release ${license}`, async () => {
+      await this.page.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: license });
       await this.expectSaved();
     });
   }
 
-  /** Adds a source by its address, title and the evidence for its licence, its creator left out. */
+  /** Adds a source by its address, title and the evidence for its license, its creator left out. */
   async addSource(address: string, title: string, evidence: string): Promise<void> {
     await this.intent(`Add the source ${title}`, async () => {
       const form = this.page.getByRole("group", { name: this.t("studio.release.newSource") });

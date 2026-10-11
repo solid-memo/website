@@ -79,7 +79,7 @@ describe("ReleaseDiffScreen", () => {
     renderScreen(draft, diffOf(draft));
     const rules = screen.getByRole("region", { name: "Rules of the series" });
     expect(within(rules).getByText(/^Drops #ch-apps/)).toBeInTheDocument();
-    expect(screen.getByText("Changed: title, licence.")).toBeInTheDocument();
+    expect(screen.getByText("Changed: title, license.")).toBeInTheDocument();
     const content = screen.getByRole("region", { name: "Its content" });
     expect(within(content).getByRole("link", { name: "Where is data?" })).toHaveAttribute("href", "#/question/q-pods-1a");
     expect(within(content).getByText(/: changed$/, { selector: "li" })).toBeInTheDocument();

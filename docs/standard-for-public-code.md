@@ -12,7 +12,7 @@ when a phase is done.
 
 The engineering is strong:
 
-- The code is open and MIT-licensed, and every deck release has an open licence.
+- The code is open and MIT-licensed, and every deck release has an open license.
 - The app is built on open standards: Solid, Solid-OIDC, RDF, SHACL, DCAT, SKOS and PROV-O.
 - Coverage is at 100% in every package, and interop is tested against several Solid servers.
 - The vocabulary, shapes and decks are versioned rigorously.
@@ -66,7 +66,7 @@ Check these again before relying on them.
 
 ## What meets the standard today
 
-- **Open code and licences.** The code is public and MIT-licensed. Production is built only from public `main`, after CI passes. No secrets are in the tree or its history. Every deck and course release declares an open `dcterms:license`. Vendored shapes keep their own licences.
+- **Open code and licenses.** The code is public and MIT-licensed. Production is built only from public `main`, after CI passes. No secrets are in the tree or its history. Every deck and course release declares an open `dcterms:license`. Vendored shapes keep their own licenses.
 - **Open standards.** The app uses the Solid Protocol, Solid-OIDC, the type index, RDF and Turtle, SHACL, DCAT 3 and DCAT-AP, SKOS, PROV-O, schema.org, CommonMark and BCP 47. It publishes its own versioned vocabulary in `ns/`.
 - **Continuous integration.** `npm run check` runs at 100% coverage, alongside the pySHACL cross-check, the pod, contract and journey tests, and a weekly interop run.
 - **Portability.** The build is static and runs from any host or subpath. `VITE_LIBRARY_INDEX_URL` points a build at another deck library.
@@ -97,7 +97,7 @@ These are the requirements not yet met, by criterion. Paths are as of
   - [authentication.md](authentication.md) does not link Solid-OIDC or WebID.
   - The type index and the CLDR plural rules are used without references.
   - No page says what the app does with personal data.
-- SHOULD — tests that check the policy. Nothing makes a deck licence required: the
+- SHOULD — tests that check the policy. Nothing makes a deck license required: the
   `#license` property shapes have no `sh:minCount`, and the deck library
   check does not look for one.
 
@@ -120,7 +120,7 @@ These are the requirements not yet met, by criterion. Paths are as of
 - MUST — contribution guidelines. There is no `CONTRIBUTING.md`.
 - MUST — governance. Nothing says who decides and how. This includes who may
   deploy by hand, and when Renovate automerges.
-- SHOULD — who pays for reviews, which organisations are involved, and a public
+- SHOULD — who pays for reviews, which organizations are involved, and a public
   roadmap. None of these is stated.
 - SHOULD — activity statistics. There are no badges, and the footer links the wrong
   repository.
@@ -205,9 +205,9 @@ These are the requirements not yet met, by criterion. Paths are as of
 
 ### 13. Publish with an open license
 
-- SHOULD — a licence in every source file. No file has an SPDX header.
+- SHOULD — a license in every source file. No file has an SPDX header.
 - Hardening:
-  - The licence of `docs/` and `ns/` is only implied by the MIT licence.
+  - The license of `docs/` and `ns/` is only implied by the MIT license.
   - `ns/vocab` declares no `dcterms:license`.
 
 ### 14. Make the codebase findable
@@ -215,7 +215,7 @@ These are the requirements not yet met, by criterion. Paths are as of
 - SHOULD — a descriptive name. The repository's name, `website`, says
   nothing about the project, and the archived `antwika/solid-memo` still shows
   up in searches.
-- SHOULD — listed in catalogues, findable by its name and by the problem it
+- SHOULD — listed in catalogs, findable by its name and by the problem it
   solves, a persistent identifier, and machine-readable metadata. It has none of these: no GitHub topics, no
   `publiccode.yml`, no DOI. The site has no crawlable page explaining what
   it is.
@@ -255,7 +255,7 @@ Several items depend on a choice only the maintainer can make:
    privacy page.
 5. **Repository name.** Rename `website` (GitHub redirects the old URL), or keep
    it and give it a descriptive description.
-6. **Licence of `docs/` and `ns/`.** MIT stated outright, or CC BY 4.0 or
+6. **License of `docs/` and `ns/`.** MIT stated outright, or CC BY 4.0 or
    CC0. This decides how REUSE is set up.
 7. **Maturity and versions.** A status (for example "beta"), SemVer 0.x
    tags, and whether release-please makes the releases.
@@ -289,7 +289,7 @@ Whatever is decided:
   - commit messages: an imperative subject, a body that explains why, a `Refs: #NN` trailer, and one change per commit;
   - text formats only;
   - review: volunteer and best effort, a target of two business days, and reasons given for a declined contribution;
-  - licensing: contributions come in under the licence they go out under, and there is no CLA;
+  - licensing: contributions come in under the license they go out under, and there is no CLA;
   - English is authoritative. *(3–7, 10, 12, 13, 15)*
 - [ ] **`GOVERNANCE.md`** and `.github/CODEOWNERS` (decisions 1, 3 and 8). They cover:
   - how decisions are made, and the rules for merging;
@@ -306,14 +306,14 @@ Whatever is decided:
   Optionally add `apps/web/public/.well-known/security.txt`, and extend `deploy.yml`'s artifact check to require it. *(5)*
 - [ ] **Templates.**
   - Issue forms for bugs, features, decks, translations and interop reports, plus `config.yml`.
-  - `.github/pull_request_template.md`, whose checklist covers the linked issue, tests, docs, i18n, the impact on `ns/`, shapes, migrations and licences, the architecture and boundaries, and that the app was run.
+  - `.github/pull_request_template.md`, whose checklist covers the linked issue, tests, docs, i18n, the impact on `ns/`, shapes, migrations and licenses, the architecture and boundaries, and that the app was run.
   - Optionally `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1). *(3–7, 12)*
 - [ ] **README.** Add:
   - an "About" in plain words;
   - a "Status" section;
   - "Run it on its own";
   - a "Contributing" section linking to issues, pull requests, `CONTRIBUTING.md`, `SECURITY.md` and Discussions;
-  - the language statement, CI and interop badges, a link to `/journeys/`, and the licence of `docs/` and `ns/`. *(3, 5, 8–10, 12, 14, 16)*
+  - the language statement, CI and interop badges, a link to `/journeys/`, and the license of `docs/` and `ns/`. *(3, 5, 8–10, 12, 14, 16)*
 - [ ] **New pages in this folder**, each listed in [README.md](README.md). *(2, 8, 10, 11)*
   - `objectives.md` — the mission, the goals with the pages that implement them, who the app is for, and what it is not for. A table maps the principles and standards to where they are enforced.
   - `policy.md` — no public policy applies. Lists the external rules the code follows, with versions: SM-2 and the CLDR plural rules.
@@ -339,7 +339,7 @@ Whatever is decided:
 
 - [ ] **`ci.yml`.**
   - Add `pull_request`, and limit `push` to `main` (and `renovate/**`, while Renovate merges onto branches).
-  - Add a `ci-ok` job that needs every other job, runs `if: always()`, and fails if any of them failed or was cancelled.
+  - Add a `ci-ok` job that needs every other job, runs `if: always()`, and fails if any of them failed or was canceled.
   - The workflow reads only and uses no secrets, so it is safe for fork pull requests. *(3–5, 7, 12, 15)*
 - [ ] **`ns.yml`.**
   - Limit `push` to `main`, and add `pull_request` with the same path filters. Its `--base` logic already handles both events.
@@ -352,7 +352,7 @@ Whatever is decided:
   - A check that fails on prerelease dependencies, with documented exceptions.
   - Write coverage totals to `$GITHUB_STEP_SUMMARY`.
 - [ ] **A docs job.** lychee (offline on pull requests, online weekly), markdownlint-cli2, cspell and publiccode-parser. *(9, 10, 12, 14)*
-- [ ] **Licence required.**
+- [ ] **License required.**
   - A new library deck shape version with `sh:minCount 1` on `#license`, or a check in the deck library, with a test that fails without one.
   - Table-driven `sm2.test.ts` cases that mirror [srs.md](srs.md). *(2)*
 - [ ] **GitHub settings** (admin). *(1, 3–5, 7, 12, 14)*

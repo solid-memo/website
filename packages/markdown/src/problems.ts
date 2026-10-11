@@ -115,7 +115,7 @@ const HOST = /^(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?\.)+\p{L}{2,}(?:[:/
  * `evil.github.io`. Any other text, "the specification", may lead
  * anywhere, as may text taken for a host name that is none, a file's
  * name such as `package.json`, which this flags too: the app shows the
- * host beside every link, the defence against a link that misleads.
+ * host beside every link, the defense against a link that misleads.
  */
 function leadsTo(text: string, href: string): boolean {
   const trimmed = text.trim();

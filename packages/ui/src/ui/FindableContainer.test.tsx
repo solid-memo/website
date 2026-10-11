@@ -50,7 +50,7 @@ describe("FindableContainer", () => {
     const items = (await within(section).findAllByRole("listitem")).map((item) => item.textContent);
     expect(items).toEqual([
       "This instance (Solid Memo's folder): in your public type index",
-      "Its catalogue of decks: in your public type index",
+      "Its catalog of decks: in your public type index",
       "Decks: missing from your public type index",
       "Cards: missing from your public type index",
       "Review states: missing from your private type index",

@@ -6,7 +6,7 @@
  * one Turtle document. Someone with no login can then read it, as the
  * access control the server has (its own ACL on a server with Web
  * Access Control, its ACR on one with Access Control Policies) now says
- * of that document alone; the catalogue lists it; the draft is released,
+ * of that document alone; the catalog lists it; the draft is released,
  * and changes no more. Publishing it again, or anything else, at the
  * same address is refused, and leaves the release as it was. A learner
  * adds the release from its link, and finds the next version published
@@ -170,7 +170,7 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([{ url: target, public: true }]);
   });
 
-  it("lets a learner add a release from its link, and finds its next version in the catalogue that published it", { timeout: 300_000 }, async () => {
+  it("lets a learner add a release from its link, and finds its next version in the catalog that published it", { timeout: 300_000 }, async () => {
     const creator = await seed(server);
     const learner = await seed(server);
     const useCases = page();
@@ -186,7 +186,7 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     expect(copy.sourceUrl).toBe(v1);
     expect((await useCases.listCards(copy)).map((card) => card.id)).toEqual(["se"]);
 
-    // The creator's catalogue, readable here, lists what its instance published: none newer yet, then version 2.
+    // The creator's catalog, readable here, lists what its instance published: none newer yet, then version 2.
     const listed = async () =>
       (await useCases.listLibraryUpdates(learner.url)).map(({ series, version, newer, fromLink }) => ({ series: series?.url, version, newer, fromLink }));
     expect(await listed()).toEqual([{ series: v1, version: "1", newer: false, fromLink: true }]);
@@ -201,7 +201,7 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     const draftUrl = made!.draft.url;
     const target = releaseUrlIn(releasesContainerOf(instance.url), "brightest-stars", 2);
 
-    // The catalogue's link refused, once the release is written: the draft is left as it was.
+    // The catalog's link refused, once the release is written: the draft is left as it was.
     const catalog = `${instance.url}catalog.ttl`;
     const cut: typeof globalThis.fetch = async (input, init) => {
       const method = (init?.method ?? "GET").toUpperCase();

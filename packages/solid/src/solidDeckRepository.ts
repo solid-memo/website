@@ -215,7 +215,7 @@ export function createSolidDeckRepository({
         const after = applyDeckTreeEdit(before, edit);
         if (after === before) return after;
         const { dataset: updated, subjects } = withTreeChanges(dataset, catalogUrl, treeChanges(stored, after));
-        // Only the groups and the catalogue are checked: a deck's position is
+        // Only the groups and the catalog are checked: a deck's position is
         // no shape's, and a deck set aside beside the moved one must not stop it.
         await checkWrite(updated, subjects, "pod");
         try {
@@ -486,7 +486,7 @@ export function createSolidDeckRepository({
   /**
    * A fresh deck's identity and document locations, before any write.
    * An import carries over the library release's provenance — its
-   * authors, licence, description, topics and keywords (per language,
+   * authors, license, description, topics and keywords (per language,
    * an older release's untagged ones kept untagged), and which
    * release it is — and the direction it is meant to be studied in. The
    * format version is always this app's own: the copy is written in the

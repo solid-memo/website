@@ -372,7 +372,7 @@ export async function addRegistrations(
  * Remove every registration of an instance's data from a type index
  * document (see changeIndex), by what each class's registration names
  * (registeredOf): the container for its sm:Instance registration, and
- * for the others exactly the instance's catalogue
+ * for the others exactly the instance's catalog
  * (`<container>catalog.ttl#catalog`), catalog document, `decks/`,
  * `reviews/` and `history/`, never anything else below the container,
  * which may be another app's. A registration that names something else

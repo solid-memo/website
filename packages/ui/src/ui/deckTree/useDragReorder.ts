@@ -70,7 +70,7 @@ function rowElements(container: HTMLElement): Map<string, HTMLElement> {
  * heard) to the drop, then lets go of everything.
  *
  * While a row is lifted the page does not scroll under the finger (a
- * touchmove is cancelled), it scrolls by itself near the viewport's top
+ * touchmove is canceled), it scrolls by itself near the viewport's top
  * and bottom (a frame at a time through `schedule`), a copy of the row
  * (`ghostRef`, which the list renders while dragging) follows the
  * pointer, and a line (`lineRef`, always in the list, hidden between

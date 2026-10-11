@@ -2,13 +2,13 @@ import type { ComponentChildren } from "preact";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { useI18n } from "@solid-memo/ui/i18n";
 
-/** What a screen cannot change: a deck, the decks it lists, or the instance's catalogue. */
+/** What a screen cannot change: a deck, the decks it lists, or the instance's catalog. */
 export type ReadOnlySubject = "deck" | "decks" | "catalogue";
 
 /**
  * Why a screen changes nothing (useDataCheck): the instance's data is
  * being checked, or it is invalid, the whole instance blocked or the
- * deck (or decks, or catalogue) set aside, with a link to the health
+ * deck (or decks, or catalog) set aside, with a link to the health
  * screen that repairs it (`healthHref`). Nothing when it may change.
  */
 export function ReadOnlyNotice({

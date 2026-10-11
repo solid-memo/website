@@ -29,7 +29,7 @@ function renderMoves(nodeKey: string) {
 }
 
 describe("MoveItems in a course's outline", () => {
-  it("moves a step among its neighbours or to another chapter, never out of its chapter or into a group", () => {
+  it("moves a step among its neighbors or to another chapter, never out of its chapter or into a group", () => {
     const onMove = renderMoves("a2");
     expect(screen.queryByRole("menuitem", { name: /Move out of/ })).toBeNull();
     expect(screen.queryByRole("menuitem", { name: /Group with/ })).toBeNull();

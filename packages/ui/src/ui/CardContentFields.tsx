@@ -420,7 +420,7 @@ export function CardFieldsErrorMessage({ invalid }: { invalid: CardFieldsError |
  * and a preview of the card as it will be studied under the fields
  * (CardPreview). Switched on over text that reads otherwise as Markdown,
  * a status under the toggle says so, while that text is unchanged
- * (switchMarkdown); not of Markdown typed afterwards, which is meant. The label and the pictures' descriptions stay single
+ * (switchMarkdown); not of Markdown typed afterward, which is meant. The label and the pictures' descriptions stay single
  * lines: a label is one line in study, and a description is plain text.
  */
 export function CardContentFields({

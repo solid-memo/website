@@ -263,7 +263,7 @@ describe("deck directions", () => {
   };
   const norway: Card = { ...sweden, id: "norway", front: { "": "Norway" }, back: { "": "Oslo" } };
 
-  it("recognises the three directions and nothing else", () => {
+  it("recognizes the three directions and nothing else", () => {
     expect(isDeckDirection("front-to-back")).toBe(true);
     expect(isDeckDirection("back-to-front")).toBe(true);
     expect(isDeckDirection("bidirectional")).toBe(true);
@@ -315,9 +315,9 @@ describe("deck directions", () => {
       question: { side: "front", text: { "": "Sweden" }, imageUrl: FLAG, imageDescription: { en: "A blue flag" } },
       answer: { side: "back", text: { "": "Stockholm" }, imageUrl: FLAG, imageDescription: { en: "The same flag" } },
     });
-    const labelled = { ...sweden, backLabel: { en: "Capital" } };
-    expect(promptSides({ card: labelled, direction: "front-to-back" }).answer).toMatchObject({ side: "back", label: { en: "Capital" } });
-    expect(promptSides({ card: labelled, direction: "back-to-front" }).question).toMatchObject({ side: "back", label: { en: "Capital" } });
+    const labeled = { ...sweden, backLabel: { en: "Capital" } };
+    expect(promptSides({ card: labeled, direction: "front-to-back" }).answer).toMatchObject({ side: "back", label: { en: "Capital" } });
+    expect(promptSides({ card: labeled, direction: "back-to-front" }).question).toMatchObject({ side: "back", label: { en: "Capital" } });
     const flagOnly = { ...sweden, frontImageUrl: FLAG, backImageUrl: undefined };
     expect(promptSides({ card: flagOnly, direction: "front-to-back" })).toEqual({
       question: { side: "front", text: { "": "Sweden" }, imageUrl: FLAG },

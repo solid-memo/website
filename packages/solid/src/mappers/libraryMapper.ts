@@ -32,10 +32,10 @@ import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 
 /**
  * Every deck the library's index lists (see docs/deck-library.md): the
- * catalogue's datasets are the decks' series, each described by its
+ * catalog's datasets are the decks' series, each described by its
  * current release, which the index carries in full but for its cards.
  * A series or release that does not fit its shape is left out. The
- * course the catalogue offers to newcomers (sm:newcomerCourse) is
+ * course the catalog offers to newcomers (sm:newcomerCourse) is
  * flagged forNewcomers, if it is listed and is a course. The index is a
  * document of relative IRIs, so every URL here is where it can be
  * fetched from.
@@ -60,7 +60,7 @@ export function toLibraryDecks(index: SolidDataset): LibraryDeck[] {
 /**
  * What the index says that places a release in the library (the
  * Studio's release check, domain/release/releaseCheck.ts): its address,
- * its catalogue's publisher, and every release of every deck it lists.
+ * its catalog's publisher, and every release of every deck it lists.
  */
 export function toLibraryIndexView(indexUrl: string, index: SolidDataset): LibraryIndexView {
   const catalog = getThingAll(index).find((thing) => getUrlAll(thing, RDF.type).includes(DCAT.Catalog));

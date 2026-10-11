@@ -70,7 +70,7 @@ function moveIri(iri: string, move: ContainerMove): string {
 /**
  * The InstanceCopier over a Solid pod: documents copied with every IRI
  * under the old container moved under the new one (a deck's cards
- * document, the catalogue node), other files byte for byte. The engine
+ * document, the catalog node), other files byte for byte. The engine
  * module (lazy, like the validator's) does the moving.
  */
 export function createSolidInstanceCopier({

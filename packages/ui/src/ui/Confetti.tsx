@@ -18,7 +18,7 @@ const PAUSE = 0.28;
 /**
  * A number in [0, 1) that looks random but follows from `index` and
  * `salt` alone, so the confetti flies the same way every time, while
- * pieces side by side, or of one colour, fly unalike.
+ * pieces side by side, or of one color, fly unalike.
  */
 function scatter(index: number, salt: number): number {
   const wave = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
@@ -33,7 +33,7 @@ function round(value: number, unit: string): string {
 /**
  * Confetti over the page, for a course just completed (style.css): three
  * shooters along the bottom of the viewport pop in quick succession, each
- * shooting a cone of pieces in the app's colours up at its own angle,
+ * shooting a cone of pieces in the app's colors up at its own angle,
  * which then flutter slowly back down and are gone, all in under five
  * seconds (WCAG 2.2.2). Decoration only: hidden from assistive technology, out of the
  * pointer's way, and fixed over the viewport, so it moves nothing on the

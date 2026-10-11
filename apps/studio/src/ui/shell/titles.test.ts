@@ -34,7 +34,7 @@ describe("crumbsOf", () => {
     ["the instances", { screen: "instances" }, [instances]],
     ["Home, at its view", { screen: "home", instanceUrl, view: { filter: "kanji" } }, [instances, here("Decks", { screen: "home", instanceUrl, view: { filter: "kanji" } })]],
     ["the groups", { screen: "groups", instanceUrl }, [instances, decks, here("Groups", { screen: "groups", instanceUrl })]],
-    ["the instance", { screen: "instance", instanceUrl }, [instances, decks, here("Name and catalogue", { screen: "instance", instanceUrl })]],
+    ["the instance", { screen: "instance", instanceUrl }, [instances, decks, here("Name and catalog", { screen: "instance", instanceUrl })]],
     ["the library copies", { screen: "library", instanceUrl }, [instances, decks, here("Library copies", { screen: "library", instanceUrl })]],
     ["import and export", { screen: "transfer", instanceUrl }, [instances, decks, here("Import and export", { screen: "transfer", instanceUrl })]],
     ["the drafts", { screen: "drafts", instanceUrl }, [instances, decks, here("Drafts", { screen: "drafts", instanceUrl })]],

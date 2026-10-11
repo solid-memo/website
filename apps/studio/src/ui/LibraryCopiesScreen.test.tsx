@@ -81,7 +81,7 @@ describe("LibraryCopiesScreen", () => {
       ],
     });
     expect(within(table()).getByRole("rowheader", { name: "Pods From bob.example" })).toBeInTheDocument();
-    expect(cells("Pods From bob.example").slice(1)).toEqual(["Release 1", "Release 1", "Not known: no public catalogue of its creator lists it"]);
+    expect(cells("Pods From bob.example").slice(1)).toEqual(["Release 1", "Release 1", "Not known: no public catalog of its creator lists it"]);
     expect(cells("Lakes From bob.example")[3]).toBe("Up to date");
   });
 

@@ -7,7 +7,7 @@ import { createSolidDeckLibrary } from "./solidDeckLibrary";
 /**
  * A release added from a link (docs/deck-library.md, From a link), read
  * as the library adapter reads it: on its own, with no index, and its
- * creator's catalogue looked for above it.
+ * creator's catalog looked for above it.
  */
 
 const RELEASES = "https://alice.example/solid-memo/main/releases/capitals/";
@@ -35,8 +35,8 @@ function serving(documents: Record<string, string | number>): typeof globalThis.
 
 const libraryOver = (fetch: typeof globalThis.fetch) => createSolidDeckLibrary({ fetch, indexUrl: "https://solid-memo.com/decks/index.ttl" });
 
-/** An instance's catalogue that links the releases it published. */
-const catalogue = (instance: string, releases: string[]) =>
+/** An instance's catalog that links the releases it published. */
+const catalog = (instance: string, releases: string[]) =>
   `<${instance}catalog.ttl#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}publishedRelease> ${releases.map((url) => `<${url}>`).join(", ")} .`;
 
 describe("readRelease", () => {
@@ -79,18 +79,18 @@ describe("readRelease", () => {
 });
 
 describe("publishedBeside", () => {
-  it("finds the catalogue above the release that links it, nearest first, as anyone reads it", async () => {
+  it("finds the catalog above the release that links it, nearest first, as anyone reads it", async () => {
     const instance = "https://alice.example/solid-memo/main/";
     const fetch = serving({
       [`${RELEASES}catalog.ttl`]: 401,
-      [`https://alice.example/solid-memo/main/releases/catalog.ttl`]: catalogue("https://alice.example/solid-memo/main/releases/", ["https://elsewhere.example/v1.ttl"]),
-      [`${instance}catalog.ttl`]: catalogue(instance, [V1, V2]),
+      [`https://alice.example/solid-memo/main/releases/catalog.ttl`]: catalog("https://alice.example/solid-memo/main/releases/", ["https://elsewhere.example/v1.ttl"]),
+      [`${instance}catalog.ttl`]: catalog(instance, [V1, V2]),
     });
     await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toEqual([V1, V2]);
     expect(fetch.asked).toEqual([`${RELEASES}catalog.ttl`, `${instance}releases/catalog.ttl`, `${instance}catalog.ttl`]);
   });
 
-  it("is null when no catalogue that links the release can be read, up to the host's root", async () => {
+  it("is null when no catalog that links the release can be read, up to the host's root", async () => {
     const fetch = serving({ "https://alice.example/catalog.ttl": 403 });
     await expect(libraryOver(fetch).publishedBeside("https://alice.example/memo/v1.ttl")).resolves.toBeNull();
     expect(fetch.asked).toEqual(["https://alice.example/memo/catalog.ttl", "https://alice.example/catalog.ttl"]);

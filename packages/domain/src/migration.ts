@@ -83,7 +83,7 @@ export interface MigrationPlan {
   preferencesOutdated: boolean;
   instanceOutdated: boolean;
   /**
-   * The instance has no catalogue (a dcat:Catalog of its decks, since
+   * The instance has no catalog (a dcat:Catalog of its decks, since
    * deck format 3): the update describes it as one and registers it.
    */
   catalogMissing: boolean;

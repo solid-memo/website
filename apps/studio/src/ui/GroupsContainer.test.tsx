@@ -77,7 +77,7 @@ describe("GroupsContainer", () => {
 
   it("says which decks are set aside, and holds the arrangement while it is set aside", async () => {
     renderContainer(
-      makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, course]), checkInstance: vi.fn(async () => invalidReport([kanji], { catalogue: true })) }),
+      makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, course]), checkInstance: vi.fn(async () => invalidReport([kanji], { catalog: true })) }),
     );
     expect(await screen.findByText("Set aside: its data needs repair")).toBeInTheDocument();
     expect(await screen.findByText(/The arrangement of these decks has invalid data/)).toBeInTheDocument();

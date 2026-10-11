@@ -1,11 +1,11 @@
 // @vitest-environment node
 /**
  * What another app wrote, against a real Solid server (docs/data-model.md
- * "Deleting an instance" and "The catalogue"): deleting an instance
+ * "Deleting an instance" and "The catalog"): deleting an instance
  * deletes only what Solid Memo wrote, keeping another app's files in its
  * folder and the folder with them, and deletes the whole folder, access
  * rules and all, when nothing else is in it; a dataset another app listed
- * in the catalogue stays listed through every deck save, and the instance
+ * in the catalog stays listed through every deck save, and the instance
  * stays valid; what is wrong with another app's subjects is only
  * warned about (docs/validation.md "Data another app wrote"); and a
  * review state another app named its own way is read by what it says it
@@ -147,7 +147,7 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
       expect(await status(url), url).toBe(404);
     }
     expect(rivers.cardsDocumentUrl.startsWith(`${instance.url}decks/`)).toBe(true);
-    // Unregistered, the catalogue too.
+    // Unregistered, the catalog too.
     expect(await page().listInstances(session)).toEqual([]);
     const index = await triples(typeIndex);
     expect(index).not.toContain(instance.url);
@@ -164,7 +164,7 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     expect(await status(folderAcl)).toBe(404);
   }, 60_000);
 
-  it("stays listed in the catalogue through every deck save and removal, and the instance stays valid", async () => {
+  it("stays listed in the catalog through every deck save and removal, and the instance stays valid", async () => {
     const { base, instance, decks, useCases } = await seed(server);
     const catalog = `${instance.url}catalog.ttl`;
     const cookbook = `${base}recipes/index.ttl#cookbook`;
@@ -215,7 +215,7 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     const warned = { foreign: true, violations: expect.arrayContaining([expect.objectContaining({ severity: "warning" })]) };
     expect(subjects.find((subject) => subject.url === `${catalog}#recipes`)).toMatchObject({ status: "profiled", ...warned });
     expect(subjects.find((subject) => subject.url === `${cards}#their-agent`)).toMatchObject({ status: "checked", shape: "agent", ...warned });
-    // The catalogue only has warnings about its links to them.
+    // The catalog only has warnings about its links to them.
     expect(subjects.find((subject) => subject.url === `${catalog}#catalog`)).toMatchObject({
       status: "checked",
       violations: expect.arrayContaining([expect.objectContaining({ path: DCAT_DATASET, severity: "warning" })]),

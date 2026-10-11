@@ -28,12 +28,12 @@ function deckOf(id: string): Deck {
 const bad = deckOf("bad");
 const good = deckOf("good");
 
-/** A report with the bad deck's cards document invalid, the catalogue too when asked, and another app's subject only warned about. */
-function invalid(catalogue = false): ValidationReport {
+/** A report with the bad deck's cards document invalid, the catalog too when asked, and another app's subject only warned about. */
+function invalid(catalog = false): ValidationReport {
   const violation = { message: { en: "Less than 1 values" }, severity: "violation" as const, constraint: "MinCount" };
   return {
     instanceUrl: INSTANCE,
-    violationCount: catalogue ? 2 : 1,
+    violationCount: catalog ? 2 : 1,
     conforms: false,
     documents: [
       {
@@ -46,7 +46,7 @@ function invalid(catalogue = false): ValidationReport {
         status: "checked",
         subjects: [{ url: `${good.cardsDocumentUrl}#theirs`, status: "foreign", violations: [] }],
       },
-      ...(catalogue
+      ...(catalog
         ? [
             {
               url: `${INSTANCE}catalog.ttl`,
@@ -105,7 +105,7 @@ describe("useDataCheck", () => {
     ).toBeInTheDocument();
   });
 
-  it("sets the arrangement aside when the catalogue is invalid", async () => {
+  it("sets the arrangement aside when the catalog is invalid", async () => {
     renderProbe({ checkInstance: vi.fn(async () => invalid(true)) });
     expect(await screen.findByText(/arrangement aside/)).toBeInTheDocument();
   });

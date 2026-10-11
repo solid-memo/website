@@ -43,7 +43,7 @@ import { SM } from "../vocab";
  *   format, and written as records (recordThing): what the shape owns is
  *   rewritten, anything else on the subject is kept.
  * - **Every other statement** (how the release was made, its sources
- *   and licence, the series it describes, and what a shaped subject says
+ *   and license, the series it describes, and what a shaped subject says
  *   beyond its shape) is read and written as it is: a raw triple.
  *
  * A subject is named in the draft as a fragment of its release document,

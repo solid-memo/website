@@ -79,7 +79,7 @@ describe("quadsToReleaseModel", () => {
       { iri: `${URL}#review`, generating: false },
     ]);
     expect(model.making).toEqual([{ iri: `${URL}#compilation`, used: ["https://solidproject.org/"], comments: [en("Compiled by Ann.")], carried: false }]);
-    expect(model.sourceDetails).toEqual([{ iri: "https://solidproject.org/", title: [plain("Solid")], creator: [], licence: [], comments: [] }]);
+    expect(model.sourceDetails).toEqual([{ iri: "https://solidproject.org/", title: [plain("Solid")], creator: [], license: [], comments: [] }]);
   });
 
   it("reads its cards, chapters, steps and distractors, retired when they state owl:deprecated true", () => {

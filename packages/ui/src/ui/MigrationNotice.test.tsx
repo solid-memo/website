@@ -86,7 +86,7 @@ describe("describeOutdated", () => {
   });
 });
 
-describe("a missing catalogue", () => {
+describe("a missing catalog", () => {
   const catalogOnly: MigrationPlan = {
     decks: [],
     deckCount: 0,
@@ -98,14 +98,14 @@ describe("a missing catalogue", () => {
   };
 
   it("is named in what is outdated, in the formats, on the list and on the button", () => {
-    expect(describeOutdated(catalogOnly, t)).toBe("the instance's catalogue");
+    expect(describeOutdated(catalogOnly, t)).toBe("the instance's catalog");
     expect(describeFormats(catalogOnly, t)).toBe(
-      "a catalogue of each instance's decks, which other apps read as a DCAT catalogue",
+      "a catalog of each instance's decks, which other apps read as a DCAT catalog",
     );
     renderNotice({ plan: catalogOnly });
-    expect(screen.getByRole("region")).toHaveTextContent("the instance's catalogue is stored in an older format.");
-    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Catalogue of the decks"]);
-    expect(screen.getByRole("button", { name: "Update the catalogue" })).toBeEnabled();
+    expect(screen.getByRole("region")).toHaveTextContent("the instance's catalog is stored in an older format.");
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Catalog of the decks"]);
+    expect(screen.getByRole("button", { name: "Update the catalog" })).toBeEnabled();
   });
 });
 

@@ -35,7 +35,7 @@ describe("DeckAboutContainer", () => {
     expect(await screen.findByRole("heading", { name: "About: Kanji N5" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toHaveAttribute("href", "#/deck");
     expect(screen.getByText("Characters.")).toBeInTheDocument();
-    expect(screen.getByText("No authors or licence stated.")).toBeInTheDocument();
+    expect(screen.getByText("No authors or license stated.")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "Front → back" })).toBeChecked();
     expect(screen.getByRole("link", { name: "study preferences" })).toHaveAttribute(
       "href",
@@ -86,42 +86,42 @@ describe("DeckAboutContainer", () => {
     await waitFor(() => expect(useCases.describeDeck).toHaveBeenCalledWith(kanji, expect.objectContaining({ description: { en: "Every N5 kanji." } })));
   });
 
-  it("gives the deck its authors and licence, keeping the form while a save is refused", async () => {
+  it("gives the deck its authors and license, keeping the form while a save is refused", async () => {
     const useCases = makeUseCasesFake();
     renderContainer(useCases);
-    fireEvent.click(await screen.findByRole("button", { name: "Edit authors and licence" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Edit authors and license" }));
     fireEvent.input(screen.getByRole("textbox", { name: "Author 1" }), { target: { value: "Ada Lovelace" } });
     fireEvent.click(screen.getByRole("button", { name: "Add an author" }));
     fireEvent.input(screen.getByRole("textbox", { name: "Author 2" }), { target: { value: "ada lovelace" } });
-    choose("Licence", CC0);
-    fireEvent.click(screen.getByRole("button", { name: "Save authors and licence" }));
+    choose("License", CC0);
+    fireEvent.click(screen.getByRole("button", { name: "Save authors and license" }));
     expect(await screen.findByText("ada lovelace is named twice. Name each author once.")).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Author 2" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Remove author 2" }));
-    fireEvent.click(screen.getByRole("button", { name: "Save authors and licence" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save authors and license" }));
     await waitFor(() => expect(screen.queryByRole("textbox", { name: "Author 1" })).toBeNull());
     expect(useCases.setDeckProvenance).toHaveBeenLastCalledWith(kanji, { authors: ["Ada Lovelace"], license: CC0 });
   });
 
-  it("edits the authors and licence the deck has, a licence of another app's kept on offer, and cancels", async () => {
+  it("edits the authors and license the deck has, a license of another app's kept on offer, and cancels", async () => {
     const own = "https://example.org/terms";
     const useCases = makeUseCasesFake();
     renderContainer(useCases, { ...kanji, authors: ["Ada Lovelace"], license: own });
-    const section = await screen.findByRole("region", { name: "Authors and licence" });
+    const section = await screen.findByRole("region", { name: "Authors and license" });
     expect(section).toHaveTextContent("By Ada Lovelace · https://example.org/terms");
-    fireEvent.click(screen.getByRole("button", { name: "Edit authors and licence" }));
+    fireEvent.click(screen.getByRole("button", { name: "Edit authors and license" }));
     expect(screen.getByRole("textbox", { name: "Author 1" })).toHaveValue("Ada Lovelace");
-    const licence = screen.getByRole("combobox", { name: "Licence" });
-    expect(licence).toHaveValue(own);
-    expect(within(licence).getByRole("option", { name: own })).toBeInTheDocument();
-    expect(within(licence).getByRole("option", { name: "CC BY 4.0" })).toHaveValue(BY);
-    choose("Licence", "");
-    fireEvent.click(screen.getByRole("button", { name: "Save authors and licence" }));
+    const license = screen.getByRole("combobox", { name: "License" });
+    expect(license).toHaveValue(own);
+    expect(within(license).getByRole("option", { name: own })).toBeInTheDocument();
+    expect(within(license).getByRole("option", { name: "CC BY 4.0" })).toHaveValue(BY);
+    choose("License", "");
+    fireEvent.click(screen.getByRole("button", { name: "Save authors and license" }));
     await waitFor(() => expect(useCases.setDeckProvenance).toHaveBeenCalledWith(expect.anything(), { authors: ["Ada Lovelace"] }));
-    fireEvent.click(await screen.findByRole("button", { name: "Edit authors and licence" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Edit authors and license" }));
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(screen.queryByRole("combobox", { name: "Licence" })).toBeNull();
+    expect(screen.queryByRole("combobox", { name: "License" })).toBeNull();
   });
 
   it("sets the pace, then the direction only when it changes", async () => {

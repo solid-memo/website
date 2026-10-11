@@ -54,9 +54,9 @@ describe("createBrowserFileExchange", () => {
 
   it("opens none when the user closes the picker, or picks nothing", async () => {
     const exchange = createBrowserFileExchange();
-    const cancelled = exchange.open(".ttl");
+    const canceled = exchange.open(".ttl");
     picker().dispatchEvent(new Event("cancel"));
-    expect(await cancelled).toBeNull();
+    expect(await canceled).toBeNull();
     const empty = exchange.open(".ttl");
     pick(picker(), []);
     expect(await empty).toBeNull();

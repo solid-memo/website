@@ -5,7 +5,7 @@ import { DCTERMS_NS, SCHEMA_NS, type ReleaseMaking, type ReleaseModel, type Rele
  * How a release says it was made, curated (docs/studio.md, The release
  * check): warnings, never errors, on what a reader of its provenance
  * would miss. A source it names says what it is (a title), whose it is
- * (a creator) and on what terms it was used (a licence, or a comment
+ * (a creator) and on what terms it was used (a license, or a comment
  * quoting the evidence for one). A source its own making used is one it
  * is derived from too. And what its making says it counts (its chapters,
  * steps, sources, cards) is what it has. No rule here names a series,
@@ -42,7 +42,7 @@ export function provenanceOf(
     iri,
     title: said(iri, `${DCTERMS_NS}title`),
     creator: said(iri, `${DCTERMS_NS}creator`),
-    licence: said(iri, `${DCTERMS_NS}license`),
+    license: said(iri, `${DCTERMS_NS}license`),
     comments: said(iri, RDFS_COMMENT),
   }));
   return { making, sourceDetails };
@@ -86,7 +86,7 @@ export function provenanceProblems(model: ReleaseModel): ReleaseProblem[] {
     const missing: SourceDetail[] = [
       ...(source.title.length === 0 ? ["title" as const] : []),
       ...(source.creator.length === 0 ? ["creator" as const] : []),
-      ...(source.licence.length === 0 && source.comments.length === 0 ? ["licence" as const] : []),
+      ...(source.license.length === 0 && source.comments.length === 0 ? ["licence" as const] : []),
     ];
     if (missing.length > 0) problems.push(problem(source.iri, { code: "sourceUndescribed", params: { missing } }, { severity: "warning" }));
     // An earlier release's making is not rewritten: what it used is not held to this release's derivation.

@@ -76,7 +76,7 @@ describe("StudioSidebar", () => {
       ["Health", studioRouteToHash({ screen: "health", instanceUrl })],
       ["Library copies", studioRouteToHash({ screen: "library", instanceUrl })],
       ["Import and export", studioRouteToHash({ screen: "transfer", instanceUrl })],
-      ["Name and catalogue", studioRouteToHash({ screen: "instance", instanceUrl })],
+      ["Name and catalog", studioRouteToHash({ screen: "instance", instanceUrl })],
     ]);
     expect(sections().getByRole("link", { name: "Groups" })).toHaveAttribute("aria-current", "page");
     expect(sections().getByRole("link", { name: "Decks" })).not.toHaveAttribute("aria-current");

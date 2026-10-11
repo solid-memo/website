@@ -9,7 +9,7 @@ const CATALOG = `${INSTANCE}catalog.ttl`;
 const RELEASE = "https://solid-memo.com/decks/solid/v1.ttl";
 const COMPLETED = "<https://solid-memo.com/ns/vocab/v1.ttl#completedChapter>";
 
-/** A pod whose catalogue holds a course's deck, deck-1, copied from RELEASE. */
+/** A pod whose catalog holds a course's deck, deck-1, copied from RELEASE. */
 async function podWithCourse() {
   const pod = fakePod();
   await pod.put(

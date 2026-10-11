@@ -139,7 +139,7 @@ describe("StudioWorkspace", () => {
     const deck = encodeURIComponent(verbs.url);
     expect(inMain().getByRole("link", { name: "Verbs" })).toHaveAttribute("href", `#/studio/about?deck=${deck}`);
     expect(await inMain().findByRole("link", { name: /cards of Verbs/ })).toHaveAttribute("href", `#/studio/cards?deck=${deck}`);
-    expect(sidebar().getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", `#/studio/instance?instance=${instance}`);
+    expect(sidebar().getByRole("link", { name: "Name and catalog" })).toHaveAttribute("href", `#/studio/instance?instance=${instance}`);
     // Home is the decks' section; a deck's screens have tabs, Home none.
     expect(sidebar().getByRole("link", { name: "Decks" })).toHaveAttribute("aria-current", "page");
     expect(screen.queryByRole("navigation", { name: "Deck" })).toBeNull();
@@ -270,15 +270,15 @@ describe("StudioWorkspace", () => {
     );
   });
 
-  it("opens the instance's name and catalogue from the sidebar", async () => {
+  it("opens the instance's name and catalog from the sidebar", async () => {
     window.history.replaceState(null, "", home(instanceA.url));
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]) }));
-    fireEvent.click(await (await sidebarFound()).findByRole("link", { name: "Name and catalogue" }));
+    fireEvent.click(await (await sidebarFound()).findByRole("link", { name: "Name and catalog" }));
     expect(await screen.findByRole("heading", { name: "Instance: Deck set A" })).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "instance", instanceUrl: instanceA.url });
-    await waitFor(() => expect(document.title).toBe("Name and catalogue – Solid Memo Studio"));
+    await waitFor(() => expect(document.title).toBe("Name and catalog – Solid Memo Studio"));
     const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
-    expect(within(trail).getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("aria-current", "page");
+    expect(within(trail).getByRole("link", { name: "Name and catalog" })).toHaveAttribute("aria-current", "page");
   });
 
   it("opens the instance's groups from the sidebar, to arrange them as in Solid Memo", async () => {
@@ -1249,8 +1249,8 @@ describe("StudioWorkspace", () => {
       expect(parseStudioHash(window.location.hash)).toEqual({ screen: "release", draftUrl: DRAFT_URL });
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Release"]);
       // Nothing is changed until the instance's data check is done.
-      await waitFor(() => expect(screen.getByRole("combobox", { name: "Licence" })).toBeEnabled());
-      choose("Licence", "https://creativecommons.org/publicdomain/zero/1.0/");
+      await waitFor(() => expect(screen.getByRole("combobox", { name: "License" })).toBeEnabled());
+      choose("License", "https://creativecommons.org/publicdomain/zero/1.0/");
       await waitFor(() => expect(useCases.editReleaseDraft).toHaveBeenCalledWith(DRAFT_URL, [{ kind: "setLicense", license: "https://creativecommons.org/publicdomain/zero/1.0/" }]));
     });
 

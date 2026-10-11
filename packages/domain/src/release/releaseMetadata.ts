@@ -112,9 +112,9 @@ export interface SourceView {
   title: string;
   /** Who made it (dcterms:creator, as text), "" for none. */
   creator: string;
-  /** Its licence (dcterms:license), "" for none. */
+  /** Its license (dcterms:license), "" for none. */
   license: string;
-  /** The evidence for its licence, quoted or described (rdfs:comment), "" for none. */
+  /** The evidence for its license, quoted or described (rdfs:comment), "" for none. */
   evidence: string;
   /** The release is drawn from it (prov:wasDerivedFrom). */
   derivedFrom: boolean;
@@ -175,7 +175,7 @@ export function sourceIri(text: string): string | null {
 }
 
 /**
- * Whether a source's licence can be saved as its form gives it: none,
+ * Whether a source's license can be saved as its form gives it: none,
  * the one it states already (`was`), or an http(s) address (sourceIri).
  * A name such as "CC BY 4.0" is no address.
  */
@@ -184,7 +184,7 @@ export function sourceLicenseValid(license: string, was = ""): boolean {
   return text === "" || text === was || sourceIri(text) !== null;
 }
 
-/** The change that gives a source (by its IRI) what its form says (its licence one sourceLicenseValid takes), its other statements kept. */
+/** The change that gives a source (by its IRI) what its form says (its license one sourceLicenseValid takes), its other statements kept. */
 export function sourceChange(iri: string, form: SourceForm, others: SourceView["others"] = []): DraftChange {
   const text = (value: string): ReleaseText => ({ kind: "literal", value: value.trim(), language: "", datatype: XSD_STRING });
   const statements = [

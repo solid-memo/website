@@ -39,7 +39,7 @@ function renderScreen(
 }
 
 describe("DeckDetailScreen", () => {
-  it("credits an imported deck's author and licence", () => {
+  it("credits an imported deck's author and license", () => {
     renderScreen({
       deck: {
         ...deck,

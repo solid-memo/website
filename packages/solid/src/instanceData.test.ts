@@ -50,7 +50,7 @@ ${catalogExtra}`,
 }
 
 describe("deleteInstanceData", () => {
-  it("deletes an instance that holds only what Solid Memo wrote, folder and all: the decks' documents first, the catalogue after them, meta.ttl last", async () => {
+  it("deletes an instance that holds only what Solid Memo wrote, folder and all: the decks' documents first, the catalog after them, meta.ttl last", async () => {
     const p = pod();
     await p.put(`${ROOT}profile/card`, `<#me> a <http://xmlns.com/foaf/0.1/Person> .`);
     await seedInstance(p);
@@ -75,7 +75,7 @@ describe("deleteInstanceData", () => {
     expect(await p.urls()).toEqual([ROOT, `${ROOT}profile/`, `${ROOT}profile/card`, `${ROOT}solid-memo/`]);
   });
 
-  it("deletes the drafts the catalogue links, before the catalogue, and never one elsewhere", async () => {
+  it("deletes the drafts the catalog links, before the catalog, and never one elsewhere", async () => {
     const p = pod();
     const draft = `${INSTANCE}drafts/solid/v1/`;
     const elsewhere = `${ROOT}solid-memo/other/drafts/solid/v1/release.ttl`;
@@ -102,7 +102,7 @@ describe("deleteInstanceData", () => {
     expect(await p.exists(elsewhere)).toBe(true);
   });
 
-  it("finds no draft in a catalogue document without the catalogue", async () => {
+  it("finds no draft in a catalog document without the catalog", async () => {
     const p = pod();
     await p.put(`${INSTANCE}catalog.ttl`, `<#deck-1> a <${SM}Deck> ; <${SM}cardsDocument> <decks/deck-1.ttl> .`);
     await p.put(`${INSTANCE}decks/deck-1.ttl`, `<#c1> a <${SM}Card> .`);
@@ -150,7 +150,7 @@ describe("deleteInstanceData", () => {
     expect(await p.urls()).toEqual([ROOT, `${ROOT}solid-memo/`, INSTANCE, `${INSTANCE}releases/`, `${INSTANCE}releases/solid/`, `${INSTANCE}releases/solid/v1.ttl`]);
   });
 
-  it("follows the catalogue only to documents below the folder, never to the folder's own documents or a container", async () => {
+  it("follows the catalog only to documents below the folder, never to the folder's own documents or a container", async () => {
     const p = pod();
     const elsewhere = `${ROOT}solid-memo/other/decks/deck-9.ttl`;
     await seedInstance(
@@ -214,7 +214,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE, undeletable.fetch)).rejects.toMatchObject({ statusCode: 403 });
   });
 
-  it("keeps a catalogue it cannot read, and the decks' documents it names, and deletes the rest", async () => {
+  it("keeps a catalog it cannot read, and the decks' documents it names, and deletes the rest", async () => {
     const p = pod();
     await seedInstance(p);
     // As another app might have written it: served as Turtle, but not Turtle.
@@ -237,7 +237,7 @@ describe("deleteInstanceData", () => {
       `${INSTANCE}reviews/deck-1.ttl`,
     ]);
 
-    // A catalogue the pod would not serve is no reason to delete less: the delete fails, to be tried again.
+    // A catalog the pod would not serve is no reason to delete less: the delete fails, to be tried again.
     const refused = pod((method, url) => (method === "GET" && url === `${INSTANCE}catalog.ttl` ? 500 : null));
     await seedInstance(refused);
     await expect(deleteInstanceData(INSTANCE, refused.fetch)).rejects.toMatchObject({ statusCode: 500 });

@@ -189,7 +189,7 @@ describe("applyRepairs", () => {
     expect(getThing(saved(), `${CATALOG}#broken`)).toBeNull();
   });
 
-  it("removes a subject from the catalogue and its deck group, keeping every other link to it", async () => {
+  it("removes a subject from the catalog and its deck group, keeping every other link to it", async () => {
     const deck = `${CATALOG}#deck-1`;
     const agent = `${CATALOG}#agent-x`;
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
@@ -227,14 +227,14 @@ describe("applyRepairs", () => {
     const group1 = getThing(saved(), `${CATALOG}#group-1`)!;
     expect(getUrlAll(group1, DCAT.dataset)).toEqual([]);
     expect(getUrlAll(group1, DCAT.catalog)).toEqual([]);
-    // Only the catalogue and the deck groups list the decks.
+    // Only the catalog and the deck groups list the decks.
     expect(getUrlAll(getThing(saved(), `${CATALOG}#other`)!, DCAT.dataset)).toEqual([deck]);
   });
 
   // Another app's dataset, described in its own document.
   const FOREIGN_DATASET = "https://pod.example/recipes/index.ttl#cookbook";
 
-  it("drops a catalogue's and a deck group's links to decks and groups the document does not describe, never one to another document or to another app's subject", async () => {
+  it("drops a catalog's and a deck group's links to decks and groups the document does not describe, never one to another document or to another app's subject", async () => {
     const group = (url: string) => buildThing(createThing({ url })).addIri(RDF.type, SM.DeckGroup).addIri(RDF.type, DCAT.Catalog);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(
@@ -258,7 +258,7 @@ describe("applyRepairs", () => {
           .build(),
         group(`${CATALOG}#group-2`).build(),
         buildThing(createThing({ url: `${CATALOG}#deck-1` })).addIri(RDF.type, SM.Deck).addIri(RDF.type, DCAT.Dataset).build(),
-        // A deck or group that lost its DCAT class is still one: the catalogue keeps it.
+        // A deck or group that lost its DCAT class is still one: the catalog keeps it.
         buildThing(createThing({ url: `${CATALOG}#deck-old` })).addIri(RDF.type, SM.Deck).build(),
         buildThing(createThing({ url: `${CATALOG}#group-old` })).addIri(RDF.type, SM.DeckGroup).build(),
         // Another app's dataset, described in this document with a class of its own.

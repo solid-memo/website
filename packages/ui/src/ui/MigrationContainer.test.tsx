@@ -179,7 +179,7 @@ describe("MigrationContainer", () => {
       expect.stringMatching(/^The cards of Kanji N5: This was changed elsewhere, perhaps in another tab or app, since Solid Memo read it/),
       expect.stringMatching(/^The review states of Kanji N5: /),
       expect.stringMatching(/^Your preferences: /),
-      expect.stringMatching(/^The catalogue of the decks: /),
+      expect.stringMatching(/^The catalog of the decks: /),
     ]);
     expect(result).toHaveTextContent(
       "1 other document was updated. Every document can be read as it is, updated or not. Trying again updates only what is still outdated.",
@@ -228,13 +228,13 @@ describe("MigrationContainer", () => {
     const useCases = makeUseCasesFake({
       planMigration: vi.fn(async () => outdated),
       updateInstance: vi.fn(async () => {
-        throw new Error("catalogue unreadable");
+        throw new Error("catalog unreadable");
       }),
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Update 1 deck" }));
     fireEvent.click(screen.getByRole("button", { name: "Start the update" }));
-    expect(await screen.findByText("catalogue unreadable")).toBeInTheDocument();
+    expect(await screen.findByText("catalog unreadable")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Update 1 deck" })).toBeEnabled();
   });
 });

@@ -23,7 +23,7 @@ export interface Answer {
   grade: ReviewQuality;
   /** ISO dateTime. */
   answeredAt: string;
-  /** The study day the answer counts towards, fixed when it was given. */
+  /** The study day the answer counts toward, fixed when it was given. */
   studyDay: string;
   /** The prompt's interval before the answer; absent on its first answer, which introduced it. */
   priorIntervalDays?: number;

@@ -89,12 +89,12 @@ describe("TransferContainer", () => {
     expect(screen.getByRole("heading", { name: "capitals.ttl: Capitals" })).toBeInTheDocument();
   });
 
-  it("holds the import while the catalogue is set aside", async () => {
-    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [kanji]), checkInstance: vi.fn(async () => invalidReport([], { catalogue: true })) });
+  it("holds the import while the catalog is set aside", async () => {
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [kanji]), checkInstance: vi.fn(async () => invalidReport([], { catalog: true })) });
     vi.mocked(useCases.openDeckFile).mockResolvedValueOnce(file);
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Choose a file…" }));
-    expect(await screen.findByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(await screen.findByText(/catalog or one of its groups has invalid data/)).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: "Import into Deck set A" })).toBeDisabled();
   });
 

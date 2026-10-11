@@ -9,15 +9,15 @@ import { LicenseSelect } from "./LicenseSelect";
 import { ReadOnlyScope } from "./ReadOnly";
 
 /**
- * An instance's name and its catalogue, each with its own form: the
+ * An instance's name and its catalog, each with its own form: the
  * name, kept in several places (UseCases.renameInstance); and the
- * catalogue's description and licence. The catalogue's publisher, the
+ * catalog's description and license. The catalog's publisher, the
  * pod's owner, is shown, never edited, as is where the instance is. An
- * instance without a catalogue (not updated yet) says so instead. Its
+ * instance without a catalog (not updated yet) says so instead. Its
  * study preferences are set in Solid Memo (`preferencesHref`). The
- * catalogue form starts again from each new read of the catalogue, as
+ * catalog form starts again from each new read of the catalog, as
  * a rename can change its description. While the instance may not be
- * changed (`readOnly`: its data is being checked, or the catalogue is
+ * changed (`readOnly`: its data is being checked, or the catalog is
  * set aside), both forms are shown but held (ReadOnlyScope), with a
  * link to its health (`healthHref`).
  */
@@ -34,10 +34,10 @@ export function InstanceAboutScreen({
   onDescribe,
 }: {
   instance: Instance;
-  /** The catalogue as read; null when the instance has none. */
+  /** The catalog as read; null when the instance has none. */
   catalog: Catalog | null;
   preferencesHref: string;
-  /** Why the name and catalogue may not be changed now (useDataCheck); null when they may. */
+  /** Why the name and catalog may not be changed now (useDataCheck); null when they may. */
   readOnly: ReadOnlyReason | null;
   /** The instance's health, where data set aside is repaired. */
   healthHref: string;
@@ -107,7 +107,7 @@ export function InstanceAboutScreen({
   );
 }
 
-/** The catalogue's description and licence, from `catalog` as read. */
+/** The catalog's description and license, from `catalog` as read. */
 function CatalogForm({ catalog, busy, onDescribe }: { catalog: Catalog; busy: boolean; onDescribe: (about: CatalogAbout) => void }) {
   const { t } = useI18n();
   const [about, setAbout] = useState({ description: catalog.description, license: catalog.license ?? "" });

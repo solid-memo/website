@@ -54,10 +54,10 @@ export function createSolidRepairRepository({
 }
 
 /**
- * The links that make a deck or deck group a member of a catalogue or
+ * The links that make a deck or deck group a member of a catalog or
  * group, and the classes of what they link to: the DCAT class, or the
  * Solid Memo one alone (a deck that lost its DCAT class is still listed,
- * so the catalogue keeps listing every deck).
+ * so the catalog keeps listing every deck).
  */
 const MEMBERSHIP = [
   { link: DCAT.dataset, types: [DCAT.Dataset, SM.Deck] },
@@ -79,9 +79,9 @@ function applyRepair(dataset: SolidDataset, repair: Repair): SolidDataset {
 }
 
 /**
- * A removed subject is no member of the catalogue (`#catalog`) or of a
+ * A removed subject is no member of the catalog (`#catalog`) or of a
  * deck group any more. Only those links go: who else names it — a deck
- * its creator, the catalogue its publisher — is left as it is.
+ * its creator, the catalog its publisher — is left as it is.
  */
 function withoutMembershipsOf(dataset: SolidDataset, documentUrl: string, url: string): SolidDataset {
   return getThingAll(dataset)
@@ -94,7 +94,7 @@ function withoutMembershipsOf(dataset: SolidDataset, documentUrl: string, url: s
 }
 
 /**
- * A catalogue or deck group without its links to subjects of its own
+ * A catalog or deck group without its links to subjects of its own
  * document that the document does not describe as decks or groups. A
  * member in another document (a dataset another app listed) is described
  * there, and its link stays, as does one another app described in this

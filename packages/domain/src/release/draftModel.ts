@@ -99,7 +99,7 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     prev: one(root.prev),
     previousVersion: one(root.previousVersion),
     distribution: iris(root.distribution),
-    licence: one(root.license),
+    license: one(root.license),
     sources,
     activities: typed(`${PROV}Activity`).map((activity) => ({ iri: activity, generating: generating.has(activity) })),
     ...provenanceOf(said, [...generating], sources, new Set(draft.published.activities.map((id) => at(`${draft.url}#${id}`)))),

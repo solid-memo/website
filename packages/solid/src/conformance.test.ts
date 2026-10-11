@@ -269,20 +269,20 @@ describe("what the app writes, under DCAT-AP", () => {
       publisher: { webId: PUBLISHER, name: "Alice" },
     });
 
-  /** The DCAT-AP violations of a catalog document, with the reference data and the deck's licence beside it. */
+  /** The DCAT-AP violations of a catalog document, with the reference data and the deck's license beside it. */
   async function profileViolations(written: ReturnType<typeof toRdfJsDataset>) {
     const shapes = await Promise.all(PROFILES["dcat-ap"].map((path) => sourceDataset(`${SHAPE_SOURCES.vendorBaseUrl}${path}`)));
     const engine = createEngine(mergeDatasets(coreOnly(shapes.flatMap((d) => [...d]))));
     const reference = await Promise.all(REFERENCE_DATA.map((path) => sourceDataset(`${SHAPE_SOURCES.vocabBaseUrl}${path}`)));
-    const licence = await datasetFromTurtle(
+    const license = await datasetFromTurtle(
       "<https://creativecommons.org/publicdomain/zero/1.0/> a <http://purl.org/dc/terms/LicenseDocument> .",
       CATALOG,
     );
-    const data = mergeDatasets(written, ...reference, licence);
+    const data = mergeDatasets(written, ...reference, license);
     return (await engine.validate(data)).filter((v) => v.severity === "violation");
   }
 
-  it("conforms: a catalog document with its catalogue, a deck, its creators and its distribution", async () => {
+  it("conforms: a catalog document with its catalog, a deck, its creators and its distribution", async () => {
     await expect(profileViolations(toRdfJsDataset(catalogDocument()))).resolves.toEqual([]);
   });
 
@@ -296,7 +296,7 @@ describe("what the app writes, under DCAT-AP", () => {
     await expect(engine.validateNode(written, deck.url, SHAPES.deck[6].shapeIri)).resolves.toEqual([]);
   });
 
-  it("conforms: a catalogue the app arranged into nested deck groups, each group also conforming to its own shape", async () => {
+  it("conforms: a catalog the app arranged into nested deck groups, each group also conforming to its own shape", async () => {
     const outer = { url: `${CATALOG}#group-1`, title: { sv: "Språk" } };
     const inner = { url: `${CATALOG}#group-2`, title: { en: "Scripts" } };
     const other: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2`, title: { en: "Greek" } };

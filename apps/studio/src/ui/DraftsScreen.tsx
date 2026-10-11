@@ -29,7 +29,7 @@ const STARTS: readonly Start[] = ["blankDeck", "blankCourse", "fromDeck", "nextV
  * next version of a release (by its address), or from a release saved as
  * a file. A draft made of a copy of a release says so, and offers to
  * start the next version of that release instead, which keeps its
- * learners' progress. Making or deleting a draft changes the catalogue,
+ * learners' progress. Making or deleting a draft changes the catalog,
  * so both are held while it may not be changed (`readOnly`).
  */
 export function DraftsScreen({

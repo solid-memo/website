@@ -38,7 +38,7 @@ import {
  * The deck library (see docs/deck-library.md), published with the site
  * from this repository's decks/ folder: every version of every deck,
  * decks/<name>/v<N>.ttl, frozen once published, and decks/index.ttl, a
- * DCAT catalogue generated from them that the app browses.
+ * DCAT catalog generated from them that the app browses.
  *
  * `npm run library` writes the index; `npm run library:check` fails when
  * it is out of date. Both check the library: the layout (nothing but the
@@ -182,13 +182,13 @@ function n3Term(term: ReleaseTerm): Quad_Object {
  * dcat:DatasetSeries (and dcat:Dataset) whose members are its releases,
  * as seriesEntry (@solid-memo/domain/release/seriesEntry) describes it:
  * the current release's title, description, themes and keywords, every
- * older release summarised, the current one described in full but for
+ * older release summarized, the current one described in full but for
  * its cards, a course's chapters, steps and distractors and the record
  * of how it was made (its schema:Course type stays, which tells a
  * course), plus sm:cardCount, the cards it has in use — so the library
  * can be listed from the index alone. The releases must be sorted by
  * deck then version.
- * The catalogue names `newcomerCourse`'s series the course for newcomers
+ * The catalog names `newcomerCourse`'s series the course for newcomers
  * (solid-memo:newcomerCourse), even when there is no such deck, which
  * newcomerProblems then reports.
  */
@@ -250,7 +250,7 @@ export function buildIndex(releases: readonly DeckRelease[], newcomerCourse?: st
   return writeIndex(distinct(out));
 }
 /**
- * Each triple once: decks share nodes (a licence, a source, an agent),
+ * Each triple once: decks share nodes (a license, a source, an agent),
  * which every deck's release describes, and a graph is a set.
  */
 function distinct(quads: readonly Quad[]): Quad[] {
@@ -400,7 +400,7 @@ export function normalizationProblems(label: string, url: string, quads: readonl
 
 /**
  * What the shapes cannot say about the course the index offers to
- * newcomers (solid-memo:newcomerCourse on its catalogue, which no shape
+ * newcomers (solid-memo:newcomerCourse on its catalog, which no shape
  * owns): at most one, a deck of the library whose current release is a
  * schema:Course.
  */

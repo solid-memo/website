@@ -6,7 +6,7 @@ import { I18nProvider } from "./i18n";
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 
 describe("DeckProvenance", () => {
-  it("names the authors and links the licence", () => {
+  it("names the authors and links the license", () => {
     const { container } = render(
       <DeckProvenance authors={["Anton Wiklund", "A friend"]} license={CC0} />,
     );
@@ -40,7 +40,7 @@ describe("DeckProvenance", () => {
     expect(container.textContent).toBe("Updated September 27, 2026");
   });
 
-  it("shows authors alone or the licence alone", () => {
+  it("shows authors alone or the license alone", () => {
     const { container, rerender } = render(
       <DeckProvenance authors={["Anton Wiklund"]} />,
     );

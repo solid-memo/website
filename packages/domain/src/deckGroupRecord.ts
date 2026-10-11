@@ -6,7 +6,7 @@ import type { StoredGroup } from "./deckTree";
  * A deck group between its shape record and the model (domain/deckTree.ts).
  * The record states what the model leaves to the pod: the group's
  * description, which DCAT-AP asks for and the app writes for the user,
- * and its publisher, the catalogue's. A negative position, which the
+ * and its publisher, the catalog's. A negative position, which the
  * shape does not allow and the tree reads as none, is left out, so that
  * the group is not written back with it.
  */

@@ -85,7 +85,7 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
   });
 
   await app.step("09 · Group the decks and name the group", async () => {
-    expect(await app.groups.groupWithNeighbour(deckA), "deck A is first, so it groups with the one below").toBe("below");
+    expect(await app.groups.groupWithNeighbor(deckA), "deck A is first, so it groups with the one below").toBe("below");
     await app.groups.nameGroup(group);
     expect(await app.groups.orderIn(group)).toEqual([deckA, deckB]);
   });

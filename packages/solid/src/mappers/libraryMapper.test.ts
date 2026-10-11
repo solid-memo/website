@@ -79,7 +79,7 @@ const INDEX_TURTLE = `
 `;
 
 describe("toLibraryDecks", () => {
-  it("lists each series of the catalogue by its current release, with every release, oldest first", async () => {
+  it("lists each series of the catalog by its current release, with every release, oldest first", async () => {
     const index = await datasetFromIndex(INDEX_TURTLE);
     expect(toLibraryDecks(index)).toEqual([
       {
@@ -154,7 +154,7 @@ describe("toLibraryDecks", () => {
     expect(deck).not.toHaveProperty("isCourse");
   });
 
-  it("flags the course the catalogue offers to newcomers, if it is listed and is a course", async () => {
+  it("flags the course the catalog offers to newcomers, if it is listed and is a course", async () => {
     const turtle = (named: string, types: string) => `
 @prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
@@ -223,14 +223,14 @@ describe("toLibraryDecks", () => {
     expect(deck).not.toHaveProperty("versionNotes");
   });
 
-  it("lists nothing for a document without a catalogue", async () => {
+  it("lists nothing for a document without a catalog", async () => {
     expect(toLibraryDecks(await datasetFromIndex(`<#x> a <${SM.Card}> .`))).toEqual([]);
   });
 });
 
 /** The index as the app reads it, from where it is published. */
 describe("toLibraryIndexView", () => {
-  it("is the index's address, its catalogue's publisher and every release of its decks", async () => {
+  it("is the index's address, its catalog's publisher and every release of its decks", async () => {
     expect(toLibraryIndexView(INDEX, await datasetFromIndex(INDEX_TURTLE))).toEqual({
       url: INDEX,
       publisher: `${INDEX}#solid-memo`,
@@ -238,7 +238,7 @@ describe("toLibraryIndexView", () => {
     });
   });
 
-  it("names no publisher without a catalogue, or one without a publisher", async () => {
+  it("names no publisher without a catalog, or one without a publisher", async () => {
     expect(toLibraryIndexView(INDEX, await datasetFromIndex(`<#x> a <${SM.Card}> .`))).toEqual({ url: INDEX, publisher: null, releases: [] });
     expect(toLibraryIndexView(INDEX, await datasetFromIndex(`<> a <http://www.w3.org/ns/dcat#Catalog> .`)).publisher).toBeNull();
   });

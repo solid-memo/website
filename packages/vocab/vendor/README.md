@@ -12,7 +12,7 @@ replace it with the upstream file byte for byte, then update its entry
 in `manifest.json` (source, commit and sha256). A test checks every
 file against the manifest.
 
-| Profile | Files | Upstream | Licence |
+| Profile | Files | Upstream | License |
 |---|---|---|---|
 | DCAT-AP 3.0.1 | `dcat-ap/3.0.1/dcat-ap-SHACL.ttl` | [SEMICeu/DCAT-AP](https://github.com/SEMICeu/DCAT-AP), `releases/3.0.1/shacl/` | CC BY 4.0 (`dcat-ap/LICENSE`), © European Union, SEMIC |
 | SKOS | `skohub/skos.shacl.ttl`, `skohub/skos.bestPractice.shacl.ttl` | [skohub-io/skohub-shapes](https://github.com/skohub-io/skohub-shapes) | Apache-2.0 (`skohub/LICENSE`) |

@@ -35,8 +35,8 @@ describe("MarkdownBlocks", () => {
 
   it("renders a code block as a named region that takes the focus, its language a label", () => {
     const md = rendered("```http\nGET / HTTP/1.1\n\nHost: x\n```\n\n    plain");
-    const [labelled, plain] = md.querySelectorAll(".md-code");
-    expect(labelled!.querySelector(".md-code-lang")).toHaveTextContent("http");
+    const [labeled, plain] = md.querySelectorAll(".md-code");
+    expect(labeled!.querySelector(".md-code-lang")).toHaveTextContent("http");
     const region = screen.getAllByRole("region", { name: "Code" })[0]!;
     expect(region.tagName).toBe("PRE");
     expect(region).toHaveAttribute("tabindex", "0");

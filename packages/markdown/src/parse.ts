@@ -37,7 +37,7 @@ export type MdAlign = "left" | "right" | "center" | null;
 /** Block content. */
 export type MdBlock =
   | { type: "paragraph"; children: MdInline[] }
-  /** A fenced or indented code block; `lang` is the info string's first word, normalised, when it is one. */
+  /** A fenced or indented code block; `lang` is the info string's first word, normalized, when it is one. */
   | { type: "code"; lang?: string; value: string }
   /** `tight` when no blank line separates its items: their paragraphs are shown as bare text. */
   | { type: "list"; ordered: boolean; start: number; tight: boolean; items: MdBlock[][] }
@@ -215,7 +215,7 @@ function tooCostly(text: string): boolean {
 }
 
 /**
- * The destination of each link reference definition, by its normalised
+ * The destination of each link reference definition, by its normalized
  * label, the first one winning, as CommonMark has it. Definitions may
  * sit in any container, so the whole tree is walked, without recursion,
  * however deep it nests.

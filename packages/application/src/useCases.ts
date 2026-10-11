@@ -431,8 +431,8 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    */
   setDeckPace(deck: Deck, pace: DeckPace): Promise<Deck>;
   /**
-   * Replace who made the deck and its licence (withProvenance): the
-   * authors tidied, the licence one of KNOWN_LICENSES or the one it has.
+   * Replace who made the deck and its license (withProvenance): the
+   * authors tidied, the license one of KNOWN_LICENSES or the one it has.
    * The edit is made of the deck as its entry says now; when the catalog
    * document changed meanwhile, it is read and made again, three times
    * in all. Throws deckGone when the deck has no entry.
@@ -491,7 +491,7 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * of the library's index serves them all; none when no deck is a copy.
    * A copy whose series the index does not list is looked for as a
    * release added from a link: its release read, and its creator's
-   * catalogue for a newer one in its series ("unknown" when it cannot be
+   * catalog for a newer one in its series ("unknown" when it cannot be
    * read). Writes nothing: planLibraryUpgrade says what an upgrade would
    * change.
    */
@@ -690,22 +690,22 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   getPreferences(instanceUrl: string): Promise<StudyPreferences>;
   /**
    * Give an instance a new name (instanceName: trimmed, not empty)
-   * everywhere it is kept: its meta document, its catalogue's title (and
+   * everywhere it is kept: its meta document, its catalog's title (and
    * the description, while it is the one the old name gave), and its
    * registrations in the type indexes, the instance's and the
-   * catalogue's, which name it in the instance list. Each write is made
+   * catalog's, which name it in the instance list. Each write is made
    * of its document as it is then, and made again from a fresh read
    * when it changed meanwhile, three times in all. The instance as
    * renamed.
    */
   renameInstance(session: Session, instance: Instance, name: string): Promise<Instance>;
-  /** The instance's catalogue; null when it has none (an instance not updated yet). */
+  /** The instance's catalog; null when it has none (an instance not updated yet). */
   readCatalog(instanceUrl: string): Promise<Catalog | null>;
   /**
-   * Replace the catalogue's description and licence (describedCatalog),
-   * of the catalogue as it is now, again from a fresh read when it
+   * Replace the catalog's description and license (describedCatalog),
+   * of the catalog as it is now, again from a fresh read when it
    * changed meanwhile, three times in all. Throws noCatalogToUpdate when
-   * the instance has no catalogue. The catalogue as written.
+   * the instance has no catalog. The catalog as written.
    */
   describeCatalog(instanceUrl: string, about: CatalogAbout): Promise<Catalog>;
   savePreferences(
@@ -981,7 +981,7 @@ function cardsChangedElsewhere(error: unknown): boolean {
 
 /**
  * How often an edit of metadata (a deck's provenance, an instance's
- * name, its catalogue) is made, in all, while its document keeps
+ * name, its catalog) is made, in all, while its document keeps
  * changing elsewhere (412).
  */
 const METADATA_ATTEMPTS = 3;
@@ -1278,7 +1278,7 @@ export function createUseCases({
 
   /**
    * A copy's series, as the index lists it, else as a release added from a
-   * link whose creator's catalogue can be read (linkedSeries); none
+   * link whose creator's catalog can be read (linkedSeries); none
    * otherwise.
    */
   async function seriesOf(deck: Deck): Promise<{ series: LibraryDeck | null; fromLink?: true }> {
@@ -1312,9 +1312,9 @@ export function createUseCases({
   /**
    * The series of a release added from a link, as its newest release
    * known describes it (docs/deck-library.md, From a link): the release
-   * itself unless its creator's catalogue can be read (`complete`), then
-   * the newest of its series the catalogue links. A release the
-   * catalogue links that cannot be read is passed over, and so is one the
+   * itself unless its creator's catalog can be read (`complete`), then
+   * the newest of its series the catalog links. A release the
+   * catalog links that cannot be read is passed over, and so is one the
    * copied release lists, as no newer one. `reads` keeps each release
    * read, for the copies looked up together: one read of each.
    */
@@ -1371,7 +1371,7 @@ export function createUseCases({
 
   /**
    * What bringing the instance up to this app's formats would touch: its
-   * meta document, preferences and catalogue, and every deck's cards and
+   * meta document, preferences and catalog, and every deck's cards and
    * review states. A document still at a version with nothing outdated in
    * it, as the instance's digest says, is not read again. Reads only: the
    * digest's format notes are written by the deck list (getStudyCounts).
@@ -1408,9 +1408,9 @@ export function createUseCases({
    * The documents the format update brings up to this app's formats, as
    * planOf finds them now, in the order it writes them: the meta document,
    * the preferences, each deck's cards and review states, and last the
-   * catalog document (its outdated deck entries, and its catalogue when it
+   * catalog document (its outdated deck entries, and its catalog when it
    * has none). No order between documents matters to what they say: each
-   * subject is brought up to date on its own, and a catalogue lists decks
+   * subject is brought up to date on its own, and a catalog lists decks
    * of its own document. A document two decks share (another app may point
    * two decks at one) is one item, written for each deck in turn. Each
    * write reads the document afresh, brings its outdated subjects up to
@@ -1442,7 +1442,7 @@ export function createUseCases({
     }
     if (plan.catalogMissing || plan.deckCount > 0) {
       add({ url: catalogUrlOf(instanceUrl), holds: "catalog" }, async () => {
-        // A catalogue for an instance that has none, named as its record names it, published by the signed-in user.
+        // A catalog for an instance that has none, named as its record names it, published by the signed-in user.
         const made = plan.catalogMissing ? await catalogOf(session, (await instanceRepository.readMeta(instanceUrl))?.name ?? instanceUrl) : null;
         return deckRepository.upgradeDecks(instanceUrl, made);
       });
@@ -2001,7 +2001,7 @@ export function createUseCases({
   }
 
   /**
-   * A new catalogue for an instance: published by the session's owner,
+   * A new catalog for an instance: published by the session's owner,
    * named as their profile names them (the WebID when it does not say).
    */
   async function catalogOf(session: Session, title: string): Promise<Catalog> {
@@ -2079,7 +2079,7 @@ export function createUseCases({
         created = true;
         progress.finished("copy", resources.length);
         const versions = await copyResources(resources, move, () => progress.stepped());
-        // The catalogue's publisher, named as the user's profile names them; then nothing may name the guest's pod.
+        // The catalog's publisher, named as the user's profile names them; then nothing may name the guest's pod.
         const documents = resources.filter((url) => !url.endsWith("/")).map((url) => rebaseIri(url, source, target));
         progress.finished("adopt", documents.length + 1);
         const catalog = await deckRepository.readCatalog(target);
@@ -2460,7 +2460,7 @@ export function createUseCases({
       const decks = await deckRepository.listDecks(instanceUrl);
       if (decks.every((deck) => deck.sourceUrl === undefined)) return [];
       const copies = libraryCopiesOf(decks, await deckLibrary.listLibraryDecks());
-      // A creator's catalogue links many releases, maybe of several copies: each is read once.
+      // A creator's catalog links many releases, maybe of several copies: each is read once.
       const reads = new Map<string, Promise<LibraryDeck>>();
       return Promise.all(copies.map((copy) => (copy.series === null ? linkedCopy(copy, reads) : copy)));
     },

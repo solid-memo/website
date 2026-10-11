@@ -53,8 +53,8 @@ function destinations(
 /**
  * The keyboard's and screen reader's way to arrange a list, the same
  * moves a drag makes, as items of a row's ActionsMenu: up or down among
- * its neighbours, out of the node it is in, into a new group with the
- * neighbour above or below (where the list makes groups: `onCombine`),
+ * its neighbors, out of the node it is in, into a new group with the
+ * neighbor above or below (where the list makes groups: `onCombine`),
  * or into another node that holds others (at its end), each indented as
  * deep as it is. The list is the deck list (groups and decks) or a
  * course's outline (chapters and steps): `fits` says where the node may

@@ -2,8 +2,8 @@
 /**
  * The Studio's edits of metadata against a real Solid server: an
  * instance renamed everywhere its name is kept (its meta document, its
- * catalogue and both of its type index registrations), its catalogue
- * described, a deck given authors and a licence, and a course's
+ * catalog and both of its type index registrations), its catalog
+ * described, a deck given authors and a license, and a course's
  * chapters completed changed. Every write is checked against the shapes,
  * and the instance stays valid. A change made elsewhere meanwhile is
  * kept: the edit is read and made again (where the server enforces
@@ -149,7 +149,7 @@ describe.each(SERVERS)("metadata on $name", ({ url: server }) => {
     everyEdit = await etagMarksEveryEdit(server);
   });
 
-  it("renames an instance in its meta document, its catalogue and every type index registration of its data", async () => {
+  it("renames an instance in its meta document, its catalog and every type index registration of its data", async () => {
     const { session, instance, typeIndex } = await seed(server);
     const useCases = page();
     // One registration for each class of the instance's data, all in the private index.
@@ -167,7 +167,7 @@ describe.each(SERVERS)("metadata on $name", ({ url: server }) => {
     expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
   });
 
-  it("describes the catalogue, its licence a licence document, as DCAT-AP asks, and changes it", async () => {
+  it("describes the catalog, its license a license document, as DCAT-AP asks, and changes it", async () => {
     const { instance } = await seed(server);
     const useCases = page();
     await expect(useCases.describeCatalog(instance.url, { description: "Decks I share.", license: CC0 })).resolves.toMatchObject({
@@ -183,7 +183,7 @@ describe.each(SERVERS)("metadata on $name", ({ url: server }) => {
     expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
   });
 
-  it("describes the catalogue again when another app changed it meanwhile, keeping that change", async (context) => {
+  it("describes the catalog again when another app changed it meanwhile, keeping that change", async (context) => {
     if (!conditional) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     // The change is made in the same second as the read, which such a server's ETag does not tell apart.
     if (!everyEdit) context.skip(ETAG_OUTLIVES_EDITS);
@@ -200,7 +200,7 @@ describe.each(SERVERS)("metadata on $name", ({ url: server }) => {
     expect(await fetch(catalogUrl).then((response) => response.text())).toContain("another app");
   });
 
-  it("gives a deck its authors and licence, an author dropped leaving no agent behind", async () => {
+  it("gives a deck its authors and license, an author dropped leaving no agent behind", async () => {
     const { instance } = await seed(server);
     const useCases = page();
     const deck = await useCases.createDeck(instance.url, { en: "Birds" });

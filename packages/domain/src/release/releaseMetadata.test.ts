@@ -113,15 +113,15 @@ describe("sources", () => {
     expect(cleared.triples.filter((triple) => triple.subject === source!.iri)).toEqual([]);
   });
 
-  it("have a licence that is an address, or one they state already", () => {
+  it("have a license that is an address, or one they state already", () => {
     expect(sourceLicenseValid("")).toBe(true);
     expect(sourceLicenseValid(" https://creativecommons.org/licenses/by/4.0/ ")).toBe(true);
     expect(sourceLicenseValid("CC BY 4.0")).toBe(false);
-    expect(sourceLicenseValid("urn:licence:own", "urn:licence:own")).toBe(true);
+    expect(sourceLicenseValid("urn:license:own", "urn:license:own")).toBe(true);
     const draft = courseDraft();
     const form = { title: "Source", creator: "", license: " https://cc0.example ", evidence: "", derivedFrom: true, used: true };
     expect(sourcesOf(made(draft, [sourceChange("https://source.example/", form)]))[0]!.license).toBe("https://cc0.example/");
-    expect(sourcesOf(made(draft, [sourceChange("https://source.example/", { ...form, license: "urn:licence:own" })]))[0]!.license).toBe("urn:licence:own");
+    expect(sourcesOf(made(draft, [sourceChange("https://source.example/", { ...form, license: "urn:license:own" })]))[0]!.license).toBe("urn:license:own");
   });
 
   it("removed, keep what they state while an earlier version's making uses them", () => {

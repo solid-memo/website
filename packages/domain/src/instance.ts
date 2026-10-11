@@ -59,7 +59,7 @@ export interface InstanceDeletion {
 /**
  * The kinds of an instance's data registered in the type indexes, one
  * class each (docs/data-model.md "Discovery chain"): the instance
- * itself, its catalogue, its decks, cards, review states and answers,
+ * itself, its catalog, its decks, cards, review states and answers,
  * and the drafts of releases its owner writes.
  */
 export const DATA_CLASSES = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const;

@@ -25,7 +25,7 @@ export type RepairKind =
   /** Name an agent without a name after its IRI. */
   | "name-agent"
   /**
-   * Drop the links of a catalogue or deck group to decks and groups the
+   * Drop the links of a catalog or deck group to decks and groups the
    * document no longer describes, as a removal elsewhere leaves them.
    */
   | "drop-dangling-members"
@@ -128,7 +128,7 @@ export function describeRepair(repair: Repair): string {
     case "recompute-due":
       return "Recompute the review's due day";
     case "name-agent":
-      return "Name the person or organisation after their address";
+      return "Name the person or organization after their address";
     case "drop-dangling-members":
       return "Drop the links to decks and groups that are gone";
     case "remove-subject":

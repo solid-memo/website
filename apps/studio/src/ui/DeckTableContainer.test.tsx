@@ -145,7 +145,7 @@ describe("DeckTableContainer", () => {
   it("leaves a deck set aside out of the bulk actions, and moves none while the arrangement is set aside", async () => {
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [kanji, verbs]),
-      checkInstance: vi.fn(async () => invalidReport([kanji], { catalogue: true })),
+      checkInstance: vi.fn(async () => invalidReport([kanji], { catalog: true })),
     });
     renderContainer(useCases);
     await waitFor(() => expect(screen.getByRole("checkbox", { name: "Select Verbs" })).toBeEnabled());

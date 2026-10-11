@@ -197,7 +197,7 @@ export function LibraryDeckScreen({
 
 /**
  * "List of national capitals — Wikipedia contributors · CC BY-SA 4.0":
- * the source, linked, and its own authors and licence when the deck
+ * the source, linked, and its own authors and license when the deck
  * states them.
  */
 function SourceLine({ source }: { source: LibrarySource }) {

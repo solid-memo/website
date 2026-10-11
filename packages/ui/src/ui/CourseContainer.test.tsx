@@ -94,7 +94,7 @@ describe("CourseContainer", () => {
     expect(within(chapterItem(/Linked data/)).getByRole("link")).toHaveAttribute("href", review(CH1));
   });
 
-  it("opens the next chapter once one is completed, the one completed still open to practise", () => {
+  it("opens the next chapter once one is completed, the one completed still open to practice", () => {
     render(<Page course={makeCourse(["q-1", "q-2", "q-3", "r-1"], [CH1])} />);
     expect(screen.getByText("1 of 2 chapters done")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Continue" })).toHaveAttribute("href", chapter(CH2));

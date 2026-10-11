@@ -7,7 +7,7 @@ import { Screen } from "./Screen.ts";
  * is shown in the app's language when the deck has one in it.
  */
 export class DeckDetail extends Screen {
-  /** The deck's description, labelled "Description". */
+  /** The deck's description, labeled "Description". */
   get description(): Locator {
     return this.page.getByRole("main").getByRole("group", { name: this.t("deckAbout.description"), exact: true });
   }

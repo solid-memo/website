@@ -116,7 +116,7 @@ describe("publishRelease", () => {
 
   it("finishes a publishing cut short after the release is written when it is published again", async () => {
     const { useCases, repository, publisher } = setUp();
-    // Its link from the catalogue failed: the draft is left as it is.
+    // Its link from the catalog failed: the draft is left as it is.
     publisher.publish.mockRejectedValueOnce(new AppError("noCatalogToUpdate"));
     await expect(useCases.publishRelease(DRAFT, TARGET, markdownCheck)).rejects.toMatchObject({ code: "noCatalogToUpdate" });
     expect(repository.applyChanges).not.toHaveBeenCalled();

@@ -44,7 +44,7 @@ const SHAPED_CLASSES = new Set(ALL_SHAPES.map((d) => d.targetClass));
 
 /**
  * Validate every Solid Memo subject of a document: one with a Solid
- * Memo type, or of a DCAT or FOAF class a shape describes (a catalogue,
+ * Memo type, or of a DCAT or FOAF class a shape describes (a catalog,
  * an agent, a distribution). Throws one Error listing every problem,
  * `label` first, so a broken file names itself. Other subjects (a
  * source's description, say) are not checked; a subject in a format

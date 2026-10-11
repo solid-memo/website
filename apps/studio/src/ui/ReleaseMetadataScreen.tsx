@@ -19,7 +19,7 @@ export interface ReleaseLinks {
 /**
  * What a draft's release says of itself beyond its listing, how it was
  * made and from what (docs/studio.md, The release's metadata and
- * provenance): its version notes, languages, licence and publisher, its
+ * provenance): its version notes, languages, license and publisher, its
  * authors, the attribution of its making ("Compiled by …", with or
  * without "with the help of AI") and the notes on it, its sources, and
  * the checks it had, by machine or AI. Nothing here records that anyone

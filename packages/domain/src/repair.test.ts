@@ -113,7 +113,7 @@ describe("describeRepair", () => {
       "Study the deck front to back",
       "Drop the review's half-written undo snapshot",
       "Recompute the review's due day",
-      "Name the person or organisation after their address",
+      "Name the person or organization after their address",
       "Drop the links to decks and groups that are gone",
       "Remove it",
     ]);

@@ -16,7 +16,7 @@ const DIRECTIONS: Record<DeckDirection, DraftDeckV1["studyDirection"]> = {
  * (docs/studio.md, Drafts): what a release says and the deck does too,
  * nothing that is the learner's own.
  *
- * - **Kept:** its title, description, licence (typed a
+ * - **Kept:** its title, description, license (typed a
  *   dcterms:LicenseDocument, as a release's is), direction, themes and
  *   keywords, each in the languages it states (a release's text is
  *   language-tagged; untagged text from an old format is left out), and
@@ -58,7 +58,7 @@ export function deckToDraft(deck: Deck, cards: readonly Card[], url: string, now
     distractors: cards.flatMap((card) =>
       (card.distractors ?? []).map((distractor): DraftNode<DistractorV1> => ({ id: distractor.id, data: distractorToRecord(distractor) })),
     ),
-    // Its licence, typed as a release's is (setLicense).
+    // Its license, typed as a release's is (setLicense).
     triples: deck.license === undefined ? [] : [licenseType(deck.license)],
   };
   return deck.sourceUrl === undefined ? { draft } : { draft, basedOn: deck.sourceUrl };

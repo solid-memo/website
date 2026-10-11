@@ -6,9 +6,9 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { LicenseSelect } from "./LicenseSelect";
 
 /**
- * Who made a deck and its licence (dcterms:creator, dcterms:license),
+ * Who made a deck and its license (dcterms:creator, dcterms:license),
  * with a form to change them: an author a line, "Name" or
- * "Name <email>", added and removed there, and a licence from those
+ * "Name <email>", added and removed there, and a license from those
  * offered (LicenseSelect). The domain tidies and checks them
  * (withProvenance): the form stays until the save is made, so one it
  * refuses loses nothing. Nothing here says anyone reviewed the deck.

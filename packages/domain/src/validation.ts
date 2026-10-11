@@ -8,7 +8,7 @@ import type { ShapeName } from "@solid-memo/vocab/types.generated";
  * instance whenever it opens it and acts on what it finds according to
  * the user's invalid data policy. What another app wrote — a subject
  * that is not Solid Memo's (the adapter's ownership.ts says which are),
- * or a catalogue's link to such a member — has its results reported as
+ * or a catalog's link to such a member — has its results reported as
  * warnings, the subject marked `foreign`, so it never sets a deck aside
  * or blocks the instance.
  */
@@ -48,7 +48,7 @@ export type SubjectReport =
   | { url: string; status: "newer"; shape: ShapeName; version: number; latest: number }
   /** Not a Solid Memo subject: listed so strays are visible, not checked. */
   | { url: string; status: "untyped" }
-  /** Not a Solid Memo subject, but one the DCAT-AP profile checks (a licence, say). */
+  /** Not a Solid Memo subject, but one the DCAT-AP profile checks (a license, say). */
   | {
       url: string;
       status: "profiled";
@@ -124,7 +124,7 @@ export function setAsideDecks(report: ValidationReport, decks: readonly Deck[]):
 }
 
 /**
- * Whether the arrangement of the deck list — the catalogue itself or one
+ * Whether the arrangement of the deck list — the catalog itself or one
  * of its deck groups — has invalid data, which the "set invalid data
  * aside" policy leaves read-only until it is repaired.
  */

@@ -10,7 +10,7 @@ import { useI18n } from "./i18n";
  * the folded tree of @solid-memo/markdown: each kind of node makes one
  * fixed element with fixed attributes, and data only ever becomes text
  * children, never markup, a class, a style, an id or a handler. There is
- * no HTML string anywhere, so nothing to sanitise.
+ * no HTML string anywhere, so nothing to sanitize.
  *
  * A code block or a table is a region of its own that scrolls sideways
  * and takes the focus, so it can be scrolled from the keyboard; the keys

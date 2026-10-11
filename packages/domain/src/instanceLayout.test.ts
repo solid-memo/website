@@ -57,7 +57,7 @@ describe("deckGroupUrlOf", () => {
 });
 
 describe("catalogNodeUrlOf", () => {
-  it("names the catalogue subject of the instance's catalog document", () => {
+  it("names the catalog subject of the instance's catalog document", () => {
     expect(catalogNodeUrlOf(INSTANCE)).toBe(`${INSTANCE}/catalog.ttl#catalog`);
   });
 });

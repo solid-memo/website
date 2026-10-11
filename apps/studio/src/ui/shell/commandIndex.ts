@@ -80,7 +80,7 @@ export function buildCommands(sources: CommandSources, i18n: Pick<I18n, "t" | "r
       (section): Command => ({
         ...at("sections", sectionHome(section, sources.instanceUrl!)),
         label: t(`studio.shell.section.${section}`),
-        // Name and catalogue has no chord.
+        // Name and catalog has no chord.
         ...(section === "instance" ? {} : { keys: keysOf(`go.${section}`) }),
       }),
     ),
@@ -168,7 +168,7 @@ const CONSECUTIVE = 2;
 /**
  * How well `text` matches `query` (both folded): null when its letters
  * do not all come in it in their order. Each letter matched scores, the
- * more at the start of a word ("dc" scores more in "Deck colours" than
+ * more at the start of a word ("dc" scores more in "Deck colors" than
  * in "Dice"), or right after the one before it; a longer text scores a
  * little less. Each letter is matched where it first comes, or at the
  * start of a later word when the rest still matches after it.

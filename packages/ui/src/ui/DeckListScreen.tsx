@@ -100,7 +100,7 @@ export function DeckListScreen({
   offer,
 }: {
   tree: DeckTree;
-  /** The catalogue or a deck group has invalid data, set aside: the list cannot be rearranged. */
+  /** The catalog or a deck group has invalid data, set aside: the list cannot be rearranged. */
   arrangementSetAside?: boolean;
   /** The data is still being checked, and the arrangement may yet be set aside: it cannot be rearranged until the check is done. */
   checking?: boolean;

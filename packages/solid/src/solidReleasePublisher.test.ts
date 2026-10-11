@@ -44,7 +44,7 @@ async function publisherPod({ wac = true, folderAcl = false } = {}) {
 }
 
 describe("publish", () => {
-  it("writes the release where nothing is, makes that document alone readable by everyone, and links it from the catalogue", async () => {
+  it("writes the release where nothing is, makes that document alone readable by everyone, and links it from the catalog", async () => {
     const { pod, publisher, writes } = await publisherPod();
     await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
     expect(writes()).toEqual([`PUT ${RELEASE} If-None-Match`, `PATCH ${RELEASE}.acl`, `PATCH ${CATALOG}`]);
@@ -142,7 +142,7 @@ describe("isPublic and listPublished", () => {
     await expect(publisher.isPublic(RELEASE)).resolves.toBe(false);
   });
 
-  it("lists nothing for an instance without a catalogue", async () => {
+  it("lists nothing for an instance without a catalog", async () => {
     const { publisher } = await publisherPod();
     await expect(publisher.listPublished(`${POD}solid-memo/other/`)).resolves.toEqual([]);
   });

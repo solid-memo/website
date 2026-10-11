@@ -57,7 +57,7 @@ export type StudioRoute =
   | { screen: "schedule"; deckUrl: string }
   /** What a deck says of itself, how it is studied and, for a course, the learner's progress through it. */
   | { screen: "about"; deckUrl: string }
-  /** The instance's name and its catalogue's description and licence. */
+  /** The instance's name and its catalog's description and license. */
   | { screen: "instance"; instanceUrl: string }
   /** Everything wrong with the instance or, with `deckUrl`, one of its decks. */
   | { screen: "health"; instanceUrl: string; deckUrl?: string }
@@ -93,7 +93,7 @@ export type StudioRoute =
   | { screen: "preview"; draftUrl: string }
   /** A draft against the release it follows: what it changes, and what a learner's copy would get. */
   | { screen: "diff"; draftUrl: string }
-  /** What a draft's release says of itself beyond its listing (its notes, languages, licence, authors), how it was made, and from what. */
+  /** What a draft's release says of itself beyond its listing (its notes, languages, license, authors), how it was made, and from what. */
   | { screen: "release"; draftUrl: string; field?: ReleaseField }
   /**
    * A draft played in a sandbox: a course's page, or with `chapter` (an

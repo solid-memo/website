@@ -164,8 +164,9 @@ it most. The specifications' versions and status are in
 ## Solid Memo's own terms
 
 - **Catalog** (`catalog.ttl`): the document that lists an instance's
-  decks, or the deck library's index of its decks. Older pages spell it
-  "catalogue". [data-model.md](data-model.md#the-catalogue).
+  decks, or the deck library's index of its decks. The published
+  shapes and vocabulary, which never change, spell it "catalogue" in
+  their text. [data-model.md](data-model.md#the-catalog).
 - **Course**: a library deck with chapters and steps that teach before
   they ask. [courses.md](courses.md).
 - **Deck**: a set of cards studied together. [data-model.md](data-model.md#decks-and-cards).
