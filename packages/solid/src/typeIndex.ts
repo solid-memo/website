@@ -451,7 +451,7 @@ async function findStorageRoot(
         return candidate;
       }
     } catch {
-      continue;
+      // A candidate that cannot be fetched is skipped.
     }
   }
   return new URL("/", resourceUrl).toString();

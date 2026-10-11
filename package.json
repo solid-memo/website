@@ -46,6 +46,8 @@
     "check:docs": "node -e \"import('./scripts/checkDocs.ts').then((m) => m.run(process))\"",
     "check:dependencies": "node -e \"import('./scripts/checkDependencies.ts').then((m) => m.run(process))\"",
     "coverage:summary": "node -e \"import('./scripts/coverageSummary.ts').then((m) => m.run(process))\"",
+    "lint": "biome check .",
+    "format": "biome check --write .",
     "lint:markdown": "markdownlint-cli2",
     "lint:spelling": "cspell --no-progress",
     "crosscheck": "python3 scripts/shacl_crosscheck.py",
@@ -61,6 +63,7 @@
     "format:turtle:check": "turbo run format:turtle:check"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
     "@vitest/coverage-v8": "^5.0.1",
     "cspell": "^10.3.6",
     "markdownlint-cli2": "^0.23.3",

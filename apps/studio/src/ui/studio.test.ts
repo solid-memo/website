@@ -14,7 +14,11 @@ beforeAll(() => {
   const site = createRequire(import.meta.url).resolve("@solid-memo/ui/style.css");
   for (const path of [site, join(import.meta.dirname, "studio.css")]) {
     const style = document.createElement("style");
-    style.textContent = readFileSync(path, "utf8").replace(/^@import .*$/gm, "");
+    // On one line each, a selector or a value broken over lines: happy-dom
+    // drops a rule whose selector list breaks inside `:not(…)`.
+    style.textContent = readFileSync(path, "utf8")
+      .replace(/^@import .*$/gm, "")
+      .replace(/\n\s*/g, " ");
     document.head.append(style);
   }
 });

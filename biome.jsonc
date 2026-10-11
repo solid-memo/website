@@ -1,0 +1,147 @@
+{
+  // Biome formats and lints the TypeScript, JavaScript, JSON and CSS
+  // (docs/style.md#formatting): `npm run lint` checks, `npm run format`
+  // rewrites.
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+  },
+  "files": {
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.js",
+      "**/*.mjs",
+      "**/*.cjs",
+      "**/*.json",
+      "**/*.jsonc",
+      "**/*.css",
+      // Written by tools, never by hand (.gitattributes).
+      "!packages/vocab/src/*.generated.ts",
+      "!**/package-lock.json",
+      "!.devcontainer/devcontainer-lock.json",
+      // Kept byte for byte as their authors publish them.
+      "!packages/vocab/vendor",
+      // Turtle and its published versions, formatted by `npm run format:turtle`.
+      "!decks",
+      "!ns",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/coverage",
+      "!**/.turbo",
+    ],
+  },
+  // As .editorconfig says, for every editor.
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 100,
+  },
+  "json": {
+    "formatter": {
+      "expand": "always",
+    },
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "arrowParentheses": "always",
+    },
+  },
+  // Imports keep the order they are written in.
+  "assist": {
+    "enabled": false,
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        // A button outside a form submits nothing; one inside a form submits it on purpose.
+        "useButtonType": "off",
+        // The ARIA roles (status, alert, group, region, ...) are deliberate, and tested by role.
+        "useSemanticElements": "off",
+        // Fires on components' own `role` prop (CardFace's "question"/"answer"), not ARIA.
+        "useValidAriaRole": "off",
+        // A dialog focuses its first field when it opens, as the dialog pattern asks.
+        "noAutofocus": "off",
+        // The study card, the charts and the option rows take clicks their buttons also offer.
+        "noStaticElementInteractions": "off",
+        "useKeyWithClickEvents": "off",
+        // The command palette's options are reached by the arrow keys from its input (listbox).
+        "useFocusableInteractive": "off",
+        "noNoninteractiveElementToInteractiveRole": "off",
+        // A wide table or code block is a focusable region, so a keyboard can scroll it.
+        "noNoninteractiveTabindex": "off",
+        // A row's overlay link is a click target; the row's own link is the one read out.
+        "useAnchorContent": "off",
+        // Tests stand in for links with a plain anchor and a click handler.
+        "useValidAnchor": "off",
+      },
+      "complexity": {
+        // A component returns an element, so a lone text is wrapped in a fragment.
+        "noUselessFragments": "off",
+        // The reduced-motion rule must win over every animation.
+        "noImportantStyles": "off",
+      },
+      "style": {
+        // Allowed where the code just made sure of the value, and in tests (docs/style.md).
+        "noNonNullAssertion": "off",
+        // The stylesheets are ordered by component, and reordering them changes the cascade.
+        "noDescendingSpecificity": "off",
+        // A concatenation of calls and raw strings reads better than a template.
+        "useTemplate": "off",
+      },
+      "suspicious": {
+        // The linear Turtle reader and the stream collectors assign as they read.
+        "noAssignInExpressions": "off",
+        // forEach with an arrow that returns, and switches the compiler checks for exhaustiveness.
+        "useIterableCallbackReturn": "off",
+        // `void | Promise<boolean>`: a callback that may or may not say whether it saved.
+        "noConfusingVoidType": "off",
+        // The Turtle writer escapes control characters, which its regex must name.
+        "noControlCharactersInRegex": "off",
+        // HIDDEN_CONTROLS matches combining characters on their own, which is its point.
+        "noMisleadingCharacterClass": "off",
+        // Tests check the literal `${VAR}` of a compose file.
+        "noTemplateCurlyInString": "off",
+      },
+    },
+  },
+  "overrides": [
+    {
+      // JSON with comments, as its tools read it: trailing commas allowed, and written.
+      "includes": [
+        "**/*.jsonc",
+      ],
+      "json": {
+        "parser": {
+          "allowTrailingCommas": true,
+        },
+        "formatter": {
+          "trailingCommas": "all",
+        },
+      },
+    },
+    {
+      "includes": [
+        "e2e/journeys/**",
+      ],
+      "linter": {
+        "rules": {
+          // Playwright reads a fixture's dependencies from its destructured first argument, even `{}`.
+          "correctness": {
+            "noEmptyPattern": "off",
+          },
+        },
+      },
+    },
+  ],
+}

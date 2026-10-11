@@ -241,7 +241,7 @@ function parseProperty(
   if (values !== undefined && kind !== "string" && kind !== "iri") {
     fail(`<${shape}> uses sh:in, which is only supported for xsd:string and IRIs.`);
   }
-  if (values !== undefined && values.some((v) => (v.termType === "NamedNode") !== (kind === "iri"))) {
+  if (values?.some((v) => (v.termType === "NamedNode") !== (kind === "iri"))) {
     fail(`<${shape}> lists sh:in values of another kind than the field's.`);
   }
   const name = of("name")[0]?.value ?? localName(predicate);

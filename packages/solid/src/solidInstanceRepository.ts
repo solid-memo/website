@@ -317,7 +317,7 @@ async function readInstanceName(
   fetch: typeof globalThis.fetch,
 ): Promise<string> {
   const metaUrl = metaUrlOf(instanceUrl);
-  let dataset;
+  let dataset: Awaited<ReturnType<typeof readDataset>>;
   try {
     dataset = await readDataset(metaUrl, fetch);
   } catch {

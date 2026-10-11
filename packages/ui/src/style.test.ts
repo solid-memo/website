@@ -208,7 +208,7 @@ describe("reflow", () => {
 
   it("indents a level of the deck list, but no further from the fifth level on", () => {
     const css = readFileSync(join(import.meta.dirname, "style.css"), "utf8");
-    const start = css.indexOf(".deck-group-clip>.deck-list {");
+    const start = css.search(/\.deck-group-clip\s*>\s*\.deck-list \{/);
     expect(css.slice(start, css.indexOf("}", start))).toContain(
       "margin-inline-start: calc(1.25rem * clamp(0, 5 - var(--depth, 1), 1));",
     );
@@ -401,7 +401,8 @@ describe("dragging the deck list", () => {
 
   it("indents the drop line as the lists are, level by level", () => {
     document.body.innerHTML = `<div class="drop-line"></div>`;
-    expect(lastMatching(document.querySelector(".drop-line")!, "inset-inline")).toBe(
+    // Compared with its spaces collapsed: Biome may break a long value over lines.
+    expect(lastMatching(document.querySelector(".drop-line")!, "inset-inline")?.replace(/\s+/g, " ")).toBe(
       "calc(min(var(--line-depth, 0), 4) * 1.25rem + var(--line-depth, 0) * (0.5rem + 2px)) 0",
     );
   });

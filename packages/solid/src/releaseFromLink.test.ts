@@ -83,7 +83,7 @@ describe("publishedBeside", () => {
     const instance = "https://alice.example/solid-memo/main/";
     const fetch = serving({
       [`${RELEASES}catalog.ttl`]: 401,
-      [`https://alice.example/solid-memo/main/releases/catalog.ttl`]: catalog("https://alice.example/solid-memo/main/releases/", ["https://elsewhere.example/v1.ttl"]),
+      "https://alice.example/solid-memo/main/releases/catalog.ttl": catalog("https://alice.example/solid-memo/main/releases/", ["https://elsewhere.example/v1.ttl"]),
       [`${instance}catalog.ttl`]: catalog(instance, [V1, V2]),
     });
     await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toEqual([V1, V2]);

@@ -1426,11 +1426,26 @@ describe("createUseCases", () => {
       vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
         d.reviewsDocumentUrl.endsWith("reviews/deck-1.ttl") ? [oldReview("a"), { ...oldReview("b"), formatVersion: 2 }] : [],
       );
-      vi.mocked(deps.instanceRepository.upgradeMeta).mockImplementation(async (url) => (written.push(`${url}meta.ttl`), true));
-      vi.mocked(deps.preferencesRepository.upgradePreferences).mockImplementation(async (url) => (written.push(`${url}preferences.ttl`), true));
-      vi.mocked(deps.deckRepository.upgradeCards).mockImplementation(async (d) => (written.push(d.cardsDocumentUrl), true));
-      vi.mocked(deps.reviewStateRepository.upgradeReviewStates).mockImplementation(async (d) => (written.push(d.reviewsDocumentUrl), true));
-      vi.mocked(deps.deckRepository.upgradeDecks).mockImplementation(async (url) => (written.push(`${url}catalog.ttl`), true));
+      vi.mocked(deps.instanceRepository.upgradeMeta).mockImplementation(async (url) => {
+        written.push(`${url}meta.ttl`);
+        return true;
+      });
+      vi.mocked(deps.preferencesRepository.upgradePreferences).mockImplementation(async (url) => {
+        written.push(`${url}preferences.ttl`);
+        return true;
+      });
+      vi.mocked(deps.deckRepository.upgradeCards).mockImplementation(async (d) => {
+        written.push(d.cardsDocumentUrl);
+        return true;
+      });
+      vi.mocked(deps.reviewStateRepository.upgradeReviewStates).mockImplementation(async (d) => {
+        written.push(d.reviewsDocumentUrl);
+        return true;
+      });
+      vi.mocked(deps.deckRepository.upgradeDecks).mockImplementation(async (url) => {
+        written.push(`${url}catalog.ttl`);
+        return true;
+      });
       return { deps, oldEntry, written };
     }
 

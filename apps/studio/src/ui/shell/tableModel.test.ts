@@ -119,24 +119,24 @@ describe("sortedRows", () => {
     { name: "Basics", due: 3 },
     { name: "Ärende", due: 1 },
   ];
-  const valueOf = (row: (typeof rows)[number], key: "name" | "due") => row[key];
+  const cellValue = (row: (typeof rows)[number], key: "name" | "due") => row[key];
   const names = (sorted: typeof rows) => sorted.map((row) => row.name);
 
   it("keeps the rows' own order without a sort", () => {
-    const sorted = sortedRows(rows, undefined, valueOf, "en");
+    const sorted = sortedRows(rows, undefined, cellValue, "en");
     expect(sorted).toEqual(rows);
     expect(sorted).not.toBe(rows);
   });
 
   it("sorts text as the reader's language does, case aside and numbers by value", () => {
-    expect(names(sortedRows(rows, { key: "name", descending: false }, valueOf, "en"))).toEqual(["Ärende", "Basics", "kanji 2", "Kanji 10"]);
-    expect(names(sortedRows(rows, { key: "name", descending: false }, valueOf, "sv"))).toEqual(["Basics", "kanji 2", "Kanji 10", "Ärende"]);
+    expect(names(sortedRows(rows, { key: "name", descending: false }, cellValue, "en"))).toEqual(["Ärende", "Basics", "kanji 2", "Kanji 10"]);
+    expect(names(sortedRows(rows, { key: "name", descending: false }, cellValue, "sv"))).toEqual(["Basics", "kanji 2", "Kanji 10", "Ärende"]);
   });
 
   it("sorts numbers either way, ties in their own order and rows without a value last", () => {
-    expect(names(sortedRows(rows, { key: "due", descending: false }, valueOf, "en"))).toEqual(["Ärende", "Kanji 10", "Basics", "kanji 2"]);
-    expect(names(sortedRows(rows, { key: "due", descending: true }, valueOf, "en"))).toEqual(["Kanji 10", "Basics", "Ärende", "kanji 2"]);
+    expect(names(sortedRows(rows, { key: "due", descending: false }, cellValue, "en"))).toEqual(["Ärende", "Kanji 10", "Basics", "kanji 2"]);
+    expect(names(sortedRows(rows, { key: "due", descending: true }, cellValue, "en"))).toEqual(["Kanji 10", "Basics", "Ärende", "kanji 2"]);
     const none = [{ name: "a", due: undefined }, { name: "b", due: undefined }];
-    expect(names(sortedRows(none, { key: "due", descending: false }, valueOf, "en"))).toEqual(["a", "b"]);
+    expect(names(sortedRows(none, { key: "due", descending: false }, cellValue, "en"))).toEqual(["a", "b"]);
   });
 });

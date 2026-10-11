@@ -47,11 +47,11 @@ const FIELDS: Readonly<Record<string, string>> = {
   [SM.distractorText]: "distractorText",
   [SM.distractorNote]: "distractorNote",
   [SM.textFormat]: "textFormat",
-  ["http://www.w3.org/ns/adms#versionNotes"]: "versionNotes",
+  "http://www.w3.org/ns/adms#versionNotes": "versionNotes",
   [`${DCTERMS}language`]: "language",
   [`${DCTERMS}creator`]: "creator",
-  ["http://www.w3.org/2000/01/rdf-schema#comment"]: "comment",
-  ["http://www.w3.org/ns/prov#wasDerivedFrom"]: "wasDerivedFrom",
+  "http://www.w3.org/2000/01/rdf-schema#comment": "comment",
+  "http://www.w3.org/ns/prov#wasDerivedFrom": "wasDerivedFrom",
 };
 
 /** A field by its name in the reader's language; one without a name by its IRI. */

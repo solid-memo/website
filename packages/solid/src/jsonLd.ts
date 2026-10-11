@@ -35,7 +35,7 @@ export function jsonLdOf(quads: Iterable<Quad>, prefixes: Readonly<Record<string
     nodes.set(id, node);
     const isType = predicate.value === RDF_TYPE && object.termType === "NamedNode";
     const key = isType ? "@type" : compact(predicate.value);
-    const value: Value = isType ? compact(object.value) : valueOf(object, compact);
+    const value: Value = isType ? compact(object.value) : termValue(object, compact);
     node.set(key, [...(node.get(key) ?? []), value]);
   }
   const graph = [...nodes]
@@ -58,7 +58,7 @@ function idOf(term: Term): string {
   return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
 }
 
-function valueOf(term: Term, compact: (iri: string) => string): Value {
+function termValue(term: Term, compact: (iri: string) => string): Value {
   if (term.termType !== "Literal") return { "@id": term.termType === "BlankNode" ? idOf(term) : compact(term.value) };
   if (term.language !== "") return { "@value": term.value, "@language": term.language };
   if (term.datatype.value === XSD_STRING) return term.value;
@@ -79,7 +79,10 @@ export function refuseRemoteContexts(text: string): void {
     throw new AppError("deckFileUnreadable", { reason: String(error) });
   }
   const visit = (value: unknown): void => {
-    if (Array.isArray(value)) return value.forEach(visit);
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
     if (typeof value !== "object" || value === null) return;
     for (const [key, child] of Object.entries(value)) {
       if (key === "@context" && remote(child)) {

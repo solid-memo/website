@@ -22,7 +22,7 @@ export function containedIn(jsonld: unknown, container: string): string[] {
     if (node === null || typeof node !== "object") continue;
     const id = node["@id"];
     if (id !== undefined && new URL(String(id), container).href !== container) continue;
-    const contains = node[LDP_CONTAINS] ?? node["contains"] ?? node["ldp:contains"];
+    const contains = node[LDP_CONTAINS] ?? node.contains ?? node["ldp:contains"];
     for (const item of Array.isArray(contains) ? contains : contains === undefined ? [] : [contains]) {
       const ref = typeof item === "string" ? item : (item as { "@id"?: unknown })["@id"];
       if (typeof ref === "string") found.add(new URL(ref, container).href);

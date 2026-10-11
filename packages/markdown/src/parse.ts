@@ -291,8 +291,7 @@ class Fold {
           },
         ];
       }
-      // Raw HTML, and anything else the parser could make, is shown as its source.
-      case "html":
+      // Raw HTML ("html"), and anything else the parser could make, is shown as its source.
       default:
         return [this.sourceParagraph(node)];
     }
@@ -333,8 +332,7 @@ class Fold {
       case "image":
       case "imageReference":
         return { type: "text", value: inLink ? visibleControls(node.alt!) : node.alt! };
-      // Raw HTML, and anything else the parser could make, is shown as its source.
-      case "html":
+      // Raw HTML ("html"), and anything else the parser could make, is shown as its source.
       default:
         return { type: "text", value: this.source(node) };
     }

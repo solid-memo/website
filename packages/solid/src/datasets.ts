@@ -2,7 +2,7 @@ import {
   createSolidDataset,
   deleteFile,
   deleteSolidDataset,
-  getSolidDataset,
+  type getSolidDataset,
   saveSolidDatasetAt,
   setThing,
   solidDatasetAsTurtle,
