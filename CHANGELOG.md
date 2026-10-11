@@ -74,6 +74,21 @@ tag. The date is set when the maintainer tags it.
   `https://solid-memo.com/ns/`, so other apps can read and write the
   same data ([docs/vocab.md](docs/vocab.md),
   [docs/shapes.md](docs/shapes.md)).
+- **Running your own copy.** The app's name, its repository and the pod
+  providers offered at sign-up are set by configuration
+  ([docs/configuration.md](docs/configuration.md),
+  [docs/reuse.md](docs/reuse.md)), and every screen links to the source
+  code, the commit and the issue tracker.
+- **Guides for learners**: studying, statistics and the library
+  ([docs/user-guide.md](docs/user-guide.md),
+  [docs/statistics.md](docs/statistics.md),
+  [docs/browsing.md](docs/browsing.md)).
+- **A project contact in decks.** New deck versions name the issue
+  tracker as their contact point, not an email address
+  ([docs/deck-library.md](docs/deck-library.md#contact)).
+- **License headers.** Every file carries a machine-readable license, as
+  [REUSE](https://reuse.software/) asks
+  ([docs/style.md](docs/style.md#licenses)).
 - **Tests.** Unit tests at 100% coverage per package, end-to-end tests
   against several Solid servers, and user journeys in a browser
   ([docs/testing.md](docs/testing.md)).

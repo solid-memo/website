@@ -11,29 +11,38 @@ can still change in ways a user notices.
 
 ## Now
 
-- **Meeting the Standard for Public Code.** Contribution and governance
-  files, CI on every pull request, a policy and a privacy page, links to
-  the source code and the issue tracker from the app, and metadata that
-  catalogs can read. The assessment and its plan are in
+- **Meeting the Standard for Public Code.** What is left is mostly in
+  the repository's settings: Discussions, private vulnerability
+  reporting, and requiring every CI check before a merge. The assessment
+  and what remains are in
   [docs/standard-for-public-code.md](docs/standard-for-public-code.md).
-- **The first tagged release**, v0.1.0, with a changelog.
+- **The first tagged release**, v0.1.0, with its
+  [changelog](CHANGELOG.md) ([docs/releasing.md](docs/releasing.md)).
 
 ## Next
 
-- **Running your own copy.** The pod providers offered at sign-up and
-  the app's name set by configuration, with a guide to hosting Solid Memo
-  elsewhere ([docs/deployment.md](docs/deployment.md)).
-- **A project contact in decks.** Future deck versions name the issue
-  tracker as their contact point, instead of a person's email address.
-  Published versions stay as they are.
 - **Native speakers' corrections** to the Korean, German, Spanish and
   French translations, which were made with the help of AI
   ([docs/i18n.md](docs/i18n.md#translations)).
 - **A second reviewer**, so that no change is merged by its own author
   alone ([GOVERNANCE.md](GOVERNANCE.md#merging)).
-- **License headers.** A machine-readable license on every file.
-- **Guides for learners**: studying, statistics, the library and the
-  courses, in plain words.
+
+## Done recently
+
+These were on the roadmap and are done. They are part of 0.1.0
+([CHANGELOG.md](CHANGELOG.md)):
+
+- Links from every screen to the source code and the issue tracker.
+- Running your own copy, with its pod providers and its name set by
+  configuration ([docs/configuration.md](docs/configuration.md),
+  [docs/reuse.md](docs/reuse.md)).
+- A project contact in new deck versions, in place of an email address
+  ([docs/deck-library.md](docs/deck-library.md#contact)).
+- A machine-readable license on every file
+  ([docs/style.md](docs/style.md#licenses)).
+- Guides for learners ([docs/user-guide.md](docs/user-guide.md),
+  [docs/statistics.md](docs/statistics.md),
+  [docs/browsing.md](docs/browsing.md)).
 
 ## Later
 
