@@ -94,6 +94,7 @@ checked by code, not left to good intentions:
 | The scheduler does what its guide says | [srs.md](srs.md#worked-examples) | [`sm2.test.ts`](../packages/domain/src/sm2.test.ts) |
 | It works with real Solid servers | [testing.md](testing.md) | the end-to-end tests against several servers, in CI |
 | Turtle is written one way | [architecture.md](architecture.md) | `npm run format:turtle:check` |
+| The docs and the English messages use one spelling, American | [style.md](style.md#language) | [`cspell.config.yaml`](../cspell.config.yaml), `npm run lint:spelling` in CI's docs job |
 
 ## Language
 

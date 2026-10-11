@@ -256,6 +256,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint:markdown
+      - run: npm run lint:spelling
       - uses: lycheeverse/lychee-action@v2
         with:
           args: --offline '**/*.md'

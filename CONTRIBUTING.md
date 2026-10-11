@@ -134,5 +134,7 @@ deck's content in its provenance ([docs/deck-library.md](docs/deck-library.md#pr
 
 English is the authoritative language of the code, the docs and the
 discussions. Write in plain English with American spelling ("license",
-"color", "organize"). A translation of the app follows the English
-messages in `packages/ui/src/i18n/en.json`.
+"color", "organize"); `npm run lint:spelling` checks the Markdown and the
+English messages for it ([docs/style.md](docs/style.md#language)). A
+translation of the app follows the English messages in
+`packages/ui/src/i18n/en.json`.

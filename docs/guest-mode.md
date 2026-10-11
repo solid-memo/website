@@ -79,13 +79,13 @@ pod: the guest can choose to keep it for later.
 
 `mergeGuestStudy` adds the guest's decks to the instance the user chose
 (the first listed, unless they pick another), deck by deck. The form
-lists the guest's decks (`planGuestMerge`), each ticked; one the user
-unticks is left out, and goes with the rest of the guest's study (at
-least one must stay ticked, unless the study has none). A guest's deck
+lists the guest's decks (`planGuestMerge`), each checked; one the user
+unchecks is left out, and goes with the rest of the guest's study (at
+least one must stay checked, unless the study has none). A guest's deck
 copied from the same [library](deck-library.md) release as one of the
 instance's (the same `prov:wasDerivedFrom`) says so: it is added beside
 that deck, as a deck of its own with its own progress, never merged
-into it card by card, and the user may untick it. The form also says
+into it card by card, and the user may uncheck it. The form also says
 that the instance keeps its own preferences: the guest's are not
 carried over. Nor is the guest's digest, which is this browser's. The
 drafts of releases the guest wrote in the [Studio](studio.md#drafts)

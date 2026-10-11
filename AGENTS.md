@@ -28,3 +28,5 @@ This repository's docs are indexed in [docs/README.md](docs/README.md); start wi
 - **One test file**: `npm run test:unit -- <path>`, from the root.
 - **Imports** follow [docs/boundaries.md](docs/boundaries.md), which
   `npm run check:boundaries` enforces.
+- **Spelling** is American English; after changing Markdown or `en.json`,
+  run `npm run lint:spelling` ([docs/style.md](docs/style.md#language)).

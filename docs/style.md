@@ -122,10 +122,15 @@ their source.
   over jargon. A term a newcomer may not know (pod, WebID, SHACL) is
   explained or linked the first time a page uses it.
 - **American spelling** is the one standard: license, color, organize,
-  catalog, behavior. Older text may still use British spelling; change
-  it when you change the text around it. An identifier keeps the spelling
-  it has (`dcterms:license`, a message key, a CSS property), since
-  renaming it is a change of its own.
+  catalog, behavior, toward, canceled, learned. It holds for the docs,
+  the comments, the English messages and the test titles alike, and
+  `npm run lint:spelling` ([cspell](https://cspell.org/), in CI's docs
+  job) checks the Markdown and `en.json` for it
+  ([testing.md](testing.md#documentation)). What is not ours to respell
+  keeps the spelling it has: the published Turtle in `decks/` and `ns/`,
+  which never changes; a term of a data format or an IRI; a message key
+  every catalog shares; an ARIA name (`aria-labelledby`); and the title
+  of something external, quoted as it is.
 - **Say what is**: describe what the code does now, not what it used to
   do or what it may do one day.
 

@@ -20,6 +20,7 @@ npm test          # every package's tests, with coverage thresholds (turbo)
 npm run check     # the same, plus typecheck, drift, formatting, boundaries, the repository's own checks (below)
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
 npm run lint:markdown      # markdownlint over the project's Markdown, as CI's docs job runs it
+npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as CI's docs job runs it
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
 npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
@@ -425,6 +426,16 @@ CI's `docs` job checks the project's Markdown (`docs/`, the READMEs,
   rows' spacing, bare URLs). `npm run lint:markdown` runs it locally. A
   placeholder such as `<title>` goes in backticks, or a renderer takes
   it for HTML and drops it.
+- **Spelling**: [cspell](https://cspell.org/) checks the Markdown and the
+  English messages (`packages/ui/src/i18n/en.json`, their text, not their
+  keys) in American English, the one standard
+  ([style.md](style.md#language)). [cspell.config.yaml](../cspell.config.yaml)
+  says what it reads and skips (`decks/`, `ns/`, the generated code, the
+  other languages' catalogs), flags the British spellings its dictionary
+  would let through, each with its fix, and lists the real
+  words it does not know: standards, names, other languages' examples.
+  A word is added there only when it is spelled right.
+  `npm run lint:spelling` runs it locally.
 - **Links**: [lychee](https://lychee.cli.rs/), offline, checks that every
   link to a file or a heading in the repository resolves
   ([lychee.toml](../lychee.toml)). The web's addresses are checked

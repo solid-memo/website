@@ -47,6 +47,7 @@
     "check:dependencies": "node -e \"import('./scripts/checkDependencies.ts').then((m) => m.run(process))\"",
     "coverage:summary": "node -e \"import('./scripts/coverageSummary.ts').then((m) => m.run(process))\"",
     "lint:markdown": "markdownlint-cli2",
+    "lint:spelling": "cspell --no-progress",
     "crosscheck": "python3 scripts/shacl_crosscheck.py",
     "test:pod": "npm run test:pod -w @solid-memo/e2e-pod",
     "pod": "npm run pod -w @solid-memo/e2e-pod",
@@ -61,6 +62,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^5.0.1",
+    "cspell": "^10.3.6",
     "markdownlint-cli2": "^0.23.3",
     "turbo": "^2.11.5",
     "typescript": "^7.0.2",

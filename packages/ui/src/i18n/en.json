@@ -912,7 +912,7 @@
     "readingStudy": "Reading your study…",
     "decks": "Decks to add",
     "noDecks": "Your study has no decks to add.",
-    "sameRelease": "{name} already has this deck from the same library release. It is added beside it as a deck of its own, with its own progress, not merged into it: untick it to leave it out.",
+    "sameRelease": "{name} already has this deck from the same library release. It is added beside it as a deck of its own, with its own progress, not merged into it: uncheck it to leave it out.",
     "leftOut": "A deck you leave out is not kept: it goes with the rest of your study in this browser.",
     "draftsCopied": {
       "one": "You wrote {count} draft in the Studio as a guest. It is copied to {name} too, under its own name, or, where {name} has a draft of that name and version, the next free one (“-2”, “-3”…).",

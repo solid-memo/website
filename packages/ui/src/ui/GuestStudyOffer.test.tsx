@@ -356,7 +356,7 @@ describe("GuestStudyOffer", () => {
       expect(within(decks).getByRole("checkbox", { name: "Capitals" })).not.toHaveAccessibleDescription();
       // A deck the instance has from the same release is added beside it, not merged, and says so.
       expect(within(decks).getByRole("checkbox", { name: "Solid fundamentals" })).toHaveAccessibleDescription(
-        "Main already has this deck from the same library release. It is added beside it as a deck of its own, with its own progress, not merged into it: untick it to leave it out.",
+        "Main already has this deck from the same library release. It is added beside it as a deck of its own, with its own progress, not merged into it: uncheck it to leave it out.",
       );
       expect(screen.getByText(/A deck you leave out is not kept/)).toBeInTheDocument();
       expect(screen.queryByText(/drafts? in the Studio as a guest/)).toBeNull();
