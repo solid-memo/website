@@ -92,8 +92,8 @@ edited, retired or deleted, and gets a note on why it is wrong
 ([DistractorFields.tsx](../packages/ui/src/ui/DistractorFields.tsx));
 one that the deck's library release published is only ever retired.
 Hints under them point out an option that lacks a language the back
-is in, or is in one the back is not, and too few options for a course. Save writes the card and its
-wrong options at once; "Remove card" asks first, then returns to the
+is in, or is in one the back is not, and too few options for a course.
+Save writes the card and its wrong options at once; "Remove card" asks first, then returns to the
 Browser. An unknown card falls back to the Browser.
 
 ## A library deck's cards
@@ -122,10 +122,13 @@ added from a link has none of them: it is read only to be added
 
 ## How it is tested
 
-- **Unit tests** at 100% coverage: each screen and container named
-  above has its `*.test.tsx` beside it in `packages/ui/src/ui/`, and
-  the use cases they call are tested in `useCases.test.ts`
-  ([testing.md](testing.md)).
+- **Unit tests** at 100% coverage: the screens and containers named
+  above are tested in the `*.test.tsx` files beside them in
+  `packages/ui/src/ui/`. A part without a test file of its own, such as
+  `AddCardForm.tsx`, `DeckAboutSection.tsx`, `RetiredCards.tsx` or
+  `LibraryPreviewScreen.tsx`, is tested through the screen or container
+  that shows it. The use cases they call are tested in
+  `useCases.test.ts` ([testing.md](testing.md)).
 - **User journeys** ([testing.md](testing.md#user-journeys)):
   - [full-learner.journey.ts](../e2e/journeys/journeys/full-learner.journey.ts)
     creates decks and adds cards with the card creator (steps 04, 05,

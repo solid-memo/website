@@ -62,9 +62,10 @@ straight to your decks. "Log out", at the top, ends the session.
 - **At the top**: the Solid Memo logo, which takes you home; the
   language list (a globe and the language's name); the light and dark
   toggle; and who you are logged in as, with "Log out".
-- **The instance bar** names the instance you are in, with links to its
-  **Statistics** and **Preferences**, "Switch instance", and "Open in
-  your Pod" (or "Kept in this browser", for a guest).
+- **The instance bar** names the instance you are in, with "Open in
+  your Pod" (or "Kept in this browser", for a guest), and links to its
+  **Statistics** and **Preferences**, "Open in Studio" and "Switch
+  instance".
 - **The breadcrumb** under it shows where you are, such as Decks ›
   Spanish › Browser, and each part is a link back up. The browser's own
   Back and Forward buttons work too, and every screen has its own
@@ -220,9 +221,9 @@ under 21 days) and mature, and how many reviews are coming in the next
 Press **Save**. A deck's own preferences can set different daily limits
 for that deck; an empty field there follows these.
 
-Under the settings (not for a guest), **Findable by other apps** shows whether other
-Solid apps can find your decks and study through the type indexes in
-your Pod, and registers what is missing when you ask
+Under the settings (not for a guest), **Findable by other apps** shows
+whether other Solid apps can find your decks and study through the type
+indexes in your Pod, and registers what is missing when you ask
 ([data-model.md](data-model.md#discovery-chain)).
 
 ## Languages
@@ -251,8 +252,8 @@ one, create a new one, attach one by its address, or delete one.
 
 ## Solid Memo Studio
 
-"Open in Studio", on a deck's page or in a deck's menu, opens Solid
-Memo Studio: a second app, for managing many decks and cards at once
+"Open in Studio", in the instance bar, on a deck's page or in a deck's
+menu, opens Solid Memo Studio: a second app, for managing many decks and cards at once
 and for writing decks and courses to publish
 ([studio.md](studio.md)).
 
