@@ -1099,7 +1099,7 @@ describe("StudioWorkspace", () => {
       await waitFor(() => expect(useCases.checkReleaseDraft).toHaveBeenLastCalledWith(draft, MARKDOWN_CHECK, "library"));
       // Another policy: the shapes are asked afresh.
       expect(await screen.findByRole("button", { name: "Check against the shapes" })).toBeInTheDocument();
-      fireEvent.click(screen.getByRole("link", { name: "Has no step in use." }));
+      fireEvent.click(await screen.findByRole("link", { name: "Has no step in use." }));
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps", field: "steps" }));
       expect(await screen.findByRole("heading", { level: 3, name: "Steps" })).toHaveAttribute("data-arrival");
     });
