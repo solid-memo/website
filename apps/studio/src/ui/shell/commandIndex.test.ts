@@ -247,19 +247,22 @@ describe("ranking the entries", () => {
           run,
         }),
       );
-    /** The fewest milliseconds, of a few runs, that ranking takes for a few queries. */
+    /** The milliseconds that ranking takes for a few queries. */
     const timed = (commands: readonly Command[]) => {
-      let best = Infinity;
-      for (let round = 0; round < 5; round++) {
-        const start = performance.now();
-        for (const query of ["k", "wa ri", "cap", "mtn 12", "zz"])
-          rankCommands(commands, query, []);
-        best = Math.min(best, performance.now() - start);
-      }
-      return best;
+      const start = performance.now();
+      for (const query of ["k", "wa ri", "cap", "mtn 12", "zz"]) rankCommands(commands, query, []);
+      return performance.now() - start;
     };
-    const small = timed(entriesOf(500));
-    const large = timed(entriesOf(4000));
+    // The fewest of a few runs each, taken in turns, so that a machine
+    // busier for a while slows both sizes and not only the one timed then.
+    const smallEntries = entriesOf(500);
+    const largeEntries = entriesOf(4000);
+    let small = Infinity;
+    let large = Infinity;
+    for (let round = 0; round < 8; round++) {
+      small = Math.min(small, timed(smallEntries));
+      large = Math.min(large, timed(largeEntries));
+    }
     // A keystroke's worth: well within a frame or two, even on a slow machine running tests side by side.
     expect(large / 5).toBeLessThan(50);
     // Eight times the entries: not much more than eight times the time (the slack is the timer's).
