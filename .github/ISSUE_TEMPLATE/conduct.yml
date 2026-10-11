@@ -1,0 +1,15 @@
+name: Code of conduct contact
+description: Ask the maintainer for a private channel to report a code of conduct issue.
+title: "Code of conduct: private contact requested"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is public. Put nothing in it but the title: no names, no details. The maintainer replies here and sets up a private channel with you, where your report goes ([CODE_OF_CONDUCT.md](https://github.com/solid-memo/website/blob/main/CODE_OF_CONDUCT.md#enforcement)).
+  - type: checkboxes
+    id: private
+    attributes:
+      label: Nothing private here
+      options:
+        - label: I have left out names and details, and will give them in the private channel.
+          required: true

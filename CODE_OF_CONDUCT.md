@@ -63,9 +63,10 @@ reported to the community leaders responsible for enforcement. In Solid Memo
 that is the maintainer, Anton Wiklund ([@antwika](https://github.com/antwika)),
 who publishes no email address. To reach him privately:
 
-1. Open an [issue](https://github.com/solid-memo/website/issues/new) titled
-   "Code of conduct: private contact requested", with nothing else in it: no
-   names, no details.
+1. Open a
+   [code of conduct contact](https://github.com/solid-memo/website/issues/new?template=conduct.yml)
+   issue, titled "Code of conduct: private contact requested", with nothing
+   else in it: no names, no details.
 2. The maintainer replies there and sets up a private channel with you, such
    as a private repository only the two of you can see. Your report goes
    there, not in the issue.
