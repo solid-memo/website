@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Language tags (BCP 47) as the app stores them with text: lower case,
  * as the pod reads them and as sh:uniqueLang compares them, and naming a

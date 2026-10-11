@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Quad, Term } from "@rdfjs/types";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";

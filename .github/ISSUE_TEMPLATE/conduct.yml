@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 name: Code of conduct contact
 description: Ask the maintainer for a private channel to report a code of conduct issue.
 title: "Code of conduct: private contact requested"

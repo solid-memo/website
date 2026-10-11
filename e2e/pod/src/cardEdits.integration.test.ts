@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The Studio's bulk edits of a deck's cards (UseCases.editCards and
  * undoCardEdit) against a real Solid server: an edit is written in one

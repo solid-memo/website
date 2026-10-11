@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Pivot, the server of solidcommunity.net, built from ./Dockerfile, in
 # memory, its root open to anyone (pivot-e2e.json): an advisory server
 # (docs/testing.md). The harness (../../servers.ts) sets E2E_PORT, the

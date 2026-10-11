@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { RefObject } from "preact";
 import { useLayoutEffect, useRef } from "preact/hooks";
 import { EASE, reducedMotion } from "../motion";

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # lychee's settings for the links in the project's Markdown
 # (docs/testing.md#documentation): CI checks the files and anchors they
 # point at on every change (--offline), and every web address weekly

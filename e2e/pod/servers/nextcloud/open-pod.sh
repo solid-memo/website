@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Run by the image, as www-data, once Nextcloud is installed: enables the
 # Solid app and opens alice's pod to anyone, before a Solid request finds
 # no root ACL and writes the owner-only default. Pretty URLs (/apps/solid/

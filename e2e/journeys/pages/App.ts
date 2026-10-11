@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
 import type { Diagnostics } from "../fixtures.ts";
 import { text, textPattern, type Locale } from "../harness/strings.ts";

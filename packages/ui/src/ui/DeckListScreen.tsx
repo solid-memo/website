@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createPortal, type ComponentChildren } from "preact";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { Deck } from "@solid-memo/domain/deck";

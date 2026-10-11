@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * How many times longer work takes on an input `times` as large: the best
  * of five runs at each size, the sizes taken in turn after a run to warm

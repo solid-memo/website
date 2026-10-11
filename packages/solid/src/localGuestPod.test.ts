@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { getThing, getUrl, getStringNoLocale } from "@inrupt/solid-client";
 import { GUEST_ORIGIN, GUEST_WEBID } from "@solid-memo/domain/guest";

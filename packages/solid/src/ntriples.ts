@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { toRdfJsDataset } from "@inrupt/solid-client";
 import type { Quad, Term } from "@rdfjs/types";
 import { getSolidDatasetLinear } from "./linearDataset";

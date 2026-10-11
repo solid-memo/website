@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /// <reference types="vite/client" />
 
 /** The site's version, from the root package.json (vite.config.ts). */

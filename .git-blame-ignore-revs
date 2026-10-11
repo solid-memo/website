@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Commits that changed only how the code looks, which `git blame` looks
 # past to the change that wrote each line (docs/style.md#formatting).
 # GitHub reads this file by itself; locally, run once:

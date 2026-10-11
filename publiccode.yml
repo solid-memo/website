@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # What Solid Memo is, for software catalogs, in the publiccode.yml
 # standard (https://yml.publiccode.tools/). Kept in step with README.md;
 # the version and its date are set when a version is tagged

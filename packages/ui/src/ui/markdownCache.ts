@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { chunksOf, inspectChunks } from "@solid-memo/markdown/chunks";
 import { parseInlineMarkdown } from "@solid-memo/markdown/inline";
 import { parseMarkdown, type MdBlock, type MdPhrase } from "@solid-memo/markdown/parse";

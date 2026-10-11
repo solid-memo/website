@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { ASIDE_WIDTH, clampSize, DETAIL_WIDTH, DOCK_HEIGHT, type PaneSize } from "./splitter";
 import { VIEW_TABLES, type SavedView, type ViewTable } from "./views";
 

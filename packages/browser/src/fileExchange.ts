@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { FileExchange } from "@solid-memo/application/ports";
 
 /** How long a saved file's text is kept for the browser to read, as FileSaver.js keeps it. */

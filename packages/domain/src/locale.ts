@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /** The languages the app's own text comes in, in the order of their names in themselves. */
 export const LOCALES = ["de", "en", "es", "fr", "sv", "ko"] as const;
 

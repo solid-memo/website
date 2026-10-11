@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readFile } from "node:fs/promises";
 import { readTurtleTree, type TurtleFile } from "@solid-memo/turtle/rdf";
 import { SHAPES_BASE, SITE, VOCAB_BASE } from "../src/ns.ts";

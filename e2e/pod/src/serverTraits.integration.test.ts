@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * What each blocking server does, pinned (serverTraits.ts): the tests skip
  * some checks where a server does without something the app copes with,

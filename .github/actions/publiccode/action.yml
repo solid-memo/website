@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # publiccode.yml, the codebase's description for software catalogs, checked
 # against the publiccode.yml standard by its own parser
 # (docs/testing.md#documentation). The parser is a release binary, checked

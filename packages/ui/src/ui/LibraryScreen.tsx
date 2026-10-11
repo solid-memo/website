@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useRef, useState } from "preact/hooks";
 import { filterLibraryDecks, topicsOf, type LibraryDeck } from "@solid-memo/domain/library";
 import { ErrorMessage } from "./ErrorMessage";

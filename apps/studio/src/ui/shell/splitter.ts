@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * How big a pane a splitter sizes may be, in CSS pixels: no smaller than
  * `min`, no bigger than `max`, and `initial` until the user sizes it.

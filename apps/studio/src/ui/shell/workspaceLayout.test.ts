@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { courseDraft, DRAFT_URL, instanceA, makeDeck } from "../../test/fixtures";
 import type { DraftRoute, StudioRoute } from "../router";

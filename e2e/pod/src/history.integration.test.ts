@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The answer log against a real Solid server (docs/data-model.md): an
  * answer is added to its month's document with one insert-only PATCH,

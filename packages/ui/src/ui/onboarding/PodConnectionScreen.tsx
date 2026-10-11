@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { SolidAccount } from "@solid-memo/domain/account";
 import { ErrorMessage } from "../ErrorMessage";
 import { ExternalLink } from "../ExternalLink";

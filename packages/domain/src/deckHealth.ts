@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { agentUrlOf } from "./agentRecord";
 import { distributionUrlOf } from "./dcat";

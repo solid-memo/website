@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A Solid Pod provider the app can suggest. Providers are data only: login
  * and Pod discovery are driven by the WebID / OIDC issuer, so no provider

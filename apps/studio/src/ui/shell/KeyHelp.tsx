@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { Fragment } from "preact";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Dialog } from "./Dialog";

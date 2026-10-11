@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * `npm run check:docs`: docs/README.md, the docs' index, lists every page
  * in docs/, and every page it lists is there (docs/testing.md#documentation).

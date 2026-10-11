@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * `npm run pod`: the Community Solid Server the tests run (servers/css-7),
  * in memory, at http://127.0.0.1:3999/, to poke at by hand or run the

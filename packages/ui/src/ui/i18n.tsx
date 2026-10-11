@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext, Fragment, type ComponentChildren, type VNode } from "preact";
 import { useContext } from "preact/hooks";
 import type { DeckDirection } from "@solid-memo/domain/deck";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Where things are in the deck library (see docs/deck-library.md): the
  * catalog is decks/index.ttl, each deck a series described there

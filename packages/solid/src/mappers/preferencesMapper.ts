@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { asUrl, type Thing, type ThingPersisted } from "@inrupt/solid-client";
 import type { StoredPreferences, StudyPreferences } from "@solid-memo/domain/preferences";
 import { preferencesFromRecord, preferencesToRecord } from "@solid-memo/domain/preferencesRecord";

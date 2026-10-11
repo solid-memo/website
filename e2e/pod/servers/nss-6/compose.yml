@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # node-solid-server 6, built from ../nss (its Dockerfile says how), in
 # a root that lets anyone read and write. The harness (../../servers.ts)
 # sets E2E_PORT, the port on 127.0.0.1 it is reached at, which the server

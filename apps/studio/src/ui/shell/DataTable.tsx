@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext, type ComponentChildren } from "preact";
 import { useContext, useRef, useState } from "preact/hooks";
 import { ActionsMenu, MenuCheckbox } from "@solid-memo/ui/ActionsMenu";

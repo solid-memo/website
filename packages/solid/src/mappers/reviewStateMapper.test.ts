@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { buildThing, createSolidDataset, getThing, removeAll } from "@inrupt/solid-client";
 import { namedReviewSubject } from "@solid-memo/domain/reviewRecord";

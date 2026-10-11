@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Nodes, Parents, PhrasingContent, Root, RootContent, Table, TableCell } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { gfmTableFromMarkdown } from "mdast-util-gfm-table";

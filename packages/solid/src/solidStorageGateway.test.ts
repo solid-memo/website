@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getPodUrlAllFrom, getProfileAll } from "@inrupt/solid-client";
 import { readDataset } from "./datasets";

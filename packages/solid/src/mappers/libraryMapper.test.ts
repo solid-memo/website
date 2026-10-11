@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";

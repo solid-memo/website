@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * What another app wrote, against a real Solid server (docs/data-model.md
  * "Deleting an instance" and "The catalog"): deleting an instance

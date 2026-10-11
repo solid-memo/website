@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { LOCALES, type Locale } from "@solid-memo/domain/locale";
 import { useI18n } from "./i18n";
 import { GlobeIcon } from "./icons";

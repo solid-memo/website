@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext } from "preact";
 import { useContext, useEffect } from "preact/hooks";
 import { useI18n, type MessageKey } from "./i18n";

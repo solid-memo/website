@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The shooters, in the order they pop: where along the bottom of the
  * viewport each stands, in percent, and how far it leans, in degrees

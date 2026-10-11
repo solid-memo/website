@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";

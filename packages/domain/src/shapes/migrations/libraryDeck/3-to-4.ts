@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { descriptionInFormat4 } from "../../../dcat";
 import { inEnglish } from "../../../langText";
 import type { MigrationStep } from "../step";

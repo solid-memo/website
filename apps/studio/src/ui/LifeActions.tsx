@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DraftChange, DraftKind, DraftRefusal } from "@solid-memo/domain/release/releaseDraft";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { useConfirm } from "./shell/ConfirmDialog";

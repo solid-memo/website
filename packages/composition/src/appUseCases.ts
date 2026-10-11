@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import { authFetch } from "@solid-memo/solid/authFetch";
 import { createWriteFence } from "@solid-memo/solid/writeFence";

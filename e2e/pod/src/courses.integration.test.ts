@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A course against a real Solid server (docs/courses.md): the app's own
  * use cases and Solid adapters, wired as in createAppUseCases, every write checked

@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Deck groups (docs/data-model.md "Deck groups") against a real Solid
  * server: the decks of an instance grouped, nested, moved, renamed and

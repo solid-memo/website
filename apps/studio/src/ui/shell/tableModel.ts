@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * What a Studio table (DataTable) keeps apart from the page: the rows
  * selected, by their keys; how it is sorted; where its cursor goes; and

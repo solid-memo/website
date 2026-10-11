@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext, createPortal, type ComponentChildren } from "preact";
 import { useContext, useId, useLayoutEffect, useRef } from "preact/hooks";
 import { MoreIcon } from "./icons";

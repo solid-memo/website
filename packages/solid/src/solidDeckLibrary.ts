@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import type { SolidDataset } from "@inrupt/solid-client";
 import type { CourseOutline } from "@solid-memo/domain/course";

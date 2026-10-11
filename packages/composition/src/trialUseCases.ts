@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { TrialSandbox } from "@solid-memo/application/trial";
 import { createUseCases } from "@solid-memo/application/useCases";

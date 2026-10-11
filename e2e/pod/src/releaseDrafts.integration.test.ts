@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The drafts of releases (docs/studio.md#drafts) against a real Solid
  * server, at the size of the library's largest course (17 chapters, 193

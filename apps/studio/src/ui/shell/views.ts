@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { queryToParams, type CardQuery, type CardState } from "@solid-memo/domain/cardQuery";
 import {
   DEFAULT_DECK_TABLE_VIEW,

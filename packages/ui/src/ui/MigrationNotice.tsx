@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION } from "@solid-memo/domain/deck";
 import { INSTANCE_FORMAT_VERSION } from "@solid-memo/domain/instance";
 import type { MigrationPlan } from "@solid-memo/domain/migration";

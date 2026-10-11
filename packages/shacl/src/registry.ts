@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
 import type { ShapeContext, ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";

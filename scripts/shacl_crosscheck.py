@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 """Cross-check what Solid Memo publishes with an independent SHACL engine.
 
 `npm run library:check` validates the deck library and the tests

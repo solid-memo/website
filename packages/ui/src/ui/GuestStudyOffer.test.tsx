@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi, type MockInstance } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

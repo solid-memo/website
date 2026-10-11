@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The easing of the app's movements: a quick start that settles gently,
  * the curve style.css gives its own transitions and keyframes.

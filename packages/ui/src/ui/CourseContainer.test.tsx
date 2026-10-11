@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChild, ComponentProps } from "preact";
 import { describe, expect, it, vi } from "vitest";
 import { render as renderView, screen, within } from "@testing-library/preact";

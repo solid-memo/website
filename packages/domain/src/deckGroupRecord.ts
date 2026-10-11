@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DeckGroupV1 } from "@solid-memo/vocab/types.generated";
 import { defaultDeckGroupDescription, isDefaultDeckGroupDescription } from "./dcat";
 import type { StoredGroup } from "./deckTree";

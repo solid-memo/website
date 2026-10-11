@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { getSolidDataset } from "@inrupt/solid-client";
 import type { WebIdDocumentRepository } from "@solid-memo/application/ports";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";

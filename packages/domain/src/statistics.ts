@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { isRecalled, monthOfStudyDay, type Answer } from "./answer";
 import { fragmentIdOf } from "./subjectUrl";
 

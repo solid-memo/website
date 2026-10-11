@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { DECK_DIRECTIONS, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import type { DeckPace } from "@solid-memo/domain/deckPace";

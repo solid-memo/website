@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { parseTurtle } from "@solid-memo/turtle/rdf";
 import { readShapeTree, SHAPES_BASE } from "./sources.ts";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import { escapeRegExp } from "../harness/strings.ts";
 import type { App } from "./App.ts";

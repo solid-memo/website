@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Community Solid Server 6, in memory, as css-7/compose.yml runs 7;
 # Renovate keeps it on 6 (renovate.json5).
 services:

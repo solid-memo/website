@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useRef } from "preact/hooks";
 import { draggedSize, splitterKey, type PaneSize } from "./splitter";
 

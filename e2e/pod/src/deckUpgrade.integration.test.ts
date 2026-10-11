@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A library deck upgrade against a real Solid server (docs/migrations.md
  * "How an upgrade is applied"): the app's own use cases and Solid

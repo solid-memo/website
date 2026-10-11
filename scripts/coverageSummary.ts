@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * `npm run coverage:summary`: the coverage each package's last `npm test`
  * measured (vitest's json-summary, `<package>/coverage/coverage-summary.json`),

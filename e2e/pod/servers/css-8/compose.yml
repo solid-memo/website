@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Community Solid Server 8, still in alpha, in memory, as css-7/compose.yml
 # runs 7: an advisory server (docs/testing.md), whose results are reported,
 # not a gate, until 8.0.0 is out. Renovate follows its prereleases

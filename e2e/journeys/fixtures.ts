@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { test as base, expect, type Page, type TestInfo } from "@playwright/test";

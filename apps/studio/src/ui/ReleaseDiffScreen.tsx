@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DraftDiff } from "@solid-memo/application/releaseDrafts";
 import type { ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
 import type { SubjectChange } from "@solid-memo/domain/release/releaseDiff";

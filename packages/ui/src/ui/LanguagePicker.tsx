@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import { canonicalTag, NO_LANGUAGE } from "@solid-memo/domain/languageTag";

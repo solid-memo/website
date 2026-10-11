@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # The whitespace the repository is written in, for any editor
 # (https://editorconfig.org, docs/style.md).
 root = true

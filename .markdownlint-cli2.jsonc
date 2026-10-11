@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 // markdownlint's rules for the project's Markdown (docs/testing.md#documentation):
 // `npm run lint:markdown`, and CI's docs job. Every rule is on but these.
 {

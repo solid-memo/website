@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { UseCases } from "@solid-memo/application/useCases";
 import { checkProblems, type DraftField } from "@solid-memo/domain/release/releaseCheck";
 import { useDraftEditor } from "./draftEditor";

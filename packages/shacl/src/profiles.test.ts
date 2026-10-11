@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Quad } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
 import { coreOnly, PROFILES, REFERENCE_DATA } from "./profiles";

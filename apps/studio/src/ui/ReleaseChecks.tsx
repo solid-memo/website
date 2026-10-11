@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { CheckActivity, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import type { ReleaseText } from "@solid-memo/domain/release/releaseModel";

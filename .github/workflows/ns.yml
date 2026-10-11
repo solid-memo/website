@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 name: Vocabulary, shapes and decks
 
 # What the site publishes under ns/ and decks/ (docs/vocab.md,

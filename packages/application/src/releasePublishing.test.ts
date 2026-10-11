@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";

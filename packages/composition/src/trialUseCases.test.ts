@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SHAPE_SOURCES, SITE, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { GUEST_SESSION } from "@solid-memo/domain/guest";

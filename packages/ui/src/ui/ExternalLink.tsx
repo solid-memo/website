@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { isHttpUrl, isLinkableUrl } from "@solid-memo/domain/webId";
 import { ExternalIcon } from "./icons";

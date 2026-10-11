@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ReviewKey, ReviewSnapshot, ReviewState } from "./review";
 import type { ReviewStateV2 } from "@solid-memo/vocab/types.generated";
 import { SCHEDULERS, STUDY_DIRECTIONS } from "@solid-memo/vocab/concepts.generated";

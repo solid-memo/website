@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, it } from "vitest";
 import { iri, model, text } from "../testing/releaseModel";
 import { curationProblems, podPolicy, repoPolicy } from "./curationRules";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { TodaySummary as Today } from "@solid-memo/domain/statistics";
 import { useI18n } from "./i18n";
 import { FlameIcon } from "./icons";

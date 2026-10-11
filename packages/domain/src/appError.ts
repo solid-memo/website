@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Errors the user may see, each named by a code, so the app can show it in
  * the reader's language: the message catalogs hold every code under

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";

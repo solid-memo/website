@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DatasetCore, Quad } from "@rdfjs/types";
 import SHACLValidator from "rdf-validate-shacl";
 import environment from "rdf-validate-shacl/src/defaultEnv.js";

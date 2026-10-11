@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createPortal } from "preact";
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { composing } from "./composing";

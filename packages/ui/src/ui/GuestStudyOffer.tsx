@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useId, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

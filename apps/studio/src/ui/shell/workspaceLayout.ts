@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { isDraftRoute, type DraftRoute, type StudioRoute } from "../router";

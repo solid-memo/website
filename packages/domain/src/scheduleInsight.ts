@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { LEECH_LAPSES, type LapseIndex } from "./cardHistory";
 import { activeCards, studyDirections, type Card, type DeckDirection } from "./deck";
 import { reviewKeyOf, type ReviewState } from "./review";

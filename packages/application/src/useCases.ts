@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { profileNameOf, type SolidAccount } from "@solid-memo/domain/account";
 import {
   defaultCatalogDescription,

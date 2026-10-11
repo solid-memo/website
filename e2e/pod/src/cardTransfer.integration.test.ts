@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The Studio's move and copy of cards between decks
  * (UseCases.transferCards, docs/studio.md#moving-and-copying-cards)

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A fetch that asks for a connection of its own on every request
  * (`Connection: close`), so none is sent on a pooled one. Node 24's fetch

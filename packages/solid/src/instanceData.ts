@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { getThing, getThingAll, getUrlAll, type SolidDataset } from "@inrupt/solid-client";
 import type { InstanceDeletion } from "@solid-memo/domain/instance";
 import {

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useEffect, useId, useRef } from "preact/hooks";
 import { useI18n } from "@solid-memo/ui/i18n";

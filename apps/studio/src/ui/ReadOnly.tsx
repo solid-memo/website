@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { useI18n } from "@solid-memo/ui/i18n";

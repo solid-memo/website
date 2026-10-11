@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { hitTest, type GapHit, type Hit, type Layout } from "./dropZones";
 import type { VisibleRow } from "./rows";
 

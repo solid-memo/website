@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { ensureTrailingSlash } from "../instanceLayout.ts";
 import type { LangText } from "../langText.ts";
 import { canonical, idIn, iriIn, type ReleaseDraft } from "./releaseDraft.ts";

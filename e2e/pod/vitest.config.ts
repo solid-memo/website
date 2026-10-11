@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { defineConfig } from "vitest/config";
 import { SERVERS, serversNamed } from "./servers.ts";
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext, type ComponentChildren } from "preact";
 import { useContext, useEffect, useLayoutEffect } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";

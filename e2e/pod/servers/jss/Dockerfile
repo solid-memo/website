@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # JavaScript Solid Server for the end-to-end tests (docs/testing.md), from
 # the lockfile beside this file, as published (AGPL-3.0: unmodified, and
 # built only where the tests run, never pushed). It keeps its pods as

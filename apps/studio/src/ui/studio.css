@@ -1,4 +1,10 @@
 /*
+ * SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+/*
  * Solid Memo Studio's own look (docs/studio.md, Layout), over the site's
  * style.css. It ships with the Studio's chunk, and every rule holds only
  * under :root[data-surface="studio"], which the Studio's shell sets while

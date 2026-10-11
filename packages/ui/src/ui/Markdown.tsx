@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { Fragment, type ComponentChildren } from "preact";
 import { liveLink } from "@solid-memo/markdown/links";
 import type { MdBlock, MdInline } from "@solid-memo/markdown/parse";

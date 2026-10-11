@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { isMarkdown } from "@solid-memo/domain/deck";
 import { isPublished, questionsOfStep } from "@solid-memo/domain/release/courseIds";
 import { chapterOfStep, draftCardOf } from "@solid-memo/domain/release/draftOutline";

@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The Studio's edits of review states (UseCases.rescheduleCards and
  * resetCards, docs/studio.md#review-state) against a real Solid server:

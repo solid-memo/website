@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { cardLabel, cardLabelText, isMarkdown, type CardContent } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
 import { labelText } from "@solid-memo/markdown/plainText";

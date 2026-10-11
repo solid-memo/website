@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # JavaScript Solid Server, built from ./Dockerfile: an advisory server
 # (docs/testing.md), with Turtle (--conneg), open to anyone (--public,
 # which skips its access control: run as it would host several pods, its

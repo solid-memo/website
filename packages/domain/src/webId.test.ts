@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { AppError } from "./appError";
 import { describe, expect, it } from "vitest";
 import { isHttpUrl, isLinkableUrl, isSecureUrl, validateWebId } from "./webId";

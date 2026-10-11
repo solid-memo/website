@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { CssAccount } from "../harness/cssAccount.ts";
 import type { App } from "../pages/App.ts";
 

@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Stating the language of a deck's untagged card sides (UseCases.stateCardLanguages)
  * against a real Solid server: the sides are re-keyed in one write of the

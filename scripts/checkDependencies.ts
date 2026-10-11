@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * `npm run check:dependencies`: the app ships only released versions of
  * other code (docs/vendor-code.md#maturity). It walks package-lock.json

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { decksOf } from "@solid-memo/domain/deckTree";

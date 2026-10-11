@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * `npm run check:boundaries`: hold every workspace package to its place in
  * the architecture (docs/architecture.md). For each import in a package:

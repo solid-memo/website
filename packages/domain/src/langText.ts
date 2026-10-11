@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { LangText, LangTexts } from "@solid-memo/vocab/types.generated";
 
 export type { LangText, LangTexts };

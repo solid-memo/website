@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { IDBFactory, IDBObjectStore } from "fake-indexeddb";
 import { describe, expect, it, vi } from "vitest";
 import { createIndexedDbResourceStore, webLock } from "./indexedDbResourceStore";

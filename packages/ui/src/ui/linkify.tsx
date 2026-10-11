@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { ExternalLink } from "./ExternalLink";
 
 /** A URL in running text, minus any punctuation that closes the sentence. */

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ResourceStore, StoredResource } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 

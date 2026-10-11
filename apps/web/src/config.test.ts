@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import { DEFAULT_APP_NAME, DEFAULT_REPO_URL, siteConfig, siteHtml } from "./config";

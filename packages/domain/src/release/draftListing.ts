@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { directionOfConcept } from "../concepts.ts";
 import { CARD_FORMAT_VERSION, type Distractor } from "../deck.ts";

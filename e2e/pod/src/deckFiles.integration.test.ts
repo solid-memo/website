@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A deck saved as a file and made a deck again (UseCases.exportDeckFile,
  * openDeckFile and importDeckFile, docs/studio.md#import-and-export)

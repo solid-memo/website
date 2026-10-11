@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DeckScheduleV1, DocumentReceiptV1 } from "@solid-memo/vocab/types.generated";
 import { conceptOfDirection, directionOfConcept } from "./concepts";
 import type { DocumentReceipt, StoredSchedule } from "./studyDigest";

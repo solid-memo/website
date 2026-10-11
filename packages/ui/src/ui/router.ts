@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { StorageSource } from "@solid-memo/domain/storage";
 import { hashParams as params, parsePage, useHashRouter, type RouteChange } from "./routerCore";
 

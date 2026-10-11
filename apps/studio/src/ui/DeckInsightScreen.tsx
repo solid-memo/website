@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DeckInsight } from "@solid-memo/application/useCases";
 import { LEECH_LAPSES } from "@solid-memo/domain/cardHistory";
 import type { Card, Deck } from "@solid-memo/domain/deck";

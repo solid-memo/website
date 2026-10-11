@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Parser, type Quad, type Quad_Subject, type Term } from "n3";

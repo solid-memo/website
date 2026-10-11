@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Trial } from "@solid-memo/application/trial";
 import type { Course } from "@solid-memo/application/useCases";
 import { choicesOf, type CourseChapter } from "@solid-memo/domain/course";

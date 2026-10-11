@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useLayoutEffect, useRef } from "preact/hooks";
 import type { ErrorText } from "./i18n";
 

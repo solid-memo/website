@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { isGuestUrl } from "@solid-memo/domain/guest";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type {

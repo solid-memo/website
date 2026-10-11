@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext } from "preact";
 import { useCallback, useContext, useEffect, useRef } from "preact/hooks";
 import type { ScreenCommand } from "./commandIndex";

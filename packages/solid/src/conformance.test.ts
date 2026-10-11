@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readdir, readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { readVersioned, recordThing } from "./records";

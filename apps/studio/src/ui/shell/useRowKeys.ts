@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useRef, useState } from "preact/hooks";
 import { EDIT_CELL } from "./EditableCell";
 import { rangeToggled, stepCursor, toggled, NO_SELECTION, type Selection } from "./tableModel";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { quadOf } from "./mappers/releaseDraftMapper";
 import { quadsOfTurtle } from "./testing/releaseDrafts";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
 import type { StudyPreferences } from "./preferences";
 import { reviewKeyOf, type ReviewState } from "./review";

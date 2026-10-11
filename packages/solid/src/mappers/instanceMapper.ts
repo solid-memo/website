@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { asUrl, type Thing, type ThingPersisted } from "@inrupt/solid-client";
 import type { Instance, InstanceMeta } from "@solid-memo/domain/instance";
 import { ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";

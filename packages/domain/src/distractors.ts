@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { AppError } from "./appError";
 import type { CardContent, Distractor } from "./deck";
 import { tidiedSideText, tidiedTagged, type LangText } from "./langText";

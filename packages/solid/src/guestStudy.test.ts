@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A guest's study, end to end, through the app's own use cases and Solid
  * adapters wired as in createAppUseCases (docs/guest-mode.md): the guest studies in

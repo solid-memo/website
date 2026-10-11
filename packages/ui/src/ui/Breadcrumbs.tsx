@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useI18n, type I18n } from "./i18n";
 import { routeToHash, type RouteRef } from "./router";
 

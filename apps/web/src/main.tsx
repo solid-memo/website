@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { render } from "preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppUseCases } from "@solid-memo/composition/appUseCases";

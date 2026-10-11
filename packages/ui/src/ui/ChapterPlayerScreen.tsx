@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useId, useLayoutEffect, useRef } from "preact/hooks";
 import type { Choice, CourseChapter } from "@solid-memo/domain/course";
 import { isMarkdown, type CardContent } from "@solid-memo/domain/deck";

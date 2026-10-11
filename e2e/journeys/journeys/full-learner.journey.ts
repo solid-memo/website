@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, test } from "../fixtures.ts";
 import { logInAndCreateInstance } from "../flows/logIn.ts";
 import { BRIGHTEST_STARS } from "../pages/Library.ts";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The Docker images the end-to-end tests run, kept in one file between CI
  * jobs (.github/actions/e2e-images, docs/testing.md), so a job pulls

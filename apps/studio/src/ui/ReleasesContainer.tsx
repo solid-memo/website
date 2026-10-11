@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useQuery } from "@tanstack/react-query";
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";

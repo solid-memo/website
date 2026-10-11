@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createPortal } from "preact";
 import { useRef, useState } from "preact/hooks";
 import type { Anchor } from "@solid-memo/domain/deckTree";

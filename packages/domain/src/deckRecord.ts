@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { agentToRecord, agentUrlOf } from "./agentRecord";
 import { directionOfConcept, conceptOfDirection } from "./concepts";
 import { defaultDeckDescriptionText, distributionUrlOf, TURTLE_MEDIA_TYPE } from "./dcat";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useId, useLayoutEffect, useRef, useState } from "preact/hooks";
 import {
   MINIMAL_ANSWER_QUALITY,

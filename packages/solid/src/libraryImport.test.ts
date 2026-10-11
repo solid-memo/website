@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A deck imported from the library, end to end, through the app's own use
  * cases and Solid adapters wired as in createAppUseCases (docs/deck-library.md): the

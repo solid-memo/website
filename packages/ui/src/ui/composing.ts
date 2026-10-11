@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Whether a key belongs to an input method composing text (Korean,
  * Japanese or Chinese, say): the Enter or Escape that commits or cancels

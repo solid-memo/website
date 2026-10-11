@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Solid Memo's own vocabulary is generated from ns/vocab/v1.ttl (see
  * docs/vocab.md); the external vocabularies below are not ours to

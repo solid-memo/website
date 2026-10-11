@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";

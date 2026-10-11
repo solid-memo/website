@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { getThingAll, type ThingPersisted, type SolidDataset } from "@inrupt/solid-client";
 import {
   receiptFromRecord,

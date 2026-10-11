@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import en from "@solid-memo/ui/i18n/en.json" with { type: "json" };
 import sv from "@solid-memo/ui/i18n/sv.json" with { type: "json" };
 import ko from "@solid-memo/ui/i18n/ko.json" with { type: "json" };

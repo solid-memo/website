@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A deck's health in the Studio (UseCases.checkDeck) against a real Solid
  * server: it reads the deck's entry, its cards and its reviews documents,

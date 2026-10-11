@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ShapeName, VersionedRecord } from "@solid-memo/vocab/types.generated";
 
 /** The record of one kind at one version. */

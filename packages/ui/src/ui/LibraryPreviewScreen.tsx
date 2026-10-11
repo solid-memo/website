@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { promptSides, type CardContent, type StudyDirection } from "@solid-memo/domain/deck";
 import { CardFace } from "./CardFace";

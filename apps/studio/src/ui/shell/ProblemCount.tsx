@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useI18n } from "@solid-memo/ui/i18n";
 
 /** How many problems, as a pill (`.studio-count`): the number shown, "3 problems" heard. */

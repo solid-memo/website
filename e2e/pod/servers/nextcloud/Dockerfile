@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Solid-Nextcloud (pdsinterop/solid-nextcloud) for the end-to-end tests
 # (docs/testing.md): Nextcloud 32, the newest its Solid app's CI requires
 # to pass (33 to 35 may fail there), with the app at a commit of its main

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { CardV5, DraftChapterV1, DraftStepV1 } from "@solid-memo/vocab/types.generated";
 import type { CardContent, Distractor } from "../deck.ts";
 import { cardContentFromRecord, cardToRecord, distractorFromRecord } from "../deckRecord.ts";

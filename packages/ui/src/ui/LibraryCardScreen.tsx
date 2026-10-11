@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { LibraryCard } from "@solid-memo/domain/library";
 import { CardFace } from "./CardFace";
 import { useI18n } from "./i18n";

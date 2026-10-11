@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { KNOWN_LICENSES, licenseLabel } from "@solid-memo/domain/license";
 import { useI18n } from "@solid-memo/ui/i18n";
 

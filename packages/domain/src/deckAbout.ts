@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { AppError } from "./appError";
 import { TOPICS } from "@solid-memo/vocab/concepts.generated";
 import type { Deck } from "./deck";

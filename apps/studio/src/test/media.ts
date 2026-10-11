@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { act } from "@testing-library/preact";
 import { expect, vi } from "vitest";
 import { MEDIUM, NARROW } from "../ui/shell/workspaceLayout";

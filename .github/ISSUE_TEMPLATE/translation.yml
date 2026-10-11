@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 name: Translation
 description: Correct a translation of the app, or propose a new language.
 labels: [i18n]

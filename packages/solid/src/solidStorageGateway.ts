@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { getPodUrlAllFrom, getProfileAll } from "@inrupt/solid-client";
 import type { StorageGateway } from "@solid-memo/application/ports";
 import type { Storage } from "@solid-memo/domain/storage";

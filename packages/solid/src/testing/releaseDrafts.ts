@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { toRdfJsDataset } from "@inrupt/solid-client";

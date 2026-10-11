@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { MAX_CHARS, MAX_DELIMITERS, MAX_DEPTH, MAX_TABLE_COLUMNS } from "./parse";
 import { markdownProblems, OPTION, PROSE, SIDE } from "./problems";

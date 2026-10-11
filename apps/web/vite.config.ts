@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { defineConfig, type Plugin } from "vite";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { DECK_DIRECTIONS, type Deck } from "./deck";
 import type { DeckGroup, DeckTree, TreeNode } from "./deckTree";
 import { folded, type LangText } from "./langText";

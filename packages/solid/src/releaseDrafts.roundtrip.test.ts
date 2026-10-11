@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Every release of the deck library made a draft in a pod as it is, then
  * published again at its own address (docs/testing.md, The round trip):

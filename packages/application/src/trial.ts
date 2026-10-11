@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { DEFAULT_PREFERENCES, type StudyPreferences } from "@solid-memo/domain/preferences";

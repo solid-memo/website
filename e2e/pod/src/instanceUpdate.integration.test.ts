@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The format update against a real Solid server (docs/migrations.md "The
  * pod migration"): the app's own use cases and Solid adapters, wired as in

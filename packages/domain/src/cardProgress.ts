@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
 import type { ReviewState } from "./review";
 import { FORECAST_DAYS, scheduledStates, type ForecastDay } from "./scheduleInsight";

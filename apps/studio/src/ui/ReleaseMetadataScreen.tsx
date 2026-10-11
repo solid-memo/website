@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { EU_LANGUAGES, type ReferenceConcept } from "@solid-memo/vocab/concepts.generated";
 import type { ReleaseField } from "@solid-memo/domain/release/releaseCheck";

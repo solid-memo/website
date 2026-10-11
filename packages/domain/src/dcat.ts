@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { english, inEnglish, sameText, shown, type LangText } from "./langText.ts";
 /**
  * The DCAT side of Solid Memo's data (see docs/data-model.md): the

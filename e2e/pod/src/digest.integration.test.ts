@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The instance digest against a real Solid server (docs/data-model.md):
  * what a visit learns is written to digest.ttl, and the next visit,

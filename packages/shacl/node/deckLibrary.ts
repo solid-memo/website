@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { execFile } from "node:child_process";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";

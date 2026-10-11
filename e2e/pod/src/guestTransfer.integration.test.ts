@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Keeping a guest's study (docs/guest-mode.md) against a real Solid server:
  * a guest studies in the pod kept on their device, then logs in and moves

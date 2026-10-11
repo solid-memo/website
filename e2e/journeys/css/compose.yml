@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Community Solid Server 7 behind TLS, for the user journeys (docs/testing.md).
 # The app only logs in with https WebIDs and issuers, so Caddy serves the
 # server at https://127.0.0.1:E2E_PORT/ with a certificate of its own CA,

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Community Solid Server 7 with Access Control Policies, built from
 # ./Dockerfile, in memory, its root open to anyone (acp-e2e.json): an
 # advisory server (docs/testing.md), where access control is ACP's. The

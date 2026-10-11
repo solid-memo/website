@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext } from "preact";
 import { useContext } from "preact/hooks";
 import { courseHref, decksHref, routeToHash } from "./router";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 {
   // Biome formats and lints the TypeScript, JavaScript, JSON and CSS
   // (docs/style.md#formatting): `npm run lint` checks, `npm run format`

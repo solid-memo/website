@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * One fetch for two pods (docs/guest-mode.md): a request below `origin`
  * goes to `local` (the guest's pod on this device), every other one to

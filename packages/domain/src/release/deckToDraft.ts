@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DistractorV1, DraftDeckV1 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { agentToRecord, agentUrlOf } from "../agentRecord.ts";

@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Publishing a release (docs/studio.md#publishing-a-release) against a
  * real Solid server: the next version of a library deck drafted in the

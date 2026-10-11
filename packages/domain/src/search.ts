@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Text search as the app does it: case-insensitively, and whatever the
  * Unicode form the text is in. Both sides are compared composed (NFC),

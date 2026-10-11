@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { problem, type ReleaseProblem } from "./problems.ts";
 import { publishedIds, versionOf, type ReleaseKind, type ReleaseModel } from "./releaseModel.ts";
 

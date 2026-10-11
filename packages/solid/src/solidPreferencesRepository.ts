@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createSolidDataset, getThing, setThing } from "@inrupt/solid-client";
 import type { PreferencesRepository } from "@solid-memo/application/ports";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";

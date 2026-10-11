@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
 import { cardAnswers, deckAnswers, distractorPicksOf, lapseIndex } from "./cardHistory";

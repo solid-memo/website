@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { DECK_DIRECTIONS, type Card, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import type { DeckAbout } from "@solid-memo/domain/deckAbout";
 import { hasUnstatedSide } from "@solid-memo/domain/deckLanguages";

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * An authenticated session with a Solid identity provider, or a guest's
  * (`guest: true`), who studies in a pod on their device before logging
