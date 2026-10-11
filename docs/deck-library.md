@@ -19,7 +19,7 @@ versions, each version a `dcat:Dataset` with its cards and a Turtle
 
 | Path under `decks/` | IRI | What |
 |---|---|---|
-| `index.ttl` | `https://solid-memo.com/decks/index.ttl` | The catalogue the app lists, generated from the versions and committed: each deck a series (`index.ttl#<name>`), its current version described in full but for its cards and how it was made, the publisher `index.ttl#solid-memo`, and the [course for newcomers](#courses). |
+| `index.ttl` | `https://solid-memo.com/decks/index.ttl` | The catalogue the app lists, generated from the versions and committed: each deck a series (`index.ttl#<name>`), its current version described in full but for its cards, how it was made and any email, the publisher `index.ttl#solid-memo`, and the [course for newcomers](#courses). |
 | `<name>/v<N>.ttl` | `https://solid-memo.com/decks/<name>/v<N>.ttl` | Version `N` of a deck, frozen once published; its cards are fragments of it (`…/v1.ttl#sweden`). |
 
 Nothing else is in `decks/`: no lock file, no sources, no scripts. A
@@ -59,11 +59,14 @@ publisher still in the index:
   [`ns/vocab/topics.ttl`](../ns/vocab/topics.ttl), next to the EU data
   theme `EDUC`; **languages** are EU authority-table IRIs described in
   [`ns/vocab/external.ttl`](../ns/vocab/external.ttl).
-- **Creators** are `foaf:Agent` nodes of the document; **licenses**
+- **Creators** are `foaf:Agent` nodes of the document, with a name and
+  no email; **licenses**
   are IRIs typed `dcterms:LicenseDocument`, and a version states at
   least one ([Checks](#checks)); the **sources** it was
   compiled from are `prov:wasDerivedFrom` IRIs, each a subject of its
   own with its title, creator and license.
+- **The contact** is the project's issue tracker, not a person's email
+  ([below](#contact)).
 - **The release**: `dcat:version "N"`, `dcterms:issued`, one
   `adms:versionNotes` (a plain string: the shape allows one, untagged),
   `dcat:inSeries` and `dcat:isVersionOf` `<…/decks/index.ttl#<name>>`,
@@ -114,6 +117,35 @@ configuration, not part of any release: `NEWCOMER_COURSE` in
 [courses.md](courses.md#the-course-for-newcomers)). The term belongs to no shape: `CatalogV1` does
 not own it, and DCAT-AP ignores it.
 
+## Contact
+
+A version names the library's contact, the project's issue tracker, as
+its `dcat:contactPoint`: a `vcard:Kind` node of the document, as
+[DCAT-AP 3.0.1](https://semiceu.github.io/DCAT-AP/releases/3.0.1/)
+describes one. It names no one's email: no subject states `foaf:mbox`.
+
+```turtle
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+
+<> dcat:contactPoint <#contact> .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+```
+
+The versions published before this rule name the maintainer's email
+instead (`foaf:mbox` on `<#anton-wiklund>`). They are frozen, so they
+keep it; a deck's next version drops it. The index never repeats an
+email, whichever version is current: `keptInIndex`
+([seriesEntry.ts](../packages/domain/src/release/seriesEntry.ts)) leaves
+out every `foaf:mbox`, and keeps the current version's contact. The
+command checks the rule on every version new since `--base`
+(`contactProblems`, [Checks](#checks)); `CONTACT_URL` in
+[deckLibrary.ts](../packages/shacl/node/deckLibrary.ts) names the
+tracker. A release in a pod ([studio.md](studio.md)) is the author's
+own and may name an email.
+
 ## Provenance
 
 Each authored deck says how it was made, in
@@ -160,10 +192,15 @@ next. To change a deck `<name>` whose latest version is `N`:
    - `dcat:prev` and `dcat:previousVersion` `<https://solid-memo.com/decks/<name>/v<N>.ttl>`,
    - `dcterms:issued` to the release time, and `dcterms:modified` if the
      deck has it,
-   - `adms:versionNotes` to what changed, in one string.
+   - `adms:versionNotes` to what changed, in one string,
+   - the [contact](#contact): `dcat:contactPoint <#contact>` and its
+     `vcard:Kind` node, and no `foaf:mbox` (copied from a version
+     published before the rule, the agent has one: remove it).
 3. `npm run format:turtle`, then `npm run library`, which validates the
    library and writes `decks/index.ttl` (the new version becomes the
-   series' `dcat:last` and current version).
+   series' `dcat:last` and current version). Then
+   `npm run library:check -- --base origin/main`, which checks the
+   contact of every version new since `origin/main`.
 4. Look at it: `npm run dev` serves the working tree's `decks/`, so the
    library screen lists the new version and offers it to copies of the
    old one ([migrations.md](migrations.md#catching-up-with-the-library)).
@@ -380,7 +417,10 @@ author meant.
 
 With `-- --base <git ref>` they also compare with the library at that
 commit: a version published there that is gone or differs by a byte
-fails. `npm run check` runs `library:check` without a base, and so
+fails, and so does a version not published there that states
+`foaf:mbox` or lacks the library's [contact](#contact)
+(`contactProblems`). Without a base nothing tells a new version from a
+published one, so that rule does not run. `npm run check` runs `library:check` without a base, and so
 does CI, as a Turbo task of the shacl package
 ([turbo.json](../packages/shacl/turbo.json)), cached until a file it
 reads (`ns/`, `decks/`, its packages' code) changes. The [ns workflow](../.github/workflows/ns.yml)
