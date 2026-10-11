@@ -323,7 +323,8 @@
   text-decoration: none;
 }
 
-:where(:root[data-surface="studio"]) .studio-tabs a[aria-current="page"] {
+/* The tab shown, or the one the page shown is under (a card under Cards). */
+:where(:root[data-surface="studio"]) .studio-tabs a[aria-current] {
   font-weight: 600;
   border-bottom: 3px solid var(--primary);
 }
@@ -1340,6 +1341,15 @@
 
 :root[data-surface="studio"] .studio-aside[hidden] {
   display: none;
+}
+
+/*
+ * Beside the main content, as wide as its splitter makes it, but never
+ * so wide that the main content keeps less than 20rem beside the sidebar
+ * (15rem): a width set on a wide window holds on a narrower one.
+ */
+:root[data-surface="studio"][data-aside] .studio-aside {
+  max-width: calc(100vw - 35rem);
 }
 
 /* Not wide: a drawer over the page, at its right (MEDIUM in workspaceLayout.ts). */

@@ -50,9 +50,15 @@ Opening a card from the list pushes a history entry; going from card
 to card beside it (`j` and `k`, Previous and Next) replaces it, as
 does putting the list at the page of a card opened from elsewhere.
 While the card's edits are not saved, a hashchange (Back, Forward, a
-hash typed in) is undone before the router hears of it, the card's
-route pushed back, and asked about first
-([studio.md](studio.md#card-inspector)).
+hash typed in) is undone before the router hears of it, by going as
+many entries the other way, and asked about first
+([studio.md](studio.md#card-inspector)). To tell how far, the router
+numbers the entries it sees (`position` in each entry's state, read by
+`historyPosition` and `shownPosition` in
+[routerCore.ts](../packages/ui/src/ui/routerCore.ts)): one more for
+each entry after another, as it pushes one or hears of one the browser
+made; a replace keeps the number. No entry is pushed to undo a move, so
+the history after it is kept.
 
 Home's route, `#/studio`, carries the view its tabs show (`show`:
 `due`, `courses`, `copies` or `attention`; every deck without it) and

@@ -152,6 +152,8 @@
     "saveButton": "Spara",
     "removeButton": "Ta bort kort",
     "removeConfirm": "Ta bort kortet ”{card}”? Det går inte att ångra.",
+    "removeHeading": "Ta bort kortet",
+    "removeAction": "Ta bort",
     "saved": "Sparat."
   },
   "cardContentFields": {
@@ -200,6 +202,7 @@
     "delete": "Ta bort",
     "deleteLabel": "Ta bort det felaktiga alternativet ”{option}”",
     "deleteConfirm": "Ta bort det felaktiga alternativet ”{option}”?",
+    "deleteHeading": "Ta bort det felaktiga alternativet",
     "noLanguage": "inget angivet språk",
     "issues": "Värt att se över",
     "issue": {
@@ -570,6 +573,8 @@
     "intro": "En instans är en samling av dina kortlekar och studier, sparad i en mapp i din Pod. De flesta behöver bara en.",
     "empty": "Inga instanser är registrerade än.",
     "deleteConfirm": "Ta bort instansen ”{name}” med alla dess kortlekar och kort? Det går inte att ångra. Filer som en annan app har lagt i dess mapp behålls, och så gör de utgåvor som publicerats från den.",
+    "deleteHeading": "Ta bort instansen",
+    "deleteAction": "Ta bort",
     "deleteLabel": "Ta bort instansen {name}",
     "delete": "Ta bort…",
     "newInstance": "Ny instans…",
@@ -1445,6 +1450,10 @@
         "one": "{count} problem hindrar publicering",
         "other": "{count} problem hindrar publicering"
       },
+      "someBlock": {
+        "one": "{count} problem, {blocking} hindrar publicering",
+        "other": "{count} problem, {blocking} hindrar publicering"
+      },
       "released": "Publicerad"
     },
     "tabs": {
@@ -1467,6 +1476,8 @@
       "button": "? Tangenter",
       "heading": "Kortkommandon",
       "chords": "Tangenter sida vid sida, som g d, trycks en efter en. Medan du skriver i ett fält fungerar bara Ctrl+K, F6, Shift+F6, F8 och Shift+F8.",
+      "characterKeys": "Kortkommandon med en tangent",
+      "characterKeysHint": "Tangenter som trycks utan Ctrl, som g d, j, [ eller ?, som kortkommandon. Stäng av dem om röststyrning eller en tangent av misstag sätter i gång dem; Ctrl+K, F6, F8 och knapparna fungerar ändå.",
       "scope": {
         "studio": "Överallt i Studion",
         "table": "I en tabell: korten, kortlekarna, ett utkasts kort…"

@@ -105,7 +105,8 @@ It takes the whole window, and the window does not scroll:
   (Pinned), in the order pinned, above the sections. A deck is opened by
   any of its screens, a draft by any of its. Its button in the header, or
   Ctrl+B, hides it, and the main content takes its room; the device
-  remembers. On a narrow screen it is a drawer over the page, closed
+  remembers. Hidden with the focus in it, it gives the focus to its
+  button, as the aside and the dock give theirs, never to the page. On a narrow screen it is a drawer over the page, closed
   until its button opens it, and closed again by a link followed in it,
   a press outside it, Escape, or its own **Close**, since the drawer
   covers the button that opened it.
@@ -124,9 +125,13 @@ It takes the whole window, and the window does not scroll:
   or Ctrl+\ hides it, and the main content takes its room; its
   splitter, on its left edge, sets its width (with the pointer, or the
   arrow keys, Home and End once it has the focus). The device remembers
-  both. On a screen 64rem wide or less it is a drawer over the page, at
-  its right, closed until its button opens it, and closed again as the
-  sidebar's drawer is.
+  both. However wide it is set, the main content keeps 20rem beside the
+  sidebar's room (the aside is at most the window less 35rem), so a
+  width set on a wide window holds on a narrower one. On a screen 64rem
+  wide or less it is a drawer over the page, at its right, closed until
+  its button opens it, and closed again as the sidebar's drawer is; but
+  Escape in a dialog of it (a question of the outline's) closes the
+  dialog alone.
 - **A card beside its deck's cards**: on a card's route, wider than
   64rem, the main content is the deck's [workbench](#card-workbench)
   and the aside, named Card, the [card inspector](#card-inspector). It
@@ -138,7 +143,8 @@ It takes the whole window, and the window does not scroll:
 - **The dock**, under the main content and the aside, a region named
   Panel: hidden until its button in the status bar, or Ctrl+J, shows
   it; the device remembers that, and its height, which its splitter on
-  its top edge sets. It has two tabs ([below](#the-dock)): Problems
+  its top edge sets. Hidden from its **Hide** or with Ctrl+J, the focus
+  in it goes to **Panel** in the status bar. It has two tabs ([below](#the-dock)): Problems
   and Activity.
 - **The status bar**, at the foot, beside the site's footer, names the
   open instance, says on a draft's screens whether the draft is saved
@@ -146,12 +152,14 @@ It takes the whole window, and the window does not scroll:
   when its write failed or the draft refused it;
   [below](#how-edits-are-saved)), and whether it can be published: **Ready
   to publish**, a link to its Release tab, while the release check finds
-  no error that keeps it from it, else "2 problems block publishing", a
-  link to its Check tab; **Released** once it is (both
+  no error that keeps it from it, **Released** once it is (both
   [below](#publishing-a-release)). Then it counts the problems of the deck or
-  the draft shown (a button that opens the dock at them), shows or
-  hides the dock (**Panel**), switches the density, and shows the keys
-  (**? Keys**).
+  the draft shown (a button that opens the dock at them), saying, once,
+  how many keep a draft from being published: "3 problems block
+  publishing" when they all do (or the check shown is for another
+  policy, which lists fewer), "5 problems, 3 block publishing" when some
+  others do not. Then it shows or hides the dock (**Panel**), switches
+  the density, and shows the keys (**? Keys**).
 
 **Tabs.** A deck's screens have the deck's tabs, under the trail
 ([`shell/ContextTabs.tsx`](../apps/studio/src/ui/shell/ContextTabs.tsx),
@@ -164,7 +172,7 @@ them), Check, which counts the problems the release check finds ("Check
 draft that follows a release) and Release. The one shown is marked
 `aria-current="page"`; on a page under a tab (a card, a chapter, a step
 or a question), that tab is marked `aria-current="true"`, so only the
-page's own tab is the page. Which
+page's own tab is the page. Both look the same, bold and underlined. Which
 tabs a route has, and which is shown, is worked out from the route
 alone ([`shell/workspaceLayout.ts`](../apps/studio/src/ui/shell/workspaceLayout.ts)).
 The card inspector's tabs and the release check's policies are tabs of
@@ -252,6 +260,18 @@ The key help lists them by their scope:
 | Ctrl+Enter, Cmd+Enter | a text of several lines | submit its form, as Enter does a text of one line (`ui`'s `LangTextField`); the key help leaves it out |
 | Escape | a drawer, a dialog, the palette, a cell edited in place | close it, the cell unchanged |
 
+**Single-key shortcuts** (a character alone: `?`, `/`, the `g` chords,
+`[`, `]`, `1` … `9`, and a table's `j`, `k`, `x`, `.`, Shift+J and
+Shift+K) can be turned off in the key help, which the device remembers
+(`characterKeys`, [Density](#layout)), so that speech input, or a key
+pressed by mistake, sets nothing off (WCAG 2.1.4); the keys with Ctrl,
+the F keys, Enter, Escape and the buttons work still. A character typed
+with AltGr, or with Option on a Mac (`[` is AltGr+8 on a Swedish
+keyboard), is the character, as one typed with Shift is; Windows
+reports AltGr as Ctrl+Alt, so there Ctrl+\ cannot be told from a `\`
+typed with AltGr, and the aside's button, or the palette, shows or
+hides it instead.
+
 A pair such as `g d` is pressed one key after the other, the second
 within 1.5 seconds; a key held down counts once, so a held `g` is not
 `g g`. A `g` chord, and a tab's key, goes where a link would, and is a
@@ -259,7 +279,9 @@ Back stop as a link is, except to the page already shown. While the user types i
 a list to choose from), the field keeps its keys, Ctrl+K, F6,
 Shift+F6, F8 and Shift+F8 aside. A key goes first to what has the focus, which may take it (a
 menu's arrows, say); then to the screen's own keys (`useScreenKeys`),
-then to the Studio's. Keys in a dialog are the dialog's, but Ctrl+K
+then to the Studio's. While a dialog is open, keys are the dialog's,
+wherever the focus is (on the page's body, once a press on the
+dialog's text took it from its buttons), but Ctrl+K
 (Cmd+K), which closes the dialog and opens the palette in its place,
 rather than reach the browser; while a menu is open (Columns, say),
 every key is the menu's, so `j` and `k` do not move the table under it. A field or
@@ -267,7 +289,10 @@ button with a key says so to screen readers (`aria-keyshortcuts`): the
 search or filter `/` goes to is the one marked so. The key help is a
 modal dialog, the browser's own
 ([`shell/Dialog.tsx`](../apps/studio/src/ui/shell/Dialog.tsx)): Escape
-or Close closes it, and the focus goes back where it was.
+or Close closes it, and the focus goes back where it was. A saved view
+renamed has the focus once it shows its new name, and one removed
+gives it to **+ Save view**: the menu button the dialog would give it
+back to went with the view.
 
 A splitter ([`shell/Splitter.tsx`](../apps/studio/src/ui/shell/Splitter.tsx))
 is a separator, as screen readers know one, that takes the focus: its
@@ -295,7 +320,14 @@ first, in the Studio's own dialog, not the browser's
 `useConfirm`): a heading, the question, the action (it has the focus)
 and Cancel; Escape or Close does nothing either. So does deleting
 cards, decks, a draft or a part of it, forgetting progress, restarting
-a course, and removing data from the pod on the health screen. A bulk
+a course, and removing data from the pod on the health screen. The
+components the Studio shares with Solid Memo ask through `ui`'s
+`AskFirst` ([`askFirst.ts`](../packages/ui/src/ui/askFirst.ts)), which
+the Studio gives its `useConfirm`, and Solid Memo leaves to the
+browser's `confirm`: removing a card, deleting a wrong option, and
+deleting an instance. Deleting a group, or a deck from the groups'
+tree, still asks in the browser's: its focus, once the deck is gone,
+is worked out from the button the question leaves it on. A bulk
 edit that needs to be told more (a language, a day, a deck, a group)
 asks in a dialog too, not in the page above the table.
 
@@ -313,7 +345,12 @@ stays in the field, marked invalid, and the screen says why. A value
 changed and not saved stays in its field as the focus goes elsewhere,
 and is asked about before it is left, as a card's edits are
 ([below](#card-inspector)); one left unchanged closes as the focus
-leaves it. Nothing is saved unasked.
+leaves it. Saved from that question, it is saved as the cell is edited
+then: a deck's pace saved from another cell of its row since is kept.
+Discarded there, its field closes, the edit gone from sight as from
+the question. Enter and Escape that an input method takes, to end or
+drop a syllable it composes (Korean, say), are the input method's.
+Nothing is saved unasked.
 
 **Saved views.** Beside a table's own views (Home's and the
 workbench's, [below](#home)), **+ Save view** saves the table's query
@@ -934,15 +971,19 @@ another tab, any other link or key that goes to another page, or the
 browser's Back and Forward, or a hash typed in) first asks, in a dialog ([`shell/ConfirmDialog.tsx`](../apps/studio/src/ui/shell/ConfirmDialog.tsx),
 on the Studio's `Dialog`): **Save** saves them as Save does, then goes
 on, unless the save failed or was refused, which the editor shows;
-**Discard** goes on without them; **Stay**, Escape or Close goes
+**Discard** goes on without them, and a cell that stays on the page
+shows them no longer; **Stay**, Escape or Close goes
 nowhere ([`shell/unsavedEdits.tsx`](../apps/studio/src/ui/shell/unsavedEdits.tsx)).
 A table's cell edited and not saved ([Layout](#layout)) is asked about
 the same way, beside a card's edits: Save saves them all, and goes on
 only once each is saved.
 Back or Forward is undone before the question, before the Studio's
-router hears of it: the card's page is put back on top of the history,
-and once the question is answered so, the Studio goes back from there,
-where Back or Forward went. A card's edits are never saved unasked.
+router hears of it: the browser goes as many entries the other way
+(the router numbers the history's entries, `historyPosition` in
+[routerCore.ts](../packages/ui/src/ui/routerCore.ts)), and once the
+question is answered so, as many again, where Back or Forward went,
+the entries after it kept for Forward; a hash typed in, a new entry,
+is undone as Back is. A card's edits are never saved unasked.
 Leaving the app (a reload, closing the tab) meanwhile is asked by the
 browser itself (`beforeunload`). The edits are kept as the window
 crosses 64rem, the card going from beside its deck's cards to alone,

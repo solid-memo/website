@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { useState } from "preact/hooks";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { answer, dialog, pick } from "../../test/dialogs";
 import { SavedViews } from "./SavedViews";
@@ -61,5 +62,20 @@ describe("SavedViews", () => {
     expect(dialog("Remove the view")).toHaveTextContent("Remove the view Due? Only the view goes: nothing in your Pod changes.");
     answer("Remove the view", "Remove");
     expect(onViews).toHaveBeenCalledWith([kanji]);
+  });
+
+  it("gives the focus to a view renamed, once it is shown so, and to Save view once a view removed is gone", () => {
+    function Kept() {
+      const [views, setViews] = useState<SavedView[]>([due, kanji]);
+      return <SavedViews views={views} current="" onApply={() => undefined} onViews={setViews} />;
+    }
+    render(<Kept />);
+    pick("Options of the view Kanji", "Rename…");
+    name("Rename the view Kanji", " Kanji N5 ");
+    expect(screen.getByRole("button", { name: "Kanji N5" })).toHaveFocus();
+    pick("Options of the view Due", "Remove");
+    answer("Remove the view", "Remove");
+    expect(screen.queryByRole("button", { name: "Due" })).toBeNull();
+    expect(screen.getByRole("button", { name: "+ Save view" })).toHaveFocus();
   });
 });

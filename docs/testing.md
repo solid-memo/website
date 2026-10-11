@@ -329,8 +329,10 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
 - **Dialogs**: a step that expects the browser's `confirm` (Solid
   Memo's) names it with `app.expectDialog(pattern)`; any other such
   dialog fails the journey. The Studio asks in a dialog of its own
-  (`ConfirmDialog`), which a step answers as a user does, by its
-  heading and its button; so do its component tests
+  (`ConfirmDialog`), also for what the components it shares with Solid
+  Memo ask (`AskFirst`: a wrong option, a card, an instance), which a
+  step answers as a user does, by its heading and its button; so do its
+  component tests
   ([test/dialogs.ts](../apps/studio/src/test/dialogs.ts)).
 - **One after another**: a journey that needs what another made is in
   its file, after it, and the file runs in turn (`mode: "serial"`): the

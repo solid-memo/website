@@ -14,6 +14,7 @@ import {
   type CardDraft,
   type CardFieldsError,
 } from "./CardContentFields";
+import { useAskFirst } from "./askFirst";
 import { CardFace } from "./CardFace";
 import { DistractorFields } from "./DistractorFields";
 import { ErrorMessage } from "./ErrorMessage";
@@ -103,6 +104,7 @@ export function CardScreen({
   keep?: { current: CardEdits | null };
 }) {
   const { t, locale, readerText } = useI18n();
+  const askFirst = useAskFirst();
   const hints = useMemo(() => cardLanguageHints(languages, deckTitle), [languages, deckTitle]);
   const startDraft = () => draftOf(card, [locale, ...navigator.languages], { defaults: hints.defaults });
   const [draft, setDraft] = useState(() => keep?.current?.draft ?? startDraft());
@@ -177,11 +179,12 @@ export function CardScreen({
 
   function handleRemove() {
     if (busy) return;
-    if (
-      window.confirm(t("card.removeConfirm", { card: cardName(card, readerText) }))
-    ) {
-      onRemove();
-    }
+    askFirst({
+      heading: t("card.removeHeading"),
+      text: t("card.removeConfirm", { card: cardName(card, readerText) }),
+      action: t("card.removeAction"),
+      onConfirm: onRemove,
+    });
   }
 
   return (

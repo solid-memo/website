@@ -1,5 +1,6 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
+import type { LossQuestion } from "@solid-memo/ui/askFirst";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Dialog } from "./Dialog";
 
@@ -49,15 +50,8 @@ export function ConfirmDialog({
   );
 }
 
-/** Something to be done once the user confirms it: what the dialog asks, and its button. */
-export interface Question {
-  heading: string;
-  /** The question itself, which says what is lost. */
-  text: string;
-  /** The button that does it. */
-  action: string;
-  onConfirm: () => void;
-}
+/** Something to be done once the user confirms it: what the dialog asks, and its button (as a component Solid Memo shares asks, AskFirst). */
+export type Question = LossQuestion;
 
 /**
  * Asks before something is done that loses something, in a

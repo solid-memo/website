@@ -1,13 +1,19 @@
 import { createContext, type ComponentChildren } from "preact";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useI18n } from "@solid-memo/ui/i18n";
+import { historyPosition, shownPosition } from "@solid-memo/ui/routerCore";
 import { ConfirmDialog } from "./ConfirmDialog";
 
 /** Edits not saved, as an editor reports them: a way to save them, which resolves to whether they were. */
 export type SaveEdits = () => Promise<boolean>;
 
-/** How an editor reports its edits not saved (`save`, null once there are none), under its own key (`from`) beside the others'. */
-export type ReportUnsaved = (save: SaveEdits | null, from?: unknown) => void;
+/**
+ * How an editor reports its edits not saved (`save`, null once there are
+ * none), under its own key (`from`) beside the others', and how they are
+ * dropped when the user discards them (`discard`), for an editor that
+ * stays on the page after the move: it shows them no longer.
+ */
+export type ReportUnsaved = (save: SaveEdits | null, from?: unknown, discard?: () => void) => void;
 
 /** How an editor deep in a screen (a table's cell, EditableCell) reports its edits; outside the Studio, to no one. */
 export const UnsavedEdits = createContext<ReportUnsaved>(() => undefined);
@@ -20,11 +26,13 @@ export const UnsavedEdits = createContext<ReportUnsaved>(() => undefined);
  * page (`guard`, any link to another of the app's pages followed by a
  * plain click, and Back, Forward or a hash typed in) first asks, in a
  * dialog: Save saves them, then moves, unless the save failed or was
- * refused, which the editor shows; Discard moves without them; Stay,
- * Escape or Close moves nowhere. A link followed after the question is
- * followed as it would have been. Back or Forward is undone before the
- * question, the page shown before it put back on top of the history, and
- * done again once answered, by going back from there to where it went.
+ * refused, which the editor shows; Discard drops them (`discard`, of an
+ * editor that stays) and moves without them; Stay, Escape or Close moves
+ * nowhere. A link followed after the question is followed as it would
+ * have been. Back or Forward is undone before the question, as many
+ * entries of the history as it went (the router numbers them,
+ * historyPosition), and done again once answered, the history kept
+ * whole on either side; a hash typed in, a new entry, is undone as Back.
  * Leaving the app (a reload, closing the tab) is left to the browser's
  * own question.
  */
@@ -34,17 +42,19 @@ export function useUnsavedEdits(): {
   dialog: ComponentChildren;
 } {
   const { t } = useI18n();
-  const unsaved = useRef(new Map<unknown, SaveEdits>());
+  const unsaved = useRef(new Map<unknown, { save: SaveEdits; discard?: () => void }>());
   const none = () => unsaved.current.size === 0;
   // The move asked about, until it is answered.
   const [asked, setAsked] = useState<(() => void) | null>(null);
   // A link followed once answered: its click is let through.
   const passing = useRef(false);
+  // The page shown, while Back or Forward is undone: the hashchange back to it is no move.
+  const returning = useRef<string | null>(null);
 
   // One function for the page's life, as the editor reports through it.
-  const report = useCallback<ReportUnsaved>((save, from = "editor") => {
+  const report = useCallback<ReportUnsaved>((save, from = "editor", discard) => {
     if (save === null) unsaved.current.delete(from);
-    else unsaved.current.set(from, save);
+    else unsaved.current.set(from, { save, discard });
   }, []);
 
   function guard(move: () => void) {
@@ -74,12 +84,19 @@ export function useUnsavedEdits(): {
   // Before the router's own listener (useHashRouter), which then never hears of the move.
   useLayoutEffect(() => {
     const hashChange = (event: HashChangeEvent) => {
+      if (returning.current === window.location.hash) {
+        returning.current = null;
+        return;
+      }
       if (none()) return;
       const shown = new URL(event.oldURL).hash;
       if (shown === window.location.hash) return;
       event.stopImmediatePropagation();
-      window.history.pushState(null, "", shown);
-      setAsked(() => () => window.history.back());
+      // How far the browser went: an entry the router has not numbered is a new one, after the page shown, as is one it numbered alike.
+      const went = (historyPosition() ?? shownPosition() + 1) - shownPosition() || 1;
+      returning.current = shown;
+      window.history.go(-went);
+      setAsked(() => () => window.history.go(went));
     };
     const unload = (event: BeforeUnloadEvent) => {
       if (!none()) event.preventDefault();
@@ -100,7 +117,7 @@ export function useUnsavedEdits(): {
           label: t("studio.confirm.unsaved.save"),
           onChoose: () => {
             setAsked(null);
-            void Promise.all([...unsaved.current.values()].map((save) => save())).then((saved) => {
+            void Promise.all([...unsaved.current.values()].map((edits) => edits.save())).then((saved) => {
               if (!saved.every(Boolean)) return;
               unsaved.current.clear();
               asked();
@@ -112,7 +129,8 @@ export function useUnsavedEdits(): {
           danger: true,
           onChoose: () => {
             setAsked(null);
-            // Left behind: the move it makes is not asked about again.
+            // Left behind, by an editor that stays too: the move it makes is not asked about again.
+            for (const edits of unsaved.current.values()) edits.discard?.();
             unsaved.current.clear();
             asked();
           },

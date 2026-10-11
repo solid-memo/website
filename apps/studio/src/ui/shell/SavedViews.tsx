@@ -1,5 +1,5 @@
 import { Fragment } from "preact";
-import { useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { ActionsMenu, MenuItem } from "@solid-memo/ui/ActionsMenu";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { useConfirm } from "./ConfirmDialog";
@@ -14,7 +14,9 @@ import { renamedView, withoutView, withSavedView, type SavedView } from "./views
  * confirms); then **Save view**, which saves the table's query under a
  * name, asked in a dialog. A name is a view's own: saving or renaming
  * under a name taken replaces that view. What changes is the screen's
- * to keep (`onViews`).
+ * to keep (`onViews`). Renamed, a view has the focus once it is shown
+ * under its new name; removed, Save view has it, once the view is gone:
+ * the menu button the dialog would give it back to goes with the view.
  */
 export function SavedViews({
   views,
@@ -34,6 +36,18 @@ export function SavedViews({
   const [naming, setNaming] = useState<string | null | undefined>(undefined);
   const [name, setName] = useState("");
   const { ask, dialog } = useConfirm();
+  const buttons = useRef(new Map<string, HTMLButtonElement>());
+  const saveButton = useRef<HTMLButtonElement>(null);
+  // Where the focus goes once the views have changed, when they have: what to focus, if it is time.
+  const refocus = useRef<((views: readonly SavedView[]) => HTMLElement | undefined) | null>(null);
+
+  // After the dialog has closed, and given the focus back to a button gone or about to go.
+  useEffect(() => {
+    const target = refocus.current?.(views);
+    if (target === undefined) return;
+    refocus.current = null;
+    target.focus();
+  });
 
   function nameIt(from: string | null) {
     setName(from ?? "");
@@ -44,7 +58,16 @@ export function SavedViews({
     <>
       {views.map((view) => (
         <Fragment key={view.name}>
-          <button type="button" class="studio-saved-view" aria-pressed={view.params === current} onClick={() => onApply(view.params)}>
+          <button
+            ref={(node) => {
+              if (node === null) buttons.current.delete(view.name);
+              else buttons.current.set(view.name, node);
+            }}
+            type="button"
+            class="studio-saved-view"
+            aria-pressed={view.params === current}
+            onClick={() => onApply(view.params)}
+          >
             {view.name}
           </button>
           <ActionsMenu
@@ -61,7 +84,10 @@ export function SavedViews({
                   heading: t("studio.views.removeHeading"),
                   text: t("studio.views.removeConfirm", { name: view.name }),
                   action: t("studio.views.remove"),
-                  onConfirm: () => onViews(withoutView(views, view.name)),
+                  onConfirm: () => {
+                    refocus.current = (now) => (now.some((each) => each.name === view.name) ? undefined : saveButton.current!);
+                    onViews(withoutView(views, view.name));
+                  },
                 })
               }
             >
@@ -70,7 +96,7 @@ export function SavedViews({
           </ActionsMenu>
         </Fragment>
       ))}
-      <button type="button" onClick={() => nameIt(null)}>
+      <button ref={saveButton} type="button" onClick={() => nameIt(null)}>
         {t("studio.views.save")}
       </button>
       {dialog}
@@ -80,6 +106,10 @@ export function SavedViews({
             onSubmit={(event) => {
               event.preventDefault();
               if (name.trim() === "") return;
+              if (naming !== null) {
+                const renamed = name.trim();
+                refocus.current = () => buttons.current.get(renamed);
+              }
               onViews(naming === null ? withSavedView(views, name, current) : renamedView(views, naming, name));
               setNaming(undefined);
             }}

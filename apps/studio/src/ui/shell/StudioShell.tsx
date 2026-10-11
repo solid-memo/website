@@ -1,7 +1,7 @@
 import type { ComponentChildren } from "preact";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { Instance } from "@solid-memo/domain/instance";
-import { useI18n } from "@solid-memo/ui/i18n";
+import { useI18n, type I18n } from "@solid-memo/ui/i18n";
 import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { DraftWaiting, useDraftSaving, type EditorReport } from "../draftEditor";
 import { studioRouteToHash, type StudioRoute } from "../router";
@@ -145,10 +145,14 @@ export function StudioShell({
   const asideShown = aside !== null && (detail !== undefined || (medium ? asideDrawer : prefs.aside));
   const asideToggleRef = useRef<HTMLButtonElement>(null);
   const asideRef = useRef<HTMLElement>(null);
+  const dockButtonRef = useRef<HTMLButtonElement>(null);
   // The dock is the open instance's, as the sidebar is.
   const docked = sidebar !== null;
   const [dockTab, setDockTab] = useState<DockTab>("problems");
   const activity = useActivityEntries();
+  const dockShown = docked && prefs.dock;
+  // How many of the problems keep the draft shown from being published.
+  const blocking = problems?.blocking ?? 0;
   // The problem F8 went to last, by its place in the list.
   const lastProblem = useRef<number | null>(null);
 
@@ -158,13 +162,15 @@ export function StudioShell({
   }
 
   function toggleSidebar() {
+    if (shown) keepFocus(sidebarRef.current, toggleRef.current);
     if (narrow) setDrawer(!drawer);
     else choose({ ...prefs, sidebar: !prefs.sidebar });
   }
 
   function toggleAside() {
-    if (detail !== undefined) detail.onClose();
-    else if (medium) setAsideDrawer(!asideDrawer);
+    if (detail !== undefined) return detail.onClose();
+    if (asideShown) keepFocus(asideRef.current, asideToggleRef.current);
+    if (medium) setAsideDrawer(!asideDrawer);
     else choose({ ...prefs, aside: !prefs.aside });
   }
 
@@ -175,6 +181,7 @@ export function StudioShell({
   }
 
   function toggleDock() {
+    if (dockShown) keepFocus(document.getElementById(DOCK_ID), dockButtonRef.current);
     choose({ ...prefs, dock: !prefs.dock });
   }
 
@@ -271,7 +278,7 @@ export function StudioShell({
         return true;
       }
     }
-  });
+  }, prefs.characterKeys);
 
   useDrawer(narrow && shown, sidebarRef, toggleRef, () => setDrawer(false));
   useDrawer(medium && asideShown, asideRef, asideToggleRef, () => setAsideDrawer(false));
@@ -308,7 +315,6 @@ export function StudioShell({
     onHidden: (table, hidden) => choose({ ...prefs, hiddenColumns: { ...prefs.hiddenColumns, [table]: [...hidden] } }),
   };
 
-  const dockShown = docked && prefs.dock;
   return (
     <ActivityLog.Provider value={activity.log}>
       <DraftWaiting.Provider value={waiting.report}>
@@ -407,12 +413,12 @@ export function StudioShell({
             style={medium ? undefined : { width: `${prefs[width.key]}px` }}
             data-region
             tabIndex={-1}
-            // As the sidebar's drawer: a link followed, or Escape, closes it.
+            // As the sidebar's drawer: a link followed, or Escape, closes it; but Escape in a dialog of it (a question of the outline's) closes the dialog alone.
             onClick={(event) => {
               if (medium && (event.target as Element).closest("a") !== null) setAsideDrawer(false);
             }}
             onKeyDown={(event) => {
-              if (medium && event.key === "Escape") hideAside();
+              if (medium && event.key === "Escape" && (event.target as Element).closest("dialog") === null) hideAside();
             }}
           >
             {!medium && (
@@ -449,7 +455,7 @@ export function StudioShell({
             onTab={setDockTab}
             problems={problems}
             activity={activity.entries}
-            onClose={() => choose({ ...prefs, dock: false })}
+            onClose={toggleDock}
           />
         )}
         <aside class="studio-status-bar" aria-label={t("studio.shell.status")} data-region tabIndex={-1}>
@@ -459,15 +465,16 @@ export function StudioShell({
           {problems?.count !== undefined && (
             <button
               type="button"
-              class={problems.count > 0 ? "studio-problem-count" : undefined}
+              class={problems.count > 0 || blocking > 0 ? "studio-problem-count" : undefined}
               aria-controls={dockShown ? DOCK_ID : undefined}
               onClick={showProblems}
             >
-              {t("studio.shell.problems", { count: problems.count })}
+              {problemsText(problems.count, blocking, { t })}
             </button>
           )}
           {docked && (
             <button
+              ref={dockButtonRef}
               type="button"
               aria-expanded={dockShown}
               // It controls the dock only while there is one to control.
@@ -494,7 +501,13 @@ export function StudioShell({
             {t("studio.keys.button")}
           </button>
         </aside>
-        {help && <KeyHelp onClose={() => setHelp(false)} />}
+        {help && (
+          <KeyHelp
+            characterKeys={prefs.characterKeys}
+            onCharacterKeys={(characterKeys) => choose({ ...prefs, characterKeys })}
+            onClose={() => setHelp(false)}
+          />
+        )}
         {palette && (
           <CommandPalette
             route={route}
@@ -509,6 +522,24 @@ export function StudioShell({
       </DraftWaiting.Provider>
     </ActivityLog.Provider>
   );
+}
+
+/** Before a region is hidden: the focus in it goes to the button that shows it again, not to the page's body. */
+function keepFocus(region: HTMLElement | null, button: HTMLElement | null) {
+  if (region?.contains(document.activeElement)) button!.focus();
+}
+
+/**
+ * The status bar's count of problems: on a draft's screens, with how
+ * many keep it from being published (PublishState says only whether it
+ * can be): "3 problems block publishing" when they are all, or more
+ * than the dock lists (a check shown for another policy), and "5
+ * problems, 3 block publishing" when some others do not.
+ */
+function problemsText(count: number, blocking: number, { t }: Pick<I18n, "t">): string {
+  if (blocking === 0) return t("studio.shell.problems", { count });
+  if (blocking >= count) return t("studio.shell.blocked", { count: blocking });
+  return t("studio.shell.someBlock", { count, blocking });
 }
 
 /** A pane beside the page: the sidebar at its left, or (`right`) the aside at its right. */

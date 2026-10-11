@@ -150,6 +150,8 @@
     "saveButton": "저장",
     "removeButton": "카드 삭제",
     "removeConfirm": "‘{card}’ 카드를 삭제할까요? 되돌릴 수 없어요.",
+    "removeHeading": "카드 삭제",
+    "removeAction": "삭제",
     "saved": "저장했어요."
   },
   "cardContentFields": {
@@ -198,6 +200,7 @@
     "delete": "삭제",
     "deleteLabel": "오답 선택지 ‘{option}’ 삭제",
     "deleteConfirm": "오답 선택지 ‘{option}’을(를) 삭제할까요?",
+    "deleteHeading": "오답 선택지 삭제",
     "noLanguage": "언어 지정 안 됨",
     "issues": "확인해 볼 점",
     "issue": {
@@ -547,6 +550,8 @@
     "intro": "인스턴스는 덱과 학습을 한데 모은 것으로, Pod의 폴더 하나에 저장돼요. 대부분은 하나면 충분해요.",
     "empty": "아직 등록된 인스턴스가 없어요.",
     "deleteConfirm": "‘{name}’ 인스턴스와 그 안의 모든 덱과 카드를 삭제할까요? 되돌릴 수 없어요. 다른 앱이 이 폴더에 넣은 파일은 그대로 남아요.",
+    "deleteHeading": "인스턴스 삭제",
+    "deleteAction": "삭제",
     "deleteLabel": "{name} 인스턴스 삭제",
     "delete": "삭제…",
     "newInstance": "새 인스턴스…",
@@ -1378,6 +1383,10 @@
         "one": "문제 {count}개 때문에 게시할 수 없어요",
         "other": "문제 {count}개 때문에 게시할 수 없어요"
       },
+      "someBlock": {
+        "one": "문제 {count}개, 그중 {blocking}개 때문에 게시할 수 없어요",
+        "other": "문제 {count}개, 그중 {blocking}개 때문에 게시할 수 없어요"
+      },
       "released": "게시됨"
     },
     "tabs": {
@@ -1400,6 +1409,8 @@
       "button": "? 키",
       "heading": "단축키",
       "chords": "g d처럼 나란히 표시된 키는 차례로 눌러요. 입력란에 입력하는 동안에는 Ctrl+K, F6, Shift+F6, F8, Shift+F8만 작동해요.",
+      "characterKeys": "한 키 단축키",
+      "characterKeysHint": "g d, j, [, ?처럼 Ctrl 없이 누르는 키를 단축키로 써요. 음성 입력이나 잘못 누른 키로 실행된다면 꺼 두세요. Ctrl+K, F6, F8과 버튼은 그대로 작동해요.",
       "scope": {
         "studio": "스튜디오 어디서나",
         "table": "표에서: 카드, 덱, 초안의 카드…"

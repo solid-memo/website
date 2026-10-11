@@ -7,6 +7,7 @@ import type { Card, Deck } from "@solid-memo/domain/deck";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { AppError } from "@solid-memo/domain/appError";
 import { AppName } from "@solid-memo/ui/documentTitle";
+import { shownPosition } from "@solid-memo/ui/routerCore";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { parseStudioHash, studioRouteToHash } from "./router";
 import { StudioWorkspace } from "./StudioWorkspace";
@@ -16,7 +17,7 @@ import { problem } from "@solid-memo/domain/release/problems";
 import { courseDraft, DRAFT_URL, instanceA, instanceB, makeCard, makeDeck, session } from "../test/fixtures";
 import { courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/course";
 import { narrowScreen, wideScreen } from "../test/media";
-import { answer } from "../test/dialogs";
+import { answer, dialog } from "../test/dialogs";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -103,6 +104,19 @@ describe("StudioWorkspace", () => {
     fireEvent.click(screen.getByRole("button", { name: instanceB.name }));
     expect(await screen.findByRole("table", { name: "The decks of Deck set B" })).toBeInTheDocument();
     expect(useCases.listDecks).toHaveBeenCalledWith(instanceB.url);
+  });
+
+  it("asks before an instance is deleted in the Studio's own dialog, not the browser's", async () => {
+    const confirm = vi.fn(() => true);
+    vi.stubGlobal("confirm", confirm);
+    const useCases = makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA, instanceB]) });
+    renderWorkspace(useCases);
+    fireEvent.click(await screen.findByRole("button", { name: `Delete instance ${instanceB.name}` }));
+    expect(dialog("Delete the instance")).toHaveTextContent(`Delete the instance "${instanceB.name}"`);
+    answer("Delete the instance", "Delete");
+    await waitFor(() => expect(useCases.deleteInstance).toHaveBeenCalledWith(session, instanceB));
+    expect(confirm).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
 
   it("keeps Home's filter and sort in the URL, replacing the entry, and links its decks to their about screen, their cards to the workbench", async () => {
@@ -806,17 +820,24 @@ describe("StudioWorkspace", () => {
       const [water, fire] = [makeCard(kanji, "water"), makeCard(kanji, "fire")];
       const route = { screen: "card" as const, deckUrl: kanji.url, cardUrl: water!.url };
       window.history.replaceState(null, "", studioRouteToHash(route));
-      const back = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
       renderWorkspace(useCasesOf([water!, fire!]));
       fireEvent.input(await (await detailFound()).findByLabelText("Front"), { target: { value: "wet" } });
-      const oldURL = window.location.href;
-      window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
-      fireEvent(window, new HashChangeEvent("hashchange", { oldURL, newURL: window.location.href }));
+      const at = shownPosition();
+      /** The browser at another entry of the history, numbered as the router numbers it. */
+      const pop = (hash: string, position: number) => {
+        const oldURL = window.location.href;
+        window.history.replaceState({ position }, "", hash);
+        fireEvent(window, new HashChangeEvent("hashchange", { oldURL, newURL: window.location.href }));
+      };
+      // Undone, the browser goes forward to the card again.
+      const go = vi.spyOn(window.history, "go").mockImplementation(() => pop(studioRouteToHash(route), at));
+      pop(studioRouteToHash({ screen: "cards", deckUrl: kanji.url }), at - 1);
       const question = await screen.findByRole("dialog", { name: "Save your changes?" });
+      expect(go).toHaveBeenCalledWith(1);
       expect(parseStudioHash(window.location.hash)).toEqual(route);
       expect(detail().getByLabelText("Front")).toHaveValue("wet");
       fireEvent.click(within(question).getByRole("button", { name: "Discard" }));
-      expect(back).toHaveBeenCalled();
+      expect(go).toHaveBeenLastCalledWith(-1);
     });
 
     it("shows the list at the page of a card opened from elsewhere, so its row is in sight, with no Back stop", async () => {
@@ -832,12 +853,13 @@ describe("StudioWorkspace", () => {
   });
 
   it("goes back to the deck's cards once the card inspected is removed, leaving no Back stop", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
     const card = makeCard(kanji, "water");
     window.history.replaceState(null, "", studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: card.url }));
     const listCards = vi.fn().mockResolvedValueOnce([card]).mockResolvedValue([]);
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]), listCards }));
     fireEvent.click(await screen.findByRole("button", { name: "Remove card" }));
+    // Asked in the Studio's own dialog, as Solid Memo's card page asks in the browser's.
+    answer("Remove the card", "Remove");
     expect(await screen.findByText("No cards in this deck yet.")).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "cards", deckUrl: kanji.url });
     vi.unstubAllGlobals();
@@ -1119,7 +1141,8 @@ describe("StudioWorkspace", () => {
       renderWorkspace(useCases);
       expect(await screen.findByRole("link", { name: "Check 2 problems" })).toBeInTheDocument();
       const status = within(screen.getByRole("complementary", { name: "Studio status" }));
-      fireEvent.click(status.getByRole("button", { name: "2 problems" }));
+      // Each an error, both keep the draft from being published.
+      fireEvent.click(status.getByRole("button", { name: "2 problems block publishing" }));
       const dock = within(screen.getByRole("region", { name: "Panel" }));
       expect(dock.getByRole("tab", { name: "Problems (2)" })).toHaveAttribute("aria-selected", "true");
       expect(within(dock.getByRole("list", { name: "Errors" })).getByRole("link", { name: "Has no step in use." })).toHaveAttribute(
@@ -1133,7 +1156,7 @@ describe("StudioWorkspace", () => {
       expect(await screen.findByRole("heading", { level: 3, name: "Steps" })).toHaveFocus();
     });
 
-    it("says in the status bar whether the draft can be published, a link to its Release tab, or to its Check tab while problems keep it from it", async () => {
+    it("says in the status bar whether the draft can be published, a link to its Release tab, or in its count of problems, once, how many keep it from it", async () => {
       const useCases = draftUseCases();
       window.history.replaceState(null, "", studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL, policy: "library" }));
       const { unmount } = renderWorkspace(useCases);
@@ -1145,10 +1168,10 @@ describe("StudioWorkspace", () => {
       const backless = problem(`${DRAFT_URL}#q-pods-1a`, { code: "noBack", params: {} });
       vi.mocked(useCases.checkReleaseDraft).mockResolvedValue({ rules: [backless, backless], library: [], drops: [], markdown: [], shapes: null });
       renderWorkspace(useCases);
-      expect(await within(screen.getByRole("complementary", { name: "Studio status" })).findByRole("link", { name: "2 problems block publishing" })).toHaveAttribute(
-        "href",
-        studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL }),
-      );
+      const bar = within(screen.getByRole("complementary", { name: "Studio status" }));
+      fireEvent.click(await bar.findByRole("button", { name: "2 problems block publishing" }));
+      expect(bar.queryByRole("link", { name: /publish/ })).toBeNull();
+      expect(screen.getByRole("region", { name: "Panel" })).toBeInTheDocument();
     });
 
     it("says in the status bar that a draft is released", async () => {
