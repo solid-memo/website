@@ -1,8 +1,30 @@
 {
   "name": "solid-memo",
+  "description": "Spaced-repetition flashcards that live in your own Solid pod.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",
+  "homepage": "https://solid-memo.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solid-memo/website.git"
+  },
+  "bugs": {
+    "url": "https://github.com/solid-memo/website/issues"
+  },
+  "author": "Anton Wiklund (https://github.com/antwika)",
+  "keywords": [
+    "solid",
+    "solid-pod",
+    "spaced-repetition",
+    "flashcards",
+    "sm-2",
+    "linked-data",
+    "rdf",
+    "shacl",
+    "dcat",
+    "preact"
+  ],
   "type": "module",
   "workspaces": [
     "apps/*",
