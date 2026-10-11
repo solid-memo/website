@@ -62,7 +62,15 @@ export interface InstanceDeletion {
  * itself, its catalog, its decks, cards, review states and answers,
  * and the drafts of releases its owner writes.
  */
-export const DATA_CLASSES = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
+export const DATA_CLASSES = [
+  "instance",
+  "catalog",
+  "deck",
+  "card",
+  "reviewState",
+  "answer",
+  "draft",
+] as const;
 export type DataClass = (typeof DATA_CLASSES)[number];
 
 /**

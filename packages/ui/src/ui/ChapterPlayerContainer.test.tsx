@@ -43,10 +43,12 @@ function answer(option: string) {
 
 describe("ChapterPlayerContainer", () => {
   it("takes the chapter a step at a time: the theory, then its questions without it, and on to the final review", async () => {
-    const answerCourseQuestion = vi.fn<UseCases["answerCourseQuestion"]>(async (_instance, _deck, _card, choice) => ({
-      effect: choice.correct ? "introduce" : "review",
-      state: null,
-    }));
+    const answerCourseQuestion = vi.fn<UseCases["answerCourseQuestion"]>(
+      async (_instance, _deck, _card, choice) => ({
+        effect: choice.correct ? "introduce" : "review",
+        state: null,
+      }),
+    );
     const useCases = makeUseCasesFake({ answerCourseQuestion });
     const course = makeCourse();
     const { onReview, invalidate, unmount } = renderPlayer(useCases, course);
@@ -84,7 +86,9 @@ describe("ChapterPlayerContainer", () => {
     expect(screen.queryByRole("radio")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "On to the questions" }));
     expect(screen.queryByText("A triple has three terms.")).toBeNull();
-    expect(screen.getByRole("heading", { name: "Check your understanding: question 1 of 2" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Check your understanding: question 1 of 2" }),
+    ).toBeInTheDocument();
     answer("Not Three terms");
     expect(await screen.findByText("Not quite.")).toBeInTheDocument();
     expect(answerCourseQuestion).toHaveBeenLastCalledWith(
@@ -98,7 +102,9 @@ describe("ChapterPlayerContainer", () => {
     // A second question of the step follows, still without the theory.
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.queryByText("A triple has three terms.")).toBeNull();
-    expect(screen.getByRole("heading", { name: "Check your understanding: question 2 of 2" })).toHaveFocus();
+    expect(
+      screen.getByRole("heading", { name: "Check your understanding: question 2 of 2" }),
+    ).toHaveFocus();
     expect(screen.getByText("What is Turtle?")).toBeInTheDocument();
     answer("A syntax");
     fireEvent.click(await screen.findByRole("button", { name: "On to the final review" }));
@@ -112,12 +118,23 @@ describe("ChapterPlayerContainer", () => {
 
   it("answers at the screen's time", async () => {
     const useCases = makeUseCasesFake();
-    vi.mocked(useCases.answerCourseQuestion).mockResolvedValue({ effect: "introduce", state: null });
+    vi.mocked(useCases.answerCourseQuestion).mockResolvedValue({
+      effect: "introduce",
+      state: null,
+    });
     const later = new Date("2026-12-24T10:00:00.000Z");
     renderPlayer(useCases, makeCourse(), () => later);
     toQuestions();
     answer("An IRI");
-    await waitFor(() => expect(useCases.answerCourseQuestion).toHaveBeenCalledWith(courseInstance.url, expect.anything(), courseCards[0], { correct: true }, later));
+    await waitFor(() =>
+      expect(useCases.answerCourseQuestion).toHaveBeenCalledWith(
+        courseInstance.url,
+        expect.anything(),
+        courseCards[0],
+        { correct: true },
+        later,
+      ),
+    );
   });
 
   it("opens at the step to resume at, on its theory", () => {
@@ -130,7 +147,9 @@ describe("ChapterPlayerContainer", () => {
     // Its questions follow, the resumed step's first.
     toQuestions();
     expect(screen.queryByText("A triple has three terms.")).toBeNull();
-    expect(screen.getByRole("heading", { name: "Check your understanding: question 1 of 2" })).toHaveFocus();
+    expect(
+      screen.getByRole("heading", { name: "Check your understanding: question 1 of 2" }),
+    ).toHaveFocus();
     expect(screen.getByRole("heading", { name: "Step 2 of 2" })).not.toHaveFocus();
     expect(screen.getByText("What is a triple?")).toBeInTheDocument();
   });
@@ -178,7 +197,9 @@ describe("ChapterPlayerContainer", () => {
     toQuestions();
     answer("An IRI");
     expect(await screen.findByText("Right!")).toBeInTheDocument();
-    expect(invalidate).not.toHaveBeenCalledWith({ queryKey: ["cards", makeCourse().deck.cardsDocumentUrl] });
+    expect(invalidate).not.toHaveBeenCalledWith({
+      queryKey: ["cards", makeCourse().deck.cardsDocumentUrl],
+    });
     unmount();
     expect(useCases.refreshStudyDigest).not.toHaveBeenCalled();
   });

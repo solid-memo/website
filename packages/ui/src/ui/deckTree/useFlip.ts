@@ -56,23 +56,31 @@ export function useFlip(containerRef: RefObject<HTMLElement | null>, edited: unk
       element.style.transition = "";
       element.style.transform = "";
     }
-    return all.flatMap<{ element: HTMLElement; offset: { x: number; y: number } | null }>((element) => {
-      const now = element.getBoundingClientRect();
-      // Not on screen (in a group folded shut, say): nowhere to slide to.
-      if (now.height === 0) return [];
-      const before = rects.get(element.dataset.rowKey!);
-      if (before === undefined || before.height === 0) return [{ element, offset: null }];
-      return [{ element, offset: { x: before.left - now.left, y: before.top - now.top } }];
-    });
+    return all.flatMap<{ element: HTMLElement; offset: { x: number; y: number } | null }>(
+      (element) => {
+        const now = element.getBoundingClientRect();
+        // Not on screen (in a group folded shut, say): nowhere to slide to.
+        if (now.height === 0) return [];
+        const before = rects.get(element.dataset.rowKey!);
+        if (before === undefined || before.height === 0) return [{ element, offset: null }];
+        return [{ element, offset: { x: before.left - now.left, y: before.top - now.top } }];
+      },
+    );
   }
 
   function capture(source?: { key: string; rect: DOMRect }) {
     // Gone from the page (an edit it left to make, see DeckListScreen's delete): nothing to move.
     if (reducedMotion() || containerRef.current === null) return;
-    const rects = new Map(rows().map((element) => [element.dataset.rowKey!, element.getBoundingClientRect()]));
+    const rects = new Map(
+      rows().map((element) => [element.dataset.rowKey!, element.getBoundingClientRect()]),
+    );
     if (source !== undefined) rects.set(source.key, source.rect);
     clearTimeout(snapshot.current?.timer);
-    const next: Snapshot = { rects, from: edited, timer: setTimeout(() => play(next), FLIP_FALLBACK_MS) };
+    const next: Snapshot = {
+      rects,
+      from: edited,
+      timer: setTimeout(() => play(next), FLIP_FALLBACK_MS),
+    };
     snapshot.current = next;
   }
 

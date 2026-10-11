@@ -20,9 +20,7 @@ const card: Card = {
 const FLAG = "https://flagcdn.com/af.svg";
 const MAP = "https://img.example/af-map.png";
 
-function renderScreen(
-  overrides: Partial<Parameters<typeof CardScreen>[0]> = {},
-) {
+function renderScreen(overrides: Partial<Parameters<typeof CardScreen>[0]> = {}) {
   const props = {
     card,
     busy: false,
@@ -46,7 +44,9 @@ function chooseLanguage(fieldId: string, tag: string) {
   const radio = panel.querySelector<HTMLInputElement>(`input[type=radio][value="${tag}"]`);
   if (radio === null) {
     fireEvent.click(screen.getByRole("radio", { name: "Other language…" }));
-    fireEvent.input(screen.getByLabelText("Language code, e.g. fi, pt-BR"), { target: { value: tag } });
+    fireEvent.input(screen.getByLabelText("Language code, e.g. fi, pt-BR"), {
+      target: { value: tag },
+    });
   } else {
     fireEvent.click(radio);
   }
@@ -56,10 +56,7 @@ function chooseLanguage(fieldId: string, tag: string) {
 describe("CardScreen", () => {
   it("marks the title with a decorative icon", () => {
     const { container } = renderScreen();
-    expect(container.querySelector("h2 svg.icon")).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
+    expect(container.querySelector("h2 svg.icon")).toHaveAttribute("aria-hidden", "true");
   });
 
   it("shows the card and an editor prefilled with it", () => {
@@ -94,13 +91,18 @@ describe("CardScreen", () => {
     expect(screen.getByLabelText("Back")).toHaveValue("water");
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "fire" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "fire", ja: "みず" } });
+    expect(props.onSave).toHaveBeenCalledWith({
+      front: { ja: "水" },
+      back: { en: "fire", ja: "みず" },
+    });
   });
 
   it("keeps a side saved with no language as it is while it is untouched", () => {
     const { props } = renderScreen({ card: { ...card, front: { "": "水" } } });
     expect(picker("card-front")).toHaveTextContent("Language: not stated");
-    expect(picker("card-front")).toHaveAccessibleDescription("State which language this text is in.");
+    expect(picker("card-front")).toHaveAccessibleDescription(
+      "State which language this text is in.",
+    );
     expect(screen.getByLabelText("Front")).not.toHaveAttribute("lang");
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "fire" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -128,10 +130,14 @@ describe("CardScreen", () => {
     fireEvent.input(screen.getByLabelText("Front"), { target: { value: "水" } });
     fireEvent.click(screen.getAllByRole("button", { name: "Translations (0)" })[0]!);
     fireEvent.click(screen.getAllByRole("button", { name: "Add a translation" })[0]!);
-    fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), { target: { value: "みず" } });
+    fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), {
+      target: { value: "みず" },
+    });
     fireEvent.click(document.getElementById("card-front-language-1")!);
     fireEvent.click(screen.getByRole("radio", { name: "Other language…" }));
-    fireEvent.input(screen.getByLabelText("Language code, e.g. fi, pt-BR"), { target: { value: "ja-hira" } });
+    fireEvent.input(screen.getByLabelText("Language code, e.g. fi, pt-BR"), {
+      target: { value: "ja-hira" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Done" }));
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(alertTexts()).toEqual([
@@ -140,7 +146,10 @@ describe("CardScreen", () => {
     expect(picker("card-front")).toHaveFocus();
     chooseLanguage("card-front", "ja");
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水", "ja-hira": "みず" }, back: { en: "water" } });
+    expect(props.onSave).toHaveBeenCalledWith({
+      front: { ja: "水", "ja-hira": "みず" },
+      back: { en: "water" },
+    });
   });
 
   it("edits each text in the language the reader is shown, marked with it and saying it", () => {
@@ -148,7 +157,14 @@ describe("CardScreen", () => {
     const { container } = render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <CardScreen
-          card={{ ...card, front: { en: "water", sv: "vatten" }, back: { en: "fire" }, frontNote: both, backLabel: both, backNote: both }}
+          card={{
+            ...card,
+            front: { en: "water", sv: "vatten" },
+            back: { en: "fire" },
+            frontNote: both,
+            backLabel: both,
+            backNote: both,
+          }}
           busy={false}
           saved={false}
           error={null}
@@ -160,33 +176,52 @@ describe("CardScreen", () => {
     const front = container.querySelector("#card-front")!;
     expect(front).toHaveValue("vatten");
     expect(front).not.toHaveAttribute("lang");
-    expect(front).toHaveAccessibleDescription("Språk: svenska Varje sida behöver text, en bild eller båda.");
+    expect(front).toHaveAccessibleDescription(
+      "Språk: svenska Varje sida behöver text, en bild eller båda.",
+    );
     expect(screen.getAllByRole("button", { name: "Översättningar (1)" })).toHaveLength(4);
     expect(container.querySelector("#card-front-note")).toHaveValue("Betydelse");
     const back = container.querySelector("#card-back")!;
     expect(back).toHaveAttribute("lang", "en");
-    expect(back).toHaveAccessibleDescription("Språk: engelska Varje sida behöver text, en bild eller båda.");
+    expect(back).toHaveAccessibleDescription(
+      "Språk: engelska Varje sida behöver text, en bild eller båda.",
+    );
     // The faces show Swedish where there is some, and mark the English.
     expect(container.querySelector(".card-front p:not(.card-note)")).not.toHaveAttribute("lang");
-    expect(container.querySelector(".card-back p:not(.card-label):not(.card-note)")).toHaveAttribute("lang", "en");
+    expect(
+      container.querySelector(".card-back p:not(.card-label):not(.card-note)"),
+    ).toHaveAttribute("lang", "en");
   });
 
   it("asks the language of a new note rather than take the page's, and remembers it for the next once saved", () => {
     const onSave = vi.fn();
     const screenOf = (saved: boolean) => (
       <I18nProvider locale="sv" onChoose={() => undefined}>
-        <CardScreen card={card} busy={false} saved={saved} error={null} onSave={onSave} onRemove={vi.fn()} />
+        <CardScreen
+          card={card}
+          busy={false}
+          saved={saved}
+          error={null}
+          onSave={onSave}
+          onRemove={vi.fn()}
+        />
       </I18nProvider>
     );
     const { rerender } = render(screenOf(false));
-    fireEvent.input(screen.getByLabelText("Anteckning på baksidan (valfritt)"), { target: { value: "Ett element." } });
+    fireEvent.input(screen.getByLabelText("Anteckning på baksidan (valfritt)"), {
+      target: { value: "Ett element." },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Spara" }));
     expect(onSave).not.toHaveBeenCalled();
     expect(alertTexts()).toEqual(["Välj språket för anteckningen under baksidan."]);
     fireEvent.click(picker("card-back-note"));
     fireEvent.click(screen.getByRole("radio", { name: "svenska (sv)" }));
     fireEvent.click(screen.getByRole("button", { name: "Spara" }));
-    expect(onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "water" }, backNote: { sv: "Ett element." } });
+    expect(onSave).toHaveBeenCalledWith({
+      front: { ja: "水" },
+      back: { en: "water" },
+      backNote: { sv: "Ett element." },
+    });
     // Not until the save succeeds.
     expect(recentLanguages("own")).toEqual([]);
     rerender(screenOf(true));
@@ -195,12 +230,22 @@ describe("CardScreen", () => {
 
   it("keeps a picture's URL typed before what is known of the deck comes", () => {
     const { props, rerender } = renderScreen();
-    fireEvent.input(screen.getByLabelText("Back picture (URL, optional)"), { target: { value: MAP } });
-    rerender(<CardScreen {...props} languages={{ own: "sv", unstatedCounts: { front: 0, back: 0 } }} />);
+    fireEvent.input(screen.getByLabelText("Back picture (URL, optional)"), {
+      target: { value: MAP },
+    });
+    rerender(
+      <CardScreen {...props} languages={{ own: "sv", unstatedCounts: { front: 0, back: 0 } }} />,
+    );
     expect(screen.getByLabelText("Back picture (URL, optional)")).toHaveValue(MAP);
-    fireEvent.input(screen.getByLabelText("Back picture (URL, optional)"), { target: { value: "" } });
-    fireEvent.input(screen.getByLabelText("Front picture (URL, optional)"), { target: { value: FLAG } });
-    rerender(<CardScreen {...props} languages={{ own: "fi", unstatedCounts: { front: 0, back: 0 } }} />);
+    fireEvent.input(screen.getByLabelText("Back picture (URL, optional)"), {
+      target: { value: "" },
+    });
+    fireEvent.input(screen.getByLabelText("Front picture (URL, optional)"), {
+      target: { value: FLAG },
+    });
+    rerender(
+      <CardScreen {...props} languages={{ own: "fi", unstatedCounts: { front: 0, back: 0 } }} />,
+    );
     expect(screen.getByLabelText("Front picture (URL, optional)")).toHaveValue(FLAG);
   });
 
@@ -212,9 +257,18 @@ describe("CardScreen", () => {
     expect(picker("card-back-label")).toHaveTextContent("Language: Swedish");
     fireEvent.input(screen.getByLabelText("Label (optional)"), { target: { value: "Betydelse" } });
     fireEvent.click(picker("card-front-note"));
-    expect(screen.getAllByRole("radio").slice(0, 2).map((radio) => radio.getAttribute("value"))).toEqual(["sv", "ja"]);
+    expect(
+      screen
+        .getAllByRole("radio")
+        .slice(0, 2)
+        .map((radio) => radio.getAttribute("value")),
+    ).toEqual(["sv", "ja"]);
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "water" }, backLabel: { sv: "Betydelse" } });
+    expect(props.onSave).toHaveBeenCalledWith({
+      front: { ja: "水" },
+      back: { en: "water" },
+      backLabel: { sv: "Betydelse" },
+    });
   });
 
   it("edits a note saved the same in English and another language in each language on its own", () => {
@@ -223,15 +277,25 @@ describe("CardScreen", () => {
     expect(screen.getByLabelText("Back note (optional)")).toHaveValue("Ett element.");
     expect(screen.queryByText(/Saved as the same text/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "water" }, backNote: { en: "Ett element.", sv: "Ett element." } });
+    expect(props.onSave).toHaveBeenCalledWith({
+      front: { ja: "水" },
+      back: { en: "water" },
+      backNote: { en: "Ett element.", sv: "Ett element." },
+    });
   });
 
   it("edits a note's English and keeps its other languages; clearing the English clears the note", () => {
     const { props } = renderScreen({
-      card: { ...card, backNote: { en: "An element.", sv: "Ett element." }, backLabel: { en: "Meaning", sv: "Betydelse" } },
+      card: {
+        ...card,
+        backNote: { en: "An element.", sv: "Ett element." },
+        backLabel: { en: "Meaning", sv: "Betydelse" },
+      },
     });
     expect(screen.getByLabelText("Back note (optional)")).toHaveValue("An element.");
-    fireEvent.input(screen.getByLabelText("Back note (optional)"), { target: { value: "One of the five elements." } });
+    fireEvent.input(screen.getByLabelText("Back note (optional)"), {
+      target: { value: "One of the five elements." },
+    });
     fireEvent.input(screen.getByLabelText("Label (optional)"), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(props.onSave).toHaveBeenCalledWith({
@@ -243,7 +307,12 @@ describe("CardScreen", () => {
 
   it("shows each side's note and the back's label, prefills them and saves them", () => {
     const { props, container } = renderScreen({
-      card: { ...card, frontNote: { en: "Kanji" }, backLabel: { en: "Meaning" }, backNote: { en: "An element." } },
+      card: {
+        ...card,
+        frontNote: { en: "Kanji" },
+        backLabel: { en: "Meaning" },
+        backNote: { en: "An element." },
+      },
     });
     expect(container.querySelector(".card-front .card-note")).toHaveTextContent("Kanji");
     expect(container.querySelector(".card-back .card-label")).toHaveTextContent("Meaning");
@@ -252,7 +321,9 @@ describe("CardScreen", () => {
     expect(screen.getByLabelText("Label (optional)")).toHaveValue("Meaning");
     expect(screen.getByLabelText("Back note (optional)")).toHaveValue("An element.");
     fireEvent.input(screen.getByLabelText("Front note (optional)"), { target: { value: " N5 " } });
-    fireEvent.input(screen.getByLabelText("Back note (optional)"), { target: { value: " One of the five elements. " } });
+    fireEvent.input(screen.getByLabelText("Back note (optional)"), {
+      target: { value: " One of the five elements. " },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(props.onSave).toHaveBeenCalledWith({
       front: { ja: "水" },
@@ -279,7 +350,9 @@ describe("CardScreen", () => {
     expect(screen.getByLabelText("Front note (optional)").tagName).toBe("INPUT");
     expect(screen.getByLabelText("Label (optional)").tagName).toBe("INPUT");
     // What was saved decides, so the field stays a textarea as its breaks are typed away.
-    fireEvent.input(screen.getByLabelText("Back note (optional)"), { target: { value: "An element.\n\nOne of five." } });
+    fireEvent.input(screen.getByLabelText("Back note (optional)"), {
+      target: { value: "An element.\n\nOne of five." },
+    });
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "water" } });
     expect(screen.getByLabelText("Back").tagName).toBe("TEXTAREA");
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "water\n\n  H₂O\n" } });
@@ -340,9 +413,7 @@ describe("CardScreen", () => {
       "alt",
       "Picture on the back of the card",
     );
-    expect(container.querySelector(".card-back")).toHaveTextContent(
-      "Afghanistan",
-    );
+    expect(container.querySelector(".card-back")).toHaveTextContent("Afghanistan");
     expect(screen.getByLabelText("Front")).toHaveValue("");
     expect(screen.getByLabelText("Front picture (URL, optional)")).toHaveValue(FLAG);
     expect(screen.getByLabelText("Back picture (URL, optional)")).toHaveValue(MAP);
@@ -353,12 +424,18 @@ describe("CardScreen", () => {
       card: {
         ...card,
         frontImageUrl: FLAG,
-        frontImageDescription: { en: "A black, red and green flag", sv: "En svart, röd och grön flagga" },
+        frontImageDescription: {
+          en: "A black, red and green flag",
+          sv: "En svart, röd och grön flagga",
+        },
         backImageUrl: MAP,
         backImageDescription: { sv: "En karta" },
       },
     });
-    expect(container.querySelector(".card-front img")).toHaveAttribute("alt", "A black, red and green flag");
+    expect(container.querySelector(".card-front img")).toHaveAttribute(
+      "alt",
+      "A black, red and green flag",
+    );
     expect(container.querySelector(".card-back img")).toHaveAttribute("alt", "En karta");
     const front = screen.getByLabelText("Front picture description (optional)");
     expect(front).toHaveValue("A black, red and green flag");
@@ -382,10 +459,16 @@ describe("CardScreen", () => {
 
   it("saves a new picture's description in the language chosen, and none without a picture", () => {
     const { props } = renderScreen();
-    fireEvent.input(screen.getByLabelText("Back picture (URL, optional)"), { target: { value: MAP } });
-    fireEvent.input(screen.getByLabelText("Back picture description (optional)"), { target: { value: "A map" } });
+    fireEvent.input(screen.getByLabelText("Back picture (URL, optional)"), {
+      target: { value: MAP },
+    });
+    fireEvent.input(screen.getByLabelText("Back picture description (optional)"), {
+      target: { value: "A map" },
+    });
     chooseLanguage("card-back-image-description", "en");
-    fireEvent.input(screen.getByLabelText("Front picture description (optional)"), { target: { value: "Nothing to describe" } });
+    fireEvent.input(screen.getByLabelText("Front picture description (optional)"), {
+      target: { value: "Nothing to describe" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(props.onSave).toHaveBeenCalledWith({
       front: { ja: "水" },
@@ -507,9 +590,17 @@ describe("CardScreen", () => {
     const options = { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }] };
     const { props, rerender } = renderScreen({ card: options });
     // Changed elsewhere (the Studio) meanwhile: an option added, one retired.
-    const afresh = { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" }, retired: true as const }, { id: "card-1-d2", text: { en: "air" } }] };
+    const afresh = {
+      ...card,
+      distractors: [
+        { id: "card-1-d1", text: { en: "fire" }, retired: true as const },
+        { id: "card-1-d2", text: { en: "air" } },
+      ],
+    };
     rerender(<CardScreen {...props} card={afresh} />);
-    expect(screen.getByRole("button", { name: "Restore the wrong option “fire”" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Restore the wrong option “fire”" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("air")).toBeInTheDocument();
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "H2O" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -518,23 +609,39 @@ describe("CardScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Restore the wrong option “fire”" }));
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(props.onSave).toHaveBeenLastCalledWith(
-      expect.objectContaining({ distractors: [{ id: "card-1-d1", text: { en: "fire" } }, { id: "card-1-d2", text: { en: "air" } }] }),
+      expect.objectContaining({
+        distractors: [
+          { id: "card-1-d1", text: { en: "fire" } },
+          { id: "card-1-d2", text: { en: "air" } },
+        ],
+      }),
     );
     rerender(<CardScreen {...props} card={options} saved />);
     expect(screen.queryByText("air")).toBeNull();
   });
 
   it("leaves out its heading and the wrong options for a page that has its own", () => {
-    renderScreen({ card: { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }] }, heading: false, withDistractors: false });
+    renderScreen({
+      card: { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }] },
+      heading: false,
+      withDistractors: false,
+    });
     expect(screen.queryByRole("heading", { name: "Card" })).toBeNull();
     expect(screen.queryByRole("group", { name: "Wrong options" })).toBeNull();
   });
 
   it("only retires a wrong option the deck's release published, refusing to delete it", () => {
-    renderScreen({ card: { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }] }, published: new Set(["card-1-d1"]) });
-    expect(screen.getByRole("button", { name: "Retire the wrong option “fire”" })).toBeInTheDocument();
+    renderScreen({
+      card: { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }] },
+      published: new Set(["card-1-d1"]),
+    });
+    expect(
+      screen.getByRole("button", { name: "Retire the wrong option “fire”" }),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “fire”" }));
-    expect(alertTexts()).toContain("This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.");
+    expect(alertTexts()).toContain(
+      "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
+    );
   });
 
   it("names a picture-only card by its back in the removal prompt", () => {
@@ -544,9 +651,7 @@ describe("CardScreen", () => {
       card: { ...card, front: {}, frontImageUrl: FLAG, back: { "": "Afghanistan" } },
     });
     fireEvent.click(screen.getByRole("button", { name: "Remove card" }));
-    expect(confirm).toHaveBeenCalledWith(
-      'Remove the card "Afghanistan"? This cannot be undone.',
-    );
+    expect(confirm).toHaveBeenCalledWith('Remove the card "Afghanistan"? This cannot be undone.');
   });
 
   it("removes the card after confirmation", () => {
@@ -554,14 +659,15 @@ describe("CardScreen", () => {
     vi.stubGlobal("confirm", confirm);
     const { props } = renderScreen();
     fireEvent.click(screen.getByRole("button", { name: "Remove card" }));
-    expect(confirm).toHaveBeenCalledWith(
-      'Remove the card "水"? This cannot be undone.',
-    );
+    expect(confirm).toHaveBeenCalledWith('Remove the card "水"? This cannot be undone.');
     expect(props.onRemove).toHaveBeenCalledOnce();
   });
 
   it("keeps the card when the confirmation is declined", () => {
-    vi.stubGlobal("confirm", vi.fn(() => false));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => false),
+    );
     const { props } = renderScreen();
     fireEvent.click(screen.getByRole("button", { name: "Remove card" }));
     expect(props.onRemove).not.toHaveBeenCalled();
@@ -571,7 +677,9 @@ describe("CardScreen", () => {
     renderScreen();
     expect(screen.queryByRole("note")).toBeNull();
     renderScreen({ card: { ...card, retired: true } });
-    expect(screen.getByRole("note")).toHaveTextContent("It is kept, with its review history, but no longer studied.");
+    expect(screen.getByRole("note")).toHaveTextContent(
+      "It is kept, with its review history, but no longer studied.",
+    );
   });
 
   it("confirms each save in a status line mounted throughout", () => {
@@ -588,7 +696,10 @@ describe("CardScreen", () => {
     renderScreen({ busy: true, error: "write refused" });
     expect(screen.getByLabelText("Front")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Save" })).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByRole("button", { name: "Remove card" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Remove card" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
     expect(alertTexts()).toEqual(["write refused"]);
     expect(statusTexts()).toEqual([]);
   });
@@ -628,15 +739,27 @@ describe("CardScreen", () => {
       expect(screen.getByLabelText("Back").tagName).toBe("TEXTAREA");
       expect(container.querySelector(".card-preview")).toBeNull();
       fireEvent.click(screen.getByRole("button", { name: "Save" }));
-      expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "`H2O`" }, textFormat: SM.plainText });
+      expect(props.onSave).toHaveBeenCalledWith({
+        front: { ja: "水" },
+        back: { en: "`H2O`" },
+        textFormat: SM.plainText,
+      });
     });
 
     it("says when a plain card switched on reads differently, and saves it in Markdown", () => {
       const { props } = renderScreen({ card: { ...card, back: { en: "H*2*O" } } });
       fireEvent.click(toggle());
-      expect(screen.getByText("Some of this card's text reads differently as Markdown: check the preview.")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Some of this card's text reads differently as Markdown: check the preview.",
+        ),
+      ).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Save" }));
-      expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "H*2*O" }, textFormat: SM.markdown });
+      expect(props.onSave).toHaveBeenCalledWith({
+        front: { ja: "水" },
+        back: { en: "H*2*O" },
+        textFormat: SM.markdown,
+      });
     });
 
     it("says nothing of reading differently for a card already in Markdown", () => {
@@ -648,7 +771,9 @@ describe("CardScreen", () => {
       const { container } = renderScreen({
         card: { ...marked, distractors: [{ id: "card-1-d1", text: { en: "`CO2`" } }] },
       });
-      expect(container.querySelector(".card-preview-option")).toHaveTextContent("As an option: H2O");
+      expect(container.querySelector(".card-preview-option")).toHaveTextContent(
+        "As an option: H2O",
+      );
       fireEvent.input(screen.getByLabelText("Back"), { target: { value: "H2O\n\nwater" } });
       expect(container.querySelector("#card-back-hints")).toHaveTextContent(
         "This card's back is one of the options of a question: keep it to one paragraph, as the others are.",
@@ -658,7 +783,9 @@ describe("CardScreen", () => {
     it("keeps Markdown switched before what is known of the deck comes", () => {
       const { props, rerender } = renderScreen();
       fireEvent.click(toggle());
-      rerender(<CardScreen {...props} languages={{ own: "sv", unstatedCounts: { front: 0, back: 0 } }} />);
+      rerender(
+        <CardScreen {...props} languages={{ own: "sv", unstatedCounts: { front: 0, back: 0 } }} />,
+      );
       expect(toggle()).toBeChecked();
     });
   });

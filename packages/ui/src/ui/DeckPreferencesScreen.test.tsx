@@ -69,14 +69,20 @@ describe("DeckPreferencesScreen", () => {
 
   it("advises a small, steady number of new cards", () => {
     renderScreen();
-    expect(screen.getByLabelText("New cards per day")).toHaveAccessibleDescription(/Better to start small and be consistent/);
-    expect(screen.getByLabelText("Max reviews per day")).not.toHaveAccessibleDescription(/start small/);
+    expect(screen.getByLabelText("New cards per day")).toHaveAccessibleDescription(
+      /Better to start small and be consistent/,
+    );
+    expect(screen.getByLabelText("Max reviews per day")).not.toHaveAccessibleDescription(
+      /start small/,
+    );
   });
 
   it("describes each limit by what it counts and by what an empty field does", () => {
     renderScreen();
     const newCards = screen.getByLabelText("New cards per day");
-    expect(newCards).toHaveAccessibleDescription(/^new cards per day .*An empty field defaults to your study preferences ?\.$/);
+    expect(newCards).toHaveAccessibleDescription(
+      /^new cards per day .*An empty field defaults to your study preferences ?\.$/,
+    );
     expect(screen.getByLabelText("Max reviews per day")).toHaveAccessibleDescription(
       /^max reviews per day An empty field defaults to your study preferences ?\.$/,
     );
@@ -104,10 +110,19 @@ describe("DeckPreferencesScreen", () => {
   it("is disabled while busy and shows an error", () => {
     renderScreen({ busy: true, error: "pod unreachable" });
     // The buttons only aria-disabled, so the one pressed keeps the focus.
-    expect(screen.getByRole("button", { name: "Save preferences" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Save preferences" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
     expect(screen.getByLabelText("New cards per day")).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Rename deck" })).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByRole("button", { name: "Remove deck" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Rename deck" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Remove deck" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
     expect(screen.getByText("pod unreachable")).toHaveClass("error");
   });
 
@@ -177,7 +192,9 @@ describe("DeckPreferencesScreen", () => {
     const props = renderScreen();
     fireEvent.click(screen.getByRole("button", { name: "Rename deck" }));
     fireEvent.click(screen.getByRole("button", { name: "Add a translation" }));
-    fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), { target: { value: "Kanji N5" } });
+    fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), {
+      target: { value: "Kanji N5" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
     expect(props.onRename).not.toHaveBeenCalled();
     const picker = screen.getByRole("button", { name: "Language: not stated" });
@@ -231,7 +248,9 @@ describe("DeckPreferencesScreen", () => {
       </I18nProvider>,
     );
     expect(screen.getByRole("heading", { name: "Inställningar: Kanji N5" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Nya kort per dag").nextElementSibling).toHaveTextContent("nytt kort per dag");
+    expect(screen.getByLabelText("Nya kort per dag").nextElementSibling).toHaveTextContent(
+      "nytt kort per dag",
+    );
     expect(screen.getByRole("link", { name: "studieinställningar" })).toBeInTheDocument();
     expect(screen.getByText("Kanji N5")).toHaveAttribute("lang", "en");
   });
@@ -260,7 +279,9 @@ describe("DeckPreferencesScreen", () => {
     expect(name).toHaveValue("Huvudstäder");
     expect(name).not.toHaveAttribute("lang");
     expect(name).toHaveAccessibleDescription("Språk: svenska");
-    fireEvent.input(screen.getByLabelText("Text på engelska"), { target: { value: "Capital cities" } });
+    fireEvent.input(screen.getByLabelText("Text på engelska"), {
+      target: { value: "Capital cities" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Spara namn" }));
     expect(onRename).toHaveBeenCalledWith({ sv: "Huvudstäder", en: "Capital cities" });
   });

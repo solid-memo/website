@@ -37,7 +37,9 @@ describe("catalog records", () => {
   });
 
   it("describe a catalog without a description of its own", () => {
-    expect(defaultCatalogDescription("Main")).toBe("Flashcard decks of the Solid Memo instance Main.");
+    expect(defaultCatalogDescription("Main")).toBe(
+      "Flashcard decks of the Solid Memo instance Main.",
+    );
   });
 });
 
@@ -63,20 +65,32 @@ describe("describedCatalog", () => {
   });
 
   it("removes the license, and keeps one another app wrote", () => {
-    expect(describedCatalog({ ...catalog, license: CC0 }, { description: "My decks." })).toEqual(catalog);
-    expect(describedCatalog({ ...catalog, license: OWN }, { description: "My decks.", license: OWN })).toEqual({ ...catalog, license: OWN });
+    expect(describedCatalog({ ...catalog, license: CC0 }, { description: "My decks." })).toEqual(
+      catalog,
+    );
+    expect(
+      describedCatalog({ ...catalog, license: OWN }, { description: "My decks.", license: OWN }),
+    ).toEqual({ ...catalog, license: OWN });
   });
 
   it("refuses an empty description, and a license it does not offer", () => {
-    expect(() => describedCatalog(catalog, { description: "  " })).toThrow(new AppError("catalogNeedsDescription"));
-    expect(() => describedCatalog(catalog, { description: "x", license: OWN })).toThrow(new AppError("licenseUnknown", { url: OWN }));
+    expect(() => describedCatalog(catalog, { description: "  " })).toThrow(
+      new AppError("catalogNeedsDescription"),
+    );
+    expect(() => describedCatalog(catalog, { description: "x", license: OWN })).toThrow(
+      new AppError("licenseUnknown", { url: OWN }),
+    );
   });
 });
 
 describe("renamedCatalog", () => {
   it("takes the new name, and the description that goes with it when it had the old name's", () => {
     const named = { ...catalog, description: defaultCatalogDescription("Main") };
-    expect(renamedCatalog(named, "Languages")).toEqual({ ...catalog, title: "Languages", description: defaultCatalogDescription("Languages") });
+    expect(renamedCatalog(named, "Languages")).toEqual({
+      ...catalog,
+      title: "Languages",
+      description: defaultCatalogDescription("Languages"),
+    });
   });
 
   it("keeps a description of the user's own", () => {

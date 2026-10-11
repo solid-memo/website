@@ -35,14 +35,29 @@ export async function draftPod({ checked = false }: { checked?: boolean } = {}) 
   const store = createMemoryResourceStore();
   let etags = 0;
   const local = createLocalPod({ root: POD, store, newEtag: () => `"e${++etags}"` });
-  const requests: { method: string; url: string; ifMatch: string | null; ifNoneMatch: string | null }[] = [];
+  const requests: {
+    method: string;
+    url: string;
+    ifMatch: string | null;
+    ifNoneMatch: string | null;
+  }[] = [];
   /** Answers to give instead, once each, by method and URL. */
-  const failures: { method: string; url: string; status: number | null; before?: () => Promise<void> }[] = [];
+  const failures: {
+    method: string;
+    url: string;
+    status: number | null;
+    before?: () => Promise<void>;
+  }[] = [];
   const fetch = (async (input, init) => {
     const url = String(input instanceof Request ? input.url : input);
     const method = (init?.method ?? "GET").toUpperCase();
     const headers = new Headers(init?.headers);
-    requests.push({ method, url, ifMatch: headers.get("If-Match"), ifNoneMatch: headers.get("If-None-Match") });
+    requests.push({
+      method,
+      url,
+      ifMatch: headers.get("If-Match"),
+      ifNoneMatch: headers.get("If-None-Match"),
+    });
     const failure = failures.findIndex((one) => one.method === method && one.url === url);
     if (failure !== -1) {
       const [{ status, before }] = failures.splice(failure, 1);
@@ -52,12 +67,20 @@ export async function draftPod({ checked = false }: { checked?: boolean } = {}) 
     return local(input, init);
   }) as typeof globalThis.fetch;
   const put = async (url: string, body: string) => {
-    const response = await local(url, { method: "PUT", headers: { "Content-Type": "text/turtle" }, body });
+    const response = await local(url, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`PUT ${url}: ${response.status}`);
   };
   await put(`${INSTANCE}catalog.ttl`, `<#catalog> a <${DCAT_CATALOG}> .`);
   const validator = createShaclShapeValidator({ fetch, shapesFetch: siteFetch, ...SHAPE_SOURCES });
-  const repository = createSolidReleaseDraftRepository({ fetch, releaseFetch: siteFetch, ...(checked ? { checkWrite: validator.checkSubjects } : {}) });
+  const repository = createSolidReleaseDraftRepository({
+    fetch,
+    releaseFetch: siteFetch,
+    ...(checked ? { checkWrite: validator.checkSubjects } : {}),
+  });
   return {
     store,
     fetch,
@@ -98,7 +121,9 @@ export function libraryReleases(): string[] {
 
 /** A Turtle document's triples, read as the app reads documents, relative IRIs against `url`. */
 export async function quadsOfTurtle(turtle: string, url: string): Promise<Quad[]> {
-  return [...toRdfJsDataset(await getSolidDatasetLinear(url, { fetch: turtleFetch(turtle) }))] as Quad[];
+  return [
+    ...toRdfJsDataset(await getSolidDatasetLinear(url, { fetch: turtleFetch(turtle) })),
+  ] as Quad[];
 }
 
 const XSD_DATE_TIME = "http://www.w3.org/2001/XMLSchema#dateTime";
@@ -122,10 +147,14 @@ export function comparable(quads: readonly Quad[], root: string): string[] {
     if (one.termType === "BlankNode") {
       if (seen.has(one.value)) return "[cycle]";
       const inner = new Set([...seen, one.value]);
-      return `[${(bySubject.get(one.value) ?? []).map((quad) => `${quad.predicate.value} ${term(quad.object, inner)}`).sort().join("; ")}]`;
+      return `[${(bySubject.get(one.value) ?? [])
+        .map((quad) => `${quad.predicate.value} ${term(quad.object, inner)}`)
+        .sort()
+        .join("; ")}]`;
     }
     if (one.termType === "Literal") {
-      const value = one.datatype.value === XSD_DATE_TIME ? new Date(one.value).toISOString() : one.value;
+      const value =
+        one.datatype.value === XSD_DATE_TIME ? new Date(one.value).toISOString() : one.value;
       return `${JSON.stringify(value)}@${one.language.toLowerCase()}^^${one.datatype.value}`;
     }
     return `<${one.value}>`;
@@ -133,8 +162,16 @@ export function comparable(quads: readonly Quad[], root: string): string[] {
   return quads
     .filter((quad) => quad.subject.termType !== "BlankNode")
     .filter((quad) => quad.predicate.value !== FORMAT_VERSION)
-    .filter((quad) => !(quad.subject.value === root && quad.predicate.value === "http://purl.org/dc/terms/modified"))
-    .map((quad) => `<${quad.subject.value}> <${quad.predicate.value}> ${term(quad.object, new Set())}`)
+    .filter(
+      (quad) =>
+        !(
+          quad.subject.value === root &&
+          quad.predicate.value === "http://purl.org/dc/terms/modified"
+        ),
+    )
+    .map(
+      (quad) => `<${quad.subject.value}> <${quad.predicate.value}> ${term(quad.object, new Set())}`,
+    )
     .sort();
 }
 
@@ -143,12 +180,18 @@ export function comparable(quads: readonly Quad[], root: string): string[] {
  * published again at its own address (assemble): the release's triples
  * and the assembled ones, comparable.
  */
-export async function roundTrip(pod: Awaited<ReturnType<typeof draftPod>>, path: string): Promise<{ release: string[]; assembled: string[]; turtle: string }> {
+export async function roundTrip(
+  pod: Awaited<ReturnType<typeof draftPod>>,
+  path: string,
+): Promise<{ release: string[]; assembled: string[]; turtle: string }> {
   const url = `${DECKS}${path}`;
   const text = readFileSync(join(DECKS_ROOT, path), "utf8");
   const release = await pod.repository.readRelease(url);
   const name = path.split("/")[0]!;
-  const summary = await pod.repository.create(INSTANCE, releaseToDraft(release, draftUrlOf(INSTANCE, name, Number(release.root.version))));
+  const summary = await pod.repository.create(
+    INSTANCE,
+    releaseToDraft(release, draftUrlOf(INSTANCE, name, Number(release.root.version))),
+  );
   const turtle = await pod.repository.assemble(summary.url, url, release.root.issued!);
   return {
     release: comparable(await quadsOfTurtle(text, url), url),

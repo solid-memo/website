@@ -132,7 +132,11 @@ export function ZoomableImage({
     const shown = current.current;
     if (shown === null || shown.phase === "leaving") return;
     // Measured again: the page may have moved under the enlarged picture.
-    setZoom(reducedMotion() ? null : { ...shown, origin: pictureBox(imageRef.current!), phase: "leaving" });
+    setZoom(
+      reducedMotion()
+        ? null
+        : { ...shown, origin: pictureBox(imageRef.current!), phase: "leaving" },
+    );
   }
 
   function toggle() {
@@ -185,7 +189,13 @@ export function ZoomableImage({
 
   return (
     <div class="picture-zoom">
-      <img ref={imageRef} class={`${className}${onScreen ? " zoomed-away" : ""}`} src={src} alt={alt} lang={lang} />
+      <img
+        ref={imageRef}
+        class={`${className}${onScreen ? " zoomed-away" : ""}`}
+        src={src}
+        alt={alt}
+        lang={lang}
+      />
       <button
         ref={buttonRef}
         type="button"
@@ -197,7 +207,9 @@ export function ZoomableImage({
           if (event.relatedTarget !== null) shrink();
         }}
       >
-        <span class="visually-hidden">{expanded ? t("zoomableImage.shrink") : t("zoomableImage.enlarge")}</span>
+        <span class="visually-hidden">
+          {expanded ? t("zoomableImage.shrink") : t("zoomableImage.enlarge")}
+        </span>
       </button>
       {zoom !== null &&
         createPortal(
@@ -218,7 +230,8 @@ export function ZoomableImage({
                 top: `${zoom.fitted.top}px`,
                 width: `${zoom.fitted.width}px`,
                 height: `${zoom.fitted.height}px`,
-                transform: zoom.phase === "entered" ? "none" : transformFrom(zoom.origin, zoom.fitted),
+                transform:
+                  zoom.phase === "entered" ? "none" : transformFrom(zoom.origin, zoom.fitted),
               }}
               onTransitionEnd={putBack}
             />

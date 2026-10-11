@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { cardProgressOf, mergeCardProgress, mergeForecasts, type CardProgress } from "./cardProgress";
+import {
+  cardProgressOf,
+  mergeCardProgress,
+  mergeForecasts,
+  type CardProgress,
+} from "./cardProgress";
 import type { Card, StudyDirection } from "./deck";
 import type { ReviewState } from "./review";
 
@@ -15,7 +20,12 @@ function card(id: string, retired = false): Card {
   };
 }
 
-function review(cardId: string, intervalDays: number, due: string, direction: StudyDirection = "front-to-back"): ReviewState {
+function review(
+  cardId: string,
+  intervalDays: number,
+  due: string,
+  direction: StudyDirection = "front-to-back",
+): ReviewState {
   return {
     cardId,
     direction,
@@ -42,12 +52,24 @@ const reviews = [
 
 describe("cardProgressOf", () => {
   it("counts the deck's active prompts new, young or mature", () => {
-    expect(cardProgressOf({ cards, direction: "front-to-back", reviews })).toEqual({ new: 1, young: 2, mature: 1 });
+    expect(cardProgressOf({ cards, direction: "front-to-back", reviews })).toEqual({
+      new: 1,
+      young: 2,
+      mature: 1,
+    });
   });
 
   it("counts a card once each way it is studied", () => {
-    expect(cardProgressOf({ cards, direction: "back-to-front", reviews })).toEqual({ new: 3, young: 0, mature: 1 });
-    expect(cardProgressOf({ cards, direction: "bidirectional", reviews })).toEqual({ new: 4, young: 2, mature: 2 });
+    expect(cardProgressOf({ cards, direction: "back-to-front", reviews })).toEqual({
+      new: 3,
+      young: 0,
+      mature: 1,
+    });
+    expect(cardProgressOf({ cards, direction: "bidirectional", reviews })).toEqual({
+      new: 4,
+      young: 2,
+      mature: 2,
+    });
   });
 });
 
@@ -82,6 +104,8 @@ describe("mergeForecasts", () => {
   });
 
   it("is nothing of no decks", () => {
-    expect(mergeForecasts([], "2026-09-21").every(({ due, reviews }) => due === 0 && reviews === 0)).toBe(true);
+    expect(
+      mergeForecasts([], "2026-09-21").every(({ due, reviews }) => due === 0 && reviews === 0),
+    ).toBe(true);
   });
 });

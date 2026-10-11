@@ -1,6 +1,12 @@
 import type { CardV5 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { blankDraft, NOTHING_PUBLISHED, type DraftTriple, type PublishedIds, type ReleaseDraft } from "../release/releaseDraft.ts";
+import {
+  blankDraft,
+  NOTHING_PUBLISHED,
+  type DraftTriple,
+  type PublishedIds,
+  type ReleaseDraft,
+} from "../release/releaseDraft.ts";
 
 /**
  * Drafts as plain data, for the tests of the draft's changes: a course
@@ -37,22 +43,53 @@ export function courseDraft(published: PublishedIds = NOTHING_PUBLISHED): Releas
     link(DRAFT, `${PROV}wasGeneratedBy`, of("compilation")),
     link(of("compilation"), RDF_TYPE, `${PROV}Activity`),
     link(of("compilation"), `${PROV}used`, "https://source.example/"),
-    { subject: "https://source.example/", predicate: "http://purl.org/dc/terms/title", object: { kind: "literal", value: "Source", language: "", datatype: "http://www.w3.org/2001/XMLSchema#string" } },
+    {
+      subject: "https://source.example/",
+      predicate: "http://purl.org/dc/terms/title",
+      object: {
+        kind: "literal",
+        value: "Source",
+        language: "",
+        datatype: "http://www.w3.org/2001/XMLSchema#string",
+      },
+    },
   ];
   return {
     ...blank,
     // No theme, as a course drafted elsewhere might state: what the release check asks of it.
     root: { ...blank.root, theme: [], wasDerivedFrom: ["https://source.example/"] },
     chapters: [
-      { id: "ch-a", data: { title: { en: "A" }, course: DRAFT, position: 0, reviewQuestion: [of("q-a-r01")] } },
+      {
+        id: "ch-a",
+        data: { title: { en: "A" }, course: DRAFT, position: 0, reviewQuestion: [of("q-a-r01")] },
+      },
       { id: "ch-b", data: { title: { en: "B" }, course: DRAFT, position: 1, reviewQuestion: [] } },
     ],
     steps: [
-      { id: "ch-a-1", data: { theory: { en: "One" }, chapter: of("ch-a"), position: 0, checkedBy: [of("q-a-1a")] } },
-      { id: "ch-a-2", data: { theory: { en: "Two" }, chapter: of("ch-a"), position: 1, checkedBy: [of("q-a-2a")] } },
+      {
+        id: "ch-a-1",
+        data: {
+          theory: { en: "One" },
+          chapter: of("ch-a"),
+          position: 0,
+          checkedBy: [of("q-a-1a")],
+        },
+      },
+      {
+        id: "ch-a-2",
+        data: {
+          theory: { en: "Two" },
+          chapter: of("ch-a"),
+          position: 1,
+          checkedBy: [of("q-a-2a")],
+        },
+      },
     ],
     cards: [
-      { id: "q-a-1a", data: card("1a", { distractor: [of("q-a-1a-d1"), of("q-a-1a-d2")], created: NOW }) },
+      {
+        id: "q-a-1a",
+        data: card("1a", { distractor: [of("q-a-1a-d1"), of("q-a-1a-d2")], created: NOW }),
+      },
       { id: "q-a-2a", data: card("2a") },
       { id: "q-a-r01", data: card("r01") },
       { id: "q-loose", data: card("loose") },
@@ -69,7 +106,14 @@ export function courseDraft(published: PublishedIds = NOTHING_PUBLISHED): Releas
 /** A plain deck at DRAFT, with one card. */
 export function deckDraft(): ReleaseDraft {
   const blank = blankDraft({ url: DRAFT, course: false, title: { en: "Words" }, now: NOW });
-  return { ...blank, root: { ...blank.root, studyDirection: SM.bidirectional as ReleaseDraft["root"]["studyDirection"] }, cards: [{ id: "w1", data: card("w1") }] };
+  return {
+    ...blank,
+    root: {
+      ...blank.root,
+      studyDirection: SM.bidirectional as ReleaseDraft["root"]["studyDirection"],
+    },
+    cards: [{ id: "w1", data: card("w1") }],
+  };
 }
 
 /**
@@ -83,10 +127,16 @@ export function playableCourseDraft(): ReleaseDraft {
   return {
     ...draft,
     chapters: draft.chapters.filter((chapter) => chapter.id !== "ch-b"),
-    cards: draft.cards.map((node) => (asked.includes(node.id) ? { ...node, data: { ...node.data, distractor: options(node.id) } } : node)),
+    cards: draft.cards.map((node) =>
+      asked.includes(node.id)
+        ? { ...node, data: { ...node.data, distractor: options(node.id) } }
+        : node,
+    ),
     distractors: [
       ...draft.distractors,
-      ...asked.flatMap((cardId) => [1, 2].map((n) => ({ id: `${cardId}-d${n}`, data: { text: { en: `${cardId} no ${n}` } } }))),
+      ...asked.flatMap((cardId) =>
+        [1, 2].map((n) => ({ id: `${cardId}-d${n}`, data: { text: { en: `${cardId} no ${n}` } } })),
+      ),
     ],
   };
 }

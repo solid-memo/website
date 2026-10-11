@@ -52,13 +52,20 @@ function schedule(extra: Partial<DeckSchedule> = {}): DeckSchedule {
 }
 
 describe("freshSchedule", () => {
-  const stored: StoredSchedule = { deck: "https://pod.example/catalog.ttl#d", cardsVersion: "c1", reviewsVersion: "r1", schedule: schedule() };
+  const stored: StoredSchedule = {
+    deck: "https://pod.example/catalog.ttl#d",
+    cardsVersion: "c1",
+    reviewsVersion: "r1",
+    schedule: schedule(),
+  };
   const versions = { cards: "c1", reviews: "r1" };
   const input = { direction: "front-to-back" as const, dayBoundaryHour: 4, today: "2026-10-09" };
 
   it("is the digest's schedule while it was computed from the documents as they are now, as the deck is studied", () => {
     expect(freshSchedule(stored, versions, input)).toBe(stored.schedule);
-    expect(freshSchedule(stored, versions, { ...input, today: "2026-10-12" })).toBe(stored.schedule);
+    expect(freshSchedule(stored, versions, { ...input, today: "2026-10-12" })).toBe(
+      stored.schedule,
+    );
   });
 
   it("is none once anything it was computed from is otherwise", () => {
@@ -77,7 +84,11 @@ describe("freshSchedule", () => {
 describe("forecastOf", () => {
   it("counts what falls due each day, today's with every prompt overdue, and carries what the cap holds back", () => {
     const due = { "2026-10-01": 2, "2026-10-09": 3, "2026-10-10": 1, "2026-10-12": 4 };
-    const forecast = forecastOf(schedule({ dueByDay: due, reviewedOnDay: 2 }), { today: "2026-10-09", days: 4, maxReviewsPerDay: 4 });
+    const forecast = forecastOf(schedule({ dueByDay: due, reviewedOnDay: 2 }), {
+      today: "2026-10-09",
+      days: 4,
+      maxReviewsPerDay: 4,
+    });
     expect(forecast).toEqual([
       // Two of today's four reviews are made already.
       { studyDay: "2026-10-09", due: 5, reviews: 2 },
@@ -88,10 +99,18 @@ describe("forecastOf", () => {
   });
 
   it("gives today the whole cap when the schedule was computed on an earlier day, and none when today's is used up", () => {
-    const earlier = schedule({ dueByDay: { "2026-10-09": 3 }, studyDay: "2026-10-08", reviewedOnDay: 9 });
-    expect(forecastOf(earlier, { today: "2026-10-09", days: 1, maxReviewsPerDay: 5 })).toEqual([{ studyDay: "2026-10-09", due: 3, reviews: 3 }]);
+    const earlier = schedule({
+      dueByDay: { "2026-10-09": 3 },
+      studyDay: "2026-10-08",
+      reviewedOnDay: 9,
+    });
+    expect(forecastOf(earlier, { today: "2026-10-09", days: 1, maxReviewsPerDay: 5 })).toEqual([
+      { studyDay: "2026-10-09", due: 3, reviews: 3 },
+    ]);
     const spent = schedule({ dueByDay: { "2026-10-09": 3 }, reviewedOnDay: 9 });
-    expect(forecastOf(spent, { today: "2026-10-09", days: 1, maxReviewsPerDay: 5 })).toEqual([{ studyDay: "2026-10-09", due: 3, reviews: 0 }]);
+    expect(forecastOf(spent, { today: "2026-10-09", days: 1, maxReviewsPerDay: 5 })).toEqual([
+      { studyDay: "2026-10-09", due: 3, reviews: 0 },
+    ]);
   });
 });
 
@@ -107,7 +126,9 @@ describe("scheduledStates", () => {
 
 describe("the histograms", () => {
   it("spread the intervals over days, a week, a month and more", () => {
-    const bins = intervalHistogram([0, 1, 3, 4, 21, 400].map((intervalDays) => state("a", { intervalDays })));
+    const bins = intervalHistogram(
+      [0, 1, 3, 4, 21, 400].map((intervalDays) => state("a", { intervalDays })),
+    );
     expect(bins[0]).toEqual({ from: 1, to: 2, count: 2 });
     expect(bins[1]).toEqual({ from: 2, to: 4, count: 1 });
     expect(bins[2]).toEqual({ from: 4, to: 8, count: 1 });
@@ -117,7 +138,11 @@ describe("the histograms", () => {
   });
 
   it("spread the eases in steps of 0.2, 2.5 itself from 2.5 on", () => {
-    const bins = easeHistogram([1.3, 1.49, 2.5, 2.5000000001, 2.4999999999, 3.1].map((easeFactor) => state("a", { easeFactor })));
+    const bins = easeHistogram(
+      [1.3, 1.49, 2.5, 2.5000000001, 2.4999999999, 3.1].map((easeFactor) =>
+        state("a", { easeFactor }),
+      ),
+    );
     expect(bins[0]).toEqual({ from: 1.3, to: 1.5, count: 2 });
     expect(bins.find((bin) => bin.from === 2.5)).toEqual({ from: 2.5, to: 2.7, count: 3 });
     expect(bins.at(-1)).toEqual({ from: 2.7, count: 1 });
@@ -144,6 +169,8 @@ describe("leechesOf", () => {
   });
 
   it("takes another least", () => {
-    expect(leechesOf(index, { minLapses: 5 })).toEqual([{ cardUrl: "https://pod.example/d.ttl#c", lapses: 7 }]);
+    expect(leechesOf(index, { minLapses: 5 })).toEqual([
+      { cardUrl: "https://pod.example/d.ttl#c", lapses: 7 },
+    ]);
   });
 });

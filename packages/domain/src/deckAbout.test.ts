@@ -36,45 +36,82 @@ describe("parseKeywords", () => {
 describe("withAbout", () => {
   it("replaces the description, the topics and the keywords, keeping other themes", () => {
     expect(
-      withAbout(deck, { description: { en: "  Every capital. " }, topics: [`${TOPIC}languages`], keywords: { en: ["new"], SV: [" ny "] } }),
-    ).toEqual({ ...deck, description: { en: "Every capital." }, themes: [EDUC, `${TOPIC}languages`], keywords: { en: ["new"], sv: ["ny"] } });
+      withAbout(deck, {
+        description: { en: "  Every capital. " },
+        topics: [`${TOPIC}languages`],
+        keywords: { en: ["new"], SV: [" ny "] },
+      }),
+    ).toEqual({
+      ...deck,
+      description: { en: "Every capital." },
+      themes: [EDUC, `${TOPIC}languages`],
+      keywords: { en: ["new"], sv: ["ny"] },
+    });
   });
 
   it("keeps the deck's untagged keywords as they are, and asks for the language of new ones", () => {
-    expect(withAbout(deck, { description: { en: "x" }, topics: [], keywords: { "": ["legacy"], sv: ["ny"] } }).keywords).toEqual({
+    expect(
+      withAbout(deck, {
+        description: { en: "x" },
+        topics: [],
+        keywords: { "": ["legacy"], sv: ["ny"] },
+      }).keywords,
+    ).toEqual({
       "": ["legacy"],
       sv: ["ny"],
     });
-    expect(() => withAbout(deck, { description: { en: "x" }, topics: [], keywords: { "": ["legacy", "new"] } })).toThrow(
-      "Choose the language of the keywords.",
-    );
+    expect(() =>
+      withAbout(deck, {
+        description: { en: "x" },
+        topics: [],
+        keywords: { "": ["legacy", "new"] },
+      }),
+    ).toThrow("Choose the language of the keywords.");
   });
 
   it("saves the description in the languages given, in any language, leaving out a cleared one", () => {
-    expect(withAbout(deck, { description: { sv: "Ny.", ja: "新しい", en: " " }, topics: [], keywords: {} }).description).toEqual({
+    expect(
+      withAbout(deck, {
+        description: { sv: "Ny.", ja: "新しい", en: " " },
+        topics: [],
+        keywords: {},
+      }).description,
+    ).toEqual({
       sv: "Ny.",
       ja: "新しい",
     });
   });
 
   it("gives a deck without themes the topics it names", () => {
-    expect(withAbout({ ...deck, themes: undefined }, { description: { en: "x" }, topics: [`${TOPIC}languages`], keywords: {} }).themes).toEqual([
-      `${TOPIC}languages`,
-    ]);
+    expect(
+      withAbout(
+        { ...deck, themes: undefined },
+        { description: { en: "x" }, topics: [`${TOPIC}languages`], keywords: {} },
+      ).themes,
+    ).toEqual([`${TOPIC}languages`]);
   });
 
   it("leaves out themes and keywords when there are none", () => {
-    const bare = withAbout({ ...deck, themes: [`${TOPIC}geography`] }, { description: { en: "x" }, topics: [], keywords: {} });
+    const bare = withAbout(
+      { ...deck, themes: [`${TOPIC}geography`] },
+      { description: { en: "x" }, topics: [], keywords: {} },
+    );
     expect(bare).not.toHaveProperty("themes");
     expect(bare).not.toHaveProperty("keywords");
-    const cleared = withAbout(deck, { description: { en: "x" }, topics: [], keywords: { en: [" "], sv: [] } });
+    const cleared = withAbout(deck, {
+      description: { en: "x" },
+      topics: [],
+      keywords: { en: [" "], sv: [] },
+    });
     expect(cleared).not.toHaveProperty("keywords");
   });
 
   it("refuses an empty description", () => {
-    expect(() => withAbout(deck, { description: { en: "  ", sv: "" }, topics: [], keywords: {} })).toThrow(
+    expect(() =>
+      withAbout(deck, { description: { en: "  ", sv: "" }, topics: [], keywords: {} }),
+    ).toThrow("A deck needs a description.");
+    expect(() => withAbout(deck, { description: {}, topics: [], keywords: {} })).toThrow(
       "A deck needs a description.",
     );
-    expect(() => withAbout(deck, { description: {}, topics: [], keywords: {} })).toThrow("A deck needs a description.");
   });
 });

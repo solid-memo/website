@@ -29,7 +29,14 @@ import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairReposi
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
-import { aclOf, changeElsewhere, ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, preconditionsOf, type Preconditions } from "./serverTraits";
+import {
+  aclOf,
+  changeElsewhere,
+  ETAG_OUTLIVES_EDITS,
+  etagMarksEveryEdit,
+  preconditionsOf,
+  type Preconditions,
+} from "./serverTraits";
 
 const SERVERS = inject("solidServers");
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
@@ -45,7 +52,9 @@ const FRIEND = "https://bob.example/profile/card#me";
 /** A predicate of another app's, which the update keeps where it is. */
 const FOREIGN = "https://other-app.example/ns#note";
 /** A PNG's first bytes and some that are not valid UTF-8: a file Solid Memo does not know, which must survive byte for byte. */
-const PICTURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xfe, 0x00, 0x80]);
+const PICTURE = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xfe, 0x00, 0x80,
+]);
 
 interface Pod {
   base: string;
@@ -123,7 +132,10 @@ async function seedPod(server: string): Promise<Pod> {
 <#friend> a acl:Authorization ; acl:agent <${FRIEND}> ; acl:accessTo <${target}> ;
     ${inherit ? `acl:default <${target}> ;` : ""} acl:mode acl:Read .`;
   await put(await aclOf(source), `${PREFIXES}${everyone(source, true)}`);
-  await put(await aclOf(`${source}decks/deck-1.ttl`), `${PREFIXES}${everyone(`${source}decks/deck-1.ttl`, false)}`);
+  await put(
+    await aclOf(`${source}decks/deck-1.ttl`),
+    `${PREFIXES}${everyone(`${source}decks/deck-1.ttl`, false)}`,
+  );
   return { base, webId, typeIndex, source, instance: { url: source, name: "Main" } };
 }
 
@@ -146,13 +158,20 @@ async function seedOldPod(server: string, format: 4 | 5): Promise<Pod> {
   const pod = await seedPod(server);
   const { source, webId } = pod;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
   const prefixes = `${PREFIXES}@prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 `;
-  const deck = (id: string, text: string) => `<#${id}> a sm:Deck, dcat:Dataset ; sm:formatVersion ${format} ;
+  const deck = (
+    id: string,
+    text: string,
+  ) => `<#${id}> a sm:Deck, dcat:Dataset ; sm:formatVersion ${format} ;
     ${text} ;
     sm:studyDirection sm:frontToBack ;
     dcat:distribution <#${id}-cards> ;
@@ -177,14 +196,20 @@ async function seedOldPod(server: string, format: 4 | 5): Promise<Pod> {
     dcterms:publisher <${webId}> ; dcat:themeTaxonomy <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#deck-1>, <#deck-2> .
 <${webId}> a foaf:Agent ; foaf:name "Alice" .
-${deck("deck-1", `dcterms:title "Spanska glosor"@en, "Spanska glosor"@sv ;
-    dcterms:description "Flashcards: Spanska glosor."@en, "Kortlek: Spanska glosor."@sv`)}
-${deck("deck-2", `dcterms:title "Huvudstader i Europa"@en ;
+${deck(
+  "deck-1",
+  `dcterms:title "Spanska glosor"@en, "Spanska glosor"@sv ;
+    dcterms:description "Flashcards: Spanska glosor."@en, "Kortlek: Spanska glosor."@sv`,
+)}
+${deck(
+  "deck-2",
+  `dcterms:title "Huvudstader i Europa"@en ;
     dcterms:description "Capitals of Europe."@en, "Europas huvudstader."@sv ;
     dcterms:creator <#agent-anton> ;
     dcat:theme <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
     dcat:keyword "capitals", "europe" ;
-    prov:wasDerivedFrom <${RELEASE}>`)}
+    prov:wasDerivedFrom <${RELEASE}>`,
+)}
 <#agent-anton> a foaf:Agent ; foaf:name "Anton" .`,
   );
   await put(
@@ -226,7 +251,11 @@ async function seedHandWritten(server: string): Promise<Pod> {
   const pod = await seedPod(server);
   const { source } = pod;
   const put = async (path: string, body: string) => {
-    const response = await fetch(`${source}${path}`, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(`${source}${path}`, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${path}: ${response.status}`);
   };
   await put(
@@ -293,12 +322,21 @@ async function seedHandWritten(server: string): Promise<Pod> {
   return pod;
 }
 
-
 const TEXT = new Set(
-  ["http://purl.org/dc/terms/title", "http://purl.org/dc/terms/description", "http://www.w3.org/ns/dcat#keyword"].concat(
-    ["front", "back", "frontNote", "backLabel", "backNote", "frontImageDescription", "backImageDescription"].map(
-      (name) => `https://solid-memo.com/ns/vocab/v1.ttl#${name}`,
-    ),
+  [
+    "http://purl.org/dc/terms/title",
+    "http://purl.org/dc/terms/description",
+    "http://www.w3.org/ns/dcat#keyword",
+  ].concat(
+    [
+      "front",
+      "back",
+      "frontNote",
+      "backLabel",
+      "backNote",
+      "frontImageDescription",
+      "backImageDescription",
+    ].map((name) => `https://solid-memo.com/ns/vocab/v1.ttl#${name}`),
   ),
 );
 
@@ -306,7 +344,9 @@ const TEXT = new Set(
 async function quadsOf(urls: string[]) {
   const quads: Quad[] = [];
   for (const url of urls) {
-    const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
+    const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) =>
+      response.text(),
+    );
     quads.push(...new Parser({ baseIRI: url }).parse(turtle));
   }
   return quads;
@@ -327,11 +367,12 @@ async function textOf(container: string, urls: string[]): Promise<string[]> {
 async function statedFormats(container: string, urls: string[]): Promise<Record<string, string>> {
   return Object.fromEntries(
     (await quadsOf(urls))
-      .filter((quad) => quad.predicate.value === "https://solid-memo.com/ns/vocab/v1.ttl#formatVersion")
+      .filter(
+        (quad) => quad.predicate.value === "https://solid-memo.com/ns/vocab/v1.ttl#formatVersion",
+      )
       .map((quad) => [quad.subject.value.replace(container, "<instance>/"), quad.object.value]),
   );
 }
-
 
 /** The app as createAppUseCases wires it, over a fetch that records every request, with the shapes read from this repository. */
 function app(
@@ -410,14 +451,20 @@ function app(
 }
 
 /** Every resource under a container, ACL documents included, as the server serves it: bytes, type and ETag. */
-async function snapshot(container: string, skip: (url: string) => boolean = () => false): Promise<Map<string, string>> {
+async function snapshot(
+  container: string,
+  skip: (url: string) => boolean = () => false,
+): Promise<Map<string, string>> {
   const result = new Map<string, string>();
   const visit = async (url: string) => {
     if (skip(url)) return;
     const response = await fetch(url, { headers: { accept: "text/turtle" } });
     if (response.status === 404) return;
     const body = new Uint8Array(await response.arrayBuffer());
-    result.set(url, `${response.headers.get("content-type")} ${response.headers.get("etag")} ${Buffer.from(body).toString("base64")}`);
+    result.set(
+      url,
+      `${response.headers.get("content-type")} ${response.headers.get("etag")} ${Buffer.from(body).toString("base64")}`,
+    );
     const link = /<([^>]+)>;\s*rel="acl"/.exec(response.headers.get("link") ?? "")?.[1];
     const acl = link === undefined ? undefined : new URL(link, url).href;
     if (acl !== undefined && !result.has(acl)) {
@@ -441,7 +488,12 @@ async function servedBytes(urls: readonly string[]): Promise<Map<string, string>
   const result = new Map<string, string>();
   for (const url of urls) {
     const response = await fetch(url, { headers: { accept: "text/turtle" } });
-    result.set(url, response.status === 404 ? "(none)" : Buffer.from(await response.arrayBuffer()).toString("latin1"));
+    result.set(
+      url,
+      response.status === 404
+        ? "(none)"
+        : Buffer.from(await response.arrayBuffer()).toString("latin1"),
+    );
   }
   return result;
 }
@@ -454,7 +506,11 @@ const isWrite = (request: Recorded) => !READS.has(request.method);
  * at: If-Match the ETag the server gave the last read of it, where the
  * server enforces If-Match; else made right after a read of it.
  */
-function expectConditional(sent: Recorded[], documents: readonly string[], conditional: Preconditions): void {
+function expectConditional(
+  sent: Recorded[],
+  documents: readonly string[],
+  conditional: Preconditions,
+): void {
   for (const [index, request] of sent.entries()) {
     if (!isWrite(request) || !documents.includes(request.url)) continue;
     const named = `${request.method} ${request.url}`;
@@ -465,7 +521,12 @@ function expectConditional(sent: Recorded[], documents: readonly string[], condi
     const read = sent
       .slice(0, index)
       .reverse()
-      .find((earlier) => earlier.method === "GET" && earlier.url === request.url && typeof earlier.etag === "string");
+      .find(
+        (earlier) =>
+          earlier.method === "GET" &&
+          earlier.url === request.url &&
+          typeof earlier.etag === "string",
+      );
     expect(read, named).toBeDefined();
     expect(request.ifMatch, named).toBe(read!.etag);
   }
@@ -473,8 +534,12 @@ function expectConditional(sent: Recorded[], documents: readonly string[], condi
 
 /** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
 async function triples(url: string): Promise<string> {
-  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
-  return new Writer({ format: "N-Triples" }).quadsToString(new Parser({ baseIRI: url }).parse(turtle));
+  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) =>
+    response.text(),
+  );
+  return new Writer({ format: "N-Triples" }).quadsToString(
+    new Parser({ baseIRI: url }).parse(turtle),
+  );
 }
 
 async function registeredContainers(pod: Pod): Promise<string> {
@@ -482,7 +547,13 @@ async function registeredContainers(pod: Pod): Promise<string> {
 }
 
 /** The documents of the seeded pod the update changes, in the order it writes them. */
-const UPDATED = ["meta.ttl", "preferences.ttl", "decks/deck-1.ttl", "reviews/deck-1.ttl", "catalog.ttl"];
+const UPDATED = [
+  "meta.ttl",
+  "preferences.ttl",
+  "decks/deck-1.ttl",
+  "reviews/deck-1.ttl",
+  "catalog.ttl",
+];
 /** What each of them holds, as the update names a document. */
 const HOLDS = [
   { holds: "instance" },
@@ -528,11 +599,14 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     expectConditional(sent, documents, conditional);
     // Nothing is kept beside the documents: no copy, no backup.
     expect(await status(`${pod.source}backups/`)).toBe(404);
-    expect(attempts.filter(isWrite).map((request) => request.url)).toEqual(writes.map((request) => request.url));
+    expect(attempts.filter(isWrite).map((request) => request.url)).toEqual(
+      writes.map((request) => request.url),
+    );
 
     // The instance: updated, conforming, at its address; the type index as it was, and each class of its data registered.
     const indexAfter = await registeredContainers(pod);
-    for (const triple of indexBefore.split("\n").filter((line) => line !== "")) expect(indexAfter).toContain(triple);
+    for (const triple of indexBefore.split("\n").filter((line) => line !== ""))
+      expect(indexAfter).toContain(triple);
     for (const [forClass, predicate, target] of [
       ["http://www.w3.org/ns/dcat#Catalog", "instance", `${pod.source}catalog.ttl#catalog`],
       [`${SM}Deck`, "instance", `${pod.source}catalog.ttl`],
@@ -540,13 +614,23 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
       [`${SM}ReviewState`, "instanceContainer", `${pod.source}reviews/`],
       [`${SM}Answer`, "instanceContainer", `${pod.source}history/`],
     ]) {
-      const registration = new RegExp(`^(<[^>]+>) <http://www.w3.org/ns/solid/terms#forClass> <${forClass}> \\.$`, "m");
+      const registration = new RegExp(
+        `^(<[^>]+>) <http://www.w3.org/ns/solid/terms#forClass> <${forClass}> \\.$`,
+        "m",
+      );
       const subject = registration.exec(indexAfter)?.[1];
       expect(subject, forClass).toBeDefined();
-      expect(indexAfter).toContain(`${subject} <http://www.w3.org/ns/solid/terms#${predicate}> <${target}> .`);
+      expect(indexAfter).toContain(
+        `${subject} <http://www.w3.org/ns/solid/terms#${predicate}> <${target}> .`,
+      );
       expect(indexAfter).toContain(`${subject} <http://purl.org/dc/terms/title> "Main" .`);
     }
-    expect(await useCases.planMigration(pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0, catalogMissing: false });
+    expect(await useCases.planMigration(pod.source)).toMatchObject({
+      deckCount: 0,
+      cardCount: 0,
+      reviewCount: 0,
+      catalogMissing: false,
+    });
     expect((await useCases.validateInstance(pod.source)).conforms).toBe(true);
     expect(await useCases.listDecks(pod.source)).toMatchObject([
       { url: `${pod.source}catalog.ttl#deck-1`, cardsDocumentUrl: `${pod.source}decks/deck-1.ttl` },
@@ -555,10 +639,16 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     expect(await triples(`${pod.source}decks/deck-1.ttl`)).toContain(`<${FOREIGN}> "kept"`);
     expect(writes.filter((request) => request.url.endsWith(".acl"))).toEqual([]);
     const after = await snapshot(pod.source);
-    for (const unchanged of [`${pod.source}attachments/picture.png`, await aclOf(pod.source), await aclOf(`${pod.source}decks/deck-1.ttl`)]) {
+    for (const unchanged of [
+      `${pod.source}attachments/picture.png`,
+      await aclOf(pod.source),
+      await aclOf(`${pod.source}decks/deck-1.ttl`),
+    ]) {
       expect(after.get(unchanged), unchanged).toBe(before.get(unchanged));
     }
-    const picture: ArrayBuffer = await (await fetch(`${pod.source}attachments/picture.png`)).arrayBuffer();
+    const picture: ArrayBuffer = await (
+      await fetch(`${pod.source}attachments/picture.png`)
+    ).arrayBuffer();
     expect(new Uint8Array(picture)).toEqual(PICTURE);
     // No resource came or went: every one is where it was.
     expect([...after.keys()].sort()).toEqual([...before.keys()].sort());
@@ -572,7 +662,9 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     "moves format-$format decks to format 6 and cards to 5 with their text unchanged: stand-ins, English-tagged Swedish, unstated sides and untagged keywords kept",
     async ({ format, cardCount }) => {
       const pod = await seedOldPod(server, format);
-      const documents = ["catalog.ttl", "decks/deck-1.ttl", "decks/deck-2.ttl"].map((path) => `${pod.source}${path}`);
+      const documents = ["catalog.ttl", "decks/deck-1.ttl", "decks/deck-2.ttl"].map(
+        (path) => `${pod.source}${path}`,
+      );
       const textBefore = await textOf(pod.source, documents);
       expect(textBefore.length).toBeGreaterThan(20);
       const { useCases, session } = app(pod);
@@ -603,7 +695,11 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
         "<instance>/decks/deck-2.ttl#no": "5",
       });
       expect((await useCases.validateInstance(pod.source)).conforms).toBe(true);
-      expect(await useCases.planMigration(pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0 });
+      expect(await useCases.planMigration(pod.source)).toMatchObject({
+        deckCount: 0,
+        cardCount: 0,
+        reviewCount: 0,
+      });
       // …and its text is what it was, value for value and language for
       // language: nothing guessed, nothing dropped (identical English copies
       // stay, as text in each language; keywords stay untagged; the user
@@ -623,7 +719,9 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
         ]),
       );
       // The library copy still names its release, which later releases are compared with.
-      expect(await triples(`${pod.source}catalog.ttl`)).toContain(`<http://www.w3.org/ns/prov#wasDerivedFrom> <${RELEASE}>`);
+      expect(await triples(`${pod.source}catalog.ttl`)).toContain(
+        `<http://www.w3.org/ns/prov#wasDerivedFrom> <${RELEASE}>`,
+      );
     },
     60_000,
   );
@@ -639,17 +737,42 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     async function prepared() {
       const pod = await seedHandWritten(server);
       const documents = UPDATED.map((path) => `${pod.source}${path}`);
-      const [meta, preferences, cards, reviews, catalog] = documents as [string, string, string, string, string];
-      return { pod, documents, meta, preferences, cards, reviews, catalog, before: await servedBytes(documents), index: await servedBytes([pod.typeIndex]) };
+      const [meta, preferences, cards, reviews, catalog] = documents as [
+        string,
+        string,
+        string,
+        string,
+        string,
+      ];
+      return {
+        pod,
+        documents,
+        meta,
+        preferences,
+        cards,
+        reviews,
+        catalog,
+        before: await servedBytes(documents),
+        index: await servedBytes([pod.typeIndex]),
+      };
     }
 
     /** The instance read and checked with some documents updated and others not: every deck, card and review state there. */
-    async function expectReadable(useCases: UseCases, seeded: Awaited<ReturnType<typeof prepared>>): Promise<void> {
+    async function expectReadable(
+      useCases: UseCases,
+      seeded: Awaited<ReturnType<typeof prepared>>,
+    ): Promise<void> {
       expect((await useCases.validateInstance(seeded.pod.source)).conforms).toBe(true);
       const [deck] = await useCases.listDecks(seeded.pod.source);
-      expect(deck).toMatchObject({ url: `${seeded.catalog}#deck-1`, cardsDocumentUrl: seeded.cards, reviewsDocumentUrl: seeded.reviews });
+      expect(deck).toMatchObject({
+        url: `${seeded.catalog}#deck-1`,
+        cardsDocumentUrl: seeded.cards,
+        reviewsDocumentUrl: seeded.reviews,
+      });
       expect((await useCases.listCards(deck!)).map((card) => card.id).sort()).toEqual(["no", "se"]);
-      expect(await useCases.getStudyCounts(seeded.pod.source, deck!, new Date("2026-09-30T12:00:00Z"))).toMatchObject({ dueCount: expect.any(Number) });
+      expect(
+        await useCases.getStudyCounts(seeded.pod.source, deck!, new Date("2026-09-30T12:00:00Z")),
+      ).toMatchObject({ dueCount: expect.any(Number) });
     }
 
     it("goes on past a document it cannot write, which is left byte for byte as it was, the instance readable; a second run finishes", async () => {
@@ -659,7 +782,9 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
       });
       const outcome = await useCases.updateInstance(session, seeded.pod.instance);
       expect(outcome, JSON.stringify(outcome)).toMatchObject({
-        updated: [seeded.meta, seeded.preferences, seeded.reviews, seeded.catalog].map((url) => ({ url })),
+        updated: [seeded.meta, seeded.preferences, seeded.reviews, seeded.catalog].map((url) => ({
+          url,
+        })),
         failed: [{ url: seeded.cards, holds: "cards", deck: { en: "Capitals" } }],
       });
       // The cards as they were, byte for byte; every other document updated, each write held to its read.
@@ -682,19 +807,31 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
 
       // Run again, it updates what is left, and nothing else.
       const second = app(seeded.pod);
-      expect(await second.useCases.updateInstance(second.session, seeded.pod.instance)).toMatchObject({
+      expect(
+        await second.useCases.updateInstance(second.session, seeded.pod.instance),
+      ).toMatchObject({
         updated: [{ url: seeded.cards }],
         failed: [],
       });
-      expect(second.sent.filter(isWrite).map((request) => request.url)).toEqual([seeded.cards, seeded.pod.typeIndex]);
-      expect(await second.useCases.planMigration(seeded.pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0 });
+      expect(second.sent.filter(isWrite).map((request) => request.url)).toEqual([
+        seeded.cards,
+        seeded.pod.typeIndex,
+      ]);
+      expect(await second.useCases.planMigration(seeded.pod.source)).toMatchObject({
+        deckCount: 0,
+        cardCount: 0,
+        reviewCount: 0,
+      });
       await expectReadable(second.useCases, seeded);
       // Another app's blank node on a card is kept through it all.
-      expect(await triples(seeded.cards)).toMatch(/_:\S+ <https:\/\/other-app\.example\/ns#by> "another app" \./);
+      expect(await triples(seeded.cards)).toMatch(
+        /_:\S+ <https:\/\/other-app\.example\/ns#by> "another app" \./,
+      );
     }, 60_000);
 
     it("leaves a document another device changed since it was read as that device left it (412); a second run updates it, the change kept", async (context) => {
-      if (!conditional.edits) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+      if (!conditional.edits)
+        context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
       const seeded = await prepared();
       let changed: string | undefined;
       const { useCases, sent, session } = app(seeded.pod, {
@@ -710,21 +847,35 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
       const outcome = await useCases.updateInstance(session, seeded.pod.instance);
       expect(changed).toBeDefined();
       expect(outcome, JSON.stringify(outcome)).toMatchObject({
-        updated: [seeded.meta, seeded.preferences, seeded.cards, seeded.catalog].map((url) => ({ url })),
+        updated: [seeded.meta, seeded.preferences, seeded.cards, seeded.catalog].map((url) => ({
+          url,
+        })),
         failed: [{ url: seeded.reviews, holds: "reviews", error: { code: "changedElsewhere" } }],
       });
       // Refused by the pod, the update's write was never made: the document is as the other device left it.
-      expect(sent.find((request) => isWrite(request) && request.url === seeded.reviews)).toMatchObject({ status: 412 });
+      expect(
+        sent.find((request) => isWrite(request) && request.url === seeded.reviews),
+      ).toMatchObject({ status: 412 });
       expect((await servedBytes([seeded.reviews])).get(seeded.reviews)).toBe(changed);
-      expect(await useCases.planMigration(seeded.pod.source)).toMatchObject({ cardCount: 0, reviewCount: 1, deckCount: 0 });
+      expect(await useCases.planMigration(seeded.pod.source)).toMatchObject({
+        cardCount: 0,
+        reviewCount: 1,
+        deckCount: 0,
+      });
       await expectReadable(useCases, seeded);
 
       const second = app(seeded.pod);
-      expect(await second.useCases.updateInstance(second.session, seeded.pod.instance)).toMatchObject({
+      expect(
+        await second.useCases.updateInstance(second.session, seeded.pod.instance),
+      ).toMatchObject({
         updated: [{ url: seeded.reviews }],
         failed: [],
       });
-      expect(await second.useCases.planMigration(seeded.pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0 });
+      expect(await second.useCases.planMigration(seeded.pod.source)).toMatchObject({
+        deckCount: 0,
+        cardCount: 0,
+        reviewCount: 0,
+      });
       expect(await triples(seeded.reviews)).toContain("studied elsewhere");
       await expectReadable(second.useCases, seeded);
     }, 60_000);
@@ -734,7 +885,11 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     const pod = await seedPod(server);
     // 600 cards: updating each card's format makes an edit larger than
     // node-solid-server reads in one PATCH (100 kB), as a real deck does.
-    const cards = Array.from({ length: 600 }, (_, i) => `<#card-${i}> a sm:Card ; sm:front "Front ${i}" ; sm:back "Back ${i}" ; sm:formatVersion 2 .`);
+    const cards = Array.from(
+      { length: 600 },
+      (_, i) =>
+        `<#card-${i}> a sm:Card ; sm:front "Front ${i}" ; sm:back "Back ${i}" ; sm:formatVersion 2 .`,
+    );
     const response = await fetch(`${pod.source}decks/deck-1.ttl`, {
       method: "PUT",
       headers: { "content-type": "text/turtle" },
@@ -745,12 +900,20 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
 
     const outcome = await useCases.updateInstance(session, pod.instance);
     expect(outcome, JSON.stringify(outcome)).toMatchObject({ failed: [] });
-    const deckWrites = sent.filter(isWrite).filter((request) => request.url === `${pod.source}decks/deck-1.ttl`);
+    const deckWrites = sent
+      .filter(isWrite)
+      .filter((request) => request.url === `${pod.source}decks/deck-1.ttl`);
     expect(deckWrites.map((request) => request.method)).toEqual(["PUT"]);
     expectConditional(sent, [`${pod.source}decks/deck-1.ttl`], conditional);
-    expect(await useCases.planMigration(pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0 });
+    expect(await useCases.planMigration(pod.source)).toMatchObject({
+      deckCount: 0,
+      cardCount: 0,
+      reviewCount: 0,
+    });
     expect((await useCases.validateInstance(pod.source)).conforms).toBe(true);
-    expect(await triples(`${pod.source}decks/deck-1.ttl`)).toContain(`<${pod.source}decks/deck-1.ttl#card-599>`);
+    expect(await triples(`${pod.source}decks/deck-1.ttl`)).toContain(
+      `<${pod.source}decks/deck-1.ttl#card-599>`,
+    );
   }, 60_000);
 
   it("refuses to write over what a newer version of the app wrote, and leaves it as it is", async () => {
@@ -764,7 +927,9 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     const { useCases } = app(pod);
     const [deck] = await useCases.listDecks(pod.source);
     const [card] = await useCases.listCards(deck!);
-    await expect(useCases.updateCard(deck!, card!, { front: { en: "Sweden" }, back: { en: "Oslo" } })).rejects.toMatchObject({
+    await expect(
+      useCases.updateCard(deck!, card!, { front: { en: "Sweden" }, back: { en: "Oslo" } }),
+    ).rejects.toMatchObject({
       code: "writtenByNewerApp",
     });
     expect(await triples(cards)).toContain('"Stockholm"');
@@ -772,20 +937,31 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
   });
 
   it("never overwrites a change made since the document was read, where the server enforces If-Match: the save fails, the change stays", async (context) => {
-    if (!conditional.edits) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+    if (!conditional.edits)
+      context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     if (!everyEdit) context.skip(ETAG_OUTLIVES_EDITS);
     const pod = await seedPod(server);
     let interfered = false;
     const { useCases } = app(pod, {
       onRequest: async (request) => {
-        if (interfered || request.method !== "PATCH" || request.url !== `${pod.source}preferences.ttl`) return;
+        if (
+          interfered ||
+          request.method !== "PATCH" ||
+          request.url !== `${pod.source}preferences.ttl`
+        )
+          return;
         interfered = true;
         // Another tab saves the preferences first.
-        await changeElsewhere(`${pod.source}preferences.ttl`, `<#it> <https://solid-memo.com/ns/vocab/v1.ttl#note> "saved in another tab" .`);
+        await changeElsewhere(
+          `${pod.source}preferences.ttl`,
+          `<#it> <https://solid-memo.com/ns/vocab/v1.ttl#note> "saved in another tab" .`,
+        );
       },
     });
     const preferences = await useCases.getPreferences(pod.source);
-    await expect(useCases.savePreferences(pod.source, { ...preferences, newCardsPerDay: 7 })).rejects.toThrow(
+    await expect(
+      useCases.savePreferences(pod.source, { ...preferences, newCardsPerDay: 7 }),
+    ).rejects.toThrow(
       `since Solid Memo read it, so nothing was saved. Reload the page and try again.\nurl: ${pod.source}preferences.ttl`,
     );
     const stored = await triples(`${pod.source}preferences.ttl`);

@@ -46,7 +46,10 @@ export function UpdateBadge({
       {copy?.newer === true && (
         <a class="studio-badge studio-badge-warning" href={href}>
           {t("studio.library.badge", { version: copy.series!.version })}
-          <span class="visually-hidden"> {t("studio.library.badgeOf", { deck: readerText(deck.title) })}</span>
+          <span class="visually-hidden">
+            {" "}
+            {t("studio.library.badgeOf", { deck: readerText(deck.title) })}
+          </span>
         </a>
       )}
     </span>

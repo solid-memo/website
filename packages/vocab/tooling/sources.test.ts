@@ -1,6 +1,16 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { fileOf, readShapeTree, readSiteTurtle, SHAPE_SOURCES, SHAPES_BASE, shapesFetch, SITE, SITE_VENDOR, VOCAB_BASE } from "./sources.ts";
+import {
+  fileOf,
+  readShapeTree,
+  readSiteTurtle,
+  SHAPE_SOURCES,
+  SHAPES_BASE,
+  shapesFetch,
+  SITE,
+  SITE_VENDOR,
+  VOCAB_BASE,
+} from "./sources.ts";
 import { DECKS_ROOT, NS_ROOT, VOCAB_ROOT } from "./root.ts";
 
 describe("fileOf", () => {
@@ -8,7 +18,9 @@ describe("fileOf", () => {
     expect(fileOf(`${VOCAB_BASE}v1.ttl#Card`)).toBe(`${NS_ROOT}vocab/v1.ttl`);
     expect(fileOf(`${SHAPES_BASE}card/v1.ttl`)).toBe(`${NS_ROOT}shapes/card/v1.ttl`);
     expect(fileOf(`${SITE}decks/index.ttl#capitals`)).toBe(`${DECKS_ROOT}index.ttl`);
-    expect(fileOf(`${SITE_VENDOR}skohub/skos.shacl.ttl`)).toBe(`${VOCAB_ROOT}vendor/skohub/skos.shacl.ttl`);
+    expect(fileOf(`${SITE_VENDOR}skohub/skos.shacl.ttl`)).toBe(
+      `${VOCAB_ROOT}vendor/skohub/skos.shacl.ttl`,
+    );
   });
 
   it("knows no other document", () => {
@@ -20,7 +32,9 @@ describe("fileOf", () => {
 describe("readSiteTurtle", () => {
   it("reads a document from disk, failing on one the repository does not publish or have", async () => {
     expect(await readSiteTurtle(`${VOCAB_BASE}v1.ttl`)).toContain(`@base <${VOCAB_BASE}v1.ttl> .`);
-    await expect(readSiteTurtle("https://pod.example/x.ttl")).rejects.toThrow("https://pod.example/x.ttl is not published from this repository.");
+    await expect(readSiteTurtle("https://pod.example/x.ttl")).rejects.toThrow(
+      "https://pod.example/x.ttl is not published from this repository.",
+    );
     await expect(readSiteTurtle(`${SHAPES_BASE}no-such-shape/v1.ttl`)).rejects.toThrow("ENOENT");
   });
 });
@@ -54,6 +68,10 @@ describe("shapesFetch", () => {
   });
 
   it("is given with the bases the app uses", () => {
-    expect(SHAPE_SOURCES).toEqual({ shapesBaseUrl: SHAPES_BASE, vocabBaseUrl: VOCAB_BASE, vendorBaseUrl: SITE_VENDOR });
+    expect(SHAPE_SOURCES).toEqual({
+      shapesBaseUrl: SHAPES_BASE,
+      vocabBaseUrl: VOCAB_BASE,
+      vendorBaseUrl: SITE_VENDOR,
+    });
   });
 });

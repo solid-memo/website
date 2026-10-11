@@ -24,7 +24,10 @@ export function toInstance(registration: InstanceRegistration): Instance {
 export function toInstanceMeta(thing: Thing): InstanceMeta | null {
   const read = readVersioned(thing, "instance");
   if (read === null) return null;
-  return instanceMetaFromRecord(read.storedVersion, migrate("instance", read.record, { subject: asUrl(thing) }));
+  return instanceMetaFromRecord(
+    read.storedVersion,
+    migrate("instance", read.record, { subject: asUrl(thing) }),
+  );
 }
 
 /** The meta subject as this app writes it, in place when it exists. */

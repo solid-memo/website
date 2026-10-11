@@ -36,7 +36,8 @@ export const SHIPPED = ["apps/web"];
 
 /** The unready versions the app may ship, and why (docs/vendor-code.md#maturity). */
 export const ALLOWED: Record<string, string> = {
-  "rdf-validate-shacl": "The only SHACL engine for RDF/JS; maintained by Zazuko, behind the ShapeEngine interface.",
+  "rdf-validate-shacl":
+    "The only SHACL engine for RDF/JS; maintained by Zazuko, behind the ShapeEngine interface.",
   "rdf-validate-datatype": "rdf-validate-shacl's check of literals, by the same maintainers.",
   "@inrupt/solid-client-errors": "Part of @inrupt/solid-client 4, released with it by Inrupt.",
   process: "The browser's stand-in for Node's process, which readable-stream asks for.",
@@ -75,7 +76,10 @@ function needs(entry: LockEntry): [string, boolean][] {
 export type Shipped = { name: string; version: string; via: string[] };
 
 /** Every third-party package the roots ship, and every dependency that could not be found. */
-export function shipped(lock: Lockfile, roots: readonly string[]): { packages: Shipped[]; missing: string[] } {
+export function shipped(
+  lock: Lockfile,
+  roots: readonly string[],
+): { packages: Shipped[]; missing: string[] } {
   const packages: Shipped[] = [];
   const missing: string[] = [];
   const seen = new Set<string>();
@@ -94,7 +98,8 @@ export function shipped(lock: Lockfile, roots: readonly string[]): { packages: S
       queue.push({ location: entry.resolved!, via });
       continue;
     }
-    const name = entry.name ?? location.slice(location.lastIndexOf("node_modules/") + "node_modules/".length);
+    const name =
+      entry.name ?? location.slice(location.lastIndexOf("node_modules/") + "node_modules/".length);
     const workspace = !location.includes("node_modules/");
     if (!workspace) packages.push({ name, version: entry.version!, via });
     for (const [dependency, optional] of needs(entry)) {
@@ -124,16 +129,24 @@ export function dependencyProblems(
   }
   for (const name of Object.keys(allowed)) {
     if (!packages.some((p) => p.name === name && isUnready(p.version))) {
-      problems.push(`${name}: allowed in scripts/checkDependencies.ts, but no unready version of it is shipped; take it off.`);
+      problems.push(
+        `${name}: allowed in scripts/checkDependencies.ts, but no unready version of it is shipped; take it off.`,
+      );
     }
     if (!vendorDoc.includes(`\`${name}\``)) {
-      problems.push(`${name}: allowed in scripts/checkDependencies.ts, but docs/vendor-code.md does not name it.`);
+      problems.push(
+        `${name}: allowed in scripts/checkDependencies.ts, but docs/vendor-code.md does not name it.`,
+      );
     }
   }
   return problems;
 }
 
-export type DependenciesIo = { lockfile(): Lockfile; vendorDoc(): string; log(message: string): void };
+export type DependenciesIo = {
+  lockfile(): Lockfile;
+  vendorDoc(): string;
+  log(message: string): void;
+};
 
 export function defaultIo(root: string): DependenciesIo {
   return {
@@ -148,7 +161,9 @@ export function main(io: DependenciesIo): number {
   const problems = dependencyProblems(io.lockfile(), SHIPPED, ALLOWED, io.vendorDoc());
   for (const problem of problems) io.log(problem);
   if (problems.length > 0) return 1;
-  io.log("The app ships released versions only, and the allowed ones (docs/vendor-code.md#maturity).");
+  io.log(
+    "The app ships released versions only, and the allowed ones (docs/vendor-code.md#maturity).",
+  );
   return 0;
 }
 

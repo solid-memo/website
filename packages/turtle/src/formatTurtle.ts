@@ -69,9 +69,7 @@ export function formatTurtle(
     blocks.set(key, block);
   }
   const inlined = new Set(
-    quads
-      .filter((quad) => quad.object.termType === "BlankNode")
-      .map((quad) => quad.object.value),
+    quads.filter((quad) => quad.object.termType === "BlankNode").map((quad) => quad.object.value),
   );
 
   const iri = (value: string): string => {
@@ -172,7 +170,9 @@ export function formatTurtle(
 function longString(value: string): string {
   const escaped = value
     // A backslash, and each control character but a tab (\u0009) or a line feed (\u000a).
-    .replace(/[\\\u0000-\u0008\u000b-\u001f]/g, (c) => (c === "\\" ? "\\\\" : JSON.stringify(c).slice(1, -1)))
+    .replace(/[\\\u0000-\u0008\u000b-\u001f]/g, (c) =>
+      c === "\\" ? "\\\\" : JSON.stringify(c).slice(1, -1),
+    )
     .replace(/"+/g, (run, offset: number, whole: string) =>
       offset === 0 || offset + run.length === whole.length
         ? '\\"'.repeat(run.length)
@@ -202,7 +202,8 @@ function turtleLines(source: string): string[] {
           i += quote.length - 1;
           quote = null;
         }
-      } else if (c === "\\") i++; // An escape in a prefixed name, `ex:a\#b`: its `#` begins no comment.
+      } else if (c === "\\")
+        i++; // An escape in a prefixed name, `ex:a\#b`: its `#` begins no comment.
       else if (c === "#") break;
       else if (c === "<") {
         const end = line.indexOf(">", i);
@@ -289,14 +290,18 @@ export async function main(argv: readonly string[], io: FormatIo): Promise<numbe
   const folders = argv.slice(1).filter((arg) => !arg.startsWith("-"));
   const { changed } = await formatFiles(io, { check, folders });
   for (const file of changed) {
-    io.log(check ? `${file} is not formatted: run \`npm run format:turtle\`.` : `formatted ${file}`);
+    io.log(
+      check ? `${file} is not formatted: run \`npm run format:turtle\`.` : `formatted ${file}`,
+    );
   }
   return check && changed.length > 0 ? 1 : 0;
 }
 
 /** The script entry: `node -e "import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))" -- [--check] <folder>…`. */
-export async function run(
-  process: { argv: readonly string[]; cwd(): string; exitCode?: number },
-): Promise<void> {
+export async function run(process: {
+  argv: readonly string[];
+  cwd(): string;
+  exitCode?: number;
+}): Promise<void> {
   process.exitCode = await main(process.argv, defaultIo(process.cwd()));
 }

@@ -8,7 +8,11 @@ import { I18nProvider } from "./i18n";
 
 afterEach(() => vi.unstubAllGlobals());
 
-const d1: Distractor = { id: "q-d1", text: { en: "Only web pages" }, note: { en: "A URL is one kind of IRI." } };
+const d1: Distractor = {
+  id: "q-d1",
+  text: { en: "Only web pages" },
+  note: { en: "A URL is one kind of IRI." },
+};
 const d2: Distractor = { id: "q-d2", text: { en: "Only people" }, retired: true };
 
 function renderFields(overrides: Partial<Parameters<typeof DistractorFields>[0]> = {}) {
@@ -36,7 +40,9 @@ describe("DistractorFields", () => {
     expect(items[0]).toHaveTextContent("q-d1");
     expect(items[0]).not.toHaveTextContent("Retired");
     expect(items[1]).toHaveTextContent(/^Only people Retired/);
-    expect(screen.getByRole("button", { name: "Restore the wrong option “Only people”" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Restore the wrong option “Only people”" }),
+    ).toBeInTheDocument();
   });
 
   it("says how often each option was chosen, when told", () => {
@@ -51,8 +57,12 @@ describe("DistractorFields", () => {
 
   it("marks the Edit button of the option a link opens the page at as where the user arrives", () => {
     renderFields({ arrival: "q-d2" });
-    expect(screen.getByRole("button", { name: "Edit the wrong option “Only people”" })).toHaveAttribute("data-arrival");
-    expect(screen.getByRole("button", { name: "Edit the wrong option “Only web pages”" })).not.toHaveAttribute("data-arrival");
+    expect(
+      screen.getByRole("button", { name: "Edit the wrong option “Only people”" }),
+    ).toHaveAttribute("data-arrival");
+    expect(
+      screen.getByRole("button", { name: "Edit the wrong option “Only web pages”" }),
+    ).not.toHaveAttribute("data-arrival");
   });
 
   it("says when the card has none", () => {
@@ -68,7 +78,9 @@ describe("DistractorFields", () => {
     expect(props.onChange).not.toHaveBeenCalled();
     fireEvent.input(screen.getByLabelText("Wrong option"), { target: { value: " Only files " } });
     expect(alertTexts()).not.toContain("A wrong option needs text.");
-    fireEvent.input(screen.getByLabelText("Why it is wrong (optional)"), { target: { value: "Files are things too." } });
+    fireEvent.input(screen.getByLabelText("Why it is wrong (optional)"), {
+      target: { value: "Files are things too." },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
     const added = { id: "q-d4", text: { en: "Only files" }, note: { en: "Files are things too." } };
     expect(props.onChange).toHaveBeenCalledWith([d1, d2, added]);
@@ -92,7 +104,9 @@ describe("DistractorFields", () => {
     renderFields({ back: { "": "42" }, distractors: [] });
     fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
     fireEvent.input(screen.getByLabelText("Wrong option"), { target: { value: "41" } });
-    fireEvent.input(screen.getByLabelText("Why it is wrong (optional)"), { target: { value: "One short." } });
+    fireEvent.input(screen.getByLabelText("Why it is wrong (optional)"), {
+      target: { value: "One short." },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
     expect(alertTexts()).toContain("Choose the language of the note on the wrong option.");
     expect(document.getElementById("distractor-note-language-0")).toHaveFocus();
@@ -120,24 +134,36 @@ describe("DistractorFields", () => {
     saved = true;
     fireEvent.click(screen.getByRole("button", { name: "Update" }));
     await vi.waitFor(() => expect(screen.queryByLabelText("Wrong option")).toBeNull());
-    expect(screen.getByRole("button", { name: "Edit the wrong option “Only web pages”" })).toHaveFocus();
+    expect(
+      screen.getByRole("button", { name: "Edit the wrong option “Only web pages”" }),
+    ).toHaveFocus();
   });
 
   it("edits an option, keeping its id, and cancels an edit", () => {
     const { props } = renderFields();
     fireEvent.click(screen.getByRole("button", { name: "Edit the wrong option “Only web pages”" }));
     expect(screen.getByLabelText("Wrong option")).toHaveValue("Only web pages");
-    expect(screen.getByLabelText("Why it is wrong (optional)")).toHaveValue("A URL is one kind of IRI.");
-    expect(screen.getByRole("button", { name: "Add a wrong option" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByLabelText("Why it is wrong (optional)")).toHaveValue(
+      "A URL is one kind of IRI.",
+    );
+    expect(screen.getByRole("button", { name: "Add a wrong option" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
     fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(screen.getByRole("button", { name: "Edit the wrong option “Only web pages”" })).toHaveFocus();
+    expect(
+      screen.getByRole("button", { name: "Edit the wrong option “Only web pages”" }),
+    ).toHaveFocus();
     expect(props.onChange).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "Edit the wrong option “Only people”" }));
     fireEvent.input(screen.getByLabelText("Wrong option"), { target: { value: "Only persons" } });
     fireEvent.click(screen.getByRole("button", { name: "Update" }));
-    expect(props.onChange).toHaveBeenCalledWith([d1, { id: "q-d2", text: { en: "Only persons" }, retired: true }]);
+    expect(props.onChange).toHaveBeenCalledWith([
+      d1,
+      { id: "q-d2", text: { en: "Only persons" }, retired: true },
+    ]);
   });
 
   it("refuses to empty an option", () => {
@@ -151,33 +177,49 @@ describe("DistractorFields", () => {
 
   it("retires an option and restores a retired one", () => {
     const { props } = renderFields();
-    fireEvent.click(screen.getByRole("button", { name: "Retire the wrong option “Only web pages”" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Retire the wrong option “Only web pages”" }),
+    );
     expect(props.onChange).toHaveBeenLastCalledWith([{ ...d1, retired: true }, d2]);
     fireEvent.click(screen.getByRole("button", { name: "Restore the wrong option “Only people”" }));
-    expect(props.onChange).toHaveBeenLastCalledWith([d1, { id: "q-d2", text: { en: "Only people" } }]);
+    expect(props.onChange).toHaveBeenLastCalledWith([
+      d1,
+      { id: "q-d2", text: { en: "Only people" } },
+    ]);
   });
 
   it("deletes an option never published, once the user confirms, and refuses a published one at once, to be retired", () => {
     const confirm = vi.fn().mockReturnValueOnce(false).mockReturnValueOnce(true);
     vi.stubGlobal("confirm", confirm);
     const { props } = renderFields({ published: new Set(["q-d1"]) });
-    fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “Only web pages”" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Delete the wrong option “Only web pages”" }),
+    );
     expect(confirm).not.toHaveBeenCalled();
-    expect(alertTexts()).toContain("This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.");
+    expect(alertTexts()).toContain(
+      "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
+    );
     const remove = screen.getByRole("button", { name: "Delete the wrong option “Only people”" });
     fireEvent.click(remove);
     expect(props.onChange).not.toHaveBeenCalled();
     fireEvent.click(remove);
     expect(confirm).toHaveBeenLastCalledWith("Delete the wrong option “Only people”?");
     expect(props.onChange).toHaveBeenCalledWith([d1]);
-    expect(alertTexts()).not.toContain("This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.");
+    expect(alertTexts()).not.toContain(
+      "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
+    );
   });
 
   it("does nothing while busy", () => {
     const confirm = vi.fn();
     vi.stubGlobal("confirm", confirm);
     const { props } = renderFields({ busy: true });
-    for (const name of ["Edit the wrong option “Only web pages”", "Retire the wrong option “Only web pages”", "Delete the wrong option “Only web pages”", "Add a wrong option"]) {
+    for (const name of [
+      "Edit the wrong option “Only web pages”",
+      "Retire the wrong option “Only web pages”",
+      "Delete the wrong option “Only web pages”",
+      "Add a wrong option",
+    ]) {
       const button = screen.getByRole("button", { name });
       expect(button).toHaveAttribute("aria-disabled", "true");
       fireEvent.click(button);
@@ -204,7 +246,9 @@ describe("DistractorFields", () => {
         { id: "q-d2", text: { "": "H2O2" } },
       ],
     });
-    const issues = within(screen.getByRole("list", { name: "Worth a look" })).getAllByRole("listitem");
+    const issues = within(screen.getByRole("list", { name: "Worth a look" })).getAllByRole(
+      "listitem",
+    );
     expect(issues.map((issue) => issue.textContent)).toEqual([
       "“Fire” has no text in Swedish — svenska (sv), which the back is in.",
       "“Fire” is in German — Deutsch (de), which the back is not.",
@@ -219,24 +263,34 @@ describe("DistractorFields", () => {
         { id: "q-d2", text: { en: "Earth" } },
       ],
     });
-    expect(within(screen.getByRole("list", { name: "Worth a look" })).getByRole("listitem")).toHaveTextContent(
-      "“Fire” is in Swedish — svenska (sv), which the back is not.",
-    );
+    expect(
+      within(screen.getByRole("list", { name: "Worth a look" })).getByRole("listitem"),
+    ).toHaveTextContent("“Fire” is in Swedish — svenska (sv), which the back is not.");
     cleanup();
-    renderFields({ back: { en: "Water", sv: "Vatten" }, distractors: [{ id: "q-d1", text: { en: "Fire" } }, { id: "q-d2", text: { en: "Earth", sv: "Jord" } }] });
-    expect(within(screen.getByRole("list", { name: "Worth a look" })).getByRole("listitem")).toHaveTextContent(
-      "“Fire” has no text in Swedish — svenska (sv), which the back is in.",
-    );
+    renderFields({
+      back: { en: "Water", sv: "Vatten" },
+      distractors: [
+        { id: "q-d1", text: { en: "Fire" } },
+        { id: "q-d2", text: { en: "Earth", sv: "Jord" } },
+      ],
+    });
+    expect(
+      within(screen.getByRole("list", { name: "Worth a look" })).getByRole("listitem"),
+    ).toHaveTextContent("“Fire” has no text in Swedish — svenska (sv), which the back is in.");
     cleanup();
     renderFields({ distractors: [d1] });
-    expect(screen.getByText("1 wrong option is in use; a course asks a question with at least 2.")).toBeInTheDocument();
+    expect(
+      screen.getByText("1 wrong option is in use; a course asks a question with at least 2."),
+    ).toBeInTheDocument();
   });
 
   it("writes and shows options in Markdown as such, hinting where one would not show as meant", () => {
     renderFields({ textFormat: SM.markdown, distractors: [{ id: "q-d1", text: { en: "`a`" } }] });
     expect(fields().querySelector("code")).toHaveTextContent("a");
     fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
-    fireEvent.input(screen.getByLabelText("Wrong option"), { target: { value: "[a](https://example.org)" } });
+    fireEvent.input(screen.getByLabelText("Wrong option"), {
+      target: { value: "[a](https://example.org)" },
+    });
     expect(fields()).toHaveTextContent(/link/i);
     expect(screen.getByLabelText("Why it is wrong (optional)").tagName).toBe("TEXTAREA");
   });
@@ -258,10 +312,19 @@ describe("DistractorFields", () => {
   it("speaks Swedish", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
-        <DistractorFields cardId="q" distractors={[]} back={{ sv: "Vatten" }} busy={false} suggestions={[]} onChange={vi.fn()} />
+        <DistractorFields
+          cardId="q"
+          distractors={[]}
+          back={{ sv: "Vatten" }}
+          busy={false}
+          suggestions={[]}
+          onChange={vi.fn()}
+        />
       </I18nProvider>,
     );
     expect(screen.getByRole("group", { name: "Felaktiga alternativ" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Lägg till ett felaktigt alternativ" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Lägg till ett felaktigt alternativ" }),
+    ).toBeInTheDocument();
   });
 });

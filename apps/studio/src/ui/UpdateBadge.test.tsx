@@ -24,7 +24,9 @@ function observeByHand() {
       disconnect() {}
     },
   );
-  return { show: () => act(() => observers.forEach((callback) => callback([{ isIntersecting: true }]))) };
+  return {
+    show: () => act(() => observers.forEach((callback) => callback([{ isIntersecting: true }]))),
+  };
 }
 
 function renderBadges(useCases: UseCases) {
@@ -58,7 +60,9 @@ describe("UpdateBadge", () => {
 
   it("shows nothing when the library cannot be read", async () => {
     const screenSays = observeByHand();
-    const useCases = makeUseCasesFake({ listLibraryUpdates: vi.fn(async () => Promise.reject(new Error("offline"))) });
+    const useCases = makeUseCasesFake({
+      listLibraryUpdates: vi.fn(async () => Promise.reject(new Error("offline"))),
+    });
     const { container } = renderBadges(useCases);
     screenSays.show();
     await waitFor(() => expect(useCases.listLibraryUpdates).toHaveBeenCalled());

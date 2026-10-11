@@ -34,11 +34,24 @@ const DIRECTIONS: Record<DeckDirection, DraftDeckV1["studyDirection"]> = {
  *   its Turtle distribution (blankDraft), made `now`, nothing published
  *   before it.
  */
-export function deckToDraft(deck: Deck, cards: readonly Card[], url: string, now: string): { draft: ReleaseDraft; basedOn?: string } {
-  const agents = new Map(deck.authors.map((author) => [agentUrlOf(url, author), agentToRecord(author)]));
+export function deckToDraft(
+  deck: Deck,
+  cards: readonly Card[],
+  url: string,
+  now: string,
+): { draft: ReleaseDraft; basedOn?: string } {
+  const agents = new Map(
+    deck.authors.map((author) => [agentUrlOf(url, author), agentToRecord(author)]),
+  );
   const creators = [...agents.keys()];
   const fragment = (iri: string) => iri.slice(url.length + 1);
-  const taken = [...creators.map(fragment), ...cards.flatMap((card) => [card.id, ...(card.distractors ?? []).map((distractor) => distractor.id)])];
+  const taken = [
+    ...creators.map(fragment),
+    ...cards.flatMap((card) => [
+      card.id,
+      ...(card.distractors ?? []).map((distractor) => distractor.id),
+    ]),
+  ];
   const blank = blankDraft({ url, course: false, title: stated(deck.title), now, taken });
   const description = stated(deck.description ?? {});
   const draft: ReleaseDraft = {
@@ -56,7 +69,12 @@ export function deckToDraft(deck: Deck, cards: readonly Card[], url: string, now
     agents: [...agents].map(([iri, data]) => ({ id: fragment(iri), data })),
     cards: cards.map((card) => ({ id: card.id, data: cardToRecord(card, card.createdAt, url) })),
     distractors: cards.flatMap((card) =>
-      (card.distractors ?? []).map((distractor): DraftNode<DistractorV1> => ({ id: distractor.id, data: distractorToRecord(distractor) })),
+      (card.distractors ?? []).map(
+        (distractor): DraftNode<DistractorV1> => ({
+          id: distractor.id,
+          data: distractorToRecord(distractor),
+        }),
+      ),
     ),
     // Its license, typed as a release's is (setLicense).
     triples: deck.license === undefined ? [] : [licenseType(deck.license)],

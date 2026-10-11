@@ -16,7 +16,13 @@ function isPlainPath(name: string): boolean {
   return name.split("/").every((segment) => /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(segment));
 }
 
-export function turtleDirectoryPlugin({ dir, publicPath = dir }: { dir: string; publicPath?: string }): Plugin {
+export function turtleDirectoryPlugin({
+  dir,
+  publicPath = dir,
+}: {
+  dir: string;
+  publicPath?: string;
+}): Plugin {
   return {
     name: `solid-memo:publish-${publicPath}`,
 

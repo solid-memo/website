@@ -42,16 +42,22 @@ function repositoryOn(fetch: typeof globalThis.fetch, checkWrite?: WriteCheck) {
 
 /** A tree as ids: a deck's, or a group's with its children's. */
 function shape(nodes: readonly TreeNode[]): unknown[] {
-  return nodes.map((node) => (node.kind === "deck" ? node.deck.id : { [node.group.url.split("#")[1]!]: shape(node.children) }));
+  return nodes.map((node) =>
+    node.kind === "deck" ? node.deck.id : { [node.group.url.split("#")[1]!]: shape(node.children) },
+  );
 }
 
-const writes = (pod: ReturnType<typeof fakePod>) => pod.requests.filter((request) => request.method !== "GET");
+const writes = (pod: ReturnType<typeof fakePod>) =>
+  pod.requests.filter((request) => request.method !== "GET");
 const group = { url: at("group-1"), title: { en: "Languages" } };
 
 describe("the deck tree in the pod", () => {
   it("is empty without a catalog document, and as the document states it otherwise", async () => {
     const pod = fakePod();
-    expect(await repositoryOn(pod.fetch).readDeckTree(INSTANCE)).toEqual({ children: [], readOnly: false });
+    expect(await repositoryOn(pod.fetch).readDeckTree(INSTANCE)).toEqual({
+      children: [],
+      readOnly: false,
+    });
     const arranged = await podWith(
       `<#catalog> dcat:catalog <#group-1> .
        <#group-1> a sm:DeckGroup, dcat:Catalog ; sm:formatVersion 1 ; dcterms:title "Languages"@en ;
@@ -67,14 +73,25 @@ describe("the deck tree in the pod", () => {
     const pod = await podWith();
     const checkWrite = vi.fn<WriteCheck>(async () => undefined);
     const repository = repositoryOn(pod.fetch, checkWrite);
-    const written = await repository.editDeckTree(INSTANCE, { kind: "combine", dragged: at("c"), target: at("a"), group });
+    const written = await repository.editDeckTree(INSTANCE, {
+      kind: "combine",
+      dragged: at("c"),
+      target: at("a"),
+      group,
+    });
     expect(shape(written.children)).toEqual([{ "group-1": ["a", "c"] }, "b"]);
-    expect(writes(pod)).toEqual([expect.objectContaining({ method: "PATCH", url: CATALOG, ifMatch: '"v1"', status: 205 })]);
+    expect(writes(pod)).toEqual([
+      expect.objectContaining({ method: "PATCH", url: CATALOG, ifMatch: '"v1"', status: 205 }),
+    ]);
     // The decks whose positions changed are not checked: only what a shape owns.
     expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [group.url, ROOT], "pod");
     expect(await repository.readDeckTree(INSTANCE)).toEqual(written);
 
-    const moved = await repository.editDeckTree(INSTANCE, { kind: "move", node: at("b"), to: { parent: group.url, after: null } });
+    const moved = await repository.editDeckTree(INSTANCE, {
+      kind: "move",
+      node: at("b"),
+      to: { parent: group.url, after: null },
+    });
     expect(shape(moved.children)).toEqual([{ "group-1": ["b", "a", "c"] }]);
     expect(await repository.readDeckTree(INSTANCE)).toEqual(moved);
   });
@@ -84,11 +101,18 @@ describe("the deck tree in the pod", () => {
     const repository = repositoryOn(pod.fetch);
     const tree = await repository.editDeckTree(INSTANCE, { kind: "removeGroup", group: group.url });
     expect(shape(tree.children)).toEqual(["a", "b", "c"]);
-    await repository.editDeckTree(INSTANCE, { kind: "move", node: at("b"), to: { parent: null, after: at("a") } });
+    await repository.editDeckTree(INSTANCE, {
+      kind: "move",
+      node: at("b"),
+      to: { parent: null, after: at("a") },
+    });
     expect(writes(pod)).toEqual([]);
     // Nor without a catalog document, where no edit can change anything.
     const empty = fakePod();
-    await repositoryOn(empty.fetch).editDeckTree(INSTANCE, { kind: "removeGroup", group: group.url });
+    await repositoryOn(empty.fetch).editDeckTree(INSTANCE, {
+      kind: "removeGroup",
+      group: group.url,
+    });
     expect(writes(empty)).toEqual([]);
   });
 
@@ -96,7 +120,8 @@ describe("the deck tree in the pod", () => {
     const pod = await podWith();
     const elsewhere = repositoryOn(pod.fetch);
     // Another tab adds a deck just before this one writes.
-    let meanwhile: (() => Promise<unknown>) | null = () => elsewhere.createDeck(INSTANCE, { en: "Added elsewhere" });
+    let meanwhile: (() => Promise<unknown>) | null = () =>
+      elsewhere.createDeck(INSTANCE, { en: "Added elsewhere" });
     const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === "PATCH" && meanwhile !== null) {
         const change = meanwhile;
@@ -121,7 +146,9 @@ describe("the deck tree in the pod", () => {
     const repository = repositoryOn(pod.fetch);
     const edit = { kind: "combine" as const, dragged: at("b"), target: at("a"), group };
     for (let i = 0; i < 3; i++) pod.failNext("PATCH", CATALOG, 412);
-    await expect(repository.editDeckTree(INSTANCE, edit)).rejects.toMatchObject({ code: "changedElsewhere" });
+    await expect(repository.editDeckTree(INSTANCE, edit)).rejects.toMatchObject({
+      code: "changedElsewhere",
+    });
     expect(writes(pod)).toHaveLength(3);
     pod.clearRequests();
     pod.failNext("PATCH", CATALOG, 500);
@@ -133,12 +160,18 @@ describe("the deck tree in the pod", () => {
     const pod = await podWith(`<#group-2> a sm:DeckGroup ; sm:formatVersion 2 .`);
     const repository = repositoryOn(pod.fetch);
     expect((await repository.readDeckTree(INSTANCE)).readOnly).toBe(true);
-    await expect(repository.editDeckTree(INSTANCE, { kind: "removeGroup", group: at("group-2") })).rejects.toMatchObject({
+    await expect(
+      repository.editDeckTree(INSTANCE, { kind: "removeGroup", group: at("group-2") }),
+    ).rejects.toMatchObject({
       code: "deckTreeTooNew",
     });
     const plain = await podWith();
     await expect(
-      repositoryOn(plain.fetch).editDeckTree(INSTANCE, { kind: "rename", group: group.url, title: { en: "X" } }),
+      repositoryOn(plain.fetch).editDeckTree(INSTANCE, {
+        kind: "rename",
+        group: group.url,
+        title: { en: "X" },
+      }),
     ).rejects.toMatchObject({ code: "deckTreeChanged" });
     expect([...writes(pod), ...writes(plain)]).toEqual([]);
   });
@@ -146,7 +179,12 @@ describe("the deck tree in the pod", () => {
   it("loses a removed deck from its group, in the same write", async () => {
     const pod = await podWith();
     const repository = repositoryOn(pod.fetch);
-    const tree: DeckTree = await repository.editDeckTree(INSTANCE, { kind: "combine", dragged: at("b"), target: at("a"), group });
+    const tree: DeckTree = await repository.editDeckTree(INSTANCE, {
+      kind: "combine",
+      dragged: at("b"),
+      target: at("a"),
+      group,
+    });
     const a = decksOf(tree.children).find((deck) => deck.id === "a") as Deck;
     pod.clearRequests();
     await repository.removeDeck(a);

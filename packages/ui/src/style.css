@@ -57,14 +57,13 @@
   --shine: rgb(255 255 255 / 0.55);
 
   --font-mono:
-    ui-monospace, "SFMono-Regular", "Cascadia Mono", "Menlo", "Consolas",
-    "Liberation Mono", monospace;
+    ui-monospace, "SFMono-Regular", "Cascadia Mono", "Menlo", "Consolas", "Liberation Mono",
+    monospace;
 
   --font-display:
-    "Bangers", "Fredoka Variable", ui-rounded,
-    "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui,
-    "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans JP", "Yu Gothic",
-    "Noto Sans KR", sans-serif;
+    "Bangers", "Fredoka Variable", ui-rounded, "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold",
+    system-ui, "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans JP", "Yu Gothic", "Noto Sans KR",
+    sans-serif;
 
   font-family:
     "Fredoka Variable", ui-rounded, "Hiragino Maru Gothic ProN",
@@ -199,8 +198,14 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at calc(100% + 5rem) 30rem, var(--paper-blue) 0 17rem, transparent 17.05rem) no-repeat,
-    radial-gradient(circle at -4rem 11rem, var(--paper-yellow) 0 9rem, transparent 9.05rem) no-repeat,
+    radial-gradient(
+      circle at calc(100% + 5rem) 30rem,
+      var(--paper-blue) 0 17rem,
+      transparent 17.05rem
+    )
+    no-repeat,
+    radial-gradient(circle at -4rem 11rem, var(--paper-yellow) 0 9rem, transparent 9.05rem)
+    no-repeat,
     var(--bg);
   background-attachment: fixed;
 }
@@ -531,7 +536,7 @@ header h2 {
   margin-right: auto;
 }
 
-section>header h2 {
+section > header h2 {
   flex: 1 1 14rem;
 }
 
@@ -592,9 +597,24 @@ h2 a:hover {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   background:
-    radial-gradient(circle at calc(100% - var(--dot-x)) 0.95rem, var(--accent-red) 0 var(--dot), transparent calc(var(--dot) + 0.05rem)) no-repeat,
-    radial-gradient(circle at calc(100% - var(--sun-x)) calc(100% + 1.1rem), var(--accent-yellow) 0 var(--sun), transparent calc(var(--sun) + 0.05rem)) no-repeat,
-    radial-gradient(circle at calc(100% - var(--blob-x)) -2rem, var(--masthead-blue) 0 var(--blob), transparent calc(var(--blob) + 0.05rem)) no-repeat,
+    radial-gradient(
+      circle at calc(100% - var(--dot-x)) 0.95rem,
+      var(--accent-red) 0 var(--dot),
+      transparent calc(var(--dot) + 0.05rem)
+    )
+    no-repeat,
+    radial-gradient(
+      circle at calc(100% - var(--sun-x)) calc(100% + 1.1rem),
+      var(--accent-yellow) 0 var(--sun),
+      transparent calc(var(--sun) + 0.05rem)
+    )
+    no-repeat,
+    radial-gradient(
+      circle at calc(100% - var(--blob-x)) -2rem,
+      var(--masthead-blue) 0 var(--blob),
+      transparent calc(var(--blob) + 0.05rem)
+    )
+    no-repeat,
     var(--masthead-bg);
 }
 
@@ -719,7 +739,7 @@ main.landing {
   padding-top: 2.5rem;
 }
 
-main.landing>h1 {
+main.landing > h1 {
   margin: 0.25rem 0 0.4rem;
   font-size: 2.8rem;
   text-align: center;
@@ -753,7 +773,7 @@ section {
   margin-bottom: 1.5rem;
 }
 
-section> :last-child {
+section > :last-child {
   margin-bottom: 0;
 }
 
@@ -781,7 +801,9 @@ textarea {
   border-radius: var(--radius);
   background: var(--surface);
   margin-bottom: 0.6rem;
-  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 textarea {
@@ -915,8 +937,8 @@ a.button.primary:hover {
   border-color: var(--primary-hover);
 }
 
-form>button,
-form>a.button {
+form > button,
+form > a.button {
   align-self: flex-start;
 }
 
@@ -1129,7 +1151,7 @@ a.hint:hover {
   background: var(--surface-sunken);
 }
 
-.provider-list li+li {
+.provider-list li + li {
   margin-top: 0.5rem;
 }
 
@@ -1294,7 +1316,7 @@ dl.facts .sources {
 
 .storage-list li,
 .instance-list li,
-.deck-list>li.deck-row {
+.deck-list > li.deck-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1303,12 +1325,14 @@ dl.facts .sources {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface-sunken);
-  transition: border-color 0.12s ease, background 0.12s ease;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
 }
 
 .storage-list li:hover,
 .instance-list li:hover,
-.deck-list>li.deck-row:hover {
+.deck-list > li.deck-row:hover {
   border-color: var(--border-strong);
   background: var(--surface-hover);
 }
@@ -1320,7 +1344,7 @@ dl.facts .sources {
   font-size: 0.8rem;
 }
 
-.deck-list>li.deck-row {
+.deck-list > li.deck-row {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
@@ -1336,14 +1360,14 @@ dl.facts .sources {
 }
 
 /* Under the name's text, past its padding and icon. */
-.deck-list .deck-meta>.hint:not(.study-done) {
+.deck-list .deck-meta > .hint:not(.study-done) {
   grid-column: 1;
   grid-row: 2;
   align-self: start;
   padding-left: 1.75rem;
 }
 
-.deck-list .deck-meta>button,
+.deck-list .deck-meta > button,
 .deck-list .study-done,
 .deck-list .study-loading {
   grid-column: 2;
@@ -1357,7 +1381,7 @@ dl.facts .sources {
   border-radius: inherit;
 }
 
-.deck-list .deck-meta>button {
+.deck-list .deck-meta > button {
   position: relative;
   z-index: 1;
 }
@@ -1497,7 +1521,7 @@ a[role="menuitem"] {
 
 /* A group: its header, then what it holds, a level in. Not a row
    itself, so it has no row's box. */
-.deck-list>li.deck-group {
+.deck-list > li.deck-group {
   display: block;
 }
 
@@ -1610,7 +1634,7 @@ a[role="menuitem"] {
 
 /* A level in, by a rule on its left; from the fifth level on no further,
    so a deep tree keeps its width (the rule still marks the level). */
-.deck-group-clip>.deck-list {
+.deck-group-clip > .deck-list {
   margin: 0.5rem 0 0;
   margin-inline-start: calc(1.25rem * clamp(0, 5 - var(--depth, 1), 1));
   padding-inline-start: 0.5rem;
@@ -1631,7 +1655,7 @@ a[role="menuitem"] {
    long press on it must not select its text, show a link's callout or
    drag the link the browser's way. The page still pans as usual; a
    touchmove is canceled only while a row is lifted. */
-.deck-list>li.deck-row,
+.deck-list > li.deck-row,
 .deck-group-header {
   -webkit-user-select: none;
   user-select: none;
@@ -1658,7 +1682,8 @@ html.drag-active {
 .drop-line {
   position: absolute;
   top: 0;
-  inset-inline: calc(min(var(--line-depth, 0), 4) * 1.25rem + var(--line-depth, 0) * (0.5rem + 2px)) 0;
+  inset-inline: calc(min(var(--line-depth, 0), 4) * 1.25rem + var(--line-depth, 0) * (0.5rem + 2px))
+    0;
   z-index: 2;
   height: 3px;
   margin-top: -1.5px;
@@ -1699,11 +1724,11 @@ html.drag-active {
 /* While a row is lifted, each open group ends in room enough to aim
    past it, the rows stay as they are under the pointer, and they no
    longer slide in as they come once moved. */
-.deck-tree[data-dragging] .deck-group-body:not([data-collapsed])>.deck-group-clip {
+.deck-tree[data-dragging] .deck-group-body:not([data-collapsed]) > .deck-group-clip {
   padding-bottom: calc(0.25rem + 20px);
 }
 
-.deck-tree[data-dragging] .deck-list>li.deck-row:hover {
+.deck-tree[data-dragging] .deck-list > li.deck-row:hover {
   border-color: var(--border);
   background: var(--surface-sunken);
 }
@@ -1722,11 +1747,11 @@ html.drag-active {
 /* A group deleted: its header folds away and fades, and what it held
    then takes its place (ui/DeckListScreen.tsx, which waits for this
    animation's end by its name). Out of reach of the pointer meanwhile. */
-.deck-list>li.deck-group.leaving {
+.deck-list > li.deck-group.leaving {
   pointer-events: none;
 }
 
-.deck-group.leaving>.deck-group-header {
+.deck-group.leaving > .deck-group-header {
   overflow: hidden;
   animation: group-leave 0.22s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
 }
@@ -1746,7 +1771,7 @@ html.drag-active {
 
 /* Held by a finger or pen: it gives a little until it lifts. The scale
    property, not a transform, so it never fights a row's movement. */
-.deck-list>li.deck-row,
+.deck-list > li.deck-row,
 .deck-group-header {
   transition:
     border-color 0.12s ease,
@@ -1759,7 +1784,7 @@ html.drag-active {
 }
 
 /* Lifted: what it leaves behind, faded and dashed. */
-.deck-list>li.drag-source {
+.deck-list > li.drag-source {
   opacity: 0.35;
 }
 
@@ -1781,7 +1806,7 @@ html.drag-active {
   scale: none;
 }
 
-.deck-list>li.deck-row.drop-combine {
+.deck-list > li.deck-row.drop-combine {
   background: var(--primary-soft);
 }
 
@@ -1915,7 +1940,7 @@ html.drag-active {
   margin-top: 1rem;
 }
 
-.library-filters+form {
+.library-filters + form {
   margin-top: 0.35rem;
 }
 
@@ -1954,7 +1979,9 @@ html.drag-active {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface-sunken);
-  transition: border-color 0.12s ease, background 0.12s ease;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
 }
 
 .library-list li:hover {
@@ -2047,7 +2074,7 @@ html.drag-active {
   font-size: 0.75rem;
 }
 
-.library-list+button {
+.library-list + button {
   align-self: flex-start;
 }
 
@@ -2102,8 +2129,8 @@ td {
   vertical-align: middle;
 }
 
-tr:last-child>th,
-tr:last-child>td {
+tr:last-child > th,
+tr:last-child > td {
   border-bottom: none;
 }
 
@@ -2177,7 +2204,7 @@ td.clickable a.cell-overlay {
   box-shadow: none;
 }
 
-.card-table td button+button {
+.card-table td button + button {
   margin-left: 0.4rem;
 }
 
@@ -2269,9 +2296,10 @@ form.card-edit {
   padding: 2.25rem 1.25rem 1.5rem;
   margin: 1rem 0 0;
   text-align: center;
-  background:
-    linear-gradient(var(--surface-sunken), var(--surface-sunken)) padding-box;
-  box-shadow: inset 0 0 0 4px var(--surface), var(--shadow-sm);
+  background: linear-gradient(var(--surface-sunken), var(--surface-sunken)) padding-box;
+  box-shadow:
+    inset 0 0 0 4px var(--surface),
+    var(--shadow-sm);
 }
 
 .card-face {
@@ -2284,8 +2312,8 @@ form.card-edit {
 
 /* A face's own paragraphs: not those inside Markdown blocks (.md), which
    have their own sizes below. */
-.card-face>p,
-.card-face>.md {
+.card-face > p,
+.card-face > .md {
   margin: 0;
   overflow-wrap: anywhere;
   /* Fredoka kerns "A" into "V", "T", "Y"…, and "Å" and "Ä" share those pairs,
@@ -2294,7 +2322,7 @@ form.card-edit {
   font-kerning: none;
 }
 
-.card-question>p {
+.card-question > p {
   font-size: clamp(2rem, 9vw, 3.25rem);
   font-weight: 700;
   line-height: 1.2;
@@ -2306,16 +2334,16 @@ form.card-edit {
   border-top: 1px dashed var(--border-strong);
 }
 
-.card-answer>p {
+.card-answer > p {
   font-size: clamp(1.4rem, 5.5vw, 1.8rem);
 }
 
-.card-face>p.hint {
+.card-face > p.hint {
   font-size: 0.9em;
 }
 
 /* The back's label: how the answer relates to the front, a small caption above it. */
-.card-face>p.card-label {
+.card-face > p.card-label {
   margin-bottom: -0.5rem;
   color: var(--text-muted);
   font-size: 0.95rem;
@@ -2324,7 +2352,7 @@ form.card-edit {
 }
 
 /* A side's note: what holds of it, set under its text, quieter than it. */
-.card-face>.card-note {
+.card-face > .card-note {
   margin-top: -0.4rem;
   max-width: 36rem;
   color: var(--text-muted);
@@ -2423,7 +2451,7 @@ form.card-edit {
   border-radius: 3px;
 }
 
-.practice-card>button {
+.practice-card > button {
   min-height: 3rem;
   padding: 0.7rem 2.5rem;
   font-size: 1.05rem;
@@ -2432,7 +2460,7 @@ form.card-edit {
   color: var(--on-primary);
 }
 
-.practice-card>button:hover:not(:disabled, [aria-disabled="true"]) {
+.practice-card > button:hover:not(:disabled, [aria-disabled="true"]) {
   background: var(--primary-hover);
   border-color: var(--primary-hover);
 }
@@ -2543,8 +2571,7 @@ form.card-edit {
   border: 2px solid color-mix(in srgb, var(--primary) 35%, transparent);
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at 100% 0, var(--paper-yellow), transparent 60%),
-    var(--primary-soft);
+    radial-gradient(circle at 100% 0, var(--paper-yellow), transparent 60%), var(--primary-soft);
   animation: bounce-in 0.42s cubic-bezier(0.2, 0.8, 0.3, 1) 0.1s backwards;
 }
 
@@ -2587,7 +2614,7 @@ form.card-edit {
   pointer-events: none;
 }
 
-.course-sparkles>span {
+.course-sparkles > span {
   position: absolute;
   width: 0.4rem;
   height: 0.4rem;
@@ -2598,7 +2625,7 @@ form.card-edit {
   animation: sparkle 0.7s ease-out 0.5s backwards;
 }
 
-.course-sparkles>span:nth-child(even) {
+.course-sparkles > span:nth-child(even) {
   background: var(--primary);
 }
 
@@ -2640,7 +2667,7 @@ form.card-edit {
   left: var(--x);
 }
 
-.confetti-shooter>span {
+.confetti-shooter > span {
   position: absolute;
   bottom: 0;
   left: -0.25rem;
@@ -2654,19 +2681,19 @@ form.card-edit {
     confetti-flutter var(--time) linear calc(var(--delay) + var(--jitter));
 }
 
-.confetti-shooter>span:nth-child(4n + 2) {
+.confetti-shooter > span:nth-child(4n + 2) {
   background: var(--accent-yellow);
 }
 
-.confetti-shooter>span:nth-child(4n + 3) {
+.confetti-shooter > span:nth-child(4n + 3) {
   background: var(--accent-red);
 }
 
-.confetti-shooter>span:nth-child(4n) {
+.confetti-shooter > span:nth-child(4n) {
   background: var(--accent-blue);
 }
 
-.confetti-shooter>span:nth-child(3n) {
+.confetti-shooter > span:nth-child(3n) {
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 50%;
@@ -2711,12 +2738,14 @@ form.card-edit {
   }
 
   45% {
-    transform: translateX(var(--sway)) rotate(calc(var(--spin) * 0.55)) rotateY(calc(var(--flip) * 0.5));
+    transform: translateX(var(--sway)) rotate(calc(var(--spin) * 0.55))
+      rotateY(calc(var(--flip) * 0.5));
     animation-timing-function: ease-in-out;
   }
 
   72% {
-    transform: translateX(calc(-1 * var(--sway))) rotate(calc(var(--spin) * 0.8)) rotateY(calc(var(--flip) * 0.75));
+    transform: translateX(calc(-1 * var(--sway))) rotate(calc(var(--spin) * 0.8))
+      rotateY(calc(var(--flip) * 0.75));
     animation-timing-function: ease-in-out;
   }
 
@@ -2857,7 +2886,7 @@ form.card-edit {
 
 /* A question is a sentence, not a word to recall: set as large text, not
    at a study card's size. */
-.course-question .card-question>p {
+.course-question .card-question > p {
   font-size: 1.3rem;
   font-weight: 600;
   text-align: left;
@@ -2989,8 +3018,8 @@ form.card-edit {
   font-weight: 600;
 }
 
-.course-why>p,
-.course-why>.md {
+.course-why > p,
+.course-why > .md {
   margin: 0.25rem 0 0;
 }
 
@@ -3008,7 +3037,7 @@ form.card-edit {
   border-top: none;
 }
 
-.course-right-answer .card-answer>p {
+.course-right-answer .card-answer > p {
   font-size: 1.15rem;
   text-align: left;
 }
@@ -3273,7 +3302,6 @@ details summary:hover {
 }
 
 @keyframes dot-bounce {
-
   0%,
   55%,
   100% {
@@ -3395,7 +3423,7 @@ h2 {
   }
 }
 
-.deck-list .deck-meta>button,
+.deck-list .deck-meta > button,
 .deck-list .study-done,
 .day-reset,
 .session-actions button,
@@ -3405,24 +3433,26 @@ p[role="status"]:not(.loading) {
 
 /* A row's subtext spans its column, so growing it from the center would
    bring the text in from the right; it slides in from the left instead. */
-.deck-list .deck-meta>.hint:not(.study-done),
+.deck-list .deck-meta > .hint:not(.study-done),
 .library-deck-meta {
   animation: row-in 0.36s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
 }
 
 /* Stands where a row's subtext will be while it loads: a bar about as
    long and tall as "12 to review", with a sheen sweeping left to right. */
-.deck-list .deck-meta>.hint.study-skeleton {
+.deck-list .deck-meta > .hint.study-skeleton {
   justify-self: start;
   width: 6.5rem;
   height: 0.8rem;
   padding: 0;
   margin: 0.3rem 0 0.35rem 1.75rem;
   border-radius: 999px;
-  background: linear-gradient(90deg,
-      var(--border) 30%,
-      var(--surface-hover) 50%,
-      var(--border) 70%);
+  background: linear-gradient(
+    90deg,
+    var(--border) 30%,
+    var(--surface-hover) 50%,
+    var(--border) 70%
+  );
   background-size: 250% 100%;
   animation:
     fade-in 0.3s ease backwards,
@@ -3486,7 +3516,6 @@ p[role="status"]:not(.loading) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -3601,8 +3630,7 @@ p[role="status"]:not(.loading) {
   margin: 0 0 1rem;
   padding: 1.25rem 1.5rem;
   background:
-    radial-gradient(circle at 100% 0, var(--paper-yellow), transparent 60%),
-    var(--primary-soft);
+    radial-gradient(circle at 100% 0, var(--paper-yellow), transparent 60%), var(--primary-soft);
   border: 2px solid color-mix(in srgb, var(--primary) 35%, transparent);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
@@ -3620,7 +3648,7 @@ p[role="status"]:not(.loading) {
   animation: newcomer-shine 1.4s ease-in-out 0.7s 2;
 }
 
-.newcomer-course>* {
+.newcomer-course > * {
   position: relative;
   z-index: 1;
 }
@@ -3638,7 +3666,7 @@ p[role="status"]:not(.loading) {
   margin: 0.5rem 0.75rem 0 1rem;
 }
 
-.newcomer-course-fan>span {
+.newcomer-course-fan > span {
   position: absolute;
   inset: 0;
   background: var(--surface);
@@ -3652,18 +3680,18 @@ p[role="status"]:not(.loading) {
   animation: fan-out 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) 0.25s backwards;
 }
 
-.newcomer-course-fan>span:nth-child(1) {
+.newcomer-course-fan > span:nth-child(1) {
   --fan: -14deg;
   border-top-color: var(--accent-blue);
 }
 
-.newcomer-course-fan>span:nth-child(2) {
+.newcomer-course-fan > span:nth-child(2) {
   --fan: 0deg;
   border-top-color: var(--accent-yellow);
   animation-delay: 0.35s;
 }
 
-.newcomer-course-fan>span:nth-child(3) {
+.newcomer-course-fan > span:nth-child(3) {
   --fan: 14deg;
   display: grid;
   place-items: center;
@@ -3674,13 +3702,13 @@ p[role="status"]:not(.loading) {
   animation-delay: 0.45s;
 }
 
-.newcomer-course-fan>span:nth-child(3)::after {
+.newcomer-course-fan > span:nth-child(3)::after {
   content: "?";
 }
 
 /* The hand opens a little further while the card is pointed at or in use. */
-.newcomer-course:hover .newcomer-course-fan>span,
-.newcomer-course:focus-within .newcomer-course-fan>span {
+.newcomer-course:hover .newcomer-course-fan > span,
+.newcomer-course:focus-within .newcomer-course-fan > span {
   transform: rotate(calc(var(--fan) * 1.5)) translateY(-0.2rem);
 }
 
@@ -3768,7 +3796,7 @@ p[role="status"]:not(.loading) {
   padding: 0.4rem 0;
 }
 
-.course-strip li+li {
+.course-strip li + li {
   border-top: 1px solid var(--border);
 }
 
@@ -3853,11 +3881,26 @@ p[role="status"]:not(.loading) {
   box-shadow: inset 0 0 0 1px var(--border);
 }
 
-.calendar-day.level-1 { background: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken)); box-shadow: none; }
-.calendar-day.level-2 { background: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken)); box-shadow: none; }
-.calendar-day.level-3 { background: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken)); box-shadow: none; }
-.calendar-day.level-4 { background: var(--primary); box-shadow: none; }
-.calendar-day.pointed { outline: 2px solid var(--text); outline-offset: 1px; }
+.calendar-day.level-1 {
+  background: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+  box-shadow: none;
+}
+.calendar-day.level-2 {
+  background: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  box-shadow: none;
+}
+.calendar-day.level-3 {
+  background: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+  box-shadow: none;
+}
+.calendar-day.level-4 {
+  background: var(--primary);
+  box-shadow: none;
+}
+.calendar-day.pointed {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+}
 
 .calendar-legend {
   display: flex;
@@ -4180,12 +4223,12 @@ table.deck-statistics td {
   text-align: left;
 }
 
-.card-face>.md {
+.card-face > .md {
   width: 100%;
   font-size: 1.15rem;
 }
 
-.card-face>.card-note.md {
+.card-face > .card-note.md {
   font-size: 0.95rem;
   text-align: left;
 }
@@ -4194,11 +4237,11 @@ table.deck-statistics td {
   line-height: 1.65;
 }
 
-.md> :first-child {
+.md > :first-child {
   margin-top: 0;
 }
 
-.md> :last-child {
+.md > :last-child {
   margin-bottom: 0;
 }
 
@@ -4217,8 +4260,8 @@ table.deck-statistics td {
   padding-inline-start: 1.5rem;
 }
 
-.md li>ul,
-.md li>ol {
+.md li > ul,
+.md li > ol {
   margin-bottom: 0;
 }
 

@@ -48,9 +48,7 @@ describe("Pager", () => {
 
   it("marks Previous disabled on the first page and Next on the last, and ignores them there", () => {
     const onPageChange = vi.fn();
-    const { rerender } = render(
-      <Pager page={1} pageCount={2} onPageChange={onPageChange} />,
-    );
+    const { rerender } = render(<Pager page={1} pageCount={2} onPageChange={onPageChange} />);
     const previous = screen.getByRole("button", { name: "Previous" });
     const next = screen.getByRole("button", { name: "Next" });
     expect(previous).toHaveAttribute("aria-disabled", "true");

@@ -6,5 +6,9 @@ import { defineConfig } from "vitest/config";
  * its answers, without Docker and without starting a server.
  */
 export default defineConfig({
-  test: { include: ["*.test.ts", "src/**/*.test.ts"], exclude: ["**/*.integration.test.ts"], environment: "node" },
+  test: {
+    include: ["*.test.ts", "src/**/*.test.ts"],
+    exclude: ["**/*.integration.test.ts"],
+    environment: "node",
+  },
 });

@@ -1,9 +1,4 @@
-import {
-  DECK_DIRECTIONS,
-  type Card,
-  type Deck,
-  type DeckDirection,
-} from "@solid-memo/domain/deck";
+import { DECK_DIRECTIONS, type Card, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import type { DeckAbout } from "@solid-memo/domain/deckAbout";
 import { hasUnstatedSide } from "@solid-memo/domain/deckLanguages";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
@@ -112,7 +107,8 @@ export function BrowserScreen({
     removing.current = null;
     const rows = tbodyRef.current?.children ?? [];
     // A page left empty gives way to the one before: its last row is nearest.
-    const row = rows[currentPage < pending.page ? rows.length - 1 : Math.min(pending.row, rows.length - 1)];
+    const row =
+      rows[currentPage < pending.page ? rows.length - 1 : Math.min(pending.row, rows.length - 1)];
     (row?.querySelector("a") ?? addCardRef.current!).focus();
     setRemoved(t("browser.removed", { card: pending.label }));
   });
@@ -145,11 +141,7 @@ export function BrowserScreen({
         </a>
       </header>
       <p class="hint">{t("browser.intro")}</p>
-      <DeckAboutSection
-        deck={deck}
-        busy={busy}
-        onSave={onDescribeDeck}
-      />
+      <DeckAboutSection deck={deck} busy={busy} onSave={onDescribeDeck} />
       <fieldset aria-describedby="deck-direction-hint">
         <legend>{t("browser.directionLegend")}</legend>
         {DECK_DIRECTIONS.map((direction) => (
@@ -270,11 +262,7 @@ export function BrowserScreen({
             </tbody>
           </table>
           {pageCount > 1 && (
-            <Pager
-              page={currentPage}
-              pageCount={pageCount}
-              onPageChange={onPageChange}
-            />
+            <Pager page={currentPage} pageCount={pageCount} onPageChange={onPageChange} />
           )}
         </>
       )}

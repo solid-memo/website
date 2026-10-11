@@ -50,11 +50,7 @@ export function DeckDetailScreen({
   const studied = t("common.cardCount", { count: studiedToday });
 
   function handleResetDay() {
-    if (
-      window.confirm(
-        t("deckDetail.resetConfirm", { title: readerText(deck.title), studied }),
-      )
-    ) {
+    if (window.confirm(t("deckDetail.resetConfirm", { title: readerText(deck.title), studied }))) {
       onResetDay();
     }
   }
@@ -85,13 +81,7 @@ export function DeckDetailScreen({
         description={deck.description}
       />
       {notice}
-      {!canStudy && (
-        <p>
-          {cardCount === 0
-            ? t("deckDetail.noCards")
-            : t("deckDetail.allStudied")}
-        </p>
-      )}
+      {!canStudy && <p>{cardCount === 0 ? t("deckDetail.noCards") : t("deckDetail.allStudied")}</p>}
       {canStudy && (
         <p class="hint">
           {dueCount === 0

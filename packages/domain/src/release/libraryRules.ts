@@ -17,12 +17,16 @@ const RELEASE_PATH = /^([^/]+)\/v([1-9][0-9]*)\.ttl$/;
 /** The deck and version a path names (`<name>/v<N>.ttl`), or undefined when it names no release. */
 export function releasePathOf(path: string): { deck: string; version: number } | undefined {
   const match = RELEASE_PATH.exec(path);
-  return match === null || !DECK_NAME.test(match[1]) ? undefined : { deck: match[1], version: Number(match[2]) };
+  return match === null || !DECK_NAME.test(match[1])
+    ? undefined
+    : { deck: match[1], version: Number(match[2]) };
 }
 
 /** A path that names no release, which a library holds nothing but. */
 export function pathProblems(path: string): ReleaseProblem[] {
-  return releasePathOf(path) === undefined ? [problem(path, { code: "notARelease", params: { path } })] : [];
+  return releasePathOf(path) === undefined
+    ? [problem(path, { code: "notARelease", params: { path } })]
+    : [];
 }
 
 /** Each deck, among the paths, whose versions do not run 1, 2, … without gaps. */
@@ -56,12 +60,22 @@ export function metadataProblems(model: ReleaseModel, place: ReleasePlace): Rele
   const literals = model.version.filter((term) => term.kind === "literal");
   if (literals.length !== 1 || literals[0].value !== String(place.version)) {
     problems.push(
-      problem(url, { code: "versionMismatch", params: { stated: model.version, expected: place.version } }, { field: `${DCAT_NS}version` }),
+      problem(
+        url,
+        { code: "versionMismatch", params: { stated: model.version, expected: place.version } },
+        { field: `${DCAT_NS}version` },
+      ),
     );
   }
   const expect = (field: string, stated: readonly ReleaseTerm[], expected: readonly string[]) => {
     if (stated.length !== expected.length || stated.some((term, i) => term.value !== expected[i])) {
-      problems.push(problem(url, { code: "linkMismatch", params: { stated: [...stated], expected: [...expected] } }, { field }));
+      problems.push(
+        problem(
+          url,
+          { code: "linkMismatch", params: { stated: [...stated], expected: [...expected] } },
+          { field },
+        ),
+      );
     }
   };
   expect(`${DCAT_NS}inSeries`, model.inSeries, [place.series]);
@@ -73,7 +87,9 @@ export function metadataProblems(model: ReleaseModel, place: ReleasePlace): Rele
   // The shapes allow a release without a license (published shapes are
   // never edited); the library does not, so a reader knows how a deck may be reused.
   if (model.license.length === 0) {
-    problems.push(problem(url, { code: "noLicense", params: {} }, { field: `${DCTERMS_NS}license` }));
+    problems.push(
+      problem(url, { code: "noLicense", params: {} }, { field: `${DCTERMS_NS}license` }),
+    );
   }
   return problems;
 }

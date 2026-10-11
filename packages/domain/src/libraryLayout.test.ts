@@ -12,7 +12,12 @@ describe("librarySeriesUrlOf and libraryPublisherUrlOf", () => {
   });
 
   it("stay beside a URL that is not a release", () => {
-    for (const url of ["https://example.com/x.ttl", `${DECKS}capitals/v0.ttl`, `${DECKS}capitals/v1`, `${DECKS}index.ttl`]) {
+    for (const url of [
+      "https://example.com/x.ttl",
+      `${DECKS}capitals/v0.ttl`,
+      `${DECKS}capitals/v1`,
+      `${DECKS}index.ttl`,
+    ]) {
       expect(librarySeriesUrlOf(url)).toBe(`${url}#series`);
       expect(libraryPublisherUrlOf(url)).toBe(`${url}#publisher`);
     }

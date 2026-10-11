@@ -40,7 +40,9 @@ describe("shapesRuleset", () => {
 
 describe("appVersion", () => {
   it("is the repository's version, from its root package.json", () => {
-    expect(appVersion()).toBe(JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")).version);
+    expect(appVersion()).toBe(
+      JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")).version,
+    );
     expect(appVersion()).toMatch(/^\d+\.\d+\.\d+/);
   });
 });

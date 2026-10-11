@@ -18,7 +18,9 @@ export async function triplesOf(url: string, turtle: string): Promise<Set<string
     return response;
   }) as unknown as typeof globalThis.fetch;
   const quads = [...toRdfJsDataset(await getSolidDatasetLinear(url, { fetch }))] as Quad[];
-  return new Set(quads.map((q) => `${termOf(q.subject)} ${termOf(q.predicate)} ${termOf(q.object)} .`));
+  return new Set(
+    quads.map((q) => `${termOf(q.subject)} ${termOf(q.predicate)} ${termOf(q.object)} .`),
+  );
 }
 
 /** A term as Solid Memo's PATCH bodies write it (datasets.ts). */

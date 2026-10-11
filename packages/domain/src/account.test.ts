@@ -19,16 +19,10 @@ function profile(
 describe("profileNameOf", () => {
   it("takes the profile's foaf:name, plain or language-tagged", () => {
     expect(
-      profileNameOf(
-        profile([{ type: "literal", value: "Alice", dataType: XSD_STRING }]),
-        WEB_ID,
-      ),
+      profileNameOf(profile([{ type: "literal", value: "Alice", dataType: XSD_STRING }]), WEB_ID),
     ).toBe("Alice");
     expect(
-      profileNameOf(
-        profile([{ type: "langString", value: " Alice ", language: "en" }]),
-        WEB_ID,
-      ),
+      profileNameOf(profile([{ type: "langString", value: " Alice ", language: "en" }]), WEB_ID),
     ).toBe("Alice");
   });
 

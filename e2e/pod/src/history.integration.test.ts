@@ -28,7 +28,7 @@ function answerOf(instanceUrl: string, studyDay: string, deck: string, n: number
     deckUrl: `${instanceUrl}catalog.ttl#${deck}`,
     cardUrl: `${instanceUrl}decks/${deck}.ttl#card-${n}`,
     direction: n % 2 === 0 ? "front-to-back" : "back-to-front",
-    grade: n % 6 as Answer["grade"],
+    grade: (n % 6) as Answer["grade"],
     answeredAt: `${studyDay}T10:00:00.000Z`,
     studyDay,
     ...(n % 3 === 0 ? {} : { priorIntervalDays: n }),
@@ -46,13 +46,20 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
   it("reads a month again only once it changed since the version read", async (context) => {
     const instanceUrl = new URL(`run-${crypto.randomUUID()}/solid-memo/main/`, server).href;
     const log = answerLog();
-    await expect(log.readMonthSince(instanceUrl, "2026-09", undefined)).resolves.toEqual({ unchanged: false, value: [], version: "absent" });
+    await expect(log.readMonthSince(instanceUrl, "2026-09", undefined)).resolves.toEqual({
+      unchanged: false,
+      value: [],
+      version: "absent",
+    });
     const first = answerOf(instanceUrl, "2026-09-21", "deck-1", 1);
     await log.append(instanceUrl, first);
     const read = await log.readMonthSince(instanceUrl, "2026-09", "absent");
     expect(read).toMatchObject({ unchanged: false, value: [first] });
-    if (read.unchanged || read.version === null) return context.skip("this server gives no ETag on a read, so every read is a whole one");
-    await expect(log.readMonthSince(instanceUrl, "2026-09", read.version)).resolves.toEqual({ unchanged: true });
+    if (read.unchanged || read.version === null)
+      return context.skip("this server gives no ETag on a read, so every read is a whole one");
+    await expect(log.readMonthSince(instanceUrl, "2026-09", read.version)).resolves.toEqual({
+      unchanged: true,
+    });
     if (!everyEdit) return context.skip(ETAG_OUTLIVES_EDITS);
     const second = answerOf(instanceUrl, "2026-09-22", "deck-1", 2);
     await log.append(instanceUrl, second);
@@ -67,7 +74,9 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
     await expect(log.months(instanceUrl)).resolves.toEqual([]);
     const october = answerOf(instanceUrl, "2026-10-01", "deck-1", 1);
     await log.append(instanceUrl, october);
-    const september = Array.from({ length: 5 }, (_, i) => answerOf(instanceUrl, "2026-09-21", "deck-1", i + 2));
+    const september = Array.from({ length: 5 }, (_, i) =>
+      answerOf(instanceUrl, "2026-09-21", "deck-1", i + 2),
+    );
     await Promise.all(september.map((answer) => log.append(instanceUrl, answer)));
     await expect(log.months(instanceUrl)).resolves.toEqual(["2026-09", "2026-10"]);
     const read = await log.readMonth(instanceUrl, "2026-09");
@@ -79,8 +88,15 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
   it("removes a deck's answers of a study day, and only those", async () => {
     const instanceUrl = new URL(`run-${crypto.randomUUID()}/solid-memo/main/`, server).href;
     const log = answerLog();
-    const kept = [answerOf(instanceUrl, "2026-09-20", "deck-1", 1), answerOf(instanceUrl, "2026-09-21", "deck-2", 2)];
-    for (const answer of [...kept, answerOf(instanceUrl, "2026-09-21", "deck-1", 3), answerOf(instanceUrl, "2026-09-21", "deck-1", 4)]) {
+    const kept = [
+      answerOf(instanceUrl, "2026-09-20", "deck-1", 1),
+      answerOf(instanceUrl, "2026-09-21", "deck-2", 2),
+    ];
+    for (const answer of [
+      ...kept,
+      answerOf(instanceUrl, "2026-09-21", "deck-1", 3),
+      answerOf(instanceUrl, "2026-09-21", "deck-1", 4),
+    ]) {
       await log.append(instanceUrl, answer);
     }
     await log.removeDay(instanceUrl, `${instanceUrl}catalog.ttl#deck-1`, "2026-09-21");
@@ -92,8 +108,13 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
   it("adds nothing that does not fit the answer shape", async () => {
     const instanceUrl = new URL(`run-${crypto.randomUUID()}/solid-memo/main/`, server).href;
     const log = answerLog();
-    const odd = { ...answerOf(instanceUrl, "2026-09-21", "deck-1", 1), grade: 7 } as unknown as Answer;
-    await expect(log.append(instanceUrl, odd)).rejects.toThrow("An answer's grade is one whole number, 0 to 5.");
+    const odd = {
+      ...answerOf(instanceUrl, "2026-09-21", "deck-1", 1),
+      grade: 7,
+    } as unknown as Answer;
+    await expect(log.append(instanceUrl, odd)).rejects.toThrow(
+      "An answer's grade is one whole number, 0 to 5.",
+    );
     await expect(log.months(instanceUrl)).resolves.toEqual([]);
   });
 });

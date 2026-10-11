@@ -21,7 +21,9 @@ function urlOf(value: string, protocols: string[]): URL | null {
   } catch {
     return null;
   }
-  return protocols.includes(url.protocol) && url.username === "" && url.password === "" ? url : null;
+  return protocols.includes(url.protocol) && url.username === "" && url.password === ""
+    ? url
+    : null;
 }
 
 /** The VITE_ variables the site reads, as Vite gives them: unset, or a string. */
@@ -63,7 +65,9 @@ function given(value: string | undefined): string | undefined {
 
 /** A setting that cannot be used, named, with what it should be. */
 function invalid(name: string, value: string, expected: string): Error {
-  return new Error(`${name} must be ${expected}; it is ${JSON.stringify(value)} (docs/configuration.md).`);
+  return new Error(
+    `${name} must be ${expected}; it is ${JSON.stringify(value)} (docs/configuration.md).`,
+  );
 }
 
 /** VITE_APP_NAME: any text on one line. */
@@ -79,7 +83,8 @@ function appNameFrom(value: string | undefined): string {
 function repoUrlFrom(value: string | undefined): string {
   const url = given(value);
   if (url === undefined) return DEFAULT_REPO_URL;
-  if (urlOf(url, ["https:", "http:"]) === null) throw invalid("VITE_REPO_URL", url, "an http(s) URL");
+  if (urlOf(url, ["https:", "http:"]) === null)
+    throw invalid("VITE_REPO_URL", url, "an http(s) URL");
   return url.replace(/\/+$/, "");
 }
 
@@ -115,8 +120,10 @@ function podProvidersFrom(value: string | undefined): readonly PodProvider[] {
     throw refuse();
   }
   if (!Array.isArray(parsed) || parsed.length === 0) throw refuse();
-  const isText = (field: unknown): field is string => typeof field === "string" && field.trim() !== "";
-  const isHttps = (field: unknown): field is string => isText(field) && urlOf(field, ["https:"]) !== null;
+  const isText = (field: unknown): field is string =>
+    typeof field === "string" && field.trim() !== "";
+  const isHttps = (field: unknown): field is string =>
+    isText(field) && urlOf(field, ["https:"]) !== null;
   const providers = parsed.map((entry: unknown): PodProvider => {
     if (typeof entry !== "object" || entry === null || Array.isArray(entry)) throw refuse();
     const fields = entry as Record<string, unknown>;
@@ -154,5 +161,7 @@ function escapeHtml(text: string): string {
  */
 export function siteHtml(html: string, config: Pick<SiteConfig, "appName">): string {
   const json = JSON.stringify(config.appName).replace(/</g, "\\u003c");
-  return html.replaceAll("%APP_NAME_JSON%", json).replaceAll("%APP_NAME%", escapeHtml(config.appName));
+  return html
+    .replaceAll("%APP_NAME_JSON%", json)
+    .replaceAll("%APP_NAME%", escapeHtml(config.appName));
 }

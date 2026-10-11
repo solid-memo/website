@@ -4,13 +4,7 @@ import { RegistrationTargetChooser } from "./RegistrationTargetChooser";
 
 describe("RegistrationTargetChooser", () => {
   it("shows no warning while options are loading", () => {
-    render(
-      <RegistrationTargetChooser
-        options={null}
-        value="private"
-        onChange={vi.fn()}
-      />,
-    );
+    render(<RegistrationTargetChooser options={null} value="private" onChange={vi.fn()} />);
     expect(screen.queryByText(/no private type index/i)).toBeNull();
   });
 
@@ -38,19 +32,13 @@ describe("RegistrationTargetChooser", () => {
         onChange={vi.fn()}
       />,
     );
-    expect(
-      screen.getByText(/no private type index yet/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/no private type index yet/i)).toBeInTheDocument();
     // The warning describes the group, heard on tabbing to a choice.
     expect(screen.getByRole("group", { name: "Register in" })).toHaveAccessibleDescription(
       /^A type index is a list in your profile.*no private type index yet/i,
     );
-    expect(
-      screen.getByLabelText("Private type index (will be created)"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("Public type index (will be created)"),
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Private type index (will be created)")).toBeInTheDocument();
+    expect(screen.getByLabelText("Public type index (will be created)")).toBeInTheDocument();
   });
 
   it("notifies on selection changes", () => {

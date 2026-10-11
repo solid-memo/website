@@ -68,11 +68,27 @@ export function ReleasePublishContainer({
       saving={editor.saving}
       errors={errors}
       links={links}
-      publish={{ pending: publishMutation.isPending, error: errorText(publishMutation.error), run: (url) => publishMutation.mutate(url) }}
+      publish={{
+        pending: publishMutation.isPending,
+        error: errorText(publishMutation.error),
+        run: (url) => publishMutation.mutate(url),
+      }}
       isPublic={publicQuery.data}
-      makePublic={{ pending: publicMutation.isPending, error: errorText(publicMutation.error), run: (url) => publicMutation.mutate(url) }}
-      startNext={{ pending: nextMutation.isPending, error: errorText(nextMutation.error), run: (url) => nextMutation.mutate(url) }}
-      download={{ pending: downloadMutation.isPending, error: errorText(downloadMutation.error), run: () => downloadMutation.mutate() }}
+      makePublic={{
+        pending: publicMutation.isPending,
+        error: errorText(publicMutation.error),
+        run: (url) => publicMutation.mutate(url),
+      }}
+      startNext={{
+        pending: nextMutation.isPending,
+        error: errorText(nextMutation.error),
+        run: (url) => nextMutation.mutate(url),
+      }}
+      download={{
+        pending: downloadMutation.isPending,
+        error: errorText(downloadMutation.error),
+        run: () => downloadMutation.mutate(),
+      }}
       downloaded={downloadMutation.data ?? null}
     />
   );

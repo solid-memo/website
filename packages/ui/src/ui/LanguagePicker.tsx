@@ -39,7 +39,13 @@ const LEGENDS: Record<LanguageRole, MessageKey> = {
 };
 
 /** The roles of text of a deck or course itself, not of a card: a name, a description, keywords, a chapter's title, a step's theory. */
-const DECK_ROLES: ReadonlySet<LanguageRole> = new Set(["deckName", "description", "keywords", "title", "theory"]);
+const DECK_ROLES: ReadonlySet<LanguageRole> = new Set([
+  "deckName",
+  "description",
+  "keywords",
+  "title",
+  "theory",
+]);
 
 /** Whose recent choices a role offers first: a deck's own text, or a card's. */
 function recentKinds(role: LanguageRole): RecentLanguageKind[] {
@@ -118,7 +124,9 @@ export function LanguagePicker({
     wasOpen.current = open;
   }, [open]);
   const hintId = `${id}-hint`;
-  const describedBy = [unstated && value === null ? hintId : undefined, errorId].filter(Boolean).join(" ");
+  const describedBy = [unstated && value === null ? hintId : undefined, errorId]
+    .filter(Boolean)
+    .join(" ");
   return (
     <div class="language-picker">
       <button
@@ -135,7 +143,9 @@ export function LanguagePicker({
         }}
       >
         <span id={languageTextId(id)}>
-          {value === null ? t("language.notStated") : t("language.button", { language: languageParts(value).name })}
+          {value === null
+            ? t("language.notStated")
+            : t("language.button", { language: languageParts(value).name })}
         </span>
       </button>
       {unstated && value === null && (
@@ -152,7 +162,10 @@ export function LanguagePicker({
           tags={choices(
             [
               ...suggestions,
-              ...choices(recentKinds(role).flatMap((kind) => recentLanguages(kind))).slice(0, RECENT_LANGUAGES),
+              ...choices(recentKinds(role).flatMap((kind) => recentLanguages(kind))).slice(
+                0,
+                RECENT_LANGUAGES,
+              ),
               locale,
               "en",
               "sv",
@@ -234,7 +247,14 @@ function LanguageChoices({
   }
 
   return (
-    <fieldset ref={ref} id={`${id}-panel`} class="language-choices" tabIndex={-1} disabled={disabled} onKeyDown={onKeyDown}>
+    <fieldset
+      ref={ref}
+      id={`${id}-panel`}
+      class="language-choices"
+      tabIndex={-1}
+      disabled={disabled}
+      onKeyDown={onKeyDown}
+    >
       <legend>{legend}</legend>
       {tags.map((tag) => (
         <label key={tag} class="radio-option">

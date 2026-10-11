@@ -1,4 +1,9 @@
-import type { UpdateDocument, UpdateOutcome, UpdateProgress, UpdateStep } from "@solid-memo/domain/instanceUpdate";
+import type {
+  UpdateDocument,
+  UpdateOutcome,
+  UpdateProgress,
+  UpdateStep,
+} from "@solid-memo/domain/instanceUpdate";
 import { useId } from "preact/hooks";
 import { useI18n, type I18n } from "./i18n";
 import { usePanelFocus } from "./panelFocus";
@@ -67,12 +72,19 @@ export function InstanceUpdateProgress({ progress }: { progress: UpdateProgress 
   return (
     <StepProgress
       region={t("instanceUpdate.progressRegion")}
-      steps={(Object.keys(labels) as UpdateStep[]).map((entry) => ({ step: entry, label: labels[entry] }))}
+      steps={(Object.keys(labels) as UpdateStep[]).map((entry) => ({
+        step: entry,
+        label: labels[entry],
+      }))}
       current={progress.step}
       done={progress.done}
       total={progress.total}
       part={part}
-      count={part === undefined ? undefined : t("instanceUpdate.count", { done: part.done, count: part.total })}
+      count={
+        part === undefined
+          ? undefined
+          : t("instanceUpdate.count", { done: part.done, count: part.total })
+      }
       status={t("instanceUpdate.running", { step })}
       progressLabel={t("instanceUpdate.progressLabel")}
       hint={t("instanceUpdate.keepOpen")}
@@ -81,7 +93,10 @@ export function InstanceUpdateProgress({ progress }: { progress: UpdateProgress 
 }
 
 /** A document as the user knows it: the instance's record, its preferences, its catalog, or a deck's cards or review states. */
-export function documentName(document: UpdateDocument, { t, readerText }: Pick<I18n, "t" | "readerText">): string {
+export function documentName(
+  document: UpdateDocument,
+  { t, readerText }: Pick<I18n, "t" | "readerText">,
+): string {
   switch (document.holds) {
     case "cards":
     case "reviews":
@@ -128,7 +143,10 @@ export function InstanceUpdateResult({
         <ul>
           {failed.map((failure) => (
             <li key={failure.url}>
-              {tx("instanceUpdate.failedItem", { document: documentName(failure, i18n), reason: errorText(failure.error) })}
+              {tx("instanceUpdate.failedItem", {
+                document: documentName(failure, i18n),
+                reason: errorText(failure.error),
+              })}
             </li>
           ))}
         </ul>

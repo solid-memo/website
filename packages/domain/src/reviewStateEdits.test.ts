@@ -53,7 +53,9 @@ describe("resetStates", () => {
   });
 
   it("forgets one direction when asked", () => {
-    expect(resetStates(states, ["a"], "back-to-front")).toEqual([{ cardId: "a", direction: "back-to-front" }]);
+    expect(resetStates(states, ["a"], "back-to-front")).toEqual([
+      { cardId: "a", direction: "back-to-front" },
+    ]);
   });
 
   it("has nothing to forget of a card never studied", () => {
@@ -71,17 +73,28 @@ describe("rescheduleState", () => {
     const moved = rescheduleState(state("a"), "2026-11-01");
     expect(moved).not.toHaveProperty("previous");
     // Without the rule, the reset would restore the snapshot: due 2026-10-08, interval 6.
-    expect(resetStudyDay([moved], now, 4)).toEqual({ restore: [{ ...moved, due: "2026-10-09" }], remove: [] });
+    expect(resetStudyDay([moved], now, 4)).toEqual({
+      restore: [{ ...moved, due: "2026-10-09" }],
+      remove: [],
+    });
   });
 
   it("refuses a day that is no date", () => {
-    expect(() => rescheduleState(state("a"), "2026-02-30")).toThrow(expect.objectContaining({ code: "dueDayInvalid" }));
+    expect(() => rescheduleState(state("a"), "2026-02-30")).toThrow(
+      expect.objectContaining({ code: "dueDayInvalid" }),
+    );
   });
 });
 
 describe("rescheduleStates", () => {
   it("sets the chosen cards due, in both directions or one, a card never studied staying new", () => {
-    expect(rescheduleStates(states, ["a", "new"], "2026-11-01").map((s) => [s.cardId, s.direction, s.due])).toEqual([
+    expect(
+      rescheduleStates(states, ["a", "new"], "2026-11-01").map((s) => [
+        s.cardId,
+        s.direction,
+        s.due,
+      ]),
+    ).toEqual([
       ["a", "front-to-back", "2026-11-01"],
       ["a", "back-to-front", "2026-11-01"],
     ]);
@@ -89,6 +102,8 @@ describe("rescheduleStates", () => {
   });
 
   it("refuses a day that is no date even with nothing to set", () => {
-    expect(() => rescheduleStates(states, ["new"], "tomorrow")).toThrow(expect.objectContaining({ code: "dueDayInvalid" }));
+    expect(() => rescheduleStates(states, ["new"], "tomorrow")).toThrow(
+      expect.objectContaining({ code: "dueDayInvalid" }),
+    );
   });
 });

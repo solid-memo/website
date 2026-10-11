@@ -4,7 +4,14 @@ import { defaultDeckDescriptionText, distributionUrlOf, TURTLE_MEDIA_TYPE } from
 import { isEmptyText, type Card, type CardContent, type Deck, type Distractor } from "./deck";
 import type { LibraryCard, LibraryDeckContent } from "./library";
 import { copyKeywords, noKeywords } from "./keywords";
-import type { AgentV1, CardV5, DeckV6, DistractorV1, DistributionV1, LibraryDeckV6 } from "@solid-memo/vocab/types.generated";
+import type {
+  AgentV1,
+  CardV5,
+  DeckV6,
+  DistractorV1,
+  DistributionV1,
+  LibraryDeckV6,
+} from "@solid-memo/vocab/types.generated";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -88,7 +95,10 @@ export function deckDistribution(deck: Deck): { url: string; record: Distributio
  * IRIs); null when a side has neither text nor a picture — the one rule
  * of the card shape a record cannot carry.
  */
-export function cardContentFromRecord(data: CardV5, distractors: readonly Distractor[] = []): CardContent | null {
+export function cardContentFromRecord(
+  data: CardV5,
+  distractors: readonly Distractor[] = [],
+): CardContent | null {
   const front = data.front ?? {};
   const back = data.back ?? {};
   if (isEmptyText(front) && data.frontImage === undefined) return null;
@@ -98,8 +108,12 @@ export function cardContentFromRecord(data: CardV5, distractors: readonly Distra
     back,
     ...(data.frontImage === undefined ? {} : { frontImageUrl: data.frontImage }),
     ...(data.backImage === undefined ? {} : { backImageUrl: data.backImage }),
-    ...(data.frontImageDescription === undefined ? {} : { frontImageDescription: data.frontImageDescription }),
-    ...(data.backImageDescription === undefined ? {} : { backImageDescription: data.backImageDescription }),
+    ...(data.frontImageDescription === undefined
+      ? {}
+      : { frontImageDescription: data.frontImageDescription }),
+    ...(data.backImageDescription === undefined
+      ? {}
+      : { backImageDescription: data.backImageDescription }),
     ...(data.frontNote === undefined ? {} : { frontNote: data.frontNote }),
     ...(data.backLabel === undefined ? {} : { backLabel: data.backLabel }),
     ...(data.backNote === undefined ? {} : { backNote: data.backNote }),
@@ -148,14 +162,22 @@ function retiredOf(data: CardV5): { retired?: true } {
  * are named as subjects of `documentUrl`, the document that holds the
  * card; distractorToRecord writes each.
  */
-export function cardToRecord(card: CardContent & { retired?: true }, createdAt: string, documentUrl: string): CardV5 {
+export function cardToRecord(
+  card: CardContent & { retired?: true },
+  createdAt: string,
+  documentUrl: string,
+): CardV5 {
   return {
     ...(isEmptyText(card.front) ? {} : { front: card.front }),
     ...(isEmptyText(card.back) ? {} : { back: card.back }),
     ...(card.frontImageUrl === undefined ? {} : { frontImage: card.frontImageUrl }),
     ...(card.backImageUrl === undefined ? {} : { backImage: card.backImageUrl }),
-    ...(card.frontImageDescription === undefined ? {} : { frontImageDescription: card.frontImageDescription }),
-    ...(card.backImageDescription === undefined ? {} : { backImageDescription: card.backImageDescription }),
+    ...(card.frontImageDescription === undefined
+      ? {}
+      : { frontImageDescription: card.frontImageDescription }),
+    ...(card.backImageDescription === undefined
+      ? {}
+      : { backImageDescription: card.backImageDescription }),
     ...(card.frontNote === undefined ? {} : { frontNote: card.frontNote }),
     ...(card.backLabel === undefined ? {} : { backLabel: card.backLabel }),
     ...(card.backNote === undefined ? {} : { backNote: card.backNote }),

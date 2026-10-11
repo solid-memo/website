@@ -59,5 +59,7 @@ function phrases(nodes: readonly MdInline[]): MdPhrase[] {
 function joined(runs: readonly MdPhrase[][], separator: string): MdPhrase[] {
   return runs
     .filter((run) => run.length > 0)
-    .flatMap((run, index) => (index === 0 ? run : [{ type: "text" as const, value: separator }, ...run]));
+    .flatMap((run, index) =>
+      index === 0 ? run : [{ type: "text" as const, value: separator }, ...run],
+    );
 }

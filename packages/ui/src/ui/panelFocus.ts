@@ -42,7 +42,9 @@ export function usePanelFocus<T extends HTMLElement>(focus = true) {
  * nearer stands in for it.
  */
 export function focusScreen() {
-  const target = document.querySelector<HTMLElement>(".screen h2") ?? document.querySelector<HTMLElement>("main");
+  const target =
+    document.querySelector<HTMLElement>(".screen h2") ??
+    document.querySelector<HTMLElement>("main");
   if (target === null) return;
   // Focusable from script only: not a Tab stop of its own.
   if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");

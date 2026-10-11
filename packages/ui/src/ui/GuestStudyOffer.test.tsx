@@ -2,7 +2,11 @@ import { describe, expect, it, vi, type MockInstance } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import type { GuestMergeOutcome, GuestMergeProgress, GuestTransferProgress } from "@solid-memo/domain/guest";
+import type {
+  GuestMergeOutcome,
+  GuestMergeProgress,
+  GuestTransferProgress,
+} from "@solid-memo/domain/guest";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
@@ -21,7 +25,9 @@ let invalidations: MockInstance<QueryClient["invalidateQueries"]>;
 function renderOffer(overrides: Partial<UseCases> = {}) {
   const useCases = makeUseCasesFake({
     findGuestStudy: vi.fn(async () => ({ instances: [{ instance: guestInstance, deckCount: 1 }] })),
-    listStorages: vi.fn(async () => [{ url: "https://alice.example/", source: "profile" as const }]),
+    listStorages: vi.fn(async () => [
+      { url: "https://alice.example/", source: "profile" as const },
+    ]),
     ...overrides,
   });
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -50,7 +56,9 @@ describe("GuestStudyOffer", () => {
 
   it("names the study and its decks, and can be put off", async () => {
     renderOffer();
-    expect(await screen.findByText(/My study has 1 deck\. Move it into your Pod/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/My study has 1 deck\. Move it into your Pod/),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Not now" }));
     expect(screen.queryByRole("region", { name: "Your study as a guest" })).toBeNull();
   });
@@ -64,7 +72,9 @@ describe("GuestStudyOffer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Discard it" }));
     vi.mocked(useCases.findGuestStudy).mockResolvedValue(null);
     fireEvent.click(screen.getByRole("button", { name: "Delete it" }));
-    await waitFor(() => expect(screen.queryByRole("region", { name: "Your study as a guest" })).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByRole("region", { name: "Your study as a guest" })).toBeNull(),
+    );
     expect(useCases.discardGuest).toHaveBeenCalledOnce();
   });
 
@@ -77,7 +87,9 @@ describe("GuestStudyOffer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Discard it" }));
     const question = screen.getByRole("region", { name: "Your study as a guest" });
     expect(question).toHaveFocus();
-    expect(question).toHaveAccessibleDescription("Delete everything you studied as a guest? This cannot be undone.");
+    expect(question).toHaveAccessibleDescription(
+      "Delete everything you studied as a guest? This cannot be undone.",
+    );
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.getByRole("region", { name: "Your study as a guest" })).toHaveFocus();
 
@@ -104,7 +116,11 @@ describe("GuestStudyOffer", () => {
     const transferGuestStudy = vi.fn(() => new Promise<never>(() => {}));
     renderOffer({ transferGuestStudy });
     await openForm();
-    await waitFor(() => expect(screen.getByLabelText("Location in your Pod")).toHaveValue("https://alice.example/solid-memo/main/"));
+    await waitFor(() =>
+      expect(screen.getByLabelText("Location in your Pod")).toHaveValue(
+        "https://alice.example/solid-memo/main/",
+      ),
+    );
     const start = screen.getByRole("button", { name: "Move it" });
     start.focus();
     fireEvent.click(start);
@@ -113,7 +129,9 @@ describe("GuestStudyOffer", () => {
     fireEvent.submit(start.closest("form")!);
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(transferGuestStudy).toHaveBeenCalledOnce();
-    expect(screen.getByRole("region", { name: "Move your study into your Pod" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Move your study into your Pod" }),
+    ).toBeInTheDocument();
   });
 
   it("says why the study could not be discarded, and forgets it on cancel", async () => {
@@ -137,7 +155,12 @@ describe("GuestStudyOffer", () => {
     let fail!: (error: unknown) => void;
     renderOffer({
       transferGuestStudy: vi.fn(
-        (_session: Session, _instance: unknown, _target: unknown, onProgress?: (p: GuestTransferProgress) => void) =>
+        (
+          _session: Session,
+          _instance: unknown,
+          _target: unknown,
+          onProgress?: (p: GuestTransferProgress) => void,
+        ) =>
           new Promise<never>((_resolve, reject) => {
             report = onProgress!;
             fail = reject;
@@ -145,7 +168,11 @@ describe("GuestStudyOffer", () => {
       ),
     });
     await openForm();
-    await waitFor(() => expect(screen.getByLabelText("Location in your Pod")).toHaveValue("https://alice.example/solid-memo/main/"));
+    await waitFor(() =>
+      expect(screen.getByLabelText("Location in your Pod")).toHaveValue(
+        "https://alice.example/solid-memo/main/",
+      ),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Move it" }));
     await waitFor(() => expect(report).toBeDefined());
     report({ step: "copy", done: 1, total: 7 });
@@ -167,10 +194,20 @@ describe("GuestStudyOffer", () => {
     let report!: (progress: GuestTransferProgress) => void;
     let finish!: () => void;
     const transferGuestStudy = vi.fn(
-      (_session: Session, _instance: unknown, _target: unknown, onProgress?: (p: GuestTransferProgress) => void) =>
+      (
+        _session: Session,
+        _instance: unknown,
+        _target: unknown,
+        onProgress?: (p: GuestTransferProgress) => void,
+      ) =>
         new Promise<Awaited<ReturnType<UseCases["transferGuestStudy"]>>>((resolve) => {
           report = onProgress!;
-          finish = () => resolve({ ok: true, instance: { url: "https://alice.example/solid-memo/main/", name: "My study" }, tidied: true });
+          finish = () =>
+            resolve({
+              ok: true,
+              instance: { url: "https://alice.example/solid-memo/main/", name: "My study" },
+              tidied: true,
+            });
         }),
     );
     const useCases = renderOffer({ transferGuestStudy });
@@ -199,10 +236,18 @@ describe("GuestStudyOffer", () => {
     // Said by a status line mounted all along, which a screen reader hears; the Close button is not in it.
     await waitFor(() => expect(announced).toHaveTextContent("Your study is in your Pod now."));
     // Not focused: an element with nothing to read, and the instance the move opens takes the focus.
-    expect(screen.getByText("Your study is in your Pod now.", { ignore: "[role=status]" }).parentElement).not.toHaveFocus();
+    expect(
+      screen.getByText("Your study is in your Pod now.", { ignore: "[role=status]" }).parentElement,
+    ).not.toHaveFocus();
     expect(within(announced).queryByRole("button")).toBeNull();
-    expect(screen.getByText("Your study is in your Pod now.", { ignore: "[role=status]" })).toHaveAttribute("aria-hidden", "true");
-    await waitFor(() => expect(window.location.hash).toContain(encodeURIComponent("https://alice.example/solid-memo/main/")));
+    expect(
+      screen.getByText("Your study is in your Pod now.", { ignore: "[role=status]" }),
+    ).toHaveAttribute("aria-hidden", "true");
+    await waitFor(() =>
+      expect(window.location.hash).toContain(
+        encodeURIComponent("https://alice.example/solid-memo/main/"),
+      ),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     await waitFor(() => expect(screen.queryByText("Your study is in your Pod now.")).toBeNull());
     expect(announced.textContent).toBe("");
@@ -217,9 +262,17 @@ describe("GuestStudyOffer", () => {
       })),
     });
     await openForm();
-    await waitFor(() => expect(screen.getByLabelText("Location in your Pod")).toHaveValue("https://alice.example/solid-memo/main/"));
+    await waitFor(() =>
+      expect(screen.getByLabelText("Location in your Pod")).toHaveValue(
+        "https://alice.example/solid-memo/main/",
+      ),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Move it" }));
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/It could not be removed from this browser/));
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        /It could not be removed from this browser/,
+      ),
+    );
   });
 
   it("lets the user pick the storage and the folder of a new instance", async () => {
@@ -262,7 +315,11 @@ describe("GuestStudyOffer", () => {
       }),
     });
     await openForm();
-    await waitFor(() => expect(screen.getByLabelText("Location in your Pod")).toHaveValue("https://alice.example/solid-memo/main/"));
+    await waitFor(() =>
+      expect(screen.getByLabelText("Location in your Pod")).toHaveValue(
+        "https://alice.example/solid-memo/main/",
+      ),
+    );
   });
 
   it("asks where to keep the study when the profile names no storage, and goes back on request", async () => {
@@ -277,11 +334,26 @@ describe("GuestStudyOffer", () => {
   it("says where the move failed, that the study is still here, and what became of the copy", async () => {
     const transferGuestStudy = vi
       .fn<UseCases["transferGuestStudy"]>()
-      .mockResolvedValueOnce({ ok: false, step: "copy", error: new AppError("alreadyExists", { url: "https://alice.example/solid-memo/main/" }), cleanedUp: true })
-      .mockResolvedValueOnce({ ok: false, step: "validate", error: "offline", cleanedUp: false, leftoverUrl: "https://alice.example/solid-memo/main/" });
+      .mockResolvedValueOnce({
+        ok: false,
+        step: "copy",
+        error: new AppError("alreadyExists", { url: "https://alice.example/solid-memo/main/" }),
+        cleanedUp: true,
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        step: "validate",
+        error: "offline",
+        cleanedUp: false,
+        leftoverUrl: "https://alice.example/solid-memo/main/",
+      });
     renderOffer({ transferGuestStudy });
     await openForm();
-    await waitFor(() => expect(screen.getByLabelText("Location in your Pod")).toHaveValue("https://alice.example/solid-memo/main/"));
+    await waitFor(() =>
+      expect(screen.getByLabelText("Location in your Pod")).toHaveValue(
+        "https://alice.example/solid-memo/main/",
+      ),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Move it" }));
     const failed = await screen.findByRole("region", { name: "Moving failed" });
     // It takes the focus, read out with why as its description.
@@ -289,13 +361,17 @@ describe("GuestStudyOffer", () => {
     expect(failed).toHaveAccessibleDescription(/Moving your study failed while copying your study/);
     // Heard through the focus alone: the status line does not say it again.
     expect(screen.getByRole("status").textContent).toBe("");
-    expect(failed).toHaveAccessibleDescription(/Something is already kept at that place in your Pod\. Choose another place\./);
+    expect(failed).toHaveAccessibleDescription(
+      /Something is already kept at that place in your Pod\. Choose another place\./,
+    );
     // The address is under the failure's technical details.
     expect(failed).toHaveTextContent("Moving your study failed while copying your study:");
     expect(within(failed).getByText("Technical details").closest("details")).toHaveTextContent(
       "url: https://alice.example/solid-memo/main/",
     );
-    expect(failed).toHaveTextContent("Your study is still in this browser. The partial copy was removed from your Pod.");
+    expect(failed).toHaveTextContent(
+      "Your study is still in this browser. The partial copy was removed from your Pod.",
+    );
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     fireEvent.click(await screen.findByRole("button", { name: "Move it" }));
     expect(await screen.findByRole("region", { name: "Moving failed" })).toHaveTextContent(
@@ -319,8 +395,13 @@ describe("GuestStudyOffer", () => {
       ...extra,
     });
     const capitals = guestDeck("deck-1", "Capitals");
-    const course = guestDeck("deck-2", "Solid fundamentals", { sourceUrl: "https://solid-memo.com/decks/solid-fundamentals/v1.ttl" });
-    const addedAs = (from: Deck, instance: Instance): Deck => ({ ...from, url: `${instance.url}catalog.ttl#${from.id}-new` });
+    const course = guestDeck("deck-2", "Solid fundamentals", {
+      sourceUrl: "https://solid-memo.com/decks/solid-fundamentals/v1.ttl",
+    });
+    const addedAs = (from: Deck, instance: Instance): Deck => ({
+      ...from,
+      url: `${instance.url}catalog.ttl#${from.id}-new`,
+    });
 
     function renderMerge(overrides: Partial<UseCases> = {}) {
       return renderOffer({
@@ -340,39 +421,71 @@ describe("GuestStudyOffer", () => {
       let report!: (progress: GuestMergeProgress) => void;
       let finish!: () => void;
       const mergeGuestStudy = vi.fn(
-        (_session: Session, _guest: Instance, target: Instance, _options?: unknown, onProgress?: (p: GuestMergeProgress) => void) =>
+        (
+          _session: Session,
+          _guest: Instance,
+          target: Instance,
+          _options?: unknown,
+          onProgress?: (p: GuestMergeProgress) => void,
+        ) =>
           new Promise<GuestMergeOutcome>((resolve) => {
             report = onProgress!;
-            finish = () => resolve({ ok: true, instance: target, added: [addedAs(capitals, target)], tidied: true });
+            finish = () =>
+              resolve({
+                ok: true,
+                instance: target,
+                added: [addedAs(capitals, target)],
+                tidied: true,
+              });
           }),
       );
       const useCases = renderMerge({ mergeGuestStudy });
       expect(await openForm()).toHaveFocus();
       expect(await screen.findByText("Your decks are added to Main.")).toBeInTheDocument();
-      expect(screen.getByText(/The instance keeps its own preferences: the ones you set as a guest are not carried over\./)).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /The instance keeps its own preferences: the ones you set as a guest are not carried over\./,
+        ),
+      ).toBeInTheDocument();
       expect(screen.queryByRole("group", { name: "Add it to" })).toBeNull();
       const decks = await screen.findByRole("group", { name: "Decks to add" });
       expect(within(decks).getByRole("checkbox", { name: "Capitals" })).toBeChecked();
-      expect(within(decks).getByRole("checkbox", { name: "Capitals" })).not.toHaveAccessibleDescription();
+      expect(
+        within(decks).getByRole("checkbox", { name: "Capitals" }),
+      ).not.toHaveAccessibleDescription();
       // A deck the instance has from the same release is added beside it, not merged, and says so.
-      expect(within(decks).getByRole("checkbox", { name: "Solid fundamentals" })).toHaveAccessibleDescription(
+      expect(
+        within(decks).getByRole("checkbox", { name: "Solid fundamentals" }),
+      ).toHaveAccessibleDescription(
         "Main already has this deck from the same library release. It is added beside it as a deck of its own, with its own progress, not merged into it: uncheck it to leave it out.",
       );
       expect(screen.getByText(/A deck you leave out is not kept/)).toBeInTheDocument();
       expect(screen.queryByText(/drafts? in the Studio as a guest/)).toBeNull();
       const announced = screen.getByRole("status");
       fireEvent.click(screen.getByRole("button", { name: "Add to Main" }));
-      await waitFor(() => expect(mergeGuestStudy).toHaveBeenCalledWith(session, guestInstance, main, { skip: [] }, expect.any(Function)));
+      await waitFor(() =>
+        expect(mergeGuestStudy).toHaveBeenCalledWith(
+          session,
+          guestInstance,
+          main,
+          { skip: [] },
+          expect.any(Function),
+        ),
+      );
       expect(useCases.planGuestMerge).toHaveBeenCalledWith(guestInstance, main);
       report({ step: "decks", done: 1, total: 5, part: { done: 1, total: 2 } });
       expect(await screen.findByRole("region", { name: "Adding your study" })).toHaveFocus();
       expect(await screen.findByText("Adding your decks…")).toBeInTheDocument();
       expect(screen.getByText("1 of 2")).toBeInTheDocument();
-      expect(screen.getByText("Keep this page open until your study is added.")).toBeInTheDocument();
+      expect(
+        screen.getByText("Keep this page open until your study is added."),
+      ).toBeInTheDocument();
       vi.mocked(useCases.findGuestStudy).mockResolvedValue(null);
       finish();
       await waitFor(() => expect(announced).toHaveTextContent("Your study is in Main now."));
-      expect(screen.getByText("Your study is in Main now.", { ignore: "[role=status]" })).toHaveAttribute("aria-hidden", "true");
+      expect(
+        screen.getByText("Your study is in Main now.", { ignore: "[role=status]" }),
+      ).toHaveAttribute("aria-hidden", "true");
       await waitFor(() => expect(window.location.hash).toContain(encodeURIComponent(main.url)));
       fireEvent.click(screen.getByRole("button", { name: "Close" }));
       await waitFor(() => expect(announced.textContent).toBe(""));
@@ -384,26 +497,47 @@ describe("GuestStudyOffer", () => {
       const instances = await screen.findByRole("group", { name: "Add it to" });
       expect(within(instances).getByRole("radio", { name: "Main" })).toBeChecked();
       fireEvent.click(within(instances).getByRole("radio", { name: "Work" }));
-      await waitFor(() => expect(useCases.planGuestMerge).toHaveBeenCalledWith(guestInstance, work));
+      await waitFor(() =>
+        expect(useCases.planGuestMerge).toHaveBeenCalledWith(guestInstance, work),
+      );
       const decks = await screen.findByRole("group", { name: "Decks to add" });
-      await waitFor(() => expect(within(decks).getByRole("checkbox", { name: "Solid fundamentals" })).not.toHaveAccessibleDescription());
+      await waitFor(() =>
+        expect(
+          within(decks).getByRole("checkbox", { name: "Solid fundamentals" }),
+        ).not.toHaveAccessibleDescription(),
+      );
       fireEvent.click(within(decks).getByRole("checkbox", { name: "Capitals" }));
       fireEvent.click(within(decks).getByRole("checkbox", { name: "Solid fundamentals" }));
       fireEvent.click(screen.getByRole("button", { name: "Add to Work" }));
-      await waitFor(() => expect(alertTexts()).toEqual(["Choose at least one deck to add, or discard your study instead."]));
+      await waitFor(() =>
+        expect(alertTexts()).toEqual([
+          "Choose at least one deck to add, or discard your study instead.",
+        ]),
+      );
       expect(useCases.mergeGuestStudy).not.toHaveBeenCalled();
       fireEvent.click(within(decks).getByRole("checkbox", { name: "Solid fundamentals" }));
       expect(alertTexts()).toEqual([]);
       fireEvent.click(screen.getByRole("button", { name: "Add to Work" }));
       await waitFor(() =>
-        expect(useCases.mergeGuestStudy).toHaveBeenCalledWith(session, guestInstance, work, { skip: [capitals.url] }, expect.any(Function)),
+        expect(useCases.mergeGuestStudy).toHaveBeenCalledWith(
+          session,
+          guestInstance,
+          work,
+          { skip: [capitals.url] },
+          expect.any(Function),
+        ),
       );
     });
 
     it("adds a study with no decks, saying so, and starts nothing before the decks are read", async () => {
       let read!: () => void;
       const useCases = renderMerge({
-        planGuestMerge: vi.fn(() => new Promise<{ decks: []; drafts: number }>((resolve) => (read = () => resolve({ decks: [], drafts: 0 })))),
+        planGuestMerge: vi.fn(
+          () =>
+            new Promise<{ decks: []; drafts: number }>(
+              (resolve) => (read = () => resolve({ decks: [], drafts: 0 })),
+            ),
+        ),
       });
       await openForm();
       expect(await screen.findByText("Reading your study…")).toBeInTheDocument();
@@ -413,11 +547,24 @@ describe("GuestStudyOffer", () => {
       read();
       expect(await screen.findByText("Your study has no decks to add.")).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Add to Main" }));
-      await waitFor(() => expect(useCases.mergeGuestStudy).toHaveBeenCalledWith(session, guestInstance, main, { skip: [] }, expect.any(Function)));
+      await waitFor(() =>
+        expect(useCases.mergeGuestStudy).toHaveBeenCalledWith(
+          session,
+          guestInstance,
+          main,
+          { skip: [] },
+          expect.any(Function),
+        ),
+      );
     });
 
     it("says the guest's drafts are copied too, never over one of the instance's", async () => {
-      renderMerge({ planGuestMerge: vi.fn(async () => ({ decks: [{ deck: capitals, sameRelease: [] }], drafts: 2 })) });
+      renderMerge({
+        planGuestMerge: vi.fn(async () => ({
+          decks: [{ deck: capitals, sameRelease: [] }],
+          drafts: 2,
+        })),
+      });
       await openForm();
       expect(
         await screen.findByText(
@@ -438,7 +585,9 @@ describe("GuestStudyOffer", () => {
 
     it("ignores the form while the study is being added, and says why one that threw could not start", async () => {
       let fail!: (error: unknown) => void;
-      const mergeGuestStudy = vi.fn(() => new Promise<never>((_resolve, reject) => (fail = reject)));
+      const mergeGuestStudy = vi.fn(
+        () => new Promise<never>((_resolve, reject) => (fail = reject)),
+      );
       renderMerge({ mergeGuestStudy });
       await openForm();
       await screen.findByRole("group", { name: "Decks to add" });
@@ -458,19 +607,42 @@ describe("GuestStudyOffer", () => {
 
     it("says when the study was added but stayed in this browser too", async () => {
       renderMerge({
-        mergeGuestStudy: vi.fn(async (_session, _guest, target) => ({ ok: true as const, instance: target, added: [], tidied: false })),
+        mergeGuestStudy: vi.fn(async (_session, _guest, target) => ({
+          ok: true as const,
+          instance: target,
+          added: [],
+          tidied: false,
+        })),
       });
       await openForm();
       await screen.findByRole("group", { name: "Decks to add" });
       fireEvent.click(screen.getByRole("button", { name: "Add to Main" }));
-      await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Your study is in Main now. It could not be removed from this browser"));
+      await waitFor(() =>
+        expect(screen.getByRole("status")).toHaveTextContent(
+          "Your study is in Main now. It could not be removed from this browser",
+        ),
+      );
     });
 
     it("says where adding failed, which decks are in the instance, whole, and that the study is still here", async () => {
       const mergeGuestStudy = vi
         .fn<UseCases["mergeGuestStudy"]>()
-        .mockResolvedValueOnce({ ok: false, instance: main, step: "decks", error: new AppError("guestStudyChanged"), added: [addedAs(capitals, main)], copied: [] })
-        .mockResolvedValueOnce({ ok: false, instance: main, step: "read", error: "offline", added: [], copied: [] });
+        .mockResolvedValueOnce({
+          ok: false,
+          instance: main,
+          step: "decks",
+          error: new AppError("guestStudyChanged"),
+          added: [addedAs(capitals, main)],
+          copied: [],
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          instance: main,
+          step: "read",
+          error: "offline",
+          added: [],
+          copied: [],
+        });
       window.location.hash = "#/statistics";
       renderMerge({ mergeGuestStudy });
       await openForm();
@@ -481,16 +653,22 @@ describe("GuestStudyOffer", () => {
       // The instance has a deck more: what is on screen of it is read again, without leaving it.
       expect(invalidations).toHaveBeenCalledWith();
       expect(window.location.hash).toBe("#/statistics");
-      expect(failed).toHaveAccessibleDescription(/^Adding your study failed while adding your decks: Your study in this browser changed/);
+      expect(failed).toHaveAccessibleDescription(
+        /^Adding your study failed while adding your decks: Your study in this browser changed/,
+      );
       expect(screen.getByRole("status").textContent).toBe("");
       expect(failed).toHaveTextContent("This deck is in Main now, whole:");
       expect(within(failed).getByRole("listitem")).toHaveTextContent("Capitals");
-      expect(failed).toHaveTextContent("Your study is still in this browser. Trying again adds what is not in Main yet.");
+      expect(failed).toHaveTextContent(
+        "Your study is still in this browser. Trying again adds what is not in Main yet.",
+      );
       fireEvent.click(screen.getByRole("button", { name: "Close" }));
       fireEvent.click(await screen.findByRole("button", { name: "Add to Main" }));
       invalidations.mockClear();
       const again = await screen.findByRole("region", { name: "Adding failed" });
-      expect(again).toHaveTextContent("Adding your study failed while reading and checking your study:");
+      expect(again).toHaveTextContent(
+        "Adding your study failed while reading and checking your study:",
+      );
       expect(invalidations).not.toHaveBeenCalledWith();
       expect(again).toHaveTextContent("Nothing was added to Main.");
       expect(within(again).queryByRole("list")).toBeNull();
@@ -523,10 +701,11 @@ describe("GuestStudyOffer", () => {
       expect(invalidations).toHaveBeenCalledWith();
       expect(failed).not.toHaveTextContent("Nothing was added");
       expect(failed).toHaveTextContent("These drafts are in Main now, whole:");
-      expect(within(failed).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
-        "Solid fundamentals (“solid-2”, version 1)",
-        "(“notes”, version 1)",
-      ]);
+      expect(
+        within(failed)
+          .getAllByRole("listitem")
+          .map((item) => item.textContent),
+      ).toEqual(["Solid fundamentals (“solid-2”, version 1)", "(“notes”, version 1)"]);
     });
   });
 });

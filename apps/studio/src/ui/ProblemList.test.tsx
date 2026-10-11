@@ -5,7 +5,11 @@ import { listedProblems } from "./ProblemList";
 
 describe("listedProblems", () => {
   it("puts the errors first, each subject's together, as the list shows them", () => {
-    const warning = problem(`${DRAFT_URL}#a`, { code: "unshaped", params: {} }, { severity: "warning" });
+    const warning = problem(
+      `${DRAFT_URL}#a`,
+      { code: "unshaped", params: {} },
+      { severity: "warning" },
+    );
     const a = problem(`${DRAFT_URL}#a`, { code: "noBack", params: {} });
     const b = problem(`${DRAFT_URL}#b`, { code: "noBack", params: {} });
     const a2 = problem(`${DRAFT_URL}#a`, { code: "unshaped", params: {} });

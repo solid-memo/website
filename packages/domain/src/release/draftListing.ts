@@ -18,7 +18,9 @@ export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
   const { root } = draft;
   const names = new Map(draft.agents.map((agent) => [iriIn(draft, agent.id), agent.data.name]));
   const said = (subject: string, predicate: string) =>
-    draft.triples.filter((triple) => triple.subject === subject && triple.predicate === predicate).map((triple) => triple.object);
+    draft.triples
+      .filter((triple) => triple.subject === subject && triple.predicate === predicate)
+      .map((triple) => triple.object);
   const version = root.version ?? "1";
   return {
     url: draft.url,
@@ -50,7 +52,9 @@ export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
       return {
         url,
         ...(title === undefined ? {} : { title: title.value }),
-        authors: said(url, `${DCTERMS_NS}creator`).filter((term) => term.kind === "literal").map((term) => term.value),
+        authors: said(url, `${DCTERMS_NS}creator`)
+          .filter((term) => term.kind === "literal")
+          .map((term) => term.value),
         ...(license === undefined ? {} : { license: license.value }),
       };
     }),
@@ -66,7 +70,15 @@ export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
  * out, as a reader leaves out one that does not fit its shape.
  */
 export function draftLibraryContent(draft: ReleaseDraft): LibraryDeckContent {
-  const { url, releases: _releases, cardCount: _cardCount, sources: _sources, createdAt: _createdAt, isCourse, ...about } = draftLibraryDeck(draft);
+  const {
+    url,
+    releases: _releases,
+    cardCount: _cardCount,
+    sources: _sources,
+    createdAt: _createdAt,
+    isCourse,
+    ...about
+  } = draftLibraryDeck(draft);
   const options = new Map(draft.distractors.map((node) => [iriIn(draft, node.id), node.data]));
   const distractorsOf = (iris: readonly string[]): Distractor[] =>
     iris
@@ -77,8 +89,19 @@ export function draftLibraryContent(draft: ReleaseDraft): LibraryDeckContent {
       })
       .sort((a, b) => a.id.localeCompare(b.id));
   const cards = draft.cards.flatMap((node): LibraryCard[] => {
-    const card = libraryCardFromRecord(iriIn(draft, node.id), CARD_FORMAT_VERSION, node.data, distractorsOf(node.data.distractor));
+    const card = libraryCardFromRecord(
+      iriIn(draft, node.id),
+      CARD_FORMAT_VERSION,
+      node.data,
+      distractorsOf(node.data.distractor),
+    );
     return card === null ? [] : [card];
   });
-  return { ...about, url, formatVersion: LATEST_VERSION.libraryDeck, cards, ...(isCourse === undefined ? {} : { isCourse }) };
+  return {
+    ...about,
+    url,
+    formatVersion: LATEST_VERSION.libraryDeck,
+    cards,
+    ...(isCourse === undefined ? {} : { isCourse }),
+  };
 }

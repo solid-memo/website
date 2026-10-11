@@ -176,7 +176,9 @@ export function publishedIds(model: ReleaseModel, kind: ReleaseKind): string[] {
 /** The version a release states, when it states one, a whole number from 1. */
 export function versionOf(model: ReleaseModel): number | undefined {
   const [stated, ...more] = model.version;
-  return more.length === 0 && stated?.kind === "literal" && /^[1-9][0-9]*$/.test(stated.value) ? Number(stated.value) : undefined;
+  return more.length === 0 && stated?.kind === "literal" && /^[1-9][0-9]*$/.test(stated.value)
+    ? Number(stated.value)
+    : undefined;
 }
 
 /** The languages of texts, "" for untagged, each once, in order. */

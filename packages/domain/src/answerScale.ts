@@ -20,20 +20,13 @@ export type MinimalAnswer = "again" | "hard" | "good" | "easy";
  * schedule identically), and Hard records 3 — the lowest *passing* grade.
  * Recording 2 would make Hard a lapse, indistinguishable from Again.
  */
-export const MINIMAL_ANSWER_QUALITY: Readonly<
-  Record<MinimalAnswer, ReviewQuality>
-> = {
+export const MINIMAL_ANSWER_QUALITY: Readonly<Record<MinimalAnswer, ReviewQuality>> = {
   again: 1,
   hard: 3,
   good: 4,
   easy: 5,
 };
 
-export const MINIMAL_ANSWERS: readonly MinimalAnswer[] = [
-  "again",
-  "hard",
-  "good",
-  "easy",
-];
+export const MINIMAL_ANSWERS: readonly MinimalAnswer[] = ["again", "hard", "good", "easy"];
 
 export const SM2_QUALITIES: readonly ReviewQuality[] = [0, 1, 2, 3, 4, 5];

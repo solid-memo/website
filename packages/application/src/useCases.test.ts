@@ -19,15 +19,31 @@ import type {
   ReleaseDraftRepository,
   Since,
 } from "./ports";
-import { GUEST_INSTANCE_URL, GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID, guestDeckStamp } from "@solid-memo/domain/guest";
+import {
+  GUEST_INSTANCE_URL,
+  GUEST_ORIGIN,
+  GUEST_SESSION,
+  GUEST_WEBID,
+  guestDeckStamp,
+} from "@solid-memo/domain/guest";
 import { createUseCases, type UseCases } from "./useCases";
-import { courseDraft, deckDraft, DRAFT, playableCourseDraft } from "@solid-memo/domain/testing/releaseDraft";
+import {
+  courseDraft,
+  deckDraft,
+  DRAFT,
+  playableCourseDraft,
+} from "@solid-memo/domain/testing/releaseDraft";
 import { draftSummaryOf, draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { TRIAL_INSTANCE_URL, TRIAL_SESSION } from "@solid-memo/domain/release/trial";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
-import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
+import {
+  CARD_FORMAT_VERSION,
+  DECK_FORMAT_VERSION,
+  type Card,
+  type Deck,
+} from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
@@ -138,7 +154,11 @@ function makeDeps() {
     saveMeta: vi.fn(async () => undefined),
     renameRegistrations: vi.fn(async () => undefined),
     upgradeMeta: vi.fn(async () => true),
-    readDataClassRegistrations: vi.fn(async () => ({ registrations: [], privateIndexMissing: false, unreadableIndexes: [] })),
+    readDataClassRegistrations: vi.fn(async () => ({
+      registrations: [],
+      privateIndexMissing: false,
+      unreadableIndexes: [],
+    })),
     registerDataClasses: vi.fn(async () => undefined),
   };
   const deckRepository: DeckRepository = {
@@ -151,8 +171,14 @@ function makeDeps() {
     saveDecks: vi.fn(async (saved) => [...saved]),
     removeDeck: vi.fn(async () => undefined),
     removeDecks: vi.fn(async () => undefined),
-    readDeckTree: vi.fn(async () => ({ children: [{ kind: "deck" as const, deck }], readOnly: false })),
-    editDeckTree: vi.fn(async () => ({ children: [{ kind: "deck" as const, deck }], readOnly: false })),
+    readDeckTree: vi.fn(async () => ({
+      children: [{ kind: "deck" as const, deck }],
+      readOnly: false,
+    })),
+    editDeckTree: vi.fn(async () => ({
+      children: [{ kind: "deck" as const, deck }],
+      readOnly: false,
+    })),
     listCards: vi.fn(async () => [card]),
     addCard: vi.fn(async () => card),
     updateCard: vi.fn(async () => card),
@@ -162,7 +188,11 @@ function makeDeps() {
     applyCardChanges: vi.fn(async () => undefined),
     importDeck: vi.fn(async () => deck),
     addDeck: vi.fn(async (added) => added),
-    readCardsSince: vi.fn(async (d) => ({ unchanged: false as const, value: await deckRepository.listCards(d), version: null })),
+    readCardsSince: vi.fn(async (d) => ({
+      unchanged: false as const,
+      value: await deckRepository.listCards(d),
+      version: null,
+    })),
     readDeck: vi.fn(async () => deck),
     upgradeDecks: vi.fn(async () => true),
     upgradeDeckEntry: vi.fn(async (_current, next) => next),
@@ -178,7 +208,11 @@ function makeDeps() {
     listLibraryDecks: vi.fn(async () => [libraryDeck]),
     fetchLibraryDeck: vi.fn(async () => libraryContent),
     fetchCourseOutline: vi.fn(async (releaseUrl) => ({ releaseUrl, chapters: [] })),
-    readLibraryIndex: vi.fn(async () => ({ url: "https://site.example/decks/index.ttl", publisher: null, releases: [] })),
+    readLibraryIndex: vi.fn(async () => ({
+      url: "https://site.example/decks/index.ttl",
+      publisher: null,
+      releases: [],
+    })),
     readRelease: vi.fn(async (url: string): Promise<LibraryDeck> => {
       throw new AppError("releaseUnreadable", { url });
     }),
@@ -349,7 +383,9 @@ describe("createUseCases", () => {
     it("writes one choice after another, a failed one not stopping the next", async () => {
       const deps = makeDeps();
       let theme: ThemeChoice = "system";
-      vi.mocked(deps.preferencesRepository.getPreferences).mockImplementation(async () => stored(theme));
+      vi.mocked(deps.preferencesRepository.getPreferences).mockImplementation(async () =>
+        stored(theme),
+      );
       vi.mocked(deps.preferencesRepository.savePreferences)
         .mockRejectedValueOnce(new Error("412"))
         .mockImplementation(async (_, preferences) => {
@@ -386,17 +422,15 @@ describe("createUseCases", () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
     await useCases.loginWithWebId("  https://alice.example/profile/card#me ");
-    expect(deps.sessionGateway.login).toHaveBeenCalledWith(
-      "https://alice.example/profile/card#me",
-    );
+    expect(deps.sessionGateway.login).toHaveBeenCalledWith("https://alice.example/profile/card#me");
   });
 
   it("loginWithWebId rejects an invalid WebID without contacting the gateway", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    await expect(
-      useCases.loginWithWebId("http://alice.example/profile/card#me"),
-    ).rejects.toThrow("A WebID must start with https://.");
+    await expect(useCases.loginWithWebId("http://alice.example/profile/card#me")).rejects.toThrow(
+      "A WebID must start with https://.",
+    );
     expect(deps.sessionGateway.login).not.toHaveBeenCalled();
   });
 
@@ -404,18 +438,16 @@ describe("createUseCases", () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
     await useCases.loginWithProvider("https://login.inrupt.com");
-    expect(deps.sessionGateway.loginWithIssuer).toHaveBeenCalledWith(
-      "https://login.inrupt.com",
-    );
+    expect(deps.sessionGateway.loginWithIssuer).toHaveBeenCalledWith("https://login.inrupt.com");
     expect(deps.sessionGateway.login).not.toHaveBeenCalled();
   });
 
   it("loginWithProvider rejects an issuer that is not an https URL", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    await expect(
-      useCases.loginWithProvider("http://idp.example"),
-    ).rejects.toThrow("An identity provider must be an https:// URL.");
+    await expect(useCases.loginWithProvider("http://idp.example")).rejects.toThrow(
+      "An identity provider must be an https:// URL.",
+    );
     expect(deps.sessionGateway.loginWithIssuer).not.toHaveBeenCalled();
   });
 
@@ -428,12 +460,8 @@ describe("createUseCases", () => {
       podUrl: storage.url,
       oidcIssuer: "https://issuer.example",
     });
-    expect(deps.storageGateway.discoverStorages).toHaveBeenCalledWith(
-      session.webId,
-    );
-    expect(deps.sessionGateway.discoverOidcIssuer).toHaveBeenCalledWith(
-      session.webId,
-    );
+    expect(deps.storageGateway.discoverStorages).toHaveBeenCalledWith(session.webId);
+    expect(deps.sessionGateway.discoverOidcIssuer).toHaveBeenCalledWith(session.webId);
   });
 
   it("discoverAccount takes the name from the profile's foaf:name", async () => {
@@ -455,9 +483,7 @@ describe("createUseCases", () => {
     const useCases = createUseCases(deps);
     const account = await useCases.discoverAccount(session);
     expect(account.name).toBe("Alice");
-    expect(
-      deps.webIdDocumentRepository.fetchWebIdDocument,
-    ).toHaveBeenCalledWith(session.webId);
+    expect(deps.webIdDocumentRepository.fetchWebIdDocument).toHaveBeenCalledWith(session.webId);
   });
 
   it("discoverAccount tolerates an unreadable profile document", async () => {
@@ -481,9 +507,7 @@ describe("createUseCases", () => {
 
   it("discoverAccount tolerates a failed issuer lookup", async () => {
     const deps = makeDeps();
-    vi.mocked(deps.sessionGateway.discoverOidcIssuer).mockRejectedValue(
-      new Error("no issuer"),
-    );
+    vi.mocked(deps.sessionGateway.discoverOidcIssuer).mockRejectedValue(new Error("no issuer"));
     const useCases = createUseCases(deps);
     await expect(useCases.discoverAccount(session)).resolves.toEqual({
       webId: session.webId,
@@ -499,9 +523,7 @@ describe("createUseCases", () => {
       new Error("profile unreachable"),
     );
     const useCases = createUseCases(deps);
-    await expect(useCases.discoverAccount(session)).rejects.toThrow(
-      "profile unreachable",
-    );
+    await expect(useCases.discoverAccount(session)).rejects.toThrow("profile unreachable");
   });
 
   it("logout delegates to the session gateway", async () => {
@@ -516,50 +538,36 @@ describe("createUseCases", () => {
     const useCases = createUseCases(deps);
     const listener = () => undefined;
     const unsubscribe = useCases.onSessionExpired(listener);
-    expect(deps.sessionGateway.onSessionExpired).toHaveBeenCalledWith(
-      listener,
-    );
+    expect(deps.sessionGateway.onSessionExpired).toHaveBeenCalledWith(listener);
     expect(typeof unsubscribe).toBe("function");
   });
 
   it("viewWebIdDocument fetches the document for the session's WebID", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    await expect(useCases.viewWebIdDocument(session)).resolves.toEqual(
-      document,
-    );
-    expect(
-      deps.webIdDocumentRepository.fetchWebIdDocument,
-    ).toHaveBeenCalledWith(session.webId);
+    await expect(useCases.viewWebIdDocument(session)).resolves.toEqual(document);
+    expect(deps.webIdDocumentRepository.fetchWebIdDocument).toHaveBeenCalledWith(session.webId);
   });
 
   it("listStorages discovers storages for the session's WebID", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
     await expect(useCases.listStorages(session)).resolves.toEqual([storage]);
-    expect(deps.storageGateway.discoverStorages).toHaveBeenCalledWith(
-      session.webId,
-    );
+    expect(deps.storageGateway.discoverStorages).toHaveBeenCalledWith(session.webId);
   });
 
   it("addManualStorage trims the URL before probing", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    await expect(
-      useCases.addManualStorage("  https://alice.example/ "),
-    ).resolves.toEqual(storage);
-    expect(deps.storageGateway.probeStorage).toHaveBeenCalledWith(
-      "https://alice.example/",
-    );
+    await expect(useCases.addManualStorage("  https://alice.example/ ")).resolves.toEqual(storage);
+    expect(deps.storageGateway.probeStorage).toHaveBeenCalledWith("https://alice.example/");
   });
 
   it("listInstances delegates with the session's WebID", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
     await expect(useCases.listInstances(session)).resolves.toEqual([instance]);
-    expect(deps.instanceRepository.listInstances).toHaveBeenCalledWith(
-      session.webId,
-    );
+    expect(deps.instanceRepository.listInstances).toHaveBeenCalledWith(session.webId);
   });
 
   it("getRegistrationOptions delegates with the session's WebID", async () => {
@@ -569,22 +577,31 @@ describe("createUseCases", () => {
       privateIndexExists: true,
       publicIndexExists: false,
     });
-    expect(
-      deps.instanceRepository.getRegistrationOptions,
-    ).toHaveBeenCalledWith(session.webId);
+    expect(deps.instanceRepository.getRegistrationOptions).toHaveBeenCalledWith(session.webId);
   });
 
   it("describeDeck saves the deck's description in the languages given, topics and keywords, refusing an empty description", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    await useCases.describeDeck(deck, { description: { en: " Kanji. " }, topics: [], keywords: { en: ["kanji"] } });
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledWith({ ...deck, description: { en: "Kanji." }, keywords: { en: ["kanji"] } });
+    await useCases.describeDeck(deck, {
+      description: { en: " Kanji. " },
+      topics: [],
+      keywords: { en: ["kanji"] },
+    });
+    expect(deps.deckRepository.saveDeck).toHaveBeenCalledWith({
+      ...deck,
+      description: { en: "Kanji." },
+      keywords: { en: ["kanji"] },
+    });
     // Only the language the user stated: no English stands in for it.
     await useCases.describeDeck(deck, { description: { sv: "Kanji." }, topics: [], keywords: {} });
-    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({ ...deck, description: { sv: "Kanji." } });
-    await expect(useCases.describeDeck(deck, { description: { en: "" }, topics: [], keywords: {} })).rejects.toThrow(
-      "A deck needs a description.",
-    );
+    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({
+      ...deck,
+      description: { sv: "Kanji." },
+    });
+    await expect(
+      useCases.describeDeck(deck, { description: { en: "" }, topics: [], keywords: {} }),
+    ).rejects.toThrow("A deck needs a description.");
   });
 
   it("describeDeck saves keywords under the canonical form of each stated language, refusing a tag that names no language and new untagged keywords", async () => {
@@ -602,10 +619,18 @@ describe("createUseCases", () => {
       keywords: { "": ["kanji"], "ja-jp": ["漢字"], he: ["קאנג'י", "כתב"] },
     });
     await expect(
-      useCases.describeDeck(deck, { description: { en: "Kanji." }, topics: [], keywords: { Swedish: ["kanji"] } }),
+      useCases.describeDeck(deck, {
+        description: { en: "Kanji." },
+        topics: [],
+        keywords: { Swedish: ["kanji"] },
+      }),
     ).rejects.toThrow("“Swedish” is not a language code.");
     await expect(
-      useCases.describeDeck(legacy, { description: { en: "Kanji." }, topics: [], keywords: { "": ["kanji", "N5"] } }),
+      useCases.describeDeck(legacy, {
+        description: { en: "Kanji." },
+        topics: [],
+        keywords: { "": ["kanji", "N5"] },
+      }),
     ).rejects.toThrow("Choose the language of the keywords.");
   });
 
@@ -627,7 +652,11 @@ describe("createUseCases", () => {
     });
     // A tag the deck does not have is still checked.
     await expect(
-      useCases.describeDeck(stored, { description: { en: "Kanji." }, topics: [], keywords: { "fr-x-custom": ["baz"] } }),
+      useCases.describeDeck(stored, {
+        description: { en: "Kanji." },
+        topics: [],
+        keywords: { "fr-x-custom": ["baz"] },
+      }),
     ).rejects.toThrow("“fr-x-custom” is not a language code.");
     expect(deps.deckRepository.saveDeck).toHaveBeenCalledTimes(1);
   });
@@ -650,12 +679,18 @@ describe("createUseCases", () => {
       const useCases = createUseCases(deps);
       await expect(useCases.stateCardLanguages(deck, { front: "JA", back: "en" })).resolves.toBe(2);
       // The tag as the app stores it, lower-cased.
-      expect(deps.deckRepository.stateCardLanguages).toHaveBeenCalledWith(deck, ["both", "back-only"], {
-        front: "ja",
-        back: "en",
-      });
+      expect(deps.deckRepository.stateCardLanguages).toHaveBeenCalledWith(
+        deck,
+        ["both", "back-only"],
+        {
+          front: "ja",
+          back: "en",
+        },
+      );
       await expect(useCases.stateCardLanguages(deck, { front: "ja" })).resolves.toBe(1);
-      expect(deps.deckRepository.stateCardLanguages).toHaveBeenLastCalledWith(deck, ["both"], { front: "ja" });
+      expect(deps.deckRepository.stateCardLanguages).toHaveBeenLastCalledWith(deck, ["both"], {
+        front: "ja",
+      });
       expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
     });
 
@@ -667,9 +702,14 @@ describe("createUseCases", () => {
         cardOf("mine", { front: { "": "Norway" }, back: { "": "Oslo" } }),
       ]);
       const useCases = createUseCases(deps);
-      await expect(useCases.stateCardLanguages(imported, { front: "en", back: "en" })).resolves.toBe(1);
+      await expect(
+        useCases.stateCardLanguages(imported, { front: "en", back: "en" }),
+      ).resolves.toBe(1);
       expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(libraryContent.url);
-      expect(deps.deckRepository.stateCardLanguages).toHaveBeenCalledWith(imported, ["mine"], { front: "en", back: "en" });
+      expect(deps.deckRepository.stateCardLanguages).toHaveBeenCalledWith(imported, ["mine"], {
+        front: "en",
+        back: "en",
+      });
     });
 
     it("writes nothing when no side is to change, or the language is no language code", async () => {
@@ -677,11 +717,13 @@ describe("createUseCases", () => {
       const useCases = createUseCases(deps);
       await expect(useCases.stateCardLanguages(deck, {})).resolves.toBe(0);
       expect(deps.deckRepository.listCards).not.toHaveBeenCalled();
-      vi.mocked(deps.deckRepository.listCards).mockResolvedValueOnce([{ ...card, front: { ja: "水" }, back: { en: "water" } }]);
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValueOnce([
+        { ...card, front: { ja: "水" }, back: { en: "water" } },
+      ]);
       await expect(useCases.stateCardLanguages(deck, { front: "ja" })).resolves.toBe(0);
-      await expect(useCases.stateCardLanguages(deck, { front: "en", back: "x-klingon" })).rejects.toThrow(
-        "“x-klingon” is not a language code.",
-      );
+      await expect(
+        useCases.stateCardLanguages(deck, { front: "en", back: "x-klingon" }),
+      ).rejects.toThrow("“x-klingon” is not a language code.");
       expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(1);
       expect(deps.deckRepository.stateCardLanguages).not.toHaveBeenCalled();
     });
@@ -692,7 +734,9 @@ describe("createUseCases", () => {
         new AppError("changedElsewhere", { url: deck.cardsDocumentUrl }),
       );
       const useCases = createUseCases(deps);
-      await expect(useCases.stateCardLanguages(deck, { front: "ja" })).rejects.toMatchObject({ code: "changedElsewhere" });
+      await expect(useCases.stateCardLanguages(deck, { front: "ja" })).rejects.toMatchObject({
+        code: "changedElsewhere",
+      });
     });
   });
 
@@ -736,21 +780,48 @@ describe("createUseCases", () => {
     it("writes the edit previewed in one write of the cards document, at the version it was planned on, then refreshes the digest", async () => {
       const { deps, useCases } = setup();
       const previewed = planCardEdit([one, two], ["one", "two"], { kind: "retire" });
-      const written = await useCases.editCards(instance.url, deck, ["one", "two"], { kind: "retire" }, previewed);
+      const written = await useCases.editCards(
+        instance.url,
+        deck,
+        ["one", "two"],
+        { kind: "retire" },
+        previewed,
+      );
       expect(written.save.map((saved) => saved.retired)).toEqual([true, true]);
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: written.save, remove: [] }, { whole: true, version: "v1" });
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(
+        deck,
+        { save: written.save, remove: [] },
+        { whole: true, version: "v1" },
+      );
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
       // The digest's refresh reads the reviews document as it is now.
-      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(deck, undefined);
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
+        deck,
+        undefined,
+      );
     });
 
     it("writes the edit whole and unchecked where the pod gave the cards document no version", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.deckRepository.readCardsSince).mockResolvedValue({ unchanged: false, value: [one, two], version: null });
+      vi.mocked(deps.deckRepository.readCardsSince).mockResolvedValue({
+        unchanged: false,
+        value: [one, two],
+        version: null,
+      });
       const previewed = planCardEdit([one, two], ["one"], { kind: "retire" });
-      const written = await useCases.editCards(instance.url, deck, ["one"], { kind: "retire" }, previewed);
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: written.save, remove: [] }, { whole: true });
+      const written = await useCases.editCards(
+        instance.url,
+        deck,
+        ["one"],
+        { kind: "retire" },
+        previewed,
+      );
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(
+        deck,
+        { save: written.save, remove: [] },
+        { whole: true },
+      );
     });
 
     it("removes cards and their review states, one write each, and undoes that, the states written back", async () => {
@@ -758,7 +829,11 @@ describe("createUseCases", () => {
       const edit = { kind: "remove" } as const;
       const previewed = planCardEdit([one, two], ["one"], edit);
       const written = await useCases.editCards(instance.url, deck, ["one"], edit, previewed);
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: [], remove: ["one"] }, { whole: true, version: "v1" });
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(
+        deck,
+        { save: [], remove: ["one"] },
+        { whole: true, version: "v1" },
+      );
       expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
         save: [],
         remove: [
@@ -771,14 +846,28 @@ describe("createUseCases", () => {
 
       const after = setup([two]);
       await after.useCases.undoCardEdit(instance.url, deck, written);
-      expect(after.deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: [one], remove: [] }, { whole: true, version: "v1" });
-      expect(after.deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, { save: [reviewed], remove: [], every: true });
+      expect(after.deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(
+        deck,
+        { save: [one], remove: [] },
+        { whole: true, version: "v1" },
+      );
+      expect(after.deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
+        save: [reviewed],
+        remove: [],
+        every: true,
+      });
     });
 
     it("writes nothing when the edit changes no card", async () => {
       const { deps, useCases } = setup();
       const edit = { kind: "restore" } as const;
-      await useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit));
+      await useCases.editCards(
+        instance.url,
+        deck,
+        ["one"],
+        edit,
+        planCardEdit([one, two], ["one"], edit),
+      );
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalled();
     });
@@ -787,25 +876,55 @@ describe("createUseCases", () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(changed());
       const edit = { kind: "retire" } as const;
-      await useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit));
+      await useCases.editCards(
+        instance.url,
+        deck,
+        ["one"],
+        edit,
+        planCardEdit([one, two], ["one"], edit),
+      );
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(deck, expect.anything(), { whole: true, version: "v2" });
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
+        deck,
+        expect.anything(),
+        { whole: true, version: "v2" },
+      );
     });
 
     it("plans the edit again on a cards document made since it was read as absent", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new AppError("createdElsewhere", { url: deck.cardsDocumentUrl }));
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
+        new AppError("createdElsewhere", { url: deck.cardsDocumentUrl }),
+      );
       const edit = { kind: "retire" } as const;
-      await useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit));
+      await useCases.editCards(
+        instance.url,
+        deck,
+        ["one"],
+        edit,
+        planCardEdit([one, two], ["one"], edit),
+      );
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(deck, expect.anything(), { whole: true, version: "v2" });
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
+        deck,
+        expect.anything(),
+        { whole: true, version: "v2" },
+      );
     });
 
     it("gives up after three attempts on a cards document that keeps changing", async () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(changed());
       const edit = { kind: "retire" } as const;
-      await expect(useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit))).rejects.toMatchObject({
+      await expect(
+        useCases.editCards(
+          instance.url,
+          deck,
+          ["one"],
+          edit,
+          planCardEdit([one, two], ["one"], edit),
+        ),
+      ).rejects.toMatchObject({
         code: "changedElsewhere",
       });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(3);
@@ -814,7 +933,15 @@ describe("createUseCases", () => {
     it("stops, writing nothing, once the edit planned again is not the one previewed", async () => {
       const { deps, useCases } = setup([tagged("one", { front: { en: "edited elsewhere" } }), two]);
       const edit = { kind: "retire" } as const;
-      await expect(useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit))).rejects.toMatchObject({
+      await expect(
+        useCases.editCards(
+          instance.url,
+          deck,
+          ["one"],
+          edit,
+          planCardEdit([one, two], ["one"], edit),
+        ),
+      ).rejects.toMatchObject({
         code: "changedElsewhere",
       });
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
@@ -824,15 +951,33 @@ describe("createUseCases", () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(new Error("offline"));
       const edit = { kind: "retire" } as const;
-      await expect(useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit))).rejects.toThrow("offline");
+      await expect(
+        useCases.editCards(
+          instance.url,
+          deck,
+          ["one"],
+          edit,
+          planCardEdit([one, two], ["one"], edit),
+        ),
+      ).rejects.toThrow("offline");
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
     });
 
     it("keeps an edit made when the digest cannot be refreshed", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(new Error("offline"));
+      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(
+        new Error("offline"),
+      );
       const edit = { kind: "retire" } as const;
-      await expect(useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit))).resolves.toMatchObject({
+      await expect(
+        useCases.editCards(
+          instance.url,
+          deck,
+          ["one"],
+          edit,
+          planCardEdit([one, two], ["one"], edit),
+        ),
+      ).resolves.toMatchObject({
         save: [expect.objectContaining({ id: "one", retired: true })],
       });
     });
@@ -840,12 +985,21 @@ describe("createUseCases", () => {
     it("undoes an edit only while the cards are as it left them", async () => {
       const edit = { kind: "retire" } as const;
       const plan = planCardEdit([one, two], ["one"], edit);
-      const { deps, useCases } = setup([tagged("one", { retired: true, front: { en: "edited elsewhere" } }), two]);
-      await expect(useCases.undoCardEdit(instance.url, deck, plan)).rejects.toMatchObject({ code: "changedElsewhere" });
+      const { deps, useCases } = setup([
+        tagged("one", { retired: true, front: { en: "edited elsewhere" } }),
+        two,
+      ]);
+      await expect(useCases.undoCardEdit(instance.url, deck, plan)).rejects.toMatchObject({
+        code: "changedElsewhere",
+      });
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
       const asLeft = setup([plan.save[0]!, two]);
       await asLeft.useCases.undoCardEdit(instance.url, deck, plan);
-      expect(asLeft.deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: [one], remove: [] }, { whole: true, version: "v1" });
+      expect(asLeft.deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(
+        deck,
+        { save: [one], remove: [] },
+        { whole: true, version: "v1" },
+      );
     });
   });
 
@@ -940,9 +1094,15 @@ describe("createUseCases", () => {
 
   it("deleteInstance passes the WebID and the instance, and says what it kept", async () => {
     const deps = makeDeps();
-    vi.mocked(deps.instanceRepository.deleteInstance).mockResolvedValue({ keptFolder: instance.url, keptReleases: false });
+    vi.mocked(deps.instanceRepository.deleteInstance).mockResolvedValue({
+      keptFolder: instance.url,
+      keptReleases: false,
+    });
     const useCases = createUseCases(deps);
-    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: instance.url, keptReleases: false });
+    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
+      keptFolder: instance.url,
+      keptReleases: false,
+    });
     expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
       webId: session.webId,
       instance,
@@ -958,7 +1118,9 @@ describe("createUseCases", () => {
     };
     vi.mocked(deps.instanceRepository.readDataClassRegistrations).mockResolvedValue(registrations);
     const useCases = createUseCases(deps);
-    await expect(useCases.dataClassRegistrations(session, instance)).resolves.toEqual(registrations);
+    await expect(useCases.dataClassRegistrations(session, instance)).resolves.toEqual(
+      registrations,
+    );
     expect(deps.instanceRepository.readDataClassRegistrations).toHaveBeenCalledWith({
       webId: session.webId,
       instanceUrl: instance.url,
@@ -975,25 +1137,37 @@ describe("createUseCases", () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
 
-    await expect(useCases.listDeckTree(instance.url)).resolves.toEqual({ children: [{ kind: "deck", deck }], readOnly: false });
+    await expect(useCases.listDeckTree(instance.url)).resolves.toEqual({
+      children: [{ kind: "deck", deck }],
+      readOnly: false,
+    });
     expect(deps.deckRepository.readDeckTree).toHaveBeenCalledWith(instance.url);
 
     const group = useCases.newDeckGroup(instance.url, { sv: " Språk " });
     expect(group).toEqual({ url: `${instance.url}catalog.ttl#group-0f3a`, title: { sv: "Språk" } });
-    expect(() => useCases.newDeckGroup(instance.url, { en: " " })).toThrow("A deck group needs a name");
+    expect(() => useCases.newDeckGroup(instance.url, { en: " " })).toThrow(
+      "A deck group needs a name",
+    );
 
     const combine = { kind: "combine" as const, dragged: deck.url, target: `${deck.url}-2`, group };
-    await expect(useCases.editDeckTree(instance.url, combine)).resolves.toEqual({ children: [{ kind: "deck", deck }], readOnly: false });
+    await expect(useCases.editDeckTree(instance.url, combine)).resolves.toEqual({
+      children: [{ kind: "deck", deck }],
+      readOnly: false,
+    });
     expect(deps.deckRepository.editDeckTree).toHaveBeenLastCalledWith(instance.url, combine);
-    await useCases.editDeckTree(instance.url, { kind: "rename", group: group.url, title: { en: " Languages ", sv: "" } });
+    await useCases.editDeckTree(instance.url, {
+      kind: "rename",
+      group: group.url,
+      title: { en: " Languages ", sv: "" },
+    });
     expect(deps.deckRepository.editDeckTree).toHaveBeenLastCalledWith(instance.url, {
       kind: "rename",
       group: group.url,
       title: { en: "Languages" },
     });
-    await expect(useCases.editDeckTree(instance.url, { kind: "rename", group: group.url, title: {} })).rejects.toThrow(
-      "A deck group needs a name",
-    );
+    await expect(
+      useCases.editDeckTree(instance.url, { kind: "rename", group: group.url, title: {} }),
+    ).rejects.toThrow("A deck group needs a name");
     expect(deps.deckRepository.editDeckTree).toHaveBeenCalledTimes(2);
   });
 
@@ -1008,21 +1182,33 @@ describe("createUseCases", () => {
     expect(deps.deckRepository.createDeck).toHaveBeenCalledWith(instance.url, { en: "Kanji N5" });
     // A name in the language the user stated, and only in it: no English stands in for it.
     await useCases.createDeck(instance.url, { sv: "Huvudstäder", en: " " });
-    expect(deps.deckRepository.createDeck).toHaveBeenLastCalledWith(instance.url, { sv: "Huvudstäder" });
-    await expect(useCases.createDeck(instance.url, { sv: " " })).rejects.toThrow("A deck needs a name");
-    await expect(useCases.createDeck(instance.url, { "": "Kanji" })).rejects.toThrow("cannot be untagged");
+    expect(deps.deckRepository.createDeck).toHaveBeenLastCalledWith(instance.url, {
+      sv: "Huvudstäder",
+    });
+    await expect(useCases.createDeck(instance.url, { sv: " " })).rejects.toThrow(
+      "A deck needs a name",
+    );
+    await expect(useCases.createDeck(instance.url, { "": "Kanji" })).rejects.toThrow(
+      "cannot be untagged",
+    );
     // Tags as the pod reads them: lower case.
     await useCases.createDeck(instance.url, { "pt-BR": "Capitais" });
-    expect(deps.deckRepository.createDeck).toHaveBeenLastCalledWith(instance.url, { "pt-br": "Capitais" });
+    expect(deps.deckRepository.createDeck).toHaveBeenLastCalledWith(instance.url, {
+      "pt-br": "Capitais",
+    });
 
     // The name in every language it is to have: one left out is removed.
     await useCases.renameDeck(deck, { ja: " 漢字 N4 ", en: "Kanji N4" });
-    expect(deps.deckRepository.renameDeck).toHaveBeenCalledWith(deck, { ja: "漢字 N4", en: "Kanji N4" });
+    expect(deps.deckRepository.renameDeck).toHaveBeenCalledWith(deck, {
+      ja: "漢字 N4",
+      en: "Kanji N4",
+    });
     await expect(useCases.renameDeck(deck, {})).rejects.toThrow("A deck needs a name");
 
-    await expect(
-      useCases.setDeckDirection(deck, "bidirectional"),
-    ).resolves.toEqual({ ...deck, direction: "bidirectional" });
+    await expect(useCases.setDeckDirection(deck, "bidirectional")).resolves.toEqual({
+      ...deck,
+      direction: "bidirectional",
+    });
     expect(deps.deckRepository.saveDeck).toHaveBeenCalledWith({
       ...deck,
       direction: "bidirectional",
@@ -1060,9 +1246,9 @@ describe("createUseCases", () => {
   it("addCard and updateCard reject incomplete content without writing", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    await expect(
-      useCases.addCard(deck, { front: {}, back: { en: "fire" } }),
-    ).rejects.toThrow("The front needs text or an image.");
+    await expect(useCases.addCard(deck, { front: {}, back: { en: "fire" } })).rejects.toThrow(
+      "The front needs text or an image.",
+    );
     await expect(
       useCases.updateCard(deck, card, {
         front: { en: "f" },
@@ -1071,18 +1257,21 @@ describe("createUseCases", () => {
       }),
     ).rejects.toThrow("The back image must be an http(s) URL.");
     // Text in no stated language is never written anew.
-    await expect(useCases.addCard(deck, { front: { "": "火" }, back: { en: "fire" } })).rejects.toThrow(
-      "Choose the language of the front.",
-    );
-    await expect(useCases.updateCard(deck, card, { front: { "": "水" }, back: { "": "water!" } })).rejects.toThrow(
-      "Choose the language of the back.",
-    );
+    await expect(
+      useCases.addCard(deck, { front: { "": "火" }, back: { en: "fire" } }),
+    ).rejects.toThrow("Choose the language of the front.");
+    await expect(
+      useCases.updateCard(deck, card, { front: { "": "水" }, back: { "": "water!" } }),
+    ).rejects.toThrow("Choose the language of the back.");
     expect(deps.deckRepository.addCard).not.toHaveBeenCalled();
     expect(deps.deckRepository.updateCard).not.toHaveBeenCalled();
   });
 
   describe("resetCards and rescheduleCards", () => {
-    const studied = (cardId: string, direction: ReviewState["direction"] = "front-to-back"): ReviewState => ({
+    const studied = (
+      cardId: string,
+      direction: ReviewState["direction"] = "front-to-back",
+    ): ReviewState => ({
       cardId,
       direction,
       easeFactor: 2.5,
@@ -1092,7 +1281,13 @@ describe("createUseCases", () => {
       firstReviewedAt: "2026-09-20T10:00:00.000Z",
       lastReviewedAt: "2026-09-28T09:00:00.000Z",
       formatVersion: 2,
-      previous: { easeFactor: 2.5, intervalDays: 1, repetitions: 1, due: "2026-09-27", lastReviewedAt: "2026-09-26T10:00:00.000Z" },
+      previous: {
+        easeFactor: 2.5,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "2026-09-27",
+        lastReviewedAt: "2026-09-26T10:00:00.000Z",
+      },
     });
 
     function setup() {
@@ -1116,12 +1311,17 @@ describe("createUseCases", () => {
         ],
         every: true,
       });
-      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(deck, undefined);
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
+        deck,
+        undefined,
+      );
     });
 
     it("forgets one direction when asked", async () => {
       const { deps, useCases } = setup();
-      await expect(useCases.resetCards(instance.url, deck, ["one"], "back-to-front")).resolves.toBe(1);
+      await expect(useCases.resetCards(instance.url, deck, ["one"], "back-to-front")).resolves.toBe(
+        1,
+      );
       expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
         save: [],
         remove: [{ cardId: "one", direction: "back-to-front" }],
@@ -1132,14 +1332,18 @@ describe("createUseCases", () => {
     it("writes nothing for cards never studied", async () => {
       const { deps, useCases } = setup();
       await expect(useCases.resetCards(instance.url, deck, ["new"])).resolves.toBe(0);
-      await expect(useCases.rescheduleCards(instance.url, deck, ["new"], "2026-10-12")).resolves.toBe(0);
+      await expect(
+        useCases.rescheduleCards(instance.url, deck, ["new"], "2026-10-12"),
+      ).resolves.toBe(0);
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalled();
     });
 
     it("sets the cards due on the day in one write, their snapshot dropped", async () => {
       const { deps, useCases } = setup();
-      await expect(useCases.rescheduleCards(instance.url, deck, ["one", "two"], "2026-10-12", "front-to-back")).resolves.toBe(2);
+      await expect(
+        useCases.rescheduleCards(instance.url, deck, ["one", "two"], "2026-10-12", "front-to-back"),
+      ).resolves.toBe(2);
       const { previous: _one, ...one } = studied("one");
       const { previous: _two, ...two } = studied("two");
       expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(deck, {
@@ -1154,13 +1358,17 @@ describe("createUseCases", () => {
 
     it("refuses a day that is no date before reading anything", async () => {
       const { deps, useCases } = setup();
-      await expect(useCases.rescheduleCards(instance.url, deck, ["one"], "2026-02-30")).rejects.toMatchObject({ code: "dueDayInvalid" });
+      await expect(
+        useCases.rescheduleCards(instance.url, deck, ["one"], "2026-02-30"),
+      ).rejects.toMatchObject({ code: "dueDayInvalid" });
       expect(deps.reviewStateRepository.listReviewStates).not.toHaveBeenCalled();
     });
 
     it("keeps an edit made when the digest cannot be refreshed", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(new Error("offline"));
+      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(
+        new Error("offline"),
+      );
       await expect(useCases.resetCards(instance.url, deck, ["two"])).resolves.toBe(1);
     });
   });
@@ -1173,8 +1381,20 @@ describe("createUseCases", () => {
       cardsDocumentUrl: `${instance.url}decks/deck-2.ttl`,
       reviewsDocumentUrl: `${instance.url}reviews/deck-2.ttl`,
     };
-    const one: Card = { ...card, id: "one", url: `${deck.cardsDocumentUrl}#one`, front: { en: "one" }, back: { sv: "ett" } };
-    const two: Card = { ...card, id: "two", url: `${deck.cardsDocumentUrl}#two`, front: { en: "two" }, back: { sv: "två" } };
+    const one: Card = {
+      ...card,
+      id: "one",
+      url: `${deck.cardsDocumentUrl}#one`,
+      front: { en: "one" },
+      back: { sv: "ett" },
+    };
+    const two: Card = {
+      ...card,
+      id: "two",
+      url: `${deck.cardsDocumentUrl}#two`,
+      front: { en: "two" },
+      back: { sv: "två" },
+    };
     const studied: ReviewState = {
       cardId: "one",
       direction: "front-to-back",
@@ -1198,13 +1418,18 @@ describe("createUseCases", () => {
         value: d.url === deck.url ? [one, two] : held,
         version: `v${++version}`,
       }));
-      vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) => (d.url === deck.url ? [studied] : []));
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
+        d.url === deck.url ? [studied] : [],
+      );
       return { deps, useCases: createUseCases(deps) };
     }
 
     it("moves cards with their progress: the target written first, then the source, then both decks' digests", async () => {
       const { deps, useCases } = setup();
-      const plan = await useCases.transferCards(instance.url, deck, target, ["one"], { mode: "move", keepProgress: true });
+      const plan = await useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "move",
+        keepProgress: true,
+      });
       expect(plan.cards).toEqual([{ from: "one", to: "one", present: false }]);
       const { applyCardChanges } = deps.deckRepository;
       expect(vi.mocked(applyCardChanges).mock.calls).toEqual([
@@ -1215,59 +1440,102 @@ describe("createUseCases", () => {
         [target, { save: [studied], remove: [], every: true }],
         [deck, { save: [], remove: [{ cardId: "one", direction: "front-to-back" }], every: true }],
       ]);
-      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(target, undefined);
-      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(deck, undefined);
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
+        target,
+        undefined,
+      );
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
+        deck,
+        undefined,
+      );
     });
 
     it("copies cards without progress, leaving the source and its digest as they are", async () => {
       const { deps, useCases } = setup();
-      await useCases.transferCards(instance.url, deck, target, ["two"], { mode: "copy", keepProgress: false });
+      await useCases.transferCards(instance.url, deck, target, ["two"], {
+        mode: "copy",
+        keepProgress: false,
+      });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
         target,
         { save: [expect.objectContaining({ id: "two" })], remove: [] },
         { whole: true, version: "v2" },
       );
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
-      expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalledWith(deck, undefined);
+      expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalledWith(
+        deck,
+        undefined,
+      );
     });
 
     it("moves a card never studied without a write of either reviews document", async () => {
       const { deps, useCases } = setup();
-      await useCases.transferCards(instance.url, deck, target, ["two"], { mode: "move", keepProgress: true });
+      await useCases.transferCards(instance.url, deck, target, ["two"], {
+        mode: "move",
+        keepProgress: true,
+      });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     });
 
     it("finishes a move stopped after the target was written, writing no card twice", async () => {
       const { deps, useCases } = setup([{ ...one, url: `${target.cardsDocumentUrl}#one` }]);
-      const plan = await useCases.transferCards(instance.url, deck, target, ["one"], { mode: "move", keepProgress: false });
+      const plan = await useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "move",
+        keepProgress: false,
+      });
       expect(plan.cards).toEqual([{ from: "one", to: "one", present: true }]);
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(deck, { save: [], remove: ["one"] }, { whole: true, version: "v1" });
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
+        deck,
+        { save: [], remove: ["one"] },
+        { whole: true, version: "v1" },
+      );
     });
 
     it("removes the source's states before its cards, so a move stopped between is finished by making it again", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.deckRepository.applyCardChanges).mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("offline"));
+      vi.mocked(deps.deckRepository.applyCardChanges)
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new Error("offline"));
       await expect(
-        useCases.transferCards(instance.url, deck, target, ["one"], { mode: "move", keepProgress: true }),
+        useCases.transferCards(instance.url, deck, target, ["one"], {
+          mode: "move",
+          keepProgress: true,
+        }),
       ).rejects.toThrow("offline");
-      const [, sourceReviews] = vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock.invocationCallOrder;
-      const [, sourceCards] = vi.mocked(deps.deckRepository.applyCardChanges).mock.invocationCallOrder;
+      const [, sourceReviews] = vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock
+        .invocationCallOrder;
+      const [, sourceCards] = vi.mocked(deps.deckRepository.applyCardChanges).mock
+        .invocationCallOrder;
       expect(sourceReviews).toBeLessThan(sourceCards!);
 
       // The source keeps the card without progress; the target has both.
       const again = setup([{ ...one, url: `${target.cardsDocumentUrl}#one` }]);
-      vi.mocked(again.deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) => (d.url === deck.url ? [] : [studied]));
-      const plan = await again.useCases.transferCards(instance.url, deck, target, ["one"], { mode: "move", keepProgress: true });
+      vi.mocked(again.deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
+        d.url === deck.url ? [] : [studied],
+      );
+      const plan = await again.useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "move",
+        keepProgress: true,
+      });
       expect(plan.cards).toEqual([{ from: "one", to: "one", present: true }]);
-      expect(again.deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(deck, { save: [], remove: ["one"] }, { whole: true, version: "v1" });
+      expect(again.deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
+        deck,
+        { save: [], remove: ["one"] },
+        { whole: true, version: "v1" },
+      );
       expect(again.deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     });
 
     it("plans the transfer again when a cards document was made since it was read as absent", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new AppError("createdElsewhere", { url: target.cardsDocumentUrl }));
-      await useCases.transferCards(instance.url, deck, target, ["one"], { mode: "copy", keepProgress: true });
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
+        new AppError("createdElsewhere", { url: target.cardsDocumentUrl }),
+      );
+      await useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "copy",
+        keepProgress: true,
+      });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
       expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
         target,
@@ -1279,7 +1547,10 @@ describe("createUseCases", () => {
     it("plans the transfer again when a document changed meanwhile, then gives up", async () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(changed());
-      await useCases.transferCards(instance.url, deck, target, ["one"], { mode: "copy", keepProgress: true });
+      await useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "copy",
+        keepProgress: true,
+      });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
         target,
         { save: [oneWritten], remove: [] },
@@ -1288,7 +1559,10 @@ describe("createUseCases", () => {
 
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(changed());
       await expect(
-        useCases.transferCards(instance.url, deck, target, ["one"], { mode: "copy", keepProgress: true }),
+        useCases.transferCards(instance.url, deck, target, ["one"], {
+          mode: "copy",
+          keepProgress: true,
+        }),
       ).rejects.toMatchObject({ code: "changedElsewhere" });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(5);
     });
@@ -1297,23 +1571,34 @@ describe("createUseCases", () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new Error("offline"));
       await expect(
-        useCases.transferCards(instance.url, deck, target, ["one"], { mode: "move", keepProgress: true }),
+        useCases.transferCards(instance.url, deck, target, ["one"], {
+          mode: "move",
+          keepProgress: true,
+        }),
       ).rejects.toThrow("offline");
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
     });
 
     it("keeps a transfer made when the digest cannot be refreshed", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(new Error("offline"));
+      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(
+        new Error("offline"),
+      );
       await expect(
-        useCases.transferCards(instance.url, deck, target, ["one"], { mode: "move", keepProgress: false }),
+        useCases.transferCards(instance.url, deck, target, ["one"], {
+          mode: "move",
+          keepProgress: false,
+        }),
       ).resolves.toMatchObject({ missing: [] });
     });
 
     it("writes nothing when no card is left to transfer", async () => {
       const { deps, useCases } = setup();
       await expect(
-        useCases.transferCards(instance.url, deck, target, ["gone"], { mode: "move", keepProgress: true }),
+        useCases.transferCards(instance.url, deck, target, ["gone"], {
+          mode: "move",
+          keepProgress: true,
+        }),
       ).resolves.toMatchObject({ missing: ["gone"] });
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
@@ -1322,7 +1607,10 @@ describe("createUseCases", () => {
     it("refuses a transfer to the deck itself before reading anything", async () => {
       const { deps, useCases } = setup();
       await expect(
-        useCases.transferCards(instance.url, deck, deck, ["one"], { mode: "move", keepProgress: true }),
+        useCases.transferCards(instance.url, deck, deck, ["one"], {
+          mode: "move",
+          keepProgress: true,
+        }),
       ).rejects.toMatchObject({ code: "cardTransferSameDeck" });
       expect(deps.deckRepository.readCardsSince).not.toHaveBeenCalled();
     });
@@ -1371,8 +1659,8 @@ describe("createUseCases", () => {
       vi.mocked(deps.deckRepository.listCards).mockImplementation(async (d) =>
         d === deck ? [old("a"), current("b"), old("c")] : [current("d")],
       );
-      vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(
-        async (d) => (d === other ? [oldReview("d")] : []),
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
+        d === other ? [oldReview("d")] : [],
       );
       const useCases = createUseCases(deps);
 
@@ -1412,7 +1700,11 @@ describe("createUseCases", () => {
      */
     function outdated() {
       const deps = makeDeps();
-      const oldEntry: Deck = { ...other, reviewsDocumentUrl: `${instance.url}reviews/deck-2.ttl`, formatVersion: 1 };
+      const oldEntry: Deck = {
+        ...other,
+        reviewsDocumentUrl: `${instance.url}reviews/deck-2.ttl`,
+        formatVersion: 1,
+      };
       const written: string[] = [];
       vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(oldMeta);
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
@@ -1424,7 +1716,9 @@ describe("createUseCases", () => {
         d.cardsDocumentUrl.endsWith("deck-2.ttl") ? [current("d")] : [old("a"), current("b")],
       );
       vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
-        d.reviewsDocumentUrl.endsWith("reviews/deck-1.ttl") ? [oldReview("a"), { ...oldReview("b"), formatVersion: 2 }] : [],
+        d.reviewsDocumentUrl.endsWith("reviews/deck-1.ttl")
+          ? [oldReview("a"), { ...oldReview("b"), formatVersion: 2 }]
+          : [],
       );
       vi.mocked(deps.instanceRepository.upgradeMeta).mockImplementation(async (url) => {
         written.push(`${url}meta.ttl`);
@@ -1461,7 +1755,9 @@ describe("createUseCases", () => {
       const { deps, written } = outdated();
       const progress: string[] = [];
       const outcome = await createUseCases(deps).updateInstance(session, instance, (p) =>
-        progress.push(`${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`),
+        progress.push(
+          `${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`,
+        ),
       );
       expect(outcome).toEqual({ updated: UPDATED, failed: [] });
       // Each document once, in this order: the record, the preferences, each deck's cards and review states, the catalog last.
@@ -1512,11 +1808,23 @@ describe("createUseCases", () => {
 
     it("updateInstance runs again on what is still outdated, as it finds it then, and finishes", async () => {
       const { deps, oldEntry } = outdated();
-      vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({ ...oldMeta, formatVersion: 2 });
-      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({ preferences: DEFAULT_PREFERENCES, formatVersion: 4 });
-      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, { ...oldEntry, formatVersion: DECK_FORMAT_VERSION }]);
+      vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({
+        ...oldMeta,
+        formatVersion: 2,
+      });
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+        preferences: DEFAULT_PREFERENCES,
+        formatVersion: 4,
+      });
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([
+        deck,
+        { ...oldEntry, formatVersion: DECK_FORMAT_VERSION },
+      ]);
       vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([]);
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ updated: [UPDATED[2]], failed: [] });
+      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
+        updated: [UPDATED[2]],
+        failed: [],
+      });
       expect(deps.instanceRepository.upgradeMeta).not.toHaveBeenCalled();
       expect(deps.deckRepository.upgradeDecks).not.toHaveBeenCalled();
       expect(deps.instanceRepository.registerDataClasses).toHaveBeenCalledOnce();
@@ -1534,7 +1842,11 @@ describe("createUseCases", () => {
       const done = makeDeps();
       vi.mocked(done.deckRepository.listCards).mockResolvedValue([current("a")]);
       const progress: string[] = [];
-      expect(await createUseCases(done).updateInstance(session, instance, (p) => progress.push(`${p.step} ${p.part === undefined ? "" : "counted"}`))).toEqual({
+      expect(
+        await createUseCases(done).updateInstance(session, instance, (p) =>
+          progress.push(`${p.step} ${p.part === undefined ? "" : "counted"}`),
+        ),
+      ).toEqual({
         updated: [],
         failed: [],
       });
@@ -1550,36 +1862,62 @@ describe("createUseCases", () => {
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([old("a")]);
       vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([oldReview("a")]);
       // The first deck's part written, the second finds nothing left to write.
-      vi.mocked(deps.deckRepository.upgradeCards).mockResolvedValueOnce(true).mockResolvedValueOnce(false);
-      vi.mocked(deps.reviewStateRepository.upgradeReviewStates).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ updated: [UPDATED[2], UPDATED[3]], failed: [] });
+      vi.mocked(deps.deckRepository.upgradeCards)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      vi.mocked(deps.reviewStateRepository.upgradeReviewStates)
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
+        updated: [UPDATED[2], UPDATED[3]],
+        failed: [],
+      });
       expect(vi.mocked(deps.deckRepository.upgradeCards).mock.calls).toEqual([[deck], [twin]]);
-      expect(vi.mocked(deps.reviewStateRepository.upgradeReviewStates).mock.calls).toEqual([[deck], [twin]]);
+      expect(vi.mocked(deps.reviewStateRepository.upgradeReviewStates).mock.calls).toEqual([
+        [deck],
+        [twin],
+      ]);
 
       // The second deck's part refused: the document is named, what the first part wrote stays.
       const refused = makeDeps();
       vi.mocked(refused.deckRepository.listDecks).mockResolvedValue([deck, twin]);
       vi.mocked(refused.deckRepository.listCards).mockResolvedValue([old("a")]);
       const error = new AppError("changedElsewhere", { url: CARDS });
-      vi.mocked(refused.deckRepository.upgradeCards).mockResolvedValueOnce(true).mockRejectedValueOnce(error);
-      expect(await createUseCases(refused).updateInstance(session, instance)).toEqual({ updated: [], failed: [{ ...UPDATED[2], error }] });
+      vi.mocked(refused.deckRepository.upgradeCards)
+        .mockResolvedValueOnce(true)
+        .mockRejectedValueOnce(error);
+      expect(await createUseCases(refused).updateInstance(session, instance)).toEqual({
+        updated: [],
+        failed: [{ ...UPDATED[2], error }],
+      });
     });
 
     it("updateInstance gives an instance without a catalog one, named as its record names it, published by the owner", async () => {
       const deps = makeDeps();
       vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(null);
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
-      vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({ ...oldMeta, formatVersion: 2 });
+      vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({
+        ...oldMeta,
+        formatVersion: 2,
+      });
       vi.mocked(deps.webIdDocumentRepository.fetchWebIdDocument).mockResolvedValue({
         url: document.url,
         subjects: [
           {
             url: session.webId,
-            properties: [{ predicate: "http://xmlns.com/foaf/0.1/name", values: [{ type: "literal", value: "Alice" }] }],
+            properties: [
+              {
+                predicate: "http://xmlns.com/foaf/0.1/name",
+                values: [{ type: "literal", value: "Alice" }],
+              },
+            ],
           },
         ],
       } as WebIdDocument);
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ updated: [UPDATED[4]], failed: [] });
+      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
+        updated: [UPDATED[4]],
+        failed: [],
+      });
       expect(deps.deckRepository.upgradeDecks).toHaveBeenCalledExactlyOnceWith(instance.url, {
         title: "Main",
         description: "Flashcard decks of the Solid Memo instance Main.",
@@ -1589,7 +1927,9 @@ describe("createUseCases", () => {
       const anonymous = makeDeps();
       vi.mocked(anonymous.deckRepository.readCatalog).mockResolvedValue(null);
       vi.mocked(anonymous.deckRepository.listCards).mockResolvedValue([]);
-      vi.mocked(anonymous.webIdDocumentRepository.fetchWebIdDocument).mockRejectedValue(new Error("offline"));
+      vi.mocked(anonymous.webIdDocumentRepository.fetchWebIdDocument).mockRejectedValue(
+        new Error("offline"),
+      );
       await createUseCases(anonymous).updateInstance(session, instance);
       expect(anonymous.deckRepository.upgradeDecks).toHaveBeenLastCalledWith(instance.url, {
         title: instance.url,
@@ -1608,19 +1948,33 @@ describe("createUseCases", () => {
 
     it("updateInstance is done even when the registrations of the instance's data cannot be added", async () => {
       const { deps } = outdated();
-      vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(new Error("index refused"));
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ updated: UPDATED, failed: [] });
+      vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(
+        new Error("index refused"),
+      );
+      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
+        updated: UPDATED,
+        failed: [],
+      });
     });
   });
 
   it("planRepair plans from a report, and applyRepairs hands the repairs to the repository", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    expect(useCases.planRepair({ instanceUrl: instance.url, documents: [], violationCount: 0, conforms: true })).toEqual({
+    expect(
+      useCases.planRepair({
+        instanceUrl: instance.url,
+        documents: [],
+        violationCount: 0,
+        conforms: true,
+      }),
+    ).toEqual({
       repairs: [],
       unrepairable: [],
     });
-    const repairs = [{ kind: "describe-deck" as const, documentUrl: "d", subjectUrl: "d#x", version: 3 }];
+    const repairs = [
+      { kind: "describe-deck" as const, documentUrl: "d", subjectUrl: "d#x", version: 3 },
+    ];
     await useCases.applyRepairs(repairs);
     expect(deps.repairRepository.applyRepairs).toHaveBeenCalledWith(repairs);
   });
@@ -1638,7 +1992,9 @@ describe("createUseCases", () => {
                 status: "checked",
                 shape: "deck",
                 version: 2,
-                violations: [{ message: { en: "no title" }, severity: "violation", constraint: "MinCount" }],
+                violations: [
+                  { message: { en: "no title" }, severity: "violation", constraint: "MinCount" },
+                ],
               },
             ],
           }
@@ -1657,33 +2013,45 @@ describe("createUseCases", () => {
 
   it("listLibraryDecks delegates to the deck library", async () => {
     const deps = makeDeps();
-    await expect(createUseCases(deps).listLibraryDecks()).resolves.toEqual([
-      libraryDeck,
-    ]);
+    await expect(createUseCases(deps).listLibraryDecks()).resolves.toEqual([libraryDeck]);
   });
 
   it("listLibraryCards fetches the deck and returns its cards", async () => {
     const deps = makeDeps();
-    await expect(
-      createUseCases(deps).listLibraryCards(libraryDeck),
-    ).resolves.toEqual(libraryContent.cards);
-    expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(
-      libraryDeck.url,
+    await expect(createUseCases(deps).listLibraryCards(libraryDeck)).resolves.toEqual(
+      libraryContent.cards,
     );
+    expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(libraryDeck.url);
     expect(deps.deckRepository.importDeck).not.toHaveBeenCalled();
   });
 
   it("planLibraryUpgrade compares the release a copy came from with the deck's current one, and writes nothing", async () => {
     const deps = makeDeps();
     const copy: Deck = { ...deck, sourceUrl: libraryDeck.url };
-    const current: LibraryDeck = { ...libraryDeck, url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2" };
+    const current: LibraryDeck = {
+      ...libraryDeck,
+      url: "https://solid-memo.com/decks/capitals/v2.ttl",
+      version: "2",
+    };
     vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
-      { ...libraryDeck, ...firstRelease("https://solid-memo.com/decks/rivers/v1.ttl"), url: "https://solid-memo.com/decks/rivers/v1.ttl" },
+      {
+        ...libraryDeck,
+        ...firstRelease("https://solid-memo.com/decks/rivers/v1.ttl"),
+        url: "https://solid-memo.com/decks/rivers/v1.ttl",
+      },
       current,
     ]);
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
       url === current.url
-        ? { ...libraryContent, url, version: "2", cards: [...libraryContent.cards, { id: "norway", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 }] }
+        ? {
+            ...libraryContent,
+            url,
+            version: "2",
+            cards: [
+              ...libraryContent.cards,
+              { id: "norway", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 },
+            ],
+          }
         : libraryContent,
     );
     vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
@@ -1700,41 +2068,88 @@ describe("createUseCases", () => {
   it("planLibraryUpgrade does not read the index again for a copy whose series is found", async () => {
     const deps = makeDeps();
     const copy: Deck = { ...deck, sourceUrl: libraryDeck.url };
-    const current: LibraryDeck = { ...libraryDeck, url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2" };
+    const current: LibraryDeck = {
+      ...libraryDeck,
+      url: "https://solid-memo.com/decks/capitals/v2.ttl",
+      version: "2",
+    };
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
       url === current.url
-        ? { ...libraryContent, url, version: "2", cards: [...libraryContent.cards, { id: "norway", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 }] }
+        ? {
+            ...libraryContent,
+            url,
+            version: "2",
+            cards: [
+              ...libraryContent.cards,
+              { id: "norway", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 },
+            ],
+          }
         : libraryContent,
     );
     vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
-    const plan = createUseCases(deps).planLibraryUpgrade(copy, { deck: copy, series: current, version: "1", newer: true });
+    const plan = createUseCases(deps).planLibraryUpgrade(copy, {
+      deck: copy,
+      series: current,
+      version: "1",
+      newer: true,
+    });
     await expect(plan).resolves.toMatchObject({ toVersion: "2", add: [{ id: "norway" }] });
     expect(deps.deckLibrary.listLibraryDecks).not.toHaveBeenCalled();
     // A release from the library's index is not checked as one from a link is.
     expect(deps.shapeValidator.validateDocument).not.toHaveBeenCalled();
-    await expect(createUseCases(deps).planLibraryUpgrade(copy, { deck: copy, series: null, version: null, newer: false })).resolves.toBeNull();
+    await expect(
+      createUseCases(deps).planLibraryUpgrade(copy, {
+        deck: copy,
+        series: null,
+        version: null,
+        newer: false,
+      }),
+    ).resolves.toBeNull();
   });
 
   it("planLibraryUpgrade plans a copy more than one release behind with the releases in between, whose cards are the library's", async () => {
     const deps = makeDeps();
     const LIB = "https://solid-memo.com/decks/capitals/";
     const backs = ["Stockholm?", "Stockholm", "Stockholm, Sweden"];
-    const releases = backs.map((_, index) => ({ url: `${LIB}v${index + 1}.ttl`, version: String(index + 1) }));
-    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([{ ...libraryDeck, url: releases[2]!.url, version: "3", releases }]);
+    const releases = backs.map((_, index) => ({
+      url: `${LIB}v${index + 1}.ttl`,
+      version: String(index + 1),
+    }));
+    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
+      { ...libraryDeck, url: releases[2]!.url, version: "3", releases },
+    ]);
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => {
       const index = releases.findIndex((release) => release.url === url);
-      return { ...libraryContent, url, version: String(index + 1), cards: [{ ...libraryContent.cards[0]!, back: { "": backs[index]! } }] };
+      return {
+        ...libraryContent,
+        url,
+        version: String(index + 1),
+        cards: [{ ...libraryContent.cards[0]!, back: { "": backs[index]! } }],
+      };
     });
     // Copied from release 1; an upgrade to release 2, cut off before it moved the deck's entry, wrote its card.
     vi.mocked(deps.deckRepository.listCards).mockResolvedValue([
-      { ...libraryContent.cards[0]!, back: { "": "Stockholm" }, url: `${deck.cardsDocumentUrl}#sweden`, createdAt: "", formatVersion: 4 },
+      {
+        ...libraryContent.cards[0]!,
+        back: { "": "Stockholm" },
+        url: `${deck.cardsDocumentUrl}#sweden`,
+        createdAt: "",
+        formatVersion: 4,
+      },
     ]);
-    await expect(createUseCases(deps).planLibraryUpgrade({ ...deck, sourceUrl: releases[0]!.url })).resolves.toMatchObject({
+    await expect(
+      createUseCases(deps).planLibraryUpgrade({ ...deck, sourceUrl: releases[0]!.url }),
+    ).resolves.toMatchObject({
       toVersion: "3",
       change: [{ id: "sweden", back: { "": "Stockholm, Sweden" } }],
       kept: [],
     });
-    expect(vi.mocked(deps.deckLibrary.fetchLibraryDeck).mock.calls.map(([url]) => url).sort()).toEqual(releases.map((release) => release.url));
+    expect(
+      vi
+        .mocked(deps.deckLibrary.fetchLibraryDeck)
+        .mock.calls.map(([url]) => url)
+        .sort(),
+    ).toEqual(releases.map((release) => release.url));
   });
 
   it("planLibraryUpgrade offers nothing for a home-made deck, or one whose deck the library no longer has", async () => {
@@ -1754,7 +2169,9 @@ describe("createUseCases", () => {
     vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
       { ...libraryDeck, releases: [...libraryDeck.releases, { url: v2, version: "2" }] },
     ]);
-    await expect(createUseCases(deps).planLibraryUpgrade({ ...deck, sourceUrl: v2 })).resolves.toBeNull();
+    await expect(
+      createUseCases(deps).planLibraryUpgrade({ ...deck, sourceUrl: v2 }),
+    ).resolves.toBeNull();
     expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
     expect(deps.deckRepository.listCards).not.toHaveBeenCalled();
   });
@@ -1762,7 +2179,12 @@ describe("createUseCases", () => {
   it("listLibraryUpdates lists the instance's copies from one read of the library's index, and reads none without a copy", async () => {
     const deps = makeDeps();
     const v2 = "https://solid-memo.com/decks/capitals/v2.ttl";
-    const current: LibraryDeck = { ...libraryDeck, url: v2, version: "2", releases: [...libraryDeck.releases, { url: v2, version: "2" }] };
+    const current: LibraryDeck = {
+      ...libraryDeck,
+      url: v2,
+      version: "2",
+      releases: [...libraryDeck.releases, { url: v2, version: "2" }],
+    };
     vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([current]);
     const old: Deck = { ...deck, url: `${deck.url}-old`, sourceUrl: libraryDeck.url };
     const fresh: Deck = { ...deck, url: `${deck.url}-fresh`, sourceUrl: v2 };
@@ -1783,19 +2205,28 @@ describe("createUseCases", () => {
   it("addReleaseLanguages gives a copy the languages its release adds, and saves it; nothing for a home-made deck or nothing to add", async () => {
     const deps = makeDeps();
     const copy: Deck = { ...deck, title: { en: "Capitals" }, sourceUrl: libraryDeck.url };
-    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockResolvedValueOnce({ ...libraryContent, title: { en: "Capitals", sv: "Huvudstäder" } });
-    await expect(createUseCases(deps).addReleaseLanguages(copy)).resolves.toMatchObject({ title: { en: "Capitals", sv: "Huvudstäder" } });
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockResolvedValueOnce({
+      ...libraryContent,
+      title: { en: "Capitals", sv: "Huvudstäder" },
+    });
+    await expect(createUseCases(deps).addReleaseLanguages(copy)).resolves.toMatchObject({
+      title: { en: "Capitals", sv: "Huvudstäder" },
+    });
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(libraryDeck.url);
     expect(deps.deckRepository.saveDeck).toHaveBeenCalledOnce();
     await expect(createUseCases(deps).addReleaseLanguages(copy)).resolves.toBeNull();
-    await expect(createUseCases(deps).addReleaseLanguages({ ...deck, sourceUrl: undefined })).resolves.toBeNull();
+    await expect(
+      createUseCases(deps).addReleaseLanguages({ ...deck, sourceUrl: undefined }),
+    ).resolves.toBeNull();
     expect(deps.deckRepository.saveDeck).toHaveBeenCalledOnce();
   });
 
   it("deckRelease reads the release a copy came from; none for a home-made deck", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    await expect(useCases.deckRelease({ ...deck, sourceUrl: libraryDeck.url })).resolves.toEqual(libraryContent);
+    await expect(useCases.deckRelease({ ...deck, sourceUrl: libraryDeck.url })).resolves.toEqual(
+      libraryContent,
+    );
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(libraryDeck.url);
     await expect(useCases.deckRelease({ ...deck, sourceUrl: undefined })).resolves.toBeNull();
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledOnce();
@@ -1808,7 +2239,10 @@ describe("createUseCases", () => {
       url: `${RELEASES}v${version}.ttl`,
       seriesUrl: `${RELEASES}v1.ttl#series`,
       version: String(version),
-      releases: Array.from({ length: version }, (_, at) => ({ url: `${RELEASES}v${at + 1}.ttl`, version: String(at + 1) })),
+      releases: Array.from({ length: version }, (_, at) => ({
+        url: `${RELEASES}v${at + 1}.ttl`,
+        version: String(at + 1),
+      })),
       ...extra,
     });
     const reading = (deps: ReturnType<typeof makeDeps>, releases: readonly LibraryDeck[]) =>
@@ -1821,39 +2255,70 @@ describe("createUseCases", () => {
     it("readReleaseFromLink reads the release and checks it against the library's shapes, as anyone, writing nothing", async () => {
       const deps = makeDeps();
       reading(deps, [linked(1)]);
-      await expect(createUseCases(deps).readReleaseFromLink(`${RELEASES}v1.ttl`)).resolves.toEqual(linked(1));
-      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${RELEASES}v1.ttl`, "library");
+      await expect(createUseCases(deps).readReleaseFromLink(`${RELEASES}v1.ttl`)).resolves.toEqual(
+        linked(1),
+      );
+      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
+        `${RELEASES}v1.ttl`,
+        "library",
+      );
       expect(deps.deckRepository.importDeck).not.toHaveBeenCalled();
     });
 
     it("readReleaseFromLink reads a link as the URL standard writes it", async () => {
       const deps = makeDeps();
       reading(deps, [linked(1)]);
-      await expect(createUseCases(deps).readReleaseFromLink(`https://Bob.example:443/memo/releases/rivers/v1.ttl`)).resolves.toEqual(linked(1));
+      await expect(
+        createUseCases(deps).readReleaseFromLink(
+          `https://Bob.example:443/memo/releases/rivers/v1.ttl`,
+        ),
+      ).resolves.toEqual(linked(1));
       expect(deps.deckLibrary.readRelease).toHaveBeenCalledWith(`${RELEASES}v1.ttl`);
     });
 
     it("readReleaseFromLink refuses text that is no release's address, before reading anything", async () => {
       const deps = makeDeps();
-      await expect(createUseCases(deps).readReleaseFromLink("rivers")).rejects.toMatchObject({ code: "releaseUrlInvalid" });
+      await expect(createUseCases(deps).readReleaseFromLink("rivers")).rejects.toMatchObject({
+        code: "releaseUrlInvalid",
+      });
       expect(deps.deckLibrary.readRelease).not.toHaveBeenCalled();
     });
 
     it("readReleaseFromLink refuses a release that breaks its shapes, counting its violations, not its warnings", async () => {
       const deps = makeDeps();
       reading(deps, [linked(1)]);
-      const violation = (severity: "violation" | "warning") => ({ path: SM.front, message: { en: "Less than 1 values" }, severity, constraint: "MinCount" });
+      const violation = (severity: "violation" | "warning") => ({
+        path: SM.front,
+        message: { en: "Less than 1 values" },
+        severity,
+        constraint: "MinCount",
+      });
       vi.mocked(deps.shapeValidator.validateDocument).mockResolvedValue({
         url: `${RELEASES}v1.ttl`,
         status: "checked",
         subjects: [
-          { url: `${RELEASES}v1.ttl#a`, status: "checked", shape: "card", version: 5, violations: [violation("violation"), violation("warning")] },
-          { url: `${RELEASES}v1.ttl#b`, status: "checked", shape: "card", version: 5, violations: [{ ...violation("violation"), path: undefined }] },
+          {
+            url: `${RELEASES}v1.ttl#a`,
+            status: "checked",
+            shape: "card",
+            version: 5,
+            violations: [violation("violation"), violation("warning")],
+          },
+          {
+            url: `${RELEASES}v1.ttl#b`,
+            status: "checked",
+            shape: "card",
+            version: 5,
+            violations: [{ ...violation("violation"), path: undefined }],
+          },
           { url: `${RELEASES}v1.ttl#c`, status: "untyped" },
         ],
       });
       const refused = createUseCases(deps).readReleaseFromLink(`${RELEASES}v1.ttl`);
-      await expect(refused).rejects.toMatchObject({ code: "releaseNotConforming", vars: { host: "bob.example", count: 2 } });
+      await expect(refused).rejects.toMatchObject({
+        code: "releaseNotConforming",
+        vars: { host: "bob.example", count: 2 },
+      });
       await expect(refused).rejects.toThrow("Less than 1 values");
     });
 
@@ -1864,21 +2329,38 @@ describe("createUseCases", () => {
       expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(`${RELEASES}v1.ttl`);
       expect(deps.deckRepository.importDeck).toHaveBeenLastCalledWith(instance.url, libraryContent);
       await useCases.importReleaseFromUrl(instance.url, linked(1, { isCourse: true }));
-      expect(deps.deckRepository.importDeck).toHaveBeenLastCalledWith(instance.url, { ...libraryContent, cards: [] });
+      expect(deps.deckRepository.importDeck).toHaveBeenLastCalledWith(instance.url, {
+        ...libraryContent,
+        cards: [],
+      });
       const started: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([started]);
-      await expect(useCases.importReleaseFromUrl(instance.url, linked(2, { isCourse: true }))).resolves.toEqual(started);
+      await expect(
+        useCases.importReleaseFromUrl(instance.url, linked(2, { isCourse: true })),
+      ).resolves.toEqual(started);
       expect(deps.deckRepository.importDeck).toHaveBeenCalledTimes(2);
     });
 
     it("listLibraryUpdates finds a newer version of a linked copy in its creator's catalog, else says it does not know", async () => {
       const deps = makeDeps();
-      const elsewhere = linked(3, { url: "https://bob.example/memo/releases/lakes/v3.ttl", seriesUrl: "https://bob.example/memo/releases/lakes/v1.ttl#series" });
+      const elsewhere = linked(3, {
+        url: "https://bob.example/memo/releases/lakes/v3.ttl",
+        seriesUrl: "https://bob.example/memo/releases/lakes/v1.ttl#series",
+      });
       reading(deps, [linked(1), linked(2), elsewhere]);
       const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
-      const gone: Deck = { ...deck, url: `${deck.url}-gone`, sourceUrl: "https://carol.example/v1.ttl" };
+      const gone: Deck = {
+        ...deck,
+        url: `${deck.url}-gone`,
+        sourceUrl: "https://carol.example/v1.ttl",
+      };
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy, gone]);
-      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([`${RELEASES}v1.ttl`, `${RELEASES}v2.ttl`, elsewhere.url, `${RELEASES}v9.ttl`]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v2.ttl`,
+        elsewhere.url,
+        `${RELEASES}v9.ttl`,
+      ]);
       const useCases = createUseCases(deps);
       await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
@@ -1886,7 +2368,13 @@ describe("createUseCases", () => {
       ]);
       // Each release is read once, however many copies the catalog serves; none the copied one lists, which is no newer.
       const reads = vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url);
-      expect(reads).toEqual([`${RELEASES}v1.ttl`, "https://carol.example/v1.ttl", `${RELEASES}v2.ttl`, elsewhere.url, `${RELEASES}v9.ttl`]);
+      expect(reads).toEqual([
+        `${RELEASES}v1.ttl`,
+        "https://carol.example/v1.ttl",
+        `${RELEASES}v2.ttl`,
+        elsewhere.url,
+        `${RELEASES}v9.ttl`,
+      ]);
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue(null);
       await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },
@@ -1896,7 +2384,12 @@ describe("createUseCases", () => {
       const lakes: Deck = { ...deck, url: `${deck.url}-lakes`, sourceUrl: elsewhere.url };
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy, lakes]);
       vi.mocked(deps.deckLibrary.readRelease).mockClear();
-      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([`${RELEASES}v1.ttl`, `${RELEASES}v2.ttl`, elsewhere.url, `${RELEASES}v9.ttl`]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v2.ttl`,
+        elsewhere.url,
+        `${RELEASES}v9.ttl`,
+      ]);
       await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
         { deck: lakes, series: elsewhere, version: "3", newer: false, fromLink: true },
@@ -1915,22 +2408,48 @@ describe("createUseCases", () => {
       const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
       vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
         url === `${RELEASES}v2.ttl`
-          ? { ...libraryContent, url, version: "2", cards: [...libraryContent.cards, { id: "norway", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 }] }
+          ? {
+              ...libraryContent,
+              url,
+              version: "2",
+              cards: [
+                ...libraryContent.cards,
+                { id: "norway", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 },
+              ],
+            }
           : { ...libraryContent, url },
       );
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
       const useCases = createUseCases(deps);
       await expect(useCases.planLibraryUpgrade(copy)).resolves.toBeNull();
-      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([`${RELEASES}v1.ttl`, `${RELEASES}v2.ttl`]);
-      await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({ fromVersion: "1", toVersion: "2", add: [{ id: "norway" }] });
-      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${RELEASES}v2.ttl`, "library");
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v2.ttl`,
+      ]);
+      await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({
+        fromVersion: "1",
+        toVersion: "2",
+        add: [{ id: "norway" }],
+      });
+      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
+        `${RELEASES}v2.ttl`,
+        "library",
+      );
     });
 
     it("planLibraryUpgrade refuses a linked copy's newer release, or one in between, that breaks the library's shapes", async () => {
       const deps = makeDeps();
       reading(deps, [linked(1), linked(2), linked(3)]);
-      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([`${RELEASES}v1.ttl`, `${RELEASES}v2.ttl`, `${RELEASES}v3.ttl`]);
-      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => ({ ...libraryContent, url, version: url.slice(-5, -4) }));
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v2.ttl`,
+        `${RELEASES}v3.ttl`,
+      ]);
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => ({
+        ...libraryContent,
+        url,
+        version: url.slice(-5, -4),
+      }));
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
       const broken = (bad: string) =>
         vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
@@ -1938,18 +2457,42 @@ describe("createUseCases", () => {
           status: "checked",
           subjects:
             url === bad
-              ? [{ url: `${url}#a`, status: "checked", shape: "card", version: 5, violations: [{ path: SM.front, message: { en: "Less than 1 values" }, severity: "violation", constraint: "MinCount" }] }]
+              ? [
+                  {
+                    url: `${url}#a`,
+                    status: "checked",
+                    shape: "card",
+                    version: 5,
+                    violations: [
+                      {
+                        path: SM.front,
+                        message: { en: "Less than 1 values" },
+                        severity: "violation",
+                        constraint: "MinCount",
+                      },
+                    ],
+                  },
+                ]
               : [],
         }));
       const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
       const useCases = createUseCases(deps);
       for (const bad of [`${RELEASES}v3.ttl`, `${RELEASES}v2.ttl`]) {
         broken(bad);
-        await expect(useCases.planLibraryUpgrade(copy)).rejects.toMatchObject({ code: "releaseNotConforming", vars: { host: "bob.example", count: 1 } });
+        await expect(useCases.planLibraryUpgrade(copy)).rejects.toMatchObject({
+          code: "releaseNotConforming",
+          vars: { host: "bob.example", count: 1 },
+        });
       }
       // Given the copy as the copies' look found it, its releases are checked all the same.
       await expect(
-        useCases.planLibraryUpgrade(copy, { deck: copy, series: linked(3), version: "1", newer: true, fromLink: true }),
+        useCases.planLibraryUpgrade(copy, {
+          deck: copy,
+          series: linked(3),
+          version: "1",
+          newer: true,
+          fromLink: true,
+        }),
       ).rejects.toMatchObject({ code: "releaseNotConforming" });
       expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalledWith(`${RELEASES}v2.ttl`);
     });
@@ -1958,16 +2501,9 @@ describe("createUseCases", () => {
   it("importLibraryDeck fetches the deck's content and imports it", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    await expect(
-      useCases.importLibraryDeck(instance.url, libraryDeck),
-    ).resolves.toEqual(deck);
-    expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(
-      libraryDeck.url,
-    );
-    expect(deps.deckRepository.importDeck).toHaveBeenCalledWith(
-      instance.url,
-      libraryContent,
-    );
+    await expect(useCases.importLibraryDeck(instance.url, libraryDeck)).resolves.toEqual(deck);
+    expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(libraryDeck.url);
+    expect(deps.deckRepository.importDeck).toHaveBeenCalledWith(instance.url, libraryContent);
   });
 
   it("getPreferences overlays defaults when nothing is stored", async () => {
@@ -2006,9 +2542,7 @@ describe("createUseCases", () => {
     );
     const useCases = createUseCases(deps);
 
-    await expect(useCases.getPreferences(instance.url)).rejects.toThrow(
-      "preferences unreachable",
-    );
+    await expect(useCases.getPreferences(instance.url)).rejects.toThrow("preferences unreachable");
     await expect(
       useCases.getPreferences("https://alice.example/solid-memo/other/"),
     ).resolves.toEqual(expect.objectContaining({ dayBoundaryHour: 4 }));
@@ -2032,9 +2566,7 @@ describe("createUseCases", () => {
       formatVersion: 2,
     });
     const useCases = createUseCases(deps);
-    await expect(useCases.getPreferences(instance.url)).resolves.toEqual(
-      stored,
-    );
+    await expect(useCases.getPreferences(instance.url)).resolves.toEqual(stored);
   });
 
   it("savePreferences delegates to the repository", async () => {
@@ -2067,11 +2599,7 @@ describe("createUseCases", () => {
     vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([]);
     const useCases = createUseCases({ ...deps, random: () => 0 });
 
-    const queue = await useCases.getStudyQueue(
-      instance.url,
-      deck,
-      new Date(2026, 8, 21, 12, 0),
-    );
+    const queue = await useCases.getStudyQueue(instance.url, deck, new Date(2026, 8, 21, 12, 0));
     expect(queue.newPrompts.map((p) => p.card.id)).toEqual(["n2", "n3", "n1"]);
   });
 
@@ -2079,10 +2607,7 @@ describe("createUseCases", () => {
     const deps = makeDeps();
     const dueCard = { ...card, id: "card-due", url: `${deck.cardsDocumentUrl}#card-due` };
     const newCard = { ...card, id: "card-new", url: `${deck.cardsDocumentUrl}#card-new` };
-    vi.mocked(deps.deckRepository.listCards).mockResolvedValue([
-      dueCard,
-      newCard,
-    ]);
+    vi.mocked(deps.deckRepository.listCards).mockResolvedValue([dueCard, newCard]);
     vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([
       {
         cardId: "card-due",
@@ -2098,11 +2623,7 @@ describe("createUseCases", () => {
     ]);
     const useCases = createUseCases(deps);
 
-    const queue = await useCases.getStudyQueue(
-      instance.url,
-      deck,
-      new Date(2026, 8, 21, 12, 0),
-    );
+    const queue = await useCases.getStudyQueue(instance.url, deck, new Date(2026, 8, 21, 12, 0));
     expect(queue.due.map((p) => p.card.id)).toEqual(["card-due"]);
     expect(queue.newPrompts.map((p) => p.card.id)).toEqual(["card-new"]);
 
@@ -2139,10 +2660,7 @@ describe("createUseCases", () => {
       lastReviewedAt: now.toISOString(),
       formatVersion: 2,
     });
-    expect(deps.reviewStateRepository.saveReviewState).toHaveBeenCalledWith(
-      deck,
-      state,
-    );
+    expect(deps.reviewStateRepository.saveReviewState).toHaveBeenCalledWith(deck, state);
   });
 
   it("recordReview transitions an existing state and keeps firstReviewedAt", async () => {
@@ -2248,14 +2766,18 @@ describe("createUseCases", () => {
       ]);
       const useCases = createUseCases(deps);
 
-      await expect(
-        useCases.resetStudyDay(instance.url, deck, now),
-      ).resolves.toBe(2);
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(2);
 
-      expect(
-        deps.reviewStateRepository.applyReviewChanges,
-      ).toHaveBeenCalledExactlyOnceWith(deck, {
-        save: [{ cardId: "reviewed", direction: "front-to-back", firstReviewedAt: earlier, formatVersion: 2, ...morning }],
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(deck, {
+        save: [
+          {
+            cardId: "reviewed",
+            direction: "front-to-back",
+            firstReviewedAt: earlier,
+            formatVersion: 2,
+            ...morning,
+          },
+        ],
         remove: [{ cardId: "introduced", direction: "front-to-back" }],
       });
     });
@@ -2263,12 +2785,8 @@ describe("createUseCases", () => {
     it("writes nothing when nothing was studied today", async () => {
       const deps = makeDeps();
       const useCases = createUseCases(deps);
-      await expect(
-        useCases.resetStudyDay(instance.url, deck, now),
-      ).resolves.toBe(0);
-      expect(
-        deps.reviewStateRepository.applyReviewChanges,
-      ).not.toHaveBeenCalled();
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(0);
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     });
 
     it("uses the instance's day boundary", async () => {
@@ -2288,9 +2806,7 @@ describe("createUseCases", () => {
         },
       ]);
       const useCases = createUseCases(deps);
-      await expect(
-        useCases.resetStudyDay(instance.url, deck, now),
-      ).resolves.toBe(0);
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(0);
 
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
         preferences: {
@@ -2304,9 +2820,7 @@ describe("createUseCases", () => {
         },
         formatVersion: 2,
       });
-      await expect(
-        useCases.resetStudyDay(instance.url, deck, now),
-      ).resolves.toBe(1);
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(1);
     });
   });
 
@@ -2369,12 +2883,26 @@ describe("the instance digest", () => {
     };
     const at = (version: string, value: unknown) =>
       vi.fn(async (_target: unknown, since: string | undefined) =>
-        since === version ? { unchanged: true as const } : { unchanged: false as const, value, version },
+        since === version
+          ? { unchanged: true as const }
+          : { unchanged: false as const, value, version },
       );
-    deps.deckRepository.readCardsSince = at("c1", [current, card2]) as DeckRepository["readCardsSince"];
-    deps.reviewStateRepository.readReviewStatesSince = at("r1", [review]) as ReviewStateRepository["readReviewStatesSince"];
-    deps.shapeValidator.validateDocumentSince = vi.fn(async (url: string, since: string | undefined) =>
-      since === `v-${url}` ? { unchanged: true as const } : { unchanged: false as const, value: { url, status: "checked" as const, subjects: [] }, version: `v-${url}` },
+    deps.deckRepository.readCardsSince = at("c1", [
+      current,
+      card2,
+    ]) as DeckRepository["readCardsSince"];
+    deps.reviewStateRepository.readReviewStatesSince = at("r1", [
+      review,
+    ]) as ReviewStateRepository["readReviewStatesSince"];
+    deps.shapeValidator.validateDocumentSince = vi.fn(
+      async (url: string, since: string | undefined) =>
+        since === `v-${url}`
+          ? { unchanged: true as const }
+          : {
+              unchanged: false as const,
+              value: { url, status: "checked" as const, subjects: [] },
+              version: `v-${url}`,
+            },
     );
     const useCases = createUseCases({ ...deps, digestRepository, ruleset: RULES });
     return { deps, useCases, digestRepository, stored: () => stored };
@@ -2390,37 +2918,72 @@ describe("the instance digest", () => {
 
   it("counts today's study from the documents the first time, and keeps the deck's schedule", async () => {
     const { useCases, stored, digestRepository } = setup();
-    await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({ dueCount: 1, newCount: 1 });
+    await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
+      dueCount: 1,
+      newCount: 1,
+    });
     await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalledOnce());
-    expect(stored()!.schedules[deck.url]).toMatchObject({ cardsVersion: "c1", reviewsVersion: "r1" });
-    expect(stored()!.receipts[deck.cardsDocumentUrl]).toEqual({ document: deck.cardsDocumentUrl, version: "c1", latestFormat: true });
-    expect(stored()!.receipts[deck.reviewsDocumentUrl]).toEqual({ document: deck.reviewsDocumentUrl, version: "r1", latestFormat: true });
+    expect(stored()!.schedules[deck.url]).toMatchObject({
+      cardsVersion: "c1",
+      reviewsVersion: "r1",
+    });
+    expect(stored()!.receipts[deck.cardsDocumentUrl]).toEqual({
+      document: deck.cardsDocumentUrl,
+      version: "c1",
+      latestFormat: true,
+    });
+    expect(stored()!.receipts[deck.reviewsDocumentUrl]).toEqual({
+      document: deck.reviewsDocumentUrl,
+      version: "r1",
+      latestFormat: true,
+    });
   });
 
   it("counts from the schedule while neither document changed", async () => {
     const { deps, useCases } = setup(await learned());
-    await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({ dueCount: 1, newCount: 1 });
+    await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
+      dueCount: 1,
+      newCount: 1,
+    });
     expect(deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(deck, "c1");
-    expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledExactlyOnceWith(deck, "r1");
+    expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledExactlyOnceWith(
+      deck,
+      "r1",
+    );
   });
 
   it("counts from the documents again when one changed, or the deck is studied another way", async () => {
     const digest = await learned();
-    const changed = setup({ ...digest, schedules: { [deck.url]: { ...digest.schedules[deck.url]!, cardsVersion: "c0" } } });
-    await expect(changed.useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({ dueCount: 1, newCount: 1 });
+    const changed = setup({
+      ...digest,
+      schedules: { [deck.url]: { ...digest.schedules[deck.url]!, cardsVersion: "c0" } },
+    });
+    await expect(changed.useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
+      dueCount: 1,
+      newCount: 1,
+    });
     expect(changed.deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(deck, "c0");
 
     const otherWay = setup(digest);
-    await expect(otherWay.useCases.getStudyCounts(instance.url, { ...deck, direction: "bidirectional" }, now)).resolves.toEqual({
+    await expect(
+      otherWay.useCases.getStudyCounts(instance.url, { ...deck, direction: "bidirectional" }, now),
+    ).resolves.toEqual({
       dueCount: 1,
       newCount: 3,
     });
-    expect(otherWay.deps.deckRepository.readCardsSince).toHaveBeenLastCalledWith(expect.anything(), undefined);
+    expect(otherWay.deps.deckRepository.readCardsSince).toHaveBeenLastCalledWith(
+      expect.anything(),
+      undefined,
+    );
   });
 
   it("notes no format receipt for a document holding something outdated, and nothing of a document without a version", async () => {
     const outdated = setup();
-    outdated.deps.deckRepository.readCardsSince = vi.fn(async () => ({ unchanged: false as const, value: [{ ...card, formatVersion: 0 }], version: "c1" }));
+    outdated.deps.deckRepository.readCardsSince = vi.fn(async () => ({
+      unchanged: false as const,
+      value: [{ ...card, formatVersion: 0 }],
+      version: "c1",
+    }));
     outdated.deps.reviewStateRepository.readReviewStatesSince = vi.fn(async () => ({
       unchanged: false as const,
       value: [{ ...review, formatVersion: 1 }],
@@ -2431,7 +2994,11 @@ describe("the instance digest", () => {
     expect(outdated.stored()!.receipts).toEqual({});
 
     const unversioned = setup();
-    unversioned.deps.deckRepository.readCardsSince = vi.fn(async () => ({ unchanged: false as const, value: [card], version: null }));
+    unversioned.deps.deckRepository.readCardsSince = vi.fn(async () => ({
+      unchanged: false as const,
+      value: [card],
+      version: null,
+    }));
     await unversioned.useCases.getStudyCounts(instance.url, deck, now);
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(unversioned.digestRepository.updateDigest).not.toHaveBeenCalled();
@@ -2441,14 +3008,22 @@ describe("the instance digest", () => {
     const { deps, useCases, digestRepository } = setup();
     vi.mocked(digestRepository.readDigest).mockRejectedValue(new Error("offline"));
     vi.mocked(digestRepository.updateDigest).mockRejectedValue(new Error("offline"));
-    await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({ dueCount: 1, newCount: 1 });
-    await expect(createUseCases(deps).getStudyCounts(instance.url, deck, now)).resolves.toEqual({ dueCount: 1, newCount: 1 });
+    await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
+      dueCount: 1,
+      newCount: 1,
+    });
+    await expect(createUseCases(deps).getStudyCounts(instance.url, deck, now)).resolves.toEqual({
+      dueCount: 1,
+      newCount: 1,
+    });
   });
 
   it("refuses a read without a version that says unchanged", async () => {
     const { deps, useCases } = setup(await learned());
     deps.deckRepository.readCardsSince = vi.fn(async () => ({ unchanged: true as const }));
-    await expect(useCases.getStudyCounts(instance.url, { ...deck, direction: "bidirectional" }, now)).rejects.toThrow("came back unchanged");
+    await expect(
+      useCases.getStudyCounts(instance.url, { ...deck, direction: "bidirectional" }, now),
+    ).rejects.toThrow("came back unchanged");
     await expect(useCases.refreshStudyDigest(instance.url, deck)).resolves.toBeUndefined();
   });
 
@@ -2456,7 +3031,10 @@ describe("the instance digest", () => {
     const { useCases, stored, digestRepository } = setup();
     await useCases.refreshStudyDigest(instance.url, deck);
     await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalledTimes(2));
-    expect(stored()!.schedules[deck.url]).toMatchObject({ cardsVersion: "c1", reviewsVersion: "r1" });
+    expect(stored()!.schedules[deck.url]).toMatchObject({
+      cardsVersion: "c1",
+      reviewsVersion: "r1",
+    });
     expect(stored()!.receipts[deck.reviewsDocumentUrl]).toEqual({
       document: deck.reviewsDocumentUrl,
       version: `v-${deck.reviewsDocumentUrl}`,
@@ -2468,12 +3046,30 @@ describe("the instance digest", () => {
     const { deps, useCases, stored, digestRepository } = setup();
     deps.shapeValidator.validateDocumentSince = vi.fn(async (url: string) => ({
       unchanged: false as const,
-      value: { url, status: "checked" as const, subjects: [{ url: `${url}#x`, status: "checked" as const, shape: "reviewState" as const, version: 2, violations: [{ message: { en: "no" }, severity: "violation" as const, constraint: "MinCount" }] }] },
+      value: {
+        url,
+        status: "checked" as const,
+        subjects: [
+          {
+            url: `${url}#x`,
+            status: "checked" as const,
+            shape: "reviewState" as const,
+            version: 2,
+            violations: [
+              { message: { en: "no" }, severity: "violation" as const, constraint: "MinCount" },
+            ],
+          },
+        ],
+      },
       version: "r1",
     }));
     await useCases.refreshStudyDigest(instance.url, deck);
     await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalledOnce());
-    expect(stored()!.receipts[deck.reviewsDocumentUrl]).toEqual({ document: deck.reviewsDocumentUrl, version: "r1", latestFormat: true });
+    expect(stored()!.receipts[deck.reviewsDocumentUrl]).toEqual({
+      document: deck.reviewsDocumentUrl,
+      version: "r1",
+      latestFormat: true,
+    });
     deps.shapeValidator.validateDocumentSince = vi.fn(async (url: string) => ({
       unchanged: false as const,
       value: { url, status: "checked" as const, subjects: [] },
@@ -2484,39 +3080,81 @@ describe("the instance digest", () => {
   });
 
   it("checks only documents changed since they conformed, by these rules", async () => {
-    const urls = [`${instance.url}meta.ttl`, `${instance.url}preferences.ttl`, `${instance.url}catalog.ttl`, deck.cardsDocumentUrl, deck.reviewsDocumentUrl];
+    const urls = [
+      `${instance.url}meta.ttl`,
+      `${instance.url}preferences.ttl`,
+      `${instance.url}catalog.ttl`,
+      deck.cardsDocumentUrl,
+      deck.reviewsDocumentUrl,
+    ];
     const first = setup();
-    await expect(first.useCases.checkInstance(instance.url)).resolves.toMatchObject({ conforms: true });
+    await expect(first.useCases.checkInstance(instance.url)).resolves.toMatchObject({
+      conforms: true,
+    });
     await vi.waitFor(() => expect(Object.keys(first.stored()!.receipts)).toHaveLength(urls.length));
-    expect(first.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(urls[0], undefined, "pod");
+    expect(first.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(
+      urls[0],
+      undefined,
+      "pod",
+    );
 
     const digest = first.stored()!;
-    const again = setup({ ...digest, receipts: { ...digest.receipts, [urls[0]!]: { ...digest.receipts[urls[0]!]!, conformedTo: "older-rules" } } });
+    const again = setup({
+      ...digest,
+      receipts: {
+        ...digest.receipts,
+        [urls[0]!]: { ...digest.receipts[urls[0]!]!, conformedTo: "older-rules" },
+      },
+    });
     const report = await again.useCases.checkInstance(instance.url);
     expect(report.documents.map((d) => d.subjects.length)).toEqual([0, 0, 0, 0, 0]);
-    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(urls[0], undefined, "pod");
-    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(urls[1], `v-${urls[1]}`, "pod");
+    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(
+      urls[0],
+      undefined,
+      "pod",
+    );
+    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(
+      urls[1],
+      `v-${urls[1]}`,
+      "pod",
+    );
   });
 
   it("checks the instance's drafts against the draft shapes, in the quick check and the full one", async () => {
-    const drafts = [`${instance.url}drafts/solid/v1/release.ttl`, `${instance.url}drafts/solid/v1/cards.ttl`];
+    const drafts = [
+      `${instance.url}drafts/solid/v1/release.ttl`,
+      `${instance.url}drafts/solid/v1/cards.ttl`,
+    ];
     const { deps } = setup();
-    const releaseDraftRepository = { documents: vi.fn(async () => drafts) } as unknown as ReleaseDraftRepository;
+    const releaseDraftRepository = {
+      documents: vi.fn(async () => drafts),
+    } as unknown as ReleaseDraftRepository;
     const useCases = createUseCases({ ...deps, releaseDraftRepository });
     const report = await useCases.checkInstance(instance.url);
     expect(report.documents.map((document) => document.url).slice(-2)).toEqual(drafts);
-    expect(deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(drafts[0], undefined, "draft");
+    expect(deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(
+      drafts[0],
+      undefined,
+      "draft",
+    );
     await useCases.validateInstance(instance.url);
     expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(drafts[1], "draft");
-    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${instance.url}catalog.ttl`, "pod");
+    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
+      `${instance.url}catalog.ttl`,
+      "pod",
+    );
   });
 
   it("keeps no drafts without a repository of them", async () => {
     const useCases = createUseCases(makeDeps());
     await expect(useCases.listReleaseDrafts(instance.url)).resolves.toEqual([]);
-    await expect(useCases.getReleaseDraft(`${instance.url}drafts/a/v1/release.ttl`)).rejects.toThrow("This app keeps no drafts.");
+    await expect(
+      useCases.getReleaseDraft(`${instance.url}drafts/a/v1/release.ttl`),
+    ).rejects.toThrow("This app keeps no drafts.");
     await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([]);
-    await expect(useCases.makeReleasePublic(`${instance.url}releases/a/v1.ttl`)).rejects.toThrow("This app keeps no drafts.");
+    await expect(useCases.makeReleasePublic(`${instance.url}releases/a/v1.ttl`)).rejects.toThrow(
+      "This app keeps no drafts.",
+    );
   });
 
   it("keeps no receipt of a document that does not conform or has no version", async () => {
@@ -2538,21 +3176,28 @@ describe("the instance digest", () => {
     };
     const unstated: Card = { ...current, front: { "": "水" }, back: { en: "water" } };
     const twin: Card = { ...unstated, id: "card-3", url: `${deck.cardsDocumentUrl}#card-3` };
-    const marked: Card = { ...card2, front: { en: "<b>x</b>" }, back: { en: "x" }, textFormat: SM.markdown };
+    const marked: Card = {
+      ...card2,
+      front: { en: "<b>x</b>" },
+      back: { en: "x" },
+      textFormat: SM.markdown,
+    };
 
     it("checks the deck's entry and documents as the instance's check does, its cards' languages, twins and Markdown", async () => {
       const { deps, useCases } = setup();
       deps.deckRepository.listCards = vi.fn(async () => [unstated, twin, marked]);
       const health = await useCases.checkDeck(instance.url, deck, text);
-      expect(vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url)).toEqual([
-        `${instance.url}catalog.ttl`,
-        deck.cardsDocumentUrl,
-        deck.reviewsDocumentUrl,
-      ]);
+      expect(
+        vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url),
+      ).toEqual([`${instance.url}catalog.ttl`, deck.cardsDocumentUrl, deck.reviewsDocumentUrl]);
       expect(health.report.conforms).toBe(true);
       expect(health.unstated!.map(({ card }) => card.id)).toEqual(["card-1", "card-3"]);
-      expect(health.duplicates.map((group) => group.map(({ id }) => id))).toEqual([["card-1", "card-3"]]);
-      expect(health.markdown.map(({ card, finding }) => [card.id, finding.code])).toEqual([["card-2", "html"]]);
+      expect(health.duplicates.map((group) => group.map(({ id }) => id))).toEqual([
+        ["card-1", "card-3"],
+      ]);
+      expect(health.markdown.map(({ card, finding }) => [card.id, finding.code])).toEqual([
+        ["card-2", "html"],
+      ]);
       expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
     });
 
@@ -2560,8 +3205,13 @@ describe("the instance digest", () => {
       const { deps, useCases } = setup();
       const copy = { ...deck, sourceUrl: libraryContent.url };
       deps.deckRepository.listCards = vi.fn(async () => [unstated, twin]);
-      deps.deckLibrary.fetchLibraryDeck = vi.fn(async () => ({ ...libraryContent, cards: [{ ...unstated, distractors: [] }] }) as LibraryDeckContent);
-      expect((await useCases.checkDeck(instance.url, copy, text)).unstated!.map(({ card }) => card.id)).toEqual(["card-3"]);
+      deps.deckLibrary.fetchLibraryDeck = vi.fn(
+        async () =>
+          ({ ...libraryContent, cards: [{ ...unstated, distractors: [] }] }) as LibraryDeckContent,
+      );
+      expect(
+        (await useCases.checkDeck(instance.url, copy, text)).unstated!.map(({ card }) => card.id),
+      ).toEqual(["card-3"]);
       deps.deckLibrary.fetchLibraryDeck = vi.fn(async () => {
         throw new Error("offline");
       });
@@ -2619,7 +3269,9 @@ describe("the instance digest", () => {
     };
     const { useCases, digestRepository } = setup({
       receipts: {},
-      schedules: { [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule } },
+      schedules: {
+        [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule },
+      },
     });
     const report = await useCases.getCardProgress(instance.url, now, { deck });
     expect(report.decks[0]!.forecast[2]).toEqual({ studyDay: "2026-09-30", due: 7, reviews: 7 });
@@ -2628,8 +3280,12 @@ describe("the instance digest", () => {
 
   it("refuses a read without a version that says unchanged, for the progress too", async () => {
     const { deps, useCases } = setup();
-    deps.reviewStateRepository.readReviewStatesSince = vi.fn(async () => ({ unchanged: true as const }));
-    await expect(useCases.getCardProgress(instance.url, now, { deck })).rejects.toThrow("came back unchanged");
+    deps.reviewStateRepository.readReviewStatesSince = vi.fn(async () => ({
+      unchanged: true as const,
+    }));
+    await expect(useCases.getCardProgress(instance.url, now, { deck })).rejects.toThrow(
+      "came back unchanged",
+    );
   });
 
   it("plans the format update without reading again documents with nothing outdated, and writes no digest", async () => {
@@ -2658,13 +3314,24 @@ describe("the answer log", () => {
       appendAll: vi.fn(async () => undefined),
       months: vi.fn(async () => [...byMonth.keys()].sort()),
       readMonth: vi.fn(async (_instanceUrl: string, month: string) => byMonth.get(month) ?? []),
-      readMonthSince: vi.fn(async (_instanceUrl: string, month: string, version: string | undefined): Promise<Since<Answer[]>> => {
-        const now = `v${versions.get(month) ?? 0}`;
-        return version === now ? { unchanged: true } : { unchanged: false, value: byMonth.get(month) ?? [], version: now };
-      }),
+      readMonthSince: vi.fn(
+        async (
+          _instanceUrl: string,
+          month: string,
+          version: string | undefined,
+        ): Promise<Since<Answer[]>> => {
+          const now = `v${versions.get(month) ?? 0}`;
+          return version === now
+            ? { unchanged: true }
+            : { unchanged: false, value: byMonth.get(month) ?? [], version: now };
+        },
+      ),
       removeDay: vi.fn(async (_instanceUrl: string, deckUrl: string, studyDay: string) => {
         for (const [month, answers] of byMonth) {
-          byMonth.set(month, answers.filter((a) => a.deckUrl !== deckUrl || a.studyDay !== studyDay));
+          byMonth.set(
+            month,
+            answers.filter((a) => a.deckUrl !== deckUrl || a.studyDay !== studyDay),
+          );
           changed(month);
         }
       }),
@@ -2676,7 +3343,11 @@ describe("the answer log", () => {
     const deps = makeDeps();
     const { log, byMonth } = memoryLog();
     let id = 0;
-    const useCases = createUseCases({ ...deps, answerLog: log, newId: () => `id${++id}-0000-0000` });
+    const useCases = createUseCases({
+      ...deps,
+      answerLog: log,
+      newId: () => `id${++id}-0000-0000`,
+    });
     return { deps, log, byMonth, useCases };
   };
 
@@ -2684,29 +3355,51 @@ describe("the answer log", () => {
     const { deps, byMonth, useCases } = setup();
     await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
     vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({
-      cardId: card.id, direction: "back-to-front", easeFactor: 2.5, intervalDays: 6, repetitions: 2,
-      due: "2026-09-21", firstReviewedAt: "2026-09-01T10:00:00.000Z", lastReviewedAt: "2026-09-15T10:00:00.000Z", formatVersion: 2,
+      cardId: card.id,
+      direction: "back-to-front",
+      easeFactor: 2.5,
+      intervalDays: 6,
+      repetitions: 2,
+      due: "2026-09-21",
+      firstReviewedAt: "2026-09-01T10:00:00.000Z",
+      lastReviewedAt: "2026-09-15T10:00:00.000Z",
+      formatVersion: 2,
     });
     await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 1, noon);
     await useCases.getStatistics(instance.url, noon);
     expect(byMonth.get("2026-09")).toEqual([
       {
         id: `answer-${noon.toISOString().replace(/[-:.]/g, "")}-id1-0000`,
-        deckUrl: deck.url, cardUrl: card.url, direction: "front-to-back", grade: 4,
-        answeredAt: noon.toISOString(), studyDay: "2026-09-21", nextIntervalDays: 1,
+        deckUrl: deck.url,
+        cardUrl: card.url,
+        direction: "front-to-back",
+        grade: 4,
+        answeredAt: noon.toISOString(),
+        studyDay: "2026-09-21",
+        nextIntervalDays: 1,
       },
       {
         id: `answer-${noon.toISOString().replace(/[-:.]/g, "")}-id2-0000`,
-        deckUrl: deck.url, cardUrl: card.url, direction: "back-to-front", grade: 1,
-        answeredAt: noon.toISOString(), studyDay: "2026-09-21", priorIntervalDays: 6, nextIntervalDays: 1,
+        deckUrl: deck.url,
+        cardUrl: card.url,
+        direction: "back-to-front",
+        grade: 1,
+        answeredAt: noon.toISOString(),
+        studyDay: "2026-09-21",
+        priorIntervalDays: 6,
+        nextIntervalDays: 1,
       },
     ]);
   });
 
   it("keeps an answer it could not add for later, in order, and does not fail the review", async () => {
     const { log, byMonth, useCases } = setup();
-    log.append.mockRejectedValueOnce(new Error("offline")).mockRejectedValueOnce(new Error("still offline"));
-    await expect(useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon)).resolves.toBeDefined();
+    log.append
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockRejectedValueOnce(new Error("still offline"));
+    await expect(
+      useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon),
+    ).resolves.toBeDefined();
     await useCases.refreshStudyDigest(instance.url, deck);
     expect(byMonth.size).toBe(0);
     await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 5, noon);
@@ -2721,24 +3414,44 @@ describe("the answer log", () => {
     const { deps, log, byMonth, useCases } = setup();
     await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
     vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([
-      { cardId: card.id, direction: "front-to-back", easeFactor: 2.6, intervalDays: 1, repetitions: 1, due: "2026-09-22",
-        firstReviewedAt: noon.toISOString(), lastReviewedAt: noon.toISOString(), formatVersion: 2 },
+      {
+        cardId: card.id,
+        direction: "front-to-back",
+        easeFactor: 2.6,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "2026-09-22",
+        firstReviewedAt: noon.toISOString(),
+        lastReviewedAt: noon.toISOString(),
+        formatVersion: 2,
+      },
     ]);
     await expect(useCases.resetStudyDay(instance.url, deck, noon)).resolves.toBe(1);
     expect(log.removeDay).toHaveBeenCalledWith(instance.url, deck.url, "2026-09-21");
-    expect(log.append.mock.invocationCallOrder[0]).toBeLessThan(log.removeDay.mock.invocationCallOrder[0]!);
+    expect(log.append.mock.invocationCallOrder[0]).toBeLessThan(
+      log.removeDay.mock.invocationCallOrder[0]!,
+    );
     expect(byMonth.get("2026-09")).toEqual([]);
   });
 
   it("computes the statistics of the months asked for, of every deck or of one", async () => {
     const { byMonth, useCases } = setup();
     const answer = (studyDay: string, deckUrl = deck.url): Answer => ({
-      id: `answer-${studyDay}`, deckUrl, cardUrl: card.url, direction: "front-to-back", grade: 4,
-      answeredAt: `${studyDay}T10:00:00.000Z`, studyDay, nextIntervalDays: 1,
+      id: `answer-${studyDay}`,
+      deckUrl,
+      cardUrl: card.url,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: `${studyDay}T10:00:00.000Z`,
+      studyDay,
+      nextIntervalDays: 1,
     });
     byMonth.set("2025-09", [answer("2025-09-30")]);
     byMonth.set("2025-10", [answer("2025-10-01")]);
-    byMonth.set("2026-09", [answer("2026-09-20"), answer("2026-09-21", "https://pod.example/other#deck")]);
+    byMonth.set("2026-09", [
+      answer("2026-09-20"),
+      answer("2026-09-21", "https://pod.example/other#deck"),
+    ]);
     const all = await useCases.getStatistics(instance.url, noon);
     expect(all.days.map((day) => day.studyDay)).toEqual(["2025-10-01", "2026-09-20", "2026-09-21"]);
     expect(all.streaks).toEqual({ current: 2, longest: 2 });
@@ -2750,9 +3463,14 @@ describe("the answer log", () => {
     const { deps, byMonth, useCases } = setup();
     byMonth.set("2026-09", []);
     await useCases.validateInstance(instance.url);
-    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${instance.url}history/2026-09.ttl`, "pod");
+    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
+      `${instance.url}history/2026-09.ttl`,
+      "pod",
+    );
     const plain = createUseCases(makeDeps());
-    await expect(plain.getStatistics(instance.url, noon)).resolves.toMatchObject({ totals: { answers: 0, studyDays: 0, cards: 0 } });
+    await expect(plain.getStatistics(instance.url, noon)).resolves.toMatchObject({
+      totals: { answers: 0, studyDays: 0, cards: 0 },
+    });
   });
 });
 
@@ -2760,7 +3478,12 @@ describe("the Studio's answer history and schedule insight", () => {
   const at = new Date("2026-10-09T12:00:00.000Z");
   const live: Card = { ...card, formatVersion: CARD_FORMAT_VERSION };
   const other: Card = { ...live, id: "card-2", url: `${deck.cardsDocumentUrl}#card-2` };
-  const retired: Card = { ...live, id: "card-3", url: `${deck.cardsDocumentUrl}#card-3`, retired: true };
+  const retired: Card = {
+    ...live,
+    id: "card-3",
+    url: `${deck.cardsDocumentUrl}#card-3`,
+    retired: true,
+  };
   const state = (cardId: string, extra: Partial<ReviewState> = {}): ReviewState => ({
     cardId,
     direction: "front-to-back",
@@ -2773,9 +3496,18 @@ describe("the Studio's answer history and schedule insight", () => {
     formatVersion: 2,
     ...extra,
   });
-  const states = [state("card-1"), state("card-2", { due: "2026-10-09", intervalDays: 40, easeFactor: 1.3 }), state("card-3")];
+  const states = [
+    state("card-1"),
+    state("card-2", { due: "2026-10-09", intervalDays: 40, easeFactor: 1.3 }),
+    state("card-3"),
+  ];
   let n = 0;
-  const answer = (cardId: string, grade: Answer["grade"], studyDay = "2026-10-01", extra: Partial<Answer> = {}): Answer => ({
+  const answer = (
+    cardId: string,
+    grade: Answer["grade"],
+    studyDay = "2026-10-01",
+    extra: Partial<Answer> = {},
+  ): Answer => ({
     id: `answer-${++n}`,
     deckUrl: deck.url,
     // Answered before an upgrade moved the cards into another document.
@@ -2795,7 +3527,10 @@ describe("the Studio's answer history and schedule insight", () => {
       "2026-09": [answer("card-1", 1, "2026-09-12"), answer("card-1", 2, "2026-09-13")],
       "2026-10": [
         answer("card-1", 0),
-        answer("card-1", 2, "2026-10-02", { mode: "multiple-choice", chosenDistractor: `${instance.url}decks/deck-1-old.ttl#card-1-d1` }),
+        answer("card-1", 2, "2026-10-02", {
+          mode: "multiple-choice",
+          chosenDistractor: `${instance.url}decks/deck-1-old.ttl#card-1-d1`,
+        }),
         answer("card-1", 4, "2026-10-03"),
         answer("card-2", 1),
         answer("card-3", 0),
@@ -2811,8 +3546,11 @@ describe("the Studio's answer history and schedule insight", () => {
       appendAll: vi.fn(async () => undefined),
       months: vi.fn(async () => Object.keys(months)),
       readMonth: vi.fn(),
-      readMonthSince: vi.fn(async (_instanceUrl: string, month: string, version: string | undefined) =>
-        version === versions[month] ? { unchanged: true as const } : { unchanged: false as const, value: months[month]!, version: versions[month]! },
+      readMonthSince: vi.fn(
+        async (_instanceUrl: string, month: string, version: string | undefined) =>
+          version === versions[month]
+            ? { unchanged: true as const }
+            : { unchanged: false as const, value: months[month]!, version: versions[month]! },
       ),
       removeDay: vi.fn(),
     };
@@ -2823,8 +3561,16 @@ describe("the Studio's answer history and schedule insight", () => {
         stored = change(stored);
       }),
     };
-    vi.mocked(deps.deckRepository.readCardsSince).mockResolvedValue({ unchanged: false, value: [live, other, retired], version: "c1" });
-    vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockResolvedValue({ unchanged: false, value: states, version: "r1" });
+    vi.mocked(deps.deckRepository.readCardsSince).mockResolvedValue({
+      unchanged: false,
+      value: [live, other, retired],
+      version: "c1",
+    });
+    vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockResolvedValue({
+      unchanged: false,
+      value: states,
+      version: "r1",
+    });
     const useCases = createUseCases({ ...deps, answerLog, digestRepository });
     return { deps, useCases, answerLog, months, versions, digestRepository, stored: () => stored };
   }
@@ -2845,7 +3591,11 @@ describe("the Studio's answer history and schedule insight", () => {
 
   it("keeps no month the log gave no version of, and reads it again each time", async () => {
     const { useCases, answerLog } = setup();
-    vi.mocked(answerLog.readMonthSince).mockResolvedValue({ unchanged: false, value: [answer("card-1", 3)], version: null });
+    vi.mocked(answerLog.readMonthSince).mockResolvedValue({
+      unchanged: false,
+      value: [answer("card-1", 3)],
+      version: null,
+    });
     await useCases.loadAnswerLog(instance.url);
     vi.mocked(answerLog.readMonthSince).mockClear();
     await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(2);
@@ -2862,12 +3612,20 @@ describe("the Studio's answer history and schedule insight", () => {
       ["2026-09-13", 2],
       ["2026-09-12", 1],
     ]);
-    expect(answers[1]).toMatchObject({ cardUrl: live.url, chosenDistractor: `${deck.cardsDocumentUrl}#card-1-d1` });
+    expect(answers[1]).toMatchObject({
+      cardUrl: live.url,
+      chosenDistractor: `${deck.cardsDocumentUrl}#card-1-d1`,
+    });
   });
 
   it("forecasts the deck's reviews capped by its pace, spreads its prompts, and finds its leeches in use", async () => {
     const { useCases, digestRepository, stored } = setup();
-    const insight = await useCases.deckInsight(instance.url, { ...deck, maxReviewsPerDay: 1 }, at, DEFAULT_PREFERENCES);
+    const insight = await useCases.deckInsight(
+      instance.url,
+      { ...deck, maxReviewsPerDay: 1 },
+      at,
+      DEFAULT_PREFERENCES,
+    );
     expect(insight.today).toBe("2026-10-09");
     expect(insight.maxReviewsPerDay).toBe(1);
     expect(insight.forecast).toHaveLength(30);
@@ -2886,7 +3644,10 @@ describe("the Studio's answer history and schedule insight", () => {
     expect(insight.leeches).toEqual([{ card: live, lapses: 4 }]);
     // The schedule was computed afresh, and kept.
     await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalled());
-    expect(stored()!.schedules[deck.url]).toMatchObject({ cardsVersion: "c1", reviewsVersion: "r1" });
+    expect(stored()!.schedules[deck.url]).toMatchObject({
+      cardsVersion: "c1",
+      reviewsVersion: "r1",
+    });
   });
 
   it("forecasts from the digest's schedule while it is of the documents as they are, with the instance's pace", async () => {
@@ -2901,7 +3662,9 @@ describe("the Studio's answer history and schedule insight", () => {
     };
     const { useCases, digestRepository } = setup({
       receipts: {},
-      schedules: { [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule } },
+      schedules: {
+        [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule },
+      },
     });
     const insight = await useCases.deckInsight(instance.url, deck, at, DEFAULT_PREFERENCES);
     expect(insight.maxReviewsPerDay).toBe(DEFAULT_PREFERENCES.maxReviewsPerDay);
@@ -2913,7 +3676,12 @@ describe("the Studio's answer history and schedule insight", () => {
 
 describe("library deck upgrade", () => {
   const LIB = "https://solid-memo.com/decks/capitals/";
-  const libraryCard = (id: string, back: string): LibraryCard => ({ id, front: { "": id }, back: { "": back }, formatVersion: 4 });
+  const libraryCard = (id: string, back: string): LibraryCard => ({
+    id,
+    front: { "": id },
+    back: { "": back },
+    formatVersion: 4,
+  });
   const reviewOf = (cardId: string): ReviewState => ({
     cardId,
     direction: "front-to-back",
@@ -2937,13 +3705,20 @@ describe("library deck upgrade", () => {
   async function world({
     reviews = [reviewOf("sweden"), reviewOf("latvia")],
     removesLatvia = true,
-  }: { reviews?: ReviewState[]; removesLatvia?: boolean } = {}) {
+  }: {
+    reviews?: ReviewState[];
+    removesLatvia?: boolean;
+  } = {}) {
     const deps = makeDeps();
     const v1: LibraryDeckContent = {
       ...libraryContent,
       url: `${LIB}v1.ttl`,
       seriesUrl: librarySeriesUrlOf(`${LIB}v1.ttl`),
-      cards: [libraryCard("sweden", "Stockholm?"), libraryCard("denmark", "Copenhagen"), libraryCard("latvia", "Riga")],
+      cards: [
+        libraryCard("sweden", "Stockholm?"),
+        libraryCard("denmark", "Copenhagen"),
+        libraryCard("latvia", "Riga"),
+      ],
     };
     const v2: LibraryDeckContent = {
       ...v1,
@@ -2969,9 +3744,14 @@ describe("library deck upgrade", () => {
         ],
       },
     ]);
-    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => (url === v2.url ? v2 : v1));
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
+      url === v2.url ? v2 : v1,
+    );
     const copy: Deck = { ...deck, title: { en: "Capitals" }, sourceUrl: v1.url };
-    const toPodCard = (documentUrl: string, { formatVersion: _version, ...content }: LibraryCard | Card): Card => ({
+    const toPodCard = (
+      documentUrl: string,
+      { formatVersion: _version, ...content }: LibraryCard | Card,
+    ): Card => ({
       ...content,
       url: `${documentUrl}#${content.id}`,
       createdAt: "createdAt" in content ? content.createdAt : "2026-09-28T10:00:00.000Z",
@@ -2979,7 +3759,9 @@ describe("library deck upgrade", () => {
     });
     const pod = {
       deck: copy as Deck | null,
-      cards: new Map<string, Card[]>([[copy.cardsDocumentUrl, v1.cards.map((c) => toPodCard(copy.cardsDocumentUrl, c))]]),
+      cards: new Map<string, Card[]>([
+        [copy.cardsDocumentUrl, v1.cards.map((c) => toPodCard(copy.cardsDocumentUrl, c))],
+      ]),
       reviews: new Map<string, ReviewState[]>([[copy.reviewsDocumentUrl, reviews]]),
       writes: new Map<string, number>(),
       /** Every write of a document of the deck, in order. */
@@ -2991,38 +3773,60 @@ describe("library deck upgrade", () => {
       pod.written.push(url);
     };
     const repo = deps.deckRepository;
-    vi.mocked(repo.readDeck).mockImplementation(async (url) => (pod.deck?.url === url ? pod.deck : null));
+    vi.mocked(repo.readDeck).mockImplementation(async (url) =>
+      pod.deck?.url === url ? pod.deck : null,
+    );
     vi.mocked(repo.listDecks).mockImplementation(async () => (pod.deck === null ? [] : [pod.deck]));
-    vi.mocked(repo.listCards).mockImplementation(async (d) => pod.cards.get(d.cardsDocumentUrl) ?? []);
+    vi.mocked(repo.listCards).mockImplementation(
+      async (d) => pod.cards.get(d.cardsDocumentUrl) ?? [],
+    );
     vi.mocked(repo.readCardsSince).mockImplementation(async (d, version) =>
       version === versionOf(d.cardsDocumentUrl)
         ? { unchanged: true }
-        : { unchanged: false, value: pod.cards.get(d.cardsDocumentUrl) ?? [], version: versionOf(d.cardsDocumentUrl) },
+        : {
+            unchanged: false,
+            value: pod.cards.get(d.cardsDocumentUrl) ?? [],
+            version: versionOf(d.cardsDocumentUrl),
+          },
     );
     vi.mocked(repo.applyCardChanges).mockImplementation(async (d, { save, remove }, options) => {
       const url = d.cardsDocumentUrl;
-      if (options?.version !== undefined && options.version !== versionOf(url)) throw new AppError("changedElsewhere", { url });
+      if (options?.version !== undefined && options.version !== versionOf(url))
+        throw new AppError("changedElsewhere", { url });
       const cards = new Map((pod.cards.get(url) ?? []).map((c) => [c.id, c]));
       for (const id of remove) cards.delete(id);
       for (const { retired, ...c } of save) {
-        const { retired: _was, ...before } = cards.get(c.id) ?? toPodCard(url, { ...c, formatVersion: 4 });
-        cards.set(c.id, { ...before, ...c, url: `${url}#${c.id}`, formatVersion: 4, ...(retired === true ? { retired } : {}) });
+        const { retired: _was, ...before } =
+          cards.get(c.id) ?? toPodCard(url, { ...c, formatVersion: 4 });
+        cards.set(c.id, {
+          ...before,
+          ...c,
+          url: `${url}#${c.id}`,
+          formatVersion: 4,
+          ...(retired === true ? { retired } : {}),
+        });
       }
       pod.cards.set(url, [...cards.values()]);
       wrote(url);
     });
     vi.mocked(repo.upgradeDeckEntry).mockImplementation(async (current, next) => {
-      if (pod.deck === null || !sameDeckState(pod.deck, current)) throw new AppError("deckChangedDuringUpgrade", { url: current.url });
+      if (pod.deck === null || !sameDeckState(pod.deck, current))
+        throw new AppError("deckChangedDuringUpgrade", { url: current.url });
       pod.deck = withDeckChanges(pod.deck, current, next);
       wrote(current.url);
       return pod.deck;
     });
     const reviewRepo = deps.reviewStateRepository;
-    vi.mocked(reviewRepo.listReviewStates).mockImplementation(async (d) => pod.reviews.get(d.reviewsDocumentUrl) ?? []);
+    vi.mocked(reviewRepo.listReviewStates).mockImplementation(
+      async (d) => pod.reviews.get(d.reviewsDocumentUrl) ?? [],
+    );
     vi.mocked(reviewRepo.applyReviewChanges).mockImplementation(async (d, { remove }) => {
       const url = d.reviewsDocumentUrl;
       const dropped = new Set(remove.map((key) => `${key.cardId} ${key.direction}`));
-      pod.reviews.set(url, (pod.reviews.get(url) ?? []).filter((s) => !dropped.has(`${s.cardId} ${s.direction}`)));
+      pod.reviews.set(
+        url,
+        (pod.reviews.get(url) ?? []).filter((s) => !dropped.has(`${s.cardId} ${s.direction}`)),
+      );
       wrote(url);
     });
     const useCases = createUseCases(deps);
@@ -3035,18 +3839,28 @@ describe("library deck upgrade", () => {
 
   it("writes the deck where it is: its cards first, held to the read the plan was made from, then the removed cards' states, the entry last", async () => {
     const { deps, pod, copy, plan, useCases } = await world();
-    expect(plan).toMatchObject({ add: [{ id: "norway" }], change: [{ id: "sweden" }], remove: [{ id: "latvia" }] });
+    expect(plan).toMatchObject({
+      add: [{ id: "norway" }],
+      change: [{ id: "sweden" }],
+      remove: [{ id: "latvia" }],
+    });
     const progress: DeckUpgradeProgress[] = [];
 
     const outcome = await useCases.applyLibraryUpgrade(copy, plan, (p) => progress.push(p));
 
-    expect(outcome).toEqual({ ok: true, deck: { ...copy, sourceUrl: `${LIB}v2.ttl`, title: { en: "Capitals", sv: "Huvudstäder" } } });
+    expect(outcome).toEqual({
+      ok: true,
+      deck: { ...copy, sourceUrl: `${LIB}v2.ttl`, title: { en: "Capitals", sv: "Huvudstäder" } },
+    });
     // Each document written once, where it is, in this order: what the deck is at is said last.
     expect(pod.written).toEqual([copy.cardsDocumentUrl, copy.reviewsDocumentUrl, copy.url]);
     // One PUT of the whole cards document, only while it is still at the version the plan read.
     expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
       copy,
-      { save: [libraryCard("norway", "Oslo"), libraryCard("sweden", "Stockholm")], remove: ["latvia"] },
+      {
+        save: [libraryCard("norway", "Oslo"), libraryCard("sweden", "Stockholm")],
+        remove: ["latvia"],
+      },
       { whole: true, version: "v0" },
     );
     expect(cardsOf(pod, copy.cardsDocumentUrl)).toEqual([
@@ -3055,21 +3869,34 @@ describe("library deck upgrade", () => {
       ["norway", "Oslo", false],
     ]);
     expect(pod.reviews.get(copy.reviewsDocumentUrl)).toEqual([reviewOf("sweden")]);
-    expect(deps.deckRepository.upgradeDeckEntry).toHaveBeenCalledWith(copy, expect.objectContaining({ sourceUrl: `${LIB}v2.ttl` }));
+    expect(deps.deckRepository.upgradeDeckEntry).toHaveBeenCalledWith(
+      copy,
+      expect.objectContaining({ sourceUrl: `${LIB}v2.ttl` }),
+    );
     // Nothing kept beside the deck: no copy, no backup, no note in the browser.
     expect(deps.deckRepository.deleteDocument).not.toHaveBeenCalled();
     expect(deps.updateJournal.begin).not.toHaveBeenCalled();
     expect(deps.shapeValidator.validateDocument).not.toHaveBeenCalled();
-    expect(progress.map((p) => `${p.step} ${p.done}/${p.total}`)).toEqual(["read 0/4", "cards 1/4", "reviews 2/4", "entry 3/4", "entry 4/4"]);
+    expect(progress.map((p) => `${p.step} ${p.done}/${p.total}`)).toEqual([
+      "read 0/4",
+      "cards 1/4",
+      "reviews 2/4",
+      "entry 3/4",
+      "entry 4/4",
+    ]);
   });
 
   it("does not touch the reviews document when no card with review states is removed, nor read it when no card is", async () => {
     const kept = await world({ reviews: [reviewOf("sweden")] });
-    await expect(kept.useCases.applyLibraryUpgrade(kept.copy, kept.plan)).resolves.toMatchObject({ ok: true });
+    await expect(kept.useCases.applyLibraryUpgrade(kept.copy, kept.plan)).resolves.toMatchObject({
+      ok: true,
+    });
     expect(kept.deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
 
     const none = await world({ removesLatvia: false });
-    await expect(none.useCases.applyLibraryUpgrade(none.copy, none.plan)).resolves.toMatchObject({ ok: true });
+    await expect(none.useCases.applyLibraryUpgrade(none.copy, none.plan)).resolves.toMatchObject({
+      ok: true,
+    });
     expect(none.deps.reviewStateRepository.listReviewStates).not.toHaveBeenCalled();
   });
 
@@ -3077,10 +3904,22 @@ describe("library deck upgrade", () => {
     const { deps, pod, copy, useCases, v2 } = await world();
     // Release 2 as the copy already has its cards, and only says the deck's name in Swedish too.
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
-      url === v2.url ? { ...v2, cards: pod.cards.get(copy.cardsDocumentUrl)!.map(({ url: _u, createdAt: _c, ...c }) => c) } : { ...v2, url, version: "1", title: { en: "Capitals" } },
+      url === v2.url
+        ? {
+            ...v2,
+            cards: pod.cards
+              .get(copy.cardsDocumentUrl)!
+              .map(({ url: _u, createdAt: _c, ...c }) => c),
+          }
+        : { ...v2, url, version: "1", title: { en: "Capitals" } },
     );
     const plan = (await useCases.planLibraryUpgrade(copy))!;
-    expect(plan).toMatchObject({ add: [], change: [], remove: [], title: { en: "Capitals", sv: "Huvudstäder" } });
+    expect(plan).toMatchObject({
+      add: [],
+      change: [],
+      remove: [],
+      title: { en: "Capitals", sv: "Huvudstäder" },
+    });
     await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ ok: true });
     expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
     expect(pod.written).toEqual([copy.url]);
@@ -3088,7 +3927,10 @@ describe("library deck upgrade", () => {
 
   it("refuses, writing nothing, when the deck no longer calls for what the user agreed to, has moved, or is gone", async () => {
     const { deps, pod, copy, plan, useCases } = await world();
-    pod.cards.get(copy.cardsDocumentUrl)![0] = { ...pod.cards.get(copy.cardsDocumentUrl)![0], back: { "": "Mine" } };
+    pod.cards.get(copy.cardsDocumentUrl)![0] = {
+      ...pod.cards.get(copy.cardsDocumentUrl)![0],
+      back: { "": "Mine" },
+    };
     await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toEqual({
       ok: false,
       step: "read",
@@ -3096,11 +3938,17 @@ describe("library deck upgrade", () => {
       changed: false,
     });
     pod.deck = { ...copy, cardsDocumentUrl: "elsewhere" };
-    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ error: expect.objectContaining({ code: "deckChangedSinceOffer" }) });
+    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({
+      error: expect.objectContaining({ code: "deckChangedSinceOffer" }),
+    });
     pod.deck = { ...copy, sourceUrl: undefined };
-    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ error: expect.objectContaining({ code: "deckChangedSinceOffer" }) });
+    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({
+      error: expect.objectContaining({ code: "deckChangedSinceOffer" }),
+    });
     pod.deck = null;
-    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ error: expect.objectContaining({ code: "deckGone" }) });
+    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({
+      error: expect.objectContaining({ code: "deckGone" }),
+    });
     expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
     expect(pod.written).toEqual([]);
   });
@@ -3108,7 +3956,11 @@ describe("library deck upgrade", () => {
   it("fails at reading when a read without a version answers unchanged", async () => {
     const { deps, copy, plan, useCases } = await world();
     vi.mocked(deps.deckRepository.readCardsSince).mockResolvedValue({ unchanged: true });
-    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ ok: false, step: "read", changed: false });
+    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({
+      ok: false,
+      step: "read",
+      changed: false,
+    });
   });
 
   it("writes no cards over a document changed since the plan read it (412), and nothing after: the deck is as it was", async () => {
@@ -3119,8 +3971,17 @@ describe("library deck upgrade", () => {
       return pod.reviews.get(d.reviewsDocumentUrl) ?? [];
     });
     const outcome = await useCases.applyLibraryUpgrade(copy, plan);
-    expect(outcome).toEqual({ ok: false, step: "cards", error: new AppError("changedElsewhere", { url: copy.cardsDocumentUrl }), changed: false });
-    expect(cardsOf(pod, copy.cardsDocumentUrl).map(([id]) => id)).toEqual(["sweden", "denmark", "latvia"]);
+    expect(outcome).toEqual({
+      ok: false,
+      step: "cards",
+      error: new AppError("changedElsewhere", { url: copy.cardsDocumentUrl }),
+      changed: false,
+    });
+    expect(cardsOf(pod, copy.cardsDocumentUrl).map(([id]) => id)).toEqual([
+      "sweden",
+      "denmark",
+      "latvia",
+    ]);
     expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     expect(deps.deckRepository.upgradeDeckEntry).not.toHaveBeenCalled();
     // A pod that gives no version holds the cards' write to none.
@@ -3130,28 +3991,53 @@ describe("library deck upgrade", () => {
       value: unversioned.pod.cards.get(d.cardsDocumentUrl) ?? [],
       version: null,
     }));
-    await expect(unversioned.useCases.applyLibraryUpgrade(unversioned.copy, unversioned.plan)).resolves.toMatchObject({ ok: true });
-    expect(vi.mocked(unversioned.deps.deckRepository.applyCardChanges).mock.calls[0]![2]).toEqual({ whole: true });
+    await expect(
+      unversioned.useCases.applyLibraryUpgrade(unversioned.copy, unversioned.plan),
+    ).resolves.toMatchObject({ ok: true });
+    expect(vi.mocked(unversioned.deps.deckRepository.applyCardChanges).mock.calls[0]![2]).toEqual({
+      whole: true,
+    });
   });
 
   it("stops where a write fails, nothing put back, and offered again it finishes, no card it wrote taken for the user's", async () => {
     const { deps, pod, copy, plan, useCases, v2 } = await world();
-    vi.mocked(deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(new AppError("changedElsewhere", { url: copy.url }));
+    vi.mocked(deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(
+      new AppError("changedElsewhere", { url: copy.url }),
+    );
     const outcome = await useCases.applyLibraryUpgrade(copy, plan);
-    expect(outcome).toEqual({ ok: false, step: "entry", error: new AppError("changedElsewhere", { url: copy.url }), changed: true });
+    expect(outcome).toEqual({
+      ok: false,
+      step: "entry",
+      error: new AppError("changedElsewhere", { url: copy.url }),
+      changed: true,
+    });
     // The entry's write was refused, so it is not read again to tell whether it was made.
     expect(deps.deckRepository.readDeck).toHaveBeenCalledOnce();
     // The deck reads as its documents are: the newer release's cards, still naming the release it came from.
     expect(pod.deck).toEqual(copy);
-    expect(cardsOf(pod, copy.cardsDocumentUrl).map(([id]) => id)).toEqual(["sweden", "denmark", "norway"]);
+    expect(cardsOf(pod, copy.cardsDocumentUrl).map(([id]) => id)).toEqual([
+      "sweden",
+      "denmark",
+      "norway",
+    ]);
     expect(pod.reviews.get(copy.reviewsDocumentUrl)).toEqual([reviewOf("sweden")]);
 
     // Offered again: the cards already as the release has them are the release's, not the user's.
     const again = (await useCases.planLibraryUpgrade(copy))!;
-    expect(again).toMatchObject({ releaseUrl: v2.url, add: [], change: [], remove: [], kept: [], gone: ["latvia"] });
+    expect(again).toMatchObject({
+      releaseUrl: v2.url,
+      add: [],
+      change: [],
+      remove: [],
+      kept: [],
+      gone: ["latvia"],
+    });
     expect(again.applied.map((card) => card.id)).toEqual(["sweden", "norway"]);
     pod.written.length = 0;
-    await expect(useCases.applyLibraryUpgrade(copy, again)).resolves.toMatchObject({ ok: true, deck: { sourceUrl: v2.url } });
+    await expect(useCases.applyLibraryUpgrade(copy, again)).resolves.toMatchObject({
+      ok: true,
+      deck: { sourceUrl: v2.url },
+    });
     // It finishes with the entry alone: the cards and the states are as the release has them already.
     expect(pod.written).toEqual([copy.url]);
     expect(await useCases.planLibraryUpgrade(pod.deck!)).toBeNull();
@@ -3159,9 +4045,18 @@ describe("library deck upgrade", () => {
 
   it("drops, when offered again, the states left of a card it removed before its write of the review states failed", async () => {
     const { deps, pod, copy, plan, useCases } = await world();
-    vi.mocked(deps.reviewStateRepository.applyReviewChanges).mockRejectedValueOnce(new TypeError("Failed to fetch"));
-    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ ok: false, step: "reviews", changed: true });
-    expect(pod.reviews.get(copy.reviewsDocumentUrl)!.map((s) => s.cardId)).toEqual(["sweden", "latvia"]);
+    vi.mocked(deps.reviewStateRepository.applyReviewChanges).mockRejectedValueOnce(
+      new TypeError("Failed to fetch"),
+    );
+    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({
+      ok: false,
+      step: "reviews",
+      changed: true,
+    });
+    expect(pod.reviews.get(copy.reviewsDocumentUrl)!.map((s) => s.cardId)).toEqual([
+      "sweden",
+      "latvia",
+    ]);
     const again = (await useCases.planLibraryUpgrade(copy))!;
     expect(again.gone).toEqual(["latvia"]);
     pod.written.length = 0;
@@ -3173,44 +4068,70 @@ describe("library deck upgrade", () => {
   it("says whether the deck changed by whether a failed write may have been made", async () => {
     // Refused before it was sent (the data would not conform): nothing changed.
     const refused = await world();
-    vi.mocked(refused.deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new AppError("dataNotConforming", { problems: "x" }));
-    await expect(refused.useCases.applyLibraryUpgrade(refused.copy, refused.plan)).resolves.toMatchObject({ ok: false, step: "cards", changed: false });
+    vi.mocked(refused.deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
+      new AppError("dataNotConforming", { problems: "x" }),
+    );
+    await expect(
+      refused.useCases.applyLibraryUpgrade(refused.copy, refused.plan),
+    ).resolves.toMatchObject({ ok: false, step: "cards", changed: false });
     // An answer lost on the way may follow a write the pod made.
     const lost = await world();
-    vi.mocked(lost.deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new TypeError("Failed to fetch"));
-    await expect(lost.useCases.applyLibraryUpgrade(lost.copy, lost.plan)).resolves.toMatchObject({ ok: false, step: "cards", changed: true });
+    vi.mocked(lost.deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
+      new TypeError("Failed to fetch"),
+    );
+    await expect(lost.useCases.applyLibraryUpgrade(lost.copy, lost.plan)).resolves.toMatchObject({
+      ok: false,
+      step: "cards",
+      changed: true,
+    });
   });
 
   it("counts an entry's write whose answer was lost as done, when the entry says it happened", async () => {
     const { deps, pod, copy, plan, useCases } = await world();
     const upgradeEntry = vi.mocked(deps.deckRepository.upgradeDeckEntry).getMockImplementation()!;
-    vi.mocked(deps.deckRepository.upgradeDeckEntry).mockImplementationOnce(async (current, next) => {
-      await upgradeEntry(current, next);
-      throw new TypeError("Failed to fetch");
-    });
+    vi.mocked(deps.deckRepository.upgradeDeckEntry).mockImplementationOnce(
+      async (current, next) => {
+        await upgradeEntry(current, next);
+        throw new TypeError("Failed to fetch");
+      },
+    );
     const outcome = await useCases.applyLibraryUpgrade(copy, plan);
     expect(outcome).toEqual({ ok: true, deck: pod.deck });
     expect(pod.deck).toMatchObject({ sourceUrl: `${LIB}v2.ttl` });
 
     // Not made, or not to be told (the entry cannot be read): the upgrade failed, its cards written.
     const lost = await world();
-    vi.mocked(lost.deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(new TypeError("Failed to fetch"));
-    await expect(lost.useCases.applyLibraryUpgrade(lost.copy, lost.plan)).resolves.toMatchObject({ ok: false, step: "entry", changed: true });
+    vi.mocked(lost.deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(
+      new TypeError("Failed to fetch"),
+    );
+    await expect(lost.useCases.applyLibraryUpgrade(lost.copy, lost.plan)).resolves.toMatchObject({
+      ok: false,
+      step: "entry",
+      changed: true,
+    });
     const unread = await world();
-    vi.mocked(unread.deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    vi.mocked(unread.deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(
+      new TypeError("Failed to fetch"),
+    );
     const readDeck = vi.mocked(unread.deps.deckRepository.readDeck).getMockImplementation()!;
     vi.mocked(unread.deps.deckRepository.readDeck).mockImplementation(async (url) => {
-      if (vi.mocked(unread.deps.deckRepository.upgradeDeckEntry).mock.calls.length > 0) throw new TypeError("offline");
+      if (vi.mocked(unread.deps.deckRepository.upgradeDeckEntry).mock.calls.length > 0)
+        throw new TypeError("offline");
       return readDeck(url);
     });
-    await expect(unread.useCases.applyLibraryUpgrade(unread.copy, unread.plan)).resolves.toMatchObject({ ok: false, step: "entry", changed: true });
+    await expect(
+      unread.useCases.applyLibraryUpgrade(unread.copy, unread.plan),
+    ).resolves.toMatchObject({ ok: false, step: "entry", changed: true });
     // The deck gone meanwhile: nothing to tell by.
     const gone = await world();
     vi.mocked(gone.deps.deckRepository.upgradeDeckEntry).mockImplementationOnce(async () => {
       gone.pod.deck = null;
       throw new TypeError("Failed to fetch");
     });
-    await expect(gone.useCases.applyLibraryUpgrade(gone.copy, gone.plan)).resolves.toMatchObject({ ok: false, step: "entry" });
+    await expect(gone.useCases.applyLibraryUpgrade(gone.copy, gone.plan)).resolves.toMatchObject({
+      ok: false,
+      step: "entry",
+    });
   });
 
   it("says the deck may have changed when the entry, its only write, lost its answer and cannot be read", async () => {
@@ -3219,23 +4140,35 @@ describe("library deck upgrade", () => {
       // Release 2 as the copy already has its cards: the upgrade writes the deck's entry alone.
       vi.mocked(setup.deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
         url === setup.v2.url
-          ? { ...setup.v2, cards: setup.pod.cards.get(setup.copy.cardsDocumentUrl)!.map(({ url: _u, createdAt: _c, ...c }) => c) }
+          ? {
+              ...setup.v2,
+              cards: setup.pod.cards
+                .get(setup.copy.cardsDocumentUrl)!
+                .map(({ url: _u, createdAt: _c, ...c }) => c),
+            }
           : { ...setup.v2, url, version: "1", title: { en: "Capitals" } },
       );
-      vi.mocked(setup.deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(new TypeError("Failed to fetch"));
+      vi.mocked(setup.deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(
+        new TypeError("Failed to fetch"),
+      );
       return { ...setup, plan: (await setup.useCases.planLibraryUpgrade(setup.copy))! };
     };
     // The entry read again still names the release the deck came from: its write was not made.
     const unmade = await entryOnly();
-    await expect(unmade.useCases.applyLibraryUpgrade(unmade.copy, unmade.plan)).resolves.toMatchObject({ ok: false, step: "entry", changed: false });
+    await expect(
+      unmade.useCases.applyLibraryUpgrade(unmade.copy, unmade.plan),
+    ).resolves.toMatchObject({ ok: false, step: "entry", changed: false });
     // The entry cannot be read again: its write may have been made.
     const unread = await entryOnly();
     const readDeck = vi.mocked(unread.deps.deckRepository.readDeck).getMockImplementation()!;
     vi.mocked(unread.deps.deckRepository.readDeck).mockImplementation(async (url) => {
-      if (vi.mocked(unread.deps.deckRepository.upgradeDeckEntry).mock.calls.length > 0) throw new TypeError("offline");
+      if (vi.mocked(unread.deps.deckRepository.upgradeDeckEntry).mock.calls.length > 0)
+        throw new TypeError("offline");
       return readDeck(url);
     });
-    await expect(unread.useCases.applyLibraryUpgrade(unread.copy, unread.plan)).resolves.toMatchObject({ ok: false, step: "entry", changed: true });
+    await expect(
+      unread.useCases.applyLibraryUpgrade(unread.copy, unread.plan),
+    ).resolves.toMatchObject({ ok: false, step: "entry", changed: true });
   });
 
   describe("guests", () => {
@@ -3257,7 +4190,10 @@ describe("library deck upgrade", () => {
       vi.mocked(deps.instanceRepository.listInstances).mockImplementation(async (webId) =>
         webId === GUEST_WEBID ? (exists ? [guestInstance] : []) : [instance],
       );
-      vi.mocked(deps.instanceRepository.attachInstance).mockResolvedValue({ url: TARGET, name: "My study" });
+      vi.mocked(deps.instanceRepository.attachInstance).mockResolvedValue({
+        url: TARGET,
+        name: "My study",
+      });
       vi.mocked(deps.instanceCopier.listResources).mockResolvedValue([
         `${GUEST_INSTANCE_URL}catalog.ttl`,
         `${GUEST_INSTANCE_URL}digest.ttl`,
@@ -3271,7 +4207,10 @@ describe("library deck upgrade", () => {
     it("restoreSession gives a guest's session when no one logged in and a guest studied here", async () => {
       const { deps } = guestDeps();
       vi.mocked(deps.sessionGateway.restore).mockResolvedValue(null);
-      expect(await createUseCases(deps).restoreSession()).toEqual({ session: GUEST_SESSION, origin: "restored" });
+      expect(await createUseCases(deps).restoreSession()).toEqual({
+        session: GUEST_SESSION,
+        origin: "restored",
+      });
       vi.mocked(deps.guestPod.exists).mockResolvedValue(false);
       expect(await createUseCases(deps).restoreSession()).toBeNull();
     });
@@ -3285,7 +4224,9 @@ describe("library deck upgrade", () => {
       const { deps, guestPod } = guestDeps({ started: false });
       vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([]);
       vi.mocked(deps.instanceRepository.createInstance).mockResolvedValue(guestInstance);
-      vi.mocked(deps.webIdDocumentRepository.fetchWebIdDocument).mockRejectedValue(new Error("no name"));
+      vi.mocked(deps.webIdDocumentRepository.fetchWebIdDocument).mockRejectedValue(
+        new Error("no name"),
+      );
       expect(await createUseCases(deps).startGuest(" My study ")).toEqual(GUEST_SESSION);
       expect(guestPod.start).toHaveBeenCalledOnce();
       expect(deps.instanceRepository.createInstance).toHaveBeenCalledWith({
@@ -3329,7 +4270,9 @@ describe("library deck upgrade", () => {
 
     it("findGuestStudy lists the guest's instances with their decks counted; null when no guest studied here", async () => {
       const { deps } = guestDeps();
-      expect(await createUseCases(deps).findGuestStudy()).toEqual({ instances: [{ instance: guestInstance, deckCount: 1 }] });
+      expect(await createUseCases(deps).findGuestStudy()).toEqual({
+        instances: [{ instance: guestInstance, deckCount: 1 }],
+      });
       expect(deps.deckRepository.listDecks).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
       vi.mocked(deps.guestPod.exists).mockResolvedValue(false);
       expect(await createUseCases(deps).findGuestStudy()).toBeNull();
@@ -3342,7 +4285,12 @@ describe("library deck upgrade", () => {
         subjects: [
           {
             url: session.webId,
-            properties: [{ predicate: "http://xmlns.com/foaf/0.1/name", values: [{ type: "literal", value: "Alice" }] }],
+            properties: [
+              {
+                predicate: "http://xmlns.com/foaf/0.1/name",
+                values: [{ type: "literal", value: "Alice" }],
+              },
+            ],
           },
         ],
       } as WebIdDocument);
@@ -3352,10 +4300,21 @@ describe("library deck upgrade", () => {
         session,
         guestInstance,
         { containerUrl: ` ${TARGET.slice(0, -1)} `, registrationTarget: "private" },
-        (p) => progress.push(`${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`),
+        (p) =>
+          progress.push(
+            `${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`,
+          ),
       );
-      expect(outcome).toEqual({ ok: true, instance: { url: TARGET, name: "My study" }, tidied: true });
-      const move = { from: GUEST_INSTANCE_URL, to: TARGET, renames: { [GUEST_WEBID]: session.webId } };
+      expect(outcome).toEqual({
+        ok: true,
+        instance: { url: TARGET, name: "My study" },
+        tidied: true,
+      });
+      const move = {
+        from: GUEST_INSTANCE_URL,
+        to: TARGET,
+        renames: { [GUEST_WEBID]: session.webId },
+      };
       expect(hold).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
       expect(deps.instanceCopier.ensureAbsent).toHaveBeenCalledWith(TARGET);
       expect(deps.instanceCopier.createContainer).toHaveBeenCalledWith(TARGET);
@@ -3384,7 +4343,10 @@ describe("library deck upgrade", () => {
         instanceUrl: TARGET,
         title: "My study",
       });
-      expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({ webId: GUEST_WEBID, instance: guestInstance });
+      expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
+        webId: GUEST_WEBID,
+        instance: guestInstance,
+      });
       expect(guestPod.discard).not.toHaveBeenCalled();
       expect(deps.updateJournal.begin).toHaveBeenCalledWith(GUEST_INSTANCE_URL, TARGET);
       expect(deps.updateJournal.end).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
@@ -3462,7 +4424,8 @@ describe("library deck upgrade", () => {
       const { deps } = guestDeps();
       createUseCases({ ...deps, writeFence });
       const changed = vi.mocked(deps.updateJournal.watch).mock.calls[0]![0];
-      const held = () => holds.filter(({ release }) => release.mock.calls.length === 0).map(({ url }) => url);
+      const held = () =>
+        holds.filter(({ release }) => release.mock.calls.length === 0).map(({ url }) => url);
       changed(GUEST_INSTANCE_URL, TARGET);
       expect(held()).toEqual([GUEST_INSTANCE_URL, TARGET]);
       // Told again, it holds the copy named now, the old hold let go.
@@ -3483,7 +4446,9 @@ describe("library deck upgrade", () => {
       changed(GUEST_INSTANCE_URL, TARGET);
       vi.mocked(deps.updateJournal.staging).mockReturnValue(TARGET);
       await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
-      await expect(useCases.removeInterruptedGuestMove(guestInstance)).rejects.toMatchObject({ code: "guestStudyBeingMoved" });
+      await expect(useCases.removeInterruptedGuestMove(guestInstance)).rejects.toMatchObject({
+        code: "guestStudyBeingMoved",
+      });
       expect(deps.instanceCopier.ensureAbsent).not.toHaveBeenCalled();
       expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
       expect(deps.updateJournal.end).not.toHaveBeenCalled();
@@ -3495,7 +4460,10 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([]);
         return { keptFolder: null, keptReleases: false };
       });
-      await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "public" });
+      await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+        containerUrl: TARGET,
+        registrationTarget: "public",
+      });
       expect(guestPod.discard).toHaveBeenCalledOnce();
     });
 
@@ -3503,10 +4471,15 @@ describe("library deck upgrade", () => {
       const { updateJournal: _j, now: _n, newId: _i, ...deps } = guestDeps().deps;
       const useCases = createUseCases(deps);
       await expect(
-        useCases.transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
+        useCases.transferGuestStudy(session, guestInstance, {
+          containerUrl: TARGET,
+          registrationTarget: "private",
+        }),
       ).resolves.toMatchObject({ ok: true });
       await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
-      expect(useCases.newDeckGroup(instance.url, { en: "Group" }).url).toMatch(/#group-[0-9a-f-]{36}$/);
+      expect(useCases.newDeckGroup(instance.url, { en: "Group" }).url).toMatch(
+        /#group-[0-9a-f-]{36}$/,
+      );
       await expect(useCases.refreshStudyDigest(instance.url, deck)).resolves.toBeUndefined();
     });
 
@@ -3524,9 +4497,18 @@ describe("library deck upgrade", () => {
       vi.mocked(answerLog.append).mockRejectedValueOnce(new Error("offline"));
       const useCases = createUseCases({ ...deps, answerLog });
       const guestDeck = { ...deck, url: `${GUEST_INSTANCE_URL}catalog.ttl#deck-1` };
-      await useCases.recordReview(GUEST_INSTANCE_URL, guestDeck, { card, direction: "front-to-back" }, 4, new Date("2026-10-03T10:00:00.000Z"));
+      await useCases.recordReview(
+        GUEST_INSTANCE_URL,
+        guestDeck,
+        { card, direction: "front-to-back" },
+        4,
+        new Date("2026-10-03T10:00:00.000Z"),
+      );
       await vi.waitFor(() => expect(answerLog.append).toHaveBeenCalledOnce());
-      await useCases.transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" });
+      await useCases.transferGuestStudy(session, guestInstance, {
+        containerUrl: TARGET,
+        registrationTarget: "private",
+      });
       expect(answerLog.append).toHaveBeenCalledTimes(2);
       expect(vi.mocked(answerLog.append).mock.invocationCallOrder[1]).toBeLessThan(
         vi.mocked(deps.instanceCopier.listResources).mock.invocationCallOrder[0]!,
@@ -3536,18 +4518,29 @@ describe("library deck upgrade", () => {
 
     it("transferGuestStudy tidies the guest's study away even when its data could not be registered", async () => {
       const { deps } = guestDeps();
-      vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(new Error("offline"));
+      vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(
+        new Error("offline"),
+      );
       expect(
-        await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
+        await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+          containerUrl: TARGET,
+          registrationTarget: "private",
+        }),
       ).toEqual({ ok: true, instance: { url: TARGET, name: "My study" }, tidied: true });
-      expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({ webId: GUEST_WEBID, instance: guestInstance });
+      expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
+        webId: GUEST_WEBID,
+        instance: guestInstance,
+      });
     });
 
     it("transferGuestStudy says the study moved even when the guest's could not be tidied away", async () => {
       const { deps } = guestDeps();
       vi.mocked(deps.instanceRepository.deleteInstance).mockRejectedValue(new Error("offline"));
       expect(
-        await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
+        await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+          containerUrl: TARGET,
+          registrationTarget: "private",
+        }),
       ).toEqual({ ok: true, instance: { url: TARGET, name: "My study" }, tidied: false });
     });
 
@@ -3555,34 +4548,73 @@ describe("library deck upgrade", () => {
       const { deps } = guestDeps();
       const useCases = createUseCases(deps);
       const target = { containerUrl: TARGET, registrationTarget: "private" as const };
-      const refusal = "A guest's study moves from the guest's pod into the pod of a user who logged in.";
-      await expect(useCases.transferGuestStudy(GUEST_SESSION, guestInstance, target)).rejects.toThrow(refusal);
+      const refusal =
+        "A guest's study moves from the guest's pod into the pod of a user who logged in.";
+      await expect(
+        useCases.transferGuestStudy(GUEST_SESSION, guestInstance, target),
+      ).rejects.toThrow(refusal);
       await expect(useCases.transferGuestStudy(session, instance, target)).rejects.toThrow(refusal);
       await expect(
-        useCases.transferGuestStudy(session, guestInstance, { ...target, containerUrl: `${GUEST_ORIGIN}x/` }),
+        useCases.transferGuestStudy(session, guestInstance, {
+          ...target,
+          containerUrl: `${GUEST_ORIGIN}x/`,
+        }),
       ).rejects.toThrow(refusal);
     });
 
     it.each([
-      ["stage", (deps: ReturnType<typeof makeDeps>) => vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("boom")), false],
-      ["copy", (deps: ReturnType<typeof makeDeps>) => vi.mocked(deps.instanceCopier.copyResource).mockRejectedValueOnce(new Error("boom")), true],
-      ["adopt", (deps: ReturnType<typeof makeDeps>) => vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(new Error("boom")), true],
-      ["register", (deps: ReturnType<typeof makeDeps>) => vi.mocked(deps.instanceRepository.attachInstance).mockRejectedValueOnce(new Error("boom")), true],
-    ] as const)("transferGuestStudy failing at %s leaves the guest's study as it was and removes the copy", async (step, fail, copied) => {
-      const { deps } = guestDeps();
-      fail(deps);
-      const outcome = await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" });
-      expect(outcome).toEqual({ ok: false, step, error: new Error("boom"), cleanedUp: true });
-      expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledTimes(copied ? 1 : 0);
-      if (copied) expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(TARGET);
-      expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
-    });
+      [
+        "stage",
+        (deps: ReturnType<typeof makeDeps>) =>
+          vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("boom")),
+        false,
+      ],
+      [
+        "copy",
+        (deps: ReturnType<typeof makeDeps>) =>
+          vi.mocked(deps.instanceCopier.copyResource).mockRejectedValueOnce(new Error("boom")),
+        true,
+      ],
+      [
+        "adopt",
+        (deps: ReturnType<typeof makeDeps>) =>
+          vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(new Error("boom")),
+        true,
+      ],
+      [
+        "register",
+        (deps: ReturnType<typeof makeDeps>) =>
+          vi
+            .mocked(deps.instanceRepository.attachInstance)
+            .mockRejectedValueOnce(new Error("boom")),
+        true,
+      ],
+    ] as const)(
+      "transferGuestStudy failing at %s leaves the guest's study as it was and removes the copy",
+      async (step, fail, copied) => {
+        const { deps } = guestDeps();
+        fail(deps);
+        const outcome = await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+          containerUrl: TARGET,
+          registrationTarget: "private",
+        });
+        expect(outcome).toEqual({ ok: false, step, error: new Error("boom"), cleanedUp: true });
+        expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledTimes(copied ? 1 : 0);
+        if (copied) expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(TARGET);
+        expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+      },
+    );
 
     it("transferGuestStudy refuses a copy that still names the guest's pod, or does not conform", async () => {
       const { deps } = guestDeps();
-      vi.mocked(deps.instanceCopier.mentions).mockImplementation(async (url) => url.endsWith("2026-10.ttl"));
+      vi.mocked(deps.instanceCopier.mentions).mockImplementation(async (url) =>
+        url.endsWith("2026-10.ttl"),
+      );
       expect(
-        await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
+        await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+          containerUrl: TARGET,
+          registrationTarget: "private",
+        }),
       ).toEqual({
         ok: false,
         step: "adopt",
@@ -3590,24 +4622,56 @@ describe("library deck upgrade", () => {
         cleanedUp: true,
       });
       vi.mocked(deps.instanceCopier.mentions).mockResolvedValue(false);
-      const violation = { message: { en: "x" }, severity: "violation" as const, constraint: "MinCount" };
+      const violation = {
+        message: { en: "x" },
+        severity: "violation" as const,
+        constraint: "MinCount",
+      };
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([]);
       vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
         url.endsWith("meta.ttl")
-          ? { url, status: "checked" as const, subjects: [{ url: `${url}#it`, status: "checked" as const, shape: "instance" as const, version: 2, violations: [violation] }] }
+          ? {
+              url,
+              status: "checked" as const,
+              subjects: [
+                {
+                  url: `${url}#it`,
+                  status: "checked" as const,
+                  shape: "instance" as const,
+                  version: 2,
+                  violations: [violation],
+                },
+              ],
+            }
           : { url, status: "missing" as const, subjects: [] },
       );
       expect(
-        await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
-      ).toMatchObject({ ok: false, step: "validate", error: new AppError("movedCopyInvalid", { count: 1 }) });
+        await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+          containerUrl: TARGET,
+          registrationTarget: "private",
+        }),
+      ).toMatchObject({
+        ok: false,
+        step: "validate",
+        error: new AppError("movedCopyInvalid", { count: 1 }),
+      });
     });
 
     it("transferGuestStudy refuses to register when the guest's study changed while it was copied", async () => {
       const { deps } = guestDeps();
       vi.mocked(deps.instanceCopier.isUnchanged).mockResolvedValueOnce(false);
       expect(
-        await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
-      ).toMatchObject({ ok: false, step: "verify", error: new AppError("resourceChangedDuringCopy", { url: `${GUEST_INSTANCE_URL}catalog.ttl` }) });
+        await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+          containerUrl: TARGET,
+          registrationTarget: "private",
+        }),
+      ).toMatchObject({
+        ok: false,
+        step: "verify",
+        error: new AppError("resourceChangedDuringCopy", {
+          url: `${GUEST_INSTANCE_URL}catalog.ttl`,
+        }),
+      });
       expect(deps.instanceRepository.attachInstance).not.toHaveBeenCalled();
       // A resource that appeared meanwhile is a change too.
       const more = guestDeps();
@@ -3616,8 +4680,15 @@ describe("library deck upgrade", () => {
         .mockResolvedValueOnce(listed)
         .mockResolvedValueOnce([...listed, `${GUEST_INSTANCE_URL}new.ttl`]);
       expect(
-        await createUseCases(more.deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
-      ).toMatchObject({ ok: false, step: "verify", error: new AppError("instanceChangedDuringCopy") });
+        await createUseCases(more.deps).transferGuestStudy(session, guestInstance, {
+          containerUrl: TARGET,
+          registrationTarget: "private",
+        }),
+      ).toMatchObject({
+        ok: false,
+        step: "verify",
+        error: new AppError("instanceChangedDuringCopy"),
+      });
     });
 
     describe("adding the study to an instance", () => {
@@ -3631,7 +4702,10 @@ describe("library deck upgrade", () => {
         reviewsDocumentUrl: `${GUEST_INSTANCE_URL}reviews/${id}.ttl`,
         ...extra,
       });
-      const course = guestDeckOf("deck-g1", { sourceUrl: RELEASE, completedChapters: [`${RELEASE}#ch-1`] });
+      const course = guestDeckOf("deck-g1", {
+        sourceUrl: RELEASE,
+        completedChapters: [`${RELEASE}#ch-1`],
+      });
       const own = guestDeckOf("deck-g2");
       const guestCard: Card = {
         ...card,
@@ -3685,7 +4759,10 @@ describe("library deck upgrade", () => {
       function mergeDeps() {
         const { deps, guestPod } = guestDeps();
         const answers = [
-          answerTo(course, "answer-1", { mode: "multiple-choice", chosenDistractor: `${course.cardsDocumentUrl}#q-1-d1` }),
+          answerTo(course, "answer-1", {
+            mode: "multiple-choice",
+            chosenDistractor: `${course.cardsDocumentUrl}#q-1-d1`,
+          }),
           answerTo(own, "answer-2"),
           // A deck the guest removed: its answers have no deck to go with.
           answerTo(guestDeckOf("deck-gone"), "answer-3"),
@@ -3703,10 +4780,17 @@ describe("library deck upgrade", () => {
         );
         vi.mocked(deps.deckRepository.readDeckTree).mockResolvedValue({
           readOnly: false,
-          children: [{ kind: "group", group: GROUP, children: [{ kind: "deck", deck: course }] }, { kind: "deck", deck: own }],
+          children: [
+            { kind: "group", group: GROUP, children: [{ kind: "deck", deck: course }] },
+            { kind: "deck", deck: own },
+          ],
         });
-        vi.mocked(deps.deckRepository.listCards).mockImplementation(async (of) => (of.url === course.url ? [guestCard] : []));
-        vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (of) => (of.url === course.url ? [guestState] : []));
+        vi.mocked(deps.deckRepository.listCards).mockImplementation(async (of) =>
+          of.url === course.url ? [guestCard] : [],
+        );
+        vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (of) =>
+          of.url === course.url ? [guestState] : [],
+        );
         vi.mocked(deps.instanceCopier.listResources).mockResolvedValue(RESOURCES);
         vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(null);
         let id = 0;
@@ -3728,7 +4812,8 @@ describe("library deck upgrade", () => {
 
       type MergeDeps = ReturnType<typeof mergeDeps>["deps"];
       /** A guest's deck's stamp as read with mergeDeps: the course's documents listed, the other deck's not. */
-      const stampOf = (of: Deck) => guestDeckStamp(of, (url) => (of.url === course.url ? `version of ${url}` : ""));
+      const stampOf = (of: Deck) =>
+        guestDeckStamp(of, (url) => (of.url === course.url ? `version of ${url}` : ""));
       /** The guest's arrangement around the decks it was added as, as a group's note stamps it. */
       const arrangementOf = (first: Deck, second: Deck) =>
         JSON.stringify([
@@ -3747,7 +4832,12 @@ describe("library deck upgrade", () => {
         });
         const list = vi.fn(async (url: string) => (url === guestInstance.url ? [{}, {}] : [{}]));
         const releaseDraftRepository = { list } as unknown as ReleaseDraftRepository;
-        expect(await createUseCases({ ...deps, releaseDraftRepository }).planGuestMerge(guestInstance, target)).toMatchObject({ drafts: 2 });
+        expect(
+          await createUseCases({ ...deps, releaseDraftRepository }).planGuestMerge(
+            guestInstance,
+            target,
+          ),
+        ).toMatchObject({ drafts: 2 });
       });
 
       it("mergeGuestStudy adds each deck whole — documents, entry, answers — groups them as the guest did, then deletes the guest's", async () => {
@@ -3759,25 +4849,45 @@ describe("library deck upgrade", () => {
           guestInstance,
           { ...target, url: TARGET.slice(0, -1) },
           {},
-          (p) => progress.push(`${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`),
+          (p) =>
+            progress.push(
+              `${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`,
+            ),
         );
         const first = added("deck-n1", course);
         const second = added("deck-n2", own);
-        expect(outcome).toEqual({ ok: true, instance: { ...target, url: TARGET.slice(0, -1) }, added: [first, second], tidied: true });
+        expect(outcome).toEqual({
+          ok: true,
+          instance: { ...target, url: TARGET.slice(0, -1) },
+          added: [first, second],
+          tidied: true,
+        });
         expect(hold).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
         // The guest's study, checked whole before anything is written.
-        expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${GUEST_INSTANCE_URL}history/2026-10.ttl`, "pod");
+        expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
+          `${GUEST_INSTANCE_URL}history/2026-10.ttl`,
+          "pod",
+        );
         const { url: _url, formatVersion: _version, ...content } = guestCard;
-        expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(first, { save: [content], remove: [] }, { whole: true });
-        expect(deps.reviewStateRepository.createReviewStates).toHaveBeenCalledExactlyOnceWith(first, [guestState]);
+        expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
+          first,
+          { save: [content], remove: [] },
+          { whole: true },
+        );
+        expect(deps.reviewStateRepository.createReviewStates).toHaveBeenCalledExactlyOnceWith(
+          first,
+          [guestState],
+        );
         expect(vi.mocked(deps.deckRepository.addDeck).mock.calls).toEqual([[first], [second]]);
         // Documents before the entry that names them.
-        expect(vi.mocked(deps.deckRepository.applyCardChanges).mock.invocationCallOrder[0]).toBeLessThan(
+        expect(
+          vi.mocked(deps.deckRepository.applyCardChanges).mock.invocationCallOrder[0],
+        ).toBeLessThan(
           vi.mocked(deps.reviewStateRepository.createReviewStates).mock.invocationCallOrder[0]!,
         );
-        expect(vi.mocked(deps.reviewStateRepository.createReviewStates).mock.invocationCallOrder[0]).toBeLessThan(
-          vi.mocked(deps.deckRepository.addDeck).mock.invocationCallOrder[0]!,
-        );
+        expect(
+          vi.mocked(deps.reviewStateRepository.createReviewStates).mock.invocationCallOrder[0],
+        ).toBeLessThan(vi.mocked(deps.deckRepository.addDeck).mock.invocationCallOrder[0]!);
         expect(vi.mocked(deps.answerLog.appendAll).mock.calls).toEqual([
           [
             TARGET,
@@ -3791,28 +4901,51 @@ describe("library deck upgrade", () => {
               },
             ],
           ],
-          [TARGET, [{ ...answers[1], id: "answer-2-deck-n2", deckUrl: second.url, cardUrl: `${second.cardsDocumentUrl}#q-1` }]],
+          [
+            TARGET,
+            [
+              {
+                ...answers[1],
+                id: "answer-2-deck-n2",
+                deckUrl: second.url,
+                cardUrl: `${second.cardsDocumentUrl}#q-1`,
+              },
+            ],
+          ],
         ]);
         expect(deps.deckRepository.editDeckTree).toHaveBeenCalledExactlyOnceWith(TARGET, {
           kind: "graft",
           nodes: [
-            { kind: "group", group: { url: `${TARGET}catalog.ttl#group-n3`, title: GROUP.title }, children: [{ kind: "deck", url: first.url }] },
+            {
+              kind: "group",
+              group: { url: `${TARGET}catalog.ttl#group-n3`, title: GROUP.title },
+              children: [{ kind: "deck", url: first.url }],
+            },
             { kind: "deck", url: second.url },
           ],
         });
         // The target's preferences stay; the guest's are not read, nor anything registered.
         expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
         expect(deps.instanceRepository.registerDataClasses).not.toHaveBeenCalled();
-        expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({ webId: GUEST_WEBID, instance: guestInstance });
+        expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
+          webId: GUEST_WEBID,
+          instance: guestInstance,
+        });
         // Each deck's note kept while the guest's study was here, then forgotten.
         expect(deps.updateJournal.begin).toHaveBeenCalledWith(
           `${course.url} added to ${TARGET}`,
           JSON.stringify({ url: first.url, stamp: stampOf(course) }),
         );
-        expect(deps.updateJournal.begin).toHaveBeenCalledWith(`${own.url} added to ${TARGET}`, JSON.stringify({ url: second.url, stamp: stampOf(own) }));
+        expect(deps.updateJournal.begin).toHaveBeenCalledWith(
+          `${own.url} added to ${TARGET}`,
+          JSON.stringify({ url: second.url, stamp: stampOf(own) }),
+        );
         expect(deps.updateJournal.begin).toHaveBeenCalledWith(
           `${GROUP.url} added to ${TARGET}`,
-          JSON.stringify({ url: `${TARGET}catalog.ttl#group-n3`, stamp: arrangementOf(first, second) }),
+          JSON.stringify({
+            url: `${TARGET}catalog.ttl#group-n3`,
+            stamp: arrangementOf(first, second),
+          }),
         );
         expect(journal.size).toBe(0);
         expect(progress).toEqual([
@@ -3834,17 +4967,25 @@ describe("library deck upgrade", () => {
 
       it("mergeGuestStudy leaves out the decks skipped, with their answers and places, and makes no groups when the guest made none", async () => {
         const { deps, guestPod } = mergeDeps();
-        vi.mocked(deps.deckRepository.readDeckTree).mockResolvedValue({ readOnly: false, children: [] });
+        vi.mocked(deps.deckRepository.readDeckTree).mockResolvedValue({
+          readOnly: false,
+          children: [],
+        });
         vi.mocked(deps.instanceRepository.deleteInstance).mockImplementation(async () => {
           vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([]);
           return { keptFolder: null, keptReleases: false };
         });
-        const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target, { skip: [course.url] });
+        const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target, {
+          skip: [course.url],
+        });
         expect(outcome).toMatchObject({ ok: true, added: [added("deck-n1", own)] });
         expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
         expect(deps.reviewStateRepository.createReviewStates).not.toHaveBeenCalled();
         expect(deps.answerLog.appendAll).toHaveBeenCalledExactlyOnceWith(TARGET, [
-          expect.objectContaining({ id: "answer-2-deck-n1", deckUrl: `${TARGET}catalog.ttl#deck-n1` }),
+          expect.objectContaining({
+            id: "answer-2-deck-n1",
+            deckUrl: `${TARGET}catalog.ttl#deck-n1`,
+          }),
         ]);
         expect(deps.deckRepository.editDeckTree).not.toHaveBeenCalled();
         expect(guestPod.discard).toHaveBeenCalledOnce();
@@ -3853,79 +4994,159 @@ describe("library deck upgrade", () => {
       describe("a guest's drafts", () => {
         const GUEST_DRAFT = draftUrlOf(GUEST_INSTANCE_URL, "solid", 1);
         const guestDraft = rebaseDraft(courseDraft(), GUEST_DRAFT);
-        const DRAFT_DOCUMENTS = [GUEST_DRAFT, `${GUEST_INSTANCE_URL}drafts/solid/v1/chapter-ch-a.ttl`];
+        const DRAFT_DOCUMENTS = [
+          GUEST_DRAFT,
+          `${GUEST_INSTANCE_URL}drafts/solid/v1/chapter-ch-a.ttl`,
+        ];
         const stamp = DRAFT_DOCUMENTS.map((url) => `${url} version of ${url}`).join("\n");
         const copyNamed = (name: string) => draftUrlOf(TARGET, name, 1);
 
         /** mergeDeps with the guest's draft, its documents listed, and the instance's drafts `targetDrafts`. */
         function draftDeps(targetDrafts: string[]) {
           const merge = mergeDeps();
-          vi.mocked(merge.deps.instanceCopier.listResources).mockResolvedValue([...RESOURCES, `${GUEST_INSTANCE_URL}drafts/`, ...DRAFT_DOCUMENTS]);
+          vi.mocked(merge.deps.instanceCopier.listResources).mockResolvedValue([
+            ...RESOURCES,
+            `${GUEST_INSTANCE_URL}drafts/`,
+            ...DRAFT_DOCUMENTS,
+          ]);
           const summaryOf = (url: string) => draftSummaryOf(rebaseDraft(guestDraft, url))!;
           const releaseDraftRepository = {
-            list: vi.fn(async (url: string) => (url === GUEST_INSTANCE_URL ? [summaryOf(GUEST_DRAFT)] : targetDrafts.map(summaryOf))),
-            documents: vi.fn(async (url: string) => (url === GUEST_INSTANCE_URL ? DRAFT_DOCUMENTS : [])),
+            list: vi.fn(async (url: string) =>
+              url === GUEST_INSTANCE_URL ? [summaryOf(GUEST_DRAFT)] : targetDrafts.map(summaryOf),
+            ),
+            documents: vi.fn(async (url: string) =>
+              url === GUEST_INSTANCE_URL ? DRAFT_DOCUMENTS : [],
+            ),
             read: vi.fn(async () => ({ draft: guestDraft, version: "v1" })),
             create: vi.fn(async (_instance: string, draft: ReleaseDraft) => draftSummaryOf(draft)!),
           } as unknown as ReleaseDraftRepository & { create: ReturnType<typeof vi.fn> };
-          return { ...merge, deps: { ...merge.deps, releaseDraftRepository }, releaseDraftRepository };
+          return {
+            ...merge,
+            deps: { ...merge.deps, releaseDraftRepository },
+            releaseDraftRepository,
+          };
         }
 
         it("copies each into the instance, under the next free name, never over one of its drafts", async () => {
           const { deps, releaseDraftRepository, journal } = draftDeps([copyNamed("solid")]);
           const progress: string[] = [];
-          const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target, {}, (p) =>
-            progress.push(`${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`),
+          const outcome = await createUseCases(deps).mergeGuestStudy(
+            session,
+            guestInstance,
+            target,
+            {},
+            (p) =>
+              progress.push(
+                `${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`,
+              ),
           );
           expect(outcome).toMatchObject({ ok: true, tidied: true });
           expect(releaseDraftRepository.read).toHaveBeenCalledWith(GUEST_DRAFT);
-          expect(releaseDraftRepository.create).toHaveBeenCalledExactlyOnceWith(TARGET, rebaseDraft(guestDraft, copyNamed("solid-2")));
+          expect(releaseDraftRepository.create).toHaveBeenCalledExactlyOnceWith(
+            TARGET,
+            rebaseDraft(guestDraft, copyNamed("solid-2")),
+          );
           expect(progress).toContain("drafts 3/6 (0 of 1)");
           // Its note kept while the guest's study was here, then forgotten.
-          expect(deps.updateJournal.begin).toHaveBeenCalledWith(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid-2"), stamp }));
+          expect(deps.updateJournal.begin).toHaveBeenCalledWith(
+            `${GUEST_DRAFT} added to ${TARGET}`,
+            JSON.stringify({ url: copyNamed("solid-2"), stamp }),
+          );
           expect(journal.size).toBe(0);
           // Copied before the guest's study goes.
-          expect(releaseDraftRepository.create.mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(deps.instanceRepository.deleteInstance).mock.invocationCallOrder[0]!);
+          expect(releaseDraftRepository.create.mock.invocationCallOrder[0]).toBeLessThan(
+            vi.mocked(deps.instanceRepository.deleteInstance).mock.invocationCallOrder[0]!,
+          );
         });
 
         it("copies one copied from this device before only when the guest changed it since, or the instance no longer has the copy", async () => {
           const unchanged = draftDeps([copyNamed("solid"), copyNamed("solid-2")]);
-          unchanged.journal.set(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid-2"), stamp }));
-          expect(await createUseCases(unchanged.deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: true });
+          unchanged.journal.set(
+            `${GUEST_DRAFT} added to ${TARGET}`,
+            JSON.stringify({ url: copyNamed("solid-2"), stamp }),
+          );
+          expect(
+            await createUseCases(unchanged.deps).mergeGuestStudy(session, guestInstance, target),
+          ).toMatchObject({ ok: true });
           expect(unchanged.releaseDraftRepository.create).not.toHaveBeenCalled();
 
           const changed = draftDeps([copyNamed("solid"), copyNamed("solid-2")]);
-          changed.journal.set(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid-2"), stamp: "older versions" }));
+          changed.journal.set(
+            `${GUEST_DRAFT} added to ${TARGET}`,
+            JSON.stringify({ url: copyNamed("solid-2"), stamp: "older versions" }),
+          );
           await createUseCases(changed.deps).mergeGuestStudy(session, guestInstance, target);
-          expect(changed.releaseDraftRepository.create).toHaveBeenCalledExactlyOnceWith(TARGET, rebaseDraft(guestDraft, copyNamed("solid-3")));
+          expect(changed.releaseDraftRepository.create).toHaveBeenCalledExactlyOnceWith(
+            TARGET,
+            rebaseDraft(guestDraft, copyNamed("solid-3")),
+          );
 
           const gone = draftDeps([copyNamed("solid")]);
-          gone.journal.set(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid-2"), stamp }));
+          gone.journal.set(
+            `${GUEST_DRAFT} added to ${TARGET}`,
+            JSON.stringify({ url: copyNamed("solid-2"), stamp }),
+          );
           await createUseCases(gone.deps).mergeGuestStudy(session, guestInstance, target);
           expect(gone.releaseDraftRepository.create).toHaveBeenCalledOnce();
         });
 
         it("keeps the guest's study, and the decks added, when a draft cannot be copied", async () => {
           const { deps, releaseDraftRepository } = draftDeps([]);
-          releaseDraftRepository.create.mockRejectedValueOnce(new AppError("changedElsewhere", { url: `${TARGET}catalog.ttl` }));
-          const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
-          expect(outcome).toMatchObject({ ok: false, step: "drafts", error: { code: "changedElsewhere" }, added: [added("deck-n1", course), added("deck-n2", own)], copied: [] });
+          releaseDraftRepository.create.mockRejectedValueOnce(
+            new AppError("changedElsewhere", { url: `${TARGET}catalog.ttl` }),
+          );
+          const outcome = await createUseCases(deps).mergeGuestStudy(
+            session,
+            guestInstance,
+            target,
+          );
+          expect(outcome).toMatchObject({
+            ok: false,
+            step: "drafts",
+            error: { code: "changedElsewhere" },
+            added: [added("deck-n1", course), added("deck-n2", own)],
+            copied: [],
+          });
           expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
         });
 
         it("says which drafts are in the instance when it fails after copying them, those copied before among them", async () => {
           const fresh = draftDeps([]);
           const listed = [...RESOURCES, `${GUEST_INSTANCE_URL}drafts/`, ...DRAFT_DOCUMENTS];
-          vi.mocked(fresh.deps.instanceCopier.listResources).mockResolvedValueOnce(listed).mockResolvedValueOnce([...listed, `${GUEST_INSTANCE_URL}new.ttl`]);
-          const outcome = await createUseCases(fresh.deps).mergeGuestStudy(session, guestInstance, target);
-          expect(outcome).toMatchObject({ ok: false, step: "verify", error: { code: "guestStudyChanged" }, copied: [{ url: copyNamed("solid"), name: "solid" }] });
+          vi.mocked(fresh.deps.instanceCopier.listResources)
+            .mockResolvedValueOnce(listed)
+            .mockResolvedValueOnce([...listed, `${GUEST_INSTANCE_URL}new.ttl`]);
+          const outcome = await createUseCases(fresh.deps).mergeGuestStudy(
+            session,
+            guestInstance,
+            target,
+          );
+          expect(outcome).toMatchObject({
+            ok: false,
+            step: "verify",
+            error: { code: "guestStudyChanged" },
+            copied: [{ url: copyNamed("solid"), name: "solid" }],
+          });
           expect(fresh.deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
 
           const before = draftDeps([copyNamed("solid")]);
-          before.journal.set(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid"), stamp }));
-          vi.mocked(before.deps.instanceCopier.listResources).mockResolvedValueOnce(listed).mockResolvedValueOnce([]);
-          const again = await createUseCases(before.deps).mergeGuestStudy(session, guestInstance, target);
-          expect(again).toMatchObject({ ok: false, step: "verify", copied: [{ url: copyNamed("solid"), name: "solid" }] });
+          before.journal.set(
+            `${GUEST_DRAFT} added to ${TARGET}`,
+            JSON.stringify({ url: copyNamed("solid"), stamp }),
+          );
+          vi.mocked(before.deps.instanceCopier.listResources)
+            .mockResolvedValueOnce(listed)
+            .mockResolvedValueOnce([]);
+          const again = await createUseCases(before.deps).mergeGuestStudy(
+            session,
+            guestInstance,
+            target,
+          );
+          expect(again).toMatchObject({
+            ok: false,
+            step: "verify",
+            copied: [{ url: copyNamed("solid"), name: "solid" }],
+          });
           expect(before.releaseDraftRepository.create).not.toHaveBeenCalled();
         });
       });
@@ -3936,18 +5157,31 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
           url === GUEST_INSTANCE_URL ? [course, own] : [targetDeck, before],
         );
-        journal.set(`${course.url} added to ${TARGET}`, JSON.stringify({ url: before.url, stamp: stampOf(course) }));
+        journal.set(
+          `${course.url} added to ${TARGET}`,
+          JSON.stringify({ url: before.url, stamp: stampOf(course) }),
+        );
         journal.set(
           `${GROUP.url} added to ${TARGET}`,
-          JSON.stringify({ url: `${TARGET}catalog.ttl#group-earlier`, stamp: arrangementOf(before, added("deck-n1", own)) }),
+          JSON.stringify({
+            url: `${TARGET}catalog.ttl#group-earlier`,
+            stamp: arrangementOf(before, added("deck-n1", own)),
+          }),
         );
         // A note of a deck the instance no longer has is no reason to leave one out.
-        journal.set(`${own.url} added to ${TARGET}`, JSON.stringify({ url: `${TARGET}catalog.ttl#deck-removed`, stamp: stampOf(own) }));
+        journal.set(
+          `${own.url} added to ${TARGET}`,
+          JSON.stringify({ url: `${TARGET}catalog.ttl#deck-removed`, stamp: stampOf(own) }),
+        );
         const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
         expect(outcome).toMatchObject({ ok: true, added: [before, added("deck-n1", own)] });
-        expect(vi.mocked(deps.deckRepository.addDeck).mock.calls).toEqual([[added("deck-n1", own)]]);
+        expect(vi.mocked(deps.deckRepository.addDeck).mock.calls).toEqual([
+          [added("deck-n1", own)],
+        ]);
         // The same entries as before: adding them again changes nothing.
-        expect(deps.answerLog.appendAll).toHaveBeenCalledWith(TARGET, [expect.objectContaining({ id: "answer-1-deck-earlier", deckUrl: before.url })]);
+        expect(deps.answerLog.appendAll).toHaveBeenCalledWith(TARGET, [
+          expect.objectContaining({ id: "answer-1-deck-earlier", deckUrl: before.url }),
+        ]);
         expect(vi.mocked(deps.updateJournal.begin).mock.calls.map(([key]) => key)).toEqual([
           `${own.url} added to ${TARGET}`,
           `${GROUP.url} added to ${TARGET}`,
@@ -3956,7 +5190,11 @@ describe("library deck upgrade", () => {
         expect(deps.deckRepository.editDeckTree).toHaveBeenCalledWith(TARGET, {
           kind: "graft",
           nodes: [
-            { kind: "group", group: { url: `${TARGET}catalog.ttl#group-earlier`, title: GROUP.title }, children: [{ kind: "deck", url: before.url }] },
+            {
+              kind: "group",
+              group: { url: `${TARGET}catalog.ttl#group-earlier`, title: GROUP.title },
+              children: [{ kind: "deck", url: before.url }],
+            },
             { kind: "deck", url: `${TARGET}catalog.ttl#deck-n1` },
           ],
         });
@@ -3968,14 +5206,22 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
           url === GUEST_INSTANCE_URL ? [course] : [before],
         );
-        journal.set(`${course.url} added to ${TARGET}`, JSON.stringify({ url: before.url, stamp: "older versions" }));
-        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+        journal.set(
+          `${course.url} added to ${TARGET}`,
+          JSON.stringify({ url: before.url, stamp: "older versions" }),
+        );
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
           ok: true,
           added: [added("deck-n1", course)],
         });
         // Its answers are entries of their own, beside those of the deck added before: no entry names two decks.
         expect(deps.answerLog.appendAll).toHaveBeenCalledWith(TARGET, [
-          expect.objectContaining({ id: "answer-1-deck-n1", deckUrl: `${TARGET}catalog.ttl#deck-n1` }),
+          expect.objectContaining({
+            id: "answer-1-deck-n1",
+            deckUrl: `${TARGET}catalog.ttl#deck-n1`,
+          }),
         ]);
       });
 
@@ -3986,10 +5232,16 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
           url === GUEST_INSTANCE_URL ? [renamed, own] : [targetDeck, before],
         );
-        journal.set(`${course.url} added to ${TARGET}`, JSON.stringify({ url: before.url, stamp: stampOf(course) }));
+        journal.set(
+          `${course.url} added to ${TARGET}`,
+          JSON.stringify({ url: before.url, stamp: stampOf(course) }),
+        );
         journal.set(
           `${GROUP.url} added to ${TARGET}`,
-          JSON.stringify({ url: `${TARGET}catalog.ttl#group-earlier`, stamp: arrangementOf(before, added("deck-n1", own)) }),
+          JSON.stringify({
+            url: `${TARGET}catalog.ttl#group-earlier`,
+            stamp: arrangementOf(before, added("deck-n1", own)),
+          }),
         );
         const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
         const again = added("deck-n1", renamed);
@@ -3998,7 +5250,11 @@ describe("library deck upgrade", () => {
         expect(deps.deckRepository.editDeckTree).toHaveBeenCalledWith(TARGET, {
           kind: "graft",
           nodes: [
-            { kind: "group", group: { url: `${TARGET}catalog.ttl#group-n3`, title: GROUP.title }, children: [{ kind: "deck", url: again.url }] },
+            {
+              kind: "group",
+              group: { url: `${TARGET}catalog.ttl#group-n3`, title: GROUP.title },
+              children: [{ kind: "deck", url: again.url }],
+            },
             { kind: "deck", url: `${TARGET}catalog.ttl#deck-n2` },
           ],
         });
@@ -4010,7 +5266,9 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.deckRepository.readDeckTree).mockImplementation(async (url) =>
           url === TARGET ? { readOnly: true, children: [] } : guestTree,
         );
-        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
           ok: false,
           step: "read",
           error: new AppError("deckTreeTooNew"),
@@ -4022,26 +5280,45 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.deckRepository.readDeckTree).mockImplementation(async (url) =>
           url === TARGET ? { readOnly: true, children: [] } : { readOnly: false, children: [] },
         );
-        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: true });
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({ ok: true });
       });
 
       it("mergeGuestStudy adds only from the guest's pod to an instance of a user who logged in", async () => {
         const { deps } = mergeDeps();
         const useCases = createUseCases(deps);
-        const refusal = "A guest's study is added from the guest's pod to an instance of a user who logged in.";
-        await expect(useCases.mergeGuestStudy(GUEST_SESSION, guestInstance, target)).rejects.toThrow(refusal);
+        const refusal =
+          "A guest's study is added from the guest's pod to an instance of a user who logged in.";
+        await expect(
+          useCases.mergeGuestStudy(GUEST_SESSION, guestInstance, target),
+        ).rejects.toThrow(refusal);
         await expect(useCases.mergeGuestStudy(session, instance, target)).rejects.toThrow(refusal);
-        await expect(useCases.mergeGuestStudy(session, guestInstance, guestInstance)).rejects.toThrow(refusal);
+        await expect(
+          useCases.mergeGuestStudy(session, guestInstance, guestInstance),
+        ).rejects.toThrow(refusal);
       });
 
       it("mergeGuestStudy adds nothing from a guest's study that does not conform, or that a newer version wrote", async () => {
         const { deps } = mergeDeps();
-        const violation = { message: { en: "x" }, severity: "violation" as const, constraint: "MinCount" };
+        const violation = {
+          message: { en: "x" },
+          severity: "violation" as const,
+          constraint: "MinCount",
+        };
         vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
           url,
           status: "checked" as const,
           subjects: url.endsWith("catalog.ttl")
-            ? [{ url: `${url}#x`, status: "checked" as const, shape: "deck" as const, version: 6, violations: [violation] }]
+            ? [
+                {
+                  url: `${url}#x`,
+                  status: "checked" as const,
+                  shape: "deck" as const,
+                  version: 6,
+                  violations: [violation],
+                },
+              ]
             : [],
         }));
         expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toEqual({
@@ -4055,9 +5332,19 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
           url,
           status: "checked" as const,
-          subjects: [{ url: `${url}#x`, status: "newer" as const, shape: "card" as const, version: 9, latest: 5 }],
+          subjects: [
+            {
+              url: `${url}#x`,
+              status: "newer" as const,
+              shape: "card" as const,
+              version: 9,
+              latest: 5,
+            },
+          ],
         }));
-        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
           ok: false,
           step: "read",
           error: new AppError("guestStudyTooNew"),
@@ -4068,8 +5355,12 @@ describe("library deck upgrade", () => {
 
       it("mergeGuestStudy writes nothing of a deck that would still name the guest's pod", async () => {
         const { deps } = mergeDeps();
-        vi.mocked(deps.deckRepository.listCards).mockResolvedValue([{ ...guestCard, frontImageUrl: `${GUEST_ORIGIN}picture.png` }]);
-        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+        vi.mocked(deps.deckRepository.listCards).mockResolvedValue([
+          { ...guestCard, frontImageUrl: `${GUEST_ORIGIN}picture.png` },
+        ]);
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
           ok: false,
           step: "decks",
           error: new AppError("guestUrlsLeft", { url: `${TARGET}catalog.ttl#deck-n1` }),
@@ -4083,10 +5374,21 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
           url === GUEST_INSTANCE_URL ? [own, course] : [targetDeck],
         );
-        vi.mocked(deps.deckRepository.addDeck).mockResolvedValueOnce(added("deck-n1", own)).mockRejectedValueOnce(new Error("offline"));
-        vi.mocked(deps.deckRepository.deleteDocument).mockRejectedValueOnce(new Error("still offline"));
+        vi.mocked(deps.deckRepository.addDeck)
+          .mockResolvedValueOnce(added("deck-n1", own))
+          .mockRejectedValueOnce(new Error("offline"));
+        vi.mocked(deps.deckRepository.deleteDocument).mockRejectedValueOnce(
+          new Error("still offline"),
+        );
         const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
-        expect(outcome).toEqual({ ok: false, instance: target, step: "decks", error: new Error("offline"), added: [added("deck-n1", own)], copied: [] });
+        expect(outcome).toEqual({
+          ok: false,
+          instance: target,
+          step: "decks",
+          error: new Error("offline"),
+          added: [added("deck-n1", own)],
+          copied: [],
+        });
         // The entry was not written after all: the documents nothing names go.
         expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(`${TARGET}catalog.ttl#deck-n2`);
         expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([
@@ -4100,52 +5402,87 @@ describe("library deck upgrade", () => {
 
       it("mergeGuestStudy deletes only what it wrote of a deck it could not add, and counts a deck whose entry was written though its answer was lost", async () => {
         const { deps } = mergeDeps();
-        vi.mocked(deps.reviewStateRepository.createReviewStates).mockRejectedValueOnce(new AppError("createdElsewhere", { url: "x" }));
-        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: false, step: "decks", added: [], copied: [] });
+        vi.mocked(deps.reviewStateRepository.createReviewStates).mockRejectedValueOnce(
+          new AppError("createdElsewhere", { url: "x" }),
+        );
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({ ok: false, step: "decks", added: [], copied: [] });
         expect(deps.deckRepository.readDeck).not.toHaveBeenCalled();
         // The cards document it wrote goes; the reviews document someone else created stays.
-        expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([[`${TARGET}decks/deck-n1.ttl`]]);
+        expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([
+          [`${TARGET}decks/deck-n1.ttl`],
+        ]);
 
         const lost = mergeDeps();
         const there = added("deck-n1", course);
-        vi.mocked(lost.deps.deckRepository.addDeck).mockRejectedValueOnce(new Error("connection reset"));
+        vi.mocked(lost.deps.deckRepository.addDeck).mockRejectedValueOnce(
+          new Error("connection reset"),
+        );
         vi.mocked(lost.deps.deckRepository.readDeck).mockResolvedValueOnce(there);
-        expect(await createUseCases(lost.deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+        expect(
+          await createUseCases(lost.deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
           ok: true,
           added: [there, added("deck-n2", own)],
         });
         expect(lost.deps.deckRepository.deleteDocument).not.toHaveBeenCalled();
 
         const unknown = mergeDeps();
-        vi.mocked(unknown.deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new Error("connection reset"));
+        vi.mocked(unknown.deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
+          new Error("connection reset"),
+        );
         vi.mocked(unknown.deps.deckRepository.readDeck).mockRejectedValueOnce(new Error("offline"));
-        expect(await createUseCases(unknown.deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: false, step: "decks" });
+        expect(
+          await createUseCases(unknown.deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({ ok: false, step: "decks" });
         // A write whose answer was lost may have been made: its document goes, as nothing names it.
-        expect(vi.mocked(unknown.deps.deckRepository.deleteDocument).mock.calls).toEqual([[`${TARGET}decks/deck-n1.ttl`]]);
+        expect(vi.mocked(unknown.deps.deckRepository.deleteDocument).mock.calls).toEqual([
+          [`${TARGET}decks/deck-n1.ttl`],
+        ]);
       });
 
       it.each([
-        ["decks", (deps: MergeDeps) => vi.mocked(deps.answerLog.appendAll).mockRejectedValueOnce(new Error("boom")), 1],
-        ["arrange", (deps: MergeDeps) => vi.mocked(deps.deckRepository.editDeckTree).mockRejectedValueOnce(new Error("boom")), 2],
-      ] as const)("mergeGuestStudy failing at %s keeps the decks added and the guest's study", async (step, fail, count) => {
-        const { deps } = mergeDeps();
-        fail(deps);
-        const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
-        expect(outcome).toMatchObject({
-          ok: false,
-          step,
-          error: new Error("boom"),
-          added: [added("deck-n1", course), added("deck-n2", own)].slice(0, count),
-        });
-        expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
-      });
+        [
+          "decks",
+          (deps: MergeDeps) =>
+            vi.mocked(deps.answerLog.appendAll).mockRejectedValueOnce(new Error("boom")),
+          1,
+        ],
+        [
+          "arrange",
+          (deps: MergeDeps) =>
+            vi.mocked(deps.deckRepository.editDeckTree).mockRejectedValueOnce(new Error("boom")),
+          2,
+        ],
+      ] as const)(
+        "mergeGuestStudy failing at %s keeps the decks added and the guest's study",
+        async (step, fail, count) => {
+          const { deps } = mergeDeps();
+          fail(deps);
+          const outcome = await createUseCases(deps).mergeGuestStudy(
+            session,
+            guestInstance,
+            target,
+          );
+          expect(outcome).toMatchObject({
+            ok: false,
+            step,
+            error: new Error("boom"),
+            added: [added("deck-n1", course), added("deck-n2", own)].slice(0, count),
+          });
+          expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+        },
+      );
 
       it("mergeGuestStudy keeps the guest's study when it changed while it was being added", async () => {
         const { deps } = mergeDeps();
         vi.mocked(deps.instanceCopier.listResources)
           .mockResolvedValueOnce(RESOURCES)
           .mockResolvedValueOnce([...RESOURCES, `${GUEST_INSTANCE_URL}new.ttl`]);
-        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
           ok: false,
           step: "verify",
           error: new AppError("guestStudyChanged"),
@@ -4155,10 +5492,14 @@ describe("library deck upgrade", () => {
         vi.mocked(changed.deps.instanceCopier.versionOf).mockImplementation(async (url) =>
           url.endsWith("2026-10.ttl") && ++reads > 1 ? "newer" : `version of ${url}`,
         );
-        expect(await createUseCases(changed.deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+        expect(
+          await createUseCases(changed.deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
           ok: false,
           step: "verify",
-          error: new AppError("guestStudyChanged", { url: `${GUEST_INSTANCE_URL}history/2026-10.ttl` }),
+          error: new AppError("guestStudyChanged", {
+            url: `${GUEST_INSTANCE_URL}history/2026-10.ttl`,
+          }),
         });
         expect(changed.deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
       });
@@ -4166,7 +5507,9 @@ describe("library deck upgrade", () => {
       it("mergeGuestStudy says the study was added even when the guest's could not be deleted, and keeps its notes", async () => {
         const { deps, journal } = mergeDeps();
         vi.mocked(deps.instanceRepository.deleteInstance).mockRejectedValue(new Error("offline"));
-        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: true, tidied: false });
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({ ok: true, tidied: false });
         expect([...journal.keys()]).toEqual([
           `${course.url} added to ${TARGET}`,
           `${own.url} added to ${TARGET}`,
@@ -4178,7 +5521,13 @@ describe("library deck upgrade", () => {
         const { deps } = mergeDeps();
         vi.mocked(deps.answerLog.append).mockRejectedValueOnce(new Error("offline"));
         const useCases = createUseCases(deps);
-        await useCases.recordReview(GUEST_INSTANCE_URL, own, { card, direction: "front-to-back" }, 4, new Date("2026-10-03T10:00:00.000Z"));
+        await useCases.recordReview(
+          GUEST_INSTANCE_URL,
+          own,
+          { card, direction: "front-to-back" },
+          4,
+          new Date("2026-10-03T10:00:00.000Z"),
+        );
         await vi.waitFor(() => expect(deps.answerLog.append).toHaveBeenCalledOnce());
         await useCases.mergeGuestStudy(session, guestInstance, target);
         expect(deps.answerLog.append).toHaveBeenCalledTimes(2);
@@ -4191,10 +5540,21 @@ describe("library deck upgrade", () => {
     it("transferGuestStudy names the copy it could not remove", async () => {
       const { deps } = guestDeps();
       vi.mocked(deps.instanceCopier.copyResource).mockRejectedValueOnce("offline");
-      vi.mocked(deps.instanceCopier.deleteRecursively).mockRejectedValueOnce(new Error("still offline"));
+      vi.mocked(deps.instanceCopier.deleteRecursively).mockRejectedValueOnce(
+        new Error("still offline"),
+      );
       expect(
-        await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
-      ).toEqual({ ok: false, step: "copy", error: "offline", cleanedUp: false, leftoverUrl: TARGET });
+        await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+          containerUrl: TARGET,
+          registrationTarget: "private",
+        }),
+      ).toEqual({
+        ok: false,
+        step: "copy",
+        error: "offline",
+        cleanedUp: false,
+        leftoverUrl: TARGET,
+      });
       expect(deps.updateJournal.end).not.toHaveBeenCalled();
     });
   });
@@ -4223,7 +5583,10 @@ describe("courses", () => {
     title: course.title,
     seriesUrl: course.seriesUrl,
     isCourse: true,
-    cards: [question, { id: "q-rdf", front: { en: "RDF?" }, back: { en: "Triples" }, formatVersion: 5 }],
+    cards: [
+      question,
+      { id: "q-rdf", front: { en: "RDF?" }, back: { en: "Triples" }, formatVersion: 5 },
+    ],
   };
   const outline: CourseOutline = {
     releaseUrl: RELEASE,
@@ -4233,7 +5596,15 @@ describe("courses", () => {
         url: at("ch-1"),
         position: 0,
         title: { en: "Linked data" },
-        steps: [{ id: "s-1", url: at("s-1"), position: 0, theory: { en: "IRIs name things." }, questionIds: ["q-iri"] }],
+        steps: [
+          {
+            id: "s-1",
+            url: at("s-1"),
+            position: 0,
+            theory: { en: "IRIs name things." },
+            questionIds: ["q-iri"],
+          },
+        ],
         reviewQuestionIds: [],
       },
       {
@@ -4241,7 +5612,15 @@ describe("courses", () => {
         url: at("ch-2"),
         position: 1,
         title: { en: "RDF" },
-        steps: [{ id: "s-2", url: at("s-2"), position: 0, theory: { en: "Triples." }, questionIds: ["q-rdf"] }],
+        steps: [
+          {
+            id: "s-2",
+            url: at("s-2"),
+            position: 0,
+            theory: { en: "Triples." },
+            questionIds: ["q-rdf"],
+          },
+        ],
         reviewQuestionIds: [],
       },
     ],
@@ -4286,7 +5665,10 @@ describe("courses", () => {
     vi.mocked(deps.deckRepository.listDecks).mockResolvedValueOnce([deck]);
     await useCases.startCourse(instance.url, course);
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(RELEASE);
-    expect(deps.deckRepository.importDeck).toHaveBeenCalledWith(instance.url, { ...release, cards: [] });
+    expect(deps.deckRepository.importDeck).toHaveBeenCalledWith(instance.url, {
+      ...release,
+      cards: [],
+    });
     vi.mocked(deps.deckRepository.listDecks).mockResolvedValueOnce([deck, courseDeck]);
     await expect(useCases.startCourse(instance.url, course)).resolves.toBe(courseDeck);
     expect(deps.deckRepository.importDeck).toHaveBeenCalledOnce();
@@ -4325,8 +5707,13 @@ describe("courses", () => {
   it("getCourse keeps a chapter completed in an older release completed in the one the deck now follows", async () => {
     const { deps, useCases } = setup();
     const older = at("ch-1").replace("/v1.ttl#", "/v0.ttl#");
-    vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce({ ...courseDeck, completedChapters: [older] });
-    expect((await useCases.getCourse(courseDeck)).progress.chapters.map((chapter) => chapter.state)).toEqual(["done", "open"]);
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce({
+      ...courseDeck,
+      completedChapters: [older],
+    });
+    expect(
+      (await useCases.getCourse(courseDeck)).progress.chapters.map((chapter) => chapter.state),
+    ).toEqual(["done", "open"]);
   });
 
   it("getCourse refuses a deck that is gone, and one that is no library copy", async () => {
@@ -4339,9 +5726,20 @@ describe("courses", () => {
 
   it("answerCourseQuestion writes a card answered for the first time into the deck, then grades it, logging a multiple-choice answer", async () => {
     const { deps, useCases, appended } = setup();
-    const answered = await useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: true }, noon);
-    expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(courseDeck, { save: [question], remove: [] });
-    expect(vi.mocked(deps.deckRepository.applyCardChanges).mock.invocationCallOrder[0]).toBeLessThan(
+    const answered = await useCases.answerCourseQuestion(
+      instance.url,
+      courseDeck,
+      question,
+      { correct: true },
+      noon,
+    );
+    expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(courseDeck, {
+      save: [question],
+      remove: [],
+    });
+    expect(
+      vi.mocked(deps.deckRepository.applyCardChanges).mock.invocationCallOrder[0],
+    ).toBeLessThan(
       vi.mocked(deps.reviewStateRepository.saveReviewState).mock.invocationCallOrder[0]!,
     );
     expect(answered).toEqual({
@@ -4380,10 +5778,17 @@ describe("courses", () => {
       { correct: false, distractorId: "q-iri-d1" },
       noon,
     );
-    expect(answered).toMatchObject({ effect: "introduce", state: { repetitions: 0, intervalDays: 1, due: "2026-10-08" } });
+    expect(answered).toMatchObject({
+      effect: "introduce",
+      state: { repetitions: 0, intervalDays: 1, due: "2026-10-08" },
+    });
     await useCases.refreshStudyDigest(instance.url, courseDeck);
     expect(appended).toEqual([
-      expect.objectContaining({ grade: 1, mode: "multiple-choice", chosenDistractor: `${courseDeck.cardsDocumentUrl}#q-iri-d1` }),
+      expect.objectContaining({
+        grade: 1,
+        mode: "multiple-choice",
+        chosenDistractor: `${courseDeck.cardsDocumentUrl}#q-iri-d1`,
+      }),
     ]);
   });
 
@@ -4391,7 +5796,9 @@ describe("courses", () => {
     const { deps, useCases } = setup();
     const morning = stateOf(new Date(2026, 9, 7, 9, 0), "2026-10-08");
     vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(morning);
-    await expect(useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: true }, noon)).resolves.toEqual({
+    await expect(
+      useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: true }, noon),
+    ).resolves.toEqual({
       effect: "none",
       state: morning,
     });
@@ -4399,48 +5806,87 @@ describe("courses", () => {
     // A wrong answer naming no option names none.
     await expect(
       useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: false }, noon),
-    ).resolves.toMatchObject({ effect: "review", state: { repetitions: 0, firstReviewedAt: morning.firstReviewedAt } });
+    ).resolves.toMatchObject({
+      effect: "review",
+      state: { repetitions: 0, firstReviewedAt: morning.firstReviewedAt },
+    });
     expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
   });
 
   it("completeChapter notes the chapter completed on the deck", async () => {
     const { deps, useCases } = setup();
-    await expect(useCases.completeChapter(courseDeck, at("ch-1"))).resolves.toMatchObject({ completedChapters: [at("ch-1")] });
+    await expect(useCases.completeChapter(courseDeck, at("ch-1"))).resolves.toMatchObject({
+      completedChapters: [at("ch-1")],
+    });
     expect(deps.deckRepository.completeChapter).toHaveBeenCalledWith(courseDeck, at("ch-1"));
   });
 
   it("setCompletedChapters changes the chapters completed on the deck", async () => {
     const { deps, useCases } = setup();
     await useCases.setCompletedChapters(courseDeck, { kind: "restart" });
-    expect(deps.deckRepository.setCompletedChapters).toHaveBeenCalledWith(courseDeck, { kind: "restart" });
+    expect(deps.deckRepository.setCompletedChapters).toHaveBeenCalledWith(courseDeck, {
+      kind: "restart",
+    });
   });
 
   it("planLibraryUpgrade adds no card to a course's deck, whichever release says it is a course", async () => {
     const { deps, useCases } = setup();
     const v2 = "https://solid-memo.com/decks/solid/v2.ttl";
     const plain = { ...release, isCourse: undefined };
-    const next = { ...plain, url: v2, version: "2", cards: [...release.cards, { id: "q-new", front: { en: "New?" }, back: { en: "Yes" }, formatVersion: 5 }] };
-    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => (url === v2 ? next : plain));
+    const next = {
+      ...plain,
+      url: v2,
+      version: "2",
+      cards: [
+        ...release.cards,
+        { id: "q-new", front: { en: "New?" }, back: { en: "Yes" }, formatVersion: 5 },
+      ],
+    };
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
+      url === v2 ? next : plain,
+    );
     vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
-    const series = { ...course, url: v2, version: "2", releases: [...course.releases, { url: v2, version: "2" }] };
+    const series = {
+      ...course,
+      url: v2,
+      version: "2",
+      releases: [...course.releases, { url: v2, version: "2" }],
+    };
     vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([series]);
     await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toBeNull();
     // Only the release copied says it is a course.
-    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([{ ...series, isCourse: undefined }]);
-    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => (url === v2 ? next : release));
+    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
+      { ...series, isCourse: undefined },
+    ]);
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
+      url === v2 ? next : release,
+    );
     await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toBeNull();
     // Neither: a plain deck's upgrade adds the card.
-    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => (url === v2 ? next : plain));
-    await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toMatchObject({ add: [{ id: "q-new" }] });
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
+      url === v2 ? next : plain,
+    );
+    await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toMatchObject({
+      add: [{ id: "q-new" }],
+    });
   });
 
   it("planLibraryUpgrade offers a course's deck a release that changes only the course's outline", async () => {
     const { deps, useCases } = setup();
     const v2 = "https://solid-memo.com/decks/solid/v2.ttl";
-    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => ({ ...release, url, version: url === v2 ? "2" : "1" }));
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => ({
+      ...release,
+      url,
+      version: url === v2 ? "2" : "1",
+    }));
     vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
     vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
-      { ...course, url: v2, version: "2", releases: [...course.releases, { url: v2, version: "2" }] },
+      {
+        ...course,
+        url: v2,
+        version: "2",
+        releases: [...course.releases, { url: v2, version: "2" }],
+      },
     ]);
     // The same outline in both: nothing to offer.
     await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toBeNull();
@@ -4451,10 +5897,22 @@ describe("courses", () => {
     const [step, ...steps] = first!.steps;
     const rewritten: CourseOutline = {
       releaseUrl: v2,
-      chapters: [{ ...first!, steps: [{ ...step!, theory: { en: "IRIs\n\n---\n\nname things." } }, ...steps] }, ...rest],
+      chapters: [
+        {
+          ...first!,
+          steps: [{ ...step!, theory: { en: "IRIs\n\n---\n\nname things." } }, ...steps],
+        },
+        ...rest,
+      ],
     };
-    vi.mocked(deps.deckLibrary.fetchCourseOutline).mockImplementation(async (url) => (url === v2 ? rewritten : outline));
-    await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toMatchObject({ toVersion: "2", change: [], outline: true });
+    vi.mocked(deps.deckLibrary.fetchCourseOutline).mockImplementation(async (url) =>
+      url === v2 ? rewritten : outline,
+    );
+    await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toMatchObject({
+      toVersion: "2",
+      change: [],
+      outline: true,
+    });
   });
 });
 
@@ -4468,7 +5926,9 @@ describe("metadata", () => {
       const now = { ...deck, title: { en: "Renamed elsewhere" } };
       vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(now);
       const useCases = createUseCases(deps);
-      await expect(useCases.setDeckProvenance(deck, { authors: [" Ada "], license: CC0 })).resolves.toEqual({
+      await expect(
+        useCases.setDeckProvenance(deck, { authors: [" Ada "], license: CC0 }),
+      ).resolves.toEqual({
         ...now,
         authors: ["Ada"],
         license: CC0,
@@ -4478,12 +5938,18 @@ describe("metadata", () => {
 
     it("reads and makes the edit again while the catalog changes elsewhere, three times in all", async () => {
       const deps = makeDeps();
-      vi.mocked(deps.deckRepository.saveDeck).mockRejectedValueOnce(changed()).mockRejectedValueOnce(changed());
+      vi.mocked(deps.deckRepository.saveDeck)
+        .mockRejectedValueOnce(changed())
+        .mockRejectedValueOnce(changed());
       const useCases = createUseCases(deps);
-      await expect(useCases.setDeckProvenance(deck, { authors: ["Ada"] })).resolves.toMatchObject({ authors: ["Ada"] });
+      await expect(useCases.setDeckProvenance(deck, { authors: ["Ada"] })).resolves.toMatchObject({
+        authors: ["Ada"],
+      });
       expect(deps.deckRepository.readDeck).toHaveBeenCalledTimes(3);
       vi.mocked(deps.deckRepository.saveDeck).mockRejectedValue(changed());
-      await expect(useCases.setDeckProvenance(deck, { authors: [] })).rejects.toMatchObject({ code: "changedElsewhere" });
+      await expect(useCases.setDeckProvenance(deck, { authors: [] })).rejects.toMatchObject({
+        code: "changedElsewhere",
+      });
       expect(deps.deckRepository.saveDeck).toHaveBeenCalledTimes(6);
     });
 
@@ -4491,8 +5957,12 @@ describe("metadata", () => {
       const deps = makeDeps();
       vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(null);
       const useCases = createUseCases(deps);
-      await expect(useCases.setDeckProvenance(deck, { authors: [] })).rejects.toMatchObject({ code: "deckGone" });
-      await expect(useCases.setDeckProvenance(deck, { authors: [], license: "https://example.org/x" })).rejects.toMatchObject({
+      await expect(useCases.setDeckProvenance(deck, { authors: [] })).rejects.toMatchObject({
+        code: "deckGone",
+      });
+      await expect(
+        useCases.setDeckProvenance(deck, { authors: [], license: "https://example.org/x" }),
+      ).rejects.toMatchObject({
         code: "licenseUnknown",
       });
       expect(deps.deckRepository.readDeck).toHaveBeenCalledTimes(2);
@@ -4506,10 +5976,19 @@ describe("metadata", () => {
     it("writes the new name to the meta document, the catalog and the type index registrations", async () => {
       const deps = makeDeps();
       vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
-      vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue({ ...catalog, description: defaultCatalogDescription("Main") });
+      vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue({
+        ...catalog,
+        description: defaultCatalogDescription("Main"),
+      });
       const useCases = createUseCases(deps);
-      await expect(useCases.renameInstance(session, instance, " Languages ")).resolves.toEqual({ ...instance, name: "Languages" });
-      expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(instance.url, { ...meta, name: "Languages" });
+      await expect(useCases.renameInstance(session, instance, " Languages ")).resolves.toEqual({
+        ...instance,
+        name: "Languages",
+      });
+      expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(instance.url, {
+        ...meta,
+        name: "Languages",
+      });
       expect(deps.deckRepository.saveCatalog).toHaveBeenCalledWith(instance.url, {
         ...catalog,
         title: "Languages",
@@ -4525,7 +6004,9 @@ describe("metadata", () => {
     it("writes only where the name is not yet the new one, and no catalog there is none of", async () => {
       const deps = makeDeps();
       vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({ ...meta, name: "Languages" });
-      vi.mocked(deps.deckRepository.readCatalog).mockResolvedValueOnce({ ...catalog, title: "Languages" }).mockResolvedValueOnce(null);
+      vi.mocked(deps.deckRepository.readCatalog)
+        .mockResolvedValueOnce({ ...catalog, title: "Languages" })
+        .mockResolvedValueOnce(null);
       const useCases = createUseCases(deps);
       await useCases.renameInstance(session, instance, "Languages");
       await useCases.renameInstance(session, instance, "Languages");
@@ -4548,8 +6029,12 @@ describe("metadata", () => {
     it("refuses an empty name, and an instance without a meta document, writing nothing", async () => {
       const deps = makeDeps();
       const useCases = createUseCases(deps);
-      await expect(useCases.renameInstance(session, instance, " ")).rejects.toMatchObject({ code: "instanceNameEmpty" });
-      await expect(useCases.renameInstance(session, instance, "Languages")).rejects.toMatchObject({ code: "noMetaToUpdate" });
+      await expect(useCases.renameInstance(session, instance, " ")).rejects.toMatchObject({
+        code: "instanceNameEmpty",
+      });
+      await expect(useCases.renameInstance(session, instance, "Languages")).rejects.toMatchObject({
+        code: "noMetaToUpdate",
+      });
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
       expect(deps.instanceRepository.renameRegistrations).not.toHaveBeenCalled();
     });
@@ -4565,7 +6050,9 @@ describe("metadata", () => {
       vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(changed());
       const useCases = createUseCases(deps);
       const described = { ...catalog, description: "Shared decks.", license: CC0 };
-      await expect(useCases.describeCatalog(instance.url, { description: " Shared decks. ", license: CC0 })).resolves.toEqual(described);
+      await expect(
+        useCases.describeCatalog(instance.url, { description: " Shared decks. ", license: CC0 }),
+      ).resolves.toEqual(described);
       expect(deps.deckRepository.readCatalog).toHaveBeenCalledTimes(2);
       expect(deps.deckRepository.saveCatalog).toHaveBeenLastCalledWith(instance.url, described);
     });
@@ -4573,7 +6060,9 @@ describe("metadata", () => {
     it("refuses an instance without one", async () => {
       const deps = makeDeps();
       vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(null);
-      await expect(createUseCases(deps).describeCatalog(instance.url, { description: "x" })).rejects.toMatchObject({
+      await expect(
+        createUseCases(deps).describeCatalog(instance.url, { description: "x" }),
+      ).rejects.toMatchObject({
         code: "noCatalogToUpdate",
       });
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
@@ -4603,7 +6092,13 @@ describe("metadata", () => {
     const file = {
       name: "kanji.ttl",
       format: "turtle" as const,
-      content: { deck: fileDeck, cards: [{ ...card, url: `${fileDeck.cardsDocumentUrl}#card-1` }], reviews: [state], upgraded: [], dropped: [] },
+      content: {
+        deck: fileDeck,
+        cards: [{ ...card, url: `${fileDeck.cardsDocumentUrl}#card-1` }],
+        reviews: [state],
+        upgraded: [],
+        dropped: [],
+      },
     };
 
     function withFiles(picked: { name: string; text: string } | null = null) {
@@ -4613,21 +6108,46 @@ describe("metadata", () => {
       };
       const fileExchange = { save: vi.fn(), open: vi.fn(async () => picked) };
       const deps = makeDeps();
-      return { deps, deckArchive, fileExchange, useCases: createUseCases({ ...deps, deckArchive, fileExchange }) };
+      return {
+        deps,
+        deckArchive,
+        fileExchange,
+        useCases: createUseCases({ ...deps, deckArchive, fileExchange }),
+      };
     }
 
     it("saves a deck as a file named after it", async () => {
       const { deckArchive, fileExchange, useCases } = withFiles();
       await useCases.exportDeckFile(deck, { format: "jsonld", withProgress: true });
-      expect(deckArchive.exportDeck).toHaveBeenCalledWith(deck, { format: "jsonld", withProgress: true });
-      expect(fileExchange.save).toHaveBeenCalledWith("kanji-n5.jsonld", "application/ld+json", "<#a> <#b> <#c> .");
+      expect(deckArchive.exportDeck).toHaveBeenCalledWith(deck, {
+        format: "jsonld",
+        withProgress: true,
+      });
+      expect(fileExchange.save).toHaveBeenCalledWith(
+        "kanji-n5.jsonld",
+        "application/ld+json",
+        "<#a> <#b> <#c> .",
+      );
     });
 
     it("reads the file the user picks, in the format its name says, at a base of its own", async () => {
-      const { deckArchive, fileExchange, useCases } = withFiles({ name: "kanji.jsonld", text: "{}" });
-      expect(await useCases.openDeckFile()).toEqual({ name: "kanji.jsonld", format: "jsonld", content: file.content });
-      expect(fileExchange.open).toHaveBeenCalledWith(".ttl,.jsonld,.json,text/turtle,application/ld+json");
-      expect(deckArchive.readDeckFile).toHaveBeenCalledWith("{}", "jsonld", "https://file.solid-memo.invalid/kanji.jsonld");
+      const { deckArchive, fileExchange, useCases } = withFiles({
+        name: "kanji.jsonld",
+        text: "{}",
+      });
+      expect(await useCases.openDeckFile()).toEqual({
+        name: "kanji.jsonld",
+        format: "jsonld",
+        content: file.content,
+      });
+      expect(fileExchange.open).toHaveBeenCalledWith(
+        ".ttl,.jsonld,.json,text/turtle,application/ld+json",
+      );
+      expect(deckArchive.readDeckFile).toHaveBeenCalledWith(
+        "{}",
+        "jsonld",
+        "https://file.solid-memo.invalid/kanji.jsonld",
+      );
     });
 
     it("reads nothing when the user picks no file", async () => {
@@ -4653,15 +6173,35 @@ describe("metadata", () => {
       });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(
         imported,
-        { save: [{ ...card, url: `${instance.url}decks/deck-x.ttl#card-1`, formatVersion: CARD_FORMAT_VERSION }], remove: [] },
+        {
+          save: [
+            {
+              ...card,
+              url: `${instance.url}decks/deck-x.ttl#card-1`,
+              formatVersion: CARD_FORMAT_VERSION,
+            },
+          ],
+          remove: [],
+        },
         { whole: true, version: "absent" },
       );
-      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(imported, { save: [state], remove: [] });
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(imported, {
+        save: [state],
+        remove: [],
+      });
       expect(deps.deckRepository.registerDeck).toHaveBeenCalledWith(imported);
-      const order = (mock: unknown) => (mock as { mock: { invocationCallOrder: number[] } }).mock.invocationCallOrder[0]!;
-      expect(order(deps.deckRepository.applyCardChanges)).toBeLessThan(order(deps.reviewStateRepository.applyReviewChanges));
-      expect(order(deps.reviewStateRepository.applyReviewChanges)).toBeLessThan(order(deps.deckRepository.registerDeck));
-      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(imported, undefined);
+      const order = (mock: unknown) =>
+        (mock as { mock: { invocationCallOrder: number[] } }).mock.invocationCallOrder[0]!;
+      expect(order(deps.deckRepository.applyCardChanges)).toBeLessThan(
+        order(deps.reviewStateRepository.applyReviewChanges),
+      );
+      expect(order(deps.reviewStateRepository.applyReviewChanges)).toBeLessThan(
+        order(deps.deckRepository.registerDeck),
+      );
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
+        imported,
+        undefined,
+      );
     });
 
     it("imports no progress unless asked, and a digest it cannot bring up to date stops nothing", async () => {
@@ -4674,30 +6214,46 @@ describe("metadata", () => {
 
     it("gives the deck a fresh id when a cards document is at its URL already, once", async () => {
       const { deps, useCases } = withFiles();
-      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new AppError("createdElsewhere"));
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
+        new AppError("createdElsewhere"),
+      );
       const imported = await useCases.importDeckFile(instance.url, file, { withProgress: true });
       expect(imported.id).toBe("deck-0f3a");
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
-      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(new AppError("createdElsewhere"));
-      await expect(useCases.importDeckFile(instance.url, file, { withProgress: true })).rejects.toMatchObject({ code: "createdElsewhere" });
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(
+        new AppError("createdElsewhere"),
+      );
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: true }),
+      ).rejects.toMatchObject({ code: "createdElsewhere" });
     });
 
     it("stops at any other failure of the cards' write, writing nothing more", async () => {
       const { deps, useCases } = withFiles();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new Error("offline"));
-      await expect(useCases.importDeckFile(instance.url, file, { withProgress: true })).rejects.toThrow("offline");
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: true }),
+      ).rejects.toThrow("offline");
       expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
     });
 
     it("has no archive nor files unless given them", async () => {
       const useCases = createUseCases(makeDeps());
-      await expect(useCases.exportDeckFile(deck, { format: "turtle", withProgress: false })).rejects.toThrow("no deck archive");
+      await expect(
+        useCases.exportDeckFile(deck, { format: "turtle", withProgress: false }),
+      ).rejects.toThrow("no deck archive");
       expect(await useCases.openDeckFile()).toBeNull();
       const { deps } = withFiles();
-      const archiveless = createUseCases({ ...deps, fileExchange: { save: vi.fn(), open: async () => ({ name: "a.ttl", text: "" }) } });
+      const archiveless = createUseCases({
+        ...deps,
+        fileExchange: { save: vi.fn(), open: async () => ({ name: "a.ttl", text: "" }) },
+      });
       await expect(archiveless.openDeckFile()).rejects.toThrow("no deck archive");
       const { deckArchive } = withFiles();
-      await createUseCases({ ...deps, deckArchive }).exportDeckFile(deck, { format: "turtle", withProgress: false });
+      await createUseCases({ ...deps, deckArchive }).exportDeckFile(deck, {
+        format: "turtle",
+        withProgress: false,
+      });
       expect(deckArchive.exportDeck).toHaveBeenCalled();
     });
   });
@@ -4719,7 +6275,12 @@ describe("openTrial", () => {
     const deps = makeDeps();
     const made = sandbox();
     vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
-      preferences: { ...DEFAULT_PREFERENCES, answerScale: "minimal", dayBoundaryHour: 2, newCardsPerDay: 1 },
+      preferences: {
+        ...DEFAULT_PREFERENCES,
+        answerScale: "minimal",
+        dayBoundaryHour: 2,
+        newCardsPerDay: 1,
+      },
       formatVersion: 4,
     });
     const trialSandbox = vi.fn(() => made);
@@ -4730,7 +6291,10 @@ describe("openTrial", () => {
     const { made, trialSandbox, useCases } = withSandbox();
     const draft = playableCourseDraft();
     const opened = await useCases.openTrial(draft, instance.url);
-    expect(opened).toEqual({ ok: true, trial: { useCases: made.useCases, instance: trialInstance, deck } });
+    expect(opened).toEqual({
+      ok: true,
+      trial: { useCases: made.useCases, instance: trialInstance, deck },
+    });
     expect(trialSandbox).toHaveBeenCalledWith(draft);
     expect(made.pod.start).toHaveBeenCalled();
     expect(made.trialUseCases.createInstance).toHaveBeenCalledWith(TRIAL_SESSION, {
@@ -4743,14 +6307,20 @@ describe("openTrial", () => {
       answerScale: "minimal",
       dayBoundaryHour: 2,
     });
-    expect(made.trialUseCases.startCourse).toHaveBeenCalledWith(TRIAL_INSTANCE_URL, expect.objectContaining({ url: DRAFT, isCourse: true }));
+    expect(made.trialUseCases.startCourse).toHaveBeenCalledWith(
+      TRIAL_INSTANCE_URL,
+      expect.objectContaining({ url: DRAFT, isCourse: true }),
+    );
     expect(made.trialUseCases.importLibraryDeck).not.toHaveBeenCalled();
   });
 
   it("imports a deck draft as a library deck", async () => {
     const { made, useCases } = withSandbox();
     await useCases.openTrial(deckDraft(), instance.url);
-    expect(made.trialUseCases.importLibraryDeck).toHaveBeenCalledWith(TRIAL_INSTANCE_URL, expect.objectContaining({ url: DRAFT }));
+    expect(made.trialUseCases.importLibraryDeck).toHaveBeenCalledWith(
+      TRIAL_INSTANCE_URL,
+      expect.objectContaining({ url: DRAFT }),
+    );
     expect(made.trialUseCases.startCourse).not.toHaveBeenCalled();
   });
 
@@ -4758,11 +6328,17 @@ describe("openTrial", () => {
     const { trialSandbox, useCases } = withSandbox();
     const opened = await useCases.openTrial(courseDraft(), instance.url);
     expect(opened.ok).toBe(false);
-    expect(!opened.ok && opened.problems.map((problem) => problem.code)).toEqual(["fewDistractors", "fewDistractors", "chapterWithoutStep"]);
+    expect(!opened.ok && opened.problems.map((problem) => problem.code)).toEqual([
+      "fewDistractors",
+      "fewDistractors",
+      "chapterWithoutStep",
+    ]);
     expect(trialSandbox).not.toHaveBeenCalled();
   });
 
   it("plays no trial unless given a sandbox", async () => {
-    await expect(createUseCases(makeDeps()).openTrial(deckDraft(), instance.url)).rejects.toThrow("plays no trials");
+    await expect(createUseCases(makeDeps()).openTrial(deckDraft(), instance.url)).rejects.toThrow(
+      "plays no trials",
+    );
   });
 });

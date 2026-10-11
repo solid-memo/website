@@ -165,10 +165,7 @@ describe("createSolidSessionGateway", () => {
       );
       expect(authnLogin).toHaveBeenCalledWith({
         oidcIssuer: "https://issuer.example",
-        redirectUrl: new URL(
-          window.location.pathname,
-          window.location.origin,
-        ).toString(),
+        redirectUrl: new URL(window.location.pathname, window.location.origin).toString(),
         clientName: "Test App",
       });
     });
@@ -205,10 +202,7 @@ describe("createSolidSessionGateway", () => {
       expect(getSolidDataset).not.toHaveBeenCalled();
       expect(authnLogin).toHaveBeenCalledWith({
         oidcIssuer: "https://login.inrupt.com",
-        redirectUrl: new URL(
-          window.location.pathname,
-          window.location.origin,
-        ).toString(),
+        redirectUrl: new URL(window.location.pathname, window.location.origin).toString(),
         clientName: "Test App",
       });
     });
@@ -229,15 +223,10 @@ describe("createSolidSessionGateway", () => {
     it("skips issuers that are not https URLs", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getIriAll).mockReturnValue([
-        "http://insecure.example",
-        "https://issuer.example",
-      ]);
+      vi.mocked(getIriAll).mockReturnValue(["http://insecure.example", "https://issuer.example"]);
 
       const gateway = createSolidSessionGateway("Test App");
-      await expect(gateway.discoverOidcIssuer(WEBID)).resolves.toBe(
-        "https://issuer.example",
-      );
+      await expect(gateway.discoverOidcIssuer(WEBID)).resolves.toBe("https://issuer.example");
     });
 
     it("rejects when no declared issuer is an https URL", async () => {
@@ -246,9 +235,7 @@ describe("createSolidSessionGateway", () => {
       vi.mocked(getIriAll).mockReturnValue(["javascript:alert(1)"]);
 
       const gateway = createSolidSessionGateway("Test App");
-      await expect(gateway.login(WEBID)).rejects.toThrow(
-        "not a secure https:// address",
-      );
+      await expect(gateway.login(WEBID)).rejects.toThrow("not a secure https:// address");
       expect(authnLogin).not.toHaveBeenCalled();
     });
   });

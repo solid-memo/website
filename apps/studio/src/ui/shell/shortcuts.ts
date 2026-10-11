@@ -8,7 +8,15 @@ import type { StudioRoute } from "../router";
 export type ShortcutScope = "studio" | "table";
 
 /** A section of the Studio that a `g` chord goes to. */
-export type Section = "decks" | "groups" | "drafts" | "releases" | "health" | "library" | "transfer" | "instances";
+export type Section =
+  | "decks"
+  | "groups"
+  | "drafts"
+  | "releases"
+  | "health"
+  | "library"
+  | "transfer"
+  | "instances";
 
 export type ShortcutId =
   | "palette"
@@ -70,7 +78,13 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "filter", keys: "/", scope: "studio" },
   { id: "nextRegion", keys: "F6", scope: "studio", whileTyping: true },
   { id: "previousRegion", keys: "Shift+F6", scope: "studio", whileTyping: true },
-  ...Object.entries(GO_KEYS).map(([section, key]): Shortcut => ({ id: `go.${section as Section}`, keys: `g ${key}`, scope: "studio" })),
+  ...Object.entries(GO_KEYS).map(
+    ([section, key]): Shortcut => ({
+      id: `go.${section as Section}`,
+      keys: `g ${key}`,
+      scope: "studio",
+    }),
+  ),
   { id: "toggleSidebar", keys: "Ctrl+b", scope: "studio" },
   { id: "toggleAside", keys: "Ctrl+\\", scope: "studio" },
   { id: "toggleDock", keys: "Ctrl+j", scope: "studio" },
@@ -79,7 +93,14 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "previousTab", keys: "[", scope: "studio" },
   { id: "nextTab", keys: "]", scope: "studio" },
   // The key help lists the nine as one.
-  ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n): Shortcut => ({ id: `tab.${n}`, keys: String(n), scope: "studio", help: n === 1 ? "1–9" : null })),
+  ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map(
+    (n): Shortcut => ({
+      id: `tab.${n}`,
+      keys: String(n),
+      scope: "studio",
+      help: n === 1 ? "1–9" : null,
+    }),
+  ),
   { id: "down", keys: "j", scope: "table" },
   { id: "up", keys: "k", scope: "table" },
   { id: "select", keys: "x", scope: "table" },
@@ -112,7 +133,9 @@ export const CHORD_TIMEOUT = 1500;
  * apart: there, Ctrl+\ cannot be pressed where \ takes AltGr.
  */
 export function keyOf(
-  event: Pick<KeyboardEvent, "key" | "ctrlKey" | "metaKey" | "altKey" | "shiftKey"> & { getModifierState?: (key: string) => boolean },
+  event: Pick<KeyboardEvent, "key" | "ctrlKey" | "metaKey" | "altKey" | "shiftKey"> & {
+    getModifierState?: (key: string) => boolean;
+  },
 ): string {
   const typed = event.key.length === 1;
   const altGraph = typed && event.altKey && (event.getModifierState?.("AltGraph") ?? false);
@@ -132,7 +155,9 @@ export function isCharacterKey(key: string): boolean {
 
 /** The shortcut of one scope a single key is, if any. */
 export function shortcutOf(key: string, scope: ShortcutScope): ShortcutId | null {
-  return SHORTCUTS.find((shortcut) => shortcut.scope === scope && shortcut.keys === key)?.id ?? null;
+  return (
+    SHORTCUTS.find((shortcut) => shortcut.scope === scope && shortcut.keys === key)?.id ?? null
+  );
 }
 
 /** The first keys of a chord pressed so far, and when the last was. */
@@ -153,11 +178,13 @@ export function pressKey(
   now: number,
   shortcuts: readonly Shortcut[],
 ): { chord: Chord | null; shortcut: ShortcutId | null } {
-  const keys = chord !== null && now - chord.at <= CHORD_TIMEOUT ? [`${chord.keys} ${key}`, key] : [key];
+  const keys =
+    chord !== null && now - chord.at <= CHORD_TIMEOUT ? [`${chord.keys} ${key}`, key] : [key];
   for (const pressed of keys) {
     const exact = shortcuts.find((shortcut) => shortcut.keys === pressed);
     if (exact !== undefined) return { chord: null, shortcut: exact.id };
-    if (shortcuts.some((shortcut) => shortcut.keys.startsWith(`${pressed} `))) return { chord: { keys: pressed, at: now }, shortcut: null };
+    if (shortcuts.some((shortcut) => shortcut.keys.startsWith(`${pressed} `)))
+      return { chord: { keys: pressed, at: now }, shortcut: null };
   }
   return { chord: null, shortcut: null };
 }
@@ -170,7 +197,13 @@ export function sectionRoute(section: Section, instanceUrl: string | null): Stud
 }
 
 /** The inputs that are pressed or checked, not typed in: their keys are the Studio's. */
-const CHOSEN_INPUTS: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset"]);
+const CHOSEN_INPUTS: ReadonlySet<string> = new Set([
+  "checkbox",
+  "radio",
+  "button",
+  "submit",
+  "reset",
+]);
 
 /** Whether a key goes to a field the user types or chooses in (a search, a filter, a text), which keeps it. */
 export function isTyping(target: EventTarget | null): boolean {

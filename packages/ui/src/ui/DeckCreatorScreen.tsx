@@ -3,7 +3,13 @@ import { AppError } from "@solid-memo/domain/appError";
 import type { LangText } from "@solid-memo/domain/langText";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
-import { draftOf, LangTextField, rememberLanguages, textOfDraft, useMissingLanguage } from "./LangTextField";
+import {
+  draftOf,
+  LangTextField,
+  rememberLanguages,
+  textOfDraft,
+  useMissingLanguage,
+} from "./LangTextField";
 import { recentLanguages } from "./remembered";
 
 /**
@@ -22,7 +28,9 @@ export function DeckCreatorScreen({
   onCreate: (title: LangText) => void;
 }) {
   const { t, errorText } = useI18n();
-  const [draft, setDraft] = useState(() => draftOf(undefined, [], { tag: recentLanguages("deck")[0] ?? null }));
+  const [draft, setDraft] = useState(() =>
+    draftOf(undefined, [], { tag: recentLanguages("deck")[0] ?? null }),
+  );
   const { missing, ask, clear } = useMissingLanguage("deck-name");
 
   function handleSubmit(event: Event) {

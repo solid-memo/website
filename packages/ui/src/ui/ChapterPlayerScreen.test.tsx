@@ -42,18 +42,22 @@ function renderStep(chapter: CourseChapter, phase: StepPhase = "read", chunkInde
     ...view,
     onAnswerPhase,
     onChunk,
-    rerenderAt: (chunk: number, stepIndex = 0) => view.rerender(screenOf(chapter, phase, chunk, onAnswerPhase, onChunk, stepIndex)),
+    rerenderAt: (chunk: number, stepIndex = 0) =>
+      view.rerender(screenOf(chapter, phase, chunk, onAnswerPhase, onChunk, stepIndex)),
   };
 }
 
-const THEORY = "A **triple**:\n\n```turtle\n<#a> <#b> <#c> .\n```\n\n| Term | Is |\n|-|-|\n| `<#a>` | the subject |";
+const THEORY =
+  "A **triple**:\n\n```turtle\n<#a> <#b> <#c> .\n```\n\n| Term | Is |\n|-|-|\n| `<#a>` | the subject |";
 
 describe("ChapterPlayerScreen", () => {
   it("shows theory in Markdown as its blocks", () => {
     const chapter = courseOutline.chapters[0]!;
     const { container } = renderStep({
       ...chapter,
-      steps: [{ ...chapter.steps[0]!, theory: { en: THEORY, sv: "Svenska" }, textFormat: SM.markdown }],
+      steps: [
+        { ...chapter.steps[0]!, theory: { en: THEORY, sv: "Svenska" }, textFormat: SM.markdown },
+      ],
     });
     const theory = container.querySelector(".course-theory")!;
     expect(theory).toHaveClass("md");
@@ -66,11 +70,19 @@ describe("ChapterPlayerScreen", () => {
     const chapter = courseOutline.chapters[0]!;
     const { container } = renderStep({
       ...chapter,
-      steps: [{ ...chapter.steps[0]!, theory: { en: THEORY }, textFormat: "https://example.org/formats#other" }],
+      steps: [
+        {
+          ...chapter.steps[0]!,
+          theory: { en: THEORY },
+          textFormat: "https://example.org/formats#other",
+        },
+      ],
     });
     const theory = container.querySelector(".course-theory")!;
     expect(theory).not.toHaveClass("md");
-    expect([...theory.querySelectorAll("p")].map((p) => p.textContent)).toEqual(THEORY.split("\n\n"));
+    expect([...theory.querySelectorAll("p")].map((p) => p.textContent)).toEqual(
+      THEORY.split("\n\n"),
+    );
     expect(screen.queryByRole("region")).toBeNull();
   });
 
@@ -96,10 +108,14 @@ describe("ChapterPlayerScreen", () => {
   });
 
   describe("theory in chunks", () => {
-    const CHUNKED = "First *part*.\n\n---\n\n- a list\n\n  ---\n\n  still the list\n\n***\n\nLast part.";
+    const CHUNKED =
+      "First *part*.\n\n---\n\n- a list\n\n  ---\n\n  still the list\n\n***\n\nLast part.";
     const chunked = (theory: Record<string, string> = { en: CHUNKED }): CourseChapter => {
       const chapter = courseOutline.chapters[0]!;
-      return { ...chapter, steps: chapter.steps.map((step) => ({ ...step, theory, textFormat: SM.markdown })) };
+      return {
+        ...chapter,
+        steps: chapter.steps.map((step) => ({ ...step, theory, textFormat: SM.markdown })),
+      };
     };
     const theoryOf = (container: Element) => container.querySelector(".course-theory")!;
 
@@ -131,7 +147,9 @@ describe("ChapterPlayerScreen", () => {
       expect(theoryOf(container)).toHaveTextContent(/^Last part\.$/);
       expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
       const on = screen.getByRole("button", { name: "On to the question" });
-      expect(on).toHaveAccessibleDescription("The theory is not shown while you answer the questions.");
+      expect(on).toHaveAccessibleDescription(
+        "The theory is not shown while you answer the questions.",
+      );
       fireEvent.click(on);
       expect(onAnswerPhase).toHaveBeenCalledOnce();
       fireEvent.click(screen.getByRole("button", { name: "Back" }));
@@ -169,7 +187,10 @@ describe("ChapterPlayerScreen", () => {
 
     it("shows plain theory whole, its rules as text", () => {
       const chapter = courseOutline.chapters[0]!;
-      const { container } = renderStep({ ...chapter, steps: [{ ...chapter.steps[0]!, theory: { en: "a\n\n---\n\nb" } }] });
+      const { container } = renderStep({
+        ...chapter,
+        steps: [{ ...chapter.steps[0]!, theory: { en: "a\n\n---\n\nb" } }],
+      });
       expect(container.querySelector(".course-part")).toBeNull();
       expect(theoryOf(container)).toHaveTextContent("a---b");
     });

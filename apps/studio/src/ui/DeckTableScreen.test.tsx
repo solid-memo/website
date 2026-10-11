@@ -11,20 +11,36 @@ import { answer, dialog, pick } from "../test/dialogs";
 import { WithKeys } from "../test/keys";
 import { instanceA, makeDeck } from "../test/fixtures";
 
-const languages: DeckGroup = { url: `${instanceA.url}catalog.ttl#group-1`, title: { en: "Languages" } };
+const languages: DeckGroup = {
+  url: `${instanceA.url}catalog.ttl#group-1`,
+  title: { en: "Languages" },
+};
 const scripts: DeckGroup = { url: `${instanceA.url}catalog.ttl#group-2`, title: { en: "Scripts" } };
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
-const verbs = { ...makeDeck("deck-2", { en: "Verbs", sv: "Verb" }), direction: "bidirectional" as const, newCardsPerDay: 5 };
+const verbs = {
+  ...makeDeck("deck-2", { en: "Verbs", sv: "Verb" }),
+  direction: "bidirectional" as const,
+  newCardsPerDay: 5,
+};
 
 const rows: DeckTableRow[] = [
-  { deck: kanji, groups: [languages, scripts], figures: { cards: 12, due: 3, new: 4 }, newCardsPerDay: 20, maxReviewsPerDay: 200 },
+  {
+    deck: kanji,
+    groups: [languages, scripts],
+    figures: { cards: 12, due: 3, new: 4 },
+    newCardsPerDay: 20,
+    maxReviewsPerDay: 200,
+  },
   { deck: verbs, groups: [], figures: {}, newCardsPerDay: 5, maxReviewsPerDay: 200 },
 ];
 
 type Props = Parameters<typeof DeckTableScreen>[0];
 
 /** The screen with its view kept as the workspace keeps it (in the URL). */
-function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { initial?: DeckTableView }) {
+function Harness({
+  initial = { filter: "" },
+  ...overrides
+}: Partial<Props> & { initial?: DeckTableView }) {
   const [view, setView] = useState<DeckTableView>(initial);
   const [shown, setShown] = useState<HomeView>("all");
   return (
@@ -40,7 +56,9 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
       onApply={() => undefined}
       onCursor={() => undefined}
       onOpen={() => undefined}
-      pending={(deck, figure) => (deck.url === verbs.url && figure === "cards" ? "unreadable" : "loading")}
+      pending={(deck, figure) =>
+        deck.url === verbs.url && figure === "cards" ? "unreadable" : "loading"
+      }
       badges={(deck): DeckBadge[] => (deck.url === kanji.url ? ["library", "invalid"] : [])}
       groups={[
         { group: languages, trail: [languages] },
@@ -71,13 +89,21 @@ const EDIT = "Edit the selected decks";
 const said = () => screen.getAllByRole("status")[0]!;
 const bar = () => screen.getByRole("group", { name: "Selected decks" });
 const table = () => screen.getByRole("table", { name: "The decks of Deck set A" });
-const names = () => within(table()).getAllByRole("rowheader").map((cell) => within(cell).getByRole("link").textContent);
-const select = (name: string) => fireEvent.click(screen.getByRole("checkbox", { name: `Select ${name}` }));
+const names = () =>
+  within(table())
+    .getAllByRole("rowheader")
+    .map((cell) => within(cell).getByRole("link").textContent);
+const select = (name: string) =>
+  fireEvent.click(screen.getByRole("checkbox", { name: `Select ${name}` }));
 
 describe("DeckTableScreen", () => {
   it("has a row per deck, named by the deck, with its groups, settings and figures", () => {
     render(<Harness />);
-    expect(within(table()).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual([
+    expect(
+      within(table())
+        .getAllByRole("columnheader")
+        .map((cell) => cell.textContent),
+    ).toEqual([
       "Select",
       "Deck",
       "Group",
@@ -91,8 +117,15 @@ describe("DeckTableScreen", () => {
     ]);
     const row = within(table()).getByRole("row", { name: /Kanji N5/ });
     expect(within(row).getByRole("rowheader")).toHaveTextContent("Kanji N5LibraryInvalid data");
-    expect(within(row).getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", "#/deck?deck=deck-1");
-    expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual([
+    expect(within(row).getByRole("link", { name: "Kanji N5" })).toHaveAttribute(
+      "href",
+      "#/deck?deck=deck-1",
+    );
+    expect(
+      within(row)
+        .getAllByRole("cell")
+        .map((cell) => cell.textContent),
+    ).toEqual([
       "",
       "Languages › Scripts",
       "Front → back",
@@ -109,7 +142,11 @@ describe("DeckTableScreen", () => {
     );
     // The deck's own pace, and figures not known yet, or not to be.
     const other = within(table()).getByRole("row", { name: /Verbs/ });
-    expect(within(other).getAllByRole("cell").map((cell) => cell.textContent)).toEqual([
+    expect(
+      within(other)
+        .getAllByRole("cell")
+        .map((cell) => cell.textContent),
+    ).toEqual([
       "",
       "Top level",
       "Both ways",
@@ -123,15 +160,31 @@ describe("DeckTableScreen", () => {
   });
 
   it("puts each deck's health beside its name", () => {
-    render(<Harness healthBadge={(deck) => <a href={`#/health?deck=${deck.id}`}>Health of {deck.id}</a>} />);
+    render(
+      <Harness
+        healthBadge={(deck) => <a href={`#/health?deck=${deck.id}`}>Health of {deck.id}</a>}
+      />,
+    );
     const kanjiRow = within(table()).getAllByRole("rowheader")[0]!;
-    expect(within(kanjiRow).getByRole("link", { name: "Health of deck-1" })).toHaveAttribute("href", "#/health?deck=deck-1");
+    expect(within(kanjiRow).getByRole("link", { name: "Health of deck-1" })).toHaveAttribute(
+      "href",
+      "#/health?deck=deck-1",
+    );
   });
 
   it("puts a deck's update beside its name", () => {
-    render(<Harness updateBadge={(deck) => (deck.url === kanji.url ? <a href="#/library?instance=a">Release 2 out</a> : null)} />);
+    render(
+      <Harness
+        updateBadge={(deck) =>
+          deck.url === kanji.url ? <a href="#/library?instance=a">Release 2 out</a> : null
+        }
+      />,
+    );
     const kanjiRow = within(table()).getAllByRole("rowheader")[0]!;
-    expect(within(kanjiRow).getByRole("link", { name: "Release 2 out" })).toHaveAttribute("href", "#/library?instance=a");
+    expect(within(kanjiRow).getByRole("link", { name: "Release 2 out" })).toHaveAttribute(
+      "href",
+      "#/library?instance=a",
+    );
   });
 
   it("exports the selected decks in import and export", () => {
@@ -139,7 +192,10 @@ describe("DeckTableScreen", () => {
     select("Verbs");
     select("Kanji N5");
     const bulk = screen.getByRole("group", { name: "Selected decks" });
-    expect(within(bulk).getByRole("link", { name: "Export" })).toHaveAttribute("href", "#/transfer?deck=deck-1&deck=deck-2");
+    expect(within(bulk).getByRole("link", { name: "Export" })).toHaveAttribute(
+      "href",
+      "#/transfer?deck=deck-1&deck=deck-2",
+    );
   });
 
   it("sorts by a column, then the other way, then as arranged, saying so on the column", () => {
@@ -165,7 +221,9 @@ describe("DeckTableScreen", () => {
     render(<Harness initial={{ filter: "script" }} />);
     expect(names()).toEqual(["Kanji N5"]);
     expect(screen.getByText("1 of 2 decks")).toBeInTheDocument();
-    fireEvent.input(screen.getByRole("searchbox", { name: "Filter by name or group" }), { target: { value: "nouns " } });
+    fireEvent.input(screen.getByRole("searchbox", { name: "Filter by name or group" }), {
+      target: { value: "nouns " },
+    });
     expect(screen.queryByRole("table")).toBeNull();
     expect(screen.getByText("No deck matches “nouns”.")).toBeInTheDocument();
   });
@@ -173,7 +231,11 @@ describe("DeckTableScreen", () => {
   it("shows the decks of a view from its tab, each counting its decks, the view chosen pressed", () => {
     render(<Harness />);
     const views = screen.getByRole("group", { name: "Views" });
-    expect(within(views).getAllByRole("button").map((button) => button.textContent)).toEqual([
+    expect(
+      within(views)
+        .getAllByRole("button")
+        .map((button) => button.textContent),
+    ).toEqual([
       "All 2",
       // Verbs' cards are still counted: shown as they may be due.
       "Due today 2",
@@ -182,13 +244,21 @@ describe("DeckTableScreen", () => {
       "Needs attention 1",
       "+ Save view",
     ]);
-    expect(within(views).getByRole("button", { name: "All 2" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(views).getByRole("button", { name: "All 2" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     fireEvent.click(within(views).getByRole("button", { name: "Due today 2" }));
     expect(names()).toEqual(["Kanji N5", "Verbs"]);
-    const verbsDue = within(within(table()).getByRole("row", { name: /Verbs/ })).getAllByRole("cell")[5]!;
+    const verbsDue = within(within(table()).getByRole("row", { name: /Verbs/ })).getAllByRole(
+      "cell",
+    )[5]!;
     expect(verbsDue).toHaveTextContent("Counting…");
     fireEvent.click(within(views).getByRole("button", { name: "Needs attention 1" }));
-    expect(within(views).getByRole("button", { name: "Needs attention 1" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(views).getByRole("button", { name: "Needs attention 1" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     expect(names()).toEqual(["Kanji N5"]);
     expect(screen.getByText("1 of 2 decks")).toBeInTheDocument();
     fireEvent.click(within(views).getByRole("button", { name: "Courses 0" }));
@@ -246,11 +316,11 @@ describe("DeckTableScreen", () => {
     pick(EDIT, "Move to group");
     expect(dialog("Move to group")).toBeInTheDocument();
     const group = screen.getByRole("combobox", { name: "Group" });
-    expect(within(group).getAllByRole("option").map((option) => option.textContent)).toEqual([
-      "Top level (no group)",
-      "Languages",
-      "Languages › Scripts",
-    ]);
+    expect(
+      within(group)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["Top level (no group)", "Languages", "Languages › Scripts"]);
     choose("Group", scripts.url);
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onMove).toHaveBeenCalledWith([kanji, verbs], scripts);
@@ -298,7 +368,9 @@ describe("DeckTableScreen", () => {
     render(<Harness moveLocked="newerVersion" />);
     select("Verbs");
     pick(EDIT, "Move to group");
-    expect(screen.getByText(/A newer version of Solid Memo arranged these groups/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/A newer version of Solid Memo arranged these groups/),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("combobox", { name: "Group" })).toBeNull();
   });
 
@@ -312,7 +384,10 @@ describe("DeckTableScreen", () => {
   it("selects only the decks that may be changed, saying why the others cannot be, all at once too", () => {
     render(<Harness selectable={(deck) => deck.url !== kanji.url} readOnly="setAside" />);
     expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute("href", "#/health?instance=a");
+    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute(
+      "href",
+      "#/health?instance=a",
+    );
     expect(screen.getByRole("checkbox", { name: "Select Kanji N5" })).toBeDisabled();
     fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck shown" }));
     expect(screen.getByRole("checkbox", { name: "Select every deck shown" })).toBeChecked();
@@ -332,13 +407,19 @@ describe("DeckTableScreen", () => {
     render(<Harness onPace={onPace} />);
     select("Verbs");
     pick(EDIT, "Set pace");
-    fireEvent.input(screen.getByRole("spinbutton", { name: "New cards per day" }), { target: { value: "8" } });
+    fireEvent.input(screen.getByRole("spinbutton", { name: "New cards per day" }), {
+      target: { value: "8" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onPace).toHaveBeenCalledWith([verbs], { newCardsPerDay: 8 });
     await waitFor(() => expect(said()).toHaveTextContent("Set the pace of 1 deck."));
     pick(EDIT, "Set pace");
-    fireEvent.input(screen.getByRole("spinbutton", { name: "New cards per day" }), { target: { value: " " } });
-    fireEvent.input(screen.getByRole("spinbutton", { name: "Max reviews per day" }), { target: { value: "50" } });
+    fireEvent.input(screen.getByRole("spinbutton", { name: "New cards per day" }), {
+      target: { value: " " },
+    });
+    fireEvent.input(screen.getByRole("spinbutton", { name: "Max reviews per day" }), {
+      target: { value: "50" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onPace).toHaveBeenLastCalledWith([verbs], { maxReviewsPerDay: 50 });
   });
@@ -396,12 +477,18 @@ describe("DeckTableScreen", () => {
     await waitFor(() => expect(onPace).toHaveBeenCalledWith([kanji], { newCardsPerDay: 8 }));
     await waitFor(() => expect(said()).toHaveTextContent("Set the pace of 1 deck."));
     edit("Reviews per day of Verbs: 200 (instance)", "spinbutton", "50");
-    await waitFor(() => expect(onPace).toHaveBeenLastCalledWith([verbs], { newCardsPerDay: 5, maxReviewsPerDay: 50 }));
+    await waitFor(() =>
+      expect(onPace).toHaveBeenLastCalledWith([verbs], { newCardsPerDay: 5, maxReviewsPerDay: 50 }),
+    );
     // Empty, the instance's pace again.
     fireEvent.click(screen.getByRole("button", { name: "New per day of Verbs: 5" }));
     expect(screen.getByRole("spinbutton", { name: "New per day of Verbs" })).toHaveValue(5);
-    fireEvent.input(screen.getByRole("spinbutton", { name: "New per day of Verbs" }), { target: { value: "" } });
-    fireEvent.keyDown(screen.getByRole("spinbutton", { name: "New per day of Verbs" }), { key: "Enter" });
+    fireEvent.input(screen.getByRole("spinbutton", { name: "New per day of Verbs" }), {
+      target: { value: "" },
+    });
+    fireEvent.keyDown(screen.getByRole("spinbutton", { name: "New per day of Verbs" }), {
+      key: "Enter",
+    });
     await waitFor(() => expect(onPace).toHaveBeenLastCalledWith([verbs], {}));
     edit("Direction of Kanji N5: Front → back", "combobox", "bidirectional");
     await waitFor(() => expect(onDirection).toHaveBeenCalledWith([kanji], "bidirectional"));
@@ -412,22 +499,40 @@ describe("DeckTableScreen", () => {
     render(<Harness selectable={(deck) => deck.url !== kanji.url} />);
     const row = within(table()).getByRole("row", { name: /Kanji N5/ });
     expect(within(row).queryByRole("button", { name: /of Kanji N5/ })).toBeNull();
-    expect(screen.getByRole("button", { name: "Direction of Verbs: Both ways" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Direction of Verbs: Both ways" }),
+    ).toBeInTheDocument();
   });
 
   it("shows the views saved beside Home's own, saves the view it is in, and puts Home in one chosen", () => {
     const onApply = vi.fn();
     const onSavedViews = vi.fn();
-    render(<Harness savedViews={[{ name: "Kanji due", params: "q=kanji&show=due" }]} onApply={onApply} onSavedViews={onSavedViews} />);
+    render(
+      <Harness
+        savedViews={[{ name: "Kanji due", params: "q=kanji&show=due" }]}
+        onApply={onApply}
+        onSavedViews={onSavedViews}
+      />,
+    );
     const views = screen.getByRole("group", { name: "Views" });
-    expect(within(views).getByRole("button", { name: "Kanji due" })).toHaveAttribute("aria-pressed", "false");
+    expect(within(views).getByRole("button", { name: "Kanji due" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
     fireEvent.click(within(views).getByRole("button", { name: "Due today 2" }));
-    fireEvent.input(screen.getByRole("searchbox", { name: "Filter by name or group" }), { target: { value: "kanji" } });
-    expect(within(views).getByRole("button", { name: "Kanji due" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.input(screen.getByRole("searchbox", { name: "Filter by name or group" }), {
+      target: { value: "kanji" },
+    });
+    expect(within(views).getByRole("button", { name: "Kanji due" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     fireEvent.click(within(views).getByRole("button", { name: "Kanji due" }));
     expect(onApply).toHaveBeenCalledWith({ view: { filter: "kanji" }, show: "due" });
     fireEvent.click(within(views).getByRole("button", { name: "+ Save view" }));
-    fireEvent.input(within(dialog("Save the view")).getByRole("textbox", { name: "Name" }), { target: { value: "Mine" } });
+    fireEvent.input(within(dialog("Save the view")).getByRole("textbox", { name: "Name" }), {
+      target: { value: "Mine" },
+    });
     fireEvent.click(within(dialog("Save the view")).getByRole("button", { name: "Save" }));
     expect(onSavedViews).toHaveBeenCalledWith([
       { name: "Kanji due", params: "q=kanji&show=due" },

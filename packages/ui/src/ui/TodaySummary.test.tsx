@@ -25,9 +25,13 @@ describe("TodaySummary", () => {
     render(<TodaySummary today={today()} statisticsHref="#/statistics" />);
     const strip = screen.getByRole("complementary", { name: "Today" });
     expect(strip).toHaveTextContent(
-      "1-day streak Day one! Come back tomorrow for two." + "Nice work! 4 cards · 2 new · 75% remembered · All statistics",
+      "1-day streak Day one! Come back tomorrow for two." +
+        "Nice work! 4 cards · 2 new · 75% remembered · All statistics",
     );
-    expect(screen.getByRole("link", { name: "All statistics" })).toHaveAttribute("href", "#/statistics");
+    expect(screen.getByRole("link", { name: "All statistics" })).toHaveAttribute(
+      "href",
+      "#/statistics",
+    );
   });
 
   it("celebrates a record streak, and otherwise names the record to beat", () => {
@@ -36,14 +40,23 @@ describe("TodaySummary", () => {
     );
     expect(screen.getByText("3-day streak")).toBeInTheDocument();
     expect(screen.getByText("Your longest yet!")).toBeInTheDocument();
-    rerender(<TodaySummary today={today({ streak: 3, longestStreak: 9 })} statisticsHref="#/statistics" />);
+    rerender(
+      <TodaySummary today={today({ streak: 3, longestStreak: 9 })} statisticsHref="#/statistics" />,
+    );
     expect(screen.getByText("Record: 9 days")).toBeInTheDocument();
   });
 
   it("cheers louder the more was studied", () => {
-    const { rerender } = render(<TodaySummary today={today({ answers: 10, recalled: 1 })} statisticsHref="#/statistics" />);
+    const { rerender } = render(
+      <TodaySummary today={today({ answers: 10, recalled: 1 })} statisticsHref="#/statistics" />,
+    );
     expect(screen.getByText(/^Great session! 10 cards/)).toBeInTheDocument();
-    rerender(<TodaySummary today={today({ answers: 50, introduced: 1, recalled: 1 })} statisticsHref="#/statistics" />);
+    rerender(
+      <TodaySummary
+        today={today({ answers: 50, introduced: 1, recalled: 1 })}
+        statisticsHref="#/statistics"
+      />,
+    );
     expect(screen.getByText(/^Impressive effort! 50 cards · 1 new/)).toBeInTheDocument();
   });
 });
@@ -51,8 +64,17 @@ describe("TodaySummary", () => {
 describe("TodaySummaryContainer", () => {
   function renderContainer(getStatistics: UseCases["getStatistics"]) {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const wrap = (node: ComponentChildren) => <QueryClientProvider client={queryClient}>{node}</QueryClientProvider>;
-    return render(wrap(<TodaySummaryContainer useCases={makeUseCasesFake({ getStatistics })} instance={INSTANCE} />));
+    const wrap = (node: ComponentChildren) => (
+      <QueryClientProvider client={queryClient}>{node}</QueryClientProvider>
+    );
+    return render(
+      wrap(
+        <TodaySummaryContainer
+          useCases={makeUseCasesFake({ getStatistics })}
+          instance={INSTANCE}
+        />,
+      ),
+    );
   }
   const answer = (studyDay: string): Answer => ({
     id: `answer-${studyDay}`,
@@ -76,7 +98,9 @@ describe("TodaySummaryContainer", () => {
   });
 
   it("shows nothing before the day's first answer, even with a streak to keep", async () => {
-    const getStatistics = vi.fn(async () => statisticsOf([answer("2026-10-01"), answer("2026-10-02")], "2026-10-03"));
+    const getStatistics = vi.fn(async () =>
+      statisticsOf([answer("2026-10-01"), answer("2026-10-02")], "2026-10-03"),
+    );
     const { container } = renderContainer(getStatistics);
     await vi.waitFor(() => expect(getStatistics).toHaveBeenCalled());
     await Promise.resolve();

@@ -24,8 +24,13 @@ export function deckGroupFromRecord(url: string, data: DeckGroupV1): StoredGroup
  * (`previous`, the record as stored) unless that is the default for its
  * old name, or it has none yet: then the default for its name.
  */
-export function deckGroupToRecord(stored: StoredGroup, publisher: string, previous?: DeckGroupV1): DeckGroupV1 {
-  const kept = previous !== undefined && !isDefaultDeckGroupDescription(previous.description, previous.title);
+export function deckGroupToRecord(
+  stored: StoredGroup,
+  publisher: string,
+  previous?: DeckGroupV1,
+): DeckGroupV1 {
+  const kept =
+    previous !== undefined && !isDefaultDeckGroupDescription(previous.description, previous.title);
   return {
     title: stored.group.title,
     description: kept ? previous.description : defaultDeckGroupDescription(stored.group.title),

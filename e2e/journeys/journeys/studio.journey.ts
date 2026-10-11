@@ -70,7 +70,12 @@ const COURSE = {
  * login reads it, and the releases list it. They go back to Solid Memo,
  * still logged in, which lists the deck they made that is left.
  */
-test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({ app, account, runId, playwright }) => {
+test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({
+  app,
+  account,
+  runId,
+  playwright,
+}) => {
   const instance = `Studio ${runId}`;
   const alpha = `Alpha ${runId}`;
   const beta = `Beta ${runId}`;
@@ -79,7 +84,9 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   const course = `Course ${runId}`;
   const authored = `Authored ${runId}`;
 
-  await app.step("01 · Visit the Studio's old address: the Studio's landing page", () => app.studio.visitOldAddress());
+  await app.step("01 · Visit the Studio's old address: the Studio's landing page", () =>
+    app.studio.visitOldAddress(),
+  );
   await app.step("02 · Log in from the Studio's landing page: back in the Studio", async () => {
     await app.onboarding.logInWithWebId(account.webId);
     await app.cssLogin.logIn(account);
@@ -87,11 +94,14 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.onboarding.continueConnected(account.pod);
     await app.studio.expectBackAfterLogin();
   });
-  await app.step("03 · Go back to Solid Memo, still logged in, and create an instance", async () => {
-    await app.studio.backToInstanceCreator();
-    await app.instanceCreator.create(instance);
-    await app.chrome.expectLoggedInAs(account.webId);
-  });
+  await app.step(
+    "03 · Go back to Solid Memo, still logged in, and create an instance",
+    async () => {
+      await app.studio.backToInstanceCreator();
+      await app.instanceCreator.create(instance);
+      await app.chrome.expectLoggedInAs(account.webId);
+    },
+  );
   await app.step("04 · Create two decks, one with two cards, and study those", async () => {
     await app.decks.openDeckCreator();
     await app.deckCreator.create(alpha);
@@ -99,7 +109,13 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.deckCreator.create(beta);
     await app.deckBrowser.openFor(alpha);
     await app.deckBrowser.openCardCreator();
-    await app.cardCreator.addCards([["Sun", "Sol"], ["Moon", "Måne"]], { front: "en", back: "sv" });
+    await app.cardCreator.addCards(
+      [
+        ["Sun", "Sol"],
+        ["Moon", "Måne"],
+      ],
+      { front: "en", back: "sv" },
+    );
     await app.cardCreator.back();
     await app.chrome.breadcrumb("breadcrumbs.decks");
     // Five new cards a day: both are studied, and due again tomorrow.
@@ -114,7 +130,9 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.library.importSelected([BRIGHTEST_STARS.en]);
   });
 
-  await app.step("06 · Open the instance in Solid Memo Studio: no second login", () => app.studio.openFromApp());
+  await app.step("06 · Open the instance in Solid Memo Studio: no second login", () =>
+    app.studio.openFromApp(),
+  );
   await app.step("07 · See the instance's decks", async () => {
     await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
     await app.studio.expectDeck(instance, beta, { cards: 0, due: 0 });
@@ -128,21 +146,27 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.selectCardsWithKeys(alpha, 2);
   });
 
-  await app.step("09 · Find and replace in the selected cards, then retire them and undo it", async () => {
-    await app.studio.findAndReplace("Sol", "Solen", 1);
-    await app.studio.expectBack(alpha, "Sun", "Solen");
-    await app.studio.retireSelectedCards(alpha, ["Moon", "Sun"]);
-    await app.studio.undoCardEdit(alpha, ["Moon", "Sun"]);
-  });
+  await app.step(
+    "09 · Find and replace in the selected cards, then retire them and undo it",
+    async () => {
+      await app.studio.findAndReplace("Sol", "Solen", 1);
+      await app.studio.expectBack(alpha, "Sun", "Solen");
+      await app.studio.retireSelectedCards(alpha, ["Moon", "Sun"]);
+      await app.studio.undoCardEdit(alpha, ["Moon", "Sun"]);
+    },
+  );
 
-  await app.step("10 · Inspect a card: add two wrong options, retire one and delete the other", async () => {
-    await app.studio.openCard(alpha, "Moon");
-    await app.studio.openWrongOptions(0);
-    await app.studio.addWrongOption("Stjärna", "En stjärna lyser själv.");
-    await app.studio.addWrongOption("Jord", "Jorden är en planet.");
-    await app.studio.retireWrongOption("Stjärna");
-    await app.studio.deleteWrongOption("Jord");
-  });
+  await app.step(
+    "10 · Inspect a card: add two wrong options, retire one and delete the other",
+    async () => {
+      await app.studio.openCard(alpha, "Moon");
+      await app.studio.openWrongOptions(0);
+      await app.studio.addWrongOption("Stjärna", "En stjärna lyser själv.");
+      await app.studio.addWrongOption("Jord", "Jorden är en planet.");
+      await app.studio.retireWrongOption("Stjärna");
+      await app.studio.deleteWrongOption("Jord");
+    },
+  );
 
   await app.step("11 · Forget the card's progress on its schedule tab", async () => {
     await app.studio.openSchedule();
@@ -151,50 +175,65 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
   });
 
-  await app.step("12 · See the card's answer on its history tab, kept though its progress is forgotten", async () => {
-    await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
-    await app.studio.openCard(alpha, "Moon");
-    await app.studio.openHistory([{ grade: "good", mode: "recall" }]);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-  });
+  await app.step(
+    "12 · See the card's answer on its history tab, kept though its progress is forgotten",
+    async () => {
+      await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
+      await app.studio.openCard(alpha, "Moon");
+      await app.studio.openHistory([{ grade: "good", mode: "recall" }]);
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+    },
+  );
 
-  await app.step("13 · Write a card in Markdown that would not show as meant, find it in the deck's health, and fix it there", async () => {
-    await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
-    await app.studio.openCard(alpha, "Moon");
-    // An HTML tag shows as typed: its opening and its closing tag are a problem each.
-    await app.studio.writeBackInMarkdown("<b>Måne</b>");
-    await app.studio.openDeckHealth(alpha, 2);
-    await app.studio.followMarkdownProblem("Moon, back (Swedish)", "back");
-    await app.studio.fixFocusedField("Måne");
-    await app.studio.openDeckHealth(alpha, 0);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.openInstanceHealth(instance, [alpha, beta]);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-  });
+  await app.step(
+    "13 · Write a card in Markdown that would not show as meant, find it in the deck's health, and fix it there",
+    async () => {
+      await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
+      await app.studio.openCard(alpha, "Moon");
+      // An HTML tag shows as typed: its opening and its closing tag are a problem each.
+      await app.studio.writeBackInMarkdown("<b>Måne</b>");
+      await app.studio.openDeckHealth(alpha, 2);
+      await app.studio.followMarkdownProblem("Moon, back (Swedish)", "back");
+      await app.studio.fixFocusedField("Måne");
+      await app.studio.openDeckHealth(alpha, 0);
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.openInstanceHealth(instance, [alpha, beta]);
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+    },
+  );
 
-  await app.step("14 · Quick open the deck with Ctrl+K, and open its schedule: one review tomorrow, and no leech", async () => {
-    await app.chrome.quickOpen(alpha, alpha);
-    await expect(app.page).toHaveURL(/#\/studio\/cards\?deck=/);
-    await app.studio.openDeckSchedule(alpha, { today: 0, week: 1, studied: 1 });
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-  });
+  await app.step(
+    "14 · Quick open the deck with Ctrl+K, and open its schedule: one review tomorrow, and no leech",
+    async () => {
+      await app.chrome.quickOpen(alpha, alpha);
+      await expect(app.page).toHaveURL(/#\/studio\/cards\?deck=/);
+      await app.studio.openDeckSchedule(alpha, { today: 0, week: 1, studied: 1 });
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+    },
+  );
 
-  await app.step("15 · Set the other card due today in the workbench: Home counts it due", async () => {
-    await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
-    await app.studio.selectCardsWithKeys(alpha, 2);
-    await app.studio.rescheduleSelectedToday(1);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.expectDeck(instance, alpha, { cards: 2, due: 1 });
-  });
+  await app.step(
+    "15 · Set the other card due today in the workbench: Home counts it due",
+    async () => {
+      await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
+      await app.studio.selectCardsWithKeys(alpha, 2);
+      await app.studio.rescheduleSelectedToday(1);
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.expectDeck(instance, alpha, { cards: 2, due: 1 });
+    },
+  );
 
-  await app.step("16 · Move the card due today to the other deck, with its progress: Home counts it there", async () => {
-    await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
-    await app.studio.selectCardsWithKeys(alpha, 1);
-    await app.studio.moveSelectedCards(alpha, beta, 1, ["Moon"]);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0 });
-    await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
-  });
+  await app.step(
+    "16 · Move the card due today to the other deck, with its progress: Home counts it there",
+    async () => {
+      await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
+      await app.studio.selectCardsWithKeys(alpha, 1);
+      await app.studio.moveSelectedCards(alpha, beta, 1, ["Moon"]);
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0 });
+      await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
+    },
+  );
 
   await app.step("17 · Name a deck's author and license on its about screen", async () => {
     await app.studio.openAbout(instance, beta);
@@ -226,12 +265,15 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   });
 
   let file = "";
-  await app.step("21 · Export a deck as Turtle, with its progress, from the selection", async () => {
-    await app.studio.clearSelection();
-    await app.studio.select([beta]);
-    file = await app.studio.exportSelected(instance, beta);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-  });
+  await app.step(
+    "21 · Export a deck as Turtle, with its progress, from the selection",
+    async () => {
+      await app.studio.clearSelection();
+      await app.studio.select([beta]);
+      file = await app.studio.exportSelected(instance, beta);
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+    },
+  );
 
   await app.step("22 · Delete that deck, confirming", async () => {
     await app.studio.select([beta]);
@@ -239,59 +281,76 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0 });
   });
 
-  await app.step("23 · Import the deck from its file, with its progress: Home counts its card due again", async () => {
-    await app.studio.importFile(instance, file, beta, 1, 1);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
-  });
+  await app.step(
+    "23 · Import the deck from its file, with its progress: Home counts its card due again",
+    async () => {
+      await app.studio.importFile(instance, file, beta, 1, 1);
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
+    },
+  );
 
-  await app.step("24 · Draft a release of a deck and a blank course; the sidebar lists both; delete one", async () => {
-    await app.studio.openDrafts(instance);
-    await app.studio.draftDeck(instance, alpha);
-    await app.studio.draftCourse(instance, course);
-    await app.studio.expectSidebarDrafts([alpha, course]);
-    await app.studio.deleteDraft(instance, course);
-    await app.studio.expectSidebarDrafts([alpha]);
-  });
+  await app.step(
+    "24 · Draft a release of a deck and a blank course; the sidebar lists both; delete one",
+    async () => {
+      await app.studio.openDrafts(instance);
+      await app.studio.draftDeck(instance, alpha);
+      await app.studio.draftCourse(instance, course);
+      await app.studio.expectSidebarDrafts([alpha, course]);
+      await app.studio.deleteDraft(instance, course);
+      await app.studio.expectSidebarDrafts([alpha]);
+    },
+  );
 
-  await app.step("25 · Write a course: a chapter, a step, and two questions with two wrong options each", async () => {
-    await app.studio.openDrafts(instance);
-    await app.studio.draftCourse(instance, authored);
-    await app.draftEditor.openDraft(authored);
-    await app.draftEditor.addChapter("Pods");
-    await app.draftEditor.openChapter("Pods");
-    await app.draftEditor.addStep();
-    await app.draftEditor.writeTheory("A pod is where your data lives.");
-    await app.draftEditor.addQuestion("Where does your data live?", "In a pod");
-    await app.draftEditor.addQuestion("Who chooses the app?", "You do");
-    await app.draftEditor.openQuestion("Where does your data live?");
-    await app.draftEditor.addWrongOption("In the app", "Apps only read it.");
-    await app.draftEditor.addWrongOption("On a server of the app's", "The pod is yours.");
-    await app.draftEditor.answerPreviewWrong("In the app", "Apps only read it.");
-    await app.draftEditor.expectOutline(authored, "Pods", "Step 1.1", ["Where does your data live?", "Who chooses the app?"]);
-    await app.draftEditor.expectBadge("Who chooses the app?", 1);
-  });
+  await app.step(
+    "25 · Write a course: a chapter, a step, and two questions with two wrong options each",
+    async () => {
+      await app.studio.openDrafts(instance);
+      await app.studio.draftCourse(instance, authored);
+      await app.draftEditor.openDraft(authored);
+      await app.draftEditor.addChapter("Pods");
+      await app.draftEditor.openChapter("Pods");
+      await app.draftEditor.addStep();
+      await app.draftEditor.writeTheory("A pod is where your data lives.");
+      await app.draftEditor.addQuestion("Where does your data live?", "In a pod");
+      await app.draftEditor.addQuestion("Who chooses the app?", "You do");
+      await app.draftEditor.openQuestion("Where does your data live?");
+      await app.draftEditor.addWrongOption("In the app", "Apps only read it.");
+      await app.draftEditor.addWrongOption("On a server of the app's", "The pod is yours.");
+      await app.draftEditor.answerPreviewWrong("In the app", "Apps only read it.");
+      await app.draftEditor.expectOutline(authored, "Pods", "Step 1.1", [
+        "Where does your data live?",
+        "Who chooses the app?",
+      ]);
+      await app.draftEditor.expectBadge("Who chooses the app?", 1);
+    },
+  );
 
-  await app.step("26 · Check the release: follow its problems to their fields, fix them, and see them clear", async () => {
-    const fewOptions = app.t("studio.problem.fewDistractors", { count: 0, least: 2 });
-    const noDescription = app.t("studio.problem.required", { field: app.t("studio.field.description") });
-    const release = app.t("studio.check.release");
-    await app.draftEditor.openCheck();
-    await app.draftEditor.expectProblem("Who chooses the app?", fewOptions);
-    await app.draftEditor.expectProblem(release, noDescription);
-    await app.draftEditor.followProblem("Who chooses the app?", fewOptions);
-    await app.draftEditor.addWrongOption("The pod", "A pod holds data.");
-    await app.draftEditor.addWrongOption("Its maker", "The user chooses.");
-    await app.draftEditor.openCheck();
-    await app.draftEditor.expectNoProblem("Who chooses the app?", fewOptions);
-    await app.draftEditor.followProblem(release, noDescription);
-    await app.draftEditor.writeDescription("What a pod is, and who holds the data in it.");
-    await app.draftEditor.openCheck();
-    await app.draftEditor.expectNoProblem(release, noDescription);
-    await app.draftEditor.checkShapes();
-    await app.draftEditor.openPreview(authored);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-  });
+  await app.step(
+    "26 · Check the release: follow its problems to their fields, fix them, and see them clear",
+    async () => {
+      const fewOptions = app.t("studio.problem.fewDistractors", { count: 0, least: 2 });
+      const noDescription = app.t("studio.problem.required", {
+        field: app.t("studio.field.description"),
+      });
+      const release = app.t("studio.check.release");
+      await app.draftEditor.openCheck();
+      await app.draftEditor.expectProblem("Who chooses the app?", fewOptions);
+      await app.draftEditor.expectProblem(release, noDescription);
+      await app.draftEditor.followProblem("Who chooses the app?", fewOptions);
+      await app.draftEditor.addWrongOption("The pod", "A pod holds data.");
+      await app.draftEditor.addWrongOption("Its maker", "The user chooses.");
+      await app.draftEditor.openCheck();
+      await app.draftEditor.expectNoProblem("Who chooses the app?", fewOptions);
+      await app.draftEditor.followProblem(release, noDescription);
+      await app.draftEditor.writeDescription("What a pod is, and who holds the data in it.");
+      await app.draftEditor.openCheck();
+      await app.draftEditor.expectNoProblem(release, noDescription);
+      await app.draftEditor.checkShapes();
+      await app.draftEditor.openPreview(authored);
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+    },
+  );
 
   await app.step("27 · Rename the instance and describe its catalog", async () => {
     await app.studio.openInstance(instance);
@@ -317,73 +376,93 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     for (const tile of tiles) counted[tile] = await app.statistics.value(tile);
   });
 
-  await app.step("31 · Test-play the course in the Studio's trial, to the end of its final review", async () => {
-    await app.studio.openFromApp();
-    await app.studio.openDrafts(renamed);
-    await app.draftEditor.openDraft(authored);
-    await app.trial.open(authored);
-    await app.trial.playToTheEnd(COURSE.chapter, COURSE.theory, COURSE.answers);
-  });
+  await app.step(
+    "31 · Test-play the course in the Studio's trial, to the end of its final review",
+    async () => {
+      await app.studio.openFromApp();
+      await app.studio.openDrafts(renamed);
+      await app.draftEditor.openDraft(authored);
+      await app.trial.open(authored);
+      await app.trial.playToTheEnd(COURSE.chapter, COURSE.theory, COURSE.answers);
+    },
+  );
 
-  await app.step("32 · The instance's decks and Solid Memo's statistics are as they were", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
-    await app.studio.expectDeck(renamed, beta, { cards: 1, due: 1 });
-    await app.studio.expectNoDeck(renamed, authored);
-    await app.studio.backToApp();
-    await app.statistics.open();
-    for (const tile of tiles) expect(await app.statistics.value(tile), tile).toBe(counted[tile]);
-  });
+  await app.step(
+    "32 · The instance's decks and Solid Memo's statistics are as they were",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
+      await app.studio.expectDeck(renamed, beta, { cards: 1, due: 1 });
+      await app.studio.expectNoDeck(renamed, authored);
+      await app.studio.backToApp();
+      await app.statistics.open();
+      for (const tile of tiles) expect(await app.statistics.value(tile), tile).toBe(counted[tile]);
+    },
+  );
 
-  await app.step("33 · Draft the library deck's next version, retire a card, and compare it with the release: learners lose nothing", async () => {
-    await app.studio.openFromApp();
-    await app.studio.openDrafts(renamed);
-    // A library release by its address, which the site serves (docs/deck-library.md).
-    const release = "https://solid-memo.com/decks/brightest-stars/v1.ttl";
-    await app.studio.draftNextVersion(release, BRIGHTEST_STARS.en, 2);
-    await app.draftEditor.openDraft(BRIGHTEST_STARS.en, { course: false });
-    await app.draftEditor.retireCard("Sirius");
-    await app.draftEditor.openDiff();
-    await app.draftEditor.expectDiff(
-      { Sirius: app.t("studio.diff.status.retired") },
-      app.t("studio.diff.upgrade", { previous: "1", changes: app.t("libraryUpgradeNotice.retires", { count: 1 }) }),
-    );
-  });
+  await app.step(
+    "33 · Draft the library deck's next version, retire a card, and compare it with the release: learners lose nothing",
+    async () => {
+      await app.studio.openFromApp();
+      await app.studio.openDrafts(renamed);
+      // A library release by its address, which the site serves (docs/deck-library.md).
+      const release = "https://solid-memo.com/decks/brightest-stars/v1.ttl";
+      await app.studio.draftNextVersion(release, BRIGHTEST_STARS.en, 2);
+      await app.draftEditor.openDraft(BRIGHTEST_STARS.en, { course: false });
+      await app.draftEditor.retireCard("Sirius");
+      await app.draftEditor.openDiff();
+      await app.draftEditor.expectDiff(
+        { Sirius: app.t("studio.diff.status.retired") },
+        app.t("studio.diff.upgrade", {
+          previous: "1",
+          changes: app.t("libraryUpgradeNotice.retires", { count: 1 }),
+        }),
+      );
+    },
+  );
 
-  await app.step("34 · Say how the course was made: its author, an attribution, its license, a source and an AI check; follow the source's warning and fix it", async () => {
-    const source = "https://example.org/pods-explained";
-    const undescribed = app.t("studio.problem.sourceUndescribed", { missing: app.t("studio.release.detail.creator") });
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.openDrafts(renamed);
-    await app.draftEditor.openDraft(authored);
-    await app.draftEditor.openRelease();
-    await app.draftEditor.addAuthor("Journey Author");
-    await app.draftEditor.attributeWithAi("Journey Author");
-    await app.draftEditor.chooseReleaseLicense("CC0 1.0");
-    await app.draftEditor.addSource(source, "Pods explained", "The page's footer: CC0.");
-    await app.draftEditor.recordAiCheck("Facts", "every question", "none wrong");
-    await app.draftEditor.openCheck();
-    await app.draftEditor.expectProblem(source, undescribed);
-    await app.draftEditor.followProblem(source, undescribed);
-    await app.draftEditor.describeSource(source, "Pods explained", "Example authors");
-    await app.draftEditor.openCheck();
-    await app.draftEditor.expectNoProblem(source, undescribed);
-  });
+  await app.step(
+    "34 · Say how the course was made: its author, an attribution, its license, a source and an AI check; follow the source's warning and fix it",
+    async () => {
+      const source = "https://example.org/pods-explained";
+      const undescribed = app.t("studio.problem.sourceUndescribed", {
+        missing: app.t("studio.release.detail.creator"),
+      });
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.openDrafts(renamed);
+      await app.draftEditor.openDraft(authored);
+      await app.draftEditor.openRelease();
+      await app.draftEditor.addAuthor("Journey Author");
+      await app.draftEditor.attributeWithAi("Journey Author");
+      await app.draftEditor.chooseReleaseLicense("CC0 1.0");
+      await app.draftEditor.addSource(source, "Pods explained", "The page's footer: CC0.");
+      await app.draftEditor.recordAiCheck("Facts", "every question", "none wrong");
+      await app.draftEditor.openCheck();
+      await app.draftEditor.expectProblem(source, undescribed);
+      await app.draftEditor.followProblem(source, undescribed);
+      await app.draftEditor.describeSource(source, "Pods explained", "Example authors");
+      await app.draftEditor.openCheck();
+      await app.draftEditor.expectNoProblem(source, undescribed);
+    },
+  );
 
-  await app.step("35 · Publish the course to the pod, public: anyone can read it, and the releases list it", async () => {
-    await app.draftEditor.openRelease();
-    await app.draftEditor.choosePublisher("Journey Author");
-    const url = await app.draftEditor.publish();
-    // Someone with no login reads it.
-    const anyone = await playwright.request.newContext();
-    const read = await anyone.get(url, { headers: { accept: "text/turtle" } });
-    expect(read.status()).toBe(200);
-    expect(await read.text()).toContain(`"${authored}"@en`);
-    await anyone.dispose();
-    await app.studio.openReleases(renamed);
-    await app.studio.expectRelease(renamed, url, `authored-${runId}`, 1);
-    published = { url, title: authored };
-  });
+  await app.step(
+    "35 · Publish the course to the pod, public: anyone can read it, and the releases list it",
+    async () => {
+      await app.draftEditor.openRelease();
+      await app.draftEditor.choosePublisher("Journey Author");
+      const url = await app.draftEditor.publish();
+      // Someone with no login reads it.
+      const anyone = await playwright.request.newContext();
+      const read = await anyone.get(url, { headers: { accept: "text/turtle" } });
+      expect(read.status()).toBe(200);
+      expect(await read.text()).toContain(`"${authored}"@en`);
+      await anyone.dispose();
+      await app.studio.openReleases(renamed);
+      await app.studio.expectRelease(renamed, url, `authored-${runId}`, 1);
+      published = { url, title: authored };
+    },
+  );
 
   await app.step("36 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
@@ -402,21 +481,33 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
  * review, as a library course is played. Their deck list then says where
  * the course came from.
  */
-test("add a course published in a pod from its link, as another user, and play its chapter @studio", async ({ app, account, runId }) => {
+test("add a course published in a pod from its link, as another user, and play its chapter @studio", async ({
+  app,
+  account,
+  runId,
+}) => {
   const course = published;
   expect(course, "the Studio journey, just before, publishes the course").not.toBeNull();
   const { url, title } = course!;
 
   await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in as another user and create an instance", () => logInAndCreateInstance(app, account, `Learner ${runId}`));
-  await app.step("03 · Paste the course's link: what it is, and where it is published", async () => {
-    await app.importUrl.openFromDeckList();
-    await app.importUrl.showCourse(url, title);
-  });
-  await app.step("04 · Start the course and play its chapter to the end of its final review", async () => {
-    await app.importUrl.startCourse(title);
-    await app.course.playChapter(COURSE.chapter, COURSE.theory, COURSE.answers);
-  });
+  await app.step("02 · Log in as another user and create an instance", () =>
+    logInAndCreateInstance(app, account, `Learner ${runId}`),
+  );
+  await app.step(
+    "03 · Paste the course's link: what it is, and where it is published",
+    async () => {
+      await app.importUrl.openFromDeckList();
+      await app.importUrl.showCourse(url, title);
+    },
+  );
+  await app.step(
+    "04 · Start the course and play its chapter to the end of its final review",
+    async () => {
+      await app.importUrl.startCourse(title);
+      await app.course.playChapter(COURSE.chapter, COURSE.theory, COURSE.answers);
+    },
+  );
   await app.step("05 · Back at Decks: the course says where it came from", async () => {
     await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.decks.expectDeckFrom(title, new URL(url).host);

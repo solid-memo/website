@@ -1,6 +1,10 @@
 import { useId } from "preact/hooks";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { groupProblems, problemTarget, type ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
+import {
+  groupProblems,
+  problemTarget,
+  type ProblemTarget,
+} from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { problemMessage, subjectName } from "./problemText";
@@ -33,15 +37,22 @@ export function ProblemList({
     <>
       {groupProblems(problems).map((group) => (
         <section key={group.severity} aria-labelledby={`${id}-${group.severity}`}>
-          <h3 id={`${id}-${group.severity}`}>{t(group.severity === "error" ? "studio.check.errors" : "studio.check.warnings")}</h3>
-          <ul class="studio-health-list release-problems" aria-labelledby={`${id}-${group.severity}`}>
+          <h3 id={`${id}-${group.severity}`}>
+            {t(group.severity === "error" ? "studio.check.errors" : "studio.check.warnings")}
+          </h3>
+          <ul
+            class="studio-health-list release-problems"
+            aria-labelledby={`${id}-${group.severity}`}
+          >
             {group.subjects.map(({ subject, problems: found }) => (
               <li key={subject}>
                 <a href={subjectHref(found[0]!)}>{subjectName(draft, subject, i18n)}</a>
                 <ul>
                   {found.map((problem, index) => (
                     <li key={index}>
-                      <a href={targetHref(problemTarget(draft, problem))}>{problemMessage(problem, draft, i18n)}</a>
+                      <a href={targetHref(problemTarget(draft, problem))}>
+                        {problemMessage(problem, draft, i18n)}
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -56,5 +67,7 @@ export function ProblemList({
 
 /** The problems in the order ProblemList shows them: errors first, each subject's together. */
 export function listedProblems(problems: readonly ReleaseProblem[]): ReleaseProblem[] {
-  return groupProblems(problems).flatMap((group) => group.subjects.flatMap((subject) => subject.problems));
+  return groupProblems(problems).flatMap((group) =>
+    group.subjects.flatMap((subject) => subject.problems),
+  );
 }

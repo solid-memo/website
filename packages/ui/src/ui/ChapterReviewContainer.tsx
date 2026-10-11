@@ -74,7 +74,10 @@ export function ChapterReviewContainer({
   });
   // Passed to mutate, not to useMutation, so that it is dropped once the
   // review is unmounted.
-  const complete = () => completeMutation.mutate(undefined, { onSuccess: (finishedCourse) => onCompleted(finishedCourse) });
+  const complete = () =>
+    completeMutation.mutate(undefined, {
+      onSuccess: (finishedCourse) => onCompleted(finishedCourse),
+    });
 
   function next() {
     answerMutation.reset();

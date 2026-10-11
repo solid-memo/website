@@ -1,7 +1,15 @@
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { AppError } from "./appError";
 import { inLanguage, type CardField } from "./cardQuery";
-import { CARD_FORMAT_VERSION, isFormatted, isMarkdown, validateCardContent, type Card, type CardContent, type Distractor } from "./deck";
+import {
+  CARD_FORMAT_VERSION,
+  isFormatted,
+  isMarkdown,
+  validateCardContent,
+  type Card,
+  type CardContent,
+  type Distractor,
+} from "./deck";
 import { withStatedLanguages } from "./deckLanguages";
 import { canonicalTag } from "./languageTag";
 import { tidied, type LangText } from "./langText";
@@ -17,7 +25,13 @@ import { reviewKeyOf, type ReviewKey, type ReviewState } from "./review";
 /** The texts a find and replace reads: those of the workbench's search, all of them but the pictures' descriptions. */
 export type ReplaceField = Exclude<CardField, "any">;
 
-export const REPLACE_FIELDS: readonly ReplaceField[] = ["front", "back", "note", "label", "distractor"];
+export const REPLACE_FIELDS: readonly ReplaceField[] = [
+  "front",
+  "back",
+  "note",
+  "label",
+  "distractor",
+];
 
 /** Which side's untagged text a stated language is for: absent, both. */
 export type StatedSide = "front" | "back";
@@ -101,7 +115,10 @@ export function planCardEdit(
       plan.skipped.push({ id, reason: "missing" });
     } else if (edit.kind === "remove") {
       plan.remove.push(id);
-      plan.reviewRemovals.push({ cardId: id, direction: "front-to-back" }, { cardId: id, direction: "back-to-front" });
+      plan.reviewRemovals.push(
+        { cardId: id, direction: "front-to-back" },
+        { cardId: id, direction: "back-to-front" },
+      );
       plan.inverse.save.push(card);
       plan.inverse.reviewSaves.push(...reviews.filter((state) => state.cardId === id));
     } else {
@@ -131,7 +148,9 @@ function editOf(edit: Exclude<CardEdit, { kind: "remove" }>): (card: Card) => Ca
     case "setTextFormat": {
       const textFormat = edit.markdown ? SM.markdown : SM.plainText;
       return (card) =>
-        isMarkdown(card.textFormat) === edit.markdown ? "unchanged" : validated(card, { ...card, textFormat }, card.retired === true);
+        isMarkdown(card.textFormat) === edit.markdown
+          ? "unchanged"
+          : validated(card, { ...card, textFormat }, card.retired === true);
     }
     case "stateLanguage": {
       const tag = canonicalTag(edit.tag);
@@ -149,7 +168,11 @@ function editOf(edit: Exclude<CardEdit, { kind: "remove" }>): (card: Card) => Ca
         const text = tidied(edit.text, isFormatted(card.textFormat));
         if (card[edit.side][edit.tag] === text) return "unchanged";
         if (text === "") return "wouldEmpty";
-        return validated(card, { ...card, [edit.side]: { ...card[edit.side], [edit.tag]: text } }, card.retired === true);
+        return validated(
+          card,
+          { ...card, [edit.side]: { ...card[edit.side], [edit.tag]: text } },
+          card.retired === true,
+        );
       };
   }
 }
@@ -194,7 +217,9 @@ function patternOf(edit: Extract<CardEdit, { kind: "replaceText" }>): RegExp {
  * empty is gone, as when it is cleared in the card editor, but a side's
  * or a wrong option's may not be: the card is skipped (wouldEmpty).
  */
-function replacing(edit: Extract<CardEdit, { kind: "replaceText" }>): (card: Card) => Card | SkipReason {
+function replacing(
+  edit: Extract<CardEdit, { kind: "replaceText" }>,
+): (card: Card) => Card | SkipReason {
   if (edit.find === "") return () => "unchanged";
   const pattern = patternOf(edit);
   const fields = new Set(edit.fields);
@@ -203,14 +228,20 @@ function replacing(edit: Extract<CardEdit, { kind: "replaceText" }>): (card: Car
     return Object.fromEntries(
       Object.entries(text).map(([tag, value]) => [
         tag,
-        edit.language === undefined || inLanguage(tag, edit.language) ? value.replace(pattern, () => edit.replace) : value,
+        edit.language === undefined || inLanguage(tag, edit.language)
+          ? value.replace(pattern, () => edit.replace)
+          : value,
       ]),
     );
   };
   return (card) => {
     const distractors = card.distractors?.map(({ note: was, ...distractor }): Distractor => {
       const note = withoutEmpty(inside(was, "distractor"));
-      return { ...distractor, text: inside(distractor.text, "distractor")!, ...(note === undefined ? {} : { note }) };
+      return {
+        ...distractor,
+        text: inside(distractor.text, "distractor")!,
+        ...(note === undefined ? {} : { note }),
+      };
     });
     const content: CardContent = {
       ...card,
@@ -222,9 +253,11 @@ function replacing(edit: Extract<CardEdit, { kind: "replaceText" }>): (card: Car
       ...(distractors === undefined ? {} : { distractors }),
     };
     if (sameContent(content, card)) return "unchanged";
-    const emptied = [content.front, content.back, ...(distractors ?? []).map((distractor) => distractor.text)].some((text) =>
-      Object.values(text).some((value) => value.trim() === ""),
-    );
+    const emptied = [
+      content.front,
+      content.back,
+      ...(distractors ?? []).map((distractor) => distractor.text),
+    ].some((text) => Object.values(text).some((value) => value.trim() === ""));
     return emptied ? "wouldEmpty" : validated(card, content, card.retired === true);
   };
 }
@@ -275,7 +308,14 @@ export function planUndo(cards: readonly Card[], plan: CardEditPlan): CardChange
 }
 
 /** A text of a card a find and replace may change. */
-export type ChangedPart = "front" | "back" | "frontNote" | "backNote" | "backLabel" | "distractor" | "distractorNote";
+export type ChangedPart =
+  | "front"
+  | "back"
+  | "frontNote"
+  | "backNote"
+  | "backLabel"
+  | "distractor"
+  | "distractorNote";
 
 /** One text as it was and as it is to be, in one language; absent on the side it is not. */
 export interface TextChange {
@@ -293,7 +333,12 @@ export function changedTexts(before: CardContent, after: CardContent): TextChang
     for (const tag of new Set([...Object.keys(was ?? {}), ...Object.keys(is ?? {})])) {
       const [from, to] = [was?.[tag], is?.[tag]];
       if (from !== to) {
-        changes.push({ part, tag, ...(from === undefined ? {} : { before: from }), ...(to === undefined ? {} : { after: to }) });
+        changes.push({
+          part,
+          tag,
+          ...(from === undefined ? {} : { before: from }),
+          ...(to === undefined ? {} : { after: to }),
+        });
       }
     }
   };
@@ -302,7 +347,9 @@ export function changedTexts(before: CardContent, after: CardContent): TextChang
   compare("frontNote", before.frontNote, after.frontNote);
   compare("backLabel", before.backLabel, after.backLabel);
   compare("backNote", before.backNote, after.backNote);
-  const theirs = new Map((after.distractors ?? []).map((distractor) => [distractor.id, distractor]));
+  const theirs = new Map(
+    (after.distractors ?? []).map((distractor) => [distractor.id, distractor]),
+  );
   for (const distractor of before.distractors ?? []) {
     const edited = theirs.get(distractor.id);
     compare("distractor", distractor.text, edited?.text);

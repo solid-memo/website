@@ -9,7 +9,11 @@ import { SERVERS, serversNamed } from "./servers.ts";
  */
 const resultFile = process.env.E2E_RESULT_JSON;
 /** One test file at a time, where a server the tests start fails writes made at once (servers.ts). */
-const serial = !process.env.SOLID_SERVER_URL && serversNamed(process.env.SOLID_SERVERS).some((id) => (SERVERS[id] as { serialFiles?: true }).serialFiles);
+const serial =
+  !process.env.SOLID_SERVER_URL &&
+  serversNamed(process.env.SOLID_SERVERS).some(
+    (id) => (SERVERS[id] as { serialFiles?: true }).serialFiles,
+  );
 
 export default defineConfig({
   test: {
@@ -17,7 +21,11 @@ export default defineConfig({
     // Naming any reporter drops the one Vitest adds on GitHub Actions: named
     // again. Named as undefined, there would be none.
     ...(resultFile && {
-      reporters: ["default", ...(process.env.GITHUB_ACTIONS ? ["github-actions"] : []), ["json", { outputFile: resultFile }]],
+      reporters: [
+        "default",
+        ...(process.env.GITHUB_ACTIONS ? ["github-actions"] : []),
+        ["json", { outputFile: resultFile }],
+      ],
     }),
     environment: "node",
     fileParallelism: !serial,

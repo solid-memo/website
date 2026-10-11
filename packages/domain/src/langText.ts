@@ -27,7 +27,9 @@ function matchingTag(text: LangText, wanted: string): string | undefined {
   if (tag in text) return tag;
   const language = tag.split("-")[0];
   if (language in text) return language;
-  return Object.keys(text).sort().find((t) => t.startsWith(`${language}-`));
+  return Object.keys(text)
+    .sort()
+    .find((t) => t.startsWith(`${language}-`));
 }
 
 /** The English text; undefined when there is none. */
@@ -128,7 +130,8 @@ export function tidiedTagged(text: LangText | undefined, formatted = false): Lan
  * formats once asked for, which the app cannot tell from a translation.
  */
 export function tidiedStated(text: LangText): LangText {
-  if ("" in text && text[""].trim() !== "") throw new Error("Text whose language is stated cannot be untagged");
+  if ("" in text && text[""].trim() !== "")
+    throw new Error("Text whose language is stated cannot be untagged");
   const tidied: Record<string, string> = {};
   for (const [tag, value] of Object.entries(text)) {
     const trimmed = value.trim();

@@ -17,8 +17,17 @@ const planets: Planet[] = [
   { name: "Mars", moons: 2 },
 ];
 
-const name: Column<Planet> = { key: "name", label: "Planet", cell: (planet) => <a href={`#/${planet.name}`}>{planet.name}</a> };
-const moons: Column<Planet> = { key: "moons", label: "Moons", number: true, cell: (planet) => planet.moons };
+const name: Column<Planet> = {
+  key: "name",
+  label: "Planet",
+  cell: (planet) => <a href={`#/${planet.name}`}>{planet.name}</a>,
+};
+const moons: Column<Planet> = {
+  key: "moons",
+  label: "Moons",
+  number: true,
+  cell: (planet) => planet.moons,
+};
 
 type Props = Parameters<typeof DataTable<Planet>>[0];
 
@@ -30,7 +39,10 @@ function Harness({
   enabled,
   disabled,
   ...overrides
-}: Partial<Props> & { selectable?: boolean; onChoose?: (chosen: Selection) => void } & Pick<TableSelection<Planet>, "offered" | "enabled" | "disabled">) {
+}: Partial<Props> & { selectable?: boolean; onChoose?: (chosen: Selection) => void } & Pick<
+    TableSelection<Planet>,
+    "offered" | "enabled" | "disabled"
+  >) {
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
   return (
     <WithKeys>
@@ -68,15 +80,27 @@ const table = () => screen.getByRole("table", { name: "The planets" });
 const row = (planet: string) => within(table()).getByRole("row", { name: new RegExp(planet) });
 const link = (planet: string) => within(table()).getByRole("link", { name: planet });
 const box = (planet: string) => screen.getByRole("checkbox", { name: `Select ${planet}` });
-const key = (name: string, init: KeyboardEventInit = {}) => fireEvent.keyDown(document.activeElement ?? document.body, { key: name, ...init });
-const selected = () => planets.filter((planet) => (box(planet.name) as HTMLInputElement).checked).map((planet) => planet.name);
+const key = (name: string, init: KeyboardEventInit = {}) =>
+  fireEvent.keyDown(document.activeElement ?? document.body, { key: name, ...init });
+const selected = () =>
+  planets
+    .filter((planet) => (box(planet.name) as HTMLInputElement).checked)
+    .map((planet) => planet.name);
 
 describe("DataTable", () => {
   it("has its caption, a header for each column shown, the name of each row its header, and figures aligned", () => {
     render(<Harness selectable={false} />);
-    expect(within(table()).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["Planet", "Moons"]);
+    expect(
+      within(table())
+        .getAllByRole("columnheader")
+        .map((cell) => cell.textContent),
+    ).toEqual(["Planet", "Moons"]);
     expect(within(table()).queryByRole("button")).toBeNull();
-    expect(within(table()).getAllByRole("rowheader").map((cell) => cell.textContent)).toEqual(["Mercury", "Venus", "Earth", "Mars"]);
+    expect(
+      within(table())
+        .getAllByRole("rowheader")
+        .map((cell) => cell.textContent),
+    ).toEqual(["Mercury", "Venus", "Earth", "Mars"]);
     expect(within(row("Mars")).getByRole("cell")).toHaveClass("number");
     expect(row("Mars")).not.toHaveAttribute("class");
     expect(table()).toHaveClass("studio-list", "studio-data-table");
@@ -91,9 +115,15 @@ describe("DataTable", () => {
   it("shows or hides its columns from its Columns menu, but the first, keeping them itself outside the Studio", () => {
     render(<Harness selectable={false} columnsOf="planets" />);
     fireEvent.click(screen.getByRole("button", { name: "Show or hide columns" }));
-    expect(screen.getAllByRole("menuitemcheckbox").map((item) => item.textContent)).toEqual(["Moons"]);
+    expect(screen.getAllByRole("menuitemcheckbox").map((item) => item.textContent)).toEqual([
+      "Moons",
+    ]);
     fireEvent.click(screen.getByRole("menuitemcheckbox", { name: "Moons", checked: true }));
-    expect(within(table()).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["Planet"]);
+    expect(
+      within(table())
+        .getAllByRole("columnheader")
+        .map((cell) => cell.textContent),
+    ).toEqual(["Planet"]);
     expect(within(row("Mars")).queryByRole("cell")).toBeNull();
     fireEvent.click(screen.getByRole("menuitemcheckbox", { name: "Moons", checked: false }));
     expect(within(row("Mars")).getByRole("cell")).toHaveTextContent("2");
@@ -109,7 +139,11 @@ describe("DataTable", () => {
         <Harness selectable={false} columnsOf="planets" />
       </HiddenColumns.Provider>,
     );
-    expect(within(table()).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["Planet"]);
+    expect(
+      within(table())
+        .getAllByRole("columnheader")
+        .map((cell) => cell.textContent),
+    ).toEqual(["Planet"]);
     fireEvent.click(screen.getByRole("button", { name: "Show or hide columns" }));
     fireEvent.click(screen.getByRole("menuitemcheckbox", { name: "Moons", checked: false }));
     expect(onHidden).toHaveBeenCalledWith("planets", new Set());
@@ -117,7 +151,9 @@ describe("DataTable", () => {
 
   it("has no Columns menu without a name to keep its columns under, or with no column but the first", () => {
     render(<Harness selectable={false} columns={[]} columnsOf="planets" />);
-    render(<Harness selectable={false} />, { container: document.body.appendChild(document.createElement("div")) });
+    render(<Harness selectable={false} />, {
+      container: document.body.appendChild(document.createElement("div")),
+    });
     expect(screen.queryByRole("button", { name: "Show or hide columns" })).toBeNull();
   });
 
@@ -125,7 +161,10 @@ describe("DataTable", () => {
     const onSort = vi.fn();
     render(<Harness sort={{ key: "moons", descending: true }} onSort={onSort} class="planets" />);
     expect(table()).toHaveClass("planets", "selectable");
-    expect(within(table()).getByRole("columnheader", { name: "Moons" })).toHaveAttribute("aria-sort", "descending");
+    expect(within(table()).getByRole("columnheader", { name: "Moons" })).toHaveAttribute(
+      "aria-sort",
+      "descending",
+    );
     fireEvent.click(within(table()).getByRole("button", { name: "Planet" }));
     expect(onSort).toHaveBeenCalledWith("name");
   });
@@ -158,7 +197,12 @@ describe("DataTable", () => {
   });
 
   it("offers checkboxes only on the rows that have them, disables those that cannot be checked now, and passes over both", () => {
-    render(<Harness offered={(planet) => planet.name !== "Venus"} enabled={(planet) => planet.name !== "Earth"} />);
+    render(
+      <Harness
+        offered={(planet) => planet.name !== "Venus"}
+        enabled={(planet) => planet.name !== "Earth"}
+      />,
+    );
     expect(screen.queryByRole("checkbox", { name: "Select Venus" })).toBeNull();
     expect(box("Earth")).toBeDisabled();
     fireEvent.click(box("Mercury"));
@@ -179,7 +223,9 @@ describe("DataTable", () => {
   it("has no checkbox for every row when no row has one, and disables it when none can be checked", () => {
     render(<Harness offered={() => false} />);
     expect(screen.queryByRole("checkbox")).toBeNull();
-    render(<Harness enabled={() => false} />, { container: document.body.appendChild(document.createElement("div")) });
+    render(<Harness enabled={() => false} />, {
+      container: document.body.appendChild(document.createElement("div")),
+    });
     expect(screen.getByRole("checkbox", { name: "Select every planet" })).toBeDisabled();
   });
 
@@ -311,7 +357,12 @@ describe("DataTable", () => {
   });
 
   it("has no keys of selection or opening without them, and moves along rows without links", () => {
-    render(<Harness selectable={false} name={{ key: "name", label: "Planet", cell: (planet) => planet.name }} />);
+    render(
+      <Harness
+        selectable={false}
+        name={{ key: "name", label: "Planet", cell: (planet) => planet.name }}
+      />,
+    );
     document.body.focus();
     expect(key("j")).toBe(false);
     expect(row("Mercury")).toHaveClass("cursor");

@@ -29,7 +29,10 @@ export function DraftOverviewContainer({
       readOnly={editor.readOnly}
       status={editor}
       links={links}
-      check={{ problems: check.data === undefined ? undefined : checkProblems(check.data), error: check.error }}
+      check={{
+        problems: check.data === undefined ? undefined : checkProblems(check.data),
+        error: check.error,
+      }}
       {...(field === undefined ? {} : { field })}
       onEdit={editor.edit}
     />

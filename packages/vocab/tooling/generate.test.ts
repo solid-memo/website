@@ -17,7 +17,9 @@ describe("render", () => {
   });
 });
 
-function fakeIo(committed: Record<string, string>): GenerateIo & { written: Record<string, string>; logs: string[] } {
+function fakeIo(
+  committed: Record<string, string>,
+): GenerateIo & { written: Record<string, string>; logs: string[] } {
   const real = defaultIo(ROOT);
   const io = {
     written: {} as Record<string, string>,
@@ -53,9 +55,7 @@ describe("main", () => {
     expect(upToDate.written).toEqual({});
     const drifted = fakeIo({ ...outputs, [OUTPUTS.vocab]: "stale" });
     expect(await main(["--check"], drifted)).toBe(1);
-    expect(drifted.logs).toEqual([
-      `${OUTPUTS.vocab} is out of date: run \`npm run generate\`.`,
-    ]);
+    expect(drifted.logs).toEqual([`${OUTPUTS.vocab} is out of date: run \`npm run generate\`.`]);
     const missing = fakeIo({ [OUTPUTS.vocab]: outputs[OUTPUTS.vocab] });
     expect(await main(["--check"], missing)).toBe(1);
     expect(missing.logs).toHaveLength(Object.keys(OUTPUTS).length - 1);
@@ -64,7 +64,11 @@ describe("main", () => {
 
 describe("run", () => {
   it("sets the exit code from the repository's own files", async () => {
-    const process = { argv: ["node", "--check"], cwd: () => ROOT, exitCode: undefined as number | undefined };
+    const process = {
+      argv: ["node", "--check"],
+      cwd: () => ROOT,
+      exitCode: undefined as number | undefined,
+    };
     await run(process);
     expect(process.exitCode).toBe(0);
   });

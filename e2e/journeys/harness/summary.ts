@@ -30,7 +30,13 @@ interface Suite {
 }
 export interface Report {
   suites?: Suite[];
-  stats?: { expected: number; unexpected: number; flaky: number; skipped: number; duration: number };
+  stats?: {
+    expected: number;
+    unexpected: number;
+    flaky: number;
+    skipped: number;
+    duration: number;
+  };
 }
 
 const ANSI = /\u001b\[[0-9;]*m/g;
@@ -50,21 +56,34 @@ function specsOf(suites: Suite[] | undefined): Spec[] {
 export function summarize(report: Report, artifact: string): string {
   const failed = specsOf(report.suites).flatMap((spec) =>
     spec.tests.flatMap((test) =>
-      test.results.filter((result) => !["passed", "skipped"].includes(result.status)).map((result) => ({ spec, test, result })),
+      test.results
+        .filter((result) => !["passed", "skipped"].includes(result.status))
+        .map((result) => ({ spec, test, result })),
     ),
   );
   const stats = report.stats;
   const lines = ["## User journeys", ""];
   if (stats !== undefined) {
-    lines.push(`${stats.expected} passed, ${stats.unexpected} failed, ${stats.flaky} flaky, ${stats.skipped} skipped in ${Math.round(stats.duration / 1000)}s.`, "");
+    lines.push(
+      `${stats.expected} passed, ${stats.unexpected} failed, ${stats.flaky} flaky, ${stats.skipped} skipped in ${Math.round(stats.duration / 1000)}s.`,
+      "",
+    );
   }
   if (failed.length === 0) return [...lines, "Every journey passed."].join("\n") + "\n";
   for (const { spec, test, result } of failed) {
     const path = failingStepPath(result.steps);
-    const message = (result.errors ?? []).map((error) => error.message ?? "").join("\n").replace(ANSI, "").split("\n").slice(0, 12).join("\n");
+    const message = (result.errors ?? [])
+      .map((error) => error.message ?? "")
+      .join("\n")
+      .replace(ANSI, "")
+      .split("\n")
+      .slice(0, 12)
+      .join("\n");
     lines.push(`### ✗ ${spec.title} (${spec.file})`, "");
     lines.push(`**Failed in:** ${path.length > 0 ? path.join(" › ") : "(outside any step)"}`, "");
-    const about = (test.annotations ?? []).filter((note) => note.description !== undefined).map((note) => `${note.type}: \`${note.description}\``);
+    const about = (test.annotations ?? [])
+      .filter((note) => note.description !== undefined)
+      .map((note) => `${note.type}: \`${note.description}\``);
     if (about.length > 0) lines.push(about.join(" · "), "");
     lines.push("```", message.trim(), "```", "");
   }
@@ -84,8 +103,15 @@ export function summarize(report: Report, artifact: string): string {
 
 /** `node harness/summary.ts <artifact name>`: appends the summary to GITHUB_STEP_SUMMARY, or prints it. */
 if (import.meta.main) {
-  const report = JSON.parse(await readFile(join(import.meta.dirname, "..", "test-results", "results.json"), "utf8").catch(() => "{}")) as Report;
-  const markdown = report.suites === undefined ? "## User journeys\n\nNo report: the journeys did not run (see the job's log).\n" : summarize(report, process.argv[2] ?? "the journeys'");
+  const report = JSON.parse(
+    await readFile(join(import.meta.dirname, "..", "test-results", "results.json"), "utf8").catch(
+      () => "{}",
+    ),
+  ) as Report;
+  const markdown =
+    report.suites === undefined
+      ? "## User journeys\n\nNo report: the journeys did not run (see the job's log).\n"
+      : summarize(report, process.argv[2] ?? "the journeys'");
   const target = process.env.GITHUB_STEP_SUMMARY;
   if (target === undefined || target === "") console.log(markdown);
   else await appendFile(target, markdown);

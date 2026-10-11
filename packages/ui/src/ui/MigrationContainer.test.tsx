@@ -26,7 +26,12 @@ const deck: Deck = {
   formatVersion: 1,
   authors: [],
 };
-const nothing = { reviewCount: 0, preferencesOutdated: false, instanceOutdated: false, catalogMissing: false };
+const nothing = {
+  reviewCount: 0,
+  preferencesOutdated: false,
+  instanceOutdated: false,
+  catalogMissing: false,
+};
 const session = { webId: "https://alice.example/profile/card#me" };
 const outdated: MigrationPlan = {
   decks: [{ deck, deckOutdated: true, cardCount: 3, reviewCount: 0 }],
@@ -90,16 +95,28 @@ describe("MigrationContainer", () => {
     // Shown with the screen, the notice leaves the focus be; it says how the update goes.
     const notice = await screen.findByRole("region", { name: "Format update" });
     expect(notice).not.toHaveFocus();
-    expect(notice).toHaveTextContent("Updating brings each document up to date on its own, where it is, one after another");
-    expect(notice).toHaveTextContent("one that cannot be updated now is left as it is, and you can try again");
+    expect(notice).toHaveTextContent(
+      "Updating brings each document up to date on its own, where it is, one after another",
+    );
+    expect(notice).toHaveTextContent(
+      "one that cannot be updated now is left as it is, and you can try again",
+    );
     expect(notice).not.toHaveTextContent(/backup|copy/);
     fireEvent.click(screen.getByRole("button", { name: "Update 1 deck" }));
     // The question takes the notice's place and its focus, read out as its description.
     const confirm = screen.getByRole("region", { name: "Start the update" });
-    expect(confirm).toHaveTextContent("Solid Memo updates the documents of Main one by one, each where it is");
-    expect(confirm).toHaveTextContent("Every document can be read throughout, whether it is updated yet or not.");
-    expect(confirm).toHaveTextContent("where your Pod checks this, only if nothing else changed it since Solid Memo read it.");
-    expect(confirm).toHaveTextContent("is left as it is, and you can try again: then only what is still outdated is updated.");
+    expect(confirm).toHaveTextContent(
+      "Solid Memo updates the documents of Main one by one, each where it is",
+    );
+    expect(confirm).toHaveTextContent(
+      "Every document can be read throughout, whether it is updated yet or not.",
+    );
+    expect(confirm).toHaveTextContent(
+      "where your Pod checks this, only if nothing else changed it since Solid Memo read it.",
+    );
+    expect(confirm).toHaveTextContent(
+      "is left as it is, and you can try again: then only what is still outdated is updated.",
+    );
     expect(confirm).toHaveTextContent("Every address stays the same");
     expect(confirm).not.toHaveTextContent(/backup|restore|put back/i);
     expect(confirm).toHaveFocus();
@@ -124,17 +141,32 @@ describe("MigrationContainer", () => {
     const { invalidate } = renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Update 1 deck" }));
     fireEvent.click(screen.getByRole("button", { name: "Start the update" }));
-    await waitFor(() => expect(screen.getByRole("region", { name: "Updating" })).toHaveTextContent("Finding what to update…"));
+    await waitFor(() =>
+      expect(screen.getByRole("region", { name: "Updating" })).toHaveTextContent(
+        "Finding what to update…",
+      ),
+    );
     expect(screen.getByRole("region", { name: "Updating" })).toHaveFocus();
     await waitFor(() => expect(report).toBeDefined());
     act(() => report!({ step: "write", done: 1, total: 3, part: { done: 3, total: 10 } }));
-    expect(screen.getByRole("region", { name: "Updating" })).toHaveTextContent("Updating your documents…3 of 10 documents");
-    expect(screen.getByRole("progressbar", { name: "Update progress" })).toHaveAttribute("value", "1.3");
+    expect(screen.getByRole("region", { name: "Updating" })).toHaveTextContent(
+      "Updating your documents…3 of 10 documents",
+    );
+    expect(screen.getByRole("progressbar", { name: "Update progress" })).toHaveAttribute(
+      "value",
+      "1.3",
+    );
     act(() => report!({ step: "write", done: 1, total: 3, part: { done: 0, total: 1 } }));
     expect(screen.getByRole("region", { name: "Updating" })).toHaveTextContent("0 of 1 document");
     act(() => report!({ step: "register", done: 2, total: 3 }));
-    expect(screen.getByRole("status")).toHaveTextContent(/^Making your data findable by other apps…$/);
-    expect(within(screen.getByRole("region", { name: "Updating" })).getAllByRole("listitem").map((step) => step.textContent)).toEqual([
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /^Making your data findable by other apps…$/,
+    );
+    expect(
+      within(screen.getByRole("region", { name: "Updating" }))
+        .getAllByRole("listitem")
+        .map((step) => step.textContent),
+    ).toEqual([
       "✓Finding what to update (done)",
       "✓Updating your documents (done)",
       "➜Making your data findable by other apps (in progress)",
@@ -143,7 +175,12 @@ describe("MigrationContainer", () => {
       "Should it be cut off, every document can still be read, updated or not, and you can update the rest later.",
     );
     plan = current;
-    act(() => finish({ updated: [{ url: deck.cardsDocumentUrl, holds: "cards", deck: deck.title }], failed: [] }));
+    act(() =>
+      finish({
+        updated: [{ url: deck.cardsDocumentUrl, holds: "cards", deck: deck.title }],
+        failed: [],
+      }),
+    );
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith());
     expect(await screen.findByRole("status")).toHaveTextContent(/^Your data is up to date\.$/);
     expect(useCases.updateInstance).toHaveBeenCalledWith(session, instance, expect.any(Function));
@@ -156,12 +193,20 @@ describe("MigrationContainer", () => {
         updated: [{ url: `${instance.url}meta.ttl`, holds: "instance" }],
         failed: [
           { url: deck.cardsDocumentUrl, holds: "cards", deck: deck.title, error: changed },
-          { url: deck.reviewsDocumentUrl, holds: "reviews", deck: deck.title, error: new TypeError("Failed to fetch") },
+          {
+            url: deck.reviewsDocumentUrl,
+            holds: "reviews",
+            deck: deck.title,
+            error: new TypeError("Failed to fetch"),
+          },
           { url: `${instance.url}preferences.ttl`, holds: "preferences", error: "refused" },
           { url: `${instance.url}catalog.ttl`, holds: "catalog", error: "refused" },
         ],
       },
-      { updated: [], failed: [{ url: `${instance.url}meta.ttl`, holds: "instance", error: "refused" }] },
+      {
+        updated: [],
+        failed: [{ url: `${instance.url}meta.ttl`, holds: "instance", error: "refused" }],
+      },
       { updated: [], failed: [] },
     ];
     const useCases = makeUseCasesFake({
@@ -175,8 +220,14 @@ describe("MigrationContainer", () => {
     // It takes the progress's focus, read out with what is left as its description.
     expect(result).toHaveFocus();
     expect(result).toHaveAccessibleDescription(/^4 documents could not be updated now:/);
-    expect(within(result).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
-      expect.stringMatching(/^The cards of Kanji N5: This was changed elsewhere, perhaps in another tab or app, since Solid Memo read it/),
+    expect(
+      within(result)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent),
+    ).toEqual([
+      expect.stringMatching(
+        /^The cards of Kanji N5: This was changed elsewhere, perhaps in another tab or app, since Solid Memo read it/,
+      ),
       expect.stringMatching(/^The review states of Kanji N5: /),
       expect.stringMatching(/^Your preferences: /),
       expect.stringMatching(/^The catalog of the decks: /),
@@ -204,14 +255,20 @@ describe("MigrationContainer", () => {
   it("says in Swedish what it could not update", async () => {
     const useCases = makeUseCasesFake({
       planMigration: vi.fn(async () => outdated),
-      updateInstance: vi.fn(async (): Promise<UpdateOutcome> => ({
-        updated: [],
-        failed: [{ url: deck.cardsDocumentUrl, holds: "cards", deck: deck.title, error: "refused" }],
-      })),
+      updateInstance: vi.fn(
+        async (): Promise<UpdateOutcome> => ({
+          updated: [],
+          failed: [
+            { url: deck.cardsDocumentUrl, holds: "cards", deck: deck.title, error: "refused" },
+          ],
+        }),
+      ),
     });
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
-        <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <QueryClientProvider
+          client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+        >
           <MigrationContainer useCases={useCases} session={session} instance={instance} />
         </QueryClientProvider>
       </I18nProvider>,
@@ -220,7 +277,9 @@ describe("MigrationContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Starta uppdateringen" }));
     const result = await screen.findByRole("region", { name: "Uppdateringen blev inte klar" });
     expect(result).toHaveTextContent("1 dokument kunde inte uppdateras nu:Korten i Kanji N5:");
-    expect(result).toHaveTextContent("Varje dokument går att läsa som det är, uppdaterat eller inte.");
+    expect(result).toHaveTextContent(
+      "Varje dokument går att läsa som det är, uppdaterat eller inte.",
+    );
     expect(within(result).getByRole("button", { name: "Försök igen" })).toBeInTheDocument();
   });
 

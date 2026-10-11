@@ -111,7 +111,13 @@ export function DeckBulkActions({
         <Dialog heading={t(`studio.bulk.${form}`)} onClose={() => setForm(null)}>
           {form === "move" &&
             (moveLocked !== null ? (
-              <p class="hint">{t(moveLocked === "newerVersion" ? "studio.bulk.moveReadOnly" : "studio.bulk.moveSetAside")}</p>
+              <p class="hint">
+                {t(
+                  moveLocked === "newerVersion"
+                    ? "studio.bulk.moveReadOnly"
+                    : "studio.bulk.moveSetAside",
+                )}
+              </p>
             ) : (
               <form
                 aria-label={t("studio.bulk.move")}
@@ -122,7 +128,11 @@ export function DeckBulkActions({
               >
                 <label>
                   {t("studio.bulk.group")}
-                  <select autoFocus value={parent} onChange={(event) => setParent(event.currentTarget.value)}>
+                  <select
+                    autoFocus
+                    value={parent}
+                    onChange={(event) => setParent(event.currentTarget.value)}
+                  >
                     <option value="">{t("studio.bulk.topLevel")}</option>
                     {groups.map(({ group, trail }) => (
                       <option key={group.url} value={group.url}>
@@ -149,7 +159,14 @@ export function DeckBulkActions({
             >
               <label>
                 {t("studio.bulk.newCardsPerDay")}
-                <input type="number" autoFocus min={0} step={1} value={newCards} onInput={(event) => setNewCards(event.currentTarget.value)} />
+                <input
+                  type="number"
+                  autoFocus
+                  min={0}
+                  step={1}
+                  value={newCards}
+                  onInput={(event) => setNewCards(event.currentTarget.value)}
+                />
               </label>
               <label>
                 {t("studio.bulk.maxReviewsPerDay")}
@@ -175,7 +192,11 @@ export function DeckBulkActions({
             >
               <label>
                 {t("studio.decks.direction")}
-                <select autoFocus value={direction} onChange={(event) => setDirection(event.currentTarget.value as DeckDirection)}>
+                <select
+                  autoFocus
+                  value={direction}
+                  onChange={(event) => setDirection(event.currentTarget.value as DeckDirection)}
+                >
                   {DECK_DIRECTIONS.map((option) => (
                     <option key={option} value={option}>
                       {directionLabel(option)}

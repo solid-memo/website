@@ -18,7 +18,9 @@ export interface DistractorText {
 }
 
 /** The card's distractors after an edit, or why the edit is refused. */
-export type DistractorEdit = { ok: true; distractors: Distractor[] } | { ok: false; error: AppError };
+export type DistractorEdit =
+  | { ok: true; distractors: Distractor[] }
+  | { ok: false; error: AppError };
 
 /** How an English error text names a wrong option's note ("Choose the language of {field}."). */
 const NOTE_NOUN = "the note on a wrong option";
@@ -40,7 +42,8 @@ export function tidiedDistractor(
   if (tags.length === 0) return { ok: false, error: new AppError("distractorEmpty") };
   if ("" in text && tags.length > 1) return { ok: false, error: new AppError("textMixesUnstated") };
   const note = tidiedTagged(entered.note, formatted);
-  if (note !== undefined && "" in note) return { ok: false, error: new AppError("textNeedsLanguage", { field: NOTE_NOUN }) };
+  if (note !== undefined && "" in note)
+    return { ok: false, error: new AppError("textNeedsLanguage", { field: NOTE_NOUN }) };
   return { ok: true, text, ...(note === undefined ? {} : { note }) };
 }
 
@@ -75,8 +78,17 @@ export function addDistractor(
 ): DistractorEdit {
   const tidy = tidiedDistractor(entered, formatted);
   if (!tidy.ok) return tidy;
-  const id = nextDistractorId(cardId, [...distractors.map((distractor) => distractor.id), ...published]);
-  return { ok: true, distractors: [...distractors, { id, text: tidy.text, ...(tidy.note === undefined ? {} : { note: tidy.note }) }] };
+  const id = nextDistractorId(cardId, [
+    ...distractors.map((distractor) => distractor.id),
+    ...published,
+  ]);
+  return {
+    ok: true,
+    distractors: [
+      ...distractors,
+      { id, text: tidy.text, ...(tidy.note === undefined ? {} : { note: tidy.note }) },
+    ],
+  };
 }
 
 /** The card's distractors with one's text and note replaced, its id and retirement kept; refused as addDistractor's. */
@@ -92,7 +104,12 @@ export function editDistractor(
     ok: true,
     distractors: distractors.map((distractor) =>
       distractor.id === id
-        ? { id, text: tidy.text, ...(tidy.note === undefined ? {} : { note: tidy.note }), ...(distractor.retired ? { retired: true } : {}) }
+        ? {
+            id,
+            text: tidy.text,
+            ...(tidy.note === undefined ? {} : { note: tidy.note }),
+            ...(distractor.retired ? { retired: true } : {}),
+          }
         : distractor,
     ),
   };
@@ -100,12 +117,16 @@ export function editDistractor(
 
 /** The card's distractors with one retired (`owl:deprecated true`): kept, never offered. */
 export function retireDistractor(distractors: readonly Distractor[], id: string): Distractor[] {
-  return distractors.map((distractor) => (distractor.id === id ? { ...distractor, retired: true } : distractor));
+  return distractors.map((distractor) =>
+    distractor.id === id ? { ...distractor, retired: true } : distractor,
+  );
 }
 
 /** The card's distractors with a retired one offered again. */
 export function restoreDistractor(distractors: readonly Distractor[], id: string): Distractor[] {
-  return distractors.map((distractor) => (distractor.id === id ? withoutRetirement(distractor) : distractor));
+  return distractors.map((distractor) =>
+    distractor.id === id ? withoutRetirement(distractor) : distractor,
+  );
 }
 
 function withoutRetirement({ id, text, note }: Distractor): Distractor {
@@ -117,7 +138,11 @@ function withoutRetirement({ id, text, note }: Distractor): Distractor {
  * one the deck's release published, which a learner's history may name:
  * it is retired instead.
  */
-export function deleteDistractor(distractors: readonly Distractor[], id: string, published: ReadonlySet<string>): DistractorEdit {
+export function deleteDistractor(
+  distractors: readonly Distractor[],
+  id: string,
+  published: ReadonlySet<string>,
+): DistractorEdit {
   if (published.has(id)) return { ok: false, error: new AppError("distractorPublished") };
   return { ok: true, distractors: distractors.filter((distractor) => distractor.id !== id) };
 }
@@ -131,7 +156,13 @@ export function deleteDistractor(distractors: readonly Distractor[], id: string,
  *   course asks a question with.
  */
 export type DistractorIssue =
-  | { code: "distractorLanguages"; severity: DistractorSeverity; id: string; missing: string[]; extra: string[] }
+  | {
+      code: "distractorLanguages";
+      severity: DistractorSeverity;
+      id: string;
+      missing: string[];
+      extra: string[];
+    }
   | { code: "fewDistractors"; severity: DistractorSeverity; count: number; least: number };
 
 export type DistractorSeverity = "warning" | "error";
@@ -141,19 +172,28 @@ export type DistractorSeverity = "warning" | "error";
  * may be as its user wants it; errors in a release (`where`), which a
  * course asks.
  */
-export function distractorIssues(card: Pick<CardContent, "back" | "distractors">, where: "pod" | "release"): DistractorIssue[] {
+export function distractorIssues(
+  card: Pick<CardContent, "back" | "distractors">,
+  where: "pod" | "release",
+): DistractorIssue[] {
   const severity: DistractorSeverity = where === "pod" ? "warning" : "error";
   const inUse = (card.distractors ?? []).filter((distractor) => distractor.retired !== true);
   const back = Object.keys(card.back);
   const issues: DistractorIssue[] = [];
   if (inUse.length > 0 && inUse.length < LEAST_DISTRACTORS) {
-    issues.push({ code: "fewDistractors", severity, count: inUse.length, least: LEAST_DISTRACTORS });
+    issues.push({
+      code: "fewDistractors",
+      severity,
+      count: inUse.length,
+      least: LEAST_DISTRACTORS,
+    });
   }
   for (const distractor of inUse) {
     const text = Object.keys(distractor.text);
     const missing = back.filter((tag) => !text.includes(tag));
     const extra = text.filter((tag) => !back.includes(tag));
-    if (missing.length + extra.length > 0) issues.push({ code: "distractorLanguages", severity, id: distractor.id, missing, extra });
+    if (missing.length + extra.length > 0)
+      issues.push({ code: "distractorLanguages", severity, id: distractor.id, missing, extra });
   }
   return issues;
 }

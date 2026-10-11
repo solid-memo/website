@@ -38,14 +38,18 @@ describe("LibraryCopiesContainer", () => {
         { deck: other, series: capitals, version: "1", newer: true },
       ]),
       planLibraryUpgrade: vi.fn(async (deck) => makePlan(deck)),
-      checkInstance: vi.fn(() => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve))),
+      checkInstance: vi.fn(
+        () => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve)),
+      ),
     });
     renderContainer(useCases);
     await waitFor(() => expect(screen.getAllByText(/updating adds 1 card/)).toHaveLength(2));
     expect(screen.getByText(/being checked/)).toBeInTheDocument();
     expect(screen.queryByRole("checkbox")).toBeNull();
     checked(invalidReport([old]));
-    expect(await screen.findByRole("checkbox", { name: "Select More capitals" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("checkbox", { name: "Select More capitals" }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("checkbox", { name: "Select Capitals" })).toBeNull();
     expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
   });
@@ -66,27 +70,53 @@ describe("LibraryCopiesContainer", () => {
         onProgress!({ step: "cards", done: 1, total: 4 });
         return new Promise((resolve) => (finish = resolve));
       })
-      .mockImplementationOnce(async () => ({ ok: false, step: "entry", error: new Error("boom"), changed: true }));
+      .mockImplementationOnce(async () => ({
+        ok: false,
+        step: "entry",
+        error: new Error("boom"),
+        changed: true,
+      }));
     const { invalidate } = renderContainer(useCases);
     expect(screen.getByText("Looking up the library…")).toBeInTheDocument();
-    const select = await screen.findByRole("checkbox", { name: "Select every deck that can be updated" });
+    const select = await screen.findByRole("checkbox", {
+      name: "Select every deck that can be updated",
+    });
     await waitFor(() => expect(screen.getAllByText(/updating adds 1 card/)).toHaveLength(2));
     expect(useCases.listLibraryUpdates).toHaveBeenCalledWith(instanceA.url);
     // Only the copies with a newer release are planned.
     expect(useCases.planLibraryUpgrade).toHaveBeenCalledTimes(2);
     expect(useCases.planLibraryUpgrade).not.toHaveBeenCalledWith(fresh, expect.anything());
     // With the series the copies' one look found.
-    expect(useCases.planLibraryUpgrade).toHaveBeenCalledWith(old, { deck: old, series: capitals, version: "1", newer: true });
+    expect(useCases.planLibraryUpgrade).toHaveBeenCalledWith(old, {
+      deck: old,
+      series: capitals,
+      version: "1",
+      newer: true,
+    });
 
     fireEvent.click(select);
     fireEvent.click(screen.getByRole("button", { name: "Update 2 decks" }));
-    expect(await screen.findByText(/^Updating Capitals/)).toHaveTextContent("Updating Capitals (1 of 2)");
-    expect(screen.getByRole("region", { name: "Updating the deck" })).toHaveTextContent("Writing the updated cards");
+    expect(await screen.findByText(/^Updating Capitals/)).toHaveTextContent(
+      "Updating Capitals (1 of 2)",
+    );
+    expect(screen.getByRole("region", { name: "Updating the deck" })).toHaveTextContent(
+      "Writing the updated cards",
+    );
     finish({ ok: true, deck: old });
-    await waitFor(() => expect(screen.getByText(/More capitals: the update failed/)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText(/More capitals: the update failed/)).toBeInTheDocument(),
+    );
     expect(screen.getByText(/Capitals: updated to release 2\./)).toBeInTheDocument();
-    expect(useCases.applyLibraryUpgrade).toHaveBeenCalledWith(old, makePlan(old), expect.any(Function));
-    expect(useCases.applyLibraryUpgrade).toHaveBeenCalledWith(other, makePlan(other), expect.any(Function));
+    expect(useCases.applyLibraryUpgrade).toHaveBeenCalledWith(
+      old,
+      makePlan(old),
+      expect.any(Function),
+    );
+    expect(useCases.applyLibraryUpgrade).toHaveBeenCalledWith(
+      other,
+      makePlan(other),
+      expect.any(Function),
+    );
     // The upgraded deck is read afresh, and the failed one planned again, read afresh too as it changed in part.
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cards", old.cardsDocumentUrl] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["libraryUpgrade", other.url] });
@@ -101,10 +131,15 @@ describe("LibraryCopiesContainer", () => {
         { deck: other, series: capitals, version: "1", newer: true },
       ]),
       planLibraryUpgrade: vi.fn(async (deck) => makePlan(deck)),
-      applyLibraryUpgrade: vi.fn(async () => ({ ok: false, step: "read", error: new Error("changed"), changed: false }) as const),
+      applyLibraryUpgrade: vi.fn(
+        async () =>
+          ({ ok: false, step: "read", error: new Error("changed"), changed: false }) as const,
+      ),
     });
     const { invalidate } = renderContainer(useCases);
-    fireEvent.click(await screen.findByRole("checkbox", { name: "Select every deck that can be updated" }));
+    fireEvent.click(
+      await screen.findByRole("checkbox", { name: "Select every deck that can be updated" }),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Update 2 decks" }));
     await waitFor(() => expect(screen.getAllByText(/the update failed/)).toHaveLength(2));
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks"] }));
@@ -116,29 +151,43 @@ describe("LibraryCopiesContainer", () => {
 
   it("takes an update that could not even start as that deck's failure, and goes on", async () => {
     const useCases = makeUseCasesFake({
-      listLibraryUpdates: vi.fn(async () => [{ deck: old, series: capitals, version: "1", newer: true }]),
+      listLibraryUpdates: vi.fn(async () => [
+        { deck: old, series: capitals, version: "1", newer: true },
+      ]),
       planLibraryUpgrade: vi.fn(async (deck) => makePlan(deck)),
       applyLibraryUpgrade: vi.fn(async () => Promise.reject(new Error("fenced"))),
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select Capitals" }));
     fireEvent.click(screen.getByRole("button", { name: "Update 1 deck" }));
-    const said = await screen.findByText(/Capitals: the update failed while reading the deck and its cards/);
-    expect(within(said.closest("li")!).getByText(/Your deck was not changed\./)).toBeInTheDocument();
+    const said = await screen.findByText(
+      /Capitals: the update failed while reading the deck and its cards/,
+    );
+    expect(
+      within(said.closest("li")!).getByText(/Your deck was not changed\./),
+    ).toBeInTheDocument();
   });
 
   it("says what an update would change could not be read", async () => {
     renderContainer(
       makeUseCasesFake({
-        listLibraryUpdates: vi.fn(async () => [{ deck: old, series: capitals, version: "1", newer: true }]),
+        listLibraryUpdates: vi.fn(async () => [
+          { deck: old, series: capitals, version: "1", newer: true },
+        ]),
         planLibraryUpgrade: vi.fn(async () => Promise.reject(new Error("offline"))),
       }),
     );
-    expect(await screen.findByText("Release 2 is out, but what it would change could not be read.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Release 2 is out, but what it would change could not be read."),
+    ).toBeInTheDocument();
   });
 
   it("says why the copies could not be listed", async () => {
-    renderContainer(makeUseCasesFake({ listLibraryUpdates: vi.fn(async () => Promise.reject(new Error("offline"))) }));
+    renderContainer(
+      makeUseCasesFake({
+        listLibraryUpdates: vi.fn(async () => Promise.reject(new Error("offline"))),
+      }),
+    );
     expect(await screen.findByRole("alert")).toBeInTheDocument();
   });
 });

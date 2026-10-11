@@ -12,7 +12,10 @@ describe("ContextTabs", () => {
     render(<ContextTabs label="Deck" tabs={tabs} />);
     const nav = screen.getByRole("navigation", { name: "Deck" });
     expect(nav).toHaveClass("studio-tabs");
-    expect(within(nav).getByRole("link", { name: "Cards" })).toHaveAttribute("aria-current", "page");
+    expect(within(nav).getByRole("link", { name: "Cards" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     expect(within(nav).getByRole("link", { name: "Schedule" })).not.toHaveAttribute("aria-current");
     // Followed as links are.
     expect(fireEvent.click(within(nav).getByRole("link", { name: "Schedule" }))).toBe(true);

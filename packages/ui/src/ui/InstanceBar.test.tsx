@@ -34,10 +34,9 @@ describe("InstanceBar", () => {
 
   it("links the instance's folder in the Pod by what it is, not by its address", () => {
     renderBar();
-    expect(screen.getByRole("link", { name: "Open in your Pod (opens in a new tab)" })).toHaveAttribute(
-      "href",
-      instance.url,
-    );
+    expect(
+      screen.getByRole("link", { name: "Open in your Pod (opens in a new tab)" }),
+    ).toHaveAttribute("href", instance.url);
   });
 
   it("links to the instance's statistics and preferences, to the instance in the Studio, and to the instance picker", () => {
@@ -51,7 +50,10 @@ describe("InstanceBar", () => {
       "href",
       routeToHash({ screen: "preferences", instanceUrl: instance.url }),
     );
-    expect(bar.getByRole("link", { name: "Open in Studio" })).toHaveAttribute("href", studioHref(instance.url));
+    expect(bar.getByRole("link", { name: "Open in Studio" })).toHaveAttribute(
+      "href",
+      studioHref(instance.url),
+    );
     expect(bar.getByRole("link", { name: "Switch instance" })).toHaveAttribute(
       "href",
       routeToHash({ screen: "instancePicker" }),

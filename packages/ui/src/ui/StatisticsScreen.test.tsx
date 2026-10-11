@@ -33,13 +33,21 @@ const answer = (studyDay: string, deckUrl: string, prior?: number): Answer => ({
   nextIntervalDays: 6,
 });
 const statistics = statisticsOf(
-  [answer("2026-09-20", deck.url), answer("2026-09-21", deck.url, 1), answer("2026-09-21", `${INSTANCE.url}catalog.ttl#gone`)],
+  [
+    answer("2026-09-20", deck.url),
+    answer("2026-09-21", deck.url, 1),
+    answer("2026-09-21", `${INSTANCE.url}catalog.ttl#gone`),
+  ],
   "2026-09-21",
 );
 
 function withQueries(node: preact.ComponentChildren) {
   return render(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{node}</QueryClientProvider>,
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      {node}
+    </QueryClientProvider>,
   );
 }
 
@@ -62,7 +70,12 @@ describe("StatisticsScreen", () => {
   });
 
   it("leaves out recall by month while there are no reviews, only first answers", () => {
-    render(<StatisticsScreen statistics={statisticsOf([answer("2026-09-21", deck.url)], "2026-09-21")} decks={[deck]} />);
+    render(
+      <StatisticsScreen
+        statistics={statisticsOf([answer("2026-09-21", deck.url)], "2026-09-21")}
+        decks={[deck]}
+      />,
+    );
     expect(screen.getByText("Cards introduced over time")).toBeInTheDocument();
     expect(screen.queryByText("Recall by month")).toBeNull();
     expect(screen.getAllByText("No reviews yet")).toHaveLength(2);
@@ -70,7 +83,9 @@ describe("StatisticsScreen", () => {
 
   it("says when there is nothing to show yet", () => {
     render(<StatisticsScreen statistics={statisticsOf([], "2026-09-21")} decks={[]} />);
-    expect(screen.getByText("No answers yet: the statistics begin with your next study session.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No answers yet: the statistics begin with your next study session."),
+    ).toBeInTheDocument();
   });
 });
 
@@ -82,7 +97,9 @@ describe("StatisticsContainer", () => {
     expect(await screen.findByText("Capitals")).toBeInTheDocument();
     expect(useCases.getStatistics).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date));
 
-    const failing = makeUseCasesFake({ getStatistics: vi.fn(async () => Promise.reject(new Error("offline"))) });
+    const failing = makeUseCasesFake({
+      getStatistics: vi.fn(async () => Promise.reject(new Error("offline"))),
+    });
     withQueries(<StatisticsContainer useCases={failing} instance={INSTANCE} decks={[]} />);
     expect(await screen.findByText("offline")).toBeInTheDocument();
   });
@@ -90,7 +107,9 @@ describe("StatisticsContainer", () => {
   it("shows where the cards stand after the statistics, even before any answer", async () => {
     const useCases = makeUseCasesFake();
     withQueries(<StatisticsContainer useCases={useCases} instance={INSTANCE} decks={[]} />);
-    expect(await screen.findByText("No answers yet: the statistics begin with your next study session.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("No answers yet: the statistics begin with your next study session."),
+    ).toBeInTheDocument();
     expect(await screen.findByText("Card maturity")).toBeInTheDocument();
     expect(useCases.getCardProgress).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date), {});
   });
@@ -99,15 +118,22 @@ describe("StatisticsContainer", () => {
 describe("DeckStatisticsContainer", () => {
   it("shows the deck's last days and recall once it has answers, and only where its cards stand before", async () => {
     const useCases = makeUseCasesFake({ getStatistics: vi.fn(async () => statistics) });
-    const { container } = withQueries(<DeckStatisticsContainer useCases={useCases} instance={INSTANCE} deck={deck} />);
+    const { container } = withQueries(
+      <DeckStatisticsContainer useCases={useCases} instance={INSTANCE} deck={deck} />,
+    );
     expect(await screen.findByText("Answers, the last 30 days")).toBeInTheDocument();
-    expect(useCases.getStatistics).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date), { deckUrl: deck.url });
+    expect(useCases.getStatistics).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date), {
+      deckUrl: deck.url,
+    });
     expect(container.querySelectorAll("rect.bar")).toHaveLength(2);
 
     expect(useCases.getCardProgress).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date), { deck });
 
     const empty = makeUseCasesFake();
-    const quiet = within(withQueries(<DeckStatisticsContainer useCases={empty} instance={INSTANCE} deck={deck} />).container as HTMLElement);
+    const quiet = within(
+      withQueries(<DeckStatisticsContainer useCases={empty} instance={INSTANCE} deck={deck} />)
+        .container as HTMLElement,
+    );
     await vi.waitFor(() => expect(empty.getStatistics).toHaveBeenCalled());
     expect(await quiet.findByText("Card maturity")).toBeInTheDocument();
     expect(quiet.queryByText("Answers, the last 30 days")).toBeNull();

@@ -25,7 +25,13 @@ export function isReleaseContainer(text: string): boolean {
   } catch {
     return false;
   }
-  return (url.protocol === "https:" || url.protocol === "http:") && url.href === text && text.endsWith("/") && url.search === "" && url.hash === "";
+  return (
+    (url.protocol === "https:" || url.protocol === "http:") &&
+    url.href === text &&
+    text.endsWith("/") &&
+    url.search === "" &&
+    url.hash === ""
+  );
 }
 
 /** The address of version `version` of the release `name` in the folder. */

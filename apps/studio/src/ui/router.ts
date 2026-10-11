@@ -1,4 +1,9 @@
-import { isDefaultQuery, queryFromParams, queryToParams, type CardQuery } from "@solid-memo/domain/cardQuery";
+import {
+  isDefaultQuery,
+  queryFromParams,
+  queryToParams,
+  type CardQuery,
+} from "@solid-memo/domain/cardQuery";
 import type { CardSpot } from "@solid-memo/domain/deckHealth";
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
 import { draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
@@ -52,7 +57,14 @@ export type StudioRoute =
    * wide screen, the deck's cards in the workbench, as `query` says (all,
    * as listed, when absent).
    */
-  | { screen: "card"; deckUrl: string; cardUrl: string; tab?: CardTab; field?: string; query?: CardQuery }
+  | {
+      screen: "card";
+      deckUrl: string;
+      cardUrl: string;
+      tab?: CardTab;
+      field?: string;
+      query?: CardQuery;
+    }
   /** A deck's schedule: the reviews to come, how its intervals and eases are spread, its lapses and leeches. */
   | { screen: "schedule"; deckUrl: string }
   /** What a deck says of itself, how it is studied and, for a course, the learner's progress through it. */
@@ -86,7 +98,14 @@ export type StudioRoute =
    * `language`, sorted by `sort`, on `page` (all, by id, the first, when
    * absent).
    */
-  | { screen: "draftCards"; draftUrl: string; filter?: DraftCardFilter; language?: string; sort?: TableSort<DraftCardColumn>; page?: number }
+  | {
+      screen: "draftCards";
+      draftUrl: string;
+      filter?: DraftCardFilter;
+      language?: string;
+      sort?: TableSort<DraftCardColumn>;
+      page?: number;
+    }
   /** The release check of a draft, for a pod or (`policy`) the repository's library; a pod's when absent. */
   | { screen: "check"; draftUrl: string; policy?: CheckPolicy }
   /** A draft as the library lists the release it will be. */
@@ -105,14 +124,24 @@ export type StudioRoute =
 /** A column of a draft's cards, to sort them by. */
 export type DraftCardColumn = "front" | "back" | "place" | "distractors" | "id";
 
-export const DRAFT_CARD_COLUMNS: readonly DraftCardColumn[] = ["front", "back", "place", "distractors", "id"];
+export const DRAFT_CARD_COLUMNS: readonly DraftCardColumn[] = [
+  "front",
+  "back",
+  "place",
+  "distractors",
+  "id",
+];
 
 /** The route of a card in the inspector. */
 export type CardRoute = Extract<StudioRoute, { screen: "card" }>;
 
 /** The deck's cards in the workbench, as a card's route has them beside it (its query). */
 export function workbenchOf(route: CardRoute): StudioRoute {
-  return { screen: "cards", deckUrl: route.deckUrl, ...(route.query === undefined ? {} : { query: route.query }) };
+  return {
+    screen: "cards",
+    deckUrl: route.deckUrl,
+    ...(route.query === undefined ? {} : { query: route.query }),
+  };
 }
 
 /** The routes of a draft's screens. */
@@ -136,8 +165,19 @@ export const CARD_TABS: readonly CardTab[] = ["content", "distractors", "schedul
 
 /** The card inspector, opened at where in a card a problem is (`spot`, domain/deckHealth.ts): its tab, and the field there. */
 export function spotRoute(deckUrl: string, { card, place }: CardSpot): StudioRoute {
-  const field = place.tab === "content" ? place.part : place.tab === "distractors" ? place.distractor : undefined;
-  return { screen: "card", deckUrl, cardUrl: card.url, tab: place.tab, ...(field === undefined ? {} : { field }) };
+  const field =
+    place.tab === "content"
+      ? place.part
+      : place.tab === "distractors"
+        ? place.distractor
+        : undefined;
+  return {
+    screen: "card",
+    deckUrl,
+    cardUrl: card.url,
+    tab: place.tab,
+    ...(field === undefined ? {} : { field }),
+  };
 }
 
 /** The instance a route is in: the one it names, or the one of the deck it names; null for the picker. */
@@ -230,7 +270,9 @@ export function studioRouteToHash(route: StudioRoute): string {
         draft: route.draftUrl,
         ...(route.filter === undefined ? {} : { filter: route.filter }),
         ...(route.language === undefined ? {} : { lang: route.language }),
-        ...(route.sort === undefined ? {} : { sort: route.sort.key, ...(route.sort.descending ? { order: "desc" } : {}) }),
+        ...(route.sort === undefined
+          ? {}
+          : { sort: route.sort.key, ...(route.sort.descending ? { order: "desc" } : {}) }),
         ...(route.page === undefined || route.page === 1 ? {} : { page: String(route.page) }),
       })}`;
     case "transfer":
@@ -293,12 +335,16 @@ export function parseStudioHash(hash: string): StudioRoute | null {
     case "/transfer": {
       if (instanceUrl === null) return null;
       const deckUrls = query.getAll("deck");
-      return deckUrls.length === 0 ? { screen: "transfer", instanceUrl } : { screen: "transfer", instanceUrl, deckUrls };
+      return deckUrls.length === 0
+        ? { screen: "transfer", instanceUrl }
+        : { screen: "transfer", instanceUrl, deckUrls };
     }
     case "/health": {
       const deckUrl = query.get("deck");
       if (instanceUrl === null) return null;
-      return deckUrl === null ? { screen: "health", instanceUrl } : { screen: "health", instanceUrl, deckUrl };
+      return deckUrl === null
+        ? { screen: "health", instanceUrl }
+        : { screen: "health", instanceUrl, deckUrl };
     }
     case "/about": {
       const deckUrl = query.get("deck");
@@ -312,7 +358,9 @@ export function parseStudioHash(hash: string): StudioRoute | null {
       const deckUrl = query.get("deck");
       if (deckUrl === null) return null;
       const cardQuery = queryFromParams(query);
-      return isDefaultQuery(cardQuery) ? { screen: "cards", deckUrl } : { screen: "cards", deckUrl, query: cardQuery };
+      return isDefaultQuery(cardQuery)
+        ? { screen: "cards", deckUrl }
+        : { screen: "cards", deckUrl, query: cardQuery };
     }
     case "/card": {
       const deckUrl = query.get("deck");
@@ -351,13 +399,31 @@ function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
     case "/draft":
       return { screen: "draft", draftUrl, ...(field("draft") as { field?: DraftField }) };
     case "/chapter":
-      return chapter === null ? null : { screen: "chapter", draftUrl, chapter, ...(field("chapter") as { field?: ChapterField }) };
+      return chapter === null
+        ? null
+        : {
+            screen: "chapter",
+            draftUrl,
+            chapter,
+            ...(field("chapter") as { field?: ChapterField }),
+          };
     case "/step":
-      return step === null ? null : { screen: "step", draftUrl, step, ...(field("step") as { field?: StepField }) };
+      return step === null
+        ? null
+        : { screen: "step", draftUrl, step, ...(field("step") as { field?: StepField }) };
     case "/question":
-      return card === null ? null : { screen: "question", draftUrl, card, ...(field("question") as { field?: QuestionField }) };
+      return card === null
+        ? null
+        : {
+            screen: "question",
+            draftUrl,
+            card,
+            ...(field("question") as { field?: QuestionField }),
+          };
     case "/check":
-      return query.get("policy") === "library" ? { screen: "check", draftUrl, policy: "library" } : { screen: "check", draftUrl };
+      return query.get("policy") === "library"
+        ? { screen: "check", draftUrl, policy: "library" }
+        : { screen: "check", draftUrl };
     case "/preview":
       return { screen: "preview", draftUrl };
     case "/diff":
@@ -368,7 +434,12 @@ function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
       // A review is of a chapter.
       return chapter === null
         ? { screen: "trial", draftUrl }
-        : { screen: "trial", draftUrl, chapter, ...(query.get("part") === "review" ? { review: true as const } : {}) };
+        : {
+            screen: "trial",
+            draftUrl,
+            chapter,
+            ...(query.get("part") === "review" ? { review: true as const } : {}),
+          };
     default: {
       const filter = DRAFT_CARD_FILTERS.find((known) => known === query.get("filter"));
       const language = query.get("lang");
@@ -379,7 +450,9 @@ function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
         draftUrl,
         ...(filter === undefined ? {} : { filter }),
         ...(language === null || language === "" ? {} : { language }),
-        ...(sort === undefined ? {} : { sort: { key: sort, descending: query.get("order") === "desc" } }),
+        ...(sort === undefined
+          ? {}
+          : { sort: { key: sort, descending: query.get("order") === "desc" } }),
         ...(Number.isInteger(page) && page > 1 ? { page } : {}),
       };
     }

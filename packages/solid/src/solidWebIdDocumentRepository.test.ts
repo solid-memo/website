@@ -9,8 +9,7 @@ import {
 import { createSolidWebIdDocumentRepository } from "./solidWebIdDocumentRepository";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@inrupt/solid-client")>();
+  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
   return { ...actual, getSolidDataset: vi.fn() };
 });
 

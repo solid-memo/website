@@ -9,14 +9,20 @@ import { logInAndCreateInstance } from "../flows/logIn.ts";
  * reload of the app, the preview showing the code each time
  * (docs/markdown.md#writing-markdown-in-the-app).
  */
-test("edit a card in Markdown and keep its line breaks @markdown", async ({ app, runId, account }) => {
+test("edit a card in Markdown and keep its line breaks @markdown", async ({
+  app,
+  runId,
+  account,
+}) => {
   const deck = `Markdown ${runId}`;
   const title = `Clone ${runId}`;
   const added = `${title} with:\n\n    git clone https://example.org/repo.git`;
   const edited = `${title} and enter it:\n\n\`\`\`sh\ngit clone https://example.org/repo.git\ncd repo\n\`\`\``;
 
   await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in with a WebID", () => logInAndCreateInstance(app, account, `Markdown ${runId}`));
+  await app.step("02 · Log in with a WebID", () =>
+    logInAndCreateInstance(app, account, `Markdown ${runId}`),
+  );
 
   await app.step("03 · Create a deck", async () => {
     await app.decks.openDeckCreator();
@@ -26,7 +32,11 @@ test("edit a card in Markdown and keep its line breaks @markdown", async ({ app,
   await app.step("04 · Add a card in Markdown with a code block", async () => {
     await app.deckBrowser.openFor(deck);
     await app.deckBrowser.openCardCreator();
-    await app.cardCreator.addMarkdownCard(added, "`git clone`", "git clone https://example.org/repo.git");
+    await app.cardCreator.addMarkdownCard(
+      added,
+      "`git clone`",
+      "git clone https://example.org/repo.git",
+    );
     await app.cardCreator.back();
   });
 

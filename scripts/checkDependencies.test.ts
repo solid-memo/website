@@ -28,11 +28,21 @@ const LOCK: Lockfile = {
       version: "2.1.0",
       dependencies: { shared: "^1.0.0", nested: "^1.0.0-beta.1" },
       optionalDependencies: { "platform-binary": "^1.0.0", "not-installed": "^1.0.0" },
-      peerDependencies: { peer: "^1.0.0", "optional-peer": "^1.0.0", "absent-optional-peer": "^1.0.0" },
-      peerDependenciesMeta: { "optional-peer": { optional: true }, "absent-optional-peer": { optional: true } },
+      peerDependencies: {
+        peer: "^1.0.0",
+        "optional-peer": "^1.0.0",
+        "absent-optional-peer": "^1.0.0",
+      },
+      peerDependenciesMeta: {
+        "optional-peer": { optional: true },
+        "absent-optional-peer": { optional: true },
+      },
     },
     // A version of its own under stable's folder wins over the hoisted one.
-    "node_modules/stable/node_modules/nested": { version: "1.0.0-beta.1", dependencies: { shared: "^1.0.0" } },
+    "node_modules/stable/node_modules/nested": {
+      version: "1.0.0-beta.1",
+      dependencies: { shared: "^1.0.0" },
+    },
     "node_modules/nested": { version: "1.0.0" },
     "node_modules/shared": { version: "1.2.3" },
     "node_modules/young": { version: "0.3.1", dependencies: { shared: "^1.0.0" } },
@@ -91,7 +101,9 @@ describe("dependencyProblems", () => {
   const DOC = "| Zazuko | `young` |";
 
   it("passes when every unready version is allowed and named in the page", () => {
-    expect(dependencyProblems(LOCK, ["apps/app"], { young: "why", nested: "why" }, `${DOC} \`nested\``)).toEqual([]);
+    expect(
+      dependencyProblems(LOCK, ["apps/app"], { young: "why", nested: "why" }, `${DOC} \`nested\``),
+    ).toEqual([]);
   });
 
   it("fails on an unready version that is not allowed", () => {
@@ -102,7 +114,12 @@ describe("dependencyProblems", () => {
 
   it("fails on an allowed package the page does not name, or that is no longer shipped unready", () => {
     expect(
-      dependencyProblems(LOCK, ["apps/app"], { young: "why", nested: "why", shared: "why" }, `${DOC} \`shared\``),
+      dependencyProblems(
+        LOCK,
+        ["apps/app"],
+        { young: "why", nested: "why", shared: "why" },
+        `${DOC} \`shared\``,
+      ),
     ).toEqual([
       "nested: allowed in scripts/checkDependencies.ts, but docs/vendor-code.md does not name it.",
       "shared: allowed in scripts/checkDependencies.ts, but no unready version of it is shipped; take it off.",
@@ -110,7 +127,9 @@ describe("dependencyProblems", () => {
   });
 
   it("fails on a dependency the lockfile lacks", () => {
-    const lock: Lockfile = { packages: { "apps/app": { name: "@x/app", dependencies: { gone: "^1.0.0" } } } };
+    const lock: Lockfile = {
+      packages: { "apps/app": { name: "@x/app", dependencies: { gone: "^1.0.0" } } },
+    };
     expect(dependencyProblems(lock, ["apps/app"], {}, "")).toEqual([
       "gone (@x/app): not in package-lock.json; run `npm install`.",
     ]);
@@ -122,15 +141,29 @@ describe("main", () => {
     const logs: string[] = [];
     const lock: Lockfile = {
       packages: {
-        "apps/web": { name: "@solid-memo/web", dependencies: Object.fromEntries(Object.keys(ALLOWED).map((name) => [name, "*"])) },
-        ...Object.fromEntries(Object.keys(ALLOWED).map((name) => [`node_modules/${name}`, { version: "0.1.0" }])),
+        "apps/web": {
+          name: "@solid-memo/web",
+          dependencies: Object.fromEntries(Object.keys(ALLOWED).map((name) => [name, "*"])),
+        },
+        ...Object.fromEntries(
+          Object.keys(ALLOWED).map((name) => [`node_modules/${name}`, { version: "0.1.0" }]),
+        ),
       },
     };
-    return { logs, lockfile: () => lock, vendorDoc: () => allowedInDoc, log: (message: string) => logs.push(message) };
+    return {
+      logs,
+      lockfile: () => lock,
+      vendorDoc: () => allowedInDoc,
+      log: (message: string) => logs.push(message),
+    };
   }
 
   it("says so and returns 0 when the app ships released or allowed versions", () => {
-    const io = fakeIo(Object.keys(ALLOWED).map((name) => `\`${name}\``).join(", "));
+    const io = fakeIo(
+      Object.keys(ALLOWED)
+        .map((name) => `\`${name}\``)
+        .join(", "),
+    );
     expect(main(io)).toBe(0);
     expect(io.logs).toEqual([
       "The app ships released versions only, and the allowed ones (docs/vendor-code.md#maturity).",
@@ -150,7 +183,9 @@ describe("the repository's app", () => {
     const process = { exitCode: undefined as number | string | null | undefined };
     run(process);
     expect(log.mock.calls).toEqual([
-      ["The app ships released versions only, and the allowed ones (docs/vendor-code.md#maturity)."],
+      [
+        "The app ships released versions only, and the allowed ones (docs/vendor-code.md#maturity).",
+      ],
     ]);
     expect(process.exitCode).toBe(0);
     log.mockRestore();

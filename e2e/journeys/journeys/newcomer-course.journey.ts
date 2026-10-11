@@ -9,11 +9,17 @@ import { logInAndCreateInstance } from "../flows/logIn.ts";
  * and the offer is gone (docs/courses.md#the-course-for-newcomers). The
  * journey reads the course's title from the offer, so it names none.
  */
-test("start the course for newcomers from an empty deck list @course", async ({ app, account, runId }) => {
+test("start the course for newcomers from an empty deck list @course", async ({
+  app,
+  account,
+  runId,
+}) => {
   let title = "";
 
   await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in with a WebID", () => logInAndCreateInstance(app, account, `Newcomer ${runId}`));
+  await app.step("02 · Log in with a WebID", () =>
+    logInAndCreateInstance(app, account, `Newcomer ${runId}`),
+  );
 
   await app.step("03 · The deck list offers the course for newcomers", async () => {
     await expect(app.decks.newcomerCourse).toBeVisible();

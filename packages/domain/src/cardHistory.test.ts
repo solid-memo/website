@@ -29,7 +29,10 @@ describe("deckAnswers", () => {
       answer(3, { deckUrl: "https://pod.example/a/catalog.ttl#deck-2" }),
     ];
     expect(deckAnswers(answers, upgraded)).toEqual([
-      answer(1, { cardUrl: `${upgraded.cardsDocumentUrl}#c-1`, chosenDistractor: `${upgraded.cardsDocumentUrl}#c-1-d1` }),
+      answer(1, {
+        cardUrl: `${upgraded.cardsDocumentUrl}#c-1`,
+        chosenDistractor: `${upgraded.cardsDocumentUrl}#c-1-d1`,
+      }),
       answer(2, { cardUrl: `${upgraded.cardsDocumentUrl}#c-1` }),
     ]);
   });
@@ -37,8 +40,17 @@ describe("deckAnswers", () => {
 
 describe("cardAnswers", () => {
   it("lists one card's answers, newest first", () => {
-    const answers = [answer(1), answer(3), answer(2, { cardUrl: `${CARDS}#c-2` }), answer(4, { id: "answer-0", answeredAt: answer(3).answeredAt })];
-    expect(cardAnswers(answers, `${CARDS}#c-1`).map((each) => each.id)).toEqual(["answer-3", "answer-0", "answer-1"]);
+    const answers = [
+      answer(1),
+      answer(3),
+      answer(2, { cardUrl: `${CARDS}#c-2` }),
+      answer(4, { id: "answer-0", answeredAt: answer(3).answeredAt }),
+    ];
+    expect(cardAnswers(answers, `${CARDS}#c-1`).map((each) => each.id)).toEqual([
+      "answer-3",
+      "answer-0",
+      "answer-1",
+    ]);
   });
 });
 
@@ -83,7 +95,12 @@ describe("lapseIndex", () => {
       Array.from({ length: count }, (_, n): Answer => {
         const day = Math.floor(n / 200);
         const studyDay = new Date(Date.UTC(2021, 0, 1 + day)).toISOString().slice(0, 10);
-        return answer(1, { id: `answer-${n}`, cardUrl: `${CARDS}#c-${(day * 7 + n) % 2_000}`, grade: (n % 6) as Answer["grade"], studyDay });
+        return answer(1, {
+          id: `answer-${n}`,
+          cardUrl: `${CARDS}#c-${(day * 7 + n) % 2_000}`,
+          grade: (n % 6) as Answer["grade"],
+          studyDay,
+        });
       });
     const years = answers(5 * 365 * 200);
     const index = lapseIndex(years);
@@ -91,10 +108,14 @@ describe("lapseIndex", () => {
     expect(index.lapses.size).toBe(2_000);
     // Four times the answers take about four times as long; work per answer
     // that grew with the answers would take sixteen.
-    const ratio = growth((count) => {
-      const some = years.slice(0, count);
-      return () => lapseIndex(some);
-    }, years.length / 8, 4);
+    const ratio = growth(
+      (count) => {
+        const some = years.slice(0, count);
+        return () => lapseIndex(some);
+      },
+      years.length / 8,
+      4,
+    );
     expect(ratio).toBeLessThan(10);
   });
 });

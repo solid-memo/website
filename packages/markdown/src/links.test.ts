@@ -3,7 +3,10 @@ import { liveLink } from "./links";
 
 describe("liveLink", () => {
   it("follows an absolute https URL, giving its host as the parser has it", () => {
-    expect(liveLink("https://example.org/a?b#c")).toEqual({ href: "https://example.org/a?b#c", host: "example.org" });
+    expect(liveLink("https://example.org/a?b#c")).toEqual({
+      href: "https://example.org/a?b#c",
+      host: "example.org",
+    });
     expect(liveLink("HTTPS://Bücher.example:8443")).toEqual({
       href: "https://xn--bcher-kva.example:8443/",
       host: "xn--bcher-kva.example:8443",

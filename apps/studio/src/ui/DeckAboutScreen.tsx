@@ -92,7 +92,13 @@ export function DeckAboutScreen({
           <DeckAboutSection deck={deck} busy={busy} onSave={onDescribe} />
         </section>
         <DeckProvenanceSection deck={deck} busy={busy} onSave={onProvenance} />
-        <DeckStudySection deck={deck} preferences={preferences} preferencesHref={preferencesHref} busy={busy} onSave={onStudy} />
+        <DeckStudySection
+          deck={deck}
+          preferences={preferences}
+          preferencesHref={preferencesHref}
+          busy={busy}
+          onSave={onStudy}
+        />
         <DeckLanguagesSection
           deck={deck}
           languages={languages}
@@ -102,7 +108,12 @@ export function DeckAboutScreen({
           onStateLanguages={onStateLanguages}
         />
         {course !== null && (
-          <CourseProgressSection course={course.course} unreadable={course.unreadable} busy={busy} onEdit={onCompletedChapters} />
+          <CourseProgressSection
+            course={course.course}
+            unreadable={course.unreadable}
+            busy={busy}
+            onEdit={onCompletedChapters}
+          />
         )}
       </ReadOnlyScope>
       <p class="hint" role="status">

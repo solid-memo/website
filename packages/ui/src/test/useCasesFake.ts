@@ -15,7 +15,10 @@ import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleIns
 export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
   const fake: UseCases = {
     restoreSession: vi.fn(async () => null),
-    startGuest: vi.fn(async () => ({ webId: "https://guest.solid-memo.invalid/profile/card#me", guest: true as const })),
+    startGuest: vi.fn(async () => ({
+      webId: "https://guest.solid-memo.invalid/profile/card#me",
+      guest: true as const,
+    })),
     discardGuest: vi.fn(async () => undefined),
     findGuestStudy: vi.fn(async () => null),
     transferGuestStudy: vi.fn(async () => ({
@@ -24,7 +27,12 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       tidied: true,
     })),
     planGuestMerge: vi.fn(async () => ({ decks: [], drafts: 0 })),
-    mergeGuestStudy: vi.fn(async (_session, _guest, target) => ({ ok: true as const, instance: target, added: [], tidied: true })),
+    mergeGuestStudy: vi.fn(async (_session, _guest, target) => ({
+      ok: true as const,
+      instance: target,
+      added: [],
+      tidied: true,
+    })),
     loginWithWebId: vi.fn(async () => undefined),
     loginWithProvider: vi.fn(async () => undefined),
     logout: vi.fn(async () => undefined),
@@ -66,7 +74,9 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     })),
     deleteInstance: vi.fn(async () => ({ keptFolder: null, keptReleases: false })),
     dataClassRegistrations: vi.fn(async () => ({
-      registrations: (["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const).map((dataClass) => ({
+      registrations: (
+        ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const
+      ).map((dataClass) => ({
         dataClass,
         index: "private" as const,
         registered: true,
@@ -82,19 +92,31 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     renameDeck: vi.fn(async (deck, title) => ({ ...deck, title })),
     // As the real ones relate to them: every listed deck at the top level, an edit made to that tree.
     listDeckTree: vi.fn(async (instanceUrl) => ({
-      children: (await fake.listDecks(instanceUrl)).map((deck) => ({ kind: "deck" as const, deck })),
+      children: (await fake.listDecks(instanceUrl)).map((deck) => ({
+        kind: "deck" as const,
+        deck,
+      })),
       readOnly: false,
     })),
-    newDeckGroup: vi.fn((instanceUrl, title) => ({ url: `${instanceUrl}catalog.ttl#group-fake`, title })),
-    editDeckTree: vi.fn(async (instanceUrl, edit) => applyDeckTreeEdit(await fake.listDeckTree(instanceUrl), edit)),
+    newDeckGroup: vi.fn((instanceUrl, title) => ({
+      url: `${instanceUrl}catalog.ttl#group-fake`,
+      title,
+    })),
+    editDeckTree: vi.fn(async (instanceUrl, edit) =>
+      applyDeckTreeEdit(await fake.listDeckTree(instanceUrl), edit),
+    ),
     setDeckDirection: vi.fn(async (deck, direction) => ({ ...deck, direction })),
     // As the real one does: keywords tidied, and left off when there are none.
     describeDeck: vi.fn(async (deck, about) => withAbout(deck, about)),
     setDeckPace: vi.fn(async (deck, pace) => ({ ...deck, ...pace })),
     // As the real one does: authors tidied, the license one offered.
     setDeckProvenance: vi.fn(async (deck, provenance) => withProvenance(deck, provenance)),
-    setDecksDirection: vi.fn(async (decks: readonly Deck[], direction) => decks.map((deck) => ({ ...deck, direction }))),
-    setDecksPace: vi.fn(async (decks: readonly Deck[], pace) => decks.map((deck) => ({ ...deck, ...pace }))),
+    setDecksDirection: vi.fn(async (decks: readonly Deck[], direction) =>
+      decks.map((deck) => ({ ...deck, direction })),
+    ),
+    setDecksPace: vi.fn(async (decks: readonly Deck[], pace) =>
+      decks.map((deck) => ({ ...deck, ...pace })),
+    ),
     removeDeck: vi.fn(async () => undefined),
     removeDecks: vi.fn(async () => undefined),
     listLibraryDecks: vi.fn(async () => []),
@@ -175,12 +197,21 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       throw new Error("editReleaseDraft fake not configured");
     }),
     deleteReleaseDraft: vi.fn(async () => undefined),
-    checkReleaseDraft: vi.fn(async (_draft, _check, _policy, options) => ({ rules: [], library: [], drops: [], markdown: [], shapes: options?.shapes === true ? [] : null })),
+    checkReleaseDraft: vi.fn(async (_draft, _check, _policy, options) => ({
+      rules: [],
+      library: [],
+      drops: [],
+      markdown: [],
+      shapes: options?.shapes === true ? [] : null,
+    })),
     diffReleaseDraft: vi.fn(async () => null),
     publishRelease: vi.fn(async (_draft, url) => ({ url, public: true })),
     makeReleasePublic: vi.fn(async () => undefined),
     isReleasePublic: vi.fn(async () => true),
-    downloadRelease: vi.fn(async () => ({ name: "release-v1.ttl", url: "https://solid-memo.com/decks/release/v1.ttl" })),
+    downloadRelease: vi.fn(async () => ({
+      name: "release-v1.ttl",
+      url: "https://solid-memo.com/decks/release/v1.ttl",
+    })),
     listPublishedReleases: vi.fn(async () => []),
     exportDeckFile: vi.fn(async () => undefined),
     openDeckFile: vi.fn(async () => null),
@@ -217,7 +248,9 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       publisher: { webId: `${new URL(instanceUrl).origin}/profile/card#me`, name: "Alice" },
     })),
     // As the real one does: of the catalog as it is read.
-    describeCatalog: vi.fn(async (instanceUrl, about) => describedCatalog((await fake.readCatalog(instanceUrl))!, about)),
+    describeCatalog: vi.fn(async (instanceUrl, about) =>
+      describedCatalog((await fake.readCatalog(instanceUrl))!, about),
+    ),
     getStudyQueue: vi.fn(async () => ({
       due: [],
       newPrompts: [],

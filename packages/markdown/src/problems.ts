@@ -70,7 +70,9 @@ export type MarkdownProblem =
 export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem[] {
   const inspected = inspectMarkdown(text);
   if (inspected === null)
-    return [text.length > MAX_CHARS ? { code: "tooLong", length: text.length } : { code: "tooComplex" }];
+    return [
+      text.length > MAX_CHARS ? { code: "tooLong", length: text.length } : { code: "tooComplex" },
+    ];
   const problems: MarkdownProblem[] = [];
   for (const note of inspected.notes) {
     switch (note.type) {
@@ -89,9 +91,11 @@ export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem
       }
       case "link": {
         const live = liveLink(note.url);
-        if (!rule.links) problems.push({ code: "link", source: note.source, autolink: note.autolink });
+        if (!rule.links)
+          problems.push({ code: "link", source: note.source, autolink: note.autolink });
         else if (live === null) problems.push({ code: "linkNotFollowed", url: note.url });
-        else if (!leadsTo(note.text, live.href)) problems.push({ code: "linkHost", text: note.text, host: live.host });
+        else if (!leadsTo(note.text, live.href))
+          problems.push({ code: "linkHost", text: note.text, host: live.host });
         const controls = hiddenControls(note.text + note.url);
         if (controls.length > 0) problems.push({ code: "hiddenControl", controls, in: "link" });
         break;

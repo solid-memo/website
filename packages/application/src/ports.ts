@@ -125,7 +125,10 @@ export interface InstanceRepository {
    * in the private index only. An index that cannot be read is left
    * out, and said to be unreadable.
    */
-  readDataClassRegistrations(args: { webId: string; instanceUrl: string }): Promise<DataClassRegistrations>;
+  readDataClassRegistrations(args: {
+    webId: string;
+    instanceUrl: string;
+  }): Promise<DataClassRegistrations>;
   /**
    * Add each registration readDataClassRegistrations finds missing,
    * titled `title`, one save per index (If-Match, read again and
@@ -273,7 +276,11 @@ export interface DeckRepository {
    * is left as it is. A card that no longer exists is skipped. How many
    * cards changed; nothing is written when none did.
    */
-  stateCardLanguages(deck: Deck, cardIds: readonly string[], languages: StatedLanguages): Promise<number>;
+  stateCardLanguages(
+    deck: Deck,
+    cardIds: readonly string[],
+    languages: StatedLanguages,
+  ): Promise<number>;
   /**
    * Write cards by fragment id, new or existing (an existing card keeps
    * its creation time and triples this app does not know; a new one is
@@ -290,7 +297,10 @@ export interface DeckRepository {
    */
   applyCardChanges(
     deck: Deck,
-    changes: { save: (CardContent & { id: string; retired?: true; createdAt?: string })[]; remove: string[] },
+    changes: {
+      save: (CardContent & { id: string; retired?: true; createdAt?: string })[];
+      remove: string[];
+    },
     options?: { whole?: boolean; version?: string },
   ): Promise<void>;
   /**
@@ -573,10 +583,7 @@ export interface PreferencesRepository {
    * instance has no preferences document yet.
    */
   getPreferences(instanceUrl: string): Promise<StoredPreferences | null>;
-  savePreferences(
-    instanceUrl: string,
-    preferences: StudyPreferences,
-  ): Promise<void>;
+  savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
   /**
    * For the format update: bring the preferences up to this app's format,
    * in place (unknown triples survive), in ONE save of the document made
@@ -600,7 +607,10 @@ export interface DigestRepository {
   /** null when the instance has none, or one this app cannot read. */
   readDigest(instanceUrl: string): Promise<InstanceDigest | null>;
   /** Change the stored digest: read, change, write only if unchanged meanwhile (else again). */
-  updateDigest(instanceUrl: string, change: (stored: InstanceDigest | null) => InstanceDigest): Promise<void>;
+  updateDigest(
+    instanceUrl: string,
+    change: (stored: InstanceDigest | null) => InstanceDigest,
+  ): Promise<void>;
 }
 
 /**
@@ -626,7 +636,11 @@ export interface AnswerLog {
    * still at `version` (undefined: read them); a month with no document
    * is at ABSENT_VERSION, with no answers.
    */
-  readMonthSince(instanceUrl: string, month: string, version: string | undefined): Promise<Since<Answer[]>>;
+  readMonthSince(
+    instanceUrl: string,
+    month: string,
+    version: string | undefined,
+  ): Promise<Since<Answer[]>>;
   /** Remove a deck's answers of a study day: what resetting the day undoes. */
   removeDay(instanceUrl: string, deckUrl: string, studyDay: string): Promise<void>;
 }
@@ -642,7 +656,11 @@ export type DocumentContext = "pod" | "draft" | "library";
 export interface ShapeValidator {
   validateDocument(url: string, context?: DocumentContext): Promise<DocumentReport>;
   /** The document's report unless it is still at `version` (undefined: check it). */
-  validateDocumentSince(url: string, version: string | undefined, context?: DocumentContext): Promise<Since<DocumentReport>>;
+  validateDocumentSince(
+    url: string,
+    version: string | undefined,
+    context?: DocumentContext,
+  ): Promise<Since<DocumentReport>>;
   /**
    * What the shapes say of a draft as the release it will be, published
    * at `asUrl` (docs/studio.md, The release check): the release as it is

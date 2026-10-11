@@ -15,19 +15,37 @@ describe("draftReleaseModel", () => {
     const model = draftReleaseModel(courseDraft());
     expect(model.url).toBe(DRAFT);
     expect(model.decks).toEqual([DRAFT]);
-    expect(model.types).toEqual([SM.Deck, "http://www.w3.org/ns/dcat#Dataset", "https://schema.org/Course"]);
-    expect(model.title).toEqual([{ kind: "literal", value: "Solid", language: "en", datatype: LANG_STRING }]);
-    expect(model.version).toEqual([{ kind: "literal", value: "1", language: "", datatype: `${XSD}string` }]);
+    expect(model.types).toEqual([
+      SM.Deck,
+      "http://www.w3.org/ns/dcat#Dataset",
+      "https://schema.org/Course",
+    ]);
+    expect(model.title).toEqual([
+      { kind: "literal", value: "Solid", language: "en", datatype: LANG_STRING },
+    ]);
+    expect(model.version).toEqual([
+      { kind: "literal", value: "1", language: "", datatype: `${XSD}string` },
+    ]);
     expect(model.studyDirection).toEqual([{ kind: "iri", value: SM.frontToBack }]);
     expect(model.inSeries).toEqual([{ kind: "iri", value: of("series") }]);
     expect(model.distribution).toEqual([{ kind: "iri", value: of("turtle") }]);
     expect(model.sources).toEqual([{ kind: "iri", value: "https://source.example/" }]);
     expect(model.activities).toEqual([{ iri: of("compilation"), generating: true }]);
-    expect(model.making).toEqual([{ iri: of("compilation"), used: ["https://source.example/"], comments: [], carried: false }]);
-    expect(model.sourceDetails).toEqual([
-      { iri: "https://source.example/", title: [{ kind: "literal", value: "Source", language: "", datatype: `${XSD}string` }], creator: [], license: [], comments: [] },
+    expect(model.making).toEqual([
+      { iri: of("compilation"), used: ["https://source.example/"], comments: [], carried: false },
     ]);
-    expect(draftReleaseModel(courseDraft({ ids: {}, activities: ["compilation"] })).making[0]!.carried).toBe(true);
+    expect(model.sourceDetails).toEqual([
+      {
+        iri: "https://source.example/",
+        title: [{ kind: "literal", value: "Source", language: "", datatype: `${XSD}string` }],
+        creator: [],
+        license: [],
+        comments: [],
+      },
+    ]);
+    expect(
+      draftReleaseModel(courseDraft({ ids: {}, activities: ["compilation"] })).making[0]!.carried,
+    ).toBe(true);
     expect(model.publisher).toEqual([]);
     expect(model.issued).toEqual([]);
     expect(model.chapters[0]).toEqual({
@@ -39,8 +57,19 @@ describe("draftReleaseModel", () => {
       positions: ["0"],
       reviewQuestions: [of("q-a-r01")],
     });
-    expect(model.steps[0]).toMatchObject({ iri: of("ch-a-1"), isPartOf: [of("ch-a")], positions: ["0"], checkedBy: [of("q-a-1a")] });
-    expect(model.cards[0]).toMatchObject({ iri: of("q-a-1a"), distractors: [{ kind: "iri", value: of("q-a-1a-d1") }, { kind: "iri", value: of("q-a-1a-d2") }] });
+    expect(model.steps[0]).toMatchObject({
+      iri: of("ch-a-1"),
+      isPartOf: [of("ch-a")],
+      positions: ["0"],
+      checkedBy: [of("q-a-1a")],
+    });
+    expect(model.cards[0]).toMatchObject({
+      iri: of("q-a-1a"),
+      distractors: [
+        { kind: "iri", value: of("q-a-1a-d1") },
+        { kind: "iri", value: of("q-a-1a-d2") },
+      ],
+    });
     expect(model.distractors.map((d) => [d.iri, d.typed, d.note.length])).toEqual([
       [of("q-a-1a-d1"), true, 0],
       [of("q-a-1a-d2"), true, 1],
@@ -51,7 +80,11 @@ describe("draftReleaseModel", () => {
     ]);
     expect(publishedIds(model, "card")).toEqual(["q-a-1a", "q-a-2a", "q-a-r01", "q-loose"]);
     // The draft's own outline holds together but for its chapter without a step and the questions without options.
-    expect(courseProblems(model).map((p) => p.code)).toEqual(["fewDistractors", "fewDistractors", "chapterWithoutStep"]);
+    expect(courseProblems(model).map((p) => p.code)).toEqual([
+      "fewDistractors",
+      "fewDistractors",
+      "chapterWithoutStep",
+    ]);
   });
 
   it("moves every subject to the release's address", () => {
@@ -79,7 +112,16 @@ describe("draftReleaseModel", () => {
         theme: ["https://theme.example/"],
       },
       cards: [
-        { id: "w1", data: { ...deck.cards[0]!.data, back: { "": "plain" }, textFormat: SM.markdown, distractor: [of("w1-x")], deprecated: true } },
+        {
+          id: "w1",
+          data: {
+            ...deck.cards[0]!.data,
+            back: { "": "plain" },
+            textFormat: SM.markdown,
+            distractor: [of("w1-x")],
+            deprecated: true,
+          },
+        },
       ],
       triples: [
         link(DRAFT, RDF_TYPE, "https://schema.org/Book"),
@@ -91,20 +133,36 @@ describe("draftReleaseModel", () => {
       ],
     };
     const model = draftReleaseModel(draft);
-    expect(model.types).toEqual([SM.Deck, "http://www.w3.org/ns/dcat#Dataset", "https://schema.org/Book"]);
+    expect(model.types).toEqual([
+      SM.Deck,
+      "http://www.w3.org/ns/dcat#Dataset",
+      "https://schema.org/Book",
+    ]);
     expect(model.decks).toEqual([DRAFT, of("other")]);
     expect(model.keywords.map((k) => [k.value, (k as { language: string }).language])).toEqual([
       ["a", "en"],
       ["b", "en"],
       ["c", "sv"],
     ]);
-    expect(model.issued).toEqual([{ kind: "literal", value: "2026-10-10T10:00:00.000Z", language: "", datatype: `${XSD}dateTime` }]);
+    expect(model.issued).toEqual([
+      {
+        kind: "literal",
+        value: "2026-10-10T10:00:00.000Z",
+        language: "",
+        datatype: `${XSD}dateTime`,
+      },
+    ]);
     expect(model.versionNotes.map((n) => n.value)).toEqual(["First"]);
     expect(model.publisher).toEqual([{ kind: "iri", value: of("me") }]);
     expect(model.themes).toEqual([{ kind: "iri", value: "https://theme.example/" }]);
     expect(model.studyDirection).toEqual([{ kind: "iri", value: SM.bidirectional }]);
-    expect(model.cards[0]).toMatchObject({ retired: true, back: [{ value: "plain", language: "", datatype: `${XSD}string` }] });
-    expect(model.distractors).toEqual([{ iri: of("w1-x"), typed: false, retired: false, text: [], note: [] }]);
+    expect(model.cards[0]).toMatchObject({
+      retired: true,
+      back: [{ value: "plain", language: "", datatype: `${XSD}string` }],
+    });
+    expect(model.distractors).toEqual([
+      { iri: of("w1-x"), typed: false, retired: false, text: [], note: [] },
+    ]);
     expect(model.distractorLinks).toEqual([
       { subject: of("w1"), object: { kind: "iri", value: of("w1-x") } },
       { subject: of("note"), object: { kind: "iri", value: of("w1") } },
@@ -131,7 +189,13 @@ describe("draftReleaseModel", () => {
   it("names a distractor two cards share once", () => {
     const deck = deckDraft();
     const shared = { ...deck.cards[0]!.data, distractor: [of("x")] };
-    const model = draftReleaseModel({ ...deck, cards: [{ id: "a", data: shared }, { id: "b", data: shared }] });
+    const model = draftReleaseModel({
+      ...deck,
+      cards: [
+        { id: "a", data: shared },
+        { id: "b", data: shared },
+      ],
+    });
     expect(model.distractors.map((d) => d.iri)).toEqual([of("x")]);
   });
 });

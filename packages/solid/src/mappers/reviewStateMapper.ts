@@ -41,7 +41,9 @@ export interface ReviewDocuments extends ReviewedDeck {
  * is another app's: never read as SM-2, written over or removed.
  */
 export function namesAnotherScheduler(thing: Thing): boolean {
-  return getTermAll(thing, SM.scheduler).some((term) => term.termType !== "NamedNode" || term.value !== SM.sm2);
+  return getTermAll(thing, SM.scheduler).some(
+    (term) => term.termType !== "NamedNode" || term.value !== SM.sm2,
+  );
 }
 
 /** What a subject says of the card, direction and scheduler it is of, in any format. */
@@ -65,7 +67,8 @@ function keyOfSubject(thing: Thing, deck: ReviewedDeck): ReviewKey | null {
   return reviewKeyOfSubject(asUrl(thing), deck, linksOf(thing));
 }
 
-const sameKey = (a: ReviewKey, b: ReviewKey) => a.cardId === b.cardId && a.direction === b.direction;
+const sameKey = (a: ReviewKey, b: ReviewKey) =>
+  a.cardId === b.cardId && a.direction === b.direction;
 
 /**
  * Map a reviews-document subject to a ReviewState of `deck`; null when the subject is not an
@@ -81,14 +84,23 @@ export function toReviewState(thing: Thing, deck: ReviewedDeck): ReviewState | n
   if (read === null) return null;
   const key = reviewKeyOfSubject(asUrl(thing), deck, linksOf(thing));
   if (key === null) return null;
-  return reviewStateFromRecord(key, read.storedVersion, migrate("reviewState", read.record, { subject: asUrl(thing) }));
+  return reviewStateFromRecord(
+    key,
+    read.storedVersion,
+    migrate("reviewState", read.record, { subject: asUrl(thing) }),
+  );
 }
 
 /** Each state of the document this app reads, with its subject: one per card and direction (pickReviewStates). */
-function readStates(dataset: SolidDataset, documents: ReviewDocuments): { url: string; key: ReviewKey; state: ReviewState }[] {
+function readStates(
+  dataset: SolidDataset,
+  documents: ReviewDocuments,
+): { url: string; key: ReviewKey; state: ReviewState }[] {
   const read = getThingAll(dataset).flatMap((thing) => {
     const state = toReviewState(thing, documents);
-    return state === null ? [] : [{ url: asUrl(thing), key: { cardId: state.cardId, direction: state.direction }, state }];
+    return state === null
+      ? []
+      : [{ url: asUrl(thing), key: { cardId: state.cardId, direction: state.direction }, state }];
   });
   return pickReviewStates(documents.reviewsDocumentUrl, read);
 }
@@ -106,12 +118,19 @@ export function toReviewStates(dataset: SolidDataset, documents: ReviewDocuments
  * by its sm:reviewOf, another scheduler's, another app's subject), a new
  * subject `#review-<id>`, which names its card.
  */
-function newSubjectFor(dataset: SolidDataset, documents: ReviewDocuments, key: ReviewKey, newId: () => string): string {
+function newSubjectFor(
+  dataset: SolidDataset,
+  documents: ReviewDocuments,
+  key: ReviewKey,
+  newId: () => string,
+): string {
   const named = namedReviewSubject(documents.reviewsDocumentUrl, key);
   const there = getThing(dataset, named);
   if (there === null) return named;
   const thereKey = keyOfSubject(there, documents);
-  return thereKey !== null && sameKey(thereKey, key) ? named : `${documents.reviewsDocumentUrl}#review-${newId()}`;
+  return thereKey !== null && sameKey(thereKey, key)
+    ? named
+    : `${documents.reviewsDocumentUrl}#review-${newId()}`;
 }
 
 /**
@@ -127,13 +146,19 @@ export function withReviewStates(
   states: readonly ReviewState[],
   newId: () => string,
 ): { dataset: SolidDataset; subjects: string[] } {
-  const subjectOf = new Map(readStates(dataset, documents).map(({ url, key }) => [reviewKeyOf(key), url]));
+  const subjectOf = new Map(
+    readStates(dataset, documents).map(({ url, key }) => [reviewKeyOf(key), url]),
+  );
   let updated = dataset;
   const subjects: string[] = [];
   for (const state of states) {
-    const subject = subjectOf.get(reviewKeyOf(state)) ?? newSubjectFor(updated, documents, state, newId);
+    const subject =
+      subjectOf.get(reviewKeyOf(state)) ?? newSubjectFor(updated, documents, state, newId);
     subjectOf.set(reviewKeyOf(state), subject);
-    updated = setThing(updated, toReviewStateThing(documents, state, getThing(updated, subject), subject));
+    updated = setThing(
+      updated,
+      toReviewStateThing(documents, state, getThing(updated, subject), subject),
+    );
     subjects.push(subject);
   }
   return { dataset: updated, subjects };
@@ -145,7 +170,11 @@ export function withReviewStates(
  * second state of the same card and direction, which the app never
  * read, stays.
  */
-export function withoutReadReviewStates(dataset: SolidDataset, documents: ReviewDocuments, keys: readonly ReviewKey[]): SolidDataset {
+export function withoutReadReviewStates(
+  dataset: SolidDataset,
+  documents: ReviewDocuments,
+  keys: readonly ReviewKey[],
+): SolidDataset {
   const removed = new Set(keys.map(reviewKeyOf));
   return readStates(dataset, documents)
     .filter(({ key }) => removed.has(reviewKeyOf(key)))
@@ -159,7 +188,11 @@ export function withoutReadReviewStates(dataset: SolidDataset, documents: Review
  * rule, read or not. Another scheduler's states, and any other subject,
  * stay.
  */
-export function withoutReviewStates(dataset: SolidDataset, documents: ReviewDocuments, keys: readonly ReviewKey[]): SolidDataset {
+export function withoutReviewStates(
+  dataset: SolidDataset,
+  documents: ReviewDocuments,
+  keys: readonly ReviewKey[],
+): SolidDataset {
   return getThingAll(dataset)
     .filter((thing) => {
       const key = keyOfSubject(thing, documents);
@@ -179,5 +212,10 @@ export function toReviewStateThing(
   existing: ThingPersisted | null,
   subjectUrl: string,
 ): ThingPersisted {
-  return recordThing(subjectUrl, REVIEW_STATE_V2, reviewStateToRecord(state, documents.cardsDocumentUrl), existing);
+  return recordThing(
+    subjectUrl,
+    REVIEW_STATE_V2,
+    reviewStateToRecord(state, documents.cardsDocumentUrl),
+    existing,
+  );
 }

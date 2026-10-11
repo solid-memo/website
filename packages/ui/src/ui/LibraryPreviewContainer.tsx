@@ -33,9 +33,7 @@ export function LibraryPreviewContainer({
     queryFn: () => useCases.listLibraryCards(deck),
   });
   const [first] = useState(random);
-  const [shown, setShown] = useState<{ index: number; turn: number } | null>(
-    null,
-  );
+  const [shown, setShown] = useState<{ index: number; turn: number } | null>(null);
 
   if (cardsQuery.error) {
     return <ErrorMessage error={errorText(cardsQuery.error)} />;

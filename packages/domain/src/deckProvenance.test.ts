@@ -21,7 +21,12 @@ const deck: Deck = {
 
 describe("withProvenance", () => {
   it("replaces the authors, tidied, and the license", () => {
-    expect(withProvenance(deck, { authors: ["  Ada  Lovelace ", "Alan Turing<alan@example.org>", " "], license: CC0 })).toEqual({
+    expect(
+      withProvenance(deck, {
+        authors: ["  Ada  Lovelace ", "Alan Turing<alan@example.org>", " "],
+        license: CC0,
+      }),
+    ).toEqual({
       ...deck,
       authors: ["Ada  Lovelace", "Alan Turing <alan@example.org>"],
       license: CC0,
@@ -41,7 +46,9 @@ describe("withProvenance", () => {
   });
 
   it("refuses an author with an address but no name", () => {
-    expect(() => withProvenance(deck, { authors: ["<ada@example.org>"] })).toThrow(new AppError("authorEmpty"));
+    expect(() => withProvenance(deck, { authors: ["<ada@example.org>"] })).toThrow(
+      new AppError("authorEmpty"),
+    );
   });
 
   it("refuses an author named twice, as the same agent node would hold both", () => {

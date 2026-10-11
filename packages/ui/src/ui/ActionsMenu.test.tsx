@@ -1,14 +1,30 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { useState } from "preact/hooks";
-import { ActionsMenu, MENU_EDGE, MENU_GAP, MenuCheckbox, MenuGroup, MenuItem, MenuLink, MenuSeparator, placeMenu } from "./ActionsMenu";
+import {
+  ActionsMenu,
+  MENU_EDGE,
+  MENU_GAP,
+  MenuCheckbox,
+  MenuGroup,
+  MenuItem,
+  MenuLink,
+  MenuSeparator,
+  placeMenu,
+} from "./ActionsMenu";
 
 function Harness({ onFirst, onLast }: { onFirst: () => void; onLast: () => void }) {
   const [open, setOpen] = useState(false);
   return (
     <>
       <button type="button">before</button>
-      <ActionsMenu label="Actions for Kana" buttonClass="row-menu" open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}>
+      <ActionsMenu
+        label="Actions for Kana"
+        buttonClass="row-menu"
+        open={open}
+        onOpen={() => setOpen(true)}
+        onClose={() => setOpen(false)}
+      >
         <MenuLink href="#/elsewhere">Preferences</MenuLink>
         <MenuItem onSelect={onFirst}>Rename</MenuItem>
         <MenuItem disabled onSelect={onFirst}>
@@ -53,7 +69,14 @@ describe("ActionsMenu", () => {
 
   it("shows a text in place of its icon, when given one, which its name holds", () => {
     render(
-      <ActionsMenu label="Switch instance: Deck set A" text="Deck set A" buttonClass="switcher" open={false} onOpen={() => undefined} onClose={() => undefined}>
+      <ActionsMenu
+        label="Switch instance: Deck set A"
+        text="Deck set A"
+        buttonClass="switcher"
+        open={false}
+        onOpen={() => undefined}
+        onClose={() => undefined}
+      >
         <MenuLink href="#/elsewhere">Deck set B</MenuLink>
       </ActionsMenu>,
     );
@@ -73,16 +96,17 @@ describe("ActionsMenu", () => {
     expect(opened.parentElement).toBe(document.body);
     expect(opened).toHaveAttribute("data-no-drag");
     expect(item("Preferences")).toHaveFocus();
-    expect(within(opened).getAllByRole("menuitem").map((each) => each.textContent)).toEqual([
-      "Preferences",
-      "Rename",
-      "Move up",
-      "Grammar",
-      "Delete",
-    ]);
-    for (const each of within(opened).getAllByRole("menuitem")) expect(each).toHaveAttribute("tabindex", "-1");
+    expect(
+      within(opened)
+        .getAllByRole("menuitem")
+        .map((each) => each.textContent),
+    ).toEqual(["Preferences", "Rename", "Move up", "Grammar", "Delete"]);
+    for (const each of within(opened).getAllByRole("menuitem"))
+      expect(each).toHaveAttribute("tabindex", "-1");
     expect(within(opened).getByRole("separator")).toBeInTheDocument();
-    expect(within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem")).toHaveTextContent("Grammar");
+    expect(
+      within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem"),
+    ).toHaveTextContent("Grammar");
     expect(item("Grammar").style.getPropertyValue("--depth")).toBe("1");
     expect(item("Delete")).toHaveClass("danger");
     expect(item("Rename")).not.toHaveClass("danger");
@@ -206,7 +230,14 @@ describe("ActionsMenu", () => {
       const [open, setOpen] = useState(false);
       const [shown, setShown] = useState(true);
       return (
-        <ActionsMenu label="Columns" text="Columns" buttonClass="" open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}>
+        <ActionsMenu
+          label="Columns"
+          text="Columns"
+          buttonClass=""
+          open={open}
+          onOpen={() => setOpen(true)}
+          onClose={() => setOpen(false)}
+        >
           <MenuCheckbox checked={shown} onChange={setShown}>
             Due
           </MenuCheckbox>
@@ -220,7 +251,10 @@ describe("ActionsMenu", () => {
     expect(due).toHaveFocus();
     expect(due).toHaveAttribute("aria-checked", "true");
     fireEvent.click(due);
-    expect(screen.getByRole("menuitemcheckbox", { name: "Due" })).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByRole("menuitemcheckbox", { name: "Due" })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
     expect(menu()).not.toBeNull();
     fireEvent.keyDown(due, { key: "ArrowDown" });
     expect(item("Reset")).toHaveFocus();
@@ -290,20 +324,31 @@ describe("placeMenu", () => {
   const size = { width: 200, height: 300 };
 
   it("puts the menu under its button, its right edge on the button's", () => {
-    expect(placeMenu({ top: 56, bottom: 100, right: 300 }, size, viewport)).toEqual({ top: 100 + MENU_GAP, left: 100 });
+    expect(placeMenu({ top: 56, bottom: 100, right: 300 }, size, viewport)).toEqual({
+      top: 100 + MENU_GAP,
+      left: 100,
+    });
   });
 
   it("keeps it inside the viewport's left and right edges", () => {
     expect(placeMenu({ top: 56, bottom: 100, right: 120 }, size, viewport).left).toBe(MENU_EDGE);
-    expect(placeMenu({ top: 56, bottom: 100, right: 400 }, size, viewport).left).toBe(320 - MENU_EDGE - 200);
+    expect(placeMenu({ top: 56, bottom: 100, right: 400 }, size, viewport).left).toBe(
+      320 - MENU_EDGE - 200,
+    );
   });
 
   it("puts it above its button when there is no room below, and there is above", () => {
-    expect(placeMenu({ top: 500, bottom: 544, right: 300 }, size, viewport).top).toBe(500 - MENU_GAP - 300);
+    expect(placeMenu({ top: 500, bottom: 544, right: 300 }, size, viewport).top).toBe(
+      500 - MENU_GAP - 300,
+    );
   });
 
   it("keeps it inside the viewport when there is room on neither side", () => {
-    expect(placeMenu({ top: 250, bottom: 294, right: 300 }, size, viewport).top).toBe(600 - MENU_EDGE - 300);
-    expect(placeMenu({ top: 250, bottom: 294, right: 300 }, { width: 200, height: 700 }, viewport).top).toBe(MENU_EDGE);
+    expect(placeMenu({ top: 250, bottom: 294, right: 300 }, size, viewport).top).toBe(
+      600 - MENU_EDGE - 300,
+    );
+    expect(
+      placeMenu({ top: 250, bottom: 294, right: 300 }, { width: 200, height: 700 }, viewport).top,
+    ).toBe(MENU_EDGE);
   });
 });

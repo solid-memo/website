@@ -58,7 +58,9 @@ export function DeckInsightScreen({
 
       <h3>{t("studio.insight.forecastHeading")}</h3>
       <p class="hint">
-        {t(ownCap ? "studio.insight.capDeck" : "studio.insight.capInstance", { max: insight.maxReviewsPerDay })}
+        {t(ownCap ? "studio.insight.capDeck" : "studio.insight.capInstance", {
+          max: insight.maxReviewsPerDay,
+        })}
       </p>
       <BarChart
         caption={t("studio.insight.forecast", { count: forecast.length })}
@@ -66,7 +68,11 @@ export function DeckInsightScreen({
         bars={forecast.map((day) => ({
           key: day.studyDay,
           value: day.reviews,
-          text: t("studio.insight.forecastDay", { date: formatDate(day.studyDay), reviews: day.reviews, due: day.due }),
+          text: t("studio.insight.forecastDay", {
+            date: formatDate(day.studyDay),
+            reviews: day.reviews,
+            due: day.due,
+          }),
         }))}
         prompt={t("statistics.pointAtDay")}
       >
@@ -117,7 +123,9 @@ export function DeckInsightScreen({
 
       <h3>{t("studio.insight.lapsesHeading")}</h3>
       <p class="hint">
-        {lapses.since === null ? t("studio.insight.noAnswers") : t("studio.insight.lapsesSince", { month: formatMonth(lapses.since) })}
+        {lapses.since === null
+          ? t("studio.insight.noAnswers")
+          : t("studio.insight.lapsesSince", { month: formatMonth(lapses.since) })}
       </p>
       <p class="hint">{t("studio.insight.leechHint", { count: LEECH_LAPSES })}</p>
       {leeches.length === 0 ? (

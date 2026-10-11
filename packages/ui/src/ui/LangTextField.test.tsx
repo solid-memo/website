@@ -61,7 +61,12 @@ describe("textOfDraft", () => {
   });
 
   it("clears the text in every language with its main text", () => {
-    expect(textOfDraft([{ id: 0, value: " ", tag: "sv" }, { id: 1, value: "Capitals", tag: "en" }])).toEqual({ text: {} });
+    expect(
+      textOfDraft([
+        { id: 0, value: " ", tag: "sv" },
+        { id: 1, value: "Capitals", tag: "en" },
+      ]),
+    ).toEqual({ text: {} });
   });
 
   it("names the text whose language is still to choose", () => {
@@ -161,7 +166,9 @@ describe("LangTextField", () => {
     // English on an English page, and text in no language, are marked with none.
     expect(screen.getByLabelText("Text in English")).not.toHaveAttribute("lang");
     expect(screen.getByLabelText(/^Text in No language/)).not.toHaveAttribute("lang");
-    expect(screen.getByLabelText("Text in English")).toHaveAccessibleDescription("Language: English");
+    expect(screen.getByLabelText("Text in English")).toHaveAccessibleDescription(
+      "Language: English",
+    );
   });
 
   it("shows its hint right under the main text, ahead of the main text's language", () => {
@@ -182,9 +189,9 @@ describe("LangTextField", () => {
     const note = screen.getByLabelText("Note");
     const hint = screen.getByText("Shown under the front");
     expect(note.nextElementSibling).toBe(hint);
-    expect(hint.compareDocumentPosition(screen.getByRole("button", { name: "Language: English" }))).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
+    expect(
+      hint.compareDocumentPosition(screen.getByRole("button", { name: "Language: English" })),
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(note).toHaveAccessibleDescription("Language: English Shown under the front");
   });
 
@@ -216,7 +223,9 @@ describe("LangTextField", () => {
 
   it("does nothing on Ctrl+Enter in a textarea outside a form", () => {
     renderField({ initial: draftOf({ en: "Alone" }, ["en"]), multiline: true });
-    expect(fireEvent.keyDown(screen.getByLabelText("Name"), { key: "Enter", ctrlKey: true })).toBe(false);
+    expect(fireEvent.keyDown(screen.getByLabelText("Name"), { key: "Enter", ctrlKey: true })).toBe(
+      false,
+    );
   });
 
   it("retags the text without retyping it", () => {
@@ -227,36 +236,53 @@ describe("LangTextField", () => {
   });
 
   it("refuses a language another text has, at the picker that chose it", () => {
-    const { onText } = renderField({ initial: draftOf({ en: "Capitals", sv: "Huvudstäder" }, ["en"]), translationsOpen: true });
+    const { onText } = renderField({
+      initial: draftOf({ en: "Capitals", sv: "Huvudstäder" }, ["en"]),
+      translationsOpen: true,
+    });
     choose("Language: English", "Swedish — svenska (sv)");
     expect(onText).not.toHaveBeenCalled();
     const error = document.getElementById("name-taken")!;
     expect(error).toHaveTextContent("There is already text in Swedish. Edit or remove it first.");
-    const picker = document.getElementById(languageButtonId("name", { id: 0, value: "", tag: null }))!;
+    const picker = document.getElementById(
+      languageButtonId("name", { id: 0, value: "", tag: null }),
+    )!;
     expect(picker).toHaveAttribute("aria-invalid", "true");
-    expect(picker).toHaveAccessibleDescription("There is already text in Swedish. Edit or remove it first.");
+    expect(picker).toHaveAccessibleDescription(
+      "There is already text in Swedish. Edit or remove it first.",
+    );
     // Changing the text clears it.
     fireEvent.input(screen.getByLabelText("Name"), { target: { value: "Capital cities" } });
     expect(error).toHaveTextContent("");
   });
 
   it("adds a translation, its language chosen at its picker, which takes the focus", () => {
-    const { text } = renderField({ initial: draftOf({ en: "Capitals" }, ["en"]), translationsOpen: true });
+    const { text } = renderField({
+      initial: draftOf({ en: "Capitals" }, ["en"]),
+      translationsOpen: true,
+    });
     const toggle = screen.getByRole("button", { name: "Translations (0)" });
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     fireEvent.click(screen.getByRole("button", { name: "Add a translation" }));
     expect(screen.getByRole("button", { name: "Translations (1)" })).toBeInTheDocument();
-    const picker = document.getElementById(languageButtonId("name", { id: 1, value: "", tag: null }))!;
+    const picker = document.getElementById(
+      languageButtonId("name", { id: 1, value: "", tag: null }),
+    )!;
     expect(picker).toHaveFocus();
     expect(picker).toHaveTextContent("Language: not stated");
-    fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), { target: { value: "Huvudstäder" } });
+    fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), {
+      target: { value: "Huvudstäder" },
+    });
     choose("Language: not stated", "Swedish — svenska (sv)");
     expect(text()).toEqual({ en: "Capitals", sv: "Huvudstäder" });
     expect(screen.getByLabelText("Text in Swedish")).toHaveAttribute("lang", "sv");
   });
 
   it("removes a translation, focus going back to Add", () => {
-    const { text } = renderField({ initial: draftOf({ en: "Capitals", sv: "Huvudstäder" }, ["en"]), translationsOpen: true });
+    const { text } = renderField({
+      initial: draftOf({ en: "Capitals", sv: "Huvudstäder" }, ["en"]),
+      translationsOpen: true,
+    });
     fireEvent.click(screen.getByRole("button", { name: "Remove the Swedish text" }));
     expect(text()).toEqual({ en: "Capitals" });
     expect(screen.getByRole("button", { name: "Add a translation" })).toHaveFocus();
@@ -266,11 +292,19 @@ describe("LangTextField", () => {
   });
 
   it("keeps translations folded away unless asked, or one needs its language", () => {
-    renderField({ initial: [{ id: 0, value: "Capitals", tag: "en" }, { id: 1, value: "Huvudstäder", tag: null }], missingId: 1 });
+    renderField({
+      initial: [
+        { id: 0, value: "Capitals", tag: "en" },
+        { id: 1, value: "Huvudstäder", tag: null },
+      ],
+      missingId: 1,
+    });
     // Shown, its picker marked, for the language it needs.
     const toggle = screen.getByRole("button", { name: "Translations (1)" });
     expect(toggle).toHaveAttribute("aria-expanded", "true");
-    const picker = document.getElementById(languageButtonId("name", { id: 1, value: "", tag: null }))!;
+    const picker = document.getElementById(
+      languageButtonId("name", { id: 1, value: "", tag: null }),
+    )!;
     expect(picker).toHaveAttribute("aria-invalid", "true");
     expect(picker).toHaveAttribute("aria-describedby", "form-error");
   });
@@ -288,7 +322,10 @@ describe("LangTextField", () => {
   });
 
   it("shows the same words in English and another language as a translation, edited on its own", () => {
-    const { text } = renderField({ initial: draftOf({ en: "Glosor", sv: "Glosor" }, ["sv"]), translationsOpen: true });
+    const { text } = renderField({
+      initial: draftOf({ en: "Glosor", sv: "Glosor" }, ["sv"]),
+      translationsOpen: true,
+    });
     expect(screen.getByLabelText("Name")).toHaveValue("Glosor");
     expect(screen.getByLabelText("Text in English")).toHaveValue("Glosor");
     expect(screen.queryByRole("listitem")).toBeNull();
@@ -297,7 +334,10 @@ describe("LangTextField", () => {
   });
 
   it("changes no language while its form saves", () => {
-    const { onText } = renderField({ initial: draftOf({ en: "Glosor", sv: "Glosor" }, ["sv"]), disabled: true });
+    const { onText } = renderField({
+      initial: draftOf({ en: "Glosor", sv: "Glosor" }, ["sv"]),
+      disabled: true,
+    });
     const picker = screen.getByRole("button", { name: "Language: Swedish" });
     expect(picker).toHaveAttribute("aria-disabled", "true");
     fireEvent.click(picker);
@@ -306,7 +346,11 @@ describe("LangTextField", () => {
   });
 
   it("marks the main text invalid when the form says so, and only then", () => {
-    renderField({ initial: draftOf({ en: "Capitals", sv: "Huvudstäder" }, ["en"]), translationsOpen: true, invalid: true });
+    renderField({
+      initial: draftOf({ en: "Capitals", sv: "Huvudstäder" }, ["en"]),
+      translationsOpen: true,
+      invalid: true,
+    });
     expect(screen.getByLabelText("Name")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText("Text in Swedish")).not.toHaveAttribute("aria-invalid");
   });

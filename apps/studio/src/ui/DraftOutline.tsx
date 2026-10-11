@@ -6,7 +6,11 @@ import type { LangText } from "@solid-memo/domain/langText";
 import { isPublished, questionsOfStep } from "@solid-memo/domain/release/courseIds";
 import { draftCardOf, draftOutline, outlineMove } from "@solid-memo/domain/release/draftOutline";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import type { DraftChange, DraftRefusal, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import type {
+  DraftChange,
+  DraftRefusal,
+  ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import { ActionsMenu, MenuItem, MenuSeparator } from "@solid-memo/ui/ActionsMenu";
 import { cardName, plainDataText } from "@solid-memo/ui/DataText";
 import { DRAG_CLASS, type RowDrag } from "@solid-memo/ui/DeckRow";
@@ -74,15 +78,19 @@ export function DraftOutline({
   const { ask, dialog } = useConfirm();
   const badge = (id: string, name: string) => {
     const found = problems.get(id);
-    return found === undefined ? null : <ProblemBadge count={found.length} name={name} href={badgeHref?.(found[0]!) ?? checkHref} />;
+    return found === undefined ? null : (
+      <ProblemBadge count={found.length} name={name} href={badgeHref?.(found[0]!) ?? checkHref} />
+    );
   };
   const current = (key: string) => (key === currentKey ? "page" : undefined);
   const listRef = useRef<HTMLDivElement>(null);
   const [menu, setMenu] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const outline = draftOutline(draft);
-  const chapterTitle = (id: string): LangText => draft.chapters.find((node) => node.id === id)!.data.title ?? { "": id };
-  const stepLabel = (chapter: number, step: number) => t("studio.outline.stepNumber", { chapter: chapter + 1, step: step + 1 });
+  const chapterTitle = (id: string): LangText =>
+    draft.chapters.find((node) => node.id === id)!.data.title ?? { "": id };
+  const stepLabel = (chapter: number, step: number) =>
+    t("studio.outline.stepNumber", { chapter: chapter + 1, step: step + 1 });
   const nodes: OutlineNode[] = outline.map(({ chapter, steps }, at) => ({
     key: chapter.id,
     title: chapterTitle(chapter.id),
@@ -107,7 +115,11 @@ export function DraftOutline({
 
   /** A drop: the outline's rules make no group, so it is a place, or into a chapter. */
   function dropped(source: string, target: DropTarget) {
-    move(source, (target as Exclude<DropTarget, { kind: "combine" }>).to, drag.ghostRef.current!.getBoundingClientRect());
+    move(
+      source,
+      (target as Exclude<DropTarget, { kind: "combine" }>).to,
+      drag.ghostRef.current!.getBoundingClientRect(),
+    );
   }
 
   const drag = useDragReorder({
@@ -118,7 +130,9 @@ export function DraftOutline({
     onCancel: () => setAnnouncement(t("studio.outline.dragCancelled")),
     rules: OUTLINE_RULES,
     describe: (label: GapLabel) =>
-      t(label.kind === "in" ? "studio.outline.inChapter" : "studio.outline.afterChapter", { chapter: readerText(chapterTitle(label.group)) }),
+      t(label.kind === "in" ? "studio.outline.inChapter" : "studio.outline.afterChapter", {
+        chapter: readerText(chapterTitle(label.group)),
+      }),
   });
   const dragging = drag.feedback.phase === "dragging";
   if (dragging) frozen.current ??= nodes;
@@ -137,7 +151,13 @@ export function DraftOutline({
     return (
       <>
         <MenuSeparator />
-        <MenuItem disabled={readOnly} onSelect={() => onEdit([{ kind: "retire", of, id }]) === null && setAnnouncement(t("studio.outline.retired", { name }))}>
+        <MenuItem
+          disabled={readOnly}
+          onSelect={() =>
+            onEdit([{ kind: "retire", of, id }]) === null &&
+            setAnnouncement(t("studio.outline.retired", { name }))
+          }
+        >
           {t("studio.draftEdit.retire")}
         </MenuItem>
         <MenuItem
@@ -149,7 +169,8 @@ export function DraftOutline({
               text: t(`studio.draftEdit.deleteConfirm.${of}`, { name }),
               action: t("studio.draftEdit.delete"),
               onConfirm: () => {
-                if (onEdit([{ kind: "delete", of, id }]) === null) setAnnouncement(t("studio.outline.deleted", { name }));
+                if (onEdit([{ kind: "delete", of, id }]) === null)
+                  setAnnouncement(t("studio.outline.deleted", { name }));
               },
             })
           }
@@ -184,7 +205,12 @@ export function DraftOutline({
 
   return (
     <div class="draft-outline">
-      <div class="deck-tree" ref={listRef} data-dragging={dragging ? "" : undefined} {...drag.containerProps}>
+      <div
+        class="deck-tree"
+        ref={listRef}
+        data-dragging={dragging ? "" : undefined}
+        {...drag.containerProps}
+      >
         {shown.length === 0 ? (
           <p>{t("studio.outline.empty")}</p>
         ) : (
@@ -193,17 +219,31 @@ export function DraftOutline({
               const name = readerText(chapter.title);
               const steps = chapter.children!;
               return (
-                <li key={chapter.key} class={`deck-group${dragging && drag.feedback.source === chapter.key ? " drag-source" : ""}`}>
+                <li
+                  key={chapter.key}
+                  class={`deck-group${dragging && drag.feedback.source === chapter.key ? " drag-source" : ""}`}
+                >
                   <div
-                    class={dragOf(chapter.key) === undefined ? "deck-group-header" : `deck-group-header ${DRAG_CLASS[dragOf(chapter.key)!]}`}
+                    class={
+                      dragOf(chapter.key) === undefined
+                        ? "deck-group-header"
+                        : `deck-group-header ${DRAG_CLASS[dragOf(chapter.key)!]}`
+                    }
                     data-row-key={chapter.key}
                     style="--depth: 0"
                   >
-                    <a class="deck-open" href={chapterHref(chapter.key)} aria-current={current(chapter.key)} draggable={false}>
+                    <a
+                      class="deck-open"
+                      href={chapterHref(chapter.key)}
+                      aria-current={current(chapter.key)}
+                      draggable={false}
+                    >
                       <ReaderText text={chapter.title} />
                     </a>
                     {badge(chapter.key, name)}
-                    <span class="hint">{t("studio.outline.stepCount", { count: steps.length })}</span>
+                    <span class="hint">
+                      {t("studio.outline.stepCount", { count: steps.length })}
+                    </span>
                     {rowMenu(chapter.key, name, "chapter")}
                   </div>
                   {steps.length === 0 ? (
@@ -219,23 +259,43 @@ export function DraftOutline({
                         return (
                           <li
                             key={step.key}
-                            class={dragOf(step.key) === undefined ? "deck-row outline-step" : `deck-row outline-step ${DRAG_CLASS[dragOf(step.key)!]}`}
+                            class={
+                              dragOf(step.key) === undefined
+                                ? "deck-row outline-step"
+                                : `deck-row outline-step ${DRAG_CLASS[dragOf(step.key)!]}`
+                            }
                             data-row-key={step.key}
                             style="--depth: 1"
                           >
                             <div class="outline-step-text">
-                              <a class="deck-open" href={stepHref(step.key)} aria-current={current(step.key)} draggable={false}>
+                              <a
+                                class="deck-open"
+                                href={stepHref(step.key)}
+                                aria-current={current(step.key)}
+                                draggable={false}
+                              >
                                 {label}
                               </a>
                               {badge(step.key, label)}
-                              <span class="hint">{theory === "" ? t("studio.outline.noTheory") : plainDataText(theory, isMarkdown(data.textFormat), 80)}</span>
+                              <span class="hint">
+                                {theory === ""
+                                  ? t("studio.outline.noTheory")
+                                  : plainDataText(theory, isMarkdown(data.textFormat), 80)}
+                              </span>
                               <ul class="outline-questions">
                                 {questionsOfStep(draft, step.key).map((card) => {
                                   const found = draftCardOf(draft, card);
-                                  const question = found === null ? card : cardName({ ...found.content, id: card }, readerText);
+                                  const question =
+                                    found === null
+                                      ? card
+                                      : cardName({ ...found.content, id: card }, readerText);
                                   return (
                                     <li key={card}>
-                                      <a href={questionHref(card)} aria-current={current(card)} draggable={false}>
+                                      <a
+                                        href={questionHref(card)}
+                                        aria-current={current(card)}
+                                        draggable={false}
+                                      >
                                         {question}
                                       </a>
                                       {badge(card, question)}

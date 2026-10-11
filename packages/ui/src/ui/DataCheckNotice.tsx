@@ -40,7 +40,10 @@ export function DataCheckNotice({
       : policy === "block-subject"
         ? setAside.length === 0
           ? t("dataCheckNotice.restKeepsWorking")
-          : tx("dataCheckNotice.setAside", { names: <ReaderTexts texts={setAside} />, count: setAside.length })
+          : tx("dataCheckNotice.setAside", {
+              names: <ReaderTexts texts={setAside} />,
+              count: setAside.length,
+            })
         : t("dataCheckNotice.keepsWorking");
   return (
     <div class="warning data-check" role="region" aria-label={t("dataCheckNotice.region")}>

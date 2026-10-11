@@ -39,7 +39,10 @@ describe("FindableContainer", () => {
         .fn<UseCases["dataClassRegistrations"]>()
         .mockResolvedValueOnce(someMissing)
         .mockResolvedValue({
-          registrations: someMissing.registrations.map((registration) => ({ ...registration, registered: true })),
+          registrations: someMissing.registrations.map((registration) => ({
+            ...registration,
+            registered: true,
+          })),
           privateIndexMissing: false,
           unreadableIndexes: [],
         }),
@@ -70,14 +73,18 @@ describe("FindableContainer", () => {
   it("says why review states and answers are not registered without a private type index", async () => {
     const useCases = makeUseCasesFake({
       dataClassRegistrations: vi.fn(async () => ({
-        registrations: [{ dataClass: "instance" as const, index: "public" as const, registered: true }],
+        registrations: [
+          { dataClass: "instance" as const, index: "public" as const, registered: true },
+        ],
         privateIndexMissing: true,
         unreadableIndexes: [],
       })),
     });
     renderContainer(useCases);
     expect(
-      await screen.findByText(/so they are only ever registered in your private type index. You have none/),
+      await screen.findByText(
+        /so they are only ever registered in your private type index. You have none/,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText("Everything is registered.")).toBeInTheDocument();
   });
@@ -85,7 +92,9 @@ describe("FindableContainer", () => {
   it("says which type index could not be read", async () => {
     const useCases = makeUseCasesFake({
       dataClassRegistrations: vi.fn(async () => ({
-        registrations: [{ dataClass: "instance" as const, index: "public" as const, registered: true }],
+        registrations: [
+          { dataClass: "instance" as const, index: "public" as const, registered: true },
+        ],
         privateIndexMissing: false,
         unreadableIndexes: ["private" as const],
       })),

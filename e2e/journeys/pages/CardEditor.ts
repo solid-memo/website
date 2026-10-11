@@ -14,12 +14,17 @@ export class CardEditor extends Screen {
     await this.intent(`Open the card ${front}`, async () => {
       const table = this.page.getByRole("main").getByRole("table");
       await table.getByRole("link", { name: new RegExp(`^${escapeRegExp(front)}`) }).click();
-      await expect(this.page.getByRole("heading", { name: this.t("card.heading"), exact: true })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("card.heading"), exact: true }),
+      ).toBeVisible();
     });
   }
 
   get markdownToggle(): Locator {
-    return this.page.getByRole("checkbox", { name: this.t("cardContentFields.markdown"), exact: true });
+    return this.page.getByRole("checkbox", {
+      name: this.t("cardContentFields.markdown"),
+      exact: true,
+    });
   }
 
   get front(): Locator {
@@ -57,8 +62,13 @@ export class CardEditor extends Screen {
   async saveFront(front: string): Promise<void> {
     await this.intent("Edit the front and save", async () => {
       await this.front.fill(front);
-      await this.page.getByRole("main").getByRole("button", { name: this.t("card.saveButton"), exact: true }).click();
-      await expect(this.page.getByRole("status").filter({ hasText: this.t("card.saved") })).toBeVisible();
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("card.saveButton"), exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("status").filter({ hasText: this.t("card.saved") }),
+      ).toBeVisible();
     });
   }
 }

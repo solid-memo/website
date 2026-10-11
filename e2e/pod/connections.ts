@@ -14,7 +14,9 @@
  */
 export function closingConnections(send: typeof fetch): typeof fetch {
   return (input, init) => {
-    const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
+    const headers = new Headers(
+      init?.headers ?? (input instanceof Request ? input.headers : undefined),
+    );
     headers.set("connection", "close");
     return send(input, { ...init, headers });
   };

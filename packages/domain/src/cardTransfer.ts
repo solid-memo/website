@@ -87,7 +87,12 @@ export function planCardTransfer(
   if (source.url === target.url) throw new AppError("cardTransferSameDeck");
   const chosen = new Set(ids);
   const byId = new Map(target.cards.map((card) => [card.id, card]));
-  const used = new Set(target.cards.flatMap((card) => [card.id, ...(card.distractors ?? []).map((distractor) => distractor.id)]));
+  const used = new Set(
+    target.cards.flatMap((card) => [
+      card.id,
+      ...(card.distractors ?? []).map((distractor) => distractor.id),
+    ]),
+  );
   const claimed = new Set<string>();
   const sourceStates = new Map(source.states.map((state) => [reviewKeyOf(state), state]));
   const targetStates = new Set(target.states.map(reviewKeyOf));
@@ -111,7 +116,8 @@ export function planCardTransfer(
       } else if (!present && held) {
         plan.target.reviewRemovals.push(key);
       }
-      if (mode === "move" && state !== undefined) plan.source.reviewRemovals.push({ cardId: card.id, direction });
+      if (mode === "move" && state !== undefined)
+        plan.source.reviewRemovals.push({ cardId: card.id, direction });
     }
     if (mode === "move") plan.source.remove.push(card.id);
   }
@@ -152,5 +158,12 @@ function placeIn(
 function asWritten(card: Card, id: string): TransferredCard {
   const { url: _url, formatVersion: _formatVersion, ...kept } = card;
   if (id === card.id || card.distractors === undefined) return { ...kept, id };
-  return { ...kept, id, distractors: card.distractors.map((distractor, i) => ({ ...distractor, id: `${id}-d${i + 1}` })) };
+  return {
+    ...kept,
+    id,
+    distractors: card.distractors.map((distractor, i) => ({
+      ...distractor,
+      id: `${id}-d${i + 1}`,
+    })),
+  };
 }

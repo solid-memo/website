@@ -7,7 +7,14 @@ import { describeChanges, LibraryUpgradeNotice } from "./LibraryUpgradeNotice";
 
 const en = createI18n("en");
 
-const card = (id: string): Card => ({ id, url: `https://pod.example/d.ttl#${id}`, front: { "": id }, back: { "": id }, createdAt: "", formatVersion: 2 });
+const card = (id: string): Card => ({
+  id,
+  url: `https://pod.example/d.ttl#${id}`,
+  front: { "": id },
+  back: { "": id },
+  createdAt: "",
+  formatVersion: 2,
+});
 const libraryCard = (id: string) => ({ id, front: { "": id }, back: { "": id }, formatVersion: 1 });
 const plan: LibraryUpgradePlan = {
   fromVersion: "1",
@@ -29,7 +36,14 @@ const plan: LibraryUpgradePlan = {
 };
 
 function renderNotice(overrides: Partial<Parameters<typeof LibraryUpgradeNotice>[0]> = {}) {
-  const props = { deckName: "Capitals", plan, busy: false, error: null, onUpgrade: vi.fn(), ...overrides };
+  const props = {
+    deckName: "Capitals",
+    plan,
+    busy: false,
+    error: null,
+    onUpgrade: vi.fn(),
+    ...overrides,
+  };
   const view = render(<LibraryUpgradeNotice {...props} />);
   return { ...view, props };
 }
@@ -37,42 +51,79 @@ function renderNotice(overrides: Partial<Parameters<typeof LibraryUpgradeNotice>
 describe("describeChanges", () => {
   it("names what the update does, in a list", () => {
     expect(describeChanges(plan, en)).toBe("adds 1 card, changes 2 cards and removes 1 card");
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], direction: "bidirectional" }, en)).toBe(
-      "studies it both ways",
-    );
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], title: { en: "Capitals", sv: "Huvudstäder" } }, en)).toBe(
-      "updates the deck's name, description or keywords",
-    );
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], keywords: { en: ["capitals"], sv: ["huvudstäder"] } }, en)).toBe(
-      "updates the deck's name, description or keywords",
-    );
+    expect(
+      describeChanges({ ...plan, add: [], change: [], remove: [], direction: "bidirectional" }, en),
+    ).toBe("studies it both ways");
+    expect(
+      describeChanges(
+        { ...plan, add: [], change: [], remove: [], title: { en: "Capitals", sv: "Huvudstäder" } },
+        en,
+      ),
+    ).toBe("updates the deck's name, description or keywords");
+    expect(
+      describeChanges(
+        {
+          ...plan,
+          add: [],
+          change: [],
+          remove: [],
+          keywords: { en: ["capitals"], sv: ["huvudstäder"] },
+        },
+        en,
+      ),
+    ).toBe("updates the deck's name, description or keywords");
   });
 
   it("counts retirements and cards brought back, not what is added or changed retired", () => {
     const retired = { ...libraryCard("yu"), retired: true as const };
     expect(
-      describeChanges({ ...plan, add: [retired], change: [retired], retire: [card("se")], restore: [card("dk"), card("fi")], remove: [] }, en),
+      describeChanges(
+        {
+          ...plan,
+          add: [retired],
+          change: [retired],
+          retire: [card("se")],
+          restore: [card("dk"), card("fi")],
+          remove: [],
+        },
+        en,
+      ),
     ).toBe("retires 1 card and brings back 2 cards");
-    expect(describeChanges({ ...plan, add: [retired], change: [], remove: [] }, en)).toBe("updates cards you no longer study");
+    expect(describeChanges({ ...plan, add: [retired], change: [], remove: [] }, en)).toBe(
+      "updates cards you no longer study",
+    );
   });
 
   it("counts the cards already as the release has them, as an upgrade cut off half-way leaves them", () => {
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], applied: [card("se")] }, en)).toBe(
-      "keeps 1 card already as the release has it",
-    );
+    expect(
+      describeChanges({ ...plan, add: [], change: [], remove: [], applied: [card("se")] }, en),
+    ).toBe("keeps 1 card already as the release has it");
     expect(describeChanges({ ...plan, applied: [card("se"), card("dk")] }, en)).toBe(
       "adds 1 card, changes 2 cards, removes 1 card and keeps 2 cards already as the release has them",
     );
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], applied: [card("se")] }, createI18n("sv"))).toBe(
-      "behåller 1 kort som redan är som i utgåvan",
-    );
+    expect(
+      describeChanges(
+        { ...plan, add: [], change: [], remove: [], applied: [card("se")] },
+        createI18n("sv"),
+      ),
+    ).toBe("behåller 1 kort som redan är som i utgåvan");
   });
 
   it("says when what the deck says of itself is already as the release has it", () => {
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], appliedAbout: ["title", "direction"] }, en)).toBe(
+    expect(
+      describeChanges(
+        { ...plan, add: [], change: [], remove: [], appliedAbout: ["title", "direction"] },
+        en,
+      ),
+    ).toBe(
       "keeps the deck's name, description, keywords, topics or direction already as the release has them",
     );
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], appliedAbout: ["keywords"] }, createI18n("sv"))).toBe(
+    expect(
+      describeChanges(
+        { ...plan, add: [], change: [], remove: [], appliedAbout: ["keywords"] },
+        createI18n("sv"),
+      ),
+    ).toBe(
       "behåller kortlekens namn, beskrivning, nyckelord, ämnen eller riktning som redan är som i utgåvan",
     );
   });
@@ -84,15 +135,26 @@ describe("describeChanges", () => {
     expect(describeChanges({ ...plan, add: [], remove: [], outline: true }, en)).toBe(
       "changes 2 cards and updates the course's chapters, steps or theory",
     );
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], outline: true }, createI18n("sv"))).toBe(
-      "uppdaterar kursens kapitel, steg eller teori",
-    );
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], outline: true, unreached: true }, en)).toBe(
+    expect(
+      describeChanges(
+        { ...plan, add: [], change: [], remove: [], outline: true },
+        createI18n("sv"),
+      ),
+    ).toBe("uppdaterar kursens kapitel, steg eller teori");
+    expect(
+      describeChanges(
+        { ...plan, add: [], change: [], remove: [], outline: true, unreached: true },
+        en,
+      ),
+    ).toBe(
       "updates the course's chapters, steps or theory and changes questions you have not reached yet",
     );
-    expect(describeChanges({ ...plan, add: [], change: [], remove: [], unreached: true }, createI18n("sv"))).toBe(
-      "ändrar frågor som du inte har kommit till än",
-    );
+    expect(
+      describeChanges(
+        { ...plan, add: [], change: [], remove: [], unreached: true },
+        createI18n("sv"),
+      ),
+    ).toBe("ändrar frågor som du inte har kommit till än");
   });
 });
 
@@ -122,10 +184,14 @@ describe("LibraryUpgradeNotice", () => {
   it("says nothing of removals, kept cards or notes when there are none, and counts kept cards", () => {
     renderNotice({ plan: { ...plan, remove: [], kept: [card("a"), card("b")], notes: [] } });
     const region = screen.getByRole("region", { name: "Newer library release" });
-    expect(region).toHaveTextContent("Your review history is kept. 2 cards you changed are left as you have them.");
+    expect(region).toHaveTextContent(
+      "Your review history is kept. 2 cards you changed are left as you have them.",
+    );
     expect(screen.queryByRole("list")).toBeNull();
     renderNotice({ plan: { ...plan, remove: [], kept: [] } });
-    expect(screen.getAllByRole("region")[1]).toHaveTextContent(/Your review history is kept\.Release 2/);
+    expect(screen.getAllByRole("region")[1]).toHaveTextContent(
+      /Your review history is kept\.Release 2/,
+    );
   });
 
   it("says the history of a card the release removed goes, though the deck no longer has the card", () => {

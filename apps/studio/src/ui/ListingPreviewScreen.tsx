@@ -28,7 +28,15 @@ export function ListingPreviewScreen({ draft }: { draft: ReleaseDraft }) {
         <div class="listing-preview" inert>
           <ul class="library-list">
             <li>
-              <LibraryDeckRow deck={deck} selected={false} imported={false} busy={false} deckHref="#" previewHref="#" onToggle={nothing} />
+              <LibraryDeckRow
+                deck={deck}
+                selected={false}
+                imported={false}
+                busy={false}
+                deckHref="#"
+                previewHref="#"
+                onToggle={nothing}
+              />
             </li>
           </ul>
         </div>
@@ -36,7 +44,16 @@ export function ListingPreviewScreen({ draft }: { draft: ReleaseDraft }) {
       <section aria-labelledby="preview-page">
         <h3 id="preview-page">{t("studio.preview.page")}</h3>
         <div class="listing-preview" inert>
-          <LibraryDeckScreen deck={deck} browseHref="#" previewHref="#" imported={false} busy={false} error={null} onImport={nothing} onStartCourse={nothing} />
+          <LibraryDeckScreen
+            deck={deck}
+            browseHref="#"
+            previewHref="#"
+            imported={false}
+            busy={false}
+            error={null}
+            onImport={nothing}
+            onStartCourse={nothing}
+          />
         </div>
       </section>
     </section>

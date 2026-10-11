@@ -1,9 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
-import {
-  promptSides,
-  type CardContent,
-  type StudyDirection,
-} from "@solid-memo/domain/deck";
+import { promptSides, type CardContent, type StudyDirection } from "@solid-memo/domain/deck";
 import { CardFace } from "./CardFace";
 import { useI18n } from "./i18n";
 
@@ -44,7 +40,13 @@ export function LibraryPreviewScreen({
     <section>
       <header>
         <h2>
-          {tx("libraryPreview.heading", { deck: <a href={deckHref} lang={deckLang}>{deckName}</a> })}
+          {tx("libraryPreview.heading", {
+            deck: (
+              <a href={deckHref} lang={deckLang}>
+                {deckName}
+              </a>
+            ),
+          })}
         </h2>
         <button onClick={onExit}>{t("libraryPreview.back")}</button>
       </header>
@@ -65,13 +67,7 @@ export function LibraryPreviewScreen({
  * As in study, the focus goes to the question when a card comes up and
  * to the answer once revealed, Next card a Tab after it.
  */
-function PreviewCard({
-  prompt,
-  onNext,
-}: {
-  prompt: PreviewPrompt;
-  onNext: () => void;
-}) {
+function PreviewCard({ prompt, onNext }: { prompt: PreviewPrompt; onNext: () => void }) {
   const { t } = useI18n();
   const [revealed, setRevealed] = useState(false);
   const { question, answer } = promptSides(prompt);

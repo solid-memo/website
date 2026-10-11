@@ -10,7 +10,14 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { libraryUpgradeQuery, refreshUpgradedDeck } from "@solid-memo/ui/LibraryUpgradeContainer";
 import { Loading } from "@solid-memo/ui/Loading";
-import { LibraryCopiesScreen, LibraryPlanScreen, type BatchResult, type BatchRun, type CopyRow, type PlanState } from "./LibraryCopiesScreen";
+import {
+  LibraryCopiesScreen,
+  LibraryPlanScreen,
+  type BatchResult,
+  type BatchRun,
+  type CopyRow,
+  type PlanState,
+} from "./LibraryCopiesScreen";
 import { libraryUpdatesQuery } from "./UpdateBadge";
 
 /**
@@ -99,7 +106,9 @@ export function LibraryCopiesContainer({
       results={results}
       deckHref={deckHref}
       libraryHref={libraryHref}
-      readOnly={check.readOnly() ?? (copies.some((copy) => check.isSetAside(copy.deck)) ? "setAside" : null)}
+      readOnly={
+        check.readOnly() ?? (copies.some((copy) => check.isSetAside(copy.deck)) ? "setAside" : null)
+      }
       selectable={(deck) => check.readOnly(deck) === null}
       healthHref={healthHref}
       onUpgrade={(chosen) => batchMutation.mutate(chosen)}
@@ -115,7 +124,15 @@ export function LibraryCopiesContainer({
  * so it reads nothing the table has not. A copy the instance no longer
  * has, or not yet read, is none.
  */
-export function LibraryPlanContainer({ useCases, instance, deckUrl }: { useCases: UseCases; instance: Instance; deckUrl: string | null }) {
+export function LibraryPlanContainer({
+  useCases,
+  instance,
+  deckUrl,
+}: {
+  useCases: UseCases;
+  instance: Instance;
+  deckUrl: string | null;
+}) {
   const { rows } = useCopyRows(useCases, instance.url);
   return <LibraryPlanScreen row={rows.find((row) => row.copy.deck.url === deckUrl) ?? null} />;
 }

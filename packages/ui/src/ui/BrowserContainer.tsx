@@ -57,8 +57,7 @@ export function BrowserContainer({
   });
 
   const setDirectionMutation = useMutation({
-    mutationFn: (direction: DeckDirection) =>
-      useCases.setDeckDirection(deck, direction),
+    mutationFn: (direction: DeckDirection) => useCases.setDeckDirection(deck, direction),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["decks"] });
       queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
@@ -66,7 +65,10 @@ export function BrowserContainer({
   });
 
   const toSettle = useMemo(
-    () => (cardsQuery.data === undefined || release === undefined ? [] : unlikeRelease(cardsQuery.data, release?.cards)),
+    () =>
+      cardsQuery.data === undefined || release === undefined
+        ? []
+        : unlikeRelease(cardsQuery.data, release?.cards),
     [cardsQuery.data, release],
   );
 

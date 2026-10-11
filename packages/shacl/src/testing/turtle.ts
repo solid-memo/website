@@ -6,10 +6,7 @@ import type { DatasetCore } from "@rdfjs/types";
  * pod documents (through @inrupt/solid-client), for tests of the SHACL
  * modules. `url` is what relative IRIs resolve against.
  */
-export async function datasetFromTurtle(
-  turtle: string,
-  url: string,
-): Promise<DatasetCore> {
+export async function datasetFromTurtle(turtle: string, url: string): Promise<DatasetCore> {
   return toRdfJsDataset(await getSolidDataset(url, { fetch: turtleFetch(turtle) }));
 }
 

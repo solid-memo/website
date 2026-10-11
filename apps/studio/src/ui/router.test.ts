@@ -22,15 +22,29 @@ describe("the Studio's routes", () => {
   const routes: StudioRoute[] = [
     { screen: "instances" },
     { screen: "home", instanceUrl: "https://pod.example/solid-memo/a/" },
-    { screen: "home", instanceUrl: "https://pod.example/solid-memo/a/", view: { filter: "kanji", sort: { column: "due", descending: true } } },
+    {
+      screen: "home",
+      instanceUrl: "https://pod.example/solid-memo/a/",
+      view: { filter: "kanji", sort: { column: "due", descending: true } },
+    },
     { screen: "groups", instanceUrl: "https://pod.example/solid-memo/a/" },
     { screen: "cards", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
     {
       screen: "cards",
       deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
-      query: { ...DEFAULT_CARD_QUERY, text: "hus", state: "due", sort: { key: "due", descending: false }, page: 2 },
+      query: {
+        ...DEFAULT_CARD_QUERY,
+        text: "hus",
+        state: "due",
+        sort: { key: "due", descending: false },
+        page: 2,
+      },
     },
-    { screen: "card", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1", cardUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl#c1" },
+    {
+      screen: "card",
+      deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
+      cardUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl#c1",
+    },
     {
       screen: "card",
       deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
@@ -41,7 +55,11 @@ describe("the Studio's routes", () => {
     { screen: "instance", instanceUrl: "https://pod.example/solid-memo/a/" },
     { screen: "schedule", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
     { screen: "health", instanceUrl: "https://pod.example/solid-memo/a/" },
-    { screen: "health", instanceUrl: "https://pod.example/solid-memo/a/", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
+    {
+      screen: "health",
+      instanceUrl: "https://pod.example/solid-memo/a/",
+      deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
+    },
     {
       screen: "card",
       deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
@@ -54,7 +72,10 @@ describe("the Studio's routes", () => {
     {
       screen: "transfer",
       instanceUrl: "https://pod.example/solid-memo/a/",
-      deckUrls: ["https://pod.example/solid-memo/a/catalog.ttl#deck-1", "https://pod.example/solid-memo/a/catalog.ttl#deck-2"],
+      deckUrls: [
+        "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
+        "https://pod.example/solid-memo/a/catalog.ttl#deck-2",
+      ],
     },
     { screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" },
     { screen: "releases", instanceUrl: "https://pod.example/solid-memo/a/" },
@@ -63,7 +84,14 @@ describe("the Studio's routes", () => {
     { screen: "step", draftUrl: DRAFT, step: "ch-pods-1" },
     { screen: "question", draftUrl: DRAFT, card: "q-pods-1a" },
     { screen: "draftCards", draftUrl: DRAFT },
-    { screen: "draftCards", draftUrl: DRAFT, filter: "unasked", language: "sv", sort: { key: "front", descending: true }, page: 3 },
+    {
+      screen: "draftCards",
+      draftUrl: DRAFT,
+      filter: "unasked",
+      language: "sv",
+      sort: { key: "front", descending: true },
+      page: 3,
+    },
     { screen: "check", draftUrl: DRAFT },
     { screen: "check", draftUrl: DRAFT, policy: "library" },
     { screen: "preview", draftUrl: DRAFT },
@@ -77,7 +105,12 @@ describe("the Studio's routes", () => {
     { screen: "diff", draftUrl: DRAFT },
     { screen: "release", draftUrl: DRAFT },
     { screen: "release", draftUrl: DRAFT, field: "sources" },
-    { screen: "home", instanceUrl: "https://pod.example/solid-memo/a/", show: "courses", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
+    {
+      screen: "home",
+      instanceUrl: "https://pod.example/solid-memo/a/",
+      show: "courses",
+      deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
+    },
     {
       screen: "home",
       instanceUrl: "https://pod.example/solid-memo/a/",
@@ -119,7 +152,9 @@ describe("the Studio's routes", () => {
 
   it("put Home at /studio, its instance in the query, and take /studio/ for it too", () => {
     expect(parseStudioHash("#/studio/?instance=a")).toEqual({ screen: "home", instanceUrl: "a" });
-    expect(studioRouteToHash(routes[1]!)).toBe("#/studio?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+    expect(studioRouteToHash(routes[1]!)).toBe(
+      "#/studio?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F",
+    );
     expect(studioRouteToHash(routes[0]!)).toBe("#/studio/instances");
   });
 
@@ -127,24 +162,47 @@ describe("the Studio's routes", () => {
     expect(studioRouteToHash(routes[2]!)).toBe(
       "#/studio?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F&q=kanji&sort=due&order=desc",
     );
-    expect(studioRouteToHash({ ...routes[1]!, view: { filter: "" } } as StudioRoute)).toBe(studioRouteToHash(routes[1]!));
-    expect(parseStudioHash("#/studio?instance=a&sort=color")).toEqual({ screen: "home", instanceUrl: "a" });
-    expect(studioRouteToHash(routes[3]!)).toBe("#/studio/groups?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+    expect(studioRouteToHash({ ...routes[1]!, view: { filter: "" } } as StudioRoute)).toBe(
+      studioRouteToHash(routes[1]!),
+    );
+    expect(parseStudioHash("#/studio?instance=a&sort=color")).toEqual({
+      screen: "home",
+      instanceUrl: "a",
+    });
+    expect(studioRouteToHash(routes[3]!)).toBe(
+      "#/studio/groups?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F",
+    );
   });
 
   it("keep Home's view and the deck beside its table in its query, and leave out every deck's view", () => {
-    expect(studioRouteToHash({ screen: "home", instanceUrl: "a", show: "courses", deckUrl: "https://pod.example/a/catalog.ttl#deck-1" })).toBe(
+    expect(
+      studioRouteToHash({
+        screen: "home",
+        instanceUrl: "a",
+        show: "courses",
+        deckUrl: "https://pod.example/a/catalog.ttl#deck-1",
+      }),
+    ).toBe(
       "#/studio?instance=a&show=courses&deck=https%3A%2F%2Fpod.example%2Fa%2Fcatalog.ttl%23deck-1",
     );
-    expect(parseStudioHash("#/studio?instance=a&show=all")).toEqual({ screen: "home", instanceUrl: "a" });
-    expect(parseStudioHash("#/studio?instance=a&show=everything&deck=d")).toEqual({ screen: "home", instanceUrl: "a", deckUrl: "d" });
+    expect(parseStudioHash("#/studio?instance=a&show=all")).toEqual({
+      screen: "home",
+      instanceUrl: "a",
+    });
+    expect(parseStudioHash("#/studio?instance=a&show=everything&deck=d")).toEqual({
+      screen: "home",
+      instanceUrl: "a",
+      deckUrl: "d",
+    });
   });
 
   it("keep the workbench's deck and query in its query, and leave out a query that is the default", () => {
     expect(studioRouteToHash(routes[5]!)).toBe(
       "#/studio/cards?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1&q=hus&state=due&sort=due&page=2",
     );
-    expect(studioRouteToHash({ ...routes[4]!, query: DEFAULT_CARD_QUERY } as StudioRoute)).toBe(studioRouteToHash(routes[4]!));
+    expect(studioRouteToHash({ ...routes[4]!, query: DEFAULT_CARD_QUERY } as StudioRoute)).toBe(
+      studioRouteToHash(routes[4]!),
+    );
     expect(parseStudioHash("#/studio/cards")).toBeNull();
   });
 
@@ -152,7 +210,9 @@ describe("the Studio's routes", () => {
     expect(studioRouteToHash(routes[7]!)).toBe(
       "#/studio/card?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1&card=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fdecks%2Fdeck-1.ttl%23c1&tab=distractors",
     );
-    expect(studioRouteToHash({ ...routes[6]!, tab: "content" } as StudioRoute)).toBe(studioRouteToHash(routes[6]!));
+    expect(studioRouteToHash({ ...routes[6]!, tab: "content" } as StudioRoute)).toBe(
+      studioRouteToHash(routes[6]!),
+    );
     expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&tab=content`)).toEqual(routes[6]);
     expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&tab=gossip`)).toEqual(routes[6]);
     const schedule = { ...routes[6]!, tab: "schedule" } as StudioRoute;
@@ -170,9 +230,14 @@ describe("the Studio's routes", () => {
     expect(hash).toBe(
       `${studioRouteToHash({ ...routes[6]!, field: "backNote" } as StudioRoute)}&q=hus&lang=sv&state=due&has=notes&sort=ease&order=desc&page=2&size=10&in=back`,
     );
-    expect(studioRouteToHash({ ...routes[6]!, query: DEFAULT_CARD_QUERY } as StudioRoute)).toBe(studioRouteToHash(routes[6]!));
+    expect(studioRouteToHash({ ...routes[6]!, query: DEFAULT_CARD_QUERY } as StudioRoute)).toBe(
+      studioRouteToHash(routes[6]!),
+    );
     // A link to a card as it was before the workbench came beside it opens it with the default query.
-    expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&field=front`)).toEqual({ ...routes[6], field: "front" });
+    expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&field=front`)).toEqual({
+      ...routes[6],
+      field: "front",
+    });
     expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&in=front&q=x`)).toEqual({
       ...routes[6],
       query: { ...DEFAULT_CARD_QUERY, text: "x", field: "front" },
@@ -183,39 +248,69 @@ describe("the Studio's routes", () => {
     const card = routes[6] as CardRoute;
     expect(workbenchOf(card)).toEqual({ screen: "cards", deckUrl: card.deckUrl });
     const beside = routes.at(-1) as CardRoute;
-    expect(workbenchOf(beside)).toEqual({ screen: "cards", deckUrl: beside.deckUrl, query: beside.query });
+    expect(workbenchOf(beside)).toEqual({
+      screen: "cards",
+      deckUrl: beside.deckUrl,
+      query: beside.query,
+    });
   });
 
   it("keep a deck's about screen and the instance's screen in their query", () => {
-    expect(studioRouteToHash(routes[8]!)).toBe("#/studio/about?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1");
-    expect(studioRouteToHash(routes[9]!)).toBe("#/studio/instance?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+    expect(studioRouteToHash(routes[8]!)).toBe(
+      "#/studio/about?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1",
+    );
+    expect(studioRouteToHash(routes[9]!)).toBe(
+      "#/studio/instance?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F",
+    );
     expect(parseStudioHash("#/studio/about")).toBeNull();
     expect(parseStudioHash("#/studio/instance")).toBeNull();
   });
 
   it("keep a deck's schedule screen's deck in its query", () => {
-    expect(studioRouteToHash(routes[10]!)).toBe("#/studio/schedule?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1");
+    expect(studioRouteToHash(routes[10]!)).toBe(
+      "#/studio/schedule?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1",
+    );
     expect(parseStudioHash("#/studio/schedule")).toBeNull();
   });
 
   it("keep the health screen's instance and deck, and the field the inspector opens at, in their query", () => {
-    expect(studioRouteToHash(routes[11]!)).toBe("#/studio/health?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+    expect(studioRouteToHash(routes[11]!)).toBe(
+      "#/studio/health?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F",
+    );
     expect(studioRouteToHash(routes[12]!)).toBe(
       "#/studio/health?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1",
     );
     expect(parseStudioHash("#/studio/health?deck=d")).toBeNull();
     expect(studioRouteToHash(routes[13]!)).toMatch(/&tab=distractors&field=c1-d2$/);
-    expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&field=back`)).toEqual({ ...routes[6], field: "back" });
+    expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&field=back`)).toEqual({
+      ...routes[6],
+      field: "back",
+    });
   });
 
   it("open the card inspector where in a card a problem is", () => {
     const deckUrl = "https://pod.example/solid-memo/a/catalog.ttl#deck-1";
     const card = { id: "c1", url: "https://pod.example/solid-memo/a/decks/deck-1.ttl#c1" } as Card;
     const at = { screen: "card", deckUrl, cardUrl: card.url } as const;
-    expect(spotRoute(deckUrl, { card, place: { tab: "content", part: "backNote" } })).toEqual({ ...at, tab: "content", field: "backNote" });
-    expect(spotRoute(deckUrl, { card, place: { tab: "content" } })).toEqual({ ...at, tab: "content" });
-    expect(spotRoute(deckUrl, { card, place: { tab: "distractors", distractor: "c1-d1", part: "note" } })).toEqual({ ...at, tab: "distractors", field: "c1-d1" });
-    expect(spotRoute(deckUrl, { card, place: { tab: "schedule" } })).toEqual({ ...at, tab: "schedule" });
+    expect(spotRoute(deckUrl, { card, place: { tab: "content", part: "backNote" } })).toEqual({
+      ...at,
+      tab: "content",
+      field: "backNote",
+    });
+    expect(spotRoute(deckUrl, { card, place: { tab: "content" } })).toEqual({
+      ...at,
+      tab: "content",
+    });
+    expect(
+      spotRoute(deckUrl, {
+        card,
+        place: { tab: "distractors", distractor: "c1-d1", part: "note" },
+      }),
+    ).toEqual({ ...at, tab: "distractors", field: "c1-d1" });
+    expect(spotRoute(deckUrl, { card, place: { tab: "schedule" } })).toEqual({
+      ...at,
+      tab: "schedule",
+    });
   });
 
   it("keep each deck to export as a deck of its own", () => {
@@ -225,48 +320,103 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(40).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([
+      null,
+      ...Array(40).fill("https://pod.example/solid-memo/a/"),
+    ]);
   });
 
   it("keep a draft and the subject of it shown in their query, and the cards' view, the first page and no filter left out", () => {
-    const at = (path: string, params: Record<string, string>) => `#/studio/${path}?${new URLSearchParams({ draft: DRAFT, ...params }).toString()}`;
-    expect(studioRouteToHash({ screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods" })).toBe(at("chapter", { chapter: "ch-pods" }));
-    expect(studioRouteToHash({ screen: "draftCards", draftUrl: DRAFT, page: 1 })).toBe(at("draft-cards", {}));
-    expect(parseStudioHash(at("draft-cards", { filter: "nonsense", lang: "", page: "0" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
-    expect(parseStudioHash(at("draft-cards", { page: "1.5" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
-    expect(studioRouteToHash({ screen: "draftCards", draftUrl: DRAFT, sort: { key: "distractors", descending: true } })).toBe(
-      at("draft-cards", { sort: "distractors", order: "desc" }),
+    const at = (path: string, params: Record<string, string>) =>
+      `#/studio/${path}?${new URLSearchParams({ draft: DRAFT, ...params }).toString()}`;
+    expect(studioRouteToHash({ screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods" })).toBe(
+      at("chapter", { chapter: "ch-pods" }),
     );
-    expect(parseStudioHash(at("draft-cards", { sort: "place" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT, sort: { key: "place", descending: false } });
-    expect(parseStudioHash(at("draft-cards", { sort: "color", order: "desc" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
+    expect(studioRouteToHash({ screen: "draftCards", draftUrl: DRAFT, page: 1 })).toBe(
+      at("draft-cards", {}),
+    );
+    expect(parseStudioHash(at("draft-cards", { filter: "nonsense", lang: "", page: "0" }))).toEqual(
+      { screen: "draftCards", draftUrl: DRAFT },
+    );
+    expect(parseStudioHash(at("draft-cards", { page: "1.5" }))).toEqual({
+      screen: "draftCards",
+      draftUrl: DRAFT,
+    });
+    expect(
+      studioRouteToHash({
+        screen: "draftCards",
+        draftUrl: DRAFT,
+        sort: { key: "distractors", descending: true },
+      }),
+    ).toBe(at("draft-cards", { sort: "distractors", order: "desc" }));
+    expect(parseStudioHash(at("draft-cards", { sort: "place" }))).toEqual({
+      screen: "draftCards",
+      draftUrl: DRAFT,
+      sort: { key: "place", descending: false },
+    });
+    expect(parseStudioHash(at("draft-cards", { sort: "color", order: "desc" }))).toEqual({
+      screen: "draftCards",
+      draftUrl: DRAFT,
+    });
     expect(isDraftRoute({ screen: "draft", draftUrl: DRAFT })).toBe(true);
-    expect(isDraftRoute({ screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" })).toBe(false);
+    expect(
+      isDraftRoute({ screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" }),
+    ).toBe(false);
   });
 
   it("leave out a pod's policy, which is the default, and a field the screen has not", () => {
-    const at = (path: string, params: Record<string, string>) => `#/studio/${path}?${new URLSearchParams({ draft: DRAFT, ...params }).toString()}`;
-    expect(studioRouteToHash({ screen: "check", draftUrl: DRAFT, policy: "pod" })).toBe(at("check", {}));
-    expect(parseStudioHash(at("check", { policy: "nonsense" }))).toEqual({ screen: "check", draftUrl: DRAFT });
-    expect(parseStudioHash(at("step", { step: "s", field: "title" }))).toEqual({ screen: "step", draftUrl: DRAFT, step: "s" });
-    expect(parseStudioHash(at("draft", { field: "theory" }))).toEqual({ screen: "draft", draftUrl: DRAFT });
-    expect(parseStudioHash(at("release", { field: "title" }))).toEqual({ screen: "release", draftUrl: DRAFT });
+    const at = (path: string, params: Record<string, string>) =>
+      `#/studio/${path}?${new URLSearchParams({ draft: DRAFT, ...params }).toString()}`;
+    expect(studioRouteToHash({ screen: "check", draftUrl: DRAFT, policy: "pod" })).toBe(
+      at("check", {}),
+    );
+    expect(parseStudioHash(at("check", { policy: "nonsense" }))).toEqual({
+      screen: "check",
+      draftUrl: DRAFT,
+    });
+    expect(parseStudioHash(at("step", { step: "s", field: "title" }))).toEqual({
+      screen: "step",
+      draftUrl: DRAFT,
+      step: "s",
+    });
+    expect(parseStudioHash(at("draft", { field: "theory" }))).toEqual({
+      screen: "draft",
+      draftUrl: DRAFT,
+    });
+    expect(parseStudioHash(at("release", { field: "title" }))).toEqual({
+      screen: "release",
+      draftUrl: DRAFT,
+    });
   });
 
   it("keep a trial's chapter in its query, and its review as a part of the chapter", () => {
-    expect(studioRouteToHash({ screen: "trial", draftUrl: DRAFT, chapter: "ch-pods", review: true })).toMatch(/\/trial\?draft=.*&chapter=ch-pods&part=review$/);
+    expect(
+      studioRouteToHash({ screen: "trial", draftUrl: DRAFT, chapter: "ch-pods", review: true }),
+    ).toMatch(/\/trial\?draft=.*&chapter=ch-pods&part=review$/);
     // A review is of a chapter.
-    expect(parseStudioHash(`#/studio/trial?draft=${encodeURIComponent(DRAFT)}&part=review`)).toEqual({ screen: "trial", draftUrl: DRAFT });
-    expect(parseStudioHash(`#/studio/trial?draft=${encodeURIComponent(DRAFT)}&chapter=c&part=x`)).toEqual({ screen: "trial", draftUrl: DRAFT, chapter: "c" });
+    expect(
+      parseStudioHash(`#/studio/trial?draft=${encodeURIComponent(DRAFT)}&part=review`),
+    ).toEqual({ screen: "trial", draftUrl: DRAFT });
+    expect(
+      parseStudioHash(`#/studio/trial?draft=${encodeURIComponent(DRAFT)}&chapter=c&part=x`),
+    ).toEqual({ screen: "trial", draftUrl: DRAFT, chapter: "c" });
   });
 
   it("open a draft's editor where a problem is", () => {
-    expect(targetRoute(DRAFT, { screen: "chapter", chapter: "ch-pods", field: "title" })).toEqual({ screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods", field: "title" });
+    expect(targetRoute(DRAFT, { screen: "chapter", chapter: "ch-pods", field: "title" })).toEqual({
+      screen: "chapter",
+      draftUrl: DRAFT,
+      chapter: "ch-pods",
+      field: "title",
+    });
     expect(targetRoute(DRAFT, { screen: "draft" })).toEqual({ screen: "draft", draftUrl: DRAFT });
   });
 
   it("leave a draft's route without its draft, or the subject it names, to the default route", () => {
     expect(parseStudioHash("#/studio/draft")).toBeNull();
-    expect(parseStudioHash("#/studio/draft?draft=https%3A%2F%2Fpod.example%2Fnot-a-draft.ttl")).toBeNull();
+    expect(
+      parseStudioHash("#/studio/draft?draft=https%3A%2F%2Fpod.example%2Fnot-a-draft.ttl"),
+    ).toBeNull();
     const draft = `draft=${encodeURIComponent(DRAFT)}`;
     expect(parseStudioHash(`#/studio/chapter?${draft}`)).toBeNull();
     expect(parseStudioHash(`#/studio/step?${draft}`)).toBeNull();
@@ -297,6 +447,9 @@ describe("useStudioRoute", () => {
     const { result } = renderHook(() => useStudioRoute());
     expect(result.current.route).toEqual({ screen: "instances" });
     act(() => result.current.navigate({ screen: "home", instanceUrl: "https://pod.example/a/" }));
-    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: "https://pod.example/a/" });
+    expect(parseStudioHash(window.location.hash)).toEqual({
+      screen: "home",
+      instanceUrl: "https://pod.example/a/",
+    });
   });
 });

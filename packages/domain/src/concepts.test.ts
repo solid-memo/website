@@ -20,7 +20,16 @@ const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 describe("conceptByIri and conceptByNotation", () => {
   it("find a concept of a scheme, or nothing", () => {
-    expect(conceptByIri(TOPICS, "https://solid-memo.com/ns/vocab/topics.ttl#swedish")?.label).toEqual({ en: "Swedish", de: "Schwedisch", es: "Sueco", fr: "Suédois", ko: "스웨덴어", sv: "Svenska" });
+    expect(
+      conceptByIri(TOPICS, "https://solid-memo.com/ns/vocab/topics.ttl#swedish")?.label,
+    ).toEqual({
+      en: "Swedish",
+      de: "Schwedisch",
+      es: "Sueco",
+      fr: "Suédois",
+      ko: "스웨덴어",
+      sv: "Svenska",
+    });
     expect(conceptByIri(TOPICS, `${SM}frontToBack`)).toBeUndefined();
     expect(conceptByNotation(STUDY_DIRECTIONS, "bidirectional")?.iri).toBe(`${SM}bidirectional`);
     expect(conceptByNotation(STUDY_DIRECTIONS, "sideways")).toBeUndefined();
@@ -36,11 +45,15 @@ describe("study directions as concepts", () => {
   });
 
   it("name no direction for a concept outside the scheme", () => {
-    expect(directionOfConcept("https://solid-memo.com/ns/vocab/topics.ttl#swedish")).toBeUndefined();
+    expect(
+      directionOfConcept("https://solid-memo.com/ns/vocab/topics.ttl#swedish"),
+    ).toBeUndefined();
   });
 
   it("name no direction for a concept whose notation the app does not know", () => {
-    const scheme = STUDY_DIRECTIONS as unknown as { concepts: { iri: string; notation?: string }[] };
+    const scheme = STUDY_DIRECTIONS as unknown as {
+      concepts: { iri: string; notation?: string }[];
+    };
     const original = scheme.concepts[0].notation;
     scheme.concepts[0].notation = "sideways";
     try {

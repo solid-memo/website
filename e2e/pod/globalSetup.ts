@@ -1,6 +1,12 @@
 import type { TestProject } from "vitest/node";
 import { checkContract } from "./contract";
-import { serversNamed, startServer, stopOnExit, type SolidServer, type StartedServer } from "./servers";
+import {
+  serversNamed,
+  startServer,
+  stopOnExit,
+  type SolidServer,
+  type StartedServer,
+} from "./servers";
 
 export type { SolidServer };
 
@@ -23,18 +29,29 @@ export default async function setup(project: TestProject) {
   if (given !== undefined && given !== "") {
     const url = given.endsWith("/") ? given : `${given}/`;
     await checkContract(url);
-    project.provide("solidServers", [{ id: "external", tier: "advisory", name: process.env.SOLID_SERVER_NAME || given, url }]);
+    project.provide("solidServers", [
+      { id: "external", tier: "advisory", name: process.env.SOLID_SERVER_NAME || given, url },
+    ]);
     return;
   }
   stopOnExit();
-  const results = await Promise.allSettled(serversNamed(process.env.SOLID_SERVERS).map(startServer));
-  const started = results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+  const results = await Promise.allSettled(
+    serversNamed(process.env.SOLID_SERVERS).map(startServer),
+  );
+  const started = results.flatMap((result) =>
+    result.status === "fulfilled" ? [result.value] : [],
+  );
   const stopAll = () => Promise.all(started.map(({ stop }) => stop()));
-  const failed = results.flatMap((result) => (result.status === "rejected" ? [result.reason as Error] : []));
+  const failed = results.flatMap((result) =>
+    result.status === "rejected" ? [result.reason as Error] : [],
+  );
   if (failed.length > 0) {
     await stopAll();
     throw new Error(failed.map((error) => error.message).join("\n\n"));
   }
-  project.provide("solidServers", started.map(({ server }: StartedServer) => server));
+  project.provide(
+    "solidServers",
+    started.map(({ server }: StartedServer) => server),
+  );
   return async () => void (await stopAll());
 }

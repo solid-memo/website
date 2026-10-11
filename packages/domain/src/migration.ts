@@ -1,10 +1,5 @@
 import type { Catalog } from "./catalog";
-import {
-  CARD_FORMAT_VERSION,
-  DECK_FORMAT_VERSION,
-  type Card,
-  type Deck,
-} from "./deck";
+import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "./deck";
 import { INSTANCE_FORMAT_VERSION, type InstanceMeta } from "./instance";
 import { PREFERENCES_FORMAT_VERSION, type StoredPreferences } from "./preferences";
 import { REVIEW_STATE_FORMAT_VERSION, type ReviewState } from "./review";
@@ -38,9 +33,7 @@ export function isDeckOutdated(deck: Deck): boolean {
  * direction is already front→back; the write then states it.
  */
 export function upgradeDeck(deck: Deck): Deck {
-  return isDeckOutdated(deck)
-    ? { ...deck, formatVersion: DECK_FORMAT_VERSION }
-    : deck;
+  return isDeckOutdated(deck) ? { ...deck, formatVersion: DECK_FORMAT_VERSION } : deck;
 }
 
 /** True when the review state is stored in an older format than this app writes. */
@@ -112,8 +105,7 @@ export function planMigration(input: {
     deckCount: decks.filter(({ deckOutdated }) => deckOutdated).length,
     cardCount: decks.reduce((sum, { cardCount }) => sum + cardCount, 0),
     reviewCount: decks.reduce((sum, { reviewCount }) => sum + reviewCount, 0),
-    preferencesOutdated:
-      input.preferences !== null && isPreferencesOutdated(input.preferences),
+    preferencesOutdated: input.preferences !== null && isPreferencesOutdated(input.preferences),
     instanceOutdated: input.instance !== null && isInstanceOutdated(input.instance),
     catalogMissing: input.catalog === null,
   };

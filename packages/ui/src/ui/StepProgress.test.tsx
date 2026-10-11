@@ -21,13 +21,25 @@ describe("StepProgress", () => {
         hint="Keep it open."
       />,
     );
-    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["✓First (done)", "✓Second (done)"]);
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "✓First (done)",
+      "✓Second (done)",
+    ]);
     expect(screen.getByRole("progressbar", { name: "Progress" })).toHaveAttribute("max", "2");
   });
 
   it("shows a bar of one before the total is known", () => {
     render(
-      <StepProgress region="Working" steps={steps} current="one" done={0} total={0} status="Starting." progressLabel="Progress" hint="" />,
+      <StepProgress
+        region="Working"
+        steps={steps}
+        current="one"
+        done={0}
+        total={0}
+        status="Starting."
+        progressLabel="Progress"
+        hint=""
+      />,
     );
     expect(screen.getByRole("progressbar", { name: "Progress" })).toHaveAttribute("max", "1");
     expect(screen.getAllByRole("listitem")[0]).toHaveAttribute("aria-current", "step");
@@ -35,13 +47,31 @@ describe("StepProgress", () => {
 
   it("says the first step a frame after the region is up, so screen readers hear it", async () => {
     const { rerender } = render(
-      <StepProgress region="Working" steps={steps} current="one" done={0} total={2} status="Starting." progressLabel="Progress" hint="" />,
+      <StepProgress
+        region="Working"
+        steps={steps}
+        current="one"
+        done={0}
+        total={2}
+        status="Starting."
+        progressLabel="Progress"
+        hint=""
+      />,
     );
     const status = screen.getByRole("status");
     expect(status.textContent).toBe("");
     await waitFor(() => expect(status).toHaveTextContent("Starting."));
     rerender(
-      <StepProgress region="Working" steps={steps} current="two" done={1} total={2} status="Going on." progressLabel="Progress" hint="" />,
+      <StepProgress
+        region="Working"
+        steps={steps}
+        current="two"
+        done={1}
+        total={2}
+        status="Going on."
+        progressLabel="Progress"
+        hint=""
+      />,
     );
     expect(screen.getByRole("status")).toBe(status);
     expect(status).toHaveTextContent("Going on.");
@@ -69,7 +99,16 @@ describe("StepProgress", () => {
 
   it("takes the focus as it mounts, as it takes the place of the button that started it", () => {
     render(
-      <StepProgress region="Working" steps={steps} current="one" done={0} total={2} status="Starting." progressLabel="Progress" hint="" />,
+      <StepProgress
+        region="Working"
+        steps={steps}
+        current="one"
+        done={0}
+        total={2}
+        status="Starting."
+        progressLabel="Progress"
+        hint=""
+      />,
     );
     expect(screen.getByRole("region", { name: "Working" })).toHaveFocus();
   });

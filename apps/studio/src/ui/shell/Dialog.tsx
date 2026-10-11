@@ -36,7 +36,13 @@ export function Dialog({
   }, []);
 
   return (
-    <dialog ref={ref} class="studio-dialog" aria-labelledby={headingId} onClose={onClose} onKeyDown={onKeyDown}>
+    <dialog
+      ref={ref}
+      class="studio-dialog"
+      aria-labelledby={headingId}
+      onClose={onClose}
+      onKeyDown={onKeyDown}
+    >
       <header>
         <h2 id={headingId}>{heading}</h2>
         <button type="button" onClick={() => ref.current!.close()}>

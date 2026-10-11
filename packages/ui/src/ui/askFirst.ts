@@ -20,8 +20,7 @@ function browserConfirm(question: LossQuestion): void {
  * own confirm, unless the app asks in a dialog of its own, as the Studio
  * does (its useConfirm, docs/studio.md).
  */
-export const AskFirst =
-  createContext<(question: LossQuestion) => void>(browserConfirm);
+export const AskFirst = createContext<(question: LossQuestion) => void>(browserConfirm);
 
 /** Asks before something is lost, as the app around asks (AskFirst). */
 export function useAskFirst(): (question: LossQuestion) => void {

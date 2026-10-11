@@ -37,7 +37,11 @@ function ReplacedOpener() {
       <div class="screen">
         <h2>Screen</h2>
       </div>
-      {open ? <PanelWithClose onClose={() => setOpen(false)} /> : <button onClick={() => setOpen(true)}>Open</button>}
+      {open ? (
+        <PanelWithClose onClose={() => setOpen(false)} />
+      ) : (
+        <button onClick={() => setOpen(true)}>Open</button>
+      )}
     </main>
   );
 }

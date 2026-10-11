@@ -19,7 +19,11 @@ const LOCAL_NAME = /^[A-Za-z_][A-Za-z0-9_-]*$/;
  */
 export function turtleOf(
   quads: Iterable<Quad>,
-  { base, prefixes, order = [] }: { base: string; prefixes: Readonly<Record<string, string>>; order?: readonly string[] },
+  {
+    base,
+    prefixes,
+    order = [],
+  }: { base: string; prefixes: Readonly<Record<string, string>>; order?: readonly string[] },
 ): string {
   const bySubject = new Map<string, Quad[]>();
   const named = new Map<string, number>();
@@ -61,7 +65,9 @@ export function turtleOf(
   const object = (term: Term, depth: number): string => {
     if (term.termType === "NamedNode") return iri(term.value);
     if (term.termType === "BlankNode") {
-      return inlined.has(term.value) ? `[ ${predicates(bySubject.get(`_:${term.value}`)!, depth + 1).join(" ; ")} ]` : `_:${term.value}`;
+      return inlined.has(term.value)
+        ? `[ ${predicates(bySubject.get(`_:${term.value}`)!, depth + 1).join(" ; ")} ]`
+        : `_:${term.value}`;
     }
     return literal(term as Quad["object"] & { termType: "Literal" }, iri);
   };
@@ -72,7 +78,9 @@ export function turtleOf(
       if (same === undefined) grouped.set(statement.predicate.value, [statement]);
       else same.push(statement);
     }
-    const keys = [...grouped.keys()].sort((a, b) => Number(b === RDF_TYPE) - Number(a === RDF_TYPE));
+    const keys = [...grouped.keys()].sort(
+      (a, b) => Number(b === RDF_TYPE) - Number(a === RDF_TYPE),
+    );
     const indent = "    ".repeat(depth + 1);
     return keys.map((predicate) => {
       const objects = grouped.get(predicate)!.map((statement) => object(statement.object, depth));
@@ -83,7 +91,10 @@ export function turtleOf(
   const keys = [...new Set([...order.filter((key) => bySubject.has(key)), ...bySubject.keys()])];
   const blocks = keys
     .filter((key) => !(key.startsWith("_:") && inlined.has(key.slice(2))))
-    .map((key) => `${key.startsWith("_:") ? key : iri(key)}\n    ${predicates(bySubject.get(key)!, 0).join(" ;\n    ")} .`);
+    .map(
+      (key) =>
+        `${key.startsWith("_:") ? key : iri(key)}\n    ${predicates(bySubject.get(key)!, 0).join(" ;\n    ")} .`,
+    );
   const header = [
     `@base <${base}> .`,
     "",
@@ -98,10 +109,14 @@ function keyOf(term: Term): string {
   return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
 }
 
-function literal(term: { value: string; language: string; datatype: { value: string } }, iri: (value: string) => string): string {
+function literal(
+  term: { value: string; language: string; datatype: { value: string } },
+  iri: (value: string) => string,
+): string {
   const datatype = term.datatype.value;
   if (datatype === `${XSD}integer` && /^[+-]?[0-9]+$/.test(term.value)) return term.value;
-  if (datatype === `${XSD}boolean` && (term.value === "true" || term.value === "false")) return term.value;
+  if (datatype === `${XSD}boolean` && (term.value === "true" || term.value === "false"))
+    return term.value;
   const text = `"${term.value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r")}"`;
   if (term.language !== "" || datatype === LANG_STRING) return `${text}@${term.language}`;
   return datatype === `${XSD}string` ? text : `${text}^^${iri(datatype)}`;

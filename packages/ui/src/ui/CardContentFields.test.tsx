@@ -73,15 +73,21 @@ describe("switching Markdown", () => {
   it("says nothing of Markdown typed after it was switched on", () => {
     const on = switchMarkdown(written("a", "b", false), true);
     expect(on.readOtherwise).toEqual([]);
-    expect(stillReadOtherwise({ ...on, front: [{ id: 0, value: "**a**", tag: "en" }] })).toBeUndefined();
+    expect(
+      stillReadOtherwise({ ...on, front: [{ id: 0, value: "**a**", tag: "en" }] }),
+    ).toBeUndefined();
   });
 });
 
 describe("textFormatOfDraft", () => {
   it("states Markdown switched on, and plain text switched off a card in Markdown", () => {
     expect(textFormatOfDraft({ ...draftOf(plain, []), markdown: true }, plain)).toBe(SM.markdown);
-    expect(textFormatOfDraft({ ...draftOf(unknown, []), markdown: true }, unknown)).toBe(SM.markdown);
-    expect(textFormatOfDraft({ ...draftOf(marked, []), markdown: false }, marked)).toBe(SM.plainText);
+    expect(textFormatOfDraft({ ...draftOf(unknown, []), markdown: true }, unknown)).toBe(
+      SM.markdown,
+    );
+    expect(textFormatOfDraft({ ...draftOf(marked, []), markdown: false }, marked)).toBe(
+      SM.plainText,
+    );
     expect(textFormatOfDraft({ ...newDraft({}), markdown: true })).toBe(SM.markdown);
   });
 
@@ -102,10 +108,18 @@ describe("checkDraft", () => {
   });
 
   it("trims the label of a card in Markdown, a single line that never holds a block", () => {
-    const draft = { ...written("a", "b", true), backLabel: [{ id: 0, value: " Replaced by ", tag: "en" }] };
+    const draft = {
+      ...written("a", "b", true),
+      backLabel: [{ id: 0, value: " Replaced by ", tag: "en" }],
+    };
     expect(checkDraft(draft)).toEqual({
       ok: true,
-      content: { front: { en: "a" }, back: { en: "b" }, backLabel: { en: "Replaced by" }, textFormat: SM.markdown },
+      content: {
+        front: { en: "a" },
+        back: { en: "b" },
+        backLabel: { en: "Replaced by" },
+        textFormat: SM.markdown,
+      },
     });
   });
 
@@ -117,7 +131,11 @@ describe("checkDraft", () => {
   });
 
   it("trims a card in Markdown switched off, saying it is plain text", () => {
-    const draft = { ...draftOf(marked, []), front: [{ id: 0, value: "  a", tag: "en" }], markdown: false };
+    const draft = {
+      ...draftOf(marked, []),
+      front: [{ id: 0, value: "  a", tag: "en" }],
+      markdown: false,
+    };
     expect(checkDraft(draft, marked)).toEqual({
       ok: true,
       content: { front: { en: "a" }, back: { en: "b" }, textFormat: SM.plainText },
@@ -129,7 +147,12 @@ describe("draftChanged", () => {
   const from = draftOf({ ...plain, frontNote: { en: "n" } }, ["en"]);
 
   it("says a draft as it was is unchanged, though a text was touched and changed back", () => {
-    expect(draftChanged({ ...from, front: [{ ...from.front[0]!, value: "a" }], touched: ["front"] }, from)).toBe(false);
+    expect(
+      draftChanged(
+        { ...from, front: [{ ...from.front[0]!, value: "a" }], touched: ["front"] },
+        from,
+      ),
+    ).toBe(false);
   });
 
   it.each<[string, Partial<CardDraft>]>([

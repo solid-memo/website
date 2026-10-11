@@ -26,7 +26,9 @@ export function agentUrlOf(subjectUrl: string, author: string): string {
     .toLowerCase();
   const slug = folded.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   const lossy = slug === "" || /[\p{L}\p{N}]/u.test(folded.replace(/[a-z0-9]/g, ""));
-  const fragment = lossy ? `${slug === "" ? "unnamed" : slug}-${hashOf(author.trim().normalize("NFC"))}` : slug;
+  const fragment = lossy
+    ? `${slug === "" ? "unnamed" : slug}-${hashOf(author.trim().normalize("NFC"))}`
+    : slug;
   return `${documentUrlOf(subjectUrl)}#agent-${fragment}`;
 }
 

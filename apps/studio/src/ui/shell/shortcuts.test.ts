@@ -1,27 +1,47 @@
 import { describe, expect, it } from "vitest";
-import { CHORD_TIMEOUT, isCharacterKey, isTyping, keyOf, nextRegion, pressKey, sectionRoute, SHORTCUTS, shortcutOf, type Section } from "./shortcuts";
+import {
+  CHORD_TIMEOUT,
+  isCharacterKey,
+  isTyping,
+  keyOf,
+  nextRegion,
+  pressKey,
+  sectionRoute,
+  SHORTCUTS,
+  shortcutOf,
+  type Section,
+} from "./shortcuts";
 
-const press = (key: string, { altGraph = false, ...held }: Partial<Record<"ctrlKey" | "metaKey" | "altKey" | "shiftKey" | "altGraph", boolean>> = {}) =>
-  keyOf({ key, ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, getModifierState: (modifier) => altGraph && modifier === "AltGraph", ...held });
+const press = (
+  key: string,
+  {
+    altGraph = false,
+    ...held
+  }: Partial<Record<"ctrlKey" | "metaKey" | "altKey" | "shiftKey" | "altGraph", boolean>> = {},
+) =>
+  keyOf({
+    key,
+    ctrlKey: false,
+    metaKey: false,
+    altKey: false,
+    shiftKey: false,
+    getModifierState: (modifier) => altGraph && modifier === "AltGraph",
+    ...held,
+  });
 
 const STUDIO = SHORTCUTS.filter((shortcut) => shortcut.scope === "studio");
 
 describe("the Studio's keymap", () => {
   it("gives every shortcut its own keys in its scope", () => {
     for (const scope of ["studio", "table"]) {
-      const keys = SHORTCUTS.filter((shortcut) => shortcut.scope === scope).map((shortcut) => shortcut.keys);
+      const keys = SHORTCUTS.filter((shortcut) => shortcut.scope === scope).map(
+        (shortcut) => shortcut.keys,
+      );
       expect(new Set(keys).size).toBe(keys.length);
     }
-    expect(STUDIO.filter((shortcut) => shortcut.keys.startsWith("g ")).map((shortcut) => shortcut.keys)).toEqual([
-      "g d",
-      "g g",
-      "g r",
-      "g p",
-      "g h",
-      "g l",
-      "g t",
-      "g i",
-    ]);
+    expect(
+      STUDIO.filter((shortcut) => shortcut.keys.startsWith("g ")).map((shortcut) => shortcut.keys),
+    ).toEqual(["g d", "g g", "g r", "g p", "g h", "g l", "g t", "g i"]);
   });
 
   it.each([
@@ -51,7 +71,9 @@ describe("the Studio's keymap", () => {
   });
 
   it("names a key without asking for AltGr where the event cannot say", () => {
-    expect(keyOf({ key: "[", ctrlKey: false, metaKey: false, altKey: true, shiftKey: false })).toBe("[");
+    expect(keyOf({ key: "[", ctrlKey: false, metaKey: false, altKey: true, shiftKey: false })).toBe(
+      "[",
+    );
   });
 
   it("finds a key's shortcut in one scope", () => {
@@ -72,15 +94,21 @@ describe("the Studio's keymap", () => {
     expect(pressKey(null, "9", 0, STUDIO).shortcut).toBe("tab.9");
     expect(pressKey(null, "0", 0, STUDIO).shortcut).toBeNull();
     // The key help lists the nine as one.
-    expect(STUDIO.filter((shortcut) => shortcut.id.startsWith("tab.")).map((shortcut) => shortcut.help)).toEqual(["1–9", ...Array(8).fill(null)]);
+    expect(
+      STUDIO.filter((shortcut) => shortcut.id.startsWith("tab.")).map((shortcut) => shortcut.help),
+    ).toEqual(["1–9", ...Array(8).fill(null)]);
   });
 
   it("toggles the aside with Ctrl+\\ and the dock with Ctrl+J, and goes from problem to problem with F8, a field's keys aside", () => {
     expect(pressKey(null, press("\\", { ctrlKey: true }), 0, STUDIO).shortcut).toBe("toggleAside");
     expect(pressKey(null, press("j", { ctrlKey: true }), 0, STUDIO).shortcut).toBe("toggleDock");
     expect(pressKey(null, press("F8"), 0, STUDIO).shortcut).toBe("nextProblem");
-    expect(pressKey(null, press("F8", { shiftKey: true }), 0, STUDIO).shortcut).toBe("previousProblem");
-    expect(STUDIO.filter((shortcut) => shortcut.whileTyping).map((shortcut) => shortcut.id)).toEqual([
+    expect(pressKey(null, press("F8", { shiftKey: true }), 0, STUDIO).shortcut).toBe(
+      "previousProblem",
+    );
+    expect(
+      STUDIO.filter((shortcut) => shortcut.whileTyping).map((shortcut) => shortcut.id),
+    ).toEqual([
       "palette",
       "palette",
       "nextRegion",
@@ -98,15 +126,24 @@ describe("the Studio's keymap", () => {
   it("waits after the first key of a chord for its second", () => {
     const first = pressKey(null, "g", 1000, STUDIO);
     expect(first).toEqual({ chord: { keys: "g", at: 1000 }, shortcut: null });
-    expect(pressKey(first.chord, "d", 1000 + CHORD_TIMEOUT, STUDIO)).toEqual({ chord: null, shortcut: "go.decks" });
-    expect(pressKey(first.chord, "g", 1200, STUDIO)).toEqual({ chord: null, shortcut: "go.groups" });
+    expect(pressKey(first.chord, "d", 1000 + CHORD_TIMEOUT, STUDIO)).toEqual({
+      chord: null,
+      shortcut: "go.decks",
+    });
+    expect(pressKey(first.chord, "g", 1200, STUDIO)).toEqual({
+      chord: null,
+      shortcut: "go.groups",
+    });
   });
 
   it("drops a chord left too long, or followed by a key that ends none, the key counting on its own", () => {
     const chord = { keys: "g", at: 1000 };
     const late = 1001 + CHORD_TIMEOUT;
     expect(pressKey(chord, "d", late, STUDIO)).toEqual({ chord: null, shortcut: null });
-    expect(pressKey(chord, "g", late, STUDIO)).toEqual({ chord: { keys: "g", at: late }, shortcut: null });
+    expect(pressKey(chord, "g", late, STUDIO)).toEqual({
+      chord: { keys: "g", at: late },
+      shortcut: null,
+    });
     expect(pressKey(chord, "?", 1200, STUDIO)).toEqual({ chord: null, shortcut: "help" });
     expect(pressKey(chord, "q", 1200, STUDIO)).toEqual({ chord: null, shortcut: null });
   });
@@ -151,7 +188,10 @@ describe("isTyping", () => {
 });
 
 describe("nextRegion", () => {
-  const regions = ["header", "main", "status"].map((name) => ({ name, contains: (other: Node | null) => other === (name as unknown) }));
+  const regions = ["header", "main", "status"].map((name) => ({
+    name,
+    contains: (other: Node | null) => other === (name as unknown),
+  }));
   const at = (name: string) => name as unknown as Node;
 
   it("goes to the next region with F6 and the one before with Shift+F6, round", () => {

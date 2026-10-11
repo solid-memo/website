@@ -110,7 +110,10 @@ export function hitTest(layout: Layout, y: number, source: VisibleRow): Hit {
   /** The place `depth` levels in, right under rows[at] (above the first row when `at` is -1). */
   function gap(at: number): GapHit | NoopHit {
     const a = rows[at];
-    if (a === undefined) return depths.min > 0 ? NOOP : place({ parent: null, after: null }, 0, rows[0]!.top - HALF_GAP_PX, null);
+    if (a === undefined)
+      return depths.min > 0
+        ? NOOP
+        : place({ parent: null, after: null }, 0, rows[0]!.top - HALF_GAP_PX, null);
     const b = rows[at + 1];
     const deepest = a.kind === "group" && !a.collapsed ? a.depth + 1 : a.depth;
     const shallowest = b?.depth ?? 0;
@@ -138,10 +141,20 @@ export function hitTest(layout: Layout, y: number, source: VisibleRow): Hit {
         : parent !== null
           ? { kind: "in", group: parent }
           : null;
-    return place({ parent, after }, depth, b === undefined ? a.bottom + HALF_GAP_PX : (a.bottom + b.top) / 2, label);
+    return place(
+      { parent, after },
+      depth,
+      b === undefined ? a.bottom + HALF_GAP_PX : (a.bottom + b.top) / 2,
+      label,
+    );
   }
 
-  function place(to: Anchor, depth: number, lineY: number, label: GapLabel | null): GapHit | NoopHit {
+  function place(
+    to: Anchor,
+    depth: number,
+    lineY: number,
+    label: GapLabel | null,
+  ): GapHit | NoopHit {
     if (to.parent === source.parent && to.after === source.before) return NOOP;
     return { kind: "gap", to, depth, y: lineY, label };
   }
@@ -155,7 +168,12 @@ export function hitTest(layout: Layout, y: number, source: VisibleRow): Hit {
   if (row.kind === "slot") return gap(at - 1);
   const nearer = y < (row.top + row.bottom) / 2 ? gap(at - 1) : gap(at);
   if (row.kind === "group" && source.ancestors.includes(row.key)) return nearer;
-  if (row.kind === "group" && source.kind === "deck" && row.depth + 1 >= depths.min && row.depth + 1 <= depths.max) {
+  if (
+    row.kind === "group" &&
+    source.kind === "deck" &&
+    row.depth + 1 >= depths.min &&
+    row.depth + 1 <= depths.max
+  ) {
     return { kind: "into", group: row.key, to: { parent: row.key, after: row.last } };
   }
   return rules.combine ? { kind: "combine", target: row.key, fallback: nearer } : nearer;
@@ -173,6 +191,7 @@ export const SCROLL_MAX_PX = 18;
  * its bottom, faster the nearer the edge, and not at all elsewhere.
  */
 export function scrollStep(clientY: number, height: number): number {
-  const push = (into: number) => SCROLL_MAX_PX * Math.min(Math.max(into, 0) / SCROLL_EDGE_PX, 1) ** 2;
+  const push = (into: number) =>
+    SCROLL_MAX_PX * Math.min(Math.max(into, 0) / SCROLL_EDGE_PX, 1) ** 2;
   return push(clientY - (height - SCROLL_EDGE_PX)) - push(SCROLL_EDGE_PX - clientY);
 }

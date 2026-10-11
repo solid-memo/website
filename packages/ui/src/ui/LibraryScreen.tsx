@@ -78,7 +78,9 @@ export function LibraryScreen({
   // not imported: the import never includes what the user cannot see. A
   // course is never imported: it is started from its page, and its cards
   // join the deck as the learner answers them (docs/courses.md).
-  const selected = shown.filter((deck) => deck.isCourse !== true && selectedUrls.includes(deck.url));
+  const selected = shown.filter(
+    (deck) => deck.isCourse !== true && selectedUrls.includes(deck.url),
+  );
   const available = topicsOf(decks);
   const count =
     shown.length === decks.length
@@ -96,16 +98,12 @@ export function LibraryScreen({
 
   function toggleTopic(topic: string, checked: boolean) {
     filtered.current = true;
-    setTopics((current) =>
-      checked ? [...current, topic] : current.filter((t) => t !== topic),
-    );
+    setTopics((current) => (checked ? [...current, topic] : current.filter((t) => t !== topic)));
   }
 
   function toggle(deck: LibraryDeck, checked: boolean) {
     setSelectedUrls((urls) =>
-      checked
-        ? [...urls, deck.url]
-        : urls.filter((url) => url !== deck.url),
+      checked ? [...urls, deck.url] : urls.filter((url) => url !== deck.url),
     );
   }
 
@@ -125,7 +123,9 @@ export function LibraryScreen({
         <span class="hint">{count}</span>
       </header>
       <p>{t("library.intro")}</p>
-      <p class="hint">{tx("library.fromLinkHint", { link: <a href={importUrlHref}>{t("library.fromLink")}</a> })}</p>
+      <p class="hint">
+        {tx("library.fromLinkHint", { link: <a href={importUrlHref}>{t("library.fromLink")}</a> })}
+      </p>
       {decks.length === 0 ? (
         <p>{t("library.empty")}</p>
       ) : (
@@ -243,9 +243,7 @@ export function LibraryDeckRow({
       <span class="library-deck-meta">
         <span class="hint">{t("common.cardCount", { count: deck.cardCount })}</span>
         {deck.isCourse === true && <span class="hint library-course">{t("library.course")}</span>}
-        {imported && (
-          <span class="hint library-imported">{t("library.alreadyImported")}</span>
-        )}
+        {imported && <span class="hint library-imported">{t("library.alreadyImported")}</span>}
       </span>
       <a
         class="button library-preview"

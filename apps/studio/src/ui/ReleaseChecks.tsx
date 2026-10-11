@@ -18,8 +18,18 @@ interface CheckForm {
 
 /** The check a form records: its day, unchanged, keeps the time the check had. */
 function activityOf(form: CheckForm, before: CheckActivity | null): CheckActivity {
-  const endedAt = before !== null && before.endedAt.slice(0, 10) === form.day ? before.endedAt : `${form.day}T00:00:00Z`;
-  return { check: form.check, label: form.label, scope: form.scope, outcome: form.outcome, endedAt, language: form.language };
+  const endedAt =
+    before !== null && before.endedAt.slice(0, 10) === form.day
+      ? before.endedAt
+      : `${form.day}T00:00:00Z`;
+  return {
+    check: form.check,
+    label: form.label,
+    scope: form.scope,
+    outcome: form.outcome,
+    endedAt,
+    language: form.language,
+  };
 }
 
 /**
@@ -30,14 +40,27 @@ function activityOf(form: CheckForm, before: CheckActivity | null): CheckActivit
  * versions are shown as they are, never edited. A new check is recorded
  * under them, `#check-<n>`.
  */
-export function ReleaseChecks({ draft, onEdit }: { draft: ReleaseDraft; onEdit: DraftEditor["edit"] }) {
+export function ReleaseChecks({
+  draft,
+  onEdit,
+}: {
+  draft: ReleaseDraft;
+  onEdit: DraftEditor["edit"];
+}) {
   const { t, locale } = useI18n();
   const checks = checksOf(draft);
   const own = checks.filter((check) => !check.carried);
   const carried = checks.filter((check) => check.carried);
   const [editing, setEditing] = useState<string | null>(null);
   const today = new Date().toISOString().slice(0, 10);
-  const blank: CheckForm = { check: "machine", label: "", scope: "", outcome: "", day: today, language: locale === "sv" ? "sv" : "en" };
+  const blank: CheckForm = {
+    check: "machine",
+    label: "",
+    scope: "",
+    outcome: "",
+    day: today,
+    language: locale === "sv" ? "sv" : "en",
+  };
   return (
     <>
       <p class="hint">{t("studio.release.checksHint")}</p>
@@ -51,10 +74,21 @@ export function ReleaseChecks({ draft, onEdit }: { draft: ReleaseDraft; onEdit: 
                 <CheckFormFields
                   id="release-check"
                   legend={nameOf(check)}
-                  start={{ ...check.activity, day: check.activity.endedAt.slice(0, 10), language: check.activity.language === "sv" ? "sv" : "en" }}
+                  start={{
+                    ...check.activity,
+                    day: check.activity.endedAt.slice(0, 10),
+                    language: check.activity.language === "sv" ? "sv" : "en",
+                  }}
                   submit={t("studio.release.saveCheck")}
                   onSubmit={(form) => {
-                    const made = onEdit([{ kind: "editCheckActivity", id: check.id, activity: activityOf(form, check.activity) }]) === null;
+                    const made =
+                      onEdit([
+                        {
+                          kind: "editCheckActivity",
+                          id: check.id,
+                          activity: activityOf(form, check.activity),
+                        },
+                      ]) === null;
                     if (made) setEditing(null);
                     return made;
                   }}
@@ -68,12 +102,20 @@ export function ReleaseChecks({ draft, onEdit }: { draft: ReleaseDraft; onEdit: 
                   <p class="hint">{t("studio.release.checkOtherwise")}</p>
                 ) : (
                   <>
-                    <button type="button" aria-label={t("studio.release.editOf", { name: nameOf(check) })} onClick={() => setEditing(check.id)}>
+                    <button
+                      type="button"
+                      aria-label={t("studio.release.editOf", { name: nameOf(check) })}
+                      onClick={() => setEditing(check.id)}
+                    >
                       {t("studio.release.edit")}
                     </button>{" "}
                   </>
                 )}
-                <button type="button" aria-label={t("studio.release.removeOf", { name: nameOf(check) })} onClick={() => onEdit([{ kind: "deleteActivity", id: check.id }])}>
+                <button
+                  type="button"
+                  aria-label={t("studio.release.removeOf", { name: nameOf(check) })}
+                  onClick={() => onEdit([{ kind: "deleteActivity", id: check.id }])}
+                >
                   {t("studio.release.remove")}
                 </button>
               </li>
@@ -86,7 +128,11 @@ export function ReleaseChecks({ draft, onEdit }: { draft: ReleaseDraft; onEdit: 
         legend={t("studio.release.newCheck")}
         start={blank}
         submit={t("studio.release.addCheck")}
-        onSubmit={(form) => onEdit([{ kind: "addCheckActivity", id: checkIdFor(draft), activity: activityOf(form, null) }]) === null}
+        onSubmit={(form) =>
+          onEdit([
+            { kind: "addCheckActivity", id: checkIdFor(draft), activity: activityOf(form, null) },
+          ]) === null
+        }
       />
       {carried.length > 0 && (
         <>
@@ -162,7 +208,10 @@ function CheckFormFields({
       class="card-edit"
       onSubmit={(event) => {
         event.preventDefault();
-        if ([form.label, form.scope, form.outcome].some((text) => text.trim() === "") || form.day === "") {
+        if (
+          [form.label, form.scope, form.outcome].some((text) => text.trim() === "") ||
+          form.day === ""
+        ) {
           setEmpty(true);
           return;
         }
@@ -175,21 +224,50 @@ function CheckFormFields({
           <legend>{t("studio.release.checkKind")}</legend>
           {(["machine", "ai"] as const).map((check) => (
             <label key={check} class="radio-option">
-              <input type="radio" name={`${id}-kind`} checked={form.check === check} onChange={() => set({ check })} />{" "}
+              <input
+                type="radio"
+                name={`${id}-kind`}
+                checked={form.check === check}
+                onChange={() => set({ check })}
+              />{" "}
               {t(check === "machine" ? "studio.release.checkMachine" : "studio.release.checkAi")}
             </label>
           ))}
         </fieldset>
         <label for={`${id}-label`}>{t("studio.release.checkLabel")}</label>
-        <input id={`${id}-label`} value={form.label} autocomplete="off" onInput={(event) => set({ label: event.currentTarget.value })} />
+        <input
+          id={`${id}-label`}
+          value={form.label}
+          autocomplete="off"
+          onInput={(event) => set({ label: event.currentTarget.value })}
+        />
         <label for={`${id}-scope`}>{t("studio.release.checkScope")}</label>
-        <textarea id={`${id}-scope`} rows={2} value={form.scope} onInput={(event) => set({ scope: event.currentTarget.value })} />
+        <textarea
+          id={`${id}-scope`}
+          rows={2}
+          value={form.scope}
+          onInput={(event) => set({ scope: event.currentTarget.value })}
+        />
         <label for={`${id}-outcome`}>{t("studio.release.checkOutcome")}</label>
-        <textarea id={`${id}-outcome`} rows={2} value={form.outcome} onInput={(event) => set({ outcome: event.currentTarget.value })} />
+        <textarea
+          id={`${id}-outcome`}
+          rows={2}
+          value={form.outcome}
+          onInput={(event) => set({ outcome: event.currentTarget.value })}
+        />
         <label for={`${id}-day`}>{t("studio.release.checkEnded")}</label>
-        <input id={`${id}-day`} type="date" value={form.day} onInput={(event) => set({ day: event.currentTarget.value })} />
+        <input
+          id={`${id}-day`}
+          type="date"
+          value={form.day}
+          onInput={(event) => set({ day: event.currentTarget.value })}
+        />
         <label for={`${id}-language`}>{t("studio.release.checkLanguage")}</label>
-        <select id={`${id}-language`} value={form.language} onChange={(event) => set({ language: event.currentTarget.value === "sv" ? "sv" : "en" })}>
+        <select
+          id={`${id}-language`}
+          value={form.language}
+          onChange={(event) => set({ language: event.currentTarget.value === "sv" ? "sv" : "en" })}
+        >
           <option value="en">{t("studio.release.checkLanguageEn")}</option>
           <option value="sv">{t("studio.release.checkLanguageSv")}</option>
         </select>

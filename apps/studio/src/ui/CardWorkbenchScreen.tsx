@@ -33,7 +33,14 @@ import { EditableCell, type CellEdit } from "./shell/EditableCell";
 import { Keys } from "./shell/KeyHelp";
 import { SavedViews } from "./shell/SavedViews";
 import { nextSort, NO_SELECTION, toggled, type Selection } from "./shell/tableModel";
-import { cardParams, cardViewOf, CARD_VIEWS, paramsText, withCardView, type SavedView } from "./shell/views";
+import {
+  cardParams,
+  cardViewOf,
+  CARD_VIEWS,
+  paramsText,
+  withCardView,
+  type SavedView,
+} from "./shell/views";
 
 /** An edit made, which can be undone while the page is open. */
 export interface CardEditMade {
@@ -208,12 +215,23 @@ export function CardWorkbenchScreen({
   const shown = page.items;
   const count = chosen.size;
   /** Cards leave the selection, once they leave the deck. */
-  const unselect = (cards: readonly Card[]) => setChosen((all) => toggled(all, cards.map((card) => card.url), false));
+  const unselect = (cards: readonly Card[]) =>
+    setChosen((all) =>
+      toggled(
+        all,
+        cards.map((card) => card.url),
+        false,
+      ),
+    );
   const editSaid =
     lastEdit === null
       ? ""
-      : t(`studio.cardBulk.done.${doneKey(lastEdit.edit)}`, { count: lastEdit.plan.save.length + lastEdit.plan.remove.length }) +
-        (lastEdit.plan.skipped.length > 0 ? ` ${t("studio.cardBulk.skipped", { count: lastEdit.plan.skipped.length })}` : "");
+      : t(`studio.cardBulk.done.${doneKey(lastEdit.edit)}`, {
+          count: lastEdit.plan.save.length + lastEdit.plan.remove.length,
+        }) +
+        (lastEdit.plan.skipped.length > 0
+          ? ` ${t("studio.cardBulk.skipped", { count: lastEdit.plan.skipped.length })}`
+          : "");
   const reviewSaid =
     reviewDone === null
       ? ""
@@ -221,7 +239,10 @@ export function CardWorkbenchScreen({
         ? t("studio.cardBulk.notStudied")
         : reviewDone.edit.kind === "reset"
           ? t("studio.cardBulk.done.reset", { count: reviewDone.count })
-          : t("studio.cardBulk.done.reschedule", { count: reviewDone.count, due: formatDate(reviewDone.edit.due) });
+          : t("studio.cardBulk.done.reschedule", {
+              count: reviewDone.count,
+              due: formatDate(reviewDone.edit.due),
+            });
   // The Studio's activity keeps what each status line said.
   useActivity(lastEdit, () => editSaid);
   useActivity(undone, () => t("studio.cardBulk.undone"));
@@ -237,7 +258,9 @@ export function CardWorkbenchScreen({
   // A language the URL names but the cards' sides do not have (one of
   // the notes', say) is still offered, so the filter shows and clears.
   const langOptions =
-    query.lang === undefined || languages.includes(query.lang) ? languages : [...languages, query.lang];
+    query.lang === undefined || languages.includes(query.lang)
+      ? languages
+      : [...languages, query.lang];
   /**
    * How a side of a card is edited in its cell: only a plain text one's,
    * in one language that is stated, while the deck may be changed; as an
@@ -246,10 +269,14 @@ export function CardWorkbenchScreen({
    */
   const textEdit = (card: Card, side: "front" | "back"): CellEdit | null => {
     const tags = Object.keys(card[side]);
-    if (readOnly !== null || isMarkdown(card.textFormat) || tags.length !== 1 || tags[0] === "") return null;
+    if (readOnly !== null || isMarkdown(card.textFormat) || tags.length !== 1 || tags[0] === "")
+      return null;
     const tag = tags[0]!;
     return {
-      label: t("studio.inline.field", { column: t(`studio.cards.column.${side}`), row: cardName(card, readerText) }),
+      label: t("studio.inline.field", {
+        column: t(`studio.cards.column.${side}`),
+        row: cardName(card, readerText),
+      }),
       shown: card[side][tag]!,
       value: card[side][tag]!,
       onSave: (text) => {
@@ -257,7 +284,9 @@ export function CardWorkbenchScreen({
         const planned = plan([card.id], edit);
         const reason = planned.save.length === 0 ? planned.skipped[0]!.reason : null;
         setRefusal(reason === "unchanged" ? null : reason);
-        return reason === null ? onEdit([card.id], edit, planned) : Promise.resolve(reason === "unchanged");
+        return reason === null
+          ? onEdit([card.id], edit, planned)
+          : Promise.resolve(reason === "unchanged");
       },
     };
   };
@@ -273,16 +302,26 @@ export function CardWorkbenchScreen({
       label: t("studio.cards.column.back"),
       cell: ({ card }) => (
         <EditableCell edit={textEdit(card, "back")}>
-          <CardRowBack back={card.back} imageUrl={card.backImageUrl} imageDescription={card.backImageDescription} textFormat={card.textFormat} />
+          <CardRowBack
+            back={card.back}
+            imageUrl={card.backImageUrl}
+            imageDescription={card.backImageDescription}
+            textFormat={card.textFormat}
+          />
         </EditableCell>
       ),
     },
-    { key: "due", label: t("studio.cards.column.due"), cell: ({ due }) => (due === undefined ? none : formatDate(due)) },
+    {
+      key: "due",
+      label: t("studio.cards.column.due"),
+      cell: ({ due }) => (due === undefined ? none : formatDate(due)),
+    },
     {
       key: "interval",
       label: t("studio.cards.column.interval"),
       number: true,
-      cell: ({ intervalDays }) => (intervalDays === undefined ? none : t("studio.cards.days", { count: intervalDays })),
+      cell: ({ intervalDays }) =>
+        intervalDays === undefined ? none : t("studio.cards.days", { count: intervalDays }),
     },
     {
       key: "ease",
@@ -290,11 +329,25 @@ export function CardWorkbenchScreen({
       number: true,
       cell: ({ easeFactor }) => (easeFactor === undefined ? none : easeFactor.toFixed(2)),
     },
-    { key: "lapses", label: t("studio.cards.column.lapses"), number: true, cell: ({ lapses }) => lapses ?? <span aria-hidden="true">–</span> },
-    { key: "created", label: t("studio.cards.column.created"), cell: ({ card }) => formatDate(card.createdAt) },
+    {
+      key: "lapses",
+      label: t("studio.cards.column.lapses"),
+      number: true,
+      cell: ({ lapses }) => lapses ?? <span aria-hidden="true">–</span>,
+    },
+    {
+      key: "created",
+      label: t("studio.cards.column.created"),
+      cell: ({ card }) => formatDate(card.createdAt),
+    },
     { key: "id", label: t("studio.cards.column.id"), cell: ({ card }) => <code>{card.id}</code> },
   ];
-  const select = (label: string, value: string, onChange: (value: string) => void, options: [string, string][]) => (
+  const select = (
+    label: string,
+    value: string,
+    onChange: (value: string) => void,
+    options: [string, string][],
+  ) => (
     <label>
       {label}
       <select value={value} onChange={(event) => onChange(event.currentTarget.value)}>
@@ -325,7 +378,9 @@ export function CardWorkbenchScreen({
       )}
       {undone && <p role="status">{t("studio.cardBulk.undone")}</p>}
       {reviewDone !== null && <p role="status">{reviewSaid}</p>}
-      {transferDone !== null && <p role="status">{transferText(transferDone, { t, readerText })}</p>}
+      {transferDone !== null && (
+        <p role="status">{transferText(transferDone, { t, readerText })}</p>
+      )}
       <ErrorMessage error={error} />
       {refusal !== null && (
         <p class="error" role="alert">
@@ -338,7 +393,12 @@ export function CardWorkbenchScreen({
         <>
           <div class="studio-views" role="group" aria-label={t("studio.views.label")}>
             {CARD_VIEWS.map((each) => (
-              <button key={each} type="button" aria-pressed={cardViewOf(query) === each} onClick={() => onQuery(withCardView(query, each))}>
+              <button
+                key={each}
+                type="button"
+                aria-pressed={cardViewOf(query) === each}
+                onClick={() => onQuery(withCardView(query, each))}
+              >
                 {t(`studio.views.cards.${each}`)}
               </button>
             ))}
@@ -367,15 +427,24 @@ export function CardWorkbenchScreen({
             )}
             {select(t("studio.cards.lang"), query.lang ?? "", (lang) => choice("lang", lang), [
               ["", t("studio.cards.anyLang")],
-              ...langOptions.map((tag): [string, string] => [tag, tag === UNSTATED ? t("studio.cards.unstated") : languageLabel(tag)]),
+              ...langOptions.map((tag): [string, string] => [
+                tag,
+                tag === UNSTATED ? t("studio.cards.unstated") : languageLabel(tag),
+              ]),
             ])}
             {select(t("studio.cards.state"), query.state ?? "", (state) => choice("state", state), [
               ["", t("studio.cards.anyState")],
-              ...CARD_STATES.map((state): [string, string] => [state, t(`studio.cards.states.${state}`)]),
+              ...CARD_STATES.map((state): [string, string] => [
+                state,
+                t(`studio.cards.states.${state}`),
+              ]),
             ])}
             {select(t("studio.cards.has"), query.has ?? "", (has) => choice("has", has), [
               ["", t("studio.cards.anything")],
-              ...CARD_FEATURES.map((feature): [string, string] => [feature, t(`studio.cards.features.${feature}`)]),
+              ...CARD_FEATURES.map((feature): [string, string] => [
+                feature,
+                t(`studio.cards.features.${feature}`),
+              ]),
             ])}
             {select(
               t("studio.cards.pageSize"),
@@ -434,24 +503,36 @@ export function CardWorkbenchScreen({
                 select={{
                   label: t("studio.cards.select"),
                   allLabel: t("studio.cards.selectAll"),
-                  rowLabel: ({ card }) => t("studio.cards.selectCard", { card: cardName(card, readerText) }),
+                  rowLabel: ({ card }) =>
+                    t("studio.cards.selectCard", { card: cardName(card, readerText) }),
                   chosen,
                   onChoose: setChosen,
                 }}
                 current={current}
                 around={{
                   ...(page.firstIndex === 0 ? {} : { previous: rows[page.firstIndex - 1]! }),
-                  ...(page.firstIndex + shown.length === rows.length ? {} : { next: rows[page.firstIndex + shown.length]! }),
+                  ...(page.firstIndex + shown.length === rows.length
+                    ? {}
+                    : { next: rows[page.firstIndex + shown.length]! }),
                 }}
                 onMove={onMove === undefined ? undefined : (row) => onMove(row.card)}
                 onOpen={(row) => onOpen(row.card)}
               />
               {page.pageCount > 1 && (
-                <Pager page={page.currentPage} pageCount={page.pageCount} onPageChange={(to) => onQuery({ ...query, page: to })} />
+                <Pager
+                  page={page.currentPage}
+                  pageCount={page.pageCount}
+                  onPageChange={(to) => onQuery({ ...query, page: to })}
+                />
               )}
             </>
           )}
-          <BulkBar label={t("studio.cardBulk.label")} count={count} said={t("studio.cards.selected", { count })} onClear={() => setChosen(NO_SELECTION)}>
+          <BulkBar
+            label={t("studio.cardBulk.label")}
+            count={count}
+            said={t("studio.cards.selected", { count })}
+            onClear={() => setChosen(NO_SELECTION)}
+          >
             {selected.length > 0 && readOnly === null && (
               <CardBulkActions
                 cards={selected}
@@ -496,7 +577,10 @@ export function CardWorkbenchScreen({
 }
 
 /** What a move or copy did: how many cards went where, how many got a new id, how many were there already. */
-function transferText({ transfer, plan }: TransferMade, { t, readerText }: Pick<I18n, "t" | "readerText">): string {
+function transferText(
+  { transfer, plan }: TransferMade,
+  { t, readerText }: Pick<I18n, "t" | "readerText">,
+): string {
   const renamed = plan.cards.filter((card) => card.to !== card.from).length;
   const present = plan.cards.filter((card) => card.present).length;
   const parts = [
@@ -506,7 +590,9 @@ function transferText({ transfer, plan }: TransferMade, { t, readerText }: Pick<
     }),
     ...(renamed > 0 ? [t("studio.cardBulk.transfer.renamed", { count: renamed })] : []),
     ...(present > 0 ? [t("studio.cardBulk.transfer.present", { count: present })] : []),
-    ...(plan.missing.length > 0 ? [t("studio.cardBulk.skipped", { count: plan.missing.length })] : []),
+    ...(plan.missing.length > 0
+      ? [t("studio.cardBulk.skipped", { count: plan.missing.length })]
+      : []),
   ];
   return parts.join(" ");
 }

@@ -31,10 +31,7 @@ export function ValidationContainer({
     <>
       <h2>{t("validation.heading", { name: instance.name })}</h2>
       <p>
-        <button
-          onClick={() => reportQuery.refetch()}
-          disabled={reportQuery.isFetching}
-        >
+        <button onClick={() => reportQuery.refetch()} disabled={reportQuery.isFetching}>
           {reportQuery.isFetching ? t("validation.validating") : t("validation.validateAgain")}
         </button>
       </p>

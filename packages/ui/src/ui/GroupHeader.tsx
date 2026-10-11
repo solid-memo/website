@@ -51,7 +51,12 @@ export function GroupHeader({
       style={`--depth: ${depth}`}
     >
       {naming ? (
-        <NameEditor initial={readerText(group.title)} label={t("deckList.groupName")} maxLength={80} onDone={onNamed} />
+        <NameEditor
+          initial={readerText(group.title)}
+          label={t("deckList.groupName")}
+          maxLength={80}
+          onDone={onNamed}
+        />
       ) : (
         <button
           type="button"

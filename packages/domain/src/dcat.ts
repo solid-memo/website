@@ -42,12 +42,16 @@ export function defaultDeckDescriptionText(title: LangText): LangText {
  * none (in English, with or without its Swedish), for a deck by any of
  * `titles`: not text the user wrote, so a release's may replace it.
  */
-export function isDefaultDeckDescription(description: LangText, titles: readonly LangText[]): boolean {
+export function isDefaultDeckDescription(
+  description: LangText,
+  titles: readonly LangText[],
+): boolean {
   return titles.some((title) => {
     const name = english(title) ?? shown(title);
     const tags = Object.keys(description).sort().join(",");
     return (
-      (tags === "en" || (tags === "en,sv" && description.sv === defaultDeckDescriptionText(title).sv)) &&
+      (tags === "en" ||
+        (tags === "en,sv" && description.sv === defaultDeckDescriptionText(title).sv)) &&
       description.en === defaultDeckDescription(name)
     );
   });
@@ -58,7 +62,9 @@ export function isDefaultDeckDescription(description: LangText, titles: readonly
  * wrote, in English and Swedish; any other as its English.
  */
 export function descriptionInFormat4(description: string, title: string): LangText {
-  return description === defaultDeckDescription(title) ? defaultDeckDescriptionText({ en: title }) : inEnglish(description);
+  return description === defaultDeckDescription(title)
+    ? defaultDeckDescriptionText({ en: title })
+    : inEnglish(description);
 }
 
 /**

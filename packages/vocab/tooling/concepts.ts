@@ -1,4 +1,10 @@
-import { RDF_TYPE, localName, objectsOf, parseTurtle, subjectsOfType } from "@solid-memo/turtle/rdf";
+import {
+  RDF_TYPE,
+  localName,
+  objectsOf,
+  parseTurtle,
+  subjectsOfType,
+} from "@solid-memo/turtle/rdf";
 import { GENERATED_HEADER } from "./vocab.ts";
 
 /**
@@ -47,14 +53,22 @@ export function parseConceptSchemes(turtle: string, baseIri: string): SchemeMode
     if (!byTag.has("en")) {
       throw new Error(`${baseIri}: <${subject}> has no English ${localName(predicate)}.`);
     }
-    const tags = [...byTag.keys()].sort((a, b) => (a === "en" ? -1 : b === "en" ? 1 : a.localeCompare(b)));
+    const tags = [...byTag.keys()].sort((a, b) =>
+      a === "en" ? -1 : b === "en" ? 1 : a.localeCompare(b),
+    );
     return Object.fromEntries(tags.map((tag) => [tag, byTag.get(tag)!]));
   };
-  const inLanguages = (subject: string, predicate: string, languages: readonly string[]): LangTextModel => {
+  const inLanguages = (
+    subject: string,
+    predicate: string,
+    languages: readonly string[],
+  ): LangTextModel => {
     const text = texts(subject, predicate);
     const missing = languages.filter((tag) => !(tag in text));
     if (missing.length > 0) {
-      throw new Error(`${baseIri}: <${subject}> has no ${localName(predicate)} in ${missing.join(", ")}.`);
+      throw new Error(
+        `${baseIri}: <${subject}> has no ${localName(predicate)} in ${missing.join(", ")}.`,
+      );
     }
     return text;
   };
@@ -129,12 +143,20 @@ export interface ReferenceScheme {
 }
 
 /** The concepts of a reference scheme (`scheme`, its IRI) in one Turtle document, in document order. */
-export function parseReferenceConcepts(turtle: string, baseIri: string, scheme: string): ReferenceModel[] {
+export function parseReferenceConcepts(
+  turtle: string,
+  baseIri: string,
+  scheme: string,
+): ReferenceModel[] {
   const quads = parseTurtle(turtle, baseIri);
   return subjectsOfType(quads, `${SKOS}Concept`)
-    .filter((concept) => objectsOf(quads, concept, `${SKOS}inScheme`).some((s) => s.value === scheme))
+    .filter((concept) =>
+      objectsOf(quads, concept, `${SKOS}inScheme`).some((s) => s.value === scheme),
+    )
     .map((iri) => {
-      const label = objectsOf(quads, iri, `${SKOS}prefLabel`).find((o) => o.termType === "Literal" && o.language === "en");
+      const label = objectsOf(quads, iri, `${SKOS}prefLabel`).find(
+        (o) => o.termType === "Literal" && o.language === "en",
+      );
       if (label === undefined) throw new Error(`${baseIri}: <${iri}> has no English prefLabel.`);
       return { iri, code: iri.slice(iri.lastIndexOf("/") + 1), label: label.value };
     });
@@ -182,7 +204,9 @@ export function renderConcepts(
         `iri: ${JSON.stringify(concept.iri)}`,
         `label: ${renderText(concept.label)}`,
         `definition: ${renderText(concept.definition)}`,
-        ...(concept.notation === undefined ? [] : [`notation: ${JSON.stringify(concept.notation)}`]),
+        ...(concept.notation === undefined
+          ? []
+          : [`notation: ${JSON.stringify(concept.notation)}`]),
         ...(concept.broader === undefined ? [] : [`broader: ${JSON.stringify(concept.broader)}`]),
       ];
       lines.push("    {");
@@ -206,7 +230,9 @@ export function renderConcepts(
     lines.push(`/** ${scheme.definition} */`);
     lines.push(`export const ${scheme.name}: readonly ReferenceConcept[] = [`);
     for (const concept of concepts) {
-      lines.push(`  { iri: ${JSON.stringify(concept.iri)}, code: ${JSON.stringify(concept.code)}, label: ${JSON.stringify(concept.label)} },`);
+      lines.push(
+        `  { iri: ${JSON.stringify(concept.iri)}, code: ${JSON.stringify(concept.code)}, label: ${JSON.stringify(concept.label)} },`,
+      );
     }
     lines.push("];", "");
   }
@@ -216,7 +242,8 @@ export function renderConcepts(
 /** A language map as an object literal: { en: "Red", sv: "Röd" }. */
 function renderText(text: LangTextModel): string {
   const entries = Object.entries(text).map(
-    ([tag, value]) => `${/^[a-z]+$/.test(tag) ? tag : JSON.stringify(tag)}: ${JSON.stringify(value)}`,
+    ([tag, value]) =>
+      `${/^[a-z]+$/.test(tag) ? tag : JSON.stringify(tag)}: ${JSON.stringify(value)}`,
   );
   return `{ ${entries.join(", ")} }`;
 }

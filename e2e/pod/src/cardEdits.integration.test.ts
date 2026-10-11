@@ -38,9 +38,18 @@ function page(beforeWrite: (url: string) => Promise<void> = async () => undefine
   };
   const writeFence = createWriteFence(watching);
   const podFetch = writeFence.fetch;
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
   const checkWrite = shapeValidator.checkSubjects;
-  const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
+  const deps = {
+    fetch: podFetch,
+    checkWrite,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  };
   return createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -69,13 +78,26 @@ async function seed(server: string): Promise<{ instanceUrl: string; deck: Deck }
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
-  await put(`${base}profile/card.ttl`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
+  await put(
+    `${base}profile/card.ttl`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
   const useCases = page();
-  const instance = await useCases.createInstance({ webId }, { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+  const instance = await useCases.createInstance(
+    { webId },
+    { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" },
+  );
   const deck = await useCases.createDeck(instance.url, { en: "Birds" });
   await put(
     deck.cardsDocumentUrl,
@@ -95,11 +117,15 @@ async function seed(server: string): Promise<{ instanceUrl: string; deck: Deck }
 
 /** What the user previews: the edit planned on the deck's cards and review states as they are. */
 async function preview(useCases: UseCases, deck: Deck, ids: string[], edit: CardEdit) {
-  const [cards, states] = await Promise.all([useCases.listCards(deck), useCases.listDeckReviewStates(deck)]);
+  const [cards, states] = await Promise.all([
+    useCases.listCards(deck),
+    useCases.listDeckReviewStates(deck),
+  ]);
   return planCardEdit(cards, ids, edit, states);
 }
 
-const byId = async (deck: Deck) => Object.fromEntries((await page().listCards(deck)).map((card) => [card.id, card]));
+const byId = async (deck: Deck) =>
+  Object.fromEntries((await page().listCards(deck)).map((card) => [card.id, card]));
 
 describe.each(SERVERS)("bulk edits of cards on $name", ({ url: server }) => {
   /** Whether this server refuses an edit whose If-Match names another version. */
@@ -114,9 +140,22 @@ describe.each(SERVERS)("bulk edits of cards on $name", ({ url: server }) => {
   it("replaces text in one write, the cards staying valid, and undoes it", async () => {
     const { instanceUrl, deck } = await seed(server);
     const useCases = page();
-    const edit: CardEdit = { kind: "replaceText", find: "fisk", replace: "sill", fields: ["front", "distractor"], caseSensitive: false, wholeWord: false };
+    const edit: CardEdit = {
+      kind: "replaceText",
+      find: "fisk",
+      replace: "sill",
+      fields: ["front", "distractor"],
+      caseSensitive: false,
+      wholeWord: false,
+    };
     const previewed = await preview(useCases, deck, ["bird", "gull", "owl"], edit);
-    const written = await useCases.editCards(instanceUrl, deck, ["bird", "gull", "owl"], edit, previewed);
+    const written = await useCases.editCards(
+      instanceUrl,
+      deck,
+      ["bird", "gull", "owl"],
+      edit,
+      previewed,
+    );
     expect(written.save.map((card) => card.id)).toEqual(["bird", "gull"]);
     let cards = await byId(deck);
     expect(cards.gull?.front).toEqual({ sv: "sillmås" });
@@ -135,7 +174,13 @@ describe.each(SERVERS)("bulk edits of cards on $name", ({ url: server }) => {
     const { instanceUrl, deck } = await seed(server);
     const useCases = page();
     const owl = (await byId(deck)).owl!;
-    await useCases.recordReview(instanceUrl, deck, { card: owl, direction: "front-to-back" }, 5, new Date());
+    await useCases.recordReview(
+      instanceUrl,
+      deck,
+      { card: owl, direction: "front-to-back" },
+      5,
+      new Date(),
+    );
     const edit: CardEdit = { kind: "remove" };
     const previewed = await preview(useCases, deck, ["owl"], edit);
     const written = await useCases.editCards(instanceUrl, deck, ["owl"], edit, previewed);
@@ -157,13 +202,19 @@ describe.each(SERVERS)("bulk edits of cards on $name", ({ url: server }) => {
       // Written whole: Community Solid Server's in-memory store cuts short a PATCH beyond ASCII.
       const read = await fetch(deck.cardsDocumentUrl, { headers: { accept: "text/turtle" } });
       const body = `${await read.text()}\n<#${id}> <${SM}backNote> "edited in another tab"@en .\n`;
-      const response = await fetch(deck.cardsDocumentUrl, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
-      if (!response.ok) throw new Error(`Changing ${deck.cardsDocumentUrl} as another app: ${response.status}.`);
+      const response = await fetch(deck.cardsDocumentUrl, {
+        method: "PUT",
+        headers: { "content-type": "text/turtle" },
+        body,
+      });
+      if (!response.ok)
+        throw new Error(`Changing ${deck.cardsDocumentUrl} as another app: ${response.status}.`);
     });
   }
 
   it("plans the edit again on a cards document another app changed since it was read, keeping that change", async (context) => {
-    if (!conditional) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+    if (!conditional)
+      context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     // The change is made in the same second as the read, which such a server's ETag does not tell apart.
     if (!everyEdit) context.skip(ETAG_OUTLIVES_EDITS);
     const { instanceUrl, deck } = await seed(server);
@@ -177,13 +228,16 @@ describe.each(SERVERS)("bulk edits of cards on $name", ({ url: server }) => {
   });
 
   it("writes nothing once the edit planned again is not the one previewed", async (context) => {
-    if (!conditional) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+    if (!conditional)
+      context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     if (!everyEdit) context.skip(ETAG_OUTLIVES_EDITS);
     const { instanceUrl, deck } = await seed(server);
     const useCases = racing(deck, "gull");
     const edit: CardEdit = { kind: "retire" };
     const previewed = await preview(useCases, deck, ["gull"], edit);
-    await expect(useCases.editCards(instanceUrl, deck, ["gull"], edit, previewed)).rejects.toMatchObject({ code: "changedElsewhere" });
+    await expect(
+      useCases.editCards(instanceUrl, deck, ["gull"], edit, previewed),
+    ).rejects.toMatchObject({ code: "changedElsewhere" });
     const cards = await byId(deck);
     expect(cards.gull?.retired).toBeUndefined();
     expect(cards.gull?.backNote).toEqual({ en: "edited in another tab" });

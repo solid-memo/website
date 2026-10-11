@@ -9,7 +9,15 @@ import { ReleaseDiffScreen, type ReleaseDiffLinks } from "./ReleaseDiffScreen";
  * keeps it (useDraftEditor): each version of the draft compared once,
  * the last one's diff shown while a newer one is made.
  */
-export function ReleaseDiffContainer({ useCases, draftUrl, links }: { useCases: UseCases; draftUrl: string; links: ReleaseDiffLinks }) {
+export function ReleaseDiffContainer({
+  useCases,
+  draftUrl,
+  links,
+}: {
+  useCases: UseCases;
+  draftUrl: string;
+  links: ReleaseDiffLinks;
+}) {
   const editor = useDraftEditor(useCases, draftUrl);
   const draft = editor.draft!;
   const diff = useQuery({

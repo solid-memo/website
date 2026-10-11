@@ -106,19 +106,35 @@ describe("what a stored review state is of", () => {
 
   it("goes by the card and direction the state names, over its name", () => {
     expect(
-      reviewKeyOfSubject(subject("card-1"), DECK, { reviewOf: `${CARDS}#card-2`, direction: `${SM}backToFront` }),
+      reviewKeyOfSubject(subject("card-1"), DECK, {
+        reviewOf: `${CARDS}#card-2`,
+        direction: `${SM}backToFront`,
+      }),
     ).toEqual({ cardId: "card-2", direction: "back-to-front" });
-    expect(reviewKeyOfSubject(subject("rs-1@back-to-front"), DECK, { reviewOf: `${CARDS}#card-2` })).toEqual({
+    expect(
+      reviewKeyOfSubject(subject("rs-1@back-to-front"), DECK, { reviewOf: `${CARDS}#card-2` }),
+    ).toEqual({
       cardId: "card-2",
       direction: "back-to-front",
     });
-    expect(reviewKeyOfSubject(subject("card-1@back-to-front"), DECK, { direction: `${SM}frontToBack` })).toEqual(key);
+    expect(
+      reviewKeyOfSubject(subject("card-1@back-to-front"), DECK, { direction: `${SM}frontToBack` }),
+    ).toEqual(key);
   });
 
   it("takes the card from a link to the deck's cards document before an upgrade moved them", () => {
-    const upgraded = { id: "deck-1", cardsDocumentUrl: "https://pod.example/a/decks/deck-1-u2.ttl" };
-    for (const former of [CARDS, "https://pod.example/a/decks/deck-1-u1.ttl", upgraded.cardsDocumentUrl]) {
-      expect(reviewKeyOfSubject(subject("rs-1"), upgraded, { reviewOf: `${former}#card-2` })).toEqual({
+    const upgraded = {
+      id: "deck-1",
+      cardsDocumentUrl: "https://pod.example/a/decks/deck-1-u2.ttl",
+    };
+    for (const former of [
+      CARDS,
+      "https://pod.example/a/decks/deck-1-u1.ttl",
+      upgraded.cardsDocumentUrl,
+    ]) {
+      expect(
+        reviewKeyOfSubject(subject("rs-1"), upgraded, { reviewOf: `${former}#card-2` }),
+      ).toEqual({
         cardId: "card-2",
         direction: "front-to-back",
       });
@@ -127,16 +143,34 @@ describe("what a stored review state is of", () => {
 
   it("is nothing this app schedules for another scheduler, a card elsewhere or another direction", () => {
     expect(reviewKeyOfSubject(subject("card-1"), DECK, { anotherScheduler: true })).toBeNull();
-    expect(reviewKeyOfSubject(subject("card-1"), DECK, { reviewOf: "https://pod.example/a/decks/deck-2.ttl#card-1" })).toBeNull();
-    expect(reviewKeyOfSubject(subject("card-1"), DECK, { reviewOf: "https://pod.example/a/decks/deck-10.ttl#card-1" })).toBeNull();
-    expect(reviewKeyOfSubject(subject("card-1"), DECK, { reviewOf: "https://pod.example/b/decks/deck-1.ttl#card-1" })).toBeNull();
+    expect(
+      reviewKeyOfSubject(subject("card-1"), DECK, {
+        reviewOf: "https://pod.example/a/decks/deck-2.ttl#card-1",
+      }),
+    ).toBeNull();
+    expect(
+      reviewKeyOfSubject(subject("card-1"), DECK, {
+        reviewOf: "https://pod.example/a/decks/deck-10.ttl#card-1",
+      }),
+    ).toBeNull();
+    expect(
+      reviewKeyOfSubject(subject("card-1"), DECK, {
+        reviewOf: "https://pod.example/b/decks/deck-1.ttl#card-1",
+      }),
+    ).toBeNull();
     expect(reviewKeyOfSubject(subject("card-1"), DECK, { reviewOf: CARDS })).toBeNull();
-    expect(reviewKeyOfSubject(subject("card-1"), DECK, { direction: `${SM}bidirectional` })).toBeNull();
+    expect(
+      reviewKeyOfSubject(subject("card-1"), DECK, { direction: `${SM}bidirectional` }),
+    ).toBeNull();
   });
 });
 
 describe("picking one state per card and direction", () => {
-  const at = (fragment: string, cardId = "card-1", direction: "front-to-back" | "back-to-front" = "front-to-back") => ({
+  const at = (
+    fragment: string,
+    cardId = "card-1",
+    direction: "front-to-back" | "back-to-front" = "front-to-back",
+  ) => ({
     url: `${REVIEWS}#${fragment}`,
     key: { cardId, direction },
   });
@@ -151,7 +185,11 @@ describe("picking one state per card and direction", () => {
     const named = at("card-1");
     const card2 = at("rs-0", "card-2");
     const reverse = at("rs-5", "card-1", "back-to-front");
-    expect(pickReviewStates(REVIEWS, [at("rs-2"), card2, named, at("rs-1"), reverse])).toEqual([card2, named, reverse]);
+    expect(pickReviewStates(REVIEWS, [at("rs-2"), card2, named, at("rs-1"), reverse])).toEqual([
+      card2,
+      named,
+      reverse,
+    ]);
     const first = at("rs-1");
     expect(pickReviewStates(REVIEWS, [at("rs-3"), first, at("rs-2")])).toEqual([first]);
     expect(pickReviewStates(REVIEWS, [named, at("rs-1")])).toEqual([named]);

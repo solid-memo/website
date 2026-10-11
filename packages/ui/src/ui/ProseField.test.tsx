@@ -16,7 +16,9 @@ function renderField(value: string, markdown: boolean, arrival?: boolean) {
       markdown={markdown}
       suggestions={[]}
       disabled={false}
-      preview={(text, inMarkdown) => <DataProse class="course-theory" text={text} markdown={inMarkdown} />}
+      preview={(text, inMarkdown) => (
+        <DataProse class="course-theory" text={text} markdown={inMarkdown} />
+      )}
       {...(arrival === undefined ? {} : { arrival })}
       onChange={onChange}
       onMarkdown={onMarkdown}
@@ -37,7 +39,11 @@ describe("ProseField", () => {
     expect(theory.tagName).toBe("TEXTAREA");
     fireEvent.click(screen.getByRole("button", { name: "Language: English" }));
     expect(screen.getByText("Language of the theory")).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Preview of Theory" }).querySelectorAll(".course-theory p")).toHaveLength(2);
+    expect(
+      screen
+        .getByRole("region", { name: "Preview of Theory" })
+        .querySelectorAll(".course-theory p"),
+    ).toHaveLength(2);
     fireEvent.input(theory, { target: { value: "Three." } });
     expect(onChange).toHaveBeenCalledWith([{ id: 0, value: "Three.", tag: "en" }]);
     fireEvent.click(screen.getByRole("checkbox", { name: "Format with Markdown" }));
@@ -52,11 +58,15 @@ describe("ProseField", () => {
     expect(theory).toHaveAccessibleDescription(/HTML/);
     // Prose may link.
     expect(theory).not.toHaveAccessibleDescription(/link/i);
-    expect(screen.getByRole("region", { name: "Preview of Theory" }).querySelector("a")).toHaveAttribute("href", expect.stringContaining("example.org"));
+    expect(
+      screen.getByRole("region", { name: "Preview of Theory" }).querySelector("a"),
+    ).toHaveAttribute("href", expect.stringContaining("example.org"));
   });
 
   it("previews nothing before there is text", () => {
     renderField("", false);
-    expect(screen.getByRole("region", { name: "Preview of Theory" })).toHaveTextContent("Nothing to show yet.");
+    expect(screen.getByRole("region", { name: "Preview of Theory" })).toHaveTextContent(
+      "Nothing to show yet.",
+    );
   });
 });

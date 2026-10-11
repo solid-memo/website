@@ -22,9 +22,12 @@ export class Course extends Screen {
 
   /** A chapter in the course's list, by its title ("Chapter 1: Studying"). */
   chapter(title: string): Locator {
-    return this.page
-      .getByRole("listitem")
-      .filter({ has: this.page.getByRole("heading", { level: 3, name: new RegExp(`${escapeRegExp(title)}$`) }) });
+    return this.page.getByRole("listitem").filter({
+      has: this.page.getByRole("heading", {
+        level: 3,
+        name: new RegExp(`${escapeRegExp(title)}$`),
+      }),
+    });
   }
 
   async expectShown(title: string): Promise<void> {
@@ -35,7 +38,10 @@ export class Course extends Screen {
   /** "Start the course": its first chapter opens at its first step. */
   async start(): Promise<void> {
     await this.intent("Start the course", async () => {
-      await this.page.getByRole("main").getByRole("link", { name: this.t("course.start"), exact: true }).click();
+      await this.page
+        .getByRole("main")
+        .getByRole("link", { name: this.t("course.start"), exact: true })
+        .click();
       await this.app.chapter.expectOpen();
     });
   }
@@ -45,11 +51,19 @@ export class Course extends Screen {
    * the chapter is done, and Continue goes on to the next.
    */
   async expectCheered(chapter: string): Promise<void> {
-    const word = this.page.getByText(this.t("course.chapterCompleted", { chapter }), { exact: true });
+    const word = this.page.getByText(this.t("course.chapterCompleted", { chapter }), {
+      exact: true,
+    });
     // The word is in the part of the page that takes the focus, with what follows it.
     await expect(word.locator("xpath=..")).toBeFocused();
-    await expect(this.chapter(chapter).getByText(this.t("course.done"), { exact: true })).toBeVisible();
-    await expect(this.page.getByRole("main").getByRole("link", { name: this.t("course.continue"), exact: true })).toBeVisible();
+    await expect(
+      this.chapter(chapter).getByText(this.t("course.done"), { exact: true }),
+    ).toBeVisible();
+    await expect(
+      this.page
+        .getByRole("main")
+        .getByRole("link", { name: this.t("course.continue"), exact: true }),
+    ).toBeVisible();
   }
 
   /**
@@ -59,29 +73,45 @@ export class Course extends Screen {
    * answered right too, back to the course's page, which cheers the
    * course completed.
    */
-  async playChapter(chapter: string, theory: string, answers: Record<string, string>): Promise<void> {
+  async playChapter(
+    chapter: string,
+    theory: string,
+    answers: Record<string, string>,
+  ): Promise<void> {
     await this.intent(`Play ${chapter} to the end of the course`, async () => {
       await this.page.getByRole("link", { name: this.t("course.start") }).click();
-      await expect(this.page.getByRole("heading", { level: 2, name: chapter, exact: true })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { level: 2, name: chapter, exact: true }),
+      ).toBeVisible();
       // The main content's: in a trial, the Studio's outline beside it shows the theory too.
       await expect(this.page.getByRole("main").getByText(theory, { exact: true })).toBeVisible();
       const count = Object.keys(answers).length;
-      await this.page.getByRole("button", { name: this.tp("chapterPlayer.toQuestions", { count }) }).click();
+      await this.page
+        .getByRole("button", { name: this.tp("chapterPlayer.toQuestions", { count }) })
+        .click();
       for (let asked = 1; asked <= count; asked++) {
         await this.answerRight(answers);
-        const onwards = asked === count ? this.t("chapterPlayer.toReview") : this.t("chapterPlayer.next");
+        const onwards =
+          asked === count ? this.t("chapterPlayer.toReview") : this.t("chapterPlayer.next");
         await this.page.getByRole("button", { name: onwards, exact: true }).click();
       }
       // The word before the review; in a trial, the Studio's heading of the trial has the focus, not the review's.
       await expect(this.app.chapterReview.heading(chapter)).toBeVisible();
-      await expect(this.page.getByText(this.t("chapterReview.cheer"), { exact: true })).toBeVisible();
+      await expect(
+        this.page.getByText(this.t("chapterReview.cheer"), { exact: true }),
+      ).toBeVisible();
       await this.app.chapterReview.start();
       for (let asked = 1; asked <= count; asked++) {
         await this.answerRight(answers);
-        await this.page.getByRole("main").getByRole("button", { name: this.t("chapterReview.next"), exact: true }).click();
+        await this.page
+          .getByRole("main")
+          .getByRole("button", { name: this.t("chapterReview.next"), exact: true })
+          .click();
       }
       // Back on the course's page, which cheers the course completed.
-      await expect(this.page.getByText(this.t("course.courseCompleted"), { exact: true })).toBeVisible();
+      await expect(
+        this.page.getByText(this.t("course.courseCompleted"), { exact: true }),
+      ).toBeVisible();
     });
   }
 
@@ -93,7 +123,11 @@ export class Course extends Screen {
     const right = answers[front];
     expect(right, `The right answer to ${front}`).toBeDefined();
     await this.page.getByRole("radio", { name: right, exact: true }).check();
-    await this.page.getByRole("button", { name: this.t("multipleChoice.check"), exact: true }).click();
-    await expect(this.page.locator(".course-question")).toContainText(this.t("courseQuestion.right"));
+    await this.page
+      .getByRole("button", { name: this.t("multipleChoice.check"), exact: true })
+      .click();
+    await expect(this.page.locator(".course-question")).toContainText(
+      this.t("courseQuestion.right"),
+    );
   }
 }

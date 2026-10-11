@@ -19,7 +19,13 @@ const untagged = { ...makeCard(deck, "untagged"), front: { "": "cat" }, back: { 
 const cards = [cat, kitten, lone, untagged];
 
 function renderDialog(overrides: Partial<Parameters<typeof FindReplaceDialog>[0]> = {}) {
-  const plan = vi.fn((edit: CardEdit) => planCardEdit(cards, cards.map((card) => card.id), edit));
+  const plan = vi.fn((edit: CardEdit) =>
+    planCardEdit(
+      cards,
+      cards.map((card) => card.id),
+      edit,
+    ),
+  );
   const onConfirm = vi.fn();
   const onCancel = vi.fn();
   render(
@@ -36,7 +42,8 @@ function renderDialog(overrides: Partial<Parameters<typeof FindReplaceDialog>[0]
   return { plan, onConfirm, onCancel };
 }
 
-const type = (name: string, value: string) => fireEvent.input(screen.getByRole("textbox", { name }), { target: { value } });
+const type = (name: string, value: string) =>
+  fireEvent.input(screen.getByRole("textbox", { name }), { target: { value } });
 const preview = () => screen.getByRole("region", { name: "Preview" });
 const confirm = () => screen.getByRole("button", { name: /^Replace in/ });
 
@@ -44,7 +51,9 @@ describe("FindReplaceDialog", () => {
   it("previews nothing until there is text to find, and writes nothing until confirmed", () => {
     const { plan, onConfirm } = renderDialog();
     expect(screen.getByRole("form", { name: "Find and replace" })).toBeInTheDocument();
-    expect(within(preview()).getByText("Type the text to find. Nothing changes until you confirm.")).toBeInTheDocument();
+    expect(
+      within(preview()).getByText("Type the text to find. Nothing changes until you confirm."),
+    ).toBeInTheDocument();
     expect(plan).not.toHaveBeenCalled();
     expect(confirm()).toHaveTextContent("Replace in 0 cards");
     expect(confirm()).toBeDisabled();
@@ -58,15 +67,18 @@ describe("FindReplaceDialog", () => {
     const shown = preview();
     expect(within(shown).getByText("2 cards change:")).toBeInTheDocument();
     const first = within(shown).getByText("cat", { selector: "strong" }).closest("li")!;
-    expect(within(first).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
-      "Front, English (en): cat → dog",
-      "Note under the front, English (en): cat → dog",
-    ]);
+    expect(
+      within(first)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent),
+    ).toEqual(["Front, English (en): cat → dog", "Note under the front, English (en): cat → dog"]);
     expect(first.querySelector("del")).toHaveTextContent("cat");
     expect(first.querySelector("ins")).toHaveTextContent("dog");
     // "Kitten", "katt" and "kattunge" hold no "cat"; the untagged front cannot be saved so once changed.
     expect(within(shown).getByText("1 card is left as it is:")).toBeInTheDocument();
-    expect(within(shown).getByText("cat: its text states no language; state it first")).toBeInTheDocument();
+    expect(
+      within(shown).getByText("cat: its text states no language; state it first"),
+    ).toBeInTheDocument();
     expect(confirm()).toHaveTextContent("Replace in 2 cards");
   });
 
@@ -88,7 +100,9 @@ describe("FindReplaceDialog", () => {
       wholeWord: true,
     };
     expect(onConfirm).toHaveBeenCalledWith(edit, plan.mock.results.at(-1)!.value);
-    expect(onConfirm.mock.calls[0]![1].save.map((card: { id: string }) => card.id)).toEqual(["kitten"]);
+    expect(onConfirm.mock.calls[0]![1].save.map((card: { id: string }) => card.id)).toEqual([
+      "kitten",
+    ]);
   });
 
   it("looks only in the fields checked, and says when no card has the text", () => {
@@ -98,7 +112,9 @@ describe("FindReplaceDialog", () => {
     for (const field of ["Front", "Back", "Notes", "Label", "Wrong options"]) {
       fireEvent.click(screen.getByRole("checkbox", { name: field }));
     }
-    expect(within(preview()).getByText("None of the selected cards has this text.")).toBeInTheDocument();
+    expect(
+      within(preview()).getByText("None of the selected cards has this text."),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "Back" }));
     expect(within(preview()).getByText("1 card changes:")).toBeInTheDocument();
   });
@@ -109,19 +125,30 @@ describe("FindReplaceDialog", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Front" }));
     expect(within(preview()).getByText("(removed)")).toBeInTheDocument();
     choose("In the language", "unstated");
-    expect(within(preview()).getByText("None of the selected cards has this text.")).toBeInTheDocument();
-    expect(within(screen.getByRole("combobox", { name: "In the language" })).getAllByRole("option").map((o) => o.textContent)).toEqual([
-      "Any language",
-      "English (en)",
-      "Swedish — svenska (sv)",
-      "No language stated",
-    ]);
+    expect(
+      within(preview()).getByText("None of the selected cards has this text."),
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("combobox", { name: "In the language" }))
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["Any language", "English (en)", "Swedish — svenska (sv)", "No language stated"]);
   });
 
   it("names untagged text so, and cancels", () => {
-    const { onCancel } = renderDialog({ cards: [untagged], plan: () => ({ ...planCardEdit([], [], { kind: "retire" }), save: [{ ...untagged, front: { "": "dog" } }] }) });
+    const { onCancel } = renderDialog({
+      cards: [untagged],
+      plan: () => ({
+        ...planCardEdit([], [], { kind: "retire" }),
+        save: [{ ...untagged, front: { "": "dog" } }],
+      }),
+    });
     type("Find", "cat");
-    expect(within(preview()).getAllByRole("listitem").map((item) => item.textContent)).toContain("Front, No language stated: cat → dog");
+    expect(
+      within(preview())
+        .getAllByRole("listitem")
+        .map((item) => item.textContent),
+    ).toContain("Front, No language stated: cat → dog");
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).toHaveBeenCalled();
   });

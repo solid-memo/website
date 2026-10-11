@@ -11,10 +11,7 @@ import {
 } from "@inrupt/solid-client";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { getSolidDatasetOrNull } from "./datasets";
-import {
-  toReviewState,
-  toReviewStateThing,
-} from "./mappers/reviewStateMapper";
+import { toReviewState, toReviewStateThing } from "./mappers/reviewStateMapper";
 import type { Deck } from "@solid-memo/domain/deck";
 import { namedReviewSubject } from "@solid-memo/domain/reviewRecord";
 import type { ReviewState } from "@solid-memo/domain/review";
@@ -23,8 +20,7 @@ import { SM } from "./vocab";
 const FSRS = "https://fsrs.example/ns#fsrs";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@inrupt/solid-client")>();
+  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
   return { ...actual, saveSolidDatasetAt: vi.fn() };
 });
 vi.mock("./datasets", async (importOriginal) => ({
@@ -59,10 +55,7 @@ const state: ReviewState = {
 };
 
 function reviewsDataset() {
-  return setThing(
-    mockSolidDatasetFrom(deck.reviewsDocumentUrl),
-    named(state),
-  );
+  return setThing(mockSolidDatasetFrom(deck.reviewsDocumentUrl), named(state));
 }
 
 function makeRepository(
@@ -79,7 +72,12 @@ function makeRepository(
 
 /** A state of the deck written at the subject the fragment rule names. */
 function named(written: ReviewState) {
-  return toReviewStateThing(deck, written, null, namedReviewSubject(deck.reviewsDocumentUrl, written));
+  return toReviewStateThing(
+    deck,
+    written,
+    null,
+    namedReviewSubject(deck.reviewsDocumentUrl, written),
+  );
 }
 
 /** A state of the deck written at `subject`, which another app may have named any way. */
@@ -98,7 +96,10 @@ function otherSchedulerAt(subject: string) {
 }
 
 function documentOf(...things: ReturnType<typeof stateAt>[]) {
-  return things.reduce((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(deck.reviewsDocumentUrl));
+  return things.reduce(
+    (dataset, thing) => setThing(dataset, thing),
+    mockSolidDatasetFrom(deck.reviewsDocumentUrl),
+  );
 }
 
 function savedDataset(): SolidDataset {
@@ -113,16 +114,12 @@ beforeEach(() => {
 describe("listReviewStates", () => {
   it("returns an empty list when the document does not exist", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual(
-      [],
-    );
+    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual([]);
   });
 
   it("maps stored review states", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(reviewsDataset());
-    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual([
-      state,
-    ]);
+    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual([state]);
   });
 });
 
@@ -150,9 +147,7 @@ describe("getReviewState", () => {
 
   it("tells the card's two directions apart", async () => {
     const reverse: ReviewState = { ...state, direction: "back-to-front", due: "2026-10-01" };
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      setThing(reviewsDataset(), named(reverse)),
-    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(reviewsDataset(), named(reverse)));
     const repository = makeRepository();
     await expect(
       repository.getReviewState(deck, { cardId: "card-1", direction: "back-to-front" }),
@@ -171,10 +166,7 @@ describe("saveReviewState", () => {
 
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(deck.reviewsDocumentUrl);
-    const thing = getThing(
-      saved as SolidDataset,
-      `${deck.reviewsDocumentUrl}#card-1`,
-    )!;
+    const thing = getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-1`)!;
     expect(toReviewState(thing, deck)).toEqual(state);
   });
 
@@ -185,10 +177,7 @@ describe("saveReviewState", () => {
     await makeRepository().saveReviewState(deck, updated);
 
     const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    const thing = getThing(
-      saved as SolidDataset,
-      `${deck.reviewsDocumentUrl}#card-1`,
-    )!;
+    const thing = getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-1`)!;
     expect(toReviewState(thing, deck)).toEqual(updated);
   });
 });
@@ -197,10 +186,7 @@ describe("applyReviewChanges", () => {
   const other: ReviewState = { ...state, cardId: "card-2" };
 
   function twoStates() {
-    return setThing(
-      reviewsDataset(),
-      named(other),
-    );
+    return setThing(reviewsDataset(), named(other));
   }
 
   it("saves and removes states in a single write", async () => {
@@ -216,9 +202,9 @@ describe("applyReviewChanges", () => {
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(deck.reviewsDocumentUrl);
     const dataset = saved as SolidDataset;
-    expect(
-      toReviewState(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck),
-    ).toEqual(restored);
+    expect(toReviewState(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
+      restored,
+    );
     expect(getThing(dataset, `${deck.reviewsDocumentUrl}#card-2`)).toBeNull();
   });
 
@@ -230,9 +216,19 @@ describe("applyReviewChanges", () => {
     await expect(
       makeRepository(checkWrite).applyReviewChanges(deck, { save: [state], remove: [] }),
     ).rejects.toThrow("does not conform");
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [`${deck.reviewsDocumentUrl}#card-1`], "pod");
-    await expect(makeRepository(checkWrite).saveReviewState(deck, state)).rejects.toThrow("does not conform");
-    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [`${deck.reviewsDocumentUrl}#card-1`], "pod");
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      [`${deck.reviewsDocumentUrl}#card-1`],
+      "pod",
+    );
+    await expect(makeRepository(checkWrite).saveReviewState(deck, state)).rejects.toThrow(
+      "does not conform",
+    );
+    expect(checkWrite).toHaveBeenLastCalledWith(
+      expect.anything(),
+      [`${deck.reviewsDocumentUrl}#card-1`],
+      "pod",
+    );
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 
@@ -241,18 +237,21 @@ describe("applyReviewChanges", () => {
     const back: ReviewState = { ...state, direction: "back-to-front" };
     await makeRepository(checkWrite).createReviewStates(deck, [state, back]);
     expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [
-      `${deck.reviewsDocumentUrl}#card-1`,
-      `${deck.reviewsDocumentUrl}#card-1@back-to-front`,
-    ], "pod");
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      [`${deck.reviewsDocumentUrl}#card-1`, `${deck.reviewsDocumentUrl}#card-1@back-to-front`],
+      "pod",
+    );
     expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0]!;
     expect(saveUrl).toBe(deck.reviewsDocumentUrl);
     const dataset = saved as SolidDataset;
-    expect(toReviewState(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(state);
-    expect(getUrl(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1@back-to-front`)!, SM.reviewOf)).toBe(
-      `${deck.cardsDocumentUrl}#card-1`,
+    expect(toReviewState(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
+      state,
     );
+    expect(
+      getUrl(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1@back-to-front`)!, SM.reviewOf),
+    ).toBe(`${deck.cardsDocumentUrl}#card-1`);
   });
 
   it("does nothing when the reviews document does not exist and there is nothing to save", async () => {
@@ -269,7 +268,9 @@ describe("applyReviewChanges", () => {
     await makeRepository().applyReviewChanges(deck, { save: [state], remove: [] });
     const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(url).toBe(deck.reviewsDocumentUrl);
-    expect(toReviewState(getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(state);
+    expect(
+      toReviewState(getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck),
+    ).toEqual(state);
   });
 });
 
@@ -286,7 +287,11 @@ describe("states that name their card", () => {
     const named: ReviewState = { ...state, due: "2026-10-01" };
     const first: ReviewState = { ...state, due: "2026-10-02" };
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      documentOf(stateAt("rs-9", { ...state, due: "2026-10-03" }), stateAt("card-1", named), stateAt("rs-1", first)),
+      documentOf(
+        stateAt("rs-9", { ...state, due: "2026-10-03" }),
+        stateAt("card-1", named),
+        stateAt("rs-1", first),
+      ),
     );
     await expect(makeRepository().listReviewStates(deck)).resolves.toEqual([named]);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
@@ -301,7 +306,9 @@ describe("states that name their card", () => {
     await makeRepository().saveReviewState(deck, updated);
     const saved = savedDataset();
     expect(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)).toBeNull();
-    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#rs-7`)!, deck)).toEqual(updated);
+    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#rs-7`)!, deck)).toEqual(
+      updated,
+    );
   });
 
   it("write every state naming its card, direction and SM-2", async () => {
@@ -320,12 +327,19 @@ describe("states that name their card", () => {
     await repository.saveReviewState(deck, state);
     const saved = savedDataset();
     expect(getUrl(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, SM.scheduler)).toBe(FSRS);
-    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#review-r1`)!, deck)).toEqual(state);
+    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#review-r1`)!, deck)).toEqual(
+      state,
+    );
 
     vi.mocked(saveSolidDatasetAt).mockReset();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
-    await repository.applyReviewChanges(deck, { save: [], remove: [{ cardId: "card-1", direction: "front-to-back" }] });
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([`${deck.reviewsDocumentUrl}#card-1`]);
+    await repository.applyReviewChanges(deck, {
+      save: [],
+      remove: [{ cardId: "card-1", direction: "front-to-back" }],
+    });
+    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+      `${deck.reviewsDocumentUrl}#card-1`,
+    ]);
   });
 
   it("write a new subject when the one named for the state holds another card's", async () => {
@@ -336,8 +350,12 @@ describe("states that name their card", () => {
     await expect(repository.listReviewStates(deck)).resolves.toEqual([card2]);
     await repository.saveReviewState(deck, state);
     const saved = savedDataset();
-    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(card2);
-    const added = getThingAll(saved).find((thing) => thing.url !== `${deck.reviewsDocumentUrl}#card-1`)!;
+    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
+      card2,
+    );
+    const added = getThingAll(saved).find(
+      (thing) => thing.url !== `${deck.reviewsDocumentUrl}#card-1`,
+    )!;
     expect(added.url).toMatch(/#review-[0-9a-f-]{36}$/);
     expect(toReviewState(added, deck)).toEqual(state);
   });
@@ -346,14 +364,21 @@ describe("states that name their card", () => {
     const broken = buildThing(stateAt("card-1")).removeAll(SM.easeFactor).build();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(broken));
     await makeRepository().saveReviewState(deck, state);
-    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([`${deck.reviewsDocumentUrl}#card-1`]);
+    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+      `${deck.reviewsDocumentUrl}#card-1`,
+    ]);
   });
 
   it("leave a second state of a card and direction a day reset removes, which the app never read", async () => {
     const reverse: ReviewState = { ...state, direction: "back-to-front" };
     const theirs: ReviewState = { ...state, due: "2026-10-05" };
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      documentOf(stateAt("card-1"), stateAt("rs-1", theirs), stateAt("rs-2", reverse), stateAt("card-2", { ...state, cardId: "card-2" })),
+      documentOf(
+        stateAt("card-1"),
+        stateAt("rs-1", theirs),
+        stateAt("rs-2", reverse),
+        stateAt("card-2", { ...state, cardId: "card-2" }),
+      ),
     );
     await makeRepository().applyReviewChanges(deck, {
       save: [],
@@ -404,13 +429,26 @@ describe("states that name their card", () => {
   });
 
   it("write many states in one save, each onto its own subject", async () => {
-    const states = Array.from({ length: 300 }, (_, i): ReviewState => ({ ...state, cardId: `card-${i}` }));
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(...states.slice(0, 150).map((s, i) => stateAt(`rs-${i}`, s))));
-    await makeRepository().applyReviewChanges(deck, { save: states.map((s) => ({ ...s, repetitions: 3 })), remove: [] });
+    const states = Array.from(
+      { length: 300 },
+      (_, i): ReviewState => ({ ...state, cardId: `card-${i}` }),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(...states.slice(0, 150).map((s, i) => stateAt(`rs-${i}`, s))),
+    );
+    await makeRepository().applyReviewChanges(deck, {
+      save: states.map((s) => ({ ...s, repetitions: 3 })),
+      remove: [],
+    });
     const saved = savedDataset();
     expect(getThingAll(saved)).toHaveLength(300);
-    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#rs-7`)!, deck)).toMatchObject({ cardId: "card-7", repetitions: 3 });
-    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-200`)!, deck)).toMatchObject({ repetitions: 3 });
+    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#rs-7`)!, deck)).toMatchObject({
+      cardId: "card-7",
+      repetitions: 3,
+    });
+    expect(
+      toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-200`)!, deck),
+    ).toMatchObject({ repetitions: 3 });
   });
 });
 

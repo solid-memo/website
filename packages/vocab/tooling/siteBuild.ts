@@ -28,7 +28,9 @@ export function commitSha(): string | null {
 
 /** The site's version, shown in the footer: the repository's, from its root package.json. */
 export function appVersion(): string {
-  return (JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")) as { version: string }).version;
+  return (
+    JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")) as { version: string }
+  ).version;
 }
 
 /**
@@ -39,7 +41,9 @@ export function appVersion(): string {
 export function shapesRuleset(): string {
   const hash = createHash("sha256");
   const visit = (root: string, dir: string) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    )) {
       const path = join(dir, entry.name);
       if (entry.isDirectory()) visit(root, path);
       else hash.update(path.slice(root.length)).update(readFileSync(path));

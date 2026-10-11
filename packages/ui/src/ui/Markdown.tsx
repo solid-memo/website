@@ -16,7 +16,13 @@ import { useI18n } from "./i18n";
  * and takes the focus, so it can be scrolled from the keyboard; the keys
  * of the screen around it leave such a region alone (dataRegion).
  */
-export function MarkdownBlocks({ blocks, tight = false }: { blocks: readonly MdBlock[]; tight?: boolean }) {
+export function MarkdownBlocks({
+  blocks,
+  tight = false,
+}: {
+  blocks: readonly MdBlock[];
+  tight?: boolean;
+}) {
   return (
     <>
       {blocks.map((block, index) => (
@@ -31,7 +37,13 @@ function MarkdownBlock({ block, tight }: { block: MdBlock; tight: boolean }) {
   switch (block.type) {
     case "paragraph":
       // A tight list's items hold their text bare, as HTML renders them.
-      return tight ? <MarkdownInlines nodes={block.children} /> : <p><MarkdownInlines nodes={block.children} /></p>;
+      return tight ? (
+        <MarkdownInlines nodes={block.children} />
+      ) : (
+        <p>
+          <MarkdownInlines nodes={block.children} />
+        </p>
+      );
     case "code":
       return (
         <div class="md-code">
@@ -47,7 +59,11 @@ function MarkdownBlock({ block, tight }: { block: MdBlock; tight: boolean }) {
           <MarkdownBlocks blocks={item} tight={block.tight} />
         </li>
       ));
-      return block.ordered ? <ol start={block.start === 1 ? undefined : block.start}>{items}</ol> : <ul>{items}</ul>;
+      return block.ordered ? (
+        <ol start={block.start === 1 ? undefined : block.start}>{items}</ol>
+      ) : (
+        <ul>{items}</ul>
+      );
     }
     case "quote":
       return (

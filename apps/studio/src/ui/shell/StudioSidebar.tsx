@@ -69,7 +69,9 @@ export function StudioSidebar({
   const draftUrl = "draftUrl" in route ? route.draftUrl : null;
   const wanted = folded(filter.trim());
   const kept = (...texts: (LangText | string)[]) =>
-    texts.flatMap((text) => (typeof text === "string" ? [text] : Object.values(text))).some((text) => folded(text).includes(wanted));
+    texts
+      .flatMap((text) => (typeof text === "string" ? [text] : Object.values(text)))
+      .some((text) => folded(text).includes(wanted));
   const decks = decksQuery.data?.filter((deck) => kept(deck.title));
   const drafts = draftsQuery.data?.filter((draft) => kept(draft.title, draft.name));
   const href = (to: StudioRoute) => studioRouteToHash(to);
@@ -77,7 +79,12 @@ export function StudioSidebar({
   const isPinned = (item: WorkItem) => pinned.some((each) => sameItem(each, item));
 
   /** An item's entry: its link (a draft that cannot be read, its name), and the button that pins it. */
-  const entry = (item: WorkItem, name: string, link: ComponentChildren, after?: ComponentChildren) => (
+  const entry = (
+    item: WorkItem,
+    name: string,
+    link: ComponentChildren,
+    after?: ComponentChildren,
+  ) => (
     <li key={`${item.kind} ${item.url}`}>
       {link}
       {after}
@@ -97,7 +104,10 @@ export function StudioSidebar({
     entry(
       { kind: "deck", url: deck.url },
       readerText(deck.title),
-      <a href={href({ screen: "cards", deckUrl: deck.url })} aria-current={deck.url === deckUrl ? "true" : undefined}>
+      <a
+        href={href({ screen: "cards", deckUrl: deck.url })}
+        aria-current={deck.url === deckUrl ? "true" : undefined}
+      >
         {readerText(deck.title)}
       </a>,
     );
@@ -106,7 +116,10 @@ export function StudioSidebar({
       { kind: "draft", url: draft.url },
       draftName(draft),
       draft.readable ? (
-        <a href={href({ screen: "draft", draftUrl: draft.url })} aria-current={draft.url === draftUrl ? "true" : undefined}>
+        <a
+          href={href({ screen: "draft", draftUrl: draft.url })}
+          aria-current={draft.url === draftUrl ? "true" : undefined}
+        >
           {draftName(draft)}
         </a>
       ) : (
@@ -145,7 +158,10 @@ export function StudioSidebar({
       <ul class="studio-sections">
         {SIDEBAR_SECTIONS.map((each) => (
           <li key={each}>
-            <a href={href(sectionHome(each, instance.url))} aria-current={each === section ? "page" : undefined}>
+            <a
+              href={href(sectionHome(each, instance.url))}
+              aria-current={each === section ? "page" : undefined}
+            >
               {t(`studio.shell.section.${each}`)}
             </a>
             {each === "health" && problems > 0 && <ProblemCount count={problems} />}
@@ -154,7 +170,11 @@ export function StudioSidebar({
       </ul>
       <label class="studio-filter">
         {t("studio.shell.filter")}
-        <input type="search" value={filter} onInput={(event) => setFilter(event.currentTarget.value)} />
+        <input
+          type="search"
+          value={filter}
+          onInput={(event) => setFilter(event.currentTarget.value)}
+        />
       </label>
       {recentEntries.length > 0 && (
         <>

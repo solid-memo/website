@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildThing, createSolidDataset, createThing, mockSolidDatasetFrom, setThing } from "@inrupt/solid-client";
+import {
+  buildThing,
+  createSolidDataset,
+  createThing,
+  mockSolidDatasetFrom,
+  setThing,
+} from "@inrupt/solid-client";
 import type { Quad, Term } from "@rdfjs/types";
 import { patchBody, saveDataset } from "./datasets";
 
@@ -8,13 +14,18 @@ const NS = "https://example.com/ns#";
 
 const named = (value: string) => ({ termType: "NamedNode", value }) as Term;
 const changes = (additions: Partial<Quad>[], deletions: Partial<Quad>[] = []) =>
-  ({ ...createSolidDataset(), internal_changeLog: { additions, deletions } }) as unknown as Parameters<typeof patchBody>[0];
+  ({
+    ...createSolidDataset(),
+    internal_changeLog: { additions, deletions },
+  }) as unknown as Parameters<typeof patchBody>[0];
 
 describe("patchBody", () => {
   it("writes each change as one N-Triples line, closed by a space and a dot, deletions first", () => {
     const read = setThing(
       mockSolidDatasetFrom(DOC),
-      buildThing(createThing({ url: `${DOC}#it` })).addInteger(`${NS}n`, 1).build(),
+      buildThing(createThing({ url: `${DOC}#it` }))
+        .addInteger(`${NS}n`, 1)
+        .build(),
     );
     const edited = setThing(
       { ...read, internal_changeLog: { additions: [], deletions: [] } },
@@ -42,16 +53,32 @@ describe("patchBody", () => {
   });
 
   it("names a Thing without a URL yet by its fragment in the document", () => {
-    const local = { termType: "NamedNode", value: "https://inrupt.com/.well-known/sdk-local-node/new" } as Term;
-    expect(patchBody(changes([{ subject: local, predicate: named(`${NS}p`), object: local } as Quad]))).toBe(
-      `INSERT DATA {\n<#new> <${NS}p> <#new> .\n};\n`,
-    );
+    const local = {
+      termType: "NamedNode",
+      value: "https://inrupt.com/.well-known/sdk-local-node/new",
+    } as Term;
+    expect(
+      patchBody(changes([{ subject: local, predicate: named(`${NS}p`), object: local } as Quad])),
+    ).toBe(`INSERT DATA {\n<#new> <${NS}p> <#new> .\n};\n`);
   });
 
   it("leaves the body to @inrupt/solid-client for a blank node, or a dataset without changes recorded", () => {
     const blank = { termType: "BlankNode", value: "b0" } as Term;
-    expect(patchBody(changes([{ subject: named(`${DOC}#a`), predicate: named(`${NS}p`), object: blank } as Quad]))).toBeNull();
-    expect(patchBody(changes([], [{ subject: blank, predicate: named(`${NS}p`), object: named(`${DOC}#a`) } as Quad]))).toBeNull();
+    expect(
+      patchBody(
+        changes([
+          { subject: named(`${DOC}#a`), predicate: named(`${NS}p`), object: blank } as Quad,
+        ]),
+      ),
+    ).toBeNull();
+    expect(
+      patchBody(
+        changes(
+          [],
+          [{ subject: blank, predicate: named(`${NS}p`), object: named(`${DOC}#a`) } as Quad],
+        ),
+      ),
+    ).toBeNull();
     expect(patchBody(createSolidDataset())).toBeNull();
   });
 
@@ -61,13 +88,30 @@ describe("patchBody", () => {
       sent.push(String(init?.body));
       return new Response("", { status: 205 });
     }) as typeof globalThis.fetch;
-    const edited = setThing(mockSolidDatasetFrom(DOC), buildThing(createThing({ url: `${DOC}#it` })).addInteger(`${NS}n`, 2).build());
+    const edited = setThing(
+      mockSolidDatasetFrom(DOC),
+      buildThing(createThing({ url: `${DOC}#it` }))
+        .addInteger(`${NS}n`, 2)
+        .build(),
+    );
     await saveDataset(DOC, edited, pod);
-    expect(sent[0]).toBe(`INSERT DATA {\n<${DOC}#it> <${NS}n> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .\n};\n`);
+    expect(sent[0]).toBe(
+      `INSERT DATA {\n<${DOC}#it> <${NS}n> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .\n};\n`,
+    );
     const blank = { termType: "BlankNode", value: "b0", equals: () => false } as unknown as Term;
     const withBlank = {
       ...mockSolidDatasetFrom(DOC),
-      internal_changeLog: { additions: [{ subject: named(`${DOC}#a`), predicate: named(`${NS}p`), object: blank, graph: { termType: "DefaultGraph", value: "" } }], deletions: [] },
+      internal_changeLog: {
+        additions: [
+          {
+            subject: named(`${DOC}#a`),
+            predicate: named(`${NS}p`),
+            object: blank,
+            graph: { termType: "DefaultGraph", value: "" },
+          },
+        ],
+        deletions: [],
+      },
     } as unknown as Parameters<typeof saveDataset>[1];
     await saveDataset(DOC, withBlank, pod);
     // @inrupt/solid-client's own body, which starts with a space where ours starts with the statement.

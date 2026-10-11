@@ -54,7 +54,11 @@ export function createSolidReleasePublisher({
     try {
       const own = await accessControlOf(url);
       if (own !== null && own === (await accessControlOf(new URL(".", url).href))) return false;
-      const access = await universalAccess.setPublicAccess(url, { read: true }, { fetch: accessFetch(fetch) });
+      const access = await universalAccess.setPublicAccess(
+        url,
+        { read: true },
+        { fetch: accessFetch(fetch) },
+      );
       return access?.read === true;
     } catch {
       return false;
@@ -66,7 +70,10 @@ export function createSolidReleasePublisher({
     try {
       const response = await fetch(url, { headers: { Accept: "text/turtle" } });
       if (!response.ok) return false;
-      const [there, here] = await Promise.all([parseDeckFile(await response.text(), "turtle", url), parseDeckFile(turtle, "turtle", url)]);
+      const [there, here] = await Promise.all([
+        parseDeckFile(await response.text(), "turtle", url),
+        parseDeckFile(turtle, "turtle", url),
+      ]);
       return statementsOf(there, url) === statementsOf(here, url);
     } catch {
       return false;
@@ -81,8 +88,10 @@ export function createSolidReleasePublisher({
         body: turtle,
       });
       if (response.status === 412) {
-        if (!(await isThisRelease(targetUrl, turtle))) throw new AppError("releaseTaken", { url: targetUrl });
-      } else if (!response.ok) throw new AppError("addFailed", { url: targetUrl, status: response.status });
+        if (!(await isThisRelease(targetUrl, turtle)))
+          throw new AppError("releaseTaken", { url: targetUrl });
+      } else if (!response.ok)
+        throw new AppError("addFailed", { url: targetUrl, status: response.status });
       const shared = await share(targetUrl);
       await addCatalogLink(instanceUrl, SM.publishedRelease, targetUrl, fetch);
       return { public: shared };
@@ -115,7 +124,11 @@ const TIMES = new Set([`${DCTERMS_NS}issued`, `${DCTERMS_NS}modified`]);
  */
 function statementsOf(quads: readonly Quad[], url: string): string {
   const term = (one: Term) =>
-    one.termType === "BlankNode" ? "_:" : one.termType === "Literal" ? JSON.stringify([one.value, one.language, one.datatype.value]) : `<${one.value}>`;
+    one.termType === "BlankNode"
+      ? "_:"
+      : one.termType === "Literal"
+        ? JSON.stringify([one.value, one.language, one.datatype.value])
+        : `<${one.value}>`;
   return quads
     .filter((quad) => !(quad.subject.value === url && TIMES.has(quad.predicate.value)))
     .map((quad) => `${term(quad.subject)} ${term(quad.predicate)} ${term(quad.object)}`)
@@ -145,18 +158,30 @@ export function accessFetch(fetch: typeof globalThis.fetch): typeof globalThis.f
   return async (input, init) => {
     if (init?.method === "PATCH") {
       // The library sends a PATCH's body as text.
-      return fetch(input, { ...init, body: (init.body as string).replace(/(>|(?<!\\)")\.(?=\s|\})/g, "$1 .") });
+      return fetch(input, {
+        ...init,
+        body: (init.body as string).replace(/(>|(?<!\\)")\.(?=\s|\})/g, "$1 ."),
+      });
     }
     const response = await fetch(input, init);
     const link = response.headers.get("Link") ?? "";
     const method = init?.method ?? "GET";
-    if ((method !== "GET" && method !== "HEAD") || response.status !== 404 || !link.includes(`<${ACCESS_CONTROL_RESOURCE}>`)) return response;
+    if (
+      (method !== "GET" && method !== "HEAD") ||
+      response.status !== 404 ||
+      !link.includes(`<${ACCESS_CONTROL_RESOURCE}>`)
+    )
+      return response;
     const body = method === "HEAD" ? null : `<> a <${ACCESS_CONTROL_RESOURCE}> .`;
-    const empty = new Response(body, { status: 200, headers: { "Content-Type": "text/turtle", Link: link } });
+    const empty = new Response(body, {
+      status: 200,
+      headers: { "Content-Type": "text/turtle", Link: link },
+    });
     Object.defineProperty(empty, "url", { value: response.url });
     return empty;
   };
 }
 
 /** A fetch as someone with no login: no cookie, no credentials of any kind. */
-export const anonymousFetch: typeof globalThis.fetch = (input, init) => globalThis.fetch(input, { ...init, credentials: "omit" });
+export const anonymousFetch: typeof globalThis.fetch = (input, init) =>
+  globalThis.fetch(input, { ...init, credentials: "omit" });

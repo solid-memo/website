@@ -69,17 +69,33 @@ describe("DraftsScreen", () => {
     renderScreen({
       drafts: [
         draft("solid", { course: true, version: 2 }),
-        draft("capitals", { title: {}, releasedAs: "https://pod.example/releases/capitals/v1.ttl" }),
+        draft("capitals", {
+          title: {},
+          releasedAs: "https://pod.example/releases/capitals/v1.ttl",
+        }),
         draft("broken", { readable: false, title: {} }),
       ],
     });
     const table = screen.getByRole("table", { name: "Drafts in Deck set A" });
     // A draft that can be read opens; one that cannot, not.
-    expect(within(table).getByRole("link", { name: "Solid" })).toHaveAttribute("href", "#/draft/solid");
-    expect(within(table).getByRole("link", { name: "Untitled (capitals)" })).toHaveAttribute("href", "#/draft/capitals");
+    expect(within(table).getByRole("link", { name: "Solid" })).toHaveAttribute(
+      "href",
+      "#/draft/solid",
+    );
+    expect(within(table).getByRole("link", { name: "Untitled (capitals)" })).toHaveAttribute(
+      "href",
+      "#/draft/capitals",
+    );
     expect(within(table).queryByRole("link", { name: "Untitled (broken)" })).toBeNull();
     const rows = within(table).getAllByRole("row").slice(1);
-    expect(rows.map((row) => within(row).getAllByRole("cell").slice(0, 3).map((cell) => cell.textContent))).toEqual([
+    expect(
+      rows.map((row) =>
+        within(row)
+          .getAllByRole("cell")
+          .slice(0, 3)
+          .map((cell) => cell.textContent),
+      ),
+    ).toEqual([
       ["Course", "2", "Being written"],
       ["Deck", "1", "Released"],
       ["", "1", "Cannot be read"],
@@ -117,9 +133,14 @@ describe("DraftsScreen", () => {
     fireEvent.click(screen.getByRole("radio", { name: "The next version of a release" }));
     const address = screen.getByRole("textbox", { name: "Address of the release" });
     expect(address).toHaveAccessibleDescription(/Where the release is published/);
-    fireEvent.input(address, { target: { value: " https://solid-memo.com/decks/capitals/v1.ttl " } });
+    fireEvent.input(address, {
+      target: { value: " https://solid-memo.com/decks/capitals/v1.ttl " },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Create the draft" }));
-    expect(onCreate).toHaveBeenLastCalledWith({ kind: "nextVersionOf", url: "https://solid-memo.com/decks/capitals/v1.ttl" });
+    expect(onCreate).toHaveBeenLastCalledWith({
+      kind: "nextVersionOf",
+      url: "https://solid-memo.com/decks/capitals/v1.ttl",
+    });
     fireEvent.click(screen.getByRole("radio", { name: "A release saved as a file" }));
     fireEvent.click(screen.getByRole("button", { name: "Choose a file and create the draft…" }));
     expect(onCreate).toHaveBeenLastCalledWith({ kind: "fromFile" });
@@ -151,7 +172,9 @@ describe("DraftsScreen", () => {
     const { onDelete } = renderScreen({ drafts: [solid], deleted: draft("old", { title: {} }) });
     const button = screen.getByRole("button", { name: "Delete the draft Solid, version 1" });
     fireEvent.click(button);
-    expect(dialog("Delete the draft")).toHaveTextContent("Delete the draft Solid, version 1? This cannot be undone.");
+    expect(dialog("Delete the draft")).toHaveTextContent(
+      "Delete the draft Solid, version 1? This cannot be undone.",
+    );
     answer("Delete the draft", "Cancel");
     expect(onDelete).not.toHaveBeenCalled();
     fireEvent.click(button);
@@ -162,14 +185,20 @@ describe("DraftsScreen", () => {
 
   it("holds every delete while one is made", () => {
     renderScreen({ drafts: [draft("solid")], deleting: draft("solid") });
-    expect(screen.getByRole("button", { name: "Delete the draft Solid, version 1" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Delete the draft Solid, version 1" }),
+    ).toBeDisabled();
     expect(screen.getByText("Deleting the draft Solid…")).toBeInTheDocument();
   });
 
   it("holds every change while the catalog may not be changed, saying why", () => {
     renderScreen({ drafts: [draft("solid")], readOnly: "setAside" });
-    expect(screen.getByText(/The instance's catalog or one of its groups has invalid data/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Delete the draft Solid, version 1" })).toBeDisabled();
+    expect(
+      screen.getByText(/The instance's catalog or one of its groups has invalid data/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Delete the draft Solid, version 1" }),
+    ).toBeDisabled();
     expect(screen.getByRole("radio", { name: "A blank deck" })).toBeDisabled();
   });
 });

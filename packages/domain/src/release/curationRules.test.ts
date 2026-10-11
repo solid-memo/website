@@ -15,11 +15,29 @@ it("accepts a release the repository's policy asks nothing more of", () => {
 });
 
 it("names each language and theme the repository's policy asks and a release lacks", () => {
-  const bare = model({ title: [text("Solid", "sv")], keywords: [text("pods"), iri("https://example.com/sv")], themes: [iri("https://example.com/theme")] });
-  expect(curationProblems(bare, repoPolicy).map(({ code, field, params }) => ({ code, field, params }))).toEqual([
-    { code: "missingLanguage", field: "http://purl.org/dc/terms/title", params: { language: "en" } },
-    { code: "missingLanguage", field: "http://purl.org/dc/terms/description", params: { language: "en" } },
-    { code: "missingLanguage", field: "http://www.w3.org/ns/dcat#keyword", params: { language: "sv" } },
+  const bare = model({
+    title: [text("Solid", "sv")],
+    keywords: [text("pods"), iri("https://example.com/sv")],
+    themes: [iri("https://example.com/theme")],
+  });
+  expect(
+    curationProblems(bare, repoPolicy).map(({ code, field, params }) => ({ code, field, params })),
+  ).toEqual([
+    {
+      code: "missingLanguage",
+      field: "http://purl.org/dc/terms/title",
+      params: { language: "en" },
+    },
+    {
+      code: "missingLanguage",
+      field: "http://purl.org/dc/terms/description",
+      params: { language: "en" },
+    },
+    {
+      code: "missingLanguage",
+      field: "http://www.w3.org/ns/dcat#keyword",
+      params: { language: "sv" },
+    },
     { code: "missingTheme", field: "http://www.w3.org/ns/dcat#theme", params: { theme: EDUC } },
   ]);
 });

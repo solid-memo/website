@@ -15,7 +15,11 @@
  * `prepare` builds the input of a size and returns the work to time, so
  * building it is not timed.
  */
-export function growth(prepare: (size: number) => () => unknown, size: number, times: number): number {
+export function growth(
+  prepare: (size: number) => () => unknown,
+  size: number,
+  times: number,
+): number {
   const small = prepare(size);
   const large = prepare(size * times);
   small();

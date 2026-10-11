@@ -3,23 +3,17 @@ import { ensureTrailingSlash, lastPathSegment } from "./urls";
 
 describe("ensureTrailingSlash", () => {
   it("appends a slash when missing", () => {
-    expect(ensureTrailingSlash("https://pod.example/a")).toBe(
-      "https://pod.example/a/",
-    );
+    expect(ensureTrailingSlash("https://pod.example/a")).toBe("https://pod.example/a/");
   });
 
   it("keeps an existing slash", () => {
-    expect(ensureTrailingSlash("https://pod.example/a/")).toBe(
-      "https://pod.example/a/",
-    );
+    expect(ensureTrailingSlash("https://pod.example/a/")).toBe("https://pod.example/a/");
   });
 });
 
 describe("lastPathSegment", () => {
   it("returns the last segment of a container URL", () => {
-    expect(lastPathSegment("https://pod.example/solid-memo/japanese/")).toBe(
-      "japanese",
-    );
+    expect(lastPathSegment("https://pod.example/solid-memo/japanese/")).toBe("japanese");
   });
 
   it("decodes percent-encoding", () => {
@@ -27,8 +21,6 @@ describe("lastPathSegment", () => {
   });
 
   it("falls back to the input for a root URL", () => {
-    expect(lastPathSegment("https://pod.example/")).toBe(
-      "https://pod.example/",
-    );
+    expect(lastPathSegment("https://pod.example/")).toBe("https://pod.example/");
   });
 });

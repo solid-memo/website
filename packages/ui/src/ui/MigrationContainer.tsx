@@ -6,7 +6,11 @@ import type { UpdateOutcome, UpdateProgress } from "@solid-memo/domain/instanceU
 import { isPlanEmpty } from "@solid-memo/domain/migration";
 import type { Session } from "@solid-memo/domain/session";
 import { useI18n } from "./i18n";
-import { InstanceUpdateConfirm, InstanceUpdateProgress, InstanceUpdateResult } from "./InstanceUpdate";
+import {
+  InstanceUpdateConfirm,
+  InstanceUpdateProgress,
+  InstanceUpdateResult,
+} from "./InstanceUpdate";
 import { MigrationNotice } from "./MigrationNotice";
 
 /**

@@ -30,7 +30,10 @@ export function createLocalStorageUpdateJournal(
   return {
     begin(sourceUrl, stagingUrl) {
       try {
-        storage().setItem(key(sourceUrl), JSON.stringify({ stagingUrl, startedAt: new Date().toISOString() }));
+        storage().setItem(
+          key(sourceUrl),
+          JSON.stringify({ stagingUrl, startedAt: new Date().toISOString() }),
+        );
       } catch {
         // Without storage, an interrupted move cannot be found later; nothing else changes.
       }
@@ -90,10 +93,12 @@ export function createLocalStorageUpdateJournal(
 function entries(storage: () => Storage): [string, string][] {
   try {
     const store = storage();
-    return Array.from({ length: store.length }, (_, index) => store.key(index)!).flatMap((entryKey) => {
-      const staging = entryKey.startsWith(PREFIX) ? stagingOf(store.getItem(entryKey)!) : null;
-      return staging === null ? [] : [[entryKey, staging] as [string, string]];
-    });
+    return Array.from({ length: store.length }, (_, index) => store.key(index)!).flatMap(
+      (entryKey) => {
+        const staging = entryKey.startsWith(PREFIX) ? stagingOf(store.getItem(entryKey)!) : null;
+        return staging === null ? [] : [[entryKey, staging] as [string, string]];
+      },
+    );
   } catch {
     return [];
   }

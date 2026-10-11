@@ -15,7 +15,10 @@ describe("the generated modules", () => {
 
   it("describe every shape at its latest version", () => {
     for (const [shape, version] of Object.entries(LATEST_VERSION)) {
-      expect(ALL_SHAPES.some((d) => d.shape === shape && d.version === version), shape).toBe(true);
+      expect(
+        ALL_SHAPES.some((d) => d.shape === shape && d.version === version),
+        shape,
+      ).toBe(true);
     }
     expect(Object.keys(SHAPES).sort()).toEqual(Object.keys(LATEST_VERSION).sort());
   });

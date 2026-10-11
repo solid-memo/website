@@ -10,7 +10,9 @@ const instance: Instance = { url: "https://pod.example/solid-memo/a/", name: "Ma
 
 function renderContainer(useCases = makeUseCasesFake()) {
   render(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
       <ValidationContainer useCases={useCases} instance={instance} />
     </QueryClientProvider>,
   );

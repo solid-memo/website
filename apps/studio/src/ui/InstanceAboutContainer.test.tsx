@@ -2,7 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import { defaultCatalogDescription, renamedCatalog, type Catalog } from "@solid-memo/domain/catalog";
+import {
+  defaultCatalogDescription,
+  renamedCatalog,
+  type Catalog,
+} from "@solid-memo/domain/catalog";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
 import { choose } from "../test/choose";
@@ -20,7 +24,12 @@ function renderContainer(useCases: UseCases) {
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   render(
     <QueryClientProvider client={queryClient}>
-      <InstanceAboutContainer useCases={useCases} session={session} instance={instanceA} healthHref="#/health" />
+      <InstanceAboutContainer
+        useCases={useCases}
+        session={session}
+        instance={instanceA}
+        healthHref="#/health"
+      />
     </QueryClientProvider>,
   );
   return { invalidate };
@@ -30,7 +39,9 @@ describe("InstanceAboutContainer", () => {
   it("shows where the instance is, who publishes its catalog, and its preferences in Solid Memo", async () => {
     renderContainer(makeUseCasesFake({ readCatalog: vi.fn(async () => catalog) }));
     expect(screen.getByText("Loading the catalog…")).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: "Instance: Deck set A" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Instance: Deck set A" }),
+    ).toBeInTheDocument();
     const [address, publisher] = screen.getAllByRole("definition");
     expect(address).toHaveTextContent(instanceA.url);
     expect(publisher).toHaveTextContent(`Alice (${session.webId}`);
@@ -43,9 +54,19 @@ describe("InstanceAboutContainer", () => {
   });
 
   it("holds both forms while the catalog is set aside, with a link to the health", async () => {
-    renderContainer(makeUseCasesFake({ readCatalog: vi.fn(async () => catalog), checkInstance: vi.fn(async () => invalidReport([], { catalog: true })) }));
-    expect(await screen.findByText(/catalog or one of its groups has invalid data/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    renderContainer(
+      makeUseCasesFake({
+        readCatalog: vi.fn(async () => catalog),
+        checkInstance: vi.fn(async () => invalidReport([], { catalog: true })),
+      }),
+    );
+    expect(
+      await screen.findByText(/catalog or one of its groups has invalid data/),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
+      "href",
+      "#/health",
+    );
     expect(screen.getByRole("button", { name: "Save name" })).toBeDisabled();
     expect(screen.getByLabelText("Description")).toBeDisabled();
   });
@@ -53,9 +74,13 @@ describe("InstanceAboutContainer", () => {
   it("renames the instance, then reads the instances and the catalog afresh", async () => {
     const useCases = makeUseCasesFake({ readCatalog: vi.fn(async () => catalog) });
     const { invalidate } = renderContainer(useCases);
-    fireEvent.input(await screen.findByLabelText("Instance name"), { target: { value: "Languages" } });
+    fireEvent.input(await screen.findByLabelText("Instance name"), {
+      target: { value: "Languages" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
-    await waitFor(() => expect(useCases.renameInstance).toHaveBeenCalledWith(session, instanceA, "Languages"));
+    await waitFor(() =>
+      expect(useCases.renameInstance).toHaveBeenCalledWith(session, instanceA, "Languages"),
+    );
     expect(await screen.findByText("Saved.")).toBeInTheDocument();
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["instances"] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["catalog", instanceA.url] });
@@ -71,13 +96,22 @@ describe("InstanceAboutContainer", () => {
       }),
     });
     renderContainer(useCases);
-    fireEvent.input(await screen.findByLabelText("Instance name"), { target: { value: "Languages" } });
+    fireEvent.input(await screen.findByLabelText("Instance name"), {
+      target: { value: "Languages" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
-    await waitFor(() => expect(screen.getByLabelText("Description")).toHaveValue(defaultCatalogDescription("Languages")));
+    await waitFor(() =>
+      expect(screen.getByLabelText("Description")).toHaveValue(
+        defaultCatalogDescription("Languages"),
+      ),
+    );
     choose("License", CC0);
     fireEvent.click(screen.getByRole("button", { name: "Save catalog" }));
     await waitFor(() =>
-      expect(useCases.describeCatalog).toHaveBeenCalledWith(instanceA.url, { description: defaultCatalogDescription("Languages"), license: CC0 }),
+      expect(useCases.describeCatalog).toHaveBeenCalledWith(instanceA.url, {
+        description: defaultCatalogDescription("Languages"),
+        license: CC0,
+      }),
     );
   });
 
@@ -90,15 +124,28 @@ describe("InstanceAboutContainer", () => {
     expect(await screen.findByText("The catalog needs a description.")).toBeInTheDocument();
     fireEvent.input(screen.getByLabelText("Description"), { target: { value: "Decks I share." } });
     fireEvent.click(screen.getByRole("button", { name: "Save catalog" }));
-    await waitFor(() => expect(useCases.describeCatalog).toHaveBeenLastCalledWith(instanceA.url, { description: "Decks I share.", license: CC0 }));
+    await waitFor(() =>
+      expect(useCases.describeCatalog).toHaveBeenLastCalledWith(instanceA.url, {
+        description: "Decks I share.",
+        license: CC0,
+      }),
+    );
     choose("License", "");
     fireEvent.click(screen.getByRole("button", { name: "Save catalog" }));
-    await waitFor(() => expect(useCases.describeCatalog).toHaveBeenLastCalledWith(instanceA.url, { description: "Decks I share." }));
+    await waitFor(() =>
+      expect(useCases.describeCatalog).toHaveBeenLastCalledWith(instanceA.url, {
+        description: "Decks I share.",
+      }),
+    );
   });
 
   it("says an instance has no catalog yet", async () => {
     renderContainer(makeUseCasesFake({ readCatalog: vi.fn(async () => null) }));
-    expect(await screen.findByText("This instance has no catalog yet. Open it in Solid Memo to update it.")).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        "This instance has no catalog yet. Open it in Solid Memo to update it.",
+      ),
+    ).toBeInTheDocument();
     expect(screen.queryByLabelText("Description")).toBeNull();
     expect(screen.getByLabelText("Instance name")).toHaveValue("Deck set A");
   });

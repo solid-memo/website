@@ -8,7 +8,11 @@ const REVIEWS = `${INSTANCE}reviews/deck-1.ttl`;
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const DC = "http://purl.org/dc/terms/";
 
-const v = (constraint: string, path?: string, severity: Violation["severity"] = "violation"): Violation => ({
+const v = (
+  constraint: string,
+  path?: string,
+  severity: Violation["severity"] = "violation",
+): Violation => ({
   ...(path === undefined ? {} : { path }),
   message: { en: `${constraint} on ${path ?? "the subject"}` },
   severity,
@@ -16,7 +20,12 @@ const v = (constraint: string, path?: string, severity: Violation["severity"] = 
 });
 const DCAT = "http://www.w3.org/ns/dcat#";
 
-const checked = (url: string, shape: "deck" | "reviewState" | "agent" | "card" | "catalog" | "deckGroup", violations: Violation[], version = 3): SubjectReport => ({
+const checked = (
+  url: string,
+  shape: "deck" | "reviewState" | "agent" | "card" | "catalog" | "deckGroup",
+  violations: Violation[],
+  version = 3,
+): SubjectReport => ({
   url,
   status: "checked",
   shape,
@@ -37,13 +46,34 @@ describe("planRepair", () => {
             v("In", `${SM}studyDirection`),
           ]),
           checked(`${CATALOG}#deck-2`, "deck", [v("MinCount", `${SM}direction`)], 2),
-          checked(`${CATALOG}#agent-x`, "agent", [v("MinCount", "http://xmlns.com/foaf/0.1/name")], 1),
-          { url: `${CATALOG}#pub`, status: "profiled", violations: [{ ...v("MinCount", "http://xmlns.com/foaf/0.1/name"), profile: "dcat-ap" }] },
-          checked(`${CATALOG}#catalog`, "catalog", [{ ...v("Class", `${DCAT}catalog`), profile: "dcat-ap" }], 1),
-          checked(`${CATALOG}#group-1`, "deckGroup", [
-            { ...v("Class", `${DCAT}dataset`), profile: "dcat-ap" },
-            { ...v("Class", `${DCAT}catalog`), profile: "dcat-ap" },
-          ], 1),
+          checked(
+            `${CATALOG}#agent-x`,
+            "agent",
+            [v("MinCount", "http://xmlns.com/foaf/0.1/name")],
+            1,
+          ),
+          {
+            url: `${CATALOG}#pub`,
+            status: "profiled",
+            violations: [
+              { ...v("MinCount", "http://xmlns.com/foaf/0.1/name"), profile: "dcat-ap" },
+            ],
+          },
+          checked(
+            `${CATALOG}#catalog`,
+            "catalog",
+            [{ ...v("Class", `${DCAT}catalog`), profile: "dcat-ap" }],
+            1,
+          ),
+          checked(
+            `${CATALOG}#group-1`,
+            "deckGroup",
+            [
+              { ...v("Class", `${DCAT}dataset`), profile: "dcat-ap" },
+              { ...v("Class", `${DCAT}catalog`), profile: "dcat-ap" },
+            ],
+            1,
+          ),
         ],
       },
       {
@@ -55,7 +85,8 @@ describe("planRepair", () => {
         ],
       },
     ]);
-    const kinds = (plan: ReturnType<typeof planRepair>) => plan.repairs.map((r) => [r.subjectUrl.split("#")[1], r.kind, r.version]);
+    const kinds = (plan: ReturnType<typeof planRepair>) =>
+      plan.repairs.map((r) => [r.subjectUrl.split("#")[1], r.kind, r.version]);
     const plan = planRepair(report);
     expect(kinds(plan)).toEqual([
       ["deck-1", "describe-deck", 3],
@@ -78,11 +109,22 @@ describe("planRepair", () => {
         url: `${INSTANCE}decks/deck-1.ttl`,
         status: "checked",
         subjects: [
-          checked(`${INSTANCE}decks/deck-1.ttl#x`, "card", [v("Or"), v("Or"), v("MinCount", `${DC}description`)], 2),
+          checked(
+            `${INSTANCE}decks/deck-1.ttl#x`,
+            "card",
+            [v("Or"), v("Or"), v("MinCount", `${DC}description`)],
+            2,
+          ),
           // A deck's dangling link is no deck-list membership to drop.
           checked(`${INSTANCE}decks/deck-1.ttl#d`, "deck", [v("Class", `${DCAT}dataset`)], 6),
           { url: `${INSTANCE}decks/deck-1.ttl#note`, status: "untyped" },
-          { url: `${INSTANCE}decks/deck-1.ttl#new`, status: "newer", shape: "card", version: 9, latest: 2 },
+          {
+            url: `${INSTANCE}decks/deck-1.ttl#new`,
+            status: "newer",
+            shape: "card",
+            version: 9,
+            latest: 2,
+          },
         ],
       },
       { url: `${INSTANCE}meta.ttl`, status: "missing", subjects: [] },
@@ -107,8 +149,18 @@ describe("planRepair", () => {
 
 describe("describeRepair", () => {
   it("says what each repair does", () => {
-    const kinds: RepairKind[] = ["describe-deck", "direct-deck", "drop-snapshot", "recompute-due", "name-agent", "drop-dangling-members", "remove-subject"];
-    expect(kinds.map((kind) => describeRepair({ kind, documentUrl: "d", subjectUrl: "s", version: 1 }))).toEqual([
+    const kinds: RepairKind[] = [
+      "describe-deck",
+      "direct-deck",
+      "drop-snapshot",
+      "recompute-due",
+      "name-agent",
+      "drop-dangling-members",
+      "remove-subject",
+    ];
+    expect(
+      kinds.map((kind) => describeRepair({ kind, documentUrl: "d", subjectUrl: "s", version: 1 })),
+    ).toEqual([
       "Give the deck the default description",
       "Study the deck front to back",
       "Drop the review's half-written undo snapshot",

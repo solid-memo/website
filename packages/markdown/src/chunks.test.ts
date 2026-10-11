@@ -3,7 +3,10 @@ import { chunksOf, inspectChunks, splitAtRules } from "./chunks";
 import { MAX_CHARS, parseMarkdown, type MdBlock } from "./parse";
 
 const blocks = (text: string): MdBlock[] => parseMarkdown(text)!;
-const paragraph = (value: string): MdBlock => ({ type: "paragraph", children: [{ type: "text", value }] });
+const paragraph = (value: string): MdBlock => ({
+  type: "paragraph",
+  children: [{ type: "text", value }],
+});
 
 describe("splitAtRules", () => {
   it("splits at top-level rules, leaving them out and keeping empty pieces", () => {
@@ -25,7 +28,10 @@ describe("splitAtRules", () => {
 
 describe("chunksOf", () => {
   it("drops empty pieces", () => {
-    expect(chunksOf(blocks("---\n\na\n\n---\n\n---\n\nb\n\n---"))).toEqual([[paragraph("a")], [paragraph("b")]]);
+    expect(chunksOf(blocks("---\n\na\n\n---\n\n---\n\nb\n\n---"))).toEqual([
+      [paragraph("a")],
+      [paragraph("b")],
+    ]);
   });
 
   it("is one chunk of a text without top-level rules, and one empty chunk of one that shows nothing", () => {
@@ -35,13 +41,19 @@ describe("chunksOf", () => {
   });
 
   it("resolves a reference link by a definition in another chunk", () => {
-    const [first] = chunksOf(blocks("See [the spec][s].\n\n---\n\n[s]: https://solidproject.org/TR/protocol\n\nMore."));
+    const [first] = chunksOf(
+      blocks("See [the spec][s].\n\n---\n\n[s]: https://solidproject.org/TR/protocol\n\nMore."),
+    );
     expect(first).toEqual([
       {
         type: "paragraph",
         children: [
           { type: "text", value: "See " },
-          { type: "link", url: "https://solidproject.org/TR/protocol", children: [{ type: "text", value: "the spec" }] },
+          {
+            type: "link",
+            url: "https://solidproject.org/TR/protocol",
+            children: [{ type: "text", value: "the spec" }],
+          },
           { type: "text", value: "." },
         ],
       },

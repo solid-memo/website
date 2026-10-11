@@ -107,7 +107,11 @@ export function LibraryCopiesScreen({
     return (
       <section>
         <header>{heading}</header>
-        <p class="hint">{tx("studio.library.empty", { library: <a href={libraryHref}>{t("studio.library.libraryLink")}</a> })}</p>
+        <p class="hint">
+          {tx("studio.library.empty", {
+            library: <a href={libraryHref}>{t("studio.library.libraryLink")}</a>,
+          })}
+        </p>
       </section>
     );
   }
@@ -162,7 +166,11 @@ export function LibraryCopiesScreen({
               <a href={deckHref(copy.deck)}>
                 <ReaderText text={copy.deck.title} />
               </a>
-              {copy.fromLink === true && <span class="studio-badge">{t("studio.decks.badge.from", { host: releaseHost(copy.deck.sourceUrl!) })}</span>}
+              {copy.fromLink === true && (
+                <span class="studio-badge">
+                  {t("studio.decks.badge.from", { host: releaseHost(copy.deck.sourceUrl!) })}
+                </span>
+              )}
             </>
           ),
         }}
@@ -171,20 +179,33 @@ export function LibraryCopiesScreen({
             key: "copied",
             label: t("studio.library.copied"),
             cell: ({ copy }) =>
-              copy.version === null ? <span class="hint">{t("studio.library.unknown")}</span> : t("studio.library.release", { version: copy.version }),
+              copy.version === null ? (
+                <span class="hint">{t("studio.library.unknown")}</span>
+              ) : (
+                t("studio.library.release", { version: copy.version })
+              ),
           },
           {
             key: "current",
             label: t("studio.library.current"),
             cell: ({ copy }) =>
-              copy.series === null ? <span class="hint">{t("studio.library.gone")}</span> : t("studio.library.release", { version: copy.series.version }),
+              copy.series === null ? (
+                <span class="hint">{t("studio.library.gone")}</span>
+              ) : (
+                t("studio.library.release", { version: copy.series.version })
+              ),
           },
-          { key: "update", label: t("studio.library.update"), cell: (row) => <UpdateText row={row} /> },
+          {
+            key: "update",
+            label: t("studio.library.update"),
+            cell: (row) => <UpdateText row={row} />,
+          },
         ]}
         select={{
           label: t("studio.decks.select"),
           allLabel: t("studio.library.selectAll"),
-          rowLabel: ({ copy }) => t("studio.decks.selectDeck", { deck: readerText(copy.deck.title) }),
+          rowLabel: ({ copy }) =>
+            t("studio.decks.selectDeck", { deck: readerText(copy.deck.title) }),
           offered: (row) => planOf(row) !== null && selectable(row.copy.deck),
           disabled: busy,
           chosen,
@@ -232,14 +253,24 @@ function UpdateText({ row }: { row: CopyRow }) {
       </>
     );
   }
-  if (row.plan === "failed") return <>{t("studio.library.planFailed", { version: series.version })}</>;
+  if (row.plan === "failed")
+    return <>{t("studio.library.planFailed", { version: series.version })}</>;
   if (plan === null) return <>{t("studio.library.nothingToUpdate", { version: series.version })}</>;
-  return <>{t("studio.library.changes", { version: plan.toVersion, changes: describeChanges(plan, i18n) })}</>;
+  return (
+    <>
+      {t("studio.library.changes", {
+        version: plan.toVersion,
+        changes: describeChanges(plan, i18n),
+      })}
+    </>
+  );
 }
 
 /** What upgrading a copy would do, once planned: null when there is nothing to offer, or it is not known yet. */
 function planOf(row: CopyRow): LibraryUpgradePlan | null {
-  return row.copy.newer === true && typeof row.plan === "object" && row.plan !== null ? row.plan : null;
+  return row.copy.newer === true && typeof row.plan === "object" && row.plan !== null
+    ? row.plan
+    : null;
 }
 
 /**
@@ -252,7 +283,8 @@ function planOf(row: CopyRow): LibraryUpgradePlan | null {
  */
 export function LibraryPlanScreen({ row }: { row: CopyRow | null }) {
   const { tx } = useI18n();
-  if (row === null) return <p class="hint">{tx("studio.library.peek", { j: <kbd>j</kbd>, k: <kbd>k</kbd> })}</p>;
+  if (row === null)
+    return <p class="hint">{tx("studio.library.peek", { j: <kbd>j</kbd>, k: <kbd>k</kbd> })}</p>;
   const plan = planOf(row);
   return (
     <section class="studio-peek" aria-labelledby="studio-plan-heading">
@@ -279,7 +311,9 @@ function PlanDetails({ plan }: { plan: LibraryUpgradePlan }) {
       {plan.notes.length > 0 && (
         <ul>
           {plan.notes.map((note) => (
-            <li key={note.version}>{t("libraryUpgradeNotice.releaseNote", { version: note.version, notes: note.notes })}</li>
+            <li key={note.version}>
+              {t("libraryUpgradeNotice.releaseNote", { version: note.version, notes: note.notes })}
+            </li>
           ))}
         </ul>
       )}
@@ -307,11 +341,16 @@ function BatchResultText({ result }: { result: BatchResult }) {
   const { t, tx, errorText } = useI18n();
   const deck = <ReaderText text={result.deck.title} />;
   const { outcome } = result;
-  if (outcome.ok) return <>{tx("studio.library.updated", { deck, version: result.plan.toVersion })}</>;
+  if (outcome.ok)
+    return <>{tx("studio.library.updated", { deck, version: result.plan.toVersion })}</>;
   return (
     <>
-      {tx("studio.library.failed", { deck, step: t(`deckUpgrade.step.${outcome.step}`).toLowerCase() })}{" "}
-      {errorText(outcome.error)} {outcome.changed ? t("deckUpgrade.partlyChanged") : t("deckUpgrade.noChanges")}
+      {tx("studio.library.failed", {
+        deck,
+        step: t(`deckUpgrade.step.${outcome.step}`).toLowerCase(),
+      })}{" "}
+      {errorText(outcome.error)}{" "}
+      {outcome.changed ? t("deckUpgrade.partlyChanged") : t("deckUpgrade.noChanges")}
     </>
   );
 }

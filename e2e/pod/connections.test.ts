@@ -16,7 +16,11 @@ let url: string;
 beforeEach(async () => {
   server = createServer((request, response) => {
     const header = (name: string) => (request.headers[name] as string | undefined) ?? null;
-    const seen: Seen = { port: request.socket.remotePort as number, connection: header("connection"), test: header("x-test") };
+    const seen: Seen = {
+      port: request.socket.remotePort as number,
+      connection: header("connection"),
+      test: header("x-test"),
+    };
     response.setHeader("content-type", "application/json");
     response.end(JSON.stringify(seen));
   });
@@ -29,7 +33,8 @@ afterEach(async () => {
   await new Promise((resolve) => server.close(resolve));
 });
 
-const seenBy = async (send: typeof fetch, input: string | Request, init?: RequestInit) => (await (await send(input, init)).json()) as Seen;
+const seenBy = async (send: typeof fetch, input: string | Request, init?: RequestInit) =>
+  (await (await send(input, init)).json()) as Seen;
 
 /** Two requests in a row, the first's connection back in the pool, idle, before the second is made. */
 async function twoBy(send: typeof fetch) {
@@ -52,7 +57,12 @@ describe("a fetch closing its connections", () => {
 
   it("keeps the request's own headers, given with it or on a Request", async () => {
     const closing = closingConnections(fetch);
-    expect(await seenBy(closing, url, { headers: { "x-test": "init" } })).toMatchObject({ connection: "close", test: "init" });
-    expect(await seenBy(closing, new Request(url, { headers: { "x-test": "request" } }))).toMatchObject({ connection: "close", test: "request" });
+    expect(await seenBy(closing, url, { headers: { "x-test": "init" } })).toMatchObject({
+      connection: "close",
+      test: "init",
+    });
+    expect(
+      await seenBy(closing, new Request(url, { headers: { "x-test": "request" } })),
+    ).toMatchObject({ connection: "close", test: "request" });
   });
 });

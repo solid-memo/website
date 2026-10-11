@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { courseDraft, deckDraft, DRAFT, link, NOW, of } from "../testing/releaseDraft";
-import { applyDraftChanges, attributionOf, isRefusal, type CheckActivity, type DraftChange, type ReleaseDraft } from "./releaseDraft";
+import {
+  applyDraftChanges,
+  attributionOf,
+  isRefusal,
+  type CheckActivity,
+  type DraftChange,
+  type ReleaseDraft,
+} from "./releaseDraft";
 import {
   addAuthorChanges,
   agentIdFor,
@@ -21,7 +28,12 @@ import { nextVersionDraft } from "./releaseVersion";
 const PROV = "http://www.w3.org/ns/prov#";
 const DCTERMS = "http://purl.org/dc/terms/";
 const COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
-const plain = (value: string) => ({ kind: "literal" as const, value, language: "", datatype: "http://www.w3.org/2001/XMLSchema#string" });
+const plain = (value: string) => ({
+  kind: "literal" as const,
+  value,
+  language: "",
+  datatype: "http://www.w3.org/2001/XMLSchema#string",
+});
 
 function made(draft: ReleaseDraft, changes: readonly DraftChange[]): ReleaseDraft {
   const result = applyDraftChanges(draft, changes);
@@ -29,7 +41,14 @@ function made(draft: ReleaseDraft, changes: readonly DraftChange[]): ReleaseDraf
   return result;
 }
 
-const check: CheckActivity = { check: "machine", label: "Checks", scope: "all", outcome: "none", endedAt: NOW, language: "en" };
+const check: CheckActivity = {
+  check: "machine",
+  label: "Checks",
+  scope: "all",
+  outcome: "none",
+  endedAt: NOW,
+  language: "en",
+};
 
 describe("authors", () => {
   it("are added as agents of the draft, under an id of their name, last among the authors", () => {
@@ -38,14 +57,22 @@ describe("authors", () => {
     expect(agentIdFor(draft, "ch-a")).toBe("ch-a-3");
     expect(agentIdFor(draft, "!!!")).toBe("author");
     const ann = made(draft, addAuthorChanges(draft, "ann", { name: "Ann" }));
-    const both = made(ann, addAuthorChanges(ann, "bo", { name: "Bo", mbox: "mailto:bo@example.org" }));
+    const both = made(
+      ann,
+      addAuthorChanges(ann, "bo", { name: "Bo", mbox: "mailto:bo@example.org" }),
+    );
     expect(authorsOf(both)).toEqual([
       { id: "ann", data: { name: "Ann" } },
       { id: "bo", data: { name: "Bo", mbox: "mailto:bo@example.org" } },
     ]);
-    const foreign = { ...both, root: { ...both.root, creator: [...both.root.creator, "https://elsewhere.example/#me"] } };
+    const foreign = {
+      ...both,
+      root: { ...both.root, creator: [...both.root.creator, "https://elsewhere.example/#me"] },
+    };
     expect(otherAuthorsOf(foreign)).toEqual(["https://elsewhere.example/#me"]);
-    expect(made(both, editAuthorChanges(both, "bo", { name: "Bob" })).agents[1]!.data.name).toBe("Bob");
+    expect(made(both, editAuthorChanges(both, "bo", { name: "Bob" })).agents[1]!.data.name).toBe(
+      "Bob",
+    );
   });
 
   it("are removed with their agent, unless it publishes the release or a statement names it", () => {
@@ -55,7 +82,10 @@ describe("authors", () => {
     expect(removed.agents).toEqual([]);
     const publishing = made(draft, [{ kind: "setMeta", meta: { publisher: of("ann") } }]);
     expect(made(publishing, removeAuthorChanges(publishing, "ann")).agents).toHaveLength(1);
-    const named = { ...draft, triples: [...draft.triples, link(of("compilation"), `${PROV}wasAssociatedWith`, of("ann"))] };
+    const named = {
+      ...draft,
+      triples: [...draft.triples, link(of("compilation"), `${PROV}wasAssociatedWith`, of("ann"))],
+    };
     expect(made(named, removeAuthorChanges(named, "ann")).agents).toHaveLength(1);
   });
 
@@ -70,7 +100,10 @@ describe("authors", () => {
     expect(attributionOf(one)!.text).toBe("Compiled by Ann with the help of AI.");
     expect(attributionOf(made(one, removeAuthorChanges(one, "ann")))).toBeNull();
     // A change the draft refuses (an id taken) keeps the attribution as it is.
-    expect(addAuthorChanges(one, "ch-a", { name: "Cy" }).at(-1)).toEqual({ kind: "setAttribution", attribution: { ai: true } });
+    expect(addAuthorChanges(one, "ch-a", { name: "Cy" }).at(-1)).toEqual({
+      kind: "setAttribution",
+      attribution: { ai: true },
+    });
   });
 });
 
@@ -79,7 +112,10 @@ describe("sources", () => {
     const draft = courseDraft();
     const more = {
       ...draft,
-      root: { ...draft.root, wasDerivedFrom: [...draft.root.wasDerivedFrom, "https://derived.example/"] },
+      root: {
+        ...draft.root,
+        wasDerivedFrom: [...draft.root.wasDerivedFrom, "https://derived.example/"],
+      },
       triples: [
         ...draft.triples,
         link(of("compilation"), `${PROV}used`, "https://used.example/"),
@@ -98,18 +134,50 @@ describe("sources", () => {
       ["https://used.example/", false, true, false],
       ["https://old.example/", false, false, true],
     ]);
-    expect(sources[0]).toMatchObject({ title: "Source", creator: "", license: "", evidence: "", others: [] });
-    expect(sources[2]).toMatchObject({ title: "", creator: "Bo", license: "https://cc0.example/", evidence: "Footer: CC0.", others: [{ predicate: COMMENT, object: plain("Used for facts.") }] });
+    expect(sources[0]).toMatchObject({
+      title: "Source",
+      creator: "",
+      license: "",
+      evidence: "",
+      others: [],
+    });
+    expect(sources[2]).toMatchObject({
+      title: "",
+      creator: "Bo",
+      license: "https://cc0.example/",
+      evidence: "Footer: CC0.",
+      others: [{ predicate: COMMENT, object: plain("Used for facts.") }],
+    });
   });
 
   it("change by their form, their other statements kept, an empty text left out", () => {
     const draft = courseDraft();
     const [source] = sourcesOf(draft);
     const others = [{ predicate: COMMENT, object: plain("Kept.") }];
-    const change = sourceChange("https://source.example/", { title: " Source 2 ", creator: "Ann", license: "https://cc0.example/", evidence: "Footer.", derivedFrom: true, used: false }, others);
+    const change = sourceChange(
+      "https://source.example/",
+      {
+        title: " Source 2 ",
+        creator: "Ann",
+        license: "https://cc0.example/",
+        evidence: "Footer.",
+        derivedFrom: true,
+        used: false,
+      },
+      others,
+    );
     const changed = made(draft, [change]);
-    expect(sourcesOf(changed)[0]).toMatchObject({ title: "Source 2", creator: "Ann", license: "https://cc0.example/", evidence: "Footer.", used: false, others });
-    const cleared = made(draft, [sourceChange(source!.iri, { ...source!, title: "", derivedFrom: true, used: true })]);
+    expect(sourcesOf(changed)[0]).toMatchObject({
+      title: "Source 2",
+      creator: "Ann",
+      license: "https://cc0.example/",
+      evidence: "Footer.",
+      used: false,
+      others,
+    });
+    const cleared = made(draft, [
+      sourceChange(source!.iri, { ...source!, title: "", derivedFrom: true, used: true }),
+    ]);
     expect(cleared.triples.filter((triple) => triple.subject === source!.iri)).toEqual([]);
   });
 
@@ -119,19 +187,41 @@ describe("sources", () => {
     expect(sourceLicenseValid("CC BY 4.0")).toBe(false);
     expect(sourceLicenseValid("urn:license:own", "urn:license:own")).toBe(true);
     const draft = courseDraft();
-    const form = { title: "Source", creator: "", license: " https://cc0.example ", evidence: "", derivedFrom: true, used: true };
-    expect(sourcesOf(made(draft, [sourceChange("https://source.example/", form)]))[0]!.license).toBe("https://cc0.example/");
-    expect(sourcesOf(made(draft, [sourceChange("https://source.example/", { ...form, license: "urn:license:own" })]))[0]!.license).toBe("urn:license:own");
+    const form = {
+      title: "Source",
+      creator: "",
+      license: " https://cc0.example ",
+      evidence: "",
+      derivedFrom: true,
+      used: true,
+    };
+    expect(
+      sourcesOf(made(draft, [sourceChange("https://source.example/", form)]))[0]!.license,
+    ).toBe("https://cc0.example/");
+    expect(
+      sourcesOf(
+        made(draft, [
+          sourceChange("https://source.example/", { ...form, license: "urn:license:own" }),
+        ]),
+      )[0]!.license,
+    ).toBe("urn:license:own");
   });
 
   it("removed, keep what they state while an earlier version's making uses them", () => {
     const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
     const next = nextVersionDraft(rebaseDraft(courseDraft(), V1), DRAFT);
     const [source] = sourcesOf(next);
-    expect(source).toMatchObject({ derivedFrom: true, used: false, usedEarlier: true, title: "Source" });
+    expect(source).toMatchObject({
+      derivedFrom: true,
+      used: false,
+      usedEarlier: true,
+      title: "Source",
+    });
     const removed = made(next, [{ kind: "setSource", iri: source!.iri, source: null }]);
     expect(sourcesOf(removed)).toEqual([{ ...source, derivedFrom: false }]);
-    expect(applyDraftChanges(removed, [{ kind: "setSource", iri: source!.iri, source: null }])).toEqual({ refused: "missing", id: source!.iri });
+    expect(
+      applyDraftChanges(removed, [{ kind: "setSource", iri: source!.iri, source: null }]),
+    ).toEqual({ refused: "missing", id: source!.iri });
     const own = made(courseDraft(), [{ kind: "setSource", iri: source!.iri, source: null }]);
     expect(sourcesOf(own)).toEqual([]);
     expect(own.triples.filter((triple) => triple.subject === source!.iri)).toEqual([]);
@@ -148,9 +238,20 @@ describe("sources", () => {
 describe("checks", () => {
   it("are the activities beside the release's own making: its checks, editable when recorded as a check, then those carried, never edited", () => {
     const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
-    const release = rebaseDraft(made(courseDraft(), [{ kind: "addCheckActivity", id: "review-1", activity: check }]), V1);
-    const next = made(nextVersionDraft(release, DRAFT), [{ kind: "addCheckActivity", id: "review-2", activity: check }]);
-    const odd = { ...next, triples: [...next.triples, link(of("odd"), "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", `${PROV}Activity`)] };
+    const release = rebaseDraft(
+      made(courseDraft(), [{ kind: "addCheckActivity", id: "review-1", activity: check }]),
+      V1,
+    );
+    const next = made(nextVersionDraft(release, DRAFT), [
+      { kind: "addCheckActivity", id: "review-2", activity: check },
+    ]);
+    const odd = {
+      ...next,
+      triples: [
+        ...next.triples,
+        link(of("odd"), "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", `${PROV}Activity`),
+      ],
+    };
     const views = checksOf(odd);
     expect(views.map((view) => [view.id, view.carried, view.activity !== null])).toEqual([
       ["review-2", false, true],
@@ -159,10 +260,15 @@ describe("checks", () => {
       ["review-1", true, false],
     ]);
     expect(views[0]).toMatchObject({ label: [{ value: "Checks" }], endedAt: NOW, activity: check });
-    expect(views[0]!.comments.map((one) => one.value)).toEqual(["Scope: all; a machine check, not a human review.", "Outcome: none"]);
+    expect(views[0]!.comments.map((one) => one.value)).toEqual([
+      "Scope: all; a machine check, not a human review.",
+      "Outcome: none",
+    ]);
     expect(views[1]).toMatchObject({ label: [], comments: [], endedAt: "" });
     expect(checksOf(courseDraft())).toEqual([]);
     expect(checkIdFor(deckDraft())).toBe("check-1");
-    expect(checkIdFor(made(deckDraft(), [{ kind: "addCheckActivity", id: "check-1", activity: check }]))).toBe("check-2");
+    expect(
+      checkIdFor(made(deckDraft(), [{ kind: "addCheckActivity", id: "check-1", activity: check }])),
+    ).toBe("check-2");
   });
 });

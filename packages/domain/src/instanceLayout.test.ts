@@ -101,7 +101,8 @@ describe("decks and their documents", () => {
   });
 
   it("lists every document the decks use, once", () => {
-    const deck = (cards: string, reviews: string) => ({ cardsDocumentUrl: cards, reviewsDocumentUrl: reviews }) as Deck;
+    const deck = (cards: string, reviews: string) =>
+      ({ cardsDocumentUrl: cards, reviewsDocumentUrl: reviews }) as Deck;
     expect([...documentsInUse([deck("a", "b"), deck("a", "c")])]).toEqual(["a", "b", "c"]);
   });
 });

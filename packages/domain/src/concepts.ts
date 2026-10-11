@@ -34,10 +34,7 @@ export function conceptByIri(scheme: ConceptScheme, iri: string): Concept | unde
   return scheme.concepts.find((concept) => concept.iri === iri);
 }
 
-export function conceptByNotation(
-  scheme: ConceptScheme,
-  notation: string,
-): Concept | undefined {
+export function conceptByNotation(scheme: ConceptScheme, notation: string): Concept | undefined {
   return scheme.concepts.find((concept) => concept.notation === notation);
 }
 

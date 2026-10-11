@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { QueryClient, QueryClientProvider, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { Trial, TrialOpening } from "@solid-memo/application/trial";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
@@ -78,7 +84,12 @@ export function TrialContainer({
     /** A trial of the draft; null: of the draft read afresh from the pod. */
     mutationFn: async (from: ReleaseDraft | null) => {
       const draft: ReleaseDraft =
-        from ?? (await queryClient.fetchQuery({ queryKey: draftKey(draftUrl), queryFn: () => useCases.getReleaseDraft(draftUrl), staleTime: 0 }));
+        from ??
+        (await queryClient.fetchQuery({
+          queryKey: draftKey(draftUrl),
+          queryFn: () => useCases.getReleaseDraft(draftUrl),
+          staleTime: 0,
+        }));
       return { draft, opening: await useCases.openTrial(draft, instanceUrl) };
     },
     onMutate: () => {
@@ -175,12 +186,18 @@ function TrialPlay({
   const course = courseQuery.data;
   const shown = course?.outline.chapters.find((one) => one.id === chapter) ?? null;
   // Answers go to the chapter shown, else to the one to take next: none once the course is done.
-  const answered = shown ?? course?.outline.chapters.find((one) => one.url === course.progress.currentChapterUrl) ?? null;
+  const answered =
+    shown ??
+    course?.outline.chapters.find((one) => one.url === course.progress.currentChapterUrl) ??
+    null;
   const renew = async () => {
     await queryClient.invalidateQueries();
     setRun((current) => current + 1);
   };
-  const act = useMutation({ mutationFn: (action: () => Promise<void>) => action(), onSuccess: renew });
+  const act = useMutation({
+    mutationFn: (action: () => Promise<void>) => action(),
+    onSuccess: renew,
+  });
   const courseLinks: CourseLinks = {
     courseHref: () => links.courseHref,
     chapterHref: (_instance, _deck, chapterUrl) => links.chapterHref(fragmentIdOf(chapterUrl)),
@@ -188,7 +205,11 @@ function TrialPlay({
   };
 
   if (draft.course && course === undefined) {
-    return courseQuery.error ? <ErrorMessage error={errorText(courseQuery.error)} /> : <Loading label={t("studio.trial.opening")} />;
+    return courseQuery.error ? (
+      <ErrorMessage error={errorText(courseQuery.error)} />
+    ) : (
+      <Loading label={t("studio.trial.opening")} />
+    );
   }
   const player = !draft.course ? (
     <StudyContainer
@@ -201,7 +222,12 @@ function TrialPlay({
       onExit={() => setRun((current) => current + 1)}
     />
   ) : shown === null ? (
-    <CourseContainer useCases={useCases} instance={instance} course={course!} justCompleted={justCompleted ?? undefined} />
+    <CourseContainer
+      useCases={useCases}
+      instance={instance}
+      course={course!}
+      justCompleted={justCompleted ?? undefined}
+    />
   ) : review ? (
     <ChapterReviewContainer
       key={`${shown.id} ${run}`}
@@ -236,12 +262,20 @@ function TrialPlay({
         error={act.error}
         onJump={(id) =>
           act.mutate(async () => {
-            await jumpToChapter(trial, course!, course!.outline.chapters.find((one) => one.id === id)!);
+            await jumpToChapter(
+              trial,
+              course!,
+              course!.outline.chapters.find((one) => one.id === id)!,
+            );
             onJump(id);
           })
         }
         onAnswerAll={(correct) =>
-          act.mutate(() => (draft.course ? answerChapter(trial, course!, answered!, correct, clock()) : answerQueue(trial, correct, clock())))
+          act.mutate(() =>
+            draft.course
+              ? answerChapter(trial, course!, answered!, correct, clock())
+              : answerQueue(trial, correct, clock()),
+          )
         }
         onAdvance={(more) => {
           setDays(days + more);

@@ -19,10 +19,19 @@ export function courseKey(deckUrl: string): string[] {
  * not done, or its final review once they all are and it is not yet
  * completed. A completed chapter opens at its steps again, for practice.
  */
-export function chapterHref(links: CourseLinks, instanceUrl: string, course: Course, chapter: CourseChapter): string {
+export function chapterHref(
+  links: CourseLinks,
+  instanceUrl: string,
+  course: Course,
+  chapter: CourseChapter,
+): string {
   const progress = course.progress.chapters.find((entry) => entry.url === chapter.url)!;
   const toReview = progress.state === "open" && progress.resumeStepId === undefined;
-  return (toReview ? links.reviewHref : links.chapterHref)(instanceUrl, course.deck.url, chapter.url);
+  return (toReview ? links.reviewHref : links.chapterHref)(
+    instanceUrl,
+    course.deck.url,
+    chapter.url,
+  );
 }
 
 /** A chapter the learner has just completed, as they come back to the course's page. */
@@ -54,7 +63,9 @@ export function CourseContainer({
 }) {
   const links = useCourseLinks();
   const instanceUrl = instance.url;
-  const current = course.outline.chapters.find((chapter) => chapter.url === course.progress.currentChapterUrl);
+  const current = course.outline.chapters.find(
+    (chapter) => chapter.url === course.progress.currentChapterUrl,
+  );
   return (
     <CourseScreen
       title={course.release.title}
@@ -63,10 +74,14 @@ export function CourseContainer({
       progress={course.progress}
       started={course.answeredCardIds.length > 0}
       chapterHref={(chapter) => chapterHref(links, instanceUrl, course, chapter)}
-      continueHref={current === undefined ? undefined : chapterHref(links, instanceUrl, course, current)}
+      continueHref={
+        current === undefined ? undefined : chapterHref(links, instanceUrl, course, current)
+      }
       decksHref={links.decksHref?.(instanceUrl)}
       justCompleted={justCompleted}
-      notice={<LibraryUpgradeContainer useCases={useCases} instance={instance} deck={course.deck} />}
+      notice={
+        <LibraryUpgradeContainer useCases={useCases} instance={instance} deck={course.deck} />
+      }
     />
   );
 }

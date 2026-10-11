@@ -12,6 +12,10 @@
     // URL as it is.
     "MD034": false,
   },
-  "globs": ["**/*.md"],
-  "ignores": ["**/node_modules/**"],
+  "globs": [
+    "**/*.md",
+  ],
+  "ignores": [
+    "**/node_modules/**",
+  ],
 }

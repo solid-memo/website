@@ -10,7 +10,13 @@ import { TodaySummary } from "./TodaySummary";
  * (as after a session). Nothing before the day's first answer, or when
  * the answers cannot be read: the deck list works without them.
  */
-export function TodaySummaryContainer({ useCases, instance }: { useCases: UseCases; instance: Instance }) {
+export function TodaySummaryContainer({
+  useCases,
+  instance,
+}: {
+  useCases: UseCases;
+  instance: Instance;
+}) {
   const statisticsQuery = useQuery({
     queryKey: ["statistics", instance.url],
     queryFn: () => useCases.getStatistics(instance.url, new Date()),

@@ -9,7 +9,14 @@ function Page({ onConfirm }: { onConfirm: () => void }) {
     <>
       <button
         type="button"
-        onClick={() => ask({ heading: "Delete the planet", text: "Delete Mars? This cannot be undone.", action: "Delete", onConfirm })}
+        onClick={() =>
+          ask({
+            heading: "Delete the planet",
+            text: "Delete Mars? This cannot be undone.",
+            action: "Delete",
+            onConfirm,
+          })
+        }
       >
         Delete Mars
       </button>

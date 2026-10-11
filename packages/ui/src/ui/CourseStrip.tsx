@@ -54,8 +54,14 @@ export function CourseStrip({ entries }: { entries: readonly CourseStripEntry[] 
             >
               {entry.started ? t("course.continue") : t("course.start")}
             </a>
-            <span class="hint">{t("course.chaptersDone", { done: entry.done, count: entry.count })}</span>
-            <progress value={entry.done} max={entry.count} aria-label={t("deckList.courseProgress")} />
+            <span class="hint">
+              {t("course.chaptersDone", { done: entry.done, count: entry.count })}
+            </span>
+            <progress
+              value={entry.done}
+              max={entry.count}
+              aria-label={t("deckList.courseProgress")}
+            />
           </li>
         ))}
       </ul>
@@ -92,7 +98,9 @@ export function CourseStripContainer({
   const entries = results.flatMap(({ data: course }): CourseStripEntry[] => {
     if (course === undefined) return [];
     // None once every chapter is done: a finished course is left out.
-    const current = course.outline.chapters.find((chapter) => chapter.url === course.progress.currentChapterUrl);
+    const current = course.outline.chapters.find(
+      (chapter) => chapter.url === course.progress.currentChapterUrl,
+    );
     if (current === undefined) return [];
     return [
       {

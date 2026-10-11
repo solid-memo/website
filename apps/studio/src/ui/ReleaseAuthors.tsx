@@ -1,7 +1,14 @@
 import { useState } from "preact/hooks";
 import type { AgentV1 } from "@solid-memo/vocab/types.generated";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
-import { addAuthorChanges, agentIdFor, authorsOf, editAuthorChanges, otherAuthorsOf, removeAuthorChanges } from "@solid-memo/domain/release/releaseMetadata";
+import {
+  addAuthorChanges,
+  agentIdFor,
+  authorsOf,
+  editAuthorChanges,
+  otherAuthorsOf,
+  removeAuthorChanges,
+} from "@solid-memo/domain/release/releaseMetadata";
 import { useI18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor } from "./draftEditor";
 
@@ -9,7 +16,10 @@ const MAILTO = "mailto:";
 
 /** An agent as its form holds it: a name, and an email without its `mailto:`. */
 function agentOf(name: string, email: string): AgentV1 {
-  return { name: name.trim(), ...(email.trim() === "" ? {} : { mbox: `${MAILTO}${email.trim()}` }) };
+  return {
+    name: name.trim(),
+    ...(email.trim() === "" ? {} : { mbox: `${MAILTO}${email.trim()}` }),
+  };
 }
 
 function emailOf(agent: AgentV1): string {
@@ -23,7 +33,13 @@ function emailOf(agent: AgentV1): string {
  * the attribution again for the authors it leaves (releaseMetadata.ts).
  * Authors another document describes are named, and kept as they are.
  */
-export function ReleaseAuthors({ draft, onEdit }: { draft: ReleaseDraft; onEdit: DraftEditor["edit"] }) {
+export function ReleaseAuthors({
+  draft,
+  onEdit,
+}: {
+  draft: ReleaseDraft;
+  onEdit: DraftEditor["edit"];
+}) {
   const { t } = useI18n();
   const authors = authorsOf(draft);
   const others = otherAuthorsOf(draft);
@@ -46,14 +62,26 @@ export function ReleaseAuthors({ draft, onEdit }: { draft: ReleaseDraft; onEdit:
           ))}
         </ul>
       )}
-      {others.length > 0 && <p class="hint">{t("studio.release.otherAuthors", { authors: others.join(", ") })}</p>}
+      {others.length > 0 && (
+        <p class="hint">{t("studio.release.otherAuthors", { authors: others.join(", ") })}</p>
+      )}
       <NewAuthorForm draft={draft} onEdit={onEdit} />
     </>
   );
 }
 
 /** An author's name and email, saved by its button once changed; and its removal. */
-function AuthorForm({ id, agent, onSave, onRemove }: { id: string; agent: AgentV1; onSave: (agent: AgentV1) => void; onRemove: () => void }) {
+function AuthorForm({
+  id,
+  agent,
+  onSave,
+  onRemove,
+}: {
+  id: string;
+  agent: AgentV1;
+  onSave: (agent: AgentV1) => void;
+  onRemove: () => void;
+}) {
   const { t } = useI18n();
   const [name, setName] = useState(agent.name);
   const [email, setEmail] = useState(emailOf(agent));
@@ -72,7 +100,11 @@ function AuthorForm({ id, agent, onSave, onRemove }: { id: string; agent: AgentV
         <button type="submit" disabled={!changed || name.trim() === ""}>
           {t("studio.release.saveAuthor")}
         </button>{" "}
-        <button type="button" aria-label={t("studio.release.removeOf", { name: agent.name })} onClick={onRemove}>
+        <button
+          type="button"
+          aria-label={t("studio.release.removeOf", { name: agent.name })}
+          onClick={onRemove}
+        >
           {t("studio.release.remove")}
         </button>
       </fieldset>
@@ -97,9 +129,20 @@ function AgentFields({
   return (
     <>
       <label for={`${id}-name`}>{t("studio.release.authorName")}</label>
-      <input id={`${id}-name`} value={name} autocomplete="off" onInput={(event) => onName(event.currentTarget.value)} />
+      <input
+        id={`${id}-name`}
+        value={name}
+        autocomplete="off"
+        onInput={(event) => onName(event.currentTarget.value)}
+      />
       <label for={`${id}-email`}>{t("studio.release.authorEmail")}</label>
-      <input id={`${id}-email`} type="email" value={email} autocomplete="off" onInput={(event) => onEmail(event.currentTarget.value)} />
+      <input
+        id={`${id}-email`}
+        type="email"
+        value={email}
+        autocomplete="off"
+        onInput={(event) => onEmail(event.currentTarget.value)}
+      />
     </>
   );
 }
@@ -119,7 +162,8 @@ function NewAuthorForm({ draft, onEdit }: { draft: ReleaseDraft; onEdit: DraftEd
           setEmpty(true);
           return;
         }
-        if (onEdit(addAuthorChanges(draft, agentIdFor(draft, name), agentOf(name, email))) !== null) return;
+        if (onEdit(addAuthorChanges(draft, agentIdFor(draft, name), agentOf(name, email))) !== null)
+          return;
         setName("");
         setEmail("");
       }}

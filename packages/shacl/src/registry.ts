@@ -23,9 +23,7 @@ export function pickShape(
   context: Exclude<ShapeContext, "any">,
 ): ShapePick {
   const matching = ALL_SHAPES.filter(
-    (d) =>
-      types.includes(d.targetClass) &&
-      (d.context === "any" || d.context === context),
+    (d) => types.includes(d.targetClass) && (d.context === "any" || d.context === context),
   );
   // A subject with a Solid Memo class is checked as that class only: a
   // deck group is a dcat:Catalog too, but not the catalog.

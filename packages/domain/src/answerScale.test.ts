@@ -21,18 +21,13 @@ describe("answer scales", () => {
   });
 
   it("makes Again the only minimal answer that repeats in the session", () => {
-    const repeating = MINIMAL_ANSWERS.filter((a) =>
-      repeatsInSession(MINIMAL_ANSWER_QUALITY[a]),
-    );
+    const repeating = MINIMAL_ANSWERS.filter((a) => repeatsInSession(MINIMAL_ANSWER_QUALITY[a]));
     expect(repeating).toEqual(["again"]);
   });
 
   it("makes Hard a pass, not a lapse", () => {
     const afterHard = applySm2(INITIAL_SM2_STATE, MINIMAL_ANSWER_QUALITY.hard);
-    const afterAgain = applySm2(
-      INITIAL_SM2_STATE,
-      MINIMAL_ANSWER_QUALITY.again,
-    );
+    const afterAgain = applySm2(INITIAL_SM2_STATE, MINIMAL_ANSWER_QUALITY.again);
     expect(afterHard.repetitions).toBe(1);
     expect(afterAgain.repetitions).toBe(0);
   });

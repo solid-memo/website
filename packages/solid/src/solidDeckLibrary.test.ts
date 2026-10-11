@@ -11,8 +11,7 @@ import { createSolidDeckLibrary } from "./solidDeckLibrary";
 import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@inrupt/solid-client")>();
+  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
   return { ...actual, getSolidDataset: vi.fn() };
 });
 
@@ -77,7 +76,11 @@ describe("readLibraryIndex", () => {
         .build(),
     );
     vi.mocked(getSolidDataset).mockResolvedValue(index);
-    await expect(makeLibrary().readLibraryIndex()).resolves.toEqual({ url: INDEX, publisher: `${INDEX}#me`, releases: [] });
+    await expect(makeLibrary().readLibraryIndex()).resolves.toEqual({
+      url: INDEX,
+      publisher: `${INDEX}#me`,
+      releases: [],
+    });
     expect(getSolidDataset).toHaveBeenCalledWith(INDEX, expect.objectContaining({ fetch }));
   });
 });
@@ -107,14 +110,19 @@ describe("fetchLibraryDeck", () => {
   it("reads a release once, for every reader of it, concurrent or later", async () => {
     vi.mocked(getSolidDataset).mockResolvedValue(deckDocument());
     const library = makeLibrary();
-    const [first, second] = await Promise.all([library.fetchLibraryDeck(DOC), library.fetchLibraryDeck(DOC)]);
+    const [first, second] = await Promise.all([
+      library.fetchLibraryDeck(DOC),
+      library.fetchLibraryDeck(DOC),
+    ]);
     expect(await library.fetchLibraryDeck(DOC)).toBe(first);
     expect(second).toBe(first);
     expect(getSolidDataset).toHaveBeenCalledTimes(1);
   });
 
   it("reads a release again after a failed read", async () => {
-    vi.mocked(getSolidDataset).mockRejectedValueOnce(new Error("offline")).mockResolvedValue(deckDocument());
+    vi.mocked(getSolidDataset)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(deckDocument());
     const library = makeLibrary();
     await expect(library.fetchLibraryDeck(DOC)).rejects.toThrow("offline");
     await expect(library.fetchLibraryDeck(DOC)).resolves.toMatchObject({ url: DOC });
@@ -146,7 +154,10 @@ describe("fetchCourseOutline", () => {
   it("reads the outline from the same read of the release as its content", async () => {
     vi.mocked(getSolidDataset).mockResolvedValue(courseDocument());
     const library = makeLibrary();
-    const [outline, content] = await Promise.all([library.fetchCourseOutline(DOC), library.fetchLibraryDeck(DOC)]);
+    const [outline, content] = await Promise.all([
+      library.fetchCourseOutline(DOC),
+      library.fetchLibraryDeck(DOC),
+    ]);
     expect(outline).toEqual({
       releaseUrl: DOC,
       chapters: [
@@ -155,7 +166,15 @@ describe("fetchCourseOutline", () => {
           url: `${DOC}#ch-1`,
           position: 0,
           title: { en: "Nordic capitals" },
-          steps: [{ id: "ch-1-1", url: `${DOC}#ch-1-1`, position: 0, theory: { en: "Stockholm is the capital of Sweden." }, questionIds: ["sweden"] }],
+          steps: [
+            {
+              id: "ch-1-1",
+              url: `${DOC}#ch-1-1`,
+              position: 0,
+              theory: { en: "Stockholm is the capital of Sweden." },
+              questionIds: ["sweden"],
+            },
+          ],
           reviewQuestionIds: [],
         },
       ],
@@ -166,9 +185,14 @@ describe("fetchCourseOutline", () => {
   });
 
   it("reads the release again after a failed read", async () => {
-    vi.mocked(getSolidDataset).mockRejectedValueOnce(new Error("offline")).mockResolvedValue(deckDocument());
+    vi.mocked(getSolidDataset)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(deckDocument());
     const library = makeLibrary();
     await expect(library.fetchCourseOutline(DOC)).rejects.toThrow("offline");
-    await expect(library.fetchCourseOutline(DOC)).resolves.toEqual({ releaseUrl: DOC, chapters: [] });
+    await expect(library.fetchCourseOutline(DOC)).resolves.toEqual({
+      releaseUrl: DOC,
+      chapters: [],
+    });
   });
 });

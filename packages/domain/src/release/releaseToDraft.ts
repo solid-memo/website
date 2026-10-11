@@ -7,7 +7,12 @@ import {
   DRAFT_DECK_V1,
   DRAFT_STEP_V1,
 } from "@solid-memo/vocab/descriptors.generated";
-import { NOTHING_PUBLISHED, type DraftNode, type DraftTriple, type ReleaseDraft } from "./releaseDraft.ts";
+import {
+  NOTHING_PUBLISHED,
+  type DraftNode,
+  type DraftTriple,
+  type ReleaseDraft,
+} from "./releaseDraft.ts";
 
 /**
  * A release as a draft at another address (docs/studio.md, Drafts): the
@@ -32,8 +37,13 @@ export function moved(iri: string, from: string, to: string): string {
 }
 
 /** Every IRI of the draft moved by `move`: the records' and the statements'. */
-export function rebaseDraft(draft: ReleaseDraft, url: string, move: (iri: string) => string = (iri) => moved(iri, draft.url, url)): ReleaseDraft {
-  const nodes = <T>(list: readonly DraftNode<T>[]) => list.map((node) => ({ id: node.id, data: rebased(node.data, move) }));
+export function rebaseDraft(
+  draft: ReleaseDraft,
+  url: string,
+  move: (iri: string) => string = (iri) => moved(iri, draft.url, url),
+): ReleaseDraft {
+  const nodes = <T>(list: readonly DraftNode<T>[]) =>
+    list.map((node) => ({ id: node.id, data: rebased(node.data, move) }));
   return {
     ...draft,
     url,
@@ -44,18 +54,33 @@ export function rebaseDraft(draft: ReleaseDraft, url: string, move: (iri: string
     steps: nodes(draft.steps),
     cards: nodes(draft.cards),
     distractors: nodes(draft.distractors),
-    triples: draft.triples.map((triple): DraftTriple => ({
-      subject: triple.subject.startsWith("_:") ? triple.subject : move(triple.subject),
-      predicate: triple.predicate,
-      object: triple.object.kind === "iri" ? { kind: "iri", value: move(triple.object.value) } : triple.object,
-    })),
+    triples: draft.triples.map(
+      (triple): DraftTriple => ({
+        subject: triple.subject.startsWith("_:") ? triple.subject : move(triple.subject),
+        predicate: triple.predicate,
+        object:
+          triple.object.kind === "iri"
+            ? { kind: "iri", value: move(triple.object.value) }
+            : triple.object,
+      }),
+    ),
   };
 }
 
 /** The fields of a draft's records that name an IRI, as their shapes say. */
 const LINKS = new Set(
-  [AGENT_V1, DISTRIBUTION_V1, DRAFT_DECK_V1, DRAFT_CHAPTER_V1, DRAFT_STEP_V1, CARD_V5, DISTRACTOR_V1].flatMap((descriptor) =>
-    descriptor.fields.filter((field) => field.kind === "iri" || field.kind === "iriEnum").map((field) => field.name),
+  [
+    AGENT_V1,
+    DISTRIBUTION_V1,
+    DRAFT_DECK_V1,
+    DRAFT_CHAPTER_V1,
+    DRAFT_STEP_V1,
+    CARD_V5,
+    DISTRACTOR_V1,
+  ].flatMap((descriptor) =>
+    descriptor.fields
+      .filter((field) => field.kind === "iri" || field.kind === "iriEnum")
+      .map((field) => field.name),
   ),
 );
 
@@ -64,7 +89,11 @@ function rebased<T>(data: T, move: (iri: string) => string): T {
   return Object.fromEntries(
     Object.entries(data as object).map(([field, value]) => [
       field,
-      !LINKS.has(field) || value === undefined ? value : Array.isArray(value) ? value.map((one: string) => move(one)) : move(value as string),
+      !LINKS.has(field) || value === undefined
+        ? value
+        : Array.isArray(value)
+          ? value.map((one: string) => move(one))
+          : move(value as string),
     ]),
   ) as T;
 }

@@ -4,7 +4,12 @@ import { isGuestUrl, mentionsGuest } from "@solid-memo/domain/guest";
 import { DECK_FILE_ACCEPT, deckFileFormatOf } from "@solid-memo/domain/deckFile";
 import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { deckToDraft } from "@solid-memo/domain/release/deckToDraft";
-import { draftNameFor, draftPlaceOf, draftUrlOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
+import {
+  draftNameFor,
+  draftPlaceOf,
+  draftUrlOf,
+  type ReleaseDraftSummary,
+} from "@solid-memo/domain/release/draftLayout";
 import {
   applyDraftChanges,
   blankDraft,
@@ -18,7 +23,12 @@ import {
   unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
 import { continuityProblems } from "@solid-memo/domain/release/continuityRules";
-import { releaseDiff, simulateLearnerUpgrade, type LearnerUpgrade, type ReleaseDiff } from "@solid-memo/domain/release/releaseDiff";
+import {
+  releaseDiff,
+  simulateLearnerUpgrade,
+  type LearnerUpgrade,
+  type ReleaseDiff,
+} from "@solid-memo/domain/release/releaseDiff";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
 import { markdownProblems, type MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
@@ -35,7 +45,13 @@ import type { ReleaseModel } from "@solid-memo/domain/release/releaseModel";
 import { releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
 import { rebaseDraft, releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
-import type { DeckLibrary, DeckRepository, FileExchange, ReleaseDraftRepository, ShapeValidator } from "./ports";
+import type {
+  DeckLibrary,
+  DeckRepository,
+  FileExchange,
+  ReleaseDraftRepository,
+  ShapeValidator,
+} from "./ports";
 
 /**
  * The drafts of releases (docs/studio.md, Drafts): a creator writes a
@@ -133,7 +149,12 @@ export interface ReleaseDraftUseCases {
    * changed into a new one, so each version is checked once), the
    * releases a draft follows read once.
    */
-  checkReleaseDraft(draft: ReleaseDraft, markdownCheck: MarkdownCheck, policy: CheckPolicy, options?: { shapes?: boolean }): Promise<ReleaseCheck>;
+  checkReleaseDraft(
+    draft: ReleaseDraft,
+    markdownCheck: MarkdownCheck,
+    policy: CheckPolicy,
+    options?: { shapes?: boolean },
+  ): Promise<ReleaseCheck>;
   /**
    * The draft as it is against the release it follows (docs/studio.md,
    * The release diff); null for a draft of a first release, which
@@ -151,7 +172,10 @@ const NAME_ATTEMPTS = 3;
 
 /** Whether a write was refused because a document changed, or was made, since it was read. */
 function raced(error: unknown): boolean {
-  return error instanceof AppError && (error.code === "changedElsewhere" || error.code === "createdElsewhere");
+  return (
+    error instanceof AppError &&
+    (error.code === "changedElsewhere" || error.code === "createdElsewhere")
+  );
 }
 
 /** Whether a new draft's release document was refused because one was made at `url` meanwhile: its place is taken, and nothing was written. */
@@ -179,7 +203,13 @@ type Made<T> = WeakMap<ReleaseDraft, Map<CheckPolicy, Promise<T>>>;
  * failure, or what `whole` says is not whole, is forgotten, so the next
  * call tries again.
  */
-function madeOnce<T>(made: Made<T>, draft: ReleaseDraft, policy: CheckPolicy, make: () => Promise<T>, whole: (value: T) => boolean = () => true): Promise<T> {
+function madeOnce<T>(
+  made: Made<T>,
+  draft: ReleaseDraft,
+  policy: CheckPolicy,
+  make: () => Promise<T>,
+  whole: (value: T) => boolean = () => true,
+): Promise<T> {
   const byPolicy = made.get(draft) ?? new Map<CheckPolicy, Promise<T>>();
   made.set(draft, byPolicy);
   let result = byPolicy.get(policy);
@@ -258,7 +288,11 @@ export function createReleaseDraftUseCases({
    * library. A part that cannot read what it needs is a problem of its
    * own (previousUnread, libraryUnread); the rest stands.
    */
-  async function ruleCheck(draft: ReleaseDraft, markdownCheck: MarkdownCheck, policy: CheckPolicy): Promise<Omit<ReleaseCheck, "shapes">> {
+  async function ruleCheck(
+    draft: ReleaseDraft,
+    markdownCheck: MarkdownCheck,
+    policy: CheckPolicy,
+  ): Promise<Omit<ReleaseCheck, "shapes">> {
     const model = draftReleaseModel(draft);
     const { prev } = draft.root;
     const [drops, library] = await Promise.all([
@@ -266,16 +300,37 @@ export function createReleaseDraftUseCases({
         ? []
         : releaseModel(prev).then(
             (before) => continuityProblems(before, model),
-            () => [problem(draft.url, { code: "previousUnread", params: { previous: prev } }, { related: [prev] })],
+            () => [
+              problem(
+                draft.url,
+                { code: "previousUnread", params: { previous: prev } },
+                { related: [prev] },
+              ),
+            ],
           ),
       policy === "pod"
         ? []
         : libraryPlace(draft).then(
-            (place) => movedProblems(libraryProblems(draftReleaseModel(draft, place.url), place.index, place.name, place.version), place.url, draft.url),
+            (place) =>
+              movedProblems(
+                libraryProblems(
+                  draftReleaseModel(draft, place.url),
+                  place.index,
+                  place.name,
+                  place.version,
+                ),
+                place.url,
+                draft.url,
+              ),
             () => [problem(draft.url, { code: "libraryUnread", params: {} })],
           ),
     ]);
-    return { rules: ruleProblems(model, policy), library, drops, markdown: markdownProblems(model, markdownCheck) };
+    return {
+      rules: ruleProblems(model, policy),
+      library,
+      drops,
+      markdown: markdownProblems(model, markdownCheck),
+    };
   }
 
   async function shapeCheck(draft: ReleaseDraft, policy: CheckPolicy): Promise<ReleaseProblem[]> {
@@ -304,7 +359,9 @@ export function createReleaseDraftUseCases({
     { title, name, version }: { title: LangText; name?: string; version: number },
     make: (url: string) => ReleaseDraft,
   ): Promise<ReleaseDraftSummary> {
-    const taken = (await releaseDraftRepository.list(instanceUrl)).filter((draft) => draft.version === version).map((draft) => draft.name);
+    const taken = (await releaseDraftRepository.list(instanceUrl))
+      .filter((draft) => draft.version === version)
+      .map((draft) => draft.name);
     for (let attempt = 1; ; attempt++) {
       const chosen = draftNameFor(name ?? shown(title), taken);
       const url = draftUrlOf(instanceUrl, chosen, version);
@@ -330,7 +387,11 @@ export function createReleaseDraftUseCases({
         case "blankCourse": {
           const title = tidiedStated(from.title);
           const course = from.kind === "blankCourse";
-          return { draft: await create(instanceUrl, { title, version: 1 }, (url) => blankDraft({ url, course, title, now: at })) };
+          return {
+            draft: await create(instanceUrl, { title, version: 1 }, (url) =>
+              blankDraft({ url, course, title, now: at }),
+            ),
+          };
         }
         case "fromDeck": {
           const cards = await deckRepository.listCards(from.deck);
@@ -349,20 +410,29 @@ export function createReleaseDraftUseCases({
           const version = Number(release.root.version ?? "1") + 1;
           const name = nameInUrl(from.url) ?? undefined;
           return {
-            draft: await create(instanceUrl, { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version }, (url) =>
-              nextVersionDraft(release, url, linked),
+            draft: await create(
+              instanceUrl,
+              { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version },
+              (url) => nextVersionDraft(release, url, linked),
             ),
           };
         }
         case "fromFile": {
           const file = await fileExchange.open(DECK_FILE_ACCEPT);
           if (file === null) return null;
-          const release = draftable(await releaseDraftRepository.parseRelease(file.text, deckFileFormatOf(file.name, file.text)));
+          const release = draftable(
+            await releaseDraftRepository.parseRelease(
+              file.text,
+              deckFileFormatOf(file.name, file.text),
+            ),
+          );
           const version = Number(release.root.version ?? "1");
           const name = nameInUrl(release.url) ?? undefined;
           return {
-            draft: await create(instanceUrl, { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version }, (url) =>
-              releaseToDraft(release, url),
+            draft: await create(
+              instanceUrl,
+              { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version },
+              (url) => releaseToDraft(release, url),
             ),
           };
         }
@@ -376,7 +446,8 @@ export function createReleaseDraftUseCases({
       return create(instanceUrl, { title: {}, name, version }, (url) => {
         const copy = rebaseDraft(draft, url);
         // A guest's pod goes once the guest's study is kept: a copy names nothing in it.
-        if (isGuestUrl(draftUrl) && mentionsGuest(copy)) throw new AppError("guestUrlsLeft", { url });
+        if (isGuestUrl(draftUrl) && mentionsGuest(copy))
+          throw new AppError("guestUrlsLeft", { url });
         return copy;
       });
     },
@@ -398,7 +469,8 @@ export function createReleaseDraftUseCases({
         const before = await withPublished(read.draft);
         let after = applyDraftChanges(before, changes);
         // Refused now that part of it is written (a subject it adds is there): what it changed, on the draft as it is.
-        if (isRefusal(after) && cut !== null) after = mergedDraft(cut.before, cut.after, before) ?? after;
+        if (isRefusal(after) && cut !== null)
+          after = mergedDraft(cut.before, cut.after, before) ?? after;
         if (isRefusal(after)) return { ok: false, refusal: after };
         try {
           await releaseDraftRepository.applyChanges(before, after, read.version);
@@ -415,8 +487,16 @@ export function createReleaseDraftUseCases({
     },
 
     async checkReleaseDraft(draft, markdownCheck, policy, { shapes = false } = {}) {
-      const rules = madeOnce(ruleChecks, draft, policy, () => ruleCheck(draft, markdownCheck, policy), readWhole);
-      const shaped = shapes ? madeOnce(shapeChecks, draft, policy, () => shapeCheck(draft, policy)) : null;
+      const rules = madeOnce(
+        ruleChecks,
+        draft,
+        policy,
+        () => ruleCheck(draft, markdownCheck, policy),
+        readWhole,
+      );
+      const shaped = shapes
+        ? madeOnce(shapeChecks, draft, policy, () => shapeCheck(draft, policy))
+        : null;
       return { ...(await rules), shapes: shaped === null ? null : await shaped };
     },
 

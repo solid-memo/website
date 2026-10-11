@@ -4,7 +4,11 @@ import type { Locks } from "../localStorageUpdateJournal";
 export function fakeLocks(): Locks {
   const held = new Set<string>();
   const waiting = new Map<string, (() => void)[]>();
-  const grant = (name: string, callback: LockGrantedCallback<unknown>, resolve: (value: unknown) => void) => {
+  const grant = (
+    name: string,
+    callback: LockGrantedCallback<unknown>,
+    resolve: (value: unknown) => void,
+  ) => {
     held.add(name);
     queueMicrotask(() => {
       void Promise.resolve(callback({ name, mode: "exclusive" })).then((value) => {

@@ -9,7 +9,9 @@ import { Screen } from "./Screen.ts";
 export class DeckDetail extends Screen {
   /** The deck's description, labeled "Description". */
   get description(): Locator {
-    return this.page.getByRole("main").getByRole("group", { name: this.t("deckAbout.description"), exact: true });
+    return this.page
+      .getByRole("main")
+      .getByRole("group", { name: this.t("deckAbout.description"), exact: true });
   }
 
   async expectDeck(name: string): Promise<void> {
@@ -19,16 +21,26 @@ export class DeckDetail extends Screen {
   /** Follows "Browser" to the deck's cards. */
   async openBrowser(): Promise<void> {
     await this.intent("Open the deck's Browser", async () => {
-      await this.page.getByRole("main").getByRole("link", { name: this.t("deckDetail.browseButton"), exact: true }).click();
-      await expect(this.page.getByRole("heading", { name: this.tp("browser.heading") })).toBeVisible();
+      await this.page
+        .getByRole("main")
+        .getByRole("link", { name: this.t("deckDetail.browseButton"), exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("heading", { name: this.tp("browser.heading") }),
+      ).toBeVisible();
     });
   }
 
   /** Starts today's session with the page's Study button. */
   async study(): Promise<void> {
     await this.intent("Study the deck from its page", async () => {
-      await this.page.getByRole("main").getByRole("button", { name: this.t("deckDetail.studyButton"), exact: true }).click();
-      await expect(this.page.getByRole("heading", { name: this.tp("study.heading") })).toBeVisible();
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("deckDetail.studyButton"), exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("heading", { name: this.tp("study.heading") }),
+      ).toBeVisible();
     });
   }
 
@@ -41,6 +53,8 @@ export class DeckDetail extends Screen {
 
   /** The description reads `text`, exactly. */
   async expectDescription(text: string): Promise<void> {
-    await this.intent("Check the deck's description", () => expect(this.description).toHaveText(text));
+    await this.intent("Check the deck's description", () =>
+      expect(this.description).toHaveText(text),
+    );
   }
 }

@@ -9,9 +9,7 @@ const storages: Storage[] = [
   { url: "https://backup.example/", source: "linkHeader" },
 ];
 
-function renderPicker(
-  overrides: Partial<Parameters<typeof StoragePicker>[0]> = {},
-) {
+function renderPicker(overrides: Partial<Parameters<typeof StoragePicker>[0]> = {}) {
   const props = {
     storages,
     busy: false,
@@ -27,13 +25,9 @@ function renderPicker(
 describe("StoragePicker", () => {
   it("lists discovered storages with their source", () => {
     renderPicker();
-    expect(
-      screen.getByRole("button", { name: "https://alice.example/" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "https://alice.example/" })).toBeInTheDocument();
     expect(screen.getByText("(from your profile)")).toBeInTheDocument();
-    expect(
-      screen.getByText("(discovered from your pod server)"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("(discovered from your pod server)")).toBeInTheDocument();
   });
 
   it("says what a storage is, under its heading", () => {
@@ -43,17 +37,13 @@ describe("StoragePicker", () => {
 
   it("selects a storage on click", () => {
     const { props } = renderPicker();
-    fireEvent.click(
-      screen.getByRole("button", { name: "https://alice.example/" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "https://alice.example/" }));
     expect(props.onSelect).toHaveBeenCalledWith(storages[0]);
   });
 
   it("shows an explanation when no storage was discovered", () => {
     renderPicker({ storages: [] });
-    expect(
-      screen.getByText(/No storage was found for your WebID/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/No storage was found for your WebID/)).toBeInTheDocument();
   });
 
   it("submits a trimmed manual URL", () => {
@@ -67,13 +57,9 @@ describe("StoragePicker", () => {
 
   it("disables all controls while busy", () => {
     renderPicker({ busy: true });
-    expect(
-      screen.getByRole("button", { name: "https://alice.example/" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "https://alice.example/" })).toBeDisabled();
     expect(screen.getByLabelText("Storage URL")).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: "Use this storage" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Use this storage" })).toBeDisabled();
   });
 
   it("shows an error message when given one", () => {
@@ -93,9 +79,7 @@ describe("StoragePicker", () => {
         />
       </I18nProvider>,
     );
-    expect(
-      screen.getByRole("heading", { name: "Välj en lagringsplats" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Välj en lagringsplats" })).toBeInTheDocument();
     expect(screen.getByText("(angiven manuellt)")).toBeInTheDocument();
   });
 });

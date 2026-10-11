@@ -11,7 +11,15 @@ function renderDialog(overrides: Partial<Parameters<typeof TransferCardsDialog>[
   const onConfirm = vi.fn();
   const onCancel = vi.fn();
   render(
-    <TransferCardsDialog mode="move" count={2} decks={[verbs, nouns]} busy={false} onConfirm={onConfirm} onCancel={onCancel} {...overrides} />,
+    <TransferCardsDialog
+      mode="move"
+      count={2}
+      decks={[verbs, nouns]}
+      busy={false}
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+      {...overrides}
+    />,
   );
   return { onConfirm, onCancel };
 }
@@ -36,7 +44,9 @@ describe("TransferCardsDialog", () => {
 
   it("says when the instance has no other deck, and can be closed", () => {
     const { onCancel } = renderDialog({ decks: [] });
-    expect(screen.getByText("This instance has no other deck to put the cards in.")).toBeInTheDocument();
+    expect(
+      screen.getByText("This instance has no other deck to put the cards in."),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("combobox")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).toHaveBeenCalled();

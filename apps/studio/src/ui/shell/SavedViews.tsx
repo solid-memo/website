@@ -85,7 +85,8 @@ export function SavedViews({
                   text: t("studio.views.removeConfirm", { name: view.name }),
                   action: t("studio.views.remove"),
                   onConfirm: () => {
-                    refocus.current = (now) => (now.some((each) => each.name === view.name) ? undefined : saveButton.current!);
+                    refocus.current = (now) =>
+                      now.some((each) => each.name === view.name) ? undefined : saveButton.current!;
                     onViews(withoutView(views, view.name));
                   },
                 })
@@ -101,7 +102,14 @@ export function SavedViews({
       </button>
       {dialog}
       {naming !== undefined && (
-        <Dialog heading={naming === null ? t("studio.views.saveHeading") : t("studio.views.renameHeading", { name: naming })} onClose={() => setNaming(undefined)}>
+        <Dialog
+          heading={
+            naming === null
+              ? t("studio.views.saveHeading")
+              : t("studio.views.renameHeading", { name: naming })
+          }
+          onClose={() => setNaming(undefined)}
+        >
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -110,13 +118,23 @@ export function SavedViews({
                 const renamed = name.trim();
                 refocus.current = () => buttons.current.get(renamed);
               }
-              onViews(naming === null ? withSavedView(views, name, current) : renamedView(views, naming, name));
+              onViews(
+                naming === null
+                  ? withSavedView(views, name, current)
+                  : renamedView(views, naming, name),
+              );
               setNaming(undefined);
             }}
           >
             <label>
               {t("studio.views.name")}
-              <input type="text" required autoFocus value={name} onInput={(event) => setName(event.currentTarget.value)} />
+              <input
+                type="text"
+                required
+                autoFocus
+                value={name}
+                onInput={(event) => setName(event.currentTarget.value)}
+              />
             </label>
             <p class="hint">{t("studio.views.nameHint")}</p>
             <p class="actions">

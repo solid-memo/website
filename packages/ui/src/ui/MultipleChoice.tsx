@@ -76,7 +76,13 @@ export function MultipleChoice({
 
   return (
     <div class="multiple-choice" onKeyDown={onKeyDown}>
-      <div ref={groupRef} role="radiogroup" aria-labelledby={labelledBy} aria-describedby={describedBy} class="choices">
+      <div
+        ref={groupRef}
+        role="radiogroup"
+        aria-labelledby={labelledBy}
+        aria-describedby={describedBy}
+        class="choices"
+      >
         {choices.map((choice, index) => {
           const right = fixed && choice.key === answered.correct;
           const wrong = fixed && choice.key === answered.chosen && !right;
@@ -117,7 +123,9 @@ export function MultipleChoice({
           >
             {busy ? t("multipleChoice.checking") : t("multipleChoice.check")}
           </button>
-          <p class="hint study-keys">{t("multipleChoice.keys", { last: Math.min(choices.length, 9) })}</p>
+          <p class="hint study-keys">
+            {t("multipleChoice.keys", { last: Math.min(choices.length, 9) })}
+          </p>
         </>
       )}
     </div>

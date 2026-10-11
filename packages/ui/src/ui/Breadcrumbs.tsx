@@ -61,7 +61,8 @@ export function breadcrumbsFor(route: RouteRef, names: CrumbNames, t: I18n["t"])
     route: { screen: "library", instanceUrl: route.instanceUrl },
   };
   if (route.screen === "library") return [decks, library];
-  if (route.screen === "importUrl") return [decks, library, { label: t("breadcrumbs.importUrl"), route }];
+  if (route.screen === "importUrl")
+    return [decks, library, { label: t("breadcrumbs.importUrl"), route }];
   if (
     route.screen === "libraryDeck" ||
     route.screen === "libraryBrowser" ||
@@ -87,13 +88,23 @@ export function breadcrumbsFor(route: RouteRef, names: CrumbNames, t: I18n["t"])
           libraryDeckUrl: route.libraryDeckUrl,
         },
       };
-      return [decks, library, libraryDeck, cards, { label: names.libraryCard ?? "", lang: names.libraryCardLang, route }];
+      return [
+        decks,
+        library,
+        libraryDeck,
+        cards,
+        { label: names.libraryCard ?? "", lang: names.libraryCardLang, route },
+      ];
     }
     return [
       decks,
       library,
       libraryDeck,
-      { label: route.screen === "libraryBrowser" ? t("breadcrumbs.cards") : t("breadcrumbs.preview"), route },
+      {
+        label:
+          route.screen === "libraryBrowser" ? t("breadcrumbs.cards") : t("breadcrumbs.preview"),
+        route,
+      },
     ];
   }
   if (route.screen === "preferences") {

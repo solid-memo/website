@@ -82,7 +82,11 @@ function StudioUnavailable(props: WorkspaceProps) {
 }
 
 /** The site header, then the main content: what the shell puts first, then the Studio's `status`. */
-function StudioPlaceholder({ banner, children, status }: WorkspaceProps & { status: ComponentChildren }) {
+function StudioPlaceholder({
+  banner,
+  children,
+  status,
+}: WorkspaceProps & { status: ComponentChildren }) {
   return (
     <>
       <header class="site-header">{banner}</header>

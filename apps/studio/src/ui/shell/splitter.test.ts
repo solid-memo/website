@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { ASIDE_WIDTH, clampSize, DETAIL_WIDTH, DOCK_HEIGHT, draggedSize, SPLITTER_STEP, splitterKey } from "./splitter";
+import {
+  ASIDE_WIDTH,
+  clampSize,
+  DETAIL_WIDTH,
+  DOCK_HEIGHT,
+  draggedSize,
+  SPLITTER_STEP,
+  splitterKey,
+} from "./splitter";
 
 const size = { min: 100, max: 300, initial: 200 };
 
@@ -15,7 +23,8 @@ describe("clampSize", () => {
   });
 
   it("starts each pane within its bounds", () => {
-    for (const pane of [ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT]) expect(clampSize(pane.initial, pane)).toBe(pane.initial);
+    for (const pane of [ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT])
+      expect(clampSize(pane.initial, pane)).toBe(pane.initial);
   });
 });
 

@@ -11,7 +11,14 @@ import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { NewcomerCourseContainer } from "./NewcomerCourseContainer";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
-import { courseHref, deckHref, importUrlHref, libraryHref, routeToHash, studioHref } from "./router";
+import {
+  courseHref,
+  deckHref,
+  importUrlHref,
+  libraryHref,
+  routeToHash,
+  studioHref,
+} from "./router";
 
 /**
  * Owns the deck list of one instance, as the user arranged it into
@@ -93,7 +100,11 @@ export function DeckListContainer({
         createDeckHref={routeToHash({ screen: "deckCreator", instanceUrl: instance.url })}
         offer={
           decksOf(editor.tree.children).length === 0 && (
-            <NewcomerCourseContainer useCases={useCases} instance={instance} onCourseStarted={onCourseStarted} />
+            <NewcomerCourseContainer
+              useCases={useCases}
+              instance={instance}
+              onCourseStarted={onCourseStarted}
+            />
           )
         }
       />

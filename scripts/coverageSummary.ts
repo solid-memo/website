@@ -24,7 +24,8 @@ function cell({ covered, total, pct }: Counts): string {
 
 /** The table, or a line saying there is nothing to show. */
 export function render(packages: readonly PackageCoverage[]): string {
-  if (packages.length === 0) return "## Coverage\n\nNo package's coverage was found: did `npm test` run?\n";
+  if (packages.length === 0)
+    return "## Coverage\n\nNo package's coverage was found: did `npm test` run?\n";
   const rows = packages.map(
     ({ name, total }) =>
       `| ${name} | ${cell(total.lines)} | ${cell(total.statements)} | ${cell(total.functions)} | ${cell(total.branches)} |`,
@@ -47,7 +48,8 @@ export type CoverageIo = {
 };
 
 export function defaultIo(root: string, env: Record<string, string | undefined>): CoverageIo {
-  const read = (path: string) => (existsSync(join(root, path)) ? readFileSync(join(root, path), "utf8") : undefined);
+  const read = (path: string) =>
+    existsSync(join(root, path)) ? readFileSync(join(root, path), "utf8") : undefined;
   return {
     packageDirs: () => [
       ...FOLDERS.flatMap((folder) =>

@@ -14,7 +14,13 @@ import { usePanelFocus } from "./panelFocus";
  * instance. Once removed, the panel goes and the focus moves to the
  * screen; while it works, the button keeps the focus (aria-disabled).
  */
-export function InterruptedMoveContainer({ useCases, instance }: { useCases: UseCases; instance: Instance }) {
+export function InterruptedMoveContainer({
+  useCases,
+  instance,
+}: {
+  useCases: UseCases;
+  instance: Instance;
+}) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
 
@@ -60,7 +66,13 @@ function LeftoverPanel({
   const { t } = useI18n();
   const ref = usePanelFocus<HTMLDivElement>(false);
   return (
-    <div ref={ref} class="warning migration" role="region" aria-label={t("interruptedMove.region")} tabIndex={-1}>
+    <div
+      ref={ref}
+      class="warning migration"
+      role="region"
+      aria-label={t("interruptedMove.region")}
+      tabIndex={-1}
+    >
       <p>{message}</p>
       <button
         onClick={() => {

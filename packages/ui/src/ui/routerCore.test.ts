@@ -1,21 +1,18 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/preact";
-import {
-  hashParams,
-  historyPosition,
-  parsePage,
-  shownPosition,
-  useHashRouter,
-} from "./routerCore";
+import { hashParams, historyPosition, parsePage, shownPosition, useHashRouter } from "./routerCore";
 
 /** An app's routes of its own, as the Studio has them. */
 type Route = { page: string };
-const parse = (hash: string): Route | null => (hash.startsWith("#/") && hash.length > 2 ? { page: hash.slice(2) } : null);
+const parse = (hash: string): Route | null =>
+  hash.startsWith("#/") && hash.length > 2 ? { page: hash.slice(2) } : null;
 const toHash = (route: Route) => `#/${route.page}`;
 
 describe("hashParams", () => {
   it("encodes each value", () => {
-    expect(hashParams({ instance: "https://pod.example/a b/" })).toBe("?instance=https%3A%2F%2Fpod.example%2Fa+b%2F");
+    expect(hashParams({ instance: "https://pod.example/a b/" })).toBe(
+      "?instance=https%3A%2F%2Fpod.example%2Fa+b%2F",
+    );
   });
 });
 

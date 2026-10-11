@@ -18,7 +18,10 @@ export interface ReleaseDiffLinks {
 const KINDS: readonly ReleaseKind[] = ["chapter", "step", "card", "distractor"];
 
 /** Where a subject of the draft is edited: a wrong option in its card's editor, at it. */
-export function subjectTarget(draft: ReleaseDraft, { kind, id }: Pick<SubjectChange, "kind" | "id">): ProblemTarget {
+export function subjectTarget(
+  draft: ReleaseDraft,
+  { kind, id }: Pick<SubjectChange, "kind" | "id">,
+): ProblemTarget {
   switch (kind) {
     case "chapter":
       return { screen: "chapter", chapter: id };
@@ -28,7 +31,9 @@ export function subjectTarget(draft: ReleaseDraft, { kind, id }: Pick<SubjectCha
       return { screen: "question", card: id };
     case "distractor": {
       const card = draft.cards.find((node) => node.data.distractor.includes(iriIn(draft, id)));
-      return card === undefined ? { screen: "draft" } : { screen: "question", card: card.id, field: `distractor:${id}` };
+      return card === undefined
+        ? { screen: "draft" }
+        : { screen: "question", card: card.id, field: `distractor:${id}` };
     }
   }
 }
@@ -62,7 +67,11 @@ export function ReleaseDiffScreen({
       </header>
       <p class="hint">{t("studio.diff.intro")}</p>
       {diff === undefined ? (
-        error ? <ErrorMessage error={errorText(error)} /> : <Loading label={t("studio.diff.comparing")} />
+        error ? (
+          <ErrorMessage error={errorText(error)} />
+        ) : (
+          <Loading label={t("studio.diff.comparing")} />
+        )
       ) : diff === null ? (
         <p>{t("studio.diff.first")}</p>
       ) : (
@@ -72,13 +81,22 @@ export function ReleaseDiffScreen({
   );
 }
 
-function DiffBody({ draft, diff, links }: { draft: ReleaseDraft; diff: DraftDiff; links: ReleaseDiffLinks }) {
+function DiffBody({
+  draft,
+  diff,
+  links,
+}: {
+  draft: ReleaseDraft;
+  diff: DraftDiff;
+  links: ReleaseDiffLinks;
+}) {
   const i18n = useI18n();
   const { t } = i18n;
   const { previous, problems, upgrade } = diff;
   const { about, subjects, unchanged } = diff.diff;
   const previousVersion = previous.root.version ?? "1";
-  const statusOf = ({ status, alsoChanged }: SubjectChange) => t(`studio.diff.status.${status}${alsoChanged === true ? "Changed" : ""}` as MessageKey);
+  const statusOf = ({ status, alsoChanged }: SubjectChange) =>
+    t(`studio.diff.status.${status}${alsoChanged === true ? "Changed" : ""}` as MessageKey);
   return (
     <>
       <p>{t("studio.diff.against", { version: previousVersion, url: previous.url })}</p>
@@ -99,7 +117,11 @@ function DiffBody({ draft, diff, links }: { draft: ReleaseDraft; diff: DraftDiff
         <p>
           {about.length === 0
             ? t("studio.diff.aboutSame")
-            : t("studio.diff.aboutChanged", { fields: about.map((detail) => t(`studio.diff.detail.${detail}` as MessageKey)).join(", ") })}
+            : t("studio.diff.aboutChanged", {
+                fields: about
+                  .map((detail) => t(`studio.diff.detail.${detail}` as MessageKey))
+                  .join(", "),
+              })}
         </p>
       </section>
       <section aria-labelledby="diff-subjects">
@@ -116,7 +138,10 @@ function DiffBody({ draft, diff, links }: { draft: ReleaseDraft; diff: DraftDiff
                   <ul>
                     {changes.map((change) => (
                       <li key={change.id}>
-                        <a href={links.targetHref(subjectTarget(draft, change))}>{subjectName(draft, iriIn(draft, change.id), i18n)}</a>: {statusOf(change)}
+                        <a href={links.targetHref(subjectTarget(draft, change))}>
+                          {subjectName(draft, iriIn(draft, change.id), i18n)}
+                        </a>
+                        : {statusOf(change)}
                       </li>
                     ))}
                   </ul>
@@ -130,19 +155,37 @@ function DiffBody({ draft, diff, links }: { draft: ReleaseDraft; diff: DraftDiff
         <h3 id="diff-learners">{t("studio.diff.learners")}</h3>
         <p>
           {!upgrade.newer
-            ? t("studio.diff.notNewer", { version: draft.root.version ?? "1", previous: previousVersion })
+            ? t("studio.diff.notNewer", {
+                version: draft.root.version ?? "1",
+                previous: previousVersion,
+              })
             : upgrade.plan === null
               ? t("studio.diff.noUpgrade", { previous: previousVersion })
-              : t("studio.diff.upgrade", { previous: previousVersion, changes: describeChanges(upgrade.plan, i18n, t("studio.diff.retiredOnly")) })}
+              : t("studio.diff.upgrade", {
+                  previous: previousVersion,
+                  changes: describeChanges(upgrade.plan, i18n, t("studio.diff.retiredOnly")),
+                })}
         </p>
         {draft.course && <p class="hint">{t("studio.diff.courseLearner")}</p>}
         {upgrade.lost.cards.length + upgrade.lost.chapters.length === 0 ? (
           <p>{t("studio.diff.nothingLost")}</p>
         ) : (
           <ul aria-label={t("studio.diff.lost")}>
-            {upgrade.lost.cards.length > 0 && <li>{t("studio.diff.lostCards", { count: upgrade.lost.cards.length, ids: upgrade.lost.cards.join(", ") })}</li>}
+            {upgrade.lost.cards.length > 0 && (
+              <li>
+                {t("studio.diff.lostCards", {
+                  count: upgrade.lost.cards.length,
+                  ids: upgrade.lost.cards.join(", "),
+                })}
+              </li>
+            )}
             {upgrade.lost.chapters.length > 0 && (
-              <li>{t("studio.diff.lostChapters", { count: upgrade.lost.chapters.length, ids: upgrade.lost.chapters.join(", ") })}</li>
+              <li>
+                {t("studio.diff.lostChapters", {
+                  count: upgrade.lost.chapters.length,
+                  ids: upgrade.lost.chapters.join(", "),
+                })}
+              </li>
             )}
           </ul>
         )}

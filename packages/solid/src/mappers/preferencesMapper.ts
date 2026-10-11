@@ -14,7 +14,9 @@ export function toPreferences(thing: Thing): StoredPreferences | null {
   const read = readVersioned(thing, "preferences");
   if (read === null) return null;
   return {
-    preferences: preferencesFromRecord(migrate("preferences", read.record, { subject: asUrl(thing) })),
+    preferences: preferencesFromRecord(
+      migrate("preferences", read.record, { subject: asUrl(thing) }),
+    ),
     formatVersion: read.storedVersion,
   };
 }

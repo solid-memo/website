@@ -9,7 +9,11 @@ import { statusTexts } from "../test/liveRegions";
 
 const card = courseCards[0]!;
 const choices = choicesOf(card, noShuffle);
-const [right, explained, unexplained] = choices as [(typeof choices)[0], (typeof choices)[0], (typeof choices)[0]];
+const [right, explained, unexplained] = choices as [
+  (typeof choices)[0],
+  (typeof choices)[0],
+  (typeof choices)[0],
+];
 
 function renderQuestion(props: Partial<Parameters<typeof CourseQuestion>[0]> = {}) {
   const onCheck = vi.fn();
@@ -34,7 +38,9 @@ function renderQuestion(props: Partial<Parameters<typeof CourseQuestion>[0]> = {
 describe("CourseQuestion", () => {
   it("asks the card's front among its options, the back's note kept back", () => {
     const { onCheck } = renderQuestion();
-    expect(screen.getByRole("radiogroup", { name: "Question: What names a thing?" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("radiogroup", { name: "Question: What names a thing?" }),
+    ).toBeInTheDocument();
     expect(screen.queryByText("IRIs name anything.")).toBeNull();
     expect(statusTexts()).toEqual([]);
     fireEvent.click(screen.getByRole("radio", { name: "Not An IRI" }));
@@ -107,27 +113,48 @@ describe("CourseQuestion", () => {
       frontImageUrl: "https://example.org/server.png",
       frontImageDescription: { en: "A server" },
       back: { en: "`409 Conflict`" },
-      backNote: { en: "See [the spec](https://solidproject.org/TR/protocol).\n\n```\nHTTP/1.1 409 Conflict\n```" },
-      distractors: [{ id: "d1", text: { en: "`205 Reset Content`" }, note: { en: "That is for an *empty* container." } }],
+      backNote: {
+        en: "See [the spec](https://solidproject.org/TR/protocol).\n\n```\nHTTP/1.1 409 Conflict\n```",
+      },
+      distractors: [
+        {
+          id: "d1",
+          text: { en: "`205 Reset Content`" },
+          note: { en: "That is for an *empty* container." },
+        },
+      ],
     };
     const markedChoices = choicesOf(marked, noShuffle);
 
     it("names the options by the question's label and picture, and describes them by the whole question", () => {
       renderQuestion({ card: marked, choices: markedChoices });
-      const group = screen.getByRole("radiogroup", { name: "Question: A server What does it answer?" });
-      expect(document.getElementById(group.getAttribute("aria-describedby")!)).toHaveTextContent("DELETE /notes/ HTTP/1.1");
-      expect(screen.getByRole("radio", { name: "409 Conflict" }).closest("label")!.querySelector("code")).toBeInTheDocument();
+      const group = screen.getByRole("radiogroup", {
+        name: "Question: A server What does it answer?",
+      });
+      expect(document.getElementById(group.getAttribute("aria-describedby")!)).toHaveTextContent(
+        "DELETE /notes/ HTTP/1.1",
+      );
+      expect(
+        screen.getByRole("radio", { name: "409 Conflict" }).closest("label")!.querySelector("code"),
+      ).toBeInTheDocument();
     });
 
     it("keeps the name out of the reading order, so the question is read once", () => {
       renderQuestion({ card: marked, choices: markedChoices });
-      const name = document.getElementById(screen.getByRole("radiogroup").getAttribute("aria-labelledby")!)!;
+      const name = document.getElementById(
+        screen.getByRole("radiogroup").getAttribute("aria-labelledby")!,
+      )!;
       expect(name).toHaveAttribute("hidden");
       expect(name).not.toBeVisible();
     });
 
     it("leaves a picture out of the name when the question has none, and a one-paragraph question undescribed", () => {
-      const noPicture = { ...marked, front: { en: "What does `DELETE` *answer*?" }, frontImageUrl: undefined, frontImageDescription: undefined };
+      const noPicture = {
+        ...marked,
+        front: { en: "What does `DELETE` *answer*?" },
+        frontImageUrl: undefined,
+        frontImageDescription: undefined,
+      };
       renderQuestion({ card: noPicture, choices: choicesOf(noPicture, noShuffle) });
       const group = screen.getByRole("radiogroup", { name: "Question: What does DELETE answer?" });
       expect(group).not.toHaveAttribute("aria-describedby");
@@ -137,7 +164,9 @@ describe("CourseQuestion", () => {
       const undescribed = { ...marked, frontImageDescription: undefined };
       renderQuestion({ card: undescribed, choices: choicesOf(undescribed, noShuffle) });
       expect(
-        screen.getByRole("radiogroup", { name: "Question: Picture on the front of the card What does it answer?" }),
+        screen.getByRole("radiogroup", {
+          name: "Question: Picture on the front of the card What does it answer?",
+        }),
       ).toBeInTheDocument();
       expect(screen.getByRole("img")).toHaveAccessibleName("Picture on the front of the card");
     });

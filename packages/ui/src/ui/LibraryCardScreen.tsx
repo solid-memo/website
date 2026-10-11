@@ -51,7 +51,13 @@ export function LibraryCardScreen({
       </div>
       {card.retired && <RetiredNotice />}
       <p class="hint">
-        {tx("libraryCard.from", { deck: <a href={deckHref} lang={deckLang}>{deckName}</a> })}
+        {tx("libraryCard.from", {
+          deck: (
+            <a href={deckHref} lang={deckLang}>
+              {deckName}
+            </a>
+          ),
+        })}
       </p>
     </section>
   );

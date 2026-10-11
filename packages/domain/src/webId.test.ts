@@ -1,11 +1,6 @@
 import { AppError } from "./appError";
 import { describe, expect, it } from "vitest";
-import {
-  isHttpUrl,
-  isLinkableUrl,
-  isSecureUrl,
-  validateWebId,
-} from "./webId";
+import { isHttpUrl, isLinkableUrl, isSecureUrl, validateWebId } from "./webId";
 
 describe("isHttpUrl", () => {
   it.each(["https://flagcdn.com/h80/af.png", "http://localhost:3000/a.png"])(
@@ -98,9 +93,7 @@ describe("validateWebId", () => {
   });
 
   it("rejects embedded credentials", () => {
-    expect(
-      validateWebId("https://alice:hunter2@alice.example/profile/card#me"),
-    ).toEqual({
+    expect(validateWebId("https://alice:hunter2@alice.example/profile/card#me")).toEqual({
       ok: false,
       error: new AppError("webIdWithCredentials"),
     });

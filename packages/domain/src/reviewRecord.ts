@@ -19,9 +19,7 @@ export const BACK_TO_FRONT_SUFFIX = "@back-to-front";
 
 /** The fragment of a card's review state in one direction. */
 export function reviewFragmentOf(key: ReviewKey): string {
-  return key.direction === "back-to-front"
-    ? `${key.cardId}${BACK_TO_FRONT_SUFFIX}`
-    : key.cardId;
+  return key.direction === "back-to-front" ? `${key.cardId}${BACK_TO_FRONT_SUFFIX}` : key.cardId;
 }
 
 /** The card and direction a review subject's fragment names. */
@@ -63,12 +61,17 @@ export type ReviewedDeck = Pick<Deck, "id" | "cardsDocumentUrl">;
  * (kept, never read as SM-2), one of a card outside the deck, or one
  * whose direction is not front to back or back to front.
  */
-export function reviewKeyOfSubject(subjectUrl: string, deck: ReviewedDeck, links: ReviewLinks): ReviewKey | null {
+export function reviewKeyOfSubject(
+  subjectUrl: string,
+  deck: ReviewedDeck,
+  links: ReviewLinks,
+): ReviewKey | null {
   if (links.anotherScheduler === true) return null;
   const named = reviewKeyOf(fragmentIdOf(subjectUrl));
   let cardId = named.cardId;
   if (links.reviewOf !== undefined) {
-    if (!links.reviewOf.includes("#") || !isCardsDocumentOf(documentUrlOf(links.reviewOf), deck)) return null;
+    if (!links.reviewOf.includes("#") || !isCardsDocumentOf(documentUrlOf(links.reviewOf), deck))
+      return null;
     cardId = fragmentIdOf(links.reviewOf);
   }
   if (links.direction === undefined) return { cardId, direction: named.direction };
@@ -95,7 +98,8 @@ export function pickReviewStates<T extends { url: string; key: ReviewKey }>(
 ): T[] {
   const picked = new Map<string, T>();
   const keyOf = (key: ReviewKey) => `${key.direction}/${key.cardId}`;
-  const rank = (state: T) => (state.url === namedReviewSubject(reviewsDocumentUrl, state.key) ? 0 : 1);
+  const rank = (state: T) =>
+    state.url === namedReviewSubject(reviewsDocumentUrl, state.key) ? 0 : 1;
   for (const state of states) {
     const current = picked.get(keyOf(state.key));
     if (

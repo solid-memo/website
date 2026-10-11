@@ -16,12 +16,21 @@ import { ForecastBars, MaturityBar } from "./StatisticsCharts";
  * then each deck's maturity on its own, or of the one deck given. When it
  * cannot be read a quiet line says so, and the rest of the page works on.
  */
-export function CardProgressContainer({ useCases, instance, deck }: { useCases: UseCases; instance: Instance; deck?: Deck }) {
+export function CardProgressContainer({
+  useCases,
+  instance,
+  deck,
+}: {
+  useCases: UseCases;
+  instance: Instance;
+  deck?: Deck;
+}) {
   const { t } = useI18n();
   const headingId = useId();
   const progressQuery = useQuery({
     queryKey: ["cardProgress", instance.url, deck?.url],
-    queryFn: () => useCases.getCardProgress(instance.url, new Date(), deck === undefined ? {} : { deck }),
+    queryFn: () =>
+      useCases.getCardProgress(instance.url, new Date(), deck === undefined ? {} : { deck }),
   });
   const report = progressQuery.data;
   return (
@@ -46,14 +55,22 @@ function CardProgressView({ report, byDeck }: { report: CardProgressReport; byDe
     <>
       <p class="hint">{t("statistics.maturityHint")}</p>
       <MaturityBar progress={overall} caption={t("statistics.maturity")} />
-      <ForecastBars forecast={mergeForecasts(report.decks.map((one) => one.forecast), report.today)} />
+      <ForecastBars
+        forecast={mergeForecasts(
+          report.decks.map((one) => one.forecast),
+          report.today,
+        )}
+      />
       {byDeck && report.decks.length > 0 && (
         <>
           <h4>{t("statistics.maturityByDeck")}</h4>
           <ul class="maturity-decks">
             {report.decks.map((one) => (
               <li key={one.deck.url}>
-                <MaturityBar progress={one.progress} caption={<ReaderText text={one.deck.title} />} />
+                <MaturityBar
+                  progress={one.progress}
+                  caption={<ReaderText text={one.deck.title} />}
+                />
               </li>
             ))}
           </ul>

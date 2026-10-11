@@ -49,7 +49,8 @@ export function ImportUrlContainer({
     queryKey: ["decks", instance.url],
     queryFn: () => useCases.listDecks(instance.url),
   });
-  const imported = release !== undefined && (decksQuery.data ?? []).some((deck) => isCopyOf(deck, release));
+  const imported =
+    release !== undefined && (decksQuery.data ?? []).some((deck) => isCopyOf(deck, release));
 
   const addMutation = useMutation({
     mutationFn: (shown: LibraryDeck) => useCases.importReleaseFromUrl(instance.url, shown),

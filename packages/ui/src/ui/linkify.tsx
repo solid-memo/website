@@ -10,7 +10,5 @@ const URL_IN_TEXT = /(https?:\/\/[^\s]*[^\s.,;:!?)])/;
 export function linkify(text: string) {
   return text
     .split(URL_IN_TEXT)
-    .map((part, i) =>
-      i % 2 === 1 ? <ExternalLink key={i} url={part} /> : part,
-    );
+    .map((part, i) => (i % 2 === 1 ? <ExternalLink key={i} url={part} /> : part));
 }

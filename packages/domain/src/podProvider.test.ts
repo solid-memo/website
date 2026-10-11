@@ -17,8 +17,6 @@ describe("POD_PROVIDERS", () => {
         expect(isSecureUrl(provider.signUpUrl)).toBe(true);
       }
     }
-    expect(new Set(POD_PROVIDERS.map((p) => p.id)).size).toBe(
-      POD_PROVIDERS.length,
-    );
+    expect(new Set(POD_PROVIDERS.map((p) => p.id)).size).toBe(POD_PROVIDERS.length);
   });
 });

@@ -1,7 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { readWhole, type CheckPolicy, type ReleaseCheck } from "@solid-memo/domain/release/releaseCheck";
+import {
+  readWhole,
+  type CheckPolicy,
+  type ReleaseCheck,
+} from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { releaseMarkdownCheck } from "@solid-memo/ui/markdownCache";
 
@@ -39,14 +43,21 @@ export function revisionOf(draft: ReleaseDraft): number {
  * check with a part unread is stale at once, so it is made again when its
  * screen opens again or the window is focused. No draft (null), no check.
  */
-export function useReleaseCheck(useCases: UseCases, draft: ReleaseDraft | null, policy: CheckPolicy) {
+export function useReleaseCheck(
+  useCases: UseCases,
+  draft: ReleaseDraft | null,
+  policy: CheckPolicy,
+) {
   return useQuery<ReleaseCheck>({
     queryKey: ["releaseCheck", draft?.url, policy, draft === null ? 0 : revisionOf(draft)],
     queryFn: () => useCases.checkReleaseDraft(draft!, markdownCheck, policy),
     enabled: draft !== null,
     placeholderData: (previous, previousQuery) =>
-      previousQuery?.queryKey[1] === draft?.url && previousQuery?.queryKey[2] === policy ? previous : undefined,
-    staleTime: (query) => (query.state.data === undefined || readWhole(query.state.data) ? Infinity : 0),
+      previousQuery?.queryKey[1] === draft?.url && previousQuery?.queryKey[2] === policy
+        ? previous
+        : undefined,
+    staleTime: (query) =>
+      query.state.data === undefined || readWhole(query.state.data) ? Infinity : 0,
   });
 }
 
@@ -56,14 +67,17 @@ export function useReleaseCheck(useCases: UseCases, draft: ReleaseDraft | null, 
  * publishing checks them (the library's own, and the shapes, aside).
  */
 export function publishErrors(check: Pick<ReleaseCheck, "rules" | "drops" | "markdown">): number {
-  return [...check.rules, ...check.drops, ...check.markdown].filter((one) => one.severity === "error").length;
+  return [...check.rules, ...check.drops, ...check.markdown].filter(
+    (one) => one.severity === "error",
+  ).length;
 }
 
 /** What the shapes say of the version of the draft they were asked of (`asked`); nothing until they are. */
 export function useShapeCheck(useCases: UseCases, asked: ReleaseDraft | null, policy: CheckPolicy) {
   return useQuery<ReleaseProblem[]>({
     queryKey: ["releaseShapes", asked?.url, policy, asked === null ? 0 : revisionOf(asked)],
-    queryFn: async () => (await useCases.checkReleaseDraft(asked!, markdownCheck, policy, { shapes: true })).shapes!,
+    queryFn: async () =>
+      (await useCases.checkReleaseDraft(asked!, markdownCheck, policy, { shapes: true })).shapes!,
     enabled: asked !== null,
     staleTime: Infinity,
   });

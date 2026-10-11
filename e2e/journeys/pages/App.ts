@@ -109,7 +109,10 @@ export class App {
       await body();
       const unmet = this.expectedDialogs.splice(0).map(String);
       expect(unmet, "dialogs this step expected that never came").toEqual([]);
-      await this.testInfo.attach(`${title}.png`, { body: await this.page.screenshot(), contentType: "image/png" });
+      await this.testInfo.attach(`${title}.png`, {
+        body: await this.page.screenshot(),
+        contentType: "image/png",
+      });
     });
   }
 }

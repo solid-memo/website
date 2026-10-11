@@ -15,7 +15,11 @@ function renderContainer(useCases: UseCases) {
   const onCourseStarted = vi.fn();
   const view = render(
     <QueryClientProvider client={queryClient}>
-      <NewcomerCourseContainer useCases={useCases} instance={courseInstance} onCourseStarted={onCourseStarted} />
+      <NewcomerCourseContainer
+        useCases={useCases}
+        instance={courseInstance}
+        onCourseStarted={onCourseStarted}
+      />
     </QueryClientProvider>,
   );
   return { ...view, onCourseStarted, queryClient };
@@ -29,9 +33,15 @@ async function librarySettled(queryClient: QueryClient) {
 
 describe("NewcomerCourseContainer", () => {
   it("offers the course the library names for newcomers, not just any course, linking to its page", async () => {
-    const other = { ...courseLibraryDeck, seriesUrl: "https://solid-memo.com/decks/index.ttl#other", title: { en: "Other" } };
+    const other = {
+      ...courseLibraryDeck,
+      seriesUrl: "https://solid-memo.com/decks/index.ttl#other",
+      title: { en: "Other" },
+    };
     renderContainer(makeUseCasesFake({ listLibraryDecks: vi.fn(async () => [other, course]) }));
-    expect(await screen.findByRole("complementary", { name: "Solid fundamentals" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("complementary", { name: "Solid fundamentals" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "About this course" })).toHaveAttribute(
       "href",
       libraryDeckHref(courseInstance.url, course.seriesUrl),
@@ -64,7 +74,10 @@ describe("NewcomerCourseContainer", () => {
 
   it("starts the course, reads the instance's decks afresh and opens the course's deck", async () => {
     const startCourse = vi.fn(async () => courseDeck);
-    const useCases = makeUseCasesFake({ listLibraryDecks: vi.fn(async () => [course]), startCourse });
+    const useCases = makeUseCasesFake({
+      listLibraryDecks: vi.fn(async () => [course]),
+      startCourse,
+    });
     const { onCourseStarted } = renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Start the course" }));
     await waitFor(() => expect(onCourseStarted).toHaveBeenCalledWith(courseDeck));
@@ -98,6 +111,9 @@ describe("NewcomerCourseContainer", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Start the course" }));
     await waitFor(() => expect(alertTexts()).toEqual([unexpectedText("pod refused")]));
     expect(onCourseStarted).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Start the course" })).not.toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Start the course" })).not.toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
   });
 });

@@ -41,7 +41,11 @@ async function podWithDeck() {
       backNote: { en: "Since 1634.", sv: "Sedan 1634." },
       textFormat: SM.markdown,
       distractors: [
-        { id: "card-se-d1", text: { en: "Gothenburg", sv: "Göteborg" }, note: { en: "The second city." } },
+        {
+          id: "card-se-d1",
+          text: { en: "Gothenburg", sv: "Göteborg" },
+          note: { en: "The second city." },
+        },
         { id: "card-se-d2", text: { en: "Uppsala", sv: "Uppsala" }, retired: true },
       ],
       createdAt: "2026-09-01T10:00:00.000Z",
@@ -71,16 +75,36 @@ async function podWithDeck() {
       firstReviewedAt: "2026-09-20T10:00:00.000Z",
       lastReviewedAt: "2026-10-01T10:00:00.000Z",
       formatVersion: LATEST_VERSION.reviewState,
-      previous: { easeFactor: 2.5, intervalDays: 1, repetitions: 1, due: "2026-10-01", lastReviewedAt: "2026-09-30T10:00:00.000Z" },
+      previous: {
+        easeFactor: 2.5,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "2026-10-01",
+        lastReviewedAt: "2026-09-30T10:00:00.000Z",
+      },
     },
   ];
   await reviews.applyReviewChanges(deck, { save: states, remove: [] });
   await repository.completeChapter(deck, CHAPTER);
   // What another app said of a card, and the deck's place among its groups.
-  await pod.put(deck.cardsDocumentUrl, [...pod.triples(deck.cardsDocumentUrl)!, `<${cards[0]!.url}> <${FOREIGN}> "5" .`].join("\n"));
-  await pod.put(`${INSTANCE}catalog.ttl`, [...pod.triples(`${INSTANCE}catalog.ttl`)!, `<${deck.url}> <${SM.position}> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .`].join("\n"));
+  await pod.put(
+    deck.cardsDocumentUrl,
+    [...pod.triples(deck.cardsDocumentUrl)!, `<${cards[0]!.url}> <${FOREIGN}> "5" .`].join("\n"),
+  );
+  await pod.put(
+    `${INSTANCE}catalog.ttl`,
+    [
+      ...pod.triples(`${INSTANCE}catalog.ttl`)!,
+      `<${deck.url}> <${SM.position}> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+    ].join("\n"),
+  );
   const stored = (await repository.readDeck(deck.url))!;
-  return { pod, deck: stored, cards: await repository.listCards(stored), states: await reviews.listReviewStates(stored) };
+  return {
+    pod,
+    deck: stored,
+    cards: await repository.listCards(stored),
+    states: await reviews.listReviewStates(stored),
+  };
 }
 
 describe("createSolidDeckArchive", () => {
@@ -111,7 +135,12 @@ describe("createSolidDeckArchive", () => {
 
   it("writes JSON-LD with its context in full, as compact IRIs and value objects", async () => {
     const { pod, deck } = await podWithDeck();
-    const json = JSON.parse(await createSolidDeckArchive({ fetch: pod.fetch }).exportDeck(deck, { format: "jsonld", withProgress: true }));
+    const json = JSON.parse(
+      await createSolidDeckArchive({ fetch: pod.fetch }).exportDeck(deck, {
+        format: "jsonld",
+        withProgress: true,
+      }),
+    );
     expect(json["@context"].sm).toBe(SM_NS);
     const entry = json["@graph"].find((node: { "@id": string }) => node["@id"] === deck.url);
     expect(entry["@type"]).toContain("sm:Deck");
@@ -119,17 +148,28 @@ describe("createSolidDeckArchive", () => {
       { "@value": "Capitals", "@language": "en" },
       { "@value": "Huvudstäder", "@language": "sv" },
     ]);
-    expect(entry["sm:formatVersion"]).toEqual({ "@value": String(LATEST_VERSION.deck), "@type": "xsd:integer" });
+    expect(entry["sm:formatVersion"]).toEqual({
+      "@value": String(LATEST_VERSION.deck),
+      "@type": "xsd:integer",
+    });
   });
 
   it("refuses to export a deck its catalog no longer lists", async () => {
     const { pod, deck } = await podWithDeck();
     const archive = createSolidDeckArchive({ fetch: pod.fetch });
-    await expect(archive.exportDeck({ ...deck, url: `${deck.url}-gone` } as Deck, { format: "turtle", withProgress: false })).rejects.toMatchObject({
+    await expect(
+      archive.exportDeck({ ...deck, url: `${deck.url}-gone` } as Deck, {
+        format: "turtle",
+        withProgress: false,
+      }),
+    ).rejects.toMatchObject({
       code: "deckGone",
     });
     await expect(
-      archive.exportDeck({ ...deck, url: "https://pod.example/elsewhere/catalog.ttl#d" }, { format: "turtle", withProgress: false }),
+      archive.exportDeck(
+        { ...deck, url: "https://pod.example/elsewhere/catalog.ttl#d" },
+        { format: "turtle", withProgress: false },
+      ),
     ).rejects.toMatchObject({ code: "deckGone" });
   });
 });
@@ -159,61 +199,106 @@ const OLD_DECK = `${PREFIXES}
 `;
 
 describe("readDeckFile", () => {
-  const archive = createSolidDeckArchive({ fetch: (() => Promise.reject(new Error("no reads"))) as unknown as typeof fetch });
+  const archive = createSolidDeckArchive({
+    fetch: (() => Promise.reject(new Error("no reads"))) as unknown as typeof fetch,
+  });
   const base = `${DECK_FILE_BASE}old.ttl`;
 
   it("brings older formats up to date, resolves relative IRIs, and says what it left out", async () => {
     const read = await archive.readDeckFile(OLD_DECK, "turtle", base);
-    expect(read.deck).toMatchObject({ url: `${base}#deck`, title: { en: "Old capitals" }, cardsDocumentUrl: `${DECK_FILE_BASE}cards` });
+    expect(read.deck).toMatchObject({
+      url: `${base}#deck`,
+      title: { en: "Old capitals" },
+      cardsDocumentUrl: `${DECK_FILE_BASE}cards`,
+    });
     expect(read.cards.map((card) => card.id)).toEqual(["c1"]);
     expect(read.reviews!.map((state) => state.cardId)).toEqual(["c1"]);
     expect(read.upgraded).toEqual([
       { kind: "deck", subject: `${base}#deck`, from: 1, to: LATEST_VERSION.deck },
       { kind: "card", subject: `${DECK_FILE_BASE}cards#c1`, from: 1, to: LATEST_VERSION.card },
-      { kind: "reviewState", subject: `${DECK_FILE_BASE}reviews#c1`, from: 1, to: LATEST_VERSION.reviewState },
+      {
+        kind: "reviewState",
+        subject: `${DECK_FILE_BASE}reviews#c1`,
+        from: 1,
+        to: LATEST_VERSION.reviewState,
+      },
     ]);
     expect(read.dropped.sort()).toEqual(
-      [`${DECK_FILE_BASE}cards#c2`, `${DECK_FILE_BASE}elsewhere#c3`, `${DECK_FILE_BASE}reviews#gone`, `${DECK_FILE_BASE}cards#broken`].sort(),
+      [
+        `${DECK_FILE_BASE}cards#c2`,
+        `${DECK_FILE_BASE}elsewhere#c3`,
+        `${DECK_FILE_BASE}reviews#gone`,
+        `${DECK_FILE_BASE}cards#broken`,
+      ].sort(),
     );
   });
 
   it("refuses a deck, a card or a review state in a newer format", async () => {
     for (const kind of ["Deck", "Card", "ReviewState"]) {
       const newer = `${OLD_DECK}<#new> a sm:${kind} ; sm:formatVersion 999 .`;
-      await expect(archive.readDeckFile(newer, "turtle", base)).rejects.toMatchObject({ code: "deckFileTooNew" });
+      await expect(archive.readDeckFile(newer, "turtle", base)).rejects.toMatchObject({
+        code: "deckFileTooNew",
+      });
     }
   });
 
   it("refuses a file that holds no deck it can read, or more than one", async () => {
-    await expect(archive.readDeckFile(PREFIXES, "turtle", base)).rejects.toMatchObject({ code: "notADeckFile" });
-    await expect(archive.readDeckFile(`${PREFIXES}<#d> a sm:Deck .`, "turtle", base)).rejects.toMatchObject({ code: "notADeckFile" });
+    await expect(archive.readDeckFile(PREFIXES, "turtle", base)).rejects.toMatchObject({
+      code: "notADeckFile",
+    });
+    await expect(
+      archive.readDeckFile(`${PREFIXES}<#d> a sm:Deck .`, "turtle", base),
+    ).rejects.toMatchObject({ code: "notADeckFile" });
     const two = `${OLD_DECK}<#other> a sm:Deck ; dcterms:title "B" ; sm:cardsDocument <b> ; sm:reviewsDocument <c> .`;
-    await expect(archive.readDeckFile(two, "turtle", base)).rejects.toMatchObject({ code: "notADeckFile" });
+    await expect(archive.readDeckFile(two, "turtle", base)).rejects.toMatchObject({
+      code: "notADeckFile",
+    });
   });
 
   it("refuses text that does not parse", async () => {
-    await expect(archive.readDeckFile("<#a> <#b>", "turtle", base)).rejects.toMatchObject({ code: "deckFileUnreadable" });
-    await expect(archive.readDeckFile("{", "jsonld", base)).rejects.toMatchObject({ code: "deckFileUnreadable" });
-    await expect(archive.readDeckFile('{"@id": 5, "@type": {}}', "jsonld", base)).rejects.toMatchObject({ code: "deckFileUnreadable" });
+    await expect(archive.readDeckFile("<#a> <#b>", "turtle", base)).rejects.toMatchObject({
+      code: "deckFileUnreadable",
+    });
+    await expect(archive.readDeckFile("{", "jsonld", base)).rejects.toMatchObject({
+      code: "deckFileUnreadable",
+    });
+    await expect(
+      archive.readDeckFile('{"@id": 5, "@type": {}}', "jsonld", base),
+    ).rejects.toMatchObject({ code: "deckFileUnreadable" });
   });
 
   it("reads JSON-LD written by hand, its context inline", async () => {
     const json = JSON.stringify({
       "@context": [{ sm: SM_NS }, { dcterms: "http://purl.org/dc/terms/" }],
       "@graph": [
-        { "@id": "#deck", "@type": "sm:Deck", "dcterms:title": "Hand", "sm:cardsDocument": { "@id": "cards" }, "sm:reviewsDocument": { "@id": "reviews" } },
+        {
+          "@id": "#deck",
+          "@type": "sm:Deck",
+          "dcterms:title": "Hand",
+          "sm:cardsDocument": { "@id": "cards" },
+          "sm:reviewsDocument": { "@id": "reviews" },
+        },
         { "@id": "cards#c1", "@type": "sm:Card", "sm:front": "A", "sm:back": "B" },
       ],
     });
     const read = await archive.readDeckFile(json, "jsonld", base);
-    expect(read).toMatchObject({ deck: { title: { en: "Hand" } }, cards: [{ id: "c1", front: { "": "A" } }] });
+    expect(read).toMatchObject({
+      deck: { title: { en: "Hand" } },
+      cards: [{ id: "c1", front: { "": "A" } }],
+    });
     expect(read.reviews).toBeUndefined();
   });
 
   it("refuses JSON-LD whose context would be fetched from elsewhere", async () => {
-    for (const context of ["https://evil.example/context.jsonld", [{ sm: SM_NS }, "https://evil.example/c"], { "@import": "https://evil.example/c" }]) {
+    for (const context of [
+      "https://evil.example/context.jsonld",
+      [{ sm: SM_NS }, "https://evil.example/c"],
+      { "@import": "https://evil.example/c" },
+    ]) {
       const json = JSON.stringify({ "@graph": [{ "@context": context, "@id": "#deck" }] });
-      await expect(archive.readDeckFile(json, "jsonld", base)).rejects.toMatchObject({ code: "deckFileUnreadable" });
+      await expect(archive.readDeckFile(json, "jsonld", base)).rejects.toMatchObject({
+        code: "deckFileUnreadable",
+      });
     }
   });
 });

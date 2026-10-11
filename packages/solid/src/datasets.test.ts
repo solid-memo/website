@@ -3,8 +3,7 @@ import { getSolidDataset, mockSolidDatasetFrom } from "@inrupt/solid-client";
 import { getSolidDatasetOrNull } from "./datasets";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@inrupt/solid-client")>();
+  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
   return { ...actual, getSolidDataset: vi.fn() };
 });
 
@@ -36,15 +35,11 @@ describe("getSolidDatasetOrNull", () => {
     vi.mocked(getSolidDataset).mockRejectedValue(
       Object.assign(new Error("Forbidden"), { statusCode: 403 }),
     );
-    await expect(getSolidDatasetOrNull(URL_, noFetch)).rejects.toThrow(
-      "Forbidden",
-    );
+    await expect(getSolidDatasetOrNull(URL_, noFetch)).rejects.toThrow("Forbidden");
   });
 
   it("rethrows failures without any status information", async () => {
     vi.mocked(getSolidDataset).mockRejectedValue(new Error("network"));
-    await expect(getSolidDatasetOrNull(URL_, noFetch)).rejects.toThrow(
-      "network",
-    );
+    await expect(getSolidDatasetOrNull(URL_, noFetch)).rejects.toThrow("network");
   });
 });

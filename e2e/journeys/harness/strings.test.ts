@@ -34,7 +34,9 @@ describe("text", () => {
   });
 
   it("throws for a key with no message, and for a group of messages", () => {
-    expect(() => text("en", "app.noSuchMessage")).toThrow(/en\.json has no message app\.noSuchMessage/);
+    expect(() => text("en", "app.noSuchMessage")).toThrow(
+      /en\.json has no message app\.noSuchMessage/,
+    );
     expect(() => text("en", "app")).toThrow(/has no message app\.$/);
   });
 });
@@ -47,12 +49,19 @@ describe("textPattern", () => {
   });
 
   it("matches filled values literally", () => {
-    expect(textPattern("en", "app.loggedInAs", { name: "a.b" }).test("Logged in as aXb")).toBe(false);
+    expect(textPattern("en", "app.loggedInAs", { name: "a.b" }).test("Logged in as aXb")).toBe(
+      false,
+    );
   });
 
   it("captures each unfilled placeholder by its name", () => {
-    expect(textPattern("en", "study.position").exec("Card 2 of 3")?.groups).toEqual({ position: "2", total: "3" });
-    expect(textPattern("en", "study.position", { total: 3 }).exec("Card 2 of 3")?.groups).toEqual({ position: "2" });
+    expect(textPattern("en", "study.position").exec("Card 2 of 3")?.groups).toEqual({
+      position: "2",
+      total: "3",
+    });
+    expect(textPattern("en", "study.position", { total: 3 }).exec("Card 2 of 3")?.groups).toEqual({
+      position: "2",
+    });
   });
 });
 

@@ -22,7 +22,10 @@ function statesOf(
   direction: StudyDirection | undefined,
 ): ReviewState[] {
   const chosen = new Set(ids);
-  return states.filter((state) => chosen.has(state.cardId) && (direction === undefined || state.direction === direction));
+  return states.filter(
+    (state) =>
+      chosen.has(state.cardId) && (direction === undefined || state.direction === direction),
+  );
 }
 
 /**

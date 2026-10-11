@@ -55,7 +55,11 @@ const roundTrips: RouteRef[] = [
     libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
   },
   { screen: "importUrl", instanceUrl: "https://pod.example/solid-memo/a/" },
-  { screen: "importUrl", instanceUrl: "https://pod.example/solid-memo/a/", url: "https://bob.example/releases/rivers/v1.ttl" },
+  {
+    screen: "importUrl",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    url: "https://bob.example/releases/rivers/v1.ttl",
+  },
   {
     screen: "deckDetail",
     instanceUrl: "https://pod.example/solid-memo/a/",
@@ -242,17 +246,16 @@ describe("routeToHash / parseHash", () => {
 
 describe("importUrlHref", () => {
   it("is the hash URL of the screen that adds a release from a link, none pasted yet", () => {
-    expect(importUrlHref("https://pod.example/a/")).toBe("#/import-url?instance=https%3A%2F%2Fpod.example%2Fa%2F");
+    expect(importUrlHref("https://pod.example/a/")).toBe(
+      "#/import-url?instance=https%3A%2F%2Fpod.example%2Fa%2F",
+    );
   });
 });
 
 describe("libraryDeckHref", () => {
   it("is the hash URL of a library deck's page in the instance", () => {
     expect(
-      libraryDeckHref(
-        "https://pod.example/a/",
-        "https://solid-memo.com/decks/capitals/v1.ttl",
-      ),
+      libraryDeckHref("https://pod.example/a/", "https://solid-memo.com/decks/capitals/v1.ttl"),
     ).toBe(
       "#/library-deck?instance=https%3A%2F%2Fpod.example%2Fa%2F&deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals%2Fv1.ttl",
     );
@@ -290,7 +293,9 @@ describe("courseHref", () => {
 
 describe("studioHref", () => {
   it("is the instance's Home in the Studio, in the same page", () => {
-    expect(studioHref("https://pod.example/a/")).toBe("#/studio?instance=https%3A%2F%2Fpod.example%2Fa%2F");
+    expect(studioHref("https://pod.example/a/")).toBe(
+      "#/studio?instance=https%3A%2F%2Fpod.example%2Fa%2F",
+    );
     expect(isStudioHash(studioHref("https://pod.example/a/"))).toBe(true);
   });
 });
@@ -322,9 +327,11 @@ describe("decksHref", () => {
 
 describe("parseHash legacy links", () => {
   it("ignores the retired return parameter of card-creator links", () => {
-    expect(parseHash("#/new-card?instance=a&deck=b&return=deckDetail")).toEqual(
-      { screen: "cardCreator", instanceUrl: "a", deckUrl: "b" },
-    );
+    expect(parseHash("#/new-card?instance=a&deck=b&return=deckDetail")).toEqual({
+      screen: "cardCreator",
+      instanceUrl: "a",
+      deckUrl: "b",
+    });
   });
 });
 

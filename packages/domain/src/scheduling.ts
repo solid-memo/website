@@ -26,9 +26,7 @@ export function nextDueDate(
   intervalDays: number,
   dayBoundaryHour: number,
 ): string {
-  const shifted = new Date(
-    reviewedAt.getTime() - dayBoundaryHour * 3_600_000,
-  );
+  const shifted = new Date(reviewedAt.getTime() - dayBoundaryHour * 3_600_000);
   shifted.setDate(shifted.getDate() + intervalDays);
   return formatLocalDate(shifted);
 }
@@ -67,8 +65,7 @@ export function buildStudyQueue(args: {
     (r) => studyDayOf(new Date(r.lastReviewedAt), prefs.dayBoundaryHour) === today,
   ).length;
   const introducedToday = reviews.filter(
-    (r) =>
-      studyDayOf(new Date(r.firstReviewedAt), prefs.dayBoundaryHour) === today,
+    (r) => studyDayOf(new Date(r.firstReviewedAt), prefs.dayBoundaryHour) === today,
   ).length;
 
   const dueBudget = Math.max(0, prefs.maxReviewsPerDay - reviewedToday);
@@ -110,8 +107,7 @@ export function interleave<T>(due: T[], fresh: T[]): T[] {
   while (i < due.length || j < fresh.length) {
     const dueTurn =
       j >= fresh.length ||
-      (i < due.length &&
-        (i === 0 || (2 * i + 1) * fresh.length <= (2 * j + 1) * due.length));
+      (i < due.length && (i === 0 || (2 * i + 1) * fresh.length <= (2 * j + 1) * due.length));
     result.push(dueTurn ? due[i++] : fresh[j++]);
   }
   return result;
@@ -136,11 +132,7 @@ export function repeatsInSession(quality: ReviewQuality): boolean {
  * Put a failed card back into the rest of the session at a random spot —
  * never straight away, unless nothing else is left to come between.
  */
-export function requeueCard<T>(
-  remaining: T[],
-  card: T,
-  random: () => number,
-): T[] {
+export function requeueCard<T>(remaining: T[], card: T, random: () => number): T[] {
   if (remaining.length === 0) return [card];
   const at = 1 + Math.floor(random() * remaining.length);
   return [...remaining.slice(0, at), card, ...remaining.slice(at)];
@@ -192,8 +184,7 @@ export function resetStudyDay(
   dayBoundaryHour: number,
 ): StudyDayReset {
   const today = studyDayOf(now, dayBoundaryHour);
-  const isToday = (instant: string) =>
-    studyDayOf(new Date(instant), dayBoundaryHour) === today;
+  const isToday = (instant: string) => studyDayOf(new Date(instant), dayBoundaryHour) === today;
 
   const reset: StudyDayReset = { restore: [], remove: [] };
   for (const review of reviews) {

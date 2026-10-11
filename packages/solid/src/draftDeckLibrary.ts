@@ -36,8 +36,20 @@ export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
 
     async fetchLibraryDeck(url): Promise<LibraryDeckContent> {
       const dataset = release(url);
-      const { url: _url, releases: _releases, cardCount: _cardCount, sources: _sources, createdAt: _createdAt, ...about } = listed();
-      return { ...about, url, formatVersion: LATEST_VERSION.libraryDeck, cards: toLibraryCards(url, dataset) };
+      const {
+        url: _url,
+        releases: _releases,
+        cardCount: _cardCount,
+        sources: _sources,
+        createdAt: _createdAt,
+        ...about
+      } = listed();
+      return {
+        ...about,
+        url,
+        formatVersion: LATEST_VERSION.libraryDeck,
+        cards: toLibraryCards(url, dataset),
+      };
     },
 
     async fetchCourseOutline(url) {

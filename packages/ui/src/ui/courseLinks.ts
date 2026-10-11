@@ -22,8 +22,10 @@ export interface CourseLinks {
 /** Solid Memo's course routes. */
 export const APP_COURSE_LINKS: CourseLinks = {
   courseHref,
-  chapterHref: (instanceUrl, deckUrl, chapterUrl) => routeToHash({ screen: "courseChapter", instanceUrl, deckUrl, chapterUrl }),
-  reviewHref: (instanceUrl, deckUrl, chapterUrl) => routeToHash({ screen: "courseReview", instanceUrl, deckUrl, chapterUrl }),
+  chapterHref: (instanceUrl, deckUrl, chapterUrl) =>
+    routeToHash({ screen: "courseChapter", instanceUrl, deckUrl, chapterUrl }),
+  reviewHref: (instanceUrl, deckUrl, chapterUrl) =>
+    routeToHash({ screen: "courseReview", instanceUrl, deckUrl, chapterUrl }),
   decksHref,
 };
 

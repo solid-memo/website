@@ -19,7 +19,15 @@ import { ReaderText } from "@solid-memo/ui/ReaderText";
  * language the user's to state (LangTextField), as Solid Memo's deck
  * preferences rename it.
  */
-export function DeckNameSection({ deck, busy, onRename }: { deck: Deck; busy: boolean; onRename: (title: LangText) => void }) {
+export function DeckNameSection({
+  deck,
+  busy,
+  onRename,
+}: {
+  deck: Deck;
+  busy: boolean;
+  onRename: (title: LangText) => void;
+}) {
   const { t, locale, errorText } = useI18n();
   /** The draft while renaming; null otherwise. */
   const [draft, setDraft] = useState<LangTextDraft | null>(null);
@@ -54,7 +62,11 @@ export function DeckNameSection({ deck, busy, onRename }: { deck: Deck; busy: bo
               </li>
             ))}
           </ul>
-          <button type="button" disabled={busy} onClick={() => setDraft(draftOf(deck.title, [locale, ...navigator.languages]))}>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => setDraft(draftOf(deck.title, [locale, ...navigator.languages]))}
+          >
             {t("studio.about.rename")}
           </button>
         </>
@@ -78,7 +90,13 @@ export function DeckNameSection({ deck, busy, onRename }: { deck: Deck; busy: bo
           />
           <ErrorMessage
             id="deck-name-error"
-            error={missing === undefined ? null : errorText(new AppError("textNeedsLanguage", { field: t("language.field.deckName") }))}
+            error={
+              missing === undefined
+                ? null
+                : errorText(
+                    new AppError("textNeedsLanguage", { field: t("language.field.deckName") }),
+                  )
+            }
           />
           <div class="edit-actions">
             <button type="submit" disabled={busy}>

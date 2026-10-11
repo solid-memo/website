@@ -28,12 +28,17 @@ const GRADES = ["blackout", "wrong", "almost", "hard", "good", "easy"] as const;
 export function CardHistoryScreen({ card, answers }: { card: Card; answers: readonly Answer[] }) {
   const { t, locale, directionLabel } = useI18n();
   const [sort, setSort] = useState<TableSort<HistoryColumn>>();
-  const instant = (iso: string) => new Date(iso).toLocaleString(locale, { dateStyle: "long", timeStyle: "short" });
+  const instant = (iso: string) =>
+    new Date(iso).toLocaleString(locale, { dateStyle: "long", timeStyle: "short" });
   const markdown = isMarkdown(card.textFormat);
   const chosen = (iri: string) => {
     const id = fragmentIdOf(iri);
     const option = card.distractors?.find((distractor) => distractor.id === id);
-    return option === undefined ? t("studio.history.unknownOption", { id }) : <DataLine text={option.text} markdown={markdown} />;
+    return option === undefined ? (
+      t("studio.history.unknownOption", { id })
+    ) : (
+      <DataLine text={option.text} markdown={markdown} />
+    );
   };
   const forgotten = answers.filter((answer) => !isRecalled(answer)).length;
   return (
@@ -60,16 +65,33 @@ export function CardHistoryScreen({ card, answers }: { card: Card; answers: read
             )}
             keyOf={(answer) => answer.id}
             classOf={(answer) => (isRecalled(answer) ? undefined : "forgotten")}
-            name={{ key: "when", label: t("studio.history.column.when"), cell: (answer) => instant(answer.answeredAt) }}
+            name={{
+              key: "when",
+              label: t("studio.history.column.when"),
+              cell: (answer) => instant(answer.answeredAt),
+            }}
             columns={[
-              { key: "direction", label: t("studio.history.column.direction"), cell: (answer) => directionLabel(answer.direction) },
-              { key: "grade", label: t("studio.history.column.grade"), cell: (answer) => t(`study.quality.${GRADES[answer.grade]}`) },
-              { key: "mode", label: t("studio.history.column.mode"), cell: (answer) => t(`studio.history.mode.${answer.mode ?? "recall"}`) },
+              {
+                key: "direction",
+                label: t("studio.history.column.direction"),
+                cell: (answer) => directionLabel(answer.direction),
+              },
+              {
+                key: "grade",
+                label: t("studio.history.column.grade"),
+                cell: (answer) => t(`study.quality.${GRADES[answer.grade]}`),
+              },
+              {
+                key: "mode",
+                label: t("studio.history.column.mode"),
+                cell: (answer) => t(`studio.history.mode.${answer.mode ?? "recall"}`),
+              },
               {
                 key: "chosen",
                 label: t("studio.history.column.chosen"),
                 unsorted: true,
-                cell: (answer) => (answer.chosenDistractor === undefined ? "" : chosen(answer.chosenDistractor)),
+                cell: (answer) =>
+                  answer.chosenDistractor === undefined ? "" : chosen(answer.chosenDistractor),
               },
             ]}
             sort={sort}

@@ -18,7 +18,10 @@ describe("CourseStrip", () => {
     render(<CourseStrip entries={[entry()]} />);
     const strip = screen.getByRole("complementary", { name: "Your courses" });
     expect(strip).toHaveTextContent("1 of 3 chapters done");
-    expect(screen.getByRole("link", { name: "Solid fundamentals" })).toHaveAttribute("href", "#/course");
+    expect(screen.getByRole("link", { name: "Solid fundamentals" })).toHaveAttribute(
+      "href",
+      "#/course",
+    );
     const button = screen.getByRole("link", { name: "Continue Solid fundamentals" });
     expect(button).toHaveTextContent("Continue");
     expect(button).toHaveAttribute("href", "#/course/chapter");

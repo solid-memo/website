@@ -21,7 +21,12 @@ const podCard = (id: string, back: string, retired?: true): Card => ({
   formatVersion: 4,
   ...(retired === undefined ? {} : { retired }),
 });
-const libraryCard = (id: string, back: string): LibraryCard => ({ id, front: { "": id }, back: { "": back }, formatVersion: 4 });
+const libraryCard = (id: string, back: string): LibraryCard => ({
+  id,
+  front: { "": id },
+  back: { "": back },
+  formatVersion: 4,
+});
 
 const deck: Deck = {
   id: "deck-1",
@@ -79,14 +84,22 @@ describe("isCardsDocumentOf", () => {
 
 describe("sameCardChanges", () => {
   it("holds for plans changing the same cards alike, whatever they say of the deck's texts", () => {
-    expect(sameCardChanges(plan, { ...plan, title: { en: "Capitals", sv: "Huvudstäder" }, add: [...plan.add] })).toBe(true);
+    expect(
+      sameCardChanges(plan, {
+        ...plan,
+        title: { en: "Capitals", sv: "Huvudstäder" },
+        add: [...plan.add],
+      }),
+    ).toBe(true);
   });
 
   it("fails on another release, direction or set of cards", () => {
     expect(sameCardChanges(plan, { ...plan, releaseUrl: "other" })).toBe(false);
     expect(sameCardChanges(plan, { ...plan, direction: "bidirectional" })).toBe(false);
     expect(sameCardChanges(plan, { ...plan, remove: [] })).toBe(false);
-    expect(sameCardChanges(plan, { ...plan, add: [libraryCard("ax", "Mariehamn"), ...plan.add] })).toBe(false);
+    expect(
+      sameCardChanges(plan, { ...plan, add: [libraryCard("ax", "Mariehamn"), ...plan.add] }),
+    ).toBe(false);
   });
 });
 
@@ -114,11 +127,21 @@ describe("withDeckChanges", () => {
   it("takes a text in several languages, listed in another order, as unchanged", () => {
     const current = { ...deck, title: { en: "Capitals", sv: "Huvudstäder" } };
     const stored = { ...current, title: { en: "Capitals", sv: "Huvudstäder", fi: "Pääkaupungit" } };
-    expect(withDeckChanges(stored, current, { ...current, title: { sv: "Huvudstäder", en: "Capitals" } })).toEqual(stored);
+    expect(
+      withDeckChanges(stored, current, {
+        ...current,
+        title: { sv: "Huvudstäder", en: "Capitals" },
+      }),
+    ).toEqual(stored);
   });
 
   it("writes what the upgrade changes onto the deck as stored, keeping changes made meanwhile", () => {
-    const next = { ...deck, sourceUrl: plan.releaseUrl, cardsDocumentUrl: "new", title: { en: "Capitals" } };
+    const next = {
+      ...deck,
+      sourceUrl: plan.releaseUrl,
+      cardsDocumentUrl: "new",
+      title: { en: "Capitals" },
+    };
     const stored = { ...deck, keywords: { en: ["geography"] } };
     expect(withDeckChanges(stored, deck, next)).toEqual({
       ...deck,

@@ -52,8 +52,7 @@ export function LibraryContainer({
       });
       onDone();
     },
-    onError: () =>
-      queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+    onError: () => queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
   });
 
   if (libraryQuery.error) {

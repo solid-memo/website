@@ -22,12 +22,27 @@ describe("DraftStatus", () => {
   });
 
   it("says why a change was refused, or a write failed", () => {
-    const { rerender } = render(<DraftStatus editor={{ saving: false, failure: { refusal: { refused: "published", of: "card", id: "q-1" } } }} />);
-    expect(screen.getByRole("alert")).toHaveTextContent("An earlier release published “q-1”: it can be retired, never deleted.");
+    const { rerender } = render(
+      <DraftStatus
+        editor={{
+          saving: false,
+          failure: { refusal: { refused: "published", of: "card", id: "q-1" } },
+        }}
+      />,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "An earlier release published “q-1”: it can be retired, never deleted.",
+    );
     expect(screen.getByRole("status")).toHaveTextContent("");
-    rerender(<DraftStatus editor={{ saving: false, failure: { refusal: { refused: "notACourse" } } }} />);
-    expect(screen.getByRole("alert")).toHaveTextContent("Only a course has chapters, steps and questions.");
-    rerender(<DraftStatus editor={{ saving: false, failure: { error: new AppError("draftGone") } }} />);
+    rerender(
+      <DraftStatus editor={{ saving: false, failure: { refusal: { refused: "notACourse" } } }} />,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Only a course has chapters, steps and questions.",
+    );
+    rerender(
+      <DraftStatus editor={{ saving: false, failure: { error: new AppError("draftGone") } }} />,
+    );
     expect(screen.getByRole("alert")).toHaveTextContent("That draft no longer exists.");
   });
 });
@@ -63,7 +78,17 @@ describe("DraftScope", () => {
 describe("DraftTextField", () => {
   it("saves the text as it is typed, once its language is chosen", () => {
     const onSave = vi.fn();
-    render(<DraftTextField id="title" label="Title" role="title" field="the title" text={undefined} disabled={false} onSave={onSave} />);
+    render(
+      <DraftTextField
+        id="title"
+        label="Title"
+        role="title"
+        field="the title"
+        text={undefined}
+        disabled={false}
+        onSave={onSave}
+      />,
+    );
     fireEvent.input(screen.getByRole("textbox", { name: "Title" }), { target: { value: "Pods" } });
     expect(onSave).not.toHaveBeenCalled();
     expect(screen.getByText("Choose the language of the title to save it.")).toBeInTheDocument();
@@ -77,32 +102,73 @@ describe("DraftTextField", () => {
   it("starts from the text saved, in the language last chosen for a deck's text when there is none", () => {
     localStorage.setItem("solid-memo:recentLanguages.deck", JSON.stringify(["sv"]));
     const onSave = vi.fn();
-    render(<DraftTextField id="title" label="Title" role="title" field="the title" text={undefined} multiline disabled={false} onSave={onSave} />);
-    fireEvent.input(screen.getByRole("textbox", { name: "Title" }), { target: { value: "Poddar" } });
+    render(
+      <DraftTextField
+        id="title"
+        label="Title"
+        role="title"
+        field="the title"
+        text={undefined}
+        multiline
+        disabled={false}
+        onSave={onSave}
+      />,
+    );
+    fireEvent.input(screen.getByRole("textbox", { name: "Title" }), {
+      target: { value: "Poddar" },
+    });
     expect(onSave).toHaveBeenCalledWith({ sv: "Poddar" });
   });
 });
 
 describe("DraftProseField", () => {
-  const preview = (text: Record<string, string>, markdown: boolean) => <DataProse class="course-theory" text={text} markdown={markdown} />;
+  const preview = (text: Record<string, string>, markdown: boolean) => (
+    <DataProse class="course-theory" text={text} markdown={markdown} />
+  );
 
   it("saves the prose and its format, previewing it as the course shows it", () => {
     const onSave = vi.fn();
     render(
-      <DraftProseField id="theory" label="Theory" role="theory" field="the theory" text={{ en: "Old" }} markdown={false} disabled={false} preview={preview} onSave={onSave} />,
+      <DraftProseField
+        id="theory"
+        label="Theory"
+        role="theory"
+        field="the theory"
+        text={{ en: "Old" }}
+        markdown={false}
+        disabled={false}
+        preview={preview}
+        onSave={onSave}
+      />,
     );
     expect(document.querySelector(".prose-preview .course-theory")).toHaveTextContent("Old");
-    fireEvent.input(screen.getByRole("textbox", { name: "Theory" }), { target: { value: "## New" } });
+    fireEvent.input(screen.getByRole("textbox", { name: "Theory" }), {
+      target: { value: "## New" },
+    });
     expect(onSave).toHaveBeenLastCalledWith({ en: "## New" }, false);
     fireEvent.click(screen.getByRole("checkbox", { name: "Format with Markdown" }));
     expect(onSave).toHaveBeenLastCalledWith({ en: "## New" }, true);
     // A heading shows as the app shows one: in bold.
-    expect(document.querySelector(".prose-preview .course-theory.md strong")).toHaveTextContent("New");
+    expect(document.querySelector(".prose-preview .course-theory.md strong")).toHaveTextContent(
+      "New",
+    );
   });
 
   it("switches the format without saving text whose language is not chosen", () => {
     const onSave = vi.fn();
-    render(<DraftProseField id="theory" label="Theory" role="theory" field="the theory" text={undefined} markdown disabled={false} preview={preview} onSave={onSave} />);
+    render(
+      <DraftProseField
+        id="theory"
+        label="Theory"
+        role="theory"
+        field="the theory"
+        text={undefined}
+        markdown
+        disabled={false}
+        preview={preview}
+        onSave={onSave}
+      />,
+    );
     expect(screen.getByText("Nothing to show yet.")).toBeInTheDocument();
     fireEvent.input(screen.getByRole("textbox", { name: "Theory" }), { target: { value: "Text" } });
     fireEvent.click(screen.getByRole("checkbox", { name: "Format with Markdown" }));
@@ -114,14 +180,18 @@ describe("DraftProseField", () => {
 describe("IdField", () => {
   it("says why an id cannot be a new subject's", () => {
     const onChange = vi.fn();
-    const { rerender } = render(<IdField id="new" draft={courseDraft()} value="ch-new" onChange={onChange} />);
+    const { rerender } = render(
+      <IdField id="new" draft={courseDraft()} value="ch-new" onChange={onChange} />,
+    );
     const field = screen.getByRole("textbox", { name: "Id" });
     expect(field).toHaveAttribute("aria-invalid", "false");
     expect(field).toHaveAccessibleDescription(/never changed once published/);
     fireEvent.input(field, { target: { value: "ch-pods" } });
     expect(onChange).toHaveBeenCalledWith("ch-pods");
     rerender(<IdField id="new" draft={courseDraft()} value="ch-pods" onChange={onChange} />);
-    expect(field).toHaveAccessibleDescription("This draft, or a release before it, already has this id.");
+    expect(field).toHaveAccessibleDescription(
+      "This draft, or a release before it, already has this id.",
+    );
     rerender(<IdField id="new" draft={courseDraft()} value="-x" onChange={onChange} />);
     expect(field).toHaveAttribute("aria-invalid", "true");
     expect(field).toHaveAccessibleDescription(/An id is letters A to Z/);

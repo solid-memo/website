@@ -14,7 +14,14 @@ import { MATURE_INTERVAL_DAYS } from "./statistics";
 /** Which texts of a card the search reads; "any" reads them all. */
 export type CardField = "any" | "front" | "back" | "note" | "label" | "distractor";
 
-export const CARD_FIELDS: readonly CardField[] = ["any", "front", "back", "note", "label", "distractor"];
+export const CARD_FIELDS: readonly CardField[] = [
+  "any",
+  "front",
+  "back",
+  "note",
+  "label",
+  "distractor",
+];
 
 /**
  * Where a card is: in use (live) or retired; and, for a card in use,
@@ -26,19 +33,50 @@ export const CARD_FIELDS: readonly CardField[] = ["any", "front", "back", "note"
  * leech was forgotten LEECH_LAPSES times or more, as the answer log
  * tells (domain/cardHistory.ts).
  */
-export type CardState = "live" | "retired" | "new" | "learning" | "young" | "mature" | "due" | "leech";
+export type CardState =
+  | "live"
+  | "retired"
+  | "new"
+  | "learning"
+  | "young"
+  | "mature"
+  | "due"
+  | "leech";
 
-export const CARD_STATES: readonly CardState[] = ["live", "retired", "new", "learning", "young", "mature", "due", "leech"];
+export const CARD_STATES: readonly CardState[] = [
+  "live",
+  "retired",
+  "new",
+  "learning",
+  "young",
+  "mature",
+  "due",
+  "leech",
+];
 
 /** What a card has: a picture on either side, distractors, Markdown text, or a note under either side. */
 export type CardFeature = "picture" | "distractors" | "markdown" | "notes";
 
-export const CARD_FEATURES: readonly CardFeature[] = ["picture", "distractors", "markdown", "notes"];
+export const CARD_FEATURES: readonly CardFeature[] = [
+  "picture",
+  "distractors",
+  "markdown",
+  "notes",
+];
 
 /** What the cards can be sorted by. */
 export type CardSort = "id" | "created" | "front" | "back" | "due" | "interval" | "ease" | "lapses";
 
-export const CARD_SORTS: readonly CardSort[] = ["id", "created", "front", "back", "due", "interval", "ease", "lapses"];
+export const CARD_SORTS: readonly CardSort[] = [
+  "id",
+  "created",
+  "front",
+  "back",
+  "due",
+  "interval",
+  "ease",
+  "lapses",
+];
 
 /** How many cards a page shows. */
 export const CARD_PAGE_SIZES = [10, 50, 200] as const;
@@ -91,7 +129,9 @@ export interface CardRow {
 export function queryFromParams(params: URLSearchParams): CardQuery {
   const pick = <T extends string>(name: string, values: readonly T[]): T | undefined => {
     const value = params.get(name);
-    return value !== null && (values as readonly string[]).includes(value) ? (value as T) : undefined;
+    return value !== null && (values as readonly string[]).includes(value)
+      ? (value as T)
+      : undefined;
   };
   const lang = params.get("lang");
   const tag = lang === null || lang === UNSTATED ? lang : canonicalTag(lang);
@@ -106,9 +146,13 @@ export function queryFromParams(params: URLSearchParams): CardQuery {
     ...(tag === null ? {} : { lang: tag }),
     ...(state === undefined ? {} : { state }),
     ...(has === undefined ? {} : { has }),
-    ...(sort === undefined ? {} : { sort: { key: sort, descending: params.get("order") === "desc" } }),
+    ...(sort === undefined
+      ? {}
+      : { sort: { key: sort, descending: params.get("order") === "desc" } }),
     page: Number.isInteger(page) && page > 1 ? page : 1,
-    size: (CARD_PAGE_SIZES as readonly number[]).includes(size) ? (size as CardPageSize) : DEFAULT_CARD_QUERY.size,
+    size: (CARD_PAGE_SIZES as readonly number[]).includes(size)
+      ? (size as CardPageSize)
+      : DEFAULT_CARD_QUERY.size,
   };
 }
 
@@ -156,10 +200,15 @@ function fieldTexts(card: Card, field: CardField): CardText[] {
     case "label":
       return textsOf(card.backLabel, markdown);
     case "distractor":
-      return (card.distractors ?? []).flatMap((d) => [...textsOf(d.text, markdown), ...textsOf(d.note, markdown)]);
+      return (card.distractors ?? []).flatMap((d) => [
+        ...textsOf(d.text, markdown),
+        ...textsOf(d.note, markdown),
+      ]);
     case "any":
       return [
-        ...(["front", "back", "note", "label", "distractor"] as const).flatMap((part) => fieldTexts(card, part)),
+        ...(["front", "back", "note", "label", "distractor"] as const).flatMap((part) =>
+          fieldTexts(card, part),
+        ),
         ...textsOf(card.frontImageDescription, false),
         ...textsOf(card.backImageDescription, false),
       ];
@@ -168,7 +217,9 @@ function fieldTexts(card: Card, field: CardField): CardText[] {
 
 /** The languages of the cards' sides, as the language filter offers them: their tags in order, then UNSTATED when a side's language is not stated. */
 export function cardLanguages(cards: readonly Card[]): string[] {
-  const tags = new Set(cards.flatMap((card) => [...Object.keys(card.front), ...Object.keys(card.back)]));
+  const tags = new Set(
+    cards.flatMap((card) => [...Object.keys(card.front), ...Object.keys(card.back)]),
+  );
   const stated = [...tags].filter((tag) => tag !== "").sort();
   return tags.has("") ? [...stated, UNSTATED] : stated;
 }
@@ -213,7 +264,9 @@ function inState(
     case "learning":
       return states.some((s) => s !== undefined && s.repetitions === 0);
     case "young":
-      return states.some((s) => s !== undefined && s.repetitions > 0 && s.intervalDays < MATURE_INTERVAL_DAYS);
+      return states.some(
+        (s) => s !== undefined && s.repetitions > 0 && s.intervalDays < MATURE_INTERVAL_DAYS,
+      );
     case "mature":
       return states.some((s) => s !== undefined && s.intervalDays >= MATURE_INTERVAL_DAYS);
     case "due":
@@ -224,7 +277,10 @@ function inState(
 }
 
 function least<T>(values: readonly T[], compare: (a: T, b: T) => number): T | undefined {
-  return values.reduce<T | undefined>((low, value) => (low === undefined || compare(value, low) < 0 ? value : low), undefined);
+  return values.reduce<T | undefined>(
+    (low, value) => (low === undefined || compare(value, low) < 0 ? value : low),
+    undefined,
+  );
 }
 
 /**
@@ -261,17 +317,31 @@ export function queryCards(
   const rows: CardRow[] = [];
   for (const card of cards) {
     if (query.has !== undefined && !hasFeature(card, query.has)) continue;
-    const prompts = directions.map((direction) => stateOf.get(reviewKeyOf({ cardId: card.id, direction })));
+    const prompts = directions.map((direction) =>
+      stateOf.get(reviewKeyOf({ cardId: card.id, direction })),
+    );
     const forgotten = lapses === undefined ? undefined : (lapses.get(card.url) ?? 0);
-    if (query.state !== undefined && !inState(card, query.state, prompts, today, forgotten)) continue;
+    if (query.state !== undefined && !inState(card, query.state, prompts, today, forgotten))
+      continue;
     if (wanted !== "" || query.lang !== undefined) {
-      const texts = fieldTexts(card, query.field).filter((text) => query.lang === undefined || inLanguage(text.tag, query.lang));
+      const texts = fieldTexts(card, query.field).filter(
+        (text) => query.lang === undefined || inLanguage(text.tag, query.lang),
+      );
       if (!texts.some((text) => wanted === "" || folded(readable(text)).includes(wanted))) continue;
     }
     const states = prompts.filter((state) => state !== undefined);
-    const due = least(states.map((s) => s.due), (a, b) => a.localeCompare(b));
-    const intervalDays = least(states.map((s) => s.intervalDays), (a, b) => a - b);
-    const easeFactor = least(states.map((s) => s.easeFactor), (a, b) => a - b);
+    const due = least(
+      states.map((s) => s.due),
+      (a, b) => a.localeCompare(b),
+    );
+    const intervalDays = least(
+      states.map((s) => s.intervalDays),
+      (a, b) => a - b,
+    );
+    const easeFactor = least(
+      states.map((s) => s.easeFactor),
+      (a, b) => a - b,
+    );
     rows.push({
       card,
       states,
@@ -316,7 +386,8 @@ export function queryCards(
     .sort((a, b) => {
       const [x, y] = [a.key, b.key];
       // A card without the key (never reviewed, or a picture only) comes last, either way.
-      if (x === undefined || y === undefined) return x === y ? a.index - b.index : x === undefined ? 1 : -1;
+      if (x === undefined || y === undefined)
+        return x === y ? a.index - b.index : x === undefined ? 1 : -1;
       return (sort.descending ? compare(y, x) : compare(x, y)) || a.index - b.index;
     })
     .map(({ row }) => row);

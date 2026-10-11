@@ -40,9 +40,18 @@ const PICTURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 function page(): UseCases {
   const writeFence = createWriteFence(fetch);
   const podFetch = writeFence.fetch;
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
   const checkWrite = shapeValidator.checkSubjects;
-  const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
+  const deps = {
+    fetch: podFetch,
+    checkWrite,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  };
   return createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -70,8 +79,12 @@ async function status(url: string): Promise<number> {
 
 /** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
 async function triples(url: string): Promise<string> {
-  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
-  return new Writer({ format: "N-Triples" }).quadsToString(new Parser({ baseIRI: url }).parse(turtle));
+  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) =>
+    response.text(),
+  );
+  return new Writer({ format: "N-Triples" }).quadsToString(
+    new Parser({ baseIRI: url }).parse(turtle),
+  );
 }
 
 /** Access rules letting anyone read, write and control the resource (and, for a container, what is in it): the tests' fetch must keep its access. */
@@ -90,8 +103,14 @@ async function seed(server: string) {
   const base = new URL(`foreign-${crypto.randomUUID()}/`, server).href;
   const webId = `${base}profile/card#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
-  await put(`${base}profile/card`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
+  await put(
+    `${base}profile/card`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
   const useCases = page();
   const session = { webId };
   const instance: Instance = await useCases.createInstance(session, {
@@ -100,7 +119,10 @@ async function seed(server: string) {
     registrationTarget: "private",
   });
   const capitals = await useCases.createDeck(instance.url, { en: "Capitals" });
-  const card = await useCases.addCard(capitals, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
+  const card = await useCases.addCard(capitals, {
+    front: { en: "Sweden" },
+    back: { en: "Stockholm" },
+  });
   await put(
     capitals.reviewsDocumentUrl,
     `@prefix sm: <${SM}> . @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -117,7 +139,10 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
   it("is kept when an instance is deleted, with the folder holding it, while everything Solid Memo wrote goes", async () => {
     const { session, typeIndex, instance, decks, month, useCases } = await seed(server);
     const [capitals, rivers] = decks as [(typeof decks)[0], (typeof decks)[0]];
-    const foreign = [`${instance.url}attachments/picture.png`, `${instance.url}decks/their-notes.ttl`];
+    const foreign = [
+      `${instance.url}attachments/picture.png`,
+      `${instance.url}decks/their-notes.ttl`,
+    ];
     await put(foreign[0]!, new Blob([PICTURE]), "image/png");
     await put(foreign[1]!, `<#note> <https://other.example/says> "mine" .`);
     // A deck's cards shared: its access rules are Solid Memo's to delete with it.
@@ -125,12 +150,19 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     await put(cardsAcl, openTo(capitals.cardsDocumentUrl, false));
     expect(await status(cardsAcl)).toBe(200);
 
-    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: instance.url, keptReleases: false });
+    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
+      keptFolder: instance.url,
+      keptReleases: false,
+    });
 
     // Another app's files, byte for byte, and the containers on their path.
     expect(new Uint8Array(await (await fetch(foreign[0]!)).arrayBuffer())).toEqual(PICTURE);
     expect(await triples(foreign[1]!)).toContain(`"mine"`);
-    for (const container of [instance.url, `${instance.url}attachments/`, `${instance.url}decks/`]) {
+    for (const container of [
+      instance.url,
+      `${instance.url}attachments/`,
+      `${instance.url}decks/`,
+    ]) {
       expect(await status(container), container).toBe(200);
     }
     // Solid Memo's documents gone, their access rules with them, and the containers it alone used.
@@ -158,7 +190,10 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     const folderAcl = await aclOf(instance.url);
     await put(folderAcl, openTo(instance.url, true));
 
-    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: null, keptReleases: false });
+    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
+      keptFolder: null,
+      keptReleases: false,
+    });
 
     expect(await status(instance.url)).toBe(404);
     expect(await status(folderAcl)).toBe(404);
@@ -179,7 +214,11 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     const rivers = await useCases.renameDeck(decks[1]!, { en: "Rivers of Europe" });
     expect(await triples(catalog)).toContain(listing);
     const lakes = await useCases.createDeck(instance.url, { en: "Lakes" });
-    await useCases.editDeckTree(instance.url, { kind: "move", node: lakes.url, to: { parent: null, after: null } });
+    await useCases.editDeckTree(instance.url, {
+      kind: "move",
+      node: lakes.url,
+      to: { parent: null, after: null },
+    });
     expect(await triples(catalog)).toContain(listing);
     await useCases.removeDeck(rivers);
     const after = await triples(catalog);
@@ -197,8 +236,14 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     // A dataset another app listed without the title and description DCAT-AP asks for, two it listed that no
     // DCAT class or IRI makes a dcat:Dataset, and a nameless agent of its own beside a deck's cards.
     for (const [url, triples] of [
-      [catalog, `<${catalog}#catalog> <${DCAT_DATASET}> <${catalog}#recipes> . <${catalog}#recipes> a <http://www.w3.org/ns/dcat#Dataset> .`],
-      [catalog, `<${catalog}#catalog> <${DCAT_DATASET}> <${catalog}#menu>, _:theirs . <${catalog}#menu> a <https://schema.org/Dataset> . _:theirs a <http://www.w3.org/ns/dcat#Dataset> .`],
+      [
+        catalog,
+        `<${catalog}#catalog> <${DCAT_DATASET}> <${catalog}#recipes> . <${catalog}#recipes> a <http://www.w3.org/ns/dcat#Dataset> .`,
+      ],
+      [
+        catalog,
+        `<${catalog}#catalog> <${DCAT_DATASET}> <${catalog}#menu>, _:theirs . <${catalog}#menu> a <https://schema.org/Dataset> . _:theirs a <http://www.w3.org/ns/dcat#Dataset> .`,
+      ],
       [cards, `<${cards}#their-agent> a <http://xmlns.com/foaf/0.1/Agent> .`],
     ] as const) {
       const patch = await fetch(url, {
@@ -212,13 +257,25 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     const report = await page().validateInstance(instance.url);
     expect(report.conforms).toBe(true);
     const subjects = report.documents.flatMap((document) => document.subjects);
-    const warned = { foreign: true, violations: expect.arrayContaining([expect.objectContaining({ severity: "warning" })]) };
-    expect(subjects.find((subject) => subject.url === `${catalog}#recipes`)).toMatchObject({ status: "profiled", ...warned });
-    expect(subjects.find((subject) => subject.url === `${cards}#their-agent`)).toMatchObject({ status: "checked", shape: "agent", ...warned });
+    const warned = {
+      foreign: true,
+      violations: expect.arrayContaining([expect.objectContaining({ severity: "warning" })]),
+    };
+    expect(subjects.find((subject) => subject.url === `${catalog}#recipes`)).toMatchObject({
+      status: "profiled",
+      ...warned,
+    });
+    expect(subjects.find((subject) => subject.url === `${cards}#their-agent`)).toMatchObject({
+      status: "checked",
+      shape: "agent",
+      ...warned,
+    });
     // The catalog only has warnings about its links to them.
     expect(subjects.find((subject) => subject.url === `${catalog}#catalog`)).toMatchObject({
       status: "checked",
-      violations: expect.arrayContaining([expect.objectContaining({ path: DCAT_DATASET, severity: "warning" })]),
+      violations: expect.arrayContaining([
+        expect.objectContaining({ path: DCAT_DATASET, severity: "warning" }),
+      ]),
     });
     expect(setAsideDecks(report, decks)).toEqual(new Set());
     expect(arrangementSetAside(report)).toBe(false);
@@ -249,18 +306,36 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     });
     expect(patch.ok, `PATCH ${reviews}: ${patch.status}`).toBe(true);
 
-    const reviewed = await useCases.recordReview(instance.url, capitals, { card: card!, direction: "back-to-front" }, 4, new Date());
+    const reviewed = await useCases.recordReview(
+      instance.url,
+      capitals,
+      { card: card!, direction: "back-to-front" },
+      4,
+      new Date(),
+    );
 
-    expect(reviewed).toMatchObject({ cardId: card!.id, direction: "back-to-front", repetitions: 2 });
+    expect(reviewed).toMatchObject({
+      cardId: card!.id,
+      direction: "back-to-front",
+      repetitions: 2,
+    });
     const after = await triples(reviews);
-    expect(after).toContain(`<${reviews}#theirs> <${SM}repetitions> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
+    expect(after).toContain(
+      `<${reviews}#theirs> <${SM}repetitions> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+    );
     expect(after).toContain(`<${reviews}#theirs> <${SM}scheduler> <${SM}sm2> .`);
     // Another scheduler's state, at the subject Solid Memo's naming rule gives, untouched.
-    expect(after).toContain(`<${reviews}#${card!.id}@back-to-front> <https://fsrs.example/ns#stability>`);
+    expect(after).toContain(
+      `<${reviews}#${card!.id}@back-to-front> <https://fsrs.example/ns#stability>`,
+    );
     expect(after).not.toContain(`<${reviews}#${card!.id}@back-to-front> <${SM}easeFactor>`);
     const report = await page().validateInstance(instance.url);
     expect(report.conforms).toBe(true);
-    expect(report.documents.flatMap((document) => document.subjects).find((subject) => subject.url === `${reviews}#${card!.id}@back-to-front`)).toMatchObject({
+    expect(
+      report.documents
+        .flatMap((document) => document.subjects)
+        .find((subject) => subject.url === `${reviews}#${card!.id}@back-to-front`),
+    ).toMatchObject({
       foreign: true,
     });
   }, 60_000);

@@ -69,7 +69,11 @@ import {
 } from "@solid-memo/domain/deckUpgrade";
 import { tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
-import { unlikeRelease, withStatedLanguages, type StatedLanguages } from "@solid-memo/domain/deckLanguages";
+import {
+  unlikeRelease,
+  withStatedLanguages,
+  type StatedLanguages,
+} from "@solid-memo/domain/deckLanguages";
 import {
   planCardEdit,
   planUndo,
@@ -95,7 +99,11 @@ import {
   metaUrlOf,
   preferencesUrlOf,
 } from "@solid-memo/domain/instanceLayout";
-import { summarize, type DocumentReport, type ValidationReport } from "@solid-memo/domain/validation";
+import {
+  summarize,
+  type DocumentReport,
+  type ValidationReport,
+} from "@solid-memo/domain/validation";
 import { deckHealth, type DeckHealth, type DeckTextCheck } from "@solid-memo/domain/deckHealth";
 import type { MarkdownFinding } from "@solid-memo/domain/release/problems";
 import {
@@ -121,7 +129,11 @@ import {
   type ReviewState,
 } from "@solid-memo/domain/review";
 import { isStudyDay, rescheduleStates, resetStates } from "@solid-memo/domain/reviewStateEdits";
-import { planCardTransfer, type CardTransferPlan, type TransferOptions } from "@solid-memo/domain/cardTransfer";
+import {
+  planCardTransfer,
+  type CardTransferPlan,
+  type TransferOptions,
+} from "@solid-memo/domain/cardTransfer";
 import {
   DECK_FILE_ACCEPT,
   DECK_FILE_TYPES,
@@ -150,7 +162,12 @@ import {
   type CourseProgress,
 } from "@solid-memo/domain/course";
 import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
-import { cardAnswers, deckAnswers, lapseIndex, type LapseIndex } from "@solid-memo/domain/cardHistory";
+import {
+  cardAnswers,
+  deckAnswers,
+  lapseIndex,
+  type LapseIndex,
+} from "@solid-memo/domain/cardHistory";
 import {
   easeHistogram,
   FORECAST_DAYS,
@@ -222,7 +239,10 @@ import type {
   ReleasePublisher,
 } from "./ports";
 import { createReleaseDraftUseCases, type ReleaseDraftUseCases } from "./releaseDrafts";
-import { createReleasePublishingUseCases, type ReleasePublishingUseCases } from "./releasePublishing";
+import {
+  createReleasePublishingUseCases,
+  type ReleasePublishingUseCases,
+} from "./releasePublishing";
 import { startTrial, type TrialOpening, type TrialSandbox } from "./trial";
 import { draftContainerOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
@@ -340,7 +360,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * plain text and check, which the caller passes in) finds in its text
    * written in Markdown. Writes nothing but the digest's receipts.
    */
-  checkDeck<F extends MarkdownFinding>(instanceUrl: string, deck: Deck, text: DeckTextCheck<F>): Promise<DeckHealth<F>>;
+  checkDeck<F extends MarkdownFinding>(
+    instanceUrl: string,
+    deck: Deck,
+    text: DeckTextCheck<F>,
+  ): Promise<DeckHealth<F>>;
   /** What the app can repair of what a check found, and what it leaves to the user. */
   planRepair(report: ValidationReport): RepairPlan;
   /** Apply repairs (the planned ones, or removals the user chose). */
@@ -584,7 +608,12 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * then the deck's schedule in the digest is brought up to date. How
    * many cards were forgotten.
    */
-  resetCards(instanceUrl: string, deck: Deck, ids: readonly string[], direction?: StudyDirection): Promise<number>;
+  resetCards(
+    instanceUrl: string,
+    deck: Deck,
+    ids: readonly string[],
+    direction?: StudyDirection,
+  ): Promise<number>;
   /**
    * Set the cards of these ids due on `due` (a study day), in one
    * direction or (absent) in both, their snapshot for resetting the
@@ -650,7 +679,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * Then the deck's schedule in the digest is brought up to date. The
    * deck as written.
    */
-  importDeckFile(instanceUrl: string, file: DeckFile, options: { withProgress: boolean }): Promise<Deck>;
+  importDeckFile(
+    instanceUrl: string,
+    file: DeckFile,
+    options: { withProgress: boolean },
+  ): Promise<Deck>;
   /**
    * What bringing the instance's cards up to this app's format would
    * touch — reads every deck's cards, writes nothing. Empty when there is
@@ -708,23 +741,20 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * the instance has no catalog. The catalog as written.
    */
   describeCatalog(instanceUrl: string, about: CatalogAbout): Promise<Catalog>;
-  savePreferences(
-    instanceUrl: string,
-    preferences: StudyPreferences,
-  ): Promise<void>;
+  savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
   /** Today's due and new cards for a deck, respecting the daily caps. */
-  getStudyQueue(
-    instanceUrl: string,
-    deck: Deck,
-    now: Date,
-  ): Promise<StudyQueue>;
+  getStudyQueue(instanceUrl: string, deck: Deck, now: Date): Promise<StudyQueue>;
   /**
    * How many prompts today's queue would hold, as getStudyQueue counts
    * them; from the deck's schedule in the instance's digest when neither
    * of its documents changed since, else from its documents (and the
    * digest is brought up to date).
    */
-  getStudyCounts(instanceUrl: string, deck: Deck, now: Date): Promise<{ dueCount: number; newCount: number }>;
+  getStudyCounts(
+    instanceUrl: string,
+    deck: Deck,
+    now: Date,
+  ): Promise<{ dueCount: number; newCount: number }>;
   /** Keep the deck's schedule in the digest, as of now: when a study session ends. */
   refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void>;
   /**
@@ -749,7 +779,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * months (12 by default), up to now: of every deck, or of one. Answers
    * still waiting to be added to the log are added first.
    */
-  getStatistics(instanceUrl: string, now: Date, options?: { months?: number; deckUrl?: string }): Promise<Statistics>;
+  getStatistics(
+    instanceUrl: string,
+    now: Date,
+    options?: { months?: number; deckUrl?: string },
+  ): Promise<Statistics>;
   /**
    * Every answer of the instance's log, of every month, answers still
    * waiting to be added to it added first. Each month's document is read
@@ -767,7 +801,12 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * are spread; and its lapses and leeches, from the answer log. Writes
    * nothing to the deck.
    */
-  deckInsight(instanceUrl: string, deck: Deck, now: Date, prefs: StudyPreferences): Promise<DeckInsight>;
+  deckInsight(
+    instanceUrl: string,
+    deck: Deck,
+    now: Date,
+    prefs: StudyPreferences,
+  ): Promise<DeckInsight>;
   /** The answers of one card of the deck (by its id), newest first, from the answer log. */
   cardAnswers(instanceUrl: string, deck: Deck, cardId: string): Promise<Answer[]>;
   /**
@@ -777,7 +816,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * instance, or of the one given. Reads each deck's cards and review
    * states, and keeps its schedule in the digest while at it.
    */
-  getCardProgress(instanceUrl: string, now: Date, options?: { deck?: Deck }): Promise<CardProgressReport>;
+  getCardProgress(
+    instanceUrl: string,
+    now: Date,
+    options?: { deck?: Deck },
+  ): Promise<CardProgressReport>;
   /**
    * Start a course (a library deck whose release is a course, see
    * docs/courses.md): the instance's deck of it, a copy of the current
@@ -946,7 +989,10 @@ export interface Dependencies {
  * the Studio) thus never write to what the other is moving. Tells
  * whether a move of the URL runs elsewhere.
  */
-function fenceMovesElsewhere(journal: UpdateJournal, fence: WriteFence): (sourceUrl: string) => boolean {
+function fenceMovesElsewhere(
+  journal: UpdateJournal,
+  fence: WriteFence,
+): (sourceUrl: string) => boolean {
   const held = new Map<string, () => void>();
   journal.watch((sourceUrl, staging) => {
     held.get(sourceUrl)?.();
@@ -976,7 +1022,9 @@ function changedElsewhere(error: unknown): boolean {
  * since it was read, or was made since it was read as absent (a 412).
  */
 function cardsChangedElsewhere(error: unknown): boolean {
-  return changedElsewhere(error) || (error instanceof AppError && error.code === "createdElsewhere");
+  return (
+    changedElsewhere(error) || (error instanceof AppError && error.code === "createdElsewhere")
+  );
 }
 
 /**
@@ -1027,7 +1075,10 @@ const NO_JOURNAL: UpdateJournal = {
   watch: () => undefined,
 };
 const NO_FENCE: WriteFence = { hold: () => () => undefined };
-const NO_DIGESTS: DigestRepository = { readDigest: async () => null, updateDigest: async () => undefined };
+const NO_DIGESTS: DigestRepository = {
+  readDigest: async () => null,
+  updateDigest: async () => undefined,
+};
 const nothing = async () => undefined;
 const none = async (): Promise<never[]> => [];
 const NO_ANSWER_LOG: AnswerLog = {
@@ -1135,7 +1186,8 @@ function stepReporter<Step extends string>(
   let step = first;
   let done = 0;
   let part: StepPart | undefined;
-  const report = () => onProgress({ step, done, total, ...(part === undefined ? {} : { part: { ...part } }) });
+  const report = () =>
+    onProgress({ step, done, total, ...(part === undefined ? {} : { part: { ...part } }) });
   const enter = (next: Step, parts: number | undefined) => {
     step = next;
     part = parts === undefined ? undefined : { done: 0, total: parts };
@@ -1242,14 +1294,21 @@ export function createUseCases({
       cards(),
     ]);
     const betweenUrls = series.releases
-      .filter((release) => Number(release.version) > Number(from.version) && Number(release.version) < Number(to.version))
+      .filter(
+        (release) =>
+          Number(release.version) > Number(from.version) &&
+          Number(release.version) < Number(to.version),
+      )
       .map((release) => release.url);
     if (fromLink === true) await Promise.all([series.url, ...betweenUrls].map(checkLinkedRelease));
     const between = await Promise.all(betweenUrls.map((url) => deckLibrary.fetchLibraryDeck(url)));
     // A course's outline stays in its release: a newer one may change only that.
     const outlines =
       from.isCourse === true && to.isCourse === true
-        ? await Promise.all([deckLibrary.fetchCourseOutline(from.url), deckLibrary.fetchCourseOutline(to.url)])
+        ? await Promise.all([
+            deckLibrary.fetchCourseOutline(from.url),
+            deckLibrary.fetchCourseOutline(to.url),
+          ])
         : null;
     return planLibraryUpgrade({
       deck,
@@ -1270,7 +1329,9 @@ export function createUseCases({
   }
 
   async function startCourse(instanceUrl: string, course: LibraryDeck): Promise<Deck> {
-    const started = (await deckRepository.listDecks(instanceUrl)).find((deck) => isCopyOf(deck, course));
+    const started = (await deckRepository.listDecks(instanceUrl)).find((deck) =>
+      isCopyOf(deck, course),
+    );
     if (started !== undefined) return started;
     const release = await deckLibrary.fetchLibraryDeck(course.url);
     return deckRepository.importDeck(instanceUrl, { ...release, cards: [] });
@@ -1282,7 +1343,9 @@ export function createUseCases({
    * otherwise.
    */
   async function seriesOf(deck: Deck): Promise<{ series: LibraryDeck | null; fromLink?: true }> {
-    const indexed = (await deckLibrary.listLibraryDecks()).find((libraryDeck) => isCopyOf(deck, libraryDeck));
+    const indexed = (await deckLibrary.listLibraryDecks()).find((libraryDeck) =>
+      isCopyOf(deck, libraryDeck),
+    );
     if (indexed !== undefined) return { series: indexed };
     return linkedSeries(deck.sourceUrl!, new Map()).then(
       (found) => (found.complete ? { series: found.series, fromLink: true } : { series: null }),
@@ -1298,13 +1361,17 @@ export function createUseCases({
   async function checkLinkedRelease(url: string): Promise<void> {
     const report = await shapeValidator.validateDocument(url, "library");
     const problems = report.subjects.flatMap((subject) =>
-      subject.status === "checked" ? subject.violations.filter((violation) => violation.severity === "violation") : [],
+      subject.status === "checked"
+        ? subject.violations.filter((violation) => violation.severity === "violation")
+        : [],
     );
     if (problems.length > 0) {
       throw new AppError("releaseNotConforming", {
         host: releaseHost(url),
         count: problems.length,
-        problems: problems.map((problem) => `${problem.path ?? ""} ${shown(problem.message)}`).join("\n"),
+        problems: problems
+          .map((problem) => `${problem.path ?? ""} ${shown(problem.message)}`)
+          .join("\n"),
       });
     }
   }
@@ -1340,10 +1407,19 @@ export function createUseCases({
   }
 
   /** A copy whose series the library's index does not list, as a release added from a link; as it was when its release cannot be read. */
-  async function linkedCopy(copy: LibraryCopy, reads: Map<string, Promise<LibraryDeck>>): Promise<LibraryCopy> {
+  async function linkedCopy(
+    copy: LibraryCopy,
+    reads: Map<string, Promise<LibraryDeck>>,
+  ): Promise<LibraryCopy> {
     try {
       const { copied, series, complete } = await linkedSeries(copy.deck.sourceUrl!, reads);
-      return { deck: copy.deck, series, version: copied.version, newer: complete ? offersNewerRelease(copy.deck, series) : "unknown", fromLink: true };
+      return {
+        deck: copy.deck,
+        series,
+        version: copied.version,
+        newer: complete ? offersNewerRelease(copy.deck, series) : "unknown",
+        fromLink: true,
+      };
     } catch {
       return copy;
     }
@@ -1363,7 +1439,9 @@ export function createUseCases({
   }
 
   function getPreferences(instanceUrl: string): Promise<StudyPreferences> {
-    return readStoredPreferences(instanceUrl).then((stored) => stored?.preferences ?? DEFAULT_PREFERENCES);
+    return readStoredPreferences(instanceUrl).then(
+      (stored) => stored?.preferences ?? DEFAULT_PREFERENCES,
+    );
   }
 
   /** Each instance's theme writes, one after another, so a later choice is never overwritten by an earlier. */
@@ -1427,23 +1505,36 @@ export function createUseCases({
       else item.writes.push(write);
     };
     if (plan.instanceOutdated) {
-      add({ url: metaUrlOf(instanceUrl), holds: "instance" }, () => instanceRepository.upgradeMeta(instanceUrl));
+      add({ url: metaUrlOf(instanceUrl), holds: "instance" }, () =>
+        instanceRepository.upgradeMeta(instanceUrl),
+      );
     }
     if (plan.preferencesOutdated) {
-      add({ url: preferencesUrlOf(instanceUrl), holds: "preferences" }, () => preferencesRepository.upgradePreferences(instanceUrl));
+      add({ url: preferencesUrlOf(instanceUrl), holds: "preferences" }, () =>
+        preferencesRepository.upgradePreferences(instanceUrl),
+      );
     }
     for (const { deck, cardCount, reviewCount } of plan.decks) {
       if (cardCount > 0) {
-        add({ url: deck.cardsDocumentUrl, holds: "cards", deck: deck.title }, () => deckRepository.upgradeCards(deck));
+        add({ url: deck.cardsDocumentUrl, holds: "cards", deck: deck.title }, () =>
+          deckRepository.upgradeCards(deck),
+        );
       }
       if (reviewCount > 0) {
-        add({ url: deck.reviewsDocumentUrl, holds: "reviews", deck: deck.title }, () => reviewStateRepository.upgradeReviewStates(deck));
+        add({ url: deck.reviewsDocumentUrl, holds: "reviews", deck: deck.title }, () =>
+          reviewStateRepository.upgradeReviewStates(deck),
+        );
       }
     }
     if (plan.catalogMissing || plan.deckCount > 0) {
       add({ url: catalogUrlOf(instanceUrl), holds: "catalog" }, async () => {
         // A catalog for an instance that has none, named as its record names it, published by the signed-in user.
-        const made = plan.catalogMissing ? await catalogOf(session, (await instanceRepository.readMeta(instanceUrl))?.name ?? instanceUrl) : null;
+        const made = plan.catalogMissing
+          ? await catalogOf(
+              session,
+              (await instanceRepository.readMeta(instanceUrl))?.name ?? instanceUrl,
+            )
+          : null;
         return deckRepository.upgradeDecks(instanceUrl, made);
       });
     }
@@ -1500,7 +1591,11 @@ export function createUseCases({
     });
   }
 
-  function noting(document: string, version: string, facts: Pick<DocumentReceipt, "conformedTo" | "latestFormat">) {
+  function noting(
+    document: string,
+    version: string,
+    facts: Pick<DocumentReceipt, "conformedTo" | "latestFormat">,
+  ) {
     return (digest: InstanceDigest) => withReceipt(digest, document, version, facts);
   }
 
@@ -1525,7 +1620,11 @@ export function createUseCases({
       const changes = plan(read.value, reviews);
       if (changes.save.length === 0 && changes.remove.length === 0) return changes;
       try {
-        await deckRepository.applyCardChanges(deck, { save: changes.save, remove: changes.remove }, wholeAt(read.version));
+        await deckRepository.applyCardChanges(
+          deck,
+          { save: changes.save, remove: changes.remove },
+          wholeAt(read.version),
+        );
       } catch (error) {
         if (cardsChangedElsewhere(error) && attempt < CARD_EDIT_ATTEMPTS) continue;
         throw error;
@@ -1533,7 +1632,11 @@ export function createUseCases({
       // A card joins before its state, and leaves before it: no state is ever without its card for long.
       if (changes.reviewSaves.length > 0 || changes.reviewRemovals.length > 0) {
         // A card removed takes every state it has with it, as removing a card does; another scheduler's stays.
-        await reviewStateRepository.applyReviewChanges(deck, { save: changes.reviewSaves, remove: changes.reviewRemovals, every: true });
+        await reviewStateRepository.applyReviewChanges(deck, {
+          save: changes.reviewSaves,
+          remove: changes.reviewRemovals,
+          every: true,
+        });
       }
       // The edit is made: a digest left behind is brought up to date by the next deck list.
       await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
@@ -1586,18 +1689,34 @@ export function createUseCases({
     );
     // The target first: a move stopped here leaves the cards in both decks, never in neither.
     if (plan.target.save.length > 0) {
-      await deckRepository.applyCardChanges(to, { save: plan.target.save, remove: [] }, wholeAt(targetCards.version));
+      await deckRepository.applyCardChanges(
+        to,
+        { save: plan.target.save, remove: [] },
+        wholeAt(targetCards.version),
+      );
     }
     if (plan.target.reviewSaves.length > 0 || plan.target.reviewRemovals.length > 0) {
-      await reviewStateRepository.applyReviewChanges(to, { save: plan.target.reviewSaves, remove: plan.target.reviewRemovals, every: true });
+      await reviewStateRepository.applyReviewChanges(to, {
+        save: plan.target.reviewSaves,
+        remove: plan.target.reviewRemovals,
+        every: true,
+      });
     }
     // The source's states before its cards: a move stopped between leaves the cards in the
     // source without progress, which the target has, and making it again finishes it.
     if (plan.source.reviewRemovals.length > 0) {
-      await reviewStateRepository.applyReviewChanges(from, { save: [], remove: plan.source.reviewRemovals, every: true });
+      await reviewStateRepository.applyReviewChanges(from, {
+        save: [],
+        remove: plan.source.reviewRemovals,
+        every: true,
+      });
     }
     if (plan.source.remove.length > 0) {
-      await deckRepository.applyCardChanges(from, { save: [], remove: plan.source.remove }, wholeAt(sourceCards.version));
+      await deckRepository.applyCardChanges(
+        from,
+        { save: [], remove: plan.source.remove },
+        wholeAt(sourceCards.version),
+      );
     }
     return plan;
   }
@@ -1613,8 +1732,15 @@ export function createUseCases({
     noteSchedule(instanceUrl, deck, cards, reviews, prefs.dayBoundaryHour, now());
     // The session changed the reviews document: check it now (it is small), not at the next visit.
     const checked = await shapeValidator.validateDocumentSince(deck.reviewsDocumentUrl, undefined);
-    if (!checked.unchanged && checked.version !== null && summarize(instanceUrl, [checked.value]).conforms) {
-      remember(instanceUrl, noting(deck.reviewsDocumentUrl, checked.version, { conformedTo: ruleset }));
+    if (
+      !checked.unchanged &&
+      checked.version !== null &&
+      summarize(instanceUrl, [checked.value]).conforms
+    ) {
+      remember(
+        instanceUrl,
+        noting(deck.reviewsDocumentUrl, checked.version, { conformedTo: ruleset }),
+      );
     }
   }
 
@@ -1627,15 +1753,22 @@ export function createUseCases({
       reviewStateRepository.readReviewStatesSince(deck, kept?.reviewsVersion),
     ]);
     if (kept !== undefined && cardsSince.unchanged && reviewsSince.unchanged) {
-      const counts = studyCountsOf(kept.schedule, { direction: deck.direction, prefs: studyPrefs, now });
+      const counts = studyCountsOf(kept.schedule, {
+        direction: deck.direction,
+        prefs: studyPrefs,
+        now,
+      });
       if (counts !== null) return counts;
     }
     const [cards, reviews] = await Promise.all([
       cardsSince.unchanged ? deckRepository.readCardsSince(deck, undefined) : cardsSince,
-      reviewsSince.unchanged ? reviewStateRepository.readReviewStatesSince(deck, undefined) : reviewsSince,
+      reviewsSince.unchanged
+        ? reviewStateRepository.readReviewStatesSince(deck, undefined)
+        : reviewsSince,
     ]);
     // A read without a version to compare is never "unchanged".
-    if (cards.unchanged || reviews.unchanged) throw new Error("A read without a version to compare came back unchanged.");
+    if (cards.unchanged || reviews.unchanged)
+      throw new Error("A read without a version to compare came back unchanged.");
     noteSchedule(instanceUrl, deck, cards, reviews, prefs.dayBoundaryHour, now);
     const queue = buildStudyQueue({
       cards: cards.value,
@@ -1661,7 +1794,13 @@ export function createUseCases({
       deck,
       cards,
       reviews,
-      scheduleOf({ cards: cards.value, direction: deck.direction, reviews: reviews.value, dayBoundaryHour, now }),
+      scheduleOf({
+        cards: cards.value,
+        direction: deck.direction,
+        reviews: reviews.value,
+        dayBoundaryHour,
+        now,
+      }),
     );
   }
 
@@ -1678,7 +1817,8 @@ export function createUseCases({
     if (cardsVersion === null || reviewsVersion === null) return;
     remember(instanceUrl, (digest) => {
       let next = withSchedule(digest, { deck: deck.url, cardsVersion, reviewsVersion, schedule });
-      if (!cards.value.some(isOutdated)) next = withReceipt(next, deck.cardsDocumentUrl, cardsVersion, { latestFormat: true });
+      if (!cards.value.some(isOutdated))
+        next = withReceipt(next, deck.cardsDocumentUrl, cardsVersion, { latestFormat: true });
       if (!reviews.value.some(isReviewStateOutdated)) {
         next = withReceipt(next, deck.reviewsDocumentUrl, reviewsVersion, { latestFormat: true });
       }
@@ -1699,9 +1839,19 @@ export function createUseCases({
     ]);
     const versions = { cards: cards.version, reviews: reviews.version };
     const today = studyDayOf(at, dayBoundaryHour);
-    let schedule = freshSchedule(digest.schedules[deck.url], versions, { direction: deck.direction, dayBoundaryHour, today });
+    let schedule = freshSchedule(digest.schedules[deck.url], versions, {
+      direction: deck.direction,
+      dayBoundaryHour,
+      today,
+    });
     if (schedule === null) {
-      schedule = scheduleOf({ cards: cards.value, direction: deck.direction, reviews: reviews.value, dayBoundaryHour, now: at });
+      schedule = scheduleOf({
+        cards: cards.value,
+        direction: deck.direction,
+        reviews: reviews.value,
+        dayBoundaryHour,
+        now: at,
+      });
       recordSchedule(instanceUrl, deck, cards, reviews, schedule);
     }
     return { cards, reviews, schedule };
@@ -1717,7 +1867,11 @@ export function createUseCases({
   }
 
   /** The instance's documents, then its drafts': each with where it is, which picks its shapes. */
-  function documentsToCheck(instanceUrl: string, decks: readonly Deck[], drafts: readonly string[]): { url: string; context: DocumentContext }[] {
+  function documentsToCheck(
+    instanceUrl: string,
+    decks: readonly Deck[],
+    drafts: readonly string[],
+  ): { url: string; context: DocumentContext }[] {
     return [
       ...instanceDocumentUrls(instanceUrl, decks).map((url) => ({ url, context: "pod" as const })),
       ...drafts.map((url) => ({ url, context: "draft" as const })),
@@ -1760,7 +1914,10 @@ export function createUseCases({
     ]);
     const urls = [
       ...documentsToCheck(instanceUrl, decks, drafts),
-      ...months.map((month) => ({ url: historyUrlOf(instanceUrl, month), context: "pod" as const })),
+      ...months.map((month) => ({
+        url: historyUrlOf(instanceUrl, month),
+        context: "pod" as const,
+      })),
     ];
     let checked = 0;
     onChecked(checked, urls.length);
@@ -1804,7 +1961,8 @@ export function createUseCases({
   async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
     await logAnswers();
     const months = await answerLog.months(instanceUrl);
-    const known = answerMonths.get(instanceUrl) ?? new Map<string, { version: string; answers: Answer[] }>();
+    const known =
+      answerMonths.get(instanceUrl) ?? new Map<string, { version: string; answers: Answer[] }>();
     const read = new Map<string, { version: string; answers: Answer[] }>();
     const answers = await Promise.all(
       months.map(async (month) => {
@@ -1814,7 +1972,8 @@ export function createUseCases({
           read.set(month, kept!);
           return kept!.answers;
         }
-        if (since.version !== null) read.set(month, { version: since.version, answers: since.value });
+        if (since.version !== null)
+          read.set(month, { version: since.version, answers: since.value });
         return since.value;
       }),
     );
@@ -1841,14 +2000,13 @@ export function createUseCases({
     const key = { cardId: prompt.cardId, direction: prompt.direction };
     const [prefs, current] =
       known === undefined
-        ? await Promise.all([getPreferences(instanceUrl), reviewStateRepository.getReviewState(deck, key)])
+        ? await Promise.all([
+            getPreferences(instanceUrl),
+            reviewStateRepository.getReviewState(deck, key),
+          ])
         : [known.prefs, known.current];
     const next = applySm2(current ?? INITIAL_SM2_STATE, quality);
-    const previous = snapshotBeforeReview(
-      current,
-      now,
-      prefs.dayBoundaryHour,
-    );
+    const previous = snapshotBeforeReview(current, now, prefs.dayBoundaryHour);
     const state: ReviewState = {
       ...key,
       ...next,
@@ -1940,7 +2098,8 @@ export function createUseCases({
   /** The guest's instance, and the whole guest pod once it has no instance left. */
   async function removeGuestInstance(instance: Instance): Promise<void> {
     await instanceRepository.deleteInstance({ webId: GUEST_WEBID, instance });
-    if ((await instanceRepository.listInstances(GUEST_WEBID)).length === 0) await guestPod.discard();
+    if ((await instanceRepository.listInstances(GUEST_WEBID)).length === 0)
+      await guestPod.discard();
   }
 
   /**
@@ -1955,10 +2114,14 @@ export function createUseCases({
    */
   async function addGuestDeck(guest: Deck, instanceUrl: string): Promise<Deck> {
     const deck = mergedDeck(guest, instanceUrl, `deck-${newId()}`, DECK_FORMAT_VERSION);
-    const [cards, states] = await Promise.all([deckRepository.listCards(guest), reviewStateRepository.listReviewStates(guest)]);
+    const [cards, states] = await Promise.all([
+      deckRepository.listCards(guest),
+      reviewStateRepository.listReviewStates(guest),
+    ]);
     // A card is written by its fragment id, in this app's format, at the time it was made.
     const content = cards.map(({ url: _url, formatVersion: _formatVersion, ...card }) => card);
-    if (mentionsGuest([deck, content, states])) throw new AppError("guestUrlsLeft", { url: deck.url });
+    if (mentionsGuest([deck, content, states]))
+      throw new AppError("guestUrlsLeft", { url: deck.url });
     const written: string[] = [];
     const create = async (url: string, write: () => Promise<void>) => {
       try {
@@ -1972,14 +2135,20 @@ export function createUseCases({
     try {
       // One PUT of the whole document: a PATCH of much text can be cut short (docs/testing.md).
       if (content.length > 0) {
-        await create(deck.cardsDocumentUrl, () => deckRepository.applyCardChanges(deck, { save: content, remove: [] }, { whole: true }));
+        await create(deck.cardsDocumentUrl, () =>
+          deckRepository.applyCardChanges(deck, { save: content, remove: [] }, { whole: true }),
+        );
       }
       if (states.length > 0) {
-        await create(deck.reviewsDocumentUrl, () => reviewStateRepository.createReviewStates(deck, states));
+        await create(deck.reviewsDocumentUrl, () =>
+          reviewStateRepository.createReviewStates(deck, states),
+        );
       }
       return await deckRepository.addDeck(deck);
     } catch (error) {
-      const entry = unsent(error) ? null : await deckRepository.readDeck(deck.url).catch(() => null);
+      const entry = unsent(error)
+        ? null
+        : await deckRepository.readDeck(deck.url).catch(() => null);
       if (entry !== null) return entry;
       for (const url of written) await deckRepository.deleteDocument(url).catch(() => undefined);
       throw error;
@@ -1988,7 +2157,11 @@ export function createUseCases({
 
   async function createInstance(
     session: Session,
-    { containerUrl, name, registrationTarget }: { containerUrl: string; name: string; registrationTarget: RegistrationTarget },
+    {
+      containerUrl,
+      name,
+      registrationTarget,
+    }: { containerUrl: string; name: string; registrationTarget: RegistrationTarget },
   ): Promise<Instance> {
     const instance = await instanceRepository.createInstance({
       webId: session.webId,
@@ -2015,10 +2188,24 @@ export function createUseCases({
       publisher: { webId: session.webId, name: name ?? session.webId },
     };
   }
-  const drafts = createReleaseDraftUseCases({ releaseDraftRepository, deckRepository, deckLibrary, shapeValidator, fileExchange, now });
+  const drafts = createReleaseDraftUseCases({
+    releaseDraftRepository,
+    deckRepository,
+    deckLibrary,
+    shapeValidator,
+    fileExchange,
+    now,
+  });
   return {
     ...drafts,
-    ...createReleasePublishingUseCases({ drafts, releaseDraftRepository, releasePublisher, deckLibrary, fileExchange, now }),
+    ...createReleasePublishingUseCases({
+      drafts,
+      releaseDraftRepository,
+      releasePublisher,
+      deckLibrary,
+      fileExchange,
+      now,
+    }),
     async restoreSession() {
       const established = await sessionGateway.restore();
       if (established !== null) return established;
@@ -2050,17 +2237,29 @@ export function createUseCases({
         ),
       };
     },
-    async transferGuestStudy(session, guestInstance, { containerUrl, registrationTarget }, onProgress = () => undefined) {
+    async transferGuestStudy(
+      session,
+      guestInstance,
+      { containerUrl, registrationTarget },
+      onProgress = () => undefined,
+    ) {
       const source = ensureTrailingSlash(guestInstance.url);
       const target = ensureTrailingSlash(containerUrl.trim());
       if (session.guest === true || !isGuestUrl(source) || isGuestUrl(target)) {
-        throw new Error("A guest's study moves from the guest's pod into the pod of a user who logged in.");
+        throw new Error(
+          "A guest's study moves from the guest's pod into the pod of a user who logged in.",
+        );
       }
       const move = { from: source, to: target, renames: { [GUEST_WEBID]: session.webId } };
-      const progress = stepReporter<GuestTransferStep>("stage", GUEST_TRANSFER_STEPS.length, onProgress);
+      const progress = stepReporter<GuestTransferStep>(
+        "stage",
+        GUEST_TRANSFER_STEPS.length,
+        onProgress,
+      );
       // The digest is what this device learned of the guest's pod's versions: the user's pod starts its own.
       const digest = digestUrlOf(source);
-      const listed = async () => (await instanceCopier.listResources(source)).filter((url) => url !== digest);
+      const listed = async () =>
+        (await instanceCopier.listResources(source)).filter((url) => url !== digest);
       // Answers still on their way to the guest's log go there first, to move with it.
       await logAnswers();
       let created = false;
@@ -2080,15 +2279,21 @@ export function createUseCases({
         progress.finished("copy", resources.length);
         const versions = await copyResources(resources, move, () => progress.stepped());
         // The catalog's publisher, named as the user's profile names them; then nothing may name the guest's pod.
-        const documents = resources.filter((url) => !url.endsWith("/")).map((url) => rebaseIri(url, source, target));
+        const documents = resources
+          .filter((url) => !url.endsWith("/"))
+          .map((url) => rebaseIri(url, source, target));
         progress.finished("adopt", documents.length + 1);
         const catalog = await deckRepository.readCatalog(target);
         if (catalog !== null) {
-          await deckRepository.saveCatalog(target, { ...catalog, publisher: (await catalogOf(session, catalog.title)).publisher });
+          await deckRepository.saveCatalog(target, {
+            ...catalog,
+            publisher: (await catalogOf(session, catalog.title)).publisher,
+          });
         }
         progress.stepped();
         for (const url of documents) {
-          if (await instanceCopier.mentions(url, GUEST_ORIGIN)) throw new AppError("guestUrlsLeft", { url });
+          if (await instanceCopier.mentions(url, GUEST_ORIGIN))
+            throw new AppError("guestUrlsLeft", { url });
           progress.stepped();
         }
         progress.finished("validate");
@@ -2100,7 +2305,11 @@ export function createUseCases({
         progress.finished("verify", resources.length + 1);
         await ensureUnchanged(listed, resources, versions, () => progress.stepped());
         progress.finished("register");
-        instance = await instanceRepository.attachInstance({ webId: session.webId, instanceUrl: target, registrationTarget });
+        instance = await instanceRepository.attachInstance({
+          webId: session.webId,
+          instanceUrl: target,
+          registrationTarget,
+        });
       } catch (error) {
         const cleanedUp = await removeCopy(source, target, created);
         return {
@@ -2138,16 +2347,25 @@ export function createUseCases({
       ]);
       return guestMergePlan(guestDecks, targetDecks, drafts.length);
     },
-    async mergeGuestStudy(session, guestInstance, target, { skip = [] } = {}, onProgress = () => undefined) {
+    async mergeGuestStudy(
+      session,
+      guestInstance,
+      target,
+      { skip = [] } = {},
+      onProgress = () => undefined,
+    ) {
       const source = ensureTrailingSlash(guestInstance.url);
       const targetUrl = ensureTrailingSlash(target.url);
       if (session.guest === true || !isGuestUrl(source) || isGuestUrl(targetUrl)) {
-        throw new Error("A guest's study is added from the guest's pod to an instance of a user who logged in.");
+        throw new Error(
+          "A guest's study is added from the guest's pod to an instance of a user who logged in.",
+        );
       }
       const progress = stepReporter<GuestMergeStep>("read", GUEST_MERGE_STEPS.length, onProgress);
       // The digest is what this device learned of the guest's pod's versions: it is not the guest's study.
       const digest = digestUrlOf(source);
-      const listed = async () => (await instanceCopier.listResources(source)).filter((url) => url !== digest);
+      const listed = async () =>
+        (await instanceCopier.listResources(source)).filter((url) => url !== digest);
       const versionsOf = async (resources: readonly string[]) =>
         new Map(
           await Promise.all(
@@ -2168,23 +2386,32 @@ export function createUseCases({
         const resources = await listed();
         const versions = await versionsOf(resources);
         const report = await validateInstance(source);
-        if (!report.conforms) throw new AppError("guestStudyInvalid", { count: report.violationCount });
-        if (report.documents.some((document) => document.subjects.some((subject) => subject.status === "newer"))) {
+        if (!report.conforms)
+          throw new AppError("guestStudyInvalid", { count: report.violationCount });
+        if (
+          report.documents.some((document) =>
+            document.subjects.some((subject) => subject.status === "newer"),
+          )
+        ) {
           throw new AppError("guestStudyTooNew");
         }
         progress.stepped();
-        const [decks, tree, months, targetDecks, targetTree, guestDrafts, targetDrafts] = await Promise.all([
-          deckRepository.listDecks(source),
-          deckRepository.readDeckTree(source),
-          answerLog.months(source),
-          deckRepository.listDecks(targetUrl),
-          deckRepository.readDeckTree(targetUrl),
-          releaseDraftRepository.list(source),
-          releaseDraftRepository.list(targetUrl),
-        ]);
+        const [decks, tree, months, targetDecks, targetTree, guestDrafts, targetDrafts] =
+          await Promise.all([
+            deckRepository.listDecks(source),
+            deckRepository.readDeckTree(source),
+            answerLog.months(source),
+            deckRepository.listDecks(targetUrl),
+            deckRepository.readDeckTree(targetUrl),
+            releaseDraftRepository.list(source),
+            releaseDraftRepository.list(targetUrl),
+          ]);
         // Groups to make in an arrangement a newer version wrote could not be: refused before anything is written.
-        if (targetTree.readOnly && tree.children.some((node) => node.kind === "group")) throw new AppError("deckTreeTooNew");
-        const answers = (await Promise.all(months.map((month) => answerLog.readMonth(source, month)))).flat();
+        if (targetTree.readOnly && tree.children.some((node) => node.kind === "group"))
+          throw new AppError("deckTreeTooNew");
+        const answers = (
+          await Promise.all(months.map((month) => answerLog.readMonth(source, month)))
+        ).flat();
         const chosen = decks.filter((deck) => !skip.includes(deck.url));
 
         // Each deck whole, one after another: its documents, its entry, then its answers.
@@ -2195,7 +2422,10 @@ export function createUseCases({
           const stamp = guestDeckStamp(deck, (url) => versions.get(url) ?? "");
           const note = decodeGuestMergeNote(updateJournal.staging(key));
           // Added from this device before, its entry and documents unchanged since: there it is.
-          let merged = note?.stamp === stamp ? targetDecks.find((candidate) => candidate.url === note.url) : undefined;
+          let merged =
+            note?.stamp === stamp
+              ? targetDecks.find((candidate) => candidate.url === note.url)
+              : undefined;
           if (merged === undefined) {
             merged = await addGuestDeck(deck, targetUrl);
             updateJournal.begin(key, encodeGuestMergeNote({ url: merged.url, stamp }));
@@ -2205,7 +2435,9 @@ export function createUseCases({
           added.push(merged);
           await answerLog.appendAll(
             targetUrl,
-            answers.filter((answer) => answer.deckUrl === deck.url).map((answer) => mergedAnswer(answer, merged)),
+            answers
+              .filter((answer) => answer.deckUrl === deck.url)
+              .map((answer) => mergedAnswer(answer, merged)),
           );
           progress.stepped();
         }
@@ -2221,7 +2453,8 @@ export function createUseCases({
           notes.push(key);
           return url;
         });
-        if (nodes.length > 0) await deckRepository.editDeckTree(targetUrl, { kind: "graft", nodes });
+        if (nodes.length > 0)
+          await deckRepository.editDeckTree(targetUrl, { kind: "graft", nodes });
 
         // Each draft copied whole, under its name or the next free one; again only when its documents changed since.
         progress.finished("drafts", guestDrafts.length);
@@ -2234,7 +2467,10 @@ export function createUseCases({
             .join("\n");
           const note = decodeGuestMergeNote(updateJournal.staging(key));
           // Copied from this device before, its documents unchanged since, and the copy still there: there it is.
-          let copy = note?.stamp === stamp ? targetDrafts.find((candidate) => candidate.url === note.url) : undefined;
+          let copy =
+            note?.stamp === stamp
+              ? targetDrafts.find((candidate) => candidate.url === note.url)
+              : undefined;
           if (copy === undefined) {
             copy = await drafts.copyReleaseDraft(draft.url, targetUrl);
             updateJournal.begin(key, encodeGuestMergeNote({ url: copy.url, stamp }));
@@ -2246,10 +2482,12 @@ export function createUseCases({
 
         // Listing the guest's study again, then each of its documents: what was added is what it holds.
         progress.finished("verify", versions.size + 1);
-        if ((await listed()).join("\n") !== resources.join("\n")) throw new AppError("guestStudyChanged");
+        if ((await listed()).join("\n") !== resources.join("\n"))
+          throw new AppError("guestStudyChanged");
         progress.stepped();
         for (const [url, version] of versions) {
-          if ((await instanceCopier.versionOf(url)) !== version) throw new AppError("guestStudyChanged", { url });
+          if ((await instanceCopier.versionOf(url)) !== version)
+            throw new AppError("guestStudyChanged", { url });
           progress.stepped();
         }
       } catch (error) {
@@ -2292,7 +2530,10 @@ export function createUseCases({
         .then(async () => {
           const stored = await preferencesRepository.getPreferences(instanceUrl);
           if (stored === null || stored.preferences.theme === choice) return;
-          await preferencesRepository.savePreferences(instanceUrl, { ...stored.preferences, theme: choice });
+          await preferencesRepository.savePreferences(instanceUrl, {
+            ...stored.preferences,
+            theme: choice,
+          });
         });
       themeWrites.set(instanceUrl, write);
       return write;
@@ -2343,7 +2584,9 @@ export function createUseCases({
         digestOf(instanceUrl).then((digest) =>
           checkDocuments(
             instanceUrl,
-            [catalogUrlOf(instanceUrl), deck.cardsDocumentUrl, deck.reviewsDocumentUrl].map((url) => ({ url, context: "pod" as const })),
+            [catalogUrlOf(instanceUrl), deck.cardsDocumentUrl, deck.reviewsDocumentUrl].map(
+              (url) => ({ url, context: "pod" as const }),
+            ),
             digest,
           ),
         ),
@@ -2388,7 +2631,10 @@ export function createUseCases({
       });
     },
     dataClassRegistrations(session, instance) {
-      return instanceRepository.readDataClassRegistrations({ webId: session.webId, instanceUrl: instance.url });
+      return instanceRepository.readDataClassRegistrations({
+        webId: session.webId,
+        instanceUrl: instance.url,
+      });
     },
     registerDataClasses(session, instance) {
       return instanceRepository.registerDataClasses({
@@ -2422,7 +2668,9 @@ export function createUseCases({
       return deckRepository.saveDeck({ ...deck, direction });
     },
     async describeDeck(deck, about) {
-      return deckRepository.saveDeck(withAbout(deck, { ...about, keywords: deckKeywords(about.keywords, deck) }));
+      return deckRepository.saveDeck(
+        withAbout(deck, { ...about, keywords: deckKeywords(about.keywords, deck) }),
+      );
     },
     async setDeckPace(deck, pace) {
       return deckRepository.saveDeck(withPace(deck, pace));
@@ -2462,7 +2710,9 @@ export function createUseCases({
       const copies = libraryCopiesOf(decks, await deckLibrary.listLibraryDecks());
       // A creator's catalog links many releases, maybe of several copies: each is read once.
       const reads = new Map<string, Promise<LibraryDeck>>();
-      return Promise.all(copies.map((copy) => (copy.series === null ? linkedCopy(copy, reads) : copy)));
+      return Promise.all(
+        copies.map((copy) => (copy.series === null ? linkedCopy(copy, reads) : copy)),
+      );
     },
     async readReleaseFromLink(text) {
       const url = releaseUrlOf(text);
@@ -2473,14 +2723,19 @@ export function createUseCases({
       return release;
     },
     importReleaseFromUrl(instanceUrl, release) {
-      return release.isCourse === true ? startCourse(instanceUrl, release) : importLibraryDeck(instanceUrl, release);
+      return release.isCourse === true
+        ? startCourse(instanceUrl, release)
+        : importLibraryDeck(instanceUrl, release);
     },
     async deckRelease(deck) {
       return deck.sourceUrl === undefined ? null : deckLibrary.fetchLibraryDeck(deck.sourceUrl);
     },
     async addReleaseLanguages(deck) {
       if (deck.sourceUrl === undefined) return null;
-      const updated = withReleaseLanguages(deck, await deckLibrary.fetchLibraryDeck(deck.sourceUrl));
+      const updated = withReleaseLanguages(
+        deck,
+        await deckLibrary.fetchLibraryDeck(deck.sourceUrl),
+      );
       return updated === null ? null : deckRepository.saveDeck(updated);
     },
     async applyLibraryUpgrade(offered, offeredPlan, onProgress = () => undefined) {
@@ -2503,17 +2758,21 @@ export function createUseCases({
         progress.start();
         const deck = await deckRepository.readDeck(offered.url);
         if (deck === null) throw new AppError("deckGone", { deck: offered.title });
-        if (deck.cardsDocumentUrl !== offered.cardsDocumentUrl) throw new AppError("deckChangedSinceOffer");
+        if (deck.cardsDocumentUrl !== offered.cardsDocumentUrl)
+          throw new AppError("deckChangedSinceOffer");
         const cards = await readNow(deckRepository.readCardsSince(deck, undefined));
         const plan = await planUpgrade(deck, async () => cards.value);
-        if (plan === null || !sameCardChanges(plan, offeredPlan)) throw new AppError("deckChangedSinceOffer");
+        if (plan === null || !sameCardChanges(plan, offeredPlan))
+          throw new AppError("deckChangedSinceOffer");
         releaseUrl = plan.releaseUrl;
         // The states of the cards the release removes go with them, and those left of any it removed already.
         const removed = new Set([...plan.remove.map((card) => card.id), ...plan.gone]);
         const dropped =
           removed.size === 0
             ? []
-            : (await reviewStateRepository.listReviewStates(deck)).filter((state) => removed.has(state.cardId));
+            : (await reviewStateRepository.listReviewStates(deck)).filter((state) =>
+                removed.has(state.cardId),
+              );
 
         // The cards first, the deck readable with them, still naming the release it came from: written whole (a
         // PATCH of much text can be cut short, docs/testing.md), and only while the document is as the plan read it.
@@ -2530,10 +2789,16 @@ export function createUseCases({
         }
         // Then the review states of the cards removed, when there are any.
         progress.finished("reviews");
-        if (dropped.length > 0) await write(() => reviewStateRepository.applyReviewChanges(deck, { save: [], remove: dropped }));
+        if (dropped.length > 0)
+          await write(() =>
+            reviewStateRepository.applyReviewChanges(deck, { save: [], remove: dropped }),
+          );
         // Last the entry, which moves the deck to the new release, only while it says what was read.
         progress.finished("entry");
-        const upgraded = await deckRepository.upgradeDeckEntry(deck, applyLibraryUpgrade(deck, plan));
+        const upgraded = await deckRepository.upgradeDeckEntry(
+          deck,
+          applyLibraryUpgrade(deck, plan),
+        );
         progress.finished();
         return { ok: true, deck: upgraded };
       } catch (error) {
@@ -2585,24 +2850,35 @@ export function createUseCases({
     editCards(instanceUrl, deck, ids, edit, previewed) {
       return writeCardEdit(instanceUrl, deck, (cards, reviews) => {
         const plan = planCardEdit(cards, ids, edit, reviews);
-        if (!sameCardEditPlan(plan, previewed)) throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
+        if (!sameCardEditPlan(plan, previewed))
+          throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
         return plan;
       });
     },
     async undoCardEdit(instanceUrl, deck, plan) {
       await writeCardEdit(instanceUrl, deck, (cards) => {
         const inverse = planUndo(cards, plan);
-        if (inverse === null) throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
+        if (inverse === null)
+          throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
         return inverse;
       });
     },
     async resetCards(instanceUrl, deck, ids, direction) {
-      const remove = resetStates(await reviewStateRepository.listReviewStates(deck), ids, direction);
+      const remove = resetStates(
+        await reviewStateRepository.listReviewStates(deck),
+        ids,
+        direction,
+      );
       return writeReviewEdit(instanceUrl, deck, { save: [], remove });
     },
     async rescheduleCards(instanceUrl, deck, ids, due, direction) {
       if (!isStudyDay(due)) throw new AppError("dueDayInvalid", { day: due });
-      const save = rescheduleStates(await reviewStateRepository.listReviewStates(deck), ids, due, direction);
+      const save = rescheduleStates(
+        await reviewStateRepository.listReviewStates(deck),
+        ids,
+        due,
+        direction,
+      );
       return writeReviewEdit(instanceUrl, deck, { save, remove: [] });
     },
     async transferCards(instanceUrl, from, to, ids, options) {
@@ -2612,7 +2888,8 @@ export function createUseCases({
           const plan = await transferOnce(from, to, ids, options);
           // The cards are where they go: a digest left behind is brought up to date by the next deck list.
           await refreshStudyDigest(instanceUrl, to).catch(() => undefined);
-          if (options.mode === "move") await refreshStudyDigest(instanceUrl, from).catch(() => undefined);
+          if (options.mode === "move")
+            await refreshStudyDigest(instanceUrl, from).catch(() => undefined);
           return plan;
         } catch (error) {
           if (!cardsChangedElsewhere(error) || attempt === CARD_EDIT_ATTEMPTS) throw error;
@@ -2621,13 +2898,21 @@ export function createUseCases({
     },
     async exportDeckFile(deck, options) {
       const text = await deckArchive.exportDeck(deck, options);
-      fileExchange.save(deckFileName(deck, options.format), DECK_FILE_TYPES[options.format].mediaType, text);
+      fileExchange.save(
+        deckFileName(deck, options.format),
+        DECK_FILE_TYPES[options.format].mediaType,
+        text,
+      );
     },
     async openDeckFile() {
       const picked = await fileExchange.open(DECK_FILE_ACCEPT);
       if (picked === null) return null;
       const format = deckFileFormatOf(picked.name, picked.text);
-      return { name: picked.name, format, content: await deckArchive.readDeckFile(picked.text, format, deckFileBaseOf(picked.name)) };
+      return {
+        name: picked.name,
+        format,
+        content: await deckArchive.readDeckFile(picked.text, format, deckFileBaseOf(picked.name)),
+      };
     },
     async importDeckFile(instanceUrl, file, { withProgress }) {
       let decks = await deckRepository.listDecks(instanceUrl);
@@ -2640,14 +2925,20 @@ export function createUseCases({
         });
         try {
           // Only where nothing is yet: a deck's documents are never written over.
-          await deckRepository.applyCardChanges(deck, { save: cards, remove: [] }, { whole: true, version: ABSENT_VERSION });
+          await deckRepository.applyCardChanges(
+            deck,
+            { save: cards, remove: [] },
+            { whole: true, version: ABSENT_VERSION },
+          );
         } catch (error) {
           // A cards document an import cut off before its entry left: the deck takes another id.
-          if (!(error instanceof AppError && error.code === "createdElsewhere") || attempt === 2) throw error;
+          if (!(error instanceof AppError && error.code === "createdElsewhere") || attempt === 2)
+            throw error;
           decks = [...decks, deck];
           continue;
         }
-        if (reviews.length > 0) await reviewStateRepository.applyReviewChanges(deck, { save: reviews, remove: [] });
+        if (reviews.length > 0)
+          await reviewStateRepository.applyReviewChanges(deck, { save: reviews, remove: [] });
         await deckRepository.registerDeck(deck);
         // The deck is in: a digest left behind is brought up to date by the next deck list.
         await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
@@ -2719,9 +3010,14 @@ export function createUseCases({
       });
       await again(async () => {
         const catalog = await deckRepository.readCatalog(instance.url);
-        if (catalog !== null && catalog.title !== name) await deckRepository.saveCatalog(instance.url, renamedCatalog(catalog, name));
+        if (catalog !== null && catalog.title !== name)
+          await deckRepository.saveCatalog(instance.url, renamedCatalog(catalog, name));
       });
-      await instanceRepository.renameRegistrations({ webId: session.webId, instanceUrl: instance.url, title: name });
+      await instanceRepository.renameRegistrations({
+        webId: session.webId,
+        instanceUrl: instance.url,
+        title: name,
+      });
       return { ...instance, name };
     },
     readCatalog(instanceUrl) {
@@ -2788,15 +3084,22 @@ export function createUseCases({
     },
     async getStatistics(instanceUrl, at, { months = 12, deckUrl } = {}) {
       await logAnswers();
-      const [prefs, logged] = await Promise.all([getPreferences(instanceUrl), answerLog.months(instanceUrl)]);
+      const [prefs, logged] = await Promise.all([
+        getPreferences(instanceUrl),
+        answerLog.months(instanceUrl),
+      ]);
       const today = studyDayOf(at, prefs.dayBoundaryHour);
       // The first of the months asked for: this one and the `months - 1` before it.
       const [year, month] = today.split("-").map(Number);
       const first = new Date(Date.UTC(year!, month! - months, 1)).toISOString().slice(0, 7);
       const read = await Promise.all(
-        logged.filter((logMonth) => logMonth >= first).map((logMonth) => answerLog.readMonth(instanceUrl, logMonth)),
+        logged
+          .filter((logMonth) => logMonth >= first)
+          .map((logMonth) => answerLog.readMonth(instanceUrl, logMonth)),
       );
-      const answers = read.flat().filter((answer) => deckUrl === undefined || answer.deckUrl === deckUrl);
+      const answers = read
+        .flat()
+        .filter((answer) => deckUrl === undefined || answer.deckUrl === deckUrl);
       return statisticsOf(answers, today);
     },
     loadAnswerLog,
@@ -2832,11 +3135,20 @@ export function createUseCases({
       const today = studyDayOf(at, prefs.dayBoundaryHour);
       const progress = await Promise.all(
         decks.map(async (one) => {
-          const { cards, reviews, schedule } = await scheduleNow(instanceUrl, one, at, prefs.dayBoundaryHour);
+          const { cards, reviews, schedule } = await scheduleNow(
+            instanceUrl,
+            one,
+            at,
+            prefs.dayBoundaryHour,
+          );
           const { maxReviewsPerDay } = deckPreferences(prefs, one);
           return {
             deck: one,
-            progress: cardProgressOf({ cards: cards.value, direction: one.direction, reviews: reviews.value }),
+            progress: cardProgressOf({
+              cards: cards.value,
+              direction: one.direction,
+              reviews: reviews.value,
+            }),
             forecast: forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay }),
           };
         }),
@@ -2844,20 +3156,26 @@ export function createUseCases({
       return { today, decks: progress };
     },
     async cardAnswers(instanceUrl, deck, cardId) {
-      return cardAnswers(deckAnswers(await loadAnswerLog(instanceUrl), deck), `${deck.cardsDocumentUrl}#${cardId}`);
+      return cardAnswers(
+        deckAnswers(await loadAnswerLog(instanceUrl), deck),
+        `${deck.cardsDocumentUrl}#${cardId}`,
+      );
     },
     startCourse,
     async getCourse(offered) {
       const deck = await deckRepository.readDeck(offered.url);
       if (deck === null) throw new AppError("deckGone", { deck: offered.title });
-      if (deck.sourceUrl === undefined) throw new Error("A course's deck names the release it was copied from");
+      if (deck.sourceUrl === undefined)
+        throw new Error("A course's deck names the release it was copied from");
       const [release, outline, reviews] = await Promise.all([
         deckLibrary.fetchLibraryDeck(deck.sourceUrl),
         deckLibrary.fetchCourseOutline(deck.sourceUrl),
         reviewStateRepository.listReviewStates(deck),
       ]);
       // A course asks front to back: a card is answered once it has that state.
-      const answeredCardIds = reviews.filter((state) => state.direction === "front-to-back").map((state) => state.cardId);
+      const answeredCardIds = reviews
+        .filter((state) => state.direction === "front-to-back")
+        .map((state) => state.cardId);
       return {
         deck,
         release,
@@ -2868,16 +3186,27 @@ export function createUseCases({
       };
     },
     async answerCourseQuestion(instanceUrl, deck, card, choice, now) {
-      const prompt = { cardId: card.id, cardUrl: `${deck.cardsDocumentUrl}#${card.id}`, direction: "front-to-back" as const };
+      const prompt = {
+        cardId: card.id,
+        cardUrl: `${deck.cardsDocumentUrl}#${card.id}`,
+        direction: "front-to-back" as const,
+      };
       const [prefs, current] = await Promise.all([
         getPreferences(instanceUrl),
-        reviewStateRepository.getReviewState(deck, { cardId: card.id, direction: prompt.direction }),
+        reviewStateRepository.getReviewState(deck, {
+          cardId: card.id,
+          direction: prompt.direction,
+        }),
       ]);
       const effect = courseAnswerEffect(current, choice.correct, now, prefs.dayBoundaryHour);
       if (effect.kind === "none") return { effect: "none", state: current };
       // The card joins the deck before its first state, so no state is ever without its card.
-      if (effect.kind === "introduce") await deckRepository.applyCardChanges(deck, { save: [card], remove: [] });
-      const chosen = choice.correct || choice.distractorId === undefined ? undefined : `${deck.cardsDocumentUrl}#${choice.distractorId}`;
+      if (effect.kind === "introduce")
+        await deckRepository.applyCardChanges(deck, { save: [card], remove: [] });
+      const chosen =
+        choice.correct || choice.distractorId === undefined
+          ? undefined
+          : `${deck.cardsDocumentUrl}#${choice.distractorId}`;
       const state = await applyGrade(
         instanceUrl,
         deck,

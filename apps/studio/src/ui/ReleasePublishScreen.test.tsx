@@ -37,7 +37,10 @@ function renderScreen(overrides: Partial<Props> = {}) {
   return props;
 }
 
-const released = (draft: ReleaseDraft = courseDraft()): ReleaseDraft => ({ ...draft, root: { ...draft.root, releasedAs: TARGET } });
+const released = (draft: ReleaseDraft = courseDraft()): ReleaseDraft => ({
+  ...draft,
+  root: { ...draft.root, releasedAs: TARGET },
+});
 
 describe("ReleasePublishScreen", () => {
   it("tells the Studio's activity of the release published and of each file saved", () => {
@@ -50,13 +53,18 @@ describe("ReleasePublishScreen", () => {
     const view = render(shown({}));
     view.rerender(shown({ draft: released() }));
     view.rerender(shown({ draft: released(), downloaded: { name: "v1.ttl", url: "blob:v1" } }));
-    expect(log.mock.calls).toEqual([[`This draft was released at ${TARGET}.`], [expect.stringContaining("v1.ttl")]]);
+    expect(log.mock.calls).toEqual([
+      [`This draft was released at ${TARGET}.`],
+      [expect.stringContaining("v1.ttl")],
+    ]);
   });
 
   it("publishes in the instance's releases folder only once the user says it will be public", () => {
     const { publish } = renderScreen();
     expect(screen.getByRole("heading", { level: 3, name: "Publish" })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Folder in your Pod" })).toHaveValue(`${instanceA.url}releases/`);
+    expect(screen.getByRole("textbox", { name: "Folder in your Pod" })).toHaveValue(
+      `${instanceA.url}releases/`,
+    );
     expect(screen.getByText(`The release will be published at ${TARGET}.`)).toBeInTheDocument();
     expect(screen.getByText(/The release check finds no errors/)).toBeInTheDocument();
     const button = screen.getByRole("button", { name: "Publish to my Pod" });
@@ -71,7 +79,11 @@ describe("ReleasePublishScreen", () => {
     const folder = screen.getByRole("textbox", { name: "Folder in your Pod" });
     fireEvent.click(screen.getByRole("checkbox", { name: /this release will be public/ }));
     fireEvent.input(folder, { target: { value: "https://pod.example/public" } });
-    expect(screen.getByText("Give the folder's web address, starting with https:// or http:// and ending in /.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Give the folder's web address, starting with https:// or http:// and ending in /.",
+      ),
+    ).toBeInTheDocument();
     expect(folder).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByRole("button", { name: "Publish to my Pod" })).toBeDisabled();
     fireEvent.submit(folder.closest("form")!);
@@ -83,17 +95,29 @@ describe("ReleasePublishScreen", () => {
 
   it("holds publishing while the check finds errors, a change waits to be saved, or the catalog may not be written", () => {
     renderScreen({ errors: 2 });
-    expect(screen.getByRole("link", { name: "The release check finds 2 errors. Fix them before you publish." })).toHaveAttribute("href", "#/check");
+    expect(
+      screen.getByRole("link", {
+        name: "The release check finds 2 errors. Fix them before you publish.",
+      }),
+    ).toHaveAttribute("href", "#/check");
     fireEvent.click(screen.getByRole("checkbox", { name: /this release will be public/ }));
     expect(screen.getByRole("button", { name: "Publish to my Pod" })).toBeDisabled();
   });
 
   it("says why publishing waits, while it checks, saves or publishes, and why it failed", () => {
-    const { publish } = renderScreen({ errors: undefined, saving: true, hold: "setAside", publish: { pending: true, error: "The pod is down.", run: vi.fn() } });
+    const { publish } = renderScreen({
+      errors: undefined,
+      saving: true,
+      hold: "setAside",
+      publish: { pending: true, error: "The pod is down.", run: vi.fn() },
+    });
     expect(screen.getByText("Checking the draft…")).toBeInTheDocument();
     expect(screen.getByText("Checking and publishing the release…")).toBeInTheDocument();
     expect(screen.getByText("The pod is down.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
+      "href",
+      "#/health",
+    );
     fireEvent.submit(screen.getByRole("textbox", { name: "Folder in your Pod" }).closest("form")!);
     expect(publish.run).not.toHaveBeenCalled();
   });
@@ -121,7 +145,10 @@ describe("ReleasePublishScreen", () => {
 
   it("holds starting the next version while the catalog may not be written, and says why", () => {
     const { startNext } = renderScreen({ draft: released(), isPublic: true, hold: "setAside" });
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
+      "href",
+      "#/health",
+    );
     const button = screen.getByRole("button", { name: "Start the next version" });
     expect(button).toBeDisabled();
     fireEvent.click(button);
@@ -130,14 +157,22 @@ describe("ReleasePublishScreen", () => {
 
   it("says a release is not public, and tries again to make it so", () => {
     const { makePublic } = renderScreen({ draft: released(), isPublic: false });
-    expect(screen.getByText(/Only you can read it: your Pod did not make it public/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Only you can read it: your Pod did not make it public/),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Make it public" }));
     expect(makePublic.run).toHaveBeenCalledWith(TARGET);
   });
 
   it("asks whether a release is public, and does each action once at a time", () => {
     const pending = { pending: true, error: "Refused.", run: vi.fn() };
-    const { makePublic, startNext, download } = renderScreen({ draft: released(), isPublic: undefined, makePublic: pending, startNext: { ...pending }, download: { ...pending } });
+    const { makePublic, startNext, download } = renderScreen({
+      draft: released(),
+      isPublic: undefined,
+      makePublic: pending,
+      startNext: { ...pending },
+      download: { ...pending },
+    });
     expect(screen.getByText("Asking whether anyone can read it…")).toBeInTheDocument();
     expect(screen.getByText("Making the release public…")).toBeInTheDocument();
     expect(screen.getByText("Starting the next version…")).toBeInTheDocument();
@@ -149,19 +184,27 @@ describe("ReleasePublishScreen", () => {
   });
 
   it("holds making public again while it is made so", () => {
-    const { makePublic } = renderScreen({ draft: released(), isPublic: false, makePublic: { pending: true, error: null, run: vi.fn() } });
+    const { makePublic } = renderScreen({
+      draft: released(),
+      isPublic: false,
+      makePublic: { pending: true, error: null, run: vi.fn() },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Make it public" }));
     expect(makePublic.run).not.toHaveBeenCalled();
   });
 
   it("saves the release as a file for the library, with the steps of a pull request", () => {
-    const { download } = renderScreen({ downloaded: { name: "solid-v1.ttl", url: "https://solid-memo.com/decks/solid/v1.ttl" } });
+    const { download } = renderScreen({
+      downloaded: { name: "solid-v1.ttl", url: "https://solid-memo.com/decks/solid/v1.ttl" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Download .ttl" }));
     expect(download.run).toHaveBeenCalled();
     expect(screen.getByText("solid-v1.ttl")).toBeInTheDocument();
     expect(screen.getByText("decks/solid/v1.ttl")).toBeInTheDocument();
     expect(screen.getByText("npm run library:check -- --base main")).toBeInTheDocument();
     expect(screen.getByText("npm run check && npm run crosscheck")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Check the draft for the library first" })).toHaveAttribute("href", "#/check-library");
+    expect(
+      screen.getByRole("link", { name: "Check the draft for the library first" }),
+    ).toHaveAttribute("href", "#/check-library");
   });
 });

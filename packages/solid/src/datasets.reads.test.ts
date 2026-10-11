@@ -32,7 +32,10 @@ function pod({ etag = '"v1"' as string | null, honorsIfNoneMatch = true } = {}) 
       honorsIfNoneMatch && current !== null && headers.get("If-None-Match") === current
         ? new Response(null, { status: 304, headers: { ETag: current } })
         : new Response(`<#it> <https://example.com/ns#n> "${current?.replaceAll('"', "")}" .`, {
-            headers: { "Content-Type": "text/turtle", ...(current === null ? {} : { ETag: current }) },
+            headers: {
+              "Content-Type": "text/turtle",
+              ...(current === null ? {} : { ETag: current }),
+            },
           });
     Object.defineProperty(response, "url", { value: url });
     return response;
@@ -58,7 +61,12 @@ function pod({ etag = '"v1"' as string | null, honorsIfNoneMatch = true } = {}) 
 }
 
 const edited = <T extends Parameters<typeof setThing>[0]>(dataset: T) =>
-  setThing(dataset, buildThing(createThing({ url: `${DOC}#new` })).addStringNoLocale("https://example.com/ns#n", "2").build());
+  setThing(
+    dataset,
+    buildThing(createThing({ url: `${DOC}#new` }))
+      .addStringNoLocale("https://example.com/ns#n", "2")
+      .build(),
+  );
 
 describe("reading a document more than once", () => {
   it("shares a read already under way", async () => {
@@ -145,7 +153,8 @@ describe("reading a document more than once", () => {
   });
 
   it("fails on a 304 it did not ask for, as before", async () => {
-    const fetch = (async () => new Response(null, { status: 304 })) as unknown as typeof globalThis.fetch;
+    const fetch = (async () =>
+      new Response(null, { status: 304 })) as unknown as typeof globalThis.fetch;
     await expect(readDataset(DOC, fetch)).rejects.toThrow();
   });
 });

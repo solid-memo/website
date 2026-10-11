@@ -71,9 +71,7 @@ export function ChapterReviewScreen({
   return (
     <section class="course-review">
       <header>
-        <h2>
-          {tx("chapterReview.heading", { chapter: <ReaderText text={chapterTitle} /> })}
-        </h2>
+        <h2>{tx("chapterReview.heading", { chapter: <ReaderText text={chapterTitle} /> })}</h2>
         {started && card !== null && (
           <span class="hint">{t("chapterReview.position", { position, total })}</span>
         )}
@@ -111,13 +109,7 @@ export function ChapterReviewScreen({
   );
 }
 
-function ReviewEnd({
-  completion,
-  onRetry,
-}: {
-  completion: Completion;
-  onRetry: () => void;
-}) {
+function ReviewEnd({ completion, onRetry }: { completion: Completion; onRetry: () => void }) {
   const { t } = useI18n();
   const endRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {

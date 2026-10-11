@@ -14,13 +14,19 @@ export type Neighbor = "below" | "above";
 export class DeckGroups extends Screen {
   /** The button that opens the actions menu of a deck or group, by its name. */
   actionsButton(name: string): Locator {
-    return this.page.getByRole("button", { name: this.t("deckList.actions", { name }), exact: true });
+    return this.page.getByRole("button", {
+      name: this.t("deckList.actions", { name }),
+      exact: true,
+    });
   }
 
   /** The list item of the group named, its header and what it holds (no deck row holds a group's menu). */
   group(name: string): Locator {
     // The innermost: a group inside another is in its list item too.
-    return this.page.getByRole("listitem").filter({ has: this.actionsButton(name) }).last();
+    return this.page
+      .getByRole("listitem")
+      .filter({ has: this.actionsButton(name) })
+      .last();
   }
 
   /**
@@ -30,13 +36,22 @@ export class DeckGroups extends Screen {
   async groupWithNeighbor(deckName: string): Promise<Neighbor> {
     return this.intent(`Group ${deckName} with its neighbor`, async () => {
       const menu = await this.openMenu(deckName);
-      const below = menu.getByRole("menuitem", { name: this.t("deckList.groupWithNext"), exact: true });
-      const above = menu.getByRole("menuitem", { name: this.t("deckList.groupWithPrevious"), exact: true });
-      const neighbor: Neighbor = (await below.getAttribute("aria-disabled")) === "true" ? "above" : "below";
+      const below = menu.getByRole("menuitem", {
+        name: this.t("deckList.groupWithNext"),
+        exact: true,
+      });
+      const above = menu.getByRole("menuitem", {
+        name: this.t("deckList.groupWithPrevious"),
+        exact: true,
+      });
+      const neighbor: Neighbor =
+        (await below.getAttribute("aria-disabled")) === "true" ? "above" : "below";
       const item = neighbor === "below" ? below : above;
       await expect(item).not.toHaveAttribute("aria-disabled", "true");
       await item.click();
-      await this.expectStatus(this.tp("deckList.combined", { group: this.t("deckList.newGroupName") }));
+      await this.expectStatus(
+        this.tp("deckList.combined", { group: this.t("deckList.newGroupName") }),
+      );
       await expect(this.groupNameField).toBeFocused();
       return neighbor;
     });
@@ -57,23 +72,34 @@ export class DeckGroups extends Screen {
    * Moves the deck (or group) one place down among its neighbors; given
    * where it should land (inside a group), checks the list says so.
    */
-  async moveDown(name: string, to?: { position: number; count: number; group: string }): Promise<void> {
+  async moveDown(
+    name: string,
+    to?: { position: number; count: number; group: string },
+  ): Promise<void> {
     await this.intent(`Move ${name} down`, async () => {
       const menu = await this.openMenu(name);
       await menu.getByRole("menuitem", { name: this.t("deckList.moveDown"), exact: true }).click();
       const place: Record<string, string | number> =
-        to === undefined ? {} : { position: to.position, count: to.count, place: this.t("deckList.inGroup", { group: to.group }) };
+        to === undefined
+          ? {}
+          : {
+              position: to.position,
+              count: to.count,
+              place: this.t("deckList.inGroup", { group: to.group }),
+            };
       await this.expectStatus(this.tp("deckList.moved", { name, ...place }));
     });
   }
 
   /** The names of what the group holds, in the order the list shows them (the group's own name left out). */
   async orderIn(groupName: string): Promise<string[]> {
-    const labels = await this.group(groupName).getByRole("button", { name: this.tp("deckList.actions") }).evaluateAll((buttons) =>
-      buttons.map((button) => button.getAttribute("aria-label") ?? ""),
-    );
+    const labels = await this.group(groupName)
+      .getByRole("button", { name: this.tp("deckList.actions") })
+      .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("aria-label") ?? ""));
     const named = this.tp("deckList.actions");
-    return labels.flatMap((label) => named.exec(label)?.groups?.name ?? []).filter((name) => name !== groupName);
+    return labels
+      .flatMap((label) => named.exec(label)?.groups?.name ?? [])
+      .filter((name) => name !== groupName);
   }
 
   /** Deletes the group, confirming; what it held stays, one level up. */
@@ -81,9 +107,13 @@ export class DeckGroups extends Screen {
     await this.intent(`Delete the group ${groupName}`, async () => {
       const held = await this.orderIn(groupName);
       expect(held.length, `decks in ${groupName}`).toBeGreaterThan(0);
-      this.app.expectDialog(this.tp("deckList.deleteGroupConfirm", { name: groupName, count: held.length }));
+      this.app.expectDialog(
+        this.tp("deckList.deleteGroupConfirm", { name: groupName, count: held.length }),
+      );
       const menu = await this.openMenu(groupName);
-      await menu.getByRole("menuitem", { name: this.t("deckList.deleteGroup"), exact: true }).click();
+      await menu
+        .getByRole("menuitem", { name: this.t("deckList.deleteGroup"), exact: true })
+        .click();
       await this.expectStatus(this.tp("deckList.deleted", { name: groupName }));
       await this.expectNoGroup(groupName);
       for (const name of held) await this.expectAtTopLevel(name);
@@ -97,7 +127,9 @@ export class DeckGroups extends Screen {
   /** The deck is in no group: the only list item around it is its own row. */
   async expectAtTopLevel(deckName: string): Promise<void> {
     await expect(this.actionsButton(deckName)).toBeVisible();
-    await expect(this.page.getByRole("listitem").filter({ has: this.actionsButton(deckName) })).toHaveCount(1);
+    await expect(
+      this.page.getByRole("listitem").filter({ has: this.actionsButton(deckName) }),
+    ).toHaveCount(1);
   }
 
   private get groupNameField(): Locator {

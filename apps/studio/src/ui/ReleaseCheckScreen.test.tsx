@@ -12,10 +12,22 @@ const links = {
   policyHref: (policy: CheckPolicy) => `#/check/${policy}`,
   targetHref: (target: ProblemTarget) => `#/${Object.values(target).join("/")}`,
 };
-const notAsked: ShapesState = { asked: false, running: false, stale: false, problems: undefined, error: null };
+const notAsked: ShapesState = {
+  asked: false,
+  running: false,
+  stale: false,
+  problems: undefined,
+  error: null,
+};
 
 function renderScreen(
-  options: { problems?: ReleaseProblem[] | undefined; error?: unknown; checking?: boolean; shapes?: ShapesState; policy?: CheckPolicy } = {},
+  options: {
+    problems?: ReleaseProblem[] | undefined;
+    error?: unknown;
+    checking?: boolean;
+    shapes?: ShapesState;
+    policy?: CheckPolicy;
+  } = {},
 ) {
   const { error = null, shapes = notAsked, policy = "pod" } = options;
   // Undefined stated: the draft is being checked.
@@ -42,8 +54,14 @@ describe("ReleaseCheckScreen", () => {
   it("checks for a pod or the library, a link each, and says when it finds nothing", () => {
     renderScreen();
     const policies = screen.getByRole("navigation", { name: "Check for" });
-    expect(within(policies).getByRole("link", { name: "A release in your pod" })).toHaveAttribute("aria-current", "page");
-    expect(within(policies).getByRole("link", { name: "The Solid Memo library" })).toHaveAttribute("href", "#/check/library");
+    expect(within(policies).getByRole("link", { name: "A release in your pod" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(policies).getByRole("link", { name: "The Solid Memo library" })).toHaveAttribute(
+      "href",
+      "#/check/library",
+    );
     expect(screen.getByText(/held to the rules of its data/)).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("No problems found.");
     expect(screen.queryByRole("heading", { name: "Errors" })).toBeNull();
@@ -54,42 +72,81 @@ describe("ReleaseCheckScreen", () => {
       policy: "library",
       problems: [
         problem(at("ch-apps"), { code: "chapterWithoutStep", params: {} }),
-        problem(at("q-pods-1a"), { code: "fewDistractors", params: { count: 1, least: 2 } }, { field: SM.distractor }),
-        problem(at("ch-apps"), { code: "missingLanguage", params: { language: "en" } }, { field: "http://purl.org/dc/terms/title" }),
+        problem(
+          at("q-pods-1a"),
+          { code: "fewDistractors", params: { count: 1, least: 2 } },
+          { field: SM.distractor },
+        ),
+        problem(
+          at("ch-apps"),
+          { code: "missingLanguage", params: { language: "en" } },
+          { field: "http://purl.org/dc/terms/title" },
+        ),
         problem(DRAFT_URL, { code: "unshaped", params: {} }, { severity: "warning" }),
       ],
     });
     expect(screen.getByText(/held to its curation too/)).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("4 problems.");
     const errors = screen.getByRole("list", { name: "Errors" });
-    expect(within(errors).getByRole("link", { name: "Apps" })).toHaveAttribute("href", "#/chapter/ch-apps");
-    expect(within(errors).getByRole("link", { name: "Has no step in use." })).toHaveAttribute("href", "#/chapter/ch-apps/steps");
-    expect(within(errors).getByRole("link", { name: "Title: no text in English." })).toHaveAttribute("href", "#/chapter/ch-apps/title");
-    expect(within(errors).getByRole("link", { name: "What holds data?" })).toHaveAttribute("href", "#/question/q-pods-1a");
-    expect(within(errors).getByRole("link", { name: /^Has 1 wrong option/ })).toHaveAttribute("href", "#/question/q-pods-1a/distractors");
+    expect(within(errors).getByRole("link", { name: "Apps" })).toHaveAttribute(
+      "href",
+      "#/chapter/ch-apps",
+    );
+    expect(within(errors).getByRole("link", { name: "Has no step in use." })).toHaveAttribute(
+      "href",
+      "#/chapter/ch-apps/steps",
+    );
+    expect(
+      within(errors).getByRole("link", { name: "Title: no text in English." }),
+    ).toHaveAttribute("href", "#/chapter/ch-apps/title");
+    expect(within(errors).getByRole("link", { name: "What holds data?" })).toHaveAttribute(
+      "href",
+      "#/question/q-pods-1a",
+    );
+    expect(within(errors).getByRole("link", { name: /^Has 1 wrong option/ })).toHaveAttribute(
+      "href",
+      "#/question/q-pods-1a/distractors",
+    );
     const warnings = screen.getByRole("list", { name: "Warnings" });
-    expect(within(warnings).getByRole("link", { name: "This release" })).toHaveAttribute("href", "#/draft");
+    expect(within(warnings).getByRole("link", { name: "This release" })).toHaveAttribute(
+      "href",
+      "#/draft",
+    );
   });
 
   it("says while it checks, or why it could not", () => {
     renderScreen({ problems: undefined });
     expect(screen.getByText("Checking the draft…")).toBeInTheDocument();
     renderScreen({ problems: undefined, error: new AppError("draftGone") });
-    expect(screen.getAllByRole("alert").some((alert) => alert.textContent?.includes("That draft no longer exists."))).toBe(true);
+    expect(
+      screen
+        .getAllByRole("alert")
+        .some((alert) => alert.textContent?.includes("That draft no longer exists.")),
+    ).toBe(true);
   });
 
   it("offers to check again when a part of the check could not be read, or the check failed, until it runs", () => {
     const again = () => screen.queryByRole("button", { name: "Check the draft again" });
     renderScreen({ problems: [problem(DRAFT_URL, { code: "noBack", params: {} })] });
     expect(again()).toBeNull();
-    const { onCheckAgain } = renderScreen({ problems: [problem(DRAFT_URL, { code: "libraryUnread", params: {} })] });
+    const { onCheckAgain } = renderScreen({
+      problems: [problem(DRAFT_URL, { code: "libraryUnread", params: {} })],
+    });
     fireEvent.click(again()!);
     expect(onCheckAgain).toHaveBeenCalledTimes(1);
     cleanup();
     renderScreen({ problems: undefined, error: new AppError("draftGone") });
     expect(again()).toBeEnabled();
     cleanup();
-    renderScreen({ problems: [problem(DRAFT_URL, { code: "previousUnread", params: { previous: "https://pod.example/v1.ttl" } })], checking: true });
+    renderScreen({
+      problems: [
+        problem(DRAFT_URL, {
+          code: "previousUnread",
+          params: { previous: "https://pod.example/v1.ttl" },
+        }),
+      ],
+      checking: true,
+    });
     expect(again()).toBeDisabled();
   });
 
@@ -109,7 +166,11 @@ describe("ReleaseCheckScreen", () => {
     expect(within(shapes()).queryByRole("button")).toBeNull();
     const found = [problem(DRAFT_URL, { code: "unshaped", params: {} })];
     renderScreen({ shapes: { ...notAsked, asked: true, stale: true, problems: found } });
-    expect(within(shapes()).getByText(/The shapes find 1 problem, among those above. The draft changed since/)).toBeInTheDocument();
+    expect(
+      within(shapes()).getByText(
+        /The shapes find 1 problem, among those above. The draft changed since/,
+      ),
+    ).toBeInTheDocument();
     expect(within(shapes()).getByRole("button", { name: "Check again" })).toBeInTheDocument();
     renderScreen({ shapes: { ...notAsked, asked: true, error: new AppError("draftGone") } });
     expect(within(shapes()).getByRole("alert")).toHaveTextContent("That draft no longer exists.");

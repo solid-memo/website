@@ -7,7 +7,13 @@ import { outlineProblems, type DraftField } from "@solid-memo/domain/release/rel
 import type { DraftChange, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { draftOf, LangTextField, rememberLanguages, textOfDraft, type DraftEntry } from "@solid-memo/ui/LangTextField";
+import {
+  draftOf,
+  LangTextField,
+  rememberLanguages,
+  textOfDraft,
+  type DraftEntry,
+} from "@solid-memo/ui/LangTextField";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
@@ -75,9 +81,18 @@ export function DraftOverviewScreen({
   return (
     <section>
       <header>
-        <h2>{Object.keys(title).length === 0 ? t("studio.draft.untitled") : <ReaderText text={title} />}</h2>
+        <h2>
+          {Object.keys(title).length === 0 ? (
+            t("studio.draft.untitled")
+          ) : (
+            <ReaderText text={title} />
+          )}
+        </h2>
         <p class="hint">
-          {t("studio.drafts.summary", { kind: t(`studio.drafts.kind.${draft.course ? "course" : "deck"}`), version: draft.root.version ?? "1" })}
+          {t("studio.drafts.summary", {
+            kind: t(`studio.drafts.kind.${draft.course ? "course" : "deck"}`),
+            version: draft.root.version ?? "1",
+          })}
         </p>
       </header>
       <DraftStatus editor={status} />
@@ -92,7 +107,9 @@ export function DraftOverviewScreen({
             text={draft.root.title}
             disabled={held}
             arrival={field === "title"}
-            onSave={(text) => onEdit([{ kind: "setMeta", meta: { title: textOrNull(text) } }], { debounce: true })}
+            onSave={(text) =>
+              onEdit([{ kind: "setMeta", meta: { title: textOrNull(text) } }], { debounce: true })
+            }
           />
           <DraftTextField
             id="draft-description"
@@ -103,12 +120,20 @@ export function DraftOverviewScreen({
             multiline
             disabled={held}
             arrival={field === "description"}
-            onSave={(text) => onEdit([{ kind: "setMeta", meta: { description: textOrNull(text) } }], { debounce: true })}
+            onSave={(text) =>
+              onEdit([{ kind: "setMeta", meta: { description: textOrNull(text) } }], {
+                debounce: true,
+              })
+            }
           />
         </section>
         {draft.course && (
           <section aria-labelledby="draft-outline-heading">
-            <h3 id="draft-outline-heading" tabIndex={-1} data-arrival={field === "outline" || undefined}>
+            <h3
+              id="draft-outline-heading"
+              tabIndex={-1}
+              data-arrival={field === "outline" || undefined}
+            >
               {t("studio.draft.outline")}
             </h3>
             <p class="hint">{t("studio.draft.outlineHint")}</p>
@@ -129,8 +154,13 @@ export function DraftOverviewScreen({
                 <ul>
                   {retired.map((node) => (
                     <li key={node.id}>
-                      <a href={links.chapterHref(node.id)}>{node.data.title === undefined ? node.id : readerText(node.data.title)}</a>{" "}
-                      <button type="button" onClick={() => onEdit([{ kind: "restore", of: "chapter", id: node.id }])}>
+                      <a href={links.chapterHref(node.id)}>
+                        {node.data.title === undefined ? node.id : readerText(node.data.title)}
+                      </a>{" "}
+                      <button
+                        type="button"
+                        onClick={() => onEdit([{ kind: "restore", of: "chapter", id: node.id }])}
+                      >
                         {t("studio.draftEdit.restore")}
                       </button>
                     </li>
@@ -141,20 +171,37 @@ export function DraftOverviewScreen({
           </section>
         )}
         <section aria-labelledby="draft-cards-heading">
-          <h3 id="draft-cards-heading">{t(draft.course ? "studio.draft.questions" : "studio.draft.cards")}</h3>
+          <h3 id="draft-cards-heading">
+            {t(draft.course ? "studio.draft.questions" : "studio.draft.cards")}
+          </h3>
           <p>
-            {t("studio.draft.cardCount", { count: draft.cards.length })} <a href={links.cardsHref}>{t("studio.draft.allCards")}</a>
+            {t("studio.draft.cardCount", { count: draft.cards.length })}{" "}
+            <a href={links.cardsHref}>{t("studio.draft.allCards")}</a>
           </p>
           {!draft.course && (
-            <NewQuestionForm id="draft-new-card" draft={draft} place={null} legend={t("studio.draft.newCard")} onAdd={(changes) => onEdit(changes) === null} />
+            <NewQuestionForm
+              id="draft-new-card"
+              draft={draft}
+              place={null}
+              legend={t("studio.draft.newCard")}
+              onAdd={(changes) => onEdit(changes) === null}
+            />
           )}
         </section>
         <section aria-labelledby="draft-problems-heading">
           <h3 id="draft-problems-heading">{t("studio.draft.problems")}</h3>
           {check.problems === undefined ? (
-            check.error ? <ErrorMessage error={errorText(check.error)} /> : <p class="hint">{t("studio.draft.problemsChecking")}</p>
+            check.error ? (
+              <ErrorMessage error={errorText(check.error)} />
+            ) : (
+              <p class="hint">{t("studio.draft.problemsChecking")}</p>
+            )
           ) : (
-            <p>{check.problems.length === 0 ? t("studio.draft.problemsNone") : t("studio.draft.problemsCount", { count: check.problems.length })}</p>
+            <p>
+              {check.problems.length === 0
+                ? t("studio.draft.problemsNone")
+                : t("studio.draft.problemsCount", { count: check.problems.length })}
+            </p>
           )}
         </section>
       </DraftScope>
@@ -168,9 +215,17 @@ export function DraftOverviewScreen({
  * (chapterIdFor) until the user writes another. Added last among the
  * chapters; the form is then empty again.
  */
-function NewChapterForm({ draft, onAdd }: { draft: ReleaseDraft; onAdd: (changes: DraftChange[]) => boolean }) {
+function NewChapterForm({
+  draft,
+  onAdd,
+}: {
+  draft: ReleaseDraft;
+  onAdd: (changes: DraftChange[]) => boolean;
+}) {
   const { t } = useI18n();
-  const [title, setTitle] = useState(() => draftOf(undefined, [], { tag: recentLanguages("deck")[0] ?? null }));
+  const [title, setTitle] = useState(() =>
+    draftOf(undefined, [], { tag: recentLanguages("deck")[0] ?? null }),
+  );
   const [typedId, setTypedId] = useState<string | null>(null);
   const [missing, setMissing] = useState<DraftEntry | undefined>(undefined);
   const text = textOfDraft(title);
@@ -185,7 +240,10 @@ function NewChapterForm({ draft, onAdd }: { draft: ReleaseDraft; onAdd: (changes
     setMissing(undefined);
     if (!idUsable(draft, id)) return;
     const titled = textOrNull(text.text);
-    if (!onAdd([{ kind: "addChapter", id, ...(titled === null ? {} : { text: { title: titled } }) }])) return;
+    if (
+      !onAdd([{ kind: "addChapter", id, ...(titled === null ? {} : { text: { title: titled } }) }])
+    )
+      return;
     rememberLanguages("deck", text.text, title);
     setTypedId(null);
     setTitle(draftOf(undefined, [], { tag: title[0]!.tag }));
@@ -210,7 +268,8 @@ function NewChapterForm({ draft, onAdd }: { draft: ReleaseDraft; onAdd: (changes
         />
         <IdField id="new-chapter-id" draft={draft} value={id} onChange={setTypedId} />
         <p id="new-chapter-error" class="error" role="alert">
-          {missing !== undefined && t("studio.draftEdit.chooseLanguage", { field: t("language.field.title") })}
+          {missing !== undefined &&
+            t("studio.draftEdit.chooseLanguage", { field: t("language.field.title") })}
         </p>
         <button type="submit">{t("studio.draft.addChapter")}</button>
       </fieldset>

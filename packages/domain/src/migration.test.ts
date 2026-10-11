@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  CARD_FORMAT_VERSION,
-  DECK_FORMAT_VERSION,
-  type Card,
-  type Deck,
-} from "./deck";
+import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "./deck";
 import {
   isDeckOutdated,
   isInstanceOutdated,
@@ -82,9 +77,7 @@ describe("upgradeDeck", () => {
       ...oldDeck,
       formatVersion: DECK_FORMAT_VERSION,
     });
-    expect(upgradeDeck({ ...oldDeck, direction: "bidirectional" }).direction).toBe(
-      "bidirectional",
-    );
+    expect(upgradeDeck({ ...oldDeck, direction: "bidirectional" }).direction).toBe("bidirectional");
   });
 
   it("returns a current or newer deck unchanged", () => {
@@ -115,17 +108,29 @@ describe("review states, preferences and the instance record", () => {
     expect(upgradeReviewState(review("a", 1))).toEqual(review("a", 2));
     const current = review("a", 3);
     expect(upgradeReviewState(current)).toBe(current);
-    expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 1 })).toBe(true);
-    expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 2 })).toBe(true);
-    expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 3 })).toBe(true);
-    expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 4 })).toBe(false);
+    expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 1 })).toBe(
+      true,
+    );
+    expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 2 })).toBe(
+      true,
+    );
+    expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 3 })).toBe(
+      true,
+    );
+    expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 4 })).toBe(
+      false,
+    );
     expect(isInstanceOutdated({ name: "Main", createdAt: "", formatVersion: 0 })).toBe(true);
     expect(isInstanceOutdated({ name: "Main", createdAt: "", formatVersion: 1 })).toBe(true);
     expect(isInstanceOutdated({ name: "Main", createdAt: "", formatVersion: 2 })).toBe(false);
   });
 });
 
-const catalog = { title: "Main", description: "Mine.", publisher: { webId: "https://a.example/#me", name: "A" } };
+const catalog = {
+  title: "Main",
+  description: "Mine.",
+  publisher: { webId: "https://a.example/#me", name: "A" },
+};
 const nothingElse = { instance: null, preferences: null, catalog };
 
 describe("planMigration", () => {
@@ -138,7 +143,11 @@ describe("planMigration", () => {
       planMigration({
         ...nothingElse,
         entries: [
-          { deck, cards: [card("a", 1), card("b", CARD_FORMAT_VERSION), card("c", 1)], reviews: [review("a", 1)] },
+          {
+            deck,
+            cards: [card("a", 1), card("b", CARD_FORMAT_VERSION), card("c", 1)],
+            reviews: [review("a", 1)],
+          },
           { deck: other, cards: [card("d", 1)], reviews: [] },
           { deck: oldEntry, cards: [card("e", CARD_FORMAT_VERSION)], reviews: [review("e", 2)] },
           { deck: upToDate, cards: [card("f", CARD_FORMAT_VERSION)], reviews: [] },

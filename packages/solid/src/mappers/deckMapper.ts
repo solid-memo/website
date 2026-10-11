@@ -32,7 +32,13 @@ import {
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
-import { AGENT_V1, CATALOG_V1, DECK_V6, DISTRACTOR_V1, DISTRIBUTION_V1 } from "@solid-memo/vocab/descriptors.generated";
+import {
+  AGENT_V1,
+  CATALOG_V1,
+  DECK_V6,
+  DISTRACTOR_V1,
+  DISTRIBUTION_V1,
+} from "@solid-memo/vocab/descriptors.generated";
 import { foreignSubjects } from "../ownership";
 import { readVersioned, recordThing, removeUnlessNewer, unlessNewer } from "../records";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
@@ -67,7 +73,10 @@ export function toDecks(dataset: SolidDataset): Deck[] {
  * deck from before format 3 names its creators itself ("Name <email>"),
  * which name the agents the migration gives it.
  */
-export function toDeck(thing: Thing, agentNames: ReadonlyMap<string, string> = new Map()): Deck | null {
+export function toDeck(
+  thing: Thing,
+  agentNames: ReadonlyMap<string, string> = new Map(),
+): Deck | null {
   const read = readVersioned(thing, "deck");
   if (read === null) return null;
   const url = asUrl(thing);
@@ -132,11 +141,21 @@ export function withoutDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
     distributionUrlOf(deck.url),
   );
   for (const thing of getThingAll(updated)) {
-    if (getUrlAll(thing, RDF.type).includes(SM.DeckGroup) && getUrlAll(thing, DCAT.dataset).includes(deck.url)) {
-      updated = setThing(updated, buildThing(unlessNewer(thing)).removeUrl(DCAT.dataset, deck.url).build());
+    if (
+      getUrlAll(thing, RDF.type).includes(SM.DeckGroup) &&
+      getUrlAll(thing, DCAT.dataset).includes(deck.url)
+    ) {
+      updated = setThing(
+        updated,
+        buildThing(unlessNewer(thing)).removeUrl(DCAT.dataset, deck.url).build(),
+      );
     }
   }
-  return withCatalogDataset(withoutStrayAgents(updated, documentUrlOf(deck.url)), deck.url, "remove");
+  return withCatalogDataset(
+    withoutStrayAgents(updated, documentUrlOf(deck.url)),
+    deck.url,
+    "remove",
+  );
 }
 
 function isTyped(dataset: SolidDataset, url: string, type: string): boolean {
@@ -156,13 +175,23 @@ function deckUrlsOf(dataset: SolidDataset): string[] {
  * a dataset another app listed in the catalog is not this app's to
  * drop (docs/data-model.md "Write discipline").
  */
-function withCatalogDataset(dataset: SolidDataset, deckUrl: string, change: "add" | "remove"): SolidDataset {
+function withCatalogDataset(
+  dataset: SolidDataset,
+  deckUrl: string,
+  change: "add" | "remove",
+): SolidDataset {
   const catalog = getThing(dataset, `${documentUrlOf(deckUrl)}#catalog`);
   if (catalog === null) return dataset;
   const listed = getUrlAll(catalog, DCAT.dataset).includes(deckUrl);
   if (listed === (change === "add")) return dataset;
   const builder = buildThing(unlessNewer(catalog));
-  return setThing(dataset, (change === "add" ? builder.addIri(DCAT.dataset, deckUrl) : builder.removeUrl(DCAT.dataset, deckUrl)).build());
+  return setThing(
+    dataset,
+    (change === "add"
+      ? builder.addIri(DCAT.dataset, deckUrl)
+      : builder.removeUrl(DCAT.dataset, deckUrl)
+    ).build(),
+  );
 }
 
 /**
@@ -193,29 +222,50 @@ export function toCatalog(dataset: SolidDataset, documentUrl: string): Catalog |
  * the document still names it a license elsewhere; with nothing else said
  * of it, it goes.
  */
-export function withCatalog(dataset: SolidDataset, documentUrl: string, catalog: Catalog): SolidDataset {
+export function withCatalog(
+  dataset: SolidDataset,
+  documentUrl: string,
+  catalog: Catalog,
+): SolidDataset {
   const url = `${documentUrl}#catalog`;
   const existing = getThing(dataset, url);
   const before = existing === null ? [] : getUrlAll(existing, DCTERMS.license);
   const foreign = foreignSubjects(dataset);
   const kept = (existing === null ? [] : getUrlAll(existing, DCAT.dataset)).filter(
-    (link) => documentUrlOf(link) !== documentUrl || isTyped(dataset, link, DCAT.Dataset) || foreign.has(link),
+    (link) =>
+      documentUrlOf(link) !== documentUrl ||
+      isTyped(dataset, link, DCAT.Dataset) ||
+      foreign.has(link),
   );
   const datasets = [...new Set([...kept, ...deckUrlsOf(dataset)])];
-  let updated = setThing(dataset, recordThing(url, CATALOG_V1, catalogToRecord(catalog, datasets), existing));
+  let updated = setThing(
+    dataset,
+    recordThing(url, CATALOG_V1, catalogToRecord(catalog, datasets), existing),
+  );
   const publisher = catalog.publisher.webId;
-  updated = setThing(updated, recordThing(publisher, AGENT_V1, publisherToRecord(catalog), getThing(updated, publisher)));
+  updated = setThing(
+    updated,
+    recordThing(publisher, AGENT_V1, publisherToRecord(catalog), getThing(updated, publisher)),
+  );
   const named = new Set(getThingAll(updated).flatMap((thing) => getUrlAll(thing, DCTERMS.license)));
-  for (const license of before.filter((license) => license !== catalog.license && !named.has(license))) {
+  for (const license of before.filter(
+    (license) => license !== catalog.license && !named.has(license),
+  )) {
     const node = getThing(updated, license);
     if (node === null) continue;
     const untyped = buildThing(node).removeUrl(RDF.type, DCTERMS.LicenseDocument).build();
-    updated = getPropertyAll(untyped).length === 0 ? removeThing(updated, license) : setThing(updated, untyped);
+    updated =
+      getPropertyAll(untyped).length === 0
+        ? removeThing(updated, license)
+        : setThing(updated, untyped);
   }
   if (catalog.license !== undefined) {
     const node = getThing(updated, catalog.license) ?? createThing({ url: catalog.license });
     if (!getUrlAll(node, RDF.type).includes(DCTERMS.LicenseDocument)) {
-      updated = setThing(updated, buildThing(node).addIri(RDF.type, DCTERMS.LicenseDocument).build());
+      updated = setThing(
+        updated,
+        buildThing(node).addIri(RDF.type, DCTERMS.LicenseDocument).build(),
+      );
     }
   }
   return updated;
@@ -244,7 +294,12 @@ export function toCard(thing: Thing, dataset: SolidDataset): Card | null {
   const read = readVersioned(thing, "card");
   if (read === null) return null;
   const data = migrate("card", read.record, { subject: asUrl(thing) });
-  return cardFromRecord(asUrl(thing), read.storedVersion, data, distractorsOf(dataset, data.distractor));
+  return cardFromRecord(
+    asUrl(thing),
+    read.storedVersion,
+    data,
+    distractorsOf(dataset, data.distractor),
+  );
 }
 
 /** Every card of a cards document. */
@@ -258,7 +313,10 @@ export function toCards(dataset: SolidDataset): Card[] {
 export function toDistractor(thing: Thing): Distractor | null {
   const read = readVersioned(thing, "distractor");
   if (read === null) return null;
-  return distractorFromRecord(asUrl(thing), migrate("distractor", read.record, { subject: asUrl(thing) }));
+  return distractorFromRecord(
+    asUrl(thing),
+    migrate("distractor", read.record, { subject: asUrl(thing) }),
+  );
 }
 
 /**
@@ -295,7 +353,12 @@ export function withDistractors(
   for (const [i, distractor] of distractors.entries()) {
     updated = setThing(
       updated,
-      recordThing(subjects[i], DISTRACTOR_V1, distractorToRecord(distractor), getThing(updated, subjects[i])),
+      recordThing(
+        subjects[i],
+        DISTRACTOR_V1,
+        distractorToRecord(distractor),
+        getThing(updated, subjects[i]),
+      ),
     );
   }
   return { dataset: updated, subjects };
@@ -314,8 +377,10 @@ export function withSuggestedAnswers(
   distractors: readonly string[],
 ): ThingPersisted {
   const builder = buildThing(card);
-  for (const url of before) if (!distractors.includes(url)) builder.removeUrl(SCHEMA.suggestedAnswer, url);
+  for (const url of before)
+    if (!distractors.includes(url)) builder.removeUrl(SCHEMA.suggestedAnswer, url);
   const suggested = getUrlAll(card, SCHEMA.suggestedAnswer);
-  for (const url of distractors) if (!suggested.includes(url)) builder.addUrl(SCHEMA.suggestedAnswer, url);
+  for (const url of distractors)
+    if (!suggested.includes(url)) builder.addUrl(SCHEMA.suggestedAnswer, url);
   return builder.build();
 }

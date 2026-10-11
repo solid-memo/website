@@ -13,7 +13,13 @@ function v1() {
   const draft = rebaseDraft(courseDraft(), V1);
   return {
     ...draft,
-    root: { ...draft.root, issued: "2026-10-10T00:00:00Z", modified: "2026-10-09T00:00:00Z", versionNotes: "First release.", releasedAs: "x" },
+    root: {
+      ...draft.root,
+      issued: "2026-10-10T00:00:00Z",
+      modified: "2026-10-09T00:00:00Z",
+      versionNotes: "First release.",
+      releasedAs: "x",
+    },
     triples: [
       ...draft.triples,
       link(`${V1}#series`, `${DCAT}hasVersion`, V1),
@@ -26,8 +32,14 @@ describe("nextVersionDraft", () => {
   it("is the release as version N + 1 after it, its subjects the draft's, nothing released yet", () => {
     const draft = nextVersionDraft(v1(), DRAFT);
     expect(draft.url).toBe(DRAFT);
-    expect(draft.root).toMatchObject({ version: "2", prev: V1, previousVersion: V1, created: v1().root.created });
-    for (const field of ["issued", "modified", "versionNotes", "releasedAs"]) expect(draft.root).not.toHaveProperty(field);
+    expect(draft.root).toMatchObject({
+      version: "2",
+      prev: V1,
+      previousVersion: V1,
+      created: v1().root.created,
+    });
+    for (const field of ["issued", "modified", "versionNotes", "releasedAs"])
+      expect(draft.root).not.toHaveProperty(field);
     expect(draft.cards[0]!.data.distractor).toEqual([`${DRAFT}#q-a-1a-d1`, `${DRAFT}#q-a-1a-d2`]);
     expect(draft.distributions[0]!.data.accessUrl).toBe(DRAFT);
   });
@@ -51,7 +63,15 @@ describe("nextVersionDraft", () => {
   });
 
   it("describes no earlier version of a series described elsewhere, as the library's index describes it", () => {
-    const release = { ...v1(), root: { ...v1().root, inSeries: "https://solid-memo.com/decks/index.ttl#solid", isVersionOf: undefined, version: undefined } };
+    const release = {
+      ...v1(),
+      root: {
+        ...v1().root,
+        inSeries: "https://solid-memo.com/decks/index.ttl#solid",
+        isVersionOf: undefined,
+        version: undefined,
+      },
+    };
     const draft = nextVersionDraft({ ...release, triples: v1().triples.slice(0, 4) }, DRAFT);
     expect(draft.root.version).toBe("2");
     expect(draft.root.inSeries).toBe("https://solid-memo.com/decks/index.ttl#solid");
@@ -60,17 +80,32 @@ describe("nextVersionDraft", () => {
 
   it("describes a series and publisher described elsewhere as their document does, so the release it makes is whole", () => {
     const INDEX = "https://solid-memo.com/decks/index.ttl";
-    const release = { ...v1(), root: { ...v1().root, inSeries: `${INDEX}#solid`, isVersionOf: `${INDEX}#solid`, publisher: `${INDEX}#pub` } };
+    const release = {
+      ...v1(),
+      root: {
+        ...v1().root,
+        inSeries: `${INDEX}#solid`,
+        isVersionOf: `${INDEX}#solid`,
+        publisher: `${INDEX}#pub`,
+      },
+    };
     const library = { ...release, triples: v1().triples.slice(0, 4) };
     const OLD = "https://solid-memo.com/decks/solid/v0.ttl";
-    const text = (subject: string, predicate: string, value: string) => ({ subject, predicate, object: { kind: "literal" as const, value, language: "en", datatype: "" } });
+    const text = (subject: string, predicate: string, value: string) => ({
+      subject,
+      predicate,
+      object: { kind: "literal" as const, value, language: "en", datatype: "" },
+    });
     const series = [
       link(`${INDEX}#solid`, RDF_TYPE, `${DCAT}DatasetSeries`),
       link(`${INDEX}#solid`, `${DCTERMS}publisher`, `${INDEX}#lib`),
       link(`${INDEX}#solid`, `${DCAT}hasVersion`, OLD),
       link(`${INDEX}#solid`, `${DCAT}hasVersion`, V1),
     ];
-    const agents = [link(`${INDEX}#pub`, RDF_TYPE, "http://xmlns.com/foaf/0.1/Agent"), text(`${INDEX}#lib`, "http://xmlns.com/foaf/0.1/name", "Library")];
+    const agents = [
+      link(`${INDEX}#pub`, RDF_TYPE, "http://xmlns.com/foaf/0.1/Agent"),
+      text(`${INDEX}#lib`, "http://xmlns.com/foaf/0.1/name", "Library"),
+    ];
     const older = [link(OLD, RDF_TYPE, `${DCAT}Dataset`), text(OLD, `${DCTERMS}title`, "Solid")];
     const elsewhere = [
       link(`${INDEX}#other`, RDF_TYPE, `${DCAT}DatasetSeries`),
@@ -85,7 +120,14 @@ describe("nextVersionDraft", () => {
     const index = [...series, ...agents, ...older, ...elsewhere];
     expect(linkedDescription(library, index)).toEqual([...series, ...agents, ...older]);
     const draft = nextVersionDraft(library, DRAFT, index);
-    expect(draft.triples).toEqual(expect.arrayContaining([...series, ...agents, ...older, link(V1, RDF_TYPE, `${DCAT}Dataset`)]));
+    expect(draft.triples).toEqual(
+      expect.arrayContaining([
+        ...series,
+        ...agents,
+        ...older,
+        link(V1, RDF_TYPE, `${DCAT}Dataset`),
+      ]),
+    );
     expect(draft.triples).not.toContainEqual(elsewhere[0]);
     // What the release describes itself is not described again.
     expect(linkedDescription(v1(), index)).toEqual([]);
@@ -93,16 +135,38 @@ describe("nextVersionDraft", () => {
 
   it("carries what the release published: its every subject, retired ones too, and its activities", () => {
     const draft = nextVersionDraft(v1(), DRAFT);
-    expect(draft.published.ids).toMatchObject({ "ch-a": "chapter", "q-a-1a": "card", "q-a-1a-d1": "distractor", "ch-a-1": "step" });
+    expect(draft.published.ids).toMatchObject({
+      "ch-a": "chapter",
+      "q-a-1a": "card",
+      "q-a-1a-d1": "distractor",
+      "ch-a-1": "step",
+    });
     expect(draft.published.activities).toEqual(["compilation"]);
   });
 
   it("describes a release's description in each of its languages", () => {
     const release = { ...v1(), root: { ...v1().root, description: { en: "About", sv: "Om" } } };
     const draft = nextVersionDraft(release, DRAFT);
-    expect(draft.triples.filter((triple) => triple.subject === V1 && triple.predicate === "http://purl.org/dc/terms/description").map((triple) => triple.object)).toEqual([
-      { kind: "literal", value: "About", language: "en", datatype: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" },
-      { kind: "literal", value: "Om", language: "sv", datatype: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" },
+    expect(
+      draft.triples
+        .filter(
+          (triple) =>
+            triple.subject === V1 && triple.predicate === "http://purl.org/dc/terms/description",
+        )
+        .map((triple) => triple.object),
+    ).toEqual([
+      {
+        kind: "literal",
+        value: "About",
+        language: "en",
+        datatype: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+      },
+      {
+        kind: "literal",
+        value: "Om",
+        language: "sv",
+        datatype: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+      },
     ]);
   });
 
@@ -110,6 +174,10 @@ describe("nextVersionDraft", () => {
     const release = { ...v1(), root: { ...v1().root, version: undefined } };
     const draft = nextVersionDraft(release, DRAFT);
     expect(draft.root.version).toBe("2");
-    expect(draft.triples.find((triple) => triple.subject === V1 && triple.predicate === `${DCAT}version`)!.object.value).toBe("1");
+    expect(
+      draft.triples.find(
+        (triple) => triple.subject === V1 && triple.predicate === `${DCAT}version`,
+      )!.object.value,
+    ).toBe("1");
   });
 });

@@ -44,9 +44,7 @@ export function OnboardingFlow({
     }
   }, [step]);
 
-  const signUpProviders = providers.filter(
-    (provider) => provider.signUpUrl !== undefined,
-  );
+  const signUpProviders = providers.filter((provider) => provider.signUpUrl !== undefined);
 
   if (step === "webId") {
     return (

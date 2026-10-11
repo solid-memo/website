@@ -10,9 +10,7 @@ const account: SolidAccount = {
   oidcIssuer: "https://issuer.example",
 };
 
-function renderScreen(
-  overrides: Partial<Parameters<typeof PodConnectionScreen>[0]> = {},
-) {
+function renderScreen(overrides: Partial<Parameters<typeof PodConnectionScreen>[0]> = {}) {
   const props = {
     account: undefined,
     busy: false,
@@ -29,31 +27,22 @@ function renderScreen(
 describe("PodConnectionScreen", () => {
   it("shows discovery in progress while busy", () => {
     renderScreen({ busy: true, account });
-    expect(
-      screen.getByRole("heading", { name: "Discovering your Pod…" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Discovering your Pod…" })).toBeInTheDocument();
   });
 
   it("shows discovery in progress before any result exists", () => {
     renderScreen();
-    expect(
-      screen.getByRole("heading", { name: "Discovering your Pod…" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Discovering your Pod…" })).toBeInTheDocument();
   });
 
   it("confirms the connection with the discovered account", () => {
     const { onContinue } = renderScreen({ account });
-    expect(
-      screen.getByRole("heading", { name: "Your Pod is connected." }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Your Pod is connected." })).toBeInTheDocument();
     expect(screen.getByText(account.webId)).toBeInTheDocument();
     expect(screen.getByText(account.podUrl!)).toBeInTheDocument();
     expect(screen.getByText(account.oidcIssuer!)).toBeInTheDocument();
     for (const url of [account.webId, account.podUrl!, account.oidcIssuer!]) {
-      expect(screen.getByRole("link", { name: newTab(url) })).toHaveAttribute(
-        "href",
-        url,
-      );
+      expect(screen.getByRole("link", { name: newTab(url) })).toHaveAttribute("href", url);
     }
 
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
@@ -99,9 +88,7 @@ describe("PodConnectionScreen", () => {
     const { onRetry, onContinue, onLogout } = renderScreen({
       account: { webId: account.webId },
     });
-    expect(
-      screen.getByRole("heading", { name: "No Pod found" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "No Pod found" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: newTab(account.webId) })).toHaveAttribute(
       "href",
       account.webId,

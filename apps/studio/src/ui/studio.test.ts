@@ -27,7 +27,9 @@ const root = document.documentElement;
 
 /** The test DOM's window this wide, as its own (happy-dom's) way has it: the cascade's @media reads it. */
 const viewport = (width: number) =>
-  (window as unknown as { happyDOM: { setViewport: (size: { width: number }) => void } }).happyDOM.setViewport({ width });
+  (
+    window as unknown as { happyDOM: { setViewport: (size: { width: number }) => void } }
+  ).happyDOM.setViewport({ width });
 
 afterEach(() => {
   document.body.innerHTML = "";
@@ -165,12 +167,20 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(page, "thead th:first-child").zIndex).toBe("2");
     expect(styleOf(page, "tbody tr.cursor > td:first-child").boxShadow).toContain("inset");
     expect(styleOf(page, "tbody tr.selected > td:first-child").boxShadow).not.toContain("inset");
-    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).toBe(styleOf(page, "tbody tr[aria-current] > td:last-child").backgroundColor);
-    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).not.toBe(styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor);
+    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).toBe(
+      styleOf(page, "tbody tr[aria-current] > td:last-child").backgroundColor,
+    );
+    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).not.toBe(
+      styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor,
+    );
     expect(styleOf(page, "tbody tr[aria-current] > td:first-child").boxShadow).toContain("inset");
     // The row's name, though it stays in sight on a color of its own, takes the row's.
-    expect(styleOf(page, "tbody tr.cursor > th").backgroundColor).toBe(styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor);
-    expect(styleOf(page, "tbody tr.selected > th").backgroundColor).toBe(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor);
+    expect(styleOf(page, "tbody tr.cursor > th").backgroundColor).toBe(
+      styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor,
+    );
+    expect(styleOf(page, "tbody tr.selected > th").backgroundColor).toBe(
+      styleOf(page, "tbody tr.selected > td:last-child").backgroundColor,
+    );
   });
 
   it("packs a table's filters into one row, each label beside its field, and keeps the bar of the rows selected in sight", () => {

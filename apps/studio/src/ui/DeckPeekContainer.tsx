@@ -41,11 +41,17 @@ export function DeckPeekContainer({
     queryFn: deck === null ? skipToken : () => useCases.listCards(deck),
   });
   const countsQuery = useQuery(
-    deck === null ? { queryKey: ["studyQueue", null, "counts"], queryFn: skipToken } : studyCountsQuery(useCases, instance.url, deck),
+    deck === null
+      ? { queryKey: ["studyQueue", null, "counts"], queryFn: skipToken }
+      : studyCountsQuery(useCases, instance.url, deck),
   );
   if (deck === null) return <DeckPeekScreen peek={null} />;
   const pending = (query: { isError: boolean }) => (query.isError ? "unreadable" : "loading");
-  const healthHref = studioRouteToHash({ screen: "health", instanceUrl: instance.url, deckUrl: deck.url });
+  const healthHref = studioRouteToHash({
+    screen: "health",
+    instanceUrl: instance.url,
+    deckUrl: deck.url,
+  });
   return (
     <DeckPeekScreen
       // Another deck: its health badge checks it afresh.
@@ -53,11 +59,22 @@ export function DeckPeekContainer({
       peek={{
         deck,
         groups: groupsOfDecks(treeQuery.data!).get(deck.url)!,
-        cards: cardsQuery.data === undefined ? pending(cardsQuery) : activeCards(cardsQuery.data).length,
+        cards:
+          cardsQuery.data === undefined ? pending(cardsQuery) : activeCards(cardsQuery.data).length,
         due: countsQuery.data?.dueCount ?? pending(countsQuery),
         fresh: countsQuery.data?.newCount ?? pending(countsQuery),
-        healthBadge: <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={healthHref} />,
-        tabs: deckTabs(route, deck.url).map((tab) => ({ key: tab.key, href: studioRouteToHash(tab.route) })),
+        healthBadge: (
+          <HealthBadge
+            useCases={useCases}
+            instanceUrl={instance.url}
+            deck={deck}
+            href={healthHref}
+          />
+        ),
+        tabs: deckTabs(route, deck.url).map((tab) => ({
+          key: tab.key,
+          href: studioRouteToHash(tab.route),
+        })),
       }}
     />
   );

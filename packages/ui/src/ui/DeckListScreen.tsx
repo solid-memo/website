@@ -199,7 +199,8 @@ export function DeckListScreen({
       request.key === null
         ? headingRef.current!
         : [...listRef.current!.querySelectorAll<HTMLElement>(`[data-row-key] ${control}`)].find(
-            (element) => element.closest<HTMLElement>("[data-row-key]")!.dataset.rowKey === request.key,
+            (element) =>
+              element.closest<HTMLElement>("[data-row-key]")!.dataset.rowKey === request.key,
           );
     // Not there (yet): a row that is gone takes no focus.
     if (target === undefined) return;
@@ -221,7 +222,8 @@ export function DeckListScreen({
     setFocusRequested((count) => count + 1);
   }
 
-  const nameOf = (node: TreeNode) => readerText(node.kind === "deck" ? node.deck.title : node.group.title);
+  const nameOf = (node: TreeNode) =>
+    readerText(node.kind === "deck" ? node.deck.title : node.group.title);
 
   /**
    * Makes the edit, the rows moving from where they are now to where it
@@ -257,7 +259,9 @@ export function DeckListScreen({
         position: at.index + 1,
         count: (holder?.children ?? next.children).length,
         place:
-          holder === null ? t("deckList.atTopLevel") : t("deckList.inGroup", { group: readerText(holder.group.title) }),
+          holder === null
+            ? t("deckList.atTopLevel")
+            : t("deckList.inGroup", { group: readerText(holder.group.title) }),
       }),
       from && { key: nodeId(node), rect: from },
     );
@@ -272,7 +276,11 @@ export function DeckListScreen({
     setNaming(group.url);
     void edit(
       { kind: "combine", dragged: nodeId(dragged), target: nodeId(target), group },
-      t("deckList.combined", { name: nameOf(target), other: nameOf(dragged), group: t("deckList.newGroupName") }),
+      t("deckList.combined", {
+        name: nameOf(target),
+        other: nameOf(dragged),
+        group: t("deckList.newGroupName"),
+      }),
       from && { key: nodeId(dragged), rect: from },
     ).then((written) => {
       if (written) return;
@@ -287,7 +295,10 @@ export function DeckListScreen({
     setNaming(null);
     if (refocus) focusLater(group.url, "toggle");
     if (name !== null) {
-      void edit({ kind: "rename", group: group.url, title: { [locale]: name } }, t("deckList.renamed", { name }));
+      void edit(
+        { kind: "rename", group: group.url, title: { [locale]: name } },
+        t("deckList.renamed", { name }),
+      );
     }
   }
 
@@ -309,7 +320,9 @@ export function DeckListScreen({
     const removeGroup = () =>
       void edit(
         { kind: "removeGroup", group: url },
-        first === undefined ? t("deckList.deletedEmpty", { name }) : t("deckList.deleted", { name }),
+        first === undefined
+          ? t("deckList.deletedEmpty", { name })
+          : t("deckList.deleted", { name }),
       ).then((written) => {
         // Back, as it was: its header unfolds again.
         if (!written) setLeaving((all) => new Set([...all].filter((other) => other !== url)));
@@ -332,7 +345,10 @@ export function DeckListScreen({
     if (refocus) focusLater(deck.url, "menu");
     if (name === null) return;
     setAnnouncement(t("deckList.deckRenamed", { name }));
-    onRenameDeck(deck, { ...deck.title, [shownTag(deck.title, [locale, ...navigator.languages])!]: name });
+    onRenameDeck(deck, {
+      ...deck.title,
+      [shownTag(deck.title, [locale, ...navigator.languages])!]: name,
+    });
   }
 
   /**
@@ -346,8 +362,11 @@ export function DeckListScreen({
     // The deck's menu button, the menu closed back on it.
     const from = document.activeElement;
     const at = locate(tree, deck.url)!;
-    const siblings = at.parent === null ? tree.children : (locate(tree, at.parent)!.node as GroupNode).children;
-    const near = [siblings[at.index + 1], siblings[at.index - 1]].filter((node) => node !== undefined);
+    const siblings =
+      at.parent === null ? tree.children : (locate(tree, at.parent)!.node as GroupNode).children;
+    const near = [siblings[at.index + 1], siblings[at.index - 1]].filter(
+      (node) => node !== undefined,
+    );
     setRemoving((all) => new Set([...all, deck.url]));
     void onRemoveDeck(deck).then((removed) => {
       setRemoving((all) => new Set([...all].filter((url) => url !== deck.url)));
@@ -409,7 +428,9 @@ export function DeckListScreen({
     rules: DECK_LIST_RULES,
     describe: (label: GapLabel) => {
       const name = readerText((locate(shown, label.group)!.node as GroupNode).group.title);
-      return label.kind === "in" ? t("deckList.inGroup", { group: name }) : t("deckList.afterGroup", { group: name });
+      return label.kind === "in"
+        ? t("deckList.inGroup", { group: name })
+        : t("deckList.afterGroup", { group: name });
     },
   });
   const dragging = drag.feedback.phase === "dragging";
@@ -447,8 +468,12 @@ export function DeckListScreen({
         {node.kind === "deck" && courseHref(node.deck) !== undefined && (
           <MenuLink href={courseHref(node.deck)!}>{t("deckList.continueCourse")}</MenuLink>
         )}
-        {node.kind === "deck" && <MenuLink href={preferencesHref(node.deck)}>{t("deckList.preferences")}</MenuLink>}
-        {node.kind === "deck" && studioHref !== undefined && <MenuLink href={studioHref}>{t("studio.open")}</MenuLink>}
+        {node.kind === "deck" && (
+          <MenuLink href={preferencesHref(node.deck)}>{t("deckList.preferences")}</MenuLink>
+        )}
+        {node.kind === "deck" && studioHref !== undefined && (
+          <MenuLink href={studioHref}>{t("studio.open")}</MenuLink>
+        )}
         {/* A group's name is the arrangement's, a deck's its own. */}
         <MenuItem disabled={busy || held} onSelect={() => setNaming(key)}>
           {t("deckList.rename")}
@@ -459,7 +484,9 @@ export function DeckListScreen({
           nodeKey={key}
           readOnly={readOnly || busy}
           onMove={(to) => move(node, { kind: "move", node: key, to })}
-          onCombine={(dragged, target) => combine(locate(tree, dragged)!.node, locate(tree, target)!.node)}
+          onCombine={(dragged, target) =>
+            combine(locate(tree, dragged)!.node, locate(tree, target)!.node)
+          }
         />
         <MenuSeparator />
         {node.kind === "deck" ? (
@@ -558,7 +585,9 @@ export function DeckListScreen({
             {lifted.kind === "deck" ? <DeckIcon /> : <FolderIcon />}
             <ReaderText text={lifted.kind === "deck" ? lifted.deck.title : lifted.group.title} />
             {lifted.kind === "group" && (
-              <span class="hint">{t("deckList.deckCount", { count: decksOf(lifted.children).length })}</span>
+              <span class="hint">
+                {t("deckList.deckCount", { count: decksOf(lifted.children).length })}
+              </span>
             )}
           </div>,
           document.body,
@@ -627,7 +656,12 @@ function DeckGroupItem({
       }}
     >
       {header(bodyId, !collapsed)}
-      <div id={bodyId} class="deck-group-body" data-collapsed={collapsed ? "" : undefined} inert={collapsed}>
+      <div
+        id={bodyId}
+        class="deck-group-body"
+        data-collapsed={collapsed ? "" : undefined}
+        inert={collapsed}
+      >
         <div class="deck-group-clip">
           {empty ? (
             <p class="hint deck-group-empty" data-row-key={slot}>

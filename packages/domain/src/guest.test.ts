@@ -49,8 +49,12 @@ describe("guest", () => {
   });
 
   it("suggests keeping a guest's study as a new instance where a first instance goes", () => {
-    expect(suggestedGuestLocation("https://pod.example")).toBe("https://pod.example/solid-memo/main/");
-    expect(suggestedGuestLocation("https://pod.example/")).toBe("https://pod.example/solid-memo/main/");
+    expect(suggestedGuestLocation("https://pod.example")).toBe(
+      "https://pod.example/solid-memo/main/",
+    );
+    expect(suggestedGuestLocation("https://pod.example/")).toBe(
+      "https://pod.example/solid-memo/main/",
+    );
   });
 });
 
@@ -59,7 +63,9 @@ describe("adding a guest's study to an instance", () => {
     const copied = deck("deck-g1", GUEST_INSTANCE_URL, { sourceUrl: RELEASE });
     const own = deck("deck-g2");
     const theirs = deck("deck-t1", TARGET, { sourceUrl: RELEASE });
-    const other = deck("deck-t2", TARGET, { sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" });
+    const other = deck("deck-t2", TARGET, {
+      sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl",
+    });
     expect(guestMergePlan([copied, own], [theirs, other, deck("deck-t3", TARGET)], 2)).toEqual({
       decks: [
         { deck: copied, sameRelease: [theirs] },
@@ -108,7 +114,12 @@ describe("adding a guest's study to an instance", () => {
       chosenDistractor: `${to.cardsDocumentUrl}#q-1-d1`,
     });
     const { mode: _mode, chosenDistractor: _chosen, ...recalled } = answer;
-    expect(mergedAnswer(recalled, to)).toEqual({ ...recalled, id: "answer-1-deck-n", deckUrl: to.url, cardUrl: `${to.cardsDocumentUrl}#q-1` });
+    expect(mergedAnswer(recalled, to)).toEqual({
+      ...recalled,
+      id: "answer-1-deck-n",
+      deckUrl: to.url,
+      cardUrl: `${to.cardsDocumentUrl}#q-1`,
+    });
     // Added to another deck, the same answer is an entry of its own; to the same deck, the same entry.
     expect(mergedAnswer(answer, deck("deck-m", TARGET)).id).toBe("answer-1-deck-m");
     expect(mergedAnswer(answer, to)).toEqual(mergedAnswer(answer, to));
@@ -116,17 +127,26 @@ describe("adding a guest's study to an instance", () => {
 
   it("stamps a guest's deck with its entry and its documents' versions, its chapters in any order", () => {
     const versionOf = (url: string) => (url.includes("/decks/") ? '"c1"' : "");
-    const course = deck("deck-g1", GUEST_INSTANCE_URL, { completedChapters: [`${RELEASE}#ch-2`, `${RELEASE}#ch-1`] });
+    const course = deck("deck-g1", GUEST_INSTANCE_URL, {
+      completedChapters: [`${RELEASE}#ch-2`, `${RELEASE}#ch-1`],
+    });
     const stamp = guestDeckStamp(course, versionOf);
     expect(JSON.parse(stamp)).toEqual({
       entry: { ...course, completedChapters: [`${RELEASE}#ch-1`, `${RELEASE}#ch-2`] },
       cards: '"c1"',
       reviews: "",
     });
-    expect(guestDeckStamp({ ...course, completedChapters: [`${RELEASE}#ch-1`, `${RELEASE}#ch-2`] }, versionOf)).toBe(stamp);
+    expect(
+      guestDeckStamp(
+        { ...course, completedChapters: [`${RELEASE}#ch-1`, `${RELEASE}#ch-2`] },
+        versionOf,
+      ),
+    ).toBe(stamp);
     expect(guestDeckStamp({ ...course, title: { en: "Renamed" } }, versionOf)).not.toBe(stamp);
     expect(guestDeckStamp(course, () => '"c2"')).not.toBe(stamp);
-    expect(JSON.parse(guestDeckStamp(deck("deck-g2"), versionOf)).entry).not.toHaveProperty("completedChapters");
+    expect(JSON.parse(guestDeckStamp(deck("deck-g2"), versionOf)).entry).not.toHaveProperty(
+      "completedChapters",
+    );
   });
 
   it("makes the guest's groups new around the decks added, in the guest's order, leaving out decks not added", () => {
@@ -138,7 +158,10 @@ describe("adding a guest's study to an instance", () => {
         {
           kind: "group",
           group: { url: `${GUEST_INSTANCE_URL}catalog.ttl#group-1`, title: { en: "Languages" } },
-          children: [{ kind: "deck", deck: b }, { kind: "group", group: { url: "x", title: { sv: "Tomt" } }, children: [] }],
+          children: [
+            { kind: "deck", deck: b },
+            { kind: "group", group: { url: "x", title: { sv: "Tomt" } }, children: [] },
+          ],
         },
         { kind: "deck", deck: c },
       ],
@@ -160,12 +183,18 @@ describe("adding a guest's study to an instance", () => {
         group: { url: `${TARGET}catalog.ttl#group-1`, title: { en: "Languages" } },
         children: [
           { kind: "deck", url: `${TARGET}catalog.ttl#b2` },
-          { kind: "group", group: { url: `${TARGET}catalog.ttl#group-2`, title: { sv: "Tomt" } }, children: [] },
+          {
+            kind: "group",
+            group: { url: `${TARGET}catalog.ttl#group-2`, title: { sv: "Tomt" } },
+            children: [],
+          },
         ],
       },
     ]);
     expect(named).toEqual([`${GUEST_INSTANCE_URL}catalog.ttl#group-1`, "x"]);
-    expect(graftOfGuestTree({ readOnly: false, children: [{ kind: "deck", deck: a }] }, added, newGroup)).toEqual([]);
+    expect(
+      graftOfGuestTree({ readOnly: false, children: [{ kind: "deck", deck: a }] }, added, newGroup),
+    ).toEqual([]);
   });
 
   it("finds the guest's pod named anywhere in a value", () => {

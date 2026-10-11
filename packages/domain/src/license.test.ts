@@ -16,9 +16,7 @@ describe("licenseLabel", () => {
   });
 
   it("falls back to the URL for anything else", () => {
-    expect(licenseLabel("https://example.org/my-terms")).toBe(
-      "https://example.org/my-terms",
-    );
+    expect(licenseLabel("https://example.org/my-terms")).toBe("https://example.org/my-terms");
   });
 });
 

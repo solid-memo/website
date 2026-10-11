@@ -5,7 +5,13 @@ const failing: Report = {
   stats: { expected: 1, unexpected: 1, flaky: 0, skipped: 0, duration: 61_500 },
   suites: [
     {
-      specs: [{ title: "smoke", file: "smoke.journey.ts", tests: [{ results: [{ status: "passed", duration: 1 }] }] }],
+      specs: [
+        {
+          title: "smoke",
+          file: "smoke.journey.ts",
+          tests: [{ results: [{ status: "passed", duration: 1 }] }],
+        },
+      ],
       suites: [
         {
           specs: [
@@ -14,15 +20,30 @@ const failing: Report = {
               file: "full-learner.journey.ts",
               tests: [
                 {
-                  annotations: [{ type: "webId", description: "https://127.0.0.1:1/j/profile/card#me" }, { type: "note" }],
+                  annotations: [
+                    { type: "webId", description: "https://127.0.0.1:1/j/profile/card#me" },
+                    { type: "note" },
+                  ],
                   results: [
                     {
                       status: "failed",
                       duration: 60_000,
-                      errors: [{ message: "\u001b[31mError: expect(locator).toHaveText()\u001b[39m\nExpected: 4" }],
+                      errors: [
+                        {
+                          message:
+                            "\u001b[31mError: expect(locator).toHaveText()\u001b[39m\nExpected: 4",
+                        },
+                      ],
                       steps: [
                         { title: "01 · Visit Solid Memo" },
-                        { title: "15 · Check the statistics", error: {}, steps: [{ title: "Open Statistics" }, { title: "Check the tiles", error: {} }] },
+                        {
+                          title: "15 · Check the statistics",
+                          error: {},
+                          steps: [
+                            { title: "Open Statistics" },
+                            { title: "Check the tiles", error: {} },
+                          ],
+                        },
                       ],
                     },
                   ],
@@ -38,10 +59,9 @@ const failing: Report = {
 
 describe("failingStepPath", () => {
   it("follows the failed steps down to the innermost", () => {
-    expect(failingStepPath(failing.suites![0]!.suites![0]!.specs![0]!.tests[0]!.results[0]!.steps)).toEqual([
-      "15 · Check the statistics",
-      "Check the tiles",
-    ]);
+    expect(
+      failingStepPath(failing.suites![0]!.suites![0]!.specs![0]!.tests[0]!.results[0]!.steps),
+    ).toEqual(["15 · Check the statistics", "Check the tiles"]);
   });
 
   it("is empty when no step failed", () => {
@@ -68,7 +88,15 @@ describe("summarize", () => {
   });
 
   it("says when a failure was outside any step", () => {
-    const report: Report = { suites: [{ specs: [{ title: "t", file: "f", tests: [{ results: [{ status: "timedOut", duration: 1 }] }] }] }] };
+    const report: Report = {
+      suites: [
+        {
+          specs: [
+            { title: "t", file: "f", tests: [{ results: [{ status: "timedOut", duration: 1 }] }] },
+          ],
+        },
+      ],
+    };
     expect(summarize(report, "x")).toContain("**Failed in:** (outside any step)");
   });
 });

@@ -11,9 +11,15 @@ export class Trial extends Screen {
   async open(draft: string): Promise<void> {
     await this.intent(`Try out ${draft}`, async () => {
       await this.app.chrome.studioTab("draft", "trial");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.trial.heading") })).toBeVisible();
-      await expect(this.page.getByRole("heading", { level: 3, name: this.t("studio.trial.controls") })).toBeVisible();
-      await expect(this.page.getByRole("heading", { level: 2, name: draft, exact: true })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { level: 2, name: this.t("studio.trial.heading") }),
+      ).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { level: 3, name: this.t("studio.trial.controls") }),
+      ).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { level: 2, name: draft, exact: true }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.trial.crumb");
     });
   }
@@ -22,7 +28,11 @@ export class Trial extends Screen {
    * Plays the course's first chapter from its page, to the end of the
    * course, as Solid Memo's own course screens play it (Course.playChapter).
    */
-  async playToTheEnd(chapter: string, theory: string, answers: Record<string, string>): Promise<void> {
+  async playToTheEnd(
+    chapter: string,
+    theory: string,
+    answers: Record<string, string>,
+  ): Promise<void> {
     await this.app.course.playChapter(chapter, theory, answers);
   }
 }

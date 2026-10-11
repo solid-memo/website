@@ -85,12 +85,9 @@ export function Workspace({
   });
   const instances = instancesQuery.data;
 
-  const instanceUrl =
-    route !== null && "instanceUrl" in route ? route.instanceUrl : null;
+  const instanceUrl = route !== null && "instanceUrl" in route ? route.instanceUrl : null;
   const activeInstance =
-    instanceUrl === null
-      ? null
-      : (instances?.find((i) => i.url === instanceUrl) ?? null);
+    instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
 
   useInstanceTheme(useCases, activeInstance?.url ?? null);
 
@@ -111,11 +108,7 @@ export function Workspace({
   useEffect(() => {
     if (instanceUrl === null || instances === undefined) return;
     if (!instances.some((i) => i.url === instanceUrl)) {
-      replace(
-        instances.length > 0
-          ? { screen: "instancePicker" }
-          : { screen: "storagePicker" },
-      );
+      replace(instances.length > 0 ? { screen: "instancePicker" } : { screen: "storagePicker" });
     }
   }, [instanceUrl, instances]);
 
@@ -124,10 +117,7 @@ export function Workspace({
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: needsDeck,
   });
-  const activeDeck =
-    needsDeck
-      ? (decksQuery.data?.find((d) => d.url === deckUrl) ?? null)
-      : null;
+  const activeDeck = needsDeck ? (decksQuery.data?.find((d) => d.url === deckUrl) ?? null) : null;
 
   useEffect(() => {
     if (!needsDeck || decksQuery.data === undefined) return;
@@ -143,9 +133,7 @@ export function Workspace({
     queryFn: () => useCases.listCards(activeDeck!),
     enabled: needsCard,
   });
-  const activeCard = needsCard
-    ? (cardsQuery.data?.find((c) => c.url === cardUrl) ?? null)
-    : null;
+  const activeCard = needsCard ? (cardsQuery.data?.find((c) => c.url === cardUrl) ?? null) : null;
 
   useEffect(() => {
     if (!needsCard || cardsQuery.data === undefined) return;
@@ -216,7 +204,9 @@ export function Workspace({
   // the course is read afresh (the last step's answer is still being
   // read as the learner goes on from it).
   const isCourseRoute =
-    route?.screen === "course" || route?.screen === "courseChapter" || route?.screen === "courseReview";
+    route?.screen === "course" ||
+    route?.screen === "courseChapter" ||
+    route?.screen === "courseReview";
   const needsCourse = isCourseRoute && activeDeck !== null;
   const courseQuery = useQuery({
     queryKey: courseKey(deckUrl!),
@@ -227,7 +217,9 @@ export function Workspace({
   const chapterUrl =
     route?.screen === "courseChapter" || route?.screen === "courseReview" ? route.chapterUrl : null;
   const chapterIndex =
-    activeCourse === null ? -1 : activeCourse.outline.chapters.findIndex((c) => c.url === chapterUrl);
+    activeCourse === null
+      ? -1
+      : activeCourse.outline.chapters.findIndex((c) => c.url === chapterUrl);
   const activeChapter =
     chapterIndex >= 0 && activeCourse!.progress.chapters[chapterIndex]!.state !== "locked"
       ? activeCourse!.outline.chapters[chapterIndex]!
@@ -254,9 +246,23 @@ export function Workspace({
     } else if (chapterUrl !== null && activeCourse !== null && activeChapter === null) {
       replace({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
     } else if (reviewTooSoon) {
-      replace({ screen: "courseChapter", instanceUrl: instanceUrl!, deckUrl: deckUrl!, chapterUrl: chapterUrl! });
+      replace({
+        screen: "courseChapter",
+        instanceUrl: instanceUrl!,
+        deckUrl: deckUrl!,
+        chapterUrl: chapterUrl!,
+      });
     }
-  }, [needsCourse, activeDeck, activeCourse, activeChapter, reviewTooSoon, chapterUrl, instanceUrl, deckUrl]);
+  }, [
+    needsCourse,
+    activeDeck,
+    activeCourse,
+    activeChapter,
+    reviewTooSoon,
+    chapterUrl,
+    instanceUrl,
+    deckUrl,
+  ]);
 
   const preferencesQuery = useQuery({
     queryKey: ["preferences", instanceUrl],
@@ -291,7 +297,12 @@ export function Workspace({
   }, [homeTreeQuery.data, instanceUrl]);
   // Until the preferences are read, the workspace waits as under "block
   // the instance": a user who chose it never sees data before the check.
-  const { policy, report: invalidReport, isSetAside, arrangementSetAside: arrangementIsSetAside } = check;
+  const {
+    policy,
+    report: invalidReport,
+    isSetAside,
+    arrangementSetAside: arrangementIsSetAside,
+  } = check;
   const decksOfCheck = useQuery({
     queryKey: ["decks", instanceUrl],
     queryFn: () => useCases.listDecks(instanceUrl!),
@@ -312,10 +323,7 @@ export function Workspace({
   });
 
   useEffect(() => {
-    if (
-      route?.screen === "storagePicker" &&
-      storagesQuery.data?.length === 1
-    ) {
+    if (route?.screen === "storagePicker" && storagesQuery.data?.length === 1) {
       replace({
         screen: "instanceCreator",
         storageUrl: storagesQuery.data[0].url,
@@ -362,18 +370,27 @@ export function Workspace({
   const crumbs =
     route === null
       ? []
-      : breadcrumbsFor(route, {
-          deck: activeDeck === null ? "" : readerText(activeDeck.title),
-          card: activeCard === null ? "" : cardName(activeCard, readerText),
-          libraryDeck: activeLibraryDeck === null ? "" : readerText(activeLibraryDeck.title),
-          libraryCard: activeLibraryCard === null ? "" : cardName(activeLibraryCard, readerText),
-          chapter: activeChapter === null ? "" : readerText(activeChapter.title),
-          deckLang: activeDeck === null ? undefined : readerLang(activeDeck.title),
-          cardLang: activeCard === null ? undefined : readerLang(cardNameText(activeCard, readerText)),
-          libraryDeckLang: activeLibraryDeck === null ? undefined : readerLang(activeLibraryDeck.title),
-          libraryCardLang: activeLibraryCard === null ? undefined : readerLang(cardNameText(activeLibraryCard, readerText)),
-          chapterLang: activeChapter === null ? undefined : readerLang(activeChapter.title),
-        }, t);
+      : breadcrumbsFor(
+          route,
+          {
+            deck: activeDeck === null ? "" : readerText(activeDeck.title),
+            card: activeCard === null ? "" : cardName(activeCard, readerText),
+            libraryDeck: activeLibraryDeck === null ? "" : readerText(activeLibraryDeck.title),
+            libraryCard: activeLibraryCard === null ? "" : cardName(activeLibraryCard, readerText),
+            chapter: activeChapter === null ? "" : readerText(activeChapter.title),
+            deckLang: activeDeck === null ? undefined : readerLang(activeDeck.title),
+            cardLang:
+              activeCard === null ? undefined : readerLang(cardNameText(activeCard, readerText)),
+            libraryDeckLang:
+              activeLibraryDeck === null ? undefined : readerLang(activeLibraryDeck.title),
+            libraryCardLang:
+              activeLibraryCard === null
+                ? undefined
+                : readerLang(cardNameText(activeLibraryCard, readerText)),
+            chapterLang: activeChapter === null ? undefined : readerLang(activeChapter.title),
+          },
+          t,
+        );
   // The page and what it is in, as the trail ends: "Study – Kanji N5 – Solid Memo".
   useDocumentTitle(
     crumbs
@@ -419,7 +436,11 @@ export function Workspace({
       if (courseQuery.error) {
         return <ErrorMessage error={errorText(courseQuery.error)} />;
       }
-      if (activeCourse === null || (chapterUrl !== null && activeChapter === null) || reviewTooSoon) {
+      if (
+        activeCourse === null ||
+        (chapterUrl !== null && activeChapter === null) ||
+        reviewTooSoon
+      ) {
         return <Loading label={t("workspace.loadingCourse")} />;
       }
     }
@@ -513,9 +534,7 @@ export function Workspace({
           <DeckCreatorContainer
             useCases={useCases}
             instance={activeInstance!}
-            onDone={() =>
-              navigate({ screen: "home", instanceUrl: instanceUrl! })
-            }
+            onDone={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
           />
         );
       case "library":
@@ -523,9 +542,7 @@ export function Workspace({
           <LibraryContainer
             useCases={useCases}
             instance={activeInstance!}
-            onDone={() =>
-              navigate({ screen: "home", instanceUrl: instanceUrl! })
-            }
+            onDone={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
           />
         );
       case "libraryDeck":
@@ -534,9 +551,7 @@ export function Workspace({
             useCases={useCases}
             instance={activeInstance!}
             deck={activeLibraryDeck!}
-            onDone={() =>
-              navigate({ screen: "home", instanceUrl: instanceUrl! })
-            }
+            onDone={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
             onCourseStarted={(started) =>
               navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: started.url })
             }
@@ -588,9 +603,7 @@ export function Workspace({
             useCases={useCases}
             deck={activeLibraryDeck!}
             deckHref={libraryDeckHref(instanceUrl!, libraryDeckUrl!)}
-            onExit={() =>
-              navigate({ screen: "library", instanceUrl: instanceUrl! })
-            }
+            onExit={() => navigate({ screen: "library", instanceUrl: instanceUrl! })}
           />
         );
       case "deckDetail":
@@ -615,9 +628,7 @@ export function Workspace({
             instance={activeInstance!}
             deck={activeDeck!}
             section={route.section}
-            onDeckRemoved={() =>
-              replace({ screen: "home", instanceUrl: instanceUrl! })
-            }
+            onDeckRemoved={() => replace({ screen: "home", instanceUrl: instanceUrl! })}
             onDone={() =>
               navigate({
                 screen: "deckDetail",
@@ -694,9 +705,7 @@ export function Workspace({
             useCases={useCases}
             instance={activeInstance!}
             deck={activeDeck!}
-            onExit={() =>
-              navigate({ screen: "home", instanceUrl: instanceUrl! })
-            }
+            onExit={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
           />
         );
       case "course":
@@ -736,28 +745,28 @@ export function Workspace({
       case "preferences":
         return (
           <>
-          <PreferencesContainer
-            useCases={useCases}
-            instance={activeInstance!}
-            onBack={() =>
-              navigate({ screen: "home", instanceUrl: instanceUrl! })
-            }
-          />
-          {/* A guest's pod is on this device: no other app looks there. */}
-          {session.guest !== true && (
-            <FindableContainer useCases={useCases} session={session} instance={activeInstance!} />
-          )}
+            <PreferencesContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              onBack={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
+            />
+            {/* A guest's pod is on this device: no other app looks there. */}
+            {session.guest !== true && (
+              <FindableContainer useCases={useCases} session={session} instance={activeInstance!} />
+            )}
           </>
         );
       case "statistics":
         return (
-          <StatisticsContainer useCases={useCases} instance={activeInstance!} decks={decksQuery.data ?? []} />
+          <StatisticsContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            decks={decksQuery.data ?? []}
+          />
         );
       case "validation":
         if (developerMode) {
-          return (
-            <ValidationContainer useCases={useCases} instance={activeInstance!} />
-          );
+          return <ValidationContainer useCases={useCases} instance={activeInstance!} />;
         }
         return preferencesQuery.isPending ? (
           <Loading label={t("workspace.loadingPreferences")} />
@@ -776,17 +785,23 @@ export function Workspace({
   };
 
   const blocked =
-    activeInstance !== null && !alwaysReachable && policy === "block-instance" &&
+    activeInstance !== null &&
+    !alwaysReachable &&
+    policy === "block-instance" &&
     (check.pending || invalidReport !== null);
   const deckSetAside = activeDeck !== null && isSetAside(activeDeck);
   const deckWaits = activeDeck !== null && checkUnsettled;
-  const shown = waiting ?? (blocked || deckWaits ? (
-    invalidReport === null ? <Loading label={t("workspace.checkingData")} /> : null
-  ) : deckSetAside ? (
-    <p class="hint">{t("workspace.deckSetAside")}</p>
-  ) : (
-    screenFor(route!, instances!)
-  ));
+  const shown =
+    waiting ??
+    (blocked || deckWaits ? (
+      invalidReport === null ? (
+        <Loading label={t("workspace.checkingData")} />
+      ) : null
+    ) : deckSetAside ? (
+      <p class="hint">{t("workspace.deckSetAside")}</p>
+    ) : (
+      screenFor(route!, instances!)
+    ));
 
   return (
     <>
@@ -800,11 +815,7 @@ export function Workspace({
         {waiting === null && activeInstance !== null && (
           <>
             <InterruptedMoveContainer useCases={useCases} instance={activeInstance} />
-            <MigrationContainer
-              useCases={useCases}
-              session={session}
-              instance={activeInstance}
-            />
+            <MigrationContainer useCases={useCases} session={session} instance={activeInstance} />
             {check.error && (
               // A div: the error may bring its technical details, a block.
               <div class="warning">
@@ -832,9 +843,7 @@ export function Workspace({
             <a href={validationHref(activeInstance.url)}>{t("workspace.validateInstance")}</a>
           </nav>
         )}
-        {developerMode && (
-          <WebIdDocumentContainer useCases={useCases} session={session} />
-        )}
+        {developerMode && <WebIdDocumentContainer useCases={useCases} session={session} />}
       </main>
     </>
   );

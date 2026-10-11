@@ -1,4 +1,10 @@
-import { getInteger, getThing, getThingAll, getUrlAll, type SolidDataset } from "@inrupt/solid-client";
+import {
+  getInteger,
+  getThing,
+  getThingAll,
+  getUrlAll,
+  type SolidDataset,
+} from "@inrupt/solid-client";
 import { namesAnotherScheduler } from "./mappers/reviewStateMapper";
 import { DCTERMS, RDF, SM, SM_NS } from "./vocab";
 
@@ -7,7 +13,11 @@ import { DCTERMS, RDF, SM, SM_NS } from "./vocab";
  * beside it: a deck's creators and distribution, a catalog's or deck
  * group's publisher.
  */
-const WRITTEN_BESIDE = [DCTERMS.creator, DCTERMS.publisher, "http://www.w3.org/ns/dcat#distribution"];
+const WRITTEN_BESIDE = [
+  DCTERMS.creator,
+  DCTERMS.publisher,
+  "http://www.w3.org/ns/dcat#distribution",
+];
 
 /**
  * The subjects of a document that Solid Memo wrote (see docs/validation.md
@@ -46,5 +56,9 @@ function solidMemoSubjects(dataset: SolidDataset): Set<string> {
 /** The subjects of a document another app wrote: every one that is not Solid Memo's (solidMemoSubjects). */
 export function foreignSubjects(dataset: SolidDataset): Set<string> {
   const owned = solidMemoSubjects(dataset);
-  return new Set(getThingAll(dataset).map((thing) => thing.url).filter((url) => !owned.has(url)));
+  return new Set(
+    getThingAll(dataset)
+      .map((thing) => thing.url)
+      .filter((url) => !owned.has(url)),
+  );
 }

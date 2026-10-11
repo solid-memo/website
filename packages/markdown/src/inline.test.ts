@@ -24,25 +24,29 @@ describe("parseInlineMarkdown", () => {
   });
 
   it("joins paragraphs, list items, quotes and table cells into one run", () => {
-    expect(parseInlineMarkdown("one\n\n- a\n- b\n  > c\n\n---\n\n| h | i |\n|-|-|\n| 1 |")).toEqual([
-      text("one"),
-      text(" "),
-      text("a"),
-      text("; "),
-      text("b"),
-      text(" "),
-      text("c"),
-      text(" "),
-      text("h"),
-      text(" · "),
-      text("i"),
-      text(" · "),
-      text("1"),
-    ]);
+    expect(parseInlineMarkdown("one\n\n- a\n- b\n  > c\n\n---\n\n| h | i |\n|-|-|\n| 1 |")).toEqual(
+      [
+        text("one"),
+        text(" "),
+        text("a"),
+        text("; "),
+        text("b"),
+        text(" "),
+        text("c"),
+        text(" "),
+        text("h"),
+        text(" · "),
+        text("i"),
+        text(" · "),
+        text("1"),
+      ],
+    );
   });
 
   it("makes a code block one code span, its white space collapsed", () => {
-    expect(parseInlineMarkdown("```\n  a\n\n    b  \n```")).toEqual([{ type: "inlineCode", value: "a b" }]);
+    expect(parseInlineMarkdown("```\n  a\n\n    b  \n```")).toEqual([
+      { type: "inlineCode", value: "a b" },
+    ]);
   });
 
   it("leaves out what shows nothing", () => {

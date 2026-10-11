@@ -5,4 +5,7 @@ import { packageConfig } from "../vitest.shared.ts";
  * like every package (docs/testing.md). checkBoundaries.ts predates them
  * and has no tests of its own: `npm run check` runs it on the repository.
  */
-export default packageConfig({ include: ["*.ts"], exclude: ["*.test.ts", "vitest.config.ts", "checkBoundaries.ts"] });
+export default packageConfig({
+  include: ["*.ts"],
+  exclude: ["*.test.ts", "vitest.config.ts", "checkBoundaries.ts"],
+});

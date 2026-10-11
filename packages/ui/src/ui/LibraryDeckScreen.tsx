@@ -82,7 +82,9 @@ export function LibraryDeckScreen({
             <dt>{t("libraryDeck.host")}</dt>
             <dd>{host}</dd>
             <dt>{t("libraryDeck.kind")}</dt>
-            <dd>{deck.isCourse === true ? t("libraryDeck.kindCourse") : t("libraryDeck.kindDeck")}</dd>
+            <dd>
+              {deck.isCourse === true ? t("libraryDeck.kindCourse") : t("libraryDeck.kindDeck")}
+            </dd>
           </>
         )}
         <dt>{t("libraryDeck.size")}</dt>
@@ -134,9 +136,7 @@ export function LibraryDeckScreen({
           <>
             <dt>{t("libraryDeck.licence")}</dt>
             <dd>
-              <ExternalLink url={deck.license}>
-                {licenseLabel(deck.license)}
-              </ExternalLink>
+              <ExternalLink url={deck.license}>{licenseLabel(deck.license)}</ExternalLink>
             </dd>
           </>
         )}
@@ -212,9 +212,7 @@ function SourceLine({ source }: { source: LibrarySource }) {
           {hasAuthors && <AuthorNames authors={source.authors} />}
           {hasAuthors && hasLicense && " · "}
           {hasLicense && (
-            <ExternalLink url={source.license!}>
-              {licenseLabel(source.license!)}
-            </ExternalLink>
+            <ExternalLink url={source.license!}>{licenseLabel(source.license!)}</ExternalLink>
           )}
         </span>
       )}

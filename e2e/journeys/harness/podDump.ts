@@ -23,7 +23,11 @@ export function containedIn(jsonld: unknown, container: string): string[] {
     const id = node["@id"];
     if (id !== undefined && new URL(String(id), container).href !== container) continue;
     const contains = node[LDP_CONTAINS] ?? node.contains ?? node["ldp:contains"];
-    for (const item of Array.isArray(contains) ? contains : contains === undefined ? [] : [contains]) {
+    for (const item of Array.isArray(contains)
+      ? contains
+      : contains === undefined
+        ? []
+        : [contains]) {
       const ref = typeof item === "string" ? item : (item as { "@id"?: unknown })["@id"];
       if (typeof ref === "string") found.add(new URL(ref, container).href);
     }
@@ -32,18 +36,31 @@ export function containedIn(jsonld: unknown, container: string): string[] {
 }
 
 /** A token for the account's WebID, by its client credentials. */
-async function bearer(api: APIRequestContext, server: string, account: CssAccount): Promise<string> {
-  const basic = Buffer.from(`${encodeURIComponent(account.client.id)}:${encodeURIComponent(account.client.secret)}`).toString("base64");
+async function bearer(
+  api: APIRequestContext,
+  server: string,
+  account: CssAccount,
+): Promise<string> {
+  const basic = Buffer.from(
+    `${encodeURIComponent(account.client.id)}:${encodeURIComponent(account.client.secret)}`,
+  ).toString("base64");
   const response = await api.post(new URL(".oidc/token", server).href, {
     headers: { authorization: `Basic ${basic}` },
     form: { grant_type: "client_credentials", scope: "webid" },
   });
-  if (!response.ok()) throw new Error(`The token endpoint refused the client credentials: ${response.status()} ${await response.text()}`);
+  if (!response.ok())
+    throw new Error(
+      `The token endpoint refused the client credentials: ${response.status()} ${await response.text()}`,
+    );
   return ((await response.json()) as { access_token: string }).access_token;
 }
 
 /** The pod's documents, each under a `# <url>` line, containers first listing what they hold. */
-export async function dumpPod(api: APIRequestContext, server: string, account: CssAccount): Promise<string> {
+export async function dumpPod(
+  api: APIRequestContext,
+  server: string,
+  account: CssAccount,
+): Promise<string> {
   const headers = { authorization: `Bearer ${await bearer(api, server, account)}` };
   const out: string[] = [];
   const queue = [account.pod];
@@ -57,7 +74,10 @@ export async function dumpPod(api: APIRequestContext, server: string, account: C
     // One document that cannot be read is said so; the rest are still dumped.
     try {
       if (url.endsWith("/")) {
-        const listing = await api.get(url, { headers: { ...headers, accept: "application/ld+json" }, timeout: TIMEOUT_MS });
+        const listing = await api.get(url, {
+          headers: { ...headers, accept: "application/ld+json" },
+          timeout: TIMEOUT_MS,
+        });
         if (listing.ok()) {
           for (const child of containedIn(await listing.json(), url)) {
             if (!seen.has(child)) {
@@ -67,9 +87,14 @@ export async function dumpPod(api: APIRequestContext, server: string, account: C
           }
         }
       }
-      const response = await api.get(url, { headers: { ...headers, accept: "text/turtle" }, timeout: TIMEOUT_MS });
+      const response = await api.get(url, {
+        headers: { ...headers, accept: "text/turtle" },
+        timeout: TIMEOUT_MS,
+      });
       const type = response.headers()["content-type"] ?? "";
-      const body = /turtle|text\/|json/.test(type) ? await response.text() : `(${type}, ${(await response.body()).length} bytes)`;
+      const body = /turtle|text\/|json/.test(type)
+        ? await response.text()
+        : `(${type}, ${(await response.body()).length} bytes)`;
       out.push(`# ${url} — ${response.status()} ${type}`, body.trimEnd(), "");
     } catch (error) {
       out.push(`# ${url} — could not be read: ${(error as Error).message.split("\n")[0]}`, "");

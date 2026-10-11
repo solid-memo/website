@@ -74,7 +74,10 @@ function page(fetch: typeof globalThis.fetch = globalThis.fetch) {
  */
 function capitals(v1: string, version: 1 | 2): string {
   const url = version === 1 ? v1 : v1.replace(/v1\.ttl$/, "v2.ttl");
-  const earlier = version === 1 ? "" : `<${v1}> a dcat:Dataset ; dcterms:title "Capitals"@en ; dcterms:description "Capitals of the world."@en ; dcat:version "1" .`;
+  const earlier =
+    version === 1
+      ? ""
+      : `<${v1}> a dcat:Dataset ; dcterms:title "Capitals"@en ; dcterms:description "Capitals of the world."@en ; dcat:version "1" .`;
   return `@base <${url}> .
 @prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -114,12 +117,25 @@ async function seed(server: string) {
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
-  await put(`${base}profile/card.ttl`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
-  return page().createInstance({ webId }, { containerUrl: `${base}main/`, name: "Main", registrationTarget: "private" });
+  await put(
+    `${base}profile/card.ttl`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
+  return page().createInstance(
+    { webId },
+    { containerUrl: `${base}main/`, name: "Main", registrationTarget: "private" },
+  );
 }
 
 /** What the access control of the document says, as its server links it (rel="acl"): its own ACL, or its ACR. */
@@ -133,10 +149,15 @@ async function accessControlOf(url: string): Promise<string> {
 }
 
 describe.each(SERVERS)("releases on $name", ({ url: server }) => {
-  it("publishes a draft as one document anyone can read, lists it, freezes the draft, and never writes over it", { timeout: 180_000 }, async () => {
+  it("publishes a draft as one document anyone can read, lists it, freezes the draft, and never writes over it", {
+    timeout: 180_000,
+  }, async () => {
     const instance = await seed(server);
     const useCases = page();
-    const made = await useCases.createReleaseDraft(instance.url, { kind: "nextVersionOf", url: STARS });
+    const made = await useCases.createReleaseDraft(instance.url, {
+      kind: "nextVersionOf",
+      url: STARS,
+    });
     const draftUrl = made!.draft.url;
     const target = releaseUrlIn(releasesContainerOf(instance.url), "brightest-stars", 2);
 
@@ -149,28 +170,45 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     const text = await read.text();
     expect(text).toContain(`@base <${target}>`);
     const access = await accessControlOf(target);
-    expect(access).toMatch(/xmlns\.com\/foaf\/0\.1\/Agent|foaf:Agent|acp#PublicAgent|acp:PublicAgent/);
+    expect(access).toMatch(
+      /xmlns\.com\/foaf\/0\.1\/Agent|foaf:Agent|acp#PublicAgent|acp:PublicAgent/,
+    );
     expect(await useCases.isReleasePublic(target)).toBe(true);
-    await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([{ url: target, public: true }]);
+    await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([
+      { url: target, public: true },
+    ]);
 
     // The draft is released, and changes no more.
     const draft = await useCases.getReleaseDraft(draftUrl);
     expect(draft.root.releasedAs).toBe(target);
-    await expect(useCases.editReleaseDraft(draftUrl, [{ kind: "setMeta", meta: { versionNotes: "Later." } }])).resolves.toEqual({
+    await expect(
+      useCases.editReleaseDraft(draftUrl, [{ kind: "setMeta", meta: { versionNotes: "Later." } }]),
+    ).resolves.toEqual({
       ok: false,
       refusal: { refused: "released" },
     });
-    await expect(useCases.publishRelease(draftUrl, target, NO_MARKDOWN_PROBLEMS)).rejects.toMatchObject({ code: "draftReleased" });
+    await expect(
+      useCases.publishRelease(draftUrl, target, NO_MARKDOWN_PROBLEMS),
+    ).rejects.toMatchObject({ code: "draftReleased" });
 
     // Another draft published at the same address is refused, and the release is as it was.
-    const other = await useCases.createReleaseDraft(instance.url, { kind: "nextVersionOf", url: STARS });
-    await expect(useCases.publishRelease(other!.draft.url, target, NO_MARKDOWN_PROBLEMS)).rejects.toMatchObject({ code: "releaseTaken", vars: { url: target } });
+    const other = await useCases.createReleaseDraft(instance.url, {
+      kind: "nextVersionOf",
+      url: STARS,
+    });
+    await expect(
+      useCases.publishRelease(other!.draft.url, target, NO_MARKDOWN_PROBLEMS),
+    ).rejects.toMatchObject({ code: "releaseTaken", vars: { url: target } });
     expect(await (await fetch(target, { headers: { accept: "text/turtle" } })).text()).toBe(text);
     expect((await useCases.getReleaseDraft(other!.draft.url)).root.releasedAs).toBeUndefined();
-    await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([{ url: target, public: true }]);
+    await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([
+      { url: target, public: true },
+    ]);
   });
 
-  it("lets a learner add a release from its link, and finds its next version in the catalog that published it", { timeout: 300_000 }, async () => {
+  it("lets a learner add a release from its link, and finds its next version in the catalog that published it", {
+    timeout: 300_000,
+  }, async () => {
     const creator = await seed(server);
     const learner = await seed(server);
     const useCases = page();
@@ -181,23 +219,47 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
 
     // Read from its link, as anyone reads it, and checked against the library's shapes: then added as the library's are.
     const release = await useCases.readReleaseFromLink(v1);
-    expect(release).toMatchObject({ url: v1, seriesUrl: `${v1}#series`, version: "1", title: { en: "Capitals" }, cardCount: 1, authors: ["Alice"] });
+    expect(release).toMatchObject({
+      url: v1,
+      seriesUrl: `${v1}#series`,
+      version: "1",
+      title: { en: "Capitals" },
+      cardCount: 1,
+      authors: ["Alice"],
+    });
     const copy = await useCases.importReleaseFromUrl(learner.url, release);
     expect(copy.sourceUrl).toBe(v1);
     expect((await useCases.listCards(copy)).map((card) => card.id)).toEqual(["se"]);
 
     // The creator's catalog, readable here, lists what its instance published: none newer yet, then version 2.
     const listed = async () =>
-      (await useCases.listLibraryUpdates(learner.url)).map(({ series, version, newer, fromLink }) => ({ series: series?.url, version, newer, fromLink }));
+      (await useCases.listLibraryUpdates(learner.url)).map(
+        ({ series, version, newer, fromLink }) => ({
+          series: series?.url,
+          version,
+          newer,
+          fromLink,
+        }),
+      );
     expect(await listed()).toEqual([{ series: v1, version: "1", newer: false, fromLink: true }]);
     await publisher.publish(creator.url, capitals(v1, 2), v2);
     expect(await listed()).toEqual([{ series: v2, version: "1", newer: true, fromLink: true }]);
-    await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({ fromVersion: "1", toVersion: "2", releaseUrl: v2, add: [{ id: "no" }] });
+    await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({
+      fromVersion: "1",
+      toVersion: "2",
+      releaseUrl: v2,
+      add: [{ id: "no" }],
+    });
   });
 
-  it("finishes a publishing cut short by publishing again, and keeps the release when the instance is deleted", { timeout: 180_000 }, async () => {
+  it("finishes a publishing cut short by publishing again, and keeps the release when the instance is deleted", {
+    timeout: 180_000,
+  }, async () => {
     const instance = await seed(server);
-    const made = await page().createReleaseDraft(instance.url, { kind: "nextVersionOf", url: STARS });
+    const made = await page().createReleaseDraft(instance.url, {
+      kind: "nextVersionOf",
+      url: STARS,
+    });
     const draftUrl = made!.draft.url;
     const target = releaseUrlIn(releasesContainerOf(instance.url), "brightest-stars", 2);
 
@@ -205,22 +267,34 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     const catalog = `${instance.url}catalog.ttl`;
     const cut: typeof globalThis.fetch = async (input, init) => {
       const method = (init?.method ?? "GET").toUpperCase();
-      return String(input) === catalog && method !== "GET" && method !== "HEAD" ? new Response("refused", { status: 500 }) : fetch(input, init);
+      return String(input) === catalog && method !== "GET" && method !== "HEAD"
+        ? new Response("refused", { status: 500 })
+        : fetch(input, init);
     };
-    await expect(page(cut).publishRelease(draftUrl, target, NO_MARKDOWN_PROBLEMS)).rejects.toThrow();
+    await expect(
+      page(cut).publishRelease(draftUrl, target, NO_MARKDOWN_PROBLEMS),
+    ).rejects.toThrow();
     expect((await fetch(target, { method: "HEAD" })).ok).toBe(true);
     const useCases = page();
     expect((await useCases.getReleaseDraft(draftUrl)).root.releasedAs).toBeUndefined();
     await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([]);
 
     // Published again, at the same address: the release there is this one, finished.
-    await expect(useCases.publishRelease(draftUrl, target, NO_MARKDOWN_PROBLEMS)).resolves.toEqual({ url: target, public: true });
+    await expect(useCases.publishRelease(draftUrl, target, NO_MARKDOWN_PROBLEMS)).resolves.toEqual({
+      url: target,
+      public: true,
+    });
     expect((await useCases.getReleaseDraft(draftUrl)).root.releasedAs).toBe(target);
-    await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([{ url: target, public: true }]);
+    await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([
+      { url: target, public: true },
+    ]);
 
     // Deleting the instance keeps the release, and its folder, and says so.
     const webId = new URL("../profile/card.ttl#me", instance.url).href;
-    await expect(useCases.deleteInstance({ webId }, instance)).resolves.toEqual({ keptFolder: instance.url, keptReleases: true });
+    await expect(useCases.deleteInstance({ webId }, instance)).resolves.toEqual({
+      keptFolder: instance.url,
+      keptReleases: true,
+    });
     expect((await fetch(target, { headers: { accept: "text/turtle" } })).status).toBe(200);
   });
 });

@@ -20,11 +20,7 @@ export interface MigrationContext {
  * module per step lives beside this one; the chain of steps from 1 to
  * the latest version of every kind is what `migrate` walks.
  */
-export interface MigrationStep<
-  S extends ShapeName,
-  From extends number,
-  To extends number,
-> {
+export interface MigrationStep<S extends ShapeName, From extends number, To extends number> {
   readonly shape: S;
   readonly from: From;
   readonly to: To;

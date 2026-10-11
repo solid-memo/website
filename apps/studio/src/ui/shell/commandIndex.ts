@@ -8,7 +8,13 @@ import { studioRouteToHash, type StudioRoute } from "../router";
 import type { WorkItem } from "./prefs";
 import { keysOf } from "./shortcuts";
 import { draftNameOf } from "./titles";
-import { sectionHome, SIDEBAR_SECTIONS, type ContextTab, type DeckTab, type DraftTab } from "./workspaceLayout";
+import {
+  sectionHome,
+  SIDEBAR_SECTIONS,
+  type ContextTab,
+  type DeckTab,
+  type DraftTab,
+} from "./workspaceLayout";
 
 /**
  * What a screen adds to the palette while it is shown
@@ -23,7 +29,16 @@ export interface ScreenCommand {
 }
 
 /** The palette's groups, each under its heading: the decks and drafts pinned, and the entries used last, first; then as buildCommands lists them. */
-export type CommandGroup = "pinned" | "recent" | "commands" | "tabs" | "sections" | "instances" | "decks" | "drafts" | "cards";
+export type CommandGroup =
+  | "pinned"
+  | "recent"
+  | "commands"
+  | "tabs"
+  | "sections"
+  | "instances"
+  | "decks"
+  | "drafts"
+  | "cards";
 
 /**
  * An entry of the palette: where it goes (`route`, as a link does) or
@@ -64,11 +79,20 @@ export interface CommandSources {
  * (those that can be read), at their overview; and the cards of the deck
  * shown, each in the inspector.
  */
-export function buildCommands(sources: CommandSources, i18n: Pick<I18n, "t" | "readerText">): Command[] {
+export function buildCommands(
+  sources: CommandSources,
+  i18n: Pick<I18n, "t" | "readerText">,
+): Command[] {
   const { t, readerText } = i18n;
-  const at = (group: Command["group"], route: StudioRoute) => ({ id: `${group}:${studioRouteToHash(route)}`, group, route });
+  const at = (group: Command["group"], route: StudioRoute) => ({
+    id: `${group}:${studioRouteToHash(route)}`,
+    group,
+    route,
+  });
   return [
-    ...sources.commands.map((command): Command => ({ ...command, id: `command:${command.id}`, group: "commands" })),
+    ...sources.commands.map(
+      (command): Command => ({ ...command, id: `command:${command.id}`, group: "commands" }),
+    ),
     ...sources.tabs.map(
       (tab, index): Command => ({
         ...at("tabs", tab.route),
@@ -84,9 +108,23 @@ export function buildCommands(sources: CommandSources, i18n: Pick<I18n, "t" | "r
         ...(section === "instance" ? {} : { keys: keysOf(`go.${section}`) }),
       }),
     ),
-    { ...at("sections", { screen: "instances" }), label: t("studio.shell.allInstances"), keys: keysOf("go.instances") },
-    ...sources.instances.map((instance): Command => ({ ...at("instances", { screen: "home", instanceUrl: instance.url }), label: instance.name })),
-    ...sources.decks.map((deck): Command => ({ ...at("decks", { screen: "cards", deckUrl: deck.url }), label: readerText(deck.title) })),
+    {
+      ...at("sections", { screen: "instances" }),
+      label: t("studio.shell.allInstances"),
+      keys: keysOf("go.instances"),
+    },
+    ...sources.instances.map(
+      (instance): Command => ({
+        ...at("instances", { screen: "home", instanceUrl: instance.url }),
+        label: instance.name,
+      }),
+    ),
+    ...sources.decks.map(
+      (deck): Command => ({
+        ...at("decks", { screen: "cards", deckUrl: deck.url }),
+        label: readerText(deck.title),
+      }),
+    ),
     ...sources.drafts
       .filter((draft) => draft.readable)
       .map(
@@ -129,18 +167,27 @@ export interface CommandSection {
  * letters typed in their order (matchScore), case and accents aside, the
  * best first, and their groups in the order of their best.
  */
-export function rankCommands(commands: readonly Command[], query: string, recent: readonly string[], pinned: readonly string[] = []): CommandSection[] {
+export function rankCommands(
+  commands: readonly Command[],
+  query: string,
+  recent: readonly string[],
+  pinned: readonly string[] = [],
+): CommandSection[] {
   const wanted = folded(query.trim());
   const shown: { group: CommandGroup; command: Command }[] = [];
   if (wanted === "") {
-    const find = (ids: readonly string[]) => ids.flatMap((id) => commands.find((command) => command.id === id) ?? []);
+    const find = (ids: readonly string[]) =>
+      ids.flatMap((id) => commands.find((command) => command.id === id) ?? []);
     const first = find(pinned);
     const used = find(recent).filter((command) => !first.includes(command));
     shown.push(...first.map((command) => ({ group: "pinned" as const, command })));
     shown.push(...used.map((command) => ({ group: "recent" as const, command })));
     shown.push(
       ...commands
-        .filter((command) => command.group !== "cards" && !first.includes(command) && !used.includes(command))
+        .filter(
+          (command) =>
+            command.group !== "cards" && !first.includes(command) && !used.includes(command),
+        )
         .map((command) => ({ group: command.group, command })),
     );
   } else {
@@ -149,7 +196,11 @@ export function rankCommands(commands: readonly Command[], query: string, recent
       return score === null ? [] : [{ score, command }];
     });
     // Sorted as found where they score the same: the commands of the screen before the decks, say.
-    shown.push(...scored.sort((a, b) => b.score - a.score).map(({ command }) => ({ group: command.group, command })));
+    shown.push(
+      ...scored
+        .sort((a, b) => b.score - a.score)
+        .map(({ command }) => ({ group: command.group, command })),
+    );
   }
   const sections = new Map<CommandGroup, Command[]>();
   for (const { group, command } of shown.slice(0, MAX_SHOWN)) {

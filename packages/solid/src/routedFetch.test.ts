@@ -7,7 +7,9 @@ describe("routedFetch", () => {
     const remote = vi.fn(async () => new Response("remote"));
     const fetch = routedFetch({ origin: "https://guest.example/", local, remote });
     expect(await (await fetch("https://guest.example/a")).text()).toBe("local");
-    expect(await (await fetch(new Request("https://guest.example/b"), { method: "HEAD" })).text()).toBe("local");
+    expect(
+      await (await fetch(new Request("https://guest.example/b"), { method: "HEAD" })).text(),
+    ).toBe("local");
     expect(await (await fetch(new URL("https://pod.example/a"))).text()).toBe("remote");
     expect(local).toHaveBeenCalledWith("https://guest.example/a", undefined);
     expect(remote).toHaveBeenCalledTimes(1);

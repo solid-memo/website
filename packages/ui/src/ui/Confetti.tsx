@@ -45,7 +45,11 @@ export function Confetti() {
   return (
     <div class="confetti" aria-hidden="true">
       {SHOOTERS.map(({ x, lean }, shooter) => (
-        <div key={shooter} class="confetti-shooter" style={{ "--x": `${x}%`, "--delay": round(shooter * PAUSE, "s") }}>
+        <div
+          key={shooter}
+          class="confetti-shooter"
+          style={{ "--x": `${x}%`, "--delay": round(shooter * PAUSE, "s") }}
+        >
           {Array.from({ length: PIECES }, (_, piece) => {
             const index = shooter * PIECES + piece + 1;
             const angle = ((lean + (scatter(index, 1) - 0.5) * 50) * Math.PI) / 180;

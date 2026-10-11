@@ -6,7 +6,9 @@ export class Onboarding extends Screen {
   async visit(): Promise<void> {
     await this.intent("Visit Solid Memo", async () => {
       await this.page.goto("./");
-      await expect(this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") })).toBeVisible();
+      await expect(
+        this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") }),
+      ).toBeVisible();
     });
   }
 
@@ -22,14 +24,18 @@ export class Onboarding extends Screen {
   /** Back from the identity provider: the pod it found, then on. */
   async continueConnected(pod: string): Promise<void> {
     await this.intent("Continue with the connected Pod", async () => {
-      await expect(this.page.getByRole("heading", { name: this.t("podConnection.connectedHeading") })).toBeVisible({ timeout: 30_000 });
+      await expect(
+        this.page.getByRole("heading", { name: this.t("podConnection.connectedHeading") }),
+      ).toBeVisible({ timeout: 30_000 });
       await expect(this.page.getByRole("main").locator(`a[href="${pod}"]`)).toBeVisible();
       await this.page.getByRole("button", { name: this.t("podConnection.continue") }).click();
     });
   }
 
   async expectLoggedOut(): Promise<void> {
-    await expect(this.page.getByRole("heading", { name: this.t("onboardingFlow.connectHeading") })).toBeVisible();
+    await expect(
+      this.page.getByRole("heading", { name: this.t("onboardingFlow.connectHeading") }),
+    ).toBeVisible();
     await expect(this.page.getByRole("textbox", { name: "WebID" })).toBeVisible();
   }
 }

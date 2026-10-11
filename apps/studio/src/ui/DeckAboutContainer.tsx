@@ -69,14 +69,19 @@ export function DeckAboutContainer({
   });
   // The release decides which cards are the user's to settle: none is counted until it is known.
   const languages = useMemo(
-    () => (cardsQuery.data === undefined || release === undefined ? undefined : deckLanguages(cardsQuery.data, release?.cards)),
+    () =>
+      cardsQuery.data === undefined || release === undefined
+        ? undefined
+        : deckLanguages(cardsQuery.data, release?.cards),
     [cardsQuery.data, release],
   );
 
   const save = useMutation({
     mutationFn: ({ write }: Save) => write(),
     onSuccess: async (_written, { touches = [] }) => {
-      await Promise.all([["decks"], ...touches].map((queryKey) => queryClient.invalidateQueries({ queryKey })));
+      await Promise.all(
+        [["decks"], ...touches].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      );
       queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
     },
   });
@@ -84,7 +89,11 @@ export function DeckAboutContainer({
     mutationFn: (languages: StatedLanguages) => useCases.stateCardLanguages(deck, languages),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
   });
-  const run = (write: Save["write"], touches?: QueryKey[]) => save.mutateAsync({ write, touches }).then(() => true, () => false);
+  const run = (write: Save["write"], touches?: QueryKey[]) =>
+    save.mutateAsync({ write, touches }).then(
+      () => true,
+      () => false,
+    );
 
   if (preferencesQuery.error) return <ErrorMessage error={errorText(preferencesQuery.error)} />;
   if (preferencesQuery.data === undefined) return <Loading label={t("deckPreferences.loading")} />;
@@ -98,9 +107,13 @@ export function DeckAboutContainer({
       preferences={preferencesQuery.data}
       preferencesHref={routeToHash({ screen: "preferences", instanceUrl: instance.url })}
       languages={languages}
-      languagesUnreadable={languages === undefined ? errorText(cardsQuery.error ?? releaseError) : null}
+      languagesUnreadable={
+        languages === undefined ? errorText(cardsQuery.error ?? releaseError) : null
+      }
       stated={stateLanguages.data ?? null}
-      course={isCourse ? { course: courseQuery.data, unreadable: errorText(courseQuery.error) } : null}
+      course={
+        isCourse ? { course: courseQuery.data, unreadable: errorText(courseQuery.error) } : null
+      }
       busy={save.isPending || stateLanguages.isPending}
       saved={save.isSuccess}
       error={errorText(save.error) ?? errorText(stateLanguages.error)}
@@ -114,7 +127,9 @@ export function DeckAboutContainer({
         })
       }
       onStateLanguages={(languages) => stateLanguages.mutate(languages)}
-      onCompletedChapters={(edit) => void run(() => useCases.setCompletedChapters(deck, edit), [["course", deck.url]])}
+      onCompletedChapters={(edit) =>
+        void run(() => useCases.setCompletedChapters(deck, edit), [["course", deck.url]])
+      }
     />
   );
 }

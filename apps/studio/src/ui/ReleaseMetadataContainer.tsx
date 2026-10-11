@@ -38,7 +38,12 @@ export function ReleaseMetadataContainer({
         {...(field === undefined ? {} : { field })}
         onEdit={editor.edit}
       />
-      <ReleasePublishContainer useCases={useCases} editor={editor} links={publishLinks} onStarted={onStarted} />
+      <ReleasePublishContainer
+        useCases={useCases}
+        editor={editor}
+        links={publishLinks}
+        onStarted={onStarted}
+      />
     </>
   );
 }

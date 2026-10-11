@@ -32,14 +32,20 @@ async function publisherPod({ wac = true, folderAcl = false } = {}) {
     `${POD}.acl`,
     `<#all> a <${ACL}Authorization>; <${ACL}agentClass> <http://xmlns.com/foaf/0.1/Agent>; <${ACL}accessTo> <${POD}>; <${ACL}default> <${POD}>; <${ACL}mode> <${ACL}Read>, <${ACL}Write>, <${ACL}Control> .`,
   );
-  const publicFetch = vi.fn(async (input: RequestInfo | URL) => new Response(null, { status: String(input) === RELEASE ? 200 : 401 }));
+  const publicFetch = vi.fn(
+    async (input: RequestInfo | URL) =>
+      new Response(null, { status: String(input) === RELEASE ? 200 : 401 }),
+  );
   const publisher = createSolidReleasePublisher({ fetch, publicFetch });
   /** The writes made since `from`, as method and URL, with If-None-Match: * when it was sent. */
   const writes = (from = 0) =>
     pod.requests
       .slice(from)
       .filter((request) => request.method !== "GET" && request.method !== "HEAD")
-      .map((request) => `${request.method} ${request.url}${request.ifNoneMatch === "*" ? " If-None-Match" : ""}`);
+      .map(
+        (request) =>
+          `${request.method} ${request.url}${request.ifNoneMatch === "*" ? " If-None-Match" : ""}`,
+      );
   return { pod, publisher, publicFetch, writes };
 }
 
@@ -47,12 +53,20 @@ describe("publish", () => {
   it("writes the release where nothing is, makes that document alone readable by everyone, and links it from the catalog", async () => {
     const { pod, publisher, writes } = await publisherPod();
     await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
-    expect(writes()).toEqual([`PUT ${RELEASE} If-None-Match`, `PATCH ${RELEASE}.acl`, `PATCH ${CATALOG}`]);
-    expect(await pod.text(RELEASE)).toContain(`<${RELEASE}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>`);
+    expect(writes()).toEqual([
+      `PUT ${RELEASE} If-None-Match`,
+      `PATCH ${RELEASE}.acl`,
+      `PATCH ${CATALOG}`,
+    ]);
+    expect(await pod.text(RELEASE)).toContain(
+      `<${RELEASE}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>`,
+    );
     const acl = await pod.text(`${RELEASE}.acl`);
     expect(acl).toContain(`<${ACL}accessTo> <${RELEASE}>`);
     // The release alone: every rule the ACL holds is of it.
-    const named = [...acl.matchAll(/<http:\/\/www\.w3\.org\/ns\/auth\/acl#(?:accessTo|default)> <([^>]+)>/g)].map((match) => match[1]);
+    const named = [
+      ...acl.matchAll(/<http:\/\/www\.w3\.org\/ns\/auth\/acl#(?:accessTo|default)> <([^>]+)>/g),
+    ].map((match) => match[1]);
     expect(new Set(named)).toEqual(new Set([RELEASE]));
     await expect(publisher.listPublished(INSTANCE)).resolves.toEqual([RELEASE]);
     expect(await pod.text(CATALOG)).toContain(`<${PUBLISHED}> <${RELEASE}>`);
@@ -62,7 +76,10 @@ describe("publish", () => {
     const { publisher, writes } = await publisherPod();
     await publisher.publish(INSTANCE, TURTLE, RELEASE);
     const before = writes().length;
-    await expect(publisher.publish(INSTANCE, "changed", RELEASE)).rejects.toMatchObject({ code: "releaseTaken", vars: { url: RELEASE } });
+    await expect(publisher.publish(INSTANCE, "changed", RELEASE)).rejects.toMatchObject({
+      code: "releaseTaken",
+      vars: { url: RELEASE },
+    });
     expect(writes(0).slice(before)).toEqual([`PUT ${RELEASE} If-None-Match`]);
   });
 
@@ -73,13 +90,27 @@ describe("publish", () => {
     // Written, then cut short: not public, not linked.
     await pod.put(RELEASE, at("2026-01-01T00:00:00.000Z"));
     const before = writes().length;
-    await expect(publisher.publish(INSTANCE, at("2026-01-02T00:00:00.000Z"), RELEASE)).resolves.toEqual({ public: true });
-    expect(writes().slice(before)).toEqual([`PUT ${RELEASE} If-None-Match`, `PATCH ${RELEASE}.acl`, `PATCH ${CATALOG}`]);
+    await expect(
+      publisher.publish(INSTANCE, at("2026-01-02T00:00:00.000Z"), RELEASE),
+    ).resolves.toEqual({ public: true });
+    expect(writes().slice(before)).toEqual([
+      `PUT ${RELEASE} If-None-Match`,
+      `PATCH ${RELEASE}.acl`,
+      `PATCH ${CATALOG}`,
+    ]);
     await expect(publisher.listPublished(INSTANCE)).resolves.toEqual([RELEASE]);
     // Another, it is not: nor one that cannot be read.
-    await expect(publisher.publish(INSTANCE, at("2026-01-02T00:00:00.000Z").replace('"Solid"', '"Other"'), RELEASE)).rejects.toMatchObject({ code: "releaseTaken" });
+    await expect(
+      publisher.publish(
+        INSTANCE,
+        at("2026-01-02T00:00:00.000Z").replace('"Solid"', '"Other"'),
+        RELEASE,
+      ),
+    ).rejects.toMatchObject({ code: "releaseTaken" });
     pod.failNext("GET", RELEASE, 500);
-    await expect(publisher.publish(INSTANCE, at("2026-01-03T00:00:00.000Z"), RELEASE)).rejects.toMatchObject({ code: "releaseTaken" });
+    await expect(
+      publisher.publish(INSTANCE, at("2026-01-03T00:00:00.000Z"), RELEASE),
+    ).rejects.toMatchObject({ code: "releaseTaken" });
   });
 
   it("publishes a release the pod will not make public all the same, readable by its owner alone", async () => {
@@ -101,13 +132,18 @@ describe("publish", () => {
     // A HEAD answered without a Link header.
     pod.failNext("HEAD", RELEASE, 200);
     await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: false });
-    expect(pod.requests.filter((request) => request.method === "HEAD" && request.url === RELEASE).length).toBeGreaterThan(1);
+    expect(
+      pod.requests.filter((request) => request.method === "HEAD" && request.url === RELEASE).length,
+    ).toBeGreaterThan(1);
   });
 
   it("says a write the pod refuses for any other reason, and writes nothing more", async () => {
     const { pod, publisher, writes } = await publisherPod();
     pod.failNext("PUT", RELEASE, 403);
-    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).rejects.toMatchObject({ code: "addFailed", vars: { url: RELEASE, status: 403 } });
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).rejects.toMatchObject({
+      code: "addFailed",
+      vars: { url: RELEASE, status: 403 },
+    });
     expect(writes()).toEqual([`PUT ${RELEASE} If-None-Match`]);
   });
 
@@ -128,7 +164,10 @@ describe("makePublic", () => {
     expect(await shared.pod.text(`${RELEASE}.acl`)).toContain(`<${ACL}accessTo> <${RELEASE}>`);
     const refused = await publisherPod({ wac: false });
     await refused.pod.put(RELEASE, TURTLE);
-    await expect(refused.publisher.makePublic(RELEASE)).rejects.toMatchObject({ code: "publicAccessRefused", vars: { url: RELEASE } });
+    await expect(refused.publisher.makePublic(RELEASE)).rejects.toMatchObject({
+      code: "publicAccessRefused",
+      vars: { url: RELEASE },
+    });
   });
 });
 
@@ -149,11 +188,17 @@ describe("isPublic and listPublished", () => {
 });
 
 describe("accessFetch", () => {
-  it("puts a space before each \".\" that ends a statement in a PATCH, after an IRI or a string", async () => {
+  it('puts a space before each "." that ends a statement in a PATCH, after an IRI or a string', async () => {
     const fetch = vi.fn(async () => new Response(null));
     const spaced = accessFetch(fetch);
-    await spaced(RELEASE, { method: "PATCH", body: 'INSERT DATA {<#a> <#b> <#c>.\n<#a> <#d> "x.y\\".", "z".}' });
-    expect(fetch).toHaveBeenLastCalledWith(RELEASE, { method: "PATCH", body: 'INSERT DATA {<#a> <#b> <#c> .\n<#a> <#d> "x.y\\".", "z" .}' });
+    await spaced(RELEASE, {
+      method: "PATCH",
+      body: 'INSERT DATA {<#a> <#b> <#c>.\n<#a> <#d> "x.y\\".", "z".}',
+    });
+    expect(fetch).toHaveBeenLastCalledWith(RELEASE, {
+      method: "PATCH",
+      body: 'INSERT DATA {<#a> <#b> <#c> .\n<#a> <#d> "x.y\\".", "z" .}',
+    });
     await spaced(RELEASE, { method: "PUT", body: "<#a> <#b> <#c>." });
     expect(fetch).toHaveBeenLastCalledWith(RELEASE, { method: "PUT", body: "<#a> <#b> <#c>." });
   });

@@ -42,12 +42,18 @@ export function createLocalPod({ root, store, newEtag }: LocalPodDeps): typeof g
     return store.exclusive(() => handle({ url, method, headers, body: init?.body ?? null }));
   };
 
-  async function handle(request: { url: string; method: string; headers: Headers; body: BodyInit | null }) {
+  async function handle(request: {
+    url: string;
+    method: string;
+    headers: Headers;
+    body: BodyInit | null;
+  }) {
     const { url, method, headers } = request;
     const current = await store.get(url);
     if (method === "GET" || method === "HEAD") {
       if (current === undefined) return answer(url, 404);
-      if (headers.get("If-None-Match") === current.etag) return answer(url, 304, null, { ETag: current.etag });
+      if (headers.get("If-None-Match") === current.etag)
+        return answer(url, 304, null, { ETag: current.etag });
       const { body, contentType } = await representationOf(url, current);
       return answer(url, 200, method === "HEAD" ? null : body, {
         "Content-Type": contentType,
@@ -63,7 +69,8 @@ export function createLocalPod({ root, store, newEtag }: LocalPodDeps): typeof g
     if (method === "DELETE") {
       if (current === undefined) return answer(url, 404);
       if (url === root) return answer(url, 405);
-      if (current.kind === "container" && (await childrenOf(url)).length > 0) return answer(url, 409);
+      if (current.kind === "container" && (await childrenOf(url)).length > 0)
+        return answer(url, 409);
       await store.delete(url);
       await touch(parentOf(url)!);
       return answer(url, 205);
@@ -79,7 +86,8 @@ export function createLocalPod({ root, store, newEtag }: LocalPodDeps): typeof g
     const text = typeof request.body === "string" ? request.body : null;
     let next: StoredResource;
     if (method === "PATCH") {
-      if (!contentType.startsWith("application/sparql-update") || text === null) return answer(url, 415);
+      if (!contentType.startsWith("application/sparql-update") || text === null)
+        return answer(url, 415);
       if (current !== undefined && current.kind !== "rdf") return answer(url, 409);
       const triples = await patched(url, current?.triples ?? [], text);
       if (triples === null) return answer(url, 400);
@@ -103,7 +111,8 @@ export function createLocalPod({ root, store, newEtag }: LocalPodDeps): typeof g
   async function create(url: string, resource: StoredResource): Promise<void> {
     const parent = parentOf(url);
     if (parent !== null) {
-      if ((await store.get(parent)) === undefined) await create(parent, { kind: "container", etag: newEtag() });
+      if ((await store.get(parent)) === undefined)
+        await create(parent, { kind: "container", etag: newEtag() });
       else await touch(parent);
     }
     await store.set(url, resource);
@@ -118,9 +127,14 @@ export function createLocalPod({ root, store, newEtag }: LocalPodDeps): typeof g
     return (await store.urls()).filter((candidate) => parentOf(candidate) === container).sort();
   }
 
-  async function representationOf(url: string, resource: StoredResource): Promise<{ body: BodyInit; contentType: string }> {
-    if (resource.kind === "file") return { body: resource.bytes as Uint8Array<ArrayBuffer>, contentType: resource.contentType };
-    if (resource.kind === "rdf") return { body: resource.triples.join("\n"), contentType: "text/turtle" };
+  async function representationOf(
+    url: string,
+    resource: StoredResource,
+  ): Promise<{ body: BodyInit; contentType: string }> {
+    if (resource.kind === "file")
+      return { body: resource.bytes as Uint8Array<ArrayBuffer>, contentType: resource.contentType };
+    if (resource.kind === "rdf")
+      return { body: resource.triples.join("\n"), contentType: "text/turtle" };
     const lines = [
       `<${url}> <${RDF_TYPE}> <${LDP}Container> .`,
       `<${url}> <${RDF_TYPE}> <${LDP}BasicContainer> .`,
@@ -147,7 +161,11 @@ async function parsed(url: string, turtle: string): Promise<Set<string> | null> 
 }
 
 /** The document's triples with the update applied, block by block; null when it is not one this pod applies. */
-async function patched(url: string, triples: readonly string[], update: string): Promise<string[] | null> {
+async function patched(
+  url: string,
+  triples: readonly string[],
+  update: string,
+): Promise<string[] | null> {
   const blocks = dataBlocks(update);
   if (blocks === null) return null;
   const result = new Set(triples);
@@ -167,7 +185,9 @@ async function patched(url: string, triples: readonly string[], update: string):
  * Update, in order, each with its triples as written; null for any other
  * update. Braces inside IRIs, strings and comments do not end a block.
  */
-export function dataBlocks(update: string): { operation: "INSERT" | "DELETE"; data: string }[] | null {
+export function dataBlocks(
+  update: string,
+): { operation: "INSERT" | "DELETE"; data: string }[] | null {
   const blocks: { operation: "INSERT" | "DELETE"; data: string }[] = [];
   let at = 0;
   for (;;) {
@@ -198,7 +218,10 @@ export function dataBlocks(update: string): { operation: "INSERT" | "DELETE"; da
       } else if (c === "}") break;
     }
     if (at >= update.length) return null;
-    blocks.push({ operation: opening[1]!.toUpperCase() as "INSERT" | "DELETE", data: update.slice(start, at) });
+    blocks.push({
+      operation: opening[1]!.toUpperCase() as "INSERT" | "DELETE",
+      data: update.slice(start, at),
+    });
     at++;
   }
 }
@@ -220,8 +243,16 @@ async function bytesOf(body: BodyInit | null): Promise<Uint8Array> {
   return new Uint8Array(await new Response(body).arrayBuffer());
 }
 
-function answer(url: string, status: number, body: BodyInit | null = null, headers: Record<string, string> = {}): Response {
-  const response = new Response(status === 304 || status === 204 || status === 205 ? null : body, { status, headers });
+function answer(
+  url: string,
+  status: number,
+  body: BodyInit | null = null,
+  headers: Record<string, string> = {},
+): Response {
+  const response = new Response(status === 304 || status === 204 || status === 205 ? null : body, {
+    status,
+    headers,
+  });
   Object.defineProperty(response, "url", { value: url });
   return response;
 }

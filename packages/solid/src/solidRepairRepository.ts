@@ -83,12 +83,25 @@ function applyRepair(dataset: SolidDataset, repair: Repair): SolidDataset {
  * deck group any more. Only those links go: who else names it — a deck
  * its creator, the catalog its publisher — is left as it is.
  */
-function withoutMembershipsOf(dataset: SolidDataset, documentUrl: string, url: string): SolidDataset {
+function withoutMembershipsOf(
+  dataset: SolidDataset,
+  documentUrl: string,
+  url: string,
+): SolidDataset {
   return getThingAll(dataset)
-    .filter((thing) => thing.url === `${documentUrl}#catalog` || getUrlAll(thing, RDF.type).includes(SM.DeckGroup))
+    .filter(
+      (thing) =>
+        thing.url === `${documentUrl}#catalog` || getUrlAll(thing, RDF.type).includes(SM.DeckGroup),
+    )
     .reduce(
       (current, parent) =>
-        setThing(current, MEMBERSHIP.reduce((builder, { link }) => builder.removeUrl(link, url), buildThing(parent)).build()),
+        setThing(
+          current,
+          MEMBERSHIP.reduce(
+            (builder, { link }) => builder.removeUrl(link, url),
+            buildThing(parent),
+          ).build(),
+        ),
       dataset,
     );
 }
@@ -104,7 +117,10 @@ function withoutDanglingMembers(dataset: SolidDataset, documentUrl: string, thin
   const foreign = foreignSubjects(dataset);
   const describes = (url: string, types: string[]) => {
     const member = getThing(dataset, url);
-    return member !== null && (foreign.has(url) || getUrlAll(member, RDF.type).some((type) => types.includes(type)));
+    return (
+      member !== null &&
+      (foreign.has(url) || getUrlAll(member, RDF.type).some((type) => types.includes(type)))
+    );
   };
   return MEMBERSHIP.reduce(
     (builder, { link, types }) =>
@@ -125,7 +141,9 @@ function repairedThing(
       // Format 4 states text language-tagged, the app's own in English and
       // Swedish; from format 5 the title may be in any language, so it is read in every one.
       if (repair.version >= 4) {
-        const description = defaultDeckDescriptionText(readText(thing, DCTERMS.title) ?? { en: "a deck" });
+        const description = defaultDeckDescriptionText(
+          readText(thing, DCTERMS.title) ?? { en: "a deck" },
+        );
         builder.removeAll(DCTERMS.description);
         for (const [language, text] of Object.entries(description)) {
           builder.addStringWithLocale(DCTERMS.description, text, language);

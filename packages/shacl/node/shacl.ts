@@ -2,18 +2,18 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { DataFactory, Store, type Quad } from "n3";
 import { createEngine, type ShapeEngine } from "../src/engine.ts";
-import {
-  coreOnly,
-  PROFILES,
-  REFERENCE_DATA,
-  type ProfileName,
-} from "../src/profiles.ts";
+import { coreOnly, PROFILES, REFERENCE_DATA, type ProfileName } from "../src/profiles.ts";
 import { pickShape } from "../src/registry.ts";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeContext } from "@solid-memo/vocab/shapeDescriptor";
 import { RDF_TYPE, parseTurtle } from "@solid-memo/turtle/rdf";
 import { SM_NS } from "@solid-memo/vocab/tooling/vocab";
-import { readSiteTurtle, SHAPES_BASE, SITE_VENDOR, VOCAB_BASE } from "@solid-memo/vocab/tooling/sources";
+import {
+  readSiteTurtle,
+  SHAPES_BASE,
+  SITE_VENDOR,
+  VOCAB_BASE,
+} from "@solid-memo/vocab/tooling/sources";
 import { shown } from "@solid-memo/domain/langText";
 
 /**
@@ -89,11 +89,7 @@ export async function validateTurtleDocument(
       );
       continue;
     }
-    for (const violation of await engine.validateNode(
-      data,
-      subject,
-      pick.descriptor.shapeIri,
-    )) {
+    for (const violation of await engine.validateNode(data, subject, pick.descriptor.shapeIri)) {
       const where = violation.path === undefined ? "" : ` (${violation.path})`;
       problems.push(`<${subject}>${where}: ${shown(violation.message)}`);
     }
@@ -104,10 +100,7 @@ export async function validateTurtleDocument(
 }
 
 /** An engine for one vendored profile (`<root>vendor/…`), its SPARQL constraints left out. */
-export async function loadProfileEngine(
-  root: string,
-  profile: ProfileName,
-): Promise<ShapeEngine> {
+export async function loadProfileEngine(root: string, profile: ProfileName): Promise<ShapeEngine> {
   const quads = await Promise.all(
     PROFILES[profile].map(async (path) =>
       parseTurtle(await readFile(join(root, "vendor", path), "utf8"), `${SITE_VENDOR}${path}`),
@@ -118,7 +111,9 @@ export async function loadProfileEngine(
 
 /** The reference data a profile check loads next to a document, from ns/vocab/. */
 export async function loadReferenceData(): Promise<Quad[]> {
-  return (await Promise.all(REFERENCE_DATA.map((path) => readSiteQuads(`${VOCAB_BASE}${path}`)))).flat();
+  return (
+    await Promise.all(REFERENCE_DATA.map((path) => readSiteQuads(`${VOCAB_BASE}${path}`)))
+  ).flat();
 }
 
 /**

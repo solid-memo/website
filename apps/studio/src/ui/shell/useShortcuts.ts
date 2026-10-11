@@ -1,6 +1,15 @@
 import { createContext } from "preact";
 import { useCallback, useContext, useEffect, useRef } from "preact/hooks";
-import { isCharacterKey, isTyping, keyOf, pressKey, shortcutOf, SHORTCUTS, type Chord, type ShortcutId } from "./shortcuts";
+import {
+  isCharacterKey,
+  isTyping,
+  keyOf,
+  pressKey,
+  shortcutOf,
+  SHORTCUTS,
+  type Chord,
+  type ShortcutId,
+} from "./shortcuts";
 
 /** A screen's own keys, given the key as the keymap names it (keyOf): the screen takes one with `preventDefault`. */
 export type ScreenKeyHandler = (event: KeyboardEvent, key: string) => void;
@@ -40,7 +49,10 @@ const TYPING_KEYS = STUDIO_KEYS.filter((shortcut) => shortcut.whileTyping);
  * is not `g g`). Returns how screens register: give it to them in
  * ScreenKeys.
  */
-export function useShortcuts(run: (shortcut: ShortcutId) => boolean, characterKeys = true): Register {
+export function useShortcuts(
+  run: (shortcut: ShortcutId) => boolean,
+  characterKeys = true,
+): Register {
   const screens = useRef(new Set<{ current: ScreenKeyHandler }>());
   const chord = useRef<Chord | null>(null);
   const runRef = useRef(run);
@@ -53,7 +65,8 @@ export function useShortcuts(run: (shortcut: ShortcutId) => boolean, characterKe
       if (event.defaultPrevented) return;
       const key = keyOf(event);
       // A key goes to an element: the one focused, else the page's body, under a dialog open too.
-      const dialog = (event.target as Element).closest("dialog") ?? document.querySelector("dialog[open]");
+      const dialog =
+        (event.target as Element).closest("dialog") ?? document.querySelector("dialog[open]");
       if (dialog !== null) {
         if (shortcutOf(key, "studio") !== "palette") return;
         event.preventDefault();
@@ -75,7 +88,12 @@ export function useShortcuts(run: (shortcut: ShortcutId) => boolean, characterKe
         }
       }
       if (event.repeat) return;
-      const pressed = pressKey(typing ? null : chord.current, key, Date.now(), typing ? TYPING_KEYS : STUDIO_KEYS);
+      const pressed = pressKey(
+        typing ? null : chord.current,
+        key,
+        Date.now(),
+        typing ? TYPING_KEYS : STUDIO_KEYS,
+      );
       chord.current = pressed.chord;
       if (pressed.shortcut !== null && runRef.current(pressed.shortcut)) event.preventDefault();
     };

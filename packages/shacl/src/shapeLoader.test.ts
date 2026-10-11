@@ -39,9 +39,12 @@ describe("createShapeLoader", () => {
     const canonical = "https://shapes.example/card/v2.ttl";
     const fetch = vi.fn(async () =>
       Object.defineProperty(
-        new Response(`@base <${canonical}> .\n<#shape> a <http://www.w3.org/ns/shacl#NodeShape> .`, {
-          headers: { "content-type": "text/turtle" },
-        }),
+        new Response(
+          `@base <${canonical}> .\n<#shape> a <http://www.w3.org/ns/shacl#NodeShape> .`,
+          {
+            headers: { "content-type": "text/turtle" },
+          },
+        ),
         "url",
         { value: "http://localhost:4173/ns/shapes/card/v2.ttl" },
       ),

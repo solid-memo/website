@@ -12,7 +12,15 @@ import { DayBars, RecallTile } from "./StatisticsCharts";
  * are no answers yet, or when they cannot be read (the deck works without
  * them); then where its cards stand, all new before the first answer.
  */
-export function DeckStatisticsContainer({ useCases, instance, deck }: { useCases: UseCases; instance: Instance; deck: Deck }) {
+export function DeckStatisticsContainer({
+  useCases,
+  instance,
+  deck,
+}: {
+  useCases: UseCases;
+  instance: Instance;
+  deck: Deck;
+}) {
   const { t } = useI18n();
   const statisticsQuery = useQuery({
     queryKey: ["statistics", instance.url, deck.url],
@@ -22,7 +30,10 @@ export function DeckStatisticsContainer({ useCases, instance, deck }: { useCases
   return (
     <>
       {statistics !== undefined && statistics.totals.answers > 0 && (
-        <section class="statistics deck-statistics-section" aria-labelledby="deck-statistics-heading">
+        <section
+          class="statistics deck-statistics-section"
+          aria-labelledby="deck-statistics-heading"
+        >
           <h3 id="deck-statistics-heading">{t("statistics.heading")}</h3>
           <DayBars days={statistics.days} today={statistics.today} />
           <div class="stat-tiles">

@@ -50,7 +50,13 @@ export function TransferContainer({
   });
 
   const exportMutation = useMutation({
-    mutationFn: async ({ decks, options }: { decks: readonly Deck[]; options: DeckFileOptions }) => {
+    mutationFn: async ({
+      decks,
+      options,
+    }: {
+      decks: readonly Deck[];
+      options: DeckFileOptions;
+    }) => {
       try {
         for (const [index, deck] of decks.entries()) {
           setExporting({ deck, index, total: decks.length });
@@ -70,7 +76,8 @@ export function TransferContainer({
   });
   const importMutation = useMutation({
     scope: { id: catalogScope(instance.url) },
-    mutationFn: (withProgress: boolean) => useCases.importDeckFile(instance.url, file!, { withProgress }),
+    mutationFn: (withProgress: boolean) =>
+      useCases.importDeckFile(instance.url, file!, { withProgress }),
     onSuccess: () => setFile(null),
     onSettled: () =>
       Promise.all([

@@ -41,12 +41,21 @@ const deck: Deck = {
 };
 
 function repositoryOn(fetch: typeof globalThis.fetch, checkWrite?: WriteCheck) {
-  return createSolidDeckRepository({ fetch, now: () => new Date("2026-10-07T10:00:00.000Z"), randomId: () => "new", checkWrite });
+  return createSolidDeckRepository({
+    fetch,
+    now: () => new Date("2026-10-07T10:00:00.000Z"),
+    randomId: () => "new",
+    checkWrite,
+  });
 }
 
-const writes = (pod: ReturnType<typeof fakePod>) => pod.requests.filter((request) => request.method !== "GET");
+const writes = (pod: ReturnType<typeof fakePod>) =>
+  pod.requests.filter((request) => request.method !== "GET");
 const completedIn = (pod: ReturnType<typeof fakePod>) =>
-  pod.triples(CATALOG)!.filter((triple) => triple.includes(COMPLETED)).map((triple) => triple.split(" ")[2]);
+  pod
+    .triples(CATALOG)!
+    .filter((triple) => triple.includes(COMPLETED))
+    .map((triple) => triple.split(" ")[2]);
 
 describe("completing a course chapter", () => {
   it("adds the chapter to the deck's catalog entry in one write, If-Match the read, and reads back with it", async () => {
@@ -54,10 +63,14 @@ describe("completing a course chapter", () => {
     const repository = repositoryOn(pod.fetch);
     const done = await repository.completeChapter(deck, `${RELEASE}#ch-1`);
     expect(done.completedChapters).toEqual([`${RELEASE}#ch-1`]);
-    expect(writes(pod)).toEqual([expect.objectContaining({ method: "PATCH", url: CATALOG, ifMatch: '"v1"', status: 205 })]);
+    expect(writes(pod)).toEqual([
+      expect.objectContaining({ method: "PATCH", url: CATALOG, ifMatch: '"v1"', status: 205 }),
+    ]);
     await repository.completeChapter(done, `${RELEASE}#ch-2`);
     expect(completedIn(pod)).toEqual([`<${RELEASE}#ch-1>`, `<${RELEASE}#ch-2>`]);
-    expect(await repository.readDeck(deck.url)).toMatchObject({ completedChapters: [`${RELEASE}#ch-1`, `${RELEASE}#ch-2`] });
+    expect(await repository.readDeck(deck.url)).toMatchObject({
+      completedChapters: [`${RELEASE}#ch-1`, `${RELEASE}#ch-2`],
+    });
   });
 
   it("writes nothing for a chapter already completed", async () => {
@@ -65,17 +78,22 @@ describe("completing a course chapter", () => {
     const repository = repositoryOn(pod.fetch);
     await repository.completeChapter(deck, `${RELEASE}#ch-1`);
     pod.clearRequests();
-    await expect(repository.completeChapter(deck, `${RELEASE}#ch-1`)).resolves.toMatchObject({ completedChapters: [`${RELEASE}#ch-1`] });
+    await expect(repository.completeChapter(deck, `${RELEASE}#ch-1`)).resolves.toMatchObject({
+      completedChapters: [`${RELEASE}#ch-1`],
+    });
     // Nor for the same chapter of a later release: completing it there is the same.
     const later = RELEASE.replace("v1.ttl", "v2.ttl");
-    await expect(repository.completeChapter(deck, `${later}#ch-1`)).resolves.toMatchObject({ completedChapters: [`${RELEASE}#ch-1`] });
+    await expect(repository.completeChapter(deck, `${later}#ch-1`)).resolves.toMatchObject({
+      completedChapters: [`${RELEASE}#ch-1`],
+    });
     expect(writes(pod)).toEqual([]);
   });
 
   it("adds it again to the document as it is when it changed meanwhile, keeping what changed", async () => {
     const pod = await podWithCourse();
     const elsewhere = repositoryOn(pod.fetch);
-    let meanwhile: (() => Promise<unknown>) | null = () => elsewhere.saveDeck({ ...deck, title: { en: "Solid, renamed" } });
+    let meanwhile: (() => Promise<unknown>) | null = () =>
+      elsewhere.saveDeck({ ...deck, title: { en: "Solid, renamed" } });
     const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === "PATCH" && meanwhile !== null) {
         const change = meanwhile;
@@ -86,7 +104,10 @@ describe("completing a course chapter", () => {
     }) as typeof globalThis.fetch;
     const done = await repositoryOn(fetch).completeChapter(deck, `${RELEASE}#ch-1`);
     expect(writes(pod).map((request) => request.status)).toEqual([205, 412, 205]);
-    expect(done).toMatchObject({ title: { en: "Solid, renamed" }, completedChapters: [`${RELEASE}#ch-1`] });
+    expect(done).toMatchObject({
+      title: { en: "Solid, renamed" },
+      completedChapters: [`${RELEASE}#ch-1`],
+    });
     expect(completedIn(pod)).toEqual([`<${RELEASE}#ch-1>`]);
   });
 
@@ -94,14 +115,20 @@ describe("completing a course chapter", () => {
     const pod = await podWithCourse();
     const repository = repositoryOn(pod.fetch);
     for (let i = 0; i < 3; i++) pod.failNext("PATCH", CATALOG, 412);
-    await expect(repository.completeChapter(deck, `${RELEASE}#ch-1`)).rejects.toMatchObject({ code: "changedElsewhere" });
+    await expect(repository.completeChapter(deck, `${RELEASE}#ch-1`)).rejects.toMatchObject({
+      code: "changedElsewhere",
+    });
     expect(writes(pod)).toHaveLength(3);
     pod.clearRequests();
     pod.failNext("PATCH", CATALOG, 500);
     await expect(repository.completeChapter(deck, `${RELEASE}#ch-1`)).rejects.toThrow();
     expect(writes(pod)).toHaveLength(1);
-    await expect(repository.completeChapter({ ...deck, url: `${CATALOG}#gone` }, `${RELEASE}#ch-1`)).rejects.toMatchObject({ code: "deckGone" });
-    await expect(repositoryOn(fakePod().fetch).completeChapter(deck, `${RELEASE}#ch-1`)).rejects.toMatchObject({ code: "deckGone" });
+    await expect(
+      repository.completeChapter({ ...deck, url: `${CATALOG}#gone` }, `${RELEASE}#ch-1`),
+    ).rejects.toMatchObject({ code: "deckGone" });
+    await expect(
+      repositoryOn(fakePod().fetch).completeChapter(deck, `${RELEASE}#ch-1`),
+    ).rejects.toMatchObject({ code: "deckGone" });
   });
 });
 
@@ -124,13 +151,20 @@ describe("changing the chapters completed in the Studio", () => {
       checked.push([...subjects]);
     });
     // The same chapter of a later release is the same chapter.
-    const edited = await repository.setCompletedChapters(deck, { kind: "notDone", chapterUrl: `${LATER}#ch-1` });
+    const edited = await repository.setCompletedChapters(deck, {
+      kind: "notDone",
+      chapterUrl: `${LATER}#ch-1`,
+    });
     expect(edited.completedChapters).toEqual([`${RELEASE}#ch-2`]);
     expect(checked).toEqual([[deck.url]]);
-    expect(writes(pod)).toEqual([expect.objectContaining({ method: "PATCH", url: CATALOG, status: 205 })]);
+    expect(writes(pod)).toEqual([
+      expect.objectContaining({ method: "PATCH", url: CATALOG, status: 205 }),
+    ]);
     expect(completedIn(pod)).toEqual([`<${RELEASE}#ch-2>`]);
     pod.clearRequests();
-    await expect(repository.setCompletedChapters(deck, { kind: "notDone", chapterUrl: `${RELEASE}#ch-1` })).resolves.toMatchObject({
+    await expect(
+      repository.setCompletedChapters(deck, { kind: "notDone", chapterUrl: `${RELEASE}#ch-1` }),
+    ).resolves.toMatchObject({
       completedChapters: [`${RELEASE}#ch-2`],
     });
     expect(writes(pod)).toEqual([]);
@@ -141,7 +175,9 @@ describe("changing the chapters completed in the Studio", () => {
     const restarted = await repositoryOn(pod.fetch).setCompletedChapters(deck, { kind: "restart" });
     expect(restarted).not.toHaveProperty("completedChapters");
     expect(completedIn(pod)).toEqual([]);
-    expect(await repositoryOn(pod.fetch).readDeck(deck.url)).not.toHaveProperty("completedChapters");
+    expect(await repositoryOn(pod.fetch).readDeck(deck.url)).not.toHaveProperty(
+      "completedChapters",
+    );
   });
 
   it("writes nothing the write check refuses", async () => {
@@ -149,7 +185,9 @@ describe("changing the chapters completed in the Studio", () => {
     const refusing = repositoryOn(pod.fetch, async () => {
       throw new Error("refused");
     });
-    await expect(refusing.setCompletedChapters(deck, { kind: "restart" })).rejects.toThrow("refused");
+    await expect(refusing.setCompletedChapters(deck, { kind: "restart" })).rejects.toThrow(
+      "refused",
+    );
     expect(writes(pod)).toEqual([]);
   });
 });
@@ -158,17 +196,30 @@ describe("registerDeck", () => {
   it("adds a deck's entry with the chapters it completed, in one checked write", async () => {
     const pod = await podWithCourse();
     const checked: string[][] = [];
-    const repository = repositoryOn(pod.fetch, async (_dataset, subjects) => void checked.push([...subjects]));
-    const added: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2`, completedChapters: [`${RELEASE}#ch1`] };
+    const repository = repositoryOn(
+      pod.fetch,
+      async (_dataset, subjects) => void checked.push([...subjects]),
+    );
+    const added: Deck = {
+      ...deck,
+      id: "deck-2",
+      url: `${CATALOG}#deck-2`,
+      completedChapters: [`${RELEASE}#ch1`],
+    };
     expect(await repository.registerDeck(added)).toBe(added);
-    expect(await repository.readDeck(added.url)).toMatchObject({ id: "deck-2", completedChapters: [`${RELEASE}#ch1`] });
+    expect(await repository.readDeck(added.url)).toMatchObject({
+      id: "deck-2",
+      completedChapters: [`${RELEASE}#ch1`],
+    });
     expect(checked[0]).toContain(added.url);
     expect(writes(pod)).toHaveLength(1);
   });
 
   it("refuses a deck the catalog has an entry of, writing nothing", async () => {
     const pod = await podWithCourse();
-    await expect(repositoryOn(pod.fetch).registerDeck(deck)).rejects.toMatchObject({ code: "alreadyExists" });
+    await expect(repositoryOn(pod.fetch).registerDeck(deck)).rejects.toMatchObject({
+      code: "alreadyExists",
+    });
     expect(writes(pod)).toHaveLength(0);
   });
 });

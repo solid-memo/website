@@ -15,9 +15,7 @@ export function useRemembered<T>(
   key: string,
   initial: T,
 ): [T, (update: (current: T) => T) => void] {
-  const [value, setValue] = useState<T>(() =>
-    memory.has(key) ? (memory.get(key) as T) : initial,
-  );
+  const [value, setValue] = useState<T>(() => (memory.has(key) ? (memory.get(key) as T) : initial));
   function update(next: (current: T) => T) {
     setValue((current) => {
       const value = next(current);
@@ -62,7 +60,9 @@ export function recentLanguages(
     return [];
   }
   if (!Array.isArray(stored)) return [];
-  const tags = stored.filter((tag): tag is string => typeof tag === "string" && canonicalTag(tag) === tag);
+  const tags = stored.filter(
+    (tag): tag is string => typeof tag === "string" && canonicalTag(tag) === tag,
+  );
   return [...new Set(tags)].slice(0, RECENT_LANGUAGES);
 }
 
@@ -98,7 +98,9 @@ export function collapsedGroups(
   } catch {
     return [];
   }
-  return Array.isArray(stored) ? stored.filter((url): url is string => typeof url === "string") : [];
+  return Array.isArray(stored)
+    ? stored.filter((url): url is string => typeof url === "string")
+    : [];
 }
 
 /** Notes which of an instance's deck groups are folded shut on this device. */

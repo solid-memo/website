@@ -60,10 +60,7 @@ export function createSolidSessionGateway(clientName: string): SessionGateway {
     window.sessionStorage.setItem(LOGIN_HASH_KEY, window.location.hash);
     await login({
       oidcIssuer,
-      redirectUrl: new URL(
-        window.location.pathname,
-        window.location.origin,
-      ).toString(),
+      redirectUrl: new URL(window.location.pathname, window.location.origin).toString(),
       clientName,
     });
   }

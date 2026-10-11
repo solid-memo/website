@@ -22,11 +22,19 @@ export function LicenseSelect({
   onChange: (license: string) => void;
 }) {
   const { t } = useI18n();
-  const offered = current === undefined || KNOWN_LICENSES.includes(current) ? KNOWN_LICENSES : [...KNOWN_LICENSES, current];
+  const offered =
+    current === undefined || KNOWN_LICENSES.includes(current)
+      ? KNOWN_LICENSES
+      : [...KNOWN_LICENSES, current];
   return (
     <>
       <label for={id}>{t("studio.license.label")}</label>
-      <select id={id} value={value} disabled={disabled} onChange={(event) => onChange(event.currentTarget.value)}>
+      <select
+        id={id}
+        value={value}
+        disabled={disabled}
+        onChange={(event) => onChange(event.currentTarget.value)}
+      >
         <option value="">{t("studio.license.none")}</option>
         {offered.map((url) => (
           <option key={url} value={url}>

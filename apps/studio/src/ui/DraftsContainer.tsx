@@ -65,7 +65,8 @@ export function DraftsContainer({
       // The instance's check covers its drafts' documents too.
       queryClient.invalidateQueries({ queryKey: ["validation", instance.url] }),
     ]);
-  const forget = (draft: ReleaseDraftSummary) => queryClient.removeQueries({ queryKey: draftKey(draft.url) });
+  const forget = (draft: ReleaseDraftSummary) =>
+    queryClient.removeQueries({ queryKey: draftKey(draft.url) });
   const createMutation = useMutation({
     scope: { id: catalogScope(instance.url) },
     mutationFn: (from: NewDraft) => useCases.createReleaseDraft(instance.url, from),
@@ -90,7 +91,8 @@ export function DraftsContainer({
 
   const error = draftsQuery.error ?? treeQuery.error;
   if (error) return <ErrorMessage error={errorText(error)} />;
-  if (draftsQuery.data === undefined || treeQuery.data === undefined) return <Loading label={t("studio.drafts.loading")} />;
+  if (draftsQuery.data === undefined || treeQuery.data === undefined)
+    return <Loading label={t("studio.drafts.loading")} />;
 
   return (
     <DraftsScreen

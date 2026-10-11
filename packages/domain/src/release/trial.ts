@@ -34,6 +34,7 @@ export const TRIAL_INSTANCE_URL = `${TRIAL_ORIGIN}solid-memo/`;
 export function trialProblems(model: ReleaseModel): ReleaseProblem[] {
   const outline = new Set([...model.chapters, ...model.steps].map((subject) => subject.iri));
   const needed = (problem: ReleaseProblem) =>
-    outline.has(problem.subject) || (problem.subject === model.url && problem.field === `${DCTERMS_NS}title`);
+    outline.has(problem.subject) ||
+    (problem.subject === model.url && problem.field === `${DCTERMS_NS}title`);
   return [...courseProblems(model), ...readinessProblems(model).filter(needed)];
 }

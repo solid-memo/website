@@ -22,11 +22,17 @@ export function placeMenu(
   menu: Size,
   viewport: Size,
 ): { top: number; left: number } {
-  const left = Math.max(MENU_EDGE, Math.min(button.right - menu.width, viewport.width - MENU_EDGE - menu.width));
+  const left = Math.max(
+    MENU_EDGE,
+    Math.min(button.right - menu.width, viewport.width - MENU_EDGE - menu.width),
+  );
   const below = button.bottom + MENU_GAP;
   const above = button.top - MENU_GAP - menu.height;
   if (below + menu.height <= viewport.height - MENU_EDGE || above < MENU_EDGE) {
-    return { left, top: Math.max(MENU_EDGE, Math.min(below, viewport.height - MENU_EDGE - menu.height)) };
+    return {
+      left,
+      top: Math.max(MENU_EDGE, Math.min(below, viewport.height - MENU_EDGE - menu.height)),
+    };
   }
   return { left, top: above };
 }
@@ -82,7 +88,11 @@ export function ActionsMenu({
   const close = useRef(onClose);
   close.current = onClose;
 
-  const items = () => [...menuRef.current!.querySelectorAll<HTMLElement>('[role="menuitem"], [role="menuitemcheckbox"]')];
+  const items = () => [
+    ...menuRef.current!.querySelectorAll<HTMLElement>(
+      '[role="menuitem"], [role="menuitemcheckbox"]',
+    ),
+  ];
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -254,9 +264,23 @@ export function MenuItem({
  * choosing it turns it the other way (`onChange`), and the menu stays
  * open, for the next.
  */
-export function MenuCheckbox({ checked, onChange, children }: { checked: boolean; onChange: (checked: boolean) => void; children: ComponentChildren }) {
+export function MenuCheckbox({
+  checked,
+  onChange,
+  children,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  children: ComponentChildren;
+}) {
   return (
-    <button type="button" role="menuitemcheckbox" tabIndex={-1} aria-checked={checked} onClick={() => onChange(!checked)}>
+    <button
+      type="button"
+      role="menuitemcheckbox"
+      tabIndex={-1}
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+    >
       {children}
     </button>
   );

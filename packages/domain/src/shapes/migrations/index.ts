@@ -1,4 +1,9 @@
-import { LATEST_VERSION, type LatestRecord, type ShapeName, type VersionedRecord } from "@solid-memo/vocab/types.generated";
+import {
+  LATEST_VERSION,
+  type LatestRecord,
+  type ShapeName,
+  type VersionedRecord,
+} from "@solid-memo/vocab/types.generated";
 import { CARD_1_TO_2 } from "./card/1-to-2";
 import { CARD_2_TO_3 } from "./card/2-to-3";
 import { CARD_3_TO_4 } from "./card/3-to-4";

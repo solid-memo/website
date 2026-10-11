@@ -16,6 +16,10 @@ export type WriteContext = Exclude<ShapeContext, "any" | "library">;
  * with DCAT subjects, to DCAT-AP. The app wires the SHACL validator in;
  * without one, nothing is checked.
  */
-export type WriteCheck = (dataset: SolidDataset, subjects: readonly string[], context: WriteContext) => Promise<void>;
+export type WriteCheck = (
+  dataset: SolidDataset,
+  subjects: readonly string[],
+  context: WriteContext,
+) => Promise<void>;
 
 export const noWriteCheck: WriteCheck = async () => undefined;

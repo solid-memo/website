@@ -30,25 +30,46 @@ function deck(id: string, title: LangText, extra: Partial<Deck> = {}): Deck {
   };
 }
 
-const languages: DeckGroup = { url: "https://pod.example/a/catalog.ttl#group-1", title: { en: "Languages" } };
-const scripts: DeckGroup = { url: "https://pod.example/a/catalog.ttl#group-2", title: { en: "Scripts", sv: "Skrifter" } };
+const languages: DeckGroup = {
+  url: "https://pod.example/a/catalog.ttl#group-1",
+  title: { en: "Languages" },
+};
+const scripts: DeckGroup = {
+  url: "https://pod.example/a/catalog.ttl#group-2",
+  title: { en: "Scripts", sv: "Skrifter" },
+};
 
 function row(of: Deck, extra: Partial<DeckTableRow> = {}): DeckTableRow {
   return { deck: of, groups: [], figures: {}, newCardsPerDay: 20, maxReviewsPerDay: 200, ...extra };
 }
 
-const kanji = row(deck("kanji", { en: "Kanji 10", ja: "漢字" }, { direction: "bidirectional", modifiedAt: "2026-10-05T10:00:00.000Z" }), {
-  groups: [languages, scripts],
-  figures: { cards: 30, due: 4 },
-  newCardsPerDay: 5,
+const kanji = row(
+  deck(
+    "kanji",
+    { en: "Kanji 10", ja: "漢字" },
+    { direction: "bidirectional", modifiedAt: "2026-10-05T10:00:00.000Z" },
+  ),
+  {
+    groups: [languages, scripts],
+    figures: { cards: 30, due: 4 },
+    newCardsPerDay: 5,
+  },
+);
+const verbs = row(deck("verbs", { en: "Verbs", sv: "Verb" }), {
+  groups: [languages],
+  figures: { cards: 12, due: 0, new: 3 },
 });
-const verbs = row(deck("verbs", { en: "Verbs", sv: "Verb" }), { groups: [languages], figures: { cards: 12, due: 0, new: 3 } });
-const capitals = row(deck("capitals", { en: "Kanji 2" }, { direction: "back-to-front" }), { figures: { due: 4 }, maxReviewsPerDay: 50 });
+const capitals = row(deck("capitals", { en: "Kanji 2" }, { direction: "back-to-front" }), {
+  figures: { due: 4 },
+  maxReviewsPerDay: 50,
+});
 const rows = [kanji, verbs, capitals];
 
 const english = (text: LangText) => shown(text, ["en"]);
-const arranged = (view: DeckTableView) => arrangeDeckRows(rows, view, english, "en").map((r) => r.deck.id);
-const sorted = (column: DeckColumn, descending = false) => arranged({ filter: "", sort: { column, descending } });
+const arranged = (view: DeckTableView) =>
+  arrangeDeckRows(rows, view, english, "en").map((r) => r.deck.id);
+const sorted = (column: DeckColumn, descending = false) =>
+  arranged({ filter: "", sort: { column, descending } });
 
 describe("the deck table's view in the URL", () => {
   it("round-trips a filter and a sort through the query, leaving out what is by default", () => {
@@ -59,14 +80,20 @@ describe("the deck table's view in the URL", () => {
       { filter: "å", sort: { column: "modified", descending: true } },
     ];
     for (const view of views) {
-      expect(deckTableViewFromParams(new URLSearchParams(deckTableViewToParams(view)))).toEqual(view);
+      expect(deckTableViewFromParams(new URLSearchParams(deckTableViewToParams(view)))).toEqual(
+        view,
+      );
     }
     expect(deckTableViewToParams({ filter: "" })).toEqual({});
-    expect(deckTableViewToParams({ filter: "", sort: { column: "title", descending: false } })).toEqual({ sort: "title" });
+    expect(
+      deckTableViewToParams({ filter: "", sort: { column: "title", descending: false } }),
+    ).toEqual({ sort: "title" });
   });
 
   it("ignores a column it does not know, and any order but descending", () => {
-    expect(deckTableViewFromParams(new URLSearchParams("sort=color&order=desc&q=x"))).toEqual({ filter: "x" });
+    expect(deckTableViewFromParams(new URLSearchParams("sort=color&order=desc&q=x"))).toEqual({
+      filter: "x",
+    });
     expect(deckTableViewFromParams(new URLSearchParams("sort=cards&order=up"))).toEqual({
       filter: "",
       sort: { column: "cards", descending: false },
@@ -80,7 +107,10 @@ describe("the deck table's view in the URL", () => {
     const down = nextSort(up, "due");
     expect(down).toEqual({ filter: "x", sort: { column: "due", descending: true } });
     expect(nextSort(down, "due")).toEqual({ filter: "x" });
-    expect(nextSort(down, "title")).toEqual({ filter: "x", sort: { column: "title", descending: false } });
+    expect(nextSort(down, "title")).toEqual({
+      filter: "x",
+      sort: { column: "title", descending: false },
+    });
   });
 });
 

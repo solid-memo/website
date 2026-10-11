@@ -19,11 +19,7 @@ function renderContainer(useCases: UseCases) {
   const onBack = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
-      <PreferencesContainer
-        useCases={useCases}
-        instance={instance}
-        onBack={onBack}
-      />
+      <PreferencesContainer useCases={useCases} instance={instance} onBack={onBack} />
     </QueryClientProvider>,
   );
   return { onBack, queryClient };
@@ -33,9 +29,7 @@ describe("PreferencesContainer", () => {
   it("shows a loading state, then the form", async () => {
     renderContainer(
       makeUseCasesFake({
-        getPreferences: vi.fn(
-          () => new Promise<StudyPreferences>(() => { }),
-        ),
+        getPreferences: vi.fn(() => new Promise<StudyPreferences>(() => {})),
       }),
     );
     expect(screen.getByText("Loading preferences…")).toBeInTheDocument();
@@ -61,9 +55,7 @@ describe("PreferencesContainer", () => {
     fireEvent.input(await screen.findByLabelText("New cards per day"), {
       target: { value: "7" },
     });
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Save" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Save" }).closest("form")!);
 
     await waitFor(() => {
       expect(onBack).toHaveBeenCalledOnce();
@@ -89,10 +81,7 @@ describe("PreferencesContainer", () => {
       }),
     );
 
-    fireEvent.submit(
-      (await screen.findByRole("button", { name: "Save" })).closest("form")!,
-    );
+    fireEvent.submit((await screen.findByRole("button", { name: "Save" })).closest("form")!);
     expect(await screen.findByText("write refused")).toBeInTheDocument();
   });
-
 });

@@ -10,7 +10,12 @@ import {
   type ThingBuilder,
   type ThingPersisted,
 } from "@inrupt/solid-client";
-import { toCourseOutline, toLibraryDeckContent, toLibraryDecks, toLibraryIndexView } from "./libraryMapper";
+import {
+  toCourseOutline,
+  toLibraryDeckContent,
+  toLibraryDecks,
+  toLibraryIndexView,
+} from "./libraryMapper";
 import { getSolidDataset } from "@inrupt/solid-client";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DCTERMS, RDF, SM } from "../vocab";
@@ -88,8 +93,18 @@ describe("toLibraryDecks", () => {
         version: "2",
         versionNotes: "Added Norway.",
         releases: [
-          { url: "https://solid-memo.com/decks/capitals/v1.ttl", version: "1", issued: "2026-09-21T10:00:00.000Z", notes: "First." },
-          { url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2", issued: "2026-09-22T10:00:00.000Z", notes: "Added Norway." },
+          {
+            url: "https://solid-memo.com/decks/capitals/v1.ttl",
+            version: "1",
+            issued: "2026-09-21T10:00:00.000Z",
+            notes: "First.",
+          },
+          {
+            url: "https://solid-memo.com/decks/capitals/v2.ttl",
+            version: "2",
+            issued: "2026-09-22T10:00:00.000Z",
+            notes: "Added Norway.",
+          },
           { url: "https://solid-memo.com/decks/capitals/v3.ttl", version: "?" },
         ],
         title: { en: "Capitals" },
@@ -103,7 +118,12 @@ describe("toLibraryDecks", () => {
         themes: [EDUC, "https://solid-memo.com/ns/vocab/topics.ttl#geography"],
         keywords: { "": ["capitals"] },
         sources: [
-          { url: WIKIPEDIA, title: "List of national capitals", authors: ["Wikipedia contributors"], license: BY_SA },
+          {
+            url: WIKIPEDIA,
+            title: "List of national capitals",
+            authors: ["Wikipedia contributors"],
+            license: BY_SA,
+          },
           { url: "https://iupac.org/", authors: ["IUPAC"] },
           { url: WIKIDATA, authors: [] },
         ],
@@ -128,7 +148,9 @@ describe("toLibraryDecks", () => {
    dcat:version "1" ; dcat:inSeries <#capitals> ; dcat:isVersionOf <#capitals> ; dcat:distribution <capitals/v1.ttl#turtle> .
 `);
     expect(toLibraryDecks(index)).toEqual([
-      expect.objectContaining({ keywords: { en: ["capitals", "countries"], sv: ["huvudstäder", "länder"] } }),
+      expect.objectContaining({
+        keywords: { en: ["capitals", "countries"], sv: ["huvudstäder", "länder"] },
+      }),
     ]);
   });
 
@@ -148,7 +170,9 @@ describe("toLibraryDecks", () => {
    dcterms:publisher <#solid-memo> ; sm:studyDirection sm:frontToBack ; dcat:theme <${EDUC}> ;
    dcat:version "1" ; dcat:inSeries <#solid> ; dcat:isVersionOf <#solid> ; dcat:distribution <solid/v1.ttl#turtle> .
 `;
-    const [course] = toLibraryDecks(await datasetFromIndex(turtle("sm:Deck, dcat:Dataset, schema:Course")));
+    const [course] = toLibraryDecks(
+      await datasetFromIndex(turtle("sm:Deck, dcat:Dataset, schema:Course")),
+    );
     expect(course).toMatchObject({ isCourse: true });
     const [deck] = toLibraryDecks(await datasetFromIndex(turtle("sm:Deck, dcat:Dataset")));
     expect(deck).not.toHaveProperty("isCourse");
@@ -171,7 +195,8 @@ describe("toLibraryDecks", () => {
    dcat:version "1" ; dcat:inSeries <#solid> ; dcat:isVersionOf <#solid> ; dcat:distribution <solid/v1.ttl#turtle> .
 `;
     const COURSE = "sm:Deck, dcat:Dataset, schema:Course";
-    const decksOf = async (named: string, types: string) => toLibraryDecks(await datasetFromIndex(turtle(named, types)));
+    const decksOf = async (named: string, types: string) =>
+      toLibraryDecks(await datasetFromIndex(turtle(named, types)));
     expect(await decksOf("; sm:newcomerCourse <#solid>", COURSE)).toEqual([
       expect.objectContaining({ isCourse: true, forNewcomers: true }),
     ]);
@@ -211,8 +236,13 @@ describe("toLibraryDecks", () => {
 
   it("names a release the index does not describe by its URL alone, and counts no cards it does not state", async () => {
     const index = await datasetFromIndex(
-      INDEX_TURTLE.replace("sm:cardCount 243 ;", "").replace(', <capitals/v1.ttl>, <capitals/v3.ttl>', ', <capitals/v9.ttl>')
-        .replace(`dcterms:license <${CC0}> ;`, "").replace('dcterms:created "2026-09-22T09:49:00.236Z"^^xsd:dateTime ; dcterms:modified "2026-09-27T20:12:13Z"^^xsd:dateTime ;', "")
+      INDEX_TURTLE.replace("sm:cardCount 243 ;", "")
+        .replace(", <capitals/v1.ttl>, <capitals/v3.ttl>", ", <capitals/v9.ttl>")
+        .replace(`dcterms:license <${CC0}> ;`, "")
+        .replace(
+          'dcterms:created "2026-09-22T09:49:00.236Z"^^xsd:dateTime ; dcterms:modified "2026-09-27T20:12:13Z"^^xsd:dateTime ;',
+          "",
+        )
         .replace('adms:versionNotes "Added Norway." ;', ""),
     );
     const [deck] = toLibraryDecks(index);
@@ -234,13 +264,26 @@ describe("toLibraryIndexView", () => {
     expect(toLibraryIndexView(INDEX, await datasetFromIndex(INDEX_TURTLE))).toEqual({
       url: INDEX,
       publisher: `${INDEX}#solid-memo`,
-      releases: ["https://solid-memo.com/decks/capitals/v1.ttl", "https://solid-memo.com/decks/capitals/v2.ttl", "https://solid-memo.com/decks/capitals/v3.ttl"],
+      releases: [
+        "https://solid-memo.com/decks/capitals/v1.ttl",
+        "https://solid-memo.com/decks/capitals/v2.ttl",
+        "https://solid-memo.com/decks/capitals/v3.ttl",
+      ],
     });
   });
 
   it("names no publisher without a catalog, or one without a publisher", async () => {
-    expect(toLibraryIndexView(INDEX, await datasetFromIndex(`<#x> a <${SM.Card}> .`))).toEqual({ url: INDEX, publisher: null, releases: [] });
-    expect(toLibraryIndexView(INDEX, await datasetFromIndex(`<> a <http://www.w3.org/ns/dcat#Catalog> .`)).publisher).toBeNull();
+    expect(toLibraryIndexView(INDEX, await datasetFromIndex(`<#x> a <${SM.Card}> .`))).toEqual({
+      url: INDEX,
+      publisher: null,
+      releases: [],
+    });
+    expect(
+      toLibraryIndexView(
+        INDEX,
+        await datasetFromIndex(`<> a <http://www.w3.org/ns/dcat#Catalog> .`),
+      ).publisher,
+    ).toBeNull();
   });
 });
 
@@ -249,9 +292,7 @@ function datasetFromIndex(turtle: string) {
 }
 
 describe("toLibraryDeckContent", () => {
-  function deckDocument(
-    ...things: ReturnType<typeof thing>[]
-  ): SolidDataset {
+  function deckDocument(...things: ReturnType<typeof thing>[]): SolidDataset {
     return things.reduce(
       (dataset, t) => setThing(dataset, t),
       mockSolidDatasetFrom(DOC) as SolidDataset,
@@ -328,9 +369,7 @@ describe("toLibraryDeckContent", () => {
 
   it("treats a deck and cards without a version as the first format", () => {
     const dataset = deckDocument(
-      thing(DOC, (t) =>
-        t.addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals"),
-      ),
+      thing(DOC, (t) => t.addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals")),
       thing(`${DOC}#se`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
@@ -356,7 +395,10 @@ describe("toLibraryDeckContent", () => {
 
   it("reads a library deck 6 release that describes its series and publisher itself, as a format-5 one", async () => {
     const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
-    const turtle = await readFile(`${VOCAB_ROOT}fixtures/library-deck/v6/valid/library-standalone-release.ttl`, "utf8");
+    const turtle = await readFile(
+      `${VOCAB_ROOT}fixtures/library-deck/v6/valid/library-standalone-release.ttl`,
+      "utf8",
+    );
     const content = toLibraryDeckContent(url, await datasetOf(turtle, url));
     expect(content).toMatchObject({
       url,
@@ -372,9 +414,7 @@ describe("toLibraryDeckContent", () => {
 
   it("refuses a deck in a newer format than it writes", () => {
     const dataset = deckDocument(
-      thing(DOC, (t) =>
-        t.addIri(RDF.type, SM.Deck).addInteger(SM.formatVersion, 7),
-      ),
+      thing(DOC, (t) => t.addIri(RDF.type, SM.Deck).addInteger(SM.formatVersion, 7)),
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
       `This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\nurl: ${DOC}\nversion: 7\nlatest: 6`,
@@ -391,7 +431,10 @@ describe("toLibraryDeckContent", () => {
           .addStringNoLocale(DCTERMS.description, "Capitals.")
           .addIri(DCTERMS.creator, `${RELEASE}#anton`)
           .addIri(DCTERMS.creator, `${RELEASE}#gone`)
-          .addIri("http://purl.org/dc/terms/publisher", "https://solid-memo.com/decks/index.ttl#solid-memo")
+          .addIri(
+            "http://purl.org/dc/terms/publisher",
+            "https://solid-memo.com/decks/index.ttl#solid-memo",
+          )
           .addIri(SM.studyDirection, SM.bidirectional)
           .addIri("http://www.w3.org/ns/dcat#theme", EDUC)
           .addStringNoLocale("http://www.w3.org/ns/dcat#version", "2")
@@ -420,9 +463,7 @@ describe("toLibraryDeckContent", () => {
 
   it("refuses a card in a newer format than it writes", () => {
     const dataset = deckDocument(
-      thing(DOC, (t) =>
-        t.addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals"),
-      ),
+      thing(DOC, (t) => t.addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals")),
       thing(`${DOC}#se`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
@@ -441,11 +482,10 @@ describe("toLibraryDeckContent", () => {
       `That is not a Solid Memo deck, so it cannot be added. Choose another deck.\nurl: ${DOC}`,
     );
     expect(() =>
-      toLibraryDeckContent(
-        DOC,
-        deckDocument(thing(DOC, (t) => t.addIri(RDF.type, SM.Deck))),
-      ),
-    ).toThrow(`That is not a Solid Memo deck, so it cannot be added. Choose another deck.\nurl: ${DOC}`);
+      toLibraryDeckContent(DOC, deckDocument(thing(DOC, (t) => t.addIri(RDF.type, SM.Deck)))),
+    ).toThrow(
+      `That is not a Solid Memo deck, so it cannot be added. Choose another deck.\nurl: ${DOC}`,
+    );
   });
 });
 
@@ -479,8 +519,20 @@ describe("toCourseOutline", () => {
           title: { en: "Linked data", sv: "Länkade data" },
           description: { en: "IRIs." },
           steps: [
-            { id: "ch-1-1", url: `${DOC}#ch-1-1`, position: 0, theory: { en: "First." }, questionIds: ["q-1", "q-2"] },
-            { id: "ch-1-2", url: `${DOC}#ch-1-2`, position: 1, theory: { en: "Second." }, questionIds: ["q-3"] },
+            {
+              id: "ch-1-1",
+              url: `${DOC}#ch-1-1`,
+              position: 0,
+              theory: { en: "First." },
+              questionIds: ["q-1", "q-2"],
+            },
+            {
+              id: "ch-1-2",
+              url: `${DOC}#ch-1-2`,
+              position: 1,
+              theory: { en: "Second." },
+              questionIds: ["q-3"],
+            },
           ],
           reviewQuestionIds: ["q-2"],
         },
@@ -504,7 +556,13 @@ describe("toCourseOutline", () => {
       DOC,
     );
     expect(toCourseOutline(DOC, dataset).chapters).toMatchObject([
-      { id: "ch-1", textFormat: SM.markdown, steps: [{ id: "ch-1-1", textFormat: SM.markdown, theory: { en: "A list:\n\n- one\n- two" } }] },
+      {
+        id: "ch-1",
+        textFormat: SM.markdown,
+        steps: [
+          { id: "ch-1-1", textFormat: SM.markdown, theory: { en: "A list:\n\n- one\n- two" } },
+        ],
+      },
     ]);
   });
 });

@@ -28,7 +28,9 @@ export class DraftEditor extends Screen {
 
   /** Waits until every change made is written. */
   async expectSaved(): Promise<void> {
-    await expect(this.page.getByRole("status").filter({ hasText: this.t("studio.draftEdit.saved") })).toHaveCount(1);
+    await expect(
+      this.page.getByRole("status").filter({ hasText: this.t("studio.draftEdit.saved") }),
+    ).toHaveCount(1);
   }
 
   /** Opens a draft from the drafts screen's table, by its name: its overview, with a course's outline. */
@@ -36,8 +38,14 @@ export class DraftEditor extends Screen {
     await this.intent(`Open the draft ${name}`, async () => {
       await this.page.getByRole("table").getByRole("link", { name, exact: true }).click();
       await expect(this.page.getByRole("heading", { level: 2, name })).toBeVisible();
-      if (course) await expect(this.page.getByRole("heading", { name: this.t("studio.draft.outline") })).toBeVisible();
-      else await expect(this.page.getByRole("heading", { name: this.t("studio.draft.cards") })).toBeVisible();
+      if (course)
+        await expect(
+          this.page.getByRole("heading", { name: this.t("studio.draft.outline") }),
+        ).toBeVisible();
+      else
+        await expect(
+          this.page.getByRole("heading", { name: this.t("studio.draft.cards") }),
+        ).toBeVisible();
     });
   }
 
@@ -45,11 +53,18 @@ export class DraftEditor extends Screen {
   async retireCard(front: string): Promise<void> {
     await this.intent(`Retire the card ${front}`, async () => {
       await this.page.getByRole("link", { name: this.t("studio.draft.allCards") }).click();
-      await this.page.getByRole("rowheader").getByRole("link", { name: front, exact: true }).click();
+      await this.page
+        .getByRole("rowheader")
+        .getByRole("link", { name: front, exact: true })
+        .click();
       await expect(this.page.getByRole("heading", { level: 2, name: front })).toBeVisible();
-      await this.page.getByRole("button", { name: this.t("studio.draftEdit.retire"), exact: true }).click();
+      await this.page
+        .getByRole("button", { name: this.t("studio.draftEdit.retire"), exact: true })
+        .click();
       await this.expectSaved();
-      await expect(this.page.getByRole("button", { name: this.t("studio.draftEdit.restore"), exact: true })).toBeVisible();
+      await expect(
+        this.page.getByRole("button", { name: this.t("studio.draftEdit.restore"), exact: true }),
+      ).toBeVisible();
     });
   }
 
@@ -57,7 +72,9 @@ export class DraftEditor extends Screen {
   async openRelease(): Promise<void> {
     await this.intent("Open the release's metadata and provenance", async () => {
       await this.app.chrome.studioTab("draft", "release");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.release.heading") })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { level: 2, name: this.t("studio.release.heading") }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.release.crumb");
     });
   }
@@ -65,7 +82,9 @@ export class DraftEditor extends Screen {
   /** Names the release's publisher, one of its authors, on the release screen. */
   async choosePublisher(name: string): Promise<void> {
     await this.intent(`Name ${name} the release's publisher`, async () => {
-      await this.page.getByRole("combobox", { name: this.t("studio.release.publisher"), exact: true }).selectOption({ label: name });
+      await this.page
+        .getByRole("combobox", { name: this.t("studio.release.publisher"), exact: true })
+        .selectOption({ label: name });
       await this.expectSaved();
     });
   }
@@ -78,19 +97,32 @@ export class DraftEditor extends Screen {
    */
   async publish(): Promise<string> {
     return this.intent("Publish the release to the pod, saying it will be public", async () => {
-      const part = this.page.getByRole("region", { name: this.t("studio.publish.heading"), exact: true });
-      await expect(part.getByText(this.t("studio.publish.noErrors"))).toBeVisible({ timeout: 30_000 });
-      const [before, after] = this.t("studio.publish.address", { url: "\u0000" }).split("\u0000") as [string, string];
+      const part = this.page.getByRole("region", {
+        name: this.t("studio.publish.heading"),
+        exact: true,
+      });
+      await expect(part.getByText(this.t("studio.publish.noErrors"))).toBeVisible({
+        timeout: 30_000,
+      });
+      const [before, after] = this.t("studio.publish.address", { url: "\u0000" }).split(
+        "\u0000",
+      ) as [string, string];
       const said = (await part.getByText(new RegExp(`^${escapeRegExp(before)}`)).textContent())!;
       const url = said.slice(before.length, said.length - after.length);
       const publish = part.getByRole("button", { name: this.t("studio.publish.publish") });
       await expect(publish).toBeDisabled();
       await part.getByRole("checkbox", { name: this.t("studio.publish.confirm") }).check();
       await publish.click();
-      await expect(part.getByRole("link", { name: url, exact: true })).toHaveAttribute("href", url, { timeout: 60_000 });
+      await expect(part.getByRole("link", { name: url, exact: true })).toHaveAttribute(
+        "href",
+        url,
+        { timeout: 60_000 },
+      );
       await expect(part.getByText(this.t("studio.publish.public"))).toBeVisible();
       // Frozen: the metadata above it changes no more.
-      await expect(this.page.getByRole("combobox", { name: this.t("studio.license.label") })).toBeDisabled();
+      await expect(
+        this.page.getByRole("combobox", { name: this.t("studio.license.label") }),
+      ).toBeDisabled();
       return url;
     });
   }
@@ -109,7 +141,10 @@ export class DraftEditor extends Screen {
   /** Chooses the attribution that names the authors, with the help of AI: it says who compiled the release, and no more. */
   async attributeWithAi(names: string): Promise<void> {
     await this.intent("Attribute the release to its authors, with the help of AI", async () => {
-      const attribution = this.page.getByRole("radio", { name: `Compiled by ${names} with the help of AI.`, exact: true });
+      const attribution = this.page.getByRole("radio", {
+        name: `Compiled by ${names} with the help of AI.`,
+        exact: true,
+      });
       await attribution.check();
       await this.expectSaved();
       await expect(attribution).toBeChecked();
@@ -119,7 +154,9 @@ export class DraftEditor extends Screen {
   /** Chooses the release's license, by its name. */
   async chooseReleaseLicense(license: string): Promise<void> {
     await this.intent(`License the release ${license}`, async () => {
-      await this.page.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: license });
+      await this.page
+        .getByRole("combobox", { name: this.t("studio.license.label") })
+        .selectOption({ label: license });
       await this.expectSaved();
     });
   }
@@ -129,20 +166,30 @@ export class DraftEditor extends Screen {
     await this.intent(`Add the source ${title}`, async () => {
       const form = this.page.getByRole("group", { name: this.t("studio.release.newSource") });
       await form.getByLabel(this.t("studio.release.sourceIri"), { exact: true }).fill(address);
-      await form.getByRole("textbox", { name: this.t("studio.release.sourceTitle"), exact: true }).fill(title);
-      await form.getByRole("textbox", { name: this.t("studio.release.sourceEvidence") }).fill(evidence);
+      await form
+        .getByRole("textbox", { name: this.t("studio.release.sourceTitle"), exact: true })
+        .fill(title);
+      await form
+        .getByRole("textbox", { name: this.t("studio.release.sourceEvidence") })
+        .fill(evidence);
       await form.getByRole("button", { name: this.t("studio.release.addSource") }).click();
       await this.expectSaved();
-      await expect(this.page.getByRole("button", { name: this.t("studio.release.editOf", { name: title }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("button", { name: this.t("studio.release.editOf", { name: title }) }),
+      ).toBeVisible();
     });
   }
 
   /** Names a source's creator (the source by its address and title), where the release check's warning led. */
   async describeSource(address: string, title: string, creator: string): Promise<void> {
     await this.intent(`Name the creator of ${title}`, async () => {
-      await this.page.getByRole("button", { name: this.t("studio.release.editOf", { name: title }) }).click();
+      await this.page
+        .getByRole("button", { name: this.t("studio.release.editOf", { name: title }) })
+        .click();
       const form = this.page.getByRole("group", { name: address, exact: true });
-      await form.getByRole("textbox", { name: this.t("studio.release.sourceCreator") }).fill(creator);
+      await form
+        .getByRole("textbox", { name: this.t("studio.release.sourceCreator") })
+        .fill(creator);
       await form.getByRole("button", { name: this.t("studio.release.saveSource") }).click();
       await this.expectSaved();
       await expect(this.page.getByText(creator, { exact: false })).toBeVisible();
@@ -156,10 +203,14 @@ export class DraftEditor extends Screen {
       await form.getByRole("radio", { name: this.t("studio.release.checkAi") }).check();
       await form.getByRole("textbox", { name: this.t("studio.release.checkLabel") }).fill(label);
       await form.getByRole("textbox", { name: this.t("studio.release.checkScope") }).fill(scope);
-      await form.getByRole("textbox", { name: this.t("studio.release.checkOutcome") }).fill(outcome);
+      await form
+        .getByRole("textbox", { name: this.t("studio.release.checkOutcome") })
+        .fill(outcome);
       await form.getByRole("button", { name: this.t("studio.release.addCheck") }).click();
       await this.expectSaved();
-      await expect(this.page.getByText(`Scope: ${scope}; an AI check, not a human review.`)).toBeVisible();
+      await expect(
+        this.page.getByText(`Scope: ${scope}; an AI check, not a human review.`),
+      ).toBeVisible();
     });
   }
 
@@ -167,7 +218,9 @@ export class DraftEditor extends Screen {
   async openDiff(): Promise<void> {
     await this.intent("Compare the draft with the previous version", async () => {
       await this.app.chrome.studioTab("draft", "diff");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.diff.heading") })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { level: 2, name: this.t("studio.diff.heading") }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.diff.crumb");
       await expect(this.page.getByText(this.t("studio.diff.comparing"))).toHaveCount(0);
     });
@@ -183,7 +236,11 @@ export class DraftEditor extends Screen {
       await expect(this.page.getByText(this.t("studio.diff.rulesKept"))).toBeVisible();
       const content = this.page.getByRole("region", { name: this.t("studio.diff.subjects") });
       for (const [name, status] of Object.entries(changes)) {
-        await expect(content.getByRole("listitem").filter({ has: this.page.getByRole("link", { name, exact: true }) })).toHaveText(`${name}: ${status}`);
+        await expect(
+          content
+            .getByRole("listitem")
+            .filter({ has: this.page.getByRole("link", { name, exact: true }) }),
+        ).toHaveText(`${name}: ${status}`);
       }
       const learners = this.page.getByRole("region", { name: this.t("studio.diff.learners") });
       await expect(learners).toContainText(upgrade);
@@ -194,7 +251,10 @@ export class DraftEditor extends Screen {
   /** Adds a chapter by its title, in English, under the id the assistant suggests: the outline shows it. */
   async addChapter(title: string): Promise<void> {
     await this.intent(`Add the chapter ${title}`, async () => {
-      const field = this.page.getByRole("textbox", { name: this.t("studio.draft.chapterTitle"), exact: true });
+      const field = this.page.getByRole("textbox", {
+        name: this.t("studio.draft.chapterTitle"),
+        exact: true,
+      });
       await field.fill(title);
       await chooseLanguageOf(this.app, field, "en");
       await this.page.getByRole("button", { name: this.t("studio.draft.addChapter") }).click();
@@ -228,7 +288,12 @@ export class DraftEditor extends Screen {
       const field = this.page.getByRole("textbox", { name: label, exact: true });
       await field.fill(theory);
       await chooseLanguageOf(this.app, field, "en");
-      await expect(this.page.getByRole("region", { name: this.t("proseField.preview", { field: label }), exact: true })).toHaveText(theory);
+      await expect(
+        this.page.getByRole("region", {
+          name: this.t("proseField.preview", { field: label }),
+          exact: true,
+        }),
+      ).toHaveText(theory);
       await this.expectSaved();
     });
   }
@@ -236,17 +301,23 @@ export class DraftEditor extends Screen {
   /** Adds a question to the step open, its front and back in English: the step lists it. */
   async addQuestion(front: string, back: string): Promise<void> {
     await this.intent(`Add the question ${front}`, async () => {
-      const form = this.page.getByRole("group", { name: this.t("studio.step.newQuestion"), exact: true });
-      const [frontField, backField] = [this.t("cardContentFields.front"), this.t("cardContentFields.back")].map((name) =>
-        form.getByRole("textbox", { name, exact: true }),
-      ) as [Locator, Locator];
+      const form = this.page.getByRole("group", {
+        name: this.t("studio.step.newQuestion"),
+        exact: true,
+      });
+      const [frontField, backField] = [
+        this.t("cardContentFields.front"),
+        this.t("cardContentFields.back"),
+      ].map((name) => form.getByRole("textbox", { name, exact: true })) as [Locator, Locator];
       await frontField.fill(front);
       await chooseLanguageOf(this.app, frontField, "en");
       await backField.fill(back);
       await chooseLanguageOf(this.app, backField, "en");
       await this.page.getByRole("button", { name: this.t("studio.draftEdit.addQuestion") }).click();
       // The step's own link: the outline beside it lists the question too.
-      await expect(this.page.getByRole("main").getByRole("link", { name: front, exact: true })).toBeVisible();
+      await expect(
+        this.page.getByRole("main").getByRole("link", { name: front, exact: true }),
+      ).toBeVisible();
       await this.expectSaved();
     });
   }
@@ -256,7 +327,9 @@ export class DraftEditor extends Screen {
     await this.intent(`Open the question ${front}`, async () => {
       await this.page.getByRole("main").getByRole("link", { name: front, exact: true }).click();
       await expect(this.page.getByRole("heading", { level: 2, name: front })).toBeVisible();
-      await expect(this.page.getByRole("heading", { name: this.t("studio.question.preview") })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("studio.question.preview") }),
+      ).toBeVisible();
     });
   }
 
@@ -271,7 +344,9 @@ export class DraftEditor extends Screen {
       const noteField = options.getByLabel(this.t("distractorFields.note"), { exact: true });
       await noteField.fill(note);
       await chooseLanguageOf(this.app, noteField, "en");
-      await options.getByRole("button", { name: this.t("distractorFields.addDone"), exact: true }).click();
+      await options
+        .getByRole("button", { name: this.t("distractorFields.addDone"), exact: true })
+        .click();
       await expect(options.getByRole("listitem").filter({ hasText: text })).toContainText(note);
       await expect(this.preview.getByRole("radio", { name: text })).toBeVisible();
       await this.expectSaved();
@@ -284,7 +359,9 @@ export class DraftEditor extends Screen {
       const preview = this.preview;
       await preview.getByRole("radio", { name: option }).check();
       await preview.getByRole("button", { name: this.t("multipleChoice.check") }).click();
-      await expect(preview.getByRole("status").filter({ hasText: this.t("courseQuestion.wrong") })).toBeVisible();
+      await expect(
+        preview.getByRole("status").filter({ hasText: this.t("courseQuestion.wrong") }),
+      ).toBeVisible();
       await expect(preview).toContainText(why);
     });
   }
@@ -299,25 +376,37 @@ export class DraftEditor extends Screen {
   }
 
   /** The outline lists the chapter, its one step, and the step's questions in order. */
-  async expectOutline(draft: string, chapter: string, step: string, questions: string[]): Promise<void> {
+  async expectOutline(
+    draft: string,
+    chapter: string,
+    step: string,
+    questions: string[],
+  ): Promise<void> {
     await this.intent("See the outline", async () => {
       await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
       await expect(this.outline.getByRole("link", { name: chapter, exact: true })).toBeVisible();
       const item = (within: Locator, name: string) =>
-        within.getByRole("listitem").filter({ has: this.page.getByRole("link", { name, exact: true }) });
+        within
+          .getByRole("listitem")
+          .filter({ has: this.page.getByRole("link", { name, exact: true }) });
       const listed = item(item(this.outline, chapter), step).getByRole("listitem");
       await expect(listed).toHaveCount(questions.length);
       // Each question's own link, in order; a badge beside it counts its problems.
       for (const [i, question] of questions.entries()) {
-        await expect(listed.nth(i).getByRole("link", { name: question, exact: true })).toBeVisible();
+        await expect(
+          listed.nth(i).getByRole("link", { name: question, exact: true }),
+        ).toBeVisible();
       }
-      await expect(this.page.getByText(this.t("studio.draft.cardCount", { count: questions.length }))).toBeVisible();
+      await expect(
+        this.page.getByText(this.t("studio.draft.cardCount", { count: questions.length })),
+      ).toBeVisible();
     });
   }
 
   /** The release check's list item of what a problem is in, by its name: among the errors or the warnings. */
   private problemsOf(subject: string): Locator {
-    const list = (severity: string) => this.page.getByRole("list", { name: this.t(`studio.check.${severity}`), exact: true });
+    const list = (severity: string) =>
+      this.page.getByRole("list", { name: this.t(`studio.check.${severity}`), exact: true });
     return list("errors")
       .or(list("warnings"))
       .getByRole("listitem")
@@ -336,23 +425,33 @@ export class DraftEditor extends Screen {
   async openCheck(): Promise<void> {
     await this.intent("Open the release check", async () => {
       await this.app.chrome.studioTab("draft", "check");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.check.heading") })).toBeVisible();
-      await expect(this.page.getByRole("status").filter({ hasText: this.t("studio.check.checking") })).toHaveCount(0);
+      await expect(
+        this.page.getByRole("heading", { level: 2, name: this.t("studio.check.heading") }),
+      ).toBeVisible();
+      await expect(
+        this.page.getByRole("status").filter({ hasText: this.t("studio.check.checking") }),
+      ).toHaveCount(0);
     });
   }
 
   /** The release check lists the problem in what it names. */
   async expectProblem(subject: string, problem: string): Promise<void> {
     await this.intent(`See the problem of ${subject}: ${problem}`, async () => {
-      await expect(this.problemsOf(subject).getByRole("link", { name: problem, exact: true })).toBeVisible();
+      await expect(
+        this.problemsOf(subject).getByRole("link", { name: problem, exact: true }),
+      ).toBeVisible();
     });
   }
 
   /** The release check no longer lists the problem in what it names. */
   async expectNoProblem(subject: string, problem: string): Promise<void> {
     await this.intent(`See the problem of ${subject} gone: ${problem}`, async () => {
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.check.heading") })).toBeVisible();
-      await expect(this.problemsOf(subject).getByRole("link", { name: problem, exact: true })).toHaveCount(0);
+      await expect(
+        this.page.getByRole("heading", { level: 2, name: this.t("studio.check.heading") }),
+      ).toBeVisible();
+      await expect(
+        this.problemsOf(subject).getByRole("link", { name: problem, exact: true }),
+      ).toHaveCount(0);
     });
   }
 
@@ -368,7 +467,10 @@ export class DraftEditor extends Screen {
   /** Writes the release's description, in English, where the overview was opened at it. */
   async writeDescription(description: string): Promise<void> {
     await this.intent("Write the release's description", async () => {
-      const field = this.page.getByRole("textbox", { name: this.t("studio.draft.description"), exact: true });
+      const field = this.page.getByRole("textbox", {
+        name: this.t("studio.draft.description"),
+        exact: true,
+      });
       await field.fill(description);
       await chooseLanguageOf(this.app, field, "en");
       await this.expectSaved();
@@ -380,7 +482,9 @@ export class DraftEditor extends Screen {
     await this.intent("Check against the shapes", async () => {
       const shapes = this.page.getByRole("region", { name: this.t("studio.check.shapesHeading") });
       await shapes.getByRole("button", { name: this.t("studio.check.shapesRun") }).click();
-      const found = this.t("studio.check.shapesCount", { count: 7 }).replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace("7", "\\d+");
+      const found = this.t("studio.check.shapesCount", { count: 7 })
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        .replace("7", "\\d+");
       await expect(shapes.getByText(new RegExp(found))).toBeVisible({ timeout: 60_000 });
     });
   }
@@ -389,9 +493,17 @@ export class DraftEditor extends Screen {
   async openPreview(draft: string): Promise<void> {
     await this.intent("Preview the listing", async () => {
       await this.app.chrome.studioTab("draft", "preview");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.preview.heading") })).toBeVisible();
-      const row = this.page.getByRole("region", { name: this.t("studio.preview.row"), exact: true });
-      const page = this.page.getByRole("region", { name: this.t("studio.preview.page"), exact: true });
+      await expect(
+        this.page.getByRole("heading", { level: 2, name: this.t("studio.preview.heading") }),
+      ).toBeVisible();
+      const row = this.page.getByRole("region", {
+        name: this.t("studio.preview.row"),
+        exact: true,
+      });
+      const page = this.page.getByRole("region", {
+        name: this.t("studio.preview.page"),
+        exact: true,
+      });
       await expect(row.getByRole("link", { name: draft, exact: true })).toBeVisible();
       await expect(page.getByRole("heading", { level: 2, name: draft, exact: true })).toBeVisible();
     });

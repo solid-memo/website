@@ -44,9 +44,18 @@ function page(beforeWrite: (url: string) => Promise<void> = async () => undefine
   };
   const writeFence = createWriteFence(watching);
   const podFetch = writeFence.fetch;
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
   const checkWrite = shapeValidator.checkSubjects;
-  const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
+  const deps = {
+    fetch: podFetch,
+    checkWrite,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  };
   return createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -76,18 +85,33 @@ const CREATED = `dcterms:created "2026-10-01T10:00:00Z"^^<http://www.w3.org/2001
  * Solid Server's in-memory store would cut short. With the page that
  * made it, whose statistics wait for its answers to be logged.
  */
-async function seed(server: string): Promise<{ instanceUrl: string; birds: Deck; seabirds: Deck; useCases: UseCases }> {
+async function seed(
+  server: string,
+): Promise<{ instanceUrl: string; birds: Deck; seabirds: Deck; useCases: UseCases }> {
   const base = new URL(`card-transfer-${crypto.randomUUID()}/`, server).href;
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
-  await put(`${base}profile/card.ttl`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
+  await put(
+    `${base}profile/card.ttl`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
   const useCases = page();
-  const instance = await useCases.createInstance({ webId }, { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+  const instance = await useCases.createInstance(
+    { webId },
+    { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" },
+  );
   const birds = await useCases.createDeck(instance.url, { en: "Birds" });
   const seabirds = await useCases.createDeck(instance.url, { en: "Seabirds" });
   const prefixes = `@prefix sm: <${SM}> .\n@prefix dcterms: <http://purl.org/dc/terms/> .\n`;
@@ -99,22 +123,39 @@ async function seed(server: string): Promise<{ instanceUrl: string; birds: Deck;
 <#owl> a sm:Card ; sm:front "uggla"@sv ; sm:back "owl"@en ; ${CREATED} .
 `,
   );
-  await put(seabirds.cardsDocumentUrl, `${prefixes}<#gull> a sm:Card ; sm:front "trut"@sv ; sm:back "herring gull"@en ; ${CREATED} .\n`);
-  const cards = Object.fromEntries((await useCases.listCards(birds)).map((card) => [card.id, card]));
+  await put(
+    seabirds.cardsDocumentUrl,
+    `${prefixes}<#gull> a sm:Card ; sm:front "trut"@sv ; sm:back "herring gull"@en ; ${CREATED} .\n`,
+  );
+  const cards = Object.fromEntries(
+    (await useCases.listCards(birds)).map((card) => [card.id, card]),
+  );
   for (const id of ["bird", "gull"]) {
-    await useCases.recordReview(instance.url, birds, { card: cards[id]!, direction: "front-to-back" }, 5, new Date());
+    await useCases.recordReview(
+      instance.url,
+      birds,
+      { card: cards[id]!, direction: "front-to-back" },
+      5,
+      new Date(),
+    );
   }
   return { instanceUrl: instance.url, birds, seabirds, useCases };
 }
 
 /** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
 async function triples(url: string): Promise<string> {
-  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
-  return new Writer({ format: "N-Triples" }).quadsToString(new Parser({ baseIRI: url }).parse(turtle));
+  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) =>
+    response.text(),
+  );
+  return new Writer({ format: "N-Triples" }).quadsToString(
+    new Parser({ baseIRI: url }).parse(turtle),
+  );
 }
 
-const byId = async (deck: Deck) => Object.fromEntries((await page().listCards(deck)).map((card) => [card.id, card]));
-const statesOf = async (deck: Deck) => (await page().listDeckReviewStates(deck)).map((state) => state.cardId).sort();
+const byId = async (deck: Deck) =>
+  Object.fromEntries((await page().listCards(deck)).map((card) => [card.id, card]));
+const statesOf = async (deck: Deck) =>
+  (await page().listDeckReviewStates(deck)).map((state) => state.cardId).sort();
 
 describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) => {
   /** Whether this server refuses an edit whose If-Match names another version. */
@@ -132,7 +173,10 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
     const before = await useCases.getStatistics(instanceUrl, new Date(), { deckUrl: birds.url });
     expect(before.totals.answers).toBe(2);
 
-    const plan = await useCases.transferCards(instanceUrl, birds, seabirds, ["bird", "gull"], { mode: "move", keepProgress: true });
+    const plan = await useCases.transferCards(instanceUrl, birds, seabirds, ["bird", "gull"], {
+      mode: "move",
+      keepProgress: true,
+    });
     expect(plan.cards).toEqual([
       { from: "bird", to: "bird", present: false },
       { from: "gull", to: "gull-2", present: false },
@@ -172,12 +216,19 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
     expect(patch.ok, `PATCH ${reviews}: ${patch.status}`).toBe(true);
     expect(await statesOf(birds)).toEqual(["bird", "gull", "owl"]);
 
-    await page().transferCards(instanceUrl, birds, seabirds, ["bird", "owl"], { mode: "move", keepProgress: true });
+    await page().transferCards(instanceUrl, birds, seabirds, ["bird", "owl"], {
+      mode: "move",
+      keepProgress: true,
+    });
 
     expect(await statesOf(seabirds)).toEqual(["bird", "owl"]);
     const target = await triples(seabirds.reviewsDocumentUrl);
-    expect(target).toContain(`<${seabirds.reviewsDocumentUrl}#owl> <${SM}reviewOf> <${seabirds.cardsDocumentUrl}#owl> .`);
-    expect(target).toContain(`<${seabirds.reviewsDocumentUrl}#owl> <${SM}intervalDays> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
+    expect(target).toContain(
+      `<${seabirds.reviewsDocumentUrl}#owl> <${SM}reviewOf> <${seabirds.cardsDocumentUrl}#owl> .`,
+    );
+    expect(target).toContain(
+      `<${seabirds.reviewsDocumentUrl}#owl> <${SM}intervalDays> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+    );
     expect(target).not.toContain("https://fsrs.example/ns#");
     const source = await triples(reviews);
     expect(source).not.toContain(`<${reviews}#theirs>`);
@@ -185,15 +236,24 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
     expect(await statesOf(birds)).toEqual(["gull"]);
     // The card in the target names its wrong option both ways, typed as Solid Memo types it.
     const cards = await triples(seabirds.cardsDocumentUrl);
-    expect(cards).toContain(`<${seabirds.cardsDocumentUrl}#bird> <${SM}distractor> <${seabirds.cardsDocumentUrl}#bird-d1> .`);
-    expect(cards).toContain(`<${seabirds.cardsDocumentUrl}#bird> <https://schema.org/suggestedAnswer> <${seabirds.cardsDocumentUrl}#bird-d1> .`);
-    expect(cards).toContain(`<${seabirds.cardsDocumentUrl}#bird-d1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://schema.org/Answer> .`);
+    expect(cards).toContain(
+      `<${seabirds.cardsDocumentUrl}#bird> <${SM}distractor> <${seabirds.cardsDocumentUrl}#bird-d1> .`,
+    );
+    expect(cards).toContain(
+      `<${seabirds.cardsDocumentUrl}#bird> <https://schema.org/suggestedAnswer> <${seabirds.cardsDocumentUrl}#bird-d1> .`,
+    );
+    expect(cards).toContain(
+      `<${seabirds.cardsDocumentUrl}#bird-d1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://schema.org/Answer> .`,
+    );
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
   });
 
   it("copies cards without progress, the source left as it is", async () => {
     const { instanceUrl, birds, seabirds } = await seed(server);
-    await page().transferCards(instanceUrl, birds, seabirds, ["bird"], { mode: "copy", keepProgress: false });
+    await page().transferCards(instanceUrl, birds, seabirds, ["bird"], {
+      mode: "copy",
+      keepProgress: false,
+    });
     expect(Object.keys(await byId(seabirds)).sort()).toEqual(["bird", "gull"]);
     expect(await statesOf(seabirds)).toEqual([]);
     expect(Object.keys(await byId(birds)).sort()).toEqual(["bird", "gull", "owl"]);
@@ -207,14 +267,20 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
       if (url === birds.cardsDocumentUrl) throw new Error("The tab was closed.");
     });
     await expect(
-      stopping.transferCards(instanceUrl, birds, seabirds, ["bird", "gull"], { mode: "move", keepProgress: true }),
+      stopping.transferCards(instanceUrl, birds, seabirds, ["bird", "gull"], {
+        mode: "move",
+        keepProgress: true,
+      }),
     ).rejects.toThrow("The tab was closed.");
     expect(Object.keys(await byId(seabirds)).sort()).toEqual(["bird", "gull", "gull-2"]);
     expect(await statesOf(seabirds)).toEqual(["bird", "gull-2"]);
     expect(Object.keys(await byId(birds)).sort()).toEqual(["bird", "gull", "owl"]);
     expect(await statesOf(birds)).toEqual([]);
 
-    const plan = await page().transferCards(instanceUrl, birds, seabirds, ["bird", "gull"], { mode: "move", keepProgress: true });
+    const plan = await page().transferCards(instanceUrl, birds, seabirds, ["bird", "gull"], {
+      mode: "move",
+      keepProgress: true,
+    });
     expect(plan.cards).toEqual([
       { from: "bird", to: "bird", present: true },
       { from: "gull", to: "gull-2", present: true },
@@ -228,7 +294,8 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
   });
 
   it("plans the transfer again on a target another app changed since it was read, keeping that change", async (context) => {
-    if (!conditional) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+    if (!conditional)
+      context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     // The change is made in the same second as the read, which such a server's ETag does not tell apart.
     if (!everyEdit) context.skip(ETAG_OUTLIVES_EDITS);
     const { instanceUrl, birds, seabirds } = await seed(server);
@@ -239,10 +306,20 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
       // Another app adds a card under the id `owl`, as the transfer is about to write it.
       const read = await fetch(seabirds.cardsDocumentUrl, { headers: { accept: "text/turtle" } });
       const body = `${await read.text()}\n<#owl> a <${SM}Card> ; <${SM}front> "berguv"@sv ; <${SM}back> "eagle-owl"@en ; <http://purl.org/dc/terms/created> "2026-10-01T10:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ; <${SM}formatVersion> 5 .\n`;
-      const response = await fetch(seabirds.cardsDocumentUrl, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
-      if (!response.ok) throw new Error(`Changing ${seabirds.cardsDocumentUrl} as another app: ${response.status}.`);
+      const response = await fetch(seabirds.cardsDocumentUrl, {
+        method: "PUT",
+        headers: { "content-type": "text/turtle" },
+        body,
+      });
+      if (!response.ok)
+        throw new Error(
+          `Changing ${seabirds.cardsDocumentUrl} as another app: ${response.status}.`,
+        );
     });
-    const plan = await racing.transferCards(instanceUrl, birds, seabirds, ["owl"], { mode: "move", keepProgress: true });
+    const plan = await racing.transferCards(instanceUrl, birds, seabirds, ["owl"], {
+      mode: "move",
+      keepProgress: true,
+    });
     expect(plan.cards).toEqual([{ from: "owl", to: "owl-2", present: false }]);
     const target = await byId(seabirds);
     expect(target.owl?.back).toEqual({ en: "eagle-owl" });

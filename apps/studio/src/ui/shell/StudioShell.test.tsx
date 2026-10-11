@@ -126,7 +126,10 @@ describe("StudioShell", () => {
     expect(root.getAttribute("data-surface")).toBe("studio");
     expect(root.getAttribute("data-density")).toBe("compact");
     expect(screen.getByText("The masthead").closest("header")).toHaveClass("site-header");
-    expect(screen.getByRole("link", { name: "Back to Solid Memo" })).toHaveAttribute("href", "#/decks");
+    expect(screen.getByRole("link", { name: "Back to Solid Memo" })).toHaveAttribute(
+      "href",
+      "#/decks",
+    );
     expect(within(screen.getByRole("main")).getByText("An editor")).toBeInTheDocument();
     unmount();
     await waitFor(() => expect(root.getAttribute("data-surface")).toBeNull());
@@ -153,14 +156,19 @@ describe("StudioShell", () => {
 
   it("says in the status bar what the screen adds, after whether the draft is saved", () => {
     renderShell({ draftUrl: DRAFT_URL, status: true });
-    expect(statusBar().getByRole("link", { name: "Ready to publish" }).previousElementSibling).toHaveTextContent("Draft saved");
+    expect(
+      statusBar().getByRole("link", { name: "Ready to publish" }).previousElementSibling,
+    ).toHaveTextContent("Draft saved");
   });
 
   it("switches the density from the status bar, without a history entry, and keeps it on this device", () => {
     const length = window.history.length;
     const { unmount } = renderShell();
     const comfortable = statusBar().getByRole("button", { name: "Comfortable" });
-    expect(statusBar().getByRole("button", { name: "Compact" })).toHaveAttribute("aria-pressed", "true");
+    expect(statusBar().getByRole("button", { name: "Compact" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     expect(comfortable).toHaveAttribute("aria-pressed", "false");
     fireEvent.click(comfortable);
     expect(comfortable).toHaveAttribute("aria-pressed", "true");
@@ -218,16 +226,35 @@ describe("StudioShell", () => {
     expect(press("?", { shiftKey: true })).toBe(true);
     const help = screen.getByRole("dialog", { name: "Keyboard shortcuts" });
     expect(help).toHaveAttribute("open");
-    expect(within(help).getByRole("heading", { name: "Anywhere in the Studio" })).toBeInTheDocument();
-    expect(within(help).getByRole("heading", { name: "In a table: the cards, the decks, a draft's cards…" })).toBeInTheDocument();
-    expect(within(help).getByText("Go to the decks").previousElementSibling).toHaveTextContent("g d");
-    expect(within(help).getByText("Go to the previous region").previousElementSibling!.querySelectorAll("kbd")).toHaveLength(2);
+    expect(
+      within(help).getByRole("heading", { name: "Anywhere in the Studio" }),
+    ).toBeInTheDocument();
+    expect(
+      within(help).getByRole("heading", {
+        name: "In a table: the cards, the decks, a draft's cards…",
+      }),
+    ).toBeInTheDocument();
+    expect(within(help).getByText("Go to the decks").previousElementSibling).toHaveTextContent(
+      "g d",
+    );
+    expect(
+      within(help)
+        .getByText("Go to the previous region")
+        .previousElementSibling!.querySelectorAll("kbd"),
+    ).toHaveLength(2);
     expect(within(help).getByText("Open the row")).toBeInTheDocument();
     // Ctrl+K and Cmd+K as one.
-    expect(within(help).getByText("Search, go to or run a command").previousElementSibling).toHaveTextContent(/^Ctrl\+K$/);
+    expect(
+      within(help).getByText("Search, go to or run a command").previousElementSibling,
+    ).toHaveTextContent(/^Ctrl\+K$/);
     // The nine tabs' keys as one.
-    expect(within(help).getByText("Go to a tab of the deck or draft by its number").previousElementSibling).toHaveTextContent(/^1–9$/);
-    expect(within(help).getAllByText("Go to a tab of the deck or draft by its number")).toHaveLength(1);
+    expect(
+      within(help).getByText("Go to a tab of the deck or draft by its number")
+        .previousElementSibling,
+    ).toHaveTextContent(/^1–9$/);
+    expect(
+      within(help).getAllByText("Go to a tab of the deck or draft by its number"),
+    ).toHaveLength(1);
     // Its keys are its own: g d goes nowhere from it.
     within(help).getByRole("button", { name: "Close" }).focus();
     expect(press("g")).toBe(false);
@@ -301,7 +328,11 @@ describe("StudioShell", () => {
     press("d");
     expect(onGo).toHaveBeenCalledWith({ screen: "home", instanceUrl: instanceA.url });
     onGo.mockClear();
-    window.history.replaceState(null, "", studioRouteToHash({ screen: "groups", instanceUrl: instanceA.url }));
+    window.history.replaceState(
+      null,
+      "",
+      studioRouteToHash({ screen: "groups", instanceUrl: instanceA.url }),
+    );
     press("g");
     expect(press("g")).toBe(true);
     expect(onGo).not.toHaveBeenCalled();
@@ -328,7 +359,9 @@ describe("StudioShell", () => {
     const button = statusBar().getByRole("button", { name: "? Keys" });
     button.focus();
     fireEvent.click(button);
-    within(screen.getByRole("dialog", { name: "Keyboard shortcuts" })).getByRole("button", { name: "Close" }).focus();
+    within(screen.getByRole("dialog", { name: "Keyboard shortcuts" }))
+      .getByRole("button", { name: "Close" })
+      .focus();
     expect(press("k", { ctrlKey: true })).toBe(true);
     expect(screen.queryByRole("dialog", { name: "Keyboard shortcuts" })).toBeNull();
     const palette = screen.getByRole("dialog", { name: "Quick open" });
@@ -353,7 +386,10 @@ describe("StudioShell", () => {
   it("turns single-key shortcuts off, and on, from the key help, as the device remembers, keys with Ctrl working still", () => {
     const { unmount } = renderShell({ filter: true, table: true });
     fireEvent.click(statusBar().getByRole("button", { name: "? Keys" }));
-    const setting = within(screen.getByRole("dialog", { name: "Keyboard shortcuts" })).getByRole("checkbox", { name: "Single-key shortcuts" });
+    const setting = within(screen.getByRole("dialog", { name: "Keyboard shortcuts" })).getByRole(
+      "checkbox",
+      { name: "Single-key shortcuts" },
+    );
     expect(setting).toBeChecked();
     fireEvent.click(setting);
     expect(setting).not.toBeChecked();
@@ -366,7 +402,9 @@ describe("StudioShell", () => {
     expect(press("j")).toBe(false);
     expect(press("b", { ctrlKey: true })).toBe(true);
     fireEvent.click(statusBar().getByRole("button", { name: "? Keys" }));
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("checkbox", { name: "Single-key shortcuts" }));
+    fireEvent.click(
+      within(screen.getByRole("dialog")).getByRole("checkbox", { name: "Single-key shortcuts" }),
+    );
     fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Close" }));
     document.body.focus();
     expect(press("/")).toBe(true);
@@ -456,7 +494,11 @@ describe("StudioShell", () => {
 
   it("shows the open instance in the header, to switch from", () => {
     renderShell();
-    expect(within(screen.getByText("The masthead").closest("header")!).getByRole("button", { name: "Deck set A" })).toBeInTheDocument();
+    expect(
+      within(screen.getByText("The masthead").closest("header")!).getByRole("button", {
+        name: "Deck set A",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("makes the sidebar a drawer on a narrow screen: closed at first, open with the focus in it, closed by a link, a press outside or Escape", () => {
@@ -546,7 +588,9 @@ describe("StudioShell", () => {
     const choose = (name: string) => {
       button.focus();
       fireEvent.click(button);
-      fireEvent.click(within(screen.getByRole("dialog", { name: "Quick open" })).getByRole("option", { name }));
+      fireEvent.click(
+        within(screen.getByRole("dialog", { name: "Quick open" })).getByRole("option", { name }),
+      );
     };
     choose("Check again");
     expect(run).toHaveBeenCalledTimes(1);
@@ -560,8 +604,16 @@ describe("StudioShell", () => {
   it("offers no sidebar in the palette without one", () => {
     renderShell({ noInstance: true });
     fireEvent.click(screen.getByRole("button", { name: "Search or run…" }));
-    expect(within(screen.getByRole("dialog")).queryByRole("option", { name: "Show or hide the sidebar" })).toBeNull();
-    expect(within(screen.getByRole("dialog")).getByRole("option", { name: "Show the keyboard shortcuts" })).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("dialog")).queryByRole("option", {
+        name: "Show or hide the sidebar",
+      }),
+    ).toBeNull();
+    expect(
+      within(screen.getByRole("dialog")).getByRole("option", {
+        name: "Show the keyboard shortcuts",
+      }),
+    ).toBeInTheDocument();
   });
 
   describe("the aside", () => {
@@ -577,7 +629,10 @@ describe("StudioShell", () => {
       ),
     };
     const pane = () => document.getElementById(asideToggle().getAttribute("aria-controls")!)!;
-    const asideToggle = () => within(screen.getByText("The masthead").closest("header")!).getByRole("button", { name: "Outline" });
+    const asideToggle = () =>
+      within(screen.getByText("The masthead").closest("header")!).getByRole("button", {
+        name: "Outline",
+      });
 
     it("shows what the route has there beside the main content, a complementary region named for it, and hides it from its buttons or with Ctrl+\\, as the device remembers", () => {
       const length = window.history.length;
@@ -619,7 +674,10 @@ describe("StudioShell", () => {
       expect(pane()).toHaveStyle({ width: `${ASIDE_WIDTH.max}px` });
       unmount();
       renderShell({ aside });
-      expect(within(pane()).getByRole("separator")).toHaveAttribute("aria-valuenow", String(ASIDE_WIDTH.max));
+      expect(within(pane()).getByRole("separator")).toHaveAttribute(
+        "aria-valuenow",
+        String(ASIDE_WIDTH.max),
+      );
     });
 
     it("is passed over by F6 while it is hidden, and has no button or key without a pane to show", () => {
@@ -694,7 +752,13 @@ describe("StudioShell", () => {
       function Menu() {
         const [open, setOpen] = useState(false);
         return (
-          <ActionsMenu label="Actions for Step 1.1" buttonClass="" open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}>
+          <ActionsMenu
+            label="Actions for Step 1.1"
+            buttonClass=""
+            open={open}
+            onOpen={() => setOpen(true)}
+            onClose={() => setOpen(false)}
+          >
             <MenuItem onSelect={onSelect}>Move down</MenuItem>
           </ActionsMenu>
         );
@@ -713,14 +777,26 @@ describe("StudioShell", () => {
     it("shows a detail of the main content while the route has it, as wide as its own splitter makes it, closed by going to the main content alone", () => {
       const onClose = vi.fn();
       localStorage.setItem("solid-memo:studioLayout.v1", JSON.stringify({ aside: false }));
-      const { unmount } = renderShell({ aside: { label: "Card", content: <p>The card</p>, detail: { closeLabel: "Close the card", onClose } } });
+      const { unmount } = renderShell({
+        aside: {
+          label: "Card",
+          content: <p>The card</p>,
+          detail: { closeLabel: "Close the card", onClose },
+        },
+      });
       const detail = screen.getByRole("complementary", { name: "Card" });
       // Shown though the outline would be hidden, and with no button to show or hide it.
       expect(detail).toBeVisible();
-      expect(within(screen.getByText("The masthead").closest("header")!).queryByRole("button", { name: "Card" })).toBeNull();
+      expect(
+        within(screen.getByText("The masthead").closest("header")!).queryByRole("button", {
+          name: "Card",
+        }),
+      ).toBeNull();
       expect(root).toHaveAttribute("data-aside");
       expect(detail).toHaveStyle({ width: `${DETAIL_WIDTH.initial}px` });
-      fireEvent.keyDown(within(detail).getByRole("separator", { name: "Width of the side pane" }), { key: "Home" });
+      fireEvent.keyDown(within(detail).getByRole("separator", { name: "Width of the side pane" }), {
+        key: "Home",
+      });
       expect(detail).toHaveStyle({ width: `${DETAIL_WIDTH.min}px` });
       const close = within(detail).getByRole("button", { name: "Close" });
       expect(close).toHaveAttribute("aria-keyshortcuts", "Control+\\");
@@ -728,13 +804,27 @@ describe("StudioShell", () => {
       document.body.focus();
       expect(press("\\", { ctrlKey: true })).toBe(true);
       fireEvent.click(screen.getByRole("button", { name: "Search or run…" }));
-      fireEvent.click(within(screen.getByRole("dialog", { name: "Quick open" })).getByRole("option", { name: "Close the card" }));
+      fireEvent.click(
+        within(screen.getByRole("dialog", { name: "Quick open" })).getByRole("option", {
+          name: "Close the card",
+        }),
+      );
       expect(onClose).toHaveBeenCalledTimes(3);
       unmount();
       // The outline keeps its own width.
-      renderShell({ aside: { label: "Card", content: <p>The card</p>, detail: { closeLabel: "Close the card", onClose } } });
-      expect(screen.getByRole("complementary", { name: "Card" })).toHaveStyle({ width: `${DETAIL_WIDTH.min}px` });
-      expect(JSON.parse(localStorage.getItem("solid-memo:studioLayout.v1")!)).toMatchObject({ asideWidth: ASIDE_WIDTH.initial });
+      renderShell({
+        aside: {
+          label: "Card",
+          content: <p>The card</p>,
+          detail: { closeLabel: "Close the card", onClose },
+        },
+      });
+      expect(screen.getByRole("complementary", { name: "Card" })).toHaveStyle({
+        width: `${DETAIL_WIDTH.min}px`,
+      });
+      expect(JSON.parse(localStorage.getItem("solid-memo:studioLayout.v1")!)).toMatchObject({
+        asideWidth: ASIDE_WIDTH.initial,
+      });
     });
 
     it("leaves Escape and links in it alone beside the page", () => {
@@ -804,19 +894,29 @@ describe("StudioShell", () => {
       fireEvent.click(count);
       expect(count).toHaveAttribute("aria-controls", dock().id);
       const tabs = within(dock()).getByRole("tablist", { name: "Panel" });
-      expect(within(tabs).getByRole("tab", { name: "Problems (3)" })).toHaveAttribute("aria-selected", "true");
-      expect(within(dock()).getByRole("tabpanel", { name: "Problems (3)" })).toHaveTextContent("The problems");
+      expect(within(tabs).getByRole("tab", { name: "Problems (3)" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(within(dock()).getByRole("tabpanel", { name: "Problems (3)" })).toHaveTextContent(
+        "The problems",
+      );
       fireEvent.click(within(tabs).getByRole("tab", { name: "Activity" }));
       expect(within(dock()).getByRole("tabpanel", { name: "Activity" })).toBeInTheDocument();
       // Open already: at the problems again.
       fireEvent.click(count);
-      expect(within(tabs).getByRole("tab", { name: "Problems (3)" })).toHaveAttribute("aria-selected", "true");
+      expect(within(tabs).getByRole("tab", { name: "Problems (3)" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
     });
 
     it("says so off a deck's or draft's screens, and while the problems are looked for, counts none", () => {
       const { unmount } = renderShell();
       fireEvent.click(dockButton());
-      expect(within(dock()).getByRole("tabpanel")).toHaveTextContent("A deck's or a draft's problems are listed on its screens.");
+      expect(within(dock()).getByRole("tabpanel")).toHaveTextContent(
+        "A deck's or a draft's problems are listed on its screens.",
+      );
       expect(within(dock()).getByRole("tab", { name: "Problems" })).toBeInTheDocument();
       unmount();
       renderShell({ problems: { ...problems, count: undefined } });
@@ -826,18 +926,26 @@ describe("StudioShell", () => {
 
     it("counts none plainly, and some as a warning", () => {
       const { unmount } = renderShell({ problems: { ...problems, count: 0, routes: [] } });
-      expect(statusBar().getByRole("button", { name: "0 problems" })).not.toHaveClass("studio-problem-count");
+      expect(statusBar().getByRole("button", { name: "0 problems" })).not.toHaveClass(
+        "studio-problem-count",
+      );
       unmount();
       renderShell({ problems });
-      expect(statusBar().getByRole("button", { name: "3 problems" })).toHaveClass("studio-problem-count");
+      expect(statusBar().getByRole("button", { name: "3 problems" })).toHaveClass(
+        "studio-problem-count",
+      );
     });
 
     it("says, in its count, how many of a draft's problems keep it from being published, once", () => {
       const { unmount } = renderShell({ problems: { ...problems, count: 5, blocking: 3 } });
-      expect(statusBar().getByRole("button", { name: "5 problems, 3 block publishing" })).toHaveClass("studio-problem-count");
+      expect(
+        statusBar().getByRole("button", { name: "5 problems, 3 block publishing" }),
+      ).toHaveClass("studio-problem-count");
       unmount();
       renderShell({ problems: { ...problems, count: 2, blocking: 3 } });
-      expect(statusBar().getByRole("button", { name: "3 problems block publishing" })).toBeInTheDocument();
+      expect(
+        statusBar().getByRole("button", { name: "3 problems block publishing" }),
+      ).toBeInTheDocument();
     });
 
     it("goes from tab to tab with the arrow keys", () => {
@@ -859,7 +967,9 @@ describe("StudioShell", () => {
       renderShell({ draftUrl: DRAFT_URL });
       fireEvent.click(dockButton());
       fireEvent.click(within(dock()).getByRole("tab", { name: "Activity" }));
-      expect(within(dock()).getByRole("tabpanel")).toHaveTextContent("Nothing done yet since the Studio was opened.");
+      expect(within(dock()).getByRole("tabpanel")).toHaveTextContent(
+        "Nothing done yet since the Studio was opened.",
+      );
       act(() => logActivity("Exported 2 decks."));
       act(() => logActivity("Moved 3 cards."));
       const editor = {};
@@ -870,20 +980,35 @@ describe("StudioShell", () => {
       }
       act(() => report(editor, { waiting: 0, failed: true }));
       // Each after its time.
-      const lines = within(dock()).getAllByRole("listitem").map((line) => line.textContent!.slice(line.querySelector("time")!.textContent!.length + 1));
-      expect(lines).toEqual(["Last change not saved", "Draft saved ×3", "Moved 3 cards.", "Exported 2 decks."]);
-      expect(within(dock()).getAllByRole("listitem")[0]!.querySelector("time")).toHaveAttribute("datetime");
+      const lines = within(dock())
+        .getAllByRole("listitem")
+        .map((line) =>
+          line.textContent!.slice(line.querySelector("time")!.textContent!.length + 1),
+        );
+      expect(lines).toEqual([
+        "Last change not saved",
+        "Draft saved ×3",
+        "Moved 3 cards.",
+        "Exported 2 decks.",
+      ]);
+      expect(within(dock()).getAllByRole("listitem")[0]!.querySelector("time")).toHaveAttribute(
+        "datetime",
+      );
     });
 
     it("is as tall as its splitter makes it", () => {
       renderShell();
       fireEvent.click(dockButton());
-      fireEvent.keyDown(within(dock()).getByRole("separator", { name: "Height of the panel" }), { key: "Home" });
+      fireEvent.keyDown(within(dock()).getByRole("separator", { name: "Height of the panel" }), {
+        key: "Home",
+      });
       expect(dock()).toHaveStyle({ height: `${DOCK_HEIGHT.min}px` });
     });
 
     it("goes to the next problem's field with F8 and the one before with Shift+F8, as a link does, from a field too", () => {
-      const onGo = vi.fn((route: StudioRoute) => window.history.replaceState(null, "", studioRouteToHash(route)));
+      const onGo = vi.fn((route: StudioRoute) =>
+        window.history.replaceState(null, "", studioRouteToHash(route)),
+      );
       const { unmount } = renderShell({ problems, onGo, filter: true });
       document.body.focus();
       expect(press("F8")).toBe(true);
@@ -920,13 +1045,20 @@ describe("StudioShell", () => {
       renderShell({ aside: { label: "Outline", content: <p>The outline</p> } });
       const choose = (name: string) => {
         fireEvent.click(screen.getByRole("button", { name: "Search or run…" }));
-        fireEvent.click(within(screen.getByRole("dialog", { name: "Quick open" })).getByRole("option", { name }));
+        fireEvent.click(
+          within(screen.getByRole("dialog", { name: "Quick open" })).getByRole("option", { name }),
+        );
       };
       choose("Show or hide the panel: problems and activity");
       expect(dock()).toBeInTheDocument();
       expect(screen.getByRole("complementary", { name: "Outline" })).toBeVisible();
-      choose("Show or hide the aside (the outline, the deck, the upgrade), or close the card beside the cards");
-      expect(screen.getByRole("button", { name: "Outline" })).toHaveAttribute("aria-expanded", "false");
+      choose(
+        "Show or hide the aside (the outline, the deck, the upgrade), or close the card beside the cards",
+      );
+      expect(screen.getByRole("button", { name: "Outline" })).toHaveAttribute(
+        "aria-expanded",
+        "false",
+      );
     });
   });
 

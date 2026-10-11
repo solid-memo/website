@@ -143,7 +143,10 @@ export function plainDataText(shown: string, markdown: boolean, max?: number): s
  * side that shows no text (a rule alone) names nothing either, so the
  * name falls back to the back, then to the card's id.
  */
-export function cardName(card: CardContent & { id: string }, readerText: I18n["readerText"]): string {
+export function cardName(
+  card: CardContent & { id: string },
+  readerText: I18n["readerText"],
+): string {
   if (!isMarkdown(card.textFormat)) return cardLabel(card, readerText);
   return labelText(readerText(cardNameText(card, readerText))) || card.id;
 }
@@ -155,5 +158,8 @@ export function cardName(card: CardContent & { id: string }, readerText: I18n["r
  */
 export function cardNameText(card: CardContent, readerText: I18n["readerText"]): LangText {
   if (!isMarkdown(card.textFormat)) return cardLabelText(card);
-  return [card.front, card.back].find((text) => labelText(readerText(text)) !== "") ?? cardLabelText(card);
+  return (
+    [card.front, card.back].find((text) => labelText(readerText(text)) !== "") ??
+    cardLabelText(card)
+  );
 }

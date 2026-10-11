@@ -30,7 +30,9 @@ export default mergeConfig(
       alias: {
         react: "preact/compat",
         "react-dom": "preact/compat",
-        "decode-named-character-reference": createRequire(import.meta.url).resolve("decode-named-character-reference"),
+        "decode-named-character-reference": createRequire(import.meta.url).resolve(
+          "decode-named-character-reference",
+        ),
       },
     },
   },

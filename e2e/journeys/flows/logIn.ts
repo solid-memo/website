@@ -6,7 +6,11 @@ import type { App } from "../pages/App.ts";
  * in with the WebID at its identity provider (the Solid server's own login
  * and consent pages), back to the app, and create the instance.
  */
-export async function logInAndCreateInstance(app: App, account: CssAccount, instanceName: string): Promise<void> {
+export async function logInAndCreateInstance(
+  app: App,
+  account: CssAccount,
+  instanceName: string,
+): Promise<void> {
   await app.onboarding.logInWithWebId(account.webId);
   await app.cssLogin.logIn(account);
   await app.cssLogin.authorize(account.webId);

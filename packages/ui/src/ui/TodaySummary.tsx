@@ -6,7 +6,11 @@ import { FlameIcon } from "./icons";
 function useCheer() {
   const { t } = useI18n();
   return (answers: number) =>
-    answers >= 50 ? t("today.cheer.many") : answers >= 10 ? t("today.cheer.some") : t("today.cheer.few");
+    answers >= 50
+      ? t("today.cheer.many")
+      : answers >= 10
+        ? t("today.cheer.some")
+        : t("today.cheer.few");
 }
 
 /** Where the streak stands: a first day, a record, or the record to beat. */

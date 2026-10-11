@@ -39,7 +39,9 @@ export function OutlineAside({
       questionHref={links.questionHref}
       checkHref={links.checkHref}
       problems={outlineProblems(draft, problems ?? [])}
-      badgeHref={(problem) => studioRouteToHash(targetRoute(draftUrl, problemTarget(draft, problem)))}
+      badgeHref={(problem) =>
+        studioRouteToHash(targetRoute(draftUrl, problemTarget(draft, problem)))
+      }
       currentKey={currentKey}
       onEdit={(changes) => editor.edit(changes)}
     />

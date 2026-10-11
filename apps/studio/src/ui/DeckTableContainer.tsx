@@ -3,7 +3,13 @@ import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/rea
 import type { UseCases } from "@solid-memo/application/useCases";
 import { activeCards, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import { deckPreferences, type DeckPace } from "@solid-memo/domain/deckPace";
-import { groupsOfDecks, groupTrails, type DeckFigure, type DeckTableRow, type DeckTableView } from "@solid-memo/domain/deckTable";
+import {
+  groupsOfDecks,
+  groupTrails,
+  type DeckFigure,
+  type DeckTableRow,
+  type DeckTableView,
+} from "@solid-memo/domain/deckTable";
 import { decksOf, type DeckGroup } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import { setAsideDecks } from "@solid-memo/domain/validation";
@@ -174,7 +180,9 @@ export function DeckTableContainer({
       groups: groups.get(deck.url)!,
       figures: {
         ...(cards.data === undefined ? {} : { cards: activeCards(cards.data).length }),
-        ...(counts.data === undefined ? {} : { due: counts.data.dueCount, new: counts.data.newCount }),
+        ...(counts.data === undefined
+          ? {}
+          : { due: counts.data.dueCount, new: counts.data.newCount }),
       },
       newCardsPerDay: pace.newCardsPerDay,
       maxReviewsPerDay: pace.maxReviewsPerDay,
@@ -211,7 +219,9 @@ export function DeckTableContainer({
       pending={pending}
       badges={badges}
       groups={groupTrails(treeQuery.data)}
-      moveLocked={treeQuery.data.readOnly ? "newerVersion" : check.arrangementSetAside ? "setAside" : null}
+      moveLocked={
+        treeQuery.data.readOnly ? "newerVersion" : check.arrangementSetAside ? "setAside" : null
+      }
       readOnly={check.readOnly() ?? (decks.some(check.isSetAside) ? "setAside" : null)}
       selectable={(deck) => check.readOnly(deck) === null}
       deckHref={deckHref}
@@ -219,11 +229,26 @@ export function DeckTableContainer({
       appHref={appHref}
       healthHref={healthHref()}
       // Checked only as its row comes into view; quiet when all is well.
-      healthBadge={(deck) => <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={healthHref(deck)} quiet />}
+      healthBadge={(deck) => (
+        <HealthBadge
+          useCases={useCases}
+          instanceUrl={instance.url}
+          deck={deck}
+          href={healthHref(deck)}
+          quiet
+        />
+      )}
       transferHref={transferHref}
       // A copy only, looked up as its row comes into view; nothing while it is up to date.
       updateBadge={(deck) =>
-        deck.sourceUrl === undefined ? null : <UpdateBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={libraryHref} />
+        deck.sourceUrl === undefined ? null : (
+          <UpdateBadge
+            useCases={useCases}
+            instanceUrl={instance.url}
+            deck={deck}
+            href={libraryHref}
+          />
+        )
       }
       onMove={(selected, parent) => run({ kind: "move", decks: selected, parent })}
       onPace={(selected, pace) => run({ kind: "pace", decks: selected, pace })}

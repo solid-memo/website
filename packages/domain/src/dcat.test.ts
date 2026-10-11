@@ -52,16 +52,39 @@ describe("isDefaultDeckDescription", () => {
   it("knows the default in English, with or without its Swedish, for any of the deck's titles", () => {
     const titles = [{ en: "Capitals of the world" }, { en: "Capitals" }];
     expect(isDefaultDeckDescription({ en: "Flashcards: Capitals." }, titles)).toBe(true);
-    expect(isDefaultDeckDescription({ en: "Flashcards: Capitals of the world.", sv: "Kortlek: Capitals of the world." }, titles)).toBe(true);
-    expect(isDefaultDeckDescription({ en: "Flashcards: Capitals.", sv: "Mina huvudstäder." }, titles)).toBe(false);
+    expect(
+      isDefaultDeckDescription(
+        { en: "Flashcards: Capitals of the world.", sv: "Kortlek: Capitals of the world." },
+        titles,
+      ),
+    ).toBe(true);
+    expect(
+      isDefaultDeckDescription({ en: "Flashcards: Capitals.", sv: "Mina huvudstäder." }, titles),
+    ).toBe(false);
     expect(isDefaultDeckDescription({ en: "Every capital." }, titles)).toBe(false);
-    expect(isDefaultDeckDescription({ en: "Flashcards: Hauptstädte.", de: "Karten" }, [{ de: "Hauptstädte" }])).toBe(false);
+    expect(
+      isDefaultDeckDescription({ en: "Flashcards: Hauptstädte.", de: "Karten" }, [
+        { de: "Hauptstädte" },
+      ]),
+    ).toBe(false);
   });
 
   it("knows the default of a deck titled in no English", () => {
-    expect(isDefaultDeckDescription({ en: "Flashcards: Huvudstäder.", sv: "Kortlek: Huvudstäder." }, [{ sv: "Huvudstäder" }])).toBe(true);
-    expect(isDefaultDeckDescription({ en: "Flashcards: 日本語の単語.", sv: "Kortlek: 日本語の単語." }, [{ ja: "日本語の単語" }])).toBe(true);
-    expect(isDefaultDeckDescription({ en: "Flashcards: 日本語の単語.", sv: "Kortlek: 日本語の単語." }, [{ ja: "日本語" }])).toBe(false);
+    expect(
+      isDefaultDeckDescription({ en: "Flashcards: Huvudstäder.", sv: "Kortlek: Huvudstäder." }, [
+        { sv: "Huvudstäder" },
+      ]),
+    ).toBe(true);
+    expect(
+      isDefaultDeckDescription({ en: "Flashcards: 日本語の単語.", sv: "Kortlek: 日本語の単語." }, [
+        { ja: "日本語の単語" },
+      ]),
+    ).toBe(true);
+    expect(
+      isDefaultDeckDescription({ en: "Flashcards: 日本語の単語.", sv: "Kortlek: 日本語の単語." }, [
+        { ja: "日本語" },
+      ]),
+    ).toBe(false);
   });
 
   it("stays in sync when the user retags the title the default was written for", () => {
@@ -73,7 +96,9 @@ describe("isDefaultDeckDescription", () => {
     const capitals = defaultDeckDescriptionText({ en: "Capitals", sv: "Huvudstäder" });
     const retagged = { en: "Capitals", de: "Huvudstäder" };
     expect(isDefaultDeckDescription(capitals, [retagged])).toBe(false);
-    expect(isDefaultDeckDescription(capitals, [retagged, { en: "Capitals", sv: "Huvudstäder" }])).toBe(true);
+    expect(
+      isDefaultDeckDescription(capitals, [retagged, { en: "Capitals", sv: "Huvudstäder" }]),
+    ).toBe(true);
   });
 });
 
@@ -83,7 +108,10 @@ describe("a deck group's default description", () => {
       en: "Deck group: Languages.",
       sv: "Kortleksgrupp: Languages.",
     });
-    expect(defaultDeckGroupDescription({ sv: "Språk" })).toEqual({ en: "Deck group: Språk.", sv: "Kortleksgrupp: Språk." });
+    expect(defaultDeckGroupDescription({ sv: "Språk" })).toEqual({
+      en: "Deck group: Språk.",
+      sv: "Kortleksgrupp: Språk.",
+    });
     expect(defaultDeckGroupDescription({ en: "Languages", sv: "Språk" })).toEqual({
       en: "Deck group: Languages.",
       sv: "Kortleksgrupp: Språk.",
@@ -92,9 +120,16 @@ describe("a deck group's default description", () => {
 
   it("is known as the default for the group's name, with or without its Swedish, and nothing else is", () => {
     const title = { sv: "Språk" };
-    expect(isDefaultDeckGroupDescription({ en: "Deck group: Språk.", sv: "Kortleksgrupp: Språk." }, title)).toBe(true);
+    expect(
+      isDefaultDeckGroupDescription(
+        { en: "Deck group: Språk.", sv: "Kortleksgrupp: Språk." },
+        title,
+      ),
+    ).toBe(true);
     expect(isDefaultDeckGroupDescription({ en: "Deck group: Språk." }, title)).toBe(true);
-    expect(isDefaultDeckGroupDescription({ en: "Deck group: Språk.", sv: "Mina språk." }, title)).toBe(false);
+    expect(
+      isDefaultDeckGroupDescription({ en: "Deck group: Språk.", sv: "Mina språk." }, title),
+    ).toBe(false);
     expect(isDefaultDeckGroupDescription({ en: "Deck group: Languages." }, title)).toBe(false);
     expect(isDefaultDeckGroupDescription({ sv: "Kortleksgrupp: Språk." }, title)).toBe(false);
   });

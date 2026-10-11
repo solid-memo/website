@@ -21,10 +21,7 @@ const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
  * `foaf:name` literal, in any language. Undefined when the profile has
  * none, so the WebID itself is shown instead.
  */
-export function profileNameOf(
-  document: WebIdDocument,
-  webId: string,
-): string | undefined {
+export function profileNameOf(document: WebIdDocument, webId: string): string | undefined {
   const subject = document.subjects.find((s) => s.url === webId);
   const names = subject?.properties.find((p) => p.predicate === FOAF_NAME);
   for (const value of names?.values ?? []) {

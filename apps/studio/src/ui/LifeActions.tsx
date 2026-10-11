@@ -34,7 +34,10 @@ export function LifeActions({
       <h3 id="draft-life-heading">{t(`studio.draftEdit.life.${of}`)}</h3>
       {published && <p class="hint">{t("studio.draftEdit.published")}</p>}
       <p class="actions">
-        <button type="button" onClick={() => onEdit({ kind: retired ? "restore" : "retire", of, id })}>
+        <button
+          type="button"
+          onClick={() => onEdit({ kind: retired ? "restore" : "retire", of, id })}
+        >
           {t(retired ? "studio.draftEdit.restore" : "studio.draftEdit.retire")}
         </button>
         <button

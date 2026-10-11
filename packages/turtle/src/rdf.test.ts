@@ -25,9 +25,9 @@ describe("parseTurtle and lookups", () => {
   const quads = parseTurtle(DOC, BASE);
 
   it("keeps objects in document order", () => {
-    expect(
-      objectsOf(quads, `${BASE}#a`, "https://example.com/ns#tag").map((o) => o.value),
-    ).toEqual(["one", "two"]);
+    expect(objectsOf(quads, `${BASE}#a`, "https://example.com/ns#tag").map((o) => o.value)).toEqual(
+      ["one", "two"],
+    );
   });
 
   it("lists named subjects of a type once each, in order of first appearance", () => {

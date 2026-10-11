@@ -1,19 +1,39 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
-import { LibraryCopiesScreen, LibraryPlanScreen, type BatchResult, type BatchRun, type CopyRow } from "./LibraryCopiesScreen";
+import {
+  LibraryCopiesScreen,
+  LibraryPlanScreen,
+  type BatchResult,
+  type BatchRun,
+  type CopyRow,
+} from "./LibraryCopiesScreen";
 import { WithKeys } from "../test/keys";
 import { capitals, instanceA, makeCard, makeCopy, makePlan } from "../test/fixtures";
 
 const old = makeCopy("deck-1", { en: "Capitals" }, "1");
 const mine = makeCopy("deck-2", { en: "My capitals" }, "1");
 const fresh = makeCopy("deck-3", { en: "Fresh capitals" }, "2");
-const gone = { ...makeCopy("deck-4", { en: "Rivers" }, "1"), sourceUrl: "https://solid-memo.com/decks/rivers/v1.ttl" };
-const stray = { ...makeCopy("deck-5", { en: "Odd capitals" }, "1"), sourceUrl: "https://solid-memo.com/decks/capitals/v7.ttl" };
+const gone = {
+  ...makeCopy("deck-4", { en: "Rivers" }, "1"),
+  sourceUrl: "https://solid-memo.com/decks/rivers/v1.ttl",
+};
+const stray = {
+  ...makeCopy("deck-5", { en: "Odd capitals" }, "1"),
+  sourceUrl: "https://solid-memo.com/decks/capitals/v7.ttl",
+};
 const planning = makeCopy("deck-6", { en: "Slow capitals" }, "1");
 const broken = makeCopy("deck-7", { en: "Broken capitals" }, "1");
 
 const plan = makePlan(old);
-const minePlan = { ...makePlan(mine), add: [], change: [], remove: [], retire: [makeCard(mine, "latvia")], kept: [makeCard(mine, "sweden")], notes: [] };
+const minePlan = {
+  ...makePlan(mine),
+  add: [],
+  change: [],
+  remove: [],
+  retire: [makeCard(mine, "latvia")],
+  kept: [makeCard(mine, "sweden")],
+  notes: [],
+};
 
 const rows: CopyRow[] = [
   { copy: { deck: old, series: capitals, version: "1", newer: true }, plan },
@@ -49,39 +69,81 @@ function renderScreen(overrides: Partial<Props> = {}) {
   return { onUpgrade };
 }
 
-const table = () => screen.getByRole("table", { name: "The decks of Deck set A copied from the library" });
+const table = () =>
+  screen.getByRole("table", { name: "The decks of Deck set A copied from the library" });
 const row = (name: string) => within(table()).getByRole("rowheader", { name }).closest("tr")!;
-const cells = (name: string) => within(row(name)).getAllByRole("cell").map((cell) => cell.textContent);
+const cells = (name: string) =>
+  within(row(name))
+    .getAllByRole("cell")
+    .map((cell) => cell.textContent);
 
 describe("LibraryCopiesScreen", () => {
   it("lists each copy with the release it came from, the library's, and what updating would change", () => {
     renderScreen();
-    expect(screen.getByRole("heading", { name: "Library copies in Deck set A" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Browse the deck library" })).toHaveAttribute("href", "#/library");
-    expect(within(row("Capitals")).getByRole("link", { name: "Capitals" })).toHaveAttribute("href", "#/about?deck=deck-1");
+    expect(
+      screen.getByRole("heading", { name: "Library copies in Deck set A" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Browse the deck library" })).toHaveAttribute(
+      "href",
+      "#/library",
+    );
+    expect(within(row("Capitals")).getByRole("link", { name: "Capitals" })).toHaveAttribute(
+      "href",
+      "#/about?deck=deck-1",
+    );
     expect(cells("Capitals")[1]).toBe("Release 1");
     expect(cells("Capitals")[2]).toBe("Release 2");
-    expect(cells("Capitals")[3]).toBe("Release 2: updating adds 1 card, changes 1 card and removes 1 card.");
+    expect(cells("Capitals")[3]).toBe(
+      "Release 2: updating adds 1 card, changes 1 card and removes 1 card.",
+    );
     expect(cells("Fresh capitals")[3]).toBe("Up to date");
     expect(cells("Rivers").slice(1)).toEqual(["Unknown release", "No longer in the library", ""]);
     expect(cells("Odd capitals")[1]).toBe("Unknown release");
-    expect(cells("Odd capitals")[3]).toBe("Release 2 is out, with nothing to update your copy with.");
+    expect(cells("Odd capitals")[3]).toBe(
+      "Release 2 is out, with nothing to update your copy with.",
+    );
     expect(cells("Slow capitals")[3]).toBe("Looking at what an update would change…");
-    expect(cells("Broken capitals")[3]).toBe("Release 2 is out, but what it would change could not be read.");
+    expect(cells("Broken capitals")[3]).toBe(
+      "Release 2 is out, but what it would change could not be read.",
+    );
   });
 
   it("says where a copy of a release added from a link came from, and when a newer version is not known", () => {
-    const linked = { ...makeCopy("deck-8", { en: "Pods" }, "1"), sourceUrl: "https://bob.example/releases/pods/v1.ttl" };
-    const known = { ...makeCopy("deck-9", { en: "Lakes" }, "1"), sourceUrl: "https://bob.example/releases/lakes/v1.ttl" };
+    const linked = {
+      ...makeCopy("deck-8", { en: "Pods" }, "1"),
+      sourceUrl: "https://bob.example/releases/pods/v1.ttl",
+    };
+    const known = {
+      ...makeCopy("deck-9", { en: "Lakes" }, "1"),
+      sourceUrl: "https://bob.example/releases/lakes/v1.ttl",
+    };
     const series = { ...capitals, url: linked.sourceUrl, version: "1" };
     renderScreen({
       rows: [
-        { copy: { deck: linked, series, version: "1", newer: "unknown", fromLink: true }, plan: "loading" },
-        { copy: { deck: known, series: { ...series, url: known.sourceUrl }, version: "1", newer: false, fromLink: true }, plan: "loading" },
+        {
+          copy: { deck: linked, series, version: "1", newer: "unknown", fromLink: true },
+          plan: "loading",
+        },
+        {
+          copy: {
+            deck: known,
+            series: { ...series, url: known.sourceUrl },
+            version: "1",
+            newer: false,
+            fromLink: true,
+          },
+          plan: "loading",
+        },
       ],
     });
-    expect(within(table()).getByRole("rowheader", { name: "Pods From bob.example" })).toBeInTheDocument();
-    expect(cells("Pods From bob.example").slice(1)).toEqual(["Release 1", "Release 1", "Not known: no public catalog of its creator lists it"]);
+    expect(
+      within(table()).getByRole("rowheader", { name: "Pods From bob.example" }),
+    ).toBeInTheDocument();
+    expect(cells("Pods From bob.example").slice(1)).toEqual([
+      "Release 1",
+      "Release 1",
+      "Not known: no public catalog of its creator lists it",
+    ]);
     expect(cells("Lakes From bob.example")[3]).toBe("Up to date");
   });
 
@@ -97,31 +159,33 @@ describe("LibraryCopiesScreen", () => {
   it("details beside the table what updating the copy keeps, the releases' notes, and the cards each change touches", () => {
     render(<LibraryPlanScreen row={rows[0]!} />);
     const plan = screen.getByRole("region", { name: "Capitals" });
-    expect(plan).toHaveTextContent("Release 2: updating adds 1 card, changes 1 card and removes 1 card.");
+    expect(plan).toHaveTextContent(
+      "Release 2: updating adds 1 card, changes 1 card and removes 1 card.",
+    );
     expect(plan).toHaveTextContent("Your review history is kept, but for the cards removed.");
-    expect(within(plan).getAllByRole("heading").map((heading) => heading.textContent)).toEqual([
-      "Capitals",
-      "Added: 1 card",
-      "Changed: 1 card",
-      "Removed: 1 card",
-    ]);
-    expect(within(plan).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
-      "Release 2: Norway added.",
-      "Norway",
-      "Sweden",
-      "latvia",
-    ]);
+    expect(
+      within(plan)
+        .getAllByRole("heading")
+        .map((heading) => heading.textContent),
+    ).toEqual(["Capitals", "Added: 1 card", "Changed: 1 card", "Removed: 1 card"]);
+    expect(
+      within(plan)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent),
+    ).toEqual(["Release 2: Norway added.", "Norway", "Sweden", "latvia"]);
   });
 
   it("details a copy's plan without notes, and with the cards kept as the user has them", () => {
     render(<LibraryPlanScreen row={rows[1]!} />);
     const plan = screen.getByRole("region", { name: "My capitals" });
-    expect(plan).toHaveTextContent("a retired card is kept, but no longer studied. 1 card you changed is left as you have it.");
-    expect(within(plan).getAllByRole("heading").map((heading) => heading.textContent)).toEqual([
-      "My capitals",
-      "Retired: 1 card",
-      "Left as you have it: 1 card",
-    ]);
+    expect(plan).toHaveTextContent(
+      "a retired card is kept, but no longer studied. 1 card you changed is left as you have it.",
+    );
+    expect(
+      within(plan)
+        .getAllByRole("heading")
+        .map((heading) => heading.textContent),
+    ).toEqual(["My capitals", "Retired: 1 card", "Left as you have it: 1 card"]);
   });
 
   it("says beside the table what it would do for a copy not to update, and how to show one", () => {
@@ -136,20 +200,28 @@ describe("LibraryCopiesScreen", () => {
     const { onUpgrade } = renderScreen();
     expect(screen.queryByRole("button", { name: /Update/ })).toBeNull();
     expect(within(row("Fresh capitals")).queryByRole("checkbox")).toBeNull();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck that can be updated" }));
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Select every deck that can be updated" }),
+    );
     fireEvent.click(screen.getByRole("checkbox", { name: "Select My capitals" }));
     fireEvent.click(screen.getByRole("button", { name: "Update 1 deck" }));
     expect(onUpgrade).toHaveBeenCalledWith([{ deck: old, plan }]);
     // The selection goes with the batch.
     expect(screen.getByRole("checkbox", { name: "Select Capitals" })).not.toBeChecked();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck that can be updated" }));
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Select every deck that can be updated" }),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Update 2 decks" }));
     expect(onUpgrade).toHaveBeenLastCalledWith([
       { deck: old, plan },
       { deck: mine, plan: minePlan },
     ]);
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck that can be updated" }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck that can be updated" }));
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Select every deck that can be updated" }),
+    );
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Select every deck that can be updated" }),
+    );
     expect(screen.queryByRole("button", { name: /Update/ })).toBeNull();
     // The bar of the copies selected counts them, and clears them.
     fireEvent.click(screen.getByRole("checkbox", { name: "Select My capitals" }));
@@ -164,7 +236,10 @@ describe("LibraryCopiesScreen", () => {
     expect(within(row("Capitals")).queryByRole("checkbox")).toBeNull();
     expect(screen.getByRole("checkbox", { name: "Select My capitals" })).toBeInTheDocument();
     expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute(
+      "href",
+      "#/health",
+    );
   });
 
   it("shows the deck a batch is updating, with its steps, and nothing to choose meanwhile", () => {
@@ -173,7 +248,9 @@ describe("LibraryCopiesScreen", () => {
     expect(screen.getByText(/^Updating My/).textContent).toBe("Updating My capitals (2 of 2)");
     expect(screen.getByRole("region", { name: "Updating the deck" })).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "Select Capitals" })).toBeDisabled();
-    expect(screen.getByRole("checkbox", { name: "Select every deck that can be updated" })).toBeDisabled();
+    expect(
+      screen.getByRole("checkbox", { name: "Select every deck that can be updated" }),
+    ).toBeDisabled();
     // How each ended is said once the batch is over.
     expect(screen.queryByText(/updated to release/)).toBeNull();
   });
@@ -181,20 +258,35 @@ describe("LibraryCopiesScreen", () => {
   it("says how each update of the batch ended", () => {
     const results: BatchResult[] = [
       { deck: old, plan, outcome: { ok: true, deck: old } },
-      { deck: mine, plan: minePlan, outcome: { ok: false, step: "entry", error: new Error("boom"), changed: false } },
-      { deck: broken, plan, outcome: { ok: false, step: "reviews", error: new Error("boom"), changed: true } },
+      {
+        deck: mine,
+        plan: minePlan,
+        outcome: { ok: false, step: "entry", error: new Error("boom"), changed: false },
+      },
+      {
+        deck: broken,
+        plan,
+        outcome: { ok: false, step: "reviews", error: new Error("boom"), changed: true },
+      },
     ];
     renderScreen({ results });
     const items = within(screen.getAllByRole("status")[0]!).getAllByRole("listitem");
     expect(items[0]).toHaveTextContent("Capitals: updated to release 2.");
-    expect(items[1]).toHaveTextContent(/^My capitals: the update failed while moving the deck to the new release: .*Your deck was not changed\.$/);
-    expect(items[2]).toHaveTextContent(/^Broken capitals: the update failed while dropping the review states of removed cards: .*Part of the new release may be in your deck already, which you can study as it is\. Update it again to finish\.$/);
+    expect(items[1]).toHaveTextContent(
+      /^My capitals: the update failed while moving the deck to the new release: .*Your deck was not changed\.$/,
+    );
+    expect(items[2]).toHaveTextContent(
+      /^Broken capitals: the update failed while dropping the review states of removed cards: .*Part of the new release may be in your deck already, which you can study as it is\. Update it again to finish\.$/,
+    );
   });
 
   it("says when no deck is a copy, linking to the library", () => {
     renderScreen({ rows: [] });
     expect(screen.getByText(/No deck here is a copy/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "the deck library" })).toHaveAttribute("href", "#/library");
+    expect(screen.getByRole("link", { name: "the deck library" })).toHaveAttribute(
+      "href",
+      "#/library",
+    );
     expect(screen.queryByRole("table")).toBeNull();
   });
 

@@ -55,11 +55,7 @@ function renderContainer(useCases: UseCases) {
   const onDone = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
-      <LibraryContainer
-        useCases={useCases}
-        instance={instance}
-        onDone={onDone}
-      />
+      <LibraryContainer useCases={useCases} instance={instance} onDone={onDone} />
     </QueryClientProvider>,
   );
   return { onDone, queryClient };
@@ -78,9 +74,7 @@ describe("LibraryContainer", () => {
       }),
     );
     expect(screen.getByText("Loading the deck library…")).toBeInTheDocument();
-    expect(
-      await screen.findByRole("checkbox", { name: "Capitals" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("checkbox", { name: "Capitals" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Deck library" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Capitals" })).toHaveAttribute(
       "href",
@@ -128,18 +122,14 @@ describe("LibraryContainer", () => {
 
     fireEvent.click(await screen.findByRole("checkbox", { name: "Capitals" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Import 2 decks" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Import 2 decks" }).closest("form")!);
 
     await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
     expect(importLibraryDeck.mock.calls).toEqual([
       [instance.url, capitals],
       [instance.url, rivers],
     ]);
-    await waitFor(() =>
-      expect(useCases.listDecks).toHaveBeenCalledTimes(2),
-    );
+    await waitFor(() => expect(useCases.listDecks).toHaveBeenCalledTimes(2));
 
     // The imported decks are no longer checked on the next visit.
     cleanup();
@@ -184,9 +174,7 @@ describe("LibraryContainer", () => {
 
     fireEvent.click(await screen.findByRole("checkbox", { name: "Capitals" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Import 2 decks" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Import 2 decks" }).closest("form")!);
 
     expect((await screen.findByText("pod refused")).closest(".error")).toBeInTheDocument();
     expect(onDone).not.toHaveBeenCalled();

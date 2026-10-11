@@ -12,17 +12,25 @@ Start with [architecture.md](architecture.md).
 
 describe("listedPages", () => {
   it("finds the pages beside the index, with or without a heading", () => {
-    expect([...listedPages(INDEX)].sort()).toEqual(["architecture.md", "boundaries.md", "testing.md"]);
+    expect([...listedPages(INDEX)].sort()).toEqual([
+      "architecture.md",
+      "boundaries.md",
+      "testing.md",
+    ]);
   });
 });
 
 describe("docsIndexProblems", () => {
   it("passes when every page is listed, the index itself aside", () => {
-    expect(docsIndexProblems(["README.md", "architecture.md", "boundaries.md", "testing.md"], INDEX)).toEqual([]);
+    expect(
+      docsIndexProblems(["README.md", "architecture.md", "boundaries.md", "testing.md"], INDEX),
+    ).toEqual([]);
   });
 
   it("names a page the index does not list, and a page it lists that is gone", () => {
-    expect(docsIndexProblems(["README.md", "architecture.md", "testing.md", "privacy.md"], INDEX)).toEqual([
+    expect(
+      docsIndexProblems(["README.md", "architecture.md", "testing.md", "privacy.md"], INDEX),
+    ).toEqual([
       "docs/privacy.md: not listed in docs/README.md; add a line for it there.",
       "docs/README.md lists boundaries.md, which is not in docs/.",
     ]);
@@ -32,7 +40,12 @@ describe("docsIndexProblems", () => {
 describe("main", () => {
   function fakeIo(pages: string[]) {
     const logs: string[] = [];
-    return { logs, pages: () => pages, index: () => INDEX, log: (message: string) => logs.push(message) };
+    return {
+      logs,
+      pages: () => pages,
+      index: () => INDEX,
+      log: (message: string) => logs.push(message),
+    };
   }
 
   it("says so and returns 0 when the index is whole", () => {
@@ -42,9 +55,17 @@ describe("main", () => {
   });
 
   it("logs each problem and returns 1", () => {
-    const io = fakeIo(["README.md", "architecture.md", "boundaries.md", "testing.md", "privacy.md"]);
+    const io = fakeIo([
+      "README.md",
+      "architecture.md",
+      "boundaries.md",
+      "testing.md",
+      "privacy.md",
+    ]);
     expect(main(io)).toBe(1);
-    expect(io.logs).toEqual(["docs/privacy.md: not listed in docs/README.md; add a line for it there."]);
+    expect(io.logs).toEqual([
+      "docs/privacy.md: not listed in docs/README.md; add a line for it there.",
+    ]);
   });
 });
 

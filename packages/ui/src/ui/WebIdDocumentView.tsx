@@ -1,8 +1,4 @@
-import type {
-  PropertyValue,
-  Subject,
-  WebIdDocument,
-} from "@solid-memo/domain/webIdDocument";
+import type { PropertyValue, Subject, WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import { ExternalLink } from "./ExternalLink";
 
 export function WebIdDocumentView({ document }: { document: WebIdDocument }) {

@@ -4,7 +4,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
-import { CH1, CH2, courseDeck, courseInstance, courseLibraryDeck, makeCourse } from "@solid-memo/ui/test/course";
+import {
+  CH1,
+  CH2,
+  courseDeck,
+  courseInstance,
+  courseLibraryDeck,
+  makeCourse,
+} from "@solid-memo/ui/test/course";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { DeckAboutContainer } from "./DeckAboutContainer";
 import { choose } from "../test/choose";
@@ -13,14 +20,23 @@ import { answer, dialog } from "../test/dialogs";
 
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 const BY = "https://creativecommons.org/licenses/by/4.0/";
-const kanji: Deck = { ...makeDeck("deck-1", { en: "Kanji N5" }), description: { en: "Characters." } };
+const kanji: Deck = {
+  ...makeDeck("deck-1", { en: "Kanji N5" }),
+  description: { en: "Characters." },
+};
 
 function renderContainer(useCases: UseCases, deck: Deck = kanji, instance = instanceA) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   render(
     <QueryClientProvider client={queryClient}>
-      <DeckAboutContainer useCases={useCases} instance={instance} deck={deck} appHref="#/deck" healthHref="#/health" />
+      <DeckAboutContainer
+        useCases={useCases}
+        instance={instance}
+        deck={deck}
+        appHref="#/deck"
+        healthHref="#/health"
+      />
     </QueryClientProvider>,
   );
   return { invalidate };
@@ -33,7 +49,10 @@ describe("DeckAboutContainer", () => {
     renderContainer(makeUseCasesFake());
     expect(screen.getByText("Loading preferences…")).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "About: Kanji N5" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toHaveAttribute("href", "#/deck");
+    expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toHaveAttribute(
+      "href",
+      "#/deck",
+    );
     expect(screen.getByText("Characters.")).toBeInTheDocument();
     expect(screen.getByText("No authors or license stated.")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "Front → back" })).toBeChecked();
@@ -41,17 +60,27 @@ describe("DeckAboutContainer", () => {
       "href",
       `#/preferences?instance=${encodeURIComponent(instanceA.url)}`,
     );
-    expect(await screen.findByText("Every card says which language its text is in.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Every card says which language its text is in."),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Course progress" })).toBeNull();
   });
 
   it("holds every form while the data is checked, then while the deck is set aside, with a link to its health", async () => {
     let checked: (report: ReturnType<typeof invalidReport>) => void = () => undefined;
-    renderContainer(makeUseCasesFake({ checkInstance: vi.fn(() => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve))) }));
+    renderContainer(
+      makeUseCasesFake({
+        checkInstance: vi.fn(
+          () => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve)),
+        ),
+      }),
+    );
     expect(await screen.findByText(/being checked/)).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "Front → back" })).toBeDisabled();
     checked(invalidReport([kanji]));
-    expect(await screen.findByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(
+      await screen.findByRole("link", { name: "Repair it on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
     expect(screen.getByRole("radio", { name: "Front → back" })).toBeDisabled();
     expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toBeInTheDocument();
   });
@@ -61,10 +90,14 @@ describe("DeckAboutContainer", () => {
     const { invalidate } = renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Rename" }));
     fireEvent.click(screen.getByRole("button", { name: "Add a translation" }));
-    fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), { target: { value: "Kanji" } });
+    fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), {
+      target: { value: "Kanji" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
     expect(useCases.renameDeck).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Language: not stated" })).toHaveAccessibleDescription("Choose the language of the deck's name.");
+    expect(
+      screen.getByRole("button", { name: "Language: not stated" }),
+    ).toHaveAccessibleDescription("Choose the language of the deck's name.");
     fireEvent.click(screen.getByRole("button", { name: "Remove this translation" }));
     fireEvent.input(screen.getByLabelText("Deck name"), { target: { value: "Kanji" } });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
@@ -83,25 +116,39 @@ describe("DeckAboutContainer", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Describe deck" }));
     fireEvent.input(screen.getByLabelText("Description"), { target: { value: "Every N5 kanji." } });
     fireEvent.click(screen.getByRole("button", { name: "Save description" }));
-    await waitFor(() => expect(useCases.describeDeck).toHaveBeenCalledWith(kanji, expect.objectContaining({ description: { en: "Every N5 kanji." } })));
+    await waitFor(() =>
+      expect(useCases.describeDeck).toHaveBeenCalledWith(
+        kanji,
+        expect.objectContaining({ description: { en: "Every N5 kanji." } }),
+      ),
+    );
   });
 
   it("gives the deck its authors and license, keeping the form while a save is refused", async () => {
     const useCases = makeUseCasesFake();
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Edit authors and license" }));
-    fireEvent.input(screen.getByRole("textbox", { name: "Author 1" }), { target: { value: "Ada Lovelace" } });
+    fireEvent.input(screen.getByRole("textbox", { name: "Author 1" }), {
+      target: { value: "Ada Lovelace" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Add an author" }));
-    fireEvent.input(screen.getByRole("textbox", { name: "Author 2" }), { target: { value: "ada lovelace" } });
+    fireEvent.input(screen.getByRole("textbox", { name: "Author 2" }), {
+      target: { value: "ada lovelace" },
+    });
     choose("License", CC0);
     fireEvent.click(screen.getByRole("button", { name: "Save authors and license" }));
-    expect(await screen.findByText("ada lovelace is named twice. Name each author once.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("ada lovelace is named twice. Name each author once."),
+    ).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Author 2" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Remove author 2" }));
     fireEvent.click(screen.getByRole("button", { name: "Save authors and license" }));
     await waitFor(() => expect(screen.queryByRole("textbox", { name: "Author 1" })).toBeNull());
-    expect(useCases.setDeckProvenance).toHaveBeenLastCalledWith(kanji, { authors: ["Ada Lovelace"], license: CC0 });
+    expect(useCases.setDeckProvenance).toHaveBeenLastCalledWith(kanji, {
+      authors: ["Ada Lovelace"],
+      license: CC0,
+    });
   });
 
   it("edits the authors and license the deck has, a license of another app's kept on offer, and cancels", async () => {
@@ -118,7 +165,11 @@ describe("DeckAboutContainer", () => {
     expect(within(license).getByRole("option", { name: "CC BY 4.0" })).toHaveValue(BY);
     choose("License", "");
     fireEvent.click(screen.getByRole("button", { name: "Save authors and license" }));
-    await waitFor(() => expect(useCases.setDeckProvenance).toHaveBeenCalledWith(expect.anything(), { authors: ["Ada Lovelace"] }));
+    await waitFor(() =>
+      expect(useCases.setDeckProvenance).toHaveBeenCalledWith(expect.anything(), {
+        authors: ["Ada Lovelace"],
+      }),
+    );
     fireEvent.click(await screen.findByRole("button", { name: "Edit authors and license" }));
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.queryByRole("combobox", { name: "License" })).toBeNull();
@@ -127,25 +178,42 @@ describe("DeckAboutContainer", () => {
   it("sets the pace, then the direction only when it changes", async () => {
     const useCases = makeUseCasesFake();
     renderContainer(useCases);
-    fireEvent.input(await screen.findByRole("spinbutton", { name: "New cards per day" }), { target: { value: "5" } });
+    fireEvent.input(await screen.findByRole("spinbutton", { name: "New cards per day" }), {
+      target: { value: "5" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Save study settings" }));
-    await waitFor(() => expect(useCases.setDeckPace).toHaveBeenCalledWith(kanji, { newCardsPerDay: 5 }));
+    await waitFor(() =>
+      expect(useCases.setDeckPace).toHaveBeenCalledWith(kanji, { newCardsPerDay: 5 }),
+    );
     expect(useCases.setDeckDirection).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("radio", { name: "Both ways" }));
     fireEvent.click(screen.getByRole("button", { name: "Save study settings" }));
-    await waitFor(() => expect(useCases.setDeckDirection).toHaveBeenCalledWith({ ...kanji, newCardsPerDay: 5 }, "bidirectional"));
+    await waitFor(() =>
+      expect(useCases.setDeckDirection).toHaveBeenCalledWith(
+        { ...kanji, newCardsPerDay: 5 },
+        "bidirectional",
+      ),
+    );
   });
 
   it("states the language of the cards' sides", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const card = { ...makeCard(kanji, "water"), front: { "": "水" } };
-    const useCases = makeUseCasesFake({ listCards: vi.fn(async () => [card]), stateCardLanguages: vi.fn(async () => 1) });
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [card]),
+      stateCardLanguages: vi.fn(async () => 1),
+    });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Language: not stated" }));
     fireEvent.click(screen.getByRole("radio", { name: "English (en)" }));
     fireEvent.click(screen.getByRole("button", { name: "Done" }));
     fireEvent.click(screen.getByRole("button", { name: "State the language" }));
-    await waitFor(() => expect(useCases.stateCardLanguages).toHaveBeenCalledWith(kanji, { front: "en" }));
+    await waitFor(() =>
+      expect(useCases.stateCardLanguages).toHaveBeenCalledWith(kanji, { front: "en" }),
+    );
     expect(await screen.findByText("Saved the language of 1 card.")).toBeInTheDocument();
   });
 
@@ -169,7 +237,9 @@ describe("DeckAboutContainer", () => {
       }),
     );
     expect(await screen.findByText("Cards unreadable")).toBeInTheDocument();
-    expect(screen.getByText("The languages of the cards could not be checked.")).toBeInTheDocument();
+    expect(
+      screen.getByText("The languages of the cards could not be checked."),
+    ).toBeInTheDocument();
   });
 
   it("says why the release the deck came from could not be read, which the languages are weighed against", async () => {
@@ -193,12 +263,18 @@ describe("DeckAboutContainer", () => {
     const { invalidate } = renderContainer(useCases, course.deck, courseInstance);
     const section = await screen.findByRole("region", { name: "Course progress" });
     expect(await within(section).findAllByRole("listitem")).toHaveLength(2);
-    expect(within(section).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
-      "Linked data Done Mark not done",
-      "Pods Open",
-    ]);
+    expect(
+      within(section)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent),
+    ).toEqual(["Linked data Done Mark not done", "Pods Open"]);
     fireEvent.click(within(section).getByRole("button", { name: "Mark Linked data not done" }));
-    await waitFor(() => expect(useCases.setCompletedChapters).toHaveBeenCalledWith(course.deck, { kind: "notDone", chapterUrl: CH1 }));
+    await waitFor(() =>
+      expect(useCases.setCompletedChapters).toHaveBeenCalledWith(course.deck, {
+        kind: "notDone",
+        chapterUrl: CH1,
+      }),
+    );
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", courseDeck.url] });
 
     fireEvent.click(within(section).getByRole("button", { name: "Restart the course" }));
@@ -209,7 +285,11 @@ describe("DeckAboutContainer", () => {
     expect(useCases.setCompletedChapters).toHaveBeenCalledTimes(1);
     fireEvent.click(within(section).getByRole("button", { name: "Restart the course" }));
     answer("Restart the course", "Restart the course");
-    await waitFor(() => expect(useCases.setCompletedChapters).toHaveBeenLastCalledWith(course.deck, { kind: "restart" }));
+    await waitFor(() =>
+      expect(useCases.setCompletedChapters).toHaveBeenLastCalledWith(course.deck, {
+        kind: "restart",
+      }),
+    );
   });
 
   it("lists the chapters completed that the course no longer has, and offers no restart with nothing done", async () => {
@@ -218,13 +298,25 @@ describe("DeckAboutContainer", () => {
     const { completedChapters: _, ...never } = makeCourse().deck;
     const fresh = { ...makeCourse(), deck: never };
     const getCourse = vi.fn().mockResolvedValueOnce(done).mockResolvedValue(fresh);
-    const useCases = makeUseCasesFake({ listLibraryDecks: vi.fn(async () => [courseLibraryDeck]), getCourse });
+    const useCases = makeUseCasesFake({
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      getCourse,
+    });
     renderContainer(useCases, done.deck, courseInstance);
-    expect(await screen.findByText("Completed chapters the course no longer has:")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Completed chapters the course no longer has:"),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Restart the course" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Mark ch-old not done" }));
-    await waitFor(() => expect(useCases.setCompletedChapters).toHaveBeenCalledWith(done.deck, { kind: "notDone", chapterUrl: old }));
-    await waitFor(() => expect(screen.queryByRole("button", { name: "Restart the course" })).toBeNull());
+    await waitFor(() =>
+      expect(useCases.setCompletedChapters).toHaveBeenCalledWith(done.deck, {
+        kind: "notDone",
+        chapterUrl: old,
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Restart the course" })).toBeNull(),
+    );
   });
 
   it("says while a course is read, and why it could not be", async () => {
@@ -238,6 +330,8 @@ describe("DeckAboutContainer", () => {
     expect(section).toHaveTextContent("Loading the course…");
     await waitFor(() => expect(useCases.getCourse).toHaveBeenCalled());
     fail(new AppError("deckGone", { deck: courseDeck.title }));
-    await waitFor(() => expect(section).toHaveTextContent("The deck “Solid fundamentals” no longer exists."));
+    await waitFor(() =>
+      expect(section).toHaveTextContent("The deck “Solid fundamentals” no longer exists."),
+    );
   });
 });

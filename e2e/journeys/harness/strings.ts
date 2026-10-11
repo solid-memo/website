@@ -28,14 +28,24 @@ const isPlural = (node: unknown): node is Plural =>
  * by the language's own plural rules, as the app does.
  * Throws for a key with no message, so a renamed key fails loudly.
  */
-export function text(locale: Locale, key: string, vars: Record<string, string | number> = {}): string {
+export function text(
+  locale: Locale,
+  key: string,
+  vars: Record<string, string | number> = {},
+): string {
   let node: unknown = CATALOGS[locale];
   for (const part of key.split(".")) node = (node as Messages | undefined)?.[part];
-  const message = isPlural(node) ? node[new Intl.PluralRules(locale).select(Number(vars.count))] : node;
-  if (typeof message !== "string") throw new Error(`packages/ui/src/i18n/${locale}.json has no message ${key}.`);
+  const message = isPlural(node)
+    ? node[new Intl.PluralRules(locale).select(Number(vars.count))]
+    : node;
+  if (typeof message !== "string")
+    throw new Error(`packages/ui/src/i18n/${locale}.json has no message ${key}.`);
   // A number is written as the language writes one ("1,000", "1 000"), as the app does.
-  const filled = (value: string | number) => (typeof value === "number" ? new Intl.NumberFormat(locale).format(value) : value);
-  return message.replace(/\{(\w+)\}/g, (whole, name: string) => (name in vars ? filled(vars[name]) : whole));
+  const filled = (value: string | number) =>
+    typeof value === "number" ? new Intl.NumberFormat(locale).format(value) : value;
+  return message.replace(/\{(\w+)\}/g, (whole, name: string) =>
+    name in vars ? filled(vars[name]) : whole,
+  );
 }
 
 /** `text` with every character a pattern would read as syntax escaped, to match it literally. */
@@ -48,8 +58,14 @@ export function escapeRegExp(text: string): string {
  * unfilled matching anything and captured by its name: `exec(…).groups`
  * reads "Card 2 of 3" back as `{ position: "2", total: "3" }`.
  */
-export function textPattern(locale: Locale, key: string, vars: Record<string, string | number> = {}): RegExp {
+export function textPattern(
+  locale: Locale,
+  key: string,
+  vars: Record<string, string | number> = {},
+): RegExp {
   const parts = text(locale, key, vars).split(/\{(\w+)\}/);
-  const pattern = parts.map((part, at) => (at % 2 === 0 ? escapeRegExp(part) : `(?<${part}>.+)`)).join("");
+  const pattern = parts
+    .map((part, at) => (at % 2 === 0 ? escapeRegExp(part) : `(?<${part}>.+)`))
+    .join("");
   return new RegExp(`^${pattern}$`);
 }

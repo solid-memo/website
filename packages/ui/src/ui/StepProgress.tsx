@@ -56,7 +56,11 @@ export function StepProgress<Step extends string>({
   return (
     <div ref={ref} class="warning migration" role="region" aria-label={region} tabIndex={-1}>
       <p role="status">{shown ? status : ""}</p>
-      {part !== undefined && <p class="hint">{count ?? t("stepProgress.count", { done: part.done, total: part.total })}</p>}
+      {part !== undefined && (
+        <p class="hint">
+          {count ?? t("stepProgress.count", { done: part.done, total: part.total })}
+        </p>
+      )}
       <progress
         value={done + (part === undefined ? 0 : Math.min(part.done / Math.max(part.total, 1), 1))}
         max={Math.max(total, 1)}
@@ -66,12 +70,18 @@ export function StepProgress<Step extends string>({
         {steps.map(({ step, label }, index) => {
           const state = finished || index < at ? "done" : index === at ? "current" : "waiting";
           return (
-            <li key={step} class={`step-${state}`} aria-current={state === "current" ? "step" : undefined}>
+            <li
+              key={step}
+              class={`step-${state}`}
+              aria-current={state === "current" ? "step" : undefined}
+            >
               <span class="step-mark" aria-hidden="true">
                 {state === "done" ? "✓" : state === "current" ? "➜" : "·"}
               </span>
               {label}
-              {state !== "waiting" && <span class="visually-hidden"> ({t(`stepProgress.${state}`)})</span>}
+              {state !== "waiting" && (
+                <span class="visually-hidden"> ({t(`stepProgress.${state}`)})</span>
+              )}
             </li>
           );
         })}

@@ -78,7 +78,13 @@ export const courseOutline: CourseOutline = {
       title: { en: "Linked data", sv: "Länkade data" },
       description: { en: "Names and links." },
       steps: [
-        { id: "s-1", url: `${RELEASE}#s-1`, position: 0, theory: { en: "Things are named by IRIs." }, questionIds: ["q-1"] },
+        {
+          id: "s-1",
+          url: `${RELEASE}#s-1`,
+          position: 0,
+          theory: { en: "Things are named by IRIs." },
+          questionIds: ["q-1"],
+        },
         {
           id: "s-2",
           url: `${RELEASE}#s-2`,
@@ -94,7 +100,15 @@ export const courseOutline: CourseOutline = {
       url: CH2,
       position: 1,
       title: { en: "Pods" },
-      steps: [{ id: "s-3", url: `${RELEASE}#s-3`, position: 0, theory: { en: "A pod stores data." }, questionIds: ["q-4"] }],
+      steps: [
+        {
+          id: "s-3",
+          url: `${RELEASE}#s-3`,
+          position: 0,
+          theory: { en: "A pod stores data." },
+          questionIds: ["q-4"],
+        },
+      ],
       reviewQuestionIds: [],
     },
   ],

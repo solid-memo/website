@@ -16,7 +16,10 @@ import { getSolidDatasetOrNull } from "./datasets";
  */
 
 /** What a container lists that lies below it. */
-function childrenOf(container: Parameters<typeof getContainedResourceUrlAll>[0], containerUrl: string): string[] {
+function childrenOf(
+  container: Parameters<typeof getContainedResourceUrlAll>[0],
+  containerUrl: string,
+): string[] {
   return getContainedResourceUrlAll(container).filter(
     (child) => child.startsWith(containerUrl) && child !== containerUrl,
   );

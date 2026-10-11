@@ -65,14 +65,21 @@ export function ReleasesScreen({
   /** A release as its address names it ("capitals, version 2"), or its address. */
   const nameOf = (url: string) => {
     const place = releasePlaceOf(url);
-    return place === null ? url : t("studio.releases.name", { name: place.name, version: place.version });
+    return place === null
+      ? url
+      : t("studio.releases.name", { name: place.name, version: place.version });
   };
   /** A draft as its link names it: its title, else its name, and its version. */
   const draftName = (draft: ReleaseDraftSummary) =>
-    t("studio.releases.name", { name: Object.keys(draft.title).length === 0 ? draft.name : readerText(draft.title), version: draft.version });
+    t("studio.releases.name", {
+      name: Object.keys(draft.title).length === 0 ? draft.name : readerText(draft.title),
+      version: draft.version,
+    });
   const wanted = folded(filter.trim());
   const shown = sortedRows(
-    releases.filter((release) => [nameOf(release.url), release.url].some((text) => folded(text).includes(wanted))),
+    releases.filter((release) =>
+      [nameOf(release.url), release.url].some((text) => folded(text).includes(wanted)),
+    ),
     sort,
     (release, column) => {
       switch (column) {
@@ -101,7 +108,12 @@ export function ReleasesScreen({
         <>
           <label class="studio-filter">
             {t("studio.releases.filter")}
-            <input type="search" aria-keyshortcuts="/" value={filter} onInput={(event) => setFilter(event.currentTarget.value)} />
+            <input
+              type="search"
+              aria-keyshortcuts="/"
+              value={filter}
+              onInput={(event) => setFilter(event.currentTarget.value)}
+            />
           </label>
           {shown.length === 0 ? (
             <p>{t("studio.releases.noMatch", { filter: filter.trim() })}</p>
@@ -133,7 +145,9 @@ export function ReleasesScreen({
                           {" "}
                           <button
                             type="button"
-                            aria-label={t("studio.releases.makePublicOf", { release: nameOf(release.url) })}
+                            aria-label={t("studio.releases.makePublicOf", {
+                              release: nameOf(release.url),
+                            })}
                             disabled={makingPublic !== null}
                             onClick={() => onMakePublic(release.url)}
                           >
@@ -149,7 +163,11 @@ export function ReleasesScreen({
                   label: t("studio.releases.column.draft"),
                   cell: (release) => {
                     const source = draftOf(release.url);
-                    return source === null ? <span class="hint">{t("studio.releases.noDraft")}</span> : <a href={source.href}>{draftName(source.draft)}</a>;
+                    return source === null ? (
+                      <span class="hint">{t("studio.releases.noDraft")}</span>
+                    ) : (
+                      <a href={source.href}>{draftName(source.draft)}</a>
+                    );
                   },
                 },
                 {
@@ -158,10 +176,15 @@ export function ReleasesScreen({
                   unsorted: true,
                   cell: (release) => (
                     <>
-                      <CopyLink url={release.url} label={t("studio.releases.copyLink", { url: release.url })} />{" "}
+                      <CopyLink
+                        url={release.url}
+                        label={t("studio.releases.copyLink", { url: release.url })}
+                      />{" "}
                       <button
                         type="button"
-                        aria-label={t("studio.releases.startNextOf", { release: nameOf(release.url) })}
+                        aria-label={t("studio.releases.startNextOf", {
+                          release: nameOf(release.url),
+                        })}
                         disabled={hold !== null || starting !== null}
                         onClick={() => onStartNext(release.url)}
                       >

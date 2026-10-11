@@ -85,7 +85,11 @@ export function ProseField({
         {markdown && <MarkdownHelp />}
       </div>
       <section class="prose-preview" aria-label={t("proseField.preview", { field: label })}>
-        {shown === undefined ? <p class="hint">{t("proseField.empty")}</p> : preview(shown, markdown)}
+        {shown === undefined ? (
+          <p class="hint">{t("proseField.empty")}</p>
+        ) : (
+          preview(shown, markdown)
+        )}
       </section>
     </div>
   );

@@ -71,7 +71,12 @@ export function NameEditor({
           finish(null, true);
         }}
       />
-      <button type="submit" class="icon" aria-label={t("deckList.saveName")} title={t("deckList.saveName")}>
+      <button
+        type="submit"
+        class="icon"
+        aria-label={t("deckList.saveName")}
+        title={t("deckList.saveName")}
+      >
         <CheckIcon />
       </button>
     </form>

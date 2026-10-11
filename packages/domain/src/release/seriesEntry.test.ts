@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { card, chapter, distractor, iri, model, RELEASE, step, text } from "../testing/releaseModel";
+import {
+  card,
+  chapter,
+  distractor,
+  iri,
+  model,
+  RELEASE,
+  step,
+  text,
+} from "../testing/releaseModel";
 import { keptInIndex, lastIssued, seriesEntry } from "./seriesEntry";
 
 const SERIES = "https://solid-memo.com/decks/index.ttl#solid";
@@ -47,7 +56,14 @@ describe("seriesEntry", () => {
   });
 
   it("summarizes an older release by what it states", () => {
-    expect(seriesEntry(SERIES, [model(), second]).older[0]).toEqual({ url: RELEASE, title: [], description: [], version: [], issued: [], versionNotes: [] });
+    expect(seriesEntry(SERIES, [model(), second]).older[0]).toEqual({
+      url: RELEASE,
+      title: [],
+      description: [],
+      version: [],
+      issued: [],
+      versionNotes: [],
+    });
   });
 });
 
@@ -80,7 +96,8 @@ describe("keptInIndex", () => {
   });
 
   it("leaves out the cards, chapters, steps and distractors", () => {
-    for (const id of ["se", "ch-1", "s-1", "se-a"]) expect(kept(`${RELEASE}#${id}`, RDF_TYPE), id).toBe(false);
+    for (const id of ["se", "ch-1", "s-1", "se-a"])
+      expect(kept(`${RELEASE}#${id}`, RDF_TYPE), id).toBe(false);
   });
 
   it("keeps of the activities only the type of the one that generated the release", () => {
@@ -91,7 +108,10 @@ describe("keptInIndex", () => {
 });
 
 it("gives when the latest release was issued, each by the first time it states", () => {
-  const twice = { ...second, issued: [text("2026-10-03T10:00:00Z", ""), text("2027-01-01T00:00:00Z", "")] };
+  const twice = {
+    ...second,
+    issued: [text("2026-10-03T10:00:00Z", ""), text("2027-01-01T00:00:00Z", "")],
+  };
   expect(lastIssued([twice, first])).toBe("2026-10-03T10:00:00Z");
   expect(lastIssued([model()])).toBeUndefined();
 });

@@ -69,8 +69,17 @@ const iron = card("c-iron", {
   backImageDescription: { en: "A bar of metal" },
   createdAt: "2026-09-01T10:00:00.000Z",
 });
-const old = card("c-old", { front: { "": "Gammal" }, back: { en: "Old" }, retired: true, backNote: { en: "Retired" } });
-const fresh = card("c-fresh", { front: {}, frontImageUrl: "https://img.example/x.png", back: { en: "Picture" } });
+const old = card("c-old", {
+  front: { "": "Gammal" },
+  back: { en: "Old" },
+  retired: true,
+  backNote: { en: "Retired" },
+});
+const fresh = card("c-fresh", {
+  front: {},
+  frontImageUrl: "https://img.example/x.png",
+  back: { en: "Picture" },
+});
 const cards = [house, cafe, iron, old, fresh];
 
 const reviews: DeckReviews = {
@@ -85,14 +94,24 @@ const reviews: DeckReviews = {
 };
 
 const ids = (query: Partial<CardQuery>, given: DeckReviews = reviews) =>
-  queryCards(cards, given, { ...DEFAULT_CARD_QUERY, ...query }, TODAY, plain, englishReader).map((row) => row.card.id);
+  queryCards(cards, given, { ...DEFAULT_CARD_QUERY, ...query }, TODAY, plain, englishReader).map(
+    (row) => row.card.id,
+  );
 
 describe("the card query in the URL", () => {
   it("round-trips through the query, leaving out what is by default", () => {
     const queries: CardQuery[] = [
       DEFAULT_CARD_QUERY,
       { ...DEFAULT_CARD_QUERY, text: "hus", field: "front", lang: "sv" },
-      { ...DEFAULT_CARD_QUERY, lang: "unstated", state: "due", has: "picture", sort: { key: "due", descending: true }, page: 3, size: 200 },
+      {
+        ...DEFAULT_CARD_QUERY,
+        lang: "unstated",
+        state: "due",
+        has: "picture",
+        sort: { key: "due", descending: true },
+        page: 3,
+        size: 200,
+      },
       { ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } },
       { ...DEFAULT_CARD_QUERY, sort: { key: "front", descending: false }, size: 10 },
     ];
@@ -105,17 +124,33 @@ describe("the card query in the URL", () => {
   });
 
   it("drops what it does not know, and canonicalizes a language tag", () => {
-    const params = new URLSearchParams("field=color&state=sleepy&has=wings&sort=size&page=-2&size=7&lang=SV-fi");
+    const params = new URLSearchParams(
+      "field=color&state=sleepy&has=wings&sort=size&page=-2&size=7&lang=SV-fi",
+    );
     expect(queryFromParams(params)).toEqual({ ...DEFAULT_CARD_QUERY, lang: "sv-fi" });
-    expect(queryFromParams(new URLSearchParams("lang=Swedish&page=2.5"))).toEqual(DEFAULT_CARD_QUERY);
+    expect(queryFromParams(new URLSearchParams("lang=Swedish&page=2.5"))).toEqual(
+      DEFAULT_CARD_QUERY,
+    );
   });
 });
 
 describe("queryCards", () => {
   it("lists every card in the deck's order, each with the states of its directions and what needs the most work", () => {
     const rows = queryCards(cards, reviews, DEFAULT_CARD_QUERY, TODAY, plain, englishReader);
-    expect(rows.map((row) => row.card.id)).toEqual(["c-house", "c-cafe", "c-iron", "c-old", "c-fresh"]);
-    expect(rows[0]).toEqual({ card: house, states: [reviews.states[0]], due: "2026-11-01", intervalDays: 30, easeFactor: 2.6 });
+    expect(rows.map((row) => row.card.id)).toEqual([
+      "c-house",
+      "c-cafe",
+      "c-iron",
+      "c-old",
+      "c-fresh",
+    ]);
+    expect(rows[0]).toEqual({
+      card: house,
+      states: [reviews.states[0]],
+      due: "2026-11-01",
+      intervalDays: 30,
+      easeFactor: 2.6,
+    });
     expect(rows[4]).toEqual({ card: fresh, states: [] });
   });
 
@@ -124,7 +159,12 @@ describe("queryCards", () => {
       direction: "bidirectional",
       states: [
         state("c-house", { intervalDays: 30, due: "2026-10-20", easeFactor: 2.1 }),
-        state("c-house", { direction: "back-to-front", intervalDays: 2, due: "2026-10-30", easeFactor: 2.7 }),
+        state("c-house", {
+          direction: "back-to-front",
+          intervalDays: 2,
+          due: "2026-10-30",
+          easeFactor: 2.7,
+        }),
       ],
     };
     const [row] = queryCards([house], both, DEFAULT_CARD_QUERY, TODAY, plain, englishReader);
@@ -155,7 +195,13 @@ describe("queryCards", () => {
 
   it("keeps the cards with text in a language, a regional one too, or with text whose language is unstated", () => {
     expect(ids({ lang: "sv" })).toEqual(["c-house"]);
-    expect(ids({ lang: "en", field: "back" })).toEqual(["c-house", "c-cafe", "c-iron", "c-old", "c-fresh"]);
+    expect(ids({ lang: "en", field: "back" })).toEqual([
+      "c-house",
+      "c-cafe",
+      "c-iron",
+      "c-old",
+      "c-fresh",
+    ]);
     expect(ids({ lang: "zxx" })).toEqual(["c-iron"]);
     expect(ids({ lang: "unstated" })).toEqual(["c-old"]);
     // The text is looked for in that language only.
@@ -187,7 +233,9 @@ describe("queryCards", () => {
     ]);
     const query = { ...DEFAULT_CARD_QUERY, state: "leech" as const };
     const leeches = (given?: ReadonlyMap<string, number>) =>
-      queryCards(cards, reviews, query, TODAY, plain, englishReader, given).map((row) => row.card.id);
+      queryCards(cards, reviews, query, TODAY, plain, englishReader, given).map(
+        (row) => row.card.id,
+      );
     // A retired card is no leech: it is not studied.
     expect(leeches(lapses)).toEqual(["c-house"]);
     expect(leeches()).toEqual([]);
@@ -195,9 +243,19 @@ describe("queryCards", () => {
 
   it("gives each card its lapses when they are known, none counting as 0", () => {
     const lapses = new Map([[house.url, 2]]);
-    const rows = queryCards(cards, reviews, DEFAULT_CARD_QUERY, TODAY, plain, englishReader, lapses);
+    const rows = queryCards(
+      cards,
+      reviews,
+      DEFAULT_CARD_QUERY,
+      TODAY,
+      plain,
+      englishReader,
+      lapses,
+    );
     expect(rows.map((row) => row.lapses)).toEqual([2, 0, 0, 0, 0]);
-    expect(queryCards(cards, reviews, DEFAULT_CARD_QUERY, TODAY, plain, englishReader)[0]).not.toHaveProperty("lapses");
+    expect(
+      queryCards(cards, reviews, DEFAULT_CARD_QUERY, TODAY, plain, englishReader)[0],
+    ).not.toHaveProperty("lapses");
   });
 
   it("sorts by lapses when they are known, else keeps the deck's order", () => {
@@ -207,28 +265,45 @@ describe("queryCards", () => {
     ]);
     const query: CardQuery = { ...DEFAULT_CARD_QUERY, sort: { key: "lapses", descending: true } };
     const sorted = (given?: ReadonlyMap<string, number>) =>
-      queryCards(cards, reviews, query, TODAY, plain, englishReader, given).map((row) => row.card.id);
+      queryCards(cards, reviews, query, TODAY, plain, englishReader, given).map(
+        (row) => row.card.id,
+      );
     expect(sorted(lapses)).toEqual(["c-iron", "c-house", "c-cafe", "c-old", "c-fresh"]);
     expect(sorted()).toEqual(["c-house", "c-cafe", "c-iron", "c-old", "c-fresh"]);
   });
 
   it("counts a card studied both ways as new while one way is not yet reviewed", () => {
-    expect(ids({ state: "new" }, { ...reviews, direction: "bidirectional" })).toEqual(["c-house", "c-cafe", "c-iron", "c-fresh"]);
+    expect(ids({ state: "new" }, { ...reviews, direction: "bidirectional" })).toEqual([
+      "c-house",
+      "c-cafe",
+      "c-iron",
+      "c-fresh",
+    ]);
   });
 
   it("keeps the cards with a picture, distractors, Markdown or notes", () => {
     expect(ids({ has: "picture" })).toEqual(["c-iron", "c-fresh"]);
     expect(ids({ has: "distractors" })).toEqual(["c-cafe"]);
     // Only distractors in use count: a card whose only one is retired has none to offer.
-    const retiredOnly = card("c-retired", { distractors: [{ id: "c-retired-d1", text: { en: "x" }, retired: true }] });
-    const only = queryCards([retiredOnly], reviews, { ...DEFAULT_CARD_QUERY, has: "distractors" }, TODAY, plain, englishReader);
+    const retiredOnly = card("c-retired", {
+      distractors: [{ id: "c-retired-d1", text: { en: "x" }, retired: true }],
+    });
+    const only = queryCards(
+      [retiredOnly],
+      reviews,
+      { ...DEFAULT_CARD_QUERY, has: "distractors" },
+      TODAY,
+      plain,
+      englishReader,
+    );
     expect(only).toEqual([]);
     expect(ids({ has: "markdown" })).toEqual(["c-cafe"]);
     expect(ids({ has: "notes" })).toEqual(["c-house", "c-old"]);
   });
 
   it("sorts by each key either way, cards without it last, ties in the deck's order", () => {
-    const sorted = (key: NonNullable<CardQuery["sort"]>["key"], descending = false) => ids({ sort: { key, descending } });
+    const sorted = (key: NonNullable<CardQuery["sort"]>["key"], descending = false) =>
+      ids({ sort: { key, descending } });
     expect(sorted("id")).toEqual(["c-cafe", "c-fresh", "c-house", "c-iron", "c-old"]);
     expect(sorted("created")).toEqual(["c-iron", "c-cafe", "c-old", "c-fresh", "c-house"]);
     expect(sorted("created", true)).toEqual(["c-house", "c-cafe", "c-old", "c-fresh", "c-iron"]);
@@ -248,7 +323,8 @@ describe("queryCards", () => {
       card("c-orange", { front: { en: "Orange", sv: "Apelsin" } }),
     ];
     const query: CardQuery = { ...DEFAULT_CARD_QUERY, sort: { key: "front", descending: false } };
-    const sorted = (languages: readonly string[]) => queryCards(fruit, reviews, query, TODAY, plain, languages).map((row) => row.card.id);
+    const sorted = (languages: readonly string[]) =>
+      queryCards(fruit, reviews, query, TODAY, plain, languages).map((row) => row.card.id);
     expect(sorted(["en"])).toEqual(["c-apple", "c-orange", "c-zebra"]);
     // In Swedish, ä comes after z.
     expect(sorted(["sv", "en"])).toEqual(["c-orange", "c-zebra", "c-apple"]);
@@ -265,7 +341,14 @@ describe("queryCards", () => {
       card("c-9", { front: { en: "Item 9" }, back: { en: "a" }, textFormat: SM.markdown }),
     ];
     const sorted = (key: "front" | "back", descending = false) =>
-      queryCards(words, reviews, { ...DEFAULT_CARD_QUERY, sort: { key, descending } }, TODAY, plain, englishReader).map((row) => row.card.id);
+      queryCards(
+        words,
+        reviews,
+        { ...DEFAULT_CARD_QUERY, sort: { key, descending } },
+        TODAY,
+        plain,
+        englishReader,
+      ).map((row) => row.card.id);
     // "été" and "Ete" sort as one word, so they keep the deck's order, either way.
     expect(sorted("front")).toEqual(["c-3", "c-2", "c-1", "c-9", "c-10"]);
     expect(sorted("front", true)).toEqual(["c-10", "c-9", "c-2", "c-1", "c-3"]);
@@ -275,12 +358,15 @@ describe("queryCards", () => {
 
   it("puts a card without the key last, whichever comes first", () => {
     const query: CardQuery = { ...DEFAULT_CARD_QUERY, sort: { key: "due", descending: false } };
-    const sorted = (given: Card[]) => queryCards(given, reviews, query, TODAY, plain, englishReader).map((row) => row.card.id);
+    const sorted = (given: Card[]) =>
+      queryCards(given, reviews, query, TODAY, plain, englishReader).map((row) => row.card.id);
     expect(sorted([fresh, iron])).toEqual(["c-iron", "c-fresh"]);
     expect(sorted([iron, fresh])).toEqual(["c-iron", "c-fresh"]);
   });
 
-  it("searches, filters and sorts 5,000 cards in time that grows with the cards", { timeout: 30_000 }, () => {
+  it("searches, filters and sorts 5,000 cards in time that grows with the cards", {
+    timeout: 30_000,
+  }, () => {
     const many = Array.from({ length: 5_000 }, (_, i) =>
       card(`c-${i}`, {
         front: { sv: `Ord nummer ${i}`, en: `Word number ${i}` },
@@ -292,17 +378,33 @@ describe("queryCards", () => {
     );
     const reviewsOf = (cards: Card[]): DeckReviews => ({
       direction: "bidirectional",
-      states: cards.map((c, i) => state(c.id, { intervalDays: i % 40, due: `2026-10-${String((i % 28) + 1).padStart(2, "0")}` })),
+      states: cards.map((c, i) =>
+        state(c.id, {
+          intervalDays: i % 40,
+          due: `2026-10-${String((i % 28) + 1).padStart(2, "0")}`,
+        }),
+      ),
     });
-    const query: CardQuery = { ...DEFAULT_CARD_QUERY, text: "méaning 4", state: "due", sort: { key: "back", descending: true } };
-    expect(queryCards(many, reviewsOf(many), query, TODAY, plain, englishReader).length).toBeGreaterThan(0);
+    const query: CardQuery = {
+      ...DEFAULT_CARD_QUERY,
+      text: "méaning 4",
+      state: "due",
+      sort: { key: "back", descending: true },
+    };
+    expect(
+      queryCards(many, reviewsOf(many), query, TODAY, plain, englishReader).length,
+    ).toBeGreaterThan(0);
     // Four times the cards take about four times as long (a little more,
     // for the sort); work per card that grew with the cards would take sixteen.
-    const ratio = growth((count) => {
-      const some = many.slice(0, count);
-      const states = reviewsOf(some);
-      return () => queryCards(some, states, query, TODAY, plain, englishReader);
-    }, 1_250, 4);
+    const ratio = growth(
+      (count) => {
+        const some = many.slice(0, count);
+        const states = reviewsOf(some);
+        return () => queryCards(some, states, query, TODAY, plain, englishReader);
+      },
+      1_250,
+      4,
+    );
     expect(ratio).toBeLessThan(10);
   });
 });

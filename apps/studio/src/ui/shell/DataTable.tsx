@@ -127,17 +127,27 @@ export function DataTable<R>({
   const shown = visibleColumns(columns, columnsHidden.hidden);
   const rowOf = new Map(rows.map((row, at) => [keys[at]!, row]));
   // A row whose checkbox may be checked now.
-  const choosable = (row: R) => select !== undefined && !select.disabled && (select.offered?.(row) ?? true) && (select.enabled?.(row) ?? true);
+  const choosable = (row: R) =>
+    select !== undefined &&
+    !select.disabled &&
+    (select.offered?.(row) ?? true) &&
+    (select.enabled?.(row) ?? true);
   const allowed = (key: string) => choosable(rowOf.get(key)!);
   const choosableKeys = keys.filter(allowed);
   const choose = (next: Selection) => select!.onChoose(onlyAllowed(select!.chosen, next, allowed));
   // The rows j and k may show, by their keys.
-  const byKey = new Map([around?.previous, ...rows, around?.next].flatMap((row) => (row === undefined ? [] : [[keyOf(row), row] as const])));
+  const byKey = new Map(
+    [around?.previous, ...rows, around?.next].flatMap((row) =>
+      row === undefined ? [] : [[keyOf(row), row] as const],
+    ),
+  );
   const { cursor, anchor, follow } = useRowKeys({
     body,
     keys,
     enabled: takesKeys,
-    ...(select === undefined || select.disabled === true ? {} : { select: { chosen: select.chosen, onChoose: choose } }),
+    ...(select === undefined || select.disabled === true
+      ? {}
+      : { select: { chosen: select.chosen, onChoose: choose } }),
     current,
     around: {
       ...(around?.previous === undefined ? {} : { previous: keyOf(around.previous) }),
@@ -149,7 +159,12 @@ export function DataTable<R>({
   });
 
   const header = (column: Column<R>) => (
-    <th key={column.key} scope="col" class={column.number ? "number" : undefined} aria-sort={sortOf(sort, column.key)}>
+    <th
+      key={column.key}
+      scope="col"
+      class={column.number ? "number" : undefined}
+      aria-sort={sortOf(sort, column.key)}
+    >
       {onSort === undefined || column.unsorted ? (
         column.label
       ) : (
@@ -162,9 +177,20 @@ export function DataTable<R>({
 
   return (
     <>
-      {columnsOf !== undefined && columns.length > 0 && <ColumnPicker columns={columns} {...columnsHidden} />}
+      {columnsOf !== undefined && columns.length > 0 && (
+        <ColumnPicker columns={columns} {...columnsHidden} />
+      )}
       <div class="studio-table">
-        <table class={["studio-list", "studio-data-table", select !== undefined && "selectable", className].filter(Boolean).join(" ")}>
+        <table
+          class={[
+            "studio-list",
+            "studio-data-table",
+            select !== undefined && "selectable",
+            className,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
           <caption class={captionHidden ? "visually-hidden" : undefined}>{caption}</caption>
           <thead>
             <tr>
@@ -177,7 +203,11 @@ export function DataTable<R>({
                       aria-label={select.allLabel}
                       checked={allSelected(select.chosen, choosableKeys)}
                       disabled={choosableKeys.length === 0}
-                      onChange={(event) => select.onChoose(toggled(select.chosen, choosableKeys, event.currentTarget.checked))}
+                      onChange={(event) =>
+                        select.onChoose(
+                          toggled(select.chosen, choosableKeys, event.currentTarget.checked),
+                        )
+                      }
                     />
                   )}
                 </th>
@@ -189,7 +219,11 @@ export function DataTable<R>({
           <tbody
             ref={body}
             // The cursor goes where the focus goes.
-            onFocusIn={(event) => follow([...body.current!.children].findIndex((row) => row.contains(event.target as Node)))}
+            onFocusIn={(event) =>
+              follow(
+                [...body.current!.children].findIndex((row) => row.contains(event.target as Node)),
+              )
+            }
           >
             {rows.map((row, at) => {
               const key = keys[at]!;
@@ -197,7 +231,11 @@ export function DataTable<R>({
               return (
                 <tr
                   key={key}
-                  class={[classOf?.(row), chosen && "selected", at === cursor && "cursor"].filter(Boolean).join(" ") || undefined}
+                  class={
+                    [classOf?.(row), chosen && "selected", at === cursor && "cursor"]
+                      .filter(Boolean)
+                      .join(" ") || undefined
+                  }
                   aria-current={key === current ? "true" : undefined}
                 >
                   {select !== undefined && (
@@ -212,7 +250,11 @@ export function DataTable<R>({
                           onClick={(event) => {
                             const on = event.currentTarget.checked;
                             const from = keys.indexOf(anchor.current ?? "");
-                            choose(event.shiftKey && from !== -1 ? rangeToggled(select.chosen, keys, from, at, on) : toggled(select.chosen, [key], on));
+                            choose(
+                              event.shiftKey && from !== -1
+                                ? rangeToggled(select.chosen, keys, from, at, on)
+                                : toggled(select.chosen, [key], on),
+                            );
                             anchor.current = key;
                           }}
                         />
@@ -240,7 +282,10 @@ export function DataTable<R>({
  * (`table`). Outside the Studio, or without a name (and so a menu to
  * hide one), its own: none until hidden.
  */
-function useHiddenColumns(table: string | undefined): { hidden: ReadonlySet<string>; onHidden: (hidden: ReadonlySet<string>) => void } {
+function useHiddenColumns(table: string | undefined): {
+  hidden: ReadonlySet<string>;
+  onHidden: (hidden: ReadonlySet<string>) => void;
+} {
   const kept = useContext(HiddenColumns);
   const [own, setOwn] = useState<ReadonlySet<string>>(NO_SELECTION);
   if (kept === null || table === undefined) return { hidden: own, onHidden: setOwn };
@@ -248,14 +293,33 @@ function useHiddenColumns(table: string | undefined): { hidden: ReadonlySet<stri
 }
 
 /** The menu that shows or hides each of a table's columns, but its first, which names the rows. */
-function ColumnPicker<R>({ columns, hidden, onHidden }: { columns: readonly Column<R>[]; hidden: ReadonlySet<string>; onHidden: (hidden: ReadonlySet<string>) => void }) {
+function ColumnPicker<R>({
+  columns,
+  hidden,
+  onHidden,
+}: {
+  columns: readonly Column<R>[];
+  hidden: ReadonlySet<string>;
+  onHidden: (hidden: ReadonlySet<string>) => void;
+}) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   return (
     <div class="studio-table-tools">
-      <ActionsMenu label={t("studio.columns.label")} text={t("studio.columns.button")} buttonClass="" open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}>
+      <ActionsMenu
+        label={t("studio.columns.label")}
+        text={t("studio.columns.button")}
+        buttonClass=""
+        open={open}
+        onOpen={() => setOpen(true)}
+        onClose={() => setOpen(false)}
+      >
         {columns.map((column) => (
-          <MenuCheckbox key={column.key} checked={!hidden.has(column.key)} onChange={(shown) => onHidden(withColumn(hidden, column.key, shown))}>
+          <MenuCheckbox
+            key={column.key}
+            checked={!hidden.has(column.key)}
+            onChange={(shown) => onHidden(withColumn(hidden, column.key, shown))}
+          >
             {column.label}
           </MenuCheckbox>
         ))}

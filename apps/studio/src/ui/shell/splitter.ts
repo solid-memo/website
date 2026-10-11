@@ -32,8 +32,14 @@ export function clampSize(value: number, size: PaneSize): number {
  * the start makes it bigger: Left for a vertical splitter, Up for a
  * horizontal one. Home makes it as small as it may be, End as big.
  */
-export function splitterKey(key: string, orientation: "vertical" | "horizontal", value: number, size: PaneSize): number | null {
-  const [grow, shrink] = orientation === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
+export function splitterKey(
+  key: string,
+  orientation: "vertical" | "horizontal",
+  value: number,
+  size: PaneSize,
+): number | null {
+  const [grow, shrink] =
+    orientation === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
   switch (key) {
     case grow:
       return clampSize(value + SPLITTER_STEP, size);

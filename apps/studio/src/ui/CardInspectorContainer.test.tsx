@@ -15,10 +15,21 @@ afterEach(() => vi.unstubAllGlobals());
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const copy = { ...deck, sourceUrl: "https://solid-memo.com/decks/kanji/v1.ttl" };
-const card: Card = { ...makeCard(deck, "water"), distractors: [{ id: "water-d1", text: { en: "fire" } }] };
+const card: Card = {
+  ...makeCard(deck, "water"),
+  distractors: [{ id: "water-d1", text: { en: "fire" } }],
+};
 const release = (cards: Partial<Card>[]) => ({ cards }) as unknown as LibraryDeckContent;
 
-function renderContainer(useCases: UseCases, { tab = "distractors" as CardTab, of = deck, shown = card, field = undefined as string | undefined } = {}) {
+function renderContainer(
+  useCases: UseCases,
+  {
+    tab = "distractors" as CardTab,
+    of = deck,
+    shown = card,
+    field = undefined as string | undefined,
+  } = {},
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   const onRemoved = vi.fn();
@@ -62,19 +73,30 @@ describe("CardInspectorContainer", () => {
     expect(screen.queryByRole("heading", { name: "Card" })).toBeNull();
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "H2O" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
-    await waitFor(() => expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, { front: { en: "water" }, back: { en: "H2O" } }));
+    await waitFor(() =>
+      expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, {
+        front: { en: "water" },
+        back: { en: "H2O" },
+      }),
+    );
     // The Studio's activity is told.
     await waitFor(() => expect(log).toHaveBeenCalledWith("Saved the card water."));
   });
 
   it("holds every tab's controls while the data is checked, and while the deck is set aside, with a link to its health", async () => {
     let checked: (report: ReturnType<typeof invalidReport>) => void = () => undefined;
-    const useCases = makeUseCasesFake({ checkInstance: vi.fn(() => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve))) });
+    const useCases = makeUseCasesFake({
+      checkInstance: vi.fn(
+        () => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve)),
+      ),
+    });
     renderContainer(useCases, { tab: "content" });
     expect(screen.getByText(/being checked/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     checked(invalidReport([deck]));
-    expect(await screen.findByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(
+      await screen.findByRole("link", { name: "Repair it on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(screen.getByLabelText("Back")).toBeDisabled();
     cleanup();
@@ -85,7 +107,12 @@ describe("CardInspectorContainer", () => {
   });
 
   it("frees the controls once the check finds the deck's data valid, another deck's invalid", async () => {
-    renderContainer(makeUseCasesFake({ checkInstance: vi.fn(async () => invalidReport([makeDeck("other", { en: "Other" })])) }), { tab: "content" });
+    renderContainer(
+      makeUseCasesFake({
+        checkInstance: vi.fn(async () => invalidReport([makeDeck("other", { en: "Other" })])),
+      }),
+      { tab: "content" },
+    );
     await waitFor(() => expect(screen.getByRole("button", { name: "Save" })).toBeEnabled());
     expect(screen.queryByText(/invalid data/)).toBeNull();
   });
@@ -96,13 +123,17 @@ describe("CardInspectorContainer", () => {
     expect(screen.getByLabelText("Back")).toHaveAttribute("data-arrival");
     cleanup();
     renderContainer(useCases, { field: "water-d1" });
-    expect(screen.getByRole("button", { name: "Edit the wrong option “fire”" })).toHaveAttribute("data-arrival");
+    expect(screen.getByRole("button", { name: "Edit the wrong option “fire”" })).toHaveAttribute(
+      "data-arrival",
+    );
   });
 
   it("shows the card's schedule on its tab", async () => {
     const useCases = makeUseCasesFake();
     renderContainer(useCases, { tab: "schedule" });
-    expect(await screen.findByText("Not studied this way yet: the card is new.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Not studied this way yet: the card is new."),
+    ).toBeInTheDocument();
     expect(useCases.listDeckReviewStates).toHaveBeenCalledWith(deck);
   });
 
@@ -144,11 +175,18 @@ describe("CardInspectorContainer", () => {
   it("saves each change of the wrong options as it is made, then reads the cards afresh", async () => {
     const useCases = makeUseCasesFake({ updateCard: vi.fn(async () => card) });
     const { invalidate, queryClient, log } = renderContainer(useCases);
-    queryClient.setQueryData(["studyQueue", deck.url], { due: [card], newCards: [], studiedToday: 0 });
+    queryClient.setQueryData(["studyQueue", deck.url], {
+      due: [card],
+      newCards: [],
+      studiedToday: 0,
+    });
     fireEvent.click(screen.getByRole("button", { name: "Retire the wrong option “fire”" }));
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Saved."));
     expect(log).toHaveBeenCalledWith("Saved the card water.");
-    expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, { ...card, distractors: [{ id: "water-d1", text: { en: "fire" }, retired: true }] });
+    expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, {
+      ...card,
+      distractors: [{ id: "water-d1", text: { en: "fire" }, retired: true }],
+    });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cards", deck.cardsDocumentUrl] });
     expect(queryClient.getQueryData(["studyQueue", deck.url])).toBeUndefined();
   });
@@ -175,7 +213,9 @@ describe("CardInspectorContainer", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
     fireEvent.input(screen.getByLabelText("Wrong option"), { target: { value: "earth" } });
-    fireEvent.input(screen.getByLabelText("Why it is wrong (optional)"), { target: { value: "Soil is not water." } });
+    fireEvent.input(screen.getByLabelText("Why it is wrong (optional)"), {
+      target: { value: "Soil is not water." },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
     expect(await screen.findByText("save refused")).toBeInTheDocument();
     expect(screen.getByLabelText("Wrong option")).toHaveValue("earth");
@@ -183,10 +223,16 @@ describe("CardInspectorContainer", () => {
   });
 
   it("warns that an edit detaches the card from the release of a library copy, and deletes no option it published", async () => {
-    renderContainer(makeUseCasesFake({ deckRelease: vi.fn(async () => release([card])) }), { of: copy });
+    renderContainer(makeUseCasesFake({ deckRelease: vi.fn(async () => release([card])) }), {
+      of: copy,
+    });
     expect(await screen.findByRole("note")).toHaveTextContent("An edit detaches it");
     fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “fire”" }));
-    expect(screen.getByText("This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("says when the card has no wrong options", () => {
@@ -195,10 +241,15 @@ describe("CardInspectorContainer", () => {
   });
 
   it("deletes an option the deck's release does not have, once the user confirms", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const useCases = makeUseCasesFake({ updateCard: vi.fn(async () => card) });
     renderContainer(useCases);
     fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “fire”" }));
-    await waitFor(() => expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, { ...card, distractors: [] }));
+    await waitFor(() =>
+      expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, { ...card, distractors: [] }),
+    );
   });
 });

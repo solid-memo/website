@@ -21,7 +21,10 @@ export interface StudyResult {
 export class Study extends Screen {
   /** The status line while a card is shown: "Card {position} of {total}". */
   private get statusLine(): Locator {
-    return this.page.getByRole("main").getByRole("status").filter({ hasText: this.tp("study.position") });
+    return this.page
+      .getByRole("main")
+      .getByRole("status")
+      .filter({ hasText: this.tp("study.position") });
   }
 
   private get gradeGroup(): Locator {
@@ -37,13 +40,17 @@ export class Study extends Screen {
   }
 
   async expectStudying(deck: string): Promise<void> {
-    await expect(this.page.getByRole("heading", { name: this.t("study.heading", { deck }) })).toBeVisible();
+    await expect(
+      this.page.getByRole("heading", { name: this.t("study.heading", { deck }) }),
+    ).toBeVisible();
   }
 
   /** The card shown and the session's size, read from "Card x of y". */
   async position(): Promise<{ position: number; total: number }> {
     await expect(this.statusLine).toBeVisible();
-    const said = this.tp("study.position").exec((await this.statusLine.textContent()) ?? "")?.groups;
+    const said = this.tp("study.position").exec(
+      (await this.statusLine.textContent()) ?? "",
+    )?.groups;
     if (said === undefined) throw new Error("The study status line says no position.");
     return { position: Number(said.position), total: Number(said.total) };
   }
@@ -55,7 +62,10 @@ export class Study extends Screen {
 
   async reveal(): Promise<void> {
     await this.intent("Reveal the answer", async () => {
-      await this.page.getByRole("main").getByRole("button", { name: this.t("study.reveal"), exact: true }).click();
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("study.reveal"), exact: true })
+        .click();
       await expect(this.gradeGroup).toBeVisible();
     });
   }
@@ -64,8 +74,12 @@ export class Study extends Screen {
   async expectScale(scale: AnswerScale): Promise<void> {
     const labels =
       scale === "minimal"
-        ? (["again", "hard", "good", "easy"] as const).map((answer) => this.t(`study.minimal.${answer}`))
-        : (["blackout", "wrong", "almost", "hard", "good", "easy"] as const).map((quality) => this.t(`study.quality.${quality}`));
+        ? (["again", "hard", "good", "easy"] as const).map((answer) =>
+            this.t(`study.minimal.${answer}`),
+          )
+        : (["blackout", "wrong", "almost", "hard", "good", "easy"] as const).map((quality) =>
+            this.t(`study.quality.${quality}`),
+          );
     await expect(this.gradeGroup.getByRole("button")).toHaveText(labels);
   }
 
@@ -73,7 +87,12 @@ export class Study extends Screen {
   private gradeButton(grade: Grade): Locator {
     return this.gradeGroup
       .getByRole("button", { name: this.t(`study.minimal.${grade}`), exact: true })
-      .or(this.gradeGroup.getByRole("button", { name: this.t(`study.quality.${grade}`), exact: true }));
+      .or(
+        this.gradeGroup.getByRole("button", {
+          name: this.t(`study.quality.${grade}`),
+          exact: true,
+        }),
+      );
   }
 
   /** Answers the revealed card; then the next card is shown, or the session's end. */
@@ -97,10 +116,17 @@ export class Study extends Screen {
    * given a `scale`, checking each card offers its buttons); returns how
    * many and the size it said.
    */
-  async studyAll({ grade = "good", scale }: { grade?: Grade; scale?: AnswerScale } = {}): Promise<StudyResult> {
+  async studyAll({
+    grade = "good",
+    scale,
+  }: {
+    grade?: Grade;
+    scale?: AnswerScale;
+  } = {}): Promise<StudyResult> {
     return this.intent(`Study every card, answering ${grade}`, async () => {
       await expect(this.statusLine.or(this.finishedMessage).or(this.nothingMessage)).toBeVisible();
-      if ((await this.nothingMessage.isVisible()) || (await this.finishedMessage.isVisible())) return { studied: 0, total: 0 };
+      if ((await this.nothingMessage.isVisible()) || (await this.finishedMessage.isVisible()))
+        return { studied: 0, total: 0 };
       const { total } = await this.position();
       let studied = 0;
       while (!(await this.finishedMessage.isVisible())) {
@@ -108,7 +134,8 @@ export class Study extends Screen {
         if (scale !== undefined) await this.expectScale(scale);
         await this.grade(grade);
         studied += 1;
-        if (studied > total) throw new Error(`The session said ${total} cards but went on past them.`);
+        if (studied > total)
+          throw new Error(`The session said ${total} cards but went on past them.`);
       }
       return { studied, total };
     });
@@ -125,7 +152,10 @@ export class Study extends Screen {
   /** "End session": back to Decks. */
   async endSession(): Promise<void> {
     await this.intent("End the session", async () => {
-      await this.page.getByRole("main").getByRole("button", { name: this.t("study.endSession"), exact: true }).click();
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("study.endSession"), exact: true })
+        .click();
       await this.app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
     });
   }

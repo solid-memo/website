@@ -29,7 +29,10 @@ describe("turtleDirectoryPlugin", () => {
     return handler!;
   }
 
-  async function request(url: string | undefined, options: { dir: string; publicPath?: string } = { dir, publicPath: "vendor" }) {
+  async function request(
+    url: string | undefined,
+    options: { dir: string; publicPath?: string } = { dir, publicPath: "vendor" },
+  ) {
     const res = { setHeader: vi.fn(), end: vi.fn() };
     const next = vi.fn();
     await devHandler(options)({ url }, res, next);
@@ -67,7 +70,10 @@ describe("turtleDirectoryPlugin", () => {
   });
 
   it("reports a folder that cannot be read to the dev server", async () => {
-    const { next } = await request("/vendor/v1.ttl", { dir: join(dir, "missing"), publicPath: "vendor" });
+    const { next } = await request("/vendor/v1.ttl", {
+      dir: join(dir, "missing"),
+      publicPath: "vendor",
+    });
     expect(next).toHaveBeenCalledWith(expect.any(Error));
   });
 

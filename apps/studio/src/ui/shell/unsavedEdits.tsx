@@ -117,11 +117,13 @@ export function useUnsavedEdits(): {
           label: t("studio.confirm.unsaved.save"),
           onChoose: () => {
             setAsked(null);
-            void Promise.all([...unsaved.current.values()].map((edits) => edits.save())).then((saved) => {
-              if (!saved.every(Boolean)) return;
-              unsaved.current.clear();
-              asked();
-            });
+            void Promise.all([...unsaved.current.values()].map((edits) => edits.save())).then(
+              (saved) => {
+                if (!saved.every(Boolean)) return;
+                unsaved.current.clear();
+                asked();
+              },
+            );
           },
         },
         {

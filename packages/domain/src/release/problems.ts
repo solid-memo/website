@@ -57,9 +57,15 @@ export type ContinuityProblem =
   /** Chapters, steps and distractors the previous release has and this one does not. */
   | { code: "outlineDropped"; params: { ids: string[]; previous: string } }
   /** An id the previous release gave one kind of subject, now another's. */
-  | { code: "idReused"; params: { id: string; was: ReleaseKind; now: ReleaseKind; previous: string } }
+  | {
+      code: "idReused";
+      params: { id: string; was: ReleaseKind; now: ReleaseKind; previous: string };
+    }
   /** A version that is not the previous one's plus one. */
-  | { code: "versionNotNext"; params: { version: number; previousVersion: number; previous: string } };
+  | {
+      code: "versionNotNext";
+      params: { version: number; previousVersion: number; previous: string };
+    };
 
 /** A course's outline and options (courseRules). */
 export type CourseProblem =
@@ -140,7 +146,16 @@ export type ShapeProblem =
    * gives (or the validator's own English, `builtIn`), the constraint it
    * is of, and the value it is about.
    */
-  | { code: "shape"; params: { message: LangText; constraint: string; builtIn?: true; value?: string; profile?: string } }
+  | {
+      code: "shape";
+      params: {
+        message: LangText;
+        constraint: string;
+        builtIn?: true;
+        value?: string;
+        profile?: string;
+      };
+    }
   /** A subject typed with a Solid Memo term no shape of this app describes, or in a format it does not know. */
   | { code: "unshaped"; params: Record<string, never> };
 

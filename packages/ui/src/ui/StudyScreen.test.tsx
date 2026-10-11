@@ -14,9 +14,7 @@ const card: Card = {
   formatVersion: 1,
 };
 
-function renderScreen(
-  overrides: Partial<Parameters<typeof StudyScreen>[0]> = {},
-) {
+function renderScreen(overrides: Partial<Parameters<typeof StudyScreen>[0]> = {}) {
   const props = {
     deckName: "Kanji N5",
     deckHref: "#/deck?deck=d",
@@ -38,10 +36,7 @@ function renderScreen(
 describe("StudyScreen", () => {
   it("links the deck's name to the deck's page", () => {
     renderScreen();
-    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute(
-      "href",
-      "#/deck?deck=d",
-    );
+    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", "#/deck?deck=d");
   });
 
   it("marks the deck's name with its language when it is not the page's", () => {
@@ -51,9 +46,7 @@ describe("StudyScreen", () => {
 
   it("shows the front and hides the back until revealed", () => {
     renderScreen();
-    expect(
-      screen.getByRole("heading", { name: "Study: Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Study: Kanji N5" })).toBeInTheDocument();
     expect(screen.getByText("水")).toBeInTheDocument();
     expect(screen.queryByText("water")).toBeNull();
     expect(screen.getByText("Card 1 of 3")).toBeInTheDocument();
@@ -82,7 +75,15 @@ describe("StudyScreen", () => {
 
   it("shows the question's note only once the answer is revealed, and the answer's with it", () => {
     const { container } = renderScreen({
-      prompt: { card: { ...card, frontNote: { en: "Kanji" }, backLabel: { en: "Meaning" }, backNote: { en: "An element." } }, direction: "front-to-back" },
+      prompt: {
+        card: {
+          ...card,
+          frontNote: { en: "Kanji" },
+          backLabel: { en: "Meaning" },
+          backNote: { en: "An element." },
+        },
+        direction: "front-to-back",
+      },
     });
     expect(container.querySelector(".card-front .card-note")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
@@ -121,12 +122,7 @@ describe("StudyScreen", () => {
     const buttons = screen
       .getAllByRole("button")
       .filter((b) => b.closest(".quality-buttons") !== null);
-    expect(buttons.map((b) => b.textContent)).toEqual([
-      "Again",
-      "Hard",
-      "Good",
-      "Easy",
-    ]);
+    expect(buttons.map((b) => b.textContent)).toEqual(["Again", "Hard", "Good", "Easy"]);
     expect(buttons.map((b) => b.dataset.grade)).toEqual(["1", "3", "4", "5"]);
 
     fireEvent.click(screen.getByRole("button", { name: "Again" }));
@@ -151,16 +147,12 @@ describe("StudyScreen", () => {
 
   it("shows the finished state after the last card", () => {
     renderScreen({ prompt: null, position: 4, total: 3 });
-    expect(
-      screen.getByText("Session finished — all cards reviewed."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Session finished — all cards reviewed.")).toBeInTheDocument();
   });
 
   it("shows the empty state when nothing is due", () => {
     renderScreen({ prompt: null, position: 1, total: 0 });
-    expect(
-      screen.getByText("Nothing to study today — come back tomorrow!"),
-    ).toHaveFocus();
+    expect(screen.getByText("Nothing to study today — come back tomorrow!")).toHaveFocus();
   });
 
   it("ends the session", () => {
@@ -258,7 +250,10 @@ describe("StudyScreen", () => {
 
   it("leaves Space on an enlarged picture to the picture, which shrinks rather than revealing", () => {
     renderScreen({
-      prompt: { card: { ...card, frontImageUrl: "https://flagcdn.com/af.svg" }, direction: "front-to-back" },
+      prompt: {
+        card: { ...card, frontImageUrl: "https://flagcdn.com/af.svg" },
+        direction: "front-to-back",
+      },
     });
     vi.spyOn(screen.getByRole("img"), "getBoundingClientRect").mockReturnValue({
       left: 0,
@@ -279,7 +274,10 @@ describe("StudyScreen", () => {
 
   it("shrinks the answer's enlarged picture on Escape, leaving the card on screen", () => {
     const { props } = renderScreen({
-      prompt: { card: { ...card, backImageUrl: "https://flagcdn.com/af.svg" }, direction: "front-to-back" },
+      prompt: {
+        card: { ...card, backImageUrl: "https://flagcdn.com/af.svg" },
+        direction: "front-to-back",
+      },
     });
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
     vi.spyOn(screen.getByRole("img"), "getBoundingClientRect").mockReturnValue({
@@ -302,7 +300,9 @@ describe("StudyScreen", () => {
         card: {
           ...card,
           textFormat: SM.markdown,
-          front: { en: "Which [command](https://git-scm.com/docs)?\n\n```\ngit diff --staged\n```" },
+          front: {
+            en: "Which [command](https://git-scm.com/docs)?\n\n```\ngit diff --staged\n```",
+          },
           back: { en: "`git diff --staged`" },
         },
         direction: "front-to-back",
@@ -381,8 +381,6 @@ describe("StudyScreen", () => {
     expect(screen.getByRole("button", { name: "Igen" })).toBeInTheDocument();
     expect(screen.getByText("Tryck 1 till 4 för att svara.")).toBeInTheDocument();
     expect(document.activeElement).toHaveTextContent("Svar: water");
-    expect(
-      screen.getByRole("group", { name: "Hur väl mindes du det?" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Hur väl mindes du det?" })).toBeInTheDocument();
   });
 });

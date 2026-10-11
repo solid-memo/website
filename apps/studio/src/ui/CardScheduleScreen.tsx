@@ -13,7 +13,9 @@ export interface CardDirectionSchedule {
 }
 
 /** What was last done on the tab, for its status line. */
-export type ScheduleEditMade = { kind: "reset"; direction: StudyDirection } | { kind: "reschedule"; direction: StudyDirection; due: string };
+export type ScheduleEditMade =
+  | { kind: "reset"; direction: StudyDirection }
+  | { kind: "reschedule"; direction: StudyDirection; due: string };
 
 /**
  * The card inspector's schedule tab: the card's review state in each
@@ -52,7 +54,12 @@ export function CardScheduleScreen({
           {state === null ? (
             <p>{t("studio.schedule.new")}</p>
           ) : (
-            <DirectionState state={state} busy={busy} onReset={() => onReset(direction)} onReschedule={(due) => onReschedule(direction, due)} />
+            <DirectionState
+              state={state}
+              busy={busy}
+              onReset={() => onReset(direction)}
+              onReschedule={(due) => onReschedule(direction, due)}
+            />
           )}
         </section>
       ))}
@@ -85,7 +92,8 @@ function DirectionState({
   const { t, locale, formatDate } = useI18n();
   const [due, setDue] = useState(state.due);
   const { ask, dialog } = useConfirm();
-  const instant = (iso: string) => new Date(iso).toLocaleString(locale, { dateStyle: "long", timeStyle: "short" });
+  const instant = (iso: string) =>
+    new Date(iso).toLocaleString(locale, { dateStyle: "long", timeStyle: "short" });
   const id = `due-${state.direction}`;
   return (
     <>
@@ -111,7 +119,14 @@ function DirectionState({
         }}
       >
         <label for={id}>{t("studio.schedule.dueLabel")}</label>
-        <input id={id} type="date" value={due} required disabled={busy} onInput={(event) => setDue(event.currentTarget.value)} />
+        <input
+          id={id}
+          type="date"
+          value={due}
+          required
+          disabled={busy}
+          onInput={(event) => setDue(event.currentTarget.value)}
+        />
         <button type="submit" disabled={busy}>
           {t("studio.schedule.reschedule")}
         </button>

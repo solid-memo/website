@@ -17,7 +17,11 @@
 import { describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch, SITE } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases } from "@solid-memo/application/useCases";
-import { draftContainerOf, draftDocuments, draftDocumentUrl } from "@solid-memo/domain/release/draftLayout";
+import {
+  draftContainerOf,
+  draftDocuments,
+  draftDocumentUrl,
+} from "@solid-memo/domain/release/draftLayout";
 import { routedFetch } from "@solid-memo/solid/routedFetch";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
@@ -36,9 +40,18 @@ const BUDGET = { create: 30_000, open: 10_000, edit: 10_000, diff: 10_000, delet
 
 /** A page of the app as createAppUseCases wires it, every pod request through `fetch`, the library read from this repository. */
 function page(podFetch: typeof globalThis.fetch = fetch) {
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
   const checkWrite = shapeValidator.checkSubjects;
-  const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
+  const deps = {
+    fetch: podFetch,
+    checkWrite,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  };
   return createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -66,13 +79,27 @@ async function seed(server: string) {
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
-  await put(`${base}profile/card.ttl`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
+  await put(
+    `${base}profile/card.ttl`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
   const session = { webId };
-  const instance = await page().createInstance(session, { containerUrl: `${base}main/`, name: "Main", registrationTarget: "private" });
+  const instance = await page().createInstance(session, {
+    containerUrl: `${base}main/`,
+    name: "Main",
+    registrationTarget: "private",
+  });
   return { session, instance };
 }
 
@@ -84,14 +111,23 @@ async function timed<T>(work: () => Promise<T>): Promise<{ took: number; value: 
 }
 
 describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
-  it("drafts, opens, edits and deletes the next version of a 466-card course, each within its budget", { timeout: 300_000 }, async () => {
+  it("drafts, opens, edits and deletes the next version of a 466-card course, each within its budget", {
+    timeout: 300_000,
+  }, async () => {
     const { instance } = await seed(server);
     const useCases = page();
 
-    const created = await timed(() => useCases.createReleaseDraft(instance.url, { kind: "nextVersionOf", url: COURSE }));
+    const created = await timed(() =>
+      useCases.createReleaseDraft(instance.url, { kind: "nextVersionOf", url: COURSE }),
+    );
     expect(created.took).toBeLessThan(BUDGET.create);
     const summary = created.value!.draft;
-    expect(summary).toMatchObject({ name: "solid-fundamentals", version: 2, course: true, readable: true });
+    expect(summary).toMatchObject({
+      name: "solid-fundamentals",
+      version: 2,
+      course: true,
+      readable: true,
+    });
     expect(await useCases.listReleaseDrafts(instance.url)).toEqual([summary]);
 
     const opened = await timed(() => useCases.getReleaseDraft(summary.url));
@@ -103,12 +139,19 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     expect(Object.keys(draft.published.ids)).toHaveLength(466 + 17 + 193 + 1398);
 
     const [card] = draft.cards;
-    const edited = await timed(() => useCases.editReleaseDraft(summary.url, [{ kind: "retire", of: "card", id: card!.id }]));
+    const edited = await timed(() =>
+      useCases.editReleaseDraft(summary.url, [{ kind: "retire", of: "card", id: card!.id }]),
+    );
     expect(edited.took).toBeLessThan(BUDGET.edit);
     expect(edited.value.ok).toBe(true);
-    expect((await useCases.getReleaseDraft(summary.url)).cards.find((node) => node.id === card!.id)!.data.deprecated).toBe(true);
+    expect(
+      (await useCases.getReleaseDraft(summary.url)).cards.find((node) => node.id === card!.id)!.data
+        .deprecated,
+    ).toBe(true);
     // Against the release it follows: one card retired, which a learner's copy retires too, losing nothing.
-    const compared = await timed(async () => useCases.diffReleaseDraft(await useCases.getReleaseDraft(summary.url)));
+    const compared = await timed(async () =>
+      useCases.diffReleaseDraft(await useCases.getReleaseDraft(summary.url)),
+    );
     expect(compared.took).toBeLessThan(BUDGET.diff);
     const diff = compared.value!;
     expect(diff.problems).toEqual([]);
@@ -116,16 +159,27 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     expect(diff.upgrade.plan!.retire.map((one) => one.id)).toEqual([card!.id]);
     expect(diff.upgrade.lost).toEqual({ cards: [], chapters: [] });
     // What an earlier release published is retired, never deleted.
-    await expect(useCases.editReleaseDraft(summary.url, [{ kind: "delete", of: "card", id: card!.id }])).resolves.toEqual({
+    await expect(
+      useCases.editReleaseDraft(summary.url, [{ kind: "delete", of: "card", id: card!.id }]),
+    ).resolves.toEqual({
       ok: false,
       refusal: { refused: "published", of: "card", id: card!.id },
     });
 
     // A document per chapter, besides the release's (and the cards no chapter asks, where there are any).
-    const documents = new Set([...draftDocuments(draft).values()].map((document) => draftDocumentUrl(summary.url, document)));
+    const documents = new Set(
+      [...draftDocuments(draft).values()].map((document) =>
+        draftDocumentUrl(summary.url, document),
+      ),
+    );
     expect(documents.size).toBeGreaterThanOrEqual(18);
     const check = await useCases.validateInstance(instance.url);
-    expect(check.documents.filter((document) => document.url.includes("/drafts/")).map((document) => document.url).sort()).toEqual([...documents].sort());
+    expect(
+      check.documents
+        .filter((document) => document.url.includes("/drafts/"))
+        .map((document) => document.url)
+        .sort(),
+    ).toEqual([...documents].sort());
     expect(check.conforms).toBe(true);
 
     const deleted = await timed(() => useCases.deleteReleaseDraft(summary));
@@ -134,12 +188,18 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     expect((await fetch(draftContainerOf(summary.url), { method: "HEAD" })).status).toBe(404);
   });
 
-  it("makes an edit again on the draft as it is when a document changed elsewhere since it was read, keeping that change", { timeout: 120_000 }, async (context) => {
-    if (!(await preconditionsOf(server)).edits) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+  it("makes an edit again on the draft as it is when a document changed elsewhere since it was read, keeping that change", {
+    timeout: 120_000,
+  }, async (context) => {
+    if (!(await preconditionsOf(server)).edits)
+      context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     // The change is made in the same second as the read, which such a server's ETag does not tell apart.
     if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
     const { instance } = await seed(server);
-    const made = await page().createReleaseDraft(instance.url, { kind: "blankCourse", title: { en: "Solid" } });
+    const made = await page().createReleaseDraft(instance.url, {
+      kind: "blankCourse",
+      title: { en: "Solid" },
+    });
     const draftUrl = made!.draft.url;
     await page().editReleaseDraft(draftUrl, [
       { kind: "addChapter", id: "ch-a", text: { title: { en: "A" } } },
@@ -154,11 +214,15 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
       const url = String(input instanceof Request ? input.url : input);
       if (!raced && url === chapter && init?.method === "PUT") {
         raced = true;
-        await page().editReleaseDraft(draftUrl, [{ kind: "editStep", id: "ch-a-1", text: { theory: { en: "Written elsewhere" } } }]);
+        await page().editReleaseDraft(draftUrl, [
+          { kind: "editStep", id: "ch-a-1", text: { theory: { en: "Written elsewhere" } } },
+        ]);
       }
       return fetch(input, init);
     };
-    const edit = await page(racing).editReleaseDraft(draftUrl, [{ kind: "editCard", id: "q-a-1a", card: { front: { en: "Q?" }, back: { en: "A" } } }]);
+    const edit = await page(racing).editReleaseDraft(draftUrl, [
+      { kind: "editCard", id: "q-a-1a", card: { front: { en: "Q?" }, back: { en: "A" } } },
+    ]);
     expect(edit.ok).toBe(true);
     expect(raced).toBe(true);
     const read = await page().getReleaseDraft(draftUrl);
@@ -166,8 +230,11 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     expect(read.cards[0]!.data.front).toEqual({ en: "Q?" });
   });
 
-  it("leaves no draft behind when its link on the catalog keeps being raced, nor takes another name", { timeout: 120_000 }, async (context) => {
-    if (!(await preconditionsOf(server)).edits) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+  it("leaves no draft behind when its link on the catalog keeps being raced, nor takes another name", {
+    timeout: 120_000,
+  }, async (context) => {
+    if (!(await preconditionsOf(server)).edits)
+      context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
     const { instance } = await seed(server);
     const catalog = `${instance.url}catalog.ttl`;
@@ -178,11 +245,19 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
       const method = init?.method ?? "GET";
       if (url === catalog && method !== "GET" && method !== "HEAD") {
         raced++;
-        await page().createReleaseDraft(instance.url, { kind: "blankDeck", title: { en: `Other ${raced}` } });
+        await page().createReleaseDraft(instance.url, {
+          kind: "blankDeck",
+          title: { en: `Other ${raced}` },
+        });
       }
       return fetch(input, init);
     };
-    await expect(page(racing).createReleaseDraft(instance.url, { kind: "blankCourse", title: { en: "Solid" } })).rejects.toMatchObject({
+    await expect(
+      page(racing).createReleaseDraft(instance.url, {
+        kind: "blankCourse",
+        title: { en: "Solid" },
+      }),
+    ).rejects.toMatchObject({
       code: "changedElsewhere",
     });
     expect(raced).toBe(3);
@@ -190,7 +265,9 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     const drafts = await page().listReleaseDrafts(instance.url);
     expect(drafts.map((draft) => draft.name).sort()).toEqual(["other-1", "other-2", "other-3"]);
     for (const name of ["solid", "solid-2"]) {
-      expect((await fetch(`${instance.url}drafts/${name}/v1/release.ttl`, { method: "HEAD" })).status).toBe(404);
+      expect(
+        (await fetch(`${instance.url}drafts/${name}/v1/release.ttl`, { method: "HEAD" })).status,
+      ).toBe(404);
     }
     expect((await page().validateInstance(instance.url)).conforms).toBe(true);
   });
@@ -198,9 +275,15 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
   it("leaves nothing of an instance deleted with a draft in it", { timeout: 120_000 }, async () => {
     const { session, instance } = await seed(server);
     const useCases = page();
-    await useCases.createReleaseDraft(instance.url, { kind: "blankCourse", title: { en: "Solid" } });
+    await useCases.createReleaseDraft(instance.url, {
+      kind: "blankCourse",
+      title: { en: "Solid" },
+    });
     await useCases.createReleaseDraft(instance.url, { kind: "blankDeck", title: { en: "Words" } });
-    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: null, keptReleases: false });
+    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
+      keptFolder: null,
+      keptReleases: false,
+    });
     expect((await fetch(instance.url, { method: "HEAD" })).status).toBe(404);
   });
 });

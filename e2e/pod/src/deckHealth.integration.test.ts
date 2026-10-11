@@ -34,15 +34,27 @@ const SERVERS = inject("solidServers");
 function page() {
   const writeFence = createWriteFence(fetch);
   const podFetch = writeFence.fetch;
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
   const checked: string[] = [];
-  const validateDocumentSince: typeof shapeValidator.validateDocumentSince = async (url, version) => {
+  const validateDocumentSince: typeof shapeValidator.validateDocumentSince = async (
+    url,
+    version,
+  ) => {
     const since = await shapeValidator.validateDocumentSince(url, version);
     if (!since.unchanged) checked.push(url);
     return since;
   };
   const checkWrite = shapeValidator.checkSubjects;
-  const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
+  const deps = {
+    fetch: podFetch,
+    checkWrite,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  };
   const useCases = createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -83,13 +95,26 @@ async function seed(server: string): Promise<{ instanceUrl: string; deck: Deck }
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
-  await put(`${base}profile/card.ttl`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
+  await put(
+    `${base}profile/card.ttl`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
   const { useCases } = page();
-  const instance = await useCases.createInstance({ webId }, { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+  const instance = await useCases.createInstance(
+    { webId },
+    { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" },
+  );
   const deck = await useCases.createDeck(instance.url, { en: "Birds" });
   await put(
     deck.cardsDocumentUrl,
@@ -111,7 +136,11 @@ describe.each(SERVERS)("a deck's health on $name", ({ url: server }) => {
   let unreliableEtags = false;
   beforeAll(async () => {
     const probe = new URL(`etag-${crypto.randomUUID()}.ttl`, server).href;
-    await fetch(probe, { method: "PUT", headers: { "content-type": "text/turtle" }, body: `<#a> <#b> "1" .` });
+    await fetch(probe, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body: `<#a> <#b> "1" .`,
+    });
     etags = await versioned(probe);
     unreliableEtags = etags && !(await etagMarksEveryEdit(server));
   });
@@ -120,15 +149,31 @@ describe.each(SERVERS)("a deck's health on $name", ({ url: server }) => {
     const { instanceUrl, deck } = await seed(server);
     const { useCases, checked } = page();
     const health = await useCases.checkDeck(instanceUrl, deck, text);
-    expect(checked).toEqual(expect.arrayContaining([`${instanceUrl}catalog.ttl`, deck.cardsDocumentUrl, deck.reviewsDocumentUrl]));
+    expect(checked).toEqual(
+      expect.arrayContaining([
+        `${instanceUrl}catalog.ttl`,
+        deck.cardsDocumentUrl,
+        deck.reviewsDocumentUrl,
+      ]),
+    );
     expect(checked).toHaveLength(3);
     const failing = health.report.documents.flatMap((document) =>
-      document.subjects.filter((subject) => subject.status === "checked" && subject.violations.some((v) => v.severity === "violation")),
+      document.subjects.filter(
+        (subject) =>
+          subject.status === "checked" &&
+          subject.violations.some((v) => v.severity === "violation"),
+      ),
     );
     expect(failing.map((subject) => subject.url)).toEqual([`${deck.cardsDocumentUrl}#wren`]);
-    expect(health.unstated!.map(({ card, place }) => [card.id, place])).toEqual([["gull", { tab: "content", part: "front" }]]);
-    expect(health.duplicates.map((group) => group.map(({ id }) => id).sort())).toEqual([["owl", "owl-again"]]);
-    expect(health.markdown.map(({ card, place, language }) => [card.id, place, language])).toEqual([["crow", { tab: "content", part: "back" }, "en"]]);
+    expect(health.unstated!.map(({ card, place }) => [card.id, place])).toEqual([
+      ["gull", { tab: "content", part: "front" }],
+    ]);
+    expect(health.duplicates.map((group) => group.map(({ id }) => id).sort())).toEqual([
+      ["owl", "owl-again"],
+    ]);
+    expect(health.markdown.map(({ card, place, language }) => [card.id, place, language])).toEqual([
+      ["crow", { tab: "content", part: "back" }, "en"],
+    ]);
     expect(healthProblemCount(health)).toBe(health.report.violationCount + 3);
   });
 
@@ -138,9 +183,16 @@ describe.each(SERVERS)("a deck's health on $name", ({ url: server }) => {
     const health = await useCases.checkDeck(instanceUrl, deck, text);
     const plan = useCases.planRepair(health.report);
     expect(plan.repairs).toEqual([]);
-    expect(plan.unrepairable.map((problem) => problem.subjectUrl)).toEqual([`${deck.cardsDocumentUrl}#wren`]);
+    expect(plan.unrepairable.map((problem) => problem.subjectUrl)).toEqual([
+      `${deck.cardsDocumentUrl}#wren`,
+    ]);
     await useCases.applyRepairs(
-      plan.unrepairable.map(({ documentUrl, subjectUrl }) => ({ kind: "remove-subject" as const, documentUrl, subjectUrl, version: 1 })),
+      plan.unrepairable.map(({ documentUrl, subjectUrl }) => ({
+        kind: "remove-subject" as const,
+        documentUrl,
+        subjectUrl,
+        version: 1,
+      })),
     );
     const again = await page().useCases.checkDeck(instanceUrl, deck, text);
     expect(again.report.violationCount).toBe(0);
@@ -154,12 +206,17 @@ describe.each(SERVERS)("a deck's health on $name", ({ url: server }) => {
     const first = page();
     await first.useCases.checkDeck(instanceUrl, deck, text);
     // The digest's receipts are written after the check, in the background.
-    await expect.poll(async () => {
-      const again = page();
-      await again.useCases.checkDeck(instanceUrl, deck, text);
-      return again.checked;
-      // Given time: with every server's suite running at once, the background write can take more than a second.
-    }, { timeout: 10_000 }).not.toContain(`${instanceUrl}catalog.ttl`);
+    await expect
+      .poll(
+        async () => {
+          const again = page();
+          await again.useCases.checkDeck(instanceUrl, deck, text);
+          return again.checked;
+          // Given time: with every server's suite running at once, the background write can take more than a second.
+        },
+        { timeout: 10_000 },
+      )
+      .not.toContain(`${instanceUrl}catalog.ttl`);
     const again = page();
     const health = await again.useCases.checkDeck(instanceUrl, deck, text);
     // The cards document does not conform, so it has no receipt and is checked every time.

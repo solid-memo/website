@@ -51,10 +51,22 @@ const state: ReviewState = {
 };
 
 function content(extra: Partial<DeckFileContent> = {}): DeckFileContent {
-  return { deck: deck("deck-a", { completedChapters: ["https://lib.example/c.ttl#ch1"] }), cards: [card], reviews: [state], upgraded: [], dropped: [], ...extra };
+  return {
+    deck: deck("deck-a", { completedChapters: ["https://lib.example/c.ttl#ch1"] }),
+    cards: [card],
+    reviews: [state],
+    upgraded: [],
+    dropped: [],
+    ...extra,
+  };
 }
 
-const options = { withProgress: true, decks: [], freshId: "deck-fresh", now: "2026-10-10T00:00:00.000Z" };
+const options = {
+  withProgress: true,
+  decks: [],
+  freshId: "deck-fresh",
+  now: "2026-10-10T00:00:00.000Z",
+};
 
 describe("deckFileFormatOf", () => {
   it("goes by the extension, whatever its case", () => {
@@ -78,8 +90,12 @@ describe("deckFileBaseOf", () => {
 
 describe("deckFileName", () => {
   it("names the file after the deck's English title, accents dropped", () => {
-    expect(deckFileName(deck("d", { title: { sv: "Städer", en: "Capitals of Europe!" } }), "turtle")).toBe("capitals-of-europe.ttl");
-    expect(deckFileName(deck("d", { title: { sv: "Städer i Sverige" } }), "jsonld")).toBe("stader-i-sverige.jsonld");
+    expect(
+      deckFileName(deck("d", { title: { sv: "Städer", en: "Capitals of Europe!" } }), "turtle"),
+    ).toBe("capitals-of-europe.ttl");
+    expect(deckFileName(deck("d", { title: { sv: "Städer i Sverige" } }), "jsonld")).toBe(
+      "stader-i-sverige.jsonld",
+    );
   });
 
   it("keeps it short, and names it deck when nothing is left", () => {
@@ -101,46 +117,72 @@ describe("importedDeck", () => {
       formatVersion: DECK_FORMAT_VERSION,
       completedChapters: ["https://lib.example/c.ttl#ch1"],
     });
-    expect(cards).toEqual([{ ...card, url: `${INSTANCE}decks/deck-a.ttl#card-1`, formatVersion: CARD_FORMAT_VERSION }]);
+    expect(cards).toEqual([
+      { ...card, url: `${INSTANCE}decks/deck-a.ttl#card-1`, formatVersion: CARD_FORMAT_VERSION },
+    ]);
     expect(reviews).toEqual([state]);
   });
 
   it("leaves the progress out unless asked", () => {
-    const { deck: imported, reviews } = importedDeck(INSTANCE, content(), { ...options, withProgress: false });
+    const { deck: imported, reviews } = importedDeck(INSTANCE, content(), {
+      ...options,
+      withProgress: false,
+    });
     expect(imported.completedChapters).toBeUndefined();
     expect(reviews).toEqual([]);
-    const withNone = importedDeck(INSTANCE, content({ deck: deck("deck-a"), reviews: undefined }), options);
+    const withNone = importedDeck(
+      INSTANCE,
+      content({ deck: deck("deck-a"), reviews: undefined }),
+      options,
+    );
     expect(withNone.deck.completedChapters).toBeUndefined();
     expect(withNone.reviews).toEqual([]);
   });
 
   it("gives the deck a fresh id when the instance has one by its id, or uses a document of its name", () => {
     const same = deck("deck-a", { url: `${INSTANCE}catalog.ttl#deck-a` });
-    expect(importedDeck(INSTANCE, content(), { ...options, decks: [same] }).deck.id).toBe("deck-fresh");
+    expect(importedDeck(INSTANCE, content(), { ...options, decks: [same] }).deck.id).toBe(
+      "deck-fresh",
+    );
     const other = deck("deck-b", { reviewsDocumentUrl: `${INSTANCE}reviews/deck-a.ttl` });
     const imported = importedDeck(INSTANCE, content(), { ...options, decks: [other] }).deck;
-    expect(imported).toMatchObject({ id: "deck-fresh", cardsDocumentUrl: `${INSTANCE}decks/deck-fresh.ttl` });
+    expect(imported).toMatchObject({
+      id: "deck-fresh",
+      cardsDocumentUrl: `${INSTANCE}decks/deck-fresh.ttl`,
+    });
   });
 
   it("gives the deck a fresh id when its own is none this app would give", () => {
-    expect(importedDeck(INSTANCE, content({ deck: deck("a b") }), options).deck.id).toBe("deck-fresh");
+    expect(importedDeck(INSTANCE, content({ deck: deck("a b") }), options).deck.id).toBe(
+      "deck-fresh",
+    );
   });
 
   it("gives the deck a fresh id when its id is another subject of the catalog document", () => {
     for (const id of ["catalog", "group-g", "agent-1", "card-1"]) {
-      expect(importedDeck(INSTANCE, content({ deck: deck(id) }), options).deck.id).toBe("deck-fresh");
+      expect(importedDeck(INSTANCE, content({ deck: deck(id) }), options).deck.id).toBe(
+        "deck-fresh",
+      );
     }
     // A deck's distribution, and a deck whose id is the file deck's distribution.
     const owner = deck("deck-b");
-    expect(importedDeck(INSTANCE, content({ deck: deck("deck-b-cards") }), { ...options, decks: [owner] }).deck.id).toBe(
+    expect(
+      importedDeck(INSTANCE, content({ deck: deck("deck-b-cards") }), {
+        ...options,
+        decks: [owner],
+      }).deck.id,
+    ).toBe("deck-fresh");
+    const named = deck("deck-a-cards");
+    expect(importedDeck(INSTANCE, content(), { ...options, decks: [named] }).deck.id).toBe(
       "deck-fresh",
     );
-    const named = deck("deck-a-cards");
-    expect(importedDeck(INSTANCE, content(), { ...options, decks: [named] }).deck.id).toBe("deck-fresh");
   });
 
   it("creates a deck the file gives no creation time of now", () => {
-    expect(importedDeck(INSTANCE, content({ deck: deck("deck-a", { createdAt: "" }) }), options).deck.createdAt).toBe(options.now);
+    expect(
+      importedDeck(INSTANCE, content({ deck: deck("deck-a", { createdAt: "" }) }), options).deck
+        .createdAt,
+    ).toBe(options.now);
   });
 });
 
@@ -149,6 +191,8 @@ describe("hasProgress", () => {
     expect(hasProgress(content())).toBe(true);
     expect(hasProgress(content({ reviews: undefined }))).toBe(true);
     expect(hasProgress(content({ deck: deck("deck-a"), reviews: [] }))).toBe(false);
-    expect(hasProgress(content({ deck: deck("deck-a", { completedChapters: [] }), reviews: undefined }))).toBe(false);
+    expect(
+      hasProgress(content({ deck: deck("deck-a", { completedChapters: [] }), reviews: undefined })),
+    ).toBe(false);
   });
 });

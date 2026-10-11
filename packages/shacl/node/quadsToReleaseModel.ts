@@ -21,7 +21,12 @@ const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 export function termOf(object: Quad_Object): ReleaseTerm {
   switch (object.termType) {
     case "Literal":
-      return { kind: "literal", value: object.value, language: object.language, datatype: object.datatype.value };
+      return {
+        kind: "literal",
+        value: object.value,
+        language: object.language,
+        datatype: object.datatype.value,
+      };
     case "BlankNode":
       return { kind: "blank", value: object.value };
     default:
@@ -49,7 +54,9 @@ export function quadsToReleaseModel(quads: readonly Quad[], url: string): Releas
     else bySubject.set(q.subject.value, [q]);
   }
   const objectsOf = (subject: string, predicate: string) =>
-    (bySubject.get(subject) ?? []).filter((q) => q.predicate.value === predicate).map((q) => q.object);
+    (bySubject.get(subject) ?? [])
+      .filter((q) => q.predicate.value === predicate)
+      .map((q) => q.object);
   const objects = (subject: string, predicate: string) => objectsOf(subject, predicate).map(termOf);
   const texts = (subject: string, predicate: string) =>
     objects(subject, predicate).filter((term): term is ReleaseText => term.kind === "literal");
@@ -57,16 +64,28 @@ export function quadsToReleaseModel(quads: readonly Quad[], url: string): Releas
     objectsOf(subject, predicate)
       .filter((o) => o.termType === "NamedNode")
       .map((o) => o.value);
-  const positions = (subject: string) => texts(subject, `${SCHEMA_NS}position`).map((text) => text.value);
+  const positions = (subject: string) =>
+    texts(subject, `${SCHEMA_NS}position`).map((text) => text.value);
   const retired = new Set(
     quads
-      .filter((q) => q.predicate.value === OWL_DEPRECATED && q.object.termType === "Literal" && q.object.value === "true")
+      .filter(
+        (q) =>
+          q.predicate.value === OWL_DEPRECATED &&
+          q.object.termType === "Literal" &&
+          q.object.value === "true",
+      )
       .map((q) => q.subject.value),
   );
   const statements = (predicate: string): ReleaseStatement[] =>
-    quads.filter((q) => q.predicate.value === predicate).map((q) => ({ subject: q.subject.value, object: termOf(q.object) }));
+    quads
+      .filter((q) => q.predicate.value === predicate)
+      .map((q) => ({ subject: q.subject.value, object: termOf(q.object) }));
   const typed = (type: string) => [
-    ...new Set(quads.filter((q) => q.predicate.value === RDF_TYPE && q.object.value === type).map((q) => q.subject.value)),
+    ...new Set(
+      quads
+        .filter((q) => q.predicate.value === RDF_TYPE && q.object.value === type)
+        .map((q) => q.subject.value),
+    ),
   ];
   const sm = (name: string) => `${SM_NS}${name}`;
 

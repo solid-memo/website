@@ -13,21 +13,31 @@ describe("markdownProblems", () => {
   it("reads the corpus's look-alikes: plain-text habits that Markdown reads otherwise", () => {
     expect(markdownProblems("M87* ln|x| `&aring;` \\&aring;", SIDE)).toEqual([]);
     expect(markdownProblems("git clone <url>", SIDE)).toEqual([{ code: "html", source: "<url>" }]);
-    expect(markdownProblems("&aring;", SIDE)).toEqual([{ code: "characterReference", source: "&aring;" }]);
-    expect(markdownProblems('"<ex:title>"', OPTION)).toEqual([{ code: "link", source: "<ex:title>", autolink: true }]);
+    expect(markdownProblems("&aring;", SIDE)).toEqual([
+      { code: "characterReference", source: "&aring;" },
+    ]);
+    expect(markdownProblems('"<ex:title>"', OPTION)).toEqual([
+      { code: "link", source: "<ex:title>", autolink: true },
+    ]);
     // A rule meant under a line of text, with no blank line between them, underlines it as a heading.
-    expect(markdownProblems("Intro\n---\n\nMore.", PROSE)).toEqual([{ code: "dashHeading", source: "Intro\n---" }]);
+    expect(markdownProblems("Intro\n---\n\nMore.", PROSE)).toEqual([
+      { code: "dashHeading", source: "Intro\n---" },
+    ]);
   });
 
   it("names a text past the parser's limits, and nothing else in it", () => {
     expect(markdownProblems(`<b>${"a".repeat(MAX_CHARS)}`, PROSE)).toEqual([
       { code: "tooLong", length: MAX_CHARS + 3 },
     ]);
-    expect(markdownProblems(`<b>${"*_".repeat(MAX_DELIMITERS)}`, PROSE)).toEqual([{ code: "tooComplex" }]);
+    expect(markdownProblems(`<b>${"*_".repeat(MAX_DELIMITERS)}`, PROSE)).toEqual([
+      { code: "tooComplex" },
+    ]);
   });
 
   it("names raw HTML and pictures, which are not shown", () => {
-    expect(markdownProblems("<div>x</div>\n\na <i>b</i> ![c](https://c.example/c.png)", PROSE)).toEqual([
+    expect(
+      markdownProblems("<div>x</div>\n\na <i>b</i> ![c](https://c.example/c.png)", PROSE),
+    ).toEqual([
       { code: "html", source: "<div>x</div>" },
       { code: "html", source: "<i>" },
       { code: "html", source: "</i>" },
@@ -36,26 +46,38 @@ describe("markdownProblems", () => {
   });
 
   it("names what nests too deep, and a table too large, which show as their source", () => {
-    expect(markdownProblems(`${"> ".repeat(MAX_DEPTH)}*a*`, PROSE)).toEqual([{ code: "tooDeep", source: "*a*" }]);
-    expect(markdownProblems(`${"> ".repeat(MAX_DEPTH - 1)}a *b*`, PROSE)).toEqual([{ code: "tooDeep", source: "*b*" }]);
+    expect(markdownProblems(`${"> ".repeat(MAX_DEPTH)}*a*`, PROSE)).toEqual([
+      { code: "tooDeep", source: "*a*" },
+    ]);
+    expect(markdownProblems(`${"> ".repeat(MAX_DEPTH - 1)}a *b*`, PROSE)).toEqual([
+      { code: "tooDeep", source: "*b*" },
+    ]);
     const wide = `|${" a |".repeat(MAX_TABLE_COLUMNS + 1)}\n|${"-|".repeat(MAX_TABLE_COLUMNS + 1)}`;
     expect(markdownProblems(wide, PROSE)).toEqual([{ code: "largeTable", source: wide }]);
   });
 
   it("passes what nests to the limit but shows as written, plain text", () => {
-    const list = Array.from({ length: MAX_DEPTH - 1 }, (_, level) => `${"  ".repeat(level)}- ${level}`).join("\n");
+    const list = Array.from(
+      { length: MAX_DEPTH - 1 },
+      (_, level) => `${"  ".repeat(level)}- ${level}`,
+    ).join("\n");
     for (const text of [`${"> ".repeat(MAX_DEPTH - 1)}a`, `${"> ".repeat(MAX_DEPTH)}a`, list]) {
       expect(markdownProblems(text, PROSE)).toEqual([]);
     }
     expect(markdownProblems(`${"> ".repeat(MAX_DEPTH - 1)}a \\* b`, PROSE)).toEqual([
       { code: "tooDeep", source: "a \\* b" },
     ]);
-    expect(markdownProblems(`${"> ".repeat(MAX_DEPTH)}a\nb`, PROSE)).toEqual([{ code: "tooDeep", source: "a\nb" }]);
+    expect(markdownProblems(`${"> ".repeat(MAX_DEPTH)}a\nb`, PROSE)).toEqual([
+      { code: "tooDeep", source: "a\nb" },
+    ]);
   });
 
   it("names every link in a field without links, references and autolinks too", () => {
     expect(
-      markdownProblems("[a](https://a.example) [b][r] <https://c.example>\n\n[r]: https://r.example", SIDE),
+      markdownProblems(
+        "[a](https://a.example) [b][r] <https://c.example>\n\n[r]: https://r.example",
+        SIDE,
+      ),
     ).toEqual([
       { code: "link", source: "[a](https://a.example)", autolink: false },
       { code: "link", source: "[b][r]", autolink: false },
@@ -112,7 +134,10 @@ describe("markdownProblems", () => {
 
   it("names bidi and zero-width controls in code and in links", () => {
     expect(
-      markdownProblems("a‮b `c‮d`\n\n```\ne​f\n```\n\n[g⁦h](https://x.example/) [i](https://x.example/‮)", PROSE),
+      markdownProblems(
+        "a‮b `c‮d`\n\n```\ne​f\n```\n\n[g⁦h](https://x.example/) [i](https://x.example/‮)",
+        PROSE,
+      ),
     ).toEqual([
       { code: "hiddenControl", controls: ["⟨U+202E⟩"], in: "code" },
       { code: "hiddenControl", controls: ["⟨U+200B⟩"], in: "code" },

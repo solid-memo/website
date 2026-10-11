@@ -78,7 +78,9 @@ export function DeckStudySection({
           </label>
         ))}
         <p id="deck-pace-hint" class="hint">
-          {tx("deckPreferences.emptyHint", { link: <a href={preferencesHref}>{t("deckPreferences.studyPreferencesLink")}</a> })}
+          {tx("deckPreferences.emptyHint", {
+            link: <a href={preferencesHref}>{t("deckPreferences.studyPreferencesLink")}</a>,
+          })}
         </p>
         <button type="submit" disabled={busy}>
           {t("studio.about.saveStudy")}

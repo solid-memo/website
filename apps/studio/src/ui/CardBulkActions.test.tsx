@@ -11,7 +11,12 @@ import { makeCard, makeDeck } from "../test/fixtures";
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const nouns = makeDeck("nouns", { en: "Nouns" });
 const water = { ...makeCard(deck, "water"), front: { "": "水" }, back: { en: "water" } };
-const fire = { ...makeCard(deck, "fire", true), front: { ja: "火" }, back: { en: "fire" }, textFormat: SM.markdown };
+const fire = {
+  ...makeCard(deck, "fire", true),
+  front: { ja: "火" },
+  back: { en: "fire" },
+  textFormat: SM.markdown,
+};
 const cards = [water, fire];
 
 function renderActions(
@@ -49,9 +54,15 @@ describe("CardBulkActions", () => {
     expect(plan).toHaveBeenCalledWith({ kind: "retire" });
     expect(onEdit).toHaveBeenCalledWith({ kind: "retire" }, plan.mock.results[0]!.value);
     pick(EDIT, "Write in Markdown");
-    expect(onEdit).toHaveBeenLastCalledWith({ kind: "setTextFormat", markdown: true }, expect.anything());
+    expect(onEdit).toHaveBeenLastCalledWith(
+      { kind: "setTextFormat", markdown: true },
+      expect.anything(),
+    );
     pick(EDIT, "Write as plain text");
-    expect(onEdit).toHaveBeenLastCalledWith({ kind: "setTextFormat", markdown: false }, expect.anything());
+    expect(onEdit).toHaveBeenLastCalledWith(
+      { kind: "setTextFormat", markdown: false },
+      expect.anything(),
+    );
     press("Restore");
     expect(onEdit).toHaveBeenLastCalledWith({ kind: "restore" }, expect.anything());
   });
@@ -60,17 +71,33 @@ describe("CardBulkActions", () => {
     const onEdit = vi.fn(async () => true);
     const markdownOnly = vi.fn((edit: CardEdit) => planCardEdit([fire], ["fire"], edit));
     render(
-      <CardBulkActions cards={[fire]} languages={[]} busy={false} plan={markdownOnly} onEdit={onEdit} today="2026-10-09" onReviewEdit={vi.fn()} decks={[]} onTransfer={vi.fn()} />,
+      <CardBulkActions
+        cards={[fire]}
+        languages={[]}
+        busy={false}
+        plan={markdownOnly}
+        onEdit={onEdit}
+        today="2026-10-09"
+        onReviewEdit={vi.fn()}
+        decks={[]}
+        onTransfer={vi.fn()}
+      />,
     );
     fireEvent.click(screen.getByRole("button", { name: "Retire" }));
     expect(onEdit).not.toHaveBeenCalled();
-    expect(screen.getByRole("status")).toHaveTextContent("None of the selected cards would change.");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "None of the selected cards would change.",
+    );
     // Said in the form, while one is open.
     pick("Edit the selected cards", "State language");
-    fireEvent.input(screen.getByRole("textbox", { name: "Language code" }), { target: { value: "ja" } });
+    fireEvent.input(screen.getByRole("textbox", { name: "Language code" }), {
+      target: { value: "ja" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onEdit).not.toHaveBeenCalled();
-    expect(within(dialog("State language")).getByRole("status")).toHaveTextContent("None of the selected cards would change.");
+    expect(within(dialog("State language")).getByRole("status")).toHaveTextContent(
+      "None of the selected cards would change.",
+    );
     expect(screen.getAllByRole("status")).toHaveLength(1);
   });
 
@@ -84,7 +111,10 @@ describe("CardBulkActions", () => {
     expect(onEdit).not.toHaveBeenCalled();
     press("Delete");
     answer("Delete the selected cards", "Delete");
-    expect(onEdit).toHaveBeenCalledWith({ kind: "remove" }, expect.objectContaining({ remove: ["water", "fire"] }));
+    expect(onEdit).toHaveBeenCalledWith(
+      { kind: "remove" },
+      expect.objectContaining({ remove: ["water", "fire"] }),
+    );
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
@@ -92,23 +122,38 @@ describe("CardBulkActions", () => {
     const { onEdit } = renderActions();
     pick(EDIT, "State language");
     expect(dialog("State language")).toBeInTheDocument();
-    expect(screen.getByText("Only a side whose language is not stated yet changes. Its text stays as it is.")).toBeInTheDocument();
-    fireEvent.input(screen.getByRole("textbox", { name: "Language code" }), { target: { value: "Japanese" } });
+    expect(
+      screen.getByText(
+        "Only a side whose language is not stated yet changes. Its text stays as it is.",
+      ),
+    ).toBeInTheDocument();
+    fireEvent.input(screen.getByRole("textbox", { name: "Language code" }), {
+      target: { value: "Japanese" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(screen.getByRole("alert")).toHaveTextContent("“Japanese” is not a language code.");
     expect(onEdit).not.toHaveBeenCalled();
-    fireEvent.input(screen.getByRole("textbox", { name: "Language code" }), { target: { value: "ja" } });
+    fireEvent.input(screen.getByRole("textbox", { name: "Language code" }), {
+      target: { value: "ja" },
+    });
     choose("Of", "front");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
-    expect(onEdit).toHaveBeenCalledWith({ kind: "stateLanguage", tag: "ja", side: "front" }, expect.anything());
+    expect(onEdit).toHaveBeenCalledWith(
+      { kind: "stateLanguage", tag: "ja", side: "front" },
+      expect.anything(),
+    );
     // Made, the form closes.
-    await waitFor(() => expect(screen.queryByRole("textbox", { name: "Language code" })).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByRole("textbox", { name: "Language code" })).not.toBeInTheDocument(),
+    );
   });
 
   it("states the language of both sides unless one is chosen, and keeps the form open when the edit fails", async () => {
     const { onEdit } = renderActions(vi.fn(async () => false));
     pick(EDIT, "State language");
-    fireEvent.input(screen.getByRole("textbox", { name: "Language code" }), { target: { value: "ja" } });
+    fireEvent.input(screen.getByRole("textbox", { name: "Language code" }), {
+      target: { value: "ja" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onEdit).toHaveBeenCalledWith({ kind: "stateLanguage", tag: "ja" }, expect.anything());
     await Promise.resolve();
@@ -125,10 +170,17 @@ describe("CardBulkActions", () => {
     const { onEdit } = renderActions();
     pick(EDIT, "Find and replace");
     fireEvent.input(screen.getByRole("textbox", { name: "Find" }), { target: { value: "water" } });
-    fireEvent.input(screen.getByRole("textbox", { name: "Replace with" }), { target: { value: "aqua" } });
+    fireEvent.input(screen.getByRole("textbox", { name: "Replace with" }), {
+      target: { value: "aqua" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Replace in 1 card" }));
-    expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ kind: "replaceText", find: "water", replace: "aqua" }), expect.anything());
-    await waitFor(() => expect(screen.queryByRole("form", { name: "Find and replace" })).not.toBeInTheDocument());
+    expect(onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "replaceText", find: "water", replace: "aqua" }),
+      expect.anything(),
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("form", { name: "Find and replace" })).not.toBeInTheDocument(),
+    );
     pick(EDIT, "Find and replace");
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.queryByRole("form", { name: "Find and replace" })).not.toBeInTheDocument();
@@ -148,7 +200,11 @@ describe("CardBulkActions", () => {
   });
 
   it("sets the cards due on a day, today to start with, the form closing once it is done", async () => {
-    const { onReviewEdit } = renderActions(undefined, false, vi.fn(async () => false));
+    const { onReviewEdit } = renderActions(
+      undefined,
+      false,
+      vi.fn(async () => false),
+    );
     pick(SCHEDULE, "Set due date");
     const day = screen.getByLabelText("Due on");
     expect(day).toHaveValue("2026-10-09");
@@ -171,7 +227,16 @@ describe("CardBulkActions", () => {
   });
 
   it("takes no due day while an edit is being made", () => {
-    const props = { cards, languages: [], plan: vi.fn(), onEdit: vi.fn(), today: "2026-10-09", onReviewEdit: vi.fn(), decks: [], onTransfer: vi.fn() };
+    const props = {
+      cards,
+      languages: [],
+      plan: vi.fn(),
+      onEdit: vi.fn(),
+      today: "2026-10-09",
+      onReviewEdit: vi.fn(),
+      decks: [],
+      onTransfer: vi.fn(),
+    };
     const { rerender } = render(<CardBulkActions {...props} busy={false} />);
     pick(SCHEDULE, "Set due date");
     rerender(<CardBulkActions {...props} busy={true} />);
@@ -181,7 +246,8 @@ describe("CardBulkActions", () => {
 
   it("groups its edits in menus, and makes nothing while an edit is being made", () => {
     const { onEdit } = renderActions(undefined, true);
-    for (const name of ["Retire", "Restore", "Delete"]) expect(screen.getByRole("button", { name })).toBeDisabled();
+    for (const name of ["Retire", "Restore", "Delete"])
+      expect(screen.getByRole("button", { name })).toBeDisabled();
     for (const [menu, items] of [
       [EDIT, ["Write in Markdown", "Write as plain text", "State language", "Find and replace"]],
       [SCHEDULE, ["Set due date", "Forget progress"]],
@@ -189,7 +255,8 @@ describe("CardBulkActions", () => {
     ] as const) {
       fireEvent.click(screen.getByRole("button", { name: menu }));
       expect(screen.getAllByRole("menuitem").map((item) => item.textContent)).toEqual(items);
-      for (const item of screen.getAllByRole("menuitem")) expect(item).toHaveAttribute("aria-disabled", "true");
+      for (const item of screen.getAllByRole("menuitem"))
+        expect(item).toHaveAttribute("aria-disabled", "true");
       // Held, an item does nothing, and the menu stays open until it is left.
       fireEvent.click(screen.getByRole("menuitem", { name: items[0] }));
       fireEvent.keyDown(screen.getByRole("menuitem", { name: items[0] }), { key: "Escape" });
@@ -207,7 +274,9 @@ describe("CardBulkActions", () => {
     fireEvent.click(screen.getByRole("button", { name: "Move 2 cards" }));
     expect(onTransfer).toHaveBeenCalledWith({ to: nouns, mode: "move", keepProgress: true });
     // Not made: the form stays.
-    await waitFor(() => expect(screen.getByRole("button", { name: "Move 2 cards" })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Move 2 cards" })).toBeInTheDocument(),
+    );
 
     onTransfer.mockResolvedValue(true);
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));

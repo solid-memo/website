@@ -43,12 +43,26 @@ export type TrialOpening = { ok: true; trial: Trial } | { ok: false; problems: R
  * user's (`prefs`), then the draft started as a course, or imported as a
  * deck, as the library's releases are.
  */
-export async function startTrial(sandbox: TrialSandbox, draft: ReleaseDraft, prefs: StudyPreferences): Promise<Trial> {
+export async function startTrial(
+  sandbox: TrialSandbox,
+  draft: ReleaseDraft,
+  prefs: StudyPreferences,
+): Promise<Trial> {
   const { useCases, pod } = sandbox;
   await pod.start();
-  const instance = await useCases.createInstance(TRIAL_SESSION, { containerUrl: TRIAL_INSTANCE_URL, name: "Trial", registrationTarget: "private" });
-  await useCases.savePreferences(instance.url, { ...DEFAULT_PREFERENCES, answerScale: prefs.answerScale, dayBoundaryHour: prefs.dayBoundaryHour });
+  const instance = await useCases.createInstance(TRIAL_SESSION, {
+    containerUrl: TRIAL_INSTANCE_URL,
+    name: "Trial",
+    registrationTarget: "private",
+  });
+  await useCases.savePreferences(instance.url, {
+    ...DEFAULT_PREFERENCES,
+    answerScale: prefs.answerScale,
+    dayBoundaryHour: prefs.dayBoundaryHour,
+  });
   const offered = draftLibraryDeck(draft);
-  const deck = draft.course ? await useCases.startCourse(instance.url, offered) : await useCases.importLibraryDeck(instance.url, offered);
+  const deck = draft.course
+    ? await useCases.startCourse(instance.url, offered)
+    : await useCases.importLibraryDeck(instance.url, offered);
   return { useCases, instance, deck };
 }

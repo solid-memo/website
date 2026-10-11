@@ -61,7 +61,9 @@ export function textOfDraft(
   const written = draft.filter((entry) => entry.value.trim() !== "");
   const missing = written.find((entry) => entry.tag === null);
   if (missing !== undefined) return { missing };
-  return { text: Object.fromEntries(written.map(({ value, tag }) => [tag!, trim ? value.trim() : value])) };
+  return {
+    text: Object.fromEntries(written.map(({ value, tag }) => [tag!, trim ? value.trim() : value])),
+  };
 }
 
 /**
@@ -196,7 +198,8 @@ export function LangTextField({
   const addRef = useRef<HTMLButtonElement>(null);
   useLayoutEffect(() => {
     if (focusNext.current === null) return;
-    const target = focusNext.current === "add" ? addRef.current : document.getElementById(focusNext.current);
+    const target =
+      focusNext.current === "add" ? addRef.current : document.getElementById(focusNext.current);
     focusNext.current = null;
     target?.focus();
   });
@@ -221,7 +224,10 @@ export function LangTextField({
   /** The entry said to be in `tag`, not the language it showed: refused when another entry has it. */
   function retag(entry: DraftEntry, tag: string) {
     if (draft.some((e) => e !== entry && e.tag === tag)) {
-      setTaken({ entry: entry.id, error: new AppError("textLanguageTaken", { language: name(tag) }) });
+      setTaken({
+        entry: entry.id,
+        error: new AppError("textLanguageTaken", { language: name(tag) }),
+      });
       return;
     }
     change(draft.map((e) => (e === entry ? { ...e, tag } : e)));
@@ -296,7 +302,9 @@ export function LangTextField({
             role={role}
             suggestions={suggestions}
             unstated={entry.tag === ""}
-            errorId={entry.id === missing?.id ? errorId : entry.id === taken?.entry ? takenId : undefined}
+            errorId={
+              entry.id === missing?.id ? errorId : entry.id === taken?.entry ? takenId : undefined
+            }
             disabled={disabled}
             onChange={(tag) => retag(entry, tag)}
           />
@@ -328,9 +336,13 @@ export function LangTextField({
             <div key={entry.id} class="translation">
               {entryFields(
                 entry,
-                tag === null ? t("language.translationUnstated") : t("language.translationLabel", { language: name(tag) }),
+                tag === null
+                  ? t("language.translationUnstated")
+                  : t("language.translationLabel", { language: name(tag) }),
                 <button type="button" onClick={() => remove(entry)} disabled={disabled}>
-                  {tag === null ? t("language.removeUnstated") : t("language.remove", { language: name(tag) })}
+                  {tag === null
+                    ? t("language.removeUnstated")
+                    : t("language.remove", { language: name(tag) })}
                 </button>,
               )}
             </div>

@@ -99,8 +99,7 @@ const LANGUAGE = /^[a-z0-9+#-]{1,20}$/;
  * other variation selectors, and Khmer's invisible vowels. They are
  * shown as visible markers there.
  */
-const HIDDEN_CONTROLS =
-  /[\p{Cf}͏ᅟᅠ឴឵᠋-᠏ㅤ︀-️ﾠ\u{E0100}-\u{E01EF}]/gu;
+const HIDDEN_CONTROLS = /[\p{Cf}͏ᅟᅠ឴឵᠋-᠏ㅤ︀-️ﾠ\u{E0100}-\u{E01EF}]/gu;
 
 /** The text with its hidden characters (HIDDEN_CONTROLS) shown as markers such as ⟨U+202E⟩ or ⟨U+E0041⟩. */
 export function visibleControls(text: string): string {
@@ -203,7 +202,11 @@ function tooCostly(text: string): boolean {
     let opened = 0;
     // An opener is nested after a list marker on its line, or on an indented line.
     let inItem = /^[ \t]/.test(line);
-    for (let opener = CONTAINER_OPENER.exec(line); opener !== null; opener = CONTAINER_OPENER.exec(line)) {
+    for (
+      let opener = CONTAINER_OPENER.exec(line);
+      opener !== null;
+      opener = CONTAINER_OPENER.exec(line)
+    ) {
       if (++opened > MAX_LINE_NESTING) return true;
       if (inItem && ++nested > MAX_NESTED_LINES) return true;
       if (!opener[0].includes(">")) inItem = true;
@@ -225,7 +228,8 @@ function definitions(tree: Root): Map<string, string> {
   const stack: Nodes[] = [tree];
   while (stack.length > 0) {
     const node = stack.pop()!;
-    if (node.type === "definition" && !found.has(node.identifier)) found.set(node.identifier, node.url);
+    if (node.type === "definition" && !found.has(node.identifier))
+      found.set(node.identifier, node.url);
     if ("children" in node) stack.push(...[...(node as Parents).children].reverse());
   }
   return found;
@@ -253,7 +257,12 @@ class Fold {
         return [{ type: "paragraph", children: this.inlines(node.children, depth + 1, false) }];
       case "heading":
         // A heading in data must not add to the page's outline.
-        return [{ type: "paragraph", children: [{ type: "strong", children: this.inlines(node.children, depth + 1, false) }] }];
+        return [
+          {
+            type: "paragraph",
+            children: [{ type: "strong", children: this.inlines(node.children, depth + 1, false) }],
+          },
+        ];
       case "thematicBreak":
         return [{ type: "rule" }];
       case "blockquote":
@@ -287,7 +296,9 @@ class Fold {
           {
             type: "table",
             align: node.align!.map((align) => align ?? null),
-            rows: rows.map((row) => row.map((cell) => this.inlines(cell.children, depth + 1, false))),
+            rows: rows.map((row) =>
+              row.map((cell) => this.inlines(cell.children, depth + 1, false)),
+            ),
           },
         ];
       }
@@ -349,7 +360,9 @@ class Fold {
     return {
       type: "paragraph",
       children: lines.flatMap((line, index): MdInline[] =>
-        index === 0 ? [{ type: "text", value: line }] : [{ type: "break" }, { type: "text", value: line }],
+        index === 0
+          ? [{ type: "text", value: line }]
+          : [{ type: "break" }, { type: "text", value: line }],
       ),
     };
   }
@@ -372,7 +385,8 @@ function rowsOf(table: Table): TableCell[][] | null {
  * run of backslashes (an odd one escapes its `&`). Whether CommonMark
  * decodes it, a name it knows, is asked of the parser (decodes).
  */
-const REFERENCE = /(?<!\\)(?:\\\\)*(&(?:#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6}|[A-Za-z][A-Za-z0-9]{0,31});)/g;
+const REFERENCE =
+  /(?<!\\)(?:\\\\)*(&(?:#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6}|[A-Za-z][A-Za-z0-9]{0,31});)/g;
 
 const decoded = new Map<string, boolean>();
 
@@ -393,7 +407,8 @@ function phrasingText(nodes: readonly PhrasingContent[]): string {
   const stack: Nodes[] = [...nodes].reverse();
   while (stack.length > 0) {
     const node = stack.pop()!;
-    if (node.type === "text" || node.type === "inlineCode" || node.type === "html") text += node.value;
+    if (node.type === "text" || node.type === "inlineCode" || node.type === "html")
+      text += node.value;
     else if (node.type === "image" || node.type === "imageReference") text += node.alt!;
     else if (node.type === "break") text += " ";
     // Emphasis and strong: what else a link's text may hold.
@@ -442,7 +457,8 @@ class Inspect {
         return;
       case "text":
         for (const [, reference] of this.source(node).matchAll(REFERENCE)) {
-          if (decodes(reference!)) this.notes.push({ type: "characterReference", source: reference! });
+          if (decodes(reference!))
+            this.notes.push({ type: "characterReference", source: reference! });
         }
         return;
       case "link":

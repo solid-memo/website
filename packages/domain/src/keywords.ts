@@ -59,7 +59,9 @@ export function noKeywords(keywords: LangTexts | undefined): boolean {
  */
 export function sameKeywords(a: LangTexts | undefined, b: LangTexts | undefined): boolean {
   const tags = (k: LangTexts | undefined) =>
-    Object.keys(k ?? {}).filter((tag) => k![tag].length > 0).sort();
+    Object.keys(k ?? {})
+      .filter((tag) => k![tag].length > 0)
+      .sort();
   const tagsA = tags(a);
   const tagsB = tags(b);
   return (

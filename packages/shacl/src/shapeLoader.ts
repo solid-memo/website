@@ -47,7 +47,9 @@ export function createShapeLoader({
       return fetchOnce(new URL(descriptor.shapeDocument, shapesBaseUrl).href);
     },
     loadProfile(profile) {
-      return Promise.all(PROFILES[profile].map((path) => fetchOnce(new URL(path, vendorBaseUrl).href)));
+      return Promise.all(
+        PROFILES[profile].map((path) => fetchOnce(new URL(path, vendorBaseUrl).href)),
+      );
     },
     loadReferenceData() {
       return Promise.all(REFERENCE_DATA.map((path) => fetchOnce(new URL(path, vocabBaseUrl).href)));

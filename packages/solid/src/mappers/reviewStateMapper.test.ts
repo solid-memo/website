@@ -32,9 +32,19 @@ describe("review state mapping", () => {
 
   it("keeps the two directions of a card under subjects of their own", () => {
     const reverse: ReviewState = { ...state, direction: "back-to-front" };
-    const written = withReviewStates(createSolidDataset(), documents, [state, reverse], () => "unused");
-    expect(written.subjects).toEqual([`${REVIEWS_DOC}#card-1`, `${REVIEWS_DOC}#card-1@back-to-front`]);
-    expect(toReviewState(getThing(written.dataset, `${REVIEWS_DOC}#card-1@back-to-front`)!, documents)).toEqual(reverse);
+    const written = withReviewStates(
+      createSolidDataset(),
+      documents,
+      [state, reverse],
+      () => "unused",
+    );
+    expect(written.subjects).toEqual([
+      `${REVIEWS_DOC}#card-1`,
+      `${REVIEWS_DOC}#card-1@back-to-front`,
+    ]);
+    expect(
+      toReviewState(getThing(written.dataset, `${REVIEWS_DOC}#card-1@back-to-front`)!, documents),
+    ).toEqual(reverse);
   });
 
   it("rejects subjects that are not sm:ReviewState", () => {
@@ -64,8 +74,7 @@ describe("review state mapping", () => {
       ...thing,
       predicates: Object.fromEntries(
         Object.entries(thing.predicates).filter(
-          ([predicate]) =>
-            predicate !== `https://solid-memo.com/ns/vocab/v1.ttl#${field}`,
+          ([predicate]) => predicate !== `https://solid-memo.com/ns/vocab/v1.ttl#${field}`,
         ),
       ),
     };
@@ -103,8 +112,7 @@ describe("review state mapping", () => {
       ...thing,
       predicates: Object.fromEntries(
         Object.entries(thing.predicates).filter(
-          ([predicate]) =>
-            predicate !== `https://solid-memo.com/ns/vocab/v1.ttl#${field}`,
+          ([predicate]) => predicate !== `https://solid-memo.com/ns/vocab/v1.ttl#${field}`,
         ),
       ),
     };
@@ -117,13 +125,26 @@ describe("what a review state is of", () => {
   const without = (predicate: string) => removeAll(written, predicate);
 
   it("goes by sm:reviewOf and sm:reviewDirection, whatever the subject", () => {
-    const named = toReviewStateThing(documents, { ...state, cardId: "card-2", direction: "back-to-front" }, null, `${REVIEWS_DOC}#card-1`);
-    expect(toReviewState(named, documents)).toMatchObject({ cardId: "card-2", direction: "back-to-front" });
+    const named = toReviewStateThing(
+      documents,
+      { ...state, cardId: "card-2", direction: "back-to-front" },
+      null,
+      `${REVIEWS_DOC}#card-1`,
+    );
+    expect(toReviewState(named, documents)).toMatchObject({
+      cardId: "card-2",
+      direction: "back-to-front",
+    });
   });
 
   it("falls back to the fragment rule for what a state leaves out", () => {
-    expect(toReviewState(without(SM.reviewOf), documents)).toMatchObject({ cardId: "card-1", direction: "back-to-front" });
-    expect(toReviewState(without(SM.reviewDirection), documents)).toMatchObject({ direction: "back-to-front" });
+    expect(toReviewState(without(SM.reviewOf), documents)).toMatchObject({
+      cardId: "card-1",
+      direction: "back-to-front",
+    });
+    expect(toReviewState(without(SM.reviewDirection), documents)).toMatchObject({
+      direction: "back-to-front",
+    });
     const elsewhere = toReviewStateThing(documents, state, null, `${REVIEWS_DOC}#rs-1`);
     expect(toReviewState(removeAll(elsewhere, SM.reviewDirection), documents)).toMatchObject({
       cardId: "card-1",
@@ -133,29 +154,49 @@ describe("what a review state is of", () => {
 
   it("reads a state of no scheduler, or SM-2's, and no other's", () => {
     expect(toReviewState(without(SM.scheduler), documents)).not.toBeNull();
-    const fsrs = buildThing(without(SM.scheduler)).addUrl(SM.scheduler, "https://fsrs.example/ns#fsrs").build();
+    const fsrs = buildThing(without(SM.scheduler))
+      .addUrl(SM.scheduler, "https://fsrs.example/ns#fsrs")
+      .build();
     expect(toReviewState(fsrs, documents)).toBeNull();
     // A literal is no SM-2 IRI, even one that spells it.
     for (const literal of ["fsrs", SM.sm2]) {
-      const named = buildThing(without(SM.scheduler)).addStringNoLocale(SM.scheduler, literal).build();
+      const named = buildThing(without(SM.scheduler))
+        .addStringNoLocale(SM.scheduler, literal)
+        .build();
       expect(toReviewState(named, documents)).toBeNull();
     }
   });
 
   it("names its card in a cards document the deck had before an upgrade moved it", () => {
-    const upgraded = { ...documents, cardsDocumentUrl: "https://pod.example/solid-memo/a/decks/deck-1-u1.ttl" };
-    const elsewhere = toReviewStateThing(documents, { ...state, cardId: "card-2" }, null, `${REVIEWS_DOC}#rs-1`);
+    const upgraded = {
+      ...documents,
+      cardsDocumentUrl: "https://pod.example/solid-memo/a/decks/deck-1-u1.ttl",
+    };
+    const elsewhere = toReviewStateThing(
+      documents,
+      { ...state, cardId: "card-2" },
+      null,
+      `${REVIEWS_DOC}#rs-1`,
+    );
     expect(toReviewState(elsewhere, upgraded)).toMatchObject({ cardId: "card-2" });
   });
 
   it("is no state of the deck's when it names a card of another document, or no card", () => {
-    expect(toReviewState(written, { ...documents, id: "deck-2", cardsDocumentUrl: "https://pod.example/solid-memo/a/decks/deck-2.ttl" })).toBeNull();
+    expect(
+      toReviewState(written, {
+        ...documents,
+        id: "deck-2",
+        cardsDocumentUrl: "https://pod.example/solid-memo/a/decks/deck-2.ttl",
+      }),
+    ).toBeNull();
     const noFragment = buildThing(without(SM.reviewOf)).addUrl(SM.reviewOf, CARDS_DOC).build();
     expect(toReviewState(noFragment, documents)).toBeNull();
   });
 
   it("is not read with a direction other than front to back or back to front", () => {
-    const both = buildThing(without(SM.reviewDirection)).addUrl(SM.reviewDirection, SM.bidirectional).build();
+    const both = buildThing(without(SM.reviewDirection))
+      .addUrl(SM.reviewDirection, SM.bidirectional)
+      .build();
     expect(toReviewState(both, documents)).toBeNull();
   });
 });

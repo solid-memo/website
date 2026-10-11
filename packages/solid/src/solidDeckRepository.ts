@@ -36,7 +36,13 @@ import { isDeckOutdated, isOutdated, upgradeCard } from "@solid-memo/domain/migr
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { CARD_V5 } from "@solid-memo/vocab/descriptors.generated";
 import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
-import { deleteDataset, getSolidDatasetOrNull, PreconditionFailedError, saveDataset, versionOf } from "./datasets";
+import {
+  deleteDataset,
+  getSolidDatasetOrNull,
+  PreconditionFailedError,
+  saveDataset,
+  versionOf,
+} from "./datasets";
 import { DCTERMS, SM } from "./vocab";
 import {
   deckSubjects,
@@ -117,8 +123,7 @@ export function createSolidDeckRepository({
 
     async saveCatalog(instanceUrl, catalog) {
       const catalogUrl = catalogUrlOf(instanceUrl);
-      const dataset =
-        (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
+      const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
       await save(catalogUrl, withCatalog(dataset, catalogUrl, catalog), [
         `${catalogUrl}#catalog`,
         catalog.publisher.webId,
@@ -170,11 +175,13 @@ export function createSolidDeckRepository({
       const written: Deck = { ...deck, formatVersion: DECK_FORMAT_VERSION };
       for (let attempt = 1; ; attempt++) {
         const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
-        if (getThing(dataset, deck.url) !== null) throw new PreconditionFailedError(deck.url, "absent");
+        if (getThing(dataset, deck.url) !== null)
+          throw new PreconditionFailedError(deck.url, "absent");
         // sm:completedChapter is no shape's: added beside the entry, as completeChapter adds it.
         let updated = withDeck(dataset, written);
         const entry = buildThing(getThing(updated, deck.url)!);
-        for (const chapter of deck.completedChapters ?? []) entry.addIri(SM.completedChapter, chapter);
+        for (const chapter of deck.completedChapters ?? [])
+          entry.addIri(SM.completedChapter, chapter);
         updated = setThing(updated, entry.build());
         try {
           // If-Match the read above: the catalog changed elsewhere meanwhile is read and the entry added again.
@@ -214,7 +221,11 @@ export function createSolidDeckRepository({
         const before = buildTree(stored);
         const after = applyDeckTreeEdit(before, edit);
         if (after === before) return after;
-        const { dataset: updated, subjects } = withTreeChanges(dataset, catalogUrl, treeChanges(stored, after));
+        const { dataset: updated, subjects } = withTreeChanges(
+          dataset,
+          catalogUrl,
+          treeChanges(stored, after),
+        );
         // Only the groups and the catalog are checked: a deck's position is
         // no shape's, and a deck set aside beside the moved one must not stop it.
         await checkWrite(updated, subjects, "pod");
@@ -230,10 +241,7 @@ export function createSolidDeckRepository({
     },
 
     async listCards(deck): Promise<Card[]> {
-      const dataset = await getSolidDatasetOrNull(
-        deck.cardsDocumentUrl,
-        fetch,
-      );
+      const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       if (dataset === null) return [];
       return toCards(dataset);
     },
@@ -254,18 +262,14 @@ export function createSolidDeckRepository({
         formatVersion: CARD_FORMAT_VERSION,
       };
       const dataset =
-        (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch)) ??
-        createSolidDataset();
+        (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch)) ?? createSolidDataset();
       const written = withCard(dataset, deck, card, null);
       await saveCardsDocument(deck, written.dataset, written.subjects);
       return card;
     },
 
     async updateCard(deck, card, content): Promise<Card> {
-      const dataset = await getSolidDatasetOrNull(
-        deck.cardsDocumentUrl,
-        fetch,
-      );
+      const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       if (dataset === null) {
         throw new AppError("cardsDocumentGone", { deck: deck.title });
       }
@@ -332,8 +336,14 @@ export function createSolidDeckRepository({
     async applyCardChanges(deck, changes, { whole, version } = {}): Promise<void> {
       const read = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       // Changes made from an earlier read go only to the document as it was then: a later edit is not undone.
-      if (version !== undefined && (read === null ? ABSENT_VERSION : (versionOf(read) ?? null)) !== version) {
-        throw new PreconditionFailedError(deck.cardsDocumentUrl, version === ABSENT_VERSION ? "absent" : "unchanged");
+      if (
+        version !== undefined &&
+        (read === null ? ABSENT_VERSION : (versionOf(read) ?? null)) !== version
+      ) {
+        throw new PreconditionFailedError(
+          deck.cardsDocumentUrl,
+          version === ABSENT_VERSION ? "absent" : "unchanged",
+        );
       }
       const changed = withCardChanges(read ?? createSolidDataset(), deck, changes);
       await saveCardsDocument(deck, changed.dataset, changed.subjects, { whole });
@@ -341,17 +351,23 @@ export function createSolidDeckRepository({
 
     async readDeck(deckUrl) {
       const dataset = await getSolidDatasetOrNull(documentUrlOf(deckUrl), fetch);
-      return dataset === null ? null : (toDecks(dataset).find((deck) => deck.url === deckUrl) ?? null);
+      return dataset === null
+        ? null
+        : (toDecks(dataset).find((deck) => deck.url === deckUrl) ?? null);
     },
 
     async upgradeDeckEntry(current, next): Promise<Deck> {
       const catalogUrl = documentUrlOf(current.url);
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-      const stored = dataset === null ? undefined : toDecks(dataset).find((deck) => deck.url === current.url);
+      const stored =
+        dataset === null ? undefined : toDecks(dataset).find((deck) => deck.url === current.url);
       if (dataset === null || stored === undefined || !sameDeckState(stored, current)) {
         throw new AppError("deckChangedDuringUpgrade", { url: current.url });
       }
-      const written: Deck = { ...withDeckChanges(stored, current, next), formatVersion: DECK_FORMAT_VERSION };
+      const written: Deck = {
+        ...withDeckChanges(stored, current, next),
+        formatVersion: DECK_FORMAT_VERSION,
+      };
       // The write carries If-Match of the read above: the entry changes as it was checked, or not at all.
       await save(catalogUrl, withDeck(dataset, written), deckSubjects(written));
       return written;
@@ -364,7 +380,9 @@ export function createSolidDeckRepository({
     completeChapter(deck, chapterUrl) {
       return editCompletedChapters(deck, (completed) =>
         // Completed in any release: a chapter keeps its fragment id from one release to the next.
-        completed.some((url) => fragmentIdOf(url) === fragmentIdOf(chapterUrl)) ? null : { add: [chapterUrl], remove: [] },
+        completed.some((url) => fragmentIdOf(url) === fragmentIdOf(chapterUrl))
+          ? null
+          : { add: [chapterUrl], remove: [] },
       );
     },
 
@@ -382,17 +400,15 @@ export function createSolidDeckRepository({
     },
 
     async removeCard(deck, card): Promise<void> {
-      const dataset = await getSolidDatasetOrNull(
-        deck.cardsDocumentUrl,
-        fetch,
-      );
+      const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       if (dataset !== null) {
-        await saveDataset(deck.cardsDocumentUrl, partOfDeck(withoutCard(dataset, card.url), deck), fetch);
+        await saveDataset(
+          deck.cardsDocumentUrl,
+          partOfDeck(withoutCard(dataset, card.url), deck),
+          fetch,
+        );
       }
-      const reviews = await getSolidDatasetOrNull(
-        deck.reviewsDocumentUrl,
-        fetch,
-      );
+      const reviews = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
       if (reviews !== null) {
         // Its states both ways, whether they name it (sm:reviewOf) or are named after it.
         const updated = withoutReviewStates(reviews, deck, [
@@ -422,7 +438,10 @@ export function createSolidDeckRepository({
     const catalogUrl = documentUrlOf(deck.url);
     for (let attempt = 1; ; attempt++) {
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-      const stored = dataset === null ? undefined : toDecks(dataset).find((candidate) => candidate.url === deck.url);
+      const stored =
+        dataset === null
+          ? undefined
+          : toDecks(dataset).find((candidate) => candidate.url === deck.url);
       if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
       const completed = stored.completedChapters ?? [];
       const changed = change(completed);
@@ -459,9 +478,15 @@ export function createSolidDeckRepository({
     const written = decks.map((deck): Deck => ({ ...deck, formatVersion: DECK_FORMAT_VERSION }));
     for (const [catalogUrl, inDocument] of byDocument(written)) {
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-      const gone = inDocument.find((deck) => dataset === null || getThing(dataset, deck.url) === null);
+      const gone = inDocument.find(
+        (deck) => dataset === null || getThing(dataset, deck.url) === null,
+      );
       if (gone !== undefined) throw new AppError("deckGone", { deck: gone.title });
-      await save(catalogUrl, inDocument.reduce(withDeck, dataset!), inDocument.flatMap(deckSubjects));
+      await save(
+        catalogUrl,
+        inDocument.reduce(withDeck, dataset!),
+        inDocument.flatMap(deckSubjects),
+      );
     }
     return written;
   }
@@ -475,7 +500,9 @@ export function createSolidDeckRepository({
     for (const [catalogUrl, inDocument] of byDocument(decks)) {
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
       const leaving = new Set(inDocument.map((deck) => deck.url));
-      const used = documentsInUse(dataset === null ? [] : toDecks(dataset).filter((other) => !leaving.has(other.url)));
+      const used = documentsInUse(
+        dataset === null ? [] : toDecks(dataset).filter((other) => !leaving.has(other.url)),
+      );
       const unused = [...documentsInUse(inDocument)].filter((url) => !used.has(url));
       for (const url of unused) await deleteDocumentIfPresent(url, fetch);
       if (dataset === null) continue;
@@ -518,9 +545,7 @@ export function createSolidDeckRepository({
       direction: source?.direction ?? DEFAULT_DECK_DIRECTION,
       authors: source?.authors ?? [],
       ...(source?.license === undefined ? {} : { license: source.license }),
-      ...(source?.description === undefined
-        ? {}
-        : { description: source.description }),
+      ...(source?.description === undefined ? {} : { description: source.description }),
       ...(source === undefined ? {} : { sourceUrl: source.url }),
       ...(source === undefined || source.themes.length === 0 ? {} : { themes: source.themes }),
       ...(source === undefined || noKeywords(source.keywords)
@@ -538,15 +563,27 @@ export function createSolidDeckRepository({
   function withCardChanges(
     dataset: SolidDataset,
     deck: Deck,
-    { save: saved, remove }: { save: (CardContent & { id: string; createdAt?: string; retired?: true })[]; remove: string[] },
+    {
+      save: saved,
+      remove,
+    }: {
+      save: (CardContent & { id: string; createdAt?: string; retired?: true })[];
+      remove: string[];
+    },
   ): { dataset: SolidDataset; subjects: string[] } {
     const urlOf = (id: string) => `${deck.cardsDocumentUrl}#${id}`;
     let updated = dataset;
     const subjects: string[] = [];
     for (const card of saved) {
       const existing = getThing(updated, urlOf(card.id));
-      const createdAt = existing === null ? undefined : getDatetime(existing, DCTERMS.created)?.toISOString();
-      const written = withCard(updated, deck, { ...card, ...(createdAt === undefined ? {} : { createdAt }) }, existing);
+      const createdAt =
+        existing === null ? undefined : getDatetime(existing, DCTERMS.created)?.toISOString();
+      const written = withCard(
+        updated,
+        deck,
+        { ...card, ...(createdAt === undefined ? {} : { createdAt }) },
+        existing,
+      );
       updated = written.dataset;
       subjects.push(...written.subjects);
     }
@@ -573,8 +610,16 @@ export function createSolidDeckRepository({
       before,
       distractors.map((distractor) => `${deck.cardsDocumentUrl}#${distractor.id}`),
     );
-    const written = withDistractors(setThing(dataset, thing), deck.cardsDocumentUrl, distractors, before);
-    return { dataset: written.dataset, subjects: [`${deck.cardsDocumentUrl}#${card.id}`, ...written.subjects] };
+    const written = withDistractors(
+      setThing(dataset, thing),
+      deck.cardsDocumentUrl,
+      distractors,
+      before,
+    );
+    return {
+      dataset: written.dataset,
+      subjects: [`${deck.cardsDocumentUrl}#${card.id}`, ...written.subjects],
+    };
   }
 
   /**
@@ -583,13 +628,13 @@ export function createSolidDeckRepository({
    */
   async function registerDeck(deck: Deck): Promise<Deck> {
     const catalogUrl = documentUrlOf(deck.url);
-    const dataset =
-      (await getSolidDatasetOrNull(catalogUrl, fetch)) ??
-      createSolidDataset();
-    if (getThing(dataset, deck.url) !== null) throw new AppError("alreadyExists", { url: deck.url });
+    const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
+    if (getThing(dataset, deck.url) !== null)
+      throw new AppError("alreadyExists", { url: deck.url });
     const written = withDeck(dataset, deck);
     let builder = buildThing(getThing(written, deck.url)!);
-    for (const url of deck.completedChapters ?? []) builder = builder.addIri(SM.completedChapter, url);
+    for (const url of deck.completedChapters ?? [])
+      builder = builder.addIri(SM.completedChapter, url);
     await save(catalogUrl, setThing(written, builder.build()), deckSubjects(deck));
     return deck;
   }
@@ -621,8 +666,12 @@ export function createSolidDeckRepository({
  * finds the deck from its cards. Any other dcterms:isPartOf stays (another
  * app may point two decks at one document).
  */
-function partOfDeck(dataset: SolidDataset, deck: Pick<Deck, "url" | "cardsDocumentUrl">): SolidDataset {
-  const document = getThing(dataset, deck.cardsDocumentUrl) ?? createThing({ url: deck.cardsDocumentUrl });
+function partOfDeck(
+  dataset: SolidDataset,
+  deck: Pick<Deck, "url" | "cardsDocumentUrl">,
+): SolidDataset {
+  const document =
+    getThing(dataset, deck.cardsDocumentUrl) ?? createThing({ url: deck.cardsDocumentUrl });
   if (getUrlAll(document, DCTERMS.isPartOf).includes(deck.url)) return dataset;
   return setThing(dataset, buildThing(document).addUrl(DCTERMS.isPartOf, deck.url).build());
 }
@@ -631,7 +680,10 @@ function partOfDeck(dataset: SolidDataset, deck: Pick<Deck, "url" | "cardsDocume
 function withoutCard(dataset: SolidDataset, cardUrl: string): SolidDataset {
   const card = getThing(dataset, cardUrl);
   const distractors = card === null ? [] : getUrlAll(card, SM.distractor);
-  return [cardUrl, ...distractors].reduce((current, url) => removeUnlessNewer(current, url), dataset);
+  return [cardUrl, ...distractors].reduce(
+    (current, url) => removeUnlessNewer(current, url),
+    dataset,
+  );
 }
 
 /** Decks by the catalog document their entries are in, in the order first met. */
@@ -644,10 +696,7 @@ function byDocument<T extends Deck>(decks: readonly T[]): Map<string, T[]> {
   return result;
 }
 
-async function deleteDocumentIfPresent(
-  url: string,
-  fetch: typeof globalThis.fetch,
-): Promise<void> {
+async function deleteDocumentIfPresent(url: string, fetch: typeof globalThis.fetch): Promise<void> {
   const existing = await getSolidDatasetOrNull(url, fetch);
   if (existing !== null) {
     await deleteDataset(url, existing, fetch);

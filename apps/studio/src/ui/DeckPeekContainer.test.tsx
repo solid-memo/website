@@ -13,14 +13,22 @@ const verbs = makeDeck("deck-2", { en: "Verbs" });
 const languages = { url: `${instanceA.url}catalog.ttl#group-1`, title: { en: "Languages" } };
 const tree: DeckTree = {
   readOnly: false,
-  children: [{ kind: "group", group: languages, children: [{ kind: "deck", deck: kanji }] }, { kind: "deck", deck: verbs }],
+  children: [
+    { kind: "group", group: languages, children: [{ kind: "deck", deck: kanji }] },
+    { kind: "deck", deck: verbs },
+  ],
 };
 
 function renderPeek(useCases: UseCases, deckUrl: string | null) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <DeckPeekContainer useCases={useCases} instance={instanceA} route={{ screen: "home", instanceUrl: instanceA.url }} deckUrl={deckUrl} />
+      <DeckPeekContainer
+        useCases={useCases}
+        instance={instanceA}
+        route={{ screen: "home", instanceUrl: instanceA.url }}
+        deckUrl={deckUrl}
+      />
     </QueryClientProvider>,
   );
 }
@@ -28,20 +36,32 @@ function renderPeek(useCases: UseCases, deckUrl: string | null) {
 /** The peek's figures, by their names. */
 const figures = () => {
   const list = screen.getByRole("region", { name: /./ }).querySelector("dl")!;
-  return [...list.querySelectorAll("dt")].map((term) => `${term.textContent}: ${term.nextElementSibling!.textContent}`);
+  return [...list.querySelectorAll("dt")].map(
+    (term) => `${term.textContent}: ${term.nextElementSibling!.textContent}`,
+  );
 };
 
 describe("DeckPeekContainer", () => {
   it("shows the deck in short: its groups, cards in use, today's counts and when it last changed, with links to its tabs", async () => {
     const useCases = makeUseCasesFake({
       listDeckTree: vi.fn(async () => tree),
-      listCards: vi.fn(async (deck) => [makeCard(deck, "a"), makeCard(deck, "b"), makeCard(deck, "c", true)]),
+      listCards: vi.fn(async (deck) => [
+        makeCard(deck, "a"),
+        makeCard(deck, "b"),
+        makeCard(deck, "c", true),
+      ]),
       getStudyCounts: vi.fn(async () => ({ dueCount: 3, newCount: 7 })),
     });
     renderPeek(useCases, kanji.url);
     const peek = within(await screen.findByRole("region", { name: "Kanji N5" }));
     await waitFor(() =>
-      expect(figures()).toEqual(["Group: Languages", "Cards: 2", "Due today: 3", "New today: 7", "Last changed: September 21, 2026"]),
+      expect(figures()).toEqual([
+        "Group: Languages",
+        "Cards: 2",
+        "Due today: 3",
+        "New today: 7",
+        "Last changed: September 21, 2026",
+      ]),
     );
     expect(peek.getAllByRole("link").map((link) => link.textContent)).toEqual([
       "Cards – Kanji N5",
@@ -66,7 +86,14 @@ describe("DeckPeekContainer", () => {
     });
     renderPeek(useCases, verbs.url);
     await screen.findByRole("region", { name: "Verbs" });
-    await waitFor(() => expect(figures().slice(0, 4)).toEqual(["Group: Top level", "Cards: –Could not be read", "Due today: Counting…", "New today: Counting…"]));
+    await waitFor(() =>
+      expect(figures().slice(0, 4)).toEqual([
+        "Group: Top level",
+        "Cards: –Could not be read",
+        "Due today: Counting…",
+        "New today: Counting…",
+      ]),
+    );
   });
 
   it("says how to show a deck when none is at the cursor, or the one named is not the instance's", async () => {

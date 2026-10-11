@@ -46,7 +46,11 @@ export interface ReleasePublishingUseCases {
    * owner alone (`public` false), until makeReleasePublic. A draft
    * released already is draftReleased; a guest's, guestCannotPublish.
    */
-  publishRelease(draftUrl: string, targetUrl: string, markdownCheck: MarkdownCheck): Promise<PublishedRelease>;
+  publishRelease(
+    draftUrl: string,
+    targetUrl: string,
+    markdownCheck: MarkdownCheck,
+  ): Promise<PublishedRelease>;
   /** Make a release readable by everyone, again; publicAccessRefused when the pod will not. */
   makeReleasePublic(url: string): Promise<void>;
   /** Whether someone with no login can read the release at `url`. */
@@ -82,17 +86,30 @@ export function createReleasePublishingUseCases({
       if (isGuestUrl(draftUrl)) throw new AppError("guestCannotPublish");
       // Read once: what is checked is what is published, and what is marked released.
       const { draft, version } = await drafts.readReleaseDraft(draftUrl);
-      if (draft.root.releasedAs !== undefined) throw new AppError("draftReleased", { url: draft.root.releasedAs });
+      if (draft.root.releasedAs !== undefined)
+        throw new AppError("draftReleased", { url: draft.root.releasedAs });
       const check = await drafts.checkReleaseDraft(draft, markdownCheck, "pod", { shapes: true });
       const errors = checkProblems(check).filter((one) => one.severity === "error").length;
       if (errors > 0) throw new AppError("releaseHasErrors", { count: errors });
       // A draft names the instance it is in.
       const { instanceUrl } = draftPlaceOf(draftUrl)!;
       // Another draft's release is that draft's, though this one would state the same: never finished as this one's.
-      if ((await releaseDraftRepository.list(instanceUrl)).some((one) => one.releasedAs === targetUrl)) throw new AppError("releaseTaken", { url: targetUrl });
-      const turtle = await releaseDraftRepository.assemble(draftUrl, targetUrl, now().toISOString(), version);
+      if (
+        (await releaseDraftRepository.list(instanceUrl)).some((one) => one.releasedAs === targetUrl)
+      )
+        throw new AppError("releaseTaken", { url: targetUrl });
+      const turtle = await releaseDraftRepository.assemble(
+        draftUrl,
+        targetUrl,
+        now().toISOString(),
+        version,
+      );
       const { public: shared } = await releasePublisher.publish(instanceUrl, turtle, targetUrl);
-      await releaseDraftRepository.applyChanges(draft, { ...draft, root: { ...draft.root, releasedAs: targetUrl } }, version);
+      await releaseDraftRepository.applyChanges(
+        draft,
+        { ...draft, root: { ...draft.root, releasedAs: targetUrl } },
+        version,
+      );
       return { url: targetUrl, public: shared };
     },
 
@@ -106,7 +123,8 @@ export function createReleasePublishingUseCases({
 
     async downloadRelease(draftUrl, targetUrl) {
       const { name, version } = draftPlaceOf(draftUrl)!;
-      const url = targetUrl ?? libraryReleaseUrl((await deckLibrary.readLibraryIndex()).url, name, version);
+      const url =
+        targetUrl ?? libraryReleaseUrl((await deckLibrary.readLibraryIndex()).url, name, version);
       const turtle = await releaseDraftRepository.assemble(draftUrl, url, now().toISOString());
       const file = releaseFileName(name, version);
       fileExchange.save(file, "text/turtle", turtle);
@@ -115,7 +133,9 @@ export function createReleasePublishingUseCases({
 
     async listPublishedReleases(instanceUrl) {
       const urls = await releasePublisher.listPublished(instanceUrl);
-      return Promise.all(urls.map(async (url) => ({ url, public: await releasePublisher.isPublic(url) })));
+      return Promise.all(
+        urls.map(async (url) => ({ url, public: await releasePublisher.isPublic(url) })),
+      );
     },
   };
 }

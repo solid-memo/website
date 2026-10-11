@@ -43,7 +43,14 @@ export function ExternalLink({
     );
   }
   return (
-    <a class={className} href={url} title={title} dir={dir} target="_blank" rel="noopener noreferrer">
+    <a
+      class={className}
+      href={url}
+      title={title}
+      dir={dir}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       {text}
       <ExternalIcon />
       <span class="visually-hidden"> {t("common.opensInNewTab")}</span>

@@ -36,8 +36,12 @@ describe("KeptFolderNotice", () => {
       </I18nProvider>,
     );
     const [other, releases] = screen.getAllByRole("status");
-    expect(other).toHaveTextContent("Solid Memo tog bort sina egna data och behöll mappen i din Pod");
+    expect(other).toHaveTextContent(
+      "Solid Memo tog bort sina egna data och behöll mappen i din Pod",
+    );
     expect(other).toHaveTextContent("en annan app har lagt filer där.");
-    expect(releases).toHaveTextContent("där finns de utgåvor som publicerats från den, som andra kan läsa.");
+    expect(releases).toHaveTextContent(
+      "där finns de utgåvor som publicerats från den, som andra kan läsa.",
+    );
   });
 });

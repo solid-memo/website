@@ -1,9 +1,6 @@
 import type { ComponentChildren } from "preact";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import {
-  problemTarget,
-  type ProblemTarget,
-} from "@solid-memo/domain/release/releaseCheck";
+import { problemTarget, type ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";

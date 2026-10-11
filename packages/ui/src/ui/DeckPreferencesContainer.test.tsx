@@ -55,10 +55,7 @@ describe("DeckPreferencesContainer", () => {
     });
     renderContainer(useCases);
     expect(screen.getByText("Loading preferences…")).toBeInTheDocument();
-    expect(await screen.findByLabelText("New cards per day")).toHaveAttribute(
-      "placeholder",
-      "7",
-    );
+    expect(await screen.findByLabelText("New cards per day")).toHaveAttribute("placeholder", "7");
     expect(useCases.getPreferences).toHaveBeenCalledWith(instance.url);
     expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute(
       "href",
@@ -92,7 +89,9 @@ describe("DeckPreferencesContainer", () => {
       }),
     );
     fireEvent.click(await screen.findByRole("button", { name: "Save preferences" }));
-    expect((await screen.findByText("A daily limit is a whole number, 0 or more.")).closest(".error")).toBeInTheDocument();
+    expect(
+      (await screen.findByText("A daily limit is a whole number, 0 or more.")).closest(".error"),
+    ).toBeInTheDocument();
     expect(onDone).not.toHaveBeenCalled();
   });
 
@@ -130,7 +129,10 @@ describe("DeckPreferencesContainer", () => {
   });
 
   it("removes the deck, refreshes the deck lists, then leaves", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const useCases = makeUseCasesFake();
     const { onDeckRemoved, queryClient } = renderContainer(useCases);
     const invalidate = vi.spyOn(queryClient, "invalidateQueries");
@@ -142,7 +144,10 @@ describe("DeckPreferencesContainer", () => {
   });
 
   it("shows a deck-remove error and stays", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const { onDeckRemoved } = renderContainer(
       makeUseCasesFake({
         removeDeck: vi.fn(async () => {
@@ -164,7 +169,9 @@ describe("DeckPreferencesContainer", () => {
         }),
       }),
     );
-    expect((await screen.findByText("preferences unreachable")).closest(".error")).toBeInTheDocument();
+    expect(
+      (await screen.findByText("preferences unreachable")).closest(".error"),
+    ).toBeInTheDocument();
   });
 
   describe("the deck's languages", () => {
@@ -182,16 +189,24 @@ describe("DeckPreferencesContainer", () => {
       const imported = { ...deck, sourceUrl: "https://solid-memo.com/decks/elements/v1.ttl" };
       const useCases = makeUseCasesFake({
         listCards: vi.fn(async () => [released, cardOf("cu", { "": "Cu" }, { "": "copper" })]),
-        deckRelease: vi.fn(async () => ({ cards: [{ ...released, formatVersion: 4 }] }) as unknown as LibraryDeckContent),
+        deckRelease: vi.fn(
+          async () =>
+            ({ cards: [{ ...released, formatVersion: 4 }] }) as unknown as LibraryDeckContent,
+        ),
       });
       renderContainer(useCases, imported);
-      expect(await screen.findByText("1 card front and 1 back do not say their language.")).toBeInTheDocument();
+      expect(
+        await screen.findByText("1 card front and 1 back do not say their language."),
+      ).toBeInTheDocument();
       expect(useCases.listCards).toHaveBeenCalledWith(imported);
     });
 
     it("states the languages chosen, reads the cards again and says how many changed", async () => {
       vi.stubGlobal("confirm", () => true);
-      let cards = [cardOf("a", { "": "水" }, { en: "water" }), cardOf("b", { "": "火" }, { en: "fire" })];
+      let cards = [
+        cardOf("a", { "": "水" }, { en: "water" }),
+        cardOf("b", { "": "火" }, { en: "fire" }),
+      ];
       const useCases = makeUseCasesFake({
         listCards: vi.fn(async () => cards),
         stateCardLanguages: vi.fn(async () => {
@@ -200,13 +215,17 @@ describe("DeckPreferencesContainer", () => {
         }),
       });
       renderContainer(useCases);
-      expect(await screen.findByText("2 card fronts and 0 backs do not say their language.")).toBeInTheDocument();
+      expect(
+        await screen.findByText("2 card fronts and 0 backs do not say their language."),
+      ).toBeInTheDocument();
       fireEvent.click(document.getElementById("deck-fronts-language")!);
       fireEvent.click(screen.getByRole("radio", { name: "Swedish — svenska (sv)" }));
       fireEvent.click(screen.getByRole("button", { name: "State the language" }));
       expect(await screen.findByText("Saved the language of 2 cards.")).toBeInTheDocument();
       expect(useCases.stateCardLanguages).toHaveBeenCalledWith(deck, { front: "sv" });
-      expect(screen.getByText("Every card says which language its text is in.")).toBeInTheDocument();
+      expect(
+        screen.getByText("Every card says which language its text is in."),
+      ).toBeInTheDocument();
       expect(useCases.listCards).toHaveBeenCalledTimes(2);
       vi.unstubAllGlobals();
     });
@@ -230,10 +249,17 @@ describe("DeckPreferencesContainer", () => {
     it("finds nothing to settle in a name or a note saved the same in English and another language", async () => {
       const same = { ...deck, title: { en: "Kanji N5", sv: "Kanji N5" } };
       const useCases = makeUseCasesFake({
-        listCards: vi.fn(async () => [{ ...cardOf("a", { ja: "水" }, { en: "water" }), frontNote: { en: "Kanji", sv: "Kanji" } }]),
+        listCards: vi.fn(async () => [
+          {
+            ...cardOf("a", { ja: "水" }, { en: "water" }),
+            frontNote: { en: "Kanji", sv: "Kanji" },
+          },
+        ]),
       });
       renderContainer(useCases, same, "languages");
-      expect(await screen.findByText("Every card says which language its text is in.")).toBeInTheDocument();
+      expect(
+        await screen.findByText("Every card says which language its text is in."),
+      ).toBeInTheDocument();
       expect(screen.queryByText(/saved the same/)).toBeNull();
       expect(screen.getByRole("heading", { name: "Languages" })).toHaveAttribute("data-arrival");
     });
@@ -246,7 +272,9 @@ describe("DeckPreferencesContainer", () => {
       });
       renderContainer(useCases);
       expect(await screen.findByText(/cards unreadable/)).toBeInTheDocument();
-      expect(screen.getByText("The languages of the cards could not be checked.")).toBeInTheDocument();
+      expect(
+        screen.getByText("The languages of the cards could not be checked."),
+      ).toBeInTheDocument();
       expect(screen.getAllByText(/cards unreadable/)).toHaveLength(1);
     });
 
@@ -259,7 +287,9 @@ describe("DeckPreferencesContainer", () => {
         }),
       });
       renderContainer(useCases, copy);
-      expect(await screen.findByText("The languages of the cards could not be checked.")).toBeInTheDocument();
+      expect(
+        await screen.findByText("The languages of the cards could not be checked."),
+      ).toBeInTheDocument();
       expect(screen.getByText(/library unreachable/)).toBeInTheDocument();
       expect(screen.queryByText("Checking the languages of the cards…")).toBeNull();
       expect(screen.queryByRole("button", { name: "State the language" })).toBeNull();

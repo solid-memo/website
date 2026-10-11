@@ -1,7 +1,13 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getBoolean, getThingAll, getUrlAll, type SolidDataset, type Thing } from "@inrupt/solid-client";
+import {
+  getBoolean,
+  getThingAll,
+  getUrlAll,
+  type SolidDataset,
+  type Thing,
+} from "@inrupt/solid-client";
 import { parseAuthor } from "@solid-memo/domain/author";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
@@ -45,18 +51,25 @@ const documents = new Map<string, Promise<SolidDataset>>();
 async function subjectsOf(url: string, type: string): Promise<{ all: string[]; inUse: string[] }> {
   if (!documents.has(url)) documents.set(url, getSolidDatasetLinear(url, { fetch: siteFetch }));
   const dataset = await documents.get(url)!;
-  const things = getThingAll(dataset).filter((thing: Thing) => getUrlAll(thing, RDF.type).includes(type));
+  const things = getThingAll(dataset).filter((thing: Thing) =>
+    getUrlAll(thing, RDF.type).includes(type),
+  );
   const id = (thing: Thing) => thing.url.slice(thing.url.indexOf("#") + 1);
   return {
     all: things.map(id).sort(),
-    inUse: things.filter((thing) => getBoolean(thing, OWL_DEPRECATED) !== true).map(id).sort(),
+    inUse: things
+      .filter((thing) => getBoolean(thing, OWL_DEPRECATED) !== true)
+      .map(id)
+      .sort(),
   };
 }
 
 it("lists every deck of the library", async () => {
   const decks = await library.listLibraryDecks();
   const names = new Set(releases.map((path) => path.split("/")[0]));
-  expect(decks.map((deck) => deck.seriesUrl).sort()).toEqual([...names].map((name) => `${DECKS}index.ttl#${name}`).sort());
+  expect(decks.map((deck) => deck.seriesUrl).sort()).toEqual(
+    [...names].map((name) => `${DECKS}index.ttl#${name}`).sort(),
+  );
 });
 
 it("offers newcomers at most one deck of the library, a course", async () => {
@@ -72,21 +85,34 @@ describe.each(releases)("decks/%s", (path) => {
     const content = await library.fetchLibraryDeck(url);
     const cards = await subjectsOf(url, SM.Card);
     expect(content.cards.map((card) => card.id).sort()).toEqual(cards.all);
-    expect(content.cards.filter((card) => card.retired !== true).map((card) => card.id).sort()).toEqual(cards.inUse);
+    expect(
+      content.cards
+        .filter((card) => card.retired !== true)
+        .map((card) => card.id)
+        .sort(),
+    ).toEqual(cards.inUse);
   });
 
   it("reads with its course outline, whose every question can be asked", async () => {
-    const [content, outline] = await Promise.all([library.fetchLibraryDeck(url), library.fetchCourseOutline(url)]);
+    const [content, outline] = await Promise.all([
+      library.fetchLibraryDeck(url),
+      library.fetchCourseOutline(url),
+    ]);
     const chapters = await subjectsOf(url, SM.Chapter);
     const steps = await subjectsOf(url, SM.Step);
     expect(outline.chapters.map((chapter) => chapter.id).sort()).toEqual(chapters.inUse);
-    expect(outline.chapters.flatMap((chapter) => chapter.steps.map((step) => step.id)).sort()).toEqual(steps.inUse);
+    expect(
+      outline.chapters.flatMap((chapter) => chapter.steps.map((step) => step.id)).sort(),
+    ).toEqual(steps.inUse);
     expect(content.isCourse === true).toBe(chapters.inUse.length > 0);
 
     const cards = new Map(content.cards.map((card) => [card.id, card]));
     for (const chapter of outline.chapters) {
       expect(chapter.steps.length).toBeGreaterThan(0);
-      for (const id of [...chapter.steps.flatMap((step) => step.questionIds), ...chapter.reviewQuestionIds]) {
+      for (const id of [
+        ...chapter.steps.flatMap((step) => step.questionIds),
+        ...chapter.reviewQuestionIds,
+      ]) {
         const card = cards.get(id);
         expect(card, `${chapter.id} asks ${id}`).toBeDefined();
         expect(card!.retired).toBeUndefined();
@@ -103,8 +129,14 @@ it("reads each deck's current release on its own, as from a link, as the index d
     const { sources: own, authors, ...read } = await library.readRelease(deck.url);
     // The index names no one's email (docs/deck-library.md, Contact); a release published before the rule does.
     const named = authors.map((author) => parseAuthor(author).name);
-    expect({ ...read, authors: named }, deck.url).toEqual({ ...described, releases: [releases.find((release) => release.url === deck.url)] });
+    expect({ ...read, authors: named }, deck.url).toEqual({
+      ...described,
+      releases: [releases.find((release) => release.url === deck.url)],
+    });
     // The index describes a source as every release does, the release as it does.
-    expect(own.map((source) => source.url), deck.url).toEqual(sources.map((source) => source.url));
+    expect(
+      own.map((source) => source.url),
+      deck.url,
+    ).toEqual(sources.map((source) => source.url));
   }
 }, 120_000);

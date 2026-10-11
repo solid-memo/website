@@ -52,6 +52,8 @@ describe("InterruptedMoveContainer", () => {
     expect(removing).toHaveAttribute("aria-disabled", "true");
     fireEvent.click(removing);
     expect(removeInterruptedGuestMove).toHaveBeenCalledTimes(2);
-    await waitFor(() => expect(screen.queryByRole("region", { name: "Interrupted move" })).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByRole("region", { name: "Interrupted move" })).toBeNull(),
+    );
   });
 });

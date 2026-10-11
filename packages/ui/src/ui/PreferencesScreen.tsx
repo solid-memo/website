@@ -75,22 +75,12 @@ export function PreferencesScreen({
 }) {
   const { t, locale, chooseLocale } = useI18n();
   const { choice: themeChoice, chooseTheme } = useTheme();
-  const [newCardsPerDay, setNewCardsPerDay] = useState(
-    String(preferences.newCardsPerDay),
-  );
-  const [maxReviewsPerDay, setMaxReviewsPerDay] = useState(
-    String(preferences.maxReviewsPerDay),
-  );
-  const [dayBoundaryHour, setDayBoundaryHour] = useState(
-    String(preferences.dayBoundaryHour),
-  );
+  const [newCardsPerDay, setNewCardsPerDay] = useState(String(preferences.newCardsPerDay));
+  const [maxReviewsPerDay, setMaxReviewsPerDay] = useState(String(preferences.maxReviewsPerDay));
+  const [dayBoundaryHour, setDayBoundaryHour] = useState(String(preferences.dayBoundaryHour));
 
-  const [answerScale, setAnswerScale] = useState<AnswerScale>(
-    preferences.answerScale,
-  );
-  const [developerMode, setDeveloperMode] = useState(
-    preferences.developerMode,
-  );
+  const [answerScale, setAnswerScale] = useState<AnswerScale>(preferences.answerScale);
+  const [developerMode, setDeveloperMode] = useState(preferences.developerMode);
   const [invalidDataPolicy, setInvalidDataPolicy] = useState<InvalidDataPolicy>(
     preferences.invalidDataPolicy,
   );

@@ -32,7 +32,11 @@ describe("inView", () => {
     ["one whose cards could not be counted", { due: "unreadable", badges: [] }, ["all"]],
     ["a copy of a library course", { due: 0, badges: ["course"] }, ["all", "courses"]],
     ["a copy of a library deck", { due: 0, badges: ["library"] }, ["all", "copies"]],
-    ["a copy of a course from a link", { due: 0, badges: ["course", { from: "pod.example" }] }, ["all", "courses", "copies"]],
+    [
+      "a copy of a course from a link",
+      { due: 0, badges: ["course", { from: "pod.example" }] },
+      ["all", "courses", "copies"],
+    ],
     ["one with invalid data", { due: 0, badges: ["invalid"] }, ["all", "attention"]],
     ["one whose cards could not be read", { due: 0, badges: ["unreadable"] }, ["all", "attention"]],
   ])("keeps %s in its views", (_, facts, views) => {
@@ -59,13 +63,17 @@ describe("viewOf and showFromParam", () => {
 
 describe("withView", () => {
   it("keeps the filter's text and the sort, in every view", () => {
-    const sorted = { view: { filter: "kanji", sort: { column: "title" as const, descending: false } } };
+    const sorted = {
+      view: { filter: "kanji", sort: { column: "title" as const, descending: false } },
+    };
     expect(withView(sorted, "due")).toEqual({ ...sorted, show: "due" });
     expect(withView({ ...sorted, show: "due" }, "courses")).toEqual({ ...sorted, show: "courses" });
   });
 
   it("leaves every deck, and a query as it starts, out of the URL", () => {
-    expect(withView({ view: { filter: "kanji" }, show: "copies" }, "all")).toEqual({ view: { filter: "kanji" } });
+    expect(withView({ view: { filter: "kanji" }, show: "copies" }, "all")).toEqual({
+      view: { filter: "kanji" },
+    });
     expect(withView({ show: "due" }, "all")).toEqual({});
   });
 });
@@ -108,9 +116,23 @@ describe("the workbench's views", () => {
   });
 
   it("are saved without the page, as a view opens at the first", () => {
-    const sorted: CardQuery = { ...query, state: "leech", sort: { key: "lapses", descending: true }, size: 200 };
-    expect(cardParams(sorted)).toEqual({ q: "cat", state: "leech", sort: "lapses", order: "desc", size: "200" });
-    expect(queryFromParams(new URLSearchParams(cardParams(sorted)))).toEqual({ ...sorted, page: 1 });
+    const sorted: CardQuery = {
+      ...query,
+      state: "leech",
+      sort: { key: "lapses", descending: true },
+      size: 200,
+    };
+    expect(cardParams(sorted)).toEqual({
+      q: "cat",
+      state: "leech",
+      sort: "lapses",
+      order: "desc",
+      size: "200",
+    });
+    expect(queryFromParams(new URLSearchParams(cardParams(sorted)))).toEqual({
+      ...sorted,
+      page: 1,
+    });
   });
 });
 
@@ -124,7 +146,10 @@ describe("the saved views", () => {
 
   it("add a view at the end, under its name trimmed, or replace the one of that name where it is", () => {
     expect(withSavedView([due], " Kanji ", "q=kanji")).toEqual([due, kanji]);
-    expect(withSavedView([due, kanji], "Due", "show=courses")).toEqual([{ name: "Due", params: "show=courses" }, kanji]);
+    expect(withSavedView([due, kanji], "Due", "show=courses")).toEqual([
+      { name: "Due", params: "show=courses" },
+      kanji,
+    ]);
   });
 
   it("rename a view where it is, another of the new name giving way", () => {

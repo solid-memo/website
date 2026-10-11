@@ -20,6 +20,8 @@ describe("CopyLink", () => {
     vi.stubGlobal("navigator", {});
     render(<CopyLink url={URL} label="Copy it" />);
     fireEvent.click(screen.getByRole("button", { name: "Copy it" }));
-    expect(await screen.findByText("The link could not be copied. Select its address and copy it.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("The link could not be copied. Select its address and copy it."),
+    ).toBeInTheDocument();
   });
 });

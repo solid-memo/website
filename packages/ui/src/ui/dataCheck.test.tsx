@@ -30,7 +30,11 @@ const good = deckOf("good");
 
 /** A report with the bad deck's cards document invalid, the catalog too when asked, and another app's subject only warned about. */
 function invalid(catalog = false): ValidationReport {
-  const violation = { message: { en: "Less than 1 values" }, severity: "violation" as const, constraint: "MinCount" };
+  const violation = {
+    message: { en: "Less than 1 values" },
+    severity: "violation" as const,
+    constraint: "MinCount",
+  };
   return {
     instanceUrl: INSTANCE,
     violationCount: catalog ? 2 : 1,
@@ -39,7 +43,15 @@ function invalid(catalog = false): ValidationReport {
       {
         url: bad.cardsDocumentUrl,
         status: "checked",
-        subjects: [{ url: `${bad.cardsDocumentUrl}#c1`, status: "checked", shape: "card", version: 5, violations: [violation] }],
+        subjects: [
+          {
+            url: `${bad.cardsDocumentUrl}#c1`,
+            status: "checked",
+            shape: "card",
+            version: 5,
+            violations: [violation],
+          },
+        ],
       },
       {
         url: good.cardsDocumentUrl,
@@ -51,7 +63,15 @@ function invalid(catalog = false): ValidationReport {
             {
               url: `${INSTANCE}catalog.ttl`,
               status: "checked" as const,
-              subjects: [{ url: `${INSTANCE}catalog.ttl#catalog`, status: "checked" as const, shape: "catalog" as const, version: 1, violations: [violation] }],
+              subjects: [
+                {
+                  url: `${INSTANCE}catalog.ttl#catalog`,
+                  status: "checked" as const,
+                  shape: "catalog" as const,
+                  version: 1,
+                  violations: [violation],
+                },
+              ],
             },
           ]
         : []),
@@ -84,12 +104,15 @@ function renderProbe(overrides: Partial<UseCases>, instanceUrl: string | null = 
   );
 }
 
-const withPolicy = (invalidDataPolicy: InvalidDataPolicy) => vi.fn(async () => ({ ...DEFAULT_PREFERENCES, invalidDataPolicy }));
+const withPolicy = (invalidDataPolicy: InvalidDataPolicy) =>
+  vi.fn(async () => ({ ...DEFAULT_PREFERENCES, invalidDataPolicy }));
 
 describe("useDataCheck", () => {
   it("holds everything while the check is made, as under blocking the instance until the preferences are read", async () => {
     renderProbe({ checkInstance: vi.fn(() => new Promise<ValidationReport>(() => undefined)) });
-    expect(screen.getByText(/policy block-instance, instance checking, bad checking/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/policy block-instance, instance checking, bad checking/),
+    ).toBeInTheDocument();
     expect(await screen.findByText(/policy block-subject, instance checking/)).toBeInTheDocument();
   });
 
@@ -101,7 +124,9 @@ describe("useDataCheck", () => {
   it("sets aside only the deck with invalid data, another app's subjects only warned about", async () => {
     renderProbe({ checkInstance: vi.fn(async () => invalid()) });
     expect(
-      await screen.findByText("policy block-subject, instance open, bad setAside, good open, arrangement open, error none"),
+      await screen.findByText(
+        "policy block-subject, instance open, bad setAside, good open, arrangement open, error none",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -111,20 +136,39 @@ describe("useDataCheck", () => {
   });
 
   it("blocks every deck under blocking the instance, and none under only warning", async () => {
-    const { unmount } = renderProbe({ getPreferences: withPolicy("block-instance"), checkInstance: vi.fn(async () => invalid()) });
-    expect(await screen.findByText(/instance blocked, bad blocked, good blocked/)).toBeInTheDocument();
+    const { unmount } = renderProbe({
+      getPreferences: withPolicy("block-instance"),
+      checkInstance: vi.fn(async () => invalid()),
+    });
+    expect(
+      await screen.findByText(/instance blocked, bad blocked, good blocked/),
+    ).toBeInTheDocument();
     unmount();
-    renderProbe({ getPreferences: withPolicy("warn-only"), checkInstance: vi.fn(() => new Promise<ValidationReport>(() => undefined)) });
-    expect(await screen.findByText(/policy warn-only, instance open, bad open, good open/)).toBeInTheDocument();
+    renderProbe({
+      getPreferences: withPolicy("warn-only"),
+      checkInstance: vi.fn(() => new Promise<ValidationReport>(() => undefined)),
+    });
+    expect(
+      await screen.findByText(/policy warn-only, instance open, bad open, good open/),
+    ).toBeInTheDocument();
   });
 
   it("sets nothing aside when the check fails, and says why", async () => {
     renderProbe({ checkInstance: vi.fn(async () => Promise.reject(new Error("offline"))) });
-    expect(await screen.findByText(/instance open, bad open, good open, arrangement open, error offline/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        /instance open, bad open, good open, arrangement open, error offline/,
+      ),
+    ).toBeInTheDocument();
   });
 
   it("falls back to the default policy when the preferences cannot be read", async () => {
-    renderProbe({ getPreferences: vi.fn(async () => Promise.reject(new Error("offline"))), checkInstance: vi.fn(async () => invalid()) });
-    expect(await screen.findByText(/policy block-subject, instance open, bad setAside/)).toBeInTheDocument();
+    renderProbe({
+      getPreferences: vi.fn(async () => Promise.reject(new Error("offline"))),
+      checkInstance: vi.fn(async () => invalid()),
+    });
+    expect(
+      await screen.findByText(/policy block-subject, instance open, bad setAside/),
+    ).toBeInTheDocument();
   });
 });

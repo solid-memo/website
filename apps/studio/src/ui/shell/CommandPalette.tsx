@@ -7,7 +7,13 @@ import { composing } from "@solid-memo/ui/composing";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { draftsKey } from "../DraftsContainer";
 import { instanceOfRoute, type StudioRoute } from "../router";
-import { buildCommands, itemCommandId, rankCommands, type Command, type ScreenCommand } from "./commandIndex";
+import {
+  buildCommands,
+  itemCommandId,
+  rankCommands,
+  type Command,
+  type ScreenCommand,
+} from "./commandIndex";
 import { Dialog } from "./Dialog";
 import { Keys } from "./KeyHelp";
 import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
@@ -57,10 +63,17 @@ export function CommandPalette({
   const [picked, setPicked] = useState(0);
   const [all] = useState(() => {
     const instanceUrl = route === null ? null : instanceOfRoute(route);
-    const decks = instanceUrl === null ? undefined : queryClient.getQueryData<Deck[]>(["decks", instanceUrl]);
+    const decks =
+      instanceUrl === null ? undefined : queryClient.getQueryData<Deck[]>(["decks", instanceUrl]);
     const deck = route === null ? undefined : decks?.find((each) => each.url === deckOf(route));
-    const cards = deck === undefined ? undefined : queryClient.getQueryData<Card[]>(["cards", deck.cardsDocumentUrl]);
-    const drafts = instanceUrl === null ? undefined : queryClient.getQueryData<ReleaseDraftSummary[]>(draftsKey(instanceUrl));
+    const cards =
+      deck === undefined
+        ? undefined
+        : queryClient.getQueryData<Card[]>(["cards", deck.cardsDocumentUrl]);
+    const drafts =
+      instanceUrl === null
+        ? undefined
+        : queryClient.getQueryData<ReleaseDraftSummary[]>(draftsKey(instanceUrl));
     return buildCommands(
       {
         instances,
@@ -96,7 +109,8 @@ export function CommandPalette({
       case "ArrowDown":
       case "ArrowUp":
         event.preventDefault();
-        if (shown.length > 0) setPicked((picked + (event.key === "ArrowDown" ? 1 : -1) + shown.length) % shown.length);
+        if (shown.length > 0)
+          setPicked((picked + (event.key === "ArrowDown" ? 1 : -1) + shown.length) % shown.length);
         return;
       case "Enter":
         event.preventDefault();
@@ -139,7 +153,12 @@ export function CommandPalette({
         }}
         onKeyDown={handleKeyDown}
       />
-      <div id={listId} role="listbox" class="studio-palette-list" aria-label={t("studio.palette.heading")}>
+      <div
+        id={listId}
+        role="listbox"
+        class="studio-palette-list"
+        aria-label={t("studio.palette.heading")}
+      >
         {sections.map((section) => (
           <ul key={section.group} role="group" aria-labelledby={`${listId}-${section.group}`}>
             <li role="presentation" id={`${listId}-${section.group}`} class="studio-palette-group">

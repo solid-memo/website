@@ -33,7 +33,12 @@ const dueToday: ReviewState = {
   formatVersion: 2,
 };
 
-function renderContainer(useCases: UseCases, query: CardQuery = DEFAULT_CARD_QUERY, of = deck, decks = [deck, nouns]) {
+function renderContainer(
+  useCases: UseCases,
+  query: CardQuery = DEFAULT_CARD_QUERY,
+  of = deck,
+  decks = [deck, nouns],
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
@@ -90,10 +95,18 @@ describe("CardWorkbenchContainer", () => {
       listCards: vi.fn(async () => [water, fire]),
       loadAnswerLog: vi.fn(() => new Promise<Answer[]>((resolve) => (read = resolve))),
     });
-    renderContainer(useCases, { ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } });
+    renderContainer(useCases, {
+      ...DEFAULT_CARD_QUERY,
+      state: "leech",
+      sort: { key: "lapses", descending: true },
+    });
     await waitFor(() => expect(useCases.loadAnswerLog).toHaveBeenCalledWith(instanceA.url));
     expect(screen.getByText("Loading cards…")).toBeInTheDocument();
-    read([1, 2, 3, 4].map((n) => lapse(n, "fire")).concat([5, 6, 7, 8].map((n) => lapse(n, "water", "https://pod.example/other#deck"))));
+    read(
+      [1, 2, 3, 4]
+        .map((n) => lapse(n, "fire"))
+        .concat([5, 6, 7, 8].map((n) => lapse(n, "water", "https://pod.example/other#deck"))),
+    );
     expect(await screen.findByText("1 of 2 cards")).toBeInTheDocument();
     expect(fronts()).toEqual(["fire"]);
   });
@@ -107,7 +120,9 @@ describe("CardWorkbenchContainer", () => {
         }),
       });
     const { unmount } = renderContainer(failing());
-    expect(await screen.findByText("The answer log could not be read, so the lapses are not known.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("The answer log could not be read, so the lapses are not known."),
+    ).toBeInTheDocument();
     expect(fronts()).toEqual(["water", "fire"]);
     unmount();
     renderContainer(failing(), { ...DEFAULT_CARD_QUERY, state: "leech" });
@@ -122,7 +137,9 @@ describe("CardWorkbenchContainer", () => {
     });
     expect(await screen.findByText("1 of 2 cards")).toBeInTheDocument();
     expect(fronts()).toEqual(["water"]);
-    expect(within(screen.getByRole("combobox", { name: "Language" })).getAllByRole("option")).toHaveLength(2);
+    expect(
+      within(screen.getByRole("combobox", { name: "Language" })).getAllByRole("option"),
+    ).toHaveLength(2);
   });
 
   it("labels a copy of a course", async () => {
@@ -139,11 +156,16 @@ describe("CardWorkbenchContainer", () => {
     };
     const copy = { ...deck, sourceUrl: url };
     renderContainer(
-      makeUseCasesFake({ listCards: vi.fn(async () => [fire]), listLibraryDecks: vi.fn(async () => [course]) }),
+      makeUseCasesFake({
+        listCards: vi.fn(async () => [fire]),
+        listLibraryDecks: vi.fn(async () => [course]),
+      }),
       DEFAULT_CARD_QUERY,
       copy,
     );
-    expect(await screen.findByText("A copy of a course: its cards are the course's questions.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("A copy of a course: its cards are the course's questions."),
+    ).toBeInTheDocument();
   });
 
   it("says why the cards could not be read", async () => {
@@ -163,13 +185,19 @@ describe("CardWorkbenchContainer", () => {
       listCards: vi.fn(async () => cards),
       listDeckReviewStates: vi.fn(async () => [dueToday]),
     });
-    vi.mocked(useCases.editCards).mockImplementation(async (_instance, _deck, _ids, _edit, plan) => {
-      cards = [water, { ...fire, retired: true }];
-      return plan;
-    });
+    vi.mocked(useCases.editCards).mockImplementation(
+      async (_instance, _deck, _ids, _edit, plan) => {
+        cards = [water, { ...fire, retired: true }];
+        return plan;
+      },
+    );
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
-    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Retire" }));
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", {
+        name: "Retire",
+      }),
+    );
     expect(await screen.findByText("Retired 1 card.")).toBeInTheDocument();
     expect(useCases.editCards).toHaveBeenCalledWith(
       instanceA.url,
@@ -184,7 +212,11 @@ describe("CardWorkbenchContainer", () => {
     await waitFor(() => expect(undo).toBeEnabled());
     fireEvent.click(undo);
     expect(await screen.findByText("Undone: the cards are as they were.")).toBeInTheDocument();
-    expect(useCases.undoCardEdit).toHaveBeenCalledWith(instanceA.url, deck, vi.mocked(useCases.editCards).mock.calls[0]![4]);
+    expect(useCases.undoCardEdit).toHaveBeenCalledWith(
+      instanceA.url,
+      deck,
+      vi.mocked(useCases.editCards).mock.calls[0]![4],
+    );
     expect(screen.queryByRole("button", { name: "Undo" })).not.toBeInTheDocument();
   });
 
@@ -197,11 +229,24 @@ describe("CardWorkbenchContainer", () => {
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
-    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Retire" }));
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("This was changed elsewhere"));
-    vi.mocked(useCases.editCards).mockImplementation(async (_instance, _deck, _ids, _edit, plan) => plan);
-    vi.mocked(useCases.undoCardEdit).mockRejectedValue(new AppError("changedElsewhere", { url: deck.cardsDocumentUrl }));
-    const retire = within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Retire" });
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", {
+        name: "Retire",
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent("This was changed elsewhere"),
+    );
+    vi.mocked(useCases.editCards).mockImplementation(
+      async (_instance, _deck, _ids, _edit, plan) => plan,
+    );
+    vi.mocked(useCases.undoCardEdit).mockRejectedValue(
+      new AppError("changedElsewhere", { url: deck.cardsDocumentUrl }),
+    );
+    const retire = within(screen.getByRole("group", { name: "Selected cards" })).getByRole(
+      "button",
+      { name: "Retire" },
+    );
     await waitFor(() => expect(retire).toBeEnabled());
     fireEvent.click(retire);
     // The error goes as the edit is made again.
@@ -209,7 +254,9 @@ describe("CardWorkbenchContainer", () => {
     const undo = await screen.findByRole("button", { name: "Undo" });
     await waitFor(() => expect(undo).toBeEnabled());
     fireEvent.click(undo);
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("This was changed elsewhere"));
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent("This was changed elsewhere"),
+    );
   });
 
   it("forgets or reschedules the selected cards' progress, says what it did, and reads the review states afresh", async () => {
@@ -222,7 +269,9 @@ describe("CardWorkbenchContainer", () => {
         return 1;
       }),
     });
-    vi.mocked(useCases.editCards).mockImplementation(async (_instance, _deck, _ids, _edit, plan) => plan);
+    vi.mocked(useCases.editCards).mockImplementation(
+      async (_instance, _deck, _ids, _edit, plan) => plan,
+    );
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
     const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
@@ -234,10 +283,17 @@ describe("CardWorkbenchContainer", () => {
     fireEvent.input(screen.getByLabelText("Due on"), { target: { value: "2099-01-01" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(await screen.findByText("Set 1 card due on January 1, 2099.")).toBeInTheDocument();
-    expect(useCases.rescheduleCards).toHaveBeenCalledWith(instanceA.url, deck, ["fire"], "2099-01-01");
+    expect(useCases.rescheduleCards).toHaveBeenCalledWith(
+      instanceA.url,
+      deck,
+      ["fire"],
+      "2099-01-01",
+    );
     // The card edit before it is no longer the last one: it cannot be undone.
     expect(screen.queryByRole("button", { name: "Undo" })).not.toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole("row", { name: /fire/ })).toHaveTextContent("January 1, 2099"));
+    await waitFor(() =>
+      expect(screen.getByRole("row", { name: /fire/ })).toHaveTextContent("January 1, 2099"),
+    );
 
     pick("Schedule the selected cards", "Forget progress");
     answer("Forget the selected cards' progress", "Forget progress");
@@ -277,26 +333,47 @@ describe("CardWorkbenchContainer", () => {
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
     pick("Move or copy the selected cards", "Move to deck…");
     // The deck itself is no choice.
-    expect(within(screen.getByRole("combobox", { name: "To the deck" })).getAllByRole("option").map((o) => o.textContent)).toEqual(["Nouns"]);
+    expect(
+      within(screen.getByRole("combobox", { name: "To the deck" }))
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["Nouns"]);
     fireEvent.click(screen.getByRole("button", { name: "Move 1 card" }));
     expect(
-      await screen.findByText("Moved 1 card to Nouns. 1 card got a new id: the deck already had one with its id. 1 card was left as it was."),
+      await screen.findByText(
+        "Moved 1 card to Nouns. 1 card got a new id: the deck already had one with its id. 1 card was left as it was.",
+      ),
     ).toBeInTheDocument();
-    expect(useCases.transferCards).toHaveBeenCalledWith(instanceA.url, deck, nouns, ["fire"], { mode: "move", keepProgress: true });
+    expect(useCases.transferCards).toHaveBeenCalledWith(instanceA.url, deck, nouns, ["fire"], {
+      mode: "move",
+      keepProgress: true,
+    });
     await waitFor(() => expect(fronts()).toEqual(["water"]));
     expect(screen.queryByRole("group", { name: "Selected cards" })).toBeNull();
   });
 
   it("offers no deck set aside to move cards to, and no edit of a deck set aside", async () => {
     const verbs = makeDeck("verbs", { en: "Verbs" });
-    const useCases = makeUseCasesFake({ listCards: vi.fn(async () => [water, fire]), checkInstance: vi.fn(async () => invalidReport([nouns])) });
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [water, fire]),
+      checkInstance: vi.fn(async () => invalidReport([nouns])),
+    });
     const { unmount } = renderContainer(useCases, DEFAULT_CARD_QUERY, deck, [deck, nouns, verbs]);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
     await screen.findByRole("group", { name: "Selected cards" });
     pick("Move or copy the selected cards", "Move to deck…");
-    expect(within(screen.getByRole("combobox", { name: "To the deck" })).getAllByRole("option").map((o) => o.textContent)).toEqual(["Verbs"]);
+    expect(
+      within(screen.getByRole("combobox", { name: "To the deck" }))
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["Verbs"]);
     unmount();
-    renderContainer(makeUseCasesFake({ listCards: vi.fn(async () => [water, fire]), checkInstance: vi.fn(async () => invalidReport([deck])) }));
+    renderContainer(
+      makeUseCasesFake({
+        listCards: vi.fn(async () => [water, fire]),
+        checkInstance: vi.fn(async () => invalidReport([deck])),
+      }),
+    );
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
     expect(await screen.findByText(/This deck has invalid data/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Retire" })).toBeNull();
@@ -315,7 +392,9 @@ describe("CardWorkbenchContainer", () => {
     const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
     pick("Move or copy the selected cards", "Copy to deck…");
     fireEvent.click(screen.getByRole("button", { name: "Copy 1 card" }));
-    expect(await screen.findByText("Copied 1 card to Nouns. 1 card was there already.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Copied 1 card to Nouns. 1 card was there already."),
+    ).toBeInTheDocument();
     // Still selected: a copy leaves the cards where they are.
     expect(bulk().getByText("1 card selected")).toBeInTheDocument();
 

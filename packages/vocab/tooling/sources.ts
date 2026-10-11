@@ -60,4 +60,8 @@ export const shapesFetch: typeof globalThis.fetch = async (input) => {
 };
 
 /** What a shape validator is given to find the shapes, the reference data and the profiles. */
-export const SHAPE_SOURCES = { shapesBaseUrl: SHAPES_BASE, vocabBaseUrl: VOCAB_BASE, vendorBaseUrl: SITE_VENDOR } as const;
+export const SHAPE_SOURCES = {
+  shapesBaseUrl: SHAPES_BASE,
+  vocabBaseUrl: VOCAB_BASE,
+  vendorBaseUrl: SITE_VENDOR,
+} as const;

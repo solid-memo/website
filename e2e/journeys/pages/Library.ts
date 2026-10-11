@@ -33,7 +33,10 @@ export class Library extends Screen {
   /** From Decks, the link "Deck library". */
   async open(): Promise<void> {
     await this.intent("Open the deck library", async () => {
-      await this.page.getByRole("main").getByRole("link", { name: this.t("deckList.libraryLink"), exact: true }).click();
+      await this.page
+        .getByRole("main")
+        .getByRole("link", { name: this.t("deckList.libraryLink"), exact: true })
+        .click();
       await this.expectOpen();
     });
   }
@@ -72,7 +75,10 @@ export class Library extends Screen {
    */
   async importSelected(titles: string[]): Promise<void> {
     await this.intent(`Import ${titles.length} deck(s)`, async () => {
-      const button = this.page.getByRole("button", { name: this.t("library.importDecks", { count: titles.length }), exact: true });
+      const button = this.page.getByRole("button", {
+        name: this.t("library.importDecks", { count: titles.length }),
+        exact: true,
+      });
       await button.click();
       await this.app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
       for (const title of titles) await this.app.decks.expectDeck(title);

@@ -1,8 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
-import { DEFAULT_INVALID_DATA_POLICY, type InvalidDataPolicy } from "@solid-memo/domain/invalidDataPolicy";
-import { arrangementSetAside, setAsideDecks, type ValidationReport } from "@solid-memo/domain/validation";
+import {
+  DEFAULT_INVALID_DATA_POLICY,
+  type InvalidDataPolicy,
+} from "@solid-memo/domain/invalidDataPolicy";
+import {
+  arrangementSetAside,
+  setAsideDecks,
+  type ValidationReport,
+} from "@solid-memo/domain/validation";
 
 /** What the check of an instance, made when it is opened, lets the screens change (docs/validation.md). */
 export interface DataCheck {
@@ -50,8 +57,10 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
   });
   // Until the preferences are read, as under "block the instance": a user who chose it never sees data before the check.
   const policy =
-    preferencesQuery.data?.invalidDataPolicy ?? (preferencesQuery.isPending ? "block-instance" : DEFAULT_INVALID_DATA_POLICY);
-  const report = checkQuery.data !== undefined && !checkQuery.data.conforms ? checkQuery.data : null;
+    preferencesQuery.data?.invalidDataPolicy ??
+    (preferencesQuery.isPending ? "block-instance" : DEFAULT_INVALID_DATA_POLICY);
+  const report =
+    checkQuery.data !== undefined && !checkQuery.data.conforms ? checkQuery.data : null;
   const setsAside = report !== null && policy === "block-subject";
   const isSetAside = (deck: Deck) => setsAside && setAsideDecks(report, [deck]).size > 0;
   return {

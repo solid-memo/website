@@ -58,13 +58,17 @@ function collectingTurtleParser(collected: { quads?: Quad[] }): Parser {
  * but in time linear in the number of quads.
  */
 export function graphsOf(quads: Iterable<Quad>): Graphs {
-  const graphs: Record<string, Record<string, { type: "Subject"; url: string; predicates: Record<string, Objects> }>> = {
+  const graphs: Record<
+    string,
+    Record<string, { type: "Subject"; url: string; predicates: Record<string, Objects> }>
+  > = {
     default: {},
   };
   const seen = new Set<string>();
   for (const quad of quads) {
     const graphId = quad.graph.termType === "DefaultGraph" ? "default" : quad.graph.value;
-    const subjectId = quad.subject.termType === "BlankNode" ? `_:${quad.subject.value}` : quad.subject.value;
+    const subjectId =
+      quad.subject.termType === "BlankNode" ? `_:${quad.subject.value}` : quad.subject.value;
     const key = `${graphId} ${subjectId} ${quad.predicate.value} ${termKey(quad.object)}`;
     if (seen.has(key)) continue;
     seen.add(key);

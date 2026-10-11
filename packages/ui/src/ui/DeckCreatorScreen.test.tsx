@@ -5,9 +5,7 @@ import { recentLanguages, rememberLanguage } from "./remembered";
 
 beforeEach(() => localStorage.clear());
 
-function renderScreen(
-  overrides: Partial<Parameters<typeof DeckCreatorScreen>[0]> = {},
-) {
+function renderScreen(overrides: Partial<Parameters<typeof DeckCreatorScreen>[0]> = {}) {
   const props = {
     busy: false,
     error: null,
@@ -62,7 +60,10 @@ describe("DeckCreatorScreen", () => {
     renderScreen({ busy: true, error: "create failed" });
     expect(screen.getByLabelText("Name")).toBeDisabled();
     // Only aria-disabled, so the button pressed keeps the focus.
-    expect(screen.getByRole("button", { name: "Create deck" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Create deck" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
     expect(screen.getByText("create failed")).toBeInTheDocument();
   });
 

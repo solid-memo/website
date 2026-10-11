@@ -10,7 +10,16 @@ const chapters = [
 function renderControls(props: Partial<Parameters<typeof TrialControls>[0]> = {}) {
   const handlers = { onJump: vi.fn(), onAnswerAll: vi.fn(), onAdvance: vi.fn() };
   render(
-    <TrialControls coursePage="#/course" chapters={chapters} answerHint="course" days={0} busy={false} error={null} {...handlers} {...props} />,
+    <TrialControls
+      coursePage="#/course"
+      chapters={chapters}
+      answerHint="course"
+      days={0}
+      busy={false}
+      error={null}
+      {...handlers}
+      {...props}
+    />,
   );
   return handlers;
 }
@@ -19,16 +28,23 @@ describe("TrialControls", () => {
   it("opens a course's page or a chapter, answers all right or wrong, and moves the clock ahead", () => {
     const { onJump, onAnswerAll, onAdvance } = renderControls();
     expect(screen.getByRole("heading", { name: "Trial controls" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "The course's page" })).toHaveAttribute("href", "#/course");
+    expect(screen.getByRole("link", { name: "The course's page" })).toHaveAttribute(
+      "href",
+      "#/course",
+    );
     expect(screen.getByRole("status")).toHaveTextContent("The trial is at today's date.");
-    fireEvent.change(screen.getByRole("combobox", { name: "Chapter" }), { target: { value: "ch-2" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Chapter" }), {
+      target: { value: "ch-2" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Open the chapter" }));
     expect(onJump).toHaveBeenCalledWith("ch-2");
     expect(screen.getByText(/^Every question of the chapter in view/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Answer all right" }));
     fireEvent.click(screen.getByRole("button", { name: "Answer all wrong" }));
     expect(onAnswerAll.mock.calls).toEqual([[true], [false]]);
-    fireEvent.input(screen.getByRole("spinbutton", { name: "Days ahead" }), { target: { value: "3" } });
+    fireEvent.input(screen.getByRole("spinbutton", { name: "Days ahead" }), {
+      target: { value: "3" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Advance" }));
     expect(onAdvance).toHaveBeenCalledWith(3);
   });

@@ -50,12 +50,18 @@ describe("toInstanceMeta and toInstanceMetaThing", () => {
   });
 
   it("round-trips what an updated copy says it replaces", () => {
-    const updated = { ...meta, replaces: "https://pod.example/solid-memo/main/", replacedAt: "2026-09-28T10:00:00.000Z" };
+    const updated = {
+      ...meta,
+      replaces: "https://pod.example/solid-memo/main/",
+      replacedAt: "2026-09-28T10:00:00.000Z",
+    };
     expect(toInstanceMeta(toInstanceMetaThing(META, updated, null))).toEqual(updated);
   });
 
   it("is null for a subject that does not fit", () => {
-    const untitled = buildThing(createThing({ url: META })).addIri(RDF.type, SM.Instance).build();
+    const untitled = buildThing(createThing({ url: META }))
+      .addIri(RDF.type, SM.Instance)
+      .build();
     expect(toInstanceMeta(untitled)).toBeNull();
   });
 

@@ -12,7 +12,9 @@ describe("agentUrlOf", () => {
   });
 
   it("names an author without letters or digits by a placeholder and a hash of the name", () => {
-    expect(agentUrlOf(`${CATALOG}#deck-1`, "—")).toMatch(new RegExp(`^${CATALOG}#agent-unnamed-[0-9a-f]{6}$`));
+    expect(agentUrlOf(`${CATALOG}#deck-1`, "—")).toMatch(
+      new RegExp(`^${CATALOG}#agent-unnamed-[0-9a-f]{6}$`),
+    );
     expect(agentUrlOf(CATALOG, "—")).not.toBe(agentUrlOf(CATALOG, "–"));
   });
 

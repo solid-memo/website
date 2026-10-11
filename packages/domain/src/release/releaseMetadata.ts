@@ -72,7 +72,9 @@ function withAttribution(draft: ReleaseDraft, changes: DraftChange[]): DraftChan
   return [
     { kind: "setAttribution", attribution: null },
     ...changes,
-    ...(left.length === 0 ? [] : [{ kind: "setAttribution" as const, attribution: { ai: attribution.ai } }]),
+    ...(left.length === 0
+      ? []
+      : [{ kind: "setAttribution" as const, attribution: { ai: attribution.ai } }]),
   ];
 }
 
@@ -96,7 +98,9 @@ export function editAuthorChanges(draft: ReleaseDraft, id: string, agent: AgentV
  */
 export function removeAuthorChanges(draft: ReleaseDraft, id: string): DraftChange[] {
   const iri = iriIn(draft, id);
-  const named = draft.root.publisher === iri || draft.triples.some((triple) => triple.object.kind === "iri" && triple.object.value === iri);
+  const named =
+    draft.root.publisher === iri ||
+    draft.triples.some((triple) => triple.object.kind === "iri" && triple.object.value === iri);
   return withAttribution(draft, [
     { kind: "setMeta", meta: { creator: draft.root.creator.filter((one) => one !== iri) } },
     ...(named ? [] : [{ kind: "setAgent" as const, id, agent: null }]),
@@ -127,12 +131,20 @@ export interface SourceView {
 }
 
 /** What a source's form gives: its texts, and how the release uses it. */
-export type SourceForm = Pick<SourceView, "title" | "creator" | "license" | "evidence" | "derivedFrom" | "used">;
+export type SourceForm = Pick<
+  SourceView,
+  "title" | "creator" | "license" | "evidence" | "derivedFrom" | "used"
+>;
 
 /** The IRIs the activities used (prov:used). */
 function usedBy(draft: ReleaseDraft, activities: readonly string[]): string[] {
   return draft.triples
-    .filter((triple) => triple.predicate === `${PROV}used` && activities.includes(triple.subject) && triple.object.kind === "iri")
+    .filter(
+      (triple) =>
+        triple.predicate === `${PROV}used` &&
+        activities.includes(triple.subject) &&
+        triple.object.kind === "iri",
+    )
     .map((triple) => triple.object.value);
 }
 
@@ -143,12 +155,21 @@ function usedBy(draft: ReleaseDraft, activities: readonly string[]): string[] {
  */
 export function sourcesOf(draft: ReleaseDraft): SourceView[] {
   const carried = new Set(draft.published.activities.map((id) => iriIn(draft, id)));
-  const own = usedBy(draft, generatingActivities(draft).filter((iri) => !carried.has(iri)));
+  const own = usedBy(
+    draft,
+    generatingActivities(draft).filter((iri) => !carried.has(iri)),
+  );
   const earlier = usedBy(draft, [...carried]);
   return [...new Set([...draft.root.wasDerivedFrom, ...own, ...earlier])].map((iri) => {
     const said = draft.triples.filter((triple) => triple.subject === iri);
-    const first = (predicate: string, kind: ReleaseTerm["kind"]) => said.find((triple) => triple.predicate === predicate && triple.object.kind === kind);
-    const shown = [first(DCTERMS_TITLE, "literal"), first(DCTERMS_CREATOR, "literal"), first(DCTERMS_LICENSE, "iri"), first(RDFS_COMMENT, "literal")];
+    const first = (predicate: string, kind: ReleaseTerm["kind"]) =>
+      said.find((triple) => triple.predicate === predicate && triple.object.kind === kind);
+    const shown = [
+      first(DCTERMS_TITLE, "literal"),
+      first(DCTERMS_CREATOR, "literal"),
+      first(DCTERMS_LICENSE, "iri"),
+      first(RDFS_COMMENT, "literal"),
+    ];
     const value = (triple: DraftTriple | undefined) => triple?.object.value ?? "";
     return {
       iri,
@@ -159,7 +180,9 @@ export function sourcesOf(draft: ReleaseDraft): SourceView[] {
       derivedFrom: draft.root.wasDerivedFrom.includes(iri),
       used: own.includes(iri),
       usedEarlier: earlier.includes(iri),
-      others: said.filter((triple) => !shown.includes(triple)).map(({ predicate, object }) => ({ predicate, object })),
+      others: said
+        .filter((triple) => !shown.includes(triple))
+        .map(({ predicate, object }) => ({ predicate, object })),
     };
   });
 }
@@ -185,16 +208,40 @@ export function sourceLicenseValid(license: string, was = ""): boolean {
 }
 
 /** The change that gives a source (by its IRI) what its form says (its license one sourceLicenseValid takes), its other statements kept. */
-export function sourceChange(iri: string, form: SourceForm, others: SourceView["others"] = []): DraftChange {
-  const text = (value: string): ReleaseText => ({ kind: "literal", value: value.trim(), language: "", datatype: XSD_STRING });
+export function sourceChange(
+  iri: string,
+  form: SourceForm,
+  others: SourceView["others"] = [],
+): DraftChange {
+  const text = (value: string): ReleaseText => ({
+    kind: "literal",
+    value: value.trim(),
+    language: "",
+    datatype: XSD_STRING,
+  });
   const statements = [
     ...(form.title.trim() === "" ? [] : [{ predicate: DCTERMS_TITLE, object: text(form.title) }]),
-    ...(form.creator.trim() === "" ? [] : [{ predicate: DCTERMS_CREATOR, object: text(form.creator) }]),
-    ...(form.license.trim() === "" ? [] : [{ predicate: DCTERMS_LICENSE, object: { kind: "iri" as const, value: sourceIri(form.license) ?? form.license.trim() } }]),
-    ...(form.evidence.trim() === "" ? [] : [{ predicate: RDFS_COMMENT, object: text(form.evidence) }]),
+    ...(form.creator.trim() === ""
+      ? []
+      : [{ predicate: DCTERMS_CREATOR, object: text(form.creator) }]),
+    ...(form.license.trim() === ""
+      ? []
+      : [
+          {
+            predicate: DCTERMS_LICENSE,
+            object: { kind: "iri" as const, value: sourceIri(form.license) ?? form.license.trim() },
+          },
+        ]),
+    ...(form.evidence.trim() === ""
+      ? []
+      : [{ predicate: RDFS_COMMENT, object: text(form.evidence) }]),
     ...others,
   ];
-  return { kind: "setSource", iri, source: { statements, derivedFrom: form.derivedFrom, used: form.used } };
+  return {
+    kind: "setSource",
+    iri,
+    source: { statements, derivedFrom: form.derivedFrom, used: form.used },
+  };
 }
 
 // --- Checks
@@ -223,7 +270,9 @@ export function checksOf(draft: ReleaseDraft): CheckView[] {
     if (making.has(iri) && !carried) return [];
     const said = draft.triples.filter((triple) => triple.subject === iri);
     const texts = (predicate: string) =>
-      said.filter((triple) => triple.predicate === predicate && triple.object.kind === "literal").map((triple) => triple.object as ReleaseText);
+      said
+        .filter((triple) => triple.predicate === predicate && triple.object.kind === "literal")
+        .map((triple) => triple.object as ReleaseText);
     return [
       {
         id,

@@ -1,7 +1,4 @@
-import type {
-  RegistrationOptions,
-  RegistrationTarget,
-} from "@solid-memo/domain/instance";
+import type { RegistrationOptions, RegistrationTarget } from "@solid-memo/domain/instance";
 import { useId } from "preact/hooks";
 import { useI18n } from "./i18n";
 

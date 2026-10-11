@@ -26,7 +26,14 @@ describe("deckProblemsOf", () => {
         report: invalidReport([kanji]),
         unstated: [{ card: water, place: { tab: "content", part: "front" } }],
         duplicates: [[fire, water]],
-        markdown: [{ card: fire, place: { tab: "content", part: "backNote" }, language: "en", finding: { code: "tooLong", length: 9000 } }],
+        markdown: [
+          {
+            card: fire,
+            place: { tab: "content", part: "backNote" },
+            language: "en",
+            finding: { code: "tooLong", length: 9000 },
+          },
+        ],
       }),
       en,
     );

@@ -10,7 +10,9 @@ import { Screen } from "./Screen.ts";
  */
 export class Validation extends Screen {
   private get againButton(): Locator {
-    return this.page.getByRole("main").getByRole("button", { name: this.t("validation.validateAgain"), exact: true });
+    return this.page
+      .getByRole("main")
+      .getByRole("button", { name: this.t("validation.validateAgain"), exact: true });
   }
 
   /** The status line once it holds a result: some count of documents conforming, or violations. */
@@ -25,7 +27,9 @@ export class Validation extends Screen {
   /** Opens "Validate this instance" from the developer tools and waits for its result. */
   async open(): Promise<void> {
     await this.intent("Open Validate this instance", async () => {
-      await this.app.chrome.developerTools.getByRole("link", { name: this.t("workspace.validateInstance") }).click();
+      await this.app.chrome.developerTools
+        .getByRole("link", { name: this.t("workspace.validateInstance") })
+        .click();
       await this.app.chrome.expectBreadcrumbHere("breadcrumbs.validation");
       await expect(this.againButton).toBeEnabled({ timeout: 60_000 });
       await expect(this.result).toBeVisible();

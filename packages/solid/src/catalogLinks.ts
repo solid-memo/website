@@ -1,4 +1,10 @@
-import { buildThing, getThing, getUrlAll, setThing, type ThingPersisted } from "@inrupt/solid-client";
+import {
+  buildThing,
+  getThing,
+  getUrlAll,
+  setThing,
+  type ThingPersisted,
+} from "@inrupt/solid-client";
 import { AppError } from "@solid-memo/domain/appError";
 import { catalogNodeUrlOf, catalogUrlOf } from "@solid-memo/domain/instanceLayout";
 import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
@@ -16,20 +22,42 @@ import { unlessNewer } from "./records";
 const LINK_ATTEMPTS = 3;
 
 /** What the catalog links by `predicate`, in the order it names them; none without a catalog. */
-export async function catalogLinks(instanceUrl: string, predicate: string, fetch: typeof globalThis.fetch): Promise<string[]> {
+export async function catalogLinks(
+  instanceUrl: string,
+  predicate: string,
+  fetch: typeof globalThis.fetch,
+): Promise<string[]> {
   const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
   const node = catalog === null ? null : getThing(catalog, catalogNodeUrlOf(instanceUrl));
   return node === null ? [] : getUrlAll(node, predicate);
 }
 
 /** Link `url` from the catalog by `predicate`, unless it is linked; noCatalogToUpdate without a catalog. */
-export function addCatalogLink(instanceUrl: string, predicate: string, url: string, fetch: typeof globalThis.fetch): Promise<void> {
-  return changeCatalog(instanceUrl, fetch, true, (node) => (getUrlAll(node, predicate).includes(url) ? null : buildThing(node).addUrl(predicate, url).build()));
+export function addCatalogLink(
+  instanceUrl: string,
+  predicate: string,
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  return changeCatalog(instanceUrl, fetch, true, (node) =>
+    getUrlAll(node, predicate).includes(url)
+      ? null
+      : buildThing(node).addUrl(predicate, url).build(),
+  );
 }
 
 /** Take the catalog's link to `url` by `predicate` away; nothing to do when it has none, or no catalog. */
-export function removeCatalogLink(instanceUrl: string, predicate: string, url: string, fetch: typeof globalThis.fetch): Promise<void> {
-  return changeCatalog(instanceUrl, fetch, false, (node) => (getUrlAll(node, predicate).includes(url) ? buildThing(node).removeUrl(predicate, url).build() : null));
+export function removeCatalogLink(
+  instanceUrl: string,
+  predicate: string,
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  return changeCatalog(instanceUrl, fetch, false, (node) =>
+    getUrlAll(node, predicate).includes(url)
+      ? buildThing(node).removeUrl(predicate, url).build()
+      : null,
+  );
 }
 
 /**

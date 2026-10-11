@@ -31,5 +31,9 @@ export async function chooseLanguage(app: App, picker: Locator, tag: string): Pr
  */
 export async function chooseLanguageOf(app: App, field: Locator, tag: string): Promise<void> {
   const [said] = (await field.getAttribute("aria-describedby"))!.split(" ");
-  await chooseLanguage(app, app.page.getByRole("button").filter({ has: app.page.locator(`[id="${said}"]`) }), tag);
+  await chooseLanguage(
+    app,
+    app.page.getByRole("button").filter({ has: app.page.locator(`[id="${said}"]`) }),
+    tag,
+  );
 }

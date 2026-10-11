@@ -25,11 +25,21 @@ export interface CrumbSubjects {
  * Drafts, then the draft; a step from its chapter, a question from the
  * draft's Cards.
  */
-export function crumbsOf(route: StudioRoute, subjects: CrumbSubjects, i18n: Pick<I18n, "t" | "readerText">): Crumb<StudioRoute>[] {
+export function crumbsOf(
+  route: StudioRoute,
+  subjects: CrumbSubjects,
+  i18n: Pick<I18n, "t" | "readerText">,
+): Crumb<StudioRoute>[] {
   const { t, readerText } = i18n;
-  const instances: Crumb<StudioRoute> = { label: t("breadcrumbs.instances"), route: { screen: "instances" } };
+  const instances: Crumb<StudioRoute> = {
+    label: t("breadcrumbs.instances"),
+    route: { screen: "instances" },
+  };
   if (route.screen === "instances") return [instances];
-  const decks: Crumb<StudioRoute> = { label: t("breadcrumbs.decks"), route: { screen: "home", instanceUrl: instanceOfRoute(route)! } };
+  const decks: Crumb<StudioRoute> = {
+    label: t("breadcrumbs.decks"),
+    route: { screen: "home", instanceUrl: instanceOfRoute(route)! },
+  };
   const deck = () => readerText(subjects.deck!.title);
   const draft = subjects.draft!;
   /** The trail to a draft: its instance's drafts, then the draft. */
@@ -38,8 +48,14 @@ export function crumbsOf(route: StudioRoute, subjects: CrumbSubjects, i18n: Pick
     return [
       instances,
       decks,
-      { label: t("studio.drafts.crumb"), route: { screen: "drafts", instanceUrl: instanceOfRoute(route)! } },
-      { label: Object.keys(title).length === 0 ? t("studio.draft.untitled") : readerText(title), route: { screen: "draft", draftUrl } },
+      {
+        label: t("studio.drafts.crumb"),
+        route: { screen: "drafts", instanceUrl: instanceOfRoute(route)! },
+      },
+      {
+        label: Object.keys(title).length === 0 ? t("studio.draft.untitled") : readerText(title),
+        route: { screen: "draft", draftUrl },
+      },
     ];
   };
   const chapterName = (chapter: string) => {
@@ -48,7 +64,8 @@ export function crumbsOf(route: StudioRoute, subjects: CrumbSubjects, i18n: Pick
   };
   const stepName = (step: string) => {
     const chapter = chapterOfStep(draft, step);
-    const number = chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === step);
+    const number =
+      chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === step);
     return number === -1 ? step : t("studio.chapter.step", { number: number + 1 });
   };
   switch (route.screen) {
@@ -67,8 +84,13 @@ export function crumbsOf(route: StudioRoute, subjects: CrumbSubjects, i18n: Pick
     case "releases":
       return [instances, decks, { label: t("studio.releases.crumb"), route }];
     case "health": {
-      const health: Crumb<StudioRoute> = { label: t("studio.health.crumb"), route: { screen: "health", instanceUrl: route.instanceUrl } };
-      return route.deckUrl === undefined ? [instances, decks, health] : [instances, decks, health, { label: deck(), route }];
+      const health: Crumb<StudioRoute> = {
+        label: t("studio.health.crumb"),
+        route: { screen: "health", instanceUrl: route.instanceUrl },
+      };
+      return route.deckUrl === undefined
+        ? [instances, decks, health]
+        : [instances, decks, health, { label: deck(), route }];
     }
     case "about":
       return [instances, decks, { label: t("studio.about.crumb", { deck: deck() }), route }];
@@ -78,14 +100,20 @@ export function crumbsOf(route: StudioRoute, subjects: CrumbSubjects, i18n: Pick
       return [
         instances,
         decks,
-        { label: t("studio.cards.crumb", { deck: deck() }), route: { screen: "cards", deckUrl: route.deckUrl } },
+        {
+          label: t("studio.cards.crumb", { deck: deck() }),
+          route: { screen: "cards", deckUrl: route.deckUrl },
+        },
         { label: t("studio.insight.crumb"), route },
       ];
     case "card":
       return [
         instances,
         decks,
-        { label: t("studio.cards.crumb", { deck: deck() }), route: { screen: "cards", deckUrl: route.deckUrl } },
+        {
+          label: t("studio.cards.crumb", { deck: deck() }),
+          route: { screen: "cards", deckUrl: route.deckUrl },
+        },
         { label: cardName(subjects.card!, readerText), route },
       ];
     case "draft":
@@ -108,20 +136,41 @@ export function crumbsOf(route: StudioRoute, subjects: CrumbSubjects, i18n: Pick
       const chapter = chapterOfStep(draft, route.step);
       return [
         ...draftCrumbs(route.draftUrl),
-        ...(chapter === null ? [] : [{ label: chapterName(chapter), route: { screen: "chapter" as const, draftUrl: route.draftUrl, chapter } }]),
+        ...(chapter === null
+          ? []
+          : [
+              {
+                label: chapterName(chapter),
+                route: { screen: "chapter" as const, draftUrl: route.draftUrl, chapter },
+              },
+            ]),
         { label: stepName(route.step), route },
       ];
     }
     case "question":
       return [
         ...draftCrumbs(route.draftUrl),
-        { label: t("studio.draftCards.crumb"), route: { screen: "draftCards", draftUrl: route.draftUrl } },
-        { label: cardName({ ...draftCardOf(draft, route.card)!.content, id: route.card }, readerText), route },
+        {
+          label: t("studio.draftCards.crumb"),
+          route: { screen: "draftCards", draftUrl: route.draftUrl },
+        },
+        {
+          label: cardName(
+            { ...draftCardOf(draft, route.card)!.content, id: route.card },
+            readerText,
+          ),
+          route,
+        },
       ];
   }
 }
 
 /** A draft as the Studio lists it: its title, else "Untitled" and its name. */
-export function draftNameOf(draft: Pick<ReleaseDraftSummary, "title" | "name">, { t, readerText }: Pick<I18n, "t" | "readerText">): string {
-  return Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : readerText(draft.title);
+export function draftNameOf(
+  draft: Pick<ReleaseDraftSummary, "title" | "name">,
+  { t, readerText }: Pick<I18n, "t" | "readerText">,
+): string {
+  return Object.keys(draft.title).length === 0
+    ? t("studio.drafts.untitled", { name: draft.name })
+    : readerText(draft.title);
 }

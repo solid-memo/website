@@ -79,7 +79,12 @@ export interface Statistics {
 export function dailyActivity(answers: readonly Answer[]): DayActivity[] {
   const byDay = new Map<string, DayActivity>();
   for (const answer of answers) {
-    const day = byDay.get(answer.studyDay) ?? { studyDay: answer.studyDay, answers: 0, introduced: 0, forgotten: 0 };
+    const day = byDay.get(answer.studyDay) ?? {
+      studyDay: answer.studyDay,
+      answers: 0,
+      introduced: 0,
+      forgotten: 0,
+    };
     day.answers += 1;
     if (answer.priorIntervalDays === undefined) day.introduced += 1;
     if (!isRecalled(answer)) day.forgotten += 1;
@@ -115,10 +120,14 @@ export function streaksOf(studyDays: readonly string[], today: string): Streaks 
 
 /** How well reviewed prompts were remembered, young and mature apart; first answers are not reviews. */
 export function retentionOf(answers: readonly Answer[]): Retention {
-  const retention: Retention = { young: { reviews: 0, recalled: 0 }, mature: { reviews: 0, recalled: 0 } };
+  const retention: Retention = {
+    young: { reviews: 0, recalled: 0 },
+    mature: { reviews: 0, recalled: 0 },
+  };
   for (const answer of answers) {
     if (answer.priorIntervalDays === undefined) continue;
-    const group = answer.priorIntervalDays >= MATURE_INTERVAL_DAYS ? retention.mature : retention.young;
+    const group =
+      answer.priorIntervalDays >= MATURE_INTERVAL_DAYS ? retention.mature : retention.young;
     group.reviews += 1;
     if (isRecalled(answer)) group.recalled += 1;
   }
@@ -154,14 +163,16 @@ export function monthlyRetention(answers: readonly Answer[]): MonthRetention[] {
 export function statisticsOf(answers: readonly Answer[], today: string): Statistics {
   const days = dailyActivity(answers);
   const byDeck = new Map<string, Answer[]>();
-  for (const answer of answers) byDeck.set(answer.deckUrl, [...(byDeck.get(answer.deckUrl) ?? []), answer]);
+  for (const answer of answers)
+    byDeck.set(answer.deckUrl, [...(byDeck.get(answer.deckUrl) ?? []), answer]);
   return {
     today,
     totals: {
       answers: answers.length,
       studyDays: days.length,
       // A card is its deck's and its id: an upgrade moves a deck's cards into a new document.
-      cards: new Set(answers.map((answer) => `${answer.deckUrl}\n${fragmentIdOf(answer.cardUrl)}`)).size,
+      cards: new Set(answers.map((answer) => `${answer.deckUrl}\n${fragmentIdOf(answer.cardUrl)}`))
+        .size,
     },
     days,
     streaks: streaksOf(
@@ -174,7 +185,10 @@ export function statisticsOf(answers: readonly Answer[], today: string): Statist
       .map(([deckUrl, deckAnswers]) => ({
         deckUrl,
         answers: deckAnswers.length,
-        lastStudyDay: deckAnswers.map((answer) => answer.studyDay).sort().at(-1)!,
+        lastStudyDay: deckAnswers
+          .map((answer) => answer.studyDay)
+          .sort()
+          .at(-1)!,
         retention: retentionOf(deckAnswers),
       }))
       .sort((a, b) => b.answers - a.answers || a.deckUrl.localeCompare(b.deckUrl)),
@@ -206,4 +220,3 @@ export function todayOf(statistics: Statistics): TodaySummary | null {
     longestStreak: statistics.streaks.longest,
   };
 }
-

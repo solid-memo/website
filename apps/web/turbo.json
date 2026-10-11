@@ -1,14 +1,32 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "extends": ["//"],
+  "extends": [
+    "//"
+  ],
   "tasks": {
     "test": {
-      "inputs": ["$TURBO_EXTENDS$", ".env*", "$TURBO_ROOT$/ns/shapes/**"],
-      "env": ["$TURBO_EXTENDS$", "VITE_*"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        ".env*",
+        "$TURBO_ROOT$/ns/shapes/**"
+      ],
+      "env": [
+        "$TURBO_EXTENDS$",
+        "VITE_*"
+      ]
     },
     "build": {
-      "inputs": ["$TURBO_EXTENDS$", ".env*", "$TURBO_ROOT$/package.json", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"],
-      "env": ["$TURBO_EXTENDS$", "VITE_*"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        ".env*",
+        "$TURBO_ROOT$/package.json",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
+      ],
+      "env": [
+        "$TURBO_EXTENDS$",
+        "VITE_*"
+      ]
     }
   }
 }

@@ -20,7 +20,11 @@ import { DRAFT_ID, idIn, idsInUse, type QuestionPlace, type ReleaseDraft } from 
 
 /** Every id the draft has, or a release before it published: none of them is a new subject's. */
 export function takenIds(draft: ReleaseDraft): Set<string> {
-  return new Set([...idsInUse(draft), ...Object.keys(draft.published.ids), ...draft.published.activities]);
+  return new Set([
+    ...idsInUse(draft),
+    ...Object.keys(draft.published.ids),
+    ...draft.published.activities,
+  ]);
 }
 
 /** Why `id` cannot be a new subject's: none a subject can have, or one taken; null when it can. */
@@ -41,8 +45,16 @@ const ID_CHARS = [..."-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrs
  * shorter is taken.
  */
 export function idBetween(before: string, after: null, taken: ReadonlySet<string>): string;
-export function idBetween(before: string, after: string | null, taken: ReadonlySet<string>): string | null;
-export function idBetween(before: string, after: string | null, taken: ReadonlySet<string>): string | null {
+export function idBetween(
+  before: string,
+  after: string | null,
+  taken: ReadonlySet<string>,
+): string | null;
+export function idBetween(
+  before: string,
+  after: string | null,
+  taken: ReadonlySet<string>,
+): string | null {
   for (let n = 1; ; n++) {
     const id = `${before}${n}`;
     if (after !== null && id >= after) break;
@@ -54,7 +66,8 @@ export function idBetween(before: string, after: string | null, taken: ReadonlyS
     const head = before + rest.slice(0, i);
     if (i > 0 && !taken.has(head)) return head;
     const lower = ID_CHARS.find((char) => char < rest[i]!);
-    if (lower !== undefined) return taken.has(head + lower) ? idBetween(head + lower, null, taken) : head + lower;
+    if (lower !== undefined)
+      return taken.has(head + lower) ? idBetween(head + lower, null, taken) : head + lower;
   }
   return null;
 }
@@ -93,20 +106,27 @@ export function stepIdFor(draft: ReleaseDraft, chapter: string): string {
 /** The cards a step asks, by id, in the order it asks them: their ids' (course.ts). */
 export function questionsOfStep(draft: ReleaseDraft, step: string): string[] {
   const node = draft.steps.find((one) => one.id === step);
-  return (node?.data.checkedBy ?? []).map((iri) => idIn(draft, iri)).filter((id) => id !== null).sort();
+  return (node?.data.checkedBy ?? [])
+    .map((iri) => idIn(draft, iri))
+    .filter((id) => id !== null)
+    .sort();
 }
 
 /** The cards a chapter asks only in its final review, by id. */
 export function reviewQuestionsOf(draft: ReleaseDraft, chapter: string): string[] {
   const node = draft.chapters.find((one) => one.id === chapter);
-  return (node?.data.reviewQuestion ?? []).map((iri) => idIn(draft, iri)).filter((id) => id !== null).sort();
+  return (node?.data.reviewQuestion ?? [])
+    .map((iri) => idIn(draft, iri))
+    .filter((id) => id !== null)
+    .sort();
 }
 
 /** The name a step's questions share: `q-<topic>-<n>` for step `ch-<topic>-<n>` of chapter `ch-<topic>`, else `q-<step>`. */
 function questionBase(draft: ReleaseDraft, step: string): string {
   const chapterIri = draft.steps.find((one) => one.id === step)?.data.chapter;
   const chapter = chapterIri === undefined ? null : idIn(draft, chapterIri);
-  const n = chapter !== null && step.startsWith(`${chapter}-`) ? step.slice(chapter.length + 1) : "";
+  const n =
+    chapter !== null && step.startsWith(`${chapter}-`) ? step.slice(chapter.length + 1) : "";
   return /^[0-9]+$/.test(n) ? `q-${topicOf(chapter!)}-${n}` : `q-${step}`;
 }
 
@@ -122,13 +142,17 @@ export function questionIdFor(draft: ReleaseDraft, place: QuestionPlace | null):
   if (place.kind === "review") return numbered(`q-${topicOf(place.chapter)}-r`, taken, 2);
   const last = questionsOfStep(draft, place.step).at(-1) ?? null;
   const base = questionBase(draft, place.step);
-  const lettered = [..."abcdefghijklmnopqrstuvwxyz"].map((letter) => `${base}${letter}`).find((id) => !taken.has(id) && (last === null || id > last));
+  const lettered = [..."abcdefghijklmnopqrstuvwxyz"]
+    .map((letter) => `${base}${letter}`)
+    .find((id) => !taken.has(id) && (last === null || id > last));
   return lettered ?? idBetween(last ?? base, null, taken);
 }
 
 /** The cards asked at `place`, by id, in the order they are asked: their ids'. */
 export function questionsAt(draft: ReleaseDraft, place: QuestionPlace): string[] {
-  return place.kind === "step" ? questionsOfStep(draft, place.step) : reviewQuestionsOf(draft, place.chapter);
+  return place.kind === "step"
+    ? questionsOfStep(draft, place.step)
+    : reviewQuestionsOf(draft, place.chapter);
 }
 
 /**
@@ -140,15 +164,24 @@ export function questionsAt(draft: ReleaseDraft, place: QuestionPlace): string[]
  * lower end. Null when no id lies between, or the first sorts before
  * the place's name: the user writes one.
  */
-export function questionIdBefore(draft: ReleaseDraft, place: QuestionPlace, next: string): string | null {
+export function questionIdBefore(
+  draft: ReleaseDraft,
+  place: QuestionPlace,
+  next: string,
+): string | null {
   const taken = takenIds(draft);
   const asked = questionsAt(draft, place);
   const previous = asked[asked.indexOf(next) - 1] ?? null;
-  const base = place.kind === "step" ? questionBase(draft, place.step) : `q-${topicOf(place.chapter)}-r00`;
+  const base =
+    place.kind === "step" ? questionBase(draft, place.step) : `q-${topicOf(place.chapter)}-r00`;
   const lower = previous ?? (base < next ? base : null);
   if (lower === null) return null;
   const lettered =
-    place.kind === "step" ? [..."abcdefghijklmnopqrstuvwxyz"].map((letter) => `${base}${letter}`).find((id) => !taken.has(id) && id > lower && id < next) : undefined;
+    place.kind === "step"
+      ? [..."abcdefghijklmnopqrstuvwxyz"]
+          .map((letter) => `${base}${letter}`)
+          .find((id) => !taken.has(id) && id > lower && id < next)
+      : undefined;
   return lettered ?? idBetween(lower, next, taken);
 }
 
@@ -156,4 +189,3 @@ export function questionIdBefore(draft: ReleaseDraft, place: QuestionPlace, next
 export function isPublished(draft: ReleaseDraft, id: string): boolean {
   return id in draft.published.ids;
 }
-

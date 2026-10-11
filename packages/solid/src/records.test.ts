@@ -16,8 +16,26 @@ import {
 import { describe, expect, it } from "vitest";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { LATEST_VERSION, type CardV5 } from "@solid-memo/vocab/types.generated";
-import { CARD_V2, CARD_V4, CARD_V5, DECK_V2, DECK_V4, DECK_V6, LIBRARY_DECK_V5, PREFERENCES_V2, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
-import { applyRecord, readRecord, readVersioned, recordThing, removeUnlessNewer, storedVersionOf, unlessNewer } from "./records";
+import {
+  CARD_V2,
+  CARD_V4,
+  CARD_V5,
+  DECK_V2,
+  DECK_V4,
+  DECK_V6,
+  LIBRARY_DECK_V5,
+  PREFERENCES_V2,
+  REVIEW_STATE_V2,
+} from "@solid-memo/vocab/descriptors.generated";
+import {
+  applyRecord,
+  readRecord,
+  readVersioned,
+  recordThing,
+  removeUnlessNewer,
+  storedVersionOf,
+  unlessNewer,
+} from "./records";
 import { DCTERMS, RDF, SM } from "./vocab";
 
 const URL_ = "https://pod.example/x.ttl#it";
@@ -53,11 +71,29 @@ const THING: ShapeDescriptor<Thing> = {
     { name: "when", predicate: `${EX}when`, kind: "dateTime", cardinality: "optional" },
     { name: "flag", predicate: `${EX}flag`, kind: "boolean", cardinality: "optional" },
     { name: "link", predicate: `${EX}link`, kind: "iri", cardinality: "optional" },
-    { name: "mode", predicate: `${EX}mode`, kind: "enum", cardinality: "optional", values: ["a", "b"] },
+    {
+      name: "mode",
+      predicate: `${EX}mode`,
+      kind: "enum",
+      cardinality: "optional",
+      values: ["a", "b"],
+    },
     { name: "tags", predicate: `${EX}tag`, kind: "string", cardinality: "many" },
     { name: "links", predicate: `${EX}links`, kind: "iri", cardinality: "many" },
-    { name: "concept", predicate: `${EX}concept`, kind: "iriEnum", cardinality: "optional", values: [`${EX}c1`, `${EX}c2`] },
-    { name: "concepts", predicate: `${EX}concepts`, kind: "iriEnum", cardinality: "many", values: [`${EX}c1`, `${EX}c2`] },
+    {
+      name: "concept",
+      predicate: `${EX}concept`,
+      kind: "iriEnum",
+      cardinality: "optional",
+      values: [`${EX}c1`, `${EX}c2`],
+    },
+    {
+      name: "concepts",
+      predicate: `${EX}concepts`,
+      kind: "iriEnum",
+      cardinality: "many",
+      values: [`${EX}c1`, `${EX}c2`],
+    },
   ],
 };
 
@@ -85,7 +121,12 @@ describe("recordThing and readRecord", () => {
   });
 
   it("leave out absent optional fields and read them back as absent", () => {
-    const thing = recordThing(URL_, THING, { name: "Ann", tags: [], links: [], concepts: [] }, null);
+    const thing = recordThing(
+      URL_,
+      THING,
+      { name: "Ann", tags: [], links: [], concepts: [] },
+      null,
+    );
     expect(readRecord(thing, THING)).toEqual({ name: "Ann", tags: [], links: [], concepts: [] });
   });
 
@@ -100,7 +141,12 @@ describe("recordThing and readRecord", () => {
       .addStringNoLocale(`${EX}foreign`, "kept")
       .addInteger(SM.formatVersion, 0)
       .build();
-    const thing = recordThing(URL_, THING, { name: "New", tags: ["fresh"], links: [], concepts: [] }, existing);
+    const thing = recordThing(
+      URL_,
+      THING,
+      { name: "New", tags: ["fresh"], links: [], concepts: [] },
+      existing,
+    );
     expect(getUrlAll(thing, RDF.type)).toEqual([`${EX}Thing`, `${EX}Extra`]);
     expect(getStringNoLocale(thing, `${EX}name`)).toBe("New");
     expect(getStringNoLocaleAll(thing, `${EX}tag`)).toEqual(["fresh"]);
@@ -112,12 +158,20 @@ describe("recordThing and readRecord", () => {
 
   it("refuse to write over a subject a newer version of the app wrote, and write over one at this app's version or older", () => {
     const stamped = (version: number) =>
-      buildThing(createThing({ url: URL_ })).addIri(RDF.type, `${EX}Thing`).addInteger(SM.formatVersion, version).build();
+      buildThing(createThing({ url: URL_ }))
+        .addIri(RDF.type, `${EX}Thing`)
+        .addInteger(SM.formatVersion, version)
+        .build();
     expect(() => recordThing(URL_, THING, FULL, stamped(2))).toThrow(
-      expect.objectContaining({ code: "writtenByNewerApp", message: expect.stringContaining(`url: ${URL_}\nversion: 2\nwrites: 1`) }),
+      expect.objectContaining({
+        code: "writtenByNewerApp",
+        message: expect.stringContaining(`url: ${URL_}\nversion: 2\nwrites: 1`),
+      }),
     );
     expect(getInteger(recordThing(URL_, THING, FULL, stamped(1)), SM.formatVersion)).toBe(1);
-    expect(getInteger(recordThing(URL_, { ...THING, version: 2 }, FULL, stamped(1)), SM.formatVersion)).toBe(2);
+    expect(
+      getInteger(recordThing(URL_, { ...THING, version: 2 }, FULL, stamped(1)), SM.formatVersion),
+    ).toBe(2);
   });
 });
 
@@ -125,7 +179,9 @@ describe("a change or removal that records no subject", () => {
   const CARD = "https://pod.example/cards.ttl#q";
   const card = (version?: number, type: string = SM.Card) => {
     const builder = buildThing(createThing({ url: CARD })).addIri(RDF.type, type);
-    return (version === undefined ? builder : builder.addInteger(SM.formatVersion, version)).build();
+    return (
+      version === undefined ? builder : builder.addInteger(SM.formatVersion, version)
+    ).build();
   };
 
   it("refuses a subject stamped above every version this app writes for its class", () => {
@@ -133,7 +189,9 @@ describe("a change or removal that records no subject", () => {
     expect(() => unlessNewer(card(newer))).toThrow(
       expect.objectContaining({
         code: "writtenByNewerApp",
-        message: expect.stringContaining(`url: ${CARD}\nversion: ${newer}\nwrites: ${LATEST_VERSION.card}`),
+        message: expect.stringContaining(
+          `url: ${CARD}\nversion: ${newer}\nwrites: ${LATEST_VERSION.card}`,
+        ),
       }),
     );
     expect(() => removeUnlessNewer(setThing(createSolidDataset(), card(newer)), CARD)).toThrow(
@@ -154,11 +212,21 @@ describe("a change or removal that records no subject", () => {
 describe("a card's text format", () => {
   const CARD = "https://pod.example/cards.ttl#q";
   const marked = () =>
-    recordThing(CARD, CARD_V5, { front: { en: "**a**" }, back: { en: "b" }, distractor: [], textFormat: SM.markdown }, null);
+    recordThing(
+      CARD,
+      CARD_V5,
+      { front: { en: "**a**" }, back: { en: "b" }, distractor: [], textFormat: SM.markdown },
+      null,
+    );
 
   it("is read, and written in place, with the card", () => {
     expect(readRecord(marked(), CARD_V5)).toMatchObject({ textFormat: SM.markdown });
-    const edited = recordThing(CARD, CARD_V5, { front: { en: "a" }, back: { en: "b" }, distractor: [] }, marked());
+    const edited = recordThing(
+      CARD,
+      CARD_V5,
+      { front: { en: "a" }, back: { en: "b" }, distractor: [] },
+      marked(),
+    );
     expect(getUrlAll(edited, SM.textFormat)).toEqual([]);
   });
 
@@ -167,15 +235,25 @@ describe("a card's text format", () => {
       ...CARD_V5,
       fields: CARD_V5.fields.filter((field) => field.name !== "textFormat"),
     } as ShapeDescriptor<Omit<CardV5, "textFormat">>;
-    const edited = recordThing(CARD, older, { front: { en: "a" }, back: { en: "b" }, distractor: [] }, marked());
+    const edited = recordThing(
+      CARD,
+      older,
+      { front: { en: "a" }, back: { en: "b" }, distractor: [] },
+      marked(),
+    );
     expect(getUrlAll(edited, SM.textFormat)).toEqual([SM.markdown]);
-    expect(readRecord(edited, CARD_V5)).toMatchObject({ front: { en: "a" }, textFormat: SM.markdown });
+    expect(readRecord(edited, CARD_V5)).toMatchObject({
+      front: { en: "a" },
+      textFormat: SM.markdown,
+    });
   });
 });
 
 describe("readRecord", () => {
   it("is null when a required field is missing", () => {
-    const thing = buildThing(createThing({ url: URL_ })).addInteger(`${EX}count`, 1).build();
+    const thing = buildThing(createThing({ url: URL_ }))
+      .addInteger(`${EX}count`, 1)
+      .build();
     expect(readRecord(thing, THING)).toBeNull();
   });
 
@@ -194,7 +272,9 @@ describe("readRecord", () => {
       shapeIri: `${EX}shape`,
       shapeDocument: "thing/v1.ttl",
       context: "any",
-      fields: [{ name: "mode", predicate: `${EX}mode`, kind: "enum", cardinality: "one", values: ["a"] }],
+      fields: [
+        { name: "mode", predicate: `${EX}mode`, kind: "enum", cardinality: "one", values: ["a"] },
+      ],
     };
     expect(readRecord(thing, required)).toBeNull();
   });
@@ -206,10 +286,23 @@ describe("readRecord", () => {
       .addIri(`${EX}concepts`, `${EX}c9`)
       .addIri(`${EX}concepts`, `${EX}c1`)
       .build();
-    expect(readRecord(thing, THING)).toEqual({ name: "Ann", tags: [], links: [], concepts: [`${EX}c1`] });
+    expect(readRecord(thing, THING)).toEqual({
+      name: "Ann",
+      tags: [],
+      links: [],
+      concepts: [`${EX}c1`],
+    });
     const required: ShapeDescriptor<{ concept: string }> = {
       ...THING,
-      fields: [{ name: "concept", predicate: `${EX}concept`, kind: "iriEnum", cardinality: "one", values: [`${EX}c1`] }],
+      fields: [
+        {
+          name: "concept",
+          predicate: `${EX}concept`,
+          kind: "iriEnum",
+          cardinality: "one",
+          values: [`${EX}c1`],
+        },
+      ],
     } as unknown as ShapeDescriptor<{ concept: string }>;
     expect(readRecord(thing, required)).toBeNull();
   });
@@ -250,7 +343,9 @@ describe("language-tagged text", () => {
       .addStringNoLocale(DCTERMS.title, "Untagged")
       .build();
     expect(readRecord(thing, DECK_V4)?.title).toEqual({ en: "Capitals", sv: "Huvudstäder" });
-    const untagged = buildThing(createThing({ url: URL_ })).addStringNoLocale(DCTERMS.title, "Capitals").build();
+    const untagged = buildThing(createThing({ url: URL_ }))
+      .addStringNoLocale(DCTERMS.title, "Capitals")
+      .build();
     expect(readRecord(untagged, DECK_V4)).toBeNull();
   });
 });
@@ -274,7 +369,10 @@ describe("several texts per language (a deck's keywords)", () => {
     expect(getStringWithLocaleAll(thing, KEYWORD, "sv")).toEqual(["huvudstäder", "länder"]);
     expect(getStringWithLocaleAll(thing, KEYWORD, "en")).toEqual(["capitals"]);
     expect(getStringNoLocaleAll(thing, KEYWORD)).toEqual(["legacy"]);
-    expect(readRecord(thing, DECK_V6)).toEqual({ ...deck, keyword: { "": ["legacy"], en: ["capitals"], sv: ["huvudstäder", "länder"] } });
+    expect(readRecord(thing, DECK_V6)).toEqual({
+      ...deck,
+      keyword: { "": ["legacy"], en: ["capitals"], sv: ["huvudstäder", "länder"] },
+    });
   });
 
   it("merges tags that differ only in case, each keyword once, and reads none as empty", () => {
@@ -284,7 +382,9 @@ describe("several texts per language (a deck's keywords)", () => {
       .addStringWithLocale(KEYWORD, "huvudstäder", "sv")
       .build();
     expect(readRecord(thing, DECK_V6)?.keyword).toEqual({ sv: ["huvudstäder", "städer"] });
-    expect(readRecord(recordThing(URL_, DECK_V6, { ...deck, keyword: {} }, null), DECK_V6)?.keyword).toEqual({});
+    expect(
+      readRecord(recordThing(URL_, DECK_V6, { ...deck, keyword: {} }, null), DECK_V6)?.keyword,
+    ).toEqual({});
   });
 
   it("reads only tagged keywords where the shape allows no untagged ones, and replaces them in place", () => {
@@ -303,9 +403,16 @@ describe("several texts per language (a deck's keywords)", () => {
       distribution: [],
       wasDerivedFrom: [],
     };
-    const existing = buildThing(recordThing(URL_, LIBRARY_DECK_V5, release, null)).addStringNoLocale(KEYWORD, "stray").build();
+    const existing = buildThing(recordThing(URL_, LIBRARY_DECK_V5, release, null))
+      .addStringNoLocale(KEYWORD, "stray")
+      .build();
     expect(readRecord(existing, LIBRARY_DECK_V5)?.keyword).toEqual({ en: ["capitals"] });
-    const thing = recordThing(URL_, LIBRARY_DECK_V5, { ...release, keyword: { sv: ["huvudstäder"] } }, existing);
+    const thing = recordThing(
+      URL_,
+      LIBRARY_DECK_V5,
+      { ...release, keyword: { sv: ["huvudstäder"] } },
+      existing,
+    );
     expect(getStringWithLocaleAll(thing, KEYWORD, "en")).toEqual([]);
     expect(getStringNoLocaleAll(thing, KEYWORD)).toEqual([]);
     expect(readRecord(thing, LIBRARY_DECK_V5)?.keyword).toEqual({ sv: ["huvudstäder"] });
@@ -328,7 +435,10 @@ describe("text that may be untagged (a card's sides)", () => {
       .addStringWithLocale(SM.front, "Sweden", "en")
       .addUrl(SM.backImage, "https://flagcdn.com/se.svg")
       .build();
-    expect(readRecord(thing, CARD_V4)).toEqual({ front: { "": "Sverige", en: "Sweden" }, backImage: "https://flagcdn.com/se.svg" });
+    expect(readRecord(thing, CARD_V4)).toEqual({
+      front: { "": "Sverige", en: "Sweden" },
+      backImage: "https://flagcdn.com/se.svg",
+    });
   });
 });
 
@@ -365,7 +475,10 @@ describe("readVersioned", () => {
   it("reads a newer version with the latest shape it knows, passing the stored version through", () => {
     expect(readVersioned(card(7), "card")).toEqual({
       storedVersion: 7,
-      record: { version: 5, data: { front: { "": "Sweden" }, back: { "": "Stockholm" }, distractor: [] } },
+      record: {
+        version: 5,
+        data: { front: { "": "Sweden" }, back: { "": "Stockholm" }, distractor: [] },
+      },
     });
     expect(readVersioned(card(0), "card")?.record.version).toBe(1);
   });
@@ -400,24 +513,51 @@ describe("the real descriptors", () => {
     expect(getUrl(deck, SM.cardsDocument)).toBe("https://pod.example/decks/d.ttl");
     expect(getStringNoLocale(deck, DCTERMS.title)).toBe("Capitals");
     expect(readVersioned(deck, "deck")?.record.data).toMatchObject({ direction: "bidirectional" });
-    const card = recordThing(URL_, CARD_V2, { frontImage: "https://flagcdn.com/se.svg", back: "Sweden" }, null);
+    const card = recordThing(
+      URL_,
+      CARD_V2,
+      { frontImage: "https://flagcdn.com/se.svg", back: "Sweden" },
+      null,
+    );
     expect(getUrl(card, SM.frontImage)).toBe("https://flagcdn.com/se.svg");
     const state = recordThing(
       URL_,
       REVIEW_STATE_V2,
-      { easeFactor: 2.5, intervalDays: 1, repetitions: 1, due: "2026-09-22", firstReviewedAt: "2026-09-21T10:00:00.000Z", lastReviewedAt: "2026-09-21T10:00:00.000Z" },
+      {
+        easeFactor: 2.5,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "2026-09-22",
+        firstReviewedAt: "2026-09-21T10:00:00.000Z",
+        lastReviewedAt: "2026-09-21T10:00:00.000Z",
+      },
       null,
     );
     expect(getInteger(state, SM.formatVersion)).toBe(2);
     const prefs = recordThing(
       URL_,
       PREFERENCES_V2,
-      { newCardsPerDay: 20, maxReviewsPerDay: 200, dayBoundaryHour: 4, answerScale: "sm2", developerMode: false },
+      {
+        newCardsPerDay: 20,
+        maxReviewsPerDay: 200,
+        dayBoundaryHour: 4,
+        answerScale: "sm2",
+        developerMode: false,
+      },
       null,
     );
     expect(readVersioned(prefs, "preferences")).toEqual({
       storedVersion: 2,
-      record: { version: 2, data: { newCardsPerDay: 20, maxReviewsPerDay: 200, dayBoundaryHour: 4, answerScale: "sm2", developerMode: false } },
+      record: {
+        version: 2,
+        data: {
+          newCardsPerDay: 20,
+          maxReviewsPerDay: 200,
+          dayBoundaryHour: 4,
+          answerScale: "sm2",
+          developerMode: false,
+        },
+      },
     });
   });
 });

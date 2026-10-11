@@ -44,7 +44,11 @@ function card(id: string, extra: Partial<Card> = {}): Card {
   };
 }
 
-const violation: Violation = { message: { en: "Wrong." }, severity: "violation", constraint: "MinCount" };
+const violation: Violation = {
+  message: { en: "Wrong." },
+  severity: "violation",
+  constraint: "MinCount",
+};
 const checked = (url: string, violations: Violation[] = [violation]) => ({
   url,
   status: "checked" as const,
@@ -52,7 +56,11 @@ const checked = (url: string, violations: Violation[] = [violation]) => ({
   version: 5,
   violations,
 });
-const document = (url: string, subjects: DocumentReport["subjects"]): DocumentReport => ({ url, status: "checked", subjects });
+const document = (url: string, subjects: DocumentReport["subjects"]): DocumentReport => ({
+  url,
+  status: "checked",
+  subjects,
+});
 
 /** A check that finds "link" in any text holding "[", saying the rule it was held to. */
 const text: DeckTextCheck<{ code: string; rule: string }> = {
@@ -72,10 +80,14 @@ describe("deckReport", () => {
       ]),
       document(CARDS, [checked(`${CARDS}#c1`)]),
       document(REVIEWS, [checked(`${REVIEWS}#c1`, [])]),
-      document("https://pod.example/a/decks/other.ttl", [checked("https://pod.example/a/decks/other.ttl#c1")]),
+      document("https://pod.example/a/decks/other.ttl", [
+        checked("https://pod.example/a/decks/other.ttl#c1"),
+      ]),
     ]);
     const scoped = deckReport(report, deck);
-    expect(scoped.documents.map((each) => [each.url, each.subjects.map((subject) => subject.url)])).toEqual([
+    expect(
+      scoped.documents.map((each) => [each.url, each.subjects.map((subject) => subject.url)]),
+    ).toEqual([
       [CATALOG, [deck.url, distributionUrlOf(deck.url), agentUrlOf(deck.url, "Ada")]],
       [CARDS, [`${CARDS}#c1`]],
       [REVIEWS, [`${REVIEWS}#c1`]],
@@ -101,7 +113,9 @@ describe("withDeckReport", () => {
       document(REVIEWS, [checked(`${REVIEWS}#c1`, [])]),
     ]);
     const merged = withDeckReport(report, deck, part);
-    expect(merged.documents.map((each) => [each.url, each.subjects.map((subject) => subject.url)])).toEqual([
+    expect(
+      merged.documents.map((each) => [each.url, each.subjects.map((subject) => subject.url)]),
+    ).toEqual([
       [CATALOG, [`${CATALOG}#deck-2`, deck.url]],
       [CARDS, []],
       [REVIEWS, [`${REVIEWS}#c1`]],
@@ -112,9 +126,15 @@ describe("withDeckReport", () => {
   });
 
   it("drops the deck's results in the catalog when the later check found it unchanged, so with no subjects", () => {
-    const part = summarize("https://pod.example/a/", [document(CATALOG, []), document(CARDS, []), document(REVIEWS, [])]);
+    const part = summarize("https://pod.example/a/", [
+      document(CATALOG, []),
+      document(CARDS, []),
+      document(REVIEWS, []),
+    ]);
     const merged = withDeckReport(report, deck, part);
-    expect(merged.documents.map((each) => [each.url, each.subjects.map((subject) => subject.url)])).toEqual([
+    expect(
+      merged.documents.map((each) => [each.url, each.subjects.map((subject) => subject.url)]),
+    ).toEqual([
       [CATALOG, [`${CATALOG}#deck-2`]],
       [CARDS, []],
       [REVIEWS, []],
@@ -136,21 +156,45 @@ describe("cardSpotOf", () => {
   const cards = [card("c1", { distractors: [{ id: "c1-d1", text: { sv: "x" } }] }), card("c1-2")];
 
   it("finds a card's text by its predicate, or the card alone", () => {
-    expect(cardSpotOf(deck, cards, `${CARDS}#c1`, SM.backNote)).toEqual({ card: cards[0], place: { tab: "content", part: "backNote" } });
-    expect(cardSpotOf(deck, cards, `${CARDS}#c1`, SM.textFormat)).toEqual({ card: cards[0], place: { tab: "content" } });
-    expect(cardSpotOf(deck, cards, `${CARDS}#c1`)).toEqual({ card: cards[0], place: { tab: "content" } });
+    expect(cardSpotOf(deck, cards, `${CARDS}#c1`, SM.backNote)).toEqual({
+      card: cards[0],
+      place: { tab: "content", part: "backNote" },
+    });
+    expect(cardSpotOf(deck, cards, `${CARDS}#c1`, SM.textFormat)).toEqual({
+      card: cards[0],
+      place: { tab: "content" },
+    });
+    expect(cardSpotOf(deck, cards, `${CARDS}#c1`)).toEqual({
+      card: cards[0],
+      place: { tab: "content" },
+    });
   });
 
   it("finds a wrong option's card, and its text or note", () => {
     const at = `${CARDS}#c1-d1`;
-    expect(cardSpotOf(deck, cards, at, SM.distractorText)).toEqual({ card: cards[0], place: { tab: "distractors", distractor: "c1-d1", part: "text" } });
-    expect(cardSpotOf(deck, cards, at, SM.distractorNote)).toEqual({ card: cards[0], place: { tab: "distractors", distractor: "c1-d1", part: "note" } });
-    expect(cardSpotOf(deck, cards, at, SM.distractor)).toEqual({ card: cards[0], place: { tab: "distractors", distractor: "c1-d1" } });
+    expect(cardSpotOf(deck, cards, at, SM.distractorText)).toEqual({
+      card: cards[0],
+      place: { tab: "distractors", distractor: "c1-d1", part: "text" },
+    });
+    expect(cardSpotOf(deck, cards, at, SM.distractorNote)).toEqual({
+      card: cards[0],
+      place: { tab: "distractors", distractor: "c1-d1", part: "note" },
+    });
+    expect(cardSpotOf(deck, cards, at, SM.distractor)).toEqual({
+      card: cards[0],
+      place: { tab: "distractors", distractor: "c1-d1" },
+    });
   });
 
   it("finds a review state's card, either way", () => {
-    expect(cardSpotOf(deck, cards, `${REVIEWS}#c1`)).toEqual({ card: cards[0], place: { tab: "schedule" } });
-    expect(cardSpotOf(deck, cards, `${REVIEWS}#c1-2@back-to-front`)).toEqual({ card: cards[1], place: { tab: "schedule" } });
+    expect(cardSpotOf(deck, cards, `${REVIEWS}#c1`)).toEqual({
+      card: cards[0],
+      place: { tab: "schedule" },
+    });
+    expect(cardSpotOf(deck, cards, `${REVIEWS}#c1-2@back-to-front`)).toEqual({
+      card: cards[1],
+      place: { tab: "schedule" },
+    });
   });
 
   it("finds nothing for another subject", () => {
@@ -171,7 +215,9 @@ describe("duplicateCardsOf", () => {
       card("f", { front: { en: "Paris" }, back: { sv: "Frankrike" }, retired: true }),
       card("g", { front: { en: "Paris" }, back: { sv: "Frankrike" } }),
     ];
-    expect(duplicateCardsOf(cards, text.plain).map((group) => group.map((each) => each.id))).toEqual([
+    expect(
+      duplicateCardsOf(cards, text.plain).map((group) => group.map((each) => each.id)),
+    ).toEqual([
       ["a", "b"],
       ["c", "g"],
     ]);
@@ -185,9 +231,12 @@ describe("duplicateCardsOf", () => {
       card("d", { front: {}, frontImageUrl: "https://example.org/1.png", back: { sv: "x" } }),
       card("e", { front: {}, frontImageUrl: "https://example.org/2.png", back: { sv: "x" } }),
     ];
-    expect(duplicateCardsOf(cards.map((each) => ({ ...each, back: { sv: "x" } })), text.plain).map((group) => group.map((each) => each.id))).toEqual([
-      ["a", "b"],
-    ]);
+    expect(
+      duplicateCardsOf(
+        cards.map((each) => ({ ...each, back: { sv: "x" } })),
+        text.plain,
+      ).map((group) => group.map((each) => each.id)),
+    ).toEqual([["a", "b"]]);
   });
 });
 
@@ -200,11 +249,18 @@ describe("cardMarkdownProblems", () => {
       backLabel: { en: "[l]" },
       frontNote: { en: "[n]" },
       backNote: { en: "  " },
-      distractors: [{ id: "m-d1", text: { en: "[o]" }, note: { en: "[why]" } }, { id: "m-d2", text: { en: "ok" } }],
+      distractors: [
+        { id: "m-d1", text: { en: "[o]" }, note: { en: "[why]" } },
+        { id: "m-d2", text: { en: "ok" } },
+      ],
     });
     const plain = card("p", { front: { en: "[a]" } });
     const retired = card("r", { textFormat: SM.markdown, front: { en: "[a]" }, retired: true });
-    expect(cardMarkdownProblems([plain, marked, retired], text.check).map(({ card, place, language, finding }) => [card.id, place, language, finding.rule])).toEqual([
+    expect(
+      cardMarkdownProblems([plain, marked, retired], text.check).map(
+        ({ card, place, language, finding }) => [card.id, place, language, finding.rule],
+      ),
+    ).toEqual([
       ["m", { tab: "content", part: "front" }, "en", "side"],
       ["m", { tab: "content", part: "back" }, "en", "option"],
       ["m", { tab: "content", part: "backLabel" }, "en", "side"],
@@ -216,13 +272,19 @@ describe("cardMarkdownProblems", () => {
 
   it("holds the back of a card without wrong options as a side", () => {
     const marked = card("m", { textFormat: SM.markdown, back: { en: "[b]" } });
-    expect(cardMarkdownProblems([marked], text.check).map(({ finding }) => finding.rule)).toEqual(["side"]);
+    expect(cardMarkdownProblems([marked], text.check).map(({ finding }) => finding.rule)).toEqual([
+      "side",
+    ]);
   });
 });
 
 describe("unstatedSides", () => {
   it("lists the untagged sides, but not of a card still as its release has it", () => {
-    const cards = [card("a", { front: { "": "x" }, back: { "": "y" } }), card("b", { back: { "": "z" } }), card("c", { front: { "": "w" } })];
+    const cards = [
+      card("a", { front: { "": "x" }, back: { "": "y" } }),
+      card("b", { back: { "": "z" } }),
+      card("c", { front: { "": "w" } }),
+    ];
     const release = [card("c", { front: { "": "w" } })];
     expect(unstatedSides(cards, release).map(({ card, place }) => [card.id, place])).toEqual([
       ["a", { tab: "content", part: "front" }],

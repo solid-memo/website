@@ -74,7 +74,10 @@ const PROFILED_CLASSES = [
 ];
 
 /** The links by which a catalog or deck group lists its members. */
-const MEMBER_LINKS: readonly (string | undefined)[] = ["http://www.w3.org/ns/dcat#dataset", "http://www.w3.org/ns/dcat#catalog"];
+const MEMBER_LINKS: readonly (string | undefined)[] = [
+  "http://www.w3.org/ns/dcat#dataset",
+  "http://www.w3.org/ns/dcat#catalog",
+];
 
 /**
  * DCAT-AP's class check on a member a catalog or deck group lists from
@@ -158,14 +161,19 @@ export function createShaclShapeValidator({
     return engine;
   }
 
-  const profileEngines = new Map<ProfileName, Promise<{ engine: ShapeEngine; reference: DatasetCore[] }>>();
+  const profileEngines = new Map<
+    ProfileName,
+    Promise<{ engine: ShapeEngine; reference: DatasetCore[] }>
+  >();
   /** A profile's engine (its SHACL Core shapes), with the reference data its checks look in: made once. */
   function profile(name: ProfileName) {
     let made = profileEngines.get(name);
     if (made === undefined) {
       made = Promise.all([loadEngine(), loader.loadProfile(name), loader.loadReferenceData()]).then(
         ([{ createEngine, mergeDatasets }, shapes, reference]) => ({
-          engine: createEngine(mergeDatasets(coreOnly(shapes.flatMap((d) => [...(d as Iterable<Quad>)])))),
+          engine: createEngine(
+            mergeDatasets(coreOnly(shapes.flatMap((d) => [...(d as Iterable<Quad>)]))),
+          ),
           reference,
         }),
       );
@@ -183,8 +191,16 @@ export function createShaclShapeValidator({
     for (const { focusNode, ...violation } of await engine.validate(
       mergeDatasets(data as Iterable<Quad>, ...(reference as Iterable<Quad>[])),
     )) {
-      if (violation.severity !== "violation" || !subjects.has(focusNode) || isMemberElsewhere(focusNode, violation)) continue;
-      bySubject.set(focusNode, [...(bySubject.get(focusNode) ?? []), { ...violation, profile: "dcat-ap" }]);
+      if (
+        violation.severity !== "violation" ||
+        !subjects.has(focusNode) ||
+        isMemberElsewhere(focusNode, violation)
+      )
+        continue;
+      bySubject.set(focusNode, [
+        ...(bySubject.get(focusNode) ?? []),
+        { ...violation, profile: "dcat-ap" },
+      ]);
     }
     return bySubject;
   }
@@ -195,7 +211,11 @@ export function createShaclShapeValidator({
    * draft is not held to DCAT-AP yet: it may lack what a published
    * dataset needs (a description), which the release check asks of it.
    */
-  async function subjectViolations(dataset: SolidDataset, subjects: readonly string[], context: WriteContext): Promise<string[]> {
+  async function subjectViolations(
+    dataset: SolidDataset,
+    subjects: readonly string[],
+    context: WriteContext,
+  ): Promise<string[]> {
     const data = toRdfJsDataset(dataset);
     const quads = [...(data as Iterable<Quad>)];
     const foreign = foreignSubjects(dataset);
@@ -214,14 +234,21 @@ export function createShaclShapeValidator({
         if (counts(subject, v)) problems.push(describe(subject, v));
       }
     }
-    const profiled = context === "pod" && subjects.some((subject) => {
-      const thing = getThing(dataset, subject);
-      return thing !== null && getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type));
-    });
+    const profiled =
+      context === "pod" &&
+      subjects.some((subject) => {
+        const thing = getThing(dataset, subject);
+        return (
+          thing !== null &&
+          getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type))
+        );
+      });
     if (profiled) {
       for (const [subject, violations] of await profileViolations(data)) {
         if (!subjects.includes(subject)) continue;
-        problems.push(...violations.filter((v) => counts(subject, v)).map((v) => describe(subject, v)));
+        problems.push(
+          ...violations.filter((v) => counts(subject, v)).map((v) => describe(subject, v)),
+        );
       }
     }
     return problems;
@@ -232,7 +259,11 @@ export function createShaclShapeValidator({
    * picked for where the document is (an instance's, or a draft's), and
    * the DCAT-AP profile where it applies, which a draft is not held to yet.
    */
-  async function reportOf(url: string, dataset: SolidDataset | null, context: DocumentContext): Promise<DocumentReport> {
+  async function reportOf(
+    url: string,
+    dataset: SolidDataset | null,
+    context: DocumentContext,
+  ): Promise<DocumentReport> {
     if (dataset === null) return { url, status: "missing", subjects: [] };
     const data = toRdfJsDataset(dataset);
     const quads = [...(data as Iterable<Quad>)];
@@ -240,7 +271,9 @@ export function createShaclShapeValidator({
     const foreign = foreignSubjects(dataset);
     /** A subject's results: all warnings for another app's subject, and for its links to another app's members. */
     const attributed = (subject: string, violations: Violation[]) =>
-      violations.map((v) => (foreign.has(subject) || isForeignMember(quads, foreign, subject, v) ? asWarning(v) : v));
+      violations.map((v) =>
+        foreign.has(subject) || isForeignMember(quads, foreign, subject, v) ? asWarning(v) : v,
+      );
     for (const thing of getThingAll(dataset)) {
       const subject = asUrl(thing);
       const version = storedVersionOf(thing);
@@ -272,7 +305,9 @@ export function createShaclShapeValidator({
     }
     const profiled =
       context === "pod" &&
-      getThingAll(dataset).some((thing) => getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type)));
+      getThingAll(dataset).some((thing) =>
+        getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type)),
+      );
     if (profiled) {
       for (const [subject, found] of await profileViolations(data)) {
         const index = subjects.findIndex((s) => s.url === subject);
@@ -282,7 +317,12 @@ export function createShaclShapeValidator({
         // an untyped subject becomes a profiled one.
         if (report?.status === "checked") report.violations.push(...violations);
         else if (report?.status === "untyped") {
-          subjects[index] = { url: subject, status: "profiled", violations, ...(foreign.has(subject) && { foreign: true }) };
+          subjects[index] = {
+            url: subject,
+            status: "profiled",
+            violations,
+            ...(foreign.has(subject) && { foreign: true }),
+          };
         }
       }
     }
@@ -302,19 +342,27 @@ export function createShaclShapeValidator({
 
     async validateDocument(url, context = "pod"): Promise<DocumentReport> {
       // A release is public: read as anyone reads it, as a library's index is, with no login sent to its host.
-      return reportOf(url, await getSolidDatasetOrNull(url, context === "library" ? shapesFetch : podFetch), context);
+      return reportOf(
+        url,
+        await getSolidDatasetOrNull(url, context === "library" ? shapesFetch : podFetch),
+        context,
+      );
     },
 
     async validateDocumentSince(url, version, context = "pod") {
       const since = await readSince(url, version, podFetch);
-      return since.unchanged ? since : { ...since, value: await reportOf(url, since.value, context) };
+      return since.unchanged
+        ? since
+        : { ...since, value: await reportOf(url, since.value, context) };
     },
 
     async validateRelease(draft, asUrl, indexUrl) {
       const { mergeDatasets, mapIris } = await loadEngine();
       // The release as assembled at the draft's own address, then every IRI moved where it is published.
       // Quads as the engine reads them (a dataset's: terms that compare), not the plain data a draft's are.
-      const assembled = quadsOf(datasetOf(releaseQuadsOf(draftQuads(draft), draft.url, new Date().toISOString())));
+      const assembled = quadsOf(
+        datasetOf(releaseQuadsOf(draftQuads(draft), draft.url, new Date().toISOString())),
+      );
       const release = mapIris(mergeDatasets(assembled), (iri) => moved(iri, draft.url, asUrl));
       const quads = [...(release as Iterable<Quad>)];
       const back = (iri: string) => moved(iri, asUrl, draft.url);
@@ -346,7 +394,9 @@ export function createShaclShapeValidator({
       for (const subject of shapedSubjectsOf(quads)) {
         const own = bySubject.get(subject)!;
         const types = own.filter((q) => q.predicate.value === RDF.type).map((q) => q.object.value);
-        const version = Number(own.find((q) => q.predicate.value === SM_FORMAT_VERSION)?.object.value ?? "1");
+        const version = Number(
+          own.find((q) => q.predicate.value === SM_FORMAT_VERSION)?.object.value ?? "1",
+        );
         const pick = pickShape(types, version, "library");
         if (pick.kind !== "shape") {
           problems.push(problem(back(subject), { code: "unshaped", params: {} }));
@@ -360,11 +410,24 @@ export function createShaclShapeValidator({
 
       // The profiles, over the release with the reference data and, for a library, its index; their violations of the release's subjects.
       // In a pod nothing else is read: a release is whole on its own, its publisher and series described in it (docs/deck-library.md).
-      const index = indexUrl === undefined ? [] : withSeriesEntry(quadsOf(await getSolidDatasetLinear(indexUrl, { fetch: shapesFetch })), quads, asUrl, indexUrl);
+      const index =
+        indexUrl === undefined
+          ? []
+          : withSeriesEntry(
+              quadsOf(await getSolidDatasetLinear(indexUrl, { fetch: shapesFetch })),
+              quads,
+              asUrl,
+              indexUrl,
+            );
       const subjects = new Set(quads.map((q) => q.subject.value));
-      for (const [name, beside] of [["dcat-ap", index], ["skos", []]] as const) {
+      for (const [name, beside] of [
+        ["dcat-ap", index],
+        ["skos", []],
+      ] as const) {
         const { engine, reference } = await profile(name);
-        for (const { focusNode, ...v } of await engine.validate(mergeDatasets(quads, beside, ...(reference as Iterable<Quad>[])))) {
+        for (const { focusNode, ...v } of await engine.validate(
+          mergeDatasets(quads, beside, ...(reference as Iterable<Quad>[])),
+        )) {
           if (v.severity !== "violation" || !subjects.has(focusNode)) continue;
           problems.push(shapeProblem(focusNode, { ...v, profile: name }, "error"));
         }
@@ -396,7 +459,11 @@ function shapedSubjectsOf(quads: readonly Quad[]): string[] {
   return [
     ...new Set(
       quads
-        .filter((q) => q.predicate.value === RDF.type && (q.object.value.startsWith(SM_NS) || SHAPED_CLASSES.has(q.object.value)))
+        .filter(
+          (q) =>
+            q.predicate.value === RDF.type &&
+            (q.object.value.startsWith(SM_NS) || SHAPED_CLASSES.has(q.object.value)),
+        )
         .map((q) => q.subject.value),
     ),
   ];
@@ -409,19 +476,40 @@ function shapedSubjectsOf(quads: readonly Quad[]): string[] {
  * itself, one of its versions; described as a new deck's, from the
  * release, when the index lists it not yet.
  */
-function withSeriesEntry(index: readonly Quad[], release: readonly Quad[], asUrl: string, indexUrl: string): Quad[] {
-  const series = release.find((q) => q.subject.value === asUrl && q.predicate.value === `${DCAT_NS}inSeries`)?.object.value;
+function withSeriesEntry(
+  index: readonly Quad[],
+  release: readonly Quad[],
+  asUrl: string,
+  indexUrl: string,
+): Quad[] {
+  const series = release.find(
+    (q) => q.subject.value === asUrl && q.predicate.value === `${DCAT_NS}inSeries`,
+  )?.object.value;
   if (series === undefined || release.some((q) => q.subject.value === series)) return [...index];
-  const link = (subject: string, predicate: string, value: string) => quadOf(subject, predicate, { kind: "iri", value });
+  const link = (subject: string, predicate: string, value: string) =>
+    quadOf(subject, predicate, { kind: "iri", value });
   const added = [link(series, `${DCAT_NS}hasVersion`, asUrl)];
   if (!index.some((q) => q.subject.value === series)) {
-    const copied = ["http://purl.org/dc/terms/title", "http://purl.org/dc/terms/description", "http://purl.org/dc/terms/publisher", `${DCAT_NS}theme`, `${DCAT_NS}keyword`];
+    const copied = [
+      "http://purl.org/dc/terms/title",
+      "http://purl.org/dc/terms/description",
+      "http://purl.org/dc/terms/publisher",
+      `${DCAT_NS}theme`,
+      `${DCAT_NS}keyword`,
+    ];
     added.push(
       link(indexUrl, `${DCAT_NS}dataset`, series),
       link(series, RDF.type, `${DCAT_NS}DatasetSeries`),
       link(series, RDF.type, `${DCAT_NS}Dataset`),
-      quadOf(series, SM_FORMAT_VERSION, { kind: "literal", value: String(LATEST_VERSION.libraryDeckSeries), language: "", datatype: XSD_INTEGER }),
-      ...release.filter((q) => q.subject.value === asUrl && copied.includes(q.predicate.value)).map((q) => quadOf(series, q.predicate.value, termOf(q.object))),
+      quadOf(series, SM_FORMAT_VERSION, {
+        kind: "literal",
+        value: String(LATEST_VERSION.libraryDeckSeries),
+        language: "",
+        datatype: XSD_INTEGER,
+      }),
+      ...release
+        .filter((q) => q.subject.value === asUrl && copied.includes(q.predicate.value))
+        .map((q) => quadOf(series, q.predicate.value, termOf(q.object))),
       link(series, `${DCAT_NS}first`, asUrl),
       link(series, `${DCAT_NS}last`, asUrl),
       link(series, `${DCAT_NS}hasCurrentVersion`, asUrl),

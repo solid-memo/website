@@ -24,7 +24,10 @@ import type { CardTab } from "./router";
 import { useActivityLog } from "./shell/activity";
 
 /** How the card stands to the release (`release`, as useDeckRelease reads it): unknown while it is read, or when it cannot be. */
-export function releaseLinkOf(card: Card, release: LibraryDeckContent | null | undefined): CardReleaseLink {
+export function releaseLinkOf(
+  card: Card,
+  release: LibraryDeckContent | null | undefined,
+): CardReleaseLink {
   const theirs = release?.cards.find((released) => released.id === card.id);
   if (theirs === undefined) return "none";
   return untouched(card, theirs) ? "same" : "changed";
@@ -102,11 +105,17 @@ export function CardInspectorContainer({
   });
   const answers = answersQuery.data;
   const picks = useMemo(
-    () => (answers === undefined ? undefined : new Map([...distractorPicksOf(answers)].map(([iri, count]) => [fragmentIdOf(iri), count]))),
+    () =>
+      answers === undefined
+        ? undefined
+        : new Map(
+            [...distractorPicksOf(answers)].map(([iri, count]) => [fragmentIdOf(iri), count]),
+          ),
     [answers],
   );
   const saveMutation = useMutation({
-    mutationFn: (distractors: Distractor[]) => useCases.updateCard(deck, card, { ...card, distractors }),
+    mutationFn: (distractors: Distractor[]) =>
+      useCases.updateCard(deck, card, { ...card, distractors }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] });
       queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
@@ -161,7 +170,12 @@ export function CardInspectorContainer({
               suggestions={Object.keys(card.back).filter((tag) => tag !== "")}
               picks={picks}
               arrival={field}
-              onChange={(distractors) => saveMutation.mutateAsync(distractors).then(() => true, () => false)}
+              onChange={(distractors) =>
+                saveMutation.mutateAsync(distractors).then(
+                  () => true,
+                  () => false,
+                )
+              }
             />
             {/* Mounted throughout, so each save is heard. */}
             <p class="hint" role="status">

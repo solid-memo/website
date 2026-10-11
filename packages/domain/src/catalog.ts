@@ -57,7 +57,9 @@ export function renamedCatalog(catalog: Catalog, name: string): Catalog {
     ...catalog,
     title: name,
     description:
-      catalog.description === defaultCatalogDescription(catalog.title) ? defaultCatalogDescription(name) : catalog.description,
+      catalog.description === defaultCatalogDescription(catalog.title)
+        ? defaultCatalogDescription(name)
+        : catalog.description,
   };
 }
 

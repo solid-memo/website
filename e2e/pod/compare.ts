@@ -3,7 +3,11 @@ import { basename, join } from "node:path";
 
 /** What Vitest's JSON reporter writes, as far as it is read here. */
 export interface Results {
-  testResults: { name: string; status: string; assertionResults: { ancestorTitles: string[]; title: string; status: string }[] }[];
+  testResults: {
+    name: string;
+    status: string;
+    assertionResults: { ancestorTitles: string[]; title: string; status: string }[];
+  }[];
 }
 
 export interface Comparison {
@@ -37,7 +41,10 @@ export function compare(results: Results, expected: Record<string, string>): Com
     }
     // A file that failed with none of its tests failing failed around them
     // (a beforeAll that threw marks them skipped): that is a failure too.
-    if (file.status === "failed" && !file.assertionResults.some((test) => test.status === "failed")) {
+    if (
+      file.status === "failed" &&
+      !file.assertionResults.some((test) => test.status === "failed")
+    ) {
       const key = `${basename(file.name)} > (the file, around its tests)`;
       comparison[key in expected ? "known" : "failed"].push(key);
     }
@@ -46,7 +53,11 @@ export function compare(results: Results, expected: Record<string, string>): Com
 }
 
 /** The comparison as the job's summary says it. */
-export function summary(id: string, comparison: Comparison, expected: Record<string, string>): string {
+export function summary(
+  id: string,
+  comparison: Comparison,
+  expected: Record<string, string>,
+): string {
   const { passed, skipped, known, failed, fixed } = comparison;
   const lines = [
     `### ${id}: ${failed.length > 0 ? "new failures" : "as expected"}`,
@@ -54,7 +65,13 @@ export function summary(id: string, comparison: Comparison, expected: Record<str
     `${passed.length} passed, ${skipped.length} skipped, ${known.length} failed as expected, ${failed.length} failed anew, ${fixed.length} passed though listed.`,
   ];
   const list = (title: string, keys: string[], why?: (key: string) => string) =>
-    keys.length > 0 && lines.push("", `**${title}**`, "", ...keys.map((key) => `- ${key}${why ? `: ${why(key)}` : ""}`));
+    keys.length > 0 &&
+    lines.push(
+      "",
+      `**${title}**`,
+      "",
+      ...keys.map((key) => `- ${key}${why ? `: ${why(key)}` : ""}`),
+    );
   list("Failed anew", failed);
   list("Passed though listed (take them off expected-failures.json)", fixed);
   list("Failed as expected", known, (key) => expected[key]!);
@@ -70,17 +87,29 @@ export function summary(id: string, comparison: Comparison, expected: Record<str
  */
 if (import.meta.main) {
   const [id, resultFile] = process.argv.slice(2);
-  if (id === undefined || resultFile === undefined) throw new Error("Usage: node compare.ts <id> <result.json>");
+  if (id === undefined || resultFile === undefined)
+    throw new Error("Usage: node compare.ts <id> <result.json>");
   const listFile = join(import.meta.dirname, "servers", id, "expected-failures.json");
-  const expected = existsSync(listFile) ? (JSON.parse(readFileSync(listFile, "utf8")) as Record<string, string>) : {};
-  const results = existsSync(resultFile) ? (JSON.parse(readFileSync(resultFile, "utf8")) as Results) : undefined;
+  const expected = existsSync(listFile)
+    ? (JSON.parse(readFileSync(listFile, "utf8")) as Record<string, string>)
+    : {};
+  const results = existsSync(resultFile)
+    ? (JSON.parse(readFileSync(resultFile, "utf8")) as Results)
+    : undefined;
   const comparison = results && compare(results, expected);
   const text =
-    comparison === undefined || comparison.passed.length + comparison.known.length + comparison.failed.length + comparison.fixed.length === 0
+    comparison === undefined ||
+    comparison.passed.length +
+      comparison.known.length +
+      comparison.failed.length +
+      comparison.fixed.length ===
+      0
       ? `### ${id}: no results\n\nNo test ran: the server did not start, or did not meet the contract (its log says).\n`
       : summary(id, comparison, expected);
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, text);
   console.log(text);
-  for (const key of comparison?.fixed ?? []) console.log(`::warning::${id}: "${key}" passes; take it off expected-failures.json`);
-  if (comparison === undefined || text.includes("no results") || comparison.failed.length > 0) process.exitCode = 1;
+  for (const key of comparison?.fixed ?? [])
+    console.log(`::warning::${id}: "${key}" passes; take it off expected-failures.json`);
+  if (comparison === undefined || text.includes("no results") || comparison.failed.length > 0)
+    process.exitCode = 1;
 }

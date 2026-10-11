@@ -5,9 +5,32 @@ import {
   type ThingBuilder,
   type ThingPersisted,
 } from "@inrupt/solid-client";
-import { mockSolidDatasetFrom, removeThing, setThing, type SolidDataset } from "@inrupt/solid-client";
-import { getBoolean, getInteger, getThing, getUrlAll, getStringNoLocale } from "@inrupt/solid-client";
-import { fragmentIdOf, toCard, toCards, toCatalog, toDeck, toDecks, toDistractor, withCatalog, withDeck, withDistractors, withoutDeck } from "./deckMapper";
+import {
+  mockSolidDatasetFrom,
+  removeThing,
+  setThing,
+  type SolidDataset,
+} from "@inrupt/solid-client";
+import {
+  getBoolean,
+  getInteger,
+  getThing,
+  getUrlAll,
+  getStringNoLocale,
+} from "@inrupt/solid-client";
+import {
+  fragmentIdOf,
+  toCard,
+  toCards,
+  toCatalog,
+  toDeck,
+  toDecks,
+  toDistractor,
+  withCatalog,
+  withDeck,
+  withDistractors,
+  withoutDeck,
+} from "./deckMapper";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DCAT, DCTERMS, RDF, SM } from "../vocab";
 
@@ -26,9 +49,7 @@ describe("fragmentIdOf", () => {
 });
 
 describe("toDeck", () => {
-  function deckThing(
-    build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>,
-  ) {
+  function deckThing(build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>) {
     return build(buildThing(createThing({ url: `${CATALOG}#deck-1` }))).build();
   }
 
@@ -56,7 +77,10 @@ describe("toDeck", () => {
   });
 
   it("reads the course chapters a deck completed, and the deck keeps them when it is written again", () => {
-    const chapters = ["https://solid-memo.com/decks/solid/v1.ttl#ch-1", "https://solid-memo.com/decks/solid/v1.ttl#ch-2"];
+    const chapters = [
+      "https://solid-memo.com/decks/solid/v1.ttl#ch-1",
+      "https://solid-memo.com/decks/solid/v1.ttl#ch-2",
+    ];
     const thing = deckThing((t) =>
       t
         .addIri(RDF.type, SM.Deck)
@@ -68,9 +92,15 @@ describe("toDeck", () => {
     );
     const deck = toDeck(thing)!;
     expect(deck.completedChapters).toEqual(chapters);
-    const rewritten = withDeck(setThing(mockSolidDatasetFrom(CATALOG), thing), { ...deck, title: { en: "Solid, renamed" } });
+    const rewritten = withDeck(setThing(mockSolidDatasetFrom(CATALOG), thing), {
+      ...deck,
+      title: { en: "Solid, renamed" },
+    });
     expect(getUrlAll(getThing(rewritten, deck.url)!, SM.completedChapter)).toEqual(chapters);
-    expect(toDecks(rewritten)[0]).toMatchObject({ title: { en: "Solid, renamed" }, completedChapters: chapters });
+    expect(toDecks(rewritten)[0]).toMatchObject({
+      title: { en: "Solid, renamed" },
+      completedChapters: chapters,
+    });
   });
 
   it("keeps the provenance of an imported deck", () => {
@@ -105,7 +135,10 @@ describe("toDeck", () => {
         .addIri(SM.studyDirection, SM.backToFront)
         .addIri(DCTERMS.creator, `${CATALOG}#agent-anton`)
         .addIri(DCTERMS.creator, `${CATALOG}#agent-gone`)
-        .addIri("http://www.w3.org/ns/dcat#theme", "https://solid-memo.com/ns/vocab/topics.ttl#geography")
+        .addIri(
+          "http://www.w3.org/ns/dcat#theme",
+          "https://solid-memo.com/ns/vocab/topics.ttl#geography",
+        )
         .addStringNoLocale("http://www.w3.org/ns/dcat#keyword", "capitals")
         .addIri(SM.cardsDocument, CARDS_DOC)
         .addIri(SM.reviewsDocument, REVIEWS_DOC)
@@ -178,7 +211,11 @@ describe("toDeck", () => {
         .addIri(SM.reviewsDocument, REVIEWS_DOC)
         .addInteger(SM.formatVersion, 2),
     );
-    expect(toDeck(thing)).toMatchObject({ direction: "bidirectional", createdAt: "", formatVersion: 2 });
+    expect(toDeck(thing)).toMatchObject({
+      direction: "bidirectional",
+      createdAt: "",
+      formatVersion: 2,
+    });
   });
 
   it("keeps a format-2 deck's co-authors whose names fold to the same slug apart", () => {
@@ -253,12 +290,8 @@ describe("toCard", () => {
   /** The card a subject is, alone in its document. */
   const cardOf = (thing: ThingPersisted) => toCard(thing, mockSolidDatasetFrom(CARDS_DOC));
 
-  function cardThing(
-    build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>,
-  ) {
-    return build(
-      buildThing(createThing({ url: `${CARDS_DOC}#card-1` })),
-    ).build();
+  function cardThing(build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>) {
+    return build(buildThing(createThing({ url: `${CARDS_DOC}#card-1` }))).build();
   }
 
   it("maps a well-formed card subject", () => {
@@ -281,10 +314,7 @@ describe("toCard", () => {
 
   it("tolerates a missing created date; a missing version is the first", () => {
     const thing = cardThing((t) =>
-      t
-        .addIri(RDF.type, SM.Card)
-        .addStringNoLocale(SM.front, "f")
-        .addStringNoLocale(SM.back, "b"),
+      t.addIri(RDF.type, SM.Card).addStringNoLocale(SM.front, "f").addStringNoLocale(SM.back, "b"),
     );
     expect(cardOf(thing)!.createdAt).toBe("");
     expect(cardOf(thing)!.formatVersion).toBe(1);
@@ -349,34 +379,28 @@ describe("toCard", () => {
 
   it("rejects cards with a side that has neither text nor a picture", () => {
     expect(
-      cardOf(
-        cardThing((t) =>
-          t.addIri(RDF.type, SM.Card).addStringNoLocale(SM.front, "f"),
-        ),
-      ),
+      cardOf(cardThing((t) => t.addIri(RDF.type, SM.Card).addStringNoLocale(SM.front, "f"))),
+    ).toBeNull();
+    expect(
+      cardOf(cardThing((t) => t.addIri(RDF.type, SM.Card).addStringNoLocale(SM.back, "b"))),
     ).toBeNull();
     expect(
       cardOf(
         cardThing((t) =>
-          t.addIri(RDF.type, SM.Card).addStringNoLocale(SM.back, "b"),
-        ),
-      ),
-    ).toBeNull();
-    expect(
-      cardOf(
-        cardThing((t) =>
-          t
-            .addIri(RDF.type, SM.Card)
-            .addStringNoLocale(SM.front, "")
-            .addIri(SM.backImage, MAP),
+          t.addIri(RDF.type, SM.Card).addStringNoLocale(SM.front, "").addIri(SM.backImage, MAP),
         ),
       ),
     ).toBeNull();
   });
 
   it("reads the distractors a card names from its document, by id, leaving out one that is missing or does not fit, and marking a retired one", () => {
-    const distractor = (id: string, build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>) =>
-      build(buildThing(createThing({ url: `${CARDS_DOC}#${id}` })).addIri(RDF.type, SM.Distractor)).build();
+    const distractor = (
+      id: string,
+      build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>,
+    ) =>
+      build(
+        buildThing(createThing({ url: `${CARDS_DOC}#${id}` })).addIri(RDF.type, SM.Distractor),
+      ).build();
     const card = cardThing((t) =>
       t
         .addIri(RDF.type, SM.Card)
@@ -391,10 +415,16 @@ describe("toCard", () => {
     );
     const dataset = [
       card,
-      distractor("d1", (t) => t.addStringWithLocale(SM.distractorText, "Only web pages", "en").addStringWithLocale(SM.distractorNote, "A URL is one kind of IRI.", "en")),
+      distractor("d1", (t) =>
+        t
+          .addStringWithLocale(SM.distractorText, "Only web pages", "en")
+          .addStringWithLocale(SM.distractorNote, "A URL is one kind of IRI.", "en"),
+      ),
       distractor("d2", (t) => t.addStringNoLocale(SM.distractorText, "404")),
       distractor("empty", (t) => t),
-      distractor("retired", (t) => t.addStringNoLocale(SM.distractorText, "500").addBoolean(OWL_DEPRECATED, true)),
+      distractor("retired", (t) =>
+        t.addStringNoLocale(SM.distractorText, "500").addBoolean(OWL_DEPRECATED, true),
+      ),
     ].reduce((current, thing) => setThing(current, thing), mockSolidDatasetFrom(CARDS_DOC));
     expect(toCard(card, dataset)!.distractors).toEqual([
       { id: "d1", text: { en: "Only web pages" }, note: { en: "A URL is one kind of IRI." } },
@@ -409,14 +439,36 @@ describe("toCard", () => {
 describe("withDistractors", () => {
   it("writes a card's distractors beside it and removes those it named before and no longer does", () => {
     const before = [`${CARDS_DOC}#d1`, `${CARDS_DOC}#old`];
-    const first = withDistractors(mockSolidDatasetFrom(CARDS_DOC), CARDS_DOC, [{ id: "d1", text: { en: "One" } }, { id: "old", text: { en: "Old" } }], []);
+    const first = withDistractors(
+      mockSolidDatasetFrom(CARDS_DOC),
+      CARDS_DOC,
+      [
+        { id: "d1", text: { en: "One" } },
+        { id: "old", text: { en: "Old" } },
+      ],
+      [],
+    );
     expect(first.subjects).toEqual(before);
-    const kept = setThing(first.dataset, buildThing(getThing(first.dataset, before[0])!).addStringNoLocale("https://example.org/other", "kept").build());
-    const second = withDistractors(kept, CARDS_DOC, [{ id: "d1", text: { en: "One, again" }, note: { sv: "Fel." } }], before);
+    const kept = setThing(
+      first.dataset,
+      buildThing(getThing(first.dataset, before[0])!)
+        .addStringNoLocale("https://example.org/other", "kept")
+        .build(),
+    );
+    const second = withDistractors(
+      kept,
+      CARDS_DOC,
+      [{ id: "d1", text: { en: "One, again" }, note: { sv: "Fel." } }],
+      before,
+    );
     expect(second.subjects).toEqual([before[0]]);
     expect(getThing(second.dataset, before[1])).toBeNull();
     const d1 = getThing(second.dataset, before[0])!;
-    expect(toDistractor(d1)).toEqual({ id: "d1", text: { en: "One, again" }, note: { sv: "Fel." } });
+    expect(toDistractor(d1)).toEqual({
+      id: "d1",
+      text: { en: "One, again" },
+      note: { sv: "Fel." },
+    });
     expect(getInteger(d1, SM.formatVersion)).toBe(1);
     expect(getUrlAll(d1, RDF.type)).toEqual([SM.Distractor, "https://schema.org/Answer"]);
     expect(getStringNoLocale(d1, "https://example.org/other")).toBe("kept");
@@ -424,12 +476,29 @@ describe("withDistractors", () => {
 
   it("retires a distractor, and restores it, keeping it named", () => {
     const url = `${CARDS_DOC}#d1`;
-    const retired = withDistractors(mockSolidDatasetFrom(CARDS_DOC), CARDS_DOC, [{ id: "d1", text: { en: "One" }, retired: true }], []);
+    const retired = withDistractors(
+      mockSolidDatasetFrom(CARDS_DOC),
+      CARDS_DOC,
+      [{ id: "d1", text: { en: "One" }, retired: true }],
+      [],
+    );
     expect(getBoolean(getThing(retired.dataset, url)!, OWL_DEPRECATED)).toBe(true);
-    expect(toDistractor(getThing(retired.dataset, url)!)).toEqual({ id: "d1", text: { en: "One" }, retired: true });
-    const restored = withDistractors(retired.dataset, CARDS_DOC, [{ id: "d1", text: { en: "One" } }], [url]);
+    expect(toDistractor(getThing(retired.dataset, url)!)).toEqual({
+      id: "d1",
+      text: { en: "One" },
+      retired: true,
+    });
+    const restored = withDistractors(
+      retired.dataset,
+      CARDS_DOC,
+      [{ id: "d1", text: { en: "One" } }],
+      [url],
+    );
     expect(getBoolean(getThing(restored.dataset, url)!, OWL_DEPRECATED)).toBeNull();
-    expect(toDistractor(getThing(restored.dataset, url)!)).toEqual({ id: "d1", text: { en: "One" } });
+    expect(toDistractor(getThing(restored.dataset, url)!)).toEqual({
+      id: "d1",
+      text: { en: "One" },
+    });
   });
 });
 
@@ -456,7 +525,12 @@ describe("the catalog node", () => {
     const written = withCatalog(withDeck(mockSolidDatasetFrom(CATALOG), deck), CATALOG, catalog);
     const node = getThing(written, `${CATALOG}#catalog`)!;
     expect(getUrlAll(node, DATASET)).toEqual([deck.url]);
-    expect(getStringNoLocale(getThing(written, catalog.publisher.webId)!, "http://xmlns.com/foaf/0.1/name")).toBe("Alice");
+    expect(
+      getStringNoLocale(
+        getThing(written, catalog.publisher.webId)!,
+        "http://xmlns.com/foaf/0.1/name",
+      ),
+    ).toBe("Alice");
     expect(toCatalog(written, CATALOG)).toEqual(catalog);
   });
 
@@ -465,7 +539,10 @@ describe("the catalog node", () => {
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([]);
     const other = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2` };
     dataset = withDeck(withDeck(dataset, deck), other);
-    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([deck.url, other.url]);
+    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([
+      deck.url,
+      other.url,
+    ]);
     dataset = withoutDeck(dataset, deck);
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([other.url]);
   });
@@ -476,9 +553,17 @@ describe("the catalog node", () => {
     let dataset = withCatalog(mockSolidDatasetFrom(CATALOG), CATALOG, catalog);
     dataset = setThing(
       dataset,
-      buildThing(getThing(dataset, `${CATALOG}#catalog`)!).addIri(DATASET, FOREIGN).addIri(DATASET, LOCAL).build(),
+      buildThing(getThing(dataset, `${CATALOG}#catalog`)!)
+        .addIri(DATASET, FOREIGN)
+        .addIri(DATASET, LOCAL)
+        .build(),
     );
-    dataset = setThing(dataset, buildThing(createThing({ url: LOCAL })).addIri(RDF.type, DCAT.Dataset).build());
+    dataset = setThing(
+      dataset,
+      buildThing(createThing({ url: LOCAL }))
+        .addIri(RDF.type, DCAT.Dataset)
+        .build(),
+    );
     const listed = () => [...getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)].sort();
 
     dataset = withDeck(dataset, deck);
@@ -501,13 +586,23 @@ describe("the catalog node", () => {
         .build(),
     );
     // Another app's dataset, described beside the decks with a class of its own.
-    dataset = setThing(dataset, buildThing(createThing({ url: `${CATALOG}#recipes` })).addIri(RDF.type, "https://schema.org/Dataset").build());
+    dataset = setThing(
+      dataset,
+      buildThing(createThing({ url: `${CATALOG}#recipes` }))
+        .addIri(RDF.type, "https://schema.org/Dataset")
+        .build(),
+    );
     // A deck save leaves it…
     dataset = withDeck(dataset, deck);
-    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toContain(`${CATALOG}#deck-gone`);
+    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toContain(
+      `${CATALOG}#deck-gone`,
+    );
     // …the catalog, written whole and checked, cannot keep it.
     dataset = withCatalog(dataset, CATALOG, catalog);
-    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([deck.url, `${CATALOG}#recipes`]);
+    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([
+      deck.url,
+      `${CATALOG}#recipes`,
+    ]);
   });
 
   it("names its publisher by the WebID when no agent node describes them", () => {
@@ -539,11 +634,17 @@ describe("the catalog node", () => {
     expect(typeOf(dataset, BY)).toEqual([DCTERMS.LicenseDocument]);
 
     // One another app says more of, or that a deck names, keeps that.
-    dataset = setThing(dataset, buildThing(getThing(dataset, BY)!).addStringNoLocale(DCTERMS.title, "CC BY").build());
+    dataset = setThing(
+      dataset,
+      buildThing(getThing(dataset, BY)!).addStringNoLocale(DCTERMS.title, "CC BY").build(),
+    );
     dataset = withCatalog(dataset, CATALOG, catalog);
     expect(typeOf(dataset, BY)).toEqual([]);
     expect(getStringNoLocale(getThing(dataset, BY)!, DCTERMS.title)).toBe("CC BY");
-    dataset = withCatalog(withDeck(dataset, { ...deck, license: CC0 }), CATALOG, { ...catalog, license: CC0 });
+    dataset = withCatalog(withDeck(dataset, { ...deck, license: CC0 }), CATALOG, {
+      ...catalog,
+      license: CC0,
+    });
     dataset = withCatalog(dataset, CATALOG, catalog);
     expect(typeOf(dataset, CC0)).toEqual([DCTERMS.LicenseDocument]);
 
@@ -558,7 +659,9 @@ describe("the catalog node", () => {
     expect(toCatalog(mockSolidDatasetFrom(CATALOG), CATALOG)).toBeNull();
     const broken = setThing(
       mockSolidDatasetFrom(CATALOG),
-      buildThing(createThing({ url: `${CATALOG}#catalog` })).addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog").build(),
+      buildThing(createThing({ url: `${CATALOG}#catalog` }))
+        .addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog")
+        .build(),
     );
     expect(toCatalog(broken, CATALOG)).toBeNull();
   });
@@ -586,7 +689,11 @@ describe("the arrangement's triples (deck groups)", () => {
 
   /** A catalog document of two decks, the first in a group with a position, the group listed by the catalog. */
   function arranged() {
-    let dataset = withCatalog(withDeck(withDeck(mockSolidDatasetFrom(CATALOG), deck), other), CATALOG, catalog);
+    let dataset = withCatalog(
+      withDeck(withDeck(mockSolidDatasetFrom(CATALOG), deck), other),
+      CATALOG,
+      catalog,
+    );
     dataset = setThing(
       dataset,
       buildThing(createThing({ url: GROUP }))
@@ -595,8 +702,16 @@ describe("the arrangement's triples (deck groups)", () => {
         .addIri(DCAT.dataset, other.url)
         .build(),
     );
-    dataset = setThing(dataset, buildThing(getThing(dataset, deck.url)!).addInteger(SM.position, 3).build());
-    return setThing(dataset, buildThing(getThing(dataset, `${CATALOG}#catalog`)!).addIri(DCAT.catalog, GROUP).build());
+    dataset = setThing(
+      dataset,
+      buildThing(getThing(dataset, deck.url)!).addInteger(SM.position, 3).build(),
+    );
+    return setThing(
+      dataset,
+      buildThing(getThing(dataset, `${CATALOG}#catalog`)!)
+        .addIri(DCAT.catalog, GROUP)
+        .build(),
+    );
   }
 
   it("survive a deck's rewrite (rename, switch, upgrade) and the catalog's", () => {

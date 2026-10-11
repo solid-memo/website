@@ -28,7 +28,8 @@ export function Splitter({
 }) {
   // Where a drag began: the pointer along the bar's axis, and the pane's size then.
   const drag = useRef<{ start: number; from: number } | null>(null);
-  const along = (event: PointerEvent) => (orientation === "vertical" ? event.clientX : event.clientY);
+  const along = (event: PointerEvent) =>
+    orientation === "vertical" ? event.clientX : event.clientY;
 
   return (
     <div
@@ -53,7 +54,8 @@ export function Splitter({
         drag.current = { start: along(event), from: value };
       }}
       onPointerMove={(event) => {
-        if (drag.current !== null) onChange(draggedSize(drag.current.from, drag.current.start, along(event), size));
+        if (drag.current !== null)
+          onChange(draggedSize(drag.current.from, drag.current.start, along(event), size));
       }}
       onPointerUp={() => (drag.current = null)}
       onPointerCancel={() => (drag.current = null)}

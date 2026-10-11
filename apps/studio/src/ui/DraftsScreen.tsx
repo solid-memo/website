@@ -7,7 +7,13 @@ import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
-import { draftOf, LangTextField, rememberLanguages, textOfDraft, useMissingLanguage } from "@solid-memo/ui/LangTextField";
+import {
+  draftOf,
+  LangTextField,
+  rememberLanguages,
+  textOfDraft,
+  useMissingLanguage,
+} from "@solid-memo/ui/LangTextField";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import { ReadOnlyScope } from "./ReadOnly";
 import { useActivity } from "./shell/activity";
@@ -18,7 +24,13 @@ import { useScreenCommands } from "./shell/useScreenCommands";
 /** What a new draft starts from, as the form offers it. */
 type Start = NewDraft["kind"];
 
-const STARTS: readonly Start[] = ["blankDeck", "blankCourse", "fromDeck", "nextVersionOf", "fromFile"];
+const STARTS: readonly Start[] = [
+  "blankDeck",
+  "blankCourse",
+  "fromDeck",
+  "nextVersionOf",
+  "fromFile",
+];
 
 /**
  * The drafts of releases an instance holds (docs/studio.md, Drafts):
@@ -75,7 +87,9 @@ export function DraftsScreen({
 }) {
   const { t, tx, errorText, readerText } = useI18n();
   const [start, setStart] = useState<Start>("blankDeck");
-  const [title, setTitle] = useState(() => draftOf(undefined, [], { tag: recentLanguages("deck")[0] ?? null }));
+  const [title, setTitle] = useState(() =>
+    draftOf(undefined, [], { tag: recentLanguages("deck")[0] ?? null }),
+  );
   const [deckUrl, setDeckUrl] = useState(decks[0]?.url ?? "");
   const [releaseUrl, setReleaseUrl] = useState("");
   const { missing, ask, clear } = useMissingLanguage("draft-name");
@@ -84,13 +98,23 @@ export function DraftsScreen({
   // From the palette: the form's first field, what to start from, while a draft can be made.
   useScreenCommands(
     readOnly === null
-      ? [{ id: "newDraft", label: t("studio.drafts.new"), run: () => formRef.current!.querySelector<HTMLInputElement>("input:checked")!.focus() }]
+      ? [
+          {
+            id: "newDraft",
+            label: t("studio.drafts.new"),
+            run: () => formRef.current!.querySelector<HTMLInputElement>("input:checked")!.focus(),
+          },
+        ]
       : [],
   );
 
   const nameOf = (draft: ReleaseDraftSummary) => draftNameOf(draft, { t, readerText });
-  useActivity(created, () => t("studio.drafts.created", { draft: nameOf(created!.draft), version: created!.draft.version }));
-  useActivity(deleted, () => t("studio.drafts.deleted", { draft: nameOf(deleted!), version: deleted!.version }));
+  useActivity(created, () =>
+    t("studio.drafts.created", { draft: nameOf(created!.draft), version: created!.draft.version }),
+  );
+  useActivity(deleted, () =>
+    t("studio.drafts.deleted", { draft: nameOf(deleted!), version: deleted!.version }),
+  );
 
   function handleSubmit(event: Event) {
     event.preventDefault();
@@ -203,12 +227,18 @@ export function DraftsScreen({
             {creating
               ? t("studio.drafts.creating")
               : created !== null &&
-                t("studio.drafts.created", { draft: nameOf(created.draft), version: created.draft.version })}
+                t("studio.drafts.created", {
+                  draft: nameOf(created.draft),
+                  version: created.draft.version,
+                })}
           </p>
           {!creating && created?.basedOn !== undefined && (
             <p>
               {tx("studio.drafts.basedOn", { release: <code>{created.basedOn}</code> })}{" "}
-              <button type="button" onClick={() => onCreate({ kind: "nextVersionOf", url: created.basedOn! })}>
+              <button
+                type="button"
+                onClick={() => onCreate({ kind: "nextVersionOf", url: created.basedOn! })}
+              >
                 {t("studio.drafts.startNext")}
               </button>
             </p>
@@ -216,7 +246,11 @@ export function DraftsScreen({
           <ErrorMessage
             id="draft-create-error"
             error={
-              missing === undefined ? createError : errorText(new AppError("textNeedsLanguage", { field: t("language.field.deckName") }))
+              missing === undefined
+                ? createError
+                : errorText(
+                    new AppError("textNeedsLanguage", { field: t("language.field.deckName") }),
+                  )
             }
           />
         </section>
@@ -247,20 +281,38 @@ export function DraftsScreen({
                     <tr key={draft.url}>
                       <th scope="row">
                         {/* One that cannot be read cannot be opened. */}
-                        {draft.readable ? <a href={draftHref(draft)}>{nameOf(draft)}</a> : nameOf(draft)}
+                        {draft.readable ? (
+                          <a href={draftHref(draft)}>{nameOf(draft)}</a>
+                        ) : (
+                          nameOf(draft)
+                        )}
                       </th>
-                      <td>{draft.readable ? t(`studio.drafts.kind.${draft.course ? "course" : "deck"}`) : ""}</td>
+                      <td>
+                        {draft.readable
+                          ? t(`studio.drafts.kind.${draft.course ? "course" : "deck"}`)
+                          : ""}
+                      </td>
                       <td class="number">{draft.version}</td>
-                      <td>{t(`studio.drafts.state.${!draft.readable ? "unreadable" : draft.releasedAs === undefined ? "writing" : "released"}`)}</td>
+                      <td>
+                        {t(
+                          `studio.drafts.state.${!draft.readable ? "unreadable" : draft.releasedAs === undefined ? "writing" : "released"}`,
+                        )}
+                      </td>
                       <td>
                         <button
                           type="button"
-                          aria-label={t("studio.drafts.deleteDraft", { draft: nameOf(draft), version: draft.version })}
+                          aria-label={t("studio.drafts.deleteDraft", {
+                            draft: nameOf(draft),
+                            version: draft.version,
+                          })}
                           disabled={deleting !== null}
                           onClick={() =>
                             confirm.ask({
                               heading: t("studio.confirm.deleteDraft"),
-                              text: t("studio.drafts.deleteConfirm", { draft: nameOf(draft), version: draft.version }),
+                              text: t("studio.drafts.deleteConfirm", {
+                                draft: nameOf(draft),
+                                version: draft.version,
+                              }),
                               action: t("studio.drafts.delete"),
                               onConfirm: () => onDelete(draft),
                             })
@@ -278,7 +330,8 @@ export function DraftsScreen({
           <p role="status">
             {deleting !== null
               ? t("studio.drafts.deleting", { draft: nameOf(deleting) })
-              : deleted !== null && t("studio.drafts.deleted", { draft: nameOf(deleted), version: deleted.version })}
+              : deleted !== null &&
+                t("studio.drafts.deleted", { draft: nameOf(deleted), version: deleted.version })}
           </p>
           <ErrorMessage error={deleteError} />
           {confirm.dialog}

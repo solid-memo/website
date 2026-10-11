@@ -135,7 +135,9 @@ describe("useUnsavedEdits", () => {
       act(() => {
         const oldURL = window.location.href;
         window.history.replaceState(position === null ? null : { position }, "", to);
-        window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL, newURL: window.location.href }));
+        window.dispatchEvent(
+          new HashChangeEvent("hashchange", { oldURL, newURL: window.location.href }),
+        );
       });
     const at = shownPosition();
     const length = window.history.length;
@@ -192,9 +194,19 @@ describe("useUnsavedEdits", () => {
     const router = vi.fn();
     window.addEventListener("hashchange", router);
     renderPage(async () => true);
-    window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL: window.location.href, newURL: window.location.href }));
+    window.dispatchEvent(
+      new HashChangeEvent("hashchange", {
+        oldURL: window.location.href,
+        newURL: window.location.href,
+      }),
+    );
     act(() => guarded.report(null));
-    window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL: "https://app.example/#/studio/drafts", newURL: window.location.href }));
+    window.dispatchEvent(
+      new HashChangeEvent("hashchange", {
+        oldURL: "https://app.example/#/studio/drafts",
+        newURL: window.location.href,
+      }),
+    );
     expect(router).toHaveBeenCalledTimes(2);
     expect(question()).toBeNull();
     window.removeEventListener("hashchange", router);

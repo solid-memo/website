@@ -64,7 +64,9 @@ export function GroupsContainer({
       preferencesHref={(deck) =>
         routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })
       }
-      renderStudyAction={(deck) => (check.isSetAside(deck) ? <span class="hint">{t("deckList.setAside")}</span> : null)}
+      renderStudyAction={(deck) =>
+        check.isSetAside(deck) ? <span class="hint">{t("deckList.setAside")}</span> : null
+      }
       createDeckHref={routeToHash({ screen: "deckCreator", instanceUrl: instance.url })}
     />
   );

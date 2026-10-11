@@ -1,4 +1,10 @@
-import { createSolidDataset, getThing, removeThing, setThing, type SolidDataset } from "@inrupt/solid-client";
+import {
+  createSolidDataset,
+  getThing,
+  removeThing,
+  setThing,
+  type SolidDataset,
+} from "@inrupt/solid-client";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { digestSubjectOf, digestUrlOf } from "@solid-memo/domain/instanceLayout";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
@@ -39,7 +45,13 @@ export function createSolidDigestRepository({
   wait = sleep,
 }: SolidDigestRepositoryDeps): DigestRepository {
   type Change = (stored: InstanceDigest | null) => InstanceDigest;
-  const queues = new Map<string, { waiting: { change: Change; done: () => void; failed: (e: unknown) => void }[]; writing: boolean }>();
+  const queues = new Map<
+    string,
+    {
+      waiting: { change: Change; done: () => void; failed: (e: unknown) => void }[];
+      writing: boolean;
+    }
+  >();
 
   async function write(instanceUrl: string, changes: Change[]): Promise<void> {
     const url = digestUrlOf(instanceUrl);
@@ -47,8 +59,16 @@ export function createSolidDigestRepository({
       if (attempt > 1) await wait(PAUSE_MS * (attempt - 1));
       const dataset = await getSolidDatasetOrNull(url, fetch);
       const stored = dataset === null ? null : toDigest(dataset);
-      const next = changes.reduce<InstanceDigest | null>((digest, change) => change(digest), stored)!;
-      const { updated, subjects } = withDigest(instanceUrl, dataset ?? createSolidDataset(), stored, next);
+      const next = changes.reduce<InstanceDigest | null>(
+        (digest, change) => change(digest),
+        stored,
+      )!;
+      const { updated, subjects } = withDigest(
+        instanceUrl,
+        dataset ?? createSolidDataset(),
+        stored,
+        next,
+      );
       if (subjects.length === 0) return;
       await checkWrite(updated, subjects, "pod");
       try {
@@ -65,7 +85,10 @@ export function createSolidDigestRepository({
     while (queue.waiting.length > 0) {
       const batch = queue.waiting.splice(0);
       try {
-        await write(instanceUrl, batch.map(({ change }) => change));
+        await write(
+          instanceUrl,
+          batch.map(({ change }) => change),
+        );
         for (const { done } of batch) done();
       } catch (error) {
         for (const { failed } of batch) failed(error);
@@ -122,8 +145,12 @@ function withDigest(
     subjects.push(url);
   }
   const gone = [
-    ...Object.keys(before.receipts).filter((document) => !(document in next.receipts)).map((d) => digestSubjectOf(instanceUrl, "receipt", d)),
-    ...Object.keys(before.schedules).filter((deck) => !(deck in next.schedules)).map((d) => digestSubjectOf(instanceUrl, "schedule", d)),
+    ...Object.keys(before.receipts)
+      .filter((document) => !(document in next.receipts))
+      .map((d) => digestSubjectOf(instanceUrl, "receipt", d)),
+    ...Object.keys(before.schedules)
+      .filter((deck) => !(deck in next.schedules))
+      .map((d) => digestSubjectOf(instanceUrl, "schedule", d)),
   ];
   for (const url of gone) {
     updated = removeThing(updated, url);

@@ -12,7 +12,10 @@ import { ReaderText } from "./ReaderText";
 function list(parts: string[], t: I18n["t"]): string {
   return parts.length <= 1
     ? parts.join("")
-    : t("migrationNotice.listAnd", { rest: parts.slice(0, -1).join(", "), last: parts[parts.length - 1] });
+    : t("migrationNotice.listAnd", {
+        rest: parts.slice(0, -1).join(", "),
+        last: parts[parts.length - 1],
+      });
 }
 
 /**
@@ -49,13 +52,16 @@ export function describeOutdated(plan: MigrationPlan, t: I18n["t"]): string {
 /** What each format this app writes added, for the formats the plan touches. */
 export function describeFormats(plan: MigrationPlan, t: I18n["t"]): string {
   const parts: string[] = [];
-  if (plan.instanceOutdated) parts.push(t("migrationNotice.instanceFormat", { version: INSTANCE_FORMAT_VERSION }));
+  if (plan.instanceOutdated)
+    parts.push(t("migrationNotice.instanceFormat", { version: INSTANCE_FORMAT_VERSION }));
   if (plan.catalogMissing) parts.push(t("migrationNotice.catalogueFormat"));
   if (plan.preferencesOutdated) {
     parts.push(t("migrationNotice.preferencesFormat", { version: PREFERENCES_FORMAT_VERSION }));
   }
-  if (plan.deckCount > 0) parts.push(t("migrationNotice.deckFormat", { version: DECK_FORMAT_VERSION }));
-  if (plan.cardCount > 0) parts.push(t("migrationNotice.cardFormat", { version: CARD_FORMAT_VERSION }));
+  if (plan.deckCount > 0)
+    parts.push(t("migrationNotice.deckFormat", { version: DECK_FORMAT_VERSION }));
+  if (plan.cardCount > 0)
+    parts.push(t("migrationNotice.cardFormat", { version: CARD_FORMAT_VERSION }));
   if (plan.reviewCount > 0) {
     parts.push(t("migrationNotice.reviewFormat", { version: REVIEW_STATE_FORMAT_VERSION }));
   }
@@ -65,7 +71,8 @@ export function describeFormats(plan: MigrationPlan, t: I18n["t"]): string {
 /** The button label: "Update 3 decks and preferences". */
 function updateLabel(plan: MigrationPlan, t: I18n["t"]): string {
   const parts: string[] = [];
-  if (plan.decks.length > 0) parts.push(t("migrationNotice.buttonDecks", { count: plan.decks.length }));
+  if (plan.decks.length > 0)
+    parts.push(t("migrationNotice.buttonDecks", { count: plan.decks.length }));
   if (plan.preferencesOutdated) parts.push(t("migrationNotice.buttonPreferences"));
   if (plan.instanceOutdated) parts.push(t("migrationNotice.buttonInstanceRecord"));
   if (plan.catalogMissing) parts.push(t("migrationNotice.buttonCatalogue"));
@@ -103,11 +110,21 @@ export function MigrationNotice({
       Number(plan.catalogMissing) ===
     1;
   return (
-    <div ref={ref} class="warning migration" role="region" aria-label={t("migrationNotice.region")} tabIndex={-1}>
+    <div
+      ref={ref}
+      class="warning migration"
+      role="region"
+      aria-label={t("migrationNotice.region")}
+      tabIndex={-1}
+    >
       <p>
         <strong>{t("migrationNotice.heading")}</strong>{" "}
-        {t("migrationNotice.stored", { count: singular ? 1 : 2, outdated: describeOutdated(plan, t) })}{" "}
-        {t("migrationNotice.writes", { formats: describeFormats(plan, t) })} {t("migrationNotice.howItWorks")}
+        {t("migrationNotice.stored", {
+          count: singular ? 1 : 2,
+          outdated: describeOutdated(plan, t),
+        })}{" "}
+        {t("migrationNotice.writes", { formats: describeFormats(plan, t) })}{" "}
+        {t("migrationNotice.howItWorks")}
       </p>
       <ul>
         {plan.instanceOutdated && <li>{t("migrationNotice.itemInstanceRecord")}</li>}
@@ -119,7 +136,9 @@ export function MigrationNotice({
             {[
               ...(deckOutdated ? [t("migrationNotice.deckEntry")] : []),
               ...(cardCount > 0 ? [t("common.cardCount", { count: cardCount })] : []),
-              ...(reviewCount > 0 ? [t("migrationNotice.reviewStates", { count: reviewCount })] : []),
+              ...(reviewCount > 0
+                ? [t("migrationNotice.reviewStates", { count: reviewCount })]
+                : []),
             ].join(", ")}
           </li>
         ))}

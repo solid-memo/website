@@ -35,7 +35,14 @@ export function topicsOfDeck(deck: Deck): string[] {
 
 /** Keywords as typed in one language: comma-separated, trimmed, each once. */
 export function parseKeywords(text: string): string[] {
-  return [...new Set(text.split(",").map((keyword) => keyword.trim()).filter((k) => k !== ""))];
+  return [
+    ...new Set(
+      text
+        .split(",")
+        .map((keyword) => keyword.trim())
+        .filter((k) => k !== ""),
+    ),
+  ];
 }
 
 /**

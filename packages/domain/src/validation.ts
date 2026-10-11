@@ -131,7 +131,10 @@ export function setAsideDecks(report: ValidationReport, decks: readonly Deck[]):
 export function arrangementSetAside(report: ValidationReport): boolean {
   return report.documents.some((document) =>
     document.subjects.some(
-      (subject) => failing(subject) && subject.status === "checked" && (subject.shape === "catalog" || subject.shape === "deckGroup"),
+      (subject) =>
+        failing(subject) &&
+        subject.status === "checked" &&
+        (subject.shape === "catalog" || subject.shape === "deckGroup"),
     ),
   );
 }

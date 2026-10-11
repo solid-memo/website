@@ -37,7 +37,9 @@ function renderContainer(useCases: UseCases, of: Deck = deck) {
 describe("directionSchedules", () => {
   it("lists the directions the deck studies, then one it no longer does while the card has a state there", () => {
     const other = { ...state, cardId: "fire" };
-    expect(directionSchedules(card, "front-to-back", [other, state])).toEqual([{ direction: "front-to-back", state, studied: true }]);
+    expect(directionSchedules(card, "front-to-back", [other, state])).toEqual([
+      { direction: "front-to-back", state, studied: true },
+    ]);
     expect(directionSchedules(card, "bidirectional", [state])).toEqual([
       { direction: "front-to-back", state, studied: true },
       { direction: "back-to-front", state: null, studied: true },
@@ -65,9 +67,19 @@ describe("CardScheduleContainer", () => {
     const forward = within(await screen.findByRole("region", { name: "Front → back" }));
     fireEvent.input(forward.getByLabelText("Due on"), { target: { value: "2026-10-12" } });
     fireEvent.click(forward.getByRole("button", { name: "Set due date" }));
-    expect(await screen.findByText("“Front → back” is now due on October 12, 2026.")).toBeInTheDocument();
-    expect(useCases.rescheduleCards).toHaveBeenCalledWith(instanceA.url, expect.objectContaining({ url: deck.url }), ["water"], "2026-10-12", "front-to-back");
-    await waitFor(() => expect(forward.getAllByRole("definition")[0]).toHaveTextContent("October 12, 2026"));
+    expect(
+      await screen.findByText("“Front → back” is now due on October 12, 2026."),
+    ).toBeInTheDocument();
+    expect(useCases.rescheduleCards).toHaveBeenCalledWith(
+      instanceA.url,
+      expect.objectContaining({ url: deck.url }),
+      ["water"],
+      "2026-10-12",
+      "front-to-back",
+    );
+    await waitFor(() =>
+      expect(forward.getAllByRole("definition")[0]).toHaveTextContent("October 12, 2026"),
+    );
     expect(queryClient.getQueryData(["studyQueue", deck.url])).toBeUndefined();
   });
 
@@ -83,9 +95,18 @@ describe("CardScheduleContainer", () => {
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Forget progress" }));
     answer("Forget the card's progress", "Forget progress");
-    expect(await screen.findByText("Forgot the card's progress in the direction “Front → back”.")).toBeInTheDocument();
-    expect(useCases.resetCards).toHaveBeenCalledWith(instanceA.url, deck, ["water"], "front-to-back");
-    expect(await screen.findByText("Not studied this way yet: the card is new.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Forgot the card's progress in the direction “Front → back”."),
+    ).toBeInTheDocument();
+    expect(useCases.resetCards).toHaveBeenCalledWith(
+      instanceA.url,
+      deck,
+      ["water"],
+      "front-to-back",
+    );
+    expect(
+      await screen.findByText("Not studied this way yet: the card is new."),
+    ).toBeInTheDocument();
   });
 
   it("says why a change was not made", async () => {

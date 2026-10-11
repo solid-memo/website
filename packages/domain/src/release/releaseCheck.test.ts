@@ -57,10 +57,23 @@ describe("the library's place", () => {
 
   it("names a name that is not plain, a gap or a version the library has, and metadata against the place", () => {
     const at = libraryReleaseUrl(INDEX, "solid", 2);
-    const model = { ...draftReleaseModel(courseDraft(), at), version: [{ kind: "literal" as const, value: "2", language: "", datatype: "" }] };
-    const index = { url: INDEX, publisher: `${INDEX}#me`, releases: ["https://site.example/decks/solid/v1.ttl", "https://site.example/decks/other/v1.ttl", "https://elsewhere.example/solid/v1.ttl"] };
+    const model = {
+      ...draftReleaseModel(courseDraft(), at),
+      version: [{ kind: "literal" as const, value: "2", language: "", datatype: "" }],
+    };
+    const index = {
+      url: INDEX,
+      publisher: `${INDEX}#me`,
+      releases: [
+        "https://site.example/decks/solid/v1.ttl",
+        "https://site.example/decks/other/v1.ttl",
+        "https://elsewhere.example/solid/v1.ttl",
+      ],
+    };
     const found = libraryProblems(model, index, "solid", 2);
-    expect(found.map((p) => [p.code, p.field ?? "", "expected" in p.params ? p.params.expected : ""])).toEqual([
+    expect(
+      found.map((p) => [p.code, p.field ?? "", "expected" in p.params ? p.params.expected : ""]),
+    ).toEqual([
       ["linkMismatch", `${DCAT}inSeries`, [`${INDEX}#solid`]],
       ["linkMismatch", `${DCAT}isVersionOf`, [`${INDEX}#solid`]],
       ["linkMismatch", `${DCTERMS}publisher`, [`${INDEX}#me`]],
@@ -68,20 +81,45 @@ describe("the library's place", () => {
       ["linkMismatch", `${DCAT}previousVersion`, ["https://site.example/decks/solid/v1.ttl"]],
       ["noLicense", `${DCTERMS}license`, ""],
     ]);
-    const first = libraryProblems(draftReleaseModel(courseDraft(), libraryReleaseUrl(INDEX, "Solid", 1)), { ...index, publisher: null }, "Solid", 1);
+    const first = libraryProblems(
+      draftReleaseModel(courseDraft(), libraryReleaseUrl(INDEX, "Solid", 1)),
+      { ...index, publisher: null },
+      "Solid",
+      1,
+    );
     expect(first[0]).toMatchObject({ code: "notARelease", params: { path: "Solid/v1.ttl" } });
-    expect(first.find((p) => p.field === `${DCTERMS}publisher`)).toMatchObject({ params: { expected: [""] } });
-    const again = libraryProblems(draftReleaseModel(courseDraft(), libraryReleaseUrl(INDEX, "solid", 1)), index, "solid", 1);
-    expect(again[0]).toMatchObject({ code: "versionGap", params: { deck: "solid", versions: [1, 1] } });
+    expect(first.find((p) => p.field === `${DCTERMS}publisher`)).toMatchObject({
+      params: { expected: [""] },
+    });
+    const again = libraryProblems(
+      draftReleaseModel(courseDraft(), libraryReleaseUrl(INDEX, "solid", 1)),
+      index,
+      "solid",
+      1,
+    );
+    expect(again[0]).toMatchObject({
+      code: "versionGap",
+      params: { deck: "solid", versions: [1, 1] },
+    });
   });
 });
 
 describe("readWhole", () => {
   it("says a check whole unless the release it follows or the library's index could not be read", () => {
-    const other = problem(DRAFT, { code: "versionGap", params: { deck: "solid", versions: [1, 1] } });
+    const other = problem(DRAFT, {
+      code: "versionGap",
+      params: { deck: "solid", versions: [1, 1] },
+    });
     expect(readWhole({ drops: [], library: [other] })).toBe(true);
-    expect(readWhole({ drops: [problem(DRAFT, { code: "previousUnread", params: { previous: INDEX } })], library: [] })).toBe(false);
-    expect(readWhole({ drops: [], library: [problem(DRAFT, { code: "libraryUnread", params: {} })] })).toBe(false);
+    expect(
+      readWhole({
+        drops: [problem(DRAFT, { code: "previousUnread", params: { previous: INDEX } })],
+        library: [],
+      }),
+    ).toBe(false);
+    expect(
+      readWhole({ drops: [], library: [problem(DRAFT, { code: "libraryUnread", params: {} })] }),
+    ).toBe(false);
   });
 
   it("says which problems are a part of the check left unread", () => {
@@ -93,27 +131,59 @@ describe("readWhole", () => {
 describe("movedProblems", () => {
   it("names the same subjects at another address", () => {
     const from = "https://site.example/decks/solid/v1.ttl";
-    const found = [problem(`${from}#q-1`, { code: "noBack", params: {} }), problem(from, { code: "noBack", params: {} }, { related: [`${from}#q-2`, "https://other.example/"] })];
+    const found = [
+      problem(`${from}#q-1`, { code: "noBack", params: {} }),
+      problem(
+        from,
+        { code: "noBack", params: {} },
+        { related: [`${from}#q-2`, "https://other.example/"] },
+      ),
+    ];
     expect(movedProblems(found, from, DRAFT)).toEqual([
       { severity: "error", subject: of("q-1"), code: "noBack", params: {} },
-      { severity: "error", subject: DRAFT, related: [of("q-2"), "https://other.example/"], code: "noBack", params: {} },
+      {
+        severity: "error",
+        subject: DRAFT,
+        related: [of("q-2"), "https://other.example/"],
+        code: "noBack",
+        params: {},
+      },
     ]);
   });
 });
 
 describe("grouping", () => {
   const error = (subject: string) => problem(subject, { code: "noBack", params: {} });
-  const warning = (subject: string) => problem(subject, { code: "unshaped", params: {} }, { severity: "warning" });
+  const warning = (subject: string) =>
+    problem(subject, { code: "unshaped", params: {} }, { severity: "warning" });
 
   it("lists every problem of a check, the shapes last when they were asked", () => {
-    const check: ReleaseCheck = { rules: [error("a")], library: [error("b")], drops: [error("c")], markdown: [error("d")], shapes: null };
+    const check: ReleaseCheck = {
+      rules: [error("a")],
+      library: [error("b")],
+      drops: [error("c")],
+      markdown: [error("d")],
+      shapes: null,
+    };
     expect(checkProblems(check).map((p) => p.subject)).toEqual(["a", "b", "c", "d"]);
-    expect(checkProblems({ ...check, shapes: [warning("e")] }).map((p) => p.subject)).toEqual(["a", "b", "c", "d", "e"]);
+    expect(checkProblems({ ...check, shapes: [warning("e")] }).map((p) => p.subject)).toEqual([
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+    ]);
   });
 
   it("groups by severity, errors first, then by subject in the order they come", () => {
     expect(groupProblems([warning("w"), error("a"), error("b"), error("a")])).toEqual([
-      { severity: "error", subjects: [{ subject: "a", problems: [error("a"), error("a")] }, { subject: "b", problems: [error("b")] }] },
+      {
+        severity: "error",
+        subjects: [
+          { subject: "a", problems: [error("a"), error("a")] },
+          { subject: "b", problems: [error("b")] },
+        ],
+      },
       { severity: "warning", subjects: [{ subject: "w", problems: [warning("w")] }] },
     ]);
     expect(groupProblems([])).toEqual([]);
@@ -121,7 +191,15 @@ describe("grouping", () => {
 
   it("finds each subject of the draft's problems by its id, its problems in their order", () => {
     const first = problem(of("a"), { code: "unshaped", params: {} });
-    expect([...outlineProblems({ url: DRAFT, cards: [] }, [first, error(of("a")), warning(of("b")), error(DRAFT), error("https://other.example/")])]).toEqual([
+    expect([
+      ...outlineProblems({ url: DRAFT, cards: [] }, [
+        first,
+        error(of("a")),
+        warning(of("b")),
+        error(DRAFT),
+        error("https://other.example/"),
+      ]),
+    ]).toEqual([
       ["a", [first, error(of("a"))]],
       ["b", [warning(of("b"))]],
     ]);
@@ -131,64 +209,162 @@ describe("grouping", () => {
     const draft = courseDraft();
     const card = draft.cards.find((node) => node.data.distractor.length > 0)!;
     const distractor = card.data.distractor[0]!;
-    expect(outlineProblems(draft, [error(distractor), warning(distractor)]).get(card.id)).toEqual([error(distractor), warning(distractor)]);
+    expect(outlineProblems(draft, [error(distractor), warning(distractor)]).get(card.id)).toEqual([
+      error(distractor),
+      warning(distractor),
+    ]);
   });
 });
 
 describe("problemTarget", () => {
   const draft = courseDraft();
   const target = (subject: string, more: { field?: string; code?: ReleaseProblem["code"] } = {}) =>
-    problemTarget(draft, { ...problem(subject, { code: (more.code ?? "noBack") as "noBack", params: {} }), ...(more.field === undefined ? {} : { field: more.field }) });
+    problemTarget(draft, {
+      ...problem(subject, { code: (more.code ?? "noBack") as "noBack", params: {} }),
+      ...(more.field === undefined ? {} : { field: more.field }),
+    });
 
   it("opens a chapter's editor at its title, description, steps or review questions", () => {
-    expect(target(of("ch-a"), { field: `${DCTERMS}title` })).toEqual({ screen: "chapter", chapter: "ch-a", field: "title" });
-    expect(target(of("ch-a"), { field: `${DCTERMS}description` })).toEqual({ screen: "chapter", chapter: "ch-a", field: "description" });
-    expect(target(of("ch-a"), { field: SM.reviewQuestion })).toEqual({ screen: "chapter", chapter: "ch-a", field: "review" });
-    expect(target(of("ch-b"), { code: "chapterWithoutStep" })).toEqual({ screen: "chapter", chapter: "ch-b", field: "steps" });
-    expect(target(of("ch-b"), { code: "stepPositions" })).toEqual({ screen: "chapter", chapter: "ch-b", field: "steps" });
-    expect(target(of("ch-b"), { field: "https://schema.org/position" })).toEqual({ screen: "chapter", chapter: "ch-b" });
+    expect(target(of("ch-a"), { field: `${DCTERMS}title` })).toEqual({
+      screen: "chapter",
+      chapter: "ch-a",
+      field: "title",
+    });
+    expect(target(of("ch-a"), { field: `${DCTERMS}description` })).toEqual({
+      screen: "chapter",
+      chapter: "ch-a",
+      field: "description",
+    });
+    expect(target(of("ch-a"), { field: SM.reviewQuestion })).toEqual({
+      screen: "chapter",
+      chapter: "ch-a",
+      field: "review",
+    });
+    expect(target(of("ch-b"), { code: "chapterWithoutStep" })).toEqual({
+      screen: "chapter",
+      chapter: "ch-b",
+      field: "steps",
+    });
+    expect(target(of("ch-b"), { code: "stepPositions" })).toEqual({
+      screen: "chapter",
+      chapter: "ch-b",
+      field: "steps",
+    });
+    expect(target(of("ch-b"), { field: "https://schema.org/position" })).toEqual({
+      screen: "chapter",
+      chapter: "ch-b",
+    });
   });
 
   it("opens a step's editor at its theory or questions", () => {
-    expect(target(of("ch-a-1"), { field: SM.theory })).toEqual({ screen: "step", step: "ch-a-1", field: "theory" });
-    expect(target(of("ch-a-1"), { field: SM.checkedBy })).toEqual({ screen: "step", step: "ch-a-1", field: "questions" });
+    expect(target(of("ch-a-1"), { field: SM.theory })).toEqual({
+      screen: "step",
+      step: "ch-a-1",
+      field: "theory",
+    });
+    expect(target(of("ch-a-1"), { field: SM.checkedBy })).toEqual({
+      screen: "step",
+      step: "ch-a-1",
+      field: "questions",
+    });
     expect(target(of("ch-a-1"))).toEqual({ screen: "step", step: "ch-a-1" });
   });
 
   it("opens a question's editor at its text or wrong options, and a distractor's card at it", () => {
-    expect(target(of("q-a-1a"), { field: SM.back })).toEqual({ screen: "question", card: "q-a-1a", field: "back" });
-    expect(target(of("q-a-1a"), { field: SM.distractor })).toEqual({ screen: "question", card: "q-a-1a", field: "distractors" });
-    expect(target(of("q-a-1a"), { field: SM.textFormat })).toEqual({ screen: "question", card: "q-a-1a" });
+    expect(target(of("q-a-1a"), { field: SM.back })).toEqual({
+      screen: "question",
+      card: "q-a-1a",
+      field: "back",
+    });
+    expect(target(of("q-a-1a"), { field: SM.distractor })).toEqual({
+      screen: "question",
+      card: "q-a-1a",
+      field: "distractors",
+    });
+    expect(target(of("q-a-1a"), { field: SM.textFormat })).toEqual({
+      screen: "question",
+      card: "q-a-1a",
+    });
     expect(target(of("q-a-1a"))).toEqual({ screen: "question", card: "q-a-1a" });
-    expect(target(of("q-a-1a-d2"), { field: SM.distractorText })).toEqual({ screen: "question", card: "q-a-1a", field: "distractor:q-a-1a-d2" });
+    expect(target(of("q-a-1a-d2"), { field: SM.distractorText })).toEqual({
+      screen: "question",
+      card: "q-a-1a",
+      field: "distractor:q-a-1a-d2",
+    });
   });
 
   it("opens the overview for the release itself, at its title, description or outline, and for any other subject", () => {
-    expect(target(DRAFT, { field: `${DCTERMS}title` })).toEqual({ screen: "draft", field: "title" });
-    expect(target(DRAFT, { field: `${DCTERMS}description` })).toEqual({ screen: "draft", field: "description" });
-    expect(target(DRAFT, { code: "courseWithoutChapter" })).toEqual({ screen: "draft", field: "outline" });
-    expect(target(DRAFT, { field: `${DCAT}theme`, code: "missingTheme" })).toEqual({ screen: "draft" });
+    expect(target(DRAFT, { field: `${DCTERMS}title` })).toEqual({
+      screen: "draft",
+      field: "title",
+    });
+    expect(target(DRAFT, { field: `${DCTERMS}description` })).toEqual({
+      screen: "draft",
+      field: "description",
+    });
+    expect(target(DRAFT, { code: "courseWithoutChapter" })).toEqual({
+      screen: "draft",
+      field: "outline",
+    });
+    expect(target(DRAFT, { field: `${DCAT}theme`, code: "missingTheme" })).toEqual({
+      screen: "draft",
+    });
     expect(target(of("series"))).toEqual({ screen: "draft" });
     expect(target("solid/v2.ttl")).toEqual({ screen: "draft" });
   });
 
   it("opens the release screen for a source, an agent, an activity, and the release's fields there", () => {
-    expect(target("https://source.example/", { code: "sourceUndescribed" })).toEqual({ screen: "release", field: "sources" });
-    expect(target("https://source.example/", { code: "usedNotDerived" })).toEqual({ screen: "release", field: "sources" });
-    expect(target(DRAFT, { field: `${DCTERMS}license` })).toEqual({ screen: "release", field: "license" });
-    expect(target(DRAFT, { field: `${DCTERMS}publisher` })).toEqual({ screen: "release", field: "publisher" });
-    expect(target(DRAFT, { field: `${DCTERMS}language` })).toEqual({ screen: "release", field: "languages" });
-    expect(target(DRAFT, { field: "http://www.w3.org/ns/adms#versionNotes" })).toEqual({ screen: "release", field: "versionNotes" });
-    expect(target(of("compilation"), { code: "countDisagrees" })).toEqual({ screen: "release", field: "making" });
+    expect(target("https://source.example/", { code: "sourceUndescribed" })).toEqual({
+      screen: "release",
+      field: "sources",
+    });
+    expect(target("https://source.example/", { code: "usedNotDerived" })).toEqual({
+      screen: "release",
+      field: "sources",
+    });
+    expect(target(DRAFT, { field: `${DCTERMS}license` })).toEqual({
+      screen: "release",
+      field: "license",
+    });
+    expect(target(DRAFT, { field: `${DCTERMS}publisher` })).toEqual({
+      screen: "release",
+      field: "publisher",
+    });
+    expect(target(DRAFT, { field: `${DCTERMS}language` })).toEqual({
+      screen: "release",
+      field: "languages",
+    });
+    expect(target(DRAFT, { field: "http://www.w3.org/ns/adms#versionNotes" })).toEqual({
+      screen: "release",
+      field: "versionNotes",
+    });
+    expect(target(of("compilation"), { code: "countDisagrees" })).toEqual({
+      screen: "release",
+      field: "making",
+    });
     const withAgent = { ...draft, agents: [{ id: "ann", data: { name: "Ann" } }] };
-    expect(problemTarget(withAgent, problem(of("ann"), { code: "required", params: {} }))).toEqual({ screen: "release", field: "authors" });
+    expect(problemTarget(withAgent, problem(of("ann"), { code: "required", params: {} }))).toEqual({
+      screen: "release",
+      field: "authors",
+    });
     const checked = {
       ...draft,
-      triples: [...draft.triples, { subject: of("review-1"), predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", object: { kind: "iri" as const, value: "http://www.w3.org/ns/prov#Activity" } }],
+      triples: [
+        ...draft.triples,
+        {
+          subject: of("review-1"),
+          predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+          object: { kind: "iri" as const, value: "http://www.w3.org/ns/prov#Activity" },
+        },
+      ],
     };
-    expect(problemTarget(checked, problem(of("review-1"), { code: "required", params: {} }))).toEqual({ screen: "release", field: "checks" });
+    expect(
+      problemTarget(checked, problem(of("review-1"), { code: "required", params: {} })),
+    ).toEqual({ screen: "release", field: "checks" });
     const carried = { ...draft, published: { ids: {}, activities: ["compilation"] } };
-    expect(problemTarget(carried, problem(of("compilation"), { code: "required", params: {} }))).toEqual({ screen: "release", field: "checks" });
+    expect(
+      problemTarget(carried, problem(of("compilation"), { code: "required", params: {} })),
+    ).toEqual({ screen: "release", field: "checks" });
   });
 
   it("knows each screen's fields", () => {

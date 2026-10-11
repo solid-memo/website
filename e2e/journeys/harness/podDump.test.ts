@@ -19,7 +19,12 @@ describe("containedIn", () => {
   });
 
   it("ignores what other nodes contain, and nodes that are not objects", () => {
-    expect(containedIn([null, 3, { "@id": `${POD}other/`, [CONTAINS]: [{ "@id": `${POD}other/z` }] }], POD)).toEqual([]);
+    expect(
+      containedIn(
+        [null, 3, { "@id": `${POD}other/`, [CONTAINS]: [{ "@id": `${POD}other/z` }] }],
+        POD,
+      ),
+    ).toEqual([]);
   });
 
   it("is empty for an empty container", () => {

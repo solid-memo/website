@@ -8,11 +8,15 @@ import { Screen } from "./Screen.ts";
  */
 export class LibraryPreview extends Screen {
   private get reveal(): Locator {
-    return this.page.getByRole("main").getByRole("button", { name: this.t("libraryPreview.reveal"), exact: true });
+    return this.page
+      .getByRole("main")
+      .getByRole("button", { name: this.t("libraryPreview.reveal"), exact: true });
   }
 
   private get nextCard(): Locator {
-    return this.page.getByRole("main").getByRole("button", { name: this.t("libraryPreview.nextCard"), exact: true });
+    return this.page
+      .getByRole("main")
+      .getByRole("button", { name: this.t("libraryPreview.nextCard"), exact: true });
   }
 
   /** Reveals the card shown and goes on to the next, `count` times. */
@@ -30,7 +34,10 @@ export class LibraryPreview extends Screen {
   /** "Back to library": the library's list again. */
   async backToLibrary(): Promise<void> {
     await this.intent("Go back to the library", async () => {
-      await this.page.getByRole("main").getByRole("button", { name: this.t("libraryPreview.back"), exact: true }).click();
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("libraryPreview.back"), exact: true })
+        .click();
       await this.app.library.expectOpen();
     });
   }

@@ -185,7 +185,8 @@ export function CardRowBack({
   const { t, readerText, readerLang } = useI18n();
   const backText = readerText(back);
   const description = imageDescription === undefined ? "" : readerText(imageDescription);
-  const alt = backText !== "" ? "" : description !== "" ? description : t("cardFace.backPictureAlt");
+  const alt =
+    backText !== "" ? "" : description !== "" ? description : t("cardFace.backPictureAlt");
   const lang = backText === "" && description !== "" ? readerLang(imageDescription!) : undefined;
   return (
     <>

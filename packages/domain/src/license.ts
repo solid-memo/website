@@ -35,8 +35,12 @@ export const KNOWN_LICENSES: readonly string[] = [
  * it had (`current`), whatever it is; anything else is refused
  * (licenseUnknown).
  */
-export function chosenLicense(license: string | undefined, current: string | undefined): string | undefined {
-  if (license === undefined || license === current || KNOWN_LICENSES.includes(license)) return license;
+export function chosenLicense(
+  license: string | undefined,
+  current: string | undefined,
+): string | undefined {
+  if (license === undefined || license === current || KNOWN_LICENSES.includes(license))
+    return license;
   throw new AppError("licenseUnknown", { url: license });
 }
 
@@ -48,9 +52,7 @@ export function licenseLabel(url: string): string {
   for (const [pattern, label] of LICENSE_NAMES) {
     const match = url.match(pattern);
     if (match !== null) {
-      return label
-        .replace("$1", (match[1] ?? "").toUpperCase())
-        .replace("$2", match[2] ?? "");
+      return label.replace("$1", (match[1] ?? "").toUpperCase()).replace("$2", match[2] ?? "");
     }
   }
   return url;

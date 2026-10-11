@@ -112,11 +112,7 @@ export function LibraryBrowserScreen({
             </tbody>
           </table>
           {pageCount > 1 && (
-            <Pager
-              page={currentPage}
-              pageCount={pageCount}
-              onPageChange={onPageChange}
-            />
+            <Pager page={currentPage} pageCount={pageCount} onPageChange={onPageChange} />
           )}
         </>
       )}

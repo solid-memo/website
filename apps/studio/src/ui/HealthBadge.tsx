@@ -20,13 +20,21 @@ import { deckTextCheck } from "@solid-memo/ui/markdownCache";
  * still current is put there: one canceled as the deck is checked
  * anew (a repair, say) read the pod before, and would hold a deck mended.
  */
-export function deckHealthQuery(useCases: UseCases, queryClient: QueryClient, instanceUrl: string, deck: Deck) {
+export function deckHealthQuery(
+  useCases: UseCases,
+  queryClient: QueryClient,
+  instanceUrl: string,
+  deck: Deck,
+) {
   return {
     queryKey: ["validation", instanceUrl, "deck", deck.url, deck.cardsDocumentUrl],
     queryFn: async ({ signal }: { signal: AbortSignal }) => {
       const health = await useCases.checkDeck(instanceUrl, deck, deckTextCheck());
       if (signal.aborted) return health;
-      queryClient.setQueryData<ValidationReport>(["validation", instanceUrl], (report) => report && withDeckReport(report, deck, health.report));
+      queryClient.setQueryData<ValidationReport>(
+        ["validation", instanceUrl],
+        (report) => report && withDeckReport(report, deck, health.report),
+      );
       return health;
     },
     staleTime: Infinity,
@@ -73,7 +81,10 @@ export function HealthBadge({
 }) {
   const { t, readerText } = useI18n();
   const [ref, seen] = useSeen<HTMLSpanElement>();
-  const query = useQuery({ ...deckHealthQuery(useCases, useQueryClient(), instanceUrl, deck), enabled: seen });
+  const query = useQuery({
+    ...deckHealthQuery(useCases, useQueryClient(), instanceUrl, deck),
+    enabled: seen,
+  });
   const count = query.data === undefined ? undefined : healthProblemCount(query.data);
   return (
     <span ref={ref}>
@@ -82,7 +93,10 @@ export function HealthBadge({
       ) : count === undefined ? null : count > 0 ? (
         <a class="studio-badge studio-badge-warning" href={href}>
           {t("studio.health.badge.problems", { count })}
-          <span class="visually-hidden"> {t("studio.decks.healthOf", { deck: readerText(deck.title) })}</span>
+          <span class="visually-hidden">
+            {" "}
+            {t("studio.decks.healthOf", { deck: readerText(deck.title) })}
+          </span>
         </a>
       ) : (
         !quiet && <span class="studio-badge">{t("studio.health.badge.healthy")}</span>

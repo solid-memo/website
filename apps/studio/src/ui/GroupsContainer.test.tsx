@@ -49,8 +49,14 @@ describe("GroupsContainer", () => {
       app(`deck?instance=${instance}&deck=${encodeURIComponent(kanji.url)}`),
     );
     expect(screen.queryByRole("button", { name: /Study/ })).toBeNull();
-    expect(screen.getByRole("link", { name: "Create deck" })).toHaveAttribute("href", app(`new-deck?instance=${instance}`));
-    expect(screen.getByRole("link", { name: "Deck library" })).toHaveAttribute("href", app(`library?instance=${instance}`));
+    expect(screen.getByRole("link", { name: "Create deck" })).toHaveAttribute(
+      "href",
+      app(`new-deck?instance=${instance}`),
+    );
+    expect(screen.getByRole("link", { name: "Deck library" })).toHaveAttribute(
+      "href",
+      app(`library?instance=${instance}`),
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Actions for Solid" }));
     expect(await screen.findByRole("menuitem", { name: "Continue course" })).toHaveAttribute(
@@ -77,17 +83,24 @@ describe("GroupsContainer", () => {
 
   it("says which decks are set aside, and holds the arrangement while it is set aside", async () => {
     renderContainer(
-      makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, course]), checkInstance: vi.fn(async () => invalidReport([kanji], { catalog: true })) }),
+      makeUseCasesFake({
+        listDecks: vi.fn(async () => [kanji, course]),
+        checkInstance: vi.fn(async () => invalidReport([kanji], { catalog: true })),
+      }),
     );
     expect(await screen.findByText("Set aside: its data needs repair")).toBeInTheDocument();
-    expect(await screen.findByText(/The arrangement of these decks has invalid data/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/The arrangement of these decks has invalid data/),
+    ).toBeInTheDocument();
   });
 
   /** Whether the deck `name`'s menu offers to rename it and to delete it. */
   function deckActions(name: string) {
     fireEvent.click(screen.getByRole("button", { name: `Actions for ${name}` }));
     const menu = screen.getByRole("menu");
-    const offered = ["Rename", "Delete deck"].map((item) => !within(menu).getByRole("menuitem", { name: item }).hasAttribute("aria-disabled"));
+    const offered = ["Rename", "Delete deck"].map(
+      (item) => !within(menu).getByRole("menuitem", { name: item }).hasAttribute("aria-disabled"),
+    );
     fireEvent.keyDown(document.activeElement!, { key: "Escape" });
     return offered;
   }
@@ -97,14 +110,19 @@ describe("GroupsContainer", () => {
     renderContainer(
       makeUseCasesFake({
         listDecks: vi.fn(async () => [kanji, course]),
-        checkInstance: vi.fn(() => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve))),
+        checkInstance: vi.fn(
+          () => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve)),
+        ),
       }),
     );
     expect(await screen.findByText(/being checked/)).toBeInTheDocument();
     expect(deckActions("Kanji N5")).toEqual([false, false]);
     checked(invalidReport([kanji]));
     expect(await screen.findByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute(
+      "href",
+      "#/health",
+    );
     expect(deckActions("Kanji N5")).toEqual([false, false]);
     expect(deckActions("Solid")).toEqual([true, true]);
   });
@@ -113,12 +131,18 @@ describe("GroupsContainer", () => {
     renderContainer(
       makeUseCasesFake({
         listDecks: vi.fn(async () => [kanji, course]),
-        getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, invalidDataPolicy: "block-instance" as const })),
+        getPreferences: vi.fn(async () => ({
+          ...DEFAULT_PREFERENCES,
+          invalidDataPolicy: "block-instance" as const,
+        })),
         checkInstance: vi.fn(async () => invalidReport([kanji])),
       }),
     );
     expect(await screen.findByText(/your preferences keep it closed/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
+      "href",
+      "#/health",
+    );
     expect(deckActions("Solid")).toEqual([false, false]);
   });
 

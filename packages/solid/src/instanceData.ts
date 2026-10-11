@@ -60,7 +60,9 @@ export async function deleteInstanceData(
   const meta = metaUrlOf(container);
   const catalogUrl = catalogUrlOf(container);
   const catalog = await readCatalog(catalogUrl, fetch);
-  const deckDocuments = (catalog === UNREADABLE || catalog === null ? [] : deckDocumentsOf(catalog)).filter(
+  const deckDocuments = (
+    catalog === UNREADABLE || catalog === null ? [] : deckDocumentsOf(catalog)
+  ).filter(
     (url) => url.startsWith(container) && !url.endsWith("/") && url !== meta && url !== catalogUrl,
   );
   const history = historyContainerOf(container);
@@ -68,7 +70,9 @@ export async function deleteInstanceData(
     (url) => monthOfHistoryUrl(container, url) !== null,
   );
   for (const url of [...new Set(deckDocuments), ...months]) await deleteIfPresent(url, fetch);
-  for (const draft of catalog === UNREADABLE || catalog === null ? [] : draftsOf(catalog, container)) {
+  for (const draft of catalog === UNREADABLE || catalog === null
+    ? []
+    : draftsOf(catalog, container)) {
     await deleteDraftResources(draft, fetch);
   }
   for (const url of [
@@ -79,13 +83,22 @@ export async function deleteInstanceData(
   ]) {
     await deleteIfPresent(url, fetch);
   }
-  for (const subcontainer of [cardsContainerOf(container), reviewsContainerOf(container), history, draftsContainerOf(container)]) {
+  for (const subcontainer of [
+    cardsContainerOf(container),
+    reviewsContainerOf(container),
+    history,
+    draftsContainerOf(container),
+  ]) {
     await deleteContainerIfEmpty(subcontainer, fetch);
   }
   await deleteIfPresent(meta, fetch);
-  if (await deleteContainerIfEmpty(container, fetch)) return { keptFolder: null, keptReleases: false };
+  if (await deleteContainerIfEmpty(container, fetch))
+    return { keptFolder: null, keptReleases: false };
   // Releases others may read by their address are never deleted: the user is told they are why the folder is kept.
-  return { keptFolder: container, keptReleases: (await fetch(releasesContainerOf(container), { method: "HEAD" })).ok };
+  return {
+    keptFolder: container,
+    keptReleases: (await fetch(releasesContainerOf(container), { method: "HEAD" })).ok,
+  };
 }
 
 const UNREADABLE = Symbol("unreadable");
@@ -117,13 +130,20 @@ async function readCatalog(
 /** The drafts the instance's catalog links that are in its `drafts/`: a link elsewhere is never followed to a delete. */
 function draftsOf(catalog: SolidDataset, container: string): string[] {
   const node = getThing(catalog, catalogNodeUrlOf(container));
-  return node === null ? [] : getUrlAll(node, SM.releaseDraft).filter((url) => draftPlaceOf(url)?.instanceUrl === container);
+  return node === null
+    ? []
+    : getUrlAll(node, SM.releaseDraft).filter(
+        (url) => draftPlaceOf(url)?.instanceUrl === container,
+      );
 }
 
 /** The cards and reviews documents every deck of a catalog document names, whether or not the deck fits its shape. */
 function deckDocumentsOf(catalog: SolidDataset): string[] {
   return getThingAll(catalog)
     .filter((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck))
-    .flatMap((thing) => [...getUrlAll(thing, SM.cardsDocument), ...getUrlAll(thing, SM.reviewsDocument)])
+    .flatMap((thing) => [
+      ...getUrlAll(thing, SM.cardsDocument),
+      ...getUrlAll(thing, SM.reviewsDocument),
+    ])
     .map(documentUrlOf);
 }

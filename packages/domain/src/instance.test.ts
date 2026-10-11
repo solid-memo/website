@@ -12,6 +12,11 @@ describe("instanceName", () => {
 describe("data classes", () => {
   it("keep review states, answers and drafts to the private type index alone", () => {
     expect(DATA_CLASSES.filter(isPrivateOnly)).toEqual(["reviewState", "answer", "draft"]);
-    expect(DATA_CLASSES.filter((dataClass) => !isPrivateOnly(dataClass))).toEqual(["instance", "catalog", "deck", "card"]);
+    expect(DATA_CLASSES.filter((dataClass) => !isPrivateOnly(dataClass))).toEqual([
+      "instance",
+      "catalog",
+      "deck",
+      "card",
+    ]);
   });
 });

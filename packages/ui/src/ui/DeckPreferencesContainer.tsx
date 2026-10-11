@@ -108,7 +108,9 @@ export function DeckPreferencesContainer({
       preferencesHref={routeToHash({ screen: "preferences", instanceUrl: instance.url })}
       languages={languages}
       section={section}
-      languagesUnreadable={languages === undefined ? errorText(cardsQuery.error ?? releaseError) : null}
+      languagesUnreadable={
+        languages === undefined ? errorText(cardsQuery.error ?? releaseError) : null
+      }
       stated={stateLanguagesMutation.data ?? null}
       busy={
         saveMutation.isPending ||

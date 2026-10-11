@@ -36,7 +36,9 @@ export class Preferences extends Screen {
   async open(): Promise<void> {
     await this.intent("Open the study preferences", async () => {
       await this.app.chrome.openPreferences();
-      await expect(this.page.getByRole("heading", { name: this.t("preferences.heading") })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("preferences.heading") }),
+      ).toBeVisible();
       await expect(this.newCardsPerDay).toBeEditable();
     });
   }
@@ -49,9 +51,12 @@ export class Preferences extends Screen {
   }
 
   async setAnswerButtons(scale: AnswerScale): Promise<void> {
-    await this.intent(`Choose the answer buttons ${this.t(`preferences.answerScale.${scale}.label`)}`, async () => {
-      await this.answerButtons(scale).check();
-    });
+    await this.intent(
+      `Choose the answer buttons ${this.t(`preferences.answerScale.${scale}.label`)}`,
+      async () => {
+        await this.answerButtons(scale).check();
+      },
+    );
   }
 
   /** Checks or clears Developer mode; leaves it be when it already is so. */
@@ -64,23 +69,30 @@ export class Preferences extends Screen {
   /** Saves; the app goes back to Decks once the pod has the preferences. */
   async save(): Promise<void> {
     await this.intent("Save the preferences", async () => {
-      await this.form.getByRole("button", { name: this.t("preferences.save"), exact: true }).click();
+      await this.form
+        .getByRole("button", { name: this.t("preferences.save"), exact: true })
+        .click();
       await this.app.decks.expectShown();
       await this.app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
     });
   }
 
   async expectNewCardsPerDay(count: number): Promise<void> {
-    await this.intent(`Check that new cards per day is ${count}`, () => expect(this.newCardsPerDay).toHaveValue(String(count)));
+    await this.intent(`Check that new cards per day is ${count}`, () =>
+      expect(this.newCardsPerDay).toHaveValue(String(count)),
+    );
   }
 
   async expectAnswerButtons(scale: AnswerScale): Promise<void> {
-    await this.intent(`Check that the answer buttons are ${this.t(`preferences.answerScale.${scale}.label`)}`, () =>
-      expect(this.answerButtons(scale)).toBeChecked(),
+    await this.intent(
+      `Check that the answer buttons are ${this.t(`preferences.answerScale.${scale}.label`)}`,
+      () => expect(this.answerButtons(scale)).toBeChecked(),
     );
   }
 
   async expectDeveloperMode(on: boolean): Promise<void> {
-    await this.intent(`Check that developer mode is ${on ? "on" : "off"}`, () => expect(this.developerMode).toBeChecked({ checked: on }));
+    await this.intent(`Check that developer mode is ${on ? "on" : "off"}`, () =>
+      expect(this.developerMode).toBeChecked({ checked: on }),
+    );
   }
 }

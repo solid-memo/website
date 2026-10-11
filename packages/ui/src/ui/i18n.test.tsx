@@ -65,12 +65,17 @@ describe("the message files", () => {
     ["de", de],
     ["es", es],
     ["fr", fr],
-  ])("give each plural message in %s exactly the forms its plural rules name", (locale, messages) => {
-    const categories = [...new Intl.PluralRules(locale).resolvedOptions().pluralCategories].sort();
-    const forms = pluralForms(messages);
-    expect(Object.keys(forms)).not.toEqual([]);
-    expect(forms).toEqual(Object.fromEntries(Object.keys(forms).map((key) => [key, categories])));
-  });
+  ])(
+    "give each plural message in %s exactly the forms its plural rules name",
+    (locale, messages) => {
+      const categories = [
+        ...new Intl.PluralRules(locale).resolvedOptions().pluralCategories,
+      ].sort();
+      const forms = pluralForms(messages);
+      expect(Object.keys(forms)).not.toEqual([]);
+      expect(forms).toEqual(Object.fromEntries(Object.keys(forms).map((key) => [key, categories])));
+    },
+  );
 });
 
 /** Every message key the app's source asks for (keys are literals by rule). */
@@ -100,8 +105,12 @@ describe("createI18n", () => {
 
   it("says the site's own name, when it has one, where Solid Memo's stands alone", () => {
     expect(createI18n("ko").t("app.documentTitle")).toBe("Solid Memo");
-    expect(createI18n("ko", "Example School Cards").t("app.documentTitle")).toBe("Example School Cards");
-    expect(createI18n("ko", "Example School Cards").t("studio.name")).toBe(createI18n("ko").t("studio.name"));
+    expect(createI18n("ko", "Example School Cards").t("app.documentTitle")).toBe(
+      "Example School Cards",
+    );
+    expect(createI18n("ko", "Example School Cards").t("studio.name")).toBe(
+      createI18n("ko").t("studio.name"),
+    );
   });
 
   it("picks a plural form by count", () => {
@@ -115,16 +124,22 @@ describe("createI18n", () => {
   it("picks the forms of the languages with more than two", () => {
     expect(createI18n("fr").t("common.cardCount", { count: 0 })).toBe("0 carte");
     expect(createI18n("fr").t("common.cardCount", { count: 2 })).toBe("2 cartes");
-    expect(createI18n("fr").t("common.cardCount", { count: 1_000_000 })).toBe("1\u202f000\u202f000 de cartes");
+    expect(createI18n("fr").t("common.cardCount", { count: 1_000_000 })).toBe(
+      "1\u202f000\u202f000 de cartes",
+    );
     expect(createI18n("es").t("common.cardCount", { count: 1 })).toBe("1 tarjeta");
-    expect(createI18n("es").t("common.cardCount", { count: 1_000_000 })).toBe("1.000.000 de tarjetas");
+    expect(createI18n("es").t("common.cardCount", { count: 1_000_000 })).toBe(
+      "1.000.000 de tarjetas",
+    );
     expect(createI18n("de").t("common.cardCount", { count: 1 })).toBe("1 Karte");
   });
 
   it("writes numbers as the language writes them, and text as it is", () => {
     expect(createI18n("en").t("common.cardCount", { count: 3010 })).toBe("3,010 cards");
     expect(createI18n("sv").t("common.cardCount", { count: 3010 })).toBe("3\u00a0010 kort");
-    expect(createI18n("en").t("instanceUpdate.count", { done: 1500, count: 2500 })).toBe("1,500 of 2,500 documents");
+    expect(createI18n("en").t("instanceUpdate.count", { done: 1500, count: 2500 })).toBe(
+      "1,500 of 2,500 documents",
+    );
     expect(createI18n("en").t("footer.version", { version: "2026" })).toBe("Version 2026");
     render(<>{createI18n("en").tx("common.cardCount", { count: 3010 })}</>);
     expect(document.body).toHaveTextContent("3,010 cards");
@@ -149,7 +164,9 @@ describe("createI18n", () => {
   it("names a missing message by its key", () => {
     expect(createI18n("sv").t("no.such.message" as MessageKey)).toBe("no.such.message");
     expect(createI18n("en").t("common" as MessageKey)).toBe("common");
-    expect(createI18n("en").t("common.cardCount.one.deeper" as MessageKey)).toBe("common.cardCount.one.deeper");
+    expect(createI18n("en").t("common.cardCount.one.deeper" as MessageKey)).toBe(
+      "common.cardCount.one.deeper",
+    );
   });
 
   it("fills placeholders with markup", () => {
@@ -209,7 +226,9 @@ describe("createI18n", () => {
 
   it("names no language as such, not by its code", () => {
     expect(createI18n("en").languageLabel("zxx")).toBe("No language (codes, numbers, symbols)");
-    expect(createI18n("sv").languageParts("zxx")).toEqual({ name: "Inget språk (koder, siffror, symboler)" });
+    expect(createI18n("sv").languageParts("zxx")).toEqual({
+      name: "Inget språk (koder, siffror, symboler)",
+    });
   });
 
   it("does not mark a Swedish name saved the same in English as English", () => {
@@ -225,7 +244,9 @@ describe("createI18n", () => {
     expect(createI18n("sv").formatMonth("2025-03")).toBe("mars 2025");
     expect(createI18n("ko").formatDate("2026-09-22T00:00:00.000Z")).toBe("2026년 9월 22일");
     expect(createI18n("de").formatDate("2026-09-22T00:00:00.000Z")).toBe("22. September 2026");
-    expect(createI18n("es").formatDate("2026-09-22T00:00:00.000Z")).toBe("22 de septiembre de 2026");
+    expect(createI18n("es").formatDate("2026-09-22T00:00:00.000Z")).toBe(
+      "22 de septiembre de 2026",
+    );
     expect(createI18n("fr").formatDate("2026-09-22T00:00:00.000Z")).toBe("22 septembre 2026");
   });
 
@@ -265,10 +286,15 @@ describe("errorText", () => {
   it("names a deck in the reader's language, marked when that is not the page's", () => {
     const gone = new AppError("deckGone", { deck: { en: "Capitals", sv: "Huvudstäder" } });
     render(<p data-testid="sv">{createI18n("sv").errorText(gone)}</p>);
-    expect(screen.getByTestId("sv")).toHaveTextContent("Kortleken ”Huvudstäder” finns inte längre.");
+    expect(screen.getByTestId("sv")).toHaveTextContent(
+      "Kortleken ”Huvudstäder” finns inte längre.",
+    );
     expect(screen.getByTestId("sv").querySelector("[lang]")).toBeNull();
 
-    const english = new AppError("cardsDocumentGone", { deck: { en: "Capitals" }, url: "https://pod.example/d.ttl" });
+    const english = new AppError("cardsDocumentGone", {
+      deck: { en: "Capitals" },
+      url: "https://pod.example/d.ttl",
+    });
     render(<p data-testid="english">{createI18n("sv").errorText(english)}</p>);
     expect(screen.getByText("Capitals")).toHaveAttribute("lang", "en");
     expect(screen.getByTestId("english")).toHaveTextContent("”Capitals”");
@@ -281,7 +307,12 @@ describe("errorText", () => {
       "Something went wrong. Try again, or reload the page. Details: broken",
     );
     expect(screen.getByText("broken")).not.toHaveAttribute("lang");
-    render(<p data-testid="others">{errorText("plain")}{errorText(42)}</p>);
+    render(
+      <p data-testid="others">
+        {errorText("plain")}
+        {errorText(42)}
+      </p>,
+    );
     expect(screen.getByTestId("others")).toHaveTextContent("Details: plain");
     expect(screen.getByTestId("others")).toHaveTextContent("Details: 42");
     expect(errorText(null)).toBeNull();
@@ -297,7 +328,10 @@ describe("errorText", () => {
   });
 
   it("folds an app error's technical detail away under the plain sentence, marked as English", () => {
-    const refused = new AppError("storageInaccessible", { url: "https://pod.example/", status: 403 });
+    const refused = new AppError("storageInaccessible", {
+      url: "https://pod.example/",
+      status: 403,
+    });
     render(<div data-testid="sv">{createI18n("sv").errorText(refused)}</div>);
     expect(screen.getByTestId("sv")).toHaveTextContent(
       "Solid Memo kommer inte åt den lagringen. Kontrollera adressen och att du är inloggad med kontot som äger den.",
@@ -306,7 +340,9 @@ describe("errorText", () => {
     expect(screen.getByText(/status: 403/)).toHaveAttribute("lang", "en");
 
     render(<div data-testid="en">{createI18n("en").errorText(refused)}</div>);
-    expect(screen.getByText(/url: https:\/\/pod.example\//, { selector: "[data-testid=en] code" })).not.toHaveAttribute("lang");
+    expect(
+      screen.getByText(/url: https:\/\/pod.example\//, { selector: "[data-testid=en] code" }),
+    ).not.toHaveAttribute("lang");
     expect(createI18n("en").errorText(refused, { detail: false })).toBe(
       "Solid Memo cannot open that storage. Check the address, and that you are logged in with the account that owns it.",
     );
@@ -327,8 +363,17 @@ describe("errorText", () => {
 });
 
 describe("violationText", () => {
-  const shaped = { message: { en: "A picture is an IRI.", sv: "En bild är en IRI." }, severity: "violation" as const, constraint: "NodeKind" };
-  const builtIn = { message: { en: "Less than 1 values" }, builtIn: true as const, severity: "violation" as const, constraint: "MinCount" };
+  const shaped = {
+    message: { en: "A picture is an IRI.", sv: "En bild är en IRI." },
+    severity: "violation" as const,
+    constraint: "NodeKind",
+  };
+  const builtIn = {
+    message: { en: "Less than 1 values" },
+    builtIn: true as const,
+    severity: "violation" as const,
+    constraint: "MinCount",
+  };
 
   it("says a shape's message in the spoken language", () => {
     expect(createI18n("sv").violationText(shaped)).toBe("En bild är en IRI.");
@@ -338,8 +383,12 @@ describe("violationText", () => {
   it("says the validator's own English by its constraint in another language, and keeps it in English", () => {
     expect(createI18n("sv").violationText(builtIn)).toBe("Ett värde saknas.");
     expect(createI18n("en").violationText(builtIn)).toBe("Less than 1 values");
-    expect(createI18n("sv").violationText({ ...builtIn, constraint: "Sparql" })).toBe("Less than 1 values");
-    expect(createI18n("sv").violationText({ ...shaped, message: { en: "Only English." } })).toBe("Only English.");
+    expect(createI18n("sv").violationText({ ...builtIn, constraint: "Sparql" })).toBe(
+      "Less than 1 values",
+    );
+    expect(createI18n("sv").violationText({ ...shaped, message: { en: "Only English." } })).toBe(
+      "Only English.",
+    );
   });
 
   it("marks a message left in another language with that language", () => {
@@ -347,7 +396,9 @@ describe("violationText", () => {
     expect(sv.violationLang(shaped)).toBeUndefined();
     expect(sv.violationLang(builtIn)).toBeUndefined();
     expect(sv.violationLang({ ...builtIn, constraint: "Sparql" })).toBe("en");
-    expect(createI18n("en").violationLang({ ...shaped, message: { sv: "Bara svenska." } })).toBe("sv");
+    expect(createI18n("en").violationLang({ ...shaped, message: { sv: "Bara svenska." } })).toBe(
+      "sv",
+    );
     expect(createI18n("en").violationLang(builtIn)).toBeUndefined();
   });
 

@@ -22,7 +22,15 @@ import { useI18n } from "./i18n";
  */
 
 /** A headline number with what it counts, named by that label as a group. */
-export function StatTile({ label, value, detail }: { label: string; value: string; detail?: string }) {
+export function StatTile({
+  label,
+  value,
+  detail,
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+}) {
   const labelId = useId();
   return (
     <div class="stat-tile" role="group" aria-labelledby={labelId}>
@@ -132,7 +140,9 @@ export function ActivityCalendar({
   const [pointed, setPointed] = useState<string | null>(null);
   const byDay = new Map(days.map((day) => [day.studyDay, day]));
   const first = shiftStudyDay(today, -weekdayOf(today) - (weeks - 1) * 7);
-  const shown = Array.from({ length: weeks * 7 }, (_, i) => shiftStudyDay(first, i)).filter((day) => day <= today);
+  const shown = Array.from({ length: weeks * 7 }, (_, i) => shiftStudyDay(first, i)).filter(
+    (day) => day <= today,
+  );
   const most = Math.max(1, ...shown.map((day) => byDay.get(day)?.answers ?? 0));
   return (
     <figure class="activity-calendar">
@@ -161,7 +171,10 @@ export function ActivityCalendar({
         ))}
         {t("statistics.more")}
       </div>
-      <Inspector text={pointed === null ? null : dayText(pointed, byDay.get(pointed))} prompt={t("statistics.pointAtDay")} />
+      <Inspector
+        text={pointed === null ? null : dayText(pointed, byDay.get(pointed))}
+        prompt={t("statistics.pointAtDay")}
+      />
       <DayTable days={days} />
     </figure>
   );
@@ -203,13 +216,35 @@ export function BarChart({
   return (
     <figure class="bar-chart">
       <figcaption>{caption}</figcaption>
-      <svg viewBox={`0 0 ${count * (width + gap)} ${height}`} preserveAspectRatio="none" role="img" aria-label={label}>
-        <line class="baseline" x1="0" x2={count * (width + gap)} y1={height - 0.5} y2={height - 0.5} />
+      <svg
+        viewBox={`0 0 ${count * (width + gap)} ${height}`}
+        preserveAspectRatio="none"
+        role="img"
+        aria-label={label}
+      >
+        <line
+          class="baseline"
+          x1="0"
+          x2={count * (width + gap)}
+          y1={height - 0.5}
+          y2={height - 0.5}
+        />
         {bars.map(({ key, value }, i) => {
           const bar = value === 0 ? 0 : Math.max(2, (value / most) * (height - 4));
           return (
-            <g key={key} data-bar={key} onPointerEnter={() => setPointed(key)} onClick={() => setPointed(key)}>
-              <rect class="bar-hit" x={i * (width + gap)} y="0" width={width + gap} height={height} />
+            <g
+              key={key}
+              data-bar={key}
+              onPointerEnter={() => setPointed(key)}
+              onClick={() => setPointed(key)}
+            >
+              <rect
+                class="bar-hit"
+                x={i * (width + gap)}
+                y="0"
+                width={width + gap}
+                height={height}
+              />
               {bar > 0 && (
                 <rect
                   class={`bar${key === pointed ? " pointed" : ""}`}
@@ -231,7 +266,15 @@ export function BarChart({
 }
 
 /** Answers on each of the last `count` study days up to today, as bars on one baseline. */
-export function DayBars({ days, today, count = 30 }: { days: readonly DayActivity[]; today: string; count?: number }) {
+export function DayBars({
+  days,
+  today,
+  count = 30,
+}: {
+  days: readonly DayActivity[];
+  today: string;
+  count?: number;
+}) {
   const { t } = useI18n();
   const dayText = useDayText();
   const byDay = new Map(days.map((day) => [day.studyDay, day]));
@@ -240,7 +283,11 @@ export function DayBars({ days, today, count = 30 }: { days: readonly DayActivit
     <BarChart
       caption={t("statistics.lastDays", { count })}
       label={t("statistics.lastDaysLabel", { count })}
-      bars={shown.map((day) => ({ key: day, value: byDay.get(day)?.answers ?? 0, text: dayText(day, byDay.get(day)) }))}
+      bars={shown.map((day) => ({
+        key: day,
+        value: byDay.get(day)?.answers ?? 0,
+        text: dayText(day, byDay.get(day)),
+      }))}
       prompt={t("statistics.pointAtDay")}
     >
       <DayTable days={days.filter((day) => day.studyDay >= shown[0]!)} />
@@ -360,7 +407,9 @@ function LineChart({
         return runs;
       }, [])
       .map((run) =>
-        run.length === 1 ? `M${at(run[0]!, values[run[0]!]!)}h0` : `M${run.map((i) => at(i, values[i]!)).join("L")}`,
+        run.length === 1
+          ? `M${at(run[0]!, values[run[0]!]!)}h0`
+          : `M${run.map((i) => at(i, values[i]!)).join("L")}`,
       );
   return (
     <figure class={`line-chart ${name}`}>
@@ -383,20 +432,35 @@ function LineChart({
           <span>{formatValue(max)}</span>
           <span>{formatValue(0)}</span>
         </span>
-        <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label={label}>
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          preserveAspectRatio="none"
+          role="img"
+          aria-label={label}
+        >
           <line class="gridline" x1="0" x2={width} y1={yOf(max)} y2={yOf(max)} />
           <line class="baseline" x1="0" x2={width} y1={yOf(0)} y2={yOf(0)} />
-          {pointed !== null && <line class="crosshair" x1={xOf(pointed)} x2={xOf(pointed)} y1="0" y2={height} />}
+          {pointed !== null && (
+            <line class="crosshair" x1={xOf(pointed)} x2={xOf(pointed)} y1="0" y2={height} />
+          )}
           {series.map((line) =>
             runsOf(line.values).map((d) => (
-              <path key={`${line.name} ${d}`} class={`line line-${line.name}${d.endsWith("h0") ? " lone" : ""}`} d={d} />
+              <path
+                key={`${line.name} ${d}`}
+                class={`line line-${line.name}${d.endsWith("h0") ? " lone" : ""}`}
+                d={d}
+              />
             )),
           )}
           {pointed !== null &&
             series.map((line) => {
               const value = line.values[pointed]!;
               return value === null ? null : (
-                <path key={line.name} class={`line-point line-${line.name}`} d={`M${at(pointed, value)}h0`} />
+                <path
+                  key={line.name}
+                  class={`line-point line-${line.name}`}
+                  d={`M${at(pointed, value)}h0`}
+                />
               );
             })}
           {keys.map((key, i) => (
@@ -454,7 +518,9 @@ export function IntroducedChart({ days, today }: { days: readonly DayActivity[];
       max={Math.max(1, values.at(-1)!)}
       formatValue={(value) => number.format(value)}
       formatKey={formatDate}
-      textAt={(i) => t("statistics.introducedDetail", { date: formatDate(keys[i]!), count: values[i]! })}
+      textAt={(i) =>
+        t("statistics.introducedDetail", { date: formatDate(keys[i]!), count: values[i]! })
+      }
       prompt={t("statistics.pointAtDay")}
       table={
         <details class="chart-table">
@@ -500,7 +566,11 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
   const { t, locale } = useI18n();
   const percent = new Intl.NumberFormat(locale, { style: "percent" });
   const formatMonth = (month: string) =>
-    new Date(`${month}-01T00:00:00Z`).toLocaleDateString(locale, { year: "numeric", month: "long", timeZone: "UTC" });
+    new Date(`${month}-01T00:00:00Z`).toLocaleDateString(locale, {
+      year: "numeric",
+      month: "long",
+      timeZone: "UTC",
+    });
   const byMonth = new Map(months.map((entry) => [entry.month, entry.retention]));
   const keys = [months[0]!.month];
   while (keys.at(-1)! < months.at(-1)!.month) keys.push(nextMonth(keys.at(-1)!));
@@ -509,7 +579,10 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
   const share = (recall: Recall) =>
     recall.reviews === 0
       ? t("statistics.noReviewsThen")
-      : t("statistics.recallShare", { percent: percent.format(recall.recalled / recall.reviews), count: recall.reviews });
+      : t("statistics.recallShare", {
+          percent: percent.format(recall.recalled / recall.reviews),
+          count: recall.reviews,
+        });
   const line = (kind: "young" | "mature") =>
     keys.map((month) => {
       const recall = retentionAt(month)[kind];
@@ -576,7 +649,13 @@ const STAGES = [
  * of the green, each as wide as its share; an empty stage takes no room.
  * The legend under it gives every count, so no table is needed.
  */
-export function MaturityBar({ progress, caption }: { progress: CardProgress; caption: ComponentChildren }) {
+export function MaturityBar({
+  progress,
+  caption,
+}: {
+  progress: CardProgress;
+  caption: ComponentChildren;
+}) {
   const { t } = useI18n();
   return (
     <figure class="maturity">
@@ -591,7 +670,11 @@ export function MaturityBar({ progress, caption }: { progress: CardProgress; cap
         })}
       >
         {STAGES.filter(([stage]) => progress[stage] > 0).map(([stage]) => (
-          <span key={stage} class={`maturity-segment maturity-${stage}`} style={{ flexGrow: progress[stage] }} />
+          <span
+            key={stage}
+            class={`maturity-segment maturity-${stage}`}
+            style={{ flexGrow: progress[stage] }}
+          />
         ))}
       </div>
       <ul class="maturity-legend hint" aria-hidden="true">

@@ -3,14 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Parser } from "n3";
 import { describe, expect, it, vi } from "vitest";
-import {
-  defaultIo,
-  formatFiles,
-  formatTurtle,
-  main,
-  run,
-  type FormatIo,
-} from "./formatTurtle.ts";
+import { defaultIo, formatFiles, formatTurtle, main, run, type FormatIo } from "./formatTurtle.ts";
 
 const BASE = "https://example.com/doc.ttl";
 
@@ -51,7 +44,9 @@ ${PREFIXES}<> a ex:Thing ; ex:name "A \\"quoted\\" name", "B"@en ; ex:count 2 ; 
   });
 
   it("resolves relative IRIs against the fallback base when the document declares none", () => {
-    expect(formatTurtle(`${PREFIXES}<#a> ex:link <> , <#b> .`, BASE)).toBe(`@prefix ex:  <https://example.com/ns#> .
+    expect(
+      formatTurtle(`${PREFIXES}<#a> ex:link <> , <#b> .`, BASE),
+    ).toBe(`@prefix ex:  <https://example.com/ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <#a>
@@ -107,14 +102,18 @@ ${PREFIXES}<> a ex:Thing ; ex:name "A \\"quoted\\" name", "B"@en ; ex:count 2 ; 
   it("refuses a document whose comments it cannot place", () => {
     expect(() =>
       formatTurtle(`${PREFIXES}<#a> ex:name "a" ;\n  # between predicates\n  ex:count 1 .`, BASE),
-    ).toThrow("a comment does not directly precede a subject and would be lost; move it or format by hand.");
+    ).toThrow(
+      "a comment does not directly precede a subject and would be lost; move it or format by hand.",
+    );
   });
 
   it("abbreviates rdf:type to `a` as a predicate only", () => {
     const turtle = `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 <#p> a sh:PropertyShape ; sh:path rdf:type .`;
-    expect(formatTurtle(turtle, BASE)).toBe(`@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    expect(
+      formatTurtle(turtle, BASE),
+    ).toBe(`@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix sh:  <http://www.w3.org/ns/shacl#> .
 
 <#p>
@@ -125,7 +124,11 @@ ${PREFIXES}<> a ex:Thing ; ex:name "A \\"quoted\\" name", "B"@en ; ex:count 2 ; 
 
   it("writes IRIs under a folder relative to it when asked", () => {
     const turtle = `<https://example.com/lib/index.ttl> <https://example.com/ns#has> <https://example.com/lib/a/1.ttl>, <https://example.com/lib/index.ttl#b>, <https://other.example/x> .`;
-    expect(formatTurtle(turtle, "https://example.com/lib/index.ttl", { relativeTo: "https://example.com/lib/" })).toBe(`<>
+    expect(
+      formatTurtle(turtle, "https://example.com/lib/index.ttl", {
+        relativeTo: "https://example.com/lib/",
+      }),
+    ).toBe(`<>
     <https://example.com/ns#has> <a/1.ttl> ,
                                  <#b> ,
                                  <https://other.example/x> .
@@ -170,7 +173,9 @@ y""" ,
     expect(formatted).toContain(String.raw`"""\"quoted"` + "\n" + String.raw`lines\""""`);
     expect(formatted).toContain(String.raw`"""a ""\" b` + "\n" + String.raw`c ""\"" d"""`);
     expect(formatted).toContain(String.raw`"""crlf\r` + "\n" + String.raw`line\r` + "\n" + `"""`);
-    expect(formatted).toContain(`"""tab\there\nbell${String.raw`\u0007`} and form${String.raw`\f`}"""`);
+    expect(formatted).toContain(
+      `"""tab\there\nbell${String.raw`\u0007`} and form${String.raw`\f`}"""`,
+    );
     expect(formatTurtle(formatted, BASE)).toBe(formatted);
   });
 
@@ -222,7 +227,9 @@ y""" ,
   });
 });
 
-function fakeIo(files: Record<string, string>): FormatIo & { written: Record<string, string>; logs: string[] } {
+function fakeIo(
+  files: Record<string, string>,
+): FormatIo & { written: Record<string, string>; logs: string[] } {
   const io = {
     written: {} as Record<string, string>,
     logs: [] as string[],
@@ -243,7 +250,11 @@ describe("formatFiles and main", () => {
   const formatted = `@prefix ex: <https://example.com/ns#> .\n\n<#a>\n    ex:name "a" .\n`;
 
   it("writes only the files that differ, in the folders it is given", async () => {
-    const io = fakeIo({ "decks/x.ttl": unformatted, "shapes/deck/v1.ttl": formatted, "other/o.ttl": unformatted });
+    const io = fakeIo({
+      "decks/x.ttl": unformatted,
+      "shapes/deck/v1.ttl": formatted,
+      "other/o.ttl": unformatted,
+    });
     expect(await main(["node", "decks", "shapes"], io)).toBe(0);
     expect(io.written).toEqual({ "decks/x.ttl": formatted });
     expect(io.logs).toEqual(["formatted decks/x.ttl"]);
@@ -258,8 +269,12 @@ describe("formatFiles and main", () => {
   });
 
   it("names the file it refuses", async () => {
-    const io = fakeIo({ "decks/z.ttl": `<#a> <https://example.com/ns#n> "a" ;\n  # stray\n  <https://example.com/ns#m> "b" .` });
-    await expect(formatFiles(io, { check: true, folders: ["decks"] })).rejects.toThrow("decks/z.ttl: a comment does not directly precede a subject");
+    const io = fakeIo({
+      "decks/z.ttl": `<#a> <https://example.com/ns#n> "a" ;\n  # stray\n  <https://example.com/ns#m> "b" .`,
+    });
+    await expect(formatFiles(io, { check: true, folders: ["decks"] })).rejects.toThrow(
+      "decks/z.ttl: a comment does not directly precede a subject",
+    );
   });
 });
 
@@ -268,7 +283,11 @@ describe("run and defaultIo", () => {
     const dir = await mkdtemp(join(tmpdir(), "solid-memo-run-"));
     await mkdir(join(dir, "decks"));
     await writeFile(join(dir, "decks", "a.ttl"), `<#a>\n    <https://example.com/ns#name> "a" .\n`);
-    const process = { argv: ["node", "--check", "decks"], cwd: () => dir, exitCode: undefined as number | undefined };
+    const process = {
+      argv: ["node", "--check", "decks"],
+      cwd: () => dir,
+      exitCode: undefined as number | undefined,
+    };
     await run(process);
     expect(process.exitCode).toBe(0);
     await writeFile(join(dir, "decks", "b.ttl"), `<#b> <https://example.com/ns#name> "b" .`);

@@ -17,7 +17,12 @@ import type { DeckArchive } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card } from "@solid-memo/domain/deck";
-import { DECK_FILE_TYPES, type DeckFileContent, type DeckFileFormat, type FormatUpgrade } from "@solid-memo/domain/deckFile";
+import {
+  DECK_FILE_TYPES,
+  type DeckFileContent,
+  type DeckFileFormat,
+  type FormatUpgrade,
+} from "@solid-memo/domain/deckFile";
 import { REVIEW_STATE_FORMAT_VERSION, type ReviewState } from "@solid-memo/domain/review";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
@@ -88,7 +93,8 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
       const dataset = datasetOf(await parseDeckFile(text, format, baseUrl));
       const things = getThingAll(dataset);
       for (const thing of things) refuseNewer(thing);
-      const typed = (type: string) => things.filter((thing) => getUrlAll(thing, RDF.type).includes(type));
+      const typed = (type: string) =>
+        things.filter((thing) => getUrlAll(thing, RDF.type).includes(type));
       const names = agentNamesOf(dataset);
       const decks = typed(SM.Deck).map((thing) => toDeck(thing, names));
       if (decks.length !== 1 || decks[0] === null) throw new AppError("notADeckFile");
@@ -103,7 +109,8 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
 
       const cards: Card[] = [];
       for (const thing of typed(SM.Card)) {
-        const card = documentUrlOf(asUrl(thing)) === deck.cardsDocumentUrl ? toCard(thing, dataset) : null;
+        const card =
+          documentUrlOf(asUrl(thing)) === deck.cardsDocumentUrl ? toCard(thing, dataset) : null;
         if (card === null) {
           dropped.push(asUrl(thing));
           continue;
@@ -114,7 +121,10 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
       const ids = new Set(cards.map((card) => card.id));
       const reviews: ReviewState[] = [];
       for (const thing of typed(SM.ReviewState)) {
-        const state = documentUrlOf(asUrl(thing)) === deck.reviewsDocumentUrl ? toReviewState(thing, deck) : null;
+        const state =
+          documentUrlOf(asUrl(thing)) === deck.reviewsDocumentUrl
+            ? toReviewState(thing, deck)
+            : null;
         if (state === null || !ids.has(state.cardId)) {
           dropped.push(asUrl(thing));
           continue;
@@ -144,22 +154,36 @@ function refuseNewer(thing: Thing): void {
   for (const { type, shape } of KINDS) {
     const version = storedVersionOf(thing);
     if (types.includes(type) && version > LATEST_VERSION[shape]) {
-      throw new AppError("deckFileTooNew", { subject: asUrl(thing), version, reads: LATEST_VERSION[shape] });
+      throw new AppError("deckFileTooNew", {
+        subject: asUrl(thing),
+        version,
+        reads: LATEST_VERSION[shape],
+      });
     }
   }
 }
 
 /** The file's triples, its relative IRIs resolved against `baseUrl`; deckFileUnreadable when it does not parse. */
-export function parseDeckFile(text: string, format: DeckFileFormat, baseUrl: string): Promise<Quad[]> {
+export function parseDeckFile(
+  text: string,
+  format: DeckFileFormat,
+  baseUrl: string,
+): Promise<Quad[]> {
   if (format === "jsonld") refuseRemoteContexts(text);
   const parser = format === "turtle" ? getTurtleParser() : getJsonLdParser();
   return new Promise((resolve, reject) => {
     const quads: Quad[] = [];
     parser.onQuad((quad) => quads.push(quad));
-    parser.onError((error) => reject(new AppError("deckFileUnreadable", { reason: String(error) })));
+    parser.onError((error) =>
+      reject(new AppError("deckFileUnreadable", { reason: String(error) })),
+    );
     parser.onComplete(() => resolve(quads));
     parser.parse(text, {
-      internal_resourceInfo: { sourceIri: baseUrl, isRawData: false, contentType: DECK_FILE_TYPES[format].mediaType },
+      internal_resourceInfo: {
+        sourceIri: baseUrl,
+        isRawData: false,
+        contentType: DECK_FILE_TYPES[format].mediaType,
+      },
     } as WithServerResourceInfo);
   });
 }

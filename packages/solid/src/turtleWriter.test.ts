@@ -10,14 +10,23 @@ const XSD = "http://www.w3.org/2001/XMLSchema#";
 const PREFIXES = { "solid-memo": SM, xsd: XSD, unused: "https://unused.example/" };
 
 const iri = (value: string) => ({ kind: "iri" as const, value });
-const literal = (value: string, datatype = `${XSD}string`, language = "") => ({ kind: "literal" as const, value, language, datatype });
+const literal = (value: string, datatype = `${XSD}string`, language = "") => ({
+  kind: "literal" as const,
+  value,
+  language,
+  datatype,
+});
 const blank = (value: string) => ({ kind: "blank" as const, value });
 
 describe("turtleOf", () => {
   it("writes the document's own subjects relative to its base, the others by prefix or in full", () => {
     const turtle = turtleOf(
       [
-        quadOf(`${BASE}#se`, `${SM}front`, literal("Sweden", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString", "en")),
+        quadOf(
+          `${BASE}#se`,
+          `${SM}front`,
+          literal("Sweden", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString", "en"),
+        ),
         quadOf(`${BASE}#se`, RDF_TYPE, iri(`${SM}Card`)),
         quadOf(BASE, `${SM}formatVersion`, literal("6", `${XSD}integer`)),
         quadOf(BASE, RDF_TYPE, iri(`${SM}Deck`)),
@@ -76,7 +85,9 @@ describe("turtleOf", () => {
       quadOf(BASE, `${SM}empty`, blank("nothing")),
     ];
     const turtle = turtleOf(quads, { base: BASE, prefixes: PREFIXES });
-    expect(turtle).toContain(`solid-memo:checksum [ solid-memo:value "abc" ; solid-memo:inner [ solid-memo:value "def" ] ] ;`);
+    expect(turtle).toContain(
+      `solid-memo:checksum [ solid-memo:value "abc" ; solid-memo:inner [ solid-memo:value "def" ] ] ;`,
+    );
     expect(turtle).toContain("solid-memo:shared _:twice");
     expect(turtle).toContain("_:twice\n    solid-memo:value");
     expect(turtle).toContain("solid-memo:empty _:nothing");

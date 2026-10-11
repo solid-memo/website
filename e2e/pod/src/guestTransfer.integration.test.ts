@@ -82,7 +82,11 @@ const library: DeckLibrary = {
   fetchLibraryDeck: async () => content,
   fetchCourseOutline: async () => ({ releaseUrl: RELEASE, chapters: [] }),
   // The release check is the Studio's: no index is read here.
-  readLibraryIndex: async () => ({ url: "https://site.example/decks/index.ttl", publisher: null, releases: [] }),
+  readLibraryIndex: async () => ({
+    url: "https://site.example/decks/index.ttl",
+    publisher: null,
+    releases: [],
+  }),
   // No release is added from a link here.
   readRelease: async (url) => {
     throw new Error(`No release is read from a link: ${url}`);
@@ -102,7 +106,11 @@ async function seedPod(server: string) {
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
   await put(
@@ -121,8 +129,14 @@ async function seedPod(server: string) {
 /** The app as createAppUseCases wires it, its guest's pod in memory, the user's pod on the server. */
 function app() {
   const guestStore = createMemoryResourceStore();
-  const guestFetch = createLocalPod({ root: GUEST_ORIGIN, store: guestStore, newEtag: () => `"${crypto.randomUUID()}"` });
-  const writeFence = createWriteFence(routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: fetch }));
+  const guestFetch = createLocalPod({
+    root: GUEST_ORIGIN,
+    store: guestStore,
+    newEtag: () => `"${crypto.randomUUID()}"`,
+  });
+  const writeFence = createWriteFence(
+    routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: fetch }),
+  );
   const podFetch = writeFence.fetch;
   const shapeValidator = createShaclShapeValidator({
     fetch: podFetch,
@@ -154,7 +168,9 @@ function app() {
 
 /** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
 function nTriples(url: string, turtle: string): string {
-  return new Writer({ format: "N-Triples" }).quadsToString(new Parser({ baseIRI: url }).parse(turtle));
+  return new Writer({ format: "N-Triples" }).quadsToString(
+    new Parser({ baseIRI: url }).parse(turtle),
+  );
 }
 
 /** Every resource below a container, as the server serves it. */
@@ -193,16 +209,24 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
       registrationTarget: "private",
     });
 
-    expect(outcome).toEqual({ ok: true, instance: { url: target, name: "My study" }, tidied: true });
+    expect(outcome).toEqual({
+      ok: true,
+      instance: { url: target, name: "My study" },
+      tidied: true,
+    });
     expect(await useCases.listInstances(session)).toEqual([{ url: target, name: "My study" }]);
     const [moved] = await useCases.listDecks(target);
-    expect((await useCases.listCards(moved!)).map((card) => card.front)).toEqual([{ en: "Sweden" }]);
+    expect((await useCases.listCards(moved!)).map((card) => card.front)).toEqual([
+      { en: "Sweden" },
+    ]);
     expect((await useCases.getStudyQueue(target, moved!, now)).newPrompts).toEqual([]);
     expect((await useCases.getStatistics(target, now)).totals.answers).toBe(1);
     expect((await useCases.validateInstance(target)).conforms).toBe(true);
     const served = await contents(target);
     expect([...served.keys()].some((url) => url.endsWith("/history/"))).toBe(true);
-    expect([...served].filter(([, body]) => body.includes(GUEST_ORIGIN)).map(([url]) => url)).toEqual([]);
+    expect(
+      [...served].filter(([, body]) => body.includes(GUEST_ORIGIN)).map(([url]) => url),
+    ).toEqual([]);
     expect(nTriples(`${target}catalog.ttl`, served.get(`${target}catalog.ttl`)!)).toContain(
       `<${target}catalog.ttl#catalog> <http://purl.org/dc/terms/publisher> <${session.webId}> .`,
     );
@@ -215,7 +239,11 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
     await useCases.startGuest("My study");
     const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
     const taken = `${base}solid-memo/main/`;
-    const put = await fetch(`${taken}note.ttl`, { method: "PUT", headers: { "content-type": "text/turtle" }, body: "" });
+    const put = await fetch(`${taken}note.ttl`, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body: "",
+    });
     expect(put.ok).toBe(true);
     const before = (await guestStore.urls()).sort();
 
@@ -251,16 +279,33 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
     const queue = await useCases.getStudyQueue(guestInstance!.url, capitals, now);
     await useCases.recordReview(guestInstance!.url, capitals, queue.newPrompts[0]!, 4, now);
     const started = await useCases.startCourse(guestInstance!.url, course);
-    await useCases.answerCourseQuestion(guestInstance!.url, started, question, { correct: false, distractorId: "q-iri-d1" }, now);
+    await useCases.answerCourseQuestion(
+      guestInstance!.url,
+      started,
+      question,
+      { correct: false, distractorId: "q-iri-d1" },
+      now,
+    );
     const guestCourse = await useCases.completeChapter(started, CHAPTER);
-    await useCases.savePreferences(guestInstance!.url, { ...DEFAULT_PREFERENCES, newCardsPerDay: 3 });
+    await useCases.savePreferences(guestInstance!.url, {
+      ...DEFAULT_PREFERENCES,
+      newCardsPerDay: 3,
+    });
     const group = useCases.newDeckGroup(guestInstance!.url, { en: "Learning" });
-    await useCases.editDeckTree(guestInstance!.url, { kind: "combine", dragged: guestCourse.url, target: capitals.url, group });
+    await useCases.editDeckTree(guestInstance!.url, {
+      kind: "combine",
+      dragged: guestCourse.url,
+      target: capitals.url,
+      group,
+    });
     // The course the instance has too is added beside it, not merged into it.
     expect(await useCases.planGuestMerge(guestInstance!, target)).toEqual({
       decks: [
         { deck: expect.objectContaining({ url: capitals.url }), sameRelease: [] },
-        { deck: expect.objectContaining({ url: guestCourse.url }), sameRelease: [expect.objectContaining({ url: theirCourse.url })] },
+        {
+          deck: expect.objectContaining({ url: guestCourse.url }),
+          sameRelease: [expect.objectContaining({ url: theirCourse.url })],
+        },
       ],
       drafts: 0,
     });
@@ -269,38 +314,66 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
 
     expect(outcome).toMatchObject({ ok: true, instance: target, tidied: true });
     const decks = await useCases.listDecks(target.url);
-    expect(decks.map((deck) => deck.title.en).sort()).toEqual(["Capitals", "Mine", "Solid fundamentals", "Solid fundamentals"]);
+    expect(decks.map((deck) => deck.title.en).sort()).toEqual([
+      "Capitals",
+      "Mine",
+      "Solid fundamentals",
+      "Solid fundamentals",
+    ]);
     const addedCapitals = decks.find((deck) => deck.title.en === "Capitals")!;
-    const addedCourse = decks.find((deck) => deck.title.en === "Solid fundamentals" && deck.url !== theirCourse.url)!;
-    expect(outcome.ok && outcome.added.map((deck) => deck.url).sort()).toEqual([addedCapitals.url, addedCourse.url].sort());
+    const addedCourse = decks.find(
+      (deck) => deck.title.en === "Solid fundamentals" && deck.url !== theirCourse.url,
+    )!;
+    expect(outcome.ok && outcome.added.map((deck) => deck.url).sort()).toEqual(
+      [addedCapitals.url, addedCourse.url].sort(),
+    );
     expect(addedCapitals.id).not.toBe(capitals.id);
-    expect((await useCases.listCards(addedCapitals)).map((card) => card.front)).toEqual([{ en: "Sweden" }]);
+    expect((await useCases.listCards(addedCapitals)).map((card) => card.front)).toEqual([
+      { en: "Sweden" },
+    ]);
     expect((await useCases.getStudyQueue(target.url, addedCapitals, now)).newPrompts).toEqual([]);
     expect(addedCourse).toMatchObject({ sourceUrl: RELEASE, completedChapters: [CHAPTER] });
     const [courseCard] = await useCases.listCards(addedCourse);
-    expect(courseCard).toMatchObject({ id: "q-iri", url: `${addedCourse.cardsDocumentUrl}#q-iri`, distractors: question.distractors });
+    expect(courseCard).toMatchObject({
+      id: "q-iri",
+      url: `${addedCourse.cardsDocumentUrl}#q-iri`,
+      distractors: question.distractors,
+    });
     expect((await useCases.getCourse(addedCourse)).answeredCardIds).toEqual(["q-iri"]);
     const statistics = await useCases.getStatistics(target.url, now);
     expect(statistics.totals.answers).toBe(2);
-    expect((await useCases.getStatistics(target.url, now, { deckUrl: addedCourse.url })).totals.answers).toBe(1);
+    expect(
+      (await useCases.getStatistics(target.url, now, { deckUrl: addedCourse.url })).totals.answers,
+    ).toBe(1);
     // The instance's preferences stay; the guest's are not carried over.
     expect((await useCases.getPreferences(target.url)).newCardsPerDay).toBe(7);
     const tree = await useCases.listDeckTree(target.url);
     // Members without a position come in document order, which a server may serialize as it likes.
-    const topLevel = tree.children.map((node) => (node.kind === "deck" ? node.deck.url : [node.group.title, node.children.length]));
+    const topLevel = tree.children.map((node) =>
+      node.kind === "deck" ? node.deck.url : [node.group.title, node.children.length],
+    );
     expect(topLevel).toHaveLength(3);
-    expect(topLevel).toEqual(expect.arrayContaining([mine.url, theirCourse.url, [{ en: "Learning" }, 2]]));
+    expect(topLevel).toEqual(
+      expect.arrayContaining([mine.url, theirCourse.url, [{ en: "Learning" }, 2]]),
+    );
     await expect(useCases.listCards(theirCourse)).resolves.toEqual([]);
     expect((await useCases.validateInstance(target.url)).conforms).toBe(true);
     const served = await contents(target.url);
-    expect([...served].filter(([, body]) => body.includes(GUEST_ORIGIN)).map(([url]) => url)).toEqual([]);
+    expect(
+      [...served].filter(([, body]) => body.includes(GUEST_ORIGIN)).map(([url]) => url),
+    ).toEqual([]);
     // The links other apps follow: a review state to its card, a cards document to its deck, a card to its options.
-    const reviews = nTriples(addedCourse.reviewsDocumentUrl, served.get(addedCourse.reviewsDocumentUrl)!);
+    const reviews = nTriples(
+      addedCourse.reviewsDocumentUrl,
+      served.get(addedCourse.reviewsDocumentUrl)!,
+    );
     expect(reviews).toContain(
       `<${addedCourse.reviewsDocumentUrl}#q-iri> <https://solid-memo.com/ns/vocab/v1.ttl#reviewOf> <${addedCourse.cardsDocumentUrl}#q-iri> .`,
     );
     const cards = nTriples(addedCourse.cardsDocumentUrl, served.get(addedCourse.cardsDocumentUrl)!);
-    expect(cards).toContain(`<${addedCourse.cardsDocumentUrl}> <http://purl.org/dc/terms/isPartOf> <${addedCourse.url}> .`);
+    expect(cards).toContain(
+      `<${addedCourse.cardsDocumentUrl}> <http://purl.org/dc/terms/isPartOf> <${addedCourse.url}> .`,
+    );
     expect(cards).toContain(
       `<${addedCourse.cardsDocumentUrl}#q-iri> <https://schema.org/suggestedAnswer> <${addedCourse.cardsDocumentUrl}#q-iri-d1> .`,
     );
@@ -317,14 +390,29 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
       registrationTarget: "private",
     });
     // The instance has a draft of the name the guest's will want.
-    const theirs = await useCases.createReleaseDraft(target.url, { kind: "blankCourse", title: { en: "Solid" } });
+    const theirs = await useCases.createReleaseDraft(target.url, {
+      kind: "blankCourse",
+      title: { en: "Solid" },
+    });
     await useCases.startGuest("My study");
     const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
-    const written = await useCases.createReleaseDraft(guestInstance!.url, { kind: "blankCourse", title: { en: "Solid" } });
+    const written = await useCases.createReleaseDraft(guestInstance!.url, {
+      kind: "blankCourse",
+      title: { en: "Solid" },
+    });
     await useCases.editReleaseDraft(written!.draft.url, [
       { kind: "addChapter", id: "ch-a", text: { title: { en: "A" } } },
-      { kind: "addStep", id: "ch-a-1", chapter: "ch-a", text: { theory: { en: "Pods hold data." } } },
-      { kind: "addCard", id: "q-a-1a", card: { front: { en: "What holds data?" }, back: { en: "A pod" } } },
+      {
+        kind: "addStep",
+        id: "ch-a-1",
+        chapter: "ch-a",
+        text: { theory: { en: "Pods hold data." } },
+      },
+      {
+        kind: "addCard",
+        id: "q-a-1a",
+        card: { front: { en: "What holds data?" }, back: { en: "A pod" } },
+      },
       { kind: "addQuestion", card: "q-a-1a", place: { kind: "step", step: "ch-a-1" } },
     ]);
     expect(await useCases.planGuestMerge(guestInstance!, target)).toEqual({ decks: [], drafts: 1 });
@@ -343,7 +431,9 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
     expect((await useCases.getReleaseDraft(theirs!.draft.url)).chapters).toEqual([]);
     expect((await useCases.validateInstance(target.url)).conforms).toBe(true);
     const served = await contents(target.url);
-    expect([...served].filter(([, body]) => body.includes(GUEST_ORIGIN)).map(([url]) => url)).toEqual([]);
+    expect(
+      [...served].filter(([, body]) => body.includes(GUEST_ORIGIN)).map(([url]) => url),
+    ).toEqual([]);
     expect(await guestStore.urls()).toEqual([]);
   });
 });

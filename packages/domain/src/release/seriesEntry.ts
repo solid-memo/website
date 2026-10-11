@@ -1,4 +1,9 @@
-import { subjectsOf, type ReleaseModel, type ReleaseTerm, type ReleaseText } from "./releaseModel.ts";
+import {
+  subjectsOf,
+  type ReleaseModel,
+  type ReleaseTerm,
+  type ReleaseText,
+} from "./releaseModel.ts";
 
 /**
  * What a library's index says of one deck (docs/deck-library.md): a
@@ -56,7 +61,9 @@ export function seriesEntry(series: string, releases: readonly ReleaseModel[]): 
       url: release.url,
       title: release.title,
       description: release.description,
-      version: release.version.filter((term): term is ReleaseText => term.kind === "literal").slice(0, 1),
+      version: release.version
+        .filter((term): term is ReleaseText => term.kind === "literal")
+        .slice(0, 1),
       issued: release.issued.slice(0, 1),
       versionNotes: release.versionNotes.slice(0, 1),
     })),
@@ -74,9 +81,13 @@ export function seriesEntry(series: string, releases: readonly ReleaseModel[]): 
  */
 export function keptInIndex(model: ReleaseModel): (subject: string, predicate: string) => boolean {
   const left = new Set(
-    (["card", "chapter", "step", "distractor"] as const).flatMap((kind) => subjectsOf(model, kind).map((subject) => subject.iri)),
+    (["card", "chapter", "step", "distractor"] as const).flatMap((kind) =>
+      subjectsOf(model, kind).map((subject) => subject.iri),
+    ),
   );
-  const activities = new Map(model.activities.map((activity) => [activity.iri, activity.generating]));
+  const activities = new Map(
+    model.activities.map((activity) => [activity.iri, activity.generating]),
+  );
   return (subject, predicate) =>
     !left.has(subject) &&
     predicate !== RDFS_COMMENT &&

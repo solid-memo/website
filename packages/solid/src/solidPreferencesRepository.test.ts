@@ -17,8 +17,7 @@ import { getSolidDatasetOrNull } from "./datasets";
 import { RDF, SM } from "./vocab";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@inrupt/solid-client")>();
+  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
   return { ...actual, saveSolidDatasetAt: vi.fn() };
 });
 vi.mock("./datasets", async (importOriginal) => ({
@@ -29,7 +28,9 @@ vi.mock("./datasets", async (importOriginal) => ({
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const DOCUMENT = `${INSTANCE}preferences.ttl`;
 
-function makeRepository(checkWrite?: Parameters<typeof createSolidPreferencesRepository>[0]["checkWrite"]) {
+function makeRepository(
+  checkWrite?: Parameters<typeof createSolidPreferencesRepository>[0]["checkWrite"],
+) {
   return createSolidPreferencesRepository({
     fetch: vi.fn() as unknown as typeof globalThis.fetch,
     ...(checkWrite === undefined ? {} : { checkWrite }),
@@ -44,18 +45,12 @@ beforeEach(() => {
 describe("getPreferences", () => {
   it("returns null when the document does not exist", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    await expect(
-      makeRepository().getPreferences(INSTANCE),
-    ).resolves.toBeNull();
+    await expect(makeRepository().getPreferences(INSTANCE)).resolves.toBeNull();
   });
 
   it("returns null when the document has no #it subject", async () => {
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      mockSolidDatasetFrom(DOCUMENT),
-    );
-    await expect(
-      makeRepository().getPreferences(INSTANCE),
-    ).resolves.toBeNull();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    await expect(makeRepository().getPreferences(INSTANCE)).resolves.toBeNull();
   });
 
   it("maps a stored document", async () => {
@@ -93,7 +88,9 @@ describe("savePreferences, checked", () => {
     const checkWrite = vi.fn(async () => {
       throw new Error("does not conform");
     });
-    await expect(makeRepository(checkWrite).savePreferences(INSTANCE, DEFAULT_PREFERENCES)).rejects.toThrow("does not conform");
+    await expect(
+      makeRepository(checkWrite).savePreferences(INSTANCE, DEFAULT_PREFERENCES),
+    ).rejects.toThrow("does not conform");
     expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [`${DOCUMENT}#it`], "pod");
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
@@ -177,14 +174,21 @@ describe("upgradePreferences", () => {
   it("writes nothing for preferences up to date, none, or no preferences document", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
     await makeRepository().savePreferences(INSTANCE, DEFAULT_PREFERENCES);
-    const current = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Parameters<typeof setThing>[0];
+    const current = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Parameters<
+      typeof setThing
+    >[0];
     vi.mocked(saveSolidDatasetAt).mockReset();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(current as never);
     await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
     await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      setThing(mockSolidDatasetFrom(DOCUMENT), buildThing(createThing({ url: `${DOCUMENT}#it` })).addInteger(SM.newCardsPerDay, 7).build()),
+      setThing(
+        mockSolidDatasetFrom(DOCUMENT),
+        buildThing(createThing({ url: `${DOCUMENT}#it` }))
+          .addInteger(SM.newCardsPerDay, 7)
+          .build(),
+      ),
     );
     await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);

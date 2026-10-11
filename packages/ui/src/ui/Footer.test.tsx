@@ -3,7 +3,11 @@ import { render, screen } from "@testing-library/preact";
 import { Footer, type SiteSource } from "./Footer";
 
 const sha = "8faa7e1bd2e6de2b6570d692fd2865bb4b3217ad";
-const source: SiteSource = { repoUrl: "https://git.example/memo", version: "0.1.0", commitSha: sha };
+const source: SiteSource = {
+  repoUrl: "https://git.example/memo",
+  version: "0.1.0",
+  commitSha: sha,
+};
 
 /** The footer's link named `name`, which opens in a new tab. */
 function externalLink(name: string): HTMLElement {
@@ -38,6 +42,9 @@ describe("Footer", () => {
   it("links to the source code and to a new issue in the repository", () => {
     render(<Footer source={source} />);
     expect(externalLink("Source code")).toHaveAttribute("href", "https://git.example/memo");
-    expect(externalLink("Report an issue")).toHaveAttribute("href", "https://git.example/memo/issues/new/choose");
+    expect(externalLink("Report an issue")).toHaveAttribute(
+      "href",
+      "https://git.example/memo/issues/new/choose",
+    );
   });
 });

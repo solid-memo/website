@@ -29,9 +29,7 @@ export function WebIdDocumentContainer({
       <summary>{t("webIdDocument.summary")}</summary>
       {documentQuery.isPending && <Loading label={t("webIdDocument.loading")} />}
       <ErrorMessage error={errorText(documentQuery.error)} />
-      {documentQuery.data && (
-        <WebIdDocumentView document={documentQuery.data} />
-      )}
+      {documentQuery.data && <WebIdDocumentView document={documentQuery.data} />}
     </details>
   );
 }

@@ -24,8 +24,21 @@ export const REVIEW_STATE_1_TO_2: MigrationStep<"reviewState", 1, 2> = {
     if (SNAPSHOT_FIELDS.every((field) => data[field] !== undefined)) {
       return { ...data };
     }
-    const { previousEaseFactor, previousIntervalDays, previousRepetitions, previousDue, previousLastReviewedAt, ...rest } = data;
-    void [previousEaseFactor, previousIntervalDays, previousRepetitions, previousDue, previousLastReviewedAt];
+    const {
+      previousEaseFactor,
+      previousIntervalDays,
+      previousRepetitions,
+      previousDue,
+      previousLastReviewedAt,
+      ...rest
+    } = data;
+    void [
+      previousEaseFactor,
+      previousIntervalDays,
+      previousRepetitions,
+      previousDue,
+      previousLastReviewedAt,
+    ];
     return rest;
   },
 };

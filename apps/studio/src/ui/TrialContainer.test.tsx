@@ -22,7 +22,10 @@ const links: TrialLinks = {
 };
 
 function opened(trialUseCases: UseCases): TrialOpening {
-  return { ok: true, trial: { useCases: trialUseCases, instance: courseInstance, deck: courseDeck } };
+  return {
+    ok: true,
+    trial: { useCases: trialUseCases, instance: courseInstance, deck: courseDeck },
+  };
 }
 
 function renderTrial({
@@ -36,7 +39,10 @@ function renderTrial({
   chapter?: string;
   review?: boolean;
 }) {
-  const useCases = makeUseCasesFake({ getReleaseDraft: vi.fn(async () => draft), openTrial: vi.fn(openTrial) });
+  const useCases = makeUseCasesFake({
+    getReleaseDraft: vi.fn(async () => draft),
+    openTrial: vi.fn(openTrial),
+  });
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   queryClient.setQueryData(draftKey(DRAFT_URL), draft);
   const onReview = vi.fn();
@@ -57,7 +63,13 @@ function renderTrial({
     </QueryClientProvider>
   );
   const view = render(element(chapter, review));
-  return { useCases, onReview, onCourse, onJump, show: (chapter: string | undefined, review = false) => view.rerender(element(chapter, review)) };
+  return {
+    useCases,
+    onReview,
+    onCourse,
+    onJump,
+    show: (chapter: string | undefined, review = false) => view.rerender(element(chapter, review)),
+  };
 }
 
 /** A course's trial use cases: the course as the fake answers and completions leave it. */
@@ -82,17 +94,28 @@ describe("TrialContainer", () => {
     const trial = courseTrial();
     const { useCases } = renderTrial({ openTrial: async () => opened(trial) });
     expect(screen.getByText("Setting up the trial…")).toBeInTheDocument();
-    expect(await screen.findByRole("link", { name: "Start the course" })).toHaveAttribute("href", "#/trial/ch-1");
+    expect(await screen.findByRole("link", { name: "Start the course" })).toHaveAttribute(
+      "href",
+      "#/trial/ch-1",
+    );
     expect(useCases.openTrial).toHaveBeenCalledWith(courseDraft(), instanceA.url);
     expect(trial.getCourse).toHaveBeenCalledWith(courseDeck);
-    expect(screen.getByRole("link", { name: "The course's page" })).toHaveAttribute("href", "#/trial");
+    expect(screen.getByRole("link", { name: "The course's page" })).toHaveAttribute(
+      "href",
+      "#/trial",
+    );
   });
 
   it("plays a chapter at the trial's clock, moved days ahead, then on to its final review", async () => {
     const trial = courseTrial();
-    const { onReview, show } = renderTrial({ openTrial: async () => opened(trial), chapter: "ch-2" });
+    const { onReview, show } = renderTrial({
+      openTrial: async () => opened(trial),
+      chapter: "ch-2",
+    });
     expect(await screen.findByRole("heading", { level: 2, name: "Pods" })).toBeInTheDocument();
-    fireEvent.input(screen.getByRole("spinbutton", { name: "Days ahead" }), { target: { value: "2" } });
+    fireEvent.input(screen.getByRole("spinbutton", { name: "Days ahead" }), {
+      target: { value: "2" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Advance" }));
     expect(await screen.findByText("The trial is 2 days ahead.")).toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "On to the question" }));
@@ -104,7 +127,9 @@ describe("TrialContainer", () => {
     expect(Math.abs(at.getTime() - Date.now() - 2 * DAY_MS)).toBeLessThan(60_000);
 
     show("ch-2", true);
-    expect(await screen.findByRole("heading", { level: 2, name: "Final review: Pods" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "Final review: Pods" }),
+    ).toBeInTheDocument();
     // A chapter the course has not: its page.
     show("ch-gone");
     expect(await screen.findByRole("link", { name: "Continue" })).toBeInTheDocument();
@@ -112,20 +137,29 @@ describe("TrialContainer", () => {
 
   it("leads a final review passed back to the course's page, which cheers the chapter until another is shown", async () => {
     const trial = courseTrial();
-    const { onCourse, show } = renderTrial({ openTrial: async () => opened(trial), chapter: "ch-2", review: true });
+    const { onCourse, show } = renderTrial({
+      openTrial: async () => opened(trial),
+      chapter: "ch-2",
+      review: true,
+    });
     fireEvent.click(await screen.findByRole("button", { name: "Start the final review" }));
     fireEvent.click(screen.getByRole("radio", { name: "A store" }));
     fireEvent.click(screen.getByRole("button", { name: "Check" }));
     fireEvent.click(await screen.findByRole("button", { name: "Next" }));
     await waitFor(() => expect(onCourse).toHaveBeenCalled());
-    expect(trial.completeChapter).toHaveBeenCalledWith(expect.objectContaining({ url: courseDeck.url }), `${CH1.slice(0, -1)}2`);
+    expect(trial.completeChapter).toHaveBeenCalledWith(
+      expect.objectContaining({ url: courseDeck.url }),
+      `${CH1.slice(0, -1)}2`,
+    );
 
     show(undefined);
     expect(await screen.findByText("Well done! You have completed Pods.")).toBeInTheDocument();
     // The trial has no deck list to go back to.
     expect(screen.queryByRole("link", { name: "Back to decks" })).toBeNull();
     show("ch-1");
-    expect(await screen.findByRole("heading", { level: 2, name: "Linked data" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "Linked data" }),
+    ).toBeInTheDocument();
     show(undefined);
     expect(await screen.findByRole("link", { name: "Continue" })).toBeInTheDocument();
     expect(screen.queryByText("Well done! You have completed Pods.")).toBeNull();
@@ -135,19 +169,39 @@ describe("TrialContainer", () => {
     const trial = courseTrial();
     const { onJump } = renderTrial({ openTrial: async () => opened(trial) });
     fireEvent.click(await screen.findByRole("button", { name: "Answer all right" }));
-    await waitFor(() => expect(trial.completeChapter).toHaveBeenCalledWith(expect.objectContaining({ url: courseDeck.url }), CH1));
-    expect(vi.mocked(trial.answerCourseQuestion).mock.calls.map(([, , card]) => card.id)).toEqual(["q-1", "q-2", "q-3", "r-1"]);
+    await waitFor(() =>
+      expect(trial.completeChapter).toHaveBeenCalledWith(
+        expect.objectContaining({ url: courseDeck.url }),
+        CH1,
+      ),
+    );
+    expect(vi.mocked(trial.answerCourseQuestion).mock.calls.map(([, , card]) => card.id)).toEqual([
+      "q-1",
+      "q-2",
+      "q-3",
+      "r-1",
+    ]);
     // The course is read again: the next chapter is open.
-    expect(await screen.findByRole("link", { name: "Continue" })).toHaveAttribute("href", "#/trial/ch-2");
+    expect(await screen.findByRole("link", { name: "Continue" })).toHaveAttribute(
+      "href",
+      "#/trial/ch-2",
+    );
     await screen.findByText("The trial is at today's date.");
-    fireEvent.change(screen.getByRole("combobox", { name: "Chapter" }), { target: { value: "ch-2" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Chapter" }), {
+      target: { value: "ch-2" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Open the chapter" }));
     await waitFor(() => expect(onJump).toHaveBeenCalledWith("ch-2"));
-    expect(trial.setCompletedChapters).toHaveBeenCalledWith(expect.objectContaining({ url: courseDeck.url }), { kind: "restart" });
+    expect(trial.setCompletedChapters).toHaveBeenCalledWith(
+      expect.objectContaining({ url: courseDeck.url }),
+      { kind: "restart" },
+    );
   });
 
   it("offers no answers once the course is done", async () => {
-    const trial = makeUseCasesFake({ getCourse: vi.fn(async () => makeCourse([], [CH1, `${CH1.slice(0, -1)}2`])) });
+    const trial = makeUseCasesFake({
+      getCourse: vi.fn(async () => makeCourse([], [CH1, `${CH1.slice(0, -1)}2`])),
+    });
     renderTrial({ openTrial: async () => opened(trial) });
     expect(await screen.findByRole("link", { name: "The course's page" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Answer all right" })).toBeNull();
@@ -156,18 +210,40 @@ describe("TrialContainer", () => {
   it("plays a deck's study, linked to the trial, answers all of it at once, and starts another session once one is left", async () => {
     const draft = { ...courseDraft(), course: false };
     const prompt: Prompt = {
-      card: { id: "a", url: `${courseDeck.cardsDocumentUrl}#a`, front: { en: "Sweden" }, back: { en: "Stockholm" }, createdAt: "2026-10-10T10:00:00.000Z", formatVersion: 5 },
+      card: {
+        id: "a",
+        url: `${courseDeck.cardsDocumentUrl}#a`,
+        front: { en: "Sweden" },
+        back: { en: "Stockholm" },
+        createdAt: "2026-10-10T10:00:00.000Z",
+        formatVersion: 5,
+      },
       direction: "front-to-back",
     };
-    const trial = makeUseCasesFake({ getStudyQueue: vi.fn(async () => ({ due: [prompt], newPrompts: [], studiedToday: 0 })) });
+    const trial = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({ due: [prompt], newPrompts: [], studiedToday: 0 })),
+    });
     renderTrial({ draft, openTrial: async () => opened(trial) });
-    expect(await screen.findByRole("link", { name: "Solid fundamentals" })).toHaveAttribute("href", "#/trial");
+    expect(await screen.findByRole("link", { name: "Solid fundamentals" })).toHaveAttribute(
+      "href",
+      "#/trial",
+    );
     expect(trial.getCourse).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Answer all wrong" }));
-    await waitFor(() => expect(trial.recordReview).toHaveBeenCalledWith(courseInstance.url, courseDeck, prompt, 1, expect.any(Date)));
+    await waitFor(() =>
+      expect(trial.recordReview).toHaveBeenCalledWith(
+        courseInstance.url,
+        courseDeck,
+        prompt,
+        1,
+        expect.any(Date),
+      ),
+    );
     const sessions = vi.mocked(trial.getStudyQueue).mock.calls.length;
     fireEvent.click(await screen.findByRole("button", { name: "End session" }));
-    await waitFor(() => expect(vi.mocked(trial.getStudyQueue).mock.calls.length).toBeGreaterThan(sessions));
+    await waitFor(() =>
+      expect(vi.mocked(trial.getStudyQueue).mock.calls.length).toBeGreaterThan(sessions),
+    );
   });
 
   it("starts over in a new sandbox, and plays the draft as the pod has it when reloaded", async () => {
@@ -189,7 +265,10 @@ describe("TrialContainer", () => {
   it("lists what keeps the draft from being played, and says why a trial or its course could not be read", async () => {
     const chapterless = problem(`${DRAFT_URL}#ch-apps`, { code: "chapterWithoutStep", params: {} });
     renderTrial({ openTrial: async () => ({ ok: false, problems: [chapterless] }) });
-    expect(await screen.findByRole("link", { name: "Has no step in use." })).toHaveAttribute("href", "#/chapter");
+    expect(await screen.findByRole("link", { name: "Has no step in use." })).toHaveAttribute(
+      "href",
+      "#/chapter",
+    );
   });
 
   it("says why a trial could not be opened", async () => {
@@ -202,7 +281,9 @@ describe("TrialContainer", () => {
   });
 
   it("says why its course could not be read", async () => {
-    const trial = makeUseCasesFake({ getCourse: vi.fn(async () => Promise.reject(new Error("unreadable"))) });
+    const trial = makeUseCasesFake({
+      getCourse: vi.fn(async () => Promise.reject(new Error("unreadable"))),
+    });
     renderTrial({ openTrial: async () => opened(trial) });
     expect(await screen.findByRole("alert")).toHaveTextContent("unreadable");
   });

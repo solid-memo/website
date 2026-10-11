@@ -12,7 +12,12 @@ import { WithKeys } from "../test/keys";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const nouns = makeDeck("nouns", { en: "Nouns" });
-const water = { ...makeCard(deck, "water"), front: { ja: "水" }, back: { en: "**Water**" }, textFormat: SM.markdown };
+const water = {
+  ...makeCard(deck, "water"),
+  front: { ja: "水" },
+  back: { en: "**Water**" },
+  textFormat: SM.markdown,
+};
 const fire = { ...makeCard(deck, "fire", true), front: { ja: "火" }, back: { en: "Fire" } };
 const tree = { ...makeCard(deck, "tree"), front: { ja: "木" }, back: { en: "Tree" } };
 
@@ -25,7 +30,11 @@ const rows: CardRow[] = [
 type Props = Parameters<typeof CardWorkbenchScreen>[0];
 
 /** The screen with its query kept as the workspace keeps it (in the URL), every change seen by `onQuery`. */
-function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partial<Props> & { initial?: CardQuery }) {
+function Harness({
+  initial = DEFAULT_CARD_QUERY,
+  onQuery,
+  ...overrides
+}: Partial<Props> & { initial?: CardQuery }) {
   const [query, setQuery] = useState<CardQuery>(initial);
   return (
     <WithKeys>
@@ -47,7 +56,13 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
         onSavedViews={() => undefined}
         cardHref={(card) => `#/card?card=${card.id}`}
         onOpen={() => undefined}
-        plan={(ids, edit) => planCardEdit(rows.map((row) => row.card), ids, edit)}
+        plan={(ids, edit) =>
+          planCardEdit(
+            rows.map((row) => row.card),
+            ids,
+            edit,
+          )
+        }
         onEdit={async () => true}
         lastEdit={null}
         undone={false}
@@ -68,40 +83,50 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
 }
 
 const table = () => screen.getByRole("table", { name: "The cards of Kanji N5" });
-const fronts = () => within(table()).getAllByRole("rowheader").map((cell) => cell.textContent);
+const fronts = () =>
+  within(table())
+    .getAllByRole("rowheader")
+    .map((cell) => cell.textContent);
 const link = (front: string | RegExp) => within(table()).getByRole("link", { name: front });
-const key = (target: Element, name: string, extra: KeyboardEventInit = {}) => fireEvent.keyDown(target, { key: name, ...extra });
+const key = (target: Element, name: string, extra: KeyboardEventInit = {}) =>
+  fireEvent.keyDown(target, { key: name, ...extra });
 
 describe("CardWorkbenchScreen", () => {
   it("shows each card's lapses, and says since when they count", () => {
     const { rerender } = render(<Harness />);
-    expect(screen.getByText("Lapses count the card's wrong answers since March 2025, the month of the deck's first answer in the log.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Lapses count the card's wrong answers since March 2025, the month of the deck's first answer in the log.",
+      ),
+    ).toBeInTheDocument();
     rerender(<Harness lapses={undefined} />);
     expect(screen.getByText("Reading the answer log for the lapses…")).toBeInTheDocument();
     rerender(<Harness lapses={{ lapses: new Map(), since: null }} />);
-    expect(screen.getByText("Lapses count the card's wrong answers: none are logged yet.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Lapses count the card's wrong answers: none are logged yet."),
+    ).toBeInTheDocument();
     rerender(<Harness lapsesFailed={true} />);
-    expect(screen.getByText("The answer log could not be read, so the lapses are not known.")).toBeInTheDocument();
+    expect(
+      screen.getByText("The answer log could not be read, so the lapses are not known."),
+    ).toBeInTheDocument();
   });
 
   it("has a row per card, named by its front, with its back, schedule, when it was added and its id", () => {
     render(<Harness />);
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Cards: Kanji N5");
-    expect(within(table()).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual([
-      "Select",
-      "Front",
-      "Back",
-      "Due",
-      "Interval",
-      "Ease",
-      "Lapses",
-      "Added",
-      "Id",
-    ]);
+    expect(
+      within(table())
+        .getAllByRole("columnheader")
+        .map((cell) => cell.textContent),
+    ).toEqual(["Select", "Front", "Back", "Due", "Interval", "Ease", "Lapses", "Added", "Id"]);
     const row = within(table()).getByRole("row", { name: /水/ });
     expect(link("水")).toHaveAttribute("href", "#/card?card=water");
     // Markdown, shown as such.
-    expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual([
+    expect(
+      within(row)
+        .getAllByRole("cell")
+        .map((cell) => cell.textContent),
+    ).toEqual([
       "",
       "Water",
       "October 12, 2026",
@@ -111,13 +136,18 @@ describe("CardWorkbenchScreen", () => {
       "September 21, 2026",
       "water",
     ]);
-    expect(within(within(table()).getByRole("row", { name: /木/ })).getAllByRole("cell")[3]).toHaveTextContent("21 days");
+    expect(
+      within(within(table()).getByRole("row", { name: /木/ })).getAllByRole("cell")[3],
+    ).toHaveTextContent("21 days");
     const retired = within(table()).getByRole("row", { name: /火/ });
     expect(retired).toHaveClass("retired");
     expect(within(retired).getByRole("rowheader")).toHaveTextContent("火Retired");
-    expect(within(retired).getAllByRole("cell").slice(2, 5).map((cell) => cell.textContent)).toEqual(
-      Array(3).fill("–Not studied yet"),
-    );
+    expect(
+      within(retired)
+        .getAllByRole("cell")
+        .slice(2, 5)
+        .map((cell) => cell.textContent),
+    ).toEqual(Array(3).fill("–Not studied yet"));
     expect(screen.getByText("3 of 4 cards")).toBeInTheDocument();
     expect(screen.getByText(/move between the cards/)).toHaveTextContent(
       "Keys: j and k move between the cards, x selects one, Enter opens it, Shift+J and Shift+K select the next one or the one before too, Escape clears the selection, F2 edits a front or a back in its cell, and . opens the actions of the selected cards.",
@@ -128,7 +158,9 @@ describe("CardWorkbenchScreen", () => {
   it("labels a course's copy", () => {
     render(<Harness course />);
     expect(screen.getByText("Course")).toHaveClass("studio-badge");
-    expect(screen.getByText("A copy of a course: its cards are the course's questions.")).toBeInTheDocument();
+    expect(
+      screen.getByText("A copy of a course: its cards are the course's questions."),
+    ).toBeInTheDocument();
   });
 
   it("says when the deck has no cards, or none matches", () => {
@@ -149,7 +181,10 @@ describe("CardWorkbenchScreen", () => {
     render(<Harness onQuery={onQuery} />);
     const header = (name: string) => within(table()).getByRole("columnheader", { name });
     fireEvent.click(within(table()).getByRole("button", { name: "Ease" }));
-    expect(onQuery).toHaveBeenLastCalledWith({ ...DEFAULT_CARD_QUERY, sort: { key: "ease", descending: false } });
+    expect(onQuery).toHaveBeenLastCalledWith({
+      ...DEFAULT_CARD_QUERY,
+      sort: { key: "ease", descending: false },
+    });
     expect(header("Ease")).toHaveAttribute("aria-sort", "ascending");
     fireEvent.click(within(table()).getByRole("button", { name: "Ease" }));
     expect(header("Ease")).toHaveAttribute("aria-sort", "descending");
@@ -161,13 +196,27 @@ describe("CardWorkbenchScreen", () => {
   it("searches and filters, each change from the first page", () => {
     const onQuery = vi.fn();
     render(<Harness initial={{ ...DEFAULT_CARD_QUERY, page: 2, size: 10 }} onQuery={onQuery} />);
-    fireEvent.input(screen.getByRole("searchbox", { name: "Search" }), { target: { value: "wat" } });
+    fireEvent.input(screen.getByRole("searchbox", { name: "Search" }), {
+      target: { value: "wat" },
+    });
     expect(onQuery).toHaveBeenLastCalledWith({ ...DEFAULT_CARD_QUERY, text: "wat", size: 10 });
     choose("In", "back");
-    expect(onQuery).toHaveBeenLastCalledWith({ ...DEFAULT_CARD_QUERY, text: "wat", field: "back", size: 10 });
-    expect(within(screen.getByRole("combobox", { name: "Language" })).getAllByRole("option").map((o) => o.textContent)).toEqual(
-      ["Any language", expect.stringMatching(/^English/), expect.stringMatching(/^Japanese/), "No language stated"],
-    );
+    expect(onQuery).toHaveBeenLastCalledWith({
+      ...DEFAULT_CARD_QUERY,
+      text: "wat",
+      field: "back",
+      size: 10,
+    });
+    expect(
+      within(screen.getByRole("combobox", { name: "Language" }))
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual([
+      "Any language",
+      expect.stringMatching(/^English/),
+      expect.stringMatching(/^Japanese/),
+      "No language stated",
+    ]);
     choose("Language", "unstated");
     choose("State", "due");
     choose("Has", "picture");
@@ -184,7 +233,13 @@ describe("CardWorkbenchScreen", () => {
     // The first choice again: any.
     choose("Language", "");
     choose("Has", "");
-    expect(onQuery).toHaveBeenLastCalledWith({ ...DEFAULT_CARD_QUERY, text: "wat", field: "back", state: "due", size: 200 });
+    expect(onQuery).toHaveBeenLastCalledWith({
+      ...DEFAULT_CARD_QUERY,
+      text: "wat",
+      field: "back",
+      state: "due",
+      size: 200,
+    });
   });
 
   it("offers the language the URL names though the deck's sides have none in it, to clear it", () => {
@@ -192,7 +247,11 @@ describe("CardWorkbenchScreen", () => {
     render(<Harness initial={{ ...DEFAULT_CARD_QUERY, lang: "de" }} onQuery={onQuery} />);
     const language = screen.getByRole("combobox", { name: "Language" });
     expect(language).toHaveValue("de");
-    expect(within(language).getAllByRole("option").map((o) => o.textContent)).toEqual([
+    expect(
+      within(language)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual([
       "Any language",
       expect.stringMatching(/^English/),
       expect.stringMatching(/^Japanese/),
@@ -205,7 +264,10 @@ describe("CardWorkbenchScreen", () => {
 
   it("shows a page at a time, with a pager while there are more", () => {
     const onQuery = vi.fn();
-    const many = Array.from({ length: 12 }, (_, i) => ({ card: { ...tree, id: `c${i}`, url: `${tree.url}${i}` }, states: [] }));
+    const many = Array.from({ length: 12 }, (_, i) => ({
+      card: { ...tree, id: `c${i}`, url: `${tree.url}${i}` },
+      states: [],
+    }));
     render(<Harness rows={many} initial={{ ...DEFAULT_CARD_QUERY, size: 10 }} onQuery={onQuery} />);
     expect(fronts()).toHaveLength(10);
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
@@ -289,8 +351,14 @@ describe("CardWorkbenchScreen", () => {
     heading.addEventListener("keydown", (event) => event.preventDefault());
     key(heading, "j");
     expect(document.activeElement).not.toBe(link("水"));
-    expect(screen.getByRole("searchbox", { name: "Search" })).toHaveAttribute("aria-keyshortcuts", "/");
-    expect(screen.getByRole("checkbox", { name: "Select 水" })).toHaveAttribute("aria-keyshortcuts", "x");
+    expect(screen.getByRole("searchbox", { name: "Search" })).toHaveAttribute(
+      "aria-keyshortcuts",
+      "/",
+    );
+    expect(screen.getByRole("checkbox", { name: "Select 水" })).toHaveAttribute(
+      "aria-keyshortcuts",
+      "x",
+    );
   });
 
   it("edits the selected cards the query keeps, deleted ones leaving the selection", async () => {
@@ -302,10 +370,16 @@ describe("CardWorkbenchScreen", () => {
     const bulk = screen.getByRole("group", { name: "Selected cards" });
     fireEvent.click(within(bulk).getByRole("button", { name: "Retire" }));
     // In the table's order.
-    expect(onEdit).toHaveBeenCalledWith(["water", "tree"], { kind: "retire" }, expect.objectContaining({ inverse: expect.anything() }));
+    expect(onEdit).toHaveBeenCalledWith(
+      ["water", "tree"],
+      { kind: "retire" },
+      expect.objectContaining({ inverse: expect.anything() }),
+    );
     fireEvent.click(within(bulk).getByRole("button", { name: "Delete" }));
     answer("Delete the selected cards", "Delete");
-    await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"));
+    await waitFor(() =>
+      expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"),
+    );
     expect(screen.queryByRole("group", { name: "Selected cards" })).not.toBeInTheDocument();
   });
 
@@ -324,11 +398,18 @@ describe("CardWorkbenchScreen", () => {
     const plan = planCardEdit([water, fire], ["water"], { kind: "retire" });
     render(<Harness readOnly="setAside" lastEdit={{ edit: { kind: "retire" }, plan }} />);
     expect(screen.getByText(/This deck has invalid data, so it is set aside/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
+      "href",
+      "#/health",
+    );
     fireEvent.click(screen.getByRole("checkbox", { name: "Select 水" }));
     const bulk = screen.getByRole("group", { name: "Selected cards" });
     expect(bulk).toHaveTextContent("1 card selected");
-    expect(within(bulk).getAllByRole("button").map((button) => button.textContent)).toEqual(["Clear selection"]);
+    expect(
+      within(bulk)
+        .getAllByRole("button")
+        .map((button) => button.textContent),
+    ).toEqual(["Clear selection"]);
     // Nothing to open.
     key(document.body, ".");
     expect(document.body).toHaveFocus();
@@ -345,10 +426,16 @@ describe("CardWorkbenchScreen", () => {
     expect(onReviewEdit).toHaveBeenCalledWith(["tree"], { kind: "reset" });
     rerender(<Harness reviewDone={{ edit: { kind: "reset" }, count: 2 }} />);
     expect(screen.getByText("Forgot the progress of 2 cards.")).toBeInTheDocument();
-    rerender(<Harness reviewDone={{ edit: { kind: "reschedule", due: "2026-10-20" }, count: 1 }} />);
+    rerender(
+      <Harness reviewDone={{ edit: { kind: "reschedule", due: "2026-10-20" }, count: 1 }} />,
+    );
     expect(screen.getByText("Set 1 card due on October 20, 2026.")).toBeInTheDocument();
-    rerender(<Harness reviewDone={{ edit: { kind: "reschedule", due: "2026-10-20" }, count: 0 }} />);
-    expect(screen.getByText("None of the selected cards has been studied yet.")).toBeInTheDocument();
+    rerender(
+      <Harness reviewDone={{ edit: { kind: "reschedule", due: "2026-10-20" }, count: 0 }} />,
+    );
+    expect(
+      screen.getByText("None of the selected cards has been studied yet."),
+    ).toBeInTheDocument();
   });
 
   it("moves or copies the selected cards, a move clearing them from the selection, and says what it did", async () => {
@@ -357,12 +444,18 @@ describe("CardWorkbenchScreen", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
     pick("Move or copy the selected cards", "Copy to deck…");
     fireEvent.click(screen.getByRole("button", { name: "Copy 1 card" }));
-    expect(onTransfer).toHaveBeenCalledWith(["tree"], { to: nouns, mode: "copy", keepProgress: true });
+    expect(onTransfer).toHaveBeenCalledWith(["tree"], {
+      to: nouns,
+      mode: "copy",
+      keepProgress: true,
+    });
     await waitFor(() => expect(screen.queryByRole("button", { name: "Copy 1 card" })).toBeNull());
     expect(screen.getAllByRole("status")[0]).toHaveTextContent("1 card selected");
     pick("Move or copy the selected cards", "Move to deck…");
     fireEvent.click(screen.getByRole("button", { name: "Move 1 card" }));
-    await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"));
+    await waitFor(() =>
+      expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"),
+    );
 
     const plan = {
       cards: [
@@ -373,7 +466,11 @@ describe("CardWorkbenchScreen", () => {
       target: { save: [], reviewSaves: [], reviewRemovals: [] },
       source: { remove: [], reviewRemovals: [] },
     };
-    rerender(<Harness transferDone={{ transfer: { to: nouns, mode: "move", keepProgress: false }, plan }} />);
+    rerender(
+      <Harness
+        transferDone={{ transfer: { to: nouns, mode: "move", keepProgress: false }, plan }}
+      />,
+    );
     expect(screen.getByText("Moved 2 cards to Nouns.")).toBeInTheDocument();
   });
 
@@ -391,7 +488,11 @@ describe("CardWorkbenchScreen", () => {
     const onEdit = vi.fn(async () => false);
     render(<Harness onEdit={onEdit} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
-    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Delete" }));
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", {
+        name: "Delete",
+      }),
+    );
     answer("Delete the selected cards", "Delete");
     await waitFor(() => expect(onEdit).toHaveBeenCalled());
     expect(screen.getAllByRole("status")[0]).toHaveTextContent("1 card selected");
@@ -399,13 +500,31 @@ describe("CardWorkbenchScreen", () => {
 
   it("says what the last edit did, and undoes it", () => {
     const onUndo = vi.fn();
-    const plan = planCardEdit([water, fire], ["water", "fire"], { kind: "setTextFormat", markdown: false });
-    const { rerender } = render(<Harness lastEdit={{ edit: { kind: "setTextFormat", markdown: false }, plan }} onUndo={onUndo} />);
-    expect(screen.getByText("Wrote 1 card as plain text. 1 card was left as it was.")).toBeInTheDocument();
+    const plan = planCardEdit([water, fire], ["water", "fire"], {
+      kind: "setTextFormat",
+      markdown: false,
+    });
+    const { rerender } = render(
+      <Harness
+        lastEdit={{ edit: { kind: "setTextFormat", markdown: false }, plan }}
+        onUndo={onUndo}
+      />,
+    );
+    expect(
+      screen.getByText("Wrote 1 card as plain text. 1 card was left as it was."),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Undo" }));
     expect(onUndo).toHaveBeenCalled();
-    const markdown = planCardEdit([water, fire], ["fire"], { kind: "setTextFormat", markdown: true });
-    rerender(<Harness lastEdit={{ edit: { kind: "setTextFormat", markdown: true }, plan: markdown }} busy />);
+    const markdown = planCardEdit([water, fire], ["fire"], {
+      kind: "setTextFormat",
+      markdown: true,
+    });
+    rerender(
+      <Harness
+        lastEdit={{ edit: { kind: "setTextFormat", markdown: true }, plan: markdown }}
+        busy
+      />,
+    );
     expect(screen.getByText("Wrote 1 card in Markdown.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
     const removal = planCardEdit([water, fire], ["water", "fire"], { kind: "remove" });
@@ -420,20 +539,46 @@ describe("CardWorkbenchScreen", () => {
     const onQuery = vi.fn();
     const onSavedViews = vi.fn();
     const saved = { name: "Hard", params: "state=leech&sort=lapses&order=desc" };
-    render(<Harness initial={{ ...DEFAULT_CARD_QUERY, page: 2 }} onQuery={onQuery} savedViews={[saved]} onSavedViews={onSavedViews} />);
+    render(
+      <Harness
+        initial={{ ...DEFAULT_CARD_QUERY, page: 2 }}
+        onQuery={onQuery}
+        savedViews={[saved]}
+        onSavedViews={onSavedViews}
+      />,
+    );
     const views = screen.getByRole("group", { name: "Views" });
-    expect(within(views).getAllByRole("button").map((button) => button.textContent)).toEqual(["All", "Due", "New", "Leeches", "Hard", "", "+ Save view"]);
-    expect(within(views).getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
+    expect(
+      within(views)
+        .getAllByRole("button")
+        .map((button) => button.textContent),
+    ).toEqual(["All", "Due", "New", "Leeches", "Hard", "", "+ Save view"]);
+    expect(within(views).getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     fireEvent.click(within(views).getByRole("button", { name: "Leeches" }));
     expect(onQuery).toHaveBeenLastCalledWith({ ...DEFAULT_CARD_QUERY, state: "leech" });
-    expect(within(views).getByRole("button", { name: "Leeches" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(views).getByRole("button", { name: "Leeches" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     choose("State", "mature");
     expect(within(views).queryAllByRole("button", { pressed: true })).toEqual([]);
     fireEvent.click(within(views).getByRole("button", { name: "Hard" }));
-    expect(onQuery).toHaveBeenLastCalledWith({ ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } });
-    expect(within(views).getByRole("button", { name: "Hard" })).toHaveAttribute("aria-pressed", "true");
+    expect(onQuery).toHaveBeenLastCalledWith({
+      ...DEFAULT_CARD_QUERY,
+      state: "leech",
+      sort: { key: "lapses", descending: true },
+    });
+    expect(within(views).getByRole("button", { name: "Hard" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     fireEvent.click(within(views).getByRole("button", { name: "+ Save view" }));
-    fireEvent.input(within(dialog("Save the view")).getByRole("textbox", { name: "Name" }), { target: { value: "Hard" } });
+    fireEvent.input(within(dialog("Save the view")).getByRole("textbox", { name: "Name" }), {
+      target: { value: "Hard" },
+    });
     fireEvent.click(within(dialog("Save the view")).getByRole("button", { name: "Save" }));
     expect(onSavedViews).toHaveBeenCalledWith([saved]);
   });
@@ -450,11 +595,19 @@ describe("CardWorkbenchScreen", () => {
     fireEvent.input(back, { target: { value: " " } });
     key(back, "Enter");
     await waitFor(() => expect(back).toHaveAttribute("aria-invalid", "true"));
-    expect(screen.getByText("Not saved: a side or a wrong option would be left empty.")).toHaveAttribute("role", "alert");
+    expect(
+      screen.getByText("Not saved: a side or a wrong option would be left empty."),
+    ).toHaveAttribute("role", "alert");
     fireEvent.input(back, { target: { value: "Trees" } });
     key(back, "Enter");
     const edit = { kind: "setText", side: "back", tag: "en", text: "Trees" };
-    await waitFor(() => expect(onEdit).toHaveBeenCalledWith(["tree"], edit, planCardEdit([tree], ["tree"], edit as never)));
+    await waitFor(() =>
+      expect(onEdit).toHaveBeenCalledWith(
+        ["tree"],
+        edit,
+        planCardEdit([tree], ["tree"], edit as never),
+      ),
+    );
     expect(screen.queryByText(/^Not saved/)).toBeNull();
     // From the keyboard, the front, whose cell is the card's link.
     link("木").focus();

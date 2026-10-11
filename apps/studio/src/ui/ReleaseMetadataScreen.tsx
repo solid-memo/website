@@ -1,7 +1,13 @@
 import { useState } from "preact/hooks";
 import { EU_LANGUAGES, type ReferenceConcept } from "@solid-memo/vocab/concepts.generated";
 import type { ReleaseField } from "@solid-memo/domain/release/releaseCheck";
-import { attributionOf, attributionText, authorNames, makingNotesOf, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import {
+  attributionOf,
+  attributionText,
+  authorNames,
+  makingNotesOf,
+  type ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import { useI18n, type I18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import { DraftScope, DraftStatus, DraftTextField } from "./DraftParts";
@@ -67,7 +73,9 @@ export function ReleaseMetadataScreen({
               value={draft.root.license ?? ""}
               current={draft.root.license}
               disabled={held}
-              onChange={(license) => onEdit([{ kind: "setLicense", license: license === "" ? null : license }])}
+              onChange={(license) =>
+                onEdit([{ kind: "setLicense", license: license === "" ? null : license }])
+              }
             />
             <p class="hint field-hint">{t("studio.release.licenseHint")}</p>
           </div>
@@ -106,7 +114,15 @@ export function ReleaseMetadataScreen({
 }
 
 /** The version notes (adms:versionNotes): one text, saved as it is typed; cleared when empty. */
-function VersionNotes({ draft, arrival, onEdit }: { draft: ReleaseDraft; arrival: boolean; onEdit: DraftEditor["edit"] }) {
+function VersionNotes({
+  draft,
+  arrival,
+  onEdit,
+}: {
+  draft: ReleaseDraft;
+  arrival: boolean;
+  onEdit: DraftEditor["edit"];
+}) {
   const { t } = useI18n();
   const [notes, setNotes] = useState(draft.root.versionNotes ?? "");
   return (
@@ -121,7 +137,9 @@ function VersionNotes({ draft, arrival, onEdit }: { draft: ReleaseDraft; arrival
         onInput={(event) => {
           const text = event.currentTarget.value;
           setNotes(text);
-          onEdit([{ kind: "setMeta", meta: { versionNotes: text.trim() === "" ? null : text } }], { debounce: true });
+          onEdit([{ kind: "setMeta", meta: { versionNotes: text.trim() === "" ? null : text } }], {
+            debounce: true,
+          });
         }}
       />
       <p id="release-version-notes-hint" class="hint field-hint">
@@ -136,7 +154,10 @@ function VersionNotes({ draft, arrival, onEdit }: { draft: ReleaseDraft; arrival
  * which Intl reads as "eng"): its English label from the table when
  * Intl does not know it.
  */
-export function languageNameOf(concept: ReferenceConcept, languageParts: I18n["languageParts"]): string {
+export function languageNameOf(
+  concept: ReferenceConcept,
+  languageParts: I18n["languageParts"],
+): string {
   const name = languageParts(concept.code.toLowerCase()).name;
   return name.toLowerCase() === concept.code.toLowerCase() ? concept.label : name;
 }
@@ -147,23 +168,45 @@ export function languageNameOf(concept: ReferenceConcept, languageParts: I18n["l
  * reader's language, and any other the release states, by its IRI, to
  * keep or leave out.
  */
-function Languages({ draft, arrival, onEdit }: { draft: ReleaseDraft; arrival: boolean; onEdit: DraftEditor["edit"] }) {
+function Languages({
+  draft,
+  arrival,
+  onEdit,
+}: {
+  draft: ReleaseDraft;
+  arrival: boolean;
+  onEdit: DraftEditor["edit"];
+}) {
   const { t, languageParts } = useI18n();
   const chosen = draft.root.language;
   const known = new Set(EU_LANGUAGES.map((concept) => concept.iri));
   const options = [
-    ...EU_LANGUAGES.map((concept) => ({ iri: concept.iri, name: languageNameOf(concept, languageParts) })),
-    ...chosen.filter((iri) => !known.has(iri)).map((iri) => ({ iri, name: t("studio.release.languageOther", { iri }) })),
+    ...EU_LANGUAGES.map((concept) => ({
+      iri: concept.iri,
+      name: languageNameOf(concept, languageParts),
+    })),
+    ...chosen
+      .filter((iri) => !known.has(iri))
+      .map((iri) => ({ iri, name: t("studio.release.languageOther", { iri }) })),
   ];
   const toggle = (iri: string, on: boolean) =>
-    onEdit([{ kind: "setMeta", meta: { language: on ? [...chosen, iri] : chosen.filter((one) => one !== iri) } }]);
+    onEdit([
+      {
+        kind: "setMeta",
+        meta: { language: on ? [...chosen, iri] : chosen.filter((one) => one !== iri) },
+      },
+    ]);
   return (
     <fieldset class="release-languages" data-arrival={arrival || undefined} tabIndex={-1}>
       <legend>{t("studio.release.languages")}</legend>
       <p class="hint">{t("studio.release.languagesHint")}</p>
       {options.map((option) => (
         <label key={option.iri} class="radio-option">
-          <input type="checkbox" checked={chosen.includes(option.iri)} onChange={(event) => toggle(option.iri, event.currentTarget.checked)} />{" "}
+          <input
+            type="checkbox"
+            checked={chosen.includes(option.iri)}
+            onChange={(event) => toggle(option.iri, event.currentTarget.checked)}
+          />{" "}
           {option.name}
         </label>
       ))}
@@ -172,11 +215,23 @@ function Languages({ draft, arrival, onEdit }: { draft: ReleaseDraft; arrival: b
 }
 
 /** Who publishes the release (dcterms:publisher): one of its agents, the one it names elsewhere, or none. */
-function Publisher({ draft, arrival, onEdit }: { draft: ReleaseDraft; arrival: boolean; onEdit: DraftEditor["edit"] }) {
+function Publisher({
+  draft,
+  arrival,
+  onEdit,
+}: {
+  draft: ReleaseDraft;
+  arrival: boolean;
+  onEdit: DraftEditor["edit"];
+}) {
   const { t } = useI18n();
   const current = draft.root.publisher;
-  const agents = draft.agents.map((node) => ({ iri: `${draft.url}#${node.id}`, name: node.data.name }));
-  const other = current !== undefined && !agents.some((agent) => agent.iri === current) ? current : null;
+  const agents = draft.agents.map((node) => ({
+    iri: `${draft.url}#${node.id}`,
+    name: node.data.name,
+  }));
+  const other =
+    current !== undefined && !agents.some((agent) => agent.iri === current) ? current : null;
   return (
     <>
       <label for="release-publisher">{t("studio.release.publisher")}</label>
@@ -219,8 +274,16 @@ function Attribution({ draft, onEdit }: { draft: ReleaseDraft; onEdit: DraftEdit
   const none = names.length === 0;
   const options = [
     { value: "none", label: t("studio.release.attributionNone"), attribution: null },
-    { value: "compiled", label: none ? null : attributionText(names, false, locale), attribution: { ai: false } },
-    { value: "ai", label: none ? null : attributionText(names, true, locale), attribution: { ai: true } },
+    {
+      value: "compiled",
+      label: none ? null : attributionText(names, false, locale),
+      attribution: { ai: false },
+    },
+    {
+      value: "ai",
+      label: none ? null : attributionText(names, true, locale),
+      attribution: { ai: true },
+    },
   ];
   return (
     <fieldset>
@@ -235,7 +298,9 @@ function Attribution({ draft, onEdit }: { draft: ReleaseDraft; onEdit: DraftEdit
                 name="release-attribution"
                 value={option.value}
                 checked={chosen === option.value}
-                onChange={() => onEdit([{ kind: "setAttribution", attribution: option.attribution }])}
+                onChange={() =>
+                  onEdit([{ kind: "setAttribution", attribution: option.attribution }])
+                }
               />{" "}
               {option.label}
             </label>

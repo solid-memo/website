@@ -5,7 +5,11 @@ import type { OutlineNode } from "./deckTree/rows";
 import { MoveItems } from "./MoveItems";
 
 const step = (key: string): OutlineNode => ({ key, title: { en: `Step ${key}` } });
-const chapter = (key: string, steps: OutlineNode[]): OutlineNode => ({ key, title: { en: `Chapter ${key}` }, children: steps });
+const chapter = (key: string, steps: OutlineNode[]): OutlineNode => ({
+  key,
+  title: { en: `Chapter ${key}` },
+  children: steps,
+});
 
 /** A course's outline: chapters A (steps a1, a2) and B (step b1). */
 const outline = [chapter("A", [step("a1"), step("a2")]), chapter("B", [step("b1")])];
@@ -14,7 +18,13 @@ const outline = [chapter("A", [step("a1"), step("a2")]), chapter("B", [step("b1"
 function renderMoves(nodeKey: string) {
   const onMove = vi.fn();
   render(
-    <ActionsMenu label="Actions" buttonClass="row-menu" open onOpen={() => undefined} onClose={() => undefined}>
+    <ActionsMenu
+      label="Actions"
+      buttonClass="row-menu"
+      open
+      onOpen={() => undefined}
+      onClose={() => undefined}
+    >
       <MoveItems
         nodes={outline}
         nodeKey={nodeKey}

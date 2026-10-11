@@ -46,7 +46,12 @@ function renderContainer(useCases: UseCases, url?: string) {
   const props = { onShow: vi.fn(), onDone: vi.fn(), onCourseStarted: vi.fn() };
   const view = (shown?: string) => (
     <QueryClientProvider client={queryClient}>
-      <ImportUrlContainer useCases={useCases} instance={instance} {...(shown === undefined ? {} : { url: shown })} {...props} />
+      <ImportUrlContainer
+        useCases={useCases}
+        instance={instance}
+        {...(shown === undefined ? {} : { url: shown })}
+        {...props}
+      />
     </QueryClientProvider>
   );
   const { rerender } = render(view(url));
@@ -69,7 +74,9 @@ describe("ImportUrlContainer", () => {
 
   it("puts a link in the URL as the URL standard writes it, and one that is no release's as typed", () => {
     const { onShow } = renderContainer(makeUseCasesFake());
-    fireEvent.input(linkField(), { target: { value: RIVERS.replace("https://bob.example/", "https://Bob.example:443/") } });
+    fireEvent.input(linkField(), {
+      target: { value: RIVERS.replace("https://bob.example/", "https://Bob.example:443/") },
+    });
     fireEvent.click(showButton());
     expect(onShow).toHaveBeenLastCalledWith(RIVERS);
     fireEvent.input(linkField(), { target: { value: "https://Bob.example/memo/" } });
@@ -79,7 +86,10 @@ describe("ImportUrlContainer", () => {
 
   it("shows the release at the link, where it is published and what it is, and imports a deck as the library's", async () => {
     const importReleaseFromUrl = vi.fn(async () => added);
-    const useCases = makeUseCasesFake({ readReleaseFromLink: vi.fn(async () => rivers), importReleaseFromUrl });
+    const useCases = makeUseCasesFake({
+      readReleaseFromLink: vi.fn(async () => rivers),
+      importReleaseFromUrl,
+    });
     const { onDone, onCourseStarted } = renderContainer(useCases, RIVERS);
     expect(linkField()).toHaveValue(RIVERS);
     expect(await screen.findByRole("heading", { name: "Rivers" })).toBeInTheDocument();
@@ -125,7 +135,11 @@ describe("ImportUrlContainer", () => {
       }),
     });
     const { rerender } = renderContainer(useCases, "https://bob.example/gone.ttl");
-    expect(await screen.findByText(/Solid Memo cannot read a release at https:\/\/bob\.example\/gone\.ttl/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        /Solid Memo cannot read a release at https:\/\/bob\.example\/gone\.ttl/,
+      ),
+    ).toBeInTheDocument();
     rerender(RIVERS);
     fireEvent.click(await screen.findByRole("button", { name: "Import this deck" }));
     expect(await screen.findByText(/pod refused/)).toBeInTheDocument();
@@ -133,10 +147,15 @@ describe("ImportUrlContainer", () => {
 
   it("reads the link again when the same one is shown again, and says while it reads", async () => {
     let answer: (release: LibraryDeck) => void = () => undefined;
-    const readReleaseFromLink = vi.fn(() => new Promise<LibraryDeck>((resolve) => (answer = resolve)));
+    const readReleaseFromLink = vi.fn(
+      () => new Promise<LibraryDeck>((resolve) => (answer = resolve)),
+    );
     // The instance's decks still on their way: the release is not marked as added meanwhile.
     const listDecks = vi.fn(() => new Promise<Deck[]>(() => undefined));
-    const { onShow } = renderContainer(makeUseCasesFake({ readReleaseFromLink, listDecks }), RIVERS);
+    const { onShow } = renderContainer(
+      makeUseCasesFake({ readReleaseFromLink, listDecks }),
+      RIVERS,
+    );
     expect(await screen.findByText("Reading and checking the release…")).toBeInTheDocument();
     answer(rivers);
     expect(await screen.findByRole("heading", { name: "Rivers" })).toBeInTheDocument();

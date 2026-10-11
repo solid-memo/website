@@ -131,7 +131,14 @@ export function CardBulkActions({
 
   /** One of the menus, by its button's text and its name. */
   const group = (which: Menu, text: string, label: string, items: ComponentChildren) => (
-    <ActionsMenu label={label} text={text} buttonClass="" open={menu === which} onOpen={() => setMenu(which)} onClose={() => setMenu(null)}>
+    <ActionsMenu
+      label={label}
+      text={text}
+      buttonClass=""
+      open={menu === which}
+      onOpen={() => setMenu(which)}
+      onClose={() => setMenu(null)}
+    >
       {items}
     </ActionsMenu>
   );
@@ -158,8 +165,12 @@ export function CardBulkActions({
         t("studio.bulk.groups.edit"),
         t("studio.bulk.groups.editCards"),
         <>
-          {item(t("studio.cardBulk.markdownOn"), () => edit({ kind: "setTextFormat", markdown: true }))}
-          {item(t("studio.cardBulk.markdownOff"), () => edit({ kind: "setTextFormat", markdown: false }))}
+          {item(t("studio.cardBulk.markdownOn"), () =>
+            edit({ kind: "setTextFormat", markdown: true }),
+          )}
+          {item(t("studio.cardBulk.markdownOff"), () =>
+            edit({ kind: "setTextFormat", markdown: false }),
+          )}
           {item(t("studio.cardBulk.stateLanguage"), () => open("language"))}
           {item(t("studio.cardBulk.findReplace"), () => open("replace"))}
         </>,
@@ -205,11 +216,19 @@ export function CardBulkActions({
           >
             <label>
               {t("studio.cardBulk.tag")}
-              <input type="text" autoFocus value={tag} onInput={(event) => setTag(event.currentTarget.value)} />
+              <input
+                type="text"
+                autoFocus
+                value={tag}
+                onInput={(event) => setTag(event.currentTarget.value)}
+              />
             </label>
             <label>
               {t("studio.cardBulk.side")}
-              <select value={side} onChange={(event) => setSide(event.currentTarget.value as StatedSide | "")}>
+              <select
+                value={side}
+                onChange={(event) => setSide(event.currentTarget.value as StatedSide | "")}
+              >
                 <option value="">{t("studio.cardBulk.sides.both")}</option>
                 <option value="front">{t("studio.cardBulk.sides.front")}</option>
                 <option value="back">{t("studio.cardBulk.sides.back")}</option>
@@ -233,7 +252,14 @@ export function CardBulkActions({
           >
             <label>
               {t("studio.cardBulk.dueLabel")}
-              <input type="date" autoFocus value={due} required disabled={busy} onInput={(event) => setDue(event.currentTarget.value)} />
+              <input
+                type="date"
+                autoFocus
+                value={due}
+                required
+                disabled={busy}
+                onInput={(event) => setDue(event.currentTarget.value)}
+              />
             </label>
             <p class="hint">{t("studio.cardBulk.rescheduleHint")}</p>
             {buttons}

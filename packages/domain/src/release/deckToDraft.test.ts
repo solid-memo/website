@@ -36,7 +36,15 @@ const cards: Card[] = [
     formatVersion: 5,
     distractors: [{ id: "turtle-d1", text: { en: "Oslo" }, retired: true }],
   },
-  { id: "c2", url: `${deck.cardsDocumentUrl}#c2`, front: { en: "Norway" }, back: { en: "Oslo" }, createdAt: "", formatVersion: 4, retired: true },
+  {
+    id: "c2",
+    url: `${deck.cardsDocumentUrl}#c2`,
+    front: { en: "Norway" },
+    back: { en: "Oslo" },
+    createdAt: "",
+    formatVersion: 4,
+    retired: true,
+  },
 ];
 
 describe("deckToDraft", () => {
@@ -61,7 +69,10 @@ describe("deckToDraft", () => {
       wasDerivedFrom: [],
     });
     expect(draft.agents).toEqual([
-      { id: "agent-alice-alice-example-org", data: { name: "Alice", mbox: "mailto:alice@example.org" } },
+      {
+        id: "agent-alice-alice-example-org",
+        data: { name: "Alice", mbox: "mailto:alice@example.org" },
+      },
       { id: "agent-bob", data: { name: "Bob" } },
     ]);
   });
@@ -71,11 +82,21 @@ describe("deckToDraft", () => {
     expect(draft.cards).toEqual([
       {
         id: "turtle",
-        data: { front: { en: "Sweden" }, back: { en: "Stockholm" }, created: "2026-01-02T00:00:00.000Z", distractor: [`${DRAFT}#turtle-d1`] },
+        data: {
+          front: { en: "Sweden" },
+          back: { en: "Stockholm" },
+          created: "2026-01-02T00:00:00.000Z",
+          distractor: [`${DRAFT}#turtle-d1`],
+        },
       },
-      { id: "c2", data: { front: { en: "Norway" }, back: { en: "Oslo" }, deprecated: true, distractor: [] } },
+      {
+        id: "c2",
+        data: { front: { en: "Norway" }, back: { en: "Oslo" }, deprecated: true, distractor: [] },
+      },
     ]);
-    expect(draft.distractors).toEqual([{ id: "turtle-d1", data: { text: { en: "Oslo" }, deprecated: true } }]);
+    expect(draft.distractors).toEqual([
+      { id: "turtle-d1", data: { text: { en: "Oslo" }, deprecated: true } },
+    ]);
     expect(draft.distributions[0]!.id).toBe("turtle-2");
   });
 
@@ -94,12 +115,26 @@ describe("deckToDraft", () => {
   });
 
   it("names no publisher, nothing a deck does not state, and nothing it is based on, for a deck of the user's own", () => {
-    const own: Deck = { ...deck, authors: [], sourceUrl: undefined, description: undefined, license: undefined, themes: undefined, keywords: undefined, direction: "front-to-back" };
+    const own: Deck = {
+      ...deck,
+      authors: [],
+      sourceUrl: undefined,
+      description: undefined,
+      license: undefined,
+      themes: undefined,
+      keywords: undefined,
+      direction: "front-to-back",
+    };
     const result = deckToDraft(own, [], DRAFT, NOW);
     expect(result).toEqual({ draft: expect.anything() });
     expect(result.draft.root).not.toHaveProperty("publisher");
     expect(result.draft.root).not.toHaveProperty("description");
-    expect(result.draft.root).toMatchObject({ creator: [], theme: [], keyword: {}, studyDirection: SM.frontToBack });
+    expect(result.draft.root).toMatchObject({
+      creator: [],
+      theme: [],
+      keyword: {},
+      studyDirection: SM.frontToBack,
+    });
     expect(result.draft.triples).toEqual([]);
   });
 });

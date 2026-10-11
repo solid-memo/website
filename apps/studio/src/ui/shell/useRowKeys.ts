@@ -115,7 +115,9 @@ export function useRowKeys({
 
   useScreenKeys((event, key) => {
     if (!enabled) return;
-    const focused = [...body.current!.children].findIndex((row) => row.contains(document.activeElement));
+    const focused = [...body.current!.children].findIndex((row) =>
+      row.contains(document.activeElement),
+    );
     const onBody = document.activeElement === document.body;
     // The row x, Enter and the extending keys act on.
     const at = focused !== -1 ? focused : onBody ? cursor : -1;
@@ -127,7 +129,12 @@ export function useRowKeys({
         const next = stepCursor(from, keys.length, shortcut === "down" ? 1 : -1);
         if (next === -1) return;
         // From either end beside the table, the row beyond it.
-        const beyond = next !== from || current === undefined || onMove === undefined ? undefined : shortcut === "down" ? around?.next : around?.previous;
+        const beyond =
+          next !== from || current === undefined || onMove === undefined
+            ? undefined
+            : shortcut === "down"
+              ? around?.next
+              : around?.previous;
         if (beyond !== undefined) {
           anchor.current = beyond;
           show(beyond);
@@ -154,7 +161,13 @@ export function useRowKeys({
         break;
       case "open":
         // The row's link opens the row itself, and its buttons do what they do.
-        if (onOpen === undefined || at === -1 || event.target instanceof HTMLAnchorElement || event.target instanceof HTMLButtonElement) return;
+        if (
+          onOpen === undefined ||
+          at === -1 ||
+          event.target instanceof HTMLAnchorElement ||
+          event.target instanceof HTMLButtonElement
+        )
+          return;
         onOpen(at);
         break;
       case "clear":
@@ -166,7 +179,9 @@ export function useRowKeys({
         const row = body.current!.children[at]!;
         const target = event.target as Element;
         // The cell the focus is in, if it can be edited; else the row's first that can.
-        const own = row.contains(target) ? target.closest("td, th")!.querySelector("[data-cell-edit]") : null;
+        const own = row.contains(target)
+          ? target.closest("td, th")!.querySelector("[data-cell-edit]")
+          : null;
         const cell = own ?? row.querySelector("[data-cell-edit]");
         if (cell === null) return;
         cell.dispatchEvent(new Event(EDIT_CELL));

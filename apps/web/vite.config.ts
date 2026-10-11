@@ -35,7 +35,9 @@ export default defineConfig({
     // library (decks/), at their IRIs, and the vendored profiles. A checkout
     // without decks/ builds without the library; the deploy checks it is there.
     turtleDirectoryPlugin({ dir: NS_ROOT, publicPath: "ns" }),
-    ...(existsSync(DECKS_ROOT) ? [turtleDirectoryPlugin({ dir: DECKS_ROOT, publicPath: "decks" })] : []),
+    ...(existsSync(DECKS_ROOT)
+      ? [turtleDirectoryPlugin({ dir: DECKS_ROOT, publicPath: "decks" })]
+      : []),
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vendor`, publicPath: "vendor" }),
   ],
   resolve: {
@@ -45,7 +47,9 @@ export default defineConfig({
       // The Markdown parser's entity decoder has a browser build that decodes
       // by writing to an element's innerHTML. Its plain one, a lookup table,
       // keeps the bundle free of HTML sinks (docs/markdown.md, src/build.test.ts).
-      "decode-named-character-reference": createRequire(import.meta.url).resolve("decode-named-character-reference"),
+      "decode-named-character-reference": createRequire(import.meta.url).resolve(
+        "decode-named-character-reference",
+      ),
     },
   },
 });

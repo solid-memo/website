@@ -60,7 +60,10 @@ export function flatten(tree: DeckTree, collapsed: ReadonlySet<string>): Visible
 }
 
 /** The rows an outline shows, with the nodes in `collapsed` folded shut. */
-export function flattenOutline(nodes: readonly OutlineNode[], collapsed: ReadonlySet<string>): VisibleRow[] {
+export function flattenOutline(
+  nodes: readonly OutlineNode[],
+  collapsed: ReadonlySet<string>,
+): VisibleRow[] {
   const rows: VisibleRow[] = [];
   const walk = (nodes: readonly OutlineNode[], ancestors: readonly string[]) => {
     const parent = ancestors.at(-1) ?? null;
@@ -73,7 +76,12 @@ export function flattenOutline(nodes: readonly OutlineNode[], collapsed: Readonl
         continue;
       }
       const shut = collapsed.has(key);
-      rows.push({ ...row, kind: "group", collapsed: shut, last: node.children.at(-1)?.key ?? null });
+      rows.push({
+        ...row,
+        kind: "group",
+        collapsed: shut,
+        last: node.children.at(-1)?.key ?? null,
+      });
       if (shut) continue;
       const inside = [...ancestors, key];
       if (node.children.length === 0) {

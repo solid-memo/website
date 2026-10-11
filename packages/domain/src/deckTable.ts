@@ -64,7 +64,10 @@ export function deckTableViewFromParams(params: URLSearchParams): DeckTableView 
   const column = params.get("sort");
   const filter = params.get("q") ?? "";
   if (column === null || !(DECK_COLUMNS as readonly string[]).includes(column)) return { filter };
-  return { filter, sort: { column: column as DeckColumn, descending: params.get("order") === "desc" } };
+  return {
+    filter,
+    sort: { column: column as DeckColumn, descending: params.get("order") === "desc" },
+  };
 }
 
 /** The query parameters of a view, none for what is as by default. */
@@ -118,7 +121,9 @@ export function groupTrails(tree: DeckTree): { group: DeckGroup; trail: readonly
 export function matchesFilter(row: DeckTableRow, filter: string): boolean {
   const wanted = folded(filter.trim());
   if (wanted === "") return true;
-  const texts = [row.deck.title, ...row.groups.map((group) => group.title)].flatMap((text) => Object.values(text));
+  const texts = [row.deck.title, ...row.groups.map((group) => group.title)].flatMap((text) =>
+    Object.values(text),
+  );
   return texts.some((text) => folded(text).includes(wanted));
 }
 
@@ -127,7 +132,11 @@ export function matchesFilter(row: DeckTableRow, filter: string): boolean {
  * while a figure is not known (such rows come last, either way).
  * `text` names a text as the reader sees it.
  */
-function sortKey(row: DeckTableRow, column: DeckColumn, text: (text: LangText) => string): string | number | undefined {
+function sortKey(
+  row: DeckTableRow,
+  column: DeckColumn,
+  text: (text: LangText) => string,
+): string | number | undefined {
   switch (column) {
     case "title":
       return text(row.deck.title);

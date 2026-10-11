@@ -2,10 +2,22 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { collect, defaultIo, FOLDERS, type PackageCoverage, render, run } from "./coverageSummary.ts";
+import {
+  collect,
+  defaultIo,
+  FOLDERS,
+  type PackageCoverage,
+  render,
+  run,
+} from "./coverageSummary.ts";
 
 const full = (n: number) => ({ total: n, covered: n, pct: 100 });
-const TOTALS: PackageCoverage["total"] = { lines: full(10), statements: full(12), functions: full(3), branches: full(4) };
+const TOTALS: PackageCoverage["total"] = {
+  lines: full(10),
+  statements: full(12),
+  functions: full(3),
+  branches: full(4),
+};
 const SUMMARY = JSON.stringify({ total: TOTALS, "/abs/src/a.ts": TOTALS });
 
 /** A repository with two packages that have coverage, one that has none, and the scripts' own. */
@@ -33,7 +45,10 @@ describe("render", () => {
     expect(
       render([
         { name: "@x/web", total: TOTALS },
-        { name: "@x/types", total: { lines: empty, statements: empty, functions: empty, branches: empty } },
+        {
+          name: "@x/types",
+          total: { lines: empty, statements: empty, functions: empty, branches: empty },
+        },
       ]),
     ).toBe(
       [
@@ -49,14 +64,21 @@ describe("render", () => {
   });
 
   it("says when there is nothing to show", () => {
-    expect(render([])).toBe("## Coverage\n\nNo package's coverage was found: did `npm test` run?\n");
+    expect(render([])).toBe(
+      "## Coverage\n\nNo package's coverage was found: did `npm test` run?\n",
+    );
   });
 });
 
 describe("collect", () => {
   it("reads every package's summary, named by its package.json or else its folder", () => {
     const io = defaultIo(repository(), {});
-    expect(io.packageDirs()).toEqual(["apps/web", "packages/domain", "packages/untested", "scripts"]);
+    expect(io.packageDirs()).toEqual([
+      "apps/web",
+      "packages/domain",
+      "packages/untested",
+      "scripts",
+    ]);
     expect(collect(io)).toEqual([
       { name: "@x/web", total: TOTALS },
       { name: "@x/domain", total: TOTALS },

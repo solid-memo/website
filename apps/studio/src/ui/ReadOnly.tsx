@@ -24,8 +24,22 @@ export function ReadOnlyNotice({
   if (reason === null) return null;
   if (reason === "checking") return <p class="hint">{t("studio.readOnly.checking")}</p>;
   // Blocked, it is the instance that is repaired, whatever the subject.
-  const repair = <a href={healthHref}>{t(subject === "decks" && reason !== "blocked" ? "studio.readOnly.repairDecks" : "studio.readOnly.repair")}</a>;
-  return <p class="warning">{tx(reason === "blocked" ? "studio.readOnly.blocked" : `studio.readOnly.${subject}`, { repair })}</p>;
+  const repair = (
+    <a href={healthHref}>
+      {t(
+        subject === "decks" && reason !== "blocked"
+          ? "studio.readOnly.repairDecks"
+          : "studio.readOnly.repair",
+      )}
+    </a>
+  );
+  return (
+    <p class="warning">
+      {tx(reason === "blocked" ? "studio.readOnly.blocked" : `studio.readOnly.${subject}`, {
+        repair,
+      })}
+    </p>
+  );
 }
 
 /**

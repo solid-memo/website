@@ -53,7 +53,13 @@ export function HealthContainer({
   return deck === null ? (
     <InstanceHealthContainer useCases={useCases} instance={instance} deckHref={deckHref} />
   ) : (
-    <DeckHealthContainer useCases={useCases} instance={instance} deck={deck} spotHref={spotHref} aboutHref={aboutHref} />
+    <DeckHealthContainer
+      useCases={useCases}
+      instance={instance}
+      deck={deck}
+      spotHref={spotHref}
+      aboutHref={aboutHref}
+    />
   );
 }
 
@@ -82,7 +88,14 @@ function useRepairs(
           text: t("repair.removeConfirm", { url: problem.subjectUrl }),
           action: t("repair.removeButton"),
           onConfirm: () =>
-            repairMutation.mutate([{ kind: "remove-subject", documentUrl: problem.documentUrl, subjectUrl: problem.subjectUrl, version: 1 }]),
+            repairMutation.mutate([
+              {
+                kind: "remove-subject",
+                documentUrl: problem.documentUrl,
+                subjectUrl: problem.subjectUrl,
+                version: 1,
+              },
+            ]),
         }),
       error: errorText(repairMutation.error),
     };
@@ -116,7 +129,8 @@ function DeckHealthContainer({
   });
   const error = healthQuery.error ?? cardsQuery.error;
   if (error) return <ErrorMessage error={errorText(error)} />;
-  if (healthQuery.data === undefined || cardsQuery.data === undefined) return <Loading label={t("studio.health.loading")} />;
+  if (healthQuery.data === undefined || cardsQuery.data === undefined)
+    return <Loading label={t("studio.health.loading")} />;
   return (
     <>
       <DeckHealthScreen
@@ -159,7 +173,8 @@ function InstanceHealthContainer({
   });
   const error = reportQuery.error ?? decksQuery.error;
   if (error) return <ErrorMessage error={errorText(error)} />;
-  if (reportQuery.data === undefined || decksQuery.data === undefined) return <Loading label={t("studio.health.loading")} />;
+  if (reportQuery.data === undefined || decksQuery.data === undefined)
+    return <Loading label={t("studio.health.loading")} />;
   return (
     <>
       <InstanceHealthScreen
@@ -170,7 +185,14 @@ function InstanceHealthContainer({
         onCheck={() => void reportQuery.refetch()}
         repairs={repairs(reportQuery.data)}
         deckHref={deckHref}
-        badge={(each) => <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={each} href={deckHref(each)} />}
+        badge={(each) => (
+          <HealthBadge
+            useCases={useCases}
+            instanceUrl={instance.url}
+            deck={each}
+            href={deckHref(each)}
+          />
+        )}
       />
       {dialog}
     </>

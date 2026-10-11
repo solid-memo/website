@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  parseVocab,
-  renderVocabConstants,
-  SM_NS,
-} from "./vocab.ts";
+import { parseVocab, renderVocabConstants, SM_NS } from "./vocab.ts";
 
 const HEAD = `
 @prefix sm:      <https://solid-memo.com/ns/vocab/v1.ttl#> .
@@ -31,9 +27,33 @@ describe("parseVocab", () => {
       version: "1.1",
       changeNote: "1.0: Deck. 1.1: front, image.",
       terms: [
-        { name: "Deck", iri: `${SM_NS}Deck`, kind: "class", label: "Deck", comment: "A deck.", history: "Since 1.0." },
-        { name: "front", iri: `${SM_NS}front`, kind: "property", label: "front", comment: 'Front "text".', range: "http://www.w3.org/2001/XMLSchema#string", domain: `${SM_NS}Deck`, history: "Added in 1.1." },
-        { name: "image", iri: `${SM_NS}image`, kind: "property", label: "image", comment: "A picture.", range: "http://www.w3.org/2000/01/rdf-schema#Resource", history: "Added in 1.1." },
+        {
+          name: "Deck",
+          iri: `${SM_NS}Deck`,
+          kind: "class",
+          label: "Deck",
+          comment: "A deck.",
+          history: "Since 1.0.",
+        },
+        {
+          name: "front",
+          iri: `${SM_NS}front`,
+          kind: "property",
+          label: "front",
+          comment: 'Front "text".',
+          range: "http://www.w3.org/2001/XMLSchema#string",
+          domain: `${SM_NS}Deck`,
+          history: "Added in 1.1.",
+        },
+        {
+          name: "image",
+          iri: `${SM_NS}image`,
+          kind: "property",
+          label: "image",
+          comment: "A picture.",
+          range: "http://www.w3.org/2000/01/rdf-schema#Resource",
+          history: "Added in 1.1.",
+        },
       ],
     });
   });
@@ -46,14 +66,16 @@ describe("parseVocab", () => {
 
   it("requires a range on every property", () => {
     expect(() =>
-      parseVocab(`${HEAD}${ONTOLOGY} sm:x a owl:DatatypeProperty ; rdfs:label "x" ; rdfs:comment "x" ; skos:historyNote "x" .`),
+      parseVocab(
+        `${HEAD}${ONTOLOGY} sm:x a owl:DatatypeProperty ; rdfs:label "x" ; rdfs:comment "x" ; skos:historyNote "x" .`,
+      ),
     ).toThrow("vocab: <https://solid-memo.com/ns/vocab/v1.ttl#x> has no range.");
   });
 
   it("rejects a term outside the namespace", () => {
-    expect(() =>
-      parseVocab(`${HEAD}${ONTOLOGY} <https://other.example/#x> a owl:Class .`),
-    ).toThrow("vocab: <https://other.example/#x> is outside the namespace");
+    expect(() => parseVocab(`${HEAD}${ONTOLOGY} <https://other.example/#x> a owl:Class .`)).toThrow(
+      "vocab: <https://other.example/#x> is outside the namespace",
+    );
   });
 
   it("requires the ontology subject", () => {
@@ -77,8 +99,22 @@ describe("parseVocab with concept schemes and deprecations", () => {
 
   it("reads a scheme's title and a concept's label, with their definitions", () => {
     expect(vocab.terms.slice(0, 2)).toEqual([
-      { name: "Colours", iri: `${SM_NS}Colours`, kind: "scheme", label: "Colours", comment: "Colours.", history: "Added in 1.1." },
-      { name: "red", iri: `${SM_NS}red`, kind: "concept", label: "Red", comment: "Blood.", history: "Added in 1.1." },
+      {
+        name: "Colours",
+        iri: `${SM_NS}Colours`,
+        kind: "scheme",
+        label: "Colours",
+        comment: "Colours.",
+        history: "Added in 1.1.",
+      },
+      {
+        name: "red",
+        iri: `${SM_NS}red`,
+        kind: "concept",
+        label: "Red",
+        comment: "Blood.",
+        history: "Added in 1.1.",
+      },
     ]);
   });
 
