@@ -117,6 +117,7 @@ path = [
     "decks/spanish-basics/*.ttl",
     "decks/spelling-alphabets/*.ttl",
     "decks/sql-basics/*.ttl",
+    "decks/standard-for-public-code/*.ttl",
     "decks/sweden-counties-and-provinces/*.ttl",
     "decks/swedish-basics/*.ttl",
     "decks/swedish-labour-market-taxonomy-occupation-names/*.ttl",
