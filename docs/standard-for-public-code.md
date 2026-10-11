@@ -192,7 +192,9 @@ What holds today, and what does not, criterion by criterion.
 - MUST, met — every file is in Git.
 - MUST, met — decisions in commit messages. CONTRIBUTING.md asks for a
   body that says why, and every commit on this branch has one. Some
-  older commits on `main` do not.
+  older commits on `main` do not. Renovate's commits have one too
+  (`commitBody` in `renovate.json5`): each update, from what version to
+  what, where, its source and release notes, and why.
 - MUST, not met — commit messages link to issues and discussions.
   CONTRIBUTING.md asks for a `Refs: #NN` trailer, but the maintainer's
   own changes start from no issue, and `main` allows only rebase merges,
@@ -504,7 +506,8 @@ The first assessment's plan, with what landed on this branch checked.
   `ci.yml` but that one, is gone.
 - [x] **`deploy.yml`.** A deploy by hand runs only from `main`, after
   `npm run check`.
-- [x] **`renovate.json5`.** `automergeType: 'pr'`.
+- [x] **`renovate.json5`.** `automergeType: 'pr'`, and a `commitBody`
+  that records each update and why.
 - [x] **Checks in `npm run check`.** The docs index
   (`npm run check:docs`), prerelease dependencies
   (`npm run check:dependencies`), and each package's coverage in the
