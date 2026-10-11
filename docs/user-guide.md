@@ -126,12 +126,16 @@ ones, mixed in among them ([srs.md](srs.md#study-sessions)).
    (easy), or Again · Hard · Good · Easy, as you choose in the
    preferences.
 
-A card you did not remember comes back later in the same session. The
-better you remember a card, the longer it waits before it comes back:
-a day, then a few days, then weeks. That is spaced repetition, and
-Solid Memo schedules it with the SM-2 method ([srs.md](srs.md)). When
-the session is over it says so; "End session" takes you back to your
-decks at any time, and nothing you answered is lost.
+A card you answer with **0 — Blackout** or **1 — Wrong**, or with
+**Again**, comes back later in the same session. A card you answer with
+**2 — Almost** does not come back in that session, but it starts over:
+it is due again the next day you study. **Hard**, on the four buttons,
+counts as remembered. The better you remember a card, the longer it
+waits before it comes back: a day, then a few days, then weeks. That is
+spaced repetition, and Solid Memo schedules it with the SM-2 method
+([srs.md](srs.md)). When the session is over it says so; "End session"
+takes you back to your decks at any time, and nothing you answered is
+lost.
 
 A deck you study both ways asks each card front to back and back to
 front, each on its own schedule.

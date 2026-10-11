@@ -43,9 +43,10 @@ its ease factor. It departs from the description in two recorded ways:
   calendar days ([srs.md](srs.md#study-days-and-the-queue)).
 - The description repeats every card graded under 4 at the end of the
   session until each scores 4 or more. Solid Memo repeats only a card
-  graded 0 or 1, within the session
-  ([srs.md](srs.md#the-sm-2-transition)), so a correct but hard answer
-  ends the card's day.
+  graded 0 or 1 (Again, on the four-button scale), within the session
+  ([srs.md](srs.md#the-sm-2-transition)). A card graded 2 is a lapse
+  and starts its repetitions again, but is not repeated that session,
+  and a correct but hard answer (3) ends the card's day too.
 
 The answer scales and a course's multiple-choice answers map onto the
 same grades; they do not change the algorithm ([srs.md](srs.md#answer-scales)).

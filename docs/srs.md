@@ -75,7 +75,8 @@ Decisions fixed in code (and tests):
   counts.
 - The original repeats every card graded below 4 after the session,
   until each scores 4 or more. Solid Memo repeats only grades 0 and 1,
-  so a hard but correct answer (3) ends the card's day.
+  so a lapse graded 2 (reset, but not repeated) and a hard but correct
+  answer (3) end the card's day.
 - Intervals are rounded to whole days.
 
 ### Worked examples
