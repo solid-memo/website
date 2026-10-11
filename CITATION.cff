@@ -1,0 +1,27 @@
+# How to cite Solid Memo (https://citation-file-format.github.io/).
+# The version and its date are set when a version is tagged
+# (docs/releasing.md).
+cff-version: 1.2.0
+message: If you use or refer to Solid Memo, please cite it as below.
+type: software
+title: Solid Memo
+abstract: >-
+  Spaced-repetition flashcards that live in your own Solid pod: a static
+  web app that schedules cards with SM-2 and keeps decks, cards and study
+  history in the user's own Solid pod, with a library of ready-made decks,
+  courses, and a studio for writing and publishing decks.
+authors:
+  - given-names: Anton
+    family-names: Wiklund
+repository-code: https://github.com/solid-memo/website
+url: https://solid-memo.com/
+license: MIT
+keywords:
+  - Solid
+  - spaced repetition
+  - flashcards
+  - SM-2
+  - linked data
+  - RDF
+  - SHACL
+  - DCAT
