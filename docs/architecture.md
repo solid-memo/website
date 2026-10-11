@@ -24,6 +24,7 @@ where the layers meet.
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
 | `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release ([markdown.md](markdown.md)). Imports nothing of the app's. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against real Solid servers, started in Docker ([testing.md](testing.md)). |
+| `@solid-memo/e2e-journeys` | `e2e/journeys/` | The user journeys: whole flows a user takes through the built app, driven in Chromium with Playwright against a Community Solid Server in Docker ([testing.md](testing.md#user-journeys)). It imports nothing of the app's but its messages, to find text on screen by. |
 
 ## Dependency rule
 
@@ -48,6 +49,7 @@ graph TD
     shacl -. node/ only .-> turtle & markdown
     vocab -. tooling/ only .-> turtle
     e2e["e2e/pod"] --> application & solid
+    journeys["e2e/journeys"] -. harness/strings.ts only .-> ui
 ```
 
 Packages are consumed as TypeScript source (`exports` maps
