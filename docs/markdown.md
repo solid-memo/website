@@ -212,6 +212,48 @@ Plain text still renders byte for byte as it did before Markdown.
   whole question describes them too. A plain question names them by the
   whole question, as before.
 
+## An example
+
+A card's back, with "Format with Markdown" on:
+
+~~~markdown
+Make a branch with `git switch -c`, then:
+
+- *stage* the files
+- **commit** them
+
+```sh
+git add .
+git commit
+```
+~~~
+
+- **Block**, on the card's face in study and in the editor's preview: a
+  paragraph with a code span, a list of two items with emphasis and
+  strong emphasis, and a code block labeled `sh` in a region named
+  "Code" that scrolls sideways. It is more than one paragraph, so it
+  is a left-aligned `div.md`.
+- **Inline**, were the card a course's question, with the back as one
+  of its options: one line, the list items joined by "; " and the code
+  block as one code span. The editor says so under the back: "This
+  card's back is one of the options of a question: keep it to one
+  paragraph, as the others are." (`notOneParagraph`, from
+  `markdownProblems(text, OPTION)`).
+- **Plain**, in the Browser's Back column (and in the breadcrumb, were
+  it the front): the first block that shows any text, marks dropped,
+  `Make a branch with git switch -c, then:` (`labelText`). The whole
+  text as plain text (`plainText`) keeps the code as written:
+  `stage the files; commit them` for the list, the code block's lines
+  as they are.
+
+What a place cannot show is not refused, only shown as typed, with a
+hint while the card is edited. On a card's side,
+`See <b>this</b> and [the docs](https://example.org).` gets three: one
+for each HTML tag ("HTML such as `<b>` shows as typed. Put it in
+backticks to show it as code.") and one for the link ("No links here,
+where they would be in the way of studying: … Put a link in a note.").
+In a note, where links are followed, only the two about HTML remain.
+
 ## Safety
 
 Pods and libraries are untrusted: anyone's data may be opened, and most
