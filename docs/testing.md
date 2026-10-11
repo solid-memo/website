@@ -17,7 +17,7 @@ package's own tests cover its own code — `npm test` fails below that.
 
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
-npm run check     # Biome's lint, markdownlint and cspell, then the same, plus typecheck, drift, Turtle formatting, boundaries, the repository's own checks (below)
+npm run check     # Biome's lint, markdownlint and cspell, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table

@@ -90,7 +90,7 @@ The [dev container](.devcontainer/devcontainer.json) has all of them.
 ```sh
 npm ci
 npm run dev       # the site, from source
-npm run check     # lint and formatting (Biome, Turtle, Markdown), spelling, typecheck, tests (100% coverage), drift, the deck library, boundaries
+npm run check     # lint and formatting (Biome, Turtle, Markdown), spelling, typecheck, tests (100% coverage), drift, the deck library, boundaries, the repository's own checks
 npm run test:pod  # the end-to-end tests, against Solid servers started in Docker
 ```
 
