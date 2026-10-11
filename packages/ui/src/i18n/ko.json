@@ -1362,7 +1362,6 @@
         "instance": "이름과 카탈로그"
       },
       "problems": {
-        "one": "문제 {count}개",
         "other": "문제 {count}개"
       },
       "filter": "덱과 초안 필터",
@@ -1380,11 +1379,9 @@
       "pin": "{name} 고정",
       "ready": "게시할 준비가 됐어요",
       "blocked": {
-        "one": "문제 {count}개 때문에 게시할 수 없어요",
         "other": "문제 {count}개 때문에 게시할 수 없어요"
       },
       "someBlock": {
-        "one": "문제 {count}개, 그중 {blocking}개 때문에 게시할 수 없어요",
         "other": "문제 {count}개, 그중 {blocking}개 때문에 게시할 수 없어요"
       },
       "released": "게시됨"
@@ -1459,7 +1456,6 @@
       "checking": "문제를 찾는 중…",
       "none": "찾은 문제가 없어요.",
       "deckData": {
-        "one": "덱 데이터의 문제 {count}개",
         "other": "덱 데이터의 문제 {count}개"
       },
       "unstated": "{place}: 언어가 지정되지 않았어요",
@@ -1889,7 +1885,6 @@
           "other": "카드 {count}장의 다음 복습일을 {due}(으)로 지정했어요."
         },
         "setText": {
-          "one": "카드 {count}개의 텍스트를 저장했어요.",
           "other": "카드 {count}개의 텍스트를 저장했어요."
         }
       },
@@ -2099,7 +2094,6 @@
       "plan": "업그레이드",
       "bulk": "선택한 복사본",
       "selected": {
-        "one": "복사본 {count}개 선택됨",
         "other": "복사본 {count}개 선택됨"
       }
     },
@@ -2315,11 +2309,9 @@
       "askedTimes": "{count}곳에서 나옴",
       "newQuestion": "새 질문, 아직 어디에도 나오지 않음",
       "retire": {
-        "one": "카드 {count}장 사용 중지",
         "other": "카드 {count}장 사용 중지"
       },
       "restore": {
-        "one": "카드 {count}장 복원",
         "other": "카드 {count}장 복원"
       }
     },

@@ -464,7 +464,7 @@
 /*
  * The header as one row: the sidebar's button, the masthead (the name,
  * who is signed in, Log out), the open instance, then the theme and the
- * languages, then the way back to Solid Memo. On a narrow screen it is
+ * language list, then the way back to Solid Memo. On a narrow screen it is
  * two: the button, the name and Log out; then the rest.
  */
 :root[data-surface="studio"] header.site-header {
@@ -527,6 +527,15 @@
   padding-top: 0;
 }
 
+/* The language list as tall and square as the header's other controls. */
+:root[data-surface="studio"] .language-selector select {
+  min-height: var(--s-control-h);
+  padding: 0.15rem 0.4rem;
+  font-size: var(--s-font-size);
+  border-color: var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
 :root[data-surface="studio"] header.site-header .header-link {
   order: 2;
   margin: 0;
@@ -574,8 +583,10 @@
 }
 
 :root[data-surface="studio"] .masthead-title {
+  flex: 1 1 auto;
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
   align-items: baseline;
   gap: 0 0.75rem;
   padding-left: calc(var(--logo-height) * 1.5 + 0.5rem);
@@ -599,9 +610,20 @@
   animation: none;
 }
 
+/*
+ * Who is signed in takes the room the row has left, cut short to keep
+ * the header one row in a language of longer words; given less than
+ * 12rem, the row wraps instead.
+ */
 :root[data-surface="studio"] .session-line {
+  flex: 1 1 auto;
+  min-width: 12rem;
   margin: 0;
+  overflow: hidden;
   color: var(--text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  contain: inline-size;
 }
 
 :root[data-surface="studio"] .session-line a:hover {
