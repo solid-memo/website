@@ -114,3 +114,7 @@ it. Future versions name a project contact instead: a
 `dcat:contactPoint` that points at the
 [issue tracker](https://github.com/solid-memo/website/issues), with no
 personal email address.
+
+The maintainer's email address is also published, on purpose, in
+[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md#enforcement), as the private
+contact for code of conduct reports.

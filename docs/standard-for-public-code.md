@@ -172,7 +172,7 @@ What holds today, and what does not, criterion by criterion.
 - SHOULD, not met — activity statistics. The README shows CI and interop
   badges, but no figures on activity.
 - OPTIONAL, met — a code of conduct: the Contributor Covenant 2.1, with a
-  private contact form.
+  private email contact for reports.
 
 ### 5. Make contributing easy
 
@@ -379,7 +379,8 @@ The maintainer made these choices. Each is recorded where it applies.
 9. **Formatting.** Biome, with a line width of 100
    ([style.md](style.md#formatting)).
 10. **Spelling.** American English everywhere, checked by cspell.
-11. **Code of conduct.** The Contributor Covenant 2.1.
+11. **Code of conduct.** The Contributor Covenant 2.1. Reports go to the
+    maintainer's email, which is published for that purpose.
 
 Whatever is decided later:
 
@@ -472,8 +473,9 @@ The first assessment's plan, with what landed on this branch checked.
 - [x] **`CONTRIBUTING.md`**, linked from the README.
 - [x] **`GOVERNANCE.md`** and `.github/CODEOWNERS`.
 - [x] **`SECURITY.md`.** No `security.txt`, as decided.
-- [x] **Templates.** Issue forms for bugs, features, decks, translations,
-  interop reports and code of conduct reports, `config.yml`, the pull
+- [x] **Templates.** Issue forms for bugs, features, decks, translations
+  and interop reports, `config.yml` (which points conduct reports to
+  their email contact), the pull
   request template, and `CODE_OF_CONDUCT.md`.
 - [x] **README.** About, Status, Run it on its own, Contributing, the
   language statement, the badges, the journeys report and the licenses.

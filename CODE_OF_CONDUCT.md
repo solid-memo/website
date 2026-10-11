@@ -61,17 +61,11 @@ representative at an online or offline event.
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement. In Solid Memo
 that is the maintainer, Anton Wiklund ([@antwika](https://github.com/antwika)),
-who publishes no email address. To reach him privately:
+by email at [antonwiklund91@gmail.com](mailto:antonwiklund91@gmail.com).
+Only the maintainer reads that address. Don't report a code of conduct issue
+in a public issue or discussion.
 
-1. Open a
-   [code of conduct contact](https://github.com/solid-memo/website/issues/new?template=conduct.yml)
-   issue, titled "Code of conduct: private contact requested", with nothing
-   else in it: no names, no details.
-2. The maintainer replies there and sets up a private channel with you, such
-   as a private repository only the two of you can see. Your report goes
-   there, not in the issue.
-
-If the report is about the maintainer, or you would rather not open an issue,
+If the report is about the maintainer, or you would rather not email,
 report the content or the account to GitHub instead, through
 [Report abuse](https://docs.github.com/en/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam).
 
