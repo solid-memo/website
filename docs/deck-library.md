@@ -52,8 +52,9 @@ publisher still in the index:
   [`ns/vocab/topics.ttl`](../ns/vocab/topics.ttl), next to the EU data
   theme `EDUC`; **languages** are EU authority-table IRIs described in
   [`ns/vocab/external.ttl`](../ns/vocab/external.ttl).
-- **Creators** are `foaf:Agent` nodes of the document; **licences**
-  are IRIs typed `dcterms:LicenseDocument`; the **sources** it was
+- **Creators** are `foaf:Agent` nodes of the document; **licenses**
+  are IRIs typed `dcterms:LicenseDocument`, and a version states at
+  least one ([Checks](#checks)); the **sources** it was
   compiled from are `prov:wasDerivedFrom` IRIs, each a subject of its
   own with its title, creator and licence.
 - **The release**: `dcat:version "N"`, `dcterms:issued`, one
@@ -238,6 +239,14 @@ what the versions make. Both check:
   the document itself, `dcat:version`, series, publisher, and
   `dcat:prev` / `dcat:previousVersion` naming the version before (none
   for version 1);
+- that each version states its license (`noLicense`): at least one
+  `dcterms:license` IRI, so a reader knows how the deck may be reused.
+  The shapes allow a deck without one, and a published shape is never
+  edited, so this is a library rule, in `metadataProblems`
+  ([`libraryRules.ts`](../packages/domain/src/release/libraryRules.ts)).
+  Every published version states one, so the rule holds new versions
+  to what the library already does. The Studio's check for the library
+  names it too;
 - that no version drops a card, chapter, step or distractor of the one
   before it, or gives one's id to another kind of subject (a step's id
   to a chapter);

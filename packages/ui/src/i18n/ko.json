@@ -2449,6 +2449,7 @@
       "notOneDeck": "릴리스가 정확히 하나의 덱, 즉 자기 자신을 설명하지 않아요. 설명하는 덱: {decks}.",
       "versionMismatch": "버전 {stated}(이)라고 밝히지만, 위치로는 {expected}이에요.",
       "linkMismatch": "{field}: {stated}(이)라고 밝히지만, 위치로는 {expected}이에요.",
+      "noLicense": "라이선스를 밝히지 않아요. 라이브러리의 덱은 어떤 라이선스로 배포되는지 밝혀야 해요.",
       "cardsDropped": "{previous}에 있는 {ids}이(가) 빠졌어요. 카드는 절대 삭제하지 않아요. 학습자가 카드와 그 기록을 유지할 수 있도록 대신 사용 중지해 주세요.",
       "outlineDropped": "{previous}에 있는 {ids}이(가) 빠졌어요. 챕터, 단계, 오답 선택지는 절대 삭제하지 않아요. 학습자가 진행 위치를 유지할 수 있도록 대신 사용 중지해 주세요.",
       "idReused": "{id}은(는) 여기서는 {now}인데 {previous}에서는 {was}(이)었어요. id 하나는 언제까지나 한 대상만 가리켜요.",

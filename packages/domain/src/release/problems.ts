@@ -46,7 +46,9 @@ export type MetadataProblem =
   | { code: "notOneDeck"; params: { decks: string[] } }
   | { code: "versionMismatch"; params: { stated: ReleaseTerm[]; expected: number } }
   /** A link (series, publisher, previous version) other than expected; `expected` empty for none. */
-  | { code: "linkMismatch"; params: { stated: ReleaseTerm[]; expected: string[] } };
+  | { code: "linkMismatch"; params: { stated: ReleaseTerm[]; expected: string[] } }
+  /** No dcterms:license: a library release says which license it is published under. */
+  | { code: "noLicense"; params: Record<string, never> };
 
 /** A release against the version before it (continuityRules). */
 export type ContinuityProblem =

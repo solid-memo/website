@@ -2581,6 +2581,7 @@
       "notOneDeck": "Die Ausgabe beschreibt nicht genau einen Stapel, nämlich sich selbst: Sie hat {decks}.",
       "versionMismatch": "Gibt Version {stated} an; nach ihrem Ort in der Bibliothek wäre es {expected}.",
       "linkMismatch": "{field}: gibt {stated} an; nach ihrem Ort in der Bibliothek wäre es {expected}.",
+      "noLicense": "Gibt keine Lizenz an: Ein Stapel der Bibliothek nennt die Lizenz, unter der er veröffentlicht wird.",
       "cardsDropped": "Lässt {ids} weg, die {previous} hat. Eine Karte wird nie entfernt: Mustere sie stattdessen aus, damit Lernende sie und ihren Verlauf behalten.",
       "outlineDropped": "Lässt {ids} weg, die {previous} hat. Ein Kapitel, ein Schritt oder eine falsche Antwortmöglichkeit wird nie entfernt: Mustere sie stattdessen aus, damit Lernende ihre Stelle im Kurs behalten.",
       "idReused": "{id} ist hier {now}, in {previous} aber {was}: Eine ID benennt dauerhaft dasselbe Subjekt.",

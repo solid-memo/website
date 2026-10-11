@@ -100,6 +100,8 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
       const [expected] = problem.params.expected;
       return `${at}states ${nameOf(problem.field!)} ${shownValues(problem.params.stated)}; its path says ${expected === undefined ? "nothing, being the first version" : `<${expected}>`}.`;
     }
+    case "noLicense":
+      return `${at}states no dcterms:license: a library release names the license it is published under, as an IRI such as <https://creativecommons.org/licenses/by/4.0/>.`;
     case "cardsDropped":
       return `${at}drops ${problem.params.ids.map((id) => `<#${id}>`).join(", ")}, which ${fileOf(problem.params.previous)} has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.`;
     case "outlineDropped":

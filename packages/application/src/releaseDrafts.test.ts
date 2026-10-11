@@ -349,7 +349,7 @@ describe("checkReleaseDraft", () => {
     const draft = courseDraft();
     const check = await useCases.checkReleaseDraft(draft, markdownCheck, "library", { shapes: true });
     expect(check.rules.map((p) => p.code)).toContain("missingLanguage");
-    // The fixture states version 1, its place version 2.
+    // The fixture states version 1, its place version 2, and no license.
     expect(check.library.map((p) => [p.code, p.subject, p.field])).toEqual([
       ["versionMismatch", draft.url, "http://www.w3.org/ns/dcat#version"],
       ["linkMismatch", draft.url, "http://www.w3.org/ns/dcat#inSeries"],
@@ -357,6 +357,7 @@ describe("checkReleaseDraft", () => {
       ["linkMismatch", draft.url, "http://purl.org/dc/terms/publisher"],
       ["linkMismatch", draft.url, "http://www.w3.org/ns/dcat#prev"],
       ["linkMismatch", draft.url, "http://www.w3.org/ns/dcat#previousVersion"],
+      ["noLicense", draft.url, "http://purl.org/dc/terms/license"],
     ]);
     expect(shapeValidator.validateRelease).toHaveBeenCalledWith(draft, `${DECKS}solid/v2.ttl`, INDEX);
     expect(deckLibrary.readLibraryIndex).toHaveBeenCalledTimes(2);

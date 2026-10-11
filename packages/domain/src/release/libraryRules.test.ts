@@ -6,6 +6,7 @@ const DCAT = "http://www.w3.org/ns/dcat#";
 const SERIES = "https://solid-memo.com/decks/index.ttl#solid";
 const PUBLISHER = "https://solid-memo.com/decks/index.ttl#solid-memo";
 const V0 = "https://solid-memo.com/decks/solid/v0.ttl";
+const MIT = "https://spdx.org/licenses/MIT";
 
 describe("the layout", () => {
   it("reads the deck and version of a release's path", () => {
@@ -37,6 +38,7 @@ describe("metadataProblems", () => {
     inSeries: [iri(SERIES)],
     isVersionOf: [iri(SERIES)],
     publisher: [iri(PUBLISHER)],
+    licence: [iri(MIT)],
   });
 
   it("accepts a release whose metadata is what its place says", () => {
@@ -67,5 +69,11 @@ describe("metadataProblems", () => {
     ]);
     expect(metadataProblems({ ...fine, version: [text("2", "")] }, first)[0].code).toBe("versionMismatch");
     expect(metadataProblems({ ...fine, version: [text("1", ""), text("1", "en")] }, first)[0].code).toBe("versionMismatch");
+  });
+
+  it("names a release that states no license", () => {
+    expect(metadataProblems({ ...fine, licence: [] }, first)).toEqual([
+      { severity: "error", subject: RELEASE, code: "noLicense", params: {}, field: "http://purl.org/dc/terms/license" },
+    ]);
   });
 });

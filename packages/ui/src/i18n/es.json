@@ -2713,6 +2713,7 @@
       "notOneDeck": "La publicación debe describir exactamente un mazo, ella misma, pero describe: {decks}.",
       "versionMismatch": "Indica la versión {stated}; su ubicación indica {expected}.",
       "linkMismatch": "{field}: {stated}, según lo indicado; {expected}, según su ubicación.",
+      "noLicense": "No indica ninguna licencia: un mazo de la biblioteca indica bajo qué licencia se publica.",
       "cardsDropped": "Quita {ids}, que {previous} sí tiene. Nunca se elimina una tarjeta: retírala, para que quienes estudian la conserven junto con su historial.",
       "outlineDropped": "Quita {ids}, que {previous} sí tiene. Nunca se elimina un capítulo, un paso ni una opción incorrecta: retíralo, para que quienes estudian no pierdan su sitio.",
       "idReused": "{id} es {now} aquí, pero era {was} en {previous}: un ID nombra siempre un mismo sujeto.",

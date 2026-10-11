@@ -2581,6 +2581,7 @@
       "notOneDeck": "The release does not describe exactly one deck, itself: it has {decks}.",
       "versionMismatch": "States version {stated}; its place says {expected}.",
       "linkMismatch": "{field}: states {stated}; its place says {expected}.",
+      "noLicense": "States no license: a deck in the library says which license it is published under.",
       "cardsDropped": "Drops {ids}, which {previous} has. A card is never removed: retire it instead, so learners keep it and its history.",
       "outlineDropped": "Drops {ids}, which {previous} has. A chapter, step or wrong option is never removed: retire it instead, so learners keep their place.",
       "idReused": "{id} is {now} here, but {was} in {previous}: an id names one subject for good.",

@@ -1780,7 +1780,10 @@ Not every problem can be fixed in the Studio yet:
 - The library policy places the draft at `decks/<draft name>/v<N>.ttl`
   and reports each link that differs from that place. A draft that
   follows a release in a pod links to that release, its series and its
-  publisher, so it has a `linkMismatch` for each.
+  publisher, so it has a `linkMismatch` for each. It also reports a
+  draft that states no license (`noLicense`, a library rule:
+  [deck-library.md](deck-library.md#checks)), linked to the release
+  screen's license field.
 - A version the library's index lists already shows up as a
   `versionGap`, with that version twice.
 

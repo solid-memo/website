@@ -66,6 +66,7 @@ describe("the library's place", () => {
       ["linkMismatch", `${DCTERMS}publisher`, [`${INDEX}#me`]],
       ["linkMismatch", `${DCAT}prev`, ["https://site.example/decks/solid/v1.ttl"]],
       ["linkMismatch", `${DCAT}previousVersion`, ["https://site.example/decks/solid/v1.ttl"]],
+      ["noLicense", `${DCTERMS}license`, ""],
     ]);
     const first = libraryProblems(draftReleaseModel(courseDraft(), libraryReleaseUrl(INDEX, "Solid", 1)), { ...index, publisher: null }, "Solid", 1);
     expect(first[0]).toMatchObject({ code: "notARelease", params: { path: "Solid/v1.ttl" } });

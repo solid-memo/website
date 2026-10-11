@@ -413,6 +413,15 @@ describe("metadataProblems", () => {
     );
   });
 
+  it("names a release that states no license", () => {
+    const url = `${DECKS}capitals/v1.ttl`;
+    const unlicensed = CAPITALS[0].turtle.replace("    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;\n", "");
+    expect(unlicensed).not.toContain("dcterms:license");
+    expect(metadataProblems({ ...CAPITALS[0], turtle: unlicensed, quads: parseTurtle(unlicensed, url) })).toEqual([
+      "decks/capitals/v1.ttl: states no dcterms:license: a library release names the license it is published under, as an IRI such as <https://creativecommons.org/licenses/by/4.0/>.",
+    ]);
+  });
+
   it("names a version, series, publisher or previous version other than its path says", () => {
     const wrong = release("capitals", 2, {
       release: [

@@ -2581,6 +2581,7 @@
       "notOneDeck": "Utgåvan beskriver inte exakt en kortlek, sig själv: den har {decks}.",
       "versionMismatch": "Anger version {stated}; dess plats säger {expected}.",
       "linkMismatch": "{field}: anger {stated}; dess plats säger {expected}.",
+      "noLicense": "Anger ingen licens: en kortlek i biblioteket anger vilken licens den ges ut under.",
       "cardsDropped": "Tar bort {ids}, som {previous} har. Ett kort tas aldrig bort: ta det ur bruk i stället, så att eleverna behåller det och dess historik.",
       "outlineDropped": "Tar bort {ids}, som {previous} har. Ett kapitel, steg eller felaktigt alternativ tas aldrig bort: ta det ur bruk i stället, så att eleverna behåller sin plats.",
       "idReused": "{id} är {now} här, men {was} i {previous}: ett id namnger ett och samma subjekt för alltid.",

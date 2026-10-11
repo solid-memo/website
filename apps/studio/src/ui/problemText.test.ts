@@ -36,6 +36,9 @@ describe("problemMessage", () => {
     expect(say({ code: "linkMismatch", params: { stated: [], expected: [] } }, `${DCAT}prev`)).toBe(
       "Previous version: states nothing; its place says nothing, being the first version.",
     );
+    expect(say({ code: "noLicense", params: {} }, "http://purl.org/dc/terms/license")).toBe(
+      "States no license: a deck in the library says which license it is published under.",
+    );
     expect(say({ code: "cardsDropped", params: { ids: ["a", "b"], previous: "https://r.example/v1.ttl" } })).toContain("Drops #a, #b, which <https://r.example/v1.ttl> has.");
     expect(say({ code: "outlineDropped", params: { ids: ["c"], previous: "https://r.example/v1.ttl" } })).toContain("Drops #c");
     expect(say({ code: "idReused", params: { id: "x", was: "card", now: "step", previous: "https://r.example/v1.ttl" } })).toBe(

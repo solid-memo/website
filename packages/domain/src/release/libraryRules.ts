@@ -6,7 +6,8 @@ import { DCAT_NS, DCTERMS_NS, type ReleaseModel, type ReleaseTerm } from "./rele
  * deck's releases at <name>/v<N>.ttl, the name plain, the versions
  * running 1, 2, … without gaps; and each release's metadata against
  * that place: one deck, the document itself, of its version, in its
- * series, by its publisher, following the version before it.
+ * series, by its publisher, following the version before it, and
+ * under a license it states.
  */
 
 /** Deck names are plain: lower-case letters, digits and dashes. */
@@ -69,5 +70,10 @@ export function metadataProblems(model: ReleaseModel, place: ReleasePlace): Rele
   const previous = place.previous === undefined ? [] : [place.previous];
   expect(`${DCAT_NS}prev`, model.prev, previous);
   expect(`${DCAT_NS}previousVersion`, model.previousVersion, previous);
+  // The shapes allow a release without a license (published shapes are
+  // never edited); the library does not, so a reader knows how a deck may be reused.
+  if (model.licence.length === 0) {
+    problems.push(problem(url, { code: "noLicense", params: {} }, { field: `${DCTERMS_NS}license` }));
+  }
   return problems;
 }

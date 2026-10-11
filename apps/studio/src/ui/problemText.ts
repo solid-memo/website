@@ -104,6 +104,7 @@ export function problemMessage(problem: ReleaseProblem, draft: ReleaseDraft, i18
     case "noBack":
     case "outlineWithoutCourse":
     case "courseWithoutChapter":
+    case "noLicense":
     case "textFormatMisplaced":
     case "unshaped":
       return t(key);
