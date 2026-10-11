@@ -4,6 +4,15 @@ How Solid Memo schedules cards. Implemented entirely in the domain layer
 ([sm2.ts](../packages/domain/src/sm2.ts), [scheduling.ts](../packages/domain/src/scheduling.ts))
 as pure functions.
 
+**Reference.** SM-2 is the algorithm of SuperMemo 2, first described in
+Woźniak, P. A. (1990). *Optimization of learning*. Master's thesis,
+University of Technology in Poznań. Its description, with the formulas
+used here, is published by SuperMemo as
+[Application of a computer to improve the results obtained in working with the SuperMemo method](https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method).
+Solid Memo departs from it where [The SM-2 transition](#the-sm-2-transition)
+says so. [policy.md](policy.md) lists it with the other rules the code
+follows.
+
 ## Prompts and directions
 
 A session asks *prompts*: a card seen from one side (`Prompt` in
@@ -57,6 +66,25 @@ Decisions fixed in code (and tests):
   session** (`repeatsInSession`); see *Study sessions*. Each pass is a
   full SM-2 review, so the state stored after the repeat is the one that
   counts.
+
+### Worked examples
+
+Each row is one answer: the state before it, the grade, and the state
+after it. [sm2.test.ts](../packages/domain/src/sm2.test.ts) checks
+exactly these rows, so a change to the rules shows up in both.
+
+| Before: ease, interval, repetitions | Grade | After: ease, interval, repetitions | Why |
+|---|---|---|---|
+| 2.5, 0, 0 (new) | 5 | 2.6, 1, 1 | The first repetition: 1 day. |
+| 2.5, 0, 0 (new) | 3 | 2.36, 1, 1 | A pass lowers the ease; the interval is still 1 day. |
+| 2.6, 1, 1 | 5 | 2.7, 6, 2 | The second repetition: 6 days. |
+| 2.5, 6, 2 | 3 | 2.36, 14, 3 | 6 × 2.36 = 14.16, rounded: the **updated** ease sets the interval. |
+| 2.5, 6, 2 | 4 | 2.5, 15, 3 | Grade 4 keeps the ease: 6 × 2.5 = 15. |
+| 2.5, 6, 2 | 5 | 2.6, 16, 3 | 6 × 2.6 = 15.6, rounded. |
+| 2.0, 10, 3 | 3 | 1.86, 19, 4 | 10 × 1.86 = 18.6, rounded. |
+| 1.3, 10, 3 | 3 | 1.3, 13, 4 | The ease would be 1.16, so it stays at the floor, 1.3. |
+| 2.2, 30, 5 | 2 | 2.2, 1, 0 | A lapse: back to 1 day, the ease kept. |
+| 2.2, 30, 5 | 0 | 2.2, 1, 0 | Grades 0, 1 and 2 schedule alike. |
 
 ## Answer scales
 

@@ -1,8 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { applySm2, INITIAL_SM2_STATE, MIN_EASE_FACTOR } from "./sm2";
+import { applySm2, INITIAL_SM2_STATE, MIN_EASE_FACTOR, type Sm2State } from "./sm2";
 import type { ReviewQuality } from "./review";
 
+/** The worked examples in docs/srs.md, row by row: before, grade, after. Keep the two the same. */
+const WORKED_EXAMPLES: [Sm2State, ReviewQuality, Sm2State][] = [
+  [{ easeFactor: 2.5, intervalDays: 0, repetitions: 0 }, 5, { easeFactor: 2.6, intervalDays: 1, repetitions: 1 }],
+  [{ easeFactor: 2.5, intervalDays: 0, repetitions: 0 }, 3, { easeFactor: 2.36, intervalDays: 1, repetitions: 1 }],
+  [{ easeFactor: 2.6, intervalDays: 1, repetitions: 1 }, 5, { easeFactor: 2.7, intervalDays: 6, repetitions: 2 }],
+  [{ easeFactor: 2.5, intervalDays: 6, repetitions: 2 }, 3, { easeFactor: 2.36, intervalDays: 14, repetitions: 3 }],
+  [{ easeFactor: 2.5, intervalDays: 6, repetitions: 2 }, 4, { easeFactor: 2.5, intervalDays: 15, repetitions: 3 }],
+  [{ easeFactor: 2.5, intervalDays: 6, repetitions: 2 }, 5, { easeFactor: 2.6, intervalDays: 16, repetitions: 3 }],
+  [{ easeFactor: 2.0, intervalDays: 10, repetitions: 3 }, 3, { easeFactor: 1.86, intervalDays: 19, repetitions: 4 }],
+  [{ easeFactor: 1.3, intervalDays: 10, repetitions: 3 }, 3, { easeFactor: 1.3, intervalDays: 13, repetitions: 4 }],
+  [{ easeFactor: 2.2, intervalDays: 30, repetitions: 5 }, 2, { easeFactor: 2.2, intervalDays: 1, repetitions: 0 }],
+  [{ easeFactor: 2.2, intervalDays: 30, repetitions: 5 }, 0, { easeFactor: 2.2, intervalDays: 1, repetitions: 0 }],
+];
+
 describe("applySm2", () => {
+  it.each(WORKED_EXAMPLES)("gives the worked example's state after %o graded %i", (before, grade, after) => {
+    const next = applySm2(before, grade);
+    expect(next.easeFactor).toBeCloseTo(after.easeFactor);
+    expect({ intervalDays: next.intervalDays, repetitions: next.repetitions }).toEqual({
+      intervalDays: after.intervalDays,
+      repetitions: after.repetitions,
+    });
+  });
+
   describe("correct answers (quality >= 3)", () => {
     it("gives a 1-day interval on the first repetition", () => {
       const next = applySm2(INITIAL_SM2_STATE, 5);
