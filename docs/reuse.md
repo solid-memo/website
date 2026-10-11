@@ -93,9 +93,9 @@ in your copy:
 
 | File | What it says |
 |---|---|
-| [apps/web/index.html](../apps/web/index.html) | The canonical address, `og:url`, `og:image` and the JSON-LD `url` and `image` (absolute URLs on https://solid-memo.com/), and the description. |
+| [apps/web/index.html](../apps/web/index.html) | The site's address, as absolute URLs on https://solid-memo.com/: the canonical link, `og:url`, `og:image` and the JSON-LD `url`, `@id` and `image`; and the description. Its links to the repository follow `VITE_REPO_URL` ([configuration.md](configuration.md#vite_repo_url)). |
 | [apps/web/public/robots.txt](../apps/web/public/robots.txt), [sitemap.xml](../apps/web/public/sitemap.xml) | The site's address. Vite copies them as they are. |
-| [apps/web/public/about/index.html](../apps/web/public/about/index.html) | What Solid Memo is, under its name, with its address on https://solid-memo.com/ and links to this repository. Rewrite it for your copy. |
+| [apps/web/public/about/index.html](../apps/web/public/about/index.html) | What Solid Memo is, under its name, with its address on https://solid-memo.com/ and links to this repository, which `VITE_REPO_URL` does not reach. Rewrite it for your copy. |
 | [apps/web/public/social-preview.png](../apps/web/public/social-preview.png), the favicons | Solid Memo's wordmark and logo. |
 | [CNAME](../CNAME) | This site's domain on GitHub Pages ([deployment.md](deployment.md#custom-domain-optional)). Delete it in a fork. |
 | [README.md](../README.md) | This project's own description and links. |

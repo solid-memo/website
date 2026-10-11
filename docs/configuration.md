@@ -7,7 +7,7 @@ run a copy of your own, see [reuse.md](reuse.md).
 | Variable | Default | What it sets |
 |---|---|---|
 | [`VITE_APP_NAME`](#vite_app_name) | `Solid Memo` | What the site calls itself. |
-| [`VITE_REPO_URL`](#vite_repo_url) | `https://github.com/solid-memo/website` | The repository the footer links to. |
+| [`VITE_REPO_URL`](#vite_repo_url) | `https://github.com/solid-memo/website` | The repository the footer and the page link to. |
 | [`VITE_POD_PROVIDERS`](#vite_pod_providers) | the list in [podProvider.ts](../packages/domain/src/podProvider.ts) | The Pod providers suggested at login and for creating a Pod. |
 | [`VITE_LIBRARY_INDEX_URL`](#vite_library_index_url) | the site's own `decks/index.ttl` | The deck library the app lists. |
 
@@ -112,8 +112,8 @@ A fork that renames the app further edits the message files
 
 ## VITE_REPO_URL
 
-The repository the footer links to. An http(s) URL, without a user name
-or password; a trailing slash is dropped.
+The repository the footer and the page link to. An http(s) URL,
+without a user name or password; a trailing slash is dropped.
 
 ```sh
 VITE_REPO_URL=https://codeberg.org/example/memo
@@ -130,6 +130,12 @@ The footer links:
 These are GitHub's paths, which Gitea and Forgejo (Codeberg) share.
 On GitLab, whose paths start with `/-/`, the commit and issue links do
 not resolve.
+
+The page links to the repository too, as vite.config.ts fills in
+[index.html](../apps/web/index.html): the JSON-LD's `sameAs` and
+`codeRepository`, and the "source code" link shown to a browser that
+runs no script. The about page's links to the repository do not follow
+it ([reuse.md](reuse.md#6-what-you-edit-by-hand)).
 
 The footer's "Created by antwika" is not a setting: it credits who
 made the software, wherever it runs.

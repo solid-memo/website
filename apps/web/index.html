@@ -43,7 +43,9 @@
        one page is the only one there is to index. Absolute URLs because
        crawlers resolve og:image and canonical without the page's base.
        The site's name in the title, the og: tags and the JSON-LD is
-       VITE_APP_NAME, put in by vite.config.ts (docs/configuration.md). -->
+       VITE_APP_NAME, and the repository in the JSON-LD and the noscript
+       link is VITE_REPO_URL, put in by vite.config.ts
+       (docs/configuration.md). -->
   <link rel="canonical" href="https://solid-memo.com/" />
   <meta name="robots" content="index, follow" />
   <meta property="og:type" content="website" />
@@ -78,7 +80,7 @@
           "image": "https://solid-memo.com/social-preview.png",
           "inLanguage": ["en", "sv", "ko", "de", "es", "fr"],
           "license": "https://spdx.org/licenses/MIT",
-          "sameAs": ["https://github.com/solid-memo/website"],
+          "sameAs": [%REPO_URL_JSON%],
           "isAccessibleForFree": true,
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
         },
@@ -86,7 +88,7 @@
           "@type": "SoftwareSourceCode",
           "@id": "https://solid-memo.com/#source",
           "name": %APP_NAME_JSON%,
-          "codeRepository": "https://github.com/solid-memo/website",
+          "codeRepository": %REPO_URL_JSON%,
           "license": "https://spdx.org/licenses/MIT",
           "programmingLanguage": "TypeScript",
           "inLanguage": "en",
@@ -102,7 +104,7 @@
        is built by script, so say what it is and where to read more. -->
   <noscript>
     <p>Solid Memo needs JavaScript. Read <a href="about/">what Solid Memo is</a>,
-      or its <a href="https://github.com/solid-memo/website">source code</a>.</p>
+      or its <a href="%REPO_URL%">source code</a>.</p>
   </noscript>
   <div id="app"></div>
   <script type="module" src="/src/main.tsx"></script>

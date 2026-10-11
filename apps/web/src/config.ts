@@ -47,7 +47,7 @@ export interface SiteConfig {
    * preview.
    */
   appName: string;
-  /** The repository the footer links to: its source code, its commits and its issue forms. */
+  /** The repository the footer links to (its source code, its commits and its issue forms), and the page's JSON-LD. */
   repoUrl: string;
   /** The Pod providers suggested at login and for creating a Pod. */
   podProviders: readonly PodProvider[];
@@ -158,15 +158,20 @@ function escapeHtml(text: string): string {
 }
 
 /**
- * index.html with the site's name in place of its placeholders:
- * `%APP_NAME%` in its text and attributes, `%APP_NAME_JSON%` as a JSON
- * string in its JSON-LD (whose `<` is escaped too, so it cannot end the
- * script). Each is put in as it is, so a `$&` or `$$` in the name stays
+ * index.html with the site's settings in place of its placeholders:
+ * `%APP_NAME%` and `%REPO_URL%` in its text and attributes,
+ * `%APP_NAME_JSON%` and `%REPO_URL_JSON%` as JSON strings in its JSON-LD
+ * (whose `<` is escaped too, so it cannot end the script). One pass puts
+ * each value in as it is: a `$&` in it, or another placeholder, stays
  * text. vite.config.ts applies it to the page as it is built.
  */
-export function siteHtml(html: string, config: Pick<SiteConfig, "appName">): string {
-  const json = JSON.stringify(config.appName).replace(/</g, "\\u003c");
-  return html
-    .replaceAll("%APP_NAME_JSON%", () => json)
-    .replaceAll("%APP_NAME%", () => escapeHtml(config.appName));
+export function siteHtml(html: string, config: Pick<SiteConfig, "appName" | "repoUrl">): string {
+  const values = { APP_NAME: config.appName, REPO_URL: config.repoUrl };
+  return html.replace(
+    /%(APP_NAME|REPO_URL)(_JSON)?%/g,
+    (_, name: keyof typeof values, json: string | undefined) =>
+      json === undefined
+        ? escapeHtml(values[name])
+        : JSON.stringify(values[name]).replace(/</g, "\\u003c"),
+  );
 }

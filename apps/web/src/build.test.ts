@@ -8,7 +8,7 @@ import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { build, loadEnv, type Rolldown } from "vite";
 import { beforeAll, describe, expect, it } from "vitest";
-import { siteConfig, siteHtml } from "./config";
+import { siteConfig, siteHtml, type SiteConfig } from "./config";
 
 /*
  * The production build itself, as the site ships it (docs/markdown.md):
@@ -19,6 +19,11 @@ import { siteConfig, siteHtml } from "./config";
 /** Ways script can turn a string into markup. */
 const HTML_SINKS =
   /\b(?:innerHTML|outerHTML|insertAdjacentHTML|dangerouslySetInnerHTML|createContextualFragment|srcdoc)\b|document\.write/;
+
+/** The settings this build was given, so a fork's own apps/web/.env passes too. */
+function builtConfig(): SiteConfig {
+  return siteConfig(loadEnv("production", resolve(import.meta.dirname, ".."), "VITE_"));
+}
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
@@ -161,13 +166,13 @@ describe("the page's structured data", () => {
     const app = nodeOfType("WebApplication");
     expect([...(app.inLanguage as string[])].sort()).toEqual(["de", "en", "es", "fr", "ko", "sv"]);
     expect(app.license).toBe("https://spdx.org/licenses/MIT");
-    expect(app.sameAs).toEqual(["https://github.com/solid-memo/website"]);
+    expect(app.sameAs).toEqual([builtConfig().repoUrl]);
   });
 
   it("gives the source code its repository, as the app's own node", () => {
     const app = nodeOfType("WebApplication");
     const source = nodeOfType("SoftwareSourceCode");
-    expect(source.codeRepository).toBe("https://github.com/solid-memo/website");
+    expect(source.codeRepository).toBe(builtConfig().repoUrl);
     expect(source.license).toBe(app.license);
     expect(source.targetProduct).toEqual({ "@id": app["@id"] });
   });
@@ -175,11 +180,9 @@ describe("the page's structured data", () => {
 
 describe("the page's name", () => {
   it("is the site's (VITE_APP_NAME, Solid Memo when unset) in its title, link preview and JSON-LD", () => {
-    // The name this build was given, so a fork's own apps/web/.env passes too.
-    const { appName } = siteConfig(
-      loadEnv("production", resolve(import.meta.dirname, ".."), "VITE_"),
-    );
-    const inHtml = siteHtml("%APP_NAME%", { appName });
+    const config = builtConfig();
+    const { appName } = config;
+    const inHtml = siteHtml("%APP_NAME%", config);
     expect(html).not.toContain("%APP_NAME");
     expect(html).toContain(
       `<title>${inHtml} - Spaced-repetition flashcards in your Solid pod</title>`,
@@ -189,5 +192,12 @@ describe("the page's name", () => {
     const jsonLd = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)![1]!;
     const graph = (JSON.parse(jsonLd) as { "@graph": Record<string, unknown>[] })["@graph"];
     expect(graph.map((node) => node.name)).toEqual([appName, appName]);
+  });
+});
+
+describe("the page's repository", () => {
+  it("is the site's (VITE_REPO_URL, Solid Memo's when unset) in its noscript link", () => {
+    expect(html).not.toContain("%REPO_URL");
+    expect(html).toContain(`<a href="${siteHtml("%REPO_URL%", builtConfig())}">source code</a>`);
   });
 });
