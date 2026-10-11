@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Deck groups (docs/data-model.md "Deck groups") against a real Solid
  * server: the decks of an instance grouped, nested, moved, renamed and
@@ -40,9 +45,18 @@ function page(beforeWrite: (url: string) => Promise<void> = async () => undefine
   };
   const writeFence = createWriteFence(watching);
   const podFetch = writeFence.fetch;
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
   const checkWrite = shapeValidator.checkSubjects;
-  const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
+  const deps = {
+    fetch: podFetch,
+    checkWrite,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  };
   return createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -67,20 +81,37 @@ async function seed(server: string): Promise<{ instanceUrl: string; decks: Recor
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
-  await put(`${base}profile/card.ttl`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
+  await put(
+    `${base}profile/card.ttl`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
   const useCases = page();
-  const instance = await useCases.createInstance({ webId }, { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+  const instance = await useCases.createInstance(
+    { webId },
+    { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" },
+  );
   const decks: Record<string, Deck> = {};
   let after: string | null = null;
   for (const name of ["A", "B", "C", "D"]) {
     const deck = await useCases.createDeck(instance.url, { en: name });
     decks[name] = deck;
     // New decks have no position, so they come in the order the server keeps them in: put them in this one.
-    await useCases.editDeckTree(instance.url, { kind: "move", node: deck.url, to: { parent: null, after } });
+    await useCases.editDeckTree(instance.url, {
+      kind: "move",
+      node: deck.url,
+      to: { parent: null, after },
+    });
     after = deck.url;
   }
   return { instanceUrl: instance.url, decks };
@@ -88,7 +119,9 @@ async function seed(server: string): Promise<{ instanceUrl: string; decks: Recor
 
 /** A tree by name: a deck's, or a group's with its children's. */
 function names(nodes: readonly TreeNode[]): unknown[] {
-  return nodes.map((node) => (node.kind === "deck" ? node.deck.title.en : { [node.group.title.en!]: names(node.children) }));
+  return nodes.map((node) =>
+    node.kind === "deck" ? node.deck.title.en : { [node.group.title.en!]: names(node.children) },
+  );
 }
 
 describe.each(SERVERS)("deck groups on $name", ({ url: server }) => {
@@ -104,16 +137,38 @@ describe.each(SERVERS)("deck groups on $name", ({ url: server }) => {
     const fresh = async () => names((await page().listDeckTree(instanceUrl)).children);
 
     const languages = useCases.newDeckGroup(instanceUrl, { en: "New group" });
-    await useCases.editDeckTree(instanceUrl, { kind: "combine", dragged: decks.C!.url, target: decks.A!.url, group: languages });
-    await useCases.editDeckTree(instanceUrl, { kind: "rename", group: languages.url, title: { en: "Languages" } });
+    await useCases.editDeckTree(instanceUrl, {
+      kind: "combine",
+      dragged: decks.C!.url,
+      target: decks.A!.url,
+      group: languages,
+    });
+    await useCases.editDeckTree(instanceUrl, {
+      kind: "rename",
+      group: languages.url,
+      title: { en: "Languages" },
+    });
     expect(await fresh()).toEqual([{ Languages: ["A", "C"] }, "B", "D"]);
 
     const scripts = useCases.newDeckGroup(instanceUrl, { en: "Scripts" });
-    await useCases.editDeckTree(instanceUrl, { kind: "combine", dragged: decks.B!.url, target: decks.C!.url, group: scripts });
+    await useCases.editDeckTree(instanceUrl, {
+      kind: "combine",
+      dragged: decks.B!.url,
+      target: decks.C!.url,
+      group: scripts,
+    });
     expect(await fresh()).toEqual([{ Languages: ["A", { Scripts: ["C", "B"] }] }, "D"]);
 
-    await useCases.editDeckTree(instanceUrl, { kind: "move", node: decks.D!.url, to: { parent: null, after: null } });
-    await useCases.editDeckTree(instanceUrl, { kind: "move", node: decks.A!.url, to: { parent: scripts.url, after: decks.B!.url } });
+    await useCases.editDeckTree(instanceUrl, {
+      kind: "move",
+      node: decks.D!.url,
+      to: { parent: null, after: null },
+    });
+    await useCases.editDeckTree(instanceUrl, {
+      kind: "move",
+      node: decks.A!.url,
+      to: { parent: scripts.url, after: decks.B!.url },
+    });
     expect(await fresh()).toEqual(["D", { Languages: [{ Scripts: ["C", "B", "A"] }] }]);
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
 
@@ -133,11 +188,21 @@ describe.each(SERVERS)("deck groups on $name", ({ url: server }) => {
       await page().createDeck(instanceUrl, { en: "E" });
     });
     const group = useCases.newDeckGroup(instanceUrl, { en: "Pair" });
-    await useCases.editDeckTree(instanceUrl, { kind: "combine", dragged: decks.B!.url, target: decks.A!.url, group });
+    await useCases.editDeckTree(instanceUrl, {
+      kind: "combine",
+      dragged: decks.B!.url,
+      target: decks.A!.url,
+      group,
+    });
     // Refused as changed, then made again on the document as it is; or, where the server may not refuse it,
     // perhaps patched beside the new deck.
     if (conditional) expect(catalogWrites).toBe(2);
-    expect(names((await page().listDeckTree(instanceUrl)).children)).toEqual([{ Pair: ["A", "B"] }, "C", "D", "E"]);
+    expect(names((await page().listDeckTree(instanceUrl)).children)).toEqual([
+      { Pair: ["A", "B"] },
+      "C",
+      "D",
+      "E",
+    ]);
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
   });
 
@@ -150,26 +215,48 @@ describe.each(SERVERS)("deck groups on $name", ({ url: server }) => {
     const fresh = async () => names((await page().listDeckTree(instanceUrl)).children);
 
     const pair = useCases.newDeckGroup(instanceUrl, { en: "Pair" });
-    await useCases.editDeckTree(instanceUrl, { kind: "combine", dragged: decks.B!.url, target: decks.A!.url, group: pair });
+    await useCases.editDeckTree(instanceUrl, {
+      kind: "combine",
+      dragged: decks.B!.url,
+      target: decks.A!.url,
+      group: pair,
+    });
     writes.length = 0;
-    await useCases.editDeckTree(instanceUrl, { kind: "gather", nodes: [decks.D!.url, decks.C!.url], parent: pair.url });
+    await useCases.editDeckTree(instanceUrl, {
+      kind: "gather",
+      nodes: [decks.D!.url, decks.C!.url],
+      parent: pair.url,
+    });
     expect(await fresh()).toEqual([{ Pair: ["A", "B", "D", "C"] }]);
 
-    const all = (await page().listDecks(instanceUrl)).filter((deck) => [decks.A, decks.C].some((one) => one!.url === deck.url));
+    const all = (await page().listDecks(instanceUrl)).filter((deck) =>
+      [decks.A, decks.C].some((one) => one!.url === deck.url),
+    );
     await useCases.setDecksPace(all, { newCardsPerDay: 3 });
     const paced = await useCases.setDecksDirection(
-      (await page().listDecks(instanceUrl)).filter((deck) => all.some((one) => one.url === deck.url)),
+      (await page().listDecks(instanceUrl)).filter((deck) =>
+        all.some((one) => one.url === deck.url),
+      ),
       "bidirectional",
     );
     // In the order the server lists them.
-    expect(paced.map((deck) => [deck.title.en, deck.newCardsPerDay, deck.direction]).sort()).toEqual([
+    expect(
+      paced.map((deck) => [deck.title.en, deck.newCardsPerDay, deck.direction]).sort(),
+    ).toEqual([
       ["A", 3, "bidirectional"],
       ["C", 3, "bidirectional"],
     ]);
     const read = await page().listDecks(instanceUrl);
-    expect(read.filter((deck) => deck.newCardsPerDay === 3).map((deck) => deck.title.en).sort()).toEqual(["A", "C"]);
+    expect(
+      read
+        .filter((deck) => deck.newCardsPerDay === 3)
+        .map((deck) => deck.title.en)
+        .sort(),
+    ).toEqual(["A", "C"]);
 
-    await useCases.removeDecks(read.filter((deck) => deck.title.en === "B" || deck.title.en === "D"));
+    await useCases.removeDecks(
+      read.filter((deck) => deck.title.en === "B" || deck.title.en === "D"),
+    );
     expect(await fresh()).toEqual([{ Pair: ["A", "C"] }]);
     // One write of the catalog each: the move, the pace, the direction and the removal.
     expect(writes.filter((url) => url.endsWith("/catalog.ttl"))).toHaveLength(4);

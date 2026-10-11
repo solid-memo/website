@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createSolidDataset } from "@inrupt/solid-client";
 import type { ReviewStateRepository } from "@solid-memo/application/ports";
 import type { ReviewState } from "@solid-memo/domain/review";
@@ -41,13 +45,15 @@ export function createSolidReviewStateRepository({
       const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
       if (dataset === null) return null;
       return (
-        toReviewStates(dataset, deck).find((state) => state.cardId === key.cardId && state.direction === key.direction) ??
-        null
+        toReviewStates(dataset, deck).find(
+          (state) => state.cardId === key.cardId && state.direction === key.direction,
+        ) ?? null
       );
     },
 
     async saveReviewState(deck, state): Promise<void> {
-      const dataset = (await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch)) ?? createSolidDataset();
+      const dataset =
+        (await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch)) ?? createSolidDataset();
       const written = withReviewStates(dataset, deck, [state], randomId);
       await checkWrite(written.dataset, written.subjects, "pod");
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);

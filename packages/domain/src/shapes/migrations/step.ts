@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ShapeName, VersionedRecord } from "@solid-memo/vocab/types.generated";
 
 /** The record of one kind at one version. */
@@ -20,11 +24,7 @@ export interface MigrationContext {
  * module per step lives beside this one; the chain of steps from 1 to
  * the latest version of every kind is what `migrate` walks.
  */
-export interface MigrationStep<
-  S extends ShapeName,
-  From extends number,
-  To extends number,
-> {
+export interface MigrationStep<S extends ShapeName, From extends number, To extends number> {
   readonly shape: S;
   readonly from: From;
   readonly to: To;

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
@@ -36,8 +40,20 @@ export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
 
     async fetchLibraryDeck(url): Promise<LibraryDeckContent> {
       const dataset = release(url);
-      const { url: _url, releases: _releases, cardCount: _cardCount, sources: _sources, createdAt: _createdAt, ...about } = listed();
-      return { ...about, url, formatVersion: LATEST_VERSION.libraryDeck, cards: toLibraryCards(url, dataset) };
+      const {
+        url: _url,
+        releases: _releases,
+        cardCount: _cardCount,
+        sources: _sources,
+        createdAt: _createdAt,
+        ...about
+      } = listed();
+      return {
+        ...about,
+        url,
+        formatVersion: LATEST_VERSION.libraryDeck,
+        cards: toLibraryCards(url, dataset),
+      };
     },
 
     async fetchCourseOutline(url) {

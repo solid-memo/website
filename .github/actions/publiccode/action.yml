@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# publiccode.yml, the codebase's description for software catalogs, checked
+# against the publiccode.yml standard by its own parser
+# (docs/testing.md#documentation). The parser is a release binary, checked
+# against the release's checksums, not a Docker image: Docker Hub's limit
+# on pulls without an account is shared by the runners. Without a
+# publiccode.yml there is nothing to check, and the step says so.
+name: publiccode.yml
+description: Validates publiccode.yml with publiccode-parser-go.
+inputs:
+  network:
+    description: Whether to check that the addresses the file names answer ("true"), or only the file and what it names in the repository ("false").
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        NETWORK: ${{ inputs.network }}
+        # renovate: datasource=github-releases depName=italia/publiccode-parser-go
+        PUBLICCODE_PARSER_VERSION: v5.4.3
+      run: |
+        if [ ! -f publiccode.yml ]; then
+          echo "No publiccode.yml: nothing to validate."
+          exit 0
+        fi
+        dir="$RUNNER_TEMP/publiccode-parser"
+        mkdir -p "$dir"
+        (
+          cd "$dir"
+          base="https://github.com/italia/publiccode-parser-go/releases/download/$PUBLICCODE_PARSER_VERSION"
+          curl -fsSLO "$base/publiccode-parser-go_Linux_x86_64.tar.gz"
+          curl -fsSLO "$base/checksums.txt"
+          grep ' publiccode-parser-go_Linux_x86_64.tar.gz$' checksums.txt | sha256sum -c -
+          tar -xzf publiccode-parser-go_Linux_x86_64.tar.gz publiccode-parser
+        )
+        if [ "$NETWORK" = true ]; then
+          "$dir/publiccode-parser" publiccode.yml
+        else
+          "$dir/publiccode-parser" --no-network publiccode.yml
+        fi

@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Translation
+description: Correct a translation of the app, or propose a new language.
+labels: [i18n]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        English is the source. Korean, German, Spanish and French were translated with the help of AI, and corrections from native speakers are welcome. How the app's languages work: [docs/i18n.md](https://github.com/solid-memo/website/blob/main/docs/i18n.md).
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options:
+        - English (en)
+        - Svenska (sv)
+        - 한국어 (ko)
+        - Deutsch (de)
+        - Español (es)
+        - Français (fr)
+        - A new language
+    validations:
+      required: true
+  - type: input
+    id: new
+    attributes:
+      label: New language
+      description: Its name and its BCP 47 code, if it is a new one.
+      placeholder: Nederlands (nl)
+  - type: textarea
+    id: details
+    attributes:
+      label: What to change
+      description: Where in the app the text shows, what it says now, and what it should say. The message's key in `packages/ui/src/i18n/<code>.json` helps, if you know it.
+    validations:
+      required: true
+  - type: dropdown
+    id: speaker
+    attributes:
+      label: Your knowledge of the language
+      options:
+        - Native speaker
+        - Fluent
+        - Learning it

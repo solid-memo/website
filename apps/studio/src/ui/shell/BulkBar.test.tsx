@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { useState } from "preact/hooks";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
@@ -6,13 +10,33 @@ import { BulkBar } from "./BulkBar";
 import { WithKeys } from "../../test/keys";
 
 /** A bar of `count` rows selected, with a menu first, a button first, or nothing to do. */
-function Harness({ count, actions, onClear = vi.fn() }: { count: number; actions: "menu" | "button" | "none"; onClear?: () => void }) {
+function Harness({
+  count,
+  actions,
+  onClear = vi.fn(),
+}: {
+  count: number;
+  actions: "menu" | "button" | "none";
+  onClear?: () => void;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <WithKeys>
-      <BulkBar label="Selected planets" count={count} said={`${count} planets selected`} onClear={onClear}>
+      <BulkBar
+        label="Selected planets"
+        count={count}
+        said={`${count} planets selected`}
+        onClear={onClear}
+      >
         {actions === "menu" && (
-          <ActionsMenu label="Edit the selected planets" text="Edit" buttonClass="" open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}>
+          <ActionsMenu
+            label="Edit the selected planets"
+            text="Edit"
+            buttonClass=""
+            open={open}
+            onOpen={() => setOpen(true)}
+            onClose={() => setOpen(false)}
+          >
             <MenuItem onSelect={vi.fn()}>Rename</MenuItem>
           </ActionsMenu>
         )}
@@ -22,7 +46,8 @@ function Harness({ count, actions, onClear = vi.fn() }: { count: number; actions
   );
 }
 
-const key = (name: string) => fireEvent.keyDown(document.activeElement ?? document.body, { key: name });
+const key = (name: string) =>
+  fireEvent.keyDown(document.activeElement ?? document.body, { key: name });
 
 describe("BulkBar", () => {
   it("shows nothing while no row is selected, but says so", () => {
@@ -40,7 +65,11 @@ describe("BulkBar", () => {
     const bar = screen.getByRole("group", { name: "Selected planets" });
     expect(bar).toHaveTextContent("2 planets selected");
     expect(screen.getByRole("status")).toHaveTextContent("2 planets selected");
-    expect(within(bar).getAllByRole("button").map((button) => button.textContent)).toEqual(["Explore", "Clear selection"]);
+    expect(
+      within(bar)
+        .getAllByRole("button")
+        .map((button) => button.textContent),
+    ).toEqual(["Explore", "Clear selection"]);
     fireEvent.click(within(bar).getByRole("button", { name: "Clear selection" }));
     expect(onClear).toHaveBeenCalled();
   });

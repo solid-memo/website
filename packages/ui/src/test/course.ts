@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Course } from "@solid-memo/application/useCases";
 import { courseProgress, type CourseOutline } from "@solid-memo/domain/course";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -78,7 +82,13 @@ export const courseOutline: CourseOutline = {
       title: { en: "Linked data", sv: "Länkade data" },
       description: { en: "Names and links." },
       steps: [
-        { id: "s-1", url: `${RELEASE}#s-1`, position: 0, theory: { en: "Things are named by IRIs." }, questionIds: ["q-1"] },
+        {
+          id: "s-1",
+          url: `${RELEASE}#s-1`,
+          position: 0,
+          theory: { en: "Things are named by IRIs." },
+          questionIds: ["q-1"],
+        },
         {
           id: "s-2",
           url: `${RELEASE}#s-2`,
@@ -94,7 +104,15 @@ export const courseOutline: CourseOutline = {
       url: CH2,
       position: 1,
       title: { en: "Pods" },
-      steps: [{ id: "s-3", url: `${RELEASE}#s-3`, position: 0, theory: { en: "A pod stores data." }, questionIds: ["q-4"] }],
+      steps: [
+        {
+          id: "s-3",
+          url: `${RELEASE}#s-3`,
+          position: 0,
+          theory: { en: "A pod stores data." },
+          questionIds: ["q-4"],
+        },
+      ],
       reviewQuestionIds: [],
     },
   ],

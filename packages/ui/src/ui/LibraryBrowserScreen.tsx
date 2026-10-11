@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { LibraryCard, LibraryDeck } from "@solid-memo/domain/library";
 import { CARDS_PER_PAGE } from "./BrowserScreen";
 import { CardRowBack, CardRowFront } from "./CardFace";
@@ -112,11 +116,7 @@ export function LibraryBrowserScreen({
             </tbody>
           </table>
           {pageCount > 1 && (
-            <Pager
-              page={currentPage}
-              pageCount={pageCount}
-              onPageChange={onPageChange}
-            />
+            <Pager page={currentPage} pageCount={pageCount} onPageChange={onPageChange} />
           )}
         </>
       )}

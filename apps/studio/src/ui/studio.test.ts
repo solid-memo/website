@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
@@ -14,7 +18,11 @@ beforeAll(() => {
   const site = createRequire(import.meta.url).resolve("@solid-memo/ui/style.css");
   for (const path of [site, join(import.meta.dirname, "studio.css")]) {
     const style = document.createElement("style");
-    style.textContent = readFileSync(path, "utf8").replace(/^@import .*$/gm, "");
+    // On one line each, a selector or a value broken over lines: happy-dom
+    // drops a rule whose selector list breaks inside `:not(…)`.
+    style.textContent = readFileSync(path, "utf8")
+      .replace(/^@import .*$/gm, "")
+      .replace(/\n\s*/g, " ");
     document.head.append(style);
   }
 });
@@ -23,7 +31,9 @@ const root = document.documentElement;
 
 /** The test DOM's window this wide, as its own (happy-dom's) way has it: the cascade's @media reads it. */
 const viewport = (width: number) =>
-  (window as unknown as { happyDOM: { setViewport: (size: { width: number }) => void } }).happyDOM.setViewport({ width });
+  (
+    window as unknown as { happyDOM: { setViewport: (size: { width: number }) => void } }
+  ).happyDOM.setViewport({ width });
 
 afterEach(() => {
   document.body.innerHTML = "";
@@ -161,12 +171,20 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(page, "thead th:first-child").zIndex).toBe("2");
     expect(styleOf(page, "tbody tr.cursor > td:first-child").boxShadow).toContain("inset");
     expect(styleOf(page, "tbody tr.selected > td:first-child").boxShadow).not.toContain("inset");
-    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).toBe(styleOf(page, "tbody tr[aria-current] > td:last-child").backgroundColor);
-    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).not.toBe(styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor);
+    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).toBe(
+      styleOf(page, "tbody tr[aria-current] > td:last-child").backgroundColor,
+    );
+    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).not.toBe(
+      styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor,
+    );
     expect(styleOf(page, "tbody tr[aria-current] > td:first-child").boxShadow).toContain("inset");
-    // The row's name, though it stays in sight on a colour of its own, takes the row's.
-    expect(styleOf(page, "tbody tr.cursor > th").backgroundColor).toBe(styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor);
-    expect(styleOf(page, "tbody tr.selected > th").backgroundColor).toBe(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor);
+    // The row's name, though it stays in sight on a color of its own, takes the row's.
+    expect(styleOf(page, "tbody tr.cursor > th").backgroundColor).toBe(
+      styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor,
+    );
+    expect(styleOf(page, "tbody tr.selected > th").backgroundColor).toBe(
+      styleOf(page, "tbody tr.selected > td:last-child").backgroundColor,
+    );
   });
 
   it("packs a table's filters into one row, each label beside its field, and keeps the bar of the rows selected in sight", () => {

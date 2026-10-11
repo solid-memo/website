@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMemo, useState } from "preact/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Course, UseCases } from "@solid-memo/application/useCases";
@@ -17,7 +21,12 @@ import { useKeepSchedule } from "./keepSchedule";
  * cards and counts. Shared by a chapter's steps and its final review.
  * The answer is given at the screen's time (useClock).
  */
-export function useCourseAnswer(useCases: UseCases, instance: Instance, course: Course, onAnswered: (answer: CheckedAnswer) => void) {
+export function useCourseAnswer(
+  useCases: UseCases,
+  instance: Instance,
+  course: Course,
+  onAnswered: (answer: CheckedAnswer) => void,
+) {
   const queryClient = useQueryClient();
   const deck = course.deck;
   const noteGraded = useKeepSchedule(useCases, instance.url, deck);
@@ -73,10 +82,22 @@ export function ChapterPlayerContainer({
   random?: () => number;
 }) {
   const { errorText } = useI18n();
-  const [at, setAt] = useState<{ step: number; phase: StepPhase; chunk: number; question: number }>(() => {
-    const resume = course.progress.chapters.find((entry) => entry.url === chapter.url)!.resumeStepId;
-    return { step: Math.max(chapter.steps.findIndex((step) => step.id === resume), 0), phase: "read", chunk: 0, question: 0 };
-  });
+  const [at, setAt] = useState<{ step: number; phase: StepPhase; chunk: number; question: number }>(
+    () => {
+      const resume = course.progress.chapters.find(
+        (entry) => entry.url === chapter.url,
+      )!.resumeStepId;
+      return {
+        step: Math.max(
+          chapter.steps.findIndex((step) => step.id === resume),
+          0,
+        ),
+        phase: "read",
+        chunk: 0,
+        question: 0,
+      };
+    },
+  );
   const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
   const step = chapter.steps[at.step]!;
   const card = course.cards[step.questionIds[at.question]!]!;

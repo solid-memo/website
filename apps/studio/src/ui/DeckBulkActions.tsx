@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { DECK_DIRECTIONS, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import type { DeckPace } from "@solid-memo/domain/deckPace";
@@ -18,7 +22,7 @@ type Form = "move" | "pace" | "direction";
  * in its BulkBar: move them into a group (or to the top level), give
  * them a pace or a direction (the three in a menu, Edit, each asking how
  * in a dialog), export them (a link to import and export, `exportHref`,
- * with them ticked), or delete them, once the user confirms
+ * with them checked), or delete them, once the user confirms
  * (ConfirmDialog), naming each. Each resolves to whether it was done;
  * the screen says what was and why not. Only one is made at a time
  * (`busy`).
@@ -40,7 +44,7 @@ export function DeckBulkActions({
   /** Why none can be moved into a group; null when they can. */
   moveLocked: MoveLock | null;
   busy: boolean;
-  /** Import and export, the selected decks ticked to export. */
+  /** Import and export, the selected decks checked to export. */
   exportHref: string;
   /** Into the group of that URL; null for the top level. */
   onMove: (parent: string | null) => Promise<boolean>;
@@ -111,7 +115,13 @@ export function DeckBulkActions({
         <Dialog heading={t(`studio.bulk.${form}`)} onClose={() => setForm(null)}>
           {form === "move" &&
             (moveLocked !== null ? (
-              <p class="hint">{t(moveLocked === "newerVersion" ? "studio.bulk.moveReadOnly" : "studio.bulk.moveSetAside")}</p>
+              <p class="hint">
+                {t(
+                  moveLocked === "newerVersion"
+                    ? "studio.bulk.moveReadOnly"
+                    : "studio.bulk.moveSetAside",
+                )}
+              </p>
             ) : (
               <form
                 aria-label={t("studio.bulk.move")}
@@ -122,7 +132,11 @@ export function DeckBulkActions({
               >
                 <label>
                   {t("studio.bulk.group")}
-                  <select autoFocus value={parent} onChange={(event) => setParent(event.currentTarget.value)}>
+                  <select
+                    autoFocus
+                    value={parent}
+                    onChange={(event) => setParent(event.currentTarget.value)}
+                  >
                     <option value="">{t("studio.bulk.topLevel")}</option>
                     {groups.map(({ group, trail }) => (
                       <option key={group.url} value={group.url}>
@@ -149,7 +163,14 @@ export function DeckBulkActions({
             >
               <label>
                 {t("studio.bulk.newCardsPerDay")}
-                <input type="number" autoFocus min={0} step={1} value={newCards} onInput={(event) => setNewCards(event.currentTarget.value)} />
+                <input
+                  type="number"
+                  autoFocus
+                  min={0}
+                  step={1}
+                  value={newCards}
+                  onInput={(event) => setNewCards(event.currentTarget.value)}
+                />
               </label>
               <label>
                 {t("studio.bulk.maxReviewsPerDay")}
@@ -175,7 +196,11 @@ export function DeckBulkActions({
             >
               <label>
                 {t("studio.decks.direction")}
-                <select autoFocus value={direction} onChange={(event) => setDirection(event.currentTarget.value as DeckDirection)}>
+                <select
+                  autoFocus
+                  value={direction}
+                  onChange={(event) => setDirection(event.currentTarget.value as DeckDirection)}
+                >
                   {DECK_DIRECTIONS.map((option) => (
                     <option key={option} value={option}>
                       {directionLabel(option)}

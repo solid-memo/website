@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { composing } from "./composing";
 import { CheckIcon } from "./icons";
@@ -71,7 +75,12 @@ export function NameEditor({
           finish(null, true);
         }}
       />
-      <button type="submit" class="icon" aria-label={t("deckList.saveName")} title={t("deckList.saveName")}>
+      <button
+        type="submit"
+        class="icon"
+        aria-label={t("deckList.saveName")}
+        title={t("deckList.saveName")}
+      >
         <CheckIcon />
       </button>
     </form>

@@ -1,7 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { MAX_CHARS } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
-import { CACHE_SIZE, deckTextCheck, markdownBlocks, markdownChunks, markdownPhrases, plainTexts, releaseMarkdownCheck } from "./markdownCache";
+import {
+  CACHE_SIZE,
+  deckTextCheck,
+  markdownBlocks,
+  markdownChunks,
+  markdownPhrases,
+  plainTexts,
+  releaseMarkdownCheck,
+} from "./markdownCache";
 
 vi.mock("@solid-memo/markdown/plainText", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/markdown/plainText")>();
@@ -11,10 +23,19 @@ vi.mock("@solid-memo/markdown/plainText", async (importOriginal) => {
 describe("markdownBlocks and markdownPhrases", () => {
   it("parse a text once, giving back what they gave before", () => {
     const blocks = markdownBlocks("*cached*");
-    expect(blocks).toEqual([{ type: "paragraph", children: [{ type: "emphasis", children: [{ type: "text", value: "cached" }] }] }]);
+    expect(blocks).toEqual([
+      {
+        type: "paragraph",
+        children: [{ type: "emphasis", children: [{ type: "text", value: "cached" }] }],
+      },
+    ]);
     expect(markdownBlocks("*cached*")).toBe(blocks);
     const phrases = markdownPhrases("- a\n- b");
-    expect(phrases).toEqual([{ type: "text", value: "a" }, { type: "text", value: "; " }, { type: "text", value: "b" }]);
+    expect(phrases).toEqual([
+      { type: "text", value: "a" },
+      { type: "text", value: "; " },
+      { type: "text", value: "b" },
+    ]);
     expect(markdownPhrases("- a\n- b")).toBe(phrases);
   });
 
@@ -53,7 +74,9 @@ describe("plainTexts", () => {
     expect(plain("**Coffee** shop")).toBe("Coffee shop");
     expect(plain("*text* 0")).toBe("text 0");
     expect(plainText).toHaveBeenCalledTimes(CACHE_SIZE + 2);
-    expect(vi.mocked(plainText).mock.calls.filter(([text]) => text === "**Coffee** shop")).toHaveLength(1);
+    expect(
+      vi.mocked(plainText).mock.calls.filter(([text]) => text === "**Coffee** shop"),
+    ).toHaveLength(1);
   });
 });
 
@@ -61,7 +84,9 @@ describe("deckTextCheck", () => {
   it("reads plain text and checks each field by the markdown package's rule", () => {
     const text = deckTextCheck();
     expect(text.plain("**Coffee**")).toBe("Coffee");
-    expect(text.check("[a](https://example.org)", "side")).toEqual([{ code: "link", source: "[a](https://example.org)", autolink: false }]);
+    expect(text.check("[a](https://example.org)", "side")).toEqual([
+      { code: "link", source: "[a](https://example.org)", autolink: false },
+    ]);
     expect(text.check("[example.org](https://example.org)", "prose")).toEqual([]);
     expect(text.check("a\n\nb", "option")).toEqual([{ code: "notOneParagraph" }]);
   });
@@ -88,7 +113,10 @@ describe("releaseMarkdownCheck", () => {
     // Timed against the first read on the same machine, not the clock: CI
     // runs the tests, coverage on, many times slower than a laptop.
     const check = releaseMarkdownCheck();
-    const texts = Array.from({ length: 1400 }, (_, index) => `**Option** ${index} with [a link](https://example.org/${index}) and \`code\``);
+    const texts = Array.from(
+      { length: 1400 },
+      (_, index) => `**Option** ${index} with [a link](https://example.org/${index}) and \`code\``,
+    );
     let started = performance.now();
     for (const text of texts) check.problems(text, "option");
     const read = performance.now() - started;

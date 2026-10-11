@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { isMarkdown } from "@solid-memo/domain/deck";
 import { isPublished, questionsOfStep } from "@solid-memo/domain/release/courseIds";
 import { chapterOfStep, draftCardOf } from "@solid-memo/domain/release/draftOutline";
@@ -45,8 +49,10 @@ export function StepEditorScreen({
   const { t, readerText } = useI18n();
   const data = draft.steps.find((node) => node.id === step)!.data;
   const chapter = chapterOfStep(draft, step);
-  const chapterData = chapter === null ? undefined : draft.chapters.find((node) => node.id === chapter)!.data;
-  const number = chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === step);
+  const chapterData =
+    chapter === null ? undefined : draft.chapters.find((node) => node.id === chapter)!.data;
+  const number =
+    chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === step);
   const name = number === -1 ? step : t("studio.chapter.step", { number: number + 1 });
 
   return (
@@ -56,7 +62,10 @@ export function StepEditorScreen({
         <p class="hint">
           {chapter !== null && (
             <>
-              {t("studio.step.inChapter")} <a href={links.chapterHref(chapter)}>{chapterData!.title === undefined ? chapter : readerText(chapterData!.title)}</a>
+              {t("studio.step.inChapter")}{" "}
+              <a href={links.chapterHref(chapter)}>
+                {chapterData!.title === undefined ? chapter : readerText(chapterData!.title)}
+              </a>
               {" · "}
             </>
           )}
@@ -75,17 +84,32 @@ export function StepEditorScreen({
           markdown={isMarkdown(data.textFormat)}
           disabled={readOnly !== null}
           arrival={field === "theory"}
-          preview={(shown, markdown) => <DataProse class="course-theory" text={shown} markdown={markdown} />}
+          preview={(shown, markdown) => (
+            <DataProse class="course-theory" text={shown} markdown={markdown} />
+          )}
           onSave={(theory, markdown) =>
             onEdit(
-              [{ kind: "editStep", id: step, text: { ...(Object.keys(theory).length === 0 ? {} : { theory }), textFormat: proseFormat(markdown, data.textFormat) } }],
+              [
+                {
+                  kind: "editStep",
+                  id: step,
+                  text: {
+                    ...(Object.keys(theory).length === 0 ? {} : { theory }),
+                    textFormat: proseFormat(markdown, data.textFormat),
+                  },
+                },
+              ],
               { debounce: true },
             )
           }
         />
 
         <section aria-labelledby="step-questions-heading">
-          <h3 id="step-questions-heading" tabIndex={-1} data-arrival={field === "questions" || undefined}>
+          <h3
+            id="step-questions-heading"
+            tabIndex={-1}
+            data-arrival={field === "questions" || undefined}
+          >
             {t("studio.step.questions")}
           </h3>
           <p class="hint">{t("studio.step.questionsHint")}</p>
@@ -94,7 +118,9 @@ export function StepEditorScreen({
               const found = draftCardOf(draft, card);
               return (
                 <li key={card}>
-                  <a href={links.questionHref(card)}>{found === null ? card : cardName({ ...found.content, id: card }, readerText)}</a>
+                  <a href={links.questionHref(card)}>
+                    {found === null ? card : cardName({ ...found.content, id: card }, readerText)}
+                  </a>
                 </li>
               );
             })}

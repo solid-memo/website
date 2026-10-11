@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   createContainerAt,
   fromRdfJsDataset,
@@ -70,7 +74,7 @@ function moveIri(iri: string, move: ContainerMove): string {
 /**
  * The InstanceCopier over a Solid pod: documents copied with every IRI
  * under the old container moved under the new one (a deck's cards
- * document, the catalogue node), other files byte for byte. The engine
+ * document, the catalog node), other files byte for byte. The engine
  * module (lazy, like the validator's) does the moving.
  */
 export function createSolidInstanceCopier({
@@ -81,7 +85,10 @@ export function createSolidInstanceCopier({
   loadEngine?: () => Promise<{ mapIris: typeof import("@solid-memo/shacl/engine").mapIris }>;
 }): InstanceCopier {
   /** A dataset with every IRI moved. */
-  async function rebasedDataset(dataset: Parameters<typeof toRdfJsDataset>[0], move: ContainerMove) {
+  async function rebasedDataset(
+    dataset: Parameters<typeof toRdfJsDataset>[0],
+    move: ContainerMove,
+  ) {
     const { mapIris } = await loadEngine();
     return fromRdfJsDataset(mapIris(toRdfJsDataset(dataset), (iri) => moveIri(iri, move)));
   }
@@ -121,9 +128,13 @@ export function createSolidInstanceCopier({
       }
       const file = await getFile(from, { fetch: source.fetch });
       try {
-        await overwriteFile(to, file, { contentType: contentType || file.type, fetch: createOnly(fetch) });
+        await overwriteFile(to, file, {
+          contentType: contentType || file.type,
+          fetch: createOnly(fetch),
+        });
       } catch (error) {
-        if ((error as { statusCode?: number }).statusCode === 412) throw new PreconditionFailedError(to, "absent");
+        if ((error as { statusCode?: number }).statusCode === 412)
+          throw new PreconditionFailedError(to, "absent");
         throw error;
       }
       return source.version();
@@ -150,7 +161,10 @@ export function createSolidInstanceCopier({
     async versionOf(url) {
       const source = versionRecorder(fetch);
       // As the app reads it, and never a browser's earlier answer.
-      const response = await source.fetch(url, { cache: "no-store", headers: { Accept: "text/turtle" } });
+      const response = await source.fetch(url, {
+        cache: "no-store",
+        headers: { Accept: "text/turtle" },
+      });
       if (response.status === 404) return null;
       if (!response.ok) throw new AppError("cannotCheck", { url, status: response.status });
       return source.version();

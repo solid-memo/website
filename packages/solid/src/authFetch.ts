@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
 
 /** Window event dispatched when the pod answers 401 (expired session). */

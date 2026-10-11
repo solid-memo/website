@@ -17,7 +17,7 @@
 # history note when it arrived.
 <>
     a skos:ConceptScheme ;
-    owl:versionInfo "1.10" ;
+    owl:versionInfo "1.11" ;
     skos:changeNote "1.0: languages, swedish, geography, computing, science, chemistry." ,
                     "1.1: art." ,
                     "1.2: labour-market." ,
@@ -28,7 +28,8 @@
                     "1.7: linked-data." ,
                     "1.8: korean; every topic named and defined in Korean as well." ,
                     "1.9: every topic named and defined in German, Spanish and French as well." ,
-                    "1.10: japanese, english." ;
+                    "1.10: japanese, english." ,
+                    "1.11: the scheme states its license, MIT." ;
     dcterms:title "Solid Memo topics"@en ,
                   "Solid Memo-ämnen"@sv ,
                   "Solid Memo 주제"@ko ,
@@ -41,6 +42,7 @@
                     "Worum es in einem Stapel Karteikarten geht."@de ,
                     "De qué trata un mazo de tarjetas de memoria."@es ,
                     "Ce dont traite un paquet de cartes mémoire."@fr ;
+    dcterms:license <https://spdx.org/licenses/MIT> ;
     skos:hasTopConcept topic:languages ,
                        topic:geography ,
                        topic:computing ,

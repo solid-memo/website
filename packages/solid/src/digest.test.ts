@@ -1,7 +1,17 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { buildThing, createSolidDataset, createThing, setThing } from "@inrupt/solid-client";
 import type { Deck } from "@solid-memo/domain/deck";
-import { ABSENT_VERSION, emptyDigest, withReceipt, withSchedule, type StoredSchedule } from "@solid-memo/domain/studyDigest";
+import {
+  ABSENT_VERSION,
+  emptyDigest,
+  withReceipt,
+  withSchedule,
+  type StoredSchedule,
+} from "@solid-memo/domain/studyDigest";
 import { readDataset, readDatasetSince, saveDataset, UNCHANGED, versionOf } from "./datasets";
 import { readSince } from "./readSince";
 import { createSolidDeckRepository } from "./solidDeckRepository";
@@ -26,7 +36,10 @@ const deck = {
 
 async function podWithDeck() {
   const pod = fakePod();
-  await pod.put(CARDS, `${PREFIXES}<#a> a sm:Card ; sm:formatVersion 1 ; sm:front "Sweden" ; sm:back "Stockholm" .`);
+  await pod.put(
+    CARDS,
+    `${PREFIXES}<#a> a sm:Card ; sm:formatVersion 1 ; sm:front "Sweden" ; sm:back "Stockholm" .`,
+  );
   return pod;
 }
 
@@ -39,7 +52,7 @@ describe("reading a document since a version", () => {
     const read = await readDatasetSince(CARDS, version, pod.fetch);
     expect(read).not.toBe(UNCHANGED);
     expect(versionOf(read as object)).toBe(pod.etag(CARDS));
-    // A plain read afterwards revalidates what that read learned.
+    // A plain read afterward revalidates what that read learned.
     await readDataset(CARDS, pod.fetch);
     expect(pod.requests.at(-1)).toMatchObject({ ifNoneMatch: pod.etag(CARDS), status: 304 });
   });
@@ -54,7 +67,16 @@ describe("reading a document since a version", () => {
     const holdAgain = pod.holdReads();
     const stillBefore = readDatasetSince(CARDS, version, pod.fetch);
     const elsewhere = readDataset(REVIEWS, pod.fetch).catch(() => null);
-    await saveDataset(CARDS, setThing(dataset, buildThing(createThing({ url: `${CARDS}#b` })).addStringNoLocale(`${SM}front`, "x").build()), pod.fetch);
+    await saveDataset(
+      CARDS,
+      setThing(
+        dataset,
+        buildThing(createThing({ url: `${CARDS}#b` }))
+          .addStringNoLocale(`${SM}front`, "x")
+          .build(),
+      ),
+      pod.fetch,
+    );
     const after = readDatasetSince(CARDS, version, pod.fetch);
     holdAgain();
     expect(await after).not.toBe(UNCHANGED);
@@ -75,7 +97,10 @@ describe("reading a document since a version", () => {
   it("shares a read of the same version under way", async () => {
     const pod = await podWithDeck();
     const version = pod.etag(CARDS)!;
-    const [a, b] = await Promise.all([readDatasetSince(CARDS, version, pod.fetch), readDatasetSince(CARDS, version, pod.fetch)]);
+    const [a, b] = await Promise.all([
+      readDatasetSince(CARDS, version, pod.fetch),
+      readDatasetSince(CARDS, version, pod.fetch),
+    ]);
     expect([a, b]).toEqual([UNCHANGED, UNCHANGED]);
     expect(pod.requests).toHaveLength(1);
   });
@@ -88,35 +113,64 @@ describe("reading a document since a version", () => {
     const pod = await podWithDeck();
     const read = await readSince(CARDS, undefined, pod.fetch);
     expect(read).toMatchObject({ unchanged: false, version: pod.etag(CARDS) });
-    expect(await readSince(REVIEWS, undefined, pod.fetch)).toEqual({ unchanged: false, value: null, version: ABSENT_VERSION });
+    expect(await readSince(REVIEWS, undefined, pod.fetch)).toEqual({
+      unchanged: false,
+      value: null,
+      version: ABSENT_VERSION,
+    });
     expect(await readSince(REVIEWS, ABSENT_VERSION, pod.fetch)).toEqual({ unchanged: true });
-    expect(await readSince(CARDS, ABSENT_VERSION, pod.fetch)).toMatchObject({ unchanged: false, version: pod.etag(CARDS) });
-    expect(await readSince(REVIEWS, '"gone"', pod.fetch)).toEqual({ unchanged: false, value: null, version: ABSENT_VERSION });
+    expect(await readSince(CARDS, ABSENT_VERSION, pod.fetch)).toMatchObject({
+      unchanged: false,
+      version: pod.etag(CARDS),
+    });
+    expect(await readSince(REVIEWS, '"gone"', pod.fetch)).toEqual({
+      unchanged: false,
+      value: null,
+      version: ABSENT_VERSION,
+    });
     const noEtag = (async () => {
-      const response = new Response(`<#a> <#b> "c" .`, { headers: { "Content-Type": "text/turtle" } });
+      const response = new Response(`<#a> <#b> "c" .`, {
+        headers: { "Content-Type": "text/turtle" },
+      });
       Object.defineProperty(response, "url", { value: CARDS });
       return response;
     }) as unknown as typeof globalThis.fetch;
-    expect(await readSince(CARDS, undefined, noEtag)).toMatchObject({ unchanged: false, version: null });
+    expect(await readSince(CARDS, undefined, noEtag)).toMatchObject({
+      unchanged: false,
+      version: null,
+    });
   });
 });
 
 describe("cards, review states and checks since a version", () => {
   it("reads a deck's cards and review states unless they are unchanged", async () => {
     const pod = await podWithDeck();
-    const decks = createSolidDeckRepository({ fetch: pod.fetch, now: () => new Date(), randomId: () => "x" });
+    const decks = createSolidDeckRepository({
+      fetch: pod.fetch,
+      now: () => new Date(),
+      randomId: () => "x",
+    });
     const reviews = createSolidReviewStateRepository({ fetch: pod.fetch });
     const cards = await decks.readCardsSince(deck, undefined);
     expect(cards).toMatchObject({ unchanged: false, version: pod.etag(CARDS) });
     expect(cards.unchanged || cards.value.map((c) => c.id)).toEqual(["a"]);
     expect(await decks.readCardsSince(deck, pod.etag(CARDS))).toEqual({ unchanged: true });
-    expect(await decks.readCardsSince({ ...deck, cardsDocumentUrl: `${INSTANCE}decks/none.ttl` }, undefined)).toEqual({
+    expect(
+      await decks.readCardsSince(
+        { ...deck, cardsDocumentUrl: `${INSTANCE}decks/none.ttl` },
+        undefined,
+      ),
+    ).toEqual({
       unchanged: false,
       value: [],
       version: ABSENT_VERSION,
     });
 
-    expect(await reviews.readReviewStatesSince(deck, undefined)).toEqual({ unchanged: false, value: [], version: ABSENT_VERSION });
+    expect(await reviews.readReviewStatesSince(deck, undefined)).toEqual({
+      unchanged: false,
+      value: [],
+      version: ABSENT_VERSION,
+    });
     expect(await reviews.readReviewStatesSince(deck, ABSENT_VERSION)).toEqual({ unchanged: true });
     await pod.put(
       REVIEWS,
@@ -135,12 +189,26 @@ describe("cards, review states and checks since a version", () => {
       shapesBaseUrl: "https://shapes.example/",
       vocabBaseUrl: "https://vocab.example/",
       vendorBaseUrl: "https://app.example/vendor/",
-      loader: { load: async () => createSolidDataset() as never, loadProfile: async () => [], loadReferenceData: async () => [] },
-      loadEngine: async () => ({ createEngine: () => ({ validateNode: async () => [], validate: async () => [] }), mergeDatasets: () => ({}) as never, mapIris: (data) => data }),
+      loader: {
+        load: async () => createSolidDataset() as never,
+        loadProfile: async () => [],
+        loadReferenceData: async () => [],
+      },
+      loadEngine: async () => ({
+        createEngine: () => ({ validateNode: async () => [], validate: async () => [] }),
+        mergeDatasets: () => ({}) as never,
+        mapIris: (data) => data,
+      }),
     });
-    expect(await validator.validateDocumentSince(CARDS, pod.etag(CARDS))).toEqual({ unchanged: true });
+    expect(await validator.validateDocumentSince(CARDS, pod.etag(CARDS))).toEqual({
+      unchanged: true,
+    });
     const checked = await validator.validateDocumentSince(CARDS, undefined);
-    expect(checked).toMatchObject({ unchanged: false, version: pod.etag(CARDS), value: { url: CARDS, status: "checked" } });
+    expect(checked).toMatchObject({
+      unchanged: false,
+      version: pod.etag(CARDS),
+      value: { url: CARDS, status: "checked" },
+    });
     expect(await validator.validateDocumentSince(REVIEWS, undefined)).toMatchObject({
       unchanged: false,
       version: ABSENT_VERSION,
@@ -165,7 +233,10 @@ describe("the instance's digest in the pod", () => {
     },
   };
   const learned = (digest = emptyDigest()) =>
-    withSchedule(withReceipt(digest, CARDS, '"v1"', { conformedTo: "rules", latestFormat: true }), schedule);
+    withSchedule(
+      withReceipt(digest, CARDS, '"v1"', { conformedTo: "rules", latestFormat: true }),
+      schedule,
+    );
 
   it("is null until something is learned, then read back as written", async () => {
     const pod = fakePod();
@@ -188,7 +259,9 @@ describe("the instance's digest in the pod", () => {
     await digests.updateDigest(INSTANCE, () => learned());
     const written = pod.etag(DIGEST);
     pod.clearRequests();
-    await digests.updateDigest(INSTANCE, (stored) => withReceipt(stored!, REVIEWS, '"r1"', { latestFormat: true }));
+    await digests.updateDigest(INSTANCE, (stored) =>
+      withReceipt(stored!, REVIEWS, '"r1"', { latestFormat: true }),
+    );
     expect(pod.requests.filter((r) => r.method !== "GET")).toEqual([
       expect.objectContaining({ method: "PATCH", url: DIGEST, ifMatch: written }),
     ]);
@@ -202,8 +275,14 @@ describe("the instance's digest in the pod", () => {
     const pod = fakePod();
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
     await digests.updateDigest(INSTANCE, () => learned());
-    await digests.updateDigest(INSTANCE, (stored) => ({ receipts: {}, schedules: stored!.schedules }));
-    expect(await digests.readDigest(INSTANCE)).toEqual({ receipts: {}, schedules: { [deck.url]: schedule } });
+    await digests.updateDigest(INSTANCE, (stored) => ({
+      receipts: {},
+      schedules: stored!.schedules,
+    }));
+    expect(await digests.readDigest(INSTANCE)).toEqual({
+      receipts: {},
+      schedules: { [deck.url]: schedule },
+    });
     expect(pod.triples(DIGEST)!.some((t) => t.includes("#receipt-"))).toBe(false);
     await digests.updateDigest(INSTANCE, () => emptyDigest());
     expect(pod.triples(DIGEST)).toEqual([]);
@@ -212,8 +291,12 @@ describe("the instance's digest in the pod", () => {
   it("writes changes asked for while a write is under way together, in the next one", async () => {
     const pod = fakePod();
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
-    const first = digests.updateDigest(INSTANCE, (stored) => withReceipt(stored ?? emptyDigest(), CARDS, '"v1"', { latestFormat: true }));
-    const second = digests.updateDigest(INSTANCE, (stored) => withReceipt(stored!, REVIEWS, '"r1"', { latestFormat: true }));
+    const first = digests.updateDigest(INSTANCE, (stored) =>
+      withReceipt(stored ?? emptyDigest(), CARDS, '"v1"', { latestFormat: true }),
+    );
+    const second = digests.updateDigest(INSTANCE, (stored) =>
+      withReceipt(stored!, REVIEWS, '"r1"', { latestFormat: true }),
+    );
     const third = digests.updateDigest(INSTANCE, (stored) => withSchedule(stored!, schedule));
     await Promise.all([first, second, third]);
     expect(pod.requests.filter((r) => r.method !== "GET")).toHaveLength(2);
@@ -223,17 +306,23 @@ describe("the instance's digest in the pod", () => {
   it("reads and changes again when the digest changed elsewhere meanwhile, six times in all, waiting longer each time", async () => {
     const pod = fakePod();
     const waits: number[] = [];
-    const digests = createSolidDigestRepository({ fetch: pod.fetch, wait: async (ms) => void waits.push(ms) });
+    const digests = createSolidDigestRepository({
+      fetch: pod.fetch,
+      wait: async (ms) => void waits.push(ms),
+    });
     await digests.updateDigest(INSTANCE, () => learned());
     pod.failNext("PATCH", DIGEST, 412);
     await digests.updateDigest(INSTANCE, (stored) => withReceipt(stored!, REVIEWS, '"r1"', {}));
-    expect((await digests.readDigest(INSTANCE))!.receipts[REVIEWS]).toEqual({ document: REVIEWS, version: '"r1"' });
+    expect((await digests.readDigest(INSTANCE))!.receipts[REVIEWS]).toEqual({
+      document: REVIEWS,
+      version: '"r1"',
+    });
     expect(waits).toEqual([50]);
     waits.length = 0;
     for (let i = 0; i < 6; i++) pod.failNext("PATCH", DIGEST, 412);
-    await expect(digests.updateDigest(INSTANCE, (stored) => withReceipt(stored!, REVIEWS, '"r2"', {}))).rejects.toThrow(
-      "changed elsewhere",
-    );
+    await expect(
+      digests.updateDigest(INSTANCE, (stored) => withReceipt(stored!, REVIEWS, '"r2"', {})),
+    ).rejects.toThrow("changed elsewhere");
     expect(waits).toEqual([50, 100, 150, 200, 250]);
   });
 
@@ -264,6 +353,8 @@ describe("the instance's digest in the pod", () => {
        <#schedule-x> a sm:DeckSchedule ; sm:scheduleOf <catalog.ttl#x> .
        <#other> a sm:Card .`,
     );
-    expect(await createSolidDigestRepository({ fetch: pod.fetch }).readDigest(INSTANCE)).toEqual(emptyDigest());
+    expect(await createSolidDigestRepository({ fetch: pod.fetch }).readDigest(INSTANCE)).toEqual(
+      emptyDigest(),
+    );
   });
 });

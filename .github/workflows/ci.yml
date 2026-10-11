@@ -1,7 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 name: CI
 
+# Every change is checked before it is merged (docs/testing.md#continuous-integration):
+# a pull request, from this repository or a fork, runs every job here,
+# and so does each push to main. A branch's pushes alone run nothing,
+# so a pull request's commits are not checked twice. The jobs read the
+# repository and nothing else: the token can only read, and no secret is
+# used, so a fork's pull request runs them as safely as ours.
+
 on:
+  pull_request:
   push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       trace:
@@ -12,9 +25,16 @@ on:
 permissions:
   contents: read
 
+# A newer run of a pull request's or a branch's checks cancels the one
+# still going. Runs on main are never canceled: deploy.yml deploys only
+# after a push run on main that passed, so a push run canceled by a later
+# run, a manual one included, would leave its commit undeployed. Each event
+# has its own group, so a run by hand never waits for a push run, and push
+# runs on main go one at a time, in order; one waiting is replaced by a
+# newer push, whose commit includes it.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
@@ -22,6 +42,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
@@ -32,11 +54,60 @@ jobs:
           key: turbo-${{ github.sha }}
           restore-keys: turbo-
       - run: npm ci
-      # Every package: typecheck, tests at 100% coverage, generated code and
+      # Biome's formatting and lint rules (docs/style.md), markdownlint's
+      # and cspell's (docs/testing.md#documentation); then every
+      # package: typecheck, tests at 100% coverage, generated code and
       # Turtle formatting in step with their sources, and the deck library
-      # (ns.yml also compares it with the base); then the boundaries.
+      # (the library job also compares it with the base); then the
+      # boundaries, the docs' index and the shipped dependencies' maturity
+      # (docs/testing.md).
       - run: npm run check
+      # Each package's coverage, in the run's summary; the thresholds that
+      # gate are each package's own, in npm run check.
+      - if: success() || failure()
+        run: npm run coverage:summary
       - run: npm run build
+
+  # The deck library compared with the base of the change
+  # (docs/deck-library.md#checks): no published version
+  # (decks/<name>/v<N>.ttl) edited or removed, and every version new
+  # since then naming the library's contact and no email. It needs the
+  # whole history, which build does not, so it is a job of its own.
+  library:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # On a push to the default branch, compare with the commit the push
+      # moved it from; on a pull request (its merge with the default
+      # branch) or a run by hand, with where it left the default branch,
+      # so a version not merged yet can still be fixed there. A push that
+      # created the default branch (all zeros), or one whose earlier
+      # commit a force push left unfetched, compares with the default
+      # branch.
+      - name: npm run library:check -- --base <base>
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          BEFORE: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [ "$EVENT" = push ] && [ "$REF" = "refs/heads/$DEFAULT_BRANCH" ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            base="$BEFORE"
+          else
+            git fetch --no-tags origin "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+            base="$(git merge-base HEAD "origin/$DEFAULT_BRANCH")"
+          fi
+          echo "Comparing the library with $base"
+          npm run library:check -- --base "$base"
 
   # The vocabulary, the deck library and pod catalog documents, checked
   # again by an independent SHACL engine (pySHACL), SPARQL constraints
@@ -48,6 +119,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v7
         with:
           python-version: "3.15"
@@ -71,6 +144,8 @@ jobs:
         server: [css-7, css-6, nss-6, nss-5, css-acp]
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
@@ -115,6 +190,8 @@ jobs:
         server: [css-8, pivot, nextcloud, jss]
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
@@ -159,6 +236,8 @@ jobs:
       JOURNEY_TRACE: ${{ (inputs.trace || github.ref == 'refs/heads/main') && 'on' || '' }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
@@ -213,3 +292,49 @@ jobs:
           name: journeys-report
           path: e2e/journeys/playwright-report/
           retention-days: 7
+
+  # The docs (docs/testing.md#documentation): every link to a file or a
+  # heading in the repository resolves (lychee, offline: the web's
+  # addresses are checked weekly, by links.yml, so a site that is down
+  # fails no change), publiccode.yml, once there, is valid, and every
+  # file states its copyright and license, as REUSE has it (`reuse lint`,
+  # docs/style.md#licenses). The Markdown's style and spelling are
+  # npm run check's, in build. None of these tools is an npm package, so
+  # the job installs none.
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # With nothing installed, only the repository's own files are there
+      # to check, whether or not reuse reads .gitignore in its container.
+      - uses: fsfe/reuse-action@v6
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline '**/*.md'
+          output: ${{ runner.temp }}/lychee.md
+          jobSummary: false
+      - uses: ./.github/actions/publiccode
+        with:
+          network: "false"
+
+  # The one check a merge to main waits for (the ruleset on main is to
+  # require it): it passes only when every job above passed. A matrix
+  # job's checks are named per server, and jobs come and go; this name
+  # stays.
+  ci-ok:
+    if: always()
+    needs: [build, library, crosscheck, pod, contract, journeys, docs]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every job passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "The jobs' results: $RESULTS"
+          for result in $RESULTS; do
+            [ "$result" = success ] || exit 1
+          done

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createPortal } from "preact";
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { composing } from "./composing";
@@ -39,7 +43,7 @@ function pictureBox(image: HTMLImageElement): Box {
 }
 
 /**
- * A box of the given box's shape as large as the viewport allows, centred
+ * A box of the given box's shape as large as the viewport allows, centered
  * in it: the viewport's full width or full height, whichever it reaches
  * first. The viewport is the root's client area, so a scrollbar is not
  * covered. No margin is kept: the page sets no `viewport-fit=cover`, so
@@ -132,7 +136,11 @@ export function ZoomableImage({
     const shown = current.current;
     if (shown === null || shown.phase === "leaving") return;
     // Measured again: the page may have moved under the enlarged picture.
-    setZoom(reducedMotion() ? null : { ...shown, origin: pictureBox(imageRef.current!), phase: "leaving" });
+    setZoom(
+      reducedMotion()
+        ? null
+        : { ...shown, origin: pictureBox(imageRef.current!), phase: "leaving" },
+    );
   }
 
   function toggle() {
@@ -185,7 +193,13 @@ export function ZoomableImage({
 
   return (
     <div class="picture-zoom">
-      <img ref={imageRef} class={`${className}${onScreen ? " zoomed-away" : ""}`} src={src} alt={alt} lang={lang} />
+      <img
+        ref={imageRef}
+        class={`${className}${onScreen ? " zoomed-away" : ""}`}
+        src={src}
+        alt={alt}
+        lang={lang}
+      />
       <button
         ref={buttonRef}
         type="button"
@@ -197,7 +211,9 @@ export function ZoomableImage({
           if (event.relatedTarget !== null) shrink();
         }}
       >
-        <span class="visually-hidden">{expanded ? t("zoomableImage.shrink") : t("zoomableImage.enlarge")}</span>
+        <span class="visually-hidden">
+          {expanded ? t("zoomableImage.shrink") : t("zoomableImage.enlarge")}
+        </span>
       </button>
       {zoom !== null &&
         createPortal(
@@ -218,7 +234,8 @@ export function ZoomableImage({
                 top: `${zoom.fitted.top}px`,
                 width: `${zoom.fitted.width}px`,
                 height: `${zoom.fitted.height}px`,
-                transform: zoom.phase === "entered" ? "none" : transformFrom(zoom.origin, zoom.fitted),
+                transform:
+                  zoom.phase === "entered" ? "none" : transformFrom(zoom.origin, zoom.fitted),
               }}
               onTransitionEnd={putBack}
             />

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
@@ -50,22 +54,32 @@ function renderScreen(overrides: Partial<Props> = {}) {
 describe("ReleasesScreen", () => {
   it("lists each release by its address, who can read it, and starts the next version of one", () => {
     const { onStartNext, onMakePublic } = renderScreen();
-    expect(screen.getByRole("heading", { level: 2, name: "Releases published from Deck set A" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Releases published from Deck set A" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "solid, version 2" })).toHaveAttribute("href", SOLID);
     // A release its address names otherwise is named by its address.
     expect(screen.getByRole("link", { name: ELSEWHERE })).toHaveAttribute("href", ELSEWHERE);
     expect(screen.getByRole("cell", { name: "Everyone" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: `Make ${ELSEWHERE} public` }));
     expect(onMakePublic).toHaveBeenCalledWith(ELSEWHERE);
-    fireEvent.click(screen.getByRole("button", { name: "Start the next version of solid, version 2" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Start the next version of solid, version 2" }),
+    );
     expect(onStartNext).toHaveBeenCalledWith(SOLID);
     expect(screen.getByRole("button", { name: `Copy the link ${SOLID}` })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Drafts of releases" })).toHaveAttribute("href", "#/drafts");
+    expect(screen.getByRole("link", { name: "Drafts of releases" })).toHaveAttribute(
+      "href",
+      "#/drafts",
+    );
   });
 
   it("links each release to the draft it was published from, while the instance has it", () => {
     renderScreen();
-    expect(screen.getByRole("link", { name: "Solid basics, version 2" })).toHaveAttribute("href", "#/draft/solid");
+    expect(screen.getByRole("link", { name: "Solid basics, version 2" })).toHaveAttribute(
+      "href",
+      "#/draft/solid",
+    );
     expect(screen.getByText("Not among this instance's drafts")).toBeInTheDocument();
     // A draft of no title, by its name.
     renderScreen({ draftOf: () => ({ draft: { ...source, title: {} }, href: "#/draft/solid" }) });
@@ -92,9 +106,16 @@ describe("ReleasesScreen", () => {
 
   it("sorts by a column's header, then the other way, then as listed, but by its actions", () => {
     const third = `${instanceA.url}releases/apps/v1.ttl`;
-    renderScreen({ releases: [{ url: SOLID, public: true }, { url: ELSEWHERE, public: false }, { url: third, public: true }] });
+    renderScreen({
+      releases: [
+        { url: SOLID, public: true },
+        { url: ELSEWHERE, public: false },
+        { url: third, public: true },
+      ],
+    });
     const table = within(screen.getByRole("table", { name: "Releases published from Deck set A" }));
-    const order = () => table.getAllByRole("rowheader").map((cell) => cell.querySelector("a")!.textContent);
+    const order = () =>
+      table.getAllByRole("rowheader").map((cell) => cell.querySelector("a")!.textContent);
     expect(table.queryByRole("button", { name: "Actions" })).toBeNull();
     fireEvent.click(table.getByRole("button", { name: "Release" }));
     expect(order()).toEqual(["apps, version 1", ELSEWHERE, "solid, version 2"]);
@@ -131,16 +152,23 @@ describe("ReleasesScreen", () => {
     expect(screen.getByRole("button", { name: `Make ${ELSEWHERE} public` })).toBeDisabled();
   });
 
-  it("holds starting a next version while one starts, or the catalogue may not be written", () => {
+  it("holds starting a next version while one starts, or the catalog may not be written", () => {
     renderScreen({ starting: SOLID, startError: "Unreadable." });
     expect(screen.getByText("Starting the next version…")).toBeInTheDocument();
     expect(screen.getByText("Unreadable.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Start the next version of solid, version 2" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Start the next version of solid, version 2" }),
+    ).toBeDisabled();
   });
 
-  it("says why the catalogue may not be written", () => {
+  it("says why the catalog may not be written", () => {
     renderScreen({ hold: "setAside" });
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
-    expect(screen.getByRole("button", { name: "Start the next version of solid, version 2" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
+      "href",
+      "#/health",
+    );
+    expect(
+      screen.getByRole("button", { name: "Start the next version of solid, version 2" }),
+    ).toBeDisabled();
   });
 });

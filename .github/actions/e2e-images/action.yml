@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # The Docker images an end-to-end job runs, from GitHub's cache, so the job
 # pulls nothing from Docker Hub, whose limit on pulls without an account the
 # runners share (docs/testing.md); what the cache does not have yet comes

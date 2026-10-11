@@ -1,5 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
-import type { ChapterState, CourseChapter, CourseOutline, CourseProgress } from "@solid-memo/domain/course";
+import type {
+  ChapterState,
+  CourseChapter,
+  CourseOutline,
+  CourseProgress,
+} from "@solid-memo/domain/course";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
 import type { CompletedChapter } from "./CourseContainer";
@@ -130,9 +139,14 @@ export function CourseScreen({
           {outline.chapters.map((chapter, index) => {
             const { state, doneStepIds } = progress.chapters[index]!;
             return (
-              <li key={chapter.url} class={`course-chapter ${state}${chapter === completed ? " just-completed" : ""}`}>
+              <li
+                key={chapter.url}
+                class={`course-chapter ${state}${chapter === completed ? " just-completed" : ""}`}
+              >
                 <h3>
-                  <span class="course-chapter-number">{t("course.chapterNumber", { number: index + 1 })}</span>{" "}
+                  <span class="course-chapter-number">
+                    {t("course.chapterNumber", { number: index + 1 })}
+                  </span>{" "}
                   {state === "locked" ? (
                     <ReaderText text={chapter.title} />
                   ) : (
@@ -146,7 +160,10 @@ export function CourseScreen({
                   {chapter === completed && (
                     <span class="course-sparkles" aria-hidden="true">
                       {Array.from({ length: SPARKLES }, (_, sparkle) => (
-                        <span key={sparkle} style={{ "--angle": `${(sparkle * 360) / SPARKLES}deg` }} />
+                        <span
+                          key={sparkle}
+                          style={{ "--angle": `${(sparkle * 360) / SPARKLES}deg` }}
+                        />
                       ))}
                     </span>
                   )}

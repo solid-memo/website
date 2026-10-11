@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
@@ -32,14 +36,22 @@ const REVIEWS = "https://pod.example/solid-memo/a/reviews/deck-1.ttl";
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
 
 function documentOf(url: string, ...things: ThingPersisted[]): never {
-  return things.reduce<SolidDataset>((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(url)) as never;
+  return things.reduce<SolidDataset>(
+    (dataset, thing) => setThing(dataset, thing),
+    mockSolidDatasetFrom(url),
+  ) as never;
 }
 
 function repository() {
   return createSolidRepairRepository({ fetch: vi.fn() as unknown as typeof fetch });
 }
 
-function repair(kind: Repair["kind"], subjectUrl: string, version = 3, documentUrl = CATALOG): Repair {
+function repair(
+  kind: Repair["kind"],
+  subjectUrl: string,
+  version = 3,
+  documentUrl = CATALOG,
+): Repair {
   return { kind, documentUrl, subjectUrl, version };
 }
 
@@ -57,10 +69,15 @@ describe("applyRepairs", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(
         CATALOG,
-        buildThing(createThing({ url: `${CATALOG}#deck-1` })).addIri(RDF.type, SM.Deck).addInteger(SM.formatVersion, 99).build(),
+        buildThing(createThing({ url: `${CATALOG}#deck-1` }))
+          .addIri(RDF.type, SM.Deck)
+          .addInteger(SM.formatVersion, 99)
+          .build(),
       ),
     );
-    await expect(repository().applyRepairs([repair("remove-subject", `${CATALOG}#deck-1`)])).rejects.toMatchObject({
+    await expect(
+      repository().applyRepairs([repair("remove-subject", `${CATALOG}#deck-1`)]),
+    ).rejects.toMatchObject({
       code: "writtenByNewerApp",
     });
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
@@ -70,8 +87,14 @@ describe("applyRepairs", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(
         CATALOG,
-        buildThing(createThing({ url: `${CATALOG}#deck-1` })).addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals").addStringNoLocale(SM.direction, "odd").build(),
-        buildThing(createThing({ url: `${CATALOG}#deck-2` })).addIri(RDF.type, SM.Deck).build(),
+        buildThing(createThing({ url: `${CATALOG}#deck-1` }))
+          .addIri(RDF.type, SM.Deck)
+          .addStringNoLocale(DCTERMS.title, "Capitals")
+          .addStringNoLocale(SM.direction, "odd")
+          .build(),
+        buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+          .addIri(RDF.type, SM.Deck)
+          .build(),
       ),
     );
     await repository().applyRepairs([
@@ -99,7 +122,9 @@ describe("applyRepairs", () => {
           .addStringWithLocale(DCTERMS.title, "Huvudstäder", "sv")
           .addStringWithLocale(DCTERMS.title, "Capitals", "en")
           .build(),
-        buildThing(createThing({ url: `${CATALOG}#deck-2` })).addIri(RDF.type, SM.Deck).build(),
+        buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+          .addIri(RDF.type, SM.Deck)
+          .build(),
       ),
     );
     await repository().applyRepairs([
@@ -153,7 +178,10 @@ describe("applyRepairs", () => {
           .addInteger(SM.intervalDays, 6)
           .addStringNoLocale(SM.previousDue, "2026-09-20")
           .build(),
-        buildThing(createThing({ url: `${REVIEWS}#b` })).addIri(RDF.type, SM.ReviewState).addStringNoLocale(SM.due, "soon").build(),
+        buildThing(createThing({ url: `${REVIEWS}#b` }))
+          .addIri(RDF.type, SM.ReviewState)
+          .addStringNoLocale(SM.due, "soon")
+          .build(),
       ),
     );
     await repository().applyRepairs([
@@ -171,9 +199,15 @@ describe("applyRepairs", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(
         CATALOG,
-        buildThing(createThing({ url: `${CATALOG}#agent-x` })).addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent").build(),
-        buildThing(createThing({ url: "https://alice.example/profile/card" })).addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent").build(),
-        buildThing(createThing({ url: `${CATALOG}#broken` })).addIri(RDF.type, SM.Deck).build(),
+        buildThing(createThing({ url: `${CATALOG}#agent-x` }))
+          .addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent")
+          .build(),
+        buildThing(createThing({ url: "https://alice.example/profile/card" }))
+          .addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent")
+          .build(),
+        buildThing(createThing({ url: `${CATALOG}#broken` }))
+          .addIri(RDF.type, SM.Deck)
+          .build(),
       ),
     );
     await repository().applyRepairs([
@@ -183,13 +217,13 @@ describe("applyRepairs", () => {
       repair("describe-deck", `${CATALOG}#gone`),
     ]);
     expect(getStringNoLocale(getThing(saved(), `${CATALOG}#agent-x`)!, FOAF_NAME)).toBe("agent-x");
-    expect(getStringNoLocale(getThing(saved(), "https://alice.example/profile/card")!, FOAF_NAME)).toBe(
-      "https://alice.example/profile/card",
-    );
+    expect(
+      getStringNoLocale(getThing(saved(), "https://alice.example/profile/card")!, FOAF_NAME),
+    ).toBe("https://alice.example/profile/card");
     expect(getThing(saved(), `${CATALOG}#broken`)).toBeNull();
   });
 
-  it("removes a subject from the catalogue and its deck group, keeping every other link to it", async () => {
+  it("removes a subject from the catalog and its deck group, keeping every other link to it", async () => {
     const deck = `${CATALOG}#deck-1`;
     const agent = `${CATALOG}#agent-x`;
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
@@ -209,10 +243,21 @@ describe("applyRepairs", () => {
           .addUrl(DCAT.dataset, deck)
           .addUrl(DCAT.catalog, `${CATALOG}#group-2`)
           .build(),
-        buildThing(createThing({ url: `${CATALOG}#group-2` })).addIri(RDF.type, SM.DeckGroup).addIri(RDF.type, DCAT.Catalog).build(),
-        buildThing(createThing({ url: `${CATALOG}#other` })).addIri(RDF.type, DCAT.Catalog).addUrl(DCAT.dataset, deck).build(),
-        buildThing(createThing({ url: deck })).addIri(RDF.type, SM.Deck).addUrl(DCTERMS.creator, agent).build(),
-        buildThing(createThing({ url: agent })).addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent").build(),
+        buildThing(createThing({ url: `${CATALOG}#group-2` }))
+          .addIri(RDF.type, SM.DeckGroup)
+          .addIri(RDF.type, DCAT.Catalog)
+          .build(),
+        buildThing(createThing({ url: `${CATALOG}#other` }))
+          .addIri(RDF.type, DCAT.Catalog)
+          .addUrl(DCAT.dataset, deck)
+          .build(),
+        buildThing(createThing({ url: deck }))
+          .addIri(RDF.type, SM.Deck)
+          .addUrl(DCTERMS.creator, agent)
+          .build(),
+        buildThing(createThing({ url: agent }))
+          .addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent")
+          .build(),
       ),
     );
     await repository().applyRepairs([
@@ -227,15 +272,18 @@ describe("applyRepairs", () => {
     const group1 = getThing(saved(), `${CATALOG}#group-1`)!;
     expect(getUrlAll(group1, DCAT.dataset)).toEqual([]);
     expect(getUrlAll(group1, DCAT.catalog)).toEqual([]);
-    // Only the catalogue and the deck groups list the decks.
+    // Only the catalog and the deck groups list the decks.
     expect(getUrlAll(getThing(saved(), `${CATALOG}#other`)!, DCAT.dataset)).toEqual([deck]);
   });
 
   // Another app's dataset, described in its own document.
   const FOREIGN_DATASET = "https://pod.example/recipes/index.ttl#cookbook";
 
-  it("drops a catalogue's and a deck group's links to decks and groups the document does not describe, never one to another document or to another app's subject", async () => {
-    const group = (url: string) => buildThing(createThing({ url })).addIri(RDF.type, SM.DeckGroup).addIri(RDF.type, DCAT.Catalog);
+  it("drops a catalog's and a deck group's links to decks and groups the document does not describe, never one to another document or to another app's subject", async () => {
+    const group = (url: string) =>
+      buildThing(createThing({ url }))
+        .addIri(RDF.type, SM.DeckGroup)
+        .addIri(RDF.type, DCAT.Catalog);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(
         CATALOG,
@@ -257,12 +305,21 @@ describe("applyRepairs", () => {
           .addUrl(DCAT.catalog, `${CATALOG}#deck-1`)
           .build(),
         group(`${CATALOG}#group-2`).build(),
-        buildThing(createThing({ url: `${CATALOG}#deck-1` })).addIri(RDF.type, SM.Deck).addIri(RDF.type, DCAT.Dataset).build(),
-        // A deck or group that lost its DCAT class is still one: the catalogue keeps it.
-        buildThing(createThing({ url: `${CATALOG}#deck-old` })).addIri(RDF.type, SM.Deck).build(),
-        buildThing(createThing({ url: `${CATALOG}#group-old` })).addIri(RDF.type, SM.DeckGroup).build(),
+        buildThing(createThing({ url: `${CATALOG}#deck-1` }))
+          .addIri(RDF.type, SM.Deck)
+          .addIri(RDF.type, DCAT.Dataset)
+          .build(),
+        // A deck or group that lost its DCAT class is still one: the catalog keeps it.
+        buildThing(createThing({ url: `${CATALOG}#deck-old` }))
+          .addIri(RDF.type, SM.Deck)
+          .build(),
+        buildThing(createThing({ url: `${CATALOG}#group-old` }))
+          .addIri(RDF.type, SM.DeckGroup)
+          .build(),
         // Another app's dataset, described in this document with a class of its own.
-        buildThing(createThing({ url: `${CATALOG}#recipes` })).addIri(RDF.type, "https://schema.org/Dataset").build(),
+        buildThing(createThing({ url: `${CATALOG}#recipes` }))
+          .addIri(RDF.type, "https://schema.org/Dataset")
+          .build(),
       ),
     );
     await repository().applyRepairs([
@@ -270,8 +327,16 @@ describe("applyRepairs", () => {
       repair("drop-dangling-members", `${CATALOG}#group-1`, 1),
     ]);
     const catalog = getThing(saved(), `${CATALOG}#catalog`)!;
-    expect(getUrlAll(catalog, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`, `${CATALOG}#deck-old`, FOREIGN_DATASET, `${CATALOG}#recipes`]);
-    expect(getUrlAll(catalog, DCAT.catalog)).toEqual([`${CATALOG}#group-1`, `${CATALOG}#group-old`]);
+    expect(getUrlAll(catalog, DCAT.dataset)).toEqual([
+      `${CATALOG}#deck-1`,
+      `${CATALOG}#deck-old`,
+      FOREIGN_DATASET,
+      `${CATALOG}#recipes`,
+    ]);
+    expect(getUrlAll(catalog, DCAT.catalog)).toEqual([
+      `${CATALOG}#group-1`,
+      `${CATALOG}#group-old`,
+    ]);
     const group1 = getThing(saved(), `${CATALOG}#group-1`)!;
     expect(getUrlAll(group1, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`]);
     expect(getUrlAll(group1, DCAT.catalog)).toEqual([`${CATALOG}#group-2`]);

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -33,9 +37,7 @@ export function LibraryPreviewContainer({
     queryFn: () => useCases.listLibraryCards(deck),
   });
   const [first] = useState(random);
-  const [shown, setShown] = useState<{ index: number; turn: number } | null>(
-    null,
-  );
+  const [shown, setShown] = useState<{ index: number; turn: number } | null>(null);
 
   if (cardsQuery.error) {
     return <ErrorMessage error={errorText(cardsQuery.error)} />;

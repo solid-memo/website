@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# The whitespace the repository is written in, for any editor
+# (https://editorconfig.org, docs/style.md).
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Turtle's house style indents each predicate four spaces
+# (packages/turtle/src/formatTurtle.ts; `npm run format:turtle`).
+[*.ttl]
+indent_size = 4
+
+[*.py]
+indent_size = 4
+
+# Biome wraps these at 100 (biome.jsonc, `npm run format`).
+[*.{ts,tsx,js,mjs,cjs,json,jsonc,css}]
+max_line_length = 100
+
+[renovate.json5]
+indent_size = 4
+
+[Caddyfile]
+indent_style = tab
+
+# Kept byte for byte as their authors publish them (.gitattributes).
+[packages/vocab/vendor/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+max_line_length = unset

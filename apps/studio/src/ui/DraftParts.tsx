@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { idProblem } from "@solid-memo/domain/release/courseIds";
@@ -5,7 +9,14 @@ import type { LangText } from "@solid-memo/domain/langText";
 import type { DraftRefusal, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type I18n } from "@solid-memo/ui/i18n";
-import { draftOf, LangTextField, rememberLanguages, textOfDraft, type DraftEntry, type LangTextDraft } from "@solid-memo/ui/LangTextField";
+import {
+  draftOf,
+  LangTextField,
+  rememberLanguages,
+  textOfDraft,
+  type DraftEntry,
+  type LangTextDraft,
+} from "@solid-memo/ui/LangTextField";
 import type { LanguageRole } from "@solid-memo/ui/LanguagePicker";
 import { ProseField } from "@solid-memo/ui/ProseField";
 import { recentLanguages } from "@solid-memo/ui/remembered";
@@ -14,7 +25,9 @@ import { ReadOnlyNotice } from "./ReadOnly";
 
 /** Why a change of a draft was not made, in words. */
 export function refusalText(refusal: DraftRefusal, t: I18n["t"]): string {
-  return t(`studio.draftEdit.refused.${refusal.refused}`, { id: "id" in refusal ? refusal.id : "" });
+  return t(`studio.draftEdit.refused.${refusal.refused}`, {
+    id: "id" in refusal ? refusal.id : "",
+  });
 }
 
 /**
@@ -30,7 +43,15 @@ export function DraftStatus({ editor }: { editor: Pick<DraftEditor, "saving" | "
       <p role="status" class="hint">
         {failure === null && t(saving ? "studio.draftEdit.saving" : "studio.draftEdit.saved")}
       </p>
-      <ErrorMessage error={failure === null ? null : "refusal" in failure ? refusalText(failure.refusal, t) : errorText(failure.error)} />
+      <ErrorMessage
+        error={
+          failure === null
+            ? null
+            : "refusal" in failure
+              ? refusalText(failure.refusal, t)
+              : errorText(failure.error)
+        }
+      />
     </>
   );
 }
@@ -55,7 +76,11 @@ export function DraftScope({
   return (
     <>
       {readOnly === "released" ? (
-        <p class="warning">{tx("studio.draftEdit.released", { drafts: <a href={draftsHref}>{t("studio.draftEdit.releasedLink")}</a> })}</p>
+        <p class="warning">
+          {tx("studio.draftEdit.released", {
+            drafts: <a href={draftsHref}>{t("studio.draftEdit.releasedLink")}</a>,
+          })}
+        </p>
       ) : (
         <ReadOnlyNotice reason={readOnly} subject="catalogue" healthHref={healthHref} />
       )}
@@ -90,7 +115,15 @@ function useSavedText(text: LangText | undefined, onSave: (text: LangText) => vo
 }
 
 /** Says, under a field, that its text is saved only once its language is chosen. */
-function MissingLanguage({ id, missing, field }: { id: string; missing: DraftEntry | undefined; field: string }) {
+function MissingLanguage({
+  id,
+  missing,
+  field,
+}: {
+  id: string;
+  missing: DraftEntry | undefined;
+  field: string;
+}) {
   const { t } = useI18n();
   return missing === undefined ? null : (
     <p id={id} class="error">
@@ -241,7 +274,9 @@ export function IdField({
         onInput={(event) => onChange(event.currentTarget.value)}
       />
       <p id={`${id}-hint`} class={problem === null ? "hint field-hint" : "error"}>
-        {problem === null ? t("studio.draftEdit.idHint") : t(`studio.draftEdit.idProblem.${problem}`)}
+        {problem === null
+          ? t("studio.draftEdit.idHint")
+          : t(`studio.draftEdit.idProblem.${problem}`)}
       </p>
     </>
   );

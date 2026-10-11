@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMemo } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -108,7 +112,9 @@ export function DeckPreferencesContainer({
       preferencesHref={routeToHash({ screen: "preferences", instanceUrl: instance.url })}
       languages={languages}
       section={section}
-      languagesUnreadable={languages === undefined ? errorText(cardsQuery.error ?? releaseError) : null}
+      languagesUnreadable={
+        languages === undefined ? errorText(cardsQuery.error ?? releaseError) : null
+      }
       stated={stateLanguagesMutation.data ?? null}
       busy={
         saveMutation.isPending ||

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { LATEST_VERSION, type CardV5 } from "@solid-memo/vocab/types.generated";
 import type { Card, Deck } from "../deck.ts";
 import { cardContentFromRecord } from "../deckRecord.ts";
@@ -84,7 +88,10 @@ function comparable(data: object): string {
     Object.fromEntries(
       Object.entries(data)
         .filter(([field]) => field !== "deprecated")
-        .map(([field, value]) => [field, Array.isArray(value) ? [...(value as string[])].sort() : value]),
+        .map(([field, value]) => [
+          field,
+          Array.isArray(value) ? [...(value as string[])].sort() : value,
+        ]),
     ),
   );
 }
@@ -112,13 +119,22 @@ function sameSubject(kind: ReleaseKind, a: object, b: object): boolean {
 }
 
 /** How a subject of the draft differs from the release's (`was`, absent when the release lacks it); null when it does not. */
-function changeOf(kind: ReleaseKind, was: DraftNode<{ deprecated?: boolean }> | undefined, now: DraftNode<{ deprecated?: boolean }>): SubjectChange | null {
+function changeOf(
+  kind: ReleaseKind,
+  was: DraftNode<{ deprecated?: boolean }> | undefined,
+  now: DraftNode<{ deprecated?: boolean }>,
+): SubjectChange | null {
   const { id } = now;
   if (was === undefined) return { kind, id, status: "added" };
   const same = sameSubject(kind, was.data, now.data);
   const retired = now.data.deprecated === true;
   if (retired !== (was.data.deprecated === true)) {
-    return { kind, id, status: retired ? "retired" : "restored", ...(same ? {} : { alsoChanged: true as const }) };
+    return {
+      kind,
+      id,
+      status: retired ? "retired" : "restored",
+      ...(same ? {} : { alsoChanged: true as const }),
+    };
   }
   return same ? null : { kind, id, status: "changed" };
 }
@@ -134,7 +150,9 @@ export function releaseDiff(previous: ReleaseDraft, draft: ReleaseDraft): Releas
   const subjects: SubjectChange[] = [];
   const unchanged = { chapter: 0, step: 0, card: 0, distractor: 0 };
   for (const [kind, list] of KINDS) {
-    const was = new Map<string, DraftNode<{ deprecated?: boolean }>>(before[list].map((node) => [node.id, node]));
+    const was = new Map<string, DraftNode<{ deprecated?: boolean }>>(
+      before[list].map((node) => [node.id, node]),
+    );
     for (const node of draft[list]) {
       const change = changeOf(kind, was.get(node.id), node);
       if (change === null) unchanged[kind]++;
@@ -183,7 +201,10 @@ const LEARNER = "https://learner.solid-memo.invalid/solid-memo/";
  * course, every chapter completed. Nothing is written: the plan is what
  * learners' decks would get.
  */
-export function simulateLearnerUpgrade(previous: ReleaseDraft, draft: ReleaseDraft): LearnerUpgrade {
+export function simulateLearnerUpgrade(
+  previous: ReleaseDraft,
+  draft: ReleaseDraft,
+): LearnerUpgrade {
   const from = draftLibraryContent(previous);
   const to = draftLibraryContent(draft);
   const newer = Number(to.version) > Number(from.version);
@@ -205,11 +226,29 @@ export function simulateLearnerUpgrade(previous: ReleaseDraft, draft: ReleaseDra
     themes: from.themes,
     keywords: from.keywords,
   };
-  const cards = from.cards.map((card): Card => ({ ...card, url: `${cardsDocumentUrl}#${card.id}`, createdAt: "" }));
-  const plan = newer ? planLibraryUpgrade({ deck, cards, from, to, releases: draftLibraryDeck(draft).releases, course }) : null;
+  const cards = from.cards.map(
+    (card): Card => ({ ...card, url: `${cardsDocumentUrl}#${card.id}`, createdAt: "" }),
+  );
+  const plan = newer
+    ? planLibraryUpgrade({
+        deck,
+        cards,
+        from,
+        to,
+        releases: draftLibraryDeck(draft).releases,
+        course,
+      })
+    : null;
   const dropped = (was: readonly { id: string }[], now: readonly { id: string }[]) => {
     const kept = new Set(now.map((one) => one.id));
     return was.map((one) => one.id).filter((id) => !kept.has(id));
   };
-  return { newer, plan, lost: { cards: dropped(from.cards, to.cards), chapters: dropped(previous.chapters, draft.chapters) } };
+  return {
+    newer,
+    plan,
+    lost: {
+      cards: dropped(from.cards, to.cards),
+      chapters: dropped(previous.chapters, draft.chapters),
+    },
+  };
 }

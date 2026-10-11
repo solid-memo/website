@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { triplesOf } from "./ntriples";
 
@@ -11,7 +15,9 @@ describe("triplesOf", () => {
     );
     const lines = [...triples];
     expect(lines).toContain(`<${DOC}#a> <${DOC}#r> "say \\"hi\\"\\n\\r\\\\"@en .`);
-    expect(lines).toContain(`<${DOC}#a> <${DOC}#r> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
+    expect(lines).toContain(
+      `<${DOC}#a> <${DOC}#r> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+    );
     expect(lines).toContain(`<${DOC}#a> <${DOC}#r> "plain" .`);
     const blank = lines.find((line) => line.startsWith(`<${DOC}#a> <${DOC}#p> _:`))!;
     const node = blank.split(" ")[2]!;

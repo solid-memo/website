@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { AppError } from "./appError";
 import type { LangTexts } from "./keywords";
 import { shown, tidied, tidiedSideText, tidiedTagged, type LangText } from "./langText";
@@ -80,9 +84,7 @@ export function isDeckDirection(value: string): value is DeckDirection {
 
 /** The directions a deck is studied in, front→back first. */
 export function studyDirections(direction: DeckDirection): StudyDirection[] {
-  return direction === "bidirectional"
-    ? ["front-to-back", "back-to-front"]
-    : [direction];
+  return direction === "bidirectional" ? ["front-to-back", "back-to-front"] : [direction];
 }
 
 /** One thing a session asks: a card, seen from one side. */
@@ -94,9 +96,7 @@ export interface Prompt {
 /** Every prompt a deck makes of its cards, card by card. */
 export function promptsOf(cards: Card[], direction: DeckDirection): Prompt[] {
   const directions = studyDirections(direction);
-  return cards.flatMap((card) =>
-    directions.map((direction) => ({ card, direction })),
-  );
+  return cards.flatMap((card) => directions.map((direction) => ({ card, direction })));
 }
 
 /** One side of a card as shown: its text and picture, and which side it is. */
@@ -119,10 +119,7 @@ export interface CardSide {
  * What a prompt asks and what it answers with. Any card content will do,
  * so a library deck's cards can be shown the same way before import.
  */
-export function promptSides(prompt: {
-  card: CardContent;
-  direction: StudyDirection;
-}): {
+export function promptSides(prompt: { card: CardContent; direction: StudyDirection }): {
   question: CardSide;
   answer: CardSide;
 } {
@@ -132,7 +129,9 @@ export function promptSides(prompt: {
     side: "front",
     text: card.front,
     ...(card.frontImageUrl === undefined ? {} : { imageUrl: card.frontImageUrl }),
-    ...(card.frontImageDescription === undefined ? {} : { imageDescription: card.frontImageDescription }),
+    ...(card.frontImageDescription === undefined
+      ? {}
+      : { imageDescription: card.frontImageDescription }),
     ...(card.frontNote === undefined ? {} : { note: card.frontNote }),
     ...format,
   };
@@ -140,7 +139,9 @@ export function promptSides(prompt: {
     side: "back",
     text: card.back,
     ...(card.backImageUrl === undefined ? {} : { imageUrl: card.backImageUrl }),
-    ...(card.backImageDescription === undefined ? {} : { imageDescription: card.backImageDescription }),
+    ...(card.backImageDescription === undefined
+      ? {}
+      : { imageDescription: card.backImageDescription }),
     ...(card.backLabel === undefined ? {} : { label: card.backLabel }),
     ...(card.backNote === undefined ? {} : { note: card.backNote }),
     ...format,
@@ -171,7 +172,7 @@ export interface Deck {
   direction: DeckDirection;
   /** Who made the deck (names), when stated. Empty for most own decks. */
   authors: string[];
-  /** URL of the licence the deck's content is offered under, when stated. */
+  /** URL of the license the deck's content is offered under, when stated. */
   license?: string;
   /**
    * A sentence or two about the deck, when stated: what it covers and,
@@ -396,10 +397,12 @@ export function validateCardContent(
   const frontImageUrl = normalizeImageUrl(input.frontImageUrl);
   const backImageUrl = normalizeImageUrl(input.backImageUrl);
   const own = {
-    frontImageDescription: frontImageUrl === undefined ? undefined : tidiedTagged(input.frontImageDescription),
+    frontImageDescription:
+      frontImageUrl === undefined ? undefined : tidiedTagged(input.frontImageDescription),
     frontNote: tidiedTagged(input.frontNote, formatted),
     backLabel: tidiedTagged(input.backLabel, formatted),
-    backImageDescription: backImageUrl === undefined ? undefined : tidiedTagged(input.backImageDescription),
+    backImageDescription:
+      backImageUrl === undefined ? undefined : tidiedTagged(input.backImageDescription),
     backNote: tidiedTagged(input.backNote, formatted),
   };
   if (frontImageUrl !== undefined && !isHttpUrl(frontImageUrl)) {
@@ -408,9 +411,16 @@ export function validateCardContent(
   if (backImageUrl !== undefined && !isHttpUrl(backImageUrl)) {
     return { ok: false, error: new AppError("cardBackImageNotWebUrl") };
   }
-  const unstated = unstatedSide("front", front, saved, formatted) ?? unstatedSide("back", back, saved, formatted);
+  const unstated =
+    unstatedSide("front", front, saved, formatted) ?? unstatedSide("back", back, saved, formatted);
   if (unstated !== undefined) return unstated;
-  for (const part of ["frontImageDescription", "frontNote", "backLabel", "backImageDescription", "backNote"] as const) {
+  for (const part of [
+    "frontImageDescription",
+    "frontNote",
+    "backLabel",
+    "backImageDescription",
+    "backNote",
+  ] as const) {
     if (own[part] !== undefined && "" in own[part]) return needsLanguage(part);
   }
   if (isEmptyText(front) && frontImageUrl === undefined) {
@@ -437,8 +447,12 @@ export function validateCardContent(
       back,
       ...(frontImageUrl === undefined ? {} : { frontImageUrl }),
       ...(backImageUrl === undefined ? {} : { backImageUrl }),
-      ...(own.frontImageDescription === undefined ? {} : { frontImageDescription: own.frontImageDescription }),
-      ...(own.backImageDescription === undefined ? {} : { backImageDescription: own.backImageDescription }),
+      ...(own.frontImageDescription === undefined
+        ? {}
+        : { frontImageDescription: own.frontImageDescription }),
+      ...(own.backImageDescription === undefined
+        ? {}
+        : { backImageDescription: own.backImageDescription }),
       ...(own.frontNote === undefined ? {} : { frontNote: own.frontNote }),
       ...(own.backLabel === undefined ? {} : { backLabel: own.backLabel }),
       ...(own.backNote === undefined ? {} : { backNote: own.backNote }),
@@ -464,7 +478,8 @@ function unstatedSide(
   formatted: boolean,
 ): CardContentValidation | undefined {
   if (!("" in text)) return undefined;
-  if (Object.keys(text).length > 1) return { ok: false, error: new AppError("textMixesUnstated"), part };
+  if (Object.keys(text).length > 1)
+    return { ok: false, error: new AppError("textMixesUnstated"), part };
   const was = saved?.[part][""];
   return was !== undefined && tidied(was, formatted) === text[""] ? undefined : needsLanguage(part);
 }

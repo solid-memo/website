@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { parseMarkdown, type MdBlock, type MdInline, type MdPhrase } from "./parse";
 
 /**
@@ -59,5 +63,7 @@ function phrases(nodes: readonly MdInline[]): MdPhrase[] {
 function joined(runs: readonly MdPhrase[][], separator: string): MdPhrase[] {
   return runs
     .filter((run) => run.length > 0)
-    .flatMap((run, index) => (index === 0 ? run : [{ type: "text" as const, value: separator }, ...run]));
+    .flatMap((run, index) =>
+      index === 0 ? run : [{ type: "text" as const, value: separator }, ...run],
+    );
 }

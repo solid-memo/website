@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Deck } from "./deck";
 import { sameText } from "./langText";
 import type { LibraryUpgradePlan } from "./libraryUpgrade";
@@ -61,7 +65,10 @@ export type DeckUpgradeOutcome =
  * `…/decks/<deckId>-<uuid>.ttl`. A link written to a card before such
  * an upgrade still names its card by its fragment.
  */
-export function isCardsDocumentOf(documentUrl: string, deck: Pick<Deck, "id" | "cardsDocumentUrl">): boolean {
+export function isCardsDocumentOf(
+  documentUrl: string,
+  deck: Pick<Deck, "id" | "cardsDocumentUrl">,
+): boolean {
   if (documentUrl === deck.cardsDocumentUrl) return true;
   const container = deck.cardsDocumentUrl.slice(0, deck.cardsDocumentUrl.lastIndexOf("/") + 1);
   if (!documentUrl.startsWith(container)) return false;
@@ -98,7 +105,9 @@ export function sameCardChanges(a: LibraryUpgradePlan, b: LibraryUpgradePlan): b
   return (
     a.releaseUrl === b.releaseUrl &&
     a.direction === b.direction &&
-    (["add", "change", "retire", "restore", "remove"] as const).every((key) => ids(a[key]) === ids(b[key]))
+    (["add", "change", "retire", "restore", "remove"] as const).every(
+      (key) => ids(a[key]) === ids(b[key]),
+    )
   );
 }
 

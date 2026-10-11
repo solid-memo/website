@@ -31,7 +31,7 @@ graph LR
   The instance and its private type index are created the way they are
   on any pod, by `createInstance`.
 - **What the pod speaks:** GET, HEAD, PUT, DELETE, and PATCH with SPARQL
-  `INSERT DATA` / `DELETE DATA`. It gives ETags, honours `If-Match`,
+  `INSERT DATA` / `DELETE DATA`. It gives ETags, honors `If-Match`,
   `If-None-Match: *` and `If-None-Match: <etag>`, keeps `ldp:contains`
   listings, and marks the root as a `pim:Storage`. It has no access
   control. Each request runs exclusively on the store, under a Web Lock
@@ -79,13 +79,13 @@ pod: the guest can choose to keep it for later.
 
 `mergeGuestStudy` adds the guest's decks to the instance the user chose
 (the first listed, unless they pick another), deck by deck. The form
-lists the guest's decks (`planGuestMerge`), each ticked; one the user
-unticks is left out, and goes with the rest of the guest's study (at
-least one must stay ticked, unless the study has none). A guest's deck
+lists the guest's decks (`planGuestMerge`), each checked; one the user
+unchecks is left out, and goes with the rest of the guest's study (at
+least one must stay checked, unless the study has none). A guest's deck
 copied from the same [library](deck-library.md) release as one of the
 instance's (the same `prov:wasDerivedFrom`) says so: it is added beside
 that deck, as a deck of its own with its own progress, never merged
-into it card by card, and the user may untick it. The form also says
+into it card by card, and the user may uncheck it. The form also says
 that the instance keeps its own preferences: the guest's are not
 carried over. Nor is the guest's digest, which is this browser's. The
 drafts of releases the guest wrote in the [Studio](studio.md#drafts)
@@ -112,7 +112,7 @@ It runs these steps:
    - a new id (`deck-<uuid>`), with its cards and reviews documents
      named after it in the instance's `decks/` and `reviews/`;
      everything else its entry says is the guest's: its title,
-     description, authors, licence, topics and keywords, its direction
+     description, authors, license, topics and keywords, its direction
      and pace, when it was made, the release it came from
      (`prov:wasDerivedFrom`) and a course's chapters completed
      (`sm:completedChapter`);
@@ -141,7 +141,7 @@ It runs these steps:
      added.
 
    Nothing written may name the guest's pod (`guestUrlsLeft`). Nothing
-   is registered: the instance's registrations name its catalogue and
+   is registered: the instance's registrations name its catalog and
    its folders, and the decks added are in them.
 3. **arrange:** when the guest made deck groups, they are made around
    the decks added, each a new group (`#group-<uuid>`) with the guest's
@@ -153,15 +153,15 @@ It runs these steps:
    level anew). An empty group the guest made comes along empty. With
    no group, nothing is written, and the decks added are listed after
    the instance's, as new decks are.
-4. **drafts:** each draft the guest's catalogue links is copied to the
+4. **drafts:** each draft the guest's catalog links is copied to the
    instance (`copyReleaseDraft`): read whole, every subject of it moved
    to its place in the instance (`drafts/<name>/v<N>/`), at its
    version, under its name, or, when the instance has a draft of that
    name and version, the next free one (`<name>-2`, …). It is written
    as a new draft is ([data-model.md](data-model.md#drafts-and-releases)):
-   each document only where none is, then the link on the catalogue,
+   each document only where none is, then the link on the catalog,
    with `If-Match`. A draft whose link cannot be written is taken back,
-   so none is left that the catalogue does not link, and none of the
+   so none is left that the catalog does not link, and none of the
    instance's is ever written over. A copy that would still name the
    guest's pod is not written (`guestUrlsLeft`).
 5. **verify:** the guest's instance must still list the same
@@ -220,7 +220,7 @@ instance goes). It runs these steps:
 2. **copy:** copy each resource with every IRI under the guest's
    instance moved under the target, and the guest's WebID renamed to the
    user's (`ContainerMove.renames`).
-3. **adopt:** name the catalogue's publisher as the user's profile names
+3. **adopt:** name the catalog's publisher as the user's profile names
    them. No document of the copy may still mention `GUEST_ORIGIN`, as an
    IRI or in text (`guestUrlsLeft`).
 4. **validate:** the copy must fully conform to the shapes
@@ -231,7 +231,7 @@ instance goes). It runs these steps:
 6. **register:** `attachInstance` in the type index the user chose.
    From here on the study is theirs.
 7. **tidy:** register each class of the instance's data (its
-   catalogue, decks, cards, review states, answers and drafts,
+   catalog, decks, cards, review states, answers and drafts,
    [data-model.md](data-model.md#discovery-chain)), then delete the guest's instance
    as any instance is deleted ([data-model.md](data-model.md#discovery-chain)),
    and the whole guest pod once no instance is left. A registration
@@ -261,4 +261,3 @@ holds what an entry names only while its lock is held. An entry a
 failed move keeps, one a closed tab left, or one noting a deck added to
 an instance fences nothing. A browser without Web Locks fences no other
 tab; the verify step catches what it misses.
-

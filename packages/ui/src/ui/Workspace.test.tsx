@@ -1,12 +1,9 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/preact";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -88,7 +85,12 @@ describe("Workspace", () => {
               shape: "deck" as const,
               version: 3,
               violations: [
-                { path: "http://purl.org/dc/terms/description", message: { en: "Less than 1 values" }, severity: "violation" as const, constraint: "MinCount" },
+                {
+                  path: "http://purl.org/dc/terms/description",
+                  message: { en: "Less than 1 values" },
+                  severity: "violation" as const,
+                  constraint: "MinCount",
+                },
               ],
             },
           ],
@@ -106,7 +108,14 @@ describe("Workspace", () => {
         getPreferences: withPolicy("block-instance"),
         validateInstance: vi.fn(() => new Promise<typeof invalid>((r) => pending.push(r))),
         planRepair: vi.fn(() => ({
-          repairs: [{ kind: "describe-deck" as const, documentUrl: `${instanceA.url}catalog.ttl`, subjectUrl: deck.url, version: 3 }],
+          repairs: [
+            {
+              kind: "describe-deck" as const,
+              documentUrl: `${instanceA.url}catalog.ttl`,
+              subjectUrl: deck.url,
+              version: 3,
+            },
+          ],
           unrepairable: [],
         })),
       });
@@ -117,7 +126,9 @@ describe("Workspace", () => {
       });
       pending.forEach((resolve) => resolve(invalid));
       const notice = await screen.findByRole("region", { name: "Data check" });
-      expect(notice).toHaveTextContent("Solid Memo will not use this instance until it is repaired.");
+      expect(notice).toHaveTextContent(
+        "Solid Memo will not use this instance until it is repaired.",
+      );
       expect(screen.queryByText("Kanji N5")).toBeNull();
       const checks = vi.mocked(useCases.validateInstance).mock.calls.length;
       fireEvent.click(within(notice).getByRole("button", { name: "Repair 1 problem" }));
@@ -131,7 +142,11 @@ describe("Workspace", () => {
     });
 
     it("keeps the preferences reachable while an instance is blocked", async () => {
-      window.history.replaceState(null, "", routeToHash({ screen: "preferences", instanceUrl: instanceA.url }));
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({ screen: "preferences", instanceUrl: instanceA.url }),
+      );
       renderWorkspace(
         makeUseCases({
           listInstances: vi.fn(async () => [instanceA]),
@@ -144,7 +159,14 @@ describe("Workspace", () => {
     });
 
     it("sets aside the decks with invalid data, keeping the rest", async () => {
-      const other = { ...deck, id: "deck-2", url: `${instanceA.url}catalog.ttl#deck-2`, title: { en: "Capitals" }, cardsDocumentUrl: `${instanceA.url}decks/deck-2.ttl`, reviewsDocumentUrl: `${instanceA.url}reviews/deck-2.ttl` };
+      const other = {
+        ...deck,
+        id: "deck-2",
+        url: `${instanceA.url}catalog.ttl#deck-2`,
+        title: { en: "Capitals" },
+        cardsDocumentUrl: `${instanceA.url}decks/deck-2.ttl`,
+        reviewsDocumentUrl: `${instanceA.url}reviews/deck-2.ttl`,
+      };
       renderWorkspace(
         makeUseCases({
           listInstances: vi.fn(async () => [instanceA]),
@@ -155,7 +177,9 @@ describe("Workspace", () => {
       );
       const notice = await screen.findByRole("region", { name: "Data check" });
       await waitFor(() => {
-        expect(notice).toHaveTextContent("Kanji N5 is set aside until repaired; the rest keeps working.");
+        expect(notice).toHaveTextContent(
+          "Kanji N5 is set aside until repaired; the rest keeps working.",
+        );
       });
       expect(await screen.findByText("Set aside: its data needs repair")).toBeInTheDocument();
       expect(screen.getByText("Capitals")).toBeInTheDocument();
@@ -171,7 +195,9 @@ describe("Workspace", () => {
       );
       const notice = await screen.findByRole("region", { name: "Data check" });
       await waitFor(() => {
-        expect(notice).toHaveTextContent("Kanji N5 is set aside until repaired; the rest keeps working.");
+        expect(notice).toHaveTextContent(
+          "Kanji N5 is set aside until repaired; the rest keeps working.",
+        );
       });
       expect(await screen.findByText("Set aside: its data needs repair")).toBeInTheDocument();
     });
@@ -183,7 +209,9 @@ describe("Workspace", () => {
         makeUseCases({
           listInstances: vi.fn(async () => [instanceA]),
           listDecks: vi.fn(async () => [deck]),
-          getPreferences: vi.fn(() => new Promise<typeof DEFAULT_PREFERENCES>((resolve) => answers.push(resolve))),
+          getPreferences: vi.fn(
+            () => new Promise<typeof DEFAULT_PREFERENCES>((resolve) => answers.push(resolve)),
+          ),
           validateInstance: vi.fn(() => new Promise<typeof invalid>((r) => pending.push(r))),
         }),
       );
@@ -210,7 +238,14 @@ describe("Workspace", () => {
               {
                 url: `${instanceA.url}catalog.ttl#theirs`,
                 status: "profiled" as const,
-                violations: [{ message: { en: "Less than 1 values" }, severity: "warning" as const, constraint: "MinCount", profile: "dcat-ap" as const }],
+                violations: [
+                  {
+                    message: { en: "Less than 1 values" },
+                    severity: "warning" as const,
+                    constraint: "MinCount",
+                    profile: "dcat-ap" as const,
+                  },
+                ],
                 foreign: true as const,
               },
             ],
@@ -229,13 +264,20 @@ describe("Workspace", () => {
       expect(screen.queryByRole("region", { name: "Data check" })).toBeNull();
     });
 
-    it("keeps the deck list from being rearranged while the catalogue or a deck group is set aside", async () => {
+    it("keeps the deck list from being rearranged while the catalog or a deck group is set aside", async () => {
       const catalog = {
         ...invalid,
         documents: [
           {
             ...invalid.documents[0],
-            subjects: [{ ...invalid.documents[0].subjects[0], url: `${instanceA.url}catalog.ttl#catalog`, shape: "catalog" as const, version: 1 }],
+            subjects: [
+              {
+                ...invalid.documents[0].subjects[0],
+                url: `${instanceA.url}catalog.ttl#catalog`,
+                shape: "catalog" as const,
+                version: 1,
+              },
+            ],
           },
         ],
       };
@@ -253,14 +295,20 @@ describe("Workspace", () => {
         );
       });
       expect(
-        await screen.findByText("The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired."),
+        await screen.findByText(
+          "The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired.",
+        ),
       ).toBeInTheDocument();
       expect(screen.getByText("Kanji N5")).toBeInTheDocument();
       expect(screen.queryByText("Set aside: its data needs repair")).toBeNull();
     });
 
     it("says a set-aside deck is set aside when it is opened", async () => {
-      window.history.replaceState(null, "", routeToHash({ screen: "browser", instanceUrl: instanceA.url, deckUrl: deck.url }));
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({ screen: "browser", instanceUrl: instanceA.url, deckUrl: deck.url }),
+      );
       renderWorkspace(
         makeUseCases({
           listInstances: vi.fn(async () => [instanceA]),
@@ -273,7 +321,11 @@ describe("Workspace", () => {
     });
 
     it("holds a deck's pages under the default policy until the check says whether the deck is set aside", async () => {
-      window.history.replaceState(null, "", routeToHash({ screen: "browser", instanceUrl: instanceA.url, deckUrl: deck.url }));
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({ screen: "browser", instanceUrl: instanceA.url, deckUrl: deck.url }),
+      );
       const pending: ((report: typeof invalid) => void)[] = [];
       renderWorkspace(
         makeUseCases({
@@ -286,7 +338,9 @@ describe("Workspace", () => {
         expect(pending.length).toBeGreaterThan(0);
       });
       expect(await screen.findByText("Checking this instance's data…")).toBeInTheDocument();
-      pending.forEach((resolve) => resolve({ ...invalid, violationCount: 0, conforms: true, documents: [] }));
+      pending.forEach((resolve) =>
+        resolve({ ...invalid, violationCount: 0, conforms: true, documents: [] }),
+      );
       await waitFor(() => {
         expect(screen.queryByText("Checking this instance's data…")).toBeNull();
       });
@@ -303,12 +357,24 @@ describe("Workspace", () => {
           validateInstance: vi.fn(async () => invalid),
         }),
       );
-      expect(await screen.findByRole("region", { name: "Data check" })).toHaveTextContent("Solid Memo keeps working with it.");
+      expect(await screen.findByRole("region", { name: "Data check" })).toHaveTextContent(
+        "Solid Memo keeps working with it.",
+      );
       expect(await screen.findByText("Kanji N5")).toBeInTheDocument();
     });
 
     it("says the rest keeps working when invalid data belongs to no deck", async () => {
-      const elsewhere = { ...invalid, documents: [{ ...invalid.documents[0], subjects: [{ ...invalid.documents[0].subjects[0], url: `${instanceA.url}catalog.ttl#catalog` }] }] };
+      const elsewhere = {
+        ...invalid,
+        documents: [
+          {
+            ...invalid.documents[0],
+            subjects: [
+              { ...invalid.documents[0].subjects[0], url: `${instanceA.url}catalog.ttl#catalog` },
+            ],
+          },
+        ],
+      };
       renderWorkspace(
         makeUseCases({
           listInstances: vi.fn(async () => [instanceA]),
@@ -343,12 +409,10 @@ describe("Workspace", () => {
   it("shows a loading state while instances are being listed", () => {
     renderWorkspace(
       makeUseCases({
-        listInstances: vi.fn(() => new Promise<Instance[]>(() => { })),
+        listInstances: vi.fn(() => new Promise<Instance[]>(() => {})),
       }),
     );
-    expect(
-      screen.getByText("Loading your Solid Memo instances…"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Loading your Solid Memo instances…")).toBeInTheDocument();
   });
 
   it("shows an error when listing instances fails", async () => {
@@ -359,18 +423,16 @@ describe("Workspace", () => {
         }),
       }),
     );
-    expect(
-      await screen.findByText("indexes unreachable"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("indexes unreachable")).toBeInTheDocument();
   });
 
   it("goes straight home with exactly one instance, showing it in the bar", async () => {
     renderWorkspace(makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }));
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
     expect(screen.getByText("Deck set A")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open in your Pod (opens in a new tab)" })).toHaveAttribute("href", instanceA.url);
+    expect(
+      screen.getByRole("link", { name: "Open in your Pod (opens in a new tab)" }),
+    ).toHaveAttribute("href", instanceA.url);
   });
 
   it("reads the home screen's decks once, for the list and its counts", async () => {
@@ -389,31 +451,23 @@ describe("Workspace", () => {
         listInstances: vi.fn(async () => [instanceA, instanceB]),
       }),
     );
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Deck set B" }),
-    );
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "Deck set B" }));
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
     expect(screen.getByText("Deck set B")).toBeInTheDocument();
   });
 
   it("starts at the storage picker when no instances exist", async () => {
     renderWorkspace(makeUseCases());
-    expect(
-      await screen.findByRole("heading", { name: "Choose a storage" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Choose a storage" })).toBeInTheDocument();
   });
 
   it("shows a storage loading state", async () => {
     renderWorkspace(
       makeUseCases({
-        listStorages: vi.fn(() => new Promise<Storage[]>(() => { })),
+        listStorages: vi.fn(() => new Promise<Storage[]>(() => {})),
       }),
     );
-    expect(
-      await screen.findByText("Discovering storages…"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Discovering storages…")).toBeInTheDocument();
   });
 
   it("shows an error when storage discovery fails", async () => {
@@ -443,19 +497,13 @@ describe("Workspace", () => {
     });
     renderWorkspace(useCases);
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "https://pod.example/" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "https://pod.example/" }));
     fireEvent.input(await screen.findByLabelText("Name"), {
       target: { value: "Deck set A" },
     });
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Create instance" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Create instance" }).closest("form")!);
 
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
     expect(screen.getByText("Deck set A")).toBeInTheDocument();
     expect(useCases.createInstance).toHaveBeenCalledWith(session, {
       containerUrl: "https://pod.example/solid-memo/main/",
@@ -478,9 +526,7 @@ describe("Workspace", () => {
     fireEvent.input(await screen.findByLabelText("Name"), {
       target: { value: "Deck set A" },
     });
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Create instance" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Create instance" }).closest("form")!);
 
     await waitFor(() => expect(useCases.listLibraryDecks).toHaveBeenCalledOnce());
     expect(screen.queryByRole("heading", { name: "Decks" })).not.toBeInTheDocument();
@@ -493,16 +539,12 @@ describe("Workspace", () => {
     fireEvent.input(await screen.findByLabelText("Storage URL"), {
       target: { value: "https://pod.example/" },
     });
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Use this storage" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Use this storage" }).closest("form")!);
 
     expect(
       await screen.findByRole("heading", { name: "New Solid Memo instance" }),
     ).toBeInTheDocument();
-    expect(useCases.addManualStorage).toHaveBeenCalledWith(
-      "https://pod.example/",
-    );
+    expect(useCases.addManualStorage).toHaveBeenCalledWith("https://pod.example/");
   });
 
   it("shows a create error and stays on the creator", async () => {
@@ -517,12 +559,8 @@ describe("Workspace", () => {
     fireEvent.input(await screen.findByLabelText("Name"), {
       target: { value: "X" },
     });
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Create instance" }).closest("form")!,
-    );
-    expect(
-      await screen.findByText("registration refused"),
-    ).toBeInTheDocument();
+    fireEvent.submit(screen.getByRole("button", { name: "Create instance" }).closest("form")!);
+    expect(await screen.findByText("registration refused")).toBeInTheDocument();
   });
 
   it("navigates back from the creator to the instance picker", async () => {
@@ -534,9 +572,7 @@ describe("Workspace", () => {
         name: "Choose a Solid Memo instance",
       }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("No instances are registered yet."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("No instances are registered yet.")).toBeInTheDocument();
   });
 
   it("reaches the creator from the instance picker via the storage picker", async () => {
@@ -546,12 +582,8 @@ describe("Workspace", () => {
       }),
     );
 
-    fireEvent.click(
-      await screen.findByRole("link", { name: "New instance…" }),
-    );
-    fireEvent.click(
-      await screen.findByRole("button", { name: "https://pod.example/" }),
-    );
+    fireEvent.click(await screen.findByRole("link", { name: "New instance…" }));
+    fireEvent.click(await screen.findByRole("button", { name: "https://pod.example/" }));
     expect(
       await screen.findByRole("heading", { name: "New Solid Memo instance" }),
     ).toBeInTheDocument();
@@ -563,13 +595,10 @@ describe("Workspace", () => {
     });
     renderWorkspace(useCases);
 
-    fireEvent.input(
-      await screen.findByLabelText("Instance container URL"),
-      { target: { value: "https://pod.example/solid-memo/b/" } },
-    );
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Attach" }).closest("form")!,
-    );
+    fireEvent.input(await screen.findByLabelText("Instance container URL"), {
+      target: { value: "https://pod.example/solid-memo/b/" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Attach" }).closest("form")!);
 
     await waitFor(() => {
       expect(useCases.attachInstanceByUrl).toHaveBeenCalledWith(
@@ -578,19 +607,18 @@ describe("Workspace", () => {
         "private",
       );
     });
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
     expect(screen.getByText("Deck set B")).toBeInTheDocument();
   });
 
   it("deletes an instance from the Switch instance view", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     let deleted = false;
     const useCases = makeUseCases({
-      listInstances: vi.fn(async () =>
-        deleted ? [instanceA] : [instanceA, instanceB],
-      ),
+      listInstances: vi.fn(async () => (deleted ? [instanceA] : [instanceA, instanceB])),
       deleteInstance: vi.fn(async () => {
         deleted = true;
         return { keptFolder: null, keptReleases: false };
@@ -598,23 +626,22 @@ describe("Workspace", () => {
     });
     renderWorkspace(useCases);
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Delete instance Deck set B" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "Delete instance Deck set B" }));
 
     await waitFor(() => {
       expect(useCases.deleteInstance).toHaveBeenCalledWith(session, instanceB);
     });
     await waitFor(() => {
-      expect(
-        screen.queryByRole("button", { name: "Deck set B" }),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Deck set B" })).not.toBeInTheDocument();
     });
     expect(screen.getByRole("button", { name: "Deck set A" })).toBeInTheDocument();
   });
 
   it("says when deleting an instance kept its folder, which holds another app's files", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     let deleted = false;
     const useCases = makeUseCases({
       listInstances: vi.fn(async () => (deleted ? [instanceA] : [instanceA, instanceB])),
@@ -629,14 +656,16 @@ describe("Workspace", () => {
 
     const notice = await screen.findByText(/Solid Memo deleted its own data and kept/);
     expect(notice).toHaveTextContent("another app put files there.");
-    expect(within(notice).getByRole("link", { name: "the folder in your Pod (opens in a new tab)" })).toHaveAttribute(
-      "href",
-      instanceB.url,
-    );
+    expect(
+      within(notice).getByRole("link", { name: "the folder in your Pod (opens in a new tab)" }),
+    ).toHaveAttribute("href", instanceB.url);
   });
 
   it("says when deleting an instance kept its folder for the releases published from it", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const useCases = makeUseCases({
       listInstances: vi.fn(async () => [instanceA, instanceB]),
       deleteInstance: vi.fn(async () => ({ keptFolder: instanceB.url, keptReleases: true })),
@@ -646,11 +675,16 @@ describe("Workspace", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Delete instance Deck set B" }));
 
     const notice = await screen.findByText(/Solid Memo deleted its own data and kept/);
-    expect(notice).toHaveTextContent("the releases published from it are there, which others may be reading.");
+    expect(notice).toHaveTextContent(
+      "the releases published from it are there, which others may be reading.",
+    );
   });
 
   it("shows the error when deleting an instance fails", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const useCases = makeUseCases({
       listInstances: vi.fn(async () => [instanceA, instanceB]),
       deleteInstance: vi.fn(async () => {
@@ -659,9 +693,7 @@ describe("Workspace", () => {
     });
     renderWorkspace(useCases);
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Delete instance Deck set B" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "Delete instance Deck set B" }));
 
     expect(await screen.findByText("pod said no")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Deck set B" })).toBeInTheDocument();
@@ -670,9 +702,7 @@ describe("Workspace", () => {
   it("returns to the instance picker from home", async () => {
     renderWorkspace(makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }));
 
-    fireEvent.click(
-      await screen.findByRole("link", { name: "Switch instance" }),
-    );
+    fireEvent.click(await screen.findByRole("link", { name: "Switch instance" }));
     expect(
       await screen.findByRole("heading", {
         name: "Choose a Solid Memo instance",
@@ -696,7 +726,10 @@ describe("Workspace", () => {
       planMigration,
       updateInstance: vi.fn(async () => {
         outdated = false;
-        return { updated: [{ url: `${instanceA.url}preferences.ttl`, holds: "preferences" as const }], failed: [] };
+        return {
+          updated: [{ url: `${instanceA.url}preferences.ttl`, holds: "preferences" as const }],
+          failed: [],
+        };
       }),
     });
     renderWorkspace(useCases);
@@ -711,30 +744,30 @@ describe("Workspace", () => {
   });
 
   it("opens the preferences from home and navigates back", async () => {
-    renderWorkspace(
-      makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }),
-    );
+    renderWorkspace(makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }));
 
-    fireEvent.click(
-      await screen.findByRole("link", { name: "Preferences" }),
-    );
-    expect(
-      await screen.findByRole("heading", { name: "Study preferences" }),
-    ).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("link", { name: "Preferences" }));
+    expect(await screen.findByRole("heading", { name: "Study preferences" })).toBeInTheDocument();
 
     const trail = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
     fireEvent.click(trail.getByRole("link", { name: "Decks" }));
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
   it("shows in the preferences how other apps find the instance's data, to a user and not to a guest", async () => {
-    window.history.replaceState(null, "", routeToHash({ screen: "preferences", instanceUrl: instanceA.url }));
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({ screen: "preferences", instanceUrl: instanceA.url }),
+    );
     const useCases = makeUseCases({ listInstances: vi.fn(async () => [instanceA]) });
     const view = renderWorkspace(useCases);
-    expect(await screen.findByRole("region", { name: "Findable by other apps" })).toBeInTheDocument();
-    await waitFor(() => expect(useCases.dataClassRegistrations).toHaveBeenCalledWith(session, instanceA));
+    expect(
+      await screen.findByRole("region", { name: "Findable by other apps" }),
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(useCases.dataClassRegistrations).toHaveBeenCalledWith(session, instanceA),
+    );
     view.unmount();
 
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -753,7 +786,9 @@ describe("Workspace", () => {
     renderWorkspace(makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }));
     fireEvent.click(await screen.findByRole("link", { name: "Statistics" }));
     expect(await screen.findByRole("heading", { name: "Statistics" })).toBeInTheDocument();
-    expect(screen.getByText("No answers yet: the statistics begin with your next study session.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No answers yet: the statistics begin with your next study session."),
+    ).toBeInTheDocument();
   });
 
   it("opens the statistics straight from their address, before any deck is loaded", async () => {
@@ -788,28 +823,18 @@ describe("Workspace", () => {
       }),
     );
 
-    fireEvent.click(
-      await screen.findByRole("link", { name: "Create deck" }),
-    );
-    expect(
-      await screen.findByRole("heading", { name: "New deck" }),
-    ).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("link", { name: "Create deck" }));
+    expect(await screen.findByRole("heading", { name: "New deck" })).toBeInTheDocument();
 
     fireEvent.input(screen.getByLabelText("Name"), {
       target: { value: "Kana" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Language: not stated" }));
     fireEvent.click(screen.getByRole("radio", { name: "English (en)" }));
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Create deck" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Create deck" }).closest("form")!);
 
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByRole("link", { name: "Kana" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Kana" })).toBeInTheDocument();
   });
 
   it("imports a library deck and returns to the deck list", async () => {
@@ -851,24 +876,16 @@ describe("Workspace", () => {
     );
 
     fireEvent.click(await screen.findByRole("link", { name: "Deck library" }));
-    expect(
-      await screen.findByRole("heading", { name: "Deck library" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Deck library" })).toBeInTheDocument();
     expect(window.location.hash).toBe(
       routeToHash({ screen: "library", instanceUrl: instanceA.url }),
     );
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Capitals" }));
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Import 1 deck" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Import 1 deck" }).closest("form")!);
 
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByRole("link", { name: "Capitals" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Capitals" })).toBeInTheDocument();
   });
 
   it("opens a library deck's page from the library and imports it there", async () => {
@@ -913,9 +930,7 @@ describe("Workspace", () => {
 
     fireEvent.click(await screen.findByRole("link", { name: "Deck library" }));
     fireEvent.click(await screen.findByRole("link", { name: "Capitals" }));
-    expect(
-      await screen.findByRole("heading", { name: "Capitals" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Capitals" })).toBeInTheDocument();
     expect(window.location.hash).toBe(
       routeToHash({
         screen: "libraryDeck",
@@ -925,9 +940,7 @@ describe("Workspace", () => {
     );
     expect(screen.getByText("Every capital.")).toBeInTheDocument();
     const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
-    expect(
-      within(nav).getByRole("link", { name: "Deck library" }),
-    ).toHaveAttribute(
+    expect(within(nav).getByRole("link", { name: "Deck library" })).toHaveAttribute(
       "href",
       routeToHash({ screen: "library", instanceUrl: instanceA.url }),
     );
@@ -937,12 +950,8 @@ describe("Workspace", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Import this deck" }));
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByRole("link", { name: "Capitals" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Capitals" })).toBeInTheDocument();
   });
 
   it("browses a library deck's cards from its page and pages through them", async () => {
@@ -957,7 +966,15 @@ describe("Workspace", () => {
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
         listLibraryDecks: vi.fn(async () => [
-          { url: libraryUrl, ...firstRelease(libraryUrl), title: { en: "Capitals" }, cardCount: 11, authors: [], direction: "front-to-back" as const, sources: [] },
+          {
+            url: libraryUrl,
+            ...firstRelease(libraryUrl),
+            title: { en: "Capitals" },
+            cardCount: 11,
+            authors: [],
+            direction: "front-to-back" as const,
+            sources: [],
+          },
         ]),
         listLibraryCards: vi.fn(async () => cards),
       }),
@@ -967,9 +984,7 @@ describe("Workspace", () => {
     fireEvent.click(await screen.findByRole("link", { name: "Capitals" }));
     fireEvent.click(await screen.findByRole("link", { name: "Browse cards" }));
 
-    expect(
-      await screen.findByRole("heading", { name: "Cards: Capitals" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Cards: Capitals" })).toBeInTheDocument();
     expect(screen.getByText("Front 1")).toBeInTheDocument();
     const browse = {
       screen: "libraryBrowser",
@@ -988,9 +1003,7 @@ describe("Workspace", () => {
       "page",
     );
     fireEvent.click(within(nav).getByRole("link", { name: "Capitals" }));
-    expect(
-      await screen.findByRole("button", { name: "Import this deck" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Import this deck" })).toBeInTheDocument();
   });
 
   it("previews a library deck from the library and goes back to it", async () => {
@@ -999,7 +1012,15 @@ describe("Workspace", () => {
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
         listLibraryDecks: vi.fn(async () => [
-          { url: libraryUrl, ...firstRelease(libraryUrl), title: { en: "Capitals" }, cardCount: 1, authors: [], direction: "front-to-back" as const, sources: [] },
+          {
+            url: libraryUrl,
+            ...firstRelease(libraryUrl),
+            title: { en: "Capitals" },
+            cardCount: 1,
+            authors: [],
+            direction: "front-to-back" as const,
+            sources: [],
+          },
         ]),
         listLibraryCards: vi.fn(async () => [
           { id: "se", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 },
@@ -1010,9 +1031,7 @@ describe("Workspace", () => {
     fireEvent.click(await screen.findByRole("link", { name: "Deck library" }));
     fireEvent.click(await screen.findByRole("link", { name: "Preview Capitals" }));
 
-    expect(
-      await screen.findByRole("heading", { name: "Preview: Capitals" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Preview: Capitals" })).toBeInTheDocument();
     expect(window.location.hash).toBe(
       routeToHash({
         screen: "libraryPreview",
@@ -1029,9 +1048,7 @@ describe("Workspace", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Back to library" }));
-    expect(
-      await screen.findByRole("checkbox", { name: "Capitals" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("checkbox", { name: "Capitals" })).toBeInTheDocument();
     expect(window.location.hash).toBe(
       routeToHash({ screen: "library", instanceUrl: instanceA.url }),
     );
@@ -1043,7 +1060,15 @@ describe("Workspace", () => {
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
         listLibraryDecks: vi.fn(async () => [
-          { url: libraryUrl, ...firstRelease(libraryUrl), title: { en: "Capitals" }, cardCount: 1, authors: [], direction: "front-to-back" as const, sources: [] },
+          {
+            url: libraryUrl,
+            ...firstRelease(libraryUrl),
+            title: { en: "Capitals" },
+            cardCount: 1,
+            authors: [],
+            direction: "front-to-back" as const,
+            sources: [],
+          },
         ]),
         listLibraryCards: vi.fn(async () => [
           { id: "sweden", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 },
@@ -1067,7 +1092,10 @@ describe("Workspace", () => {
       }),
     );
     const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
-    expect(within(nav).getByRole("link", { name: "Sweden" })).toHaveAttribute("aria-current", "page");
+    expect(within(nav).getByRole("link", { name: "Sweden" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     fireEvent.click(within(nav).getByRole("link", { name: "Cards" }));
     expect(await screen.findByRole("heading", { name: "Cards: Capitals" })).toBeInTheDocument();
   });
@@ -1078,13 +1106,26 @@ describe("Workspace", () => {
     window.history.replaceState(
       null,
       "",
-      routeToHash({ screen: "libraryCard", instanceUrl: instanceA.url, libraryDeckUrl, cardId: "atlantis" }),
+      routeToHash({
+        screen: "libraryCard",
+        instanceUrl: instanceA.url,
+        libraryDeckUrl,
+        cardId: "atlantis",
+      }),
     );
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
         listLibraryDecks: vi.fn(async () => [
-          { url: libraryUrl, ...firstRelease(libraryUrl), title: { en: "Capitals" }, cardCount: 1, authors: [], direction: "front-to-back" as const, sources: [] },
+          {
+            url: libraryUrl,
+            ...firstRelease(libraryUrl),
+            title: { en: "Capitals" },
+            cardCount: 1,
+            authors: [],
+            direction: "front-to-back" as const,
+            sources: [],
+          },
         ]),
         listLibraryCards: vi.fn(async () => [
           { id: "sweden", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 },
@@ -1113,7 +1154,15 @@ describe("Workspace", () => {
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
         listLibraryDecks: vi.fn(async () => [
-          { url: libraryUrl, ...firstRelease(libraryUrl), title: { en: "Capitals" }, cardCount: 1, authors: [], direction: "front-to-back" as const, sources: [] },
+          {
+            url: libraryUrl,
+            ...firstRelease(libraryUrl),
+            title: { en: "Capitals" },
+            cardCount: 1,
+            authors: [],
+            direction: "front-to-back" as const,
+            sources: [],
+          },
         ]),
         listLibraryCards: vi.fn(async () => {
           throw new Error("library offline");
@@ -1153,25 +1202,49 @@ describe("Workspace", () => {
       importReleaseFromUrl: vi.fn(async () => deck),
       getCourse: vi.fn(() => new Promise<never>(() => undefined)),
     });
-    window.history.replaceState(null, "", routeToHash({ screen: "library", instanceUrl: instanceA.url }));
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({ screen: "library", instanceUrl: instanceA.url }),
+    );
     renderWorkspace(useCases);
 
     fireEvent.click(await screen.findByRole("link", { name: "Add from a link" }));
     expect(await screen.findByRole("heading", { name: "Add from a link" })).toBeInTheDocument();
-    fireEvent.input(screen.getByRole("textbox", { name: "Link to the release" }), { target: { value: release } });
+    fireEvent.input(screen.getByRole("textbox", { name: "Link to the release" }), {
+      target: { value: release },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Show" }));
     expect(await screen.findByRole("heading", { name: "Pods" })).toBeInTheDocument();
-    expect(window.location.hash).toBe(routeToHash({ screen: "importUrl", instanceUrl: instanceA.url, url: release }));
+    expect(window.location.hash).toBe(
+      routeToHash({ screen: "importUrl", instanceUrl: instanceA.url, url: release }),
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Start course" }));
-    await waitFor(() => expect(window.location.hash).toBe(routeToHash({ screen: "course", instanceUrl: instanceA.url, deckUrl: deck.url })));
+    await waitFor(() =>
+      expect(window.location.hash).toBe(
+        routeToHash({ screen: "course", instanceUrl: instanceA.url, deckUrl: deck.url }),
+      ),
+    );
     expect(useCases.importReleaseFromUrl).toHaveBeenCalledWith(instanceA.url, pods);
   });
 
   it("returns to the deck list once a deck is added from a link", async () => {
     const release = "https://bob.example/releases/rivers/v1.ttl";
-    const rivers = { url: release, ...firstRelease(release), title: { en: "Rivers" }, cardCount: 2, authors: [], direction: "front-to-back" as const, sources: [] };
-    window.history.replaceState(null, "", routeToHash({ screen: "importUrl", instanceUrl: instanceA.url, url: release }));
+    const rivers = {
+      url: release,
+      ...firstRelease(release),
+      title: { en: "Rivers" },
+      cardCount: 2,
+      authors: [],
+      direction: "front-to-back" as const,
+      sources: [],
+    };
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({ screen: "importUrl", instanceUrl: instanceA.url, url: release }),
+    );
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
@@ -1193,7 +1266,11 @@ describe("Workspace", () => {
       }),
     );
     fireEvent.click(await screen.findByRole("button", { name: "Import this deck" }));
-    await waitFor(() => expect(window.location.hash).toBe(routeToHash({ screen: "home", instanceUrl: instanceA.url })));
+    await waitFor(() =>
+      expect(window.location.hash).toBe(
+        routeToHash({ screen: "home", instanceUrl: instanceA.url }),
+      ),
+    );
   });
 
   it("opens a library deck's page from a link to one of its releases", async () => {
@@ -1254,9 +1331,7 @@ describe("Workspace", () => {
       }),
     );
 
-    expect(
-      await screen.findByRole("heading", { name: "Deck library" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Deck library" })).toBeInTheDocument();
     expect(window.location.hash).toBe(
       routeToHash({ screen: "library", instanceUrl: instanceA.url }),
     );
@@ -1305,15 +1380,11 @@ describe("Workspace", () => {
     );
 
     fireEvent.click(await screen.findByRole("link", { name: "Kanji N5" }));
-    expect(
-      await screen.findByRole("heading", { name: "Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Kanji N5" })).toBeInTheDocument();
 
     const trail = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
     fireEvent.click(trail.getByRole("link", { name: "Decks" }));
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
   it("reaches the card creator from the Browser only, and returns there", async () => {
@@ -1343,13 +1414,9 @@ describe("Workspace", () => {
 
     fireEvent.click(browserLink);
     fireEvent.click(await screen.findByRole("link", { name: "Add card" }));
-    expect(
-      await screen.findByRole("heading", { name: "New card" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "New card" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("link", { name: "Back" }));
-    expect(
-      await screen.findByRole("heading", { name: "Browser: Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Browser: Kanji N5" })).toBeInTheDocument();
   });
 
   it("keeps the Browser page in the URL and restores it on Back from a card", async () => {
@@ -1389,12 +1456,8 @@ describe("Workspace", () => {
     expect(window.history.length).toBe(historyBefore);
     expect(window.location.hash).toBe(`${browserHash}&page=2`);
 
-    fireEvent.click(
-      screen.getByRole("link", { name: `Country ${CARDS_PER_PAGE + 1}` }),
-    );
-    expect(
-      await screen.findByRole("heading", { name: "Card" }),
-    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("link", { name: `Country ${CARDS_PER_PAGE + 1}` }));
+    expect(await screen.findByRole("heading", { name: "Card" })).toBeInTheDocument();
 
     window.history.back();
     expect(await screen.findByText("Page 2 of 2")).toBeInTheDocument();
@@ -1412,15 +1475,18 @@ describe("Workspace", () => {
       formatVersion: 1,
       authors: [],
     };
-    const cards: Card[] = Array.from({ length: CARDS_PER_PAGE + 2 }, (_, i): Card => ({
-      id: `card-${i + 1}`,
-      url: `${deck.cardsDocumentUrl}#card-${i + 1}`,
-      // The first says its language; the others, two pages of them, do not.
-      front: i === 0 ? { en: `Country ${i + 1}` } : { "": `Country ${i + 1}` },
-      back: { "": `Capital ${i + 1}` },
-      createdAt: "2026-09-21T10:00:00.000Z",
-      formatVersion: 1,
-    }));
+    const cards: Card[] = Array.from(
+      { length: CARDS_PER_PAGE + 2 },
+      (_, i): Card => ({
+        id: `card-${i + 1}`,
+        url: `${deck.cardsDocumentUrl}#card-${i + 1}`,
+        // The first says its language; the others, two pages of them, do not.
+        front: i === 0 ? { en: `Country ${i + 1}` } : { "": `Country ${i + 1}` },
+        back: { "": `Capital ${i + 1}` },
+        createdAt: "2026-09-21T10:00:00.000Z",
+        formatVersion: 1,
+      }),
+    );
     cards[0]!.back = { en: "Capital 1" };
     const useCases = makeUseCases({
       listInstances: vi.fn(async () => [instanceA]),
@@ -1458,7 +1524,10 @@ describe("Workspace", () => {
   });
 
   it("removes a deck from its preferences and lands on the deck list", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const deck: Deck = {
       id: "deck-1",
       url: `${instanceA.url}catalog.ttl#deck-1`,
@@ -1547,15 +1616,11 @@ describe("Workspace", () => {
 
     fireEvent.click(await screen.findByRole("link", { name: "Kanji N5" }));
     fireEvent.click(await screen.findByRole("link", { name: "Browser" }));
-    expect(
-      await screen.findByRole("heading", { name: "Browser: Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Browser: Kanji N5" })).toBeInTheDocument();
 
     const trail = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
     fireEvent.click(trail.getByRole("link", { name: "Kanji N5" }));
-    expect(
-      await screen.findByRole("heading", { name: "Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Kanji N5" })).toBeInTheDocument();
   });
 
   it("titles each screen and gives its heading focus after the user moves there", async () => {
@@ -1625,13 +1690,14 @@ describe("Workspace", () => {
       routeToHash({ screen: "deckPreferences", instanceUrl: instanceA.url, deckUrl: deck.url }),
     );
     const trail = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
-    expect(trail.getByRole("link", { name: "Preferences" })).toHaveAttribute("aria-current", "page");
+    expect(trail.getByRole("link", { name: "Preferences" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
 
     fireEvent.input(screen.getByLabelText("New cards per day"), { target: { value: "4" } });
     fireEvent.click(screen.getByRole("button", { name: "Save preferences" }));
-    expect(
-      await screen.findByRole("heading", { name: "Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Kanji N5" })).toBeInTheDocument();
     expect(setDeckPace).toHaveBeenCalledWith(deck, { newCardsPerDay: 4 });
   });
 
@@ -1673,16 +1739,10 @@ describe("Workspace", () => {
 
     fireEvent.click(await screen.findByRole("link", { name: "Kanji N5" }));
     fireEvent.click(await screen.findByRole("button", { name: "Study" }));
-    expect(
-      await screen.findByRole("heading", { name: "Study: Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Study: Kanji N5" })).toBeInTheDocument();
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "End session" }),
-    );
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "End session" }));
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
   const dueCard: Card = {
@@ -1707,12 +1767,8 @@ describe("Workspace", () => {
       }),
     );
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Study Kanji N5" }),
-    );
-    expect(
-      await screen.findByRole("heading", { name: "Study: Kanji N5" }),
-    ).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "Study Kanji N5" }));
+    expect(await screen.findByRole("heading", { name: "Study: Kanji N5" })).toBeInTheDocument();
     expect(window.location.hash).toContain("#/study");
   });
 
@@ -1729,12 +1785,8 @@ describe("Workspace", () => {
       }),
     );
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Study Kanji N5" }),
-    );
-    expect(
-      await screen.findByRole("heading", { name: "Study: Kanji N5" }),
-    ).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "Study Kanji N5" }));
+    expect(await screen.findByRole("heading", { name: "Study: Kanji N5" })).toBeInTheDocument();
     expect(window.location.hash).toContain("#/study");
   });
 
@@ -1759,16 +1811,12 @@ describe("Workspace", () => {
     );
 
     await screen.findByRole("heading", { name: "Decks" });
-    expect(window.location.hash).toBe(
-      `#/decks?instance=${encodeURIComponent(instanceA.url)}`,
-    );
+    expect(window.location.hash).toBe(`#/decks?instance=${encodeURIComponent(instanceA.url)}`);
 
     fireEvent.click(await screen.findByRole("link", { name: "Kanji N5" }));
     await screen.findByRole("heading", { name: "Kanji N5" });
     expect(window.location.hash).toBe(
-      `#/deck?instance=${encodeURIComponent(
-        instanceA.url,
-      )}&deck=${encodeURIComponent(deck.url)}`,
+      `#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(deck.url)}`,
     );
   });
 
@@ -1776,9 +1824,7 @@ describe("Workspace", () => {
     window.history.replaceState(
       null,
       "",
-      `#/deck?instance=${encodeURIComponent(
-        instanceA.url,
-      )}&deck=${encodeURIComponent(deck.url)}`,
+      `#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(deck.url)}`,
     );
     renderWorkspace(
       makeUseCases({
@@ -1787,9 +1833,7 @@ describe("Workspace", () => {
       }),
     );
 
-    expect(
-      await screen.findByRole("heading", { name: "Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Kanji N5" })).toBeInTheDocument();
   });
 
   it("follows Back/Forward (external hash changes)", async () => {
@@ -1803,16 +1847,10 @@ describe("Workspace", () => {
     fireEvent.click(await screen.findByRole("link", { name: "Kanji N5" }));
     await screen.findByRole("heading", { name: "Kanji N5" });
 
-    window.history.replaceState(
-      null,
-      "",
-      `#/decks?instance=${encodeURIComponent(instanceA.url)}`,
-    );
+    window.history.replaceState(null, "", `#/decks?instance=${encodeURIComponent(instanceA.url)}`);
     fireEvent(window, new Event("hashchange"));
 
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
   describe("card pages", () => {
@@ -1844,20 +1882,16 @@ describe("Workspace", () => {
 
       fireEvent.click(await screen.findByRole("link", { name: "水" }));
 
-      expect(
-        await screen.findByRole("heading", { name: "Card" }),
-      ).toBeInTheDocument();
+      expect(await screen.findByRole("heading", { name: "Card" })).toBeInTheDocument();
       expect(window.location.hash).toContain("#/card?");
-      const trail = within(
-        screen.getByRole("navigation", { name: "Breadcrumb" }),
-      );
-      expect(
-        trail.getAllByRole("link").map((link) => link.textContent),
-      ).toEqual(["Decks", deck.title.en, "Browser", "水"]);
-      expect(trail.getByRole("link", { name: "水" })).toHaveAttribute(
-        "aria-current",
-        "page",
-      );
+      const trail = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
+      expect(trail.getAllByRole("link").map((link) => link.textContent)).toEqual([
+        "Decks",
+        deck.title.en,
+        "Browser",
+        "水",
+      ]);
+      expect(trail.getByRole("link", { name: "水" })).toHaveAttribute("aria-current", "page");
 
       fireEvent.click(trail.getByRole("link", { name: "Browser" }));
       expect(
@@ -1892,7 +1926,10 @@ describe("Workspace", () => {
     });
 
     it("returns to the Browser after removing the card", async () => {
-      vi.stubGlobal("confirm", vi.fn(() => true));
+      vi.stubGlobal(
+        "confirm",
+        vi.fn(() => true),
+      );
       let removed = false;
       await openBrowser(
         makeUseCases({
@@ -1905,13 +1942,9 @@ describe("Workspace", () => {
         }),
       );
       fireEvent.click(await screen.findByRole("link", { name: "水" }));
-      fireEvent.click(
-        await screen.findByRole("button", { name: "Remove card" }),
-      );
+      fireEvent.click(await screen.findByRole("button", { name: "Remove card" }));
 
-      expect(
-        await screen.findByText("No cards in this deck yet."),
-      ).toBeInTheDocument();
+      expect(await screen.findByText("No cards in this deck yet.")).toBeInTheDocument();
       expect(window.location.hash).toContain("#/browse?");
     });
 
@@ -1953,9 +1986,7 @@ describe("Workspace", () => {
       const useCases = makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
         listDecks: vi.fn(async () => [deck]),
-        listCards: vi.fn(
-          () => new Promise<Card[]>((_resolve, reject) => (fail = reject)),
-        ),
+        listCards: vi.fn(() => new Promise<Card[]>((_resolve, reject) => (fail = reject))),
       });
       renderWorkspace(useCases);
       expect(await screen.findByText("Loading card…")).toBeInTheDocument();
@@ -2049,9 +2080,7 @@ describe("Workspace", () => {
       ).toBeInTheDocument();
       expect(await screen.findByText("All 0 documents conform.")).toBeInTheDocument();
       expect(developer.validateInstance).toHaveBeenCalledWith(instanceA.url);
-      expect(
-        screen.getByRole("link", { name: "Validation", current: "page" }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Validation", current: "page" })).toBeInTheDocument();
     });
 
     it("explains how to turn developer mode on when the validation route is opened without it", async () => {
@@ -2087,9 +2116,7 @@ describe("Workspace", () => {
       });
       renderWorkspace(useCases);
 
-      fireEvent.click(
-        await screen.findByRole("link", { name: "Preferences" }),
-      );
+      fireEvent.click(await screen.findByRole("link", { name: "Preferences" }));
       fireEvent.click(await screen.findByLabelText("Developer mode"));
       fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
@@ -2107,28 +2134,23 @@ describe("Workspace", () => {
 
     await screen.findByRole("heading", { name: "Decks" });
     expect(
-      within(screen.getByRole("navigation", { name: "Breadcrumb" })).getByRole(
-        "link",
-        { name: "Decks" },
-      ),
+      within(screen.getByRole("navigation", { name: "Breadcrumb" })).getByRole("link", {
+        name: "Decks",
+      }),
     ).toHaveAttribute("aria-current", "page");
 
     fireEvent.click(screen.getByRole("link", { name: "Kanji N5" }));
     fireEvent.click(await screen.findByRole("link", { name: "Browser" }));
     await screen.findByRole("heading", { name: "Browser: Kanji N5" });
 
-    const trail = within(
-      screen.getByRole("navigation", { name: "Breadcrumb" }),
-    );
+    const trail = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
     expect(trail.getByText("Browser")).toHaveAttribute("aria-current", "page");
 
     const decksHref = trail.getByRole("link", { name: "Decks" }).getAttribute("href")!;
     window.history.pushState(null, "", decksHref);
     fireEvent(window, new Event("hashchange"));
 
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
   it("returns to the deck list when the brand link empties the route", async () => {
@@ -2145,17 +2167,11 @@ describe("Workspace", () => {
     window.history.replaceState(null, "", "#/");
     fireEvent(window, new Event("hashchange"));
 
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
   it("falls back to the instance picker for a deep link to an unknown instance", async () => {
-    window.history.replaceState(
-      null,
-      "",
-      "#/decks?instance=https%3A%2F%2Felsewhere.example%2F",
-    );
+    window.history.replaceState(null, "", "#/decks?instance=https%3A%2F%2Felsewhere.example%2F");
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA, instanceB]),
@@ -2170,16 +2186,10 @@ describe("Workspace", () => {
   });
 
   it("falls back to the storage picker for an unknown instance when none exist", async () => {
-    window.history.replaceState(
-      null,
-      "",
-      "#/decks?instance=https%3A%2F%2Felsewhere.example%2F",
-    );
+    window.history.replaceState(null, "", "#/decks?instance=https%3A%2F%2Felsewhere.example%2F");
     renderWorkspace(makeUseCases());
 
-    expect(
-      await screen.findByRole("heading", { name: "Choose a storage" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Choose a storage" })).toBeInTheDocument();
   });
 
   it("falls back to the deck list for a deep link to an unknown deck", async () => {
@@ -2197,23 +2207,19 @@ describe("Workspace", () => {
       }),
     );
 
-    expect(
-      await screen.findByRole("heading", { name: "Decks" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
   it("shows a loading state while a deep-linked deck is being fetched", async () => {
     window.history.replaceState(
       null,
       "",
-      `#/deck?instance=${encodeURIComponent(
-        instanceA.url,
-      )}&deck=${encodeURIComponent(deck.url)}`,
+      `#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(deck.url)}`,
     );
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
-        listDecks: vi.fn(() => new Promise<Deck[]>(() => { })),
+        listDecks: vi.fn(() => new Promise<Deck[]>(() => {})),
       }),
     );
 
@@ -2224,9 +2230,7 @@ describe("Workspace", () => {
     window.history.replaceState(
       null,
       "",
-      `#/deck?instance=${encodeURIComponent(
-        instanceA.url,
-      )}&deck=${encodeURIComponent(deck.url)}`,
+      `#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(deck.url)}`,
     );
     renderWorkspace(
       makeUseCases({
@@ -2237,13 +2241,15 @@ describe("Workspace", () => {
       }),
     );
 
-    expect(
-      await screen.findByText("catalog unreachable"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("catalog unreachable")).toBeInTheDocument();
   });
 
   describe("courses", () => {
-    const courseRoute = { screen: "course", instanceUrl: instanceA.url, deckUrl: courseDeck.url } as const;
+    const courseRoute = {
+      screen: "course",
+      instanceUrl: instanceA.url,
+      deckUrl: courseDeck.url,
+    } as const;
     const chapterRoute = { ...courseRoute, screen: "courseChapter", chapterUrl: CH1 } as const;
     const reviewRoute = { ...courseRoute, screen: "courseReview", chapterUrl: CH1 } as const;
 
@@ -2269,7 +2275,11 @@ describe("Workspace", () => {
       window.history.replaceState(
         null,
         "",
-        routeToHash({ screen: "libraryDeck", instanceUrl: instanceA.url, libraryDeckUrl: courseLibraryDeck.seriesUrl }),
+        routeToHash({
+          screen: "libraryDeck",
+          instanceUrl: instanceA.url,
+          libraryDeckUrl: courseLibraryDeck.seriesUrl,
+        }),
       );
       renderWorkspace(useCases);
       fireEvent.click(await screen.findByRole("button", { name: "Start course" }));
@@ -2278,11 +2288,11 @@ describe("Workspace", () => {
       expect(window.location.hash).toBe(routeToHash(courseRoute));
       expect(useCases.getCourse).toHaveBeenCalledWith(courseDeck);
       const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
-      expect(within(nav).getAllByRole("link").map((link) => link.textContent)).toEqual([
-        "Decks",
-        "Solid fundamentals",
-        "Course",
-      ]);
+      expect(
+        within(nav)
+          .getAllByRole("link")
+          .map((link) => link.textContent),
+      ).toEqual(["Decks", "Solid fundamentals", "Course"]);
       expect(document.title).toBe("Course – Solid fundamentals – Solid Memo");
     });
 
@@ -2290,13 +2300,19 @@ describe("Workspace", () => {
       let started = false;
       const useCases = courseUseCases({
         listDecks: vi.fn(async () => (started ? [courseDeck] : [])),
-        listLibraryDecks: vi.fn(async () => [{ ...courseLibraryDeck, forNewcomers: true as const }]),
+        listLibraryDecks: vi.fn(async () => [
+          { ...courseLibraryDeck, forNewcomers: true as const },
+        ]),
         startCourse: vi.fn(async () => {
           started = true;
           return courseDeck;
         }),
       });
-      window.history.replaceState(null, "", routeToHash({ screen: "home", instanceUrl: instanceA.url }));
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({ screen: "home", instanceUrl: instanceA.url }),
+      );
       renderWorkspace(useCases);
       fireEvent.click(await screen.findByRole("button", { name: "Start the course" }));
 
@@ -2311,17 +2327,22 @@ describe("Workspace", () => {
       renderWorkspace(
         courseUseCases({
           getCourse: vi.fn(async () => makeCourse([...answered])),
-          answerCourseQuestion: vi.fn(async (_instanceUrl: string, _deck: Deck, card: { id: string }) => {
-            answered.push(card.id);
-            return { effect: "introduce" as const, state: null };
-          }),
+          answerCourseQuestion: vi.fn(
+            async (_instanceUrl: string, _deck: Deck, card: { id: string }) => {
+              answered.push(card.id);
+              return { effect: "introduce" as const, state: null };
+            },
+          ),
         }),
       );
       fireEvent.click(await screen.findByRole("link", { name: "Start the course" }));
       expect(await screen.findByRole("heading", { name: "Step 1 of 2" })).toBeInTheDocument();
       expect(window.location.hash).toBe(routeToHash(chapterRoute));
       const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
-      expect(within(nav).getByRole("link", { name: "Linked data" })).toHaveAttribute("aria-current", "page");
+      expect(within(nav).getByRole("link", { name: "Linked data" })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
 
       const answer = async (option: string, next: string) => {
         fireEvent.click(screen.getByRole("radio", { name: option }));
@@ -2338,18 +2359,18 @@ describe("Workspace", () => {
       await answer("Three terms", "Next");
       await answer("A syntax", "On to the final review");
       // The review opens on a word before it, its heading focused.
-      const reviewHeading = await screen.findByRole("heading", { name: "Final review: Linked data" });
+      const reviewHeading = await screen.findByRole("heading", {
+        name: "Final review: Linked data",
+      });
       await waitFor(() => expect(reviewHeading).toHaveFocus());
       expect(screen.getByRole("button", { name: "Start the final review" })).toBeInTheDocument();
       expect(document.querySelector(".course-theory")).toBeNull();
       expect(window.location.hash).toBe(routeToHash(reviewRoute));
-      expect(within(screen.getByRole("navigation", { name: "Breadcrumb" })).getAllByRole("link").map((l) => l.textContent)).toEqual([
-        "Decks",
-        "Solid fundamentals",
-        "Course",
-        "Linked data",
-        "Final review",
-      ]);
+      expect(
+        within(screen.getByRole("navigation", { name: "Breadcrumb" }))
+          .getAllByRole("link")
+          .map((l) => l.textContent),
+      ).toEqual(["Decks", "Solid fundamentals", "Course", "Linked data", "Final review"]);
     });
 
     it("takes the learner back to the course from a chapter completed, cheering it once", async () => {
@@ -2361,7 +2382,12 @@ describe("Workspace", () => {
         "Which is linked data?": "Data with links",
       };
       const useCases = courseUseCases({
-        getCourse: vi.fn(async () => makeCourse(["q-1", "q-2", "q-3", ...(completed.length > 0 ? ["r-1"] : [])], [...completed])),
+        getCourse: vi.fn(async () =>
+          makeCourse(
+            ["q-1", "q-2", "q-3", ...(completed.length > 0 ? ["r-1"] : [])],
+            [...completed],
+          ),
+        ),
         answerCourseQuestion: vi.fn(async () => ({ effect: "review" as const, state: null })),
         completeChapter: vi.fn(async (deck: Deck, chapterUrl: string) => {
           completed.push(chapterUrl);
@@ -2372,11 +2398,16 @@ describe("Workspace", () => {
       renderWorkspace(useCases);
       // A chapter whose steps are done goes on to its final review, which opens on the word before it.
       fireEvent.click(await screen.findByRole("link", { name: "Continue" }));
-      const reviewHeading = await screen.findByRole("heading", { name: "Final review: Linked data" });
+      const reviewHeading = await screen.findByRole("heading", {
+        name: "Final review: Linked data",
+      });
       expect(window.location.hash).toBe(routeToHash(reviewRoute));
       await waitFor(() => expect(reviewHeading).toHaveFocus());
       // Back to the chapters is the way out before starting.
-      expect(screen.getByRole("link", { name: "Back to the chapters" })).toHaveAttribute("href", routeToHash(courseRoute));
+      expect(screen.getByRole("link", { name: "Back to the chapters" })).toHaveAttribute(
+        "href",
+        routeToHash(courseRoute),
+      );
 
       fireEvent.click(screen.getByRole("button", { name: "Start the final review" }));
       for (let asked = 0; asked < 4; asked++) {
@@ -2386,8 +2417,13 @@ describe("Workspace", () => {
         fireEvent.click(await screen.findByRole("button", { name: "Next" }));
       }
 
-      const cheer = (await screen.findByText("Well done! You have completed Linked data.")).closest(".course-cheer");
-      expect(useCases.completeChapter).toHaveBeenCalledWith(expect.objectContaining({ url: courseDeck.url }), CH1);
+      const cheer = (await screen.findByText("Well done! You have completed Linked data.")).closest(
+        ".course-cheer",
+      );
+      expect(useCases.completeChapter).toHaveBeenCalledWith(
+        expect.objectContaining({ url: courseDeck.url }),
+        CH1,
+      );
       expect(window.location.hash).toBe(routeToHash(courseRoute));
       await waitFor(() => expect(cheer).toHaveFocus());
       expect(screen.getByText("1 of 2 chapters done")).toBeInTheDocument();
@@ -2406,7 +2442,11 @@ describe("Workspace", () => {
     });
 
     it("falls back to the course for a chapter it does not have, or one still locked", async () => {
-      window.history.replaceState(null, "", routeToHash({ ...chapterRoute, chapterUrl: `${CH1}-gone` }));
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({ ...chapterRoute, chapterUrl: `${CH1}-gone` }),
+      );
       const { unmount } = renderWorkspace(courseUseCases());
       expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
       expect(window.location.hash).toBe(routeToHash(courseRoute));
@@ -2428,16 +2468,22 @@ describe("Workspace", () => {
     });
 
     it("falls back to the deck's page for a deck that is no copy of a course", async () => {
-      const useCases = courseUseCases({ listDecks: vi.fn(async () => [{ ...courseDeck, sourceUrl: undefined }]) });
+      const useCases = courseUseCases({
+        listDecks: vi.fn(async () => [{ ...courseDeck, sourceUrl: undefined }]),
+      });
       window.history.replaceState(null, "", routeToHash(courseRoute));
       renderWorkspace(useCases);
-      await waitFor(() => expect(window.location.hash).toBe(routeToHash({ ...courseRoute, screen: "deckDetail" })));
+      await waitFor(() =>
+        expect(window.location.hash).toBe(routeToHash({ ...courseRoute, screen: "deckDetail" })),
+      );
       expect(useCases.getCourse).not.toHaveBeenCalled();
     });
 
     it("shows a loading state while the course is read, and why it could not be", async () => {
       window.history.replaceState(null, "", routeToHash(courseRoute));
-      const { unmount } = renderWorkspace(courseUseCases({ getCourse: vi.fn(() => new Promise<never>(() => undefined)) }));
+      const { unmount } = renderWorkspace(
+        courseUseCases({ getCourse: vi.fn(() => new Promise<never>(() => undefined)) }),
+      );
       expect(await screen.findByText("Loading the course…")).toBeInTheDocument();
       unmount();
 

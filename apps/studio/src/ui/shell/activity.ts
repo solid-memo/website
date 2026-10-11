@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext } from "preact";
 import { useContext, useEffect, useRef } from "preact/hooks";
 
@@ -18,7 +22,12 @@ export const ACTIVITY_LIMIT = 50;
  * last line counts it once more, at the time told; else it is a line of
  * its own, `id`, before the others, the oldest past ACTIVITY_LIMIT left out.
  */
-export function addActivity(entries: readonly ActivityEntry[], text: string, at: Date, id: number): ActivityEntry[] {
+export function addActivity(
+  entries: readonly ActivityEntry[],
+  text: string,
+  at: Date,
+  id: number,
+): ActivityEntry[] {
   const [last, ...before] = entries;
   if (last?.text === text) return [{ ...last, at, count: last.count + 1 }, ...before];
   return [{ id, at, text, count: 1 }, ...entries].slice(0, ACTIVITY_LIMIT);

@@ -1,5 +1,17 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
-import { ASIDE_WIDTH, clampSize, DETAIL_WIDTH, DOCK_HEIGHT, draggedSize, SPLITTER_STEP, splitterKey } from "./splitter";
+import {
+  ASIDE_WIDTH,
+  clampSize,
+  DETAIL_WIDTH,
+  DOCK_HEIGHT,
+  draggedSize,
+  SPLITTER_STEP,
+  splitterKey,
+} from "./splitter";
 
 const size = { min: 100, max: 300, initial: 200 };
 
@@ -15,7 +27,8 @@ describe("clampSize", () => {
   });
 
   it("starts each pane within its bounds", () => {
-    for (const pane of [ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT]) expect(clampSize(pane.initial, pane)).toBe(pane.initial);
+    for (const pane of [ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT])
+      expect(clampSize(pane.initial, pane)).toBe(pane.initial);
   });
 });
 
@@ -41,7 +54,7 @@ describe("splitterKey", () => {
 });
 
 describe("draggedSize", () => {
-  it("grows as the pointer moves towards the start, and shrinks as it moves away, within the bounds", () => {
+  it("grows as the pointer moves toward the start, and shrinks as it moves away, within the bounds", () => {
     expect(draggedSize(200, 500, 450, size)).toBe(250);
     expect(draggedSize(200, 500, 560, size)).toBe(140);
     expect(draggedSize(200, 500, 0, size)).toBe(300);

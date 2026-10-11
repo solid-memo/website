@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { InstanceMeta } from "./instance";
 import type { InstanceV2 } from "@solid-memo/vocab/types.generated";
 

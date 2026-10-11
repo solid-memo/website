@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Quad } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
 import { coreOnly, PROFILES, REFERENCE_DATA } from "./profiles";
@@ -19,7 +23,8 @@ describe("coreOnly", () => {
 
 describe("PROFILES", () => {
   it("names vendored files under the site's vendor/, and the reference data as documents of the vocabulary", () => {
-    for (const path of Object.values(PROFILES).flat()) expect(path).toMatch(/^[\w-]+\/[\w./-]+\.ttl$/);
+    for (const path of Object.values(PROFILES).flat())
+      expect(path).toMatch(/^[\w-]+\/[\w./-]+\.ttl$/);
     for (const path of REFERENCE_DATA) expect(path).toMatch(/^[a-z0-9-]+\.ttl$/);
   });
 });

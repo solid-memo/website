@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/domain",
+  "description": "Solid Memo's domain: pure types and functions for decks, cards, SM-2 scheduling, releases and migrations.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { problem, type ReleaseProblem } from "./problems.ts";
 import { publishedIds, versionOf, type ReleaseKind, type ReleaseModel } from "./releaseModel.ts";
 
@@ -21,19 +25,40 @@ export function continuityProblems(before: ReleaseModel, after: ReleaseModel): R
     return kinds.flatMap((kind) => publishedIds(before, kind)).filter((id) => !now.has(id));
   };
   const cards = dropped(["card"]);
-  if (cards.length > 0) problems.push(problem(after.url, { code: "cardsDropped", params: { ids: cards, previous } }, { related: [previous] }));
+  if (cards.length > 0)
+    problems.push(
+      problem(
+        after.url,
+        { code: "cardsDropped", params: { ids: cards, previous } },
+        { related: [previous] },
+      ),
+    );
   const outline = dropped(OUTLINE);
   if (outline.length > 0) {
-    problems.push(problem(after.url, { code: "outlineDropped", params: { ids: outline, previous } }, { related: [previous] }));
+    problems.push(
+      problem(
+        after.url,
+        { code: "outlineDropped", params: { ids: outline, previous } },
+        { related: [previous] },
+      ),
+    );
   }
 
   const kindsNow = new Map<string, ReleaseKind[]>();
-  for (const kind of KINDS) for (const id of publishedIds(after, kind)) kindsNow.set(id, [...(kindsNow.get(id) ?? []), kind]);
+  for (const kind of KINDS)
+    for (const id of publishedIds(after, kind))
+      kindsNow.set(id, [...(kindsNow.get(id) ?? []), kind]);
   for (const was of KINDS) {
     for (const id of publishedIds(before, was)) {
       const now = kindsNow.get(id) ?? [];
       if (now.length > 0 && !now.includes(was)) {
-        problems.push(problem(after.url, { code: "idReused", params: { id, was, now: now[0], previous } }, { related: [previous] }));
+        problems.push(
+          problem(
+            after.url,
+            { code: "idReused", params: { id, was, now: now[0], previous } },
+            { related: [previous] },
+          ),
+        );
       }
     }
   }
@@ -41,7 +66,13 @@ export function continuityProblems(before: ReleaseModel, after: ReleaseModel): R
   const version = versionOf(after);
   const previousVersion = versionOf(before);
   if (version !== undefined && previousVersion !== undefined && version !== previousVersion + 1) {
-    problems.push(problem(after.url, { code: "versionNotNext", params: { version, previousVersion, previous } }, { related: [previous] }));
+    problems.push(
+      problem(
+        after.url,
+        { code: "versionNotNext", params: { version, previousVersion, previous } },
+        { related: [previous] },
+      ),
+    );
   }
   return problems;
 }

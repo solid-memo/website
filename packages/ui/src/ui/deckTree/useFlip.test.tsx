@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render } from "@testing-library/preact";
 import { useRef } from "preact/hooks";
@@ -9,7 +13,13 @@ let hidden = new Set<string>();
 let onReflow = () => {};
 
 /** A list of rows, one under the other, 40px each; `flip` gets its hook. */
-function List({ rows, flip }: { rows: readonly string[]; flip: { current: ReturnType<typeof useFlip> | null } }) {
+function List({
+  rows,
+  flip,
+}: {
+  rows: readonly string[];
+  flip: { current: ReturnType<typeof useFlip> | null };
+}) {
   const ref = useRef<HTMLUListElement>(null);
   flip.current = useFlip(ref, rows);
   return (
@@ -52,7 +62,9 @@ describe("useFlip", () => {
     hidden = new Set();
     onReflow = () => {};
     setReducedMotion(false);
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
       const key = this.dataset.rowKey;
       if (key === undefined) {
         onReflow();

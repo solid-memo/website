@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -6,7 +10,11 @@ import type { UpdateOutcome, UpdateProgress } from "@solid-memo/domain/instanceU
 import { isPlanEmpty } from "@solid-memo/domain/migration";
 import type { Session } from "@solid-memo/domain/session";
 import { useI18n } from "./i18n";
-import { InstanceUpdateConfirm, InstanceUpdateProgress, InstanceUpdateResult } from "./InstanceUpdate";
+import {
+  InstanceUpdateConfirm,
+  InstanceUpdateProgress,
+  InstanceUpdateResult,
+} from "./InstanceUpdate";
 import { MigrationNotice } from "./MigrationNotice";
 
 /**
@@ -26,7 +34,7 @@ export function MigrationContainer({
   instance,
 }: {
   useCases: UseCases;
-  /** Whose pod it is: the publisher of a catalogue the update writes. */
+  /** Whose pod it is: the publisher of a catalog the update writes. */
   session: Session;
   instance: Instance;
 }) {

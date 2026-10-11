@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -18,9 +22,31 @@ const report: ValidationReport = {
   conforms: false,
   documents: [],
 };
-const repair = (subject: string) => ({ kind: "describe-deck" as const, documentUrl: CATALOG, subjectUrl: `${CATALOG}#${subject}`, version: 3 });
-const second = { message: { sv: "Ett andra fel." }, severity: "violation" as const, constraint: "Or" };
-const problem = { documentUrl: `${instance.url}decks/deck-1.ttl`, subjectUrl: `${instance.url}decks/deck-1.ttl#x`, violations: [{ message: { en: "Each side of a card needs text or a picture.", sv: "Varje sida av ett kort behöver text eller en bild." }, severity: "violation" as const, constraint: "Or" }] };
+const repair = (subject: string) => ({
+  kind: "describe-deck" as const,
+  documentUrl: CATALOG,
+  subjectUrl: `${CATALOG}#${subject}`,
+  version: 3,
+});
+const second = {
+  message: { sv: "Ett andra fel." },
+  severity: "violation" as const,
+  constraint: "Or",
+};
+const problem = {
+  documentUrl: `${instance.url}decks/deck-1.ttl`,
+  subjectUrl: `${instance.url}decks/deck-1.ttl#x`,
+  violations: [
+    {
+      message: {
+        en: "Each side of a card needs text or a picture.",
+        sv: "Varje sida av ett kort behöver text eller en bild.",
+      },
+      severity: "violation" as const,
+      constraint: "Or",
+    },
+  ],
+};
 
 function renderRepair(useCases: UseCases) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -38,11 +64,16 @@ afterEach(() => {
 describe("RepairContainer", () => {
   it("repairs every problem it can with one click", async () => {
     const useCases = makeUseCasesFake({
-      planRepair: vi.fn(() => ({ repairs: [repair("deck-1"), repair("deck-2")], unrepairable: [] })),
+      planRepair: vi.fn(() => ({
+        repairs: [repair("deck-1"), repair("deck-2")],
+        unrepairable: [],
+      })),
     });
     renderRepair(useCases);
     expect(screen.getAllByText("3 violations in 0 documents.")[0]).toBeVisible();
-    expect(screen.getAllByRole("listitem")[0]).toHaveTextContent(`Give the deck the default description: ${CATALOG}#deck-1`);
+    expect(screen.getAllByRole("listitem")[0]).toHaveTextContent(
+      `Give the deck the default description: ${CATALOG}#deck-1`,
+    );
     fireEvent.click(screen.getByRole("button", { name: "Repair 2 problems" }));
     await waitFor(() => {
       expect(useCases.applyRepairs).toHaveBeenCalledWith([repair("deck-1"), repair("deck-2")]);
@@ -53,7 +84,10 @@ describe("RepairContainer", () => {
     const confirm = vi.fn(() => false);
     vi.stubGlobal("confirm", confirm);
     const useCases = makeUseCasesFake({
-      planRepair: vi.fn(() => ({ repairs: [], unrepairable: [{ ...problem, violations: [...problem.violations, second] }] })),
+      planRepair: vi.fn(() => ({
+        repairs: [],
+        unrepairable: [{ ...problem, violations: [...problem.violations, second] }],
+      })),
       applyRepairs: vi.fn(async () => {
         throw new Error("write refused");
       }),
@@ -69,7 +103,12 @@ describe("RepairContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
     await waitFor(() => {
       expect(useCases.applyRepairs).toHaveBeenCalledWith([
-        { kind: "remove-subject", documentUrl: problem.documentUrl, subjectUrl: problem.subjectUrl, version: 1 },
+        {
+          kind: "remove-subject",
+          documentUrl: problem.documentUrl,
+          subjectUrl: problem.subjectUrl,
+          version: 1,
+        },
       ]);
     });
     expect(await screen.findByText("write refused")).toBeInTheDocument();
@@ -92,11 +131,20 @@ describe("DataCheckNotice", () => {
     const notice = (setAside: LangText[]) =>
       render(
         <QueryClientProvider client={queryClient}>
-          <DataCheckNotice useCases={makeUseCasesFake()} instance={instance} report={report} policy="block-subject" setAside={setAside} arrangementSetAside={false} />
+          <DataCheckNotice
+            useCases={makeUseCasesFake()}
+            instance={instance}
+            report={report}
+            policy="block-subject"
+            setAside={setAside}
+            arrangementSetAside={false}
+          />
         </QueryClientProvider>,
       );
     notice([{ en: "Kanji" }, { en: "Capitals" }]);
-    expect(screen.getByRole("region", { name: "Data check" })).toHaveTextContent("Kanji, Capitals are set aside until repaired");
+    expect(screen.getByRole("region", { name: "Data check" })).toHaveTextContent(
+      "Kanji, Capitals are set aside until repaired",
+    );
   });
 
   it("marks a set-aside deck's name with its language when that is not the page's", () => {

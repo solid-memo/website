@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { releaseHost, type LibraryDeck } from "@solid-memo/domain/library";
 import { ErrorMessage } from "./ErrorMessage";
@@ -58,7 +62,12 @@ export function ImportUrlScreen({
       <form onSubmit={handleSubmit}>
         <label>
           {t("importUrl.label")}
-          <input type="url" required value={typed} onInput={(event) => setTyped(event.currentTarget.value)} />
+          <input
+            type="url"
+            required
+            value={typed}
+            onInput={(event) => setTyped(event.currentTarget.value)}
+          />
         </label>
         <button type="submit">{t("importUrl.show")}</button>
       </form>

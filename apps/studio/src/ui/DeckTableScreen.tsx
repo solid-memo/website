@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { DECK_DIRECTIONS, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
@@ -25,7 +29,16 @@ import { DataTable, type Column } from "./shell/DataTable";
 import { EditableCell } from "./shell/EditableCell";
 import { SavedViews } from "./shell/SavedViews";
 import { NO_SELECTION, type Selection } from "./shell/tableModel";
-import { homeParams, homeQueryOf, HOME_VIEWS, inView, paramsText, type HomeQuery, type HomeView, type SavedView } from "./shell/views";
+import {
+  homeParams,
+  homeQueryOf,
+  HOME_VIEWS,
+  inView,
+  paramsText,
+  type HomeQuery,
+  type HomeView,
+  type SavedView,
+} from "./shell/views";
 
 /** One figure of a deck's row: a number, or why there is none yet. */
 export type Count = number | "loading" | "unreadable";
@@ -38,7 +51,13 @@ export type Count = number | "loading" | "unreadable";
 export type DeckBadge = "library" | "course" | "invalid" | "unreadable" | { from: string };
 
 /** The columns of figures, aligned to compare. */
-const NUMBERS: ReadonlySet<DeckColumn> = new Set(["newCardsPerDay", "maxReviewsPerDay", "due", "new", "cards"]);
+const NUMBERS: ReadonlySet<DeckColumn> = new Set([
+  "newCardsPerDay",
+  "maxReviewsPerDay",
+  "due",
+  "new",
+  "cards",
+]);
 
 /** The columns, in the table's order, after the deck's name. */
 const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
@@ -72,7 +91,7 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * selected, but is left alone until shown again. A deck's name opens
  * what it says of itself (`deckHref`), its number of cards its cards in
  * the Studio's card workbench (`cardsHref`); the bulk actions' Export
- * opens import and export with the selected decks ticked
+ * opens import and export with the selected decks checked
  * (`transferHref`). Each deck's name has its health beside it
  * (`healthBadge`), and for a library copy whether a newer release is out
  * (`updateBadge`). Only a deck that may be changed (`selectable`) can be
@@ -151,7 +170,7 @@ export function DeckTableScreen({
   healthHref: string;
   /** A deck's health, as a badge beside its name. */
   healthBadge: (deck: Deck) => ComponentChildren;
-  /** Import and export, these decks ticked to export. */
+  /** Import and export, these decks checked to export. */
   transferHref: (decks: readonly Deck[]) => string;
   /** Whether the library has a newer release of a deck, as a badge beside its name. */
   updateBadge: (deck: Deck) => ComponentChildren;
@@ -175,12 +194,15 @@ export function DeckTableScreen({
         <header>
           <h2>{t("studio.decks.heading")}</h2>
         </header>
-        <p class="hint">{tx("studio.decks.empty", { app: <a href={appHref}>{t("app.documentTitle")}</a> })}</p>
+        <p class="hint">
+          {tx("studio.decks.empty", { app: <a href={appHref}>{t("app.documentTitle")}</a> })}
+        </p>
       </section>
     );
   }
 
-  const figure = (row: DeckTableRow, which: DeckFigure): Count => row.figures[which] ?? pending(row.deck, which);
+  const figure = (row: DeckTableRow, which: DeckFigure): Count =>
+    row.figures[which] ?? pending(row.deck, which);
   const factsOf = (row: DeckTableRow) => ({ due: figure(row, "due"), badges: badges(row.deck) });
   const shown = arrangeDeckRows(
     rows.filter((row) => inView(shownView, factsOf(row))),
@@ -189,7 +211,9 @@ export function DeckTableScreen({
     locale,
   );
   // Only decks shown, in the table's order: one filtered out, or deleted here or elsewhere, is left alone.
-  const selected = shown.map((row) => row.deck).filter((deck) => chosen.has(deck.url) && selectable(deck));
+  const selected = shown
+    .map((row) => row.deck)
+    .filter((deck) => chosen.has(deck.url) && selectable(deck));
   const count = selected.length;
 
   /** Makes a bulk action; once it is done, says so, the Studio's activity too (and, after a deletion, nothing stays selected). */
@@ -207,7 +231,8 @@ export function DeckTableScreen({
   }
 
   /** What a deck's cell is, for its field's name: "New per day of Kanji N5". */
-  const fieldOf = (column: DeckColumn, deck: Deck) => t("studio.inline.field", { column: t(`studio.decks.${column}`), row: readerText(deck.title) });
+  const fieldOf = (column: DeckColumn, deck: Deck) =>
+    t("studio.inline.field", { column: t(`studio.decks.${column}`), row: readerText(deck.title) });
   const pace = ({ deck, ...row }: DeckTableRow, cap: "newCardsPerDay" | "maxReviewsPerDay") => {
     const follows = deck[cap] === undefined;
     return (
@@ -216,7 +241,9 @@ export function DeckTableScreen({
           selectable(deck)
             ? {
                 label: fieldOf(cap, deck),
-                shown: follows ? `${row[cap]} ${t("studio.decks.followsInstance")}` : String(row[cap]),
+                shown: follows
+                  ? `${row[cap]} ${t("studio.decks.followsInstance")}`
+                  : String(row[cap]),
                 // Empty, the instance's pace again.
                 value: follows ? "" : String(deck[cap]),
                 number: true,
@@ -236,7 +263,11 @@ export function DeckTableScreen({
   };
   const cells: Record<Exclude<DeckColumn, "title">, (row: DeckTableRow) => ComponentChildren> = {
     group: (row) =>
-      row.groups.length === 0 ? <span class="hint">{t("studio.decks.topLevel")}</span> : row.groups.map((group) => readerText(group.title)).join(" › "),
+      row.groups.length === 0 ? (
+        <span class="hint">{t("studio.decks.topLevel")}</span>
+      ) : (
+        row.groups.map((group) => readerText(group.title)).join(" › ")
+      ),
     direction: ({ deck }) => (
       <EditableCell
         edit={
@@ -245,8 +276,15 @@ export function DeckTableScreen({
                 label: fieldOf("direction", deck),
                 shown: directionLabel(deck.direction),
                 value: deck.direction,
-                options: DECK_DIRECTIONS.map((direction) => ({ value: direction, label: directionLabel(direction) })),
-                onSave: (value) => bulk(onDirection([deck], value as DeckDirection), t("studio.bulk.directed", { count: 1 })),
+                options: DECK_DIRECTIONS.map((direction) => ({
+                  value: direction,
+                  label: directionLabel(direction),
+                })),
+                onSave: (value) =>
+                  bulk(
+                    onDirection([deck], value as DeckDirection),
+                    t("studio.bulk.directed", { count: 1 }),
+                  ),
               }
             : null
         }
@@ -264,7 +302,10 @@ export function DeckTableScreen({
       return typeof cards === "number" ? (
         <a href={cardsHref(row.deck)}>
           {cards}
-          <span class="visually-hidden"> {t("studio.decks.cardsOf", { deck: readerText(row.deck.title) })}</span>
+          <span class="visually-hidden">
+            {" "}
+            {t("studio.decks.cardsOf", { deck: readerText(row.deck.title) })}
+          </span>
         </a>
       ) : (
         <CountCell count={cards} />
@@ -285,13 +326,23 @@ export function DeckTableScreen({
       </header>
       <div class="studio-views" role="group" aria-label={t("studio.views.label")}>
         {HOME_VIEWS.map((each) => (
-          <button key={each} type="button" aria-pressed={each === shownView} onClick={() => onShow(each)}>
-            {t(`studio.views.${each}`)} <span class="studio-count">{rows.filter((row) => inView(each, factsOf(row))).length}</span>
+          <button
+            key={each}
+            type="button"
+            aria-pressed={each === shownView}
+            onClick={() => onShow(each)}
+          >
+            {t(`studio.views.${each}`)}{" "}
+            <span class="studio-count">
+              {rows.filter((row) => inView(each, factsOf(row))).length}
+            </span>
           </button>
         ))}
         <SavedViews
           views={savedViews}
-          current={paramsText(homeParams({ view, ...(shownView === "all" ? {} : { show: shownView }) }))}
+          current={paramsText(
+            homeParams({ view, ...(shownView === "all" ? {} : { show: shownView }) }),
+          )}
           onApply={(params) => onApply(homeQueryOf(new URLSearchParams(params)))}
           onViews={onSavedViews}
         />
@@ -316,7 +367,11 @@ export function DeckTableScreen({
       <ReadOnlyNotice reason={readOnly} subject="decks" healthHref={healthHref} />
       <ErrorMessage error={error} />
       {shown.length === 0 ? (
-        <p>{view.filter.trim() === "" ? t("studio.views.none") : t("studio.decks.noMatch", { filter: view.filter.trim() })}</p>
+        <p>
+          {view.filter.trim() === ""
+            ? t("studio.views.none")
+            : t("studio.decks.noMatch", { filter: view.filter.trim() })}
+        </p>
       ) : (
         <DataTable
           caption={t("studio.decks.caption", { instance: instance.name })}
@@ -348,7 +403,11 @@ export function DeckTableScreen({
           }}
           columns={columns}
           columnsOf="decks"
-          sort={view.sort === undefined ? undefined : { key: view.sort.column, descending: view.sort.descending }}
+          sort={
+            view.sort === undefined
+              ? undefined
+              : { key: view.sort.column, descending: view.sort.descending }
+          }
           onSort={(column) => onView(nextSort(view, column as DeckColumn))}
           select={{
             label: t("studio.decks.select"),
@@ -363,7 +422,12 @@ export function DeckTableScreen({
           onOpen={({ deck }) => onOpen(deck)}
         />
       )}
-      <BulkBar label={t("studio.bulk.label")} count={count} said={t("studio.bulk.selected", { count })} onClear={() => setChosen(NO_SELECTION)}>
+      <BulkBar
+        label={t("studio.bulk.label")}
+        count={count}
+        said={t("studio.bulk.selected", { count })}
+        onClear={() => setChosen(NO_SELECTION)}
+      >
         <DeckBulkActions
           selected={selected}
           groups={groups}
@@ -376,7 +440,9 @@ export function DeckTableScreen({
             return bulk(onMove(selected, group), t("studio.bulk.moved", { count, group: name }));
           }}
           onPace={(change) => bulk(onPace(selected, change), t("studio.bulk.paced", { count }))}
-          onDirection={(direction) => bulk(onDirection(selected, direction), t("studio.bulk.directed", { count }))}
+          onDirection={(direction) =>
+            bulk(onDirection(selected, direction), t("studio.bulk.directed", { count }))
+          }
           onRemove={() => bulk(onRemove(selected), t("studio.bulk.removed", { count }), true)}
         />
       </BulkBar>

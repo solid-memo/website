@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type {
   AgentV1,
   CardV5,
@@ -19,7 +23,7 @@ import type { ReleaseKind, ReleaseTerm, ReleaseText } from "./releaseModel.ts";
  * release's: the repository keeps the draft in several documents and
  * maps their IRIs to these (draftLayout.ts). What a shape describes is
  * a record of it, at its latest format; every other statement (how the
- * release was made, its sources and licence, the series it describes,
+ * release was made, its sources and license, the series it describes,
  * and what a subject says beyond its shape) is a triple, kept as it is.
  *
  * A draft is changed by DraftChange values (applyDraftChange), each one
@@ -174,7 +178,14 @@ export function idsInUse(draft: ReleaseDraft): Set<string> {
     const id = idIn(draft, iri);
     if (id !== null) ids.add(id);
   };
-  for (const nodes of [draft.agents, draft.distributions, draft.chapters, draft.steps, draft.cards, draft.distractors]) {
+  for (const nodes of [
+    draft.agents,
+    draft.distributions,
+    draft.chapters,
+    draft.steps,
+    draft.cards,
+    draft.distractors,
+  ]) {
     for (const node of nodes) ids.add(node.id);
   }
   for (const triple of draft.triples) {
@@ -182,7 +193,8 @@ export function idsInUse(draft: ReleaseDraft): Set<string> {
     if (triple.object.kind === "iri") note(triple.object.value);
   }
   for (const value of Object.values(draft.root)) {
-    for (const one of Array.isArray(value) ? value : [value]) if (typeof one === "string") note(one);
+    for (const one of Array.isArray(value) ? value : [value])
+      if (typeof one === "string") note(one);
   }
   return ids;
 }
@@ -209,7 +221,9 @@ export type QuestionPlace = { kind: "step"; step: string } | { kind: "review"; c
  * not. The release a draft was published as is never set here.
  */
 export type DraftMetaPatch = {
-  readonly [K in Exclude<keyof DraftDeckV1, "releasedAs" | "studyDirection">]?: DraftDeckV1[K] | null;
+  readonly [K in Exclude<keyof DraftDeckV1, "releasedAs" | "studyDirection">]?:
+    | DraftDeckV1[K]
+    | null;
 } & {
   readonly studyDirection?: DraftDeckV1["studyDirection"];
   readonly course?: boolean;
@@ -229,7 +243,7 @@ export type DistractorText = Omit<DistractorV1, "deprecated">;
 
 /**
  * A source of the release: its statements (a title, a creator, the
- * evidence for its licence), and whether the release states it is drawn
+ * evidence for its license), and whether the release states it is drawn
  * from it (`prov:wasDerivedFrom`, `derivedFrom`) and how it was made used
  * it (`prov:used` of the activity that generated the release, `used`).
  */
@@ -294,7 +308,7 @@ export type DraftChange =
    * carried from an earlier release still uses; else it is refused.
    */
   | { kind: "setSource"; iri: string; source: DraftSource | null }
-  /** The licence (dcterms:license), typed dcterms:LicenseDocument; null for none. */
+  /** The license (dcterms:license), typed dcterms:LicenseDocument; null for none. */
   | { kind: "setLicense"; license: string | null }
   /**
    * The attribution of how the release was made: "Compiled by <its
@@ -344,7 +358,10 @@ export function isRefusal(result: ReleaseDraft | DraftRefusal): result is DraftR
  * an activity carried from an earlier release states is never changed:
  * a change that would is refused (carriedActivity).
  */
-export function applyDraftChange(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | DraftRefusal {
+export function applyDraftChange(
+  draft: ReleaseDraft,
+  change: DraftChange,
+): ReleaseDraft | DraftRefusal {
   const next = changedDraft(draft, change);
   if (isRefusal(next) || next.triples === draft.triples) return next;
   const triples = withoutOrphans(next.triples, draft.triples);
@@ -354,8 +371,18 @@ export function applyDraftChange(draft: ReleaseDraft, change: DraftChange): Rele
 
 /** The first activity carried from an earlier release whose statements `triples` changes, by id; null when none. */
 function rewrittenActivity(draft: ReleaseDraft, triples: readonly DraftTriple[]): string | null {
-  const said = (list: readonly DraftTriple[], iri: string) => JSON.stringify(list.filter((triple) => triple.subject === iri).map(keyOfTriple).sort());
-  return draft.published.activities.find((id) => said(draft.triples, iriIn(draft, id)) !== said(triples, iriIn(draft, id))) ?? null;
+  const said = (list: readonly DraftTriple[], iri: string) =>
+    JSON.stringify(
+      list
+        .filter((triple) => triple.subject === iri)
+        .map(keyOfTriple)
+        .sort(),
+    );
+  return (
+    draft.published.activities.find(
+      (id) => said(draft.triples, iriIn(draft, id)) !== said(triples, iriIn(draft, id)),
+    ) ?? null
+  );
 }
 
 /** A statement as a string, to compare by. */
@@ -369,9 +396,13 @@ function blankOf(term: ReleaseTerm): string | null {
 }
 
 /** `kept` without the statements of blank nodes that only statements of `before` it lacks named, however deep. */
-function withoutOrphans(kept: readonly DraftTriple[], before: readonly DraftTriple[]): DraftTriple[] {
+function withoutOrphans(
+  kept: readonly DraftTriple[],
+  before: readonly DraftTriple[],
+): DraftTriple[] {
   const keys = new Set(kept.map(keyOfTriple));
-  const named = (triples: readonly DraftTriple[]) => new Set(triples.map((triple) => blankOf(triple.object)).filter((blank) => blank !== null));
+  const named = (triples: readonly DraftTriple[]) =>
+    new Set(triples.map((triple) => blankOf(triple.object)).filter((blank) => blank !== null));
   let result = [...kept];
   let gone = before.filter((triple) => !keys.has(keyOfTriple(triple)));
   for (;;) {
@@ -393,13 +424,19 @@ function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | 
     case "addChapter":
       return addChapter(draft, change.id, change.text ?? {}, change.at);
     case "editChapter":
-      return editNode(draft, "chapters", change.id, (data) => ({ ...withoutText(data, ["title", "description", "textFormat"]), ...defined(change.text) }));
+      return editNode(draft, "chapters", change.id, (data) => ({
+        ...withoutText(data, ["title", "description", "textFormat"]),
+        ...defined(change.text),
+      }));
     case "moveChapter":
       return moveChapter(draft, change.id, change.to);
     case "addStep":
       return addStep(draft, change.id, change.chapter, change.text ?? {}, change.at);
     case "editStep":
-      return editNode(draft, "steps", change.id, (data) => ({ ...withoutText(data, ["theory", "textFormat"]), ...defined(change.text) }));
+      return editNode(draft, "steps", change.id, (data) => ({
+        ...withoutText(data, ["theory", "textFormat"]),
+        ...defined(change.text),
+      }));
     case "moveStep":
       return moveStep(draft, change.id, change.chapter, change.to);
     case "addCard":
@@ -407,7 +444,9 @@ function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | 
     case "editCard":
       return editNode(draft, "cards", change.id, (data) => ({
         ...defined(change.card),
-        ...(data.created === undefined || change.card.created !== undefined ? {} : { created: data.created }),
+        ...(data.created === undefined || change.card.created !== undefined
+          ? {}
+          : { created: data.created }),
         ...(data.deprecated === true ? { deprecated: true } : {}),
         distractor: data.distractor,
       }));
@@ -418,11 +457,16 @@ function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | 
     case "addDistractor":
       return addDistractor(draft, change.card, change.id, change.distractor);
     case "editDistractor":
-      return editNode(draft, "distractors", change.id, (data) => ({ ...defined(change.distractor), ...(data.deprecated === true ? { deprecated: true } : {}) }));
+      return editNode(draft, "distractors", change.id, (data) => ({
+        ...defined(change.distractor),
+        ...(data.deprecated === true ? { deprecated: true } : {}),
+      }));
     case "retire":
     case "restore": {
       const edited = editNode(draft, NODES[change.of], change.id, (data) =>
-        change.kind === "retire" ? { ...data, deprecated: true } : withoutText(data, ["deprecated"]),
+        change.kind === "retire"
+          ? { ...data, deprecated: true }
+          : withoutText(data, ["deprecated"]),
       );
       // A chapter or step that leaves or rejoins those in use: they are numbered again.
       return isRefusal(edited) ? edited : renumberedOutline(edited);
@@ -447,7 +491,10 @@ function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | 
 }
 
 /** The changes made in turn; the first refusal stops them. */
-export function applyDraftChanges(draft: ReleaseDraft, changes: readonly DraftChange[]): ReleaseDraft | DraftRefusal {
+export function applyDraftChanges(
+  draft: ReleaseDraft,
+  changes: readonly DraftChange[],
+): ReleaseDraft | DraftRefusal {
   let current = draft;
   for (const change of changes) {
     const next = applyDraftChange(current, change);
@@ -483,11 +530,19 @@ function defined<T extends object>(value: T): T {
   return Object.fromEntries(Object.entries(value).filter(([, one]) => one !== undefined)) as T;
 }
 
-function nodeOf<K extends keyof NodeLists>(draft: ReleaseDraft, list: K, id: string): DraftNode<NodeLists[K]> | undefined {
+function nodeOf<K extends keyof NodeLists>(
+  draft: ReleaseDraft,
+  list: K,
+  id: string,
+): DraftNode<NodeLists[K]> | undefined {
   return (draft[list] as readonly DraftNode<NodeLists[K]>[]).find((node) => node.id === id);
 }
 
-function withNodes<K extends keyof NodeLists>(draft: ReleaseDraft, list: K, nodes: readonly DraftNode<NodeLists[K]>[]): ReleaseDraft {
+function withNodes<K extends keyof NodeLists>(
+  draft: ReleaseDraft,
+  list: K,
+  nodes: readonly DraftNode<NodeLists[K]>[],
+): ReleaseDraft {
   return { ...draft, [list]: nodes };
 }
 
@@ -499,20 +554,37 @@ function editNode<K extends keyof NodeLists>(
 ): ReleaseDraft | DraftRefusal {
   if (nodeOf(draft, list, id) === undefined) return { refused: "missing", id };
   const nodes = draft[list] as readonly DraftNode<NodeLists[K]>[];
-  return withNodes(draft, list, nodes.map((node) => (node.id === id ? { id, data: edit(node.data) } : node)));
+  return withNodes(
+    draft,
+    list,
+    nodes.map((node) => (node.id === id ? { id, data: edit(node.data) } : node)),
+  );
 }
 
 /** Why a subject may not be added by that id; null when it may. */
 function refuseId(draft: ReleaseDraft, id: string): DraftRefusal | null {
   if (!DRAFT_ID.test(id)) return { refused: "idInvalid", id };
-  if (idsInUse(draft).has(id) || id in draft.published.ids || draft.published.activities.includes(id)) return { refused: "idTaken", id };
+  if (
+    idsInUse(draft).has(id) ||
+    id in draft.published.ids ||
+    draft.published.activities.includes(id)
+  )
+    return { refused: "idTaken", id };
   return null;
 }
 
-function addNode<K extends keyof NodeLists>(draft: ReleaseDraft, list: K, id: string, data: NodeLists[K]): ReleaseDraft | DraftRefusal {
+function addNode<K extends keyof NodeLists>(
+  draft: ReleaseDraft,
+  list: K,
+  id: string,
+  data: NodeLists[K],
+): ReleaseDraft | DraftRefusal {
   const refusal = refuseId(draft, id);
   if (refusal !== null) return refusal;
-  return withNodes(draft, list, [...(draft[list] as readonly DraftNode<NodeLists[K]>[]), { id, data }]);
+  return withNodes(draft, list, [
+    ...(draft[list] as readonly DraftNode<NodeLists[K]>[]),
+    { id, data },
+  ]);
 }
 
 // --- What the release says of itself
@@ -534,10 +606,19 @@ function setMeta(draft: ReleaseDraft, patch: DraftMetaPatch): ReleaseDraft | Dra
   return { ...draft, course, root: next };
 }
 
-function setAgent(draft: ReleaseDraft, id: string, agent: AgentV1 | null): ReleaseDraft | DraftRefusal {
+function setAgent(
+  draft: ReleaseDraft,
+  id: string,
+  agent: AgentV1 | null,
+): ReleaseDraft | DraftRefusal {
   const known = nodeOf(draft, "agents", id) !== undefined;
   if (agent !== null) {
-    if (known) return withNodes(draft, "agents", draft.agents.map((node) => (node.id === id ? { id, data: agent } : node)));
+    if (known)
+      return withNodes(
+        draft,
+        "agents",
+        draft.agents.map((node) => (node.id === id ? { id, data: agent } : node)),
+      );
     return addNode(draft, "agents", id, agent);
   }
   if (!known) return { refused: "missing", id };
@@ -545,9 +626,16 @@ function setAgent(draft: ReleaseDraft, id: string, agent: AgentV1 | null): Relea
   const { publisher, ...root } = draft.root;
   return {
     ...draft,
-    root: { ...root, ...(publisher === undefined || publisher === iri ? {} : { publisher }), creator: draft.root.creator.filter((one) => one !== iri) },
+    root: {
+      ...root,
+      ...(publisher === undefined || publisher === iri ? {} : { publisher }),
+      creator: draft.root.creator.filter((one) => one !== iri),
+    },
     agents: draft.agents.filter((node) => node.id !== id),
-    triples: draft.triples.filter((triple) => triple.subject !== iri && !(triple.object.kind === "iri" && triple.object.value === iri)),
+    triples: draft.triples.filter(
+      (triple) =>
+        triple.subject !== iri && !(triple.object.kind === "iri" && triple.object.value === iri),
+    ),
   };
 }
 
@@ -561,7 +649,9 @@ export function liveChapters(draft: ReleaseDraft): DraftNode<DraftChapterV1>[] {
 /** The steps in use of a chapter (by id), in their order. */
 export function liveSteps(draft: ReleaseDraft, chapter: string): DraftNode<DraftStepV1>[] {
   const iri = iriIn(draft, chapter);
-  return inOrder(draft.steps.filter((node) => node.data.deprecated !== true && node.data.chapter === iri));
+  return inOrder(
+    draft.steps.filter((node) => node.data.deprecated !== true && node.data.chapter === iri),
+  );
 }
 
 function inOrder<T extends { position?: number }>(nodes: DraftNode<T>[]): DraftNode<T>[] {
@@ -571,10 +661,15 @@ function inOrder<T extends { position?: number }>(nodes: DraftNode<T>[]): DraftN
 }
 
 /** `order` (live siblings' ids) numbered 0, 1, …, each given its position. */
-function renumbered<T extends { position?: number }>(nodes: readonly DraftNode<T>[], order: readonly string[]): DraftNode<T>[] {
+function renumbered<T extends { position?: number }>(
+  nodes: readonly DraftNode<T>[],
+  order: readonly string[],
+): DraftNode<T>[] {
   return nodes.map((node) => {
     const at = order.indexOf(node.id);
-    return at === -1 || node.data.position === at ? node : { id: node.id, data: { ...node.data, position: at } };
+    return at === -1 || node.data.position === at
+      ? node
+      : { id: node.id, data: { ...node.data, position: at } };
   });
 }
 
@@ -585,11 +680,24 @@ function placed(order: readonly string[], id: string, at: number | undefined): s
   return [...rest.slice(0, index), id, ...rest.slice(index)];
 }
 
-function addChapter(draft: ReleaseDraft, id: string, text: ChapterText, at: number | undefined): ReleaseDraft | DraftRefusal {
+function addChapter(
+  draft: ReleaseDraft,
+  id: string,
+  text: ChapterText,
+  at: number | undefined,
+): ReleaseDraft | DraftRefusal {
   if (!draft.course) return { refused: "notACourse" };
-  const added = addNode(draft, "chapters", id, { ...defined(text), course: draft.url, reviewQuestion: [] });
+  const added = addNode(draft, "chapters", id, {
+    ...defined(text),
+    course: draft.url,
+    reviewQuestion: [],
+  });
   if (isRefusal(added)) return added;
-  const order = placed(liveChapters(draft).map((node) => node.id), id, at);
+  const order = placed(
+    liveChapters(draft).map((node) => node.id),
+    id,
+    at,
+  );
   return withNodes(added, "chapters", renumbered(added.chapters, order));
 }
 
@@ -597,20 +705,43 @@ function moveChapter(draft: ReleaseDraft, id: string, to: number): ReleaseDraft 
   const chapter = nodeOf(draft, "chapters", id);
   if (chapter === undefined) return { refused: "missing", id };
   if (chapter.data.deprecated === true) return draft;
-  const order = placed(liveChapters(draft).map((node) => node.id), id, to);
+  const order = placed(
+    liveChapters(draft).map((node) => node.id),
+    id,
+    to,
+  );
   return withNodes(draft, "chapters", renumbered(draft.chapters, order));
 }
 
-function addStep(draft: ReleaseDraft, id: string, chapter: string, text: StepText, at: number | undefined): ReleaseDraft | DraftRefusal {
+function addStep(
+  draft: ReleaseDraft,
+  id: string,
+  chapter: string,
+  text: StepText,
+  at: number | undefined,
+): ReleaseDraft | DraftRefusal {
   if (!draft.course) return { refused: "notACourse" };
   if (nodeOf(draft, "chapters", chapter) === undefined) return { refused: "missing", id: chapter };
-  const added = addNode(draft, "steps", id, { ...defined(text), chapter: iriIn(draft, chapter), checkedBy: [] });
+  const added = addNode(draft, "steps", id, {
+    ...defined(text),
+    chapter: iriIn(draft, chapter),
+    checkedBy: [],
+  });
   if (isRefusal(added)) return added;
-  const order = placed(liveSteps(draft, chapter).map((node) => node.id), id, at);
+  const order = placed(
+    liveSteps(draft, chapter).map((node) => node.id),
+    id,
+    at,
+  );
   return withNodes(added, "steps", renumbered(added.steps, order));
 }
 
-function moveStep(draft: ReleaseDraft, id: string, chapter: string, to: number): ReleaseDraft | DraftRefusal {
+function moveStep(
+  draft: ReleaseDraft,
+  id: string,
+  chapter: string,
+  to: number,
+): ReleaseDraft | DraftRefusal {
   const step = nodeOf(draft, "steps", id);
   if (step === undefined) return { refused: "missing", id };
   if (nodeOf(draft, "chapters", chapter) === undefined) return { refused: "missing", id: chapter };
@@ -618,12 +749,25 @@ function moveStep(draft: ReleaseDraft, id: string, chapter: string, to: number):
   const moved = withNodes(
     draft,
     "steps",
-    draft.steps.map((node) => (node.id === id ? { id, data: { ...node.data, chapter: iriIn(draft, chapter) } } : node)),
+    draft.steps.map((node) =>
+      node.id === id ? { id, data: { ...node.data, chapter: iriIn(draft, chapter) } } : node,
+    ),
   );
   if (step.data.deprecated === true) return moved;
-  let steps = renumbered(moved.steps, placed(liveSteps(moved, chapter).map((node) => node.id), id, to));
+  let steps = renumbered(
+    moved.steps,
+    placed(
+      liveSteps(moved, chapter).map((node) => node.id),
+      id,
+      to,
+    ),
+  );
   // The chapter it left is numbered again too.
-  if (from !== null && from !== chapter) steps = renumbered(steps, liveSteps({ ...moved, steps }, from).map((node) => node.id));
+  if (from !== null && from !== chapter)
+    steps = renumbered(
+      steps,
+      liveSteps({ ...moved, steps }, from).map((node) => node.id),
+    );
   return withNodes(draft, "steps", steps);
 }
 
@@ -641,36 +785,66 @@ function unasked(draft: ReleaseDraft, iri: string): ReleaseDraft {
   return {
     ...draft,
     steps: draft.steps.map((node) =>
-      node.data.checkedBy.includes(iri) ? { id: node.id, data: { ...node.data, checkedBy: node.data.checkedBy.filter((one) => one !== iri) } } : node,
+      node.data.checkedBy.includes(iri)
+        ? {
+            id: node.id,
+            data: { ...node.data, checkedBy: node.data.checkedBy.filter((one) => one !== iri) },
+          }
+        : node,
     ),
     chapters: draft.chapters.map((node) =>
       node.data.reviewQuestion.includes(iri)
-        ? { id: node.id, data: { ...node.data, reviewQuestion: node.data.reviewQuestion.filter((one) => one !== iri) } }
+        ? {
+            id: node.id,
+            data: {
+              ...node.data,
+              reviewQuestion: node.data.reviewQuestion.filter((one) => one !== iri),
+            },
+          }
         : node,
     ),
   };
 }
 
-function askedAt(draft: ReleaseDraft, iri: string, place: QuestionPlace): ReleaseDraft | DraftRefusal {
+function askedAt(
+  draft: ReleaseDraft,
+  iri: string,
+  place: QuestionPlace,
+): ReleaseDraft | DraftRefusal {
   if (place.kind === "step") {
-    if (nodeOf(draft, "steps", place.step) === undefined) return { refused: "missing", id: place.step };
+    if (nodeOf(draft, "steps", place.step) === undefined)
+      return { refused: "missing", id: place.step };
     return withNodes(
       draft,
       "steps",
-      draft.steps.map((node) => (node.id === place.step ? { id: node.id, data: { ...node.data, checkedBy: [...node.data.checkedBy, iri] } } : node)),
+      draft.steps.map((node) =>
+        node.id === place.step
+          ? { id: node.id, data: { ...node.data, checkedBy: [...node.data.checkedBy, iri] } }
+          : node,
+      ),
     );
   }
-  if (nodeOf(draft, "chapters", place.chapter) === undefined) return { refused: "missing", id: place.chapter };
+  if (nodeOf(draft, "chapters", place.chapter) === undefined)
+    return { refused: "missing", id: place.chapter };
   return withNodes(
     draft,
     "chapters",
     draft.chapters.map((node) =>
-      node.id === place.chapter ? { id: node.id, data: { ...node.data, reviewQuestion: [...node.data.reviewQuestion, iri] } } : node,
+      node.id === place.chapter
+        ? {
+            id: node.id,
+            data: { ...node.data, reviewQuestion: [...node.data.reviewQuestion, iri] },
+          }
+        : node,
     ),
   );
 }
 
-function addQuestion(draft: ReleaseDraft, card: string, place: QuestionPlace): ReleaseDraft | DraftRefusal {
+function addQuestion(
+  draft: ReleaseDraft,
+  card: string,
+  place: QuestionPlace,
+): ReleaseDraft | DraftRefusal {
   if (!draft.course) return { refused: "notACourse" };
   if (nodeOf(draft, "cards", card) === undefined) return { refused: "missing", id: card };
   const now = placeOf(draft, card);
@@ -678,7 +852,11 @@ function addQuestion(draft: ReleaseDraft, card: string, place: QuestionPlace): R
   return askedAt(draft, iriIn(draft, card), place);
 }
 
-function moveQuestion(draft: ReleaseDraft, card: string, place: QuestionPlace | null): ReleaseDraft | DraftRefusal {
+function moveQuestion(
+  draft: ReleaseDraft,
+  card: string,
+  place: QuestionPlace | null,
+): ReleaseDraft | DraftRefusal {
   if (nodeOf(draft, "cards", card) === undefined) return { refused: "missing", id: card };
   if (place !== null && !draft.course) return { refused: "notACourse" };
   const iri = iriIn(draft, card);
@@ -686,7 +864,12 @@ function moveQuestion(draft: ReleaseDraft, card: string, place: QuestionPlace | 
   return place === null ? from : askedAt(from, iri, place);
 }
 
-function addDistractor(draft: ReleaseDraft, card: string, id: string, distractor: DistractorText): ReleaseDraft | DraftRefusal {
+function addDistractor(
+  draft: ReleaseDraft,
+  card: string,
+  id: string,
+  distractor: DistractorText,
+): ReleaseDraft | DraftRefusal {
   if (nodeOf(draft, "cards", card) === undefined) return { refused: "missing", id: card };
   const added = addNode(draft, "distractors", id, defined(distractor));
   if (isRefusal(added)) return added;
@@ -694,7 +877,11 @@ function addDistractor(draft: ReleaseDraft, card: string, id: string, distractor
   return withNodes(
     added,
     "cards",
-    added.cards.map((node) => (node.id === card ? { id: card, data: { ...node.data, distractor: [...node.data.distractor, iri] } } : node)),
+    added.cards.map((node) =>
+      node.id === card
+        ? { id: card, data: { ...node.data, distractor: [...node.data.distractor, iri] } }
+        : node,
+    ),
   );
 }
 
@@ -702,45 +889,78 @@ function addDistractor(draft: ReleaseDraft, card: string, id: string, distractor
 
 /** The draft without the subjects (by IRI) and every statement of them or naming them. */
 function without(draft: ReleaseDraft, iris: ReadonlySet<string>): ReleaseDraft {
-  const kept = <T>(nodes: readonly DraftNode<T>[]) => nodes.filter((node) => !iris.has(iriIn(draft, node.id)));
+  const kept = <T>(nodes: readonly DraftNode<T>[]) =>
+    nodes.filter((node) => !iris.has(iriIn(draft, node.id)));
   const others = (list: readonly string[]) => list.filter((one) => !iris.has(one));
   return {
     ...draft,
-    chapters: kept(draft.chapters).map((node) => ({ id: node.id, data: { ...node.data, reviewQuestion: others(node.data.reviewQuestion) } })),
-    steps: kept(draft.steps).map((node) => ({ id: node.id, data: { ...node.data, checkedBy: others(node.data.checkedBy) } })),
-    cards: kept(draft.cards).map((node) => ({ id: node.id, data: { ...node.data, distractor: others(node.data.distractor) } })),
+    chapters: kept(draft.chapters).map((node) => ({
+      id: node.id,
+      data: { ...node.data, reviewQuestion: others(node.data.reviewQuestion) },
+    })),
+    steps: kept(draft.steps).map((node) => ({
+      id: node.id,
+      data: { ...node.data, checkedBy: others(node.data.checkedBy) },
+    })),
+    cards: kept(draft.cards).map((node) => ({
+      id: node.id,
+      data: { ...node.data, distractor: others(node.data.distractor) },
+    })),
     distractors: kept(draft.distractors),
-    triples: draft.triples.filter((triple) => !iris.has(triple.subject) && !(triple.object.kind === "iri" && iris.has(triple.object.value))),
+    triples: draft.triples.filter(
+      (triple) =>
+        !iris.has(triple.subject) &&
+        !(triple.object.kind === "iri" && iris.has(triple.object.value)),
+    ),
   };
 }
 
-function deleteSubject(draft: ReleaseDraft, of: DraftKind, id: string): ReleaseDraft | DraftRefusal {
+function deleteSubject(
+  draft: ReleaseDraft,
+  of: DraftKind,
+  id: string,
+): ReleaseDraft | DraftRefusal {
   if (nodeOf(draft, NODES[of], id) === undefined) return { refused: "missing", id };
   // What goes with it: a chapter's steps, a card's distractors.
   const going: { of: DraftKind; id: string }[] = [{ of, id }];
   if (of === "chapter") {
     const iri = iriIn(draft, id);
-    going.push(...draft.steps.filter((node) => node.data.chapter === iri).map((node) => ({ of: "step" as const, id: node.id })));
+    going.push(
+      ...draft.steps
+        .filter((node) => node.data.chapter === iri)
+        .map((node) => ({ of: "step" as const, id: node.id })),
+    );
   }
   if (of === "card") {
     going.push(
       ...nodeOf(draft, "cards", id)!
         .data.distractor.map((iri) => idIn(draft, iri))
-        .filter((one): one is string => one !== null && nodeOf(draft, "distractors", one) !== undefined)
+        .filter(
+          (one): one is string => one !== null && nodeOf(draft, "distractors", one) !== undefined,
+        )
         .map((one) => ({ of: "distractor" as const, id: one })),
     );
   }
   const published = going.find((subject) => subject.id in draft.published.ids);
   if (published !== undefined) return { refused: "published", ...published };
   // A card asked by what goes stays, asked from nowhere; what is in use is numbered again.
-  return renumberedOutline(without(draft, new Set(going.map((subject) => iriIn(draft, subject.id)))));
+  return renumberedOutline(
+    without(draft, new Set(going.map((subject) => iriIn(draft, subject.id)))),
+  );
 }
 
 /** The chapters in use numbered 0, 1, …, and the steps in use of each chapter. */
 function renumberedOutline(draft: ReleaseDraft): ReleaseDraft {
-  const chapters = renumbered(draft.chapters, liveChapters(draft).map((node) => node.id));
+  const chapters = renumbered(
+    draft.chapters,
+    liveChapters(draft).map((node) => node.id),
+  );
   const steps = draft.chapters.reduce(
-    (current, chapter) => renumbered(current, liveSteps({ ...draft, steps: current }, chapter.id).map((node) => node.id)),
+    (current, chapter) =>
+      renumbered(
+        current,
+        liveSteps({ ...draft, steps: current }, chapter.id).map((node) => node.id),
+      ),
     draft.steps,
   );
   return { ...draft, chapters, steps };
@@ -748,26 +968,58 @@ function renumberedOutline(draft: ReleaseDraft): ReleaseDraft {
 
 // --- How the release was made
 
-function setSource(draft: ReleaseDraft, iri: string, source: DraftSource | null): ReleaseDraft | DraftRefusal {
+function setSource(
+  draft: ReleaseDraft,
+  iri: string,
+  source: DraftSource | null,
+): ReleaseDraft | DraftRefusal {
   const generating = ownGeneratingActivities(draft);
   const carried = new Set(draft.published.activities.map((id) => iriIn(draft, id)));
-  const usedBy = (triple: DraftTriple) => triple.predicate === `${PROV}used` && triple.object.kind === "iri" && triple.object.value === iri;
+  const usedBy = (triple: DraftTriple) =>
+    triple.predicate === `${PROV}used` &&
+    triple.object.kind === "iri" &&
+    triple.object.value === iri;
   // What it states is kept when removed while an earlier version's making still uses it.
-  const described = source === null && draft.triples.some((triple) => usedBy(triple) && carried.has(triple.subject));
-  const triples = draft.triples.filter((triple) => (described || triple.subject !== iri) && !(usedBy(triple) && generating.includes(triple.subject)));
+  const described =
+    source === null &&
+    draft.triples.some((triple) => usedBy(triple) && carried.has(triple.subject));
+  const triples = draft.triples.filter(
+    (triple) =>
+      (described || triple.subject !== iri) &&
+      !(usedBy(triple) && generating.includes(triple.subject)),
+  );
   const derived = draft.root.wasDerivedFrom.filter((one) => one !== iri);
   if (source === null) {
-    if (triples.length === draft.triples.length && derived.length === draft.root.wasDerivedFrom.length) return { refused: "missing", id: iri };
+    if (
+      triples.length === draft.triples.length &&
+      derived.length === draft.root.wasDerivedFrom.length
+    )
+      return { refused: "missing", id: iri };
     return { ...draft, root: { ...draft.root, wasDerivedFrom: derived }, triples };
   }
   // A source is one the release is derived from or a making used: else nothing would point to what it states.
-  if (!source.derivedFrom && !source.used && !triples.some((triple) => usedBy(triple) && carried.has(triple.subject))) return { refused: "unusedSource", id: iri };
-  const making = source.used ? usingMaking({ ...draft, triples }) : { draft: { ...draft, triples }, activities: [] };
-  const used = making.activities.map((activity) => ({ subject: activity, predicate: `${PROV}used`, object: { kind: "iri" as const, value: iri } }));
+  if (
+    !source.derivedFrom &&
+    !source.used &&
+    !triples.some((triple) => usedBy(triple) && carried.has(triple.subject))
+  )
+    return { refused: "unusedSource", id: iri };
+  const making = source.used
+    ? usingMaking({ ...draft, triples })
+    : { draft: { ...draft, triples }, activities: [] };
+  const used = making.activities.map((activity) => ({
+    subject: activity,
+    predicate: `${PROV}used`,
+    object: { kind: "iri" as const, value: iri },
+  }));
   return {
     ...draft,
     root: { ...draft.root, wasDerivedFrom: source.derivedFrom ? [...derived, iri] : derived },
-    triples: [...making.draft.triples, ...source.statements.map((statement) => ({ subject: iri, ...statement })), ...used],
+    triples: [
+      ...making.draft.triples,
+      ...source.statements.map((statement) => ({ subject: iri, ...statement })),
+      ...used,
+    ],
   };
 }
 
@@ -782,7 +1034,12 @@ function usingMaking(draft: ReleaseDraft): { draft: ReleaseDraft; activities: st
 /** The activities the release states it was generated by (prov:wasGeneratedBy), by IRI. */
 export function generatingActivities(draft: ReleaseDraft): string[] {
   return draft.triples
-    .filter((triple) => triple.subject === draft.url && triple.predicate === `${PROV}wasGeneratedBy` && triple.object.kind === "iri")
+    .filter(
+      (triple) =>
+        triple.subject === draft.url &&
+        triple.predicate === `${PROV}wasGeneratedBy` &&
+        triple.object.kind === "iri",
+    )
     .map((triple) => triple.object.value);
 }
 
@@ -799,10 +1056,18 @@ function ownGeneratingActivities(draft: ReleaseDraft): string[] {
  * of its own, `#revision-<version>` (an id none of `reserved`), since
  * those are not rewritten; a release that names none stays so.
  */
-function withOwnMaking(draft: ReleaseDraft, reserved: readonly string[] = []): { draft: ReleaseDraft; activities: string[] } {
+function withOwnMaking(
+  draft: ReleaseDraft,
+  reserved: readonly string[] = [],
+): { draft: ReleaseDraft; activities: string[] } {
   const own = ownGeneratingActivities(draft);
   if (own.length > 0 || generatingActivities(draft).length === 0) return { draft, activities: own };
-  const taken = new Set([...idsInUse(draft), ...Object.keys(draft.published.ids), ...draft.published.activities, ...reserved]);
+  const taken = new Set([
+    ...idsInUse(draft),
+    ...Object.keys(draft.published.ids),
+    ...draft.published.activities,
+    ...reserved,
+  ]);
   const base = `revision-${draft.root.version ?? "1"}`;
   let id = base;
   for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
@@ -812,7 +1077,11 @@ function withOwnMaking(draft: ReleaseDraft, reserved: readonly string[] = []): {
       ...draft,
       triples: [
         ...draft.triples,
-        { subject: draft.url, predicate: `${PROV}wasGeneratedBy`, object: { kind: "iri", value: iri } },
+        {
+          subject: draft.url,
+          predicate: `${PROV}wasGeneratedBy`,
+          object: { kind: "iri", value: iri },
+        },
         { subject: iri, predicate: RDF_TYPE, object: { kind: "iri", value: `${PROV}Activity` } },
       ],
     },
@@ -823,7 +1092,12 @@ function withOwnMaking(draft: ReleaseDraft, reserved: readonly string[] = []): {
 /** The activities of the draft (prov:Activity), by id. */
 export function activitiesOf(draft: ReleaseDraft): string[] {
   return draft.triples
-    .filter((triple) => triple.predicate === RDF_TYPE && triple.object.kind === "iri" && triple.object.value === `${PROV}Activity`)
+    .filter(
+      (triple) =>
+        triple.predicate === RDF_TYPE &&
+        triple.object.kind === "iri" &&
+        triple.object.value === `${PROV}Activity`,
+    )
     .map((triple) => idIn(draft, triple.subject))
     .filter((id): id is string => id !== null);
 }
@@ -832,15 +1106,35 @@ export function activitiesOf(draft: ReleaseDraft): string[] {
  * How a check reads in the record, in English or Swedish (another
  * language reads as English): never a human review, in its own words.
  */
-const CHECK_WORDING: Record<"en" | "sv", Record<CheckActivity["check"], { label: (label: string) => string; scope: (scope: string) => string }> & { outcome: (outcome: string) => string }> = {
+const CHECK_WORDING: Record<
+  "en" | "sv",
+  Record<
+    CheckActivity["check"],
+    { label: (label: string) => string; scope: (scope: string) => string }
+  > & { outcome: (outcome: string) => string }
+> = {
   en: {
-    machine: { label: (label) => label, scope: (scope) => `Scope: ${scope}; a machine check, not a human review.` },
-    ai: { label: (label) => `${label} (AI)`, scope: (scope) => `Scope: ${scope}; an AI check, not a human review.` },
+    machine: {
+      label: (label) => label,
+      scope: (scope) => `Scope: ${scope}; a machine check, not a human review.`,
+    },
+    ai: {
+      label: (label) => `${label} (AI)`,
+      scope: (scope) => `Scope: ${scope}; an AI check, not a human review.`,
+    },
     outcome: (outcome) => `Outcome: ${outcome}`,
   },
   sv: {
-    machine: { label: (label) => label, scope: (scope) => `Omfattning: ${scope}; en maskinell kontroll, inte en granskning av en människa.` },
-    ai: { label: (label) => `${label} (AI)`, scope: (scope) => `Omfattning: ${scope}; en kontroll av AI, inte en granskning av en människa.` },
+    machine: {
+      label: (label) => label,
+      scope: (scope) =>
+        `Omfattning: ${scope}; en maskinell kontroll, inte en granskning av en människa.`,
+    },
+    ai: {
+      label: (label) => `${label} (AI)`,
+      scope: (scope) =>
+        `Omfattning: ${scope}; en kontroll av AI, inte en granskning av en människa.`,
+    },
     outcome: (outcome) => `Utfall: ${outcome}`,
   },
 };
@@ -849,13 +1143,34 @@ const CHECK_WORDING: Record<"en" | "sv", Record<CheckActivity["check"], { label:
 export function checkActivityTriples(iri: string, activity: CheckActivity): DraftTriple[] {
   const language = activity.language === "sv" ? "sv" : "en";
   const wording = CHECK_WORDING[language];
-  const text = (value: string) => ({ kind: "literal" as const, value, language, datatype: LANG_STRING });
+  const text = (value: string) => ({
+    kind: "literal" as const,
+    value,
+    language,
+    datatype: LANG_STRING,
+  });
   return [
     { subject: iri, predicate: RDF_TYPE, object: { kind: "iri", value: `${PROV}Activity` } },
-    { subject: iri, predicate: `${PROV}endedAtTime`, object: { kind: "literal", value: activity.endedAt, language: "", datatype: XSD_DATE_TIME } },
-    { subject: iri, predicate: `${RDFS}label`, object: text(wording[activity.check].label(activity.label.trim())) },
-    { subject: iri, predicate: `${RDFS}comment`, object: text(wording[activity.check].scope(activity.scope.trim())) },
-    { subject: iri, predicate: `${RDFS}comment`, object: text(wording.outcome(activity.outcome.trim())) },
+    {
+      subject: iri,
+      predicate: `${PROV}endedAtTime`,
+      object: { kind: "literal", value: activity.endedAt, language: "", datatype: XSD_DATE_TIME },
+    },
+    {
+      subject: iri,
+      predicate: `${RDFS}label`,
+      object: text(wording[activity.check].label(activity.label.trim())),
+    },
+    {
+      subject: iri,
+      predicate: `${RDFS}comment`,
+      object: text(wording[activity.check].scope(activity.scope.trim())),
+    },
+    {
+      subject: iri,
+      predicate: `${RDFS}comment`,
+      object: text(wording.outcome(activity.outcome.trim())),
+    },
   ];
 }
 
@@ -867,30 +1182,59 @@ export function checkActivityTriples(iri: string, activity: CheckActivity): Draf
 export function readCheckActivity(draft: ReleaseDraft, id: string): CheckActivity | null {
   const iri = iriIn(draft, id);
   const said = draft.triples.filter((triple) => triple.subject === iri);
-  const literal = (predicate: string) => said.find((triple) => triple.predicate === predicate && triple.object.kind === "literal")?.object as ReleaseText | undefined;
+  const literal = (predicate: string) =>
+    said.find((triple) => triple.predicate === predicate && triple.object.kind === "literal")
+      ?.object as ReleaseText | undefined;
   const label = literal(`${RDFS}label`);
   const endedAt = literal(`${PROV}endedAtTime`);
   if (label === undefined || endedAt === undefined) return null;
-  const comments = said.flatMap((triple) => (triple.predicate === RDFS_COMMENT && triple.object.kind === "literal" ? [triple.object.value] : []));
+  const comments = said.flatMap((triple) =>
+    triple.predicate === RDFS_COMMENT && triple.object.kind === "literal"
+      ? [triple.object.value]
+      : [],
+  );
   // What a wording puts around its text: its words before and after.
   const around = (word: (text: string) => string, text: string) => {
     const [before, after] = word("\u0000").split("\u0000") as [string, string];
-    return text.startsWith(before) && text.endsWith(after) && text.length >= before.length + after.length ? text.slice(before.length, text.length - after.length) : null;
+    return text.startsWith(before) &&
+      text.endsWith(after) &&
+      text.length >= before.length + after.length
+      ? text.slice(before.length, text.length - after.length)
+      : null;
   };
   const language = label.language === "sv" ? "sv" : "en";
   const wording = CHECK_WORDING[language];
   for (const check of ["machine", "ai"] as const) {
     const name = around(wording[check].label, label.value);
-    const scope = comments.map((comment) => around(wording[check].scope, comment)).find((one) => one !== null);
-    const outcome = comments.map((comment) => around(wording.outcome, comment)).find((one) => one !== null);
+    const scope = comments
+      .map((comment) => around(wording[check].scope, comment))
+      .find((one) => one !== null);
+    const outcome = comments
+      .map((comment) => around(wording.outcome, comment))
+      .find((one) => one !== null);
     if (name === null || scope === undefined || outcome === undefined) continue;
-    const activity: CheckActivity = { check, label: name, scope: scope!, outcome: outcome!, endedAt: endedAt.value, language: label.language };
-    if (canonical(checkActivityTriples(iri, activity).map(keyOfTriple).sort()) === canonical(said.map(keyOfTriple).sort())) return activity;
+    const activity: CheckActivity = {
+      check,
+      label: name,
+      scope: scope!,
+      outcome: outcome!,
+      endedAt: endedAt.value,
+      language: label.language,
+    };
+    if (
+      canonical(checkActivityTriples(iri, activity).map(keyOfTriple).sort()) ===
+      canonical(said.map(keyOfTriple).sort())
+    )
+      return activity;
   }
   return null;
 }
 
-function addCheckActivity(draft: ReleaseDraft, id: string, activity: CheckActivity): ReleaseDraft | DraftRefusal {
+function addCheckActivity(
+  draft: ReleaseDraft,
+  id: string,
+  activity: CheckActivity,
+): ReleaseDraft | DraftRefusal {
   const refusal = refuseId(draft, id);
   if (refusal !== null) return refusal;
   const iri = iriIn(draft, id);
@@ -900,7 +1244,10 @@ function addCheckActivity(draft: ReleaseDraft, id: string, activity: CheckActivi
     predicate: `${PROV}wasInformedBy`,
     object: { kind: "iri" as const, value: iri },
   }));
-  return { ...draft, triples: [...making.draft.triples, ...checkActivityTriples(iri, activity), ...informed] };
+  return {
+    ...draft,
+    triples: [...making.draft.triples, ...checkActivityTriples(iri, activity), ...informed],
+  };
 }
 
 function refuseActivity(draft: ReleaseDraft, id: string): DraftRefusal | null {
@@ -909,41 +1256,72 @@ function refuseActivity(draft: ReleaseDraft, id: string): DraftRefusal | null {
   return null;
 }
 
-function editCheckActivity(draft: ReleaseDraft, id: string, activity: CheckActivity): ReleaseDraft | DraftRefusal {
+function editCheckActivity(
+  draft: ReleaseDraft,
+  id: string,
+  activity: CheckActivity,
+): ReleaseDraft | DraftRefusal {
   const refusal = refuseActivity(draft, id);
   if (refusal !== null) return refusal;
   const iri = iriIn(draft, id);
-  return { ...draft, triples: [...draft.triples.filter((triple) => triple.subject !== iri), ...checkActivityTriples(iri, activity)] };
+  return {
+    ...draft,
+    triples: [
+      ...draft.triples.filter((triple) => triple.subject !== iri),
+      ...checkActivityTriples(iri, activity),
+    ],
+  };
 }
 
 function deleteActivity(draft: ReleaseDraft, id: string): ReleaseDraft | DraftRefusal {
   const refusal = refuseActivity(draft, id);
   if (refusal !== null) return refusal;
   const iri = iriIn(draft, id);
-  const triples = draft.triples.filter((triple) => triple.subject !== iri && !(triple.object.kind === "iri" && triple.object.value === iri));
+  const triples = draft.triples.filter(
+    (triple) =>
+      triple.subject !== iri && !(triple.object.kind === "iri" && triple.object.value === iri),
+  );
   // A source only this activity used is no source any more: what the draft states of it goes too, so nothing is left that nothing names.
-  const sources = new Set(draft.triples.filter((triple) => triple.subject === iri && triple.predicate === `${PROV}used`).map((triple) => triple.object.value));
-  const named = (source: string) => draft.root.wasDerivedFrom.includes(source) || triples.some((triple) => triple.object.kind === "iri" && triple.object.value === source);
-  return { ...draft, triples: triples.filter((triple) => !sources.has(triple.subject) || named(triple.subject)) };
+  const sources = new Set(
+    draft.triples
+      .filter((triple) => triple.subject === iri && triple.predicate === `${PROV}used`)
+      .map((triple) => triple.object.value),
+  );
+  const named = (source: string) =>
+    draft.root.wasDerivedFrom.includes(source) ||
+    triples.some((triple) => triple.object.kind === "iri" && triple.object.value === source);
+  return {
+    ...draft,
+    triples: triples.filter((triple) => !sources.has(triple.subject) || named(triple.subject)),
+  };
 }
 
-// --- The licence
+// --- The license
 
-/** The statement that types a licence a dcterms:LicenseDocument, as DCAT-AP asks of it. */
+/** The statement that types a license a dcterms:LicenseDocument, as DCAT-AP asks of it. */
 export function licenseType(license: string): DraftTriple {
-  return { subject: license, predicate: RDF_TYPE, object: { kind: "iri", value: LICENSE_DOCUMENT } };
+  return {
+    subject: license,
+    predicate: RDF_TYPE,
+    object: { kind: "iri", value: LICENSE_DOCUMENT },
+  };
 }
 
 /**
- * The draft with its licence set, and typed: the licence it had loses
- * its type when nothing else in the draft names it (a source's licence
- * may), so the release says nothing of a licence it no longer has.
+ * The draft with its license set, and typed: the license it had loses
+ * its type when nothing else in the draft names it (a source's license
+ * may), so the release says nothing of a license it no longer has.
  */
 function setLicense(draft: ReleaseDraft, license: string | null): ReleaseDraft {
   const { license: before, ...root } = draft.root;
-  const typed = (triples: readonly DraftTriple[], iri: string) => triples.some((triple) => keyOfTriple(triple) === keyOfTriple(licenseType(iri)));
+  const typed = (triples: readonly DraftTriple[], iri: string) =>
+    triples.some((triple) => keyOfTriple(triple) === keyOfTriple(licenseType(iri)));
   let triples = [...draft.triples];
-  if (before !== undefined && before !== license && !triples.some((triple) => triple.object.kind === "iri" && triple.object.value === before)) {
+  if (
+    before !== undefined &&
+    before !== license &&
+    !triples.some((triple) => triple.object.kind === "iri" && triple.object.value === before)
+  ) {
     triples = triples.filter((triple) => keyOfTriple(triple) !== keyOfTriple(licenseType(before)));
   }
   if (license !== null && !typed(triples, license)) triples.push(licenseType(license));
@@ -954,7 +1332,9 @@ function setLicense(draft: ReleaseDraft, license: string | null): ReleaseDraft {
 
 /** "A", "A and B", "A, B and C", with the language's "and". */
 function namesIn(names: readonly string[], and: string): string {
-  return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} ${and} ${names.at(-1)}`;
+  return names.length < 2
+    ? names.join("")
+    : `${names.slice(0, -1).join(", ")} ${and} ${names.at(-1)}`;
 }
 
 /**
@@ -979,14 +1359,20 @@ function attributionsOf(draft: ReleaseDraft): Map<string, boolean> {
   const names = authorNames(draft);
   const texts = new Map<string, boolean>();
   if (names.length === 0) return texts;
-  for (const language of ["en", "sv"]) for (const ai of [false, true]) texts.set(`${language} ${attributionText(names, ai, language)}`, ai);
+  for (const language of ["en", "sv"])
+    for (const ai of [false, true])
+      texts.set(`${language} ${attributionText(names, ai, language)}`, ai);
   return texts;
 }
 
 /** Whether a statement of an activity is an attribution comment, of those `attributions` (attributionsOf) has. */
 function isAttribution(attributions: ReadonlyMap<string, boolean>, triple: DraftTriple): boolean {
   const { object } = triple;
-  return triple.predicate === RDFS_COMMENT && object.kind === "literal" && attributions.has(`${object.language} ${object.value}`);
+  return (
+    triple.predicate === RDFS_COMMENT &&
+    object.kind === "literal" &&
+    attributions.has(`${object.language} ${object.value}`)
+  );
 }
 
 /** The release's own making: the first activity of the draft's own that generated it; null when it has none. */
@@ -1002,7 +1388,9 @@ export function ownMakingOf(draft: ReleaseDraft): string | null {
 export function attributionOf(draft: ReleaseDraft): { ai: boolean; text: string } | null {
   const making = ownMakingOf(draft);
   const attributions = attributionsOf(draft);
-  const said = draft.triples.filter((triple) => triple.subject === making && isAttribution(attributions, triple)).map((triple) => triple.object as ReleaseText);
+  const said = draft.triples
+    .filter((triple) => triple.subject === making && isAttribution(attributions, triple))
+    .map((triple) => triple.object as ReleaseText);
   const shown = said.find((text) => text.language === "en") ?? said[0];
   if (shown === undefined) return null;
   return { ai: attributions.get(`${shown.language} ${shown.value}`)!, text: shown.value };
@@ -1014,10 +1402,18 @@ export function makingNotesOf(draft: ReleaseDraft): LangText {
   const attributions = attributionsOf(draft);
   const notes: Record<string, string[]> = {};
   for (const triple of draft.triples) {
-    if (triple.subject !== making || triple.predicate !== RDFS_COMMENT || triple.object.kind !== "literal" || isAttribution(attributions, triple)) continue;
+    if (
+      triple.subject !== making ||
+      triple.predicate !== RDFS_COMMENT ||
+      triple.object.kind !== "literal" ||
+      isAttribution(attributions, triple)
+    )
+      continue;
     (notes[triple.object.language] ??= []).push(triple.object.value);
   }
-  return Object.fromEntries(Object.entries(notes).map(([language, paragraphs]) => [language, paragraphs.join("\n\n")]));
+  return Object.fromEntries(
+    Object.entries(notes).map(([language, paragraphs]) => [language, paragraphs.join("\n\n")]),
+  );
 }
 
 /**
@@ -1029,7 +1425,11 @@ export function makingNotesOf(draft: ReleaseDraft): LangText {
 function withMaking(draft: ReleaseDraft): { draft: ReleaseDraft; making: string } {
   const own = withOwnMaking(draft);
   if (own.activities.length > 0) return { draft: own.draft, making: own.activities[0]! };
-  const taken = new Set([...idsInUse(draft), ...Object.keys(draft.published.ids), ...draft.published.activities]);
+  const taken = new Set([
+    ...idsInUse(draft),
+    ...Object.keys(draft.published.ids),
+    ...draft.published.activities,
+  ]);
   let id = "compilation";
   for (let n = 2; taken.has(id); n++) id = `compilation-${n}`;
   const iri = iriIn(draft, id);
@@ -1038,7 +1438,11 @@ function withMaking(draft: ReleaseDraft): { draft: ReleaseDraft; making: string 
       ...draft,
       triples: [
         ...draft.triples,
-        { subject: draft.url, predicate: `${PROV}wasGeneratedBy`, object: { kind: "iri", value: iri } },
+        {
+          subject: draft.url,
+          predicate: `${PROV}wasGeneratedBy`,
+          object: { kind: "iri", value: iri },
+        },
         { subject: iri, predicate: RDF_TYPE, object: { kind: "iri", value: `${PROV}Activity` } },
       ],
     },
@@ -1047,12 +1451,24 @@ function withMaking(draft: ReleaseDraft): { draft: ReleaseDraft; making: string 
 }
 
 /** The comments of the release's own making that `keep` keeps, then `comments`; made when there are any and it has none. */
-function withMakingComments(draft: ReleaseDraft, keep: (triple: DraftTriple) => boolean, comments: readonly ReleaseText[]): ReleaseDraft {
+function withMakingComments(
+  draft: ReleaseDraft,
+  keep: (triple: DraftTriple) => boolean,
+  comments: readonly ReleaseText[],
+): ReleaseDraft {
   const existing = ownMakingOf(draft);
   if (existing === null && comments.length === 0) return draft;
   const made = withMaking(draft);
-  const triples = made.draft.triples.filter((triple) => triple.subject !== made.making || triple.predicate !== RDFS_COMMENT || keep(triple));
-  return { ...made.draft, triples: [...triples, ...comments.map((object) => ({ subject: made.making, predicate: RDFS_COMMENT, object }))] };
+  const triples = made.draft.triples.filter(
+    (triple) => triple.subject !== made.making || triple.predicate !== RDFS_COMMENT || keep(triple),
+  );
+  return {
+    ...made.draft,
+    triples: [
+      ...triples,
+      ...comments.map((object) => ({ subject: made.making, predicate: RDFS_COMMENT, object })),
+    ],
+  };
 }
 
 function commentIn(value: string, language: string): ReleaseText {
@@ -1068,13 +1484,18 @@ export function authorNames(draft: ReleaseDraft): string[] {
   });
 }
 
-function setAttribution(draft: ReleaseDraft, attribution: { ai: boolean } | null): ReleaseDraft | DraftRefusal {
+function setAttribution(
+  draft: ReleaseDraft,
+  attribution: { ai: boolean } | null,
+): ReleaseDraft | DraftRefusal {
   const attributions = attributionsOf(draft);
   const kept = (triple: DraftTriple) => !isAttribution(attributions, triple);
   if (attribution === null) return withMakingComments(draft, kept, []);
   const names = authorNames(draft);
   if (names.length === 0) return { refused: "noAuthors" };
-  const comments = ["en", "sv"].map((language) => commentIn(attributionText(names, attribution.ai, language), language));
+  const comments = ["en", "sv"].map((language) =>
+    commentIn(attributionText(names, attribution.ai, language), language),
+  );
   return withMakingComments(draft, kept, comments);
 }
 
@@ -1099,7 +1520,10 @@ export function publishedIdsOf(release: ReleaseDraft): PublishedIds {
   for (const kind of Object.keys(NODES) as DraftKind[]) {
     for (const node of release[NODES[kind]]) ids[node.id] = kind;
   }
-  return { ids, activities: [...new Set([...release.published.activities, ...activitiesOf(release)])] };
+  return {
+    ids,
+    activities: [...new Set([...release.published.activities, ...activitiesOf(release)])],
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -1108,7 +1532,9 @@ export function publishedIdsOf(release: ReleaseDraft): PublishedIds {
 /** A value as a string to compare by, whatever order its records' fields are in. */
 export function canonical(value: unknown): string {
   return JSON.stringify(value, (_field, one: unknown) =>
-    one !== null && typeof one === "object" && !Array.isArray(one) ? Object.fromEntries(Object.entries(one).sort(([a], [b]) => (a < b ? -1 : 1))) : one,
+    one !== null && typeof one === "object" && !Array.isArray(one)
+      ? Object.fromEntries(Object.entries(one).sort(([a], [b]) => (a < b ? -1 : 1)))
+      : one,
   );
 }
 
@@ -1116,14 +1542,19 @@ const LISTS = ["agents", "distributions", "chapters", "steps", "cards", "distrac
 
 /** Each part of a draft that a change makes or not, by a key: what it says of itself, each record, each subject's statements. */
 function partsOf(draft: ReleaseDraft): Map<string, string> {
-  const parts = new Map<string, string>([["root", canonical({ course: draft.course, root: draft.root })]]);
-  for (const list of LISTS) for (const node of draft[list] as readonly DraftNode<unknown>[]) parts.set(`${list} ${node.id}`, canonical(node.data));
+  const parts = new Map<string, string>([
+    ["root", canonical({ course: draft.course, root: draft.root })],
+  ]);
+  for (const list of LISTS)
+    for (const node of draft[list] as readonly DraftNode<unknown>[])
+      parts.set(`${list} ${node.id}`, canonical(node.data));
   const statements = new Map<string, string[]>();
   for (const triple of draft.triples) {
     const said = statements.get(triple.subject) ?? [];
     statements.set(triple.subject, [...said, canonical([triple.predicate, triple.object])]);
   }
-  for (const [subject, said] of statements) parts.set(`triples ${subject}`, JSON.stringify(said.sort()));
+  for (const [subject, said] of statements)
+    parts.set(`triples ${subject}`, JSON.stringify(said.sort()));
   return parts;
 }
 
@@ -1134,8 +1565,16 @@ function partsOf(draft: ReleaseDraft): Map<string, string> {
  * statements) as `mine` says it where it changed it, else as `theirs`
  * does. Null when both changed a part, each its own way.
  */
-export function mergedDraft(base: ReleaseDraft, mine: ReleaseDraft, theirs: ReleaseDraft): ReleaseDraft | null {
-  const [was, made, now] = [base, mine, theirs].map(partsOf) as [Map<string, string>, Map<string, string>, Map<string, string>];
+export function mergedDraft(
+  base: ReleaseDraft,
+  mine: ReleaseDraft,
+  theirs: ReleaseDraft,
+): ReleaseDraft | null {
+  const [was, made, now] = [base, mine, theirs].map(partsOf) as [
+    Map<string, string>,
+    Map<string, string>,
+    Map<string, string>,
+  ];
   const ours = new Set<string>();
   for (const key of new Set([...was.keys(), ...made.keys(), ...now.keys()])) {
     if (made.get(key) === was.get(key)) continue;
@@ -1145,7 +1584,11 @@ export function mergedDraft(base: ReleaseDraft, mine: ReleaseDraft, theirs: Rele
   const from = (key: string) => (ours.has(key) ? mine : theirs);
   const nodes = <K extends (typeof LISTS)[number]>(list: K): ReleaseDraft[K] => {
     const ids = [...new Set([...theirs[list], ...mine[list]].map((node) => node.id))];
-    return ids.flatMap((id) => (from(`${list} ${id}`)[list] as readonly DraftNode<unknown>[]).filter((node) => node.id === id)) as ReleaseDraft[K];
+    return ids.flatMap((id) =>
+      (from(`${list} ${id}`)[list] as readonly DraftNode<unknown>[]).filter(
+        (node) => node.id === id,
+      ),
+    ) as ReleaseDraft[K];
   };
   const root = from("root");
   return {

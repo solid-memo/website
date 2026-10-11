@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A deck imported from the library, end to end, through the app's own use
  * cases and Solid adapters wired as in createAppUseCases (docs/deck-library.md): the
@@ -107,7 +111,11 @@ async function app() {
     headers: { "Content-Type": "text/turtle" },
     body: `<#me> <http://xmlns.com/foaf/0.1/name> "Alice" ; <http://www.w3.org/ns/pim/space#storage> <${POD}> .`,
   });
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch: siteFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch: siteFetch,
+    ...SHAPE_SOURCES,
+  });
   const checkWrite = shapeValidator.checkSubjects;
   const ids = { now: () => new Date(), randomId: () => crypto.randomUUID() };
   const useCases = createUseCases({
@@ -127,17 +135,32 @@ async function app() {
 }
 
 describe("a deck imported from the library", () => {
-  it("is written at deck format 6 and card format 5 from a format-4 release, its text exactly the release's", { timeout: 30_000 }, async () => {
+  it("is written at deck format 6 and card format 5 from a format-4 release, its text exactly the release's", {
+    timeout: 30_000,
+  }, async () => {
     // Releases are frozen: a format-4 release is read as it was published.
     expect(LATEST_VERSION.libraryDeck).toBe(6);
     const { useCases, store } = await app();
-    const instance = await useCases.createInstance(ALICE, { containerUrl: `${POD}solid-memo/`, name: "Main", registrationTarget: "private" });
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
 
     const deck = await useCases.importLibraryDeck(instance.url, { url: RELEASE } as LibraryDeck);
 
-    expect(deck).toMatchObject({ formatVersion: 6, sourceUrl: RELEASE, title: { en: "Capitals", sv: "Huvudstäder" }, keywords: { "": ["capitals"] } });
+    expect(deck).toMatchObject({
+      formatVersion: 6,
+      sourceUrl: RELEASE,
+      title: { en: "Capitals", sv: "Huvudstäder" },
+      keywords: { "": ["capitals"] },
+    });
     const [listed] = await useCases.listDecks(instance.url);
-    expect(listed).toMatchObject({ formatVersion: 6, title: { en: "Capitals", sv: "Huvudstäder" }, keywords: { "": ["capitals"] } });
+    expect(listed).toMatchObject({
+      formatVersion: 6,
+      title: { en: "Capitals", sv: "Huvudstäder" },
+      keywords: { "": ["capitals"] },
+    });
     const cards = await useCases.listCards(listed!);
     expect(cards.map((card) => [card.id, card.formatVersion]).sort()).toEqual([
       ["dk", 5],
@@ -146,7 +169,10 @@ describe("a deck imported from the library", () => {
       ["se", 5],
     ]);
     expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
-    expect(await useCases.planMigration(instance.url)).toMatchObject({ deckCount: 0, cardCount: 0 });
+    expect(await useCases.planMigration(instance.url)).toMatchObject({
+      deckCount: 0,
+      cardCount: 0,
+    });
 
     // The text is the release's, triple for triple: nothing tagged, nothing dropped, nothing invented.
     const triples = await everyTriple(store);
@@ -176,9 +202,13 @@ describe("a deck imported from the library", () => {
         `${card("dk")} <${SM_NS}frontNote> "A kingdom."@en .`,
       ]),
     );
-    expect(triples).toContain(`<${listed!.url}> <${SM_NS}formatVersion> "6"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
+    expect(triples).toContain(
+      `<${listed!.url}> <${SM_NS}formatVersion> "6"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+    );
     for (const subject of ["se", "no", "q12418", "dk"].map(card)) {
-      expect(triples, subject).toContain(`${subject} <${SM_NS}formatVersion> "5"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
+      expect(triples, subject).toContain(
+        `${subject} <${SM_NS}formatVersion> "5"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+      );
     }
     const texts = (subject: string, predicate: string) =>
       triples.filter((line) => line.startsWith(`${subject} <${predicate}> "`)).length;
@@ -189,17 +219,30 @@ describe("a deck imported from the library", () => {
     expect(texts(card("dk"), `${SM_NS}frontNote`)).toBe(1);
   });
 
-  it("copies a format-5 release's keywords with their language tags", { timeout: 30_000 }, async () => {
+  it("copies a format-5 release's keywords with their language tags", {
+    timeout: 30_000,
+  }, async () => {
     const { useCases, store } = await app();
-    const instance = await useCases.createInstance(ALICE, { containerUrl: `${POD}solid-memo/`, name: "Main", registrationTarget: "private" });
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
 
-    const deck = await useCases.importLibraryDeck(instance.url, { url: TAGGED_RELEASE } as LibraryDeck);
+    const deck = await useCases.importLibraryDeck(instance.url, {
+      url: TAGGED_RELEASE,
+    } as LibraryDeck);
 
     expect(deck.keywords).toEqual({ en: ["capitals", "countries"], sv: ["huvudstäder", "länder"] });
     const [listed] = await useCases.listDecks(instance.url);
-    expect(listed!.keywords).toEqual({ en: ["capitals", "countries"], sv: ["huvudstäder", "länder"] });
+    expect(listed!.keywords).toEqual({
+      en: ["capitals", "countries"],
+      sv: ["huvudstäder", "länder"],
+    });
     expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
-    const keywords = (await everyTriple(store)).filter((line) => line.startsWith(`<${listed!.url}> <${KEYWORD}> `)).sort();
+    const keywords = (await everyTriple(store))
+      .filter((line) => line.startsWith(`<${listed!.url}> <${KEYWORD}> `))
+      .sort();
     expect(keywords).toEqual([
       `<${listed!.url}> <${KEYWORD}> "capitals"@en .`,
       `<${listed!.url}> <${KEYWORD}> "countries"@en .`,

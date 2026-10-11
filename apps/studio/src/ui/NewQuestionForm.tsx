@@ -1,11 +1,26 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { isEmptyText } from "@solid-memo/domain/deck";
 import { questionIdBefore, questionIdFor, questionsAt } from "@solid-memo/domain/release/courseIds";
 import { draftCardOf } from "@solid-memo/domain/release/draftOutline";
-import type { DraftChange, QuestionPlace, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import type {
+  DraftChange,
+  QuestionPlace,
+  ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { draftOf, LangTextField, rememberLanguages, textOfDraft, type DraftEntry, type LangTextDraft } from "@solid-memo/ui/LangTextField";
+import {
+  draftOf,
+  LangTextField,
+  rememberLanguages,
+  textOfDraft,
+  type DraftEntry,
+  type LangTextDraft,
+} from "@solid-memo/ui/LangTextField";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import { idUsable, IdField } from "./DraftParts";
 
@@ -46,14 +61,18 @@ export function NewQuestionForm({
   const [before, setBefore] = useState<string | null>(null);
   const [front, setFront] = useState(emptySide);
   const [back, setBack] = useState(emptySide);
-  const [missing, setMissing] = useState<{ side: "front" | "back"; entry: DraftEntry } | null>(null);
+  const [missing, setMissing] = useState<{ side: "front" | "back"; entry: DraftEntry } | null>(
+    null,
+  );
   const [empty, setEmpty] = useState(false);
   const asked = place === null ? [] : questionsAt(draft, place);
   const next = before !== null && asked.includes(before) ? before : null;
-  const suggested = next === null ? questionIdFor(draft, place) : questionIdBefore(draft, place!, next);
+  const suggested =
+    next === null ? questionIdFor(draft, place) : questionIdBefore(draft, place!, next);
   const cardId = typedId ?? suggested ?? "";
   // The place asks its cards in the order of their ids: one the user writes is asked where it sorts, which may not be where they chose.
-  const previous = next === null ? (asked.at(-1) ?? null) : (asked[asked.indexOf(next) - 1] ?? null);
+  const previous =
+    next === null ? (asked.at(-1) ?? null) : (asked[asked.indexOf(next) - 1] ?? null);
   const sortsThere = (previous === null || cardId > previous) && (next === null || cardId < next);
   const whereHint =
     typedId === null
@@ -74,7 +93,11 @@ export function NewQuestionForm({
     setEmpty(false);
     if (!idUsable(draft, cardId)) return;
     const changes: DraftChange[] = [
-      { kind: "addCard", id: cardId, card: { front: frontText.text, back: backText.text, created: new Date().toISOString() } },
+      {
+        kind: "addCard",
+        id: cardId,
+        card: { front: frontText.text, back: backText.text, created: new Date().toISOString() },
+      },
       ...(place === null ? [] : [{ kind: "addQuestion" as const, card: cardId, place }]),
     ];
     if (!onAdd(changes, cardId)) return;
@@ -125,7 +148,8 @@ export function NewQuestionForm({
               <option value="">{t("studio.draftEdit.askedLast")}</option>
               {asked.map((card) => {
                 const found = draftCardOf(draft, card);
-                const name = found === null ? card : cardName({ ...found.content, id: card }, readerText);
+                const name =
+                  found === null ? card : cardName({ ...found.content, id: card }, readerText);
                 return (
                   <option key={card} value={card}>
                     {t("studio.draftEdit.askedBefore", { name })}
@@ -135,7 +159,13 @@ export function NewQuestionForm({
             </select>
           </>
         )}
-        <IdField id={`${id}-id`} draft={draft} value={cardId} describedBy={whereHint ? `${id}-where-hint` : undefined} onChange={setTypedId} />
+        <IdField
+          id={`${id}-id`}
+          draft={draft}
+          value={cardId}
+          describedBy={whereHint ? `${id}-where-hint` : undefined}
+          onChange={setTypedId}
+        />
         {whereHint && (
           <p id={`${id}-where-hint`} class={typedId === null ? "hint" : "warning"}>
             {whereHint}

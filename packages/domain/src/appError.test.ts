@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { AppError, fillTemplate, technicalDetail } from "./appError";
 
@@ -8,7 +12,9 @@ describe("AppError", () => {
     expect(error.name).toBe("AppError");
     expect(error.code).toBe("deckGone");
     expect(error.vars).toEqual({ deck: "Capitals" });
-    expect(error.message).toBe("The deck “Capitals” no longer exists. Perhaps it was removed in another tab or app.");
+    expect(error.message).toBe(
+      "The deck “Capitals” no longer exists. Perhaps it was removed in another tab or app.",
+    );
     expect(error.detail).toBe("");
     expect(new AppError("webIdEmpty").vars).toEqual({});
   });
@@ -32,7 +38,9 @@ describe("AppError", () => {
     expect(error.message).toBe(
       "Solid Memo cannot open that storage. Check the address, and that you are logged in with the account that owns it.\nurl: https://pod.example/\nstatus: 403",
     );
-    expect(technicalDetail({ one: "{count} {a}", other: "{count} {b}" }, { count: 2, a: 1, b: 2, c: 3 })).toBe("c: 3");
+    expect(
+      technicalDetail({ one: "{count} {a}", other: "{count} {b}" }, { count: 2, a: 1, b: 2, c: 3 }),
+    ).toBe("c: 3");
   });
 
   it("leaves a placeholder without a value as it is", () => {

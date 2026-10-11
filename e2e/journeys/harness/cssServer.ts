@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createWriteStream } from "node:fs";
@@ -32,7 +36,20 @@ export interface StartedCss {
 
 /** Pulls the images unless they are here. */
 export async function prepare(): Promise<void> {
-  await docker(["compose", "-p", `${PREFIX}prepare`, "-f", COMPOSE_FILE, "pull", "--policy", "missing", "--quiet"], PLACEHOLDERS);
+  await docker(
+    [
+      "compose",
+      "-p",
+      `${PREFIX}prepare`,
+      "-f",
+      COMPOSE_FILE,
+      "pull",
+      "--policy",
+      "missing",
+      "--quiet",
+    ],
+    PLACEHOLDERS,
+  );
 }
 
 /**
@@ -45,11 +62,15 @@ export async function startCss(): Promise<StartedCss> {
   // One project per process: journeys run alongside each other's servers.
   const project = `${PREFIX}${process.pid}`;
   const env = { E2E_PORT: "" };
-  const compose = (args: string[]) => docker(["compose", "-p", project, "-f", COMPOSE_FILE, ...args], env);
+  const compose = (args: string[]) =>
+    docker(["compose", "-p", project, "-f", COMPOSE_FILE, ...args], env);
   let logs: ChildProcess | undefined;
   const stopNow = () => {
     process.off("exit", stopNow);
-    spawnSync("docker", ["compose", "-p", project, "down", "-v", "--remove-orphans", "-t", "0"], { cwd: tmpdir(), stdio: "ignore" });
+    spawnSync("docker", ["compose", "-p", project, "down", "-v", "--remove-orphans", "-t", "0"], {
+      cwd: tmpdir(),
+      stdio: "ignore",
+    });
     logs?.kill();
   };
   // On any exit: Playwright's own Ctrl-C handling runs the teardown first, its reports written.
@@ -67,7 +88,8 @@ export async function startCss(): Promise<StartedCss> {
       break;
     } catch (error) {
       await compose(["down", "-v", "--remove-orphans", "-t", "0"]).catch(() => {});
-      if (attempt === 2 || !/already allocated|address already in use/.test(String(error))) throw error;
+      if (attempt === 2 || !/already allocated|address already in use/.test(String(error)))
+        throw error;
     }
   }
   await mkdir(LOGS, { recursive: true });
@@ -84,20 +106,31 @@ export async function startCss(): Promise<StartedCss> {
 
 /** Every server this checkout's runs left behind (a killed run), taken down: `npm run css:clean`. */
 export async function clean(): Promise<string[]> {
-  const listed = JSON.parse(await docker(["compose", "ls", "--all", "--format", "json"], {})) as { Name: string }[];
+  const listed = JSON.parse(await docker(["compose", "ls", "--all", "--format", "json"], {})) as {
+    Name: string;
+  }[];
   const ours = listed.map(({ Name }) => Name).filter((name) => name.startsWith(PREFIX));
-  await Promise.all(ours.map((name) => docker(["compose", "-p", name, "down", "-v", "--remove-orphans", "-t", "0"], {}, tmpdir())));
+  await Promise.all(
+    ours.map((name) =>
+      docker(["compose", "-p", name, "down", "-v", "--remove-orphans", "-t", "0"], {}, tmpdir()),
+    ),
+  );
   return ours;
 }
 
 /** What the server and its proxy print, with times, into logs/css.log. */
 function follow(project: string, env: Record<string, string>): ChildProcess {
-  const child = spawn("docker", ["compose", "-p", project, "-f", COMPOSE_FILE, "logs", "-f", "--no-color", "--timestamps"], {
-    env: { ...process.env, ...env },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+  const child = spawn(
+    "docker",
+    ["compose", "-p", project, "-f", COMPOSE_FILE, "logs", "-f", "--no-color", "--timestamps"],
+    {
+      env: { ...process.env, ...env },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
   const out = createWriteStream(CSS_LOG);
-  const lost = (error: Error) => console.warn(`The Solid server's log is not kept (${CSS_LOG}): ${error.message}`);
+  const lost = (error: Error) =>
+    console.warn(`The Solid server's log is not kept (${CSS_LOG}): ${error.message}`);
   out.on("error", lost);
   child.on("error", lost);
   child.stdout!.pipe(out);
@@ -108,14 +141,26 @@ function follow(project: string, env: Record<string, string>): ChildProcess {
 /** Runs docker, resolving with what it printed; rejecting with it if it fails. */
 function docker(args: string[], env: Record<string, string>, cwd = HERE): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = spawn("docker", args, { cwd, env: { ...process.env, ...env }, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn("docker", args, {
+      cwd,
+      env: { ...process.env, ...env },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
     let out = "";
     child.stdout.on("data", (chunk: Buffer) => void (out += chunk.toString()));
     child.stderr.on("data", (chunk: Buffer) => void (out += chunk.toString()));
     child.on("error", (error) =>
-      reject(new Error(`docker could not be run (${error.message}); the journeys start their Solid server in it (docs/testing.md).`)),
+      reject(
+        new Error(
+          `docker could not be run (${error.message}); the journeys start their Solid server in it (docs/testing.md).`,
+        ),
+      ),
     );
-    child.on("close", (code) => (code === 0 ? resolve(out) : reject(new Error(`docker ${args.join(" ")} failed (${code}):\n${out}`))));
+    child.on("close", (code) =>
+      code === 0
+        ? resolve(out)
+        : reject(new Error(`docker ${args.join(" ")} failed (${code}):\n${out}`)),
+    );
   });
 }
 
@@ -135,7 +180,10 @@ async function untilUp(url: string): Promise<void> {
   try {
     const deadline = Date.now() + START_TIMEOUT_MS;
     while (Date.now() < deadline) {
-      const up = await api.get(url, { timeout: 5_000 }).then((response) => response.ok(), () => false);
+      const up = await api.get(url, { timeout: 5_000 }).then(
+        (response) => response.ok(),
+        () => false,
+      );
       if (up) return;
       await new Promise((resolve) => setTimeout(resolve, 250));
     }
@@ -162,8 +210,11 @@ if (import.meta.main) {
     console.log(taken.length > 0 ? `Took down ${taken.join(", ")}.` : "Nothing to take down.");
   } else if (command === undefined) {
     const { url, stop } = await startCss();
-    for (const signal of ["SIGINT", "SIGTERM"] as const) process.once(signal, () => void stop().finally(() => process.exit(0)));
-    console.log(`Community Solid Server 7 at ${url} (its log: ${CSS_LOG}). Run the journeys against it with\n  JOURNEY_SERVER_URL=${url} npm run journeys\nCtrl-C stops it.`);
+    for (const signal of ["SIGINT", "SIGTERM"] as const)
+      process.once(signal, () => void stop().finally(() => process.exit(0)));
+    console.log(
+      `Community Solid Server 7 at ${url} (its log: ${CSS_LOG}). Run the journeys against it with\n  JOURNEY_SERVER_URL=${url} npm run journeys\nCtrl-C stops it.`,
+    );
     await new Promise(() => {});
   } else {
     throw new Error("Usage: node harness/cssServer.ts [prepare|clean]");

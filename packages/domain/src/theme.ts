@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /** The looks the app comes in. */
 export const THEMES = ["light", "dark"] as const;
 

@@ -1,10 +1,23 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { choicesOf, type Choice } from "@solid-memo/domain/course";
 import type { CardContent } from "@solid-memo/domain/deck";
 import { isPublished } from "@solid-memo/domain/release/courseIds";
-import { cardTextOf, distractorChanges, draftCardOf, draftOutline } from "@solid-memo/domain/release/draftOutline";
+import {
+  cardTextOf,
+  distractorChanges,
+  draftCardOf,
+  draftOutline,
+} from "@solid-memo/domain/release/draftOutline";
 import type { QuestionField } from "@solid-memo/domain/release/releaseCheck";
-import { placeOf, type QuestionPlace, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import {
+  placeOf,
+  type QuestionPlace,
+  type ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import type { CardTextPart } from "@solid-memo/domain/deck";
 import {
   CardContentFields,
@@ -24,12 +37,20 @@ import { LifeActions } from "./LifeActions";
 
 /** A place as the select's value: `step <id>`, `review <id>`, or "" for nowhere. */
 function placeValue(place: QuestionPlace | null): string {
-  return place === null ? "" : place.kind === "step" ? `step ${place.step}` : `review ${place.chapter}`;
+  return place === null
+    ? ""
+    : place.kind === "step"
+      ? `step ${place.step}`
+      : `review ${place.chapter}`;
 }
 
 function placeFrom(value: string): QuestionPlace | null {
   const [kind, id] = value.split(" ");
-  return kind === "step" ? { kind: "step", step: id! } : kind === "review" ? { kind: "review", chapter: id! } : null;
+  return kind === "step"
+    ? { kind: "step", step: id! }
+    : kind === "review"
+      ? { kind: "review", chapter: id! }
+      : null;
 }
 
 /** The order the preview offers the options in: as they come, so the same card shows the same each time it is drawn. */
@@ -79,7 +100,11 @@ export function QuestionEditorScreen({
   // The preview: the card as typed, while it is a card; else as saved.
   const typed = checkDraft(form, saved.content);
   const shown: CardContent = typed.ok
-    ? { ...typed.content, textFormat: typed.content.textFormat ?? saved.content.textFormat, distractors: saved.content.distractors }
+    ? {
+        ...typed.content,
+        textFormat: typed.content.textFormat ?? saved.content.textFormat,
+        distractors: saved.content.distractors,
+      }
     : saved.content;
   const choices = choicesOf(shown, IN_ORDER);
 
@@ -91,7 +116,10 @@ export function QuestionEditorScreen({
       return;
     }
     setInvalid(null);
-    const content = { ...check.content, textFormat: check.content.textFormat ?? saved.content.textFormat };
+    const content = {
+      ...check.content,
+      textFormat: check.content.textFormat ?? saved.content.textFormat,
+    };
     onEdit([{ kind: "editCard", id: card, card: cardTextOf(content, saved.created) }]);
   }
 
@@ -114,17 +142,28 @@ export function QuestionEditorScreen({
           {draft.course && (
             <label>
               {t("studio.question.place")}
-              <select value={placeValue(place)} onChange={(event) => onEdit([{ kind: "moveQuestion", card, place: placeFrom(event.currentTarget.value) }])}>
+              <select
+                value={placeValue(place)}
+                onChange={(event) =>
+                  onEdit([
+                    { kind: "moveQuestion", card, place: placeFrom(event.currentTarget.value) },
+                  ])
+                }
+              >
                 <option value="">{t("studio.question.nowhere")}</option>
                 {outline.map(({ chapter, steps }) => {
-                  const title = chapter.data.title === undefined ? chapter.id : readerText(chapter.data.title);
+                  const title =
+                    chapter.data.title === undefined ? chapter.id : readerText(chapter.data.title);
                   return [
                     ...steps.map((step, index) => (
                       <option key={step.id} value={placeValue({ kind: "step", step: step.id })}>
                         {t("studio.question.atStep", { chapter: title, step: index + 1 })}
                       </option>
                     )),
-                    <option key={`review ${chapter.id}`} value={placeValue({ kind: "review", chapter: chapter.id })}>
+                    <option
+                      key={`review ${chapter.id}`}
+                      value={placeValue({ kind: "review", chapter: chapter.id })}
+                    >
                       {t("studio.question.atReview", { chapter: title })}
                     </option>,
                   ];
@@ -140,7 +179,9 @@ export function QuestionEditorScreen({
               busy={false}
               invalid={invalid}
               suggestions={{ front: [], back: [], own: [] }}
-              {...(field === undefined || field === "distractors" || field.startsWith("distractor:") ? {} : { arrival: field as CardTextPart })}
+              {...(field === undefined || field === "distractors" || field.startsWith("distractor:")
+                ? {}
+                : { arrival: field as CardTextPart })}
               onChange={(next) => {
                 if (invalid?.entry !== undefined) setInvalid(null);
                 setForm(next);
@@ -152,18 +193,26 @@ export function QuestionEditorScreen({
             </button>
           </form>
 
-          <div id="question-distractors" tabIndex={-1} data-arrival={field === "distractors" || undefined}>
-          <DistractorFields
-            cardId={card}
-            distractors={saved.content.distractors ?? []}
-            published={new Set(Object.keys(draft.published.ids))}
-            back={saved.content.back}
-            textFormat={saved.content.textFormat}
-            busy={held}
-            suggestions={[]}
-            {...(field?.startsWith("distractor:") === true ? { arrival: field.slice("distractor:".length) } : {})}
-            onChange={(next) => Promise.resolve(onEdit(distractorChanges(draft, card, next)) === null)}
-          />
+          <div
+            id="question-distractors"
+            tabIndex={-1}
+            data-arrival={field === "distractors" || undefined}
+          >
+            <DistractorFields
+              cardId={card}
+              distractors={saved.content.distractors ?? []}
+              published={new Set(Object.keys(draft.published.ids))}
+              back={saved.content.back}
+              textFormat={saved.content.textFormat}
+              busy={held}
+              suggestions={[]}
+              {...(field?.startsWith("distractor:") === true
+                ? { arrival: field.slice("distractor:".length) }
+                : {})}
+              onChange={(next) =>
+                Promise.resolve(onEdit(distractorChanges(draft, card, next)) === null)
+              }
+            />
           </div>
 
           <LifeActions

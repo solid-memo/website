@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useLayoutEffect, useRef } from "preact/hooks";
 import type { RouteChange } from "./routerCore";
 
@@ -42,7 +46,8 @@ export function useScreenFocus(route: unknown, change: RouteChange) {
       if (target === null) return false;
       // Focusable from script only: not a Tab stop of its own. A form
       // field (a link to one) is one already, and stays one.
-      if (target.tabIndex < 0 && !target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+      if (target.tabIndex < 0 && !target.hasAttribute("tabindex"))
+        target.setAttribute("tabindex", "-1");
       target.focus();
       pending.current = false;
       return true;

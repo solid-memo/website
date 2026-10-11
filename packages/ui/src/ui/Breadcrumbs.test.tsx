@@ -1,10 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/preact";
 import { Breadcrumbs, breadcrumbsFor as crumbsIn, type CrumbNames } from "./Breadcrumbs";
 import { createI18n, I18nProvider } from "./i18n";
 import { routeToHash, type RouteRef } from "./router";
 
-const breadcrumbsFor = (route: RouteRef, names: CrumbNames) => crumbsIn(route, names, createI18n("en").t);
+const breadcrumbsFor = (route: RouteRef, names: CrumbNames) =>
+  crumbsIn(route, names, createI18n("en").t);
 
 const instanceUrl = "https://pod.example/solid-memo/a/";
 const deckUrl = `${instanceUrl}catalog.ttl#deck-1`;
@@ -74,17 +79,13 @@ describe("breadcrumbsFor", () => {
       instanceUrl,
       libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
     };
-    expect(
-      breadcrumbsFor(libraryDeck, { ...NO_NAMES, libraryDeck: "Capitals" }),
-    ).toEqual([
+    expect(breadcrumbsFor(libraryDeck, { ...NO_NAMES, libraryDeck: "Capitals" })).toEqual([
       { label: "Decks", route: home },
       { label: "Deck library", route: { screen: "library", instanceUrl } },
       { label: "Capitals", route: libraryDeck },
     ]);
     const cards: RouteRef = { ...libraryDeck, screen: "libraryBrowser", page: 2 };
-    expect(
-      breadcrumbsFor(cards, { ...NO_NAMES, libraryDeck: "Capitals" }),
-    ).toEqual([
+    expect(breadcrumbsFor(cards, { ...NO_NAMES, libraryDeck: "Capitals" })).toEqual([
       { label: "Decks", route: home },
       { label: "Deck library", route: { screen: "library", instanceUrl } },
       { label: "Capitals", route: libraryDeck },
@@ -93,7 +94,11 @@ describe("breadcrumbsFor", () => {
     const libraryCard: RouteRef = { ...libraryDeck, screen: "libraryCard", cardId: "sweden" };
     const cardsCrumb = {
       label: "Cards",
-      route: { screen: "libraryBrowser", instanceUrl, libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl" },
+      route: {
+        screen: "libraryBrowser",
+        instanceUrl,
+        libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
+      },
     };
     expect(
       breadcrumbsFor(libraryCard, { ...NO_NAMES, libraryDeck: "Capitals", libraryCard: "Sweden" }),
@@ -106,9 +111,7 @@ describe("breadcrumbsFor", () => {
     ]);
     expect(breadcrumbsFor(libraryCard, NO_NAMES).at(-1)).toEqual({ label: "", route: libraryCard });
     const preview: RouteRef = { ...libraryDeck, screen: "libraryPreview" };
-    expect(
-      breadcrumbsFor(preview, { ...NO_NAMES, libraryDeck: "Capitals" }),
-    ).toEqual([
+    expect(breadcrumbsFor(preview, { ...NO_NAMES, libraryDeck: "Capitals" })).toEqual([
       { label: "Decks", route: home },
       { label: "Deck library", route: { screen: "library", instanceUrl } },
       { label: "Capitals", route: libraryDeck },
@@ -117,7 +120,11 @@ describe("breadcrumbsFor", () => {
   });
 
   it("puts adding a release from a link under the library", () => {
-    const importUrl: RouteRef = { screen: "importUrl", instanceUrl, url: "https://bob.example/v1.ttl" };
+    const importUrl: RouteRef = {
+      screen: "importUrl",
+      instanceUrl,
+      url: "https://bob.example/v1.ttl",
+    };
     expect(breadcrumbsFor(importUrl, NO_NAMES)).toEqual([
       { label: "Decks", route: home },
       { label: "Deck library", route: { screen: "library", instanceUrl } },
@@ -188,7 +195,13 @@ describe("breadcrumbsFor", () => {
     const course: RouteRef = { screen: "course", instanceUrl, deckUrl };
     const chapter: RouteRef = { screen: "courseChapter", instanceUrl, deckUrl, chapterUrl };
     const review: RouteRef = { screen: "courseReview", instanceUrl, deckUrl, chapterUrl };
-    const names = { deck: "Solid", card: "", libraryDeck: "", chapter: "Länkade data", chapterLang: "sv" };
+    const names = {
+      deck: "Solid",
+      card: "",
+      libraryDeck: "",
+      chapter: "Länkade data",
+      chapterLang: "sv",
+    };
     expect(breadcrumbsFor(course, names)).toEqual([
       { label: "Decks", route: home },
       { label: "Solid", route: deckDetail },
@@ -212,7 +225,11 @@ describe("breadcrumbsFor", () => {
 
 describe("Breadcrumbs", () => {
   it("makes every crumb a link, the current page included", () => {
-    render(<Breadcrumbs crumbs={breadcrumbsFor(deckDetail, { deck: "Verbs", card: "", libraryDeck: "" })} />);
+    render(
+      <Breadcrumbs
+        crumbs={breadcrumbsFor(deckDetail, { deck: "Verbs", card: "", libraryDeck: "" })}
+      />,
+    );
     const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
 
     const decks = within(nav).getByRole("link", { name: "Decks" });
@@ -225,7 +242,11 @@ describe("Breadcrumbs", () => {
   });
 
   it("links ancestors by URL and marks the current page", () => {
-    render(<Breadcrumbs crumbs={breadcrumbsFor(browser, { deck: "Kanji N5", card: "", libraryDeck: "" })} />);
+    render(
+      <Breadcrumbs
+        crumbs={breadcrumbsFor(browser, { deck: "Kanji N5", card: "", libraryDeck: "" })}
+      />,
+    );
 
     const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
     expect(within(nav).getByRole("link", { name: "Decks" })).toHaveAttribute(
@@ -242,10 +263,21 @@ describe("Breadcrumbs", () => {
   });
 
   it("marks a deck's or card's name in another language than the page's with its language", () => {
-    const cardRoute: RouteRef = { screen: "card", instanceUrl, deckUrl, cardUrl: `${instanceUrl}decks/deck-1.ttl#card-1` };
+    const cardRoute: RouteRef = {
+      screen: "card",
+      instanceUrl,
+      deckUrl,
+      cardUrl: `${instanceUrl}decks/deck-1.ttl#card-1`,
+    };
     render(
       <Breadcrumbs
-        crumbs={breadcrumbsFor(cardRoute, { deck: "Kanji N5", card: "水", libraryDeck: "", deckLang: "en", cardLang: "ja" })}
+        crumbs={breadcrumbsFor(cardRoute, {
+          deck: "Kanji N5",
+          card: "水",
+          libraryDeck: "",
+          deckLang: "en",
+          cardLang: "ja",
+        })}
       />,
     );
     expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute("lang", "en");
@@ -254,7 +286,11 @@ describe("Breadcrumbs", () => {
   });
 
   it("copes with a deck named like another crumb", () => {
-    render(<Breadcrumbs crumbs={breadcrumbsFor(browser, { deck: "Decks", card: "", libraryDeck: "" })} />);
+    render(
+      <Breadcrumbs
+        crumbs={breadcrumbsFor(browser, { deck: "Decks", card: "", libraryDeck: "" })}
+      />,
+    );
     expect(screen.getAllByRole("link", { name: "Decks" })).toHaveLength(2);
   });
 });
@@ -264,7 +300,10 @@ describe("Breadcrumbs of another app's routes", () => {
     type Route = { page: string };
     render(
       <Breadcrumbs<Route>
-        crumbs={[{ label: "Top", route: { page: "top" } }, { label: "Here", route: { page: "here" } }]}
+        crumbs={[
+          { label: "Top", route: { page: "top" } },
+          { label: "Here", route: { page: "here" } },
+        ]}
         toHash={(route) => `#/${route.page}`}
       />,
     );
@@ -277,7 +316,13 @@ describe("breadcrumbs in Swedish", () => {
   it("names the steps and the trail in the reader's language", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
-        <Breadcrumbs crumbs={crumbsIn(browser, { deck: "Kanji N5", card: "", libraryDeck: "" }, createI18n("sv").t)} />
+        <Breadcrumbs
+          crumbs={crumbsIn(
+            browser,
+            { deck: "Kanji N5", card: "", libraryDeck: "" },
+            createI18n("sv").t,
+          )}
+        />
       </I18nProvider>,
     );
     const trail = screen.getByRole("navigation", { name: "Brödsmulor" });

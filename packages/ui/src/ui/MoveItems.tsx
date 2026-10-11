@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import type { Anchor, ParentId } from "@solid-memo/domain/deckTree";
 import { MenuGroup, MenuItem, MenuSeparator } from "./ActionsMenu";
@@ -13,7 +17,11 @@ interface Place {
 }
 
 /** Where the node keyed `key` is among `nodes`, however deep; undefined when it is not there. */
-function placeOf(nodes: readonly OutlineNode[], key: string, parent: ParentId = null): Place | undefined {
+function placeOf(
+  nodes: readonly OutlineNode[],
+  key: string,
+  parent: ParentId = null,
+): Place | undefined {
   for (const [index, node] of nodes.entries()) {
     if (node.key === key) return { parent, siblings: nodes, index };
     const inside = node.children === undefined ? undefined : placeOf(node.children, key, node.key);
@@ -53,8 +61,8 @@ function destinations(
 /**
  * The keyboard's and screen reader's way to arrange a list, the same
  * moves a drag makes, as items of a row's ActionsMenu: up or down among
- * its neighbours, out of the node it is in, into a new group with the
- * neighbour above or below (where the list makes groups: `onCombine`),
+ * its neighbors, out of the node it is in, into a new group with the
+ * neighbor above or below (where the list makes groups: `onCombine`),
  * or into another node that holds others (at its end), each indented as
  * deep as it is. The list is the deck list (groups and decks) or a
  * course's outline (chapters and steps): `fits` says where the node may
@@ -92,7 +100,11 @@ export function MoveItems({
   const below = at.siblings[at.index + 1];
   const into = destinations(nodes, nodeKey, at.parent, fits);
 
-  function action(label: ComponentChildren, next: OutlineNode | undefined, act: (next: OutlineNode) => void) {
+  function action(
+    label: ComponentChildren,
+    next: OutlineNode | undefined,
+    act: (next: OutlineNode) => void,
+  ) {
     return (
       <MenuItem disabled={readOnly || next === undefined} onSelect={() => act(next!)}>
         {label}
@@ -105,9 +117,14 @@ export function MoveItems({
       {action(t("deckList.moveUp"), above, () =>
         onMove({ parent: at.parent, after: at.index < 2 ? null : at.siblings[at.index - 2]!.key }),
       )}
-      {action(t("deckList.moveDown"), below, (next) => onMove({ parent: at.parent, after: next.key }))}
+      {action(t("deckList.moveDown"), below, (next) =>
+        onMove({ parent: at.parent, after: next.key }),
+      )}
       {holder !== null && fits(holder.parent) && (
-        <MenuItem disabled={readOnly} onSelect={() => onMove({ parent: holder.parent, after: at.parent })}>
+        <MenuItem
+          disabled={readOnly}
+          onSelect={() => onMove({ parent: holder.parent, after: at.parent })}
+        >
           {t("deckList.moveOut", { group: readerText(holder.siblings[holder.index]!.title) })}
         </MenuItem>
       )}

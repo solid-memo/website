@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { AppError } from "./appError";
 import type { CardContent, Distractor } from "./deck";
@@ -12,7 +16,11 @@ import {
   tidiedDistractor,
 } from "./distractors";
 
-const d1: Distractor = { id: "q-d1", text: { en: "Only web pages" }, note: { en: "A URL is one kind of IRI." } };
+const d1: Distractor = {
+  id: "q-d1",
+  text: { en: "Only web pages" },
+  note: { en: "A URL is one kind of IRI." },
+};
 const d2: Distractor = { id: "q-d2", text: { en: "Only people" } };
 
 describe("nextDistractorId", () => {
@@ -29,17 +37,33 @@ describe("nextDistractorId", () => {
 
 describe("tidiedDistractor", () => {
   it("trims the text and drops an empty note", () => {
-    expect(tidiedDistractor({ text: { en: " a " }, note: { en: " " } })).toEqual({ ok: true, text: { en: "a" } });
-    expect(tidiedDistractor({ text: { "": "404" }, note: { sv: " Fel. " } })).toEqual({ ok: true, text: { "": "404" }, note: { sv: "Fel." } });
+    expect(tidiedDistractor({ text: { en: " a " }, note: { en: " " } })).toEqual({
+      ok: true,
+      text: { en: "a" },
+    });
+    expect(tidiedDistractor({ text: { "": "404" }, note: { sv: " Fel. " } })).toEqual({
+      ok: true,
+      text: { "": "404" },
+      note: { sv: "Fel." },
+    });
   });
 
   it("keeps the spaces formatted text starts with", () => {
-    expect(tidiedDistractor({ text: { en: "\n    code  " } }, true)).toEqual({ ok: true, text: { en: "    code" } });
+    expect(tidiedDistractor({ text: { en: "\n    code  " } }, true)).toEqual({
+      ok: true,
+      text: { en: "    code" },
+    });
   });
 
   it("refuses an empty text, untagged text with translations, and a note in no language", () => {
-    expect(tidiedDistractor({ text: { en: " " } })).toEqual({ ok: false, error: new AppError("distractorEmpty") });
-    expect(tidiedDistractor({ text: { "": "a", en: "a" } })).toEqual({ ok: false, error: new AppError("textMixesUnstated") });
+    expect(tidiedDistractor({ text: { en: " " } })).toEqual({
+      ok: false,
+      error: new AppError("distractorEmpty"),
+    });
+    expect(tidiedDistractor({ text: { "": "a", en: "a" } })).toEqual({
+      ok: false,
+      error: new AppError("textMixesUnstated"),
+    });
     expect(tidiedDistractor({ text: { en: "a" }, note: { "": "why" } })).toEqual({
       ok: false,
       error: new AppError("textNeedsLanguage", { field: "the note on a wrong option" }),
@@ -49,7 +73,14 @@ describe("tidiedDistractor", () => {
 
 describe("addDistractor", () => {
   it("adds a distractor at the end, under an id neither the card nor its release has used", () => {
-    expect(addDistractor([d1], "q", { text: { en: " Only files " } }, { published: ["q-d1", "q-d2", "q-d3"] })).toEqual({
+    expect(
+      addDistractor(
+        [d1],
+        "q",
+        { text: { en: " Only files " } },
+        { published: ["q-d1", "q-d2", "q-d3"] },
+      ),
+    ).toEqual({
       ok: true,
       distractors: [d1, { id: "q-d4", text: { en: "Only files" } }],
     });
@@ -60,28 +91,41 @@ describe("addDistractor", () => {
   });
 
   it("creates none until it has text", () => {
-    expect(addDistractor([d1], "q", { text: {} })).toEqual({ ok: false, error: new AppError("distractorEmpty") });
+    expect(addDistractor([d1], "q", { text: {} })).toEqual({
+      ok: false,
+      error: new AppError("distractorEmpty"),
+    });
   });
 
   it("tidies formatted text as the card's", () => {
-    expect(addDistractor([], "q", { text: { en: "    code" } }, { formatted: true })).toMatchObject({
-      distractors: [{ text: { en: "    code" } }],
-    });
+    expect(addDistractor([], "q", { text: { en: "    code" } }, { formatted: true })).toMatchObject(
+      {
+        distractors: [{ text: { en: "    code" } }],
+      },
+    );
   });
 });
 
 describe("editDistractor", () => {
   it("replaces one's text and note, keeping its id and retirement", () => {
-    expect(editDistractor([d1, d2], "q-d1", { text: { en: "Pages" } })).toEqual({ ok: true, distractors: [{ id: "q-d1", text: { en: "Pages" } }, d2] });
+    expect(editDistractor([d1, d2], "q-d1", { text: { en: "Pages" } })).toEqual({
+      ok: true,
+      distractors: [{ id: "q-d1", text: { en: "Pages" } }, d2],
+    });
     const retired = { ...d2, retired: true as const };
-    expect(editDistractor([retired], "q-d2", { text: { en: "People" }, note: { en: "No." } })).toEqual({
+    expect(
+      editDistractor([retired], "q-d2", { text: { en: "People" }, note: { en: "No." } }),
+    ).toEqual({
       ok: true,
       distractors: [{ id: "q-d2", text: { en: "People" }, note: { en: "No." }, retired: true }],
     });
   });
 
   it("refuses to empty one", () => {
-    expect(editDistractor([d1], "q-d1", { text: { en: "" } }, true)).toEqual({ ok: false, error: new AppError("distractorEmpty") });
+    expect(editDistractor([d1], "q-d1", { text: { en: "" } }, true)).toEqual({
+      ok: false,
+      error: new AppError("distractorEmpty"),
+    });
   });
 });
 
@@ -90,25 +134,47 @@ describe("retiring and restoring", () => {
     const retired = retireDistractor([d1, d2], "q-d2");
     expect(retired).toEqual([d1, { ...d2, retired: true }]);
     expect(restoreDistractor(retired, "q-d2")).toEqual([d1, d2]);
-    expect(restoreDistractor([{ ...d1, retired: true }, { ...d2, retired: true }], "q-d1")).toEqual([d1, { ...d2, retired: true }]);
+    expect(
+      restoreDistractor(
+        [
+          { ...d1, retired: true },
+          { ...d2, retired: true },
+        ],
+        "q-d1",
+      ),
+    ).toEqual([d1, { ...d2, retired: true }]);
   });
 });
 
 describe("deleteDistractor", () => {
   it("deletes one its release never published", () => {
-    expect(deleteDistractor([d1, d2], "q-d2", new Set(["q-d1"]))).toEqual({ ok: true, distractors: [d1] });
+    expect(deleteDistractor([d1, d2], "q-d2", new Set(["q-d1"]))).toEqual({
+      ok: true,
+      distractors: [d1],
+    });
   });
 
   it("refuses one its release published, to be retired instead", () => {
-    expect(deleteDistractor([d1, d2], "q-d1", new Set(["q-d1"]))).toEqual({ ok: false, error: new AppError("distractorPublished") });
+    expect(deleteDistractor([d1, d2], "q-d1", new Set(["q-d1"]))).toEqual({
+      ok: false,
+      error: new AppError("distractorPublished"),
+    });
   });
 
   it("frees the id of the highest one, never published, for the next one added", () => {
     const d3: Distractor = { id: "q-d3", text: { en: "Only files" } };
     const deleted = deleteDistractor([d1, d2, d3], "q-d3", new Set(["q-d1"]));
     expect(deleted).toEqual({ ok: true, distractors: [d1, d2] });
-    const added = addDistractor([d1, d2], "q", { text: { en: "Only names" } }, { published: ["q-d1"] });
-    expect(added).toEqual({ ok: true, distractors: [d1, d2, { id: "q-d3", text: { en: "Only names" } }] });
+    const added = addDistractor(
+      [d1, d2],
+      "q",
+      { text: { en: "Only names" } },
+      { published: ["q-d1"] },
+    );
+    expect(added).toEqual({
+      ok: true,
+      distractors: [d1, d2, { id: "q-d3", text: { en: "Only names" } }],
+    });
   });
 });
 
@@ -127,13 +193,29 @@ describe("distractorIssues", () => {
         { id: "q-d3", text: { fr: "z" }, retired: true as const },
       ],
     };
-    expect(distractorIssues(card, "pod")).toEqual([{ code: "distractorLanguages", severity: "warning", id: "q-d1", missing: ["sv"], extra: ["de"] }]);
-    expect(distractorIssues(card, "release")).toEqual([{ code: "distractorLanguages", severity: "error", id: "q-d1", missing: ["sv"], extra: ["de"] }]);
+    expect(distractorIssues(card, "pod")).toEqual([
+      {
+        code: "distractorLanguages",
+        severity: "warning",
+        id: "q-d1",
+        missing: ["sv"],
+        extra: ["de"],
+      },
+    ]);
+    expect(distractorIssues(card, "release")).toEqual([
+      {
+        code: "distractorLanguages",
+        severity: "error",
+        id: "q-d1",
+        missing: ["sv"],
+        extra: ["de"],
+      },
+    ]);
   });
 
   it("finds too few distractors in use", () => {
-    expect(distractorIssues({ back: { en: "b" }, distractors: [d1, { ...d2, retired: true }] }, "pod")).toEqual([
-      { code: "fewDistractors", severity: "warning", count: 1, least: 2 },
-    ]);
+    expect(
+      distractorIssues({ back: { en: "b" }, distractors: [d1, { ...d2, retired: true }] }, "pod"),
+    ).toEqual([{ code: "fewDistractors", severity: "warning", count: 1, least: 2 }]);
   });
 });

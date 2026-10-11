@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -141,8 +145,12 @@ export function StudioShell({
   const [asideDrawer, setAsideDrawer] = useState(false);
   const detail = aside?.detail;
   // A detail is as wide as its own splitter makes it.
-  const width = detail === undefined ? ({ key: "asideWidth", size: ASIDE_WIDTH } as const) : ({ key: "detailWidth", size: DETAIL_WIDTH } as const);
-  const asideShown = aside !== null && (detail !== undefined || (medium ? asideDrawer : prefs.aside));
+  const width =
+    detail === undefined
+      ? ({ key: "asideWidth", size: ASIDE_WIDTH } as const)
+      : ({ key: "detailWidth", size: DETAIL_WIDTH } as const);
+  const asideShown =
+    aside !== null && (detail !== undefined || (medium ? asideDrawer : prefs.aside));
   const asideToggleRef = useRef<HTMLButtonElement>(null);
   const asideRef = useRef<HTMLElement>(null);
   const dockButtonRef = useRef<HTMLButtonElement>(null);
@@ -194,7 +202,12 @@ export function StudioShell({
   /** Goes to the field of the next problem (`step` 1) or the one before (-1), as a link does. */
   function goToProblem(step: 1 | -1): boolean {
     const routes = problems?.routes ?? [];
-    const at = stepProblem(routes.map(studioRouteToHash), window.location.hash, lastProblem.current, step);
+    const at = stepProblem(
+      routes.map(studioRouteToHash),
+      window.location.hash,
+      lastProblem.current,
+      step,
+    );
     if (at === null) return false;
     lastProblem.current = at;
     go(routes[at]!);
@@ -204,11 +217,36 @@ export function StudioShell({
   /** The shell's own commands in the palette, beside the screen's. */
   const shellCommands = (): ScreenCommand[] => [
     { id: "help", label: t("studio.palette.help"), keys: keysOf("help"), run: () => setHelp(true) },
-    ...(sidebar === null ? [] : [{ id: "toggleSidebar", label: t("studio.keys.toggleSidebar"), keys: keysOf("toggleSidebar"), run: toggleSidebar }]),
+    ...(sidebar === null
+      ? []
+      : [
+          {
+            id: "toggleSidebar",
+            label: t("studio.keys.toggleSidebar"),
+            keys: keysOf("toggleSidebar"),
+            run: toggleSidebar,
+          },
+        ]),
     ...(aside === null
       ? []
-      : [{ id: "toggleAside", label: detail?.closeLabel ?? t("studio.keys.toggleAside"), keys: keysOf("toggleAside"), run: toggleAside }]),
-    ...(docked ? [{ id: "toggleDock", label: t("studio.keys.toggleDock"), keys: keysOf("toggleDock"), run: toggleDock }] : []),
+      : [
+          {
+            id: "toggleAside",
+            label: detail?.closeLabel ?? t("studio.keys.toggleAside"),
+            keys: keysOf("toggleAside"),
+            run: toggleAside,
+          },
+        ]),
+    ...(docked
+      ? [
+          {
+            id: "toggleDock",
+            label: t("studio.keys.toggleDock"),
+            keys: keysOf("toggleDock"),
+            run: toggleDock,
+          },
+        ]
+      : []),
   ];
 
   function chooseCommand(command: Command) {
@@ -312,7 +350,8 @@ export function StudioShell({
   // The columns the screens' tables hide, as the device keeps them.
   const hiddenColumns: HiddenColumns = {
     hidden: (table) => new Set(prefs.hiddenColumns[table]),
-    onHidden: (table, hidden) => choose({ ...prefs, hiddenColumns: { ...prefs.hiddenColumns, [table]: [...hidden] } }),
+    onHidden: (table, hidden) =>
+      choose({ ...prefs, hiddenColumns: { ...prefs.hiddenColumns, [table]: [...hidden] } }),
   };
 
   return (
@@ -336,7 +375,12 @@ export function StudioShell({
           )}
           {banner}
           {switcher}
-          <button type="button" class="studio-search" aria-keyshortcuts="Control+K Meta+K" onClick={() => setPalette(true)}>
+          <button
+            type="button"
+            class="studio-search"
+            aria-keyshortcuts="Control+K Meta+K"
+            onClick={() => setPalette(true)}
+          >
             <span>{t("studio.palette.button")}</span>
             <span class="studio-palette-keys" aria-hidden="true">
               <Keys keys="Ctrl+K" />
@@ -418,7 +462,12 @@ export function StudioShell({
               if (medium && (event.target as Element).closest("a") !== null) setAsideDrawer(false);
             }}
             onKeyDown={(event) => {
-              if (medium && event.key === "Escape" && (event.target as Element).closest("dialog") === null) hideAside();
+              if (
+                medium &&
+                event.key === "Escape" &&
+                (event.target as Element).closest("dialog") === null
+              )
+                hideAside();
             }}
           >
             {!medium && (
@@ -458,7 +507,12 @@ export function StudioShell({
             onClose={toggleDock}
           />
         )}
-        <aside class="studio-status-bar" aria-label={t("studio.shell.status")} data-region tabIndex={-1}>
+        <aside
+          class="studio-status-bar"
+          aria-label={t("studio.shell.status")}
+          data-region
+          tabIndex={-1}
+        >
           {instance !== null && <p>{instance.name}</p>}
           {draftUrl !== null && <DraftSaveState draftUrl={draftUrl} reports={waiting.total} />}
           {status}
@@ -569,7 +623,12 @@ function SidebarIcon({ right = false }: { right?: boolean }) {
  * say) closes it. A menu a button in it opened is laid over the page
  * (ActionsMenu), but is the pane's: a press there leaves it open.
  */
-function useDrawer(open: boolean, paneRef: { current: HTMLElement | null }, buttonRef: { current: HTMLElement | null }, close: () => void) {
+function useDrawer(
+  open: boolean,
+  paneRef: { current: HTMLElement | null },
+  buttonRef: { current: HTMLElement | null },
+  close: () => void,
+) {
   useEffect(() => {
     if (!open) return;
     paneRef.current!.focus();
@@ -577,7 +636,12 @@ function useDrawer(open: boolean, paneRef: { current: HTMLElement | null }, butt
       const target = event.target as Element;
       const opener = target.closest('[role="menu"]')?.getAttribute("aria-labelledby");
       const inPane = (node: Node | null) => node !== null && paneRef.current!.contains(node);
-      if (!inPane(target) && !inPane(opener ? document.getElementById(opener) : null) && !buttonRef.current!.contains(target)) close();
+      if (
+        !inPane(target) &&
+        !inPane(opener ? document.getElementById(opener) : null) &&
+        !buttonRef.current!.contains(target)
+      )
+        close();
     };
     document.addEventListener("pointerdown", outside, true);
     return () => document.removeEventListener("pointerdown", outside, true);
@@ -617,7 +681,10 @@ function useWaiting() {
     if (report.waiting === 0 && !report.failed) reports.current.delete(editor);
     else reports.current.set(editor, report);
     const all = [...reports.current.values()];
-    setTotal({ waiting: all.reduce((sum, one) => sum + one.waiting, 0), failed: all.some((one) => one.failed) });
+    setTotal({
+      waiting: all.reduce((sum, one) => sum + one.waiting, 0),
+      failed: all.some((one) => one.failed),
+    });
   }, []);
   return { report, total };
 }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { datasetFromTurtle } from "./testing/turtle";
 import type { Literal, Quad } from "@rdfjs/types";
@@ -27,10 +31,7 @@ async function engine() {
 
 describe("createEngine", () => {
   it("returns no violations for a conforming node", async () => {
-    const data = await datasetFromTurtle(
-      `<#a> <https://example.com/ns#name> "Ann" .`,
-      DATA_URL,
-    );
+    const data = await datasetFromTurtle(`<#a> <https://example.com/ns#name> "Ann" .`, DATA_URL);
     expect(
       await (await engine()).validateNode(data, `${DATA_URL}#a`, `${SHAPES_URL}#shape`),
     ).toEqual([]);
@@ -47,7 +48,7 @@ describe("createEngine", () => {
     ).toEqual([
       {
         path: "https://example.com/ns#age",
-        message: { en: 'Value does not have datatype <http://www.w3.org/2001/XMLSchema#integer>' },
+        message: { en: "Value does not have datatype <http://www.w3.org/2001/XMLSchema#integer>" },
         builtIn: true,
         value: "young",
         severity: "warning",
@@ -55,7 +56,11 @@ describe("createEngine", () => {
       },
       {
         path: "https://example.com/ns#name",
-        message: { en: "One name, as text.", "en-gb": "One name, as text.", sv: "Ett namn, som text." },
+        message: {
+          en: "One name, as text.",
+          "en-gb": "One name, as text.",
+          sv: "Ett namn, som text.",
+        },
         severity: "violation",
         constraint: "MaxCount",
       },
@@ -128,7 +133,9 @@ describe("createEngine", () => {
       DATA_URL,
     );
     const check = async (node: string) =>
-      (await e.validateNode(data, `${DATA_URL}#${node}`, `${SHAPES_URL}#shape`)).map((v) => v.constraint);
+      (await e.validateNode(data, `${DATA_URL}#${node}`, `${SHAPES_URL}#shape`)).map(
+        (v) => v.constraint,
+      );
     expect(await Promise.all([check("named"), check("nameless")])).toEqual([[], ["MinCount"]]);
     expect(await Promise.all([check("nameless"), check("named")])).toEqual([["MinCount"], []]);
   });
@@ -174,7 +181,10 @@ describe("createEngine", () => {
         constraint: "MinCount",
       },
     ]);
-    const good = await datasetFromTurtle(`<#a> a <https://example.com/ns#Person> ; <https://example.com/ns#name> "Ann" .`, DATA_URL);
+    const good = await datasetFromTurtle(
+      `<#a> a <https://example.com/ns#Person> ; <https://example.com/ns#name> "Ann" .`,
+      DATA_URL,
+    );
     expect(await e.validate(good)).toEqual([]);
   });
 });
@@ -185,11 +195,21 @@ describe("mapIris", () => {
       `<#a> <#p> <#b>, "x", _:n . _:n <https://example.com/ns#q> "1"^^<https://example.com/ns#type> .`,
       DATA_URL,
     );
-    const moved = mapIris(data, (iri) => iri.replace("https://example.com/", "https://moved.example/"));
-    const triples = [...(moved as Iterable<Quad>)].map((q) => [q.subject.value, q.predicate.value, q.object.value]);
+    const moved = mapIris(data, (iri) =>
+      iri.replace("https://example.com/", "https://moved.example/"),
+    );
+    const triples = [...(moved as Iterable<Quad>)].map((q) => [
+      q.subject.value,
+      q.predicate.value,
+      q.object.value,
+    ]);
     expect(triples).toEqual(
       expect.arrayContaining([
-        ["https://moved.example/data.ttl#a", "https://moved.example/data.ttl#p", "https://moved.example/data.ttl#b"],
+        [
+          "https://moved.example/data.ttl#a",
+          "https://moved.example/data.ttl#p",
+          "https://moved.example/data.ttl#b",
+        ],
         ["https://moved.example/data.ttl#a", "https://moved.example/data.ttl#p", "x"],
       ]),
     );

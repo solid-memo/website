@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { TrialSandbox } from "@solid-memo/application/trial";
 import { createUseCases } from "@solid-memo/application/useCases";
@@ -41,9 +45,16 @@ export interface TrialWiring {
  * language, theme or update journal of the device: none of it is the
  * trial's.
  */
-export function createTrialUseCases(draft: ReleaseDraft, { podFetch, shapeValidator, ruleset }: TrialWiring): TrialSandbox {
+export function createTrialUseCases(
+  draft: ReleaseDraft,
+  { podFetch, shapeValidator, ruleset }: TrialWiring,
+): TrialSandbox {
   const store = createMemoryResourceStore();
-  const local = createLocalPod({ root: TRIAL_ORIGIN, store, newEtag: () => `"${crypto.randomUUID()}"` });
+  const local = createLocalPod({
+    root: TRIAL_ORIGIN,
+    store,
+    newEtag: () => `"${crypto.randomUUID()}"`,
+  });
   const fetch = routedFetch({ origin: TRIAL_ORIGIN, local, remote: readOnlyFetch(podFetch) });
   const validator = shapeValidator.over(fetch);
   const checkWrite = validator.checkSubjects;
@@ -74,7 +85,9 @@ export function createTrialUseCases(draft: ReleaseDraft, { podFetch, shapeValida
  */
 export function readOnlyFetch(fetch: typeof globalThis.fetch): typeof globalThis.fetch {
   return (input, init) => {
-    const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+    const method = (
+      init?.method ?? (input instanceof Request ? input.method : "GET")
+    ).toUpperCase();
     if (method !== "GET" && method !== "HEAD") {
       const url = input instanceof Request ? input.url : String(input);
       return Promise.reject(new Error(`A trial does not write to ${url} (${method}).`));

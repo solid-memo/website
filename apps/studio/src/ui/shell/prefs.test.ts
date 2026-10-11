@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   DEFAULT_PREFS,
@@ -58,7 +62,16 @@ describe("the Studio's layout preferences", () => {
   it("take the default for what the app does not store, each preference on its own", () => {
     localStorage.setItem(
       KEY,
-      JSON.stringify({ density: "roomy", sidebar: "no", aside: 1, asideWidth: "wide", detailWidth: "wider", dock: null, dockHeight: Infinity, characterKeys: "off" }),
+      JSON.stringify({
+        density: "roomy",
+        sidebar: "no",
+        aside: 1,
+        asideWidth: "wide",
+        detailWidth: "wider",
+        dock: null,
+        dockHeight: Infinity,
+        characterKeys: "off",
+      }),
     );
     expect(studioPrefs()).toEqual(DEFAULT_PREFS);
     localStorage.setItem(KEY, JSON.stringify({ density: "comfortable" }));
@@ -74,7 +87,10 @@ describe("the Studio's layout preferences", () => {
   });
 
   it("keep only lists of columns' names, by their tables' names", () => {
-    localStorage.setItem(KEY, JSON.stringify({ hiddenColumns: { cards: ["ease", 2, null, "id"], decks: "due", home: {} } }));
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ hiddenColumns: { cards: ["ease", 2, null, "id"], decks: "due", home: {} } }),
+    );
     expect(studioPrefs().hiddenColumns).toEqual({ cards: ["ease", "id"] });
     for (const stored of [["cards"], "cards", null]) {
       localStorage.setItem(KEY, JSON.stringify({ hiddenColumns: stored }));
@@ -83,8 +99,16 @@ describe("the Studio's layout preferences", () => {
   });
 
   it("keep the panes' sizes within their bounds", () => {
-    localStorage.setItem(KEY, JSON.stringify({ asideWidth: 10, detailWidth: 10_000, dockHeight: 10_000 }));
-    expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, asideWidth: ASIDE_WIDTH.min, detailWidth: DETAIL_WIDTH.max, dockHeight: DOCK_HEIGHT.max });
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ asideWidth: 10, detailWidth: 10_000, dockHeight: 10_000 }),
+    );
+    expect(studioPrefs()).toEqual({
+      ...DEFAULT_PREFS,
+      asideWidth: ASIDE_WIDTH.min,
+      detailWidth: DETAIL_WIDTH.max,
+      dockHeight: DOCK_HEIGHT.max,
+    });
   });
 
   it("are the defaults, and are not kept, when the browser's storage refuses", () => {
@@ -92,7 +116,9 @@ describe("the Studio's layout preferences", () => {
       throw new Error("SecurityError");
     };
     expect(studioPrefs(refusing)).toEqual(DEFAULT_PREFS);
-    expect(() => rememberPrefs({ ...DEFAULT_PREFS, density: "comfortable" }, refusing)).not.toThrow();
+    expect(() =>
+      rememberPrefs({ ...DEFAULT_PREFS, density: "comfortable" }, refusing),
+    ).not.toThrow();
   });
 });
 
@@ -136,7 +162,10 @@ describe("what the device keeps of an instance", () => {
   const kanji: WorkItem = { kind: "deck", url: `${a}decks/kanji.ttl` };
   const solid: WorkItem = { kind: "draft", url: `${a}drafts/solid/v1/release.ttl` };
   const kept: InstancePrefs = {
-    views: { home: [{ name: "Due", params: "show=due" }], cards: [{ name: "Leeches", params: "state=leech" }] },
+    views: {
+      home: [{ name: "Due", params: "show=due" }],
+      cards: [{ name: "Leeches", params: "state=leech" }],
+    },
     pinned: [kanji],
     recent: [solid, kanji],
   };
@@ -155,9 +184,21 @@ describe("what the device keeps of an instance", () => {
       INSTANCES,
       JSON.stringify({
         [a]: {
-          views: { home: [{ name: "Due", params: "show=due" }, { name: "", params: "q=x" }, { name: "No query" }, null, "Due"], cards: "Leeches" },
+          views: {
+            home: [
+              { name: "Due", params: "show=due" },
+              { name: "", params: "q=x" },
+              { name: "No query" },
+              null,
+              "Due",
+            ],
+            cards: "Leeches",
+          },
           pinned: [kanji, { kind: "card", url: "x" }, { kind: "deck" }, 3],
-          recent: Array.from({ length: RECENT_ITEMS + 2 }, (_, n) => ({ kind: "deck", url: `${a}decks/${n}.ttl` })),
+          recent: Array.from({ length: RECENT_ITEMS + 2 }, (_, n) => ({
+            kind: "deck",
+            url: `${a}decks/${n}.ttl`,
+          })),
         },
         [b]: { views: null, pinned: {}, recent: "kanji" },
       }),
@@ -188,8 +229,14 @@ describe("what the device keeps of an instance", () => {
 
   it("lists the item opened now first, once, as many as it keeps", () => {
     expect(openedNow([kanji, solid], solid)).toEqual([solid, kanji]);
-    expect(openedNow([kanji], { kind: "draft", url: kanji.url })).toEqual([{ kind: "draft", url: kanji.url }, kanji]);
-    const many = Array.from({ length: RECENT_ITEMS }, (_, n): WorkItem => ({ kind: "deck", url: `${a}decks/${n}.ttl` }));
+    expect(openedNow([kanji], { kind: "draft", url: kanji.url })).toEqual([
+      { kind: "draft", url: kanji.url },
+      kanji,
+    ]);
+    const many = Array.from(
+      { length: RECENT_ITEMS },
+      (_, n): WorkItem => ({ kind: "deck", url: `${a}decks/${n}.ttl` }),
+    );
     expect(openedNow(many, kanji)).toEqual([kanji, ...many.slice(0, RECENT_ITEMS - 1)]);
   });
 });

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * How big a pane a splitter sizes may be, in CSS pixels: no smaller than
  * `min`, no bigger than `max`, and `initial` until the user sizes it.
@@ -28,12 +32,18 @@ export function clampSize(value: number, size: PaneSize): number {
 /**
  * The size a key gives the pane a splitter sizes, or null for a key the
  * splitter does not take. The pane is at the end of the splitter (the
- * aside right of it, the dock under it), so moving the splitter towards
+ * aside right of it, the dock under it), so moving the splitter toward
  * the start makes it bigger: Left for a vertical splitter, Up for a
  * horizontal one. Home makes it as small as it may be, End as big.
  */
-export function splitterKey(key: string, orientation: "vertical" | "horizontal", value: number, size: PaneSize): number | null {
-  const [grow, shrink] = orientation === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
+export function splitterKey(
+  key: string,
+  orientation: "vertical" | "horizontal",
+  value: number,
+  size: PaneSize,
+): number | null {
+  const [grow, shrink] =
+    orientation === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
   switch (key) {
     case grow:
       return clampSize(value + SPLITTER_STEP, size);
@@ -50,7 +60,7 @@ export function splitterKey(key: string, orientation: "vertical" | "horizontal",
 
 /**
  * The size a drag gives the pane: what it was when the drag began
- * (`from`), and as far bigger as the pointer moved towards the start
+ * (`from`), and as far bigger as the pointer moved toward the start
  * since (`start`, then `at`, along the splitter's axis).
  */
 export function draggedSize(from: number, start: number, at: number, size: PaneSize): number {

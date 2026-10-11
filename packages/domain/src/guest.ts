@@ -1,9 +1,18 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Answer } from "./answer";
 import type { Deck } from "./deck";
 import type { DeckGroup, DeckTree, GraftNode, TreeNode } from "./deckTree";
 import type { StepPart } from "./deckUpgrade";
 import type { Instance } from "./instance";
-import { cardsContainerOf, catalogUrlOf, ensureTrailingSlash, reviewsContainerOf } from "./instanceLayout";
+import {
+  cardsContainerOf,
+  catalogUrlOf,
+  ensureTrailingSlash,
+  reviewsContainerOf,
+} from "./instanceLayout";
 import type { ReleaseDraftSummary } from "./release/draftLayout";
 import type { Session } from "./session";
 import { fragmentIdOf } from "./subjectUrl";
@@ -39,7 +48,15 @@ export function isGuestUrl(url: string): boolean {
  * deleted from the device. A failure before the registration deletes the
  * copy and leaves the guest's study as it was.
  */
-export const GUEST_TRANSFER_STEPS = ["stage", "copy", "adopt", "validate", "verify", "register", "tidy"] as const;
+export const GUEST_TRANSFER_STEPS = [
+  "stage",
+  "copy",
+  "adopt",
+  "validate",
+  "verify",
+  "register",
+  "tidy",
+] as const;
 
 export type GuestTransferStep = (typeof GUEST_TRANSFER_STEPS)[number];
 
@@ -60,7 +77,13 @@ export type GuestTransferOutcome =
    * was. `cleanedUp` says whether the partial copy was deleted; when it
    * was not, `leftoverUrl` is where it remains.
    */
-  | { ok: false; step: GuestTransferStep; error: unknown; cleanedUp: boolean; leftoverUrl?: string };
+  | {
+      ok: false;
+      step: GuestTransferStep;
+      error: unknown;
+      cleanedUp: boolean;
+      leftoverUrl?: string;
+    };
 
 /**
  * Where to suggest keeping a guest's study in a storage, as a new
@@ -112,7 +135,14 @@ export type GuestMergeOutcome =
    * "arrange"; the drafts in `copied` are in `instance`, each whole;
    * nothing else was written. The guest's study is as it was.
    */
-  | { ok: false; instance: Instance; step: GuestMergeStep; error: unknown; added: Deck[]; copied: ReleaseDraftSummary[] };
+  | {
+      ok: false;
+      instance: Instance;
+      step: GuestMergeStep;
+      error: unknown;
+      added: Deck[];
+      copied: ReleaseDraftSummary[];
+    };
 
 /**
  * What adding a guest's study to an instance would add: each of the
@@ -128,12 +158,18 @@ export interface GuestMergePlan {
 }
 
 /** The guest's decks, each with the target's decks copied from the same library release, and the guest's drafts, counted. */
-export function guestMergePlan(guestDecks: readonly Deck[], targetDecks: readonly Deck[], drafts: number): GuestMergePlan {
+export function guestMergePlan(
+  guestDecks: readonly Deck[],
+  targetDecks: readonly Deck[],
+  drafts: number,
+): GuestMergePlan {
   return {
     decks: guestDecks.map((deck) => ({
       deck,
       sameRelease:
-        deck.sourceUrl === undefined ? [] : targetDecks.filter((target) => target.sourceUrl === deck.sourceUrl),
+        deck.sourceUrl === undefined
+          ? []
+          : targetDecks.filter((target) => target.sourceUrl === deck.sourceUrl),
     })),
     drafts,
   };
@@ -146,7 +182,12 @@ export function guestMergePlan(guestDecks: readonly Deck[], targetDecks: readonl
  * provenance, direction, pace, chapters completed, when it was made) as
  * the guest's deck says it. Written in this app's format.
  */
-export function mergedDeck(guest: Deck, instanceUrl: string, id: string, formatVersion: number): Deck {
+export function mergedDeck(
+  guest: Deck,
+  instanceUrl: string,
+  id: string,
+  formatVersion: number,
+): Deck {
   const base = ensureTrailingSlash(instanceUrl);
   return {
     ...guest,
@@ -174,7 +215,9 @@ export function mergedAnswer(answer: Answer, to: Deck): Answer {
     id: `${answer.id}-${to.id}`,
     deckUrl: to.url,
     cardUrl: inCards(answer.cardUrl),
-    ...(answer.chosenDistractor === undefined ? {} : { chosenDistractor: inCards(answer.chosenDistractor) }),
+    ...(answer.chosenDistractor === undefined
+      ? {}
+      : { chosenDistractor: inCards(answer.chosenDistractor) }),
   };
 }
 
@@ -194,7 +237,13 @@ export function graftOfGuestTree(
   const graftOf = (nodes: readonly TreeNode[]): GraftNode[] =>
     nodes.flatMap((node): GraftNode[] => {
       if (node.kind === "group") {
-        return [{ kind: "group", group: { url: groupUrl(node.group), title: node.group.title }, children: graftOf(node.children) }];
+        return [
+          {
+            kind: "group",
+            group: { url: groupUrl(node.group), title: node.group.title },
+            children: graftOf(node.children),
+          },
+        ];
       }
       const deck = added.get(node.deck.url);
       return deck === undefined ? [] : [{ kind: "deck", url: deck.url }];
@@ -235,7 +284,11 @@ export interface GuestMergeNote {
  */
 export function guestDeckStamp(deck: Deck, versionOf: (url: string) => string): string {
   return JSON.stringify({
-    entry: { ...deck, completedChapters: deck.completedChapters === undefined ? undefined : [...deck.completedChapters].sort() },
+    entry: {
+      ...deck,
+      completedChapters:
+        deck.completedChapters === undefined ? undefined : [...deck.completedChapters].sort(),
+    },
     cards: versionOf(deck.cardsDocumentUrl),
     reviews: versionOf(deck.reviewsDocumentUrl),
   });
@@ -260,5 +313,7 @@ export function decodeGuestMergeNote(text: string | null): GuestMergeNote | null
     return null;
   }
   const note = value as Partial<GuestMergeNote> | null;
-  return typeof note?.url === "string" && typeof note.stamp === "string" ? { url: note.url, stamp: note.stamp } : null;
+  return typeof note?.url === "string" && typeof note.stamp === "string"
+    ? { url: note.url, stamp: note.stamp }
+    : null;
 }

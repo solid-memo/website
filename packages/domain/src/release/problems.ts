@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { LangText } from "../langText.ts";
 import type { ReleaseKind, ReleaseTerm } from "./releaseModel.ts";
 
@@ -46,7 +50,9 @@ export type MetadataProblem =
   | { code: "notOneDeck"; params: { decks: string[] } }
   | { code: "versionMismatch"; params: { stated: ReleaseTerm[]; expected: number } }
   /** A link (series, publisher, previous version) other than expected; `expected` empty for none. */
-  | { code: "linkMismatch"; params: { stated: ReleaseTerm[]; expected: string[] } };
+  | { code: "linkMismatch"; params: { stated: ReleaseTerm[]; expected: string[] } }
+  /** No dcterms:license: a library release says which license it is published under. */
+  | { code: "noLicense"; params: Record<string, never> };
 
 /** A release against the version before it (continuityRules). */
 export type ContinuityProblem =
@@ -55,9 +61,15 @@ export type ContinuityProblem =
   /** Chapters, steps and distractors the previous release has and this one does not. */
   | { code: "outlineDropped"; params: { ids: string[]; previous: string } }
   /** An id the previous release gave one kind of subject, now another's. */
-  | { code: "idReused"; params: { id: string; was: ReleaseKind; now: ReleaseKind; previous: string } }
+  | {
+      code: "idReused";
+      params: { id: string; was: ReleaseKind; now: ReleaseKind; previous: string };
+    }
   /** A version that is not the previous one's plus one. */
-  | { code: "versionNotNext"; params: { version: number; previousVersion: number; previous: string } };
+  | {
+      code: "versionNotNext";
+      params: { version: number; previousVersion: number; previous: string };
+    };
 
 /** A course's outline and options (courseRules). */
 export type CourseProblem =
@@ -117,7 +129,7 @@ export type CurationProblem =
   /** A making's comment that states a count the release does not have. */
   | { code: "countDisagrees"; params: { what: CountedThing; stated: number; counted: number } };
 
-/** What a source states of itself: its title, its creator, and its licence or the evidence for one. */
+/** What a source states of itself: its title, its creator, and its license or the evidence for one. */
 export type SourceDetail = "title" | "creator" | "licence";
 
 /** What a making's comments count: chapters, steps, sources and cards in use. */
@@ -138,7 +150,16 @@ export type ShapeProblem =
    * gives (or the validator's own English, `builtIn`), the constraint it
    * is of, and the value it is about.
    */
-  | { code: "shape"; params: { message: LangText; constraint: string; builtIn?: true; value?: string; profile?: string } }
+  | {
+      code: "shape";
+      params: {
+        message: LangText;
+        constraint: string;
+        builtIn?: true;
+        value?: string;
+        profile?: string;
+      };
+    }
   /** A subject typed with a Solid Memo term no shape of this app describes, or in a format it does not know. */
   | { code: "unshaped"; params: Record<string, never> };
 

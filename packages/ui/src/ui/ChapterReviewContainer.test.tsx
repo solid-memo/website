@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,7 +15,12 @@ import { CH1, CH2, courseInstance, makeCourse, noShuffle } from "../test/course"
 
 const course = makeCourse(["q-1", "q-2", "q-3"]);
 
-function renderReview(useCases: UseCases, chapterIndex = 0, reviewed = course, links: CourseLinks = APP_COURSE_LINKS) {
+function renderReview(
+  useCases: UseCases,
+  chapterIndex = 0,
+  reviewed = course,
+  links: CourseLinks = APP_COURSE_LINKS,
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   const onCompleted = vi.fn();
@@ -45,15 +54,23 @@ async function answer(option: string) {
 }
 
 const rightAnswers = (useCases: UseCases) =>
-  vi.mocked(useCases.answerCourseQuestion).mockImplementation(async () => ({ effect: "review", state: null }));
+  vi
+    .mocked(useCases.answerCourseQuestion)
+    .mockImplementation(async () => ({ effect: "review", state: null }));
 
 describe("ChapterReviewContainer", () => {
   it("opens on a word before the review, with the way on to it and back to the chapters", () => {
     const useCases = makeUseCasesFake();
     renderReview(useCases);
-    expect(screen.getByRole("heading", { level: 2, name: "Final review: Linked data" })).toBeInTheDocument();
-    expect(screen.getByText("Well done: you have worked through every step of this chapter!")).toBeInTheDocument();
-    expect(screen.getByText(/^Now the final review: every question of the chapter once more, shuffled/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Final review: Linked data" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Well done: you have worked through every step of this chapter!"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/^Now the final review: every question of the chapter once more, shuffled/),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back to the chapters" })).toHaveAttribute(
       "href",
       courseHref(courseInstance.url, course.deck.url),
@@ -103,8 +120,14 @@ describe("ChapterReviewContainer", () => {
   });
 
   it("links back to the course's page where the course links say", () => {
-    renderReview(makeUseCasesFake(), 0, course, { ...APP_COURSE_LINKS, courseHref: (_instance, deckUrl) => `#/trial/${deckUrl}` });
-    expect(screen.getByRole("link", { name: "Back to the chapters" })).toHaveAttribute("href", `#/trial/${course.deck.url}`);
+    renderReview(makeUseCasesFake(), 0, course, {
+      ...APP_COURSE_LINKS,
+      courseHref: (_instance, deckUrl) => `#/trial/${deckUrl}`,
+    });
+    expect(screen.getByRole("link", { name: "Back to the chapters" })).toHaveAttribute(
+      "href",
+      `#/trial/${course.deck.url}`,
+    );
   });
 
   it("leaves a learner who goes elsewhere while the chapter is completed where they went", async () => {
@@ -123,7 +146,9 @@ describe("ChapterReviewContainer", () => {
     });
     complete({ ...course.deck, completedChapters: [CH2] });
     // The course is still read afresh, but nothing takes the learner anywhere.
-    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks", courseInstance.url] }));
+    await waitFor(() =>
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks", courseInstance.url] }),
+    );
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", course.deck.url] });
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(onCompleted).not.toHaveBeenCalled();
@@ -132,14 +157,22 @@ describe("ChapterReviewContainer", () => {
   it("says the course is finished by its last chapter left, and not by one retaken", async () => {
     const useCases = makeUseCasesFake();
     rightAnswers(useCases);
-    const { onCompleted } = renderReview(useCases, 1, makeCourse(["q-1", "q-2", "q-3", "r-1"], [CH1]));
+    const { onCompleted } = renderReview(
+      useCases,
+      1,
+      makeCourse(["q-1", "q-2", "q-3", "r-1"], [CH1]),
+    );
     start();
     await answer("A store");
     await waitFor(() => expect(onCompleted).toHaveBeenCalledWith(true));
     expect(useCases.completeChapter).toHaveBeenCalledWith(expect.anything(), CH2);
     cleanup();
 
-    const retaken = renderReview(useCases, 1, makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2]));
+    const retaken = renderReview(
+      useCases,
+      1,
+      makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2]),
+    );
     start();
     await answer("A store");
     await waitFor(() => expect(retaken.onCompleted).toHaveBeenCalledWith(false));

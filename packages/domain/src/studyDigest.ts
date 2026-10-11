@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
 import type { StudyPreferences } from "./preferences";
 import { reviewKeyOf, type ReviewState } from "./review";
@@ -42,7 +46,9 @@ export function scheduleOf(input: {
   const dueByDay: Record<string, number> = {};
   let unreviewed = 0;
   for (const prompt of promptsOf(activeCards(cards), direction)) {
-    const review = reviewOf.get(reviewKeyOf({ cardId: prompt.card.id, direction: prompt.direction }));
+    const review = reviewOf.get(
+      reviewKeyOf({ cardId: prompt.card.id, direction: prompt.direction }),
+    );
     if (review === undefined) unreviewed++;
     else dueByDay[review.due] = (dueByDay[review.due] ?? 0) + 1;
   }
@@ -68,7 +74,8 @@ export function studyCountsOf(
   input: { direction: DeckDirection; prefs: StudyPreferences; now: Date },
 ): { dueCount: number; newCount: number } | null {
   const { direction, prefs, now } = input;
-  if (schedule.direction !== direction || schedule.dayBoundaryHour !== prefs.dayBoundaryHour) return null;
+  if (schedule.direction !== direction || schedule.dayBoundaryHour !== prefs.dayBoundaryHour)
+    return null;
   const today = studyDayOf(now, prefs.dayBoundaryHour);
   if (schedule.studyDay > today) return null;
   // Any review since the schedule was computed changed the reviews document, so on a later day none was made yet.

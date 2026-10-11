@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { ExternalLink } from "./ExternalLink";
 
 /** A URL in running text, minus any punctuation that closes the sentence. */
@@ -10,7 +14,5 @@ const URL_IN_TEXT = /(https?:\/\/[^\s]*[^\s.,;:!?)])/;
 export function linkify(text: string) {
   return text
     .split(URL_IN_TEXT)
-    .map((part, i) =>
-      i % 2 === 1 ? <ExternalLink key={i} url={part} /> : part,
-    );
+    .map((part, i) => (i % 2 === 1 ? <ExternalLink key={i} url={part} /> : part));
 }

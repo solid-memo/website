@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { AppError } from "./appError";
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
@@ -29,7 +33,9 @@ describe("validateCardContent", () => {
 
   it("keeps the card's text format", () => {
     const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
-    expect(validateCardContent({ front: { en: "**a**" }, back: { en: "b" }, textFormat: MARKDOWN })).toEqual({
+    expect(
+      validateCardContent({ front: { en: "**a**" }, back: { en: "b" }, textFormat: MARKDOWN }),
+    ).toEqual({
       ok: true,
       content: { front: { en: "**a**" }, back: { en: "b" }, textFormat: MARKDOWN },
     });
@@ -40,40 +46,89 @@ describe("validateCardContent", () => {
     const PLAIN = "https://solid-memo.com/ns/vocab/v1.ttl#plainText";
     const saved = { front: { "": "    code\n" }, back: { en: "b" }, textFormat: MARKDOWN };
     // The editor states no text format: the saved card's is kept, and with it the code block.
-    expect(validateCardContent({ front: { "": "\n  \n    code  \n" }, back: { en: "the b" } }, saved)).toEqual({
+    expect(
+      validateCardContent({ front: { "": "\n  \n    code  \n" }, back: { en: "the b" } }, saved),
+    ).toEqual({
       ok: true,
       content: { front: { "": "    code" }, back: { en: "the b" } },
     });
     expect(
-      validateCardContent({ front: { en: "    code" }, back: { en: " b" }, backNote: { en: "\n    note" }, textFormat: MARKDOWN }),
+      validateCardContent({
+        front: { en: "    code" },
+        back: { en: " b" },
+        backNote: { en: "\n    note" },
+        textFormat: MARKDOWN,
+      }),
     ).toEqual({
       ok: true,
-      content: { front: { en: "    code" }, back: { en: " b" }, backNote: { en: "    note" }, textFormat: MARKDOWN },
+      content: {
+        front: { en: "    code" },
+        back: { en: " b" },
+        backNote: { en: "    note" },
+        textFormat: MARKDOWN,
+      },
     });
     // Plain text, stated or not, is trimmed as ever.
-    expect(validateCardContent({ front: { en: "    code" }, back: { en: "b" }, textFormat: PLAIN })).toEqual({
+    expect(
+      validateCardContent({ front: { en: "    code" }, back: { en: "b" }, textFormat: PLAIN }),
+    ).toEqual({
       ok: true,
       content: { front: { en: "code" }, back: { en: "b" }, textFormat: PLAIN },
     });
   });
 
   it("keeps a note under the answer, trimmed, and drops an empty one", () => {
-    expect(validateCardContent({ front: { sv: "Aktiemäklare" }, back: { sv: "Finansmäklare" }, backNote: { en: " Replaced in version 30. " } })).toEqual({
+    expect(
+      validateCardContent({
+        front: { sv: "Aktiemäklare" },
+        back: { sv: "Finansmäklare" },
+        backNote: { en: " Replaced in version 30. " },
+      }),
+    ).toEqual({
       ok: true,
-      content: { front: { sv: "Aktiemäklare" }, back: { sv: "Finansmäklare" }, backNote: { en: "Replaced in version 30." } },
+      content: {
+        front: { sv: "Aktiemäklare" },
+        back: { sv: "Finansmäklare" },
+        backNote: { en: "Replaced in version 30." },
+      },
     });
-    expect(validateCardContent({ front: { en: "a" }, back: { en: "b" }, backNote: { en: "  " } })).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" } } });
+    expect(
+      validateCardContent({ front: { en: "a" }, back: { en: "b" }, backNote: { en: "  " } }),
+    ).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" } } });
   });
 
   it("keeps a note's every language, trimmed, English or not", () => {
     expect(
-      validateCardContent({ front: { en: "a" }, back: { en: "b" }, backNote: { en: " Replaced. ", sv: " Ersatt. ", de: " " } }),
-    ).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" }, backNote: { en: "Replaced.", sv: "Ersatt." } } });
-    expect(validateCardContent({ front: { en: "a" }, back: { en: "b" }, frontNote: { en: "", sv: "Används inte längre" } })).toEqual({
+      validateCardContent({
+        front: { en: "a" },
+        back: { en: "b" },
+        backNote: { en: " Replaced. ", sv: " Ersatt. ", de: " " },
+      }),
+    ).toEqual({
+      ok: true,
+      content: {
+        front: { en: "a" },
+        back: { en: "b" },
+        backNote: { en: "Replaced.", sv: "Ersatt." },
+      },
+    });
+    expect(
+      validateCardContent({
+        front: { en: "a" },
+        back: { en: "b" },
+        frontNote: { en: "", sv: "Används inte längre" },
+      }),
+    ).toEqual({
       ok: true,
       content: { front: { en: "a" }, back: { en: "b" }, frontNote: { sv: "Används inte längre" } },
     });
-    expect(validateCardContent({ front: { en: "a" }, back: { en: "b" }, backLabel: { fi: "Pääkaupunki" } })).toEqual({
+    expect(
+      validateCardContent({
+        front: { en: "a" },
+        back: { en: "b" },
+        backLabel: { fi: "Pääkaupunki" },
+      }),
+    ).toEqual({
       ok: true,
       content: { front: { en: "a" }, back: { en: "b" }, backLabel: { fi: "Pääkaupunki" } },
     });
@@ -81,18 +136,37 @@ describe("validateCardContent", () => {
 
   it("asks the language of a note, the label or a picture's description, never keeping untagged text", () => {
     const card = { front: { en: "a" }, back: { en: "b" } };
-    expect(validateCardContent({ ...card, frontNote: { "": "Out of use" } }, { ...card, frontNote: { "": "Out of use" } })).toEqual({
+    expect(
+      validateCardContent(
+        { ...card, frontNote: { "": "Out of use" } },
+        { ...card, frontNote: { "": "Out of use" } },
+      ),
+    ).toEqual({
       ok: false,
       error: new AppError("textNeedsLanguage", { field: "the note under the front" }),
       part: "frontNote",
     });
-    expect(validateCardContent({ ...card, backLabel: { "": "Capital" } })).toMatchObject({ ok: false, part: "backLabel" });
-    expect(validateCardContent({ ...card, backNote: { "": "Since 1634" } })).toMatchObject({ ok: false, part: "backNote" });
-    expect(validateCardContent({ ...card, frontImageUrl: FLAG, frontImageDescription: { "": "A flag" } })).toMatchObject({
+    expect(validateCardContent({ ...card, backLabel: { "": "Capital" } })).toMatchObject({
+      ok: false,
+      part: "backLabel",
+    });
+    expect(validateCardContent({ ...card, backNote: { "": "Since 1634" } })).toMatchObject({
+      ok: false,
+      part: "backNote",
+    });
+    expect(
+      validateCardContent({
+        ...card,
+        frontImageUrl: FLAG,
+        frontImageDescription: { "": "A flag" },
+      }),
+    ).toMatchObject({
       ok: false,
       part: "frontImageDescription",
     });
-    expect(validateCardContent({ ...card, backImageUrl: FLAG, backImageDescription: { "": "A map" } })).toEqual({
+    expect(
+      validateCardContent({ ...card, backImageUrl: FLAG, backImageDescription: { "": "A map" } }),
+    ).toEqual({
       ok: false,
       error: new AppError("textNeedsLanguage", { field: "the back picture's description" }),
       part: "backImageDescription",
@@ -102,12 +176,20 @@ describe("validateCardContent", () => {
   it("keeps a side's untagged text only as the card saved it", () => {
     const saved = { front: { "": "水" }, back: { "": "water" } };
     // Untouched: kept as it is, whatever else changes.
-    expect(validateCardContent({ ...saved, front: { "": " 水 " }, backNote: { en: "An element." } }, saved)).toEqual({
+    expect(
+      validateCardContent(
+        { ...saved, front: { "": " 水 " }, backNote: { en: "An element." } },
+        saved,
+      ),
+    ).toEqual({
       ok: true,
       content: { ...saved, backNote: { en: "An element." } },
     });
     // Its language stated: tagged from now on.
-    expect(validateCardContent({ ...saved, front: { ja: "水" } }, saved)).toEqual({ ok: true, content: { ...saved, front: { ja: "水" } } });
+    expect(validateCardContent({ ...saved, front: { ja: "水" } }, saved)).toEqual({
+      ok: true,
+      content: { ...saved, front: { ja: "水" } },
+    });
     // Edited, or new: its language is asked.
     expect(validateCardContent({ ...saved, front: { "": "火" } }, saved)).toEqual({
       ok: false,
@@ -119,7 +201,12 @@ describe("validateCardContent", () => {
       error: new AppError("textNeedsLanguage", { field: "the back" }),
       part: "back",
     });
-    expect(validateCardContent({ front: { ja: "水" }, back: { "": "water" } }, { front: { ja: "水" }, back: {} })).toMatchObject({
+    expect(
+      validateCardContent(
+        { front: { ja: "水" }, back: { "": "water" } },
+        { front: { ja: "水" }, back: {} },
+      ),
+    ).toMatchObject({
       ok: false,
       part: "back",
     });
@@ -140,29 +227,75 @@ describe("validateCardContent", () => {
         frontImageDescription: { sv: " En flagga med ett gult kors " },
         backImageDescription: { en: "Nothing to describe" },
       }),
-    ).toEqual({ ok: true, content: { front: {}, back: { en: "Sweden" }, frontImageUrl: FLAG, frontImageDescription: { sv: "En flagga med ett gult kors" } } });
+    ).toEqual({
+      ok: true,
+      content: {
+        front: {},
+        back: { en: "Sweden" },
+        frontImageUrl: FLAG,
+        frontImageDescription: { sv: "En flagga med ett gult kors" },
+      },
+    });
     expect(
-      validateCardContent({ front: { en: "a" }, back: { en: "b" }, backImageUrl: FLAG, backImageDescription: { en: " " } }),
+      validateCardContent({
+        front: { en: "a" },
+        back: { en: "b" },
+        backImageUrl: FLAG,
+        backImageDescription: { en: " " },
+      }),
     ).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" }, backImageUrl: FLAG } });
     expect(
-      validateCardContent({ front: { en: "a" }, back: {}, backImageUrl: FLAG, backImageDescription: { en: "A flag" } }),
-    ).toEqual({ ok: true, content: { front: { en: "a" }, back: {}, backImageUrl: FLAG, backImageDescription: { en: "A flag" } } });
+      validateCardContent({
+        front: { en: "a" },
+        back: {},
+        backImageUrl: FLAG,
+        backImageDescription: { en: "A flag" },
+      }),
+    ).toEqual({
+      ok: true,
+      content: {
+        front: { en: "a" },
+        back: {},
+        backImageUrl: FLAG,
+        backImageDescription: { en: "A flag" },
+      },
+    });
   });
 
   it("keeps a note under the front, trimmed, and drops an empty one", () => {
-    expect(validateCardContent({ front: { sv: "Aktiemäklare" }, back: { sv: "Finansmäklare" }, frontNote: { en: " Out of use " } })).toEqual({
+    expect(
+      validateCardContent({
+        front: { sv: "Aktiemäklare" },
+        back: { sv: "Finansmäklare" },
+        frontNote: { en: " Out of use " },
+      }),
+    ).toEqual({
       ok: true,
-      content: { front: { sv: "Aktiemäklare" }, back: { sv: "Finansmäklare" }, frontNote: { en: "Out of use" } },
+      content: {
+        front: { sv: "Aktiemäklare" },
+        back: { sv: "Finansmäklare" },
+        frontNote: { en: "Out of use" },
+      },
     });
-    expect(validateCardContent({ front: { en: "a" }, back: { en: "b" }, frontNote: { en: " " } })).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" } } });
+    expect(
+      validateCardContent({ front: { en: "a" }, back: { en: "b" }, frontNote: { en: " " } }),
+    ).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" } } });
   });
 
   it("keeps a label above the back, trimmed, and drops an empty one", () => {
-    expect(validateCardContent({ front: { en: "Sweden" }, back: { en: "Stockholm" }, backLabel: { en: " Capital " } })).toEqual({
+    expect(
+      validateCardContent({
+        front: { en: "Sweden" },
+        back: { en: "Stockholm" },
+        backLabel: { en: " Capital " },
+      }),
+    ).toEqual({
       ok: true,
       content: { front: { en: "Sweden" }, back: { en: "Stockholm" }, backLabel: { en: "Capital" } },
     });
-    expect(validateCardContent({ front: { en: "a" }, back: { en: "b" }, backLabel: { en: "" } })).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" } } });
+    expect(
+      validateCardContent({ front: { en: "a" }, back: { en: "b" }, backLabel: { en: "" } }),
+    ).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" } } });
   });
 
   it("accepts a picture-only side, trimming the URL", () => {
@@ -202,9 +335,10 @@ describe("validateCardContent", () => {
       ok: false,
       error: new AppError("cardFrontEmpty"),
     });
-    expect(
-      validateCardContent({ front: {}, back: {}, frontImageUrl: FLAG }),
-    ).toEqual({ ok: false, error: new AppError("cardBackEmpty") });
+    expect(validateCardContent({ front: {}, back: {}, frontImageUrl: FLAG })).toEqual({
+      ok: false,
+      error: new AppError("cardBackEmpty"),
+    });
   });
 
   it("rejects images that are not http(s) URLs", () => {
@@ -237,17 +371,34 @@ describe("validateCardContent", () => {
       }),
     ).toEqual({
       ok: true,
-      content: { ...card, distractors: [{ id: "c-d1", text: { en: "one" } }, { id: "c-d2", text: { en: "two" }, note: { sv: "Fel." }, retired: true }] },
+      content: {
+        ...card,
+        distractors: [
+          { id: "c-d1", text: { en: "one" } },
+          { id: "c-d2", text: { en: "two" }, note: { sv: "Fel." }, retired: true },
+        ],
+      },
     });
-    expect(validateCardContent({ ...card, textFormat: MARKDOWN, distractors: [{ id: "c-d1", text: { en: "    code" } }] })).toMatchObject({
+    expect(
+      validateCardContent({
+        ...card,
+        textFormat: MARKDOWN,
+        distractors: [{ id: "c-d1", text: { en: "    code" } }],
+      }),
+    ).toMatchObject({
       ok: true,
       content: { distractors: [{ id: "c-d1", text: { en: "    code" } }] },
     });
-    expect(validateCardContent({ ...card, distractors: [{ id: "c-d1", text: { en: " " } }] })).toEqual({
+    expect(
+      validateCardContent({ ...card, distractors: [{ id: "c-d1", text: { en: " " } }] }),
+    ).toEqual({
       ok: false,
       error: new AppError("distractorEmpty"),
     });
-    expect(validateCardContent({ ...card, distractors: [] })).toEqual({ ok: true, content: { ...card, distractors: [] } });
+    expect(validateCardContent({ ...card, distractors: [] })).toEqual({
+      ok: true,
+      content: { ...card, distractors: [] },
+    });
   });
 });
 
@@ -263,7 +414,7 @@ describe("deck directions", () => {
   };
   const norway: Card = { ...sweden, id: "norway", front: { "": "Norway" }, back: { "": "Oslo" } };
 
-  it("recognises the three directions and nothing else", () => {
+  it("recognizes the three directions and nothing else", () => {
     expect(isDeckDirection("front-to-back")).toBe(true);
     expect(isDeckDirection("back-to-front")).toBe(true);
     expect(isDeckDirection("bidirectional")).toBe(true);
@@ -273,10 +424,7 @@ describe("deck directions", () => {
   it("studies a one-way deck one way and a bidirectional deck both ways", () => {
     expect(studyDirections("front-to-back")).toEqual(["front-to-back"]);
     expect(studyDirections("back-to-front")).toEqual(["back-to-front"]);
-    expect(studyDirections("bidirectional")).toEqual([
-      "front-to-back",
-      "back-to-front",
-    ]);
+    expect(studyDirections("bidirectional")).toEqual(["front-to-back", "back-to-front"]);
   });
 
   it("makes the deck's prompts card by card", () => {
@@ -301,23 +449,58 @@ describe("deck directions", () => {
       question: { side: "back", text: { "": "Stockholm" }, imageUrl: FLAG },
       answer: { side: "front", text: { "": "Sweden" } },
     });
-    const noted = { ...sweden, frontNote: { en: "A kingdom." }, backNote: { en: "The capital since 1634." } };
+    const noted = {
+      ...sweden,
+      frontNote: { en: "A kingdom." },
+      backNote: { en: "The capital since 1634." },
+    };
     expect(promptSides({ card: noted, direction: "front-to-back" })).toEqual({
       question: { side: "front", text: { "": "Sweden" }, note: { en: "A kingdom." } },
-      answer: { side: "back", text: { "": "Stockholm" }, imageUrl: FLAG, note: { en: "The capital since 1634." } },
+      answer: {
+        side: "back",
+        text: { "": "Stockholm" },
+        imageUrl: FLAG,
+        note: { en: "The capital since 1634." },
+      },
     });
     expect(promptSides({ card: noted, direction: "back-to-front" })).toEqual({
-      question: { side: "back", text: { "": "Stockholm" }, imageUrl: FLAG, note: { en: "The capital since 1634." } },
+      question: {
+        side: "back",
+        text: { "": "Stockholm" },
+        imageUrl: FLAG,
+        note: { en: "The capital since 1634." },
+      },
       answer: { side: "front", text: { "": "Sweden" }, note: { en: "A kingdom." } },
     });
-    const described = { ...sweden, frontImageUrl: FLAG, frontImageDescription: { en: "A blue flag" }, backImageDescription: { en: "The same flag" } };
+    const described = {
+      ...sweden,
+      frontImageUrl: FLAG,
+      frontImageDescription: { en: "A blue flag" },
+      backImageDescription: { en: "The same flag" },
+    };
     expect(promptSides({ card: described, direction: "front-to-back" })).toEqual({
-      question: { side: "front", text: { "": "Sweden" }, imageUrl: FLAG, imageDescription: { en: "A blue flag" } },
-      answer: { side: "back", text: { "": "Stockholm" }, imageUrl: FLAG, imageDescription: { en: "The same flag" } },
+      question: {
+        side: "front",
+        text: { "": "Sweden" },
+        imageUrl: FLAG,
+        imageDescription: { en: "A blue flag" },
+      },
+      answer: {
+        side: "back",
+        text: { "": "Stockholm" },
+        imageUrl: FLAG,
+        imageDescription: { en: "The same flag" },
+      },
     });
-    const labelled = { ...sweden, backLabel: { en: "Capital" } };
-    expect(promptSides({ card: labelled, direction: "front-to-back" }).answer).toMatchObject({ side: "back", label: { en: "Capital" } });
-    expect(promptSides({ card: labelled, direction: "back-to-front" }).question).toMatchObject({ side: "back", label: { en: "Capital" } });
+    const labeled = { ...sweden, backLabel: { en: "Capital" } };
+    expect(promptSides({ card: labeled, direction: "front-to-back" }).answer).toMatchObject({
+      side: "back",
+      label: { en: "Capital" },
+    });
+    expect(promptSides({ card: labeled, direction: "back-to-front" }).question).toMatchObject({
+      side: "back",
+      label: { en: "Capital" },
+    });
     const flagOnly = { ...sweden, frontImageUrl: FLAG, backImageUrl: undefined };
     expect(promptSides({ card: flagOnly, direction: "front-to-back" })).toEqual({
       question: { side: "front", text: { "": "Sweden" }, imageUrl: FLAG },
@@ -325,7 +508,12 @@ describe("deck directions", () => {
     });
     const marked = { ...sweden, textFormat: SM.markdown };
     expect(promptSides({ card: marked, direction: "back-to-front" })).toEqual({
-      question: { side: "back", text: { "": "Stockholm" }, imageUrl: FLAG, textFormat: SM.markdown },
+      question: {
+        side: "back",
+        text: { "": "Stockholm" },
+        imageUrl: FLAG,
+        textFormat: SM.markdown,
+      },
       answer: { side: "front", text: { "": "Sweden" }, textFormat: SM.markdown },
     });
   });
@@ -363,8 +551,6 @@ describe("cardLabel", () => {
     expect(cardLabel({ ...card, back: { "": "Afghanistan" }, frontImageUrl: FLAG })).toBe(
       "Afghanistan",
     );
-    expect(cardLabel({ ...card, frontImageUrl: FLAG, backImageUrl: FLAG })).toBe(
-      "afghanistan",
-    );
+    expect(cardLabel({ ...card, frontImageUrl: FLAG, backImageUrl: FLAG })).toBe("afghanistan");
   });
 });

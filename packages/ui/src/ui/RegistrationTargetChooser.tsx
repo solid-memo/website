@@ -1,7 +1,8 @@
-import type {
-  RegistrationOptions,
-  RegistrationTarget,
-} from "@solid-memo/domain/instance";
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import type { RegistrationOptions, RegistrationTarget } from "@solid-memo/domain/instance";
 import { useId } from "preact/hooks";
 import { useI18n } from "./i18n";
 

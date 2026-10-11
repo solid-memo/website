@@ -1,0 +1,81 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# What Solid Memo is, for software catalogs, in the publiccode.yml
+# standard (https://yml.publiccode.tools/). Kept in step with README.md;
+# the version and its date are set when a version is tagged
+# (docs/releasing.md).
+publiccodeYmlVersion: "0"
+
+name: Solid Memo
+url: https://github.com/solid-memo/website
+landingURL: https://solid-memo.com/
+
+platforms:
+  - web
+
+categories:
+  - educational-content
+  - knowledge-management
+
+developmentStatus: beta
+softwareType: standalone/web
+
+description:
+  en:
+    shortDescription: Spaced-repetition flashcards that live in your own Solid pod.
+    longDescription: >
+      Solid Memo is a flashcard app that schedules each card with
+      spaced repetition (SM-2): it shows a card again just before you
+      would forget it. Your decks, cards and study history are not kept
+      on Solid Memo's servers but in your own Solid pod, an online data
+      store you choose and control. Any app that speaks the same open
+      vocabulary can read them, and you can move them to another pod
+      provider or stop using Solid Memo without losing anything.
+
+
+      Solid Memo comes with a library of ready-made decks, each with its
+      own open license and its sources, and with courses that mix short
+      lessons with multiple-choice questions. Solid Memo Studio, part of
+      the same app, lets authors manage decks and cards in bulk and
+      write, check, try and publish their own decks and courses.
+
+
+      The app is a static web page with no server-side code, so anyone
+      can run their own copy on any static web host. Its vocabulary and
+      SHACL shapes are published with it, every data format is
+      versioned, and older data is brought up to date in place.
+    features:
+      - Flashcards scheduled by spaced repetition (SM-2)
+      - Decks, cards and study history stored in the user's own Solid pod
+      - Sign-in with Solid-OIDC against any Solid identity provider
+      - A guest mode to try the app before connecting a pod
+      - A library of ready-made decks with open licenses and sources
+      - Courses with lessons and multiple-choice questions
+      - Cards with text, pictures and Markdown
+      - Study statistics and deck groups
+      - Decks saved to and opened from Turtle and JSON-LD files
+      - Solid Memo Studio for writing and publishing decks and courses
+      - Data checked against published SHACL shapes in the browser
+      - English, Swedish, Korean, German, Spanish and French
+    screenshots:
+      - apps/web/public/social-preview.png
+
+legal:
+  license: MIT
+
+maintenance:
+  type: community
+  contacts:
+    - name: Anton Wiklund
+
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
+    - sv
+    - ko
+    - de
+    - es
+    - fr

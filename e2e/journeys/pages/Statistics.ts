@@ -1,8 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
 
 /** A tile's key under statistics.* in the i18n files: what it counts. */
-export type StatisticsTile = "answers" | "studyDays" | "cards" | "currentStreak" | "longestStreak" | "young" | "mature";
+export type StatisticsTile =
+  | "answers"
+  | "studyDays"
+  | "cards"
+  | "currentStreak"
+  | "longestStreak"
+  | "young"
+  | "mature";
 
 /** How many prompts are new, young and mature: a bidirectional deck counts each card twice. */
 export interface Maturity {
@@ -40,7 +51,9 @@ export class Statistics extends Screen {
   }
 
   private get byDeck(): Locator {
-    return this.main.getByRole("table").filter({ has: this.page.getByRole("columnheader", { name: this.t("statistics.lastStudied") }) });
+    return this.main.getByRole("table").filter({
+      has: this.page.getByRole("columnheader", { name: this.t("statistics.lastStudied") }),
+    });
   }
 
   /** A headline tile, named by its label. */
@@ -52,8 +65,16 @@ export class Statistics extends Screen {
   async open(): Promise<void> {
     await this.intent("Open Statistics", async () => {
       await this.app.chrome.openStatistics();
-      await expect(this.page.getByRole("heading", { name: this.t("statistics.heading"), exact: true, level: 2 })).toBeVisible();
-      await expect(this.main.getByText(this.t("statistics.empty"), { exact: true }).or(this.tile("answers"))).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          name: this.t("statistics.heading"),
+          exact: true,
+          level: 2,
+        }),
+      ).toBeVisible();
+      await expect(
+        this.main.getByText(this.t("statistics.empty"), { exact: true }).or(this.tile("answers")),
+      ).toBeVisible();
     });
   }
 
@@ -72,14 +93,25 @@ export class Statistics extends Screen {
 
   async expectStatistics(expected: ExpectedStatistics): Promise<void> {
     await this.intent("Check the statistics", async () => {
-      const counts = { answers: expected.answers, studyDays: expected.studyDays, cards: expected.cards } as const;
+      const counts = {
+        answers: expected.answers,
+        studyDays: expected.studyDays,
+        cards: expected.cards,
+      } as const;
       for (const [key, count] of Object.entries(counts)) {
         if (count !== undefined) await this.expectValue(key as StatisticsTile, String(count));
       }
       if (expected.answers !== undefined) await this.expectIntroduced();
-      const streaks = { currentStreak: expected.currentStreak, longestStreak: expected.longestStreak } as const;
+      const streaks = {
+        currentStreak: expected.currentStreak,
+        longestStreak: expected.longestStreak,
+      } as const;
       for (const [key, days] of Object.entries(streaks)) {
-        if (days !== undefined) await this.expectValue(key as StatisticsTile, this.t("statistics.dayCount", { count: days }));
+        if (days !== undefined)
+          await this.expectValue(
+            key as StatisticsTile,
+            this.t("statistics.dayCount", { count: days }),
+          );
       }
       for (const key of ["young", "mature"] as const) {
         const recall = expected[key];
@@ -87,7 +119,8 @@ export class Statistics extends Screen {
       }
       if (expected.decks !== undefined) await this.expectByDeck(expected.decks);
       if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
-      if (expected.maturityByDeck !== undefined) await this.expectMaturityByDeck(expected.maturityByDeck);
+      if (expected.maturityByDeck !== undefined)
+        await this.expectMaturityByDeck(expected.maturityByDeck);
     });
   }
 
@@ -107,7 +140,9 @@ export class Statistics extends Screen {
 
   /** The chart of cards introduced over time, which comes with answers. */
   private async expectIntroduced(): Promise<void> {
-    await expect(this.main.getByRole("img", { name: this.t("statistics.introducedLabel"), exact: true })).toBeVisible();
+    await expect(
+      this.main.getByRole("img", { name: this.t("statistics.introducedLabel"), exact: true }),
+    ).toBeVisible();
   }
 
   /**
@@ -116,16 +151,28 @@ export class Statistics extends Screen {
    */
   private async expectMaturity(maturity: Maturity): Promise<void> {
     const bar = this.figure(this.t("statistics.maturity")).getByRole("img");
-    await expect(bar, this.t("statistics.maturity")).toHaveAccessibleName(this.maturityLabel(maturity));
-    await expect(this.main.getByRole("img", { name: this.t("statistics.forecastLabel", { count: 30 }), exact: true })).toBeVisible();
+    await expect(bar, this.t("statistics.maturity")).toHaveAccessibleName(
+      this.maturityLabel(maturity),
+    );
+    await expect(
+      this.main.getByRole("img", {
+        name: this.t("statistics.forecastLabel", { count: 30 }),
+        exact: true,
+      }),
+    ).toBeVisible();
   }
 
   private async expectMaturityByDeck(decks: ({ name: string } & Maturity)[]): Promise<void> {
     const list = this.main.getByRole("list").filter({ has: this.page.getByRole("figure") });
-    await expect(list.getByRole("listitem"), this.t("statistics.maturityByDeck")).toHaveCount(decks.length);
+    await expect(list.getByRole("listitem"), this.t("statistics.maturityByDeck")).toHaveCount(
+      decks.length,
+    );
     for (const deck of decks) {
       const bar = list.getByRole("figure", { name: deck.name, exact: true }).getByRole("img");
-      await expect(bar, `${this.t("statistics.maturityByDeck")}: ${deck.name}`).toHaveAccessibleName(this.maturityLabel(deck));
+      await expect(
+        bar,
+        `${this.t("statistics.maturityByDeck")}: ${deck.name}`,
+      ).toHaveAccessibleName(this.maturityLabel(deck));
     }
   }
 
@@ -133,24 +180,41 @@ export class Statistics extends Screen {
     await expect(this.tile(key).getByRole("strong"), this.t(`statistics.${key}`)).toHaveText(value);
   }
 
-  private async expectRecall(key: "young" | "mature", recall: { recalled: number; reviews: number } | null): Promise<void> {
+  private async expectRecall(
+    key: "young" | "mature",
+    recall: { recalled: number; reviews: number } | null,
+  ): Promise<void> {
     if (recall === null) {
       await this.expectValue(key, "–");
       await expect(this.tile(key)).toContainText(this.t("statistics.noReviews"));
       return;
     }
-    const percent = new Intl.NumberFormat(this.app.locale, { style: "percent" }).format(recall.recalled / recall.reviews);
+    const percent = new Intl.NumberFormat(this.app.locale, { style: "percent" }).format(
+      recall.recalled / recall.reviews,
+    );
     await this.expectValue(key, percent);
-    await expect(this.tile(key)).toContainText(this.t("statistics.ofReviews", { count: recall.reviews }));
+    await expect(this.tile(key)).toContainText(
+      this.t("statistics.ofReviews", { count: recall.reviews }),
+    );
   }
 
-  private async expectByDeck(decks: { name: string; answers: number; lastStudied?: "today" }[]): Promise<void> {
+  private async expectByDeck(
+    decks: { name: string; answers: number; lastStudied?: "today" }[],
+  ): Promise<void> {
     // Data rows only: the header row has column headers, not cells.
-    await expect(this.byDeck.getByRole("row").filter({ has: this.page.getByRole("cell") })).toHaveCount(decks.length);
+    await expect(
+      this.byDeck.getByRole("row").filter({ has: this.page.getByRole("cell") }),
+    ).toHaveCount(decks.length);
     const today = await this.today();
     for (const deck of decks) {
-      const row = this.byDeck.getByRole("row").filter({ has: this.page.getByRole("cell", { name: deck.name, exact: true }) });
-      const cells = [deck.name, String(deck.answers), ...(deck.lastStudied === "today" ? [today] : [/.+/])];
+      const row = this.byDeck
+        .getByRole("row")
+        .filter({ has: this.page.getByRole("cell", { name: deck.name, exact: true }) });
+      const cells = [
+        deck.name,
+        String(deck.answers),
+        ...(deck.lastStudied === "today" ? [today] : [/.+/]),
+      ];
       await expect(row.getByRole("cell"), `By deck: ${deck.name}`).toHaveText(cells);
     }
   }

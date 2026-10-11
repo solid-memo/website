@@ -1,13 +1,27 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
-import { isReleaseContainer, releaseFileName, releasePlaceOf, releasesContainerOf, releaseUrlIn } from "./releasePlace.ts";
+import {
+  isReleaseContainer,
+  releaseFileName,
+  releasePlaceOf,
+  releasesContainerOf,
+  releaseUrlIn,
+} from "./releasePlace.ts";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 
 describe("where a release is published", () => {
   it("is the instance's releases folder, by name and version, unless another is chosen", () => {
     expect(releasesContainerOf(INSTANCE.slice(0, -1))).toBe(`${INSTANCE}releases/`);
-    expect(releaseUrlIn(`${INSTANCE}releases/`, "capitals", 2)).toBe(`${INSTANCE}releases/capitals/v2.ttl`);
-    expect(releaseUrlIn("https://pod.example/public", "capitals", 1)).toBe("https://pod.example/public/capitals/v1.ttl");
+    expect(releaseUrlIn(`${INSTANCE}releases/`, "capitals", 2)).toBe(
+      `${INSTANCE}releases/capitals/v2.ttl`,
+    );
+    expect(releaseUrlIn("https://pod.example/public", "capitals", 1)).toBe(
+      "https://pod.example/public/capitals/v1.ttl",
+    );
   });
 
   it("is a folder's address: http(s), ending in a slash, with no query or fragment", () => {
@@ -23,7 +37,10 @@ describe("where a release is published", () => {
   });
 
   it("names a release by its address, or not at all", () => {
-    expect(releasePlaceOf(`${INSTANCE}releases/capitals/v12.ttl`)).toEqual({ name: "capitals", version: 12 });
+    expect(releasePlaceOf(`${INSTANCE}releases/capitals/v12.ttl`)).toEqual({
+      name: "capitals",
+      version: 12,
+    });
     expect(releasePlaceOf(`${INSTANCE}releases/Capitals/v1.ttl`)).toBeNull();
     expect(releasePlaceOf(`${INSTANCE}releases/capitals/v0.ttl`)).toBeNull();
     expect(releasePlaceOf(`${INSTANCE}capitals.ttl`)).toBeNull();

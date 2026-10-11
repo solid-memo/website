@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { DeckProvenance } from "./DeckProvenance";
@@ -6,7 +10,7 @@ import { I18nProvider } from "./i18n";
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 
 describe("DeckProvenance", () => {
-  it("names the authors and links the licence", () => {
+  it("names the authors and links the license", () => {
     const { container } = render(
       <DeckProvenance authors={["Anton Wiklund", "A friend"]} license={CC0} />,
     );
@@ -40,10 +44,8 @@ describe("DeckProvenance", () => {
     expect(container.textContent).toBe("Updated September 27, 2026");
   });
 
-  it("shows authors alone or the licence alone", () => {
-    const { container, rerender } = render(
-      <DeckProvenance authors={["Anton Wiklund"]} />,
-    );
+  it("shows authors alone or the license alone", () => {
+    const { container, rerender } = render(<DeckProvenance authors={["Anton Wiklund"]} />);
     expect(container.textContent).toBe("By Anton Wiklund");
     rerender(<DeckProvenance authors={[]} license={CC0} />);
     expect(container.textContent).toBe("CC0 1.0 (opens in a new tab)");
@@ -53,28 +55,28 @@ describe("DeckProvenance", () => {
     const { container } = render(
       <DeckProvenance
         authors={["Anton Wiklund"]}
-        description={{ en: "Flags from https://flagcdn.com, listed at https://flagpedia.net/index. Enjoy!" }}
+        description={{
+          en: "Flags from https://flagcdn.com, listed at https://flagpedia.net/index. Enjoy!",
+        }}
       />,
     );
     expect(container.textContent).toBe(
       "By Anton WiklundFlags from https://flagcdn.com (opens in a new tab), listed at https://flagpedia.net/index (opens in a new tab). Enjoy!",
     );
+    expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+      "https://flagcdn.com",
+      "https://flagpedia.net/index",
+    ]);
     expect(
-      screen.getAllByRole("link").map((link) => link.getAttribute("href")),
-    ).toEqual(["https://flagcdn.com", "https://flagpedia.net/index"]);
-    expect(screen.getByRole("link", { name: "https://flagcdn.com (opens in a new tab)" })).toHaveAttribute(
-      "target",
-      "_blank",
-    );
+      screen.getByRole("link", { name: "https://flagcdn.com (opens in a new tab)" }),
+    ).toHaveAttribute("target", "_blank");
   });
 
   it("shows a description alone, as plain text when it has no URL", () => {
     const { container } = render(
       <DeckProvenance authors={[]} description={{ en: "Just a deck." }} />,
     );
-    expect(container.querySelector(".deck-description")).toHaveTextContent(
-      "Just a deck.",
-    );
+    expect(container.querySelector(".deck-description")).toHaveTextContent("Just a deck.");
     expect(screen.getByRole("group", { name: "Description" })).toHaveTextContent("Just a deck.");
     expect(screen.queryByRole("link")).toBeNull();
   });

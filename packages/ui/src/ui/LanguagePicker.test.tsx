@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { useState } from "preact/hooks";
@@ -46,7 +50,9 @@ function open() {
 }
 
 function radioNames() {
-  return within(screen.getByRole("group")).getAllByRole("radio").map((radio) => radio.parentElement!.textContent);
+  return within(screen.getByRole("group"))
+    .getAllByRole("radio")
+    .map((radio) => radio.parentElement!.textContent);
 }
 
 beforeEach(() => localStorage.clear());
@@ -69,14 +75,20 @@ describe("LanguagePicker", () => {
     const button = screen.getByRole("button", { name: "Language: Swedish" });
     expect(button).toHaveAttribute("aria-expanded", "false");
     expect(button).toHaveAttribute("id", "front-language");
-    expect(document.getElementById(languageTextId("front-language"))).toHaveTextContent("Language: Swedish");
+    expect(document.getElementById(languageTextId("front-language"))).toHaveTextContent(
+      "Language: Swedish",
+    );
     expect(screen.queryByRole("group")).toBeNull();
   });
 
   it("says a language not yet chosen is not stated, and checks no radio for the user", () => {
     render(<Picker suggestions={["sv"]} />);
     expect(open()).toHaveTextContent("Language: not stated");
-    expect(within(screen.getByRole("group")).getAllByRole("radio").filter((radio) => (radio as HTMLInputElement).checked)).toEqual([]);
+    expect(
+      within(screen.getByRole("group"))
+        .getAllByRole("radio")
+        .filter((radio) => (radio as HTMLInputElement).checked),
+    ).toEqual([]);
   });
 
   it("asks for the language of text saved with none, and offers what the deck uses", () => {
@@ -92,7 +104,9 @@ describe("LanguagePicker", () => {
     render(<Picker unstated />);
     open();
     fireEvent.click(screen.getByRole("radio", { name: "Swedish — svenska (sv)" }));
-    expect(screen.getByRole("button", { name: "Language: Swedish" })).not.toHaveAccessibleDescription();
+    expect(
+      screen.getByRole("button", { name: "Language: Swedish" }),
+    ).not.toHaveAccessibleDescription();
   });
 
   it("opens in place onto a group named for its text, which takes focus", () => {
@@ -199,7 +213,12 @@ describe("LanguagePicker", () => {
     const button = open();
     fireEvent.click(screen.getByRole("radio", { name: "English (en)" }));
     // An input method's Escape is its own.
-    expect(fireEvent.keyDown(screen.getByRole("radio", { name: "English (en)" }), { key: "Escape", isComposing: true })).toBe(true);
+    expect(
+      fireEvent.keyDown(screen.getByRole("radio", { name: "English (en)" }), {
+        key: "Escape",
+        isComposing: true,
+      }),
+    ).toBe(true);
     expect(screen.getByRole("group")).toBeInTheDocument();
     outer.mockClear();
     fireEvent.keyDown(screen.getByRole("radio", { name: "English (en)" }), { key: "Escape" });
@@ -238,7 +257,9 @@ describe("LanguagePicker", () => {
     open();
     fireEvent.click(screen.getByRole("radio", { name: "No language (codes, numbers, symbols)" }));
     expect(onChange).toHaveBeenCalledWith("zxx");
-    expect(screen.getByRole("button", { name: "Language: No language (codes, numbers, symbols)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Language: No language (codes, numbers, symbols)" }),
+    ).toBeInTheDocument();
   });
 
   it("takes any other language by its code, naming it as it is typed", () => {
@@ -250,7 +271,9 @@ describe("LanguagePicker", () => {
     const code = screen.getByRole("textbox", { name: "Language code, e.g. fi, pt-BR" });
     expect(code).toHaveFocus();
     fireEvent.input(code, { target: { value: "PT-br" } });
-    expect(screen.getByRole("status")).toHaveTextContent("Brazilian Portuguese — português (Brasil) (pt-BR)");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Brazilian Portuguese — português (Brasil) (pt-BR)",
+    );
     expect(code).toHaveAccessibleDescription("Brazilian Portuguese — português (Brasil) (pt-BR)");
     // The Enter that ends an input method's composition does not take the code yet.
     expect(fireEvent.keyDown(code, { key: "Enter", isComposing: true })).toBe(true);
@@ -332,7 +355,9 @@ describe("LanguagePicker", () => {
     expect(screen.getByRole("button", { name: "Språk: engelska" })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Språk för kortlekens namn" })).toBeInTheDocument();
     expect(radioNames().slice(0, 2)).toEqual(["engelska — English (en)", "svenska (sv)"]);
-    expect(screen.getByRole("radio", { name: "Inget språk (koder, siffror, symboler)" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("radio", { name: "Inget språk (koder, siffror, symboler)" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Klar" })).toBeInTheDocument();
   });
 });

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readFile } from "node:fs/promises";
 import { readTurtleTree, type TurtleFile } from "@solid-memo/turtle/rdf";
 import { SHAPES_BASE, SITE, VOCAB_BASE } from "../src/ns.ts";
@@ -60,4 +64,8 @@ export const shapesFetch: typeof globalThis.fetch = async (input) => {
 };
 
 /** What a shape validator is given to find the shapes, the reference data and the profiles. */
-export const SHAPE_SOURCES = { shapesBaseUrl: SHAPES_BASE, vocabBaseUrl: VOCAB_BASE, vendorBaseUrl: SITE_VENDOR } as const;
+export const SHAPE_SOURCES = {
+  shapesBaseUrl: SHAPES_BASE,
+  vocabBaseUrl: VOCAB_BASE,
+  vendorBaseUrl: SITE_VENDOR,
+} as const;

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   emptyReleaseModel,
   type ReleaseCard,
@@ -30,19 +34,63 @@ export function iri(value: string): ReleaseTerm {
 }
 
 export function card(id: string, extra: Partial<ReleaseCard> = {}): ReleaseCard {
-  return { iri: at(id), retired: false, front: [], back: [text(`Answer ${id}`)], backLabel: [], frontNote: [], backNote: [], distractors: [], ...extra };
+  return {
+    iri: at(id),
+    retired: false,
+    front: [],
+    back: [text(`Answer ${id}`)],
+    backLabel: [],
+    frontNote: [],
+    backNote: [],
+    distractors: [],
+    ...extra,
+  };
 }
 
-export function chapter(id: string, position: number, extra: Partial<ReleaseChapter> = {}): ReleaseChapter {
-  return { iri: at(id), retired: false, title: [], description: [], isPartOf: [RELEASE], positions: [String(position)], reviewQuestions: [], ...extra };
+export function chapter(
+  id: string,
+  position: number,
+  extra: Partial<ReleaseChapter> = {},
+): ReleaseChapter {
+  return {
+    iri: at(id),
+    retired: false,
+    title: [],
+    description: [],
+    isPartOf: [RELEASE],
+    positions: [String(position)],
+    reviewQuestions: [],
+    ...extra,
+  };
 }
 
-export function step(id: string, of: string, position: number, checkedBy: readonly string[], extra: Partial<ReleaseStep> = {}): ReleaseStep {
-  return { iri: at(id), retired: false, theory: [], isPartOf: [at(of)], positions: [String(position)], checkedBy: checkedBy.map(at), ...extra };
+export function step(
+  id: string,
+  of: string,
+  position: number,
+  checkedBy: readonly string[],
+  extra: Partial<ReleaseStep> = {},
+): ReleaseStep {
+  return {
+    iri: at(id),
+    retired: false,
+    theory: [],
+    isPartOf: [at(of)],
+    positions: [String(position)],
+    checkedBy: checkedBy.map(at),
+    ...extra,
+  };
 }
 
 export function distractor(id: string, extra: Partial<ReleaseDistractor> = {}): ReleaseDistractor {
-  return { iri: at(id), typed: true, retired: false, text: [text(`Wrong ${id}`)], note: [], ...extra };
+  return {
+    iri: at(id),
+    typed: true,
+    retired: false,
+    text: [text(`Wrong ${id}`)],
+    note: [],
+    ...extra,
+  };
 }
 
 /** A model at RELEASE with `extra`. */
@@ -51,7 +99,12 @@ export function model(extra: Partial<ReleaseModel> = {}): ReleaseModel {
 }
 
 /** A course: the release typed schema:Course, studied front to back, with these subjects; distractor links follow the cards'. */
-export function course(subjects: { cards?: ReleaseCard[]; chapters?: ReleaseChapter[]; steps?: ReleaseStep[]; distractors?: ReleaseDistractor[] }): ReleaseModel {
+export function course(subjects: {
+  cards?: ReleaseCard[];
+  chapters?: ReleaseChapter[];
+  steps?: ReleaseStep[];
+  distractors?: ReleaseDistractor[];
+}): ReleaseModel {
   const cards = subjects.cards ?? [];
   return model({
     types: ["https://schema.org/Course"],
@@ -60,7 +113,9 @@ export function course(subjects: { cards?: ReleaseCard[]; chapters?: ReleaseChap
     chapters: subjects.chapters ?? [],
     steps: subjects.steps ?? [],
     distractors: subjects.distractors ?? [],
-    distractorLinks: cards.flatMap((c) => c.distractors.map((object) => ({ subject: c.iri, object }))),
+    distractorLinks: cards.flatMap((c) =>
+      c.distractors.map((object) => ({ subject: c.iri, object })),
+    ),
   });
 }
 

@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/e2e-pod",
+  "description": "End-to-end tests of Solid Memo's use cases and Solid adapters against real Solid servers in Docker.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

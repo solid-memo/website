@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -32,11 +36,7 @@ function renderContainer(useCases: UseCases) {
   const onDone = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
-      <DeckCreatorContainer
-        useCases={useCases}
-        instance={instance}
-        onDone={onDone}
-      />
+      <DeckCreatorContainer useCases={useCases} instance={instance} onDone={onDone} />
     </QueryClientProvider>,
   );
   return { onDone };
@@ -58,9 +58,7 @@ describe("DeckCreatorContainer", () => {
     fireEvent.input(screen.getByLabelText("Name"), {
       target: { value: "Kana" },
     });
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Create deck" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Create deck" }).closest("form")!);
 
     await waitFor(() => {
       expect(onDone).toHaveBeenCalledOnce();
@@ -79,9 +77,7 @@ describe("DeckCreatorContainer", () => {
     fireEvent.input(screen.getByLabelText("Name"), {
       target: { value: "X" },
     });
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Create deck" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Create deck" }).closest("form")!);
 
     // Said in the alert that was there, empty, all along, so screen readers hear it.
     const alert = document.getElementById("deck-creator-error")!;
@@ -92,10 +88,7 @@ describe("DeckCreatorContainer", () => {
 
     // Trying again clears the alert while the save runs, so the same error would be said again.
     vi.mocked(useCases.createDeck).mockReturnValueOnce(new Promise(() => {}));
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Create deck" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Create deck" }).closest("form")!);
     await waitFor(() => expect(alert.textContent).toBe(""));
   });
-
 });

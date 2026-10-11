@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useEffect, useId, useRef } from "preact/hooks";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -36,7 +40,13 @@ export function Dialog({
   }, []);
 
   return (
-    <dialog ref={ref} class="studio-dialog" aria-labelledby={headingId} onClose={onClose} onKeyDown={onKeyDown}>
+    <dialog
+      ref={ref}
+      class="studio-dialog"
+      aria-labelledby={headingId}
+      onClose={onClose}
+      onKeyDown={onKeyDown}
+    >
       <header>
         <h2 id={headingId}>{heading}</h2>
         <button type="button" onClick={() => ref.current!.close()}>

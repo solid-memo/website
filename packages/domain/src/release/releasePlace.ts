@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { ensureTrailingSlash } from "../instanceLayout.ts";
 
 /**
@@ -25,7 +29,13 @@ export function isReleaseContainer(text: string): boolean {
   } catch {
     return false;
   }
-  return (url.protocol === "https:" || url.protocol === "http:") && url.href === text && text.endsWith("/") && url.search === "" && url.hash === "";
+  return (
+    (url.protocol === "https:" || url.protocol === "http:") &&
+    url.href === text &&
+    text.endsWith("/") &&
+    url.search === "" &&
+    url.hash === ""
+  );
 }
 
 /** The address of version `version` of the release `name` in the folder. */

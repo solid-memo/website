@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/solid-memo/website/security/advisories/new
+    about: Report it privately, never in a public issue (SECURITY.md).
+  - name: Ask a question or discuss an idea
+    url: https://github.com/solid-memo/website/discussions
+    about: Questions, ideas that are still open, and talk about Solid Memo.
+  - name: Report a code of conduct issue
+    url: https://github.com/solid-memo/website/blob/main/CODE_OF_CONDUCT.md#enforcement
+    about: Report it privately, by email, never in a public issue (CODE_OF_CONDUCT.md).

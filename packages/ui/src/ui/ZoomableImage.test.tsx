@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/preact";
 import { I18nProvider } from "./i18n";
@@ -7,8 +11,14 @@ const FLAG = "https://flagcdn.com/af.svg";
 
 /** A viewport of the given size, as the root's client area says. */
 function setViewport(width: number, height: number) {
-  Object.defineProperty(document.documentElement, "clientWidth", { configurable: true, value: width });
-  Object.defineProperty(document.documentElement, "clientHeight", { configurable: true, value: height });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    configurable: true,
+    value: width,
+  });
+  Object.defineProperty(document.documentElement, "clientHeight", {
+    configurable: true,
+    value: height,
+  });
 }
 
 /** A browser that does, or does not, ask for reduced motion. */
@@ -70,12 +80,15 @@ describe("ZoomableImage", () => {
     expect(button).toHaveAttribute("aria-expanded", "true");
     expect(button).toHaveAccessibleName("Shrink picture");
     // The picture keeps its place, unseen; the copy over the page is hidden from screen readers.
-    expect(screen.getByRole("img", { name: "Flag of Afghanistan" })).toHaveClass("card-image", "zoomed-away");
+    expect(screen.getByRole("img", { name: "Flag of Afghanistan" })).toHaveClass(
+      "card-image",
+      "zoomed-away",
+    );
     expect(layer()).toHaveAttribute("aria-hidden", "true");
     expect(layer()!.parentElement).toBe(document.body);
     expect(copy()).toHaveAttribute("alt", "");
     expect(copy()).toHaveAttribute("src", FLAG);
-    // 200 by 100 in a 1000 by 800 viewport: full width, centred.
+    // 200 by 100 in a 1000 by 800 viewport: full width, centered.
     expect(copy()!.style.left).toBe("0px");
     expect(copy()!.style.top).toBe("150px");
     expect(copy()!.style.width).toBe("1000px");
@@ -89,7 +102,9 @@ describe("ZoomableImage", () => {
     renderPicture();
     const transforms: string[] = [];
     const original = HTMLElement.prototype.getBoundingClientRect;
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
       if (this.classList.contains("picture-zoom-image")) transforms.push(this.style.transform);
       return original.call(this);
     });
@@ -116,7 +131,9 @@ describe("ZoomableImage", () => {
     Object.defineProperty(image, "clientTop", { configurable: true, value: 1 });
     const transforms: string[] = [];
     const original = HTMLElement.prototype.getBoundingClientRect;
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
       if (this.classList.contains("picture-zoom-image")) transforms.push(this.style.transform);
       return original.call(this);
     });
@@ -322,7 +339,9 @@ describe("ZoomableImage", () => {
   });
 
   it("takes the enlarged picture away with it when it goes", () => {
-    const { unmount } = render(<ZoomableImage class="card-image" src={FLAG} alt="Flag of Afghanistan" />);
+    const { unmount } = render(
+      <ZoomableImage class="card-image" src={FLAG} alt="Flag of Afghanistan" />,
+    );
     placePicture();
     fireEvent.click(screen.getByRole("button"));
     unmount();

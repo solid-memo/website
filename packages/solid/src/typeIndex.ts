@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   buildThing,
   createSolidDataset,
@@ -14,13 +18,15 @@ import {
   type Thing,
   type WithResourceInfo,
 } from "@inrupt/solid-client";
-import { getSolidDatasetOrNull, PreconditionFailedError, readDataset, saveDataset } from "./datasets";
+import {
+  getSolidDatasetOrNull,
+  PreconditionFailedError,
+  readDataset,
+  saveDataset,
+} from "./datasets";
 import { ensureTrailingSlash } from "./urls";
 import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
-import {
-  candidateStorageUrls,
-  hasStorageLink,
-} from "./solidStorageGateway";
+import { candidateStorageUrls, hasStorageLink } from "./solidStorageGateway";
 import { AppError } from "@solid-memo/domain/appError";
 import { DATA_CLASSES, type DataClass } from "@solid-memo/domain/instance";
 import {
@@ -48,10 +54,7 @@ export interface TypeIndexLocations {
  * private index is additionally looked up in the pim:preferencesFile
  * (per spec).
  */
-export async function locateTypeIndexes(
-  webId: string,
-  fetch: Fetch,
-): Promise<TypeIndexLocations> {
+export async function locateTypeIndexes(webId: string, fetch: Fetch): Promise<TypeIndexLocations> {
   const profileDataset = await readDataset(webId, fetch);
   const profile = getThing(profileDataset, webId);
   if (profile === null) {
@@ -61,10 +64,7 @@ export async function locateTypeIndexes(
   let publicIndexUrl = getUrl(profile, SOLID.publicTypeIndex);
   let privateIndexUrl = getUrl(profile, SOLID.privateTypeIndex);
 
-  for (const extendedProfileUrl of extendedProfileUrls(
-    profile,
-    profileDataset,
-  )) {
+  for (const extendedProfileUrl of extendedProfileUrls(profile, profileDataset)) {
     if (publicIndexUrl !== null && privateIndexUrl !== null) break;
     const subject = await readSubjectSafely(extendedProfileUrl, webId, fetch);
     if (subject === null) continue;
@@ -75,13 +75,8 @@ export async function locateTypeIndexes(
   if (privateIndexUrl === null) {
     const preferencesFileUrl = getUrl(profile, PIM.preferencesFile);
     if (preferencesFileUrl !== null) {
-      const subject = await readSubjectSafely(
-        preferencesFileUrl,
-        webId,
-        fetch,
-      );
-      privateIndexUrl =
-        subject === null ? null : getUrl(subject, SOLID.privateTypeIndex);
+      const subject = await readSubjectSafely(preferencesFileUrl, webId, fetch);
+      privateIndexUrl = subject === null ? null : getUrl(subject, SOLID.privateTypeIndex);
     }
   }
 
@@ -97,10 +92,7 @@ function extendedProfileUrls(
   profile: Thing,
   profileDataset: SolidDataset & WithResourceInfo,
 ): string[] {
-  const self = new Set([
-    stripFragment(profile.url),
-    stripFragment(getSourceUrl(profileDataset)),
-  ]);
+  const self = new Set([stripFragment(profile.url), stripFragment(getSourceUrl(profileDataset))]);
   const urls = [
     ...getUrlAll(profile, RDFS.seeAlso),
     ...getUrlAll(profile, FOAF.isPrimaryTopicOf),
@@ -147,10 +139,7 @@ export async function createTypeIndex(
       createSolidDataset(),
       buildThing(createThing({ url: indexUrl }))
         .addIri(RDF.type, SOLID.TypeIndex)
-        .addIri(
-          RDF.type,
-          kind === "public" ? SOLID.ListedDocument : SOLID.UnlistedDocument,
-        )
+        .addIri(RDF.type, kind === "public" ? SOLID.ListedDocument : SOLID.UnlistedDocument)
         .build(),
     );
     await saveDataset(indexUrl, indexDocument, fetch);
@@ -177,8 +166,7 @@ async function linkTypeIndexFromProfile(
   if (profile === null) {
     throw new AppError("profileNoSubject", { webId });
   }
-  const predicate =
-    kind === "public" ? SOLID.publicTypeIndex : SOLID.privateTypeIndex;
+  const predicate = kind === "public" ? SOLID.publicTypeIndex : SOLID.privateTypeIndex;
 
   const failures: string[] = [];
   try {
@@ -195,12 +183,8 @@ async function linkTypeIndexFromProfile(
   for (const documentUrl of extendedProfileUrls(profile, profileDataset)) {
     try {
       const dataset = await readDataset(documentUrl, fetch);
-      const subject =
-        getThing(dataset, webId) ?? createThing({ url: webId });
-      const updated = setThing(
-        dataset,
-        buildThing(subject).addIri(predicate, indexUrl).build(),
-      );
+      const subject = getThing(dataset, webId) ?? createThing({ url: webId });
+      const updated = setThing(dataset, buildThing(subject).addIri(predicate, indexUrl).build());
       await saveDataset(documentUrl, updated, fetch);
       return;
     } catch (error) {
@@ -208,10 +192,13 @@ async function linkTypeIndexFromProfile(
     }
   }
 
-  throw new AppError(kind === "private" ? "privateTypeIndexNotLinked" : "publicTypeIndexNotLinked", {
-    index: indexUrl,
-    failures: failures.map((failure) => `- ${failure}`).join("\n"),
-  });
+  throw new AppError(
+    kind === "private" ? "privateTypeIndexNotLinked" : "publicTypeIndexNotLinked",
+    {
+      index: indexUrl,
+      failures: failures.map((failure) => `- ${failure}`).join("\n"),
+    },
+  );
 }
 
 function describeFailure(documentUrl: string, error: unknown): string {
@@ -227,8 +214,7 @@ export async function ensureTypeIndex(
   fetch: Fetch,
 ): Promise<string> {
   const locations = await locateTypeIndexes(webId, fetch);
-  const existing =
-    kind === "public" ? locations.publicIndexUrl : locations.privateIndexUrl;
+  const existing = kind === "public" ? locations.publicIndexUrl : locations.privateIndexUrl;
   return existing ?? createTypeIndex(kind, webId, nearUrl, fetch);
 }
 
@@ -248,8 +234,7 @@ export async function readInstanceRegistrations(
     const types = getUrlAll(thing, RDF.type);
     if (!types.includes(SOLID.TypeRegistration)) continue;
     if (!getUrlAll(thing, SOLID.forClass).includes(SM.Instance)) continue;
-    const containerUrl =
-      getUrl(thing, SOLID.instanceContainer) ?? getUrl(thing, SOLID.instance);
+    const containerUrl = getUrl(thing, SOLID.instanceContainer) ?? getUrl(thing, SOLID.instance);
     if (containerUrl === null) continue;
     registrations.push({
       containerUrl,
@@ -270,14 +255,44 @@ const DATA_CLASS_TARGETS: Record<
   DataClass,
   { forClass: string; predicate: string; target: (container: string) => string; idPrefix: string }
 > = {
-  instance: { forClass: SM.Instance, predicate: SOLID.instanceContainer, target: (container) => container, idPrefix: "sm-inst" },
-  catalog: { forClass: DCAT.Catalog, predicate: SOLID.instance, target: catalogNodeUrlOf, idPrefix: "sm-cat" },
+  instance: {
+    forClass: SM.Instance,
+    predicate: SOLID.instanceContainer,
+    target: (container) => container,
+    idPrefix: "sm-inst",
+  },
+  catalog: {
+    forClass: DCAT.Catalog,
+    predicate: SOLID.instance,
+    target: catalogNodeUrlOf,
+    idPrefix: "sm-cat",
+  },
   deck: { forClass: SM.Deck, predicate: SOLID.instance, target: catalogUrlOf, idPrefix: "sm-deck" },
-  card: { forClass: SM.Card, predicate: SOLID.instanceContainer, target: cardsContainerOf, idPrefix: "sm-card" },
-  reviewState: { forClass: SM.ReviewState, predicate: SOLID.instanceContainer, target: reviewsContainerOf, idPrefix: "sm-review" },
-  answer: { forClass: SM.Answer, predicate: SOLID.instanceContainer, target: historyContainerOf, idPrefix: "sm-answer" },
+  card: {
+    forClass: SM.Card,
+    predicate: SOLID.instanceContainer,
+    target: cardsContainerOf,
+    idPrefix: "sm-card",
+  },
+  reviewState: {
+    forClass: SM.ReviewState,
+    predicate: SOLID.instanceContainer,
+    target: reviewsContainerOf,
+    idPrefix: "sm-review",
+  },
+  answer: {
+    forClass: SM.Answer,
+    predicate: SOLID.instanceContainer,
+    target: historyContainerOf,
+    idPrefix: "sm-answer",
+  },
   // A draft's release document is an sm:Deck too: the drafts are told from the decks by where they are.
-  draft: { forClass: SM.Deck, predicate: SOLID.instanceContainer, target: draftsContainerOf, idPrefix: "sm-draft" },
+  draft: {
+    forClass: SM.Deck,
+    predicate: SOLID.instanceContainer,
+    target: draftsContainerOf,
+    idPrefix: "sm-draft",
+  },
 };
 
 /**
@@ -293,7 +308,9 @@ function registeredOf(registration: Thing, dataClass: DataClass, container: stri
   if (!getUrlAll(registration, SOLID.forClass).includes(forClass)) return [];
   const ours = target(container);
   const matches =
-    dataClass === "instance" ? (url: string) => ensureTrailingSlash(url) === ours : (url: string) => url === ours;
+    dataClass === "instance"
+      ? (url: string) => ensureTrailingSlash(url) === ours
+      : (url: string) => url === ours;
   return registeredUrls(registration).filter(matches);
 }
 
@@ -327,10 +344,16 @@ async function changeIndex<R>(
 }
 
 /** Which classes of the instance's data a type index document registers. */
-export async function readRegisteredClasses(indexUrl: string, instanceUrl: string, fetch: Fetch): Promise<DataClass[]> {
+export async function readRegisteredClasses(
+  indexUrl: string,
+  instanceUrl: string,
+  fetch: Fetch,
+): Promise<DataClass[]> {
   const container = ensureTrailingSlash(instanceUrl);
   const things = getThingAll(await readDataset(indexUrl, fetch));
-  return DATA_CLASSES.filter((dataClass) => things.some((thing) => registeredOf(thing, dataClass, container).length > 0));
+  return DATA_CLASSES.filter((dataClass) =>
+    things.some((thing) => registeredOf(thing, dataClass, container).length > 0),
+  );
 }
 
 /**
@@ -342,7 +365,11 @@ export async function readRegisteredClasses(indexUrl: string, instanceUrl: strin
  */
 export async function addRegistrations(
   indexUrl: string,
-  { instanceUrl, title, classes }: { instanceUrl: string; title: string; classes: readonly DataClass[] },
+  {
+    instanceUrl,
+    title,
+    classes,
+  }: { instanceUrl: string; title: string; classes: readonly DataClass[] },
   newId: () => string,
   fetch: Fetch,
 ): Promise<DataClass[]> {
@@ -372,7 +399,7 @@ export async function addRegistrations(
  * Remove every registration of an instance's data from a type index
  * document (see changeIndex), by what each class's registration names
  * (registeredOf): the container for its sm:Instance registration, and
- * for the others exactly the instance's catalogue
+ * for the others exactly the instance's catalog
  * (`<container>catalog.ttl#catalog`), catalog document, `decks/`,
  * `reviews/` and `history/`, never anything else below the container,
  * which may be another app's. A registration that names something else
@@ -397,15 +424,24 @@ export async function removeInstanceRegistrations(
 
 /** What a registration registers, under either predicate. */
 function registeredUrls(registration: Thing): string[] {
-  return [...getUrlAll(registration, SOLID.instanceContainer), ...getUrlAll(registration, SOLID.instance)];
+  return [
+    ...getUrlAll(registration, SOLID.instanceContainer),
+    ...getUrlAll(registration, SOLID.instance),
+  ];
 }
 
 /** The index without the registration's links to `urls`: the whole registration when it registers nothing else. */
-function withoutRegistered(dataset: SolidDataset, registration: Thing, urls: readonly string[]): SolidDataset {
+function withoutRegistered(
+  dataset: SolidDataset,
+  registration: Thing,
+  urls: readonly string[],
+): SolidDataset {
   if (urls.length === 0) return dataset;
-  if (registeredUrls(registration).every((url) => urls.includes(url))) return removeThing(dataset, registration);
+  if (registeredUrls(registration).every((url) => urls.includes(url)))
+    return removeThing(dataset, registration);
   const builder = urls.reduce(
-    (current, url) => current.removeUrl(SOLID.instanceContainer, url).removeUrl(SOLID.instance, url),
+    (current, url) =>
+      current.removeUrl(SOLID.instanceContainer, url).removeUrl(SOLID.instance, url),
     buildThing(registration),
   );
   return setThing(dataset, builder.build());
@@ -426,9 +462,14 @@ export async function renameInstanceRegistrations(
   await changeIndex(indexUrl, fetch, (dataset) => {
     let updated: SolidDataset = dataset;
     for (const thing of getThingAll(dataset)) {
-      const ours = DATA_CLASSES.some((dataClass) => registeredOf(thing, dataClass, container).length > 0);
+      const ours = DATA_CLASSES.some(
+        (dataClass) => registeredOf(thing, dataClass, container).length > 0,
+      );
       if (ours && getStringNoLocale(thing, DCTERMS.title) !== title) {
-        updated = setThing(updated, buildThing(thing).setStringNoLocale(DCTERMS.title, title).build());
+        updated = setThing(
+          updated,
+          buildThing(thing).setStringNoLocale(DCTERMS.title, title).build(),
+        );
       }
     }
     return { dataset: updated, result: undefined };
@@ -439,10 +480,7 @@ export async function renameInstanceRegistrations(
  * Storage root for a resource per the Solid Protocol Link-header walk-up,
  * falling back to the origin root when no candidate advertises one.
  */
-async function findStorageRoot(
-  resourceUrl: string,
-  fetch: Fetch,
-): Promise<string> {
+async function findStorageRoot(resourceUrl: string, fetch: Fetch): Promise<string> {
   const candidates = candidateStorageUrls(resourceUrl);
   for (const candidate of candidates) {
     try {
@@ -451,7 +489,7 @@ async function findStorageRoot(
         return candidate;
       }
     } catch {
-      continue;
+      // A candidate that cannot be fetched is skipped.
     }
   }
   return new URL("/", resourceUrl).toString();

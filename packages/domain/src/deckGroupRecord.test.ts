@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { deckGroupFromRecord, deckGroupToRecord } from "./deckGroupRecord";
 
@@ -39,12 +43,17 @@ describe("deck group records", () => {
 
   it("keep a description the user wrote, and renew the default one on a rename", () => {
     const renamed = { group: { url: URL, title: { en: "Words" } }, decks: [], groups: [] };
-    const previous = deckGroupToRecord({ ...renamed, group: { url: URL, title: { en: "Languages" } } }, PUBLISHER);
+    const previous = deckGroupToRecord(
+      { ...renamed, group: { url: URL, title: { en: "Languages" } } },
+      PUBLISHER,
+    );
     expect(deckGroupToRecord(renamed, PUBLISHER, previous).description).toEqual({
       en: "Deck group: Words.",
       sv: "Kortleksgrupp: Words.",
     });
     const written = { ...previous, description: { en: "Every language I study." } };
-    expect(deckGroupToRecord(renamed, PUBLISHER, written).description).toEqual({ en: "Every language I study." });
+    expect(deckGroupToRecord(renamed, PUBLISHER, written).description).toEqual({
+      en: "Every language I study.",
+    });
   });
 });

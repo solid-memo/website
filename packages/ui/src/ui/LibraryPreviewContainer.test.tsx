@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -21,11 +25,7 @@ function card(front: string, back: string): LibraryCard {
   return { id: front.toLowerCase(), front: { "": front }, back: { "": back }, formatVersion: 1 };
 }
 
-const CARDS = [
-  card("Sweden", "Stockholm"),
-  card("Norway", "Oslo"),
-  card("Finland", "Helsinki"),
-];
+const CARDS = [card("Sweden", "Stockholm"), card("Norway", "Oslo"), card("Finland", "Helsinki")];
 
 /** A random source handing out the given values in turn. */
 function randomOf(...values: number[]) {
@@ -71,9 +71,7 @@ describe("LibraryPreviewContainer", () => {
       random: randomOf(0.5),
     });
     expect(screen.getByText("Loading cards…")).toBeInTheDocument();
-    expect(
-      await screen.findByRole("heading", { name: "Preview: Capitals" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Preview: Capitals" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Capitals" })).toHaveAttribute(
       "href",
       "#/library-deck?deck=capitals",
@@ -141,17 +139,13 @@ describe("LibraryPreviewContainer", () => {
     renderContainer({
       useCases: makeUseCasesFake({ listLibraryCards: vi.fn(async () => []) }),
     });
-    expect(
-      await screen.findByText("This deck has no cards."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("This deck has no cards.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reveal" })).toBeNull();
   });
 
   it("goes back to the library", async () => {
     const { onExit } = renderContainer();
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Back to library" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "Back to library" }));
     expect(onExit).toHaveBeenCalledOnce();
   });
 

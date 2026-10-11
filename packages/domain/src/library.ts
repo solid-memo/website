@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { TOPICS } from "@solid-memo/vocab/concepts.generated";
 import type { CardContent, Deck, DeckDirection } from "./deck";
 import { allKeywords, type LangTexts } from "./keywords";
@@ -47,7 +51,7 @@ export interface LibraryDeck {
    * cards, studied through the course before they join the learner's deck.
    */
   isCourse?: true;
-  /** Set on the course the library's index offers to newcomers (solid-memo:newcomerCourse on its catalogue): at most one deck, always a course. */
+  /** Set on the course the library's index offers to newcomers (solid-memo:newcomerCourse on its catalog): at most one deck, always a course. */
   forNewcomers?: true;
 }
 
@@ -63,7 +67,7 @@ export interface LibraryRelease {
 
 /**
  * A resource a library deck was compiled from, with what the deck says
- * about it. The authors and licence are the source's own, not the
+ * about it. The authors and license are the source's own, not the
  * deck's: a CC0 deck may well be compiled from a CC BY-SA page.
  */
 export interface LibrarySource {
@@ -146,7 +150,11 @@ export function releaseUrlOf(text: string): string | null {
   } catch {
     return null;
   }
-  return (url.protocol === "https:" || url.protocol === "http:") && !url.href.includes("#") && !url.pathname.endsWith("/") ? url.href : null;
+  return (url.protocol === "https:" || url.protocol === "http:") &&
+    !url.href.includes("#") &&
+    !url.pathname.endsWith("/")
+    ? url.href
+    : null;
 }
 
 /** The host a release is published on, as a "from <host>" badge names it. */
@@ -156,13 +164,20 @@ export function releaseHost(url: string): string {
 
 /**
  * The newest release of the copied one's series among `found` (the
- * releases its creator's catalogue links, read): the copied one when
+ * releases its creator's catalog links, read): the copied one when
  * none is newer. A release in another series is none of it.
  */
-export function newestRelease(copied: LibraryDeck, found: readonly (LibraryDeck | null)[]): LibraryDeck {
+export function newestRelease(
+  copied: LibraryDeck,
+  found: readonly (LibraryDeck | null)[],
+): LibraryDeck {
   return found.reduce<LibraryDeck>(
     (newest, release) =>
-      release !== null && release.seriesUrl === copied.seriesUrl && Number(release.version) > Number(newest.version) ? release : newest,
+      release !== null &&
+      release.seriesUrl === copied.seriesUrl &&
+      Number(release.version) > Number(newest.version)
+        ? release
+        : newest,
     copied,
   );
 }
@@ -190,7 +205,9 @@ export function topicsOf(decks: readonly LibraryDeck[]): Topic[] {
 
 /** The labels (in English and Swedish) of the Solid Memo topics among a deck's themes, in the scheme's order. */
 export function topicLabels(themes: readonly string[]): LangText[] {
-  return TOPICS.concepts.filter((concept) => themes.includes(concept.iri)).map((concept) => concept.label);
+  return TOPICS.concepts
+    .filter((concept) => themes.includes(concept.iri))
+    .map((concept) => concept.label);
 }
 
 /** Whether a deck is about a topic: it names the topic, or a narrower one. */
@@ -215,7 +232,14 @@ export function filterLibraryDecks(
   return decks.filter(
     (deck) =>
       topics.every((topic) => isAbout(deck, topic)) &&
-      matchesQuery([...Object.values(deck.title), ...Object.values(deck.description ?? {}), ...allKeywords(deck.keywords)], query),
+      matchesQuery(
+        [
+          ...Object.values(deck.title),
+          ...Object.values(deck.description ?? {}),
+          ...allKeywords(deck.keywords),
+        ],
+        query,
+      ),
   );
 }
 
@@ -235,7 +259,7 @@ export function offersNewerRelease(deck: Deck, series: LibraryDeck): boolean {
 /**
  * A deck in the pod copied from a library release (it has
  * prov:wasDerivedFrom), as the library's index sees it, or a release
- * added from a link as the release and its creator's catalogue do.
+ * added from a link as the release and its creator's catalog do.
  */
 export interface LibraryCopy {
   deck: Deck;
@@ -251,7 +275,7 @@ export interface LibraryCopy {
   /**
    * Whether the library has a newer release to offer (offersNewerRelease);
    * planLibraryUpgrade says what it would change. "unknown" for a release
-   * added from a link whose creator's catalogue cannot be read, which
+   * added from a link whose creator's catalog cannot be read, which
    * alone would list a newer one.
    */
   newer: boolean | "unknown";
@@ -264,7 +288,10 @@ export interface LibraryCopy {
  * deck in the library: the index is looked up once a series, however
  * many copies of it there are. Home-made decks are left out.
  */
-export function libraryCopiesOf(decks: readonly Deck[], library: readonly LibraryDeck[]): LibraryCopy[] {
+export function libraryCopiesOf(
+  decks: readonly Deck[],
+  library: readonly LibraryDeck[],
+): LibraryCopy[] {
   const bySeries = new Map(library.map((libraryDeck) => [libraryDeck.seriesUrl, libraryDeck]));
   return decks.flatMap((deck): LibraryCopy[] => {
     if (deck.sourceUrl === undefined) return [];

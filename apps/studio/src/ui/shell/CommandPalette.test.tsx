@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -23,7 +27,14 @@ function readCache() {
   return queryClient;
 }
 
-function renderPalette(props: { route?: StudioRoute | null; queryClient?: QueryClient; commands?: ScreenCommand[]; pinned?: WorkItem[] } = {}) {
+function renderPalette(
+  props: {
+    route?: StudioRoute | null;
+    queryClient?: QueryClient;
+    commands?: ScreenCommand[];
+    pinned?: WorkItem[];
+  } = {},
+) {
   const onChoose = vi.fn();
   const onClose = vi.fn();
   const route = props.route === undefined ? cardsRoute : props.route;
@@ -33,7 +44,11 @@ function renderPalette(props: { route?: StudioRoute | null; queryClient?: QueryC
         route={route}
         instances={[instanceA, instanceB]}
         tabs={route?.screen === "cards" ? deckTabs(route, route.deckUrl) : []}
-        commands={props.commands ?? [{ id: "help", label: "Show the keyboard shortcuts", keys: "?", run: () => undefined }]}
+        commands={
+          props.commands ?? [
+            { id: "help", label: "Show the keyboard shortcuts", keys: "?", run: () => undefined },
+          ]
+        }
         pinned={props.pinned ?? []}
         onChoose={onChoose}
         onClose={onClose}
@@ -43,12 +58,16 @@ function renderPalette(props: { route?: StudioRoute | null; queryClient?: QueryC
   return { onChoose, onClose, unmount };
 }
 
-const field = () => screen.getByRole("combobox", { name: "Search decks, drafts, cards and commands" });
+const field = () =>
+  screen.getByRole("combobox", { name: "Search decks, drafts, cards and commands" });
 const list = () => screen.getByRole("listbox");
 const type = (text: string) => fireEvent.input(field(), { target: { value: text } });
 const press = (key: string) => fireEvent.keyDown(field(), { key });
 /** The list's groups, by their headings. */
-const headings = () => within(list()).getAllByRole("group").map((group) => document.getElementById(group.getAttribute("aria-labelledby")!)!.textContent);
+const headings = () =>
+  within(list())
+    .getAllByRole("group")
+    .map((group) => document.getElementById(group.getAttribute("aria-labelledby")!)!.textContent);
 const picked = () => document.getElementById(field().getAttribute("aria-activedescendant")!)!;
 
 describe("CommandPalette", () => {
@@ -68,9 +87,15 @@ describe("CommandPalette", () => {
     renderPalette();
     expect(headings()).toEqual(["Commands", "Tabs", "Sections", "Instances", "Decks"]);
     const decks = within(list()).getByRole("group", { name: "Decks" });
-    expect(within(decks).getAllByRole("option").map((option) => option.textContent)).toEqual(["Kanji N5", "Verbs"]);
+    expect(
+      within(decks)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["Kanji N5", "Verbs"]);
     expect(within(list()).getByRole("group", { name: "Sections" })).toHaveTextContent("Groupsg g");
-    expect(within(list()).getByRole("option", { name: "Groups" }).querySelectorAll("kbd")).toHaveLength(2);
+    expect(
+      within(list()).getByRole("option", { name: "Groups" }).querySelectorAll("kbd"),
+    ).toHaveLength(2);
     expect(within(list()).queryByRole("group", { name: "Cards of this deck" })).toBeNull();
     expect(picked()).toHaveTextContent("Show the keyboard shortcuts");
     expect(picked()).toHaveAttribute("aria-selected", "true");
@@ -79,7 +104,9 @@ describe("CommandPalette", () => {
   it("keeps what matches as the user types, the cards of the deck shown among them, and says when nothing does", () => {
     renderPalette();
     type("water");
-    expect(within(list()).getByRole("group", { name: "Cards of this deck" })).toHaveTextContent("water");
+    expect(within(list()).getByRole("group", { name: "Cards of this deck" })).toHaveTextContent(
+      "water",
+    );
     expect(within(list()).getAllByRole("option")).toHaveLength(1);
     expect(screen.getByRole("status")).toHaveTextContent("");
     type("zzz");
@@ -118,8 +145,12 @@ describe("CommandPalette", () => {
     const { onChoose } = renderPalette();
     type("verbs");
     press("Enter");
-    expect(onChoose).toHaveBeenCalledWith(expect.objectContaining({ label: "Verbs", route: { screen: "cards", deckUrl: verbs.url } }));
-    expect(recentCommands()).toEqual([`decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`]);
+    expect(onChoose).toHaveBeenCalledWith(
+      expect.objectContaining({ label: "Verbs", route: { screen: "cards", deckUrl: verbs.url } }),
+    );
+    expect(recentCommands()).toEqual([
+      `decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`,
+    ]);
   });
 
   it("leaves Enter and the arrows to an input method composing a letter", () => {
@@ -141,16 +172,26 @@ describe("CommandPalette", () => {
   });
 
   it("lists the entries used last first", () => {
-    localStorage.setItem("solid-memo:studioRecent.v1", JSON.stringify([`decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`]));
+    localStorage.setItem(
+      "solid-memo:studioRecent.v1",
+      JSON.stringify([`decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`]),
+    );
     renderPalette();
-    expect(within(list()).getAllByRole("group")[0]).toBe(within(list()).getByRole("group", { name: "Recently used" }));
+    expect(within(list()).getAllByRole("group")[0]).toBe(
+      within(list()).getByRole("group", { name: "Recently used" }),
+    );
     expect(picked()).toHaveTextContent("Verbs");
   });
 
   it("lists the decks and drafts pinned first, then those used last but those pinned, with nothing typed", () => {
     rememberCommand(`decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`);
     rememberCommand(`decks:${studioRouteToHash(cardsRoute)}`);
-    renderPalette({ pinned: [{ kind: "deck", url: verbs.url }, { kind: "draft", url: DRAFT_URL }] });
+    renderPalette({
+      pinned: [
+        { kind: "deck", url: verbs.url },
+        { kind: "draft", url: DRAFT_URL },
+      ],
+    });
     expect(headings().slice(0, 2)).toEqual(["Pinned", "Recently used"]);
     expect(within(list()).getAllByRole("group")[0]).toHaveTextContent(/^PinnedVerbs$/);
     expect(within(list()).getAllByRole("group")[1]).toHaveTextContent(/^Recently usedKanji N5$/);
@@ -197,7 +238,9 @@ describe("CommandPalette, off a deck", () => {
     for (const route of [{ screen: "instances" } as StudioRoute, null]) {
       const { unmount } = renderPalette({ route, commands: [] });
       expect(headings()).toEqual(["Sections", "Instances"]);
-      expect(within(list()).getByRole("group", { name: "Sections" })).toHaveTextContent(/^SectionsAll instancesg i$/);
+      expect(within(list()).getByRole("group", { name: "Sections" })).toHaveTextContent(
+        /^SectionsAll instancesg i$/,
+      );
       unmount();
     }
   });
@@ -205,7 +248,15 @@ describe("CommandPalette, off a deck", () => {
   it("lists the drafts of the open instance, but no cards, on another screen of it", () => {
     const queryClient = readCache();
     queryClient.setQueryData(draftsKey(instanceA.url), [
-      { url: DRAFT_URL, instanceUrl: instanceA.url, name: "solid", version: 1, readable: true, title: { en: "Solid" }, course: true },
+      {
+        url: DRAFT_URL,
+        instanceUrl: instanceA.url,
+        name: "solid",
+        version: 1,
+        readable: true,
+        title: { en: "Solid" },
+        course: true,
+      },
     ]);
     renderPalette({ route: { screen: "groups", instanceUrl: instanceA.url }, queryClient });
     expect(within(list()).getByRole("group", { name: "Drafts" })).toHaveTextContent("Solid");

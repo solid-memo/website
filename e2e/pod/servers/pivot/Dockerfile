@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Pivot (solid-contrib/pivot, the server of solidcommunity.net) for the
 # end-to-end tests (docs/testing.md): the Community Solid Server with
 # Pivot's components, from the lockfile beside this file, run with

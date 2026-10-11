@@ -1,17 +1,33 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
 import { isPublished, reviewQuestionsOf, stepIdFor } from "@solid-memo/domain/release/courseIds";
 import { draftCardOf, retiredSteps } from "@solid-memo/domain/release/draftOutline";
 import type { ChapterField } from "@solid-memo/domain/release/releaseCheck";
-import { liveChapters, liveSteps, type ChapterText, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import {
+  liveChapters,
+  liveSteps,
+  type ChapterText,
+  type ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { cardName, DataText } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import type { DraftLinks } from "./DraftOverviewScreen";
-import { DraftProseField, DraftScope, DraftStatus, DraftTextField, IdField, idUsable } from "./DraftParts";
+import {
+  DraftProseField,
+  DraftScope,
+  DraftStatus,
+  DraftTextField,
+  IdField,
+  idUsable,
+} from "./DraftParts";
 import { LifeActions } from "./LifeActions";
 import { NewQuestionForm } from "./NewQuestionForm";
 
@@ -58,7 +74,11 @@ export function ChapterEditorScreen({
   const { t, readerText } = useI18n();
   const held = readOnly !== null;
   const data = draft.chapters.find((node) => node.id === chapter)!.data;
-  const text: ChapterText = { title: data.title, description: data.description, textFormat: data.textFormat };
+  const text: ChapterText = {
+    title: data.title,
+    description: data.description,
+    textFormat: data.textFormat,
+  };
   const number = liveChapters(draft).findIndex((node) => node.id === chapter);
   const steps = liveSteps(draft, chapter);
   const retired = retiredSteps(draft, chapter);
@@ -79,9 +99,20 @@ export function ChapterEditorScreen({
   return (
     <section>
       <header>
-        <h2>{data.title === undefined ? t("studio.chapter.untitled", { id: chapter }) : <ReaderText text={data.title} />}</h2>
+        <h2>
+          {data.title === undefined ? (
+            t("studio.chapter.untitled", { id: chapter })
+          ) : (
+            <ReaderText text={data.title} />
+          )}
+        </h2>
         <p class="hint">
-          {data.deprecated === true ? t("studio.chapter.retired") : t("studio.chapter.number", { number: number + 1, count: liveChapters(draft).length })}{" "}
+          {data.deprecated === true
+            ? t("studio.chapter.retired")
+            : t("studio.chapter.number", {
+                number: number + 1,
+                count: liveChapters(draft).length,
+              })}{" "}
           <code>{chapter}</code>
         </p>
       </header>
@@ -108,11 +139,21 @@ export function ChapterEditorScreen({
           arrival={field === "description"}
           // As the course's screen shows a chapter's description.
           preview={(shown, markdown) => <DataText text={shown} markdown={markdown} />}
-          onSave={(description, markdown) => save({ ...text, description: emptyAsNone(description), textFormat: proseFormat(markdown, data.textFormat) })}
+          onSave={(description, markdown) =>
+            save({
+              ...text,
+              description: emptyAsNone(description),
+              textFormat: proseFormat(markdown, data.textFormat),
+            })
+          }
         />
 
         <section aria-labelledby="chapter-steps-heading">
-          <h3 id="chapter-steps-heading" tabIndex={-1} data-arrival={field === "steps" || undefined}>
+          <h3
+            id="chapter-steps-heading"
+            tabIndex={-1}
+            data-arrival={field === "steps" || undefined}
+          >
             {t("studio.chapter.steps")}
           </h3>
           {steps.length === 0 ? (
@@ -128,7 +169,9 @@ export function ChapterEditorScreen({
                       type="button"
                       aria-label={t("studio.chapter.stepUp", { step: label })}
                       disabled={index === 0}
-                      onClick={() => onEdit([{ kind: "moveStep", id: step.id, chapter, to: index - 1 }])}
+                      onClick={() =>
+                        onEdit([{ kind: "moveStep", id: step.id, chapter, to: index - 1 }])
+                      }
                     >
                       {t("deckList.moveUp")}
                     </button>{" "}
@@ -136,7 +179,9 @@ export function ChapterEditorScreen({
                       type="button"
                       aria-label={t("studio.chapter.stepDown", { step: label })}
                       disabled={index === steps.length - 1}
-                      onClick={() => onEdit([{ kind: "moveStep", id: step.id, chapter, to: index + 1 }])}
+                      onClick={() =>
+                        onEdit([{ kind: "moveStep", id: step.id, chapter, to: index + 1 }])
+                      }
                     >
                       {t("deckList.moveDown")}
                     </button>
@@ -161,7 +206,10 @@ export function ChapterEditorScreen({
                     <a href={links.stepHref(step.id)}>
                       <code>{step.id}</code>
                     </a>{" "}
-                    <button type="button" onClick={() => onEdit([{ kind: "restore", of: "step", id: step.id }])}>
+                    <button
+                      type="button"
+                      onClick={() => onEdit([{ kind: "restore", of: "step", id: step.id }])}
+                    >
                       {t("studio.draftEdit.restore")}
                     </button>
                   </li>
@@ -172,7 +220,11 @@ export function ChapterEditorScreen({
         </section>
 
         <section aria-labelledby="chapter-review-heading">
-          <h3 id="chapter-review-heading" tabIndex={-1} data-arrival={field === "review" || undefined}>
+          <h3
+            id="chapter-review-heading"
+            tabIndex={-1}
+            data-arrival={field === "review" || undefined}
+          >
             {t("studio.chapter.review")}
           </h3>
           <p class="hint">{t("studio.chapter.reviewHint")}</p>
@@ -181,7 +233,9 @@ export function ChapterEditorScreen({
               const found = draftCardOf(draft, card);
               return (
                 <li key={card}>
-                  <a href={links.questionHref(card)}>{found === null ? card : cardName({ ...found.content, id: card }, readerText)}</a>
+                  <a href={links.questionHref(card)}>
+                    {found === null ? card : cardName({ ...found.content, id: card }, readerText)}
+                  </a>
                 </li>
               );
             })}

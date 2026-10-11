@@ -1,8 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { chunksOf, inspectChunks } from "@solid-memo/markdown/chunks";
 import { parseInlineMarkdown } from "@solid-memo/markdown/inline";
 import { parseMarkdown, type MdBlock, type MdPhrase } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
-import { markdownProblems, OPTION, PROSE, SIDE, type FieldRule, type MarkdownProblem } from "@solid-memo/markdown/problems";
+import {
+  markdownProblems,
+  OPTION,
+  PROSE,
+  SIDE,
+  type FieldRule,
+  type MarkdownProblem,
+} from "@solid-memo/markdown/problems";
 import type { DeckTextCheck } from "@solid-memo/domain/deckHealth";
 import type { FieldRuleName, MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 

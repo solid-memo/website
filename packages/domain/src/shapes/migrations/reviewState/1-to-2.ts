@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { MigrationStep } from "../step";
 
 const SNAPSHOT_FIELDS = [
@@ -24,8 +28,21 @@ export const REVIEW_STATE_1_TO_2: MigrationStep<"reviewState", 1, 2> = {
     if (SNAPSHOT_FIELDS.every((field) => data[field] !== undefined)) {
       return { ...data };
     }
-    const { previousEaseFactor, previousIntervalDays, previousRepetitions, previousDue, previousLastReviewedAt, ...rest } = data;
-    void [previousEaseFactor, previousIntervalDays, previousRepetitions, previousDue, previousLastReviewedAt];
+    const {
+      previousEaseFactor,
+      previousIntervalDays,
+      previousRepetitions,
+      previousDue,
+      previousLastReviewedAt,
+      ...rest
+    } = data;
+    void [
+      previousEaseFactor,
+      previousIntervalDays,
+      previousRepetitions,
+      previousDue,
+      previousLastReviewedAt,
+    ];
     return rest;
   },
 };

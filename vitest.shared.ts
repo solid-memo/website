@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { defineConfig, type ViteUserConfig } from "vitest/config";
 
 /**
@@ -29,6 +33,8 @@ export function packageConfig({
       ...test,
       coverage: {
         provider: "v8",
+        // json-summary: the totals CI's run summary shows (scripts/coverageSummary.ts).
+        reporter: ["text", "html", "json-summary"],
         include: ["src/**/*.{ts,tsx}", ...include],
         exclude: ["src/testing/**", "src/test/**", ...exclude],
         thresholds: { lines: 100, functions: 100, branches: 100, statements: 100 },

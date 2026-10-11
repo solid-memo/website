@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 import type { SubjectReport, ValidationReport, Violation } from "./validation";
@@ -25,7 +29,7 @@ export type RepairKind =
   /** Name an agent without a name after its IRI. */
   | "name-agent"
   /**
-   * Drop the links of a catalogue or deck group to decks and groups the
+   * Drop the links of a catalog or deck group to decks and groups the
    * document no longer describes, as a removal elsewhere leaves them.
    */
   | "drop-dangling-members"
@@ -55,7 +59,8 @@ export interface RepairPlan {
 /** The repair that answers one violation of a subject of a shape; null when none does. */
 function repairFor(shape: ShapeName | null, violation: Violation): RepairKind | null {
   const { path, constraint } = violation;
-  if (shape === "deck" && path === `${DCTERMS}description` && constraint === "MinCount") return "describe-deck";
+  if (shape === "deck" && path === `${DCTERMS}description` && constraint === "MinCount")
+    return "describe-deck";
   if (
     shape === "deck" &&
     (path === `${SM}studyDirection` || path === `${SM}direction`) &&
@@ -64,7 +69,8 @@ function repairFor(shape: ShapeName | null, violation: Violation): RepairKind | 
     return "direct-deck";
   }
   if (shape === "reviewState" && constraint === "Xone") return "drop-snapshot";
-  if (shape === "reviewState" && path === `${SM}due` && constraint === "Pattern") return "recompute-due";
+  if (shape === "reviewState" && path === `${SM}due` && constraint === "Pattern")
+    return "recompute-due";
   if (path === `${FOAF}name` && constraint === "MinCount") return "name-agent";
   if (
     (shape === "catalog" || shape === "deckGroup") &&
@@ -76,11 +82,14 @@ function repairFor(shape: ShapeName | null, violation: Violation): RepairKind | 
   return null;
 }
 
-function problemsOf(subject: SubjectReport): { shape: ShapeName | null; version: number; violations: Violation[] } | null {
+function problemsOf(
+  subject: SubjectReport,
+): { shape: ShapeName | null; version: number; violations: Violation[] } | null {
   if (subject.status === "checked") {
     return { shape: subject.shape, version: subject.version, violations: subject.violations };
   }
-  if (subject.status === "profiled") return { shape: null, version: 1, violations: subject.violations };
+  if (subject.status === "profiled")
+    return { shape: null, version: 1, violations: subject.violations };
   return null;
 }
 
@@ -105,11 +114,20 @@ export function planRepair(report: ValidationReport): RepairPlan {
           continue;
         }
         if (!repairs.some((r) => r.kind === kind && r.subjectUrl === subject.url)) {
-          repairs.push({ kind, documentUrl: document.url, subjectUrl: subject.url, version: problems.version });
+          repairs.push({
+            kind,
+            documentUrl: document.url,
+            subjectUrl: subject.url,
+            version: problems.version,
+          });
         }
       }
       if (left.size > 0) {
-        unrepairable.push({ documentUrl: document.url, subjectUrl: subject.url, violations: [...left.values()] });
+        unrepairable.push({
+          documentUrl: document.url,
+          subjectUrl: subject.url,
+          violations: [...left.values()],
+        });
       }
     }
   }
@@ -128,7 +146,7 @@ export function describeRepair(repair: Repair): string {
     case "recompute-due":
       return "Recompute the review's due day";
     case "name-agent":
-      return "Name the person or organisation after their address";
+      return "Name the person or organization after their address";
     case "drop-dangling-members":
       return "Drop the links to decks and groups that are gone";
     case "remove-subject":

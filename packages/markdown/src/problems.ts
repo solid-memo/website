@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { liveLink } from "./links.ts";
 import { MAX_CHARS, hiddenControls, inspectMarkdown } from "./parse.ts";
 
@@ -70,7 +74,9 @@ export type MarkdownProblem =
 export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem[] {
   const inspected = inspectMarkdown(text);
   if (inspected === null)
-    return [text.length > MAX_CHARS ? { code: "tooLong", length: text.length } : { code: "tooComplex" }];
+    return [
+      text.length > MAX_CHARS ? { code: "tooLong", length: text.length } : { code: "tooComplex" },
+    ];
   const problems: MarkdownProblem[] = [];
   for (const note of inspected.notes) {
     switch (note.type) {
@@ -89,9 +95,11 @@ export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem
       }
       case "link": {
         const live = liveLink(note.url);
-        if (!rule.links) problems.push({ code: "link", source: note.source, autolink: note.autolink });
+        if (!rule.links)
+          problems.push({ code: "link", source: note.source, autolink: note.autolink });
         else if (live === null) problems.push({ code: "linkNotFollowed", url: note.url });
-        else if (!leadsTo(note.text, live.href)) problems.push({ code: "linkHost", text: note.text, host: live.host });
+        else if (!leadsTo(note.text, live.href))
+          problems.push({ code: "linkHost", text: note.text, host: live.host });
         const controls = hiddenControls(note.text + note.url);
         if (controls.length > 0) problems.push({ code: "hiddenControl", controls, in: "link" });
         break;
@@ -115,7 +123,7 @@ const HOST = /^(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?\.)+\p{L}{2,}(?:[:/
  * `evil.github.io`. Any other text, "the specification", may lead
  * anywhere, as may text taken for a host name that is none, a file's
  * name such as `package.json`, which this flags too: the app shows the
- * host beside every link, the defence against a link that misleads.
+ * host beside every link, the defense against a link that misleads.
  */
 function leadsTo(text: string, href: string): boolean {
   const trimmed = text.trim();

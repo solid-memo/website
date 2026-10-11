@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useId, useLayoutEffect, useRef } from "preact/hooks";
 import type { Choice, CourseChapter } from "@solid-memo/domain/course";
 import { isMarkdown, type CardContent } from "@solid-memo/domain/deck";
@@ -87,7 +91,8 @@ export function ChapterPlayerScreen({
   const chunk = Math.min(chunkIndex, chunks - 1);
   const lastChunk = chunk === chunks - 1;
   const shownChunk = useRef({ step: stepIndex, chunk: chunkIndex });
-  const last = stepIndex === chapter.steps.length - 1 && questionIndex === step.questionIds.length - 1;
+  const last =
+    stepIndex === chapter.steps.length - 1 && questionIndex === step.questionIds.length - 1;
 
   useLayoutEffect(() => {
     if (shownStep.current === stepIndex) return;
@@ -136,7 +141,9 @@ export function ChapterPlayerScreen({
                 </p>
               )}
               <div class="actions">
-                {chunk > 0 && <button onClick={() => onChunk(chunk - 1)}>{t("chapterPlayer.back")}</button>}
+                {chunk > 0 && (
+                  <button onClick={() => onChunk(chunk - 1)}>{t("chapterPlayer.back")}</button>
+                )}
                 {lastChunk ? (
                   <button class="primary" aria-describedby={hintId} onClick={onAnswerPhase}>
                     {t("chapterPlayer.toQuestions", { count: step.questionIds.length })}
@@ -155,7 +162,10 @@ export function ChapterPlayerScreen({
         <>
           <h3 ref={checkRef} class="course-check-heading" tabIndex={-1}>
             {step.questionIds.length > 1
-              ? t("chapterPlayer.checkNumbered", { number: questionIndex + 1, count: step.questionIds.length })
+              ? t("chapterPlayer.checkNumbered", {
+                  number: questionIndex + 1,
+                  count: step.questionIds.length,
+                })
               : t("chapterPlayer.check")}
           </h3>
           <CourseQuestion

@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Deck or course
+description: Propose a new deck or course for the library, or report a mistake in one.
+labels: [deck]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The library's decks are in [`decks/`](https://github.com/solid-memo/website/tree/main/decks), described in [docs/deck-library.md](https://github.com/solid-memo/website/blob/main/docs/deck-library.md). A published version is never edited: a correction ships in the deck's next version.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is it
+      options:
+        - A correction to a deck or a course
+        - A new deck
+        - A new course
+    validations:
+      required: true
+  - type: input
+    id: deck
+    attributes:
+      label: Deck and version
+      description: For a correction, the release's address, as the library shows it.
+      placeholder: https://solid-memo.com/decks/capitals-of-the-world/v2.ttl
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: For a correction, the card and what is wrong. For a new deck or course, its subject, who it is for, its languages, and roughly how many cards.
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources and license
+      description: Where the content comes from, and the license it may be published under. Each deck states its own license.
+    validations:
+      required: true
+  - type: checkboxes
+    id: studio
+    attributes:
+      label: A release file
+      options:
+        - label: I wrote it in the Studio, and can open a pull request with the release file it downloads ([docs/studio.md](https://github.com/solid-memo/website/blob/main/docs/studio.md#publishing-a-release)).

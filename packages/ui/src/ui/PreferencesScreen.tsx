@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { AnswerScale } from "@solid-memo/domain/answerScale";
 import {
@@ -75,22 +79,12 @@ export function PreferencesScreen({
 }) {
   const { t, locale, chooseLocale } = useI18n();
   const { choice: themeChoice, chooseTheme } = useTheme();
-  const [newCardsPerDay, setNewCardsPerDay] = useState(
-    String(preferences.newCardsPerDay),
-  );
-  const [maxReviewsPerDay, setMaxReviewsPerDay] = useState(
-    String(preferences.maxReviewsPerDay),
-  );
-  const [dayBoundaryHour, setDayBoundaryHour] = useState(
-    String(preferences.dayBoundaryHour),
-  );
+  const [newCardsPerDay, setNewCardsPerDay] = useState(String(preferences.newCardsPerDay));
+  const [maxReviewsPerDay, setMaxReviewsPerDay] = useState(String(preferences.maxReviewsPerDay));
+  const [dayBoundaryHour, setDayBoundaryHour] = useState(String(preferences.dayBoundaryHour));
 
-  const [answerScale, setAnswerScale] = useState<AnswerScale>(
-    preferences.answerScale,
-  );
-  const [developerMode, setDeveloperMode] = useState(
-    preferences.developerMode,
-  );
+  const [answerScale, setAnswerScale] = useState<AnswerScale>(preferences.answerScale);
+  const [developerMode, setDeveloperMode] = useState(preferences.developerMode);
   const [invalidDataPolicy, setInvalidDataPolicy] = useState<InvalidDataPolicy>(
     preferences.invalidDataPolicy,
   );

@@ -1,9 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { ExternalLink } from "./ExternalLink";
 
 describe("ExternalLink", () => {
-  it("links a URL, labelled with the URL itself, in a new tab it says it opens", () => {
+  it("links a URL, labeled with the URL itself, in a new tab it says it opens", () => {
     render(<ExternalLink url="https://alice.example/profile/card#me" />);
     const link = screen.getByRole("link", {
       name: "https://alice.example/profile/card#me (opens in a new tab)",

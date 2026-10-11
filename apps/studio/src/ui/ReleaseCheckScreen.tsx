@@ -1,5 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { CHECK_POLICIES, isUnread, type CheckPolicy, type ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
+import {
+  CHECK_POLICIES,
+  isUnread,
+  type CheckPolicy,
+  type ProblemTarget,
+} from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -59,7 +68,8 @@ export function ReleaseCheckScreen({
   onCheckAgain: () => void;
 }) {
   const { t, errorText } = useI18n();
-  const policyLabel = (one: CheckPolicy) => t(one === "pod" ? "studio.check.policyPod" : "studio.check.policyLibrary");
+  const policyLabel = (one: CheckPolicy) =>
+    t(one === "pod" ? "studio.check.policyPod" : "studio.check.policyLibrary");
   const incomplete = problems === undefined ? Boolean(error) : problems.some(isUnread);
 
   return (
@@ -70,14 +80,29 @@ export function ReleaseCheckScreen({
       <p class="hint">{t("studio.check.intro")}</p>
       <ContextTabs
         label={t("studio.check.policy")}
-        tabs={CHECK_POLICIES.map((one) => ({ key: one, href: links.policyHref(one), label: policyLabel(one), current: one === policy && "page" }))}
+        tabs={CHECK_POLICIES.map((one) => ({
+          key: one,
+          href: links.policyHref(one),
+          label: policyLabel(one),
+          current: one === policy && "page",
+        }))}
       />
-      <p class="hint">{t(policy === "pod" ? "studio.check.policyHintPod" : "studio.check.policyHintLibrary")}</p>
+      <p class="hint">
+        {t(policy === "pod" ? "studio.check.policyHintPod" : "studio.check.policyHintLibrary")}
+      </p>
       {problems === undefined ? (
-        error ? <ErrorMessage error={errorText(error)} /> : <Loading label={t("studio.check.checking")} />
+        error ? (
+          <ErrorMessage error={errorText(error)} />
+        ) : (
+          <Loading label={t("studio.check.checking")} />
+        )
       ) : (
         <>
-          <p role="status">{problems.length === 0 ? t("studio.check.clear") : t("studio.check.summary", { count: problems.length })}</p>
+          <p role="status">
+            {problems.length === 0
+              ? t("studio.check.clear")
+              : t("studio.check.summary", { count: problems.length })}
+          </p>
           <ProblemList draft={draft} problems={problems} targetHref={links.targetHref} />
         </>
       )}
@@ -98,7 +123,9 @@ export function ReleaseCheckScreen({
             {shapes.error ? <ErrorMessage error={errorText(shapes.error)} /> : null}
             {shapes.problems !== undefined && (
               <p>
-                {shapes.problems.length === 0 ? t("studio.check.shapesClear") : t("studio.check.shapesCount", { count: shapes.problems.length })}
+                {shapes.problems.length === 0
+                  ? t("studio.check.shapesClear")
+                  : t("studio.check.shapesCount", { count: shapes.problems.length })}
                 {shapes.stale && ` ${t("studio.check.shapesStale")}`}
               </p>
             )}

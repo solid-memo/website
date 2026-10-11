@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { Pager, paginate } from "./Pager";
@@ -48,9 +52,7 @@ describe("Pager", () => {
 
   it("marks Previous disabled on the first page and Next on the last, and ignores them there", () => {
     const onPageChange = vi.fn();
-    const { rerender } = render(
-      <Pager page={1} pageCount={2} onPageChange={onPageChange} />,
-    );
+    const { rerender } = render(<Pager page={1} pageCount={2} onPageChange={onPageChange} />);
     const previous = screen.getByRole("button", { name: "Previous" });
     const next = screen.getByRole("button", { name: "Next" });
     expect(previous).toHaveAttribute("aria-disabled", "true");

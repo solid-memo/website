@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -15,8 +19,8 @@ import { ReleasePublishScreen, type ReleasePublishLinks } from "./ReleasePublish
  * The release screen's publishing, over the draft as its editor keeps it
  * (`editor`, the metadata's above it): the release check's errors as the
  * draft changes; publishing it (publishRelease), which writes the
- * catalogue, so it waits its turn with the catalogue's other writes, and
- * is held while the catalogue may not be written (useDataCheck); then
+ * catalog, so it waits its turn with the catalog's other writes, and
+ * is held while the catalog may not be written (useDataCheck); then
  * the draft, the drafts and the releases are read afresh, the draft now
  * released. Whether its release is public, making it so again, its next
  * version, and the release saved as a file.
@@ -68,11 +72,27 @@ export function ReleasePublishContainer({
       saving={editor.saving}
       errors={errors}
       links={links}
-      publish={{ pending: publishMutation.isPending, error: errorText(publishMutation.error), run: (url) => publishMutation.mutate(url) }}
+      publish={{
+        pending: publishMutation.isPending,
+        error: errorText(publishMutation.error),
+        run: (url) => publishMutation.mutate(url),
+      }}
       isPublic={publicQuery.data}
-      makePublic={{ pending: publicMutation.isPending, error: errorText(publicMutation.error), run: (url) => publicMutation.mutate(url) }}
-      startNext={{ pending: nextMutation.isPending, error: errorText(nextMutation.error), run: (url) => nextMutation.mutate(url) }}
-      download={{ pending: downloadMutation.isPending, error: errorText(downloadMutation.error), run: () => downloadMutation.mutate() }}
+      makePublic={{
+        pending: publicMutation.isPending,
+        error: errorText(publicMutation.error),
+        run: (url) => publicMutation.mutate(url),
+      }}
+      startNext={{
+        pending: nextMutation.isPending,
+        error: errorText(nextMutation.error),
+        run: (url) => nextMutation.mutate(url),
+      }}
+      download={{
+        pending: downloadMutation.isPending,
+        error: errorText(downloadMutation.error),
+        run: () => downloadMutation.mutate(),
+      }}
       downloaded={downloadMutation.data ?? null}
     />
   );

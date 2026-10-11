@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { test as base, expect, type Page, type TestInfo } from "@playwright/test";
@@ -69,10 +73,15 @@ export const test = base.extend<Fixtures>({
     const api = await playwright.request.newContext({ ignoreHTTPSErrors: true });
     try {
       const account = await createAccount(api, server, runId);
-      testInfo.annotations.push({ type: "webId", description: account.webId }, { type: "pod", description: account.pod });
+      testInfo.annotations.push(
+        { type: "webId", description: account.webId },
+        { type: "pod", description: account.pod },
+      );
       await use(account);
       if (testInfo.status !== testInfo.expectedStatus || failsOn(diagnostics)) {
-        const dump = await dumpPod(api, server, account).catch((error: Error) => `# The pod could not be read: ${error.message}`);
+        const dump = await dumpPod(api, server, account).catch(
+          (error: Error) => `# The pod could not be read: ${error.message}`,
+        );
         await testInfo.attach("pod-dump.ttl", { body: dump, contentType: "text/turtle" });
       }
     } finally {
@@ -103,20 +112,40 @@ export const test = base.extend<Fixtures>({
         found.blockedRequests.push(url.href);
         return route.abort("blockedbyclient");
       });
-      page.on("console", (message) => found.console.push({ type: message.type(), text: message.text(), url: message.location().url || undefined }));
+      page.on("console", (message) =>
+        found.console.push({
+          type: message.type(),
+          text: message.text(),
+          url: message.location().url || undefined,
+        }),
+      );
       page.on("pageerror", (error) => found.pageErrors.push(error.stack ?? String(error)));
       page.on("requestfailed", (request) =>
-        found.failedRequests.push({ method: request.method(), url: request.url(), failure: request.failure()?.errorText ?? "" }),
+        found.failedRequests.push({
+          method: request.method(),
+          url: request.url(),
+          failure: request.failure()?.errorText ?? "",
+        }),
       );
       page.on("response", (response) => {
-        if (response.status() >= 400) found.errorResponses.push({ method: response.request().method(), url: response.url(), status: response.status() });
+        if (response.status() >= 400)
+          found.errorResponses.push({
+            method: response.request().method(),
+            url: response.url(),
+            status: response.status(),
+          });
       });
       const started = new Date();
       await use(found);
-      await testInfo.attach("diagnostics.json", { body: JSON.stringify(found, null, 2), contentType: "application/json" });
+      await testInfo.attach("diagnostics.json", {
+        body: JSON.stringify(found, null, 2),
+        contentType: "application/json",
+      });
       await attachServerLog(testInfo, started, new Date());
       expect.soft(found.pageErrors, "errors thrown in the page (diagnostics.json)").toEqual([]);
-      expect.soft(found.blockedRequests, "requests to hosts other than 127.0.0.1 (diagnostics.json)").toEqual([]);
+      expect
+        .soft(found.blockedRequests, "requests to hosts other than 127.0.0.1 (diagnostics.json)")
+        .toEqual([]);
       expect.soft(found.unexpectedDialogs, "dialogs no step expected").toEqual([]);
     },
     { auto: true },
@@ -130,7 +159,8 @@ export const test = base.extend<Fixtures>({
 export { expect };
 
 /** Whether the journey fails on what diagnostics found, though its steps passed. */
-const failsOn = (found: Diagnostics) => found.pageErrors.length + found.blockedRequests.length + found.unexpectedDialogs.length > 0;
+const failsOn = (found: Diagnostics) =>
+  found.pageErrors.length + found.blockedRequests.length + found.unexpectedDialogs.length > 0;
 
 /** The Solid server's log lines from the journey's time (logs/css.log has a timestamp on each). */
 async function attachServerLog(testInfo: TestInfo, from: Date, to: Date): Promise<void> {
@@ -146,7 +176,10 @@ async function attachServerLog(testInfo: TestInfo, from: Date, to: Date): Promis
     return time >= from.getTime() - 1_000 && time <= to.getTime() + 1_000;
   });
   const note = `# The Solid server's log from ${from.toISOString()} to ${to.toISOString()}: every journey running then, this one among them.`;
-  await testInfo.attach("css.log", { body: [note, ...lines].join("\n"), contentType: "text/plain" });
+  await testInfo.attach("css.log", {
+    body: [note, ...lines].join("\n"),
+    contentType: "text/plain",
+  });
 }
 
 export type { Page };

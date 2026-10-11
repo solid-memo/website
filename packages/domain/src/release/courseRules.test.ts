@@ -1,6 +1,22 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { asked, at, card, chapter, course, distractor, iri, model, RELEASE, step, text } from "../testing/releaseModel";
+import {
+  asked,
+  at,
+  card,
+  chapter,
+  course,
+  distractor,
+  iri,
+  model,
+  RELEASE,
+  step,
+  text,
+} from "../testing/releaseModel";
 import { EDUCATION_THEME } from "../dcat";
 import { courseProblems, readinessProblems } from "./courseRules";
 import type { ReleaseProblem } from "./problems";
@@ -17,7 +33,8 @@ function outline() {
 }
 
 /** Each problem's code, subject and params, for a short comparison. */
-const brief = (problems: readonly ReleaseProblem[]) => problems.map(({ code, subject, params }) => ({ code, subject, params }));
+const brief = (problems: readonly ReleaseProblem[]) =>
+  problems.map(({ code, subject, params }) => ({ code, subject, params }));
 
 describe("courseProblems", () => {
   it("accepts a course whose outline holds together, and a deck that is no course", () => {
@@ -29,21 +46,35 @@ describe("courseProblems", () => {
     expect(brief(courseProblems({ ...course(outline()), types: [] }))).toEqual([
       { code: "outlineWithoutCourse", subject: RELEASE, params: {} },
     ]);
-    expect(brief(courseProblems(model({ steps: [step("s-1", "ch-1", 0, [])] })))[0].code).toBe("outlineWithoutCourse");
+    expect(brief(courseProblems(model({ steps: [step("s-1", "ch-1", 0, [])] })))[0].code).toBe(
+      "outlineWithoutCourse",
+    );
   });
 
   it("names a course without a chapter", () => {
-    expect(brief(courseProblems(course({})))).toEqual([{ code: "courseWithoutChapter", subject: RELEASE, params: {} }]);
+    expect(brief(courseProblems(course({})))).toEqual([
+      { code: "courseWithoutChapter", subject: RELEASE, params: {} },
+    ]);
   });
 
   it("names a course that does not study front to back, or states it more than once", () => {
     const backwards = [iri(SM.backToFront)];
     expect(courseProblems({ ...course(outline()), studyDirection: backwards })).toEqual([
-      { severity: "error", subject: RELEASE, field: SM.studyDirection, code: "courseDirection", params: { stated: backwards } },
+      {
+        severity: "error",
+        subject: RELEASE,
+        field: SM.studyDirection,
+        code: "courseDirection",
+        params: { stated: backwards },
+      },
     ]);
-    expect(courseProblems({ ...course(outline()), studyDirection: [] })[0].code).toBe("courseDirection");
+    expect(courseProblems({ ...course(outline()), studyDirection: [] })[0].code).toBe(
+      "courseDirection",
+    );
     const twice = [iri(SM.frontToBack), iri(SM.frontToBack)];
-    expect(courseProblems({ ...course(outline()), studyDirection: twice })[0].code).toBe("courseDirection");
+    expect(courseProblems({ ...course(outline()), studyDirection: twice })[0].code).toBe(
+      "courseDirection",
+    );
   });
 
   it("names a chapter that is part of something else than its release, and a step that is part of no chapter of it", () => {
@@ -51,7 +82,11 @@ describe("courseProblems", () => {
     o.chapters[1].isPartOf = [RELEASE, "https://example.com/other"];
     o.steps[1].isPartOf = [at("ch-2"), at("q-1")];
     expect(brief(courseProblems(course(o)))).toEqual([
-      { code: "chapterPartOf", subject: at("ch-2"), params: { parts: [RELEASE, "https://example.com/other"] } },
+      {
+        code: "chapterPartOf",
+        subject: at("ch-2"),
+        params: { parts: [RELEASE, "https://example.com/other"] },
+      },
       { code: "stepPartOf", subject: at("s-2"), params: { part: at("q-1") } },
     ]);
   });
@@ -74,10 +109,27 @@ describe("courseProblems", () => {
         distractors: [...q1.distractors, ...q2.distractors, ...q3.distractors],
       }),
     );
-    expect(problems.map(({ code, subject, field, params }) => ({ code, subject, field, params }))).toEqual([
-      { code: "askedNotACard", subject: at("s-1"), field: SM.checkedBy, params: { card: at("nothing") } },
-      { code: "askedNotACard", subject: at("ch-1"), field: SM.reviewQuestion, params: { card: "https://example.com/card" } },
-      { code: "askedRetired", subject: at("ch-2"), field: SM.reviewQuestion, params: { card: at("q-4") } },
+    expect(
+      problems.map(({ code, subject, field, params }) => ({ code, subject, field, params })),
+    ).toEqual([
+      {
+        code: "askedNotACard",
+        subject: at("s-1"),
+        field: SM.checkedBy,
+        params: { card: at("nothing") },
+      },
+      {
+        code: "askedNotACard",
+        subject: at("ch-1"),
+        field: SM.reviewQuestion,
+        params: { card: "https://example.com/card" },
+      },
+      {
+        code: "askedRetired",
+        subject: at("ch-2"),
+        field: SM.reviewQuestion,
+        params: { card: at("q-4") },
+      },
     ]);
   });
 
@@ -90,7 +142,11 @@ describe("courseProblems", () => {
     );
     expect(brief(courseProblems(release))).toEqual([
       { code: "notADistractor", subject: at("se"), params: { distractor: at("q-1") } },
-      { code: "distractorShared", subject: at("q-1-a"), params: { cards: [at("q-1"), at("q-2"), at("se")] } },
+      {
+        code: "distractorShared",
+        subject: at("q-1-a"),
+        params: { cards: [at("q-1"), at("q-2"), at("se")] },
+      },
     ]);
   });
 
@@ -99,7 +155,11 @@ describe("courseProblems", () => {
     o.steps[1].checkedBy.push(at("q-1"), at("q-2"));
     expect(brief(courseProblems(course(o)))).toEqual([
       { code: "checkedTwice", subject: at("q-1"), params: { steps: [at("s-1"), at("s-2")] } },
-      { code: "checkedAndReviewed", subject: at("q-2"), params: { steps: [at("s-2")], chapters: [at("ch-1")] } },
+      {
+        code: "checkedAndReviewed",
+        subject: at("q-2"),
+        params: { steps: [at("s-2")], chapters: [at("ch-1")] },
+      },
     ]);
   });
 
@@ -107,12 +167,19 @@ describe("courseProblems", () => {
     const problems = courseProblems(
       course({
         cards: [
-          card("q-1", { back: [], distractors: [iri(at("q-1-a")), iri(at("q-1-b")), iri(at("q-1-c")), text("q-1-d")] }),
+          card("q-1", {
+            back: [],
+            distractors: [iri(at("q-1-a")), iri(at("q-1-b")), iri(at("q-1-c")), text("q-1-d")],
+          }),
           card("q-2"),
         ],
         chapters: [chapter("ch-1", 0, { reviewQuestions: [at("q-2")] })],
         steps: [step("s-1", "ch-1", 0, ["q-1"])],
-        distractors: [distractor("q-1-a"), distractor("q-1-b", { retired: true }), distractor("q-1-c", { typed: false })],
+        distractors: [
+          distractor("q-1-a"),
+          distractor("q-1-b", { retired: true }),
+          distractor("q-1-c", { typed: false }),
+        ],
       }),
     );
     expect(brief(problems)).toEqual([
@@ -128,8 +195,14 @@ describe("courseProblems", () => {
     const problems = courseProblems(
       course({
         cards: [
-          card("q-1", { back: [text("Answer"), text("Svar", "sv")], distractors: [iri(at("q-1-a")), iri(at("q-1-b"))] }),
-          card("q-2", { back: [text("42", "")], distractors: [iri(at("q-2-a")), iri(at("q-2-b"))] }),
+          card("q-1", {
+            back: [text("Answer"), text("Svar", "sv")],
+            distractors: [iri(at("q-1-a")), iri(at("q-1-b"))],
+          }),
+          card("q-2", {
+            back: [text("42", "")],
+            distractors: [iri(at("q-2-a")), iri(at("q-2-b"))],
+          }),
         ],
         chapters: [chapter("ch-1", 0)],
         steps: [step("s-1", "ch-1", 0, ["q-1", "q-2"])],
@@ -142,8 +215,16 @@ describe("courseProblems", () => {
       }),
     );
     expect(brief(problems)).toEqual([
-      { code: "distractorLanguages", subject: at("q-1-b"), params: { card: at("q-1"), missing: ["sv"] } },
-      { code: "distractorLanguages", subject: at("q-2-b"), params: { card: at("q-2"), missing: [""] } },
+      {
+        code: "distractorLanguages",
+        subject: at("q-1-b"),
+        params: { card: at("q-1"), missing: ["sv"] },
+      },
+      {
+        code: "distractorLanguages",
+        subject: at("q-2-b"),
+        params: { card: at("q-2"), missing: [""] },
+      },
     ]);
   });
 
@@ -164,8 +245,16 @@ describe("courseProblems", () => {
       }),
     );
     expect(brief(problems)).toEqual([
-      { code: "chapterPositions", subject: RELEASE, params: { chapters: [at("ch-1"), at("ch-2")], position: "0" } },
-      { code: "stepPositions", subject: at("ch-1"), params: { steps: [at("s-1"), at("s-2")], chapter: at("ch-1"), position: "0" } },
+      {
+        code: "chapterPositions",
+        subject: RELEASE,
+        params: { chapters: [at("ch-1"), at("ch-2")], position: "0" },
+      },
+      {
+        code: "stepPositions",
+        subject: at("ch-1"),
+        params: { steps: [at("s-1"), at("s-2")], chapter: at("ch-1"), position: "0" },
+      },
     ]);
   });
 
@@ -177,7 +266,9 @@ describe("courseProblems", () => {
         steps: [step("s-1", "ch-1", 0, ["q-1"], { retired: true })],
       }),
     );
-    expect(brief(problems)).toEqual([{ code: "chapterWithoutStep", subject: at("ch-1"), params: {} }]);
+    expect(brief(problems)).toEqual([
+      { code: "chapterWithoutStep", subject: at("ch-1"), params: {} },
+    ]);
   });
 });
 
@@ -204,32 +295,80 @@ describe("readinessProblems", () => {
     distribution: [iri(at("turtle"))],
     themes: [iri(EDUCATION_THEME)],
   };
-  const brief = (problems: readonly ReleaseProblem[]) => problems.map(({ code, subject, field, params }) => ({ code, subject, field, params }));
+  const brief = (problems: readonly ReleaseProblem[]) =>
+    problems.map(({ code, subject, field, params }) => ({ code, subject, field, params }));
 
   it("accepts a release with what a release states", () => {
     expect(readinessProblems({ ...ready(), ...stated })).toEqual([]);
   });
 
   it("names what the release lacks: a field, an English text, the theme EDUC", () => {
-    const required = (subject: string, field: string) => ({ code: "required", subject, field, params: {} });
-    expect(brief(readinessProblems({ ...ready(), ...stated, title: [], description: [text("Om", "sv")], publisher: [], version: [], inSeries: [], isVersionOf: [], distribution: [], themes: [] }))).toEqual([
+    const required = (subject: string, field: string) => ({
+      code: "required",
+      subject,
+      field,
+      params: {},
+    });
+    expect(
+      brief(
+        readinessProblems({
+          ...ready(),
+          ...stated,
+          title: [],
+          description: [text("Om", "sv")],
+          publisher: [],
+          version: [],
+          inSeries: [],
+          isVersionOf: [],
+          distribution: [],
+          themes: [],
+        }),
+      ),
+    ).toEqual([
       required(RELEASE, `${DCTERMS}title`),
-      { code: "missingLanguage", subject: RELEASE, field: `${DCTERMS}description`, params: { language: "en" } },
+      {
+        code: "missingLanguage",
+        subject: RELEASE,
+        field: `${DCTERMS}description`,
+        params: { language: "en" },
+      },
       required(RELEASE, `${DCTERMS}publisher`),
       required(RELEASE, `${DCAT}version`),
       required(RELEASE, `${DCAT}inSeries`),
       required(RELEASE, `${DCAT}isVersionOf`),
       required(RELEASE, `${DCAT}distribution`),
-      { code: "missingTheme", subject: RELEASE, field: `${DCAT}theme`, params: { theme: EDUCATION_THEME } },
+      {
+        code: "missingTheme",
+        subject: RELEASE,
+        field: `${DCAT}theme`,
+        params: { theme: EDUCATION_THEME },
+      },
     ]);
   });
 
   it("names what a chapter or a step lacks, retired or not", () => {
     const release = { ...ready(), ...stated };
-    release.chapters[1] = { ...release.chapters[1], retired: true, title: [text("Kapitel", "sv")], isPartOf: [], positions: [] };
-    release.steps[1] = { ...release.steps[1], theory: [], checkedBy: [], isPartOf: [], positions: [] };
+    release.chapters[1] = {
+      ...release.chapters[1],
+      retired: true,
+      title: [text("Kapitel", "sv")],
+      isPartOf: [],
+      positions: [],
+    };
+    release.steps[1] = {
+      ...release.steps[1],
+      theory: [],
+      checkedBy: [],
+      isPartOf: [],
+      positions: [],
+    };
     expect(brief(readinessProblems(release))).toEqual([
-      { code: "missingLanguage", subject: at("ch-2"), field: `${DCTERMS}title`, params: { language: "en" } },
+      {
+        code: "missingLanguage",
+        subject: at("ch-2"),
+        field: `${DCTERMS}title`,
+        params: { language: "en" },
+      },
       { code: "required", subject: at("ch-2"), field: `${SCHEMA}isPartOf`, params: {} },
       { code: "required", subject: at("ch-2"), field: `${SCHEMA}position`, params: {} },
       { code: "required", subject: at("s-2"), field: SM.theory, params: {} },

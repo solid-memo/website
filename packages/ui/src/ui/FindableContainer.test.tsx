@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -39,7 +43,10 @@ describe("FindableContainer", () => {
         .fn<UseCases["dataClassRegistrations"]>()
         .mockResolvedValueOnce(someMissing)
         .mockResolvedValue({
-          registrations: someMissing.registrations.map((registration) => ({ ...registration, registered: true })),
+          registrations: someMissing.registrations.map((registration) => ({
+            ...registration,
+            registered: true,
+          })),
           privateIndexMissing: false,
           unreadableIndexes: [],
         }),
@@ -50,7 +57,7 @@ describe("FindableContainer", () => {
     const items = (await within(section).findAllByRole("listitem")).map((item) => item.textContent);
     expect(items).toEqual([
       "This instance (Solid Memo's folder): in your public type index",
-      "Its catalogue of decks: in your public type index",
+      "Its catalog of decks: in your public type index",
       "Decks: missing from your public type index",
       "Cards: missing from your public type index",
       "Review states: missing from your private type index",
@@ -70,14 +77,18 @@ describe("FindableContainer", () => {
   it("says why review states and answers are not registered without a private type index", async () => {
     const useCases = makeUseCasesFake({
       dataClassRegistrations: vi.fn(async () => ({
-        registrations: [{ dataClass: "instance" as const, index: "public" as const, registered: true }],
+        registrations: [
+          { dataClass: "instance" as const, index: "public" as const, registered: true },
+        ],
         privateIndexMissing: true,
         unreadableIndexes: [],
       })),
     });
     renderContainer(useCases);
     expect(
-      await screen.findByText(/so they are only ever registered in your private type index. You have none/),
+      await screen.findByText(
+        /so they are only ever registered in your private type index. You have none/,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText("Everything is registered.")).toBeInTheDocument();
   });
@@ -85,7 +96,9 @@ describe("FindableContainer", () => {
   it("says which type index could not be read", async () => {
     const useCases = makeUseCasesFake({
       dataClassRegistrations: vi.fn(async () => ({
-        registrations: [{ dataClass: "instance" as const, index: "public" as const, registered: true }],
+        registrations: [
+          { dataClass: "instance" as const, index: "public" as const, registered: true },
+        ],
         privateIndexMissing: false,
         unreadableIndexes: ["private" as const],
       })),

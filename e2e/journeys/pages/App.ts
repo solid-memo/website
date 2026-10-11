@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
 import type { Diagnostics } from "../fixtures.ts";
 import { text, textPattern, type Locale } from "../harness/strings.ts";
@@ -109,7 +113,10 @@ export class App {
       await body();
       const unmet = this.expectedDialogs.splice(0).map(String);
       expect(unmet, "dialogs this step expected that never came").toEqual([]);
-      await this.testInfo.attach(`${title}.png`, { body: await this.page.screenshot(), contentType: "image/png" });
+      await this.testInfo.attach(`${title}.png`, {
+        body: await this.page.screenshot(),
+        contentType: "image/png",
+      });
     });
   }
 }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { execFile } from "node:child_process";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
@@ -5,7 +9,13 @@ import { promisify } from "node:util";
 import { DataFactory, Writer, type Quad, type Quad_Object } from "n3";
 import type { ShapeEngine } from "../src/engine.ts";
 import { inspectChunks } from "@solid-memo/markdown/chunks";
-import { markdownProblems as textProblems, OPTION, PROSE, SIDE, type FieldRule } from "@solid-memo/markdown/problems";
+import {
+  markdownProblems as textProblems,
+  OPTION,
+  PROSE,
+  SIDE,
+  type FieldRule,
+} from "@solid-memo/markdown/problems";
 import { continuityProblems } from "@solid-memo/domain/release/continuityRules";
 import { courseProblems as releaseCourseProblems } from "@solid-memo/domain/release/courseRules";
 import {
@@ -14,10 +24,17 @@ import {
   releasePathOf,
   versionGapProblems,
 } from "@solid-memo/domain/release/libraryRules";
-import { markdownProblems as releaseMarkdownProblems, type FieldRuleName } from "@solid-memo/domain/release/markdownFields";
+import {
+  markdownProblems as releaseMarkdownProblems,
+  type FieldRuleName,
+} from "@solid-memo/domain/release/markdownFields";
 import { libraryReleaseUrl, librarySeriesUrl } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { SCHEMA_NS, type ReleaseModel, type ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
+import {
+  SCHEMA_NS,
+  type ReleaseModel,
+  type ReleaseTerm,
+} from "@solid-memo/domain/release/releaseModel";
 import { keptInIndex, lastIssued, seriesEntry } from "@solid-memo/domain/release/seriesEntry";
 import { formatTurtle } from "@solid-memo/turtle/formatTurtle";
 import { objectsOf, parseTurtle, RDF_TYPE } from "@solid-memo/turtle/rdf";
@@ -38,7 +55,7 @@ import {
  * The deck library (see docs/deck-library.md), published with the site
  * from this repository's decks/ folder: every version of every deck,
  * decks/<name>/v<N>.ttl, frozen once published, and decks/index.ttl, a
- * DCAT catalogue generated from them that the app browses.
+ * DCAT catalog generated from them that the app browses.
  *
  * `npm run library` writes the index; `npm run library:check` fails when
  * it is out of date. Both check the library: the layout (nothing but the
@@ -50,7 +67,8 @@ import {
  * a card, chapter, step or distractor of the one before it. With
  * `--base <git ref>`, a version published at that ref must be there
  * still, byte for byte: a published version is never edited or removed,
- * only followed by the next. The rules that read a release's data are
+ * only followed by the next, and a version new since then names the
+ * library's contact, not an email (contactProblems). The rules that read a release's data are
  * the domain's (@solid-memo/domain/release), which the Studio runs too:
  * this file reads the files, builds each release's model
  * (quadsToReleaseModel.ts), words the problems in English
@@ -65,12 +83,20 @@ const XSD = "http://www.w3.org/2001/XMLSchema#";
 const DATA_THEMES = "http://publications.europa.eu/resource/authority/data-theme";
 const TOPICS = `${VOCAB_BASE}topics.ttl`;
 const PROV = "http://www.w3.org/ns/prov#";
+const VCARD = "http://www.w3.org/2006/vcard/ns#";
 
 /** Where the site publishes the library. Every IRI of it is under this: the index, its series and publisher, and every release. */
 export const DECKS_BASE = `${SITE}decks/`;
 export const INDEX_FILE = "index.ttl";
 export const INDEX_URL = `${DECKS_BASE}${INDEX_FILE}`;
 export const PUBLISHER_URL = `${INDEX_URL}#solid-memo`;
+
+/**
+ * The library's contact (docs/deck-library.md, Contact): the project's
+ * issue tracker. A new release names it as its dcat:contactPoint, a
+ * vcard:Kind with this vcard:hasURL, and names no one's email.
+ */
+export const CONTACT_URL = "https://github.com/solid-memo/website/issues";
 
 /** The deck whose series the index names the course for newcomers (solid-memo:newcomerCourse); undefined names none. See docs/deck-library.md. */
 export const NEWCOMER_COURSE: string | undefined = "getting-started";
@@ -129,7 +155,12 @@ export function releasesOf(files: LibraryFiles): { releases: DeckRelease[]; prob
     }
     const { deck, version } = at;
     try {
-      releases.push({ deck, version, turtle, quads: parseTurtle(turtle, releaseUrlOf(deck, version)) });
+      releases.push({
+        deck,
+        version,
+        turtle,
+        quads: parseTurtle(turtle, releaseUrlOf(deck, version)),
+      });
     } catch (error) {
       problems.push(`decks/${path}: ${(error as Error).message}`);
     }
@@ -173,20 +204,21 @@ function n3Term(term: ReleaseTerm): Quad_Object {
  * dcat:DatasetSeries (and dcat:Dataset) whose members are its releases,
  * as seriesEntry (@solid-memo/domain/release/seriesEntry) describes it:
  * the current release's title, description, themes and keywords, every
- * older release summarised, the current one described in full but for
+ * older release summarized, the current one described in full but for
  * its cards, a course's chapters, steps and distractors and the record
  * of how it was made (its schema:Course type stays, which tells a
  * course), plus sm:cardCount, the cards it has in use — so the library
  * can be listed from the index alone. The releases must be sorted by
  * deck then version.
- * The catalogue names `newcomerCourse`'s series the course for newcomers
+ * The catalog names `newcomerCourse`'s series the course for newcomers
  * (solid-memo:newcomerCourse), even when there is no such deck, which
  * newcomerProblems then reports.
  */
 export function buildIndex(releases: readonly DeckRelease[], newcomerCourse?: string): string {
   const { namedNode, literal, quad } = DataFactory;
   const out: Quad[] = [];
-  const add = (s: string, p: string, o: Quad_Object) => out.push(quad(namedNode(s), namedNode(p), o));
+  const add = (s: string, p: string, o: Quad_Object) =>
+    out.push(quad(namedNode(s), namedNode(p), o));
   const addAll = (s: string, p: string, terms: readonly ReleaseTerm[]) => {
     for (const term of terms) add(s, p, n3Term(term));
   };
@@ -196,13 +228,19 @@ export function buildIndex(releases: readonly DeckRelease[], newcomerCourse?: st
 
   add(INDEX_URL, RDF_TYPE, iri(`${DCAT}Catalog`));
   add(INDEX_URL, `${DCTERMS}title`, literal("Solid Memo deck library"));
-  add(INDEX_URL, `${DCTERMS}description`, literal("Ready-made flashcard decks to import into your own Solid pod."));
+  add(
+    INDEX_URL,
+    `${DCTERMS}description`,
+    literal("Ready-made flashcard decks to import into your own Solid pod."),
+  );
   add(INDEX_URL, `${DCTERMS}publisher`, iri(PUBLISHER_URL));
-  if (modified !== undefined) add(INDEX_URL, `${DCTERMS}modified`, literal(modified, iri(`${XSD}dateTime`)));
+  if (modified !== undefined)
+    add(INDEX_URL, `${DCTERMS}modified`, literal(modified, iri(`${XSD}dateTime`)));
   add(INDEX_URL, `${DCAT}themeTaxonomy`, iri(DATA_THEMES));
   add(INDEX_URL, `${DCAT}themeTaxonomy`, iri(TOPICS));
   for (const deck of decks) add(INDEX_URL, `${DCAT}dataset`, iri(seriesUrlOf(deck)));
-  if (newcomerCourse !== undefined) add(INDEX_URL, `${SM_NS}newcomerCourse`, iri(seriesUrlOf(newcomerCourse)));
+  if (newcomerCourse !== undefined)
+    add(INDEX_URL, `${SM_NS}newcomerCourse`, iri(seriesUrlOf(newcomerCourse)));
   add(PUBLISHER_URL, RDF_TYPE, iri(`${FOAF}Agent`));
   add(PUBLISHER_URL, `${FOAF}name`, literal("Solid Memo"));
 
@@ -213,7 +251,11 @@ export function buildIndex(releases: readonly DeckRelease[], newcomerCourse?: st
     const { series } = entry;
     add(series, RDF_TYPE, iri(`${DCAT}DatasetSeries`));
     add(series, RDF_TYPE, iri(`${DCAT}Dataset`));
-    add(series, `${SM_NS}formatVersion`, literal(String(LIBRARY_DECK_SERIES_FORMAT), iri(`${XSD}integer`)));
+    add(
+      series,
+      `${SM_NS}formatVersion`,
+      literal(String(LIBRARY_DECK_SERIES_FORMAT), iri(`${XSD}integer`)),
+    );
     // A release without a title or description fails validation, which says so.
     addAll(series, `${DCTERMS}title`, entry.title);
     addAll(series, `${DCTERMS}description`, entry.description);
@@ -241,7 +283,7 @@ export function buildIndex(releases: readonly DeckRelease[], newcomerCourse?: st
   return writeIndex(distinct(out));
 }
 /**
- * Each triple once: decks share nodes (a licence, a source, an agent),
+ * Each triple once: decks share nodes (a license, a source, an agent),
  * which every deck's release describes, and a graph is a set.
  */
 function distinct(quads: readonly Quad[]): Quad[] {
@@ -272,6 +314,7 @@ function writeIndex(quads: readonly Quad[]): string {
       adms: ADMS,
       foaf: FOAF,
       prov: PROV,
+      vcard: VCARD,
       topic: `${TOPICS}#`,
       xsd: XSD,
     },
@@ -324,7 +367,9 @@ export function metadataProblems(release: DeckRelease): string[] {
   const problems: string[] = [];
   const base = /^@base\s+<([^>]*)>/m.exec(release.turtle)?.[1];
   if (base !== url) {
-    problems.push(`${labelOf(deck, version)}: states ${base === undefined ? "no @base" : `@base <${base}>`}; its path says @base <${url}>.`);
+    problems.push(
+      `${labelOf(deck, version)}: states ${base === undefined ? "no @base" : `@base <${base}>`}; its path says @base <${url}>.`,
+    );
   }
   const place = {
     version,
@@ -351,13 +396,18 @@ const RULES: Record<FieldRuleName, FieldRule> = { side: SIDE, option: OPTION, pr
 export function markdownProblems(release: DeckRelease): string[] {
   return messagesOf(
     release,
-    releaseMarkdownProblems(modelOf(release), { problems: (text, rule) => textProblems(text, RULES[rule]), chunks: inspectChunks }),
+    releaseMarkdownProblems(modelOf(release), {
+      problems: (text, rule) => textProblems(text, RULES[rule]),
+      chunks: inspectChunks,
+    }),
   );
 }
 
 /** A code point as Unicode writes it: U+00E9. */
 function codePoints(text: string): string {
-  return [...text].map((c) => `U+${c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`).join(" ");
+  return [...text]
+    .map((c) => `U+${c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`)
+    .join(" ");
 }
 
 /**
@@ -369,9 +419,17 @@ function codePoints(text: string): string {
  * a reader types does. Each names the first character (grapheme) that
  * composes differently.
  */
-export function normalizationProblems(label: string, url: string, quads: readonly Quad[]): string[] {
+export function normalizationProblems(
+  label: string,
+  url: string,
+  quads: readonly Quad[],
+): string[] {
   const shown = (subject: Quad["subject"]) =>
-    subject.termType === "BlankNode" ? "a blank node's" : subject.value.startsWith(`${url}#`) ? `<${subject.value.slice(url.length)}>` : `<${subject.value}>`;
+    subject.termType === "BlankNode"
+      ? "a blank node's"
+      : subject.value.startsWith(`${url}#`)
+        ? `<${subject.value.slice(url.length)}>`
+        : `<${subject.value}>`;
   const graphemes = new Intl.Segmenter("und", { granularity: "grapheme" });
   const problems: string[] = [];
   for (const q of quads) {
@@ -390,7 +448,7 @@ export function normalizationProblems(label: string, url: string, quads: readonl
 
 /**
  * What the shapes cannot say about the course the index offers to
- * newcomers (solid-memo:newcomerCourse on its catalogue, which no shape
+ * newcomers (solid-memo:newcomerCourse on its catalog, which no shape
  * owns): at most one, a deck of the library whose current release is a
  * schema:Course.
  */
@@ -399,18 +457,53 @@ export function newcomerProblems(indexQuads: readonly Quad[]): string[] {
   const problems: string[] = [];
   const named = objectsOf(indexQuads, INDEX_URL, `${SM_NS}newcomerCourse`);
   if (named.length > 1) {
-    problems.push(`${label}: names ${named.length} courses for newcomers by solid-memo:newcomerCourse: at most one.`);
+    problems.push(
+      `${label}: names ${named.length} courses for newcomers by solid-memo:newcomerCourse: at most one.`,
+    );
   }
   const decks = new Set(objectsOf(indexQuads, INDEX_URL, `${DCAT}dataset`).map((o) => o.value));
-  const isCourse = (release: Quad_Object) => objectsOf(indexQuads, release.value, RDF_TYPE).some((o) => o.value === `${SCHEMA_NS}Course`);
+  const isCourse = (release: Quad_Object) =>
+    objectsOf(indexQuads, release.value, RDF_TYPE).some((o) => o.value === `${SCHEMA_NS}Course`);
   for (const course of named) {
-    const value = course.termType === "Literal" ? JSON.stringify(course.value) : `<${course.value}>`;
+    const value =
+      course.termType === "Literal" ? JSON.stringify(course.value) : `<${course.value}>`;
     const shown = `${label}: names ${value} by solid-memo:newcomerCourse`;
     if (course.termType !== "NamedNode") problems.push(`${shown}, which is no IRI.`);
     else if (!decks.has(course.value)) problems.push(`${shown}, which is no deck of the library.`);
     else if (!objectsOf(indexQuads, course.value, `${DCAT}hasCurrentVersion`).some(isCourse)) {
       problems.push(`${shown}, which is not a course: its current release is no schema:Course.`);
     }
+  }
+  return problems;
+}
+
+/**
+ * What a new release says of the library's contact (docs/deck-library.md,
+ * Contact), which main checks on the versions not published at `--base`:
+ * no foaf:mbox on any subject, and as the release's dcat:contactPoint
+ * the library's contact, a vcard:Kind of the release with vcard:hasURL
+ * <CONTACT_URL>.
+ */
+export function contactProblems(release: DeckRelease): string[] {
+  const label = labelOf(release.deck, release.version);
+  const url = releaseUrlOf(release.deck, release.version);
+  const shown = (subject: string) =>
+    subject.startsWith(`${url}#`) ? `<${subject.slice(url.length)}>` : `<${subject}>`;
+  const problems = release.quads
+    .filter((q) => q.predicate.value === `${FOAF}mbox`)
+    .map(
+      (q) =>
+        `${label}: ${shown(q.subject.value)} states foaf:mbox: a new version names no one's email; the library's contact is its dcat:contactPoint.`,
+    );
+  const isContact = (point: Quad_Object) =>
+    objectsOf(release.quads, point.value, RDF_TYPE).some((o) => o.value === `${VCARD}Kind`) &&
+    objectsOf(release.quads, point.value, `${VCARD}hasURL`).some(
+      (o) => o.termType === "NamedNode" && o.value === CONTACT_URL,
+    );
+  if (!objectsOf(release.quads, url, `${DCAT}contactPoint`).some(isContact)) {
+    problems.push(
+      `${label}: states no dcat:contactPoint that is the library's contact: a new version states \`<> dcat:contactPoint <#contact>\` and \`<#contact> a vcard:Kind ; vcard:hasURL <${CONTACT_URL}>\`.`,
+    );
   }
   return problems;
 }
@@ -449,26 +542,48 @@ export async function validateLibrary(
   for (const release of releases) {
     const label = labelOf(release.deck, release.version);
     problems.push(...metadataProblems(release));
-    const before = releases.find((r) => r.deck === release.deck && r.version === release.version - 1);
+    const before = releases.find(
+      (r) => r.deck === release.deck && r.version === release.version - 1,
+    );
     if (before !== undefined) {
       // Its path fixes each version, so metadataProblems names one that is not the one before it plus one.
-      const continuity = continuityProblems(modelOf(before), modelOf(release)).filter((p) => p.code !== "versionNotNext");
+      const continuity = continuityProblems(modelOf(before), modelOf(release)).filter(
+        (p) => p.code !== "versionNotNext",
+      );
       problems.push(...messagesOf(release, continuity));
     }
     problems.push(...courseProblems(release), ...markdownProblems(release));
-    problems.push(...normalizationProblems(label, releaseUrlOf(release.deck, release.version), release.quads));
     problems.push(
-      ...(await problemsOf(validateTurtleDocument(label, release.quads, validators.shapes, "library"))),
-      ...(await problemsOf(validateProfile(label, release.quads, validators.dcatAp, [...validators.reference, ...indexQuads]))),
-      ...(await problemsOf(validateProfile(label, release.quads, validators.skos, validators.reference))),
+      ...normalizationProblems(label, releaseUrlOf(release.deck, release.version), release.quads),
+    );
+    problems.push(
+      ...(await problemsOf(
+        validateTurtleDocument(label, release.quads, validators.shapes, "library"),
+      )),
+      ...(await problemsOf(
+        validateProfile(label, release.quads, validators.dcatAp, [
+          ...validators.reference,
+          ...indexQuads,
+        ]),
+      )),
+      ...(await problemsOf(
+        validateProfile(label, release.quads, validators.skos, validators.reference),
+      )),
     );
   }
   const label = `decks/${INDEX_FILE}`;
-  problems.push(...newcomerProblems(indexQuads), ...normalizationProblems(label, INDEX_URL, indexQuads));
+  problems.push(
+    ...newcomerProblems(indexQuads),
+    ...normalizationProblems(label, INDEX_URL, indexQuads),
+  );
   problems.push(
     ...(await problemsOf(validateTurtleDocument(label, indexQuads, validators.shapes, "library"))),
-    ...(await problemsOf(validateProfile(label, indexQuads, validators.dcatAp, validators.reference))),
-    ...(await problemsOf(validateProfile(label, indexQuads, validators.skos, validators.reference))),
+    ...(await problemsOf(
+      validateProfile(label, indexQuads, validators.dcatAp, validators.reference),
+    )),
+    ...(await problemsOf(
+      validateProfile(label, indexQuads, validators.skos, validators.reference),
+    )),
   );
   return problems;
 }
@@ -485,9 +600,13 @@ export function baseProblems(files: LibraryFiles, published: LibraryFiles, ref: 
     if (path === INDEX_FILE) continue;
     const now = files.get(path);
     if (now === undefined) {
-      problems.push(`decks/${path} was published at ${ref} and is gone: a published version is never removed.`);
+      problems.push(
+        `decks/${path} was published at ${ref} and is gone: a published version is never removed.`,
+      );
     } else if (now !== turtle) {
-      problems.push(`decks/${path} has changed since ${ref}: a published version is never edited; publish the next version instead.`);
+      problems.push(
+        `decks/${path} has changed since ${ref}: a published version is never edited; publish the next version instead.`,
+      );
     }
   }
   return problems;
@@ -506,13 +625,16 @@ export interface LibraryIo {
   log(message: string): void;
 }
 
-const USAGE = "Usage: npm run library [-- --base <git ref>], or npm run library:check [-- --base <git ref>]";
+const USAGE =
+  "Usage: npm run library [-- --base <git ref>], or npm run library:check [-- --base <git ref>]";
 
 /**
  * `npm run library` writes decks/index.ttl from the releases;
  * `npm run library:check` (`--check`) fails if it is not what they make.
  * Both validate the library, and with `--base <git ref>` check that no
- * version published at that ref was edited or removed. Exit code 0 when
+ * version published at that ref was edited or removed, and that each
+ * version new since then names the library's contact and no email
+ * (contactProblems). Exit code 0 when
  * the library is valid (and, in check mode, its index up to date).
  */
 export async function main(argv: readonly string[], io: LibraryIo): Promise<number> {
@@ -521,7 +643,9 @@ export async function main(argv: readonly string[], io: LibraryIo): Promise<numb
   const check = args.includes("--check");
   const baseAt = args.indexOf("--base");
   const ref = baseAt === -1 ? undefined : args[baseAt + 1];
-  const known = args.every((arg, i) => arg === "--check" || arg === "--base" || (baseAt !== -1 && i === baseAt + 1));
+  const known = args.every(
+    (arg, i) => arg === "--check" || arg === "--base" || (baseAt !== -1 && i === baseAt + 1),
+  );
   if (!known || (baseAt !== -1 && (ref === undefined || ref.startsWith("-")))) {
     io.log(USAGE);
     return 1;
@@ -530,11 +654,20 @@ export async function main(argv: readonly string[], io: LibraryIo): Promise<numb
     const files = await io.readFiles();
     const { releases, problems } = releasesOf(files);
     const index = buildIndex(releases, io.newcomerCourse);
-    if (ref !== undefined) problems.push(...baseProblems(files, await io.readFilesAt(ref), ref));
+    if (ref !== undefined) {
+      const published = await io.readFilesAt(ref);
+      problems.push(...baseProblems(files, published, ref));
+      // A version not published at the ref is new: it names the library's contact, not an email.
+      for (const release of releases.filter((r) => !published.has(`${r.deck}/v${r.version}.ttl`))) {
+        problems.push(...contactProblems(release));
+      }
+    }
     if (check) {
       const stated = files.get(INDEX_FILE);
-      if (stated === undefined) problems.push(`decks/${INDEX_FILE} is missing: run \`npm run library\`.`);
-      else if (stated !== index) problems.push(`decks/${INDEX_FILE} is out of date: run \`npm run library\`.`);
+      if (stated === undefined)
+        problems.push(`decks/${INDEX_FILE} is missing: run \`npm run library\`.`);
+      else if (stated !== index)
+        problems.push(`decks/${INDEX_FILE} is out of date: run \`npm run library\`.`);
     } else if (problems.length === 0) {
       await io.writeIndex(index);
       io.log(`wrote decks/${INDEX_FILE}`);
@@ -542,7 +675,9 @@ export async function main(argv: readonly string[], io: LibraryIo): Promise<numb
     problems.push(...(await validateLibrary(releases, index, await io.loadValidators())));
     for (const problem of problems) io.log(problem);
     if (problems.length > 0) return 1;
-    io.log(`decks/: ${releases.length} versions of ${new Set(releases.map((r) => r.deck)).size} decks, valid.`);
+    io.log(
+      `decks/: ${releases.length} versions of ${new Set(releases.map((r) => r.deck)).size} decks, valid.`,
+    );
     return 0;
   } catch (error) {
     io.log((error as Error).message);
@@ -554,7 +689,10 @@ const run_ = promisify(execFile);
 
 /** git in `repo`, its output as text; large enough for any release. */
 async function git(repo: string, args: readonly string[]): Promise<string> {
-  const { stdout } = await run_("git", ["-C", repo, ...args], { maxBuffer: 1 << 30, encoding: "utf8" });
+  const { stdout } = await run_("git", ["-C", repo, ...args], {
+    maxBuffer: 1 << 30,
+    encoding: "utf8",
+  });
   return stdout;
 }
 
@@ -564,22 +702,42 @@ export function defaultIo(repo: string): LibraryIo {
   return {
     readFiles: async () => {
       const entries = await readdir(dir, { recursive: true, withFileTypes: true }).catch(() => []);
-      const pathOf = (entry: (typeof entries)[number]) => relative(dir, join(entry.parentPath, entry.name)).replaceAll("\\", "/");
+      const pathOf = (entry: (typeof entries)[number]) =>
+        relative(dir, join(entry.parentPath, entry.name)).replaceAll("\\", "/");
       const other = entries.find((entry) => !entry.isFile() && !entry.isDirectory());
       if (other !== undefined) {
-        throw new Error(`decks/${pathOf(other)} is neither a file nor a folder: decks/ holds only index.ttl and <name>/v<N>.ttl, as plain files.`);
+        throw new Error(
+          `decks/${pathOf(other)} is neither a file nor a folder: decks/ holds only index.ttl and <name>/v<N>.ttl, as plain files.`,
+        );
       }
-      const paths = entries.filter((entry) => entry.isFile()).map(pathOf).sort();
-      return new Map(await Promise.all(paths.map(async (path) => [path, await readFile(join(dir, path), "utf8")] as const)));
+      const paths = entries
+        .filter((entry) => entry.isFile())
+        .map(pathOf)
+        .sort();
+      return new Map(
+        await Promise.all(
+          paths.map(async (path) => [path, await readFile(join(dir, path), "utf8")] as const),
+        ),
+      );
     },
     readFilesAt: async (ref) => {
-      const commit = (await git(repo, ["rev-parse", "--verify", "--end-of-options", `${ref}^{commit}`])).trim();
-      const paths = (await git(repo, ["ls-tree", "-r", "--name-only", "-z", commit, "--", "decks/"]))
+      const commit = (
+        await git(repo, ["rev-parse", "--verify", "--end-of-options", `${ref}^{commit}`])
+      ).trim();
+      const paths = (
+        await git(repo, ["ls-tree", "-r", "--name-only", "-z", commit, "--", "decks/"])
+      )
         .split("\0")
         .filter((path) => path !== "");
       return new Map(
         await Promise.all(
-          paths.map(async (path) => [path.slice("decks/".length), await git(repo, ["show", `${commit}:${path}`])] as const),
+          paths.map(
+            async (path) =>
+              [
+                path.slice("decks/".length),
+                await git(repo, ["show", `${commit}:${path}`]),
+              ] as const,
+          ),
         ),
       );
     },
@@ -591,8 +749,6 @@ export function defaultIo(repo: string): LibraryIo {
 }
 
 /** The script entry: `node -e "import('@solid-memo/shacl/node/deckLibrary').then((m) => m.run(process))" -- [--check] [--base <ref>]`. */
-export async function run(
-  process: { argv: readonly string[]; exitCode?: number },
-): Promise<void> {
+export async function run(process: { argv: readonly string[]; exitCode?: number }): Promise<void> {
   process.exitCode = await main(process.argv, defaultIo(join(DECKS_ROOT, "..")));
 }

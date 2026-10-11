@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Deck } from "./deck";
 
 /**
@@ -78,13 +82,17 @@ export function monthOfHistoryUrl(instanceUrl: string, url: string): string | nu
  * it is under the instance, else its whole URL, with every character
  * but letters, digits, ".", "_" and "-" made a "-".
  */
-export function digestSubjectOf(instanceUrl: string, kind: "receipt" | "schedule", target: string): string {
+export function digestSubjectOf(
+  instanceUrl: string,
+  kind: "receipt" | "schedule",
+  target: string,
+): string {
   const container = ensureTrailingSlash(instanceUrl);
   const where = target.startsWith(container) ? target.slice(container.length) : target;
   return `${digestUrlOf(instanceUrl)}#${kind}-${where.replace(/[^A-Za-z0-9._-]/g, "-")}`;
 }
 
-/** The instance's catalogue: the dcat:Catalog subject of its catalog document. */
+/** The instance's catalog: the dcat:Catalog subject of its catalog document. */
 export function catalogNodeUrlOf(instanceUrl: string): string {
   return `${catalogUrlOf(instanceUrl)}#catalog`;
 }

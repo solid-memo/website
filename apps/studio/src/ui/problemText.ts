@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import { chapterOfStep, draftCardOf } from "@solid-memo/domain/release/draftOutline";
@@ -47,11 +51,11 @@ const FIELDS: Readonly<Record<string, string>> = {
   [SM.distractorText]: "distractorText",
   [SM.distractorNote]: "distractorNote",
   [SM.textFormat]: "textFormat",
-  ["http://www.w3.org/ns/adms#versionNotes"]: "versionNotes",
+  "http://www.w3.org/ns/adms#versionNotes": "versionNotes",
   [`${DCTERMS}language`]: "language",
   [`${DCTERMS}creator`]: "creator",
-  ["http://www.w3.org/2000/01/rdf-schema#comment"]: "comment",
-  ["http://www.w3.org/ns/prov#wasDerivedFrom"]: "wasDerivedFrom",
+  "http://www.w3.org/2000/01/rdf-schema#comment": "comment",
+  "http://www.w3.org/ns/prov#wasDerivedFrom": "wasDerivedFrom",
 };
 
 /** A field by its name in the reader's language; one without a name by its IRI. */
@@ -72,13 +76,18 @@ function named(draft: ReleaseDraft, iri: string): string {
  * its title, a step by its place, a question by its front, a wrong
  * option by its id; anything else by its id or IRI.
  */
-export function subjectName(draft: ReleaseDraft, subject: string, i18n: Pick<I18n, "t" | "readerText">): string {
+export function subjectName(
+  draft: ReleaseDraft,
+  subject: string,
+  i18n: Pick<I18n, "t" | "readerText">,
+): string {
   const { t, readerText } = i18n;
   if (subject === draft.url) return t("studio.check.release");
   const id = idIn(draft, subject);
   if (id === null) return subject;
   const chapter = draft.chapters.find((node) => node.id === id);
-  if (chapter !== undefined) return chapter.data.title === undefined ? id : readerText(chapter.data.title);
+  if (chapter !== undefined)
+    return chapter.data.title === undefined ? id : readerText(chapter.data.title);
   if (draft.steps.some((node) => node.id === id)) {
     const of = chapterOfStep(draft, id);
     const number = of === null ? -1 : liveSteps(draft, of).findIndex((node) => node.id === id);
@@ -91,12 +100,19 @@ export function subjectName(draft: ReleaseDraft, subject: string, i18n: Pick<I18
 }
 
 /** A problem in the reader's language, after the name of what it is in. */
-export function problemMessage(problem: ReleaseProblem, draft: ReleaseDraft, i18n: Pick<I18n, "t" | "languageParts" | "violationText">): string {
+export function problemMessage(
+  problem: ReleaseProblem,
+  draft: ReleaseDraft,
+  i18n: Pick<I18n, "t" | "languageParts" | "violationText">,
+): string {
   const { t, languageParts, violationText } = i18n;
   const list = (iris: readonly string[]) => iris.map((iri) => named(draft, iri)).join(", ");
-  const value = (term: ReleaseTerm) => (term.kind === "literal" ? `"${term.value}"` : named(draft, term.value));
-  const values = (terms: readonly ReleaseTerm[]) => (terms.length === 0 ? t("studio.check.nothing") : terms.map(value).join(", "));
-  const language = (tag: string) => (tag === "" ? t("studio.check.untagged") : languageParts(tag).name);
+  const value = (term: ReleaseTerm) =>
+    term.kind === "literal" ? `"${term.value}"` : named(draft, term.value);
+  const values = (terms: readonly ReleaseTerm[]) =>
+    terms.length === 0 ? t("studio.check.nothing") : terms.map(value).join(", ");
+  const language = (tag: string) =>
+    tag === "" ? t("studio.check.untagged") : languageParts(tag).name;
   const field = fieldName(problem.field, t);
   const key = `studio.problem.${problem.code}` as MessageKey;
   switch (problem.code) {
@@ -104,6 +120,7 @@ export function problemMessage(problem: ReleaseProblem, draft: ReleaseDraft, i18
     case "noBack":
     case "outlineWithoutCourse":
     case "courseWithoutChapter":
+    case "noLicense":
     case "textFormatMisplaced":
     case "unshaped":
       return t(key);
@@ -112,18 +129,32 @@ export function problemMessage(problem: ReleaseProblem, draft: ReleaseDraft, i18
     case "versionGap":
       return t(key, { deck: problem.params.deck, versions: problem.params.versions.join(", ") });
     case "notOneDeck":
-      return t(key, { decks: problem.params.decks.length === 0 ? t("studio.check.nothing") : list(problem.params.decks) });
+      return t(key, {
+        decks:
+          problem.params.decks.length === 0
+            ? t("studio.check.nothing")
+            : list(problem.params.decks),
+      });
     case "versionMismatch":
-      return t(key, { stated: values(problem.params.stated), expected: `"${problem.params.expected}"` });
+      return t(key, {
+        stated: values(problem.params.stated),
+        expected: `"${problem.params.expected}"`,
+      });
     case "linkMismatch":
       return t(key, {
         field,
         stated: values(problem.params.stated),
-        expected: problem.params.expected.length === 0 ? t("studio.check.firstVersion") : list(problem.params.expected),
+        expected:
+          problem.params.expected.length === 0
+            ? t("studio.check.firstVersion")
+            : list(problem.params.expected),
       });
     case "cardsDropped":
     case "outlineDropped":
-      return t(key, { ids: problem.params.ids.map((id) => `#${id}`).join(", "), previous: `<${problem.params.previous}>` });
+      return t(key, {
+        ids: problem.params.ids.map((id) => `#${id}`).join(", "),
+        previous: `<${problem.params.previous}>`,
+      });
     case "idReused":
       return t(key, {
         id: `#${problem.params.id}`,
@@ -132,7 +163,11 @@ export function problemMessage(problem: ReleaseProblem, draft: ReleaseDraft, i18
         previous: `<${problem.params.previous}>`,
       });
     case "versionNotNext":
-      return t(key, { version: problem.params.version, previous: `<${problem.params.previous}>`, previousVersion: problem.params.previousVersion });
+      return t(key, {
+        version: problem.params.version,
+        previous: `<${problem.params.previous}>`,
+        previousVersion: problem.params.previousVersion,
+      });
     case "courseDirection":
       return t(key, { stated: values(problem.params.stated) });
     case "chapterPartOf":
@@ -153,7 +188,10 @@ export function problemMessage(problem: ReleaseProblem, draft: ReleaseDraft, i18
     case "fewDistractors":
       return t(key, { count: problem.params.count, least: problem.params.least });
     case "distractorLanguages":
-      return t(key, { missing: problem.params.missing.map(language).join(", "), card: named(draft, problem.params.card) });
+      return t(key, {
+        missing: problem.params.missing.map(language).join(", "),
+        card: named(draft, problem.params.card),
+      });
     case "chapterPositions":
       return t(key, { chapters: list(problem.params.chapters), position: problem.params.position });
     case "stepPositions":
@@ -161,7 +199,11 @@ export function problemMessage(problem: ReleaseProblem, draft: ReleaseDraft, i18
     case "textFormatUnknown":
       return t(key, { format: value(problem.params.format) });
     case "markdown":
-      return t(key, { field, language: language(problem.params.language), finding: problemText(problem.params.finding as MarkdownProblem, t) });
+      return t(key, {
+        field,
+        language: language(problem.params.language),
+        finding: problemText(problem.params.finding as MarkdownProblem, t),
+      });
     case "theoryEmptyChunk":
       return t(key, { field, language: language(problem.params.language) });
     case "theoryChunks": {
@@ -173,23 +215,41 @@ export function problemMessage(problem: ReleaseProblem, draft: ReleaseDraft, i18
     case "missingLanguage":
       return t(key, { field, language: language(problem.params.language) });
     case "missingTheme":
-      return t(key, { theme: problem.params.theme.slice(problem.params.theme.lastIndexOf("/") + 1) });
+      return t(key, {
+        theme: problem.params.theme.slice(problem.params.theme.lastIndexOf("/") + 1),
+      });
     case "required":
       return t(key, { field });
     case "sourceUndescribed":
-      return t(key, { missing: problem.params.missing.map((detail) => t(`studio.release.detail.${detail}`)).join(", ") });
+      return t(key, {
+        missing: problem.params.missing
+          .map((detail) => t(`studio.release.detail.${detail}`))
+          .join(", "),
+      });
     case "usedNotDerived":
       return t(key);
     case "countDisagrees":
-      return t(key, { stated: problem.params.stated, counted: problem.params.counted, what: t(`studio.release.counted.${problem.params.what}`) });
+      return t(key, {
+        stated: problem.params.stated,
+        counted: problem.params.counted,
+        what: t(`studio.release.counted.${problem.params.what}`),
+      });
     case "previousUnread":
       return t(key, { previous: `<${problem.params.previous}>` });
     case "libraryUnread":
       return t(key);
     case "shape": {
       const { message, constraint, builtIn, profile } = problem.params;
-      const said = violationText({ message, constraint, severity: "violation", ...(builtIn === true ? { builtIn } : {}) });
-      const worded = profile === undefined ? said : t("studio.check.profile", { profile: profile.toUpperCase(), message: said });
+      const said = violationText({
+        message,
+        constraint,
+        severity: "violation",
+        ...(builtIn === true ? { builtIn } : {}),
+      });
+      const worded =
+        profile === undefined
+          ? said
+          : t("studio.check.profile", { profile: profile.toUpperCase(), message: said });
       return problem.field === undefined ? worded : t(key, { field, message: worded });
     }
   }

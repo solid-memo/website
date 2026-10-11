@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -8,7 +12,10 @@ import type { LibraryDeckContent } from "@solid-memo/domain/library";
  * for a deck not from the library, undefined while it is read or when it
  * cannot be. Read once per release: a release never changes.
  */
-export function useDeckRelease(useCases: UseCases, deck: Deck): LibraryDeckContent | null | undefined {
+export function useDeckRelease(
+  useCases: UseCases,
+  deck: Deck,
+): LibraryDeckContent | null | undefined {
   return useDeckReleaseQuery(useCases, deck).release;
 }
 
@@ -26,7 +33,9 @@ export function useDeckReleaseQuery(
     enabled: deck.sourceUrl !== undefined,
     staleTime: Infinity,
   });
-  return deck.sourceUrl === undefined ? { release: null, error: null } : { release: query.data, error: query.error };
+  return deck.sourceUrl === undefined
+    ? { release: null, error: null }
+    : { release: query.data, error: query.error };
 }
 
 /**
@@ -40,7 +49,8 @@ export function publishedDistractorIds(
   release: LibraryDeckContent | null | undefined,
   card: { id: string; distractors?: readonly { id: string }[] },
 ): ReadonlySet<string> {
-  if (release === undefined) return new Set((card.distractors ?? []).map((distractor) => distractor.id));
+  if (release === undefined)
+    return new Set((card.distractors ?? []).map((distractor) => distractor.id));
   const published = release?.cards.find((released) => released.id === card.id);
   return new Set((published?.distractors ?? []).map((distractor) => distractor.id));
 }

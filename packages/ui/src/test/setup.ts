@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import "@testing-library/jest-dom/vitest";
 
 // happy-dom has no HTMLElement.translate. Browsers reflect it as the

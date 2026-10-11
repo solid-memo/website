@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DraftChange, DraftKind, DraftRefusal } from "@solid-memo/domain/release/releaseDraft";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { useConfirm } from "./shell/ConfirmDialog";
@@ -34,7 +38,10 @@ export function LifeActions({
       <h3 id="draft-life-heading">{t(`studio.draftEdit.life.${of}`)}</h3>
       {published && <p class="hint">{t("studio.draftEdit.published")}</p>}
       <p class="actions">
-        <button type="button" onClick={() => onEdit({ kind: retired ? "restore" : "retire", of, id })}>
+        <button
+          type="button"
+          onClick={() => onEdit({ kind: retired ? "restore" : "retire", of, id })}
+        >
           {t(retired ? "studio.draftEdit.restore" : "studio.draftEdit.retire")}
         </button>
         <button

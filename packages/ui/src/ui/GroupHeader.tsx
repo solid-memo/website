@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import type { DeckGroup } from "@solid-memo/domain/deckTree";
 import { ChevronIcon, FolderIcon, FolderOpenIcon } from "./icons";
@@ -51,7 +55,12 @@ export function GroupHeader({
       style={`--depth: ${depth}`}
     >
       {naming ? (
-        <NameEditor initial={readerText(group.title)} label={t("deckList.groupName")} maxLength={80} onDone={onNamed} />
+        <NameEditor
+          initial={readerText(group.title)}
+          label={t("deckList.groupName")}
+          maxLength={80}
+          onDone={onNamed}
+        />
       ) : (
         <button
           type="button"

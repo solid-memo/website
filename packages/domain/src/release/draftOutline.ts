@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { CardV5, DraftChapterV1, DraftStepV1 } from "@solid-memo/vocab/types.generated";
 import type { CardContent, Distractor } from "../deck.ts";
 import { cardContentFromRecord, cardToRecord, distractorFromRecord } from "../deckRecord.ts";
@@ -48,7 +52,9 @@ export function retiredChapters(draft: ReleaseDraft): DraftNode<DraftChapterV1>[
 /** A chapter's steps retired, by id: those of a chapter retired whole stay in its outline. */
 export function retiredSteps(draft: ReleaseDraft, chapter: string): DraftNode<DraftStepV1>[] {
   const iri = iriIn(draft, chapter);
-  return draft.steps.filter((node) => node.data.deprecated === true && node.data.chapter === iri).sort(byId);
+  return draft.steps
+    .filter((node) => node.data.deprecated === true && node.data.chapter === iri)
+    .sort(byId);
 }
 
 /** Where a chapter's or step's place is: a key of the outline (a chapter's or step's id) and the place it is dragged or moved to. */
@@ -65,16 +71,30 @@ export interface OutlinePlace {
  * outline has no place for (a chapter into a chapter, a step at the top)
  * or of what it does not show.
  */
-export function outlineMove(draft: ReleaseDraft, key: string, to: OutlinePlace): DraftChange | null {
+export function outlineMove(
+  draft: ReleaseDraft,
+  key: string,
+  to: OutlinePlace,
+): DraftChange | null {
   const index = (order: readonly string[]) => (to.after === null ? 0 : order.indexOf(to.after) + 1);
   const outline = draftOutline(draft);
   if (outline.some(({ chapter }) => chapter.id === key)) {
     if (to.parent !== null) return null;
-    return { kind: "moveChapter", id: key, to: index(outline.map(({ chapter }) => chapter.id).filter((id) => id !== key)) };
+    return {
+      kind: "moveChapter",
+      id: key,
+      to: index(outline.map(({ chapter }) => chapter.id).filter((id) => id !== key)),
+    };
   }
   const into = outline.find(({ chapter }) => chapter.id === to.parent);
-  if (into === undefined || !outline.some(({ steps }) => steps.some((step) => step.id === key))) return null;
-  return { kind: "moveStep", id: key, chapter: into.chapter.id, to: index(into.steps.map((step) => step.id).filter((id) => id !== key)) };
+  if (into === undefined || !outline.some(({ steps }) => steps.some((step) => step.id === key)))
+    return null;
+  return {
+    kind: "moveStep",
+    id: key,
+    chapter: into.chapter.id,
+    to: index(into.steps.map((step) => step.id).filter((id) => id !== key)),
+  };
 }
 
 /** A card of the draft as the card editors take it: its content, its wrong options (retired ones too), and whether it is retired. */
@@ -96,13 +116,19 @@ export function draftCardOf(draft: ReleaseDraft, id: string): DraftCard | null {
     return distractor === null ? [] : [distractor];
   });
   const content = cardContentFromRecord(node.data, distractors);
-  return content === null ? null : { id, content, retired: node.data.deprecated === true, created: node.data.created ?? "" };
+  return content === null
+    ? null
+    : { id, content, retired: node.data.deprecated === true, created: node.data.created ?? "" };
 }
 
 /** A card's content as a change states it: its record, without its wrong options and whether it is retired, which their own changes make. */
 export function cardTextOf(content: CardContent, created: string): CardText {
   // The document is no matter here: the wrong options are left out.
-  const { distractor: _distractors, deprecated: _retired, ...text } = cardToRecord(content, created, "");
+  const {
+    distractor: _distractors,
+    deprecated: _retired,
+    ...text
+  } = cardToRecord(content, created, "");
   return text;
 }
 
@@ -111,23 +137,40 @@ export function cardTextOf(content: CardContent, created: string): CardText {
  * gives them so): one added, its text or note changed, retired or
  * restored, or deleted.
  */
-export function distractorChanges(draft: ReleaseDraft, card: string, next: readonly Distractor[]): DraftChange[] {
+export function distractorChanges(
+  draft: ReleaseDraft,
+  card: string,
+  next: readonly Distractor[],
+): DraftChange[] {
   const current = draftCardOf(draft, card)?.content.distractors ?? [];
   const changes: DraftChange[] = [];
-  const textOf = (distractor: Distractor) => ({ text: distractor.text, ...(distractor.note === undefined ? {} : { note: distractor.note }) });
+  const textOf = (distractor: Distractor) => ({
+    text: distractor.text,
+    ...(distractor.note === undefined ? {} : { note: distractor.note }),
+  });
   for (const distractor of next) {
     const was = current.find((one) => one.id === distractor.id);
     if (was === undefined) {
-      changes.push({ kind: "addDistractor", card, id: distractor.id, distractor: textOf(distractor) });
+      changes.push({
+        kind: "addDistractor",
+        card,
+        id: distractor.id,
+        distractor: textOf(distractor),
+      });
     } else if (!sameText(was.text, distractor.text) || !sameText(was.note, distractor.note)) {
       changes.push({ kind: "editDistractor", id: distractor.id, distractor: textOf(distractor) });
     }
     if ((was?.retired === true) !== (distractor.retired === true)) {
-      changes.push({ kind: distractor.retired === true ? "retire" : "restore", of: "distractor", id: distractor.id });
+      changes.push({
+        kind: distractor.retired === true ? "retire" : "restore",
+        of: "distractor",
+        id: distractor.id,
+      });
     }
   }
   for (const distractor of current) {
-    if (!next.some((one) => one.id === distractor.id)) changes.push({ kind: "delete", of: "distractor", id: distractor.id });
+    if (!next.some((one) => one.id === distractor.id))
+      changes.push({ kind: "delete", of: "distractor", id: distractor.id });
   }
   return changes;
 }
@@ -152,22 +195,36 @@ export interface DraftCardRow {
  */
 export type DraftCardFilter = "unasked" | "askedTwice" | "fewDistractors" | "retired";
 
-export const DRAFT_CARD_FILTERS: readonly DraftCardFilter[] = ["unasked", "askedTwice", "fewDistractors", "retired"];
+export const DRAFT_CARD_FILTERS: readonly DraftCardFilter[] = [
+  "unasked",
+  "askedTwice",
+  "fewDistractors",
+  "retired",
+];
 
 /** Whether a text is in a language: the tag, or a regional form of it (`sv` finds `sv-fi`); `unstated` for text whose language is not stated. */
 function inLanguage(text: LangText | undefined, language: string): boolean {
-  return Object.keys(text ?? {}).some((tag) => (language === "unstated" ? tag === "" : tag === language || tag.startsWith(`${language}-`)));
+  return Object.keys(text ?? {}).some((tag) =>
+    language === "unstated" ? tag === "" : tag === language || tag.startsWith(`${language}-`),
+  );
 }
 
 /** The draft's cards, as the table lists them: by id, those `filter` keeps, with text in `language` on a side when given. */
-export function draftCardRows(draft: ReleaseDraft, { filter, language }: { filter?: DraftCardFilter; language?: string } = {}): DraftCardRow[] {
+export function draftCardRows(
+  draft: ReleaseDraft,
+  { filter, language }: { filter?: DraftCardFilter; language?: string } = {},
+): DraftCardRow[] {
   const asking = new Map<string, number>();
   const count = (iris: readonly string[]) => {
     for (const iri of iris) asking.set(iri, (asking.get(iri) ?? 0) + 1);
   };
   for (const node of draft.steps) count(node.data.checkedBy);
   for (const node of draft.chapters) count(node.data.reviewQuestion);
-  const live = new Set(draft.distractors.filter((node) => node.data.deprecated !== true).map((node) => iriIn(draft, node.id)));
+  const live = new Set(
+    draft.distractors
+      .filter((node) => node.data.deprecated !== true)
+      .map((node) => iriIn(draft, node.id)),
+  );
   const rows = draft.cards.map(
     (node): DraftCardRow => ({
       id: node.id,
@@ -186,13 +243,23 @@ export function draftCardRows(draft: ReleaseDraft, { filter, language }: { filte
   };
   return rows
     .filter((row) => filter === undefined || keeps[filter](row))
-    .filter((row) => language === undefined || inLanguage(row.card.front, language) || inLanguage(row.card.back, language))
+    .filter(
+      (row) =>
+        language === undefined ||
+        inLanguage(row.card.front, language) ||
+        inLanguage(row.card.back, language),
+    )
     .sort(byId);
 }
 
 /** The languages of the draft's cards' fronts and backs, for the table's filter: stated ones by tag, `unstated` last when a side has none. */
 export function draftCardLanguages(draft: ReleaseDraft): string[] {
-  const tags = new Set(draft.cards.flatMap((node) => [...Object.keys(node.data.front ?? {}), ...Object.keys(node.data.back ?? {})]));
+  const tags = new Set(
+    draft.cards.flatMap((node) => [
+      ...Object.keys(node.data.front ?? {}),
+      ...Object.keys(node.data.back ?? {}),
+    ]),
+  );
   const stated = [...tags].filter((tag) => tag !== "").sort();
   return tags.has("") ? [...stated, "unstated"] : stated;
 }

@@ -1,6 +1,16 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { Deck } from "@solid-memo/domain/deck";
-import { DECK_FILE_FORMATS, hasProgress, type DeckFile, type DeckFileFormat, type DeckFileOptions } from "@solid-memo/domain/deckFile";
+import {
+  DECK_FILE_FORMATS,
+  hasProgress,
+  type DeckFile,
+  type DeckFileFormat,
+  type DeckFileOptions,
+} from "@solid-memo/domain/deckFile";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -20,13 +30,13 @@ export interface ExportRun {
 
 /**
  * Decks to and from files (docs/studio.md#import-and-export). Export:
- * the instance's decks, the ones `chosen` ticked (the URL holds them),
+ * the instance's decks, the ones `chosen` checked (the URL holds them),
  * saved each as a file of its own, in the format picked, with the
  * user's progress when asked. Import: a file the user picks, what it
  * holds (its deck, its cards, any progress, and what of it was brought
  * up to date or left out), then a new deck of the instance made of it,
- * with its progress when asked. An import adds to the catalogue, so it
- * is held while the catalogue may not be changed (`importReadOnly`); a
+ * with its progress when asked. An import adds to the catalog, so it
+ * is held while the catalog may not be changed (`importReadOnly`); a
  * file can still be read, and every deck exported.
  */
 export function TransferScreen({
@@ -53,7 +63,7 @@ export function TransferScreen({
   instance: Instance;
   /** The instance's decks, in the order the user arranged them. */
   decks: readonly Deck[];
-  /** The URLs of the decks ticked to export. */
+  /** The URLs of the decks checked to export. */
   chosen: readonly string[];
   onChoose: (urls: readonly string[]) => void;
   /** The deck being exported; null when none is. */
@@ -87,11 +97,16 @@ export function TransferScreen({
   const [importProgress, setImportProgress] = useState(true);
 
   const selected = decks.filter((deck) => chosen.includes(deck.url));
-  const toggle = (url: string, on: boolean) => onChoose(on ? [...chosen, url] : chosen.filter((each) => each !== url));
+  const toggle = (url: string, on: boolean) =>
+    onChoose(on ? [...chosen, url] : chosen.filter((each) => each !== url));
   const exportLabel = t("studio.transfer.exportButton", { count: selected.length });
   const exportSelected = () => onExport(selected, { format, withProgress });
   // The palette's command does what the form's button does, when it can.
-  useScreenCommands(selected.length === 0 || exporting !== null ? [] : [{ id: "export", label: exportLabel, run: exportSelected }]);
+  useScreenCommands(
+    selected.length === 0 || exporting !== null
+      ? []
+      : [{ id: "export", label: exportLabel, run: exportSelected }],
+  );
 
   return (
     <section>
@@ -142,10 +157,18 @@ export function TransferScreen({
               ))}
             </fieldset>
             <label>
-              <input type="checkbox" checked={withProgress} onChange={(event) => setWithProgress(event.currentTarget.checked)} />
+              <input
+                type="checkbox"
+                checked={withProgress}
+                onChange={(event) => setWithProgress(event.currentTarget.checked)}
+              />
               {t("studio.transfer.withProgress")}
             </label>
-            <button type="submit" class="primary" disabled={selected.length === 0 || exporting !== null}>
+            <button
+              type="submit"
+              class="primary"
+              disabled={selected.length === 0 || exporting !== null}
+            >
               {exportLabel}
             </button>
           </form>
@@ -185,20 +208,37 @@ export function TransferScreen({
               }}
             >
               <h4 id="transfer-file-heading">
-                {tx("studio.transfer.file", { name: file.name, deck: <ReaderText text={file.content.deck.title} /> })}
+                {tx("studio.transfer.file", {
+                  name: file.name,
+                  deck: <ReaderText text={file.content.deck.title} />,
+                })}
               </h4>
               <ul>
                 <li>{t("studio.transfer.cards", { count: file.content.cards.length })}</li>
-                {file.content.reviews !== undefined && <li>{t("studio.transfer.states", { count: file.content.reviews.length })}</li>}
-                {file.content.deck.completedChapters !== undefined && (
-                  <li>{t("studio.transfer.chapters", { count: file.content.deck.completedChapters.length })}</li>
+                {file.content.reviews !== undefined && (
+                  <li>{t("studio.transfer.states", { count: file.content.reviews.length })}</li>
                 )}
-                {file.content.upgraded.length > 0 && <li>{t("studio.transfer.upgraded", { count: file.content.upgraded.length })}</li>}
-                {file.content.dropped.length > 0 && <li>{t("studio.transfer.dropped", { count: file.content.dropped.length })}</li>}
+                {file.content.deck.completedChapters !== undefined && (
+                  <li>
+                    {t("studio.transfer.chapters", {
+                      count: file.content.deck.completedChapters.length,
+                    })}
+                  </li>
+                )}
+                {file.content.upgraded.length > 0 && (
+                  <li>{t("studio.transfer.upgraded", { count: file.content.upgraded.length })}</li>
+                )}
+                {file.content.dropped.length > 0 && (
+                  <li>{t("studio.transfer.dropped", { count: file.content.dropped.length })}</li>
+                )}
               </ul>
               {hasProgress(file.content) && (
                 <label>
-                  <input type="checkbox" checked={importProgress} onChange={(event) => setImportProgress(event.currentTarget.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={importProgress}
+                    onChange={(event) => setImportProgress(event.currentTarget.checked)}
+                  />
                   {t("studio.transfer.importProgress")}
                 </label>
               )}

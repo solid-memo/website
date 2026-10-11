@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { fireEvent, screen, within } from "@testing-library/preact";
 
 /** Chooses an item of a menu (ActionsMenu), as a user does: the menu's button, by its name, then the item. */

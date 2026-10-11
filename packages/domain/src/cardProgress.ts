@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
 import type { ReviewState } from "./review";
 import { FORECAST_DAYS, scheduledStates, type ForecastDay } from "./scheduleInsight";
@@ -23,7 +27,11 @@ export interface CardProgress {
  * state of a retired card, or of a direction the deck is not studied in,
  * counts for nothing (scheduledStates, as in scheduleOf, studyDigest.ts).
  */
-export function cardProgressOf(input: { cards: Card[]; direction: DeckDirection; reviews: ReviewState[] }): CardProgress {
+export function cardProgressOf(input: {
+  cards: Card[];
+  direction: DeckDirection;
+  reviews: ReviewState[];
+}): CardProgress {
   const { cards, direction, reviews } = input;
   const states = scheduledStates(cards, direction, reviews);
   const young = states.filter((state) => state.intervalDays < MATURE_INTERVAL_DAYS).length;
@@ -50,8 +58,15 @@ export function mergeCardProgress(list: readonly CardProgress[]): CardProgress {
  * FORECAST_DAYS study days from `today`) taken together: on each day,
  * what falls due and the reviews let through, of every deck.
  */
-export function mergeForecasts(list: readonly (readonly ForecastDay[])[], today: string): ForecastDay[] {
-  const merged = Array.from({ length: FORECAST_DAYS }, (_, offset) => ({ studyDay: shiftStudyDay(today, offset), due: 0, reviews: 0 }));
+export function mergeForecasts(
+  list: readonly (readonly ForecastDay[])[],
+  today: string,
+): ForecastDay[] {
+  const merged = Array.from({ length: FORECAST_DAYS }, (_, offset) => ({
+    studyDay: shiftStudyDay(today, offset),
+    due: 0,
+    reviews: 0,
+  }));
   for (const forecast of list) {
     forecast.forEach((day, offset) => {
       merged[offset]!.due += day.due;

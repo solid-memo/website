@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { DeckStudyAction } from "./DeckStudyAction";
@@ -63,10 +67,7 @@ describe("DeckStudyAction", () => {
     const { container } = renderAction({ due: [], newPrompts: [], studiedToday: 12 });
     expect(screen.queryByRole("button")).toBeNull();
     expect(screen.getByText("Done for today")).toBeInTheDocument();
-    expect(container.querySelector(".study-done svg.icon")).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
+    expect(container.querySelector(".study-done svg.icon")).toHaveAttribute("aria-hidden", "true");
     expect(screen.queryByText(/review/)).toBeNull();
   });
 
@@ -93,7 +94,12 @@ describe("DeckStudyAction in Swedish", () => {
   it("offers Studera with the count in Swedish", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
-        <DeckStudyAction deckName="Kanji N5" queue={{ dueCount: 2, newCount: 0 }} loading={false} onStudy={vi.fn()} />
+        <DeckStudyAction
+          deckName="Kanji N5"
+          queue={{ dueCount: 2, newCount: 0 }}
+          loading={false}
+          onStudy={vi.fn()}
+        />
       </I18nProvider>,
     );
     expect(screen.getByRole("button", { name: "Studera Kanji N5" })).toHaveTextContent("Studera");

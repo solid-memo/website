@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   ANSWER_MODES,
   INVALID_DATA_POLICIES,
@@ -34,10 +38,7 @@ export function conceptByIri(scheme: ConceptScheme, iri: string): Concept | unde
   return scheme.concepts.find((concept) => concept.iri === iri);
 }
 
-export function conceptByNotation(
-  scheme: ConceptScheme,
-  notation: string,
-): Concept | undefined {
+export function conceptByNotation(scheme: ConceptScheme, notation: string): Concept | undefined {
   return scheme.concepts.find((concept) => concept.notation === notation);
 }
 

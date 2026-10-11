@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -53,7 +57,9 @@ export function TrialControls({
             <form
               onSubmit={(event) => {
                 event.preventDefault();
-                onJump((event.currentTarget.elements.namedItem("chapter") as HTMLSelectElement).value);
+                onJump(
+                  (event.currentTarget.elements.namedItem("chapter") as HTMLSelectElement).value,
+                );
               }}
             >
               <label>
@@ -103,7 +109,11 @@ export function TrialControls({
         </form>
       </fieldset>
       <p role="status">
-        {busy ? t("studio.trial.working") : days === 0 ? t("studio.trial.today") : t("studio.trial.ahead", { count: days })}
+        {busy
+          ? t("studio.trial.working")
+          : days === 0
+            ? t("studio.trial.today")
+            : t("studio.trial.ahead", { count: days })}
       </p>
       {error ? <ErrorMessage error={errorText(error)} /> : null}
     </section>

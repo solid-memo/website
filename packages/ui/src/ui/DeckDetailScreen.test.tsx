@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { DeckDetailScreen } from "./DeckDetailScreen";
@@ -16,9 +20,7 @@ const deck: Deck = {
   authors: [],
 };
 
-function renderScreen(
-  overrides: Partial<Parameters<typeof DeckDetailScreen>[0]> = {},
-) {
+function renderScreen(overrides: Partial<Parameters<typeof DeckDetailScreen>[0]> = {}) {
   const props = {
     deck,
     preferencesHref: "#/deck-preferences?deck=d",
@@ -39,7 +41,7 @@ function renderScreen(
 }
 
 describe("DeckDetailScreen", () => {
-  it("credits an imported deck's author and licence", () => {
+  it("credits an imported deck's author and license", () => {
     renderScreen({
       deck: {
         ...deck,
@@ -63,10 +65,7 @@ describe("DeckDetailScreen", () => {
 
   it("marks the title with a decorative icon", () => {
     const { container } = renderScreen();
-    expect(container.querySelector("h2 svg.icon")).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
+    expect(container.querySelector("h2 svg.icon")).toHaveAttribute("aria-hidden", "true");
   });
 
   it("names the deck without linking to the page it is on", () => {
@@ -76,9 +75,7 @@ describe("DeckDetailScreen", () => {
 
   it("shows the deck name and card count", () => {
     renderScreen();
-    expect(
-      screen.getByRole("heading", { name: "Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Kanji N5" })).toBeInTheDocument();
     expect(screen.getByText(/3 cards in this deck/)).toBeInTheDocument();
   });
 
@@ -89,22 +86,16 @@ describe("DeckDetailScreen", () => {
 
   it("presents Study as the primary, and only, session action", () => {
     renderScreen();
-    expect(screen.getByRole("button", { name: "Study" })).toHaveClass(
-      "primary",
-    );
+    expect(screen.getByRole("button", { name: "Study" })).toHaveClass("primary");
     expect(screen.queryByRole("button", { name: "Practice" })).toBeNull();
   });
 
   it("says so, without offering a session, when everything is studied", () => {
     renderScreen({ dueCount: 0, newCount: 0 });
     expect(
-      screen.getByText(
-        "All cards have been studied — nothing more to study today.",
-      ),
+      screen.getByText("All cards have been studied — nothing more to study today."),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Study" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Study" })).not.toBeInTheDocument();
   });
 
   it("does not claim an empty deck has been studied", () => {
@@ -117,20 +108,14 @@ describe("DeckDetailScreen", () => {
 
   it("offers Study when nothing is due but new cards remain", () => {
     renderScreen({ dueCount: 0, newCount: 2 });
-    expect(screen.getByRole("button", { name: "Study" })).toHaveClass(
-      "primary",
-    );
-    expect(
-      screen.getByText("No cards are due today; 2 new to introduce."),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Study" })).toHaveClass("primary");
+    expect(screen.getByText("No cards are due today; 2 new to introduce.")).toBeInTheDocument();
     expect(screen.queryByText(/All cards have been studied/)).toBeNull();
   });
 
   it("says how many cards are due and new while cards are due", () => {
     renderScreen({ dueCount: 2, newCount: 1 });
-    expect(
-      screen.getByText("2 cards due today, and 1 new to introduce."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("2 cards due today, and 1 new to introduce.")).toBeInTheDocument();
     expect(screen.queryByText(/All cards have been studied/)).toBeNull();
     expect(screen.queryByText(/No cards are due today/)).toBeNull();
   });
@@ -143,9 +128,7 @@ describe("DeckDetailScreen", () => {
   describe("resetting the day", () => {
     it("is not offered when nothing was studied today", () => {
       renderScreen();
-      expect(
-        screen.queryByRole("button", { name: "Reset today's study" }),
-      ).toBeNull();
+      expect(screen.queryByRole("button", { name: "Reset today's study" })).toBeNull();
     });
 
     it("shows how much was studied and resets after confirmation", () => {
@@ -154,9 +137,7 @@ describe("DeckDetailScreen", () => {
       const { props } = renderScreen({ studiedToday: 12 });
       expect(screen.getByText("12 cards studied today.")).toBeInTheDocument();
 
-      fireEvent.click(
-        screen.getByRole("button", { name: "Reset today's study" }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "Reset today's study" }));
       expect(confirm).toHaveBeenCalledWith(
         expect.stringContaining('Reset today\'s study of "Kanji N5"? The 12 cards'),
       );
@@ -169,20 +150,19 @@ describe("DeckDetailScreen", () => {
     });
 
     it("keeps the day when the confirmation is declined", () => {
-      vi.stubGlobal("confirm", vi.fn(() => false));
-      const { props } = renderScreen({ studiedToday: 3 });
-      fireEvent.click(
-        screen.getByRole("button", { name: "Reset today's study" }),
+      vi.stubGlobal(
+        "confirm",
+        vi.fn(() => false),
       );
+      const { props } = renderScreen({ studiedToday: 3 });
+      fireEvent.click(screen.getByRole("button", { name: "Reset today's study" }));
       expect(props.onResetDay).not.toHaveBeenCalled();
     });
 
     it("is offered on the 'all studied' screen — where it is wanted most", () => {
       renderScreen({ dueCount: 0, newCount: 0, studiedToday: 5 });
       expect(screen.getByText(/All cards have been studied/)).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: "Reset today's study" }),
-      ).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Reset today's study" })).toBeEnabled();
     });
 
     it("locks the screen while resetting, and shows a failure", () => {
@@ -209,7 +189,10 @@ describe("DeckDetailScreen", () => {
 
   it("links to the deck's instance in the Studio", () => {
     renderScreen();
-    expect(screen.getByRole("link", { name: "Open in Studio" })).toHaveAttribute("href", "#/studio?instance=a");
+    expect(screen.getByRole("link", { name: "Open in Studio" })).toHaveAttribute(
+      "href",
+      "#/studio?instance=a",
+    );
   });
 
   it("links to the deck's preferences above the Browser's link", () => {
@@ -223,9 +206,7 @@ describe("DeckDetailScreen", () => {
   it("offers no editing: cards are added and edited in the Browser", () => {
     renderScreen();
     expect(screen.queryByRole("link", { name: "Add card" })).toBeNull();
-    expect(
-      screen.getByText(/Add, edit or remove cards in the Browser/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Add, edit or remove cards in the Browser/)).toBeInTheDocument();
   });
 
   it("shows the deck's description when it has one", () => {
@@ -252,7 +233,9 @@ describe("DeckDetailScreen", () => {
         />
       </I18nProvider>,
     );
-    expect(screen.getByText("2 kort att repetera idag, och 1 nytt att introducera.")).toBeInTheDocument();
+    expect(
+      screen.getByText("2 kort att repetera idag, och 1 nytt att introducera."),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Studera" })).toBeInTheDocument();
     // An English-only deck's name is marked English on a Swedish page.
     expect(screen.getByText("Kanji N5")).toHaveAttribute("lang", "en");

@@ -1,11 +1,26 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { CardTextPart } from "../deck.ts";
 import { courseProblems, readinessProblems } from "./courseRules.ts";
 import { curationProblems, podPolicy, repoPolicy, type LibraryPolicy } from "./curationRules.ts";
-import { metadataProblems, pathProblems, releasePathOf, versionGapProblems } from "./libraryRules.ts";
+import {
+  metadataProblems,
+  pathProblems,
+  releasePathOf,
+  versionGapProblems,
+} from "./libraryRules.ts";
 import type { ReleaseProblem, ReleaseSeverity } from "./problems.ts";
 import { provenanceProblems } from "./provenanceRules.ts";
-import { activitiesOf, generatingActivities, idIn, PROV, type ReleaseDraft } from "./releaseDraft.ts";
+import {
+  activitiesOf,
+  generatingActivities,
+  idIn,
+  PROV,
+  type ReleaseDraft,
+} from "./releaseDraft.ts";
 import { DCTERMS_NS, type ReleaseModel } from "./releaseModel.ts";
 import { moved } from "./releaseToDraft.ts";
 
@@ -91,10 +106,17 @@ export interface LibraryIndexView {
  * and its metadata against that place (metadataProblems: in the deck's
  * series, by the index's publisher, after the version before it).
  */
-export function libraryProblems(model: ReleaseModel, index: LibraryIndexView, name: string, version: number): ReleaseProblem[] {
+export function libraryProblems(
+  model: ReleaseModel,
+  index: LibraryIndexView,
+  name: string,
+  version: number,
+): ReleaseProblem[] {
   const base = new URL(".", index.url).href;
   const path = `${name}/v${version}.ttl`;
-  const paths = index.releases.filter((url) => url.startsWith(base)).map((url) => url.slice(base.length));
+  const paths = index.releases
+    .filter((url) => url.startsWith(base))
+    .map((url) => url.slice(base.length));
   // A version the library has already is there twice: the versions do not run 1, 2, … then either.
   const ofDeck = paths.filter((one) => releasePathOf(one)?.deck === name);
   const place = {
@@ -103,15 +125,25 @@ export function libraryProblems(model: ReleaseModel, index: LibraryIndexView, na
     publisher: index.publisher ?? "",
     ...(version > 1 ? { previous: libraryReleaseUrl(index.url, name, version - 1) } : {}),
   };
-  return [...pathProblems(path), ...versionGapProblems([...ofDeck, path]), ...metadataProblems(model, place)];
+  return [
+    ...pathProblems(path),
+    ...versionGapProblems([...ofDeck, path]),
+    ...metadataProblems(model, place),
+  ];
 }
 
 /** Problems about subjects at `from` (a release's address), about the same subjects at `to`. */
-export function movedProblems(problems: readonly ReleaseProblem[], from: string, to: string): ReleaseProblem[] {
+export function movedProblems(
+  problems: readonly ReleaseProblem[],
+  from: string,
+  to: string,
+): ReleaseProblem[] {
   return problems.map((one) => ({
     ...one,
     subject: moved(one.subject, from, to),
-    ...(one.related === undefined ? {} : { related: one.related.map((iri) => moved(iri, from, to)) }),
+    ...(one.related === undefined
+      ? {}
+      : { related: one.related.map((iri) => moved(iri, from, to)) }),
   }));
 }
 
@@ -131,7 +163,13 @@ export function isUnread(one: ReleaseProblem): boolean {
 
 /** Every problem the check found, by the order of its rules, the shapes last. */
 export function checkProblems(check: ReleaseCheck): ReleaseProblem[] {
-  return [...check.rules, ...check.library, ...check.drops, ...check.markdown, ...(check.shapes ?? [])];
+  return [
+    ...check.rules,
+    ...check.library,
+    ...check.drops,
+    ...check.markdown,
+    ...(check.shapes ?? []),
+  ];
 }
 
 /** The problems of one severity, by the subject they are in, each subject in the order its first problem comes. */
@@ -145,8 +183,12 @@ export function groupProblems(problems: readonly ReleaseProblem[]): ProblemGroup
   return (["error", "warning"] as const)
     .map((severity) => {
       const bySubject = new Map<string, ReleaseProblem[]>();
-      for (const one of problems.filter((p) => p.severity === severity)) bySubject.set(one.subject, [...(bySubject.get(one.subject) ?? []), one]);
-      return { severity, subjects: [...bySubject].map(([subject, found]) => ({ subject, problems: found })) };
+      for (const one of problems.filter((p) => p.severity === severity))
+        bySubject.set(one.subject, [...(bySubject.get(one.subject) ?? []), one]);
+      return {
+        severity,
+        subjects: [...bySubject].map(([subject, found]) => ({ subject, problems: found })),
+      };
     })
     .filter((group) => group.subjects.length > 0);
 }
@@ -161,7 +203,10 @@ function cardOfDistractor(draft: Pick<ReleaseDraft, "cards">, subject: string) {
  * outline's badges count them, and link to the first), in their order; a
  * wrong option's under its card's, which the outline shows it in.
  */
-export function outlineProblems(draft: Pick<ReleaseDraft, "url" | "cards">, problems: readonly ReleaseProblem[]): ReadonlyMap<string, ReleaseProblem[]> {
+export function outlineProblems(
+  draft: Pick<ReleaseDraft, "url" | "cards">,
+  problems: readonly ReleaseProblem[],
+): ReadonlyMap<string, ReleaseProblem[]> {
   const found = new Map<string, ReleaseProblem[]>();
   for (const one of problems) {
     const own = idIn(draft, one.subject);
@@ -184,9 +229,26 @@ export type DraftField = "title" | "description" | "outline";
 export type ChapterField = "title" | "description" | "steps" | "review";
 export type StepField = "theory" | "questions";
 /** The release screen's parts: what the release says of itself beyond its listing, who made it and how, and from what. */
-export type ReleaseField = "versionNotes" | "languages" | "license" | "publisher" | "authors" | "making" | "sources" | "checks";
+export type ReleaseField =
+  | "versionNotes"
+  | "languages"
+  | "license"
+  | "publisher"
+  | "authors"
+  | "making"
+  | "sources"
+  | "checks";
 
-export const RELEASE_FIELDS: readonly ReleaseField[] = ["versionNotes", "languages", "license", "publisher", "authors", "making", "sources", "checks"];
+export const RELEASE_FIELDS: readonly ReleaseField[] = [
+  "versionNotes",
+  "languages",
+  "license",
+  "publisher",
+  "authors",
+  "making",
+  "sources",
+  "checks",
+];
 
 /** A question's text, its wrong options (all), or one of them by its id. */
 export type QuestionField = CardTextPart | "distractors" | `distractor:${string}`;
@@ -212,7 +274,11 @@ const RELEASE_SCREEN_FIELDS: Readonly<Record<string, ReleaseField>> = {
 /** The problems of a source, by code, which the release screen's sources show. */
 const SOURCE_CODES: ReadonlySet<string> = new Set(["sourceUndescribed", "usedNotDerived"]);
 /** The problems of the outline, by code, which the outline's part of the screen shows. */
-const OUTLINE_CODES: ReadonlySet<string> = new Set(["courseWithoutChapter", "chapterPositions", "outlineWithoutCourse"]);
+const OUTLINE_CODES: ReadonlySet<string> = new Set([
+  "courseWithoutChapter",
+  "chapterPositions",
+  "outlineWithoutCourse",
+]);
 
 /**
  * Where to show a problem of the draft: the editor of the subject it is
@@ -224,38 +290,65 @@ const OUTLINE_CODES: ReadonlySet<string> = new Set(["courseWithoutChapter", "cha
  */
 export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): ProblemTarget {
   const id = idIn(draft, problem.subject);
-  const has = (nodes: readonly { id: string }[]) => id !== null && nodes.some((node) => node.id === id);
+  const has = (nodes: readonly { id: string }[]) =>
+    id !== null && nodes.some((node) => node.id === id);
   const { field, code } = problem;
   if (has(draft.chapters)) {
     const chapterField: ChapterField | undefined =
-      field === DCTERMS_TITLE ? "title"
-      : field === DCTERMS_DESCRIPTION ? "description"
-      : field === SM.reviewQuestion ? "review"
-      : code === "stepPositions" || code === "chapterWithoutStep" ? "steps"
-      : undefined;
-    return { screen: "chapter", chapter: id!, ...(chapterField === undefined ? {} : { field: chapterField }) };
+      field === DCTERMS_TITLE
+        ? "title"
+        : field === DCTERMS_DESCRIPTION
+          ? "description"
+          : field === SM.reviewQuestion
+            ? "review"
+            : code === "stepPositions" || code === "chapterWithoutStep"
+              ? "steps"
+              : undefined;
+    return {
+      screen: "chapter",
+      chapter: id!,
+      ...(chapterField === undefined ? {} : { field: chapterField }),
+    };
   }
   if (has(draft.steps)) {
-    const stepField: StepField | undefined = field === SM.theory ? "theory" : field === SM.checkedBy ? "questions" : undefined;
+    const stepField: StepField | undefined =
+      field === SM.theory ? "theory" : field === SM.checkedBy ? "questions" : undefined;
     return { screen: "step", step: id!, ...(stepField === undefined ? {} : { field: stepField }) };
   }
   if (has(draft.cards)) {
-    const cardField: QuestionField | undefined = field === SM.distractor ? "distractors" : field === undefined ? undefined : CARD_FIELDS[field];
-    return { screen: "question", card: id!, ...(cardField === undefined ? {} : { field: cardField }) };
+    const cardField: QuestionField | undefined =
+      field === SM.distractor
+        ? "distractors"
+        : field === undefined
+          ? undefined
+          : CARD_FIELDS[field];
+    return {
+      screen: "question",
+      card: id!,
+      ...(cardField === undefined ? {} : { field: cardField }),
+    };
   }
   const card = id === null ? undefined : cardOfDistractor(draft, problem.subject);
   if (card !== undefined) return { screen: "question", card: card.id, field: `distractor:${id}` };
   if (SOURCE_CODES.has(code)) return { screen: "release", field: "sources" };
   if (has(draft.agents)) return { screen: "release", field: "authors" };
   if (id !== null && activitiesOf(draft).includes(id)) {
-    const making = generatingActivities(draft).includes(problem.subject) && !draft.published.activities.includes(id);
+    const making =
+      generatingActivities(draft).includes(problem.subject) &&
+      !draft.published.activities.includes(id);
     return { screen: "release", field: making ? "making" : "checks" };
   }
   if (problem.subject !== draft.url) return { screen: "draft" };
   const releaseField = field === undefined ? undefined : RELEASE_SCREEN_FIELDS[field];
   if (releaseField !== undefined) return { screen: "release", field: releaseField };
   const draftField: DraftField | undefined =
-    field === DCTERMS_TITLE ? "title" : field === DCTERMS_DESCRIPTION ? "description" : OUTLINE_CODES.has(code) ? "outline" : undefined;
+    field === DCTERMS_TITLE
+      ? "title"
+      : field === DCTERMS_DESCRIPTION
+        ? "description"
+        : OUTLINE_CODES.has(code)
+          ? "outline"
+          : undefined;
   return { screen: "draft", ...(draftField === undefined ? {} : { field: draftField }) };
 }
 
@@ -269,7 +362,10 @@ export function isTargetField(screen: ProblemTarget["screen"], field: string): b
     case "step":
       return ["theory", "questions"].includes(field);
     case "question":
-      return [...Object.values(CARD_FIELDS), "distractors"].includes(field) || /^distractor:./.test(field);
+      return (
+        [...Object.values(CARD_FIELDS), "distractors"].includes(field) ||
+        /^distractor:./.test(field)
+      );
     case "release":
       return (RELEASE_FIELDS as readonly string[]).includes(field);
   }

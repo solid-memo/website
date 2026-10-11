@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { INVALID_DATA_POLICIES, STUDY_DIRECTIONS, TOPICS } from "./concepts.generated";
 import { ALL_SHAPES, SHAPES } from "./descriptors.generated";
@@ -15,7 +19,10 @@ describe("the generated modules", () => {
 
   it("describe every shape at its latest version", () => {
     for (const [shape, version] of Object.entries(LATEST_VERSION)) {
-      expect(ALL_SHAPES.some((d) => d.shape === shape && d.version === version), shape).toBe(true);
+      expect(
+        ALL_SHAPES.some((d) => d.shape === shape && d.version === version),
+        shape,
+      ).toBe(true);
     }
     expect(Object.keys(SHAPES).sort()).toEqual(Object.keys(LATEST_VERSION).sort());
   });

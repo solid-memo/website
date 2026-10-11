@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -25,9 +29,9 @@ describe("parseTurtle and lookups", () => {
   const quads = parseTurtle(DOC, BASE);
 
   it("keeps objects in document order", () => {
-    expect(
-      objectsOf(quads, `${BASE}#a`, "https://example.com/ns#tag").map((o) => o.value),
-    ).toEqual(["one", "two"]);
+    expect(objectsOf(quads, `${BASE}#a`, "https://example.com/ns#tag").map((o) => o.value)).toEqual(
+      ["one", "two"],
+    );
   });
 
   it("lists named subjects of a type once each, in order of first appearance", () => {

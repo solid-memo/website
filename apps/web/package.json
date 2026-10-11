@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/web",
+  "description": "The Solid Memo site: the app's page, the About page, and the build that publishes them with the vocabulary, shapes and deck library.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",
@@ -16,6 +17,7 @@
   "dependencies": {
     "@solid-memo/application": "*",
     "@solid-memo/composition": "*",
+    "@solid-memo/domain": "*",
     "@solid-memo/studio": "*",
     "@solid-memo/ui": "*",
     "@solid-memo/vocab": "*",

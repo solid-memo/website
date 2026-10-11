@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { activeCards } from "@solid-memo/domain/deck";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { ErrorMessage } from "./ErrorMessage";
@@ -23,15 +27,29 @@ export function describeChanges(
   const parts = [
     ...(added > 0 ? [t("libraryUpgradeNotice.adds", { count: added })] : []),
     ...(changed > 0 ? [t("libraryUpgradeNotice.changes", { count: changed })] : []),
-    ...(plan.retire.length > 0 ? [t("libraryUpgradeNotice.retires", { count: plan.retire.length })] : []),
-    ...(plan.restore.length > 0 ? [t("libraryUpgradeNotice.bringsBack", { count: plan.restore.length })] : []),
-    ...(plan.remove.length > 0 ? [t("libraryUpgradeNotice.removes", { count: plan.remove.length })] : []),
-    ...(plan.applied.length > 0 ? [t("libraryUpgradeNotice.alreadyApplied", { count: plan.applied.length })] : []),
+    ...(plan.retire.length > 0
+      ? [t("libraryUpgradeNotice.retires", { count: plan.retire.length })]
+      : []),
+    ...(plan.restore.length > 0
+      ? [t("libraryUpgradeNotice.bringsBack", { count: plan.restore.length })]
+      : []),
+    ...(plan.remove.length > 0
+      ? [t("libraryUpgradeNotice.removes", { count: plan.remove.length })]
+      : []),
+    ...(plan.applied.length > 0
+      ? [t("libraryUpgradeNotice.alreadyApplied", { count: plan.applied.length })]
+      : []),
     ...(plan.appliedAbout.length > 0 ? [t("libraryUpgradeNotice.alreadyDescribed")] : []),
     ...(plan.direction === undefined
       ? []
-      : [t("libraryUpgradeNotice.studies", { direction: directionLabel(plan.direction).toLowerCase() })]),
-    ...([plan.title, plan.description, plan.keywords, plan.themes].some((value) => value !== undefined)
+      : [
+          t("libraryUpgradeNotice.studies", {
+            direction: directionLabel(plan.direction).toLowerCase(),
+          }),
+        ]),
+    ...([plan.title, plan.description, plan.keywords, plan.themes].some(
+      (value) => value !== undefined,
+    )
       ? [t("libraryUpgradeNotice.describes")]
       : []),
     ...(plan.outline === true ? [t("libraryUpgradeNotice.outline")] : []),
@@ -106,7 +124,9 @@ export function LibraryUpgradeNotice({
         </ul>
       )}
       <button class="primary" onClick={onUpgrade} disabled={busy}>
-        {busy ? t("libraryUpgradeNotice.updating") : t("libraryUpgradeNotice.update", { version: plan.toVersion })}
+        {busy
+          ? t("libraryUpgradeNotice.updating")
+          : t("libraryUpgradeNotice.update", { version: plan.toVersion })}
       </button>
       <ErrorMessage error={error} />
     </div>

@@ -1,5 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useRef, useState } from "preact/hooks";
-import { instancePrefs, NO_INSTANCE_PREFS, rememberInstancePrefs, type InstancePrefs } from "./prefs";
+import {
+  instancePrefs,
+  NO_INSTANCE_PREFS,
+  rememberInstancePrefs,
+  type InstancePrefs,
+} from "./prefs";
 
 /**
  * What the device keeps of the open instance (prefs.ts): its saved

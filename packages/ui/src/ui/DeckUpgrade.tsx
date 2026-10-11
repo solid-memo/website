@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   DECK_UPGRADE_STEPS,
   type DeckUpgradeOutcome,
@@ -12,7 +16,10 @@ import { StepProgress } from "./StepProgress";
 /** The upgrade's steps as the screen shows them: the use case's, then refreshing what is shown. */
 export type DeckUpgradeScreenStep = DeckUpgradeStep | "refresh";
 
-export const DECK_UPGRADE_SCREEN_STEPS: readonly DeckUpgradeScreenStep[] = [...DECK_UPGRADE_STEPS, "refresh"];
+export const DECK_UPGRADE_SCREEN_STEPS: readonly DeckUpgradeScreenStep[] = [
+  ...DECK_UPGRADE_STEPS,
+  "refresh",
+];
 
 function stepLabel(t: I18n["t"], step: DeckUpgradeScreenStep): string {
   return t(`deckUpgrade.step.${step}`);
@@ -34,7 +41,10 @@ export function DeckUpgradeProgress({
   return (
     <StepProgress
       region={t("deckUpgrade.progressRegion")}
-      steps={DECK_UPGRADE_SCREEN_STEPS.map((entry) => ({ step: entry, label: stepLabel(t, entry) }))}
+      steps={DECK_UPGRADE_SCREEN_STEPS.map((entry) => ({
+        step: entry,
+        label: stepLabel(t, entry),
+      }))}
       current={step}
       done={done}
       total={DECK_UPGRADE_SCREEN_STEPS.length}
@@ -74,7 +84,9 @@ export function DeckUpgradeFailure({
       tabIndex={-1}
     >
       <div id={whyId} class="failure-why">
-        <strong>{t("deckUpgrade.failedWhile", { step: stepLabel(t, outcome.step).toLowerCase() })}</strong>{" "}
+        <strong>
+          {t("deckUpgrade.failedWhile", { step: stepLabel(t, outcome.step).toLowerCase() })}
+        </strong>{" "}
         {errorText(outcome.error)}
       </div>
       <p>{outcome.changed ? t("deckUpgrade.partlyChanged") : t("deckUpgrade.noChanges")}</p>

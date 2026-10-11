@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DatasetCore, Quad } from "@rdfjs/types";
 import SHACLValidator from "rdf-validate-shacl";
 import environment from "rdf-validate-shacl/src/defaultEnv.js";
@@ -22,11 +26,7 @@ export interface FocusedViolation extends Violation {
 
 export interface ShapeEngine {
   /** Every result of checking `focusNode` against `shapeIri`; empty when it conforms. */
-  validateNode(
-    data: DatasetCore,
-    focusNode: string,
-    shapeIri: string,
-  ): Promise<Violation[]>;
+  validateNode(data: DatasetCore, focusNode: string, shapeIri: string): Promise<Violation[]>;
   /** Every result of checking the whole of `data` against every targeted shape. */
   validate(data: DatasetCore): Promise<FocusedViolation[]>;
 }
@@ -38,8 +38,9 @@ const SH = "http://www.w3.org/ns/shacl#";
  * literal datatypes) mapped: a document moved to another container.
  */
 export function mapIris(data: DatasetCore, map: (iri: string) => string): DatasetCore {
-  const term = <T extends Quad["subject"] | Quad["predicate"] | Quad["object"] | Quad["graph"]>(t: T): T =>
-    (t.termType === "NamedNode" ? environment.namedNode(map(t.value)) : t) as T;
+  const term = <T extends Quad["subject"] | Quad["predicate"] | Quad["object"] | Quad["graph"]>(
+    t: T,
+  ): T => (t.termType === "NamedNode" ? environment.namedNode(map(t.value)) : t) as T;
   return environment.dataset(
     [...(data as Iterable<Quad>)].map((q) =>
       environment.quad(term(q.subject), term(q.predicate), term(q.object), term(q.graph)),
@@ -59,9 +60,7 @@ function localName(iri: string): string {
   return iri.slice(iri.lastIndexOf("#") + 1);
 }
 
-type ValidationResult = Awaited<
-  ReturnType<SHACLValidator["validate"]>
->["results"][number];
+type ValidationResult = Awaited<ReturnType<SHACLValidator["validate"]>>["results"][number];
 
 function toViolation(result: ValidationResult): Violation {
   const constraint = localName(result.sourceConstraintComponent.value).replace(
@@ -89,19 +88,33 @@ function toViolation(result: ValidationResult): Violation {
  * in each language it gives (tagged literals); else the validator's own
  * English, untagged, or a word on the constraint when it has none either.
  */
-function messageOf(result: ValidationResult, constraint: string): Pick<Violation, "message" | "builtIn"> {
-  const tagged = result.message.filter((term) => term.termType === "Literal" && term.language !== "");
+function messageOf(
+  result: ValidationResult,
+  constraint: string,
+): Pick<Violation, "message" | "builtIn"> {
+  const tagged = result.message.filter(
+    (term) => term.termType === "Literal" && term.language !== "",
+  );
   if (tagged.length > 0) {
     const tags = tagged.map((term) => (term as { language: string }).language.toLowerCase());
-    const ordered = [...new Set(tags)].sort((a, b) => Number(b === "en") - Number(a === "en") || a.localeCompare(b));
-    return { message: Object.fromEntries(ordered.map((tag) => [tag, tagged[tags.indexOf(tag)].value])) };
+    const ordered = [...new Set(tags)].sort(
+      (a, b) => Number(b === "en") - Number(a === "en") || a.localeCompare(b),
+    );
+    return {
+      message: Object.fromEntries(ordered.map((tag) => [tag, tagged[tags.indexOf(tag)].value])),
+    };
   }
   const builtIn = result.message.map((term) => term.value).join(" ");
-  return { message: { en: builtIn === "" ? `${constraint} constraint failed.` : builtIn }, builtIn: true };
+  return {
+    message: { en: builtIn === "" ? `${constraint} constraint failed.` : builtIn },
+    builtIn: true,
+  };
 }
 
 function byPathThenMessage(a: Violation, b: Violation): number {
-  return (a.path ?? "").localeCompare(b.path ?? "") || shown(a.message).localeCompare(shown(b.message));
+  return (
+    (a.path ?? "").localeCompare(b.path ?? "") || shown(a.message).localeCompare(shown(b.message))
+  );
 }
 
 export function createEngine(shapes: DatasetCore): ShapeEngine {
@@ -134,13 +147,13 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
         validator.validationEngine.initReport();
         const report = await validator.validate(data);
         return report.results
-          .map((result): FocusedViolation => ({
-            focusNode: result.focusNode.value,
-            ...toViolation(result),
-          }))
-          .sort(
-            (a, b) => a.focusNode.localeCompare(b.focusNode) || byPathThenMessage(a, b),
-          );
+          .map(
+            (result): FocusedViolation => ({
+              focusNode: result.focusNode.value,
+              ...toViolation(result),
+            }),
+          )
+          .sort((a, b) => a.focusNode.localeCompare(b.focusNode) || byPathThenMessage(a, b));
       }),
   };
 }

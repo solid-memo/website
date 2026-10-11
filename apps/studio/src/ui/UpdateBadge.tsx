@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -46,7 +50,10 @@ export function UpdateBadge({
       {copy?.newer === true && (
         <a class="studio-badge studio-badge-warning" href={href}>
           {t("studio.library.badge", { version: copy.series!.version })}
-          <span class="visually-hidden"> {t("studio.library.badgeOf", { deck: readerText(deck.title) })}</span>
+          <span class="visually-hidden">
+            {" "}
+            {t("studio.library.badgeOf", { deck: readerText(deck.title) })}
+          </span>
         </a>
       )}
     </span>

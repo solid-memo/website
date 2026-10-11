@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A deck saved as a file and made a deck again (UseCases.exportDeckFile,
  * openDeckFile and importDeckFile, docs/studio.md#import-and-export)
@@ -49,9 +54,18 @@ function files(): FileExchange & { saved: { name: string; mediaType: string; tex
 function page(fileExchange: FileExchange = files()) {
   const writeFence = createWriteFence(fetch);
   const podFetch = writeFence.fetch;
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
   const checkWrite = shapeValidator.checkSubjects;
-  const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
+  const deps = {
+    fetch: podFetch,
+    checkWrite,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  };
   return createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -87,15 +101,33 @@ async function seed(server: string) {
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
-  await put(`${base}profile/card.ttl`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
+  await put(
+    `${base}profile/card.ttl`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
   const useCases = page();
   const session = { webId };
-  const main = await useCases.createInstance(session, { containerUrl: `${base}main/`, name: "Main", registrationTarget: "private" });
-  const other = await useCases.createInstance(session, { containerUrl: `${base}other/`, name: "Other", registrationTarget: "private" });
+  const main = await useCases.createInstance(session, {
+    containerUrl: `${base}main/`,
+    name: "Main",
+    registrationTarget: "private",
+  });
+  const other = await useCases.createInstance(session, {
+    containerUrl: `${base}other/`,
+    name: "Other",
+    registrationTarget: "private",
+  });
   const deck = await useCases.createDeck(main.url, { en: "Capitals" });
   const prefixes = `@prefix sm: <${SM}> .\n@prefix dcterms: <http://purl.org/dc/terms/> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n`;
   await put(
@@ -110,19 +142,30 @@ async function seed(server: string) {
   );
   const cards = Object.fromEntries((await useCases.listCards(deck)).map((card) => [card.id, card]));
   for (const id of ["se", "flag"]) {
-    await useCases.recordReview(main.url, deck, { card: cards[id]!, direction: "front-to-back" }, 4, new Date());
+    await useCases.recordReview(
+      main.url,
+      deck,
+      { card: cards[id]!, direction: "front-to-back" },
+      4,
+      new Date(),
+    );
   }
   return { main, other, deck, useCases };
 }
 
 /** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
 async function triples(url: string): Promise<string> {
-  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
-  return new Writer({ format: "N-Triples" }).quadsToString(new Parser({ baseIRI: url }).parse(turtle));
+  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) =>
+    response.text(),
+  );
+  return new Writer({ format: "N-Triples" }).quadsToString(
+    new Parser({ baseIRI: url }).parse(turtle),
+  );
 }
 
 /** A deck's cards without where they are: what a file carries over. */
-const contentOf = (cards: readonly Card[]) => cards.map(({ url: _, ...card }) => card).sort((a, b) => a.id.localeCompare(b.id));
+const contentOf = (cards: readonly Card[]) =>
+  cards.map(({ url: _, ...card }) => card).sort((a, b) => a.id.localeCompare(b.id));
 const statesOf = async (deck: Deck) =>
   (await page().listDeckReviewStates(deck)).sort((a, b) => a.cardId.localeCompare(b.cardId));
 
@@ -135,20 +178,31 @@ describe.each(SERVERS)("decks as files on $name", ({ url: server }) => {
       await useCases.exportDeckFile(deck, { format, withProgress: true });
       expect(exchange.saved).toHaveLength(1);
       const file = (await useCases.openDeckFile())!;
-      expect(file).toMatchObject({ name: `capitals${format === "turtle" ? ".ttl" : ".jsonld"}`, format });
+      expect(file).toMatchObject({
+        name: `capitals${format === "turtle" ? ".ttl" : ".jsonld"}`,
+        format,
+      });
       expect(file.content.upgraded).toEqual([]);
       expect(file.content.dropped).toEqual([]);
 
       const imported = await useCases.importDeckFile(other.url, file, { withProgress: true });
-      expect(imported).toMatchObject({ id: deck.id, url: `${other.url}catalog.ttl#${deck.id}`, title: { en: "Capitals" } });
-      expect(contentOf(await page().listCards(imported))).toEqual(contentOf(await page().listCards(deck)));
+      expect(imported).toMatchObject({
+        id: deck.id,
+        url: `${other.url}catalog.ttl#${deck.id}`,
+        title: { en: "Capitals" },
+      });
+      expect(contentOf(await page().listCards(imported))).toEqual(
+        contentOf(await page().listCards(deck)),
+      );
       const copied = await statesOf(imported);
       expect(copied.map((state) => state.cardId)).toEqual(["flag", "se"]);
       expect(copied).toEqual(await statesOf(deck));
       // Written as Solid Memo writes them: each wrong option a suggested answer too, each state naming its card here.
       const cardsWritten = await triples(imported.cardsDocumentUrl);
       for (const id of ["se-d1", "se-d2"]) {
-        expect(cardsWritten).toContain(`<${imported.cardsDocumentUrl}#se> <https://schema.org/suggestedAnswer> <${imported.cardsDocumentUrl}#${id}> .`);
+        expect(cardsWritten).toContain(
+          `<${imported.cardsDocumentUrl}#se> <https://schema.org/suggestedAnswer> <${imported.cardsDocumentUrl}#${id}> .`,
+        );
       }
       expect(await triples(imported.reviewsDocumentUrl)).toContain(
         `<${imported.reviewsDocumentUrl}#se> <${SM}reviewOf> <${imported.cardsDocumentUrl}#se> .`,
@@ -171,11 +225,15 @@ describe.each(SERVERS)("decks as files on $name", ({ url: server }) => {
     const back = await useCases.importDeckFile(main.url, file, { withProgress: false });
     expect(back.url).toBe(deck.url);
     expect(back.cardsDocumentUrl).toBe(deck.cardsDocumentUrl);
-    expect(contentOf(await page().listCards(back))).toEqual(contentOf(await page().listCards(fresh)));
+    expect(contentOf(await page().listCards(back))).toEqual(
+      contentOf(await page().listCards(fresh)),
+    );
     // Imported again beside itself: a fresh id, its own documents.
     const twice = await useCases.importDeckFile(main.url, file, { withProgress: false });
     expect(twice.id).not.toBe(deck.id);
-    expect((await page().listDecks(main.url)).map((each) => each.url).sort()).toEqual([back.url, twice.url].sort());
+    expect((await page().listDecks(main.url)).map((each) => each.url).sort()).toEqual(
+      [back.url, twice.url].sort(),
+    );
     expect((await page().validateInstance(main.url)).conforms).toBe(true);
   });
 });

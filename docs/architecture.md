@@ -24,6 +24,11 @@ where the layers meet.
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
 | `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release ([markdown.md](markdown.md)). Imports nothing of the app's. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against real Solid servers, started in Docker ([testing.md](testing.md)). |
+| `@solid-memo/e2e-journeys` | `e2e/journeys/` | The user journeys: whole flows a user takes through the built app, driven in Chromium with Playwright against a Community Solid Server in Docker ([testing.md](testing.md#user-journeys)). It imports nothing of the app's but its messages, to find text on screen by. |
+
+Each package's folder has a `README.md`: what the package is, what it
+exports, what it may import and who may import it, and how to test it.
+Its `package.json` has a one-line `description`.
 
 ## Dependency rule
 
@@ -48,6 +53,7 @@ graph TD
     shacl -. node/ only .-> turtle & markdown
     vocab -. tooling/ only .-> turtle
     e2e["e2e/pod"] --> application & solid
+    journeys["e2e/journeys"] -. harness/strings.ts only .-> ui
 ```
 
 Packages are consumed as TypeScript source (`exports` maps
@@ -70,7 +76,7 @@ read the library. The Studio has no build of its own: Solid Memo's
 bundles it ([studio.md](studio.md)).
 
 ```sh
-npm run check     # every package: typecheck, tests (100% coverage), the round trip, drift, formatting, the deck library; then boundaries
+npm run check     # Biome's lint, markdownlint, cspell; then every package: typecheck, tests (100% coverage), the round trip, drift, Turtle formatting, the deck library; then boundaries
 npm run build     # the site, the Studio included, into apps/web/dist/
 npm run dev       # the site, from source; the Studio at #/studio
 npm start         # the site as deployed: built, then served at http://localhost:4173

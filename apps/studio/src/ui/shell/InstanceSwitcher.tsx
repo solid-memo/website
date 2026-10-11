@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { Instance } from "@solid-memo/domain/instance";
 import { ActionsMenu, MenuLink, MenuSeparator } from "@solid-memo/ui/ActionsMenu";
@@ -10,7 +14,13 @@ import { studioRouteToHash } from "../router";
  * user with several instances has one: with one, there is nothing to
  * switch to.
  */
-export function InstanceSwitcher({ instances, instance }: { instances: readonly Instance[]; instance: Instance }) {
+export function InstanceSwitcher({
+  instances,
+  instance,
+}: {
+  instances: readonly Instance[];
+  instance: Instance;
+}) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   if (instances.length < 2) return null;
@@ -26,12 +36,17 @@ export function InstanceSwitcher({ instances, instance }: { instances: readonly 
       {instances
         .filter((other) => other.url !== instance.url)
         .map((other) => (
-          <MenuLink key={other.url} href={studioRouteToHash({ screen: "home", instanceUrl: other.url })}>
+          <MenuLink
+            key={other.url}
+            href={studioRouteToHash({ screen: "home", instanceUrl: other.url })}
+          >
             {other.name}
           </MenuLink>
         ))}
       <MenuSeparator />
-      <MenuLink href={studioRouteToHash({ screen: "instances" })}>{t("studio.shell.allInstances")}</MenuLink>
+      <MenuLink href={studioRouteToHash({ screen: "instances" })}>
+        {t("studio.shell.allInstances")}
+      </MenuLink>
     </ActionsMenu>
   );
 }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ChapterV1, StepV1 } from "@solid-memo/vocab/types.generated";
 import { activeCards, type CardContent } from "./deck";
 import { sameText, type LangText } from "./langText";
@@ -84,27 +88,33 @@ export function courseOutlineFromRecords(
   return {
     releaseUrl,
     chapters: byPosition(
-      inUse(chapters).map(({ url, data }): CourseChapter => ({
-        id: fragmentIdOf(url),
-        url,
-        position: data.position,
-        title: data.title,
-        ...(data.description === undefined ? {} : { description: data.description }),
-        ...(data.textFormat === undefined ? {} : { textFormat: data.textFormat }),
-        steps: byPosition(
-          inUse(steps)
-            .filter((step) => step.data.chapter === url)
-            .map((step): CourseStep => ({
-              id: fragmentIdOf(step.url),
-              url: step.url,
-              position: step.data.position,
-              theory: step.data.theory,
-              ...(step.data.textFormat === undefined ? {} : { textFormat: step.data.textFormat }),
-              questionIds: idsOf(step.data.checkedBy),
-            })),
-        ),
-        reviewQuestionIds: idsOf(data.reviewQuestion),
-      })),
+      inUse(chapters).map(
+        ({ url, data }): CourseChapter => ({
+          id: fragmentIdOf(url),
+          url,
+          position: data.position,
+          title: data.title,
+          ...(data.description === undefined ? {} : { description: data.description }),
+          ...(data.textFormat === undefined ? {} : { textFormat: data.textFormat }),
+          steps: byPosition(
+            inUse(steps)
+              .filter((step) => step.data.chapter === url)
+              .map(
+                (step): CourseStep => ({
+                  id: fragmentIdOf(step.url),
+                  url: step.url,
+                  position: step.data.position,
+                  theory: step.data.theory,
+                  ...(step.data.textFormat === undefined
+                    ? {}
+                    : { textFormat: step.data.textFormat }),
+                  questionIds: idsOf(step.data.checkedBy),
+                }),
+              ),
+          ),
+          reviewQuestionIds: idsOf(data.reviewQuestion),
+        }),
+      ),
     ),
   };
 }
@@ -127,9 +137,13 @@ function byPosition<T extends { id: string; position: number }>(items: T[]): T[]
  * not compared.
  */
 export function sameOutline(a: CourseOutline, b: CourseOutline): boolean {
-  const sameIds = (x: readonly string[], y: readonly string[]) => x.length === y.length && x.every((id, i) => id === y[i]);
+  const sameIds = (x: readonly string[], y: readonly string[]) =>
+    x.length === y.length && x.every((id, i) => id === y[i]);
   const sameStep = (x: CourseStep, y: CourseStep) =>
-    x.id === y.id && sameText(x.theory, y.theory) && x.textFormat === y.textFormat && sameIds(x.questionIds, y.questionIds);
+    x.id === y.id &&
+    sameText(x.theory, y.theory) &&
+    x.textFormat === y.textFormat &&
+    sameIds(x.questionIds, y.questionIds);
   const sameChapter = (x: CourseChapter, y: CourseChapter) =>
     x.id === y.id &&
     sameText(x.title, y.title) &&
@@ -138,7 +152,10 @@ export function sameOutline(a: CourseOutline, b: CourseOutline): boolean {
     sameIds(x.reviewQuestionIds, y.reviewQuestionIds) &&
     x.steps.length === y.steps.length &&
     x.steps.every((step, i) => sameStep(step, y.steps[i]!));
-  return a.chapters.length === b.chapters.length && a.chapters.every((chapter, i) => sameChapter(chapter, b.chapters[i]!));
+  return (
+    a.chapters.length === b.chapters.length &&
+    a.chapters.every((chapter, i) => sameChapter(chapter, b.chapters[i]!))
+  );
 }
 
 /**
@@ -197,7 +214,12 @@ export function courseProgress(
       .filter((step) => step.questionIds.every((id) => answered.has(id)))
       .map((step) => step.id);
     const resume = chapter.steps.find((step) => !doneStepIds.includes(step.id));
-    return { url: chapter.url, state, doneStepIds, ...(resume === undefined ? {} : { resumeStepId: resume.id }) };
+    return {
+      url: chapter.url,
+      state,
+      doneStepIds,
+      ...(resume === undefined ? {} : { resumeStepId: resume.id }),
+    };
   });
   const current = chapters.find((chapter) => chapter.state === "open");
   return {
@@ -216,7 +238,10 @@ export function courseProgress(
 export type CompletedChaptersEdit = { kind: "notDone"; chapterUrl: string } | { kind: "restart" };
 
 /** The completed chapters (their URLs) once `edit` is made of them. */
-export function editCompletedChapters(completed: readonly string[], edit: CompletedChaptersEdit): string[] {
+export function editCompletedChapters(
+  completed: readonly string[],
+  edit: CompletedChaptersEdit,
+): string[] {
   if (edit.kind === "restart") return [];
   const id = fragmentIdOf(edit.chapterUrl);
   return completed.filter((url) => fragmentIdOf(url) !== id);
@@ -260,7 +285,15 @@ export function choicesOf(card: CardContent, random: () => number): Choice[] {
  * every review question it names, each once, shuffled by `random`.
  */
 export function finalReviewQueue(chapter: CourseChapter, random: () => number): string[] {
-  return shuffle([...new Set([...chapter.steps.flatMap((step) => step.questionIds), ...chapter.reviewQuestionIds])], random);
+  return shuffle(
+    [
+      ...new Set([
+        ...chapter.steps.flatMap((step) => step.questionIds),
+        ...chapter.reviewQuestionIds,
+      ]),
+    ],
+    random,
+  );
 }
 
 /**
@@ -305,7 +338,8 @@ export function courseAnswerEffect(
   now: Date,
   dayBoundaryHour: number,
 ): CourseAnswerEffect {
-  if (state === null || state === undefined) return { kind: "introduce", grade: gradeOfChoice(correct) };
+  if (state === null || state === undefined)
+    return { kind: "introduce", grade: gradeOfChoice(correct) };
   const today = studyDayOf(now, dayBoundaryHour);
   if (studyDayOf(new Date(state.lastReviewedAt), dayBoundaryHour) === today) {
     return correct ? { kind: "none" } : { kind: "review", grade: gradeOfChoice(false) };

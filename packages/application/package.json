@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/application",
+  "description": "Solid Memo's use cases, and the ports the adapters implement.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

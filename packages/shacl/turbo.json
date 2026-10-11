@@ -1,6 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "extends": ["//"],
+  "extends": [
+    "//"
+  ],
   "tasks": {
     "test": {
       "inputs": [
@@ -12,8 +14,14 @@
       ]
     },
     "library:check": {
-      "dependsOn": ["transit"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"],
+      "dependsOn": [
+        "transit"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
+      ],
       "outputs": [],
       "outputLogs": "new-only"
     }

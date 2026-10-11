@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createRequire } from "node:module";
 import { mergeConfig } from "vitest/config";
 import preact from "@preact/preset-vite";
@@ -26,7 +30,9 @@ export default mergeConfig(
         // The Markdown parser's entity decoder has a browser build that decodes
         // by writing to an element's innerHTML. The tests use the plain one, a
         // lookup table, as the built app does (apps/web/vite.config.ts).
-        "decode-named-character-reference": createRequire(import.meta.url).resolve("decode-named-character-reference"),
+        "decode-named-character-reference": createRequire(import.meta.url).resolve(
+          "decode-named-character-reference",
+        ),
       },
     },
   },

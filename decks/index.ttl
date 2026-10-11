@@ -6,6 +6,7 @@
 @prefix adms:       <http://www.w3.org/ns/adms#> .
 @prefix foaf:       <http://xmlns.com/foaf/0.1/> .
 @prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
 @prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
 @prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
 
@@ -257,8 +258,7 @@
 
 <https://solid-memo.com/decks/academy-award-best-picture/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://creativecommons.org/licenses/by-sa/4.0/>
     a dcterms:LicenseDocument .
@@ -443,8 +443,7 @@
 
 <https://solid-memo.com/decks/brightest-stars/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://creativecommons.org/licenses/by/4.0/>
     a dcterms:LicenseDocument .
@@ -606,8 +605,7 @@
 
 <https://solid-memo.com/decks/capitals-of-the-world/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://en.wikipedia.org/wiki/List_of_national_capitals>
     dcterms:title "List of national capitals" ;
@@ -749,8 +747,7 @@
 
 <https://solid-memo.com/decks/chemical-compounds/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/chemical-compounds/v2.ttl#compilation>
     a prov:Activity .
@@ -960,8 +957,7 @@
 
 <https://solid-memo.com/decks/chess-openings/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/chess-openings/v2.ttl#compilation>
     a prov:Activity .
@@ -1126,8 +1122,7 @@
 
 <https://solid-memo.com/decks/classic-novels/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/classic-novels/v2.ttl#compilation>
     a prov:Activity .
@@ -1296,8 +1291,7 @@
 
 <https://solid-memo.com/decks/classical-music-composers/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/classical-music-composers/v2.ttl#compilation>
     a prov:Activity .
@@ -1453,8 +1447,7 @@
 
 <https://solid-memo.com/decks/common-ions/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/common-ions/v2.ttl#compilation>
     a prov:Activity .
@@ -1618,8 +1611,7 @@
 
 <https://solid-memo.com/decks/constellations/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/constellations/v2.ttl#compilation>
     a prov:Activity .
@@ -1802,8 +1794,7 @@
 
 <https://solid-memo.com/decks/country-calling-codes/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/country-calling-codes/v2.ttl#compilation>
     a prov:Activity .
@@ -1975,8 +1966,7 @@
 
 <https://solid-memo.com/decks/country-code-top-level-domains/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/country-code-top-level-domains/v2.ttl#compilation>
     a prov:Activity .
@@ -2131,8 +2121,7 @@
 
 <https://solid-memo.com/decks/danish-monarchs/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/danish-monarchs/v2.ttl#compilation>
     a prov:Activity .
@@ -2295,8 +2284,7 @@
 
 <https://solid-memo.com/decks/derivatives/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/derivatives/v2.ttl#compilation>
     a prov:Activity .
@@ -2467,8 +2455,7 @@
 
 <https://solid-memo.com/decks/english-and-british-monarchs/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/english-and-british-monarchs/v2.ttl#compilation>
     a prov:Activity .
@@ -2628,8 +2615,7 @@
 
 <https://solid-memo.com/decks/english-basics/v1.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://creativecommons.org/publicdomain/mark/1.0/>
     a dcterms:LicenseDocument .
@@ -2810,8 +2796,7 @@
 
 <https://solid-memo.com/decks/eu-member-states/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/eu-member-states/v2.ttl#compilation>
     a prov:Activity .
@@ -2997,8 +2982,7 @@
 
 <https://solid-memo.com/decks/eurovision-winners/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/eurovision-winners/v2.ttl#compilation>
     a prov:Activity .
@@ -3169,8 +3153,7 @@
 
 <https://solid-memo.com/decks/famous-buildings/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/famous-buildings/v2.ttl#compilation>
     a prov:Activity .
@@ -3366,8 +3349,7 @@
 
 <https://solid-memo.com/decks/famous-paintings/v3.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/famous-paintings/v3.ttl#generation>
     a prov:Activity .
@@ -3524,8 +3506,7 @@
 
 <https://solid-memo.com/decks/famous-sculptures/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://creativecommons.org/licenses/by-sa/3.0/>
     a dcterms:LicenseDocument .
@@ -3734,8 +3715,7 @@
 
 <https://solid-memo.com/decks/federal-states-and-capitals/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/federal-states-and-capitals/v2.ttl#compilation>
     a prov:Activity .
@@ -3929,8 +3909,7 @@
 
 <https://solid-memo.com/decks/fifa-world-cup/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/fifa-world-cup/v2.ttl#compilation>
     a prov:Activity .
@@ -4115,8 +4094,7 @@
 
 <https://solid-memo.com/decks/finnish-basics/v3.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://creativecommons.org/licenses/by-sa/2.5/>
     a dcterms:LicenseDocument .
@@ -4307,8 +4285,7 @@
 
 <https://solid-memo.com/decks/french-basics/v3.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/french-basics/v3.ttl#compilation>
     a prov:Activity .
@@ -4469,8 +4446,7 @@
 
 <https://solid-memo.com/decks/geologic-time-scale/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/geologic-time-scale/v2.ttl#compilation>
     a prov:Activity .
@@ -4646,8 +4622,7 @@
 
 <https://solid-memo.com/decks/geometry-formulas/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/geometry-formulas/v2.ttl#compilation>
     a prov:Activity .
@@ -4813,8 +4788,7 @@
 
 <https://solid-memo.com/decks/german-basics/v3.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/german-basics/v3.ttl#compilation>
     a prov:Activity .
@@ -5038,8 +5012,7 @@
 
 <https://solid-memo.com/decks/getting-started/v4.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/getting-started/v4.ttl#compilation>
     a prov:Activity .
@@ -5203,8 +5176,7 @@
 
 <https://solid-memo.com/decks/git-commands/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
     a dcterms:LicenseDocument .
@@ -5365,8 +5337,7 @@
 
 <https://solid-memo.com/decks/greek-alphabet/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/greek-alphabet/v2.ttl#compilation>
     a prov:Activity .
@@ -5527,8 +5498,7 @@
 
 <https://solid-memo.com/decks/greek-and-roman-gods/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/greek-and-roman-gods/v2.ttl#compilation>
     a prov:Activity .
@@ -5678,8 +5648,7 @@
 
 <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/highest-points-of-europe/v2.ttl#compilation>
     a prov:Activity .
@@ -5883,8 +5852,7 @@
 
 <https://solid-memo.com/decks/html-elements/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/html-elements/v2.ttl#compilation>
     a prov:Activity .
@@ -6024,8 +5992,7 @@
 
 <https://solid-memo.com/decks/http-status-codes/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status>
     dcterms:title "HTTP response status codes" ;
@@ -6179,8 +6146,7 @@
 
 <https://solid-memo.com/decks/human-organs/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/human-organs/v2.ttl#compilation>
     a prov:Activity .
@@ -6339,8 +6305,7 @@
 
 <https://solid-memo.com/decks/human-skeleton/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/human-skeleton/v2.ttl#compilation>
     a prov:Activity .
@@ -6502,8 +6467,7 @@
 
 <https://solid-memo.com/decks/imperial-units/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/imperial-units/v2.ttl#compilation>
     a prov:Activity .
@@ -6665,8 +6629,7 @@
 
 <https://solid-memo.com/decks/integrals/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/integrals/v2.ttl#compilation>
     a prov:Activity .
@@ -6842,8 +6805,7 @@
 
 <https://solid-memo.com/decks/italian-basics/v3.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/italian-basics/v3.ttl#compilation>
     a prov:Activity .
@@ -7007,8 +6969,7 @@
 
 <https://solid-memo.com/decks/japanese-basics/v1.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/japanese-basics/v1.ttl#compilation>
     a prov:Activity .
@@ -7148,8 +7109,7 @@
 
 <https://solid-memo.com/decks/korean-adjectives/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://creativecommons.org/licenses/by-sa/2.0/kr/>
     a dcterms:LicenseDocument .
@@ -7307,8 +7267,7 @@
 
 <https://solid-memo.com/decks/korean-basics/v1.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/korean-basics/v1.ttl#compilation>
     a prov:Activity .
@@ -7443,8 +7402,7 @@
 
 <https://solid-memo.com/decks/korean-nouns/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/korean-nouns/v2.ttl#compilation>
     a prov:Activity .
@@ -7574,8 +7532,7 @@
 
 <https://solid-memo.com/decks/korean-verbs/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/korean-verbs/v2.ttl#compilation>
     a prov:Activity .
@@ -7726,8 +7683,7 @@
 
 <https://solid-memo.com/decks/latin-phrases/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/latin-phrases/v2.ttl#compilation>
     a prov:Activity .
@@ -7886,8 +7842,7 @@
 
 <https://solid-memo.com/decks/mathematical-symbols/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/mathematical-symbols/v2.ttl#compilation>
     a prov:Activity .
@@ -8069,8 +8024,7 @@
 
 <https://solid-memo.com/decks/media-types/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/media-types/v2.ttl#compilation>
     a prov:Activity .
@@ -8240,8 +8194,7 @@
 
 <https://solid-memo.com/decks/minerals/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/minerals/v2.ttl#compilation>
     a prov:Activity .
@@ -8414,8 +8367,7 @@
 
 <https://solid-memo.com/decks/morse-code/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/morse-code/v2.ttl#compilation>
     a prov:Activity .
@@ -8631,8 +8583,7 @@
 
 <https://solid-memo.com/decks/musical-terms/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/musical-terms/v2.ttl#compilation>
     a prov:Activity .
@@ -8779,8 +8730,7 @@
 
 <https://solid-memo.com/decks/network-ports/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/network-ports/v2.ttl#generation>
     a prov:Activity .
@@ -8924,8 +8874,7 @@
 
 <https://solid-memo.com/decks/nobel-peace-prize/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/nobel-peace-prize/v2.ttl#compilation>
     a prov:Activity .
@@ -9092,8 +9041,7 @@
 
 <https://solid-memo.com/decks/nobel-prize-in-chemistry/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/nobel-prize-in-chemistry/v2.ttl#compilation>
     a prov:Activity .
@@ -9243,8 +9191,7 @@
 
 <https://solid-memo.com/decks/nobel-prize-in-literature/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/nobel-prize-in-literature/v2.ttl#compilation>
     a prov:Activity .
@@ -9406,8 +9353,7 @@
 
 <https://solid-memo.com/decks/nobel-prize-in-physics/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/nobel-prize-in-physics/v2.ttl#compilation>
     a prov:Activity .
@@ -9569,8 +9515,7 @@
 
 <https://solid-memo.com/decks/nordic-birds/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/nordic-birds/v2.ttl#compilation>
     a prov:Activity .
@@ -9733,8 +9678,7 @@
 
 <https://solid-memo.com/decks/nordic-fish/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/nordic-fish/v2.ttl#compilation>
     a prov:Activity .
@@ -9897,8 +9841,7 @@
 
 <https://solid-memo.com/decks/nordic-mammals/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/nordic-mammals/v2.ttl#compilation>
     a prov:Activity .
@@ -10060,8 +10003,7 @@
 
 <https://solid-memo.com/decks/nordic-trees/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/nordic-trees/v2.ttl#compilation>
     a prov:Activity .
@@ -10235,8 +10177,7 @@
 
 <https://solid-memo.com/decks/nordic-world-heritage-sites/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/nordic-world-heritage-sites/v2.ttl#compilation>
     a prov:Activity .
@@ -10421,8 +10362,7 @@
 
 <https://solid-memo.com/decks/norse-mythology/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/norse-mythology/v2.ttl#compilation>
     a prov:Activity .
@@ -10596,8 +10536,7 @@
 
 <https://solid-memo.com/decks/olympic-games/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/olympic-games/v2.ttl#compilation>
     a prov:Activity .
@@ -10743,8 +10682,7 @@
 
 <https://solid-memo.com/decks/periodic-table/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://en.wikipedia.org/wiki/List_of_chemical_elements>
     dcterms:title "List of chemical elements" ;
@@ -10905,8 +10843,7 @@
 
 <https://solid-memo.com/decks/physical-constants/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/physical-constants/v2.ttl#compilation>
     a prov:Activity .
@@ -11098,8 +11035,7 @@
 
 <https://solid-memo.com/decks/physics-equations/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/physics-equations/v2.ttl#compilation>
     a prov:Activity .
@@ -11281,8 +11217,7 @@
 
 <https://solid-memo.com/decks/portuguese-basics/v3.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/portuguese-basics/v3.ttl#compilation>
     a prov:Activity .
@@ -11448,8 +11383,7 @@
 
 <https://solid-memo.com/decks/python-built-ins/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/python-built-ins/v2.ttl#compilation>
     a prov:Activity .
@@ -11630,8 +11564,7 @@
 
 <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#compilation>
     a prov:Activity .
@@ -11800,8 +11733,7 @@
 
 <https://solid-memo.com/decks/roman-numerals/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/roman-numerals/v2.ttl#compilation>
     a prov:Activity .
@@ -11980,8 +11912,7 @@
 
 <https://solid-memo.com/decks/shakespeare-plays/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/shakespeare-plays/v2.ttl#compilation>
     a prov:Activity .
@@ -12151,8 +12082,7 @@
 
 <https://solid-memo.com/decks/si-units/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/si-units/v2.ttl#compilation>
     a prov:Activity .
@@ -12308,8 +12238,7 @@
 
 <https://solid-memo.com/decks/solar-system/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/solar-system/v2.ttl#compilation>
     a prov:Activity .
@@ -12859,8 +12788,7 @@
 
 <https://solid-memo.com/decks/solid-fundamentals/v3.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/solid-fundamentals/v3.ttl#compilation>
     a prov:Activity .
@@ -14005,8 +13933,7 @@
 
 <https://solid-memo.com/decks/space-exploration/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/space-exploration/v2.ttl#compilation>
     a prov:Activity .
@@ -14193,8 +14120,7 @@
 
 <https://solid-memo.com/decks/spanish-basics/v3.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/spanish-basics/v3.ttl#compilation>
     a prov:Activity .
@@ -14358,8 +14284,7 @@
 
 <https://solid-memo.com/decks/spelling-alphabets/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/spelling-alphabets/v2.ttl#compilation>
     a prov:Activity .
@@ -14541,8 +14466,7 @@
 
 <https://solid-memo.com/decks/sql-basics/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/sql-basics/v2.ttl#compilation>
     a prov:Activity .
@@ -14724,8 +14648,7 @@
 
 <https://solid-memo.com/decks/sweden-counties-and-provinces/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/sweden-counties-and-provinces/v2.ttl#compilation>
     a prov:Activity .
@@ -14878,8 +14801,7 @@
 
 <https://solid-memo.com/decks/swedish-adjectives/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/swedish-adjectives/v2.ttl#generation>
     a prov:Activity .
@@ -15021,8 +14943,7 @@
 
 <https://solid-memo.com/decks/swedish-basics/v1.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/swedish-basics/v1.ttl#compilation>
     a prov:Activity .
@@ -15173,8 +15094,7 @@
 
 <https://solid-memo.com/decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <http://spdx.org/rdf/terms#checksumAlgorithm_sha256>
     a <http://spdx.org/rdf/terms#ChecksumAlgorithm> .
@@ -15615,8 +15535,7 @@
 
 <https://solid-memo.com/decks/swedish-literature/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/swedish-literature/v2.ttl#compilation>
     a prov:Activity .
@@ -15759,8 +15678,7 @@
 
 <https://solid-memo.com/decks/swedish-monarchs/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/swedish-monarchs/v2.ttl#compilation>
     a prov:Activity .
@@ -15934,8 +15852,7 @@
 
 <https://solid-memo.com/decks/swedish-national-parks/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/swedish-national-parks/v2.ttl#compilation>
     a prov:Activity .
@@ -16094,8 +16011,7 @@
 
 <https://solid-memo.com/decks/swedish-nouns/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/swedish-nouns/v2.ttl#generation>
     a prov:Activity .
@@ -16229,8 +16145,7 @@
 
 <https://solid-memo.com/decks/swedish-prime-ministers/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/swedish-prime-ministers/v2.ttl#compilation>
     a prov:Activity .
@@ -16421,8 +16336,7 @@
 
 <https://solid-memo.com/decks/swedish-provincial-symbols/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/swedish-provincial-symbols/v2.ttl#compilation>
     a prov:Activity .
@@ -16587,8 +16501,7 @@
 
 <https://solid-memo.com/decks/swedish-verbs/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/swedish-verbs/v2.ttl#generation>
     a prov:Activity .
@@ -16747,8 +16660,7 @@
 
 <https://solid-memo.com/decks/trigonometry/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/trigonometry/v2.ttl#compilation>
     a prov:Activity .
@@ -16902,8 +16814,7 @@
 
 <https://solid-memo.com/decks/united-nations/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/united-nations/v2.ttl#compilation>
     a prov:Activity .
@@ -17115,8 +17026,7 @@
 
 <https://solid-memo.com/decks/unix-shell-commands/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://www.gnu.org/licenses/fdl-1.3.html>
     a dcterms:LicenseDocument .
@@ -17318,8 +17228,7 @@
 
 <https://solid-memo.com/decks/us-constitution-amendments/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/us-constitution-amendments/v2.ttl#compilation>
     a prov:Activity .
@@ -17484,8 +17393,7 @@
 
 <https://solid-memo.com/decks/us-presidents/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/us-presidents/v2.ttl#compilation>
     a prov:Activity .
@@ -17672,8 +17580,7 @@
 
 <https://solid-memo.com/decks/us-states-and-capitals/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/us-states-and-capitals/v2.ttl#compilation>
     a prov:Activity .
@@ -17831,8 +17738,7 @@
 
 <https://solid-memo.com/decks/vitamins/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/vitamins/v2.ttl#compilation>
     a prov:Activity .
@@ -18004,8 +17910,7 @@
 
 <https://solid-memo.com/decks/world-currencies/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/world-currencies/v2.ttl#compilation>
     a prov:Activity .
@@ -18153,8 +18058,7 @@
 
 <https://solid-memo.com/decks/world-flags/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://flagpedia.net/index>
     dcterms:title "Flagpedia: flags of all countries" ;
@@ -18294,8 +18198,7 @@
 
 <https://solid-memo.com/decks/world-history-dates/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/world-history-dates/v2.ttl#compilation>
     a prov:Activity .
@@ -18449,8 +18352,7 @@
 
 <https://solid-memo.com/decks/world-rivers/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/world-rivers/v2.ttl#compilation>
     a prov:Activity .
@@ -18600,8 +18502,7 @@
 
 <https://solid-memo.com/decks/world-war-ii/v2.ttl#anton-wiklund>
     a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+    foaf:name "Anton Wiklund" .
 
 <https://solid-memo.com/decks/world-war-ii/v2.ttl#compilation>
     a prov:Activity .

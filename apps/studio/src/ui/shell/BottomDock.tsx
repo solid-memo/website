@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useId } from "preact/hooks";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -58,7 +62,9 @@ export function BottomDock({
   const tabId = (each: DockTab) => `${base}-${each}`;
   const panelId = `${base}-panel`;
   const label = (each: DockTab) =>
-    each === "problems" && problems?.count !== undefined ? t("studio.dock.problemsCount", { count: problems.count }) : t(`studio.dock.${each}`);
+    each === "problems" && problems?.count !== undefined
+      ? t("studio.dock.problemsCount", { count: problems.count })
+      : t(`studio.dock.${each}`);
 
   function step(event: KeyboardEvent) {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
@@ -69,8 +75,22 @@ export function BottomDock({
   }
 
   return (
-    <section id={id} class="studio-dock" aria-label={t("studio.dock.label")} data-region tabIndex={-1} style={{ height: `${height}px` }}>
-      <Splitter label={t("studio.dock.resize")} controls={id} orientation="horizontal" value={height} size={DOCK_HEIGHT} onChange={onHeight} />
+    <section
+      id={id}
+      class="studio-dock"
+      aria-label={t("studio.dock.label")}
+      data-region
+      tabIndex={-1}
+      style={{ height: `${height}px` }}
+    >
+      <Splitter
+        label={t("studio.dock.resize")}
+        controls={id}
+        orientation="horizontal"
+        value={height}
+        size={DOCK_HEIGHT}
+        onChange={onHeight}
+      />
       <div class="studio-dock-bar">
         <div role="tablist" aria-label={t("studio.dock.label")}>
           {DOCK_TABS.map((each) => (
@@ -93,7 +113,13 @@ export function BottomDock({
           {t("studio.shell.hide")}
         </button>
       </div>
-      <div id={panelId} role="tabpanel" class="studio-dock-panel" aria-labelledby={tabId(tab)} tabIndex={0}>
+      <div
+        id={panelId}
+        role="tabpanel"
+        class="studio-dock-panel"
+        aria-labelledby={tabId(tab)}
+        tabIndex={0}
+      >
         {tab === "activity" ? (
           activity.length === 0 ? (
             <p class="hint">{t("studio.dock.noActivity")}</p>
@@ -101,8 +127,12 @@ export function BottomDock({
             <ol class="studio-activity">
               {activity.map((entry) => (
                 <li key={entry.id}>
-                  <time dateTime={entry.at.toISOString()}>{entry.at.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}</time>{" "}
-                  {entry.count === 1 ? entry.text : t("studio.dock.repeated", { text: entry.text, count: entry.count })}
+                  <time dateTime={entry.at.toISOString()}>
+                    {entry.at.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
+                  </time>{" "}
+                  {entry.count === 1
+                    ? entry.text
+                    : t("studio.dock.repeated", { text: entry.text, count: entry.count })}
                 </li>
               ))}
             </ol>

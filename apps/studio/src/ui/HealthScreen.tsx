@@ -1,7 +1,16 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import type { Card, Deck } from "@solid-memo/domain/deck";
-import { cardSpotOf, healthProblemCount, type CardSpot, type DeckHealth } from "@solid-memo/domain/deckHealth";
+import {
+  cardSpotOf,
+  healthProblemCount,
+  type CardSpot,
+  type DeckHealth,
+} from "@solid-memo/domain/deckHealth";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { RepairPlan, Unrepairable } from "@solid-memo/domain/repair";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
@@ -51,7 +60,9 @@ function DataCheckSection({
   const results = report.documents.flatMap((document) =>
     document.subjects.flatMap((subject) =>
       subject.status === "checked" || subject.status === "profiled"
-        ? subject.violations.filter((v) => v.severity !== "info").map((violation) => ({ subject: subject.url, violation }))
+        ? subject.violations
+            .filter((v) => v.severity !== "info")
+            .map((violation) => ({ subject: subject.url, violation }))
         : [],
     ),
   );
@@ -65,7 +76,8 @@ function DataCheckSection({
         <ul class="studio-health-list">
           {results.map(({ subject, violation }, index) => (
             <li key={index}>
-              {link(subject, violation.path)}: <Result violation={violation} severity={severityLabel(violation.severity)} />
+              {link(subject, violation.path)}:{" "}
+              <Result violation={violation} severity={severityLabel(violation.severity)} />
             </li>
           ))}
         </ul>
@@ -81,7 +93,9 @@ function DataCheckSection({
             ))}
           </ul>
           <button class="primary" onClick={repairs.onRepair} disabled={busy}>
-            {busy ? t("repair.repairing") : t("repair.repairButton", { count: plan.repairs.length })}
+            {busy
+              ? t("repair.repairing")
+              : t("repair.repairButton", { count: plan.repairs.length })}
           </button>
         </>
       )}
@@ -130,7 +144,11 @@ export function placeText(spot: CardSpot, t: I18n["t"], readerText: I18n["reader
       return t("studio.health.place.schedule", { card });
     case "distractors":
       return t(
-        place.part === "text" ? "studio.health.place.distractorText" : place.part === "note" ? "studio.health.place.distractorNote" : "studio.health.place.distractor",
+        place.part === "text"
+          ? "studio.health.place.distractorText"
+          : place.part === "note"
+            ? "studio.health.place.distractorNote"
+            : "studio.health.place.distractor",
         { card, id: place.distractor },
       );
     case "content":
@@ -141,15 +159,36 @@ export function placeText(spot: CardSpot, t: I18n["t"], readerText: I18n["reader
 }
 
 /** A problem's place in a card, as a link to that field of the card inspector (`spotHref`); named only, with none. */
-function SpotLink({ spot, spotHref, language }: { spot: CardSpot; spotHref: ((spot: CardSpot) => string) | null; language?: string }) {
+function SpotLink({
+  spot,
+  spotHref,
+  language,
+}: {
+  spot: CardSpot;
+  spotHref: ((spot: CardSpot) => string) | null;
+  language?: string;
+}) {
   const { t, readerText, languageParts } = useI18n();
   const place = placeText(spot, t, readerText);
-  const text = language === undefined || language === "" ? place : t("studio.health.language", { place, language: languageParts(language).name });
+  const text =
+    language === undefined || language === ""
+      ? place
+      : t("studio.health.language", { place, language: languageParts(language).name });
   return spotHref === null ? <>{text}</> : <a href={spotHref(spot)}>{text}</a>;
 }
 
 /** The heading of a part of the health screen, and what it says when nothing in it is wrong. */
-function Part({ id, heading, fine, children }: { id: string; heading: string; fine: string | null; children?: ComponentChildren }) {
+function Part({
+  id,
+  heading,
+  fine,
+  children,
+}: {
+  id: string;
+  heading: string;
+  fine: string | null;
+  children?: ComponentChildren;
+}) {
   return (
     <section aria-labelledby={id}>
       <h3 id={id}>{heading}</h3>
@@ -201,9 +240,14 @@ export function DeckHealthScreen({
   const toSpot = held ? null : spotHref;
   const link: SubjectLink = (subjectUrl, path) => {
     if (subjectUrl === deck.url) return about(t("studio.health.deckEntry"));
-    if (subjectUrl === distributionUrlOf(deck.url)) return about(t("studio.health.deckDistribution"));
+    if (subjectUrl === distributionUrlOf(deck.url))
+      return about(t("studio.health.deckDistribution"));
     const spot = cardSpotOf(deck, cards, subjectUrl, path);
-    return spot === null ? <ExternalLink url={subjectUrl} /> : <SpotLink spot={spot} spotHref={toSpot} />;
+    return spot === null ? (
+      <ExternalLink url={subjectUrl} />
+    ) : (
+      <SpotLink spot={spot} spotHref={toSpot} />
+    );
   };
   const unstated = health.unstated;
   return (
@@ -216,17 +260,33 @@ export function DeckHealthScreen({
       </header>
       {/* Mounted throughout, so the count is heard each time a check ends. */}
       <p class={count === 0 ? "hint" : "warning"} role="status">
-        {checking ? "" : count === 0 ? t("studio.health.allWell") : t("studio.health.summary", { count })}
+        {checking
+          ? ""
+          : count === 0
+            ? t("studio.health.allWell")
+            : t("studio.health.summary", { count })}
       </p>
       {held && <p class="warning">{t("studio.health.held")}</p>}
-      <DataCheckSection report={health.report} hint={t("studio.health.dataHint")} link={link} repairs={repairs} />
+      <DataCheckSection
+        report={health.report}
+        hint={t("studio.health.dataHint")}
+        link={link}
+        repairs={repairs}
+      />
       <Part
         id="health-languages"
         heading={t("studio.health.languagesHeading")}
-        fine={unstated === null ? t("studio.health.languagesUnchecked") : unstated.length === 0 ? t("studio.health.languagesFine") : null}
+        fine={
+          unstated === null
+            ? t("studio.health.languagesUnchecked")
+            : unstated.length === 0
+              ? t("studio.health.languagesFine")
+              : null
+        }
       >
         <p>
-          {t("studio.health.unstated", { count: unstated?.length ?? 0 })} {!held && <a href={aboutHref}>{t("studio.health.unstatedLink")}</a>}
+          {t("studio.health.unstated", { count: unstated?.length ?? 0 })}{" "}
+          {!held && <a href={aboutHref}>{t("studio.health.unstatedLink")}</a>}
         </p>
         <ul class="studio-health-list">
           {unstated?.map((spot, index) => (
@@ -265,7 +325,8 @@ export function DeckHealthScreen({
         <ul class="studio-health-list">
           {health.markdown.map((problem, index) => (
             <li key={index}>
-              <SpotLink spot={problem} spotHref={toSpot} language={problem.language} />: {problemText(problem.finding, t)}
+              <SpotLink spot={problem} spotHref={toSpot} language={problem.language} />:{" "}
+              {problemText(problem.finding, t)}
             </li>
           ))}
         </ul>
@@ -314,7 +375,8 @@ export function InstanceHealthScreen({
       <ExternalLink url={subjectUrl} />
     ) : (
       <>
-        <ExternalLink url={subjectUrl} /> <a href={deckHref(deck)}>{t("studio.health.inDeck", { deck: readerText(deck.title) })}</a>
+        <ExternalLink url={subjectUrl} />{" "}
+        <a href={deckHref(deck)}>{t("studio.health.inDeck", { deck: readerText(deck.title) })}</a>
       </>
     );
   };
@@ -326,7 +388,12 @@ export function InstanceHealthScreen({
           {checking ? t("studio.health.checking") : t("studio.health.checkAgain")}
         </button>
       </header>
-      <DataCheckSection report={report} hint={t("studio.health.instanceDataHint")} link={link} repairs={repairs} />
+      <DataCheckSection
+        report={report}
+        hint={t("studio.health.instanceDataHint")}
+        link={link}
+        repairs={repairs}
+      />
       <section aria-labelledby="health-decks">
         <h3 id="health-decks">{t("studio.health.decksHeading")}</h3>
         <p class="hint">{t("studio.health.decksHint")}</p>
@@ -348,5 +415,7 @@ export function InstanceHealthScreen({
 /** "Check again" in the palette too, while the screen is not checking. */
 function useCheckAgain(checking: boolean, onCheck: () => void) {
   const { t } = useI18n();
-  useScreenCommands(checking ? [] : [{ id: "checkAgain", label: t("studio.health.checkAgain"), run: onCheck }]);
+  useScreenCommands(
+    checking ? [] : [{ id: "checkAgain", label: t("studio.health.checkAgain"), run: onCheck }],
+  );
 }

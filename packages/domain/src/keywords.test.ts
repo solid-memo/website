@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import {
   allKeywords,
@@ -20,7 +24,13 @@ const KEYWORDS = {
 
 describe("keywordsIn", () => {
   it("shows the keywords of every tag of the language, and those in no stated language, each once in stored order", () => {
-    expect(keywordsIn(KEYWORDS, "sv")).toEqual(["huvudstäder", "länder", "städer", "legacy", "ISO 3166"]);
+    expect(keywordsIn(KEYWORDS, "sv")).toEqual([
+      "huvudstäder",
+      "länder",
+      "städer",
+      "legacy",
+      "ISO 3166",
+    ]);
     expect(keywordsIn(KEYWORDS, "en")).toEqual(["capitals", "countries", "legacy", "ISO 3166"]);
     expect(keywordsIn(KEYWORDS, "SV-se")).toEqual(keywordsIn(KEYWORDS, "sv"));
   });
@@ -87,14 +97,21 @@ describe("sameKeywords", () => {
 
 describe("tidiedKeywords", () => {
   it("trims, drops empty and repeated keywords and empty languages, lower-cases tags", () => {
-    expect(tidiedKeywords({ EN: [" capitals ", "", "capitals", "countries"], sv: [" "], "SV-fi": ["städer"] }, undefined)).toEqual({
+    expect(
+      tidiedKeywords(
+        { EN: [" capitals ", "", "capitals", "countries"], sv: [" "], "SV-fi": ["städer"] },
+        undefined,
+      ),
+    ).toEqual({
       en: ["capitals", "countries"],
       "sv-fi": ["städer"],
     });
   });
 
   it("merges two tags that differ only in case", () => {
-    expect(tidiedKeywords({ sv: ["a", "b"], SV: ["b", "c"] }, undefined)).toEqual({ sv: ["a", "b", "c"] });
+    expect(tidiedKeywords({ sv: ["a", "b"], SV: ["b", "c"] }, undefined)).toEqual({
+      sv: ["a", "b", "c"],
+    });
   });
 
   it("keeps untagged keywords only as saved, some of them removed", () => {
@@ -108,14 +125,20 @@ describe("tidiedKeywords", () => {
   });
 
   it("asks for the language of new untagged keywords", () => {
-    expect(() => tidiedKeywords({ "": ["capitals", "new"] }, { "": ["capitals"] })).toThrow("Choose the language of the keywords.");
-    expect(() => tidiedKeywords({ "": ["new"] }, undefined)).toThrow("Choose the language of the keywords.");
+    expect(() => tidiedKeywords({ "": ["capitals", "new"] }, { "": ["capitals"] })).toThrow(
+      "Choose the language of the keywords.",
+    );
+    expect(() => tidiedKeywords({ "": ["new"] }, undefined)).toThrow(
+      "Choose the language of the keywords.",
+    );
   });
 });
 
 describe("untaggedKeywords", () => {
   it("keeps an older format's keywords untagged, guessing no language", () => {
-    expect(untaggedKeywords(["capitals", "huvudstäder"])).toEqual({ "": ["capitals", "huvudstäder"] });
+    expect(untaggedKeywords(["capitals", "huvudstäder"])).toEqual({
+      "": ["capitals", "huvudstäder"],
+    });
     expect(untaggedKeywords([])).toEqual({});
     expect(untaggedKeywords(undefined)).toEqual({});
   });

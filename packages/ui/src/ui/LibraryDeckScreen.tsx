@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { licenseLabel } from "@solid-memo/domain/license";
 import { keywordsIn } from "@solid-memo/domain/keywords";
 import { topicLabels, type LibraryDeck, type LibrarySource } from "@solid-memo/domain/library";
@@ -82,7 +86,9 @@ export function LibraryDeckScreen({
             <dt>{t("libraryDeck.host")}</dt>
             <dd>{host}</dd>
             <dt>{t("libraryDeck.kind")}</dt>
-            <dd>{deck.isCourse === true ? t("libraryDeck.kindCourse") : t("libraryDeck.kindDeck")}</dd>
+            <dd>
+              {deck.isCourse === true ? t("libraryDeck.kindCourse") : t("libraryDeck.kindDeck")}
+            </dd>
           </>
         )}
         <dt>{t("libraryDeck.size")}</dt>
@@ -134,9 +140,7 @@ export function LibraryDeckScreen({
           <>
             <dt>{t("libraryDeck.licence")}</dt>
             <dd>
-              <ExternalLink url={deck.license}>
-                {licenseLabel(deck.license)}
-              </ExternalLink>
+              <ExternalLink url={deck.license}>{licenseLabel(deck.license)}</ExternalLink>
             </dd>
           </>
         )}
@@ -197,7 +201,7 @@ export function LibraryDeckScreen({
 
 /**
  * "List of national capitals — Wikipedia contributors · CC BY-SA 4.0":
- * the source, linked, and its own authors and licence when the deck
+ * the source, linked, and its own authors and license when the deck
  * states them.
  */
 function SourceLine({ source }: { source: LibrarySource }) {
@@ -212,9 +216,7 @@ function SourceLine({ source }: { source: LibrarySource }) {
           {hasAuthors && <AuthorNames authors={source.authors} />}
           {hasAuthors && hasLicense && " · "}
           {hasLicense && (
-            <ExternalLink url={source.license!}>
-              {licenseLabel(source.license!)}
-            </ExternalLink>
+            <ExternalLink url={source.license!}>{licenseLabel(source.license!)}</ExternalLink>
           )}
         </span>
       )}

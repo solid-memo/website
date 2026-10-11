@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { DCAT_NS, DCTERMS_NS, type ReleaseText } from "./releaseModel.ts";
 import { publishedIdsOf, RDF_TYPE, type DraftTriple, type ReleaseDraft } from "./releaseDraft.ts";
@@ -26,25 +30,53 @@ const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
  * drop or give to another, and how it was made, its activities, which
  * the draft keeps as they are.
  */
-export function nextVersionDraft(read: ReleaseDraft, url: string, linked: readonly DraftTriple[] = []): ReleaseDraft {
+export function nextVersionDraft(
+  read: ReleaseDraft,
+  url: string,
+  linked: readonly DraftTriple[] = [],
+): ReleaseDraft {
   const release = { ...read, triples: [...read.triples, ...linkedDescription(read, linked)] };
-  const series = new Set([release.root.inSeries, release.root.isVersionOf].filter((iri): iri is string => iri !== undefined));
-  const draft = rebaseDraft(release, url, (iri) => (series.has(iri) ? iri : moved(iri, release.url, url)));
+  const series = new Set(
+    [release.root.inSeries, release.root.isVersionOf].filter(
+      (iri): iri is string => iri !== undefined,
+    ),
+  );
+  const draft = rebaseDraft(release, url, (iri) =>
+    series.has(iri) ? iri : moved(iri, release.url, url),
+  );
   // What the series says stays as it is: the versions it lists are the releases before, as they are.
-  const triples = draft.triples.map((triple, at) => (series.has(release.triples[at]!.subject) ? release.triples[at]! : triple));
+  const triples = draft.triples.map((triple, at) =>
+    series.has(release.triples[at]!.subject) ? release.triples[at]! : triple,
+  );
   const described = release.triples.some((triple) => series.has(triple.subject));
-  const { issued: _issued, versionNotes: _notes, modified: _modified, releasedAs: _released, ...root } = draft.root;
+  const {
+    issued: _issued,
+    versionNotes: _notes,
+    modified: _modified,
+    releasedAs: _released,
+    ...root
+  } = draft.root;
   const version = Number(release.root.version ?? "1");
   return {
     ...draft,
-    root: { ...root, version: String(version + 1), prev: release.url, previousVersion: release.url },
+    root: {
+      ...root,
+      version: String(version + 1),
+      prev: release.url,
+      previousVersion: release.url,
+    },
     triples: described ? [...triples, ...earlierVersion(release)] : triples,
     published: publishedIdsOf(read),
   };
 }
 
 /** What an earlier version is described by: its class, title, description and version. */
-const EARLIER_VERSION = new Set([RDF_TYPE, `${DCTERMS_NS}title`, `${DCTERMS_NS}description`, `${DCAT_NS}version`]);
+const EARLIER_VERSION = new Set([
+  RDF_TYPE,
+  `${DCTERMS_NS}title`,
+  `${DCTERMS_NS}description`,
+  `${DCAT_NS}version`,
+]);
 
 /** What a series is described by: what a library's index says of one (LibraryDeckSeriesV3), and what withSeries writes. */
 const SERIES = new Set([
@@ -74,13 +106,33 @@ const AGENT = new Set([RDF_TYPE, "http://xmlns.com/foaf/0.1/name"]);
  * version the series lists but the release, as a dcat:Dataset with its
  * title, description and version.
  */
-export function linkedDescription(release: ReleaseDraft, linked: readonly DraftTriple[]): DraftTriple[] {
+export function linkedDescription(
+  release: ReleaseDraft,
+  linked: readonly DraftTriple[],
+): DraftTriple[] {
   const own = new Set(release.triples.map((triple) => triple.subject));
-  const series = new Set([release.root.inSeries, release.root.isVersionOf].filter((iri): iri is string => iri !== undefined && !own.has(iri)));
+  const series = new Set(
+    [release.root.inSeries, release.root.isVersionOf].filter(
+      (iri): iri is string => iri !== undefined && !own.has(iri),
+    ),
+  );
   const of = (subjects: ReadonlySet<string>, predicate: string) =>
-    linked.filter((triple) => subjects.has(triple.subject) && triple.predicate === predicate && triple.object.kind === "iri").map((triple) => triple.object.value);
-  const agents = new Set([release.root.publisher, ...of(series, `${DCTERMS_NS}publisher`)].filter((iri): iri is string => iri !== undefined && !own.has(iri)));
-  const versions = new Set(of(series, `${DCAT_NS}hasVersion`).filter((iri) => iri !== release.url && !own.has(iri)));
+    linked
+      .filter(
+        (triple) =>
+          subjects.has(triple.subject) &&
+          triple.predicate === predicate &&
+          triple.object.kind === "iri",
+      )
+      .map((triple) => triple.object.value);
+  const agents = new Set(
+    [release.root.publisher, ...of(series, `${DCTERMS_NS}publisher`)].filter(
+      (iri): iri is string => iri !== undefined && !own.has(iri),
+    ),
+  );
+  const versions = new Set(
+    of(series, `${DCAT_NS}hasVersion`).filter((iri) => iri !== release.url && !own.has(iri)),
+  );
   return linked.filter(
     (triple) =>
       (series.has(triple.subject) && SERIES.has(triple.predicate)) ||
@@ -93,17 +145,37 @@ export function linkedDescription(release: ReleaseDraft, linked: readonly DraftT
 
 /** The statements that describe a release as an earlier version of its series: a dcat:Dataset with its title, description and version. */
 function earlierVersion(release: ReleaseDraft): DraftTriple[] {
-  const text = (language: string, value: string): ReleaseText => ({ kind: "literal", value, language, datatype: LANG_STRING });
+  const text = (language: string, value: string): ReleaseText => ({
+    kind: "literal",
+    value,
+    language,
+    datatype: LANG_STRING,
+  });
   const texts = (predicate: string, values: Readonly<Record<string, string>> = {}) =>
-    Object.entries(values).map(([language, value]): DraftTriple => ({ subject: release.url, predicate, object: text(language, value) }));
+    Object.entries(values).map(
+      ([language, value]): DraftTriple => ({
+        subject: release.url,
+        predicate,
+        object: text(language, value),
+      }),
+    );
   return [
-    { subject: release.url, predicate: RDF_TYPE, object: { kind: "iri", value: `${DCAT_NS}Dataset` } },
+    {
+      subject: release.url,
+      predicate: RDF_TYPE,
+      object: { kind: "iri", value: `${DCAT_NS}Dataset` },
+    },
     ...texts(`${DCTERMS_NS}title`, release.root.title),
     ...texts(`${DCTERMS_NS}description`, release.root.description),
     {
       subject: release.url,
       predicate: `${DCAT_NS}version`,
-      object: { kind: "literal", value: release.root.version ?? "1", language: "", datatype: XSD_STRING },
+      object: {
+        kind: "literal",
+        value: release.root.version ?? "1",
+        language: "",
+        datatype: XSD_STRING,
+      },
     },
   ];
 }

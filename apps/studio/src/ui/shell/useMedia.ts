@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useState } from "preact/hooks";
 
 /** Whether the screen is as narrow as `query` says (NARROW, MEDIUM in workspaceLayout.ts), as it changes. */

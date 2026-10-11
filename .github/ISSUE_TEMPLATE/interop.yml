@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Interop report
+description: How Solid Memo works, or fails, with a Solid server or identity provider.
+labels: [interop]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The servers the tests already run against are listed in [docs/testing.md](https://github.com/solid-memo/website/blob/main/docs/testing.md). A report from any server is welcome, whether Solid Memo works on it or not.
+  - type: input
+    id: server
+    attributes:
+      label: Server and version
+      placeholder: Community Solid Server 7.1.7
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Provider
+      description: Where the pod is hosted, if it is a public provider.
+      placeholder: solidcommunity.net
+  - type: dropdown
+    id: access
+    attributes:
+      label: Access control
+      options:
+        - Web Access Control (WAC)
+        - Access Control Policies (ACP)
+        - I do not know
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Everything works
+        - Some things fail
+        - Signing in fails
+        - Nothing works
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What you tried
+      description: What you did (sign in, add a deck, study, the Studio…), and what happened. Failed requests in the browser's network tab, with their status, help most. Leave out tokens and anything private.
+    validations:
+      required: true

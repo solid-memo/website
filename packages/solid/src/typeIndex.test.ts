@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
@@ -28,8 +32,7 @@ import {
 import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@inrupt/solid-client")>();
+  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
   return {
     ...actual,
     getSolidDataset: vi.fn(),
@@ -47,9 +50,7 @@ const EXTENDED_PROFILE = "https://alice.example/profile";
 const noFetch = vi.fn() as unknown as typeof globalThis.fetch;
 
 function profileDataset(
-  build: (
-    thing: ThingBuilder<ThingPersisted>,
-  ) => ThingBuilder<ThingPersisted> = (t) => t,
+  build: (thing: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted> = (t) => t,
 ): SolidDataset {
   return setThing(
     mockSolidDatasetFrom(PROFILE_DOC),
@@ -60,9 +61,7 @@ function profileDataset(
 /** A document at `documentUrl` holding the WebID subject with `build` applied. */
 function subjectDocument(
   documentUrl: string,
-  build: (
-    thing: ThingBuilder<ThingPersisted>,
-  ) => ThingBuilder<ThingPersisted> = (t) => t,
+  build: (thing: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted> = (t) => t,
 ): SolidDataset {
   return setThing(
     mockSolidDatasetFrom(documentUrl),
@@ -93,9 +92,7 @@ describe("locateTypeIndexes", () => {
   it("finds both indexes linked directly from the profile", async () => {
     mockDatasets({
       [WEBID]: profileDataset((t) =>
-        t
-          .addIri(SOLID.privateTypeIndex, PRIVATE_INDEX)
-          .addIri(SOLID.publicTypeIndex, PUBLIC_INDEX),
+        t.addIri(SOLID.privateTypeIndex, PRIVATE_INDEX).addIri(SOLID.publicTypeIndex, PUBLIC_INDEX),
       ),
     });
     await expect(locateTypeIndexes(WEBID, noFetch)).resolves.toEqual({
@@ -114,9 +111,7 @@ describe("locateTypeIndexes", () => {
 
   it("follows the preferences file to the private index", async () => {
     mockDatasets({
-      [WEBID]: profileDataset((t) =>
-        t.addIri(PIM.preferencesFile, PREFERENCES_FILE),
-      ),
+      [WEBID]: profileDataset((t) => t.addIri(PIM.preferencesFile, PREFERENCES_FILE)),
       [PREFERENCES_FILE]: setThing(
         mockSolidDatasetFrom(PREFERENCES_FILE),
         buildThing(createThing({ url: WEBID }))
@@ -132,9 +127,7 @@ describe("locateTypeIndexes", () => {
 
   it("treats an unreadable preferences file as no private index", async () => {
     mockDatasets({
-      [WEBID]: profileDataset((t) =>
-        t.addIri(PIM.preferencesFile, PREFERENCES_FILE),
-      ),
+      [WEBID]: profileDataset((t) => t.addIri(PIM.preferencesFile, PREFERENCES_FILE)),
     });
     await expect(locateTypeIndexes(WEBID, noFetch)).resolves.toEqual({
       privateIndexUrl: null,
@@ -144,9 +137,7 @@ describe("locateTypeIndexes", () => {
 
   it("treats a preferences file without the WebID subject as no private index", async () => {
     mockDatasets({
-      [WEBID]: profileDataset((t) =>
-        t.addIri(PIM.preferencesFile, PREFERENCES_FILE),
-      ),
+      [WEBID]: profileDataset((t) => t.addIri(PIM.preferencesFile, PREFERENCES_FILE)),
       [PREFERENCES_FILE]: mockSolidDatasetFrom(PREFERENCES_FILE),
     });
     await expect(locateTypeIndexes(WEBID, noFetch)).resolves.toEqual({
@@ -167,9 +158,7 @@ describe("locateTypeIndexes", () => {
     mockDatasets({
       [WEBID]: profileDataset((t) => t.addIri(RDFS.seeAlso, EXTENDED_PROFILE)),
       [EXTENDED_PROFILE]: subjectDocument(EXTENDED_PROFILE, (t) =>
-        t
-          .addIri(SOLID.privateTypeIndex, PRIVATE_INDEX)
-          .addIri(SOLID.publicTypeIndex, PUBLIC_INDEX),
+        t.addIri(SOLID.privateTypeIndex, PRIVATE_INDEX).addIri(SOLID.publicTypeIndex, PUBLIC_INDEX),
       ),
     });
     await expect(locateTypeIndexes(WEBID, noFetch)).resolves.toEqual({
@@ -180,9 +169,7 @@ describe("locateTypeIndexes", () => {
 
   it("finds indexes linked from a foaf:isPrimaryTopicOf extended profile", async () => {
     mockDatasets({
-      [WEBID]: profileDataset((t) =>
-        t.addIri(FOAF.isPrimaryTopicOf, EXTENDED_PROFILE),
-      ),
+      [WEBID]: profileDataset((t) => t.addIri(FOAF.isPrimaryTopicOf, EXTENDED_PROFILE)),
       [EXTENDED_PROFILE]: subjectDocument(EXTENDED_PROFILE, (t) =>
         t.addIri(SOLID.privateTypeIndex, PRIVATE_INDEX),
       ),
@@ -196,9 +183,7 @@ describe("locateTypeIndexes", () => {
   it("prefers links in the WebID document over the extended profile", async () => {
     mockDatasets({
       [WEBID]: profileDataset((t) =>
-        t
-          .addIri(SOLID.privateTypeIndex, PRIVATE_INDEX)
-          .addIri(RDFS.seeAlso, EXTENDED_PROFILE),
+        t.addIri(SOLID.privateTypeIndex, PRIVATE_INDEX).addIri(RDFS.seeAlso, EXTENDED_PROFILE),
       ),
       [EXTENDED_PROFILE]: subjectDocument(EXTENDED_PROFILE, (t) =>
         t
@@ -230,9 +215,7 @@ describe("locateTypeIndexes", () => {
 
   it("does not re-fetch the WebID document when it is its own isPrimaryTopicOf", async () => {
     mockDatasets({
-      [WEBID]: profileDataset((t) =>
-        t.addIri(FOAF.isPrimaryTopicOf, PROFILE_DOC),
-      ),
+      [WEBID]: profileDataset((t) => t.addIri(FOAF.isPrimaryTopicOf, PROFILE_DOC)),
     });
     await expect(locateTypeIndexes(WEBID, noFetch)).resolves.toEqual({
       privateIndexUrl: null,
@@ -257,10 +240,7 @@ describe("createTypeIndex", () => {
     return vi.fn(async (input: RequestInfo | URL) => {
       const headers = new Headers();
       if (String(input) === storageRoot) {
-        headers.set(
-          "Link",
-          '<http://www.w3.org/ns/pim/space#Storage>; rel="type"',
-        );
+        headers.set("Link", '<http://www.w3.org/ns/pim/space#Storage>; rel="type"');
       }
       return new Response(null, { status: 200, headers });
     }) as typeof globalThis.fetch;
@@ -278,17 +258,12 @@ describe("createTypeIndex", () => {
     );
 
     expect(indexUrl).toBe(PRIVATE_INDEX);
-    const [firstSaveUrl, indexDataset] =
-      vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    const [firstSaveUrl, indexDataset] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(firstSaveUrl).toBe(PRIVATE_INDEX);
     const indexThing = getThing(indexDataset as SolidDataset, PRIVATE_INDEX)!;
-    expect(getUrlAll(indexThing, RDF.type)).toEqual([
-      SOLID.TypeIndex,
-      SOLID.UnlistedDocument,
-    ]);
+    expect(getUrlAll(indexThing, RDF.type)).toEqual([SOLID.TypeIndex, SOLID.UnlistedDocument]);
 
-    const [secondSaveUrl, profileSaved] =
-      vi.mocked(saveSolidDatasetAt).mock.calls[1];
+    const [secondSaveUrl, profileSaved] = vi.mocked(saveSolidDatasetAt).mock.calls[1];
     expect(secondSaveUrl).toBe(PROFILE_DOC);
     const profileThing = getThing(profileSaved as SolidDataset, WEBID)!;
     expect(getUrl(profileThing, SOLID.privateTypeIndex)).toBe(PRIVATE_INDEX);
@@ -316,9 +291,7 @@ describe("createTypeIndex", () => {
 
   it("falls back to the origin root when no candidate advertises a storage", async () => {
     mockDatasets({ [WEBID]: profileDataset() });
-    const fetch = vi.fn(async () =>
-      new Response(null, { status: 200 }),
-    ) as typeof globalThis.fetch;
+    const fetch = vi.fn(async () => new Response(null, { status: 200 })) as typeof globalThis.fetch;
 
     const indexUrl = await createTypeIndex(
       "private",
@@ -337,10 +310,7 @@ describe("createTypeIndex", () => {
       .mockImplementation(async (input: RequestInfo | URL) => {
         const headers = new Headers();
         if (String(input) === "https://alice.example/") {
-          headers.set(
-            "Link",
-            '<http://www.w3.org/ns/pim/space#Storage>; rel="type"',
-          );
+          headers.set("Link", '<http://www.w3.org/ns/pim/space#Storage>; rel="type"');
         }
         return new Response(null, { status: 200, headers });
       });
@@ -364,9 +334,7 @@ describe("createTypeIndex", () => {
       createTypeIndex("private", WEBID, "https://alice.example/x/", fetch),
     ).resolves.toBe(PRIVATE_INDEX);
 
-    const saveUrls = vi
-      .mocked(saveSolidDatasetAt)
-      .mock.calls.map(([url]) => url);
+    const saveUrls = vi.mocked(saveSolidDatasetAt).mock.calls.map(([url]) => url);
     expect(saveUrls).toEqual([PROFILE_DOC]);
   });
 
@@ -395,22 +363,21 @@ describe("createTypeIndex", () => {
 
   describe("with a read-only WebID document (Inrupt PodSpaces style)", () => {
     function rejectSavesTo(...readOnlyUrls: string[]) {
-      vi.mocked(saveSolidDatasetAt).mockImplementation(
-        (async (url: string, dataset: SolidDataset) => {
-          if (readOnlyUrls.includes(url)) {
-            throw new Error(`Storing the Resource at [${url}] failed: [405]`);
-          }
-          return dataset;
-        }) as never,
-      );
+      vi.mocked(saveSolidDatasetAt).mockImplementation((async (
+        url: string,
+        dataset: SolidDataset,
+      ) => {
+        if (readOnlyUrls.includes(url)) {
+          throw new Error(`Storing the Resource at [${url}] failed: [405]`);
+        }
+        return dataset;
+      }) as never);
     }
 
     it("links the index from the extended profile instead", async () => {
       mockDatasets({
         [WEBID]: profileDataset((t) =>
-          t
-            .addIri(RDFS.seeAlso, EXTENDED_PROFILE)
-            .addIri(FOAF.isPrimaryTopicOf, EXTENDED_PROFILE),
+          t.addIri(RDFS.seeAlso, EXTENDED_PROFILE).addIri(FOAF.isPrimaryTopicOf, EXTENDED_PROFILE),
         ),
         [EXTENDED_PROFILE]: subjectDocument(EXTENDED_PROFILE),
       });
@@ -421,9 +388,7 @@ describe("createTypeIndex", () => {
         createTypeIndex("private", WEBID, "https://alice.example/x/", fetch),
       ).resolves.toBe(PRIVATE_INDEX);
 
-      const saveUrls = vi
-        .mocked(saveSolidDatasetAt)
-        .mock.calls.map(([url]) => url);
+      const saveUrls = vi.mocked(saveSolidDatasetAt).mock.calls.map(([url]) => url);
       expect(saveUrls).toEqual([PRIVATE_INDEX, PROFILE_DOC, EXTENDED_PROFILE]);
       const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[2];
       const subject = getThing(saved as SolidDataset, WEBID)!;
@@ -472,20 +437,27 @@ describe("createTypeIndex", () => {
 
       await expect(
         createTypeIndex("private", WEBID, "https://alice.example/x/", fetch),
-      ).rejects.toMatchObject({ code: "privateTypeIndexNotLinked", message: expect.stringContaining("could not link its private list") });
+      ).rejects.toMatchObject({
+        code: "privateTypeIndexNotLinked",
+        message: expect.stringContaining("could not link its private list"),
+      });
       await expect(
         createTypeIndex("public", WEBID, "https://alice.example/x/", fetch),
-      ).rejects.toMatchObject({ code: "publicTypeIndexNotLinked", message: expect.stringContaining("could not link its public list") });
+      ).rejects.toMatchObject({
+        code: "publicTypeIndexNotLinked",
+        message: expect.stringContaining("could not link its public list"),
+      });
     });
 
     it("describes non-Error rejections too", async () => {
       mockDatasets({ [WEBID]: profileDataset() });
-      vi.mocked(saveSolidDatasetAt).mockImplementation(
-        (async (url: string, dataset: SolidDataset) => {
-          if (url === PROFILE_DOC) throw "nope";
-          return dataset;
-        }) as never,
-      );
+      vi.mocked(saveSolidDatasetAt).mockImplementation((async (
+        url: string,
+        dataset: SolidDataset,
+      ) => {
+        if (url === PROFILE_DOC) throw "nope";
+        return dataset;
+      }) as never);
       const fetch = storageAwareFetch("https://alice.example/");
 
       await expect(
@@ -498,9 +470,7 @@ describe("createTypeIndex", () => {
 describe("ensureTypeIndex", () => {
   it("returns the existing index without creating anything", async () => {
     mockDatasets({
-      [WEBID]: profileDataset((t) =>
-        t.addIri(SOLID.privateTypeIndex, PRIVATE_INDEX),
-      ),
+      [WEBID]: profileDataset((t) => t.addIri(SOLID.privateTypeIndex, PRIVATE_INDEX)),
     });
     await expect(
       ensureTypeIndex("private", WEBID, "https://alice.example/x/", noFetch),
@@ -510,9 +480,7 @@ describe("ensureTypeIndex", () => {
 
   it("returns the existing public index", async () => {
     mockDatasets({
-      [WEBID]: profileDataset((t) =>
-        t.addIri(SOLID.publicTypeIndex, PUBLIC_INDEX),
-      ),
+      [WEBID]: profileDataset((t) => t.addIri(SOLID.publicTypeIndex, PUBLIC_INDEX)),
     });
     await expect(
       ensureTypeIndex("public", WEBID, "https://alice.example/x/", noFetch),
@@ -521,9 +489,7 @@ describe("ensureTypeIndex", () => {
 
   it("creates the index when missing", async () => {
     mockDatasets({ [WEBID]: profileDataset() });
-    const fetch = vi.fn(async () =>
-      new Response(null, { status: 200 }),
-    ) as typeof globalThis.fetch;
+    const fetch = vi.fn(async () => new Response(null, { status: 200 })) as typeof globalThis.fetch;
 
     await expect(
       ensureTypeIndex("private", WEBID, "https://alice.example/x/", fetch),
@@ -540,10 +506,7 @@ describe("readInstanceRegistrations", () => {
       buildThing(createThing({ url: `${PRIVATE_INDEX}#a` }))
         .addIri(RDF.type, SOLID.TypeRegistration)
         .addIri(SOLID.forClass, SM.Instance)
-        .addIri(
-          SOLID.instanceContainer,
-          "https://alice.example/solid-memo/a/",
-        )
+        .addIri(SOLID.instanceContainer, "https://alice.example/solid-memo/a/")
         .addStringNoLocale(DCTERMS.title, "Deck set A")
         .build(),
     );
@@ -578,9 +541,7 @@ describe("readInstanceRegistrations", () => {
     );
     mockDatasets({ [PRIVATE_INDEX]: dataset });
 
-    await expect(
-      readInstanceRegistrations(PRIVATE_INDEX, noFetch),
-    ).resolves.toEqual([
+    await expect(readInstanceRegistrations(PRIVATE_INDEX, noFetch)).resolves.toEqual([
       {
         containerUrl: "https://alice.example/solid-memo/a/",
         title: "Deck set A",
@@ -601,10 +562,14 @@ function registered(id: string, forClass: string, predicate: string, url: string
 
 /** The private index holding these things. */
 function privateIndex(...things: ThingPersisted[]): SolidDataset {
-  return things.reduce<SolidDataset>((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(PRIVATE_INDEX));
+  return things.reduce<SolidDataset>(
+    (dataset, thing) => setThing(dataset, thing),
+    mockSolidDatasetFrom(PRIVATE_INDEX),
+  );
 }
 
-const preconditionFailed = () => Object.assign(new Error("412 Precondition Failed"), { statusCode: 412 });
+const preconditionFailed = () =>
+  Object.assign(new Error("412 Precondition Failed"), { statusCode: 412 });
 
 describe("readRegisteredClasses", () => {
   const MAIN = "https://alice.example/solid-memo/main/";
@@ -617,9 +582,14 @@ describe("readRegisteredClasses", () => {
         registered("deck", SM.Deck, SOLID.instance, `${MAIN}catalog.ttl`),
         registered("card", SM.Card, SOLID.instance, `${MAIN}decks/`),
         // Not the instance's: its answers' container without the slash, another instance's review states,
-        // a catalogue elsewhere in the folder, and a registration that is not one.
+        // a catalog elsewhere in the folder, and a registration that is not one.
         registered("answer", SM.Answer, SOLID.instanceContainer, `${MAIN}history`),
-        registered("review", SM.ReviewState, SOLID.instanceContainer, "https://alice.example/solid-memo/b/reviews/"),
+        registered(
+          "review",
+          SM.ReviewState,
+          SOLID.instanceContainer,
+          "https://alice.example/solid-memo/b/reviews/",
+        ),
         registered("cat", DCAT.Catalog, SOLID.instance, `${MAIN}attachments/index.ttl#catalog`),
         buildThing(createThing({ url: `${PRIVATE_INDEX}#note` }))
           .addIri(SOLID.forClass, DCAT.Catalog)
@@ -627,11 +597,9 @@ describe("readRegisteredClasses", () => {
           .build(),
       ),
     });
-    await expect(readRegisteredClasses(PRIVATE_INDEX, "https://alice.example/solid-memo/main", noFetch)).resolves.toEqual([
-      "instance",
-      "deck",
-      "card",
-    ]);
+    await expect(
+      readRegisteredClasses(PRIVATE_INDEX, "https://alice.example/solid-memo/main", noFetch),
+    ).resolves.toEqual(["instance", "deck", "card"]);
   });
 });
 
@@ -647,7 +615,11 @@ describe("addRegistrations", () => {
     await expect(
       addRegistrations(
         PRIVATE_INDEX,
-        { instanceUrl: "https://alice.example/solid-memo/main", title: "Main", classes: ["instance", "catalog", "deck", "card", "reviewState", "answer"] },
+        {
+          instanceUrl: "https://alice.example/solid-memo/main",
+          title: "Main",
+          classes: ["instance", "catalog", "deck", "card", "reviewState", "answer"],
+        },
         ids(),
         noFetch,
       ),
@@ -665,12 +637,48 @@ describe("addRegistrations", () => {
     }));
     const common = { types: [SOLID.TypeRegistration], title: "Main" };
     expect(registrations).toEqual([
-      { ...common, url: `${PRIVATE_INDEX}#sm-inst-id1`, forClass: [SM.Instance], instance: [], instanceContainer: [MAIN] },
-      { ...common, url: `${PRIVATE_INDEX}#sm-cat-id2`, forClass: [DCAT.Catalog], instance: [`${MAIN}catalog.ttl#catalog`], instanceContainer: [] },
-      { ...common, url: `${PRIVATE_INDEX}#sm-deck-id3`, forClass: [SM.Deck], instance: [`${MAIN}catalog.ttl`], instanceContainer: [] },
-      { ...common, url: `${PRIVATE_INDEX}#sm-card-id4`, forClass: [SM.Card], instance: [], instanceContainer: [`${MAIN}decks/`] },
-      { ...common, url: `${PRIVATE_INDEX}#sm-review-id5`, forClass: [SM.ReviewState], instance: [], instanceContainer: [`${MAIN}reviews/`] },
-      { ...common, url: `${PRIVATE_INDEX}#sm-answer-id6`, forClass: [SM.Answer], instance: [], instanceContainer: [`${MAIN}history/`] },
+      {
+        ...common,
+        url: `${PRIVATE_INDEX}#sm-inst-id1`,
+        forClass: [SM.Instance],
+        instance: [],
+        instanceContainer: [MAIN],
+      },
+      {
+        ...common,
+        url: `${PRIVATE_INDEX}#sm-cat-id2`,
+        forClass: [DCAT.Catalog],
+        instance: [`${MAIN}catalog.ttl#catalog`],
+        instanceContainer: [],
+      },
+      {
+        ...common,
+        url: `${PRIVATE_INDEX}#sm-deck-id3`,
+        forClass: [SM.Deck],
+        instance: [`${MAIN}catalog.ttl`],
+        instanceContainer: [],
+      },
+      {
+        ...common,
+        url: `${PRIVATE_INDEX}#sm-card-id4`,
+        forClass: [SM.Card],
+        instance: [],
+        instanceContainer: [`${MAIN}decks/`],
+      },
+      {
+        ...common,
+        url: `${PRIVATE_INDEX}#sm-review-id5`,
+        forClass: [SM.ReviewState],
+        instance: [],
+        instanceContainer: [`${MAIN}reviews/`],
+      },
+      {
+        ...common,
+        url: `${PRIVATE_INDEX}#sm-answer-id6`,
+        forClass: [SM.Answer],
+        instance: [],
+        instanceContainer: [`${MAIN}history/`],
+      },
     ]);
   });
 
@@ -681,7 +689,12 @@ describe("addRegistrations", () => {
     );
     mockDatasets({ [PRIVATE_INDEX]: index });
     await expect(
-      addRegistrations(PRIVATE_INDEX, { instanceUrl: MAIN, title: "Main", classes: ["instance", "catalog", "card"] }, ids(), noFetch),
+      addRegistrations(
+        PRIVATE_INDEX,
+        { instanceUrl: MAIN, title: "Main", classes: ["instance", "catalog", "card"] },
+        ids(),
+        noFetch,
+      ),
     ).resolves.toEqual(["card"]);
     const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
     expect(getThingAll(saved).map((thing) => thing.url)).toEqual([
@@ -692,7 +705,12 @@ describe("addRegistrations", () => {
 
     vi.mocked(saveSolidDatasetAt).mockClear();
     await expect(
-      addRegistrations(PRIVATE_INDEX, { instanceUrl: MAIN, title: "Main", classes: ["instance", "catalog"] }, ids(), noFetch),
+      addRegistrations(
+        PRIVATE_INDEX,
+        { instanceUrl: MAIN, title: "Main", classes: ["instance", "catalog"] },
+        ids(),
+        noFetch,
+      ),
     ).resolves.toEqual([]);
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
@@ -701,28 +719,50 @@ describe("addRegistrations", () => {
     let reads = 0;
     vi.mocked(getSolidDataset).mockImplementation((async () =>
       // Meanwhile another tab registered the cards.
-      ++reads === 1 ? privateIndex() : privateIndex(registered("theirs", SM.Card, SOLID.instanceContainer, `${MAIN}decks/`))) as never);
+      ++reads === 1
+        ? privateIndex()
+        : privateIndex(
+            registered("theirs", SM.Card, SOLID.instanceContainer, `${MAIN}decks/`),
+          )) as never);
     vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce(preconditionFailed());
     await expect(
-      addRegistrations(PRIVATE_INDEX, { instanceUrl: MAIN, title: "Main", classes: ["deck", "card"] }, ids(), noFetch),
+      addRegistrations(
+        PRIVATE_INDEX,
+        { instanceUrl: MAIN, title: "Main", classes: ["deck", "card"] },
+        ids(),
+        noFetch,
+      ),
     ).resolves.toEqual(["deck"]);
     expect(saveSolidDatasetAt).toHaveBeenCalledTimes(2);
     const saved = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as SolidDataset;
-    expect(getThingAll(saved).map((thing) => thing.url)).toEqual([`${PRIVATE_INDEX}#theirs`, `${PRIVATE_INDEX}#sm-deck-id3`]);
+    expect(getThingAll(saved).map((thing) => thing.url)).toEqual([
+      `${PRIVATE_INDEX}#theirs`,
+      `${PRIVATE_INDEX}#sm-deck-id3`,
+    ]);
   });
 
   it("gives up after three attempts, and rethrows any other failure at once", async () => {
     mockDatasets({ [PRIVATE_INDEX]: privateIndex() });
     vi.mocked(saveSolidDatasetAt).mockRejectedValue(preconditionFailed());
     await expect(
-      addRegistrations(PRIVATE_INDEX, { instanceUrl: MAIN, title: "Main", classes: ["deck"] }, ids(), noFetch),
+      addRegistrations(
+        PRIVATE_INDEX,
+        { instanceUrl: MAIN, title: "Main", classes: ["deck"] },
+        ids(),
+        noFetch,
+      ),
     ).rejects.toMatchObject({ code: "changedElsewhere" });
     expect(saveSolidDatasetAt).toHaveBeenCalledTimes(3);
 
     vi.mocked(saveSolidDatasetAt).mockReset();
     vi.mocked(saveSolidDatasetAt).mockRejectedValue(new Error("403 Forbidden"));
     await expect(
-      addRegistrations(PRIVATE_INDEX, { instanceUrl: MAIN, title: "Main", classes: ["deck"] }, ids(), noFetch),
+      addRegistrations(
+        PRIVATE_INDEX,
+        { instanceUrl: MAIN, title: "Main", classes: ["deck"] },
+        ids(),
+        noFetch,
+      ),
     ).rejects.toThrow("403 Forbidden");
     expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
   });
@@ -737,7 +777,7 @@ describe("removeInstanceRegistrations", () => {
       .build();
   }
 
-  it("removes every registration of the container under either predicate, and its catalogue's by exact IRI", async () => {
+  it("removes every registration of the container under either predicate, and its catalog's by exact IRI", async () => {
     let dataset = mockSolidDatasetFrom(PRIVATE_INDEX);
     dataset = setThing(
       dataset,
@@ -775,7 +815,7 @@ describe("removeInstanceRegistrations", () => {
         .addIri(SOLID.instance, "https://alice.example/solid-memo/b/catalog.ttl#catalog")
         .build(),
     );
-    // Another app's catalogues in the instance's folder: not the instance's.
+    // Another app's catalogs in the instance's folder: not the instance's.
     dataset = setThing(
       dataset,
       buildThing(createThing({ url: `${PRIVATE_INDEX}#cat-elsewhere` }))
@@ -812,11 +852,7 @@ describe("removeInstanceRegistrations", () => {
     );
     mockDatasets({ [PRIVATE_INDEX]: dataset });
 
-    await removeInstanceRegistrations(
-      PRIVATE_INDEX,
-      "https://alice.example/solid-memo/a",
-      noFetch,
-    );
+    await removeInstanceRegistrations(PRIVATE_INDEX, "https://alice.example/solid-memo/a", noFetch);
 
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(PRIVATE_INDEX);
@@ -831,12 +867,14 @@ describe("removeInstanceRegistrations", () => {
       PRIVATE_INDEX,
     ]);
     const instShared = getThing(saved as SolidDataset, `${PRIVATE_INDEX}#inst-shared`)!;
-    expect(getUrlAll(instShared, SOLID.instanceContainer)).toEqual(["https://alice.example/notes/"]);
-    expect(getUrlAll(instShared, SOLID.instance)).toEqual([]);
-    // A registration of another catalogue besides keeps that one only.
-    expect(getUrlAll(getThing(saved as SolidDataset, `${PRIVATE_INDEX}#cat-shared`)!, SOLID.instance)).toEqual([
-      "https://alice.example/recipes/index.ttl#catalog",
+    expect(getUrlAll(instShared, SOLID.instanceContainer)).toEqual([
+      "https://alice.example/notes/",
     ]);
+    expect(getUrlAll(instShared, SOLID.instance)).toEqual([]);
+    // A registration of another catalog besides keeps that one only.
+    expect(
+      getUrlAll(getThing(saved as SolidDataset, `${PRIVATE_INDEX}#cat-shared`)!, SOLID.instance),
+    ).toEqual(["https://alice.example/recipes/index.ttl#catalog"]);
   });
 
   it("removes the registration of each class of the instance's data by exact IRI, never another app's below the folder", async () => {
@@ -851,7 +889,12 @@ describe("removeInstanceRegistrations", () => {
         // Another app's, below the folder, and another instance's.
         registered("their-cards", SM.Card, SOLID.instanceContainer, `${MAIN}decks/theirs/`),
         registered("their-decks", SM.Deck, SOLID.instance, `${MAIN}attachments/decks.ttl`),
-        registered("other-reviews", SM.ReviewState, SOLID.instanceContainer, "https://alice.example/solid-memo/b/reviews/"),
+        registered(
+          "other-reviews",
+          SM.ReviewState,
+          SOLID.instanceContainer,
+          "https://alice.example/solid-memo/b/reviews/",
+        ),
         // A class that is not the one the resource is registered for.
         registered("wrong-class", SM.Answer, SOLID.instanceContainer, `${MAIN}reviews/`),
         buildThing(registered("shared", SM.Card, SOLID.instanceContainer, `${MAIN}decks/`))
@@ -870,9 +913,9 @@ describe("removeInstanceRegistrations", () => {
       `${PRIVATE_INDEX}#wrong-class`,
       `${PRIVATE_INDEX}#shared`,
     ]);
-    expect(getUrlAll(getThing(saved, `${PRIVATE_INDEX}#shared`)!, SOLID.instanceContainer)).toEqual([
-      "https://alice.example/flashcards/",
-    ]);
+    expect(getUrlAll(getThing(saved, `${PRIVATE_INDEX}#shared`)!, SOLID.instanceContainer)).toEqual(
+      ["https://alice.example/flashcards/"],
+    );
   });
 
   it("reads the index again and removes what is still there when it changed meanwhile", async () => {
@@ -882,7 +925,16 @@ describe("removeInstanceRegistrations", () => {
       privateIndex(
         registered("inst", SM.Instance, SOLID.instanceContainer, MAIN),
         // Meanwhile another app registered its notes.
-        ...(++reads === 1 ? [] : [registered("notes", "https://schema.org/NoteDigitalDocument", SOLID.instanceContainer, "https://alice.example/notes/")]),
+        ...(++reads === 1
+          ? []
+          : [
+              registered(
+                "notes",
+                "https://schema.org/NoteDigitalDocument",
+                SOLID.instanceContainer,
+                "https://alice.example/notes/",
+              ),
+            ]),
       )) as never);
     vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce(preconditionFailed());
 
@@ -915,7 +967,13 @@ describe("renameInstanceRegistrations", () => {
   const MAIN = "https://alice.example/solid-memo/main/";
   const args = { containerUrl: MAIN, title: "Languages" };
 
-  function registration(id: string, forClass: string, predicate: string, url: string, title = "Main") {
+  function registration(
+    id: string,
+    forClass: string,
+    predicate: string,
+    url: string,
+    title = "Main",
+  ) {
     return buildThing(createThing({ url: `${PRIVATE_INDEX}#${id}` }))
       .addIri(RDF.type, SOLID.TypeRegistration)
       .addIri(SOLID.forClass, forClass)
@@ -925,10 +983,14 @@ describe("renameInstanceRegistrations", () => {
   }
 
   function index(...things: ThingPersisted[]): SolidDataset {
-    return things.reduce((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(PRIVATE_INDEX));
+    return things.reduce(
+      (dataset, thing) => setThing(dataset, thing),
+      mockSolidDatasetFrom(PRIVATE_INDEX),
+    );
   }
 
-  const titleOf = (saved: SolidDataset, id: string) => getStringNoLocale(getThing(saved, `${PRIVATE_INDEX}#${id}`)!, DCTERMS.title);
+  const titleOf = (saved: SolidDataset, id: string) =>
+    getStringNoLocale(getThing(saved, `${PRIVATE_INDEX}#${id}`)!, DCTERMS.title);
 
   it("renames the registration of each class of the instance's data, in one save, and no other", async () => {
     mockDatasets({
@@ -937,9 +999,21 @@ describe("renameInstanceRegistrations", () => {
         registration("cat", DCAT.Catalog, SOLID.instance, `${MAIN}catalog.ttl#catalog`),
         registration("deck", SM.Deck, SOLID.instance, `${MAIN}catalog.ttl`),
         registration("card", SM.Card, SOLID.instanceContainer, `${MAIN}decks/`),
-        registration("other", SM.Instance, SOLID.instanceContainer, "https://alice.example/solid-memo/b/"),
-        registration("other-cat", DCAT.Catalog, SOLID.instance, "https://alice.example/solid-memo/b/catalog.ttl#catalog"),
-        buildThing(createThing({ url: `${PRIVATE_INDEX}#note` })).addStringNoLocale(DCTERMS.title, "x").build(),
+        registration(
+          "other",
+          SM.Instance,
+          SOLID.instanceContainer,
+          "https://alice.example/solid-memo/b/",
+        ),
+        registration(
+          "other-cat",
+          DCAT.Catalog,
+          SOLID.instance,
+          "https://alice.example/solid-memo/b/catalog.ttl#catalog",
+        ),
+        buildThing(createThing({ url: `${PRIVATE_INDEX}#note` }))
+          .addStringNoLocale(DCTERMS.title, "x")
+          .build(),
       ),
     });
     await renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch);
@@ -959,7 +1033,12 @@ describe("renameInstanceRegistrations", () => {
       [PRIVATE_INDEX]: index(
         registration("inst", SM.Instance, SOLID.instanceContainer, MAIN),
         registration("nested", SM.Instance, SOLID.instanceContainer, `${MAIN}archive/`),
-        registration("nested-cat", DCAT.Catalog, SOLID.instance, `${MAIN}archive/catalog.ttl#catalog`),
+        registration(
+          "nested-cat",
+          DCAT.Catalog,
+          SOLID.instance,
+          `${MAIN}archive/catalog.ttl#catalog`,
+        ),
       ),
     });
     await renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch);
@@ -970,26 +1049,38 @@ describe("renameInstanceRegistrations", () => {
   });
 
   it("saves nothing when the registrations already say so", async () => {
-    mockDatasets({ [PRIVATE_INDEX]: index(registration("inst", SM.Instance, SOLID.instanceContainer, MAIN, "Languages")) });
+    mockDatasets({
+      [PRIVATE_INDEX]: index(
+        registration("inst", SM.Instance, SOLID.instanceContainer, MAIN, "Languages"),
+      ),
+    });
     await renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch);
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 
   it("reads and renames again while the index changes elsewhere, three times in all", async () => {
-    mockDatasets({ [PRIVATE_INDEX]: index(registration("inst", SM.Instance, SOLID.instanceContainer, MAIN)) });
+    mockDatasets({
+      [PRIVATE_INDEX]: index(registration("inst", SM.Instance, SOLID.instanceContainer, MAIN)),
+    });
     const changed = Object.assign(new Error("412"), { statusCode: 412 });
     vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce(changed);
     await renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch);
     expect(saveSolidDatasetAt).toHaveBeenCalledTimes(2);
 
     vi.mocked(saveSolidDatasetAt).mockReset().mockRejectedValue(changed);
-    await expect(renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch)).rejects.toMatchObject({ code: "changedElsewhere" });
+    await expect(renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch)).rejects.toMatchObject({
+      code: "changedElsewhere",
+    });
     expect(saveSolidDatasetAt).toHaveBeenCalledTimes(3);
   });
 
   it("gives up at once on any other failure", async () => {
-    mockDatasets({ [PRIVATE_INDEX]: index(registration("inst", SM.Instance, SOLID.instanceContainer, MAIN)) });
-    vi.mocked(saveSolidDatasetAt).mockRejectedValue(Object.assign(new Error("403"), { statusCode: 403 }));
+    mockDatasets({
+      [PRIVATE_INDEX]: index(registration("inst", SM.Instance, SOLID.instanceContainer, MAIN)),
+    });
+    vi.mocked(saveSolidDatasetAt).mockRejectedValue(
+      Object.assign(new Error("403"), { statusCode: 403 }),
+    );
     await expect(renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch)).rejects.toThrow("403");
     expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
   });

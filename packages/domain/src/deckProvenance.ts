@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { agentUrlOf } from "./agentRecord";
 import { AppError } from "./appError";
 import { parseAuthor } from "./author";
@@ -7,7 +11,7 @@ import { chosenLicense } from "./license";
 /**
  * Who made a deck and under what terms: its authors, each "Name" or
  * "Name <email>" (dcterms:creator, a foaf:Agent node each), and its
- * licence (dcterms:license), none when it states none.
+ * license (dcterms:license), none when it states none.
  */
 export interface DeckProvenance {
   authors: readonly string[];
@@ -15,11 +19,11 @@ export interface DeckProvenance {
 }
 
 /**
- * The deck with its authors and licence as an edit gives them. Each
+ * The deck with its authors and license as an edit gives them. Each
  * author is tidied ("Name <email>", spaces trimmed), and one left empty
  * is dropped; one with an address but no name is refused (authorEmpty),
  * as is one named twice (authorTwice): two authors written to the same
- * agent node (agentUrlOf) would be one. The licence is none, one of
+ * agent node (agentUrlOf) would be one. The license is none, one of
  * KNOWN_LICENSES, or the one the deck has (chosenLicense).
  */
 export function withProvenance(deck: Deck, provenance: DeckProvenance): Deck {

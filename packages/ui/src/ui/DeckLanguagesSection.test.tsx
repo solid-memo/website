@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -29,7 +33,11 @@ function renderSection(overrides: Partial<Parameters<typeof DeckLanguagesSection
     ...overrides,
   };
   const view = render(<DeckLanguagesSection {...props} />);
-  return { props, rerender: (more: Partial<typeof props>) => view.rerender(<DeckLanguagesSection {...props} {...more} />) };
+  return {
+    props,
+    rerender: (more: Partial<typeof props>) =>
+      view.rerender(<DeckLanguagesSection {...props} {...more} />),
+  };
 }
 
 /** Choose a side's language as a keyboard would: its picker, the radio, Done. */
@@ -46,8 +54,13 @@ describe("DeckLanguagesSection", () => {
   it("is a named region that counts the fronts and backs that do not say their language", () => {
     renderSection();
     const region = screen.getByRole("region", { name: "Languages" });
-    expect(within(region).getByText("3 card fronts and 1 back do not say their language.")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Languages" })).toHaveAttribute("id", DECK_LANGUAGES_ID);
+    expect(
+      within(region).getByText("3 card fronts and 1 back do not say their language."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Languages" })).toHaveAttribute(
+      "id",
+      DECK_LANGUAGES_ID,
+    );
     expect(screen.getByRole("group", { name: "Fronts" })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Backs" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "State the language" })).toHaveAccessibleDescription(
@@ -60,7 +73,9 @@ describe("DeckLanguagesSection", () => {
     const pickers = screen.getAllByRole("button", { name: "Language: not stated" });
     expect(pickers).toHaveLength(2);
     fireEvent.click(document.getElementById("deck-backs-language")!);
-    const radios = within(screen.getByRole("group", { name: "Language of the back" })).getAllByRole("radio");
+    const radios = within(screen.getByRole("group", { name: "Language of the back" })).getAllByRole(
+      "radio",
+    );
     expect(radios.slice(0, 2).map((radio) => radio.parentElement!.textContent)).toEqual([
       "English (en)",
       "Finnish — suomi (fi)",
@@ -109,7 +124,9 @@ describe("DeckLanguagesSection", () => {
 
   it("offers a picker only for a side with text to state", () => {
     renderSection({ languages: { unstatedCounts: { front: 0, back: 2 } } });
-    expect(screen.getByText("0 card fronts and 2 backs do not say their language.")).toBeInTheDocument();
+    expect(
+      screen.getByText("0 card fronts and 2 backs do not say their language."),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("group", { name: "Fronts" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "State the language" }));
     expect(screen.getByRole("alert")).toHaveTextContent("Choose the language of the back.");
@@ -126,14 +143,26 @@ describe("DeckLanguagesSection", () => {
     expect(button).toHaveAttribute("aria-disabled", "true");
     fireEvent.click(button);
     expect(button).toHaveFocus();
-    rerender({ busy: false, stated: 3, languages: { back: "en", unstatedCounts: { front: 0, back: 1 } } });
+    rerender({
+      busy: false,
+      stated: 3,
+      languages: { back: "en", unstatedCounts: { front: 0, back: 1 } },
+    });
     // A side is left: the button stays, and so does the focus.
     expect(button).toHaveFocus();
     expect(screen.getByRole("status")).toHaveTextContent("Saved the language of 3 cards.");
     choose("deck-backs-language", "English (en)");
     fireEvent.click(screen.getByRole("button", { name: "State the language" }));
-    rerender({ busy: true, stated: 3, languages: { back: "en", unstatedCounts: { front: 0, back: 1 } } });
-    rerender({ busy: false, stated: 1, languages: { back: "en", unstatedCounts: { front: 0, back: 0 } } });
+    rerender({
+      busy: true,
+      stated: 3,
+      languages: { back: "en", unstatedCounts: { front: 0, back: 1 } },
+    });
+    rerender({
+      busy: false,
+      stated: 1,
+      languages: { back: "en", unstatedCounts: { front: 0, back: 0 } },
+    });
     expect(screen.queryByRole("button", { name: "State the language" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Languages" })).toHaveFocus();
     expect(screen.getByRole("status")).toHaveTextContent("Saved the language of 1 card.");
@@ -153,8 +182,13 @@ describe("DeckLanguagesSection", () => {
   });
 
   it("says the languages could not be checked, and why, rather than waiting on the cards", () => {
-    const { rerender } = renderSection({ languages: undefined, unreadable: "The library could not be read." });
-    expect(screen.getByText("The languages of the cards could not be checked.")).toBeInTheDocument();
+    const { rerender } = renderSection({
+      languages: undefined,
+      unreadable: "The library could not be read.",
+    });
+    expect(
+      screen.getByText("The languages of the cards could not be checked."),
+    ).toBeInTheDocument();
     expect(screen.queryByText("Checking the languages of the cards…")).toBeNull();
     expect(screen.getByRole("alert")).toHaveTextContent("The library could not be read.");
     rerender({ languages: undefined, unreadable: null });
@@ -170,7 +204,10 @@ describe("DeckLanguagesSection", () => {
   });
 
   it("says when the cards are still read, and that a library deck's untouched cards are left out", () => {
-    renderSection({ languages: undefined, deck: { ...deck, sourceUrl: "https://solid-memo.com/decks/x/v1.ttl" } });
+    renderSection({
+      languages: undefined,
+      deck: { ...deck, sourceUrl: "https://solid-memo.com/decks/x/v1.ttl" },
+    });
     expect(screen.getByText("Checking the languages of the cards…")).toBeInTheDocument();
     expect(screen.queryByText(/library release/)).toBeNull();
     renderSection({
@@ -178,12 +215,17 @@ describe("DeckLanguagesSection", () => {
       deck: { ...deck, sourceUrl: "https://solid-memo.com/decks/x/v1.ttl" },
     });
     expect(
-      screen.getByText("Cards still as their library release has them are left out: a later release updates them."),
+      screen.getByText(
+        "Cards still as their library release has them are left out: a later release updates them.",
+      ),
     ).toBeInTheDocument();
   });
 
   it("speaks Swedish", () => {
-    vi.stubGlobal("confirm", vi.fn(() => false));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => false),
+    );
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <DeckLanguagesSection
@@ -196,7 +238,9 @@ describe("DeckLanguagesSection", () => {
       </I18nProvider>,
     );
     expect(screen.getByRole("heading", { name: "Språk" })).toBeInTheDocument();
-    expect(screen.getByText("1 framsida och 2 baksidor anger inte sitt språk.")).toBeInTheDocument();
+    expect(
+      screen.getByText("1 framsida och 2 baksidor anger inte sitt språk."),
+    ).toBeInTheDocument();
     choose("deck-backs-language", "finska — suomi (fi)");
     fireEvent.click(screen.getByRole("button", { name: "Ange språket" }));
     expect(window.confirm).toHaveBeenCalledWith("Spara 2 baksidor som finska?");

@@ -1,6 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { AnswerV1 } from "@solid-memo/vocab/types.generated";
 import type { Answer } from "./answer";
-import { answerModeOfConcept, conceptOfAnswerMode, conceptOfDirection, directionOfConcept } from "./concepts";
+import {
+  answerModeOfConcept,
+  conceptOfAnswerMode,
+  conceptOfDirection,
+  directionOfConcept,
+} from "./concepts";
 import type { StudyDirection } from "./deck";
 import type { ReviewQuality } from "./review";
 
@@ -17,7 +26,9 @@ export function answerToRecord(answer: Answer): AnswerV1 {
     grade: answer.grade,
     answeredAt: answer.answeredAt,
     studyDay: answer.studyDay,
-    ...(answer.priorIntervalDays === undefined ? {} : { priorIntervalDays: answer.priorIntervalDays }),
+    ...(answer.priorIntervalDays === undefined
+      ? {}
+      : { priorIntervalDays: answer.priorIntervalDays }),
     nextIntervalDays: answer.nextIntervalDays,
     ...(answer.mode === undefined ? {} : { mode: conceptOfAnswerMode(answer.mode) }),
     ...(answer.chosenDistractor === undefined ? {} : { chosenDistractor: answer.chosenDistractor }),

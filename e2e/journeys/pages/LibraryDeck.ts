@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
 
@@ -14,14 +18,23 @@ export class LibraryDeck extends Screen {
 
   async expectOpen(title: string): Promise<void> {
     await expect(this.heading(title)).toBeVisible();
-    await expect(this.page.getByRole("main").getByRole("button", { name: this.t("libraryDeck.import"), exact: true })).toBeVisible();
+    await expect(
+      this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("libraryDeck.import"), exact: true }),
+    ).toBeVisible();
   }
 
   /** "Preview": the deck's cards, one at a time, before importing it. */
   async openPreview(title: string): Promise<void> {
     await this.intent(`Preview ${title}`, async () => {
-      await this.page.getByRole("main").getByRole("link", { name: this.t("libraryDeck.preview"), exact: true }).click();
-      await expect(this.page.getByRole("heading", { name: this.t("libraryPreview.heading", { deck: title }) })).toBeVisible();
+      await this.page
+        .getByRole("main")
+        .getByRole("link", { name: this.t("libraryDeck.preview"), exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("libraryPreview.heading", { deck: title }) }),
+      ).toBeVisible();
     });
   }
 }

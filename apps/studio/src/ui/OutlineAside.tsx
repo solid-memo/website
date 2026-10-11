@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import { outlineProblems, problemTarget } from "@solid-memo/domain/release/releaseCheck";
@@ -39,7 +43,9 @@ export function OutlineAside({
       questionHref={links.questionHref}
       checkHref={links.checkHref}
       problems={outlineProblems(draft, problems ?? [])}
-      badgeHref={(problem) => studioRouteToHash(targetRoute(draftUrl, problemTarget(draft, problem)))}
+      badgeHref={(problem) =>
+        studioRouteToHash(targetRoute(draftUrl, problemTarget(draft, problem)))
+      }
       currentKey={currentKey}
       onEdit={(changes) => editor.edit(changes)}
     />

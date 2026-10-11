@@ -1,8 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Quad } from "@rdfjs/types";
 
 /**
  * The published SHACL profiles Solid Memo data must conform to on top of
- * its own shapes (see docs/validation.md): DCAT-AP for catalogues, decks
+ * its own shapes (see docs/validation.md): DCAT-AP for catalogs, decks
  * and their releases, and SKOS for the concept schemes in the
  * vocabulary. The files are vendored verbatim under vendor/ and
  * published with the site; the paths here are relative to its vendor/.

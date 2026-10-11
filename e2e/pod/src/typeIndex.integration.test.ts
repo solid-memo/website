@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Where an instance is registered against a real Solid server
  * (docs/data-model.md): a profile without a private type index gets one,
@@ -26,18 +31,31 @@ const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 /** The instance repository as createAppUseCases wires it. */
 function instances() {
   const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
-  return createSolidInstanceRepository({ fetch, checkWrite: shapeValidator.checkSubjects, now: () => new Date(), randomId: () => crypto.randomUUID() });
+  return createSolidInstanceRepository({
+    fetch,
+    checkWrite: shapeValidator.checkSubjects,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  });
 }
 
 async function put(url: string, body: string): Promise<void> {
-  const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: { "content-type": "text/turtle" },
+    body,
+  });
   if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
 }
 
 /** A document as N-Triples: every IRI written out in full. */
 async function triples(url: string): Promise<string> {
-  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
-  return new Writer({ format: "N-Triples" }).quadsToString(new Parser({ baseIRI: url }).parse(turtle));
+  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) =>
+    response.text(),
+  );
+  return new Writer({ format: "N-Triples" }).quadsToString(
+    new Parser({ baseIRI: url }).parse(turtle),
+  );
 }
 
 /**
@@ -45,14 +63,21 @@ async function triples(url: string): Promise<string> {
  * and, when asked, a private type index in the folder, which is made
  * (else it names none); and the folder.
  */
-async function profile(server: string, seeAlso: (base: string) => string[] = () => [], { privateIndex = false } = {}) {
+async function profile(
+  server: string,
+  seeAlso: (base: string) => string[] = () => [],
+  { privateIndex = false } = {},
+) {
   const base = new URL(`run-${crypto.randomUUID()}/`, server).href;
   const card = `${base}profile/card`;
   const index = `${base}settings/privateTypeIndex.ttl`;
-  if (privateIndex) await put(index, `<> a <${SOLID_TERMS}TypeIndex>, <${SOLID_TERMS}UnlistedDocument> .`);
+  if (privateIndex)
+    await put(index, `<> a <${SOLID_TERMS}TypeIndex>, <${SOLID_TERMS}UnlistedDocument> .`);
   // A statement each: Solid-Nextcloud stores `<#me> a <Person> ; <p> <o>` as `<#me> <Person> <p>`.
   const links = [
-    ...seeAlso(base).map((url) => `\n<#me> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <${url}> .`),
+    ...seeAlso(base).map(
+      (url) => `\n<#me> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <${url}> .`,
+    ),
     ...(privateIndex ? [`\n<#me> <${PRIVATE_TYPE_INDEX}> <${index}> .`] : []),
   ].join("");
   await put(card, `<#me> a <http://xmlns.com/foaf/0.1/Person> .${links}`);
@@ -67,7 +92,9 @@ async function profile(server: string, seeAlso: (base: string) => string[] = () 
  */
 async function readOnly(url: string): Promise<void> {
   const control = await aclOf(url);
-  const acp = /<http:\/\/www\.w3\.org\/ns\/solid\/acp#AccessControlResource>;\s*rel="type"/.test((await fetch(control, { method: "HEAD" })).headers.get("link") ?? "");
+  const acp = /<http:\/\/www\.w3\.org\/ns\/solid\/acp#AccessControlResource>;\s*rel="type"/.test(
+    (await fetch(control, { method: "HEAD" })).headers.get("link") ?? "",
+  );
   const ACL = "http://www.w3.org/ns/auth/acl#";
   const ACP = "http://www.w3.org/ns/solid/acp#";
   await put(
@@ -80,19 +107,28 @@ async function readOnly(url: string): Promise<void> {
       : `<#read> a <${ACL}Authorization> ; <${ACL}agentClass> <http://xmlns.com/foaf/0.1/Agent> ;
     <${ACL}accessTo> <${url}> ; <${ACL}mode> <${ACL}Read> .`,
   );
-  const write = await fetch(url, { method: "PATCH", headers: { "content-type": "application/sparql-update" }, body: `INSERT DATA { <#x> <#y> "z" . };` });
+  const write = await fetch(url, {
+    method: "PATCH",
+    headers: { "content-type": "application/sparql-update" },
+    body: `INSERT DATA { <#x> <#y> "z" . };`,
+  });
   expect(write.ok, `${url} is still writable`).toBe(false);
 }
 
-
 /** The registrations in a type index of what lies in `container`: each one's class, predicate, what it names, and title; sorted. */
 async function registrationsIn(index: string, container: string) {
-  const turtle = await fetch(index, { headers: { accept: "text/turtle" } }).then((response) => response.text());
+  const turtle = await fetch(index, { headers: { accept: "text/turtle" } }).then((response) =>
+    response.text(),
+  );
   const quads = new Parser({ baseIRI: index }).parse(turtle);
   const of = (subject: (typeof quads)[number]["subject"], predicate: string) =>
-    quads.filter((quad) => quad.subject.equals(subject) && quad.predicate.value === predicate).map((quad) => quad.object.value);
+    quads
+      .filter((quad) => quad.subject.equals(subject) && quad.predicate.value === predicate)
+      .map((quad) => quad.object.value);
   return quads
-    .filter((quad) => [`${SOLID_TERMS}instance`, `${SOLID_TERMS}instanceContainer`].includes(quad.predicate.value))
+    .filter((quad) =>
+      [`${SOLID_TERMS}instance`, `${SOLID_TERMS}instanceContainer`].includes(quad.predicate.value),
+    )
     .filter((quad) => quad.object.value.startsWith(container))
     .map((quad) => ({
       subject: quad.subject.value,
@@ -105,15 +141,34 @@ async function registrationsIn(index: string, container: string) {
 }
 
 /** What each class of an instance's data is registered as, in the order registrationsIn sorts them. */
-function registered(container: string, classes: ("instance" | "catalog" | "deck" | "card" | "reviewState" | "answer" | "draft")[]) {
+function registered(
+  container: string,
+  classes: ("instance" | "catalog" | "deck" | "card" | "reviewState" | "answer" | "draft")[],
+) {
   const all = {
     instance: { forClass: [`${SM}Instance`], predicate: "instanceContainer", target: container },
-    catalog: { forClass: ["http://www.w3.org/ns/dcat#Catalog"], predicate: "instance", target: `${container}catalog.ttl#catalog` },
+    catalog: {
+      forClass: ["http://www.w3.org/ns/dcat#Catalog"],
+      predicate: "instance",
+      target: `${container}catalog.ttl#catalog`,
+    },
     deck: { forClass: [`${SM}Deck`], predicate: "instance", target: `${container}catalog.ttl` },
     card: { forClass: [`${SM}Card`], predicate: "instanceContainer", target: `${container}decks/` },
-    reviewState: { forClass: [`${SM}ReviewState`], predicate: "instanceContainer", target: `${container}reviews/` },
-    answer: { forClass: [`${SM}Answer`], predicate: "instanceContainer", target: `${container}history/` },
-    draft: { forClass: [`${SM}Deck`], predicate: "instanceContainer", target: `${container}drafts/` },
+    reviewState: {
+      forClass: [`${SM}ReviewState`],
+      predicate: "instanceContainer",
+      target: `${container}reviews/`,
+    },
+    answer: {
+      forClass: [`${SM}Answer`],
+      predicate: "instanceContainer",
+      target: `${container}history/`,
+    },
+    draft: {
+      forClass: [`${SM}Deck`],
+      predicate: "instanceContainer",
+      target: `${container}drafts/`,
+    },
   };
   return classes
     .map((dataClass) => ({ ...all[dataClass], subject: expect.any(String), title: ["Main"] }))
@@ -125,24 +180,41 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     const { base, card, webId } = await profile(server);
     const repository = instances();
 
-    const instance = await repository.createInstance({ webId, containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+    const instance = await repository.createInstance({
+      webId,
+      containerUrl: `${base}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
 
     const index = `${await storageOf(base)}settings/privateTypeIndex.ttl`;
     expect(await triples(card)).toContain(`<${webId}> <${PRIVATE_TYPE_INDEX}> <${index}> .`);
-    expect(await repository.listInstances(webId)).toContainEqual(expect.objectContaining({ url: instance.url }));
+    expect(await repository.listInstances(webId)).toContainEqual(
+      expect.objectContaining({ url: instance.url }),
+    );
   });
 
   it("registers each class of the instance's data in it, where Solid Memo still finds the instance by its own", async () => {
     const { base, webId } = await profile(server);
     const repository = instances();
 
-    const instance = await repository.createInstance({ webId, containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+    const instance = await repository.createInstance({
+      webId,
+      containerUrl: `${base}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
 
     const index = `${await storageOf(base)}settings/privateTypeIndex.ttl`;
     const all = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
     expect(await registrationsIn(index, instance.url)).toEqual(registered(instance.url, [...all]));
-    expect(await repository.listInstances(webId)).toContainEqual({ url: instance.url, name: "Main" });
-    expect(await repository.readDataClassRegistrations({ webId, instanceUrl: instance.url })).toEqual({
+    expect(await repository.listInstances(webId)).toContainEqual({
+      url: instance.url,
+      name: "Main",
+    });
+    expect(
+      await repository.readDataClassRegistrations({ webId, instanceUrl: instance.url }),
+    ).toEqual({
       registrations: all.map((dataClass) => ({ dataClass, index: "private", registered: true })),
       privateIndexMissing: false,
       unreadableIndexes: [],
@@ -156,13 +228,20 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
   it("says a registration the user removed is missing, and adds it back only when asked", async (context) => {
     const { base, webId } = await profile(server);
     const repository = instances();
-    const instance = await repository.createInstance({ webId, containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+    const instance = await repository.createInstance({
+      webId,
+      containerUrl: `${base}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
     const index = `${await storageOf(base)}settings/privateTypeIndex.ttl`;
     // The removal is made in the same second as the index was read, which such a server's ETag does not tell apart.
     if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
     const all = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
 
-    const cards = (await registrationsIn(index, instance.url)).find((registration) => registration.target.endsWith("decks/"))!;
+    const cards = (await registrationsIn(index, instance.url)).find((registration) =>
+      registration.target.endsWith("decks/"),
+    )!;
     const removal = await fetch(index, {
       method: "PATCH",
       headers: { "content-type": "application/sparql-update" },
@@ -170,8 +249,13 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
         <${SOLID_TERMS}instanceContainer> <${cards.target}> ; <http://purl.org/dc/terms/title> "Main" . }`,
     });
     expect(removal.ok, `PATCH ${index}: ${removal.status}`).toBe(true);
-    expect(await registrationsIn(index, instance.url)).toEqual(registered(instance.url, ["instance", "catalog", "deck", "reviewState", "answer", "draft"]));
-    expect((await repository.readDataClassRegistrations({ webId, instanceUrl: instance.url })).registrations).toContainEqual({
+    expect(await registrationsIn(index, instance.url)).toEqual(
+      registered(instance.url, ["instance", "catalog", "deck", "reviewState", "answer", "draft"]),
+    );
+    expect(
+      (await repository.readDataClassRegistrations({ webId, instanceUrl: instance.url }))
+        .registrations,
+    ).toContainEqual({
       dataClass: "card",
       index: "private",
       registered: false,
@@ -185,13 +269,27 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     const privateIndex = `${base}settings/privateTypeIndex.ttl`;
     const repository = instances();
 
-    const instance = await repository.createInstance({ webId, containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "public" });
+    const instance = await repository.createInstance({
+      webId,
+      containerUrl: `${base}solid-memo/`,
+      name: "Main",
+      registrationTarget: "public",
+    });
 
     const publicIndex = `${await storageOf(base)}settings/publicTypeIndex.ttl`;
-    expect(await triples(card)).toContain(`<${webId}> <${SOLID_TERMS}publicTypeIndex> <${publicIndex}> .`);
-    expect(await registrationsIn(publicIndex, instance.url)).toEqual(registered(instance.url, ["instance", "catalog", "deck", "card"]));
-    expect(await registrationsIn(privateIndex, instance.url)).toEqual(registered(instance.url, ["reviewState", "answer", "draft"]));
-    expect(await repository.listInstances(webId)).toContainEqual({ url: instance.url, name: "Main" });
+    expect(await triples(card)).toContain(
+      `<${webId}> <${SOLID_TERMS}publicTypeIndex> <${publicIndex}> .`,
+    );
+    expect(await registrationsIn(publicIndex, instance.url)).toEqual(
+      registered(instance.url, ["instance", "catalog", "deck", "card"]),
+    );
+    expect(await registrationsIn(privateIndex, instance.url)).toEqual(
+      registered(instance.url, ["reviewState", "answer", "draft"]),
+    );
+    expect(await repository.listInstances(webId)).toContainEqual({
+      url: instance.url,
+      name: "Main",
+    });
 
     await repository.deleteInstance({ webId, instance });
     expect(await registrationsIn(publicIndex, instance.url)).toEqual([]);
@@ -205,12 +303,21 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     const before = await triples(card);
     const repository = instances();
 
-    const instance = await repository.createInstance({ webId, containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+    const instance = await repository.createInstance({
+      webId,
+      containerUrl: `${base}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
 
     const index = `${await storageOf(base)}settings/privateTypeIndex.ttl`;
-    expect(await triples(`${base}extended/profile`)).toContain(`<${webId}> <${PRIVATE_TYPE_INDEX}> <${index}> .`);
+    expect(await triples(`${base}extended/profile`)).toContain(
+      `<${webId}> <${PRIVATE_TYPE_INDEX}> <${index}> .`,
+    );
     expect(await triples(card)).toBe(before);
-    expect(await repository.listInstances(webId)).toContainEqual(expect.objectContaining({ url: instance.url }));
+    expect(await repository.listInstances(webId)).toContainEqual(
+      expect.objectContaining({ url: instance.url }),
+    );
   });
 
   it("refuses, saying where it tried, and keeps no instance, when no profile document can be written", async () => {
@@ -218,8 +325,16 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     await readOnly(card);
 
     await expect(
-      instances().createInstance({ webId, containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" }),
-    ).rejects.toMatchObject({ code: "privateTypeIndexNotLinked", message: expect.stringContaining(card) });
+      instances().createInstance({
+        webId,
+        containerUrl: `${base}solid-memo/`,
+        name: "Main",
+        registrationTarget: "private",
+      }),
+    ).rejects.toMatchObject({
+      code: "privateTypeIndexNotLinked",
+      message: expect.stringContaining(card),
+    });
     expect(await fetch(`${base}solid-memo/meta.ttl`).then((response) => response.status)).toBe(404);
   });
 });

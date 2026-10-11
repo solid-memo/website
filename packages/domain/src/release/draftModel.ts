@@ -1,6 +1,16 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { LangText, LangTexts } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { PROV, RDF_TYPE, SCHEMA_COURSE, type DraftNode, type ReleaseDraft } from "./releaseDraft.ts";
+import {
+  PROV,
+  RDF_TYPE,
+  SCHEMA_COURSE,
+  type DraftNode,
+  type ReleaseDraft,
+} from "./releaseDraft.ts";
 import {
   DCAT_NS,
   type ReleaseDistractor,
@@ -33,9 +43,16 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
   const literal = (value: string | undefined, datatype: string): ReleaseText[] =>
     value === undefined ? [] : [{ kind: "literal", value, language: "", datatype }];
   const texts = (text: LangText | undefined): ReleaseText[] =>
-    Object.entries(text ?? {}).map(([language, value]) => ({ kind: "literal", value, language, datatype: language === "" ? XSD_STRING : LANG_STRING }));
+    Object.entries(text ?? {}).map(([language, value]) => ({
+      kind: "literal",
+      value,
+      language,
+      datatype: language === "" ? XSD_STRING : LANG_STRING,
+    }));
   const keywords = (keyword: LangTexts): ReleaseText[] =>
-    Object.entries(keyword).flatMap(([language, values]) => values.map((value) => texts({ [language]: value })[0]!));
+    Object.entries(keyword).flatMap(([language, values]) =>
+      values.map((value) => texts({ [language]: value })[0]!),
+    );
   // The statements beyond the records, every IRI moved.
   const triples = draft.triples.map(({ subject, predicate, object }) => ({
     subject: at(subject),
@@ -43,13 +60,30 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     object: object.kind === "iri" ? iri(object.value) : object,
   }));
   const statements = (predicate: string): ReleaseStatement[] =>
-    triples.filter((triple) => triple.predicate === predicate).map(({ subject, object }) => ({ subject, object }));
-  const typed = (type: string) => [...new Set(statements(RDF_TYPE).filter(({ object }) => object.value === type).map(({ subject }) => subject))];
-  const subjectAt = (node: DraftNode<{ deprecated?: boolean }>) => ({ iri: at(`${draft.url}#${node.id}`), retired: node.data.deprecated === true });
+    triples
+      .filter((triple) => triple.predicate === predicate)
+      .map(({ subject, object }) => ({ subject, object }));
+  const typed = (type: string) => [
+    ...new Set(
+      statements(RDF_TYPE)
+        .filter(({ object }) => object.value === type)
+        .map(({ subject }) => subject),
+    ),
+  ];
+  const subjectAt = (node: DraftNode<{ deprecated?: boolean }>) => ({
+    iri: at(`${draft.url}#${node.id}`),
+    retired: node.data.deprecated === true,
+  });
   const { root } = draft;
-  const generating = new Set(statements(`${PROV}wasGeneratedBy`).filter(({ subject }) => subject === url).map(({ object }) => object.value));
+  const generating = new Set(
+    statements(`${PROV}wasGeneratedBy`)
+      .filter(({ subject }) => subject === url)
+      .map(({ object }) => object.value),
+  );
   const said = (subject: string, predicate: string) =>
-    triples.filter((triple) => triple.subject === subject && triple.predicate === predicate).map((triple) => triple.object);
+    triples
+      .filter((triple) => triple.subject === subject && triple.predicate === predicate)
+      .map((triple) => triple.object);
   const sources = iris(root.wasDerivedFrom);
 
   const cards = draft.cards.map((node) => ({
@@ -75,14 +109,22 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
       distractors.push({ iri: option.value, typed: false, retired: false, text: [], note: [] });
     }
   }
-  const formatted = [...draft.cards, ...draft.chapters, ...draft.steps].flatMap((node): ReleaseStatement[] =>
-    node.data.textFormat === undefined ? [] : [{ subject: subjectAt(node).iri, object: iri(node.data.textFormat) }],
+  const formatted = [...draft.cards, ...draft.chapters, ...draft.steps].flatMap(
+    (node): ReleaseStatement[] =>
+      node.data.textFormat === undefined
+        ? []
+        : [{ subject: subjectAt(node).iri, object: iri(node.data.textFormat) }],
   );
 
   return {
     url,
     decks: [url, ...typed(SM.Deck).filter((deck) => deck !== url)],
-    types: [SM.Deck, `${DCAT_NS}Dataset`, ...(draft.course ? [SCHEMA_COURSE] : []), ...otherTypes(statements(RDF_TYPE), url)],
+    types: [
+      SM.Deck,
+      `${DCAT_NS}Dataset`,
+      ...(draft.course ? [SCHEMA_COURSE] : []),
+      ...otherTypes(statements(RDF_TYPE), url),
+    ],
     version: literal(root.version, XSD_STRING),
     title: texts(root.title),
     description: texts(root.description),
@@ -99,10 +141,18 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     prev: one(root.prev),
     previousVersion: one(root.previousVersion),
     distribution: iris(root.distribution),
-    licence: one(root.license),
+    license: one(root.license),
     sources,
-    activities: typed(`${PROV}Activity`).map((activity) => ({ iri: activity, generating: generating.has(activity) })),
-    ...provenanceOf(said, [...generating], sources, new Set(draft.published.activities.map((id) => at(`${draft.url}#${id}`)))),
+    activities: typed(`${PROV}Activity`).map((activity) => ({
+      iri: activity,
+      generating: generating.has(activity),
+    })),
+    ...provenanceOf(
+      said,
+      [...generating],
+      sources,
+      new Set(draft.published.activities.map((id) => at(`${draft.url}#${id}`))),
+    ),
     cards,
     chapters: draft.chapters.map((node) => ({
       ...subjectAt(node),
@@ -131,5 +181,7 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
 /** The other types the statements give the release: those its record does not. */
 function otherTypes(types: readonly ReleaseStatement[], url: string): string[] {
   const own = new Set<string>([SM.Deck, `${DCAT_NS}Dataset`, SCHEMA_COURSE]);
-  return types.filter(({ subject, object }) => subject === url && !own.has(object.value)).map(({ object }) => object.value);
+  return types
+    .filter(({ subject, object }) => subject === url && !own.has(object.value))
+    .map(({ object }) => object.value);
 }

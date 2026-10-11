@@ -1,9 +1,14 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "extends": ["//"],
+  "extends": [
+    "//"
+  ],
   "tasks": {
     "test": {
-      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/shapes/**"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/ns/shapes/**"
+      ]
     }
   }
 }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -28,7 +32,10 @@ const card: Card = {
   formatVersion: 1,
 };
 
-function renderContainer(useCases: UseCases, { shown = card, of = deck, onSaved }: { shown?: Card; of?: Deck; onSaved?: () => void } = {}) {
+function renderContainer(
+  useCases: UseCases,
+  { shown = card, of = deck, onSaved }: { shown?: Card; of?: Deck; onSaved?: () => void } = {},
+) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -78,13 +85,28 @@ describe("CardContainer", () => {
   });
 
   it("starts the card's new text in the language the deck's cards have", async () => {
-    const other: Card = { ...card, id: "card-2", url: `${deck.cardsDocumentUrl}#card-2`, backNote: { sv: "Ett element." } };
+    const other: Card = {
+      ...card,
+      id: "card-2",
+      url: `${deck.cardsDocumentUrl}#card-2`,
+      backNote: { sv: "Ett element." },
+    };
     renderContainer(makeUseCasesFake({ listCards: vi.fn(async () => [card, other]) }));
-    await waitFor(() => expect(document.getElementById("card-back-label-language-0")).toHaveTextContent("Language: Swedish"));
+    await waitFor(() =>
+      expect(document.getElementById("card-back-label-language-0")).toHaveTextContent(
+        "Language: Swedish",
+      ),
+    );
   });
 
   it("deletes none of the wrong options the deck's release published, nor any while it is read", async () => {
-    const withOptions: Card = { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }, { id: "card-1-d2", text: { en: "air" } }] };
+    const withOptions: Card = {
+      ...card,
+      distractors: [
+        { id: "card-1-d1", text: { en: "fire" } },
+        { id: "card-1-d2", text: { en: "air" } },
+      ],
+    };
     const release = { cards: [{ ...withOptions, distractors: [withOptions.distractors![0]!] }] };
     let read: (value: never) => void = () => undefined;
     const deckRelease = vi.fn(() => new Promise<never>((resolve) => (read = resolve)));
@@ -92,7 +114,8 @@ describe("CardContainer", () => {
     renderContainer(makeUseCasesFake({ deckRelease }), { shown: withOptions, of });
     const confirm = vi.fn(() => false);
     vi.stubGlobal("confirm", confirm);
-    const refusal = "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.";
+    const refusal =
+      "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.";
     fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “air”" }));
     expect(await screen.findByText(refusal)).toBeInTheDocument();
     await waitFor(() => expect(deckRelease).toHaveBeenCalled());
@@ -118,7 +141,10 @@ describe("CardContainer", () => {
   });
 
   it("removes the card, refreshes cards and reviews, then leaves", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const useCases = makeUseCasesFake();
     const { onRemoved, invalidate, queryClient } = renderContainer(useCases);
     const queueKey = ["studyQueue", deck.url];
@@ -140,7 +166,10 @@ describe("CardContainer", () => {
   });
 
   it("shows a remove error and stays", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const { onRemoved } = renderContainer(
       makeUseCasesFake({
         removeCard: vi.fn(async () => {

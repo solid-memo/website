@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import {
   checkEveryConceptInAScheme,
@@ -63,14 +67,18 @@ describe("parseConceptSchemes", () => {
   it("requires a concept's label and definition in every language of the scheme's title, untagged text not counting", () => {
     const turtle = `${HEAD} <> a skos:ConceptScheme ; dcterms:title "Colours"@en, "Färger"@sv ; skos:definition "x"@en .
 c:red a skos:Concept ; skos:prefLabel "Red"@en, "Röd" ; skos:definition "Blood."@en, "Blod."@sv ; skos:inScheme <> .`;
-    expect(() => parseConceptSchemes(turtle, BASE)).toThrow(`${BASE}: <${BASE}#red> has no prefLabel in sv.`);
+    expect(() => parseConceptSchemes(turtle, BASE)).toThrow(
+      `${BASE}: <${BASE}#red> has no prefLabel in sv.`,
+    );
   });
 });
 
 describe("checkEveryConceptInAScheme", () => {
   it("accepts concepts that belong to a scheme and rejects strays", () => {
     const schemes = parseConceptSchemes(SCHEME, BASE);
-    expect(() => checkEveryConceptInAScheme([{ turtle: SCHEME, baseIri: BASE }], schemes)).not.toThrow();
+    expect(() =>
+      checkEveryConceptInAScheme([{ turtle: SCHEME, baseIri: BASE }], schemes),
+    ).not.toThrow();
     const stray = `${SCHEME} c:blue a skos:Concept ; skos:prefLabel "Blue"@en .`;
     expect(() => checkEveryConceptInAScheme([{ turtle: stray, baseIri: BASE }], schemes)).toThrow(
       `${BASE}: <${BASE}#blue> is in none of the concept schemes.`,
@@ -122,17 +130,28 @@ describe("parseReferenceConcepts", () => {
   });
 
   it("requires an English label", () => {
-    expect(() => parseReferenceConcepts(`${HEAD}<${TABLE}/DEU> a skos:Concept ; skos:prefLabel "Deutsch"@de ; skos:inScheme <${TABLE}> .`, BASE, TABLE)).toThrow(
-      `<${TABLE}/DEU> has no English prefLabel.`,
-    );
+    expect(() =>
+      parseReferenceConcepts(
+        `${HEAD}<${TABLE}/DEU> a skos:Concept ; skos:prefLabel "Deutsch"@de ; skos:inScheme <${TABLE}> .`,
+        BASE,
+        TABLE,
+      ),
+    ).toThrow(`<${TABLE}/DEU> has no English prefLabel.`);
   });
 });
 
 describe("renderConcepts with reference schemes", () => {
   it("renders each as a list of its entries", () => {
-    const rendered = renderConcepts([], [], [
-      { scheme: { name: "EU_LANGUAGES", iri: TABLE, definition: "Languages." }, concepts: parseReferenceConcepts(EXTERNAL, BASE, TABLE) },
-    ]);
+    const rendered = renderConcepts(
+      [],
+      [],
+      [
+        {
+          scheme: { name: "EU_LANGUAGES", iri: TABLE, definition: "Languages." },
+          concepts: parseReferenceConcepts(EXTERNAL, BASE, TABLE),
+        },
+      ],
+    );
     expect(rendered).toContain("export interface ReferenceConcept {");
     expect(rendered).toContain(`/** Languages. */
 export const EU_LANGUAGES: readonly ReferenceConcept[] = [

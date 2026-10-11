@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   asUrl,
   createSolidDataset,
@@ -13,7 +17,11 @@ import {
 import type { Quad } from "@rdfjs/types";
 import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
-import { catalogNodeUrlOf, catalogUrlOf, ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
+import {
+  catalogNodeUrlOf,
+  catalogUrlOf,
+  ensureTrailingSlash,
+} from "@solid-memo/domain/instanceLayout";
 import {
   draftContainerOf,
   draftPlaceOf,
@@ -23,7 +31,11 @@ import {
   type ReleaseDraftSummary,
 } from "@solid-memo/domain/release/draftLayout";
 import { DCAT_NS, DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
-import { RDF_TYPE, type DraftTriple, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import {
+  RDF_TYPE,
+  type DraftTriple,
+  type ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import { moved } from "@solid-memo/domain/release/releaseToDraft";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { addCatalogLink, catalogLinks, removeCatalogLink } from "./catalogLinks";
@@ -78,7 +90,7 @@ interface Read {
 /**
  * The ReleaseDraftRepository over the pod (docs/data-model.md "Drafts"):
  * a draft is the container its release document is in, linked from the
- * instance's catalogue by `sm:releaseDraft`. A draft's documents are
+ * instance's catalog by `sm:releaseDraft`. A draft's documents are
  * read whole, each remembered as read, and an edit of one is written
  * only if it is still as it was (If-Match), one PUT of it whole; an
  * edit is made from the read it names by its version, or refused. What
@@ -103,11 +115,15 @@ export function createSolidReleaseDraftRepository({
   /** Each draft's documents as last read, so an edit is written only if they are still so. */
   const reads = new Map<string, Read>();
 
-  /** The drafts the instance's catalogue links, as their places say: a link anywhere but a draft's place in the instance is not followed. */
-  async function linked(instanceUrl: string): Promise<{ url: string; place: { instanceUrl: string; name: string; version: number } }[]> {
+  /** The drafts the instance's catalog links, as their places say: a link anywhere but a draft's place in the instance is not followed. */
+  async function linked(
+    instanceUrl: string,
+  ): Promise<{ url: string; place: { instanceUrl: string; name: string; version: number } }[]> {
     return (await catalogLinks(instanceUrl, SM.releaseDraft, fetch)).flatMap((url) => {
       const place = draftPlaceOf(url);
-      return place === null || place.instanceUrl !== ensureTrailingSlash(instanceUrl) ? [] : [{ url, place }];
+      return place === null || place.instanceUrl !== ensureTrailingSlash(instanceUrl)
+        ? []
+        : [{ url, place }];
     });
   }
 
@@ -122,19 +138,27 @@ export function createSolidReleaseDraftRepository({
     const quads = datasets.flatMap((dataset, at) =>
       quadsOf(dataset).map((quad) => {
         // Blank nodes are named afresh in each document: here, they are each document's own.
-        const blank = (key: string) => (key.startsWith("_:") ? `_:d${at}-${key.slice(2)}` : iriOf(key));
+        const blank = (key: string) =>
+          key.startsWith("_:") ? `_:d${at}-${key.slice(2)}` : iriOf(key);
         const object = termOf(quad.object);
         return quadOf(
           blank(keyOf(quad.subject)),
           quad.predicate.value,
-          object.kind === "iri" ? { kind: "iri", value: iriOf(object.value) } : object.kind === "blank" ? { kind: "blank", value: `d${at}-${object.value}` } : object,
+          object.kind === "iri"
+            ? { kind: "iri", value: iriOf(object.value) }
+            : object.kind === "blank"
+              ? { kind: "blank", value: `d${at}-${object.value}` }
+              : object,
         );
       }),
     );
     const draft = draftFromQuads(quads, draftUrl);
     if (draft === null) throw new AppError("draftGone");
     const version = versionOfDocuments(urls, datasets);
-    reads.set(draftUrl, { version, documents: new Map(urls.map((url, at) => [url, datasets[at]!])) });
+    reads.set(draftUrl, {
+      version,
+      documents: new Map(urls.map((url, at) => [url, datasets[at]!])),
+    });
     return { draft, version };
   }
 
@@ -142,15 +166,27 @@ export function createSolidReleaseDraftRepository({
   function readReleaseQuads(quads: readonly Quad[], url: string): ReleaseDraft {
     const release = draftFromQuads(quads, url);
     // A version is 1, 2, …: a draft is numbered after it.
-    if (release === null || !/^[1-9][0-9]*$/.test(release.root.version ?? "1")) throw new AppError("releaseUnreadable", { url });
+    if (release === null || !/^[1-9][0-9]*$/.test(release.root.version ?? "1"))
+      throw new AppError("releaseUnreadable", { url });
     const dataset = datasetOf(quads);
     const root = getThing(dataset, url)!;
     if (storedVersionOf(root) > LATEST_VERSION.libraryDeck) {
-      throw new AppError("libraryDeckTooNew", { url, version: storedVersionOf(root), reads: LATEST_VERSION.libraryDeck });
+      throw new AppError("libraryDeckTooNew", {
+        url,
+        version: storedVersionOf(root),
+        reads: LATEST_VERSION.libraryDeck,
+      });
     }
     for (const thing of getThingAll(dataset)) {
-      if (getUrlAll(thing, RDF_TYPE).includes(SM.Card) && storedVersionOf(thing) > LATEST_VERSION.card) {
-        throw new AppError("libraryCardTooNew", { url: asUrl(thing), version: storedVersionOf(thing), reads: LATEST_VERSION.card });
+      if (
+        getUrlAll(thing, RDF_TYPE).includes(SM.Card) &&
+        storedVersionOf(thing) > LATEST_VERSION.card
+      ) {
+        throw new AppError("libraryCardTooNew", {
+          url: asUrl(thing),
+          version: storedVersionOf(thing),
+          reads: LATEST_VERSION.card,
+        });
       }
     }
     return release;
@@ -172,12 +208,15 @@ export function createSolidReleaseDraftRepository({
     },
 
     async documents(instanceUrl) {
-      return (await Promise.all((await linked(instanceUrl)).map(({ url }) => documentsOf(url)))).flat();
+      return (
+        await Promise.all((await linked(instanceUrl)).map(({ url }) => documentsOf(url)))
+      ).flat();
     },
 
     async create(instanceUrl, draft) {
       const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
-      if (catalog === null || getThing(catalog, catalogNodeUrlOf(instanceUrl)) === null) throw new AppError("noCatalogToUpdate");
+      if (catalog === null || getThing(catalog, catalogNodeUrlOf(instanceUrl)) === null)
+        throw new AppError("noCatalogToUpdate");
       const byDocument = new Map<string, DraftEntry[]>([[draft.url, []]]);
       for (const entry of draftEntries(draft).values()) {
         const entries = byDocument.get(entry.document);
@@ -195,8 +234,11 @@ export function createSolidReleaseDraftRepository({
         }
         await addCatalogLink(instanceUrl, SM.releaseDraft, draft.url, fetch);
       } catch (error) {
-        // What this draft wrote goes, the release document last: no draft is left that no catalogue links, nor deletes.
-        if (written.length > 0) await deleteDocuments(draft.url, [...written.slice(1).reverse(), draft.url], fetch).catch(() => undefined);
+        // What this draft wrote goes, the release document last: no draft is left that no catalog links, nor deletes.
+        if (written.length > 0)
+          await deleteDocuments(draft.url, [...written.slice(1).reverse(), draft.url], fetch).catch(
+            () => undefined,
+          );
         throw error;
       }
       return draftSummaryOf(draft)!;
@@ -208,7 +250,9 @@ export function createSolidReleaseDraftRepository({
 
     async readSince(draftUrl, version) {
       const read = await readDraft(draftUrl);
-      return version !== undefined && read.version === version ? { unchanged: true } : { unchanged: false, value: read.draft, version: read.version };
+      return version !== undefined && read.version === version
+        ? { unchanged: true }
+        : { unchanged: false, value: read.draft, version: read.version };
     },
 
     async applyChanges(before, after, version) {
@@ -218,7 +262,10 @@ export function createSolidReleaseDraftRepository({
       const was = draftEntries(before);
       const now = draftEntries(after);
       /** For each document, the entries that leave it and those that come or change in it. */
-      const touched = new Map<string, { gone: DraftEntry[]; made: { entry: DraftEntry; was?: DraftEntry }[] }>();
+      const touched = new Map<
+        string,
+        { gone: DraftEntry[]; made: { entry: DraftEntry; was?: DraftEntry }[] }
+      >();
       const at = (document: string) => {
         let changes = touched.get(document);
         if (changes === undefined) {
@@ -231,25 +278,51 @@ export function createSolidReleaseDraftRepository({
         const old = was.get(key);
         const next = now.get(key);
         if (old !== undefined && next !== undefined && sameEntry(old, next)) continue;
-        if (old !== undefined && (next === undefined || old.document !== next.document || old.subject !== next.subject)) at(old.document).gone.push(old);
-        if (next !== undefined) at(next.document).made.push({ entry: next, ...(old?.document === next.document && old.subject === next.subject ? { was: old } : {}) });
+        if (
+          old !== undefined &&
+          (next === undefined || old.document !== next.document || old.subject !== next.subject)
+        )
+          at(old.document).gone.push(old);
+        if (next !== undefined)
+          at(next.document).made.push({
+            entry: next,
+            ...(old?.document === next.document && old.subject === next.subject
+              ? { was: old }
+              : {}),
+          });
       }
       // New documents first, so no subject is ever named from where it is not yet; then the others, the release document last.
-      const order = [...touched.keys()].sort((a, b) => Number(read.documents.has(a)) - Number(read.documents.has(b)) || Number(a === before.url) - Number(b === before.url));
+      const order = [...touched.keys()].sort(
+        (a, b) =>
+          Number(read.documents.has(a)) - Number(read.documents.has(b)) ||
+          Number(a === before.url) - Number(b === before.url),
+      );
       for (const url of order) {
         const changes = touched.get(url)!;
         const gone = changes.gone.map(inDocument);
-        const made = changes.made.map(({ entry, was }) => ({ entry: inDocument(entry), ...(was === undefined ? {} : { was: inDocument(was) }) }));
+        const made = changes.made.map(({ entry, was }) => ({
+          entry: inDocument(entry),
+          ...(was === undefined ? {} : { was: inDocument(was) }),
+        }));
         const stored = read.documents.get(url);
         let dataset: SolidDataset = stored ?? createSolidDataset();
-        const blank = [...gone, ...made.flatMap(({ entry, was }) => [entry, ...(was === undefined ? [] : [was])])].some(involvesBlank);
-        for (const entry of gone) if (!entry.subject.startsWith("_:")) dataset = removeUnlessNewer(dataset, entry.subject);
+        const blank = [
+          ...gone,
+          ...made.flatMap(({ entry, was }) => [entry, ...(was === undefined ? [] : [was])]),
+        ].some(involvesBlank);
+        for (const entry of gone)
+          if (!entry.subject.startsWith("_:")) dataset = removeUnlessNewer(dataset, entry.subject);
         for (const { entry, was } of made) {
-          if (!entry.subject.startsWith("_:")) dataset = setThing(dataset, rewritten(getThing(dataset, entry.subject), entry, was));
+          if (!entry.subject.startsWith("_:"))
+            dataset = setThing(dataset, rewritten(getThing(dataset, entry.subject), entry, was));
         }
         if (blank) dataset = withBlankNodes(dataset, gone, made);
         await checkWrite(dataset, shapedSubjects(made.map(({ entry }) => entry)), "draft");
-        if (stored !== undefined && url !== before.url && Object.keys(dataset.graphs.default).length === 0) {
+        if (
+          stored !== undefined &&
+          url !== before.url &&
+          Object.keys(dataset.graphs.default).length === 0
+        ) {
           // A chapter's document with nothing left in it goes, as it was read.
           await deleteDataset(url, stored, fetch);
         } else {
@@ -269,21 +342,36 @@ export function createSolidReleaseDraftRepository({
       const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
       const to = (iri: string) => moved(iriOf(iri), draftUrl, targetUrl);
       const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
-      if (version !== undefined && versionOfDocuments(urls, datasets) !== version) throw new AppError("changedElsewhere", { url: draftUrl });
+      if (version !== undefined && versionOfDocuments(urls, datasets) !== version)
+        throw new AppError("changedElsewhere", { url: draftUrl });
       const atTarget = datasets.flatMap((dataset, at) =>
         quadsOf(dataset).map((quad) => {
           const object = termOf(quad.object);
           const label = (value: string) => `d${at}-${value}`;
           return quadOf(
-            quad.subject.termType === "BlankNode" ? `_:${label(quad.subject.value)}` : to(quad.subject.value),
+            quad.subject.termType === "BlankNode"
+              ? `_:${label(quad.subject.value)}`
+              : to(quad.subject.value),
             quad.predicate.value,
-            object.kind === "iri" ? { kind: "iri", value: to(object.value) } : object.kind === "blank" ? { kind: "blank", value: label(object.value) } : object,
+            object.kind === "iri"
+              ? { kind: "iri", value: to(object.value) }
+              : object.kind === "blank"
+                ? { kind: "blank", value: label(object.value) }
+                : object,
           );
         }),
       );
       const quads = releaseQuadsOf(atTarget, targetUrl, issued);
       const subjects = [...new Set(quads.map((quad) => keyOf(quad.subject)))];
-      return turtleOf(quads, { base: targetUrl, prefixes: RELEASE_PREFIXES, order: [targetUrl, ...subjects.filter((subject) => !subject.startsWith(`${targetUrl}#`)), ...subjects] });
+      return turtleOf(quads, {
+        base: targetUrl,
+        prefixes: RELEASE_PREFIXES,
+        order: [
+          targetUrl,
+          ...subjects.filter((subject) => !subject.startsWith(`${targetUrl}#`)),
+          ...subjects,
+        ],
+      });
     },
 
     async readRelease(url) {
@@ -298,8 +386,14 @@ export function createSolidReleaseDraftRepository({
 
     async readLinked(release) {
       const own = new Set(release.triples.map((triple) => triple.subject));
-      const named = [release.root.inSeries, release.root.isVersionOf, release.root.publisher].filter((iri): iri is string => iri !== undefined && !own.has(iri));
-      const documents = [...new Set(named.map((iri) => iri.split("#")[0]!))].filter((url) => url !== release.url);
+      const named = [
+        release.root.inSeries,
+        release.root.isVersionOf,
+        release.root.publisher,
+      ].filter((iri): iri is string => iri !== undefined && !own.has(iri));
+      const documents = [...new Set(named.map((iri) => iri.split("#")[0]!))].filter(
+        (url) => url !== release.url,
+      );
       // One that cannot be read says nothing: the draft is made without it, and the release check finds what it lacks.
       const read = await Promise.all(
         documents.map((url) =>
@@ -315,15 +409,30 @@ export function createSolidReleaseDraftRepository({
     async parseRelease(text, format) {
       const base = "https://file.solid-memo.invalid/release.ttl";
       const quads = await parseDeckFile(text, format, base);
-      const roots = [...new Set(quads.filter((quad) => quad.predicate.value === RDF_TYPE && quad.object.value === SM.Deck).map((quad) => quad.subject.value))];
+      const roots = [
+        ...new Set(
+          quads
+            .filter((quad) => quad.predicate.value === RDF_TYPE && quad.object.value === SM.Deck)
+            .map((quad) => quad.subject.value),
+        ),
+      ];
       if (roots.length !== 1 || roots[0]!.includes("#")) throw new AppError("notAReleaseFile");
-      if (quads.some((quad) => quad.subject.value === roots[0] && (quad.predicate.value === SM.cardsDocument || quad.predicate.value === SM.reviewsDocument))) {
+      if (
+        quads.some(
+          (quad) =>
+            quad.subject.value === roots[0] &&
+            (quad.predicate.value === SM.cardsDocument ||
+              quad.predicate.value === SM.reviewsDocument),
+        )
+      ) {
         throw new AppError("notAReleaseFile");
       }
       try {
         return readReleaseQuads(quads, roots[0]!);
       } catch (error) {
-        throw error instanceof AppError && error.code === "releaseUnreadable" ? new AppError("notAReleaseFile") : error;
+        throw error instanceof AppError && error.code === "releaseUnreadable"
+          ? new AppError("notAReleaseFile")
+          : error;
       }
     },
 
@@ -349,11 +458,23 @@ function versionOfDocuments(urls: readonly string[], datasets: readonly SolidDat
  */
 export function releaseQuadsOf(quads: readonly Quad[], targetUrl: string, issued: string): Quad[] {
   const time = { kind: "literal" as const, value: issued, language: "", datatype: XSD_DATE_TIME };
-  const dropped = new Set([SM.formatVersion, SM.releasedAs, DCTERMS("issued"), DCTERMS("modified")]);
+  const dropped = new Set([
+    SM.formatVersion,
+    SM.releasedAs,
+    DCTERMS("issued"),
+    DCTERMS("modified"),
+  ]);
   return withSeries(
     [
-      ...quads.filter((quad) => !(quad.subject.value === targetUrl && dropped.has(quad.predicate.value))),
-      quadOf(targetUrl, SM.formatVersion, { kind: "literal", value: String(LATEST_VERSION.libraryDeck), language: "", datatype: "http://www.w3.org/2001/XMLSchema#integer" }),
+      ...quads.filter(
+        (quad) => !(quad.subject.value === targetUrl && dropped.has(quad.predicate.value)),
+      ),
+      quadOf(targetUrl, SM.formatVersion, {
+        kind: "literal",
+        value: String(LATEST_VERSION.libraryDeck),
+        language: "",
+        datatype: "http://www.w3.org/2001/XMLSchema#integer",
+      }),
       quadOf(targetUrl, DCTERMS("issued"), time),
       quadOf(targetUrl, DCTERMS("modified"), time),
     ],
@@ -362,7 +483,10 @@ export function releaseQuadsOf(quads: readonly Quad[], targetUrl: string, issued
 }
 
 /** The documents of a draft's container, those a draft has (draftLayout.ts), by URL; none when it is gone (404). */
-export async function draftDocumentsIn(draftUrl: string, fetch: typeof globalThis.fetch): Promise<string[]> {
+export async function draftDocumentsIn(
+  draftUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<string[]> {
   const container = draftContainerOf(draftUrl);
   // The listing is read afresh, never answered from what was read before: a server whose ETag
   // outlives edits made in the same second would say a document just made is not there.
@@ -385,13 +509,20 @@ export async function draftDocumentsIn(draftUrl: string, fetch: typeof globalThi
  * `drafts/`, each only if it is then empty. Anything else in them,
  * another app's, is kept, and so is the container holding it.
  */
-export async function deleteDraftResources(draftUrl: string, fetch: typeof globalThis.fetch): Promise<void> {
+export async function deleteDraftResources(
+  draftUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
   const urls = await draftDocumentsIn(draftUrl, fetch);
   await deleteDocuments(draftUrl, [...urls.filter((one) => one !== draftUrl), draftUrl], fetch);
 }
 
 /** Delete the documents, in order, then the draft's containers, each only if it is then empty. */
-async function deleteDocuments(draftUrl: string, urls: readonly string[], fetch: typeof globalThis.fetch): Promise<void> {
+async function deleteDocuments(
+  draftUrl: string,
+  urls: readonly string[],
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
   for (const url of urls) await deleteIfPresent(url, fetch);
   const container = draftContainerOf(draftUrl);
   const named = container.slice(0, container.slice(0, -1).lastIndexOf("/") + 1);
@@ -407,7 +538,9 @@ function shapedSubjects(entries: readonly DraftEntry[]): string[] {
 }
 
 function involvesBlank(entry: DraftEntry): boolean {
-  return entry.subject.startsWith("_:") || entry.raw.some((triple) => triple.object.kind === "blank");
+  return (
+    entry.subject.startsWith("_:") || entry.raw.some((triple) => triple.object.kind === "blank")
+  );
 }
 
 /**
@@ -417,18 +550,34 @@ function involvesBlank(entry: DraftEntry): boolean {
  * (`was`) and does not now taken out, those it says now put in; anything
  * else the document says of it kept.
  */
-function rewritten(existing: ThingPersisted | null, entry: DraftEntry, was: DraftEntry | undefined): ThingPersisted {
+function rewritten(
+  existing: ThingPersisted | null,
+  entry: DraftEntry,
+  was: DraftEntry | undefined,
+): ThingPersisted {
   const empty: ThingPersisted = { type: "Subject", url: entry.subject, predicates: {} };
-  const base = entry.shaped === undefined ? (existing ?? empty) : recordThing(entry.subject, entry.shaped.descriptor, entry.shaped.record, existing);
+  const base =
+    entry.shaped === undefined
+      ? (existing ?? empty)
+      : recordThing(entry.subject, entry.shaped.descriptor, entry.shaped.record, existing);
   const removed = new Set((was?.raw ?? []).map(tripleKey));
-  const kept = quadsOf(setThing(createSolidDataset(), base)).filter((quad) => !removed.has(tripleKey(asTriple(quad))));
-  const quads = [...kept, ...entry.raw.map((triple) => quadOf(triple.subject, triple.predicate, triple.object))];
+  const kept = quadsOf(setThing(createSolidDataset(), base)).filter(
+    (quad) => !removed.has(tripleKey(asTriple(quad))),
+  );
+  const quads = [
+    ...kept,
+    ...entry.raw.map((triple) => quadOf(triple.subject, triple.predicate, triple.object)),
+  ];
   // The entry says something of its subject (a record's type, or a statement): the subject is there.
   return graphsOf(quads).default[entry.subject] as ThingPersisted;
 }
 
 function asTriple(quad: Quad): DraftTriple {
-  return { subject: keyOf(quad.subject), predicate: quad.predicate.value, object: termOf(quad.object) };
+  return {
+    subject: keyOf(quad.subject),
+    predicate: quad.predicate.value,
+    object: termOf(quad.object),
+  };
 }
 
 /** A blank node's label in its document: the draft's (`d<n>-<label>`, a document's own) without what made it the document's. */
@@ -441,7 +590,10 @@ function inDocument(entry: DraftEntry): DraftEntry {
   const triple = (one: DraftTriple): DraftTriple => ({
     subject: podLabel(one.subject),
     predicate: one.predicate,
-    object: one.object.kind === "blank" ? { kind: "blank", value: podLabel(one.object.value) } : one.object,
+    object:
+      one.object.kind === "blank"
+        ? { kind: "blank", value: podLabel(one.object.value) }
+        : one.object,
   });
   return { ...entry, subject: podLabel(entry.subject), raw: entry.raw.map(triple) };
 }
@@ -456,12 +608,22 @@ function withBlankNodes(
   gone: readonly DraftEntry[],
   made: readonly { entry: DraftEntry; was?: DraftEntry }[],
 ): SolidDataset {
-  const before = new Set([...gone, ...made.flatMap(({ was }) => (was === undefined ? [] : [was]))].filter((entry) => entry.subject.startsWith("_:")).map((entry) => entry.subject));
+  const before = new Set(
+    [...gone, ...made.flatMap(({ was }) => (was === undefined ? [] : [was]))]
+      .filter((entry) => entry.subject.startsWith("_:"))
+      .map((entry) => entry.subject),
+  );
   const quads = [
     ...quadsOf(dataset).filter((quad) => !before.has(keyOf(quad.subject))),
-    ...made.filter(({ entry }) => entry.subject.startsWith("_:")).flatMap(({ entry }) => entryQuads(entry)),
+    ...made
+      .filter(({ entry }) => entry.subject.startsWith("_:"))
+      .flatMap(({ entry }) => entryQuads(entry)),
   ];
-  return Object.freeze({ ...dataset, graphs: graphsOf(quads), internal_changeLog: { additions: [], deletions: [] } }) as SolidDataset;
+  return Object.freeze({
+    ...dataset,
+    graphs: graphsOf(quads),
+    internal_changeLog: { additions: [], deletions: [] },
+  }) as SolidDataset;
 }
 
 /**
@@ -473,14 +635,30 @@ function withBlankNodes(
  * series elsewhere, which an index describes, is left to it.
  */
 function withSeries(quads: readonly Quad[], target: string): Quad[] {
-  const of = (subject: string, predicate: string) => quads.filter((quad) => quad.subject.value === subject && quad.predicate.value === predicate);
+  const of = (subject: string, predicate: string) =>
+    quads.filter((quad) => quad.subject.value === subject && quad.predicate.value === predicate);
   const [series] = of(target, DCAT("inSeries")).map((quad) => quad.object.value);
   if (series === undefined) return [...quads];
   const described = quads.some((quad) => quad.subject.value === series);
   if (!described && !series.startsWith(`${target}#`)) return [...quads];
-  const replaced = new Set([DCAT("last"), DCAT("hasCurrentVersion"), DCTERMS("title"), DCTERMS("description"), DCTERMS("publisher"), DCAT("theme"), DCAT("keyword")]);
-  const link = (predicate: string, value: string) => quadOf(series, predicate, { kind: "iri", value });
-  const copied = [DCTERMS("title"), DCTERMS("description"), DCTERMS("publisher"), DCAT("theme"), DCAT("keyword")].flatMap((predicate) =>
+  const replaced = new Set([
+    DCAT("last"),
+    DCAT("hasCurrentVersion"),
+    DCTERMS("title"),
+    DCTERMS("description"),
+    DCTERMS("publisher"),
+    DCAT("theme"),
+    DCAT("keyword"),
+  ]);
+  const link = (predicate: string, value: string) =>
+    quadOf(series, predicate, { kind: "iri", value });
+  const copied = [
+    DCTERMS("title"),
+    DCTERMS("description"),
+    DCTERMS("publisher"),
+    DCAT("theme"),
+    DCAT("keyword"),
+  ].flatMap((predicate) =>
     of(target, predicate).map((quad) => quadOf(series, predicate, termOf(quad.object))),
   );
   const fresh = described
@@ -488,12 +666,21 @@ function withSeries(quads: readonly Quad[], target: string): Quad[] {
     : [
         link(RDF_TYPE, DCAT("DatasetSeries")),
         link(RDF_TYPE, DCAT("Dataset")),
-        quadOf(series, SM.formatVersion, { kind: "literal", value: String(LATEST_VERSION.libraryDeckSeries), language: "", datatype: "http://www.w3.org/2001/XMLSchema#integer" }),
+        quadOf(series, SM.formatVersion, {
+          kind: "literal",
+          value: String(LATEST_VERSION.libraryDeckSeries),
+          language: "",
+          datatype: "http://www.w3.org/2001/XMLSchema#integer",
+        }),
         link(DCAT("first"), target),
       ];
-  const versions = of(series, DCAT("hasVersion")).some((quad) => quad.object.value === target) ? [] : [link(DCAT("hasVersion"), target)];
+  const versions = of(series, DCAT("hasVersion")).some((quad) => quad.object.value === target)
+    ? []
+    : [link(DCAT("hasVersion"), target)];
   return [
-    ...quads.filter((quad) => !(quad.subject.value === series && replaced.has(quad.predicate.value))),
+    ...quads.filter(
+      (quad) => !(quad.subject.value === series && replaced.has(quad.predicate.value)),
+    ),
     ...fresh,
     ...copied,
     link(DCAT("last"), target),

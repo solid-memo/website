@@ -1,8 +1,8 @@
-import {
-  createSolidDataset,
-  getThing,
-  setThing,
-} from "@inrupt/solid-client";
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import { createSolidDataset, getThing, setThing } from "@inrupt/solid-client";
 import type { PreferencesRepository } from "@solid-memo/application/ports";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isPreferencesOutdated } from "@solid-memo/domain/migration";
@@ -34,9 +34,7 @@ export function createSolidPreferencesRepository({
     /** Rewrites the subject in place, so triples this app does not know survive. */
     async savePreferences(instanceUrl, preferences): Promise<void> {
       const documentUrl = preferencesUrlOf(instanceUrl);
-      const dataset =
-        (await getSolidDatasetOrNull(documentUrl, fetch)) ??
-        createSolidDataset();
+      const dataset = (await getSolidDatasetOrNull(documentUrl, fetch)) ?? createSolidDataset();
       const url = `${documentUrl}#it`;
       const updated = setThing(
         dataset,

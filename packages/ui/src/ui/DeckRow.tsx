@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DeckIcon } from "./icons";
@@ -53,14 +57,24 @@ export function DeckRow({
 }) {
   const { t, readerText } = useI18n();
   return (
-    <li class={drag === undefined ? "deck-row" : `deck-row ${DRAG_CLASS[drag]}`} data-row-key={deck.url} style={`--depth: ${depth}`}>
+    <li
+      class={drag === undefined ? "deck-row" : `deck-row ${DRAG_CLASS[drag]}`}
+      data-row-key={deck.url}
+      style={`--depth: ${depth}`}
+    >
       {naming ? (
-        <NameEditor initial={readerText(deck.title)} label={t("deckList.deckName")} onDone={onNamed} />
+        <NameEditor
+          initial={readerText(deck.title)}
+          label={t("deckList.deckName")}
+          onDone={onNamed}
+        />
       ) : (
         <a class="deck-open" href={href} draggable={false}>
           <DeckIcon />
           <ReaderText text={deck.title} />
-          {fromHost !== null && <span class="hint deck-source">{t("deckList.fromHost", { host: fromHost })}</span>}
+          {fromHost !== null && (
+            <span class="hint deck-source">{t("deckList.fromHost", { host: fromHost })}</span>
+          )}
         </a>
       )}
       <span class="deck-meta">{action}</span>

@@ -1,10 +1,19 @@
-import { subjectsOf, type ReleaseModel, type ReleaseTerm, type ReleaseText } from "./releaseModel.ts";
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import {
+  subjectsOf,
+  type ReleaseModel,
+  type ReleaseTerm,
+  type ReleaseText,
+} from "./releaseModel.ts";
 
 /**
  * What a library's index says of one deck (docs/deck-library.md): a
  * series of its releases, which are its versions too, stating the
  * current release's title, description, themes and keywords; every
- * older release summarised (its title, description, version, issue time
+ * older release summarized (its title, description, version, issue time
  * and notes); the current one described in full but for its cards, a
  * course's chapters, steps and distractors, and the record of how it
  * was made, plus the cards it has in use. The node tooling writes it as
@@ -25,7 +34,7 @@ export interface SeriesEntry {
   cardCount: number;
 }
 
-/** A release before the current one, as the index summarises it. */
+/** A release before the current one, as the index summarizes it. */
 export interface OlderRelease {
   url: string;
   title: ReleaseText[];
@@ -38,6 +47,7 @@ export interface OlderRelease {
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
+const FOAF_MBOX = "http://xmlns.com/foaf/0.1/mbox";
 
 /** The entry of a series of releases, sorted by version, the last one current. There is at least one. */
 export function seriesEntry(series: string, releases: readonly ReleaseModel[]): SeriesEntry {
@@ -55,7 +65,9 @@ export function seriesEntry(series: string, releases: readonly ReleaseModel[]): 
       url: release.url,
       title: release.title,
       description: release.description,
-      version: release.version.filter((term): term is ReleaseText => term.kind === "literal").slice(0, 1),
+      version: release.version
+        .filter((term): term is ReleaseText => term.kind === "literal")
+        .slice(0, 1),
       issued: release.issued.slice(0, 1),
       versionNotes: release.versionNotes.slice(0, 1),
     })),
@@ -65,18 +77,25 @@ export function seriesEntry(series: string, releases: readonly ReleaseModel[]): 
 
 /**
  * Whether the index keeps a statement of the current release: not of a
- * card, chapter, step or distractor, no rdfs:comment, and of its
- * activities only the type of the one that generated it, which DCAT-AP
- * asks for (the release itself carries the rest).
+ * card, chapter, step or distractor, no rdfs:comment, no foaf:mbox (the
+ * index names no one's email; the library's contact is a release's
+ * dcat:contactPoint), and of its activities only the type of the one
+ * that generated it, which DCAT-AP asks for (the release itself carries
+ * the rest).
  */
 export function keptInIndex(model: ReleaseModel): (subject: string, predicate: string) => boolean {
   const left = new Set(
-    (["card", "chapter", "step", "distractor"] as const).flatMap((kind) => subjectsOf(model, kind).map((subject) => subject.iri)),
+    (["card", "chapter", "step", "distractor"] as const).flatMap((kind) =>
+      subjectsOf(model, kind).map((subject) => subject.iri),
+    ),
   );
-  const activities = new Map(model.activities.map((activity) => [activity.iri, activity.generating]));
+  const activities = new Map(
+    model.activities.map((activity) => [activity.iri, activity.generating]),
+  );
   return (subject, predicate) =>
     !left.has(subject) &&
     predicate !== RDFS_COMMENT &&
+    predicate !== FOAF_MBOX &&
     (!activities.has(subject) || (activities.get(subject) === true && predicate === RDF_TYPE));
 }
 

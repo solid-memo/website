@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The instance digest against a real Solid server (docs/data-model.md):
  * what a visit learns is written to digest.ttl, and the next visit,
@@ -41,7 +46,11 @@ function page() {
   const requests: Recorded[] = [];
   const recording: typeof fetch = async (input, init) => {
     const headers = new Headers(init?.headers);
-    const recorded: Recorded = { method: (init?.method ?? "GET").toUpperCase(), url: String(input), ifNoneMatch: headers.get("If-None-Match") };
+    const recorded: Recorded = {
+      method: (init?.method ?? "GET").toUpperCase(),
+      url: String(input),
+      ifNoneMatch: headers.get("If-None-Match"),
+    };
     requests.push(recorded);
     const response = await fetch(input, init);
     recorded.status = response.status;
@@ -49,9 +58,18 @@ function page() {
   };
   const writeFence = createWriteFence(recording);
   const podFetch = writeFence.fetch;
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
   const checkWrite = shapeValidator.checkSubjects;
-  const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
+  const deps = {
+    fetch: podFetch,
+    checkWrite,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  };
   const useCases = createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -77,21 +95,39 @@ async function seed(server: string): Promise<{ instanceUrl: string; deck: Deck }
   const webId = `${base}profile/card#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
-  await put(`${base}profile/card`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
+  await put(
+    `${base}profile/card`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
   const { useCases } = page();
-  const instance = await useCases.createInstance({ webId }, { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+  const instance = await useCases.createInstance(
+    { webId },
+    { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" },
+  );
   const deck = await useCases.createDeck(instance.url, { en: "Capitals" });
-  for (const [front, back] of [["Sweden", "Stockholm"], ["Norway", "Oslo"], ["Finland", "Helsinki"]]) {
+  for (const [front, back] of [
+    ["Sweden", "Stockholm"],
+    ["Norway", "Oslo"],
+    ["Finland", "Helsinki"],
+  ]) {
     await useCases.addCard(deck, { front: { en: front }, back: { en: back } });
   }
   return { instanceUrl: instance.url, deck };
 }
 
-const isDocument = (deck: Deck) => (r: Recorded) => r.url === deck.cardsDocumentUrl || r.url === deck.reviewsDocumentUrl;
+const isDocument = (deck: Deck) => (r: Recorded) =>
+  r.url === deck.cardsDocumentUrl || r.url === deck.reviewsDocumentUrl;
 
 /**
  * How long to wait for what pages write in the background: every write is
@@ -112,14 +148,11 @@ async function digestOf(instanceUrl: string): Promise<string> {
  * write what they learn in the background, in more than one write.
  */
 async function untilLearned(instanceUrl: string, deck: Deck): Promise<void> {
-  await vi.waitFor(
-    async () => {
-      const digest = await createSolidDigestRepository({ fetch }).readDigest(instanceUrl);
-      expect(digest?.schedules[deck.url]).toBeDefined();
-      expect(digest?.receipts[deck.cardsDocumentUrl]?.conformedTo).toBe(RULESET);
-    },
-    LEARNING,
-  );
+  await vi.waitFor(async () => {
+    const digest = await createSolidDigestRepository({ fetch }).readDigest(instanceUrl);
+    expect(digest?.schedules[deck.url]).toBeDefined();
+    expect(digest?.receipts[deck.cardsDocumentUrl]?.conformedTo).toBe(RULESET);
+  }, LEARNING);
 }
 
 describe.each(SERVERS)("the instance digest on $name", ({ url: server }) => {
@@ -127,7 +160,11 @@ describe.each(SERVERS)("the instance digest on $name", ({ url: server }) => {
   let unreliableEtags = false;
   beforeAll(async () => {
     const probe = new URL(`etag-${crypto.randomUUID()}.ttl`, server).href;
-    await fetch(probe, { method: "PUT", headers: { "content-type": "text/turtle" }, body: `<#a> <#b> "1" .` });
+    await fetch(probe, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body: `<#a> <#b> "1" .`,
+    });
     unreliableEtags = (await versioned(probe)) && !(await etagMarksEveryEdit(server));
   });
 
@@ -157,7 +194,9 @@ describe.each(SERVERS)("the instance digest on $name", ({ url: server }) => {
       expect(await digestOf(instanceUrl)).not.toContain("DeckSchedule");
       expect(cards.every((r) => r.status === 200)).toBe(true);
     }
-    expect(second.requests.filter(isDocument(deck)).every((r) => [200, 304, 404].includes(r.status!))).toBe(true);
+    expect(
+      second.requests.filter(isDocument(deck)).every((r) => [200, 304, 404].includes(r.status!)),
+    ).toBe(true);
   });
 
   it("counts a card added since the digest was written", async (context) => {
@@ -167,18 +206,28 @@ describe.each(SERVERS)("the instance digest on $name", ({ url: server }) => {
     const first = page();
     await first.useCases.getStudyCounts(instanceUrl, deck, now);
     if (await versioned(deck.cardsDocumentUrl)) {
-      await vi.waitFor(async () => expect(await digestOf(instanceUrl)).toContain("DeckSchedule"), LEARNING);
+      await vi.waitFor(
+        async () => expect(await digestOf(instanceUrl)).toContain("DeckSchedule"),
+        LEARNING,
+      );
     }
     await first.useCases.addCard(deck, { front: { en: "Denmark" }, back: { en: "Copenhagen" } });
-    expect(await page().useCases.getStudyCounts(instanceUrl, deck, now)).toEqual({ dueCount: 0, newCount: 4 });
+    expect(await page().useCases.getStudyCounts(instanceUrl, deck, now)).toEqual({
+      dueCount: 0,
+      newCount: 4,
+    });
   });
 
   it("keeps what two pages learn at once", async (context) => {
     const { instanceUrl, deck } = await seed(server);
-    if (!(await versioned(deck.cardsDocumentUrl))) context.skip("this server gives no ETag on a read, so nothing is kept");
+    if (!(await versioned(deck.cardsDocumentUrl)))
+      context.skip("this server gives no ETag on a read, so nothing is kept");
     if (unreliableEtags) context.skip(ETAG_OUTLIVES_EDITS);
     const [a, b] = [page(), page()];
-    await Promise.all([a.useCases.getStudyCounts(instanceUrl, deck, new Date()), b.useCases.checkInstance(instanceUrl)]);
+    await Promise.all([
+      a.useCases.getStudyCounts(instanceUrl, deck, new Date()),
+      b.useCases.checkInstance(instanceUrl),
+    ]);
     await vi.waitFor(async () => {
       const digest = await digestOf(instanceUrl);
       expect(digest).toContain("DeckSchedule");

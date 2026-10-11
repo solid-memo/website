@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { InstanceCreator } from "./InstanceCreator";
@@ -5,9 +9,7 @@ import type { Storage } from "@solid-memo/domain/storage";
 
 const storage: Storage = { url: "https://pod.example/", source: "profile" };
 
-function renderCreator(
-  overrides: Partial<Parameters<typeof InstanceCreator>[0]> = {},
-) {
+function renderCreator(overrides: Partial<Parameters<typeof InstanceCreator>[0]> = {}) {
   const props = {
     storage,
     options: { privateIndexExists: true, publicIndexExists: true },
@@ -24,9 +26,7 @@ function renderCreator(
 describe("InstanceCreator", () => {
   it("prefills the location from the chosen storage", () => {
     renderCreator();
-    expect(screen.getByLabelText("Location")).toHaveValue(
-      "https://pod.example/solid-memo/main/",
-    );
+    expect(screen.getByLabelText("Location")).toHaveValue("https://pod.example/solid-memo/main/");
   });
 
   it("creates an instance with trimmed values and the chosen target", () => {
@@ -49,9 +49,7 @@ describe("InstanceCreator", () => {
 
   it("explains what an instance is and where it is kept", () => {
     renderCreator();
-    expect(
-      screen.getByText(/An instance is one collection of your decks/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/An instance is one collection of your decks/)).toBeInTheDocument();
     expect(screen.getByLabelText("Location")).toHaveAccessibleDescription(
       "The folder in your Pod where this instance keeps its decks and study.",
     );
@@ -65,9 +63,7 @@ describe("InstanceCreator", () => {
   it("disables the form while busy and shows errors", () => {
     renderCreator({ busy: true, error: "create failed" });
     expect(screen.getByLabelText("Name")).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: "Create instance" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Create instance" })).toBeDisabled();
     expect(screen.getByText("create failed")).toBeInTheDocument();
   });
 });

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -29,7 +33,14 @@ function renderContainer(useCases: UseCases, onStarted = vi.fn()) {
   const remove = vi.spyOn(queryClient, "removeQueries");
   render(
     <QueryClientProvider client={queryClient}>
-      <ReleasesContainer useCases={useCases} instance={instanceA} healthHref="#/health" draftsHref="#/drafts" draftHref={(draft) => `#/draft/${draft.name}`} onStarted={onStarted} />
+      <ReleasesContainer
+        useCases={useCases}
+        instance={instanceA}
+        healthHref="#/health"
+        draftsHref="#/drafts"
+        draftHref={(draft) => `#/draft/${draft.name}`}
+        onStarted={onStarted}
+      />
     </QueryClientProvider>,
   );
   return { invalidate, remove, onStarted };
@@ -56,10 +67,21 @@ describe("ReleasesContainer", () => {
   it("links a release to the draft it was published from", async () => {
     const useCases = makeUseCasesFake({
       listPublishedReleases: vi.fn(async () => [{ url: SOLID, public: true }]),
-      listReleaseDrafts: vi.fn(async () => [next, { ...next, url: `${instanceA.url}drafts/solid/v1/release.ttl`, version: 1, releasedAs: SOLID }]),
+      listReleaseDrafts: vi.fn(async () => [
+        next,
+        {
+          ...next,
+          url: `${instanceA.url}drafts/solid/v1/release.ttl`,
+          version: 1,
+          releasedAs: SOLID,
+        },
+      ]),
     });
     renderContainer(useCases);
-    expect(await screen.findByRole("link", { name: "Solid, version 1" })).toHaveAttribute("href", "#/draft/solid");
+    expect(await screen.findByRole("link", { name: "Solid, version 1" })).toHaveAttribute(
+      "href",
+      "#/draft/solid",
+    );
   });
 
   it("starts the next version of a release, forgets what was read at its draft's URL, and opens it", async () => {
@@ -69,11 +91,16 @@ describe("ReleasesContainer", () => {
     });
     const { onStarted, remove, invalidate } = renderContainer(useCases);
     // Nothing is changed until the instance's data check is done.
-    const start = await screen.findByRole("button", { name: "Start the next version of solid, version 1" });
+    const start = await screen.findByRole("button", {
+      name: "Start the next version of solid, version 1",
+    });
     await waitFor(() => expect(start).toBeEnabled());
     fireEvent.click(start);
     await waitFor(() => expect(onStarted).toHaveBeenCalledWith({ draft: next }));
-    expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, { kind: "nextVersionOf", url: SOLID });
+    expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, {
+      kind: "nextVersionOf",
+      url: SOLID,
+    });
     expect(remove).toHaveBeenCalledWith({ queryKey: draftKey(next.url) });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: draftsKey(instanceA.url) });
   });
@@ -89,26 +116,39 @@ describe("ReleasesContainer", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Make solid, version 1 public" }));
     expect(await screen.findByText("Making the release public…")).toBeInTheDocument();
     finish();
-    await waitFor(() => expect(screen.queryByText("Making the release public…")).not.toBeInTheDocument());
-    const start = screen.getByRole("button", { name: "Start the next version of solid, version 1" });
+    await waitFor(() =>
+      expect(screen.queryByText("Making the release public…")).not.toBeInTheDocument(),
+    );
+    const start = screen.getByRole("button", {
+      name: "Start the next version of solid, version 1",
+    });
     await waitFor(() => expect(start).toBeEnabled());
     fireEvent.click(start);
     expect(await screen.findByText("Starting the next version…")).toBeInTheDocument();
   });
 
-  it("holds a next version while the instance's catalogue is set aside", async () => {
+  it("holds a next version while the instance's catalog is set aside", async () => {
     const useCases = makeUseCasesFake({
-      getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, invalidDataPolicy: "block-subject" as const })),
-      checkInstance: vi.fn(async () => invalidReport([], { catalogue: true })),
+      getPreferences: vi.fn(async () => ({
+        ...DEFAULT_PREFERENCES,
+        invalidDataPolicy: "block-subject" as const,
+      })),
+      checkInstance: vi.fn(async () => invalidReport([], { catalog: true })),
       listPublishedReleases: vi.fn(async () => [{ url: SOLID, public: true }]),
     });
     renderContainer(useCases);
-    expect(await screen.findByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Start the next version of solid, version 1" })).toBeDisabled();
+    expect(
+      await screen.findByText(/catalog or one of its groups has invalid data/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Start the next version of solid, version 1" }),
+    ).toBeDisabled();
   });
 
   it("says why the releases could not be read", async () => {
-    const failing = makeUseCasesFake({ listPublishedReleases: vi.fn(async () => Promise.reject(new AppError("cannotCheck"))) });
+    const failing = makeUseCasesFake({
+      listPublishedReleases: vi.fn(async () => Promise.reject(new AppError("cannotCheck"))),
+    });
     renderContainer(failing);
     expect(await screen.findByText(/Solid Memo could not check your Pod/)).toBeInTheDocument();
   });

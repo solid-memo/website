@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -20,7 +24,7 @@ import { TransferScreen, type ExportRun } from "./TransferScreen";
  * catalog, so it waits its turn with the other writes of the catalog
  * (catalogScope), and every query of the instance's decks is read afresh
  * after it. It is held until the instance's data check is done, and
- * while the catalogue is set aside (useDataCheck).
+ * while the catalog is set aside (useDataCheck).
  */
 export function TransferContainer({
   useCases,
@@ -32,7 +36,7 @@ export function TransferContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
-  /** The URLs of the decks ticked to export (the route's). */
+  /** The URLs of the decks checked to export (the route's). */
   chosen: readonly string[];
   onChoose: (urls: readonly string[]) => void;
   cardsHref: (deck: Deck) => string;
@@ -50,7 +54,13 @@ export function TransferContainer({
   });
 
   const exportMutation = useMutation({
-    mutationFn: async ({ decks, options }: { decks: readonly Deck[]; options: DeckFileOptions }) => {
+    mutationFn: async ({
+      decks,
+      options,
+    }: {
+      decks: readonly Deck[];
+      options: DeckFileOptions;
+    }) => {
       try {
         for (const [index, deck] of decks.entries()) {
           setExporting({ deck, index, total: decks.length });
@@ -70,7 +80,8 @@ export function TransferContainer({
   });
   const importMutation = useMutation({
     scope: { id: catalogScope(instance.url) },
-    mutationFn: (withProgress: boolean) => useCases.importDeckFile(instance.url, file!, { withProgress }),
+    mutationFn: (withProgress: boolean) =>
+      useCases.importDeckFile(instance.url, file!, { withProgress }),
     onSuccess: () => setFile(null),
     onSettled: () =>
       Promise.all([

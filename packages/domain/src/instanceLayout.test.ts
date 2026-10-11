@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import type { Deck } from "./deck";
 import {
@@ -57,7 +61,7 @@ describe("deckGroupUrlOf", () => {
 });
 
 describe("catalogNodeUrlOf", () => {
-  it("names the catalogue subject of the instance's catalog document", () => {
+  it("names the catalog subject of the instance's catalog document", () => {
     expect(catalogNodeUrlOf(INSTANCE)).toBe(`${INSTANCE}/catalog.ttl#catalog`);
   });
 });
@@ -101,7 +105,8 @@ describe("decks and their documents", () => {
   });
 
   it("lists every document the decks use, once", () => {
-    const deck = (cards: string, reviews: string) => ({ cardsDocumentUrl: cards, reviewsDocumentUrl: reviews }) as Deck;
+    const deck = (cards: string, reviews: string) =>
+      ({ cardsDocumentUrl: cards, reviewsDocumentUrl: reviews }) as Deck;
     expect([...documentsInUse([deck("a", "b"), deck("a", "c")])]).toEqual(["a", "b", "c"]);
   });
 });

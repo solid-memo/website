@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Quad, Quad_Object } from "n3";
 import {
   listMembers,
@@ -26,14 +30,10 @@ const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
 
 /**
  * The vocabularies a shape's sh:class may come from: Solid Memo's own,
- * and the standard ones whose classes it writes (DCAT catalogues,
+ * and the standard ones whose classes it writes (DCAT catalogs,
  * datasets and distributions; FOAF agents).
  */
-export const CLASS_NAMESPACES = [
-  SM_NS,
-  "http://www.w3.org/ns/dcat#",
-  "http://xmlns.com/foaf/0.1/",
-];
+export const CLASS_NAMESPACES = [SM_NS, "http://www.w3.org/ns/dcat#", "http://xmlns.com/foaf/0.1/"];
 
 export type TermKind =
   | "string"
@@ -110,9 +110,7 @@ export function parseShapes(files: readonly TurtleFile[]): ShapeModel[] {
     }
     names.add(model.name);
   }
-  return models.sort(
-    (a, b) => a.shape.localeCompare(b.shape) || a.version - b.version,
-  );
+  return models.sort((a, b) => a.shape.localeCompare(b.shape) || a.version - b.version);
 }
 
 function parseShapeFile(file: TurtleFile): ShapeModel[] {
@@ -241,7 +239,7 @@ function parseProperty(
   if (values !== undefined && kind !== "string" && kind !== "iri") {
     fail(`<${shape}> uses sh:in, which is only supported for xsd:string and IRIs.`);
   }
-  if (values !== undefined && values.some((v) => (v.termType === "NamedNode") !== (kind === "iri"))) {
+  if (values?.some((v) => (v.termType === "NamedNode") !== (kind === "iri"))) {
     fail(`<${shape}> lists sh:in values of another kind than the field's.`);
   }
   const name = of("name")[0]?.value ?? localName(predicate);
@@ -251,11 +249,21 @@ function parseProperty(
   const textual = kind === "text" || kind === "anyText";
   const uniqueLang = of("uniqueLang")[0]?.value === "true";
   if (textual && !uniqueLang && maxCount !== undefined) {
-    fail(`<${shape}> limits a text with several values per language; drop sh:maxCount or add sh:uniqueLang true.`);
+    fail(
+      `<${shape}> limits a text with several values per language; drop sh:maxCount or add sh:uniqueLang true.`,
+    );
   }
   const cardinality: Cardinality = textual
-    ? uniqueLang ? (minCount >= 1 ? "one" : "optional") : "many"
-    : maxCount === undefined ? "many" : minCount >= 1 ? "one" : "optional";
+    ? uniqueLang
+      ? minCount >= 1
+        ? "one"
+        : "optional"
+      : "many"
+    : maxCount === undefined
+      ? "many"
+      : minCount >= 1
+        ? "one"
+        : "optional";
   if (cardinality === "many" && !textual && kind !== "string" && kind !== "iri") {
     fail(`<${shape}> repeats a ${kind}; only strings, IRIs and texts may repeat.`);
   }
@@ -277,7 +285,9 @@ function alternativesKind(quads: readonly Quad[], list: Quad_Object): TermKind |
   const datatypes = listMembers(quads, list)
     .map((member) => objectsOf(quads, member.value, `${SH}datatype`)[0]?.value)
     .sort();
-  return datatypes.length === 2 && datatypes[0] === RDF_LANG_STRING && datatypes[1] === `${XSD}string`
+  return datatypes.length === 2 &&
+    datatypes[0] === RDF_LANG_STRING &&
+    datatypes[1] === `${XSD}string`
     ? "anyText"
     : undefined;
 }
@@ -330,9 +340,9 @@ export function renderDomainTypes(models: readonly ShapeModel[]): string {
     GENERATED_HEADER("ns/shapes/<class>/v<N>.ttl"),
     "/**",
     " * A text in one or more languages (rdf:langString values): language tag,",
-    " * lower case (\"en\", \"sv\", \"en-gb\"), to the text in that language.",
+    ' * lower case ("en", "sv", "en-gb"), to the text in that language.',
     " * Where a shape also allows untagged text (a card's sides), the empty tag",
-    " * (\"\") holds it.",
+    ' * ("") holds it.',
     " */",
     "export type LangText = Readonly<Record<string, string>>;",
     "",
@@ -340,7 +350,7 @@ export function renderDomainTypes(models: readonly ShapeModel[]): string {
     " * Several texts per language (rdf:langString values without",
     " * sh:uniqueLang, such as a deck's keywords): language tag, lower case, to",
     " * the texts in that language, in stored order. Where a shape also allows",
-    " * untagged text, the empty tag (\"\") holds it; {} is none.",
+    ' * untagged text, the empty tag ("") holds it; {} is none.',
     " */",
     "export type LangTexts = Readonly<Record<string, readonly string[]>>;",
     "",
@@ -363,9 +373,7 @@ export function renderDomainTypes(models: readonly ShapeModel[]): string {
     lines.push("}", "");
   }
   for (const [shape, versions] of groups) {
-    const union = versions
-      .map((m) => `{ version: ${m.version}; data: ${m.name} }`)
-      .join(" | ");
+    const union = versions.map((m) => `{ version: ${m.version}; data: ${m.name} }`).join(" | ");
     lines.push(`export type ${upperFirst(shape)}Record = ${union};`);
   }
   lines.push(
@@ -416,9 +424,7 @@ export function renderDescriptors(models: readonly ShapeModel[]): string {
         `predicate: ${JSON.stringify(field.predicate)}`,
         `kind: ${JSON.stringify(field.kind)}`,
         `cardinality: ${JSON.stringify(field.cardinality)}`,
-        ...(field.values === undefined
-          ? []
-          : [`values: ${JSON.stringify(field.values)}`]),
+        ...(field.values === undefined ? [] : [`values: ${JSON.stringify(field.values)}`]),
       ];
       lines.push(`    { ${parts.join(", ")} },`);
     }

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A time zone in which `now` is about noon, for the browser: the app's
  * study day turns over in the early morning (preferences' day boundary),

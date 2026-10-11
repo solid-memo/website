@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import type { Answer } from "@solid-memo/domain/answer";
 import { createSolidAnswerLog } from "./solidAnswerLog";
@@ -33,14 +37,17 @@ function pod() {
       return new Response("", { status });
     }
     if (method === "GET" || method === "HEAD") {
-      const contained = [...documents.keys()].filter((doc) => doc.startsWith(url) && url.endsWith("/"));
+      const contained = [...documents.keys()].filter(
+        (doc) => doc.startsWith(url) && url.endsWith("/"),
+      );
       const lines = url.endsWith("/")
         ? contained.map((doc) => `<${url}> <http://www.w3.org/ns/ldp#contains> <${doc}> .`)
         : [...(documents.get(url) ?? [])];
       if (!url.endsWith("/") && !documents.has(url)) return new Response("", { status: 404 });
       if (url.endsWith("/") && contained.length === 0) return new Response("", { status: 404 });
       const etag = `"v${versions.get(url) ?? 0}"`;
-      if (headers.get("If-None-Match") === etag) return new Response(null, { status: 304, headers: { ETag: etag } });
+      if (headers.get("If-None-Match") === etag)
+        return new Response(null, { status: 304, headers: { ETag: etag } });
       const response = new Response(lines.join("\n"), {
         headers: { "Content-Type": "text/turtle", ETag: etag },
       });
@@ -48,7 +55,8 @@ function pod() {
       return response;
     }
     const ifMatch = headers.get("If-Match");
-    if (ifMatch !== null && ifMatch !== `"v${versions.get(url) ?? 0}"`) return new Response("", { status: 412 });
+    if (ifMatch !== null && ifMatch !== `"v${versions.get(url) ?? 0}"`)
+      return new Response("", { status: 412 });
     const triples = documents.get(url) ?? new Set<string>();
     for (const [, operation, block] of body.matchAll(/(INSERT|DELETE) DATA \{\n([\s\S]*?)\n\};/g)) {
       for (const line of block!.split("\n")) {
@@ -64,7 +72,8 @@ function pod() {
     fetch,
     documents,
     requests,
-    writes: () => requests.filter((request) => request.method !== "GET" && request.method !== "HEAD"),
+    writes: () =>
+      requests.filter((request) => request.method !== "GET" && request.method !== "HEAD"),
     /** The next request fails with this status. */
     failNext(status: number) {
       failNext = status;
@@ -104,8 +113,12 @@ describe("createSolidAnswerLog", () => {
       ["PATCH", SEPTEMBER, null],
       ["PATCH", SEPTEMBER, null],
     ]);
-    expect(fake.requests[0]!.body).toMatch(/^INSERT DATA \{\n<https:\/\/pod\.example\/solid-memo\/main\/history\/2026-09\.ttl#answer-\d+> /);
-    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual(expect.arrayContaining([first, second]));
+    expect(fake.requests[0]!.body).toMatch(
+      /^INSERT DATA \{\n<https:\/\/pod\.example\/solid-memo\/main\/history\/2026-09\.ttl#answer-\d+> /,
+    );
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual(
+      expect.arrayContaining([first, second]),
+    );
   });
 
   it("adds a course's multiple-choice answer with its mode and the wrong option chosen, and reads them back", async () => {
@@ -121,7 +134,9 @@ describe("createSolidAnswerLog", () => {
     expect(fake.requests[0]!.body).toContain(
       `<https://solid-memo.com/ns/vocab/v1.ttl#answerMode> <https://solid-memo.com/ns/vocab/v1.ttl#multipleChoice>`,
     );
-    expect(fake.requests[0]!.body).toContain(`<https://solid-memo.com/ns/vocab/v1.ttl#chosenDistractor> <${chosen.chosenDistractor}>`);
+    expect(fake.requests[0]!.body).toContain(
+      `<https://solid-memo.com/ns/vocab/v1.ttl#chosenDistractor> <${chosen.chosenDistractor}>`,
+    );
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([chosen]);
   });
 
@@ -140,7 +155,9 @@ describe("createSolidAnswerLog", () => {
   it("says when the pod refuses an answer", async () => {
     const fake = pod();
     fake.failNext(500);
-    await expect(createSolidAnswerLog({ fetch: fake.fetch }).append(INSTANCE, answer("2026-09-21"))).rejects.toMatchObject({
+    await expect(
+      createSolidAnswerLog({ fetch: fake.fetch }).append(INSTANCE, answer("2026-09-21")),
+    ).rejects.toMatchObject({
       code: "addFailed",
       detail: `url: ${SEPTEMBER}\nstatus: 500`,
     });
@@ -157,9 +174,15 @@ describe("createSolidAnswerLog", () => {
       ["PATCH", SEPTEMBER, null],
       ["PATCH", `${HISTORY}2026-10.ttl`, null],
     ]);
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), september.map((given) => `${SEPTEMBER}#${given.id}`), "pod");
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      september.map((given) => `${SEPTEMBER}#${given.id}`),
+      "pod",
+    );
     await log.appendAll(INSTANCE, september);
-    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual(expect.arrayContaining(september));
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual(
+      expect.arrayContaining(september),
+    );
     expect(await log.readMonth(INSTANCE, "2026-09")).toHaveLength(2);
     expect(fake.documents.get(SEPTEMBER)!.size).toBe(fake.requests[0]!.body.split("\n").length - 3);
     await log.appendAll(INSTANCE, []);
@@ -173,7 +196,8 @@ describe("createSolidAnswerLog", () => {
     await log.appendAll(INSTANCE, many);
     const patches = fake.writes();
     expect(patches.length).toBeGreaterThan(1);
-    for (const patch of patches) expect(new TextEncoder().encode(patch.body).length).toBeLessThanOrEqual(MAX_PATCH_BYTES + 32);
+    for (const patch of patches)
+      expect(new TextEncoder().encode(patch.body).length).toBeLessThanOrEqual(MAX_PATCH_BYTES + 32);
     expect(await log.readMonth(INSTANCE, "2026-09")).toHaveLength(300);
   });
 
@@ -185,10 +209,14 @@ describe("createSolidAnswerLog", () => {
         throw new Error("does not conform");
       },
     });
-    await expect(refusing.appendAll(INSTANCE, [answer("2026-09-21")])).rejects.toThrow("does not conform");
+    await expect(refusing.appendAll(INSTANCE, [answer("2026-09-21")])).rejects.toThrow(
+      "does not conform",
+    );
     expect(fake.requests).toEqual([]);
     fake.failNext(500);
-    await expect(createSolidAnswerLog({ fetch: fake.fetch }).appendAll(INSTANCE, [answer("2026-09-21")])).rejects.toMatchObject({
+    await expect(
+      createSolidAnswerLog({ fetch: fake.fetch }).appendAll(INSTANCE, [answer("2026-09-21")]),
+    ).rejects.toMatchObject({
       code: "addFailed",
     });
   });
@@ -209,19 +237,29 @@ describe("createSolidAnswerLog", () => {
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([]);
     const given = answer("2026-09-21");
     await log.append(INSTANCE, given);
-    fake.documents.get(SEPTEMBER)!.add(`<${SEPTEMBER}#odd> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://solid-memo.com/ns/vocab/v1.ttl#Answer> .`);
+    fake.documents
+      .get(SEPTEMBER)!
+      .add(
+        `<${SEPTEMBER}#odd> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://solid-memo.com/ns/vocab/v1.ttl#Answer> .`,
+      );
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
   });
 
   it("reads a month again only when its document changed since the version known", async () => {
     const fake = pod();
     const log = createSolidAnswerLog({ fetch: fake.fetch });
-    await expect(log.readMonthSince(INSTANCE, "2026-09", undefined)).resolves.toEqual({ unchanged: false, value: [], version: "absent" });
+    await expect(log.readMonthSince(INSTANCE, "2026-09", undefined)).resolves.toEqual({
+      unchanged: false,
+      value: [],
+      version: "absent",
+    });
     const given = answer("2026-09-21");
     await log.append(INSTANCE, given);
     const read = await log.readMonthSince(INSTANCE, "2026-09", "absent");
     expect(read).toEqual({ unchanged: false, value: [given], version: '"v1"' });
-    await expect(log.readMonthSince(INSTANCE, "2026-09", '"v1"')).resolves.toEqual({ unchanged: true });
+    await expect(log.readMonthSince(INSTANCE, "2026-09", '"v1"')).resolves.toEqual({
+      unchanged: true,
+    });
     const more = answer("2026-09-22");
     await log.append(INSTANCE, more);
     await expect(log.readMonthSince(INSTANCE, "2026-09", '"v1"')).resolves.toEqual({
@@ -236,7 +274,8 @@ describe("createSolidAnswerLog", () => {
     const log = createSolidAnswerLog({ fetch: fake.fetch });
     await log.removeDay(INSTANCE, DECK, "2026-09-21");
     const kept = [answer("2026-09-20"), answer("2026-09-21", OTHER)];
-    for (const given of [answer("2026-09-21"), ...kept, answer("2026-09-21", DECK, 6)]) await log.append(INSTANCE, given);
+    for (const given of [answer("2026-09-21"), ...kept, answer("2026-09-21", DECK, 6)])
+      await log.append(INSTANCE, given);
     await log.removeDay(INSTANCE, DECK, "2026-09-22");
     const before = fake.writes().length;
     await log.removeDay(INSTANCE, DECK, "2026-09-21");
@@ -261,9 +300,9 @@ describe("createSolidAnswerLog", () => {
 
     await log.append(INSTANCE, answer("2026-09-21"));
     elsewhere = 3;
-    await expect(createSolidAnswerLog({ fetch: racing }).removeDay(INSTANCE, DECK, "2026-09-21")).rejects.toThrow(
-      "was changed elsewhere",
-    );
+    await expect(
+      createSolidAnswerLog({ fetch: racing }).removeDay(INSTANCE, DECK, "2026-09-21"),
+    ).rejects.toThrow("was changed elsewhere");
   });
 
   it("passes on a failure that is not a lost race", async () => {
@@ -271,7 +310,11 @@ describe("createSolidAnswerLog", () => {
     const log = createSolidAnswerLog({ fetch: fake.fetch });
     await log.append(INSTANCE, answer("2026-09-21"));
     const failing = (async (input: RequestInfo | URL, init?: RequestInit) =>
-      init?.method === "PATCH" ? new Response("", { status: 500 }) : fake.fetch(input, init)) as typeof globalThis.fetch;
-    await expect(createSolidAnswerLog({ fetch: failing }).removeDay(INSTANCE, DECK, "2026-09-21")).rejects.toThrow();
+      init?.method === "PATCH"
+        ? new Response("", { status: 500 })
+        : fake.fetch(input, init)) as typeof globalThis.fetch;
+    await expect(
+      createSolidAnswerLog({ fetch: failing }).removeDay(INSTANCE, DECK, "2026-09-21"),
+    ).rejects.toThrow();
   });
 });

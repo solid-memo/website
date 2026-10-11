@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { parseMarkdown } from "@solid-memo/markdown/parse";
@@ -24,7 +28,9 @@ describe("MarkdownBlocks", () => {
   });
 
   it("lets text wrap after a slash, but never code", () => {
-    expect(rendered("a/b `c/d`").innerHTML).toBe('<p>a/<wbr>b <code class="md-inline-code" translate="no">c/d</code></p>');
+    expect(rendered("a/b `c/d`").innerHTML).toBe(
+      '<p>a/<wbr>b <code class="md-inline-code" translate="no">c/d</code></p>',
+    );
   });
 
   it("renders a heading as a bold paragraph, never a heading", () => {
@@ -35,8 +41,8 @@ describe("MarkdownBlocks", () => {
 
   it("renders a code block as a named region that takes the focus, its language a label", () => {
     const md = rendered("```http\nGET / HTTP/1.1\n\nHost: x\n```\n\n    plain");
-    const [labelled, plain] = md.querySelectorAll(".md-code");
-    expect(labelled!.querySelector(".md-code-lang")).toHaveTextContent("http");
+    const [labeled, plain] = md.querySelectorAll(".md-code");
+    expect(labeled!.querySelector(".md-code-lang")).toHaveTextContent("http");
     const region = screen.getAllByRole("region", { name: "Code" })[0]!;
     expect(region.tagName).toBe("PRE");
     expect(region).toHaveAttribute("tabindex", "0");
@@ -52,8 +58,12 @@ describe("MarkdownBlocks", () => {
   });
 
   it("renders lists: tight ones' items bare, loose ones' in paragraphs, an ordered one from its start", () => {
-    expect(rendered("- a\n- b\n  1. c").innerHTML).toBe("<ul><li>a</li><li>b<ol><li>c</li></ol></li></ul>");
-    expect(rendered("3. a\n\n4. b").innerHTML).toBe('<ol start="3"><li><p>a</p></li><li><p>b</p></li></ol>');
+    expect(rendered("- a\n- b\n  1. c").innerHTML).toBe(
+      "<ul><li>a</li><li>b<ol><li>c</li></ol></li></ul>",
+    );
+    expect(rendered("3. a\n\n4. b").innerHTML).toBe(
+      '<ol start="3"><li><p>a</p></li><li><p>b</p></li></ol>',
+    );
   });
 
   it("renders block quotes and thematic breaks", () => {
@@ -93,7 +103,9 @@ describe("Markdown from data stays text", () => {
   });
 
   it("never loads a picture, showing its alt text", () => {
-    const md = rendered("![a tracker](https://tracker.example/p.gif) ![ref][r]\n\n[r]: https://tracker.example/q.gif");
+    const md = rendered(
+      "![a tracker](https://tracker.example/p.gif) ![ref][r]\n\n[r]: https://tracker.example/q.gif",
+    );
     expect(md.querySelector("img")).toBeNull();
     expect(md.textContent).toBe("a tracker ref");
   });
@@ -115,7 +127,9 @@ describe("Markdown from data stays text", () => {
   });
 
   it("follows an https link in a new tab, saying where it leads when its text is not its address", () => {
-    const md = rendered("[the spec](https://bücher.example/spec) and <https://solidproject.org/TR/protocol>");
+    const md = rendered(
+      "[the spec](https://bücher.example/spec) and <https://solidproject.org/TR/protocol>",
+    );
     const [named, bare] = screen.getAllByRole("link");
     expect(named).toHaveAttribute("href", "https://xn--bcher-kva.example/spec");
     expect(named).toHaveAttribute("target", "_blank");
@@ -127,7 +141,9 @@ describe("Markdown from data stays text", () => {
   });
 
   it("shows the host of a link whose text looks like another address", () => {
-    const md = rendered("[https://bank.example](https://evil.example) [`code` *x*  \ny](https://evil.example)");
+    const md = rendered(
+      "[https://bank.example](https://evil.example) [`code` *x*  \ny](https://evil.example)",
+    );
     expect([...md.querySelectorAll(".md-link-host")].map((host) => host.textContent)).toEqual([
       " (evil.example)",
       " (evil.example)",
@@ -144,7 +160,9 @@ describe("Markdown from data stays text", () => {
   });
 
   it("isolates a link and its host from a bidi override in the text before them", () => {
-    const md = rendered("See \u202E<https://evil.example/#moc.knab//:sptth> and [moc.knab.xyz](https://moc.knab.xyz.example)");
+    const md = rendered(
+      "See \u202E<https://evil.example/#moc.knab//:sptth> and [moc.knab.xyz](https://moc.knab.xyz.example)",
+    );
     const [bare, named] = screen.getAllByRole("link");
     expect(bare).toHaveAttribute("dir", "ltr");
     expect(named).toHaveAttribute("dir", "ltr");
@@ -155,7 +173,9 @@ describe("Markdown from data stays text", () => {
     const md = rendered("[<https://bank.example.evil.example/login>](https://bank.example/)");
     expect(md.querySelectorAll("a a")).toHaveLength(0);
     expect(screen.getByRole("link")).toHaveAttribute("href", "https://bank.example/");
-    expect([...md.querySelectorAll(".md-link-host")].map((host) => host.textContent)).toEqual([" (bank.example)"]);
+    expect([...md.querySelectorAll(".md-link-host")].map((host) => host.textContent)).toEqual([
+      " (bank.example)",
+    ]);
   });
 
   it("follows a reference link like any other", () => {

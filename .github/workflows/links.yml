@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Links
+
+# Every web address the docs link to, and every one publiccode.yml names,
+# still answers (docs/testing.md#documentation). CI checks the links
+# within the repository on every change, offline; the web's addresses are
+# checked here, weekly and by hand, since a site that is down for an hour
+# should fail no one's change. A failure here is a link to fix, or to
+# exclude in lychee.toml with a reason.
+
+on:
+  schedule:
+    - cron: "41 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: links
+  cancel-in-progress: true
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # lychee asks GitHub's own addresses with the run's token, read-only,
+      # as GitHub refuses many requests without one.
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          args: --max-retries 3 '**/*.md'
+          output: ${{ runner.temp }}/lychee.md
+      - uses: ./.github/actions/publiccode
+        if: success() || failure()
+        with:
+          network: "true"

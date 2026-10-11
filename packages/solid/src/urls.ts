@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 export { ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
 
 /** Last path segment of a URL, e.g. "japanese" for ".../solid-memo/japanese/". */

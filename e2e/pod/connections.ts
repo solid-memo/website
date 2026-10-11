@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A fetch that asks for a connection of its own on every request
  * (`Connection: close`), so none is sent on a pooled one. Node 24's fetch
@@ -9,12 +13,14 @@
  * needs no retry of its own: the fault is the tests' client's.
  *
  * The Fetch standard forbids the header and a browser drops it; undici
- * sends it and honours it, which connections.test.ts checks, so a Node
+ * sends it and honors it, which connections.test.ts checks, so a Node
  * that stops doing so fails there rather than bring the flake back.
  */
 export function closingConnections(send: typeof fetch): typeof fetch {
   return (input, init) => {
-    const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
+    const headers = new Headers(
+      init?.headers ?? (input instanceof Request ? input.headers : undefined),
+    );
     headers.set("connection", "close");
     return send(input, { ...init, headers });
   };

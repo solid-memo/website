@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { hitTest, type GapHit, type Hit, type Layout } from "./dropZones";
 import type { VisibleRow } from "./rows";
 
@@ -79,7 +83,11 @@ export function dragReducer(state: DragState, event: DragInput): DragState {
       const hit = hitTest(state.layout, event.y, state.source);
       const target = hit.kind === "combine" ? hit.target : null;
       const dwell =
-        target === null ? null : state.dwell?.target === target ? state.dwell : { target, armed: false };
+        target === null
+          ? null
+          : state.dwell?.target === target
+            ? state.dwell
+            : { target, armed: false };
       return { ...state, pointer: event.point, hit, dwell };
     }
     case "hold":
@@ -109,7 +117,10 @@ function lifted(state: Extract<DragState, { phase: "pending" }>, pointer: Point)
 }
 
 /** What a drop would do: a place, a group to go into, or a new group with a row; null for nothing. */
-export type DropTarget = GapHit | Extract<Hit, { kind: "into" }> | { kind: "combine"; target: string };
+export type DropTarget =
+  | GapHit
+  | Extract<Hit, { kind: "into" }>
+  | { kind: "combine"; target: string };
 
 /** What dropping now would do. */
 export function dropTarget(state: DragState): DropTarget | null {

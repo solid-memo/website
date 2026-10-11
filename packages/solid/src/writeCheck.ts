@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { SolidDataset } from "@inrupt/solid-client";
 import type { ShapeContext } from "@solid-memo/vocab/shapeDescriptor";
 
@@ -16,6 +20,10 @@ export type WriteContext = Exclude<ShapeContext, "any" | "library">;
  * with DCAT subjects, to DCAT-AP. The app wires the SHACL validator in;
  * without one, nothing is checked.
  */
-export type WriteCheck = (dataset: SolidDataset, subjects: readonly string[], context: WriteContext) => Promise<void>;
+export type WriteCheck = (
+  dataset: SolidDataset,
+  subjects: readonly string[],
+  context: WriteContext,
+) => Promise<void>;
 
 export const noWriteCheck: WriteCheck = async () => undefined;

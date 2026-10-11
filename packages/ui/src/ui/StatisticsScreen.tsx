@@ -1,7 +1,17 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Statistics } from "@solid-memo/domain/statistics";
 import { useI18n } from "./i18n";
-import { ActivityCalendar, IntroducedChart, RecallChart, RecallTile, StatTile } from "./StatisticsCharts";
+import {
+  ActivityCalendar,
+  IntroducedChart,
+  RecallChart,
+  RecallTile,
+  StatTile,
+} from "./StatisticsCharts";
 import { ReaderText } from "./ReaderText";
 
 /**
@@ -10,7 +20,13 @@ import { ReaderText } from "./ReaderText";
  * remembered, in all and month by month, and each deck's share. A deck
  * that has since been removed is named as such.
  */
-export function StatisticsScreen({ statistics, decks }: { statistics: Statistics; decks: readonly Deck[] }) {
+export function StatisticsScreen({
+  statistics,
+  decks,
+}: {
+  statistics: Statistics;
+  decks: readonly Deck[];
+}) {
   const { t, formatDate } = useI18n();
   const { totals, streaks, retention } = statistics;
   const nameOf = (deckUrl: string) => {
@@ -28,8 +44,14 @@ export function StatisticsScreen({ statistics, decks }: { statistics: Statistics
             <StatTile label={t("statistics.answers")} value={String(totals.answers)} />
             <StatTile label={t("statistics.studyDays")} value={String(totals.studyDays)} />
             <StatTile label={t("statistics.cards")} value={String(totals.cards)} />
-            <StatTile label={t("statistics.currentStreak")} value={t("statistics.dayCount", { count: streaks.current })} />
-            <StatTile label={t("statistics.longestStreak")} value={t("statistics.dayCount", { count: streaks.longest })} />
+            <StatTile
+              label={t("statistics.currentStreak")}
+              value={t("statistics.dayCount", { count: streaks.current })}
+            />
+            <StatTile
+              label={t("statistics.longestStreak")}
+              value={t("statistics.dayCount", { count: streaks.longest })}
+            />
           </div>
           <ActivityCalendar days={statistics.days} today={statistics.today} />
           <h3>{t("statistics.progress")}</h3>
@@ -39,7 +61,9 @@ export function StatisticsScreen({ statistics, decks }: { statistics: Statistics
             <RecallTile label={t("statistics.young")} recall={retention.young} />
             <RecallTile label={t("statistics.mature")} recall={retention.mature} />
           </div>
-          {retention.young.reviews + retention.mature.reviews > 0 && <RecallChart months={statistics.months} />}
+          {retention.young.reviews + retention.mature.reviews > 0 && (
+            <RecallChart months={statistics.months} />
+          )}
           <h3>{t("statistics.byDeck")}</h3>
           <table class="deck-statistics">
             <thead>

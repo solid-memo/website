@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -5,11 +9,7 @@ import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReviewQuality } from "@solid-memo/domain/review";
-import {
-  interleave,
-  repeatsInSession,
-  requeueCard,
-} from "@solid-memo/domain/scheduling";
+import { interleave, repeatsInSession, requeueCard } from "@solid-memo/domain/scheduling";
 import { ErrorMessage } from "./ErrorMessage";
 import { Loading } from "./Loading";
 import { StudyScreen } from "./StudyScreen";
@@ -59,8 +59,7 @@ export function StudyContainer({
     queryKey: ["preferences", instance.url],
     queryFn: () => useCases.getPreferences(instance.url),
   });
-  const answerScale =
-    preferencesQuery.data?.answerScale ?? DEFAULT_PREFERENCES.answerScale;
+  const answerScale = preferencesQuery.data?.answerScale ?? DEFAULT_PREFERENCES.answerScale;
 
   const [session, setSession] = useState<{
     prompts: Prompt[];
@@ -102,13 +101,7 @@ export function StudyContainer({
 
   const answerMutation = useMutation({
     mutationFn: (args: { prompt: Prompt; quality: ReviewQuality }) =>
-      useCases.recordReview(
-        instance.url,
-        deck,
-        args.prompt,
-        args.quality,
-        now(),
-      ),
+      useCases.recordReview(instance.url, deck, args.prompt, args.quality, now()),
     onSuccess: (state, { prompt, quality }) => {
       answered.current++;
       queryClient.setQueryData(
@@ -167,9 +160,7 @@ export function StudyContainer({
       answerScale={answerScale}
       busy={answerMutation.isPending}
       error={errorText(answerMutation.error)}
-      onAnswer={(quality) =>
-        answerMutation.mutate({ prompt: prompt!, quality })
-      }
+      onAnswer={(quality) => answerMutation.mutate({ prompt: prompt!, quality })}
       onExit={() => void handleExit()}
     />
   );

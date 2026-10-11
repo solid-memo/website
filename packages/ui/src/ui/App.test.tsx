@@ -1,17 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/preact";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppShell, SOLID_MEMO, STUDIO } from "./App";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
+import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
@@ -19,20 +17,26 @@ import { MAIN_ID } from "./SkipLink";
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const restored: EstablishedSession = { session, origin: "restored" };
 const loggedIn: EstablishedSession = { session, origin: "login" };
+const source = {
+  repoUrl: "https://github.com/solid-memo/website",
+  version: "0.1.0",
+  commitSha: "8faa7e1bd2e6de2b6570d692fd2865bb4b3217ad",
+};
 function makeUseCases(overrides: Partial<UseCases> = {}): UseCases {
   return makeUseCasesFake(overrides);
 }
 
 /** Walk the signed-out onboarding to the WebID step and submit it. */
 async function submitWebId(webId: string) {
-  fireEvent.click(
-    await screen.findByRole("button", { name: "I already have a Pod" }),
-  );
+  fireEvent.click(await screen.findByRole("button", { name: "I already have a Pod" }));
   fireEvent.input(screen.getByLabelText("WebID"), { target: { value: webId } });
   fireEvent.click(screen.getByRole("button", { name: "Log in with Solid" }));
 }
 
-function renderApp(useCases: UseCases) {
+function renderApp(
+  useCases: UseCases,
+  site: { appName?: string; providers?: typeof POD_PROVIDERS } = {},
+) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -40,7 +44,9 @@ function renderApp(useCases: UseCases) {
     <QueryClientProvider client={queryClient}>
       <AppShell
         useCases={useCases}
-        commitSha="8faa7e1bd2e6de2b6570d692fd2865bb4b3217ad"
+        source={source}
+        appName={site.appName}
+        providers={site.providers ?? POD_PROVIDERS}
         identity={SOLID_MEMO}
         workspace={Workspace}
       />
@@ -85,7 +91,10 @@ describe("AppShell", () => {
     const instance = { url: "https://pod.example/solid-memo/main/", name: "Main" };
 
     /** Logged in, in an instance whose preferences hold `theme` (null: it has none yet). */
-    function inInstance(theme: "system" | "light" | "dark" | null, overrides: Partial<UseCases> = {}) {
+    function inInstance(
+      theme: "system" | "light" | "dark" | null,
+      overrides: Partial<UseCases> = {},
+    ) {
       window.location.hash = "";
       return makeUseCases({
         restoreSession: vi.fn(async () => restored),
@@ -98,7 +107,9 @@ describe("AppShell", () => {
     it("follows the browser while nothing is chosen, as it changes", async () => {
       const browser = fakeBrowserScheme(true);
       const { unmount } = renderApp(makeUseCases());
-      expect(await screen.findByRole("button", { name: "Switch to light mode" })).toBeInTheDocument();
+      expect(
+        await screen.findByRole("button", { name: "Switch to light mode" }),
+      ).toBeInTheDocument();
       expect(document.documentElement.dataset.theme).toBe("dark");
       browser.change(false);
       expect(document.documentElement.dataset.theme).toBe("light");
@@ -111,7 +122,9 @@ describe("AppShell", () => {
     it("shows the theme chosen on this device, whatever the browser prefers", async () => {
       fakeBrowserScheme(true);
       renderApp(makeUseCases({ themeChoice: vi.fn(() => "light" as const) }));
-      expect(await screen.findByRole("button", { name: "Switch to dark mode" })).toBeInTheDocument();
+      expect(
+        await screen.findByRole("button", { name: "Switch to dark mode" }),
+      ).toBeInTheDocument();
       expect(document.documentElement.dataset.theme).toBe("light");
     });
 
@@ -158,7 +171,9 @@ describe("AppShell", () => {
 
     it("puts back the pod's theme when a choice cannot be written there", async () => {
       fakeBrowserScheme(false);
-      const useCases = inInstance("dark", { chooseTheme: vi.fn(async () => Promise.reject(new Error("412"))) });
+      const useCases = inInstance("dark", {
+        chooseTheme: vi.fn(async () => Promise.reject(new Error("412"))),
+      });
       renderApp(useCases);
       await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
       fireEvent.click(screen.getByRole("button", { name: "Switch to light mode" }));
@@ -186,7 +201,9 @@ describe("AppShell", () => {
   it("switches language, and keeps the choice", async () => {
     const useCases = makeUseCases();
     renderApp(useCases);
-    fireEvent.input(await screen.findByRole("combobox", { name: "Language" }), { target: { value: "sv" } });
+    fireEvent.input(await screen.findByRole("combobox", { name: "Language" }), {
+      target: { value: "sv" },
+    });
     expect(useCases.chooseLanguage).toHaveBeenCalledWith("sv");
     expect(await screen.findByText(/Skapad av/)).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("sv");
@@ -228,7 +245,9 @@ describe("AppShell", () => {
       expect(
         await within(screen.getByRole("main")).findByRole("heading", { name: "Decks" }),
       ).toBeInTheDocument();
-      expect(within(screen.getByRole("main")).queryByRole("navigation", { name: "Instance" })).toBeNull();
+      expect(
+        within(screen.getByRole("main")).queryByRole("navigation", { name: "Instance" }),
+      ).toBeNull();
     });
   });
 
@@ -237,42 +256,52 @@ describe("AppShell", () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       return render(
         <QueryClientProvider client={queryClient}>
-          <AppShell useCases={useCases} commitSha={null} identity={STUDIO} workspace={Workspace} />
+          <AppShell
+            useCases={useCases}
+            source={{ ...source, commitSha: null }}
+            providers={POD_PROVIDERS}
+            identity={STUDIO}
+            workspace={Workspace}
+          />
         </QueryClientProvider>,
       );
     }
 
     it("names itself, and shows its link out in the header before it is signed in", async () => {
       renderStudio(makeUseCases());
-      expect(await screen.findByRole("heading", { level: 1, name: "Solid Memo Studio" })).toBeInTheDocument();
+      expect(
+        await screen.findByRole("heading", { level: 1, name: "Solid Memo Studio" }),
+      ).toBeInTheDocument();
       expect(screen.getByText("Manage the decks in your Solid Pod.")).toBeInTheDocument();
-      expect(within(screen.getByRole("banner")).getByRole("link", { name: "Back to Solid Memo" })).toHaveAttribute(
-        "href",
-        "#/",
-      );
+      expect(
+        within(screen.getByRole("banner")).getByRole("link", { name: "Back to Solid Memo" }),
+      ).toHaveAttribute("href", "#/");
       await waitFor(() => expect(document.title).toBe("Log in – Solid Memo Studio"));
     });
 
     it("links its wordmark to its own home once signed in", async () => {
       renderStudio(makeUseCases({ restoreSession: vi.fn(async () => restored) }));
-      expect(await screen.findByRole("link", { name: "Solid Memo Studio" })).toHaveAttribute("href", "#/studio");
+      expect(await screen.findByRole("link", { name: "Solid Memo Studio" })).toHaveAttribute(
+        "href",
+        "#/studio",
+      );
     });
   });
 
   it("shows a restoring indicator while the session check is pending", () => {
     renderApp(
       makeUseCases({
-        restoreSession: vi.fn(() => new Promise<null>(() => { })),
+        restoreSession: vi.fn(() => new Promise<null>(() => {})),
       }),
     );
     expect(screen.getByText("Restoring session…")).toBeInTheDocument();
     expect(screen.getByRole("main")).toHaveTextContent("Restoring session…");
-    expect(within(screen.getByRole("banner")).getByRole("button", { name: "Switch to dark mode" })).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("banner")).getByRole("button", { name: "Switch to dark mode" }),
+    ).toBeInTheDocument();
     expect(document.title).toBe("Solid Memo");
-    expect(screen.getByRole("contentinfo")).toHaveTextContent(
-      "Created by antwika",
-    );
-    expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 8faa7e1");
+    expect(screen.getByRole("contentinfo")).toHaveTextContent("Created by antwika");
+    expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 0.1.0 (8faa7e1");
   });
 
   it("starts the Pod onboarding when no session is restored", async () => {
@@ -280,17 +309,39 @@ describe("AppShell", () => {
     expect(
       await screen.findByRole("heading", { name: "Set up your Solid Pod" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /iGrant\.io Data Pod/ }),
-    ).toHaveAttribute("href", "https://igrant.io/datapod.html");
+    expect(screen.getByRole("link", { name: /iGrant\.io Data Pod/ })).toHaveAttribute(
+      "href",
+      "https://igrant.io/datapod.html",
+    );
     // The picture is decorative; the product name is the page's heading.
     expect(container.querySelector("img.hero")).toHaveAttribute("alt", "");
     expect(screen.getByRole("heading", { level: 1, name: "Solid Memo" })).toBeInTheDocument();
     // The theme and language choices make the banner; the onboarding is the main content.
     const banner = screen.getByRole("banner");
     expect(within(banner).getByRole("combobox", { name: "Language" })).toBeInTheDocument();
-    expect(within(screen.getByRole("main")).getByRole("heading", { name: "Set up your Solid Pod" })).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("main")).getByRole("heading", { name: "Set up your Solid Pod" }),
+    ).toBeInTheDocument();
     await waitFor(() => expect(document.title).toBe("Log in – Solid Memo"));
+  });
+
+  it("is called by the site's own name, and suggests the site's own Pod providers", async () => {
+    const school = {
+      id: "school",
+      name: "Example School Pods",
+      oidcIssuer: "https://pods.school.example/",
+      signUpUrl: "https://school.example/join",
+    };
+    renderApp(makeUseCases(), { appName: "Example School Cards", providers: [school] });
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Example School Cards" }),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(document.title).toBe("Log in – Example School Cards"));
+    expect(screen.getByRole("link", { name: /Example School Pods/ })).toHaveAttribute(
+      "href",
+      "https://school.example/join",
+    );
+    expect(screen.queryByRole("link", { name: /iGrant\.io Data Pod/ })).toBeNull();
   });
 
   it("shows a session-restore error (Error instance)", async () => {
@@ -316,36 +367,28 @@ describe("AppShell", () => {
   });
 
   it("logs in with the entered WebID and stays busy while redirecting", async () => {
-    const loginWithWebId = vi.fn(() => new Promise<void>(() => { }));
+    const loginWithWebId = vi.fn(() => new Promise<void>(() => {}));
     const useCases = makeUseCases({ loginWithWebId });
     renderApp(useCases);
 
     await submitWebId(session.webId);
 
     expect(loginWithWebId).toHaveBeenCalledWith(session.webId);
-    expect(
-      await screen.findByRole("button", { name: "Redirecting…" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Redirecting…" })).toBeInTheDocument();
   });
 
   it("logs in at a suggested provider without a WebID", async () => {
-    const loginWithProvider = vi.fn(() => new Promise<void>(() => { }));
+    const loginWithProvider = vi.fn(() => new Promise<void>(() => {}));
     const useCases = makeUseCases({ loginWithProvider });
     renderApp(useCases);
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "I already have a Pod" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "I already have a Pod" }));
     fireEvent.click(screen.getByRole("button", { name: "Inrupt PodSpaces" }));
 
     expect(loginWithProvider).toHaveBeenCalledWith("https://login.inrupt.com");
     expect(useCases.loginWithWebId).not.toHaveBeenCalled();
-    expect(
-      await screen.findByRole("button", { name: "Redirecting…" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Inrupt PodSpaces" }),
-    ).toBeDisabled();
+    expect(await screen.findByRole("button", { name: "Redirecting…" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Inrupt PodSpaces" })).toBeDisabled();
   });
 
   it("shows an error when a provider login cannot start", async () => {
@@ -356,9 +399,7 @@ describe("AppShell", () => {
         }),
       }),
     );
-    fireEvent.click(
-      await screen.findByRole("button", { name: "I already have a Pod" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "I already have a Pod" }));
     fireEvent.click(screen.getByRole("button", { name: "solidweb.me" }));
 
     expect(await screen.findByText("provider unreachable")).toBeInTheDocument();
@@ -375,12 +416,8 @@ describe("AppShell", () => {
     );
 
     await submitWebId(session.webId);
-    expect(
-      await screen.findByText("issuer discovery failed"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Log in with Solid" }),
-    ).toBeEnabled();
+    expect(await screen.findByText("issuer discovery failed")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Log in with Solid" })).toBeEnabled();
   });
 
   it("shows a login error (non-Error rejection)", async () => {
@@ -406,20 +443,21 @@ describe("AppShell", () => {
       await screen.findByRole("link", { name: `${session.webId} (opens in a new tab)` }),
     ).toBeInTheDocument();
     // One link home, the logo part of it: no second stop beside the name.
-    const home = within(
-      screen.getByRole("heading", { level: 1, name: "Solid Memo" }),
-    ).getByRole("link", { name: "Solid Memo" });
+    const home = within(screen.getByRole("heading", { level: 1, name: "Solid Memo" })).getByRole(
+      "link",
+      { name: "Solid Memo" },
+    );
     expect(home).toHaveAttribute("href", "#/");
     expect(home.querySelector("img.logo")).toHaveAttribute("alt", "");
-    expect(screen.getAllByRole("link").filter((link) => link.getAttribute("href") === "#/")).toHaveLength(1);
+    expect(
+      screen.getAllByRole("link").filter((link) => link.getAttribute("href") === "#/"),
+    ).toHaveLength(1);
     // The masthead and instance bar make the banner, above the main content.
     const banner = screen.getByRole("banner");
     expect(within(banner).getByRole("button", { name: "Log out" })).toBeInTheDocument();
     expect(container.querySelector("main .masthead")).toBeNull();
     expect(useCases.discoverAccount).not.toHaveBeenCalled();
-    expect(screen.getByRole("contentinfo")).toHaveTextContent(
-      "Created by antwika",
-    );
+    expect(screen.getByRole("contentinfo")).toHaveTextContent("Created by antwika");
     expect(screen.queryByText("WebID document")).toBeNull();
     expect(useCases.viewWebIdDocument).not.toHaveBeenCalled();
   });
@@ -436,7 +474,9 @@ describe("AppShell", () => {
     expect(banner).toContainElement(logOut);
     expect(within(banner).getByRole("combobox", { name: "Language" })).toBeInTheDocument();
     expect(
-      within(screen.getByRole("main")).getByText("Loading your Solid Memo instances", { exact: false }),
+      within(screen.getByRole("main")).getByText("Loading your Solid Memo instances", {
+        exact: false,
+      }),
     ).toBeInTheDocument();
     expect(screen.getByRole("main")).toHaveAttribute("id", MAIN_ID);
   });
@@ -451,7 +491,9 @@ describe("AppShell", () => {
     renderApp(useCases);
 
     await waitFor(() =>
-      expect(within(screen.getByRole("main")).getByRole("alert")).toHaveTextContent("pod unreachable"),
+      expect(within(screen.getByRole("main")).getByRole("alert")).toHaveTextContent(
+        "pod unreachable",
+      ),
     );
     expect(
       within(screen.getByRole("banner")).getByRole("button", { name: "Log out" }),
@@ -492,12 +534,8 @@ describe("AppShell", () => {
       expect(screen.getByText("https://alice.example/")).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-      expect(
-        await screen.findByRole("button", { name: "Log out" }),
-      ).toBeInTheDocument();
-      expect(screen.getByText(/Logged in as/)).toHaveTextContent(
-        "Logged in as Alice",
-      );
+      expect(await screen.findByRole("button", { name: "Log out" })).toBeInTheDocument();
+      expect(screen.getByText(/Logged in as/)).toHaveTextContent("Logged in as Alice");
       expect(screen.getByRole("link", { name: "Alice (opens in a new tab)" })).toHaveAttribute(
         "href",
         session.webId,
@@ -546,9 +584,7 @@ describe("AppShell", () => {
       await waitFor(() => {
         expect(useCases.logout).toHaveBeenCalledOnce();
       });
-      expect(
-        await screen.findByRole("button", { name: "Log in with Solid" }),
-      ).toBeInTheDocument();
+      expect(await screen.findByRole("button", { name: "Log in with Solid" })).toBeInTheDocument();
     });
   });
 
@@ -571,9 +607,7 @@ describe("AppShell", () => {
     expect(alert).toHaveAttribute("role", "alert");
     expect(alert).toHaveFocus();
     expect(alert.previousElementSibling).toHaveClass("tagline");
-    expect(
-      screen.getByRole("button", { name: "Log in with Solid" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Log in with Solid" })).toBeInTheDocument();
   });
 
   it("logs out and returns to the WebID form", async () => {
@@ -587,13 +621,14 @@ describe("AppShell", () => {
     await waitFor(() => {
       expect(useCases.logout).toHaveBeenCalledOnce();
     });
-    expect(
-      await screen.findByRole("button", { name: "Log in with Solid" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Log in with Solid" })).toBeInTheDocument();
   });
 
   describe("as a guest", () => {
-    const guest: Session = { webId: "https://guest.solid-memo.invalid/profile/card#me", guest: true };
+    const guest: Session = {
+      webId: "https://guest.solid-memo.invalid/profile/card#me",
+      guest: true,
+    };
 
     it("starts studying without logging in, in an instance named in the reader's language", async () => {
       const useCases = makeUseCases();
@@ -606,7 +641,9 @@ describe("AppShell", () => {
     });
 
     it("shows why a guest's study could not start", async () => {
-      const useCases = makeUseCases({ startGuest: vi.fn(async () => Promise.reject(new Error("no storage"))) });
+      const useCases = makeUseCases({
+        startGuest: vi.fn(async () => Promise.reject(new Error("no storage"))),
+      });
       renderApp(useCases);
       fireEvent.click(await screen.findByRole("button", { name: "Try it without logging in" }));
       expect(await screen.findByText("no storage")).toBeInTheDocument();
@@ -650,17 +687,25 @@ describe("AppShell", () => {
       expect(discard).toHaveFocus();
       // Escape cancels too.
       fireEvent.click(discard);
-      fireEvent.keyDown(screen.getByRole("region", { name: "Discard your study as a guest" }), { key: "Escape" });
+      fireEvent.keyDown(screen.getByRole("region", { name: "Discard your study as a guest" }), {
+        key: "Escape",
+      });
       expect(screen.queryByRole("region", { name: "Discard your study as a guest" })).toBeNull();
       expect(discard).toHaveFocus();
       fireEvent.click(discard);
-      fireEvent.keyDown(screen.getByRole("region", { name: "Discard your study as a guest" }), { key: "Enter" });
-      expect(screen.getByRole("region", { name: "Discard your study as a guest" })).toBeInTheDocument();
+      fireEvent.keyDown(screen.getByRole("region", { name: "Discard your study as a guest" }), {
+        key: "Enter",
+      });
+      expect(
+        screen.getByRole("region", { name: "Discard your study as a guest" }),
+      ).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
       expect(useCases.discardGuest).not.toHaveBeenCalled();
       fireEvent.click(screen.getByRole("button", { name: "Discard" }));
       fireEvent.click(screen.getByRole("button", { name: "Delete it" }));
-      expect(await screen.findByRole("heading", { name: "Set up your Solid Pod" })).toBeInTheDocument();
+      expect(
+        await screen.findByRole("heading", { name: "Set up your Solid Pod" }),
+      ).toBeInTheDocument();
       expect(useCases.discardGuest).toHaveBeenCalledOnce();
     });
 
@@ -672,8 +717,13 @@ describe("AppShell", () => {
       renderApp(useCases);
       fireEvent.click(await screen.findByRole("button", { name: "Discard" }));
       fireEvent.click(screen.getByRole("button", { name: "Delete it" }));
-      expect((await screen.findByText("storage refused")).closest("[role=alert]")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Delete it" })).toHaveAttribute("aria-disabled", "false");
+      expect(
+        (await screen.findByText("storage refused")).closest("[role=alert]"),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Delete it" })).toHaveAttribute(
+        "aria-disabled",
+        "false",
+      );
       // Trying again clears the error first, so the same failure is said again.
       vi.mocked(useCases.discardGuest).mockReturnValueOnce(new Promise(() => {}));
       const deleteIt = screen.getByRole("button", { name: "Delete it" });
@@ -685,16 +735,25 @@ describe("AppShell", () => {
       expect(deleteIt).toHaveFocus();
       fireEvent.click(deleteIt);
       fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-      fireEvent.keyDown(screen.getByRole("region", { name: "Discard your study as a guest" }), { key: "Escape" });
+      fireEvent.keyDown(screen.getByRole("region", { name: "Discard your study as a guest" }), {
+        key: "Escape",
+      });
       expect(useCases.discardGuest).toHaveBeenCalledTimes(2);
-      expect(screen.getByRole("region", { name: "Discard your study as a guest" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("region", { name: "Discard your study as a guest" }),
+      ).toBeInTheDocument();
     });
 
     it("offers a user who logged in the study a guest left in this browser", async () => {
       const useCases = makeUseCases({
         restoreSession: vi.fn(async () => restored),
         findGuestStudy: vi.fn(async () => ({
-          instances: [{ instance: { url: "https://guest.solid-memo.invalid/solid-memo/", name: "My study" }, deckCount: 2 }],
+          instances: [
+            {
+              instance: { url: "https://guest.solid-memo.invalid/solid-memo/", name: "My study" },
+              deckCount: 2,
+            },
+          ],
         })),
       });
       renderApp(useCases);

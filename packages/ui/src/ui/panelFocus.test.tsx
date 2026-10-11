@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { fireEvent, render, screen } from "@testing-library/preact";
@@ -37,7 +41,11 @@ function ReplacedOpener() {
       <div class="screen">
         <h2>Screen</h2>
       </div>
-      {open ? <PanelWithClose onClose={() => setOpen(false)} /> : <button onClick={() => setOpen(true)}>Open</button>}
+      {open ? (
+        <PanelWithClose onClose={() => setOpen(false)} />
+      ) : (
+        <button onClick={() => setOpen(true)}>Open</button>
+      )}
     </main>
   );
 }

@@ -1,10 +1,18 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Locks } from "../localStorageUpdateJournal";
 
 /** Web Locks shared by the pages of a test: exclusive, granted in the order asked. */
 export function fakeLocks(): Locks {
   const held = new Set<string>();
   const waiting = new Map<string, (() => void)[]>();
-  const grant = (name: string, callback: LockGrantedCallback<unknown>, resolve: (value: unknown) => void) => {
+  const grant = (
+    name: string,
+    callback: LockGrantedCallback<unknown>,
+    resolve: (value: unknown) => void,
+  ) => {
     held.add(name);
     queueMicrotask(() => {
       void Promise.resolve(callback({ name, mode: "exclusive" })).then((value) => {

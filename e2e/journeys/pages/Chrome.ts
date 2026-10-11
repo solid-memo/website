@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import { escapeRegExp, type Locale } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
@@ -33,7 +37,9 @@ export class Chrome extends Screen {
 
   /** Follows a section of the Studio's sidebar, by its key ("groups"). */
   async studioSection(section: string): Promise<void> {
-    await this.studioSidebar.getByRole("link", { name: this.t(`studio.shell.section.${section}`), exact: true }).click();
+    await this.studioSidebar
+      .getByRole("link", { name: this.t(`studio.shell.section.${section}`), exact: true })
+      .click();
   }
 
   /**
@@ -42,7 +48,9 @@ export class Chrome extends Screen {
    * its problems after its name ("Check 2 problems").
    */
   async studioTab(of: "deck" | "draft", tab: string): Promise<void> {
-    const link = this.studioTabs(of).getByRole("link", { name: new RegExp(`^${escapeRegExp(this.t(`studio.tabs.${tab}`))}( |$)`) });
+    const link = this.studioTabs(of).getByRole("link", {
+      name: new RegExp(`^${escapeRegExp(this.t(`studio.tabs.${tab}`))}( |$)`),
+    });
     await link.click();
     await expect(link).toHaveAttribute("aria-current", "page");
   }
@@ -58,7 +66,10 @@ export class Chrome extends Screen {
       const field = palette.getByRole("combobox", { name: this.t("studio.palette.label") });
       await expect(field).toBeFocused();
       await field.fill(query);
-      await expect(palette.getByRole("option", { name: entry, exact: true })).toHaveAttribute("aria-selected", "true");
+      await expect(palette.getByRole("option", { name: entry, exact: true })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
       await field.press("Enter");
       await expect(palette).toBeHidden();
     });
@@ -71,7 +82,9 @@ export class Chrome extends Screen {
 
   async expectLoggedInAs(webId: string): Promise<void> {
     await this.intent("Check who is logged in", async () => {
-      await expect(this.page.getByRole("banner")).toContainText(this.t("app.loggedInAs", { name: "" }).trim());
+      await expect(this.page.getByRole("banner")).toContainText(
+        this.t("app.loggedInAs", { name: "" }).trim(),
+      );
       await expect(this.page.getByRole("banner").getByRole("link", { name: webId })).toBeVisible();
     });
   }
@@ -105,11 +118,15 @@ export class Chrome extends Screen {
   }
 
   async openStatistics(): Promise<void> {
-    await this.intent("Open Statistics", () => this.instanceNav.getByRole("link", { name: this.t("instanceBar.statistics") }).click());
+    await this.intent("Open Statistics", () =>
+      this.instanceNav.getByRole("link", { name: this.t("instanceBar.statistics") }).click(),
+    );
   }
 
   async openPreferences(): Promise<void> {
-    await this.intent("Open Preferences", () => this.instanceNav.getByRole("link", { name: this.t("instanceBar.preferences") }).click());
+    await this.intent("Open Preferences", () =>
+      this.instanceNav.getByRole("link", { name: this.t("instanceBar.preferences") }).click(),
+    );
   }
 
   /**
@@ -118,7 +135,14 @@ export class Chrome extends Screen {
    * the list's own name ("Language", "Språk") with it.
    */
   async switchLanguage(locale: Locale): Promise<void> {
-    const name = { en: "English", sv: "Svenska", ko: "한국어", de: "Deutsch", es: "Español", fr: "Français" }[locale];
+    const name = {
+      en: "English",
+      sv: "Svenska",
+      ko: "한국어",
+      de: "Deutsch",
+      es: "Español",
+      fr: "Français",
+    }[locale];
     await this.intent(`Switch the language to ${name}`, async () => {
       await this.languageSelector.selectOption({ label: name });
       this.app.locale = locale;
@@ -128,8 +152,13 @@ export class Chrome extends Screen {
 
   async logOut(): Promise<void> {
     await this.intent("Log out", async () => {
-      await this.page.getByRole("banner").getByRole("button", { name: this.t("app.logOut") }).click();
-      await expect(this.page.getByRole("heading", { name: this.t("onboardingFlow.connectHeading") })).toBeVisible();
+      await this.page
+        .getByRole("banner")
+        .getByRole("button", { name: this.t("app.logOut") })
+        .click();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("onboardingFlow.connectHeading") }),
+      ).toBeVisible();
     });
   }
 }

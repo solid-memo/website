@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { DEFAULT_PREFERENCES } from "../../../preferences";
 import type { MigrationStep } from "../step";
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -49,7 +53,8 @@ export function ImportUrlContainer({
     queryKey: ["decks", instance.url],
     queryFn: () => useCases.listDecks(instance.url),
   });
-  const imported = release !== undefined && (decksQuery.data ?? []).some((deck) => isCopyOf(deck, release));
+  const imported =
+    release !== undefined && (decksQuery.data ?? []).some((deck) => isCopyOf(deck, release));
 
   const addMutation = useMutation({
     mutationFn: (shown: LibraryDeck) => useCases.importReleaseFromUrl(instance.url, shown),

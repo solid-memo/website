@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { isGuestUrl } from "@solid-memo/domain/guest";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type {
@@ -58,7 +62,12 @@ export function InstancePicker({
 
   useLayoutEffect(() => {
     const pending = deleting.current;
-    if (pending === null || busy || instances.some((instance) => instance.url === pending.instance.url)) return;
+    if (
+      pending === null ||
+      busy ||
+      instances.some((instance) => instance.url === pending.instance.url)
+    )
+      return;
     deleting.current = null;
     const rows = listRef.current?.children ?? [];
     const row = rows[Math.min(pending.row, rows.length - 1)];
@@ -134,11 +143,7 @@ export function InstancePicker({
             required
             disabled={busy}
           />
-          <RegistrationTargetChooser
-            options={options}
-            value={target}
-            onChange={setTarget}
-          />
+          <RegistrationTargetChooser options={options} value={target} onChange={setTarget} />
           <button type="submit" aria-disabled={busy}>
             {t("instancePicker.attach")}
           </button>

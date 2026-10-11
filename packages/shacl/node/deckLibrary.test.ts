@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { execFileSync } from "node:child_process";
 import { mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -6,6 +10,8 @@ import { describe, expect, it, vi } from "vitest";
 import {
   baseProblems,
   buildIndex,
+  CONTACT_URL,
+  contactProblems,
   courseProblems,
   defaultIo,
   INDEX_URL,
@@ -47,7 +53,13 @@ interface Fixture {
   course?: string;
   /** The library deck format the release is in, 5 unless stated. */
   format?: 5 | 6;
+  /** The release names the library's contact, as a new version does. */
+  contact?: boolean;
+  /** The agent states an email, as the published versions do. */
+  mbox?: boolean;
 }
+
+const CONTACT = { contact: true } as const;
 
 /** A release of `deck` in library deck format 5 (or `format`), as decks/<deck>/v<version>.ttl holds it. */
 function releaseText(deck: string, version: number, fixture: Fixture = {}): string {
@@ -66,7 +78,9 @@ function releaseText(deck: string, version: number, fixture: Fixture = {}): stri
       `    dcterms:publisher <${INDEX}#solid-memo> ;`,
       `    dcat:inSeries <${INDEX}#${deck}> ;`,
       `    dcat:isVersionOf <${INDEX}#${deck}> ;`,
-      ...(version > 1 ? [`    dcat:prev ${previous} ;`, `    dcat:previousVersion ${previous} ;`] : []),
+      ...(version > 1
+        ? [`    dcat:prev ${previous} ;`, `    dcat:previousVersion ${previous} ;`]
+        : []),
     ].join("\n");
   return `@base <${DECKS}${deck}/v${version}.ttl> .
 
@@ -94,12 +108,20 @@ ${issued === null ? "" : `    dcterms:issued "${issued}"^^xsd:dateTime ;\n`}    
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     adms:versionNotes "${notes}" ;
     dcat:distribution <#turtle> ;
-${release} .
+${fixture.contact === true ? "    dcat:contactPoint <#contact> ;\n" : ""}${release} .
 
 <#anton>
     a foaf:Agent ;
-    foaf:name "Anton" .
-
+    foaf:name "Anton"${fixture.mbox === true ? " ;\n    foaf:mbox <mailto:anton@example.com>" : ""} .
+${
+  fixture.contact === true
+    ? `
+<#contact>
+    a <http://www.w3.org/2006/vcard/ns#Kind> ;
+    <http://www.w3.org/2006/vcard/ns#hasURL> <https://github.com/solid-memo/website/issues> .
+`
+    : ""
+}
 <#turtle>
     a dcat:Distribution ;
     dcat:accessURL <> ;
@@ -146,7 +168,13 @@ function chapter(id: string, position: number, extra = ""): string {
 `;
 }
 
-function step(id: string, of: string, position: number, checks: readonly string[], extra = ""): string {
+function step(
+  id: string,
+  of: string,
+  position: number,
+  checks: readonly string[],
+  extra = "",
+): string {
   return `
 <#${id}>
     a solid-memo:Step ,
@@ -160,8 +188,16 @@ function step(id: string, of: string, position: number, checks: readonly string[
 }
 
 /** A card a course asks, naming its distractors; `back` replaces its English back. */
-function question(id: string, distractors: readonly string[], extra = "", back = `solid-memo:back "Answer ${id}"@en ;`): string {
-  const named = distractors.length === 0 ? "" : ` ;\n    solid-memo:distractor ${distractors.map((d) => `<#${d}>`).join(" , ")}`;
+function question(
+  id: string,
+  distractors: readonly string[],
+  extra = "",
+  back = `solid-memo:back "Answer ${id}"@en ;`,
+): string {
+  const named =
+    distractors.length === 0
+      ? ""
+      : ` ;\n    solid-memo:distractor ${distractors.map((d) => `<#${d}>`).join(" , ")}`;
   return `
 <#${id}>
     a solid-memo:Card ;
@@ -203,7 +239,10 @@ function course(version: number, outline = OUTLINE): DeckRelease {
 }
 
 /** The library's files for these releases, its index built from them. */
-function filesOf(releases: readonly DeckRelease[], index = buildIndex(releases)): Map<string, string> {
+function filesOf(
+  releases: readonly DeckRelease[],
+  index = buildIndex(releases),
+): Map<string, string> {
   return new Map([
     ["index.ttl", index],
     ...releases.map((r) => [`${r.deck}/v${r.version}.ttl`, r.turtle] as [string, string]),
@@ -213,7 +252,11 @@ function filesOf(releases: readonly DeckRelease[], index = buildIndex(releases))
 describe("releasesOf", () => {
   it("reads every release, sorted by deck then version", () => {
     const { releases, problems } = releasesOf(filesOf([RIVERS, CAPITALS[1], CAPITALS[0]]));
-    expect(releases.map((r) => `${r.deck}/v${r.version}`)).toEqual(["capitals/v1", "capitals/v2", "rivers/v1"]);
+    expect(releases.map((r) => `${r.deck}/v${r.version}`)).toEqual([
+      "capitals/v1",
+      "capitals/v2",
+      "rivers/v1",
+    ]);
     expect(releases[0].quads).toEqual(CAPITALS[0].quads);
     expect(problems).toEqual([]);
   });
@@ -248,7 +291,9 @@ describe("buildIndex", () => {
   const index = buildIndex(LIBRARY);
   const quads = parseTurtle(index, "https://elsewhere.example/");
   const of = (s: string, p: string) =>
-    quads.filter((q) => q.subject.value === s && q.predicate.value === p).map((q) => q.object.value);
+    quads
+      .filter((q) => q.subject.value === s && q.predicate.value === p)
+      .map((q) => q.object.value);
 
   it("states its own address as its @base, in the house style", () => {
     expect(index.startsWith(`@base <${INDEX}> .\n`)).toBe(true);
@@ -256,7 +301,7 @@ describe("buildIndex", () => {
     expect(formatTurtle(index, "https://format.invalid/decks/index.ttl")).toBe(index);
   });
 
-  it("is a catalogue of the decks, published by Solid Memo, classified by the EU themes and the topics", () => {
+  it("is a catalog of the decks, published by Solid Memo, classified by the EU themes and the topics", () => {
     expect(of(INDEX, RDF_TYPE)).toEqual([`${DCAT}Catalog`]);
     expect(of(INDEX, `${DCAT}dataset`)).toEqual([`${INDEX}#capitals`, `${INDEX}#rivers`]);
     expect(of(INDEX, `${DCTERMS}publisher`)).toEqual([`${INDEX}#solid-memo`]);
@@ -276,13 +321,18 @@ describe("buildIndex", () => {
     expect(of(series, `${DCAT}keyword`)).toEqual(["capitals"]);
     expect(of(series, `${DCAT}first`)).toEqual([`${DECKS}capitals/v1.ttl`]);
     expect(of(series, `${DCAT}last`)).toEqual([`${DECKS}capitals/v2.ttl`]);
-    expect(of(series, `${DCAT}hasVersion`)).toEqual([`${DECKS}capitals/v1.ttl`, `${DECKS}capitals/v2.ttl`]);
+    expect(of(series, `${DCAT}hasVersion`)).toEqual([
+      `${DECKS}capitals/v1.ttl`,
+      `${DECKS}capitals/v2.ttl`,
+    ]);
     expect(of(series, `${DCAT}hasCurrentVersion`)).toEqual([`${DECKS}capitals/v2.ttl`]);
   });
 
   it("summarizes older releases and describes the current one in full, without its cards", () => {
     expect(of(`${DECKS}capitals/v1.ttl`, `${DCAT}version`)).toEqual(["1"]);
-    expect(of(`${DECKS}capitals/v1.ttl`, "http://www.w3.org/ns/adms#versionNotes")).toEqual(["First release."]);
+    expect(of(`${DECKS}capitals/v1.ttl`, "http://www.w3.org/ns/adms#versionNotes")).toEqual([
+      "First release.",
+    ]);
     expect(of(`${DECKS}capitals/v1.ttl`, `${SM}cardCount`)).toEqual([]);
     const current = `${DECKS}capitals/v2.ttl`;
     expect(of(current, `${SM}cardCount`)).toEqual(["2"]);
@@ -296,7 +346,10 @@ describe("buildIndex", () => {
     const built = parseTurtle(buildIndex([...CAPITALS, retired]), INDEX);
     expect(
       built
-        .filter((q) => q.subject.value === `${DECKS}capitals/v3.ttl` && q.predicate.value === `${SM}cardCount`)
+        .filter(
+          (q) =>
+            q.subject.value === `${DECKS}capitals/v3.ttl` && q.predicate.value === `${SM}cardCount`,
+        )
         .map((q) => q.object.value),
     ).toEqual(["1"]);
   });
@@ -314,25 +367,42 @@ describe("buildIndex", () => {
 
 <#anton> <http://www.w3.org/2000/01/rdf-schema#comment> "Compiled the deck." .
 `;
-    const made: DeckRelease = { deck: "capitals", version: 1, turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) };
+    const made: DeckRelease = {
+      deck: "capitals",
+      version: 1,
+      turtle,
+      quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`),
+    };
     const built = parseTurtle(buildIndex([made]), INDEX);
     const current = `${DECKS}capitals/v1.ttl`;
-    expect(built.filter((q) => q.subject.value === `${current}#compilation`).map((q) => [q.predicate.value, q.object.value])).toEqual([
-      [RDF_TYPE, "http://www.w3.org/ns/prov#Activity"],
-    ]);
+    expect(
+      built
+        .filter((q) => q.subject.value === `${current}#compilation`)
+        .map((q) => [q.predicate.value, q.object.value]),
+    ).toEqual([[RDF_TYPE, "http://www.w3.org/ns/prov#Activity"]]);
     expect(built.filter((q) => q.subject.value === `${current}#review`)).toEqual([]);
-    expect(built.filter((q) => q.predicate.value === "http://www.w3.org/2000/01/rdf-schema#comment")).toEqual([]);
-    expect(built.some((q) => q.subject.value === current && q.object.value === `${current}#compilation`)).toBe(true);
-    expect(built.some((q) => q.subject.value === `${current}#anton` && q.object.value === "Anton")).toBe(true);
+    expect(
+      built.filter((q) => q.predicate.value === "http://www.w3.org/2000/01/rdf-schema#comment"),
+    ).toEqual([]);
+    expect(
+      built.some((q) => q.subject.value === current && q.object.value === `${current}#compilation`),
+    ).toBe(true);
+    expect(
+      built.some((q) => q.subject.value === `${current}#anton` && q.object.value === "Anton"),
+    ).toBe(true);
   });
 
   it("keeps a course's type but leaves out its chapters, steps and distractors, counting its cards in use", () => {
     const built = parseTurtle(buildIndex([course(1)]), INDEX);
     const current = `${DECKS}solid/v1.ttl`;
-    expect(built.filter((q) => q.subject.value === current && q.predicate.value === RDF_TYPE).map((q) => q.object.value)).toContain(
-      "https://schema.org/Course",
-    );
-    expect(built.filter((q) => q.subject.value.startsWith(`${current}#`)).map((q) => q.subject.value)).toEqual([
+    expect(
+      built
+        .filter((q) => q.subject.value === current && q.predicate.value === RDF_TYPE)
+        .map((q) => q.object.value),
+    ).toContain("https://schema.org/Course");
+    expect(
+      built.filter((q) => q.subject.value.startsWith(`${current}#`)).map((q) => q.subject.value),
+    ).toEqual([
       `${current}#anton`,
       `${current}#anton`,
       `${current}#turtle`,
@@ -341,23 +411,43 @@ describe("buildIndex", () => {
       `${current}#turtle`,
     ]);
     expect(
-      built.filter((q) => q.subject.value === current && q.predicate.value === `${SM}cardCount`).map((q) => q.object.value),
+      built
+        .filter((q) => q.subject.value === current && q.predicate.value === `${SM}cardCount`)
+        .map((q) => q.object.value),
     ).toEqual(["4"]);
   });
 
   it("states a node the decks share once", () => {
     const built = parseTurtle(index, INDEX);
-    const keys = built.map((q) => JSON.stringify([q.subject.value, q.predicate.value, q.object.value, q.object.termType]));
+    const keys = built.map((q) =>
+      JSON.stringify([q.subject.value, q.predicate.value, q.object.value, q.object.termType]),
+    );
     expect(new Set(keys).size).toBe(keys.length);
     expect(
-      built.filter((q) => q.subject.value === "https://creativecommons.org/publicdomain/zero/1.0/" && q.predicate.value === RDF_TYPE),
+      built.filter(
+        (q) =>
+          q.subject.value === "https://creativecommons.org/publicdomain/zero/1.0/" &&
+          q.predicate.value === RDF_TYPE,
+      ),
     ).toHaveLength(1);
   });
 
   it("states the current release's themes and keywords as it states them, a blank node too", () => {
     const turtle = `${releaseText("capitals", 1)}\n<> <${DCAT}theme> [ a <http://www.w3.org/2004/02/skos/core#Concept> ] .\n`;
-    const built = parseTurtle(buildIndex([{ deck: "capitals", version: 1, turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) }]), INDEX);
-    const themes = built.filter((q) => q.subject.value === `${INDEX}#capitals` && q.predicate.value === `${DCAT}theme`);
+    const built = parseTurtle(
+      buildIndex([
+        {
+          deck: "capitals",
+          version: 1,
+          turtle,
+          quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`),
+        },
+      ]),
+      INDEX,
+    );
+    const themes = built.filter(
+      (q) => q.subject.value === `${INDEX}#capitals` && q.predicate.value === `${DCAT}theme`,
+    );
     expect(themes.map((q) => q.object.termType)).toEqual(["NamedNode", "NamedNode", "BlankNode"]);
   });
 
@@ -369,15 +459,37 @@ describe("buildIndex", () => {
       quads: parseTurtle(`<> a <${SM}Deck> .`, `${DECKS}x/v${version}.ttl`),
     });
     const built = parseTurtle(buildIndex([bare(1), bare(2)]), INDEX);
-    expect(built.filter((q) => q.subject.value === `${DECKS}x/v1.ttl`).map((q) => q.predicate.value)).toEqual([RDF_TYPE]);
-    expect(built.some((q) => q.subject.value === `${INDEX}#x` && q.predicate.value === `${DCTERMS}title`)).toBe(false);
+    expect(
+      built.filter((q) => q.subject.value === `${DECKS}x/v1.ttl`).map((q) => q.predicate.value),
+    ).toEqual([RDF_TYPE]);
+    expect(
+      built.some(
+        (q) => q.subject.value === `${INDEX}#x` && q.predicate.value === `${DCTERMS}title`,
+      ),
+    ).toBe(false);
     expect(built.some((q) => q.predicate.value === `${DCTERMS}modified`)).toBe(false);
     expect(buildIndex([])).not.toContain("modified");
   });
 
+  it("names no one's email, but keeps the current release's contact", () => {
+    const built = buildIndex([release("capitals", 1, { mbox: true, contact: true })]);
+    const quads = parseTurtle(built, INDEX);
+    const current = `${DECKS}capitals/v1.ttl`;
+    expect(quads.filter((q) => q.predicate.value === "http://xmlns.com/foaf/0.1/mbox")).toEqual([]);
+    expect(
+      quads.some((q) => q.subject.value === `${current}#anton` && q.object.value === "Anton"),
+    ).toBe(true);
+    expect(
+      quads.some((q) => q.subject.value === current && q.predicate.value === `${DCAT}contactPoint`),
+    ).toBe(true);
+    expect(built).toContain("vcard:hasURL <https://github.com/solid-memo/website/issues>");
+  });
+
   it("names the course for newcomers when given one, even one the library does not have", () => {
     const named = (index: string) =>
-      parseTurtle(index, INDEX).filter((q) => q.predicate.value === `${SM}newcomerCourse`).map((q) => [q.subject.value, q.object.value]);
+      parseTurtle(index, INDEX)
+        .filter((q) => q.predicate.value === `${SM}newcomerCourse`)
+        .map((q) => [q.subject.value, q.object.value]);
     expect(named(buildIndex([course(1)], "solid"))).toEqual([[INDEX, `${INDEX}#solid`]]);
     expect(buildIndex([course(1)], "solid")).toContain("solid-memo:newcomerCourse <#solid>");
     expect(named(buildIndex(LIBRARY, "nowhere"))).toEqual([[INDEX, `${INDEX}#nowhere`]]);
@@ -391,7 +503,10 @@ describe("metadataProblems", () => {
   });
 
   it("names a release whose @base is not its own address, or that states none", () => {
-    const moved = { ...CAPITALS[0], turtle: CAPITALS[0].turtle.replace("capitals/v1.ttl> .", "capitals/v9.ttl> .") };
+    const moved = {
+      ...CAPITALS[0],
+      turtle: CAPITALS[0].turtle.replace("capitals/v1.ttl> .", "capitals/v9.ttl> ."),
+    };
     expect(metadataProblems(moved)).toEqual([
       `decks/capitals/v1.ttl: states @base <${DECKS}capitals/v9.ttl>; its path says @base <${DECKS}capitals/v1.ttl>.`,
     ]);
@@ -403,7 +518,10 @@ describe("metadataProblems", () => {
 
   it("names a release that is not one deck, the document itself", () => {
     const url = `${DECKS}capitals/v1.ttl`;
-    const two = { ...CAPITALS[0], quads: parseTurtle(`${CAPITALS[0].turtle}\n<#other> a <${SM}Deck> .\n`, url) };
+    const two = {
+      ...CAPITALS[0],
+      quads: parseTurtle(`${CAPITALS[0].turtle}\n<#other> a <${SM}Deck> .\n`, url),
+    };
     expect(metadataProblems(two)).toEqual([
       `decks/capitals/v1.ttl: expected the document itself to be its one solid-memo:Deck, found <${url}>, <${url}#other>.`,
     ]);
@@ -411,6 +529,20 @@ describe("metadataProblems", () => {
     expect(metadataProblems(none)).toContain(
       "decks/capitals/v1.ttl: expected the document itself to be its one solid-memo:Deck, found none.",
     );
+  });
+
+  it("names a release that states no license", () => {
+    const url = `${DECKS}capitals/v1.ttl`;
+    const unlicensed = CAPITALS[0].turtle.replace(
+      "    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;\n",
+      "",
+    );
+    expect(unlicensed).not.toContain("dcterms:license");
+    expect(
+      metadataProblems({ ...CAPITALS[0], turtle: unlicensed, quads: parseTurtle(unlicensed, url) }),
+    ).toEqual([
+      "decks/capitals/v1.ttl: states no dcterms:license: a library release names the license it is published under, as an IRI such as <https://creativecommons.org/licenses/by/4.0/>.",
+    ]);
   });
 
   it("names a version, series, publisher or previous version other than its path says", () => {
@@ -454,6 +586,16 @@ describe("validateLibrary", () => {
     await expect(validateLibrary(LIBRARY, buildIndex(LIBRARY), validators)).resolves.toEqual([]);
   });
 
+  it("accepts a release that names the library's contact, in format 5 or 6", async () => {
+    const contacted = [
+      release("capitals", 1, CONTACT),
+      release("capitals", 2, { ...NORWAY, ...CONTACT, format: 6 }),
+    ];
+    await expect(validateLibrary(contacted, buildIndex(contacted), validators)).resolves.toEqual(
+      [],
+    );
+  });
+
   it("accepts a release in library deck format 6 after one in format 5, each checked against its own format", async () => {
     const mixed = [CAPITALS[0], release("capitals", 2, { ...NORWAY, format: 6 })];
     await expect(validateLibrary(mixed, buildIndex(mixed), validators)).resolves.toEqual([]);
@@ -484,14 +626,19 @@ describe("validateLibrary", () => {
   });
 
   it("names a release that gives an id of the version before it to another kind of subject", async () => {
-    const reused = [course(1), course(2, OUTLINE.replace("<#s-2>", "<#s-2-new>") + chapter("s-2", 2, RETIRED))];
+    const reused = [
+      course(1),
+      course(2, OUTLINE.replace("<#s-2>", "<#s-2-new>") + chapter("s-2", 2, RETIRED)),
+    ];
     expect(await validateLibrary(reused, buildIndex(reused), validators)).toEqual([
       "decks/solid/v2.ttl: <#s-2> is a chapter, but a step in v1.ttl: an id names one subject for good, so give the chapter an id of its own.",
     ]);
   });
 
   it("accepts a course, and names what its outline does not hold together", async () => {
-    await expect(validateLibrary([course(1)], buildIndex([course(1)]), validators)).resolves.toEqual([]);
+    await expect(
+      validateLibrary([course(1)], buildIndex([course(1)]), validators),
+    ).resolves.toEqual([]);
     const empty = [course(1, "")];
     expect(await validateLibrary(empty, buildIndex(empty), validators)).toEqual([
       "decks/solid/v1.ttl: is a schema:Course without a chapter: a course has at least one solid-memo:Chapter.",
@@ -523,7 +670,17 @@ describe("validateLibrary", () => {
     ];
     const dropped = [
       course(1, v1.join("")),
-      course(2, [v1[0], step("s-1", "ch-1", 0, ["q-1"]), question("q-1", ["q-1-a", "q-1-b"]), v1[5], v1[6], asked("q-2")].join("")),
+      course(
+        2,
+        [
+          v1[0],
+          step("s-1", "ch-1", 0, ["q-1"]),
+          question("q-1", ["q-1-a", "q-1-b"]),
+          v1[5],
+          v1[6],
+          asked("q-2"),
+        ].join(""),
+      ),
     ];
     expect(await validateLibrary(dropped, buildIndex(dropped), validators)).toEqual([
       "decks/solid/v2.ttl: drops <#ch-2>, <#s-2>, <#q-1-c>, which v1.ttl has. A chapter, step or distractor is never removed: retire it (owl:deprecated true), so the copies that follow the course keep their place in it.",
@@ -549,7 +706,9 @@ describe("validateLibrary", () => {
   });
 
   it("names a literal of a release or of the index that is not in Unicode NFC", async () => {
-    const card = [release("capitals", 1, { cards: { kr: ["South Korea", "서울".normalize("NFD")] } })];
+    const card = [
+      release("capitals", 1, { cards: { kr: ["South Korea", "서울".normalize("NFD")] } }),
+    ];
     expect(await validateLibrary(card, buildIndex(card), validators)).toEqual([
       `decks/capitals/v1.ttl: <#kr> <${SM}back> is not in Unicode NFC: its character 1, U+1109 U+1165, is U+C11C composed. Write text composed, as keyboards type it.`,
     ]);
@@ -560,7 +719,11 @@ describe("validateLibrary", () => {
   });
 
   it("names a release whose metadata is not what its path says", async () => {
-    const moved = { ...CAPITALS[0], version: 2, quads: parseTurtle(CAPITALS[0].turtle, `${DECKS}capitals/v2.ttl`) };
+    const moved = {
+      ...CAPITALS[0],
+      version: 2,
+      quads: parseTurtle(CAPITALS[0].turtle, `${DECKS}capitals/v2.ttl`),
+    };
     expect(await validateLibrary([moved], buildIndex([moved]), validators)).toContain(
       `decks/capitals/v2.ttl: states @base <${DECKS}capitals/v1.ttl>; its path says @base <${DECKS}capitals/v2.ttl>.`,
     );
@@ -571,30 +734,44 @@ describe("validateLibrary", () => {
     broken[0].quads = broken[0].quads.filter((q) => q.predicate.value !== `${SM}studyDirection`);
     const problems = await validateLibrary(broken, buildIndex(broken), validators);
     expect(problems).toContainEqual(
-      expect.stringContaining(`decks/capitals/v1.ttl:\n  <${DECKS}capitals/v1.ttl> (${SM}studyDirection): `),
+      expect.stringContaining(
+        `decks/capitals/v1.ttl:\n  <${DECKS}capitals/v1.ttl> (${SM}studyDirection): `,
+      ),
     );
   });
 
   it("names a release that breaks DCAT-AP, with the index beside it", async () => {
     const unnamed = [release("capitals", 1)];
-    unnamed[0].quads = unnamed[0].quads.filter((q) => q.predicate.value !== "http://xmlns.com/foaf/0.1/name");
+    unnamed[0].quads = unnamed[0].quads.filter(
+      (q) => q.predicate.value !== "http://xmlns.com/foaf/0.1/name",
+    );
     expect(await validateLibrary(unnamed, buildIndex(unnamed), validators)).toContainEqual(
-      expect.stringMatching(/^decks\/capitals\/v1\.ttl:\n {2}<https:\/\/solid-memo\.com\/decks\/capitals\/v1\.ttl#anton> \(http:\/\/xmlns\.com\/foaf\/0\.1\/name\): Less than 1 values/),
+      expect.stringMatching(
+        /^decks\/capitals\/v1\.ttl:\n {2}<https:\/\/solid-memo\.com\/decks\/capitals\/v1\.ttl#anton> \(http:\/\/xmlns\.com\/foaf\/0\.1\/name\): Less than 1 values/,
+      ),
     );
   });
 
   it("names a release that breaks SKOS", async () => {
     const skos = "http://www.w3.org/2004/02/skos/core#";
     const turtle = `${CAPITALS[0].turtle}\n<#red> a <${skos}Concept> ; <${skos}prefLabel> "Red"@en , "Crimson"@en .\n`;
-    const labelled = [{ ...CAPITALS[0], turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) }];
-    expect(await validateLibrary(labelled, buildIndex(labelled), validators)).toContainEqual(
-      expect.stringMatching(/^decks\/capitals\/v1\.ttl:\n {2}<https:\/\/solid-memo\.com\/decks\/capitals\/v1\.ttl#red> \(http:\/\/www\.w3\.org\/2004\/02\/skos\/core#prefLabel\): Language "en" has been used by 2 values/),
+    const labeled = [
+      { ...CAPITALS[0], turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) },
+    ];
+    expect(await validateLibrary(labeled, buildIndex(labeled), validators)).toContainEqual(
+      expect.stringMatching(
+        /^decks\/capitals\/v1\.ttl:\n {2}<https:\/\/solid-memo\.com\/decks\/capitals\/v1\.ttl#red> \(http:\/\/www\.w3\.org\/2004\/02\/skos\/core#prefLabel\): Language "en" has been used by 2 values/,
+      ),
     );
   });
 
   it("accepts the course for newcomers, and names one that is no course of the library", async () => {
-    await expect(validateLibrary([course(1)], buildIndex([course(1)], "solid"), validators)).resolves.toEqual([]);
-    expect(await validateLibrary([course(1)], buildIndex([course(1)], "nowhere"), validators)).toEqual([
+    await expect(
+      validateLibrary([course(1)], buildIndex([course(1)], "solid"), validators),
+    ).resolves.toEqual([]);
+    expect(
+      await validateLibrary([course(1)], buildIndex([course(1)], "nowhere"), validators),
+    ).toEqual([
       `decks/index.ttl: names <${INDEX}#nowhere> by solid-memo:newcomerCourse, which is no deck of the library.`,
     ]);
     expect(await validateLibrary(LIBRARY, buildIndex(LIBRARY, "rivers"), validators)).toEqual([
@@ -612,7 +789,8 @@ describe("validateLibrary", () => {
 describe("newcomerProblems", () => {
   const { namedNode, literal, quad } = DataFactory;
   const index = parseTurtle(buildIndex([course(1)], "solid"), INDEX);
-  const naming = (object: Quad_Object) => quad(namedNode(INDEX), namedNode(`${SM}newcomerCourse`), object);
+  const naming = (object: Quad_Object) =>
+    quad(namedNode(INDEX), namedNode(`${SM}newcomerCourse`), object);
 
   it("accepts an index that names one course of the library, or none", () => {
     expect(newcomerProblems(index)).toEqual([]);
@@ -630,11 +808,17 @@ describe("newcomerProblems", () => {
 describe("normalizationProblems", () => {
   const { blankNode, literal, namedNode, quad } = DataFactory;
   const URL = `${DECKS}capitals/v1.ttl`;
-  const text = (subject: Quad_Subject, value: string) => quad(subject, namedNode(`${SM}front`), literal(value));
+  const text = (subject: Quad_Subject, value: string) =>
+    quad(subject, namedNode(`${SM}front`), literal(value));
 
   it("accepts composed text, Hangul included, and finds nothing in a library that is composed", () => {
-    expect(normalizationProblems("L", URL, [text(namedNode(`${URL}#a`), "사람, café, Ångström")])).toEqual([]);
-    for (const r of LIBRARY) expect(normalizationProblems("L", `${DECKS}${r.deck}/v${r.version}.ttl`, r.quads)).toEqual([]);
+    expect(
+      normalizationProblems("L", URL, [text(namedNode(`${URL}#a`), "사람, café, Ångström")]),
+    ).toEqual([]);
+    for (const r of LIBRARY)
+      expect(normalizationProblems("L", `${DECKS}${r.deck}/v${r.version}.ttl`, r.quads)).toEqual(
+        [],
+      );
   });
 
   it("names the first character that composes differently, and its subject in the document or out of it", () => {
@@ -679,7 +863,9 @@ describe("courseProblems", () => {
   it("names a course that does not study front to back", () => {
     const backwards = course(1);
     backwards.quads = backwards.quads.map((q) =>
-      q.object.value === `${SM}frontToBack` ? DataFactory.quad(q.subject, q.predicate, DataFactory.namedNode(`${SM}backToFront`)) : q,
+      q.object.value === `${SM}frontToBack`
+        ? DataFactory.quad(q.subject, q.predicate, DataFactory.namedNode(`${SM}backToFront`))
+        : q,
     );
     expect(courseProblems(backwards)).toEqual([
       `${L}: states solid-memo:studyDirection <${SM}backToFront>; a course studies solid-memo:frontToBack.`,
@@ -707,7 +893,11 @@ describe("courseProblems", () => {
     expect(
       problemsOf(
         [
-          chapter("ch-1", 0, " ;\n    solid-memo:reviewQuestion <#q-2> , <https://example.com/card>"),
+          chapter(
+            "ch-1",
+            0,
+            " ;\n    solid-memo:reviewQuestion <#q-2> , <https://example.com/card>",
+          ),
           chapter("ch-2", 1, " ;\n    solid-memo:reviewQuestion <#q-4>"),
           chapter("ch-3", 2, ` ;\n    solid-memo:reviewQuestion <#q-4>${RETIRED}`),
           step("s-1", "ch-1", 0, ["q-1", "nothing"]),
@@ -744,7 +934,9 @@ describe("courseProblems", () => {
 <#q-2> solid-memo:distractor <#q-1-a> .
 <#se> solid-memo:distractor <#q-1-a> .
 `),
-    ).toEqual([`${L}: distractor <#q-1-a> is named by <#q-1>, <#q-2>, <#se>; a distractor is one card's: give each card its own.`]);
+    ).toEqual([
+      `${L}: distractor <#q-1-a> is named by <#q-1>, <#q-2>, <#se>; a distractor is one card's: give each card its own.`,
+    ]);
   });
 
   it("names a card checked by two steps, or both checked by a step and reviewed by a chapter", () => {
@@ -830,7 +1022,9 @@ describe("courseProblems", () => {
           question("q-1", [], RETIRED),
         ].join(""),
       ),
-    ).toEqual([`${L}: chapter <#ch-1> has no step in use; a chapter in use has at least one step that is not retired.`]);
+    ).toEqual([
+      `${L}: chapter <#ch-1> has no step in use; a chapter in use has at least one step that is not retired.`,
+    ]);
   });
 });
 
@@ -839,12 +1033,21 @@ describe("markdownProblems", () => {
   const MD = " ;\n    solid-memo:textFormat solid-memo:markdown";
   const problemsOf = (outline: string) => markdownProblems(course(1, outline));
   /** A marked card with `fields` (Turtle) beside its front and back, and its two distractors. */
-  const marked = (id: string, fields: string, distractors = [distractor(`${id}-a`), distractor(`${id}-b`)]) =>
-    question(id, distractors.length === 0 ? [] : [`${id}-a`, `${id}-b`], `${MD}${fields}`) + distractors.join("");
+  const marked = (
+    id: string,
+    fields: string,
+    distractors = [distractor(`${id}-a`), distractor(`${id}-b`)],
+  ) =>
+    question(id, distractors.length === 0 ? [] : [`${id}-a`, `${id}-b`], `${MD}${fields}`) +
+    distractors.join("");
 
   it("accepts Markdown that shows as written, and finds nothing in text that is not marked", () => {
     const good = [
-      chapter("ch-1", 0, `${MD} ;\n    dcterms:description "Read *this* first, from [the spec](https://solidproject.org/TR/protocol)."@en`),
+      chapter(
+        "ch-1",
+        0,
+        `${MD} ;\n    dcterms:description "Read *this* first, from [the spec](https://solidproject.org/TR/protocol)."@en`,
+      ),
       step(
         "s-1",
         "ch-1",
@@ -852,16 +1055,37 @@ describe("markdownProblems", () => {
         ["q-1"],
         `${MD} ;\n    solid-memo:theory """Create with \`PUT\`:\n\n\`\`\`http\nPUT /notes/a HTTP/1.1\n\`\`\`\n\n| Method | Target |\n|---|---|\n| \`PUT\` | the resource |"""@en`,
       ),
-      marked("q-1", ` ;\n    solid-memo:backNote "See [solidproject.org](https://solidproject.org/)."@en`),
-      question("q-2", [], `${MD} ;\n    solid-memo:backLabel "Status"@en`, `solid-memo:back """\`201\`\n\nor \`200\`"""@en ;`),
-      step("s-2", "ch-1", 1, ["q-3"], ` ;\n    solid-memo:theory "git clone <url> &aring; [x](http://x.example)"@en`),
-      question("q-3", [], ` ;\n    solid-memo:textFormat solid-memo:plainText ;\n    solid-memo:frontNote "<b>&aring;</b>"@en`),
+      marked(
+        "q-1",
+        ` ;\n    solid-memo:backNote "See [solidproject.org](https://solidproject.org/)."@en`,
+      ),
+      question(
+        "q-2",
+        [],
+        `${MD} ;\n    solid-memo:backLabel "Status"@en`,
+        `solid-memo:back """\`201\`\n\nor \`200\`"""@en ;`,
+      ),
+      step(
+        "s-2",
+        "ch-1",
+        1,
+        ["q-3"],
+        ` ;\n    solid-memo:theory "git clone <url> &aring; [x](http://x.example)"@en`,
+      ),
+      question(
+        "q-3",
+        [],
+        ` ;\n    solid-memo:textFormat solid-memo:plainText ;\n    solid-memo:frontNote "<b>&aring;</b>"@en`,
+      ),
       // Only a marked card's distractors are Markdown, and only the fields of docs/markdown.md: no title, no picture's description.
       question("q-4", ["q-4-a", "q-4-b"]),
       distractor("q-4-a", ` ;\n    solid-memo:distractorNote "<b>&aring;</b>"@en`, `"<b>"@en`),
       distractor("q-4-b", "", `"""&aring;\n\n- a"""@en`),
       chapter("ch-2", 1, `${MD} ;\n    dcterms:title "<x> &aring;"@en`),
-      marked("q-5", ` ;\n    solid-memo:frontImageDescription "<x> &aring;"@en ;\n    solid-memo:backImageDescription "&aring;"@en`),
+      marked(
+        "q-5",
+        ` ;\n    solid-memo:frontImageDescription "<x> &aring;"@en ;\n    solid-memo:backImageDescription "&aring;"@en`,
+      ),
     ].join("");
     expect(problemsOf(good)).toEqual([]);
     for (const r of LIBRARY) expect(markdownProblems(r)).toEqual([]);
@@ -870,16 +1094,31 @@ describe("markdownProblems", () => {
   it("names, field by field, what a card's text, its distractors', a step's theory and a chapter's description would not show as meant", () => {
     const bad = [
       chapter("ch-1", 0, `${MD} ;\n    dcterms:description "Run \`ls‮\`."@en`),
-      step("s-1", "ch-1", 0, ["q-1"], `${MD} ;\n    solid-memo:theory "See [example.org](https://evil.example/) [it](https://x.example/\u200B)."@en`),
+      step(
+        "s-1",
+        "ch-1",
+        0,
+        ["q-1"],
+        `${MD} ;\n    solid-memo:theory "See [example.org](https://evil.example/) [it](https://x.example/\u200B)."@en`,
+      ),
       marked(
         "q-1",
         ` ;\n    solid-memo:frontNote "&aring;"@en ;\n    solid-memo:backNote "![a](https://a.example/a.png) [b](http://b.example)"@en`,
         [
-          distractor("q-1-a", ` ;\n    solid-memo:distractorNote "[c](mailto:c@c.example)"@en`, `"<ex:title>"@en`),
+          distractor(
+            "q-1-a",
+            ` ;\n    solid-memo:distractorNote "[c](mailto:c@c.example)"@en`,
+            `"<ex:title>"@en`,
+          ),
           distractor("q-1-b", "", `"""a\n\nb"""@en`),
         ],
       ),
-      question("q-2", [], `${MD} ;\n    solid-memo:backLabel "[d](https://d.example)"`, `solid-memo:back "git clone <url>"@en , "x"@sv ;`),
+      question(
+        "q-2",
+        [],
+        `${MD} ;\n    solid-memo:backLabel "[d](https://d.example)"`,
+        `solid-memo:back "git clone <url>"@en , "x"@sv ;`,
+      ),
     ].join("");
     expect(problemsOf(bad)).toEqual([
       `${L}: <#q-1> solid-memo:frontNote@en has the character reference &aring;, which Markdown shows decoded: write it as code, or escape its "&" (\\&aring;).`,
@@ -897,14 +1136,24 @@ describe("markdownProblems", () => {
   });
 
   it("holds the back of a card with distractors to one paragraph, as its options", () => {
-    expect(problemsOf(marked("q-1", "").replace(`solid-memo:back "Answer q-1"@en`, `solid-memo:back "- a"@en`))).toEqual([
+    expect(
+      problemsOf(
+        marked("q-1", "").replace(`solid-memo:back "Answer q-1"@en`, `solid-memo:back "- a"@en`),
+      ),
+    ).toEqual([
       `${L}: <#q-1> solid-memo:back@en is an option but not one paragraph: the right option and the wrong ones must look alike.`,
     ]);
   });
 
   it("names text the app would not read as Markdown, or would show in part as its source", () => {
     const theory = (id: string, position: number, text: string) =>
-      step(id, "ch-1", position, ["q-1"], `${MD} ;\n    solid-memo:theory ${JSON.stringify(text)}@en`);
+      step(
+        id,
+        "ch-1",
+        position,
+        ["q-1"],
+        `${MD} ;\n    solid-memo:theory ${JSON.stringify(text)}@en`,
+      );
     const outline = [
       chapter("ch-1", 0),
       theory("s-1", 0, "a".repeat(20_001)),
@@ -968,6 +1217,56 @@ describe("markdownProblems", () => {
   });
 });
 
+describe("contactProblems", () => {
+  const L = "decks/capitals/v1.ttl";
+  const NONE = `${L}: states no dcat:contactPoint that is the library's contact: a new version states \`<> dcat:contactPoint <#contact>\` and \`<#contact> a vcard:Kind ; vcard:hasURL <${CONTACT_URL}>\`.`;
+
+  it("accepts a release that names the library's contact and no email", () => {
+    expect(contactProblems(release("capitals", 1, CONTACT))).toEqual([]);
+  });
+
+  it("names every email a release states, and a release without the library's contact", () => {
+    const turtle = `${releaseText("capitals", 1, { mbox: true })}\n<https://example.org/bo> <http://xmlns.com/foaf/0.1/mbox> <mailto:bo@example.org> .\n`;
+    const made: DeckRelease = {
+      deck: "capitals",
+      version: 1,
+      turtle,
+      quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`),
+    };
+    expect(contactProblems(made)).toEqual([
+      `${L}: <#anton> states foaf:mbox: a new version names no one's email; the library's contact is its dcat:contactPoint.`,
+      `${L}: <https://example.org/bo> states foaf:mbox: a new version names no one's email; the library's contact is its dcat:contactPoint.`,
+      NONE,
+    ]);
+  });
+
+  it("names a contact point that is no vcard:Kind, or that leads elsewhere", () => {
+    const VCARD = "http://www.w3.org/2006/vcard/ns#";
+    const withPoint = (point: string) => {
+      const turtle = `${releaseText("capitals", 1)}\n<> <${DCAT}contactPoint> <#contact> .\n${point}\n`;
+      return {
+        deck: "capitals",
+        version: 1,
+        turtle,
+        quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`),
+      };
+    };
+    expect(contactProblems(withPoint(`<#contact> <${VCARD}hasURL> <${CONTACT_URL}> .`))).toEqual([
+      NONE,
+    ]);
+    expect(
+      contactProblems(
+        withPoint(`<#contact> a <${VCARD}Kind> ; <${VCARD}hasURL> <https://example.org/issues> .`),
+      ),
+    ).toEqual([NONE]);
+    expect(
+      contactProblems(
+        withPoint(`<#contact> a <${VCARD}Kind> ; <${VCARD}hasURL> "${CONTACT_URL}" .`),
+      ),
+    ).toEqual([NONE]);
+  });
+});
+
 describe("baseProblems", () => {
   it("accepts versions new since the ref and a changed index", () => {
     const published = filesOf(CAPITALS.slice(0, 1));
@@ -1003,7 +1302,10 @@ describe("main", () => {
     const { io: library, log, writeIndex } = io(files);
     expect(await main(["node"], library)).toBe(0);
     expect(writeIndex).toHaveBeenCalledWith(buildIndex(LIBRARY));
-    expect(log.mock.calls.map(([m]) => m)).toEqual(["wrote decks/index.ttl", "decks/: 3 versions of 2 decks, valid."]);
+    expect(log.mock.calls.map(([m]) => m)).toEqual([
+      "wrote decks/index.ttl",
+      "decks/: 3 versions of 2 decks, valid.",
+    ]);
   });
 
   it("names in the index the course for newcomers its io names", async () => {
@@ -1031,7 +1333,9 @@ describe("main", () => {
   it("fails the check on an index out of date, or missing", async () => {
     const stale = io(filesOf(LIBRARY, buildIndex(CAPITALS)));
     expect(await main(["node", "--check"], stale.io)).toBe(1);
-    expect(stale.log).toHaveBeenCalledWith("decks/index.ttl is out of date: run `npm run library`.");
+    expect(stale.log).toHaveBeenCalledWith(
+      "decks/index.ttl is out of date: run `npm run library`.",
+    );
     const files = filesOf(LIBRARY);
     files.delete("index.ttl");
     const missing = io(files);
@@ -1040,7 +1344,10 @@ describe("main", () => {
   });
 
   it("checks against a git ref that no published version was edited or removed", async () => {
-    const ok = io(filesOf(LIBRARY), filesOf(CAPITALS));
+    const ok = io(
+      filesOf([...CAPITALS, release("rivers", 1, { title: "Rivers", ...CONTACT })]),
+      filesOf(CAPITALS),
+    );
     expect(await main(["node", "--check", "--base", "origin/main"], ok.io)).toBe(0);
     expect(ok.readFilesAt).toHaveBeenCalledWith("origin/main");
     const gone = io(filesOf(CAPITALS.slice(0, 1)), filesOf(CAPITALS));
@@ -1051,11 +1358,30 @@ describe("main", () => {
     );
   });
 
+  it("holds only the versions new since the git ref to the library's contact, not the published ones", async () => {
+    const emailed = [
+      release("capitals", 1, { mbox: true }),
+      release("capitals", 2, { ...NORWAY, mbox: true }),
+    ];
+    const published = io(filesOf(emailed), filesOf(emailed));
+    expect(await main(["node", "--check", "--base", "origin/main"], published.io)).toBe(0);
+    const added = io(filesOf(emailed), filesOf(emailed.slice(0, 1)));
+    expect(await main(["node", "--check", "--base", "origin/main"], added.io)).toBe(1);
+    expect(
+      added.log.mock.calls.map(([m]) => m).filter((m) => m.startsWith("decks/capitals/v")),
+    ).toEqual([
+      "decks/capitals/v2.ttl: <#anton> states foaf:mbox: a new version names no one's email; the library's contact is its dcat:contactPoint.",
+      expect.stringMatching(/^decks\/capitals\/v2\.ttl: states no dcat:contactPoint/),
+    ]);
+  });
+
   it("fails on a release that does not validate", async () => {
     const dropped = [...CAPITALS, release("capitals", 3)];
     const { io: library, log } = io(filesOf(dropped));
     expect(await main(["node", "--check"], library)).toBe(1);
-    expect(log).toHaveBeenCalledWith(expect.stringMatching(/^decks\/capitals\/v3\.ttl: drops <#no>/));
+    expect(log).toHaveBeenCalledWith(
+      expect.stringMatching(/^decks\/capitals\/v3\.ttl: drops <#no>/),
+    );
   });
 
   it("reports what it could not read", async () => {
@@ -1068,11 +1394,18 @@ describe("main", () => {
   });
 
   it("shows how to run it when the arguments are not its own", async () => {
-    for (const argv of [["node", "--bogus"], ["node", "--base"], ["node", "--base", "--check"], ["node", "extra"]]) {
+    for (const argv of [
+      ["node", "--bogus"],
+      ["node", "--base"],
+      ["node", "--base", "--check"],
+      ["node", "extra"],
+    ]) {
       const { io: library, log } = io(filesOf(LIBRARY));
       expect(await main(argv, library), argv.join(" ")).toBe(1);
       expect(log.mock.calls).toEqual([
-        ["Usage: npm run library [-- --base <git ref>], or npm run library:check [-- --base <git ref>]"],
+        [
+          "Usage: npm run library [-- --base <git ref>], or npm run library:check [-- --base <git ref>]",
+        ],
       ]);
     }
   });
@@ -1080,9 +1413,23 @@ describe("main", () => {
 
 describe("defaultIo", () => {
   const git = (repo: string, ...args: string[]) =>
-    execFileSync("git", ["-C", repo, "-c", "user.name=Test", "-c", "user.email=test@example.com", "-c", "commit.gpgsign=false", ...args], {
-      encoding: "utf8",
-    });
+    execFileSync(
+      "git",
+      [
+        "-C",
+        repo,
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.com",
+        "-c",
+        "commit.gpgsign=false",
+        ...args,
+      ],
+      {
+        encoding: "utf8",
+      },
+    );
 
   it("reads decks/ in the working tree and at a git ref, and writes the index", async () => {
     const repo = await mkdtemp(join(tmpdir(), "solid-memo-decks-"));
@@ -1116,7 +1463,10 @@ describe("defaultIo", () => {
     );
     await expect(library.readFilesAt("HEAD~1")).resolves.toEqual(new Map());
     await expect(library.readFilesAt("no-such-ref")).rejects.toThrow();
-    await symlink(join(repo, "decks", "capitals", "v1.ttl"), join(repo, "decks", "capitals", "v3.ttl"));
+    await symlink(
+      join(repo, "decks", "capitals", "v1.ttl"),
+      join(repo, "decks", "capitals", "v3.ttl"),
+    );
     await expect(library.readFiles()).rejects.toThrow(
       "decks/capitals/v3.ttl is neither a file nor a folder: decks/ holds only index.ttl and <name>/v<N>.ttl, as plain files.",
     );

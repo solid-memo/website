@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { isHttpUrl, isLinkableUrl } from "@solid-memo/domain/webId";
 import { ExternalIcon } from "./icons";
@@ -43,7 +47,14 @@ export function ExternalLink({
     );
   }
   return (
-    <a class={className} href={url} title={title} dir={dir} target="_blank" rel="noopener noreferrer">
+    <a
+      class={className}
+      href={url}
+      title={title}
+      dir={dir}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       {text}
       <ExternalIcon />
       <span class="visually-hidden"> {t("common.opensInNewTab")}</span>

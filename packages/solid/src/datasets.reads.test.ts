@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { buildThing, createSolidDataset, createThing, setThing } from "@inrupt/solid-client";
 import { deleteDataset, getSolidDatasetOrNull, readDataset, saveDataset } from "./datasets";
@@ -9,7 +13,7 @@ import { deleteDataset, getSolidDatasetOrNull, readDataset, saveDataset } from "
  */
 const DOC = "https://pod.example/doc.ttl";
 
-function pod({ etag = '"v1"' as string | null, honoursIfNoneMatch = true } = {}) {
+function pod({ etag = '"v1"' as string | null, honorsIfNoneMatch = true } = {}) {
   const gets: { ifNoneMatch: string | null }[] = [];
   const caches: (RequestCache | undefined)[] = [];
   let current = etag;
@@ -29,10 +33,13 @@ function pod({ etag = '"v1"' as string | null, honoursIfNoneMatch = true } = {})
     await held;
     if (!exists) return new Response("", { status: 404 });
     const response =
-      honoursIfNoneMatch && current !== null && headers.get("If-None-Match") === current
+      honorsIfNoneMatch && current !== null && headers.get("If-None-Match") === current
         ? new Response(null, { status: 304, headers: { ETag: current } })
         : new Response(`<#it> <https://example.com/ns#n> "${current?.replaceAll('"', "")}" .`, {
-            headers: { "Content-Type": "text/turtle", ...(current === null ? {} : { ETag: current }) },
+            headers: {
+              "Content-Type": "text/turtle",
+              ...(current === null ? {} : { ETag: current }),
+            },
           });
     Object.defineProperty(response, "url", { value: url });
     return response;
@@ -58,7 +65,12 @@ function pod({ etag = '"v1"' as string | null, honoursIfNoneMatch = true } = {})
 }
 
 const edited = <T extends Parameters<typeof setThing>[0]>(dataset: T) =>
-  setThing(dataset, buildThing(createThing({ url: `${DOC}#new` })).addStringNoLocale("https://example.com/ns#n", "2").build());
+  setThing(
+    dataset,
+    buildThing(createThing({ url: `${DOC}#new` }))
+      .addStringNoLocale("https://example.com/ns#n", "2")
+      .build(),
+  );
 
 describe("reading a document more than once", () => {
   it("shares a read already under way", async () => {
@@ -145,7 +157,8 @@ describe("reading a document more than once", () => {
   });
 
   it("fails on a 304 it did not ask for, as before", async () => {
-    const fetch = (async () => new Response(null, { status: 304 })) as unknown as typeof globalThis.fetch;
+    const fetch = (async () =>
+      new Response(null, { status: 304 })) as unknown as typeof globalThis.fetch;
     await expect(readDataset(DOC, fetch)).rejects.toThrow();
   });
 });

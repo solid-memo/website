@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import { TOPICS } from "@solid-memo/vocab/concepts.generated";
@@ -63,14 +67,18 @@ export function DeckAboutSection({
   function edit() {
     const languages = [locale, ...navigator.languages];
     const titleTag = shownTag(deck.title, languages);
-    const descriptionTag = deck.description === undefined ? undefined : shownTag(deck.description, languages);
+    const descriptionTag =
+      deck.description === undefined ? undefined : shownTag(deck.description, languages);
     setDraft({
       description: draftOf(deck.description, languages, {
         tag: titleTag ?? recentLanguages("deck")[0] ?? null,
       }),
       topics: topicsOfDeck(deck),
       keywords: draftOf(joinedKeywords(deck.keywords), languages, {
-        tag: [descriptionTag, titleTag].find((tag) => tag !== undefined && tag !== "") ?? recentLanguages("deck")[0] ?? null,
+        tag:
+          [descriptionTag, titleTag].find((tag) => tag !== undefined && tag !== "") ??
+          recentLanguages("deck")[0] ??
+          null,
       }),
     });
   }
@@ -79,7 +87,9 @@ export function DeckAboutSection({
   function toggleTopic(topic: string, checked: boolean) {
     setDraft((current) => ({
       ...current!,
-      topics: checked ? [...current!.topics, topic] : current!.topics.filter((other) => other !== topic),
+      topics: checked
+        ? [...current!.topics, topic]
+        : current!.topics.filter((other) => other !== topic),
     }));
   }
 
@@ -115,7 +125,8 @@ export function DeckAboutSection({
         )}
         {(topics.length > 0 || keywords.length > 0) && (
           <p class="hint">
-            {topics.length > 0 && tx("deckAbout.topicsLine", { topics: <ReaderTexts texts={topics} /> })}
+            {topics.length > 0 &&
+              tx("deckAbout.topicsLine", { topics: <ReaderTexts texts={topics} /> })}
             {topics.length > 0 && keywords.length > 0 && " · "}
             {keywords.length > 0 && t("deckAbout.keywordsLine", { keywords: keywords.join(", ") })}
           </p>
@@ -151,7 +162,9 @@ export function DeckAboutSection({
         error={
           missing === undefined
             ? null
-            : errorText(new AppError("textNeedsLanguage", { field: t("language.field.description") }))
+            : errorText(
+                new AppError("textNeedsLanguage", { field: t("language.field.description") }),
+              )
         }
       />
       <fieldset class="library-topics">
@@ -173,7 +186,9 @@ export function DeckAboutSection({
         label={t("deckAbout.keywords")}
         role="keywords"
         draft={draft.keywords}
-        suggestions={Object.keys({ ...deck.keywords, ...deck.description, ...deck.title }).filter((tag) => tag !== "")}
+        suggestions={Object.keys({ ...deck.keywords, ...deck.description, ...deck.title }).filter(
+          (tag) => tag !== "",
+        )}
         hint={
           <p id="deck-keywords-hint" class="hint field-hint">
             {t("deckAbout.keywordsHint")}
@@ -244,7 +259,10 @@ function keywordsOfDraft(
   for (const entry of draft) {
     const list = parseKeywords(entry.value);
     if (list.length === 0) continue;
-    if (entry.tag === null || (entry.tag === "" && list.some((keyword) => !savedUntagged.includes(keyword)))) {
+    if (
+      entry.tag === null ||
+      (entry.tag === "" && list.some((keyword) => !savedUntagged.includes(keyword)))
+    ) {
       return { missing: entry };
     }
     keywords[entry.tag] = list;

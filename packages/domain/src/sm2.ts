@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ReviewQuality } from "./review";
 
 /** The three values the SM-2 algorithm transitions. */
@@ -16,7 +20,11 @@ export const INITIAL_SM2_STATE: Sm2State = {
 };
 
 /**
- * One SM-2 transition (SuperMemo 2, Wozniak 1990).
+ * One SM-2 transition (SuperMemo 2). Source: Woźniak, P. A. (1990).
+ * Optimization of learning. Master's thesis, University of Technology
+ * in Poznań. Described at
+ * https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method
+ * (docs/srs.md, which also says where Solid Memo departs from it).
  *
  * quality >= 3 (correct): repetitions increments; the ease factor is
  * updated first and the new value is used for the interval growth.

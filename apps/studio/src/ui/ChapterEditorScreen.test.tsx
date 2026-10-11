@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
@@ -7,10 +11,22 @@ import type { DraftEditor } from "./draftEditor";
 import { courseDraft, draftLinks } from "../test/fixtures";
 import { answer, dialog } from "../test/dialogs";
 
-function renderScreen(chapter: string, draft: ReleaseDraft = courseDraft(), onEdit = vi.fn<DraftEditor["edit"]>(() => null)) {
+function renderScreen(
+  chapter: string,
+  draft: ReleaseDraft = courseDraft(),
+  onEdit = vi.fn<DraftEditor["edit"]>(() => null),
+) {
   const onDeleted = vi.fn();
   render(
-    <ChapterEditorScreen draft={draft} chapter={chapter} readOnly={null} status={{ saving: false, failure: null }} links={draftLinks} onEdit={onEdit} onDeleted={onDeleted} />,
+    <ChapterEditorScreen
+      draft={draft}
+      chapter={chapter}
+      readOnly={null}
+      status={{ saving: false, failure: null }}
+      links={draftLinks}
+      onEdit={onEdit}
+      onDeleted={onDeleted}
+    />,
   );
   return { onEdit, onDeleted };
 }
@@ -32,13 +48,31 @@ describe("ChapterEditorScreen", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Pods" })).toBeInTheDocument();
     expect(screen.getByText("Chapter 1 of 2")).toBeInTheDocument();
     fireEvent.input(screen.getByRole("textbox", { name: "Title" }), { target: { value: "Pods!" } });
-    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "editChapter", id: "ch-pods", text: { title: { en: "Pods!" }, description: undefined, textFormat: undefined } }], {
-      debounce: true,
-    });
+    expect(onEdit).toHaveBeenLastCalledWith(
+      [
+        {
+          kind: "editChapter",
+          id: "ch-pods",
+          text: { title: { en: "Pods!" }, description: undefined, textFormat: undefined },
+        },
+      ],
+      {
+        debounce: true,
+      },
+    );
     fireEvent.input(screen.getByRole("textbox", { name: "Title" }), { target: { value: "" } });
-    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "editChapter", id: "ch-pods", text: { title: undefined, description: undefined, textFormat: undefined } }], {
-      debounce: true,
-    });
+    expect(onEdit).toHaveBeenLastCalledWith(
+      [
+        {
+          kind: "editChapter",
+          id: "ch-pods",
+          text: { title: undefined, description: undefined, textFormat: undefined },
+        },
+      ],
+      {
+        debounce: true,
+      },
+    );
     const description = screen.getByRole("textbox", { name: "Description" });
     fireEvent.input(description, { target: { value: "*All* of it" } });
     const group = description.closest<HTMLElement>(".lang-text-field")!;
@@ -46,33 +80,68 @@ describe("ChapterEditorScreen", () => {
     fireEvent.click(within(group).getByRole("radio", { name: "English (en)" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Format with Markdown" }));
     expect(onEdit).toHaveBeenLastCalledWith(
-      [{ kind: "editChapter", id: "ch-pods", text: { title: { en: "Pods" }, description: { en: "*All* of it" }, textFormat: SM.markdown } }],
+      [
+        {
+          kind: "editChapter",
+          id: "ch-pods",
+          text: {
+            title: { en: "Pods" },
+            description: { en: "*All* of it" },
+            textFormat: SM.markdown,
+          },
+        },
+      ],
       { debounce: true },
     );
     // Shown as the course's screen shows it.
-    expect(screen.getByRole("region", { name: "Preview of Description" }).querySelector("em")).toHaveTextContent("All");
+    expect(
+      screen.getByRole("region", { name: "Preview of Description" }).querySelector("em"),
+    ).toHaveTextContent("All");
     fireEvent.input(description, { target: { value: "" } });
-    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "editChapter", id: "ch-pods", text: { title: { en: "Pods" }, description: undefined, textFormat: SM.markdown } }], {
-      debounce: true,
-    });
+    expect(onEdit).toHaveBeenLastCalledWith(
+      [
+        {
+          kind: "editChapter",
+          id: "ch-pods",
+          text: { title: { en: "Pods" }, description: undefined, textFormat: SM.markdown },
+        },
+      ],
+      {
+        debounce: true,
+      },
+    );
   });
 
   it("orders its steps, and adds one under the id the assistant suggests", () => {
-    const onEdit = vi.fn<DraftEditor["edit"]>().mockReturnValueOnce(null).mockReturnValueOnce(null).mockReturnValueOnce({ refused: "idTaken", id: "x" }).mockReturnValue(null);
+    const onEdit = vi
+      .fn<DraftEditor["edit"]>()
+      .mockReturnValueOnce(null)
+      .mockReturnValueOnce(null)
+      .mockReturnValueOnce({ refused: "idTaken", id: "x" })
+      .mockReturnValue(null);
     renderScreen("ch-pods", courseDraft(), onEdit);
     const steps = screen.getByRole("heading", { name: "Steps" }).parentElement!;
-    expect(within(steps).getByRole("link", { name: "Step 1" })).toHaveAttribute("href", "#/step/ch-pods-1");
+    expect(within(steps).getByRole("link", { name: "Step 1" })).toHaveAttribute(
+      "href",
+      "#/step/ch-pods-1",
+    );
     expect(within(steps).getByRole("button", { name: "Move Step 1 up" })).toBeDisabled();
     expect(within(steps).getByRole("button", { name: "Move Step 2 down" })).toBeDisabled();
     fireEvent.click(within(steps).getByRole("button", { name: "Move Step 1 down" }));
-    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "moveStep", id: "ch-pods-1", chapter: "ch-pods", to: 1 }]);
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveStep", id: "ch-pods-1", chapter: "ch-pods", to: 1 },
+    ]);
     fireEvent.click(within(steps).getByRole("button", { name: "Move Step 2 up" }));
-    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "moveStep", id: "ch-pods-2", chapter: "ch-pods", to: 0 }]);
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveStep", id: "ch-pods-2", chapter: "ch-pods", to: 0 },
+    ]);
     const id = within(steps).getByRole("textbox", { name: "Id" });
     expect(id).toHaveValue("ch-pods-3");
     fireEvent.input(id, { target: { value: "ch-pods-9" } });
     fireEvent.click(within(steps).getByRole("button", { name: "Add the step" }));
-    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "addStep", id: "ch-pods-9", chapter: "ch-pods" }]);
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "addStep", id: "ch-pods-9", chapter: "ch-pods" },
+    ]);
     // Refused: the id stays as typed.
     expect(id).toHaveValue("ch-pods-9");
     fireEvent.click(within(steps).getByRole("button", { name: "Add the step" }));
@@ -83,12 +152,34 @@ describe("ChapterEditorScreen", () => {
   });
 
   it("lists its review questions and its retired steps, and adds a review question", () => {
-    const draft = applyDraftChanges(courseDraft(), [{ kind: "retire", of: "step", id: "ch-pods-2" }]) as ReleaseDraft;
-    const { onEdit } = renderScreen("ch-pods", { ...draft, chapters: draft.chapters.map((node) => (node.id === "ch-pods" ? { ...node, data: { ...node.data, reviewQuestion: [...node.data.reviewQuestion, `${draft.url}#gone`] } } : node)) });
-    expect(screen.getByRole("link", { name: "Who owns a pod?" })).toHaveAttribute("href", "#/question/q-pods-r01");
+    const draft = applyDraftChanges(courseDraft(), [
+      { kind: "retire", of: "step", id: "ch-pods-2" },
+    ]) as ReleaseDraft;
+    const { onEdit } = renderScreen("ch-pods", {
+      ...draft,
+      chapters: draft.chapters.map((node) =>
+        node.id === "ch-pods"
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                reviewQuestion: [...node.data.reviewQuestion, `${draft.url}#gone`],
+              },
+            }
+          : node,
+      ),
+    });
+    expect(screen.getByRole("link", { name: "Who owns a pod?" })).toHaveAttribute(
+      "href",
+      "#/question/q-pods-r01",
+    );
     expect(screen.getByRole("link", { name: "gone" })).toHaveAttribute("href", "#/question/gone");
-    const retired = screen.getByRole("heading", { name: "Retired steps" }).nextElementSibling as HTMLElement;
-    expect(within(retired).getByRole("link", { name: "ch-pods-2" })).toHaveAttribute("href", "#/step/ch-pods-2");
+    const retired = screen.getByRole("heading", { name: "Retired steps" })
+      .nextElementSibling as HTMLElement;
+    expect(within(retired).getByRole("link", { name: "ch-pods-2" })).toHaveAttribute(
+      "href",
+      "#/step/ch-pods-2",
+    );
     fireEvent.click(within(retired).getByRole("button", { name: "Restore" }));
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "restore", of: "step", id: "ch-pods-2" }]);
     const form = screen.getByRole("group", { name: "New review question" });
@@ -113,15 +204,23 @@ describe("ChapterEditorScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Retire" }));
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "retire", of: "chapter", id: "ch-apps" }]);
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    expect(dialog("Delete the chapter")).toHaveTextContent("Delete the chapter Apps, with its steps? Its questions stay, asked nowhere.");
+    expect(dialog("Delete the chapter")).toHaveTextContent(
+      "Delete the chapter Apps, with its steps? Its questions stay, asked nowhere.",
+    );
     answer("Delete the chapter", "Delete");
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "delete", of: "chapter", id: "ch-apps" }]);
     expect(onDeleted).toHaveBeenCalled();
   });
 
   it("names a chapter retired, or of no title, and only retires one published", () => {
-    const draft = applyDraftChanges(courseDraft(), [{ kind: "addChapter", id: "ch-x" }, { kind: "retire", of: "chapter", id: "ch-x" }]) as ReleaseDraft;
-    const { onEdit, onDeleted } = renderScreen("ch-x", { ...draft, published: { ids: { "ch-x": "chapter" }, activities: [] } });
+    const draft = applyDraftChanges(courseDraft(), [
+      { kind: "addChapter", id: "ch-x" },
+      { kind: "retire", of: "chapter", id: "ch-x" },
+    ]) as ReleaseDraft;
+    const { onEdit, onDeleted } = renderScreen("ch-x", {
+      ...draft,
+      published: { ids: { "ch-x": "chapter" }, activities: [] },
+    });
     expect(screen.getByRole("heading", { level: 2, name: "Chapter ch-x" })).toBeInTheDocument();
     expect(screen.getByText("Retired chapter")).toBeInTheDocument();
     expect(screen.getByText(/An earlier release published this/)).toBeInTheDocument();
@@ -132,7 +231,11 @@ describe("ChapterEditorScreen", () => {
   });
 
   it("stays when the user does not confirm, or the delete is refused", () => {
-    const { onEdit, onDeleted } = renderScreen("ch-apps", courseDraft(), vi.fn<DraftEditor["edit"]>(() => ({ refused: "missing", id: "ch-apps" })));
+    const { onEdit, onDeleted } = renderScreen(
+      "ch-apps",
+      courseDraft(),
+      vi.fn<DraftEditor["edit"]>(() => ({ refused: "missing", id: "ch-apps" })),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
     answer("Delete the chapter", "Cancel");
     expect(onEdit).not.toHaveBeenCalled();

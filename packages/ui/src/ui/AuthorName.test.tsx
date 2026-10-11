@@ -1,12 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { AuthorName, AuthorNames } from "./AuthorName";
 
 describe("AuthorName", () => {
   it("links a name to its address", () => {
-    const { container } = render(
-      <AuthorName author="Anton Wiklund <anton@example.com>" />,
-    );
+    const { container } = render(<AuthorName author="Anton Wiklund <anton@example.com>" />);
     expect(container.textContent).toBe("Anton Wiklund");
     expect(screen.getByRole("link", { name: "Anton Wiklund" })).toHaveAttribute(
       "href",

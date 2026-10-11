@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 node_modules/
 dist/
 coverage/
@@ -8,3 +12,5 @@ e2e/journeys/logs/
 e2e/journeys/test-results/
 e2e/journeys/playwright-report/
 e2e/journeys/blob-report/
+.env.local
+.env.*.local

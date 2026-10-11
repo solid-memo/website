@@ -1,10 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
-import {
-  describeFormats,
-  describeOutdated,
-  MigrationNotice,
-} from "./MigrationNotice";
+import { describeFormats, describeOutdated, MigrationNotice } from "./MigrationNotice";
 import { createI18n, I18nProvider } from "./i18n";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { MigrationPlan } from "@solid-memo/domain/migration";
@@ -39,9 +39,7 @@ const plan: MigrationPlan = {
   ...nothing,
 };
 
-function renderNotice(
-  overrides: Partial<Parameters<typeof MigrationNotice>[0]> = {},
-) {
+function renderNotice(overrides: Partial<Parameters<typeof MigrationNotice>[0]> = {}) {
   const props = {
     plan,
     busy: false,
@@ -62,31 +60,37 @@ describe("describeOutdated", () => {
       ),
     );
     expect(
-      describeOutdated({
-        decks: [{ deck, deckOutdated: true, cardCount: 0, reviewCount: 0 }],
-        deckCount: 1,
-        cardCount: 0,
-        reviewCount: 0,
-        ...nothing,
-      }, t),
+      describeOutdated(
+        {
+          decks: [{ deck, deckOutdated: true, cardCount: 0, reviewCount: 0 }],
+          deckCount: 1,
+          cardCount: 0,
+          reviewCount: 0,
+          ...nothing,
+        },
+        t,
+      ),
     ).toBe("1 deck entry");
     expect(
-      describeOutdated({
-        decks: [{ deck, deckOutdated: false, cardCount: 1, reviewCount: 1 }],
-        deckCount: 0,
-        cardCount: 1,
-        reviewCount: 1,
-        preferencesOutdated: true,
-        instanceOutdated: true,
-        catalogMissing: false,
-      }, t),
+      describeOutdated(
+        {
+          decks: [{ deck, deckOutdated: false, cardCount: 1, reviewCount: 1 }],
+          deckCount: 0,
+          cardCount: 1,
+          reviewCount: 1,
+          preferencesOutdated: true,
+          instanceOutdated: true,
+          catalogMissing: false,
+        },
+        t,
+      ),
     ).toBe(
       "the instance record, your preferences, 1 card in one deck and 1 review state in one deck",
     );
   });
 });
 
-describe("a missing catalogue", () => {
+describe("a missing catalog", () => {
   const catalogOnly: MigrationPlan = {
     decks: [],
     deckCount: 0,
@@ -98,14 +102,18 @@ describe("a missing catalogue", () => {
   };
 
   it("is named in what is outdated, in the formats, on the list and on the button", () => {
-    expect(describeOutdated(catalogOnly, t)).toBe("the instance's catalogue");
+    expect(describeOutdated(catalogOnly, t)).toBe("the instance's catalog");
     expect(describeFormats(catalogOnly, t)).toBe(
-      "a catalogue of each instance's decks, which other apps read as a DCAT catalogue",
+      "a catalog of each instance's decks, which other apps read as a DCAT catalog",
     );
     renderNotice({ plan: catalogOnly });
-    expect(screen.getByRole("region")).toHaveTextContent("the instance's catalogue is stored in an older format.");
-    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Catalogue of the decks"]);
-    expect(screen.getByRole("button", { name: "Update the catalogue" })).toBeEnabled();
+    expect(screen.getByRole("region")).toHaveTextContent(
+      "the instance's catalog is stored in an older format.",
+    );
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Catalog of the decks",
+    ]);
+    expect(screen.getByRole("button", { name: "Update the catalog" })).toBeEnabled();
   });
 });
 
@@ -115,15 +123,18 @@ describe("describeFormats", () => {
       "deck format 6, which describes decks with the DCAT and SKOS standards, gives every deck a description and lets a deck's title, description and keywords be in any language you state, card format 5, which adds pictures on cards, lets a library deck retire a card it no longer uses and lets a card's text be in any language you state and review-state format 2, which keeps each study direction's state and the day's undo snapshot",
     );
     expect(
-      describeFormats({
-        decks: [],
-        deckCount: 0,
-        cardCount: 0,
-        reviewCount: 0,
-        preferencesOutdated: true,
-        instanceOutdated: true,
-        catalogMissing: false,
-      }, t),
+      describeFormats(
+        {
+          decks: [],
+          deckCount: 0,
+          cardCount: 0,
+          reviewCount: 0,
+          preferencesOutdated: true,
+          instanceOutdated: true,
+          catalogMissing: false,
+        },
+        t,
+      ),
     ).toBe(
       "instance format 2 and preferences format 4, which records the answer scale, developer mode, what to do with invalid data and the theme",
     );
@@ -139,9 +150,7 @@ describe("MigrationNotice", () => {
     );
     expect(region).toHaveTextContent("Solid Memo now writes deck format 6");
     expect(region).toHaveTextContent("card format 5");
-    expect(
-      screen.getAllByRole("listitem").map((item) => item.textContent),
-    ).toEqual([
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
       "Kanji N5 — deck entry, 12 cards",
       "Capitals — 243 cards, 30 review states",
       "Verbs — deck entry",
@@ -180,9 +189,11 @@ describe("MigrationNotice", () => {
         catalogMissing: false,
       },
     });
-    expect(
-      screen.getAllByRole("listitem").map((item) => item.textContent),
-    ).toEqual(["Instance record", "Preferences", "Kanji N5 — 2 review states"]);
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Instance record",
+      "Preferences",
+      "Kanji N5 — 2 review states",
+    ]);
     expect(
       screen.getByRole("button", { name: "Update 1 deck, preferences and the instance record" }),
     ).toBeEnabled();

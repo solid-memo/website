@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { Parser, type Quad, type Quad_Object } from "n3";
@@ -69,9 +73,7 @@ export async function readTurtleTree(dir: string): Promise<TurtleFile[]> {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true });
   const paths = entries
     .filter((entry) => entry.isFile() && entry.name.endsWith(".ttl"))
-    .map((entry) =>
-      relative(dir, join(entry.parentPath, entry.name)).replaceAll("\\", "/"),
-    )
+    .map((entry) => relative(dir, join(entry.parentPath, entry.name)).replaceAll("\\", "/"))
     .sort();
   return Promise.all(
     paths.map(async (path) => ({

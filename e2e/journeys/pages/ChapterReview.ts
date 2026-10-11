@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import type { Answers } from "./CourseQuestion.ts";
 import { Screen } from "./Screen.ts";
@@ -10,19 +14,27 @@ import { Screen } from "./Screen.ts";
  */
 export class ChapterReview extends Screen {
   heading(chapter: string): Locator {
-    return this.page.getByRole("heading", { level: 2, name: this.t("chapterReview.heading", { chapter }), exact: true });
+    return this.page.getByRole("heading", {
+      level: 2,
+      name: this.t("chapterReview.heading", { chapter }),
+      exact: true,
+    });
   }
 
   /** The word before the review, its heading focused, with the way back to the chapters. */
   async expectWord(chapter: string): Promise<void> {
     await expect(this.heading(chapter)).toBeFocused();
     await expect(this.page.getByText(this.t("chapterReview.cheer"), { exact: true })).toBeVisible();
-    await expect(this.page.getByRole("link", { name: this.t("chapterReview.backToCourse"), exact: true })).toBeVisible();
+    await expect(
+      this.page.getByRole("link", { name: this.t("chapterReview.backToCourse"), exact: true }),
+    ).toBeVisible();
   }
 
   async start(): Promise<void> {
     await this.intent("Start the final review", async () => {
-      await this.page.getByRole("button", { name: this.t("chapterReview.start"), exact: true }).click();
+      await this.page
+        .getByRole("button", { name: this.t("chapterReview.start"), exact: true })
+        .click();
       await expect(this.app.question.options).toBeVisible();
     });
   }
@@ -47,9 +59,13 @@ export class ChapterReview extends Screen {
       const { question, correct } = await this.app.question.answer(known, { wrongly });
       questions.add(question);
       if (!correct) wrong += 1;
-      await this.page.getByRole("main").getByRole("button", { name: this.t("chapterReview.next"), exact: true }).click();
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("chapterReview.next"), exact: true })
+        .click();
       await expect(this.app.question.options.or(this.app.course.cheer)).toBeVisible();
-      if (await this.app.course.cheer.isVisible()) return { asked, questions: questions.size, wrong };
+      if (await this.app.course.cheer.isVisible())
+        return { asked, questions: questions.size, wrong };
     }
   }
 }

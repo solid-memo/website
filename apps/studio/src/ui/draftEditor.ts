@@ -1,10 +1,20 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext } from "preact";
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DraftEdit } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { changedDocuments, draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
-import { applyDraftChanges, isRefusal, type DraftChange, type DraftRefusal, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import {
+  applyDraftChanges,
+  isRefusal,
+  type DraftChange,
+  type DraftRefusal,
+  type ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import { useDataCheck, type ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 
 /** The query of a draft: its screens, and the workspace's trail, share it. */
@@ -33,7 +43,9 @@ export interface EditorReport {
  * own key (the editor itself), for the Studio's status bar
  * (useDraftSaving); none, outside it.
  */
-export const DraftWaiting = createContext<(editor: object, report: EditorReport) => void>(() => undefined);
+export const DraftWaiting = createContext<(editor: object, report: EditorReport) => void>(
+  () => undefined,
+);
 
 /** Whether a draft's changes are all written: some are on their way, the last one failed, or all are saved. */
 export type DraftSaving = "saving" | "failed" | "saved";
@@ -44,7 +56,8 @@ export type DraftSaving = "saving" | "failed" | "saved";
  * DraftWaiting (`reports`, all of them together).
  */
 export function useDraftSaving(draftUrl: string, reports: EditorReport): DraftSaving {
-  if (useIsMutating({ mutationKey: writeKey(draftUrl) }) > 0 || reports.waiting > 0) return "saving";
+  if (useIsMutating({ mutationKey: writeKey(draftUrl) }) > 0 || reports.waiting > 0)
+    return "saving";
   return reports.failed ? "failed" : "saved";
 }
 
@@ -159,11 +172,13 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
   }
 
   function write(changes: readonly DraftChange[]) {
-    const mutation = queryClient.getMutationCache().build<DraftEdit, unknown, readonly DraftChange[], unknown>(queryClient, {
-      mutationKey,
-      scope: { id: draftScope(draftUrl) },
-      mutationFn: (variables) => useCases.editReleaseDraft(draftUrl, variables),
-    });
+    const mutation = queryClient
+      .getMutationCache()
+      .build<DraftEdit, unknown, readonly DraftChange[], unknown>(queryClient, {
+        mutationKey,
+        scope: { id: draftScope(draftUrl) },
+        mutationFn: (variables) => useCases.editReleaseDraft(draftUrl, variables),
+      });
     mutation
       .execute(changes)
       .then((result) => {
@@ -199,13 +214,19 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
   // The status bar counts what waits here too, and says when the last change failed.
   const report = useContext(DraftWaiting);
   const self = useRef({});
-  useEffect(() => report(self.current, { waiting: waitingCount, failed: failure !== null }), [waitingCount, failure]);
+  useEffect(
+    () => report(self.current, { waiting: waitingCount, failed: failure !== null }),
+    [waitingCount, failure],
+  );
   useEffect(() => () => report(self.current, { waiting: 0, failed: false }), []);
 
   const released = query.data?.root.releasedAs !== undefined;
   const readOnly: DraftReadOnly | null = released ? "released" : check.readOnly();
 
-  function edit(changes: readonly DraftChange[], { debounce = false }: { debounce?: boolean } = {}): DraftRefusal | null {
+  function edit(
+    changes: readonly DraftChange[],
+    { debounce = false }: { debounce?: boolean } = {},
+  ): DraftRefusal | null {
     const before = queryClient.getQueryData<ReleaseDraft>(draftKey(draftUrl))!;
     const after = applyDraftChanges(before, changes);
     if (isRefusal(after)) {

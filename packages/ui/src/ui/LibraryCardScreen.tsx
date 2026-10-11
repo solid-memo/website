@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { LibraryCard } from "@solid-memo/domain/library";
 import { CardFace } from "./CardFace";
 import { useI18n } from "./i18n";
@@ -51,7 +55,13 @@ export function LibraryCardScreen({
       </div>
       {card.retired && <RetiredNotice />}
       <p class="hint">
-        {tx("libraryCard.from", { deck: <a href={deckHref} lang={deckLang}>{deckName}</a> })}
+        {tx("libraryCard.from", {
+          deck: (
+            <a href={deckHref} lang={deckLang}>
+              {deckName}
+            </a>
+          ),
+        })}
       </p>
     </section>
   );

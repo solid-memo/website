@@ -8,20 +8,35 @@ Read `docs/README.md` inside that installed package first, then read the relevan
 
 This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
 <!-- END:turborepo-agent-rules -->
+<!-- markdownlint-disable-file MD025 -- turbo writes the block above, with a heading of its own. -->
 
 # Solid Memo
 
 This repository's docs are indexed in [docs/README.md](docs/README.md); start with
-[docs/architecture.md](docs/architecture.md).
+[docs/architecture.md](docs/architecture.md). How contributions are made
+(commit messages, one change per commit, pull requests) is in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
-- **Done** means `npm run check` passes, and `npm run crosscheck` too when
-  `ns/` or `decks/` changed (it needs `pip install -r scripts/requirements-ci.txt`).
+- **Done** means `npm run check` passes (Biome, markdownlint, cspell,
+  typecheck, tests and the repository's checks), `npm run lint:reuse` too
+  when a file was added (it needs reuse: `pipx run reuse lint`, or
+  `uv run --no-project --with reuse reuse lint`), and `npm run crosscheck`
+  too when `ns/` or `decks/` changed (it needs
+  `pip install -r scripts/requirements-ci.txt`).
 - **Generated files** (`packages/vocab/src/*.generated.ts`) are never
   edited by hand: change `ns/` and run `npm run generate`.
 - **Turtle**: after editing a `.ttl` file, run `npm run format:turtle`; after
   changing `decks/`, `npm run library` ([docs/deck-library.md](docs/deck-library.md)).
 - **Coverage** is 100% per package; new code ships with its tests, and
   unreachable code is removed, not excluded ([docs/testing.md](docs/testing.md)).
+- **Formatting**: after editing TypeScript, JSON or CSS, run `npm run format`
+  (Biome); `npm run lint` checks it ([docs/style.md](docs/style.md#formatting)).
 - **One test file**: `npm run test:unit -- <path>`, from the root.
 - **Imports** follow [docs/boundaries.md](docs/boundaries.md), which
   `npm run check:boundaries` enforces.
+- **Licenses**: a new file that can carry a comment starts with the SPDX
+  header, which `npm run lint:reuse` checks; a new deck is listed in
+  `REUSE.toml` under its license, which `npm run check:reuse` (in
+  `npm run check`) checks ([docs/style.md](docs/style.md#licenses)).
+- **Spelling** is American English; `npm run lint:spelling`, part of
+  `npm run check`, checks Markdown and `en.json` ([docs/style.md](docs/style.md#language)).

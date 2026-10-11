@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useI18n } from "./i18n";
 
 /** Where the skip link goes: the main landmark, past the site header. */

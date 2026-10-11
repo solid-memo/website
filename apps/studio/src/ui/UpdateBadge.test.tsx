@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -24,7 +28,9 @@ function observeByHand() {
       disconnect() {}
     },
   );
-  return { show: () => act(() => observers.forEach((callback) => callback([{ isIntersecting: true }]))) };
+  return {
+    show: () => act(() => observers.forEach((callback) => callback([{ isIntersecting: true }]))),
+  };
 }
 
 function renderBadges(useCases: UseCases) {
@@ -58,7 +64,9 @@ describe("UpdateBadge", () => {
 
   it("shows nothing when the library cannot be read", async () => {
     const screenSays = observeByHand();
-    const useCases = makeUseCasesFake({ listLibraryUpdates: vi.fn(async () => Promise.reject(new Error("offline"))) });
+    const useCases = makeUseCasesFake({
+      listLibraryUpdates: vi.fn(async () => Promise.reject(new Error("offline"))),
+    });
     const { container } = renderBadges(useCases);
     screenSays.show();
     await waitFor(() => expect(useCases.listLibraryUpdates).toHaveBeenCalled());

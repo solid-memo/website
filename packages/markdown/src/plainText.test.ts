@@ -1,12 +1,18 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { MAX_CHARS } from "./parse";
 import { LABEL_PREFIX, labelText, plainText } from "./plainText";
 
 describe("plainText", () => {
   it("keeps code, drops marks, and shows a link as its text and a picture as its alt", () => {
-    expect(plainText("Run `git diff --staged`, *then* **commit** ([docs](https://x.example)) ![a cat](c.png)")).toBe(
-      "Run git diff --staged, then commit (docs) a cat",
-    );
+    expect(
+      plainText(
+        "Run `git diff --staged`, *then* **commit** ([docs](https://x.example)) ![a cat](c.png)",
+      ),
+    ).toBe("Run git diff --staged, then commit (docs) a cat");
   });
 
   it("puts blocks and hard breaks on lines of their own, list items joined by '; ' and table cells by ' | '", () => {

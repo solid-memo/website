@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Bug report
+description: Something in Solid Memo does not work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. A security issue goes to a [private report](https://github.com/solid-memo/website/security/advisories/new) instead, never here.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Click …
+        3. See …
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: The page's address (the part from `#/` on is enough), or "the Studio".
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The commit the footer links to.
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and system
+      placeholder: Firefox 140 on Ubuntu 24.04
+  - type: input
+    id: server
+    attributes:
+      label: Pod
+      description: The Solid server or provider your pod is on, or "guest mode".
+      placeholder: solidcommunity.net
+  - type: dropdown
+    id: language
+    attributes:
+      label: The app's language
+      options:
+        - English
+        - Svenska
+        - 한국어
+        - Deutsch
+        - Español
+        - Français
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Screenshots, or messages from the browser's console. Leave out tokens and anything private from your pod.

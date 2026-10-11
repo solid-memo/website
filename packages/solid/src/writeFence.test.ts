@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { createWriteFence } from "./writeFence";
 
@@ -20,12 +24,20 @@ describe("createWriteFence", () => {
     async (method) => {
       const { inner, fetch, hold } = fence();
       hold(MAIN);
-      for (const url of [MAIN, `${MAIN}decks/deck-1.ttl`, `${MAIN}.acl`, "https://POD.example:443/solid-memo/main/meta.ttl", "https://pod.example/solid-memo/%6Dain/x.ttl"]) {
+      for (const url of [
+        MAIN,
+        `${MAIN}decks/deck-1.ttl`,
+        `${MAIN}.acl`,
+        "https://POD.example:443/solid-memo/main/meta.ttl",
+        "https://pod.example/solid-memo/%6Dain/x.ttl",
+      ]) {
         await expect(fetch(url, { method })).rejects.toThrow(
           `Solid Memo is moving your study in this browser into your Pod and saves nothing to it until that is done. Wait for it to finish, then try again.\ncontainer: ${MAIN}`,
         );
       }
-      await expect(fetch(new Request(`${MAIN}meta.ttl`, { method: "DELETE" }))).rejects.toThrow("method: DELETE");
+      await expect(fetch(new Request(`${MAIN}meta.ttl`, { method: "DELETE" }))).rejects.toThrow(
+        "method: DELETE",
+      );
       await expect(fetch(new URL(`${MAIN}meta.ttl`), { method })).rejects.toThrow();
       expect(inner).not.toHaveBeenCalled();
     },

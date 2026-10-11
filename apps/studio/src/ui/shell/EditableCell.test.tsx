@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { WithKeys } from "../../test/keys";
@@ -43,7 +47,10 @@ describe("EditableCell", () => {
     fireEvent.click(button());
     expect(field()).toHaveFocus();
     expect(field()).toHaveValue("2");
-    expect([(field() as HTMLInputElement).selectionStart, (field() as HTMLInputElement).selectionEnd]).toEqual([0, 1]);
+    expect([
+      (field() as HTMLInputElement).selectionStart,
+      (field() as HTMLInputElement).selectionEnd,
+    ]).toEqual([0, 1]);
     fireEvent.input(field(), { target: { value: "3" } });
     key(field(), "Enter");
     await waitFor(() => expect(button()).toHaveFocus());
@@ -78,7 +85,9 @@ describe("EditableCell", () => {
 
   it("keeps a value refused in its field, marked invalid until it changes, and saves once at a time", async () => {
     let refuse!: (ok: boolean) => void;
-    const edit = moons({ onSave: vi.fn(() => new Promise<boolean>((resolve) => (refuse = resolve))) });
+    const edit = moons({
+      onSave: vi.fn(() => new Promise<boolean>((resolve) => (refuse = resolve))),
+    });
     renderCell(edit);
     fireEvent.click(button());
     fireEvent.input(field(), { target: { value: "-1" } });
@@ -99,7 +108,12 @@ describe("EditableCell", () => {
     expect(number).toHaveAttribute("min", "0");
     expect(number).toHaveAttribute("step", "1");
     unmount();
-    const edit = moons({ options: [{ value: "2", label: "Two" }, { value: "3", label: "Three" }] });
+    const edit = moons({
+      options: [
+        { value: "2", label: "Two" },
+        { value: "3", label: "Three" },
+      ],
+    });
     renderCell(edit);
     fireEvent.click(button());
     const choice = screen.getByRole("combobox", { name: "Moons of Mars" });
@@ -181,8 +195,18 @@ describe("EditableCell", () => {
           caption="Planets"
           rows={["Mars", "Venus"]}
           keyOf={(planet) => planet}
-          name={{ key: "name", label: "Planet", cell: (planet) => (planet === "Mars" ? cell("Name of Mars", true) : planet) }}
-          columns={[{ key: "moons", label: "Moons", cell: (planet) => (planet === "Mars" ? cell("Moons of Mars") : "0") }]}
+          name={{
+            key: "name",
+            label: "Planet",
+            cell: (planet) => (planet === "Mars" ? cell("Name of Mars", true) : planet),
+          }}
+          columns={[
+            {
+              key: "moons",
+              label: "Moons",
+              cell: (planet) => (planet === "Mars" ? cell("Moons of Mars") : "0"),
+            },
+          ]}
         />
       </WithKeys>,
     );

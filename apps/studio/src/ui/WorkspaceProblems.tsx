@@ -1,10 +1,18 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { healthProblemCount, type CardSpot, type DeckHealth } from "@solid-memo/domain/deckHealth";
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { checkProblems, problemTarget, type ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
+import {
+  checkProblems,
+  problemTarget,
+  type ProblemTarget,
+} from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type I18n } from "@solid-memo/ui/i18n";
@@ -14,7 +22,13 @@ import { deckHealthQuery } from "./HealthBadge";
 import { placeText } from "./HealthScreen";
 import { listedProblems, ProblemList } from "./ProblemList";
 import { publishErrors, useReleaseCheck } from "./releaseCheck";
-import { isDraftRoute, spotRoute, studioRouteToHash, targetRoute, type StudioRoute } from "./router";
+import {
+  isDraftRoute,
+  spotRoute,
+  studioRouteToHash,
+  targetRoute,
+  type StudioRoute,
+} from "./router";
 import type { WorkspaceProblems } from "./shell/BottomDock";
 
 /** A deck's health as the badges and its health screen check it, with what its Markdown check finds. */
@@ -44,17 +58,28 @@ export function useWorkspaceProblems(
   useCases: UseCases,
   route: StudioRoute | null,
   shown: { deck: Deck | null; draft: ReleaseDraft | null },
-): { problems: WorkspaceProblems | null; draft: ReleaseProblem[] | undefined; publish: PublishReadiness | null } {
+): {
+  problems: WorkspaceProblems | null;
+  draft: ReleaseProblem[] | undefined;
+  publish: PublishReadiness | null;
+} {
   const i18n = useI18n();
   const queryClient = useQueryClient();
   const draftRoute = route !== null && isDraftRoute(route) ? route : null;
   const draft = draftRoute === null ? null : shown.draft;
-  const check = useReleaseCheck(useCases, draft, draftRoute?.screen === "check" ? (draftRoute.policy ?? "pod") : "pod");
+  const check = useReleaseCheck(
+    useCases,
+    draft,
+    draftRoute?.screen === "check" ? (draftRoute.policy ?? "pod") : "pod",
+  );
   // A pod's, as publishing checks it: the one above but where the check shows the library's.
   const podCheck = useReleaseCheck(useCases, draft, "pod");
   const deck = shown.deck;
   const health = useQuery<Health>({
-    queryKey: deck === null ? ["validation", null] : deckHealthQuery(useCases, queryClient, instanceUrlOfDeck(deck.url), deck).queryKey,
+    queryKey:
+      deck === null
+        ? ["validation", null]
+        : deckHealthQuery(useCases, queryClient, instanceUrlOfDeck(deck.url), deck).queryKey,
     queryFn: skipToken,
   });
 
@@ -66,8 +91,17 @@ export function useWorkspaceProblems(
       problems: {
         count: found?.length,
         blocking,
-        routes: (found ?? []).map((problem) => targetRoute(draft.url, problemTarget(draft, problem))),
-        list: <DraftProblems draft={draft} problems={found} error={check.error} targetHref={targetHref} />,
+        routes: (found ?? []).map((problem) =>
+          targetRoute(draft.url, problemTarget(draft, problem)),
+        ),
+        list: (
+          <DraftProblems
+            draft={draft}
+            problems={found}
+            error={check.error}
+            targetHref={targetHref}
+          />
+        ),
       },
       draft: found,
       publish: {
@@ -80,7 +114,10 @@ export function useWorkspaceProblems(
     return {
       problems: {
         count: health.data === undefined ? undefined : healthProblemCount(health.data),
-        routes: health.data === undefined ? [] : deckProblemsOf(deck, health.data, i18n).map((one) => one.route),
+        routes:
+          health.data === undefined
+            ? []
+            : deckProblemsOf(deck, health.data, i18n).map((one) => one.route),
         list: <DeckProblems useCases={useCases} deck={deck} />,
       },
       draft: undefined,
@@ -103,7 +140,13 @@ export interface PublishReadiness {
  * checked, nor while problems keep it from it: the status bar's count
  * of problems says how many do ("3 problems block publishing"), once.
  */
-export function PublishState({ readiness, releaseHref }: { readiness: PublishReadiness; releaseHref: string }) {
+export function PublishState({
+  readiness,
+  releaseHref,
+}: {
+  readiness: PublishReadiness;
+  releaseHref: string;
+}) {
   const { t } = useI18n();
   const { blocking, released } = readiness;
   if (released) return <a href={releaseHref}>{t("studio.shell.released")}</a>;
@@ -124,7 +167,12 @@ function DraftProblems({
   targetHref: (target: ProblemTarget) => string;
 }) {
   const { t, errorText } = useI18n();
-  if (problems === undefined) return error ? <ErrorMessage error={errorText(error)} /> : <Loading label={t("studio.dock.checking")} />;
+  if (problems === undefined)
+    return error ? (
+      <ErrorMessage error={errorText(error)} />
+    ) : (
+      <Loading label={t("studio.dock.checking")} />
+    );
   if (problems.length === 0) return <p class="hint">{t("studio.dock.none")}</p>;
   return <ProblemList draft={draft} problems={problems} targetHref={targetHref} />;
 }
@@ -142,20 +190,37 @@ export interface DeckProblem {
  * first card) and each finding in its Markdown, at its field of the card
  * inspector.
  */
-export function deckProblemsOf(deck: Deck, health: Health, { t, readerText }: Pick<I18n, "t" | "readerText">): DeckProblem[] {
+export function deckProblemsOf(
+  deck: Deck,
+  health: Health,
+  { t, readerText }: Pick<I18n, "t" | "readerText">,
+): DeckProblem[] {
   const at = (spot: CardSpot) => spotRoute(deck.url, spot);
   const place = (spot: CardSpot) => placeText(spot, t, readerText);
   const { violationCount } = health.report;
-  const atHealth: StudioRoute = { screen: "health", instanceUrl: instanceUrlOfDeck(deck.url), deckUrl: deck.url };
-  const data: DeckProblem[] = violationCount === 0 ? [] : [{ text: t("studio.dock.deckData", { count: violationCount }), route: atHealth }];
+  const atHealth: StudioRoute = {
+    screen: "health",
+    instanceUrl: instanceUrlOfDeck(deck.url),
+    deckUrl: deck.url,
+  };
+  const data: DeckProblem[] =
+    violationCount === 0
+      ? []
+      : [{ text: t("studio.dock.deckData", { count: violationCount }), route: atHealth }];
   return [
     ...data,
-    ...(health.unstated ?? []).map((spot) => ({ text: t("studio.dock.unstated", { place: place(spot) }), route: at(spot) })),
+    ...(health.unstated ?? []).map((spot) => ({
+      text: t("studio.dock.unstated", { place: place(spot) }),
+      route: at(spot),
+    })),
     ...health.duplicates.map((group) => {
       const spot: CardSpot = { card: group[0]!, place: { tab: "content" } };
       return { text: t("studio.dock.duplicate", { place: place(spot) }), route: at(spot) };
     }),
-    ...health.markdown.map((problem) => ({ text: `${place(problem)}: ${problemText(problem.finding, t)}`, route: at(problem) })),
+    ...health.markdown.map((problem) => ({
+      text: `${place(problem)}: ${problemText(problem.finding, t)}`,
+      route: at(problem),
+    })),
   ];
 }
 
@@ -163,8 +228,15 @@ export function deckProblemsOf(deck: Deck, health: Health, { t, readerText }: Pi
 function DeckProblems({ useCases, deck }: { useCases: UseCases; deck: Deck }) {
   const i18n = useI18n();
   const { t, errorText } = i18n;
-  const health = useQuery(deckHealthQuery(useCases, useQueryClient(), instanceUrlOfDeck(deck.url), deck));
-  if (health.data === undefined) return health.error ? <ErrorMessage error={errorText(health.error)} /> : <Loading label={t("studio.dock.checking")} />;
+  const health = useQuery(
+    deckHealthQuery(useCases, useQueryClient(), instanceUrlOfDeck(deck.url), deck),
+  );
+  if (health.data === undefined)
+    return health.error ? (
+      <ErrorMessage error={errorText(health.error)} />
+    ) : (
+      <Loading label={t("studio.dock.checking")} />
+    );
   const found = deckProblemsOf(deck, health.data, i18n);
   if (found.length === 0) return <p class="hint">{t("studio.dock.none")}</p>;
   return (

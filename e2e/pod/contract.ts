@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { randomUUID } from "node:crypto";
 import { Parser } from "n3";
 
@@ -12,19 +16,30 @@ const LDP_CONTAINS = "http://www.w3.org/ns/ldp#contains";
  */
 export async function checkContract(root: string): Promise<void> {
   const url = new URL(`probe-${randomUUID()}.ttl`, root).href;
-  const put = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body: `<#a> <#b> "1" .` }).catch((error: Error) => {
-    throw new Error(`${root} cannot be reached: ${(error.cause as Error | undefined)?.message ?? error.message}.`);
+  const put = await fetch(url, {
+    method: "PUT",
+    headers: { "content-type": "text/turtle" },
+    body: `<#a> <#b> "1" .`,
+  }).catch((error: Error) => {
+    throw new Error(
+      `${root} cannot be reached: ${(error.cause as Error | undefined)?.message ?? error.message}.`,
+    );
   });
-  if (!put.ok) throw new Error(`${root} does not let anyone write: PUT ${url} answered ${put.status}.`);
+  if (!put.ok)
+    throw new Error(`${root} does not let anyone write: PUT ${url} answered ${put.status}.`);
   let failure: Error | undefined;
   try {
     const read = await fetch(url, { headers: { accept: "text/turtle" } });
     if (read.status !== 200) throw new Error(`GET ${url} answered ${read.status} after the PUT.`);
     const listing = await fetch(root, { headers: { accept: "text/turtle" } });
     const quads = new Parser({ baseIRI: root }).parse(await listing.text());
-    const listed = quads.filter((q) => q.predicate.value === LDP_CONTAINS).map((q) => q.object.value);
+    const listed = quads
+      .filter((q) => q.predicate.value === LDP_CONTAINS)
+      .map((q) => q.object.value);
     if (!listed.includes(url)) {
-      throw new Error(`${root} does not list ${url} (it lists ${listed.join(", ") || "nothing"}): does the server know the URL it is reached at?`);
+      throw new Error(
+        `${root} does not list ${url} (it lists ${listed.join(", ") || "nothing"}): does the server know the URL it is reached at?`,
+      );
     }
   } catch (error) {
     failure = error as Error;

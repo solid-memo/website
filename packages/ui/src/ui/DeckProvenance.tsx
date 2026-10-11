@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import type { LangText } from "@solid-memo/domain/langText";
 import { licenseLabel } from "@solid-memo/domain/license";
@@ -10,7 +14,7 @@ import { linkify } from "./linkify";
  * "By Anton Wiklund · CC0 1.0 · Updated September 27, 2026", and under
  * it the deck's description when it has one: who made a deck, under what
  * terms, when it last changed, and where its content came from. Renders
- * nothing when none is stated, as for most home-made decks. The licence
+ * nothing when none is stated, as for most home-made decks. The license
  * URL and any URL in the description come from deck data, so they go
  * through ExternalLink.
  */

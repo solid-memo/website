@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   CARD_FORMAT_VERSION,
   type Card,
@@ -163,7 +167,9 @@ function upgradedKeywords(
   before: LangTexts,
   after: LangTexts,
 ): LangTexts | undefined {
-  return sameKeywords(mine, before) && !sameKeywords(before, after) ? copyKeywords(after) : undefined;
+  return sameKeywords(mine, before) && !sameKeywords(before, after)
+    ? copyKeywords(after)
+    : undefined;
 }
 
 /** Whether two lists hold the same values, in any order. */
@@ -197,7 +203,11 @@ export function withReleaseLanguages(deck: Deck, release: LibraryDeckContent): D
           : release.description
         : withLanguagesOf(deck.description, release.description);
   if (title === undefined && description === undefined) return null;
-  return { ...deck, ...(title === undefined ? {} : { title }), ...(description === undefined ? {} : { description }) };
+  return {
+    ...deck,
+    ...(title === undefined ? {} : { title }),
+    ...(description === undefined ? {} : { description }),
+  };
 }
 
 /**
@@ -230,7 +240,10 @@ export function sameContent(a: CardContent, b: CardContent): boolean {
  * Markdown release, Markdown switched off) was changed on purpose.
  */
 export function untouched(mine: CardContent, release: CardContent): boolean {
-  return sameContent(mine.textFormat === undefined ? { ...mine, textFormat: release.textFormat } : mine, release);
+  return sameContent(
+    mine.textFormat === undefined ? { ...mine, textFormat: release.textFormat } : mine,
+    release,
+  );
 }
 
 /**
@@ -324,7 +337,8 @@ export function planLibraryUpgrade({
 }): LibraryUpgradePlan | null {
   if (Number(to.version) <= Number(from.version)) return null;
   if (to.cards.some((card) => card.formatVersion > CARD_FORMAT_VERSION)) return null;
-  const byId = (release: LibraryDeckContent) => new Map(release.cards.map((card) => [card.id, card]));
+  const byId = (release: LibraryDeckContent) =>
+    new Map(release.cards.map((card) => [card.id, card]));
   const before = byId(from);
   const passed = between.map(byId);
   const after = byId(to);
@@ -350,16 +364,20 @@ export function planLibraryUpgrade({
     // The library's retirement holds whatever the user did to the card: one a later release adds is as the newer
     // release has it; another, when a release before it had it as the copy has it (the library changed it since).
     const retiresAnew =
-      retired !== wasRetired && (old === undefined || earlier.some((card) => (card.retired === true) === wasRetired));
+      retired !== wasRetired &&
+      (old === undefined || earlier.some((card) => (card.retired === true) === wasRetired));
     if (retiresAnew) (retired ? retire : restore).push(mine);
     if (action === "change") change.push(next);
     else if (action === "kept") kept.push(mine);
     // Nothing to write, but already as the newer release changed it: its content, or its retirement.
     const retirementApplied = old !== undefined && retired !== (old.retired === true);
-    if (action !== "change" && !retiresAnew && (action === "applied" || retirementApplied)) applied.push(mine);
+    if (action !== "change" && !retiresAnew && (action === "applied" || retirementApplied))
+      applied.push(mine);
   };
   // Every card of the releases, the copy's own release's first, in the order they list them.
-  for (const id of new Set([from, ...between, to].flatMap((release) => release.cards.map((card) => card.id)))) {
+  for (const id of new Set(
+    [from, ...between, to].flatMap((release) => release.cards.map((card) => card.id)),
+  )) {
     const old = before.get(id);
     const next = after.get(id);
     const mine = copy.get(id);
@@ -372,7 +390,11 @@ export function planLibraryUpgrade({
     // Not in the copy: added unless the user removed it, or, in a course's deck, the learner has not reached it,
     // and will meet it as the release the deck names has it.
     else if (old === undefined && !course) add.push(next);
-    else if (old !== undefined && course && (!sameContent(old, next) || (old.retired === true) !== (next.retired === true))) {
+    else if (
+      old !== undefined &&
+      course &&
+      (!sameContent(old, next) || (old.retired === true) !== (next.retired === true))
+    ) {
       unreached = true;
     }
   }
@@ -382,7 +404,8 @@ export function planLibraryUpgrade({
     title: upgradedText(deck.title, from.title, to.title),
     // The app's default description is not the user's: it gives way to the release's.
     description:
-      deck.description !== undefined && isDefaultDeckDescription(deck.description, [deck.title, from.title])
+      deck.description !== undefined &&
+      isDefaultDeckDescription(deck.description, [deck.title, from.title])
         ? to.description === undefined || sameText(deck.description, to.description)
           ? undefined
           : to.description
@@ -397,13 +420,26 @@ export function planLibraryUpgrade({
     [
       ["direction", to.direction !== from.direction && deck.direction === to.direction],
       ["title", !sameText(from.title, to.title) && sameText(deck.title, to.title)],
-      ["description", !sameText(from.description, to.description) && sameText(deck.description, to.description)],
-      ["keywords", !sameKeywords(from.keywords, to.keywords) && sameKeywords(deck.keywords, to.keywords)],
+      [
+        "description",
+        !sameText(from.description, to.description) && sameText(deck.description, to.description),
+      ],
+      [
+        "keywords",
+        !sameKeywords(from.keywords, to.keywords) && sameKeywords(deck.keywords, to.keywords),
+      ],
       ["themes", !sameList(from.themes, to.themes) && sameList(deck.themes ?? [], to.themes)],
     ] as const
   ).flatMap(([detail, isApplied]): DeckDetail[] => (isApplied ? [detail] : []));
   if (
-    add.length + change.length + retire.length + restore.length + remove.length + applied.length + appliedAbout.length === 0 &&
+    add.length +
+      change.length +
+      retire.length +
+      restore.length +
+      remove.length +
+      applied.length +
+      appliedAbout.length ===
+      0 &&
     // A course's deck lacks every card the learner has not reached: one the release removed is no sign of an upgrade.
     (course || gone.length === 0) &&
     direction === undefined &&
@@ -418,7 +454,9 @@ export function planLibraryUpgrade({
     toVersion: to.version,
     releaseUrl: to.url,
     notes: releases
-      .filter((r) => Number(r.version) > Number(from.version) && Number(r.version) <= Number(to.version))
+      .filter(
+        (r) => Number(r.version) > Number(from.version) && Number(r.version) <= Number(to.version),
+      )
       .flatMap((r) => (r.notes === undefined ? [] : [{ version: r.version, notes: r.notes }])),
     add,
     change,
@@ -461,7 +499,9 @@ export function applyLibraryUpgrade(deck: Deck, plan: LibraryUpgradePlan): Deck 
   const upgradedKeywords = plan.keywords ?? keywords;
   return {
     ...rest,
-    ...(upgradedKeywords === undefined || noKeywords(upgradedKeywords) ? {} : { keywords: upgradedKeywords }),
+    ...(upgradedKeywords === undefined || noKeywords(upgradedKeywords)
+      ? {}
+      : { keywords: upgradedKeywords }),
     sourceUrl: plan.releaseUrl,
     ...(plan.direction === undefined ? {} : { direction: plan.direction }),
     ...(plan.title === undefined ? {} : { title: plan.title }),

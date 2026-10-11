@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { LanguagePreference } from "@solid-memo/application/ports";
 import { localeOf } from "@solid-memo/domain/locale";
 

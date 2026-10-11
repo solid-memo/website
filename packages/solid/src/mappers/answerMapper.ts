@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { asUrl, type Thing, type ThingPersisted } from "@inrupt/solid-client";
 import type { Answer } from "@solid-memo/domain/answer";
 import { answerFromRecord, answerToRecord } from "@solid-memo/domain/answerRecord";
@@ -10,7 +14,10 @@ import { readVersioned, recordThing } from "../records";
 export function toAnswer(thing: Thing): Answer | null {
   const read = readVersioned(thing, "answer");
   if (read === null) return null;
-  return answerFromRecord(fragmentIdOf(asUrl(thing)), migrate("answer", read.record, { subject: asUrl(thing) }));
+  return answerFromRecord(
+    fragmentIdOf(asUrl(thing)),
+    migrate("answer", read.record, { subject: asUrl(thing) }),
+  );
 }
 
 /** An answer as a new subject of its month's document. */

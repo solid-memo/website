@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -42,7 +46,7 @@ const prompt: Prompt = { card, direction: "front-to-back" };
 
 function renderContainer(
   useCases: UseCases,
-  seed: (queryClient: QueryClient) => void = () => { },
+  seed: (queryClient: QueryClient) => void = () => {},
   isSetAside?: (deck: Deck) => boolean,
 ) {
   const queryClient = new QueryClient({
@@ -72,9 +76,7 @@ describe("DeckListContainer", () => {
     });
     renderContainer(useCases);
     expect(screen.getByText("Loading decks…")).toBeInTheDocument();
-    expect(
-      await screen.findByRole("link", { name: "Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Kanji N5" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
@@ -86,16 +88,31 @@ describe("DeckListContainer", () => {
         }),
       }),
     );
-    expect(
-      await screen.findByText("catalog unreachable"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("catalog unreachable")).toBeInTheDocument();
   });
 
   it("offers to continue the course of a deck copied from one, the library read for it only", async () => {
     const course = { ...courseLibraryDeck };
-    const plain = { ...courseLibraryDeck, url: "https://solid-memo.com/decks/rivers/v1.ttl", seriesUrl: "https://solid-memo.com/decks/index.ttl#rivers", isCourse: undefined };
-    const fromCourse = { ...deck, id: "deck-2", url: `${instance.url}catalog.ttl#deck-2`, title: { en: "Solid" }, sourceUrl: course.url };
-    const fromPlain = { ...deck, id: "deck-3", url: `${instance.url}catalog.ttl#deck-3`, title: { en: "Rivers" }, sourceUrl: plain.url };
+    const plain = {
+      ...courseLibraryDeck,
+      url: "https://solid-memo.com/decks/rivers/v1.ttl",
+      seriesUrl: "https://solid-memo.com/decks/index.ttl#rivers",
+      isCourse: undefined,
+    };
+    const fromCourse = {
+      ...deck,
+      id: "deck-2",
+      url: `${instance.url}catalog.ttl#deck-2`,
+      title: { en: "Solid" },
+      sourceUrl: course.url,
+    };
+    const fromPlain = {
+      ...deck,
+      id: "deck-3",
+      url: `${instance.url}catalog.ttl#deck-3`,
+      title: { en: "Rivers" },
+      sourceUrl: plain.url,
+    };
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck, fromCourse, fromPlain]),
       listLibraryDecks: vi.fn(async () => [course, plain]),
@@ -133,7 +150,10 @@ describe("DeckListContainer", () => {
       listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
       getCourse: vi.fn(async (d: Deck) => {
         if (d === unreadable) throw new Error("course unreachable");
-        const course = d === finished ? makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2]) : makeCourse(["q-1"]);
+        const course =
+          d === finished
+            ? makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2])
+            : makeCourse(["q-1"]);
         return { ...course, deck: d };
       }),
     });
@@ -141,7 +161,12 @@ describe("DeckListContainer", () => {
     const button = await screen.findByRole("link", { name: "Continue Solid fundamentals" });
     expect(button).toHaveAttribute(
       "href",
-      routeToHash({ screen: "courseChapter", instanceUrl: instance.url, deckUrl: going.url, chapterUrl: CH1 }),
+      routeToHash({
+        screen: "courseChapter",
+        instanceUrl: instance.url,
+        deckUrl: going.url,
+        chapterUrl: CH1,
+      }),
     );
     const strip = screen.getByRole("complementary", { name: "Your courses" });
     expect(within(strip).getAllByRole("listitem")).toHaveLength(1);
@@ -164,20 +189,46 @@ describe("DeckListContainer", () => {
   });
 
   it("says where a copy of a release added from a link came from, its own release saying whether it is a course", async () => {
-    const linkedCourse = { ...deck, id: "deck-2", url: `${instance.url}catalog.ttl#deck-2`, title: { en: "Pods" }, sourceUrl: "https://bob.example/releases/pods/v1.ttl" };
-    const linked = { ...deck, id: "deck-3", url: `${instance.url}catalog.ttl#deck-3`, title: { en: "Rivers" }, sourceUrl: "https://bob.example:8443/releases/rivers/v1.ttl" };
+    const linkedCourse = {
+      ...deck,
+      id: "deck-2",
+      url: `${instance.url}catalog.ttl#deck-2`,
+      title: { en: "Pods" },
+      sourceUrl: "https://bob.example/releases/pods/v1.ttl",
+    };
+    const linked = {
+      ...deck,
+      id: "deck-3",
+      url: `${instance.url}catalog.ttl#deck-3`,
+      title: { en: "Rivers" },
+      sourceUrl: "https://bob.example:8443/releases/rivers/v1.ttl",
+    };
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck, linkedCourse, linked]),
       listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
-      deckRelease: vi.fn(async (copy: Deck) => ({ ...courseLibraryDeck, url: copy.sourceUrl!, formatVersion: 6, cards: [], isCourse: copy === linkedCourse ? (true as const) : undefined })),
+      deckRelease: vi.fn(async (copy: Deck) => ({
+        ...courseLibraryDeck,
+        url: copy.sourceUrl!,
+        formatVersion: 6,
+        cards: [],
+        isCourse: copy === linkedCourse ? (true as const) : undefined,
+      })),
     });
     renderContainer(useCases);
-    expect(await screen.findByRole("link", { name: "Rivers from bob.example:8443" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", { name: "Rivers from bob.example:8443" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Kanji N5" })).toBeInTheDocument();
     await waitFor(() => expect(useCases.deckRelease).toHaveBeenCalledTimes(2));
     fireEvent.click(screen.getByRole("button", { name: "Actions for Pods" }));
-    expect(await screen.findByRole("menuitem", { name: "Continue course" })).toHaveAttribute("href", courseHref(instance.url, linkedCourse.url));
-    expect(screen.getByRole("link", { name: "Add from a link" })).toHaveAttribute("href", routeToHash({ screen: "importUrl", instanceUrl: instance.url }));
+    expect(await screen.findByRole("menuitem", { name: "Continue course" })).toHaveAttribute(
+      "href",
+      courseHref(instance.url, linkedCourse.url),
+    );
+    expect(screen.getByRole("link", { name: "Add from a link" })).toHaveAttribute(
+      "href",
+      routeToHash({ screen: "importUrl", instanceUrl: instance.url }),
+    );
   });
 
   it("reads no library when no deck is copied from it", async () => {
@@ -196,13 +247,21 @@ describe("DeckListContainer", () => {
       const aside = await screen.findByRole("complementary", { name: "Solid fundamentals" });
       const heading = screen.getByRole("heading", { name: "Decks" });
       const empty = screen.getByText(/^No decks yet\./);
-      expect(heading.compareDocumentPosition(aside) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(
+        heading.compareDocumentPosition(aside) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
       expect(aside.compareDocumentPosition(empty) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
     it("is offered when the instance has only groups, empty", async () => {
       const groupOnly: DeckTree = {
-        children: [{ kind: "group", group: { url: `${instance.url}catalog.ttl#group-1`, title: { en: "Later" } }, children: [] }],
+        children: [
+          {
+            kind: "group",
+            group: { url: `${instance.url}catalog.ttl#group-1`, title: { en: "Later" } },
+            children: [],
+          },
+        ],
         readOnly: false,
       };
       renderContainer(
@@ -211,7 +270,9 @@ describe("DeckListContainer", () => {
           listLibraryDecks: vi.fn(async () => [newcomerCourse]),
         }),
       );
-      expect(await screen.findByRole("complementary", { name: "Solid fundamentals" })).toBeInTheDocument();
+      expect(
+        await screen.findByRole("complementary", { name: "Solid fundamentals" }),
+      ).toBeInTheDocument();
     });
 
     it("is not offered once the instance has a deck", async () => {
@@ -227,7 +288,11 @@ describe("DeckListContainer", () => {
 
     it("opens the course once started, though the deck it brings takes the offer away", async () => {
       let started = false;
-      const fromCourse = { ...deck, title: { en: "Solid fundamentals" }, sourceUrl: newcomerCourse.url };
+      const fromCourse = {
+        ...deck,
+        title: { en: "Solid fundamentals" },
+        sourceUrl: newcomerCourse.url,
+      };
       const useCases = makeUseCasesFake({
         listDecks: vi.fn(async () => (started ? [fromCourse] : [])),
         listLibraryDecks: vi.fn(async () => [newcomerCourse]),
@@ -247,18 +312,20 @@ describe("DeckListContainer", () => {
 
   it("links to this instance's deck creator", async () => {
     renderContainer(makeUseCasesFake({ listDecks: vi.fn(async () => []) }));
-    expect(
-      await screen.findByRole("link", { name: "Create deck" }),
-    ).toHaveAttribute("href", routeToHash({ screen: "deckCreator", instanceUrl: instance.url }));
+    expect(await screen.findByRole("link", { name: "Create deck" })).toHaveAttribute(
+      "href",
+      routeToHash({ screen: "deckCreator", instanceUrl: instance.url }),
+    );
   });
 
   it("links a deck's name to its page in this instance", async () => {
     const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) });
     renderContainer(useCases);
 
-    expect(
-      await screen.findByRole("link", { name: "Kanji N5" }),
-    ).toHaveAttribute("href", deckHref(instance.url, deck.url));
+    expect(await screen.findByRole("link", { name: "Kanji N5" })).toHaveAttribute(
+      "href",
+      deckHref(instance.url, deck.url),
+    );
   });
 
   it("suggests Study for a deck with due cards, and starts it", async () => {
@@ -272,29 +339,25 @@ describe("DeckListContainer", () => {
     });
     const { onStudyDeck } = renderContainer(useCases);
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Study Kanji N5" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "Study Kanji N5" }));
     expect(onStudyDeck).toHaveBeenCalledWith(deck);
-    expect(useCases.getStudyQueue).toHaveBeenCalledWith(
-      instance.url,
-      deck,
-      expect.any(Date),
-    );
+    expect(useCases.getStudyQueue).toHaveBeenCalledWith(instance.url, deck, expect.any(Date));
   });
 
   it("shows stale counts at once while fresh ones are fetched", async () => {
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck]),
-      getStudyQueue: vi.fn(() => new Promise<StudyQueue>(() => { })),
+      getStudyQueue: vi.fn(() => new Promise<StudyQueue>(() => {})),
     });
     renderContainer(useCases, (queryClient) =>
-      queryClient.setQueryData(["studyQueue", deck.url, "counts"], { dueCount: 2, newCount: 0 }, { updatedAt: 0 }),
+      queryClient.setQueryData(
+        ["studyQueue", deck.url, "counts"],
+        { dueCount: 2, newCount: 0 },
+        { updatedAt: 0 },
+      ),
     );
 
-    expect(
-      await screen.findByRole("button", { name: "Study Kanji N5" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Study Kanji N5" })).toBeInTheDocument();
     expect(screen.getByText("2 to review")).toBeInTheDocument();
     await waitFor(() => {
       expect(useCases.getStudyQueue).toHaveBeenCalledOnce();
@@ -303,27 +366,21 @@ describe("DeckListContainer", () => {
   });
 
   it("shows a loader in the action slot until the first queue arrives", async () => {
-    let resolveQueue: (queue: StudyQueue) => void = () => { };
+    let resolveQueue: (queue: StudyQueue) => void = () => {};
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck]),
-      getStudyQueue: vi.fn(
-        () => new Promise<StudyQueue>((resolve) => (resolveQueue = resolve)),
-      ),
+      getStudyQueue: vi.fn(() => new Promise<StudyQueue>((resolve) => (resolveQueue = resolve))),
     });
     renderContainer(useCases);
 
-    expect(
-      await screen.findByText("Checking what is due"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Checking what is due")).toBeInTheDocument();
     expect(screen.queryByText("Done for today")).toBeNull();
 
     await waitFor(() => {
       expect(useCases.getStudyQueue).toHaveBeenCalledOnce();
     });
     resolveQueue({ due: [], newPrompts: [], studiedToday: 0 });
-    expect(
-      await screen.findByText("Done for today"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Done for today")).toBeInTheDocument();
     expect(screen.queryByText("Checking what is due")).toBeNull();
   });
 
@@ -338,20 +395,14 @@ describe("DeckListContainer", () => {
     });
     const { onStudyDeck } = renderContainer(useCases);
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Study Kanji N5" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "Study Kanji N5" }));
     expect(onStudyDeck).toHaveBeenCalledWith(deck);
     expect(screen.getByText("1 to review")).toBeInTheDocument();
   });
 
   it("does not suggest studying a deck with nothing left today", async () => {
-    renderContainer(
-      makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) }),
-    );
-    expect(
-      await screen.findByText("Done for today"),
-    ).toBeInTheDocument();
+    renderContainer(makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) }));
+    expect(await screen.findByText("Done for today")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Study|Practice/ })).toBeNull();
   });
 
@@ -368,26 +419,30 @@ describe("DeckListContainer", () => {
     await waitFor(() => {
       expect(screen.queryByRole("button", { name: /Study|Practice/ })).toBeNull();
     });
-    expect(
-      screen.queryByText("Done for today"),
-    ).toBeNull();
+    expect(screen.queryByText("Done for today")).toBeNull();
     await waitFor(() => {
-      expect(
-        screen.queryByText("Checking what is due"),
-      ).toBeNull();
+      expect(screen.queryByText("Checking what is due")).toBeNull();
     });
     expect(screen.queryByText("reviews unreachable")).toBeNull();
   });
 });
 
-const second: Deck = { ...deck, id: "deck-2", url: `${instance.url}catalog.ttl#deck-2`, title: { en: "Kana" } };
+const second: Deck = {
+  ...deck,
+  id: "deck-2",
+  url: `${instance.url}catalog.ttl#deck-2`,
+  title: { en: "Kana" },
+};
 const groupUrl = `${instance.url}catalog.ttl#group-1`;
 const treeKey = ["decks", instance.url, "tree"];
 const node = (d: Deck): TreeNode => ({ kind: "deck", deck: d });
 const flat: DeckTree = { readOnly: false, children: [node(deck), node(second)] };
 const grouped: DeckTree = {
   readOnly: false,
-  children: [{ kind: "group", group: { url: groupUrl, title: { en: "Japanese" } }, children: [node(deck)] }, node(second)],
+  children: [
+    { kind: "group", group: { url: groupUrl, title: { en: "Japanese" } }, children: [node(deck)] },
+    node(second),
+  ],
 };
 
 /** The deck names in the order the list shows them. */
@@ -397,7 +452,11 @@ function order(): string[] {
 
 /** An editDeckTree whose writes the test settles, one by one. */
 function deferredEdits() {
-  const writes: { edit: DeckTreeEdit; resolve: (tree: DeckTree) => void; reject: (error: Error) => void }[] = [];
+  const writes: {
+    edit: DeckTreeEdit;
+    resolve: (tree: DeckTree) => void;
+    reject: (error: Error) => void;
+  }[] = [];
   const editDeckTree = vi.fn(
     (_url: string, edit: DeckTreeEdit) =>
       new Promise<DeckTree>((resolve, reject) => writes.push({ edit, resolve, reject })),
@@ -430,7 +489,10 @@ describe("DeckListContainer, arranging decks", () => {
 
   it("shows an edit at once, and the pod's tree once it is written", async () => {
     const { editDeckTree, writes } = deferredEdits();
-    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), editDeckTree });
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, second]),
+      editDeckTree,
+    });
     renderContainer(useCases);
     await screen.findByRole("link", { name: "Kana" });
     moveDown("Kanji N5");
@@ -442,13 +504,19 @@ describe("DeckListContainer, arranging decks", () => {
       node: deck.url,
       to: { parent: null, after: second.url },
     });
-    writes[0]!.resolve({ readOnly: false, children: [node(second), node({ ...deck, title: { en: "Kanji N4" } })] });
+    writes[0]!.resolve({
+      readOnly: false,
+      children: [node(second), node({ ...deck, title: { en: "Kanji N4" } })],
+    });
     expect(await screen.findByRole("link", { name: "Kanji N4" })).toBeInTheDocument();
   });
 
   it("takes a failed edit back, says why, and reads the list afresh", async () => {
     const { editDeckTree, writes } = deferredEdits();
-    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), editDeckTree });
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, second]),
+      editDeckTree,
+    });
     renderContainer(useCases);
     await screen.findByRole("link", { name: "Kana" });
     moveDown("Kanji N5");
@@ -473,8 +541,16 @@ describe("DeckListContainer, arranging decks", () => {
 
   it("writes edits one after another, showing all of them meanwhile", async () => {
     const { editDeckTree, writes } = deferredEdits();
-    const third: Deck = { ...deck, id: "deck-3", url: `${instance.url}catalog.ttl#deck-3`, title: { en: "Verbs" } };
-    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second, third]), editDeckTree });
+    const third: Deck = {
+      ...deck,
+      id: "deck-3",
+      url: `${instance.url}catalog.ttl#deck-3`,
+      title: { en: "Verbs" },
+    };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, second, third]),
+      editDeckTree,
+    });
     renderContainer(useCases);
     await screen.findByRole("link", { name: "Verbs" });
     moveDown("Kanji N5");
@@ -493,7 +569,11 @@ describe("DeckListContainer, arranging decks", () => {
       expect(editDeckTree).toHaveBeenCalledTimes(2);
     });
     expect(order()).toEqual(["Kana", "Verbs", "Kanji N5"]);
-    expect(writes[1]!.edit).toEqual({ kind: "move", node: deck.url, to: { parent: null, after: third.url } });
+    expect(writes[1]!.edit).toEqual({
+      kind: "move",
+      node: deck.url,
+      to: { parent: null, after: third.url },
+    });
     writes[1]!.resolve({ readOnly: false, children: [node(second), node(third), node(deck)] });
     await waitFor(() => {
       expect(useCases.listDeckTree).toHaveBeenCalledOnce();
@@ -502,8 +582,16 @@ describe("DeckListContainer, arranging decks", () => {
 
   it("leaves an edit waiting on screen when one before it fails", async () => {
     const { editDeckTree, writes } = deferredEdits();
-    const third: Deck = { ...deck, id: "deck-3", url: `${instance.url}catalog.ttl#deck-3`, title: { en: "Verbs" } };
-    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second, third]), editDeckTree });
+    const third: Deck = {
+      ...deck,
+      id: "deck-3",
+      url: `${instance.url}catalog.ttl#deck-3`,
+      title: { en: "Verbs" },
+    };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, second, third]),
+      editDeckTree,
+    });
     renderContainer(useCases);
     await screen.findByRole("link", { name: "Verbs" });
     moveDown("Kanji N5");
@@ -526,8 +614,14 @@ describe("DeckListContainer, arranging decks", () => {
   });
 
   it("leaves an edit the list no longer allows to the pod's tree", async () => {
-    const editDeckTree = vi.fn(async () => ({ readOnly: false, children: [node(second), node(deck)] }));
-    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), editDeckTree });
+    const editDeckTree = vi.fn(async () => ({
+      readOnly: false,
+      children: [node(second), node(deck)],
+    }));
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, second]),
+      editDeckTree,
+    });
     const { queryClient } = renderContainer(useCases);
     await screen.findByRole("link", { name: "Kana" });
     fireEvent.click(screen.getByRole("button", { name: "Actions for Kanji N5" }));
@@ -544,7 +638,10 @@ describe("DeckListContainer, arranging decks", () => {
 
   it("makes a new group, then names it, in that order", async () => {
     const { editDeckTree, writes } = deferredEdits();
-    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), editDeckTree });
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, second]),
+      editDeckTree,
+    });
     renderContainer(useCases);
     await screen.findByRole("link", { name: "Kana" });
     choose("Kana", "Group with the one above");
@@ -593,23 +690,39 @@ describe("DeckListContainer, arranging decks", () => {
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "true");
-    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual([]);
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual(
+      [],
+    );
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual([groupUrl]);
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual(
+      [groupUrl],
+    );
   });
 
   it("opens a group folded shut as something is moved into it", async () => {
     localStorage.setItem(`solid-memo:collapsedGroups.${instance.url}`, JSON.stringify([groupUrl]));
     renderContainer(makeUseCasesFake({ listDeckTree: vi.fn(async () => grouped) }));
     fireEvent.click(await screen.findByRole("button", { name: `Actions for ${second.title.en}` }));
-    fireEvent.click(within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem", { name: "Japanese" }));
-    expect(await screen.findByRole("button", { name: "Japanese 2 decks" })).toHaveAttribute("aria-expanded", "true");
-    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual([]);
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem", {
+        name: "Japanese",
+      }),
+    );
+    expect(await screen.findByRole("button", { name: "Japanese 2 decks" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual(
+      [],
+    );
   });
 
   it("forgets a deleted group's folding", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const useCases = makeUseCasesFake({
       listDeckTree: vi.fn(async () => grouped),
       editDeckTree: vi.fn(async () => flat),
@@ -618,12 +731,21 @@ describe("DeckListContainer, arranging decks", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Japanese 1 deck" }));
     choose("Japanese", "Delete group");
     // Once its header has folded away.
-    fireEvent.animationEnd(document.querySelector(".deck-group.leaving")!, { animationName: "group-leave" });
-    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual([]);
-    await waitFor(() => {
-      expect(useCases.editDeckTree).toHaveBeenCalledWith(instance.url, { kind: "removeGroup", group: groupUrl });
+    fireEvent.animationEnd(document.querySelector(".deck-group.leaving")!, {
+      animationName: "group-leave",
     });
-    expect(within(document.querySelector(".deck-tree")!).queryByRole("button", { name: /Japanese/ })).toBeNull();
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual(
+      [],
+    );
+    await waitFor(() => {
+      expect(useCases.editDeckTree).toHaveBeenCalledWith(instance.url, {
+        kind: "removeGroup",
+        group: groupUrl,
+      });
+    });
+    expect(
+      within(document.querySelector(".deck-tree")!).queryByRole("button", { name: /Japanese/ }),
+    ).toBeNull();
     vi.unstubAllGlobals();
   });
 });
@@ -663,7 +785,14 @@ describe("DeckListContainer, renaming and deleting decks", () => {
     expect(statusTexts()).toEqual(['Renamed the deck to "Kanji N4".']);
     listDeckTree.mockResolvedValue({
       readOnly: false,
-      children: [{ kind: "group", group: { url: groupUrl, title: { en: "Japanese" } }, children: [node(renamed)] }, node(second)],
+      children: [
+        {
+          kind: "group",
+          group: { url: groupUrl, title: { en: "Japanese" } },
+          children: [node(renamed)],
+        },
+        node(second),
+      ],
     });
     written(renamed);
     await waitFor(() => {
@@ -695,7 +824,10 @@ describe("DeckListContainer, renaming and deleting decks", () => {
   });
 
   it("deletes a deck once confirmed, its row going once the decks are read afresh", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const listDecks = vi.fn(async () => [deck, second]);
     const useCases = makeUseCasesFake({ listDecks });
     renderContainer(useCases);
@@ -714,9 +846,17 @@ describe("DeckListContainer, renaming and deleting decks", () => {
   });
 
   it("deletes a deck only once an edit before it is written, the catalog being written by both", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const { editDeckTree, writes } = deferredEdits();
-    const third: Deck = { ...deck, id: "deck-3", url: `${instance.url}catalog.ttl#deck-3`, title: { en: "Verbs" } };
+    const third: Deck = {
+      ...deck,
+      id: "deck-3",
+      url: `${instance.url}catalog.ttl#deck-3`,
+      title: { en: "Verbs" },
+    };
     const listDecks = vi.fn(async () => [deck, second, third]);
     const useCases = makeUseCasesFake({ listDecks, editDeckTree });
     renderContainer(useCases);
@@ -765,7 +905,10 @@ describe("DeckListContainer, renaming and deleting decks", () => {
     expect(queryClient.getQueryState(other)!.isInvalidated).toBe(true);
     expect(useCases.listDeckTree).toHaveBeenCalledOnce();
     expect(order()).toEqual(["Kana", "Kanji N4"]);
-    writes[0]!.resolve({ readOnly: false, children: [node(second), node({ ...deck, title: { en: "Kanji N4" } })] });
+    writes[0]!.resolve({
+      readOnly: false,
+      children: [node(second), node({ ...deck, title: { en: "Kanji N4" } })],
+    });
     await waitFor(() => {
       expect(editDeckTree).toHaveBeenCalledOnce();
     });
@@ -805,7 +948,10 @@ describe("DeckListContainer, renaming and deleting decks", () => {
   });
 
   it("keeps a deck, and says why, when it cannot be deleted; the next try clears that", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
     const removeDeck = vi.fn(async () => {
       throw new Error("pod unreachable");
     });
@@ -821,7 +967,9 @@ describe("DeckListContainer, renaming and deleting decks", () => {
     // Deleting it is offered again once the try is through.
     fireEvent.click(screen.getByRole("button", { name: "Actions for Kanji N5" }));
     await waitFor(() => {
-      expect(screen.getByRole("menuitem", { name: "Delete deck" })).not.toHaveAttribute("aria-disabled");
+      expect(screen.getByRole("menuitem", { name: "Delete deck" })).not.toHaveAttribute(
+        "aria-disabled",
+      );
     });
     fireEvent.click(screen.getByRole("menuitem", { name: "Delete deck" }));
     await waitFor(() => {

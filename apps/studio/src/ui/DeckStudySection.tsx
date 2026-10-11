@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { DECK_DIRECTIONS, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import type { DeckPace } from "@solid-memo/domain/deckPace";
@@ -78,7 +82,9 @@ export function DeckStudySection({
           </label>
         ))}
         <p id="deck-pace-hint" class="hint">
-          {tx("deckPreferences.emptyHint", { link: <a href={preferencesHref}>{t("deckPreferences.studyPreferencesLink")}</a> })}
+          {tx("deckPreferences.emptyHint", {
+            link: <a href={preferencesHref}>{t("deckPreferences.studyPreferencesLink")}</a>,
+          })}
         </p>
         <button type="submit" disabled={busy}>
           {t("studio.about.saveStudy")}

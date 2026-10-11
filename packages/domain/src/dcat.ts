@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { english, inEnglish, sameText, shown, type LangText } from "./langText.ts";
 /**
  * The DCAT side of Solid Memo's data (see docs/data-model.md): the
@@ -8,7 +12,7 @@ import { english, inEnglish, sameText, shown, type LangText } from "./langText.t
 /** The EU data theme every library deck has: education, culture and sport. */
 export const EDUCATION_THEME = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 
-/** The EU data theme scheme, a theme taxonomy of every catalogue. */
+/** The EU data theme scheme, a theme taxonomy of every catalog. */
 export const DATA_THEME_SCHEME = "http://publications.europa.eu/resource/authority/data-theme";
 
 export const TURTLE_MEDIA_TYPE = "https://www.iana.org/assignments/media-types/text/turtle";
@@ -42,12 +46,16 @@ export function defaultDeckDescriptionText(title: LangText): LangText {
  * none (in English, with or without its Swedish), for a deck by any of
  * `titles`: not text the user wrote, so a release's may replace it.
  */
-export function isDefaultDeckDescription(description: LangText, titles: readonly LangText[]): boolean {
+export function isDefaultDeckDescription(
+  description: LangText,
+  titles: readonly LangText[],
+): boolean {
   return titles.some((title) => {
     const name = english(title) ?? shown(title);
     const tags = Object.keys(description).sort().join(",");
     return (
-      (tags === "en" || (tags === "en,sv" && description.sv === defaultDeckDescriptionText(title).sv)) &&
+      (tags === "en" ||
+        (tags === "en,sv" && description.sv === defaultDeckDescriptionText(title).sv)) &&
       description.en === defaultDeckDescription(name)
     );
   });
@@ -58,12 +66,14 @@ export function isDefaultDeckDescription(description: LangText, titles: readonly
  * wrote, in English and Swedish; any other as its English.
  */
 export function descriptionInFormat4(description: string, title: string): LangText {
-  return description === defaultDeckDescription(title) ? defaultDeckDescriptionText({ en: title }) : inEnglish(description);
+  return description === defaultDeckDescription(title)
+    ? defaultDeckDescriptionText({ en: title })
+    : inEnglish(description);
 }
 
 /**
  * The description a deck group gets: DCAT-AP asks one of every
- * catalogue, and the user only names a group. In English and Swedish, as
+ * catalog, and the user only names a group. In English and Swedish, as
  * a deck's, the Swedish naming the group by its Swedish name when it has
  * one, both by its English name, else the one shown.
  */

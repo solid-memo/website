@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   addDatetime,
   buildThing,
@@ -25,10 +29,7 @@ import {
   type ShapeName,
   type VersionedRecord,
 } from "@solid-memo/vocab/types.generated";
-import type {
-  FieldDescriptor,
-  ShapeDescriptor,
-} from "@solid-memo/vocab/shapeDescriptor";
+import type { FieldDescriptor, ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { RDF, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
@@ -62,7 +63,10 @@ function readField(thing: Thing, field: FieldDescriptor): FieldValue | null | un
   return value;
 }
 
-function readScalar(thing: Thing, field: FieldDescriptor): string | number | boolean | LangText | null {
+function readScalar(
+  thing: Thing,
+  field: FieldDescriptor,
+): string | number | boolean | LangText | null {
   switch (field.kind) {
     case "text":
       return readText(thing, field.predicate);
@@ -98,7 +102,10 @@ function readScalar(thing: Thing, field: FieldDescriptor): string | number | boo
  */
 export function readText(thing: Thing, predicate: string): LangText | null {
   const text: LangText = Object.fromEntries(
-    [...getStringByLocaleAll(thing, predicate)].map(([language, values]) => [language.toLowerCase(), values[0]]),
+    [...getStringByLocaleAll(thing, predicate)].map(([language, values]) => [
+      language.toLowerCase(),
+      values[0],
+    ]),
   );
   return Object.keys(text).length > 0 ? text : null;
 }
@@ -107,7 +114,11 @@ export function readText(thing: Thing, predicate: string): LangText | null {
 function readAnyText(thing: Thing, predicate: string): LangText | null {
   const untagged = getStringNoLocale(thing, predicate);
   const text = readText(thing, predicate) ?? {};
-  return untagged === null ? (Object.keys(text).length > 0 ? text : null) : { "": untagged, ...text };
+  return untagged === null
+    ? Object.keys(text).length > 0
+      ? text
+      : null
+    : { "": untagged, ...text };
 }
 
 /**
@@ -262,7 +273,11 @@ export function recordThing<T>(
   existing: ThingPersisted | null,
 ): ThingPersisted {
   if (existing !== null && storedVersionOf(existing) > descriptor.version) {
-    throw new AppError("writtenByNewerApp", { url, version: storedVersionOf(existing), writes: descriptor.version });
+    throw new AppError("writtenByNewerApp", {
+      url,
+      version: storedVersionOf(existing),
+      writes: descriptor.version,
+    });
   }
   const thing = existing ?? createThing({ url });
   const builder = buildThing(thing);
@@ -287,11 +302,16 @@ export function unlessNewer<T extends Thing>(thing: T): T {
   const writes = Math.max(
     0,
     ...(Object.keys(LATEST_VERSION) as ShapeName[])
-      .filter((shape) => types.includes((SHAPES[shape] as Record<number, ShapeDescriptor>)[LATEST_VERSION[shape]].targetClass))
+      .filter((shape) =>
+        types.includes(
+          (SHAPES[shape] as Record<number, ShapeDescriptor>)[LATEST_VERSION[shape]].targetClass,
+        ),
+      )
       .map((shape) => LATEST_VERSION[shape]),
   );
   const version = storedVersionOf(thing);
-  if (writes > 0 && version > writes) throw new AppError("writtenByNewerApp", { url: thing.url, version, writes });
+  if (writes > 0 && version > writes)
+    throw new AppError("writtenByNewerApp", { url: thing.url, version, writes });
   return thing;
 }
 

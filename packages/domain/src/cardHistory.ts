@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { isRecalled, monthOfStudyDay, type Answer } from "./answer";
 import type { Deck } from "./deck";
 import { fragmentIdOf } from "./subjectUrl";
@@ -26,14 +30,19 @@ export interface LapseIndex {
  * moved to another deck keeps naming its old deck, so its history there
  * starts again.
  */
-export function deckAnswers(answers: readonly Answer[], deck: Pick<Deck, "url" | "cardsDocumentUrl">): Answer[] {
+export function deckAnswers(
+  answers: readonly Answer[],
+  deck: Pick<Deck, "url" | "cardsDocumentUrl">,
+): Answer[] {
   const here = (iri: string) => `${deck.cardsDocumentUrl}#${fragmentIdOf(iri)}`;
   return answers
     .filter((answer) => answer.deckUrl === deck.url)
     .map((answer) => ({
       ...answer,
       cardUrl: here(answer.cardUrl),
-      ...(answer.chosenDistractor === undefined ? {} : { chosenDistractor: here(answer.chosenDistractor) }),
+      ...(answer.chosenDistractor === undefined
+        ? {}
+        : { chosenDistractor: here(answer.chosenDistractor) }),
     }));
 }
 
@@ -48,7 +57,8 @@ export function cardAnswers(answers: readonly Answer[], cardIri: string): Answer
 export function distractorPicksOf(answers: readonly Answer[]): Map<string, number> {
   const picks = new Map<string, number>();
   for (const { chosenDistractor } of answers) {
-    if (chosenDistractor !== undefined) picks.set(chosenDistractor, (picks.get(chosenDistractor) ?? 0) + 1);
+    if (chosenDistractor !== undefined)
+      picks.set(chosenDistractor, (picks.get(chosenDistractor) ?? 0) + 1);
   }
   return picks;
 }

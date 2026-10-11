@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/preact";
 import { breakable } from "./breakable";
@@ -5,7 +9,9 @@ import { breakable } from "./breakable";
 describe("breakable", () => {
   it("lets a line break after each slash, keeping the text as it is", () => {
     const { container } = render(<p>{breakable("Fastighetstekniker/Drifttekniker, fastighet")}</p>);
-    expect(container.querySelector("p")!.innerHTML).toBe("Fastighetstekniker/<wbr>Drifttekniker, fastighet");
+    expect(container.querySelector("p")!.innerHTML).toBe(
+      "Fastighetstekniker/<wbr>Drifttekniker, fastighet",
+    );
     expect(container).toHaveTextContent("Fastighetstekniker/Drifttekniker, fastighet");
   });
 

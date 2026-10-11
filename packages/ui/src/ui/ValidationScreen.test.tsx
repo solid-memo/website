@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { createI18n, I18nProvider } from "./i18n";
@@ -39,8 +43,20 @@ const report: ValidationReport = {
             },
           ],
         },
-        { url: `${INSTANCE}catalog.ttl#deck-2`, status: "checked", shape: "deck", version: 1, violations: [] },
-        { url: `${INSTANCE}catalog.ttl#deck-3`, status: "newer", shape: "deck", version: 3, latest: 2 },
+        {
+          url: `${INSTANCE}catalog.ttl#deck-2`,
+          status: "checked",
+          shape: "deck",
+          version: 1,
+          violations: [],
+        },
+        {
+          url: `${INSTANCE}catalog.ttl#deck-3`,
+          status: "newer",
+          shape: "deck",
+          version: 3,
+          latest: 2,
+        },
         { url: `${INSTANCE}catalog.ttl#note`, status: "untyped" },
       ],
     },
@@ -56,10 +72,21 @@ describe("summaryOf", () => {
       summaryOf({ ...report, violationCount: 4, documents: [...report.documents, another] }, t),
     ).toBe("4 violations in 2 documents.");
     expect(
-      summaryOf({ instanceUrl: INSTANCE, violationCount: 0, conforms: true, documents: report.documents }, t),
+      summaryOf(
+        { instanceUrl: INSTANCE, violationCount: 0, conforms: true, documents: report.documents },
+        t,
+      ),
     ).toBe("All 2 documents conform.");
     expect(
-      summaryOf({ instanceUrl: INSTANCE, violationCount: 0, conforms: true, documents: [report.documents[1]] }, t),
+      summaryOf(
+        {
+          instanceUrl: INSTANCE,
+          violationCount: 0,
+          conforms: true,
+          documents: [report.documents[1]],
+        },
+        t,
+      ),
     ).toBe("The 1 document conforms.");
   });
 });
@@ -75,7 +102,10 @@ describe("ValidationScreen", () => {
     expect(items[1]).toContain("conforms to deck format 1.");
     expect(items[2]).toContain("deck format 3 is newer than this app knows (up to 2); skipped.");
     expect(items[3]).toContain("not a Solid Memo subject.");
-    const rows = screen.getAllByRole("row").slice(1).map((row) => row.textContent);
+    const rows = screen
+      .getAllByRole("row")
+      .slice(1)
+      .map((row) => row.textContent);
     expect(rows).toEqual([
       "violationhttp://purl.org/dc/terms/title (opens in a new tab)Less than 1 values",
       "violation(the subject)Value does not match patternodd",
@@ -97,7 +127,14 @@ describe("ValidationScreen", () => {
                 {
                   url: "https://creativecommons.org/publicdomain/zero/1.0/",
                   status: "profiled",
-                  violations: [{ message: { en: "Class constraint failed." }, severity: "violation", constraint: "Class", profile: "dcat-ap" }],
+                  violations: [
+                    {
+                      message: { en: "Class constraint failed." },
+                      severity: "violation",
+                      constraint: "Class",
+                      profile: "dcat-ap",
+                    },
+                  ],
                 },
               ],
             },
@@ -106,12 +143,18 @@ describe("ValidationScreen", () => {
       />,
     );
     expect(screen.getByText("1 violation in 1 document.")).toHaveClass("warning");
-    expect(screen.getByRole("listitem")).toHaveTextContent("not a Solid Memo subject; DCAT-AP says:");
+    expect(screen.getByRole("listitem")).toHaveTextContent(
+      "not a Solid Memo subject; DCAT-AP says:",
+    );
     expect(screen.getAllByRole("row")[1]).toHaveTextContent("DCAT-AP: Class constraint failed.");
   });
 
   it("says what another app wrote is only warned about, its results warnings", () => {
-    const warning = { message: { en: "Less than 1 values" }, severity: "warning" as const, constraint: "MinCount" };
+    const warning = {
+      message: { en: "Less than 1 values" },
+      severity: "warning" as const,
+      constraint: "MinCount",
+    };
     render(
       <ValidationScreen
         report={{
@@ -123,8 +166,20 @@ describe("ValidationScreen", () => {
               url: `${INSTANCE}catalog.ttl`,
               status: "checked",
               subjects: [
-                { url: `${INSTANCE}catalog.ttl#their-agent`, status: "checked", shape: "agent", version: 1, violations: [warning], foreign: true },
-                { url: `${INSTANCE}catalog.ttl#their-dataset`, status: "profiled", violations: [{ ...warning, profile: "dcat-ap" }], foreign: true },
+                {
+                  url: `${INSTANCE}catalog.ttl#their-agent`,
+                  status: "checked",
+                  shape: "agent",
+                  version: 1,
+                  violations: [warning],
+                  foreign: true,
+                },
+                {
+                  url: `${INSTANCE}catalog.ttl#their-dataset`,
+                  status: "profiled",
+                  violations: [{ ...warning, profile: "dcat-ap" }],
+                  foreign: true,
+                },
               ],
             },
           ],
@@ -143,7 +198,12 @@ describe("ValidationScreen", () => {
   it("says so when everything conforms", () => {
     render(
       <ValidationScreen
-        report={{ instanceUrl: INSTANCE, violationCount: 0, conforms: true, documents: [report.documents[1]] }}
+        report={{
+          instanceUrl: INSTANCE,
+          violationCount: 0,
+          conforms: true,
+          documents: [report.documents[1]],
+        }}
       />,
     );
     expect(screen.getByText("The 1 document conforms.")).toHaveClass("hint");
@@ -163,7 +223,9 @@ describe("ValidationScreen", () => {
     );
     expect(screen.getByText("2 överträdelser i 1 dokument.")).toHaveClass("warning");
     expect(screen.getByText("Inte skapat än.")).toBeInTheDocument();
-    expect(screen.getAllByRole("listitem")[2]).toHaveTextContent("formatet deck 3 är nyare än vad appen känner till");
+    expect(screen.getAllByRole("listitem")[2]).toHaveTextContent(
+      "formatet deck 3 är nyare än vad appen känner till",
+    );
     expect(screen.getAllByRole("columnheader")[0]).toHaveTextContent("Allvarlighetsgrad");
   });
 });

@@ -1,13 +1,27 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import { studyDirections, type Card, type Deck, type DeckDirection, type StudyDirection } from "@solid-memo/domain/deck";
+import {
+  studyDirections,
+  type Card,
+  type Deck,
+  type DeckDirection,
+  type StudyDirection,
+} from "@solid-memo/domain/deck";
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
-import { CardScheduleScreen, type CardDirectionSchedule, type ScheduleEditMade } from "./CardScheduleScreen";
+import {
+  CardScheduleScreen,
+  type CardDirectionSchedule,
+  type ScheduleEditMade,
+} from "./CardScheduleScreen";
 
 const BOTH: readonly StudyDirection[] = ["front-to-back", "back-to-front"];
 
@@ -15,11 +29,19 @@ const BOTH: readonly StudyDirection[] = ["front-to-back", "back-to-front"];
  * The card's schedule in each direction: those the deck studies, then
  * one it no longer does while the card keeps a state there.
  */
-export function directionSchedules(card: Card, direction: DeckDirection, states: readonly ReviewState[]): CardDirectionSchedule[] {
+export function directionSchedules(
+  card: Card,
+  direction: DeckDirection,
+  states: readonly ReviewState[],
+): CardDirectionSchedule[] {
   const studied = studyDirections(direction);
   return BOTH.flatMap((each) => {
-    const state = states.find((candidate) => candidate.cardId === card.id && candidate.direction === each) ?? null;
-    return studied.includes(each) || state !== null ? [{ direction: each, state, studied: studied.includes(each) }] : [];
+    const state =
+      states.find((candidate) => candidate.cardId === card.id && candidate.direction === each) ??
+      null;
+    return studied.includes(each) || state !== null
+      ? [{ direction: each, state, studied: studied.includes(each) }]
+      : [];
   });
 }
 
@@ -31,7 +53,15 @@ export function directionSchedules(card: Card, direction: DeckDirection, states:
  * only; then the review states are read afresh, and the deck's study
  * queue dropped, as Solid Memo does after a reset of the day.
  */
-export function CardScheduleContainer({ useCases, deck, card }: { useCases: UseCases; deck: Deck; card: Card }) {
+export function CardScheduleContainer({
+  useCases,
+  deck,
+  card,
+}: {
+  useCases: UseCases;
+  deck: Deck;
+  card: Card;
+}) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const [done, setDone] = useState<ScheduleEditMade | null>(null);

@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Stating the language of a deck's untagged card sides (UseCases.stateCardLanguages)
  * against a real Solid server: the sides are re-keyed in one write of the
@@ -36,9 +41,18 @@ function page(beforeWrite: (url: string) => Promise<void> = async () => undefine
   };
   const writeFence = createWriteFence(watching);
   const podFetch = writeFence.fetch;
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator = createShaclShapeValidator({
+    fetch: podFetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
   const checkWrite = shapeValidator.checkSubjects;
-  const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
+  const deps = {
+    fetch: podFetch,
+    checkWrite,
+    now: () => new Date(),
+    randomId: () => crypto.randomUUID(),
+  };
   return createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -63,13 +77,26 @@ async function seed(server: string): Promise<{ instanceUrl: string; deck: Deck }
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   const put = async (url: string, body: string) => {
-    const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body,
+    });
     if (!response.ok) throw new Error(`Seeding ${url}: ${response.status}`);
   };
-  await put(`${base}profile/card.ttl`, `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`);
-  await put(typeIndex, `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`);
+  await put(
+    `${base}profile/card.ttl`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+  );
+  await put(
+    typeIndex,
+    `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>, <http://www.w3.org/ns/solid/terms#UnlistedDocument> .`,
+  );
   const useCases = page();
-  const instance = await useCases.createInstance({ webId }, { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+  const instance = await useCases.createInstance(
+    { webId },
+    { containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" },
+  );
   const deck = await useCases.createDeck(instance.url, { en: "Kanji" });
   await put(
     deck.cardsDocumentUrl,
@@ -106,7 +133,8 @@ describe.each(SERVERS)("stating card languages on $name", ({ url: server }) => {
   });
 
   it("writes nothing over a cards document another app changed since it was read", async (context) => {
-    if (!conditional) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+    if (!conditional)
+      context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     // The change is made in the same second as the read, which such a server's ETag does not tell apart.
     if (!everyEdit) context.skip(ETAG_OUTLIVES_EDITS);
     const { deck } = await seed(server);
@@ -118,13 +146,22 @@ describe.each(SERVERS)("stating card languages on $name", ({ url: server }) => {
       // text beyond ASCII (as saveDataset's `whole` says), which is not what this test is about.
       const read = await fetch(deck.cardsDocumentUrl, { headers: { accept: "text/turtle" } });
       const body = `${await read.text()}\n<#water> <${SM}note> "edited in another tab" .\n`;
-      const response = await fetch(deck.cardsDocumentUrl, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
-      if (!response.ok) throw new Error(`Changing ${deck.cardsDocumentUrl} as another app: ${response.status}.`);
+      const response = await fetch(deck.cardsDocumentUrl, {
+        method: "PUT",
+        headers: { "content-type": "text/turtle" },
+        body,
+      });
+      if (!response.ok)
+        throw new Error(`Changing ${deck.cardsDocumentUrl} as another app: ${response.status}.`);
     });
-    await expect(useCases.stateCardLanguages(deck, { front: "ja" })).rejects.toMatchObject({ code: "changedElsewhere" });
+    await expect(useCases.stateCardLanguages(deck, { front: "ja" })).rejects.toMatchObject({
+      code: "changedElsewhere",
+    });
     const cards = Object.fromEntries((await page().listCards(deck)).map((card) => [card.id, card]));
     expect(cards.water?.front).toEqual({ "": "水" });
-    const turtle = await (await fetch(deck.cardsDocumentUrl, { headers: { accept: "text/turtle" } })).text();
+    const turtle = await (
+      await fetch(deck.cardsDocumentUrl, { headers: { accept: "text/turtle" } })
+    ).text();
     expect(turtle).toContain("edited in another tab");
   });
 });

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { composing } from "@solid-memo/ui/composing";
@@ -43,7 +47,15 @@ export interface CellEdit {
  * input method takes, to end or drop what it composes (Korean, say),
  * are its own.
  */
-export function EditableCell({ edit, link = false, children }: { edit: CellEdit | null; link?: boolean; children: ComponentChildren }) {
+export function EditableCell({
+  edit,
+  link = false,
+  children,
+}: {
+  edit: CellEdit | null;
+  link?: boolean;
+  children: ComponentChildren;
+}) {
   const { t } = useI18n();
   const report = useContext(UnsavedEdits);
   const cell = useRef<HTMLSpanElement>(null);
@@ -77,7 +89,9 @@ export function EditableCell({ edit, link = false, children }: { edit: CellEdit 
 
   useLayoutEffect(() => {
     if (editing) {
-      const field = cell.current!.querySelector<HTMLInputElement | HTMLSelectElement>("input, select")!;
+      const field = cell.current!.querySelector<HTMLInputElement | HTMLSelectElement>(
+        "input, select",
+      )!;
       field.focus();
       if (field instanceof HTMLInputElement) field.select();
     } else if (refocus.current) {
@@ -88,7 +102,12 @@ export function EditableCell({ edit, link = false, children }: { edit: CellEdit 
 
   useEffect(() => {
     // Discarded, the field closes where it is: the focus has gone where the move took it.
-    if (dirty) report(() => save(latest.current), cell, () => setEditing(false));
+    if (dirty)
+      report(
+        () => save(latest.current),
+        cell,
+        () => setEditing(false),
+      );
     else report(null, cell);
   }, [dirty]);
   useEffect(() => () => report(null, cell), []);
@@ -161,7 +180,8 @@ export function EditableCell({ edit, link = false, children }: { edit: CellEdit 
       data-cell-edit
       // A field left as it was closes as the focus leaves the cell.
       onFocusOut={(event) => {
-        if (!dirty && !cell.current!.contains(event.relatedTarget as Node | null)) setEditing(false);
+        if (!dirty && !cell.current!.contains(event.relatedTarget as Node | null))
+          setEditing(false);
       }}
     >
       {edit.options !== undefined ? (
@@ -173,7 +193,11 @@ export function EditableCell({ edit, link = false, children }: { edit: CellEdit 
           ))}
         </select>
       ) : (
-        <input {...field} {...(edit.number ? { type: "number", min: 0, step: 1 } : { type: "text" })} onInput={(event) => typed(event.currentTarget.value)} />
+        <input
+          {...field}
+          {...(edit.number ? { type: "number", min: 0, step: 1 } : { type: "text" })}
+          onInput={(event) => typed(event.currentTarget.value)}
+        />
       )}
       <button type="button" disabled={saving} onClick={() => void save(value)}>
         {t("studio.inline.save")}

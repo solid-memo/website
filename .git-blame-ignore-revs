@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# Commits that changed only how the code looks, which `git blame` looks
+# past to the change that wrote each line (docs/style.md#formatting).
+# GitHub reads this file by itself; locally, run once:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+# A rebase merge gives a commit a new SHA: list the one it has on main.
+
+# Reformat the code with Biome
+764641376f9588b865555638d223f4475af54127

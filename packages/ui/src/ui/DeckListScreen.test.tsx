@@ -1,7 +1,17 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { useState } from "preact/hooks";
-import { applyDeckTreeEdit, type DeckGroup, type DeckTree, type DeckTreeEdit, type TreeNode } from "@solid-memo/domain/deckTree";
+import {
+  applyDeckTreeEdit,
+  type DeckGroup,
+  type DeckTree,
+  type DeckTreeEdit,
+  type TreeNode,
+} from "@solid-memo/domain/deckTree";
 import { DeckListScreen, LEAVE_FALLBACK_MS } from "./DeckListScreen";
 import { FLIP_FALLBACK_MS } from "./deckTree/useFlip";
 import { I18nProvider } from "./i18n";
@@ -83,7 +93,11 @@ function Harness({
       collapsed={collapsed}
       onToggle={(url) => {
         onToggle(url);
-        setCollapsed((all) => (all.has(url) ? new Set([...all].filter((other) => other !== url)) : new Set([...all, url])));
+        setCollapsed((all) =>
+          all.has(url)
+            ? new Set([...all].filter((other) => other !== url))
+            : new Set([...all, url]),
+        );
       }}
       onUnfold={(urls) => {
         onUnfold(urls);
@@ -92,7 +106,8 @@ function Harness({
       onEdit={async (edit) => {
         onEdit(edit);
         // As the container does: a deleted group is folded no more.
-        if (edit.kind === "removeGroup") setCollapsed((all) => new Set([...all].filter((other) => other !== edit.group)));
+        if (edit.kind === "removeGroup")
+          setCollapsed((all) => new Set([...all].filter((other) => other !== edit.group)));
         const before = shown;
         if (slow) await Promise.resolve();
         setShown((current) => applyDeckTreeEdit(current, edit));
@@ -116,12 +131,21 @@ function Harness({
   );
 }
 
-function renderScreen(initial: DeckTree = tree, options: Partial<Parameters<typeof Harness>[0]> = {}) {
+function renderScreen(
+  initial: DeckTree = tree,
+  options: Partial<Parameters<typeof Harness>[0]> = {},
+) {
   const onEdit = vi.fn();
   const onToggle = vi.fn();
   const onUnfold = vi.fn();
   const view = render(
-    <Harness initial={initial} onEdit={onEdit} onToggle={onToggle} onUnfold={onUnfold} {...options} />,
+    <Harness
+      initial={initial}
+      onEdit={onEdit}
+      onToggle={onToggle}
+      onUnfold={onUnfold}
+      {...options}
+    />,
   );
   return { ...view, onEdit, onToggle, onUnfold };
 }
@@ -177,8 +201,12 @@ describe("DeckListScreen", () => {
     for (const name of ["Kanji N5", "Kana", "Verbs", "Nouns"]) {
       expect(screen.getByRole("link", { name })).toBeInTheDocument();
     }
-    expect(screen.getByRole("button", { name: "Japanese 2 decks", expanded: true })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Grammar 1 deck", expanded: true })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Japanese 2 decks", expanded: true }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Grammar 1 deck", expanded: true }),
+    ).toBeInTheDocument();
   });
 
   it("nests a group's members in a list of their own, each row knowing its depth", () => {
@@ -188,7 +216,9 @@ describe("DeckListScreen", () => {
     expect(row(verbs.url).getAttribute("style")).toContain("--depth: 2");
     expect(row(grammar).getAttribute("style")).toContain("--depth: 1");
     expect(row(verbs.url).closest("ul")!.getAttribute("style")).toContain("--depth: 2");
-    expect(row(verbs.url).closest(".deck-group")!.querySelector(".deck-group-header")).toBe(row(grammar));
+    expect(row(verbs.url).closest(".deck-group")!.querySelector(".deck-group-header")).toBe(
+      row(grammar),
+    );
   });
 
   it("uses the singular for one deck", () => {
@@ -204,14 +234,22 @@ describe("DeckListScreen", () => {
   it("still shows a group without decks, and says it is empty", () => {
     renderScreen({ readOnly: false, children: [group("group-1", "Japanese", [])] });
     expect(screen.queryByText(/No decks yet/)).toBeNull();
-    expect(screen.getByText("0 decks", { selector: ".deck-group-header .hint" })).toBeInTheDocument();
+    expect(
+      screen.getByText("0 decks", { selector: ".deck-group-header .hint" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Nothing in this group yet.")).toBeInTheDocument();
   });
 
   it("links each deck's name to that deck's page, and leaves its study suggestion to the container", () => {
     renderScreen();
-    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", "#/deck?deck=deck-1");
-    expect(screen.getByRole("link", { name: "Verbs" })).toHaveAttribute("href", "#/deck?deck=deck-3");
+    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute(
+      "href",
+      "#/deck?deck=deck-1",
+    );
+    expect(screen.getByRole("link", { name: "Verbs" })).toHaveAttribute(
+      "href",
+      "#/deck?deck=deck-3",
+    );
     expect(screen.getByText("action for Verbs")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Study/ })).toBeNull();
   });
@@ -221,7 +259,8 @@ describe("DeckListScreen", () => {
     expect(container.querySelector("h2 svg.icon")).toHaveAttribute("aria-hidden", "true");
     expect(container.querySelectorAll(".deck-open svg.icon")).toHaveLength(4);
     expect(container.querySelectorAll(".group-toggle svg.icon")).toHaveLength(6);
-    for (const icon of container.querySelectorAll("button svg")) expect(icon).toHaveAttribute("aria-hidden", "true");
+    for (const icon of container.querySelectorAll("button svg"))
+      expect(icon).toHaveAttribute("aria-hidden", "true");
   });
 
   it("gives every deck and group one menu button, always there, last in its row", () => {
@@ -230,8 +269,12 @@ describe("DeckListScreen", () => {
       expect(row(key).lastElementChild).toHaveClass("row-menu");
       expect(row(key).lastElementChild).toBeEnabled();
     }
-    expect(row(kana.url).lastElementChild).toBe(screen.getByRole("button", { name: "Actions for Kana" }));
-    expect(row(japanese).lastElementChild).toBe(screen.getByRole("button", { name: "Actions for Japanese" }));
+    expect(row(kana.url).lastElementChild).toBe(
+      screen.getByRole("button", { name: "Actions for Kana" }),
+    );
+    expect(row(japanese).lastElementChild).toBe(
+      screen.getByRole("button", { name: "Actions for Japanese" }),
+    );
     // The fold button is the group's other one.
     expect(within(row(japanese)).getAllByRole("button")).toHaveLength(2);
   });
@@ -286,7 +329,11 @@ describe("DeckListScreen", () => {
       "href",
       "#/studio?instance=a",
     );
-    expect(within(menu).getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
+    expect(
+      within(menu)
+        .getAllByRole("menuitem")
+        .map((item) => item.textContent),
+    ).toEqual([
       "Preferences",
       "Open in Studio",
       "Rename",
@@ -310,7 +357,11 @@ describe("DeckListScreen", () => {
     renderScreen();
     openMenu("Grammar");
     const menu = screen.getByRole("menu", { name: "Actions for Grammar" });
-    expect(within(menu).getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
+    expect(
+      within(menu)
+        .getAllByRole("menuitem")
+        .map((item) => item.textContent),
+    ).toEqual([
       "Rename",
       "Move up",
       "Move down",
@@ -329,7 +380,10 @@ describe("DeckListScreen", () => {
     openMenu("Kanji N5");
     expect(screen.getAllByRole("menu")).toHaveLength(1);
     expect(screen.getByRole("menu")).toHaveAccessibleName("Actions for Kanji N5");
-    expect(screen.getByRole("button", { name: "Actions for Kana" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Actions for Kana" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
   });
 
   it("closes the menu on Escape, back on its button", () => {
@@ -346,12 +400,21 @@ describe("DeckListScreen", () => {
     expect(screen.getByRole("menu").closest("[data-no-drag]")).not.toBeNull();
   });
 
-  it("moves a deck down past its neighbour, says where, and keeps focus on its menu button", () => {
+  it("moves a deck down past its neighbor, says where, and keeps focus on its menu button", () => {
     const { onEdit } = renderScreen(flat);
     openMenu("Kanji N5");
     fireEvent.click(screen.getByRole("menuitem", { name: "Move down" }));
-    expect(onEdit).toHaveBeenCalledWith({ kind: "move", node: kanji.url, to: { parent: null, after: kana.url } });
-    expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual(["Kana", "Kanji N5", "Create deck", "Deck library"]);
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "move",
+      node: kanji.url,
+      to: { parent: null, after: kana.url },
+    });
+    expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual([
+      "Kana",
+      "Kanji N5",
+      "Create deck",
+      "Deck library",
+    ]);
     expect(statusTexts()).toEqual(["Moved Kanji N5: 2 of 2 at the top level."]);
     expect(screen.getByRole("button", { name: "Actions for Kanji N5" })).toHaveFocus();
     expect(screen.queryByRole("menu")).toBeNull();
@@ -362,10 +425,18 @@ describe("DeckListScreen", () => {
     const { onEdit } = renderScreen(three);
     openMenu("Verbs");
     fireEvent.click(screen.getByRole("menuitem", { name: "Move up" }));
-    expect(onEdit).toHaveBeenLastCalledWith({ kind: "move", node: verbs.url, to: { parent: null, after: kanji.url } });
+    expect(onEdit).toHaveBeenLastCalledWith({
+      kind: "move",
+      node: verbs.url,
+      to: { parent: null, after: kanji.url },
+    });
     openMenu("Verbs");
     fireEvent.click(screen.getByRole("menuitem", { name: "Move up" }));
-    expect(onEdit).toHaveBeenLastCalledWith({ kind: "move", node: verbs.url, to: { parent: null, after: null } });
+    expect(onEdit).toHaveBeenLastCalledWith({
+      kind: "move",
+      node: verbs.url,
+      to: { parent: null, after: null },
+    });
     expect(statusTexts()).toEqual(["Moved Verbs: 1 of 3 at the top level."]);
   });
 
@@ -377,7 +448,9 @@ describe("DeckListScreen", () => {
       expect(button).toHaveAttribute("aria-disabled", "true");
       fireEvent.click(button);
     }
-    expect(screen.getByRole("menuitem", { name: "Move down" })).not.toHaveAttribute("aria-disabled");
+    expect(screen.getByRole("menuitem", { name: "Move down" })).not.toHaveAttribute(
+      "aria-disabled",
+    );
     openMenu("Kana");
     for (const name of ["Move down", "Group with the one below"]) {
       expect(screen.getByRole("menuitem", { name })).toHaveAttribute("aria-disabled", "true");
@@ -393,7 +466,11 @@ describe("DeckListScreen", () => {
     const { onEdit } = renderScreen();
     openMenu("Verbs");
     fireEvent.click(screen.getByRole("menuitem", { name: "Move out of Grammar" }));
-    expect(onEdit).toHaveBeenCalledWith({ kind: "move", node: verbs.url, to: { parent: japanese, after: grammar } });
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "move",
+      node: verbs.url,
+      to: { parent: japanese, after: grammar },
+    });
     expect(statusTexts()).toEqual(["Moved Verbs: 3 of 3 in Japanese."]);
     expect(screen.getByRole("button", { name: "Actions for Verbs" })).toHaveFocus();
   });
@@ -421,10 +498,20 @@ describe("DeckListScreen", () => {
     const { onEdit, onUnfold } = renderScreen();
     fireEvent.click(screen.getByRole("button", { name: "Other 1 deck" }));
     openMenu("Kanji N5");
-    fireEvent.click(within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem", { name: "Other" }));
-    expect(onEdit).toHaveBeenCalledWith({ kind: "move", node: kanji.url, to: { parent: other, after: nouns.url } });
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem", {
+        name: "Other",
+      }),
+    );
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "move",
+      node: kanji.url,
+      to: { parent: other, after: nouns.url },
+    });
     expect(onUnfold).toHaveBeenCalledWith([other]);
-    expect(screen.getByRole("button", { name: "Other 2 decks", expanded: true })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Other 2 decks", expanded: true }),
+    ).toBeInTheDocument();
     expect(statusTexts()).toEqual(["Moved Kanji N5: 2 of 2 in Other."]);
     expect(screen.getByRole("button", { name: "Actions for Kanji N5" })).toHaveFocus();
   });
@@ -434,18 +521,35 @@ describe("DeckListScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Grammar 1 deck" }));
     fireEvent.click(screen.getByRole("button", { name: "Japanese 2 decks" }));
     openMenu("Kanji N5");
-    fireEvent.click(within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem", { name: "Grammar" }));
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem", {
+        name: "Grammar",
+      }),
+    );
     expect(onUnfold).toHaveBeenCalledOnce();
     expect(onUnfold).toHaveBeenCalledWith([grammar, japanese]);
-    expect(screen.getByRole("button", { name: "Japanese 3 decks", expanded: true })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Japanese 3 decks", expanded: true }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Actions for Kanji N5" })).toHaveFocus();
   });
 
   it("moves into an empty group as its first", () => {
-    const { onEdit, onUnfold } = renderScreen({ readOnly: false, children: [deck(kanji), group("group-1", "Japanese", [])] });
+    const { onEdit, onUnfold } = renderScreen({
+      readOnly: false,
+      children: [deck(kanji), group("group-1", "Japanese", [])],
+    });
     openMenu("Kanji N5");
-    fireEvent.click(within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem", { name: "Japanese" }));
-    expect(onEdit).toHaveBeenCalledWith({ kind: "move", node: kanji.url, to: { parent: japanese, after: null } });
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem", {
+        name: "Japanese",
+      }),
+    );
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "move",
+      node: kanji.url,
+      to: { parent: japanese, after: null },
+    });
     expect(onUnfold).not.toHaveBeenCalled();
   });
 
@@ -453,8 +557,17 @@ describe("DeckListScreen", () => {
     const { onEdit } = renderScreen();
     openMenu("Japanese");
     fireEvent.click(screen.getByRole("menuitem", { name: "Move up" }));
-    expect(onEdit).toHaveBeenCalledWith({ kind: "move", node: japanese, to: { parent: null, after: null } });
-    expect(screen.getAllByRole("link").map((link) => link.textContent).slice(0, 4)).toEqual(["Kana", "Verbs", "Kanji N5", "Nouns"]);
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "move",
+      node: japanese,
+      to: { parent: null, after: null },
+    });
+    expect(
+      screen
+        .getAllByRole("link")
+        .map((link) => link.textContent)
+        .slice(0, 4),
+    ).toEqual(["Kana", "Verbs", "Kanji N5", "Nouns"]);
     expect(screen.getByRole("button", { name: "Actions for Japanese" })).toHaveFocus();
   });
 
@@ -468,7 +581,9 @@ describe("DeckListScreen", () => {
       target: kanji.url,
       group: { url: fresh, title: { en: "New group" } },
     });
-    expect(statusTexts()).toEqual(['Put Kanji N5 and Kana in a new group. Name it, or press Escape to keep "New group".']);
+    expect(statusTexts()).toEqual([
+      'Put Kanji N5 and Kana in a new group. Name it, or press Escape to keep "New group".',
+    ]);
     const field = screen.getByRole("textbox", { name: "Group name" }) as HTMLInputElement;
     expect(field).toHaveFocus();
     expect(field.value).toBe("New group");
@@ -483,7 +598,12 @@ describe("DeckListScreen", () => {
     expect(onEdit).toHaveBeenCalledWith(
       expect.objectContaining({ kind: "combine", dragged: kana.url, target: kanji.url }),
     );
-    expect(screen.getAllByRole("link").map((link) => link.textContent).slice(0, 2)).toEqual(["Kanji N5", "Kana"]);
+    expect(
+      screen
+        .getAllByRole("link")
+        .map((link) => link.textContent)
+        .slice(0, 2),
+    ).toEqual(["Kanji N5", "Kana"]);
   });
 
   it("names a new group with Enter, in the page's language, and focuses it", async () => {
@@ -493,7 +613,11 @@ describe("DeckListScreen", () => {
     const field = screen.getByRole("textbox", { name: "Group name" });
     fireEvent.input(field, { target: { value: "  Japanese  " } });
     fireEvent.submit(field.closest("form")!);
-    expect(onEdit).toHaveBeenLastCalledWith({ kind: "rename", group: fresh, title: { en: "Japanese" } });
+    expect(onEdit).toHaveBeenLastCalledWith({
+      kind: "rename",
+      group: fresh,
+      title: { en: "Japanese" },
+    });
     expect(statusTexts()).toEqual(['Renamed the group to "Japanese".']);
     expect(screen.queryByRole("textbox")).toBeNull();
     expect(screen.getByRole("button", { name: "Japanese 2 decks" })).toHaveFocus();
@@ -528,7 +652,11 @@ describe("DeckListScreen", () => {
     const create = screen.getByRole("link", { name: "Create deck" });
     create.focus();
     fireEvent.focusOut(field, { relatedTarget: create });
-    expect(onEdit).toHaveBeenLastCalledWith({ kind: "rename", group: fresh, title: { en: "Japanese" } });
+    expect(onEdit).toHaveBeenLastCalledWith({
+      kind: "rename",
+      group: fresh,
+      title: { en: "Japanese" },
+    });
     expect(create).toHaveFocus();
   });
 
@@ -555,7 +683,11 @@ describe("DeckListScreen", () => {
       expect(screen.queryByRole("textbox")).toBeNull();
     });
     expect(onEdit).toHaveBeenCalledTimes(2);
-    expect(onEdit).toHaveBeenLastCalledWith({ kind: "rename", group: fresh, title: { en: "Japanese" } });
+    expect(onEdit).toHaveBeenLastCalledWith({
+      kind: "rename",
+      group: fresh,
+      title: { en: "Japanese" },
+    });
   });
 
   it("closes the name field, back on the deck, when the new group could not be made", async () => {
@@ -601,7 +733,11 @@ describe("DeckListScreen", () => {
     expect(field.value).toBe("Japanese");
     fireEvent.input(field, { target: { value: "Nihongo" } });
     fireEvent.submit(field.closest("form")!);
-    expect(onEdit).toHaveBeenCalledWith({ kind: "rename", group: japanese, title: { en: "Nihongo" } });
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "rename",
+      group: japanese,
+      title: { en: "Nihongo" },
+    });
     expect(screen.getByRole("button", { name: "Nihongo 2 decks" })).toHaveFocus();
   });
 
@@ -661,7 +797,9 @@ describe("DeckListScreen", () => {
     const onRemoveDeck = vi.fn(async () => true);
     renderScreen(flat, { onRemoveDeck });
     choose("Kanji N5", "Delete deck");
-    expect(confirm).toHaveBeenCalledWith('Remove the deck "Kanji N5" and all its cards? This cannot be undone.');
+    expect(confirm).toHaveBeenCalledWith(
+      'Remove the deck "Kanji N5" and all its cards? This cannot be undone.',
+    );
     expect(onRemoveDeck).toHaveBeenCalledWith(kanji);
     await waitFor(() => {
       expect(statusTexts()).toEqual(['Deleted the deck "Kanji N5".']);
@@ -676,7 +814,12 @@ describe("DeckListScreen", () => {
       "Kana",
       () => screen.getByRole("button", { name: "Actions for Nouns" }),
     ],
-    ["the group it was in, when it was alone there", tree, "Verbs", () => screen.getByRole("button", { name: "Grammar 1 deck" })],
+    [
+      "the group it was in, when it was alone there",
+      tree,
+      "Verbs",
+      () => screen.getByRole("button", { name: "Grammar 1 deck" }),
+    ],
     [
       "the heading, when it was the only one",
       { readOnly: false, children: [deck(kanji)] },
@@ -721,18 +864,25 @@ describe("DeckListScreen", () => {
       for (const name of ["Rename", "Move down", "Group with the one below", "Delete deck"]) {
         expect(screen.getByRole("menuitem", { name })).toHaveAttribute("aria-disabled", "true");
       }
-      expect(screen.getByRole("menuitem", { name: "Preferences" })).toHaveAttribute("href", "#/deck-preferences?deck=deck-1");
+      expect(screen.getByRole("menuitem", { name: "Preferences" })).toHaveAttribute(
+        "href",
+        "#/deck-preferences?deck=deck-1",
+      );
       fireEvent.click(screen.getByRole("menuitem", { name: "Delete deck" }));
       expect(onRemoveDeck).toHaveBeenCalledOnce();
       fireEvent.keyDown(screen.getByRole("menuitem", { name: "Delete deck" }), { key: "Escape" });
       // The others are not held up.
       openMenu("Kana");
-      expect(screen.getByRole("menuitem", { name: "Delete deck" })).not.toHaveAttribute("aria-disabled");
+      expect(screen.getByRole("menuitem", { name: "Delete deck" })).not.toHaveAttribute(
+        "aria-disabled",
+      );
       fireEvent.keyDown(screen.getByRole("menuitem", { name: "Delete deck" }), { key: "Escape" });
       // It could not be deleted: it can be again.
       await act(async () => settle(false));
       openMenu("Kanji N5");
-      expect(screen.getByRole("menuitem", { name: "Delete deck" })).not.toHaveAttribute("aria-disabled");
+      expect(screen.getByRole("menuitem", { name: "Delete deck" })).not.toHaveAttribute(
+        "aria-disabled",
+      );
     });
 
     it("leaves focus where the user took it meanwhile", async () => {
@@ -747,26 +897,24 @@ describe("DeckListScreen", () => {
     });
 
     it.each([
-      [
-        "its neighbours",
-        flat,
-        "Kanji N5",
-        { readOnly: false, children: [deck(kanji)] },
-      ],
+      ["its neighbors", flat, "Kanji N5", { readOnly: false, children: [deck(kanji)] }],
       [
         "the group it was in",
         { readOnly: false, children: [deck(kanji), group("group-3", "Other", [deck(nouns)])] },
         "Nouns",
         { readOnly: false, children: [deck(kanji), deck(nouns)] },
       ],
-    ])("puts focus on the heading when %s went meanwhile", async (_, initial: DeckTree, name, after: DeckTree) => {
-      stubConfirm(true);
-      const { rerender } = render(<DeckListScreen {...props(initial)} />);
-      choose(name, "Delete deck");
-      rerender(<DeckListScreen {...props(after)} />);
-      await act(async () => settle(true));
-      expect(screen.getByRole("heading", { name: "Decks" })).toHaveFocus();
-    });
+    ])(
+      "puts focus on the heading when %s went meanwhile",
+      async (_, initial: DeckTree, name, after: DeckTree) => {
+        stubConfirm(true);
+        const { rerender } = render(<DeckListScreen {...props(initial)} />);
+        choose(name, "Delete deck");
+        rerender(<DeckListScreen {...props(after)} />);
+        await act(async () => settle(true));
+        expect(screen.getByRole("heading", { name: "Decks" })).toHaveFocus();
+      },
+    );
   });
 
   it("keeps a deck when deleting it is not confirmed", () => {
@@ -793,7 +941,9 @@ describe("DeckListScreen", () => {
     const confirm = stubConfirm(true);
     const { onEdit } = renderScreen();
     choose("Japanese", "Delete group");
-    expect(confirm).toHaveBeenCalledWith('Delete the group "Japanese"? Its 2 decks are kept, one level up.');
+    expect(confirm).toHaveBeenCalledWith(
+      'Delete the group "Japanese"? Its 2 decks are kept, one level up.',
+    );
     // Its header folds away first; a row in it ending an animation of its own is no end of that.
     expect(row(japanese).closest("li")).toHaveClass("leaving");
     headerFolded(japanese, "bounce-in");
@@ -803,14 +953,19 @@ describe("DeckListScreen", () => {
     expect(onEdit).toHaveBeenCalledWith({ kind: "removeGroup", group: japanese });
     expect(row(japanese)).toBeNull();
     expect(screen.getByRole("button", { name: "Actions for Kana" })).toHaveFocus();
-    expect(statusTexts()).toEqual(['Deleted the group "Japanese"; what it held moved up one level.']);
+    expect(statusTexts()).toEqual([
+      'Deleted the group "Japanese"; what it held moved up one level.',
+    ]);
   });
 
   it("puts focus on what a group folded shut held once it is deleted, not while that is out of reach", async () => {
     stubConfirm(true);
     // As a browser does: nothing in an inert part of the page takes focus.
     const focus = HTMLElement.prototype.focus;
-    vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function (this: HTMLElement, options) {
+    vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function (
+      this: HTMLElement,
+      options,
+    ) {
       if (this.closest("[inert]") === null) focus.call(this, options);
     });
     renderScreen(tree, { slow: true });
@@ -829,7 +984,9 @@ describe("DeckListScreen", () => {
     const confirm = stubConfirm(false);
     const { onEdit } = renderScreen();
     choose("Grammar", "Delete group");
-    expect(confirm).toHaveBeenCalledWith('Delete the group "Grammar"? Its 1 deck is kept, one level up.');
+    expect(confirm).toHaveBeenCalledWith(
+      'Delete the group "Grammar"? Its 1 deck is kept, one level up.',
+    );
     expect(onEdit).not.toHaveBeenCalled();
     expect(row(grammar)).not.toBeNull();
   });
@@ -837,7 +994,10 @@ describe("DeckListScreen", () => {
   it("deletes a group at once under reduced motion", () => {
     setReducedMotion(true);
     const confirm = stubConfirm(true);
-    renderScreen({ readOnly: false, children: [group("group-1", "Japanese", [group("group-2", "Grammar", [])])] });
+    renderScreen({
+      readOnly: false,
+      children: [group("group-1", "Japanese", [group("group-2", "Grammar", [])])],
+    });
     choose("Grammar", "Delete group");
     expect(confirm).toHaveBeenCalledWith('Delete the empty group "Grammar"?');
     expect(row(grammar)).toBeNull();
@@ -890,11 +1050,18 @@ describe("DeckListScreen", () => {
 
   it("asks before deleting a group of groups with no decks, keeping its groups", () => {
     const confirm = stubConfirm(true);
-    renderScreen({ readOnly: false, children: [group("group-1", "Japanese", [group("group-2", "Grammar", [])])] });
+    renderScreen({
+      readOnly: false,
+      children: [group("group-1", "Japanese", [group("group-2", "Grammar", [])])],
+    });
     choose("Japanese", "Delete group");
     headerFolded(japanese);
-    expect(confirm).toHaveBeenCalledWith('Delete the group "Japanese"? The groups in it are kept, one level up.');
-    expect(statusTexts()).toEqual(['Deleted the group "Japanese"; what it held moved up one level.']);
+    expect(confirm).toHaveBeenCalledWith(
+      'Delete the group "Japanese"? The groups in it are kept, one level up.',
+    );
+    expect(statusTexts()).toEqual([
+      'Deleted the group "Japanese"; what it held moved up one level.',
+    ]);
     expect(screen.getByRole("button", { name: "Actions for Grammar" })).toHaveFocus();
   });
 
@@ -960,11 +1127,14 @@ describe("DeckListScreen", () => {
   it("only shows a list arranged by a newer version, with nothing to rearrange it", () => {
     const confirm = stubConfirm(true);
     const { onEdit } = renderScreen({ ...tree, readOnly: true });
-    expect(screen.getByText(/A newer version of Solid Memo arranged these decks/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/A newer version of Solid Memo arranged these decks/),
+    ).toBeInTheDocument();
     // Folding is this device's own, and stays.
     expect(screen.getByRole("button", { name: "Japanese 2 decks" })).toBeEnabled();
     openMenu("Japanese");
-    for (const item of screen.getAllByRole("menuitem")) expect(item).toHaveAttribute("aria-disabled", "true");
+    for (const item of screen.getAllByRole("menuitem"))
+      expect(item).toHaveAttribute("aria-disabled", "true");
     for (const name of ["Rename", "Move down", "Other", "Delete group"]) {
       fireEvent.click(screen.getByRole("menuitem", { name }));
     }
@@ -973,8 +1143,15 @@ describe("DeckListScreen", () => {
     openMenu("Japanese");
     // A deck's name, preferences and cards are its own: they are not the arrangement's.
     openMenu("Kana");
-    const enabled = screen.getAllByRole("menuitem").filter((item) => !item.hasAttribute("aria-disabled"));
-    expect(enabled.map((item) => item.textContent)).toEqual(["Preferences", "Open in Studio", "Rename", "Delete deck"]);
+    const enabled = screen
+      .getAllByRole("menuitem")
+      .filter((item) => !item.hasAttribute("aria-disabled"));
+    expect(enabled.map((item) => item.textContent)).toEqual([
+      "Preferences",
+      "Open in Studio",
+      "Rename",
+      "Delete deck",
+    ]);
     fireEvent.click(screen.getByRole("menuitem", { name: "Move out of Japanese" }));
     expect(onEdit).not.toHaveBeenCalled();
     expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -985,15 +1162,25 @@ describe("DeckListScreen", () => {
   it("only shows a list whose arrangement is set aside for invalid data, saying so, with nothing to rearrange it", () => {
     const { onEdit } = renderScreen(tree, { arrangementSetAside: true });
     expect(
-      screen.getByText("The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired."),
+      screen.getByText(
+        "The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired.",
+      ),
     ).toBeInTheDocument();
     expect(screen.queryByText(/A newer version of Solid Memo arranged these decks/)).toBeNull();
     openMenu("Japanese");
-    for (const item of screen.getAllByRole("menuitem")) expect(item).toHaveAttribute("aria-disabled", "true");
+    for (const item of screen.getAllByRole("menuitem"))
+      expect(item).toHaveAttribute("aria-disabled", "true");
     openMenu("Japanese");
     openMenu("Kana");
-    const enabled = screen.getAllByRole("menuitem").filter((item) => !item.hasAttribute("aria-disabled"));
-    expect(enabled.map((item) => item.textContent)).toEqual(["Preferences", "Open in Studio", "Rename", "Delete deck"]);
+    const enabled = screen
+      .getAllByRole("menuitem")
+      .filter((item) => !item.hasAttribute("aria-disabled"));
+    expect(enabled.map((item) => item.textContent)).toEqual([
+      "Preferences",
+      "Open in Studio",
+      "Rename",
+      "Delete deck",
+    ]);
     fireEvent.click(screen.getByRole("menuitem", { name: "Move out of Japanese" }));
     expect(onEdit).not.toHaveBeenCalled();
   });
@@ -1002,7 +1189,8 @@ describe("DeckListScreen", () => {
     const { onEdit } = renderScreen(tree, { checking: true });
     expect(screen.queryByText(/cannot be rearranged/)).toBeNull();
     openMenu("Japanese");
-    for (const item of screen.getAllByRole("menuitem")) expect(item).toHaveAttribute("aria-disabled", "true");
+    for (const item of screen.getAllByRole("menuitem"))
+      expect(item).toHaveAttribute("aria-disabled", "true");
     openMenu("Japanese");
     openMenu("Kana");
     fireEvent.click(screen.getByRole("menuitem", { name: "Move out of Japanese" }));
@@ -1012,13 +1200,23 @@ describe("DeckListScreen", () => {
   it("neither renames nor deletes a deck the container holds, the others and the groups as before", () => {
     renderScreen(tree, { deckHeld: (each) => each.url === kana.url });
     openMenu("Kana");
-    expect(screen.getByRole("menuitem", { name: "Rename" })).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByRole("menuitem", { name: "Delete deck" })).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByRole("menuitem", { name: "Move out of Japanese" })).not.toHaveAttribute("aria-disabled");
+    expect(screen.getByRole("menuitem", { name: "Rename" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    expect(screen.getByRole("menuitem", { name: "Delete deck" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    expect(screen.getByRole("menuitem", { name: "Move out of Japanese" })).not.toHaveAttribute(
+      "aria-disabled",
+    );
     openMenu("Kana");
     openMenu("Kanji N5");
     expect(screen.getByRole("menuitem", { name: "Rename" })).not.toHaveAttribute("aria-disabled");
-    expect(screen.getByRole("menuitem", { name: "Delete deck" })).not.toHaveAttribute("aria-disabled");
+    expect(screen.getByRole("menuitem", { name: "Delete deck" })).not.toHaveAttribute(
+      "aria-disabled",
+    );
     openMenu("Kanji N5");
     openMenu("Japanese");
     expect(screen.getByRole("menuitem", { name: "Rename" })).not.toHaveAttribute("aria-disabled");
@@ -1031,7 +1229,10 @@ describe("DeckListScreen", () => {
 
   it("links to the deck library and to the deck creator, styled as the primary button", () => {
     renderScreen();
-    expect(screen.getByRole("link", { name: "Deck library" })).toHaveAttribute("href", "#/library?instance=a");
+    expect(screen.getByRole("link", { name: "Deck library" })).toHaveAttribute(
+      "href",
+      "#/library?instance=a",
+    );
     const link = screen.getByRole("link", { name: "Create deck" });
     expect(link).toHaveClass("button", "primary");
     expect(link).toHaveAttribute("href", "#/new-deck?instance=a");
@@ -1044,7 +1245,9 @@ describe("DeckListScreen moving rows", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     // Each row 40px under the one before; the list itself, and anything else, nowhere.
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
       const index = [...document.querySelectorAll("[data-row-key]")].indexOf(this);
       return index === -1 ? new DOMRect() : new DOMRect(0, index * 40, 500, 40);
     });
@@ -1104,7 +1307,12 @@ describe("DeckListScreen in Swedish", () => {
     const onEdit = vi.fn();
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
-        <Harness initial={flat} onEdit={onEdit} onToggle={() => undefined} onUnfold={() => undefined} />
+        <Harness
+          initial={flat}
+          onEdit={onEdit}
+          onToggle={() => undefined}
+          onUnfold={() => undefined}
+        />
       </I18nProvider>,
     );
     expect(screen.getByRole("heading", { name: "Kortlekar" })).toBeInTheDocument();
@@ -1112,11 +1320,17 @@ describe("DeckListScreen in Swedish", () => {
     expect(screen.getByRole("link", { name: "Skapa kortlek" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Åtgärder för Kana" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Gruppera med den ovanför" }));
-    expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ group: { url: fresh, title: { sv: "Ny grupp" } } }));
+    expect(onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({ group: { url: fresh, title: { sv: "Ny grupp" } } }),
+    );
     const field = screen.getByRole("textbox", { name: "Gruppens namn" });
     fireEvent.input(field, { target: { value: "Japanska" } });
     fireEvent.submit(field.closest("form")!);
-    expect(onEdit).toHaveBeenLastCalledWith({ kind: "rename", group: fresh, title: { sv: "Japanska" } });
+    expect(onEdit).toHaveBeenLastCalledWith({
+      kind: "rename",
+      group: fresh,
+      title: { sv: "Japanska" },
+    });
   });
 });
 
@@ -1132,7 +1346,9 @@ describe("DeckListScreen dragging", () => {
     vi.useFakeTimers();
     listTop = 100;
     onListMeasured = () => {};
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
       if (this.classList.contains("deck-tree")) {
         onListMeasured();
         return new DOMRect(0, listTop, 600, 1000);
@@ -1140,7 +1356,9 @@ describe("DeckListScreen dragging", () => {
       // The copy that follows the pointer, where it was placed.
       const placed = /translate3d\((.+)px, (.+)px, 0\)/.exec(this.style.transform);
       if (placed !== null) return new DOMRect(Number(placed[1]), Number(placed[2]), 500, 40);
-      const shown = [...document.querySelectorAll("[data-row-key]")].filter((element) => element.closest("[data-collapsed]") === null);
+      const shown = [...document.querySelectorAll("[data-row-key]")].filter(
+        (element) => element.closest("[data-collapsed]") === null,
+      );
       const index = shown.indexOf(this);
       return index === -1 ? new DOMRect() : new DOMRect(10, yOf(index, 0), 500, 40);
     });
@@ -1153,9 +1371,17 @@ describe("DeckListScreen dragging", () => {
 
   /** A pointer of a kind, pressing, moving and letting go at a height on the page. */
   function pointer(pointerType: "touch" | "pen" | "mouse", pointerId = 1) {
-    const at = (y: number) => ({ pointerId, pointerType, clientX: 50, clientY: y, button: 0, isPrimary: true });
+    const at = (y: number) => ({
+      pointerId,
+      pointerType,
+      clientX: 50,
+      clientY: y,
+      button: 0,
+      isPrimary: true,
+    });
     return {
-      down: (target: Element, y: number, init: object = {}) => fireEvent.pointerDown(target, { ...at(y), ...init }),
+      down: (target: Element, y: number, init: object = {}) =>
+        fireEvent.pointerDown(target, { ...at(y), ...init }),
       move: (y: number) => fireEvent.pointerMove(window, at(y)),
       up: (y: number) => fireEvent.pointerUp(window, at(y)),
     };
@@ -1210,7 +1436,11 @@ describe("DeckListScreen dragging", () => {
     onListMeasured = () => settled.push(row(kanji.url).style.transform);
     touch.up(yOf(2, 44));
     expect(settled).toContain("translate(0px, 24px)");
-    expect(onEdit).toHaveBeenCalledWith({ kind: "move", node: kanji.url, to: { parent: japanese, after: kana.url } });
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "move",
+      node: kanji.url,
+      to: { parent: japanese, after: kana.url },
+    });
     expect(statusTexts()).toEqual(["Moved Kanji N5: 2 of 3 in Japanese."]);
     expect(dragging()).toBe(false);
     expect(ghost()).toBeNull();
@@ -1246,7 +1476,11 @@ describe("DeckListScreen dragging", () => {
     expect(row(other).querySelectorAll("svg")[1]!.querySelectorAll("path")).toHaveLength(2);
     expect(line().hidden).toBe(true);
     mouse.up(yOf(5));
-    expect(onEdit).toHaveBeenCalledWith({ kind: "move", node: kanji.url, to: { parent: other, after: nouns.url } });
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "move",
+      node: kanji.url,
+      to: { parent: other, after: nouns.url },
+    });
     expect(onUnfold).toHaveBeenCalledWith([other]);
     expect(row(other)).not.toHaveClass("drop-into");
     // The click goes through once the drag is long gone.
@@ -1304,7 +1538,11 @@ describe("DeckListScreen dragging", () => {
     ["a button", () => screen.getByRole("button", { name: "Actions for Kanji N5" }), {}],
     ["the right button", () => handle(kanji.url), { button: 2 }],
     ["a second, later pointer", () => handle(kanji.url), { isPrimary: false }],
-    ["what a group holds, between its rows", () => row(japanese).closest(".deck-group")!.querySelector(".deck-group-body")!, {}],
+    [
+      "what a group holds, between its rows",
+      () => row(japanese).closest(".deck-group")!.querySelector(".deck-group-body")!,
+      {},
+    ],
   ])("starts no drag on %s", (_, target, init) => {
     renderScreen();
     pointer("touch").down(target(), yOf(0), init);
@@ -1356,7 +1594,11 @@ describe("DeckListScreen dragging", () => {
     expect(line().dataset.label).toBe("after Other");
     expect(line().style.getPropertyValue("--line-depth")).toBe("0");
     touch.up(yOf(6, 62));
-    expect(onEdit).toHaveBeenCalledWith({ kind: "move", node: japanese, to: { parent: null, after: other } });
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "move",
+      node: japanese,
+      to: { parent: null, after: other },
+    });
     // Its fold button's click, the drop's own, does not fold it.
     fireEvent.click(handle(japanese));
     expect(onToggle).not.toHaveBeenCalled();
@@ -1401,13 +1643,18 @@ describe("DeckListScreen dragging", () => {
       group: { url: fresh, title: { en: "New group" } },
     });
     expect(screen.getByRole("textbox", { name: "Group name" })).toHaveFocus();
-    expect(statusTexts()).toEqual(['Put Kanji N5 and Kana in a new group. Name it, or press Escape to keep "New group".']);
+    expect(statusTexts()).toEqual([
+      'Put Kanji N5 and Kana in a new group. Name it, or press Escape to keep "New group".',
+    ]);
   });
 
   it.each<[string, () => void]>([
     ["Escape", () => expect(fireEvent.keyDown(document.body, { key: "Escape" })).toBe(false)],
     ["the pointer's cancel", () => fireEvent.pointerCancel(window, { pointerId: 1 })],
-    ["the pointer's capture lost", () => fireEvent(document.querySelector(".deck-tree")!, new Event("lostpointercapture"))],
+    [
+      "the pointer's capture lost",
+      () => fireEvent(document.querySelector(".deck-tree")!, new Event("lostpointercapture")),
+    ],
     ["the window losing focus", () => fireEvent.blur(window)],
     [
       "the page being hidden",
@@ -1425,7 +1672,7 @@ describe("DeckListScreen dragging", () => {
     expect(dragging()).toBe(false);
     expect(ghost()).toBeNull();
     expect(line().hidden).toBe(true);
-    expect(statusTexts()).toEqual(["Move cancelled: the deck or group stays where it was."]);
+    expect(statusTexts()).toEqual(["Move canceled: the deck or group stays where it was."]);
     touch.up(yOf(2, 44));
     expect(onEdit).not.toHaveBeenCalled();
   });
@@ -1534,7 +1781,9 @@ describe("DeckListScreen dragging", () => {
 describe("DeckListScreen dragging while the list changes", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
       const shown = [...document.querySelectorAll("[data-row-key]")];
       const index = shown.indexOf(this);
       return index === -1 ? new DOMRect() : new DOMRect(0, index * 48, 500, 40);
@@ -1566,14 +1815,28 @@ describe("DeckListScreen dragging while the list changes", () => {
       createDeckHref: "#/new-deck?instance=a",
     });
     const view = render(<DeckListScreen {...props(initial)} />);
-    return { onEdit, change: (next: DeckTree) => view.rerender(<DeckListScreen {...props(next)} />) };
+    return {
+      onEdit,
+      change: (next: DeckTree) => view.rerender(<DeckListScreen {...props(next)} />),
+    };
   }
 
-  const titles = () => screen.getAllByRole("link").map((link) => link.textContent).slice(0, -2);
+  const titles = () =>
+    screen
+      .getAllByRole("link")
+      .map((link) => link.textContent)
+      .slice(0, -2);
 
   /** Lifts the row at `index` with a long press, and moves to `y`. */
   function liftTo(index: number, y: number) {
-    const at = (clientY: number) => ({ pointerId: 1, pointerType: "touch", clientX: 5, clientY, button: 0, isPrimary: true });
+    const at = (clientY: number) => ({
+      pointerId: 1,
+      pointerType: "touch",
+      clientX: 5,
+      clientY,
+      button: 0,
+      isPrimary: true,
+    });
     fireEvent.pointerDown(document.querySelectorAll(".deck-open")[index]!, at(index * 48 + 20));
     act(() => {
       vi.advanceTimersByTime(400);
@@ -1591,7 +1854,11 @@ describe("DeckListScreen dragging while the list changes", () => {
     change({ readOnly: false, children: [deck(verbs), deck(kanji), deck(kana), deck(nouns)] });
     expect(titles()).toEqual(["Kanji N5", "Kana", "Verbs"]);
     drop();
-    expect(onEdit).toHaveBeenCalledWith({ kind: "move", node: kanji.url, to: { parent: null, after: kana.url } });
+    expect(onEdit).toHaveBeenCalledWith({
+      kind: "move",
+      node: kanji.url,
+      to: { parent: null, after: kana.url },
+    });
     expect(titles()).toEqual(["Verbs", "Kanji N5", "Kana", "Nouns"]);
   });
 
@@ -1622,7 +1889,14 @@ describe("DeckListScreen dragging while the list changes", () => {
 
   it("lifts nothing, quietly, when the deck pressed goes while it is held", () => {
     const { onEdit, change } = renderList(three);
-    const at = (clientY: number) => ({ pointerId: 1, pointerType: "touch", clientX: 5, clientY, button: 0, isPrimary: true });
+    const at = (clientY: number) => ({
+      pointerId: 1,
+      pointerType: "touch",
+      clientX: 5,
+      clientY,
+      button: 0,
+      isPrimary: true,
+    });
     fireEvent.pointerDown(document.querySelectorAll(".deck-open")[0]!, at(20));
     change({ readOnly: false, children: [deck(kana), deck(verbs)] });
     act(() => {
@@ -1643,7 +1917,7 @@ describe("DeckListScreen dragging while the list changes", () => {
     change({ readOnly: false, children: [deck(kana), deck(verbs)] });
     drop();
     expect(onEdit).not.toHaveBeenCalled();
-    expect(statusTexts()).toEqual(["Move cancelled: the deck or group stays where it was."]);
+    expect(statusTexts()).toEqual(["Move canceled: the deck or group stays where it was."]);
   });
 
   it("gives a new group up, and says so, when the other deck is gone", () => {
@@ -1656,7 +1930,7 @@ describe("DeckListScreen dragging while the list changes", () => {
     change({ readOnly: false, children: [deck(kanji), deck(verbs)] });
     drop();
     expect(onEdit).not.toHaveBeenCalled();
-    expect(statusTexts()).toEqual(["Move cancelled: the deck or group stays where it was."]);
+    expect(statusTexts()).toEqual(["Move canceled: the deck or group stays where it was."]);
     expect(screen.queryByRole("textbox")).toBeNull();
   });
 });

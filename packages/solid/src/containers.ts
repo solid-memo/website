@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   deleteContainer,
   deleteFile,
@@ -16,7 +20,10 @@ import { getSolidDatasetOrNull } from "./datasets";
  */
 
 /** What a container lists that lies below it. */
-function childrenOf(container: Parameters<typeof getContainedResourceUrlAll>[0], containerUrl: string): string[] {
+function childrenOf(
+  container: Parameters<typeof getContainedResourceUrlAll>[0],
+  containerUrl: string,
+): string[] {
   return getContainedResourceUrlAll(container).filter(
     (child) => child.startsWith(containerUrl) && child !== containerUrl,
   );

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -40,15 +44,20 @@ export function useMakePublic(useCases: UseCases, instanceUrl: string) {
 
 /**
  * Start the next version of a release as a draft of the instance, then
- * `onStarted` with it. It writes the catalogue, so it waits its turn with
- * the catalogue's other writes; the drafts are read afresh after it, and
+ * `onStarted` with it. It writes the catalog, so it waits its turn with
+ * the catalog's other writes; the drafts are read afresh after it, and
  * what was read at the new draft's URL is forgotten.
  */
-export function useStartNextVersion(useCases: UseCases, instanceUrl: string, onStarted: (created: CreatedDraft) => void) {
+export function useStartNextVersion(
+  useCases: UseCases,
+  instanceUrl: string,
+  onStarted: (created: CreatedDraft) => void,
+) {
   const queryClient = useQueryClient();
   return useMutation({
     scope: { id: catalogScope(instanceUrl) },
-    mutationFn: async (url: string) => (await useCases.createReleaseDraft(instanceUrl, { kind: "nextVersionOf", url }))!,
+    mutationFn: async (url: string) =>
+      (await useCases.createReleaseDraft(instanceUrl, { kind: "nextVersionOf", url }))!,
     onSuccess: (created) => {
       queryClient.removeQueries({ queryKey: draftKey(created.draft.url) });
       onStarted(created);

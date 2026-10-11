@@ -1,4 +1,14 @@
-import { RDF_TYPE, localName, objectsOf, parseTurtle, subjectsOfType } from "@solid-memo/turtle/rdf";
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import {
+  RDF_TYPE,
+  localName,
+  objectsOf,
+  parseTurtle,
+  subjectsOfType,
+} from "@solid-memo/turtle/rdf";
 import { VOCAB_BASE } from "../src/ns.ts";
 
 /**
@@ -55,8 +65,7 @@ export interface Vocab {
 export function parseVocab(turtle: string): Vocab {
   const quads = parseTurtle(turtle, VOCAB_IRI);
   const literal = (subject: string, predicate: string): string | undefined =>
-    objectsOf(quads, subject, predicate).find((o) => o.termType === "Literal")
-      ?.value;
+    objectsOf(quads, subject, predicate).find((o) => o.termType === "Literal")?.value;
   const required = (subject: string, predicate: string): string => {
     const value = literal(subject, predicate);
     if (value === undefined) {

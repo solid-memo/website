@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import { ariaNames } from "../harness/ariaNames.ts";
 import { escapeRegExp } from "../harness/strings.ts";
@@ -19,13 +23,18 @@ export class CourseQuestion extends Screen {
   }
 
   get check(): Locator {
-    return this.page.getByRole("main").getByRole("button", { name: this.t("multipleChoice.check"), exact: true });
+    return this.page
+      .getByRole("main")
+      .getByRole("button", { name: this.t("multipleChoice.check"), exact: true });
   }
 
   /** The question's name and its options' names, as a screen reader reads them. */
   async read(): Promise<{ question: string; options: string[] }> {
     const snapshot = await this.options.ariaSnapshot();
-    return { question: ariaNames(snapshot, "radiogroup")[0]!, options: ariaNames(snapshot, "radio") };
+    return {
+      question: ariaNames(snapshot, "radiogroup")[0]!,
+      options: ariaNames(snapshot, "radio"),
+    };
   }
 
   /**
@@ -35,7 +44,10 @@ export class CourseQuestion extends Screen {
    * for the first time (none of a fresh learner's), that its card joined
    * the deck.
    */
-  async answer(known: Answers, { wrongly = false }: { wrongly?: boolean } = {}): Promise<{ question: string; correct: boolean }> {
+  async answer(
+    known: Answers,
+    { wrongly = false }: { wrongly?: boolean } = {},
+  ): Promise<{ question: string; correct: boolean }> {
     return this.intent("Answer the question", async () => {
       const { question, options } = await this.read();
       const remembered = known.get(question);
@@ -49,14 +61,23 @@ export class CourseQuestion extends Screen {
       await this.check.click();
 
       const mark = this.t("multipleChoice.right");
-      const marked = this.options.getByRole("radio", { name: new RegExp(`${escapeRegExp(mark)}$`) });
+      const marked = this.options.getByRole("radio", {
+        name: new RegExp(`${escapeRegExp(mark)}$`),
+      });
       await expect(marked).toBeVisible();
-      const rightName = ariaNames(await marked.ariaSnapshot(), "radio")[0]!.slice(0, -mark.length).trim();
+      const rightName = ariaNames(await marked.ariaSnapshot(), "radio")[0]!
+        .slice(0, -mark.length)
+        .trim();
       known.set(question, rightName);
 
       const correct = rightName === chosen;
-      const verdict = [this.t(correct ? "courseQuestion.right" : "courseQuestion.wrong"), ...(added ? [this.t("courseQuestion.added")] : [])];
-      await expect(this.page.getByRole("status").filter({ hasText: verdict[0] })).toHaveText(verdict.join(" "));
+      const verdict = [
+        this.t(correct ? "courseQuestion.right" : "courseQuestion.wrong"),
+        ...(added ? [this.t("courseQuestion.added")] : []),
+      ];
+      await expect(this.page.getByRole("status").filter({ hasText: verdict[0] })).toHaveText(
+        verdict.join(" "),
+      );
       // Answered, it can be checked no more.
       await expect(this.check).toBeHidden();
       return { question, correct };

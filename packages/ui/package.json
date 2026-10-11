@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/ui",
+  "description": "Solid Memo's Preact UI: components, router, messages in each language, theme and styles.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

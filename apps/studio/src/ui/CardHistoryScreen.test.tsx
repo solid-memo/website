@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { Answer } from "@solid-memo/domain/answer";
@@ -7,7 +11,10 @@ import { makeCard, makeDeck } from "../test/fixtures";
 import { WithKeys } from "../test/keys";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
-const card: Card = { ...makeCard(deck, "water"), distractors: [{ id: "water-d1", text: { en: "fire" } }] };
+const card: Card = {
+  ...makeCard(deck, "water"),
+  distractors: [{ id: "water-d1", text: { en: "fire" } }],
+};
 
 function answer(n: number, extra: Partial<Answer> = {}): Answer {
   return {
@@ -29,8 +36,16 @@ describe("CardHistoryScreen", () => {
       <CardHistoryScreen
         card={card}
         answers={[
-          answer(3, { grade: 1, mode: "multiple-choice", chosenDistractor: `${deck.cardsDocumentUrl}#water-d1` }),
-          answer(2, { grade: 0, mode: "multiple-choice", chosenDistractor: `${deck.cardsDocumentUrl}#water-d9` }),
+          answer(3, {
+            grade: 1,
+            mode: "multiple-choice",
+            chosenDistractor: `${deck.cardsDocumentUrl}#water-d1`,
+          }),
+          answer(2, {
+            grade: 0,
+            mode: "multiple-choice",
+            chosenDistractor: `${deck.cardsDocumentUrl}#water-d9`,
+          }),
           answer(1, { direction: "back-to-front" }),
         ]}
       />,
@@ -39,15 +54,19 @@ describe("CardHistoryScreen", () => {
     const table = screen.getByRole("table", { name: "The card's answers, newest first" });
     const rows = within(table).getAllByRole("row").slice(1);
     expect(within(rows[0]!).getByRole("rowheader")).toHaveTextContent("October 3, 2026");
-    expect(within(rows[0]!).getAllByRole("cell").map((cell) => cell.textContent)).toEqual([
-      "Front → back",
-      "1 — Wrong",
-      "Multiple choice",
-      "fire",
-    ]);
+    expect(
+      within(rows[0]!)
+        .getAllByRole("cell")
+        .map((cell) => cell.textContent),
+    ).toEqual(["Front → back", "1 — Wrong", "Multiple choice", "fire"]);
     expect(rows[0]).toHaveClass("forgotten");
     expect(rows[1]).toHaveTextContent("water-d9 (no longer on the card)");
-    expect(within(rows[2]!).getAllByRole("cell").map((cell) => cell.textContent).slice(1)).toEqual(["4 — Good", "Recalled", ""]);
+    expect(
+      within(rows[2]!)
+        .getAllByRole("cell")
+        .map((cell) => cell.textContent)
+        .slice(1),
+    ).toEqual(["4 — Good", "Recalled", ""]);
     expect(rows[2]).not.toHaveClass("forgotten");
   });
 
@@ -56,12 +75,19 @@ describe("CardHistoryScreen", () => {
       <WithKeys>
         <CardHistoryScreen
           card={card}
-          answers={[answer(3, { grade: 1, mode: "multiple-choice" }), answer(2, { grade: 5, direction: "back-to-front" }), answer(1, { grade: 3 })]}
+          answers={[
+            answer(3, { grade: 1, mode: "multiple-choice" }),
+            answer(2, { grade: 5, direction: "back-to-front" }),
+            answer(1, { grade: 3 }),
+          ]}
         />
       </WithKeys>,
     );
     const table = within(screen.getByRole("table", { name: "The card's answers, newest first" }));
-    const days = () => table.getAllByRole("rowheader").map((cell) => Number(/October (\d+)/.exec(cell.textContent!)![1]));
+    const days = () =>
+      table
+        .getAllByRole("rowheader")
+        .map((cell) => Number(/October (\d+)/.exec(cell.textContent!)![1]));
     expect(table.queryByRole("button", { name: "Wrong option chosen" })).toBeNull();
     fireEvent.click(table.getByRole("button", { name: "When" }));
     expect(days()).toEqual([1, 2, 3]);

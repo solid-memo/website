@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { card, courseDraft, deckDraft, DRAFT } from "../testing/releaseDraft.ts";
@@ -12,7 +16,11 @@ const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 const v1 = (draft: ReleaseDraft = courseDraft()): ReleaseDraft => rebaseDraft(draft, V1);
 
 /** The node of a list with its record changed by `change`; the others as they are. */
-function edit<T>(nodes: readonly DraftNode<T>[], id: string, change: (data: T) => T): DraftNode<T>[] {
+function edit<T>(
+  nodes: readonly DraftNode<T>[],
+  id: string,
+  change: (data: T) => T,
+): DraftNode<T>[] {
   return nodes.map((node) => (node.id === id ? { id, data: change(node.data) } : node));
 }
 
@@ -27,7 +35,10 @@ describe("releaseDiff", () => {
   });
 
   it("lists each subject added, changed, retired or restored, chapters first, then steps, cards and wrong options", () => {
-    const release = { ...v1(), distractors: edit(v1().distractors, "q-a-1a-d1", (data) => ({ ...data, deprecated: true })) };
+    const release = {
+      ...v1(),
+      distractors: edit(v1().distractors, "q-a-1a-d1", (data) => ({ ...data, deprecated: true })),
+    };
     const next = nextVersionDraft(release, DRAFT);
     const draft: ReleaseDraft = {
       ...next,
@@ -70,9 +81,16 @@ describe("releaseDiff", () => {
     const next = nextVersionDraft(release, DRAFT);
     const draft: ReleaseDraft = {
       ...next,
-      chapters: edit(next.chapters, "ch-a", (data) => ({ ...data, reviewQuestion: [...data.reviewQuestion].reverse() })),
+      chapters: edit(next.chapters, "ch-a", (data) => ({
+        ...data,
+        reviewQuestion: [...data.reviewQuestion].reverse(),
+      })),
       cards: edit(
-        edit(next.cards, "q-a-1a", (data) => ({ ...data, distractor: [...data.distractor].reverse(), created: "2027-01-01T00:00:00Z" })),
+        edit(next.cards, "q-a-1a", (data) => ({
+          ...data,
+          distractor: [...data.distractor].reverse(),
+          created: "2027-01-01T00:00:00Z",
+        })),
         "q-a-2a",
         (data) => ({ ...data, textFormat: SM.plainText as typeof data.textFormat }),
       ),
@@ -81,12 +99,20 @@ describe("releaseDiff", () => {
   });
 
   it("compares a card without text on a side, which no learner gets, by its record", () => {
-    const blank = (front: string) => ({ ...courseDraft(), cards: [{ id: "q-a-1a", data: card(front, { front: {}, back: { en: "x" } }) }] });
+    const blank = (front: string) => ({
+      ...courseDraft(),
+      cards: [{ id: "q-a-1a", data: card(front, { front: {}, back: { en: "x" } }) }],
+    });
     const release = v1(blank("a"));
     const next = nextVersionDraft(release, DRAFT);
     expect(releaseDiff(release, next).subjects).toEqual([]);
-    const changed = { ...next, cards: edit(next.cards, "q-a-1a", (data) => ({ ...data, back: { en: "y" } })) };
-    expect(releaseDiff(release, changed).subjects).toEqual([{ kind: "card", id: "q-a-1a", status: "changed" }]);
+    const changed = {
+      ...next,
+      cards: edit(next.cards, "q-a-1a", (data) => ({ ...data, back: { en: "y" } })),
+    };
+    expect(releaseDiff(release, changed).subjects).toEqual([
+      { kind: "card", id: "q-a-1a", status: "changed" },
+    ]);
   });
 
   it("names what the release says of itself that the draft changes", () => {
@@ -127,7 +153,11 @@ describe("releaseDiff", () => {
 describe("simulateLearnerUpgrade", () => {
   it("offers a learner nothing to change for a next version as it starts, and loses nothing", () => {
     const release = v1();
-    expect(simulateLearnerUpgrade(release, nextVersionDraft(release, DRAFT))).toEqual({ newer: true, plan: null, lost: { cards: [], chapters: [] } });
+    expect(simulateLearnerUpgrade(release, nextVersionDraft(release, DRAFT))).toEqual({
+      newer: true,
+      plan: null,
+      lost: { cards: [], chapters: [] },
+    });
   });
 
   it("plans a course learner's upgrade, who reached every question: what changes, what retires, nothing added until reached", () => {
@@ -148,18 +178,37 @@ describe("simulateLearnerUpgrade", () => {
     const upgrade = simulateLearnerUpgrade(release, draft);
     expect(upgrade.newer).toBe(true);
     expect(upgrade.lost).toEqual({ cards: [], chapters: [] });
-    expect(upgrade.plan).toMatchObject({ fromVersion: "1", toVersion: "2", releaseUrl: DRAFT, notes: [{ version: "2", notes: "Clearer." }], add: [] });
+    expect(upgrade.plan).toMatchObject({
+      fromVersion: "1",
+      toVersion: "2",
+      releaseUrl: DRAFT,
+      notes: [{ version: "2", notes: "Clearer." }],
+      add: [],
+    });
     expect(upgrade.plan!.change.map((one) => one.id)).toEqual(["q-a-2a"]);
     expect(upgrade.plan!.retire.map((one) => one.id)).toEqual(["q-loose"]);
     // The copy's card is the release's, its wrong options with it.
-    expect(upgrade.plan!.retire[0]!.url).toBe("https://learner.solid-memo.invalid/solid-memo/decks/learner.ttl#q-loose");
+    expect(upgrade.plan!.retire[0]!.url).toBe(
+      "https://learner.solid-memo.invalid/solid-memo/decks/learner.ttl#q-loose",
+    );
   });
 
-  it("adds a deck's new cards to a learner's copy, and follows its new title and licence", () => {
-    const deck = { ...deckDraft(), root: { ...deckDraft().root, license: "https://creativecommons.org/licenses/by/4.0/", description: { en: "Words." } } };
+  it("adds a deck's new cards to a learner's copy, and follows its new title and license", () => {
+    const deck = {
+      ...deckDraft(),
+      root: {
+        ...deckDraft().root,
+        license: "https://creativecommons.org/licenses/by/4.0/",
+        description: { en: "Words." },
+      },
+    };
     const release = v1(deck);
     const next = nextVersionDraft(release, DRAFT);
-    const draft = { ...next, root: { ...next.root, title: { en: "More words" } }, cards: [...next.cards, { id: "w2", data: card("w2") }] };
+    const draft = {
+      ...next,
+      root: { ...next.root, title: { en: "More words" } },
+      cards: [...next.cards, { id: "w2", data: card("w2") }],
+    };
     const plan = simulateLearnerUpgrade(release, draft).plan!;
     expect(plan.add.map((one) => one.id)).toEqual(["w2"]);
     expect(plan.title).toEqual({ en: "More words" });
@@ -168,7 +217,11 @@ describe("simulateLearnerUpgrade", () => {
   it("says what progress a draft that drops cards and chapters would lose", () => {
     const release = v1();
     const next = nextVersionDraft(release, DRAFT);
-    const draft = { ...next, cards: next.cards.filter((node) => node.id !== "q-loose"), chapters: next.chapters.filter((node) => node.id !== "ch-b") };
+    const draft = {
+      ...next,
+      cards: next.cards.filter((node) => node.id !== "q-loose"),
+      chapters: next.chapters.filter((node) => node.id !== "ch-b"),
+    };
     const upgrade = simulateLearnerUpgrade(release, draft);
     expect(upgrade.lost).toEqual({ cards: ["q-loose"], chapters: ["ch-b"] });
     expect(upgrade.plan!.remove.map((one) => one.id)).toEqual(["q-loose"]);
@@ -177,7 +230,15 @@ describe("simulateLearnerUpgrade", () => {
   it("offers nothing for a draft whose version does not come after the release's, and still says what it would lose", () => {
     const release = v1();
     const next = nextVersionDraft(release, DRAFT);
-    const draft = { ...next, root: { ...next.root, version: "1" }, cards: next.cards.filter((node) => node.id !== "q-loose") };
-    expect(simulateLearnerUpgrade(release, draft)).toEqual({ newer: false, plan: null, lost: { cards: ["q-loose"], chapters: [] } });
+    const draft = {
+      ...next,
+      root: { ...next.root, version: "1" },
+      cards: next.cards.filter((node) => node.id !== "q-loose"),
+    };
+    expect(simulateLearnerUpgrade(release, draft)).toEqual({
+      newer: false,
+      plan: null,
+      lost: { cards: ["q-loose"], chapters: [] },
+    });
   });
 });

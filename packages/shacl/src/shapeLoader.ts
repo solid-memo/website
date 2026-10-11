@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { getSolidDataset, toRdfJsDataset } from "@inrupt/solid-client";
 import type { DatasetCore } from "@rdfjs/types";
 import { PROFILES, REFERENCE_DATA, type ProfileName } from "./profiles";
@@ -47,7 +51,9 @@ export function createShapeLoader({
       return fetchOnce(new URL(descriptor.shapeDocument, shapesBaseUrl).href);
     },
     loadProfile(profile) {
-      return Promise.all(PROFILES[profile].map((path) => fetchOnce(new URL(path, vendorBaseUrl).href)));
+      return Promise.all(
+        PROFILES[profile].map((path) => fetchOnce(new URL(path, vendorBaseUrl).href)),
+      );
     },
     loadReferenceData() {
       return Promise.all(REFERENCE_DATA.map((path) => fetchOnce(new URL(path, vocabBaseUrl).href)));

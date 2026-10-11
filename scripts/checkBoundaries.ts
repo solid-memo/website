@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * `npm run check:boundaries`: hold every workspace package to its place in
  * the architecture (docs/architecture.md). For each import in a package:
@@ -69,13 +73,15 @@ const ONLY_FROM: Record<string, Record<string, RegExp>> = {
 const VENDOR_ONLY_FROM: { specifier: RegExp; names: RegExp; files: Record<string, RegExp> }[] = [
   {
     specifier: /^@inrupt\/solid-client(\/|$)/,
-    names: /^(universalAccess|access|acp_\w+|\w*Ac[lr]\w*|(get|set)(Agent|Group|Public)(Resource|Default)?Access(All)?|getEffectiveAccess)$/,
+    names:
+      /^(universalAccess|access|acp_\w+|\w*Ac[lr]\w*|(get|set)(Agent|Group|Public)(Resource|Default)?Access(All)?|getEffectiveAccess)$/,
     files: { solid: /^src\/solidReleasePublisher\.ts$/ },
   },
 ];
 
 /** A static import's specifier, and what it names: the names inside its braces, or "*" for a namespace import. */
-const NAMED_IMPORT = /^import\s+(?:type\s+)?(?:[\w$]+\s*,\s*)?(?:\{([^}]*)\}|(\*)\s+as\s+[\w$]+)\s*from\s*["']([^"'\s]+)["']/gm;
+const NAMED_IMPORT =
+  /^import\s+(?:type\s+)?(?:[\w$]+\s*,\s*)?(?:\{([^}]*)\}|(\*)\s+as\s+[\w$]+)\s*from\s*["']([^"'\s]+)["']/gm;
 
 /** Packages a package may import only with a dynamic import(), so they stay out of its first chunk. */
 const LAZY_ONLY: Record<string, string[]> = {
@@ -97,11 +103,20 @@ const BROWSER: Record<string, RegExp> = {
   web: /^src\//,
   studio: /^src\//,
 };
-const NODE_ONLY = [/^node:/, /^n3$/, /^@solid-memo\/turtle(\/|$)/, /^@solid-memo\/[a-z-]+\/(tooling|node)\//];
+const NODE_ONLY = [
+  /^node:/,
+  /^n3$/,
+  /^@solid-memo\/turtle(\/|$)/,
+  /^@solid-memo\/[a-z-]+\/(tooling|node)\//,
+];
 
-const SHARED_TEST_TOOLING = new Set(Object.keys(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).devDependencies));
+const SHARED_TEST_TOOLING = new Set(
+  Object.keys(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).devDependencies),
+);
 const isTestFile = (path: string) =>
-  /\.test\.tsx?$/.test(path) || /(^|\/)(testing|test)\//.test(path) || /^(vitest(\.\w+)?\.config|globalSetup)\.ts$/.test(path);
+  /\.test\.tsx?$/.test(path) ||
+  /(^|\/)(testing|test)\//.test(path) ||
+  /^(vitest(\.\w+)?\.config|globalSetup)\.ts$/.test(path);
 
 const IMPORT = /(?:\bfrom\s*|\bimport\s*\(\s*|^import\s+|\bvi\.mock\(\s*)["']([^"'\s]+)["']/gm;
 
@@ -144,8 +159,10 @@ for (const group of ["apps", "packages", "e2e"]) {
         if (specifier!.startsWith(".")) {
           const target = relative(dir, resolve(dir, dirname(file), specifier!));
           // Every package's vitest config (vitest.config.ts, and one of a task of its own) shares the root's setup.
-          const shared = /^vitest(\.\w+)?\.config\.ts$/.test(file) && specifier === "../../vitest.shared.ts";
-          if (target.startsWith("..") && !shared) problems.push(`${where}: "${specifier}" reaches outside the package.`);
+          const shared =
+            /^vitest(\.\w+)?\.config\.ts$/.test(file) && specifier === "../../vitest.shared.ts";
+          if (target.startsWith("..") && !shared)
+            problems.push(`${where}: "${specifier}" reaches outside the package.`);
           continue;
         }
         if (specifier!.startsWith("node:")) {
@@ -160,10 +177,14 @@ for (const group of ["apps", "packages", "e2e"]) {
             problems.push(`${where}: only files matching ${only} may import @solid-memo/${other}.`);
           }
           if (LAZY_ONLY[short]?.includes(other) && !/^import\s*\(/.test(statement!)) {
-            problems.push(`${where}: may import @solid-memo/${other} only with a dynamic import().`);
+            problems.push(
+              `${where}: may import @solid-memo/${other} only with a dynamic import().`,
+            );
           }
           if (other !== short && !declared.has(`@solid-memo/${other}`)) {
-            problems.push(`${where}: imports @solid-memo/${other}, which package.json does not declare.`);
+            problems.push(
+              `${where}: imports @solid-memo/${other}, which package.json does not declare.`,
+            );
           }
         } else {
           const name = packageName(specifier!);
@@ -172,17 +193,34 @@ for (const group of ["apps", "packages", "e2e"]) {
             problems.push(`${where}: imports ${name}, which package.json does not declare.`);
           }
         }
-        if (BROWSER[short]?.test(file) && !test && NODE_ONLY.some((pattern) => pattern.test(specifier!))) {
+        if (
+          BROWSER[short]?.test(file) &&
+          !test &&
+          NODE_ONLY.some((pattern) => pattern.test(specifier!))
+        ) {
           problems.push(`${where}: runs in the browser, so may not import "${specifier}".`);
         }
       }
       for (const [, braces, namespace, specifier] of test ? [] : text.matchAll(NAMED_IMPORT)) {
         for (const rule of VENDOR_ONLY_FROM) {
           if (!rule.specifier.test(specifier!) || rule.files[short]?.test(file)) continue;
-          const names = namespace !== undefined ? ["*"] : braces!.split(",").map((one) => one.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0]!);
+          const names =
+            namespace !== undefined
+              ? ["*"]
+              : braces!.split(",").map(
+                  (one) =>
+                    one
+                      .trim()
+                      .replace(/^type\s+/, "")
+                      .split(/\s+as\s+/)[0]!,
+                );
           for (const name of names.filter((one) => one === "*" || rule.names.test(one))) {
-            const only = Object.entries(rule.files).map(([folder, pattern]) => `${folder} files matching ${pattern}`).join(", ");
-            problems.push(`${where}: may not import ${name === "*" ? "everything" : name} from ${specifier}: only ${only} may.`);
+            const only = Object.entries(rule.files)
+              .map(([folder, pattern]) => `${folder} files matching ${pattern}`)
+              .join(", ");
+            problems.push(
+              `${where}: may not import ${name === "*" ? "everything" : name} from ${specifier}: only ${only} may.`,
+            );
           }
         }
       }
@@ -191,5 +229,9 @@ for (const group of ["apps", "packages", "e2e"]) {
 }
 
 for (const problem of problems) console.error(problem);
-console.log(problems.length === 0 ? "Every package keeps to its boundaries." : `${problems.length} boundary problem(s).`);
+console.log(
+  problems.length === 0
+    ? "Every package keeps to its boundaries."
+    : `${problems.length} boundary problem(s).`,
+);
 process.exitCode = problems.length === 0 ? 0 : 1;

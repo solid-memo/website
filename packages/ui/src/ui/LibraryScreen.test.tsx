@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/preact";
 import { LibraryScreen } from "./LibraryScreen";
@@ -28,7 +32,7 @@ const rivers: LibraryDeck = {
   sources: [],
 };
 
-/** A fresh memory key per render, so no test sees another's ticks. */
+/** A fresh memory key per render, so no test sees another's checked decks. */
 let renders = 0;
 
 function renderScreen(
@@ -62,19 +66,18 @@ function importButton() {
 describe("LibraryScreen", () => {
   it("offers to add a deck or course published elsewhere from a link", () => {
     renderScreen();
-    expect(screen.getByRole("link", { name: "Add from a link" })).toHaveAttribute("href", "#/import-url?instance=x");
+    expect(screen.getByRole("link", { name: "Add from a link" })).toHaveAttribute(
+      "href",
+      "#/import-url?instance=x",
+    );
   });
 
   it("lists every deck with its card count under a heading that is no link to this page", () => {
     renderScreen();
-    expect(
-      screen.getByRole("heading", { name: "Deck library" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Deck library" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Deck library" })).toBeNull();
     expect(screen.getByText("2 decks")).toBeInTheDocument();
-    expect(
-      screen.getByRole("checkbox", { name: "Capitals of the world" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Capitals of the world" })).toBeInTheDocument();
     expect(screen.getByText("243 cards")).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "Rivers" })).toBeInTheDocument();
     expect(screen.getByText("1 card")).toBeInTheDocument();
@@ -82,9 +85,10 @@ describe("LibraryScreen", () => {
 
   it("links each deck's name to its own page and says nothing more about it", () => {
     renderScreen();
-    expect(
-      screen.getByRole("link", { name: "Capitals of the world" }),
-    ).toHaveAttribute("href", `#/library-deck?deck=${capitals.url}`);
+    expect(screen.getByRole("link", { name: "Capitals of the world" })).toHaveAttribute(
+      "href",
+      `#/library-deck?deck=${capitals.url}`,
+    );
     expect(screen.getByRole("link", { name: "Rivers" })).toHaveAttribute(
       "href",
       `#/library-deck?deck=${rivers.url}`,
@@ -96,17 +100,23 @@ describe("LibraryScreen", () => {
 
   it("links each deck's Preview button to its preview", () => {
     renderScreen();
-    expect(
-      screen.getByRole("link", { name: "Preview Capitals of the world" }),
-    ).toHaveAttribute("href", `#/library-preview?deck=${capitals.url}`);
-    expect(screen.getByRole("link", { name: "Preview Rivers" })).toHaveTextContent(
-      "Preview",
+    expect(screen.getByRole("link", { name: "Preview Capitals of the world" })).toHaveAttribute(
+      "href",
+      `#/library-preview?deck=${capitals.url}`,
     );
+    expect(screen.getByRole("link", { name: "Preview Rivers" })).toHaveTextContent("Preview");
   });
 
   it("narrows the list to the chosen topics, broader ones included, and says how many are shown", () => {
-    const geography = { ...capitals, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"] };
-    const swedish = { ...rivers, title: { en: "Swedish nouns" }, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#swedish"] };
+    const geography = {
+      ...capitals,
+      themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"],
+    };
+    const swedish = {
+      ...rivers,
+      title: { en: "Swedish nouns" },
+      themes: ["https://solid-memo.com/ns/vocab/topics.ttl#swedish"],
+    };
     renderScreen({ decks: [geography, swedish] });
     const topics = screen.getByRole("group", { name: "Topics" });
     expect([...topics.querySelectorAll("label")].map((l) => l.textContent)).toEqual([
@@ -123,10 +133,17 @@ describe("LibraryScreen", () => {
   });
 
   it("names the topics in the language the user reads", () => {
-    const swedish = { ...rivers, title: { en: "Swedish nouns" }, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#swedish"] };
+    const swedish = {
+      ...rivers,
+      title: { en: "Swedish nouns" },
+      themes: ["https://solid-memo.com/ns/vocab/topics.ttl#swedish"],
+    };
     renderScreen({ decks: [swedish] }, "sv");
     const topics = screen.getByRole("group", { name: "Ämnen" });
-    expect([...topics.querySelectorAll("label")].map((l) => l.textContent)).toEqual(["Språk", "Svenska"]);
+    expect([...topics.querySelectorAll("label")].map((l) => l.textContent)).toEqual([
+      "Språk",
+      "Svenska",
+    ]);
   });
 
   it("offers no topics when no deck names one", () => {
@@ -135,7 +152,9 @@ describe("LibraryScreen", () => {
   });
 
   it("searches names, descriptions and keywords, in every language, and says when nothing matches", () => {
-    renderScreen({ decks: [capitals, { ...rivers, keywords: { en: ["water"], sv: ["vattendrag"] } }] });
+    renderScreen({
+      decks: [capitals, { ...rivers, keywords: { en: ["water"], sv: ["vattendrag"] } }],
+    });
     fireEvent.input(screen.getByLabelText("Search"), { target: { value: "WATER" } });
     expect(screen.getByRole("checkbox", { name: "Rivers" })).toBeInTheDocument();
     expect(screen.queryByRole("checkbox", { name: "Capitals of the world" })).toBeNull();
@@ -169,13 +188,16 @@ describe("LibraryScreen", () => {
     expect(screen.getAllByText("Course")).toHaveLength(1);
   });
 
-  it("offers no tick for a course, which is started from its page, never imported", () => {
+  it("offers no checkbox for a course, which is started from its page, never imported", () => {
     const first = renderScreen();
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Capitals of the world" }));
     first.unmount();
-    // Ticked before the release became a course: still not imported.
-    const { props } = renderScreen({ decks: [capitals, { ...rivers, isCourse: true }], memoryKey: first.props.memoryKey });
+    // Checked before the release became a course: still not imported.
+    const { props } = renderScreen({
+      decks: [capitals, { ...rivers, isCourse: true }],
+      memoryKey: first.props.memoryKey,
+    });
     expect(screen.queryByRole("checkbox", { name: "Rivers" })).toBeNull();
     expect(screen.getByRole("link", { name: "Rivers" })).toBeInTheDocument();
     expect(importButton()).toHaveTextContent("Import 1 deck");
@@ -183,16 +205,14 @@ describe("LibraryScreen", () => {
     expect(props.onImport).toHaveBeenCalledWith([capitals]);
   });
 
-  it("imports the ticked decks, counting them on the button", () => {
+  it("imports the checked decks, counting them on the button", () => {
     const { props } = renderScreen();
     expect(importButton()).toHaveTextContent("Import selected");
     expect(importButton()).toBeDisabled();
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
     expect(importButton()).toHaveTextContent("Import 1 deck");
-    fireEvent.click(
-      screen.getByRole("checkbox", { name: "Capitals of the world" }),
-    );
+    fireEvent.click(screen.getByRole("checkbox", { name: "Capitals of the world" }));
     expect(importButton()).toHaveTextContent("Import 2 decks");
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
     expect(importButton()).toHaveTextContent("Import 1 deck");
@@ -223,7 +243,7 @@ describe("LibraryScreen", () => {
     expect(props.onImport).not.toHaveBeenCalled();
   });
 
-  it("imports only the ticked decks the filters still show, and keeps the hidden ones ticked", () => {
+  it("imports only the checked decks the filters still show, and keeps the hidden ones checked", () => {
     const { props } = renderScreen();
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Capitals of the world" }));
@@ -283,9 +303,12 @@ describe("LibraryScreen", () => {
       expect(statusTexts()).toEqual(["No deck matches."]);
     });
 
-    it("says the count after a topic is ticked, and the whole library once it is cleared", () => {
+    it("says the count after a topic is checked, and the whole library once it is cleared", () => {
       vi.useFakeTimers();
-      const geography = { ...capitals, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"] };
+      const geography = {
+        ...capitals,
+        themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"],
+      };
       renderScreen({ decks: [geography, rivers] });
       fireEvent.click(screen.getByRole("checkbox", { name: "Geography" }));
       act(() => {

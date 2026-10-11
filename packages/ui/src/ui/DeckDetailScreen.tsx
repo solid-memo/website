@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DeckProvenance } from "./DeckProvenance";
@@ -50,11 +54,7 @@ export function DeckDetailScreen({
   const studied = t("common.cardCount", { count: studiedToday });
 
   function handleResetDay() {
-    if (
-      window.confirm(
-        t("deckDetail.resetConfirm", { title: readerText(deck.title), studied }),
-      )
-    ) {
+    if (window.confirm(t("deckDetail.resetConfirm", { title: readerText(deck.title), studied }))) {
       onResetDay();
     }
   }
@@ -85,13 +85,7 @@ export function DeckDetailScreen({
         description={deck.description}
       />
       {notice}
-      {!canStudy && (
-        <p>
-          {cardCount === 0
-            ? t("deckDetail.noCards")
-            : t("deckDetail.allStudied")}
-        </p>
-      )}
+      {!canStudy && <p>{cardCount === 0 ? t("deckDetail.noCards") : t("deckDetail.allStudied")}</p>}
       {canStudy && (
         <p class="hint">
           {dueCount === 0

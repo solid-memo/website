@@ -1,5 +1,9 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
- * A dereferenced WebID document, modelled independently of any RDF library.
+ * A dereferenced WebID document, modeled independently of any RDF library.
  */
 export interface WebIdDocument {
   /** URL of the resource the WebID dereferenced to. */

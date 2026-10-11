@@ -1,6 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
-import { MAX_CHARS, MAX_DELIMITERS, MAX_DEPTH, MAX_TABLE_COLUMNS } from "@solid-memo/markdown/parse";
+import {
+  MAX_CHARS,
+  MAX_DELIMITERS,
+  MAX_DEPTH,
+  MAX_TABLE_COLUMNS,
+} from "@solid-memo/markdown/parse";
 import { OPTION, PROSE, SIDE } from "@solid-memo/markdown/problems";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { createI18n } from "./i18n";
@@ -42,10 +51,12 @@ describe("markdownHints", () => {
     expect(hint(`a ${"*_".repeat(MAX_DELIMITERS)}`)).toEqual([
       "Too complex to read as Markdown: it shows as plain text.",
     ]);
-    expect(hint(`${"> ".repeat(MAX_DEPTH)}*a*`)).toEqual(["Nested too deeply: the innermost part shows as typed."]);
-    expect(hint(`|${" a |".repeat(MAX_TABLE_COLUMNS + 1)}\n|${"-|".repeat(MAX_TABLE_COLUMNS + 1)}`)).toEqual([
-      "A table this large shows as typed: at most 20 columns and 2,000 cells.",
+    expect(hint(`${"> ".repeat(MAX_DEPTH)}*a*`)).toEqual([
+      "Nested too deeply: the innermost part shows as typed.",
     ]);
+    expect(
+      hint(`|${" a |".repeat(MAX_TABLE_COLUMNS + 1)}\n|${"-|".repeat(MAX_TABLE_COLUMNS + 1)}`),
+    ).toEqual(["A table this large shows as typed: at most 20 columns and 2,000 cells."]);
     expect(hint("a ![b](https://b.example/b.png)")).toEqual([
       "Pictures in Markdown are not shown, only their description: add one with the side's picture field.",
     ]);
@@ -55,7 +66,9 @@ describe("markdownHints", () => {
     expect(hint('"<ex:title>"', SIDE)).toEqual([
       "<ex:title> reads as a link, shown without its angle brackets. Put it in backticks to show it as typed.",
     ]);
-    expect(hint("[a](http://a.example/)")).toEqual(["Only https links are followed: http://a.example/ shows as text."]);
+    expect(hint("[a](http://a.example/)")).toEqual([
+      "Only https links are followed: http://a.example/ shows as text.",
+    ]);
     expect(hint("[bank.example](https://evil.example/)")).toEqual([
       'The link text "bank.example" names another site than the one it leads to, evil.example.',
     ]);
@@ -140,7 +153,9 @@ describe("CardPreview", () => {
     });
     expect(container.querySelector(".card-front em")).toHaveTextContent("Which?");
     expect(container.querySelector(".card-label")).toHaveTextContent("Command");
-    expect(container.querySelector(".card-preview-option")).toHaveTextContent("As an option: git diff --staged");
+    expect(container.querySelector(".card-preview-option")).toHaveTextContent(
+      "As an option: git diff --staged",
+    );
   });
 
   it("shows no option for a back with no text", () => {

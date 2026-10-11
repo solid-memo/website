@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { LibraryDeckScreen } from "./LibraryDeckScreen";
@@ -34,9 +38,7 @@ const capitals: LibraryDeck = {
   ],
 };
 
-function renderScreen(
-  overrides: Partial<Parameters<typeof LibraryDeckScreen>[0]> = {},
-) {
+function renderScreen(overrides: Partial<Parameters<typeof LibraryDeckScreen>[0]> = {}) {
   const props = {
     deck: capitals,
     browseHref: "#/library-browse?deck=capitals",
@@ -68,7 +70,11 @@ describe("LibraryDeckScreen", () => {
         versionNotes: "Added Norway.",
         releases: [
           { url: "https://solid-memo.com/decks/capitals/v1.ttl", version: "1" },
-          { url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2", issued: "2026-09-28T10:00:00Z" },
+          {
+            url: "https://solid-memo.com/decks/capitals/v2.ttl",
+            version: "2",
+            issued: "2026-09-28T10:00:00Z",
+          },
         ],
         themes: [
           "http://publications.europa.eu/resource/authority/data-theme/EDUC",
@@ -85,7 +91,12 @@ describe("LibraryDeckScreen", () => {
   });
 
   it("shows the keywords in the reader's language, and those in none, only", () => {
-    const keywords = { "en-gb": ["capitals"], sv: ["huvudstäder"], "sv-fi": ["huvudstäder", "städer"], zxx: ["ISO 3166"] };
+    const keywords = {
+      "en-gb": ["capitals"],
+      sv: ["huvudstäder"],
+      "sv-fi": ["huvudstäder", "städer"],
+      zxx: ["ISO 3166"],
+    };
     renderScreen({ deck: { ...capitals, keywords } });
     expect(fact("Keywords")).toHaveTextContent(/^capitals, ISO 3166$/);
     cleanup();
@@ -112,26 +123,26 @@ describe("LibraryDeckScreen", () => {
   });
 
   it("uses the singular for one topic", () => {
-    renderScreen({ deck: { ...capitals, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"] } });
+    renderScreen({
+      deck: { ...capitals, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"] },
+    });
     expect(fact("Topic")).toHaveTextContent("Geography");
   });
 
   it("shows the deck in full under a heading that links nowhere: the page is this one", () => {
     renderScreen();
-    expect(
-      screen.getByRole("heading", { name: "Capitals of the world" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Capitals of the world" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Capitals of the world" })).toBeNull();
     expect(fact("Size")).toHaveTextContent("243 cards");
 
-    expect(screen.getByText(/Every country and its capital/)).toHaveClass(
-      "deck-description",
-    );
+    expect(screen.getByText(/Every country and its capital/)).toHaveClass("deck-description");
     expect(screen.getAllByRole("link", { name: newTab(WIKIPEDIA) })).toHaveLength(1);
 
     expect(fact("Author")).toHaveTextContent("Anton Wiklund");
-    expect(within(fact("Licence")).getByRole("link", { name: newTab("CC0 1.0") }))
-      .toHaveAttribute("href", CC0);
+    expect(within(fact("License")).getByRole("link", { name: newTab("CC0 1.0") })).toHaveAttribute(
+      "href",
+      CC0,
+    );
     expect(fact("Created")).toHaveTextContent("September 22, 2026");
     expect(fact("Updated")).toHaveTextContent("September 27, 2026");
   });
@@ -152,7 +163,7 @@ describe("LibraryDeckScreen", () => {
     expect(screen.getAllByText("Back → front")).toHaveLength(1);
   });
 
-  it("lists each source, linked, with its own authors and licence", () => {
+  it("lists each source, linked, with its own authors and license", () => {
     renderScreen();
     const sources = within(fact("Sources")).getAllByRole("listitem");
     expect(sources).toHaveLength(2);
@@ -182,9 +193,7 @@ describe("LibraryDeckScreen", () => {
       },
     });
     expect(fact("Authors")).toHaveTextContent("Anton Wiklund, A friend");
-    expect(fact("Source")).toHaveTextContent(
-      `${WIKIDATA}${NEW_TAB} — Wikidata contributors`,
-    );
+    expect(fact("Source")).toHaveTextContent(`${WIKIDATA}${NEW_TAB} — Wikidata contributors`);
   });
 
   it("links authors named with an address, of the deck and of a source", () => {
@@ -195,12 +204,14 @@ describe("LibraryDeckScreen", () => {
         sources: [{ url: WIKIDATA, authors: ["Wiki <wiki@example.com>"] }],
       },
     });
-    expect(
-      within(fact("Author")).getByRole("link", { name: "Anton Wiklund" }),
-    ).toHaveAttribute("href", "mailto:anton@example.com");
-    expect(
-      within(fact("Source")).getByRole("link", { name: "Wiki" }),
-    ).toHaveAttribute("href", "mailto:wiki@example.com");
+    expect(within(fact("Author")).getByRole("link", { name: "Anton Wiklund" })).toHaveAttribute(
+      "href",
+      "mailto:anton@example.com",
+    );
+    expect(within(fact("Source")).getByRole("link", { name: "Wiki" })).toHaveAttribute(
+      "href",
+      "mailto:wiki@example.com",
+    );
   });
 
   it("leaves out whatever the deck does not state", () => {
@@ -266,7 +277,10 @@ describe("LibraryDeckScreen", () => {
   });
 
   it("continues a course the instance has started, and locks the button while it starts", () => {
-    const { rerender, props } = renderScreen({ deck: { ...capitals, isCourse: true }, imported: true });
+    const { rerender, props } = renderScreen({
+      deck: { ...capitals, isCourse: true },
+      imported: true,
+    });
     expect(screen.getByRole("button", { name: "Continue course" })).toBeEnabled();
     expect(screen.queryByText("Already imported")).toBeNull();
     rerender(<LibraryDeckScreen {...props} busy />);

@@ -1,4 +1,15 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 name: Deploy to GitHub Pages
+
+# The site, from main only (docs/deployment.md): when CI has passed on a
+# push to main, the commit it checked; or, run by hand from main, main
+# as it is, after npm run check. CI also runs on pull requests, a fork's
+# included, and a fork's branch may be named main too: workflow_run's
+# branch filter matches that name, so the job checks that CI ran for a
+# push, in this repository.
 
 on:
   workflow_run:
@@ -20,17 +31,30 @@ concurrency:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
+    # A run by hand checks first, with no Turbo cache: as long as CI's build.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # CI checked the commit a workflow_run deploys; a run by hand has no
+      # CI run behind it, so it checks main itself.
+      - if: github.event_name == 'workflow_dispatch'
+        run: npm run check
       - run: npm run build
       # The artifact is the whole site: the app, and beside it what Vite
       # copies from ns/, decks/ and the vendored shapes (docs/deployment.md).
@@ -56,6 +80,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

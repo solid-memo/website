@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
@@ -38,28 +42,33 @@ function lastMatching(element: Element, property: string): string | undefined {
   return [...document.styleSheets]
     .flatMap((sheet) => [...sheet.cssRules])
     .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule)
-    .filter((rule) => element.matches(rule.selectorText) && rule.style.getPropertyValue(property) !== "")
+    .filter(
+      (rule) => element.matches(rule.selectorText) && rule.style.getPropertyValue(property) !== "",
+    )
     .map((rule) => rule.style.getPropertyValue(property))
     .at(-1);
 }
 
 describe("focus styles", () => {
-  it.each(["radio", "checkbox"])("rings a focused %s in the primary colour", (type) => {
+  it.each(["radio", "checkbox"])("rings a focused %s in the primary color", (type) => {
     const style = focused(`<input type="${type}">`, "input");
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("#2c6b3d");
     expect(style.outlineOffset).toBe("2px");
   });
 
-  it("shows a text field's focus with its border, and keeps an outline for forced colours", () => {
+  it("shows a text field's focus with its border, and keeps an outline for forced colors", () => {
     const style = focused(`<input type="text">`, "input");
     expect(style.borderColor).toBe("#2c6b3d");
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("transparent");
   });
 
-  it("rings the focused language list in the primary colour", () => {
-    const style = focused(`<label class="language-selector"><select><option>en</option></select></label>`, "select");
+  it("rings the focused language list in the primary color", () => {
+    const style = focused(
+      `<label class="language-selector"><select><option>en</option></select></label>`,
+      "select",
+    );
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("#2c6b3d");
   });
@@ -75,20 +84,48 @@ describe("focus styles", () => {
 
   it.each([
     ["the brand", `<header class="masthead"><a class="brand" href="#/">x</a></header>`, "a"],
-    ["the wordmark", `<header class="masthead"><h1><a class="wordmark" href="#/">x</a></h1></header>`, "a"],
-    ["the WebID link", `<header class="masthead"><p class="session-line"><a href="https://x">x</a></p></header>`, "a"],
+    [
+      "the wordmark",
+      `<header class="masthead"><h1><a class="wordmark" href="#/">x</a></h1></header>`,
+      "a",
+    ],
+    [
+      "the WebID link",
+      `<header class="masthead"><p class="session-line"><a href="https://x">x</a></p></header>`,
+      "a",
+    ],
     ["a button", `<header class="masthead"><button>x</button></header>`, "button"],
-  ])("rings %s in the masthead's text colour, which shows on its navy", (_, html, selector) => {
+  ])("rings %s in the masthead's text color, which shows on its navy", (_, html, selector) => {
     expect(focused(html, selector).outlineColor).toBe("#f7f6f1");
   });
 
   it.each([
-    ["a deck's menu button", `<ul class="deck-list"><li class="deck-row"><button class="icon row-menu">x</button></li></ul>`, "button"],
-    ["a group's fold button", `<div class="deck-group-header"><button class="group-toggle">x</button></div>`, "button"],
-    ["a group's menu button", `<div class="deck-group-header"><button class="icon row-menu">x</button></div>`, "button"],
-    ["a menu's item", `<div class="actions-menu" role="menu"><button role="menuitem">x</button></div>`, "button"],
-    ["a menu's link", `<div class="actions-menu" role="menu"><a role="menuitem" href="#/">x</a></div>`, "a"],
-  ])("rings %s in the primary colour", (_, html, selector) => {
+    [
+      "a deck's menu button",
+      `<ul class="deck-list"><li class="deck-row"><button class="icon row-menu">x</button></li></ul>`,
+      "button",
+    ],
+    [
+      "a group's fold button",
+      `<div class="deck-group-header"><button class="group-toggle">x</button></div>`,
+      "button",
+    ],
+    [
+      "a group's menu button",
+      `<div class="deck-group-header"><button class="icon row-menu">x</button></div>`,
+      "button",
+    ],
+    [
+      "a menu's item",
+      `<div class="actions-menu" role="menu"><button role="menuitem">x</button></div>`,
+      "button",
+    ],
+    [
+      "a menu's link",
+      `<div class="actions-menu" role="menu"><a role="menuitem" href="#/">x</a></div>`,
+      "a",
+    ],
+  ])("rings %s in the primary color", (_, html, selector) => {
     const style = focused(html, selector);
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("#2c6b3d");
@@ -100,9 +137,15 @@ describe("focus styles", () => {
     expect(getComputedStyle(button).opacity).not.toBe("0");
     const hovering = [...document.styleSheets]
       .flatMap((sheet) => [...sheet.cssRules])
-      .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.conditionText === "(hover: hover)")
+      .filter(
+        (rule): rule is CSSMediaRule =>
+          rule instanceof CSSMediaRule && rule.conditionText === "(hover: hover)",
+      )
       .flatMap((rule) => [...rule.cssRules])
-      .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText.includes("row-menu"));
+      .filter(
+        (rule): rule is CSSStyleRule =>
+          rule instanceof CSSStyleRule && rule.selectorText.includes("row-menu"),
+      );
     expect(hovering).toEqual([]);
   });
 
@@ -126,7 +169,10 @@ describe("focus styles", () => {
     const hovered = (element: Element) =>
       [...document.styleSheets]
         .flatMap((sheet) => [...sheet.cssRules])
-        .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText.includes(":hover"))
+        .filter(
+          (rule): rule is CSSStyleRule =>
+            rule instanceof CSSStyleRule && rule.selectorText.includes(":hover"),
+        )
         .filter((rule) => element.matches(rule.selectorText.replaceAll(":hover", "")))
         .map((rule) => rule.style.getPropertyValue("box-shadow"))
         .filter((shadow) => shadow !== "");
@@ -138,19 +184,28 @@ describe("focus styles", () => {
     expect(hovered(item)).toEqual([]);
   });
 
-  it("rings a course question's radio in the primary colour", () => {
-    const style = focused(`<div class="choices"><label class="choice"><input type="radio"></label></div>`, "input");
+  it("rings a course question's radio in the primary color", () => {
+    const style = focused(
+      `<div class="choices"><label class="choice"><input type="radio"></label></div>`,
+      "input",
+    );
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("#2c6b3d");
   });
 
   it("rings a menu's item inside it, clear of its clipping", () => {
-    const style = focused(`<div class="actions-menu" role="menu"><button role="menuitem">x</button></div>`, "button");
+    const style = focused(
+      `<div class="actions-menu" role="menu"><button role="menuitem">x</button></div>`,
+      "button",
+    );
     expect(style.outlineOffset).toBe("-2px");
   });
 
   it("draws a card table link's ring inside its cell, clear of the table's clipping", () => {
-    const style = focused(`<table><tr><td class="clickable"><a href="#/">x</a></td></tr></table>`, "a");
+    const style = focused(
+      `<table><tr><td class="clickable"><a href="#/">x</a></td></tr></table>`,
+      "a",
+    );
     expect(style.outlineOffset).toBe("-4px");
   });
 });
@@ -169,17 +224,49 @@ describe("reflow", () => {
   it.each([
     ["a button", `<button>x</button>`, "button"],
     ["a link styled as a button", `<a class="button" href="#/">x</a>`, "a"],
-    ["the wordmark", `<div class="masthead"><h1><a class="brand" href="#/"><span class="wordmark">x</span></a></h1></div>`, "h1"],
+    [
+      "the wordmark",
+      `<div class="masthead"><h1><a class="brand" href="#/"><span class="wordmark">x</span></a></h1></div>`,
+      "h1",
+    ],
     ["the session line", `<div class="masthead"><p class="session-line">x</p></div>`, "p"],
     ["a breadcrumb", `<nav class="breadcrumbs"><ol><li><a href="#/">x</a></li></ol></nav>`, "a"],
-    ["a deck's name", `<ul class="deck-list"><li class="deck-row"><a class="deck-open" href="#/">x</a></li></ul>`, "a"],
-    ["a group's name", `<div class="deck-group-header"><button class="group-toggle"><span class="group-name">x</span></button></div>`, "span"],
+    [
+      "a deck's name",
+      `<ul class="deck-list"><li class="deck-row"><a class="deck-open" href="#/">x</a></li></ul>`,
+      "a",
+    ],
+    [
+      "a group's name",
+      `<div class="deck-group-header"><button class="group-toggle"><span class="group-name">x</span></button></div>`,
+      "span",
+    ],
     ["a group to move into", `<div class="move-into"><button>x</button></div>`, "button"],
-    ["a library deck's name", `<ul class="library-list"><li><a class="library-deck-name" href="#/">x</a></li></ul>`, "a"],
-    ["the instance's name", `<div class="instance-bar-identity"><strong>x</strong></div>`, "strong"],
-    ["the instance's address", `<div class="instance-bar-identity"><span class="hint">x</span></div>`, "span"],
-    ["a storage's address", `<ul class="storage-list"><li><span class="hint">x</span></li></ul>`, "span"],
-    ["an instance's address", `<ul class="instance-list"><li><span class="hint">x</span></li></ul>`, "span"],
+    [
+      "a library deck's name",
+      `<ul class="library-list"><li><a class="library-deck-name" href="#/">x</a></li></ul>`,
+      "a",
+    ],
+    [
+      "the instance's name",
+      `<div class="instance-bar-identity"><strong>x</strong></div>`,
+      "strong",
+    ],
+    [
+      "the instance's address",
+      `<div class="instance-bar-identity"><span class="hint">x</span></div>`,
+      "span",
+    ],
+    [
+      "a storage's address",
+      `<ul class="storage-list"><li><span class="hint">x</span></li></ul>`,
+      "span",
+    ],
+    [
+      "an instance's address",
+      `<ul class="instance-list"><li><span class="hint">x</span></li></ul>`,
+      "span",
+    ],
   ])("wraps %s instead of cutting it off", (_, html, selector) => {
     const style = styled(html, selector);
     expect(style.whiteSpace).not.toBe("nowrap");
@@ -188,16 +275,35 @@ describe("reflow", () => {
 
   it.each([
     ["the session line", `<div class="masthead"><p class="session-line">x</p></div>`, "p"],
-    ["a deck's name", `<ul class="deck-list"><li class="deck-row"><a class="deck-open" href="#/">x</a></li></ul>`, "a"],
-    ["a group's name", `<div class="deck-group-header"><button class="group-toggle"><span class="group-name">x</span></button></div>`, "span"],
-    ["a storage's address", `<ul class="storage-list"><li><span class="hint">x</span></li></ul>`, "span"],
+    [
+      "a deck's name",
+      `<ul class="deck-list"><li class="deck-row"><a class="deck-open" href="#/">x</a></li></ul>`,
+      "a",
+    ],
+    [
+      "a group's name",
+      `<div class="deck-group-header"><button class="group-toggle"><span class="group-name">x</span></button></div>`,
+      "span",
+    ],
+    [
+      "a storage's address",
+      `<ul class="storage-list"><li><span class="hint">x</span></li></ul>`,
+      "span",
+    ],
   ])("breaks %s anywhere, so a long WebID or name fits the width", (_, html, selector) => {
     expect(styled(html, selector).overflowWrap).toBe("anywhere");
   });
 
   it("lets a group's header wrap its actions under its name", () => {
     expect(styled(`<div class="deck-group-header"></div>`, "div").flexWrap).toBe("wrap");
-    expect(parseFloat(styled(`<div class="deck-group-header"><button class="group-toggle">x</button></div>`, "button").minWidth)).toBe(0);
+    expect(
+      parseFloat(
+        styled(
+          `<div class="deck-group-header"><button class="group-toggle">x</button></div>`,
+          "button",
+        ).minWidth,
+      ),
+    ).toBe(0);
   });
 
   it("gives a group no row's box: its header and members are rows of their own", () => {
@@ -208,7 +314,7 @@ describe("reflow", () => {
 
   it("indents a level of the deck list, but no further from the fifth level on", () => {
     const css = readFileSync(join(import.meta.dirname, "style.css"), "utf8");
-    const start = css.indexOf(".deck-group-clip>.deck-list {");
+    const start = css.search(/\.deck-group-clip\s*>\s*\.deck-list \{/);
     expect(css.slice(start, css.indexOf("}", start))).toContain(
       "margin-inline-start: calc(1.25rem * clamp(0, 5 - var(--depth, 1), 1));",
     );
@@ -237,10 +343,12 @@ function tokens(selector: string): Record<string, string> {
   const css = readFileSync(join(import.meta.dirname, "style.css"), "utf8");
   const start = css.indexOf(`${selector} {`);
   const block = css.slice(start, css.indexOf("}", start));
-  return Object.fromEntries([...block.matchAll(/(--[\w-]+):\s*(#[0-9a-f]{6});/g)].map((m) => [m[1], m[2]]));
+  return Object.fromEntries(
+    [...block.matchAll(/(--[\w-]+):\s*(#[0-9a-f]{6});/g)].map((m) => [m[1], m[2]]),
+  );
 }
 
-/** WCAG's contrast ratio of two #rrggbb colours. */
+/** WCAG's contrast ratio of two #rrggbb colors. */
 function contrast(a: string, b: string): number {
   const luminance = (hex: string) => {
     const [r, g, bl] = [1, 3, 5].map((i) => {
@@ -258,28 +366,37 @@ describe("contrast", () => {
   const themes = { light, dark: { ...light, ...tokens(':root[data-theme="dark"]') } };
   const surfaces = ["--bg", "--surface", "--surface-sunken", "--surface-hover"];
 
-  it.each(Object.entries(themes))("gives text fields an edge of at least 3:1 in the %s theme", (_, theme) => {
-    for (const surface of surfaces) {
-      expect(contrast(theme["--control-border"], theme[surface])).toBeGreaterThanOrEqual(3);
-    }
-  });
+  it.each(Object.entries(themes))(
+    "gives text fields an edge of at least 3:1 in the %s theme",
+    (_, theme) => {
+      for (const surface of surfaces) {
+        expect(contrast(theme["--control-border"], theme[surface])).toBeGreaterThanOrEqual(3);
+      }
+    },
+  );
 
-  it.each(Object.entries(themes))("keeps muted text at 4.5:1 or more in the %s theme", (_, theme) => {
-    for (const surface of surfaces) {
-      expect(contrast(theme["--text-muted"], theme[surface])).toBeGreaterThanOrEqual(4.5);
-    }
-  });
+  it.each(Object.entries(themes))(
+    "keeps muted text at 4.5:1 or more in the %s theme",
+    (_, theme) => {
+      for (const surface of surfaces) {
+        expect(contrast(theme["--text-muted"], theme[surface])).toBeGreaterThanOrEqual(4.5);
+      }
+    },
+  );
 
   it("keeps muted text readable over the light background's blue disc", () => {
     // --paper-blue, rgba(177, 207, 227, 0.5), laid over --bg.
     expect(contrast(light["--text-muted"], "#d4e2ea")).toBeGreaterThanOrEqual(4.5);
   });
 
-  it.each(Object.entries(themes))("keeps text on the course for newcomers' card at 4.5:1 or more in the %s theme", (_, theme) => {
-    for (const text of ["--text", "--text-muted"]) {
-      expect(contrast(theme[text], theme["--primary-soft"])).toBeGreaterThanOrEqual(4.5);
-    }
-  });
+  it.each(Object.entries(themes))(
+    "keeps text on the course for newcomers' card at 4.5:1 or more in the %s theme",
+    (_, theme) => {
+      for (const text of ["--text", "--text-muted"]) {
+        expect(contrast(theme[text], theme["--primary-soft"])).toBeGreaterThanOrEqual(4.5);
+      }
+    },
+  );
 
   it("keeps muted text readable under the course for newcomers' yellow glow", () => {
     // --paper-yellow, rgba(232, 171, 20, 0.16) and 0.05 in the dark, laid over --primary-soft.
@@ -289,13 +406,18 @@ describe("contrast", () => {
 
   it.each(["input", "textarea"])("edges a resting %s with the control border", (tag) => {
     document.body.innerHTML = `<${tag}></${tag}>`;
-    expect(getComputedStyle(document.querySelector(tag)!).borderColor).toBe(light["--control-border"]);
+    expect(getComputedStyle(document.querySelector(tag)!).borderColor).toBe(
+      light["--control-border"],
+    );
   });
 
   it("draws placeholders in muted text at full opacity", () => {
     const rule = [...document.styleSheets]
       .flatMap((sheet) => [...sheet.cssRules])
-      .find((r): r is CSSStyleRule => r instanceof CSSStyleRule && r.selectorText.includes("::placeholder"))!;
+      .find(
+        (r): r is CSSStyleRule =>
+          r instanceof CSSStyleRule && r.selectorText.includes("::placeholder"),
+      )!;
     expect(rule.style.getPropertyValue("color")).toBe("var(--text-muted)");
     expect(rule.style.getPropertyValue("opacity")).toBe("1");
   });
@@ -325,7 +447,10 @@ describe("target size", () => {
     expect(lastMatching(link, "position")).toBeUndefined();
     const stretch = [...document.styleSheets]
       .flatMap((sheet) => [...sheet.cssRules])
-      .find((r): r is CSSStyleRule => r instanceof CSSStyleRule && r.selectorText === ".library-list .library-deck-name::after")!;
+      .find(
+        (r): r is CSSStyleRule =>
+          r instanceof CSSStyleRule && r.selectorText === ".library-list .library-deck-name::after",
+      )!;
     expect(stretch.style.getPropertyValue("position")).toBe("absolute");
     expect(stretch.style.getPropertyValue("z-index")).toBe("");
   });
@@ -384,7 +509,9 @@ describe("target size", () => {
 
   it("gives a group's fold button a 44px target", () => {
     document.body.innerHTML = `<div class="deck-group-header"><button class="group-toggle">x</button></div>`;
-    expect(parseFloat(getComputedStyle(document.querySelector("button")!).minHeight)).toBeGreaterThanOrEqual(44);
+    expect(
+      parseFloat(getComputedStyle(document.querySelector("button")!).minHeight),
+    ).toBeGreaterThanOrEqual(44);
   });
 });
 
@@ -401,7 +528,10 @@ describe("dragging the deck list", () => {
 
   it("indents the drop line as the lists are, level by level", () => {
     document.body.innerHTML = `<div class="drop-line"></div>`;
-    expect(lastMatching(document.querySelector(".drop-line")!, "inset-inline")).toBe(
+    // Compared with its spaces collapsed: Biome may break a long value over lines.
+    expect(
+      lastMatching(document.querySelector(".drop-line")!, "inset-inline")?.replace(/\s+/g, " "),
+    ).toBe(
       "calc(min(var(--line-depth, 0), 4) * 1.25rem + var(--line-depth, 0) * (0.5rem + 2px)) 0",
     );
   });
@@ -412,8 +542,16 @@ describe("dragging the deck list", () => {
   });
 
   it.each([
-    ["a group's", `<div class="deck-group-header"><form class="name-form"><input></form></div>`, ".deck-group-header"],
-    ["a deck's", `<ul class="deck-list"><li class="deck-row"><form class="name-form"><input></form></li></ul>`, ".deck-row"],
+    [
+      "a group's",
+      `<div class="deck-group-header"><form class="name-form"><input></form></div>`,
+      ".deck-group-header",
+    ],
+    [
+      "a deck's",
+      `<ul class="deck-list"><li class="deck-row"><form class="name-form"><input></form></li></ul>`,
+      ".deck-row",
+    ],
   ])("lets %s name be typed into, though its row cannot be selected", (_, html, selector) => {
     document.body.innerHTML = html;
     expect(lastMatching(document.querySelector(selector)!, "user-select")).toBe("none");
@@ -439,9 +577,13 @@ describe("dragging the deck list", () => {
     const html = (collapsed: string) =>
       `<div class="deck-tree" data-dragging><div class="deck-group-body" ${collapsed}><div class="deck-group-clip"></div></div></div>`;
     document.body.innerHTML = html("");
-    expect(lastMatching(document.querySelector(".deck-group-clip")!, "padding-bottom")).toBe("calc(0.25rem + 20px)");
+    expect(lastMatching(document.querySelector(".deck-group-clip")!, "padding-bottom")).toBe(
+      "calc(0.25rem + 20px)",
+    );
     document.body.innerHTML = html("data-collapsed");
-    expect(lastMatching(document.querySelector(".deck-group-clip")!, "padding-bottom")).toBe("0.25rem");
+    expect(lastMatching(document.querySelector(".deck-group-clip")!, "padding-bottom")).toBe(
+      "0.25rem",
+    );
   });
 });
 
@@ -456,7 +598,9 @@ describe("moving the deck list's rows", () => {
 
   it("folds a deleted group's header away, keeps it folded till the group goes, and out of the pointer's way", () => {
     document.body.innerHTML = `<ul class="deck-list"><li class="deck-group leaving"><div class="deck-group-header"></div></li></ul>`;
-    expect(lastMatching(document.querySelector(".deck-group-header")!, "animation")).toMatch(/^group-leave .* forwards$/);
+    expect(lastMatching(document.querySelector(".deck-group-header")!, "animation")).toMatch(
+      /^group-leave .* forwards$/,
+    );
     expect(getComputedStyle(document.querySelector("li")!).pointerEvents).toBe("none");
   });
 });
@@ -485,7 +629,10 @@ describe("Markdown from data", () => {
   });
 
   it("rings a code block or table region taking the focus", () => {
-    const style = focused(`<div class="md"><pre class="md-region" tabindex="0"><code>x</code></pre></div>`, "pre");
+    const style = focused(
+      `<div class="md"><pre class="md-region" tabindex="0"><code>x</code></pre></div>`,
+      "pre",
+    );
     expect(style.outlineStyle).toBe("solid");
   });
 
@@ -589,19 +736,27 @@ describe("Korean", () => {
   it("puts the Korean fonts after Fredoka and before the Japanese ones, and breaks between words", () => {
     const style = styled(`<p lang="ko">사람</p>`, "p");
     expect(style.fontFamily).toMatch(/^"Fredoka Variable", "Apple SD Gothic Neo"/);
-    expect(place(style.fontFamily, "Noto Sans CJK KR")).toBeLessThan(place(style.fontFamily, "Noto Sans CJK JP"));
+    expect(place(style.fontFamily, "Noto Sans CJK KR")).toBeLessThan(
+      place(style.fontFamily, "Noto Sans CJK JP"),
+    );
     expect(style.wordBreak).toBe("keep-all");
     expect(styled(`<p>x</p>`, "p").wordBreak).not.toBe("keep-all");
   });
 
   it("still breaks a Korean word too long for its card", () => {
-    expect(styled(`<div class="card-face"><p lang="ko">사람</p></div>`, "p").overflowWrap).toBe("anywhere");
+    expect(styled(`<div class="card-face"><p lang="ko">사람</p></div>`, "p").overflowWrap).toBe(
+      "anywhere",
+    );
   });
 
   it.each([
     ["a Korean heading", `<h1 lang="ko">사람</h1>`, "h1"],
     ["Korean text in a heading", `<h2><span lang="ko">사람</span></h2>`, "span"],
-    ["the newcomer card's title", `<div class="newcomer-course-body"><p class="newcomer-course-title" lang="ko">사람</p></div>`, "p"],
+    [
+      "the newcomer card's title",
+      `<div class="newcomer-course-body"><p class="newcomer-course-title" lang="ko">사람</p></div>`,
+      "p",
+    ],
   ])("draws %s in Bangers, then a Korean font, bold and untracked", (_, html, selector) => {
     const style = styled(html, selector);
     expect(style.fontFamily).toMatch(/^"?Bangers"?, "Fredoka Variable", "Apple SD Gothic Neo"/);
@@ -611,7 +766,10 @@ describe("Korean", () => {
 
   it.each([
     ["a code span", `<p lang="ko"><code class="md-inline-code">x</code></p>`],
-    ["the Markdown help's samples", `<div class="markdown-help"><pre><code lang="ko">**굵게**</code></pre></div>`],
+    [
+      "the Markdown help's samples",
+      `<div class="markdown-help"><pre><code lang="ko">**굵게**</code></pre></div>`,
+    ],
     ["code no rule of ours styles", `<p><code lang="ko">x</code></p>`],
   ])("keeps %s in a monospace font", (_, html) => {
     expect(styled(html, "code").fontFamily).toMatch(/^ui-monospace/);
@@ -622,8 +780,16 @@ describe("Korean", () => {
     ["the account's label", `<dl class="account"><dt lang="ko">사람</dt></dl>`, "dt"],
     ["a legend", `<fieldset><legend lang="ko">사람</legend></fieldset>`, "legend"],
     ["a table header", `<table><tr><th lang="ko">사람</th></tr></table>`, "th"],
-    ["Korean text in a table header", `<table><tr><th><span lang="ko">사람</span></th></tr></table>`, "span"],
-    ["the newcomer card's eyebrow", `<div class="newcomer-course-body"><p class="newcomer-course-eyebrow" lang="ko">사람</p></div>`, "p"],
+    [
+      "Korean text in a table header",
+      `<table><tr><th><span lang="ko">사람</span></th></tr></table>`,
+      "span",
+    ],
+    [
+      "the newcomer card's eyebrow",
+      `<div class="newcomer-course-body"><p class="newcomer-course-eyebrow" lang="ko">사람</p></div>`,
+      "p",
+    ],
   ])("does not track %s apart", (_, html, selector) => {
     expect(styled(html, selector).letterSpacing).toBe("0px");
   });

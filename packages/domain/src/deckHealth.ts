@@ -1,7 +1,18 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { agentUrlOf } from "./agentRecord";
 import { distributionUrlOf } from "./dcat";
-import { activeCards, isMarkdown, type Card, type CardContent, type CardTextPart, type Deck } from "./deck";
+import {
+  activeCards,
+  isMarkdown,
+  type Card,
+  type CardContent,
+  type CardTextPart,
+  type Deck,
+} from "./deck";
 import { unlikeRelease } from "./deckLanguages";
 import type { FieldRuleName } from "./release/markdownFields";
 import type { MarkdownFinding } from "./release/problems";
@@ -71,7 +82,10 @@ const PARTS: ReadonlyMap<string, CardTextPart> = new Map([
 ]);
 
 /** The parts of a card the deck health reads Markdown in, and the rule each is held to (as the card editor holds them). */
-const MARKDOWN_PARTS: readonly { part: CardTextPart; rule: (card: CardContent) => FieldRuleName }[] = [
+const MARKDOWN_PARTS: readonly {
+  part: CardTextPart;
+  rule: (card: CardContent) => FieldRuleName;
+}[] = [
   { part: "front", rule: () => "side" },
   { part: "back", rule: (card) => ((card.distractors?.length ?? 0) > 0 ? "option" : "side") },
   { part: "backLabel", rule: () => "side" },
@@ -100,7 +114,11 @@ export function deckReport(report: ValidationReport, deck: Deck): ValidationRepo
 
 /** The deck's subjects in the catalog: its entry, its distribution and its authors' agent nodes. */
 function ownSubjectUrls(deck: Deck): Set<string> {
-  return new Set([deck.url, distributionUrlOf(deck.url), ...deck.authors.map((author) => agentUrlOf(deck.url, author))]);
+  return new Set([
+    deck.url,
+    distributionUrlOf(deck.url),
+    ...deck.authors.map((author) => agentUrlOf(deck.url, author)),
+  ]);
 }
 
 /**
@@ -114,7 +132,11 @@ function ownSubjectUrls(deck: Deck): Set<string> {
  * `part` does not hold stays as it was; one `report` did not hold (a
  * deck made since it was made) comes at the end.
  */
-export function withDeckReport(report: ValidationReport, deck: Deck, part: ValidationReport): ValidationReport {
+export function withDeckReport(
+  report: ValidationReport,
+  deck: Deck,
+  part: ValidationReport,
+): ValidationReport {
   const own = ownSubjectUrls(deck);
   const catalog = documentUrlOf(deck.url);
   const fresh = new Map(part.documents.map((document) => [document.url, document]));
@@ -122,10 +144,19 @@ export function withDeckReport(report: ValidationReport, deck: Deck, part: Valid
     const update = fresh.get(document.url);
     if (update === undefined) return document;
     if (update.url !== catalog) return update;
-    return { ...update, subjects: [...document.subjects.filter((subject) => !own.has(subject.url)), ...update.subjects] };
+    return {
+      ...update,
+      subjects: [
+        ...document.subjects.filter((subject) => !own.has(subject.url)),
+        ...update.subjects,
+      ],
+    };
   });
   const known = new Set(report.documents.map((document) => document.url));
-  return summarize(report.instanceUrl, [...documents, ...part.documents.filter((document) => !known.has(document.url))]);
+  return summarize(report.instanceUrl, [
+    ...documents,
+    ...part.documents.filter((document) => !known.has(document.url)),
+  ]);
 }
 
 /**
@@ -134,7 +165,12 @@ export function withDeckReport(report: ValidationReport, deck: Deck, part: Valid
  * its review state; null for any other subject (the deck's entry, one
  * the deck has no card for).
  */
-export function cardSpotOf(deck: Deck, cards: readonly Card[], subjectUrl: string, path?: string): CardSpot | null {
+export function cardSpotOf(
+  deck: Deck,
+  cards: readonly Card[],
+  subjectUrl: string,
+  path?: string,
+): CardSpot | null {
   const document = documentUrlOf(subjectUrl);
   const id = fragmentIdOf(subjectUrl);
   if (document === deck.reviewsDocumentUrl) {
@@ -149,12 +185,20 @@ export function cardSpotOf(deck: Deck, cards: readonly Card[], subjectUrl: strin
   }
   const owner = cards.find((each) => each.distractors?.some((distractor) => distractor.id === id));
   if (owner === undefined) return null;
-  const part = path === SM.distractorText ? "text" : path === SM.distractorNote ? "note" : undefined;
-  return { card: owner, place: { tab: "distractors", distractor: id, ...(part === undefined ? {} : { part }) } };
+  const part =
+    path === SM.distractorText ? "text" : path === SM.distractorNote ? "note" : undefined;
+  return {
+    card: owner,
+    place: { tab: "distractors", distractor: id, ...(part === undefined ? {} : { part }) },
+  };
 }
 
 /** A side's texts as compared: each language's plain text, white space collapsed, in the order of their tags; then its picture. */
-function sideKey(text: Readonly<Record<string, string>>, image: string | undefined, plain: (text: string) => string): string {
+function sideKey(
+  text: Readonly<Record<string, string>>,
+  image: string | undefined,
+  plain: (text: string) => string,
+): string {
   const texts = Object.entries(text)
     .map(([tag, value]) => [tag, plain(value).replace(/\s+/g, " ").trim()])
     .sort(([a], [b]) => (a! < b! ? -1 : 1));
@@ -168,11 +212,15 @@ function sideKey(text: Readonly<Record<string, string>>, image: string | undefin
  * "May" and "may" differ. Each group holds two or more cards, in the
  * deck's order, and the groups come in the order of their first card.
  */
-export function duplicateCardsOf(cards: readonly Card[], plain: (text: string) => string): Card[][] {
+export function duplicateCardsOf(
+  cards: readonly Card[],
+  plain: (text: string) => string,
+): Card[][] {
   const groups = new Map<string, Card[]>();
   for (const card of activeCards(cards)) {
     const read = isMarkdown(card.textFormat) ? plain : (text: string) => text;
-    const key = sideKey(card.front, card.frontImageUrl, read) + sideKey(card.back, card.backImageUrl, read);
+    const key =
+      sideKey(card.front, card.frontImageUrl, read) + sideKey(card.back, card.backImageUrl, read);
     groups.set(key, [...(groups.get(key) ?? []), card]);
   }
   return [...groups.values()].filter((group) => group.length > 1);
@@ -191,17 +239,33 @@ export function cardMarkdownProblems<F extends MarkdownFinding>(
   check: DeckTextCheck<F>["check"],
 ): CardMarkdownProblem<F>[] {
   const problems: CardMarkdownProblem<F>[] = [];
-  const add = (card: Card, place: CardPlace, text: Readonly<Record<string, string>> | undefined, rule: FieldRuleName) => {
+  const add = (
+    card: Card,
+    place: CardPlace,
+    text: Readonly<Record<string, string>> | undefined,
+    rule: FieldRuleName,
+  ) => {
     for (const [language, value] of Object.entries(text ?? {})) {
       if (value.trim() === "") continue;
       for (const finding of check(value, rule)) problems.push({ card, place, language, finding });
     }
   };
   for (const card of activeCards(cards).filter((each) => isMarkdown(each.textFormat))) {
-    for (const { part, rule } of MARKDOWN_PARTS) add(card, { tab: "content", part }, card[part], rule(card));
+    for (const { part, rule } of MARKDOWN_PARTS)
+      add(card, { tab: "content", part }, card[part], rule(card));
     for (const distractor of card.distractors ?? []) {
-      add(card, { tab: "distractors", distractor: distractor.id, part: "text" }, distractor.text, "option");
-      add(card, { tab: "distractors", distractor: distractor.id, part: "note" }, distractor.note, "prose");
+      add(
+        card,
+        { tab: "distractors", distractor: distractor.id, part: "text" },
+        distractor.text,
+        "option",
+      );
+      add(
+        card,
+        { tab: "distractors", distractor: distractor.id, part: "note" },
+        distractor.note,
+        "prose",
+      );
     }
   }
   return problems;
@@ -212,9 +276,14 @@ export function cardMarkdownProblems<F extends MarkdownFinding>(
  * of the cards the user may settle: all but those still as the release
  * the deck was copied from has them (`release`; see unlikeRelease).
  */
-export function unstatedSides(cards: readonly Card[], release: readonly (CardContent & { id: string })[] = []): CardSpot[] {
+export function unstatedSides(
+  cards: readonly Card[],
+  release: readonly (CardContent & { id: string })[] = [],
+): CardSpot[] {
   return unlikeRelease(cards, release).flatMap((card) =>
-    (["front", "back"] as const).filter((side) => "" in card[side]).map((part) => ({ card, place: { tab: "content" as const, part } })),
+    (["front", "back"] as const)
+      .filter((side) => "" in card[side])
+      .map((part) => ({ card, place: { tab: "content" as const, part } })),
   );
 }
 
@@ -246,5 +315,10 @@ export function deckHealth<F extends MarkdownFinding>(
  * in text written in Markdown.
  */
 export function healthProblemCount(health: DeckHealth<MarkdownFinding>): number {
-  return health.report.violationCount + (health.unstated?.length ?? 0) + health.duplicates.length + health.markdown.length;
+  return (
+    health.report.violationCount +
+    (health.unstated?.length ?? 0) +
+    health.duplicates.length +
+    health.markdown.length
+  );
 }

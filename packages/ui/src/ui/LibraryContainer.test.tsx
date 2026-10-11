@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -55,18 +59,14 @@ function renderContainer(useCases: UseCases) {
   const onDone = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
-      <LibraryContainer
-        useCases={useCases}
-        instance={instance}
-        onDone={onDone}
-      />
+      <LibraryContainer useCases={useCases} instance={instance} onDone={onDone} />
     </QueryClientProvider>,
   );
   return { onDone, queryClient };
 }
 
 describe("LibraryContainer", () => {
-  // The library remembers its ticks and filters per instance; each test starts afresh.
+  // The library remembers its checked decks and filters per instance; each test starts afresh.
   afterEach(() => {
     for (const part of ["selected", "topics", "query"]) forget(`library:${instance.url}:${part}`);
   });
@@ -78,9 +78,7 @@ describe("LibraryContainer", () => {
       }),
     );
     expect(screen.getByText("Loading the deck library…")).toBeInTheDocument();
-    expect(
-      await screen.findByRole("checkbox", { name: "Capitals" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("checkbox", { name: "Capitals" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Deck library" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Capitals" })).toHaveAttribute(
       "href",
@@ -117,7 +115,7 @@ describe("LibraryContainer", () => {
     expect(screen.getAllByText("Already imported")).toHaveLength(1);
   });
 
-  it("imports the ticked decks one by one, then returns to the deck list", async () => {
+  it("imports the checked decks one by one, then returns to the deck list", async () => {
     const importLibraryDeck = vi.fn(async () => importedDeck);
     const useCases = makeUseCasesFake({
       listLibraryDecks: vi.fn(async () => [capitals, rivers]),
@@ -128,27 +126,23 @@ describe("LibraryContainer", () => {
 
     fireEvent.click(await screen.findByRole("checkbox", { name: "Capitals" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Import 2 decks" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Import 2 decks" }).closest("form")!);
 
     await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
     expect(importLibraryDeck.mock.calls).toEqual([
       [instance.url, capitals],
       [instance.url, rivers],
     ]);
-    await waitFor(() =>
-      expect(useCases.listDecks).toHaveBeenCalledTimes(2),
-    );
+    await waitFor(() => expect(useCases.listDecks).toHaveBeenCalledTimes(2));
 
-    // The imported decks are no longer ticked on the next visit.
+    // The imported decks are no longer checked on the next visit.
     cleanup();
     renderContainer(useCases);
     expect(await screen.findByRole("checkbox", { name: "Capitals" })).not.toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Rivers" })).not.toBeChecked();
   });
 
-  it("keeps the ticks and the search when the library is left and come back to", async () => {
+  it("keeps the checked decks and the search when the library is left and come back to", async () => {
     const useCases = makeUseCasesFake({
       listLibraryDecks: vi.fn(async () => [capitals, rivers]),
     });
@@ -184,9 +178,7 @@ describe("LibraryContainer", () => {
 
     fireEvent.click(await screen.findByRole("checkbox", { name: "Capitals" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
-    fireEvent.submit(
-      screen.getByRole("button", { name: "Import 2 decks" }).closest("form")!,
-    );
+    fireEvent.submit(screen.getByRole("button", { name: "Import 2 decks" }).closest("form")!);
 
     expect((await screen.findByText("pod refused")).closest(".error")).toBeInTheDocument();
     expect(onDone).not.toHaveBeenCalled();

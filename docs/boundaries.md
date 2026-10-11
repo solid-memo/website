@@ -26,6 +26,44 @@ package and fails on:
 Test files follow the same rules as their subject; they and the vitest
 configs may also use the shared test tooling of the root `package.json`.
 
+### An example
+
+A screen in `ui` may use what the use cases give it, since `ui` may
+import `application` (the [table](#layers) below):
+
+```ts
+// packages/ui/src/ui/DeckListContainer.tsx
+import type { UseCases } from "@solid-memo/application/useCases";
+```
+
+It may not reach for an adapter, such as the guest's pod in `solid`:
+
+```ts
+// packages/ui/src/ui/SomeScreen.tsx
+import { createLocalPod } from "@solid-memo/solid/localPod";
+```
+
+The check names the file and the rule, once for each problem, and
+fails:
+
+```text
+packages/ui/src/ui/SomeScreen.tsx: @solid-memo/ui may not import @solid-memo/solid.
+packages/ui/src/ui/SomeScreen.tsx: imports @solid-memo/solid, which package.json does not declare.
+2 boundary problem(s).
+```
+
+The fix is a use case: the screen calls one on `UseCases`, and
+`composition` wires the adapter behind its port. A package that may
+import another only from some files says which. Importing the
+composition root anywhere in `apps/web` but its entry point gives:
+
+```text
+apps/web/src/App.tsx: only files matching /^src\/main\.tsx$/ may import @solid-memo/composition.
+```
+
+When every import keeps to the rules, the check prints "Every package
+keeps to its boundaries."
+
 ## Layers
 
 | Package | May import | Only from |

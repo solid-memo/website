@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -86,10 +90,15 @@ export function DeckLanguagesSection({
     }
     const question = ready
       .map((side) =>
-        t(side === "front" ? "deckPreferences.languages.confirmFronts" : "deckPreferences.languages.confirmBacks", {
-          count: counts[side],
-          language: languageParts(chosen[side]!).name,
-        }),
+        t(
+          side === "front"
+            ? "deckPreferences.languages.confirmFronts"
+            : "deckPreferences.languages.confirmBacks",
+          {
+            count: counts[side],
+            language: languageParts(chosen[side]!).name,
+          },
+        ),
       )
       .join("\n");
     if (!window.confirm(question)) return;
@@ -104,7 +113,11 @@ export function DeckLanguagesSection({
       </h3>
       {languages === undefined ? (
         <p class="hint">
-          {t(unreadable === null ? "deckPreferences.languages.loading" : "deckPreferences.languages.unreadable")}
+          {t(
+            unreadable === null
+              ? "deckPreferences.languages.loading"
+              : "deckPreferences.languages.unreadable",
+          )}
         </p>
       ) : (
         <>
@@ -119,13 +132,19 @@ export function DeckLanguagesSection({
               {sides.map((side) => (
                 <fieldset key={side} class="language-side">
                   <legend>
-                    {t(side === "front" ? "deckPreferences.languages.fronts" : "deckPreferences.languages.backsLegend")}
+                    {t(
+                      side === "front"
+                        ? "deckPreferences.languages.fronts"
+                        : "deckPreferences.languages.backsLegend",
+                    )}
                   </legend>
                   <LanguagePicker
                     id={pickerId(side)}
                     value={chosen[side]}
                     role={side}
-                    suggestions={[languages[side], ...Object.keys(deck.title)].filter((tag) => tag !== undefined)}
+                    suggestions={[languages[side], ...Object.keys(deck.title)].filter(
+                      (tag) => tag !== undefined,
+                    )}
                     errorId={missing === side ? "deck-languages-error" : undefined}
                     onChange={(tag) => {
                       setMissing(null);
@@ -145,10 +164,10 @@ export function DeckLanguagesSection({
               </button>
             </>
           )}
-          {sides.length === 0 && (
-            <p>{t("deckPreferences.languages.settled")}</p>
+          {sides.length === 0 && <p>{t("deckPreferences.languages.settled")}</p>}
+          {deck.sourceUrl !== undefined && (
+            <p class="hint">{t("deckPreferences.languages.releaseHint")}</p>
           )}
-          {deck.sourceUrl !== undefined && <p class="hint">{t("deckPreferences.languages.releaseHint")}</p>}
         </>
       )}
       <ErrorMessage
@@ -156,7 +175,9 @@ export function DeckLanguagesSection({
         error={
           missing === null
             ? unreadable
-            : errorText(new AppError("textNeedsLanguage", { field: t(`language.field.${missing}`) }))
+            : errorText(
+                new AppError("textNeedsLanguage", { field: t(`language.field.${missing}`) }),
+              )
         }
       />
       <p class="hint" role="status">

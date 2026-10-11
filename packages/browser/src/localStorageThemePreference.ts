@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ThemePreference } from "@solid-memo/application/ports";
 import { isThemeChoice } from "@solid-memo/domain/theme";
 

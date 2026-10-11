@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { ContextTabs } from "./ContextTabs";
@@ -12,7 +16,10 @@ describe("ContextTabs", () => {
     render(<ContextTabs label="Deck" tabs={tabs} />);
     const nav = screen.getByRole("navigation", { name: "Deck" });
     expect(nav).toHaveClass("studio-tabs");
-    expect(within(nav).getByRole("link", { name: "Cards" })).toHaveAttribute("aria-current", "page");
+    expect(within(nav).getByRole("link", { name: "Cards" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     expect(within(nav).getByRole("link", { name: "Schedule" })).not.toHaveAttribute("aria-current");
     // Followed as links are.
     expect(fireEvent.click(within(nav).getByRole("link", { name: "Schedule" }))).toBe(true);

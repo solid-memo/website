@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { I18nProvider } from "./i18n";
@@ -12,7 +16,11 @@ describe("LanguageSelector", () => {
     );
     const list = screen.getByRole("combobox", { name: "Språk" });
     expect(list).toHaveValue("sv");
-    expect(screen.getAllByRole("option").map((option) => [option.textContent, option.getAttribute("lang")])).toEqual([
+    expect(
+      screen
+        .getAllByRole("option")
+        .map((option) => [option.textContent, option.getAttribute("lang")]),
+    ).toEqual([
       ["Deutsch", "de"],
       ["English", "en"],
       ["Español", "es"],

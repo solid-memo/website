@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { NewQuestionForm } from "./NewQuestionForm";
@@ -8,9 +12,20 @@ afterEach(() => vi.useRealTimers());
 
 const NOW = "2026-10-10T12:00:00.000Z";
 
-function renderForm(onAdd = vi.fn(() => true), place: Parameters<typeof NewQuestionForm>[0]["place"] = { kind: "step", step: "ch-pods-1" }) {
+function renderForm(
+  onAdd = vi.fn(() => true),
+  place: Parameters<typeof NewQuestionForm>[0]["place"] = { kind: "step", step: "ch-pods-1" },
+) {
   vi.setSystemTime(NOW);
-  render(<NewQuestionForm id="nq" draft={courseDraft()} place={place} legend="New question" onAdd={onAdd} />);
+  render(
+    <NewQuestionForm
+      id="nq"
+      draft={courseDraft()}
+      place={place}
+      legend="New question"
+      onAdd={onAdd}
+    />,
+  );
   return onAdd;
 }
 
@@ -37,7 +52,11 @@ describe("NewQuestionForm", () => {
     add();
     expect(onAdd).toHaveBeenCalledWith(
       [
-        { kind: "addCard", id: "q-pods-1b", card: { front: { en: "What is a pod?" }, back: { en: "A store of data" }, created: NOW } },
+        {
+          kind: "addCard",
+          id: "q-pods-1b",
+          card: { front: { en: "What is a pod?" }, back: { en: "A store of data" }, created: NOW },
+        },
         { kind: "addQuestion", card: "q-pods-1b", place: { kind: "step", step: "ch-pods-1" } },
       ],
       "q-pods-1b",
@@ -60,7 +79,9 @@ describe("NewQuestionForm", () => {
     add();
     expect(error()).toHaveTextContent("Write the front and the back.");
     write("Back", "Back");
-    fireEvent.input(screen.getByRole("textbox", { name: "Id" }), { target: { value: "q-pods-1a" } });
+    fireEvent.input(screen.getByRole("textbox", { name: "Id" }), {
+      target: { value: "q-pods-1a" },
+    });
     add();
     expect(onAdd).not.toHaveBeenCalled();
     fireEvent.input(screen.getByRole("textbox", { name: "Id" }), { target: { value: "q-new" } });
@@ -82,7 +103,12 @@ describe("NewQuestionForm", () => {
     write("Front", "F");
     write("Back", "B");
     add();
-    expect(onAdd).toHaveBeenCalledWith(expect.arrayContaining([{ kind: "addQuestion", card: "q-pods-11", place: { kind: "step", step: "ch-pods-1" } }]), "q-pods-11");
+    expect(onAdd).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        { kind: "addQuestion", card: "q-pods-11", place: { kind: "step", step: "ch-pods-1" } },
+      ]),
+      "q-pods-11",
+    );
     // The next is asked after the last again.
     expect(where).toHaveValue("");
     expect(screen.getByRole("textbox", { name: "Id" })).toHaveValue("q-pods-1b");
@@ -92,27 +118,69 @@ describe("NewQuestionForm", () => {
     const draft = courseDraft();
     const early: typeof draft = {
       ...draft,
-      steps: draft.steps.map((node) => (node.id === "ch-pods-1" ? { ...node, data: { ...node.data, checkedBy: [`${draft.url}#a`] } } : node)),
+      steps: draft.steps.map((node) =>
+        node.id === "ch-pods-1"
+          ? { ...node, data: { ...node.data, checkedBy: [`${draft.url}#a`] } }
+          : node,
+      ),
     };
-    const { rerender } = render(<NewQuestionForm id="nq" draft={early} place={{ kind: "step", step: "ch-pods-1" }} legend="New question" onAdd={vi.fn()} />);
+    const { rerender } = render(
+      <NewQuestionForm
+        id="nq"
+        draft={early}
+        place={{ kind: "step", step: "ch-pods-1" }}
+        legend="New question"
+        onAdd={vi.fn()}
+      />,
+    );
     fireEvent.change(screen.getByRole("combobox", { name: "Ask it" }), { target: { value: "a" } });
     expect(screen.getByRole("option", { name: "Before “a”" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Id" })).toHaveValue("");
-    expect(screen.getByText("The assistant finds no id that sorts there: write one that does.")).toBeInTheDocument();
+    expect(
+      screen.getByText("The assistant finds no id that sorts there: write one that does."),
+    ).toBeInTheDocument();
     // The card it was to be asked before is asked there no more: after the last, then.
-    const moved = { ...early, steps: early.steps.map((node) => (node.id === "ch-pods-1" ? { ...node, data: { ...node.data, checkedBy: [`${draft.url}#q-pods-1a`] } } : node)) };
-    rerender(<NewQuestionForm id="nq" draft={moved} place={{ kind: "step", step: "ch-pods-1" }} legend="New question" onAdd={vi.fn()} />);
+    const moved = {
+      ...early,
+      steps: early.steps.map((node) =>
+        node.id === "ch-pods-1"
+          ? { ...node, data: { ...node.data, checkedBy: [`${draft.url}#q-pods-1a`] } }
+          : node,
+      ),
+    };
+    rerender(
+      <NewQuestionForm
+        id="nq"
+        draft={moved}
+        place={{ kind: "step", step: "ch-pods-1" }}
+        legend="New question"
+        onAdd={vi.fn()}
+      />,
+    );
     expect(screen.getByRole("textbox", { name: "Id" })).toHaveValue("q-pods-1b");
-    rerender(<NewQuestionForm id="nq" draft={early} place={{ kind: "step", step: "ch-pods-1" }} legend="New question" onAdd={vi.fn()} />);
+    rerender(
+      <NewQuestionForm
+        id="nq"
+        draft={early}
+        place={{ kind: "step", step: "ch-pods-1" }}
+        legend="New question"
+        onAdd={vi.fn()}
+      />,
+    );
     fireEvent.input(screen.getByRole("textbox", { name: "Id" }), { target: { value: "0" } });
-    expect(screen.queryByText("The assistant finds no id that sorts there: write one that does.")).toBeNull();
+    expect(
+      screen.queryByText("The assistant finds no id that sorts there: write one that does."),
+    ).toBeNull();
   });
 
   it("says when an id the user writes does not sort where the question is to be asked", () => {
     renderForm();
     const id = screen.getByRole("textbox", { name: "Id" });
-    const notThere = "This id does not sort there, so the question would not be asked where “Ask it” says: write one that does.";
-    fireEvent.change(screen.getByRole("combobox", { name: "Ask it" }), { target: { value: "q-pods-1a" } });
+    const notThere =
+      "This id does not sort there, so the question would not be asked where “Ask it” says: write one that does.";
+    fireEvent.change(screen.getByRole("combobox", { name: "Ask it" }), {
+      target: { value: "q-pods-1a" },
+    });
     fireEvent.input(id, { target: { value: "q-pods-1z" } });
     expect(id).toHaveAccessibleDescription(expect.stringContaining(notThere));
     fireEvent.input(id, { target: { value: "q-pods-10" } });
@@ -128,12 +196,24 @@ describe("NewQuestionForm", () => {
   });
 
   it("adds a card asked nowhere yet", () => {
-    const onAdd = renderForm(vi.fn(() => true), null);
+    const onAdd = renderForm(
+      vi.fn(() => true),
+      null,
+    );
     expect(screen.queryByRole("combobox", { name: "Ask it" })).toBeNull();
     expect(screen.getByRole("textbox", { name: "Id" })).toHaveValue("q-1");
     write("Front", "F");
     write("Back", "B");
     add();
-    expect(onAdd).toHaveBeenCalledWith([{ kind: "addCard", id: "q-1", card: { front: { en: "F" }, back: { en: "B" }, created: NOW } }], "q-1");
+    expect(onAdd).toHaveBeenCalledWith(
+      [
+        {
+          kind: "addCard",
+          id: "q-1",
+          card: { front: { en: "F" }, back: { en: "B" }, created: NOW },
+        },
+      ],
+      "q-1",
+    );
   });
 });

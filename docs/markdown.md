@@ -1,5 +1,11 @@
 # Markdown
 
+Markdown is a simple way to format text with plain
+characters, such as `**strong**` for strong emphasis or a dash at the
+start of a line for a list item. Cards and courses can be written in
+it. This page says which Markdown Solid Memo reads, which texts may
+use it, how each place shows it, and why showing it is always safe.
+
 How Solid Memo reads and shows text written in Markdown: the dialect,
 which texts may be in it, how each place in the app shows it, and why
 showing it is safe whatever a pod or library holds.
@@ -10,8 +16,9 @@ render policy, which may change without touching data.
 
 ## The dialect
 
-`sm:markdown` is CommonMark 0.31.2 with GitHub Flavored Markdown pipe
-tables and CJK-friendly emphasis, and nothing else: no strikethrough,
+`sm:markdown` is [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/)
+with [GitHub Flavored Markdown pipe tables](https://github.github.com/gfm/#tables-extension-)
+and CJK-friendly emphasis, and nothing else: no strikethrough,
 autolink literals (`www.x`), task lists or footnotes, which show as
 typed. Wider Markdown would be a new concept, since it would change how
 text already written reads.
@@ -33,11 +40,15 @@ which CommonMark counts as punctuation, so emphasis next to one now
 follows the specification:
 `*😀*a` and `a**😀**b` keep their asterisks, as `*★*a` always did,
 though the app showed them as emphasis before it took this amendment.
-`_` inside a word still never emphasises, in Korean as in English:
+`_` inside a word still never emphasizes, in Korean as in English:
 `__사람__들` shows as typed, so use `**사람**들`.
 
 CommonMark has no invalid documents, so nothing is ever refused: what a
 place cannot show is shown as text.
+
+GFM and the CJK-friendly amendment are not formal standards;
+[standards.md](standards.md#drafts-and-de-facto-specifications) says why
+they do not stand in the way of reading the text elsewhere.
 
 ## What is Markdown
 
@@ -201,6 +212,48 @@ Plain text still renders byte for byte as it did before Markdown.
   whole question describes them too. A plain question names them by the
   whole question, as before.
 
+## An example
+
+A card's back, with "Format with Markdown" on:
+
+~~~markdown
+Make a branch with `git switch -c`, then:
+
+- *stage* the files
+- **commit** them
+
+```sh
+git add .
+git commit
+```
+~~~
+
+- **Block**, on the card's face in study and in the editor's preview: a
+  paragraph with a code span, a list of two items with emphasis and
+  strong emphasis, and a code block labeled `sh` in a region named
+  "Code" that scrolls sideways. It is more than one paragraph, so it
+  is a left-aligned `div.md`.
+- **Inline**, were the card a course's question, with the back as one
+  of its options: one line, the list items joined by "; " and the code
+  block as one code span. The editor says so under the back: "This
+  card's back is one of the options of a question: keep it to one
+  paragraph, as the others are." (`notOneParagraph`, from
+  `markdownProblems(text, OPTION)`).
+- **Plain**, in the Browser's Back column (and in the breadcrumb, were
+  it the front): the first block that shows any text, marks dropped,
+  `Make a branch with git switch -c, then:` (`labelText`). The whole
+  text as plain text (`plainText`) keeps the code as written:
+  `stage the files; commit them` for the list, the code block's lines
+  as they are.
+
+What a place cannot show is not refused, only shown as typed, with a
+hint while the card is edited. On a card's side,
+`See <b>this</b> and [the docs](https://example.org).` gets three: one
+for each HTML tag ("HTML such as `<b>` shows as typed. Put it in
+backticks to show it as code.") and one for the link ("No links here,
+where they would be in the way of studying: … Put a link in a note.").
+In a note, where links are followed, only the two about HTML remain.
+
 ## Safety
 
 Pods and libraries are untrusted: anyone's data may be opened, and most
@@ -211,7 +264,7 @@ text is rendered, and none relies on a check of the data.
 | Threat | Rule |
 |---|---|
 | Raw HTML, `<script>`, `<img onerror>` | Text: the tree has no HTML node. |
-| An HTML sink | None. The renderer turns each node into one fixed element with fixed attributes; data only becomes text children, never markup, a class, a style, an id or a handler. No `dangerouslySetInnerHTML`, no sanitiser. |
+| An HTML sink | None. The renderer turns each node into one fixed element with fixed attributes; data only becomes text children, never markup, a class, a style, an id or a handler. No `dangerouslySetInnerHTML`, no sanitizer. |
 | `javascript:`, `data:`, `http:`, `mailto:`, relative and `#/route` links, a URL with a user name or password | Shown as their text: only an absolute `https:` URL without credentials is followed (`liveLink`), so data can neither run script, steer the app, fill in a mail, nor hide its host behind `user@`. (`isLinkableUrl`, for the source links decks state, is unchanged.) |
 | Link spoofing | A followed link opens in a new tab, says so, and when its text is not its own URL, or its host is an international one, the host it leads to follows it in sight: "the spec (solidproject.org)", punycode kept, so `<https://bаnk.example>` with a Cyrillic "а" shows "(xn--bnk-6cd.example)". The link and its host are each isolated (`dir="ltr"`), so a bidi override in the text before them cannot reorder them. |
 | Tracking pictures | Never loaded: alt text only. Pictures belong in `sm:frontImage`/`sm:backImage`, with a description. |
@@ -256,7 +309,7 @@ shows the same problems as hints, never as a block
 | A picture (`image`) | It is never shown, only its alt text. A card shows a picture by `sm:frontImage`/`sm:backImage`, with a description. |
 | A link where none may be (`link`): a card's `front`, `back` and `backLabel` and a distractor's `distractorText` (fields `SIDE` and `OPTION`), an autolink `<ex:title>` or `<http://…>` included | A link there is in the way of the keys that reveal and grade, and of the `<label>` an option sits in; an autolink also loses its angle brackets. Write it as code. |
 | A link the app does not follow (`linkNotFollowed`), in a note, a step's theory or a chapter's description (field `PROSE`) | Only `https:` without a user name or password is followed; any other shows as text. |
-| Link text that reads as an address or a host name other than the link's (`linkHost`) | Misleading text. The named host must be the link's, give or take a `www.`: `[solidproject.org](https://www.solidproject.org/)` is fine, `[bank.example](https://evil.example/)` is not, and neither is `[github.io](https://evil.github.io/)`, for a domain the host is in says nothing of who runs it. The test is by shape, a dotted word ending in letters, so text that reads as a host name but is none counts too: "Node.js", and a file's name such as `package.json`, `v1.ttl` or `README.md`, even as code. Word it otherwise ("npm's documentation of package.json"). This is a check of the data only: the defence against a link that misleads is the host the app shows beside it ([safety](#safety)). |
+| Link text that reads as an address or a host name other than the link's (`linkHost`) | Misleading text. The named host must be the link's, give or take a `www.`: `[solidproject.org](https://www.solidproject.org/)` is fine, `[bank.example](https://evil.example/)` is not, and neither is `[github.io](https://evil.github.io/)`, for a domain the host is in says nothing of who runs it. The test is by shape, a dotted word ending in letters, so text that reads as a host name but is none counts too: "Node.js", and a file's name such as `package.json`, `v1.ttl` or `README.md`, even as code. Word it otherwise ("npm's documentation of package.json"). This is a check of the data only: the defense against a link that misleads is the host the app shows beside it ([safety](#safety)). |
 | A bidi control, zero-width or other hidden character in code or a link (`hiddenControl`) | Code that reads other than it runs ("Trojan Source"); the app shows them as markers. |
 | A character reference outside code (`characterReference`), such as `&aring;` | CommonMark decodes it: it shows as "å". Write it as code, or escape its `&` (`\&aring;`). An unknown name, `&nosuchname;`, is text and passes. |
 | A heading underlined with dashes (`dashHeading`): a line of text with `---` right under it, no blank line between | It reads like a line of text over a thematic break, which it would be with a blank line before the `---`; in a step's theory that break would end a [chunk](#chunks). Leave the blank line, or write the heading with `##`. Underlined with `===`, a heading is no such look-alike, and passes. |
@@ -311,7 +364,7 @@ languages.
   link to its field.
 - **Switching on.** Text Markdown reads otherwise (`readsDifferently`:
   its plain text is not what was typed, white space aside) is noted at
-  the moment the box is ticked (`switchMarkdown`), and a status under
+  the moment the box is checked (`switchMarkdown`), and a status under
   the checkbox, a polite live region that also describes it, says so
   while that text is as it was: "check the preview" when a main text
   is among it, and "check them" when only translations are, which the

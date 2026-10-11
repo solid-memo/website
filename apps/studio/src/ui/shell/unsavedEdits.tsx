@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext, type ComponentChildren } from "preact";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -117,11 +121,13 @@ export function useUnsavedEdits(): {
           label: t("studio.confirm.unsaved.save"),
           onChoose: () => {
             setAsked(null);
-            void Promise.all([...unsaved.current.values()].map((edits) => edits.save())).then((saved) => {
-              if (!saved.every(Boolean)) return;
-              unsaved.current.clear();
-              asked();
-            });
+            void Promise.all([...unsaved.current.values()].map((edits) => edits.save())).then(
+              (saved) => {
+                if (!saved.every(Boolean)) return;
+                unsaved.current.clear();
+                asked();
+              },
+            );
           },
         },
         {

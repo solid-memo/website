@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Catalog } from "@solid-memo/domain/catalog";
 import type { Locale } from "@solid-memo/domain/locale";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -79,7 +83,7 @@ export interface InstanceRepository {
   /**
    * Create the instance container + meta document and register it in the
    * chosen type index (creating the index if needed), with its
-   * catalogue, decks and cards; its review states and answers in the
+   * catalog, decks and cards; its review states and answers in the
    * private index, whichever is chosen, and nowhere when there is none
    * (docs/data-model.md "Discovery chain"). Fails loudly and cleans up
    * the container when registration in the chosen index fails; the
@@ -110,7 +114,7 @@ export interface InstanceRepository {
   deleteInstance(args: { webId: string; instance: Instance }): Promise<InstanceDeletion>;
   /**
    * Delete what the instance's container holds of Solid Memo's (its
-   * meta, preferences, catalogue and digest documents, every deck's cards
+   * meta, preferences, catalog and digest documents, every deck's cards
    * and reviews documents, the answer log's months), its sub-containers
    * and the container itself only once empty. Anything else, another
    * app's, is kept, and so is the container holding it. Its
@@ -120,12 +124,15 @@ export interface InstanceRepository {
   /**
    * The registrations of the instance's data, one per class, that
    * belong in the type indexes there are, and whether each is there:
-   * Solid Memo's own, the catalogue's, the decks' and the cards' in each
+   * Solid Memo's own, the catalog's, the decks' and the cards' in each
    * index that registers the instance, the review states' and answers'
    * in the private index only. An index that cannot be read is left
    * out, and said to be unreadable.
    */
-  readDataClassRegistrations(args: { webId: string; instanceUrl: string }): Promise<DataClassRegistrations>;
+  readDataClassRegistrations(args: {
+    webId: string;
+    instanceUrl: string;
+  }): Promise<DataClassRegistrations>;
   /**
    * Add each registration readDataClassRegistrations finds missing,
    * titled `title`, one save per index (If-Match, read again and
@@ -136,7 +143,7 @@ export interface InstanceRepository {
   /**
    * Give the instance's registrations a new title, in every type index
    * that registers it: its sm:Instance registration, which names it in
-   * the instance list, and its catalogue's dcat:Catalog registration.
+   * the instance list, and its catalog's dcat:Catalog registration.
    * One write per index, made only if the index is as it was read
    * (If-Match), else read and written again, a few times. An index
    * already saying so is not written.
@@ -172,15 +179,15 @@ export type Since<T> = { unchanged: true } | { unchanged: false; value: T; versi
 
 export interface DeckRepository {
   listDecks(instanceUrl: string): Promise<Deck[]>;
-  /** The instance's catalogue (catalog.ttl#catalog); null when it has none yet. */
+  /** The instance's catalog (catalog.ttl#catalog); null when it has none yet. */
   readCatalog(instanceUrl: string): Promise<Catalog | null>;
-  /** Write the instance's catalogue, listing every deck, creating the catalog document if need be. */
+  /** Write the instance's catalog, listing every deck, creating the catalog document if need be. */
   saveCatalog(instanceUrl: string, catalog: Catalog): Promise<void>;
   /**
    * For the format update: bring every deck entry of the catalog document
    * stored in an older format up to this app's, in place (unknown triples
    * survive), each as read and brought up to date in memory, and write
-   * `catalog` as the instance's catalogue when one is given and the
+   * `catalog` as the instance's catalog when one is given and the
    * document has none, all in ONE save of the catalog document, made only
    * if it is still as it was read (If-Match; created only if nothing is
    * there, when there is no document). An entry that does not fit its
@@ -273,7 +280,11 @@ export interface DeckRepository {
    * is left as it is. A card that no longer exists is skipped. How many
    * cards changed; nothing is written when none did.
    */
-  stateCardLanguages(deck: Deck, cardIds: readonly string[], languages: StatedLanguages): Promise<number>;
+  stateCardLanguages(
+    deck: Deck,
+    cardIds: readonly string[],
+    languages: StatedLanguages,
+  ): Promise<number>;
   /**
    * Write cards by fragment id, new or existing (an existing card keeps
    * its creation time and triples this app does not know; a new one is
@@ -290,7 +301,10 @@ export interface DeckRepository {
    */
   applyCardChanges(
     deck: Deck,
-    changes: { save: (CardContent & { id: string; retired?: true; createdAt?: string })[]; remove: string[] },
+    changes: {
+      save: (CardContent & { id: string; retired?: true; createdAt?: string })[];
+      remove: string[];
+    },
     options?: { whole?: boolean; version?: string },
   ): Promise<void>;
   /**
@@ -366,10 +380,10 @@ export interface DeckLibrary {
    */
   readRelease(url: string): Promise<LibraryDeck>;
   /**
-   * The releases the catalogue of the instance that published `url`
+   * The releases the catalog of the instance that published `url`
    * links (`sm:publishedRelease`), read as anyone reads it: looked for
    * in the folders above the release, nearest first, the first that
-   * links it. Null when none can be read: an instance's catalogue is
+   * links it. Null when none can be read: an instance's catalog is
    * private unless its owner shares it.
    */
   publishedBeside(url: string): Promise<string[] | null>;
@@ -404,7 +418,7 @@ export interface DeckArchive {
 /**
  * Driven port: the drafts of releases an instance's owner writes in it
  * (docs/studio.md, Drafts; domain/release/draftLayout.ts). A draft is a
- * container of documents, linked from the instance's catalogue
+ * container of documents, linked from the instance's catalog
  * (`sm:releaseDraft`); its subjects are read into a ReleaseDraft, each
  * named as a fragment of its release document, and written back where
  * draftDocuments keeps them. What its shapes describe is written in this
@@ -412,19 +426,19 @@ export interface DeckArchive {
  * statement is kept as it is.
  */
 export interface ReleaseDraftRepository {
-  /** The drafts the instance's catalogue links, each as its release document says; one that cannot be read is listed as such. */
+  /** The drafts the instance's catalog links, each as its release document says; one that cannot be read is listed as such. */
   list(instanceUrl: string): Promise<ReleaseDraftSummary[]>;
   /** Every document of the instance's drafts, for the instance's check. */
   documents(instanceUrl: string): Promise<string[]>;
   /**
    * Write a new draft where its URL says (draftLayout.ts): each document
    * made only if nothing is there yet (If-None-Match: *), the release
-   * document first, then the link from the catalogue, If-Match, read and
+   * document first, then the link from the catalog, If-Match, read and
    * made again on a 412, a few times. A release document there already is
    * createdElsewhere naming it, with nothing written. Any later failure
    * deletes the documents written, and their containers left empty,
-   * before it is thrown: no draft is left that the catalogue does not
-   * link. Throws noCatalogToUpdate when the instance has no catalogue.
+   * before it is thrown: no draft is left that the catalog does not
+   * link. Throws noCatalogToUpdate when the instance has no catalog.
    */
   create(instanceUrl: string, draft: ReleaseDraft): Promise<ReleaseDraftSummary>;
   /**
@@ -480,7 +494,7 @@ export interface ReleaseDraftRepository {
   /**
    * Delete a draft: its documents (those of a draft's, nothing else in
    * its container), its container and the ones above it when they are
-   * then empty, then its link from the catalogue.
+   * then empty, then its link from the catalog.
    */
   delete(draft: ReleaseDraftSummary): Promise<void>;
 }
@@ -500,7 +514,7 @@ export interface ReleasePublisher {
    * this one does, its time of issue aside, is this one, written by a
    * publishing cut short, and is finished as if just written), then
    * make it readable by everyone,
-   * then link it from the instance's catalogue (`sm:publishedRelease`,
+   * then link it from the instance's catalog (`sm:publishedRelease`,
    * If-Match, read and made again on a 412). `public` is false when the
    * pod would not make it readable by everyone: it is written and linked
    * all the same, readable by its owner alone, until makePublic.
@@ -510,7 +524,7 @@ export interface ReleasePublisher {
   makePublic(url: string): Promise<void>;
   /** Whether someone with no login can read the release at `url`. */
   isPublic(url: string): Promise<boolean>;
-  /** The releases the instance's catalogue says it published, in the order it names them. */
+  /** The releases the instance's catalog says it published, in the order it names them. */
   listPublished(instanceUrl: string): Promise<string[]>;
 }
 
@@ -573,10 +587,7 @@ export interface PreferencesRepository {
    * instance has no preferences document yet.
    */
   getPreferences(instanceUrl: string): Promise<StoredPreferences | null>;
-  savePreferences(
-    instanceUrl: string,
-    preferences: StudyPreferences,
-  ): Promise<void>;
+  savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
   /**
    * For the format update: bring the preferences up to this app's format,
    * in place (unknown triples survive), in ONE save of the document made
@@ -600,7 +611,10 @@ export interface DigestRepository {
   /** null when the instance has none, or one this app cannot read. */
   readDigest(instanceUrl: string): Promise<InstanceDigest | null>;
   /** Change the stored digest: read, change, write only if unchanged meanwhile (else again). */
-  updateDigest(instanceUrl: string, change: (stored: InstanceDigest | null) => InstanceDigest): Promise<void>;
+  updateDigest(
+    instanceUrl: string,
+    change: (stored: InstanceDigest | null) => InstanceDigest,
+  ): Promise<void>;
 }
 
 /**
@@ -626,7 +640,11 @@ export interface AnswerLog {
    * still at `version` (undefined: read them); a month with no document
    * is at ABSENT_VERSION, with no answers.
    */
-  readMonthSince(instanceUrl: string, month: string, version: string | undefined): Promise<Since<Answer[]>>;
+  readMonthSince(
+    instanceUrl: string,
+    month: string,
+    version: string | undefined,
+  ): Promise<Since<Answer[]>>;
   /** Remove a deck's answers of a study day: what resetting the day undoes. */
   removeDay(instanceUrl: string, deckUrl: string, studyDay: string): Promise<void>;
 }
@@ -642,7 +660,11 @@ export type DocumentContext = "pod" | "draft" | "library";
 export interface ShapeValidator {
   validateDocument(url: string, context?: DocumentContext): Promise<DocumentReport>;
   /** The document's report unless it is still at `version` (undefined: check it). */
-  validateDocumentSince(url: string, version: string | undefined, context?: DocumentContext): Promise<Since<DocumentReport>>;
+  validateDocumentSince(
+    url: string,
+    version: string | undefined,
+    context?: DocumentContext,
+  ): Promise<Since<DocumentReport>>;
   /**
    * What the shapes say of a draft as the release it will be, published
    * at `asUrl` (docs/studio.md, The release check): the release as it is

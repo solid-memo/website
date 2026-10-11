@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { AppError } from "./appError";
 import { TOPICS } from "@solid-memo/vocab/concepts.generated";
 import type { Deck } from "./deck";
@@ -35,7 +39,14 @@ export function topicsOfDeck(deck: Deck): string[] {
 
 /** Keywords as typed in one language: comma-separated, trimmed, each once. */
 export function parseKeywords(text: string): string[] {
-  return [...new Set(text.split(",").map((keyword) => keyword.trim()).filter((k) => k !== ""))];
+  return [
+    ...new Set(
+      text
+        .split(",")
+        .map((keyword) => keyword.trim())
+        .filter((k) => k !== ""),
+    ),
+  ];
 }
 
 /**

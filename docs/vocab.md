@@ -1,5 +1,12 @@
 # Vocabulary
 
+Solid Memo stores its data as linked data (RDF), where
+every kind of thing and every property is named by a web address.
+Where no existing standard has a term, as for a card's review
+schedule, Solid Memo defines its own. This page says where those terms
+are defined, how they are versioned, and how code is generated from
+them.
+
 Solid Memo's own RDF terms, where they are defined, how they are
 versioned and how the app's constants are produced from them. The
 namespace is `https://solid-memo.com/ns/vocab/v1.ttl#` — declared as
@@ -16,9 +23,11 @@ ontology), `topics.ttl` (the topics scheme) and `external.ttl`
 (reference data), each at an address that is also its IRI and its
 `@base`, so every term IRI is a fragment of the document that defines
 it. Changes to them go through git and CI like any other change
-([ns.yml](../.github/workflows/ns.yml)).
+([ci.yml](../.github/workflows/ci.yml)).
 
-[`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) is an RDFS/OWL ontology: the
+[`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) is an
+[RDFS](https://www.w3.org/TR/rdf11-schema/)/[OWL](https://www.w3.org/TR/owl2-overview/)
+ontology: the
 `owl:Ontology` subject carries `owl:versionInfo` and a `skos:changeNote`
 per release, and every term is an `owl:Class`, `owl:DatatypeProperty`
 (literal-valued, with an `xsd:` range) or `owl:ObjectProperty`
@@ -35,14 +44,21 @@ flowchart LR
 ```
 
 `SM` in [vocab.ts](../packages/solid/src/vocab.ts) is a re-export
-of the generated constants; the external vocabularies there (Solid, PIM,
-Dublin Core, RDF, RDFS, FOAF) are not ours to publish and stay
-hand-written. The generator copies each term's comment and history note
+of the generated constants; the external vocabularies there
+([Solid terms](https://www.w3.org/ns/solid/terms),
+[PIM space](https://www.w3.org/ns/pim/space),
+[Dublin Core terms](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/),
+[RDF](https://www.w3.org/TR/rdf11-concepts/),
+[RDFS](https://www.w3.org/TR/rdf11-schema/),
+[FOAF](http://xmlns.com/foaf/spec/)) are not ours to publish and stay
+hand-written. [standards.md](standards.md) lists every vocabulary and
+specification Solid Memo uses, with its version and status. The generator copies each term's comment and history note
 into the constant's JSDoc, so the meaning is one hover away.
 
 ## Concept schemes
 
-Where a value is one of a fixed set, it is a SKOS concept, not a
+Where a value is one of a fixed set, it is a
+[SKOS](https://www.w3.org/TR/skos-reference/) concept, not a
 string, so other applications can look up what it means:
 
 | Scheme | Where | Concepts | Used by |
@@ -110,10 +126,10 @@ string, so other applications can look up what it means:
   ([Text formats](#text-formats)), and 1.16's `sm:reviewOf`,
   `sm:reviewDirection` and `sm:scheduler` review-state format 2
   ([Review states](#review-states)). 1.17's `sm:newcomerCourse` is written
-  on the library index's catalogue outside `CatalogV1`, as `sm:position`
-  is on a deck, so the catalogue format did not move
+  on the library index's catalog outside `CatalogV1`, as `sm:position`
+  is on a deck, so the catalog format did not move
   ([The library index](#the-library-index)). 1.18's `sm:releaseDraft`
-  and `sm:publishedRelease` are written on a pod's catalogue the same
+  and `sm:publishedRelease` are written on a pod's catalog the same
   way, and its `sm:releasedAs` joined a new shape, draft deck format 1
   ([Drafts and releases](#drafts-and-releases)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
@@ -265,13 +281,13 @@ publish it there (the Studio, [studio.md](studio.md)):
 
 | Term | From → to | What |
 |---|---|---|
-| `sm:releaseDraft` | `dcat:Catalog` → `sm:Deck` | A draft of a release the catalogue's owner is writing in the instance: the draft's release document, whose subject is the draft deck itself, as a release is its document. |
-| `sm:publishedRelease` | `dcat:Catalog` → `dcat:Dataset` | A release the owner published from the instance, frozen once published. Where the catalogue is readable, a reader finds the author's releases there. |
+| `sm:releaseDraft` | `dcat:Catalog` → `sm:Deck` | A draft of a release the catalog's owner is writing in the instance: the draft's release document, whose subject is the draft deck itself, as a release is its document. |
+| `sm:publishedRelease` | `dcat:Catalog` → `dcat:Dataset` | A release the owner published from the instance, frozen once published. Where the catalog is readable, a reader finds the author's releases there. |
 | `sm:releasedAs` | `sm:Deck` → `dcat:Dataset` | On a draft: the release it was published as. A draft that states it is released, and no longer edited; absent, it is still being written. |
 
-The two catalogue links belong to no shape, as `sm:newcomerCourse`
-does: `CatalogV1` does not own them, so the catalogue format did not
-move, and every writer of the catalogue keeps them. `sm:releasedAs`
+The two catalog links belong to no shape, as `sm:newcomerCourse`
+does: `CatalogV1` does not own them, so the catalog format did not
+move, and every writer of the catalog keeps them. `sm:releasedAs`
 belongs to draft deck format 1 ([shapes.md](shapes.md#version-by-version)).
 A link to the release, rather than a flag, says where the draft went.
 
@@ -285,7 +301,7 @@ Solid Memo's text properties (`sm:front`, `sm:back`, `sm:frontNote`,
 own language tag (`"Huvudstäder"@sv`), one value per language, not
 with a term of ours. A deck's keywords (`dcat:keyword`) are tagged the
 same way, the one text with several values per language
-(`"capitals"@en, "countries"@en, "huvudstäder"@sv`). Tags are BCP 47, stored in lower case. Text in no
+(`"capitals"@en, "countries"@en, "huvudstäder"@sv`). Tags are [BCP 47](https://www.rfc-editor.org/info/bcp47), stored in lower case. Text in no
 language — codes, numbers, symbols ("404", "Fe") — is tagged `zxx`,
 BCP 47's "no linguistic content", rather than with a language it is
 not in; a page shows it with no `lang`. A card side saved untagged
@@ -300,6 +316,17 @@ languages to offer from the tags the deck's text already uses (see
 format bump, as above, should that prove too weak. `dcterms:language`
 is used only on library releases, for DCAT-AP: it names EU
 authority-table languages and cannot tell a card's front from its back.
+
+## License
+
+Everything in `ns/` is MIT-licensed, like the rest of the repository
+([README](../README.md#license)). The topics scheme says so in its own
+data, `dcterms:license <https://spdx.org/licenses/MIT>` on the scheme
+(since 1.11). The ontology's `v1.ttl`, the shapes' versions and
+`external.ttl` do not state it in their RDF; [REUSE.toml](../REUSE.toml) states it for every
+file in `ns/` instead, without editing them
+([style.md](style.md#licenses)). A future version of the ontology or
+of a shape may state it the way the topics scheme does.
 
 ## What dereferences
 

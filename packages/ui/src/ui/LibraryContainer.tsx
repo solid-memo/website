@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -45,15 +49,14 @@ export function LibraryContainer({
       }
     },
     onSuccess: async () => {
-      // The ticked decks are in now; the next visit starts with none.
+      // The checked decks are in now; the next visit starts with none.
       forgetLibrarySelection(memoryKey);
       await queryClient.invalidateQueries({
         queryKey: ["decks", instance.url],
       });
       onDone();
     },
-    onError: () =>
-      queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+    onError: () => queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
   });
 
   if (libraryQuery.error) {

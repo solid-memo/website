@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, test, type Locator } from "@playwright/test";
 import { escapeRegExp } from "../harness/strings.ts";
 import { chooseLanguageOf } from "./languages.ts";
@@ -14,7 +18,7 @@ import { cellOf } from "./tables.ts";
  * states, and its moves to another deck), the card inspector (a card's content, its wrong options,
  * its schedule and its history), a deck's schedule, a deck's and the
  * instance's health, its library copies, a deck's about screen (its
- * authors and licence), the instance's name and catalogue, a deck
+ * authors and license), the instance's name and catalog, a deck
  * exported to a file and imported from it, the instance's drafts of
  * releases (made, the next version of a release among them, listed in
  * the sidebar and deleted), the releases it published, and its way back
@@ -41,9 +45,13 @@ export class Studio extends Screen {
     await this.intent("Visit the Studio's old address", async () => {
       await this.page.goto("studio/#/");
       await expect(this.page).toHaveURL(/\/#\/studio\/$/);
-      await expect(this.page.getByRole("heading", { level: 1, name: this.t("studio.name") })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { level: 1, name: this.t("studio.name") }),
+      ).toBeVisible();
       await expect(this.page.getByText(this.t("studio.tagline"))).toBeVisible();
-      await expect(this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") })).toBeVisible();
+      await expect(
+        this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") }),
+      ).toBeVisible();
     });
   }
 
@@ -54,7 +62,11 @@ export class Studio extends Screen {
   async expectBackAfterLogin(): Promise<void> {
     await this.intent("Come back to the Studio after the login", async () => {
       await expect(this.page).toHaveURL(/\/#\/studio\/$/);
-      await expect(this.page.getByRole("banner").getByRole("link", { name: this.t("studio.name"), exact: true })).toBeVisible();
+      await expect(
+        this.page
+          .getByRole("banner")
+          .getByRole("link", { name: this.t("studio.name"), exact: true }),
+      ).toBeVisible();
     });
   }
 
@@ -65,8 +77,13 @@ export class Studio extends Screen {
    */
   async backToInstanceCreator(): Promise<void> {
     await this.intent("Go back to Solid Memo to create an instance", async () => {
-      await this.page.getByRole("banner").getByRole("link", { name: this.t("studio.backToApp") }).click();
-      await expect(this.page.getByRole("heading", { name: this.t("instanceCreator.heading") })).toBeVisible();
+      await this.page
+        .getByRole("banner")
+        .getByRole("link", { name: this.t("studio.backToApp") })
+        .click();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("instanceCreator.heading") }),
+      ).toBeVisible();
     });
   }
 
@@ -78,14 +95,22 @@ export class Studio extends Screen {
     await this.intent("Open Solid Memo Studio from Solid Memo", async () => {
       await this.app.chrome.instanceNav.getByRole("link", { name: this.t("studio.open") }).click();
       await expect(this.page).toHaveURL(/\/#\/studio\?instance=/);
-      await expect(this.page.getByRole("banner").getByRole("link", { name: this.t("studio.name"), exact: true })).toBeVisible();
-      await expect(this.page.getByRole("banner").getByRole("link", { name: this.t("studio.backToApp") })).toBeVisible();
+      await expect(
+        this.page
+          .getByRole("banner")
+          .getByRole("link", { name: this.t("studio.name"), exact: true }),
+      ).toBeVisible();
+      await expect(
+        this.page.getByRole("banner").getByRole("link", { name: this.t("studio.backToApp") }),
+      ).toBeVisible();
     });
   }
 
   /** The deck's row in the instance's table. */
   row(instance: string, deck: string): Locator {
-    return this.decks(instance).getByRole("row").filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
+    return this.decks(instance)
+      .getByRole("row")
+      .filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
   }
 
   /**
@@ -99,10 +124,16 @@ export class Studio extends Screen {
     figures: { cards: number; due: number; group?: string; newCardsPerDay?: string },
   ): Promise<void> {
     await this.intent(`See ${deck} in the Studio`, async () => {
-      await expect(this.page.getByRole("heading", { name: this.t("studio.decks.heading"), level: 2 })).toBeVisible();
-      const cell = (column: string) => cellOf(this.decks(instance), this.row(instance, deck), this.t(`studio.decks.${column}`));
-      await expect(await cell("group")).toHaveText(figures.group ?? this.t("studio.decks.topLevel"));
-      if (figures.newCardsPerDay !== undefined) await expect(await cell("newCardsPerDay")).toHaveText(figures.newCardsPerDay);
+      await expect(
+        this.page.getByRole("heading", { name: this.t("studio.decks.heading"), level: 2 }),
+      ).toBeVisible();
+      const cell = (column: string) =>
+        cellOf(this.decks(instance), this.row(instance, deck), this.t(`studio.decks.${column}`));
+      await expect(await cell("group")).toHaveText(
+        figures.group ?? this.t("studio.decks.topLevel"),
+      );
+      if (figures.newCardsPerDay !== undefined)
+        await expect(await cell("newCardsPerDay")).toHaveText(figures.newCardsPerDay);
       await expect(await cell("due")).toHaveText(String(figures.due));
       await expect(await cell("cards")).toContainText(String(figures.cards));
     });
@@ -111,7 +142,9 @@ export class Studio extends Screen {
   /** Home does not list the deck: the instance has none by that name. */
   async expectNoDeck(instance: string, deck: string): Promise<void> {
     await this.intent(`See no ${deck} in the Studio`, async () => {
-      await expect(this.page.getByRole("heading", { name: this.t("studio.decks.heading"), level: 2 })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("studio.decks.heading"), level: 2 }),
+      ).toBeVisible();
       await expect(this.decks(instance).getByRole("rowheader").first()).toBeVisible();
       await expect(this.row(instance, deck)).toHaveCount(0);
     });
@@ -121,7 +154,9 @@ export class Studio extends Screen {
   async openGroups(): Promise<void> {
     await this.intent("Open the Groups screen", async () => {
       await this.app.chrome.studioSection("groups");
-      await expect(this.page.getByRole("heading", { name: this.t("studio.groups.heading"), level: 2 })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("studio.groups.heading"), level: 2 }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("breadcrumbs.groups");
     });
   }
@@ -148,13 +183,17 @@ export class Studio extends Screen {
     });
   }
 
-  /** Ticks the decks' checkboxes in Home's table. */
+  /** Checks the decks' checkboxes in Home's table. */
   async select(decks: string[]): Promise<void> {
     await this.intent(`Select ${decks.join(", ")}`, async () => {
       for (const deck of decks) {
-        await this.page.getByRole("checkbox", { name: this.t("studio.decks.selectDeck", { deck }), exact: true }).check();
+        await this.page
+          .getByRole("checkbox", { name: this.t("studio.decks.selectDeck", { deck }), exact: true })
+          .check();
       }
-      await expect(this.bulk.getByText(this.t("studio.bulk.selected", { count: decks.length }))).toBeVisible();
+      await expect(
+        this.bulk.getByText(this.t("studio.bulk.selected", { count: decks.length })),
+      ).toBeVisible();
     });
   }
 
@@ -170,7 +209,9 @@ export class Studio extends Screen {
   async setNewCardsPerDay(count: number, decks: number): Promise<void> {
     await this.intent(`Set the selected decks' new cards per day to ${count}`, async () => {
       await this.pickBulk(this.bulk, "studio.bulk.groups.editDecks", "studio.bulk.pace");
-      await this.bulk.getByRole("spinbutton", { name: this.t("studio.bulk.newCardsPerDay") }).fill(String(count));
+      await this.bulk
+        .getByRole("spinbutton", { name: this.t("studio.bulk.newCardsPerDay") })
+        .fill(String(count));
       await this.bulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
       await this.expectStatus(this.t("studio.bulk.paced", { count: decks }));
     });
@@ -182,7 +223,9 @@ export class Studio extends Screen {
       await this.pickBulk(this.bulk, "studio.bulk.groups.editDecks", "studio.bulk.move");
       await this.bulk.getByRole("combobox", { name: this.t("studio.bulk.group") }).selectOption("");
       await this.bulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
-      await this.expectStatus(this.t("studio.bulk.moved", { count: decks, group: this.t("studio.bulk.topLevel") }));
+      await this.expectStatus(
+        this.t("studio.bulk.moved", { count: decks, group: this.t("studio.bulk.topLevel") }),
+      );
     });
   }
 
@@ -190,8 +233,14 @@ export class Studio extends Screen {
   async deleteSelected(instance: string, decks: string[]): Promise<void> {
     await this.intent(`Delete ${decks.join(", ")}`, async () => {
       const names = decks.map((deck) => `“${deck}”`).join(", ");
-      await this.bulk.getByRole("button", { name: this.t("studio.bulk.remove"), exact: true }).click();
-      await this.confirm("studio.confirm.deleteDecks", this.tp("studio.bulk.removeConfirm", { count: decks.length, names }), "studio.bulk.remove");
+      await this.bulk
+        .getByRole("button", { name: this.t("studio.bulk.remove"), exact: true })
+        .click();
+      await this.confirm(
+        "studio.confirm.deleteDecks",
+        this.tp("studio.bulk.removeConfirm", { count: decks.length, names }),
+        "studio.bulk.remove",
+      );
       await this.expectStatus(this.t("studio.bulk.removed", { count: decks.length }));
       for (const deck of decks) await expect(this.row(instance, deck)).toHaveCount(0);
     });
@@ -199,24 +248,43 @@ export class Studio extends Screen {
 
   /**
    * Follows the selection's Export to import and export, the selected
-   * deck ticked there (the URL holds it), and saves it as a Turtle file
+   * deck checked there (the URL holds it), and saves it as a Turtle file
    * with the user's progress: the browser downloads it, named after the
    * deck. Where the file is kept.
    */
   async exportSelected(instance: string, deck: string): Promise<string> {
     return this.intent(`Export ${deck} with its progress`, async () => {
-      await this.bulk.getByRole("link", { name: this.t("studio.bulk.export"), exact: true }).click();
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.transfer.heading", { instance }) })).toBeVisible();
+      await this.bulk
+        .getByRole("link", { name: this.t("studio.bulk.export"), exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.transfer.heading", { instance }),
+        }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.transfer.crumb");
       await expect(this.page).toHaveURL(/[?&]deck=/);
       await expect(this.page.getByRole("checkbox", { name: deck, exact: true })).toBeChecked();
-      await this.page.getByRole("radio", { name: this.t("studio.transfer.formats.turtle") }).check();
-      await this.page.getByRole("checkbox", { name: this.t("studio.transfer.withProgress") }).check();
+      await this.page
+        .getByRole("radio", { name: this.t("studio.transfer.formats.turtle") })
+        .check();
+      await this.page
+        .getByRole("checkbox", { name: this.t("studio.transfer.withProgress") })
+        .check();
       const downloaded = this.page.waitForEvent("download");
-      await this.page.getByRole("button", { name: this.t("studio.transfer.exportButton", { count: 1 }) }).click();
+      await this.page
+        .getByRole("button", { name: this.t("studio.transfer.exportButton", { count: 1 }) })
+        .click();
       const download = await downloaded;
-      expect(download.suggestedFilename()).toBe(`${deck.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.ttl`);
-      await expect(this.page.getByRole("status").filter({ hasText: this.t("studio.transfer.exported", { count: 1 }) })).toHaveCount(1);
+      expect(download.suggestedFilename()).toBe(
+        `${deck.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.ttl`,
+      );
+      await expect(
+        this.page
+          .getByRole("status")
+          .filter({ hasText: this.t("studio.transfer.exported", { count: 1 }) }),
+      ).toHaveCount(1);
       // Kept under the name the browser was given, as a user's downloads folder would keep it.
       const path = test.info().outputPath(download.suggestedFilename());
       await download.saveAs(path);
@@ -229,20 +297,43 @@ export class Studio extends Screen {
    * it holds (its deck, its cards and its progress), and imports it with
    * its progress: the deck it made is linked.
    */
-  async importFile(instance: string, path: string, deck: string, cards: number, states: number): Promise<void> {
+  async importFile(
+    instance: string,
+    path: string,
+    deck: string,
+    cards: number,
+    states: number,
+  ): Promise<void> {
     await this.intent(`Import ${deck} from its file`, async () => {
       await this.app.chrome.studioSection("transfer");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.transfer.heading", { instance }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.transfer.heading", { instance }),
+        }),
+      ).toBeVisible();
       const chooser = this.page.waitForEvent("filechooser");
       await this.page.getByRole("button", { name: this.t("studio.transfer.choose") }).click();
       await (await chooser).setFiles(path);
       const name = path.split(/[\\/]/).at(-1)!;
-      await expect(this.page.getByRole("heading", { name: this.t("studio.transfer.file", { name, deck }) })).toBeVisible();
-      await expect(this.page.getByText(this.t("studio.transfer.cards", { count: cards }), { exact: true })).toBeVisible();
-      await expect(this.page.getByText(this.t("studio.transfer.states", { count: states }), { exact: true })).toBeVisible();
-      await expect(this.page.getByRole("checkbox", { name: this.t("studio.transfer.importProgress") })).toBeChecked();
-      await this.page.getByRole("button", { name: this.t("studio.transfer.importButton", { instance }) }).click();
-      await expect(this.page.getByRole("status").getByRole("link", { name: deck, exact: true })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("studio.transfer.file", { name, deck }) }),
+      ).toBeVisible();
+      await expect(
+        this.page.getByText(this.t("studio.transfer.cards", { count: cards }), { exact: true }),
+      ).toBeVisible();
+      await expect(
+        this.page.getByText(this.t("studio.transfer.states", { count: states }), { exact: true }),
+      ).toBeVisible();
+      await expect(
+        this.page.getByRole("checkbox", { name: this.t("studio.transfer.importProgress") }),
+      ).toBeChecked();
+      await this.page
+        .getByRole("button", { name: this.t("studio.transfer.importButton", { instance }) })
+        .click();
+      await expect(
+        this.page.getByRole("status").getByRole("link", { name: deck, exact: true }),
+      ).toBeVisible();
     });
   }
 
@@ -255,7 +346,12 @@ export class Studio extends Screen {
   async openDrafts(instance: string): Promise<void> {
     await this.intent("Open the instance's drafts", async () => {
       await this.app.chrome.studioSection("drafts");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.drafts.heading", { instance }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.drafts.heading", { instance }),
+        }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.drafts.crumb");
     });
   }
@@ -264,7 +360,12 @@ export class Studio extends Screen {
   async openReleases(instance: string): Promise<void> {
     await this.intent("Open the instance's releases", async () => {
       await this.app.chrome.studioSection("releases");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.releases.heading", { instance }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.releases.heading", { instance }),
+        }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.releases.crumb");
     });
   }
@@ -272,10 +373,24 @@ export class Studio extends Screen {
   /** The releases list one, by its address and its name and version, readable by everyone. */
   async expectRelease(instance: string, url: string, name: string, version: number): Promise<void> {
     await this.intent(`See ${name}, version ${version}, among the releases`, async () => {
-      const table = this.page.getByRole("table", { name: this.t("studio.releases.caption", { instance }) });
-      const row = table.getByRole("row").filter({ has: this.page.getByRole("link", { name: this.t("studio.releases.name", { name, version }), exact: true }) });
-      await expect(row.getByRole("link", { name: this.t("studio.releases.name", { name, version }), exact: true })).toHaveAttribute("href", url);
-      await expect(row.getByRole("cell", { name: this.t("studio.releases.public"), exact: true })).toBeVisible();
+      const table = this.page.getByRole("table", {
+        name: this.t("studio.releases.caption", { instance }),
+      });
+      const row = table.getByRole("row").filter({
+        has: this.page.getByRole("link", {
+          name: this.t("studio.releases.name", { name, version }),
+          exact: true,
+        }),
+      });
+      await expect(
+        row.getByRole("link", {
+          name: this.t("studio.releases.name", { name, version }),
+          exact: true,
+        }),
+      ).toHaveAttribute("href", url);
+      await expect(
+        row.getByRole("cell", { name: this.t("studio.releases.public"), exact: true }),
+      ).toBeVisible();
     });
   }
 
@@ -283,8 +398,12 @@ export class Studio extends Screen {
   async draftDeck(instance: string, deck: string): Promise<void> {
     await this.intent(`Draft a release of ${deck}`, async () => {
       await this.page.getByRole("radio", { name: this.t("studio.drafts.start.fromDeck") }).check();
-      await this.page.getByRole("combobox", { name: this.t("studio.drafts.deck") }).selectOption({ label: deck });
-      await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
+      await this.page
+        .getByRole("combobox", { name: this.t("studio.drafts.deck") })
+        .selectOption({ label: deck });
+      await this.page
+        .getByRole("button", { name: this.t("studio.drafts.create"), exact: true })
+        .click();
       await this.expectOpened(deck);
       await this.expectDraft(instance, deck, "deck");
     });
@@ -293,11 +412,18 @@ export class Studio extends Screen {
   /** Starts a blank course, named in English: it opens, and back at the drafts it is listed, being written. */
   async draftCourse(instance: string, name: string): Promise<void> {
     await this.intent(`Draft a course, ${name}`, async () => {
-      await this.page.getByRole("radio", { name: this.t("studio.drafts.start.blankCourse") }).check();
-      const field = this.page.getByRole("textbox", { name: this.t("studio.drafts.name"), exact: true });
+      await this.page
+        .getByRole("radio", { name: this.t("studio.drafts.start.blankCourse") })
+        .check();
+      const field = this.page.getByRole("textbox", {
+        name: this.t("studio.drafts.name"),
+        exact: true,
+      });
       await field.fill(name);
       await chooseLanguageOf(this.app, field, "en");
-      await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
+      await this.page
+        .getByRole("button", { name: this.t("studio.drafts.create"), exact: true })
+        .click();
       await this.expectOpened(name);
       await this.expectDraft(instance, name, "course");
     });
@@ -310,44 +436,76 @@ export class Studio extends Screen {
    */
   async draftNextVersion(url: string, title: string, version: number): Promise<void> {
     await this.intent(`Draft version ${version} of ${title}`, async () => {
-      await this.page.getByRole("radio", { name: this.t("studio.drafts.start.nextVersionOf") }).check();
+      await this.page
+        .getByRole("radio", { name: this.t("studio.drafts.start.nextVersionOf") })
+        .check();
       await this.page.getByRole("textbox", { name: this.t("studio.drafts.release") }).fill(url);
-      await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
+      await this.page
+        .getByRole("button", { name: this.t("studio.drafts.create"), exact: true })
+        .click();
       await this.expectOpened(title);
     });
   }
 
   /** The draft just made is open, at its overview; then back at the drafts, from the sidebar. */
   private async expectOpened(title: string): Promise<void> {
-    await expect(this.page.getByRole("heading", { level: 2, name: title, exact: true })).toBeVisible();
+    await expect(
+      this.page.getByRole("heading", { level: 2, name: title, exact: true }),
+    ).toBeVisible();
     await this.app.chrome.studioSection("drafts");
     await this.app.chrome.expectBreadcrumbHere("studio.drafts.crumb");
   }
 
   /** A draft's row, by its name: its kind, version 1, and being written. */
-  private async expectDraft(instance: string, name: string, kind: "deck" | "course"): Promise<void> {
-    const row = this.drafts(instance).getByRole("row").filter({ has: this.page.getByRole("rowheader", { name, exact: true }) });
-    await expect(row.getByRole("cell")).toHaveText([this.t(`studio.drafts.kind.${kind}`), "1", this.t("studio.drafts.state.writing"), this.t("studio.drafts.delete")]);
+  private async expectDraft(
+    instance: string,
+    name: string,
+    kind: "deck" | "course",
+  ): Promise<void> {
+    const row = this.drafts(instance)
+      .getByRole("row")
+      .filter({ has: this.page.getByRole("rowheader", { name, exact: true }) });
+    await expect(row.getByRole("cell")).toHaveText([
+      this.t(`studio.drafts.kind.${kind}`),
+      "1",
+      this.t("studio.drafts.state.writing"),
+      this.t("studio.drafts.delete"),
+    ]);
   }
 
   /** Deletes a draft, confirming the question that names it; its row goes. */
   async deleteDraft(instance: string, name: string): Promise<void> {
     await this.intent(`Delete the draft ${name}`, async () => {
-      await this.page.getByRole("button", { name: this.t("studio.drafts.deleteDraft", { draft: name, version: 1 }) }).click();
-      await this.confirm("studio.confirm.deleteDraft", this.tp("studio.drafts.deleteConfirm", { draft: name, version: 1 }), "studio.drafts.delete");
+      await this.page
+        .getByRole("button", {
+          name: this.t("studio.drafts.deleteDraft", { draft: name, version: 1 }),
+        })
+        .click();
+      await this.confirm(
+        "studio.confirm.deleteDraft",
+        this.tp("studio.drafts.deleteConfirm", { draft: name, version: 1 }),
+        "studio.drafts.delete",
+      );
       await this.expectStatus(this.t("studio.drafts.deleted", { draft: name, version: 1 }));
-      await expect(this.drafts(instance).getByRole("rowheader", { name, exact: true })).toHaveCount(0);
+      await expect(this.drafts(instance).getByRole("rowheader", { name, exact: true })).toHaveCount(
+        0,
+      );
     });
   }
 
   /** The sidebar lists the drafts, these alone, each at version 1. */
   async expectSidebarDrafts(drafts: string[]): Promise<void> {
     await this.intent("See the drafts in the sidebar", async () => {
-      const list = this.app.chrome.studioSidebar.getByRole("list", { name: this.t("studio.shell.draftList"), exact: true });
+      const list = this.app.chrome.studioSidebar.getByRole("list", {
+        name: this.t("studio.shell.draftList"),
+        exact: true,
+      });
       for (const name of drafts) {
-        await expect(list.getByRole("listitem").filter({ has: this.page.getByRole("link", { name, exact: true }) })).toContainText(
-          this.t("studio.shell.version", { version: 1 }),
-        );
+        await expect(
+          list
+            .getByRole("listitem")
+            .filter({ has: this.page.getByRole("link", { name, exact: true }) }),
+        ).toContainText(this.t("studio.shell.version", { version: 1 }));
       }
       await expect(list.getByRole("listitem")).toHaveCount(drafts.length);
     });
@@ -363,7 +521,12 @@ export class Studio extends Screen {
     await this.intent(`Open the cards of ${deck}`, async () => {
       const name = new RegExp(escapeRegExp(this.t("studio.decks.cardsOf", { deck })));
       await this.row(instance, deck).getByRole("link", { name }).click();
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.cards.heading", { deck }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.cards.heading", { deck }),
+        }),
+      ).toBeVisible();
       await expect(this.page).toHaveURL(/#\/studio\/cards\?deck=/);
       await expect(this.cards(deck).getByRole("rowheader")).toHaveText(fronts);
     });
@@ -407,7 +570,21 @@ export class Studio extends Screen {
    */
   async selectCardsWithKeys(deck: string, count: number): Promise<void> {
     await this.intent(`Select ${count} cards with the keyboard`, async () => {
-      await expect(this.page.getByText(this.t("studio.cards.keys", { j: "j", k: "k", x: "x", enter: "Enter", shiftJ: "Shift+J", shiftK: "Shift+K", escape: "Escape", f2: "F2", dot: "." }))).toBeVisible();
+      await expect(
+        this.page.getByText(
+          this.t("studio.cards.keys", {
+            j: "j",
+            k: "k",
+            x: "x",
+            enter: "Enter",
+            shiftJ: "Shift+J",
+            shiftK: "Shift+K",
+            escape: "Escape",
+            f2: "F2",
+            dot: ".",
+          }),
+        ),
+      ).toBeVisible();
       await this.page.keyboard.press("j");
       await expect(this.cards(deck).getByRole("rowheader").first().getByRole("link")).toBeFocused();
       for (let index = 0; index < count; index++) {
@@ -425,15 +602,25 @@ export class Studio extends Screen {
    */
   async findAndReplace(find: string, replace: string, changes: number): Promise<void> {
     await this.intent(`Replace ${find} with ${replace} in the selected cards`, async () => {
-      await this.pickBulk(this.cardBulk, "studio.bulk.groups.editCards", "studio.cardBulk.findReplace");
+      await this.pickBulk(
+        this.cardBulk,
+        "studio.bulk.groups.editCards",
+        "studio.cardBulk.findReplace",
+      );
       const form = this.page.getByRole("form", { name: this.t("studio.cardBulk.findReplace") });
       await form.getByRole("textbox", { name: this.t("studio.cardBulk.find") }).fill(find);
-      await form.getByRole("textbox", { name: this.t("studio.cardBulk.replaceWith") }).fill(replace);
+      await form
+        .getByRole("textbox", { name: this.t("studio.cardBulk.replaceWith") })
+        .fill(replace);
       const preview = form.getByRole("region", { name: this.t("studio.cardBulk.preview") });
-      await expect(preview.getByText(this.t("studio.cardBulk.changes", { count: changes }))).toBeVisible();
+      await expect(
+        preview.getByText(this.t("studio.cardBulk.changes", { count: changes })),
+      ).toBeVisible();
       await expect(preview.getByRole("deletion").first()).toHaveText(find);
       await expect(preview.getByRole("insertion").first()).toHaveText(replace);
-      await form.getByRole("button", { name: this.t("studio.cardBulk.confirmReplace", { count: changes }) }).click();
+      await form
+        .getByRole("button", { name: this.t("studio.cardBulk.confirmReplace", { count: changes }) })
+        .click();
       await this.expectStatus(this.t("studio.cardBulk.done.replaceText", { count: changes }));
     });
   }
@@ -441,8 +628,12 @@ export class Studio extends Screen {
   /** The workbench shows the card of this front with this back. */
   async expectBack(deck: string, front: string, back: string): Promise<void> {
     await this.intent(`See ${front}'s back as ${back}`, async () => {
-      const row = this.cards(deck).getByRole("row").filter({ has: this.page.getByRole("rowheader", { name: front, exact: true }) });
-      await expect(await cellOf(this.cards(deck), row, this.t("studio.cards.column.back"))).toHaveText(back);
+      const row = this.cards(deck)
+        .getByRole("row")
+        .filter({ has: this.page.getByRole("rowheader", { name: front, exact: true }) });
+      await expect(
+        await cellOf(this.cards(deck), row, this.t("studio.cards.column.back")),
+      ).toHaveText(back);
     });
   }
 
@@ -453,7 +644,12 @@ export class Studio extends Screen {
       await this.expectStatus(this.t("studio.cardBulk.done.retire", { count: fronts.length }));
       const tag = this.t("retiredCards.tag");
       for (const front of fronts) {
-        await expect(this.cards(deck).getByRole("rowheader").filter({ hasText: front }).filter({ hasText: tag })).toHaveCount(1);
+        await expect(
+          this.cards(deck)
+            .getByRole("rowheader")
+            .filter({ hasText: front })
+            .filter({ hasText: tag }),
+        ).toHaveCount(1);
       }
     });
   }
@@ -464,7 +660,9 @@ export class Studio extends Screen {
       await this.page.getByRole("button", { name: this.t("studio.cardBulk.undo") }).click();
       await this.expectStatus(this.t("studio.cardBulk.undone"));
       for (const front of fronts) {
-        await expect(this.cards(deck).getByRole("rowheader", { name: front, exact: true })).toBeVisible();
+        await expect(
+          this.cards(deck).getByRole("rowheader", { name: front, exact: true }),
+        ).toBeVisible();
       }
     });
   }
@@ -472,17 +670,29 @@ export class Studio extends Screen {
   /** Opens a card from the workbench in the card inspector, on its content. */
   async openCard(deck: string, front: string): Promise<void> {
     await this.intent(`Inspect the card ${front}`, async () => {
-      await this.cards(deck).getByRole("rowheader", { name: front, exact: true }).getByRole("link").click();
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.card.heading", { card: front }) })).toBeVisible();
+      await this.cards(deck)
+        .getByRole("rowheader", { name: front, exact: true })
+        .getByRole("link")
+        .click();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.card.heading", { card: front }),
+        }),
+      ).toBeVisible();
       await expect(this.page).toHaveURL(/#\/studio\/card\?deck=/);
-      await expect(this.page.getByLabel(this.t("cardContentFields.front"), { exact: true })).toHaveValue(front);
+      await expect(
+        this.page.getByLabel(this.t("cardContentFields.front"), { exact: true }),
+      ).toHaveValue(front);
     });
   }
 
   /** Writes the inspected card in Markdown, its back as typed, and saves it. */
   async writeBackInMarkdown(back: string): Promise<void> {
     await this.intent(`Write the card in Markdown, its back ${back}`, async () => {
-      await this.page.getByRole("checkbox", { name: this.t("cardContentFields.markdown"), exact: true }).check();
+      await this.page
+        .getByRole("checkbox", { name: this.t("cardContentFields.markdown"), exact: true })
+        .check();
       await this.page.getByLabel(this.t("cardContentFields.back"), { exact: true }).fill(back);
       await this.page.getByRole("button", { name: this.t("card.saveButton"), exact: true }).click();
       await this.expectStatus(this.t("card.saved"));
@@ -493,10 +703,17 @@ export class Studio extends Screen {
   async openDeckHealth(deck: string, problems: number): Promise<void> {
     await this.intent(`Open the health of ${deck}`, async () => {
       await this.app.chrome.studioTab("deck", "health");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.health.deckHeading", { deck }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.health.deckHeading", { deck }),
+        }),
+      ).toBeVisible();
       await expect(this.page).toHaveURL(/#\/studio\/health\?instance=.*&deck=/);
       await expect(this.page.getByRole("status").filter({ hasText: /\S/ })).toHaveText(
-        problems === 0 ? this.t("studio.health.allWell") : this.t("studio.health.summary", { count: problems }),
+        problems === 0
+          ? this.t("studio.health.allWell")
+          : this.t("studio.health.summary", { count: problems }),
       );
     });
   }
@@ -508,9 +725,15 @@ export class Studio extends Screen {
    */
   async followMarkdownProblem(place: string, field: string): Promise<void> {
     await this.intent(`Follow the Markdown problem of ${place}`, async () => {
-      await this.page.getByRole("region", { name: this.t("studio.health.markdownHeading") }).getByRole("link", { name: place }).first().click();
+      await this.page
+        .getByRole("region", { name: this.t("studio.health.markdownHeading") })
+        .getByRole("link", { name: place })
+        .first()
+        .click();
       await expect(this.page).toHaveURL(/#\/studio\/card\?.*field=/);
-      await expect(this.page.getByLabel(this.t(`cardContentFields.${field}`), { exact: true })).toBeFocused();
+      await expect(
+        this.page.getByLabel(this.t(`cardContentFields.${field}`), { exact: true }),
+      ).toBeFocused();
     });
   }
 
@@ -528,12 +751,19 @@ export class Studio extends Screen {
   async openInstanceHealth(instance: string, healthy: string[]): Promise<void> {
     await this.intent("Open the instance's health", async () => {
       await this.app.chrome.studioSection("health");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.health.heading", { instance }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.health.heading", { instance }),
+        }),
+      ).toBeVisible();
       const decks = this.page.getByRole("region", { name: this.t("studio.health.decksHeading") });
       for (const deck of healthy) {
-        await expect(decks.getByRole("listitem").filter({ has: this.page.getByRole("link", { name: deck, exact: true }) })).toContainText(
-          this.t("studio.health.badge.healthy"),
-        );
+        await expect(
+          decks
+            .getByRole("listitem")
+            .filter({ has: this.page.getByRole("link", { name: deck, exact: true }) }),
+        ).toContainText(this.t("studio.health.badge.healthy"));
       }
     });
   }
@@ -546,11 +776,22 @@ export class Studio extends Screen {
   async openLibraryCopies(instance: string, deck: string): Promise<void> {
     await this.intent("Open the instance's library copies", async () => {
       await this.app.chrome.studioSection("library");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.library.heading", { instance }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.library.heading", { instance }),
+        }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.library.crumb");
-      const table = this.page.getByRole("table", { name: this.t("studio.library.caption", { instance }) });
-      const row = table.getByRole("row").filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
-      await expect(await cellOf(table, row, this.t("studio.library.update"))).toHaveText(this.t("studio.library.upToDate"));
+      const table = this.page.getByRole("table", {
+        name: this.t("studio.library.caption", { instance }),
+      });
+      const row = table
+        .getByRole("row")
+        .filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
+      await expect(await cellOf(table, row, this.t("studio.library.update"))).toHaveText(
+        this.t("studio.library.upToDate"),
+      );
       await expect(row.getByRole("checkbox")).toHaveCount(0);
     });
   }
@@ -558,7 +799,9 @@ export class Studio extends Screen {
   /** Follows the inspector's tab of the card's wrong options, which the URL holds. */
   async openWrongOptions(count: number): Promise<void> {
     await this.intent("Open the card's wrong options", async () => {
-      await this.cardTabs.getByRole("link", { name: this.t("studio.card.tab.distractors", { count }) }).click();
+      await this.cardTabs
+        .getByRole("link", { name: this.t("studio.card.tab.distractors", { count }) })
+        .click();
       await expect(this.page).toHaveURL(/[?&]tab=distractors/);
       await expect(this.wrongOptions).toBeVisible();
     });
@@ -568,9 +811,15 @@ export class Studio extends Screen {
   async addWrongOption(text: string, note: string): Promise<void> {
     await this.intent(`Add the wrong option ${text}`, async () => {
       await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.add") }).click();
-      await this.wrongOptions.getByLabel(this.t("distractorFields.text"), { exact: true }).fill(text);
-      await this.wrongOptions.getByLabel(this.t("distractorFields.note"), { exact: true }).fill(note);
-      await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.addDone"), exact: true }).click();
+      await this.wrongOptions
+        .getByLabel(this.t("distractorFields.text"), { exact: true })
+        .fill(text);
+      await this.wrongOptions
+        .getByLabel(this.t("distractorFields.note"), { exact: true })
+        .fill(note);
+      await this.wrongOptions
+        .getByRole("button", { name: this.t("distractorFields.addDone"), exact: true })
+        .click();
       await this.expectStatus(this.t("card.saved"));
       await expect(this.wrongOption(text)).toContainText(note);
     });
@@ -579,17 +828,29 @@ export class Studio extends Screen {
   /** Retires a wrong option: it is kept, marked retired. */
   async retireWrongOption(text: string): Promise<void> {
     await this.intent(`Retire the wrong option ${text}`, async () => {
-      await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.retireLabel", { option: text }) }).click();
+      await this.wrongOptions
+        .getByRole("button", { name: this.t("distractorFields.retireLabel", { option: text }) })
+        .click();
       await expect(this.wrongOption(text)).toContainText(this.t("distractorFields.retiredTag"));
-      await expect(this.wrongOptions.getByRole("button", { name: this.t("distractorFields.restoreLabel", { option: text }) })).toBeVisible();
+      await expect(
+        this.wrongOptions.getByRole("button", {
+          name: this.t("distractorFields.restoreLabel", { option: text }),
+        }),
+      ).toBeVisible();
     });
   }
 
   /** Deletes a wrong option never published, confirming in the Studio's own dialog: it goes. */
   async deleteWrongOption(text: string): Promise<void> {
     await this.intent(`Delete the wrong option ${text}`, async () => {
-      await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.deleteLabel", { option: text }) }).click();
-      await this.confirm("distractorFields.deleteHeading", this.tp("distractorFields.deleteConfirm", { option: text }), "distractorFields.delete");
+      await this.wrongOptions
+        .getByRole("button", { name: this.t("distractorFields.deleteLabel", { option: text }) })
+        .click();
+      await this.confirm(
+        "distractorFields.deleteHeading",
+        this.tp("distractorFields.deleteConfirm", { option: text }),
+        "distractorFields.delete",
+      );
       await expect(this.wrongOption(text)).toHaveCount(0);
     });
   }
@@ -597,7 +858,9 @@ export class Studio extends Screen {
   /** Follows the inspector's tab of the card's schedule, which the URL holds: the card was studied front to back. */
   async openSchedule(): Promise<void> {
     await this.intent("Open the card's schedule", async () => {
-      await this.cardTabs.getByRole("link", { name: this.t("studio.card.tab.schedule"), exact: true }).click();
+      await this.cardTabs
+        .getByRole("link", { name: this.t("studio.card.tab.schedule"), exact: true })
+        .click();
       await expect(this.page).toHaveURL(/[?&]tab=schedule/);
       await expect(this.scheduleOf("frontToBack").getByRole("term")).toHaveText([
         this.t("studio.schedule.due"),
@@ -611,9 +874,13 @@ export class Studio extends Screen {
   }
 
   /** Follows the inspector's tab of the card's history: its answers, newest first, each with its grade and how it was given. */
-  async openHistory(answers: { grade: string; mode: "recall" | "multiple-choice" }[]): Promise<void> {
+  async openHistory(
+    answers: { grade: string; mode: "recall" | "multiple-choice" }[],
+  ): Promise<void> {
     await this.intent("Open the card's history", async () => {
-      await this.cardTabs.getByRole("link", { name: this.t("studio.card.tab.history"), exact: true }).click();
+      await this.cardTabs
+        .getByRole("link", { name: this.t("studio.card.tab.history"), exact: true })
+        .click();
       await expect(this.page).toHaveURL(/[?&]tab=history/);
       const table = this.page.getByRole("table", { name: this.t("studio.history.caption") });
       const rows = table.getByRole("row").filter({ has: this.page.getByRole("cell") });
@@ -630,51 +897,96 @@ export class Studio extends Screen {
    * the reviews today and in the week to come, and the cards studied; it
    * names no leech.
    */
-  async openDeckSchedule(deck: string, expected: { today: number; week: number; studied: number }): Promise<void> {
+  async openDeckSchedule(
+    deck: string,
+    expected: { today: number; week: number; studied: number },
+  ): Promise<void> {
     await this.intent(`Open the schedule of ${deck}`, async () => {
       await this.app.chrome.studioTab("deck", "schedule");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.insight.heading", { deck }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.insight.heading", { deck }),
+        }),
+      ).toBeVisible();
       await expect(this.page).toHaveURL(/#\/studio\/schedule\?deck=/);
-      const tile = (label: string) => this.page.getByRole("group", { name: label, exact: true }).getByRole("strong");
+      const tile = (label: string) =>
+        this.page.getByRole("group", { name: label, exact: true }).getByRole("strong");
       await expect(tile(this.t("studio.insight.today"))).toHaveText(String(expected.today));
-      await expect(tile(this.t("studio.insight.week", { count: 7 }))).toHaveText(String(expected.week));
+      await expect(tile(this.t("studio.insight.week", { count: 7 }))).toHaveText(
+        String(expected.week),
+      );
       await expect(tile(this.t("studio.insight.scheduled"))).toHaveText(String(expected.studied));
       await expect(tile(this.t("studio.insight.leeches"))).toHaveText("0");
-      await expect(this.page.getByText(this.t("studio.insight.noLeeches"), { exact: true })).toBeVisible();
+      await expect(
+        this.page.getByText(this.t("studio.insight.noLeeches"), { exact: true }),
+      ).toBeVisible();
     });
   }
 
   /** Forgets the card's progress front to back, confirming: it is new that way. */
   async forgetProgress(): Promise<void> {
     await this.intent("Forget the card's progress front to back", async () => {
-      await this.scheduleOf("frontToBack").getByRole("button", { name: this.t("studio.schedule.reset") }).click();
-      await this.confirm("studio.confirm.forgetDirection", this.tp("studio.schedule.resetConfirm"), "studio.schedule.reset");
-      await this.expectStatus(this.t("studio.schedule.done.reset", { direction: this.t("common.direction.frontToBack") }));
-      await expect(this.scheduleOf("frontToBack").getByText(this.t("studio.schedule.new"))).toBeVisible();
+      await this.scheduleOf("frontToBack")
+        .getByRole("button", { name: this.t("studio.schedule.reset") })
+        .click();
+      await this.confirm(
+        "studio.confirm.forgetDirection",
+        this.tp("studio.schedule.resetConfirm"),
+        "studio.schedule.reset",
+      );
+      await this.expectStatus(
+        this.t("studio.schedule.done.reset", { direction: this.t("common.direction.frontToBack") }),
+      );
+      await expect(
+        this.scheduleOf("frontToBack").getByText(this.t("studio.schedule.new")),
+      ).toBeVisible();
     });
   }
 
   /** Sets the selected cards due today, the day the form offers; the status line counts those studied. */
   async rescheduleSelectedToday(count: number): Promise<void> {
     await this.intent("Set the selected cards due today", async () => {
-      await this.pickBulk(this.cardBulk, "studio.bulk.groups.scheduleCards", "studio.cardBulk.reschedule");
-      await expect(this.cardBulk.getByLabel(this.t("studio.cardBulk.dueLabel"))).not.toHaveValue("");
+      await this.pickBulk(
+        this.cardBulk,
+        "studio.bulk.groups.scheduleCards",
+        "studio.cardBulk.reschedule",
+      );
+      await expect(this.cardBulk.getByLabel(this.t("studio.cardBulk.dueLabel"))).not.toHaveValue(
+        "",
+      );
       await this.cardBulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
-      await expect(this.page.getByRole("status").filter({ hasText: this.tp("studio.cardBulk.done.reschedule", { count }) })).toHaveCount(1);
+      await expect(
+        this.page
+          .getByRole("status")
+          .filter({ hasText: this.tp("studio.cardBulk.done.reschedule", { count }) }),
+      ).toHaveCount(1);
     });
   }
 
   /**
    * Moves the selected cards to another deck of the instance, with their
-   * progress (ticked to start with): the status line says how many went
+   * progress (checked to start with): the status line says how many went
    * where, and the workbench lists the fronts left.
    */
   async moveSelectedCards(deck: string, to: string, count: number, left: string[]): Promise<void> {
     await this.intent(`Move the selected cards to ${to}`, async () => {
-      await this.pickBulk(this.cardBulk, "studio.bulk.groups.transferCards", "studio.cardBulk.moveTo");
-      await this.cardBulk.getByRole("combobox", { name: this.t("studio.cardBulk.transfer.deck") }).selectOption({ label: to });
-      await expect(this.cardBulk.getByRole("checkbox", { name: this.t("studio.cardBulk.transfer.keepProgress") })).toBeChecked();
-      await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.transfer.move", { count }) }).click();
+      await this.pickBulk(
+        this.cardBulk,
+        "studio.bulk.groups.transferCards",
+        "studio.cardBulk.moveTo",
+      );
+      await this.cardBulk
+        .getByRole("combobox", { name: this.t("studio.cardBulk.transfer.deck") })
+        .selectOption({ label: to });
+      await expect(
+        this.cardBulk.getByRole("checkbox", {
+          name: this.t("studio.cardBulk.transfer.keepProgress"),
+        }),
+      ).toBeChecked();
+      await this.cardBulk
+        .getByRole("button", { name: this.t("studio.cardBulk.transfer.move", { count }) })
+        .click();
       await this.expectStatus(this.t("studio.cardBulk.transfer.moved", { count, deck: to }));
       await expect(this.cards(deck).getByRole("rowheader")).toHaveText(left);
     });
@@ -688,31 +1000,50 @@ export class Studio extends Screen {
   /** Follows a deck's name on Home to what it says of itself. */
   async openAbout(instance: string, deck: string): Promise<void> {
     await this.intent(`Open what ${deck} says of itself`, async () => {
-      await this.row(instance, deck).getByRole("rowheader").getByRole("link", { name: deck, exact: true }).click();
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.about.heading", { deck }) })).toBeVisible();
+      await this.row(instance, deck)
+        .getByRole("rowheader")
+        .getByRole("link", { name: deck, exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.about.heading", { deck }),
+        }),
+      ).toBeVisible();
       await expect(this.page).toHaveURL(/#\/studio\/about\?deck=/);
     });
   }
 
-  /** Gives the deck one author and a licence (by its name), which the about screen then shows. */
-  async setAuthorAndLicence(author: string, licence: string): Promise<void> {
-    await this.intent(`Name ${author} the author, under ${licence}`, async () => {
+  /** Gives the deck one author and a license (by its name), which the about screen then shows. */
+  async setAuthorAndLicense(author: string, license: string): Promise<void> {
+    await this.intent(`Name ${author} the author, under ${license}`, async () => {
       const section = this.page.getByRole("region", { name: this.t("studio.about.provenance") });
       await section.getByRole("button", { name: this.t("studio.about.editProvenance") }).click();
-      await section.getByRole("textbox", { name: this.t("studio.about.author", { number: 1 }) }).fill(author);
-      await section.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: licence });
+      await section
+        .getByRole("textbox", { name: this.t("studio.about.author", { number: 1 }) })
+        .fill(author);
+      await section
+        .getByRole("combobox", { name: this.t("studio.license.label") })
+        .selectOption({ label: license });
       await section.getByRole("button", { name: this.t("studio.about.saveProvenance") }).click();
       await this.expectStatus(this.t("studio.about.saved"));
       await expect(section).toContainText(author);
-      await expect(section.getByRole("link", { name: new RegExp(escapeRegExp(licence)) })).toBeVisible();
+      await expect(
+        section.getByRole("link", { name: new RegExp(escapeRegExp(license)) }),
+      ).toBeVisible();
     });
   }
 
-  /** Follows the sidebar's link to the instance's name and catalogue. */
+  /** Follows the sidebar's link to the instance's name and catalog. */
   async openInstance(instance: string): Promise<void> {
-    await this.intent("Open the instance's name and catalogue", async () => {
+    await this.intent("Open the instance's name and catalog", async () => {
       await this.app.chrome.studioSection("instance");
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.instance.heading", { instance }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.instance.heading", { instance }),
+        }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.instance.crumb");
     });
   }
@@ -723,15 +1054,24 @@ export class Studio extends Screen {
       await this.page.getByLabel(this.t("studio.instance.nameLabel"), { exact: true }).fill(name);
       await this.page.getByRole("button", { name: this.t("studio.instance.saveName") }).click();
       await this.expectStatus(this.t("studio.about.saved"));
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.instance.heading", { instance: name }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.instance.heading", { instance: name }),
+        }),
+      ).toBeVisible();
     });
   }
 
-  /** Describes the instance's catalogue and gives it a licence (by its name). */
-  async describeCatalog(description: string, licence: string): Promise<void> {
-    await this.intent(`Describe the catalogue, under ${licence}`, async () => {
-      await this.page.getByLabel(this.t("studio.instance.description"), { exact: true }).fill(description);
-      await this.page.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: licence });
+  /** Describes the instance's catalog and gives it a license (by its name). */
+  async describeCatalog(description: string, license: string): Promise<void> {
+    await this.intent(`Describe the catalog, under ${license}`, async () => {
+      await this.page
+        .getByLabel(this.t("studio.instance.description"), { exact: true })
+        .fill(description);
+      await this.page
+        .getByRole("combobox", { name: this.t("studio.license.label") })
+        .selectOption({ label: license });
       await this.page.getByRole("button", { name: this.t("studio.instance.saveCatalog") }).click();
       await this.expectStatus(this.t("studio.about.saved"));
     });
@@ -760,7 +1100,10 @@ export class Studio extends Screen {
   /** Chooses an action of the selection's bar from its menu: the menu's button, then the item. */
   private async pickBulk(bar: Locator, menu: string, item: string): Promise<void> {
     await bar.getByRole("button", { name: this.t(menu), exact: true }).click();
-    await this.page.getByRole("menu", { name: this.t(menu), exact: true }).getByRole("menuitem", { name: this.t(item), exact: true }).click();
+    await this.page
+      .getByRole("menu", { name: this.t(menu), exact: true })
+      .getByRole("menuitem", { name: this.t(item), exact: true })
+      .click();
   }
 
   /** Answers the Studio's question (its dialog, by its heading), which says `question`, with its action. */
@@ -780,7 +1123,9 @@ export class Studio extends Screen {
   async pickInstance(name: string): Promise<void> {
     await this.intent(`Pick the instance ${name}`, async () => {
       await this.app.chrome.breadcrumb("breadcrumbs.instances");
-      await expect(this.page.getByRole("heading", { name: this.t("instancePicker.heading") })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("instancePicker.heading") }),
+      ).toBeVisible();
       await this.page.getByRole("main").getByRole("button", { name, exact: true }).click();
       await this.app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
     });
@@ -792,9 +1137,16 @@ export class Studio extends Screen {
    */
   async backToApp(): Promise<void> {
     await this.intent("Go back to Solid Memo", async () => {
-      await this.page.getByRole("banner").getByRole("link", { name: this.t("studio.backToApp") }).click();
+      await this.page
+        .getByRole("banner")
+        .getByRole("link", { name: this.t("studio.backToApp") })
+        .click();
       await expect(this.page).toHaveURL(/\/#\/decks\?instance=/);
-      await expect(this.page.getByRole("banner").getByRole("link", { name: this.t("app.documentTitle"), exact: true })).toBeVisible();
+      await expect(
+        this.page
+          .getByRole("banner")
+          .getByRole("link", { name: this.t("app.documentTitle"), exact: true }),
+      ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
     });
   }

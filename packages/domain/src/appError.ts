@@ -1,6 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Errors the user may see, each named by a code, so the app can show it in
- * the reader's language: the message catalogues hold every code under
+ * the reader's language: the message catalogs hold every code under
  * `errors.<code>` (packages/ui/src/i18n), the English one exactly as here, which
  * a test holds them to. A text says what went wrong in plain words and
  * what to do about it; the values it leaves out — addresses, statuses, a
@@ -30,21 +34,24 @@ export const ERROR_TEMPLATES = {
   textNeedsLanguage: "Choose the language of {field}.",
   textLanguageInvalid: "“{tag}” is not a language code.",
   textLanguageTaken: "There is already text in {language}. Edit or remove it first.",
-  textMixesUnstated: "This text does not say which language it is in, so it cannot have translations. Choose its language first.",
+  textMixesUnstated:
+    "This text does not say which language it is in, so it cannot have translations. Choose its language first.",
   distractorEmpty: "A wrong option needs text.",
-  distractorPublished: "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
+  distractorPublished:
+    "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
   dailyLimitInvalid: "A daily limit is a whole number, 0 or more.",
   dueDayInvalid: "“{day}” is not a day. Choose the day the card is due.",
   cardTransferSameDeck: "The cards are in this deck already. Choose another deck.",
-  licenseUnknown: "Choose one of the licences offered.",
+  licenseUnknown: "Choose one of the licenses offered.",
   authorEmpty: "An author needs a name.",
   authorTwice: "{author} is named twice. Name each author once.",
   instanceNameEmpty: "An instance needs a name.",
-  catalogNeedsDescription: "The catalogue needs a description.",
-  noCatalogToUpdate: "This instance has no catalogue yet. Update the instance in Solid Memo first.",
+  catalogNeedsDescription: "The catalog needs a description.",
+  noCatalogToUpdate: "This instance has no catalog yet. Update the instance in Solid Memo first.",
   noMetaToUpdate: "This instance has no description to update. Reload the page and try again.",
   webIdEmpty: "Enter your WebID.",
-  webIdInvalidUrl: "That is not a valid URL. A WebID looks like https://you.example/profile/card#me.",
+  webIdInvalidUrl:
+    "That is not a valid URL. A WebID looks like https://you.example/profile/card#me.",
   webIdNotHttps: "A WebID must start with https://.",
   webIdWithCredentials: "A WebID must not contain a username or password.",
   providerNotHttps: "An identity provider must be an https:// URL.",
@@ -68,13 +75,15 @@ export const ERROR_TEMPLATES = {
     "That folder is not a Solid Memo instance: its description cannot be read. Check that you pasted the right address.",
   movedCopyInvalid: {
     one: "The copy in your Pod is not in the format Solid Memo expects ({count} problem), so your study is left as it was. Try again later.",
-    other: "The copy in your Pod is not in the format Solid Memo expects ({count} problems), so your study is left as it was. Try again later.",
+    other:
+      "The copy in your Pod is not in the format Solid Memo expects ({count} problems), so your study is left as it was. Try again later.",
   },
   guestUrlsLeft:
     "The copy in your Pod still points to the guest's study, so your study is left as it was. Try again.",
   guestStudyInvalid: {
     one: "Part of your study in this browser is not in the format Solid Memo expects ({count} problem), so none of it was added to your Pod. It is still here.",
-    other: "Part of your study in this browser is not in the format Solid Memo expects ({count} problems), so none of it was added to your Pod. It is still here.",
+    other:
+      "Part of your study in this browser is not in the format Solid Memo expects ({count} problems), so none of it was added to your Pod. It is still here.",
   },
   guestStudyTooNew:
     "A newer version of Solid Memo saved part of your study in this browser, so this version does not add it to your Pod. Reload the page to get the latest version.",
@@ -88,7 +97,8 @@ export const ERROR_TEMPLATES = {
     "Solid Memo is moving your study in this browser into your Pod and saves nothing to it until that is done. Wait for it to finish, then try again.",
   deckChangedSinceOffer:
     "The deck changed since the update was offered, perhaps in another tab or app, so nothing was changed. Look at the offer again.",
-  deckChangedDuringUpgrade: "The deck changed while it was being updated, perhaps in another tab or app. Try again.",
+  deckChangedDuringUpgrade:
+    "The deck changed while it was being updated, perhaps in another tab or app. Try again.",
   changedElsewhere:
     "This was changed elsewhere, perhaps in another tab or app, since Solid Memo read it, so nothing was saved. Reload the page and try again.",
   deckTreeChanged:
@@ -105,40 +115,50 @@ export const ERROR_TEMPLATES = {
     "Solid Memo did not save this: it is not in the format Solid Memo expects. Nothing was changed. Reload the page and try again.",
   deckGone: "The deck “{deck}” no longer exists. Perhaps it was removed in another tab or app.",
   cardsDocumentGone: "The cards of “{deck}” can no longer be found. Reload the page and try again.",
-  cardGone: "That card no longer exists. Perhaps it was removed in another tab or app. Reload the page.",
+  cardGone:
+    "That card no longer exists. Perhaps it was removed in another tab or app. Reload the page.",
   notADeck: "That is not a Solid Memo deck, so it cannot be added. Choose another deck.",
   libraryDeckTooNew:
     "This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
   libraryCardTooNew:
     "A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
-  deckFileUnreadable: "Solid Memo cannot read that file. Choose a Turtle or JSON-LD file exported from Solid Memo.",
-  notADeckFile: "That file does not hold one Solid Memo deck. Choose a file exported from Solid Memo.",
+  deckFileUnreadable:
+    "Solid Memo cannot read that file. Choose a Turtle or JSON-LD file exported from Solid Memo.",
+  notADeckFile:
+    "That file does not hold one Solid Memo deck. Choose a file exported from Solid Memo.",
   deckFileTooNew:
     "That file was written by a newer version of Solid Memo, so this one cannot import it. Reload the page to get the latest version.",
   noGuestPod: "There is no guest study on this device.",
-  guestPodStartFailed: "The guest study on this device could not be opened. Reload the page and try again.",
+  guestPodStartFailed:
+    "The guest study on this device could not be opened. Reload the page and try again.",
   guestStorageAborted:
     "This browser refused to save a change to the guest study. Check that it has room to keep data, then try again.",
   addFailed: "Solid Memo could not save to your Pod. Check your connection and try again.",
   draftGone: "That draft no longer exists. Perhaps it was deleted in another tab or app.",
-  releaseUnreadable: "Solid Memo cannot read a release at {url}. Check the address, and that the release is published there.",
-  notAReleaseFile: "That file does not hold one deck or course release. Choose a release saved as Turtle or JSON-LD.",
+  releaseUnreadable:
+    "Solid Memo cannot read a release at {url}. Check the address, and that the release is published there.",
+  notAReleaseFile:
+    "That file does not hold one deck or course release. Choose a release saved as Turtle or JSON-LD.",
   releaseIdUnsupported:
     "This release names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. It cannot be made a draft.",
-  releaseTaken: "A release is already published at {url}, and a release is never written over. Publish the next version, or choose another folder.",
+  releaseTaken:
+    "A release is already published at {url}, and a release is never written over. Publish the next version, or choose another folder.",
   releaseHasErrors: {
     one: "The release check finds {count} error. Fix it before you publish the release.",
     other: "The release check finds {count} errors. Fix them before you publish the release.",
   },
-  draftReleased: "This draft was released already, at {url}, and is no longer changed. Start its next version instead.",
+  draftReleased:
+    "This draft was released already, at {url}, and is no longer changed. Start its next version instead.",
   guestCannotPublish:
     "A guest's study is kept in this browser alone, where no one else can read a release. Move your study into a Pod to publish it, or download the release as a file.",
   publicAccessRefused:
     "Your Pod did not let Solid Memo make the release at {url} public, so only you can read it. Try again, or make it readable by everyone with your Pod provider's tools.",
-  releaseUrlInvalid: "That is not the address of a release. Paste its whole address, starting with https:// or http://.",
+  releaseUrlInvalid:
+    "That is not the address of a release. Paste its whole address, starting with https:// or http://.",
   releaseNotConforming: {
     one: "The release on {host} breaks Solid Memo's rules in {count} place, so it cannot be added. Ask its creator to check it.",
-    other: "The release on {host} breaks Solid Memo's rules in {count} places, so it cannot be added. Ask its creator to check it.",
+    other:
+      "The release on {host} breaks Solid Memo's rules in {count} places, so it cannot be added. Ask its creator to check it.",
   },
 } as const satisfies Record<string, ErrorTemplate>;
 
@@ -153,14 +173,19 @@ function englishValue(value: ErrorVars[string]): string {
 
 /** An error text with its values filled in, in English (plural by `count`, 1 being singular). */
 export function fillTemplate(template: ErrorTemplate, vars: ErrorVars): string {
-  const text = typeof template === "string" ? template : vars.count === 1 ? template.one : template.other;
-  return text.replace(PLACEHOLDER, (whole, name: string) => (name in vars ? englishValue(vars[name]!) : whole));
+  const text =
+    typeof template === "string" ? template : vars.count === 1 ? template.one : template.other;
+  return text.replace(PLACEHOLDER, (whole, name: string) =>
+    name in vars ? englishValue(vars[name]!) : whole,
+  );
 }
 
 /** The placeholders an error text names, in any of its plural forms. */
 function placeholders(template: ErrorTemplate): Set<string> {
   const texts = typeof template === "string" ? [template] : [template.one, template.other];
-  return new Set(texts.flatMap((text) => [...text.matchAll(PLACEHOLDER)].map((match) => match[1]!)));
+  return new Set(
+    texts.flatMap((text) => [...text.matchAll(PLACEHOLDER)].map((match) => match[1]!)),
+  );
 }
 
 /** The values an error text leaves out, one "name: value" a line; "" when it says them all. */

@@ -1,6 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useLayoutEffect, useRef } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
-import { isMarkdown, validateCardContent, type CardContent, type CardTextPart } from "@solid-memo/domain/deck";
+import {
+  isMarkdown,
+  validateCardContent,
+  type CardContent,
+  type CardTextPart,
+} from "@solid-memo/domain/deck";
 import type { DeckLanguages } from "@solid-memo/domain/deckLanguages";
 import type { LangText } from "@solid-memo/domain/langText";
 import { OPTION, PROSE, SIDE, type FieldRule } from "@solid-memo/markdown/problems";
@@ -154,12 +163,24 @@ export function cardLanguageHints(languages: DeckLanguages, title: LangText): Ca
     back: languages.back,
     own: languages.own ?? recentLanguages("own")[0],
   };
-  const suggest = (group: LanguageGroup) => [...(defaults[group] === undefined ? [] : [defaults[group]]), ...Object.keys(title)];
-  return { defaults, suggestions: { front: suggest("front"), back: suggest("back"), own: suggest("own") } };
+  const suggest = (group: LanguageGroup) => [
+    ...(defaults[group] === undefined ? [] : [defaults[group]]),
+    ...Object.keys(title),
+  ];
+  return {
+    defaults,
+    suggestions: { front: suggest("front"), back: suggest("back"), own: suggest("own") },
+  };
 }
 
 /** The texts that are Markdown in a card in Markdown: all but the pictures' descriptions, which are a picture's alt text. */
-const MARKDOWN_PARTS: readonly CardTextPart[] = ["front", "frontNote", "backLabel", "back", "backNote"];
+const MARKDOWN_PARTS: readonly CardTextPart[] = [
+  "front",
+  "frontNote",
+  "backLabel",
+  "back",
+  "backNote",
+];
 
 /**
  * The texts a textarea suits once the card is in Markdown: the sides and
@@ -174,7 +195,9 @@ const BLOCK_PARTS: readonly CardTextPart[] = ["front", "back", "frontNote", "bac
  * writer's to switch on.
  */
 function emptyDraft(tagOf: (part: CardTextPart) => string | undefined): CardDraft {
-  const texts = Object.fromEntries(TEXT_PARTS.map((part) => [part, textDraftOf(undefined, [], { tag: tagOf(part) ?? null })]));
+  const texts = Object.fromEntries(
+    TEXT_PARTS.map((part) => [part, textDraftOf(undefined, [], { tag: tagOf(part) ?? null })]),
+  );
   return {
     ...(texts as Record<CardTextPart, LangTextDraft>),
     frontImageUrl: "",
@@ -226,7 +249,13 @@ export function withDefaults(
     const tag = defaults[group];
     const current = draft[part][0]!.tag;
     const replaceable = current === null || current === previous[group];
-    if (tag !== undefined && tag !== current && !draft.touched.includes(part) && isBlank(draft[part]) && replaceable) {
+    if (
+      tag !== undefined &&
+      tag !== current &&
+      !draft.touched.includes(part) &&
+      isBlank(draft[part]) &&
+      replaceable
+    ) {
       next = { ...next, [part]: textDraftOf(undefined, [], { tag }) };
     }
   }
@@ -275,7 +304,9 @@ export function textFormatOfDraft(draft: CardDraft, saved?: CardContent): string
 }
 
 /** Outcome of checking a card's draft: its content, validated, or why it is refused. */
-export type CardDraftCheck = { ok: true; content: CardContent } | { ok: false; invalid: CardFieldsError };
+export type CardDraftCheck =
+  | { ok: true; content: CardContent }
+  | { ok: false; invalid: CardFieldsError };
 
 /**
  * A draft switched to Markdown, or from it (`on`): on, it notes the
@@ -326,7 +357,14 @@ export function checkDraft(draft: CardDraft, saved?: CardContent): CardDraftChec
     if (part === "backImageDescription" && draft.backImageUrl.trim() === "") continue;
     const result = textOfDraft(draft[part], { trim: !BLOCK_PARTS.includes(part) });
     if ("missing" in result) {
-      return { ok: false, invalid: { error: new AppError("textNeedsLanguage", { field: part }), part, entry: result.missing } };
+      return {
+        ok: false,
+        invalid: {
+          error: new AppError("textNeedsLanguage", { field: part }),
+          part,
+          entry: result.missing,
+        },
+      };
     }
     texts[part] = result.text;
   }
@@ -345,7 +383,10 @@ export function checkDraft(draft: CardDraft, saved?: CardContent): CardDraftChec
   if (validation.ok) return validation;
   const { error, part } = validation;
   if (part === undefined) return { ok: false, invalid: { error } };
-  return { ok: false, invalid: { error, part, entry: draft[part].find((entry) => entry.tag === "") } };
+  return {
+    ok: false,
+    invalid: { error, part, entry: draft[part].find((entry) => entry.tag === "") },
+  };
 }
 
 /**
@@ -355,7 +396,8 @@ export function checkDraft(draft: CardDraft, saved?: CardContent): CardDraftChec
  * touched does not count: a text changed and changed back is as it was.
  */
 export function draftChanged(draft: CardDraft, from: CardDraft): boolean {
-  const entries = (text: LangTextDraft) => JSON.stringify(text.map(({ tag, value }) => [tag, value]));
+  const entries = (text: LangTextDraft) =>
+    JSON.stringify(text.map(({ tag, value }) => [tag, value]));
   return (
     TEXT_PARTS.some((part) => entries(draft[part]) !== entries(from[part])) ||
     draft.frontImageUrl !== from.frontImageUrl ||
@@ -420,7 +462,7 @@ export function CardFieldsErrorMessage({ invalid }: { invalid: CardFieldsError |
  * and a preview of the card as it will be studied under the fields
  * (CardPreview). Switched on over text that reads otherwise as Markdown,
  * a status under the toggle says so, while that text is unchanged
- * (switchMarkdown); not of Markdown typed afterwards, which is meant. The label and the pictures' descriptions stay single
+ * (switchMarkdown); not of Markdown typed afterward, which is meant. The label and the pictures' descriptions stay single
  * lines: a label is one line in study, and a description is plain text.
  */
 export function CardContentFields({
@@ -472,7 +514,12 @@ export function CardContentFields({
     const { tag } = text[0]!;
     if (isBlank(draft[part]) && isBlank(text) && tag !== null && tag !== draft[part][0]!.tag) {
       for (const other of TEXT_PARTS) {
-        if (other !== part && groupOf(other) === groupOf(part) && !touched.includes(other) && isBlank(next[other])) {
+        if (
+          other !== part &&
+          groupOf(other) === groupOf(part) &&
+          !touched.includes(other) &&
+          isBlank(next[other])
+        ) {
           next = { ...next, [other]: textDraftOf(undefined, [], { tag }) };
         }
       }
@@ -485,7 +532,12 @@ export function CardContentFields({
    * when that is about its text; `hint` (its id and text) is shown under
    * its text.
    */
-  const textField = (part: CardTextPart, label: string, hintIds: string[], hint?: { id: string; text: string }) => {
+  const textField = (
+    part: CardTextPart,
+    label: string,
+    hintIds: string[],
+    hint?: { id: string; text: string },
+  ) => {
     const id = FIELD_IDS[part];
     const textInvalid = id === invalidField && !languageError;
     const inMarkdown = draft.markdown && MARKDOWN_PARTS.includes(part);
@@ -531,7 +583,8 @@ export function CardContentFields({
     type: "url" as const,
     placeholder: t("cardContentFields.imagePlaceholder"),
     value: draft[key],
-    onInput: (e: { currentTarget: { value: string } }) => onChange({ ...draft, [key]: e.currentTarget.value }),
+    onInput: (e: { currentTarget: { value: string } }) =>
+      onChange({ ...draft, [key]: e.currentTarget.value }),
     disabled: busy,
     "aria-invalid": id === invalidField,
     "aria-describedby": id === invalidField ? CARD_FIELDS_ERROR_ID : undefined,
@@ -547,7 +600,9 @@ export function CardContentFields({
             type="checkbox"
             checked={draft.markdown}
             onChange={(e) => onChange(switchMarkdown(draft, e.currentTarget.checked))}
-            aria-describedby={readOtherwise ? "card-markdown-hint card-markdown-differs" : "card-markdown-hint"}
+            aria-describedby={
+              readOtherwise ? "card-markdown-hint card-markdown-differs" : "card-markdown-hint"
+            }
             disabled={busy}
           />
           {t("cardContentFields.markdown")}
@@ -558,7 +613,11 @@ export function CardContentFields({
         <div role="status">
           {readOtherwise && (
             <p id="card-markdown-differs" class="hint field-hint">
-              {t(readOtherwise === "main" ? "cardContentFields.markdownDiffers" : "cardContentFields.markdownDiffersTranslation")}
+              {t(
+                readOtherwise === "main"
+                  ? "cardContentFields.markdownDiffers"
+                  : "cardContentFields.markdownDiffersTranslation",
+              )}
             </p>
           )}
         </div>

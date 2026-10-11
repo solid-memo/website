@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import {
   ANSWER_SCALES,
@@ -9,7 +13,7 @@ import { repeatsInSession } from "./scheduling";
 import { applySm2, INITIAL_SM2_STATE } from "./sm2";
 
 describe("answer scales", () => {
-  it("recognises the known scales only", () => {
+  it("recognizes the known scales only", () => {
     for (const scale of ANSWER_SCALES) expect(isAnswerScale(scale)).toBe(true);
     expect(isAnswerScale("emoji")).toBe(false);
     expect(isAnswerScale(null)).toBe(false);
@@ -21,18 +25,13 @@ describe("answer scales", () => {
   });
 
   it("makes Again the only minimal answer that repeats in the session", () => {
-    const repeating = MINIMAL_ANSWERS.filter((a) =>
-      repeatsInSession(MINIMAL_ANSWER_QUALITY[a]),
-    );
+    const repeating = MINIMAL_ANSWERS.filter((a) => repeatsInSession(MINIMAL_ANSWER_QUALITY[a]));
     expect(repeating).toEqual(["again"]);
   });
 
   it("makes Hard a pass, not a lapse", () => {
     const afterHard = applySm2(INITIAL_SM2_STATE, MINIMAL_ANSWER_QUALITY.hard);
-    const afterAgain = applySm2(
-      INITIAL_SM2_STATE,
-      MINIMAL_ANSWER_QUALITY.again,
-    );
+    const afterAgain = applySm2(INITIAL_SM2_STATE, MINIMAL_ANSWER_QUALITY.again);
     expect(afterHard.repetitions).toBe(1);
     expect(afterAgain.repetitions).toBe(0);
   });

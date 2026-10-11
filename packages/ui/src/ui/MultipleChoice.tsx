@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useId, useRef, useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
 import { DataLine } from "./DataText";
@@ -20,7 +24,7 @@ export interface ChoiceOption {
  * aria-disabled, so it keeps the focus if saving fails.
  *
  * Once checked (`answered`), the options stay, fixed, each marked in
- * words as well as colour: the right answer, and the one chosen when it
+ * words as well as color: the right answer, and the one chosen when it
  * was not.
  *
  * Options in Markdown (`markdown`, the card's format) show as one line
@@ -76,7 +80,13 @@ export function MultipleChoice({
 
   return (
     <div class="multiple-choice" onKeyDown={onKeyDown}>
-      <div ref={groupRef} role="radiogroup" aria-labelledby={labelledBy} aria-describedby={describedBy} class="choices">
+      <div
+        ref={groupRef}
+        role="radiogroup"
+        aria-labelledby={labelledBy}
+        aria-describedby={describedBy}
+        class="choices"
+      >
         {choices.map((choice, index) => {
           const right = fixed && choice.key === answered.correct;
           const wrong = fixed && choice.key === answered.chosen && !right;
@@ -117,7 +127,9 @@ export function MultipleChoice({
           >
             {busy ? t("multipleChoice.checking") : t("multipleChoice.check")}
           </button>
-          <p class="hint study-keys">{t("multipleChoice.keys", { last: Math.min(choices.length, 9) })}</p>
+          <p class="hint study-keys">
+            {t("multipleChoice.keys", { last: Math.min(choices.length, 9) })}
+          </p>
         </>
       )}
     </div>

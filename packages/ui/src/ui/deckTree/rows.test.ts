@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckTree, TreeNode } from "@solid-memo/domain/deckTree";
@@ -17,23 +21,85 @@ const deck = (url: string): TreeNode => {
   };
   return { kind: "deck", deck: value };
 };
-const group = (url: string, children: TreeNode[]): TreeNode => ({ kind: "group", group: { url, title: { en: url } }, children });
+const group = (url: string, children: TreeNode[]): TreeNode => ({
+  kind: "group",
+  group: { url, title: { en: url } },
+  children,
+});
 
 /** A; G (B; H (C); E ()); D. */
 const tree: DeckTree = {
   readOnly: false,
-  children: [deck("A"), group("G", [deck("B"), group("H", [deck("C")]), group("E", [])]), deck("D")],
+  children: [
+    deck("A"),
+    group("G", [deck("B"), group("H", [deck("C")]), group("E", [])]),
+    deck("D"),
+  ],
 };
 
 describe("flatten", () => {
-  it("lists the rows in reading order, each knowing its depth, parent, groups and neighbour", () => {
+  it("lists the rows in reading order, each knowing its depth, parent, groups and neighbor", () => {
     expect(flatten(tree, new Set())).toEqual([
-      { key: "A", kind: "deck", depth: 0, parent: null, ancestors: [], before: null, collapsed: false, last: null },
-      { key: "G", kind: "group", depth: 0, parent: null, ancestors: [], before: "A", collapsed: false, last: "E" },
-      { key: "B", kind: "deck", depth: 1, parent: "G", ancestors: ["G"], before: null, collapsed: false, last: null },
-      { key: "H", kind: "group", depth: 1, parent: "G", ancestors: ["G"], before: "B", collapsed: false, last: "C" },
-      { key: "C", kind: "deck", depth: 2, parent: "H", ancestors: ["G", "H"], before: null, collapsed: false, last: null },
-      { key: "E", kind: "group", depth: 1, parent: "G", ancestors: ["G"], before: "H", collapsed: false, last: null },
+      {
+        key: "A",
+        kind: "deck",
+        depth: 0,
+        parent: null,
+        ancestors: [],
+        before: null,
+        collapsed: false,
+        last: null,
+      },
+      {
+        key: "G",
+        kind: "group",
+        depth: 0,
+        parent: null,
+        ancestors: [],
+        before: "A",
+        collapsed: false,
+        last: "E",
+      },
+      {
+        key: "B",
+        kind: "deck",
+        depth: 1,
+        parent: "G",
+        ancestors: ["G"],
+        before: null,
+        collapsed: false,
+        last: null,
+      },
+      {
+        key: "H",
+        kind: "group",
+        depth: 1,
+        parent: "G",
+        ancestors: ["G"],
+        before: "B",
+        collapsed: false,
+        last: "C",
+      },
+      {
+        key: "C",
+        kind: "deck",
+        depth: 2,
+        parent: "H",
+        ancestors: ["G", "H"],
+        before: null,
+        collapsed: false,
+        last: null,
+      },
+      {
+        key: "E",
+        kind: "group",
+        depth: 1,
+        parent: "G",
+        ancestors: ["G"],
+        before: "H",
+        collapsed: false,
+        last: null,
+      },
       // An open, empty group's slot, where a drag can put something.
       {
         key: slotKey("E"),
@@ -45,7 +111,16 @@ describe("flatten", () => {
         collapsed: false,
         last: null,
       },
-      { key: "D", kind: "deck", depth: 0, parent: null, ancestors: [], before: "G", collapsed: false, last: null },
+      {
+        key: "D",
+        kind: "deck",
+        depth: 0,
+        parent: null,
+        ancestors: [],
+        before: "G",
+        collapsed: false,
+        last: null,
+      },
     ]);
   });
 
@@ -62,6 +137,8 @@ describe("flatten", () => {
   });
 
   it("keys a slot apart from any URL", () => {
-    expect(slotKey("https://pod.example/catalog.ttl#group-1")).toBe("slot https://pod.example/catalog.ttl#group-1");
+    expect(slotKey("https://pod.example/catalog.ttl#group-1")).toBe(
+      "slot https://pod.example/catalog.ttl#group-1",
+    );
   });
 });

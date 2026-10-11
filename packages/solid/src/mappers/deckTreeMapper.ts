@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   asUrl,
   buildThing,
@@ -14,7 +18,13 @@ import type { StoredGroup, StoredLayout, TreeChanges } from "@solid-memo/domain/
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
-import { readVersioned, recordThing, removeUnlessNewer, storedVersionOf, unlessNewer } from "../records";
+import {
+  readVersioned,
+  recordThing,
+  removeUnlessNewer,
+  storedVersionOf,
+  unlessNewer,
+} from "../records";
 import { DCAT, DCTERMS, RDF, SM } from "../vocab";
 import { toDecks } from "./deckMapper";
 
@@ -26,7 +36,7 @@ import { toDecks } from "./deckMapper";
  *
  * A group the app cannot read (one that does not fit its shape) is not
  * part of the layout and is never written: its members are at the top
- * level, and the catalogue's `dcat:catalog` keeps listing it. A group in
+ * level, and the catalog's `dcat:catalog` keeps listing it. A group in
  * a newer format than this app's makes the whole layout read-only.
  */
 
@@ -52,17 +62,23 @@ export function toStoredLayout(dataset: SolidDataset, catalogUrl: string): Store
     if (position !== null) deckPositions.set(deck.url, position);
   }
   const root = getThing(dataset, `${catalogUrl}#catalog`);
-  return { decks, deckPositions, groups, rootGroups: root === null ? [] : getUrlAll(root, DCAT.catalog), readOnly };
+  return {
+    decks,
+    deckPositions,
+    groups,
+    rootGroups: root === null ? [] : getUrlAll(root, DCAT.catalog),
+    readOnly,
+  };
 }
 
 /**
  * The catalog document with an arrangement's changes (domain/deckTree.ts
  * `treeChanges`) written, and the subjects to check before it is saved:
- * the groups written and the catalogue. Groups are written in their
- * shape's format, a new one published by the catalogue's publisher; the
- * catalogue's `dcat:catalog` and the decks' `sm:position` are triples no
+ * the groups written and the catalog. Groups are written in their
+ * shape's format, a new one published by the catalog's publisher; the
+ * catalog's `dcat:catalog` and the decks' `sm:position` are triples no
  * shape owns, written as they are. A member link to a node the layout
- * does not have is kept only when it names a dataset (or catalogue) the
+ * does not have is kept only when it names a dataset (or catalog) the
  * document says is one, or a node in another document; a link to what
  * is gone is dropped as its list is written.
  */
@@ -76,9 +92,13 @@ export function withTreeChanges(
   const groupUrls = new Set(layout.groups.map((entry) => entry.group.url));
   const known = new Set([...deckUrls, ...groupUrls]);
   const typed = (type: string) =>
-    new Set(getThingAll(dataset).filter((thing) => getUrlAll(thing, RDF.type).includes(type)).map(asUrl));
+    new Set(
+      getThingAll(dataset)
+        .filter((thing) => getUrlAll(thing, RDF.type).includes(type))
+        .map(asUrl),
+    );
   const datasets = typed(DCAT.Dataset);
-  // A group the app cannot read may lack its `dcat:Catalog` type: a link to it is still one to a catalogue.
+  // A group the app cannot read may lack its `dcat:Catalog` type: a link to it is still one to a catalog.
   const catalogs = new Set([...typed(DCAT.Catalog), ...typed(SM.DeckGroup)]);
   /** The links to keep beside the layout's own: to what the document says is of that kind, or what is elsewhere. */
   const foreign = (links: readonly string[], kind: ReadonlySet<string>) =>
@@ -86,10 +106,10 @@ export function withTreeChanges(
 
   const rootUrl = `${catalogUrl}#catalog`;
   const root = getThing(dataset, rootUrl);
-  const noCatalogue = () => new Error("Deck groups need the catalogue, and its publisher");
+  const noCatalog = () => new Error("Deck groups need the catalog, and its publisher");
   const publisher = () => {
     const url = root === null ? null : getUrl(root, DCTERMS.publisher);
-    if (url === null) throw noCatalogue();
+    if (url === null) throw noCatalog();
     return url;
   };
 
@@ -97,7 +117,9 @@ export function withTreeChanges(
   for (const url of changes.groupsRemoved) updated = removeUnlessNewer(updated, url);
 
   const stored = new Map(layout.groups.map((entry) => [entry.group.url, entry]));
-  const titles = new Map([...changes.groupsAdded, ...changes.groupsRetitled].map((group) => [group.url, group]));
+  const titles = new Map(
+    [...changes.groupsAdded, ...changes.groupsRetitled].map((group) => [group.url, group]),
+  );
   const written = new Set([
     ...titles.keys(),
     ...changes.members.keys(),
@@ -107,8 +129,10 @@ export function withTreeChanges(
     const before = stored.get(url);
     const existing = getThing(updated, url);
     // A new group's URL is minted by the client: one the document already has is not this app's to write.
-    if (before === undefined && existing !== null) throw new Error(`${url} is already in the catalog document`);
-    const previous = before === undefined ? undefined : readVersioned(existing!, "deckGroup")!.record.data;
+    if (before === undefined && existing !== null)
+      throw new Error(`${url} is already in the catalog document`);
+    const previous =
+      before === undefined ? undefined : readVersioned(existing!, "deckGroup")!.record.data;
     const members = changes.members.get(url) ?? {
       decks: before!.decks.filter((link) => deckUrls.has(link)),
       groups: before!.groups.filter((link) => groupUrls.has(link)),
@@ -126,13 +150,21 @@ export function withTreeChanges(
 
   for (const [url, position] of changes.positions) {
     if (written.has(url)) continue;
-    updated = setThing(updated, buildThing(unlessNewer(getThing(updated, url)!)).setInteger(SM.position, position).build());
+    updated = setThing(
+      updated,
+      buildThing(unlessNewer(getThing(updated, url)!))
+        .setInteger(SM.position, position)
+        .build(),
+    );
   }
 
   if (changes.rootGroups !== undefined) {
-    if (root === null) throw noCatalogue();
+    if (root === null) throw noCatalog();
     let builder = buildThing(unlessNewer(getThing(updated, rootUrl)!)).removeAll(DCAT.catalog);
-    for (const url of [...changes.rootGroups, ...foreign(getUrlAll(root!, DCAT.catalog), catalogs)]) {
+    for (const url of [
+      ...changes.rootGroups,
+      ...foreign(getUrlAll(root!, DCAT.catalog), catalogs),
+    ]) {
       builder = builder.addIri(DCAT.catalog, url);
     }
     updated = setThing(updated, builder.build());

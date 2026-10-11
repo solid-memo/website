@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
 
@@ -37,12 +41,18 @@ export class DeckList extends Screen {
 
   /** The row of the deck named `name`: the innermost list item holding its link. */
   row(name: string): Locator {
-    return this.tree.getByRole("listitem").filter({ has: this.page.getByRole("link", { name, exact: true }) }).last();
+    return this.tree
+      .getByRole("listitem")
+      .filter({ has: this.page.getByRole("link", { name, exact: true }) })
+      .last();
   }
 
   /** The deck's "Study" button in its row ("Study {deck}"), there while it has something to study today. */
   studyButton(name: string): Locator {
-    return this.page.getByRole("button", { name: this.t("deckStudyAction.studyLabel", { deck: name }), exact: true });
+    return this.page.getByRole("button", {
+      name: this.t("deckStudyAction.studyLabel", { deck: name }),
+      exact: true,
+    });
   }
 
   /**
@@ -50,9 +60,9 @@ export class DeckList extends Screen {
    * "Start the course", named by the course's title, whichever it is.
    */
   get newcomerCourse(): Locator {
-    return this.page
-      .getByRole("complementary")
-      .filter({ has: this.page.getByRole("button", { name: this.t("newcomerCourse.start"), exact: true }) });
+    return this.page.getByRole("complementary").filter({
+      has: this.page.getByRole("button", { name: this.t("newcomerCourse.start"), exact: true }),
+    });
   }
 
   /** The title of the course offered to newcomers: what names its landmark. */
@@ -64,7 +74,9 @@ export class DeckList extends Screen {
   /** Starts the course offered to newcomers, which opens it. */
   async startNewcomerCourse(title: string): Promise<void> {
     await this.intent(`Start the course for newcomers ${title}`, async () => {
-      await this.newcomerCourse.getByRole("button", { name: this.t("newcomerCourse.start"), exact: true }).click();
+      await this.newcomerCourse
+        .getByRole("button", { name: this.t("newcomerCourse.start"), exact: true })
+        .click();
       await this.app.course.expectShown(title);
     });
   }
@@ -85,8 +97,13 @@ export class DeckList extends Screen {
   /** Follows "Create deck" to the deck creator. */
   async openDeckCreator(): Promise<void> {
     await this.intent("Open the deck creator", async () => {
-      await this.page.getByRole("main").getByRole("link", { name: this.t("deckList.createButton"), exact: true }).click();
-      await expect(this.page.getByRole("heading", { name: this.t("deckCreator.heading") })).toBeVisible();
+      await this.page
+        .getByRole("main")
+        .getByRole("link", { name: this.t("deckList.createButton"), exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("deckCreator.heading") }),
+      ).toBeVisible();
     });
   }
 
@@ -102,7 +119,9 @@ export class DeckList extends Screen {
   async study(name: string): Promise<void> {
     await this.intent(`Study ${name} from the deck list`, async () => {
       await this.studyButton(name).click();
-      await expect(this.page.getByRole("heading", { name: this.t("study.heading", { deck: name }) })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("study.heading", { deck: name }) }),
+      ).toBeVisible();
     });
   }
 

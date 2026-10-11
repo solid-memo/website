@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import {
   buildStudyQueue,
@@ -89,16 +93,37 @@ describe("buildStudyQueue", () => {
       review("future", "2026-09-22", yesterday),
     ];
 
-    const queue = buildStudyQueue({ cards, direction: "front-to-back", reviews, prefs, now, random: keepOrder });
+    const queue = buildStudyQueue({
+      cards,
+      direction: "front-to-back",
+      reviews,
+      prefs,
+      now,
+      random: keepOrder,
+    });
     expect(queue.due.map((p) => p.card.id)).toEqual(["a", "b"]);
     expect(queue.newPrompts.map((p) => p.card.id)).toEqual(["new1", "new2"]);
   });
 
   it("never studies a retired card, due or new", () => {
-    const cards = [card("a"), { ...card("retired-due"), retired: true as const }, { ...card("retired-new"), retired: true as const }];
-    const reviews = [review("a", "2026-09-20", yesterday), review("retired-due", "2026-09-20", yesterday)];
+    const cards = [
+      card("a"),
+      { ...card("retired-due"), retired: true as const },
+      { ...card("retired-new"), retired: true as const },
+    ];
+    const reviews = [
+      review("a", "2026-09-20", yesterday),
+      review("retired-due", "2026-09-20", yesterday),
+    ];
 
-    const queue = buildStudyQueue({ cards, direction: "front-to-back", reviews, prefs, now, random: keepOrder });
+    const queue = buildStudyQueue({
+      cards,
+      direction: "front-to-back",
+      reviews,
+      prefs,
+      now,
+      random: keepOrder,
+    });
     expect(queue.due.map((p) => p.card.id)).toEqual(["a"]);
     expect(queue.newPrompts).toEqual([]);
   });
@@ -118,22 +143,30 @@ describe("buildStudyQueue", () => {
 
   it("uses the random source only for new cards, never for due order", () => {
     const cards = [card("b"), card("a")];
-    const reviews = [
-      review("a", "2026-09-19", yesterday),
-      review("b", "2026-09-20", yesterday),
-    ];
-    const queue = buildStudyQueue({ cards, direction: "front-to-back", reviews, prefs, now, random: () => 0 });
+    const reviews = [review("a", "2026-09-19", yesterday), review("b", "2026-09-20", yesterday)];
+    const queue = buildStudyQueue({
+      cards,
+      direction: "front-to-back",
+      reviews,
+      prefs,
+      now,
+      random: () => 0,
+    });
     expect(queue.due.map((p) => p.card.id)).toEqual(["a", "b"]);
   });
 
   it("keeps a stable order for cards due on the same day", () => {
     const cards = [card("x"), card("y")];
-    const reviews = [
-      review("x", "2026-09-21", yesterday),
-      review("y", "2026-09-21", yesterday),
-    ];
+    const reviews = [review("x", "2026-09-21", yesterday), review("y", "2026-09-21", yesterday)];
 
-    const queue = buildStudyQueue({ cards, direction: "front-to-back", reviews, prefs, now, random: keepOrder });
+    const queue = buildStudyQueue({
+      cards,
+      direction: "front-to-back",
+      reviews,
+      prefs,
+      now,
+      random: keepOrder,
+    });
     expect(queue.due.map((p) => p.card.id)).toEqual(["x", "y"]);
   });
 
@@ -177,9 +210,7 @@ describe("buildStudyQueue", () => {
 
   it("reduces the new-card budget by cards introduced today", () => {
     const cards = [card("new1"), card("new2"), card("introduced")];
-    const reviews = [
-      review("introduced", "2026-09-22", new Date(2026, 8, 21, 9, 0)),
-    ];
+    const reviews = [review("introduced", "2026-09-22", new Date(2026, 8, 21, 9, 0))];
 
     const queue = buildStudyQueue({
       cards,
@@ -225,9 +256,7 @@ describe("buildStudyQueue directions", () => {
       random: keepOrder,
     });
     expect(queue.due).toEqual([]);
-    expect(queue.newPrompts).toEqual([
-      { card: card("a"), direction: "back-to-front" },
-    ]);
+    expect(queue.newPrompts).toEqual([{ card: card("a"), direction: "back-to-front" }]);
   });
 
   it("counts both directions against the day's budgets", () => {
@@ -290,9 +319,7 @@ describe("snapshotBeforeReview", () => {
   });
 
   it("carries no snapshot for a card introduced today and reviewed again", () => {
-    expect(
-      snapshotBeforeReview(review("a", "2026-09-22", now), now, 4),
-    ).toBeUndefined();
+    expect(snapshotBeforeReview(review("a", "2026-09-22", now), now, 4)).toBeUndefined();
   });
 });
 
@@ -306,9 +333,10 @@ describe("resetStudyDay", () => {
   };
 
   it("leaves cards that were not reviewed today alone", () => {
-    expect(
-      resetStudyDay([review("a", "2026-09-25", yesterday)], now, 4),
-    ).toEqual({ restore: [], remove: [] });
+    expect(resetStudyDay([review("a", "2026-09-25", yesterday)], now, 4)).toEqual({
+      restore: [],
+      remove: [],
+    });
   });
 
   it("makes a card introduced today new again", () => {
@@ -342,9 +370,7 @@ describe("resetStudyDay", () => {
 
   it("makes a card without a snapshot due today, as the best it can do", () => {
     const legacy = review("a", "2026-09-27", now, yesterday);
-    expect(resetStudyDay([legacy], now, 4).restore).toEqual([
-      { ...legacy, due: "2026-09-21" },
-    ]);
+    expect(resetStudyDay([legacy], now, 4).restore).toEqual([{ ...legacy, due: "2026-09-21" }]);
   });
 
   it("frees the day's budget: a reset card is due and counted unstudied again", () => {
@@ -367,9 +393,10 @@ describe("resetStudyDay", () => {
 
   it("respects the day boundary: 03:00 still belongs to the previous day", () => {
     const lateNight = new Date(2026, 8, 21, 3, 0);
-    expect(
-      resetStudyDay([review("a", "2026-09-22", lateNight)], now, 4),
-    ).toEqual({ restore: [], remove: [] });
+    expect(resetStudyDay([review("a", "2026-09-22", lateNight)], now, 4)).toEqual({
+      restore: [],
+      remove: [],
+    });
   });
 });
 
@@ -396,9 +423,7 @@ describe("interleave", () => {
 
 describe("repeatsInSession", () => {
   it("repeats only the two lowest grades", () => {
-    const repeats = ([0, 1, 2, 3, 4, 5] as ReviewQuality[]).filter(
-      repeatsInSession,
-    );
+    const repeats = ([0, 1, 2, 3, 4, 5] as ReviewQuality[]).filter(repeatsInSession);
     expect(repeats).toEqual([0, 1]);
   });
 });
@@ -409,21 +434,11 @@ describe("requeueCard", () => {
   });
 
   it("never puts the card back as the very next one", () => {
-    expect(requeueCard(["a", "b", "c"], "x", () => 0)).toEqual([
-      "a",
-      "x",
-      "b",
-      "c",
-    ]);
+    expect(requeueCard(["a", "b", "c"], "x", () => 0)).toEqual(["a", "x", "b", "c"]);
   });
 
   it("can put the card at the very end", () => {
-    expect(requeueCard(["a", "b", "c"], "x", () => 0.999)).toEqual([
-      "a",
-      "b",
-      "c",
-      "x",
-    ]);
+    expect(requeueCard(["a", "b", "c"], "x", () => 0.999)).toEqual(["a", "b", "c", "x"]);
   });
 
   it("spreads the card over every allowed position", () => {

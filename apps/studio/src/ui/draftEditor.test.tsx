@@ -1,10 +1,18 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { DraftEdit } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { AppError } from "@solid-memo/domain/appError";
-import { applyDraftChanges, type DraftChange, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import {
+  applyDraftChanges,
+  type DraftChange,
+  type ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { DEBOUNCE_MS, draftKey, draftScope, useDraftEditor, type DraftEditor } from "./draftEditor";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
@@ -35,13 +43,23 @@ function deferred<T>() {
 }
 
 /** The edit as the use case makes it: the changes on the draft given. */
-const made = (draft: ReleaseDraft, changes: readonly DraftChange[]): DraftEdit => ({ ok: true, draft: applyDraftChanges(draft, changes) as ReleaseDraft });
+const made = (draft: ReleaseDraft, changes: readonly DraftChange[]): DraftEdit => ({
+  ok: true,
+  draft: applyDraftChanges(draft, changes) as ReleaseDraft,
+});
 
-const rename = (en: string): DraftChange => ({ kind: "editChapter", id: "ch-apps", text: { title: { en } } });
+const rename = (en: string): DraftChange => ({
+  kind: "editChapter",
+  id: "ch-apps",
+  text: { title: { en } },
+});
 
 async function renderEditor(overrides: Partial<UseCases> = {}, { twice = false } = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const useCases = makeUseCasesFake({ getReleaseDraft: vi.fn(async () => courseDraft()), ...overrides });
+  const useCases = makeUseCasesFake({
+    getReleaseDraft: vi.fn(async () => courseDraft()),
+    ...overrides,
+  });
   const view = render(
     <QueryClientProvider client={queryClient}>
       <Probe useCases={useCases} />
@@ -52,13 +70,17 @@ async function renderEditor(overrides: Partial<UseCases> = {}, { twice = false }
   return { useCases, queryClient, view };
 }
 
-const chapterTitle = (id: string) => editor.draft!.chapters.find((node) => node.id === id)!.data.title;
+const chapterTitle = (id: string) =>
+  editor.draft!.chapters.find((node) => node.id === id)!.data.title;
 
 afterEach(() => vi.useRealTimers());
 
 describe("useDraftEditor", () => {
   it("makes a change at once, writes it, and keeps the draft as the write left it", async () => {
-    const written = { ...courseDraft(), root: { ...courseDraft().root, title: { en: "As written" } } };
+    const written = {
+      ...courseDraft(),
+      root: { ...courseDraft().root, title: { en: "As written" } },
+    };
     const write = deferred<DraftEdit>();
     const { useCases } = await renderEditor({ editReleaseDraft: vi.fn(() => write.promise) });
     let refusal: unknown;
@@ -68,7 +90,9 @@ describe("useDraftEditor", () => {
     expect(refusal).toBeNull();
     await waitFor(() => expect(chapterTitle("ch-apps")).toEqual({ en: "Applications" }));
     expect(editor.saving).toBe(true);
-    await waitFor(() => expect(useCases.editReleaseDraft).toHaveBeenCalledWith(DRAFT_URL, [rename("Applications")]));
+    await waitFor(() =>
+      expect(useCases.editReleaseDraft).toHaveBeenCalledWith(DRAFT_URL, [rename("Applications")]),
+    );
     await act(async () => write.resolve({ ok: true, draft: written }));
     await waitFor(() => expect(editor.saving).toBe(false));
     expect(editor.draft!.root.title).toEqual({ en: "As written" });
@@ -77,7 +101,9 @@ describe("useDraftEditor", () => {
   });
 
   it("writes typing once its document has been still a moment, the changes of that time together", async () => {
-    const { useCases } = await renderEditor({ editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)) });
+    const { useCases } = await renderEditor({
+      editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)),
+    });
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     act(() => {
       editor.edit([rename("A")], { debounce: true });
@@ -101,7 +127,9 @@ describe("useDraftEditor", () => {
   });
 
   it("writes what waits before a change that is not typing, and when the screen goes", async () => {
-    const { useCases, view } = await renderEditor({ editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)) });
+    const { useCases, view } = await renderEditor({
+      editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)),
+    });
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     act(() => {
       editor.edit([rename("Typed")], { debounce: true });
@@ -112,7 +140,10 @@ describe("useDraftEditor", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
     });
-    expect(vi.mocked(useCases.editReleaseDraft).mock.calls.map(([, changes]) => changes)).toEqual([[rename("Typed")], [{ kind: "moveChapter", id: "ch-apps", to: 0 }]]);
+    expect(vi.mocked(useCases.editReleaseDraft).mock.calls.map(([, changes]) => changes)).toEqual([
+      [rename("Typed")],
+      [{ kind: "moveChapter", id: "ch-apps", to: 0 }],
+    ]);
     act(() => {
       editor.edit([rename("Left")], { debounce: true });
     });
@@ -124,10 +155,15 @@ describe("useDraftEditor", () => {
   });
 
   it("writes typing at once when it changes several documents", async () => {
-    const { useCases } = await renderEditor({ editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)) });
+    const { useCases } = await renderEditor({
+      editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)),
+    });
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     act(() => {
-      editor.edit([rename("One"), { kind: "editChapter", id: "ch-pods", text: { title: { en: "Two" } } }], { debounce: true });
+      editor.edit(
+        [rename("One"), { kind: "editChapter", id: "ch-pods", text: { title: { en: "Two" } } }],
+        { debounce: true },
+      );
     });
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
@@ -164,7 +200,9 @@ describe("useDraftEditor", () => {
     act(() => {
       editor.edit([rename("Gone")]);
     });
-    await waitFor(() => expect(editor.failure).toEqual({ refusal: { refused: "missing", id: "ch-apps" } }));
+    await waitFor(() =>
+      expect(editor.failure).toEqual({ refusal: { refused: "missing", id: "ch-apps" } }),
+    );
     await waitFor(() => expect(chapterTitle("ch-apps")).toEqual({ en: "Apps" }));
     expect(useCases.getReleaseDraft).toHaveBeenCalledTimes(2);
     act(() => {
@@ -177,9 +215,16 @@ describe("useDraftEditor", () => {
   it("queues the writes of a draft, whatever their documents and screens, and takes the draft of the last", async () => {
     const first = deferred<DraftEdit>();
     const second = deferred<DraftEdit>();
-    const edit = vi.fn<UseCases["editReleaseDraft"]>().mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const edit = vi
+      .fn<UseCases["editReleaseDraft"]>()
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
     await renderEditor({ editReleaseDraft: edit }, { twice: true });
-    const pods: DraftChange = { kind: "editChapter", id: "ch-pods", text: { title: { en: "Stores" } } };
+    const pods: DraftChange = {
+      kind: "editChapter",
+      id: "ch-pods",
+      text: { title: { en: "Stores" } },
+    };
     act(() => {
       editor.edit([rename("Applications")]);
     });
@@ -203,7 +248,10 @@ describe("useDraftEditor", () => {
   });
 
   it("writes what another editor of the draft has waiting before its own change, and every editor says it saves", async () => {
-    const { useCases } = await renderEditor({ editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)) }, { twice: true });
+    const { useCases } = await renderEditor(
+      { editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)) },
+      { twice: true },
+    );
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     act(() => {
       editor.edit([rename("Typed")], { debounce: true });
@@ -215,7 +263,10 @@ describe("useDraftEditor", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
     });
-    expect(vi.mocked(useCases.editReleaseDraft).mock.calls.map(([, changes]) => changes)).toEqual([[rename("Typed")], [{ kind: "moveChapter", id: "ch-apps", to: 0 }]]);
+    expect(vi.mocked(useCases.editReleaseDraft).mock.calls.map(([, changes]) => changes)).toEqual([
+      [rename("Typed")],
+      [{ kind: "moveChapter", id: "ch-apps", to: 0 }],
+    ]);
     await act(async () => {
       await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
     });
@@ -255,7 +306,10 @@ describe("useDraftEditor", () => {
   it("reads the draft afresh after a failed write only once the writes after it are done", async () => {
     const first = deferred<DraftEdit>();
     const second = deferred<DraftEdit>();
-    const edit = vi.fn<UseCases["editReleaseDraft"]>().mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const edit = vi
+      .fn<UseCases["editReleaseDraft"]>()
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
     const { useCases } = await renderEditor({ editReleaseDraft: edit });
     act(() => {
       editor.edit([rename("One")]);
@@ -275,7 +329,10 @@ describe("useDraftEditor", () => {
   it("queues the writes of a document, and leaves the draft as made while another write is on its way", async () => {
     const first = deferred<DraftEdit>();
     const second = deferred<DraftEdit>();
-    const edit = vi.fn<UseCases["editReleaseDraft"]>().mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const edit = vi
+      .fn<UseCases["editReleaseDraft"]>()
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
     const { queryClient } = await renderEditor({ editReleaseDraft: edit });
     act(() => {
       editor.edit([rename("One")]);
@@ -288,18 +345,27 @@ describe("useDraftEditor", () => {
     });
     // The second waits in the document's queue.
     expect(edit).toHaveBeenCalledTimes(1);
-    expect(queryClient.getMutationCache().getAll()[0]!.options.scope).toEqual({ id: draftScope(DRAFT_URL) });
+    expect(queryClient.getMutationCache().getAll()[0]!.options.scope).toEqual({
+      id: draftScope(DRAFT_URL),
+    });
     await act(async () => first.resolve({ ok: true, draft: courseDraft() }));
     await waitFor(() => expect(edit).toHaveBeenCalledTimes(2));
     // The first's draft would undo the second: it is not taken.
     expect(chapterTitle("ch-apps")).toEqual({ en: "Two" });
     await act(async () => second.resolve(made(courseDraft(), [rename("Two")])));
     await waitFor(() => expect(editor.saving).toBe(false));
-    expect(queryClient.getQueryData<ReleaseDraft>(draftKey(DRAFT_URL))!.chapters.find((node) => node.id === "ch-apps")!.data.title).toEqual({ en: "Two" });
+    expect(
+      queryClient
+        .getQueryData<ReleaseDraft>(draftKey(DRAFT_URL))!
+        .chapters.find((node) => node.id === "ch-apps")!.data.title,
+    ).toEqual({ en: "Two" });
   });
 
   it("holds a draft released, and one the instance's data check holds", async () => {
-    const released = { ...courseDraft(), root: { ...courseDraft().root, releasedAs: "https://pod.example/releases/solid/v1.ttl" } };
+    const released = {
+      ...courseDraft(),
+      root: { ...courseDraft().root, releasedAs: "https://pod.example/releases/solid/v1.ttl" },
+    };
     await renderEditor({ getReleaseDraft: vi.fn(async () => released) });
     expect(editor.readOnly).toBe("released");
   });

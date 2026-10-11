@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { triplesOf } from "../ntriples";
 
 /**
@@ -10,7 +14,13 @@ import { triplesOf } from "../ntriples";
  */
 export function fakePod() {
   const documents = new Map<string, { triples: Set<string>; etag: string }>();
-  const requests: { method: string; url: string; ifMatch: string | null; ifNoneMatch: string | null; status: number }[] = [];
+  const requests: {
+    method: string;
+    url: string;
+    ifMatch: string | null;
+    ifNoneMatch: string | null;
+    status: number;
+  }[] = [];
   let versions = 0;
   const nextEtag = () => `"v${++versions}"`;
   /** Answers to give instead, once each, by method and URL. */
@@ -22,9 +32,22 @@ export function fakePod() {
     const url = String(input);
     const method = (init?.method ?? "GET").toUpperCase();
     const headers = new Headers(init?.headers);
-    const answer = (status: number, body: string | null = null, extra: Record<string, string> = {}) => {
-      requests.push({ method, url, ifMatch: headers.get("If-Match"), ifNoneMatch: headers.get("If-None-Match"), status });
-      const response = new Response(status === 304 || status === 204 || status === 205 ? null : body, { status, headers: extra });
+    const answer = (
+      status: number,
+      body: string | null = null,
+      extra: Record<string, string> = {},
+    ) => {
+      requests.push({
+        method,
+        url,
+        ifMatch: headers.get("If-Match"),
+        ifNoneMatch: headers.get("If-None-Match"),
+        status,
+      });
+      const response = new Response(
+        status === 304 || status === 204 || status === 205 ? null : body,
+        { status, headers: extra },
+      );
       Object.defineProperty(response, "url", { value: url });
       return response;
     };
@@ -33,14 +56,18 @@ export function fakePod() {
       const [{ status, before }] = failures.splice(failure, 1);
       before?.();
       if (status !== 412) return answer(status, "failed");
-      if (headers.get("If-Match") !== null || headers.get("If-None-Match") === "*") return answer(412);
+      if (headers.get("If-Match") !== null || headers.get("If-None-Match") === "*")
+        return answer(412);
     }
     if ((method === "GET" || method === "HEAD") && held !== null) await held;
     const doc = documents.get(url);
     if (method === "GET" || method === "HEAD") {
       if (doc === undefined) return answer(404, "");
       if (headers.get("If-None-Match") === doc.etag) return answer(304, null, { ETag: doc.etag });
-      return answer(200, [...doc.triples].join("\n"), { "Content-Type": "text/turtle", ETag: doc.etag });
+      return answer(200, [...doc.triples].join("\n"), {
+        "Content-Type": "text/turtle",
+        ETag: doc.etag,
+      });
     }
     const ifMatch = headers.get("If-Match");
     if (ifMatch !== null && ifMatch !== doc?.etag) return answer(412);

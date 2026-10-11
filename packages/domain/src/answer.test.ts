@@ -1,9 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { answerIdOf, isRecalled, monthOfStudyDay } from "./answer";
 
 describe("answers", () => {
   it("are named by their time and a random part", () => {
-    expect(answerIdOf("2026-10-03T08:15:30.123Z", "k3f9qa")).toBe("answer-20261003T081530123Z-k3f9qa");
+    expect(answerIdOf("2026-10-03T08:15:30.123Z", "k3f9qa")).toBe(
+      "answer-20261003T081530123Z-k3f9qa",
+    );
   });
 
   it("belong to the month of their study day", () => {

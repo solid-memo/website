@@ -1,9 +1,17 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { SavedRelease } from "@solid-memo/application/releasePublishing";
 import { isGuestUrl } from "@solid-memo/domain/guest";
 import { draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
-import { isReleaseContainer, releasesContainerOf, releaseUrlIn } from "@solid-memo/domain/release/releasePlace";
+import {
+  isReleaseContainer,
+  releasesContainerOf,
+  releaseUrlIn,
+} from "@solid-memo/domain/release/releasePlace";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
@@ -34,7 +42,7 @@ interface Action<T> {
  *
  * - **Publish to my Pod**, unless it is a guest's (whose pod is this
  *   browser's alone): in a folder, the instance's `releases/` unless the
- *   user types another, at `<folder><name>/v<N>.ttl`. The user ticks that
+ *   user types another, at `<folder><name>/v<N>.ttl`. The user checks that
  *   the release will be public and can never be changed, first. The
  *   release check's errors are counted, with a link to it; publishing
  *   checks again, the shapes too, and an error stops it.
@@ -44,7 +52,7 @@ interface Action<T> {
  *   the steps that send it to the library's `decks/` as a pull request.
  *
  * Nothing is published while a change waits to be saved (`saving`), and
- * nothing is published or started while the instance's catalogue may not
+ * nothing is published or started while the instance's catalog may not
  * be written (`hold`).
  */
 export function ReleasePublishScreen({
@@ -81,33 +89,65 @@ export function ReleasePublishScreen({
   const place = draftPlaceOf(draft.url)!;
   const released = draft.root.releasedAs;
   useActivity(released, () => t("studio.publish.releasedAt", { url: released! }));
-  useActivity(downloaded, () => t("studio.publish.downloaded", { file: downloaded!.name, url: downloaded!.url }));
+  useActivity(downloaded, () =>
+    t("studio.publish.downloaded", { file: downloaded!.name, url: downloaded!.url }),
+  );
   return (
     <>
       <section aria-labelledby="release-publish-heading">
         <h3 id="release-publish-heading">{t("studio.publish.heading")}</h3>
         {released !== undefined ? (
-          <Released url={released} hold={hold} healthHref={links.healthHref} isPublic={isPublic} makePublic={makePublic} startNext={startNext} />
+          <Released
+            url={released}
+            hold={hold}
+            healthHref={links.healthHref}
+            isPublic={isPublic}
+            makePublic={makePublic}
+            startNext={startNext}
+          />
         ) : isGuestUrl(draft.url) ? (
           <p class="hint">{t("studio.publish.guest")}</p>
         ) : (
-          <PublishForm place={place} hold={hold} saving={saving} errors={errors} links={links} publish={publish} />
+          <PublishForm
+            place={place}
+            hold={hold}
+            saving={saving}
+            errors={errors}
+            links={links}
+            publish={publish}
+          />
         )}
       </section>
       <section aria-labelledby="release-download-heading">
         <h3 id="release-download-heading">{t("studio.publish.downloadHeading")}</h3>
         <p class="hint">{t("studio.publish.downloadIntro")}</p>
         {/* Only aria-disabled while it saves, so it keeps the focus. */}
-        <button type="button" aria-disabled={download.pending} onClick={() => !download.pending && download.run()}>
+        <button
+          type="button"
+          aria-disabled={download.pending}
+          onClick={() => !download.pending && download.run()}
+        >
           {t("studio.publish.download")}
         </button>
-        <p role="status">{downloaded !== null && !download.pending && tx("studio.publish.downloaded", { file: <code>{downloaded.name}</code>, url: <code>{downloaded.url}</code> })}</p>
+        <p role="status">
+          {downloaded !== null &&
+            !download.pending &&
+            tx("studio.publish.downloaded", {
+              file: <code>{downloaded.name}</code>,
+              url: <code>{downloaded.url}</code>,
+            })}
+        </p>
         <ErrorMessage error={download.error} />
         <p>{t("studio.publish.stepsIntro")}</p>
         <ol class="release-steps">
-          <li>{tx("studio.publish.stepCopy", { file: <code>{`decks/${place.name}/v${place.version}.ttl`}</code> })}</li>
           <li>
-            {t("studio.publish.stepLibrary")} <code>npm run format:turtle &amp;&amp; npm run library</code>
+            {tx("studio.publish.stepCopy", {
+              file: <code>{`decks/${place.name}/v${place.version}.ttl`}</code>,
+            })}
+          </li>
+          <li>
+            {t("studio.publish.stepLibrary")}{" "}
+            <code>npm run format:turtle &amp;&amp; npm run library</code>
           </li>
           <li>
             {t("studio.publish.stepCheck")} <code>npm run library:check -- --base main</code>
@@ -177,10 +217,16 @@ function PublishForm({
           onInput={(event) => setFolder(event.currentTarget.value)}
         />
         <p id="release-folder-hint" class={valid ? "hint field-hint" : "error"}>
-          {target === null ? t("studio.publish.folderInvalid") : t("studio.publish.address", { url: target })}
+          {target === null
+            ? t("studio.publish.folderInvalid")
+            : t("studio.publish.address", { url: target })}
         </p>
         <label class="radio-option">
-          <input type="checkbox" checked={understood} onChange={(event) => setUnderstood(event.currentTarget.checked)} />{" "}
+          <input
+            type="checkbox"
+            checked={understood}
+            onChange={(event) => setUnderstood(event.currentTarget.checked)}
+          />{" "}
           {t("studio.publish.confirm")}
         </label>
         {/* Only aria-disabled while it publishes, so it keeps the focus should that fail. */}
@@ -188,7 +234,11 @@ function PublishForm({
           {t("studio.publish.publish")}
         </button>
       </form>
-      <p role="status">{publish.pending ? t("studio.publish.publishing") : saving && t("studio.publish.waitSaving")}</p>
+      <p role="status">
+        {publish.pending
+          ? t("studio.publish.publishing")
+          : saving && t("studio.publish.waitSaving")}
+      </p>
       <ErrorMessage error={publish.error} />
     </>
   );
@@ -224,7 +274,11 @@ function Released({
       ) : (
         <>
           <p class="warning">{t("studio.publish.private")}</p>
-          <button type="button" aria-disabled={makePublic.pending} onClick={() => !makePublic.pending && makePublic.run(url)}>
+          <button
+            type="button"
+            aria-disabled={makePublic.pending}
+            onClick={() => !makePublic.pending && makePublic.run(url)}
+          >
             {t("studio.publish.makePublic")}
           </button>
         </>
@@ -233,7 +287,12 @@ function Released({
       <ErrorMessage error={makePublic.error} />
       <p class="hint">{t("studio.publish.nextHint")}</p>
       <ReadOnlyNotice reason={hold} subject="catalogue" healthHref={healthHref} />
-      <button type="button" disabled={hold !== null} aria-disabled={startNext.pending} onClick={() => !startNext.pending && startNext.run(url)}>
+      <button
+        type="button"
+        disabled={hold !== null}
+        aria-disabled={startNext.pending}
+        onClick={() => !startNext.pending && startNext.run(url)}
+      >
         {t("studio.releases.startNext")}
       </button>
       <p role="status">{startNext.pending && t("studio.releases.starting")}</p>

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import type { Answers } from "./CourseQuestion.ts";
 import { Screen } from "./Screen.ts";
@@ -24,7 +28,9 @@ export class Chapter extends Screen {
   }
 
   get continue(): Locator {
-    return this.page.getByRole("main").getByRole("button", { name: this.t("chapterPlayer.continue"), exact: true });
+    return this.page
+      .getByRole("main")
+      .getByRole("button", { name: this.t("chapterPlayer.continue"), exact: true });
   }
 
   /** The chapter's title, once it is open at a step's theory. */
@@ -41,20 +47,31 @@ export class Chapter extends Screen {
    */
   async readTheory(): Promise<{ step: number; chunks: number }> {
     return this.intent("Read the step's theory", async () => {
-      const step = Number(this.tp("chapterPlayer.step").exec(await this.step.innerText())!.groups!.number);
+      const step = Number(
+        this.tp("chapterPlayer.step").exec(await this.step.innerText())!.groups!.number,
+      );
       let chunks = 1;
       while (await this.continue.isVisible()) {
         await this.continue.click();
         chunks += 1;
         // The part moved to takes the focus, so it is read from its start.
-        await expect(this.page.getByText(this.tp("chapterPlayer.part", { number: chunks }))).toBeFocused();
+        await expect(
+          this.page.getByText(this.tp("chapterPlayer.part", { number: chunks })),
+        ).toBeFocused();
       }
-      await expect(this.page.getByText(this.t("chapterPlayer.theoryHidden"), { exact: true })).toBeVisible();
+      await expect(
+        this.page.getByText(this.t("chapterPlayer.theoryHidden"), { exact: true }),
+      ).toBeVisible();
       await this.toQuestions.click();
       await expect(this.toQuestions).toBeHidden();
-      await expect(this.page.getByRole("heading", { level: 3, name: this.tp("chapterPlayer.check") }).or(
-        this.page.getByRole("heading", { level: 3, name: this.tp("chapterPlayer.checkNumbered") }),
-      )).toBeFocused();
+      await expect(
+        this.page.getByRole("heading", { level: 3, name: this.tp("chapterPlayer.check") }).or(
+          this.page.getByRole("heading", {
+            level: 3,
+            name: this.tp("chapterPlayer.checkNumbered"),
+          }),
+        ),
+      ).toBeFocused();
       return { step, chunks };
     });
   }
@@ -68,12 +85,18 @@ export class Chapter extends Screen {
     const steps = [await this.readTheory()];
     for (;;) {
       await this.app.question.answer(known);
-      const toReview = this.page.getByRole("button", { name: this.t("chapterPlayer.toReview"), exact: true });
+      const toReview = this.page.getByRole("button", {
+        name: this.t("chapterPlayer.toReview"),
+        exact: true,
+      });
       if (await toReview.isVisible()) {
         await toReview.click();
         return steps;
       }
-      await this.page.getByRole("main").getByRole("button", { name: this.t("chapterPlayer.next"), exact: true }).click();
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("chapterPlayer.next"), exact: true })
+        .click();
       // The step's next question, or the next step's theory.
       await expect(this.app.question.check.or(this.continue).or(this.toQuestions)).toBeVisible();
       if (!(await this.app.question.check.isVisible())) steps.push(await this.readTheory());

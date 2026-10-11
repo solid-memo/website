@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { IDBFactory, IDBObjectStore } from "fake-indexeddb";
 import { describe, expect, it, vi } from "vitest";
 import { createIndexedDbResourceStore, webLock } from "./indexedDbResourceStore";
@@ -8,9 +12,19 @@ const URL_B = "https://guest.example/b";
 describe("createIndexedDbResourceStore", () => {
   it("keeps, lists, deletes and forgets resources, bytes included", async () => {
     const store = createIndexedDbResourceStore({ indexedDB: new IDBFactory() });
-    await store.set(URL_A, { kind: "file", etag: '"1"', contentType: "image/png", bytes: new Uint8Array([1, 2]) });
+    await store.set(URL_A, {
+      kind: "file",
+      etag: '"1"',
+      contentType: "image/png",
+      bytes: new Uint8Array([1, 2]),
+    });
     await store.set(URL_B, { kind: "rdf", etag: '"2"', triples: ["<a> <b> <c> ."] });
-    expect(await store.get(URL_A)).toEqual({ kind: "file", etag: '"1"', contentType: "image/png", bytes: new Uint8Array([1, 2]) });
+    expect(await store.get(URL_A)).toEqual({
+      kind: "file",
+      etag: '"1"',
+      contentType: "image/png",
+      bytes: new Uint8Array([1, 2]),
+    });
     expect((await store.urls()).sort()).toEqual([URL_A, URL_B]);
     await store.delete(URL_A);
     expect(await store.get(URL_A)).toBeUndefined();
@@ -20,8 +34,14 @@ describe("createIndexedDbResourceStore", () => {
 
   it("keeps resources for the next page", async () => {
     const indexedDB = new IDBFactory();
-    await createIndexedDbResourceStore({ indexedDB }).set(URL_A, { kind: "container", etag: '"1"' });
-    expect(await createIndexedDbResourceStore({ indexedDB }).get(URL_A)).toEqual({ kind: "container", etag: '"1"' });
+    await createIndexedDbResourceStore({ indexedDB }).set(URL_A, {
+      kind: "container",
+      etag: '"1"',
+    });
+    expect(await createIndexedDbResourceStore({ indexedDB }).get(URL_A)).toEqual({
+      kind: "container",
+      etag: '"1"',
+    });
   });
 
   it("runs exclusive work under the guest pod's lock", async () => {
@@ -50,7 +70,9 @@ describe("createIndexedDbResourceStore", () => {
 
   it("fails when its transaction is aborted", async () => {
     const store = createIndexedDbResourceStore({ indexedDB: new IDBFactory() });
-    const get = vi.spyOn(IDBObjectStore.prototype, "get").mockImplementation(function (this: IDBObjectStore) {
+    const get = vi.spyOn(IDBObjectStore.prototype, "get").mockImplementation(function (
+      this: IDBObjectStore,
+    ) {
       this.transaction.abort();
       return {} as IDBRequest;
     });
@@ -61,7 +83,9 @@ describe("createIndexedDbResourceStore", () => {
   it("fails when a write fails", async () => {
     const store = createIndexedDbResourceStore({ indexedDB: new IDBFactory() });
     // A function cannot be stored: the put throws a DataCloneError before any transaction event.
-    await expect(store.set(URL_A, { kind: "container", etag: (() => "") as never })).rejects.toThrow();
+    await expect(
+      store.set(URL_A, { kind: "container", etag: (() => "") as never }),
+    ).rejects.toThrow();
   });
 });
 

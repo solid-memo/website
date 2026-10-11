@@ -1,8 +1,24 @@
 # Spaced repetition (SM-2)
 
+Spaced repetition shows a card again just before you
+would forget it: soon after you learn it, then at longer and longer
+intervals. Solid Memo uses the SM-2 method to pick each card's next day
+from how well you remembered it. This page says how that schedule is
+worked out, how a day's study session is built, and where the cards
+stand.
+
 How Solid Memo schedules cards. Implemented entirely in the domain layer
 ([sm2.ts](../packages/domain/src/sm2.ts), [scheduling.ts](../packages/domain/src/scheduling.ts))
 as pure functions.
+
+**Reference.** SM-2 is the algorithm of SuperMemo 2, first described in
+Woźniak, P. A. (1990). *Optimization of learning*. Master's thesis,
+University of Technology in Poznań. Its description, with the formulas
+used here, is published by SuperMemo as
+[Application of a computer to improve the results obtained in working with the SuperMemo method](https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method).
+Solid Memo departs from it where [The SM-2 transition](#the-sm-2-transition)
+says so. [policy.md](policy.md) lists it with the other rules the code
+follows.
 
 ## Prompts and directions
 
@@ -50,13 +66,39 @@ flowchart TD
 Decisions fixed in code (and tests):
 
 - The **updated** ease factor drives interval growth (computed before the
-  interval, per Wozniak's original description).
+  interval, per Woźniak's original description).
 - Lapses (`q < 3`) keep the ease factor; only repetitions and interval reset.
   The card returns the next study day (interval 1).
 - A grade of 0 or 1 additionally sends the card round again **within the
   session** (`repeatsInSession`); see *Study sessions*. Each pass is a
   full SM-2 review, so the state stored after the repeat is the one that
   counts.
+- The original repeats every card graded below 4 after the session,
+  until each scores 4 or more. Solid Memo repeats only grades 0 and 1,
+  so a lapse graded 2 (reset, but not repeated) and a hard but correct
+  answer (3) end the card's day.
+- Intervals are rounded to whole days.
+
+### Worked examples
+
+Each row is one answer: the state before it, the grade, and the state
+after it. [sm2.test.ts](../packages/domain/src/sm2.test.ts) reads this
+table and checks that the code gives every row, so a change to the
+rules, or to a row, that leaves the two apart fails the tests. Keep its
+header and its three number columns as they are.
+
+| Before: ease, interval, repetitions | Grade | After: ease, interval, repetitions | Why |
+|---|---|---|---|
+| 2.5, 0, 0 (new) | 5 | 2.6, 1, 1 | The first repetition: 1 day. |
+| 2.5, 0, 0 (new) | 3 | 2.36, 1, 1 | A pass lowers the ease; the interval is still 1 day. |
+| 2.6, 1, 1 | 5 | 2.7, 6, 2 | The second repetition: 6 days. |
+| 2.5, 6, 2 | 3 | 2.36, 14, 3 | 6 × 2.36 = 14.16, rounded: the **updated** ease sets the interval. |
+| 2.5, 6, 2 | 4 | 2.5, 15, 3 | Grade 4 keeps the ease: 6 × 2.5 = 15. |
+| 2.5, 6, 2 | 5 | 2.6, 16, 3 | 6 × 2.6 = 15.6, rounded. |
+| 2.0, 10, 3 | 3 | 1.86, 19, 4 | 10 × 1.86 = 18.6, rounded. |
+| 1.3, 10, 3 | 3 | 1.3, 13, 4 | The ease would be 1.16, so it stays at the floor, 1.3. |
+| 2.2, 30, 5 | 2 | 2.2, 1, 0 | A lapse: back to 1 day, the ease kept. |
+| 2.2, 30, 5 | 0 | 2.2, 1, 0 | Grades 0, 1 and 2 schedule alike. |
 
 ## Answer scales
 
@@ -118,7 +160,7 @@ Whether an answer is graded at all depends on the card's state
 - **No daily limit** applies: the learner reached the card in the
   course. A card introduced there still counts as introduced that day,
   so it uses up the deck's new-card budget in study (below).
-- **Afterwards** the cards are studied by flip-and-grade, with the
+- **Afterward** the cards are studied by flip-and-grade, with the
   instance's answer scale.
 
 ## Study days and the queue
@@ -126,7 +168,7 @@ Whether an answer is graded at all depends on the card's state
 Scheduling works in *study days*, not calendar days. `studyDayOf` shifts an
 instant back by `dayBoundaryHour` (default 4) before taking the local date —
 reviewing at 03:00 still counts as yesterday. Timezone caveat: study days are
-device-local; travelling shifts due times by a few hours (accepted for v1).
+device-local; traveling shifts due times by a few hours (accepted for v1).
 
 `buildStudyQueue` produces the day's session from cards + the deck's
 direction + review states + preferences — the instance's, with the
@@ -291,7 +333,7 @@ The day's answers of that deck then leave the
 [answer log](data-model.md#the-answer-log) as well, so the statistics
 match the cards: answers still on their way to the log are added first,
 then removed with the rest.
-"Today" honours the instance's `dayBoundaryHour`, like the queue.
+"Today" honors the instance's `dayBoundaryHour`, like the queue.
 
 The [Studio](studio.md#card-inspector) changes a state outside a review.
 Setting a card's due day (`rescheduleState`, in

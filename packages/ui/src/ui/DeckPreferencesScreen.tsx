@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { Fragment } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -109,7 +113,7 @@ export function DeckPreferencesScreen({
   const { missing, ask, clear } = useMissingLanguage("deck-name");
   const renameRef = useRef<HTMLButtonElement>(null);
   const nameRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
-  /** Rename takes the focus once it is back: the renaming was saved or cancelled. */
+  /** Rename takes the focus once it is back: the renaming was saved or canceled. */
   const backToRename = useRef(false);
 
   useLayoutEffect(() => {
@@ -149,11 +153,7 @@ export function DeckPreferencesScreen({
 
   function handleRemove() {
     if (busy) return;
-    if (
-      window.confirm(
-        t("deckPreferences.removeConfirm", { title: readerText(deck.title) }),
-      )
-    ) {
+    if (window.confirm(t("deckPreferences.removeConfirm", { title: readerText(deck.title) }))) {
       onRemove();
     }
   }
@@ -199,10 +199,7 @@ export function DeckPreferencesScreen({
           </button>
         </div>
       ) : (
-        <form
-          class="card-edit"
-          onSubmit={(e) => handleRenameSubmit(e, deckName)}
-        >
+        <form class="card-edit" onSubmit={(e) => handleRenameSubmit(e, deckName)}>
           <LangTextField
             id="deck-name"
             label={t("deckPreferences.deckName")}
@@ -225,7 +222,9 @@ export function DeckPreferencesScreen({
             error={
               missing === undefined
                 ? null
-                : errorText(new AppError("textNeedsLanguage", { field: t("language.field.deckName") }))
+                : errorText(
+                    new AppError("textNeedsLanguage", { field: t("language.field.deckName") }),
+                  )
             }
           />
           <div class="edit-actions">
@@ -268,7 +267,11 @@ export function DeckPreferencesScreen({
                 disabled={busy}
               />
               <span id={`deck-${limit}-unit`} class="hint">
-                {limitUnit(t, limit, draft[limit] === "" ? preferences[limit] : Number(draft[limit]))}
+                {limitUnit(
+                  t,
+                  limit,
+                  draft[limit] === "" ? preferences[limit] : Number(draft[limit]),
+                )}
               </span>
             </span>
             {limit === "newCardsPerDay" && (

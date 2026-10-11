@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckGroup } from "@solid-memo/domain/deckTree";
@@ -29,11 +33,7 @@ export interface DeckPeek {
 export function DeckPeekScreen({ peek }: { peek: DeckPeek | null }) {
   const { t, tx, readerText, formatDate } = useI18n();
   if (peek === null) {
-    return (
-      <p class="hint">
-        {tx("studio.peek.none", { j: <kbd>j</kbd>, k: <kbd>k</kbd> })}
-      </p>
-    );
+    return <p class="hint">{tx("studio.peek.none", { j: <kbd>j</kbd>, k: <kbd>k</kbd> })}</p>;
   }
   const { deck, groups, cards, due, fresh, healthBadge, tabs } = peek;
   const name = readerText(deck.title);
@@ -45,7 +45,11 @@ export function DeckPeekScreen({ peek }: { peek: DeckPeek | null }) {
       {healthBadge}
       <dl>
         <dt>{t("studio.decks.group")}</dt>
-        <dd>{groups.length === 0 ? t("studio.decks.topLevel") : groups.map((group) => readerText(group.title)).join(" › ")}</dd>
+        <dd>
+          {groups.length === 0
+            ? t("studio.decks.topLevel")
+            : groups.map((group) => readerText(group.title)).join(" › ")}
+        </dd>
         <dt>{t("studio.decks.cards")}</dt>
         <dd>
           <CountCell count={cards} />

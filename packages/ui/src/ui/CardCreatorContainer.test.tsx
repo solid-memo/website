@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -49,18 +53,23 @@ function submitCard(front: string, back: string) {
     target: { value: front },
   });
   fireEvent.input(screen.getByLabelText("Back"), { target: { value: back } });
-  fireEvent.submit(
-    screen.getByRole("button", { name: "Add card" }).closest("form")!,
-  );
+  fireEvent.submit(screen.getByRole("button", { name: "Add card" }).closest("form")!);
 }
 
 describe("CardCreatorContainer", () => {
   it("adds a card, in the languages the deck's cards have, and stays on the page for the next one", async () => {
-    const useCases = makeUseCasesFake({ addCard: vi.fn(async () => card), listCards: vi.fn(async () => [card]) });
+    const useCases = makeUseCasesFake({
+      addCard: vi.fn(async () => card),
+      listCards: vi.fn(async () => [card]),
+    });
     const { queryClient } = renderContainer(useCases);
     const queueKey = ["studyQueue", deck.url];
     queryClient.setQueryData(queueKey, { due: [], newCards: [], studiedToday: 0 });
-    await waitFor(() => expect(document.getElementById("card-front-language-0")).toHaveTextContent("Language: Japanese"));
+    await waitFor(() =>
+      expect(document.getElementById("card-front-language-0")).toHaveTextContent(
+        "Language: Japanese",
+      ),
+    );
 
     submitCard("火", "fire");
 
@@ -73,9 +82,7 @@ describe("CardCreatorContainer", () => {
     await waitFor(() => {
       expect(queryClient.getQueryData(queueKey)).toBeUndefined();
     });
-    expect(
-      screen.getByRole("heading", { name: "New card" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "New card" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText("Front")).toHaveValue(""));
     expect(screen.getByText("Card added.")).toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText("Front")).toHaveFocus());
@@ -90,7 +97,11 @@ describe("CardCreatorContainer", () => {
         }),
       }),
     );
-    await waitFor(() => expect(document.getElementById("card-back-language-0")).toHaveTextContent("Language: English"));
+    await waitFor(() =>
+      expect(document.getElementById("card-back-language-0")).toHaveTextContent(
+        "Language: English",
+      ),
+    );
 
     submitCard("x", "y");
     expect(await screen.findByText("write refused")).toBeInTheDocument();

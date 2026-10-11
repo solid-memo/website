@@ -1,14 +1,20 @@
 # Shapes
 
+A shape is a machine-readable description of what valid
+Solid Memo data looks like: which properties a thing has, and of what
+kind. There is one shape for each kind of data and each format
+version. The app uses them to check data, to generate code, and to
+tell an old format from a new one.
+
 What a valid Solid Memo subject looks like, version by version, as
-SHACL; and how those shapes drive the code. One shape file per class
+[SHACL](https://www.w3.org/TR/shacl/); and how those shapes drive the code. One shape file per class
 per format version under [`ns/shapes/`](../ns/shapes/), published with
 the site at `https://solid-memo.com/ns/shapes/`
 ([ns.ts](../packages/vocab/src/ns.ts), [deployment.md](deployment.md)).
 
 ## Files and IRIs
 
-```
+```text
 instance/v1.ttl, v2.ttl       https://solid-memo.com/ns/shapes/instance/v1.ttl#shape
 deck/v1.ttl … v6.ttl          …/deck/v2.ttl#inPod  and  …/deck/v2.ttl#inLibrary
 library-deck/v5.ttl, v6.ttl   …/library-deck/v5.ttl#inLibrary  (library deck 5 on)
@@ -81,7 +87,7 @@ checked by the shapes every place shares (`<#shape>`).
   English: a Korean reader sees these in English. Where a shape sets
   none, the validator's own English stands, and the app says it in
   the reader's language by its constraint (`validation.constraint.*` in
-  the message catalogues), more generally.
+  the message catalogs), more generally.
 - **Rules a record cannot carry** — a card side has text or a picture
   (`sh:or`), the review snapshot is all five triples or none (`sh:xone`),
   a review state names its card with `sm:reviewOf` or is named
@@ -119,8 +125,8 @@ checked by the shapes every place shares (`<#shape>`).
 | Library deck series 1 | The deck across its releases in the library index: a `dcat:DatasetSeries` and `dcat:Dataset`; title, description, publisher 1..1; `dcat:first`, `dcat:last`, `dcat:hasCurrentVersion` 1..1; `dcat:hasVersion` 1..n; themes and keywords 0..n |
 | Library deck series 2 | Library deck series 1 with the version stated (`sh:hasValue 2`) and the title and description as language-tagged text, as in deck format 4 |
 | Library deck series 3 | Library deck series 2, but the keywords, copied from the current release, are language-tagged text, several per language, or untagged as a library deck 4 release has them |
-| Catalog 1 | A `dcat:Catalog` (an instance's `catalog.ttl#catalog`, the library index): title, description, `dcterms:publisher` 1..1; licence, modification time 0..1; `dcat:themeTaxonomy`, `dcat:dataset` 0..n. The library index's `sm:newcomerCourse` belongs to no shape ([deck-library.md](deck-library.md#courses)) |
-| Deck group 1 | In a pod (`DeckGroupV1`, beside the decks in `catalog.ttl`): a [deck group](data-model.md#deck-groups), a `sm:DeckGroup` and a `dcat:Catalog`; `dcterms:title` and `dcterms:description` 1..n language-tagged text, one per language (`sh:uniqueLang`); `dcterms:publisher` 1..1 IRI (the catalogue's); `dcat:dataset` (its decks) and `dcat:catalog` (its sub-groups) 0..n IRIs; `sm:position` 0..1, an integer ≥ 0. That a deck or group has one parent is not a shape rule: the reader decides one. A deck's `sm:position` and the catalogue's `dcat:catalog` belong to no shape, so `DeckV6` and `CatalogV1` keep them untouched |
+| Catalog 1 | A `dcat:Catalog` (an instance's `catalog.ttl#catalog`, the library index): title, description, `dcterms:publisher` 1..1; license, modification time 0..1; `dcat:themeTaxonomy`, `dcat:dataset` 0..n. The library index's `sm:newcomerCourse` belongs to no shape ([deck-library.md](deck-library.md#courses)) |
+| Deck group 1 | In a pod (`DeckGroupV1`, beside the decks in `catalog.ttl`): a [deck group](data-model.md#deck-groups), a `sm:DeckGroup` and a `dcat:Catalog`; `dcterms:title` and `dcterms:description` 1..n language-tagged text, one per language (`sh:uniqueLang`); `dcterms:publisher` 1..1 IRI (the catalog's); `dcat:dataset` (its decks) and `dcat:catalog` (its sub-groups) 0..n IRIs; `sm:position` 0..1, an integer ≥ 0. That a deck or group has one parent is not a shape rule: the reader decides one. A deck's `sm:position` and the catalog's `dcat:catalog` belong to no shape, so `DeckV6` and `CatalogV1` keep them untouched |
 | Agent 1 | A `foaf:Agent`: `foaf:name` 1..1, `foaf:mbox` 0..1 (a `mailto:` IRI) |
 | Distribution 1 | A `dcat:Distribution`: `dcat:accessURL` 1..1; `dcat:downloadURL`, `dcat:mediaType`, `dcterms:format` 0..1 |
 | Document receipt 1 | In an instance's [digest](data-model.md#the-digest): `sm:receiptOf` (the document) and `sm:documentVersion` (its ETag) 1..1; `sm:conformedTo` (the rules it conformed to) and `sm:latestFormat` 0..1 |
@@ -131,7 +137,7 @@ checked by the shapes every place shares (`<#shape>`).
 | Deck schedule 1 | In an instance's digest: `sm:scheduleOf` (the deck), `sm:cardsVersion`, `sm:reviewsVersion` (`"absent"` for none), `sm:scheduledDirection` (a concept of `sm:StudyDirections`), `sm:scheduledDayBoundaryHour` (0–23), `sm:scheduledOn` (`YYYY-MM-DD`), `sm:unreviewedCount`, `sm:reviewedOnDayCount`, `sm:introducedOnDayCount` 1..1; `sm:dueOnDay` 0..n, `"YYYY-MM-DD count"` |
 
 The DCAT and FOAF classes' values (an agent is a `foaf:Agent`, a theme a
-`skos:Concept`, a licence a `dcterms:LicenseDocument`) are checked by the
+`skos:Concept`, a license a `dcterms:LicenseDocument`) are checked by the
 DCAT-AP profile, with the reference data; Solid Memo's own shapes only
 say IRI (see [validation.md](validation.md#profiles-dcat-ap-and-skos)).
 

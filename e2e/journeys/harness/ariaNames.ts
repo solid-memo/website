@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The names an aria snapshot (Playwright's `locator.ariaSnapshot()`)
  * gives the elements of a role, in the order it lists them. A line is

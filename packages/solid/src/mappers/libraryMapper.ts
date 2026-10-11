@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   asUrl,
   getDatetime,
@@ -32,10 +36,10 @@ import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 
 /**
  * Every deck the library's index lists (see docs/deck-library.md): the
- * catalogue's datasets are the decks' series, each described by its
+ * catalog's datasets are the decks' series, each described by its
  * current release, which the index carries in full but for its cards.
  * A series or release that does not fit its shape is left out. The
- * course the catalogue offers to newcomers (sm:newcomerCourse) is
+ * course the catalog offers to newcomers (sm:newcomerCourse) is
  * flagged forNewcomers, if it is listed and is a course. The index is a
  * document of relative IRIs, so every URL here is where it can be
  * fetched from.
@@ -60,10 +64,12 @@ export function toLibraryDecks(index: SolidDataset): LibraryDeck[] {
 /**
  * What the index says that places a release in the library (the
  * Studio's release check, domain/release/releaseCheck.ts): its address,
- * its catalogue's publisher, and every release of every deck it lists.
+ * its catalog's publisher, and every release of every deck it lists.
  */
 export function toLibraryIndexView(indexUrl: string, index: SolidDataset): LibraryIndexView {
-  const catalog = getThingAll(index).find((thing) => getUrlAll(thing, RDF.type).includes(DCAT.Catalog));
+  const catalog = getThingAll(index).find((thing) =>
+    getUrlAll(thing, RDF.type).includes(DCAT.Catalog),
+  );
   return {
     url: indexUrl,
     publisher: catalog === undefined ? null : getUrl(catalog, DCTERMS.publisher),
@@ -79,7 +85,9 @@ function toLibraryDeck(
   const seriesThing = getThing(index, seriesUrl);
   const series = seriesThing === null ? null : readVersioned(seriesThing, "libraryDeckSeries");
   if (series === null) return null;
-  const { hasCurrentVersion, hasVersion } = migrate("libraryDeckSeries", series.record, { subject: seriesUrl });
+  const { hasCurrentVersion, hasVersion } = migrate("libraryDeckSeries", series.record, {
+    subject: seriesUrl,
+  });
   const currentThing = getThing(index, hasCurrentVersion);
   const current = currentThing === null ? null : readVersioned(currentThing, "libraryDeck");
   if (current === null) return null;
@@ -151,17 +159,16 @@ function toLibrarySource(url: string, thing: Thing | null): LibrarySource {
  * it would silently drop whatever the newer format added. Older formats
  * are brought up to the current one in memory.
  */
-export function toLibraryDeckContent(
-  url: string,
-  dataset: SolidDataset,
-): LibraryDeckContentOf {
+export function toLibraryDeckContent(url: string, dataset: SolidDataset): LibraryDeckContentOf {
   const things = getThingAll(dataset);
-  const deck = things.find((thing) =>
-    getUrlAll(thing, RDF.type).includes(SM.Deck),
-  );
+  const deck = things.find((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck));
   const formatVersion = deck === undefined ? 1 : storedVersionOf(deck);
   if (formatVersion > LATEST_VERSION.libraryDeck) {
-    throw new AppError("libraryDeckTooNew", { url, version: formatVersion, latest: LATEST_VERSION.libraryDeck });
+    throw new AppError("libraryDeckTooNew", {
+      url,
+      version: formatVersion,
+      latest: LATEST_VERSION.libraryDeck,
+    });
   }
   const read = deck === undefined ? null : readVersioned(deck, "libraryDeck");
   if (read === null) {
@@ -200,7 +207,10 @@ export function toStandaloneLibraryDeck(url: string, dataset: SolidDataset): Lib
   const release = migrate("libraryDeck", readVersioned(deck, "libraryDeck")!.record, { subject });
   const seriesThing = getThing(dataset, release.inSeries);
   const series = seriesThing === null ? null : readVersioned(seriesThing, "libraryDeckSeries");
-  const versions = series === null ? [subject] : migrate("libraryDeckSeries", series.record, { subject: release.inSeries }).hasVersion;
+  const versions =
+    series === null
+      ? [subject]
+      : migrate("libraryDeckSeries", series.record, { subject: release.inSeries }).hasVersion;
   return {
     ...content,
     releases: versions
@@ -209,7 +219,9 @@ export function toStandaloneLibraryDeck(url: string, dataset: SolidDataset): Lib
       .sort((a, b) => Number(a.version) - Number(b.version)),
     cardCount: cards.filter((card) => card.retired !== true).length,
     ...(release.created === undefined ? {} : { createdAt: release.created }),
-    sources: release.wasDerivedFrom.map((sourceUrl) => toLibrarySource(sourceUrl, getThing(dataset, sourceUrl))),
+    sources: release.wasDerivedFrom.map((sourceUrl) =>
+      toLibrarySource(sourceUrl, getThing(dataset, sourceUrl)),
+    ),
   };
 }
 
@@ -225,7 +237,8 @@ export function toCourseOutline(releaseUrl: string, dataset: SolidDataset): Cour
   for (const thing of getThingAll(dataset)) {
     const url = asUrl(thing);
     const chapter = readVersioned(thing, "chapter");
-    if (chapter !== null) chapters.push({ url, data: migrate("chapter", chapter.record, { subject: url }) });
+    if (chapter !== null)
+      chapters.push({ url, data: migrate("chapter", chapter.record, { subject: url }) });
     const step = readVersioned(thing, "step");
     if (step !== null) steps.push({ url, data: migrate("step", step.record, { subject: url }) });
   }
@@ -255,5 +268,10 @@ function toLibraryCard(url: string, thing: Thing, dataset: SolidDataset): Librar
   const read = readVersioned(thing, "card");
   if (read === null) return null;
   const data = migrate("card", read.record, { subject: asUrl(thing) });
-  return libraryCardFromRecord(asUrl(thing), formatVersion, data, distractorsOf(dataset, data.distractor));
+  return libraryCardFromRecord(
+    asUrl(thing),
+    formatVersion,
+    data,
+    distractorsOf(dataset, data.distractor),
+  );
 }

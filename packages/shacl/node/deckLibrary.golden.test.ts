@@ -1,10 +1,22 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, it } from "vitest";
 import type { Quad } from "n3";
 import { parseTurtle } from "@solid-memo/turtle/rdf";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
-import { buildIndex, courseProblems, loadValidators, markdownProblems, metadataProblems, validateLibrary, type DeckRelease } from "./deckLibrary.ts";
+import {
+  buildIndex,
+  courseProblems,
+  loadValidators,
+  markdownProblems,
+  metadataProblems,
+  validateLibrary,
+  type DeckRelease,
+} from "./deckLibrary.ts";
 
 /**
  * The golden test of the library's rules (docs/deck-library.md, Checks):
@@ -25,11 +37,20 @@ const OUTLINE_SUBJECT = /(\n<#[^>]*>\n\s+a solid-memo:(?:Card|Step|Chapter|Distr
 
 async function published(deck: string): Promise<DeckRelease> {
   const turtle = await readFile(join(DECKS_ROOT, deck, "v1.ttl"), "utf8");
-  return { deck, version: 1, turtle, quads: parseTurtle(turtle, `https://solid-memo.com/decks/${deck}/v1.ttl`) };
+  return {
+    deck,
+    version: 1,
+    turtle,
+    quads: parseTurtle(turtle, `https://solid-memo.com/decks/${deck}/v1.ttl`),
+  };
 }
 
 function rewritten(release: DeckRelease, turtle: string): DeckRelease {
-  return { ...release, turtle, quads: parseTurtle(turtle, `https://solid-memo.com/decks/${release.deck}/v1.ttl`) };
+  return {
+    ...release,
+    turtle,
+    quads: parseTurtle(turtle, `https://solid-memo.com/decks/${release.deck}/v1.ttl`),
+  };
 }
 
 function without(release: DeckRelease, drop: (q: Quad) => boolean): DeckRelease {
@@ -39,16 +60,30 @@ function without(release: DeckRelease, drop: (q: Quad) => boolean): DeckRelease 
 it("says what it said of published releases with faults put in", async () => {
   const validators = await loadValidators();
   const out: string[] = [];
-  const section = (title: string, problems: readonly string[]) => out.push(`## ${title}`, ...problems);
+  const section = (title: string, problems: readonly string[]) =>
+    out.push(`## ${title}`, ...problems);
   for (const deck of DECKS) {
     const release = await published(deck);
     // The course's own Markdown, some 2,000 texts, is checked by `npm run library:check`, as every release's is; here it would cost most of the test.
     const marked = deck === "solid-fundamentals" ? [] : markdownProblems(release);
-    section(`${deck}: as published`, [...metadataProblems(release), ...courseProblems(release), ...marked]);
+    section(`${deck}: as published`, [
+      ...metadataProblems(release),
+      ...courseProblems(release),
+      ...marked,
+    ]);
     section(`${deck}: at the next version's path`, metadataProblems({ ...release, version: 2 }));
-    const retired = rewritten(release, release.turtle.replace(OUTLINE_SUBJECT, "$1\n    <http://www.w3.org/2002/07/owl#deprecated> true ;"));
+    const retired = rewritten(
+      release,
+      release.turtle.replace(
+        OUTLINE_SUBJECT,
+        "$1\n    <http://www.w3.org/2002/07/owl#deprecated> true ;",
+      ),
+    );
     section(`${deck}: everything retired`, courseProblems(retired));
-    const outline = without(release, (q) => q.predicate.value === `${SCHEMA}isPartOf` || q.predicate.value === `${SCHEMA}position`);
+    const outline = without(
+      release,
+      (q) => q.predicate.value === `${SCHEMA}isPartOf` || q.predicate.value === `${SCHEMA}position`,
+    );
     section(`${deck}: no outline links`, courseProblems(outline));
     const card = /\n<(#[^>]+)>\n\s+a solid-memo:Card/.exec(release.turtle)![1];
     const coursed = rewritten(
@@ -59,17 +94,40 @@ it("says what it said of published releases with faults put in", async () => {
   }
   for (const deck of DECKS.slice(0, 2)) {
     const release = await published(deck);
-    const marked = rewritten(release, release.turtle.replace(OUTLINE_SUBJECT, "$1\n    solid-memo:textFormat solid-memo:markdown ;"));
+    const marked = rewritten(
+      release,
+      release.turtle.replace(
+        OUTLINE_SUBJECT,
+        "$1\n    solid-memo:textFormat solid-memo:markdown ;",
+      ),
+    );
     section(`${deck}: everything in Markdown`, markdownProblems(marked));
-    const subjects = [...new Set(release.quads.map((q) => q.subject.value).filter((s) => s.includes("#")))];
+    const subjects = [
+      ...new Set(release.quads.map((q) => q.subject.value).filter((s) => s.includes("#"))),
+    ];
     const dropped = new Set(subjects.filter((_, i) => i % 3 === 0));
     const next = { ...without(release, (q) => dropped.has(q.subject.value)), version: 2 };
-    const problems = await validateLibrary([release, next], buildIndex([release, next]), validators);
+    const problems = await validateLibrary(
+      [release, next],
+      buildIndex([release, next]),
+      validators,
+    );
     // The shapes' reports (several lines each) are pySHACL's and rdf-validate-shacl's words, not the rules'.
-    section(`${deck}: a next version that drops a third`, problems.filter((p) => !p.includes("\n")));
+    section(
+      `${deck}: a next version that drops a third`,
+      problems.filter((p) => !p.includes("\n")),
+    );
   }
   const course = await published("solid-fundamentals");
-  const stripped = without(course, (q) => [`${SM}distractorText`, `${SM}back`].includes(q.predicate.value) && !q.subject.value.includes("#ch-1"));
-  section("solid-fundamentals: no backs nor distractor text", courseProblems(stripped).slice(0, 40));
+  const stripped = without(
+    course,
+    (q) =>
+      [`${SM}distractorText`, `${SM}back`].includes(q.predicate.value) &&
+      !q.subject.value.includes("#ch-1"),
+  );
+  section(
+    "solid-fundamentals: no backs nor distractor text",
+    courseProblems(stripped).slice(0, 40),
+  );
   await expect(`${out.join("\n")}\n`).toMatchFileSnapshot("deckLibrary.golden.txt");
 }, 30_000);

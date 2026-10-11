@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   createSolidDataset,
   getThing,
@@ -43,7 +47,7 @@ import { SM } from "../vocab";
  *   format, and written as records (recordThing): what the shape owns is
  *   rewritten, anything else on the subject is kept.
  * - **Every other statement** (how the release was made, its sources
- *   and licence, the series it describes, and what a shaped subject says
+ *   and license, the series it describes, and what a shaped subject says
  *   beyond its shape) is read and written as it is: a raw triple.
  *
  * A subject is named in the draft as a fragment of its release document,
@@ -52,7 +56,10 @@ import { SM } from "../vocab";
  */
 
 /** The kinds of shaped subject a draft has besides its root, by the class that marks each. */
-const KINDS: readonly { list: Exclude<keyof ReleaseDraft, "url" | "course" | "root" | "triples" | "published">; shape: ShapeName }[] = [
+const KINDS: readonly {
+  list: Exclude<keyof ReleaseDraft, "url" | "course" | "root" | "triples" | "published">;
+  shape: ShapeName;
+}[] = [
   { list: "agents", shape: "agent" },
   { list: "distributions", shape: "distribution" },
   { list: "chapters", shape: "draftChapter" },
@@ -70,7 +77,12 @@ const LATEST = (shape: ShapeName): ShapeDescriptor => {
 export function termOf(term: Term): ReleaseTerm {
   switch (term.termType) {
     case "Literal":
-      return { kind: "literal", value: term.value, language: term.language, datatype: term.datatype.value };
+      return {
+        kind: "literal",
+        value: term.value,
+        language: term.language,
+        datatype: term.datatype.value,
+      };
     case "BlankNode":
       return { kind: "blank", value: term.value };
     default:
@@ -80,14 +92,23 @@ export function termOf(term: Term): ReleaseTerm {
 
 /** A subject or object of a triple: `_:label` for a blank node. */
 function subjectTerm(value: string): Term {
-  return (value.startsWith("_:") ? { termType: "BlankNode", value: value.slice(2) } : { termType: "NamedNode", value }) as Term;
+  return (
+    value.startsWith("_:")
+      ? { termType: "BlankNode", value: value.slice(2) }
+      : { termType: "NamedNode", value }
+  ) as Term;
 }
 
 /** A statement as a quad of the default graph, plain data that linearDataset's graphsOf and turtleOf read. */
 export function quadOf(subject: string, predicate: string, object: ReleaseTerm): Quad {
   const term =
     object.kind === "literal"
-      ? { termType: "Literal", value: object.value, language: object.language, datatype: { termType: "NamedNode", value: object.datatype } }
+      ? {
+          termType: "Literal",
+          value: object.value,
+          language: object.language,
+          datatype: { termType: "NamedNode", value: object.datatype },
+        }
       : subjectTerm(object.kind === "blank" ? `_:${object.value}` : object.value);
   return {
     subject: subjectTerm(subject),
@@ -105,7 +126,10 @@ export function keyOf(term: Term): string {
 /** One statement as a string, to compare by. */
 export function tripleKey(triple: DraftTriple): string {
   const { object } = triple;
-  const value = object.kind === "literal" ? `"${object.value}"@${object.language.toLowerCase()}^^${object.datatype}` : `${object.kind} ${object.value}`;
+  const value =
+    object.kind === "literal"
+      ? `"${object.value}"@${object.language.toLowerCase()}^^${object.datatype}`
+      : `${object.kind} ${object.value}`;
   return `${triple.subject} ${triple.predicate} ${value}`;
 }
 
@@ -145,17 +169,26 @@ export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraf
   const owned = new Map<string, { predicates: Set<string>; types: Set<string> }>();
   const own = (subject: string, descriptor: ShapeDescriptor, types: readonly string[] = []) =>
     owned.set(subject, {
-      predicates: new Set([...descriptor.fields.map((field) => field.predicate), ...descriptor.absent, SM.formatVersion]),
+      predicates: new Set([
+        ...descriptor.fields.map((field) => field.predicate),
+        ...descriptor.absent,
+        SM.formatVersion,
+      ]),
       types: new Set([descriptor.targetClass, ...descriptor.additionalTypes, ...types]),
     });
 
   const rootThing = getThing(dataset, url);
   const rootTypes = rootThing === null ? [] : getUrlAll(rootThing, RDF_TYPE);
-  const root = rootThing === null || !rootTypes.includes(SM.Deck) ? null : readRecord(rootThing, DRAFT_DECK_V1);
+  const root =
+    rootThing === null || !rootTypes.includes(SM.Deck)
+      ? null
+      : readRecord(rootThing, DRAFT_DECK_V1);
   if (root === null) return null;
   own(url, DRAFT_DECK_V1, [SCHEMA_COURSE]);
 
-  const nodes: Record<string, DraftNode<unknown>[]> = Object.fromEntries(KINDS.map(({ list }) => [list, []]));
+  const nodes: Record<string, DraftNode<unknown>[]> = Object.fromEntries(
+    KINDS.map(({ list }) => [list, []]),
+  );
   const subjects = [...new Set(quads.map((quad) => keyOf(quad.subject)))];
   for (const subject of subjects) {
     const id = idIn({ url }, subject);
@@ -177,12 +210,21 @@ export function draftFromQuads(quads: readonly Quad[], url: string): ReleaseDraf
       if (quad.predicate.value === RDF_TYPE) return !shaped.types.has(quad.object.value);
       return !shaped.predicates.has(quad.predicate.value);
     })
-    .map((quad): DraftTriple => ({ subject: keyOf(quad.subject), predicate: quad.predicate.value, object: termOf(quad.object) }));
+    .map(
+      (quad): DraftTriple => ({
+        subject: keyOf(quad.subject),
+        predicate: quad.predicate.value,
+        object: termOf(quad.object),
+      }),
+    );
   return {
     url,
     course: rootTypes.includes(SCHEMA_COURSE),
     root,
-    ...(nodes as unknown as Pick<ReleaseDraft, "agents" | "distributions" | "chapters" | "steps" | "cards" | "distractors">),
+    ...(nodes as unknown as Pick<
+      ReleaseDraft,
+      "agents" | "distributions" | "chapters" | "steps" | "cards" | "distractors"
+    >),
     triples,
     published: NOTHING_PUBLISHED,
   };
@@ -205,7 +247,8 @@ export interface DraftEntry {
  */
 export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
   const places = draftDocuments(draft);
-  const documentOf = (iri: string) => draftDocumentUrl(draft.url, places.get(iri) ?? { kind: "release" });
+  const documentOf = (iri: string) =>
+    draftDocumentUrl(draft.url, places.get(iri) ?? { kind: "release" });
   const podIri = (iri: string) => {
     const id = idIn(draft, iri);
     return id === null ? iri : `${documentOf(iri)}#${id}`;
@@ -216,7 +259,9 @@ export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
     document: draft.url,
     subject: draft.url,
     shaped: { descriptor: DRAFT_DECK_V1, record: pod.root },
-    raw: draft.course ? [{ subject: draft.url, predicate: RDF_TYPE, object: { kind: "iri", value: SCHEMA_COURSE } }] : [],
+    raw: draft.course
+      ? [{ subject: draft.url, predicate: RDF_TYPE, object: { kind: "iri", value: SCHEMA_COURSE } }]
+      : [],
   });
   for (const { list, shape } of KINDS) {
     (draft[list] as readonly DraftNode<unknown>[]).forEach((node, at) => {
@@ -224,7 +269,10 @@ export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
       entries.set(iri, {
         document: documentOf(iri),
         subject: podIri(iri),
-        shaped: { descriptor: LATEST(shape), record: (pod[list] as readonly DraftNode<unknown>[])[at]!.data },
+        shaped: {
+          descriptor: LATEST(shape),
+          record: (pod[list] as readonly DraftNode<unknown>[])[at]!.data,
+        },
         raw: [],
       });
     });
@@ -233,7 +281,11 @@ export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
     const key = triple.subject;
     let entry = entries.get(key);
     if (entry === undefined) {
-      entry = { document: documentOf(key), subject: key.startsWith("_:") ? key : podIri(key), raw: [] };
+      entry = {
+        document: documentOf(key),
+        subject: key.startsWith("_:") ? key : podIri(key),
+        raw: [],
+      };
       entries.set(key, entry);
     }
     entry.raw.push(pod.triples[at]!);
@@ -251,14 +303,24 @@ export function draftQuads(draft: ReleaseDraft): Quad[] {
     document: draft.url,
     subject: draft.url,
     shaped: { descriptor: DRAFT_DECK_V1, record: draft.root },
-    raw: draft.course ? [{ subject: draft.url, predicate: RDF_TYPE, object: { kind: "iri", value: SCHEMA_COURSE } }] : [],
+    raw: draft.course
+      ? [{ subject: draft.url, predicate: RDF_TYPE, object: { kind: "iri", value: SCHEMA_COURSE } }]
+      : [],
   };
   const nodes = KINDS.flatMap(({ list, shape }) =>
     (draft[list] as readonly DraftNode<unknown>[]).map(
-      (node): DraftEntry => ({ document: draft.url, subject: iriIn(draft, node.id), shaped: { descriptor: LATEST(shape), record: node.data }, raw: [] }),
+      (node): DraftEntry => ({
+        document: draft.url,
+        subject: iriIn(draft, node.id),
+        shaped: { descriptor: LATEST(shape), record: node.data },
+        raw: [],
+      }),
     ),
   );
-  return [...[root, ...nodes].flatMap(entryQuads), ...draft.triples.map((triple) => quadOf(triple.subject, triple.predicate, triple.object))];
+  return [
+    ...[root, ...nodes].flatMap(entryQuads),
+    ...draft.triples.map((triple) => quadOf(triple.subject, triple.predicate, triple.object)),
+  ];
 }
 
 /** A subject as the quads its document holds of it, written new. */
@@ -266,8 +328,16 @@ export function entryQuads(entry: DraftEntry): Quad[] {
   const shaped =
     entry.shaped === undefined
       ? []
-      : quadsOf(setThing(createSolidDataset(), recordThing(entry.subject, entry.shaped.descriptor, entry.shaped.record, null)));
-  return [...shaped, ...entry.raw.map((triple) => quadOf(triple.subject, triple.predicate, triple.object))];
+      : quadsOf(
+          setThing(
+            createSolidDataset(),
+            recordThing(entry.subject, entry.shaped.descriptor, entry.shaped.record, null),
+          ),
+        );
+  return [
+    ...shaped,
+    ...entry.raw.map((triple) => quadOf(triple.subject, triple.predicate, triple.object)),
+  ];
 }
 
 /** Whether two entries say the same of their subject, in the same place. */

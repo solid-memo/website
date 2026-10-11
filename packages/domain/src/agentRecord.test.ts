@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { agentToRecord, agentUrlOf, authorFromAgentRecord } from "./agentRecord";
 
@@ -12,7 +16,9 @@ describe("agentUrlOf", () => {
   });
 
   it("names an author without letters or digits by a placeholder and a hash of the name", () => {
-    expect(agentUrlOf(`${CATALOG}#deck-1`, "—")).toMatch(new RegExp(`^${CATALOG}#agent-unnamed-[0-9a-f]{6}$`));
+    expect(agentUrlOf(`${CATALOG}#deck-1`, "—")).toMatch(
+      new RegExp(`^${CATALOG}#agent-unnamed-[0-9a-f]{6}$`),
+    );
     expect(agentUrlOf(CATALOG, "—")).not.toBe(agentUrlOf(CATALOG, "–"));
   });
 

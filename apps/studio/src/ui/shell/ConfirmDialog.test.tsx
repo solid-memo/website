@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { useConfirm } from "./ConfirmDialog";
@@ -9,7 +13,14 @@ function Page({ onConfirm }: { onConfirm: () => void }) {
     <>
       <button
         type="button"
-        onClick={() => ask({ heading: "Delete the planet", text: "Delete Mars? This cannot be undone.", action: "Delete", onConfirm })}
+        onClick={() =>
+          ask({
+            heading: "Delete the planet",
+            text: "Delete Mars? This cannot be undone.",
+            action: "Delete",
+            onConfirm,
+          })
+        }
       >
         Delete Mars
       </button>

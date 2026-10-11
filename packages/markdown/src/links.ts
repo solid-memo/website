@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Whether a Markdown link is followed, and where it leads: only an
  * absolute `https:` URL without a user name or password is

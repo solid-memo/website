@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { AppError } from "./appError";
 import type { Deck } from "./deck";
@@ -20,28 +24,35 @@ const deck: Deck = {
 };
 
 describe("withProvenance", () => {
-  it("replaces the authors, tidied, and the licence", () => {
-    expect(withProvenance(deck, { authors: ["  Ada  Lovelace ", "Alan Turing<alan@example.org>", " "], license: CC0 })).toEqual({
+  it("replaces the authors, tidied, and the license", () => {
+    expect(
+      withProvenance(deck, {
+        authors: ["  Ada  Lovelace ", "Alan Turing<alan@example.org>", " "],
+        license: CC0,
+      }),
+    ).toEqual({
       ...deck,
       authors: ["Ada  Lovelace", "Alan Turing <alan@example.org>"],
       license: CC0,
     });
   });
 
-  it("removes the licence, and keeps one another app wrote", () => {
+  it("removes the license, and keeps one another app wrote", () => {
     const { license: _, ...without } = deck;
     expect(withProvenance(deck, { authors: [] })).toEqual({ ...without, authors: [] });
     expect(withProvenance(deck, { authors: [], license: OWN })).toEqual({ ...deck, authors: [] });
   });
 
-  it("refuses a licence it does not offer", () => {
+  it("refuses a license it does not offer", () => {
     expect(() => withProvenance({ ...deck, license: BY }, { authors: [], license: OWN })).toThrow(
       new AppError("licenseUnknown", { url: OWN }),
     );
   });
 
   it("refuses an author with an address but no name", () => {
-    expect(() => withProvenance(deck, { authors: ["<ada@example.org>"] })).toThrow(new AppError("authorEmpty"));
+    expect(() => withProvenance(deck, { authors: ["<ada@example.org>"] })).toThrow(
+      new AppError("authorEmpty"),
+    );
   });
 
   it("refuses an author named twice, as the same agent node would hold both", () => {

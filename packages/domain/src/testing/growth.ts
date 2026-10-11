@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * How many times longer work takes on an input `times` as large: the best
  * of five runs at each size, the sizes taken in turn after a run to warm
@@ -15,7 +19,11 @@
  * `prepare` builds the input of a size and returns the work to time, so
  * building it is not timed.
  */
-export function growth(prepare: (size: number) => () => unknown, size: number, times: number): number {
+export function growth(
+  prepare: (size: number) => () => unknown,
+  size: number,
+  times: number,
+): number {
   const small = prepare(size);
   const large = prepare(size * times);
   small();

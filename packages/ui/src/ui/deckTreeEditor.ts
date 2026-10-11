@@ -1,8 +1,25 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
-import { hashKey, useMutation, useQueries, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
+import {
+  hashKey,
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
-import { applyDeckTreeEdit, type DeckGroup, type DeckTree, type DeckTreeEdit, type TreeNode } from "@solid-memo/domain/deckTree";
+import {
+  applyDeckTreeEdit,
+  type DeckGroup,
+  type DeckTree,
+  type DeckTreeEdit,
+  type TreeNode,
+} from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
 import { isCopyOf, releaseHost } from "@solid-memo/domain/library";
@@ -26,7 +43,9 @@ export function deckTreeKey(instanceUrl: string): unknown[] {
 
 /** Every group's URL in the nodes, at any depth. */
 function groupUrls(nodes: readonly TreeNode[]): string[] {
-  return nodes.flatMap((node) => (node.kind === "group" ? [node.group.url, ...groupUrls(node.children)] : []));
+  return nodes.flatMap((node) =>
+    node.kind === "group" ? [node.group.url, ...groupUrls(node.children)] : [],
+  );
 }
 
 /** The nodes, the deck `url` names under its new title. */
@@ -95,10 +114,10 @@ export function useDeckTreeEditor(
 
   const scope = catalogScope(instance.url);
   const pending = () =>
-    queryClient
-      .getMutationCache()
-      .findAll({ predicate: (mutation) => mutation.options.scope?.id === scope && mutation.state.status === "pending" })
-      .length;
+    queryClient.getMutationCache().findAll({
+      predicate: (mutation) =>
+        mutation.options.scope?.id === scope && mutation.state.status === "pending",
+    }).length;
   const editMutation = useMutation({
     scope: { id: scope },
     mutationFn: (edit: DeckTreeEdit) => useCases.editDeckTree(instance.url, edit),
@@ -138,13 +157,17 @@ export function useDeckTreeEditor(
 
   const retitle = (deck: Deck, title: LangText) => {
     const tree = queryClient.getQueryData<DeckTree>(treeKey)!;
-    queryClient.setQueryData(treeKey, { ...tree, children: retitled(tree.children, deck.url, title) });
+    queryClient.setQueryData(treeKey, {
+      ...tree,
+      children: retitled(tree.children, deck.url, title),
+    });
   };
 
   // In the arrangement's scope: both write the catalog it is kept in.
   const renameMutation = useMutation({
     scope: { id: scope },
-    mutationFn: ({ deck, title }: { deck: Deck; title: LangText }) => useCases.renameDeck(deck, title),
+    mutationFn: ({ deck, title }: { deck: Deck; title: LangText }) =>
+      useCases.renameDeck(deck, title),
     onMutate: async ({ deck, title }) => {
       setFailure(null);
       await queryClient.cancelQueries({ queryKey: treeKey });
@@ -170,7 +193,9 @@ export function useDeckTreeEditor(
 
   const groups = new Set(groupUrls(treeQuery.data.children));
   // Only groups still there: one deleted, here or elsewhere, is forgotten at the next change.
-  const collapsed = (collapsedBy[instance.url] ?? collapsedGroups(instance.url)).filter((url) => groups.has(url));
+  const collapsed = (collapsedBy[instance.url] ?? collapsedGroups(instance.url)).filter((url) =>
+    groups.has(url),
+  );
   function remember(urls: readonly string[]) {
     rememberCollapsed(instance.url, urls);
     setCollapsedBy((all) => ({ ...all, [instance.url]: urls }));
@@ -182,7 +207,11 @@ export function useDeckTreeEditor(
       tree: treeQuery.data,
       collapsed: new Set(collapsed),
       onToggle: (url) =>
-        remember(collapsed.includes(url) ? collapsed.filter((other) => other !== url) : [...collapsed, url]),
+        remember(
+          collapsed.includes(url)
+            ? collapsed.filter((other) => other !== url)
+            : [...collapsed, url],
+        ),
       onUnfold: (urls) => remember(collapsed.filter((url) => !urls.includes(url))),
       onEdit: (edit) => {
         if (edit.kind === "removeGroup") remember(collapsed.filter((url) => url !== edit.group));
@@ -228,7 +257,11 @@ export function useCopies(
   const linked =
     library === undefined
       ? []
-      : decks.filter((deck) => deck.sourceUrl !== undefined && !library.some((libraryDeck) => isCopyOf(deck, libraryDeck)));
+      : decks.filter(
+          (deck) =>
+            deck.sourceUrl !== undefined &&
+            !library.some((libraryDeck) => isCopyOf(deck, libraryDeck)),
+        );
   const releaseQueries = useQueries({
     queries: linked.map((deck) => ({
       queryKey: ["deckRelease", deck.sourceUrl],
@@ -237,12 +270,22 @@ export function useCopies(
       refetchOnWindowFocus: false,
     })),
   });
-  const courses = new Set((library ?? []).filter((deck) => deck.isCourse === true).map((deck) => deck.seriesUrl));
+  const courses = new Set(
+    (library ?? []).filter((deck) => deck.isCourse === true).map((deck) => deck.seriesUrl),
+  );
   const linkedSources = new Set(linked.map((deck) => deck.sourceUrl!));
-  const linkedCourses = new Set(linked.filter((_, at) => releaseQueries[at]!.data?.isCourse === true).map((deck) => deck.sourceUrl!));
+  const linkedCourses = new Set(
+    linked
+      .filter((_, at) => releaseQueries[at]!.data?.isCourse === true)
+      .map((deck) => deck.sourceUrl!),
+  );
   return {
     isCourse: (deck) =>
-      deck.sourceUrl !== undefined && (courses.has(librarySeriesUrlOf(deck.sourceUrl)) || linkedCourses.has(deck.sourceUrl)),
-    linkedHost: (deck) => (deck.sourceUrl !== undefined && linkedSources.has(deck.sourceUrl) ? releaseHost(deck.sourceUrl) : null),
+      deck.sourceUrl !== undefined &&
+      (courses.has(librarySeriesUrlOf(deck.sourceUrl)) || linkedCourses.has(deck.sourceUrl)),
+    linkedHost: (deck) =>
+      deck.sourceUrl !== undefined && linkedSources.has(deck.sourceUrl)
+        ? releaseHost(deck.sourceUrl)
+        : null,
   };
 }

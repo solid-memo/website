@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { CardFace, CardRowBack, CardRowFront, CardThumbnail, ROW_TEXT_MAX } from "./CardFace";
@@ -13,15 +17,18 @@ describe("CardFace", () => {
 
   it("shows text alone", () => {
     const { container } = render(<CardFace side="front" text={{ "": "水" }} />);
-    expect(container.querySelector(".card-face.card-front")).toHaveTextContent(
-      "水",
-    );
+    expect(container.querySelector(".card-face.card-front")).toHaveTextContent("水");
     expect(container.querySelector("img")).toBeNull();
   });
 
   it("marks text in another language than the page's with its language, and untagged text with none", () => {
     render(
-      <CardFace side="front" text={{ sv: "sjuksköterska" }} label={{ en: "Meaning" }} note={{ de: "Beruf" }} />,
+      <CardFace
+        side="front"
+        text={{ sv: "sjuksköterska" }}
+        label={{ en: "Meaning" }}
+        note={{ de: "Beruf" }}
+      />,
     );
     expect(screen.getByText("sjuksköterska")).toHaveAttribute("lang", "sv");
     expect(screen.getByText("Meaning")).not.toHaveAttribute("lang");
@@ -54,7 +61,13 @@ describe("CardFace", () => {
   });
 
   it("shows a label above the text", () => {
-    const { container } = render(<CardFace side="back" text={{ "": "Finansmäklare" }} label={{ en: "Out of use · replaced by" }} />);
+    const { container } = render(
+      <CardFace
+        side="back"
+        text={{ "": "Finansmäklare" }}
+        label={{ en: "Out of use · replaced by" }}
+      />,
+    );
     const [label, text] = container.querySelectorAll(".card-back p");
     expect(label).toHaveClass("card-label");
     expect(label).toHaveTextContent("Out of use · replaced by");
@@ -62,8 +75,16 @@ describe("CardFace", () => {
   });
 
   it("shows a note under the text", () => {
-    const { container } = render(<CardFace side="back" text={{ "": "Finansmäklare" }} note={{ en: "Replaced in version 30." }} />);
-    expect(container.querySelector(".card-back p.card-note")).toHaveTextContent("Replaced in version 30.");
+    const { container } = render(
+      <CardFace
+        side="back"
+        text={{ "": "Finansmäklare" }}
+        note={{ en: "Replaced in version 30." }}
+      />,
+    );
+    expect(container.querySelector(".card-back p.card-note")).toHaveTextContent(
+      "Replaced in version 30.",
+    );
   });
 
   it("shows the label and note in the reader's language", () => {
@@ -82,19 +103,26 @@ describe("CardFace", () => {
   });
 
   it("shows the text in the reader's language, else in English", () => {
-    const text = { en: "The Starry Night — Vincent van Gogh, 1889", sv: "Stjärnenatt — Vincent van Gogh, 1889" };
+    const text = {
+      en: "The Starry Night — Vincent van Gogh, 1889",
+      sv: "Stjärnenatt — Vincent van Gogh, 1889",
+    };
     const { container, rerender } = render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <CardFace side="back" text={text} />
       </I18nProvider>,
     );
-    expect(container.querySelector(".card-back")).toHaveTextContent("Stjärnenatt — Vincent van Gogh, 1889");
+    expect(container.querySelector(".card-back")).toHaveTextContent(
+      "Stjärnenatt — Vincent van Gogh, 1889",
+    );
     rerender(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <CardFace side="back" text={{ en: "Mona Lisa — Leonardo da Vinci, 1500s" }} />
       </I18nProvider>,
     );
-    expect(container.querySelector(".card-back")).toHaveTextContent("Mona Lisa — Leonardo da Vinci, 1500s");
+    expect(container.querySelector(".card-back")).toHaveTextContent(
+      "Mona Lisa — Leonardo da Vinci, 1500s",
+    );
   });
 
   it("shows a picture alone, described for screen readers", () => {
@@ -119,12 +147,27 @@ describe("CardFace", () => {
 
   it("describes a picture by the card's own description, in the reader's language, marked when another", () => {
     const { container, rerender } = render(
-      <CardFace side="front" text={{ "": "Which country?" }} imageUrl={FLAG} imageDescription={{ en: "A black, red and green flag", sv: "En svart, röd och grön flagga" }} />,
+      <CardFace
+        side="front"
+        text={{ "": "Which country?" }}
+        imageUrl={FLAG}
+        imageDescription={{
+          en: "A black, red and green flag",
+          sv: "En svart, röd och grön flagga",
+        }}
+      />,
     );
     const image = () => container.querySelector("img")!;
     expect(image()).toHaveAttribute("alt", "A black, red and green flag");
     expect(image()).not.toHaveAttribute("lang");
-    rerender(<CardFace side="back" text={{}} imageUrl={FLAG} imageDescription={{ sv: "En svart, röd och grön flagga" }} />);
+    rerender(
+      <CardFace
+        side="back"
+        text={{}}
+        imageUrl={FLAG}
+        imageDescription={{ sv: "En svart, röd och grön flagga" }}
+      />,
+    );
     expect(image()).toHaveAttribute("alt", "En svart, röd och grön flagga");
     expect(image()).toHaveAttribute("lang", "sv");
     const empty = render(<CardFace side="back" text={{}} imageUrl={FLAG} imageDescription={{}} />);
@@ -146,11 +189,24 @@ describe("CardFace", () => {
 
   it("enlarges its picture on a tap, the picture still read by its description", () => {
     render(
-      <CardFace side="front" text={{ "": "Which country?" }} imageUrl={FLAG} imageDescription={{ sv: "En svart, röd och grön flagga" }} />,
+      <CardFace
+        side="front"
+        text={{ "": "Which country?" }}
+        imageUrl={FLAG}
+        imageDescription={{ sv: "En svart, röd och grön flagga" }}
+      />,
     );
     const button = screen.getByRole("button", { name: "Enlarge picture" });
-    expect(screen.getByRole("img", { name: "En svart, röd och grön flagga" })).toHaveAttribute("lang", "sv");
-    vi.spyOn(screen.getByRole("img"), "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 40, height: 20 } as DOMRect);
+    expect(screen.getByRole("img", { name: "En svart, röd och grön flagga" })).toHaveAttribute(
+      "lang",
+      "sv",
+    );
+    vi.spyOn(screen.getByRole("img"), "getBoundingClientRect").mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 40,
+      height: 20,
+    } as DOMRect);
     fireEvent.click(button);
     expect(button).toHaveAttribute("aria-expanded", "true");
     expect(document.querySelector(".picture-zoom-layer")).not.toBeNull();
@@ -174,9 +230,9 @@ describe("CardThumbnail", () => {
 describe("CardThumbnail alt", () => {
   it("takes a name when the picture is all there is", () => {
     render(<CardThumbnail imageUrl={FLAG} alt="Picture for: Afghanistan" />);
-    expect(
-      screen.getByRole("img", { name: "Picture for: Afghanistan" }),
-    ).toHaveClass("card-thumbnail");
+    expect(screen.getByRole("img", { name: "Picture for: Afghanistan" })).toHaveClass(
+      "card-thumbnail",
+    );
   });
 });
 
@@ -196,15 +252,18 @@ describe("CardRowFront", () => {
 
   it("names a picture-only front after the back, so its link has a name", () => {
     link({}, { "": "Afghanistan" });
-    expect(
-      screen.getByRole("link", { name: "Picture for: Afghanistan" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Picture for: Afghanistan" })).toBeInTheDocument();
   });
 
   it("names a picture-only front by its description, when the card gives one, marked with its language", () => {
     const { container } = render(
       <a href="#card">
-        <CardRowFront front={{}} back={{ "": "Afghanistan" }} imageUrl={FLAG} imageDescription={{ sv: "En svart, röd och grön flagga" }} />
+        <CardRowFront
+          front={{}}
+          back={{ "": "Afghanistan" }}
+          imageUrl={FLAG}
+          imageDescription={{ sv: "En svart, röd och grön flagga" }}
+        />
       </a>,
     );
     expect(screen.getByRole("link", { name: "En svart, röd och grön flagga" })).toBeInTheDocument();
@@ -214,7 +273,12 @@ describe("CardRowFront", () => {
   it("keeps a described picture decorative beside the front's text", () => {
     const { container } = render(
       <a href="#card">
-        <CardRowFront front={{ "": "Kabul" }} back={{}} imageUrl={FLAG} imageDescription={{ en: "A flag" }} />
+        <CardRowFront
+          front={{ "": "Kabul" }}
+          back={{}}
+          imageUrl={FLAG}
+          imageDescription={{ en: "A flag" }}
+        />
       </a>,
     );
     expect(screen.getByRole("link", { name: "Kabul" })).toBeInTheDocument();
@@ -232,20 +296,26 @@ describe("CardRowFront", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <a href="#card">
-          <CardRowFront front={{}} back={{ en: "Afghanistan", sv: "Afghanistan (sv)" }} imageUrl={FLAG} />
+          <CardRowFront
+            front={{}}
+            back={{ en: "Afghanistan", sv: "Afghanistan (sv)" }}
+            imageUrl={FLAG}
+          />
         </a>
       </I18nProvider>,
     );
-    expect(
-      screen.getByRole("link", { name: "Bild till: Afghanistan (sv)" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Bild till: Afghanistan (sv)" })).toBeInTheDocument();
   });
 });
 
 describe("CardRowBack", () => {
   it("keeps the picture decorative beside the back's text", () => {
     const { container } = render(
-      <CardRowBack back={{ "": "Afghanistan" }} imageUrl={FLAG} imageDescription={{ en: "A map" }} />,
+      <CardRowBack
+        back={{ "": "Afghanistan" }}
+        imageUrl={FLAG}
+        imageDescription={{ en: "A map" }}
+      />,
     );
     expect(container).toHaveTextContent("Afghanistan");
     expect(container.querySelector("img")).toHaveAttribute("alt", "");
@@ -259,7 +329,9 @@ describe("CardRowBack", () => {
 
   it("names a picture-only back by its side when the card gives no description", () => {
     render(<CardRowBack back={{}} imageUrl={FLAG} />);
-    expect(screen.getByRole("img", { name: "Picture on the back of the card" })).not.toHaveAttribute("lang");
+    expect(
+      screen.getByRole("img", { name: "Picture on the back of the card" }),
+    ).not.toHaveAttribute("lang");
   });
 });
 
@@ -270,12 +342,16 @@ describe("a card in Markdown", () => {
         side="back"
         text={{ en: "`git diff --staged`" }}
         label={{ en: "*Command*\n\n- x" }}
-        note={{ en: "Without `--staged`:\n\n| Command | Compares |\n|-|-|\n| `git diff` | tree ↔ index |" }}
+        note={{
+          en: "Without `--staged`:\n\n| Command | Compares |\n|-|-|\n| `git diff` | tree ↔ index |",
+        }}
         textFormat={SM.markdown}
       />,
     );
     const face = container.querySelector(".card-face")!;
-    expect(face.querySelector(":scope > p:not(.card-label) > code")).toHaveTextContent("git diff --staged");
+    expect(face.querySelector(":scope > p:not(.card-label) > code")).toHaveTextContent(
+      "git diff --staged",
+    );
     expect(face.querySelector(":scope > p.card-label")!.innerHTML).toBe("<em>Command</em> x");
     expect(face.querySelector(":scope > div.md.card-note")).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Table" })).toHaveTextContent("tree ↔ index");
@@ -306,19 +382,36 @@ describe("a card in Markdown", () => {
 
   it("names a picture-only front's picture after the back's label", () => {
     render(
-      <CardRowFront front={{}} back={{ en: "**Kabul**\n\nThe capital" }} imageUrl={FLAG} textFormat={SM.markdown} />,
+      <CardRowFront
+        front={{}}
+        back={{ en: "**Kabul**\n\nThe capital" }}
+        imageUrl={FLAG}
+        textFormat={SM.markdown}
+      />,
     );
     expect(screen.getByRole("img")).toHaveAccessibleName("Picture for: Kabul");
   });
 
   it("shows a row's front past a rule, and names its picture when the front shows no text", () => {
     const { container, unmount } = render(
-      <CardRowFront front={{ en: "---\nWhat is X?" }} back={{ en: "b" }} imageUrl={FLAG} textFormat={SM.markdown} />,
+      <CardRowFront
+        front={{ en: "---\nWhat is X?" }}
+        back={{ en: "b" }}
+        imageUrl={FLAG}
+        textFormat={SM.markdown}
+      />,
     );
     expect(container).toHaveTextContent("What is X?");
     expect(container.querySelector("img")).toHaveAttribute("alt", "");
     unmount();
-    render(<CardRowFront front={{ en: "* * *" }} back={{ en: "Kabul" }} imageUrl={FLAG} textFormat={SM.markdown} />);
+    render(
+      <CardRowFront
+        front={{ en: "* * *" }}
+        back={{ en: "Kabul" }}
+        imageUrl={FLAG}
+        textFormat={SM.markdown}
+      />,
+    );
     expect(screen.getByRole("img")).toHaveAccessibleName("Picture for: Kabul");
   });
 });

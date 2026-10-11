@@ -1,8 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   createSolidDataset,
   deleteFile,
   deleteSolidDataset,
-  getSolidDataset,
+  type getSolidDataset,
   saveSolidDatasetAt,
   setThing,
   solidDatasetAsTurtle,
@@ -83,7 +87,10 @@ export class PreconditionFailedError extends AppError {
  */
 const READS = new WeakMap<
   typeof globalThis.fetch,
-  { inFlight: Map<string, Promise<Dataset>>; known: Map<string, { etag: string; dataset: Dataset }> }
+  {
+    inFlight: Map<string, Promise<Dataset>>;
+    known: Map<string, { etag: string; dataset: Dataset }>;
+  }
 >();
 
 function readsOf(fetch: typeof globalThis.fetch) {
@@ -242,9 +249,12 @@ export async function saveDataset<T extends SolidDataset>(
   const etag = isEdit ? strong(ETAGS.get(info)) : undefined;
   forgetRead(url, fetch);
   try {
-    await saveSolidDatasetAt(url, dataset, { fetch: ownPatches(withIfMatch(fetch, etag), dataset, whole) });
+    await saveSolidDatasetAt(url, dataset, {
+      fetch: ownPatches(withIfMatch(fetch, etag), dataset, whole),
+    });
   } catch (error) {
-    if (statusOf(error) === 412) throw new PreconditionFailedError(url, isEdit ? "unchanged" : "absent");
+    if (statusOf(error) === 412)
+      throw new PreconditionFailedError(url, isEdit ? "unchanged" : "absent");
     throw error;
   }
   // The pod need not say the new ETag; a later write reads again.
@@ -286,7 +296,10 @@ export async function deleteIfPresent(url: string, fetch: typeof globalThis.fetc
 }
 
 /** The fetch, with `If-Match` added to the request that writes (the only one @inrupt/solid-client makes for it). */
-function withIfMatch(fetch: typeof globalThis.fetch, etag: string | undefined): typeof globalThis.fetch {
+function withIfMatch(
+  fetch: typeof globalThis.fetch,
+  etag: string | undefined,
+): typeof globalThis.fetch {
   if (etag === undefined) return fetch;
   return (input, init) => {
     const headers = new Headers(init?.headers);
@@ -302,16 +315,28 @@ function withIfMatch(fetch: typeof globalThis.fetch, etag: string | undefined): 
  * always (`whole`); other headers kept. @inrupt/solid-client takes the
  * answer as its PATCH's.
  */
-function ownPatches(fetch: typeof globalThis.fetch, dataset: SolidDataset, whole: boolean): typeof globalThis.fetch {
+function ownPatches(
+  fetch: typeof globalThis.fetch,
+  dataset: SolidDataset,
+  whole: boolean,
+): typeof globalThis.fetch {
   return async (input, init) => {
     if (init?.method !== "PATCH") return fetch(input, init);
     const body = patchBody(dataset) ?? init.body;
-    if (!whole && (typeof body !== "string" || new TextEncoder().encode(body).length <= MAX_PATCH_BYTES)) {
+    if (
+      !whole &&
+      (typeof body !== "string" || new TextEncoder().encode(body).length <= MAX_PATCH_BYTES)
+    ) {
       return fetch(input, { ...init, body });
     }
     const headers = new Headers(init.headers);
     headers.set("Content-Type", "text/turtle");
-    return fetch(input, { ...init, method: "PUT", headers, body: await solidDatasetAsTurtle(dataset) });
+    return fetch(input, {
+      ...init,
+      method: "PUT",
+      headers,
+      body: await solidDatasetAsTurtle(dataset),
+    });
   };
 }
 
@@ -322,7 +347,11 @@ function ownPatches(fetch: typeof globalThis.fetch, dataset: SolidDataset, whole
  * app is tested on creates the document (and its container) when it is
  * missing, and keeps every one of several concurrent inserts.
  */
-export function appendToDocument(url: string, thing: Thing, fetch: typeof globalThis.fetch): Promise<void> {
+export function appendToDocument(
+  url: string,
+  thing: Thing,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
   return appendAllToDocument(url, [thing], fetch);
 }
 
@@ -387,7 +416,10 @@ export function patchBody(dataset: SolidDataset): string | null {
 
 function tripleLine(quad: Quad): string | null {
   const { subject, predicate, object } = quad;
-  if (subject.termType !== "NamedNode" || (object.termType !== "NamedNode" && object.termType !== "Literal")) {
+  if (
+    subject.termType !== "NamedNode" ||
+    (object.termType !== "NamedNode" && object.termType !== "Literal")
+  ) {
     return null;
   }
   return `${iri(subject.value)} ${iri(predicate.value)} ${object.termType === "Literal" ? literal(object) : iri(object.value)} .`;
@@ -407,7 +439,9 @@ function strong(etag: string | undefined): string | undefined {
   return etag === undefined || etag.startsWith("W/") ? undefined : etag;
 }
 
-function resourceInfoOf(dataset: object): WithServerResourceInfo["internal_resourceInfo"] | undefined {
+function resourceInfoOf(
+  dataset: object,
+): WithServerResourceInfo["internal_resourceInfo"] | undefined {
   return (dataset as Partial<WithServerResourceInfo>).internal_resourceInfo;
 }
 

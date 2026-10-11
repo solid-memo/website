@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import type { DeckFile } from "@solid-memo/domain/deckFile";
@@ -13,7 +17,10 @@ const file: DeckFile = {
   name: "capitals.ttl",
   format: "turtle",
   content: {
-    deck: { ...makeDeck("deck-x", { en: "Capitals" }), completedChapters: ["https://lib.example/c.ttl#ch1"] },
+    deck: {
+      ...makeDeck("deck-x", { en: "Capitals" }),
+      completedChapters: ["https://lib.example/c.ttl#ch1"],
+    },
     cards: [makeCard(kanji, "a"), makeCard(kanji, "b")],
     reviews: [
       {
@@ -81,12 +88,17 @@ describe("TransferScreen", () => {
     const view = render(shown({ exported: 1 }));
     view.rerender(shown({ exported: 2 }));
     view.rerender(shown({ exported: 2, imported: kanji }));
-    expect(log.mock.calls).toEqual([[expect.stringMatching(/^Handed 2 decks/)], ["Imported Kanji N5."]]);
+    expect(log.mock.calls).toEqual([
+      [expect.stringMatching(/^Handed 2 decks/)],
+      ["Imported Kanji N5."],
+    ]);
   });
 
-  it("ticks the decks to export, and exports them in the format chosen, with progress when asked", () => {
+  it("checks the decks to export, and exports them in the format chosen, with progress when asked", () => {
     const props = renderScreen({ chosen: [verbs.url] });
-    expect(screen.getByRole("heading", { name: "Import and export decks of Deck set A" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Import and export decks of Deck set A" }),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "Kanji N5" }));
     expect(props.onChoose).toHaveBeenCalledWith([verbs.url, kanji.url]);
     fireEvent.click(screen.getByRole("checkbox", { name: "Verbs" }));
@@ -97,25 +109,31 @@ describe("TransferScreen", () => {
     expect(props.onExport).toHaveBeenCalledWith([verbs], { format: "jsonld", withProgress: true });
   });
 
-  it("exports the decks ticked from the palette too, while some are and none is being exported", () => {
+  it("exports the decks checked from the palette too, while some are and none is being exported", () => {
     const props = renderScreen({ chosen: [verbs.url, kanji.url] });
     expect(screenCommands().export!.label).toBe("Export 2 decks");
     screenCommands().export!.run();
-    expect(props.onExport).toHaveBeenCalledWith([kanji, verbs], { format: "turtle", withProgress: false });
+    expect(props.onExport).toHaveBeenCalledWith([kanji, verbs], {
+      format: "turtle",
+      withProgress: false,
+    });
   });
 
-  it("offers no export in the palette with no deck ticked", () => {
+  it("offers no export in the palette with no deck checked", () => {
     renderScreen();
     expect(screenCommands()).toEqual({});
   });
 
-  it("exports nothing until a deck is ticked", () => {
+  it("exports nothing until a deck is checked", () => {
     renderScreen();
     expect(screen.getByRole("button", { name: "Export 0 decks" })).toBeDisabled();
   });
 
   it("says which deck it is exporting, then how many it exported", () => {
-    renderScreen({ chosen: [kanji.url, verbs.url], exporting: { deck: verbs, index: 1, total: 2 } });
+    renderScreen({
+      chosen: [kanji.url, verbs.url],
+      exporting: { deck: verbs, index: 1, total: 2 },
+    });
     expect(screen.getByText("Exporting Verbs (2 of 2)…")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Export 2 decks" })).toBeDisabled();
     expect(screen.getByRole("checkbox", { name: "Kanji N5" })).toBeDisabled();
@@ -157,16 +175,25 @@ describe("TransferScreen", () => {
     expect(props.onImport).toHaveBeenLastCalledWith(false);
   });
 
-  it("holds the import while the catalogue may not be changed, a file still read", () => {
+  it("holds the import while the catalog may not be changed, a file still read", () => {
     const props = renderScreen({ file, importReadOnly: "setAside" });
-    expect(screen.getByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(screen.getByText(/catalog or one of its groups has invalid data/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Import into Deck set A" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Choose a file…" })).toBeEnabled();
     expect(props.onImport).not.toHaveBeenCalled();
   });
 
   it("offers no progress to import when the file has none", () => {
-    const bare: DeckFile = { ...file, content: { ...file.content, deck: makeDeck("deck-x", { en: "Capitals" }), reviews: undefined, upgraded: [], dropped: [] } };
+    const bare: DeckFile = {
+      ...file,
+      content: {
+        ...file.content,
+        deck: makeDeck("deck-x", { en: "Capitals" }),
+        reviews: undefined,
+        upgraded: [],
+        dropped: [],
+      },
+    };
     const props = renderScreen({ file: bare });
     expect(screen.queryByRole("checkbox", { name: "Import the progress too" })).toBeNull();
     expect(screen.queryByText(/Progress/)).toBeNull();
@@ -188,7 +215,10 @@ describe("TransferScreen", () => {
 
   it("links to the deck it imported", () => {
     renderScreen({ imported: kanji });
-    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", "#/cards?deck=deck-1");
+    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute(
+      "href",
+      "#/cards?deck=deck-1",
+    );
     expect(screen.getByText(/Imported/)).toBeInTheDocument();
   });
 });

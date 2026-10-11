@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getPodUrlAllFrom, getProfileAll } from "@inrupt/solid-client";
 import { readDataset } from "./datasets";
@@ -8,15 +12,13 @@ import {
 } from "./solidStorageGateway";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@inrupt/solid-client")>();
+  const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
   return { ...actual, getPodUrlAllFrom: vi.fn(), getProfileAll: vi.fn() };
 });
 vi.mock("./datasets", () => ({ readDataset: vi.fn() }));
 
 const WEBID = "https://alice.example/profile/card#me";
-const STORAGE_LINK =
-  '<http://www.w3.org/ns/pim/space#Storage>; rel="type"';
+const STORAGE_LINK = '<http://www.w3.org/ns/pim/space#Storage>; rel="type"';
 
 function headResponse(linkHeader?: string): Response {
   const headers = new Headers();
@@ -43,18 +45,14 @@ describe("hasStorageLink", () => {
 
   it("recognizes a storage type link among several links", () => {
     expect(
-      hasStorageLink(
-        `<http://www.w3.org/ns/ldp#Container>; rel="type", ${STORAGE_LINK}`,
-      ),
+      hasStorageLink(`<http://www.w3.org/ns/ldp#Container>; rel="type", ${STORAGE_LINK}`),
     ).toBe(true);
   });
 
   it("requires rel=type, not just the Storage IRI", () => {
-    expect(
-      hasStorageLink(
-        '<http://www.w3.org/ns/pim/space#Storage>; rel="describedby"',
-      ),
-    ).toBe(false);
+    expect(hasStorageLink('<http://www.w3.org/ns/pim/space#Storage>; rel="describedby"')).toBe(
+      false,
+    );
   });
 });
 
@@ -117,9 +115,7 @@ describe("createSolidStorageGateway", () => {
 
     it("returns an empty list when nothing advertises a storage", async () => {
       vi.mocked(getPodUrlAllFrom).mockReturnValue([]);
-      const fetch = vi
-        .fn<typeof globalThis.fetch>()
-        .mockResolvedValue(headResponse());
+      const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(headResponse());
       const gateway = createSolidStorageGateway({ fetch });
 
       await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([]);
@@ -128,28 +124,26 @@ describe("createSolidStorageGateway", () => {
 
   describe("probeStorage", () => {
     it("normalizes the URL with a trailing slash and accepts a 200", async () => {
-      const fetch = vi
-        .fn<typeof globalThis.fetch>()
-        .mockResolvedValue(headResponse());
+      const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(headResponse());
       const gateway = createSolidStorageGateway({ fetch });
 
-      await expect(
-        gateway.probeStorage("https://pod.example"),
-      ).resolves.toEqual({ url: "https://pod.example/", source: "manual" });
+      await expect(gateway.probeStorage("https://pod.example")).resolves.toEqual({
+        url: "https://pod.example/",
+        source: "manual",
+      });
       expect(fetch).toHaveBeenCalledWith("https://pod.example/", {
         method: "HEAD",
       });
     });
 
     it("keeps an existing trailing slash", async () => {
-      const fetch = vi
-        .fn<typeof globalThis.fetch>()
-        .mockResolvedValue(headResponse());
+      const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(headResponse());
       const gateway = createSolidStorageGateway({ fetch });
 
-      await expect(gateway.probeStorage("https://pod.example/")).resolves.toEqual(
-        { url: "https://pod.example/", source: "manual" },
-      );
+      await expect(gateway.probeStorage("https://pod.example/")).resolves.toEqual({
+        url: "https://pod.example/",
+        source: "manual",
+      });
     });
 
     it("rejects when the storage is not reachable", async () => {
@@ -158,9 +152,7 @@ describe("createSolidStorageGateway", () => {
         .mockResolvedValue(new Response(null, { status: 403 }));
       const gateway = createSolidStorageGateway({ fetch });
 
-      await expect(
-        gateway.probeStorage("https://pod.example/"),
-      ).rejects.toThrow("status: 403");
+      await expect(gateway.probeStorage("https://pod.example/")).rejects.toThrow("status: 403");
     });
   });
 });

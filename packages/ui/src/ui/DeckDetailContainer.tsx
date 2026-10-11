@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMemo } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -90,42 +94,46 @@ export function DeckDetailContainer({
 
   return (
     <>
-    <DeckDetailScreen
-      deck={deck}
-      cardCount={activeCards(cardsQuery.data).length}
-      dueCount={queueQuery.data.due.length}
-      newCount={queueQuery.data.newPrompts.length}
-      studiedToday={queueQuery.data.studiedToday}
-      busy={resetDayMutation.isPending}
-      error={errorText(resetDayMutation.error)}
-      onResetDay={() => resetDayMutation.mutate()}
-      preferencesHref={routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })}
-      browseHref={routeToHash({ screen: "browser", instanceUrl: instance.url, deckUrl: deck.url })}
-      studioHref={studioHref(instance.url)}
-      onStudy={onStudy}
-      notice={
-        <>
-          <LibraryUpgradeContainer
-            useCases={useCases}
-            instance={instance}
-            deck={deck}
-          />
-          {languageIssues !== null && (
-            <DeckLanguagesNotice
-              issues={languageIssues}
-              unchecked={unchecked}
-              href={routeToHash({
-                screen: "deckPreferences",
-                instanceUrl: instance.url,
-                deckUrl: deck.url,
-                section: "languages",
-              })}
-            />
-          )}
-        </>
-      }
-    />
-    <DeckStatisticsContainer useCases={useCases} instance={instance} deck={deck} />
+      <DeckDetailScreen
+        deck={deck}
+        cardCount={activeCards(cardsQuery.data).length}
+        dueCount={queueQuery.data.due.length}
+        newCount={queueQuery.data.newPrompts.length}
+        studiedToday={queueQuery.data.studiedToday}
+        busy={resetDayMutation.isPending}
+        error={errorText(resetDayMutation.error)}
+        onResetDay={() => resetDayMutation.mutate()}
+        preferencesHref={routeToHash({
+          screen: "deckPreferences",
+          instanceUrl: instance.url,
+          deckUrl: deck.url,
+        })}
+        browseHref={routeToHash({
+          screen: "browser",
+          instanceUrl: instance.url,
+          deckUrl: deck.url,
+        })}
+        studioHref={studioHref(instance.url)}
+        onStudy={onStudy}
+        notice={
+          <>
+            <LibraryUpgradeContainer useCases={useCases} instance={instance} deck={deck} />
+            {languageIssues !== null && (
+              <DeckLanguagesNotice
+                issues={languageIssues}
+                unchecked={unchecked}
+                href={routeToHash({
+                  screen: "deckPreferences",
+                  instanceUrl: instance.url,
+                  deckUrl: deck.url,
+                  section: "languages",
+                })}
+              />
+            )}
+          </>
+        }
+      />
+      <DeckStatisticsContainer useCases={useCases} instance={instance} deck={deck} />
     </>
   );
 }

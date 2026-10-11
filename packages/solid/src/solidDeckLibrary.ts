@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import type { SolidDataset } from "@inrupt/solid-client";
 import type { CourseOutline } from "@solid-memo/domain/course";
@@ -5,7 +9,13 @@ import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library
 import { AppError } from "@solid-memo/domain/appError";
 import { catalogLinks } from "./catalogLinks";
 import { getSolidDatasetLinear } from "./linearDataset";
-import { toCourseOutline, toLibraryDeckContent, toLibraryDecks, toLibraryIndexView, toStandaloneLibraryDeck } from "./mappers/libraryMapper";
+import {
+  toCourseOutline,
+  toLibraryDeckContent,
+  toLibraryDecks,
+  toLibraryIndexView,
+  toStandaloneLibraryDeck,
+} from "./mappers/libraryMapper";
 import { SM } from "./vocab";
 
 export interface SolidDeckLibraryDeps {
@@ -32,13 +42,10 @@ export interface SolidDeckLibraryDeps {
  *
  * A release added from a link (readRelease) is read on its own, afresh
  * each time, with no index: its address may hold anything, now or later,
- * until it is copied. Its creator's catalogue (publishedBeside) is read
+ * until it is copied. Its creator's catalog (publishedBeside) is read
  * as anyone reads it, as the fetch reads everything: no login is sent.
  */
-export function createSolidDeckLibrary({
-  fetch,
-  indexUrl,
-}: SolidDeckLibraryDeps): DeckLibrary {
+export function createSolidDeckLibrary({ fetch, indexUrl }: SolidDeckLibraryDeps): DeckLibrary {
   const releases = new Map<string, Promise<SolidDataset>>();
   const contents = new Map<string, Promise<LibraryDeckContent>>();
   const outlines = new Map<string, Promise<CourseOutline>>();
@@ -58,11 +65,15 @@ export function createSolidDeckLibrary({
     },
 
     fetchLibraryDeck(url) {
-      return kept(contents, url, () => release(url).then((dataset) => toLibraryDeckContent(url, dataset)));
+      return kept(contents, url, () =>
+        release(url).then((dataset) => toLibraryDeckContent(url, dataset)),
+      );
     },
 
     fetchCourseOutline(url) {
-      return kept(outlines, url, () => release(url).then((dataset) => toCourseOutline(url, dataset)));
+      return kept(outlines, url, () =>
+        release(url).then((dataset) => toCourseOutline(url, dataset)),
+      );
     },
 
     async readRelease(url) {
@@ -77,8 +88,10 @@ export function createSolidDeckLibrary({
 
     async publishedBeside(url) {
       for (const folder of foldersAbove(url)) {
-        // An instance's catalogue is `<instance>catalog.ttl`; one that cannot be read is no answer.
-        const links = await catalogLinks(folder, SM.publishedRelease, fetch).catch((): string[] => []);
+        // An instance's catalog is `<instance>catalog.ttl`; one that cannot be read is no answer.
+        const links = await catalogLinks(folder, SM.publishedRelease, fetch).catch(
+          (): string[] => [],
+        );
         if (links.includes(url)) return links;
       }
       return null;

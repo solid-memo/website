@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { PodProvider } from "@solid-memo/domain/podProvider";
 import { useI18n } from "../i18n";
@@ -44,9 +48,7 @@ export function OnboardingFlow({
     }
   }, [step]);
 
-  const signUpProviders = providers.filter(
-    (provider) => provider.signUpUrl !== undefined,
-  );
+  const signUpProviders = providers.filter((provider) => provider.signUpUrl !== undefined);
 
   if (step === "webId") {
     return (

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import {
@@ -8,7 +12,11 @@ import {
   type DraftCardFilter,
   type DraftCardRow,
 } from "@solid-memo/domain/release/draftOutline";
-import { liveSteps, type QuestionPlace, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import {
+  liveSteps,
+  type QuestionPlace,
+  type ReleaseDraft,
+} from "@solid-memo/domain/release/releaseDraft";
 import { DataLine } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Pager, paginate } from "@solid-memo/ui/Pager";
@@ -19,7 +27,13 @@ import { NewQuestionForm } from "./NewQuestionForm";
 import type { DraftCardColumn } from "./router";
 import { BulkBar } from "./shell/BulkBar";
 import { DataTable, type Column } from "./shell/DataTable";
-import { nextSort, NO_SELECTION, sortedRows, type Selection, type TableSort } from "./shell/tableModel";
+import {
+  nextSort,
+  NO_SELECTION,
+  sortedRows,
+  type Selection,
+  type TableSort,
+} from "./shell/tableModel";
 
 /** How many cards a page of the table shows. */
 export const DRAFT_CARDS_PAGE = 50;
@@ -89,7 +103,10 @@ export function DraftCardsScreen({
 }) {
   const { t, locale, readerText } = useI18n();
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
-  const found = draftCardRows(draft, { ...(view.filter === undefined ? {} : { filter: view.filter }), ...(view.language === undefined ? {} : { language: view.language }) });
+  const found = draftCardRows(draft, {
+    ...(view.filter === undefined ? {} : { filter: view.filter }),
+    ...(view.language === undefined ? {} : { language: view.language }),
+  });
   const languages = draftCardLanguages(draft);
   const chapterName = (id: string) => {
     const title = draft.chapters.find((node) => node.id === id)?.data.title;
@@ -97,13 +114,19 @@ export function DraftCardsScreen({
   };
   const placeName = (place: QuestionPlace | null) => {
     if (place === null) return t("studio.question.nowhere");
-    if (place.kind === "review") return t("studio.question.atReview", { chapter: chapterName(place.chapter) });
+    if (place.kind === "review")
+      return t("studio.question.atReview", { chapter: chapterName(place.chapter) });
     const chapter = chapterOfStep(draft, place.step);
-    const number = chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === place.step);
-    return number === -1 ? place.step : t("studio.question.atStep", { chapter: chapterName(chapter!), step: number + 1 });
+    const number =
+      chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === place.step);
+    return number === -1
+      ? place.step
+      : t("studio.question.atStep", { chapter: chapterName(chapter!), step: number + 1 });
   };
-  const languageName = (tag: string) => (tag === "unstated" ? t("studio.draftCards.unstated") : tag);
-  const placeText = (row: DraftCardRow) => (row.asked > 1 ? t("studio.draftCards.askedTimes", { count: row.asked }) : placeName(row.place));
+  const languageName = (tag: string) =>
+    tag === "unstated" ? t("studio.draftCards.unstated") : tag;
+  const placeText = (row: DraftCardRow) =>
+    row.asked > 1 ? t("studio.draftCards.askedTimes", { count: row.asked }) : placeName(row.place);
   const rows = sortedRows(
     found,
     view.sort,
@@ -134,19 +157,36 @@ export function DraftCardsScreen({
     {
       key: "back",
       label: t("studio.draftCards.column.back"),
-      cell: (row) => (row.card.back === undefined ? "" : <DataLine text={row.card.back} markdown={isMarkdown(row.card.textFormat)} />),
+      cell: (row) =>
+        row.card.back === undefined ? (
+          ""
+        ) : (
+          <DataLine text={row.card.back} markdown={isMarkdown(row.card.textFormat)} />
+        ),
     },
-    ...(draft.course ? [{ key: "place", label: t("studio.draftCards.column.place"), cell: placeText }] : []),
-    { key: "distractors", label: t("studio.draftCards.column.distractors"), number: true, cell: (row) => row.distractors },
+    ...(draft.course
+      ? [{ key: "place", label: t("studio.draftCards.column.place"), cell: placeText }]
+      : []),
+    {
+      key: "distractors",
+      label: t("studio.draftCards.column.distractors"),
+      number: true,
+      cell: (row) => row.distractors,
+    },
     { key: "id", label: t("studio.draftCards.column.id"), cell: (row) => <code>{row.id}</code> },
   ];
 
   return (
     <section>
       <header>
-        <h2>{t(draft.course ? "studio.draftCards.headingCourse" : "studio.draftCards.heading", {
-            draft: draft.root.title === undefined ? t("studio.draft.untitled") : readerText(draft.root.title),
-          })}</h2>
+        <h2>
+          {t(draft.course ? "studio.draftCards.headingCourse" : "studio.draftCards.heading", {
+            draft:
+              draft.root.title === undefined
+                ? t("studio.draft.untitled")
+                : readerText(draft.root.title),
+          })}
+        </h2>
       </header>
       <DraftStatus editor={status} />
       <div class="studio-filters">
@@ -157,11 +197,19 @@ export function DraftCardsScreen({
             value={view.filter ?? ""}
             onChange={(event) => {
               const value = event.currentTarget.value;
-              onView(cleanView({ ...view, filter: DRAFT_CARD_FILTERS.find((known) => known === value), page: undefined }));
+              onView(
+                cleanView({
+                  ...view,
+                  filter: DRAFT_CARD_FILTERS.find((known) => known === value),
+                  page: undefined,
+                }),
+              );
             }}
           >
             <option value="">{t("studio.draftCards.all")}</option>
-            {DRAFT_CARD_FILTERS.filter((filter) => draft.course || filter === "fewDistractors" || filter === "retired").map((filter) => (
+            {DRAFT_CARD_FILTERS.filter(
+              (filter) => draft.course || filter === "fewDistractors" || filter === "retired",
+            ).map((filter) => (
               <option key={filter} value={filter}>
                 {t(`studio.draftCards.filters.${filter}`)}
               </option>
@@ -174,11 +222,15 @@ export function DraftCardsScreen({
             value={view.language ?? ""}
             onChange={(event) => {
               const value = event.currentTarget.value;
-              onView(cleanView({ ...view, language: value === "" ? undefined : value, page: undefined }));
+              onView(
+                cleanView({ ...view, language: value === "" ? undefined : value, page: undefined }),
+              );
             }}
           >
             <option value="">{t("studio.draftCards.anyLanguage")}</option>
-            {[...new Set([...languages, ...(view.language === undefined ? [] : [view.language])])].map((tag) => (
+            {[
+              ...new Set([...languages, ...(view.language === undefined ? [] : [view.language])]),
+            ].map((tag) => (
               <option key={tag} value={tag}>
                 {languageName(tag)}
               </option>
@@ -199,7 +251,11 @@ export function DraftCardsScreen({
             cell: (row) => (
               <>
                 <a href={links.questionHref(row.id)}>
-                  {row.card.front === undefined ? row.id : <DataLine text={row.card.front} markdown={isMarkdown(row.card.textFormat)} />}
+                  {row.card.front === undefined ? (
+                    row.id
+                  ) : (
+                    <DataLine text={row.card.front} markdown={isMarkdown(row.card.textFormat)} />
+                  )}
                 </a>
                 {row.retired && <span class="hint"> {t("studio.draftCards.retired")}</span>}
               </>
@@ -209,14 +265,25 @@ export function DraftCardsScreen({
           columnsOf={draft.course ? "draftQuestions" : "draftCards"}
           sort={view.sort}
           // Sorted afresh: from the first page.
-          onSort={(key) => onView(cleanView({ ...view, sort: nextSort(view.sort, key as DraftCardColumn), page: undefined }))}
+          onSort={(key) =>
+            onView(
+              cleanView({
+                ...view,
+                sort: nextSort(view.sort, key as DraftCardColumn),
+                page: undefined,
+              }),
+            )
+          }
           // Nothing is changed while the draft may not be.
           {...(readOnly === null
             ? {
                 select: {
                   label: t("studio.cards.select"),
                   allLabel: t("studio.cards.selectAll"),
-                  rowLabel: (row: DraftCardRow) => t("studio.cards.selectCard", { card: row.card.front === undefined ? row.id : readerText(row.card.front) }),
+                  rowLabel: (row: DraftCardRow) =>
+                    t("studio.cards.selectCard", {
+                      card: row.card.front === undefined ? row.id : readerText(row.card.front),
+                    }),
                   chosen,
                   onChoose: setChosen,
                 },
@@ -225,7 +292,13 @@ export function DraftCardsScreen({
           onOpen={(row) => onOpen(row.id)}
         />
       )}
-      {page.pageCount > 1 && <Pager page={page.currentPage} pageCount={page.pageCount} onPageChange={(next) => onView(cleanView({ ...view, page: next }))} />}
+      {page.pageCount > 1 && (
+        <Pager
+          page={page.currentPage}
+          pageCount={page.pageCount}
+          onPageChange={(next) => onView(cleanView({ ...view, page: next }))}
+        />
+      )}
       {readOnly === null && (
         <BulkBar
           label={t("studio.cardBulk.label")}

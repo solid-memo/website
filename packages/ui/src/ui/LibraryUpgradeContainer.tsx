@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
@@ -9,7 +13,12 @@ import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { courseKey } from "./CourseContainer";
 import { useI18n } from "./i18n";
 import { LibraryUpgradeNotice } from "./LibraryUpgradeNotice";
-import { DECK_UPGRADE_SCREEN_STEPS, DeckUpgradeFailure, DeckUpgradeProgress, type DeckUpgradeScreenStep } from "./DeckUpgrade";
+import {
+  DECK_UPGRADE_SCREEN_STEPS,
+  DeckUpgradeFailure,
+  DeckUpgradeProgress,
+  type DeckUpgradeScreenStep,
+} from "./DeckUpgrade";
 
 /**
  * What upgrading the deck would do (UseCases.planLibraryUpgrade), kept
@@ -26,7 +35,11 @@ export function libraryUpgradeQuery(useCases: UseCases, deck: Deck) {
 }
 
 /** After a deck's upgrade, everything it touched is read again at once, so the deck changes on screen in one go. */
-export function refreshUpgradedDeck(queryClient: QueryClient, instanceUrl: string, deck: Deck): Promise<unknown> {
+export function refreshUpgradedDeck(
+  queryClient: QueryClient,
+  instanceUrl: string,
+  deck: Deck,
+): Promise<unknown> {
   queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: ["decks"] }),
@@ -64,7 +77,10 @@ export function LibraryUpgradeContainer({
   const { t, readerText, readerLang, errorText } = useI18n();
   const queryClient = useQueryClient();
 
-  const planQuery = useQuery({ ...libraryUpgradeQuery(useCases, deck), enabled: deck.sourceUrl !== undefined });
+  const planQuery = useQuery({
+    ...libraryUpgradeQuery(useCases, deck),
+    enabled: deck.sourceUrl !== undefined,
+  });
 
   useQuery({
     queryKey: ["releaseLanguages", deck.url, deck.sourceUrl],
@@ -78,7 +94,11 @@ export function LibraryUpgradeContainer({
     retry: false,
   });
 
-  const [progress, setProgress] = useState<{ step: DeckUpgradeScreenStep; done: number; part?: StepPart }>({
+  const [progress, setProgress] = useState<{
+    step: DeckUpgradeScreenStep;
+    done: number;
+    part?: StepPart;
+  }>({
     step: "read",
     done: 0,
   });
@@ -117,7 +137,11 @@ export function LibraryUpgradeContainer({
     shown = (
       <DeckUpgradeFailure
         outcome={outcome}
-        onRetry={() => (plan === undefined || plan === null ? upgradeMutation.reset() : upgradeMutation.mutate(plan))}
+        onRetry={() =>
+          plan === undefined || plan === null
+            ? upgradeMutation.reset()
+            : upgradeMutation.mutate(plan)
+        }
         onDismiss={() => upgradeMutation.reset()}
       />
     );
@@ -140,7 +164,9 @@ export function LibraryUpgradeContainer({
       {/* Mounted throughout, so the update's end is heard: a live region
           inserted along with its text often goes unheard. */}
       <p class="hint" role="status">
-        {updated ? t("libraryUpgrade.updated", { version: upgradeMutation.variables.toVersion }) : ""}
+        {updated
+          ? t("libraryUpgrade.updated", { version: upgradeMutation.variables.toVersion })
+          : ""}
       </p>
     </>
   );

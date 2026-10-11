@@ -1,8 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren, ComponentType } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { PodProvider } from "@solid-memo/domain/podProvider";
 import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "@solid-memo/ui/App";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
+import type { SiteSource } from "@solid-memo/ui/Footer";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { isStudioHash } from "@solid-memo/ui/router";
@@ -20,15 +26,21 @@ export interface StudioModule {
  * session, its login, the language and the theme carry from one to the
  * other. The Studio's code is fetched (`loadStudio`, from src/main.tsx)
  * only once a Studio route is opened, so a learner never downloads it.
- * `commitSha` is the build's, shown in the footer.
+ * `source` is the build's version and repository, shown in the footer;
+ * `appName` and `providers`, the site's name and the Pod providers it
+ * suggests (src/config.ts).
  */
 export function App({
   useCases,
-  commitSha,
+  source,
+  appName,
+  providers,
   loadStudio,
 }: {
   useCases: UseCases;
-  commitSha: string | null;
+  source: SiteSource;
+  appName: string;
+  providers: readonly PodProvider[];
   loadStudio: () => Promise<StudioModule>;
 }) {
   const [inStudio, setInStudio] = useState(() => isStudioHash(window.location.hash));
@@ -52,7 +64,9 @@ export function App({
   return (
     <AppShell
       useCases={useCases}
-      commitSha={commitSha}
+      source={source}
+      appName={appName}
+      providers={providers}
       identity={inStudio ? STUDIO : SOLID_MEMO}
       workspace={inStudio ? (studio ?? StudioLoading) : Workspace}
     />
@@ -72,7 +86,11 @@ function StudioUnavailable(props: WorkspaceProps) {
 }
 
 /** The site header, then the main content: what the shell puts first, then the Studio's `status`. */
-function StudioPlaceholder({ banner, children, status }: WorkspaceProps & { status: ComponentChildren }) {
+function StudioPlaceholder({
+  banner,
+  children,
+  status,
+}: WorkspaceProps & { status: ComponentChildren }) {
   return (
     <>
       <header class="site-header">{banner}</header>

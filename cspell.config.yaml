@@ -1,0 +1,175 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# cspell's settings for the project's prose (docs/style.md#language,
+# docs/testing.md#documentation): `npm run lint:spelling`, and CI's docs
+# job. American English is the one standard, so a British spelling
+# (licence, catalogue, colour) fails like a typo.
+version: "0.2"
+language: en-US
+# What is checked: every Markdown file and the English messages. The
+# other languages' catalogs are their translators', not English.
+files:
+  - "**/*.md"
+  - packages/ui/src/i18n/en.json
+useGitignore: true
+# .github/ holds Markdown too (the pull request template).
+enableGlobDot: true
+ignorePaths:
+  - "**/node_modules/**"
+  - "**/coverage/**"
+  - "**/dist/**"
+  - package-lock.json
+  # Published Turtle and the deck library: frozen once published, and
+  # their text is the decks' and the vocabulary's, not the docs'.
+  - decks/**
+  - ns/**
+  - "**/*.generated.ts"
+  - packages/vocab/vendor/*/**
+  - packages/ui/src/i18n/de.json
+  - packages/ui/src/i18n/es.json
+  - packages/ui/src/i18n/fr.json
+  - packages/ui/src/i18n/ko.json
+  - packages/ui/src/i18n/sv.json
+overrides:
+  # A message key is an identifier, shared by every catalog, and keeps
+  # the spelling it has (docs/style.md#language); only the text is prose.
+  - filename: "**/i18n/en.json"
+    ignoreRegExpList:
+      - '/"[A-Za-z0-9_.]+"(?=\s*:)/g'
+# British spellings cspell's en-US dictionary lets through, each with
+# its American spelling.
+flagWords:
+  - afterwards->afterward
+  - ageing->aging
+  - amongst->among
+  - artefact->artifact
+  - cancelled->canceled
+  - cancelling->canceling
+  - catalogue->catalog
+  - catalogued->cataloged
+  - catalogues->catalogs
+  - centre->center
+  - centred->centered
+  - centres->centers
+  - cosy->cozy
+  - enquiry->inquiry
+  - enrol->enroll
+  - fulfil->fulfill
+  - grey->gray
+  - honour->honor
+  - honours->honors
+  - judgement->judgment
+  - labelled->labeled
+  - labelling->labeling
+  - learnt->learned
+  - modelled->modeled
+  - modelling->modeling
+  - mould->mold
+  - programme->program
+  - spelt->spelled
+  - storey->story
+  - ticked->checked
+  - untick->uncheck
+  - unticked->unchecked
+  - towards->toward
+  - whilst->while
+# Real words cspell's dictionaries lack: standards, vocabularies and
+# their terms, products, projects and people, and the words of other
+# languages the docs quote as examples. Add a word here only when it is
+# spelled right; keep the list sorted.
+words:
+  # Standards, vocabularies and their terms
+  - adms
+  - bidi
+  - CLDR
+  - commonmark
+  - datatypes
+  - DCAT
+  - dcterms
+  - DCMI
+  - foaf
+  - FSRS
+  - iiif
+  - PKCE
+  - rdfs
+  - SEMIC
+  - setext
+  - SHACL
+  - SKOS
+  - SPARQL
+  - subproperties
+  - subproperty
+  - subtag
+  - vcard
+  - WCAG
+  - xone
+  # Products, projects, organizations and people
+  - antwika
+  - clownface
+  - cmark
+  - Codeberg
+  - datapod
+  - flagcdn
+  - Forgejo
+  - Fredoka
+  - fsfe
+  - Gitea
+  - igrant
+  - Inrupt
+  - Malgun
+  - micr
+  - Nextcloud
+  - Noto
+  - Piotr
+  - pipx
+  - Poznań
+  - publiccode
+  - rdfjs
+  - rdflib
+  - skohub
+  - solidcommunity
+  - solidproject
+  - Wiklund
+  - Woźniak
+  - Zazuko
+  - Zenodo
+  # Solid Memo's own words, and words of the trade
+  - automerges
+  - automerging
+  - autolinks
+  - beforeunload
+  - bookmarkable
+  - crawlable
+  - distractor
+  - distractors
+  - hashchange
+  - indexeddb
+  - jamo
+  - keymap
+  - prefs
+  - premerge
+  - replayable
+  - resends
+  - retagged
+  - retags
+  - screenful
+  - srcdoc
+  - strikethrough
+  - textareas
+  - unconfigured
+  - Undescribed
+  - unreviewed
+  - WEBID
+  - wordmark
+  - zoomable
+  # Other languages, quoted as examples
+  - hjälp
+  - huvudstäder
+  - Kortlek
+  - Kortleksgrupp
+  - Sammanställd
+  - svenska
+  - vous
+  - Wiederholungsintervall

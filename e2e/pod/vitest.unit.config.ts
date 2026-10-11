@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { defineConfig } from "vitest/config";
 
 /**
@@ -6,5 +10,9 @@ import { defineConfig } from "vitest/config";
  * its answers, without Docker and without starting a server.
  */
 export default defineConfig({
-  test: { include: ["*.test.ts", "src/**/*.test.ts"], exclude: ["**/*.integration.test.ts"], environment: "node" },
+  test: {
+    include: ["*.test.ts", "src/**/*.test.ts"],
+    exclude: ["**/*.integration.test.ts"],
+    environment: "node",
+  },
 });

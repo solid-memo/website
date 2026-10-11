@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # The CI cross-check (scripts/shacl_crosscheck.py): an independent SHACL
 # engine, SPARQL-based constraints included.
 pyshacl==0.40.1

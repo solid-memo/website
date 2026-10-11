@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- About Solid Memo (docs/deployment.md): a page of plain HTML that
+       search engines and readers without script can read, since the app's
+       own page is built by script and routes by hash. It runs no script at
+       all, loads nothing from elsewhere, and posts no form
+       (src/aboutPage.test.ts checks the policy and the links). -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Solid Memo is a free, open-source flashcard app with spaced repetition. Your cards and progress live in your own Solid Pod, not on our servers." />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f7f6f1" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#11171e" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="../favicon.ico" sizes="48x48" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="canonical" href="https://solid-memo.com/about/" />
+  <meta name="robots" content="index, follow" />
+  <title>About Solid Memo - Spaced-repetition flashcards in your Solid Pod</title>
+  <!-- The colors are the app's own (packages/ui/src/style.css). With no
+       script, the page follows the browser's light or dark. -->
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f6f1;
+      --surface: #ffffff;
+      --text: #16202a;
+      --text-muted: #545c68;
+      --border: #e4e1d5;
+      --primary-fill: #2c6b3d;
+      --primary-hover: #235430;
+      --on-primary: #ffffff;
+      --link: #25603a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg: #11171e;
+        --surface: #19212b;
+        --text: #ecebe4;
+        --text-muted: #9ba6b2;
+        --border: #2a3644;
+        --primary-fill: #2a7340;
+        --primary-hover: #33864b;
+        --on-primary: #ffffff;
+        --link: #74cc8e;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      overflow-wrap: break-word;
+    }
+
+    main,
+    footer {
+      max-width: 44rem;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    header {
+      padding: 2.5rem 0 1rem;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      line-height: 1.2;
+      margin: 0 0 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.375rem;
+      line-height: 1.3;
+      margin: 0 0 0.5rem;
+    }
+
+    .lead {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      margin: 0 0 1.5rem;
+    }
+
+    a {
+      color: var(--link);
+      text-underline-offset: 0.15em;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .actions a {
+      display: inline-block;
+      padding: 0.6rem 1.1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: var(--surface);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .actions a.primary {
+      background: var(--primary-fill);
+      border-color: var(--primary-fill);
+      color: var(--on-primary);
+    }
+
+    .actions a.primary:hover {
+      background: var(--primary-hover);
+    }
+
+    nav[aria-label="On this page"] ul {
+      margin: 1.5rem 0 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1.25rem;
+    }
+
+    section {
+      margin: 1.5rem 0;
+      padding: 1.25rem 1.25rem 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+    }
+
+    section ul {
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin: 0.25rem 0;
+    }
+
+    footer {
+      padding-top: 0.5rem;
+      padding-bottom: 2.5rem;
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+    }
+
+    @media (max-width: 30rem) {
+      h1 {
+        font-size: 1.875rem;
+      }
+
+      section {
+        padding: 1rem 1rem 0.25rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header>
+      <h1>Solid Memo</h1>
+      <p class="lead">Spaced-repetition flashcards that live in your own Solid Pod.</p>
+      <p>
+        Solid Memo is a free flashcard app. It shows you each card again just
+        before you would forget it, so a few minutes a day are enough to
+        remember what you learn. Your cards and your progress are kept in a
+        <a href="https://solidproject.org/">Solid</a> Pod that you choose, not
+        on our servers.
+      </p>
+      <ul class="actions">
+        <li><a class="primary" href="../">Open Solid Memo</a></li>
+        <li><a href="https://github.com/solid-memo/website">Source code</a></li>
+        <li><a href="https://github.com/solid-memo/website/blob/main/docs/README.md">Documentation</a></li>
+      </ul>
+      <nav aria-label="On this page">
+        <ul>
+          <li><a href="#learners">For learners</a></li>
+          <li><a href="#authors">For deck authors</a></li>
+          <li><a href="#technologists">For technologists</a></li>
+          <li><a href="#decision-makers">For decision makers</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <section id="learners" aria-labelledby="learners-title">
+      <h2 id="learners-title">For learners</h2>
+      <ul>
+        <li>
+          Study flashcards a little every day. Solid Memo schedules each card
+          with the SM-2 method: a card you know comes back after days, then
+          weeks; a card you forgot comes back the next day.
+        </li>
+        <li>
+          Start right away as a guest, with no account. What you study is kept
+          in your browser, and you can move it into your own Pod when you log
+          in.
+        </li>
+        <li>
+          Add ready-made decks and courses from the library, or make your own
+          decks. A course teaches a subject in short chapters, and every
+          question you answer becomes a card to review later.
+        </li>
+        <li>
+          Your data is yours: it lives in your Pod, in open formats, and you can
+          take it with you. Solid Memo keeps no account of yours and costs
+          nothing.
+        </li>
+        <li>The app speaks English, Swedish, Korean, German, Spanish and French.</li>
+      </ul>
+    </section>
+
+    <section id="authors" aria-labelledby="authors-title">
+      <h2 id="authors-title">For deck authors</h2>
+      <ul>
+        <li>
+          Write decks and courses in Solid Memo Studio, the app's workspace for
+          authors. Drafts are kept in your own Pod.
+        </li>
+        <li>
+          Check a draft against the rules a release must meet, then try it out
+          as a learner would, without touching your own study.
+        </li>
+        <li>
+          Publish a release in your Pod, readable by anyone, and share its link.
+          Or save it as a file and propose it for the library.
+        </li>
+        <li>
+          Cards and theory can use Markdown: emphasis, lists, tables and links.
+          Each deck states its own license.
+        </li>
+      </ul>
+    </section>
+
+    <section id="technologists" aria-labelledby="technologists-title">
+      <h2 id="technologists-title">For technologists</h2>
+      <ul>
+        <li>
+          A static web app in TypeScript and Preact, with no back end: it talks
+          to the user's Solid Pod directly, and logs in with Solid-OIDC.
+        </li>
+        <li>
+          Data is RDF. Solid Memo's own <a href="../ns/vocab/v1.ttl">vocabulary</a>
+          and SHACL shapes are published with the site, and the app checks the
+          data it reads against them. The deck library is a
+          <a href="../decks/index.ttl">DCAT catalog</a> that conforms to DCAT-AP.
+        </li>
+        <li>
+          Hexagonal layers, each its own package, with 100% test coverage, and
+          end-to-end tests against several Solid servers.
+        </li>
+        <li>
+          Released under the <a href="https://github.com/solid-memo/website/blob/main/LICENSE">MIT License</a>.
+          Read the <a href="https://github.com/solid-memo/website/blob/main/docs/architecture.md">architecture</a>
+          to find your way around.
+        </li>
+      </ul>
+    </section>
+
+    <section id="decision-makers" aria-labelledby="decision-makers-title">
+      <h2 id="decision-makers-title">For decision makers</h2>
+      <ul>
+        <li>
+          No lock-in: learners keep their data in a Pod of their choice, in open
+          standards (Solid, RDF, DCAT-AP, SHACL) that other software can read.
+        </li>
+        <li>
+          Nothing to host but static files. Anyone can run their own copy on
+          any web server, under the MIT License.
+        </li>
+        <li>
+          Solid Memo is in beta (version 0.x). It is a volunteer project, run by
+          one maintainer, with no funding and no organization behind it.
+        </li>
+        <li>
+          It works toward the
+          <a href="https://standard.publiccode.net/">Standard for Public Code</a>;
+          see the <a href="https://github.com/solid-memo/website/blob/main/docs/standard-for-public-code.md">assessment</a>.
+          Questions and ideas are welcome in the
+          <a href="https://github.com/solid-memo/website/issues">issue tracker</a>.
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      <a href="../">Solid Memo</a> ·
+      <a href="https://github.com/solid-memo/website">Source code</a> ·
+      <a href="https://github.com/solid-memo/website/blob/main/docs/README.md">Documentation</a> ·
+      <a href="https://github.com/solid-memo/website/issues">Report an issue</a> ·
+      <a href="https://github.com/solid-memo/website/blob/main/LICENSE">MIT License</a>
+    </p>
+  </footer>
+</body>
+
+</html>

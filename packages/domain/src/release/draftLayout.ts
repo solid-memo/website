@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { ensureTrailingSlash } from "../instanceLayout.ts";
 import type { LangText } from "../langText.ts";
 import { canonical, idIn, iriIn, type ReleaseDraft } from "./releaseDraft.ts";
@@ -39,9 +43,13 @@ export function draftContainerOf(draftUrl: string): string {
 }
 
 /** The draft a release document is of: its instance, name and version; null for a URL no draft has. */
-export function draftPlaceOf(draftUrl: string): { instanceUrl: string; name: string; version: number } | null {
+export function draftPlaceOf(
+  draftUrl: string,
+): { instanceUrl: string; name: string; version: number } | null {
   const match = /^(.*\/)drafts\/([^/]+)\/v([1-9][0-9]*)\/release\.ttl$/.exec(draftUrl);
-  return match === null ? null : { instanceUrl: match[1]!, name: match[2]!, version: Number(match[3]) };
+  return match === null
+    ? null
+    : { instanceUrl: match[1]!, name: match[2]!, version: Number(match[3]) };
 }
 
 /**
@@ -77,7 +85,10 @@ export function draftSummaryOf(draft: ReleaseDraft): ReleaseDraftSummary | null 
 }
 
 /** The summary of a draft whose release document could not be read. */
-export function unreadableDraftSummary(url: string, place: { instanceUrl: string; name: string; version: number }): ReleaseDraftSummary {
+export function unreadableDraftSummary(
+  url: string,
+  place: { instanceUrl: string; name: string; version: number },
+): ReleaseDraftSummary {
   return { url, ...place, readable: false, title: {}, course: false };
 }
 
@@ -97,7 +108,10 @@ export function isDraftDocumentName(name: string): boolean {
 }
 
 /** Where a draft's subject is kept: in its release document, its cards document, or a chapter's. */
-export type DraftDocument = { kind: "release" } | { kind: "cards" } | { kind: "chapter"; chapter: string };
+export type DraftDocument =
+  | { kind: "release" }
+  | { kind: "cards" }
+  | { kind: "chapter"; chapter: string };
 
 /** The URL of a document of the draft. */
 export function draftDocumentUrl(draftUrl: string, document: DraftDocument): string {
@@ -129,14 +143,19 @@ export function draftDocuments(draft: ReleaseDraft): Map<string, DraftDocument> 
   const places = new Map<string, DraftDocument>();
   const release: DraftDocument = { kind: "release" };
   const chapters = new Set(draft.chapters.map((node) => node.id));
-  for (const node of draft.chapters) places.set(iriIn(draft, node.id), { kind: "chapter", chapter: node.id });
+  for (const node of draft.chapters)
+    places.set(iriIn(draft, node.id), { kind: "chapter", chapter: node.id });
   for (const node of draft.steps) {
     const chapter = node.data.chapter === undefined ? null : idIn(draft, node.data.chapter);
-    places.set(iriIn(draft, node.id), chapter !== null && chapters.has(chapter) ? { kind: "chapter", chapter } : release);
+    places.set(
+      iriIn(draft, node.id),
+      chapter !== null && chapters.has(chapter) ? { kind: "chapter", chapter } : release,
+    );
   }
   const asking = new Map<string, DraftDocument>();
   for (const node of draft.chapters) {
-    for (const card of node.data.reviewQuestion) asking.set(card, places.get(iriIn(draft, node.id))!);
+    for (const card of node.data.reviewQuestion)
+      asking.set(card, places.get(iriIn(draft, node.id))!);
   }
   for (const node of draft.steps) {
     for (const card of node.data.checkedBy) asking.set(card, places.get(iriIn(draft, node.id))!);
@@ -145,7 +164,8 @@ export function draftDocuments(draft: ReleaseDraft): Map<string, DraftDocument> 
     const iri = iriIn(draft, node.id);
     const place = asking.get(iri) ?? { kind: "cards" };
     places.set(iri, place);
-    for (const distractor of node.data.distractor) if (!places.has(distractor)) places.set(distractor, place);
+    for (const distractor of node.data.distractor)
+      if (!places.has(distractor)) places.set(distractor, place);
   }
   for (const node of draft.distractors) {
     const iri = iriIn(draft, node.id);
@@ -154,7 +174,8 @@ export function draftDocuments(draft: ReleaseDraft): Map<string, DraftDocument> 
   // A blank node goes with the subject that names it, however deep.
   const namedBy = new Map<string, string>();
   for (const triple of draft.triples) {
-    if (triple.object.kind === "blank" && !namedBy.has(`_:${triple.object.value}`)) namedBy.set(`_:${triple.object.value}`, triple.subject);
+    if (triple.object.kind === "blank" && !namedBy.has(`_:${triple.object.value}`))
+      namedBy.set(`_:${triple.object.value}`, triple.subject);
   }
   const placeOf = (subject: string, seen: Set<string>): DraftDocument => {
     const known = places.get(subject);
@@ -163,7 +184,8 @@ export function draftDocuments(draft: ReleaseDraft): Map<string, DraftDocument> 
     return parent === undefined || seen.has(parent) ? release : placeOf(parent, seen.add(parent));
   };
   for (const triple of draft.triples) {
-    if (!places.has(triple.subject)) places.set(triple.subject, placeOf(triple.subject, new Set([triple.subject])));
+    if (!places.has(triple.subject))
+      places.set(triple.subject, placeOf(triple.subject, new Set([triple.subject])));
   }
   places.set(draft.url, release);
   return places;
@@ -182,7 +204,8 @@ function documentContents(draft: ReleaseDraft): Map<string, string[]> {
   for (const node of draft.agents) put(release, ["agents", node.id, node.data]);
   for (const node of draft.distributions) put(release, ["distributions", node.id, node.data]);
   for (const list of ["chapters", "steps", "cards", "distractors"] as const) {
-    for (const node of draft[list] as readonly { id: string; data: unknown }[]) put(places.get(iriIn(draft, node.id))!, [list, node.id, node.data]);
+    for (const node of draft[list] as readonly { id: string; data: unknown }[])
+      put(places.get(iriIn(draft, node.id))!, [list, node.id, node.data]);
   }
   for (const triple of draft.triples) put(places.get(triple.subject)!, triple);
   return contents;
@@ -197,8 +220,11 @@ function documentContents(draft: ReleaseDraft): Map<string, string[]> {
 export function changedDocuments(before: ReleaseDraft, after: ReleaseDraft): string[] {
   const was = documentContents(before);
   const now = documentContents(after);
-  const same = (a: string[] | undefined, b: string[] | undefined) => JSON.stringify(a?.sort()) === JSON.stringify(b?.sort());
-  return [...new Set([...was.keys(), ...now.keys()])].filter((url) => !same(was.get(url), now.get(url)));
+  const same = (a: string[] | undefined, b: string[] | undefined) =>
+    JSON.stringify(a?.sort()) === JSON.stringify(b?.sort());
+  return [...new Set([...was.keys(), ...now.keys()])].filter(
+    (url) => !same(was.get(url), now.get(url)),
+  );
 }
 
 /**

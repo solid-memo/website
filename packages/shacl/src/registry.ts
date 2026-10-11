@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
 import type { ShapeContext, ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
@@ -23,12 +27,10 @@ export function pickShape(
   context: Exclude<ShapeContext, "any">,
 ): ShapePick {
   const matching = ALL_SHAPES.filter(
-    (d) =>
-      types.includes(d.targetClass) &&
-      (d.context === "any" || d.context === context),
+    (d) => types.includes(d.targetClass) && (d.context === "any" || d.context === context),
   );
   // A subject with a Solid Memo class is checked as that class only: a
-  // deck group is a dcat:Catalog too, but not the catalogue.
+  // deck group is a dcat:Catalog too, but not the catalog.
   const own = (d: ShapeDescriptor) => d.targetClass.startsWith(SM_NS);
   const candidates = matching.some(own) ? matching.filter(own) : matching;
   if (candidates.length === 0) return { kind: "untyped" };

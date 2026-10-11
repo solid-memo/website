@@ -1,5 +1,11 @@
 # Testing
 
+Every change to Solid Memo is checked by automated tests
+before it is published. Small tests check each part of the code on its
+own, every line of it; larger ones run the app against real Solid
+servers and click through it in a real browser. This page says what
+each kind covers, how to run them, and how to read a failure.
+
 Unit tests with [Vitest](https://vitest.dev/) in every package, in node
 unless the package runs in the browser: `ui`, `web`, `studio`, `solid` and `browser`
 run in `happy-dom`, and the UI's tests use `@testing-library/preact`
@@ -11,7 +17,13 @@ package's own tests cover its own code — `npm test` fails below that.
 
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
-npm run check     # the same, plus typecheck, drift, formatting, boundaries
+npm run check     # Biome's lint, markdownlint and cspell, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
+npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
+npm run format    # Biome: rewrite those files as it formats them
+npm run coverage:summary   # the coverage the last tests measured, per package, as a table
+npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
+npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
+npm run lint:reuse         # reuse lint: every file states its copyright and license, as CI's docs job checks (needs reuse; not in npm run check)
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
 npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
@@ -85,7 +97,7 @@ onto a pooled connection the server closed while a long synchronous
 stretch (a big update, on a slow runner) kept it from noticing, and
 then fails it without resending it; a browser resends it, so the app
 needs no retry. The Fetch standard forbids the header, but Node's fetch
-honours it, and `npm test` checks that it still does
+honors it, and `npm test` checks that it still does
 ([connections.test.ts](../e2e/pod/connections.test.ts)).
 
 `SOLID_SERVERS=css-7,nss-5` runs the suite against some only (`all`
@@ -195,7 +207,7 @@ blocking so that the ACR's write gates CI as the ACL's does) says once
 published: the test reads that document, not only the
 release. A second release at the same address is refused, and leaves
 the first as it was. A publishing cut short after the release is
-written (its catalogue link refused once) is finished by publishing
+written (its catalog link refused once) is finished by publishing
 again; deleting the instance then keeps the release and its folder,
 and says so (`keptReleases`). node-solid-server refuses the PATCH
 `@inrupt/solid-client` writes an ACL with, and the Community Solid
@@ -243,7 +255,8 @@ reaches its own https address too (to read the WebIDs it checks tokens
 for). It keeps its pods in files, not in memory, because the journeys
 PATCH Swedish text (see above). The journeys need Docker and Chromium
 (`npm run browsers -w @solid-memo/e2e-journeys` installs it), and CI
-runs them on every push. They block, as the blocking servers do.
+runs them on every pull request and every push to `main`. They block,
+as the blocking servers do.
 
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
@@ -283,7 +296,7 @@ run's server, and it is kept out of search engines (`robots.txt`).
 Since only a green run deploys, a failure on `main` is read from the
 run's artifact.
 
-A run by hand (Actions › CI › Run workflow) with *trace* ticked keeps
+A run by hand (Actions › CI › Run workflow) with *trace* checked keeps
 traces for passing journeys on any branch. Locally, `JOURNEY_TRACE=on
 npm run journeys` does the same, and `npm run journeys:report -w
 @solid-memo/e2e-journeys` serves the report so its traces open.
@@ -345,6 +358,130 @@ run check`). The page objects and journeys are themselves tests, run by
 `npm run journeys`, and have no coverage of their own, as with
 `e2e/pod`.
 
+## Continuous integration
+
+[ci.yml](../.github/workflows/ci.yml) runs on every pull request, a
+fork's included, on every push to `main`, and by hand. A branch's
+pushes alone run nothing, so a pull request's commits are not checked
+twice. Its jobs, side by side:
+
+| Job | What it checks |
+|---|---|
+| `build` | `npm run check`, then `npm run build`; the coverage of every package goes to the run's summary (`npm run coverage:summary`) |
+| `library` | the deck library against the base of the change: no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)) |
+| `crosscheck` | the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
+| `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
+| `contract (<server>)` | that each advisory server starts and meets the contract |
+| `journeys` | the user journeys ([User journeys](#user-journeys)) |
+| `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
+| `ci-ok` | that every job above passed |
+
+**`ci-ok` is the one check a merge to `main` waits for**: the ruleset
+on `main` (a setting of the repository, Settings › Rules) is to require
+it and nothing else, and Renovate merges its updates
+through a pull request once it passes (`automergeType: 'pr'` in
+`renovate.json5`), as anyone's change is merged. It runs even when a job
+before it failed, and fails unless every one passed. A matrix job's
+checks are named per server, and jobs come and go, so the ruleset names
+this job alone. (Another workflow's job named `build`, deploy.yml's,
+would also answer to a required check of that name.) Deploys follow a green run on `main`
+([deployment.md](deployment.md#github-pages-automatic)). Every check of
+`ns/` and `decks/` runs here, the comparison with the base included, so
+`ci-ok` gates them all and nothing is checked twice.
+
+A newer run for the same pull request or branch cancels the one still
+going, so a pull request pushed to again is checked once, at its latest
+commit. Runs on `main` are never canceled, since only a push run on
+`main` that passed deploys
+([deployment.md](deployment.md#github-pages-automatic)): each event has
+its own concurrency group, so a run by hand does not cancel a push run,
+and push runs on `main` go one at a time, in order (a push waiting its
+turn is replaced by a newer one, whose commit includes it).
+
+A fork's pull request runs the same jobs, and its results are public.
+That is safe because the jobs only read: the workflow's token can read
+the repository and nothing more, no job uses a secret, and no checkout
+keeps the token (`persist-credentials: false`). A fork's run may
+restore the caches `main`'s runs saved; what it saves is kept for its
+own pull request only.
+
+The job ids `pod` and `contract`, and their `matrix.server` lists, are
+read by [servers.test.ts](../e2e/pod/servers.test.ts), which checks that
+each workflow runs the servers [servers.ts](../e2e/pod/servers.ts) says
+it should; keep them when changing the workflow.
+
+### The repository's own checks
+
+`npm run check` starts with `npm run lint`: [Biome](https://biomejs.dev/)
+fails on a TypeScript, JSON or CSS file it would format otherwise, or
+that breaks one of its lint rules ([style.md](style.md#formatting)).
+Then `npm run lint:markdown` and `npm run lint:spelling` check the
+Markdown's style and spelling ([Documentation](#documentation)). It
+ends with checks of the repository as a whole, plain Node scripts in
+[scripts/](../scripts/):
+
+- `check:boundaries` ([checkBoundaries.ts](../scripts/checkBoundaries.ts)):
+  the imports between packages ([boundaries.md](boundaries.md)).
+- `check:docs` ([checkDocs.ts](../scripts/checkDocs.ts)): every page in
+  `docs/` is listed in [the docs' index](README.md), and every page the
+  index lists is there.
+- `check:dependencies` ([checkDependencies.ts](../scripts/checkDependencies.ts)):
+  the app ships released versions of other code only, or the exceptions
+  [vendor-code.md](vendor-code.md#maturity) explains.
+- `check:reuse` ([checkReuse.ts](../scripts/checkReuse.ts)): every
+  library deck version is licensed in [REUSE.toml](../REUSE.toml) as its
+  own `dcterms:license` says ([style.md](style.md#licenses)).
+- `check:scripts`: these scripts' own tests and types, at 100%
+  coverage like a package's (`scripts/vitest.config.ts`).
+
+## Documentation
+
+The project's Markdown (`docs/`, the READMEs, `AGENTS.md`) is checked
+for its style and spelling by `npm run check` (so in CI's `build` job),
+and for its links, with publiccode.yml and every file's license, by
+CI's `docs` job:
+
+- **Style**: [markdownlint](https://github.com/DavidAnson/markdownlint)'s
+  rules, all of them but those [.markdownlint-cli2.jsonc](../.markdownlint-cli2.jsonc)
+  turns off, each with its reason (line length, the table delimiter
+  rows' spacing, bare URLs). `npm run lint:markdown` runs it alone. A
+  placeholder such as `<title>` goes in backticks, or a renderer takes
+  it for HTML and drops it.
+- **Spelling**: [cspell](https://cspell.org/) checks the Markdown and the
+  English messages (`packages/ui/src/i18n/en.json`, their text, not their
+  keys) in American English, the one standard
+  ([style.md](style.md#language)). [cspell.config.yaml](../cspell.config.yaml)
+  says what it reads and skips (`decks/`, `ns/`, the generated code, the
+  other languages' catalogs), flags the British spellings its dictionary
+  would let through, each with its fix, and lists the real
+  words it does not know: standards, names, other languages' examples.
+  A word is added there only when it is spelled right.
+  `npm run lint:spelling` runs it alone.
+- **Links**: [lychee](https://lychee.cli.rs/), offline, checks that every
+  link to a file or a heading in the repository resolves
+  ([lychee.toml](../lychee.toml)). The web's addresses are checked
+  weekly, and by hand, by the [Links workflow](../.github/workflows/links.yml),
+  so a site that is down for an hour fails no one's change; a link it
+  finds broken is fixed, or excluded in `lychee.toml` with a reason.
+- **publiccode.yml**: once the repository has one, the
+  [publiccode.yml parser](https://github.com/italia/publiccode-parser-go)
+  validates it against the standard, and the files it names; the Links
+  workflow also checks the addresses it names. Without one, the step
+  says so and passes ([.github/actions/publiccode](../.github/actions/publiccode/action.yml)).
+- **Licenses**: [reuse](https://reuse.software/) (`fsfe/reuse-action`,
+  `reuse lint`) checks that every file in the repository states its
+  copyright and license, in an SPDX header or in
+  [REUSE.toml](../REUSE.toml), and that the text of every license used
+  is in [LICENSES/](../LICENSES/) ([style.md](style.md#licenses)). The
+  job installs nothing, so only the repository's own files are there.
+  It is not part of `npm run check`, since reuse is a Python tool:
+  `npm run lint:reuse` runs it locally with reuse installed, or
+  `pipx run reuse lint` or `uv run --no-project --with reuse reuse lint`
+  without installing it.
+
+That every page is listed in the index is `npm run check`'s
+(`check:docs`, above).
+
 ## Without the network
 
 Apart from the end-to-end tests' Docker images and the journeys'
@@ -371,6 +508,9 @@ documented exclusions:
   packages' tests import (`@solid-memo/domain/testing/libraryDeck`,
   `@solid-memo/shacl/testing/turtle`, `@solid-memo/ui/test/useCasesFake`,
   `@solid-memo/browser/testing/fakeLocks`), not product code.
+- `scripts/checkBoundaries.ts` — older than the scripts' tests, and run
+  on the whole repository by every `npm run check`; the other scripts in
+  `scripts/` are at 100% ([scripts/vitest.config.ts](../scripts/vitest.config.ts)).
 - `e2e/pod/` and `e2e/journeys/` — they are tests. Their harnesses'
   logic is unit-tested (what they make of a server's answers, the
   journeys' time zone, seed, text and CI summary), but no threshold

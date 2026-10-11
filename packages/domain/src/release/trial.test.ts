@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { courseDraft, deckDraft, DRAFT, of, playableCourseDraft } from "../testing/releaseDraft";
 import { draftReleaseModel } from "./draftModel";
@@ -14,7 +18,14 @@ describe("trial", () => {
 describe("trialProblems", () => {
   it("finds none in a course that can be played, nor in a deck, whatever their listing lacks", () => {
     const course = playableCourseDraft();
-    expect(trialProblems(draftReleaseModel({ ...course, root: { ...course.root, version: undefined, distribution: [] } }))).toEqual([]);
+    expect(
+      trialProblems(
+        draftReleaseModel({
+          ...course,
+          root: { ...course.root, version: undefined, distribution: [] },
+        }),
+      ),
+    ).toEqual([]);
     expect(trialProblems(draftReleaseModel(deckDraft()))).toEqual([]);
   });
 
@@ -24,7 +35,9 @@ describe("trialProblems", () => {
       draftReleaseModel({
         ...draft,
         root: { ...draft.root, title: { sv: "Solid" } },
-        steps: draft.steps.map((step, at) => (at === 0 ? { ...step, data: { ...step.data, theory: {} } } : step)),
+        steps: draft.steps.map((step, at) =>
+          at === 0 ? { ...step, data: { ...step.data, theory: {} } } : step,
+        ),
       }),
     );
     expect(problems.map((problem) => [problem.code, problem.subject])).toEqual([

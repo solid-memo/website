@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { problem, type MarkdownFinding, type ReleaseProblem } from "./problems.ts";
 import { DCTERMS_NS, type ReleaseModel, type ReleaseText } from "./releaseModel.ts";
@@ -45,13 +49,20 @@ const TEXT_FORMATS: readonly string[] = [SM.plainText, SM.markdown];
 
 /** Whether a subject states it is written in Markdown. */
 export function isMarked(model: ReleaseModel, subject: string): boolean {
-  return model.textFormats.some((statement) => statement.subject === subject && statement.object.value === SM.markdown);
+  return model.textFormats.some(
+    (statement) => statement.subject === subject && statement.object.value === SM.markdown,
+  );
 }
 
 /** Every text of the release written in Markdown, with the rule it is held to, in the order a check names them. */
 export function markdownFields(model: ReleaseModel): MarkdownField[] {
   const fields: MarkdownField[] = [];
-  const add = (subject: string, field: string, texts: readonly ReleaseText[], rule: FieldRuleName) => {
+  const add = (
+    subject: string,
+    field: string,
+    texts: readonly ReleaseText[],
+    rule: FieldRuleName,
+  ) => {
     for (const text of texts) fields.push({ subject, field, text, rule });
   };
   const distractors = new Map(model.distractors.map((d) => [d.iri, d]));
@@ -69,7 +80,8 @@ export function markdownFields(model: ReleaseModel): MarkdownField[] {
       add(option, SM.distractorNote, distractor.note, "prose");
     }
   }
-  for (const step of model.steps.filter((step) => isMarked(model, step.iri))) add(step.iri, SM.theory, step.theory, "prose");
+  for (const step of model.steps.filter((step) => isMarked(model, step.iri)))
+    add(step.iri, SM.theory, step.theory, "prose");
   for (const chapter of model.chapters.filter((chapter) => isMarked(model, chapter.iri))) {
     add(chapter.iri, `${DCTERMS_NS}description`, chapter.description, "prose");
   }
@@ -86,13 +98,27 @@ export function markdownFields(model: ReleaseModel): MarkdownField[] {
  */
 export function markdownProblems(model: ReleaseModel, check: MarkdownCheck): ReleaseProblem[] {
   const problems: ReleaseProblem[] = [];
-  const formatted = new Set([...model.cards, ...model.steps, ...model.chapters].map((subject) => subject.iri));
+  const formatted = new Set(
+    [...model.cards, ...model.steps, ...model.chapters].map((subject) => subject.iri),
+  );
   const distractors = new Set(model.distractors.filter((d) => d.typed).map((d) => d.iri));
   for (const { subject, object } of model.textFormats) {
     if (!formatted.has(subject)) {
-      problems.push(problem(subject, { code: "textFormatMisplaced", params: { distractor: distractors.has(subject) } }, { field: SM.textFormat }));
+      problems.push(
+        problem(
+          subject,
+          { code: "textFormatMisplaced", params: { distractor: distractors.has(subject) } },
+          { field: SM.textFormat },
+        ),
+      );
     } else if (!TEXT_FORMATS.includes(object.value)) {
-      problems.push(problem(subject, { code: "textFormatUnknown", params: { format: object } }, { field: SM.textFormat }));
+      problems.push(
+        problem(
+          subject,
+          { code: "textFormatUnknown", params: { format: object } },
+          { field: SM.textFormat },
+        ),
+      );
     }
   }
   const fields = markdownFields(model);
@@ -100,7 +126,13 @@ export function markdownProblems(model: ReleaseModel, check: MarkdownCheck): Rel
   let theory: ReleaseText[] = [];
   fields.forEach(({ subject, field, text, rule }, index) => {
     for (const finding of check.problems(text.value, rule)) {
-      problems.push(problem(subject, { code: "markdown", params: { language: text.language, finding } }, { field }));
+      problems.push(
+        problem(
+          subject,
+          { code: "markdown", params: { language: text.language, finding } },
+          { field },
+        ),
+      );
     }
     if (field !== SM.theory) return;
     theory.push(text);
@@ -121,14 +153,22 @@ export function markdownProblems(model: ReleaseModel, check: MarkdownCheck): Rel
  * numbers of chunks in other languages, as a learner who switches
  * language would lose their place.
  */
-export function theoryChunkProblems(step: string, theory: readonly ReleaseText[], check: MarkdownCheck): ReleaseProblem[] {
+export function theoryChunkProblems(
+  step: string,
+  theory: readonly ReleaseText[],
+  check: MarkdownCheck,
+): ReleaseProblem[] {
   const chunked = theory.map((text) => ({ language: text.language, ...check.chunks(text.value) }));
   const problems = chunked
     .filter(({ empty }) => empty > 0)
-    .map(({ language }) => problem(step, { code: "theoryEmptyChunk", params: { language } }, { field: SM.theory }));
+    .map(({ language }) =>
+      problem(step, { code: "theoryEmptyChunk", params: { language } }, { field: SM.theory }),
+    );
   if (new Set(chunked.map(({ chunks }) => chunks)).size > 1) {
     const counts = chunked.map(({ language, chunks }) => ({ language, chunks }));
-    problems.push(problem(step, { code: "theoryChunks", params: { counts } }, { field: SM.theory }));
+    problems.push(
+      problem(step, { code: "theoryChunks", params: { counts } }, { field: SM.theory }),
+    );
   }
   return problems;
 }

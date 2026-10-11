@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -14,7 +18,12 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { plainTexts } from "@solid-memo/ui/markdownCache";
 import type { ReviewEdit } from "./CardBulkActions";
-import { CardWorkbenchScreen, type CardEditMade, type ReviewEditMade, type TransferMade } from "./CardWorkbenchScreen";
+import {
+  CardWorkbenchScreen,
+  type CardEditMade,
+  type ReviewEditMade,
+  type TransferMade,
+} from "./CardWorkbenchScreen";
 import type { CardTransfer } from "./TransferCardsDialog";
 import type { SavedView } from "./shell/views";
 
@@ -111,20 +120,37 @@ export function CardWorkbenchContainer({
     queryFn: () => useCases.loadAnswerLog(instance.url),
   });
   const answers = answersQuery.data;
-  const lapses = useMemo(() => (answers === undefined ? undefined : lapseIndex(deckAnswers(answers, deck))), [answers, deck]);
+  const lapses = useMemo(
+    () => (answers === undefined ? undefined : lapseIndex(deckAnswers(answers, deck))),
+    [answers, deck],
+  );
   const needsLapses = query.state === "leech" || query.sort?.key === "lapses";
   const isCourse = useCopies(useCases, [deck]).isCourse;
   const cards = cardsQuery.data;
   const plain = useMemo(() => plainTexts(), [cards]);
-  const today = preferencesQuery.data === undefined ? undefined : studyDayOf(new Date(), preferencesQuery.data.dayBoundaryHour);
+  const today =
+    preferencesQuery.data === undefined
+      ? undefined
+      : studyDayOf(new Date(), preferencesQuery.data.dayBoundaryHour);
   const states = reviewsQuery.data;
   // As readerText reads them.
   const languages = useMemo(() => [locale, ...navigator.languages], [locale]);
   const rows = useMemo(
     () =>
-      cards === undefined || states === undefined || today === undefined || (needsLapses && lapses === undefined)
+      cards === undefined ||
+      states === undefined ||
+      today === undefined ||
+      (needsLapses && lapses === undefined)
         ? undefined
-        : queryCards(cards, { direction: deck.direction, states }, query, today, plain, languages, lapses?.lapses),
+        : queryCards(
+            cards,
+            { direction: deck.direction, states },
+            query,
+            today,
+            plain,
+            languages,
+            lapses?.lapses,
+          ),
     [cards, states, today, query, deck.direction, plain, languages, lapses, needsLapses],
   );
 
@@ -155,8 +181,15 @@ export function CardWorkbenchContainer({
     setTransferDone(null);
   };
   const editMutation = useMutation({
-    mutationFn: ({ ids, edit, plan }: { ids: readonly string[]; edit: CardEdit; plan: CardEditPlan }) =>
-      useCases.editCards(instance.url, deck, ids, edit, plan),
+    mutationFn: ({
+      ids,
+      edit,
+      plan,
+    }: {
+      ids: readonly string[];
+      edit: CardEdit;
+      plan: CardEditPlan;
+    }) => useCases.editCards(instance.url, deck, ids, edit, plan),
     onMutate: starting,
     onSuccess: (written, { edit }) => setLastEdit({ edit, plan: written }),
     onError: (error) => setFailure(error),
@@ -174,12 +207,18 @@ export function CardWorkbenchContainer({
   });
   const transferMutation = useMutation({
     mutationFn: ({ ids, transfer }: { ids: readonly string[]; transfer: CardTransfer }) =>
-      useCases.transferCards(instance.url, deck, transfer.to, ids, { mode: transfer.mode, keepProgress: transfer.keepProgress }),
+      useCases.transferCards(instance.url, deck, transfer.to, ids, {
+        mode: transfer.mode,
+        keepProgress: transfer.keepProgress,
+      }),
     onMutate: starting,
     onSuccess: (plan, { transfer }) => setTransferDone({ transfer, plan }),
     onError: (error) => setFailure(error),
     onSettled: async (_plan, _error, { transfer }) => {
-      await Promise.all([reread([deck, transfer.to]), queryClient.invalidateQueries({ queryKey: ["decks", instance.url] })]);
+      await Promise.all([
+        reread([deck, transfer.to]),
+        queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+      ]);
     },
   });
   const undoMutation = useMutation({
@@ -193,7 +232,11 @@ export function CardWorkbenchContainer({
     onSettled: () => reread(),
   });
 
-  const error = cardsQuery.error ?? reviewsQuery.error ?? preferencesQuery.error ?? (needsLapses ? answersQuery.error : null);
+  const error =
+    cardsQuery.error ??
+    reviewsQuery.error ??
+    preferencesQuery.error ??
+    (needsLapses ? answersQuery.error : null);
   if (error) return <ErrorMessage error={errorText(error)} />;
   if (rows === undefined) return <Loading label={t("studio.cards.loading")} />;
 
@@ -242,7 +285,12 @@ export function CardWorkbenchContainer({
       }
       transferDone={transferDone}
       readOnly={check.readOnly(deck)}
-      busy={editMutation.isPending || undoMutation.isPending || reviewMutation.isPending || transferMutation.isPending}
+      busy={
+        editMutation.isPending ||
+        undoMutation.isPending ||
+        reviewMutation.isPending ||
+        transferMutation.isPending
+      }
       error={errorText(failure)}
     />
   );

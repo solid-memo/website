@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
@@ -14,12 +18,17 @@ export class CardEditor extends Screen {
     await this.intent(`Open the card ${front}`, async () => {
       const table = this.page.getByRole("main").getByRole("table");
       await table.getByRole("link", { name: new RegExp(`^${escapeRegExp(front)}`) }).click();
-      await expect(this.page.getByRole("heading", { name: this.t("card.heading"), exact: true })).toBeVisible();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("card.heading"), exact: true }),
+      ).toBeVisible();
     });
   }
 
   get markdownToggle(): Locator {
-    return this.page.getByRole("checkbox", { name: this.t("cardContentFields.markdown"), exact: true });
+    return this.page.getByRole("checkbox", {
+      name: this.t("cardContentFields.markdown"),
+      exact: true,
+    });
   }
 
   get front(): Locator {
@@ -39,7 +48,7 @@ export class CardEditor extends Screen {
   }
 
   /**
-   * The card is in Markdown: the box ticked, the front a textarea holding
+   * The card is in Markdown: the box checked, the front a textarea holding
    * `front` exactly, its line breaks and indentation kept, and the
    * preview, open on a wide screen, showing `code` as a code block.
    */
@@ -57,8 +66,13 @@ export class CardEditor extends Screen {
   async saveFront(front: string): Promise<void> {
     await this.intent("Edit the front and save", async () => {
       await this.front.fill(front);
-      await this.page.getByRole("main").getByRole("button", { name: this.t("card.saveButton"), exact: true }).click();
-      await expect(this.page.getByRole("status").filter({ hasText: this.t("card.saved") })).toBeVisible();
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("card.saveButton"), exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("status").filter({ hasText: this.t("card.saved") }),
+      ).toBeVisible();
     });
   }
 }

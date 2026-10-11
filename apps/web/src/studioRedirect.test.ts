@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -36,12 +41,16 @@ describe("the Studio's old address", () => {
   it("lets its one script run by its hash, and nothing else", () => {
     const meta = /<meta http-equiv="Content-Security-Policy"\s+content="([^"]*)"/.exec(html)!;
     expect(html.indexOf("Content-Security-Policy")).toBeLessThan(html.indexOf("<script"));
-    const policy = new Map(meta[1]!.split(";").map((part) => {
-      const [name, ...values] = part.trim().split(/\s+/);
-      return [name!, values];
-    }));
+    const policy = new Map(
+      meta[1]!.split(";").map((part) => {
+        const [name, ...values] = part.trim().split(/\s+/);
+        return [name!, values];
+      }),
+    );
     expect(scripts).toHaveLength(1);
-    expect(policy.get("script-src")).toEqual([`'sha256-${createHash("sha256").update(scripts[0]!).digest("base64")}'`]);
+    expect(policy.get("script-src")).toEqual([
+      `'sha256-${createHash("sha256").update(scripts[0]!).digest("base64")}'`,
+    ]);
     expect(policy.get("object-src")).toEqual(["'none'"]);
     expect(policy.get("base-uri")).toEqual(["'none'"]);
     expect(policy.get("form-action")).toEqual(["'none'"]);

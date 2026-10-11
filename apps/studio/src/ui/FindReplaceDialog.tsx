@@ -1,5 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMemo, useState } from "preact/hooks";
-import { changedTexts, REPLACE_FIELDS, type CardEdit, type CardEditPlan, type ReplaceField } from "@solid-memo/domain/cardBulk";
+import {
+  changedTexts,
+  REPLACE_FIELDS,
+  type CardEdit,
+  type CardEditPlan,
+  type ReplaceField,
+} from "@solid-memo/domain/cardBulk";
 import { UNSTATED } from "@solid-memo/domain/cardQuery";
 import type { Card } from "@solid-memo/domain/deck";
 import { cardName } from "@solid-memo/ui/DataText";
@@ -58,7 +68,11 @@ export function FindReplaceDialog({
   const tagName = (tag: string) => (tag === "" ? t("studio.cards.unstated") : languageLabel(tag));
   const check = (label: string, checked: boolean, onChange: (checked: boolean) => void) => (
     <label class="studio-check">
-      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.currentTarget.checked)} />
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.currentTarget.checked)}
+      />
       {label}
     </label>
   );
@@ -75,18 +89,30 @@ export function FindReplaceDialog({
       >
         <label>
           {t("studio.cardBulk.find")}
-          <input type="text" autoFocus value={find} onInput={(event) => setFind(event.currentTarget.value)} />
+          <input
+            type="text"
+            autoFocus
+            value={find}
+            onInput={(event) => setFind(event.currentTarget.value)}
+          />
         </label>
         <label>
           {t("studio.cardBulk.replaceWith")}
-          <input type="text" value={replace} onInput={(event) => setReplace(event.currentTarget.value)} />
+          <input
+            type="text"
+            value={replace}
+            onInput={(event) => setReplace(event.currentTarget.value)}
+          />
         </label>
         <fieldset>
           <legend>{t("studio.cardBulk.fields")}</legend>
           {REPLACE_FIELDS.map((field) => (
             <span key={field}>
               {check(t(`studio.cards.fields.${field}`), fields.has(field), (on) =>
-                setFields((all) => new Set(on ? [...all, field] : [...all].filter((other) => other !== field))),
+                setFields(
+                  (all) =>
+                    new Set(on ? [...all, field] : [...all].filter((other) => other !== field)),
+                ),
               )}
             </span>
           ))}
@@ -156,7 +182,11 @@ export function FindReplaceDialog({
           )}
         </section>
         <p class="actions">
-          <button type="submit" class="primary" disabled={busy || preview === null || preview.save.length === 0}>
+          <button
+            type="submit"
+            class="primary"
+            disabled={busy || preview === null || preview.save.length === 0}
+          >
             {t("studio.cardBulk.confirmReplace", { count: preview?.save.length ?? 0 })}
           </button>
           <button type="button" onClick={onCancel}>

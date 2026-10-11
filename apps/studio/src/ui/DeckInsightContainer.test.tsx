@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -13,7 +17,13 @@ function renderContainer(useCases: UseCases, of = deck) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={queryClient}>
-      <DeckInsightContainer useCases={useCases} instance={instanceA} deck={of} cardHref={() => "#card"} leechesHref="#leeches" />
+      <DeckInsightContainer
+        useCases={useCases}
+        instance={instanceA}
+        deck={of}
+        cardHref={() => "#card"}
+        leechesHref="#leeches"
+      />
     </QueryClientProvider>,
   );
 }
@@ -24,15 +34,28 @@ describe("DeckInsightContainer", () => {
     renderContainer(useCases, { ...deck, maxReviewsPerDay: 9 });
     expect(screen.getByText("Loading the schedule…")).toBeInTheDocument();
     expect(await screen.findByText(/as this deck sets it/)).toBeInTheDocument();
-    expect(useCases.deckInsight).toHaveBeenCalledWith(instanceA.url, { ...deck, maxReviewsPerDay: 9 }, expect.any(Date), DEFAULT_PREFERENCES);
+    expect(useCases.deckInsight).toHaveBeenCalledWith(
+      instanceA.url,
+      { ...deck, maxReviewsPerDay: 9 },
+      expect.any(Date),
+      DEFAULT_PREFERENCES,
+    );
   });
 
   it("reads the insight again once the deck's own cap changed, not showing the one of the old cap", async () => {
     const useCases = makeUseCasesFake();
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    });
     const view = (of: typeof deck) => (
       <QueryClientProvider client={queryClient}>
-        <DeckInsightContainer useCases={useCases} instance={instanceA} deck={of} cardHref={() => "#card"} leechesHref="#leeches" />
+        <DeckInsightContainer
+          useCases={useCases}
+          instance={instanceA}
+          deck={of}
+          cardHref={() => "#card"}
+          leechesHref="#leeches"
+        />
       </QueryClientProvider>
     );
     const { rerender } = render(view(deck));

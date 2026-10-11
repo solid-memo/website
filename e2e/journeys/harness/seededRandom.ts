@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Replaces Math.random with a seeded generator (mulberry32), so the
  * shuffles a journey meets (the study queue, the library's preview) come

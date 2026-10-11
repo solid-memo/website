@@ -1,7 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
 import { plainText } from "@solid-memo/markdown/plainText";
-import { markdownProblems, type FieldRule, type MarkdownProblem } from "@solid-memo/markdown/problems";
+import {
+  markdownProblems,
+  type FieldRule,
+  type MarkdownProblem,
+} from "@solid-memo/markdown/problems";
 import { CardFace } from "./CardFace";
 import { DataLine } from "./DataText";
 import { useI18n, type I18n, type MessageKey } from "./i18n";
@@ -172,7 +180,12 @@ export function CardPreview({
     >
       <summary>{t("cardContentFields.preview")}</summary>
       <div class="practice-card">
-        <CardFace side="front" text={previewText(front) ?? {}} note={previewText(frontNote)} textFormat={textFormat} />
+        <CardFace
+          side="front"
+          text={previewText(front) ?? {}}
+          note={previewText(frontNote)}
+          textFormat={textFormat}
+        />
         <CardFace
           side="back"
           text={backText ?? {}}

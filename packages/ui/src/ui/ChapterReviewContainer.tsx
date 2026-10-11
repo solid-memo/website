@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMemo, useState } from "preact/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Course, UseCases } from "@solid-memo/application/useCases";
@@ -74,7 +78,10 @@ export function ChapterReviewContainer({
   });
   // Passed to mutate, not to useMutation, so that it is dropped once the
   // review is unmounted.
-  const complete = () => completeMutation.mutate(undefined, { onSuccess: (finishedCourse) => onCompleted(finishedCourse) });
+  const complete = () =>
+    completeMutation.mutate(undefined, {
+      onSuccess: (finishedCourse) => onCompleted(finishedCourse),
+    });
 
   function next() {
     answerMutation.reset();

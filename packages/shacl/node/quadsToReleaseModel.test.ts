@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { parseTurtle } from "@solid-memo/turtle/rdf";
 import { quadsToReleaseModel, termOf } from "./quadsToReleaseModel.ts";
@@ -78,8 +82,23 @@ describe("quadsToReleaseModel", () => {
       { iri: `${URL}#compilation`, generating: true },
       { iri: `${URL}#review`, generating: false },
     ]);
-    expect(model.making).toEqual([{ iri: `${URL}#compilation`, used: ["https://solidproject.org/"], comments: [en("Compiled by Ann.")], carried: false }]);
-    expect(model.sourceDetails).toEqual([{ iri: "https://solidproject.org/", title: [plain("Solid")], creator: [], licence: [], comments: [] }]);
+    expect(model.making).toEqual([
+      {
+        iri: `${URL}#compilation`,
+        used: ["https://solidproject.org/"],
+        comments: [en("Compiled by Ann.")],
+        carried: false,
+      },
+    ]);
+    expect(model.sourceDetails).toEqual([
+      {
+        iri: "https://solidproject.org/",
+        title: [plain("Solid")],
+        creator: [],
+        license: [],
+        comments: [],
+      },
+    ]);
   });
 
   it("reads its cards, chapters, steps and distractors, retired when they state owl:deprecated true", () => {
@@ -107,7 +126,14 @@ describe("quadsToReleaseModel", () => {
       },
     ]);
     expect(model.steps).toEqual([
-      { iri: `${URL}#s-1`, retired: false, theory: [en("Theory")], isPartOf: [`${URL}#ch-1`], positions: ["0"], checkedBy: [`${URL}#q-1`] },
+      {
+        iri: `${URL}#s-1`,
+        retired: false,
+        theory: [en("Theory")],
+        isPartOf: [`${URL}#ch-1`],
+        positions: ["0"],
+        checkedBy: [`${URL}#q-1`],
+      },
     ]);
     expect(model.distractors).toEqual([
       { iri: `${URL}#q-1-a`, typed: true, retired: true, text: [en("Wrong")], note: [] },
@@ -116,7 +142,11 @@ describe("quadsToReleaseModel", () => {
   });
 
   it("reads every distractor link and text format, of any subject", () => {
-    expect(model.distractorLinks.map((link) => link.object.value)).toEqual([`${URL}#q-1-a`, `${URL}#named`, "loose"]);
+    expect(model.distractorLinks.map((link) => link.object.value)).toEqual([
+      `${URL}#q-1-a`,
+      `${URL}#named`,
+      "loose",
+    ]);
     expect(model.textFormats).toEqual([{ subject: `${URL}#q-1`, object: iri(`${SM}markdown`) }]);
   });
 

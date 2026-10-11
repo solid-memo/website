@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Course } from "@solid-memo/application/useCases";
 import type { CompletedChaptersEdit } from "@solid-memo/domain/course";
 import type { Deck, DeckDirection } from "@solid-memo/domain/deck";
@@ -22,7 +26,7 @@ import { ReadOnlyScope } from "./ReadOnly";
 /**
  * What a deck says of itself, and how it is studied, each part with its
  * own form: its name; its description, topics and keywords (Solid Memo's
- * DeckAboutSection); its authors and licence; its direction and pace;
+ * DeckAboutSection); its authors and license; its direction and pace;
  * its card sides whose language is not stated (DeckLanguagesSection);
  * and, for a copy of a course (`course` not null), the learner's
  * progress through it. One status line says what the last save did, and
@@ -92,7 +96,13 @@ export function DeckAboutScreen({
           <DeckAboutSection deck={deck} busy={busy} onSave={onDescribe} />
         </section>
         <DeckProvenanceSection deck={deck} busy={busy} onSave={onProvenance} />
-        <DeckStudySection deck={deck} preferences={preferences} preferencesHref={preferencesHref} busy={busy} onSave={onStudy} />
+        <DeckStudySection
+          deck={deck}
+          preferences={preferences}
+          preferencesHref={preferencesHref}
+          busy={busy}
+          onSave={onStudy}
+        />
         <DeckLanguagesSection
           deck={deck}
           languages={languages}
@@ -102,7 +112,12 @@ export function DeckAboutScreen({
           onStateLanguages={onStateLanguages}
         />
         {course !== null && (
-          <CourseProgressSection course={course.course} unreadable={course.unreadable} busy={busy} onEdit={onCompletedChapters} />
+          <CourseProgressSection
+            course={course.course}
+            unreadable={course.unreadable}
+            busy={busy}
+            onEdit={onCompletedChapters}
+          />
         )}
       </ReadOnlyScope>
       <p class="hint" role="status">

@@ -1,5 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { queryToParams, type CardQuery, type CardState } from "@solid-memo/domain/cardQuery";
-import { DEFAULT_DECK_TABLE_VIEW, deckTableViewFromParams, deckTableViewToParams, type DeckTableView } from "@solid-memo/domain/deckTable";
+import {
+  DEFAULT_DECK_TABLE_VIEW,
+  deckTableViewFromParams,
+  deckTableViewToParams,
+  type DeckTableView,
+} from "@solid-memo/domain/deckTable";
 
 /**
  * Home's views and the card workbench's (docs/studio.md, Home and Card
@@ -57,7 +66,9 @@ export function viewOf(query: HomeQuery): HomeView {
 
 /** The view the URL's `show` names; none for every deck, or for a name it does not know. */
 export function showFromParam(param: string | null): HomeQuery["show"] {
-  return HOME_VIEWS.find((view): view is Exclude<HomeView, "all"> => view !== "all" && view === param);
+  return HOME_VIEWS.find(
+    (view): view is Exclude<HomeView, "all"> => view !== "all" && view === param,
+  );
 }
 
 /** Home's query in another view: the filter's text and the sort kept. */
@@ -130,15 +141,23 @@ export function paramsText(params: Record<string, string>): string {
  * view's own, so one saved under a name taken replaces that view, where
  * it was; another is added at the end.
  */
-export function withSavedView(views: readonly SavedView[], name: string, params: string): SavedView[] {
+export function withSavedView(
+  views: readonly SavedView[],
+  name: string,
+  params: string,
+): SavedView[] {
   const view = { name: name.trim(), params };
-  return views.some((each) => each.name === view.name) ? views.map((each) => (each.name === view.name ? view : each)) : [...views, view];
+  return views.some((each) => each.name === view.name)
+    ? views.map((each) => (each.name === view.name ? view : each))
+    : [...views, view];
 }
 
 /** The saved views with one renamed (`from`), where it was: another of the new name gives way to it. */
 export function renamedView(views: readonly SavedView[], from: string, to: string): SavedView[] {
   const name = to.trim();
-  return views.flatMap((each) => (each.name === from ? [{ ...each, name }] : each.name === name ? [] : [each]));
+  return views.flatMap((each) =>
+    each.name === from ? [{ ...each, name }] : each.name === name ? [] : [each],
+  );
 }
 
 /** The saved views without one. */

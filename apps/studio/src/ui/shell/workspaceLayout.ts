@@ -1,12 +1,33 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { isDraftRoute, type DraftRoute, type StudioRoute } from "../router";
 
 /** A section of an instance, as the sidebar lists them. */
-export type SidebarSection = "decks" | "groups" | "drafts" | "releases" | "health" | "library" | "transfer" | "instance";
+export type SidebarSection =
+  | "decks"
+  | "groups"
+  | "drafts"
+  | "releases"
+  | "health"
+  | "library"
+  | "transfer"
+  | "instance";
 
 /** The sidebar's sections, in its order. */
-export const SIDEBAR_SECTIONS: readonly SidebarSection[] = ["decks", "groups", "drafts", "releases", "health", "library", "transfer", "instance"];
+export const SIDEBAR_SECTIONS: readonly SidebarSection[] = [
+  "decks",
+  "groups",
+  "drafts",
+  "releases",
+  "health",
+  "library",
+  "transfer",
+  "instance",
+];
 
 /** Where a section of an instance opens: the decks are Home. */
 export function sectionHome(section: SidebarSection, instanceUrl: string): StudioRoute {
@@ -72,17 +93,23 @@ export interface ContextTab<K extends string = string> {
 }
 
 /** The tabs of the deck or the draft a route is about, and which of the two they are. */
-export type ContextTabs = { of: "deck"; tabs: ContextTab<DeckTab>[] } | { of: "draft"; tabs: ContextTab<DraftTab>[] };
+export type ContextTabs =
+  | { of: "deck"; tabs: ContextTab<DeckTab>[] }
+  | { of: "draft"; tabs: ContextTab<DraftTab>[] };
 
 /**
  * The tabs of a deck's screens: its cards (a card of it under them), its
  * schedule, its health, its about screen, and its export (import and
- * export, the deck ticked), which is a screen of the instance's, so never
+ * export, the deck checked), which is a screen of the instance's, so never
  * the current tab.
  */
 export function deckTabs(route: StudioRoute, deckUrl: string): ContextTab<DeckTab>[] {
   const instanceUrl = instanceUrlOfDeck(deckUrl);
-  const tab = (key: DeckTab, to: StudioRoute, ...screens: StudioRoute["screen"][]): ContextTab<DeckTab> => ({
+  const tab = (
+    key: DeckTab,
+    to: StudioRoute,
+    ...screens: StudioRoute["screen"][]
+  ): ContextTab<DeckTab> => ({
     key,
     route: to,
     current: currentOf(route.screen, screens),
@@ -104,7 +131,11 @@ export function deckTabs(route: StudioRoute, deckUrl: string): ContextTab<DeckTa
  */
 export function draftTabs(route: DraftRoute, hasPrevious: boolean): ContextTab<DraftTab>[] {
   const { draftUrl } = route;
-  const tab = (key: DraftTab, to: DraftRoute, ...under: DraftRoute["screen"][]): ContextTab<DraftTab> => ({
+  const tab = (
+    key: DraftTab,
+    to: DraftRoute,
+    ...under: DraftRoute["screen"][]
+  ): ContextTab<DraftTab> => ({
     key,
     route: to,
     current: currentOf(route.screen, [to.screen, ...under]),
@@ -121,7 +152,10 @@ export function draftTabs(route: DraftRoute, hasPrevious: boolean): ContextTab<D
 }
 
 /** Whether a tab of `screens` (its own first, then those under it) is the screen shown, or what it is part of. */
-function currentOf(shown: StudioRoute["screen"], screens: readonly StudioRoute["screen"][]): Current {
+function currentOf(
+  shown: StudioRoute["screen"],
+  screens: readonly StudioRoute["screen"][],
+): Current {
   const at = screens.indexOf(shown);
   return at === -1 ? false : at === 0 ? "page" : "true";
 }
@@ -130,7 +164,8 @@ function currentOf(shown: StudioRoute["screen"], screens: readonly StudioRoute["
 export function contextTabsOf(route: StudioRoute, draft: ReleaseDraft | null): ContextTabs | null {
   const deckUrl = deckOf(route);
   if (deckUrl !== null) return { of: "deck", tabs: deckTabs(route, deckUrl) };
-  if (isDraftRoute(route)) return { of: "draft", tabs: draftTabs(route, draft!.root.prev !== undefined) };
+  if (isDraftRoute(route))
+    return { of: "draft", tabs: draftTabs(route, draft!.root.prev !== undefined) };
   return null;
 }
 
@@ -139,7 +174,10 @@ export function contextTabsOf(route: StudioRoute, draft: ReleaseDraft | null): C
  * round from either end; from none, the first or the last. None of no
  * tabs.
  */
-export function stepTab<T extends { current: unknown }>(tabs: readonly T[], step: 1 | -1): T | undefined {
+export function stepTab<T extends { current: unknown }>(
+  tabs: readonly T[],
+  step: 1 | -1,
+): T | undefined {
   const at = tabs.findIndex((tab) => tab.current);
   const from = at === -1 ? (step === 1 ? -1 : 0) : at;
   return tabs[(from + step + tabs.length) % tabs.length];
@@ -187,7 +225,12 @@ export function currentOutlineKey(route: StudioRoute): string | null {
  * else after the first problem of the page shown; else, from none, the
  * first or the last. Null without problems.
  */
-export function stepProblem(hrefs: readonly string[], shown: string, last: number | null, step: 1 | -1): number | null {
+export function stepProblem(
+  hrefs: readonly string[],
+  shown: string,
+  last: number | null,
+  step: 1 | -1,
+): number | null {
   if (hrefs.length === 0) return null;
   const at = last !== null && hrefs[last] === shown ? last : hrefs.indexOf(shown);
   const from = at === -1 ? (step === 1 ? -1 : 0) : at;

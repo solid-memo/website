@@ -1,6 +1,17 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { createWriteStream, existsSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import {
+  createWriteStream,
+  existsSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+} from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -52,11 +63,51 @@ interface Entry {
 
 /** The servers the end-to-end tests can start, by the id SOLID_SERVERS names them with. */
 export const SERVERS = {
-  "css-7": { label: "Community Solid Server", tier: "blocking", internalPort: 3000, podPath: "", readyPath: "", startTimeoutMs: 60_000, version: () => imageTag("css-7") },
-  "css-6": { label: "Community Solid Server", tier: "blocking", internalPort: 3000, podPath: "", readyPath: "", startTimeoutMs: 60_000, version: () => imageTag("css-6") },
-  "nss-6": { label: "node-solid-server", tier: "blocking", internalPort: 8443, podPath: "", readyPath: "", startTimeoutMs: 60_000, version: () => lockedVersion("nss/6", "solid-server") },
-  "nss-5": { label: "node-solid-server", tier: "blocking", internalPort: 8443, podPath: "", readyPath: "", startTimeoutMs: 60_000, version: () => lockedVersion("nss/5", "solid-server") },
-  "css-8": { label: "Community Solid Server", tier: "advisory", internalPort: 3000, podPath: "", readyPath: "", startTimeoutMs: 60_000, version: () => imageTag("css-8") },
+  "css-7": {
+    label: "Community Solid Server",
+    tier: "blocking",
+    internalPort: 3000,
+    podPath: "",
+    readyPath: "",
+    startTimeoutMs: 60_000,
+    version: () => imageTag("css-7"),
+  },
+  "css-6": {
+    label: "Community Solid Server",
+    tier: "blocking",
+    internalPort: 3000,
+    podPath: "",
+    readyPath: "",
+    startTimeoutMs: 60_000,
+    version: () => imageTag("css-6"),
+  },
+  "nss-6": {
+    label: "node-solid-server",
+    tier: "blocking",
+    internalPort: 8443,
+    podPath: "",
+    readyPath: "",
+    startTimeoutMs: 60_000,
+    version: () => lockedVersion("nss/6", "solid-server"),
+  },
+  "nss-5": {
+    label: "node-solid-server",
+    tier: "blocking",
+    internalPort: 8443,
+    podPath: "",
+    readyPath: "",
+    startTimeoutMs: 60_000,
+    version: () => lockedVersion("nss/5", "solid-server"),
+  },
+  "css-8": {
+    label: "Community Solid Server",
+    tier: "advisory",
+    internalPort: 3000,
+    podPath: "",
+    readyPath: "",
+    startTimeoutMs: 60_000,
+    version: () => imageTag("css-8"),
+  },
   "css-acp": {
     label: "Community Solid Server with ACP",
     // The one server with Access Control Policies that gates CI: a release's ACR is written here (docs/testing.md).
@@ -75,7 +126,8 @@ export const SERVERS = {
     readyPath: "",
     startTimeoutMs: 60_000,
     // With the Community Solid Server it runs on, which its lockfile and solidcommunity.net's may resolve differently.
-    version: () => `${lockedVersion("pivot", "@solid/pivot")} (Community Solid Server ${lockedVersion("pivot", "@solid/community-server")})`,
+    version: () =>
+      `${lockedVersion("pivot", "@solid/pivot")} (Community Solid Server ${lockedVersion("pivot", "@solid/community-server")})`,
   },
   nextcloud: {
     label: "Solid-Nextcloud",
@@ -85,7 +137,8 @@ export const SERVERS = {
     readyPath: "apps/solid/~alice/storage/",
     // Installing Nextcloud, on every start.
     startTimeoutMs: 180_000,
-    version: () => `${dockerfileArg("nextcloud", "SOLID_NEXTCLOUD_SHA").slice(0, 8)} (Nextcloud ${baseImageTag("nextcloud")})`,
+    version: () =>
+      `${dockerfileArg("nextcloud", "SOLID_NEXTCLOUD_SHA").slice(0, 8)} (Nextcloud ${baseImageTag("nextcloud")})`,
     rootEntrypoint: true,
     // Its SQLite database refuses concurrent writes (500), so tests would fail by chance.
     serialFiles: true,
@@ -108,11 +161,15 @@ export const SERVER_IDS = Object.keys(SERVERS) as ServerId[];
 
 /** The servers a comma-separated list names: every one for "all", the blocking ones when it is empty. */
 export function serversNamed(list: string | undefined): ServerId[] {
-  if (list === undefined || list.trim() === "") return SERVER_IDS.filter((id) => SERVERS[id].tier === "blocking");
+  if (list === undefined || list.trim() === "")
+    return SERVER_IDS.filter((id) => SERVERS[id].tier === "blocking");
   if (list.trim() === "all") return [...SERVER_IDS];
   const named = list.split(",").map((id) => id.trim());
   const unknown = named.filter((id) => !(id in SERVERS));
-  if (unknown.length > 0) throw new Error(`SOLID_SERVERS names no server ${unknown.join(", ")}; it knows ${SERVER_IDS.join(", ")} (or all).`);
+  if (unknown.length > 0)
+    throw new Error(
+      `SOLID_SERVERS names no server ${unknown.join(", ")}; it knows ${SERVER_IDS.join(", ")} (or all).`,
+    );
   return named as ServerId[];
 }
 
@@ -130,28 +187,37 @@ const compose = (id: ServerId, args: string[], env: Record<string, string>) =>
 
 /** The tag its image is pinned to in its compose.yml: "7.2.0". */
 function imageTag(id: string): string {
-  const tag = /^\s*image:\s*[^\s:]+:([^@\s]+)@sha256:/m.exec(readFileSync(composeFile(id), "utf8"))?.[1];
+  const tag = /^\s*image:\s*[^\s:]+:([^@\s]+)@sha256:/m.exec(
+    readFileSync(composeFile(id), "utf8"),
+  )?.[1];
   if (tag === undefined) throw new Error(`${composeFile(id)} pins no image by tag and digest.`);
   return tag;
 }
 
 /** A build argument's value in a server's Dockerfile: the commit an image is built from. */
 function dockerfileArg(id: string, name: string): string {
-  const value = new RegExp(`^ARG ${name}=(\\S+)`, "m").exec(readFileSync(join(HERE, "servers", id, "Dockerfile"), "utf8"))?.[1];
+  const value = new RegExp(`^ARG ${name}=(\\S+)`, "m").exec(
+    readFileSync(join(HERE, "servers", id, "Dockerfile"), "utf8"),
+  )?.[1];
   if (value === undefined) throw new Error(`servers/${id}/Dockerfile sets no ${name}.`);
   return value;
 }
 
 /** The tag of the image a server's Dockerfile builds on: "32.0.15-apache" says "32.0.15". */
 function baseImageTag(id: string): string {
-  const tag = /^FROM [^\s:]+:(\d[\w.]*?)(-[\w]+)?@sha256:/m.exec(readFileSync(join(HERE, "servers", id, "Dockerfile"), "utf8"))?.[1];
-  if (tag === undefined) throw new Error(`servers/${id}/Dockerfile builds on no image pinned by tag and digest.`);
+  const tag = /^FROM [^\s:]+:(\d[\w.]*?)(-[\w]+)?@sha256:/m.exec(
+    readFileSync(join(HERE, "servers", id, "Dockerfile"), "utf8"),
+  )?.[1];
+  if (tag === undefined)
+    throw new Error(`servers/${id}/Dockerfile builds on no image pinned by tag and digest.`);
   return tag;
 }
 
 /** A package's version in the lockfile an image is built from (servers/<dir>/package-lock.json). */
 function lockedVersion(dir: string, pkg: string): string {
-  const lock = JSON.parse(readFileSync(join(HERE, "servers", dir, "package-lock.json"), "utf8")) as { packages: Record<string, { version: string }> };
+  const lock = JSON.parse(
+    readFileSync(join(HERE, "servers", dir, "package-lock.json"), "utf8"),
+  ) as { packages: Record<string, { version: string }> };
   return lock.packages[`node_modules/${pkg}`]!.version;
 }
 
@@ -164,11 +230,17 @@ function lockedVersion(dir: string, pkg: string): string {
 function ignoredIn(context: string): { name: string; anyDepth: boolean }[] {
   const file = join(context, ".dockerignore");
   if (!existsSync(file)) return [];
-  const lines = readFileSync(file, "utf8").split("\n").map((line) => line.trim()).filter((line) => line !== "" && !line.startsWith("#"));
+  const lines = readFileSync(file, "utf8")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line !== "" && !line.startsWith("#"));
   return lines.map((line) => {
     const anyDepth = line.startsWith("**/");
     const name = anyDepth ? line.slice(3) : line;
-    if (!/^[\w.-]+$/.test(name)) throw new Error(`${file}: "${line}" is a pattern the image cache's hash (servers.ts) does not know.`);
+    if (!/^[\w.-]+$/.test(name))
+      throw new Error(
+        `${file}: "${line}" is a pattern the image cache's hash (servers.ts) does not know.`,
+      );
     return { name, anyDepth };
   });
 }
@@ -179,7 +251,8 @@ function contextFiles(context: string): string[] {
   const files: string[] = [];
   const walk = (dir: string, depth: number): void => {
     for (const entry of readdirSync(join(context, dir), { withFileTypes: true })) {
-      if (ignored.some(({ name, anyDepth }) => entry.name === name && (anyDepth || depth === 0))) continue;
+      if (ignored.some(({ name, anyDepth }) => entry.name === name && (anyDepth || depth === 0)))
+        continue;
       const path = dir === "" ? entry.name : `${dir}/${entry.name}`;
       if (entry.isDirectory()) walk(path, depth + 1);
       else if (entry.isFile()) files.push(path);
@@ -196,9 +269,13 @@ function contextFiles(context: string): string[] {
  */
 export function inputsOf(composePath: string): string | null {
   const text = readFileSync(composePath, "utf8");
-  const build = (parse(text) as { services: { server: { build?: string | { context: string } } } }).services.server.build;
+  const build = (parse(text) as { services: { server: { build?: string | { context: string } } } })
+    .services.server.build;
   if (build === undefined) return null;
-  const context = resolvePath(dirname(composePath), typeof build === "string" ? build : build.context);
+  const context = resolvePath(
+    dirname(composePath),
+    typeof build === "string" ? build : build.context,
+  );
   const hash = createHash("sha256").update(text);
   for (const file of contextFiles(context)) {
     const executable = (statSync(join(context, file)).mode & 0o111) !== 0;
@@ -215,7 +292,9 @@ export function inputsOf(composePath: string): string | null {
 export function builtImage(id: string): { image: string; inputs: string } | null {
   const inputs = inputsOf(composeFile(id));
   if (inputs === null) return null;
-  const image = (parse(readFileSync(composeFile(id), "utf8")) as { services: { server: { image: string } } }).services.server.image;
+  const image = (
+    parse(readFileSync(composeFile(id), "utf8")) as { services: { server: { image: string } } }
+  ).services.server.image;
   return { image, inputs: `${repositoryOf(image)}:inputs-${inputs}` };
 }
 
@@ -256,7 +335,17 @@ export async function prepare(id: ServerId): Promise<void> {
   // Tagged only when nothing changed while it was built, and older tags let go, so `docker image prune` takes their images.
   if (built === null || builtImage(id)?.inputs !== built.inputs) return;
   await docker(["tag", built.image, built.inputs], {});
-  const tags = await docker(["image", "ls", "--filter", `reference=${repositoryOf(built.image)}:inputs-*`, "--format", "{{.Repository}}:{{.Tag}}"], {});
+  const tags = await docker(
+    [
+      "image",
+      "ls",
+      "--filter",
+      `reference=${repositoryOf(built.image)}:inputs-*`,
+      "--format",
+      "{{.Repository}}:{{.Tag}}",
+    ],
+    {},
+  );
   const older = tags.split("\n").filter((tag) => tag !== "" && tag !== built.inputs);
   if (older.length > 0) await docker(["rmi", ...older], {});
 }
@@ -285,7 +374,18 @@ export async function startServer(id: ServerId): Promise<StartedServer> {
     if (stopping !== undefined) return;
     stopping = Promise.resolve();
     running.delete(stopNow);
-    const args = ["compose", "-p", project(id), "-f", composeFile(id), "down", "-v", "--remove-orphans", "-t", "0"];
+    const args = [
+      "compose",
+      "-p",
+      project(id),
+      "-f",
+      composeFile(id),
+      "down",
+      "-v",
+      "--remove-orphans",
+      "-t",
+      "0",
+    ];
     spawnSync("docker", args, { env: { ...process.env, ...env }, stdio: "ignore" });
     logs?.kill();
     rmSync(lockFile(id), { force: true });
@@ -309,13 +409,20 @@ export async function startServer(id: ServerId): Promise<StartedServer> {
   await writeFile(lockFile(id), JSON.stringify({ pid: process.pid }));
   logs = follow(id, env, log);
   const base = `http://127.0.0.1:${env.E2E_PORT}/`;
-  const server: SolidServer = { id, tier: entry.tier, name: `${entry.label} ${entry.version()}`, url: base + entry.podPath };
+  const server: SolidServer = {
+    id,
+    tier: entry.tier,
+    name: `${entry.label} ${entry.version()}`,
+    url: base + entry.podPath,
+  };
   try {
     await untilUp(server.name, base + entry.readyPath, entry.startTimeoutMs, log);
     await checkContract(server.url);
   } catch (error) {
     await stop();
-    throw new Error(`${server.name} (${id}): ${(error as Error).message}\nIts log: ${log}`, { cause: error });
+    throw new Error(`${server.name} (${id}): ${(error as Error).message}\nIts log: ${log}`, {
+      cause: error,
+    });
   }
   return { server, stop };
 }
@@ -331,7 +438,10 @@ const running = new Set<() => void>();
 export function stopOnExit(): void {
   const stopAllNow = () => running.forEach((stopNow) => stopNow());
   process.once("exit", stopAllNow);
-  for (const [signal, code] of [["SIGINT", 130], ["SIGTERM", 143]] as const) {
+  for (const [signal, code] of [
+    ["SIGINT", 130],
+    ["SIGTERM", 143],
+  ] as const) {
     process.once(signal, () => {
       stopAllNow();
       process.exit(code);
@@ -348,7 +458,9 @@ async function clearLeftovers(id: ServerId): Promise<void> {
   if (existsSync(lockFile(id))) {
     const { pid } = JSON.parse(await readFile(lockFile(id), "utf8")) as { pid: number };
     if (pid !== process.pid && alive(pid) && (await projects()).includes(project(id))) {
-      throw new Error(`Another run (process ${pid}) is using ${id}; if there is none, run npm run pod:clean.`);
+      throw new Error(
+        `Another run (process ${pid}) is using ${id}; if there is none, run npm run pod:clean.`,
+      );
     }
   }
   await takeDown(project(id));
@@ -356,17 +468,22 @@ async function clearLeftovers(id: ServerId): Promise<void> {
 
 /** Every server this checkout's runs left behind, taken down: `npm run pod:clean`. */
 export async function clean(): Promise<string[]> {
-  const ours = (await projects()).filter((name) => name.startsWith("solid-memo-e2e-") && name.endsWith(`-${CHECKOUT}`));
+  const ours = (await projects()).filter(
+    (name) => name.startsWith("solid-memo-e2e-") && name.endsWith(`-${CHECKOUT}`),
+  );
   await Promise.all(ours.map(takeDown));
   await rm(LOGS, { recursive: true, force: true });
   return ours;
 }
 
 /** A compose project, down by its name alone: compose needs no file for that, nor its variables. */
-const takeDown = (name: string) => docker(["compose", "-p", name, "down", "-v", "--remove-orphans", "-t", "0"], {}, tmpdir());
+const takeDown = (name: string) =>
+  docker(["compose", "-p", name, "down", "-v", "--remove-orphans", "-t", "0"], {}, tmpdir());
 
 async function projects(): Promise<string[]> {
-  const listed = JSON.parse(await docker(["compose", "ls", "--all", "--format", "json"], {})) as { Name: string }[];
+  const listed = JSON.parse(await docker(["compose", "ls", "--all", "--format", "json"], {})) as {
+    Name: string;
+  }[];
   return listed.map(({ Name }) => Name);
 }
 
@@ -383,10 +500,24 @@ function alive(pid: number): boolean {
 
 /** What the server prints, with times, into the file, until killed or the server is gone. */
 function follow(id: ServerId, env: Record<string, string>, file: string): ChildProcess {
-  const child = spawn("docker", ["compose", "-p", project(id), "-f", composeFile(id), "logs", "-f", "--no-color", "--timestamps"], {
-    env: { ...process.env, ...env },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+  const child = spawn(
+    "docker",
+    [
+      "compose",
+      "-p",
+      project(id),
+      "-f",
+      composeFile(id),
+      "logs",
+      "-f",
+      "--no-color",
+      "--timestamps",
+    ],
+    {
+      env: { ...process.env, ...env },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
   const out = createWriteStream(file);
   child.stdout!.pipe(out);
   child.stderr!.pipe(out);
@@ -396,14 +527,26 @@ function follow(id: ServerId, env: Record<string, string>, file: string): ChildP
 /** Runs docker, resolving with what it printed; rejecting with it if it fails. */
 function docker(args: string[], env: Record<string, string>, cwd = HERE): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = spawn("docker", args, { cwd, env: { ...process.env, ...env }, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn("docker", args, {
+      cwd,
+      env: { ...process.env, ...env },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
     let out = "";
     child.stdout.on("data", (chunk: Buffer) => void (out += chunk.toString()));
     child.stderr.on("data", (chunk: Buffer) => void (out += chunk.toString()));
     child.on("error", (error) =>
-      reject(new Error(`docker could not be run (${error.message}); the end-to-end tests start their servers in it (docs/testing.md).`)),
+      reject(
+        new Error(
+          `docker could not be run (${error.message}); the end-to-end tests start their servers in it (docs/testing.md).`,
+        ),
+      ),
     );
-    child.on("close", (code) => (code === 0 ? resolve(out) : reject(new Error(`docker ${args.join(" ")} failed (${code}):\n${out}`))));
+    child.on("close", (code) =>
+      code === 0
+        ? resolve(out)
+        : reject(new Error(`docker ${args.join(" ")} failed (${code}):\n${out}`)),
+    );
   });
 }
 
@@ -420,12 +563,17 @@ function freePort(): Promise<number> {
 async function untilUp(name: string, url: string, timeoutMs: number, log: string): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const up = await fetch(url).then((r) => r.ok, () => false);
+    const up = await fetch(url).then(
+      (r) => r.ok,
+      () => false,
+    );
     if (up) return;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   const printed = await readFile(log, "utf8").catch(() => "");
-  throw new Error(`${name} did not answer at ${url} within ${timeoutMs / 1000}s; it printed last:\n${printed.split("\n").slice(-20).join("\n")}`);
+  throw new Error(
+    `${name} did not answer at ${url} within ${timeoutMs / 1000}s; it printed last:\n${printed.split("\n").slice(-20).join("\n")}`,
+  );
 }
 
 /**

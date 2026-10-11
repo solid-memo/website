@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import type { ChapterV1, StepV1 } from "@solid-memo/vocab/types.generated";
 import {
@@ -24,7 +28,12 @@ const chapter = (position: number, extra: Partial<ChapterV1> = {}): ChapterV1 =>
   reviewQuestion: [],
   ...extra,
 });
-const step = (chapterId: string, position: number, questions: string[], extra: Partial<StepV1> = {}): StepV1 => ({
+const step = (
+  chapterId: string,
+  position: number,
+  questions: string[],
+  extra: Partial<StepV1> = {},
+): StepV1 => ({
   theory: { en: `Theory ${chapterId} ${position}` },
   checkedBy: questions.map(at),
   chapter: at(chapterId),
@@ -37,7 +46,10 @@ const outline: CourseOutline = courseOutlineFromRecords(
   RELEASE,
   [
     { url: at("ch-b"), data: chapter(1) },
-    { url: at("ch-a"), data: chapter(0, { description: { en: "First." }, reviewQuestion: [at("q-review")] }) },
+    {
+      url: at("ch-a"),
+      data: chapter(0, { description: { en: "First." }, reviewQuestion: [at("q-review")] }),
+    },
   ],
   [
     { url: at("a-2"), data: step("ch-a", 1, ["q3"]) },
@@ -58,8 +70,20 @@ describe("a course's outline", () => {
           title: { en: "Chapter 0" },
           description: { en: "First." },
           steps: [
-            { id: "a-1", url: at("a-1"), position: 0, theory: { en: "Theory ch-a 0" }, questionIds: ["q1", "q2"] },
-            { id: "a-2", url: at("a-2"), position: 1, theory: { en: "Theory ch-a 1" }, questionIds: ["q3"] },
+            {
+              id: "a-1",
+              url: at("a-1"),
+              position: 0,
+              theory: { en: "Theory ch-a 0" },
+              questionIds: ["q1", "q2"],
+            },
+            {
+              id: "a-2",
+              url: at("a-2"),
+              position: 1,
+              theory: { en: "Theory ch-a 1" },
+              questionIds: ["q3"],
+            },
           ],
           reviewQuestionIds: ["q-review"],
         },
@@ -68,7 +92,15 @@ describe("a course's outline", () => {
           url: at("ch-b"),
           position: 1,
           title: { en: "Chapter 1" },
-          steps: [{ id: "b-1", url: at("b-1"), position: 0, theory: { en: "Theory ch-b 0" }, questionIds: ["q4"] }],
+          steps: [
+            {
+              id: "b-1",
+              url: at("b-1"),
+              position: 0,
+              theory: { en: "Theory ch-b 0" },
+              questionIds: ["q4"],
+            },
+          ],
           reviewQuestionIds: [],
         },
       ],
@@ -79,13 +111,21 @@ describe("a course's outline", () => {
     const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
     const marked = courseOutlineFromRecords(
       RELEASE,
-      [{ url: at("ch-a"), data: chapter(0, { description: { en: "**First.**" }, textFormat: MARKDOWN }) }],
+      [
+        {
+          url: at("ch-a"),
+          data: chapter(0, { description: { en: "**First.**" }, textFormat: MARKDOWN }),
+        },
+      ],
       [
         { url: at("a-1"), data: step("ch-a", 0, ["q1"], { textFormat: MARKDOWN }) },
         { url: at("a-2"), data: step("ch-a", 1, ["q2"]) },
       ],
     );
-    expect(marked.chapters[0]).toMatchObject({ textFormat: MARKDOWN, steps: [{ id: "a-1", textFormat: MARKDOWN }, { id: "a-2" }] });
+    expect(marked.chapters[0]).toMatchObject({
+      textFormat: MARKDOWN,
+      steps: [{ id: "a-1", textFormat: MARKDOWN }, { id: "a-2" }],
+    });
     expect(marked.chapters[0]!.steps[1]).not.toHaveProperty("textFormat");
     expect(outline.chapters[0]).not.toHaveProperty("textFormat");
   });
@@ -115,21 +155,39 @@ describe("two releases' outlines", () => {
   const V2 = "https://solid-memo.com/decks/solid/v2.ttl";
   const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
   /** What release 2 changes: of chapter ch-a or ch-b, or of step a-1, a-2 or b-1. */
-  type Change = Partial<Record<"ch-a" | "ch-b", Partial<ChapterV1>> & Record<"a-1" | "a-2" | "b-1", Partial<StepV1>>>;
+  type Change = Partial<
+    Record<"ch-a" | "ch-b", Partial<ChapterV1>> & Record<"a-1" | "a-2" | "b-1", Partial<StepV1>>
+  >;
   /** The outline as release 2 states it, each subject at its own URL there, as `change` has it. */
   const next = (change: Change = {}) => {
     const in2 = (id: string) => `${V2}#${id}`;
-    const ofChapter = (chapterId: string, position: number, questions: string[], id: "a-1" | "a-2" | "b-1") => ({
+    const ofChapter = (
+      chapterId: string,
+      position: number,
+      questions: string[],
+      id: "a-1" | "a-2" | "b-1",
+    ) => ({
       url: in2(id),
       data: { ...step(chapterId, position, questions), chapter: in2(chapterId), ...change[id] },
     });
     return courseOutlineFromRecords(
       V2,
       [
-        { url: in2("ch-a"), data: chapter(0, { description: { en: "First." }, reviewQuestion: [at("q-review")], ...change["ch-a"] }) },
+        {
+          url: in2("ch-a"),
+          data: chapter(0, {
+            description: { en: "First." },
+            reviewQuestion: [at("q-review")],
+            ...change["ch-a"],
+          }),
+        },
         { url: in2("ch-b"), data: chapter(1, change["ch-b"]) },
       ],
-      [ofChapter("ch-a", 0, ["q1", "q2"], "a-1"), ofChapter("ch-a", 1, ["q3"], "a-2"), ofChapter("ch-b", 0, ["q4"], "b-1")],
+      [
+        ofChapter("ch-a", 0, ["q1", "q2"], "a-1"),
+        ofChapter("ch-a", 1, ["q3"], "a-2"),
+        ofChapter("ch-b", 0, ["q4"], "b-1"),
+      ],
     );
   };
 
@@ -179,21 +237,37 @@ describe("a learner's progress", () => {
 
   it("counts a step done once each of its questions is answered, and resumes at the first not done", () => {
     const progress = courseProgress(outline, new Set(["q1", "q3"]), []);
-    expect(progress.chapters[0]).toEqual({ url: at("ch-a"), state: "open", doneStepIds: ["a-2"], resumeStepId: "a-1" });
+    expect(progress.chapters[0]).toEqual({
+      url: at("ch-a"),
+      state: "open",
+      doneStepIds: ["a-2"],
+      resumeStepId: "a-1",
+    });
     const allSteps = courseProgress(outline, ["q1", "q2", "q3"], []);
     // Every step done: the final review is next.
-    expect(allSteps.chapters[0]).toEqual({ url: at("ch-a"), state: "open", doneStepIds: ["a-1", "a-2"] });
+    expect(allSteps.chapters[0]).toEqual({
+      url: at("ch-a"),
+      state: "open",
+      doneStepIds: ["a-1", "a-2"],
+    });
   });
 
   it("unlocks a chapter once those before it are completed, and is done when every chapter is", () => {
     const first = courseProgress(outline, ["q1", "q2", "q3"], [at("ch-a")]);
     expect(first.chapters.map((c) => c.state)).toEqual(["done", "open"]);
     expect(first.currentChapterUrl).toBe(at("ch-b"));
-    const all = courseProgress(outline, ["q1", "q2", "q3", "q4"], [at("ch-b"), at("ch-a"), at("ch-retired")]);
+    const all = courseProgress(
+      outline,
+      ["q1", "q2", "q3", "q4"],
+      [at("ch-b"), at("ch-a"), at("ch-retired")],
+    );
     expect(all).toMatchObject({ done: true });
     expect(all.currentChapterUrl).toBeUndefined();
     // A completed chapter stays done, even after one that is not.
-    expect(courseProgress(outline, [], [at("ch-b")]).chapters.map((c) => c.state)).toEqual(["open", "done"]);
+    expect(courseProgress(outline, [], [at("ch-b")]).chapters.map((c) => c.state)).toEqual([
+      "open",
+      "done",
+    ]);
   });
 
   it("keeps a chapter completed in an earlier release completed in the release the deck now follows", () => {
@@ -203,7 +277,10 @@ describe("a learner's progress", () => {
       [{ url: "https://solid-memo.com/decks/solid/v2.ttl#ch-a", data: chapter(0) }],
       [],
     );
-    expect(courseProgress(v2, [], [v1])).toMatchObject({ chapters: [{ state: "done" }], done: true });
+    expect(courseProgress(v2, [], [v1])).toMatchObject({
+      chapters: [{ state: "done" }],
+      done: true,
+    });
   });
 });
 
@@ -216,15 +293,30 @@ describe("multiple-choice questions", () => {
     front: { en: "What can an IRI name?" },
     back: { en: "Any thing at all" },
     distractors: [
-      { id: "q1-d1", text: { en: "Only web pages" }, note: { en: "A web page is one kind of thing." } },
+      {
+        id: "q1-d1",
+        text: { en: "Only web pages" },
+        note: { en: "A web page is one kind of thing." },
+      },
       { id: "q1-d2", text: { en: "Only people" } },
     ],
   };
 
   it("offer the back and every distractor, shuffled by the random source", () => {
     const right = { key: "back", text: { en: "Any thing at all" }, correct: true };
-    const d1 = { key: "distractor:q1-d1", text: { en: "Only web pages" }, correct: false, distractorId: "q1-d1", note: { en: "A web page is one kind of thing." } };
-    const d2 = { key: "distractor:q1-d2", text: { en: "Only people" }, correct: false, distractorId: "q1-d2" };
+    const d1 = {
+      key: "distractor:q1-d1",
+      text: { en: "Only web pages" },
+      correct: false,
+      distractorId: "q1-d1",
+      note: { en: "A web page is one kind of thing." },
+    };
+    const d2 = {
+      key: "distractor:q1-d2",
+      text: { en: "Only people" },
+      correct: false,
+      distractorId: "q1-d2",
+    };
     expect(choicesOf(card, last)).toEqual([right, d1, d2]);
     expect(choicesOf(card, first)).toEqual([d1, d2, right]);
   });
@@ -232,11 +324,16 @@ describe("multiple-choice questions", () => {
   it("never offer a retired distractor", () => {
     const [d1, d2] = card.distractors!;
     const retired = { ...card, distractors: [d1!, { ...d2!, retired: true as const }] };
-    expect(choicesOf(retired, last).map((choice) => choice.key)).toEqual(["back", "distractor:q1-d1"]);
+    expect(choicesOf(retired, last).map((choice) => choice.key)).toEqual([
+      "back",
+      "distractor:q1-d1",
+    ]);
   });
 
   it("offer only the back of a card without distractors", () => {
-    expect(choicesOf({ front: { en: "Q" }, back: { en: "A" } }, first)).toEqual([{ key: "back", text: { en: "A" }, correct: true }]);
+    expect(choicesOf({ front: { en: "Q" }, back: { en: "A" } }, first)).toEqual([
+      { key: "back", text: { en: "A" }, correct: true },
+    ]);
   });
 
   it("grade a right choice 3 and a wrong one 1", () => {
@@ -280,9 +377,17 @@ describe("a course answer's effect on the schedule", () => {
 
   it("reviews a card due today or earlier, and leaves one not yet due as practice", () => {
     const yesterday = new Date(2026, 9, 6, 12, 0);
-    expect(courseAnswerEffect(state(yesterday, "2026-10-07"), true, now, 4)).toEqual({ kind: "review", grade: 3 });
-    expect(courseAnswerEffect(state(yesterday, "2026-10-05"), false, now, 4)).toEqual({ kind: "review", grade: 1 });
-    expect(courseAnswerEffect(state(yesterday, "2026-10-12"), false, now, 4)).toEqual({ kind: "none" });
+    expect(courseAnswerEffect(state(yesterday, "2026-10-07"), true, now, 4)).toEqual({
+      kind: "review",
+      grade: 3,
+    });
+    expect(courseAnswerEffect(state(yesterday, "2026-10-05"), false, now, 4)).toEqual({
+      kind: "review",
+      grade: 1,
+    });
+    expect(courseAnswerEffect(state(yesterday, "2026-10-12"), false, now, 4)).toEqual({
+      kind: "none",
+    });
   });
 
   it("counts a review before the day boundary as the day before", () => {
@@ -298,7 +403,9 @@ describe("editing the chapters completed", () => {
   const completed = [`${v1}#ch-a`, `${v2}#ch-a`, `${v2}#ch-b`];
 
   it("marks a chapter not done, in every release", () => {
-    expect(editCompletedChapters(completed, { kind: "notDone", chapterUrl: `${v2}#ch-a` })).toEqual([`${v2}#ch-b`]);
+    expect(editCompletedChapters(completed, { kind: "notDone", chapterUrl: `${v2}#ch-a` })).toEqual(
+      [`${v2}#ch-b`],
+    );
   });
 
   it("restarts the course: no chapter completed", () => {

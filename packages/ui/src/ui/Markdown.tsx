@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { Fragment, type ComponentChildren } from "preact";
 import { liveLink } from "@solid-memo/markdown/links";
 import type { MdBlock, MdInline } from "@solid-memo/markdown/parse";
@@ -10,13 +14,19 @@ import { useI18n } from "./i18n";
  * the folded tree of @solid-memo/markdown: each kind of node makes one
  * fixed element with fixed attributes, and data only ever becomes text
  * children, never markup, a class, a style, an id or a handler. There is
- * no HTML string anywhere, so nothing to sanitise.
+ * no HTML string anywhere, so nothing to sanitize.
  *
  * A code block or a table is a region of its own that scrolls sideways
  * and takes the focus, so it can be scrolled from the keyboard; the keys
  * of the screen around it leave such a region alone (dataRegion).
  */
-export function MarkdownBlocks({ blocks, tight = false }: { blocks: readonly MdBlock[]; tight?: boolean }) {
+export function MarkdownBlocks({
+  blocks,
+  tight = false,
+}: {
+  blocks: readonly MdBlock[];
+  tight?: boolean;
+}) {
   return (
     <>
       {blocks.map((block, index) => (
@@ -31,7 +41,13 @@ function MarkdownBlock({ block, tight }: { block: MdBlock; tight: boolean }) {
   switch (block.type) {
     case "paragraph":
       // A tight list's items hold their text bare, as HTML renders them.
-      return tight ? <MarkdownInlines nodes={block.children} /> : <p><MarkdownInlines nodes={block.children} /></p>;
+      return tight ? (
+        <MarkdownInlines nodes={block.children} />
+      ) : (
+        <p>
+          <MarkdownInlines nodes={block.children} />
+        </p>
+      );
     case "code":
       return (
         <div class="md-code">
@@ -47,7 +63,11 @@ function MarkdownBlock({ block, tight }: { block: MdBlock; tight: boolean }) {
           <MarkdownBlocks blocks={item} tight={block.tight} />
         </li>
       ));
-      return block.ordered ? <ol start={block.start === 1 ? undefined : block.start}>{items}</ol> : <ul>{items}</ul>;
+      return block.ordered ? (
+        <ol start={block.start === 1 ? undefined : block.start}>{items}</ol>
+      ) : (
+        <ul>{items}</ul>
+      );
     }
     case "quote":
       return (

@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { AppError } from "./appError";
 /** Outcome of validating user input as a WebID. */
-export type WebIdValidation =
-  | { ok: true; webId: string }
-  | { ok: false; error: AppError };
+export type WebIdValidation = { ok: true; webId: string } | { ok: false; error: AppError };
 
 function parseUrl(value: string): URL | null {
   try {

@@ -13,8 +13,8 @@ come, its lapses and leeches, and everything wrong with a deck or the
 instance. It lists the decks copied from the library or added from a
 link, and upgrades them to newer releases. It exports decks as Turtle
 or JSON-LD files, and imports them. It edits what a deck says of itself
-(its authors and licence among it), a course's progress, and the
-instance's name and catalogue.
+(its authors and license among it), a course's progress, and the
+instance's name and catalog.
 
 To create, it keeps the drafts of releases a creator writes in the
 instance. A draft is started from nothing, from a deck, as the next
@@ -93,7 +93,7 @@ It takes the whole window, and the window does not scroll:
   ([`shell/StudioSidebar.tsx`](../apps/studio/src/ui/shell/StudioSidebar.tsx),
   a navigation named Studio), links to the instance's sections: Decks
   (Home), Groups, Drafts, Releases, Health, Library copies, Import and
-  export, and Name and catalogue. The one shown is marked
+  export, and Name and catalog. The one shown is marked
   (`aria-current`); beside Health, the number of problems the instance's
   check found, once a screen has made it (the sidebar makes none). Under
   them, the instance's decks, each at its cards, and its drafts, each at
@@ -167,7 +167,7 @@ It takes the whole window, and the window does not scroll:
 ([`shell/ContextTabs.tsx`](../apps/studio/src/ui/shell/ContextTabs.tsx),
 a navigation named Deck): Cards (a card in the inspector among them),
 Schedule, Health, About, and Export, which opens import and export with
-the deck ticked. A draft's screens have the draft's (named Draft):
+the deck checked. A draft's screens have the draft's (named Draft):
 Overview (its chapters and steps under it), Cards (its questions under
 them), Check, which counts the problems the release check finds ("Check
 3", heard as "Check 3 problems"), Preview, Trial, Changes (only for a
@@ -193,7 +193,7 @@ not.
 | the instances | no sidebar: no instance is open | none | none | none |
 | Home | Decks | none (its views are its own) | the deck at the table's cursor (Deck) | none |
 | the library copies | Library copies | none | the upgrade of the copy at the table's cursor (Upgrade) | none |
-| groups, drafts, releases, the instance's health, import and export, name and catalogue | that section | none | none | none |
+| groups, drafts, releases, the instance's health, import and export, name and catalog | that section | none | none | none |
 | a deck's cards, schedule, health and about screen | the deck | the deck's | none | what the deck's health found |
 | a card | the deck | the deck's, Cards marked as the card's | on a wide screen, the card (Card), the deck's cards in the main content; else the card is the main content | what the deck's health found |
 | a draft's overview | the draft | the draft's | none | its release check's |
@@ -214,7 +214,7 @@ Studio is laid out is kept on the device as it changes
 
 Its look is calm: headings in the body's type, sections flat with a
 thin border, and no tilt, stamp or pop as a screen comes in. Its
-colours are Solid Memo's, so the theme and an instance's colours carry
+colors are Solid Memo's, so the theme and an instance's colors carry
 over ([theme.md](theme.md)).
 
 **Density.** Rows and controls are compact, about 28px high, on every
@@ -478,7 +478,7 @@ dock. A screen's:
 | --- | --- | --- |
 | [Drafts](#drafts) | New draft | goes to the new draft's form, while a draft can be made |
 | [Health](#health), an instance's or a deck's | Check again | checks again, while it is not checking |
-| [Import and export](#import-and-export) | Export *n* decks | exports the decks ticked, as the form's button does, while some are and none is being exported |
+| [Import and export](#import-and-export) | Export *n* decks | exports the decks checked, as the form's button does, while some are and none is being exported |
 
 ## Routes
 
@@ -498,10 +498,10 @@ others.
 | `#/studio/card?deck=…&card=…[&tab=distractors\|schedule\|history&field=…][&q&in&lang&state&has&sort&order&page&size]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, with `tab=schedule` its review state, or with `tab=history` its answers ([below](#card-inspector)). The content is the default tab, and is left out of the URL. `field` opens it at one field: a text of the content (`front`, `backNote`…), or a wrong option by its id. The rest is the query of the workbench beside the card, as the workbench's own, but `in` for its `field` (where to look); without it, the deck's cards as listed. |
 | `#/studio/schedule?deck=…` | a deck's schedule: the reviews to come, its intervals and eases, its lapses and leeches ([below](#a-decks-schedule)). |
 | `#/studio/about?deck=…` | a deck's about screen: what it says of itself, how it is studied and, for a course, the learner's progress ([below](#a-decks-about-screen)). |
-| `#/studio/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
+| `#/studio/instance?instance=…` | the instance's name and its catalog ([below](#the-instance)). |
 | `#/studio/health?instance=…[&deck=…]` | everything wrong with the instance, or with one of its decks ([below](#health)). |
 | `#/studio/library?instance=…` | the instance's copies of library releases, the newer releases and what upgrading would change ([below](#library-copies)). |
-| `#/studio/transfer?instance=…[&deck=…&deck=…]` | import and export: the instance's decks to save as files, those of each `deck` ticked, and a file to make a deck of ([below](#import-and-export)). |
+| `#/studio/transfer?instance=…[&deck=…&deck=…]` | import and export: the instance's decks to save as files, those of each `deck` checked, and a file to make a deck of ([below](#import-and-export)). |
 | `#/studio/drafts?instance=…` | the instance's drafts of releases, and a new one to start ([below](#drafts)). |
 | `#/studio/draft?draft=…[&field=…]` | a draft's overview: what the release says of itself and, for a course, its outline ([below](#a-drafts-overview)). `draft` is the draft's release document, which names the instance. |
 | `#/studio/chapter?draft=…&chapter=…[&field=…]` | a chapter of a course draft, by its id ([below](#a-chapter)). |
@@ -532,7 +532,7 @@ not have is left out.
 Like Solid Memo's fallbacks, these replace the history entry.
 
 Changing Home's filter, sort or view, the deck beside its table, the
-workbench's query, the inspector's tab, the decks ticked to export, or
+workbench's query, the inspector's tab, the decks checked to export, or
 the view of a draft's cards, replaces the history entry: it is the
 same screen, looked at another way, so Back leaves it. So does going
 from card to card beside the deck's cards (`j` and `k`, Previous and
@@ -546,7 +546,7 @@ in its instance bar, each deck's actions menu and the deck page;
 The trail is Instances › Decks, then › Groups on the Groups screen,
 › Cards of *deck* in the workbench, › Cards of *deck* › *card* in the
 inspector, › Cards of *deck* › Schedule on a deck's schedule, › About *deck* on a deck's about screen, or › Name and
-catalogue on the instance's screen, › Health on the instance's health,
+catalog on the instance's screen, › Health on the instance's health,
 › Health › *deck* on a deck's, › Library copies on the library
 copies, › Import and export on import and export, › Drafts on the
 drafts, and › Releases on the releases. A draft's screens go on from › Drafts: › *draft* on its
@@ -607,7 +607,7 @@ Beside a copy's name, "Release 2 out" when a newer release of it is
 out, a link to the [library copies](#library-copies). It too is looked
 up once its row is on the screen: one read of the library's index for
 every copy (`listLibraryUpdates`), and for a copy from a link its
-creator's catalogue. A copy up to date, or one whose newer releases
+creator's catalog. A copy up to date, or one whose newer releases
 cannot be known, gets no badge.
 
 The instance's other sections, and its drafts, are in the
@@ -670,7 +670,7 @@ it is shown again):
   preferences again;
 - **given a direction**;
 - **exported**: Export opens [import and export](#import-and-export)
-  with them ticked;
+  with them checked;
 - **deleted**, with their cards, once the user confirms a question that
   names each deck (a ConfirmDialog).
 
@@ -748,7 +748,7 @@ The table is the Studio's `DataTable`
 its header row and its first column (the checkboxes and the fronts)
 stay in sight as it scrolls. Cards are selected by their checkbox, or
 all those on the page at once; a click with Shift held selects, or
-not, every card from the one ticked last. The selection stays while
+not, every card from the one checked last. The selection stays while
 the view changes, and the selection's bar under the table counts it
 ([Layout](#layout)). The keys say so, quietly, under the bar: **j** and **k** move the cursor between the rows (the focus
 goes to the row's front), **x** selects the row, **Shift+J** and
@@ -784,7 +784,7 @@ it is read, the cards show without their lapses, and a query that needs
 them (`state=leech`, `sort=lapses`) waits. When it cannot be read, the
 line says so, and such a query shows why. The deck's tabs go to its
 [schedule](#a-decks-schedule), its [health](#health) and its export
-([import and export](#import-and-export), the deck ticked).
+([import and export](#import-and-export), the deck checked).
 
 A card opens in the [card inspector](#card-inspector): on a screen
 wider than 64rem beside the workbench, which stays as it is, its query,
@@ -815,7 +815,7 @@ be changed, the bar has Clear selection alone. The edits are:
 - **Find and replace**
   ([`FindReplaceDialog`](../apps/studio/src/ui/FindReplaceDialog.tsx)):
   text as written (Markdown as its source), never a pattern. It looks in
-  the fields ticked (the front, the back, the notes, the label, the wrong
+  the fields checked (the front, the back, the notes, the label, the wrong
   options and their notes), in one language or all, matching case and
   whole words when asked. A preview lists every text it changes, before
   and after, and every card it leaves as it is, and why. Nothing is
@@ -1037,7 +1037,7 @@ end-to-end tests hold both against real servers
 **Move to deck…** and **Copy to deck…** open a form
 ([`TransferCardsDialog`](../apps/studio/src/ui/TransferCardsDialog.tsx)).
 It offers the instance's other decks, and **Keep their progress**,
-ticked to start with. It says what becomes of the cards' history. A
+checked to start with. It says what becomes of the cards' history. A
 moved card leaves the selection.
 
 The domain plans the transfer
@@ -1146,10 +1146,10 @@ says when a save is made:
   Solid Memo's deck preferences (`renameDeck`).
 - **About this deck**: its description, topics and keywords, with
   Solid Memo's own form (`DeckAboutSection` in `ui`, `describeDeck`).
-- **Authors and licence**: an author a line, "Name" or "Name <email>",
-  and a licence chosen from those offered (`KNOWN_LICENSES` in
+- **Authors and license**: an author a line, `Name` or `Name <email>`,
+  and a license chosen from those offered (`KNOWN_LICENSES` in
   [license.ts](../packages/domain/src/license.ts), each named as
-  `licenseLabel` names it). A licence another app wrote is offered too,
+  `licenseLabel` names it). A license another app wrote is offered too,
   so it can be kept. The domain tidies and checks them
   ([deckProvenance.ts](../packages/domain/src/deckProvenance.ts)): two
   authors that would share one agent node are refused, and the form
@@ -1179,20 +1179,20 @@ shows where the instance is, and links to its study preferences in
 Solid Memo. Its forms:
 
 - **Name**: `renameInstance` writes it everywhere it is kept: the meta
-  document, the catalogue and the type index registrations
-  ([data-model.md](data-model.md#the-catalogue)). Then the instances
+  document, the catalog and the type index registrations
+  ([data-model.md](data-model.md#the-catalog)). Then the instances
   are read afresh, so every screen names it anew. An empty name is
   refused.
-- **Catalogue**: its description, required, and its licence, from the
+- **Catalog**: its description, required, and its license, from the
   same list as a deck's (`describeCatalog`). Its publisher, the pod's
-  owner, is shown, never edited. An instance without a catalogue (one
+  owner, is shown, never edited. An instance without a catalog (one
   not updated yet) says so instead. The form starts again from each
-  read of the catalogue, as a rename can change its description.
+  read of the catalog, as a rename can change its description.
 
 Both forms are held until the data check is done, and while the
-catalogue or a group is set aside ([below](#data-set-aside)).
+catalog or a group is set aside ([below](#data-set-aside)).
 
-The meta document and catalogue writes pass the shape check. The type
+The meta document and catalog writes pass the shape check. The type
 index renames have no shape, so they are If-Match writes only. Each
 write is made again from a fresh read on a 412, three times in all. The end-to-end tests hold these edits
 against real servers
@@ -1210,7 +1210,7 @@ together ([deckHealth.ts](../packages/domain/src/deckHealth.ts)). A line
 counts the problems, then the screen has four parts:
 
 - **Data check**: the [shape check](validation.md) of the deck's
-  subjects in the catalogue (its entry, its distribution and its
+  subjects in the catalog (its entry, its distribution and its
   authors' agent nodes), and of its cards and reviews documents
   (`deckReport`). It is made as the check made when
   an instance is opened: a document still at the version the
@@ -1289,7 +1289,7 @@ For each copy with a newer release, the screen asks what upgrading
 would do (`planLibraryUpgrade`, the plan Solid Memo's deck page offers;
 [migrations.md](migrations.md#catching-up-with-the-library)). It gives
 the copy as the copies were found, its series with it, so the index is
-not read again for each copy, nor a link's catalogue. It says so in a sentence, as Solid Memo does. A newer release with nothing for the copy says so.
+not read again for each copy, nor a link's catalog. It says so in a sentence, as Solid Memo does. A newer release with nothing for the copy says so.
 
 The table is a [`DataTable`](#card-workbench): **j** and **k** move its
 cursor, and the copy at the cursor is shown in the aside (named
@@ -1322,18 +1322,18 @@ batch of two upgrades against real servers
 A copy whose series the index does not list is looked up as a copy
 of a release added from a link
 ([deck-library.md](deck-library.md#from-a-link)). Its release is read,
-and its row says "From \<host>". Its creator's catalogue, found in the
+and its row says "From \<host>". Its creator's catalog, found in the
 folders above the release and read as anyone reads it, lists the
 releases its instance published (`sm:publishedRelease`): the newest of
 the copy's series is its upgrade, planned and applied as a library
-copy's. Each release a catalogue links is read once for all the copies,
+copy's. Each release a catalog links is read once for all the copies,
 and none the copy's own release lists, which is no newer. Before an
 upgrade is planned, the newer release and those in between are checked
 against the library's shapes, as the first was; one that breaks them
-is refused (`releaseNotConforming`). When no public catalogue of its
+is refused (`releaseNotConforming`). When no public catalog of its
 creator lists the release, it is unknown whether a newer version is
-out, and the row says "Not known: no public catalogue of its creator
-lists it". A catalogue can be private (an instance's is, unless its
+out, and the row says "Not known: no public catalog of its creator
+lists it". A catalog can be private (an instance's is, unless its
 owner shares it), or not link the release. A copy whose release cannot
 be read either shows as no longer in the library.
 
@@ -1345,8 +1345,8 @@ JSON-LD, one deck to a file, as
 [data-model.md](data-model.md#decks-as-files) describes it.
 
 **Export** lists the instance's decks, as they are arranged. The decks
-ticked are in the URL, so Home's bulk Export and a deck's Export tab
-open the screen with them ticked. The user picks the format and
+checked are in the URL, so Home's bulk Export and a deck's Export tab
+open the screen with them checked. The user picks the format and
 whether their progress goes too: the cards' review states and a
 course's completed chapters. **Export** saves each deck as a file of
 its own, named after its title (`capitals.ttl`), one after another;
@@ -1367,9 +1367,9 @@ are brought up to date, and how many cannot be read and are left out.
 A file in a newer format than the app reads is refused, as is one
 without exactly one deck, or one that does not parse. **Import into**
 the instance (`importDeckFile`) makes a new deck of it, with its
-progress when the file has some and the user leaves it ticked. Its
+progress when the file has some and the user leaves it checked. Its
 cards document goes first, only if none is at its URL yet, then its
-review states, then its entry in the catalogue, so the deck shows only
+review states, then its entry in the catalog, so the deck shows only
 once it is whole. One left behind by an import cut off makes the deck
 take a fresh id, once. The deck's schedule in the digest is then
 brought up to date, and the screen links to the deck's cards. Every
@@ -1380,7 +1380,7 @@ named with `sm:distractor` and `schema:suggestedAnswer`, its states
 naming their card in the new deck. It needs no type-index registration
 of its own: the instance's registrations of its decks, cards and
 review states cover it ([data-model.md](data-model.md#decks-as-files)).
-While the data check is under way, or the catalogue is set aside, the
+While the data check is under way, or the catalog is set aside, the
 import is held ([below](#data-set-aside)); a file can still be read.
 
 A file in a newer format is refused as `deckFileTooNew`, not as
@@ -1462,9 +1462,9 @@ anything is written.
 It is named after its title, or its release's name, unlike the
 instance's other drafts of that version. Only a draft's place taken
 meanwhile (its release document made there first) gives it the next
-name; any other failure, such as the catalogue's link refused on 412
+name; any other failure, such as the catalog's link refused on 412
 a few times, takes back what was written and is thrown, so no draft is
-left that the catalogue does not link. The use cases are
+left that the catalog does not link. The use cases are
 `listReleaseDrafts`, `createReleaseDraft`, `copyReleaseDraft` (a
 guest's draft, as the guest's study is added to an instance,
 [guest-mode.md](guest-mode.md#adding-to-an-instance)), `getReleaseDraft`,
@@ -1478,8 +1478,8 @@ else changed it (`mergedDraft`). What a release before a draft
 published is read from that release (`dcat:prev`), once, since a
 release never changes; while it cannot be read, everything the draft
 has counts as published, so nothing is deleted that might have been. Making or deleting a draft
-changes the catalogue, so both are held until the data check is done,
-and while the catalogue is set aside ([below](#data-set-aside)). A
+changes the catalog, so both are held until the data check is done,
+and while the catalog is set aside ([below](#data-set-aside)). A
 draft made with a deleted draft's name has its URL, so what the screens
 read of a draft is forgotten when one is deleted or made.
 
@@ -1774,13 +1774,16 @@ Not every problem can be fixed in the Studio yet:
 - No screen has a field yet for the version, the series (`inSeries`,
   `isVersionOf`), the distribution or the theme EDUC. A problem about
   one of them links to the overview. A problem about the release's
-  licence, publisher, languages, version notes or authors, a source, an
+  license, publisher, languages, version notes or authors, a source, an
   agent or an activity links to the
   [release screen](#the-releases-metadata-and-provenance), at its part.
 - The library policy places the draft at `decks/<draft name>/v<N>.ttl`
   and reports each link that differs from that place. A draft that
   follows a release in a pod links to that release, its series and its
-  publisher, so it has a `linkMismatch` for each.
+  publisher, so it has a `linkMismatch` for each. It also reports a
+  draft that states no license (`noLicense`, a library rule:
+  [deck-library.md](deck-library.md#checks)), linked to the release
+  screen's license field.
 - A version the library's index lists already shows up as a
   `versionGap`, with that version twice.
 
@@ -1833,7 +1836,7 @@ sandbox up with `startTrial`
   over the trial's pod (`over`): the same shapes, loaded once.
 - **Set up as a guest's.** The trial's pod is started as a
   guest's is (a profile, then an instance with its meta document and
-  its catalogue), with new preferences but for the answer scale and the
+  its catalog), with new preferences but for the answer scale and the
   hour the day rolls over, which are the user's. Then the draft is
   started as a course (`startCourse`), or imported as a deck.
 
@@ -1887,7 +1890,7 @@ it cannot be read. It shows:
   (`continuityProblems`): a subject dropped, an id given to another
   kind of subject, a version that is not the next.
 - **What it says of itself**: which of its title, description,
-  keywords, themes, study direction, licence, authors, languages and
+  keywords, themes, study direction, license, authors, languages and
   sources changed, and whether it became a course or a deck
   (`releaseDiff` in
   [releaseDiff.ts](../packages/domain/src/release/releaseDiff.ts)).
@@ -1932,15 +1935,15 @@ library's releases are written
 ([above](#how-edits-are-saved)). Its parts:
 
 - **About this version**: the version notes (`adms:versionNotes`, one
-  text), the languages (`dcterms:language`), the licence and the
+  text), the languages (`dcterms:language`), the license and the
   publisher. The languages are those of the EU's table that the
   reference data describes (`EU_LANGUAGES`, generated from
   [external.ttl](../ns/vocab/external.ttl): [vocab.md](vocab.md)), each
   named in the reader's language. One the release states outside the
-  table is shown by its IRI, to keep or leave out. The licence is one of
+  table is shown by its IRI, to keep or leave out. The license is one of
   `KNOWN_LICENSES` ([license.ts](../packages/domain/src/license.ts)), or
   the one it has. `setLicense` types it `dcterms:LicenseDocument`, as
-  DCAT-AP asks; the licence it replaces loses that type, unless a source
+  DCAT-AP asks; the license it replaces loses that type, unless a source
   still names it. The publisher is one of the release's agents, or the
   one it names elsewhere.
 - **Authors**: the release's own agents (`foaf:Agent`, `#<name>`), its
@@ -1963,15 +1966,15 @@ library's releases are written
   `#compilation`, when it first needs it; a next version, its own
   `#revision-<N>`, as for a check.
 - **Sources**: each by its address, shown as text and never opened, with
-  its title, its creator (as text), its licence, and the evidence for
-  that licence (a comment that quotes or describes it). Each says
+  its title, its creator (as text), its license, and the evidence for
+  that license (a comment that quotes or describes it). Each says
   whether the release is derived from it (`prov:wasDerivedFrom`) and
   whether this version's making used it (`prov:used`). It is at least
   one of the two: else nothing would name what the draft states of it,
   and the change is refused (`unusedSource`). Only one an earlier
   version's making used may be neither. A release that names no making
   is given `#compilation` for a source it used. What else the
-  draft states of a source is kept as it is. Its licence is an address
+  draft states of a source is kept as it is. Its license is an address
   (`http:` or `https:`), as a source's is, not a name such as "CC BY
   4.0" (`sourceLicenseValid`); one it states already is kept. A source
   only an earlier version's making used says so, and cannot be removed:
@@ -1998,7 +2001,7 @@ would miss (`provenanceProblems` in
 Each is a warning, never an error, and links to the release screen:
 
 - **A source that does not describe itself** (`sourceUndescribed`): it
-  states no title, no creator, or neither a licence nor a comment with
+  states no title, no creator, or neither a license nor a comment with
   the evidence for one.
 - **A source used, not derived from** (`usedNotDerived`): this
   version's own making used it, but the release does not say it is
@@ -2032,10 +2035,10 @@ releases it, two ways.
   [releasePlace.ts](../packages/domain/src/release/releasePlace.ts)): the
   draft's name and version, as the library names its releases. The
   screen shows the address before anything is written.
-- **The user's word.** The user ticks that the release will be public:
+- **The user's word.** The user checks that the release will be public:
   anyone with its address can read it, and once published it is never
   changed or taken back here. Publishing waits for that, for the
-  changes typed above to be saved, and for the catalogue to be writable
+  changes typed above to be saved, and for the catalog to be writable
   ([below](#data-set-aside)).
 - **Checked.** The screen counts the errors the release check finds
   (its rules, for a pod), with a link to it; so does the status bar, on
@@ -2054,7 +2057,7 @@ releases it, two ways.
   Web Access Control, its ACR on one with Access Control Policies
   (`ReleasePublisher`, [boundaries.md](boundaries.md#access-control)).
   This is the only place the app changes who may read something.
-- **Listed.** The catalogue links it (`sm:publishedRelease`).
+- **Listed.** The catalog links it (`sm:publishedRelease`).
 - **Frozen.** The draft names the release it was published as
   (`sm:releasedAs`), and changes no more: every screen shows it, frozen.
 - **One version.** The draft is read once. What is checked is what is
@@ -2064,7 +2067,7 @@ releases it, two ways.
   written. After, the release stays, as it was checked, and the draft is
   not marked.
 - **Finished again.** Publishing cut short after the release is written
-  (the catalogue, the draft or the network failed) is finished by
+  (the catalog, the draft or the network failed) is finished by
   publishing again, at the same address. The document there states what
   this release does, its time of issue aside, so it is this one: it is
   made public, listed and its draft frozen, as if just written. A
@@ -2113,14 +2116,14 @@ It links to the draft's release check for the library first
 The releases screen
 ([`ReleasesContainer`](../apps/studio/src/ui/ReleasesContainer.tsx),
 `listPublishedReleases`) lists the releases the instance published, as
-its catalogue links them. Each has its address, named by it ("capitals,
+its catalog links them. Each has its address, named by it ("capitals,
 version 2") when it is named as releases are, a link to copy, who can
 read it (everyone, or only its owner, with **Make it public**), and
 **Start the next version**, which makes a draft of it and opens it.
 Each links the draft it was published from (the draft says what it was
 released as), while the instance has it. It changes no release. The
 table is a [`DataTable`](#card-workbench): a column's name sorts it,
-then the other way, then as the catalogue lists them, **Enter** opens
+then the other way, then as the catalog lists them, **Enter** opens
 the release at the cursor, as its name's link does, and a filter
 keeps the releases whose name or address holds its text, case and
 accents aside. The sidebar and the drafts screen link to it
@@ -2147,9 +2150,9 @@ and again after a repair. A deck checked again on its own (its
   left out of every bulk action: Home and the library copies do not let
   it be selected, and moving or copying cards does not offer it.
   Groups does not rename or delete it.
-- **The arrangement set aside** (the catalogue or a deck group invalid):
+- **The arrangement set aside** (the catalog or a deck group invalid):
   Groups cannot be rearranged, Home moves no deck into a group, and the
-  instance's name and catalogue, an import, making or deleting a draft,
+  instance's name and catalog, an import, making or deleting a draft,
   publishing a release and starting a next version are held.
 - **Under "block the instance"**, invalid data holds every deck and the
   instance, as a set-aside deck is held.

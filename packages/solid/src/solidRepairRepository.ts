@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   buildThing,
   getDatetime,
@@ -54,10 +58,10 @@ export function createSolidRepairRepository({
 }
 
 /**
- * The links that make a deck or deck group a member of a catalogue or
+ * The links that make a deck or deck group a member of a catalog or
  * group, and the classes of what they link to: the DCAT class, or the
  * Solid Memo one alone (a deck that lost its DCAT class is still listed,
- * so the catalogue keeps listing every deck).
+ * so the catalog keeps listing every deck).
  */
 const MEMBERSHIP = [
   { link: DCAT.dataset, types: [DCAT.Dataset, SM.Deck] },
@@ -79,22 +83,35 @@ function applyRepair(dataset: SolidDataset, repair: Repair): SolidDataset {
 }
 
 /**
- * A removed subject is no member of the catalogue (`#catalog`) or of a
+ * A removed subject is no member of the catalog (`#catalog`) or of a
  * deck group any more. Only those links go: who else names it — a deck
- * its creator, the catalogue its publisher — is left as it is.
+ * its creator, the catalog its publisher — is left as it is.
  */
-function withoutMembershipsOf(dataset: SolidDataset, documentUrl: string, url: string): SolidDataset {
+function withoutMembershipsOf(
+  dataset: SolidDataset,
+  documentUrl: string,
+  url: string,
+): SolidDataset {
   return getThingAll(dataset)
-    .filter((thing) => thing.url === `${documentUrl}#catalog` || getUrlAll(thing, RDF.type).includes(SM.DeckGroup))
+    .filter(
+      (thing) =>
+        thing.url === `${documentUrl}#catalog` || getUrlAll(thing, RDF.type).includes(SM.DeckGroup),
+    )
     .reduce(
       (current, parent) =>
-        setThing(current, MEMBERSHIP.reduce((builder, { link }) => builder.removeUrl(link, url), buildThing(parent)).build()),
+        setThing(
+          current,
+          MEMBERSHIP.reduce(
+            (builder, { link }) => builder.removeUrl(link, url),
+            buildThing(parent),
+          ).build(),
+        ),
       dataset,
     );
 }
 
 /**
- * A catalogue or deck group without its links to subjects of its own
+ * A catalog or deck group without its links to subjects of its own
  * document that the document does not describe as decks or groups. A
  * member in another document (a dataset another app listed) is described
  * there, and its link stays, as does one another app described in this
@@ -104,7 +121,10 @@ function withoutDanglingMembers(dataset: SolidDataset, documentUrl: string, thin
   const foreign = foreignSubjects(dataset);
   const describes = (url: string, types: string[]) => {
     const member = getThing(dataset, url);
-    return member !== null && (foreign.has(url) || getUrlAll(member, RDF.type).some((type) => types.includes(type)));
+    return (
+      member !== null &&
+      (foreign.has(url) || getUrlAll(member, RDF.type).some((type) => types.includes(type)))
+    );
   };
   return MEMBERSHIP.reduce(
     (builder, { link, types }) =>
@@ -125,7 +145,9 @@ function repairedThing(
       // Format 4 states text language-tagged, the app's own in English and
       // Swedish; from format 5 the title may be in any language, so it is read in every one.
       if (repair.version >= 4) {
-        const description = defaultDeckDescriptionText(readText(thing, DCTERMS.title) ?? { en: "a deck" });
+        const description = defaultDeckDescriptionText(
+          readText(thing, DCTERMS.title) ?? { en: "a deck" },
+        );
         builder.removeAll(DCTERMS.description);
         for (const [language, text] of Object.entries(description)) {
           builder.addStringWithLocale(DCTERMS.description, text, language);

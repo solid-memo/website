@@ -1,9 +1,16 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { VOCAB_ROOT } from "./root.ts";
 
 const execFileSync = vi.hoisted(() => vi.fn());
 vi.mock("node:child_process", () => ({ execFileSync }));
 
-const { commitSha, shapesRuleset, siteDefines } = await import("./siteBuild.ts");
+const { appVersion, commitSha, shapesRuleset, siteDefines } = await import("./siteBuild.ts");
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -35,10 +42,20 @@ describe("shapesRuleset", () => {
   });
 });
 
+describe("appVersion", () => {
+  it("is the repository's version, from its root package.json", () => {
+    expect(appVersion()).toBe(
+      JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")).version,
+    );
+    expect(appVersion()).toMatch(/^\d+\.\d+\.\d+/);
+  });
+});
+
 describe("siteDefines", () => {
-  it("gives the apps both as code", () => {
+  it("gives the apps all three as code", () => {
     execFileSync.mockReturnValue("abc123\n");
     expect(siteDefines()).toEqual({
+      __APP_VERSION__: JSON.stringify(appVersion()),
       __COMMIT_SHA__: '"abc123"',
       __SHAPES_RULESET__: JSON.stringify(shapesRuleset()),
     });

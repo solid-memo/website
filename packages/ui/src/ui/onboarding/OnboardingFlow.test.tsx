@@ -1,11 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { OnboardingFlow } from "./OnboardingFlow";
 import { POD_PROVIDERS, type PodProvider } from "@solid-memo/domain/podProvider";
 
-function renderFlow(
-  overrides: Partial<Parameters<typeof OnboardingFlow>[0]> = {},
-) {
+function renderFlow(overrides: Partial<Parameters<typeof OnboardingFlow>[0]> = {}) {
   const props = {
     providers: POD_PROVIDERS,
     busy: false,
@@ -21,15 +23,11 @@ function renderFlow(
 describe("OnboardingFlow", () => {
   it("explains Solid Pods and offers both paths", () => {
     renderFlow();
-    expect(
-      screen.getByRole("heading", { name: "Set up your Solid Pod" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Set up your Solid Pod" })).toBeInTheDocument();
     expect(
       screen.getByText(/Your data is stored in a Solid Pod that you control/),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "I already have a Pod" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "I already have a Pod" })).toBeInTheDocument();
   });
 
   it("offers trying the app as a guest first, ahead of setting up a Pod, when it may", () => {
@@ -83,9 +81,10 @@ describe("OnboardingFlow", () => {
     renderFlow({ providers });
     expect(screen.getAllByRole("link")).toHaveLength(2);
     expect(screen.queryByText("Login Only")).toBeNull();
-    expect(
-      screen.getByRole("link", { name: /Other Pods/ }),
-    ).toHaveAttribute("href", "https://other.example/new");
+    expect(screen.getByRole("link", { name: /Other Pods/ })).toHaveAttribute(
+      "href",
+      "https://other.example/new",
+    );
   });
 
   it("moves to the WebID step, focused, and logs in from there", () => {
@@ -103,13 +102,9 @@ describe("OnboardingFlow", () => {
 
   it("suggests identity providers for users who do not type a WebID", () => {
     const { onLogin, onLoginWithProvider } = renderFlow({ returning: true });
-    expect(
-      screen.getByRole("heading", { name: "Or pick your provider" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Or pick your provider" })).toBeInTheDocument();
     for (const provider of POD_PROVIDERS) {
-      expect(
-        screen.getByRole("button", { name: provider.name }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: provider.name })).toBeInTheDocument();
     }
 
     fireEvent.click(screen.getByRole("button", { name: "solidcommunity.net" }));
@@ -121,18 +116,14 @@ describe("OnboardingFlow", () => {
 
   it("disables the provider suggestions while busy", () => {
     renderFlow({ returning: true, busy: true });
-    expect(
-      screen.getByRole("button", { name: "Inrupt PodSpaces" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Inrupt PodSpaces" })).toBeDisabled();
   });
 
   it("goes back from the WebID step to the choice, focused on the button that led there", () => {
     renderFlow();
     fireEvent.click(screen.getByRole("button", { name: "I already have a Pod" }));
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
-    expect(
-      screen.getByRole("heading", { name: "Set up your Solid Pod" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Set up your Solid Pod" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "I already have a Pod" })).toHaveFocus();
   });
 
@@ -152,6 +143,9 @@ describe("OnboardingFlow", () => {
 
   it("passes the busy state to the form", () => {
     renderFlow({ returning: true, busy: true });
-    expect(screen.getByRole("button", { name: "Redirecting…" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Redirecting…" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
   });
 });

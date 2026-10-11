@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import {
   asUrl,
   getSourceUrl,
@@ -13,9 +17,7 @@ import type {
   WebIdDocument,
 } from "@solid-memo/domain/webIdDocument";
 
-export function toWebIdDocument(
-  dataset: SolidDataset & WithResourceInfo,
-): WebIdDocument {
+export function toWebIdDocument(dataset: SolidDataset & WithResourceInfo): WebIdDocument {
   return {
     url: getSourceUrl(dataset),
     subjects: getThingAll(dataset).map(toSubject),
@@ -34,9 +36,7 @@ export function toSubject(thing: Thing): Subject {
   };
 }
 
-export function toPropertyValues(
-  objects: Thing["predicates"][string],
-): PropertyValue[] {
+export function toPropertyValues(objects: Thing["predicates"][string]): PropertyValue[] {
   const values: PropertyValue[] = [];
   for (const iri of objects.namedNodes ?? []) {
     values.push({ type: "iri", value: iri });
@@ -46,9 +46,7 @@ export function toPropertyValues(
       values.push({ type: "literal", value: literal, dataType });
     }
   }
-  for (const [language, strings] of Object.entries(
-    objects.langStrings ?? {},
-  )) {
+  for (const [language, strings] of Object.entries(objects.langStrings ?? {})) {
     for (const value of strings) {
       values.push({ type: "langString", value, language });
     }

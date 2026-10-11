@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { InvalidDataPolicy } from "@solid-memo/domain/invalidDataPolicy";
@@ -29,7 +33,7 @@ export function DataCheckNotice({
   policy: InvalidDataPolicy;
   /** Titles of the decks set aside, under "set invalid data aside". */
   setAside: LangText[];
-  /** The catalogue or a deck group is set aside, under "set invalid data aside": the list cannot be rearranged. */
+  /** The catalog or a deck group is set aside, under "set invalid data aside": the list cannot be rearranged. */
   arrangementSetAside: boolean;
 }) {
   const { t, tx } = useI18n();
@@ -40,7 +44,10 @@ export function DataCheckNotice({
       : policy === "block-subject"
         ? setAside.length === 0
           ? t("dataCheckNotice.restKeepsWorking")
-          : tx("dataCheckNotice.setAside", { names: <ReaderTexts texts={setAside} />, count: setAside.length })
+          : tx("dataCheckNotice.setAside", {
+              names: <ReaderTexts texts={setAside} />,
+              count: setAside.length,
+            })
         : t("dataCheckNotice.keepsWorking");
   return (
     <div class="warning data-check" role="region" aria-label={t("dataCheckNotice.region")}>

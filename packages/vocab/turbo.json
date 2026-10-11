@@ -1,15 +1,27 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "extends": ["//"],
+  "extends": [
+    "//"
+  ],
   "tasks": {
     "test": {
-      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/ns/**"
+      ]
     },
     "generate:check": {
-      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/ns/**"
+      ]
     },
     "format:turtle:check": {
-      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
+      ]
     }
   }
 }

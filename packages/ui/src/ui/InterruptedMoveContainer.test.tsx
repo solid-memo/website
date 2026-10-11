@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -52,6 +56,8 @@ describe("InterruptedMoveContainer", () => {
     expect(removing).toHaveAttribute("aria-disabled", "true");
     fireEvent.click(removing);
     expect(removeInterruptedGuestMove).toHaveBeenCalledTimes(2);
-    await waitFor(() => expect(screen.queryByRole("region", { name: "Interrupted move" })).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByRole("region", { name: "Interrupted move" })).toBeNull(),
+    );
   });
 });

@@ -1,4 +1,9 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A course against a real Solid server (docs/courses.md): the app's own
  * use cases and Solid adapters, wired as in createAppUseCases, every write checked
@@ -35,7 +40,11 @@ const question = (id: string, back: string, wrong: string[]): LibraryCard => ({
   back: { en: back },
   backNote: { en: "Why it is so." },
   formatVersion: 5,
-  distractors: wrong.map((text, i) => ({ id: `${id}-d${i + 1}`, text: { en: text }, note: { en: `Not ${text}.` } })),
+  distractors: wrong.map((text, i) => ({
+    id: `${id}-d${i + 1}`,
+    text: { en: text },
+    note: { en: `Not ${text}.` },
+  })),
 });
 
 const cards = [
@@ -67,7 +76,15 @@ const outline: CourseOutline = {
       url: at("ch-linked-data"),
       position: 0,
       title: { en: "Linked data and IRIs" },
-      steps: [{ id: "ch-linked-data-1", url: at("ch-linked-data-1"), position: 0, theory: { en: "IRIs name things." }, questionIds: ["q-iri"] }],
+      steps: [
+        {
+          id: "ch-linked-data-1",
+          url: at("ch-linked-data-1"),
+          position: 0,
+          theory: { en: "IRIs name things." },
+          questionIds: ["q-iri"],
+        },
+      ],
       reviewQuestionIds: [],
     },
     {
@@ -75,7 +92,15 @@ const outline: CourseOutline = {
       url: at("ch-rdf"),
       position: 1,
       title: { en: "RDF and Turtle" },
-      steps: [{ id: "ch-rdf-1", url: at("ch-rdf-1"), position: 0, theory: { en: "RDF is triples." }, questionIds: ["q-triple"] }],
+      steps: [
+        {
+          id: "ch-rdf-1",
+          url: at("ch-rdf-1"),
+          position: 0,
+          theory: { en: "RDF is triples." },
+          questionIds: ["q-triple"],
+        },
+      ],
       reviewQuestionIds: [],
     },
   ],
@@ -101,7 +126,11 @@ const library: DeckLibrary = {
   fetchLibraryDeck: async () => content,
   fetchCourseOutline: async () => outline,
   // The release check is the Studio's: no index is read here.
-  readLibraryIndex: async () => ({ url: "https://site.example/decks/index.ttl", publisher: null, releases: [] }),
+  readLibraryIndex: async () => ({
+    url: "https://site.example/decks/index.ttl",
+    publisher: null,
+    releases: [],
+  }),
   // No release is added from a link here.
   readRelease: async (url) => {
     throw new Error(`No release is read from a link: ${url}`);
@@ -142,7 +171,9 @@ describe.each(SERVERS)("a course on $name", ({ url: server }) => {
     expect(deck).toMatchObject({ sourceUrl: RELEASE, title: content.title });
     await expect(deckRepository.listCards(deck)).resolves.toEqual([]);
     // Started once: starting again returns the same deck.
-    await expect(useCases.startCourse(instanceUrl, course)).resolves.toMatchObject({ url: deck.url });
+    await expect(useCases.startCourse(instanceUrl, course)).resolves.toMatchObject({
+      url: deck.url,
+    });
 
     const now = new Date();
     const answered = await useCases.answerCourseQuestion(
@@ -152,7 +183,10 @@ describe.each(SERVERS)("a course on $name", ({ url: server }) => {
       { correct: false, distractorId: "q-iri-d1" },
       now,
     );
-    expect(answered).toMatchObject({ effect: "introduce", state: { cardId: "q-iri", repetitions: 0, intervalDays: 1 } });
+    expect(answered).toMatchObject({
+      effect: "introduce",
+      state: { cardId: "q-iri", repetitions: 0, intervalDays: 1 },
+    });
 
     const [card] = await deckRepository.listCards(deck);
     expect(card).toMatchObject({
@@ -161,14 +195,16 @@ describe.each(SERVERS)("a course on $name", ({ url: server }) => {
       back: { en: "Any thing at all" },
       distractors: cards[0]!.distractors,
     });
-    await expect(reviewStateRepository.getReviewState(deck, { cardId: "q-iri", direction: "front-to-back" })).resolves.toEqual(
-      answered.state,
-    );
+    await expect(
+      reviewStateRepository.getReviewState(deck, { cardId: "q-iri", direction: "front-to-back" }),
+    ).resolves.toEqual(answered.state);
 
     // The answer reaches the log once the session's answers are flushed.
     await useCases.refreshStudyDigest(instanceUrl, deck);
     const months = await answerLog.months(instanceUrl);
-    const logged = (await Promise.all(months.map((month) => answerLog.readMonth(instanceUrl, month)))).flat();
+    const logged = (
+      await Promise.all(months.map((month) => answerLog.readMonth(instanceUrl, month)))
+    ).flat();
     expect(logged).toEqual([
       expect.objectContaining({
         cardUrl: card!.url,
@@ -180,8 +216,14 @@ describe.each(SERVERS)("a course on $name", ({ url: server }) => {
 
     // The step is done; study finds nothing new, the card being due tomorrow.
     const progress = (await useCases.getCourse(deck)).progress;
-    expect(progress.chapters[0]).toMatchObject({ state: "open", doneStepIds: ["ch-linked-data-1"] });
-    await expect(useCases.getStudyQueue(instanceUrl, deck, now)).resolves.toMatchObject({ due: [], newPrompts: [] });
+    expect(progress.chapters[0]).toMatchObject({
+      state: "open",
+      doneStepIds: ["ch-linked-data-1"],
+    });
+    await expect(useCases.getStudyQueue(instanceUrl, deck, now)).resolves.toMatchObject({
+      due: [],
+      newPrompts: [],
+    });
   });
 
   it("notes a chapter completed on the deck's catalog entry, unlocking the next", async () => {
@@ -190,7 +232,9 @@ describe.each(SERVERS)("a course on $name", ({ url: server }) => {
     const deck = await useCases.startCourse(instanceUrl, course);
     const done = await useCases.completeChapter(deck, at("ch-linked-data"));
     expect(done.completedChapters).toEqual([at("ch-linked-data")]);
-    await expect(deckRepository.readDeck(deck.url)).resolves.toMatchObject({ completedChapters: [at("ch-linked-data")] });
+    await expect(deckRepository.readDeck(deck.url)).resolves.toMatchObject({
+      completedChapters: [at("ch-linked-data")],
+    });
     const progress = (await useCases.getCourse(deck)).progress;
     expect(progress.chapters.map((chapter) => chapter.state)).toEqual(["done", "open"]);
     // The entry keeps it through an ordinary write of the deck.

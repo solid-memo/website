@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
@@ -35,7 +39,10 @@ const CONCEPT_SOURCES = [
 ] as const;
 
 /** The reference data the app offers to choose from (ns/vocab/external.ttl), with the constant each is rendered as. */
-const REFERENCE_SOURCE = { path: "vocab/external.ttl", baseIri: `${VOCAB_BASE}external.ttl` } as const;
+const REFERENCE_SOURCE = {
+  path: "vocab/external.ttl",
+  baseIri: `${VOCAB_BASE}external.ttl`,
+} as const;
 const REFERENCE_SCHEMES: readonly ReferenceScheme[] = [
   {
     name: "EU_LANGUAGES",
@@ -119,8 +126,10 @@ export async function main(argv: readonly string[], io: GenerateIo): Promise<num
 }
 
 /** The script entry: `node -e "import('./tooling/generate.ts').then((m) => m.run())"`. */
-export async function run(
-  process: { argv: readonly string[]; cwd(): string; exitCode?: number },
-): Promise<void> {
+export async function run(process: {
+  argv: readonly string[];
+  cwd(): string;
+  exitCode?: number;
+}): Promise<void> {
   process.exitCode = await main(process.argv, defaultIo(process.cwd()));
 }

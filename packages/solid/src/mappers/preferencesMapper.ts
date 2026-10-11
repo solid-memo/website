@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { asUrl, type Thing, type ThingPersisted } from "@inrupt/solid-client";
 import type { StoredPreferences, StudyPreferences } from "@solid-memo/domain/preferences";
 import { preferencesFromRecord, preferencesToRecord } from "@solid-memo/domain/preferencesRecord";
@@ -14,7 +18,9 @@ export function toPreferences(thing: Thing): StoredPreferences | null {
   const read = readVersioned(thing, "preferences");
   if (read === null) return null;
   return {
-    preferences: preferencesFromRecord(migrate("preferences", read.record, { subject: asUrl(thing) })),
+    preferences: preferencesFromRecord(
+      migrate("preferences", read.record, { subject: asUrl(thing) }),
+    ),
     formatVersion: read.storedVersion,
   };
 }

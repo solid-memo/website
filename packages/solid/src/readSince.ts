@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { SolidDataset } from "@inrupt/solid-client";
 import type { Since } from "@solid-memo/application/ports";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";

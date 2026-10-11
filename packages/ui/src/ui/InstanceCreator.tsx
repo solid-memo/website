@@ -1,8 +1,9 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
-import type {
-  RegistrationOptions,
-  RegistrationTarget,
-} from "@solid-memo/domain/instance";
+import type { RegistrationOptions, RegistrationTarget } from "@solid-memo/domain/instance";
 import type { Storage } from "@solid-memo/domain/storage";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
@@ -30,9 +31,7 @@ export function InstanceCreator({
 }) {
   const { t } = useI18n();
   const [name, setName] = useState("");
-  const [containerUrl, setContainerUrl] = useState(
-    `${storage.url}solid-memo/main/`,
-  );
+  const [containerUrl, setContainerUrl] = useState(`${storage.url}solid-memo/main/`);
   const [target, setTarget] = useState<RegistrationTarget>("private");
 
   function handleSubmit(event: Event) {
@@ -74,11 +73,7 @@ export function InstanceCreator({
         <span id="instance-container-hint" class="hint">
           {t("instanceCreator.locationHint")}
         </span>
-        <RegistrationTargetChooser
-          options={options}
-          value={target}
-          onChange={setTarget}
-        />
+        <RegistrationTargetChooser options={options} value={target} onChange={setTarget} />
         <button type="submit" disabled={busy}>
           {t("instanceCreator.create")}
         </button>

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/preact";
 import { I18nProvider } from "./i18n";
@@ -36,8 +40,12 @@ describe("KeptFolderNotice", () => {
       </I18nProvider>,
     );
     const [other, releases] = screen.getAllByRole("status");
-    expect(other).toHaveTextContent("Solid Memo tog bort sina egna data och behöll mappen i din Pod");
+    expect(other).toHaveTextContent(
+      "Solid Memo tog bort sina egna data och behöll mappen i din Pod",
+    );
     expect(other).toHaveTextContent("en annan app har lagt filer där.");
-    expect(releases).toHaveTextContent("där finns de utgåvor som publicerats från den, som andra kan läsa.");
+    expect(releases).toHaveTextContent(
+      "där finns de utgåvor som publicerats från den, som andra kan läsa.",
+    );
   });
 });

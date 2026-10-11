@@ -8,6 +8,7 @@ decks/greek-alphabet/v2.ttl: states dcat:isVersionOf nothing; its path says <htt
 decks/greek-alphabet/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
 decks/greek-alphabet/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
 decks/greek-alphabet/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
+decks/greek-alphabet/v2.ttl: states no dcterms:license: a library release names the license it is published under, as an IRI such as <https://creativecommons.org/licenses/by/4.0/>.
 ## greek-alphabet: everything retired
 ## greek-alphabet: no outline links
 ## greek-alphabet: an outline added
@@ -26,6 +27,7 @@ decks/git-commands/v2.ttl: states dcat:isVersionOf nothing; its path says <https
 decks/git-commands/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
 decks/git-commands/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/git-commands/v1.ttl>.
 decks/git-commands/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/git-commands/v1.ttl>.
+decks/git-commands/v2.ttl: states no dcterms:license: a library release names the license it is published under, as an IRI such as <https://creativecommons.org/licenses/by/4.0/>.
 ## git-commands: everything retired
 ## git-commands: no outline links
 ## git-commands: an outline added
@@ -44,6 +46,7 @@ decks/solid-fundamentals/v2.ttl: states dcat:isVersionOf nothing; its path says 
 decks/solid-fundamentals/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
 decks/solid-fundamentals/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/solid-fundamentals/v1.ttl>.
 decks/solid-fundamentals/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/solid-fundamentals/v1.ttl>.
+decks/solid-fundamentals/v2.ttl: states no dcterms:license: a library release names the license it is published under, as an IRI such as <https://creativecommons.org/licenses/by/4.0/>.
 ## solid-fundamentals: everything retired
 ## solid-fundamentals: no outline links
 decks/solid-fundamentals/v1.ttl: chapter <#ch-why-solid> has no step in use; a chapter in use has at least one step that is not retired.
@@ -78,6 +81,7 @@ decks/greek-alphabet/v2.ttl: states dcat:isVersionOf nothing; its path says <htt
 decks/greek-alphabet/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
 decks/greek-alphabet/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
 decks/greek-alphabet/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
+decks/greek-alphabet/v2.ttl: states no dcterms:license: a library release names the license it is published under, as an IRI such as <https://creativecommons.org/licenses/by/4.0/>.
 decks/greek-alphabet/v2.ttl: drops <#gamma>, <#zeta>, <#iota>, <#mu>, <#omicron>, <#sigma>, <#phi>, <#omega>, which v1.ttl has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.
 ## git-commands: everything in Markdown
 decks/git-commands/v1.ttl: <#clone> solid-memo:back has raw HTML, "<url>", which is shown as its source: write it as code, or escape its "<" (\<).
@@ -137,6 +141,7 @@ decks/git-commands/v2.ttl: states dcat:isVersionOf nothing; its path says <https
 decks/git-commands/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
 decks/git-commands/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/git-commands/v1.ttl>.
 decks/git-commands/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/git-commands/v1.ttl>.
+decks/git-commands/v2.ttl: states no dcterms:license: a library release names the license it is published under, as an IRI such as <https://creativecommons.org/licenses/by/4.0/>.
 decks/git-commands/v2.ttl: drops <#config-name>, <#add-file>, <#diff>, <#commit-amend>, <#rm>, <#branch-list>, <#switch-create>, <#branch-delete>, <#merge-abort>, <#rebase-abort>, <#log-oneline>, <#blame>, <#remote-add>, <#pull>, <#push-upstream>, <#stash>, <#stash-pop>, <#reset-hard>, which v1.ttl has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.
 ## solid-fundamentals: no backs nor distractor text
 decks/solid-fundamentals/v1.ttl: <#q-why-solid-1a> has no text on its back (solid-memo:back), the right one among the options a course offers.

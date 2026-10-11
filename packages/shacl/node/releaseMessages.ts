@@ -1,6 +1,21 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { MarkdownProblem } from "@solid-memo/markdown/problems";
-import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_CELLS, MAX_TABLE_COLUMNS } from "@solid-memo/markdown/parse";
-import type { CurationProblem, ReadinessProblem, ReleaseProblem, ShapeProblem, UnreadProblem } from "@solid-memo/domain/release/problems";
+import {
+  MAX_CHARS,
+  MAX_DEPTH,
+  MAX_TABLE_CELLS,
+  MAX_TABLE_COLUMNS,
+} from "@solid-memo/markdown/parse";
+import type {
+  CurationProblem,
+  ReadinessProblem,
+  ReleaseProblem,
+  ShapeProblem,
+  UnreadProblem,
+} from "@solid-memo/domain/release/problems";
 import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import { SM_NS } from "@solid-memo/vocab/tooling/vocab";
 
@@ -28,7 +43,11 @@ function nameOf(iri: string): string {
 
 /** Values as a problem quotes them: a literal's text in quotes, any other `<iri>`; "nothing" for none. */
 function shownValues(terms: readonly ReleaseTerm[]): string {
-  return terms.length === 0 ? "nothing" : terms.map((t) => (t.kind === "literal" ? JSON.stringify(t.value) : `<${t.value}>`)).join(", ");
+  return terms.length === 0
+    ? "nothing"
+    : terms
+        .map((t) => (t.kind === "literal" ? JSON.stringify(t.value) : `<${t.value}>`))
+        .join(", ");
 }
 
 /** What a Markdown problem means for a release's author, after the subject and field it is in. */
@@ -81,7 +100,8 @@ export type WordedProblem = Exclude<
  * relative to.
  */
 export function releaseMessage(problem: WordedProblem, label: string, url: string): string {
-  const shown = (iri: string) => (iri.startsWith(`${url}#`) ? `<${iri.slice(url.length)}>` : `<${iri}>`);
+  const shown = (iri: string) =>
+    iri.startsWith(`${url}#`) ? `<${iri.slice(url.length)}>` : `<${iri}>`;
   const list = (iris: readonly string[]) => iris.map(shown).join(", ");
   /** The file of a release, as its successor names it: `v1.ttl`. */
   const fileOf = (release: string) => release.slice(release.lastIndexOf("/") + 1);
@@ -100,6 +120,8 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
       const [expected] = problem.params.expected;
       return `${at}states ${nameOf(problem.field!)} ${shownValues(problem.params.stated)}; its path says ${expected === undefined ? "nothing, being the first version" : `<${expected}>`}.`;
     }
+    case "noLicense":
+      return `${at}states no dcterms:license: a library release names the license it is published under, as an IRI such as <https://creativecommons.org/licenses/by/4.0/>.`;
     case "cardsDropped":
       return `${at}drops ${problem.params.ids.map((id) => `<#${id}>`).join(", ")}, which ${fileOf(problem.params.previous)} has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.`;
     case "outlineDropped":
@@ -133,7 +155,9 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
     case "fewDistractors":
       return `${at}${subject} has too few distractors (${problem.params.count}); a card a course asks has at least ${problem.params.least}.`;
     case "distractorLanguages": {
-      const missing = problem.params.missing.map((l) => (l === "" ? "untagged" : `@${l}`)).join(", ");
+      const missing = problem.params.missing
+        .map((l) => (l === "" ? "untagged" : `@${l}`))
+        .join(", ");
       return `${at}distractor ${subject} has no text ${missing}, which the back of ${shown(problem.params.card)} has.`;
     }
     case "chapterPositions":
@@ -143,7 +167,9 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
     case "chapterWithoutStep":
       return `${at}chapter ${subject} has no step in use; a chapter in use has at least one step that is not retired.`;
     case "textFormatMisplaced": {
-      const why = problem.params.distractor ? "a distractor's text is written as its card's" : "its text is plain text";
+      const why = problem.params.distractor
+        ? "a distractor's text is written as its card's"
+        : "its text is plain text";
       return `${at}${subject} states solid-memo:textFormat, which only a card, a step or a chapter does: ${why}.`;
     }
     case "textFormatUnknown":
@@ -158,7 +184,8 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
     }
     case "theoryChunks": {
       const counts = problem.params.counts.map(
-        ({ language, chunks }) => `${chunks} ${chunks === 1 ? "chunk" : "chunks"} in solid-memo:theory${language === "" ? "" : `@${language}`}`,
+        ({ language, chunks }) =>
+          `${chunks} ${chunks === 1 ? "chunk" : "chunks"} in solid-memo:theory${language === "" ? "" : `@${language}`}`,
       );
       return `${at}${subject} has its theory in ${counts.join(", ")}: a step's theory is in as many chunks in each language, so a learner who switches language keeps their place.`;
     }

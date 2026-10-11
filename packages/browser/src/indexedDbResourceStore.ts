@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ResourceStore, StoredResource } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 
@@ -18,7 +22,10 @@ export type Lock = <T>(name: string, work: () => Promise<T>) => Promise<T>;
 export function createIndexedDbResourceStore({
   indexedDB = globalThis.indexedDB,
   lock = webLock(),
-}: { indexedDB?: IDBFactory; lock?: Lock } = {}): ResourceStore {
+}: {
+  indexedDB?: IDBFactory;
+  lock?: Lock;
+} = {}): ResourceStore {
   let opened: Promise<IDBDatabase> | null = null;
 
   function database(): Promise<IDBDatabase> {
@@ -33,7 +40,10 @@ export function createIndexedDbResourceStore({
     return opened;
   }
 
-  async function run<T>(mode: IDBTransactionMode, operation: (store: IDBObjectStore) => IDBRequest): Promise<T> {
+  async function run<T>(
+    mode: IDBTransactionMode,
+    operation: (store: IDBObjectStore) => IDBRequest,
+  ): Promise<T> {
     const db = await database();
     return new Promise<T>((resolve, reject) => {
       const transaction = db.transaction(RESOURCES, mode);
@@ -46,9 +56,13 @@ export function createIndexedDbResourceStore({
 
   return {
     get: (url) => run<StoredResource | undefined>("readonly", (store) => store.get(url)),
-    set: (url, resource) => run<void>("readwrite", (store) => store.put(resource, url)).then(() => undefined),
+    set: (url, resource) =>
+      run<void>("readwrite", (store) => store.put(resource, url)).then(() => undefined),
     delete: (url) => run<void>("readwrite", (store) => store.delete(url)).then(() => undefined),
-    urls: () => run<IDBValidKey[]>("readonly", (store) => store.getAllKeys()).then((keys) => keys.map(String)),
+    urls: () =>
+      run<IDBValidKey[]>("readonly", (store) => store.getAllKeys()).then((keys) =>
+        keys.map(String),
+      ),
     clear: () => run<void>("readwrite", (store) => store.clear()).then(() => undefined),
     exclusive: (work) => lock(LOCK, work),
   };

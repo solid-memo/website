@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { RefObject } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import {
@@ -57,7 +61,10 @@ const NOT_A_HANDLE = "button:not([data-drag-handle]), input, form, [data-no-drag
 
 function rowElements(container: HTMLElement): Map<string, HTMLElement> {
   return new Map(
-    [...container.querySelectorAll<HTMLElement>("[data-row-key]")].map((element) => [element.dataset.rowKey!, element]),
+    [...container.querySelectorAll<HTMLElement>("[data-row-key]")].map((element) => [
+      element.dataset.rowKey!,
+      element,
+    ]),
   );
 }
 
@@ -70,7 +77,7 @@ function rowElements(container: HTMLElement): Map<string, HTMLElement> {
  * heard) to the drop, then lets go of everything.
  *
  * While a row is lifted the page does not scroll under the finger (a
- * touchmove is cancelled), it scrolls by itself near the viewport's top
+ * touchmove is canceled), it scrolls by itself near the viewport's top
  * and bottom (a frame at a time through `schedule`), a copy of the row
  * (`ghostRef`, which the list renders while dragging) follows the
  * pointer, and a line (`lineRef`, always in the list, hidden between
@@ -141,7 +148,8 @@ export function useDragReorder({
 
   /** Renders what changed of the drag, and nothing when nothing did. */
   function mirror(state: DragState) {
-    const shown = state.phase === "idle" || (state.phase === "pending" && !state.touch) ? null : state;
+    const shown =
+      state.phase === "idle" || (state.phase === "pending" && !state.touch) ? null : state;
     const target = dropTarget(state);
     const next: DragFeedback = {
       phase: shown?.phase ?? "idle",
@@ -200,7 +208,10 @@ export function useDragReorder({
       clearTimeout(current.dwellTimer);
       current.dwellFor = waiting;
       if (waiting !== null) {
-        current.dwellTimer = setTimeout(() => dispatch({ type: "dwell", target: waiting }), COMBINE_DWELL_MS);
+        current.dwellTimer = setTimeout(
+          () => dispatch({ type: "dwell", target: waiting }),
+          COMBINE_DWELL_MS,
+        );
       }
     }
     if (!current.scrolling && scrollStep(state.pointer.y, window.innerHeight) !== 0) {
@@ -219,7 +230,12 @@ export function useDragReorder({
   /** The drop target again, for the pointer where it is, the list having moved under it. */
   function rehit() {
     const state = machine.current as Extract<DragState, { phase: "dragging" }>;
-    dispatch({ type: "move", pointerId: state.pointerId, point: state.pointer, y: state.pointer.y - containerTop() });
+    dispatch({
+      type: "move",
+      pointerId: state.pointerId,
+      point: state.pointer,
+      y: state.pointer.y - containerTop(),
+    });
   }
 
   /** Where each row is, the lifted one and what it holds set apart as the hole it leaves. */
@@ -232,7 +248,8 @@ export function useDragReorder({
       const rect = elements.get(row.key)!.getBoundingClientRect();
       return { ...row, top: rect.top - top, bottom: rect.bottom - top };
     });
-    const lifted = (row: MeasuredRow) => row.key === source.key || row.ancestors.includes(source.key);
+    const lifted = (row: MeasuredRow) =>
+      row.key === source.key || row.ancestors.includes(source.key);
     const hole = measured.filter(lifted);
     dispatch({
       type: "measured",
@@ -345,12 +362,14 @@ export function useDragReorder({
       pointerType: event.pointerType,
       point: { x: event.clientX, y: event.clientY },
     });
-    if (event.pointerType !== "mouse") current.hold = setTimeout(() => dispatch({ type: "hold" }), LONG_PRESS_MS);
+    if (event.pointerType !== "mouse")
+      current.hold = setTimeout(() => dispatch({ type: "hold" }), LONG_PRESS_MS);
   }
 
   function onPointerDown(event: PointerEvent) {
     clearGuard();
-    if (!enabled || machine.current.phase !== "idle" || event.button !== 0 || !event.isPrimary) return;
+    if (!enabled || machine.current.phase !== "idle" || event.button !== 0 || !event.isPrimary)
+      return;
     const element = event.target as Element;
     if (element.closest(NOT_A_HANDLE) !== null) return;
     const key = element.closest<HTMLElement>("[data-row-key]")?.dataset.rowKey;

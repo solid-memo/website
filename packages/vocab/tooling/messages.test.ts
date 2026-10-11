@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { parseTurtle } from "@solid-memo/turtle/rdf";
 import { readShapeTree, SHAPES_BASE } from "./sources.ts";
@@ -17,10 +21,14 @@ describe("the shapes' messages", () => {
       for (const q of parseTurtle(turtle, `${SHAPES_BASE}${path}`)) {
         if (q.predicate.value !== SH_MESSAGE) continue;
         const tag = q.object.termType === "Literal" ? q.object.language : "";
-        bySubject.set(q.subject.value, [...(bySubject.get(q.subject.value) ?? []), tag || "(untagged)"]);
+        bySubject.set(q.subject.value, [
+          ...(bySubject.get(q.subject.value) ?? []),
+          tag || "(untagged)",
+        ]);
       }
       for (const [subject, tags] of bySubject) {
-        if (tags.sort().join(",") !== "en,sv") wrong.push(`${path} <${subject}>: ${tags.join(", ")}`);
+        if (tags.sort().join(",") !== "en,sv")
+          wrong.push(`${path} <${subject}>: ${tags.join(", ")}`);
       }
     }
     expect(wrong).toEqual([]);

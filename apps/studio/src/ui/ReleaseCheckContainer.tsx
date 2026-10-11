@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { checkProblems, type CheckPolicy } from "@solid-memo/domain/release/releaseCheck";
@@ -33,10 +37,20 @@ export function ReleaseCheckContainer({
     <ReleaseCheckScreen
       draft={draft}
       policy={policy}
-      problems={check.data === undefined ? undefined : checkProblems({ ...check.data, shapes: found ?? null })}
+      problems={
+        check.data === undefined
+          ? undefined
+          : checkProblems({ ...check.data, shapes: found ?? null })
+      }
       error={check.error}
       checking={check.isFetching}
-      shapes={{ asked: asked !== null, running: shapes.isFetching, stale: asked !== null && asked !== draft, problems: found, error: shapes.error }}
+      shapes={{
+        asked: asked !== null,
+        running: shapes.isFetching,
+        stale: asked !== null && asked !== draft,
+        problems: found,
+        error: shapes.error,
+      }}
       links={links}
       // The same version asked again only after the shapes failed: the query is run again, its key the same.
       onCheckShapes={() => (asked === draft ? void shapes.refetch() : setAsked(draft))}

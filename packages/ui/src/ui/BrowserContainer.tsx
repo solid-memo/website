@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMemo } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -57,8 +61,7 @@ export function BrowserContainer({
   });
 
   const setDirectionMutation = useMutation({
-    mutationFn: (direction: DeckDirection) =>
-      useCases.setDeckDirection(deck, direction),
+    mutationFn: (direction: DeckDirection) => useCases.setDeckDirection(deck, direction),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["decks"] });
       queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
@@ -66,7 +69,10 @@ export function BrowserContainer({
   });
 
   const toSettle = useMemo(
-    () => (cardsQuery.data === undefined || release === undefined ? [] : unlikeRelease(cardsQuery.data, release?.cards)),
+    () =>
+      cardsQuery.data === undefined || release === undefined
+        ? []
+        : unlikeRelease(cardsQuery.data, release?.cards),
     [cardsQuery.data, release],
   );
 

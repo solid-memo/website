@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { beforeEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import {
@@ -71,7 +75,10 @@ describe("recent languages", () => {
   });
 
   it("leave out what is not a language tag as the app stores it", () => {
-    localStorage.setItem("solid-memo:recentLanguages.own", JSON.stringify(["sv", 7, "PT-BR", "x-private", "fi"]));
+    localStorage.setItem(
+      "solid-memo:recentLanguages.own",
+      JSON.stringify(["sv", 7, "PT-BR", "x-private", "fi"]),
+    );
     expect(recentLanguages("own")).toEqual(["sv", "fi"]);
     localStorage.setItem("solid-memo:recentLanguages.own", "{not json");
     expect(recentLanguages("own")).toEqual([]);
@@ -101,7 +108,9 @@ describe("collapsed deck groups", () => {
     rememberCollapsed(a, [`${a}catalog.ttl#group-1`]);
     expect(collapsedGroups(a)).toEqual([`${a}catalog.ttl#group-1`]);
     expect(collapsedGroups(b)).toEqual([]);
-    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${a}`)!)).toEqual([`${a}catalog.ttl#group-1`]);
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${a}`)!)).toEqual([
+      `${a}catalog.ttl#group-1`,
+    ]);
   });
 
   it("leave out what is not a URL as the app stores it", () => {

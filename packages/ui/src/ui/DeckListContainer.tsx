@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { decksOf } from "@solid-memo/domain/deckTree";
@@ -11,7 +15,14 @@ import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { NewcomerCourseContainer } from "./NewcomerCourseContainer";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
-import { courseHref, deckHref, importUrlHref, libraryHref, routeToHash, studioHref } from "./router";
+import {
+  courseHref,
+  deckHref,
+  importUrlHref,
+  libraryHref,
+  routeToHash,
+  studioHref,
+} from "./router";
 
 /**
  * Owns the deck list of one instance, as the user arranged it into
@@ -37,7 +48,7 @@ export function DeckListContainer({
   useCases: UseCases;
   instance: Instance;
   isSetAside?: (deck: Deck) => boolean;
-  /** The catalogue or a deck group is invalid, and the policy sets it aside: the list cannot be rearranged. */
+  /** The catalog or a deck group is invalid, and the policy sets it aside: the list cannot be rearranged. */
   arrangementSetAside?: boolean;
   /** The instance's data is still being checked, under a policy that may set some of it aside: the list cannot be rearranged yet. */
   checking?: boolean;
@@ -93,7 +104,11 @@ export function DeckListContainer({
         createDeckHref={routeToHash({ screen: "deckCreator", instanceUrl: instance.url })}
         offer={
           decksOf(editor.tree.children).length === 0 && (
-            <NewcomerCourseContainer useCases={useCases} instance={instance} onCourseStarted={onCourseStarted} />
+            <NewcomerCourseContainer
+              useCases={useCases}
+              instance={instance}
+              onCourseStarted={onCourseStarted}
+            />
           )
         }
       />

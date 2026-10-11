@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { createLocalStorageUpdateJournal } from "./localStorageUpdateJournal";
 import { fakeLocks } from "./testing/fakeLocks";
@@ -26,7 +30,9 @@ describe("createLocalStorageUpdateJournal", () => {
     expect(journal.staging(SOURCE)).toBeNull();
     journal.begin(SOURCE, STAGING);
     expect(journal.staging(SOURCE)).toBe(STAGING);
-    expect(JSON.parse(storage.getItem(`solid-memo:update:${SOURCE}`)!)).toMatchObject({ stagingUrl: STAGING });
+    expect(JSON.parse(storage.getItem(`solid-memo:update:${SOURCE}`)!)).toMatchObject({
+      stagingUrl: STAGING,
+    });
     journal.end(SOURCE);
     expect(journal.staging(SOURCE)).toBeNull();
   });
@@ -60,8 +66,16 @@ describe("createLocalStorageUpdateJournal", () => {
     const locks = fakeLocks();
     const storage = memoryStorage();
     const events = new EventTarget();
-    const updating = createLocalStorageUpdateJournal(() => storage, new EventTarget(), () => locks);
-    const watching = createLocalStorageUpdateJournal(() => storage, events, () => locks);
+    const updating = createLocalStorageUpdateJournal(
+      () => storage,
+      new EventTarget(),
+      () => locks,
+    );
+    const watching = createLocalStorageUpdateJournal(
+      () => storage,
+      events,
+      () => locks,
+    );
     const changed = vi.fn();
     watching.watch(changed);
     const stop = updating.run(SOURCE);
@@ -74,14 +88,21 @@ describe("createLocalStorageUpdateJournal", () => {
     stop();
     stop();
     await settled();
-    expect(changed.mock.calls).toEqual([[SOURCE, STAGING], [SOURCE, null]]);
+    expect(changed.mock.calls).toEqual([
+      [SOURCE, STAGING],
+      [SOURCE, null],
+    ]);
     expect(watching.staging(SOURCE)).toBe(STAGING);
   });
 
   it("tells a page that starts of the updates running already, not of entries left behind", async () => {
     const locks = fakeLocks();
     const storage = memoryStorage();
-    const updating = createLocalStorageUpdateJournal(() => storage, new EventTarget(), () => locks);
+    const updating = createLocalStorageUpdateJournal(
+      () => storage,
+      new EventTarget(),
+      () => locks,
+    );
     const left = "https://pod.example/solid-memo/old/";
     updating.begin(left, `${left.slice(0, -1)}-0f3a/`);
     storage.setItem(`solid-memo:update:${"https://pod.example/solid-memo/broken/"}`, "{");
@@ -90,12 +111,19 @@ describe("createLocalStorageUpdateJournal", () => {
     updating.begin(SOURCE, STAGING);
     await settled();
     const changed = vi.fn();
-    createLocalStorageUpdateJournal(() => storage, new EventTarget(), () => locks).watch(changed);
+    createLocalStorageUpdateJournal(
+      () => storage,
+      new EventTarget(),
+      () => locks,
+    ).watch(changed);
     await settled();
     expect(changed.mock.calls).toEqual([[SOURCE, STAGING]]);
     stop();
     await settled();
-    expect(changed.mock.calls).toEqual([[SOURCE, STAGING], [SOURCE, null]]);
+    expect(changed.mock.calls).toEqual([
+      [SOURCE, STAGING],
+      [SOURCE, null],
+    ]);
   });
 
   it("tells of an entry that ends, or that names no copy, at once", () => {
@@ -105,7 +133,9 @@ describe("createLocalStorageUpdateJournal", () => {
     events.dispatchEvent(storageEvent("{"));
     events.dispatchEvent(storageEvent(null));
     // Another key, and a cleared storage, name no update.
-    events.dispatchEvent(new StorageEvent("storage", { key: "solid-memo:language", newValue: "sv" }));
+    events.dispatchEvent(
+      new StorageEvent("storage", { key: "solid-memo:language", newValue: "sv" }),
+    );
     events.dispatchEvent(new StorageEvent("storage", { key: null }));
     expect(changed.mock.calls).toEqual([
       [SOURCE, null],
@@ -123,7 +153,11 @@ describe("createLocalStorageUpdateJournal", () => {
     const changed = vi.fn();
     const storage = memoryStorage();
     storage.setItem(KEY, JSON.stringify({ stagingUrl: STAGING }));
-    createLocalStorageUpdateJournal(() => storage, new EventTarget(), () => locks).watch(changed);
+    createLocalStorageUpdateJournal(
+      () => storage,
+      new EventTarget(),
+      () => locks,
+    ).watch(changed);
     await settled();
     expect(changed).not.toHaveBeenCalled();
   });
@@ -131,7 +165,11 @@ describe("createLocalStorageUpdateJournal", () => {
   it("tells of no other page's updates without Web Locks", () => {
     const events = new EventTarget();
     const storage = memoryStorage();
-    const journal = createLocalStorageUpdateJournal(() => storage, events, () => null);
+    const journal = createLocalStorageUpdateJournal(
+      () => storage,
+      events,
+      () => null,
+    );
     const changed = vi.fn();
     journal.watch(changed);
     expect(() => journal.run(SOURCE)()).not.toThrow();

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { buildThing, createThing, getInteger, getStringNoLocale } from "@inrupt/solid-client";
 import { toPreferences, toPreferencesThing } from "./preferencesMapper";
@@ -47,7 +51,9 @@ describe("toPreferences", () => {
       },
       formatVersion: 1,
     });
-    const empty = buildThing(createThing({ url: SUBJECT })).addIri(RDF.type, SM.Preferences).build();
+    const empty = buildThing(createThing({ url: SUBJECT }))
+      .addIri(RDF.type, SM.Preferences)
+      .build();
     expect(toPreferences(empty)?.preferences).toEqual({
       newCardsPerDay: 20,
       maxReviewsPerDay: 200,
@@ -66,7 +72,9 @@ describe("toPreferences", () => {
       .addInteger(SM.newCardsPerDay, 10)
       .build();
     expect(toPreferences(partial)).toBeNull();
-    const card = buildThing(createThing({ url: SUBJECT })).addIri(RDF.type, SM.Card).build();
+    const card = buildThing(createThing({ url: SUBJECT }))
+      .addIri(RDF.type, SM.Card)
+      .build();
     expect(toPreferences(card)).toBeNull();
   });
 });

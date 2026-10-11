@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * What a server does that the tests depend on, asked of it rather than
  * assumed (docs/testing.md).
@@ -21,14 +25,26 @@ const PIM_STORAGE = "http://www.w3.org/ns/pim/space#Storage";
 /** A new Turtle document under the server's root, for a probe. */
 async function probeDocument(server: string): Promise<string> {
   const url = new URL(`probe-${crypto.randomUUID()}.ttl`, server).href;
-  const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body: `<#a> <#b> "0" .` });
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: { "content-type": "text/turtle" },
+    body: `<#a> <#b> "0" .`,
+  });
   if (!response.ok) throw new Error(`Probing ${server}: PUT ${url} answered ${response.status}.`);
   return url;
 }
 
 /** A SPARQL Update PATCH, as the app sends. */
-async function sparqlPatch(url: string, body: string, headers: Record<string, string> = {}): Promise<Response> {
-  return fetch(url, { method: "PATCH", headers: { "content-type": "application/sparql-update", ...headers }, body });
+async function sparqlPatch(
+  url: string,
+  body: string,
+  headers: Record<string, string> = {},
+): Promise<Response> {
+  return fetch(url, {
+    method: "PATCH",
+    headers: { "content-type": "application/sparql-update", ...headers },
+    body,
+  });
 }
 
 /** Whether the server gives a read's ETag: only then can a version be kept. */
@@ -50,7 +66,10 @@ export async function etagMarksEveryEdit(server: string): Promise<boolean> {
   for (let edit = 1; edit <= 5; edit++) {
     const before = (await fetch(url)).headers.get("etag");
     const patched = await sparqlPatch(url, `INSERT DATA { <#e${edit}> <#n> "${edit}" . };`);
-    if (!patched.ok) throw new Error(`Probing whether an edit changes the ETag: PATCH ${url} answered ${patched.status}.`);
+    if (!patched.ok)
+      throw new Error(
+        `Probing whether an edit changes the ETag: PATCH ${url} answered ${patched.status}.`,
+      );
     const after = (await fetch(url)).headers.get("etag");
     if (before === null || before === after) return false;
   }
@@ -68,23 +87,39 @@ export interface Preconditions {
 export async function preconditionsOf(server: string): Promise<Preconditions> {
   const url = new URL(`probe-${crypto.randomUUID()}.ttl`, server).href;
   const put = () =>
-    fetch(url, { method: "PUT", headers: { "content-type": "text/turtle", "if-none-match": "*" }, body: `<#a> <#b> "c" .` });
+    fetch(url, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle", "if-none-match": "*" },
+      body: `<#a> <#b> "c" .`,
+    });
   await put();
   const creations = (await put()).status === 412;
   const etag = (await fetch(url)).headers.get("etag");
   if (etag === null || etag.startsWith("W/")) return { edits: false, creations };
-  const response = await sparqlPatch(url, `INSERT DATA { <#d> <#e> "f" . };`, { "if-match": '"another-version"' });
+  const response = await sparqlPatch(url, `INSERT DATA { <#d> <#e> "f" . };`, {
+    "if-match": '"another-version"',
+  });
   if (response.status !== 412 && !response.ok) {
-    throw new Error(`Probing whether If-Match is enforced: PATCH ${url} answered ${response.status}.`);
+    throw new Error(
+      `Probing whether If-Match is enforced: PATCH ${url} answered ${response.status}.`,
+    );
   }
   return { edits: response.status === 412, creations };
 }
 
 /** The PATCH formats a server applies, each tried: SPARQL Update (what the app sends) and N3 Patch (what the Solid Protocol asks of every server). */
-export async function patchFormatsOf(server: string): Promise<{ sparqlUpdate: boolean; n3: boolean }> {
+export async function patchFormatsOf(
+  server: string,
+): Promise<{ sparqlUpdate: boolean; n3: boolean }> {
   const url = await probeDocument(server);
   const sparqlUpdate = (await sparqlPatch(url, `INSERT DATA { <#s> <#p> "sparql" . };`)).ok;
-  const n3 = (await fetch(url, { method: "PATCH", headers: { "content-type": "text/n3" }, body: n3Insert(`<#s> <#p> "n3" .`) })).ok;
+  const n3 = (
+    await fetch(url, {
+      method: "PATCH",
+      headers: { "content-type": "text/n3" },
+      body: n3Insert(`<#s> <#p> "n3" .`),
+    })
+  ).ok;
   return { sparqlUpdate, n3 };
 }
 
@@ -101,16 +136,26 @@ export async function changeElsewhere(url: string, triple: string): Promise<void
   const read = await fetch(url, { headers: { accept: "text/turtle" } });
   const accepted = read.headers.get("accept-patch") ?? "";
   const response = accepted.includes("text/n3")
-    ? await fetch(url, { method: "PATCH", headers: { "content-type": "text/n3" }, body: n3Insert(triple) })
+    ? await fetch(url, {
+        method: "PATCH",
+        headers: { "content-type": "text/n3" },
+        body: n3Insert(triple),
+      })
     : accepted.includes("application/sparql-update")
       ? await sparqlPatch(url, `INSERT DATA { ${triple} };`)
-      : await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body: `${await read.text()}\n${triple}\n` });
+      : await fetch(url, {
+          method: "PUT",
+          headers: { "content-type": "text/turtle" },
+          body: `${await read.text()}\n${triple}\n`,
+        });
   if (!response.ok) throw new Error(`Changing ${url} as another app: ${response.status}.`);
 }
 
 /** The ACL document of a resource, where its Link rel="acl" says: the Solid Protocol leaves the name to the server. */
 export async function aclOf(url: string): Promise<string> {
-  const link = /<([^>]+)>;\s*rel="acl"/.exec((await fetch(url, { method: "HEAD" })).headers.get("link") ?? "")?.[1];
+  const link = /<([^>]+)>;\s*rel="acl"/.exec(
+    (await fetch(url, { method: "HEAD" })).headers.get("link") ?? "",
+  )?.[1];
   if (link === undefined) throw new Error(`${url} names no ACL document (Link rel="acl").`);
   return new URL(link, url).href;
 }
@@ -119,7 +164,8 @@ export async function aclOf(url: string): Promise<string> {
 export async function storageOf(url: string): Promise<string> {
   for (let container = new URL("./", url); ; container = new URL("../", container)) {
     const link = (await fetch(container, { method: "HEAD" })).headers.get("link") ?? "";
-    if (new RegExp(`<${PIM_STORAGE}>;\\s*rel="type"`).test(link) || container.pathname === "/") return container.href;
+    if (new RegExp(`<${PIM_STORAGE}>;\\s*rel="type"`).test(link) || container.pathname === "/")
+      return container.href;
   }
 }
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import type { Card } from "@solid-memo/domain/deck";
 import { cardName } from "@solid-memo/ui/DataText";
@@ -55,10 +59,20 @@ export function CardInspectorScreen({
         {card.retired && <span class="studio-badge">{t("retiredCards.tag")}</span>}
         {steps !== undefined && (
           <div class="studio-card-steps" role="group" aria-label={t("studio.card.steps")}>
-            <button type="button" aria-keyshortcuts="k" disabled={steps.previous === null} onClick={steps.previous ?? undefined}>
+            <button
+              type="button"
+              aria-keyshortcuts="k"
+              disabled={steps.previous === null}
+              onClick={steps.previous ?? undefined}
+            >
               {t("studio.card.previous")}
             </button>
-            <button type="button" aria-keyshortcuts="j" disabled={steps.next === null} onClick={steps.next ?? undefined}>
+            <button
+              type="button"
+              aria-keyshortcuts="j"
+              disabled={steps.next === null}
+              onClick={steps.next ?? undefined}
+            >
               {t("studio.card.next")}
             </button>
           </div>
@@ -79,7 +93,10 @@ export function CardInspectorScreen({
         tabs={CARD_TABS.map((each) => ({
           key: each,
           href: tabHref(each),
-          label: each === "distractors" ? t("studio.card.tab.distractors", { count }) : t(`studio.card.tab.${each}`),
+          label:
+            each === "distractors"
+              ? t("studio.card.tab.distractors", { count })
+              : t(`studio.card.tab.${each}`),
           current: each === tab && "page",
         }))}
         onFollow={onTab}

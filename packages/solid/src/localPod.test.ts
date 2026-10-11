@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { createLocalPod, dataBlocks, parentOf } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
@@ -91,25 +95,70 @@ describe("createLocalPod", () => {
 
   it("holds writes to If-Match and If-None-Match: *", async () => {
     const { fetch } = pod();
-    expect((await fetch(DOC, { ...turtle(""), headers: { "Content-Type": "text/turtle", "If-Match": '"x"' } })).status).toBe(412);
-    expect((await fetch(DOC, { ...turtle(""), headers: { "Content-Type": "text/turtle", "If-None-Match": "*" } })).status).toBe(201);
-    expect((await fetch(DOC, { ...turtle(""), headers: { "Content-Type": "text/turtle", "If-None-Match": "*" } })).status).toBe(412);
+    expect(
+      (
+        await fetch(DOC, {
+          ...turtle(""),
+          headers: { "Content-Type": "text/turtle", "If-Match": '"x"' },
+        })
+      ).status,
+    ).toBe(412);
+    expect(
+      (
+        await fetch(DOC, {
+          ...turtle(""),
+          headers: { "Content-Type": "text/turtle", "If-None-Match": "*" },
+        })
+      ).status,
+    ).toBe(201);
+    expect(
+      (
+        await fetch(DOC, {
+          ...turtle(""),
+          headers: { "Content-Type": "text/turtle", "If-None-Match": "*" },
+        })
+      ).status,
+    ).toBe(412);
     const etag = (await fetch(DOC, { method: "HEAD" })).headers.get("ETag")!;
-    expect((await fetch(DOC, { ...turtle(""), headers: { "Content-Type": "text/turtle", "If-Match": etag } })).status).toBe(205);
-    expect((await fetch(DOC, { ...turtle(""), headers: { "Content-Type": "text/turtle", "If-Match": etag } })).status).toBe(412);
+    expect(
+      (
+        await fetch(DOC, {
+          ...turtle(""),
+          headers: { "Content-Type": "text/turtle", "If-Match": etag },
+        })
+      ).status,
+    ).toBe(205);
+    expect(
+      (
+        await fetch(DOC, {
+          ...turtle(""),
+          headers: { "Content-Type": "text/turtle", "If-Match": etag },
+        })
+      ).status,
+    ).toBe(412);
   });
 
   it("refuses Turtle that does not parse", async () => {
     const { fetch } = pod();
     expect((await fetch(DOC, turtle("<#it> <#p"))).status).toBe(400);
     expect((await fetch(DOC)).status).toBe(404);
-    expect((await fetch(DOC, { method: "PUT", headers: { "Content-Type": "text/turtle" } })).status).toBe(201);
+    expect(
+      (await fetch(DOC, { method: "PUT", headers: { "Content-Type": "text/turtle" } })).status,
+    ).toBe(201);
   });
 
   it("keeps any other file as it is, under its content type", async () => {
     const { fetch } = pod();
     const bytes = new Uint8Array([1, 2, 3]);
-    expect((await fetch(`${ROOT}img.png`, { method: "PUT", headers: { "Content-Type": "image/png" }, body: bytes })).status).toBe(201);
+    expect(
+      (
+        await fetch(`${ROOT}img.png`, {
+          method: "PUT",
+          headers: { "Content-Type": "image/png" },
+          body: bytes,
+        })
+      ).status,
+    ).toBe(201);
     const get = await fetch(`${ROOT}img.png`);
     expect(get.headers.get("Content-Type")).toBe("image/png");
     expect(new Uint8Array(await get.arrayBuffer())).toEqual(bytes);
@@ -119,7 +168,9 @@ describe("createLocalPod", () => {
 
   it("applies SPARQL Updates in order, creating a missing document", async () => {
     const { fetch } = pod();
-    expect((await fetch(DOC, update("INSERT DATA {\n<#a> <#b> <#c> .\n<#a> <#b> 1 .\n};\n"))).status).toBe(201);
+    expect(
+      (await fetch(DOC, update("INSERT DATA {\n<#a> <#b> <#c> .\n<#a> <#b> 1 .\n};\n"))).status,
+    ).toBe(201);
     const patched = await fetch(
       DOC,
       update('DELETE DATA {\n<#a> <#b> 1 .\n};\nINSERT DATA {\n<#a> <#b> "x}y" .\n};\n'),
@@ -133,26 +184,50 @@ describe("createLocalPod", () => {
 
   it("refuses a PATCH it cannot apply", async () => {
     const { fetch } = pod();
-    expect((await fetch(DOC, { method: "PATCH", headers: { "Content-Type": "text/n3" }, body: "" })).status).toBe(415);
-    expect((await fetch(DOC, { method: "PATCH", headers: { "Content-Type": "application/sparql-update" } })).status).toBe(415);
+    expect(
+      (await fetch(DOC, { method: "PATCH", headers: { "Content-Type": "text/n3" }, body: "" }))
+        .status,
+    ).toBe(415);
+    expect(
+      (
+        await fetch(DOC, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/sparql-update" },
+        })
+      ).status,
+    ).toBe(415);
     expect((await fetch(DOC, update("DELETE { ?s ?p ?o } WHERE { ?s ?p ?o }"))).status).toBe(400);
     expect((await fetch(DOC, update("INSERT DATA { <#a> <#b> }"))).status).toBe(400);
-    await fetch(`${ROOT}img.png`, { method: "PUT", headers: { "Content-Type": "image/png" }, body: "x" });
-    expect((await fetch(`${ROOT}img.png`, update("INSERT DATA { <#a> <#b> <#c> . }"))).status).toBe(409);
+    await fetch(`${ROOT}img.png`, {
+      method: "PUT",
+      headers: { "Content-Type": "image/png" },
+      body: "x",
+    });
+    expect((await fetch(`${ROOT}img.png`, update("INSERT DATA { <#a> <#b> <#c> . }"))).status).toBe(
+      409,
+    );
   });
 
   it("holds a PATCH to If-Match", async () => {
     const { fetch } = pod();
     await fetch(DOC, turtle(""));
-    expect((await fetch(DOC, update("INSERT DATA { <#a> <#b> <#c> . }", { "If-Match": '"old"' }))).status).toBe(412);
+    expect(
+      (await fetch(DOC, update("INSERT DATA { <#a> <#b> <#c> . }", { "If-Match": '"old"' })))
+        .status,
+    ).toBe(412);
   });
 
   it("creates containers by PUT, never twice, and nothing else at a container URL", async () => {
     const { fetch } = pod();
-    expect((await fetch(`${ROOT}c/d/`, { method: "PUT", headers: { "Content-Type": "text/turtle" } })).status).toBe(201);
+    expect(
+      (await fetch(`${ROOT}c/d/`, { method: "PUT", headers: { "Content-Type": "text/turtle" } }))
+        .status,
+    ).toBe(201);
     expect((await fetch(`${ROOT}c/`)).status).toBe(200);
     expect((await fetch(`${ROOT}c/d/`, { method: "PUT" })).status).toBe(409);
-    expect((await fetch(`${ROOT}c/e/`, update("INSERT DATA { <#a> <#b> <#c> . }"))).status).toBe(409);
+    expect((await fetch(`${ROOT}c/e/`, update("INSERT DATA { <#a> <#b> <#c> . }"))).status).toBe(
+      409,
+    );
   });
 
   it("deletes documents and empty containers, never the root or a full container", async () => {
@@ -182,8 +257,12 @@ describe("createLocalPod", () => {
 
   it("runs one request at a time on its store", async () => {
     const { fetch } = pod();
-    const writes = Array.from({ length: 5 }, (_, i) => fetch(DOC, update(`INSERT DATA { <#a> <#b> ${i} . }`)));
-    expect((await Promise.all(writes)).map((r) => r.status).sort()).toEqual([201, 205, 205, 205, 205]);
+    const writes = Array.from({ length: 5 }, (_, i) =>
+      fetch(DOC, update(`INSERT DATA { <#a> <#b> ${i} . }`)),
+    );
+    expect((await Promise.all(writes)).map((r) => r.status).sort()).toEqual([
+      201, 205, 205, 205, 205,
+    ]);
     expect((await (await fetch(DOC)).text()).split("\n")).toHaveLength(5);
   });
 });

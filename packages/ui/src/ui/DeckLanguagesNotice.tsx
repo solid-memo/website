@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { DeckLanguageIssues } from "@solid-memo/domain/deckLanguages";
 import { useI18n } from "./i18n";
 

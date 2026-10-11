@@ -76,7 +76,10 @@
   },
   "footer": {
     "createdBy": "Créé par {author}",
-    "version": "Version {version}"
+    "version": "Version {version}",
+    "versionAtCommit": "Version {version} ({commit})",
+    "sourceCode": "Code source",
+    "reportIssue": "Signaler un problème"
   },
   "addCardForm": {
     "submitButton": "Ajouter une carte",
@@ -2710,6 +2713,7 @@
       "notOneDeck": "La publication ne décrit pas exactement un paquet, à savoir elle-même. Paquets décrits : {decks}.",
       "versionMismatch": "Indique la version {stated} ; son emplacement indique {expected}.",
       "linkMismatch": "{field} : indique {stated} ; son emplacement indique {expected}.",
+      "noLicense": "N’indique aucune licence : un paquet de la bibliothèque indique sous quelle licence il est publié.",
       "cardsDropped": "Supprime {ids}, que contient {previous}. Une carte n’est jamais supprimée : archivez-la plutôt, pour que les apprenants la conservent avec son historique.",
       "outlineDropped": "Supprime {ids}, que contient {previous}. Un chapitre, une étape ou une mauvaise réponse n’est jamais supprimé : archivez-le plutôt, pour que les apprenants gardent leur place.",
       "idReused": "{id} est {now} ici, mais {was} dans {previous} : un identifiant désigne un seul sujet, pour toujours.",

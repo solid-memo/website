@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { AnswerScale } from "./answerScale";
 import { DEFAULT_INVALID_DATA_POLICY, type InvalidDataPolicy } from "./invalidDataPolicy";
 import { DEFAULT_THEME_CHOICE, type ThemeChoice } from "./theme";

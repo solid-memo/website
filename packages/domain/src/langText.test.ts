@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import {
   english,
@@ -73,7 +77,9 @@ describe("a card side's text", () => {
   });
 
   it("keeps the spaces a formatted text's first line starts with, losing only blank lines before and white space after", () => {
-    expect(tidiedSideText({ en: " \n\t\r\n    code \n", sv: "\n " }, true)).toEqual({ en: "    code" });
+    expect(tidiedSideText({ en: " \n\t\r\n    code \n", sv: "\n " }, true)).toEqual({
+      en: "    code",
+    });
     expect(tidiedTagged({ en: "  - item\n" }, true)).toEqual({ en: "  - item" });
     expect(tidiedTagged({ en: "  - item\n" })).toEqual({ en: "- item" });
   });
@@ -96,7 +102,14 @@ describe("language-tagged text that needs no English", () => {
 
 describe("text whose languages the user states", () => {
   it("finds the tag the texts use most, untagged text stating none", () => {
-    expect(usualTag([{ sv: "en bil" }, { sv: "ett hus", en: "a house" }, { en: "a tree" }, { sv: "en båt" }])).toBe("sv");
+    expect(
+      usualTag([
+        { sv: "en bil" },
+        { sv: "ett hus", en: "a house" },
+        { en: "a tree" },
+        { sv: "en båt" },
+      ]),
+    ).toBe("sv");
     expect(usualTag([{ fi: "auto" }, { "": "en bil" }, { "": "ett hus" }])).toBe("fi");
     expect(usualTag([{ ja: "犬" }, { de: "Hund" }])).toBe("ja");
     expect(usualTag([{ "": "en bil" }, {}])).toBeUndefined();
@@ -116,7 +129,10 @@ describe("tidiedStated", () => {
   });
 
   it("keeps tags lower case, refusing a language given twice", () => {
-    expect(tidiedStated({ "pt-BR": " Capitais ", SV: "Huvudstäder" })).toEqual({ "pt-br": "Capitais", sv: "Huvudstäder" });
+    expect(tidiedStated({ "pt-BR": " Capitais ", SV: "Huvudstäder" })).toEqual({
+      "pt-br": "Capitais",
+      sv: "Huvudstäder",
+    });
     // An emptied one is no language at all, so it does not clash.
     expect(tidiedStated({ EN: " ", en: "Capitals" })).toEqual({ en: "Capitals" });
     expect(() => tidiedStated({ EN: "Capitals", en: "Capitals" })).toThrow("has en twice");

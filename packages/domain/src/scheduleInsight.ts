@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { LEECH_LAPSES, type LapseIndex } from "./cardHistory";
 import { activeCards, studyDirections, type Card, type DeckDirection } from "./deck";
 import { reviewKeyOf, type ReviewState } from "./review";
@@ -72,10 +76,16 @@ export function forecastOf(
 }
 
 /** The review states the deck schedules: of its cards in use, in the directions it studies. */
-export function scheduledStates(cards: readonly Card[], direction: DeckDirection, states: readonly ReviewState[]): ReviewState[] {
+export function scheduledStates(
+  cards: readonly Card[],
+  direction: DeckDirection,
+  states: readonly ReviewState[],
+): ReviewState[] {
   const byKey = new Map(states.map((state) => [reviewKeyOf(state), state]));
   return activeCards(cards).flatMap((card) =>
-    studyDirections(direction).flatMap((each) => byKey.get(reviewKeyOf({ cardId: card.id, direction: each })) ?? []),
+    studyDirections(direction).flatMap(
+      (each) => byKey.get(reviewKeyOf({ cardId: card.id, direction: each })) ?? [],
+    ),
   );
 }
 
@@ -88,7 +98,11 @@ export interface Bin {
 
 /** How many values fall in each bin; `bounds`, ascending, start them. A value below the first counts in the first. */
 function histogram(values: readonly number[], bounds: readonly number[]): Bin[] {
-  const bins: Bin[] = bounds.map((from, i) => ({ from, ...(i + 1 < bounds.length ? { to: bounds[i + 1] } : {}), count: 0 }));
+  const bins: Bin[] = bounds.map((from, i) => ({
+    from,
+    ...(i + 1 < bounds.length ? { to: bounds[i + 1] } : {}),
+    count: 0,
+  }));
   for (const value of values) {
     const above = bounds.filter((bound) => value >= bound).length;
     bins[Math.max(0, above - 1)]!.count += 1;
@@ -116,7 +130,11 @@ export function easeHistogram(states: readonly ReviewState[]): Bin[] {
   return histogram(
     states.map((state) => hundredths(state.easeFactor)),
     EASE_BOUNDS.map(hundredths),
-  ).map((bin) => ({ ...bin, from: bin.from / 100, ...(bin.to === undefined ? {} : { to: bin.to / 100 }) }));
+  ).map((bin) => ({
+    ...bin,
+    from: bin.from / 100,
+    ...(bin.to === undefined ? {} : { to: bin.to / 100 }),
+  }));
 }
 
 /** A card forgotten often, and how often. */
@@ -126,7 +144,10 @@ export interface Leech {
 }
 
 /** The cards forgotten `minLapses` times or more (LEECH_LAPSES by default), the most forgotten first. */
-export function leechesOf(index: LapseIndex, { minLapses = LEECH_LAPSES }: { minLapses?: number } = {}): Leech[] {
+export function leechesOf(
+  index: LapseIndex,
+  { minLapses = LEECH_LAPSES }: { minLapses?: number } = {},
+): Leech[] {
   return [...index.lapses]
     .filter(([, lapses]) => lapses >= minLapses)
     .map(([cardUrl, lapses]) => ({ cardUrl, lapses }))

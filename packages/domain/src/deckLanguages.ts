@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { CardContent } from "./deck";
 import { usualTag, type LangText } from "./langText";
 import { untouched } from "./libraryUpgrade";
@@ -23,9 +27,13 @@ type DeckCard = CardContent & { id: string };
 
 /** The parts of a card that hold the user's own text: notes, the label and the pictures' descriptions. */
 function ownTexts(card: CardContent): LangText[] {
-  return [card.frontNote, card.backLabel, card.backNote, card.frontImageDescription, card.backImageDescription].filter(
-    (text) => text !== undefined,
-  );
+  return [
+    card.frontNote,
+    card.backLabel,
+    card.backNote,
+    card.frontImageDescription,
+    card.backImageDescription,
+  ].filter((text) => text !== undefined);
 }
 
 /**
@@ -37,7 +45,10 @@ function ownTexts(card: CardContent): LangText[] {
  * changing it would set the card apart from the library's, and a later
  * release would no longer update it.
  */
-export function deckLanguages(cards: readonly DeckCard[], release: readonly DeckCard[] = []): DeckLanguages {
+export function deckLanguages(
+  cards: readonly DeckCard[],
+  release: readonly DeckCard[] = [],
+): DeckLanguages {
   const own = unlikeRelease(cards, release);
   const unstated = (side: "front" | "back") => own.filter((card) => "" in card[side]).length;
   const front = usualTag(cards.map((card) => card.front));
@@ -58,7 +69,10 @@ export function deckLanguages(cards: readonly DeckCard[], release: readonly Deck
  * that only lost the release's text format too (see untouched), which
  * the next release brings back.
  */
-export function unlikeRelease<T extends DeckCard>(cards: readonly T[], release: readonly DeckCard[] = []): T[] {
+export function unlikeRelease<T extends DeckCard>(
+  cards: readonly T[],
+  release: readonly DeckCard[] = [],
+): T[] {
   const released = new Map(release.map((card) => [card.id, card]));
   return cards.filter((card) => {
     const theirs = released.get(card.id);
@@ -78,7 +92,10 @@ export interface StatedLanguages {
  * A side that states its language already is never touched, nor is one
  * mixing untagged and tagged text (no format allows that).
  */
-export function withStatedLanguages<T extends CardContent>(card: T, languages: StatedLanguages): T | null {
+export function withStatedLanguages<T extends CardContent>(
+  card: T,
+  languages: StatedLanguages,
+): T | null {
   let changed = false;
   const stated = { ...card };
   for (const side of ["front", "back"] as const) {

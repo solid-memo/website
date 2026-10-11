@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { problem } from "@solid-memo/domain/release/problems";
@@ -15,9 +19,7 @@ function renderScreen(props: Partial<Parameters<typeof TrialScreen>[0]> = {}) {
         opening={false}
         error={null}
         problems={null}
-        targetHref={(target) =>
-          `#/${target.screen}/${"id" in target ? target.id : ""}`
-        }
+        targetHref={(target) => `#/${target.screen}/${"id" in target ? target.id : ""}`}
         onReset={onReset}
         onReload={onReload}
         {...props}
@@ -32,9 +34,7 @@ function renderScreen(props: Partial<Parameters<typeof TrialScreen>[0]> = {}) {
 describe("TrialScreen", () => {
   it("shows the trial, which can be started over or played as the draft is now", () => {
     const { onReset, onReload } = renderScreen();
-    expect(
-      screen.getByRole("heading", { level: 2, name: "Trial" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Trial" })).toBeInTheDocument();
     expect(screen.getByText("The trial")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Start over" }));
     fireEvent.click(screen.getByRole("button", { name: "Reload the draft" }));
@@ -73,9 +73,10 @@ describe("TrialScreen", () => {
     expect(
       screen.getByText("This draft cannot be played yet. Fix these first:"),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Has no step in use." }),
-    ).toHaveAttribute("href", "#/chapter/");
+    expect(screen.getByRole("link", { name: "Has no step in use." })).toHaveAttribute(
+      "href",
+      "#/chapter/",
+    );
     expect(screen.getByRole("listitem")).toHaveTextContent(/^Apps: /);
     expect(screen.queryByText("The trial")).toBeNull();
   });

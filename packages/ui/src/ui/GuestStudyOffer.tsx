@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useId, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -50,10 +54,14 @@ function mergeStepLabels(t: I18n["t"]): Record<GuestMergeStep, string> {
 type Stage = "offer" | "discard" | "form" | "dismissed";
 
 /** How keeping the study ended: moved into a new instance, or added to one the user has. */
-type KeepOutcome = { kind: "transfer"; outcome: GuestTransferOutcome } | { kind: "merge"; outcome: GuestMergeOutcome };
+type KeepOutcome =
+  | { kind: "transfer"; outcome: GuestTransferOutcome }
+  | { kind: "merge"; outcome: GuestMergeOutcome };
 
 /** Where the move under way is. */
-type KeepProgress = { kind: "transfer"; progress: GuestTransferProgress } | { kind: "merge"; progress: GuestMergeProgress };
+type KeepProgress =
+  | { kind: "transfer"; progress: GuestTransferProgress }
+  | { kind: "merge"; progress: GuestMergeProgress };
 
 /**
  * For a user who logged in where a guest studied before (docs/guest-mode.md):
@@ -73,7 +81,12 @@ export function GuestStudyOffer({ useCases, session }: { useCases: UseCases; ses
       <p class="visually-hidden" role="status">
         {outcome === null ? "" : keptText(t, outcome)}
       </p>
-      <GuestStudyOfferStage useCases={useCases} session={session} outcome={outcome} onOutcome={setOutcome} />
+      <GuestStudyOfferStage
+        useCases={useCases}
+        session={session}
+        outcome={outcome}
+        onOutcome={setOutcome}
+      />
     </>
   );
 }
@@ -81,8 +94,11 @@ export function GuestStudyOffer({ useCases, session }: { useCases: UseCases; ses
 /** What a move that succeeded says; nothing for one that failed. */
 function keptText(t: I18n["t"], { kind, outcome }: KeepOutcome): string {
   if (!outcome.ok) return "";
-  if (kind === "transfer") return t(outcome.tidied ? "guestOffer.moved" : "guestOffer.movedNotTidied");
-  return t(outcome.tidied ? "guestOffer.added" : "guestOffer.addedNotTidied", { name: outcome.instance.name });
+  if (kind === "transfer")
+    return t(outcome.tidied ? "guestOffer.moved" : "guestOffer.movedNotTidied");
+  return t(outcome.tidied ? "guestOffer.added" : "guestOffer.addedNotTidied", {
+    name: outcome.instance.name,
+  });
 }
 
 /**
@@ -125,16 +141,23 @@ function GuestStudyOfferStage({
     onOutcome(result);
     if (!result.outcome.ok) {
       // Decks and drafts added before adding failed are in the instance: its lists, which may be on screen, are read again, while the user reads why.
-      if (result.kind === "merge" && result.outcome.added.length + result.outcome.copied.length > 0) void queryClient.invalidateQueries();
+      if (result.kind === "merge" && result.outcome.added.length + result.outcome.copied.length > 0)
+        void queryClient.invalidateQueries();
       return;
     }
     // The user's instances have changed, and so may every list of the instance: its decks, groups and statistics.
     await queryClient.invalidateQueries();
-    window.location.hash = routeToHash({ screen: "home", instanceUrl: result.outcome.instance.url });
+    window.location.hash = routeToHash({
+      screen: "home",
+      instanceUrl: result.outcome.instance.url,
+    });
   }
 
   const move = useMutation({
-    mutationFn: (args: { instance: Instance; target: { containerUrl: string; registrationTarget: RegistrationTarget } }) =>
+    mutationFn: (args: {
+      instance: Instance;
+      target: { containerUrl: string; registrationTarget: RegistrationTarget };
+    }) =>
       useCases.transferGuestStudy(session, args.instance, args.target, (step) =>
         setProgress({ kind: "transfer", progress: step }),
       ),
@@ -364,7 +387,12 @@ function GuestKeepForm({
   const instances = instancesQuery.data ?? [];
 
   return (
-    <section ref={ref} class="guest-transfer" aria-label={t("guestOffer.formHeading")} tabIndex={-1}>
+    <section
+      ref={ref}
+      class="guest-transfer"
+      aria-label={t("guestOffer.formHeading")}
+      tabIndex={-1}
+    >
       <h2>{t("guestOffer.formHeading")}</h2>
       {instancesQuery.isPending ? (
         <>
@@ -402,7 +430,15 @@ function GuestKeepForm({
 }
 
 /** The form's buttons: start, and Back to the offer; both ignored while a move starts. */
-function FormActions({ start, busy, onBack }: { start: string; busy: boolean; onBack: () => void }) {
+function FormActions({
+  start,
+  busy,
+  onBack,
+}: {
+  start: string;
+  busy: boolean;
+  onBack: () => void;
+}) {
   const { t } = useI18n();
   return (
     <div class="edit-actions">
@@ -424,7 +460,7 @@ function FormActions({ start, busy, onBack }: { start: string; busy: boolean; on
 
 /**
  * Which of the user's instances the study is added to, and which of its
- * decks: each guest deck is offered, ticked; one the instance has from
+ * decks: each guest deck is offered, checked; one the instance has from
  * the same library release says that it is added beside it, not merged.
  */
 function GuestMergeFields({
@@ -534,9 +570,20 @@ function GuestMergeFields({
           </fieldset>
         )}
         <p class="hint">{t("guestOffer.leftOut")}</p>
-        {plan !== undefined && plan.drafts > 0 && <p class="hint">{t("guestOffer.draftsCopied", { count: plan.drafts, name: target.name })}</p>}
-        <ErrorMessage error={noneChosen ? t("guestOffer.chooseDeck") : error} focus={cameWithError} />
-        <FormActions start={t("guestOffer.addStart", { name: target.name })} busy={busy} onBack={onBack} />
+        {plan !== undefined && plan.drafts > 0 && (
+          <p class="hint">
+            {t("guestOffer.draftsCopied", { count: plan.drafts, name: target.name })}
+          </p>
+        )}
+        <ErrorMessage
+          error={noneChosen ? t("guestOffer.chooseDeck") : error}
+          focus={cameWithError}
+        />
+        <FormActions
+          start={t("guestOffer.addStart", { name: target.name })}
+          busy={busy}
+          onBack={onBack}
+        />
       </form>
     </>
   );
@@ -587,7 +634,9 @@ function GuestTransferFields({
     <>
       <p>{t("guestOffer.explain")}</p>
       <form onSubmit={handleSubmit}>
-        {storagesQuery.isSuccess && storages.length === 0 && <p class="hint">{t("guestOffer.noStorage")}</p>}
+        {storagesQuery.isSuccess && storages.length === 0 && (
+          <p class="hint">{t("guestOffer.noStorage")}</p>
+        )}
         {storages.length > 1 && (
           <fieldset>
             <legend>{t("guestOffer.storage")}</legend>
@@ -616,7 +665,11 @@ function GuestTransferFields({
           required
           disabled={busy}
         />
-        <RegistrationTargetChooser options={optionsQuery.data ?? null} value={target} onChange={setTarget} />
+        <RegistrationTargetChooser
+          options={optionsQuery.data ?? null}
+          value={target}
+          onChange={setTarget}
+        />
         <ErrorMessage error={error} focus={cameWithError} />
         <FormActions start={t("guestOffer.start")} busy={busy} onBack={onBack} />
       </form>
@@ -661,7 +714,14 @@ function KeepFailedPanel({
   const ref = usePanelFocus<HTMLDivElement>();
   const whyId = useId();
   return (
-    <div ref={ref} class="warning migration" role="region" aria-label={region} aria-describedby={whyId} tabIndex={-1}>
+    <div
+      ref={ref}
+      class="warning migration"
+      role="region"
+      aria-label={region}
+      aria-describedby={whyId}
+      tabIndex={-1}
+    >
       <div id={whyId} class="failure-why">
         <strong>{why}</strong> {errorText(error)}
       </div>
@@ -712,11 +772,15 @@ function GuestMergeFailed({
   return (
     <KeepFailedPanel
       region={t("guestOffer.mergeFailedRegion")}
-      why={t("guestOffer.mergeFailedWhile", { step: mergeStepLabels(t)[outcome.step].toLowerCase() })}
+      why={t("guestOffer.mergeFailedWhile", {
+        step: mergeStepLabels(t)[outcome.step].toLowerCase(),
+      })}
       error={outcome.error}
       onClose={onClose}
     >
-      {outcome.added.length + outcome.copied.length === 0 && <p>{t("guestOffer.nothingAdded", { name })}</p>}
+      {outcome.added.length + outcome.copied.length === 0 && (
+        <p>{t("guestOffer.nothingAdded", { name })}</p>
+      )}
       {outcome.added.length > 0 && (
         <>
           <p>{t("guestOffer.keptDecks", { name, count: outcome.added.length })}</p>

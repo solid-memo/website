@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { CardInspectorScreen } from "./CardInspectorScreen";
@@ -5,7 +9,10 @@ import type { CardTab } from "./router";
 import { makeCard, makeDeck } from "../test/fixtures";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
-const card = { ...makeCard(deck, "water"), distractors: [{ id: "water-d1", text: { en: "fire" } }] };
+const card = {
+  ...makeCard(deck, "water"),
+  distractors: [{ id: "water-d1", text: { en: "fire" } }],
+};
 
 function renderScreen(overrides: Partial<Parameters<typeof CardInspectorScreen>[0]> = {}) {
   const props = {
@@ -31,14 +38,20 @@ describe("CardInspectorScreen", () => {
     expect(screen.getByRole("heading", { name: "Card: water" })).toBeInTheDocument();
     const tabs = screen.getByRole("navigation", { name: "What to edit" });
     expect(tabs).toHaveTextContent("ContentWrong options (1)Schedule");
-    expect(screen.getByRole("link", { name: "Wrong options (1)" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Wrong options (1)" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     const content = screen.getByRole("link", { name: "Content" });
     expect(content).toHaveAttribute("href", "#/card?tab=content");
     expect(content).not.toHaveAttribute("aria-current");
     fireEvent.click(content);
     expect(props.onTab).toHaveBeenCalledWith("content");
     expect(screen.getByText("The panel")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open this card in Solid Memo" })).toHaveAttribute("href", "#/card");
+    expect(screen.getByRole("link", { name: "Open this card in Solid Memo" })).toHaveAttribute(
+      "href",
+      "#/card",
+    );
     expect(screen.queryByRole("note")).toBeNull();
   });
 
@@ -65,7 +78,10 @@ describe("CardInspectorScreen", () => {
     const steps = screen.getByRole("group", { name: "Cards in the list" });
     expect(steps).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Previous card" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Previous card" })).toHaveAttribute("aria-keyshortcuts", "k");
+    expect(screen.getByRole("button", { name: "Previous card" })).toHaveAttribute(
+      "aria-keyshortcuts",
+      "k",
+    );
     fireEvent.click(screen.getByRole("button", { name: "Next card" }));
     expect(next).toHaveBeenCalled();
   });

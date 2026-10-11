@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Feature request
+description: Suggest something new, or a change to how something works.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        An idea that is still open fits better in [Discussions](https://github.com/solid-memo/website/discussions). What is planned is in [ROADMAP.md](https://github.com/solid-memo/website/blob/main/ROADMAP.md).
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to do, and what stands in the way.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Your proposal
+      description: What you would like Solid Memo to do.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Other ways you considered, or how you work around it today.
+  - type: checkboxes
+    id: data
+    attributes:
+      label: Data
+      description: A change to the vocabulary, the shapes or what the app writes to a pod is agreed here before any code is written ([CONTRIBUTING.md](https://github.com/solid-memo/website/blob/main/CONTRIBUTING.md#open-an-issue-first)).
+      options:
+        - label: This changes the vocabulary (`ns/vocab/`), the shapes (`ns/shapes/`) or the data the app writes to a pod.
+  - type: dropdown
+    id: help
+    attributes:
+      label: Would you like to make it?
+      options:
+        - Yes, I would like to open a pull request
+        - Maybe, with some help
+        - "No"

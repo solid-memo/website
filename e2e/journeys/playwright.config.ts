@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { defineConfig, devices } from "@playwright/test";
 import { noonTimeZone } from "./harness/timezone.ts";
 
@@ -11,7 +15,8 @@ const CI = process.env.CI !== undefined && process.env.CI !== "";
 const APP = "http://127.0.0.1:4173/";
 const TRACE_MODES = ["on", "off", "retain-on-failure"] as const;
 const trace = process.env.JOURNEY_TRACE || "retain-on-failure";
-if (!(TRACE_MODES as readonly string[]).includes(trace)) throw new Error(`JOURNEY_TRACE is "${trace}"; it may be ${TRACE_MODES.join(", ")}.`);
+if (!(TRACE_MODES as readonly string[]).includes(trace))
+  throw new Error(`JOURNEY_TRACE is "${trace}"; it may be ${TRACE_MODES.join(", ")}.`);
 
 export default defineConfig({
   testDir: "journeys",

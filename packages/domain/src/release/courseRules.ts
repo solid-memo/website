@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { EDUCATION_THEME } from "../dcat.ts";
 import { problem, type ReleaseProblem } from "./problems.ts";
@@ -41,22 +45,42 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
   const chapterIris = chapters.map((chapter) => chapter.iri);
 
   const course = model.types.includes(`${SCHEMA_NS}Course`);
-  if (!course && chapters.length + steps.length > 0) problems.push(problem(url, { code: "outlineWithoutCourse", params: {} }));
-  if (course && chapters.length === 0) problems.push(problem(url, { code: "courseWithoutChapter", params: {} }));
+  if (!course && chapters.length + steps.length > 0)
+    problems.push(problem(url, { code: "outlineWithoutCourse", params: {} }));
+  if (course && chapters.length === 0)
+    problems.push(problem(url, { code: "courseWithoutChapter", params: {} }));
   const direction = model.studyDirection;
   if (course && (direction.length !== 1 || direction[0].value !== SM.frontToBack)) {
-    problems.push(problem(url, { code: "courseDirection", params: { stated: direction } }, { field: SM.studyDirection }));
+    problems.push(
+      problem(
+        url,
+        { code: "courseDirection", params: { stated: direction } },
+        { field: SM.studyDirection },
+      ),
+    );
   }
 
   for (const chapter of chapters) {
     const parts = chapter.isPartOf;
     if (parts.some((part) => part !== url)) {
-      problems.push(problem(chapter.iri, { code: "chapterPartOf", params: { parts } }, { field: IS_PART_OF, related: parts }));
+      problems.push(
+        problem(
+          chapter.iri,
+          { code: "chapterPartOf", params: { parts } },
+          { field: IS_PART_OF, related: parts },
+        ),
+      );
     }
   }
   for (const step of steps) {
     for (const part of step.isPartOf.filter((part) => !chapterIris.includes(part))) {
-      problems.push(problem(step.iri, { code: "stepPartOf", params: { part } }, { field: IS_PART_OF, related: [part] }));
+      problems.push(
+        problem(
+          step.iri,
+          { code: "stepPartOf", params: { part } },
+          { field: IS_PART_OF, related: [part] },
+        ),
+      );
     }
   }
 
@@ -66,9 +90,13 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
     for (const card of named) {
       const found = cards.get(card);
       if (found === undefined) {
-        problems.push(problem(asker, { code: "askedNotACard", params: { card } }, { field, related: [card] }));
+        problems.push(
+          problem(asker, { code: "askedNotACard", params: { card } }, { field, related: [card] }),
+        );
       } else if (found.retired) {
-        problems.push(problem(asker, { code: "askedRetired", params: { card } }, { field, related: [card] }));
+        problems.push(
+          problem(asker, { code: "askedRetired", params: { card } }, { field, related: [card] }),
+        );
       } else {
         const entry = asked.get(card) ?? { card: found, checkedBy: [], reviewedBy: [] };
         entry[field === SM.checkedBy ? "checkedBy" : "reviewedBy"].push(asker);
@@ -77,9 +105,18 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
     }
   };
   for (const step of steps.filter(inUse)) ask(step.iri, step.checkedBy, SM.checkedBy);
-  for (const chapter of chapters.filter(inUse)) ask(chapter.iri, chapter.reviewQuestions, SM.reviewQuestion);
-  for (const { subject, object } of model.distractorLinks.filter((link) => !distractors.has(link.object.value))) {
-    problems.push(problem(subject, { code: "notADistractor", params: { distractor: object.value } }, { field: SM.distractor, related: [object.value] }));
+  for (const chapter of chapters.filter(inUse))
+    ask(chapter.iri, chapter.reviewQuestions, SM.reviewQuestion);
+  for (const { subject, object } of model.distractorLinks.filter(
+    (link) => !distractors.has(link.object.value),
+  )) {
+    problems.push(
+      problem(
+        subject,
+        { code: "notADistractor", params: { distractor: object.value } },
+        { field: SM.distractor, related: [object.value] },
+      ),
+    );
   }
   // A card's distractors are its own: a copy writes and removes them with it, so one two cards share would go with either.
   const namers = new Map<string, Set<string>>();
@@ -89,34 +126,61 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
   for (const [distractor, by] of namers) {
     if (by.size > 1) {
       const named = [...by];
-      problems.push(problem(distractor, { code: "distractorShared", params: { cards: named } }, { related: named }));
+      problems.push(
+        problem(
+          distractor,
+          { code: "distractorShared", params: { cards: named } },
+          { related: named },
+        ),
+      );
     }
   }
 
   for (const [iri, { card, checkedBy, reviewedBy }] of asked) {
     if (checkedBy.length > 1) {
-      problems.push(problem(iri, { code: "checkedTwice", params: { steps: checkedBy } }, { related: checkedBy }));
+      problems.push(
+        problem(
+          iri,
+          { code: "checkedTwice", params: { steps: checkedBy } },
+          { related: checkedBy },
+        ),
+      );
     }
     if (checkedBy.length > 0 && reviewedBy.length > 0) {
       problems.push(
-        problem(iri, { code: "checkedAndReviewed", params: { steps: checkedBy, chapters: reviewedBy } }, { related: [...checkedBy, ...reviewedBy] }),
+        problem(
+          iri,
+          { code: "checkedAndReviewed", params: { steps: checkedBy, chapters: reviewedBy } },
+          { related: [...checkedBy, ...reviewedBy] },
+        ),
       );
     }
     const back = languagesOf(card.back);
-    if (back.length === 0) problems.push(problem(iri, { code: "noBack", params: {} }, { field: SM.back }));
+    if (back.length === 0)
+      problems.push(problem(iri, { code: "noBack", params: {} }, { field: SM.back }));
     const options = card.distractors
       .filter((d) => d.kind === "iri")
       .map((d) => distractors.get(d.value))
       .filter((d): d is ReleaseDistractor => d !== undefined && inUse(d));
     if (options.length < LEAST_DISTRACTORS) {
-      problems.push(problem(iri, { code: "fewDistractors", params: { count: options.length, least: LEAST_DISTRACTORS } }, { field: SM.distractor }));
+      problems.push(
+        problem(
+          iri,
+          { code: "fewDistractors", params: { count: options.length, least: LEAST_DISTRACTORS } },
+          { field: SM.distractor },
+        ),
+      );
     }
     for (const option of options) {
       const text = new Set(languagesOf(option.text));
       const missing = back.filter((language) => !text.has(language));
       if (missing.length > 0) {
         problems.push(
-          problem(option.iri, { code: "distractorLanguages", params: { card: iri, missing } }, { field: SM.distractorText, related: [iri] }),
+          problem(
+            option.iri,
+            { code: "distractorLanguages", params: { card: iri, missing } },
+            { field: SM.distractorText, related: [iri] },
+          ),
         );
       }
     }
@@ -126,21 +190,33 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
   const clashes = (members: readonly { iri: string; positions: readonly string[] }[]) => {
     const at = new Map<string, string[]>();
     for (const member of members) {
-      for (const position of member.positions) at.set(position, [...(at.get(position) ?? []), member.iri]);
+      for (const position of member.positions)
+        at.set(position, [...(at.get(position) ?? []), member.iri]);
     }
     return [...at].filter(([, sharing]) => sharing.length > 1);
   };
   for (const [position, sharing] of clashes(chapters.filter(inUse))) {
-    problems.push(problem(url, { code: "chapterPositions", params: { chapters: sharing, position } }, { field: POSITION, related: sharing }));
+    problems.push(
+      problem(
+        url,
+        { code: "chapterPositions", params: { chapters: sharing, position } },
+        { field: POSITION, related: sharing },
+      ),
+    );
   }
   for (const chapter of chapters) {
     const ofChapter = steps.filter((step) => inUse(step) && step.isPartOf.includes(chapter.iri));
     for (const [position, sharing] of clashes(ofChapter)) {
       problems.push(
-        problem(chapter.iri, { code: "stepPositions", params: { steps: sharing, chapter: chapter.iri, position } }, { field: POSITION, related: sharing }),
+        problem(
+          chapter.iri,
+          { code: "stepPositions", params: { steps: sharing, chapter: chapter.iri, position } },
+          { field: POSITION, related: sharing },
+        ),
       );
     }
-    if (inUse(chapter) && ofChapter.length === 0) problems.push(problem(chapter.iri, { code: "chapterWithoutStep", params: {} }));
+    if (inUse(chapter) && ofChapter.length === 0)
+      problems.push(problem(chapter.iri, { code: "chapterWithoutStep", params: {} }));
   }
   return problems;
 }
@@ -159,14 +235,22 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
 export function readinessProblems(model: ReleaseModel): ReleaseProblem[] {
   const problems: ReleaseProblem[] = [];
   const required = (subject: string, field: string, values: readonly unknown[]) => {
-    if (values.length === 0) problems.push(problem(subject, { code: "required", params: {} }, { field }));
+    if (values.length === 0)
+      problems.push(problem(subject, { code: "required", params: {} }, { field }));
     return values.length > 0;
   };
   // A language range, as sh:languageIn reads it: "en" is met by "en-gb" too.
   const english = (subject: string, field: string, texts: readonly ReleaseTerm[]) => {
     if (!required(subject, field, texts)) return;
-    if (!texts.some((term) => term.kind === "literal" && (term.language === "en" || term.language.startsWith("en-")))) {
-      problems.push(problem(subject, { code: "missingLanguage", params: { language: "en" } }, { field }));
+    if (
+      !texts.some(
+        (term) =>
+          term.kind === "literal" && (term.language === "en" || term.language.startsWith("en-")),
+      )
+    ) {
+      problems.push(
+        problem(subject, { code: "missingLanguage", params: { language: "en" } }, { field }),
+      );
     }
   };
   const { url } = model;
@@ -178,7 +262,13 @@ export function readinessProblems(model: ReleaseModel): ReleaseProblem[] {
   required(url, `${DCAT_NS}isVersionOf`, model.isVersionOf);
   required(url, `${DCAT_NS}distribution`, model.distribution);
   if (!model.themes.some((theme) => theme.value === EDUCATION_THEME)) {
-    problems.push(problem(url, { code: "missingTheme", params: { theme: EDUCATION_THEME } }, { field: `${DCAT_NS}theme` }));
+    problems.push(
+      problem(
+        url,
+        { code: "missingTheme", params: { theme: EDUCATION_THEME } },
+        { field: `${DCAT_NS}theme` },
+      ),
+    );
   }
   for (const chapter of model.chapters) {
     english(chapter.iri, `${DCTERMS_NS}title`, chapter.title);

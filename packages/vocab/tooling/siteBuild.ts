@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
@@ -11,7 +15,7 @@ import { NS_ROOT, VOCAB_ROOT } from "./root.ts";
  */
 
 /**
- * The commit being built, shown as the site's version in the footer. Read
+ * The commit being built, shown beside the site's version in the footer. Read
  * from the checkout itself (the deploy workflow builds a specific commit,
  * which GITHUB_SHA need not equal); null outside a git checkout.
  */
@@ -26,6 +30,13 @@ export function commitSha(): string | null {
   }
 }
 
+/** The site's version, shown in the footer: the repository's, from its root package.json. */
+export function appVersion(): string {
+  return (
+    JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")) as { version: string }
+  ).version;
+}
+
 /**
  * Names the rules pod documents are checked by: a hash of every shape
  * (ns/shapes/) and vendored profile file. A check receipt in an
@@ -34,7 +45,9 @@ export function commitSha(): string | null {
 export function shapesRuleset(): string {
   const hash = createHash("sha256");
   const visit = (root: string, dir: string) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    )) {
       const path = join(dir, entry.name);
       if (entry.isDirectory()) visit(root, path);
       else hash.update(path.slice(root.length)).update(readFileSync(path));
@@ -45,9 +58,10 @@ export function shapesRuleset(): string {
   return hash.digest("hex").slice(0, 16);
 }
 
-/** Vite's `define`: `__COMMIT_SHA__` and `__SHAPES_RULESET__`, as each app's vite-env.d.ts declares them. */
+/** Vite's `define`: `__APP_VERSION__`, `__COMMIT_SHA__` and `__SHAPES_RULESET__`, as each app's vite-env.d.ts declares them. */
 export function siteDefines(): Record<string, string> {
   return {
+    __APP_VERSION__: JSON.stringify(appVersion()),
     __COMMIT_SHA__: JSON.stringify(commitSha()),
     __SHAPES_RULESET__: JSON.stringify(shapesRuleset()),
   };

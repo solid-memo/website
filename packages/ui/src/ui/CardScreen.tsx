@@ -1,5 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
-import { isMarkdown, type Card, type CardContent, type CardTextPart, type Distractor } from "@solid-memo/domain/deck";
+import {
+  isMarkdown,
+  type Card,
+  type CardContent,
+  type CardTextPart,
+  type Distractor,
+} from "@solid-memo/domain/deck";
 import { cardName } from "./DataText";
 import type { DeckLanguages } from "@solid-memo/domain/deckLanguages";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -106,7 +116,8 @@ export function CardScreen({
   const { t, locale, readerText } = useI18n();
   const askFirst = useAskFirst();
   const hints = useMemo(() => cardLanguageHints(languages, deckTitle), [languages, deckTitle]);
-  const startDraft = () => draftOf(card, [locale, ...navigator.languages], { defaults: hints.defaults });
+  const startDraft = () =>
+    draftOf(card, [locale, ...navigator.languages], { defaults: hints.defaults });
   const [draft, setDraft] = useState(() => keep?.current?.draft ?? startDraft());
   /** The draft as it started, or as last saved: what is not saved differs from it. */
   const [pristine, setPristine] = useState(keep?.current?.pristine ?? draft);

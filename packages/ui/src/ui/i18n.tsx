@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createContext, Fragment, type ComponentChildren, type VNode } from "preact";
 import { useContext } from "preact/hooks";
 import type { DeckDirection } from "@solid-memo/domain/deck";
@@ -152,7 +156,15 @@ function writtenTag(tag: string): string {
   return Intl.getCanonicalLocales(tag)[0]!;
 }
 
-export function createI18n(locale: Locale): I18n {
+/** The message that is the app's name: Solid Memo in every language, unless the site is given another (`appName`). */
+const APP_NAME_KEY: MessageKey = "app.documentTitle";
+
+/**
+ * The app's text in `locale`. `appName`, when given, is the site's own
+ * name (an app's setting, docs/configuration.md), said in place of
+ * Solid Memo's wherever the name stands alone in every language.
+ */
+export function createI18n(locale: Locale, appName?: string): I18n {
   const plurals = new Intl.PluralRules(locale);
   const numbers = new Intl.NumberFormat(locale);
   const languageNames = new Intl.DisplayNames(locale, { type: "language" });
@@ -167,6 +179,7 @@ export function createI18n(locale: Locale): I18n {
   }
 
   function template(key: string, count: unknown): string {
+    if (key === APP_NAME_KEY && appName !== undefined) return appName;
     const message = lookup(CATALOGS[locale], key) ?? key;
     if (typeof message === "string") return message;
     // The message files' tests give each plural message every form its language names.
@@ -187,27 +200,36 @@ export function createI18n(locale: Locale): I18n {
     const pieces = template(key, vars.count).split(PLACEHOLDER);
     // split() puts each placeholder's name at the odd indexes.
     return pieces.map((piece, index) =>
-      index % 2 === 0 ? piece : <Fragment key={index}>{piece in vars ? filled(vars[piece]) : `{${piece}}`}</Fragment>,
+      index % 2 === 0 ? (
+        piece
+      ) : (
+        <Fragment key={index}>{piece in vars ? filled(vars[piece]) : `{${piece}}`}</Fragment>
+      ),
     );
   };
 
   // A regional tag ("en-gb") on an English page is in the page's language.
   const partLang: I18n["partLang"] = (tag) =>
-    tag === undefined || tag === "" || tag === NO_LANGUAGE || tag.split("-")[0] === locale ? undefined : tag;
+    tag === undefined || tag === "" || tag === NO_LANGUAGE || tag.split("-")[0] === locale
+      ? undefined
+      : tag;
 
   const languageParts: I18n["languageParts"] = (tag) => {
     if (tag === NO_LANGUAGE) return { name: t("language.none") };
     const name = languageName(tag);
     if (name.toLowerCase() === tag.toLowerCase()) return { name };
     const autonym = autonymOf(tag);
-    const same = autonym === undefined || autonym.toLocaleLowerCase(tag) === name.toLocaleLowerCase(locale);
+    const same =
+      autonym === undefined || autonym.toLocaleLowerCase(tag) === name.toLocaleLowerCase(locale);
     return same ? { name, code: writtenTag(tag) } : { name, autonym, code: writtenTag(tag) };
   };
 
   /** A message whose values are English text, each in its own span, marked as English on another page. */
   function markedEnglish(key: MessageKey, vars: Vars): ErrorText {
     const lang = partLang("en");
-    const marked = Object.fromEntries(Object.entries(vars).map(([name, value]) => [name, <span lang={lang}>{value}</span>]));
+    const marked = Object.fromEntries(
+      Object.entries(vars).map(([name, value]) => [name, <span lang={lang}>{value}</span>]),
+    );
     return <>{tx(key, marked)}</>;
   }
 
@@ -217,7 +239,8 @@ export function createI18n(locale: Locale): I18n {
    * this page's.
    */
   function errorSentence(key: MessageKey, vars: ErrorVars): ErrorText {
-    if (!Object.values(vars).some((value) => typeof value === "object")) return t(key, vars as Vars);
+    if (!Object.values(vars).some((value) => typeof value === "object"))
+      return t(key, vars as Vars);
     const marked = Object.fromEntries(
       Object.entries(vars).map(([name, value]) => {
         if (typeof value !== "object") return [name, value];
@@ -231,7 +254,10 @@ export function createI18n(locale: Locale): I18n {
 
   /** Whether a violation is the validator's own, its constraint worded in this language. */
   function translatedConstraint(violation: Violation): boolean {
-    return violation.builtIn === true && lookup(CATALOGS[locale], `validation.constraint.${violation.constraint}`) !== undefined;
+    return (
+      violation.builtIn === true &&
+      lookup(CATALOGS[locale], `validation.constraint.${violation.constraint}`) !== undefined
+    );
   }
 
   return {
@@ -254,11 +280,16 @@ export function createI18n(locale: Locale): I18n {
       return new Date(iso).toLocaleDateString(locale, { dateStyle: "long", timeZone: "UTC" });
     },
     formatMonth(month) {
-      return new Date(`${month}-01T00:00:00.000Z`).toLocaleDateString(locale, { month: "long", year: "numeric", timeZone: "UTC" });
+      return new Date(`${month}-01T00:00:00.000Z`).toLocaleDateString(locale, {
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      });
     },
     violationText(violation) {
       if (locale in violation.message) return violation.message[locale];
-      if (translatedConstraint(violation)) return t(`validation.constraint.${violation.constraint}` as MessageKey);
+      if (translatedConstraint(violation))
+        return t(`validation.constraint.${violation.constraint}` as MessageKey);
       return shown(violation.message, [locale]);
     },
     violationLang(violation) {
@@ -284,8 +315,11 @@ export function createI18n(locale: Locale): I18n {
           </>
         );
       }
-      if (error instanceof TypeError && NETWORK_FAILURE.test(error.message)) return t("common.networkError");
-      return markedEnglish("common.unexpectedError", { detail: error instanceof Error ? error.message : String(error) });
+      if (error instanceof TypeError && NETWORK_FAILURE.test(error.message))
+        return t("common.networkError");
+      return markedEnglish("common.unexpectedError", {
+        detail: error instanceof Error ? error.message : String(error),
+      });
     },
     directionLabel(direction) {
       switch (direction) {
@@ -313,15 +347,18 @@ const I18nContext = createContext<I18nState>({
 /** The language the screens below speak, and how to choose another. */
 export function I18nProvider({
   locale,
+  appName,
   onChoose,
   children,
 }: {
   locale: Locale;
+  /** The site's own name, in place of Solid Memo's (see createI18n). */
+  appName?: string;
   onChoose: (locale: Locale) => void;
   children: ComponentChildren;
 }) {
   return (
-    <I18nContext.Provider value={{ ...createI18n(locale), chooseLocale: onChoose }}>
+    <I18nContext.Provider value={{ ...createI18n(locale, appName), chooseLocale: onChoose }}>
       {children}
     </I18nContext.Provider>
   );

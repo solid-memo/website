@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { expect, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
 
@@ -27,7 +31,9 @@ export class DeckBrowser extends Screen {
   }
 
   async expectDeck(name: string): Promise<void> {
-    await expect(this.page.getByRole("heading", { name: this.t("browser.heading", { deck: name }) })).toBeVisible();
+    await expect(
+      this.page.getByRole("heading", { name: this.t("browser.heading", { deck: name }) }),
+    ).toBeVisible();
   }
 
   /** "About this deck", where "Describe deck" is. */
@@ -36,7 +42,10 @@ export class DeckBrowser extends Screen {
   }
 
   get describeButton(): Locator {
-    return this.about.getByRole("button", { name: this.t("deckAbout.describeButton"), exact: true });
+    return this.about.getByRole("button", {
+      name: this.t("deckAbout.describeButton"),
+      exact: true,
+    });
   }
 
   /**
@@ -54,7 +63,10 @@ export class DeckBrowser extends Screen {
       // The deck's other languages follow the main field in no set order: the Swedish one is found by its language.
       const swedish = form.locator('textarea[id^="deck-description-"][lang="sv"]');
       await expect(english).toBeVisible();
-      await expect(swedish, "the Swedish description: only a deck that has one shows it").toHaveAttribute("lang", "sv");
+      await expect(
+        swedish,
+        "the Swedish description: only a deck that has one shows it",
+      ).toHaveAttribute("lang", "sv");
       await english.fill(text.en);
       await swedish.fill(text.sv);
       await form.getByRole("button", { name: this.t("deckAbout.saveButton"), exact: true }).click();
@@ -65,14 +77,23 @@ export class DeckBrowser extends Screen {
 
   /** The cards' rows (the table's header left out). */
   get cardRows(): Locator {
-    return this.page.getByRole("main").getByRole("table").getByRole("row").filter({ has: this.page.getByRole("cell") });
+    return this.page
+      .getByRole("main")
+      .getByRole("table")
+      .getByRole("row")
+      .filter({ has: this.page.getByRole("cell") });
   }
 
   /** Follows the header's "Add card" link to the card creator. */
   async openCardCreator(): Promise<void> {
     await this.intent("Open the card creator", async () => {
-      await this.page.getByRole("main").getByRole("link", { name: this.t("browser.addCardButton"), exact: true }).click();
-      await expect(this.page.getByRole("heading", { name: this.t("cardCreator.heading") })).toBeVisible();
+      await this.page
+        .getByRole("main")
+        .getByRole("link", { name: this.t("browser.addCardButton"), exact: true })
+        .click();
+      await expect(
+        this.page.getByRole("heading", { name: this.t("cardCreator.heading") }),
+      ).toBeVisible();
     });
   }
 
@@ -90,6 +111,7 @@ export class DeckBrowser extends Screen {
   /** The table lists exactly these fronts (in any order). */
   async expectFronts(fronts: readonly string[]): Promise<void> {
     await expect(this.cardRows).toHaveCount(fronts.length);
-    for (const front of fronts) await expect(this.cardRows.filter({ hasText: front })).toHaveCount(1);
+    for (const front of fronts)
+      await expect(this.cardRows.filter({ hasText: front })).toHaveCount(1);
   }
 }

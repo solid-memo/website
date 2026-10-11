@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { AppError } from "./appError";
 import type { Deck } from "./deck";
 import { sameText, type LangText } from "./langText";
@@ -8,7 +12,7 @@ import { sameText, type LangText } from "./langText";
  * its own, in the order the user put them. The pod states it in the
  * catalog document, every group a dcat:Catalog listing its members and
  * each member's place an `sm:position` within its parent; the root is
- * the instance's catalogue, whose `dcat:catalog` lists the top-level
+ * the instance's catalog, whose `dcat:catalog` lists the top-level
  * groups (its `dcat:dataset` lists every deck, grouped or not).
  *
  * The pod's statements may disagree with a tree (a deck in two groups, a
@@ -44,7 +48,7 @@ export type ParentId = string | null;
 
 /**
  * A place in the tree: in `parent`, right after the sibling `after`, or
- * first when that is null. A place names its neighbour rather than an
+ * first when that is null. A place names its neighbor rather than an
  * index so that it still means the same after other changes.
  */
 export interface Anchor {
@@ -86,7 +90,7 @@ export interface StoredLayout {
   deckPositions: ReadonlyMap<string, number>;
   /** The groups the app can read, in document order. */
   groups: readonly StoredGroup[];
-  /** The catalogue's `dcat:catalog` links, as they are. */
+  /** The catalog's `dcat:catalog` links, as they are. */
   rootGroups: readonly string[];
   /** A group is in a newer format than this app's. */
   readOnly: boolean;
@@ -105,7 +109,7 @@ export interface TreeChanges {
   groupsRetitled: readonly DeckGroup[];
   /** The full new member lists, of the nodes the layout has, of every group whose members changed (each added group's too). */
   members: ReadonlyMap<string, { decks: readonly string[]; groups: readonly string[] }>;
-  /** The catalogue's new `dcat:catalog` list of the groups the layout has, when it changed; a link to a group it cannot read stays beside it. */
+  /** The catalog's new `dcat:catalog` list of the groups the layout has, when it changed; a link to a group it cannot read stays beside it. */
   rootGroups?: readonly string[];
   /** A node's new position within its parent, for each one whose position or parent changed. */
   positions: ReadonlyMap<string, number>;
@@ -126,7 +130,11 @@ export interface TreeLocation {
   index: number;
 }
 
-function locateIn(nodes: readonly TreeNode[], parent: ParentId, id: string): TreeLocation | undefined {
+function locateIn(
+  nodes: readonly TreeNode[],
+  parent: ParentId,
+  id: string,
+): TreeLocation | undefined {
   for (const [index, node] of nodes.entries()) {
     if (nodeId(node) === id) return { node, parent, index };
     if (node.kind === "group") {
@@ -190,7 +198,8 @@ function changed(): AppError {
 export function moveNode(tree: DeckTree, id: string, to: Anchor): DeckTree {
   const from = locate(tree, id);
   if (from === undefined || childrenOf(tree, to.parent) === undefined) throw changed();
-  if (to.parent === id || (to.parent !== null && isDescendant(tree, id, to.parent))) throw changed();
+  if (to.parent === id || (to.parent !== null && isDescendant(tree, id, to.parent)))
+    throw changed();
   if (to.parent === from.parent && to.after === id) return tree;
   const rest = without(tree, from);
   const siblings = childrenOf(rest, to.parent)!;
@@ -207,7 +216,12 @@ export function moveNode(tree: DeckTree, id: string, to: Anchor): DeckTree {
  * group cannot be combined with a deck or group inside it, nor with the
  * group it is in.
  */
-export function combine(tree: DeckTree, dragged: string, target: string, group: DeckGroup): DeckTree {
+export function combine(
+  tree: DeckTree,
+  dragged: string,
+  target: string,
+  group: DeckGroup,
+): DeckTree {
   if (dragged === target) throw new Error("A node cannot be combined with itself");
   const existing = locate(tree, group.url);
   if (existing !== undefined) {
@@ -231,7 +245,11 @@ export function combine(tree: DeckTree, dragged: string, target: string, group: 
 export function deleteGroup(tree: DeckTree, url: string): DeckTree {
   const at = locate(tree, url);
   if (at?.node.kind !== "group") return tree;
-  return withChildren(tree, at.parent, spliced(childrenOf(tree, at.parent)!, at.index, 1, ...at.node.children));
+  return withChildren(
+    tree,
+    at.parent,
+    spliced(childrenOf(tree, at.parent)!, at.index, 1, ...at.node.children),
+  );
 }
 
 /**
@@ -272,12 +290,15 @@ export function renameGroup(tree: DeckTree, url: string, title: LangText): DeckT
  */
 export function graft(tree: DeckTree, nodes: readonly GraftNode[]): DeckTree {
   const groups = (list: readonly GraftNode[]): string[] =>
-    list.flatMap((node) => (node.kind === "group" ? [node.group.url, ...groups(node.children)] : []));
+    list.flatMap((node) =>
+      node.kind === "group" ? [node.group.url, ...groups(node.children)] : [],
+    );
   if (groups(nodes).some((url) => locate(tree, url) !== undefined)) return tree;
   let rest = tree;
   const placed = (list: readonly GraftNode[]): TreeNode[] =>
     list.flatMap((node): TreeNode[] => {
-      if (node.kind === "group") return [{ kind: "group", group: node.group, children: placed(node.children) }];
+      if (node.kind === "group")
+        return [{ kind: "group", group: node.group, children: placed(node.children) }];
       const at = locate(rest, node.url);
       if (at?.node.kind !== "deck") return [];
       rest = without(rest, at);
@@ -315,9 +336,11 @@ function parentsOf(stored: StoredLayout): Map<string, string> {
   // Lowest group URL first, so its claim on a node listed twice wins.
   const byUrl = [...stored.groups].sort((a, b) => (a.group.url < b.group.url ? -1 : 1));
   for (const { group, decks: deckLinks, groups: groupLinks } of byUrl) {
-    for (const url of deckLinks) if (decks.has(url) && !parents.has(url)) parents.set(url, group.url);
+    for (const url of deckLinks)
+      if (decks.has(url) && !parents.has(url)) parents.set(url, group.url);
     for (const url of groupLinks) {
-      if (groups.has(url) && url !== group.url && !rootGroups.has(url) && !parents.has(url)) parents.set(url, group.url);
+      if (groups.has(url) && url !== group.url && !rootGroups.has(url) && !parents.has(url))
+        parents.set(url, group.url);
     }
   }
   // A group that cannot reach the top level is in a cycle: lift its lowest member to the top, until none is.
@@ -349,18 +372,34 @@ function parentsOf(stored: StoredLayout): Map<string, string> {
  */
 export function buildTree(stored: StoredLayout): DeckTree {
   const parents = parentsOf(stored);
-  type Entry = { id: string; order: number; position: number | undefined } & ({ deck: Deck } | { group: DeckGroup });
+  type Entry = { id: string; order: number; position: number | undefined } & (
+    | { deck: Deck }
+    | { group: DeckGroup }
+  );
   const entries: Entry[] = [
-    ...stored.decks.map((deck, order) => ({ deck, id: deck.url, order, position: stored.deckPositions.get(deck.url) })),
-    ...stored.groups.map(({ group, position }, order) => ({ group, id: group.url, order: stored.decks.length + order, position })),
+    ...stored.decks.map((deck, order) => ({
+      deck,
+      id: deck.url,
+      order,
+      position: stored.deckPositions.get(deck.url),
+    })),
+    ...stored.groups.map(({ group, position }, order) => ({
+      group,
+      id: group.url,
+      order: stored.decks.length + order,
+      position,
+    })),
   ];
-  const rank = (entry: Entry) => (entry.position !== undefined && entry.position >= 0 ? entry.position : Infinity);
+  const rank = (entry: Entry) =>
+    entry.position !== undefined && entry.position >= 0 ? entry.position : Infinity;
   entries.sort((a, b) => rank(a) - rank(b) || a.order - b.order);
   const childrenIn = (parent: ParentId): TreeNode[] =>
     entries
       .filter((entry) => (parents.get(entry.id) ?? null) === parent)
       .map((entry) =>
-        "deck" in entry ? { kind: "deck", deck: entry.deck } : { kind: "group", group: entry.group, children: childrenIn(entry.id) },
+        "deck" in entry
+          ? { kind: "deck", deck: entry.deck }
+          : { kind: "group", group: entry.group, children: childrenIn(entry.id) },
       );
   return { children: childrenIn(null), readOnly: stored.readOnly };
 }
@@ -376,7 +415,11 @@ function levels(tree: DeckTree): Map<ParentId, string[]> {
   return result;
 }
 
-function sameMembers(stated: readonly string[], known: ReadonlySet<string>, wanted: readonly string[]): boolean {
+function sameMembers(
+  stated: readonly string[],
+  known: ReadonlySet<string>,
+  wanted: readonly string[],
+): boolean {
   const kept = new Set(stated.filter((url) => known.has(url)));
   return kept.size === wanted.length && wanted.every((url) => kept.has(url));
 }
@@ -385,7 +428,7 @@ function sameMembers(stated: readonly string[], known: ReadonlySet<string>, want
  * What to write so that the pod, which states `stored`, states `after`:
  * the groups to add, remove and rename; the new member lists of each
  * group whose members changed, and of the top level (its groups only:
- * the catalogue lists every deck anyway); and the new position of every
+ * the catalog lists every deck anyway); and the new position of every
  * member of a parent whose order changed, renumbered from 0. Member lists
  * are compared to what the layout states of the nodes it has, so a link
  * to a node that is gone is dropped only as its list is written anyway,
@@ -432,14 +475,25 @@ export function treeChanges(stored: StoredLayout, after: DeckTree): TreeChanges 
       const entry = storedGroups.get(parent);
       if (entry === undefined) groupsAdded.push(group);
       else if (!sameText(entry.group.title, group.title)) groupsRetitled.push(group);
-      if (entry === undefined || !sameMembers(entry.decks, decks, list.decks) || !sameMembers(entry.groups, groups, list.groups)) {
+      if (
+        entry === undefined ||
+        !sameMembers(entry.decks, decks, list.decks) ||
+        !sameMembers(entry.groups, groups, list.groups)
+      ) {
         members.set(parent, list);
       }
     }
     const old = before.get(parent);
-    if (old !== undefined && old.length === ids.length && old.every((id, index) => ids[index] === id)) continue;
+    if (
+      old !== undefined &&
+      old.length === ids.length &&
+      old.every((id, index) => ids[index] === id)
+    )
+      continue;
     for (const [index, id] of ids.entries()) {
-      const position = storedGroups.has(id) ? storedGroups.get(id)!.position : stored.deckPositions.get(id);
+      const position = storedGroups.has(id)
+        ? storedGroups.get(id)!.position
+        : stored.deckPositions.get(id);
       if (position !== index || parentBefore.get(id) !== parent) positions.set(id, index);
     }
   }

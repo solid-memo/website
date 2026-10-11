@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { getPodUrlAllFrom, getProfileAll } from "@inrupt/solid-client";
 import type { StorageGateway } from "@solid-memo/application/ports";
 import type { Storage } from "@solid-memo/domain/storage";
@@ -11,15 +15,16 @@ export interface SolidStorageGatewayDeps {
   fetch: typeof globalThis.fetch;
 }
 
-export function createSolidStorageGateway({
-  fetch,
-}: SolidStorageGatewayDeps): StorageGateway {
+export function createSolidStorageGateway({ fetch }: SolidStorageGatewayDeps): StorageGateway {
   return {
     async discoverStorages(webId): Promise<Storage[]> {
       // The WebID document read through `fetch`, as every pod read is: left to
       // itself, @inrupt/solid-client reads it with the browser's own fetch,
       // which cannot reach the guest's pod (docs/guest-mode.md).
-      const profiles = await getProfileAll(webId, { fetch, webIdProfile: await readDataset(webId, fetch) });
+      const profiles = await getProfileAll(webId, {
+        fetch,
+        webIdProfile: await readDataset(webId, fetch),
+      });
       const fromProfile = getPodUrlAllFrom(profiles, webId);
       if (fromProfile.length > 0) {
         return fromProfile.map((url) => ({ url, source: "profile" }));
@@ -73,11 +78,7 @@ export function hasStorageLink(linkHeader: string | null): boolean {
   }
   return linkHeader
     .split(",")
-    .some(
-      (link) =>
-        link.includes(`<${PIM_STORAGE_TYPE}>`) &&
-        /rel="?type"?/.test(link),
-    );
+    .some((link) => link.includes(`<${PIM_STORAGE_TYPE}>`) && /rel="?type"?/.test(link));
 }
 
 async function walkUpToStorage(

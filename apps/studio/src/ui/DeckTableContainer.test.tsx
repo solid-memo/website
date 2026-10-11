@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -44,23 +48,35 @@ function renderContainer(useCases: UseCases) {
   );
 }
 
-const cells = (row: HTMLElement) => within(row).getAllByRole("cell").map((cell) => cell.textContent);
+const cells = (row: HTMLElement) =>
+  within(row)
+    .getAllByRole("cell")
+    .map((cell) => cell.textContent);
 
 describe("DeckTableContainer", () => {
   it("reads the decks as arranged, then each one's cards in use and today's counts, with the instance's pace", async () => {
     const tree: DeckTree = {
       readOnly: false,
       children: [
-        { kind: "group", group: languages, children: [{ kind: "deck", deck: { ...kanji, newCardsPerDay: 5 } }] },
+        {
+          kind: "group",
+          group: languages,
+          children: [{ kind: "deck", deck: { ...kanji, newCardsPerDay: 5 } }],
+        },
         { kind: "deck", deck: verbs },
       ],
     };
     const useCases = makeUseCasesFake({
       listDeckTree: vi.fn(async () => tree),
       listCards: vi.fn(async (deck) =>
-        deck.url === kanji.url ? [makeCard(deck, "a"), makeCard(deck, "b"), makeCard(deck, "c", true)] : [],
+        deck.url === kanji.url
+          ? [makeCard(deck, "a"), makeCard(deck, "b"), makeCard(deck, "c", true)]
+          : [],
       ),
-      getStudyCounts: vi.fn(async (_instanceUrl, deck) => ({ dueCount: deck.url === kanji.url ? 2 : 0, newCount: 5 })),
+      getStudyCounts: vi.fn(async (_instanceUrl, deck) => ({
+        dueCount: deck.url === kanji.url ? 2 : 0,
+        newCount: 5,
+      })),
     });
     renderContainer(useCases);
     expect(screen.getByText("Loading decks…")).toBeInTheDocument();
@@ -80,14 +96,30 @@ describe("DeckTableContainer", () => {
     );
     expect(useCases.listDeckTree).toHaveBeenCalledWith(instanceA.url);
     expect(useCases.getPreferences).toHaveBeenCalledWith(instanceA.url);
-    expect(useCases.getStudyCounts).toHaveBeenCalledWith(instanceA.url, { ...kanji, newCardsPerDay: 5 }, expect.any(Date));
+    expect(useCases.getStudyCounts).toHaveBeenCalledWith(
+      instanceA.url,
+      { ...kanji, newCardsPerDay: 5 },
+      expect.any(Date),
+    );
   });
 
   it("shows a row's figures that could not be read as such, and badges a library copy, a course, copies from a link and invalid data", async () => {
-    const course = { ...makeDeck("deck-3", { en: "Solid" }), sourceUrl: "https://solid-memo.com/decks/solid/v1.ttl" };
-    const copy = { ...makeDeck("deck-4", { en: "Capitals" }), sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" };
-    const linked = { ...makeDeck("deck-5", { en: "Rivers" }), sourceUrl: "https://bob.example/releases/rivers/v1.ttl" };
-    const linkedCourse = { ...makeDeck("deck-6", { en: "Pods" }), sourceUrl: "https://bob.example/releases/pods/v1.ttl" };
+    const course = {
+      ...makeDeck("deck-3", { en: "Solid" }),
+      sourceUrl: "https://solid-memo.com/decks/solid/v1.ttl",
+    };
+    const copy = {
+      ...makeDeck("deck-4", { en: "Capitals" }),
+      sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl",
+    };
+    const linked = {
+      ...makeDeck("deck-5", { en: "Rivers" }),
+      sourceUrl: "https://bob.example/releases/rivers/v1.ttl",
+    };
+    const linkedCourse = {
+      ...makeDeck("deck-6", { en: "Pods" }),
+      sourceUrl: "https://bob.example/releases/pods/v1.ttl",
+    };
     const report: ValidationReport = {
       instanceUrl: instanceA.url,
       conforms: false,
@@ -102,7 +134,14 @@ describe("DeckTableContainer", () => {
               status: "checked",
               shape: "card",
               version: 5,
-              violations: [{ path: "", message: { en: "Wrong" }, severity: "violation", constraint: "MinCount" }],
+              violations: [
+                {
+                  path: "",
+                  message: { en: "Wrong" },
+                  severity: "violation",
+                  constraint: "MinCount",
+                },
+              ],
             },
           ],
         },
@@ -127,28 +166,53 @@ describe("DeckTableContainer", () => {
       }),
       getStudyCounts: vi.fn(() => new Promise<never>(() => undefined)),
       checkInstance: vi.fn(async () => report),
-      listLibraryDecks: vi.fn(async () => [solid, { ...plain, ...firstRelease(copy.sourceUrl), url: copy.sourceUrl }]),
-      deckRelease: vi.fn(async (deck) => (deck.url === linkedCourse.url ? ({ isCourse: true } as LibraryDeckContent) : ({} as LibraryDeckContent))),
+      listLibraryDecks: vi.fn(async () => [
+        solid,
+        { ...plain, ...firstRelease(copy.sourceUrl), url: copy.sourceUrl },
+      ]),
+      deckRelease: vi.fn(async (deck) =>
+        deck.url === linkedCourse.url
+          ? ({ isCourse: true } as LibraryDeckContent)
+          : ({} as LibraryDeckContent),
+      ),
     });
     renderContainer(useCases);
     const row = await screen.findByRole("row", { name: /Kanji N5/ });
-    await waitFor(() => expect(within(row).getAllByRole("cell")[8]).toHaveTextContent("Could not be read"));
+    await waitFor(() =>
+      expect(within(row).getAllByRole("cell")[8]).toHaveTextContent("Could not be read"),
+    );
     expect(within(row).getAllByRole("cell")[5]).toHaveTextContent("Counting…");
     expect(within(row).getByRole("rowheader")).toHaveTextContent("Kanji N5Unreadable");
-    await waitFor(() => expect(screen.getByRole("rowheader", { name: /Verbs/ })).toHaveTextContent("VerbsInvalid data"));
-    await waitFor(() => expect(screen.getByRole("rowheader", { name: /Solid/ })).toHaveTextContent("SolidCourse"));
-    expect(screen.getByRole("rowheader", { name: /Capitals/ })).toHaveTextContent("CapitalsLibrary");
-    await waitFor(() => expect(screen.getByRole("rowheader", { name: /Pods/ })).toHaveTextContent("PodsCourseFrom bob.example"));
-    expect(screen.getByRole("rowheader", { name: /Rivers/ })).toHaveTextContent("RiversFrom bob.example");
+    await waitFor(() =>
+      expect(screen.getByRole("rowheader", { name: /Verbs/ })).toHaveTextContent(
+        "VerbsInvalid data",
+      ),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("rowheader", { name: /Solid/ })).toHaveTextContent("SolidCourse"),
+    );
+    expect(screen.getByRole("rowheader", { name: /Capitals/ })).toHaveTextContent(
+      "CapitalsLibrary",
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("rowheader", { name: /Pods/ })).toHaveTextContent(
+        "PodsCourseFrom bob.example",
+      ),
+    );
+    expect(screen.getByRole("rowheader", { name: /Rivers/ })).toHaveTextContent(
+      "RiversFrom bob.example",
+    );
   });
 
   it("leaves a deck set aside out of the bulk actions, and moves none while the arrangement is set aside", async () => {
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [kanji, verbs]),
-      checkInstance: vi.fn(async () => invalidReport([kanji], { catalogue: true })),
+      checkInstance: vi.fn(async () => invalidReport([kanji], { catalog: true })),
     });
     renderContainer(useCases);
-    await waitFor(() => expect(screen.getByRole("checkbox", { name: "Select Verbs" })).toBeEnabled());
+    await waitFor(() =>
+      expect(screen.getByRole("checkbox", { name: "Select Verbs" })).toBeEnabled(),
+    );
     expect(screen.getByRole("checkbox", { name: "Select Kanji N5" })).toBeDisabled();
     expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Verbs" }));
@@ -158,19 +222,29 @@ describe("DeckTableContainer", () => {
 
   it("moves no deck into a group that a newer version arranged", async () => {
     const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, verbs]) });
-    vi.mocked(useCases.listDeckTree).mockImplementation(async () => ({ readOnly: true, children: [kanji, verbs].map((deck) => ({ kind: "deck" as const, deck })) }));
+    vi.mocked(useCases.listDeckTree).mockImplementation(async () => ({
+      readOnly: true,
+      children: [kanji, verbs].map((deck) => ({ kind: "deck" as const, deck })),
+    }));
     renderContainer(useCases);
-    await waitFor(() => expect(screen.getByRole("checkbox", { name: "Select Verbs" })).toBeEnabled());
+    await waitFor(() =>
+      expect(screen.getByRole("checkbox", { name: "Select Verbs" })).toBeEnabled(),
+    );
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Verbs" }));
     pick("Edit the selected decks", "Move to group");
-    expect(screen.getByText(/A newer version of Solid Memo arranged these groups/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/A newer version of Solid Memo arranged these groups/),
+    ).toBeInTheDocument();
   });
 
   it("moves, paces, directs and deletes the selected decks, each in one call, and reads the decks afresh after", async () => {
     const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, verbs]) });
     vi.mocked(useCases.listDeckTree).mockImplementation(async () => ({
       readOnly: false,
-      children: [{ kind: "group", group: languages, children: [] }, ...[kanji, verbs].map((deck) => ({ kind: "deck" as const, deck }))],
+      children: [
+        { kind: "group", group: languages, children: [] },
+        ...[kanji, verbs].map((deck) => ({ kind: "deck" as const, deck })),
+      ],
     }));
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select Kanji N5" }));
@@ -192,16 +266,25 @@ describe("DeckTableContainer", () => {
       nodes: [kanji.url, verbs.url],
       parent: languages.url,
     });
-    await waitFor(() => expect(vi.mocked(useCases.listDeckTree).mock.calls.length).toBeGreaterThan(reads));
+    await waitFor(() =>
+      expect(vi.mocked(useCases.listDeckTree).mock.calls.length).toBeGreaterThan(reads),
+    );
     await apply(
       "Move to group",
       () => choose("Group", ""),
       "Moved 2 decks to Top level (no group).",
     );
-    expect(useCases.editDeckTree).toHaveBeenLastCalledWith(instanceA.url, { kind: "gather", nodes: [kanji.url, verbs.url], parent: null });
+    expect(useCases.editDeckTree).toHaveBeenLastCalledWith(instanceA.url, {
+      kind: "gather",
+      nodes: [kanji.url, verbs.url],
+      parent: null,
+    });
     await apply(
       "Set pace",
-      () => fireEvent.input(screen.getByRole("spinbutton", { name: "New cards per day" }), { target: { value: "3" } }),
+      () =>
+        fireEvent.input(screen.getByRole("spinbutton", { name: "New cards per day" }), {
+          target: { value: "3" },
+        }),
       "Set the pace of 2 decks.",
     );
     expect(useCases.setDecksPace).toHaveBeenCalledWith([kanji, verbs], { newCardsPerDay: 3 });
@@ -213,7 +296,9 @@ describe("DeckTableContainer", () => {
     expect(useCases.setDecksDirection).toHaveBeenCalledWith([kanji, verbs], "bidirectional");
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
     answer("Delete the selected decks", "Delete");
-    await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("Deleted 2 decks."));
+    await waitFor(() =>
+      expect(screen.getAllByRole("status")[0]).toHaveTextContent("Deleted 2 decks."),
+    );
     expect(useCases.removeDecks).toHaveBeenCalledWith([kanji, verbs]);
   });
 

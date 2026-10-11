@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
@@ -55,7 +59,13 @@ import { UnsavedEdits, useUnsavedEdits } from "./shell/unsavedEdits";
 import { useInstancePrefs } from "./shell/useInstancePrefs";
 import { useMedia } from "./shell/useMedia";
 import { viewOf, withView, type SavedView, type ViewTable } from "./shell/views";
-import { asideOf, contextTabsOf, currentOutlineKey, MEDIUM, type Aside } from "./shell/workspaceLayout";
+import {
+  asideOf,
+  contextTabsOf,
+  currentOutlineKey,
+  MEDIUM,
+  type Aside,
+} from "./shell/workspaceLayout";
 import { PublishState, useWorkspaceProblems } from "./WorkspaceProblems";
 import {
   instanceOfRoute,
@@ -101,7 +111,10 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const split = route?.screen === "card" && !medium;
   // After a move, the screen's heading takes the focus: beside a card, the
   // workbench stays where it is, and the card's takes it.
-  const mainScreen = useMemo(() => route, [route?.screen === "cards" || split ? `cards ${(route as CardRoute).deckUrl}` : route]);
+  const mainScreen = useMemo(
+    () => route,
+    [route?.screen === "cards" || split ? `cards ${(route as CardRoute).deckUrl}` : route],
+  );
   const screenRef = useScreenFocus(mainScreen, change);
   const detailRef = useScreenFocus(split ? route : null, change);
   const unsaved = useUnsavedEdits();
@@ -120,9 +133,13 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   });
   const instances = instancesQuery.data;
   const instanceUrl = route === null ? null : instanceOfRoute(route);
-  const activeInstance = instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
+  const activeInstance =
+    instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
   const deckUrl =
-    route?.screen === "cards" || route?.screen === "card" || route?.screen === "about" || route?.screen === "schedule"
+    route?.screen === "cards" ||
+    route?.screen === "card" ||
+    route?.screen === "about" ||
+    route?.screen === "schedule"
       ? route.deckUrl
       : route?.screen === "health"
         ? (route.deckUrl ?? null)
@@ -132,7 +149,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: deckUrl !== null && activeInstance !== null,
   });
-  const activeDeck = deckUrl === null ? null : (decksQuery.data?.find((deck) => deck.url === deckUrl) ?? null);
+  const activeDeck =
+    deckUrl === null ? null : (decksQuery.data?.find((deck) => deck.url === deckUrl) ?? null);
   const cardUrl = route?.screen === "card" ? route.cardUrl : null;
   // The same query as the workbench's and Solid Memo's, so an edit anywhere shows here.
   const cardsQuery = useQuery({
@@ -140,11 +158,15 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     queryFn: () => useCases.listCards(activeDeck!),
     enabled: cardUrl !== null && activeDeck !== null,
   });
-  const activeCard = cardUrl === null ? null : (cardsQuery.data?.find((card) => card.url === cardUrl) ?? null);
+  const activeCard =
+    cardUrl === null ? null : (cardsQuery.data?.find((card) => card.url === cardUrl) ?? null);
   // What the card's editor holds, for the editor shown next of the same card on the same tab (beside its deck's cards, or alone):
   // another card, or another tab and back (its edits saved or discarded on the way), starts afresh.
   const cardTab = route?.screen === "card" ? (route.tab ?? "content") : null;
-  const cardEdits = useMemo<{ current: CardEdits | null }>(() => ({ current: null }), [cardUrl, cardTab]);
+  const cardEdits = useMemo<{ current: CardEdits | null }>(
+    () => ({ current: null }),
+    [cardUrl, cardTab],
+  );
   const draftUrl = route !== null && isDraftRoute(route) ? route.draftUrl : null;
   // The draft's editors share this query (useDraftEditor): it is read once, and changed as they edit it.
   const draftQuery = useQuery({
@@ -157,12 +179,18 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const draftSubject = activeDraft === null ? null : subjectOf(activeDraft, route!);
   const mine = useInstancePrefs(activeInstance?.url ?? null);
   // The deck or the draft the route is about, as the sidebar lists those opened last.
-  const opened: WorkItem | null = deckUrl !== null ? { kind: "deck", url: deckUrl } : draftUrl !== null ? { kind: "draft", url: draftUrl } : null;
+  const opened: WorkItem | null =
+    deckUrl !== null
+      ? { kind: "deck", url: deckUrl }
+      : draftUrl !== null
+        ? { kind: "draft", url: draftUrl }
+        : null;
 
   useInstanceTheme(useCases, activeInstance?.url ?? null);
 
   useEffect(() => {
-    if (opened !== null && activeInstance !== null) mine.change((prefs) => ({ ...prefs, recent: openedNow(prefs.recent, opened) }));
+    if (opened !== null && activeInstance !== null)
+      mine.change((prefs) => ({ ...prefs, recent: openedNow(prefs.recent, opened) }));
   }, [opened?.url, activeInstance?.url]);
 
   // No route: the only instance's decks, else the picker. An instance the
@@ -170,7 +198,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   useEffect(() => {
     if (instances === undefined) return;
     if (route === null) {
-      replace(instances.length === 1 ? { screen: "home", instanceUrl: instances[0]!.url } : { screen: "instances" });
+      replace(
+        instances.length === 1
+          ? { screen: "home", instanceUrl: instances[0]!.url }
+          : { screen: "instances" },
+      );
     } else if (instanceUrl !== null && !instances.some((i) => i.url === instanceUrl)) {
       replace({ screen: "instances" });
     } else if (deckUrl !== null && decksQuery.data !== undefined && activeDeck === null) {
@@ -209,17 +241,28 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     (draftUrl !== null && (activeDraft === null || draftSubject === false)) ? (
     <Loading label={t("workspace.loadingInstances")} />
   ) : null;
-  const crumbs = waiting === null ? crumbsOf(route!, { deck: activeDeck, card: activeCard, draft: activeDraft }, { t, readerText }) : [];
+  const crumbs =
+    waiting === null
+      ? crumbsOf(
+          route!,
+          { deck: activeDeck, card: activeCard, draft: activeDraft },
+          { t, readerText },
+        )
+      : [];
   // The page the trail ends at: "Decks – Solid Memo Studio".
   useDocumentTitle(crumbs.slice(-1).map((crumb) => crumb.label));
   const tabs = waiting === null ? contextTabsOf(route!, activeDraft) : null;
-  const found = useWorkspaceProblems(useCases, waiting === null ? route : null, { deck: activeDeck, draft: activeDraft });
+  const found = useWorkspaceProblems(useCases, waiting === null ? route : null, {
+    deck: activeDeck,
+    draft: activeDraft,
+  });
   const checkCount = found.draft?.length ?? 0;
   const aside = waiting === null ? asideOf(route!, activeDraft) : null;
   /** The views saved of a table, and keeping them as they change. */
   const saved = (table: ViewTable) => ({
     savedViews: mine.prefs.views[table],
-    onSavedViews: (views: SavedView[]) => mine.change((prefs) => ({ ...prefs, views: { ...prefs.views, [table]: views } })),
+    onSavedViews: (views: SavedView[]) =>
+      mine.change((prefs) => ({ ...prefs, views: { ...prefs.views, [table]: views } })),
   });
 
   const draftLinks = (draftUrl: string): DraftLinks => ({
@@ -238,7 +281,12 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     const cardRoute = (card: Card): CardRoute =>
       route.screen === "card"
         ? { ...withoutField(route), cardUrl: card.url }
-        : { screen: "card", deckUrl: route.deckUrl, cardUrl: card.url, ...(route.query === undefined ? {} : { query: route.query }) };
+        : {
+            screen: "card",
+            deckUrl: route.deckUrl,
+            cardUrl: card.url,
+            ...(route.query === undefined ? {} : { query: route.query }),
+          };
     return (
       <CardWorkbenchContainer
         // Another deck's cards: a new page, its selection and its Undo gone. A card beside them keeps them.
@@ -255,11 +303,18 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         onOpen={(card) => unsaved.guard(() => navigate(cardRoute(card)))}
         // Moving from card to card beside them is no Back stop either.
         {...(route.screen === "card"
-          ? { current: route.cardUrl, onMove: (card: Card) => unsaved.guard(() => replace(atItsPage(cardRoute(card)))) }
+          ? {
+              current: route.cardUrl,
+              onMove: (card: Card) => unsaved.guard(() => replace(atItsPage(cardRoute(card)))),
+            }
           : {})}
         // Read already as a card opens beside them.
         onRows={setOrder}
-        healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
+        healthHref={studioRouteToHash({
+          screen: "health",
+          instanceUrl: activeInstance!.url,
+          deckUrl: route.deckUrl,
+        })}
       />
     );
   };
@@ -267,7 +322,10 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   /** A card's route beside its deck's cards, the list at the card's page there. */
   const atItsPage = (route: CardRoute): CardRoute => {
     const query = route.query ?? DEFAULT_CARD_QUERY;
-    return { ...route, query: { ...query, page: Math.floor(order.indexOf(route.cardUrl) / query.size) + 1 } };
+    return {
+      ...route,
+      query: { ...query, page: Math.floor(order.indexOf(route.cardUrl) / query.size) + 1 },
+    };
   };
 
   /**
@@ -296,8 +354,17 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         tabHref={(tab) => studioRouteToHash({ ...base, tab })}
         // Like the workbench's query, the tab is no Back stop.
         onTab={(tab) => replace({ ...base, tab })}
-        appHref={routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: route.cardUrl })}
-        healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
+        appHref={routeToHash({
+          screen: "card",
+          instanceUrl: activeInstance!.url,
+          deckUrl: route.deckUrl,
+          cardUrl: route.cardUrl,
+        })}
+        healthHref={studioRouteToHash({
+          screen: "health",
+          instanceUrl: activeInstance!.url,
+          deckUrl: route.deckUrl,
+        })}
         onRemoved={() => replace(workbenchOf(route))}
         {...(split ? { steps: { previous: step(-1), next: step(1) } } : {})}
         onUnsaved={unsaved.report}
@@ -320,9 +387,22 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
           />
         );
       case "peek":
-        return <DeckPeekContainer useCases={useCases} instance={activeInstance!} route={route} deckUrl={(route as HomeRoute).deckUrl ?? null} />;
+        return (
+          <DeckPeekContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            route={route}
+            deckUrl={(route as HomeRoute).deckUrl ?? null}
+          />
+        );
       case "plan":
-        return <LibraryPlanContainer useCases={useCases} instance={activeInstance!} deckUrl={libraryDeck} />;
+        return (
+          <LibraryPlanContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            deckUrl={libraryDeck}
+          />
+        );
     }
   };
 
@@ -347,20 +427,29 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             draftUrl={route.draftUrl}
             policy={route.policy ?? "pod"}
             links={{
-              policyHref: (policy) => studioRouteToHash({ screen: "check", draftUrl: route.draftUrl, policy }),
+              policyHref: (policy) =>
+                studioRouteToHash({ screen: "check", draftUrl: route.draftUrl, policy }),
               targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)),
             }}
           />
         );
       case "preview":
-        return <ListingPreviewContainer key={route.draftUrl} useCases={useCases} draftUrl={route.draftUrl} />;
+        return (
+          <ListingPreviewContainer
+            key={route.draftUrl}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+          />
+        );
       case "diff":
         return (
           <ReleaseDiffContainer
             key={route.draftUrl}
             useCases={useCases}
             draftUrl={route.draftUrl}
-            links={{ targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)) }}
+            links={{
+              targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)),
+            }}
           />
         );
       case "release":
@@ -372,8 +461,15 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             links={draftLinks(route.draftUrl)}
             publishLinks={{
               checkHref: studioRouteToHash({ screen: "check", draftUrl: route.draftUrl }),
-              libraryCheckHref: studioRouteToHash({ screen: "check", draftUrl: route.draftUrl, policy: "library" }),
-              healthHref: studioRouteToHash({ screen: "health", instanceUrl: instanceOfRoute(route)! }),
+              libraryCheckHref: studioRouteToHash({
+                screen: "check",
+                draftUrl: route.draftUrl,
+                policy: "library",
+              }),
+              healthHref: studioRouteToHash({
+                screen: "health",
+                instanceUrl: instanceOfRoute(route)!,
+              }),
             }}
             {...(route.field === undefined ? {} : { field: route.field })}
             onStarted={(created) => navigate({ screen: "draft", draftUrl: created.draft.url })}
@@ -390,11 +486,20 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             review={route.review === true}
             links={{
               courseHref: studioRouteToHash({ screen: "trial", draftUrl: route.draftUrl }),
-              chapterHref: (chapter) => studioRouteToHash({ screen: "trial", draftUrl: route.draftUrl, chapter }),
-              reviewHref: (chapter) => studioRouteToHash({ screen: "trial", draftUrl: route.draftUrl, chapter, review: true }),
+              chapterHref: (chapter) =>
+                studioRouteToHash({ screen: "trial", draftUrl: route.draftUrl, chapter }),
+              reviewHref: (chapter) =>
+                studioRouteToHash({
+                  screen: "trial",
+                  draftUrl: route.draftUrl,
+                  chapter,
+                  review: true,
+                }),
               targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)),
             }}
-            onReview={(chapter) => navigate({ screen: "trial", draftUrl: route.draftUrl, chapter, review: true })}
+            onReview={(chapter) =>
+              navigate({ screen: "trial", draftUrl: route.draftUrl, chapter, review: true })
+            }
             onCourse={() => navigate({ screen: "trial", draftUrl: route.draftUrl })}
             onJump={(chapter) => navigate({ screen: "trial", draftUrl: route.draftUrl, chapter })}
           />
@@ -478,10 +583,20 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             onCursor={(deck) => replace({ ...route, deckUrl: deck.url })}
             onOpen={(deck) => navigate({ screen: "about", deckUrl: deck.url })}
             appHref={decksHref(route.instanceUrl)}
-            healthHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, ...(deck === undefined ? {} : { deckUrl: deck.url }) })}
+            healthHref={(deck) =>
+              studioRouteToHash({
+                screen: "health",
+                instanceUrl: route.instanceUrl,
+                ...(deck === undefined ? {} : { deckUrl: deck.url }),
+              })
+            }
             libraryHref={studioRouteToHash({ screen: "library", instanceUrl: route.instanceUrl })}
             transferHref={(decks) =>
-              studioRouteToHash({ screen: "transfer", instanceUrl: route.instanceUrl, deckUrls: decks.map((deck) => deck.url) })
+              studioRouteToHash({
+                screen: "transfer",
+                instanceUrl: route.instanceUrl,
+                deckUrls: decks.map((deck) => deck.url),
+              })
             }
             deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
             cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
@@ -529,7 +644,13 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             deck={activeDeck}
             spotHref={(deck, spot) => studioRouteToHash(spotRoute(deck.url, spot))}
             aboutHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
-            deckHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, deckUrl: deck.url })}
+            deckHref={(deck) =>
+              studioRouteToHash({
+                screen: "health",
+                instanceUrl: route.instanceUrl,
+                deckUrl: deck.url,
+              })
+            }
           />
         );
       case "library":
@@ -552,8 +673,14 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             useCases={useCases}
             instance={activeInstance!}
             chosen={route.deckUrls ?? []}
-            // Like Home's view, which decks are ticked is no Back stop.
-            onChoose={(urls) => replace({ screen: "transfer", instanceUrl: route.instanceUrl, ...(urls.length === 0 ? {} : { deckUrls: urls }) })}
+            // Like Home's view, which decks are checked is no Back stop.
+            onChoose={(urls) =>
+              replace({
+                screen: "transfer",
+                instanceUrl: route.instanceUrl,
+                ...(urls.length === 0 ? {} : { deckUrls: urls }),
+              })
+            }
             cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
           />
@@ -578,7 +705,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             instance={activeInstance!}
             deck={activeDeck!}
             appHref={deckHref(activeInstance!.url, route.deckUrl)}
-            healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
+            healthHref={studioRouteToHash({
+              screen: "health",
+              instanceUrl: activeInstance!.url,
+              deckUrl: route.deckUrl,
+            })}
           />
         );
       case "cards":
@@ -589,11 +720,22 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             useCases={useCases}
             instance={activeInstance!}
             deck={activeDeck!}
-            cardHref={(card) => studioRouteToHash({ screen: "card", deckUrl: route.deckUrl, cardUrl: card.url, tab: "history" })}
+            cardHref={(card) =>
+              studioRouteToHash({
+                screen: "card",
+                deckUrl: route.deckUrl,
+                cardUrl: card.url,
+                tab: "history",
+              })
+            }
             leechesHref={studioRouteToHash({
               screen: "cards",
               deckUrl: route.deckUrl,
-              query: { ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } },
+              query: {
+                ...DEFAULT_CARD_QUERY,
+                state: "leech",
+                sort: { key: "lapses", descending: true },
+              },
             })}
           />
         );
@@ -610,7 +752,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         route={route}
         instances={instances ?? []}
         instance={activeInstance}
-        switcher={activeInstance !== null && <InstanceSwitcher instances={instances!} instance={activeInstance} />}
+        switcher={
+          activeInstance !== null && (
+            <InstanceSwitcher instances={instances!} instance={activeInstance} />
+          )
+        }
         sidebar={
           activeInstance === null ? null : (
             <StudioSidebar
@@ -619,7 +765,9 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
               route={route!}
               pinned={mine.prefs.pinned}
               recent={mine.prefs.recent}
-              onPin={(item) => mine.change((prefs) => ({ ...prefs, pinned: togglePin(prefs.pinned, item) }))}
+              onPin={(item) =>
+                mine.change((prefs) => ({ ...prefs, pinned: togglePin(prefs.pinned, item) }))
+              }
             />
           )
         }
@@ -634,7 +782,10 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
                     {inspector(route as CardRoute)}
                   </div>
                 ),
-                detail: { closeLabel: t("studio.card.close"), onClose: () => unsaved.guard(() => navigate(workbenchOf(route as CardRoute))) },
+                detail: {
+                  closeLabel: t("studio.card.close"),
+                  onClose: () => unsaved.guard(() => navigate(workbenchOf(route as CardRoute))),
+                },
               }
             : aside === null
               ? null
@@ -642,7 +793,14 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         }
         problems={found.problems}
         pinned={mine.prefs.pinned}
-        status={found.publish !== null && <PublishState readiness={found.publish} releaseHref={studioRouteToHash({ screen: "release", draftUrl: draftUrl! })} />}
+        status={
+          found.publish !== null && (
+            <PublishState
+              readiness={found.publish}
+              releaseHref={studioRouteToHash({ screen: "release", draftUrl: draftUrl! })}
+            />
+          )
+        }
         onGo={(to) => unsaved.guard(() => navigate(to))}
       >
         {children}
@@ -668,7 +826,9 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
           />
         )}
         <div ref={screenRef} class="screen">
-          <UnsavedEdits.Provider value={unsaved.report}>{waiting ?? screenFor(route!)}</UnsavedEdits.Provider>
+          <UnsavedEdits.Provider value={unsaved.report}>
+            {waiting ?? screenFor(route!)}
+          </UnsavedEdits.Provider>
         </div>
       </StudioShell>
     </AskFirst.Provider>
@@ -676,7 +836,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
 }
 
 /** What each aside is named, as its region. */
-const ASIDE_LABELS = { outline: "studio.draft.outline", peek: "studio.peek.label", plan: "studio.library.plan" } as const;
+const ASIDE_LABELS = {
+  outline: "studio.draft.outline",
+  peek: "studio.peek.label",
+  plan: "studio.library.plan",
+} as const;
 
 type HomeRoute = Extract<StudioRoute, { screen: "home" }>;
 

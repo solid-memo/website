@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * A guest's study, end to end, through the app's own use cases and Solid
  * adapters wired as in createAppUseCases (docs/guest-mode.md): the guest studies in
@@ -49,7 +53,9 @@ async function restamp(store: ResourceStore, subject: string, version: number): 
   const resource = await store.get(document);
   if (resource?.kind !== "rdf") throw new Error(`No document ${document}`);
   const stamp = `<${subject}> <${SM_NS}formatVersion> `;
-  const triples = resource.triples.map((line) => (line.startsWith(stamp) ? `${stamp}"${version}"^^<${XSD_INTEGER}> .` : line));
+  const triples = resource.triples.map((line) =>
+    line.startsWith(stamp) ? `${stamp}"${version}"^^<${XSD_INTEGER}> .` : line,
+  );
   expect(triples, subject).not.toEqual(resource.triples);
   await store.set(document, { ...resource, triples, etag: `"${crypto.randomUUID()}"` });
 }
@@ -60,7 +66,9 @@ async function untagSides(store: ResourceStore, subject: string): Promise<void> 
   const resource = await store.get(document);
   if (resource?.kind !== "rdf") throw new Error(`No document ${document}`);
   const sides = [`<${subject}> <${SM_NS}front> `, `<${subject}> <${SM_NS}back> `];
-  const triples = resource.triples.map((line) => (sides.some((side) => line.startsWith(side)) ? line.replace(/"@[a-z-]+ \.$/, '" .') : line));
+  const triples = resource.triples.map((line) =>
+    sides.some((side) => line.startsWith(side)) ? line.replace(/"@[a-z-]+ \.$/, '" .') : line,
+  );
   expect(triples, subject).not.toEqual(resource.triples);
   await store.set(document, { ...resource, triples, etag: `"${crypto.randomUUID()}"` });
 }
@@ -69,7 +77,11 @@ async function untagSides(store: ResourceStore, subject: string): Promise<void> 
 async function addTriples(store: ResourceStore, document: string, lines: string[]): Promise<void> {
   const resource = await store.get(document);
   if (resource?.kind !== "rdf") throw new Error(`No document ${document}`);
-  await store.set(document, { ...resource, triples: [...resource.triples, ...lines], etag: `"${crypto.randomUUID()}"` });
+  await store.set(document, {
+    ...resource,
+    triples: [...resource.triples, ...lines],
+    etag: `"${crypto.randomUUID()}"`,
+  });
 }
 
 async function app() {
@@ -88,7 +100,9 @@ async function app() {
     requests.push(input instanceof Request ? input.url : String(input));
     return aliceFetch(input, init);
   };
-  const writeFence = createWriteFence(routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: recorded }));
+  const writeFence = createWriteFence(
+    routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: recorded }),
+  );
   const podFetch = writeFence.fetch;
   const shapeValidator = createShaclShapeValidator({
     fetch: podFetch,
@@ -98,7 +112,10 @@ async function app() {
   const checkWrite = shapeValidator.checkSubjects;
   const ids = { now: () => new Date(), randomId: () => crypto.randomUUID() };
   const useCases = createUseCases({
-    sessionGateway: { restore: async () => null, discoverOidcIssuer: async () => Promise.reject(new Error("none")) } as never,
+    sessionGateway: {
+      restore: async () => null,
+      discoverOidcIssuer: async () => Promise.reject(new Error("none")),
+    } as never,
     deckLibrary: undefined as never,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway: createSolidStorageGateway({ fetch: podFetch }),
@@ -128,7 +145,9 @@ describe("a guest's study", () => {
     vi.unstubAllGlobals();
   });
 
-  it("is kept on the device, with nothing sent anywhere, until the guest logs in", { timeout: 30_000 }, async () => {
+  it("is kept on the device, with nothing sent anywhere, until the guest logs in", {
+    timeout: 30_000,
+  }, async () => {
     const { useCases, guestStore, requests } = await app();
     expect(await useCases.restoreSession()).toBeNull();
     expect(await useCases.startGuest("My study")).toEqual(GUEST_SESSION);
@@ -148,7 +167,9 @@ describe("a guest's study", () => {
     expect((await guestStore.urls()).length).toBeGreaterThan(5);
   });
 
-  it("moves into the pod the guest logs in to, as theirs, and leaves the device", { timeout: 30_000 }, async () => {
+  it("moves into the pod the guest logs in to, as theirs, and leaves the device", {
+    timeout: 30_000,
+  }, async () => {
     const { useCases, guestStore, aliceStore } = await app();
     await useCases.startGuest("My study");
     const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
@@ -163,7 +184,11 @@ describe("a guest's study", () => {
       registrationTarget: "private",
     });
 
-    expect(outcome).toEqual({ ok: true, instance: { url: TARGET, name: "My study" }, tidied: true });
+    expect(outcome).toEqual({
+      ok: true,
+      instance: { url: TARGET, name: "My study" },
+      tidied: true,
+    });
     expect(await useCases.listInstances(ALICE)).toEqual([{ url: TARGET, name: "My study" }]);
     const [moved] = await useCases.listDecks(TARGET);
     expect(moved!.url).toBe(`${TARGET}catalog.ttl#${deck.id}`);
@@ -175,46 +200,67 @@ describe("a guest's study", () => {
     expect((await useCases.validateInstance(TARGET)).conforms).toBe(true);
     const triples = await everyTriple(aliceStore);
     expect(triples.filter((line) => line.includes(GUEST_ORIGIN))).toEqual([]);
-    expect(triples).toContain(`<${TARGET}catalog.ttl#catalog> <http://purl.org/dc/terms/publisher> <${ALICE.webId}> .`);
+    expect(triples).toContain(
+      `<${TARGET}catalog.ttl#catalog> <http://purl.org/dc/terms/publisher> <${ALICE.webId}> .`,
+    );
     expect(triples).toContain(`<${ALICE.webId}> <http://xmlns.com/foaf/0.1/name> "Alice" .`);
     expect(await guestStore.urls()).toEqual([]);
     expect(await useCases.findGuestStudy()).toBeNull();
   });
 
-  it("moves a study that mixes formats 4 and 5, each subject checked against its own format and kept at it", { timeout: 30_000 }, async () => {
+  it("moves a study that mixes formats 4 and 5, each subject checked against its own format and kept at it", {
+    timeout: 30_000,
+  }, async () => {
     const { useCases, guestStore, aliceStore } = await app();
     await useCases.startGuest("My study");
     const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
     // A format-4 deck, as a format-4 app left it: a Swedish title with an
     // English stand-in, a card whose sides do not say their language and
     // one with a note saved the same in English and Swedish.
-    const old = await useCases.createDeck(guestInstance!.url, { en: "Huvudstäder", sv: "Huvudstäder" });
-    const unstated = await useCases.addCard(old, { front: { sv: "Sverige" }, back: { sv: "Stockholm" } });
+    const old = await useCases.createDeck(guestInstance!.url, {
+      en: "Huvudstäder",
+      sv: "Huvudstäder",
+    });
+    const unstated = await useCases.addCard(old, {
+      front: { sv: "Sverige" },
+      back: { sv: "Stockholm" },
+    });
     await untagSides(guestStore, unstated.url);
     const standIn = await useCases.addCard(old, {
       front: { sv: "Norge" },
       back: { sv: "Oslo" },
       backNote: { en: "Huvudstad sedan 1299.", sv: "Huvudstad sedan 1299." },
     });
-    for (const subject of [old.url, unstated.url, standIn.url]) await restamp(guestStore, subject, 4);
+    for (const subject of [old.url, unstated.url, standIn.url])
+      await restamp(guestStore, subject, 4);
     // A deck of the current formats beside it (deck 6, card 5), with a note in Finnish only: valid at 5, not at 4.
     const current = await useCases.createDeck(guestInstance!.url, { en: "Capitals" });
-    const finnish = await useCases.addCard(current, { front: { fi: "Suomi" }, back: { fi: "Helsinki" } });
-    await addTriples(guestStore, current.cardsDocumentUrl, [`<${finnish.url}> <${SM_NS}frontNote> "Pääkaupunki vuodesta 1812."@fi .`]);
+    const finnish = await useCases.addCard(current, {
+      front: { fi: "Suomi" },
+      back: { fi: "Helsinki" },
+    });
+    await addTriples(guestStore, current.cardsDocumentUrl, [
+      `<${finnish.url}> <${SM_NS}frontNote> "Pääkaupunki vuodesta 1812."@fi .`,
+    ]);
     // Both directions are held to: the Finnish note fails format 4, and a
     // format-4 subject fails format 5 on its stated version alone (each
     // shape has sh:hasValue on solid-memo:formatVersion), so a check that
     // held every subject to one format, the latest or 4, would not conform.
     expect((await useCases.checkInstance(guestInstance!.url)).conforms).toBe(true);
 
-    const outcome = await useCases.transferGuestStudy(ALICE, guestInstance!, { containerUrl: TARGET, registrationTarget: "private" });
+    const outcome = await useCases.transferGuestStudy(ALICE, guestInstance!, {
+      containerUrl: TARGET,
+      registrationTarget: "private",
+    });
 
     expect(outcome).toMatchObject({ ok: true, instance: { url: TARGET } });
     expect((await useCases.validateInstance(TARGET)).conforms).toBe(true);
     const moved = (url: string) => url.replace(guestInstance!.url, TARGET);
     const triples = await everyTriple(aliceStore);
-    const stated = (subject: string) => triples.find((line) => line.startsWith(`<${moved(subject)}> <${SM_NS}formatVersion> `));
-    for (const subject of [old.url, unstated.url, standIn.url]) expect(stated(subject), subject).toContain('"4"');
+    const stated = (subject: string) =>
+      triples.find((line) => line.startsWith(`<${moved(subject)}> <${SM_NS}formatVersion> `));
+    for (const subject of [old.url, unstated.url, standIn.url])
+      expect(stated(subject), subject).toContain('"4"');
     expect(stated(current.url)).toContain('"6"');
     expect(stated(finnish.url)).toContain('"5"');
     // The text is as the guest's pod had it: nothing tagged, nothing dropped.
@@ -233,19 +279,35 @@ describe("a guest's study", () => {
     expect(await useCases.planMigration(TARGET)).toMatchObject({ deckCount: 1, cardCount: 2 });
   });
 
-  it("is brought up to date in place, each document on its own, at its address, another app's triples kept", { timeout: 30_000 }, async () => {
+  it("is brought up to date in place, each document on its own, at its address, another app's triples kept", {
+    timeout: 30_000,
+  }, async () => {
     const { useCases, guestStore } = await app();
     await useCases.startGuest("My study");
     const [instance] = await useCases.listInstances(GUEST_SESSION);
     const deck = await useCases.createDeck(instance!.url, { en: "Capitals" });
-    const card = await useCases.addCard(deck, { front: { sv: "Sverige" }, back: { sv: "Stockholm" } });
-    await useCases.recordReview(instance!.url, deck, { card, direction: "front-to-back" }, 4, new Date("2026-10-09T10:00:00Z"));
+    const card = await useCases.addCard(deck, {
+      front: { sv: "Sverige" },
+      back: { sv: "Stockholm" },
+    });
+    await useCases.recordReview(
+      instance!.url,
+      deck,
+      { card, direction: "front-to-back" },
+      4,
+      new Date("2026-10-09T10:00:00Z"),
+    );
     // As a format-4 app left them: the deck's entry and its card, and another app's triple beside the card.
     await restamp(guestStore, deck.url, 5);
     await restamp(guestStore, card.url, 4);
-    await addTriples(guestStore, deck.cardsDocumentUrl, [`<${card.url}> <https://example.org/seen> "yes" .`]);
+    await addTriples(guestStore, deck.cardsDocumentUrl, [
+      `<${card.url}> <https://example.org/seen> "yes" .`,
+    ]);
     const urls = await guestStore.urls();
-    expect(await useCases.planMigration(instance!.url)).toMatchObject({ deckCount: 1, cardCount: 1 });
+    expect(await useCases.planMigration(instance!.url)).toMatchObject({
+      deckCount: 1,
+      cardCount: 1,
+    });
 
     const outcome = await useCases.updateInstance(GUEST_SESSION, instance!);
 
@@ -256,26 +318,44 @@ describe("a guest's study", () => {
       ],
       failed: [],
     });
-    expect(await useCases.planMigration(instance!.url)).toMatchObject({ deckCount: 0, cardCount: 0 });
+    expect(await useCases.planMigration(instance!.url)).toMatchObject({
+      deckCount: 0,
+      cardCount: 0,
+    });
     expect((await useCases.validateInstance(instance!.url)).conforms).toBe(true);
-    expect(await useCases.listDecks(instance!.url)).toMatchObject([{ url: deck.url, cardsDocumentUrl: deck.cardsDocumentUrl }]);
-    expect(await everyTriple(guestStore)).toContain(`<${card.url}> <https://example.org/seen> "yes" .`);
+    expect(await useCases.listDecks(instance!.url)).toMatchObject([
+      { url: deck.url, cardsDocumentUrl: deck.cardsDocumentUrl },
+    ]);
+    expect(await everyTriple(guestStore)).toContain(
+      `<${card.url}> <https://example.org/seen> "yes" .`,
+    );
     // Nothing is kept beside the documents, no copy or backup; the answer log and the digest are written as ever.
-    const added = (await guestStore.urls()).filter((url) => !urls.includes(url) && !/\/history\/|\/digest\.ttl$/.test(url));
+    const added = (await guestStore.urls()).filter(
+      (url) => !urls.includes(url) && !/\/history\/|\/digest\.ttl$/.test(url),
+    );
     expect(added).toEqual([]);
   });
 
-  it("refuses a write over a subject a newer version of the app wrote", { timeout: 30_000 }, async () => {
+  it("refuses a write over a subject a newer version of the app wrote", {
+    timeout: 30_000,
+  }, async () => {
     const { useCases, guestStore } = await app();
     await useCases.startGuest("My study");
     const [instance] = await useCases.listInstances(GUEST_SESSION);
     const deck = await useCases.createDeck(instance!.url, { en: "Capitals" });
-    const card = await useCases.addCard(deck, { front: { sv: "Sverige" }, back: { sv: "Stockholm" } });
+    const card = await useCases.addCard(deck, {
+      front: { sv: "Sverige" },
+      back: { sv: "Stockholm" },
+    });
     await restamp(guestStore, card.url, 99);
     const [read] = await useCases.listCards(deck);
-    await expect(useCases.updateCard(deck, read!, { front: { sv: "Sverige" }, back: { sv: "Oslo" } })).rejects.toMatchObject({
+    await expect(
+      useCases.updateCard(deck, read!, { front: { sv: "Sverige" }, back: { sv: "Oslo" } }),
+    ).rejects.toMatchObject({
       code: "writtenByNewerApp",
     });
-    expect(await everyTriple(guestStore)).toContain(`<${card.url}> <${SM_NS}back> "Stockholm"@sv .`);
+    expect(await everyTriple(guestStore)).toContain(
+      `<${card.url}> <${SM_NS}back> "Stockholm"@sv .`,
+    );
   });
 });

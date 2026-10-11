@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { ReleaseField } from "@solid-memo/domain/release/releaseCheck";
@@ -38,7 +42,12 @@ export function ReleaseMetadataContainer({
         {...(field === undefined ? {} : { field })}
         onEdit={editor.edit}
       />
-      <ReleasePublishContainer useCases={useCases} editor={editor} links={publishLinks} onStarted={onStarted} />
+      <ReleasePublishContainer
+        useCases={useCases}
+        editor={editor}
+        links={publishLinks}
+        onStarted={onStarted}
+      />
     </>
   );
 }

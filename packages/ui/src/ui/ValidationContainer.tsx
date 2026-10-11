@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -31,10 +35,7 @@ export function ValidationContainer({
     <>
       <h2>{t("validation.heading", { name: instance.name })}</h2>
       <p>
-        <button
-          onClick={() => reportQuery.refetch()}
-          disabled={reportQuery.isFetching}
-        >
+        <button onClick={() => reportQuery.refetch()} disabled={reportQuery.isFetching}>
           {reportQuery.isFetching ? t("validation.validating") : t("validation.validateAgain")}
         </button>
       </p>

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { afterEach, describe, expect, it } from "vitest";
 import { seedRandom } from "./seededRandom.ts";
 
@@ -29,6 +33,8 @@ describe("seedRandom", () => {
   });
 
   it("refers to nothing outside itself, as a script added to a page must", () => {
-    expect(() => new Function(`(${seedRandom.toString()})(1); return Math.random();`)()).not.toThrow();
+    expect(() =>
+      new Function(`(${seedRandom.toString()})(1); return Math.random();`)(),
+    ).not.toThrow();
   });
 });

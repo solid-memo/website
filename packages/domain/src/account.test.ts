@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { profileNameOf } from "./account";
 import type { WebIdDocument } from "./webIdDocument";
@@ -19,16 +23,10 @@ function profile(
 describe("profileNameOf", () => {
   it("takes the profile's foaf:name, plain or language-tagged", () => {
     expect(
-      profileNameOf(
-        profile([{ type: "literal", value: "Alice", dataType: XSD_STRING }]),
-        WEB_ID,
-      ),
+      profileNameOf(profile([{ type: "literal", value: "Alice", dataType: XSD_STRING }]), WEB_ID),
     ).toBe("Alice");
     expect(
-      profileNameOf(
-        profile([{ type: "langString", value: " Alice ", language: "en" }]),
-        WEB_ID,
-      ),
+      profileNameOf(profile([{ type: "langString", value: " Alice ", language: "en" }]), WEB_ID),
     ).toBe("Alice");
   });
 

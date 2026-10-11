@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { StorageSource } from "@solid-memo/domain/storage";
 import { hashParams as params, parsePage, useHashRouter, type RouteChange } from "./routerCore";
 
@@ -25,18 +29,18 @@ export type RouteRef =
   | { screen: "libraryDeck"; instanceUrl: string; libraryDeckUrl: string }
   /** A library deck's cards, read-only; paged like the Browser. */
   | {
-    screen: "libraryBrowser";
-    instanceUrl: string;
-    libraryDeckUrl: string;
-    page?: number;
-  }
+      screen: "libraryBrowser";
+      instanceUrl: string;
+      libraryDeckUrl: string;
+      page?: number;
+    }
   /** One card of a library deck, read-only; `cardId` is its fragment id. */
   | {
-    screen: "libraryCard";
-    instanceUrl: string;
-    libraryDeckUrl: string;
-    cardId: string;
-  }
+      screen: "libraryCard";
+      instanceUrl: string;
+      libraryDeckUrl: string;
+      cardId: string;
+    }
   /** A library deck's cards shown at random, for a try before import;
       nothing is recorded. */
   | { screen: "libraryPreview"; instanceUrl: string; libraryDeckUrl: string }
@@ -51,12 +55,12 @@ export type RouteRef =
   /** `page` is 1-based; absent means the first page. `languages` narrows
       the list to the cards whose language is yet to settle; absent lists all. */
   | {
-    screen: "browser";
-    instanceUrl: string;
-    deckUrl: string;
-    page?: number;
-    languages?: BrowserLanguageFilter;
-  }
+      screen: "browser";
+      instanceUrl: string;
+      deckUrl: string;
+      page?: number;
+      languages?: BrowserLanguageFilter;
+    }
   | { screen: "cardCreator"; instanceUrl: string; deckUrl: string }
   | { screen: "card"; instanceUrl: string; deckUrl: string; cardUrl: string }
   /** A study session over the deck's due and new prompts. */
@@ -111,9 +115,7 @@ export function routeToHash(ref: RouteRef): string {
       return `#/library-browse${params({
         instance: ref.instanceUrl,
         deck: ref.libraryDeckUrl,
-        ...(ref.page !== undefined && ref.page > 1
-          ? { page: String(ref.page) }
-          : {}),
+        ...(ref.page !== undefined && ref.page > 1 ? { page: String(ref.page) } : {}),
       })}`;
     case "libraryCard":
       return `#/library-card${params({
@@ -141,9 +143,7 @@ export function routeToHash(ref: RouteRef): string {
         instance: ref.instanceUrl,
         deck: ref.deckUrl,
         ...(ref.languages === undefined ? {} : { languages: ref.languages }),
-        ...(ref.page !== undefined && ref.page > 1
-          ? { page: String(ref.page) }
-          : {}),
+        ...(ref.page !== undefined && ref.page > 1 ? { page: String(ref.page) } : {}),
       })}`;
     case "cardCreator":
       return `#/new-card${params({
@@ -216,18 +216,12 @@ export function importUrlHref(instanceUrl: string): string {
  * Hash URL of a library deck's page: what its name links to in the
  * library list, where it is read about and imported on its own.
  */
-export function libraryDeckHref(
-  instanceUrl: string,
-  libraryDeckUrl: string,
-): string {
+export function libraryDeckHref(instanceUrl: string, libraryDeckUrl: string): string {
   return routeToHash({ screen: "libraryDeck", instanceUrl, libraryDeckUrl });
 }
 
 /** Hash URL of a library deck's preview: what its Preview button opens. */
-export function libraryPreviewHref(
-  instanceUrl: string,
-  libraryDeckUrl: string,
-): string {
+export function libraryPreviewHref(instanceUrl: string, libraryDeckUrl: string): string {
   return routeToHash({ screen: "libraryPreview", instanceUrl, libraryDeckUrl });
 }
 
@@ -290,9 +284,7 @@ export function parseHash(hash: string): RouteRef | null {
     case "/decks":
       return instanceUrl === null ? null : { screen: "home", instanceUrl };
     case "/new-deck":
-      return instanceUrl === null
-        ? null
-        : { screen: "deckCreator", instanceUrl };
+      return instanceUrl === null ? null : { screen: "deckCreator", instanceUrl };
     case "/library":
       return instanceUrl === null ? null : { screen: "library", instanceUrl };
     case "/library-deck":
@@ -322,7 +314,9 @@ export function parseHash(hash: string): RouteRef | null {
     case "/import-url": {
       if (instanceUrl === null) return null;
       const url = query.get("url");
-      return url === null ? { screen: "importUrl", instanceUrl } : { screen: "importUrl", instanceUrl, url };
+      return url === null
+        ? { screen: "importUrl", instanceUrl }
+        : { screen: "importUrl", instanceUrl, url };
     }
     case "/deck":
       return instanceUrl === null || deckUrl === null
@@ -342,7 +336,9 @@ export function parseHash(hash: string): RouteRef | null {
         instanceUrl,
         deckUrl,
         ...(page === null ? {} : { page }),
-        ...(languages !== null && BROWSER_LANGUAGE_FILTERS.includes(languages) ? { languages } : {}),
+        ...(languages !== null && BROWSER_LANGUAGE_FILTERS.includes(languages)
+          ? { languages }
+          : {}),
       };
     }
     case "/new-card":
@@ -371,9 +367,7 @@ export function parseHash(hash: string): RouteRef | null {
       return { screen, instanceUrl, deckUrl, chapterUrl };
     }
     case "/preferences":
-      return instanceUrl === null
-        ? null
-        : { screen: "preferences", instanceUrl };
+      return instanceUrl === null ? null : { screen: "preferences", instanceUrl };
     case "/statistics":
       return instanceUrl === null ? null : { screen: "statistics", instanceUrl };
     case "/validate":

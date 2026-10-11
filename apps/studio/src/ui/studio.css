@@ -1,9 +1,15 @@
 /*
+ * SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+/*
  * Solid Memo Studio's own look (docs/studio.md, Layout), over the site's
  * style.css. It ships with the Studio's chunk, and every rule holds only
  * under :root[data-surface="studio"], which the Studio's shell sets while
  * it is shown: Solid Memo shares the page, and keeps its own look. Its
- * colours are style.css's tokens, so the theme and an instance's colours
+ * colors are style.css's tokens, so the theme and an instance's colors
  * carry over.
  */
 
@@ -361,7 +367,7 @@
   min-width: 0;
 }
 
-:where(:root[data-surface="studio"]) .draft-outline .outline-step-text>.hint {
+:where(:root[data-surface="studio"]) .draft-outline .outline-step-text > .hint {
   padding-left: 0.4rem;
   overflow-wrap: anywhere;
 }
@@ -687,7 +693,8 @@
   animation: none;
 }
 
-:root[data-surface="studio"] :is(.breadcrumbs, .instance-list li, .deck-list li, .card-table tbody tr) {
+:root[data-surface="studio"]
+  :is(.breadcrumbs, .instance-list li, .deck-list li, .card-table tbody tr) {
   animation: none;
 }
 
@@ -697,7 +704,13 @@
 }
 
 /* Controls as tall as the density says; a sort button, a switch and a picture keep their own size. */
-:root[data-surface="studio"] main :is(button, a.button, select, input:not([type="radio"], [type="checkbox"])):not(.sort, .switch, .picture-zoom-button),
+:root[data-surface="studio"]
+  main
+  :is(button, a.button, select, input:not([type="radio"], [type="checkbox"])):not(
+    .sort,
+    .switch,
+    .picture-zoom-button
+  ),
 :root[data-surface="studio"] :is(.masthead, .studio-status-bar) button {
   min-height: var(--s-control-h);
   padding: 0.15rem 0.6rem;
@@ -761,8 +774,8 @@
 /*
  * A DataTable (shell/DataTable.tsx): its first column (the checkbox that
  * selects a row, then the row's name) stays in sight as the main content
- * scrolls sideways, on the table's own colour. The cursor's row has a
- * bar at its start and the hover's colour; a row selected, the primary's
+ * scrolls sideways, on the table's own color. The cursor's row has a
+ * bar at its start and the hover's color; a row selected, the primary's
  * soft tint; the row shown beside the table, both bar and tint.
  */
 :root[data-surface="studio"] main .studio-data-table {
@@ -792,9 +805,14 @@
   z-index: 2;
 }
 
-/* Below the cursor's and the selection's colours, which cover the first column too. */
+/* Below the cursor's and the selection's colors, which cover the first column too. */
 :root[data-surface="studio"] main .studio-data-table tbody tr > :where(:first-child),
-:root[data-surface="studio"] main .studio-data-table:where(.selectable) tbody tr > :where(:nth-child(2)) {
+:root[data-surface="studio"]
+  main
+  .studio-data-table:where(.selectable)
+  tbody
+  tr
+  > :where(:nth-child(2)) {
   background: var(--surface);
 }
 
@@ -806,7 +824,12 @@
   background: var(--primary-soft);
 }
 
-:root[data-surface="studio"] main .studio-data-table tbody tr:is(.cursor, [aria-current]) > :first-child {
+:root[data-surface="studio"]
+  main
+  .studio-data-table
+  tbody
+  tr:is(.cursor, [aria-current])
+  > :first-child {
   box-shadow: inset 3px 0 0 var(--primary);
 }
 
@@ -1600,7 +1623,10 @@
   cursor: text;
 }
 
-:root[data-surface="studio"] main .studio-data-table button.studio-cell-edit:is(:hover, :focus-visible) {
+:root[data-surface="studio"]
+  main
+  .studio-data-table
+  button.studio-cell-edit:is(:hover, :focus-visible) {
   border-color: var(--border-strong);
 }
 
@@ -1619,7 +1645,7 @@
   min-width: 0;
 }
 
-/* Whether the draft can be published, in the status bar: a link in the bar's colour, framed while problems keep it from it. */
+/* Whether the draft can be published, in the status bar: a link in the bar's color, framed while problems keep it from it. */
 :root[data-surface="studio"] .studio-status-bar a {
   color: inherit;
 }

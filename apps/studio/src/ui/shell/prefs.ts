@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { ASIDE_WIDTH, clampSize, DETAIL_WIDTH, DOCK_HEIGHT, type PaneSize } from "./splitter";
 import { VIEW_TABLES, type SavedView, type ViewTable } from "./views";
 
@@ -55,11 +59,22 @@ export function studioPrefs(storage: () => Storage = () => globalThis.localStora
   } catch {
     return DEFAULT_PREFS;
   }
-  const { density, sidebar, aside, asideWidth, detailWidth, dock, dockHeight, hiddenColumns, characterKeys } =
-    typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
-  const shown = (value: unknown, fallback: boolean) => (typeof value === "boolean" ? value : fallback);
+  const {
+    density,
+    sidebar,
+    aside,
+    asideWidth,
+    detailWidth,
+    dock,
+    dockHeight,
+    hiddenColumns,
+    characterKeys,
+  } = typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
+  const shown = (value: unknown, fallback: boolean) =>
+    typeof value === "boolean" ? value : fallback;
   // A size out of its bounds is brought within them: the bounds may have changed since.
-  const sized = (value: unknown, size: PaneSize) => (typeof value === "number" && Number.isFinite(value) ? clampSize(value, size) : size.initial);
+  const sized = (value: unknown, size: PaneSize) =>
+    typeof value === "number" && Number.isFinite(value) ? clampSize(value, size) : size.initial;
   return {
     density: DENSITIES.includes(density as Density) ? (density as Density) : DEFAULT_PREFS.density,
     sidebar: shown(sidebar, DEFAULT_PREFS.sidebar),
@@ -78,13 +93,18 @@ function columnsHidden(value: unknown): Record<string, string[]> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
   return Object.fromEntries(
     Object.entries(value).flatMap(([table, keys]) =>
-      Array.isArray(keys) ? [[table, keys.filter((key): key is string => typeof key === "string")]] : [],
+      Array.isArray(keys)
+        ? [[table, keys.filter((key): key is string => typeof key === "string")]]
+        : [],
     ),
   );
 }
 
 /** Notes the Studio's layout on this device. */
-export function rememberPrefs(prefs: StudioPrefs, storage: () => Storage = () => globalThis.localStorage): void {
+export function rememberPrefs(
+  prefs: StudioPrefs,
+  storage: () => Storage = () => globalThis.localStorage,
+): void {
   try {
     storage().setItem(PREFS_KEY, JSON.stringify(prefs));
   } catch {
@@ -110,12 +130,20 @@ export function recentCommands(storage: () => Storage = () => globalThis.localSt
   } catch {
     return [];
   }
-  return Array.isArray(stored) ? stored.filter((id): id is string => typeof id === "string").slice(0, RECENT_LIMIT) : [];
+  return Array.isArray(stored)
+    ? stored.filter((id): id is string => typeof id === "string").slice(0, RECENT_LIMIT)
+    : [];
 }
 
 /** Notes an entry of the palette as the one used last. */
-export function rememberCommand(id: string, storage: () => Storage = () => globalThis.localStorage): void {
-  const recent = [id, ...recentCommands(storage).filter((each) => each !== id)].slice(0, RECENT_LIMIT);
+export function rememberCommand(
+  id: string,
+  storage: () => Storage = () => globalThis.localStorage,
+): void {
+  const recent = [id, ...recentCommands(storage).filter((each) => each !== id)].slice(
+    0,
+    RECENT_LIMIT,
+  );
   try {
     storage().setItem(RECENT_KEY, JSON.stringify(recent));
   } catch {
@@ -140,7 +168,11 @@ export interface InstancePrefs {
   recent: readonly WorkItem[];
 }
 
-export const NO_INSTANCE_PREFS: InstancePrefs = { views: { home: [], cards: [] }, pinned: [], recent: [] };
+export const NO_INSTANCE_PREFS: InstancePrefs = {
+  views: { home: [], cards: [] },
+  pinned: [],
+  recent: [],
+};
 
 /** How many of the decks and drafts opened last the device keeps for an instance. */
 export const RECENT_ITEMS = 5;
@@ -151,7 +183,9 @@ const INSTANCE_KEY = "solid-memo:studioInstances.v1";
 function storedInstances(storage: () => Storage): Record<string, unknown> {
   try {
     const stored: unknown = JSON.parse(storage().getItem(INSTANCE_KEY) ?? "{}");
-    return typeof stored === "object" && stored !== null && !Array.isArray(stored) ? (stored as Record<string, unknown>) : {};
+    return typeof stored === "object" && stored !== null && !Array.isArray(stored)
+      ? (stored as Record<string, unknown>)
+      : {};
   } catch {
     return {};
   }
@@ -163,12 +197,19 @@ function storedInstances(storage: () => Storage): Record<string, unknown> {
  * or holds something else gives none, each part on its own, and a view
  * or an item that is not one is left out.
  */
-export function instancePrefs(instanceUrl: string, storage: () => Storage = () => globalThis.localStorage): InstancePrefs {
+export function instancePrefs(
+  instanceUrl: string,
+  storage: () => Storage = () => globalThis.localStorage,
+): InstancePrefs {
   const stored = storedInstances(storage)[instanceUrl];
-  const { views, pinned, recent } = typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
-  const byTable = typeof views === "object" && views !== null ? (views as Record<string, unknown>) : {};
+  const { views, pinned, recent } =
+    typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
+  const byTable =
+    typeof views === "object" && views !== null ? (views as Record<string, unknown>) : {};
   return {
-    views: Object.fromEntries(VIEW_TABLES.map((table) => [table, savedViews(byTable[table])])) as Record<ViewTable, SavedView[]>,
+    views: Object.fromEntries(
+      VIEW_TABLES.map((table) => [table, savedViews(byTable[table])]),
+    ) as Record<ViewTable, SavedView[]>,
     pinned: workItems(pinned),
     recent: workItems(recent).slice(0, RECENT_ITEMS),
   };
@@ -177,26 +218,41 @@ export function instancePrefs(instanceUrl: string, storage: () => Storage = () =
 /** The views stored, those that are: a name and a query's parameters, as text. */
 function savedViews(value: unknown): SavedView[] {
   return listOf(value).flatMap((view) =>
-    typeof view.name === "string" && view.name !== "" && typeof view.params === "string" ? [{ name: view.name, params: view.params }] : [],
+    typeof view.name === "string" && view.name !== "" && typeof view.params === "string"
+      ? [{ name: view.name, params: view.params }]
+      : [],
   );
 }
 
 /** The items stored, those that are: a deck's or a draft's URL. */
 function workItems(value: unknown): WorkItem[] {
   return listOf(value).flatMap((item) =>
-    (item.kind === "deck" || item.kind === "draft") && typeof item.url === "string" ? [{ kind: item.kind, url: item.url }] : [],
+    (item.kind === "deck" || item.kind === "draft") && typeof item.url === "string"
+      ? [{ kind: item.kind, url: item.url }]
+      : [],
   );
 }
 
 /** The objects of a list stored; none of anything else. */
 function listOf(value: unknown): Record<string, unknown>[] {
-  return Array.isArray(value) ? value.filter((each): each is Record<string, unknown> => typeof each === "object" && each !== null) : [];
+  return Array.isArray(value)
+    ? value.filter(
+        (each): each is Record<string, unknown> => typeof each === "object" && each !== null,
+      )
+    : [];
 }
 
 /** Notes what the device keeps of an instance, the others' kept as they are. */
-export function rememberInstancePrefs(instanceUrl: string, prefs: InstancePrefs, storage: () => Storage = () => globalThis.localStorage): void {
+export function rememberInstancePrefs(
+  instanceUrl: string,
+  prefs: InstancePrefs,
+  storage: () => Storage = () => globalThis.localStorage,
+): void {
   try {
-    storage().setItem(INSTANCE_KEY, JSON.stringify({ ...storedInstances(storage), [instanceUrl]: prefs }));
+    storage().setItem(
+      INSTANCE_KEY,
+      JSON.stringify({ ...storedInstances(storage), [instanceUrl]: prefs }),
+    );
   } catch {
     // Without storage the views, the pins and the decks opened last go with the page; nothing else depends on them.
   }
@@ -209,7 +265,9 @@ export function sameItem(a: WorkItem, b: WorkItem): boolean {
 
 /** The items pinned with one pinned at the end, or, pinned already, no longer. */
 export function togglePin(pinned: readonly WorkItem[], item: WorkItem): WorkItem[] {
-  return pinned.some((each) => sameItem(each, item)) ? pinned.filter((each) => !sameItem(each, item)) : [...pinned, item];
+  return pinned.some((each) => sameItem(each, item))
+    ? pinned.filter((each) => !sameItem(each, item))
+    : [...pinned, item];
 }
 
 /** The items opened last with one opened now: first, once, as many as the device keeps. */

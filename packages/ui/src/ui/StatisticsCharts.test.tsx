@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import type { DayActivity, MonthRetention } from "@solid-memo/domain/statistics";
@@ -55,10 +59,14 @@ describe("ActivityCalendar", () => {
     expect(container.querySelector('[data-day="2026-09-14"]')).toHaveClass("level-4");
     expect(container.querySelector('[data-day="2026-09-20"]')).toHaveClass("level-1");
     expect(container.querySelector('[data-day="2026-09-15"]')).toHaveClass("level-0");
-    const inspector = screen.getByText("Point at a day to see what it held, or open the table below.");
+    const inspector = screen.getByText(
+      "Point at a day to see what it held, or open the table below.",
+    );
     expect(inspector).not.toHaveAttribute("aria-live");
     fireEvent.pointerEnter(container.querySelector('[data-day="2026-09-14"]')!);
-    expect(screen.getByText("September 14, 2026: 40 answers, 10 new, 4 forgotten.")).toBeInTheDocument();
+    expect(
+      screen.getByText("September 14, 2026: 40 answers, 10 new, 4 forgotten."),
+    ).toBeInTheDocument();
     expect(container.querySelector('[data-day="2026-09-14"]')).toHaveClass("pointed");
     fireEvent.click(container.querySelector('[data-day="2026-09-15"]')!);
     expect(screen.getByText("September 15, 2026: nothing studied.")).toBeInTheDocument();
@@ -71,8 +79,12 @@ describe("ActivityCalendar", () => {
     const grid = container.querySelector<HTMLElement>(".calendar-grid")!;
     expect(grid.style.getPropertyValue("--weeks")).toBe("52");
     expect(container.querySelectorAll(".calendar-grid .calendar-day")).toHaveLength(51 * 7 + 1);
-    expect(container.querySelector<HTMLElement>('[data-day="2026-09-21"]')!.style.gridColumn).toMatch(/^52/);
-    expect(container.querySelector<HTMLElement>('[data-day="2026-09-14"]')!.style.gridColumn).toMatch(/^51/);
+    expect(
+      container.querySelector<HTMLElement>('[data-day="2026-09-21"]')!.style.gridColumn,
+    ).toMatch(/^52/);
+    expect(
+      container.querySelector<HTMLElement>('[data-day="2026-09-14"]')!.style.gridColumn,
+    ).toMatch(/^51/);
   });
 });
 
@@ -82,7 +94,9 @@ describe("DayBars", () => {
     expect(container.querySelectorAll("g[data-bar]")).toHaveLength(7);
     expect(container.querySelectorAll("rect.bar")).toHaveLength(2);
     fireEvent.pointerEnter(container.querySelector('g[data-bar="2026-09-21"]')!);
-    expect(screen.getByText("September 21, 2026: 1 answer, 1 new, 0 forgotten.")).toBeInTheDocument();
+    expect(
+      screen.getByText("September 21, 2026: 1 answer, 1 new, 0 forgotten."),
+    ).toBeInTheDocument();
     expect(container.querySelector('g[data-bar="2026-09-21"] rect.bar')).toHaveClass("pointed");
     fireEvent.click(container.querySelector('g[data-bar="2026-09-19"]')!);
     expect(screen.getByText("September 19, 2026: nothing studied.")).toBeInTheDocument();
@@ -99,12 +113,18 @@ describe("ForecastBars", () => {
     ];
     const { container } = render(<ForecastBars forecast={forecast} />);
     expect(screen.getByText("Reviews due, the next 3 days")).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /Reviews due on each of the next 3 days/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: /Reviews due on each of the next 3 days/ }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/without your daily review limit/)).toBeInTheDocument();
     expect(container.querySelectorAll("rect.bar")).toHaveLength(2);
-    expect(screen.getByText("Point at a day to see what falls due, or open the table below.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Point at a day to see what falls due, or open the table below."),
+    ).toBeInTheDocument();
     fireEvent.pointerEnter(container.querySelector('g[data-bar="2026-09-21"]')!);
-    expect(screen.getByText("September 21, 2026, today: 5 reviews due, overdue ones included.")).toBeInTheDocument();
+    expect(
+      screen.getByText("September 21, 2026, today: 5 reviews due, overdue ones included."),
+    ).toBeInTheDocument();
     fireEvent.click(container.querySelector('g[data-bar="2026-09-23"]')!);
     expect(screen.getByText("September 23, 2026: 1 review due.")).toBeInTheDocument();
     expect(screen.getAllByRole("row").map((row) => row.textContent)).toEqual([
@@ -139,7 +159,9 @@ describe("IntroducedChart", () => {
     expect(container.querySelectorAll("path.line")).toHaveLength(1);
     expect(container.querySelector(".line-legend")).toBeNull();
     expect(container.querySelector(".line-axis")).toHaveTextContent("110");
-    expect(container.querySelector(".line-keys")).toHaveTextContent("September 14, 2026September 22, 2026");
+    expect(container.querySelector(".line-keys")).toHaveTextContent(
+      "September 14, 2026September 22, 2026",
+    );
     fireEvent.pointerEnter(container.querySelector('[data-point="2026-09-17"]')!);
     expect(screen.getByText("September 17, 2026: 10 introduced in all.")).toBeInTheDocument();
     expect(container.querySelector(".crosshair")).not.toBeNull();
@@ -157,7 +179,9 @@ describe("IntroducedChart", () => {
   it("runs on past today to answers a later day boundary left after it", () => {
     const { container } = render(<IntroducedChart days={days} today="2026-09-20" />);
     expect(container.querySelectorAll("[data-point]")).toHaveLength(8);
-    expect(container.querySelector(".line-keys")).toHaveTextContent("September 14, 2026September 21, 2026");
+    expect(container.querySelector(".line-keys")).toHaveTextContent(
+      "September 14, 2026September 21, 2026",
+    );
     fireEvent.click(container.querySelector('[data-point="2026-09-21"]')!);
     expect(screen.getByText("September 21, 2026: 11 introduced in all.")).toBeInTheDocument();
   });
@@ -181,14 +205,20 @@ describe("RecallChart", () => {
     // Young: June and July joined; mature: July alone, September alone.
     expect(container.querySelectorAll("path.line-young")).toHaveLength(1);
     expect(container.querySelectorAll("path.line-mature.lone")).toHaveLength(2);
-    expect(screen.getByText("Point at a month to see how well it was remembered, or open the table below.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Point at a month to see how well it was remembered, or open the table below.",
+      ),
+    ).toBeInTheDocument();
     fireEvent.pointerEnter(container.querySelector('[data-point="2026-07"]')!);
     expect(
       screen.getByText("July 2026: young cards 90% of 10 reviews, mature cards 100% of 1 review."),
     ).toBeInTheDocument();
     expect(container.querySelectorAll("path.line-point")).toHaveLength(2);
     fireEvent.click(container.querySelector('[data-point="2026-08"]')!);
-    expect(screen.getByText("August 2026: young cards no reviews, mature cards no reviews.")).toBeInTheDocument();
+    expect(
+      screen.getByText("August 2026: young cards no reviews, mature cards no reviews."),
+    ).toBeInTheDocument();
     expect(container.querySelectorAll("path.line-point")).toHaveLength(0);
     expect(screen.getAllByRole("row").map((row) => row.textContent)).toEqual([
       "MonthYoungMature",
@@ -202,7 +232,9 @@ describe("RecallChart", () => {
     const { container } = render(<RecallChart months={[months[0]!]} />);
     expect(container.querySelector(".line-keys")!.children).toHaveLength(1);
     fireEvent.pointerEnter(container.querySelector('[data-point="2026-06"]')!);
-    expect(screen.getByText("June 2026: young cards 75% of 4 reviews, mature cards no reviews.")).toBeInTheDocument();
+    expect(
+      screen.getByText("June 2026: young cards 75% of 4 reviews, mature cards no reviews."),
+    ).toBeInTheDocument();
   });
 });
 

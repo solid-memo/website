@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { EDUCATION_THEME } from "../dcat.ts";
 import { problem, type ReleaseProblem } from "./problems.ts";
 import { DCAT_NS, DCTERMS_NS, type ReleaseModel, type ReleaseTerm } from "./releaseModel.ts";
@@ -41,9 +45,12 @@ export function curationProblems(model: ReleaseModel, policy: LibraryPolicy): Re
   const languages = (field: string, terms: readonly ReleaseTerm[], wanted: readonly string[]) => {
     const stated = terms.flatMap((term) => (term.kind === "literal" ? [term.language] : []));
     // A language range, as sh:languageIn reads it: "en" is met by "en-gb" too.
-    const has = (language: string) => stated.some((tag) => tag === language || tag.startsWith(`${language}-`));
+    const has = (language: string) =>
+      stated.some((tag) => tag === language || tag.startsWith(`${language}-`));
     for (const language of wanted.filter((language) => !has(language))) {
-      problems.push(problem(model.url, { code: "missingLanguage", params: { language } }, { field }));
+      problems.push(
+        problem(model.url, { code: "missingLanguage", params: { language } }, { field }),
+      );
     }
   };
   languages(`${DCTERMS_NS}title`, model.title, policy.titleLanguages);
@@ -51,7 +58,9 @@ export function curationProblems(model: ReleaseModel, policy: LibraryPolicy): Re
   languages(`${DCAT_NS}keyword`, model.keywords, policy.keywordLanguages);
   const themes = new Set(model.themes.map((theme) => theme.value));
   for (const theme of policy.themes.filter((theme) => !themes.has(theme))) {
-    problems.push(problem(model.url, { code: "missingTheme", params: { theme } }, { field: `${DCAT_NS}theme` }));
+    problems.push(
+      problem(model.url, { code: "missingTheme", params: { theme } }, { field: `${DCAT_NS}theme` }),
+    );
   }
   return problems;
 }

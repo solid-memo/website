@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMemo } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -56,8 +60,7 @@ export function CardContainer({
   const release = useDeckRelease(useCases, deck);
 
   const updateCardMutation = useMutation({
-    mutationFn: (content: CardContent) =>
-      useCases.updateCard(deck, card, content),
+    mutationFn: (content: CardContent) => useCases.updateCard(deck, card, content),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["cards", deck.cardsDocumentUrl],
@@ -92,10 +95,7 @@ export function CardContainer({
       arrival={arrival}
       busy={updateCardMutation.isPending || removeCardMutation.isPending}
       saved={updateCardMutation.isSuccess}
-      error={
-        errorText(updateCardMutation.error) ??
-        errorText(removeCardMutation.error)
-      }
+      error={errorText(updateCardMutation.error) ?? errorText(removeCardMutation.error)}
       onSave={(content) =>
         updateCardMutation.mutateAsync(content).then(
           () => true,

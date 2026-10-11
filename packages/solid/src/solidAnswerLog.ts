@@ -1,9 +1,29 @@
-import { createSolidDataset, getThingAll, removeThing, setThing, type SolidDataset } from "@inrupt/solid-client";
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import {
+  createSolidDataset,
+  getThingAll,
+  removeThing,
+  setThing,
+  type SolidDataset,
+} from "@inrupt/solid-client";
 import type { AnswerLog } from "@solid-memo/application/ports";
 import { monthOfStudyDay, type Answer } from "@solid-memo/domain/answer";
-import { historyContainerOf, historyUrlOf, monthOfHistoryUrl } from "@solid-memo/domain/instanceLayout";
+import {
+  historyContainerOf,
+  historyUrlOf,
+  monthOfHistoryUrl,
+} from "@solid-memo/domain/instanceLayout";
 import { listContainerTree } from "./containers";
-import { appendAllToDocument, appendToDocument, getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
+import {
+  appendAllToDocument,
+  appendToDocument,
+  getSolidDatasetOrNull,
+  PreconditionFailedError,
+  saveDataset,
+} from "./datasets";
 import { toAnswer, toAnswerThing } from "./mappers/answerMapper";
 import { mapSince, readSince } from "./readSince";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
@@ -47,7 +67,11 @@ export function createSolidAnswerLog({
       }
       for (const [url, month] of byMonth) {
         const things = month.map((answer) => toAnswerThing(url, answer));
-        await checkWrite(things.reduce(setThing, createSolidDataset()), month.map((answer) => `${url}#${answer.id}`), "pod");
+        await checkWrite(
+          things.reduce(setThing, createSolidDataset()),
+          month.map((answer) => `${url}#${answer.id}`),
+          "pod",
+        );
         await appendAllToDocument(url, things, fetch);
       }
     },

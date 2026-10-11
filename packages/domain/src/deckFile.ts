@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "./deck";
 import { catalogUrlOf, documentsInUse, ensureTrailingSlash } from "./instanceLayout";
 import { shown } from "./langText";
@@ -17,7 +21,9 @@ export type DeckFileFormat = "turtle" | "jsonld";
 export const DECK_FILE_FORMATS: readonly DeckFileFormat[] = ["turtle", "jsonld"];
 
 /** Each format's media type, and the extension of the files it is written to. */
-export const DECK_FILE_TYPES: Readonly<Record<DeckFileFormat, { mediaType: string; extension: string }>> = {
+export const DECK_FILE_TYPES: Readonly<
+  Record<DeckFileFormat, { mediaType: string; extension: string }>
+> = {
   turtle: { mediaType: "text/turtle", extension: ".ttl" },
   jsonld: { mediaType: "application/ld+json", extension: ".jsonld" },
 };
@@ -151,7 +157,11 @@ export function importedDeck(
     ...(withProgress && completedChapters !== undefined ? { completedChapters } : {}),
   };
   const cards = content.cards.map(
-    (card): Card => ({ ...card, url: `${cardsDocumentUrl}#${card.id}`, formatVersion: CARD_FORMAT_VERSION }),
+    (card): Card => ({
+      ...card,
+      url: `${cardsDocumentUrl}#${card.id}`,
+      formatVersion: CARD_FORMAT_VERSION,
+    }),
   );
   return { deck, cards, reviews: withProgress ? (content.reviews ?? []) : [] };
 }

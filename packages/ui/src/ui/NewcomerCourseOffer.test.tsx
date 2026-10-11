@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { alertTexts } from "../test/liveRegions";
@@ -8,7 +12,16 @@ const course = { ...courseLibraryDeck, forNewcomers: true as const };
 
 function renderOffer(props: Partial<Parameters<typeof NewcomerCourseOffer>[0]> = {}) {
   const onStart = vi.fn();
-  render(<NewcomerCourseOffer course={course} aboutHref="#/library-deck" busy={false} error={null} onStart={onStart} {...props} />);
+  render(
+    <NewcomerCourseOffer
+      course={course}
+      aboutHref="#/library-deck"
+      busy={false}
+      error={null}
+      onStart={onStart}
+      {...props}
+    />,
+  );
   return { onStart };
 }
 
@@ -19,7 +32,10 @@ describe("NewcomerCourseOffer", () => {
     expect(offer).toHaveTextContent("New here?");
     expect(offer).toHaveTextContent("Every question you answer becomes a card in your deck.");
     expect(offer).toHaveTextContent("Course · 5 cards");
-    expect(within(offer).getByRole("link", { name: "About this course" })).toHaveAttribute("href", "#/library-deck");
+    expect(within(offer).getByRole("link", { name: "About this course" })).toHaveAttribute(
+      "href",
+      "#/library-deck",
+    );
     expect(alertTexts()).toEqual([]);
   });
 

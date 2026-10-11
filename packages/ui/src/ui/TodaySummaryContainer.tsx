@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -10,7 +14,13 @@ import { TodaySummary } from "./TodaySummary";
  * (as after a session). Nothing before the day's first answer, or when
  * the answers cannot be read: the deck list works without them.
  */
-export function TodaySummaryContainer({ useCases, instance }: { useCases: UseCases; instance: Instance }) {
+export function TodaySummaryContainer({
+  useCases,
+  instance,
+}: {
+  useCases: UseCases;
+  instance: Instance;
+}) {
   const statisticsQuery = useQuery({
     queryKey: ["statistics", instance.url],
     queryFn: () => useCases.getStatistics(instance.url, new Date()),

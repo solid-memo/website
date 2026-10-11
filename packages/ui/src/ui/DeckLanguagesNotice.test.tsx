@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/preact";
 import { DeckLanguagesNotice } from "./DeckLanguagesNotice";
@@ -12,7 +16,10 @@ describe("DeckLanguagesNotice", () => {
     expect(region).toHaveTextContent(
       "Some of this deck's text does not say which language it is in. 3 card sides state no language.",
     );
-    expect(within(region).getByRole("link", { name: "Set the languages" })).toHaveAttribute("href", href);
+    expect(within(region).getByRole("link", { name: "Set the languages" })).toHaveAttribute(
+      "href",
+      href,
+    );
   });
 
   it("is no live region: it is read as the user reaches it", () => {
@@ -38,7 +45,10 @@ describe("DeckLanguagesNotice", () => {
         "could not be read, so how much of it is yours to settle is not known.",
     );
     expect(region).not.toHaveTextContent(/card side/);
-    expect(within(region).getByRole("link", { name: "Set the languages" })).toHaveAttribute("href", href);
+    expect(within(region).getByRole("link", { name: "Set the languages" })).toHaveAttribute(
+      "href",
+      href,
+    );
   });
 
   it("speaks Swedish", () => {
@@ -51,6 +61,9 @@ describe("DeckLanguagesNotice", () => {
     expect(region).toHaveTextContent(
       "En del av kortlekens text anger inte vilket språk den är på. 2 kortsidor anger inget språk.",
     );
-    expect(within(region).getByRole("link", { name: "Ange språken" })).toHaveAttribute("href", href);
+    expect(within(region).getByRole("link", { name: "Ange språken" })).toHaveAttribute(
+      "href",
+      href,
+    );
   });
 });

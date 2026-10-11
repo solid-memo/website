@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import { useId } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -85,7 +89,11 @@ export function ProseField({
         {markdown && <MarkdownHelp />}
       </div>
       <section class="prose-preview" aria-label={t("proseField.preview", { field: label })}>
-        {shown === undefined ? <p class="hint">{t("proseField.empty")}</p> : preview(shown, markdown)}
+        {shown === undefined ? (
+          <p class="hint">{t("proseField.empty")}</p>
+        ) : (
+          preview(shown, markdown)
+        )}
       </section>
     </div>
   );

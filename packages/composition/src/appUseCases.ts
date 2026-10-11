@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import { authFetch } from "@solid-memo/solid/authFetch";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
@@ -12,7 +16,10 @@ import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
-import { anonymousFetch, createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
+import {
+  anonymousFetch,
+  createSolidReleasePublisher,
+} from "@solid-memo/solid/solidReleasePublisher";
 import { createBrowserFileExchange } from "@solid-memo/browser/fileExchange";
 import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
 import { createLocalStorageThemePreference } from "@solid-memo/browser/localStorageThemePreference";
@@ -54,9 +61,18 @@ export interface AppOptions {
  * them. Each app calls it once, from its src/main.tsx, and hands the
  * result to its components.
  */
-export function createAppUseCases({ clientName, servedSite, libraryIndexUrl, ruleset, indexedDB }: AppOptions): UseCases {
+export function createAppUseCases({
+  clientName,
+  servedSite,
+  libraryIndexUrl,
+  ruleset,
+  indexedDB,
+}: AppOptions): UseCases {
   /** A guest's pod, kept in this browser (docs/guest-mode.md). */
-  const guestStore = indexedDB === undefined ? createMemoryResourceStore() : createIndexedDbResourceStore({ indexedDB });
+  const guestStore =
+    indexedDB === undefined
+      ? createMemoryResourceStore()
+      : createIndexedDbResourceStore({ indexedDB });
   const guestFetch = createLocalPod({
     root: GUEST_ORIGIN,
     store: guestStore,
@@ -68,7 +84,9 @@ export function createAppUseCases({ clientName, servedSite, libraryIndexUrl, rul
    * moved cannot be written (docs/guest-mode.md); then to the guest's pod
    * or, as the logged-in user, to any other.
    */
-  const writeFence = createWriteFence(routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: authFetch }));
+  const writeFence = createWriteFence(
+    routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: authFetch }),
+  );
   const podFetch = writeFence.fetch;
   const siteFetch = createSiteFetch(servedSite);
 
@@ -88,7 +106,12 @@ export function createAppUseCases({ clientName, servedSite, libraryIndexUrl, rul
     sessionGateway: createSolidSessionGateway(clientName),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway: createSolidStorageGateway({ fetch: podFetch }),
-    instanceRepository: createSolidInstanceRepository({ fetch: podFetch, checkWrite, now, randomId }),
+    instanceRepository: createSolidInstanceRepository({
+      fetch: podFetch,
+      checkWrite,
+      now,
+      randomId,
+    }),
     deckRepository: createSolidDeckRepository({ fetch: podFetch, checkWrite, now, randomId }),
     deckLibrary: createSolidDeckLibrary({
       fetch: siteFetch,

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The Docker images the end-to-end tests run, kept in one file between CI
  * jobs (.github/actions/e2e-images, docs/testing.md), so a job pulls
@@ -20,8 +24,14 @@ import { dirname } from "node:path";
 const PLACEHOLDERS = { E2E_PORT: "1", E2E_SECRET: "placeholder" };
 
 function docker(args: string[]): string {
-  const result = spawnSync("docker", args, { env: { ...process.env, ...PLACEHOLDERS }, encoding: "utf8" });
-  if (result.status !== 0) throw new Error(`docker ${args.join(" ")} failed (${result.status}):\n${result.stdout}${result.stderr}`);
+  const result = spawnSync("docker", args, {
+    env: { ...process.env, ...PLACEHOLDERS },
+    encoding: "utf8",
+  });
+  if (result.status !== 0)
+    throw new Error(
+      `docker ${args.join(" ")} failed (${result.status}):\n${result.stdout}${result.stderr}`,
+    );
   return result.stdout;
 }
 
@@ -33,11 +43,15 @@ function docker(args: string[]): string {
  * its reference without pulling.
  */
 function tagsOf(composeFiles: string[]): string[] {
-  const references = composeFiles.flatMap((file) => docker(["compose", "-f", file, "config", "--images"]).split("\n").filter(Boolean));
+  const references = composeFiles.flatMap((file) =>
+    docker(["compose", "-f", file, "config", "--images"]).split("\n").filter(Boolean),
+  );
   const tags = references.flatMap((reference) => {
     const tagged = /^([^@]+:[^@/]+)@sha256:/.exec(reference)?.[1];
     if (tagged !== undefined) docker(["tag", reference, tagged]);
-    return JSON.parse(docker(["image", "inspect", "--format", "{{json .RepoTags}}", reference])) as string[];
+    return JSON.parse(
+      docker(["image", "inspect", "--format", "{{json .RepoTags}}", reference]),
+    ) as string[];
   });
   return [...new Set(tags)].sort();
 }
@@ -55,13 +69,18 @@ const [command, file, ...composeFiles] = process.argv.slice(2);
 if (command === "save" && file !== undefined && composeFiles.length > 0) {
   tolerantly(() => {
     const tags = tagsOf(composeFiles);
-    if (tags.length === 0) throw new Error(`no image of ${composeFiles.join(", ")} has a tag to save it by.`);
+    if (tags.length === 0)
+      throw new Error(`no image of ${composeFiles.join(", ")} has a tag to save it by.`);
     mkdirSync(dirname(file), { recursive: true });
     docker(["save", "-o", file, ...tags]);
     console.log(`Saved ${tags.join(", ")}.`);
   });
 } else if (command === "load" && file !== undefined && composeFiles.length === 0) {
-  tolerantly(() => console.log(existsSync(file) ? docker(["load", "-i", file]).trim() : `No ${file}: nothing to load.`));
+  tolerantly(() =>
+    console.log(
+      existsSync(file) ? docker(["load", "-i", file]).trim() : `No ${file}: nothing to load.`,
+    ),
+  );
 } else {
   throw new Error("Usage: node e2e/pod/images.ts save <file> <compose.yml>... | load <file>");
 }

@@ -1,5 +1,18 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
-import { card, chapter, distractor, iri, model, RELEASE, step, text } from "../testing/releaseModel";
+import {
+  card,
+  chapter,
+  distractor,
+  iri,
+  model,
+  RELEASE,
+  step,
+  text,
+} from "../testing/releaseModel";
 import { keptInIndex, lastIssued, seriesEntry } from "./seriesEntry";
 
 const SERIES = "https://solid-memo.com/decks/index.ttl#solid";
@@ -22,7 +35,7 @@ const second = model({
 });
 
 describe("seriesEntry", () => {
-  it("states the current release's description and the series' releases, summarising the older ones", () => {
+  it("states the current release's description and the series' releases, summarizing the older ones", () => {
     expect(seriesEntry(SERIES, [first, second])).toEqual({
       series: SERIES,
       title: [text("Solid")],
@@ -46,8 +59,15 @@ describe("seriesEntry", () => {
     });
   });
 
-  it("summarises an older release by what it states", () => {
-    expect(seriesEntry(SERIES, [model(), second]).older[0]).toEqual({ url: RELEASE, title: [], description: [], version: [], issued: [], versionNotes: [] });
+  it("summarizes an older release by what it states", () => {
+    expect(seriesEntry(SERIES, [model(), second]).older[0]).toEqual({
+      url: RELEASE,
+      title: [],
+      description: [],
+      version: [],
+      issued: [],
+      versionNotes: [],
+    });
   });
 });
 
@@ -74,8 +94,14 @@ describe("keptInIndex", () => {
     expect(kept(`${RELEASE}#anton`, COMMENT)).toBe(false);
   });
 
+  it("names no one's email: it leaves out every foaf:mbox", () => {
+    expect(kept(`${RELEASE}#anton`, "http://xmlns.com/foaf/0.1/mbox")).toBe(false);
+    expect(kept(`${RELEASE}#contact`, "http://www.w3.org/2006/vcard/ns#hasURL")).toBe(true);
+  });
+
   it("leaves out the cards, chapters, steps and distractors", () => {
-    for (const id of ["se", "ch-1", "s-1", "se-a"]) expect(kept(`${RELEASE}#${id}`, RDF_TYPE), id).toBe(false);
+    for (const id of ["se", "ch-1", "s-1", "se-a"])
+      expect(kept(`${RELEASE}#${id}`, RDF_TYPE), id).toBe(false);
   });
 
   it("keeps of the activities only the type of the one that generated the release", () => {
@@ -86,7 +112,10 @@ describe("keptInIndex", () => {
 });
 
 it("gives when the latest release was issued, each by the first time it states", () => {
-  const twice = { ...second, issued: [text("2026-10-03T10:00:00Z", ""), text("2027-01-01T00:00:00Z", "")] };
+  const twice = {
+    ...second,
+    issued: [text("2026-10-03T10:00:00Z", ""), text("2027-01-01T00:00:00Z", "")],
+  };
   expect(lastIssued([twice, first])).toBe("2026-10-03T10:00:00Z");
   expect(lastIssued([model()])).toBeUndefined();
 });

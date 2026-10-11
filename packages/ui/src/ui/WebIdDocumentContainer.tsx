@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Session } from "@solid-memo/domain/session";
@@ -29,9 +33,7 @@ export function WebIdDocumentContainer({
       <summary>{t("webIdDocument.summary")}</summary>
       {documentQuery.isPending && <Loading label={t("webIdDocument.loading")} />}
       <ErrorMessage error={errorText(documentQuery.error)} />
-      {documentQuery.data && (
-        <WebIdDocumentView document={documentQuery.data} />
-      )}
+      {documentQuery.data && <WebIdDocumentView document={documentQuery.data} />}
     </details>
   );
 }

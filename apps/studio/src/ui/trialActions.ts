@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Trial } from "@solid-memo/application/trial";
 import type { Course } from "@solid-memo/application/useCases";
 import { choicesOf, type CourseChapter } from "@solid-memo/domain/course";
@@ -15,9 +19,20 @@ const inOrder = () => 0;
  * right, or wrong (its first wrong option), at `now`. A chapter answered
  * right is completed, as its final review would complete it.
  */
-export async function answerChapter(trial: Trial, course: Course, chapter: CourseChapter, correct: boolean, now: Date): Promise<void> {
+export async function answerChapter(
+  trial: Trial,
+  course: Course,
+  chapter: CourseChapter,
+  correct: boolean,
+  now: Date,
+): Promise<void> {
   const { useCases, instance } = trial;
-  const ids = [...new Set([...chapter.steps.flatMap((step) => step.questionIds), ...chapter.reviewQuestionIds])];
+  const ids = [
+    ...new Set([
+      ...chapter.steps.flatMap((step) => step.questionIds),
+      ...chapter.reviewQuestionIds,
+    ]),
+  ];
   for (const id of ids) {
     const card = course.cards[id]!;
     // A question the course asks has wrong options (trialProblems).
@@ -26,7 +41,10 @@ export async function answerChapter(trial: Trial, course: Course, chapter: Cours
       instance.url,
       course.deck,
       card,
-      { correct, ...(choice.distractorId === undefined ? {} : { distractorId: choice.distractorId }) },
+      {
+        correct,
+        ...(choice.distractorId === undefined ? {} : { distractorId: choice.distractorId }),
+      },
       now,
     );
   }
@@ -38,7 +56,11 @@ export async function answerChapter(trial: Trial, course: Course, chapter: Cours
  * and none after: the course restarted, then each one before it
  * completed. The answers given stay.
  */
-export async function jumpToChapter(trial: Trial, course: Course, chapter: CourseChapter): Promise<void> {
+export async function jumpToChapter(
+  trial: Trial,
+  course: Course,
+  chapter: CourseChapter,
+): Promise<void> {
   const { useCases } = trial;
   let deck = await useCases.setCompletedChapters(course.deck, { kind: "restart" });
   for (const before of course.outline.chapters.slice(0, course.outline.chapters.indexOf(chapter))) {

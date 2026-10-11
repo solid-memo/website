@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * Where Solid Memo's vocabulary and shapes are published: with the site,
  * from this repository's ns/ folder (docs/vocab.md). The vocabulary's

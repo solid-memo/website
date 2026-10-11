@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import {
   fromRdfJsDataset,
@@ -45,14 +49,16 @@ describe("getSolidDatasetLinear", () => {
     expect(actual.internal_resourceInfo).toEqual(expected.internal_resourceInfo);
     expect(getSourceIri(actual)).toBe(URL_);
     expect(getThingAll(actual)).toHaveLength(2);
-    expect(getStringNoLocale(getThing(actual, `${URL_}#b`)!, "https://example.com/ns#front")).toBe("Norway");
+    expect(getStringNoLocale(getThing(actual, `${URL_}#b`)!, "https://example.com/ns#front")).toBe(
+      "Norway",
+    );
     expect(Object.isFrozen(actual)).toBe(true);
   });
 
   it("fails as getSolidDataset does on a document that is not Turtle", async () => {
-    await expect(getSolidDatasetLinear(URL_, { fetch: turtleFetch("<#a> <#b> .") })).rejects.toThrow(
-      `Encountered an error parsing the Resource at [${URL_}]`,
-    );
+    await expect(
+      getSolidDatasetLinear(URL_, { fetch: turtleFetch("<#a> <#b> .") }),
+    ).rejects.toThrow(`Encountered an error parsing the Resource at [${URL_}]`);
   });
 
   it("fails as getSolidDataset does on a missing document", async () => {
@@ -70,7 +76,9 @@ describe("graphsOf", () => {
 
   it("builds what solid-client's fromRdfJsDataset builds, each value once", async () => {
     const quads = await quadsOf(TURTLE);
-    const expected = fromRdfJsDataset(quads as unknown as Parameters<typeof fromRdfJsDataset>[0]).graphs;
+    const expected = fromRdfJsDataset(
+      quads as unknown as Parameters<typeof fromRdfJsDataset>[0],
+    ).graphs;
     expect(graphsOf(quads)).toEqual(expected);
     expect(graphsOf([...quads, ...quads])).toEqual(expected);
   });
@@ -78,9 +86,18 @@ describe("graphsOf", () => {
   it("keeps a named graph apart from the default graph", async () => {
     const [first] = await quadsOf(`<#a> <https://example.com/ns#p> "x" .`);
     const { subject, predicate, object } = first!;
-    const graphs = graphsOf([{ subject, predicate, object, graph: { termType: "NamedNode", value: "https://example.com/g" } } as Quad]);
+    const graphs = graphsOf([
+      {
+        subject,
+        predicate,
+        object,
+        graph: { termType: "NamedNode", value: "https://example.com/g" },
+      } as Quad,
+    ]);
     expect(Object.keys(graphs)).toEqual(["default", "https://example.com/g"]);
-    expect(graphs["https://example.com/g"]![`${URL_}#a`]!.predicates["https://example.com/ns#p"]).toEqual({
+    expect(
+      graphs["https://example.com/g"]![`${URL_}#a`]!.predicates["https://example.com/ns#p"],
+    ).toEqual({
       literals: { "http://www.w3.org/2001/XMLSchema#string": ["x"] },
     });
   });
@@ -88,7 +105,12 @@ describe("graphsOf", () => {
   it("refuses an object solid-client cannot hold, as solid-client does", async () => {
     const [first] = await quadsOf(`<#a> <https://example.com/ns#p> "x" .`);
     const { subject, predicate, graph } = first!;
-    const variable = { subject, predicate, graph, object: { termType: "Variable", value: "v" } } as Quad;
+    const variable = {
+      subject,
+      predicate,
+      graph,
+      object: { termType: "Variable", value: "v" },
+    } as Quad;
     expect(() => graphsOf([variable])).toThrow("Objects of type [Variable] are not supported.");
   });
 
@@ -96,6 +118,16 @@ describe("graphsOf", () => {
     const graphs = graphsOf(await quadsOf(TURTLE));
     const subject = graphs.default[`${URL_}#a`]!;
     const objects = subject.predicates["https://example.com/ns#back"]!;
-    expect([graphs, graphs.default, subject, subject.predicates, objects, objects.langStrings, objects.langStrings!["en-gb"]].every(Object.isFrozen)).toBe(true);
+    expect(
+      [
+        graphs,
+        graphs.default,
+        subject,
+        subject.predicates,
+        objects,
+        objects.langStrings,
+        objects.langStrings!["en-gb"],
+      ].every(Object.isFrozen),
+    ).toBe(true);
   });
 });

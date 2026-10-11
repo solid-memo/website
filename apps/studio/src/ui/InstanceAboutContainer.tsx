@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -10,12 +14,12 @@ import { routeToHash } from "@solid-memo/ui/router";
 import { InstanceAboutScreen } from "./InstanceAboutScreen";
 
 /**
- * The instance screen's data: the instance's catalogue (UseCases.readCatalog).
+ * The instance screen's data: the instance's catalog (UseCases.readCatalog).
  * Renaming the instance (renameInstance) reads the user's instances
- * afresh, so every screen names it anew; describing the catalogue
- * (describeCatalog) reads the catalogue afresh. Both write the
- * catalogue, so neither can be made until the instance's data check is
- * done, nor while the catalogue or a group is set aside (useDataCheck).
+ * afresh, so every screen names it anew; describing the catalog
+ * (describeCatalog) reads the catalog afresh. Both write the
+ * catalog, so neither can be made until the instance's data check is
+ * done, nor while the catalog or a group is set aside (useDataCheck).
  */
 export function InstanceAboutContainer({
   useCases,

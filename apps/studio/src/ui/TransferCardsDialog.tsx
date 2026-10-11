@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { TransferMode } from "@solid-memo/domain/cardTransfer";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -63,7 +67,11 @@ export function TransferCardsDialog({
       >
         <label>
           {t("studio.cardBulk.transfer.deck")}
-          <select autoFocus value={deckUrl} onChange={(event) => setDeckUrl(event.currentTarget.value)}>
+          <select
+            autoFocus
+            value={deckUrl}
+            onChange={(event) => setDeckUrl(event.currentTarget.value)}
+          >
             {decks.map((deck) => (
               <option key={deck.url} value={deck.url}>
                 {readerText(deck.title)}
@@ -72,7 +80,11 @@ export function TransferCardsDialog({
           </select>
         </label>
         <label class="studio-check">
-          <input type="checkbox" checked={keepProgress} onChange={(event) => setKeepProgress(event.currentTarget.checked)} />
+          <input
+            type="checkbox"
+            checked={keepProgress}
+            onChange={(event) => setKeepProgress(event.currentTarget.checked)}
+          />
           {t("studio.cardBulk.transfer.keepProgress")}
         </label>
         <p class="hint">{t(`studio.cardBulk.transfer.${mode}Hint`)}</p>

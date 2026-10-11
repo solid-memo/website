@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useId, useLayoutEffect, useRef, useState } from "preact/hooks";
 import {
   MINIMAL_ANSWER_QUALITY,
@@ -54,15 +58,15 @@ function answerButtons(
 ): { label: string; quality: ReviewQuality; key: string }[] {
   return scale === "minimal"
     ? MINIMAL_ANSWERS.map((answer, index) => ({
-      label: minimalLabel(answer, t),
-      quality: MINIMAL_ANSWER_QUALITY[answer],
-      key: String(index + 1),
-    }))
+        label: minimalLabel(answer, t),
+        quality: MINIMAL_ANSWER_QUALITY[answer],
+        key: String(index + 1),
+      }))
     : SM2_QUALITIES.map((quality) => ({
-      label: qualityLabel(quality, t),
-      quality,
-      key: String(quality),
-    }));
+        label: qualityLabel(quality, t),
+        quality,
+        key: String(quality),
+      }));
 }
 
 export function StudyScreen({
@@ -112,7 +116,15 @@ export function StudyScreen({
   return (
     <section>
       <header>
-        <h2>{tx("study.heading", { deck: <a href={deckHref} lang={deckLang}>{deckName}</a> })}</h2>
+        <h2>
+          {tx("study.heading", {
+            deck: (
+              <a href={deckHref} lang={deckLang}>
+                {deckName}
+              </a>
+            ),
+          })}
+        </h2>
         <button onClick={onExit} disabled={busy}>
           {t("study.endSession")}
         </button>
@@ -185,7 +197,14 @@ function StudyCard({
   const buttons = answerButtons(answerScale, t);
 
   function onKeyDown(event: KeyboardEvent) {
-    if (busy || event.ctrlKey || event.altKey || event.metaKey || inDataRegion(event.target as Element)) return;
+    if (
+      busy ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.metaKey ||
+      inDataRegion(event.target as Element)
+    )
+      return;
     if (!revealed) {
       // Space on Reveal itself already presses it.
       if (event.key !== " " || (event.target as Element).closest("button")) return;

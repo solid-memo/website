@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { courseDraft, DRAFT_URL, instanceA, makeDeck } from "../../test/fixtures";
 import type { DraftRoute, StudioRoute } from "../router";
@@ -22,7 +26,8 @@ const draftUrl = DRAFT_URL;
 const draft = courseDraft();
 
 /** The tabs as their keys, the one shown starred, the one the page shown is under marked ^. */
-const keys = (tabs: readonly ContextTab[]) => tabs.map((tab) => ({ page: "*", true: "^", false: "" })[`${tab.current}`] + tab.key);
+const keys = (tabs: readonly ContextTab[]) =>
+  tabs.map((tab) => ({ page: "*", true: "^", false: "" })[`${tab.current}`] + tab.key);
 
 describe("the sidebar's sections", () => {
   it("open where their links go: the decks at Home, each other at its screen", () => {
@@ -84,9 +89,15 @@ describe("deckTabs", () => {
 
   it.each<[StudioRoute, string[]]>([
     [{ screen: "cards", deckUrl }, ["*cards", "schedule", "health", "about", "export"]],
-    [{ screen: "card", deckUrl, cardUrl: `${deckUrl}#water`, tab: "history" }, ["^cards", "schedule", "health", "about", "export"]],
+    [
+      { screen: "card", deckUrl, cardUrl: `${deckUrl}#water`, tab: "history" },
+      ["^cards", "schedule", "health", "about", "export"],
+    ],
     [{ screen: "schedule", deckUrl }, ["cards", "*schedule", "health", "about", "export"]],
-    [{ screen: "health", instanceUrl, deckUrl }, ["cards", "schedule", "*health", "about", "export"]],
+    [
+      { screen: "health", instanceUrl, deckUrl },
+      ["cards", "schedule", "*health", "about", "export"],
+    ],
     [{ screen: "about", deckUrl }, ["cards", "schedule", "health", "*about", "export"]],
   ])("marks the tab %j is on", (route, tabs) => {
     expect(keys(deckTabs(route, deckUrl))).toEqual(tabs);
@@ -107,33 +118,79 @@ describe("draftTabs", () => {
   });
 
   it.each<[DraftRoute, string[]]>([
-    [{ screen: "draft", draftUrl, field: "title" }, ["*overview", "cards", "check", "preview", "trial", "diff", "release"]],
-    [{ screen: "chapter", draftUrl, chapter: "basics" }, ["^overview", "cards", "check", "preview", "trial", "diff", "release"]],
-    [{ screen: "step", draftUrl, step: "basics-1" }, ["^overview", "cards", "check", "preview", "trial", "diff", "release"]],
-    [{ screen: "draftCards", draftUrl, page: 2 }, ["overview", "*cards", "check", "preview", "trial", "diff", "release"]],
-    [{ screen: "question", draftUrl, card: "q1" }, ["overview", "^cards", "check", "preview", "trial", "diff", "release"]],
-    [{ screen: "check", draftUrl, policy: "library" }, ["overview", "cards", "*check", "preview", "trial", "diff", "release"]],
-    [{ screen: "preview", draftUrl }, ["overview", "cards", "check", "*preview", "trial", "diff", "release"]],
-    [{ screen: "trial", draftUrl, chapter: "basics" }, ["overview", "cards", "check", "preview", "*trial", "diff", "release"]],
-    [{ screen: "diff", draftUrl }, ["overview", "cards", "check", "preview", "trial", "*diff", "release"]],
-    [{ screen: "release", draftUrl, field: "authors" }, ["overview", "cards", "check", "preview", "trial", "diff", "*release"]],
+    [
+      { screen: "draft", draftUrl, field: "title" },
+      ["*overview", "cards", "check", "preview", "trial", "diff", "release"],
+    ],
+    [
+      { screen: "chapter", draftUrl, chapter: "basics" },
+      ["^overview", "cards", "check", "preview", "trial", "diff", "release"],
+    ],
+    [
+      { screen: "step", draftUrl, step: "basics-1" },
+      ["^overview", "cards", "check", "preview", "trial", "diff", "release"],
+    ],
+    [
+      { screen: "draftCards", draftUrl, page: 2 },
+      ["overview", "*cards", "check", "preview", "trial", "diff", "release"],
+    ],
+    [
+      { screen: "question", draftUrl, card: "q1" },
+      ["overview", "^cards", "check", "preview", "trial", "diff", "release"],
+    ],
+    [
+      { screen: "check", draftUrl, policy: "library" },
+      ["overview", "cards", "*check", "preview", "trial", "diff", "release"],
+    ],
+    [
+      { screen: "preview", draftUrl },
+      ["overview", "cards", "check", "*preview", "trial", "diff", "release"],
+    ],
+    [
+      { screen: "trial", draftUrl, chapter: "basics" },
+      ["overview", "cards", "check", "preview", "*trial", "diff", "release"],
+    ],
+    [
+      { screen: "diff", draftUrl },
+      ["overview", "cards", "check", "preview", "trial", "*diff", "release"],
+    ],
+    [
+      { screen: "release", draftUrl, field: "authors" },
+      ["overview", "cards", "check", "preview", "trial", "diff", "*release"],
+    ],
   ])("marks the tab %j is on", (route, tabs) => {
     expect(keys(draftTabs(route, true))).toEqual(tabs);
   });
 
   it("has no Changes for a first version, nor any current tab on its comparison", () => {
-    expect(keys(draftTabs({ screen: "diff", draftUrl }, false))).toEqual(["overview", "cards", "check", "preview", "trial", "release"]);
+    expect(keys(draftTabs({ screen: "diff", draftUrl }, false))).toEqual([
+      "overview",
+      "cards",
+      "check",
+      "preview",
+      "trial",
+      "release",
+    ]);
   });
 });
 
 describe("contextTabsOf", () => {
   it("gives a deck's screens the deck's tabs", () => {
-    expect(contextTabsOf({ screen: "schedule", deckUrl }, null)).toEqual({ of: "deck", tabs: deckTabs({ screen: "schedule", deckUrl }, deckUrl) });
+    expect(contextTabsOf({ screen: "schedule", deckUrl }, null)).toEqual({
+      of: "deck",
+      tabs: deckTabs({ screen: "schedule", deckUrl }, deckUrl),
+    });
   });
 
   it("gives a draft's screens the draft's tabs, Changes as the draft follows a release", () => {
-    expect(contextTabsOf({ screen: "check", draftUrl }, draft)).toEqual({ of: "draft", tabs: draftTabs({ screen: "check", draftUrl }, false) });
-    const next = { ...draft, root: { ...draft.root, prev: "https://pod.example/releases/solid/v1.ttl" } };
+    expect(contextTabsOf({ screen: "check", draftUrl }, draft)).toEqual({
+      of: "draft",
+      tabs: draftTabs({ screen: "check", draftUrl }, false),
+    });
+    const next = {
+      ...draft,
+      root: { ...draft.root, prev: "https://pod.example/releases/solid/v1.ttl" },
+    };
     expect(keys(contextTabsOf({ screen: "check", draftUrl }, next)!.tabs)).toContain("diff");
   });
 

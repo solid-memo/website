@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { ComponentChildren } from "preact";
 import type { ScreenCommand } from "../ui/shell/commandIndex";
 import { ScreenCommands } from "../ui/shell/useScreenCommands";
@@ -16,5 +20,7 @@ export function WithCommands({ children }: { children: ComponentChildren }) {
 
 /** The commands the screens shown in WithCommands add to the palette now, by their ids. */
 export function screenCommands(): Record<string, ScreenCommand> {
-  return Object.fromEntries([...registered].flatMap((screen) => screen.current).map((command) => [command.id, command]));
+  return Object.fromEntries(
+    [...registered].flatMap((screen) => screen.current).map((command) => [command.id, command]),
+  );
 }

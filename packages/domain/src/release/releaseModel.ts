@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { fragmentIdOf } from "../subjectUrl.ts";
 
 /**
@@ -93,12 +97,12 @@ export interface ReleaseMaking {
   carried: boolean;
 }
 
-/** What a release states of a source it names: its title, its creator, its licence and its comments (which may quote the evidence for it). */
+/** What a release states of a source it names: its title, its creator, its license and its comments (which may quote the evidence for it). */
 export interface ReleaseSource {
   iri: string;
   title: ReleaseTerm[];
   creator: ReleaseTerm[];
-  licence: ReleaseTerm[];
+  license: ReleaseTerm[];
   comments: ReleaseTerm[];
 }
 
@@ -131,8 +135,8 @@ export interface ReleaseModel {
   prev: ReleaseTerm[];
   previousVersion: ReleaseTerm[];
   distribution: ReleaseTerm[];
-  /** The licence (dcterms:license). */
-  licence: ReleaseTerm[];
+  /** The license (dcterms:license). */
+  license: ReleaseTerm[];
   /** What it was compiled from (prov:wasDerivedFrom). */
   sources: ReleaseTerm[];
   activities: ReleaseActivity[];
@@ -176,7 +180,9 @@ export function publishedIds(model: ReleaseModel, kind: ReleaseKind): string[] {
 /** The version a release states, when it states one, a whole number from 1. */
 export function versionOf(model: ReleaseModel): number | undefined {
   const [stated, ...more] = model.version;
-  return more.length === 0 && stated?.kind === "literal" && /^[1-9][0-9]*$/.test(stated.value) ? Number(stated.value) : undefined;
+  return more.length === 0 && stated?.kind === "literal" && /^[1-9][0-9]*$/.test(stated.value)
+    ? Number(stated.value)
+    : undefined;
 }
 
 /** The languages of texts, "" for untagged, each once, in order. */
@@ -206,7 +212,7 @@ export function emptyReleaseModel(url: string): ReleaseModel {
     prev: [],
     previousVersion: [],
     distribution: [],
-    licence: [],
+    license: [],
     sources: [],
     activities: [],
     making: [],

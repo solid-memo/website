@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /** What an ExternalLink to the web adds to its name: it opens in a new tab. */
 export const NEW_TAB = " (opens in a new tab)";
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * What the app does when data in an instance does not conform to its
  * shapes (see docs/validation.md): a preference, stored as a concept of

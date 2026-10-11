@@ -1,5 +1,9 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
- * A loading state: four dots in the logotype's colours bouncing in turn,
+ * A loading state: four dots in the logotype's colors bouncing in turn,
  * next to a label saying what is on its way. The dots are decoration; the
  * label is what assistive technology announces.
  */

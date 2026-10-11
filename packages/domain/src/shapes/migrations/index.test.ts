@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { DEFAULT_PREFERENCES } from "../../preferences";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
@@ -15,9 +19,10 @@ describe("the migration chain", () => {
   it("has exactly one step between every pair of consecutive versions, and none beyond", () => {
     for (const shape of SHAPES) {
       const steps = MIGRATIONS.filter((step) => step.shape === shape);
-      expect(steps.map((step) => [step.from, step.to]), shape).toEqual(
-        Array.from({ length: LATEST_VERSION[shape] - 1 }, (_, i) => [i + 1, i + 2]),
-      );
+      expect(
+        steps.map((step) => [step.from, step.to]),
+        shape,
+      ).toEqual(Array.from({ length: LATEST_VERSION[shape] - 1 }, (_, i) => [i + 1, i + 2]));
     }
     expect(MIGRATIONS.every((step) => SHAPES.includes(step.shape))).toBe(true);
   });
@@ -49,8 +54,15 @@ describe("migrate", () => {
   });
 
   it("restamps a format-4 deck and card, changing nothing but the deck's keywords' form: no language guessed, stand-ins and untagged sides kept", () => {
-    const card = { front: { "": "Sweden" }, back: { en: "Stockholm", sv: "Stockholm" }, backNote: { en: "Huvudstad.", sv: "Huvudstad." } };
-    expect(migrate("card", { version: 4, data: card }, CONTEXT)).toEqual({ ...card, distractor: [] });
+    const card = {
+      front: { "": "Sweden" },
+      back: { en: "Stockholm", sv: "Stockholm" },
+      backNote: { en: "Huvudstad.", sv: "Huvudstad." },
+    };
+    expect(migrate("card", { version: 4, data: card }, CONTEXT)).toEqual({
+      ...card,
+      distractor: [],
+    });
     const deck = {
       title: { en: "Japanska glosor", sv: "Japanska glosor" },
       description: { en: "Flashcards: Japanska glosor.", sv: "Kortlek: Japanska glosor." },
@@ -67,8 +79,21 @@ describe("migrate", () => {
 
   it("keeps a deck's, a release's and a series' keywords untagged, their language unknown: no language guessed", () => {
     const keyword = ["capitals", "huvudstäder"];
-    const deck = { title: { sv: "Huvudstäder" }, description: { sv: "Kortlek." }, creator: [], studyDirection: `${SM}frontToBack` as const, theme: [], keyword, distribution: [], cardsDocument: "d", reviewsDocument: "r" };
-    expect(migrate("deck", { version: 5, data: deck }, CONTEXT)).toEqual({ ...deck, keyword: { "": keyword } });
+    const deck = {
+      title: { sv: "Huvudstäder" },
+      description: { sv: "Kortlek." },
+      creator: [],
+      studyDirection: `${SM}frontToBack` as const,
+      theme: [],
+      keyword,
+      distribution: [],
+      cardsDocument: "d",
+      reviewsDocument: "r",
+    };
+    expect(migrate("deck", { version: 5, data: deck }, CONTEXT)).toEqual({
+      ...deck,
+      keyword: { "": keyword },
+    });
     const release = {
       title: { en: "Capitals" },
       description: { en: "Capitals." },
@@ -84,9 +109,25 @@ describe("migrate", () => {
       distribution: [],
       wasDerivedFrom: [],
     };
-    expect(migrate("libraryDeck", { version: 4, data: release }, CONTEXT)).toEqual({ ...release, keyword: { "": keyword } });
-    const series = { title: { en: "L" }, description: { en: "C." }, publisher: "p", theme: [], keyword, first: "a", last: "b", hasVersion: ["a", "b"], hasCurrentVersion: "b" };
-    expect(migrate("libraryDeckSeries", { version: 2, data: series }, CONTEXT)).toEqual({ ...series, keyword: { "": keyword } });
+    expect(migrate("libraryDeck", { version: 4, data: release }, CONTEXT)).toEqual({
+      ...release,
+      keyword: { "": keyword },
+    });
+    const series = {
+      title: { en: "L" },
+      description: { en: "C." },
+      publisher: "p",
+      theme: [],
+      keyword,
+      first: "a",
+      last: "b",
+      hasVersion: ["a", "b"],
+      hasCurrentVersion: "b",
+    };
+    expect(migrate("libraryDeckSeries", { version: 2, data: series }, CONTEXT)).toEqual({
+      ...series,
+      keyword: { "": keyword },
+    });
   });
 
   it("brings the library's kinds to the formats whose keywords state their language, a release to the one that may describe its series", () => {
@@ -114,21 +155,39 @@ describe("migrate", () => {
   });
 
   it("has no migration for the draft kinds, which start at format 1", () => {
-    expect([LATEST_VERSION.draftDeck, LATEST_VERSION.draftChapter, LATEST_VERSION.draftStep]).toEqual([1, 1, 1]);
+    expect([
+      LATEST_VERSION.draftDeck,
+      LATEST_VERSION.draftChapter,
+      LATEST_VERSION.draftStep,
+    ]).toEqual([1, 1, 1]);
   });
 
   it("walks a record up to the latest version", () => {
-    expect(migrate("card", { version: 1, data: { front: "Sweden", back: "Stockholm" } }, CONTEXT)).toEqual({
+    expect(
+      migrate("card", { version: 1, data: { front: "Sweden", back: "Stockholm" } }, CONTEXT),
+    ).toEqual({
       front: { "": "Sweden" },
       back: { "": "Stockholm" },
       distractor: [],
     });
-    expect(migrate("card", { version: 3, data: { frontImage: "https://flagcdn.com/se.svg", back: "Sweden" } }, CONTEXT)).toEqual({
+    expect(
+      migrate(
+        "card",
+        { version: 3, data: { frontImage: "https://flagcdn.com/se.svg", back: "Sweden" } },
+        CONTEXT,
+      ),
+    ).toEqual({
       frontImage: "https://flagcdn.com/se.svg",
       back: { "": "Sweden" },
       distractor: [],
     });
-    expect(migrate("card", { version: 3, data: { front: "Sweden", backImage: "https://flagcdn.com/se.svg" } }, CONTEXT)).toEqual({
+    expect(
+      migrate(
+        "card",
+        { version: 3, data: { front: "Sweden", backImage: "https://flagcdn.com/se.svg" } },
+        CONTEXT,
+      ),
+    ).toEqual({
       front: { "": "Sweden" },
       backImage: "https://flagcdn.com/se.svg",
       distractor: [],
@@ -148,7 +207,15 @@ describe("migrate", () => {
     expect(
       migrate(
         "deck",
-        { version: 2, data: { ...deck, description: "Mine.", direction: "bidirectional", source: "https://solid-memo.com/decks/capitals/v1.ttl" } },
+        {
+          version: 2,
+          data: {
+            ...deck,
+            description: "Mine.",
+            direction: "bidirectional",
+            source: "https://solid-memo.com/decks/capitals/v1.ttl",
+          },
+        },
         CONTEXT,
       ),
     ).toMatchObject({
@@ -160,7 +227,15 @@ describe("migrate", () => {
     expect(
       migrate(
         "libraryDeck",
-        { version: 1, data: { title: "L", description: "Capitals.", creator: [], source: ["https://en.wikipedia.org/"] } },
+        {
+          version: 1,
+          data: {
+            title: "L",
+            description: "Capitals.",
+            creator: [],
+            source: ["https://en.wikipedia.org/"],
+          },
+        },
         { subject: LIBRARY },
       ),
     ).toEqual({
@@ -179,10 +254,26 @@ describe("migrate", () => {
       wasDerivedFrom: ["https://en.wikipedia.org/"],
     });
     expect(
-      migrate("libraryDeck", { version: 2, data: { title: "L", creator: [], direction: "back-to-front", source: [] } }, { subject: LIBRARY }),
+      migrate(
+        "libraryDeck",
+        { version: 2, data: { title: "L", creator: [], direction: "back-to-front", source: [] } },
+        { subject: LIBRARY },
+      ),
     ).toMatchObject({ description: { en: "Flashcards: L." }, studyDirection: `${SM}backToFront` });
-    const series = { title: "L", description: "Capitals.", publisher: "p", theme: [], keyword: [], first: "a", last: "b", hasVersion: ["a", "b"], hasCurrentVersion: "b" };
-    expect(migrate("libraryDeckSeries", { version: 1, data: series }, { subject: LIBRARY })).toEqual({
+    const series = {
+      title: "L",
+      description: "Capitals.",
+      publisher: "p",
+      theme: [],
+      keyword: [],
+      first: "a",
+      last: "b",
+      hasVersion: ["a", "b"],
+      hasCurrentVersion: "b",
+    };
+    expect(
+      migrate("libraryDeckSeries", { version: 1, data: series }, { subject: LIBRARY }),
+    ).toEqual({
       ...series,
       title: { en: "L" },
       description: { en: "Capitals." },
@@ -204,19 +295,31 @@ describe("migrate", () => {
       previousDue: "2026-09-21",
       previousLastReviewedAt: "2026-09-20T10:00:00.000Z",
     };
-    expect(migrate("reviewState", { version: 1, data: { ...review, ...snapshot } }, CONTEXT)).toEqual({
+    expect(
+      migrate("reviewState", { version: 1, data: { ...review, ...snapshot } }, CONTEXT),
+    ).toEqual({
       ...review,
       ...snapshot,
     });
     expect(
-      migrate("reviewState", { version: 1, data: { ...review, previousDue: "2026-09-21" } }, CONTEXT),
+      migrate(
+        "reviewState",
+        { version: 1, data: { ...review, previousDue: "2026-09-21" } },
+        CONTEXT,
+      ),
     ).toEqual(review);
     expect(migrate("preferences", { version: 1, data: { newCardsPerDay: 5 } }, CONTEXT)).toEqual({
       ...DEFAULT_PREFERENCES,
       ...MIGRATED_CONCEPTS,
       newCardsPerDay: 5,
     });
-    expect(migrate("preferences", { version: 1, data: { answerScale: "minimal", developerMode: true } }, CONTEXT)).toEqual({
+    expect(
+      migrate(
+        "preferences",
+        { version: 1, data: { answerScale: "minimal", developerMode: true } },
+        CONTEXT,
+      ),
+    ).toEqual({
       ...DEFAULT_PREFERENCES,
       ...MIGRATED_CONCEPTS,
       // A format-1 document without the field meant the default of its day.

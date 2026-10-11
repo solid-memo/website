@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import { courseDraft, deckDraft, of } from "../testing/releaseDraft.ts";
 import {
@@ -14,12 +18,16 @@ import {
 } from "./courseIds.ts";
 import { DRAFT_ID, NOTHING_PUBLISHED, type ReleaseDraft } from "./releaseDraft.ts";
 
-const published = { ids: { "ch-gone": "chapter" as const, "q-a-1b": "card" as const }, activities: ["compilation"] };
+const published = {
+  ids: { "ch-gone": "chapter" as const, "q-a-1b": "card" as const },
+  activities: ["compilation"],
+};
 
 describe("takenIds and idProblem", () => {
   it("takes every id the draft has and every one a release before it published", () => {
     const taken = takenIds(courseDraft(published));
-    for (const id of ["ch-a", "q-a-1a-d1", "turtle", "series", "compilation", "ch-gone", "q-a-1b"]) expect(taken.has(id)).toBe(true);
+    for (const id of ["ch-a", "q-a-1a-d1", "turtle", "series", "compilation", "ch-gone", "q-a-1b"])
+      expect(taken.has(id)).toBe(true);
     expect(taken.has("ch-c")).toBe(false);
   });
 
@@ -45,13 +53,17 @@ describe("chapterIdFor and stepIdFor", () => {
     expect(chapterIdFor(draft, { sv: "Ä", en: "A" })).toBe("ch-a-3");
     expect(chapterIdFor(draft, { en: "Gone" })).toBe("ch-gone-2");
     expect(chapterIdFor(draft, { en: "?" })).toBe("ch-1");
-    expect(chapterIdFor({ ...draft, published: { ids: { "ch-7": "chapter" }, activities: [] } }, {})).toBe("ch-8");
+    expect(
+      chapterIdFor({ ...draft, published: { ids: { "ch-7": "chapter" }, activities: [] } }, {}),
+    ).toBe("ch-8");
   });
 
   it("numbers a chapter's steps after the highest taken", () => {
     expect(stepIdFor(courseDraft(), "ch-a")).toBe("ch-a-3");
     expect(stepIdFor(courseDraft(), "ch-b")).toBe("ch-b-1");
-    expect(stepIdFor(courseDraft({ ids: { "ch-b-4": "step" }, activities: [] }), "ch-b")).toBe("ch-b-5");
+    expect(stepIdFor(courseDraft({ ids: { "ch-b-4": "step" }, activities: [] }), "ch-b")).toBe(
+      "ch-b-5",
+    );
   });
 });
 
@@ -60,7 +72,17 @@ describe("questions and their ids", () => {
     const draft = courseDraft();
     const asked: ReleaseDraft = {
       ...draft,
-      steps: draft.steps.map((node) => (node.id === "ch-a-1" ? { ...node, data: { ...node.data, checkedBy: [of("q-a-1c"), of("q-a-1a"), "https://elsewhere.example/#q"] } } : node)),
+      steps: draft.steps.map((node) =>
+        node.id === "ch-a-1"
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                checkedBy: [of("q-a-1c"), of("q-a-1a"), "https://elsewhere.example/#q"],
+              },
+            }
+          : node,
+      ),
     };
     expect(questionsOfStep(asked, "ch-a-1")).toEqual(["q-a-1a", "q-a-1c"]);
     expect(questionsOfStep(asked, "nowhere")).toEqual([]);
@@ -94,14 +116,31 @@ describe("questions and their ids", () => {
     const draft = courseDraft();
     const full: ReleaseDraft = {
       ...draft,
-      steps: draft.steps.map((node) => (node.id === "ch-a-2" ? { ...node, data: { ...node.data, checkedBy: [of("q-a-2z")] } } : node)),
+      steps: draft.steps.map((node) =>
+        node.id === "ch-a-2"
+          ? { ...node, data: { ...node.data, checkedBy: [of("q-a-2z")] } }
+          : node,
+      ),
     };
     expect(questionIdFor(full, { kind: "step", step: "ch-a-2" })).toBe("q-a-2z1");
-    expect(questionIdFor({ ...full, published: { ids: { "q-a-2z1": "card" }, activities: [] } }, { kind: "step", step: "ch-a-2" })).toBe("q-a-2z2");
+    expect(
+      questionIdFor(
+        { ...full, published: { ids: { "q-a-2z1": "card" }, activities: [] } },
+        { kind: "step", step: "ch-a-2" },
+      ),
+    ).toBe("q-a-2z2");
     // Every letter taken, none asked by the step: a number after its name.
-    const letters = Object.fromEntries([..."abcdefghijklmnopqrstuvwxyz"].map((letter) => [`q-b-1${letter}`, "card" as const]));
+    const letters = Object.fromEntries(
+      [..."abcdefghijklmnopqrstuvwxyz"].map((letter) => [`q-b-1${letter}`, "card" as const]),
+    );
     const empty = courseDraft({ ids: letters, activities: [] });
-    const withStep: ReleaseDraft = { ...empty, steps: [...empty.steps, { id: "ch-b-1", data: { chapter: of("ch-b"), position: 0, checkedBy: [] } }] };
+    const withStep: ReleaseDraft = {
+      ...empty,
+      steps: [
+        ...empty.steps,
+        { id: "ch-b-1", data: { chapter: of("ch-b"), position: 0, checkedBy: [] } },
+      ],
+    };
     expect(questionIdFor(withStep, { kind: "step", step: "ch-b-1" })).toBe("q-b-11");
   });
 
@@ -118,19 +157,34 @@ describe("questions and their ids", () => {
 describe("questionIdBefore", () => {
   const asking = (checkedBy: string[], published = NOTHING_PUBLISHED): ReleaseDraft => {
     const draft = courseDraft(published);
-    return { ...draft, steps: draft.steps.map((node) => (node.id === "ch-a-1" ? { ...node, data: { ...node.data, checkedBy: checkedBy.map(of) } } : node)) };
+    return {
+      ...draft,
+      steps: draft.steps.map((node) =>
+        node.id === "ch-a-1"
+          ? { ...node, data: { ...node.data, checkedBy: checkedBy.map(of) } }
+          : node,
+      ),
+    };
   };
   const step = { kind: "step" as const, step: "ch-a-1" };
 
   it("names a question asked before another between it and the one before, by letter when one is free", () => {
     expect(questionIdBefore(asking(["q-a-1a", "q-a-1c"]), step, "q-a-1c")).toBe("q-a-1b");
     // b was published: an id between the two.
-    expect(questionIdBefore(asking(["q-a-1a", "q-a-1c"], { ids: { "q-a-1b": "card" }, activities: [] }), step, "q-a-1c")).toBe("q-a-1a1");
+    expect(
+      questionIdBefore(
+        asking(["q-a-1a", "q-a-1c"], { ids: { "q-a-1b": "card" }, activities: [] }),
+        step,
+        "q-a-1c",
+      ),
+    ).toBe("q-a-1a1");
   });
 
   it("puts one before the first after the place's own name", () => {
     expect(questionIdBefore(asking(["q-a-1a"]), step, "q-a-1a")).toBe("q-a-11");
-    expect(questionIdBefore(courseDraft(), { kind: "review", chapter: "ch-a" }, "q-a-r01")).toBe("q-a-r001");
+    expect(questionIdBefore(courseDraft(), { kind: "review", chapter: "ch-a" }, "q-a-r01")).toBe(
+      "q-a-r001",
+    );
   });
 
   it("finds none when the first sorts before the place's name, or no id lies between", () => {
@@ -160,7 +214,11 @@ describe("idBetween", () => {
     let seed = 11;
     const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     const chars = [..."-.019AZ_az"];
-    const tail = () => Array.from({ length: Math.floor(random() * 4) }, () => chars[Math.floor(random() * chars.length)]!).join("");
+    const tail = () =>
+      Array.from(
+        { length: Math.floor(random() * 4) },
+        () => chars[Math.floor(random() * chars.length)]!,
+      ).join("");
     for (let run = 0; run < 2000; run++) {
       const before = `q${tail()}`;
       // Often the second begins with the first, where numbers may not fit.

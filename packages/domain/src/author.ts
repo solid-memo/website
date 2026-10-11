@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /** Who made something, as a deck names them in `dcterms:creator`. */
 export interface Author {
   name: string;

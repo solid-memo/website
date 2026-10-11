@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 {
     $schema: 'https://docs.renovatebot.com/renovate-schema.json',
     extends: [
@@ -6,9 +10,26 @@
     baseBranchPatterns: [
         'main',
     ],
+    // An update is merged through a pull request once CI's ci-ok check
+    // passes, as anyone's change is (docs/testing.md#continuous-integration):
+    // the pull request is where the update's commit links to.
     automerge: true,
-    automergeType: 'branch',
+    automergeType: 'pr',
+    // Each commit says what it updates, from what to what, where, and why,
+    // and where its source and release notes are: the commit is the record
+    // of the decision (docs/standard-for-public-code.md, criterion 6), and
+    // its pull request has the notes in full.
+    commitBody: '{{#each upgrades}}{{#if (equals updateType \'lockFileMaintenance\')}}- package-lock.json: every dependency to the newest version its range allows (lock file maintenance)\n{{else}}- {{{depName}}} {{{displayFrom}}} → {{{displayTo}}} ({{{updateType}}}{{#if depType}}, {{{depType}}}{{/if}}) in {{{packageFile}}}{{#if sourceUrl}}; source and release notes: {{{sourceUrl}}}{{/if}}\n{{/if}}{{/each}}\nWhy: renovate.json5 keeps every dependency current, within the versions it allows, so that fixes arrive while they are small; the update was merged only after CI passed on it.',
     customManagers: [
+        // A tool a workflow downloads, its version after a comment that
+        // names it (`# renovate: datasource=github-releases depName=<owner>/<repo>`).
+        {
+            customType: 'regex',
+            managerFilePatterns: ['/^\\.github/(workflows|actions)/.+\\.ya?ml$/'],
+            matchStrings: [
+                '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+[A-Z_]+: (?<currentValue>\\S+)',
+            ],
+        },
         // The commit of Solid-Nextcloud its end-to-end tests' image builds,
         // as the branch its Dockerfile names moves on.
         {

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -43,10 +47,7 @@ function makePrompt(id: string, front: string): Prompt {
   };
 }
 
-function renderContainer(
-  useCases: UseCases,
-  random: () => number = () => 0,
-) {
+function renderContainer(useCases: UseCases, random: () => number = () => 0) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -84,9 +85,7 @@ describe("StudyContainer", () => {
         })),
       }),
     );
-    expect(
-      screen.getByText("Preparing your study session…"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Preparing your study session…")).toBeInTheDocument();
     expect(await screen.findByText("front-a")).toBeInTheDocument();
     expect(screen.getByText("Card 1 of 2")).toBeInTheDocument();
   });
@@ -142,9 +141,7 @@ describe("StudyContainer", () => {
       await answer("5 — Easy");
     }
     expect(seen).toEqual(["due-a", "new-x", "due-b", "new-y", "due-c"]);
-    expect(
-      await screen.findByText("Session finished — all cards reviewed."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Session finished — all cards reviewed.")).toBeInTheDocument();
   });
 
   it("shows an error when the queue cannot be built", async () => {
@@ -183,15 +180,11 @@ describe("StudyContainer", () => {
     const secondReveal = await screen.findByRole("button", {
       name: "Reveal",
     });
-    await waitFor(() =>
-      expect(secondReveal).toHaveAttribute("aria-disabled", "false"),
-    );
+    await waitFor(() => expect(secondReveal).toHaveAttribute("aria-disabled", "false"));
     fireEvent.click(secondReveal);
     fireEvent.click(screen.getByRole("button", { name: "3 — Hard" }));
 
-    expect(
-      await screen.findByText("Session finished — all cards reviewed."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Session finished — all cards reviewed.")).toBeInTheDocument();
   });
 
   it("stays on the card and shows the error when recording fails", async () => {
@@ -217,19 +210,42 @@ describe("StudyContainer", () => {
   it("studies at the screen's time, its deck linked where it is told", async () => {
     const later = new Date("2026-12-24T10:00:00.000Z");
     const useCases = makeUseCasesFake({
-      getStudyQueue: vi.fn(async () => ({ due: [makePrompt("card-a", "front-a")], newPrompts: [], studiedToday: 0 })),
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a")],
+        newPrompts: [],
+        studiedToday: 0,
+      })),
     });
     render(
-      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
         <Clock.Provider value={() => later}>
-          <StudyContainer useCases={useCases} instance={instance} deck={deck} onExit={vi.fn()} deckLink="#/trial" />
+          <StudyContainer
+            useCases={useCases}
+            instance={instance}
+            deck={deck}
+            onExit={vi.fn()}
+            deckLink="#/trial"
+          />
         </Clock.Provider>
       </QueryClientProvider>,
     );
-    expect(await screen.findByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", "#/trial");
+    expect(await screen.findByRole("link", { name: "Kanji N5" })).toHaveAttribute(
+      "href",
+      "#/trial",
+    );
     expect(useCases.getStudyQueue).toHaveBeenCalledWith(instance.url, deck, later);
     await answer("5 — Easy");
-    await waitFor(() => expect(useCases.recordReview).toHaveBeenCalledWith(instance.url, deck, expect.anything(), 5, later));
+    await waitFor(() =>
+      expect(useCases.recordReview).toHaveBeenCalledWith(
+        instance.url,
+        deck,
+        expect.anything(),
+        5,
+        later,
+      ),
+    );
   });
 
   it("shows the empty state when nothing is due", async () => {
@@ -275,9 +291,7 @@ describe("StudyContainer", () => {
 
     expect(await screen.findByText("front-c")).toBeInTheDocument();
     await answer("4 — Good");
-    expect(
-      await screen.findByText("Session finished — all cards reviewed."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Session finished — all cards reviewed.")).toBeInTheDocument();
     expect(useCases.recordReview).toHaveBeenCalledTimes(4);
   });
 
@@ -293,17 +307,13 @@ describe("StudyContainer", () => {
 
     await answer("0 — Blackout");
     expect(
-      await screen.findByText(
-        "Card 2 of 2. You'll see the last card again later in this session.",
-      ),
+      await screen.findByText("Card 2 of 2. You'll see the last card again later in this session."),
     ).toBeInTheDocument();
     expect(screen.getByText("front-a")).toBeInTheDocument();
     expect(screen.queryByText("front-a-back")).toBeNull();
 
     await answer("2 — Almost");
-    expect(
-      await screen.findByText("Session finished — all cards reviewed."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Session finished — all cards reviewed.")).toBeInTheDocument();
     expect(useCases.recordReview).toHaveBeenCalledTimes(2);
   });
 
@@ -318,9 +328,7 @@ describe("StudyContainer", () => {
     renderContainer(useCases);
 
     await answer("2 — Almost");
-    expect(
-      await screen.findByText("Session finished — all cards reviewed."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Session finished — all cards reviewed.")).toBeInTheDocument();
   });
 
   it("shows the answer buttons the preferences ask for", async () => {
@@ -369,16 +377,12 @@ describe("StudyContainer", () => {
     renderContainer(useCases);
 
     fireEvent.click(await screen.findByRole("button", { name: "Reveal" }));
-    expect(
-      screen.getByRole("button", { name: "0 — Blackout" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "0 — Blackout" })).toBeInTheDocument();
   });
 
   it("exits when the session ends", async () => {
     const { onExit } = renderContainer(makeUseCasesFake());
-    fireEvent.click(
-      await screen.findByRole("button", { name: "End session" }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: "End session" }));
     await waitFor(() => {
       expect(onExit).toHaveBeenCalledOnce();
     });
@@ -427,7 +431,9 @@ describe("StudyContainer keeping the deck's schedule", () => {
     await waitFor(() => expect(end).toBeEnabled());
     fireEvent.click(end);
     await waitFor(() => expect(onExit).toHaveBeenCalled());
-    await waitFor(() => expect(useCases.refreshStudyDigest).toHaveBeenCalledExactlyOnceWith(instance.url, deck));
+    await waitFor(() =>
+      expect(useCases.refreshStudyDigest).toHaveBeenCalledExactlyOnceWith(instance.url, deck),
+    );
   });
 
   it("keeps nothing for a session without answers", async () => {
@@ -460,7 +466,11 @@ describe("StudyContainer keeping the deck's schedule", () => {
 describe("StudyContainer leaving for the deck list", () => {
   it("lets the deck list count afresh, not show the counts from before the session", async () => {
     const useCases = makeUseCasesFake({
-      getStudyQueue: vi.fn(async () => ({ due: [makePrompt("card-a", "front-a")], newPrompts: [], studiedToday: 0 })),
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a")],
+        newPrompts: [],
+        studiedToday: 0,
+      })),
       getStudyCounts: vi.fn(async () => ({ dueCount: 0, newCount: 0 })),
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -469,9 +479,19 @@ describe("StudyContainer leaving for the deck list", () => {
     const screenFor = (studying: boolean) => (
       <QueryClientProvider client={queryClient}>
         {studying ? (
-          <StudyContainer useCases={useCases} instance={instance} deck={deck} onExit={() => undefined} />
+          <StudyContainer
+            useCases={useCases}
+            instance={instance}
+            deck={deck}
+            onExit={() => undefined}
+          />
         ) : (
-          <DeckStudyActionContainer useCases={useCases} instance={instance} deck={deck} onStudy={() => undefined} />
+          <DeckStudyActionContainer
+            useCases={useCases}
+            instance={instance}
+            deck={deck}
+            onStudy={() => undefined}
+          />
         )}
       </QueryClientProvider>
     );

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 /**
  * The shooters, in the order they pop: where along the bottom of the
  * viewport each stands, in percent, and how far it leans, in degrees
@@ -18,7 +22,7 @@ const PAUSE = 0.28;
 /**
  * A number in [0, 1) that looks random but follows from `index` and
  * `salt` alone, so the confetti flies the same way every time, while
- * pieces side by side, or of one colour, fly unalike.
+ * pieces side by side, or of one color, fly unalike.
  */
 function scatter(index: number, salt: number): number {
   const wave = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
@@ -33,7 +37,7 @@ function round(value: number, unit: string): string {
 /**
  * Confetti over the page, for a course just completed (style.css): three
  * shooters along the bottom of the viewport pop in quick succession, each
- * shooting a cone of pieces in the app's colours up at its own angle,
+ * shooting a cone of pieces in the app's colors up at its own angle,
  * which then flutter slowly back down and are gone, all in under five
  * seconds (WCAG 2.2.2). Decoration only: hidden from assistive technology, out of the
  * pointer's way, and fixed over the viewport, so it moves nothing on the
@@ -45,7 +49,11 @@ export function Confetti() {
   return (
     <div class="confetti" aria-hidden="true">
       {SHOOTERS.map(({ x, lean }, shooter) => (
-        <div key={shooter} class="confetti-shooter" style={{ "--x": `${x}%`, "--delay": round(shooter * PAUSE, "s") }}>
+        <div
+          key={shooter}
+          class="confetti-shooter"
+          style={{ "--x": `${x}%`, "--delay": round(shooter * PAUSE, "s") }}
+        >
           {Array.from({ length: PIECES }, (_, piece) => {
             const index = shooter * PIECES + piece + 1;
             const angle = ((lean + (scatter(index, 1) - 0.5) * 50) * Math.PI) / 180;

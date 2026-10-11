@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import { isFormatted, isMarkdown, type Distractor } from "@solid-memo/domain/deck";
@@ -16,7 +20,14 @@ import { useAskFirst } from "./askFirst";
 import { DataLine, plainDataText } from "./DataText";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
-import { draftOf, LangTextField, languageButtonId, textOfDraft, type DraftEntry, type LangTextDraft } from "./LangTextField";
+import {
+  draftOf,
+  LangTextField,
+  languageButtonId,
+  textOfDraft,
+  type DraftEntry,
+  type LangTextDraft,
+} from "./LangTextField";
 import { markdownHints } from "./MarkdownEditing";
 
 const NONE_PUBLISHED: ReadonlySet<string> = new Set();
@@ -104,10 +115,18 @@ export function DistractorFields({
   const missing = editing?.missing;
   useLayoutEffect(() => {
     if (missing === undefined) return;
-    document.getElementById(languageButtonId(missing.field === "text" ? "distractor-text" : "distractor-note", missing.entry))?.focus();
+    document
+      .getElementById(
+        languageButtonId(
+          missing.field === "text" ? "distractor-text" : "distractor-note",
+          missing.entry,
+        ),
+      )
+      ?.focus();
   }, [missing]);
 
-  const named = (distractor: Distractor) => plainDataText(readerText(distractor.text), markdown, 60);
+  const named = (distractor: Distractor) =>
+    plainDataText(readerText(distractor.text), markdown, 60);
   const editButtonId = (id: string) => `distractor-${id}-edit`;
   const backTag = shownTag(back) ?? null;
 
@@ -128,9 +147,19 @@ export function DistractorFields({
   function done() {
     if (editing === null || busy) return;
     const text = textOfDraft(editing.text, { trim: !formatted });
-    if ("missing" in text) return setEditing({ ...editing, missing: { field: "text", entry: text.missing }, error: null });
+    if ("missing" in text)
+      return setEditing({
+        ...editing,
+        missing: { field: "text", entry: text.missing },
+        error: null,
+      });
     const note = textOfDraft(editing.note, { trim: !formatted });
-    if ("missing" in note) return setEditing({ ...editing, missing: { field: "note", entry: note.missing }, error: null });
+    if ("missing" in note)
+      return setEditing({
+        ...editing,
+        missing: { field: "note", entry: note.missing },
+        error: null,
+      });
     const entered = { text: text.text, note: note.text };
     const edit =
       editing.id === null
@@ -174,13 +203,20 @@ export function DistractorFields({
   }
 
   const languages = (tags: readonly string[]) =>
-    tags.map((tag) => (tag === "" ? t("distractorFields.noLanguage") : languageLabel(tag))).join(", ");
+    tags
+      .map((tag) => (tag === "" ? t("distractorFields.noLanguage") : languageLabel(tag)))
+      .join(", ");
   const issueText = (issue: DistractorIssue): string[] => {
-    if (issue.code === "fewDistractors") return [t("distractorFields.issue.few", { count: issue.count, least: issue.least })];
+    if (issue.code === "fewDistractors")
+      return [t("distractorFields.issue.few", { count: issue.count, least: issue.least })];
     const option = named(distractors.find((distractor) => distractor.id === issue.id)!);
     return [
-      ...(issue.missing.length === 0 ? [] : [t("distractorFields.issue.missing", { option, languages: languages(issue.missing) })]),
-      ...(issue.extra.length === 0 ? [] : [t("distractorFields.issue.extra", { option, languages: languages(issue.extra) })]),
+      ...(issue.missing.length === 0
+        ? []
+        : [t("distractorFields.issue.missing", { option, languages: languages(issue.missing) })]),
+      ...(issue.extra.length === 0
+        ? []
+        : [t("distractorFields.issue.extra", { option, languages: languages(issue.extra) })]),
     ];
   };
   const issues = distractorIssues({ back, distractors }, "pod").flatMap(issueText);
@@ -223,7 +259,13 @@ export function DistractorFields({
         error={errorText(
           state.missing === undefined
             ? state.error
-            : new AppError("textNeedsLanguage", { field: t(state.missing.field === "text" ? "language.field.distractor" : "language.field.distractorNote") }),
+            : new AppError("textNeedsLanguage", {
+                field: t(
+                  state.missing.field === "text"
+                    ? "language.field.distractor"
+                    : "language.field.distractorNote",
+                ),
+              }),
         )}
       />
       <div class="edit-actions">
@@ -268,7 +310,9 @@ export function DistractorFields({
                 )}
                 <p class="hint distractor-id">{distractor.id}</p>
                 {picks !== undefined && (
-                  <p class="hint distractor-picks">{t("distractorFields.picks", { count: picks.get(distractor.id) ?? 0 })}</p>
+                  <p class="hint distractor-picks">
+                    {t("distractorFields.picks", { count: picks.get(distractor.id) ?? 0 })}
+                  </p>
                 )}
                 <div class="edit-actions">
                   <button
@@ -285,11 +329,24 @@ export function DistractorFields({
                   <button
                     type="button"
                     class="secondary"
-                    aria-label={t(distractor.retired ? "distractorFields.restoreLabel" : "distractorFields.retireLabel", {
-                      option: named(distractor),
-                    })}
+                    aria-label={t(
+                      distractor.retired
+                        ? "distractorFields.restoreLabel"
+                        : "distractorFields.retireLabel",
+                      {
+                        option: named(distractor),
+                      },
+                    )}
                     aria-disabled={busy}
-                    onClick={() => !busy && change((distractor.retired ? restoreDistractor : retireDistractor)(distractors, distractor.id))}
+                    onClick={() =>
+                      !busy &&
+                      change(
+                        (distractor.retired ? restoreDistractor : retireDistractor)(
+                          distractors,
+                          distractor.id,
+                        ),
+                      )
+                    }
                   >
                     {t(distractor.retired ? "distractorFields.restore" : "distractorFields.retire")}
                   </button>

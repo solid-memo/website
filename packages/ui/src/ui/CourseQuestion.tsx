@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useId, useLayoutEffect, useRef } from "preact/hooks";
 import type { CourseAnswer } from "@solid-memo/application/useCases";
 import type { Choice } from "@solid-memo/domain/course";
@@ -79,7 +83,8 @@ export function CourseQuestion({
   function pictureName(): string[] {
     if (question.imageUrl === undefined) return [];
     if (!isHttpUrl(question.imageUrl)) return [t("cardFace.notWebUrl")];
-    const description = question.imageDescription === undefined ? "" : readerText(question.imageDescription);
+    const description =
+      question.imageDescription === undefined ? "" : readerText(question.imageDescription);
     return [description !== "" ? description : t("cardFace.frontPictureAlt")];
   }
 
@@ -99,7 +104,12 @@ export function CourseQuestion({
         ].join(" ");
 
   function onFeedbackKeyDown(event: KeyboardEvent) {
-    if (event.key !== "Enter" || (event.target as Element).closest("button") || inDataRegion(event.target as Element)) return;
+    if (
+      event.key !== "Enter" ||
+      (event.target as Element).closest("button") ||
+      inDataRegion(event.target as Element)
+    )
+      return;
     event.preventDefault();
     onNext();
   }
@@ -112,7 +122,11 @@ export function CourseQuestion({
       {markdown && (
         // Hidden, so it is read only as the options' name, not again after the question.
         <span id={nameId} hidden>
-          {[`${t("cardFace.question")}:`, ...pictureName(), plainDataText(shownQuestion, true)].join(" ")}
+          {[
+            `${t("cardFace.question")}:`,
+            ...pictureName(),
+            plainDataText(shownQuestion, true),
+          ].join(" ")}
         </span>
       )}
       <MultipleChoice

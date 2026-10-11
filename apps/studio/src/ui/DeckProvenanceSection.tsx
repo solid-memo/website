@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { useState } from "preact/hooks";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckProvenance as Provenance } from "@solid-memo/domain/deckProvenance";
@@ -6,9 +10,9 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { LicenseSelect } from "./LicenseSelect";
 
 /**
- * Who made a deck and its licence (dcterms:creator, dcterms:license),
+ * Who made a deck and its license (dcterms:creator, dcterms:license),
  * with a form to change them: an author a line, "Name" or
- * "Name <email>", added and removed there, and a licence from those
+ * "Name <email>", added and removed there, and a license from those
  * offered (LicenseSelect). The domain tidies and checks them
  * (withProvenance): the form stays until the save is made, so one it
  * refuses loses nothing. Nothing here says anyone reviewed the deck.
@@ -30,22 +34,40 @@ export function DeckProvenanceSection({
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
-    if (await onSave({ authors: draft!.authors, ...(draft!.license === "" ? {} : { license: draft!.license }) })) setDraft(null);
+    if (
+      await onSave({
+        authors: draft!.authors,
+        ...(draft!.license === "" ? {} : { license: draft!.license }),
+      })
+    )
+      setDraft(null);
   }
 
   const setAuthor = (index: number, author: string) =>
-    setDraft({ ...draft!, authors: draft!.authors.map((other, i) => (i === index ? author : other)) });
+    setDraft({
+      ...draft!,
+      authors: draft!.authors.map((other, i) => (i === index ? author : other)),
+    });
 
   return (
     <section aria-labelledby="deck-provenance-heading">
       <h3 id="deck-provenance-heading">{t("studio.about.provenance")}</h3>
       {draft === null ? (
         <>
-          {stated ? <DeckProvenance authors={deck.authors} license={deck.license} /> : <p class="hint">{t("studio.about.noProvenance")}</p>}
+          {stated ? (
+            <DeckProvenance authors={deck.authors} license={deck.license} />
+          ) : (
+            <p class="hint">{t("studio.about.noProvenance")}</p>
+          )}
           <button
             type="button"
             disabled={busy}
-            onClick={() => setDraft({ authors: deck.authors.length === 0 ? [""] : [...deck.authors], license: deck.license ?? "" })}
+            onClick={() =>
+              setDraft({
+                authors: deck.authors.length === 0 ? [""] : [...deck.authors],
+                license: deck.license ?? "",
+              })
+            }
           >
             {t("studio.about.editProvenance")}
           </button>
@@ -69,13 +91,19 @@ export function DeckProvenanceSection({
                 <button
                   type="button"
                   disabled={busy}
-                  onClick={() => setDraft({ ...draft, authors: draft.authors.filter((_, i) => i !== index) })}
+                  onClick={() =>
+                    setDraft({ ...draft, authors: draft.authors.filter((_, i) => i !== index) })
+                  }
                 >
                   {t("studio.about.removeAuthor", { number: index + 1 })}
                 </button>
               </div>
             ))}
-            <button type="button" disabled={busy} onClick={() => setDraft({ ...draft, authors: [...draft.authors, ""] })}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setDraft({ ...draft, authors: [...draft.authors, ""] })}
+            >
               {t("studio.about.addAuthor")}
             </button>
           </fieldset>

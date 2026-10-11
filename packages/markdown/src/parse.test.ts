@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import {
   MAX_CHARS,
@@ -65,7 +69,9 @@ describe("parseMarkdown", () => {
   it("counts an emoji next to a delimiter as punctuation, as CommonMark does", () => {
     expect(parseMarkdown("*😀*a")).toEqual([paragraph(text("*😀*a"))]);
     expect(parseMarkdown("a**😀**b")).toEqual([paragraph(text("a**😀**b"))]);
-    expect(parseMarkdown("*😀*")).toEqual([paragraph({ type: "emphasis", children: [text("😀")] })]);
+    expect(parseMarkdown("*😀*")).toEqual([
+      paragraph({ type: "emphasis", children: [text("😀")] }),
+    ]);
   });
 
   it("reads nothing from empty text", () => {
@@ -74,11 +80,14 @@ describe("parseMarkdown", () => {
 
   it("folds a heading into a bold paragraph, so data never adds to the page's outline", () => {
     expect(parseMarkdown("## A *b*")).toEqual([
-      paragraph({ type: "strong", children: [text("A "), { type: "emphasis", children: [text("b")] }] }),
+      paragraph({
+        type: "strong",
+        children: [text("A "), { type: "emphasis", children: [text("b")] }],
+      }),
     ]);
   });
 
-  it("reads fenced code with its language, normalised, and indented code without one", () => {
+  it("reads fenced code with its language, normalized, and indented code without one", () => {
     expect(parseMarkdown("```HTTP extra words\nGET / HTTP/1.1\n\nHost: x\n```")).toEqual([
       { type: "code", lang: "http", value: "GET / HTTP/1.1\n\nHost: x" },
     ]);
@@ -86,8 +95,12 @@ describe("parseMarkdown", () => {
   });
 
   it("drops an info string that is not a language name", () => {
-    expect(parseMarkdown('```{.class onclick="x"}\ny\n```')).toEqual([{ type: "code", value: "y" }]);
-    expect(parseMarkdown(`\`\`\`${"a".repeat(21)}\ny\n\`\`\``)).toEqual([{ type: "code", value: "y" }]);
+    expect(parseMarkdown('```{.class onclick="x"}\ny\n```')).toEqual([
+      { type: "code", value: "y" },
+    ]);
+    expect(parseMarkdown(`\`\`\`${"a".repeat(21)}\ny\n\`\`\``)).toEqual([
+      { type: "code", value: "y" },
+    ]);
   });
 
   it("reads lists, ordered with their start, tight or loose, and nested", () => {
@@ -101,7 +114,13 @@ describe("parseMarkdown", () => {
           [paragraph(text("a"))],
           [
             paragraph(text("b")),
-            { type: "list", ordered: false, start: 1, tight: true, items: [[paragraph(text("c"))]] },
+            {
+              type: "list",
+              ordered: false,
+              start: 1,
+              tight: true,
+              items: [[paragraph(text("c"))]],
+            },
           ],
         ],
       },
@@ -128,7 +147,9 @@ describe("parseMarkdown", () => {
         ],
       },
     ]);
-    expect(parseMarkdown("| a |\n|---|")).toEqual([{ type: "table", align: [null], rows: [[[text("a")]]] }]);
+    expect(parseMarkdown("| a |\n|---|")).toEqual([
+      { type: "table", align: [null], rows: [[[text("a")]]] },
+    ]);
   });
 
   it("drops a body row's cells past the header's, as GFM does", () => {
@@ -136,12 +157,16 @@ describe("parseMarkdown", () => {
       { type: "table", align: [null], rows: [[[text("a")]], [[text("b")]]] },
     ]);
     const long = `| a |\n|-|\n|${" b |".repeat(MAX_TABLE_CELLS)}`;
-    expect(parseMarkdown(long)).toEqual([{ type: "table", align: [null], rows: [[[text("a")]], [[text("b")]]] }]);
+    expect(parseMarkdown(long)).toEqual([
+      { type: "table", align: [null], rows: [[[text("a")]], [[text("b")]]] },
+    ]);
   });
 
   it("shows a table over the column or cell cap as its source", () => {
     const wide = `|${" a |".repeat(MAX_TABLE_COLUMNS + 1)}\n|${"-|".repeat(MAX_TABLE_COLUMNS + 1)}`;
-    expect(parseMarkdown(wide)).toEqual([paragraph(text(wide.split("\n")[0]!), { type: "break" }, text(wide.split("\n")[1]!))]);
+    expect(parseMarkdown(wide)).toEqual([
+      paragraph(text(wide.split("\n")[0]!), { type: "break" }, text(wide.split("\n")[1]!)),
+    ]);
     const atCap = `|${" a |".repeat(MAX_TABLE_COLUMNS)}\n|${"-|".repeat(MAX_TABLE_COLUMNS)}`;
     expect(parseMarkdown(atCap)![0]!.type).toBe("table");
 
@@ -153,7 +178,13 @@ describe("parseMarkdown", () => {
 
   it("shows raw HTML as its source text, block and inline", () => {
     expect(parseMarkdown("<div>\n<script>alert(1)</script>\n</div>")).toEqual([
-      paragraph(text("<div>"), { type: "break" }, text("<script>alert(1)</script>"), { type: "break" }, text("</div>")),
+      paragraph(
+        text("<div>"),
+        { type: "break" },
+        text("<script>alert(1)</script>"),
+        { type: "break" },
+        text("</div>"),
+      ),
     ]);
     expect(parseMarkdown('a <img src=x onerror="alert(1)"> b')).toEqual([
       paragraph(text("a "), text('<img src=x onerror="alert(1)">'), text(" b")),
@@ -161,13 +192,15 @@ describe("parseMarkdown", () => {
   });
 
   it("shows a picture as its alt text, never loading it", () => {
-    expect(parseMarkdown("![a *cat*](https://tracker.example/p.png) and ![][i]\n\n[i]: https://x/i.png")).toEqual([
-      paragraph(text("a cat"), text(" and "), text("")),
-    ]);
+    expect(
+      parseMarkdown("![a *cat*](https://tracker.example/p.png) and ![][i]\n\n[i]: https://x/i.png"),
+    ).toEqual([paragraph(text("a cat"), text(" and "), text(""))]);
   });
 
   it("keeps a link's URL as written, for the renderer to judge", () => {
-    expect(parseMarkdown("[see](https://example.org/a) <https://b.example> [js](javascript:alert(1))")).toEqual([
+    expect(
+      parseMarkdown("[see](https://example.org/a) <https://b.example> [js](javascript:alert(1))"),
+    ).toEqual([
       paragraph(
         { type: "link", url: "https://example.org/a", children: [text("see")] },
         text(" "),
@@ -183,7 +216,12 @@ describe("parseMarkdown", () => {
       paragraph({
         type: "link",
         url: "https://good.example/",
-        children: [text("a "), text("https://evil.example/"), text(" "), { type: "emphasis", children: [text("b")] }],
+        children: [
+          text("a "),
+          text("https://evil.example/"),
+          text(" "),
+          { type: "emphasis", children: [text("b")] },
+        ],
       }),
     ]);
   });
@@ -206,7 +244,9 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown("M87* ln|x| `&aring;` &aring; \\&aring;")).toEqual([
       paragraph(text("M87* ln|x| "), { type: "inlineCode", value: "&aring;" }, text(" å &aring;")),
     ]);
-    expect(parseMarkdown("git clone <url>")).toEqual([paragraph(text("git clone "), text("<url>"))]);
+    expect(parseMarkdown("git clone <url>")).toEqual([
+      paragraph(text("git clone "), text("<url>")),
+    ]);
     expect(parseMarkdown("<ex:title>")).toEqual([
       paragraph({ type: "link", url: "ex:title", children: [text("ex:title")] }),
     ]);
@@ -219,13 +259,21 @@ describe("parseMarkdown", () => {
       paragraph({ type: "link", url: "https://x.example", children: [text("g⟨U+2066⟩h")] }),
     ]);
     expect(parseMarkdown("![a‮b](x) [![c‮d](x)](https://e.example)")).toEqual([
-      paragraph(text("a‮b"), text(" "), { type: "link", url: "https://e.example", children: [text("c⟨U+202E⟩d")] }),
+      paragraph(text("a‮b"), text(" "), {
+        type: "link",
+        url: "https://e.example",
+        children: [text("c⟨U+202E⟩d")],
+      }),
     ]);
   });
 
   it("reads nothing past MAX_LINE_NESTING containers opened on one line, a thematic break aside", () => {
     expect(parseMarkdown(`${"- ".repeat(MAX_LINE_NESTING)}a`)).not.toBeNull();
-    expect(parseMarkdown(`ok\n${"> ".repeat(MAX_LINE_NESTING / 2)}${"1) ".repeat(MAX_LINE_NESTING / 2)}a`)).not.toBeNull();
+    expect(
+      parseMarkdown(
+        `ok\n${"> ".repeat(MAX_LINE_NESTING / 2)}${"1) ".repeat(MAX_LINE_NESTING / 2)}a`,
+      ),
+    ).not.toBeNull();
     expect(parseMarkdown(`ok\n${"- ".repeat(MAX_LINE_NESTING + 1)}a`)).toBeNull();
     expect(parseMarkdown(`${">".repeat(MAX_LINE_NESTING + 1)}a`)).toBeNull();
     expect(parseMarkdown("* ".repeat(MAX_LINE_NESTING + 1))).toEqual([{ type: "rule" }]);
@@ -236,7 +284,11 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown("- - a\n".repeat(MAX_NESTED_LINES))).not.toBeNull();
     expect(parseMarkdown("- - a\n".repeat(MAX_NESTED_LINES + 1))).toBeNull();
     expect(parseMarkdown(`${"- > a\n".repeat(MAX_NESTED_LINES)}  - b`)).toBeNull();
-    expect(parseMarkdown(`${"- a\n".repeat(MAX_NESTED_LINES)}${"   1. b\n".repeat(MAX_NESTED_LINES + 1)}`)).toBeNull();
+    expect(
+      parseMarkdown(
+        `${"- a\n".repeat(MAX_NESTED_LINES)}${"   1. b\n".repeat(MAX_NESTED_LINES + 1)}`,
+      ),
+    ).toBeNull();
     expect(parseMarkdown("> - a\n> > b\n".repeat(MAX_NESTED_LINES))).not.toBeNull();
   });
 
@@ -258,7 +310,9 @@ describe("parseMarkdown", () => {
   });
 
   it("reads nothing past MAX_UNDERLINES lines that could underline a heading", () => {
-    expect(parseMarkdown("a\n=\n".repeat(MAX_UNDERLINES / 2) + "b\n---\n".repeat(MAX_UNDERLINES / 2))).not.toBeNull();
+    expect(
+      parseMarkdown("a\n=\n".repeat(MAX_UNDERLINES / 2) + "b\n---\n".repeat(MAX_UNDERLINES / 2)),
+    ).not.toBeNull();
     expect(parseMarkdown(`${"a\n=\n".repeat(MAX_UNDERLINES)}   ---  `)).toBeNull();
     expect(parseMarkdown("a\n- b\n".repeat(MAX_UNDERLINES + 1))).not.toBeNull();
   });
@@ -295,7 +349,8 @@ describe("inspectMarkdown", () => {
 
   it("tells one paragraph as written, and gives nothing past parseMarkdown's limits", () => {
     expect(inspectMarkdown("a *b*\n\n[r]: https://r.example")!.oneParagraph).toBe(true);
-    for (const markdown of ["# A", "A\n-", "a\n\nb", "- a", ""]) expect(inspectMarkdown(markdown)!.oneParagraph).toBe(false);
+    for (const markdown of ["# A", "A\n-", "a\n\nb", "- a", ""])
+      expect(inspectMarkdown(markdown)!.oneParagraph).toBe(false);
     expect(inspectMarkdown("a".repeat(MAX_CHARS + 1))).toBeNull();
   });
 
@@ -304,7 +359,9 @@ describe("inspectMarkdown", () => {
   });
 
   it("notes raw HTML, pictures and code, as written", () => {
-    expect(notesOf("<div>\nx\n</div>\n\ngit clone <url> ![a](p.png) ![b][r] `c`\n\n    d\n\n[r]: q.png")).toEqual([
+    expect(
+      notesOf("<div>\nx\n</div>\n\ngit clone <url> ![a](p.png) ![b][r] `c`\n\n    d\n\n[r]: q.png"),
+    ).toEqual([
       { type: "html", source: "<div>\nx\n</div>" },
       { type: "html", source: "<url>" },
       { type: "image", source: "![a](p.png)" },
@@ -315,24 +372,45 @@ describe("inspectMarkdown", () => {
   });
 
   it("notes links with their URL, a reference's resolved, their text as plain text, code in it not apart, and autolinks", () => {
-    expect(notesOf("[*a* `b` ![c](x)](https://a.example) [d][r] <ex:title>\n\n[r]: https://r.example")).toEqual([
-      { type: "link", url: "https://a.example", text: "a b c", source: "[*a* `b` ![c](x)](https://a.example)", autolink: false },
+    expect(
+      notesOf("[*a* `b` ![c](x)](https://a.example) [d][r] <ex:title>\n\n[r]: https://r.example"),
+    ).toEqual([
+      {
+        type: "link",
+        url: "https://a.example",
+        text: "a b c",
+        source: "[*a* `b` ![c](x)](https://a.example)",
+        autolink: false,
+      },
       { type: "image", source: "![c](x)" },
       { type: "link", url: "https://r.example", text: "d", source: "[d][r]", autolink: false },
       { type: "link", url: "ex:title", text: "ex:title", source: "<ex:title>", autolink: true },
     ]);
-    expect(notesOf("[a  \n<b>c</b>](https://a.example)")[0]).toMatchObject({ type: "link", text: "a <b>c</b>" });
+    expect(notesOf("[a  \n<b>c</b>](https://a.example)")[0]).toMatchObject({
+      type: "link",
+      text: "a <b>c</b>",
+    });
   });
 
   it("notes the character references CommonMark decodes outside code, not escaped ones, unknown names or an autolink's", () => {
-    expect(notesOf("&aring; &#229; &#xE5; &amp;aring; \\&ouml; \\\\&nbsp; &nosuchname; `&copy;` <https://x.example/?a&amp;b>")).toEqual([
+    expect(
+      notesOf(
+        "&aring; &#229; &#xE5; &amp;aring; \\&ouml; \\\\&nbsp; &nosuchname; `&copy;` <https://x.example/?a&amp;b>",
+      ),
+    ).toEqual([
       { type: "characterReference", source: "&aring;" },
       { type: "characterReference", source: "&#229;" },
       { type: "characterReference", source: "&#xE5;" },
       { type: "characterReference", source: "&amp;" },
       { type: "characterReference", source: "&nbsp;" },
       { type: "code", value: "&copy;" },
-      { type: "link", url: "https://x.example/?a&amp;b", text: "https://x.example/?a&amp;b", source: "<https://x.example/?a&amp;b>", autolink: true },
+      {
+        type: "link",
+        url: "https://x.example/?a&amp;b",
+        text: "https://x.example/?a&amp;b",
+        source: "<https://x.example/?a&amp;b>",
+        autolink: true,
+      },
     ]);
     expect(notesOf("| &aring; |\n|---|\n\n## &aring; again")).toEqual([
       { type: "characterReference", source: "&aring;" },
@@ -341,13 +419,17 @@ describe("inspectMarkdown", () => {
   });
 
   it("notes a heading underlined with dashes, wherever it is, but no other heading, rule or table", () => {
-    expect(notesOf("Intro\n---\n\nmore\n- - -")).toEqual([{ type: "dashHeading", source: "Intro\n---" }]);
+    expect(notesOf("Intro\n---\n\nmore\n- - -")).toEqual([
+      { type: "dashHeading", source: "Intro\n---" },
+    ]);
     expect(notesOf("a\nb &aring;\n   -   \n\n> c\n> ---")).toEqual([
       { type: "dashHeading", source: "a\nb &aring;\n   -   " },
       { type: "characterReference", source: "&aring;" },
       { type: "dashHeading", source: "c\n> ---" },
     ]);
-    expect(notesOf("a\n\n---\n\n## b\n\nc\n===\n\n| d |\n|---|\n\n```\ne\n---\n```")).toEqual([{ type: "code", value: "e\n---" }]);
+    expect(notesOf("a\n\n---\n\n## b\n\nc\n===\n\n| d |\n|---|\n\n```\ne\n---\n```")).toEqual([
+      { type: "code", value: "e\n---" },
+    ]);
   });
 
   it("notes a table past its caps, and what nests past MAX_DEPTH, once each, as their source", () => {
@@ -356,7 +438,9 @@ describe("inspectMarkdown", () => {
     expect(notesOf(`${"> ".repeat(MAX_DEPTH)}<b>`)).toEqual([{ type: "tooDeep", source: "<b>" }]);
     expect(notesOf(`${"> ".repeat(MAX_DEPTH - 1)}<b>`)).toEqual([{ type: "html", source: "<b>" }]);
     expect(notesOf(`${"> ".repeat(MAX_DEPTH - 1)}a`)).toEqual([]);
-    expect(notesOf(`${"> ".repeat(MAX_DEPTH - 1)}&amp;`)).toEqual([{ type: "tooDeep", source: "&amp;" }]);
+    expect(notesOf(`${"> ".repeat(MAX_DEPTH - 1)}&amp;`)).toEqual([
+      { type: "tooDeep", source: "&amp;" },
+    ]);
   });
 });
 
@@ -376,7 +460,17 @@ describe("visibleControls", () => {
   });
 
   it("marks characters that show nothing or look blank yet count, astral ones by their code point", () => {
-    const hidden = ["\u3164", "\u115F", "\u2062", "\u00AD", "\u034F", "\u180E", "\uFE0F", "\u{E0041}", "\u{E0100}"];
+    const hidden = [
+      "\u3164",
+      "\u115F",
+      "\u2062",
+      "\u00AD",
+      "\u034F",
+      "\u180E",
+      "\uFE0F",
+      "\u{E0041}",
+      "\u{E0100}",
+    ];
     expect(hidden.map((character) => visibleControls(`a${character}b`))).toEqual([
       "a⟨U+3164⟩b",
       "a⟨U+115F⟩b",
@@ -411,13 +505,28 @@ describe("pathological input", () => {
     ["nested block quotes", fill("> ", "", "a")],
     ["nested lists", fill("- ", "", "a")],
     ["nested ordered lists", fill("1. ", "", "a")],
-    ["block quotes and lists nested at the cap, line after line", fill(`${"> - ".repeat(MAX_LINE_NESTING / 2)}a\n`)],
-    ["items holding a list or quote, at the cap", fill("\nb", `${"- - a\n".repeat(MAX_NESTED_LINES / 2)}${"- > a\n".repeat(MAX_NESTED_LINES / 2)}`)],
+    [
+      "block quotes and lists nested at the cap, line after line",
+      fill(`${"> - ".repeat(MAX_LINE_NESTING / 2)}a\n`),
+    ],
+    [
+      "items holding a list or quote, at the cap",
+      fill(
+        "\nb",
+        `${"- - a\n".repeat(MAX_NESTED_LINES / 2)}${"- > a\n".repeat(MAX_NESTED_LINES / 2)}`,
+      ),
+    ],
     ["items holding a list or quote, past the cap", fill("- - a\n")],
     ["lazy lines at the cap, run after run", fill(`- a\n${"b\n".repeat(MAX_LAZY_LINES)}`)],
-    ["lazy lines in a nested quote, run after run", fill(`> - > - a\n${"b\n".repeat(MAX_LAZY_LINES)}`)],
+    [
+      "lazy lines in a nested quote, run after run",
+      fill(`> - > - a\n${"b\n".repeat(MAX_LAZY_LINES)}`),
+    ],
     ["lazy lines past the cap", fill("b\n", "- a\n")],
-    ["lists nested by indentation", Array.from({ length: 139 }, (_, level) => `${"  ".repeat(level)}- a`).join("\n")],
+    [
+      "lists nested by indentation",
+      Array.from({ length: 139 }, (_, level) => `${"  ".repeat(level)}- a`).join("\n"),
+    ],
     ["sibling list items", fill("- a\n")],
     ["emphasis delimiters at the cap", fill("a", "*_".repeat(MAX_DELIMITERS / 2))],
     ["unclosed links", fill("[")],
@@ -426,7 +535,10 @@ describe("pathological input", () => {
     ["emphasis openers", fill("*a ")],
     ["mixed delimiters", fill("*_")],
     ["strong closers", fill("a**")],
-    ["emphasis delimiters among Hangul at the cap", fill("가", "**(가)**나".repeat(MAX_DELIMITERS / 4))],
+    [
+      "emphasis delimiters among Hangul at the cap",
+      fill("가", "**(가)**나".repeat(MAX_DELIMITERS / 4)),
+    ],
     ["strong closers after punctuation before Hangul", fill("가)**나")],
     ["underscores in words", fill("snake_case ")],
     ["backtick runs", fill("`a``")],
@@ -439,7 +551,10 @@ describe("pathological input", () => {
     ["setext underlines", fill("=\n")],
     ["setext headings", fill("a\n-\n")],
     ["long setext underlines", fill("a\n==\n")],
-    ["setext headings at the cap among long lines", fill(`${"a".repeat(80)}\n`, `${"a".repeat(80)}\n=\n`.repeat(MAX_UNDERLINES))],
+    [
+      "setext headings at the cap among long lines",
+      fill(`${"a".repeat(80)}\n`, `${"a".repeat(80)}\n=\n`.repeat(MAX_UNDERLINES)),
+    ],
   ])("reads %s in time", { timeout: 60_000 }, (_, input) => {
     expect(input.length).toBeLessThanOrEqual(MAX_CHARS);
     const baseline = fill("Plain words in a paragraph.\n");
@@ -453,6 +568,8 @@ describe("pathological input", () => {
       parseMarkdown(input);
       took = Math.min(took, performance.now() - started);
     }
-    expect(took, `${Math.round(took)} ms against ${Math.round(base)} ms`).toBeLessThan(base * slowest);
+    expect(took, `${Math.round(took)} ms against ${Math.round(base)} ms`).toBeLessThan(
+      base * slowest,
+    );
   });
 });

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
 # node-solid-server for the end-to-end tests (docs/testing.md), built from
 # the lockfile of one major (MAJOR: 5 or 6), as ../nss-<major>/compose.yml
 # asks. Without install scripts: solid-server depends on its own commit-hook

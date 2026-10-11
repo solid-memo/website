@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -35,7 +39,13 @@ async function openedTwice(checks: ReleaseCheck[]) {
   return { checkReleaseDraft, second };
 }
 
-const check = (drops: ReleaseCheck["drops"]): ReleaseCheck => ({ rules: [], library: [], drops, markdown: [], shapes: null });
+const check = (drops: ReleaseCheck["drops"]): ReleaseCheck => ({
+  rules: [],
+  library: [],
+  drops,
+  markdown: [],
+  shapes: null,
+});
 
 describe("useReleaseCheck", () => {
   it("keeps a whole check of a version of the draft", async () => {
@@ -44,7 +54,10 @@ describe("useReleaseCheck", () => {
   });
 
   it("checks again, when it is shown again, a check whose release before could not be read", async () => {
-    const unread = problem(DRAFT_URL, { code: "previousUnread", params: { previous: "https://pod.example/v1.ttl" } });
+    const unread = problem(DRAFT_URL, {
+      code: "previousUnread",
+      params: { previous: "https://pod.example/v1.ttl" },
+    });
     const { checkReleaseDraft, second } = await openedTwice([check([unread]), check([])]);
     await second.findByText("0 dropped");
     expect(checkReleaseDraft).toHaveBeenCalledTimes(2);
@@ -52,14 +65,24 @@ describe("useReleaseCheck", () => {
 });
 
 describe("useReleaseCheck, as the draft and the policy change", () => {
-  function Shown({ useCases, of, policy }: { useCases: UseCases; of: ReleaseDraft | null; policy: CheckPolicy }) {
+  function Shown({
+    useCases,
+    of,
+    policy,
+  }: {
+    useCases: UseCases;
+    of: ReleaseDraft | null;
+    policy: CheckPolicy;
+  }) {
     const found = useReleaseCheck(useCases, of, policy);
     return <p>{found.data === undefined ? "nothing" : `${found.data.drops.length} dropped`}</p>;
   }
 
   it("shows the last version's check while a newer one is checked, but not another draft's or policy's, and checks no draft", async () => {
     const pending: ((check: ReleaseCheck) => void)[] = [];
-    const checkReleaseDraft = vi.fn(() => new Promise<ReleaseCheck>((resolve) => pending.push(resolve)));
+    const checkReleaseDraft = vi.fn(
+      () => new Promise<ReleaseCheck>((resolve) => pending.push(resolve)),
+    );
     const useCases = makeUseCasesFake({ checkReleaseDraft });
     const queryClient = new QueryClient();
     const shown = (of: ReleaseDraft | null, policy: CheckPolicy = "pod") => (
@@ -67,7 +90,10 @@ describe("useReleaseCheck, as the draft and the policy change", () => {
         <Shown useCases={useCases} of={of} policy={policy} />
       </QueryClientProvider>
     );
-    const unread = problem(DRAFT_URL, { code: "previousUnread", params: { previous: "https://pod.example/v1.ttl" } });
+    const unread = problem(DRAFT_URL, {
+      code: "previousUnread",
+      params: { previous: "https://pod.example/v1.ttl" },
+    });
     const view = render(shown(null));
     expect(checkReleaseDraft).not.toHaveBeenCalled();
     view.rerender(shown(draft));
@@ -89,7 +115,11 @@ describe("useReleaseCheck, as the draft and the policy change", () => {
 describe("publishErrors", () => {
   it("counts the errors of the rules, the drops and the Markdown, as publishing checks them", () => {
     const error = problem(DRAFT_URL, { code: "libraryUnread", params: {} });
-    const warning = problem(DRAFT_URL, { code: "libraryUnread", params: {} }, { severity: "warning" });
+    const warning = problem(
+      DRAFT_URL,
+      { code: "libraryUnread", params: {} },
+      { severity: "warning" },
+    );
     expect(publishErrors({ rules: [error, warning], drops: [error], markdown: [error] })).toBe(3);
     const elsewhere: ReleaseCheck = { ...check([warning]), library: [error], shapes: [error] };
     expect(publishErrors(elsewhere)).toBe(0);

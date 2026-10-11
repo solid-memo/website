@@ -1,8 +1,14 @@
 // @vitest-environment node
+
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
-import { build, type Rolldown } from "vite";
+import { build, loadEnv, type Rolldown } from "vite";
 import { beforeAll, describe, expect, it } from "vitest";
+import { siteConfig, siteHtml, type SiteConfig } from "./config";
 
 /*
  * The production build itself, as the site ships it (docs/markdown.md):
@@ -11,7 +17,13 @@ import { beforeAll, describe, expect, it } from "vitest";
  */
 
 /** Ways script can turn a string into markup. */
-const HTML_SINKS = /\b(?:innerHTML|outerHTML|insertAdjacentHTML|dangerouslySetInnerHTML|createContextualFragment|srcdoc)\b|document\.write/;
+const HTML_SINKS =
+  /\b(?:innerHTML|outerHTML|insertAdjacentHTML|dangerouslySetInnerHTML|createContextualFragment|srcdoc)\b|document\.write/;
+
+/** The settings this build was given, so a fork's own apps/web/.env passes too. */
+function builtConfig(): SiteConfig {
+  return siteConfig(loadEnv("production", resolve(import.meta.dirname, ".."), "VITE_"));
+}
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
@@ -36,7 +48,9 @@ beforeAll(async () => {
   }
   chunks = result.output.filter((item): item is Rolldown.OutputChunk => item.type === "chunk");
   assets = result.output.filter((item): item is Rolldown.OutputAsset => item.type === "asset");
-  const page = result.output.find((item): item is Rolldown.OutputAsset => item.fileName === "index.html")!;
+  const page = result.output.find(
+    (item): item is Rolldown.OutputAsset => item.fileName === "index.html",
+  )!;
   html = page.source as string;
 }, 120_000);
 
@@ -52,8 +66,12 @@ describe("the bundle", () => {
 
   it("decodes Markdown's character references with a table, not the browser's parser", () => {
     const ids = chunks.flatMap((chunk) => Object.keys(chunk.modules));
-    expect(ids).toContainEqual(expect.stringMatching(/decode-named-character-reference\/index\.js$/));
-    expect(ids).not.toContainEqual(expect.stringMatching(/decode-named-character-reference\/index\.dom\.js$/));
+    expect(ids).toContainEqual(
+      expect.stringMatching(/decode-named-character-reference\/index\.js$/),
+    );
+    expect(ids).not.toContainEqual(
+      expect.stringMatching(/decode-named-character-reference\/index\.dom\.js$/),
+    );
   });
 });
 
@@ -79,15 +97,19 @@ describe("the Studio", () => {
     expect(studio[0]!.isDynamicEntry).toBe(true);
     expect(studio[0]!.isEntry).toBe(false);
     expect(upFront().has(studio[0]!.fileName)).toBe(false);
-    for (const fileName of upFront()) expect(Object.keys(chunkNamed(fileName).modules).filter(isStudio)).toEqual([]);
+    for (const fileName of upFront())
+      expect(Object.keys(chunkNamed(fileName).modules).filter(isStudio)).toEqual([]);
     expect(html).not.toContain(studio[0]!.fileName);
   });
 
   it("brings its stylesheet (studio.css) with its chunk, never up front", () => {
     const [stylesheet, ...others] = [...studioChunks()[0]!.viteMetadata!.importedCss];
     expect(others).toEqual([]);
-    expect(assets.find((asset) => asset.fileName === stylesheet)!.source).toContain(":root[data-surface=studio]");
-    for (const fileName of upFront()) expect([...chunkNamed(fileName).viteMetadata!.importedCss]).not.toContain(stylesheet);
+    expect(assets.find((asset) => asset.fileName === stylesheet)!.source).toContain(
+      ":root[data-surface=studio]",
+    );
+    for (const fileName of upFront())
+      expect([...chunkNamed(fileName).viteMetadata!.importedCss]).not.toContain(stylesheet);
     expect(html).not.toContain(stylesheet);
   });
 });
@@ -95,10 +117,12 @@ describe("the Studio", () => {
 describe("the page's Content Security Policy", () => {
   const policy = () => {
     const meta = /<meta http-equiv="Content-Security-Policy"\s+content="([^"]*)"/.exec(html);
-    return new Map(meta![1]!.split(";").map((part) => {
-      const [name, ...values] = part.trim().split(/\s+/);
-      return [name!, values];
-    }));
+    return new Map(
+      meta![1]!.split(";").map((part) => {
+        const [name, ...values] = part.trim().split(/\s+/);
+        return [name!, values];
+      }),
+    );
   };
 
   it("comes before any script, so it covers them all", () => {
@@ -111,16 +135,69 @@ describe("the page's Content Security Policy", () => {
     // Every script without a src runs inline, whatever its attributes, but data
     // (a JSON-LD block) is never run.
     const inline = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)]
-      .filter(([, attributes]) => !/\bsrc=/.test(attributes!) && !/\btype="application\/ld\+json"/.test(attributes!))
+      .filter(
+        ([, attributes]) =>
+          !/\bsrc=/.test(attributes!) && !/\btype="application\/ld\+json"/.test(attributes!),
+      )
       .map(([, , code]) => `'sha256-${createHash("sha256").update(code!).digest("base64")}'`);
     expect(inline).toHaveLength(1);
     expect(allowed.filter((source) => source.startsWith("'sha256-"))).toEqual(inline);
-    for (const [, src] of html.matchAll(/<script\b[^>]*\bsrc="([^"]*)"/g)) expect(src).toMatch(/^\.\/assets\//);
+    for (const [, src] of html.matchAll(/<script\b[^>]*\bsrc="([^"]*)"/g))
+      expect(src).toMatch(/^\.\/assets\//);
   });
 
   it("allows no plugins, no base element and no form posts", () => {
     expect(policy().get("object-src")).toEqual(["'none'"]);
     expect(policy().get("base-uri")).toEqual(["'none'"]);
     expect(policy().get("form-action")).toEqual(["'none'"]);
+  });
+});
+
+describe("the page's structured data", () => {
+  type Node = Record<string, unknown>;
+  const graph = () => {
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+    expect(blocks).toHaveLength(1);
+    return (JSON.parse(blocks[0]![1]!) as { "@graph": Node[] })["@graph"];
+  };
+  const nodeOfType = (type: string) => graph().find((node) => node["@type"] === type)!;
+
+  it("names the app's languages, its license and its source code", () => {
+    const app = nodeOfType("WebApplication");
+    expect([...(app.inLanguage as string[])].sort()).toEqual(["de", "en", "es", "fr", "ko", "sv"]);
+    expect(app.license).toBe("https://spdx.org/licenses/MIT");
+    expect(app.sameAs).toEqual([builtConfig().repoUrl]);
+  });
+
+  it("gives the source code its repository, as the app's own node", () => {
+    const app = nodeOfType("WebApplication");
+    const source = nodeOfType("SoftwareSourceCode");
+    expect(source.codeRepository).toBe(builtConfig().repoUrl);
+    expect(source.license).toBe(app.license);
+    expect(source.targetProduct).toEqual({ "@id": app["@id"] });
+  });
+});
+
+describe("the page's name", () => {
+  it("is the site's (VITE_APP_NAME, Solid Memo when unset) in its title, link preview and JSON-LD", () => {
+    const config = builtConfig();
+    const { appName } = config;
+    const inHtml = siteHtml("%APP_NAME%", config);
+    expect(html).not.toContain("%APP_NAME");
+    expect(html).toContain(
+      `<title>${inHtml} - Spaced-repetition flashcards in your Solid pod</title>`,
+    );
+    expect(html).toContain(`<meta property="og:site_name" content="${inHtml}" />`);
+    expect(html).toContain(`<meta property="og:title" content="${inHtml}" />`);
+    const jsonLd = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)![1]!;
+    const graph = (JSON.parse(jsonLd) as { "@graph": Record<string, unknown>[] })["@graph"];
+    expect(graph.map((node) => node.name)).toEqual([appName, appName]);
+  });
+});
+
+describe("the page's repository", () => {
+  it("is the site's (VITE_REPO_URL, Solid Memo's when unset) in its noscript link", () => {
+    expect(html).not.toContain("%REPO_URL");
+    expect(html).toContain(`<a href="${siteHtml("%REPO_URL%", builtConfig())}">source code</a>`);
   });
 });

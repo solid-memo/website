@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { useState } from "preact/hooks";
@@ -6,7 +10,13 @@ import { Splitter } from "./Splitter";
 const size = { min: 100, max: 300, initial: 200 };
 
 /** A splitter over a pane whose size it keeps, as the shell does. */
-function Sized({ orientation, onChange }: { orientation: "vertical" | "horizontal"; onChange: (value: number) => void }) {
+function Sized({
+  orientation,
+  onChange,
+}: {
+  orientation: "vertical" | "horizontal";
+  onChange: (value: number) => void;
+}) {
   const [value, setValue] = useState(size.initial);
   return (
     <Splitter

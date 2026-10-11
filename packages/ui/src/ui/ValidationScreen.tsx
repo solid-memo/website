@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type {
   DocumentReport,
   SubjectReport,
@@ -33,7 +37,13 @@ export function summaryClass(report: ValidationReport): string {
  * The report, document by document, under its summary line — which a
  * screen that announces the summary itself leaves out (`summary={false}`).
  */
-export function ValidationScreen({ report, summary = true }: { report: ValidationReport; summary?: boolean }) {
+export function ValidationScreen({
+  report,
+  summary = true,
+}: {
+  report: ValidationReport;
+  summary?: boolean;
+}) {
   const { t } = useI18n();
   return (
     <div class="validation">
@@ -95,7 +105,9 @@ function SubjectView({ subject }: { subject: SubjectReport }) {
       );
     case "checked":
       if (subject.violations.length === 0) {
-        return <>{tx("validation.conforms", { name, shape: subject.shape, version: subject.version })}</>;
+        return (
+          <>{tx("validation.conforms", { name, shape: subject.shape, version: subject.version })}</>
+        );
       }
       return (
         <>
@@ -115,7 +127,11 @@ function SubjectView({ subject }: { subject: SubjectReport }) {
 export function ViolationMessage({ violation }: { violation: Violation }) {
   const { violationText, violationLang } = useI18n();
   const lang = violationLang(violation);
-  return lang === undefined ? <>{violationText(violation)}</> : <span lang={lang}>{violationText(violation)}</span>;
+  return lang === undefined ? (
+    <>{violationText(violation)}</>
+  ) : (
+    <span lang={lang}>{violationText(violation)}</span>
+  );
 }
 
 /** One row per result; a DCAT-AP result says so before its message. */

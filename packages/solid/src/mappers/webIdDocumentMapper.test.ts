@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { describe, expect, it } from "vitest";
 import {
   buildThing,
@@ -6,11 +10,7 @@ import {
   setThing,
   type Thing,
 } from "@inrupt/solid-client";
-import {
-  toPropertyValues,
-  toSubject,
-  toWebIdDocument,
-} from "./webIdDocumentMapper";
+import { toPropertyValues, toSubject, toWebIdDocument } from "./webIdDocumentMapper";
 
 const SUBJECT = "https://alice.example/profile/card#me";
 
@@ -46,10 +46,7 @@ describe("toSubject", () => {
   it("maps a Thing's url and predicates", () => {
     const thing: Thing = buildThing(createThing({ url: SUBJECT }))
       .addStringNoLocale("http://xmlns.com/foaf/0.1/name", "Alice")
-      .addIri(
-        "http://www.w3.org/ns/solid/terms#oidcIssuer",
-        "https://issuer.example",
-      )
+      .addIri("http://www.w3.org/ns/solid/terms#oidcIssuer", "https://issuer.example")
       .build();
 
     const subject = toSubject(thing);

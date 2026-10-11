@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import type { Course } from "@solid-memo/application/useCases";
 import type { CompletedChaptersEdit } from "@solid-memo/domain/course";
 import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
@@ -33,14 +37,21 @@ export function CourseProgressSection({
     return (
       <section aria-labelledby="course-progress-heading">
         <h3 id="course-progress-heading">{t("studio.about.progress")}</h3>
-        {unreadable === null ? <p class="hint">{t("studio.about.progressLoading")}</p> : <ErrorMessage error={unreadable} />}
+        {unreadable === null ? (
+          <p class="hint">{t("studio.about.progressLoading")}</p>
+        ) : (
+          <ErrorMessage error={unreadable} />
+        )}
       </section>
     );
   }
 
   const inOutline = new Set(course.outline.chapters.map((chapter) => chapter.id));
-  const gone = (course.deck.completedChapters ?? []).filter((url) => !inOutline.has(fragmentIdOf(url)));
-  const done = course.progress.chapters.some((chapter) => chapter.state === "done") || gone.length > 0;
+  const gone = (course.deck.completedChapters ?? []).filter(
+    (url) => !inOutline.has(fragmentIdOf(url)),
+  );
+  const done =
+    course.progress.chapters.some((chapter) => chapter.state === "done") || gone.length > 0;
   const notDone = (chapterUrl: string, name: string) => (
     <button
       type="button"
@@ -60,7 +71,8 @@ export function CourseProgressSection({
           const { state } = course.progress.chapters[index]!;
           return (
             <li key={chapter.id}>
-              <ReaderText text={chapter.title} /> <span class="studio-badge">{t(`studio.about.chapter.${state}`)}</span>
+              <ReaderText text={chapter.title} />{" "}
+              <span class="studio-badge">{t(`studio.about.chapter.${state}`)}</span>
               {state === "done" && <> {notDone(chapter.url, readerText(chapter.title))}</>}
             </li>
           );

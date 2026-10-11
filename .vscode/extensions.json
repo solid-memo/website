@@ -3,6 +3,7 @@
   // tsserver.js: its language service is the native preview's.
   "recommendations": [
     "anthropic.claude-code",
+    "biomejs.biome",
     "vitest.explorer",
     "typescriptteam.native-preview",
     "stardog-union.stardog-rdf-grammars"

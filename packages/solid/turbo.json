@@ -1,12 +1,22 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "extends": ["//"],
+  "extends": [
+    "//"
+  ],
   "tasks": {
     "test": {
-      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
+      ]
     },
     "test:roundtrip": {
-      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
+      ]
     }
   }
 }

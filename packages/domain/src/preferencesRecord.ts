@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { conceptOfPolicy, conceptOfTheme, policyOfConcept, themeOfConcept } from "./concepts";
 import type { StudyPreferences } from "./preferences";
 import type { PreferencesV4 } from "@solid-memo/vocab/types.generated";

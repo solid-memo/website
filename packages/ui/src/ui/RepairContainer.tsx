@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
 import { Fragment } from "preact";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -30,10 +34,15 @@ export function repairLabels(t: I18n["t"]): Record<RepairKind, string> {
  * Studio, under the same key); a deck's health alone where what it
  * finds is put in the instance's check.
  */
-export function useRepairMutation(useCases: UseCases, instanceUrl: string, checkKey: readonly unknown[] = ["validation", instanceUrl]) {
+export function useRepairMutation(
+  useCases: UseCases,
+  instanceUrl: string,
+  checkKey: readonly unknown[] = ["validation", instanceUrl],
+) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (repairs: Parameters<UseCases["applyRepairs"]>[0]) => useCases.applyRepairs(repairs),
+    mutationFn: (repairs: Parameters<UseCases["applyRepairs"]>[0]) =>
+      useCases.applyRepairs(repairs),
     onSuccess: async () => {
       for (const key of ["decks", "cards", "reviews", "preferences", "migration"]) {
         await queryClient.invalidateQueries({ queryKey: [key] });
@@ -65,7 +74,12 @@ export function RepairContainer({
   function remove(problem: Unrepairable) {
     if (window.confirm(t("repair.removeConfirm", { url: problem.subjectUrl }))) {
       repairMutation.mutate([
-        { kind: "remove-subject", documentUrl: problem.documentUrl, subjectUrl: problem.subjectUrl, version: 1 },
+        {
+          kind: "remove-subject",
+          documentUrl: problem.documentUrl,
+          subjectUrl: problem.subjectUrl,
+          version: 1,
+        },
       ]);
     }
   }
@@ -85,8 +99,14 @@ export function RepairContainer({
               </li>
             ))}
           </ul>
-          <button class="primary" onClick={() => repairMutation.mutate(plan.repairs)} disabled={busy}>
-            {busy ? t("repair.repairing") : t("repair.repairButton", { count: plan.repairs.length })}
+          <button
+            class="primary"
+            onClick={() => repairMutation.mutate(plan.repairs)}
+            disabled={busy}
+          >
+            {busy
+              ? t("repair.repairing")
+              : t("repair.repairButton", { count: plan.repairs.length })}
           </button>
         </>
       )}
