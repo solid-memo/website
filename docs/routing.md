@@ -91,6 +91,8 @@ full URLs, carried URL-encoded in hash query parameters.
 | `#/library?instance=…` | [deck library](deck-library.md): ready-made decks to import into the instance |
 | `#/library-deck?instance=…&deck=…` | one library deck's page — its description, topics, keywords in the reader's language, release, authors, licence, dates and sources, with an import button for that deck alone. `deck` is the deck's series (`…/decks/index.ttl#name`); a release's URL finds it too, and an unknown deck falls back to the library |
 | `#/library-browse?instance=…&deck=…[&page=n]` | a library deck's cards, read-only, paged like the Browser (paging *replaces* the history entry) |
+| `#/library-card?instance=…&deck=…&card=…` | one card of a library deck, read-only: both sides as study shows them, and a link to the deck's page (opened by clicking a row of `#/library-browse`). `card` is the card's fragment id in its release (`sweden` for `…/v1.ttl#sweden`); a card the deck does not have falls back to the deck's cards (*replaces*) |
+| `#/library-preview?instance=…&deck=…` | a try of a library deck before import: its cards at random, one at a time, revealed as in study, with nothing graded or recorded. Opened by Preview in the library and on the deck's page; "Back to library" returns to the library |
 | `#/import-url?instance=…[&url=…]` | a deck or course [added from a link](deck-library.md#from-a-link) to its release, published anywhere: the link pasted goes into `url` (*pushes*, so Back returns to the link before), and the release at it is read, checked and shown, to import or start. Opened from the deck list and the library; its breadcrumb is under the library |
 | `#/deck?instance=…&deck=…` | deck detail |
 | `#/deck-preferences?instance=…&deck=…[&section=languages]` | a deck's own preferences: its name, daily limits and the languages of its text. `section=languages` opens it at the Languages section, whose heading takes the focus (marked `data-arrival` for `useScreenFocus`): where the deck page's notice of text that does not say its language links; an unknown `section` opens the screen at its start |
@@ -102,6 +104,7 @@ full URLs, carried URL-encoded in hash query parameters.
 | `#/course-chapter?instance=…&deck=…&chapter=…` | one chapter of the course (`chapter` is its subject in the release), a step at a time: the theory, then its questions without it. The step to take is derived from the learner's progress (the first not done), not carried in the URL; a chapter the course does not have, or one still locked, falls back to the course |
 | `#/course-review?instance=…&deck=…&chapter=…` | a chapter's final review, which completes it. It opens on a word before the review, with a link back to the course; once the chapter is completed it navigates (*pushes*) to the course, unless the learner has left the review meanwhile. Falls back as `course-chapter` does, and to `course-chapter` (*replaces*) for a chapter with steps not done, once the course has been read afresh: going on from the last step reaches it before that step's answer is read back |
 | `#/preferences?instance=…` | preferences |
+| `#/statistics?instance=…` | the instance's [statistics](statistics.md): totals and streaks, the year's activity, the cards introduced, recall, answers by deck, and where the cards stand. Linked from the instance bar and from the today strip above the deck list |
 | `#/validate?instance=…` | developer tool: the instance's documents checked against the shapes ([validation.md](validation.md)); shows how to turn developer mode on when it is off |
 
 ## Resolution and fallbacks
@@ -133,7 +136,8 @@ flowchart LR
   falls back to the default route (home / instance picker / storage
   picker, by instance count), an unknown instance falls back to the
   instance picker, an unknown deck to that instance's deck list, an
-  unknown library deck to the library. All
+  unknown library deck to the library, an unknown library card to its
+  deck's cards. All
   fallbacks use `history.replaceState`, so they are not Back stops;
   in-app navigation uses `pushState`, so Back walks the screens.
 
