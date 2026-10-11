@@ -53,4 +53,4 @@ you don't know is in [glossary.md](glossary.md).
 - [policy.md](policy.md) — no public policy applies; the outside rules the code follows (SM-2, CLDR plural rules, BCP 47, NFC, DCAT-AP) and the project's own rules, with the tests that check each.
 - [standards.md](standards.md) — every standard and specification used, with version, status, link and where it is used, and why the drafts and de facto ones do not get in the way of reuse.
 
-- [standard-for-public-code.md](standard-for-public-code.md) — how well Solid Memo meets the Standard for Public Code, what to decide, and a plan for the gaps.
+- [standard-for-public-code.md](standard-for-public-code.md) — how well Solid Memo meets the Standard for Public Code, criterion by criterion: the scorecard, the decisions made, the GitHub settings and actions that remain, and the gaps still open.

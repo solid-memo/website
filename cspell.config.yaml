@@ -149,6 +149,7 @@ words:
   - jamo
   - keymap
   - prefs
+  - premerge
   - replayable
   - resends
   - retagged
