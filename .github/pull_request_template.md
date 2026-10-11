@@ -21,7 +21,7 @@ Refs: #
 - [ ] **Vocabulary and shapes.** Any change to `ns/` was agreed in an issue first; no published `ns/shapes/*/vN.ttl` or `decks/*/vN.ttl` was edited; generated files were regenerated, not edited.
 - [ ] **Pod data.** Any change to what the app writes to a pod comes with its migration ([docs/migrations.md](https://github.com/solid-memo/website/blob/main/docs/migrations.md)).
 - [ ] **Policy.** Any change to an external rule the code follows (SM-2, the plural rules, a specification) is cited.
-- [ ] **Licenses.** New content is MIT, or a deck states its own license; third-party content is credited.
+- [ ] **Licenses.** New content is MIT, or a deck states its own license; a new file has its SPDX header, or a new deck its line in `REUSE.toml`; third-party content is credited.
 - [ ] **Architecture.** Imports follow [docs/boundaries.md](https://github.com/solid-memo/website/blob/main/docs/boundaries.md) and the layers of [docs/architecture.md](https://github.com/solid-memo/website/blob/main/docs/architecture.md).
 - [ ] **Run.** I ran the app (`npm run dev`) and tried the change, and considered the user journeys.
 - [ ] **Commits.** Each commit is one logical change, with an imperative subject and a body that explains why ([CONTRIBUTING.md](https://github.com/solid-memo/website/blob/main/CONTRIBUTING.md#commit-messages)).

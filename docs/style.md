@@ -112,8 +112,8 @@ and never changes after; `vendor/` is not ours and is never reformatted.
 
 ## Comments
 
-- Every module starts with a `/** … */` block that says what it is for
-  and why it exists. An exported function, type or constant has one too,
+- Every module starts, after its [license header](#licenses), with a
+  `/** … */` block that says what it is for and why it exists. An exported function, type or constant has one too,
   unless its name says all there is.
 - A comment says why, or what is not obvious: the rule the code follows,
   the case it guards against, the server it works around. It does not
@@ -122,6 +122,56 @@ and never changes after; `vendor/` is not ours and is never reformatted.
   repository: `(docs/migrations.md)`.
 - A comment is kept true: a change to the code changes its comment in
   the same commit.
+
+## Licenses
+
+Every file says who holds its copyright and under which license it may
+be reused, as the [REUSE specification](https://reuse.software/spec-3.3/)
+has it, so a file copied out of the repository still says so. A file
+that can carry a comment does, in a header at its top:
+
+```ts
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+```
+
+A new file starts with that header, in its own kind of comment (`#` in
+YAML, a Dockerfile or a shell script, `/* … */` in CSS). The
+[reuse tool](https://reuse.software/) writes it:
+
+```sh
+reuse annotate --copyright "Anton Wiklund and Solid Memo contributors" --year 2026 --license MIT <file>
+```
+
+- A shebang stays on the first line, and the header follows it.
+- A test's `// @vitest-environment node` stays on the first line too, and
+  a blank line comes between it and the header. reuse takes a comment
+  that touches the header for part of it, and drops it the next time it
+  rewrites the header.
+
+The files that cannot carry a header, or must not be edited, are
+licensed in [REUSE.toml](../REUSE.toml) instead: the Markdown (kept
+free of headers so that it reads cleanly), the HTML (whose doctype
+comes first), JSON, pictures, test fixtures, the generated vocabulary,
+the published Turtle in `decks/` and `ns/`, and the vendored shapes,
+which keep their authors' licenses. A new file of one of those kinds
+is covered by the pattern that matches it. The text of each license is
+in [LICENSES/](../LICENSES/).
+
+A library deck is under the license it states in `dcterms:license`, so
+`REUSE.toml` lists each deck under its license, and a new deck is added
+there under its own. `npm run check:reuse`, part of `npm run check`,
+fails when a version's `dcterms:license` is not the license
+`REUSE.toml` gives it ([testing.md](testing.md#the-repositorys-own-checks)).
+A deck under a license no deck has used yet needs its SPDX identifier
+in [checkReuse.ts](../scripts/checkReuse.ts) and its text in
+`LICENSES/` (`reuse download <SPDX id>`).
+
+`reuse lint` checks that every file in the repository has both, in CI's
+docs job ([testing.md](testing.md#documentation)); `npm run lint:reuse`
+runs it locally with [reuse](https://reuse.software/) installed
+(`pipx install reuse`, or `uvx reuse lint` without installing it).
 
 ## Docs
 

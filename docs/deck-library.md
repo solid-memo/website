@@ -208,7 +208,12 @@ next. To change a deck `<name>` whose latest version is `N`:
    them.
 
 A new deck is the same with `decks/<name>/v1.ttl`, without `dcat:prev`
-and `dcat:previousVersion`, its notes "First release.".
+and `dcat:previousVersion`, its notes "First release.". It is also
+listed in [REUSE.toml](../REUSE.toml) under the license its
+`dcterms:license` names, as `"decks/<name>/*.ttl"`, and a version that
+changes the deck's license moves it there to the license's own
+annotation, or names that version alone. `npm run check:reuse` fails
+until it agrees ([style.md](style.md#licenses)).
 
 **Text over several lines.** `npm run format:turtle` writes a literal
 whose text has a line feed as a long string, `"""…"""` with its language

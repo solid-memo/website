@@ -30,5 +30,8 @@ This repository's docs are indexed in [docs/README.md](docs/README.md); start wi
 - **One test file**: `npm run test:unit -- <path>`, from the root.
 - **Imports** follow [docs/boundaries.md](docs/boundaries.md), which
   `npm run check:boundaries` enforces.
+- **Licenses**: a new file that can carry a comment starts with the SPDX
+  header; a new deck is listed in `REUSE.toml` under its license, which
+  `npm run check:reuse` checks ([docs/style.md](docs/style.md#licenses)).
 - **Spelling** is American English; after changing Markdown or `en.json`,
   run `npm run lint:spelling` ([docs/style.md](docs/style.md#language)).

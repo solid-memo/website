@@ -133,6 +133,12 @@ Only contribute what you have the right to: your own work, or work under
 a license compatible with the file it goes into. Name the source of a
 deck's content in its provenance ([docs/deck-library.md](docs/deck-library.md#provenance)).
 
+Every file says so in a machine-readable way, as
+[REUSE](https://reuse.software/) has it: a new source file starts with
+the SPDX header, and a new deck is listed in [REUSE.toml](REUSE.toml)
+under the license it states. [docs/style.md](docs/style.md#licenses)
+says how, and `npm run check` and CI check it.
+
 ## Language
 
 English is the authoritative language of the code, the docs and the

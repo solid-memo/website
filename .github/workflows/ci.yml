@@ -247,7 +247,9 @@ jobs:
   # heading in the repository resolves (lychee, offline: the web's
   # addresses are checked weekly, by links.yml, so a site that is down
   # fails no change), the Markdown keeps markdownlint's rules
-  # (.markdownlint-cli2.jsonc), and publiccode.yml, once there, is valid.
+  # (.markdownlint-cli2.jsonc), publiccode.yml, once there, is valid, and
+  # every file states its copyright and license, as REUSE has it
+  # (`reuse lint`, docs/style.md#licenses).
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -255,6 +257,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      # Before npm ci, so that only the repository's own files are there
+      # to check, whether or not reuse reads .gitignore in its container.
+      - uses: fsfe/reuse-action@v6
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc

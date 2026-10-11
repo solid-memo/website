@@ -23,6 +23,7 @@ npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
 npm run lint:markdown      # markdownlint over the project's Markdown, as CI's docs job runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as CI's docs job runs it
+npm run lint:reuse         # reuse lint: every file states its copyright and license, as CI's docs job checks (needs reuse)
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
 npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
@@ -417,13 +418,16 @@ ends with checks of the repository as a whole, plain Node scripts in
 - `check:dependencies` ([checkDependencies.ts](../scripts/checkDependencies.ts)):
   the app ships released versions of other code only, or the exceptions
   [vendor-code.md](vendor-code.md#maturity) explains.
+- `check:reuse` ([checkReuse.ts](../scripts/checkReuse.ts)): every
+  library deck version is licensed in [REUSE.toml](../REUSE.toml) as its
+  own `dcterms:license` says ([style.md](style.md#licenses)).
 - `check:scripts`: these scripts' own tests and types, at 100%
   coverage like a package's (`scripts/vitest.config.ts`).
 
 ## Documentation
 
 CI's `docs` job checks the project's Markdown (`docs/`, the READMEs,
-`AGENTS.md`):
+`AGENTS.md`), and that every file is licensed:
 
 - **Style**: [markdownlint](https://github.com/DavidAnson/markdownlint)'s
   rules, all of them but those [.markdownlint-cli2.jsonc](../.markdownlint-cli2.jsonc)
@@ -452,6 +456,13 @@ CI's `docs` job checks the project's Markdown (`docs/`, the READMEs,
   validates it against the standard, and the files it names; the Links
   workflow also checks the addresses it names. Without one, the step
   says so and passes ([.github/actions/publiccode](../.github/actions/publiccode/action.yml)).
+- **Licenses**: [reuse](https://reuse.software/) (`fsfe/reuse-action`,
+  `reuse lint`) checks that every file in the repository states its
+  copyright and license, in an SPDX header or in
+  [REUSE.toml](../REUSE.toml), and that the text of every license used
+  is in [LICENSES/](../LICENSES/) ([style.md](style.md#licenses)). It
+  runs before `npm ci`, so that only the repository's own files are
+  there. `npm run lint:reuse` runs it locally, with reuse installed.
 
 That every page is listed in the index is `npm run check`'s
 (`check:docs`, above).

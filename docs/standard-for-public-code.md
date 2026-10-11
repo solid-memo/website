@@ -374,11 +374,11 @@ Whatever is decided:
   - Cover the card creators, the chapter player and the today summary.
   - Add examples to [markdown.md](markdown.md) and [boundaries.md](boundaries.md), and a plain summary at the top of long pages.
 - [ ] **Formatter and linter.** Add Biome to `npm run check`. Reformat once, and record that commit in `.git-blame-ignore-revs`. *(10, 15)*
-- [ ] **REUSE** (decision 6). *(11, 13)*
+- [x] **REUSE** (decision 6). *(11, 13)*
   - `REUSE.toml` for the decks and vendored files, and a `LICENSES/` folder.
   - SPDX headers added with `reuse annotate`, keeping `@vitest-environment` pragmas on the first line.
-  - `dcterms:license` on the `ns/` graphs.
-  - `reuse lint` in CI.
+  - `dcterms:license` on the `ns/` graphs: on the topics scheme; the ontology's `v1.ttl`, the shapes and `external.ttl` are licensed by `REUSE.toml` ([vocab.md](vocab.md#license)).
+  - `reuse lint` in CI, and `npm run check:reuse` for the decks' licenses ([style.md](style.md#licenses)).
 - [ ] **Releases.** *(6, 14, 16)*
   - Tag `v0.1.0` with release-please.
   - Show the version next to the SHA in the footer.
