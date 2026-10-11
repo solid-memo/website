@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/composition",
+  "description": "Solid Memo's composition root: every adapter behind its port, and the use cases over them.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

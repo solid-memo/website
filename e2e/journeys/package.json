@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/e2e-journeys",
+  "description": "Solid Memo's user journeys: the built app in Chromium, driven by Playwright against a Solid server.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

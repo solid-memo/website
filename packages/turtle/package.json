@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/turtle",
+  "description": "Node-only Turtle tooling for Solid Memo: parsing, and the house-style formatter.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

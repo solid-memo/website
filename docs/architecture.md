@@ -26,6 +26,10 @@ where the layers meet.
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against real Solid servers, started in Docker ([testing.md](testing.md)). |
 | `@solid-memo/e2e-journeys` | `e2e/journeys/` | The user journeys: whole flows a user takes through the built app, driven in Chromium with Playwright against a Community Solid Server in Docker ([testing.md](testing.md#user-journeys)). It imports nothing of the app's but its messages, to find text on screen by. |
 
+Each package's folder has a `README.md`: what the package is, what it
+exports, what it may import and who may import it, and how to test it.
+Its `package.json` has a one-line `description`.
+
 ## Dependency rule
 
 A package may depend only on packages below it in this graph. Adapters

@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/web",
+  "description": "The Solid Memo site: its one page, and the build that publishes it with the vocabulary, shapes and deck library.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/studio",
+  "description": "Solid Memo Studio: managing decks in bulk, and writing, checking and publishing decks and courses.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

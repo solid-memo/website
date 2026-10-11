@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/vocab",
+  "description": "Solid Memo's data contract: TypeScript generated from the RDF vocabulary and SHACL shapes in ns/, with the generator.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

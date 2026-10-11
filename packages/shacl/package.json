@@ -1,5 +1,6 @@
 {
   "name": "@solid-memo/shacl",
+  "description": "SHACL validation for Solid Memo, in the browser and in node, and the deck library's checks.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",
