@@ -7,10 +7,10 @@ import { defineConfig } from "vitest/config";
  * the thresholds are each package's, checked by its own `npm test`
  * (turbo, so CI), which never reads this file. e2e/pod's and
  * e2e/journeys' are their harnesses' own tests, not those against real
- * servers or in a browser.
+ * servers or in a browser; scripts/' are the repository's own checks.
  */
 export default defineConfig({
   test: {
-    projects: ["apps/web", "apps/studio", "packages/*", "e2e/pod/vitest.unit.config.ts", "e2e/journeys/vitest.unit.config.ts"],
+    projects: ["apps/web", "apps/studio", "packages/*", "e2e/pod/vitest.unit.config.ts", "e2e/journeys/vitest.unit.config.ts", "scripts/vitest.config.ts"],
   },
 });
