@@ -132,8 +132,9 @@ What holds today, and what does not, criterion by criterion.
   rules are SHACL shapes and the library's checks; SM-2 is pure functions
   in `packages/domain`.
 - SHOULD, met — CI checks the code against the policy. `sm2.test.ts`
-  checks the scheduler row by row against
-  [srs.md's worked examples](srs.md#worked-examples), and
+  reads the table of [srs.md's worked examples](srs.md#worked-examples)
+  from the page and checks the scheduler against every row, so a change
+  to either that the other does not match fails; and
   `npm run library:check` refuses a new deck version without a license.
 
 ### 3. Make the codebase reusable and portable
@@ -153,9 +154,17 @@ What holds today, and what does not, criterion by criterion.
 - SHOULD, met — configuration rather than code.
 - SHOULD, met — localizable. The app speaks six languages
   ([i18n.md](i18n.md)).
-- SHOULD, not met — no situation-specific information. `CNAME`,
-  `robots.txt`, `sitemap.xml` and the about page carry this deployment's
-  domain. [reuse.md](reuse.md) lists them as files to edit by hand.
+- SHOULD, not met — no situation-specific information. The app's name,
+  its pod providers and its repository links are settings: the footer's
+  links and `index.html`'s links to the repository (its JSON-LD and its
+  `noscript` source link) follow `VITE_REPO_URL`. What is still written
+  for this deployment: `index.html`'s absolute URLs on solid-memo.com
+  (the canonical link, `og:url`, `og:image`, and the JSON-LD `url`, `@id`
+  and `image`) and its description; `robots.txt` and `sitemap.xml`; the
+  about page, with its address and its links to this repository;
+  Solid Memo's wordmark and logo; `CNAME`; and the README.
+  [reuse.md](reuse.md#6-what-you-edit-by-hand) lists them as files to
+  edit by hand.
 - SHOULD, met — modules documented for reuse. Each package has a README
   that says what it exports and may import.
 - SHOULD, met — no single-vendor platform. Any static host serves the
@@ -297,8 +306,13 @@ What holds today, and what does not, criterion by criterion.
 - MUST, met — all functionality has automated tests, at 100% coverage
   in every package.
 - MUST, not met — contributions pass all tests before they are merged.
-  CI runs on every pull request, and `ci-ok` passes only when every job
-  did, but the ruleset requires only `build`.
+  CI runs on every pull request, and `ci-ok` passes only when all its
+  jobs did: `build`, `library` (the deck library compared with the
+  change's base), `crosscheck`, `pod`, `contract`, `journeys` and `docs`.
+  The ruleset requires only `build`, so a change can still merge with
+  the base comparison, the end-to-end tests or the docs checks failing.
+  The interop workflow's advisory servers report and do not gate, by
+  design ([testing.md](testing.md)).
 - MUST, met — guidelines for structuring contributions in
   CONTRIBUTING.md.
 - MUST, met — an active contributor who reviews contributions: the
@@ -471,9 +485,12 @@ them:
 - **Criterion 3, several parties.** Use, the roadmap and development by
   several parties need other parties. The roadmap invites them, but
   none has joined.
-- **Criterion 3, situation-specific information.** `CNAME`, the sitemap,
-  `robots.txt` and the about page name solid-memo.com. A deployed site
-  needs them, and [reuse.md](reuse.md) lists them for a copy to change.
+- **Criterion 3, situation-specific information.** `index.html`'s site
+  URLs, `CNAME`, the sitemap, `robots.txt` and the about page name
+  solid-memo.com, and the about page links to this repository. A
+  deployed site needs them, and
+  [reuse.md](reuse.md#6-what-you-edit-by-hand) lists them for a copy to
+  change.
 - **Criterion 6, decisions in commit messages.** 90 commits on `main`
   record no reason, and rewriting `main` to add them is not an option.
   New commits have a body, so the share without one only shrinks.
@@ -538,7 +555,8 @@ The first assessment's plan, with what landed on this branch checked.
   `reuse lint` and the publiccode.yml parser; markdownlint and cspell
   run in `npm run check`, so in the build job.
 - [x] **License required.** `npm run library:check` refuses a new deck
-  version without `dcterms:license`, and `sm2.test.ts` mirrors
+  version without `dcterms:license`, and `sm2.test.ts` checks the
+  scheduler against the table it reads from
   [srs.md](srs.md#worked-examples).
 - [ ] **GitHub settings.** Listed above.
 
