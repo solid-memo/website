@@ -1,0 +1,15 @@
+# lychee's settings for the links in the project's Markdown
+# (docs/testing.md#documentation): CI checks the files and anchors they
+# point at on every change (--offline), and every web address weekly
+# (.github/workflows/links.yml).
+
+# A link to a heading must find it.
+include_fragments = "full"
+
+# The addresses a local server answers at (npm start, the journeys' server).
+exclude_all_private = true
+
+# Only the project's own Markdown: what npm installed is not ours to fix.
+exclude_path = ["(^|/)node_modules/"]
+
+no_progress = true

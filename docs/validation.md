@@ -299,7 +299,7 @@ the subject's own stored format:
 
 | Problem | Repair |
 |---|---|
-| A deck without a description | The default description, "Flashcards: <title>." |
+| A deck without a description | The default description, `Flashcards: <title>.` |
 | A deck without a study direction, or an unknown one | Front to back, as format 1 studied every deck |
 | A review state with half an undo snapshot | The snapshot dropped (as the review-state 1 → 2 migration does) |
 | A malformed due day | Recomputed from the last review and the interval |

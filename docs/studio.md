@@ -1146,7 +1146,7 @@ says when a save is made:
   Solid Memo's deck preferences (`renameDeck`).
 - **About this deck**: its description, topics and keywords, with
   Solid Memo's own form (`DeckAboutSection` in `ui`, `describeDeck`).
-- **Authors and licence**: an author a line, "Name" or "Name <email>",
+- **Authors and licence**: an author a line, `Name` or `Name <email>`,
   and a licence chosen from those offered (`KNOWN_LICENSES` in
   [license.ts](../packages/domain/src/license.ts), each named as
   `licenseLabel` names it). A licence another app wrote is offered too,

@@ -218,7 +218,7 @@ data.
 
 ## Instance layout
 
-```
+```text
 <storage>solid-memo/<name>/          (default path; user-editable)
 ├── meta.ttl        #it: a sm:Instance; dcterms:title; dcterms:created;
 │                        on an instance an earlier version's format
@@ -323,11 +323,11 @@ graph LR
   [vocab.md](vocab.md) and [validation.md](validation.md)): it always has
   a description (`dcterms:description`: what it covers and where its
   content came from — shown on the deck page with its URLs as links; a
-  deck without one gets "Flashcards: <title>."@en and
-  "Kortlek: <title>."@sv, app-written text for any title), and may name its
+  deck without one gets `"Flashcards: <title>."@en` and
+  `"Kortlek: <title>."@sv`, app-written text for any title), and may name its
   authors (`dcterms:creator`, each a `foaf:Agent` node `#agent-<slug>`
   beside the deck, with `foaf:name` and a `mailto:` `foaf:mbox`; the app
-  shows them as "Name <email>"; the slug is the author folded to ASCII,
+  shows them as `Name <email>`; the slug is the author folded to ASCII,
   `unnamed` when nothing is left of it, and an author the folding loses
   letters or digits of, such as 김민수 or "Kim 민수", or that has none
   to lose, such as "—", gets six hex digits of a hash of the whole author

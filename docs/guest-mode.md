@@ -261,4 +261,3 @@ holds what an entry names only while its lock is held. An entry a
 failed move keeps, one a closed tab left, or one noting a deck added to
 an instance fences nothing. A browser without Web Locks fences no other
 tab; the verify step catches what it misses.
-

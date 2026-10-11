@@ -576,7 +576,7 @@ keywords are the old release's in every language takes the new
 release's, all languages at once (untagged keywords imported from a
 format-4 release give way to the new release's tagged ones), and a copy
 whose keywords the user changed in any language keeps them all. The default
-description the app gave a deck that had none ("Flashcards: <title>.")
+description the app gave a deck that had none (`Flashcards: <title>.`)
 is not the user's: it gives way to the release's description. A copy upgraded
 before upgrades brought these texts along is given its own release's
 languages, the same way, once a session when its page opens

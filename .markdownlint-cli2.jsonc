@@ -1,0 +1,17 @@
+// markdownlint's rules for the project's Markdown (docs/testing.md#documentation):
+// `npm run lint:markdown`, and CI's docs job. Every rule is on but these.
+{
+  "config": {
+    "default": true,
+    // Prose is wrapped by hand, near 72 columns; tables, commands and
+    // links run as long as they need, and a wrap there would break them.
+    "MD013": false,
+    // A table's delimiter row is written without spaces (`|---|---|`).
+    "MD060": false,
+    // GitHub, and every other renderer the docs are read in, links a bare
+    // URL as it is.
+    "MD034": false,
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["**/node_modules/**"],
+}

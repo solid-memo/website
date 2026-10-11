@@ -8,7 +8,7 @@ the site at `https://solid-memo.com/ns/shapes/`
 
 ## Files and IRIs
 
-```
+```text
 instance/v1.ttl, v2.ttl       https://solid-memo.com/ns/shapes/instance/v1.ttl#shape
 deck/v1.ttl … v6.ttl          …/deck/v2.ttl#inPod  and  …/deck/v2.ttl#inLibrary
 library-deck/v5.ttl, v6.ttl   …/library-deck/v5.ttl#inLibrary  (library deck 5 on)
