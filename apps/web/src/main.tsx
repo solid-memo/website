@@ -3,6 +3,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppUseCases } from "@solid-memo/composition/appUseCases";
 import "@solid-memo/ui/style.css";
 import { App } from "./App";
+import { siteConfig } from "./config";
+
+// The build's settings (docs/configuration.md), checked as it was built (vite.config.ts).
+const config = siteConfig(import.meta.env);
 
 const useCases = createAppUseCases({
   clientName: "Solid Memo",
@@ -20,7 +24,7 @@ render(
   <QueryClientProvider client={queryClient}>
     <App
       useCases={useCases}
-      commitSha={__COMMIT_SHA__}
+      source={{ repoUrl: config.repoUrl, version: __APP_VERSION__, commitSha: __COMMIT_SHA__ }}
       // The Studio, a chunk of its own, fetched the first time a Studio route opens (docs/studio.md).
       loadStudio={() => import("@solid-memo/studio")}
     />

@@ -74,7 +74,10 @@
   },
   "footer": {
     "createdBy": "Skapad av {author}",
-    "version": "Version {version}"
+    "version": "Version {version}",
+    "versionAtCommit": "Version {version} ({commit})",
+    "sourceCode": "Källkod",
+    "reportIssue": "Rapportera ett problem"
   },
   "addCardForm": {
     "submitButton": "Lägg till kort",

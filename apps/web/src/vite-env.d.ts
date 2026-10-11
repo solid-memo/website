@@ -12,4 +12,6 @@ declare const __SHAPES_RULESET__: string;
 interface ImportMetaEnv {
   /** The deck library's index, passed to createAppUseCases; the site's own, decks/index.ttl, when unset (docs/deck-library.md). */
   readonly VITE_LIBRARY_INDEX_URL?: string;
+  /** The repository the footer links to, read by src/config.ts (docs/configuration.md). */
+  readonly VITE_REPO_URL?: string;
 }

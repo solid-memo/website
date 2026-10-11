@@ -1,15 +1,30 @@
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import preact from "@preact/preset-vite";
 import { turtleDirectoryPlugin } from "@solid-memo/vocab/tooling/publishTurtle";
 import { DECKS_ROOT, NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { siteDefines } from "@solid-memo/vocab/tooling/siteBuild";
+import { siteConfig } from "./src/config.ts";
+
+/**
+ * The settings the page reads (docs/configuration.md), checked as the
+ * build starts, so a wrong one fails the build rather than the page.
+ */
+function siteSettings(): Plugin {
+  return {
+    name: "solid-memo:site-settings",
+    configResolved(config) {
+      siteConfig(config.env);
+    },
+  };
+}
 
 export default defineConfig({
   define: siteDefines(),
   base: "./",
   plugins: [
+    siteSettings(),
     preact(),
     // Published with the site: the vocabulary and the shapes (ns/) and the deck
     // library (decks/), at their IRIs, and the vendored profiles. A checkout

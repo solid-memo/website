@@ -3,6 +3,7 @@ import { useEffect, useState } from "preact/hooks";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "@solid-memo/ui/App";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
+import type { SiteSource } from "@solid-memo/ui/Footer";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { isStudioHash } from "@solid-memo/ui/router";
@@ -20,15 +21,15 @@ export interface StudioModule {
  * session, its login, the language and the theme carry from one to the
  * other. The Studio's code is fetched (`loadStudio`, from src/main.tsx)
  * only once a Studio route is opened, so a learner never downloads it.
- * `commitSha` is the build's, shown in the footer.
+ * `source` is the build's version and repository, shown in the footer.
  */
 export function App({
   useCases,
-  commitSha,
+  source,
   loadStudio,
 }: {
   useCases: UseCases;
-  commitSha: string | null;
+  source: SiteSource;
   loadStudio: () => Promise<StudioModule>;
 }) {
   const [inStudio, setInStudio] = useState(() => isStudioHash(window.location.hash));
@@ -52,7 +53,7 @@ export function App({
   return (
     <AppShell
       useCases={useCases}
-      commitSha={commitSha}
+      source={source}
       identity={inStudio ? STUDIO : SOLID_MEMO}
       workspace={inStudio ? (studio ?? StudioLoading) : Workspace}
     />

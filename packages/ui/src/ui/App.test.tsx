@@ -19,6 +19,11 @@ import { MAIN_ID } from "./SkipLink";
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const restored: EstablishedSession = { session, origin: "restored" };
 const loggedIn: EstablishedSession = { session, origin: "login" };
+const source = {
+  repoUrl: "https://github.com/solid-memo/website",
+  version: "0.1.0",
+  commitSha: "8faa7e1bd2e6de2b6570d692fd2865bb4b3217ad",
+};
 function makeUseCases(overrides: Partial<UseCases> = {}): UseCases {
   return makeUseCasesFake(overrides);
 }
@@ -40,7 +45,7 @@ function renderApp(useCases: UseCases) {
     <QueryClientProvider client={queryClient}>
       <AppShell
         useCases={useCases}
-        commitSha="8faa7e1bd2e6de2b6570d692fd2865bb4b3217ad"
+        source={source}
         identity={SOLID_MEMO}
         workspace={Workspace}
       />
@@ -237,7 +242,7 @@ describe("AppShell", () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       return render(
         <QueryClientProvider client={queryClient}>
-          <AppShell useCases={useCases} commitSha={null} identity={STUDIO} workspace={Workspace} />
+          <AppShell useCases={useCases} source={{ ...source, commitSha: null }} identity={STUDIO} workspace={Workspace} />
         </QueryClientProvider>,
       );
     }
@@ -272,7 +277,7 @@ describe("AppShell", () => {
     expect(screen.getByRole("contentinfo")).toHaveTextContent(
       "Created by antwika",
     );
-    expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 8faa7e1");
+    expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 0.1.0 (8faa7e1");
   });
 
   it("starts the Pod onboarding when no session is restored", async () => {

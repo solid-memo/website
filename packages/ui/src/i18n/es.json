@@ -76,7 +76,10 @@
   },
   "footer": {
     "createdBy": "Creado por {author}",
-    "version": "Versión {version}"
+    "version": "Versión {version}",
+    "versionAtCommit": "Versión {version} ({commit})",
+    "sourceCode": "Código fuente",
+    "reportIssue": "Informar de un problema"
   },
   "addCardForm": {
     "submitButton": "Añadir tarjeta",

@@ -72,7 +72,10 @@
   },
   "footer": {
     "createdBy": "만든 사람: {author}",
-    "version": "버전 {version}"
+    "version": "버전 {version}",
+    "versionAtCommit": "버전 {version} ({commit})",
+    "sourceCode": "소스 코드",
+    "reportIssue": "문제 신고"
   },
   "addCardForm": {
     "submitButton": "카드 추가",

@@ -74,7 +74,10 @@
   },
   "footer": {
     "createdBy": "Erstellt von {author}",
-    "version": "Version {version}"
+    "version": "Version {version}",
+    "versionAtCommit": "Version {version} ({commit})",
+    "sourceCode": "Quellcode",
+    "reportIssue": "Problem melden"
   },
   "addCardForm": {
     "submitButton": "Karte hinzufügen",

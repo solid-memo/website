@@ -13,7 +13,7 @@ import type { Session } from "@solid-memo/domain/session";
 import illustrationUrl from "../assets/illustration.svg";
 import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
-import { Footer } from "./Footer";
+import { Footer, type SiteSource } from "./Footer";
 import { I18nProvider, useI18n, type MessageKey } from "./i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { Loading } from "./Loading";
@@ -89,12 +89,13 @@ export const STUDIO: AppIdentity = {
  */
 export function AppShell({
   useCases,
-  commitSha,
+  source,
   identity,
   workspace,
 }: {
   useCases: UseCases;
-  commitSha: string | null;
+  /** The code the site runs and where it is, for the footer. */
+  source: SiteSource;
   identity: AppIdentity;
   workspace: ComponentType<WorkspaceProps>;
 }) {
@@ -171,7 +172,7 @@ export function AppShell({
             identity={identity}
             workspace={workspace}
           />
-          <Footer commitSha={commitSha} />
+          <Footer source={source} />
         </AppName.Provider>
       </ThemeProvider>
     </I18nProvider>

@@ -22,11 +22,13 @@ function FakeStudioWorkspace({ banner }: WorkspaceProps) {
 
 const studioModule: StudioModule = { StudioWorkspace: FakeStudioWorkspace };
 
+const source = { repoUrl: "https://git.example/memo", version: "0.1.0", commitSha: null };
+
 function renderApp(useCases: UseCases, loadStudio: () => Promise<StudioModule>) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <App useCases={useCases} commitSha={null} loadStudio={loadStudio} />
+      <App useCases={useCases} source={source} loadStudio={loadStudio} />
     </QueryClientProvider>,
   );
 }
@@ -50,6 +52,16 @@ describe("App", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Solid Memo" })).toBeInTheDocument();
     expect(screen.getByText("Spaced-repetition flashcards that live in your own Solid Pod.")).toBeInTheDocument();
     expect(loadStudio).not.toHaveBeenCalled();
+  });
+
+  it("names its version and links its repository in the footer", async () => {
+    renderApp(makeUseCasesFake(), vi.fn(async () => studioModule));
+    const footer = await screen.findByRole("contentinfo");
+    expect(footer).toHaveTextContent("Version 0.1.0");
+    expect(within(footer).getByRole("link", { name: "Source code (opens in a new tab)" })).toHaveAttribute(
+      "href",
+      "https://git.example/memo",
+    );
   });
 
   it("names the Studio at its routes, and fetches its code", async () => {
