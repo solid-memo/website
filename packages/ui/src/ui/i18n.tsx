@@ -152,7 +152,15 @@ function writtenTag(tag: string): string {
   return Intl.getCanonicalLocales(tag)[0]!;
 }
 
-export function createI18n(locale: Locale): I18n {
+/** The message that is the app's name: Solid Memo in every language, unless the site is given another (`appName`). */
+const APP_NAME_KEY: MessageKey = "app.documentTitle";
+
+/**
+ * The app's text in `locale`. `appName`, when given, is the site's own
+ * name (an app's setting, docs/configuration.md), said in place of
+ * Solid Memo's wherever the name stands alone in every language.
+ */
+export function createI18n(locale: Locale, appName?: string): I18n {
   const plurals = new Intl.PluralRules(locale);
   const numbers = new Intl.NumberFormat(locale);
   const languageNames = new Intl.DisplayNames(locale, { type: "language" });
@@ -167,6 +175,7 @@ export function createI18n(locale: Locale): I18n {
   }
 
   function template(key: string, count: unknown): string {
+    if (key === APP_NAME_KEY && appName !== undefined) return appName;
     const message = lookup(CATALOGS[locale], key) ?? key;
     if (typeof message === "string") return message;
     // The message files' tests give each plural message every form its language names.
@@ -313,15 +322,18 @@ const I18nContext = createContext<I18nState>({
 /** The language the screens below speak, and how to choose another. */
 export function I18nProvider({
   locale,
+  appName,
   onChoose,
   children,
 }: {
   locale: Locale;
+  /** The site's own name, in place of Solid Memo's (see createI18n). */
+  appName?: string;
   onChoose: (locale: Locale) => void;
   children: ComponentChildren;
 }) {
   return (
-    <I18nContext.Provider value={{ ...createI18n(locale), chooseLocale: onChoose }}>
+    <I18nContext.Provider value={{ ...createI18n(locale, appName), chooseLocale: onChoose }}>
       {children}
     </I18nContext.Provider>
   );

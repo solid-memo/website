@@ -16,6 +16,7 @@
   "dependencies": {
     "@solid-memo/application": "*",
     "@solid-memo/composition": "*",
+    "@solid-memo/domain": "*",
     "@solid-memo/studio": "*",
     "@solid-memo/ui": "*",
     "@solid-memo/vocab": "*",

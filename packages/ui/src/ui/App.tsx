@@ -8,7 +8,7 @@ import {
 } from "@solid-memo/domain/theme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
+import type { PodProvider } from "@solid-memo/domain/podProvider";
 import type { Session } from "@solid-memo/domain/session";
 import illustrationUrl from "../assets/illustration.svg";
 import { ErrorMessage } from "./ErrorMessage";
@@ -90,12 +90,18 @@ export const STUDIO: AppIdentity = {
 export function AppShell({
   useCases,
   source,
+  appName,
+  providers,
   identity,
   workspace,
 }: {
   useCases: UseCases;
   /** The code the site runs and where it is, for the footer. */
   source: SiteSource;
+  /** What the site calls itself, in place of Solid Memo in every language; Solid Memo when absent. */
+  appName?: string;
+  /** The Pod providers suggested at login and for creating a Pod. */
+  providers: readonly PodProvider[];
   identity: AppIdentity;
   workspace: ComponentType<WorkspaceProps>;
 }) {
@@ -155,7 +161,7 @@ export function AppShell({
   }
 
   return (
-    <I18nProvider locale={locale} onChoose={chooseLocale}>
+    <I18nProvider locale={locale} appName={appName} onChoose={chooseLocale}>
       <ThemeProvider
         choice={themeChoice}
         preferred={preferredTheme}
@@ -169,6 +175,7 @@ export function AppShell({
           <SkipLink />
           <AppContent
             useCases={useCases}
+            providers={providers}
             identity={identity}
             workspace={workspace}
           />
@@ -184,10 +191,12 @@ const SESSION_EXPIRED = Symbol("session expired");
 
 function AppContent({
   useCases,
+  providers,
   identity,
   workspace: AppWorkspace,
 }: {
   useCases: UseCases;
+  providers: readonly PodProvider[];
   identity: AppIdentity;
   workspace: ComponentType<WorkspaceProps>;
 }) {
@@ -327,7 +336,7 @@ function AppContent({
               changed under the user, and this says why. */}
           <ErrorMessage error={authText} focus />
           <OnboardingFlow
-            providers={POD_PROVIDERS}
+            providers={providers}
             busy={busy}
             returning={returning || guest}
             onLogin={(webId) =>

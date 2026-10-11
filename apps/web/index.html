@@ -37,16 +37,18 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <title>Solid Memo - Spaced-repetition flashcards in your Solid pod</title>
+  <title>%APP_NAME% - Spaced-repetition flashcards in your Solid pod</title>
 
   <!-- Search engines and link previews. The app routes by URL hash, so this
        one page is the only one there is to index. Absolute URLs because
-       crawlers resolve og:image and canonical without the page's base. -->
+       crawlers resolve og:image and canonical without the page's base.
+       The site's name in the title, the og: tags and the JSON-LD is
+       VITE_APP_NAME, put in by vite.config.ts (docs/configuration.md). -->
   <link rel="canonical" href="https://solid-memo.com/" />
   <meta name="robots" content="index, follow" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Solid Memo" />
-  <meta property="og:title" content="Solid Memo" />
+  <meta property="og:site_name" content="%APP_NAME%" />
+  <meta property="og:title" content="%APP_NAME%" />
   <meta property="og:description" content="Spaced-repetition flashcards that live in your own Solid pod." />
   <meta property="og:url" content="https://solid-memo.com/" />
   <meta property="og:image" content="https://solid-memo.com/social-preview.png" />
@@ -67,7 +69,7 @@
         {
           "@type": "WebApplication",
           "@id": "https://solid-memo.com/#app",
-          "name": "Solid Memo",
+          "name": %APP_NAME_JSON%,
           "url": "https://solid-memo.com/",
           "description": "Spaced-repetition flashcards that live in your own Solid pod.",
           "applicationCategory": "EducationalApplication",
@@ -83,7 +85,7 @@
         {
           "@type": "SoftwareSourceCode",
           "@id": "https://solid-memo.com/#source",
-          "name": "Solid Memo",
+          "name": %APP_NAME_JSON%,
           "codeRepository": "https://github.com/solid-memo/website",
           "license": "https://spdx.org/licenses/MIT",
           "programmingLanguage": "TypeScript",

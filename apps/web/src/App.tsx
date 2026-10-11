@@ -1,6 +1,7 @@
 import type { ComponentChildren, ComponentType } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { PodProvider } from "@solid-memo/domain/podProvider";
 import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "@solid-memo/ui/App";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import type { SiteSource } from "@solid-memo/ui/Footer";
@@ -21,15 +22,21 @@ export interface StudioModule {
  * session, its login, the language and the theme carry from one to the
  * other. The Studio's code is fetched (`loadStudio`, from src/main.tsx)
  * only once a Studio route is opened, so a learner never downloads it.
- * `source` is the build's version and repository, shown in the footer.
+ * `source` is the build's version and repository, shown in the footer;
+ * `appName` and `providers`, the site's name and the Pod providers it
+ * suggests (src/config.ts).
  */
 export function App({
   useCases,
   source,
+  appName,
+  providers,
   loadStudio,
 }: {
   useCases: UseCases;
   source: SiteSource;
+  appName: string;
+  providers: readonly PodProvider[];
   loadStudio: () => Promise<StudioModule>;
 }) {
   const [inStudio, setInStudio] = useState(() => isStudioHash(window.location.hash));
@@ -54,6 +61,8 @@ export function App({
     <AppShell
       useCases={useCases}
       source={source}
+      appName={appName}
+      providers={providers}
       identity={inStudio ? STUDIO : SOLID_MEMO}
       workspace={inStudio ? (studio ?? StudioLoading) : Workspace}
     />

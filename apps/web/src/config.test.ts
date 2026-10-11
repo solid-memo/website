@@ -1,10 +1,53 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_REPO_URL, siteConfig } from "./config";
+import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
+import { DEFAULT_APP_NAME, DEFAULT_REPO_URL, siteConfig, siteHtml } from "./config";
 
 describe("siteConfig", () => {
+  it("is Solid Memo's own settings when nothing is set", () => {
+    expect(siteConfig({})).toEqual({
+      appName: "Solid Memo",
+      repoUrl: "https://github.com/solid-memo/website",
+      podProviders: POD_PROVIDERS,
+      libraryIndexUrl: undefined,
+    });
+  });
+
+  describe("VITE_LIBRARY_INDEX_URL", () => {
+    it("is the site's own library when blank", () => {
+      expect(siteConfig({ VITE_LIBRARY_INDEX_URL: " " }).libraryIndexUrl).toBeUndefined();
+    });
+
+    it("is the index given", () => {
+      expect(siteConfig({ VITE_LIBRARY_INDEX_URL: "https://example.org/decks/index.ttl" }).libraryIndexUrl).toBe(
+        "https://example.org/decks/index.ttl",
+      );
+    });
+
+    it("refuses anything but an http(s) URL, naming the variable", () => {
+      expect(() => siteConfig({ VITE_LIBRARY_INDEX_URL: "decks/index.ttl" })).toThrow(
+        'VITE_LIBRARY_INDEX_URL must be an http(s) URL; it is "decks/index.ttl" (docs/configuration.md).',
+      );
+    });
+  });
+
+  describe("VITE_APP_NAME", () => {
+    it("is Solid Memo when blank", () => {
+      expect(siteConfig({ VITE_APP_NAME: " " }).appName).toBe(DEFAULT_APP_NAME);
+    });
+
+    it("is the name given, trimmed", () => {
+      expect(siteConfig({ VITE_APP_NAME: " Flashcards at Example School " }).appName).toBe("Flashcards at Example School");
+    });
+
+    it("refuses a name on more than one line, naming the variable", () => {
+      expect(() => siteConfig({ VITE_APP_NAME: "Flash\ncards" })).toThrow(
+        'VITE_APP_NAME must be text on one line; it is "Flash\\ncards" (docs/configuration.md).',
+      );
+    });
+  });
+
   describe("VITE_REPO_URL", () => {
-    it("is Solid Memo's own repository when unset or blank", () => {
-      expect(siteConfig({}).repoUrl).toBe("https://github.com/solid-memo/website");
+    it("is Solid Memo's own repository when blank", () => {
       expect(siteConfig({ VITE_REPO_URL: "  " }).repoUrl).toBe(DEFAULT_REPO_URL);
     });
 
@@ -14,12 +57,60 @@ describe("siteConfig", () => {
       );
     });
 
-    it("refuses anything but an http(s) URL, naming the variable", () => {
+    it("refuses anything but an http(s) URL without credentials, naming the variable", () => {
       expect(() => siteConfig({ VITE_REPO_URL: "javascript:alert(1)" })).toThrow(
         'VITE_REPO_URL must be an http(s) URL; it is "javascript:alert(1)" (docs/configuration.md).',
       );
       expect(() => siteConfig({ VITE_REPO_URL: "github.com/someone/memo" })).toThrow("VITE_REPO_URL");
       expect(() => siteConfig({ VITE_REPO_URL: "https://me:secret@git.example/memo" })).toThrow("VITE_REPO_URL");
     });
+  });
+
+  describe("VITE_POD_PROVIDERS", () => {
+    const school = { id: "school", name: "Example School Pods", oidcIssuer: "https://pods.school.example/" };
+
+    it("is the providers Solid Memo suggests when blank", () => {
+      expect(siteConfig({ VITE_POD_PROVIDERS: "" }).podProviders).toBe(POD_PROVIDERS);
+    });
+
+    it("is the providers given, with a sign-up page or without", () => {
+      const withSignUp = { id: "other", name: "Other", oidcIssuer: "https://login.other.example", signUpUrl: "https://other.example/join" };
+      expect(siteConfig({ VITE_POD_PROVIDERS: JSON.stringify([school, withSignUp]) }).podProviders).toEqual([school, withSignUp]);
+    });
+
+    it.each([
+      ["text that is not JSON", "school"],
+      ["an object, not an array", JSON.stringify(school)],
+      ["no provider at all", "[]"],
+      ["a provider that is not an object", JSON.stringify(["school"])],
+      ["a provider that is null", "[null]"],
+      ["a provider that is an array", "[[]]"],
+      ["a provider without an id", JSON.stringify([{ ...school, id: undefined }])],
+      ["a provider with a blank name", JSON.stringify([{ ...school, name: " " }])],
+      ["an issuer over http", JSON.stringify([{ ...school, oidcIssuer: "http://pods.school.example/" }])],
+      ["an issuer that is not a URL", JSON.stringify([{ ...school, oidcIssuer: "pods.school.example" }])],
+      ["an issuer that is not text", JSON.stringify([{ ...school, oidcIssuer: 1 }])],
+      ["a sign-up page over http", JSON.stringify([{ ...school, signUpUrl: "http://school.example/join" }])],
+      ["a misspelled key", JSON.stringify([{ ...school, signupUrl: "https://school.example/join" }])],
+      ["two providers with one id", JSON.stringify([school, { ...school, name: "Again" }])],
+    ])("refuses %s, naming the variable", (_, value) => {
+      expect(() => siteConfig({ VITE_POD_PROVIDERS: value })).toThrow(/^VITE_POD_PROVIDERS must be a JSON array/);
+    });
+  });
+});
+
+describe("siteHtml", () => {
+  it("puts the name in the page's text and attributes, and as a string in its JSON-LD", () => {
+    const html = '<title>%APP_NAME% - flashcards</title><meta content="%APP_NAME%" /><script type="application/ld+json">{"name": %APP_NAME_JSON%}</script>';
+    expect(siteHtml(html, { appName: "Solid Memo" })).toBe(
+      '<title>Solid Memo - flashcards</title><meta content="Solid Memo" /><script type="application/ld+json">{"name": "Solid Memo"}</script>',
+    );
+  });
+
+  it("keeps a name's markup characters text, and out of the JSON-LD's script", () => {
+    const html = '<title>%APP_NAME%</title><meta content="%APP_NAME%" />{"name": %APP_NAME_JSON%}';
+    expect(siteHtml(html, { appName: `"Tom" & <Jerry's>` })).toBe(
+      '<title>&#34;Tom&#34; &#38; &#60;Jerry&#39;s&#62;</title><meta content="&#34;Tom&#34; &#38; &#60;Jerry&#39;s&#62;" />{"name": "\\"Tom\\" & \\u003cJerry\'s>"}',
+    );
   });
 });

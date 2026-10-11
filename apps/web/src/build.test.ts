@@ -149,3 +149,15 @@ describe("the page's structured data", () => {
     expect(source.targetProduct).toEqual({ "@id": app["@id"] });
   });
 });
+
+describe("the page's name", () => {
+  it("is the site's, Solid Memo when VITE_APP_NAME is unset, in its title, link preview and JSON-LD", () => {
+    expect(html).not.toContain("%APP_NAME");
+    expect(html).toContain("<title>Solid Memo - Spaced-repetition flashcards in your Solid pod</title>");
+    expect(html).toContain('<meta property="og:site_name" content="Solid Memo" />');
+    expect(html).toContain('<meta property="og:title" content="Solid Memo" />');
+    const jsonLd = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)![1]!;
+    const graph = (JSON.parse(jsonLd) as { "@graph": Record<string, unknown>[] })["@graph"];
+    expect(graph.map((node) => node.name)).toEqual(["Solid Memo", "Solid Memo"]);
+  });
+});

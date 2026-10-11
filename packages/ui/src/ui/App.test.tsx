@@ -12,6 +12,7 @@ import { AppShell, SOLID_MEMO, STUDIO } from "./App";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
+import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
@@ -37,7 +38,7 @@ async function submitWebId(webId: string) {
   fireEvent.click(screen.getByRole("button", { name: "Log in with Solid" }));
 }
 
-function renderApp(useCases: UseCases) {
+function renderApp(useCases: UseCases, site: { appName?: string; providers?: typeof POD_PROVIDERS } = {}) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -46,6 +47,8 @@ function renderApp(useCases: UseCases) {
       <AppShell
         useCases={useCases}
         source={source}
+        appName={site.appName}
+        providers={site.providers ?? POD_PROVIDERS}
         identity={SOLID_MEMO}
         workspace={Workspace}
       />
@@ -242,7 +245,7 @@ describe("AppShell", () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       return render(
         <QueryClientProvider client={queryClient}>
-          <AppShell useCases={useCases} source={{ ...source, commitSha: null }} identity={STUDIO} workspace={Workspace} />
+          <AppShell useCases={useCases} source={{ ...source, commitSha: null }} providers={POD_PROVIDERS} identity={STUDIO} workspace={Workspace} />
         </QueryClientProvider>,
       );
     }
@@ -296,6 +299,15 @@ describe("AppShell", () => {
     expect(within(banner).getByRole("combobox", { name: "Language" })).toBeInTheDocument();
     expect(within(screen.getByRole("main")).getByRole("heading", { name: "Set up your Solid Pod" })).toBeInTheDocument();
     await waitFor(() => expect(document.title).toBe("Log in – Solid Memo"));
+  });
+
+  it("is called by the site's own name, and suggests the site's own Pod providers", async () => {
+    const school = { id: "school", name: "Example School Pods", oidcIssuer: "https://pods.school.example/", signUpUrl: "https://school.example/join" };
+    renderApp(makeUseCases(), { appName: "Example School Cards", providers: [school] });
+    expect(await screen.findByRole("heading", { level: 1, name: "Example School Cards" })).toBeInTheDocument();
+    await waitFor(() => expect(document.title).toBe("Log in – Example School Cards"));
+    expect(screen.getByRole("link", { name: /Example School Pods/ })).toHaveAttribute("href", "https://school.example/join");
+    expect(screen.queryByRole("link", { name: /iGrant\.io Data Pod/ })).toBeNull();
   });
 
   it("shows a session-restore error (Error instance)", async () => {

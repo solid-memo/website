@@ -5,17 +5,22 @@ import preact from "@preact/preset-vite";
 import { turtleDirectoryPlugin } from "@solid-memo/vocab/tooling/publishTurtle";
 import { DECKS_ROOT, NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { siteDefines } from "@solid-memo/vocab/tooling/siteBuild";
-import { siteConfig } from "./src/config.ts";
+import { siteConfig, siteHtml, type SiteConfig } from "./src/config.ts";
 
 /**
  * The settings the page reads (docs/configuration.md), checked as the
- * build starts, so a wrong one fails the build rather than the page.
+ * build starts, so a wrong one fails the build rather than the page;
+ * and the site's name, put in the page's HTML.
  */
 function siteSettings(): Plugin {
+  let settings: SiteConfig;
   return {
     name: "solid-memo:site-settings",
     configResolved(config) {
-      siteConfig(config.env);
+      settings = siteConfig(config.env);
+    },
+    transformIndexHtml(html) {
+      return siteHtml(html, settings);
     },
   };
 }

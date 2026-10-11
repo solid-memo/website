@@ -98,6 +98,12 @@ describe("createI18n", () => {
     expect(createI18n("en").t("footer.version")).toBe("Version {version}");
   });
 
+  it("says the site's own name, when it has one, where Solid Memo's stands alone", () => {
+    expect(createI18n("ko").t("app.documentTitle")).toBe("Solid Memo");
+    expect(createI18n("ko", "Example School Cards").t("app.documentTitle")).toBe("Example School Cards");
+    expect(createI18n("ko", "Example School Cards").t("studio.name")).toBe(createI18n("ko").t("studio.name"));
+  });
+
   it("picks a plural form by count", () => {
     expect(createI18n("en").t("common.cardCount", { count: 1 })).toBe("1 card");
     expect(createI18n("en").t("common.cardCount", { count: 3 })).toBe("3 cards");

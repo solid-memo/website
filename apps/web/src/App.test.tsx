@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { WorkspaceProps } from "@solid-memo/ui/App";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { App, type StudioModule } from "./App";
@@ -24,11 +25,11 @@ const studioModule: StudioModule = { StudioWorkspace: FakeStudioWorkspace };
 
 const source = { repoUrl: "https://git.example/memo", version: "0.1.0", commitSha: null };
 
-function renderApp(useCases: UseCases, loadStudio: () => Promise<StudioModule>) {
+function renderApp(useCases: UseCases, loadStudio: () => Promise<StudioModule>, appName = "Solid Memo") {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <App useCases={useCases} source={source} loadStudio={loadStudio} />
+      <App useCases={useCases} source={source} appName={appName} providers={POD_PROVIDERS} loadStudio={loadStudio} />
     </QueryClientProvider>,
   );
 }
@@ -52,6 +53,11 @@ describe("App", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Solid Memo" })).toBeInTheDocument();
     expect(screen.getByText("Spaced-repetition flashcards that live in your own Solid Pod.")).toBeInTheDocument();
     expect(loadStudio).not.toHaveBeenCalled();
+  });
+
+  it("is called by the site's own name", async () => {
+    renderApp(makeUseCasesFake(), vi.fn(async () => studioModule), "Example School Cards");
+    expect(await screen.findByRole("heading", { level: 1, name: "Example School Cards" })).toBeInTheDocument();
   });
 
   it("names its version and links its repository in the footer", async () => {

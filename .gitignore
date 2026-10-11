@@ -8,3 +8,5 @@ e2e/journeys/logs/
 e2e/journeys/test-results/
 e2e/journeys/playwright-report/
 e2e/journeys/blob-report/
+.env.local
+.env.*.local
