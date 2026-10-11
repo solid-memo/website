@@ -50,14 +50,56 @@ jobs:
       # Biome's formatting and lint rules (docs/style.md); then every
       # package: typecheck, tests at 100% coverage, generated code and
       # Turtle formatting in step with their sources, and the deck library
-      # (ns.yml also compares it with the base); then the boundaries, the
-      # docs' index and the shipped dependencies' maturity (docs/testing.md).
+      # (the library job also compares it with the base); then the
+      # boundaries, the docs' index and the shipped dependencies' maturity
+      # (docs/testing.md).
       - run: npm run check
       # Each package's coverage, in the run's summary; the thresholds that
       # gate are each package's own, in npm run check.
       - if: success() || failure()
         run: npm run coverage:summary
       - run: npm run build
+
+  # The deck library compared with the base of the change
+  # (docs/deck-library.md#checks): no published version
+  # (decks/<name>/v<N>.ttl) edited or removed, and every version new
+  # since then naming the library's contact and no email. It needs the
+  # whole history, which build does not, so it is a job of its own.
+  library:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # On a push to the default branch, compare with the commit the push
+      # moved it from; on a pull request (its merge with the default
+      # branch) or a run by hand, with where it left the default branch,
+      # so a version not merged yet can still be fixed there. A push that
+      # created the default branch (all zeros), or one whose earlier
+      # commit a force push left unfetched, compares with the default
+      # branch.
+      - name: npm run library:check -- --base <base>
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          BEFORE: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [ "$EVENT" = push ] && [ "$REF" = "refs/heads/$DEFAULT_BRANCH" ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            base="$BEFORE"
+          else
+            git fetch --no-tags origin "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+            base="$(git merge-base HEAD "origin/$DEFAULT_BRANCH")"
+          fi
+          echo "Comparing the library with $base"
+          npm run library:check -- --base "$base"
 
   # The vocabulary, the deck library and pod catalog documents, checked
   # again by an independent SHACL engine (pySHACL), SPARQL constraints
@@ -282,7 +324,7 @@ jobs:
   # stays.
   ci-ok:
     if: always()
-    needs: [build, crosscheck, pod, contract, journeys, docs]
+    needs: [build, library, crosscheck, pod, contract, journeys, docs]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

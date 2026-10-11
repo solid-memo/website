@@ -23,7 +23,7 @@ ontology), `topics.ttl` (the topics scheme) and `external.ttl`
 (reference data), each at an address that is also its IRI and its
 `@base`, so every term IRI is a fragment of the document that defines
 it. Changes to them go through git and CI like any other change
-([ns.yml](../.github/workflows/ns.yml)).
+([ci.yml](../.github/workflows/ci.yml)).
 
 [`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) is an
 [RDFS](https://www.w3.org/TR/rdf11-schema/)/[OWL](https://www.w3.org/TR/owl2-overview/)

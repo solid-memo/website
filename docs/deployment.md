@@ -32,9 +32,10 @@ repository:
 
 The workflow enables Pages for the repository on its first run, and
 stops before deploying if the vocabulary or the deck library is missing
-from the build. Changes that touch `ns/` or `decks/` also run the
-[ns workflow](../.github/workflows/ns.yml)
-([deck-library.md](deck-library.md#checks)). The `github-pages`
+from the build. CI's checks of `ns/` and `decks/`, the comparison of
+the deck library with its base included
+([deck-library.md](deck-library.md#checks)), are among those a deploy
+waits for. The `github-pages`
 environment should also be limited to `main` in the repository's
 settings (Settings › Environments), so nothing but this workflow's runs
 on `main` can deploy.

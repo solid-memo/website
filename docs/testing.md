@@ -368,6 +368,7 @@ twice. Its jobs, side by side:
 | Job | What it checks |
 |---|---|
 | `build` | `npm run check`, then `npm run build`; the coverage of every package goes to the run's summary (`npm run coverage:summary`) |
+| `library` | the deck library against the base of the change: no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)) |
 | `crosscheck` | the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | that each advisory server starts and meets the contract |
@@ -384,11 +385,9 @@ before it failed, and fails unless every one passed. A matrix job's
 checks are named per server, and jobs come and go, so the ruleset names
 this job alone. (Another workflow's job named `build`, deploy.yml's,
 would also answer to a required check of that name.) Deploys follow a green run on `main`
-([deployment.md](deployment.md#github-pages-automatic)). Changes to
-`ns/` and `decks/` also run the [ns workflow](../.github/workflows/ns.yml),
-which compares the deck library with its base
-([deck-library.md](deck-library.md#checks)); it is not a required check,
-since a change that touches neither never runs it.
+([deployment.md](deployment.md#github-pages-automatic)). Every check of
+`ns/` and `decks/` runs here, the comparison with the base included, so
+`ci-ok` gates them all and nothing is checked twice.
 
 A fork's pull request runs the same jobs, and its results are public.
 That is safe because the jobs only read: the workflow's token can read

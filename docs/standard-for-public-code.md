@@ -497,8 +497,9 @@ The first assessment's plan, with what landed on this branch checked.
 
 - [x] **`ci.yml`.** Runs on every pull request and on pushes to `main`,
   with the `ci-ok` job, a read-only token and no secrets.
-- [x] **`ns.yml`.** Runs on pull requests and on pushes to `main`, with
-  the same path filters.
+- [x] **The deck library's base.** Compared in `ci.yml`'s `library`
+  job, which `ci-ok` waits for; `ns.yml`, whose checks were all in
+  `ci.yml` but that one, is gone.
 - [x] **`deploy.yml`.** A deploy by hand runs only from `main`, after
   `npm run check`.
 - [x] **`renovate.json5`.** `automergeType: 'pr'`.

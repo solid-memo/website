@@ -428,10 +428,12 @@ fails, and so does a version not published there that states
 published one, so that rule does not run. `npm run check` runs
 `library:check` without a base, and so does CI, as a Turbo task of the shacl package
 ([turbo.json](../packages/shacl/turbo.json)), cached until a file it
-reads (`ns/`, `decks/`, its packages' code) changes. The [ns workflow](../.github/workflows/ns.yml)
-runs on pull requests and on pushes to the default branch that touch
-those files, not on other branches' pushes, so a pull request's commits
-are checked once. On a push to the default branch it passes the commit
+reads (`ns/`, `decks/`, its packages' code) changes. CI's `library`
+job ([ci.yml](../.github/workflows/ci.yml),
+[testing.md](testing.md#continuous-integration)) passes a base, on pull
+requests and on pushes to the default branch, not on other branches'
+pushes, so a pull request's commits are checked once; `ci-ok` waits for
+it like every other job. On a push to the default branch it passes the commit
 the push moved it from; on a pull request, the commit where the change
 left the default branch, so an edit to a published version is caught
 before it is merged, while a version not merged yet can still be fixed.
