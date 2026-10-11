@@ -394,7 +394,7 @@ in. [appUseCases.ts](../packages/composition/src/appUseCases.ts) names
 the index; during `npm run dev` and `npm run preview` the site's own
 addresses are read from the local server (`siteFetch`), so the working
 tree's library is what the app shows. `VITE_LIBRARY_INDEX_URL` names
-another index at build time:
+another index at build time ([configuration.md](configuration.md)):
 
 ```sh
 VITE_LIBRARY_INDEX_URL=https://example.org/decks/index.ttl npm run dev

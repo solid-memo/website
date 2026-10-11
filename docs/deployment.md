@@ -6,7 +6,7 @@ deployed automatically by CI.
 
 ## GitHub Pages (automatic)
 
-The site is live at **https://solid-memo.com/**. `.github/workflows/deploy.yml`
+This deployment is live at **https://solid-memo.com/**. `.github/workflows/deploy.yml`
 runs when the CI workflow has finished on `main`
 (`workflow_run`), and deploys only if CI passed:
 
@@ -72,16 +72,18 @@ gh repo create <user>/solid-memo --public --source . --push
 ```
 
 (GitHub Pages on the free plan requires a public repository.) A fork
-deploys to `https://<user>.github.io/solid-memo/`; its app works there,
+deploys to `https://<user>.github.io/<repository>/`; its app works there,
 but the IRIs it reads still name `https://solid-memo.com/`, which
 `siteFetch` ([appUseCases.ts](../packages/composition/src/appUseCases.ts)) maps to wherever the
-site is served.
+site is served. A fork gives its build its own name, repository link and
+Pod providers in `VITE_` variables ([configuration.md](configuration.md)),
+and [reuse.md](reuse.md) walks through running a copy.
 
 ## Why any static host works, unconfigured
 
 - Asset URLs are relative (`base: "./"` in `vite.config.ts`), so the
-  build works at a domain root or any subfolder — including the
-  `/solid-memo/` project path on GitHub Pages.
+  build works at a domain root or any subfolder — including a fork's
+  `/<repository>/` project path on GitHub Pages.
 - Routing is hash-based (`docs/routing.md`), so deep links resolve to
   `index.html` without rewrite rules.
 - The Solid OIDC redirect URL derives from `window.location` at
@@ -93,14 +95,37 @@ site is served.
   may add the directives a meta tag cannot carry, such as
   `frame-ancestors`.
 
-## Custom domain (solid-memo.com via one.com DNS)
+## Custom domain (optional)
 
-The domain is live: one.com's DNS points `solid-memo.com` at GitHub
-Pages, the custom domain is set in the repository (Settings → Pages →
-Custom domain, recorded in [CNAME](../CNAME)), and GitHub provisions
-the certificate. Nothing in the app depends on it: the same build
-serves from any origin. The vocabulary, shape and library IRIs do name
-it, so they resolve only once it serves this site.
+Nothing in the app depends on a domain: the same build serves from any
+origin. To serve a GitHub Pages deployment from a domain of your own:
+
+1. At the domain's DNS provider, point it at GitHub Pages: for a
+   subdomain (`memo.example.org`), a `CNAME` record to
+   `<user>.github.io`; for an apex domain (`example.org`), `A` records
+   to `185.199.108.153`, `185.199.109.153`, `185.199.110.153` and
+   `185.199.111.153`, and `AAAA` records to `2606:50c0:8000::153`
+   through `2606:50c0:8003::153`.
+2. In the repository, set it under Settings → Pages → Custom domain.
+   GitHub checks the DNS and provisions the certificate; then tick
+   Enforce HTTPS.
+3. Verify the domain for your account or organization (Settings →
+   Pages), so no other repository can claim it.
+
+The deploy workflow publishes through `actions/deploy-pages`, which
+takes the domain from that setting only: a `CNAME` file in the
+repository is not read. On another host, follow its own steps.
+
+The vocabulary, shape and library IRIs name `https://solid-memo.com/`
+whatever domain serves the site; the app reads them from where it is
+served ([reuse.md](reuse.md#what-stays-the-same)).
+
+### This deployment
+
+One.com's DNS points `solid-memo.com` at GitHub Pages, and the custom
+domain is set in the repository's settings. [CNAME](../CNAME) records
+that setting; the deploy does not read it. The IRIs above resolve on
+the web because this domain serves this site.
 
 ## Manual publish (any static web space)
 

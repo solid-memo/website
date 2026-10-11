@@ -20,8 +20,9 @@ Alternatively the user picks a suggested provider ([onboarding](onboarding.md));
 that issuer.
 
 The app never handles credentials: no password field, no client secret, no
-hand-rolled OIDC. The authn library registers the client dynamically and
-runs the authorization-code + PKCE flow.
+hand-rolled OIDC. The authn library registers the client dynamically,
+under the site's name (`VITE_APP_NAME`, [configuration.md](configuration.md)),
+and runs the authorization-code + PKCE flow.
 
 ```mermaid
 sequenceDiagram

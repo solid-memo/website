@@ -52,7 +52,9 @@ its heading, started in one click
 [packages/domain/src/podProvider.ts](../packages/domain/src/podProvider.ts) lists the
 providers suggested (`POD_PROVIDERS`). A provider is data, nothing more —
 a name, its Solid-OIDC issuer, and optionally a sign-up link — so adding a
-provider is adding a list entry:
+provider is adding a list entry. A build can suggest a list of its own
+instead, in `VITE_POD_PROVIDERS` ([configuration.md](configuration.md#vite_pod_providers));
+`AppShell` takes the list as its `providers`:
 
 - providers **with a `signUpUrl`** are offered on the first step for
   creating a Pod (currently iGrant.io Data Pod);
