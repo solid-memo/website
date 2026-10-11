@@ -1,0 +1,29 @@
+# How git stores and shows the files (docs/style.md).
+
+# Text is stored and checked out with LF line endings, on every system.
+* text=auto eol=lf
+
+# Pictures are binary: never converted, never diffed as text.
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+
+# Vendored files are kept byte for byte as their authors publish them (one
+# license there has CRLF line endings): the shapes' ruleset is a hash of
+# every file under vendor/ (shapesRuleset in
+# packages/vocab/tooling/siteBuild.ts), and a changed byte would void the
+# check receipts in users' pods.
+packages/vocab/vendor/** -text linguist-vendored
+
+# Written by tools, never by hand: collapsed in GitHub's diffs and left out
+# of its language statistics. The vocabulary's constants come from ns/ by
+# `npm run generate` (docs/vocab.md); the golden file from its test, run
+# with -u.
+packages/vocab/src/*.generated.ts linguist-generated
+packages/shacl/node/deckLibrary.golden.txt linguist-generated
+package-lock.json linguist-generated
+e2e/pod/servers/**/package-lock.json linguist-generated
+.devcontainer/devcontainer-lock.json linguist-generated
