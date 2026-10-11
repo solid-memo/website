@@ -76,7 +76,7 @@ read the library. The Studio has no build of its own: Solid Memo's
 bundles it ([studio.md](studio.md)).
 
 ```sh
-npm run check     # every package: typecheck, tests (100% coverage), the round trip, drift, formatting, the deck library; then boundaries
+npm run check     # Biome's lint; then every package: typecheck, tests (100% coverage), the round trip, drift, Turtle formatting, the deck library; then boundaries
 npm run build     # the site, the Studio included, into apps/web/dist/
 npm run dev       # the site, from source; the Studio at #/studio
 npm start         # the site as deployed: built, then served at http://localhost:4173
