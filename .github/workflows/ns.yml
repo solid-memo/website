@@ -6,13 +6,16 @@ name: Vocabulary, shapes and decks
 # valid with its index up to date and no published version edited or
 # removed since the base of the change, the generated code in step with
 # the vocabulary and the shapes, and their tests. CI runs most of this
-# too, on every push, and gates the deploy; it also runs pySHACL's
+# too, and gates merges and the deploy; it also runs pySHACL's
 # cross-check, which is not repeated here. This workflow adds the
-# comparison with the base. It runs on pushes, not on pull requests.
+# comparison with the base. Like CI, it runs on pull requests and on
+# pushes to main, not on other branches' pushes, so a pull request's
+# commits are checked once. It is not a required check: a change that
+# touches none of these paths never runs it.
 
 on:
-  push:
-    paths:
+  pull_request:
+    paths: &paths
       - ns/**
       - decks/**
       - packages/vocab/**
@@ -24,6 +27,9 @@ on:
       - package-lock.json
       - .nvmrc
       - .github/workflows/ns.yml
+  push:
+    branches: [main]
+    paths: *paths
   workflow_dispatch:
 
 permissions:
@@ -36,6 +42,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       # The whole history: the library is compared with an earlier commit.
       - uses: actions/checkout@v7
@@ -57,11 +64,12 @@ jobs:
       - run: npm run format:turtle:check
       # A published version (decks/<name>/v<N>.ttl) is never edited or
       # removed: on a push to the default branch, compare with the commit
-      # the push moved it from; on a push to any other branch, with where
-      # it left the default branch, so a version not merged yet can still
-      # be fixed there. A push that
-      # created the default branch (all zeros), or one whose earlier commit
-      # a force push left unfetched, compares with the default branch.
+      # the push moved it from; on a pull request (its merge with the
+      # default branch) or a run by hand, with where it left the default
+      # branch, so a version not merged yet can still be fixed there. A
+      # push that created the default branch (all zeros), or one whose
+      # earlier commit a force push left unfetched, compares with the
+      # default branch.
       - name: npm run library:check -- --base <base>
         env:
           EVENT: ${{ github.event_name }}

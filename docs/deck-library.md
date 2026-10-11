@@ -367,12 +367,15 @@ commit: a version published there that is gone or differs by a byte
 fails. `npm run check` runs `library:check` without a base, and so
 does CI, as a Turbo task of the shacl package
 ([turbo.json](../packages/shacl/turbo.json)), cached until a file it
-reads (`ns/`, `decks/`, its packages' code) changes; the [ns workflow](../.github/workflows/ns.yml), which runs on
-pushes (not on pull requests), passes the commit a push to the default
-branch moved it from or, on a push to any other branch, the commit where
-that branch left the default branch, so an edit to a published version
-is caught on the branch while a version not merged yet can still be
-fixed. To check a change locally before pushing:
+reads (`ns/`, `decks/`, its packages' code) changes. The [ns workflow](../.github/workflows/ns.yml)
+runs on pull requests and on pushes to the default branch that touch
+those files, not on other branches' pushes, so a pull request's commits
+are checked once. On a push to the default branch it passes the commit
+the push moved it from; on a pull request, the commit where the change
+left the default branch, so an edit to a published version is caught
+before it is merged, while a version not merged yet can still be fixed.
+A branch with no pull request is not compared; open one, or check it
+locally before pushing:
 
 ```sh
 npm run library:check -- --base origin/main
