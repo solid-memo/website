@@ -34,7 +34,7 @@ describe("deckProblemsOf", () => {
       "1 problem in the deck's data",
       "water, front: its language is not stated",
       "fire: says the same as another card",
-      "fire, note under the back: Too long to read as Markdown (9000 characters): it shows as plain text.",
+      "fire, note under the back: Too long to read as Markdown (9,000 characters): it shows as plain text.",
     ]);
     expect(found.map((one) => one.route)).toEqual([
       { screen: "health", instanceUrl: instanceA.url, deckUrl: kanji.url },

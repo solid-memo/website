@@ -152,6 +152,8 @@
     "saveButton": "Speichern",
     "removeButton": "Karte entfernen",
     "removeConfirm": "Karte „{card}“ entfernen? Das lässt sich nicht rückgängig machen.",
+    "removeHeading": "Karte entfernen",
+    "removeAction": "Entfernen",
     "saved": "Gespeichert."
   },
   "cardContentFields": {
@@ -200,6 +202,7 @@
     "delete": "Löschen",
     "deleteLabel": "Falsche Antwortmöglichkeit „{option}“ löschen",
     "deleteConfirm": "Falsche Antwortmöglichkeit „{option}“ löschen?",
+    "deleteHeading": "Falsche Antwortmöglichkeit löschen",
     "noLanguage": "ohne Sprachangabe",
     "issues": "Einen Blick wert",
     "issue": {
@@ -570,6 +573,8 @@
     "intro": "Eine Instanz ist eine Sammlung deiner Stapel und deines Lernstands, gespeichert in einem Ordner in deinem Pod. Die meisten brauchen nur eine.",
     "empty": "Es sind noch keine Instanzen eingetragen.",
     "deleteConfirm": "Instanz „{name}“ mit allen Stapeln und Karten löschen? Das lässt sich nicht rückgängig machen. Dateien, die eine andere App in ihrem Ordner abgelegt hat, bleiben erhalten, ebenso die Ausgaben, die aus ihr veröffentlicht wurden.",
+    "deleteHeading": "Instanz löschen",
+    "deleteAction": "Löschen",
     "deleteLabel": "Instanz „{name}“ löschen",
     "delete": "Löschen…",
     "newInstance": "Neue Instanz…",
@@ -1402,13 +1407,154 @@
     "open": "Im Studio öffnen",
     "loading": "Das Studio wird geöffnet…",
     "loadFailed": "Das Studio konnte nicht geöffnet werden. Lade die Seite neu, um es erneut zu versuchen.",
+    "shell": {
+      "status": "Status des Studios",
+      "density": "Dichte",
+      "compact": "Kompakt",
+      "comfortable": "Komfortabel",
+      "saving": "Der Entwurf wird gespeichert…",
+      "saved": "Entwurf gespeichert",
+      "failed": "Letzte Änderung nicht gespeichert",
+      "close": "Schließen",
+      "sidebar": "Seitenleiste",
+      "nav": "Studio",
+      "section": {
+        "decks": "Stapel",
+        "groups": "Gruppen",
+        "drafts": "Entwürfe",
+        "releases": "Ausgaben",
+        "health": "Zustand",
+        "library": "Kopien aus der Bibliothek",
+        "transfer": "Importieren und exportieren",
+        "instance": "Name und Katalog"
+      },
+      "problems": {
+        "one": "{count} Problem",
+        "other": "{count} Probleme"
+      },
+      "filter": "Stapel und Entwürfe filtern",
+      "deckList": "Stapel",
+      "draftList": "Entwürfe",
+      "noDecks": "Keine Stapel.",
+      "noDrafts": "Keine Entwürfe.",
+      "version": "v{version}",
+      "switchInstance": "Instanz wechseln: {instance}",
+      "allInstances": "Alle Instanzen",
+      "resizeAside": "Breite des Seitenbereichs",
+      "hide": "Ausblenden",
+      "pinned": "Angeheftet",
+      "recent": "Zuletzt geöffnet",
+      "pin": "{name} anheften",
+      "ready": "Bereit zum Veröffentlichen",
+      "blocked": {
+        "one": "{count} Problem verhindert die Veröffentlichung",
+        "other": "{count} Probleme verhindern die Veröffentlichung"
+      },
+      "someBlock": {
+        "one": "{count} Problem, davon verhindern {blocking} die Veröffentlichung",
+        "other": "{count} Probleme, davon verhindern {blocking} die Veröffentlichung"
+      },
+      "released": "Veröffentlicht"
+    },
+    "tabs": {
+      "deck": "Stapel",
+      "draft": "Entwurf",
+      "cards": "Karten",
+      "schedule": "Zeitplan",
+      "health": "Zustand",
+      "about": "Über",
+      "export": "Exportieren",
+      "overview": "Übersicht",
+      "check": "Prüfung",
+      "preview": "Vorschau",
+      "trial": "Probelauf",
+      "diff": "Änderungen",
+      "release": "Ausgabe"
+    },
+    "keys": {
+      "palette": "Suchen, hingehen oder einen Befehl ausführen",
+      "button": "? Tasten",
+      "heading": "Tastenkürzel",
+      "chords": "Nebeneinander gezeigte Tasten wie g d werden nacheinander gedrückt. Während du in einem Feld tippst, funktionieren nur Ctrl+K, F6, Shift+F6, F8 und Shift+F8.",
+      "characterKeys": "Kürzel mit einer Taste",
+      "characterKeysHint": "Tasten, die ohne Ctrl gedrückt werden, wie g d, j, [ oder ?, als Kürzel. Schalte sie aus, wenn Spracheingabe oder eine versehentlich gedrückte Taste sie auslöst; Ctrl+K, F6, F8 und die Schaltflächen funktionieren weiterhin.",
+      "scope": {
+        "studio": "Überall im Studio",
+        "table": "In einer Tabelle: die Karten, die Stapel, die Karten eines Entwurfs…"
+      },
+      "help": "Diese Tastenkürzel anzeigen",
+      "filter": "Zur Suche oder zum Filter der Ansicht gehen",
+      "nextRegion": "Zum nächsten Bereich gehen: Kopfzeile, Seitenleiste, Hauptinhalt, Seitenbereich, Panel, Statusleiste",
+      "previousRegion": "Zum vorigen Bereich gehen",
+      "go": {
+        "decks": "Zu den Stapeln gehen",
+        "groups": "Zu den Gruppen gehen",
+        "drafts": "Zu den Entwürfen gehen",
+        "releases": "Zu den Ausgaben gehen",
+        "health": "Zum Zustand gehen",
+        "library": "Zu den Kopien aus der Bibliothek gehen",
+        "transfer": "Zu Importieren und Exportieren gehen",
+        "instances": "Zu den Instanzen gehen"
+      },
+      "toggleSidebar": "Seitenleiste ein- oder ausblenden",
+      "toggleAside": "Seitenbereich ein- oder ausblenden (die Gliederung, den Stapel, die Aktualisierung) oder die Karte neben den Karten schließen",
+      "toggleDock": "Panel ein- oder ausblenden: Probleme und Aktivität",
+      "nextProblem": "Zum Feld des nächsten Problems gehen",
+      "previousProblem": "Zum Feld des vorigen Problems gehen",
+      "previousTab": "Zum vorigen Tab des Stapels oder Entwurfs gehen",
+      "nextTab": "Zum nächsten Tab des Stapels oder Entwurfs gehen",
+      "tab": "Über seine Nummer zu einem Tab des Stapels oder Entwurfs gehen",
+      "down": "Nächste Zeile",
+      "up": "Vorige Zeile",
+      "select": "Zeile auswählen",
+      "open": "Zeile öffnen",
+      "extendDown": "Die Zeile und auch die nächste auswählen",
+      "extendUp": "Die Zeile und auch die vorige auswählen",
+      "clear": "Auswahl aufheben",
+      "bulk": "Aktionen der ausgewählten Zeilen öffnen",
+      "edit": "Zelle bearbeiten: Enter speichert, Escape bricht ab"
+    },
+    "dock": {
+      "label": "Panel",
+      "problems": "Probleme",
+      "problemsCount": "Probleme ({count})",
+      "activity": "Aktivität",
+      "resize": "Höhe des Panels",
+      "noActivity": "Seit dem Öffnen des Studios ist noch nichts geschehen.",
+      "repeated": "{text} ×{count}",
+      "noProblemsHere": "Die Probleme eines Stapels oder eines Entwurfs werden in seinen Ansichten aufgeführt.",
+      "checking": "Es wird nach Problemen gesucht…",
+      "none": "Keine Probleme gefunden.",
+      "deckData": {
+        "one": "{count} Problem in den Daten des Stapels",
+        "other": "{count} Probleme in den Daten des Stapels"
+      },
+      "unstated": "{place}: Die Sprache ist nicht angegeben",
+      "duplicate": "{place}: sagt dasselbe wie eine andere Karte"
+    },
+    "palette": {
+      "button": "Suchen oder ausführen…",
+      "heading": "Schnell öffnen",
+      "label": "Stapel, Entwürfe, Karten und Befehle durchsuchen",
+      "none": "Nichts passt.",
+      "help": "Tastenkürzel anzeigen",
+      "group": {
+        "recent": "Zuletzt verwendet",
+        "commands": "Befehle",
+        "tabs": "Tabs",
+        "sections": "Bereiche",
+        "instances": "Instanzen",
+        "decks": "Stapel",
+        "drafts": "Entwürfe",
+        "cards": "Karten dieses Stapels",
+        "pinned": "Angeheftet"
+      }
+    },
     "decks": {
       "heading": "Stapel",
       "caption": "Die Stapel von „{instance}“",
       "loading": "Stapel werden geladen…",
       "empty": "Noch keine Stapel: Erstelle oder importiere sie in {app}.",
-      "groupsLink": "Gruppen ordnen",
-      "instanceLink": "Name und Katalog",
       "filter": "Nach Name oder Gruppe filtern",
       "shown": {
         "one": "{shown} von {count} Stapel",
@@ -1439,11 +1585,38 @@
         "unreadable": "Nicht lesbar",
         "from": "Von {host}"
       },
-      "healthLink": "Zustand",
-      "libraryLink": "Kopien aus der Bibliothek",
-      "healthOf": "in „{deck}“",
-      "transferLink": "Importieren und exportieren",
-      "draftsLink": "Entwürfe"
+      "healthOf": "in „{deck}“"
+    },
+    "views": {
+      "label": "Ansichten",
+      "all": "Alle",
+      "due": "Heute fällig",
+      "courses": "Kurse",
+      "copies": "Kopien aus der Bibliothek",
+      "attention": "Braucht Aufmerksamkeit",
+      "none": "Kein Stapel in dieser Ansicht.",
+      "cards": {
+        "all": "Alle",
+        "due": "Fällig",
+        "new": "Neu",
+        "leech": "Problemkarten"
+      },
+      "options": "Optionen der Ansicht {name}",
+      "rename": "Umbenennen…",
+      "remove": "Entfernen",
+      "removeHeading": "Ansicht entfernen",
+      "removeConfirm": "Die Ansicht {name} entfernen? Nur die Ansicht verschwindet: In deinem Pod ändert sich nichts.",
+      "save": "+ Ansicht speichern",
+      "saveHeading": "Ansicht speichern",
+      "renameHeading": "Ansicht {name} umbenennen",
+      "name": "Name",
+      "nameHint": "Eine Ansicht mit demselben Namen wird ersetzt.",
+      "saveButton": "Speichern"
+    },
+    "peek": {
+      "label": "Stapel",
+      "none": "Gehe zur Zeile eines Stapels ({j}, {k}), um ihn hier zu sehen.",
+      "of": "– {deck}"
     },
     "bulk": {
       "label": "Ausgewählte Stapel",
@@ -1485,7 +1658,16 @@
         "other": "{count} Stapel gelöscht."
       },
       "export": "Exportieren",
-      "moveSetAside": "Die Anordnung dieser Stapel enthält ungültige Daten, daher lassen sich Stapel erst nach der Reparatur in Gruppen verschieben."
+      "moveSetAside": "Die Anordnung dieser Stapel enthält ungültige Daten, daher lassen sich Stapel erst nach der Reparatur in Gruppen verschieben.",
+      "groups": {
+        "edit": "Bearbeiten",
+        "editCards": "Ausgewählte Karten bearbeiten",
+        "editDecks": "Ausgewählte Stapel bearbeiten",
+        "schedule": "Zeitplan",
+        "scheduleCards": "Ausgewählte Karten einplanen",
+        "transfer": "Verschieben oder kopieren",
+        "transferCards": "Ausgewählte Karten verschieben oder kopieren"
+      }
     },
     "groups": {
       "heading": "Gruppen"
@@ -1534,12 +1716,11 @@
         "one": "{shown} von {count} Karte",
         "other": "{shown} von {count} Karten"
       },
-      "keys": "Tasten: {j} und {k} wechseln zwischen den Karten, {x} wählt eine aus, {enter} öffnet sie.",
+      "keys": "Tasten: {j} und {k} wechseln zwischen den Karten, {x} wählt eine aus, {enter} öffnet sie, {shiftJ} und {shiftK} wählen auch die nächste oder die vorige aus, {escape} hebt die Auswahl auf, {f2} bearbeitet eine Vorder- oder Rückseite in ihrer Zelle, und {dot} öffnet die Aktionen der ausgewählten Karten.",
       "selected": {
         "one": "{count} Karte ausgewählt",
         "other": "{count} Karten ausgewählt"
       },
-      "clear": "Auswahl aufheben",
       "noMatch": "Keine Karte passt.",
       "caption": "Die Karten von „{deck}“",
       "select": "Auswählen",
@@ -1563,10 +1744,11 @@
       "lapsesSince": "Als Aussetzer zählen die falschen Antworten zur Karte seit {month}, dem Monat der ersten Antwort des Stapels im Protokoll.",
       "lapsesNone": "Als Aussetzer zählen die falschen Antworten zur Karte: Bisher ist keine protokolliert.",
       "lapsesLoading": "Das Antwortprotokoll wird für die Aussetzer gelesen…",
-      "lapsesFailed": "Das Antwortprotokoll konnte nicht gelesen werden, daher sind die Aussetzer nicht bekannt.",
-      "scheduleLink": "Zeitplan, Aussetzer und Problemkarten",
-      "healthLink": "Zustand",
-      "exportLink": "Exportieren"
+      "lapsesFailed": "Das Antwortprotokoll konnte nicht gelesen werden, daher sind die Aussetzer nicht bekannt."
+    },
+    "columns": {
+      "button": "Spalten",
+      "label": "Spalten ein- oder ausblenden"
     },
     "card": {
       "heading": "Karte: {card}",
@@ -1579,7 +1761,35 @@
       },
       "releaseSame": "Diese Karte ist so, wie sie in der Ausgabe steht, aus der dieser Stapel kopiert wurde, daher aktualisiert eine neuere Ausgabe sie. Eine Änderung löst sie von der Ausgabe: Neuere Ausgaben aktualisieren sie dann nicht mehr, können sie aber weiterhin ausmustern.",
       "releaseChanged": "Diese Karte wurde gegenüber der Ausgabe geändert, aus der dieser Stapel kopiert wurde, daher aktualisieren neuere Ausgaben sie nicht mehr. Sie können sie aber weiterhin ausmustern.",
-      "openInApp": "Diese Karte in Solid Memo öffnen"
+      "openInApp": "Diese Karte in Solid Memo öffnen",
+      "steps": "Karten in der Liste",
+      "previous": "Vorige Karte",
+      "next": "Nächste Karte",
+      "detail": "Karte",
+      "close": "Karte schließen",
+      "saved": "Karte {card} gespeichert."
+    },
+    "confirm": {
+      "unsaved": {
+        "heading": "Änderungen speichern?",
+        "text": "Einige Änderungen sind nicht gespeichert. Speichere sie, bevor du weitermachst, verwirf sie oder bleib, wo du bist.",
+        "save": "Speichern",
+        "discard": "Verwerfen",
+        "stay": "Bleiben"
+      },
+      "cancel": "Abbrechen",
+      "deleteCards": "Ausgewählte Karten löschen",
+      "forgetCards": "Fortschritt der ausgewählten Karten zurücksetzen",
+      "deleteDecks": "Ausgewählte Stapel löschen",
+      "forgetDirection": "Fortschritt der Karte zurücksetzen",
+      "restartCourse": "Kurs neu beginnen",
+      "deleteDraft": "Entwurf löschen",
+      "deletePart": {
+        "chapter": "Kapitel löschen",
+        "step": "Schritt löschen",
+        "card": "Karte löschen"
+      },
+      "removeData": "Aus deinem Pod entfernen"
     },
     "schedule": {
       "loading": "Der Zeitplan wird geladen…",
@@ -1770,6 +1980,10 @@
         "reschedule": {
           "one": "{count} Karte ist jetzt am {due} fällig.",
           "other": "{count} Karten sind jetzt am {due} fällig."
+        },
+        "setText": {
+          "one": "Text von {count} Karte gespeichert.",
+          "other": "Text von {count} Karten gespeichert."
         }
       },
       "skipped": {
@@ -1809,6 +2023,10 @@
         "present": {
           "one": "{count} Karte war schon dort.",
           "other": "{count} Karten waren schon dort."
+        },
+        "heading": {
+          "move": "Karten in einen anderen Stapel verschieben",
+          "copy": "Karten in einen anderen Stapel kopieren"
         }
       }
     },
@@ -1956,7 +2174,6 @@
       "planFailed": "Ausgabe {version} ist erschienen, aber was sie ändern würde, konnte nicht gelesen werden.",
       "nothingToUpdate": "Ausgabe {version} ist erschienen, enthält aber nichts, womit sich deine Kopie aktualisieren ließe.",
       "changes": "Ausgabe {version}: Eine Aktualisierung {changes}.",
-      "details": "Was sich ändert",
       "cards": {
         "add": {
           "one": "Hinzugefügt: {count} Karte",
@@ -1987,7 +2204,14 @@
       "failed": "„{deck}“: Die Aktualisierung ist beim Schritt „{step}“ fehlgeschlagen:",
       "badge": "Ausgabe {version} ist erschienen",
       "badgeOf": "für „{deck}“",
-      "newerUnknown": "Unbekannt: Der Stapel steht in keinem öffentlichen Katalog der Person, die ihn erstellt hat"
+      "newerUnknown": "Unbekannt: Der Stapel steht in keinem öffentlichen Katalog der Person, die ihn erstellt hat",
+      "peek": "Gehe zur Zeile einer Kopie ({j}, {k}), um zu sehen, was eine Aktualisierung ändern würde.",
+      "plan": "Aktualisierung",
+      "bulk": "Ausgewählte Kopien",
+      "selected": {
+        "one": "{count} Kopie ausgewählt",
+        "other": "{count} Kopien ausgewählt"
+      }
     },
     "transfer": {
       "crumb": "Importieren und exportieren",
@@ -2096,7 +2320,6 @@
       },
       "untitled": "Unbenannt ({name})",
       "summary": "{kind}, Version {version}",
-      "manage": "Entwürfe für Ausgaben",
       "delete": "Löschen",
       "deleteDraft": "Entwurf {draft}, Version {version} löschen",
       "deleteConfirm": "Entwurf {draft}, Version {version} löschen? Das lässt sich nicht rückgängig machen.",
@@ -2128,12 +2351,7 @@
       "problemsCount": {
         "one": "Die Prüfung der Ausgabe findet {count} Problem.",
         "other": "Die Prüfung der Ausgabe findet {count} Probleme."
-      },
-      "problemsLink": "Prüfung der Ausgabe ansehen",
-      "previewLink": "Vorschau des Eintrags",
-      "trialLink": "Ausprobieren",
-      "diffLink": "Mit der vorigen Version vergleichen",
-      "releaseLink": "Metadaten und Herkunft der Ausgabe"
+      }
     },
     "outline": {
       "empty": "Noch keine Kapitel.",
@@ -2191,7 +2409,6 @@
       "crumb": "Karten",
       "heading": "Karten von „{draft}“",
       "headingCourse": "Fragen von „{draft}“",
-      "overview": "Übersicht des Entwurfs",
       "filter": "Anzeigen",
       "all": "Alle Karten",
       "filters": {
@@ -2217,7 +2434,15 @@
       },
       "retired": "(ausgemustert)",
       "askedTimes": "An {count} Stellen gestellt",
-      "newQuestion": "Neue Frage, noch nirgends gestellt"
+      "newQuestion": "Neue Frage, noch nirgends gestellt",
+      "retire": {
+        "one": "{count} Karte ausmustern",
+        "other": "{count} Karten ausmustern"
+      },
+      "restore": {
+        "one": "{count} Karte zurückholen",
+        "other": "{count} Karten zurückholen"
+      }
     },
     "draftEdit": {
       "saving": "Wird gespeichert…",
@@ -2295,7 +2520,6 @@
         "one": "Die Formen finden {count} Problem; es ist oben bereits aufgeführt.",
         "other": "Die Formen finden {count} Probleme; sie sind oben bereits aufgeführt."
       },
-      "previewLink": "Vorschau des Eintrags",
       "release": "Diese Ausgabe",
       "distractor": "Falsche Antwortmöglichkeit {id}",
       "badge": {
@@ -2312,8 +2536,7 @@
         "step": "ein Schritt",
         "distractor": "eine falsche Antwortmöglichkeit"
       },
-      "profile": "{profile}: {message}",
-      "trialLink": "Ausprobieren"
+      "profile": "{profile}: {message}"
     },
     "field": {
       "title": "Titel",
@@ -2478,7 +2701,6 @@
       "chapter": "Kapitel",
       "jump": "Kapitel öffnen",
       "jumpHint": "Wie jemand, der alle Kapitel davor abgeschlossen hat.",
-      "answers": "Antworten",
       "answersCourse": "Jede Frage des angezeigten Kapitels oder des Kapitels, das als Nächstes ansteht:",
       "answersDeck": "Jede Karte, die jetzt zu lernen ist:",
       "allRight": "Alle richtig beantworten",
@@ -2631,8 +2853,12 @@
       "column": {
         "release": "Ausgabe",
         "readers": "Lesbar für",
+        "draft": "Entwurf",
         "actions": "Aktionen"
       },
+      "filter": "Nach Name oder Adresse filtern",
+      "noMatch": "Keine Ausgabe passt zu „{filter}“.",
+      "noDraft": "Nicht unter den Entwürfen dieser Instanz",
       "name": "{name}, Version {version}",
       "public": "Alle",
       "private": "Nur du",
@@ -2645,6 +2871,13 @@
       "startNextOf": "Nächste Version von {release} beginnen",
       "starting": "Die nächste Version wird angelegt…",
       "drafts": "Entwürfe für Ausgaben"
+    },
+    "inline": {
+      "field": "{column} von {row}",
+      "cell": "{field}: {value}",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "refused": "Nicht gespeichert: {reason}."
     }
   },
   "proseField": {

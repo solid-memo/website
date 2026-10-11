@@ -154,6 +154,8 @@
     "saveButton": "Guardar",
     "removeButton": "Eliminar tarjeta",
     "removeConfirm": "¿Eliminar la tarjeta «{card}»? No se puede deshacer.",
+    "removeHeading": "Eliminar la tarjeta",
+    "removeAction": "Eliminar",
     "saved": "Guardado."
   },
   "cardContentFields": {
@@ -202,6 +204,7 @@
     "delete": "Eliminar",
     "deleteLabel": "Eliminar la opción incorrecta «{option}»",
     "deleteConfirm": "¿Eliminar la opción incorrecta «{option}»?",
+    "deleteHeading": "Eliminar la opción incorrecta",
     "noLanguage": "sin idioma indicado",
     "issues": "Conviene revisar",
     "issue": {
@@ -593,6 +596,8 @@
     "intro": "Una instancia es una colección de tus mazos y tus datos de estudio, guardada en una carpeta de tu Pod. La mayoría de la gente solo necesita una.",
     "empty": "Todavía no hay ninguna instancia registrada.",
     "deleteConfirm": "¿Eliminar la instancia «{name}» con todos sus mazos y tarjetas? No se puede deshacer. Los archivos que otra aplicación haya puesto en su carpeta se conservan, igual que las publicaciones que se hicieron desde ella.",
+    "deleteHeading": "Eliminar la instancia",
+    "deleteAction": "Eliminar",
     "deleteLabel": "Eliminar la instancia {name}",
     "delete": "Eliminar…",
     "newInstance": "Instancia nueva…",
@@ -1469,13 +1474,158 @@
     "open": "Abrir en Studio",
     "loading": "Abriendo el Studio…",
     "loadFailed": "No se pudo abrir el Studio. Vuelve a cargar la página para intentarlo de nuevo.",
+    "shell": {
+      "status": "Estado del Studio",
+      "density": "Densidad",
+      "compact": "Compacta",
+      "comfortable": "Cómoda",
+      "saving": "Guardando el borrador…",
+      "saved": "Borrador guardado",
+      "failed": "El último cambio no se guardó",
+      "close": "Cerrar",
+      "sidebar": "Barra lateral",
+      "nav": "Studio",
+      "section": {
+        "decks": "Mazos",
+        "groups": "Grupos",
+        "drafts": "Borradores",
+        "releases": "Publicaciones",
+        "health": "Diagnóstico",
+        "library": "Copias de la biblioteca",
+        "transfer": "Importar y exportar",
+        "instance": "Nombre y catálogo"
+      },
+      "problems": {
+        "one": "{count} problema",
+        "many": "{count} de problemas",
+        "other": "{count} problemas"
+      },
+      "filter": "Filtrar mazos y borradores",
+      "deckList": "Mazos",
+      "draftList": "Borradores",
+      "noDecks": "No hay mazos.",
+      "noDrafts": "No hay borradores.",
+      "version": "v{version}",
+      "switchInstance": "Cambiar de instancia: {instance}",
+      "allInstances": "Todas las instancias",
+      "resizeAside": "Anchura del panel lateral",
+      "hide": "Ocultar",
+      "pinned": "Fijados",
+      "recent": "Abiertos recientemente",
+      "pin": "Fijar {name}",
+      "ready": "Listo para publicar",
+      "blocked": {
+        "one": "{count} problema impide publicar",
+        "many": "{count} de problemas impiden publicar",
+        "other": "{count} problemas impiden publicar"
+      },
+      "someBlock": {
+        "one": "{count} problema, {blocking} impiden publicar",
+        "many": "{count} de problemas, {blocking} impiden publicar",
+        "other": "{count} problemas, {blocking} impiden publicar"
+      },
+      "released": "Publicado"
+    },
+    "tabs": {
+      "deck": "Mazo",
+      "draft": "Borrador",
+      "cards": "Tarjetas",
+      "schedule": "Programación",
+      "health": "Diagnóstico",
+      "about": "Acerca de",
+      "export": "Exportar",
+      "overview": "Resumen",
+      "check": "Comprobación",
+      "preview": "Vista previa",
+      "trial": "Prueba",
+      "diff": "Cambios",
+      "release": "Publicación"
+    },
+    "keys": {
+      "palette": "Buscar, ir a un sitio o ejecutar un comando",
+      "button": "? Teclas",
+      "heading": "Atajos de teclado",
+      "chords": "Las teclas que se muestran una junto a otra, como g d, se pulsan una después de la otra. Mientras escribes en un campo, solo funcionan Ctrl+K, F6, Shift+F6, F8 y Shift+F8.",
+      "characterKeys": "Atajos de una sola tecla",
+      "characterKeysHint": "Teclas que se pulsan sin Ctrl, como g d, j, [ o ?, como atajos. Desactívalos si la entrada por voz o una tecla pulsada sin querer los activa; Ctrl+K, F6, F8 y los botones siguen funcionando.",
+      "scope": {
+        "studio": "En cualquier parte del Studio",
+        "table": "En una tabla: las tarjetas, los mazos, las tarjetas de un borrador…"
+      },
+      "help": "Mostrar estos atajos",
+      "filter": "Ir a la búsqueda o al filtro de la pantalla",
+      "nextRegion": "Ir a la siguiente región: cabecera, barra lateral, contenido principal, panel lateral, panel, barra de estado",
+      "previousRegion": "Ir a la región anterior",
+      "go": {
+        "decks": "Ir a los mazos",
+        "groups": "Ir a los grupos",
+        "drafts": "Ir a los borradores",
+        "releases": "Ir a las publicaciones",
+        "health": "Ir al diagnóstico",
+        "library": "Ir a las copias de la biblioteca",
+        "transfer": "Ir a importar y exportar",
+        "instances": "Ir a las instancias"
+      },
+      "toggleSidebar": "Mostrar u ocultar la barra lateral",
+      "toggleAside": "Mostrar u ocultar el panel lateral (la estructura, el mazo, la actualización) o cerrar la tarjeta junto a las tarjetas",
+      "toggleDock": "Mostrar u ocultar el panel: problemas y actividad",
+      "nextProblem": "Ir al campo del siguiente problema",
+      "previousProblem": "Ir al campo del problema anterior",
+      "previousTab": "Ir a la pestaña anterior del mazo o del borrador",
+      "nextTab": "Ir a la siguiente pestaña del mazo o del borrador",
+      "tab": "Ir a una pestaña del mazo o del borrador por su número",
+      "down": "Fila siguiente",
+      "up": "Fila anterior",
+      "select": "Seleccionar la fila",
+      "open": "Abrir la fila",
+      "extendDown": "Seleccionar la fila y también la siguiente",
+      "extendUp": "Seleccionar la fila y también la anterior",
+      "clear": "Borrar la selección",
+      "bulk": "Abrir las acciones de las filas seleccionadas",
+      "edit": "Editar la celda: Enter guarda, Escape cancela"
+    },
+    "dock": {
+      "label": "Panel",
+      "problems": "Problemas",
+      "problemsCount": "Problemas ({count})",
+      "activity": "Actividad",
+      "resize": "Altura del panel",
+      "noActivity": "Aún no se ha hecho nada desde que se abrió el Studio.",
+      "repeated": "{text} ×{count}",
+      "noProblemsHere": "Los problemas de un mazo o de un borrador se muestran en sus pantallas.",
+      "checking": "Buscando problemas…",
+      "none": "No se encontraron problemas.",
+      "deckData": {
+        "one": "{count} problema en los datos del mazo",
+        "many": "{count} de problemas en los datos del mazo",
+        "other": "{count} problemas en los datos del mazo"
+      },
+      "unstated": "{place}: no se indica su idioma",
+      "duplicate": "{place}: dice lo mismo que otra tarjeta"
+    },
+    "palette": {
+      "button": "Buscar o ejecutar…",
+      "heading": "Apertura rápida",
+      "label": "Buscar mazos, borradores, tarjetas y comandos",
+      "none": "No hay coincidencias.",
+      "help": "Mostrar los atajos de teclado",
+      "group": {
+        "recent": "Usados recientemente",
+        "commands": "Comandos",
+        "tabs": "Pestañas",
+        "sections": "Secciones",
+        "instances": "Instancias",
+        "decks": "Mazos",
+        "drafts": "Borradores",
+        "cards": "Tarjetas de este mazo",
+        "pinned": "Fijados"
+      }
+    },
     "decks": {
       "heading": "Mazos",
       "caption": "Los mazos de {instance}",
       "loading": "Cargando mazos…",
       "empty": "Aún no hay mazos: créalos o impórtalos en {app}.",
-      "groupsLink": "Organizar los grupos",
-      "instanceLink": "Nombre y catálogo",
       "filter": "Filtrar por nombre o grupo",
       "shown": {
         "one": "{shown} de {count} mazo",
@@ -1507,11 +1657,38 @@
         "unreadable": "Ilegible",
         "from": "De {host}"
       },
-      "healthLink": "Diagnóstico",
-      "libraryLink": "Copias de la biblioteca",
-      "healthOf": "en {deck}",
-      "transferLink": "Importar y exportar",
-      "draftsLink": "Borradores"
+      "healthOf": "en {deck}"
+    },
+    "views": {
+      "label": "Vistas",
+      "all": "Todos",
+      "due": "Para repasar hoy",
+      "courses": "Cursos",
+      "copies": "Copias de la biblioteca",
+      "attention": "Requieren atención",
+      "none": "Ningún mazo en esta vista.",
+      "cards": {
+        "all": "Todas",
+        "due": "Para repasar",
+        "new": "Nuevas",
+        "leech": "Sanguijuelas"
+      },
+      "options": "Opciones de la vista {name}",
+      "rename": "Renombrar…",
+      "remove": "Eliminar",
+      "removeHeading": "Eliminar la vista",
+      "removeConfirm": "¿Eliminar la vista {name}? Solo desaparece la vista: no cambia nada en tu Pod.",
+      "save": "+ Guardar vista",
+      "saveHeading": "Guardar la vista",
+      "renameHeading": "Renombrar la vista {name}",
+      "name": "Nombre",
+      "nameHint": "Una vista con el mismo nombre se reemplaza.",
+      "saveButton": "Guardar"
+    },
+    "peek": {
+      "label": "Mazo",
+      "none": "Ve a la fila de un mazo ({j}, {k}) para verlo aquí.",
+      "of": "– {deck}"
     },
     "bulk": {
       "label": "Mazos seleccionados",
@@ -1559,7 +1736,16 @@
         "other": "Se eliminaron {count} mazos."
       },
       "export": "Exportar",
-      "moveSetAside": "La organización de estos mazos tiene datos no válidos, así que no se pueden mover mazos a grupos hasta que se repare."
+      "moveSetAside": "La organización de estos mazos tiene datos no válidos, así que no se pueden mover mazos a grupos hasta que se repare.",
+      "groups": {
+        "edit": "Editar",
+        "editCards": "Editar las tarjetas seleccionadas",
+        "editDecks": "Editar los mazos seleccionados",
+        "schedule": "Programación",
+        "scheduleCards": "Programar las tarjetas seleccionadas",
+        "transfer": "Mover o copiar",
+        "transferCards": "Mover o copiar las tarjetas seleccionadas"
+      }
     },
     "groups": {
       "heading": "Grupos"
@@ -1609,13 +1795,12 @@
         "many": "{shown} de {count} de tarjetas",
         "other": "{shown} de {count} tarjetas"
       },
-      "keys": "Teclas: {j} y {k} para moverte entre las tarjetas, {x} para seleccionar una, {enter} para abrirla.",
+      "keys": "Teclas: {j} y {k} para moverte entre las tarjetas, {x} para seleccionar una, {enter} para abrirla, {shiftJ} y {shiftK} para seleccionar también la siguiente o la anterior, {escape} para borrar la selección, {f2} para editar un anverso o un reverso en su celda, y {dot} para abrir las acciones de las tarjetas seleccionadas.",
       "selected": {
         "one": "{count} tarjeta seleccionada",
         "many": "{count} de tarjetas seleccionadas",
         "other": "{count} tarjetas seleccionadas"
       },
-      "clear": "Borrar la selección",
       "noMatch": "Ninguna tarjeta coincide.",
       "caption": "Las tarjetas de {deck}",
       "select": "Seleccionar",
@@ -1640,10 +1825,11 @@
       "lapsesSince": "Los fallos cuentan las respuestas incorrectas de la tarjeta desde {month}, el mes de la primera respuesta del mazo en el registro.",
       "lapsesNone": "Los fallos cuentan las respuestas incorrectas de la tarjeta: aún no hay ninguna en el registro.",
       "lapsesLoading": "Leyendo el registro de respuestas para los fallos…",
-      "lapsesFailed": "No se pudo leer el registro de respuestas, así que no se conocen los fallos.",
-      "scheduleLink": "Programación, fallos y sanguijuelas",
-      "healthLink": "Diagnóstico",
-      "exportLink": "Exportar"
+      "lapsesFailed": "No se pudo leer el registro de respuestas, así que no se conocen los fallos."
+    },
+    "columns": {
+      "button": "Columnas",
+      "label": "Mostrar u ocultar columnas"
     },
     "card": {
       "heading": "Tarjeta: {card}",
@@ -1656,7 +1842,35 @@
       },
       "releaseSame": "Esta tarjeta está tal como la tiene la publicación de la que se copió este mazo, así que una publicación más reciente la actualiza. Al editarla, se desvincula: las publicaciones más recientes dejan de actualizarla, aunque todavía pueden retirarla.",
       "releaseChanged": "Esta tarjeta se cambió respecto a la publicación de la que se copió este mazo, así que las publicaciones más recientes ya no la actualizan, aunque todavía pueden retirarla.",
-      "openInApp": "Abrir esta tarjeta en Solid Memo"
+      "openInApp": "Abrir esta tarjeta en Solid Memo",
+      "steps": "Tarjetas de la lista",
+      "previous": "Tarjeta anterior",
+      "next": "Tarjeta siguiente",
+      "detail": "Tarjeta",
+      "close": "Cerrar la tarjeta",
+      "saved": "Se guardó la tarjeta {card}."
+    },
+    "confirm": {
+      "unsaved": {
+        "heading": "¿Guardar los cambios?",
+        "text": "Hay cambios sin guardar. Guárdalos antes de continuar, descártalos o quédate donde estás.",
+        "save": "Guardar",
+        "discard": "Descartar",
+        "stay": "Quedarse"
+      },
+      "cancel": "Cancelar",
+      "deleteCards": "Eliminar las tarjetas seleccionadas",
+      "forgetCards": "Olvidar el progreso de las tarjetas seleccionadas",
+      "deleteDecks": "Eliminar los mazos seleccionados",
+      "forgetDirection": "Olvidar el progreso de la tarjeta",
+      "restartCourse": "Reiniciar el curso",
+      "deleteDraft": "Eliminar el borrador",
+      "deletePart": {
+        "chapter": "Eliminar el capítulo",
+        "step": "Eliminar el paso",
+        "card": "Eliminar la tarjeta"
+      },
+      "removeData": "Eliminarlo de tu Pod"
     },
     "schedule": {
       "loading": "Cargando la programación…",
@@ -1863,6 +2077,11 @@
           "one": "{count} tarjeta se repasará el {due}.",
           "many": "{count} de tarjetas se repasarán el {due}.",
           "other": "{count} tarjetas se repasarán el {due}."
+        },
+        "setText": {
+          "one": "Se guardó el texto de {count} tarjeta.",
+          "many": "Se guardó el texto de {count} de tarjetas.",
+          "other": "Se guardó el texto de {count} tarjetas."
         }
       },
       "skipped": {
@@ -1909,6 +2128,10 @@
           "one": "{count} tarjeta ya estaba allí.",
           "many": "{count} de tarjetas ya estaban allí.",
           "other": "{count} tarjetas ya estaban allí."
+        },
+        "heading": {
+          "move": "Mover tarjetas a otro mazo",
+          "copy": "Copiar tarjetas a otro mazo"
         }
       }
     },
@@ -2060,7 +2283,6 @@
       "planFailed": "Ya está disponible la versión {version}, pero no se pudo leer qué cambiaría.",
       "nothingToUpdate": "Ya está disponible la versión {version}, pero no trae nada con lo que actualizar tu copia.",
       "changes": "Versión {version}: la actualización {changes}.",
-      "details": "Qué cambia",
       "cards": {
         "add": {
           "one": "Añadida: {count} tarjeta",
@@ -2097,7 +2319,15 @@
       "failed": "{deck}: la actualización falló en el paso «{step}»:",
       "badge": "Versión {version} disponible",
       "badgeOf": "para {deck}",
-      "newerUnknown": "Se desconoce: ningún catálogo público de quien la creó la incluye"
+      "newerUnknown": "Se desconoce: ningún catálogo público de quien la creó la incluye",
+      "peek": "Ve a la fila de una copia ({j}, {k}) para ver qué cambiaría al actualizarla.",
+      "plan": "Actualización",
+      "bulk": "Copias seleccionadas",
+      "selected": {
+        "one": "{count} copia seleccionada",
+        "many": "{count} de copias seleccionadas",
+        "other": "{count} copias seleccionadas"
+      }
     },
     "transfer": {
       "crumb": "Importar y exportar",
@@ -2213,7 +2443,6 @@
       },
       "untitled": "Sin título ({name})",
       "summary": "{kind}, versión {version}",
-      "manage": "Borradores de publicaciones",
       "delete": "Eliminar",
       "deleteDraft": "Eliminar el borrador {draft}, versión {version}",
       "deleteConfirm": "¿Eliminar el borrador {draft}, versión {version}? No se puede deshacer.",
@@ -2247,12 +2476,7 @@
         "one": "La comprobación de la publicación encuentra {count} problema.",
         "many": "La comprobación de la publicación encuentra {count} de problemas.",
         "other": "La comprobación de la publicación encuentra {count} problemas."
-      },
-      "problemsLink": "Ver la comprobación de la publicación",
-      "previewLink": "Previsualizar la ficha",
-      "trialLink": "Probarlo",
-      "diffLink": "Comparar con la versión anterior",
-      "releaseLink": "Metadatos y procedencia de la publicación"
+      }
     },
     "outline": {
       "empty": "Aún no hay capítulos.",
@@ -2311,7 +2535,6 @@
       "crumb": "Tarjetas",
       "heading": "Tarjetas de {draft}",
       "headingCourse": "Preguntas de {draft}",
-      "overview": "Resumen del borrador",
       "filter": "Mostrar",
       "all": "Todas las tarjetas",
       "filters": {
@@ -2338,7 +2561,17 @@
       },
       "retired": "(retirada)",
       "askedTimes": "Se pregunta en {count} sitios",
-      "newQuestion": "Pregunta nueva, aún no se pregunta en ningún sitio"
+      "newQuestion": "Pregunta nueva, aún no se pregunta en ningún sitio",
+      "retire": {
+        "one": "Retirar {count} tarjeta",
+        "many": "Retirar {count} de tarjetas",
+        "other": "Retirar {count} tarjetas"
+      },
+      "restore": {
+        "one": "Recuperar {count} tarjeta",
+        "many": "Recuperar {count} de tarjetas",
+        "other": "Recuperar {count} tarjetas"
+      }
     },
     "draftEdit": {
       "saving": "Guardando…",
@@ -2418,7 +2651,6 @@
         "many": "Las formas encuentran {count} de problemas, entre los de arriba.",
         "other": "Las formas encuentran {count} problemas, entre los de arriba."
       },
-      "previewLink": "Previsualizar la ficha",
       "release": "Esta publicación",
       "distractor": "Opción incorrecta {id}",
       "badge": {
@@ -2436,8 +2668,7 @@
         "step": "un paso",
         "distractor": "una opción incorrecta"
       },
-      "profile": "{profile}: {message}",
-      "trialLink": "Probarlo"
+      "profile": "{profile}: {message}"
     },
     "field": {
       "title": "Título",
@@ -2607,7 +2838,6 @@
       "chapter": "Capítulo",
       "jump": "Abrir el capítulo",
       "jumpHint": "Como quien ha completado todos los capítulos anteriores.",
-      "answers": "Respuestas",
       "answersCourse": "Todas las preguntas del capítulo que se ve, o del siguiente capítulo por hacer:",
       "answersDeck": "Todas las tarjetas por estudiar ahora:",
       "allRight": "Responder todo bien",
@@ -2763,8 +2993,12 @@
       "column": {
         "release": "Publicación",
         "readers": "Quién puede leerla",
+        "draft": "Borrador",
         "actions": "Acciones"
       },
+      "filter": "Filtrar por nombre o dirección",
+      "noMatch": "Ninguna publicación coincide con «{filter}».",
+      "noDraft": "No está entre los borradores de esta instancia",
       "name": "{name}, versión {version}",
       "public": "Todo el mundo",
       "private": "Solo tú",
@@ -2777,6 +3011,13 @@
       "startNextOf": "Empezar la siguiente versión de {release}",
       "starting": "Empezando la siguiente versión…",
       "drafts": "Borradores de publicaciones"
+    },
+    "inline": {
+      "field": "{column} de {row}",
+      "cell": "{field}: {value}",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "refused": "No se guardó: {reason}."
     }
   },
   "proseField": {

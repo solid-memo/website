@@ -81,9 +81,11 @@ It takes the whole window, and the window does not scroll:
 - **The header** is one row: the sidebar's button, the masthead (the
   Studio's name, who is signed in, Log out), the open instance, the
   palette's button (**Search or run…**, [below](#quick-open-and-commands)),
-  the theme and the languages, and the link back to Solid Memo. On a narrow
-  screen (48rem or less) it is two: the button, the name and Log out,
-  then the rest; who is signed in is left out there.
+  the theme and the language list, and the link back to Solid Memo. Who
+  is signed in is cut short (to no less than 12rem) to keep it one row in
+  a language of longer words. On a narrow screen (48rem or less) it is
+  two: the button, the name and Log out, then the rest; who is signed in
+  is left out there.
 - **The open instance**, for a user with several, is a menu
   ([`shell/InstanceSwitcher.tsx`](../apps/studio/src/ui/shell/InstanceSwitcher.tsx)):
   each other instance, at its decks, and All instances, the picker.
