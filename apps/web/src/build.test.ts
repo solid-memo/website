@@ -1,8 +1,9 @@
 // @vitest-environment node
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
-import { build, type Rolldown } from "vite";
+import { build, loadEnv, type Rolldown } from "vite";
 import { beforeAll, describe, expect, it } from "vitest";
+import { siteConfig, siteHtml } from "./config";
 
 /*
  * The production build itself, as the site ships it (docs/markdown.md):
@@ -151,13 +152,16 @@ describe("the page's structured data", () => {
 });
 
 describe("the page's name", () => {
-  it("is the site's, Solid Memo when VITE_APP_NAME is unset, in its title, link preview and JSON-LD", () => {
+  it("is the site's (VITE_APP_NAME, Solid Memo when unset) in its title, link preview and JSON-LD", () => {
+    // The name this build was given, so a fork's own apps/web/.env passes too.
+    const { appName } = siteConfig(loadEnv("production", resolve(import.meta.dirname, ".."), "VITE_"));
+    const inHtml = siteHtml("%APP_NAME%", { appName });
     expect(html).not.toContain("%APP_NAME");
-    expect(html).toContain("<title>Solid Memo - Spaced-repetition flashcards in your Solid pod</title>");
-    expect(html).toContain('<meta property="og:site_name" content="Solid Memo" />');
-    expect(html).toContain('<meta property="og:title" content="Solid Memo" />');
+    expect(html).toContain(`<title>${inHtml} - Spaced-repetition flashcards in your Solid pod</title>`);
+    expect(html).toContain(`<meta property="og:site_name" content="${inHtml}" />`);
+    expect(html).toContain(`<meta property="og:title" content="${inHtml}" />`);
     const jsonLd = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)![1]!;
     const graph = (JSON.parse(jsonLd) as { "@graph": Record<string, unknown>[] })["@graph"];
-    expect(graph.map((node) => node.name)).toEqual(["Solid Memo", "Solid Memo"]);
+    expect(graph.map((node) => node.name)).toEqual([appName, appName]);
   });
 });

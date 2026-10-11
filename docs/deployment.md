@@ -107,10 +107,10 @@ origin. To serve a GitHub Pages deployment from a domain of your own:
    `185.199.111.153`, and `AAAA` records to `2606:50c0:8000::153`
    through `2606:50c0:8003::153`.
 2. In the repository, set it under Settings → Pages → Custom domain.
-   GitHub checks the DNS and provisions the certificate; then tick
+   GitHub checks the DNS and provisions the certificate; then turn on
    Enforce HTTPS.
-3. Verify the domain for your account or organization (Settings →
-   Pages), so no other repository can claim it.
+3. Verify the domain in your account's or organization's settings
+   (Pages → Add a domain), so no other repository can claim it.
 
 The deploy workflow publishes through `actions/deploy-pages`, which
 takes the domain from that setting only: a `CNAME` file in the

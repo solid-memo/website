@@ -11,7 +11,7 @@ import { NS_ROOT, VOCAB_ROOT } from "./root.ts";
  */
 
 /**
- * The commit being built, shown as the site's version in the footer. Read
+ * The commit being built, shown beside the site's version in the footer. Read
  * from the checkout itself (the deploy workflow builds a specific commit,
  * which GITHUB_SHA need not equal); null outside a git checkout.
  */

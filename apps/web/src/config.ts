@@ -92,7 +92,7 @@ function libraryIndexUrlFrom(value: string | undefined): string | undefined {
   return url;
 }
 
-const PROVIDER_KEYS =new Set(["id", "name", "oidcIssuer", "signUpUrl"]);
+const PROVIDER_KEYS = new Set(["id", "name", "oidcIssuer", "signUpUrl"]);
 
 /** Expected of VITE_POD_PROVIDERS, for its error. */
 const PROVIDERS_EXPECTED =
