@@ -1,0 +1,185 @@
+# Who holds the copyright to each file and under which license it may be
+# reused, as the REUSE specification (https://reuse.software/) has it:
+# `reuse lint` checks that every file says so (docs/style.md#licenses).
+#
+# A file that can carry a comment says so in its own SPDX header. This file
+# speaks for the rest: what cannot carry a comment (JSON, pictures), what
+# must not be edited (the published Turtle in decks/ and ns/, the vendored
+# shapes), what tools write (the generated vocabulary, the lock files),
+# the Markdown, kept free of headers so that it reads cleanly, and the
+# HTML, whose first line is its doctype.
+# Where several annotations match a file, the last one wins.
+version = 1
+SPDX-PackageName = "Solid Memo"
+SPDX-PackageDownloadLocation = "https://github.com/solid-memo/website"
+
+# The project's own files without a header of their own: MIT, as LICENSE
+# and LICENSES/MIT.txt say.
+[[annotations]]
+path = [
+    "**/*.md",
+    "**/*.json",
+    "**/*.png",
+    "**/*.ico",
+    "**/*.svg",
+    # A page starts with its doctype, so its license is stated here.
+    "**/*.html",
+    ".nvmrc",
+    "CNAME",
+    "apps/web/public/robots.txt",
+    "apps/web/public/sitemap.xml",
+    # The vocabulary and the shapes: published, so never edited (docs/vocab.md).
+    "ns/**",
+    # Test data.
+    "packages/vocab/fixtures/**",
+    "e2e/pod/servers/nss/seed/**",
+    "e2e/pod/servers/nextcloud/open.acl",
+    # Written by tools (.gitattributes).
+    "packages/vocab/src/*.generated.ts",
+    "packages/shacl/node/deckLibrary.golden.txt",
+    # The deck library's index, written by `npm run library`.
+    "decks/index.ttl",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Anton Wiklund and Solid Memo contributors"
+SPDX-License-Identifier = "MIT"
+
+# The library's decks: each under the license its versions state in
+# dcterms:license, so a deck is listed under its license here, and a new
+# deck is added under its own. `npm run check:reuse` checks that every
+# version's dcterms:license is the one named here (docs/deck-library.md).
+[[annotations]]
+path = [
+    "decks/academy-award-best-picture/*.ttl",
+    "decks/capitals-of-the-world/*.ttl",
+    "decks/chemical-compounds/*.ttl",
+    "decks/chess-openings/*.ttl",
+    "decks/classic-novels/*.ttl",
+    "decks/classical-music-composers/*.ttl",
+    "decks/common-ions/*.ttl",
+    "decks/country-calling-codes/*.ttl",
+    "decks/country-code-top-level-domains/*.ttl",
+    "decks/danish-monarchs/*.ttl",
+    "decks/derivatives/*.ttl",
+    "decks/english-and-british-monarchs/*.ttl",
+    "decks/english-basics/*.ttl",
+    "decks/famous-buildings/*.ttl",
+    "decks/famous-paintings/*.ttl",
+    "decks/famous-sculptures/*.ttl",
+    "decks/federal-states-and-capitals/*.ttl",
+    "decks/fifa-world-cup/*.ttl",
+    "decks/finnish-basics/*.ttl",
+    "decks/french-basics/*.ttl",
+    "decks/geologic-time-scale/*.ttl",
+    "decks/geometry-formulas/*.ttl",
+    "decks/german-basics/*.ttl",
+    "decks/getting-started/*.ttl",
+    "decks/git-commands/*.ttl",
+    "decks/greek-alphabet/*.ttl",
+    "decks/greek-and-roman-gods/*.ttl",
+    "decks/highest-points-of-europe/*.ttl",
+    "decks/http-status-codes/*.ttl",
+    "decks/human-organs/*.ttl",
+    "decks/human-skeleton/*.ttl",
+    "decks/imperial-units/*.ttl",
+    "decks/italian-basics/*.ttl",
+    "decks/japanese-basics/*.ttl",
+    "decks/korean-basics/*.ttl",
+    "decks/latin-phrases/*.ttl",
+    "decks/mathematical-symbols/*.ttl",
+    "decks/media-types/*.ttl",
+    "decks/minerals/*.ttl",
+    "decks/morse-code/*.ttl",
+    "decks/musical-terms/*.ttl",
+    "decks/network-ports/*.ttl",
+    "decks/nobel-peace-prize/*.ttl",
+    "decks/nobel-prize-in-chemistry/*.ttl",
+    "decks/nobel-prize-in-literature/*.ttl",
+    "decks/nobel-prize-in-physics/*.ttl",
+    "decks/nordic-birds/*.ttl",
+    "decks/nordic-fish/*.ttl",
+    "decks/nordic-trees/*.ttl",
+    "decks/nordic-world-heritage-sites/*.ttl",
+    "decks/norse-mythology/*.ttl",
+    "decks/olympic-games/*.ttl",
+    "decks/periodic-table/*.ttl",
+    "decks/physics-equations/*.ttl",
+    "decks/portuguese-basics/*.ttl",
+    "decks/python-built-ins/*.ttl",
+    "decks/rijksmuseum-collection/*.ttl",
+    "decks/roman-numerals/*.ttl",
+    "decks/shakespeare-plays/*.ttl",
+    "decks/si-units/*.ttl",
+    "decks/solar-system/*.ttl",
+    "decks/solid-fundamentals/*.ttl",
+    "decks/space-exploration/*.ttl",
+    "decks/spanish-basics/*.ttl",
+    "decks/spelling-alphabets/*.ttl",
+    "decks/sql-basics/*.ttl",
+    "decks/sweden-counties-and-provinces/*.ttl",
+    "decks/swedish-basics/*.ttl",
+    "decks/swedish-labour-market-taxonomy-occupation-names/*.ttl",
+    "decks/swedish-literature/*.ttl",
+    "decks/swedish-monarchs/*.ttl",
+    "decks/swedish-national-parks/*.ttl",
+    "decks/swedish-prime-ministers/*.ttl",
+    "decks/trigonometry/*.ttl",
+    "decks/united-nations/*.ttl",
+    "decks/unix-shell-commands/*.ttl",
+    "decks/us-constitution-amendments/*.ttl",
+    "decks/us-presidents/*.ttl",
+    "decks/us-states-and-capitals/*.ttl",
+    "decks/vitamins/*.ttl",
+    "decks/world-currencies/*.ttl",
+    "decks/world-flags/*.ttl",
+    "decks/world-history-dates/*.ttl",
+    "decks/world-rivers/*.ttl",
+    "decks/world-war-ii/*.ttl",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Anton Wiklund and Solid Memo contributors"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = [
+    "decks/brightest-stars/*.ttl",
+    "decks/constellations/*.ttl",
+    "decks/eu-member-states/*.ttl",
+    "decks/html-elements/*.ttl",
+    "decks/nordic-mammals/*.ttl",
+    "decks/physical-constants/*.ttl",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Anton Wiklund and Solid Memo contributors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = [
+    "decks/eurovision-winners/*.ttl",
+    "decks/integrals/*.ttl",
+    "decks/korean-adjectives/*.ttl",
+    "decks/korean-nouns/*.ttl",
+    "decks/korean-verbs/*.ttl",
+    "decks/swedish-adjectives/*.ttl",
+    "decks/swedish-nouns/*.ttl",
+    "decks/swedish-provincial-symbols/*.ttl",
+    "decks/swedish-verbs/*.ttl",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Anton Wiklund and Solid Memo contributors"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+# The vendored shapes, kept byte for byte as their authors publish them
+# (packages/vocab/vendor/README.md, whose manifest.json names each file's
+# license). Each folder's LICENSE is the upstream one.
+[[annotations]]
+path = "packages/vocab/vendor/dcat-ap/**"
+precedence = "override"
+SPDX-FileCopyrightText = "European Union, SEMIC"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = "packages/vocab/vendor/skohub/**"
+precedence = "override"
+SPDX-FileCopyrightText = "SkoHub contributors (https://github.com/skohub-io/skohub-shapes)"
+SPDX-License-Identifier = "Apache-2.0"
