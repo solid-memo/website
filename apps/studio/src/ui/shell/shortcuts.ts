@@ -1,10 +1,11 @@
 import type { StudioRoute } from "../router";
 
 /**
- * Where a shortcut works: anywhere in the Studio, or on one screen,
- * whose own handler (useScreenKeys) takes the key before the Studio's.
+ * Where a shortcut works: anywhere in the Studio, or in a table, whose
+ * own handler (useRowKeys, through useScreenKeys) takes the key before
+ * the Studio's.
  */
-export type ShortcutScope = "studio" | "cards";
+export type ShortcutScope = "studio" | "table";
 
 /** A section of the Studio that a `g` chord goes to. */
 export type Section = "decks" | "groups" | "drafts" | "releases" | "health" | "library" | "transfer" | "instances";
@@ -79,16 +80,16 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "nextTab", keys: "]", scope: "studio" },
   // The key help lists the nine as one.
   ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n): Shortcut => ({ id: `tab.${n}`, keys: String(n), scope: "studio", help: n === 1 ? "1–9" : null })),
-  { id: "down", keys: "j", scope: "cards" },
-  { id: "up", keys: "k", scope: "cards" },
-  { id: "select", keys: "x", scope: "cards" },
-  { id: "open", keys: "Enter", scope: "cards" },
+  { id: "down", keys: "j", scope: "table" },
+  { id: "up", keys: "k", scope: "table" },
+  { id: "select", keys: "x", scope: "table" },
+  { id: "open", keys: "Enter", scope: "table" },
   // Shift is in the character: Shift+J types "J".
-  { id: "extendDown", keys: "J", scope: "cards", help: "Shift+J" },
-  { id: "extendUp", keys: "K", scope: "cards", help: "Shift+K" },
-  { id: "clear", keys: "Escape", scope: "cards" },
-  { id: "bulk", keys: ".", scope: "cards" },
-  { id: "edit", keys: "F2", scope: "cards" },
+  { id: "extendDown", keys: "J", scope: "table", help: "Shift+J" },
+  { id: "extendUp", keys: "K", scope: "table", help: "Shift+K" },
+  { id: "clear", keys: "Escape", scope: "table" },
+  { id: "bulk", keys: ".", scope: "table" },
+  { id: "edit", keys: "F2", scope: "table" },
 ];
 
 /** A shortcut's keys, as the keymap names them (its first, for one with several). */

@@ -3,7 +3,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Dialog } from "./Dialog";
 import { SHORTCUTS, type ShortcutId, type ShortcutScope } from "./shortcuts";
 
-const SCOPES: readonly ShortcutScope[] = ["studio", "cards"];
+const SCOPES: readonly ShortcutScope[] = ["studio", "table"];
 
 /** What a shortcut does, as the key help says it: the nine tabs' keys as one. */
 const aboutOf = (id: ShortcutId) => (id.startsWith("tab.") ? "tab" : (id as Exclude<ShortcutId, `tab.${number}`>));

@@ -1469,11 +1469,11 @@
       "chords": "Tangenter sida vid sida, som g d, trycks en efter en. Medan du skriver i ett fält fungerar bara Ctrl+K, F6, Shift+F6, F8 och Shift+F8.",
       "scope": {
         "studio": "Överallt i Studion",
-        "cards": "I en tabell: korten, kortlekarna, ett utkasts kort…"
+        "table": "I en tabell: korten, kortlekarna, ett utkasts kort…"
       },
       "help": "Visa kortkommandona",
       "filter": "Gå till skärmens sökning eller filter",
-      "nextRegion": "Gå till nästa område: sidhuvud, sidofält, huvudinnehåll, disposition, panel, statusfält",
+      "nextRegion": "Gå till nästa område: sidhuvud, sidofält, huvudinnehåll, sidopanel, panel, statusfält",
       "previousRegion": "Gå till föregående område",
       "go": {
         "decks": "Gå till kortlekarna",
@@ -2690,7 +2690,6 @@
       "chapter": "Kapitel",
       "jump": "Öppna kapitlet",
       "jumpHint": "Som en elev som har klarat varje kapitel före det.",
-      "answers": "Svar",
       "answersCourse": "Varje fråga i kapitlet som visas, eller i kapitlet som står på tur:",
       "answersDeck": "Varje kort att studera nu:",
       "allRight": "Svara rätt på allt",

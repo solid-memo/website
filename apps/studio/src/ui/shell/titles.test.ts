@@ -3,7 +3,7 @@ import { createI18n } from "@solid-memo/ui/i18n";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { courseDraft, DRAFT_URL, instanceA, makeCard, makeDeck } from "../../test/fixtures";
 import { studioRouteToHash, type StudioRoute } from "../router";
-import { crumbsOf, type CrumbSubjects } from "./titles";
+import { crumbsOf, draftNameOf, type CrumbSubjects } from "./titles";
 
 const en = createI18n("en");
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
@@ -87,5 +87,12 @@ describe("crumbsOf", () => {
     const given = { ...subjects, draft: loose };
     expect(trail({ screen: "chapter", draftUrl, chapter: "ch-pods" }, given).slice(-2).map(([label]) => label)).toEqual(["Untitled draft", "ch-pods"]);
     expect(trail({ screen: "step", draftUrl, step: "loose" }, given).slice(-2).map(([label]) => label)).toEqual(["Untitled draft", "loose"]);
+  });
+});
+
+describe("draftNameOf", () => {
+  it("names a draft by its title, else by its name", () => {
+    expect(draftNameOf({ title: { en: "Solid" }, name: "solid" }, en)).toBe("Solid");
+    expect(draftNameOf({ title: {}, name: "solid" }, en)).toBe("Untitled (solid)");
   });
 });

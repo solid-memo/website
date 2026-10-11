@@ -12,6 +12,7 @@ import { recentLanguages } from "@solid-memo/ui/remembered";
 import { ReadOnlyScope } from "./ReadOnly";
 import { useActivity } from "./shell/activity";
 import { useConfirm } from "./shell/ConfirmDialog";
+import { draftNameOf } from "./shell/titles";
 import { useScreenCommands } from "./shell/useScreenCommands";
 
 /** What a new draft starts from, as the form offers it. */
@@ -87,8 +88,7 @@ export function DraftsScreen({
       : [],
   );
 
-  const nameOf = (draft: ReleaseDraftSummary) =>
-    Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : readerText(draft.title);
+  const nameOf = (draft: ReleaseDraftSummary) => draftNameOf(draft, { t, readerText });
   useActivity(created, () => t("studio.drafts.created", { draft: nameOf(created!.draft), version: created!.draft.version }));
   useActivity(deleted, () => t("studio.drafts.deleted", { draft: nameOf(deleted!), version: deleted!.version }));
 

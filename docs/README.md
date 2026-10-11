@@ -31,7 +31,7 @@ and [testing.md](testing.md).
 - [routing.md](routing.md) — the URL as the view the user is looking at: bookmarkable, shareable, Back and Forward.
 - [i18n.md](i18n.md) — English, Swedish, Korean, German, Spanish and French: how the language is picked, and text in the user's languages.
 - [theme.md](theme.md) — light, dark, or as the browser says, and where the choice is kept.
-- [studio.md](studio.md) — Solid Memo Studio, the second app, in Solid Memo's page at `#/studio`: managing an instance's decks and cards in bulk, and writing decks and courses as drafts, checking, trying, comparing and publishing them, and listing the releases published; what it shares with Solid Memo, its layout, its routes, and how it is built and served.
+- [studio.md](studio.md) — Solid Memo Studio, the second app, in Solid Memo's page at `#/studio`: managing an instance's decks and cards in bulk, and writing decks and courses as drafts, checking, trying, comparing and publishing them, and listing the releases published; what it shares with Solid Memo, its workspace (layout, keys, palette, what the device keeps), its routes, and how it is built and served.
 
 ## The project
 
