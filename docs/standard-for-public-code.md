@@ -34,7 +34,9 @@ What is left falls into three groups:
    MUST.
 3. Gaps that stay open for now. The largest is criterion 7, review by
    someone other than the author, which cannot be met honestly while the
-   project has one maintainer.
+   project has one maintainer. Criterion 6 is non-compliant: older
+   commits on `main` record no reason, and commits do not link to
+   issues.
 
 ## Scorecard
 
@@ -49,7 +51,7 @@ nothing to apply it to counts as met, and the text says so.
 | 3 | [Make the codebase reusable and portable](https://www.standardforpubliccode.org/criteria/make-the-codebase-reusable-and-portable.html) | 2/2 | 4/8 | Compliant |
 | 4 | [Welcome contributors](https://www.standardforpubliccode.org/criteria/welcome-contributors.html) | 3/3 | 3/4 | Compliant |
 | 5 | [Make contributing easy](https://www.standardforpubliccode.org/criteria/make-contributing-easy.html) | 3/5 | – | Partial |
-| 6 | [Maintain version control](https://www.standardforpubliccode.org/criteria/maintain-version-control.html) | 2/3 | 3/4 | Partial |
+| 6 | [Maintain version control](https://www.standardforpubliccode.org/criteria/maintain-version-control.html) | 1/3 | 3/4 | Non-compliant |
 | 7 | [Require review of contributions](https://www.standardforpubliccode.org/criteria/require-review-of-contributions.html) | 2/3 | 2/5 | Partial |
 | 8 | [Document codebase objectives](https://www.standardforpubliccode.org/criteria/document-codebase-objectives.html) | 1/1 | 1/1 | Compliant |
 | 9 | [Document the code](https://www.standardforpubliccode.org/criteria/document-the-code.html) | 3/3 | 5/5 | Compliant |
@@ -60,7 +62,7 @@ nothing to apply it to counts as met, and the text says so.
 | 14 | [Make the codebase findable](https://www.standardforpubliccode.org/criteria/make-the-codebase-findable.html) | – | 3/8 | No MUSTs |
 | 15 | [Use a coherent style](https://www.standardforpubliccode.org/criteria/use-a-coherent-style.html) | 1/1 | 2/2 | Compliant |
 | 16 | [Document codebase maturity](https://www.standardforpubliccode.org/criteria/document-codebase-maturity.html) | 2/3 | 2/2 | Partial |
-| | **Total** | **40/46** | **36/51** | |
+| | **Total** | **39/46** | **36/51** | |
 
 A criterion is compliant when all its MUSTs are met. It is non-compliant
 when more than half of them are not met, and partial otherwise.
@@ -69,9 +71,10 @@ The first assessment scored 17/44 MUSTs and 8/50 SHOULDs. It counted
 too few requirements in criteria 1, 10 and 11; the counts above are the
 Standard's own.
 
-With the admin settings and the v0.1.0 tag, the MUSTs reach 44/46. The
-two left are criterion 6's links to issues, which needs a change of
-practice, and criterion 7's second reviewer.
+With the admin settings and the v0.1.0 tag, the MUSTs reach 43/46. The
+three left are in criterion 6, the commits on `main` that record no
+reason, which the history keeps, and the links to issues, which need a
+change of practice; and criterion 7's second reviewer.
 
 ## GitHub settings
 
@@ -190,11 +193,15 @@ What holds today, and what does not, criterion by criterion.
 ### 6. Maintain version control
 
 - MUST, met — every file is in Git.
-- MUST, met — decisions in commit messages. CONTRIBUTING.md asks for a
-  body that says why, and every commit on this branch has one. Some
-  older commits on `main` do not. Renovate's commits have one too
-  (`commitBody` in `renovate.json5`): each update, from what version to
-  what, where, its source and release notes, and why.
+- MUST, not met — decisions in commit messages. Of the 281 commits on
+  `main` at `cae0a9f`, 63 have no body at all (40 by the maintainer, 23
+  by Renovate), and 27 more have only a `Co-authored-by` trailer (20 and
+  7), so 90 record no reason. New commits comply: CONTRIBUTING.md asks
+  for a body that says why, every commit on this branch has one, and
+  Renovate's commits now carry one (`commitBody` in `renovate.json5`):
+  each update, from what version to what, where, its source and release
+  notes, and why. Nothing checks a body automatically, and the history
+  cannot change, so this stays not met.
 - MUST, not met — commit messages link to issues and discussions.
   CONTRIBUTING.md asks for a `Refs: #NN` trailer, but the maintainer's
   own changes start from no issue, and `main` allows only rebase merges,
@@ -455,6 +462,9 @@ them:
 - **Criterion 3, situation-specific information.** `CNAME`, the sitemap,
   `robots.txt` and the about page name solid-memo.com. A deployed site
   needs them, and [reuse.md](reuse.md) lists them for a copy to change.
+- **Criterion 6, decisions in commit messages.** 90 commits on `main`
+  record no reason, and rewriting `main` to add them is not an option.
+  New commits have a body, so the share without one only shrinks.
 - **Criterion 6, links to issues.** Most changes start from no issue, and
   rebase merges keep the pull request out of the commit. Opening an issue
   for each change, or adding `Refs:` with the pull request, would close
