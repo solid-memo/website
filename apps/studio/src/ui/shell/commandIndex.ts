@@ -7,6 +7,7 @@ import type { I18n } from "@solid-memo/ui/i18n";
 import { studioRouteToHash, type StudioRoute } from "../router";
 import type { WorkItem } from "./prefs";
 import { keysOf } from "./shortcuts";
+import { draftNameOf } from "./titles";
 import { sectionHome, SIDEBAR_SECTIONS, type ContextTab, type DeckTab, type DraftTab } from "./workspaceLayout";
 
 /**
@@ -91,7 +92,7 @@ export function buildCommands(sources: CommandSources, i18n: Pick<I18n, "t" | "r
       .map(
         (draft): Command => ({
           ...at("drafts", { screen: "draft", draftUrl: draft.url }),
-          label: Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : readerText(draft.title),
+          label: draftNameOf(draft, i18n),
         }),
       ),
     ...(sources.cards?.cards ?? []).map(

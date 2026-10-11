@@ -50,8 +50,8 @@ router. It sits on the same layers as Solid Memo's app
   containers over use cases and screens over props, as in `ui`. They
   reuse `ui`'s components, such as `InstancePickerContainer`,
   `Breadcrumbs` and `ReaderText`.
-- Its text is in `ui`'s message files, under `studio.*`, in English and
-  Swedish ([i18n.md](i18n.md)).
+- Its text is in `ui`'s message files, under `studio.*`, in English,
+  Swedish and Korean ([i18n.md](i18n.md)).
 
 Both apps are one page. So they share one session and one login
 ([authentication.md](authentication.md#session-restore)): a link from
@@ -174,6 +174,34 @@ The sidebar and the tabs are links: each is a Back stop. Hiding the
 sidebar, the aside or the dock, opening a drawer, or sizing a pane, is
 not.
 
+**What each screen has around it**, worked out from its route alone
+([`shell/workspaceLayout.ts`](../apps/studio/src/ui/shell/workspaceLayout.ts):
+`sectionOf`, `deckOf`, `contextTabsOf`, `asideOf`):
+
+| Screens | The sidebar marks | Tabs | The aside | The dock's problems |
+| --- | --- | --- | --- | --- |
+| the instances | no sidebar: no instance is open | none | none | none |
+| Home | Decks | none (its views are its own) | the deck at the table's cursor (Deck) | none |
+| the library copies | Library copies | none | the upgrade of the copy at the table's cursor (Upgrade) | none |
+| groups, drafts, releases, the instance's health, import and export, name and catalogue | that section | none | none | none |
+| a deck's cards, schedule, health and about screen | the deck | the deck's | none | what the deck's health found |
+| a card | the deck | the deck's, Cards marked as the card's | on a wide screen, the card (Card), the deck's cards in the main content; else the card is the main content | what the deck's health found |
+| a draft's overview | the draft | the draft's | none | its release check's |
+| a draft's other screens: its cards, check, preview, trial, changes and release | the draft | the draft's | a course's outline (Outline) | its release check's |
+| a chapter, a step, a question | the draft | the draft's, Overview or Cards marked as theirs | a course's outline, the item edited marked | its release check's |
+
+**What is saved, and when.** A draft's changes are saved as they are
+typed or made, and the status bar says so ([below](#how-edits-are-saved)).
+Elsewhere a button, a menu's item or a drag changes the pod at once
+(asking first when something is lost), and what is typed into a form
+waits for its Save: a card's content, its wrong options, a deck's or
+the instance's about screen, a cell edited in place (Enter saves it).
+A card's content changed and not saved, and a cell changed and not
+saved, are asked about (Save, Discard or Stay) before anything leaves
+them, Back and Forward among it ([below](#card-inspector)). How the
+Studio is laid out is kept on the device as it changes
+([Density](#layout), below), never in the pod.
+
 Its look is calm: headings in the body's type, sections flat with a
 thin border, and no tilt, stamp or pop as a screen comes in. Its
 colours are Solid Memo's, so the theme and an instance's colours carry
@@ -198,7 +226,10 @@ for the page's life only.
 **Keys.** The Studio has one listener of keys, in its shell
 ([`shell/useShortcuts.ts`](../apps/studio/src/ui/shell/useShortcuts.ts)),
 and its keymap is data
-([`shell/shortcuts.ts`](../apps/studio/src/ui/shell/shortcuts.ts)):
+([`shell/shortcuts.ts`](../apps/studio/src/ui/shell/shortcuts.ts)),
+each key of one scope: anywhere in the Studio, or in a table
+(`useRowKeys`, [`shell/useRowKeys.ts`](../apps/studio/src/ui/shell/useRowKeys.ts)).
+The key help lists them by their scope:
 
 | Keys | Where | What they do |
 | --- | --- | --- |
@@ -218,6 +249,8 @@ and its keymap is data
 | Shift+J, Shift+K, Escape | a table whose rows are selected | select the row and the next, or the one before; clear the selection |
 | `.` | a table whose rows are selected | open the first menu of the selection's bar, or go to its first button ([below](#bulk-edits)) |
 | F2 | a table with cells to edit: Home, the card workbench | edit the cell the focus is in, or the row's first that can be edited ([below](#layout)) |
+| Ctrl+Enter, Cmd+Enter | a text of several lines | submit its form, as Enter does a text of one line (`ui`'s `LangTextField`); the key help leaves it out |
+| Escape | a drawer, a dialog, the palette, a cell edited in place | close it, the cell unchanged |
 
 A pair such as `g d` is pressed one key after the other, the second
 within 1.5 seconds; a key held down counts once, so a held `g` is not
@@ -336,14 +369,20 @@ field are each gone to), else from the page shown
 
 **Its stylesheet** is
 [`studio.css`](../apps/studio/src/ui/studio.css), over the site's
-`style.css`. The shell imports it, so it comes with the Studio's chunk
-and a learner never downloads it. Solid Memo shares the page, and the
-app switches between the two without a reload, so every rule holds
-under `<html data-surface="studio">`, which the shell sets while it is
-shown and takes away after; the density is `data-density` beside it.
-A test ([studio.test.ts](../apps/studio/src/ui/studio.test.ts)) checks
-the rules through the cascade, and that Solid Memo's screens are left
-as they were.
+`style.css`, and holds every rule of the Studio's own: the workspace's,
+and its screens' (its tables, badges, filters, tabs, the outline, the
+listing preview), which `style.css` holds none of. The shell imports
+it, so it comes with the Studio's chunk and a learner never downloads
+it. Solid Memo shares the page, and the app switches between the two
+without a reload, so every rule holds under
+`<html data-surface="studio">`, which the shell sets while it is shown
+and takes away after; the density is `data-density` beside it. The
+screens' rules come first, their scope in `:where()`, which weighs
+nothing: so the workspace's rules after them, the density's among
+them, win over them. A test
+([studio.test.ts](../apps/studio/src/ui/studio.test.ts)) checks the
+rules through the cascade, and that Solid Memo's screens are left as
+they were.
 
 ### Quick open and commands
 
@@ -1263,7 +1302,7 @@ JSON-LD, one deck to a file, as
 [data-model.md](data-model.md#decks-as-files) describes it.
 
 **Export** lists the instance's decks, as they are arranged. The decks
-ticked are in the URL, so Home's bulk Export and the workbench's link
+ticked are in the URL, so Home's bulk Export and a deck's Export tab
 open the screen with them ticked. The user picks the format and
 whether their progress goes too: the cards' review states and a
 course's completed chapters. **Export** saves each deck as a file of

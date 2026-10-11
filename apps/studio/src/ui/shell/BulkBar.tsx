@@ -31,7 +31,7 @@ export function BulkBar({
   const actions = useRef<HTMLDivElement>(null);
 
   useScreenKeys((event, key) => {
-    if (count === 0 || shortcutOf(key, "cards") !== "bulk") return;
+    if (count === 0 || shortcutOf(key, "table") !== "bulk") return;
     const first = actions.current!.querySelector<HTMLElement>("button, a");
     // With nothing to do (the deck may not be changed), only Clear.
     if (first === null) return;

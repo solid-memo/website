@@ -1,4 +1,5 @@
 import type { Card, Deck } from "@solid-memo/domain/deck";
+import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { chapterOfStep, draftCardOf } from "@solid-memo/domain/release/draftOutline";
 import { liveSteps, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import type { Crumb } from "@solid-memo/ui/Breadcrumbs";
@@ -118,4 +119,9 @@ export function crumbsOf(route: StudioRoute, subjects: CrumbSubjects, i18n: Pick
         { label: cardName({ ...draftCardOf(draft, route.card)!.content, id: route.card }, readerText), route },
       ];
   }
+}
+
+/** A draft as the Studio lists it: its title, else "Untitled" and its name. */
+export function draftNameOf(draft: Pick<ReleaseDraftSummary, "title" | "name">, { t, readerText }: Pick<I18n, "t" | "readerText">): string {
+  return Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : readerText(draft.title);
 }

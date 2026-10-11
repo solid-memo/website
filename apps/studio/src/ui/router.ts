@@ -14,8 +14,8 @@ import {
   type StepField,
 } from "@solid-memo/domain/release/releaseCheck";
 import { STUDIO_PATH } from "@solid-memo/ui/router";
-import type { TableSort } from "./shell/tableModel";
 import { hashParams, useHashRouter } from "@solid-memo/ui/routerCore";
+import type { TableSort } from "./shell/tableModel";
 import { homeParams, homeQueryOf, type HomeQuery } from "./shell/views";
 
 /**
@@ -23,9 +23,10 @@ import { homeParams, homeQueryOf, type HomeQuery } from "./shell/views";
  * identifiers (instance, deck and card URLs) and how a screen is looked
  * at (Home's filter, sort and view, and the deck it shows beside its
  * table; the card workbench's query, beside a card too; the card
- * inspector's tab; how a draft's cards are looked at), so it round-trips through the hash. The Studio
- * shares the site's one page with Solid Memo, so its hashes all start
- * with `#/studio` (STUDIO_PATH); Solid Memo's own routes are the others
+ * inspector's tab; how a draft's cards are looked at), so it
+ * round-trips through the hash. The Studio shares the site's one page
+ * with Solid Memo, so its hashes all start with `#/studio`
+ * (STUDIO_PATH); Solid Memo's own routes are the others
  * (packages/ui/src/ui/router.ts). Both keep the hash with the same core
  * (routerCore.ts).
  */

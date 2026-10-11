@@ -119,7 +119,7 @@ export function useRowKeys({
     const onBody = document.activeElement === document.body;
     // The row x, Enter and the extending keys act on.
     const at = focused !== -1 ? focused : onBody ? cursor : -1;
-    const shortcut = shortcutOf(key, "cards");
+    const shortcut = shortcutOf(key, "table");
     switch (shortcut) {
       case "down":
       case "up": {

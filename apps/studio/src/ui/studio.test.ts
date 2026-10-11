@@ -189,6 +189,23 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(page, ".studio-bulk-bar .actions").display).toBe("flex");
   });
 
+  it("keeps its screens' own rules to the Studio, weighing less than the workspace's", () => {
+    const page = `
+      <main class="workspace">
+        <span class="studio-badge">Course</span>
+        <div class="studio-filters"><label>State <select><option>Any</option></select></label></div>
+        <nav class="studio-tabs"><ul><li><a href="#" aria-current="page">Cards</a></li></ul></nav>
+      </main>`;
+    expect(styleOf(page, ".studio-badge").display).not.toBe("inline-block");
+    expect(styleOf(page, ".studio-tabs ul").display).not.toBe("flex");
+    root.setAttribute("data-surface", "studio");
+    expect(styleOf(page, ".studio-badge").display).toBe("inline-block");
+    expect(styleOf(page, ".studio-tabs ul").display).toBe("flex");
+    expect(styleOf(page, ".studio-tabs a").borderBottomStyle).toBe("solid");
+    // The filter's own height gives way to the density's.
+    expect(styleOf(page, ".studio-filters select").minHeight).toBe("28px");
+  });
+
   it("makes the card inspector's card small, its faces side by side", () => {
     const page = `
       <main class="workspace">

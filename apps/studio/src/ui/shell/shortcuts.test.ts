@@ -8,7 +8,7 @@ const STUDIO = SHORTCUTS.filter((shortcut) => shortcut.scope === "studio");
 
 describe("the Studio's keymap", () => {
   it("gives every shortcut its own keys in its scope", () => {
-    for (const scope of ["studio", "cards"]) {
+    for (const scope of ["studio", "table"]) {
       const keys = SHORTCUTS.filter((shortcut) => shortcut.scope === scope).map((shortcut) => shortcut.keys);
       expect(new Set(keys).size).toBe(keys.length);
     }
@@ -37,13 +37,13 @@ describe("the Studio's keymap", () => {
   });
 
   it("finds a key's shortcut in one scope", () => {
-    expect(shortcutOf("j", "cards")).toBe("down");
-    expect(shortcutOf("Enter", "cards")).toBe("open");
-    expect(shortcutOf(press("J", { shiftKey: true }), "cards")).toBe("extendDown");
-    expect(shortcutOf(press("Escape"), "cards")).toBe("clear");
-    expect(shortcutOf(".", "cards")).toBe("bulk");
+    expect(shortcutOf("j", "table")).toBe("down");
+    expect(shortcutOf("Enter", "table")).toBe("open");
+    expect(shortcutOf(press("J", { shiftKey: true }), "table")).toBe("extendDown");
+    expect(shortcutOf(press("Escape"), "table")).toBe("clear");
+    expect(shortcutOf(".", "table")).toBe("bulk");
     expect(shortcutOf("j", "studio")).toBeNull();
-    expect(shortcutOf("Ctrl+j", "cards")).toBeNull();
+    expect(shortcutOf("Ctrl+j", "table")).toBeNull();
   });
 
   it("toggles the sidebar with Ctrl+B, and changes the context tab with [ and ] or by its number", () => {

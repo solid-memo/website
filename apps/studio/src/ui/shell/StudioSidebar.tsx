@@ -13,6 +13,7 @@ import { draftsKey } from "../DraftsContainer";
 import { studioRouteToHash, type StudioRoute } from "../router";
 import { sameItem, type WorkItem } from "./prefs";
 import { ProblemCount } from "./ProblemCount";
+import { draftNameOf } from "./titles";
 import { deckOf, sectionHome, sectionOf, SIDEBAR_SECTIONS } from "./workspaceLayout";
 
 /**
@@ -72,8 +73,7 @@ export function StudioSidebar({
   const decks = decksQuery.data?.filter((deck) => kept(deck.title));
   const drafts = draftsQuery.data?.filter((draft) => kept(draft.title, draft.name));
   const href = (to: StudioRoute) => studioRouteToHash(to);
-  const draftName = (draft: ReleaseDraftSummary) =>
-    Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : readerText(draft.title);
+  const draftName = (draft: ReleaseDraftSummary) => draftNameOf(draft, { t, readerText });
   const isPinned = (item: WorkItem) => pinned.some((each) => sameItem(each, item));
 
   /** An item's entry: its link (a draft that cannot be read, its name), and the button that pins it. */

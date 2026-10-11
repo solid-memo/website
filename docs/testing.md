@@ -318,7 +318,12 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
   header (`cellOf`, [tables.ts](../e2e/journeys/pages/tables.ts)), not
   by where it stands, and a text's language picker through its field,
   which the picker's text describes (`chooseLanguageOf`,
-  [languages.ts](../e2e/journeys/pages/languages.ts)).
+  [languages.ts](../e2e/journeys/pages/languages.ts)). The Studio's
+  sections are followed in its sidebar, and a deck's or a draft's
+  screens in its tabs, each found in its navigation by name
+  (`studioSection`, `studioTab` in
+  [Chrome.ts](../e2e/journeys/pages/Chrome.ts)), since the trail names
+  the same screens; `quickOpen` goes through the palette.
 - **Flows** ([flows/](../e2e/journeys/flows/)): the steps many journeys
   share, such as logging in.
 - **Dialogs**: a step that expects the browser's `confirm` (Solid

@@ -31,6 +31,351 @@
 }
 
 /*
+ * The Studio's screens: its tables, badges, filters, lists and forms.
+ * These rules weigh what they would without the scope (:where() adds
+ * none), so the workspace's own rules below, the density's among them,
+ * win over them.
+ */
+/* The Studio's tables, of decks and of cards: the deck's name (or the
+   card's front) as the row's heading, in the body's own type; the figures
+   beside it right-aligned, to compare. */
+:where(:root[data-surface="studio"]) table.studio-list caption {
+  caption-side: top;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  color: var(--text-muted);
+}
+
+:where(:root[data-surface="studio"]) table.studio-list tbody th {
+  background: none;
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  white-space: normal;
+  min-width: 10rem;
+}
+
+:where(:root[data-surface="studio"]) table.studio-list .number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Wide: it scrolls on its own, never the page, on a narrow screen. */
+:where(:root[data-surface="studio"]) .studio-table {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-table table {
+  margin-bottom: 0;
+}
+
+:where(:root[data-surface="studio"]) table.studio-list thead th,
+:where(:root[data-surface="studio"]) table.studio-list td {
+  white-space: nowrap;
+}
+
+/* A column's name is the button that sorts by it, in the header's type. */
+:where(:root[data-surface="studio"]) table.studio-list button.sort {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+:where(:root[data-surface="studio"]) table.studio-list [aria-sort="ascending"] button.sort::after {
+  content: " ▲";
+}
+
+:where(:root[data-surface="studio"]) table.studio-list [aria-sort="descending"] button.sort::after {
+  content: " ▼";
+}
+
+:where(:root[data-surface="studio"]) table.studio-list input[type="checkbox"] {
+  min-height: 0;
+  margin: 0;
+}
+
+:where(:root[data-surface="studio"]) .studio-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+/* A deck's problems, as a link to its health; a newer library release, as a link to the library copies. */
+:where(:root[data-surface="studio"]) .studio-badge-warning {
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
+  color: var(--warning-text);
+}
+
+/* What a library upgrade would change, folded out under its summary. */
+:where(:root[data-surface="studio"]) .studio-diff {
+  margin-top: 0.25rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-diff h4 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 0.875rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-health-list li {
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+:where(:root[data-surface="studio"]) .studio-filter input {
+  display: block;
+  width: 100%;
+  max-width: 24rem;
+  margin-top: 0.25rem;
+}
+
+/* The card workbench: a card's sides wrap, as in Solid Memo's Browser;
+   its filters side by side while there is room; the selection's count. */
+:where(:root[data-surface="studio"]) table.studio-cards tbody th,
+:where(:root[data-surface="studio"]) table.studio-cards tbody td:nth-child(3) {
+  white-space: normal;
+  min-width: 10rem;
+  max-width: 24rem;
+}
+
+:where(:root[data-surface="studio"]) table.studio-cards tbody th p,
+:where(:root[data-surface="studio"]) table.studio-cards tbody td p {
+  margin: 0;
+}
+
+:where(:root[data-surface="studio"]) .studio-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-filters label {
+  display: block;
+}
+
+:where(:root[data-surface="studio"]) .studio-filters .studio-filter {
+  flex: 1 1 14rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-filters select {
+  display: block;
+  font: inherit;
+  min-height: 2.75rem;
+  margin-top: 0.25rem;
+  max-width: 100%;
+  padding: 0.55rem 0.8rem;
+  color: var(--text);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+:where(:root[data-surface="studio"]) .studio-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-selection p {
+  margin: 0;
+}
+
+/* A Studio screen's part that changes things (ReadOnlyScope): no frame of its own. */
+:where(:root[data-surface="studio"]) .studio-scope {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+:where(:root[data-surface="studio"]) .studio-preview {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+:where(:root[data-surface="studio"]) .studio-preview h4 {
+  margin: 0 0 0.5rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-preview del {
+  color: var(--text-muted);
+}
+
+:where(:root[data-surface="studio"]) .studio-preview ins {
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* An author of a deck: the name's field, and its Remove button beside it. */
+:where(:root[data-surface="studio"]) .studio-author {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-author input {
+  flex: 1 1 12rem;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+/* A card's schedule, a section per direction: its due day to set, the
+   field and its button side by side while they fit. */
+:where(:root[data-surface="studio"]) .studio-schedule section {
+  margin-bottom: 1.25rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-reschedule {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-reschedule label {
+  flex-basis: 100%;
+}
+
+:where(:root[data-surface="studio"]) .studio-reschedule input {
+  max-width: 100%;
+  margin-bottom: 0;
+}
+
+/* A card's answers: one that forgot the card is marked, as the
+   statistics mark a day's forgotten answers. */
+:where(:root[data-surface="studio"]) table.studio-list tr.forgotten td:nth-child(3) {
+  color: var(--danger);
+}
+
+/* A deck's schedule: its charts' sections apart, its leeches a list. */
+:where(:root[data-surface="studio"]) .studio-insight .bar-chart {
+  margin: 0 0 1.25rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-leeches {
+  margin: 0 0 0.75rem;
+  padding-left: 1.5rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-leeches li {
+  margin: 0.35rem 0;
+}
+
+/* A course's chapters, each with its state and what can be done with it. */
+:where(:root[data-surface="studio"]) .studio-chapters {
+  margin: 0 0 0.75rem;
+  padding-left: 1.5rem;
+}
+
+:where(:root[data-surface="studio"]) .studio-chapters li {
+  margin: 0.35rem 0;
+}
+
+/* A deck's name, one per language. */
+:where(:root[data-surface="studio"]) .studio-names {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+:where(:root[data-surface="studio"]) .studio-names li {
+  margin: 0.25rem 0;
+}
+
+/* The Studio's tabs: links in a row, the one shown marked. */
+:where(:root[data-surface="studio"]) .studio-tabs ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+:where(:root[data-surface="studio"]) .studio-tabs a {
+  display: inline-block;
+  padding: 0.4rem 0.1rem;
+  text-decoration: none;
+}
+
+:where(:root[data-surface="studio"]) .studio-tabs a[aria-current="page"] {
+  font-weight: 600;
+  border-bottom: 3px solid var(--primary);
+}
+
+/* A draft's listing preview (ListingPreviewScreen.tsx): the
+   library's row and page as learners will see them, framed as a picture,
+   nothing in them to press. */
+:where(:root[data-surface="studio"]) .listing-preview {
+  margin: 0.5rem 0 1rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+
+/* The release check's problems: each subject, then its problems under it. */
+:where(:root[data-surface="studio"]) .release-problems > li > ul {
+  margin: 0.15rem 0 0.5rem;
+}
+
+/* A course draft's outline (DraftOutline.tsx): the deck list's
+   rows, a step's name with the first words of its theory and its
+   questions under it, none with an icon to indent past. */
+:where(:root[data-surface="studio"]) .draft-outline .deck-open {
+  padding-left: 0.4rem;
+  text-indent: 0;
+}
+
+:where(:root[data-surface="studio"]) .draft-outline .outline-step-text {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+:where(:root[data-surface="studio"]) .draft-outline .outline-step-text>.hint {
+  padding-left: 0.4rem;
+  overflow-wrap: anywhere;
+}
+
+:where(:root[data-surface="studio"]) .draft-outline .outline-questions {
+  margin: 0.25rem 0 0;
+  padding-left: 1.6rem;
+  font-size: 0.9rem;
+}
+
+:where(:root[data-surface="studio"]) .draft-order li {
+  margin: 0.25rem 0;
+}
+
+/*
  * The page is a grid the window's height: the header across it; the
  * sidebar, then the main content, then the aside (while it is beside it,
  * data-aside), each scrolling on its own; the dock under the main content
@@ -961,7 +1306,7 @@
   margin: 0;
 }
 
-:root[data-surface="studio"] :is(.studio-keymap, .studio-palette-keys) kbd {
+:root[data-surface="studio"] :is(.studio-keys, .studio-keymap, .studio-palette-keys) kbd {
   padding: 0 0.3rem;
   border: 1px solid var(--border-strong);
   border-radius: 4px;
@@ -1142,7 +1487,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* The status bar's count of problems, a button that opens the dock at them: marked while there are any. */
+/* The status bar's count of problems, a button that opens the dock at them, and the link to the check when problems keep a draft from being published: marked while there are any. */
 :root[data-surface="studio"] .studio-status-bar .studio-problem-count {
   color: var(--warning-text);
   background: var(--warning-soft);
@@ -1205,12 +1550,6 @@
   margin: 0;
 }
 
-:root[data-surface="studio"] main .studio-views .studio-saved-view[aria-pressed="true"] {
-  color: var(--text);
-  background: var(--primary-soft);
-  border-color: var(--primary);
-}
-
 /*
  * A cell edited in place: its button looks as the cell's text does,
  * outlined only as it is pointed at or has the focus; open, the field
@@ -1248,15 +1587,13 @@
   min-width: 0;
 }
 
-/* Whether the draft can be published, in the status bar: a link, marked while problems keep it from it. */
+/* Whether the draft can be published, in the status bar: a link in the bar's colour, framed while problems keep it from it. */
 :root[data-surface="studio"] .studio-status-bar a {
   color: inherit;
 }
 
 :root[data-surface="studio"] .studio-status-bar a.studio-problem-count {
   padding: 0 0.4rem;
-  color: var(--warning-text);
-  background: var(--warning-soft);
   border: 1px solid var(--warning-border);
   border-radius: var(--radius-sm);
 }
