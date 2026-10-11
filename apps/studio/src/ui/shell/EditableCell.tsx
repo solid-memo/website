@@ -1,5 +1,6 @@
 import type { ComponentChildren } from "preact";
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
+import { composing } from "@solid-memo/ui/composing";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { UnsavedEdits } from "./unsavedEdits";
 
@@ -34,8 +35,13 @@ export interface CellEdit {
  * was. A value changed and not saved stays in the field, the focus gone
  * elsewhere or not, and is reported as unsaved (UnsavedEdits), so that
  * the Studio asks before it is left, as it asks of a card's edits; a
- * field left unchanged closes as the focus leaves it. A save refused
- * keeps the field open, marked invalid until it changes.
+ * field left unchanged closes as the focus leaves it. Saved from there,
+ * it is saved as the cell is edited then (its `edit` as last rendered,
+ * which another cell of its row saved since may have changed); its
+ * edits discarded there, the field closes. A save refused keeps the
+ * field open, marked invalid until it changes. Enter and Escape that an
+ * input method takes, to end or drop what it composes (Korean, say),
+ * are its own.
  */
 export function EditableCell({ edit, link = false, children }: { edit: CellEdit | null; link?: boolean; children: ComponentChildren }) {
   const { t } = useI18n();
@@ -50,6 +56,9 @@ export function EditableCell({ edit, link = false, children }: { edit: CellEdit 
   const dirty = editing && edit !== null && value !== edit.value;
   const latest = useRef(value);
   latest.current = value;
+  // A save asked from elsewhere (UnsavedEdits) saves as the cell is edited now, not as it was once its value changed.
+  const current = useRef(edit);
+  current.current = edit;
 
   function start() {
     setValue(edit!.value);
@@ -78,7 +87,9 @@ export function EditableCell({ edit, link = false, children }: { edit: CellEdit 
   }, [editing]);
 
   useEffect(() => {
-    report(dirty ? () => save(latest.current) : null, cell);
+    // Discarded, the field closes where it is: the focus has gone where the move took it.
+    if (dirty) report(() => save(latest.current), cell, () => setEditing(false));
+    else report(null, cell);
   }, [dirty]);
   useEffect(() => () => report(null, cell), []);
 
@@ -90,12 +101,13 @@ export function EditableCell({ edit, link = false, children }: { edit: CellEdit 
   }
 
   async function save(saved: string): Promise<boolean> {
-    if (saved === edit!.value) {
+    const now = current.current!;
+    if (saved === now.value) {
       close();
       return true;
     }
     setSaving(true);
-    const ok = await edit!.onSave(saved);
+    const ok = await now.onSave(saved);
     setSaving(false);
     setRefused(!ok);
     if (ok) close();
@@ -103,6 +115,7 @@ export function EditableCell({ edit, link = false, children }: { edit: CellEdit 
   }
 
   const keys = (event: KeyboardEvent) => {
+    if (composing(event)) return;
     if (event.key === "Enter") {
       event.preventDefault();
       if (!saving) void save(value);

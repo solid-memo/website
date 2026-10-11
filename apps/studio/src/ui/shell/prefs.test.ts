@@ -22,7 +22,7 @@ const KEY = "solid-memo:studioLayout.v1";
 describe("the Studio's layout preferences", () => {
   beforeEach(() => localStorage.clear());
 
-  it("are compact at first, the sidebar and the aside shown, the dock hidden", () => {
+  it("are compact at first, the sidebar and the aside shown, the dock hidden, single-key shortcuts on", () => {
     const first = {
       density: "compact",
       sidebar: true,
@@ -32,20 +32,34 @@ describe("the Studio's layout preferences", () => {
       dock: false,
       dockHeight: DOCK_HEIGHT.initial,
       hiddenColumns: {},
+      characterKeys: true,
     };
     expect(studioPrefs()).toEqual(first);
     expect(DEFAULT_PREFS).toEqual(first);
   });
 
   it("are kept on this device", () => {
-    const prefs = { density: "comfortable", sidebar: false, aside: false, asideWidth: 400, detailWidth: 600, dock: true, dockHeight: 300, hiddenColumns: { cards: ["ease", "id"] } } as const;
+    const prefs = {
+      density: "comfortable",
+      sidebar: false,
+      aside: false,
+      asideWidth: 400,
+      detailWidth: 600,
+      dock: true,
+      dockHeight: 300,
+      hiddenColumns: { cards: ["ease", "id"] },
+      characterKeys: false,
+    } as const;
     rememberPrefs(prefs);
     expect(studioPrefs()).toEqual(prefs);
     expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual(prefs);
   });
 
   it("take the default for what the app does not store, each preference on its own", () => {
-    localStorage.setItem(KEY, JSON.stringify({ density: "roomy", sidebar: "no", aside: 1, asideWidth: "wide", detailWidth: "wider", dock: null, dockHeight: Infinity }));
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ density: "roomy", sidebar: "no", aside: 1, asideWidth: "wide", detailWidth: "wider", dock: null, dockHeight: Infinity, characterKeys: "off" }),
+    );
     expect(studioPrefs()).toEqual(DEFAULT_PREFS);
     localStorage.setItem(KEY, JSON.stringify({ density: "comfortable" }));
     expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, density: "comfortable" });

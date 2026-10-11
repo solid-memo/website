@@ -5,6 +5,7 @@ import { DEFAULT_DECK_TABLE_VIEW } from "@solid-memo/domain/deckTable";
 import type { Card } from "@solid-memo/domain/deck";
 import type { WorkspaceProps } from "@solid-memo/ui/App";
 import type { CardEdits } from "@solid-memo/ui/CardScreen";
+import { AskFirst } from "@solid-memo/ui/askFirst";
 import { Breadcrumbs } from "@solid-memo/ui/Breadcrumbs";
 import { useDocumentTitle } from "@solid-memo/ui/documentTitle";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -42,6 +43,7 @@ import { ReleasesContainer } from "./ReleasesContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
 import { TrialContainer } from "./TrialContainer";
 import { OutlineAside } from "./OutlineAside";
+import { useConfirm } from "./shell/ConfirmDialog";
 import { ContextTabs } from "./shell/ContextTabs";
 import { InstanceSwitcher } from "./shell/InstanceSwitcher";
 import { ProblemCount } from "./shell/ProblemCount";
@@ -103,6 +105,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const screenRef = useScreenFocus(mainScreen, change);
   const detailRef = useScreenFocus(split ? route : null, change);
   const unsaved = useUnsavedEdits();
+  // What a component Solid Memo shares asks before it loses something (a wrong option, an instance), in the Studio's own dialog.
+  const asked = useConfirm();
   // The cards the workbench beside a card lists, in its order, for the card's Previous and Next.
   const [order, setOrder] = useState<readonly string[]>([]);
   // The library copy at the cursor of the table of them, shown beside it, by its deck's URL.
@@ -599,80 +603,75 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   };
 
   return (
-    <StudioShell
-      banner={banner}
-      backHref={instanceUrl === null ? "#/" : decksHref(instanceUrl)}
-      route={route}
-      instances={instances ?? []}
-      instance={activeInstance}
-      switcher={activeInstance !== null && <InstanceSwitcher instances={instances!} instance={activeInstance} />}
-      sidebar={
-        activeInstance === null ? null : (
-          <StudioSidebar
-            useCases={useCases}
-            instance={activeInstance}
-            route={route!}
-            pinned={mine.prefs.pinned}
-            recent={mine.prefs.recent}
-            onPin={(item) => mine.change((prefs) => ({ ...prefs, pinned: togglePin(prefs.pinned, item) }))}
+    <AskFirst.Provider value={asked.ask}>
+      <StudioShell
+        banner={banner}
+        backHref={instanceUrl === null ? "#/" : decksHref(instanceUrl)}
+        route={route}
+        instances={instances ?? []}
+        instance={activeInstance}
+        switcher={activeInstance !== null && <InstanceSwitcher instances={instances!} instance={activeInstance} />}
+        sidebar={
+          activeInstance === null ? null : (
+            <StudioSidebar
+              useCases={useCases}
+              instance={activeInstance}
+              route={route!}
+              pinned={mine.prefs.pinned}
+              recent={mine.prefs.recent}
+              onPin={(item) => mine.change((prefs) => ({ ...prefs, pinned: togglePin(prefs.pinned, item) }))}
+            />
+          )
+        }
+        tabs={tabs?.tabs ?? []}
+        draftUrl={draftUrl}
+        aside={
+          split && waiting === null
+            ? {
+                label: t("studio.card.detail"),
+                content: (
+                  <div ref={detailRef} class="screen">
+                    {inspector(route as CardRoute)}
+                  </div>
+                ),
+                detail: { closeLabel: t("studio.card.close"), onClose: () => unsaved.guard(() => navigate(workbenchOf(route as CardRoute))) },
+              }
+            : aside === null
+              ? null
+              : { label: t(ASIDE_LABELS[aside]), content: asideFor(aside, route!) }
+        }
+        problems={found.problems}
+        pinned={mine.prefs.pinned}
+        status={found.publish !== null && <PublishState readiness={found.publish} releaseHref={studioRouteToHash({ screen: "release", draftUrl: draftUrl! })} />}
+        onGo={(to) => unsaved.guard(() => navigate(to))}
+      >
+        {children}
+        {unsaved.dialog}
+        {asked.dialog}
+        {waiting === null && <Breadcrumbs crumbs={crumbs} toHash={studioRouteToHash} />}
+        {tabs !== null && (
+          <ContextTabs
+            label={t(`studio.tabs.${tabs.of}`)}
+            tabs={tabs.tabs.map((tab) => ({
+              key: tab.key,
+              href: studioRouteToHash(tab.route),
+              label:
+                tab.key === "check" && checkCount > 0 ? (
+                  <>
+                    {t("studio.tabs.check")} <ProblemCount count={checkCount} />
+                  </>
+                ) : (
+                  t(`studio.tabs.${tab.key}`)
+                ),
+              current: tab.current,
+            }))}
           />
-        )
-      }
-      tabs={tabs?.tabs ?? []}
-      draftUrl={draftUrl}
-      aside={
-        split && waiting === null
-          ? {
-              label: t("studio.card.detail"),
-              content: (
-                <div ref={detailRef} class="screen">
-                  {inspector(route as CardRoute)}
-                </div>
-              ),
-              detail: { closeLabel: t("studio.card.close"), onClose: () => unsaved.guard(() => navigate(workbenchOf(route as CardRoute))) },
-            }
-          : aside === null
-            ? null
-            : { label: t(ASIDE_LABELS[aside]), content: asideFor(aside, route!) }
-      }
-      problems={found.problems}
-      pinned={mine.prefs.pinned}
-      status={
-        found.publish !== null && (
-          <PublishState
-            readiness={found.publish}
-            checkHref={studioRouteToHash({ screen: "check", draftUrl: draftUrl! })}
-            releaseHref={studioRouteToHash({ screen: "release", draftUrl: draftUrl! })}
-          />
-        )
-      }
-      onGo={(to) => unsaved.guard(() => navigate(to))}
-    >
-      {children}
-      {unsaved.dialog}
-      {waiting === null && <Breadcrumbs crumbs={crumbs} toHash={studioRouteToHash} />}
-      {tabs !== null && (
-        <ContextTabs
-          label={t(`studio.tabs.${tabs.of}`)}
-          tabs={tabs.tabs.map((tab) => ({
-            key: tab.key,
-            href: studioRouteToHash(tab.route),
-            label:
-              tab.key === "check" && checkCount > 0 ? (
-                <>
-                  {t("studio.tabs.check")} <ProblemCount count={checkCount} />
-                </>
-              ) : (
-                t(`studio.tabs.${tab.key}`)
-              ),
-            current: tab.current,
-          }))}
-        />
-      )}
-      <div ref={screenRef} class="screen">
-        <UnsavedEdits.Provider value={unsaved.report}>{waiting ?? screenFor(route!)}</UnsavedEdits.Provider>
-      </div>
-    </StudioShell>
+        )}
+        <div ref={screenRef} class="screen">
+          <UnsavedEdits.Provider value={unsaved.report}>{waiting ?? screenFor(route!)}</UnsavedEdits.Provider>
+        </div>
+      </StudioShell>
+    </AskFirst.Provider>
   );
 }
 

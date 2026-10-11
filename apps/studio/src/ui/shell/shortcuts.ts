@@ -104,16 +104,30 @@ export const CHORD_TIMEOUT = 1500;
  * A key as the keymap names it: the character it types, or its name
  * ("Enter", "F6"), after the modifiers held ("Ctrl+k"). Shift is named
  * only before a key that types nothing: it is already in the
- * character ("?", "J").
+ * character ("?", "J"). So is Alt, before a character, but with Cmd:
+ * Option types characters of its own on a Mac ("[" is Option+8 on a
+ * Swedish one), and so does AltGr, which Windows reports as Ctrl+Alt,
+ * the Ctrl with it left out too ("[" is AltGr+8 there). A Ctrl held with
+ * AltGr is left out with it on Windows, which cannot tell the two
+ * apart: there, Ctrl+\ cannot be pressed where \ takes AltGr.
  */
-export function keyOf(event: Pick<KeyboardEvent, "key" | "ctrlKey" | "metaKey" | "altKey" | "shiftKey">): string {
+export function keyOf(
+  event: Pick<KeyboardEvent, "key" | "ctrlKey" | "metaKey" | "altKey" | "shiftKey"> & { getModifierState?: (key: string) => boolean },
+): string {
+  const typed = event.key.length === 1;
+  const altGraph = typed && event.altKey && (event.getModifierState?.("AltGraph") ?? false);
   const modifiers = [
-    event.ctrlKey && "Ctrl",
+    event.ctrlKey && !altGraph && "Ctrl",
     event.metaKey && "Meta",
-    event.altKey && "Alt",
-    event.shiftKey && event.key.length > 1 && "Shift",
+    event.altKey && (!typed || event.metaKey) && "Alt",
+    event.shiftKey && !typed && "Shift",
   ].filter(Boolean);
   return [...modifiers, event.key].join("+");
+}
+
+/** Whether a key, as the keymap names it, is a character alone, with no modifier but Shift ("g", "?"): those the user can turn off (useShortcuts). */
+export function isCharacterKey(key: string): boolean {
+  return key.length === 1;
 }
 
 /** The shortcut of one scope a single key is, if any. */

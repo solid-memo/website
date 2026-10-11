@@ -130,6 +130,44 @@ describe("EditableCell", () => {
     expect(report).toHaveBeenLastCalledWith(null, from);
   });
 
+  it("saves, from elsewhere, as the cell is edited then, and closes once its edits are discarded there", async () => {
+    const report = vi.fn<ReportUnsaved>();
+    const cell = (edit: CellEdit) => (
+      <UnsavedEdits.Provider value={report}>
+        <p tabIndex={-1}>Elsewhere</p>
+        <EditableCell edit={edit}>
+          <span>2</span>
+        </EditableCell>
+      </UnsavedEdits.Provider>
+    );
+    const { rerender } = render(cell(moons()));
+    fireEvent.click(button());
+    fireEvent.input(field(), { target: { value: "3" } });
+    const [save] = report.mock.lastCall!;
+    // Another cell of the row saved meanwhile: its row read afresh, the cell's edit is another.
+    const now = moons({ onSave: vi.fn(async () => true) });
+    rerender(cell(now));
+    await act(async () => expect(await save!()).toBe(true));
+    expect(now.onSave).toHaveBeenCalledWith("3");
+    fireEvent.click(button());
+    fireEvent.input(field(), { target: { value: "4" } });
+    screen.getByText("Elsewhere").focus();
+    act(() => report.mock.lastCall![2]!());
+    expect(screen.queryByRole("textbox")).toBeNull();
+    expect(screen.getByText("Elsewhere")).toHaveFocus();
+  });
+
+  it("leaves Enter and Escape to an input method composing", () => {
+    const edit = moons();
+    renderCell(edit);
+    fireEvent.click(button());
+    fireEvent.input(field(), { target: { value: "3" } });
+    fireEvent.keyDown(field(), { key: "Enter", isComposing: true });
+    fireEvent.keyDown(field(), { key: "Escape", keyCode: 229 });
+    expect(field()).toHaveValue("3");
+    expect(edit.onSave).not.toHaveBeenCalled();
+  });
+
   it("opens with F2 on its row: the cell the focus is in, else the row's first, a link's too", () => {
     const save = vi.fn(async () => true);
     const cell = (label: string, link = false) => (

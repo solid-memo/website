@@ -338,6 +338,40 @@ describe("StudioShell", () => {
     expect(button).toHaveFocus();
   });
 
+  it("leaves the keys to a dialog open while the focus is on the page's body, but Ctrl+K", () => {
+    renderShell({ filter: true });
+    fireEvent.click(statusBar().getByRole("button", { name: "? Keys" }));
+    // A press on the dialog's text leaves the focus on the page's body.
+    document.body.focus();
+    expect(press("?", { shiftKey: true })).toBe(false);
+    expect(press("/")).toBe(false);
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(press("k", { ctrlKey: true })).toBe(true);
+    expect(screen.getByRole("dialog", { name: "Quick open" })).toBeInTheDocument();
+  });
+
+  it("turns single-key shortcuts off, and on, from the key help, as the device remembers, keys with Ctrl working still", () => {
+    const { unmount } = renderShell({ filter: true, table: true });
+    fireEvent.click(statusBar().getByRole("button", { name: "? Keys" }));
+    const setting = within(screen.getByRole("dialog", { name: "Keyboard shortcuts" })).getByRole("checkbox", { name: "Single-key shortcuts" });
+    expect(setting).toBeChecked();
+    fireEvent.click(setting);
+    expect(setting).not.toBeChecked();
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Close" }));
+    unmount();
+    renderShell({ filter: true, table: true });
+    document.body.focus();
+    expect(press("?", { shiftKey: true })).toBe(false);
+    expect(press("/")).toBe(false);
+    expect(press("j")).toBe(false);
+    expect(press("b", { ctrlKey: true })).toBe(true);
+    fireEvent.click(statusBar().getByRole("button", { name: "? Keys" }));
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("checkbox", { name: "Single-key shortcuts" }));
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Close" }));
+    document.body.focus();
+    expect(press("/")).toBe(true);
+  });
+
   it("leaves the keys to a menu while one is open", () => {
     renderShell({ table: true });
     fireEvent.click(screen.getByRole("button", { name: "Show or hide columns" }));
@@ -388,6 +422,28 @@ describe("StudioShell", () => {
     fireEvent.click(within(sidebar()).getByRole("link", { name: "Groups" }));
     fireEvent.keyDown(sidebar(), { key: "Escape" });
     expect(sidebar()).toBeVisible();
+  });
+
+  it("gives the focus in the sidebar, as Ctrl+B hides it, to its button, beside the page or as a drawer", () => {
+    const { unmount } = renderShell();
+    within(sidebar()).getByRole("link", { name: "Groups" }).focus();
+    press("b", { ctrlKey: true });
+    expect(sidebar()).not.toBeVisible();
+    expect(toggle()).toHaveFocus();
+    // Elsewhere, the focus stays where it is.
+    press("b", { ctrlKey: true });
+    screen.getByRole("main").focus();
+    press("b", { ctrlKey: true });
+    expect(screen.getByRole("main")).toHaveFocus();
+    unmount();
+    vi.restoreAllMocks();
+    narrowScreen();
+    renderShell();
+    fireEvent.click(toggle());
+    within(sidebar()).getByRole("link", { name: "Groups" }).focus();
+    press("b", { ctrlKey: true });
+    expect(sidebar()).not.toBeVisible();
+    expect(toggle()).toHaveFocus();
   });
 
   it("has no sidebar, nor its button, without an instance open, and leaves Ctrl+B alone", () => {
@@ -548,6 +604,14 @@ describe("StudioShell", () => {
       expect(pane()).not.toBeVisible();
     });
 
+    it("gives the focus in it, as Ctrl+\\ hides it, to the header's button", () => {
+      renderShell({ aside });
+      within(pane()).getByRole("link", { name: "Step 1.1" }).focus();
+      press("\\", { ctrlKey: true });
+      expect(pane()).not.toBeVisible();
+      expect(asideToggle()).toHaveFocus();
+    });
+
     it("is as wide as its splitter makes it, which the device remembers", () => {
       const { unmount } = renderShell({ aside });
       const splitter = within(pane()).getByRole("separator", { name: "Width of the side pane" });
@@ -603,6 +667,24 @@ describe("StudioShell", () => {
       fireEvent.click(asideToggle());
       fireEvent.click(within(pane()).getByRole("button", { name: "Hide" }));
       expect(pane()).not.toBeVisible();
+    });
+
+    it("stays open as a drawer while Escape closes a dialog in it", () => {
+      vi.restoreAllMocks();
+      narrowScreen(true);
+      renderShell({
+        aside: {
+          label: "Outline",
+          content: (
+            <dialog open>
+              <button type="button">Keep the step</button>
+            </dialog>
+          ),
+        },
+      });
+      fireEvent.click(asideToggle());
+      fireEvent.keyDown(screen.getByRole("button", { name: "Keep the step" }), { key: "Escape" });
+      expect(pane()).toBeVisible();
     });
 
     it("stays open as a drawer while a menu of it, laid over the page, is used", () => {
@@ -695,6 +777,19 @@ describe("StudioShell", () => {
       expect(screen.queryByRole("region", { name: "Panel" })).toBeNull();
     });
 
+    it("gives the focus in it, as it is hidden from its Hide or with Ctrl+J, to the status bar's button", () => {
+      renderShell();
+      fireEvent.click(dockButton());
+      within(dock()).getByRole("button", { name: "Hide" }).focus();
+      fireEvent.click(within(dock()).getByRole("button", { name: "Hide" }));
+      expect(dockButton()).toHaveFocus();
+      fireEvent.click(dockButton());
+      within(dock()).getByRole("tab", { name: "Activity" }).focus();
+      press("j", { ctrlKey: true });
+      expect(screen.queryByRole("region", { name: "Panel" })).toBeNull();
+      expect(dockButton()).toHaveFocus();
+    });
+
     it("has no button or key without an instance open", () => {
       renderShell({ noInstance: true });
       expect(statusBar().queryByRole("button", { name: "Panel" })).toBeNull();
@@ -735,6 +830,14 @@ describe("StudioShell", () => {
       unmount();
       renderShell({ problems });
       expect(statusBar().getByRole("button", { name: "3 problems" })).toHaveClass("studio-problem-count");
+    });
+
+    it("says, in its count, how many of a draft's problems keep it from being published, once", () => {
+      const { unmount } = renderShell({ problems: { ...problems, count: 5, blocking: 3 } });
+      expect(statusBar().getByRole("button", { name: "5 problems, 3 block publishing" })).toHaveClass("studio-problem-count");
+      unmount();
+      renderShell({ problems: { ...problems, count: 2, blocking: 3 } });
+      expect(statusBar().getByRole("button", { name: "3 problems block publishing" })).toBeInTheDocument();
     });
 
     it("goes from tab to tab with the arrow keys", () => {

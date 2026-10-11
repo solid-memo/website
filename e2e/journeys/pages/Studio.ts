@@ -585,11 +585,11 @@ export class Studio extends Screen {
     });
   }
 
-  /** Deletes a wrong option never published, confirming: it goes. */
+  /** Deletes a wrong option never published, confirming in the Studio's own dialog: it goes. */
   async deleteWrongOption(text: string): Promise<void> {
     await this.intent(`Delete the wrong option ${text}`, async () => {
-      this.app.expectDialog(this.tp("distractorFields.deleteConfirm", { option: text }));
       await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.deleteLabel", { option: text }) }).click();
+      await this.confirm("distractorFields.deleteHeading", this.tp("distractorFields.deleteConfirm", { option: text }), "distractorFields.delete");
       await expect(this.wrongOption(text)).toHaveCount(0);
     });
   }

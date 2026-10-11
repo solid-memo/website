@@ -5,6 +5,7 @@ import type {
   RegistrationOptions,
   RegistrationTarget,
 } from "@solid-memo/domain/instance";
+import { useAskFirst } from "./askFirst";
 import { ErrorMessage } from "./ErrorMessage";
 import { RegistrationTargetChooser } from "./RegistrationTargetChooser";
 import { ExternalLink } from "./ExternalLink";
@@ -46,6 +47,7 @@ export function InstancePicker({
   keptReleases?: boolean;
 }) {
   const { t } = useI18n();
+  const askFirst = useAskFirst();
   const [attachUrl, setAttachUrl] = useState("");
   const [target, setTarget] = useState<RegistrationTarget>("private");
   const listRef = useRef<HTMLUListElement>(null);
@@ -72,13 +74,16 @@ export function InstancePicker({
 
   function handleDelete(instance: Instance) {
     if (busy) return;
-    if (
-      window.confirm(t("instancePicker.deleteConfirm", { name: instance.name }))
-    ) {
-      deleting.current = { instance, row: instances.indexOf(instance) };
-      setDeleted("");
-      onDelete(instance);
-    }
+    askFirst({
+      heading: t("instancePicker.deleteHeading"),
+      text: t("instancePicker.deleteConfirm", { name: instance.name }),
+      action: t("instancePicker.deleteAction"),
+      onConfirm: () => {
+        deleting.current = { instance, row: instances.indexOf(instance) };
+        setDeleted("");
+        onDelete(instance);
+      },
+    });
   }
 
   return (

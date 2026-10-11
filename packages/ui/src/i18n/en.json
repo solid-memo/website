@@ -152,6 +152,8 @@
     "saveButton": "Save",
     "removeButton": "Remove card",
     "removeConfirm": "Remove the card \"{card}\"? This cannot be undone.",
+    "removeHeading": "Remove the card",
+    "removeAction": "Remove",
     "saved": "Saved."
   },
   "cardContentFields": {
@@ -200,6 +202,7 @@
     "delete": "Delete",
     "deleteLabel": "Delete the wrong option “{option}”",
     "deleteConfirm": "Delete the wrong option “{option}”?",
+    "deleteHeading": "Delete the wrong option",
     "noLanguage": "no stated language",
     "issues": "Worth a look",
     "issue": {
@@ -570,6 +573,8 @@
     "intro": "An instance is one collection of your decks and study, kept in a folder in your Pod. Most people need only one.",
     "empty": "No instances are registered yet.",
     "deleteConfirm": "Delete the instance \"{name}\" and all its decks and cards? This cannot be undone. Files another app put in its folder are kept, and so are the releases published from it.",
+    "deleteHeading": "Delete the instance",
+    "deleteAction": "Delete",
     "deleteLabel": "Delete instance {name}",
     "delete": "Delete…",
     "newInstance": "New instance…",
@@ -1445,6 +1450,10 @@
         "one": "{count} problem blocks publishing",
         "other": "{count} problems block publishing"
       },
+      "someBlock": {
+        "one": "{count} problem, {blocking} block publishing",
+        "other": "{count} problems, {blocking} block publishing"
+      },
       "released": "Released"
     },
     "tabs": {
@@ -1467,6 +1476,8 @@
       "button": "? Keys",
       "heading": "Keyboard shortcuts",
       "chords": "Keys shown side by side, such as g d, are pressed one after the other. While you type in a field, only Ctrl+K, F6, Shift+F6, F8 and Shift+F8 work.",
+      "characterKeys": "Single-key shortcuts",
+      "characterKeysHint": "Keys pressed without Ctrl, such as g d, j, [ or ?, as shortcuts. Turn them off if speech input or a stray key sets them off; Ctrl+K, F6, F8 and the buttons still work.",
       "scope": {
         "studio": "Anywhere in the Studio",
         "table": "In a table: the cards, the decks, a draft's cards…"

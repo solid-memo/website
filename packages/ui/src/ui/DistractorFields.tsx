@@ -12,6 +12,7 @@ import {
 } from "@solid-memo/domain/distractors";
 import { shownTag, type LangText } from "@solid-memo/domain/langText";
 import { OPTION, PROSE } from "@solid-memo/markdown/problems";
+import { useAskFirst } from "./askFirst";
 import { DataLine, plainDataText } from "./DataText";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
@@ -85,6 +86,7 @@ export function DistractorFields({
   onChange: (distractors: Distractor[]) => void | Promise<boolean>;
 }) {
   const { t, readerText, languageLabel, errorText } = useI18n();
+  const askFirst = useAskFirst();
   const [editing, setEditing] = useState<Editing | null>(null);
   /** Why the last Delete was refused, until the next change. */
   const [refusal, setRefusal] = useState<AppError | null>(null);
@@ -160,9 +162,15 @@ export function DistractorFields({
     const edit = deleteDistractor(distractors, distractor.id, published);
     // One the release published is refused at once, saying to retire it instead.
     if (!edit.ok) return setRefusal(edit.error);
-    if (!window.confirm(t("distractorFields.deleteConfirm", { option: named(distractor) }))) return;
-    focusNext.current = "distractor-add";
-    change(edit.distractors);
+    askFirst({
+      heading: t("distractorFields.deleteHeading"),
+      text: t("distractorFields.deleteConfirm", { option: named(distractor) }),
+      action: t("distractorFields.delete"),
+      onConfirm: () => {
+        focusNext.current = "distractor-add";
+        change(edit.distractors);
+      },
+    });
   }
 
   const languages = (tags: readonly string[]) =>

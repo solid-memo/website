@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { CHORD_TIMEOUT, isTyping, keyOf, nextRegion, pressKey, sectionRoute, SHORTCUTS, shortcutOf, type Section } from "./shortcuts";
+import { CHORD_TIMEOUT, isCharacterKey, isTyping, keyOf, nextRegion, pressKey, sectionRoute, SHORTCUTS, shortcutOf, type Section } from "./shortcuts";
 
-const press = (key: string, held: Partial<Record<"ctrlKey" | "metaKey" | "altKey" | "shiftKey", boolean>> = {}) =>
-  keyOf({ key, ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, ...held });
+const press = (key: string, { altGraph = false, ...held }: Partial<Record<"ctrlKey" | "metaKey" | "altKey" | "shiftKey" | "altGraph", boolean>> = {}) =>
+  keyOf({ key, ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, getModifierState: (modifier) => altGraph && modifier === "AltGraph", ...held });
 
 const STUDIO = SHORTCUTS.filter((shortcut) => shortcut.scope === "studio");
 
@@ -32,8 +32,26 @@ describe("the Studio's keymap", () => {
     ["k", { ctrlKey: true }, "Ctrl+k"],
     ["k", { metaKey: true, altKey: true }, "Meta+Alt+k"],
     ["Enter", {}, "Enter"],
+    // AltGr on Windows, reported as Ctrl+Alt: in the character, as Shift is.
+    ["[", { ctrlKey: true, altKey: true, altGraph: true }, "["],
+    // AltGr elsewhere, with Ctrl.
+    ["\\", { ctrlKey: true, altGraph: true }, "Ctrl+\\"],
+    // Option on a Mac, with Ctrl or not.
+    ["]", { altKey: true }, "]"],
+    ["\\", { ctrlKey: true, altKey: true }, "Ctrl+\\"],
+    ["Escape", { altKey: true }, "Alt+Escape"],
   ])("names %s as the keymap does", (key, held, named) => {
     expect(press(key, held)).toBe(named);
+  });
+
+  it("tells a character alone from a key with a modifier, or a key's name", () => {
+    expect(isCharacterKey(press("?", { shiftKey: true }))).toBe(true);
+    expect(isCharacterKey(press("k", { ctrlKey: true }))).toBe(false);
+    expect(isCharacterKey(press("Escape"))).toBe(false);
+  });
+
+  it("names a key without asking for AltGr where the event cannot say", () => {
+    expect(keyOf({ key: "[", ctrlKey: false, metaKey: false, altKey: true, shiftKey: false })).toBe("[");
   });
 
   it("finds a key's shortcut in one scope", () => {

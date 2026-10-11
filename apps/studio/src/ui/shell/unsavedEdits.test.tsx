@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
+import { shownPosition } from "@solid-memo/ui/routerCore";
 import { useUnsavedEdits, type SaveEdits } from "./unsavedEdits";
 
 let guarded: ReturnType<typeof useUnsavedEdits>;
@@ -126,37 +127,65 @@ describe("useUnsavedEdits", () => {
   it("undoes Back or Forward first while edits are unsaved, before the router hears of it, and goes there once answered", async () => {
     const router = vi.fn();
     window.addEventListener("hashchange", router);
-    const back = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
+    const go = vi.spyOn(window.history, "go").mockImplementation(() => undefined);
     const save = vi.fn(async () => true);
     renderPage(save);
-    /** The browser going to another entry of the history, as Back does. */
-    const pop = (to: string) =>
+    /** The browser going to another entry of the history, numbered as the router numbers it (null: a new one), as Back does. */
+    const pop = (to: string, position: number | null = null) =>
       act(() => {
         const oldURL = window.location.href;
-        window.history.replaceState(null, "", to);
+        window.history.replaceState(position === null ? null : { position }, "", to);
         window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL, newURL: window.location.href }));
       });
+    const at = shownPosition();
     const length = window.history.length;
-    pop("#/studio/drafts");
+    // Back two entries: undone by going as far forward, the history as it was.
+    pop("#/studio/drafts", at - 2);
     expect(router).not.toHaveBeenCalled();
-    expect(window.location.hash).toBe("#/studio/cards");
-    // The page shown is put back on top: Back from it goes where Back went.
-    expect(window.history.length).toBe(length + 1);
+    expect(go).toHaveBeenLastCalledWith(2);
+    expect(window.history.length).toBe(length);
+    // Undone, the browser back at the page shown: no move to ask about.
+    pop("#/studio/cards", at);
+    expect(router).toHaveBeenCalledTimes(1);
     answer("Stay");
-    expect(back).not.toHaveBeenCalled();
-    pop("#/studio/drafts");
+    expect(go).toHaveBeenCalledTimes(1);
+    // Forward, or a hash typed in (a new entry): undone by going back.
+    pop("#/studio/drafts", at + 1);
+    expect(go).toHaveBeenLastCalledWith(-1);
+    pop("#/studio/cards", at);
     answer("Discard");
-    expect(back).toHaveBeenCalledTimes(1);
+    expect(go).toHaveBeenLastCalledWith(1);
     // Answered, the move is not asked about again.
     pop("#/studio/drafts");
     expect(question()).toBeNull();
-    expect(router).toHaveBeenCalledTimes(1);
+    expect(router).toHaveBeenCalledTimes(3);
     act(() => guarded.report(save));
     pop("#/studio/groups");
+    expect(go).toHaveBeenLastCalledWith(-1);
+    pop("#/studio/drafts", at);
     answer("Save");
-    await waitFor(() => expect(back).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(go).toHaveBeenLastCalledWith(1));
     expect(save).toHaveBeenCalled();
+    act(() => guarded.report(save));
+    // An entry numbered as the page shown is is taken for a new one.
+    pop("#/studio/groups", shownPosition());
+    expect(go).toHaveBeenLastCalledWith(-1);
+    go.mockRestore();
     window.removeEventListener("hashchange", router);
+  });
+
+  it("drops the edits of an editor that stays on the page once they are discarded, and asks of those made after", () => {
+    const discard = vi.fn();
+    renderPage();
+    act(() => guarded.report(async () => true, "cell", discard));
+    const move = vi.fn();
+    act(() => guarded.guard(move));
+    answer("Discard");
+    expect(discard).toHaveBeenCalledTimes(1);
+    expect(move).toHaveBeenCalledTimes(1);
+    act(() => guarded.report(async () => true, "cell", discard));
+    act(() => guarded.guard(move));
+    expect(question()).not.toBeNull();
   });
 
   it("leaves a hash change to the page shown, or with nothing unsaved, to the router", () => {

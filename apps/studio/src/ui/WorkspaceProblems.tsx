@@ -61,15 +61,17 @@ export function useWorkspaceProblems(
   if (draft !== null) {
     const found = check.data === undefined ? undefined : listedProblems(checkProblems(check.data));
     const targetHref = (target: ProblemTarget) => studioRouteToHash(targetRoute(draft.url, target));
+    const blocking = podCheck.data === undefined ? undefined : publishErrors(podCheck.data);
     return {
       problems: {
         count: found?.length,
+        blocking,
         routes: (found ?? []).map((problem) => targetRoute(draft.url, problemTarget(draft, problem))),
         list: <DraftProblems draft={draft} problems={found} error={check.error} targetHref={targetHref} />,
       },
       draft: found,
       publish: {
-        blocking: podCheck.data === undefined ? undefined : publishErrors(podCheck.data),
+        blocking,
         released: draft.root.releasedAs !== undefined,
       },
     };
@@ -97,21 +99,16 @@ export interface PublishReadiness {
 /**
  * Whether the draft can be published, in the Studio's status bar: a
  * link to its Release tab while nothing keeps it from it ("Ready to
- * publish") or once it is published ("Released"), else to its Check tab
- * ("2 problems block publishing"). Nothing while it is checked.
+ * publish") or once it is published ("Released"). Nothing while it is
+ * checked, nor while problems keep it from it: the status bar's count
+ * of problems says how many do ("3 problems block publishing"), once.
  */
-export function PublishState({ readiness, checkHref, releaseHref }: { readiness: PublishReadiness; checkHref: string; releaseHref: string }) {
+export function PublishState({ readiness, releaseHref }: { readiness: PublishReadiness; releaseHref: string }) {
   const { t } = useI18n();
   const { blocking, released } = readiness;
   if (released) return <a href={releaseHref}>{t("studio.shell.released")}</a>;
-  if (blocking === undefined) return null;
-  return blocking === 0 ? (
-    <a href={releaseHref}>{t("studio.shell.ready")}</a>
-  ) : (
-    <a href={checkHref} class="studio-problem-count">
-      {t("studio.shell.blocked", { count: blocking })}
-    </a>
-  );
+  if (blocking !== 0) return null;
+  return <a href={releaseHref}>{t("studio.shell.ready")}</a>;
 }
 
 /** A draft's problems in the dock: its release check's, once it is made. */

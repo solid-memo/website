@@ -19,6 +19,8 @@ export const DOCK_TABS: readonly DockTab[] = ["problems", "activity"];
  */
 export interface WorkspaceProblems {
   count: number | undefined;
+  /** Of a draft: how many problems keep it from being published (none while it is checked, or of a deck). */
+  blocking?: number;
   routes: readonly StudioRoute[];
   list: ComponentChildren;
 }

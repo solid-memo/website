@@ -12,7 +12,8 @@ export const DENSITIES: readonly Density[] = ["compact", "comfortable"];
  * width, as itself and as a detail; whether the dock is shown, and its
  * height (in CSS pixels); and the columns each table hides, by the
  * table's name (DataTable's `columnsOf`), every column shown when a
- * table has none.
+ * table has none; and whether a character alone is a shortcut
+ * (`characterKeys`, useShortcuts), which the user may turn off.
  */
 export interface StudioPrefs {
   density: Density;
@@ -23,6 +24,7 @@ export interface StudioPrefs {
   dock: boolean;
   dockHeight: number;
   hiddenColumns: Readonly<Record<string, readonly string[]>>;
+  characterKeys: boolean;
 }
 
 export const DEFAULT_PREFS: StudioPrefs = {
@@ -34,6 +36,7 @@ export const DEFAULT_PREFS: StudioPrefs = {
   dock: false,
   dockHeight: DOCK_HEIGHT.initial,
   hiddenColumns: {},
+  characterKeys: true,
 };
 
 /** Versioned: a later shape of the preferences gets a key of its own, and starts from the defaults. */
@@ -52,7 +55,7 @@ export function studioPrefs(storage: () => Storage = () => globalThis.localStora
   } catch {
     return DEFAULT_PREFS;
   }
-  const { density, sidebar, aside, asideWidth, detailWidth, dock, dockHeight, hiddenColumns } =
+  const { density, sidebar, aside, asideWidth, detailWidth, dock, dockHeight, hiddenColumns, characterKeys } =
     typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
   const shown = (value: unknown, fallback: boolean) => (typeof value === "boolean" ? value : fallback);
   // A size out of its bounds is brought within them: the bounds may have changed since.
@@ -66,6 +69,7 @@ export function studioPrefs(storage: () => Storage = () => globalThis.localStora
     dock: shown(dock, DEFAULT_PREFS.dock),
     dockHeight: sized(dockHeight, DOCK_HEIGHT),
     hiddenColumns: columnsHidden(hiddenColumns),
+    characterKeys: shown(characterKeys, DEFAULT_PREFS.characterKeys),
   };
 }
 
