@@ -140,7 +140,6 @@ and the SkoHub SKOS shapes Apache 2.0
 The repository follows the [REUSE](https://reuse.software/)
 specification: every file states its copyright and license, in an SPDX
 header or, for the files that cannot or must not carry one (the decks
-among them),
-in [REUSE.toml](REUSE.toml), and the text of every license used is in
+among them), in [REUSE.toml](REUSE.toml), and the text of every license used is in
 [LICENSES/](LICENSES/). `reuse lint` checks it in CI
 ([docs/style.md](docs/style.md#licenses)).

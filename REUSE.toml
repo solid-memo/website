@@ -4,7 +4,8 @@
 #
 # A file that can carry a comment says so in its own SPDX header. This file
 # speaks for the rest: what cannot carry a comment (JSON, pictures), what
-# must not be edited (the published Turtle in decks/ and ns/, the vendored
+# is served as RDF and kept free of headers (the Turtle in decks/ and ns/,
+# whose published versions are never edited) or is not ours (the vendored
 # shapes), what tools write (the generated vocabulary, the lock files),
 # the Markdown, kept free of headers so that it reads cleanly, and the
 # HTML, whose first line is its doctype.
@@ -28,7 +29,7 @@ path = [
     "CNAME",
     "apps/web/public/robots.txt",
     "apps/web/public/sitemap.xml",
-    # The vocabulary and the shapes: published, so never edited (docs/vocab.md).
+    # The vocabulary and the shapes, served as RDF (docs/vocab.md#license).
     "ns/**",
     # Test data.
     "packages/vocab/fixtures/**",

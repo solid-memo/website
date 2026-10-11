@@ -113,8 +113,9 @@ and never changes after; `vendor/` is not ours and is never reformatted.
 ## Comments
 
 - Every module starts, after its [license header](#licenses), with a
-  `/** … */` block that says what it is for and why it exists. An exported function, type or constant has one too,
-  unless its name says all there is.
+  `/** … */` block that says what it is for and why it exists. An
+  exported function, type or constant has one too, unless its name says
+  all there is.
 - A comment says why, or what is not obvious: the rule the code follows,
   the case it guards against, the server it works around. It does not
   repeat what the code says.

@@ -322,8 +322,8 @@ authority-table languages and cannot tell a card's front from its back.
 Everything in `ns/` is MIT-licensed, like the rest of the repository
 ([README](../README.md#license)). The topics scheme says so in its own
 data, `dcterms:license <https://spdx.org/licenses/MIT>` on the scheme
-(since 1.11). The ontology's `v1.ttl`, the shapes' versions and `external.ttl` do not
-state it in their RDF; [REUSE.toml](../REUSE.toml) states it for every
+(since 1.11). The ontology's `v1.ttl`, the shapes' versions and
+`external.ttl` do not state it in their RDF; [REUSE.toml](../REUSE.toml) states it for every
 file in `ns/` instead, without editing them
 ([style.md](style.md#licenses)). A future version of the ontology or
 of a shape may state it the way the topics scheme does.
