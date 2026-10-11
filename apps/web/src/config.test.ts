@@ -150,4 +150,16 @@ describe("siteHtml", () => {
       '<title>&#34;Tom&#34; &#38; &#60;Jerry&#39;s&#62;</title><meta content="&#34;Tom&#34; &#38; &#60;Jerry&#39;s&#62;" />{"name": "\\"Tom\\" & \\u003cJerry\'s>"}',
     );
   });
+
+  it.each([
+    ["Memo $& Co", "Memo $&#38; Co"],
+    ["Memo $' Co", "Memo $&#39; Co"],
+    ["Memo $$ Co", "Memo $$ Co"],
+    ["Memo $` Co", "Memo $` Co"],
+  ])("puts %s in as it is, not as a replacement pattern", (appName, inText) => {
+    const html = '<title>%APP_NAME%</title>{"name": %APP_NAME_JSON%}';
+    expect(siteHtml(html, { appName })).toBe(
+      `<title>${inText}</title>{"name": ${JSON.stringify(appName)}}`,
+    );
+  });
 });

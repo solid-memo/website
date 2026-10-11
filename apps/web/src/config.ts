@@ -161,11 +161,12 @@ function escapeHtml(text: string): string {
  * index.html with the site's name in place of its placeholders:
  * `%APP_NAME%` in its text and attributes, `%APP_NAME_JSON%` as a JSON
  * string in its JSON-LD (whose `<` is escaped too, so it cannot end the
- * script). vite.config.ts applies it to the page as it is built.
+ * script). Each is put in as it is, so a `$&` or `$$` in the name stays
+ * text. vite.config.ts applies it to the page as it is built.
  */
 export function siteHtml(html: string, config: Pick<SiteConfig, "appName">): string {
   const json = JSON.stringify(config.appName).replace(/</g, "\\u003c");
   return html
-    .replaceAll("%APP_NAME_JSON%", json)
-    .replaceAll("%APP_NAME%", escapeHtml(config.appName));
+    .replaceAll("%APP_NAME_JSON%", () => json)
+    .replaceAll("%APP_NAME%", () => escapeHtml(config.appName));
 }
