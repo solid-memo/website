@@ -216,7 +216,8 @@ What holds today, and what does not, criterion by criterion.
 
 - MUST, not met — every contribution reviewed by someone other than its
   author. The maintainer merges his own pull requests without review, a
-  temporary exception that GOVERNANCE.md states.
+  temporary exception that GOVERNANCE.md states, and Renovate merges its
+  own once CI passes, with no person reviewing them.
 - MUST, met — reviews cover the source, the policy, the tests and the
   docs. CONTRIBUTING.md and the pull request template say so.
 - MUST, met — a written reason for every declined contribution.
@@ -228,7 +229,8 @@ What holds today, and what does not, criterion by criterion.
   app when the change shows in it.
 - SHOULD, not met — a reviewer from a different context.
 - SHOULD, not met — no unreviewed changes on `main`. The ruleset
-  requires no approval.
+  requires no approval, so the maintainer's own pull requests and
+  the ones Renovate merges on its own reach `main` unreviewed.
 - SHOULD, not met — review within two business days. It is a stated
   target, but one volunteer cannot assure it, and nothing measures it.
 
@@ -384,7 +386,11 @@ The maintainer made these choices. Each is recorded where it applies.
    hand, with a changelog in the Keep a Changelog format
    ([releasing.md](releasing.md)).
 8. **Renovate.** Updates are merged automatically through pull requests
-   (`automergeType: 'pr'`), once CI passes.
+   (`automergeType: 'pr'`), once CI passes. Renovate cannot approve its
+   own pull requests, so once `main` requires an approval, a maintainer
+   approves each update and automerge merges it after that; Renovate gets
+   no bypass. If that is too many approvals, automerge is narrowed, not
+   the review ([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)).
 9. **Formatting.** Biome, with a line width of 100
    ([style.md](style.md#formatting)).
 10. **Spelling.** American English everywhere, checked by cspell.
@@ -445,7 +451,9 @@ Only an admin of the repository can change these:
   `hide-theory`, `markdown-cards`, `more-languages-premerge-backup` and
   `solid-course-research`. *(1)*
 - [ ] **A second reviewer.** Then require one approval and code-owner
-  review on `main`. *(7, 12)*
+  review on `main`. Renovate's pull requests then wait for a
+  maintainer's approval too, and automerge merges them once it is given
+  (decision 8). *(7, 12)*
 
 ### Gaps that remain
 
@@ -453,9 +461,13 @@ These are not met, and the settings and actions above do not close
 them:
 
 - **Criterion 7, review by another person.** With one maintainer, his own
-  changes have no second reviewer. Neither do the SHOULDs on a reviewer
-  from a different context, no unreviewed changes on `main`, and review
-  within two business days. Only a second reviewer closes them.
+  changes have no second reviewer, and Renovate's updates are merged with
+  no reviewer at all. A second reviewer, with one approval required on
+  `main` for every pull request, Renovate's included, closes the MUST and
+  the SHOULD on no unreviewed changes. The SHOULD on a reviewer from a
+  different context needs that reviewer to come from one, and review
+  within two business days needs enough reviewers to assure it, and a
+  way to measure it.
 - **Criterion 3, several parties.** Use, the roadmap and development by
   several parties need other parties. The roadmap invites them, but
   none has joined.

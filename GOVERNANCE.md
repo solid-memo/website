@@ -41,14 +41,18 @@ Code asks for every contribution to be reviewed by someone other than its
 author, so Solid Memo does not yet meet that requirement
 ([docs/standard-for-public-code.md](docs/standard-for-public-code.md)). The
 project invites a second reviewer: say so in an issue or in Discussions.
-Once there is one, `main` requires an approving review.
+Once there is one, `main` requires an approving review, for Renovate's
+pull requests too ([Dependency updates](#dependency-updates)).
 
 ## Dependency updates
 
 [Renovate](https://docs.renovatebot.com/) proposes dependency updates
 ([renovate.json5](renovate.json5)). Each update is a pull request, and
-Renovate merges it on its own only when CI passes. A few updates wait
-for a person, as `renovate.json5` says why.
+Renovate merges it on its own only when CI passes, with no person
+reviewing it, so its updates are unreviewed changes too. A few updates
+wait for a person, as `renovate.json5` says why. Renovate cannot approve
+its own pull requests: once `main` requires an approving review, a
+maintainer approves each update, and Renovate merges it after that.
 
 ## Deploying
 
