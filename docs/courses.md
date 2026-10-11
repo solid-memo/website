@@ -400,8 +400,10 @@ completed and the questions answered kept.
 
 ## Why schema.org
 
-- **Others can read it.** `schema:Course`, `schema:Syllabus`,
-  `schema:LearningResource` and `schema:Answer` are what search engines
+- **Others can read it.** [`schema:Course`](https://schema.org/Course),
+  [`schema:Syllabus`](https://schema.org/Syllabus),
+  [`schema:LearningResource`](https://schema.org/LearningResource) and
+  [`schema:Answer`](https://schema.org/Answer) are what search engines
   and learning tools already understand. Typing the release, chapters,
   steps and distractors with them tells such a tool what it is looking
   at without knowing Solid Memo.

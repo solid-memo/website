@@ -3,7 +3,11 @@
 Where Solid Memo stores data in a user's pod and how it finds it again.
 Implemented in `packages/solid/src/` (vocabulary in
 [vocab.ts](../packages/solid/src/vocab.ts), discovery in
-[typeIndex.ts](../packages/solid/src/typeIndex.ts)).
+[typeIndex.ts](../packages/solid/src/typeIndex.ts)). The pod is read and
+written by the [Solid Protocol](https://solidproject.org/TR/protocol),
+and Solid Memo's data is found through the
+[type indexes](https://solid.github.io/type-indexes/), an editor's
+draft ([standards.md](standards.md#drafts-and-de-facto-specifications)).
 
 ## Vocabulary and shapes
 

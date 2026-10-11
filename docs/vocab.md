@@ -18,7 +18,9 @@ ontology), `topics.ttl` (the topics scheme) and `external.ttl`
 it. Changes to them go through git and CI like any other change
 ([ns.yml](../.github/workflows/ns.yml)).
 
-[`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) is an RDFS/OWL ontology: the
+[`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) is an
+[RDFS](https://www.w3.org/TR/rdf11-schema/)/[OWL](https://www.w3.org/TR/owl2-overview/)
+ontology: the
 `owl:Ontology` subject carries `owl:versionInfo` and a `skos:changeNote`
 per release, and every term is an `owl:Class`, `owl:DatatypeProperty`
 (literal-valued, with an `xsd:` range) or `owl:ObjectProperty`
@@ -35,14 +37,21 @@ flowchart LR
 ```
 
 `SM` in [vocab.ts](../packages/solid/src/vocab.ts) is a re-export
-of the generated constants; the external vocabularies there (Solid, PIM,
-Dublin Core, RDF, RDFS, FOAF) are not ours to publish and stay
-hand-written. The generator copies each term's comment and history note
+of the generated constants; the external vocabularies there
+([Solid terms](https://www.w3.org/ns/solid/terms),
+[PIM space](https://www.w3.org/ns/pim/space),
+[Dublin Core terms](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/),
+[RDF](https://www.w3.org/TR/rdf11-concepts/),
+[RDFS](https://www.w3.org/TR/rdf11-schema/),
+[FOAF](http://xmlns.com/foaf/spec/)) are not ours to publish and stay
+hand-written. [standards.md](standards.md) lists every vocabulary and
+specification Solid Memo uses, with its version and status. The generator copies each term's comment and history note
 into the constant's JSDoc, so the meaning is one hover away.
 
 ## Concept schemes
 
-Where a value is one of a fixed set, it is a SKOS concept, not a
+Where a value is one of a fixed set, it is a
+[SKOS](https://www.w3.org/TR/skos-reference/) concept, not a
 string, so other applications can look up what it means:
 
 | Scheme | Where | Concepts | Used by |
@@ -285,7 +294,7 @@ Solid Memo's text properties (`sm:front`, `sm:back`, `sm:frontNote`,
 own language tag (`"Huvudstäder"@sv`), one value per language, not
 with a term of ours. A deck's keywords (`dcat:keyword`) are tagged the
 same way, the one text with several values per language
-(`"capitals"@en, "countries"@en, "huvudstäder"@sv`). Tags are BCP 47, stored in lower case. Text in no
+(`"capitals"@en, "countries"@en, "huvudstäder"@sv`). Tags are [BCP 47](https://www.rfc-editor.org/info/bcp47), stored in lower case. Text in no
 language — codes, numbers, symbols ("404", "Fe") — is tagged `zxx`,
 BCP 47's "no linguistic content", rather than with a language it is
 not in; a page shows it with no `lang`. A card side saved untagged

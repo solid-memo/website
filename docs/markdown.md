@@ -10,8 +10,9 @@ render policy, which may change without touching data.
 
 ## The dialect
 
-`sm:markdown` is CommonMark 0.31.2 with GitHub Flavored Markdown pipe
-tables and CJK-friendly emphasis, and nothing else: no strikethrough,
+`sm:markdown` is [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/)
+with [GitHub Flavored Markdown pipe tables](https://github.github.com/gfm/#tables-extension-)
+and CJK-friendly emphasis, and nothing else: no strikethrough,
 autolink literals (`www.x`), task lists or footnotes, which show as
 typed. Wider Markdown would be a new concept, since it would change how
 text already written reads.
@@ -38,6 +39,10 @@ though the app showed them as emphasis before it took this amendment.
 
 CommonMark has no invalid documents, so nothing is ever refused: what a
 place cannot show is shown as text.
+
+GFM and the CJK-friendly amendment are not formal standards;
+[standards.md](standards.md#drafts-and-de-facto-specifications) says why
+they do not stand in the way of reading the text elsewhere.
 
 ## What is Markdown
 

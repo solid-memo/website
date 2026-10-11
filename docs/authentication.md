@@ -1,13 +1,17 @@
 # Authentication
 
 Login, session restore, and logout against a Solid identity provider using
-Solid-OIDC. All authentication code lives in
+[Solid-OIDC](https://solidproject.org/TR/oidc), which builds on
+[OpenID Connect](https://openid.net/specs/openid-connect-core-1_0.html)
+and [DPoP](https://www.rfc-editor.org/rfc/rfc9449) (the specifications
+and their status are in [standards.md](standards.md)). All authentication code lives in
 [packages/solid/src/solidSessionGateway.ts](../packages/solid/src/solidSessionGateway.ts),
 behind the `SessionGateway` port.
 
 ## Login flow
 
-The user enters only their WebID (collected by the
+The user enters only their [WebID](https://www.w3.org/2005/Incubator/webid/spec/identity/)
+([its profile in Solid](https://solid.github.io/webid-profile/); collected by the
 [onboarding flow](onboarding.md), validated as an `https:` URL). The app
 dereferences it (unauthenticated) and reads the `solid:oidcIssuer` triple to
 find their identity provider, then starts the OIDC redirect flow. The issuer
