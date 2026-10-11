@@ -23,6 +23,7 @@
       // As .vscode/extensions.json recommends.
       "extensions": [
         "anthropic.claude-code",
+        "biomejs.biome",
         "vitest.explorer",
         "typescriptteam.native-preview",
         "stardog-union.stardog-rdf-grammars"

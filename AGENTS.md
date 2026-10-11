@@ -25,6 +25,8 @@ This repository's docs are indexed in [docs/README.md](docs/README.md); start wi
   changing `decks/`, `npm run library` ([docs/deck-library.md](docs/deck-library.md)).
 - **Coverage** is 100% per package; new code ships with its tests, and
   unreachable code is removed, not excluded ([docs/testing.md](docs/testing.md)).
+- **Formatting**: after editing TypeScript, JSON or CSS, run `npm run format`
+  (Biome); `npm run lint` checks it ([docs/style.md](docs/style.md#formatting)).
 - **One test file**: `npm run test:unit -- <path>`, from the root.
 - **Imports** follow [docs/boundaries.md](docs/boundaries.md), which
   `npm run check:boundaries` enforces.

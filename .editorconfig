@@ -18,6 +18,10 @@ indent_size = 4
 [*.py]
 indent_size = 4
 
+# Biome wraps these at 100 (biome.jsonc, `npm run format`).
+[*.{ts,tsx,js,mjs,cjs,json,jsonc,css}]
+max_line_length = 100
+
 [renovate.json5]
 indent_size = 4
 
@@ -32,3 +36,4 @@ insert_final_newline = unset
 trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
+max_line_length = unset

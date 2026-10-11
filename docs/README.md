@@ -20,7 +20,7 @@ you don't know is in [glossary.md](glossary.md).
 - [deployment.md](deployment.md) — the static build, deployed to GitHub Pages by CI, or published by hand to any web space.
 - [configuration.md](configuration.md) — the VITE_ settings a build reads (the app's name, the repository the footer links to, the Pod providers, the deck library), their defaults, how to set them, and what they do not reach.
 - [reuse.md](reuse.md) — running your own instance: fork, configure, build, host anywhere, make the deck library your own, the files to edit by hand, and the names that must stay because they are part of the data.
-- [style.md](style.md) — how the code, Turtle, docs and commit messages are written: formatting, TypeScript, naming, the Turtle house style, comments, plain English with American spelling, and English as the authoritative language.
+- [style.md](style.md) — how the code, Turtle, docs and commit messages are written: formatting and linting with Biome, TypeScript, naming, the Turtle house style, comments, plain English with American spelling, and English as the authoritative language.
 - [releasing.md](releasing.md) — how the app's versions are numbered (SemVer 0.x), what counts as breaking for data in pods, how a version is tagged by hand and the changelog kept, and how the app's version differs from those of the vocabulary, shapes and decks.
 
 ## The data

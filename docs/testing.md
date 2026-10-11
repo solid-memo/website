@@ -17,7 +17,9 @@ package's own tests cover its own code — `npm test` fails below that.
 
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
-npm run check     # the same, plus typecheck, drift, formatting, boundaries, the repository's own checks (below)
+npm run check     # Biome's lint, then the same, plus typecheck, drift, formatting, boundaries, the repository's own checks (below)
+npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
+npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
 npm run lint:markdown      # markdownlint over the project's Markdown, as CI's docs job runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as CI's docs job runs it
@@ -401,8 +403,11 @@ it should; keep them when changing the workflow.
 
 ### The repository's own checks
 
-`npm run check` ends with checks of the repository as a whole, plain
-Node scripts in [scripts/](../scripts/):
+`npm run check` starts with `npm run lint`: [Biome](https://biomejs.dev/)
+fails on a TypeScript, JSON or CSS file it would format otherwise, or
+that breaks one of its lint rules ([style.md](style.md#formatting)). It
+ends with checks of the repository as a whole, plain Node scripts in
+[scripts/](../scripts/):
 
 - `check:boundaries` ([checkBoundaries.ts](../scripts/checkBoundaries.ts)):
   the imports between packages ([boundaries.md](boundaries.md)).

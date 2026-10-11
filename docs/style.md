@@ -16,12 +16,36 @@ this page.
 - TypeScript: double quotes, a semicolon after every statement, a
   trailing comma in a literal or call that spans lines, and parentheses
   around an arrow function's parameters, even one: `(card) => card.id`.
-- Lines up to 100 characters. Older code was wrapped at 80, and some is
-  longer; leave it until the formatter changes it.
+- Lines up to 100 characters.
+- JSON: one item a line in an object or a list, as npm writes
+  `package.json`; a trailing comma only in JSON with comments (`.jsonc`).
 
-[Biome](https://biomejs.dev/) will enforce the TypeScript, JSON and CSS
-formatting with a line width of 100, as part of `npm run check`. Until
-it does, these rules are kept by hand.
+[Biome](https://biomejs.dev/) formats and lints the TypeScript,
+JavaScript, JSON and CSS as [`biome.jsonc`](../biome.jsonc) says, and
+`npm run check` fails on a file it would change. It leaves alone what
+is written by tools (the generated vocabulary, the lock files), the
+vendored files, and the Turtle in `decks/` and `ns/`, which has
+[its own formatter](#turtle).
+
+```sh
+npm run format   # rewrite the files as Biome formats them, and apply its safe fixes
+npm run lint     # check them, as npm run check does: formatting and lint rules
+```
+
+Biome's recommended lint rules are on. A rule that fires on code that is
+right as it is, is turned off in `biome.jsonc` with its reason beside it;
+a problem it finds is fixed.
+
+**In an editor**, install Biome's extension (`biomejs.biome` for VS Code,
+which [`.vscode/extensions.json`](../.vscode/extensions.json) and the dev
+container recommend; others are listed on [biomejs.dev](https://biomejs.dev/)),
+and make it the formatter for these files, on save if you like. It
+reads the same `biome.jsonc`, so the editor and the check agree.
+
+The code was reformatted with Biome in one commit, which changed nothing
+else. [`.git-blame-ignore-revs`](../.git-blame-ignore-revs) lists it, so
+GitHub's blame looks past it; locally, run
+`git config blame.ignoreRevsFile .git-blame-ignore-revs` once.
 
 ## TypeScript
 

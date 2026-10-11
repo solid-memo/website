@@ -68,6 +68,9 @@ bug, needs no issue.
 The code follows the [style guide](docs/style.md), the
 [import rules](docs/boundaries.md) and the [testing policy](docs/testing.md):
 100% coverage in every package, and new code ships with its tests.
+[Biome](https://biomejs.dev/) formats and lints the code: run
+`npm run format` before you commit, and `npm run check` fails on what it
+would still change ([docs/style.md](docs/style.md#formatting)).
 
 **Text formats.** Keep the repository diff-friendly: code in TypeScript,
 data in Turtle, docs in Markdown, configuration in JSON or YAML. Do not

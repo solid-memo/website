@@ -31,8 +31,7 @@ can still change in ways a user notices.
   ([docs/i18n.md](docs/i18n.md#translations)).
 - **A second reviewer**, so that no change is merged by its own author
   alone ([GOVERNANCE.md](GOVERNANCE.md#merging)).
-- **A formatter and license headers.** One formatter for the code, and a
-  machine-readable license on every file.
+- **License headers.** A machine-readable license on every file.
 - **Guides for learners**: studying, statistics, the library and the
   courses, in plain words.
 

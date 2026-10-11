@@ -43,7 +43,8 @@ jobs:
           key: turbo-${{ github.sha }}
           restore-keys: turbo-
       - run: npm ci
-      # Every package: typecheck, tests at 100% coverage, generated code and
+      # Biome's formatting and lint rules (docs/style.md); then every
+      # package: typecheck, tests at 100% coverage, generated code and
       # Turtle formatting in step with their sources, and the deck library
       # (ns.yml also compares it with the base); then the boundaries, the
       # docs' index and the shipped dependencies' maturity (docs/testing.md).
