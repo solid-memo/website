@@ -6,9 +6,21 @@
     baseBranchPatterns: [
         'main',
     ],
+    // An update is merged through a pull request once CI's ci-ok check
+    // passes, as anyone's change is (docs/testing.md#continuous-integration):
+    // the pull request is where the update's commit links to.
     automerge: true,
-    automergeType: 'branch',
+    automergeType: 'pr',
     customManagers: [
+        // A tool a workflow downloads, its version after a comment that
+        // names it (`# renovate: datasource=github-releases depName=<owner>/<repo>`).
+        {
+            customType: 'regex',
+            managerFilePatterns: ['/^\\.github/(workflows|actions)/.+\\.ya?ml$/'],
+            matchStrings: [
+                '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+[A-Z_]+: (?<currentValue>\\S+)',
+            ],
+        },
         // The commit of Solid-Nextcloud its end-to-end tests' image builds,
         // as the branch its Dockerfile names moves on.
         {

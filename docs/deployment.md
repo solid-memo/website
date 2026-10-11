@@ -12,15 +12,32 @@ runs when the CI workflow has finished on `main`
 
 ```mermaid
 flowchart LR
-    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods"] -->|success| build["deploy.yml:<br/>npm run build"] --> guard["ns/ and decks/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
+    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods,<br/>journeys, docs"] -->|success| build["deploy.yml:<br/>npm run build"] --> guard["ns/ and decks/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
+    hand["run by hand<br/>from main"] --> check["deploy.yml:<br/>npm run check"] --> build
 ```
 
-A red CI run never deploys; `workflow_dispatch` deploys by hand. The
-workflow builds the commit CI checked, enables Pages for the repository
-on its first run, and stops before deploying if the vocabulary or the
-deck library is missing from the build. Pushes that touch `ns/` or
-`decks/` also run the [ns workflow](../.github/workflows/ns.yml)
-([deck-library.md](deck-library.md#checks)).
+A red CI run never deploys. Only `main` deploys, and only from this
+repository:
+
+- **After CI.** CI also runs on pull requests, a fork's included
+  ([testing.md](testing.md#continuous-integration)), and a fork's branch
+  may be named `main` too. So the deploy checks that the CI run it
+  follows was for a push to `main` in this repository
+  (`workflow_run.event`, `head_branch` and `head_repository`), and
+  skips any other. It builds the commit CI checked.
+- **By hand** (Actions › Deploy to GitHub Pages › Run workflow, from
+  `main`; from any other branch the job is skipped). No CI run is behind
+  it, so it runs `npm run check` before it builds `main` as it is. It
+  has no Turbo cache, so it takes about as long as CI's build job.
+
+The workflow enables Pages for the repository on its first run, and
+stops before deploying if the vocabulary or the deck library is missing
+from the build. Changes that touch `ns/` or `decks/` also run the
+[ns workflow](../.github/workflows/ns.yml)
+([deck-library.md](deck-library.md#checks)). The `github-pages`
+environment should also be limited to `main` in the repository's
+settings (Settings › Environments), so nothing but this workflow's runs
+on `main` can deploy.
 
 ### What the artifact contains
 
