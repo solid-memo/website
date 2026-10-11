@@ -194,8 +194,8 @@ next. To change a deck `<name>` whose latest version is `N`:
      deck has it,
    - `adms:versionNotes` to what changed, in one string,
    - the [contact](#contact): `dcat:contactPoint <#contact>` and its
-     `vcard:Kind` node, and no `foaf:mbox` (copied from a version
-     published before the rule, the agent has one: remove it).
+     `vcard:Kind` node, and no `foaf:mbox` (an agent copied from a
+     version published before the rule has one: remove it).
 3. `npm run format:turtle`, then `npm run library`, which validates the
    library and writes `decks/index.ttl` (the new version becomes the
    series' `dcat:last` and current version). Then
@@ -420,8 +420,8 @@ commit: a version published there that is gone or differs by a byte
 fails, and so does a version not published there that states
 `foaf:mbox` or lacks the library's [contact](#contact)
 (`contactProblems`). Without a base nothing tells a new version from a
-published one, so that rule does not run. `npm run check` runs `library:check` without a base, and so
-does CI, as a Turbo task of the shacl package
+published one, so that rule does not run. `npm run check` runs
+`library:check` without a base, and so does CI, as a Turbo task of the shacl package
 ([turbo.json](../packages/shacl/turbo.json)), cached until a file it
 reads (`ns/`, `decks/`, its packages' code) changes. The [ns workflow](../.github/workflows/ns.yml)
 runs on pull requests and on pushes to the default branch that touch
