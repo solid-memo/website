@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+/** The site's version, from the root package.json (vite.config.ts). */
+declare const __APP_VERSION__: string;
+
 /** The commit the site was built from (vite.config.ts); null when unknown. */
 declare const __COMMIT_SHA__: string | null;
 

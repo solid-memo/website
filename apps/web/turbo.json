@@ -6,7 +6,7 @@
       "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/shapes/**"]
     },
     "build": {
-      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"]
+      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/package.json", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"]
     }
   }
 }

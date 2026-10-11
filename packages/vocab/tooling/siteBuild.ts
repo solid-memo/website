@@ -26,6 +26,11 @@ export function commitSha(): string | null {
   }
 }
 
+/** The site's version, shown in the footer: the repository's, from its root package.json. */
+export function appVersion(): string {
+  return (JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")) as { version: string }).version;
+}
+
 /**
  * Names the rules pod documents are checked by: a hash of every shape
  * (ns/shapes/) and vendored profile file. A check receipt in an
@@ -45,9 +50,10 @@ export function shapesRuleset(): string {
   return hash.digest("hex").slice(0, 16);
 }
 
-/** Vite's `define`: `__COMMIT_SHA__` and `__SHAPES_RULESET__`, as each app's vite-env.d.ts declares them. */
+/** Vite's `define`: `__APP_VERSION__`, `__COMMIT_SHA__` and `__SHAPES_RULESET__`, as each app's vite-env.d.ts declares them. */
 export function siteDefines(): Record<string, string> {
   return {
+    __APP_VERSION__: JSON.stringify(appVersion()),
     __COMMIT_SHA__: JSON.stringify(commitSha()),
     __SHAPES_RULESET__: JSON.stringify(shapesRuleset()),
   };
