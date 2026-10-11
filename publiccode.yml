@@ -6,7 +6,7 @@
 # standard (https://yml.publiccode.tools/). Kept in step with README.md;
 # the version and its date are set when a version is tagged
 # (docs/releasing.md).
-publiccodeYmlVersion: "0.4"
+publiccodeYmlVersion: "0"
 
 name: Solid Memo
 url: https://github.com/solid-memo/website
