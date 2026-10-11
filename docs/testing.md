@@ -389,6 +389,15 @@ would also answer to a required check of that name.) Deploys follow a green run 
 `ns/` and `decks/` runs here, the comparison with the base included, so
 `ci-ok` gates them all and nothing is checked twice.
 
+A newer run for the same pull request or branch cancels the one still
+going, so a pull request pushed to again is checked once, at its latest
+commit. Runs on `main` are never canceled, since only a push run on
+`main` that passed deploys
+([deployment.md](deployment.md#github-pages-automatic)): each event has
+its own concurrency group, so a run by hand does not cancel a push run,
+and push runs on `main` go one at a time, in order (a push waiting its
+turn is replaced by a newer one, whose commit includes it).
+
 A fork's pull request runs the same jobs, and its results are public.
 That is safe because the jobs only read: the workflow's token can read
 the repository and nothing more, no job uses a secret, and no checkout

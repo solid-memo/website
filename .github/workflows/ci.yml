@@ -25,9 +25,16 @@ on:
 permissions:
   contents: read
 
+# A newer run of a pull request's or a branch's checks cancels the one
+# still going. Runs on main are never canceled: deploy.yml deploys only
+# after a push run on main that passed, so a push run canceled by a later
+# run, a manual one included, would leave its commit undeployed. Each event
+# has its own group, so a run by hand never waits for a push run, and push
+# runs on main go one at a time, in order; one waiting is replaced by a
+# newer push, whose commit includes it.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:

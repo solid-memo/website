@@ -24,7 +24,13 @@ repository:
   may be named `main` too. So the deploy checks that the CI run it
   follows was for a push to `main` in this repository
   (`workflow_run.event`, `head_branch` and `head_repository`), and
-  skips any other. It builds the commit CI checked.
+  skips any other. It builds the commit CI checked. CI never cancels a
+  run on `main`, and a run of CI by hand has a concurrency group of its
+  own, so it cannot cancel the push run a deploy waits for; push runs
+  on `main` go one at a time, and a push waiting its turn is replaced
+  by a newer one, which deploys it too
+  ([testing.md](testing.md#continuous-integration)). Deploys go one at
+  a time as well (concurrency group `pages`), none canceled.
 - **By hand** (Actions › Deploy to GitHub Pages › Run workflow, from
   `main`; from any other branch the job is skipped). No CI run is behind
   it, so it runs `npm run check` before it builds `main` as it is. It
