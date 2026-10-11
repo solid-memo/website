@@ -447,6 +447,13 @@ Only an admin of the repository can change these:
 
 ### Actions for the maintainer
 
+- [ ] **The blame-ignore list, after merging this branch.** `main`
+  allows only rebase merges, and GitHub's rebase merge writes new
+  commits, so the reformat's SHA in `.git-blame-ignore-revs`
+  (`7646413`, "Reformat the code with Biome") no longer names a commit
+  on `main`. Replace it with that commit's SHA on `main`, in a pull
+  request of its own; or merge this pull request with a merge commit,
+  which keeps the SHA ([style.md](style.md#formatting)). *(15)*
 - [ ] **Tag v0.1.0** as [releasing.md](releasing.md#tagging-a-version)
   says: date the `[0.1.0]` heading in CHANGELOG.md, set the version and
   date in `publiccode.yml` and `CITATION.cff`, then tag the merged
@@ -594,4 +601,7 @@ The first assessment's plan, with what landed on this branch checked.
 - A deploy by hand from a branch other than `main` is skipped.
 - The footer's links open the source code, the commit and the issues on
   `solid-memo/website`.
+- GitHub's blame of a reformatted file on `main` shows the change that
+  wrote each line, not the reformat.
+- `lychee.toml` excludes no address whose setting or tag now exists.
 - Go through the criteria again, and update the scorecard here.
