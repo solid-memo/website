@@ -845,7 +845,8 @@ mature, and the reviews due ahead, are not from the log but from the
 review states ([srs.md](srs.md#where-cards-stand)). Once a day has
 answers, a slim strip above the deck list (where a session usually
 ends) says what the day came to (`todayOf`), led by the streak (with the record to beat,
-or a new record cheered), then a word of praise and the day's numbers.
+or a new record cheered), then a word of praise and the day's numbers
+([statistics.md](statistics.md) says what each screen shows).
 A review state
 says only where a card stands now; the log is the history, and source
 data, since nothing could rebuild it.
