@@ -50,7 +50,8 @@ import {
  * a card, chapter, step or distractor of the one before it. With
  * `--base <git ref>`, a version published at that ref must be there
  * still, byte for byte: a published version is never edited or removed,
- * only followed by the next. The rules that read a release's data are
+ * only followed by the next, and a version new since then names the
+ * library's contact, not an email (contactProblems). The rules that read a release's data are
  * the domain's (@solid-memo/domain/release), which the Studio runs too:
  * this file reads the files, builds each release's model
  * (quadsToReleaseModel.ts), words the problems in English
@@ -65,12 +66,20 @@ const XSD = "http://www.w3.org/2001/XMLSchema#";
 const DATA_THEMES = "http://publications.europa.eu/resource/authority/data-theme";
 const TOPICS = `${VOCAB_BASE}topics.ttl`;
 const PROV = "http://www.w3.org/ns/prov#";
+const VCARD = "http://www.w3.org/2006/vcard/ns#";
 
 /** Where the site publishes the library. Every IRI of it is under this: the index, its series and publisher, and every release. */
 export const DECKS_BASE = `${SITE}decks/`;
 export const INDEX_FILE = "index.ttl";
 export const INDEX_URL = `${DECKS_BASE}${INDEX_FILE}`;
 export const PUBLISHER_URL = `${INDEX_URL}#solid-memo`;
+
+/**
+ * The library's contact (docs/deck-library.md, Contact): the project's
+ * issue tracker. A new release names it as its dcat:contactPoint, a
+ * vcard:Kind with this vcard:hasURL, and names no one's email.
+ */
+export const CONTACT_URL = "https://github.com/solid-memo/website/issues";
 
 /** The deck whose series the index names the course for newcomers (solid-memo:newcomerCourse); undefined names none. See docs/deck-library.md. */
 export const NEWCOMER_COURSE: string | undefined = "getting-started";
@@ -272,6 +281,7 @@ function writeIndex(quads: readonly Quad[]): string {
       adms: ADMS,
       foaf: FOAF,
       prov: PROV,
+      vcard: VCARD,
       topic: `${TOPICS}#`,
       xsd: XSD,
     },
@@ -415,6 +425,31 @@ export function newcomerProblems(indexQuads: readonly Quad[]): string[] {
   return problems;
 }
 
+/**
+ * What a new release says of the library's contact (docs/deck-library.md,
+ * Contact), which main checks on the versions not published at `--base`:
+ * no foaf:mbox on any subject, and as the release's dcat:contactPoint
+ * the library's contact, a vcard:Kind of the release with vcard:hasURL
+ * <CONTACT_URL>.
+ */
+export function contactProblems(release: DeckRelease): string[] {
+  const label = labelOf(release.deck, release.version);
+  const url = releaseUrlOf(release.deck, release.version);
+  const shown = (subject: string) => (subject.startsWith(`${url}#`) ? `<${subject.slice(url.length)}>` : `<${subject}>`);
+  const problems = release.quads
+    .filter((q) => q.predicate.value === `${FOAF}mbox`)
+    .map((q) => `${label}: ${shown(q.subject.value)} states foaf:mbox: a new version names no one's email; the library's contact is its dcat:contactPoint.`);
+  const isContact = (point: Quad_Object) =>
+    objectsOf(release.quads, point.value, RDF_TYPE).some((o) => o.value === `${VCARD}Kind`) &&
+    objectsOf(release.quads, point.value, `${VCARD}hasURL`).some((o) => o.termType === "NamedNode" && o.value === CONTACT_URL);
+  if (!objectsOf(release.quads, url, `${DCAT}contactPoint`).some(isContact)) {
+    problems.push(
+      `${label}: states no dcat:contactPoint that is the library's contact: a new version states \`<> dcat:contactPoint <#contact>\` and \`<#contact> a vcard:Kind ; vcard:hasURL <${CONTACT_URL}>\`.`,
+    );
+  }
+  return problems;
+}
+
 /** The problems a check that throws one Error per document reports, or none. */
 async function problemsOf(check: Promise<void>): Promise<string[]> {
   try {
@@ -512,7 +547,9 @@ const USAGE = "Usage: npm run library [-- --base <git ref>], or npm run library:
  * `npm run library` writes decks/index.ttl from the releases;
  * `npm run library:check` (`--check`) fails if it is not what they make.
  * Both validate the library, and with `--base <git ref>` check that no
- * version published at that ref was edited or removed. Exit code 0 when
+ * version published at that ref was edited or removed, and that each
+ * version new since then names the library's contact and no email
+ * (contactProblems). Exit code 0 when
  * the library is valid (and, in check mode, its index up to date).
  */
 export async function main(argv: readonly string[], io: LibraryIo): Promise<number> {
@@ -530,7 +567,14 @@ export async function main(argv: readonly string[], io: LibraryIo): Promise<numb
     const files = await io.readFiles();
     const { releases, problems } = releasesOf(files);
     const index = buildIndex(releases, io.newcomerCourse);
-    if (ref !== undefined) problems.push(...baseProblems(files, await io.readFilesAt(ref), ref));
+    if (ref !== undefined) {
+      const published = await io.readFilesAt(ref);
+      problems.push(...baseProblems(files, published, ref));
+      // A version not published at the ref is new: it names the library's contact, not an email.
+      for (const release of releases.filter((r) => !published.has(`${r.deck}/v${r.version}.ttl`))) {
+        problems.push(...contactProblems(release));
+      }
+    }
     if (check) {
       const stated = files.get(INDEX_FILE);
       if (stated === undefined) problems.push(`decks/${INDEX_FILE} is missing: run \`npm run library\`.`);

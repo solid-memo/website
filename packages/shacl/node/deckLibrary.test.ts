@@ -6,6 +6,8 @@ import { describe, expect, it, vi } from "vitest";
 import {
   baseProblems,
   buildIndex,
+  CONTACT_URL,
+  contactProblems,
   courseProblems,
   defaultIo,
   INDEX_URL,
@@ -47,7 +49,13 @@ interface Fixture {
   course?: string;
   /** The library deck format the release is in, 5 unless stated. */
   format?: 5 | 6;
+  /** The release names the library's contact, as a new version does. */
+  contact?: boolean;
+  /** The agent states an email, as the published versions do. */
+  mbox?: boolean;
 }
+
+const CONTACT = { contact: true } as const;
 
 /** A release of `deck` in library deck format 5 (or `format`), as decks/<deck>/v<version>.ttl holds it. */
 function releaseText(deck: string, version: number, fixture: Fixture = {}): string {
@@ -94,12 +102,20 @@ ${issued === null ? "" : `    dcterms:issued "${issued}"^^xsd:dateTime ;\n`}    
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     adms:versionNotes "${notes}" ;
     dcat:distribution <#turtle> ;
-${release} .
+${fixture.contact === true ? "    dcat:contactPoint <#contact> ;\n" : ""}${release} .
 
 <#anton>
     a foaf:Agent ;
-    foaf:name "Anton" .
-
+    foaf:name "Anton"${fixture.mbox === true ? " ;\n    foaf:mbox <mailto:anton@example.com>" : ""} .
+${
+  fixture.contact === true
+    ? `
+<#contact>
+    a <http://www.w3.org/2006/vcard/ns#Kind> ;
+    <http://www.w3.org/2006/vcard/ns#hasURL> <https://github.com/solid-memo/website/issues> .
+`
+    : ""
+}
 <#turtle>
     a dcat:Distribution ;
     dcat:accessURL <> ;
@@ -375,6 +391,16 @@ describe("buildIndex", () => {
     expect(buildIndex([])).not.toContain("modified");
   });
 
+  it("names no one's email, but keeps the current release's contact", () => {
+    const built = buildIndex([release("capitals", 1, { mbox: true, contact: true })]);
+    const quads = parseTurtle(built, INDEX);
+    const current = `${DECKS}capitals/v1.ttl`;
+    expect(quads.filter((q) => q.predicate.value === "http://xmlns.com/foaf/0.1/mbox")).toEqual([]);
+    expect(quads.some((q) => q.subject.value === `${current}#anton` && q.object.value === "Anton")).toBe(true);
+    expect(quads.some((q) => q.subject.value === current && q.predicate.value === `${DCAT}contactPoint`)).toBe(true);
+    expect(built).toContain("vcard:hasURL <https://github.com/solid-memo/website/issues>");
+  });
+
   it("names the course for newcomers when given one, even one the library does not have", () => {
     const named = (index: string) =>
       parseTurtle(index, INDEX).filter((q) => q.predicate.value === `${SM}newcomerCourse`).map((q) => [q.subject.value, q.object.value]);
@@ -461,6 +487,11 @@ describe("metadataProblems", () => {
 describe("validateLibrary", () => {
   it("accepts releases and an index that conform to the shapes and to the profiles", async () => {
     await expect(validateLibrary(LIBRARY, buildIndex(LIBRARY), validators)).resolves.toEqual([]);
+  });
+
+  it("accepts a release that names the library's contact, in format 5 or 6", async () => {
+    const contacted = [release("capitals", 1, CONTACT), release("capitals", 2, { ...NORWAY, ...CONTACT, format: 6 })];
+    await expect(validateLibrary(contacted, buildIndex(contacted), validators)).resolves.toEqual([]);
   });
 
   it("accepts a release in library deck format 6 after one in format 5, each checked against its own format", async () => {
@@ -977,6 +1008,36 @@ describe("markdownProblems", () => {
   });
 });
 
+describe("contactProblems", () => {
+  const L = "decks/capitals/v1.ttl";
+  const NONE = `${L}: states no dcat:contactPoint that is the library's contact: a new version states \`<> dcat:contactPoint <#contact>\` and \`<#contact> a vcard:Kind ; vcard:hasURL <${CONTACT_URL}>\`.`;
+
+  it("accepts a release that names the library's contact and no email", () => {
+    expect(contactProblems(release("capitals", 1, CONTACT))).toEqual([]);
+  });
+
+  it("names every email a release states, and a release without the library's contact", () => {
+    const turtle = `${releaseText("capitals", 1, { mbox: true })}\n<https://example.org/bo> <http://xmlns.com/foaf/0.1/mbox> <mailto:bo@example.org> .\n`;
+    const made: DeckRelease = { deck: "capitals", version: 1, turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) };
+    expect(contactProblems(made)).toEqual([
+      `${L}: <#anton> states foaf:mbox: a new version names no one's email; the library's contact is its dcat:contactPoint.`,
+      `${L}: <https://example.org/bo> states foaf:mbox: a new version names no one's email; the library's contact is its dcat:contactPoint.`,
+      NONE,
+    ]);
+  });
+
+  it("names a contact point that is no vcard:Kind, or that leads elsewhere", () => {
+    const VCARD = "http://www.w3.org/2006/vcard/ns#";
+    const withPoint = (point: string) => {
+      const turtle = `${releaseText("capitals", 1)}\n<> <${DCAT}contactPoint> <#contact> .\n${point}\n`;
+      return { deck: "capitals", version: 1, turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) };
+    };
+    expect(contactProblems(withPoint(`<#contact> <${VCARD}hasURL> <${CONTACT_URL}> .`))).toEqual([NONE]);
+    expect(contactProblems(withPoint(`<#contact> a <${VCARD}Kind> ; <${VCARD}hasURL> <https://example.org/issues> .`))).toEqual([NONE]);
+    expect(contactProblems(withPoint(`<#contact> a <${VCARD}Kind> ; <${VCARD}hasURL> "${CONTACT_URL}" .`))).toEqual([NONE]);
+  });
+});
+
 describe("baseProblems", () => {
   it("accepts versions new since the ref and a changed index", () => {
     const published = filesOf(CAPITALS.slice(0, 1));
@@ -1049,7 +1110,7 @@ describe("main", () => {
   });
 
   it("checks against a git ref that no published version was edited or removed", async () => {
-    const ok = io(filesOf(LIBRARY), filesOf(CAPITALS));
+    const ok = io(filesOf([...CAPITALS, release("rivers", 1, { title: "Rivers", ...CONTACT })]), filesOf(CAPITALS));
     expect(await main(["node", "--check", "--base", "origin/main"], ok.io)).toBe(0);
     expect(ok.readFilesAt).toHaveBeenCalledWith("origin/main");
     const gone = io(filesOf(CAPITALS.slice(0, 1)), filesOf(CAPITALS));
@@ -1058,6 +1119,18 @@ describe("main", () => {
     expect(gone.log).toHaveBeenCalledWith(
       "decks/capitals/v2.ttl was published at HEAD and is gone: a published version is never removed.",
     );
+  });
+
+  it("holds only the versions new since the git ref to the library's contact, not the published ones", async () => {
+    const emailed = [release("capitals", 1, { mbox: true }), release("capitals", 2, { ...NORWAY, mbox: true })];
+    const published = io(filesOf(emailed), filesOf(emailed));
+    expect(await main(["node", "--check", "--base", "origin/main"], published.io)).toBe(0);
+    const added = io(filesOf(emailed), filesOf(emailed.slice(0, 1)));
+    expect(await main(["node", "--check", "--base", "origin/main"], added.io)).toBe(1);
+    expect(added.log.mock.calls.map(([m]) => m).filter((m) => m.startsWith("decks/capitals/v"))).toEqual([
+      "decks/capitals/v2.ttl: <#anton> states foaf:mbox: a new version names no one's email; the library's contact is its dcat:contactPoint.",
+      expect.stringMatching(/^decks\/capitals\/v2\.ttl: states no dcat:contactPoint/),
+    ]);
   });
 
   it("fails on a release that does not validate", async () => {
