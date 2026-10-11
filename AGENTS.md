@@ -17,8 +17,12 @@ This repository's docs are indexed in [docs/README.md](docs/README.md); start wi
 (commit messages, one change per commit, pull requests) is in
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
-- **Done** means `npm run check` passes, and `npm run crosscheck` too when
-  `ns/` or `decks/` changed (it needs `pip install -r scripts/requirements-ci.txt`).
+- **Done** means `npm run check` passes (Biome, markdownlint, cspell,
+  typecheck, tests and the repository's checks), `npm run lint:reuse` too
+  when a file was added (it needs reuse: `pipx run reuse lint`, or
+  `uv run --no-project --with reuse reuse lint`), and `npm run crosscheck`
+  too when `ns/` or `decks/` changed (it needs
+  `pip install -r scripts/requirements-ci.txt`).
 - **Generated files** (`packages/vocab/src/*.generated.ts`) are never
   edited by hand: change `ns/` and run `npm run generate`.
 - **Turtle**: after editing a `.ttl` file, run `npm run format:turtle`; after
@@ -31,7 +35,8 @@ This repository's docs are indexed in [docs/README.md](docs/README.md); start wi
 - **Imports** follow [docs/boundaries.md](docs/boundaries.md), which
   `npm run check:boundaries` enforces.
 - **Licenses**: a new file that can carry a comment starts with the SPDX
-  header; a new deck is listed in `REUSE.toml` under its license, which
-  `npm run check:reuse` checks ([docs/style.md](docs/style.md#licenses)).
-- **Spelling** is American English; after changing Markdown or `en.json`,
-  run `npm run lint:spelling` ([docs/style.md](docs/style.md#language)).
+  header, which `npm run lint:reuse` checks; a new deck is listed in
+  `REUSE.toml` under its license, which `npm run check:reuse` (in
+  `npm run check`) checks ([docs/style.md](docs/style.md#licenses)).
+- **Spelling** is American English; `npm run lint:spelling`, part of
+  `npm run check`, checks Markdown and `en.json` ([docs/style.md](docs/style.md#language)).

@@ -170,9 +170,11 @@ in [checkReuse.ts](../scripts/checkReuse.ts) and its text in
 `LICENSES/` (`reuse download <SPDX id>`).
 
 `reuse lint` checks that every file in the repository has both, in CI's
-docs job ([testing.md](testing.md#documentation)); `npm run lint:reuse`
-runs it locally with [reuse](https://reuse.software/) installed
-(`pipx install reuse`, or `uvx reuse lint` without installing it).
+docs job ([testing.md](testing.md#documentation)), not in
+`npm run check`; `npm run lint:reuse` runs it locally with
+[reuse](https://reuse.software/) installed (`pipx install reuse`), and
+`pipx run reuse lint` or `uv run --no-project --with reuse reuse lint`
+run it without installing it.
 
 ## Docs
 
@@ -200,8 +202,8 @@ their source.
   catalog, behavior, toward, canceled, learned; a box is checked, not
   given a tick. It holds for the docs, the comments, the English
   messages and the test titles alike, and
-  `npm run lint:spelling` ([cspell](https://cspell.org/), in CI's docs
-  job) checks the Markdown and `en.json` for it
+  `npm run lint:spelling` ([cspell](https://cspell.org/), part of
+  `npm run check`) checks the Markdown and `en.json` for it
   ([testing.md](testing.md#documentation)). What is not ours to respell
   keeps the spelling it has: the published Turtle in `decks/` and `ns/`,
   which never changes; a term of a data format or an IRI; a message key

@@ -512,8 +512,9 @@ The first assessment's plan, with what landed on this branch checked.
   (`npm run check:docs`), prerelease dependencies
   (`npm run check:dependencies`), and each package's coverage in the
   run's summary.
-- [x] **A docs job.** markdownlint, cspell, lychee (offline on every
-  change, online weekly), `reuse lint` and the publiccode.yml parser.
+- [x] **A docs job.** lychee (offline on every change, online weekly),
+  `reuse lint` and the publiccode.yml parser; markdownlint and cspell
+  run in `npm run check`, so in the build job.
 - [x] **License required.** `npm run library:check` refuses a new deck
   version without `dcterms:license`, and `sm2.test.ts` mirrors
   [srs.md](srs.md#worked-examples).

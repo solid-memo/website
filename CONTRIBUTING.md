@@ -137,13 +137,18 @@ Every file says so in a machine-readable way, as
 [REUSE](https://reuse.software/) has it: a new source file starts with
 the SPDX header, and a new deck is listed in [REUSE.toml](REUSE.toml)
 under the license it states. [docs/style.md](docs/style.md#licenses)
-says how, and `npm run check` and CI check it.
+says how. `npm run lint:reuse` checks it (it needs the
+[reuse](https://reuse.software/) tool: `pipx run reuse lint`, or
+`uv run --no-project --with reuse reuse lint`, without installing it),
+and so does CI; `npm run check` checks only that each deck is listed
+under the license it states.
 
 ## Language
 
 English is the authoritative language of the code, the docs and the
 discussions. Write in plain English with American spelling ("license",
-"color", "organize"); `npm run lint:spelling` checks the Markdown and the
-English messages for it ([docs/style.md](docs/style.md#language)). A
+"color", "organize"); `npm run lint:spelling`, part of `npm run check`,
+checks the Markdown and the English messages for it
+([docs/style.md](docs/style.md#language)). A
 translation of the app follows the English messages in
 `packages/ui/src/i18n/en.json`.

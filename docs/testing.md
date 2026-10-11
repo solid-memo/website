@@ -17,13 +17,13 @@ package's own tests cover its own code — `npm test` fails below that.
 
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
-npm run check     # Biome's lint, then the same, plus typecheck, drift, Turtle formatting, boundaries, the repository's own checks (below)
+npm run check     # Biome's lint, markdownlint and cspell, then the same, plus typecheck, drift, Turtle formatting, boundaries, the repository's own checks (below)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
-npm run lint:markdown      # markdownlint over the project's Markdown, as CI's docs job runs it
-npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as CI's docs job runs it
-npm run lint:reuse         # reuse lint: every file states its copyright and license, as CI's docs job checks (needs reuse)
+npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
+npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
+npm run lint:reuse         # reuse lint: every file states its copyright and license, as CI's docs job checks (needs reuse; not in npm run check)
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
 npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
@@ -373,7 +373,7 @@ twice. Its jobs, side by side:
 | `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | that each advisory server starts and meets the contract |
 | `journeys` | the user journeys ([User journeys](#user-journeys)) |
-| `docs` | the docs' Markdown and links, and `publiccode.yml` ([Documentation](#documentation)) |
+| `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
 | `ci-ok` | that every job above passed |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset
@@ -414,7 +414,9 @@ it should; keep them when changing the workflow.
 
 `npm run check` starts with `npm run lint`: [Biome](https://biomejs.dev/)
 fails on a TypeScript, JSON or CSS file it would format otherwise, or
-that breaks one of its lint rules ([style.md](style.md#formatting)). It
+that breaks one of its lint rules ([style.md](style.md#formatting)).
+Then `npm run lint:markdown` and `npm run lint:spelling` check the
+Markdown's style and spelling ([Documentation](#documentation)). It
 ends with checks of the repository as a whole, plain Node scripts in
 [scripts/](../scripts/):
 
@@ -434,13 +436,15 @@ ends with checks of the repository as a whole, plain Node scripts in
 
 ## Documentation
 
-CI's `docs` job checks the project's Markdown (`docs/`, the READMEs,
-`AGENTS.md`), and that every file is licensed:
+The project's Markdown (`docs/`, the READMEs, `AGENTS.md`) is checked
+for its style and spelling by `npm run check` (so in CI's `build` job),
+and for its links, with publiccode.yml and every file's license, by
+CI's `docs` job:
 
 - **Style**: [markdownlint](https://github.com/DavidAnson/markdownlint)'s
   rules, all of them but those [.markdownlint-cli2.jsonc](../.markdownlint-cli2.jsonc)
   turns off, each with its reason (line length, the table delimiter
-  rows' spacing, bare URLs). `npm run lint:markdown` runs it locally. A
+  rows' spacing, bare URLs). `npm run lint:markdown` runs it alone. A
   placeholder such as `<title>` goes in backticks, or a renderer takes
   it for HTML and drops it.
 - **Spelling**: [cspell](https://cspell.org/) checks the Markdown and the
@@ -452,7 +456,7 @@ CI's `docs` job checks the project's Markdown (`docs/`, the READMEs,
   would let through, each with its fix, and lists the real
   words it does not know: standards, names, other languages' examples.
   A word is added there only when it is spelled right.
-  `npm run lint:spelling` runs it locally.
+  `npm run lint:spelling` runs it alone.
 - **Links**: [lychee](https://lychee.cli.rs/), offline, checks that every
   link to a file or a heading in the repository resolves
   ([lychee.toml](../lychee.toml)). The web's addresses are checked
@@ -468,9 +472,12 @@ CI's `docs` job checks the project's Markdown (`docs/`, the READMEs,
   `reuse lint`) checks that every file in the repository states its
   copyright and license, in an SPDX header or in
   [REUSE.toml](../REUSE.toml), and that the text of every license used
-  is in [LICENSES/](../LICENSES/) ([style.md](style.md#licenses)). It
-  runs before `npm ci`, so that only the repository's own files are
-  there. `npm run lint:reuse` runs it locally, with reuse installed.
+  is in [LICENSES/](../LICENSES/) ([style.md](style.md#licenses)). The
+  job installs nothing, so only the repository's own files are there.
+  It is not part of `npm run check`, since reuse is a Python tool:
+  `npm run lint:reuse` runs it locally with reuse installed, or
+  `pipx run reuse lint` or `uv run --no-project --with reuse reuse lint`
+  without installing it.
 
 That every page is listed in the index is `npm run check`'s
 (`check:docs`, above).
