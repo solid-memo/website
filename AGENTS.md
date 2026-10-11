@@ -13,7 +13,9 @@ This block is written and re-added by `turbo` before repository-scoped commands 
 # Solid Memo
 
 This repository's docs are indexed in [docs/README.md](docs/README.md); start with
-[docs/architecture.md](docs/architecture.md).
+[docs/architecture.md](docs/architecture.md). How contributions are made
+(commit messages, one change per commit, pull requests) is in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 - **Done** means `npm run check` passes, and `npm run crosscheck` too when
   `ns/` or `decks/` changed (it needs `pip install -r scripts/requirements-ci.txt`).
