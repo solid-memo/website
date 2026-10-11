@@ -2,66 +2,64 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { applySm2, INITIAL_SM2_STATE, MIN_EASE_FACTOR, type Sm2State } from "./sm2";
 import type { ReviewQuality } from "./review";
 
-/** The worked examples in docs/srs.md, row by row: before, grade, after. Keep the two the same. */
-const WORKED_EXAMPLES: [Sm2State, ReviewQuality, Sm2State][] = [
-  [
-    { easeFactor: 2.5, intervalDays: 0, repetitions: 0 },
-    5,
-    { easeFactor: 2.6, intervalDays: 1, repetitions: 1 },
-  ],
-  [
-    { easeFactor: 2.5, intervalDays: 0, repetitions: 0 },
-    3,
-    { easeFactor: 2.36, intervalDays: 1, repetitions: 1 },
-  ],
-  [
-    { easeFactor: 2.6, intervalDays: 1, repetitions: 1 },
-    5,
-    { easeFactor: 2.7, intervalDays: 6, repetitions: 2 },
-  ],
-  [
-    { easeFactor: 2.5, intervalDays: 6, repetitions: 2 },
-    3,
-    { easeFactor: 2.36, intervalDays: 14, repetitions: 3 },
-  ],
-  [
-    { easeFactor: 2.5, intervalDays: 6, repetitions: 2 },
-    4,
-    { easeFactor: 2.5, intervalDays: 15, repetitions: 3 },
-  ],
-  [
-    { easeFactor: 2.5, intervalDays: 6, repetitions: 2 },
-    5,
-    { easeFactor: 2.6, intervalDays: 16, repetitions: 3 },
-  ],
-  [
-    { easeFactor: 2.0, intervalDays: 10, repetitions: 3 },
-    3,
-    { easeFactor: 1.86, intervalDays: 19, repetitions: 4 },
-  ],
-  [
-    { easeFactor: 1.3, intervalDays: 10, repetitions: 3 },
-    3,
-    { easeFactor: 1.3, intervalDays: 13, repetitions: 4 },
-  ],
-  [
-    { easeFactor: 2.2, intervalDays: 30, repetitions: 5 },
-    2,
-    { easeFactor: 2.2, intervalDays: 1, repetitions: 0 },
-  ],
-  [
-    { easeFactor: 2.2, intervalDays: 30, repetitions: 5 },
-    0,
-    { easeFactor: 2.2, intervalDays: 1, repetitions: 0 },
-  ],
-];
+/** docs/srs.md, whose worked examples these tests check. */
+const SRS_DOC = resolve(import.meta.dirname, "../../../docs/srs.md");
+
+/** "2.5, 0, 0 (new)" as a state. */
+function stateOf(cell: string): Sm2State {
+  const [easeFactor, intervalDays, repetitions] = cell
+    .replace("(new)", "")
+    .split(",")
+    .map((field) => Number(field.trim()));
+  return { easeFactor: easeFactor!, intervalDays: intervalDays!, repetitions: repetitions! };
+}
+
+/** The lines of the "Worked examples" table in docs/srs.md, header and separator included. */
+function workedExampleLines(): string[] {
+  const section = readFileSync(SRS_DOC, "utf8").split("### Worked examples\n")[1]!;
+  return section
+    .split(/^#/m)[0]!
+    .split("\n")
+    .filter((line) => line.startsWith("|"));
+}
+
+/**
+ * The table's rows, each the state before an answer, its grade and the
+ * state after: read from the page, so a change to the rules or to the
+ * table that leaves the two apart fails.
+ */
+function workedExamples(): [Sm2State, ReviewQuality, Sm2State][] {
+  return workedExampleLines()
+    .slice(2)
+    .map((line) => {
+      const [before, grade, after] = line.split("|").slice(1, 4);
+      return [stateOf(before!), Number(grade!.trim()) as ReviewQuality, stateOf(after!)];
+    });
+}
+
+describe("docs/srs.md's worked examples", () => {
+  it("are a table whose every row reads as a state, a grade and a state", () => {
+    expect(workedExampleLines()[0]).toBe(
+      "| Before: ease, interval, repetitions | Grade | After: ease, interval, repetitions | Why |",
+    );
+    const rows = workedExamples();
+    expect(rows.length).toBeGreaterThan(0);
+    for (const [before, grade, after] of rows) {
+      expect(
+        [...Object.values(before), grade, ...Object.values(after)].every(Number.isFinite),
+      ).toBe(true);
+    }
+  });
+});
 
 describe("applySm2", () => {
-  it.each(WORKED_EXAMPLES)(
+  it.each(workedExamples())(
     "gives the worked example's state after %o graded %i",
     (before, grade, after) => {
       const next = applySm2(before, grade);

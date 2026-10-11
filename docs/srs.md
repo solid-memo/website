@@ -81,8 +81,10 @@ Decisions fixed in code (and tests):
 ### Worked examples
 
 Each row is one answer: the state before it, the grade, and the state
-after it. [sm2.test.ts](../packages/domain/src/sm2.test.ts) checks
-exactly these rows, so a change to the rules shows up in both.
+after it. [sm2.test.ts](../packages/domain/src/sm2.test.ts) reads this
+table and checks that the code gives every row, so a change to the
+rules, or to a row, that leaves the two apart fails the tests. Keep its
+header and its three number columns as they are.
 
 | Before: ease, interval, repetitions | Grade | After: ease, interval, repetitions | Why |
 |---|---|---|---|
