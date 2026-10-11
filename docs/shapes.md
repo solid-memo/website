@@ -1,5 +1,11 @@
 # Shapes
 
+**In short:** a shape is a machine-readable description of what valid
+Solid Memo data looks like: which properties a thing has, and of what
+kind. There is one shape for each kind of data and each format
+version. The app uses them to check data, to generate code, and to
+tell an old format from a new one.
+
 What a valid Solid Memo subject looks like, version by version, as
 [SHACL](https://www.w3.org/TR/shacl/); and how those shapes drive the code. One shape file per class
 per format version under [`ns/shapes/`](../ns/shapes/), published with

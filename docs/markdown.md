@@ -1,5 +1,11 @@
 # Markdown
 
+**In short:** Markdown is a simple way to format text with plain
+characters, such as `**strong**` for strong emphasis or a dash at the
+start of a line for a list item. Cards and courses can be written in
+it. This page says which Markdown Solid Memo reads, which texts may
+use it, how each place shows it, and why showing it is always safe.
+
 How Solid Memo reads and shows text written in Markdown: the dialect,
 which texts may be in it, how each place in the app shows it, and why
 showing it is safe whatever a pod or library holds.

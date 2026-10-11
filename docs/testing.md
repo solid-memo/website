@@ -1,5 +1,11 @@
 # Testing
 
+**In short:** every change to Solid Memo is checked by automated tests
+before it is published. Small tests check each part of the code on its
+own, every line of it; larger ones run the app against real Solid
+servers and click through it in a real browser. This page says what
+each kind covers, how to run them, and how to read a failure.
+
 Unit tests with [Vitest](https://vitest.dev/) in every package, in node
 unless the package runs in the browser: `ui`, `web`, `studio`, `solid` and `browser`
 run in `happy-dom`, and the UI's tests use `@testing-library/preact`

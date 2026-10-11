@@ -1,5 +1,12 @@
 # Vocabulary
 
+**In short:** Solid Memo stores its data as linked data (RDF), where
+every kind of thing and every property is named by a web address.
+Where no existing standard has a term, as for a card's review
+schedule, Solid Memo defines its own. This page says where those terms
+are defined, how they are versioned, and how code is generated from
+them.
+
 Solid Memo's own RDF terms, where they are defined, how they are
 versioned and how the app's constants are produced from them. The
 namespace is `https://solid-memo.com/ns/vocab/v1.ttl#` — declared as

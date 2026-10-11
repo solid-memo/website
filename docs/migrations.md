@@ -1,5 +1,11 @@
 # Format versions and migrations
 
+**In short:** the way Solid Memo stores data changes as the app grows,
+and a Pod may hold data an older version wrote. Every stored item says
+which format version it is in. This page says how the app brings old
+data up to the current format, leaves data from a newer version alone,
+and updates a deck copied from the library to its newer release.
+
 How Solid Memo tells old data from new, and how it brings a pod up to
 the format the current app writes. The formats are the
 [shapes](shapes.md); the steps between them are the migration modules

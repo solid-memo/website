@@ -1,5 +1,12 @@
 # Spaced repetition (SM-2)
 
+**In short:** spaced repetition shows a card again just before you
+would forget it: soon after you learn it, then at longer and longer
+intervals. Solid Memo uses the SM-2 method to pick each card's next day
+from how well you remembered it. This page says how that schedule is
+worked out, how a day's study session is built, and where the cards
+stand.
+
 How Solid Memo schedules cards. Implemented entirely in the domain layer
 ([sm2.ts](../packages/domain/src/sm2.ts), [scheduling.ts](../packages/domain/src/scheduling.ts))
 as pure functions.

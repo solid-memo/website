@@ -1,5 +1,12 @@
 # Deck library
 
+**In short:** the deck library is the set of ready-made decks and
+courses anyone can copy into their own instance. They are files in
+this repository's `decks/` folder, published with the site and
+described in DCAT, a standard catalog format other tools can read.
+This page says how a deck version is written, checked and published,
+and how the app lists, imports and adds one from a link.
+
 Ready-made decks that any user can copy into their own instance. The
 library lives in this repository's [`decks/`](../decks/) folder and is
 published with the site, next to the app

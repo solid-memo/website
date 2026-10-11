@@ -1,5 +1,11 @@
 # Data model in the pod
 
+**In short:** Solid Memo keeps everything a learner makes and studies
+in their own Solid Pod, as linked data files in one folder, the
+instance. This page says which file holds what, how the app finds the
+files again after a login, and how it writes them without losing a
+change made on another device.
+
 Where Solid Memo stores data in a user's pod and how it finds it again.
 Implemented in `packages/solid/src/` (vocabulary in
 [vocab.ts](../packages/solid/src/vocab.ts), discovery in

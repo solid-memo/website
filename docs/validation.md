@@ -1,5 +1,10 @@
 # Validation
 
+**In short:** Solid Memo checks that the data it reads from a Pod, and
+every change it writes, has the form the app expects. This page says
+what is checked and when, what happens to data that does not fit, and
+how it can be repaired.
+
 Solid Memo checks the data it works on against its [shapes](shapes.md)
 and the [DCAT-AP profile](#profiles-dcat-ap-and-skos), in the browser:
 
