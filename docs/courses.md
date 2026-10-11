@@ -223,7 +223,11 @@ new type-index entries ([data-model.md](data-model.md#courses)):
 
 How each answer is graded, and when it is graded at all, is in
 [srs.md](srs.md#multiple-choice-answers-in-a-course). The screens and
-their routes are in [routing.md](routing.md).
+their routes are in [routing.md](routing.md). The chapter player is
+`ChapterPlayerScreen` and `ChapterPlayerContainer`, and the review between
+a chapter's theory and its questions is `ChapterReviewScreen` and
+`ChapterReviewContainer`, all in
+[`packages/ui/src/ui/`](../packages/ui/src/ui/).
 
 ## The course for newcomers
 

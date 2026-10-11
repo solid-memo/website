@@ -1,7 +1,15 @@
 # Docs
 
-One page per part of Solid Memo. Start with [architecture.md](architecture.md)
-and [testing.md](testing.md).
+One page per part of Solid Memo. New to the app? Read
+[user-guide.md](user-guide.md). Working on the code? Start with
+[architecture.md](architecture.md) and [testing.md](testing.md). A term
+you don't know is in [glossary.md](glossary.md).
+
+## Using the app
+
+- [user-guide.md](user-guide.md) — a walk through Solid Memo for a learner: signing in or trying it as a guest, adding a deck, studying, courses, statistics, and the settings.
+- [glossary.md](glossary.md) — the terms and abbreviations the docs use, each explained in plain words with a link.
+- [privacy.md](privacy.md) — where your data is stored, what stays in the browser, what the host and other servers see, no analytics, and the email address published in deck metadata.
 
 ## The code
 
@@ -10,6 +18,10 @@ and [testing.md](testing.md).
 - [vendor-code.md](vendor-code.md) — which third-party technology the app depends on, where each is confined, and what replacing one would cost.
 - [testing.md](testing.md) — unit tests at 100% coverage per package, the end-to-end tests against Solid servers in Docker, the user journeys in a browser (and how to debug and add one), and the commands.
 - [deployment.md](deployment.md) — the static build, deployed to GitHub Pages by CI, or published by hand to any web space.
+- [configuration.md](configuration.md) — the VITE_ settings a build reads (the app's name, the repository the footer links to, the Pod providers, the deck library), their defaults, how to set them, and what they do not reach.
+- [reuse.md](reuse.md) — running your own instance: fork, configure, build, host anywhere, make the deck library your own, the files to edit by hand, and the names that must stay because they are part of the data.
+- [style.md](style.md) — how the code, Turtle, docs and commit messages are written: formatting, TypeScript, naming, the Turtle house style, comments, plain English with American spelling, and English as the authoritative language.
+- [releasing.md](releasing.md) — how the app's versions are numbered (SemVer 0.x), what counts as breaking for data in pods, how a version is tagged by hand and the changelog kept, and how the app's version differs from those of the vocabulary, shapes and decks.
 
 ## The data
 
@@ -30,9 +42,15 @@ and [testing.md](testing.md).
 - [srs.md](srs.md) — how cards are scheduled (SM-2), as pure functions in the domain.
 - [routing.md](routing.md) — the URL as the view the user is looking at: bookmarkable, shareable, Back and Forward.
 - [i18n.md](i18n.md) — English, Swedish, Korean, German, Spanish and French: how the language is picked, and text in the user's languages.
+- [statistics.md](statistics.md) — the learner's own figures: the day's summary above the deck list, the statistics page and its charts, and a deck's figures, all worked out from the review log.
+- [browsing.md](browsing.md) — making a deck, looking through and editing its cards in the Browser, the card creators, and previewing a library deck before importing it.
 - [theme.md](theme.md) — light, dark, or as the browser says, and where the choice is kept.
 - [studio.md](studio.md) — Solid Memo Studio, the second app, in Solid Memo's page at `#/studio`: managing an instance's decks and cards in bulk, and writing decks and courses as drafts, checking, trying, comparing and publishing them, and listing the releases published; what it shares with Solid Memo, its workspace (layout, keys, palette, what the device keeps), its routes, and how it is built and served.
 
 ## The project
+
+- [objectives.md](objectives.md) — what Solid Memo is for and who it is for, what it is not for, and each principle with the check that enforces it.
+- [policy.md](policy.md) — no public policy applies; the outside rules the code follows (SM-2, CLDR plural rules, BCP 47, NFC, DCAT-AP) and the project's own rules, with the tests that check each.
+- [standards.md](standards.md) — every standard and specification used, with version, status, link and where it is used, and why the drafts and de facto ones do not get in the way of reuse.
 
 - [standard-for-public-code.md](standard-for-public-code.md) — how well Solid Memo meets the Standard for Public Code, what to decide, and a plan for the gaps.

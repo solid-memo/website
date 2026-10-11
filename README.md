@@ -9,7 +9,7 @@ Spaced-repetition flashcards that live in your own Solid Pod.
 
 The app, its vocabulary and shapes ([`ns/`](ns/)) and the ready-made
 decks ([`decks/`](decks/)) are published together at
-https://solid-memo.com/ ([docs/deployment.md](docs/deployment.md)).
+<https://solid-memo.com/> ([docs/deployment.md](docs/deployment.md)).
 
 ## About
 
@@ -35,6 +35,11 @@ It is for:
 - **developers** building on Solid, who can reuse its vocabulary, its
   shapes and its decks ([docs/vocab.md](docs/vocab.md),
   [docs/shapes.md](docs/shapes.md)).
+
+How to use it: [docs/user-guide.md](docs/user-guide.md). What it is
+for, and what it is not: [docs/objectives.md](docs/objectives.md). The
+same, for learners, authors, technologists and decision makers:
+[solid-memo.com/about](https://solid-memo.com/about/).
 
 To see what the app does without signing in, open the report of its
 [user journeys](https://solid-memo.com/journeys/): tests that use the
@@ -90,6 +95,7 @@ npm run test:pod  # the end-to-end tests, against Solid servers started in Docke
 ```
 
 How the code is laid out: [docs/architecture.md](docs/architecture.md);
+each package's own `README.md` says what it exports and may import;
 how it is tested: [docs/testing.md](docs/testing.md); how it is written:
 [docs/style.md](docs/style.md); everything else:
 [docs/](docs/README.md).
