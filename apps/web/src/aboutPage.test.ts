@@ -15,7 +15,7 @@ const repository = resolve(app, "../..");
 const read = (path: string) => readFileSync(resolve(app, path), "utf8");
 const html = read("public/about/index.html");
 
-const hrefs = [...html.matchAll(/<a\b[^>]*\bhref="([^"]*)"/g)].map(([, href]) => href!);
+const hrefs = [...html.matchAll(/<(?:a|link)\b[^>]*\bhref="([^"]*)"/g)].map(([, href]) => href!);
 
 /** Where a link relative to /about/ is served from: the site's page, public/, or the folders the build publishes. */
 function served(href: string): string {
@@ -67,7 +67,7 @@ describe("the About page", () => {
     expect(hrefs).toContain("https://github.com/solid-memo/website/issues");
   });
 
-  it("links only to what is there: its own sections, the site's files, the repository's documents and https pages", () => {
+  it("links only to what is there, its icons included: its own sections, the site's files, the repository's documents and https pages", () => {
     const ids = [...html.matchAll(/\bid="([^"]*)"/g)].map(([, id]) => id!);
     expect(new Set(ids).size).toBe(ids.length);
     for (const href of hrefs) {

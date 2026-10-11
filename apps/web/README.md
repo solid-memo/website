@@ -1,7 +1,7 @@
 # @solid-memo/web
 
-The site, https://solid-memo.com/: Solid Memo's one page, and the Vite
-build that publishes it together with the vocabulary and shapes
+The site, https://solid-memo.com/: the app's page, the About page, and
+the Vite build that publishes them together with the vocabulary and shapes
 (`ns/`), the deck library (`decks/`) and the vendored shapes
 ([deployment.md](../../docs/deployment.md)).
 
