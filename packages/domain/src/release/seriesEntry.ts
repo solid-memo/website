@@ -38,6 +38,7 @@ export interface OlderRelease {
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
+const FOAF_MBOX = "http://xmlns.com/foaf/0.1/mbox";
 
 /** The entry of a series of releases, sorted by version, the last one current. There is at least one. */
 export function seriesEntry(series: string, releases: readonly ReleaseModel[]): SeriesEntry {
@@ -65,9 +66,11 @@ export function seriesEntry(series: string, releases: readonly ReleaseModel[]): 
 
 /**
  * Whether the index keeps a statement of the current release: not of a
- * card, chapter, step or distractor, no rdfs:comment, and of its
- * activities only the type of the one that generated it, which DCAT-AP
- * asks for (the release itself carries the rest).
+ * card, chapter, step or distractor, no rdfs:comment, no foaf:mbox (the
+ * index names no one's email; the library's contact is a release's
+ * dcat:contactPoint), and of its activities only the type of the one
+ * that generated it, which DCAT-AP asks for (the release itself carries
+ * the rest).
  */
 export function keptInIndex(model: ReleaseModel): (subject: string, predicate: string) => boolean {
   const left = new Set(
@@ -77,6 +80,7 @@ export function keptInIndex(model: ReleaseModel): (subject: string, predicate: s
   return (subject, predicate) =>
     !left.has(subject) &&
     predicate !== RDFS_COMMENT &&
+    predicate !== FOAF_MBOX &&
     (!activities.has(subject) || (activities.get(subject) === true && predicate === RDF_TYPE));
 }
 

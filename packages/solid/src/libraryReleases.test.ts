@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getBoolean, getThingAll, getUrlAll, type SolidDataset, type Thing } from "@inrupt/solid-client";
+import { parseAuthor } from "@solid-memo/domain/author";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { getSolidDatasetLinear } from "./linearDataset";
@@ -99,8 +100,10 @@ describe.each(releases)("decks/%s", (path) => {
 it("reads each deck's current release on its own, as from a link, as the index describes it", async () => {
   for (const deck of await library.listLibraryDecks()) {
     const { releases, forNewcomers: _forNewcomers, sources, ...described } = deck;
-    const { sources: own, ...read } = await library.readRelease(deck.url);
-    expect(read, deck.url).toEqual({ ...described, releases: [releases.find((release) => release.url === deck.url)] });
+    const { sources: own, authors, ...read } = await library.readRelease(deck.url);
+    // The index names no one's email (docs/deck-library.md, Contact); a release published before the rule does.
+    const named = authors.map((author) => parseAuthor(author).name);
+    expect({ ...read, authors: named }, deck.url).toEqual({ ...described, releases: [releases.find((release) => release.url === deck.url)] });
     // The index describes a source as every release does, the release as it does.
     expect(own.map((source) => source.url), deck.url).toEqual(sources.map((source) => source.url));
   }

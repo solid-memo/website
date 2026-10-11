@@ -74,6 +74,11 @@ describe("keptInIndex", () => {
     expect(kept(`${RELEASE}#anton`, COMMENT)).toBe(false);
   });
 
+  it("names no one's email: it leaves out every foaf:mbox", () => {
+    expect(kept(`${RELEASE}#anton`, "http://xmlns.com/foaf/0.1/mbox")).toBe(false);
+    expect(kept(`${RELEASE}#contact`, "http://www.w3.org/2006/vcard/ns#hasURL")).toBe(true);
+  });
+
   it("leaves out the cards, chapters, steps and distractors", () => {
     for (const id of ["se", "ch-1", "s-1", "se-a"]) expect(kept(`${RELEASE}#${id}`, RDF_TYPE), id).toBe(false);
   });
