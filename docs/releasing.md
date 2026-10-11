@@ -89,7 +89,9 @@ The maintainer tags versions by hand; nothing tags them automatically.
 1. Check that CI passed on the commit of `main` to release.
 2. In CHANGELOG.md, rename `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`,
    add an empty `## [Unreleased]` above it, and update the links at the
-   bottom of the file.
+   bottom of the file. For 0.1.0, whose section is already written, set
+   its date in place of `Unreleased` and move into it anything listed
+   under `## [Unreleased]` since.
 3. Set the version in the root `package.json` (and the root entry of
    `package-lock.json`, with `npm install --package-lock-only`), and the
    version and date in [`CITATION.cff`](../CITATION.cff) (`version`,
@@ -97,11 +99,12 @@ The maintainer tags versions by hand; nothing tags them automatically.
    (`softwareVersion`, `releaseDate`).
 4. Commit that as `Release X.Y.Z`, through a pull request like any other
    change, and let CI pass.
-5. Tag the merged commit and push the tag:
+5. Tag the merged release commit, not whatever `main` has moved on to
+   since, and push the tag:
 
    ```sh
    git switch main && git pull
-   git tag -a vX.Y.Z -m "Solid Memo X.Y.Z"
+   git tag -a vX.Y.Z <release-commit> -m "Solid Memo X.Y.Z"
    git push origin vX.Y.Z
    ```
 

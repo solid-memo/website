@@ -11,7 +11,8 @@ this page.
   the end of every file; no spaces at the end of a line.
   [`.editorconfig`](../.editorconfig) tells editors so, and
   [`.gitattributes`](../.gitattributes) keeps git to it on every system.
-- Four spaces in Turtle and Python, as their own styles have it.
+- Four spaces in Turtle, as its house style has it ([below](#turtle)),
+  and in Python, as PEP 8 has it.
 - TypeScript: double quotes, a semicolon after every statement, a
   trailing comma in a literal or call that spans lines, and parentheses
   around an arrow function's parameters, even one: `(card) => card.id`.
@@ -20,7 +21,7 @@ this page.
 
 [Biome](https://biomejs.dev/) will enforce the TypeScript, JSON and CSS
 formatting with a line width of 100, as part of `npm run check`. Until
-it does, these rules are kept by hand and by review.
+it does, these rules are kept by hand.
 
 ## TypeScript
 

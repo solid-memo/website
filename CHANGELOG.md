@@ -66,9 +66,9 @@ tag. The date is set when the maintainer tags it.
 - **Six languages.** English, Swedish, Korean, German, Spanish and
   French, and deck and card text shown in the reader's languages
   ([docs/i18n.md](docs/i18n.md)).
-- **Accessibility.** Keyboard and screen-reader use, aimed at WCAG 2.2
-  AA; light and dark themes ([docs/theme.md](docs/theme.md)); every
-  view a URL that can be bookmarked and shared
+- **Accessibility.** Keyboard and screen-reader use; light and dark
+  themes ([docs/theme.md](docs/theme.md)); every view a URL that can
+  be bookmarked and shared
   ([docs/routing.md](docs/routing.md)).
 - **Open data.** The vocabulary and the shapes are published at
   `https://solid-memo.com/ns/`, so other apps can read and write the

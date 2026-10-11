@@ -49,7 +49,7 @@ description:
       - A guest mode to try the app before connecting a pod
       - A library of ready-made decks with open licenses and sources
       - Courses with lessons and multiple-choice questions
-      - Text and picture cards, written in Markdown
+      - Cards with text, pictures and Markdown
       - Study statistics and deck groups
       - Decks saved to and opened from Turtle and JSON-LD files
       - Solid Memo Studio for writing and publishing decks and courses
