@@ -55,19 +55,42 @@
   <meta property="og:image:alt" content="The Solid Memo wordmark beside &quot;Spaced-repetition flashcards in your own Solid pod.&quot;" />
   <meta property="og:locale" content="en" />
   <meta name="twitter:card" content="summary_large_image" />
+  <!-- The app, and the source code it is built from: codeRepository is a
+       property of SoftwareSourceCode, not of WebApplication, so the source
+       is a node of its own whose targetProduct is the app. inLanguage is
+       the languages the app speaks (docs/i18n.md): a new one goes here
+       and in src/build.test.ts, which checks these fields. -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Solid Memo",
-      "url": "https://solid-memo.com/",
-      "description": "Spaced-repetition flashcards that live in your own Solid pod.",
-      "applicationCategory": "EducationalApplication",
-      "operatingSystem": "Any",
-      "browserRequirements": "Requires JavaScript",
-      "image": "https://solid-memo.com/social-preview.png",
-      "isAccessibleForFree": true,
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://solid-memo.com/#app",
+          "name": "Solid Memo",
+          "url": "https://solid-memo.com/",
+          "description": "Spaced-repetition flashcards that live in your own Solid pod.",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "image": "https://solid-memo.com/social-preview.png",
+          "inLanguage": ["en", "sv", "ko", "de", "es", "fr"],
+          "license": "https://spdx.org/licenses/MIT",
+          "sameAs": ["https://github.com/solid-memo/website"],
+          "isAccessibleForFree": true,
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+        },
+        {
+          "@type": "SoftwareSourceCode",
+          "@id": "https://solid-memo.com/#source",
+          "name": "Solid Memo",
+          "codeRepository": "https://github.com/solid-memo/website",
+          "license": "https://spdx.org/licenses/MIT",
+          "programmingLanguage": "TypeScript",
+          "inLanguage": "en",
+          "targetProduct": { "@id": "https://solid-memo.com/#app" }
+        }
+      ]
     }
   </script>
 </head>

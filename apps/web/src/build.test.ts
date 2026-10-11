@@ -124,3 +124,28 @@ describe("the page's Content Security Policy", () => {
     expect(policy().get("form-action")).toEqual(["'none'"]);
   });
 });
+
+describe("the page's structured data", () => {
+  type Node = Record<string, unknown>;
+  const graph = () => {
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+    expect(blocks).toHaveLength(1);
+    return (JSON.parse(blocks[0]![1]!) as { "@graph": Node[] })["@graph"];
+  };
+  const nodeOfType = (type: string) => graph().find((node) => node["@type"] === type)!;
+
+  it("names the app's languages, its license and its source code", () => {
+    const app = nodeOfType("WebApplication");
+    expect([...(app.inLanguage as string[])].sort()).toEqual(["de", "en", "es", "fr", "ko", "sv"]);
+    expect(app.license).toBe("https://spdx.org/licenses/MIT");
+    expect(app.sameAs).toEqual(["https://github.com/solid-memo/website"]);
+  });
+
+  it("gives the source code its repository, as the app's own node", () => {
+    const app = nodeOfType("WebApplication");
+    const source = nodeOfType("SoftwareSourceCode");
+    expect(source.codeRepository).toBe("https://github.com/solid-memo/website");
+    expect(source.license).toBe(app.license);
+    expect(source.targetProduct).toEqual({ "@id": app["@id"] });
+  });
+});
