@@ -309,7 +309,7 @@ describe("ReleaseMetadataScreen", () => {
 
   it("asks how the release uses a source, in a new source's form and in one being edited", () => {
     const onEdit = renderScreen();
-    const unused = "Tick at least one: the release is derived from it, or this version's making used it.";
+    const unused = "Check at least one: the release is derived from it, or this version's making used it.";
     const add = screen.getByRole("group", { name: "New source" });
     fireEvent.input(within(add).getByLabelText("Address"), { target: { value: "https://new.example/" } });
     fireEvent.click(within(add).getByRole("checkbox", { name: "The release is derived from it" }));

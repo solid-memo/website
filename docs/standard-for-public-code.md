@@ -5,7 +5,7 @@ How well Solid Memo meets the [Standard for Public Code](https://www.standardfor
 requirements, and each requirement is a MUST, a SHOULD or OPTIONAL.
 
 This is an assessment of `main` at `18eace6`, made on 2026-10-10, and a
-work list. It is not a promise. Tick items off as they land, and re-assess
+work list. It is not a promise. Check items off as they land, and re-assess
 when a phase is done.
 
 ## Summary

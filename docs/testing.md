@@ -293,7 +293,7 @@ run's server, and it is kept out of search engines (`robots.txt`).
 Since only a green run deploys, a failure on `main` is read from the
 run's artifact.
 
-A run by hand (Actions › CI › Run workflow) with *trace* ticked keeps
+A run by hand (Actions › CI › Run workflow) with *trace* checked keeps
 traces for passing journeys on any branch. Locally, `JOURNEY_TRACE=on
 npm run journeys` does the same, and `npm run journeys:report -w
 @solid-memo/e2e-journeys` serves the report so its traces open.

@@ -30,7 +30,7 @@ function renderContainer(useCases: UseCases, chosen: readonly string[] = []) {
 }
 
 describe("TransferContainer", () => {
-  it("exports the decks ticked one after another, saying which it is at", async () => {
+  it("exports the decks checked one after another, saying which it is at", async () => {
     let finish: () => void = () => undefined;
     const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, verbs]) });
     vi.mocked(useCases.exportDeckFile)

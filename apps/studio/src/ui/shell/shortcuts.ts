@@ -169,7 +169,7 @@ export function sectionRoute(section: Section, instanceUrl: string | null): Stud
   return section === "decks" ? { screen: "home", instanceUrl } : { screen: section, instanceUrl };
 }
 
-/** The inputs that are pressed or ticked, not typed in: their keys are the Studio's. */
+/** The inputs that are pressed or checked, not typed in: their keys are the Studio's. */
 const CHOSEN_INPUTS: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset"]);
 
 /** Whether a key goes to a field the user types or chooses in (a search, a filter, a text), which keeps it. */

@@ -28,7 +28,7 @@ const rivers: LibraryDeck = {
   sources: [],
 };
 
-/** A fresh memory key per render, so no test sees another's ticks. */
+/** A fresh memory key per render, so no test sees another's checked decks. */
 let renders = 0;
 
 function renderScreen(
@@ -169,12 +169,12 @@ describe("LibraryScreen", () => {
     expect(screen.getAllByText("Course")).toHaveLength(1);
   });
 
-  it("offers no tick for a course, which is started from its page, never imported", () => {
+  it("offers no checkbox for a course, which is started from its page, never imported", () => {
     const first = renderScreen();
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Capitals of the world" }));
     first.unmount();
-    // Ticked before the release became a course: still not imported.
+    // Checked before the release became a course: still not imported.
     const { props } = renderScreen({ decks: [capitals, { ...rivers, isCourse: true }], memoryKey: first.props.memoryKey });
     expect(screen.queryByRole("checkbox", { name: "Rivers" })).toBeNull();
     expect(screen.getByRole("link", { name: "Rivers" })).toBeInTheDocument();
@@ -183,7 +183,7 @@ describe("LibraryScreen", () => {
     expect(props.onImport).toHaveBeenCalledWith([capitals]);
   });
 
-  it("imports the ticked decks, counting them on the button", () => {
+  it("imports the checked decks, counting them on the button", () => {
     const { props } = renderScreen();
     expect(importButton()).toHaveTextContent("Import selected");
     expect(importButton()).toBeDisabled();
@@ -223,7 +223,7 @@ describe("LibraryScreen", () => {
     expect(props.onImport).not.toHaveBeenCalled();
   });
 
-  it("imports only the ticked decks the filters still show, and keeps the hidden ones ticked", () => {
+  it("imports only the checked decks the filters still show, and keeps the hidden ones checked", () => {
     const { props } = renderScreen();
     fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Capitals of the world" }));
@@ -283,7 +283,7 @@ describe("LibraryScreen", () => {
       expect(statusTexts()).toEqual(["No deck matches."]);
     });
 
-    it("says the count after a topic is ticked, and the whole library once it is cleared", () => {
+    it("says the count after a topic is checked, and the whole library once it is cleared", () => {
       vi.useFakeTimers();
       const geography = { ...capitals, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"] };
       renderScreen({ decks: [geography, rivers] });

@@ -148,7 +148,7 @@ export class Studio extends Screen {
     });
   }
 
-  /** Ticks the decks' checkboxes in Home's table. */
+  /** Checks the decks' checkboxes in Home's table. */
   async select(decks: string[]): Promise<void> {
     await this.intent(`Select ${decks.join(", ")}`, async () => {
       for (const deck of decks) {
@@ -199,7 +199,7 @@ export class Studio extends Screen {
 
   /**
    * Follows the selection's Export to import and export, the selected
-   * deck ticked there (the URL holds it), and saves it as a Turtle file
+   * deck checked there (the URL holds it), and saves it as a Turtle file
    * with the user's progress: the browser downloads it, named after the
    * deck. Where the file is kept.
    */
@@ -666,7 +666,7 @@ export class Studio extends Screen {
 
   /**
    * Moves the selected cards to another deck of the instance, with their
-   * progress (ticked to start with): the status line says how many went
+   * progress (checked to start with): the status line says how many went
    * where, and the workbench lists the fronts left.
    */
   async moveSelectedCards(deck: string, to: string, count: number, left: string[]): Promise<void> {

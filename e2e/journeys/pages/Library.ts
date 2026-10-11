@@ -18,7 +18,7 @@ export const BRIGHTEST_STARS: LibraryTitle = {
 
 /**
  * The deck library: ready-made decks, reached from Decks, each opened by
- * its name, ticked by its checkbox and imported with "Import N decks".
+ * its name, checked by its checkbox and imported with "Import N decks".
  */
 export class Library extends Screen {
   get heading(): Locator {
@@ -57,9 +57,9 @@ export class Library extends Screen {
     });
   }
 
-  /** Ticks a deck; the import button then counts it. */
+  /** Checks a deck; the import button then counts it. */
   async select(title: string): Promise<void> {
-    await this.intent(`Tick ${title}`, async () => {
+    await this.intent(`Check ${title}`, async () => {
       const box = this.page.getByRole("checkbox", { name: title, exact: true });
       await box.check();
       await expect(box).toBeChecked();
@@ -67,7 +67,7 @@ export class Library extends Screen {
   }
 
   /**
-   * "Import N decks": imports the ticked decks, which must be `titles`
+   * "Import N decks": imports the checked decks, which must be `titles`
    * exactly; the app goes back to Decks, where each now is.
    */
   async importSelected(titles: string[]): Promise<void> {

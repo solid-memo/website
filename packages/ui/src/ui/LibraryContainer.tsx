@@ -45,7 +45,7 @@ export function LibraryContainer({
       }
     },
     onSuccess: async () => {
-      // The ticked decks are in now; the next visit starts with none.
+      // The checked decks are in now; the next visit starts with none.
       forgetLibrarySelection(memoryKey);
       await queryClient.invalidateQueries({
         queryKey: ["decks", instance.url],

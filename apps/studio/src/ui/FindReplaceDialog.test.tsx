@@ -91,7 +91,7 @@ describe("FindReplaceDialog", () => {
     expect(onConfirm.mock.calls[0]![1].save.map((card: { id: string }) => card.id)).toEqual(["kitten"]);
   });
 
-  it("looks only in the fields ticked, and says when no card has the text", () => {
+  it("looks only in the fields checked, and says when no card has the text", () => {
     renderDialog();
     type("Find", "cat");
     type("Replace with", "dog");

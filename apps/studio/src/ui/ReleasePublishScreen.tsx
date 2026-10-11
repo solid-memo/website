@@ -34,7 +34,7 @@ interface Action<T> {
  *
  * - **Publish to my Pod**, unless it is a guest's (whose pod is this
  *   browser's alone): in a folder, the instance's `releases/` unless the
- *   user types another, at `<folder><name>/v<N>.ttl`. The user ticks that
+ *   user types another, at `<folder><name>/v<N>.ttl`. The user checks that
  *   the release will be public and can never be changed, first. The
  *   release check's errors are counted, with a link to it; publishing
  *   checks again, the shapes too, and an error stops it.

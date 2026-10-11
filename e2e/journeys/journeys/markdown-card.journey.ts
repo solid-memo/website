@@ -3,8 +3,8 @@ import { logInAndCreateInstance } from "../flows/logIn.ts";
 
 /**
  * A card written in Markdown keeps its line breaks through the pod: added
- * with "Format with Markdown" ticked and an indented code block on its
- * front, opened again with the box ticked and the front as typed, edited
+ * with "Format with Markdown" checked and an indented code block on its
+ * front, opened again with the box checked and the front as typed, edited
  * to a fenced block of two lines, saved, and read back from the pod on a
  * reload of the app, the preview showing the code each time
  * (docs/markdown.md#writing-markdown-in-the-app).

@@ -562,9 +562,9 @@ flowchart LR
 - The copy is written in this app's own format, whatever the release
   said. A release or card in a *newer* format than the app writes is
   refused at import rather than silently stripped.
-- Several decks can be ticked and imported at once, one at a time; a
+- Several decks can be checked and imported at once, one at a time; a
   failure part-way leaves the earlier ones imported and reports the error.
-- A course is started rather than imported (the list offers no tick for
+- A course is started rather than imported (the list offers no checkbox for
   it, only its page): its copy starts with no
   cards, and a card joins it when its question is answered
   ([courses.md](courses.md)).

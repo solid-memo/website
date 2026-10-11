@@ -10,6 +10,8 @@ files:
   - "**/*.md"
   - packages/ui/src/i18n/en.json
 useGitignore: true
+# .github/ holds Markdown too (the pull request template).
+enableGlobDot: true
 ignorePaths:
   - "**/node_modules/**"
   - "**/coverage/**"
@@ -64,6 +66,9 @@ flagWords:
   - programme->program
   - spelt->spelled
   - storey->story
+  - ticked->checked
+  - untick->uncheck
+  - unticked->unchecked
   - towards->toward
   - whilst->while
 # Real words cspell's dictionaries lack: standards, vocabularies and

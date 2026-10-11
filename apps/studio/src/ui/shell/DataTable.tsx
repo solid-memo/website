@@ -36,9 +36,9 @@ export interface TableSelection<R> extends RowSelection {
   rowLabel: (row: R) => string;
   /** Whether a row has a checkbox; every row has when absent. */
   offered?: (row: R) => boolean;
-  /** Whether a row's checkbox may be ticked now; it is disabled, and the row not selected, when not. */
+  /** Whether a row's checkbox may be checked now; it is disabled, and the row not selected, when not. */
   enabled?: (row: R) => boolean;
-  /** No checkbox may be ticked now (while the selected rows are acted on). */
+  /** No checkbox may be checked now (while the selected rows are acted on). */
   disabled?: boolean;
 }
 
@@ -62,7 +62,7 @@ export const HiddenColumns = createContext<HiddenColumns | null>(null);
  * With `select`, each row has a checkbox (each it `offered`, disabled
  * while it is not `enabled`), and the header one that selects every row
  * shown that can be; a click with Shift held selects, or not, every row
- * from the one ticked last, passing over those that cannot be. The rows are moved between,
+ * from the one checked last, passing over those that cannot be. The rows are moved between,
  * selected and opened from the keyboard (useRowKeys): the cursor's row
  * is marked, as is each row selected, and the row shown beside the
  * table (`current`, `aria-current`), j and k showing another, from
@@ -126,7 +126,7 @@ export function DataTable<R>({
   const columnsHidden = useHiddenColumns(columnsOf);
   const shown = visibleColumns(columns, columnsHidden.hidden);
   const rowOf = new Map(rows.map((row, at) => [keys[at]!, row]));
-  // A row whose checkbox may be ticked now.
+  // A row whose checkbox may be checked now.
   const choosable = (row: R) => select !== undefined && !select.disabled && (select.offered?.(row) ?? true) && (select.enabled?.(row) ?? true);
   const allowed = (key: string) => choosable(rowOf.get(key)!);
   const choosableKeys = keys.filter(allowed);

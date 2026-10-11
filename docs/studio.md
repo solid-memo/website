@@ -167,7 +167,7 @@ It takes the whole window, and the window does not scroll:
 ([`shell/ContextTabs.tsx`](../apps/studio/src/ui/shell/ContextTabs.tsx),
 a navigation named Deck): Cards (a card in the inspector among them),
 Schedule, Health, About, and Export, which opens import and export with
-the deck ticked. A draft's screens have the draft's (named Draft):
+the deck checked. A draft's screens have the draft's (named Draft):
 Overview (its chapters and steps under it), Cards (its questions under
 them), Check, which counts the problems the release check finds ("Check
 3", heard as "Check 3 problems"), Preview, Trial, Changes (only for a
@@ -478,7 +478,7 @@ dock. A screen's:
 | --- | --- | --- |
 | [Drafts](#drafts) | New draft | goes to the new draft's form, while a draft can be made |
 | [Health](#health), an instance's or a deck's | Check again | checks again, while it is not checking |
-| [Import and export](#import-and-export) | Export *n* decks | exports the decks ticked, as the form's button does, while some are and none is being exported |
+| [Import and export](#import-and-export) | Export *n* decks | exports the decks checked, as the form's button does, while some are and none is being exported |
 
 ## Routes
 
@@ -501,7 +501,7 @@ others.
 | `#/studio/instance?instance=…` | the instance's name and its catalog ([below](#the-instance)). |
 | `#/studio/health?instance=…[&deck=…]` | everything wrong with the instance, or with one of its decks ([below](#health)). |
 | `#/studio/library?instance=…` | the instance's copies of library releases, the newer releases and what upgrading would change ([below](#library-copies)). |
-| `#/studio/transfer?instance=…[&deck=…&deck=…]` | import and export: the instance's decks to save as files, those of each `deck` ticked, and a file to make a deck of ([below](#import-and-export)). |
+| `#/studio/transfer?instance=…[&deck=…&deck=…]` | import and export: the instance's decks to save as files, those of each `deck` checked, and a file to make a deck of ([below](#import-and-export)). |
 | `#/studio/drafts?instance=…` | the instance's drafts of releases, and a new one to start ([below](#drafts)). |
 | `#/studio/draft?draft=…[&field=…]` | a draft's overview: what the release says of itself and, for a course, its outline ([below](#a-drafts-overview)). `draft` is the draft's release document, which names the instance. |
 | `#/studio/chapter?draft=…&chapter=…[&field=…]` | a chapter of a course draft, by its id ([below](#a-chapter)). |
@@ -532,7 +532,7 @@ not have is left out.
 Like Solid Memo's fallbacks, these replace the history entry.
 
 Changing Home's filter, sort or view, the deck beside its table, the
-workbench's query, the inspector's tab, the decks ticked to export, or
+workbench's query, the inspector's tab, the decks checked to export, or
 the view of a draft's cards, replaces the history entry: it is the
 same screen, looked at another way, so Back leaves it. So does going
 from card to card beside the deck's cards (`j` and `k`, Previous and
@@ -670,7 +670,7 @@ it is shown again):
   preferences again;
 - **given a direction**;
 - **exported**: Export opens [import and export](#import-and-export)
-  with them ticked;
+  with them checked;
 - **deleted**, with their cards, once the user confirms a question that
   names each deck (a ConfirmDialog).
 
@@ -748,7 +748,7 @@ The table is the Studio's `DataTable`
 its header row and its first column (the checkboxes and the fronts)
 stay in sight as it scrolls. Cards are selected by their checkbox, or
 all those on the page at once; a click with Shift held selects, or
-not, every card from the one ticked last. The selection stays while
+not, every card from the one checked last. The selection stays while
 the view changes, and the selection's bar under the table counts it
 ([Layout](#layout)). The keys say so, quietly, under the bar: **j** and **k** move the cursor between the rows (the focus
 goes to the row's front), **x** selects the row, **Shift+J** and
@@ -784,7 +784,7 @@ it is read, the cards show without their lapses, and a query that needs
 them (`state=leech`, `sort=lapses`) waits. When it cannot be read, the
 line says so, and such a query shows why. The deck's tabs go to its
 [schedule](#a-decks-schedule), its [health](#health) and its export
-([import and export](#import-and-export), the deck ticked).
+([import and export](#import-and-export), the deck checked).
 
 A card opens in the [card inspector](#card-inspector): on a screen
 wider than 64rem beside the workbench, which stays as it is, its query,
@@ -815,7 +815,7 @@ be changed, the bar has Clear selection alone. The edits are:
 - **Find and replace**
   ([`FindReplaceDialog`](../apps/studio/src/ui/FindReplaceDialog.tsx)):
   text as written (Markdown as its source), never a pattern. It looks in
-  the fields ticked (the front, the back, the notes, the label, the wrong
+  the fields checked (the front, the back, the notes, the label, the wrong
   options and their notes), in one language or all, matching case and
   whole words when asked. A preview lists every text it changes, before
   and after, and every card it leaves as it is, and why. Nothing is
@@ -1037,7 +1037,7 @@ end-to-end tests hold both against real servers
 **Move to deck…** and **Copy to deck…** open a form
 ([`TransferCardsDialog`](../apps/studio/src/ui/TransferCardsDialog.tsx)).
 It offers the instance's other decks, and **Keep their progress**,
-ticked to start with. It says what becomes of the cards' history. A
+checked to start with. It says what becomes of the cards' history. A
 moved card leaves the selection.
 
 The domain plans the transfer
@@ -1345,8 +1345,8 @@ JSON-LD, one deck to a file, as
 [data-model.md](data-model.md#decks-as-files) describes it.
 
 **Export** lists the instance's decks, as they are arranged. The decks
-ticked are in the URL, so Home's bulk Export and a deck's Export tab
-open the screen with them ticked. The user picks the format and
+checked are in the URL, so Home's bulk Export and a deck's Export tab
+open the screen with them checked. The user picks the format and
 whether their progress goes too: the cards' review states and a
 course's completed chapters. **Export** saves each deck as a file of
 its own, named after its title (`capitals.ttl`), one after another;
@@ -1367,7 +1367,7 @@ are brought up to date, and how many cannot be read and are left out.
 A file in a newer format than the app reads is refused, as is one
 without exactly one deck, or one that does not parse. **Import into**
 the instance (`importDeckFile`) makes a new deck of it, with its
-progress when the file has some and the user leaves it ticked. Its
+progress when the file has some and the user leaves it checked. Its
 cards document goes first, only if none is at its URL yet, then its
 review states, then its entry in the catalog, so the deck shows only
 once it is whole. One left behind by an import cut off makes the deck
@@ -2035,7 +2035,7 @@ releases it, two ways.
   [releasePlace.ts](../packages/domain/src/release/releasePlace.ts)): the
   draft's name and version, as the library names its releases. The
   screen shows the address before anything is written.
-- **The user's word.** The user ticks that the release will be public:
+- **The user's word.** The user checks that the release will be public:
   anyone with its address can read it, and once published it is never
   changed or taken back here. Publishing waits for that, for the
   changes typed above to be saved, and for the catalog to be writable

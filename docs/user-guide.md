@@ -146,7 +146,7 @@ front, each on its own schedule.
   remove one.
 - **Add card** opens a form for the front and the back: text, a
   picture, or both, and optional notes. It stays open after each card,
-  so you can add many in a row. Tick "Format with Markdown" for code,
+  so you can add many in a row. Check "Format with Markdown" for code,
   lists or tables ([markdown.md](markdown.md#writing-markdown-in-the-app)).
 
 All of this is described in [browsing.md](browsing.md).
@@ -161,7 +161,7 @@ description or keyword, or narrow the list to topics.
   license and sources. From there, **Browse cards** lists its cards.
 - **Preview** shows its cards at random, to try before you take it.
   Nothing is recorded.
-- Tick several decks and press **Import**, or import one from its own
+- Check several decks and press **Import**, or import one from its own
   page. The copy is yours: edit it as you like. A deck you have already
   imported is marked so.
 - **Add from a link** adds a deck or a course that someone published in

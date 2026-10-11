@@ -1,6 +1,6 @@
 <!-- markdownlint-disable-file MD041 -->
 <!--
-Thanks for contributing. See CONTRIBUTING.md. Tick what applies, and say
+Thanks for contributing. See CONTRIBUTING.md. Check what applies, and say
 "n/a" beside what does not. A security fix goes through a private report
 first (SECURITY.md).
 -->

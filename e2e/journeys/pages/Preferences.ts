@@ -54,7 +54,7 @@ export class Preferences extends Screen {
     });
   }
 
-  /** Ticks or clears Developer mode; leaves it be when it already is so. */
+  /** Checks or clears Developer mode; leaves it be when it already is so. */
   async setDeveloperMode(on: boolean): Promise<void> {
     await this.intent(`Turn developer mode ${on ? "on" : "off"}`, async () => {
       await this.developerMode.setChecked(on);

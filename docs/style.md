@@ -122,8 +122,9 @@ their source.
   over jargon. A term a newcomer may not know (pod, WebID, SHACL) is
   explained or linked the first time a page uses it.
 - **American spelling** is the one standard: license, color, organize,
-  catalog, behavior, toward, canceled, learned. It holds for the docs,
-  the comments, the English messages and the test titles alike, and
+  catalog, behavior, toward, canceled, learned; a box is checked, not
+  given a tick. It holds for the docs, the comments, the English
+  messages and the test titles alike, and
   `npm run lint:spelling` ([cspell](https://cspell.org/), in CI's docs
   job) checks the Markdown and `en.json` for it
   ([testing.md](testing.md#documentation)). What is not ours to respell

@@ -548,7 +548,7 @@ describe("StudioWorkspace", () => {
     expect(screen.queryByRole("button", { name: /Switch instance/ })).toBeNull();
   });
 
-  it("opens import and export from the sidebar, the decks ticked in the URL, and Home's selected decks export them", async () => {
+  it("opens import and export from the sidebar, the decks checked in the URL, and Home's selected decks export them", async () => {
     window.history.replaceState(null, "", home(instanceA.url));
     const imported = makeDeck("deck-3", { en: "Capitals" });
     renderWorkspace(

@@ -39,7 +39,7 @@ export class CardEditor extends Screen {
   }
 
   /**
-   * The card is in Markdown: the box ticked, the front a textarea holding
+   * The card is in Markdown: the box checked, the front a textarea holding
    * `front` exactly, its line breaks and indentation kept, and the
    * preview, open on a wide screen, showing `code` as a code block.
    */

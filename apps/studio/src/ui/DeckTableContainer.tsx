@@ -86,7 +86,7 @@ export function DeckTableContainer({
   healthHref: (deck?: Deck) => string;
   /** The instance's copies of library releases, where a copy is upgraded. */
   libraryHref: string;
-  /** Import and export, these decks ticked to export. */
+  /** Import and export, these decks checked to export. */
   transferHref: (decks: readonly Deck[]) => string;
   /** What a deck says of itself, in the Studio. */
   deckHref: (deck: Deck) => string;

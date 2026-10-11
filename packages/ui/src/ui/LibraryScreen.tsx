@@ -6,7 +6,7 @@ import { useI18n, type I18n, type ErrorText } from "./i18n";
 import { ReaderText } from "./ReaderText";
 import { forget, useRemembered } from "./remembered";
 
-/** "Import selected" until something is ticked, then the count. */
+/** "Import selected" until something is checked, then the count. */
 function importLabel(t: I18n["t"], count: number): string {
   if (count === 0) return t("library.importSelected");
   return t("library.importDecks", { count });
@@ -16,7 +16,7 @@ function importLabel(t: I18n["t"], count: number): string {
 const ANNOUNCE_DELAY_MS = 500;
 
 /**
- * Forgets the decks ticked on the library under `memoryKey`, once they
+ * Forgets the decks checked on the library under `memoryKey`, once they
  * are imported; its filters are kept.
  */
 export function forgetLibrarySelection(memoryKey: string): void {
@@ -25,7 +25,7 @@ export function forgetLibrarySelection(memoryKey: string): void {
 
 /**
  * The deck library: ready-made decks to copy into the current instance.
- * Any number can be ticked and imported in one go. The list can be
+ * Any number can be checked and imported in one go. The list can be
  * narrowed to topics (checkboxes, from Solid Memo's topics scheme) and
  * by a search of names, descriptions and keywords, in every language
  * (filterLibraryDecks). A row says only the
@@ -36,10 +36,10 @@ export function forgetLibrarySelection(memoryKey: string): void {
  * (`importUrlHref`).
  *
  * The filters sit outside the import form, so Enter in the search field
- * never imports, and only the ticked decks still shown are imported. A
+ * never imports, and only the checked decks still shown are imported. A
  * hidden status line says the result count once the filters settle.
  *
- * The ticks and filters are remembered under `memoryKey`, so a look at a
+ * The checked decks and filters are remembered under `memoryKey`, so a look at a
  * deck's page or preview and back finds the list as it was left.
  */
 export function LibraryScreen({
@@ -54,7 +54,7 @@ export function LibraryScreen({
   onImport,
 }: {
   decks: LibraryDeck[];
-  /** Where the ticks and filters are kept between visits. */
+  /** Where the checked decks and filters are kept between visits. */
   memoryKey: string;
   /** URL of a library deck's page; its name links there. */
   deckHref: (deck: LibraryDeck) => string;
@@ -74,7 +74,7 @@ export function LibraryScreen({
   const [topics, setTopics] = useRemembered<string[]>(`${memoryKey}:topics`, []);
   const [query, setQuery] = useRemembered(`${memoryKey}:query`, "");
   const shown = filterLibraryDecks(decks, { topics, query });
-  // A deck the filters hide stays ticked for when it shows again, but is
+  // A deck the filters hide stays checked for when it shows again, but is
   // not imported: the import never includes what the user cannot see. A
   // course is never imported: it is started from its page, and its cards
   // join the deck as the learner answers them (docs/courses.md).
@@ -195,7 +195,7 @@ export function LibraryScreen({
 }
 
 /**
- * One deck of the library's list (LibraryScreen): a box to tick it (a
+ * One deck of the library's list (LibraryScreen): a box to check it (a
  * course has none, being started from its page), its name, linking to
  * its page, its size, that it is a course or already imported, and its
  * Preview button. The Studio shows a draft's row as learners will see
@@ -222,7 +222,7 @@ export function LibraryDeckRow({
   return (
     <>
       {/* A 44px target above the row's link, so a near miss
-          ticks the deck instead of leaving the screen. A course
+          checks the deck instead of leaving the screen. A course
           has none, only its place: it is started from its page. */}
       {deck.isCourse === true ? (
         <span class="library-pick" aria-hidden="true" />

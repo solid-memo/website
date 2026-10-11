@@ -642,7 +642,7 @@
       "one": "{shown} of {count} deck",
       "other": "{shown} of {count} decks"
     },
-    "intro": "Ready-made decks. Open one to read about it, or tick several and import them into this instance as your own copies.",
+    "intro": "Ready-made decks. Open one to read about it, or check several and import them into this instance as your own copies.",
     "empty": "The library has no decks yet.",
     "topics": "Topics",
     "search": "Search",
@@ -2491,7 +2491,7 @@
         "notFrontToBack": "A course is studied front to back.",
         "carriedActivity": "How an earlier release was made is not rewritten.",
         "noAuthors": "Name an author first: the attribution names the release's authors.",
-        "unusedSource": "A source is one the release is derived from or its making used: tick at least one."
+        "unusedSource": "A source is one the release is derived from or its making used: check at least one."
       }
     },
     "check": {
@@ -2771,7 +2771,7 @@
       "addSource": "Add the source",
       "sourceInvalid": "Give the source's web address, starting with https:// or http://.",
       "sourceExists": "The release names this source already.",
-      "sourceUnused": "Tick at least one: the release is derived from it, or this version's making used it.",
+      "sourceUnused": "Check at least one: the release is derived from it, or this version's making used it.",
       "licenseInvalid": "Give the license's web address, starting with https:// or http://, or leave it empty.",
       "checks": "Checks",
       "checksHint": "Checks the release had, by machine (the validators, the release check) or by AI. Each is recorded as not a human review: the Studio records no human review.",

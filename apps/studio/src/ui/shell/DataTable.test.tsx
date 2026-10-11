@@ -150,14 +150,14 @@ describe("DataTable", () => {
     expect(selected()).toEqual(["Mercury", "Venus", "Earth", "Mars"]);
     fireEvent.click(all);
     expect(selected()).toEqual([]);
-    // With nothing ticked before, Shift selects the row alone.
+    // With nothing checked before, Shift selects the row alone.
     render(<Harness />, { container: document.body.appendChild(document.createElement("div")) });
     const second = screen.getAllByRole("checkbox", { name: "Select Earth" })[1]!;
     fireEvent.click(second, { shiftKey: true });
     expect(second).toBeChecked();
   });
 
-  it("offers checkboxes only on the rows that have them, disables those that cannot be ticked now, and passes over both", () => {
+  it("offers checkboxes only on the rows that have them, disables those that cannot be checked now, and passes over both", () => {
     render(<Harness offered={(planet) => planet.name !== "Venus"} enabled={(planet) => planet.name !== "Earth"} />);
     expect(screen.queryByRole("checkbox", { name: "Select Venus" })).toBeNull();
     expect(box("Earth")).toBeDisabled();
@@ -170,13 +170,13 @@ describe("DataTable", () => {
     expect(all).toBeChecked();
     fireEvent.click(all);
     expect(box("Mercury")).not.toBeChecked();
-    // From the keyboard too: x on a row that cannot be ticked does nothing.
+    // From the keyboard too: x on a row that cannot be checked does nothing.
     act(() => box("Earth").focus());
     key("x");
     expect(box("Earth")).not.toBeChecked();
   });
 
-  it("has no checkbox for every row when no row has one, and disables it when none can be ticked", () => {
+  it("has no checkbox for every row when no row has one, and disables it when none can be checked", () => {
     render(<Harness offered={() => false} />);
     expect(screen.queryByRole("checkbox")).toBeNull();
     render(<Harness enabled={() => false} />, { container: document.body.appendChild(document.createElement("div")) });

@@ -18,7 +18,7 @@ export function toggled(selection: Selection, keys: readonly string[], on: boole
  * The selection with every row from one to another (`from` and `to`, by
  * their place among `keys`, the rows in the table's order, either way
  * round, both in) selected (`on`), or not: a range, as a click with
- * Shift held makes from the row ticked last.
+ * Shift held makes from the row checked last.
  */
 export function rangeToggled(selection: Selection, keys: readonly string[], from: number, to: number, on: boolean): Selection {
   return toggled(selection, keys.slice(Math.min(from, to), Math.max(from, to) + 1), on);

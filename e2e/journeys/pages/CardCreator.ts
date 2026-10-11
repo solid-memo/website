@@ -29,7 +29,7 @@ export class CardCreator extends Screen {
   }
 
   /**
-   * Adds a card written in Markdown: "Format with Markdown" ticked, the
+   * Adds a card written in Markdown: "Format with Markdown" checked, the
    * sides typed in their textareas, line breaks and all, and the code
    * block the front holds seen in the preview (open, on a wide screen)
    * before adding. The next card starts as plain text again.

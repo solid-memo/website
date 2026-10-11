@@ -20,7 +20,7 @@ export interface ExportRun {
 
 /**
  * Decks to and from files (docs/studio.md#import-and-export). Export:
- * the instance's decks, the ones `chosen` ticked (the URL holds them),
+ * the instance's decks, the ones `chosen` checked (the URL holds them),
  * saved each as a file of its own, in the format picked, with the
  * user's progress when asked. Import: a file the user picks, what it
  * holds (its deck, its cards, any progress, and what of it was brought
@@ -53,7 +53,7 @@ export function TransferScreen({
   instance: Instance;
   /** The instance's decks, in the order the user arranged them. */
   decks: readonly Deck[];
-  /** The URLs of the decks ticked to export. */
+  /** The URLs of the decks checked to export. */
   chosen: readonly string[];
   onChoose: (urls: readonly string[]) => void;
   /** The deck being exported; null when none is. */

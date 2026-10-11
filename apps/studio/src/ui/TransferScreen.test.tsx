@@ -84,7 +84,7 @@ describe("TransferScreen", () => {
     expect(log.mock.calls).toEqual([[expect.stringMatching(/^Handed 2 decks/)], ["Imported Kanji N5."]]);
   });
 
-  it("ticks the decks to export, and exports them in the format chosen, with progress when asked", () => {
+  it("checks the decks to export, and exports them in the format chosen, with progress when asked", () => {
     const props = renderScreen({ chosen: [verbs.url] });
     expect(screen.getByRole("heading", { name: "Import and export decks of Deck set A" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "Kanji N5" }));
@@ -97,19 +97,19 @@ describe("TransferScreen", () => {
     expect(props.onExport).toHaveBeenCalledWith([verbs], { format: "jsonld", withProgress: true });
   });
 
-  it("exports the decks ticked from the palette too, while some are and none is being exported", () => {
+  it("exports the decks checked from the palette too, while some are and none is being exported", () => {
     const props = renderScreen({ chosen: [verbs.url, kanji.url] });
     expect(screenCommands().export!.label).toBe("Export 2 decks");
     screenCommands().export!.run();
     expect(props.onExport).toHaveBeenCalledWith([kanji, verbs], { format: "turtle", withProgress: false });
   });
 
-  it("offers no export in the palette with no deck ticked", () => {
+  it("offers no export in the palette with no deck checked", () => {
     renderScreen();
     expect(screenCommands()).toEqual({});
   });
 
-  it("exports nothing until a deck is ticked", () => {
+  it("exports nothing until a deck is checked", () => {
     renderScreen();
     expect(screen.getByRole("button", { name: "Export 0 decks" })).toBeDisabled();
   });

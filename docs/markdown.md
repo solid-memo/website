@@ -364,7 +364,7 @@ languages.
   link to its field.
 - **Switching on.** Text Markdown reads otherwise (`readsDifferently`:
   its plain text is not what was typed, white space aside) is noted at
-  the moment the box is ticked (`switchMarkdown`), and a status under
+  the moment the box is checked (`switchMarkdown`), and a status under
   the checkbox, a polite live region that also describes it, says so
   while that text is as it was: "check the preview" when a main text
   is among it, and "check them" when only translations are, which the

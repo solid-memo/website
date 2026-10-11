@@ -140,7 +140,7 @@ describe("isTyping", () => {
     expect(isTyping(element('<div contenteditable="true"></div>'))).toBe(true);
   });
 
-  it("takes the keys of what is pressed or ticked, and of the rest of the page", () => {
+  it("takes the keys of what is pressed or checked, and of the rest of the page", () => {
     expect(isTyping(element('<input type="checkbox">'))).toBe(false);
     expect(isTyping(element('<input type="radio">'))).toBe(false);
     expect(isTyping(element("<button></button>"))).toBe(false);

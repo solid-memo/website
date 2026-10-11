@@ -18,7 +18,7 @@ type Form = "move" | "pace" | "direction";
  * in its BulkBar: move them into a group (or to the top level), give
  * them a pace or a direction (the three in a menu, Edit, each asking how
  * in a dialog), export them (a link to import and export, `exportHref`,
- * with them ticked), or delete them, once the user confirms
+ * with them checked), or delete them, once the user confirms
  * (ConfirmDialog), naming each. Each resolves to whether it was done;
  * the screen says what was and why not. Only one is made at a time
  * (`busy`).
@@ -40,7 +40,7 @@ export function DeckBulkActions({
   /** Why none can be moved into a group; null when they can. */
   moveLocked: MoveLock | null;
   busy: boolean;
-  /** Import and export, the selected decks ticked to export. */
+  /** Import and export, the selected decks checked to export. */
   exportHref: string;
   /** Into the group of that URL; null for the top level. */
   onMove: (parent: string | null) => Promise<boolean>;

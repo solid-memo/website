@@ -552,7 +552,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             useCases={useCases}
             instance={activeInstance!}
             chosen={route.deckUrls ?? []}
-            // Like Home's view, which decks are ticked is no Back stop.
+            // Like Home's view, which decks are checked is no Back stop.
             onChoose={(urls) => replace({ screen: "transfer", instanceUrl: route.instanceUrl, ...(urls.length === 0 ? {} : { deckUrls: urls }) })}
             cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}

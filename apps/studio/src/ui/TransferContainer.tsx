@@ -32,7 +32,7 @@ export function TransferContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
-  /** The URLs of the decks ticked to export (the route's). */
+  /** The URLs of the decks checked to export (the route's). */
   chosen: readonly string[];
   onChoose: (urls: readonly string[]) => void;
   cardsHref: (deck: Deck) => string;

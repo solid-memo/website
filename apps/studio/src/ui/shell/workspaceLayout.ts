@@ -77,7 +77,7 @@ export type ContextTabs = { of: "deck"; tabs: ContextTab<DeckTab>[] } | { of: "d
 /**
  * The tabs of a deck's screens: its cards (a card of it under them), its
  * schedule, its health, its about screen, and its export (import and
- * export, the deck ticked), which is a screen of the instance's, so never
+ * export, the deck checked), which is a screen of the instance's, so never
  * the current tab.
  */
 export function deckTabs(route: StudioRoute, deckUrl: string): ContextTab<DeckTab>[] {

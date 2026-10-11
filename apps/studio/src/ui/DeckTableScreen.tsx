@@ -72,7 +72,7 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * selected, but is left alone until shown again. A deck's name opens
  * what it says of itself (`deckHref`), its number of cards its cards in
  * the Studio's card workbench (`cardsHref`); the bulk actions' Export
- * opens import and export with the selected decks ticked
+ * opens import and export with the selected decks checked
  * (`transferHref`). Each deck's name has its health beside it
  * (`healthBadge`), and for a library copy whether a newer release is out
  * (`updateBadge`). Only a deck that may be changed (`selectable`) can be
@@ -151,7 +151,7 @@ export function DeckTableScreen({
   healthHref: string;
   /** A deck's health, as a badge beside its name. */
   healthBadge: (deck: Deck) => ComponentChildren;
-  /** Import and export, these decks ticked to export. */
+  /** Import and export, these decks checked to export. */
   transferHref: (decks: readonly Deck[]) => string;
   /** Whether the library has a newer release of a deck, as a badge beside its name. */
   updateBadge: (deck: Deck) => ComponentChildren;

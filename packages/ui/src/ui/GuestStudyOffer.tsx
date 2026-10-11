@@ -424,7 +424,7 @@ function FormActions({ start, busy, onBack }: { start: string; busy: boolean; on
 
 /**
  * Which of the user's instances the study is added to, and which of its
- * decks: each guest deck is offered, ticked; one the instance has from
+ * decks: each guest deck is offered, checked; one the instance has from
  * the same library release says that it is added beside it, not merged.
  */
 function GuestMergeFields({

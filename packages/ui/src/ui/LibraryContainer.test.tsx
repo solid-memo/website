@@ -66,7 +66,7 @@ function renderContainer(useCases: UseCases) {
 }
 
 describe("LibraryContainer", () => {
-  // The library remembers its ticks and filters per instance; each test starts afresh.
+  // The library remembers its checked decks and filters per instance; each test starts afresh.
   afterEach(() => {
     for (const part of ["selected", "topics", "query"]) forget(`library:${instance.url}:${part}`);
   });
@@ -117,7 +117,7 @@ describe("LibraryContainer", () => {
     expect(screen.getAllByText("Already imported")).toHaveLength(1);
   });
 
-  it("imports the ticked decks one by one, then returns to the deck list", async () => {
+  it("imports the checked decks one by one, then returns to the deck list", async () => {
     const importLibraryDeck = vi.fn(async () => importedDeck);
     const useCases = makeUseCasesFake({
       listLibraryDecks: vi.fn(async () => [capitals, rivers]),
@@ -141,14 +141,14 @@ describe("LibraryContainer", () => {
       expect(useCases.listDecks).toHaveBeenCalledTimes(2),
     );
 
-    // The imported decks are no longer ticked on the next visit.
+    // The imported decks are no longer checked on the next visit.
     cleanup();
     renderContainer(useCases);
     expect(await screen.findByRole("checkbox", { name: "Capitals" })).not.toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Rivers" })).not.toBeChecked();
   });
 
-  it("keeps the ticks and the search when the library is left and come back to", async () => {
+  it("keeps the checked decks and the search when the library is left and come back to", async () => {
     const useCases = makeUseCasesFake({
       listLibraryDecks: vi.fn(async () => [capitals, rivers]),
     });
