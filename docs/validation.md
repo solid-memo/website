@@ -336,8 +336,14 @@ series and publisher themselves) to DCAT-AP with no index beside it, and
 that release and the draft fixtures (draft deck, chapter and step 1) to
 Solid Memo's own shapes: the script picks each subject's shape by class,
 format version and context as `pickShape` does, and targets it with
-`sh:targetNode`. A disagreement between the
-engines, or a constraint the browser's engine cannot run, fails CI. It
+`sh:targetNode`. Each version is checked beside the index, but only for
+the subjects it states something about, targeted the same way: DCAT-AP
+asks a node only about its own statements and the class of what they
+point at, so a version cannot break an index node it says nothing about,
+and the index has a check of its own. The script stops if DCAT-AP starts
+asking more, or if any document states `rdfs:subClassOf`, since either
+would make that untrue. The checks run in parallel, one process per CPU.
+A disagreement between the engines, or a constraint the browser's engine cannot run, fails CI. It
 reads `ns/` and `decks/` from the repository, each file at the IRI the
 site publishes it under, and needs neither a build nor the network, so
 it runs as its own job beside the build. Locally: `pip install -r
