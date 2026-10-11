@@ -14,7 +14,7 @@ build that publishes it together with the vocabulary and shapes
   build's values) and renders `src/App.tsx`, which shows Solid Memo, or
   the Studio at its routes, loaded lazily.
 - `public/`: files served as they are: the icons, `robots.txt`,
-  `sitemap.xml` and the Studio's old address
+  `sitemap.xml`, the About page (`about/`) and the Studio's old address
   (`studio/`).
 - `vite.config.ts`: the build.
 
