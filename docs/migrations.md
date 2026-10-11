@@ -1,6 +1,6 @@
 # Format versions and migrations
 
-**In short:** the way Solid Memo stores data changes as the app grows,
+The way Solid Memo stores data changes as the app grows,
 and a Pod may hold data an older version wrote. Every stored item says
 which format version it is in. This page says how the app brings old
 data up to the current format, leaves data from a newer version alone,

@@ -1,6 +1,6 @@
 # Testing
 
-**In short:** every change to Solid Memo is checked by automated tests
+Every change to Solid Memo is checked by automated tests
 before it is published. Small tests check each part of the code on its
 own, every line of it; larger ones run the app against real Solid
 servers and click through it in a real browser. This page says what

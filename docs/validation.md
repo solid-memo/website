@@ -1,6 +1,6 @@
 # Validation
 
-**In short:** Solid Memo checks that the data it reads from a Pod, and
+Solid Memo checks that the data it reads from a Pod, and
 every change it writes, has the form the app expects. This page says
 what is checked and when, what happens to data that does not fit, and
 how it can be repaired.

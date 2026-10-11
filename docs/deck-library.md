@@ -1,6 +1,6 @@
 # Deck library
 
-**In short:** the deck library is the set of ready-made decks and
+The deck library is the set of ready-made decks and
 courses anyone can copy into their own instance. They are files in
 this repository's `decks/` folder, published with the site and
 described in DCAT, a standard catalog format other tools can read.

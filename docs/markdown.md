@@ -1,6 +1,6 @@
 # Markdown
 
-**In short:** Markdown is a simple way to format text with plain
+Markdown is a simple way to format text with plain
 characters, such as `**strong**` for strong emphasis or a dash at the
 start of a line for a list item. Cards and courses can be written in
 it. This page says which Markdown Solid Memo reads, which texts may

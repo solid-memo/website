@@ -1,6 +1,6 @@
 # Vocabulary
 
-**In short:** Solid Memo stores its data as linked data (RDF), where
+Solid Memo stores its data as linked data (RDF), where
 every kind of thing and every property is named by a web address.
 Where no existing standard has a term, as for a card's review
 schedule, Solid Memo defines its own. This page says where those terms

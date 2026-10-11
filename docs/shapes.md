@@ -1,6 +1,6 @@
 # Shapes
 
-**In short:** a shape is a machine-readable description of what valid
+A shape is a machine-readable description of what valid
 Solid Memo data looks like: which properties a thing has, and of what
 kind. There is one shape for each kind of data and each format
 version. The app uses them to check data, to generate code, and to
