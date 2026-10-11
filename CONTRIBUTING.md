@@ -72,7 +72,7 @@ The code follows the [style guide](docs/style.md), the
 **Text formats.** Keep the repository diff-friendly: code in TypeScript,
 data in Turtle, docs in Markdown, configuration in JSON or YAML. Do not
 commit binary documents, such as word-processor files or spreadsheets.
-Images belong only where the app serves them, in `apps/web/public/`.
+An image is committed only when the app shows it.
 
 ## Commit messages
 
