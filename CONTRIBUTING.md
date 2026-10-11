@@ -105,6 +105,12 @@ follows), and runs the app when the change shows in it.
   reason.
 - Every pull request must pass CI before it is merged.
 
+The review of a deck or a course looks at its form: that the library's
+checks pass, and that its license and its sources are stated. It does
+not check the facts on the cards; the deck's provenance says how they
+were researched and checked
+([docs/deck-library.md](docs/deck-library.md#provenance)).
+
 The project has one maintainer for now, so a contribution is reviewed by
 him. His own pull requests are merged without a second reviewer, as a
 known, temporary exception ([GOVERNANCE.md](GOVERNANCE.md#merging)). If
