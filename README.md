@@ -2,6 +2,9 @@
 
 [![CI](https://github.com/solid-memo/website/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/solid-memo/website/actions/workflows/ci.yml)
 [![Interop](https://github.com/solid-memo/website/actions/workflows/interop.yml/badge.svg?branch=main)](https://github.com/solid-memo/website/actions/workflows/interop.yml)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/solid-memo/website)](https://github.com/solid-memo/website/pulse)
+[![Last commit](https://img.shields.io/github/last-commit/solid-memo/website)](https://github.com/solid-memo/website/commits/main)
+[![Contributors](https://img.shields.io/github/contributors/solid-memo/website)](https://github.com/solid-memo/website/graphs/contributors)
 
 [![Solid Memo](apps/web/public/social-preview.png)](https://solid-memo.com/)
 
@@ -114,6 +117,10 @@ Everyone is welcome to suggest a change, report a problem or send one.
 - Report a security problem privately, never in a public issue:
   [SECURITY.md](SECURITY.md).
 
+How active the project is: its
+[pulse](https://github.com/solid-memo/website/pulse), its
+[commits](https://github.com/solid-memo/website/graphs/commit-activity) and its
+[contributors](https://github.com/solid-memo/website/graphs/contributors).
 How the project is run and who decides: [GOVERNANCE.md](GOVERNANCE.md).
 What is planned: [ROADMAP.md](ROADMAP.md). How we treat each other:
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).

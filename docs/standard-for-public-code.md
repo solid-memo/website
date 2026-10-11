@@ -49,7 +49,7 @@ nothing to apply it to counts as met, and the text says so.
 | 1 | [Code in the open](https://www.standardforpubliccode.org/criteria/code-in-the-open.html) | 3/3 | 0/1 | Compliant |
 | 2 | [Bundle policy and source code](https://www.standardforpubliccode.org/criteria/bundle-policy-and-source-code.html) | 2/2 | 2/2 | Compliant |
 | 3 | [Make the codebase reusable and portable](https://www.standardforpubliccode.org/criteria/make-the-codebase-reusable-and-portable.html) | 2/2 | 4/8 | Compliant |
-| 4 | [Welcome contributors](https://www.standardforpubliccode.org/criteria/welcome-contributors.html) | 3/3 | 3/4 | Compliant |
+| 4 | [Welcome contributors](https://www.standardforpubliccode.org/criteria/welcome-contributors.html) | 3/3 | 4/4 | Compliant |
 | 5 | [Make contributing easy](https://www.standardforpubliccode.org/criteria/make-contributing-easy.html) | 3/5 | – | Partial |
 | 6 | [Maintain version control](https://www.standardforpubliccode.org/criteria/maintain-version-control.html) | 1/3 | 3/4 | Non-compliant |
 | 7 | [Require review of contributions](https://www.standardforpubliccode.org/criteria/require-review-of-contributions.html) | 2/3 | 2/5 | Partial |
@@ -62,7 +62,7 @@ nothing to apply it to counts as met, and the text says so.
 | 14 | [Make the codebase findable](https://www.standardforpubliccode.org/criteria/make-the-codebase-findable.html) | – | 3/8 | No MUSTs |
 | 15 | [Use a coherent style](https://www.standardforpubliccode.org/criteria/use-a-coherent-style.html) | 1/1 | 2/2 | Compliant |
 | 16 | [Document codebase maturity](https://www.standardforpubliccode.org/criteria/document-codebase-maturity.html) | 2/3 | 2/2 | Partial |
-| | **Total** | **39/46** | **36/51** | |
+| | **Total** | **39/46** | **37/51** | |
 
 A criterion is compliant when all its MUSTs are met. It is non-compliant
 when more than half of them are not met, and partial otherwise.
@@ -181,8 +181,9 @@ What holds today, and what does not, criterion by criterion.
 - SHOULD, met — the engagement of organizations. GOVERNANCE.md says no
   organization is committed.
 - SHOULD, met — a public roadmap in [ROADMAP.md](../ROADMAP.md).
-- SHOULD, not met — activity statistics. The README shows CI and interop
-  badges, but no figures on activity.
+- SHOULD, met — activity statistics. The README shows commit activity,
+  the last commit and the contributors as badges, and links GitHub's
+  pulse and activity graphs.
 - OPTIONAL, met — a code of conduct: the Contributor Covenant 2.1, with a
   private email contact for reports.
 
@@ -505,8 +506,7 @@ them:
   rebase merges keep the pull request out of the commit. Opening an issue
   for each change, or adding `Refs:` with the pull request, would close
   it.
-- **Criterion 4, activity statistics.** None are published. A link to
-  GitHub's Insights, or a badge, would close it.
+
 - **Criterion 14, findability.** The repository name is kept by choice.
   Catalogs, search engines and a DOI wait for the actions above.
 
