@@ -15,7 +15,10 @@ browser's engine cannot run, fails CI (see docs/validation.md):
 
 - DCAT-AP 3 over the deck library: decks/index.ttl and every release
   decks/<name>/v<N>.ttl, each with the index and the reference data
-  (ns/vocab/external.ttl, ns/vocab/topics.ttl) beside it;
+  (ns/vocab/external.ttl, ns/vocab/topics.ttl) beside it. A release's
+  check targets only the subjects it states something about: DCAT-AP
+  asks a node only about itself, and the index has its own check (the
+  script stops if DCAT-AP or the documents ever make that untrue);
 - DCAT-AP 3 over pod catalog documents as the app writes them (the
   valid pod fixtures of deck formats 4, 5 and 6 under
   packages/vocab/fixtures/deck/: format 5 titles and describes a deck in
@@ -37,7 +40,8 @@ browser's engine cannot run, fails CI (see docs/validation.md):
   and ns/vocab/topics.ttl, where warnings fail too.
 
 Every document is read from this repository, at the address the site
-publishes it under; nothing needs the network.
+publishes it under; nothing needs the network. The documents are checked
+in parallel, one process per CPU the script may use.
 
 The rest of Solid Memo's shapes are checked by `npm run library:check`
 and the tests, with rdf-validate-shacl.
@@ -48,12 +52,14 @@ Run:  npm run crosscheck  (or python3 scripts/shacl_crosscheck.py)
 from __future__ import annotations
 
 import sys
+from concurrent.futures import ProcessPoolExecutor
+from functools import cache, partial
 from pathlib import Path
 
 try:
     from pyshacl import validate
     from rdflib import Graph, Literal, Namespace, URIRef
-    from rdflib.namespace import RDF
+    from rdflib.namespace import RDF, RDFS
 except ModuleNotFoundError as missing:
     # pySHACL (which brings rdflib) is not part of the npm install: say how
     # to get it rather than end on a traceback.
@@ -114,33 +120,92 @@ def targeted(data: Graph, shapes: Graph, picks: list[tuple[URIRef, URIRef, int, 
     return chosen
 
 
-def check(label: str, data: Graph, shapes: Graph, *, warnings_fail: bool) -> bool:
+REFERENCE = [site("ns/vocab/external.ttl"), site("ns/vocab/topics.ttl")]
+# DCAT-AP asks a node only about its own statements and the class of what
+# they point at, and no document states rdfs:subClassOf, so a release can
+# only give an index node a class it lacked, never break it: deck_release()
+# checks the release's own subjects only. DCAT_AP_TERMS is what that
+# relies on (sh:name and sh:description are labels).
+DCAT_AP_TERMS = {SH[term] for term in ("property", "path", "name", "description", "nodeKind", "class", "maxCount", "minCount", "datatype", "closed", "targetClass")}
+
+
+@cache
+def dcat_ap() -> Graph:
+    """DCAT-AP 3.0.1's shapes, once per process, provided they still use only DCAT_AP_TERMS and close no shape."""
+    shapes = graph(site("vendor/dcat-ap/3.0.1/dcat-ap-SHACL.ttl"))
+    terms = {p for p in shapes.predicates() if str(p).startswith(str(SH))}
+    if not terms <= DCAT_AP_TERMS or (None, SH.closed, Literal(True)) in shapes:
+        raise ValueError(f"DCAT-AP now uses {sorted(terms - DCAT_AP_TERMS)} or closes a shape: a release might break the index unseen (DCAT_AP_TERMS).")
+    return shapes
+
+
+@cache
+def library() -> Graph:
+    """decks/index.ttl and the reference data, once per process: every release is checked beside them."""
+    return without_subclasses(graph(site("decks/index.ttl"), *REFERENCE), "the index or the reference data")
+
+
+def without_subclasses(data: Graph, name: str) -> Graph:
+    if (None, RDFS.subClassOf, None) in data:
+        raise ValueError(f"{name} states rdfs:subClassOf: a release might then break the index unseen (DCAT_AP_TERMS).")
+    return data
+
+
+def own_subjects(shapes: Graph, document: Graph, data: Graph) -> Graph:
+    """The shapes with each class target narrowed to the subjects `document` states something about."""
+    narrowed = Graph()
+    for triple in shapes.triples((None, None, None)):
+        if triple[1] != SH.targetClass:
+            narrowed.add(triple)
+    subjects = set(document.subjects())
+    for shape, target in shapes.subject_objects(SH.targetClass):
+        for subject in subjects.intersection(data.subjects(RDF.type, target)):
+            narrowed.add((shape, SH.targetNode, subject))
+    return narrowed
+
+
+def deck_release(name: str) -> tuple[bool, str]:
+    """Whether a release conforms to DCAT-AP beside the index and the reference data, whose own nodes the index's check covers."""
+    document = without_subclasses(graph(site(name)), name)
+    data = library()
+    # Adding the release to the shared graph and taking it out again is far
+    # cheaper than copying the index for each release.
+    added = [triple for triple in document if triple not in data]
+    for triple in added:
+        data.add(triple)
+    try:
+        return conformance(data, own_subjects(dcat_ap(), document, data), warnings_fail=False)
+    finally:
+        for triple in added:
+            data.remove(triple)
+
+
+def conformance(data: Graph, shapes: Graph, *, warnings_fail: bool) -> tuple[bool, str]:
+    """Whether `data` conforms to `shapes`, and pySHACL's report."""
     conforms, _, text = validate(
         data,
         shacl_graph=shapes,
         inference="none",
         advanced=True,
+        # advanced=True would copy the data graph in case a sh:rule writes to it; no shape here has one.
+        inplace=True,
         allow_warnings=not warnings_fail,
         allow_infos=True,
     )
-    print(f"{'ok  ' if conforms else 'FAIL'} {label}")
-    if not conforms:
-        print(text)
-    return conforms
+    return conforms, text
 
 
 def main() -> int:
-    dcat_ap = graph(site("vendor/dcat-ap/3.0.1/dcat-ap-SHACL.ttl"))
     skos = graph(site("vendor/skohub/skos.shacl.ttl"), site("vendor/skohub/skos.bestPractice.shacl.ttl"))
-    reference = [site("ns/vocab/external.ttl"), site("ns/vocab/topics.ttl")]
 
     index = site("decks/index.ttl")
 
-    results = [check("decks/index.ttl (DCAT-AP)", graph(index, *reference), dcat_ap, warnings_fail=False)]
-    for release in sorted((ROOT / "decks").glob("*/v*.ttl")):
-        name = release.relative_to(ROOT).as_posix()
-        data = graph(site(name), index, *reference)
-        results.append(check(f"{name} (DCAT-AP)", data, dcat_ap, warnings_fail=False))
+    # Each job: its label, the check, and roughly how long it takes (the
+    # larger, the sooner it starts, so the slowest do not finish last).
+    jobs = [("decks/index.ttl (DCAT-AP)", partial(conformance, graph(index, *REFERENCE), dcat_ap(), warnings_fail=False), index[0].stat().st_size)]
+    for path in sorted((ROOT / "decks").glob("*/v*.ttl")):
+        name = path.relative_to(ROOT).as_posix()
+        jobs.append((f"{name} (DCAT-AP)", partial(deck_release, name), path.stat().st_size))
     pods = [
         VOCAB / "fixtures/deck/v4/valid/pod.ttl",
         *sorted((VOCAB / "fixtures/deck/v5/valid").glob("pod*.ttl")),
@@ -149,13 +214,13 @@ def main() -> int:
     ]
     for pod in pods:
         name = pod.relative_to(VOCAB / "fixtures").as_posix()
-        data = graph((pod, "https://pod.example/solid-memo/main/catalog.ttl"), *reference)
-        results.append(check(f"a pod catalog document, {name} (DCAT-AP)", data, dcat_ap, warnings_fail=False))
+        data = graph((pod, "https://pod.example/solid-memo/main/catalog.ttl"), *REFERENCE)
+        jobs.append((f"a pod catalog document, {name} (DCAT-AP)", partial(conformance, data, dcat_ap(), warnings_fail=False), 0))
     standalone = sorted((VOCAB / "fixtures/library-deck/v6/valid").glob("*.ttl"))
     for release in standalone:
         name = release.relative_to(VOCAB / "fixtures").as_posix()
-        data = graph((release, "https://pod.example/releases/release.ttl"), *reference)
-        results.append(check(f"a release in a pod, {name} (DCAT-AP, no index)", data, dcat_ap, warnings_fail=False))
+        data = graph((release, "https://pod.example/releases/release.ttl"), *REFERENCE)
+        jobs.append((f"a release in a pod, {name} (DCAT-AP, no index)", partial(conformance, data, dcat_ap(), warnings_fail=False), 0))
     shapes, picks = own_shapes()
     studio = [(release, "library") for release in standalone] + [
         (draft, "draft") for kind in ("draft-deck", "draft-chapter", "draft-step") for draft in sorted((VOCAB / f"fixtures/{kind}/v1/valid").glob("*.ttl"))
@@ -163,11 +228,20 @@ def main() -> int:
     for fixture, context in studio:
         name = fixture.relative_to(VOCAB / "fixtures").as_posix()
         data = graph((fixture, "https://pod.example/solid-memo/main/drafts/d/v1/release.ttl"))
-        results.append(check(f"{name} (Solid Memo's shapes, {context})", data, targeted(data, shapes, picks, context), warnings_fail=False))
+        jobs.append((f"{name} (Solid Memo's shapes, {context})", partial(conformance, data, targeted(data, shapes, picks, context), warnings_fail=False), 0))
     for vocab in ("ns/vocab/v1.ttl", "ns/vocab/topics.ttl"):
-        results.append(check(f"{vocab} (SKOS, best practice)", graph(site(vocab)), skos, warnings_fail=True))
-    failed = results.count(False)
-    print(f"{len(results) - failed} of {len(results)} documents conform.")
+        # SkoHub's SPARQL constraints make these the slowest of all.
+        jobs.append((f"{vocab} (SKOS, best practice)", partial(conformance, graph(site(vocab)), skos, warnings_fail=True), sys.maxsize))
+    failed = 0
+    with ProcessPoolExecutor() as pool:
+        running = {label: pool.submit(check) for label, check, _ in sorted(jobs, key=lambda job: job[2], reverse=True)}
+        for label, _, _ in jobs:
+            conforms, text = running[label].result()
+            print(f"{'ok  ' if conforms else 'FAIL'} {label}", flush=True)
+            if not conforms:
+                failed += 1
+                print(text)
+    print(f"{len(jobs) - failed} of {len(jobs)} documents conform.")
     return 0 if failed == 0 else 1
 
 
