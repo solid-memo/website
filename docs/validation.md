@@ -89,7 +89,7 @@ flowchart LR
   [appUseCases.ts](../packages/composition/src/appUseCases.ts) reads them from wherever the
   site is served, so `npm run dev` and `npm run preview` use the
   repository's `ns/`. Each shape document is fetched once per session.
-- The SHACL engine ([engine.ts](../packages/shacl/src/engine.ts),
+- The [SHACL](https://www.w3.org/TR/shacl/) engine ([engine.ts](../packages/shacl/src/engine.ts),
   the only module that imports `rdf-validate-shacl`) is loaded with a
   dynamic import, so the library is a separate chunk fetched only when a
   validation is asked for. It validates one focus node against one node
@@ -108,8 +108,8 @@ checks) and published with the site at `/vendor/`:
 
 | Profile | Shapes | Applies to |
 |---|---|---|
-| `dcat-ap` | DCAT-AP 3.0.1 (SEMIC) | catalogues, decks and deck releases, distributions, agents |
-| `skos` | SkoHub `skos.shacl.ttl` + `skos.bestPractice.shacl.ttl` | the concept schemes in `ns/vocab/` |
+| `dcat-ap` | [DCAT-AP 3.0.1](https://semiceu.github.io/DCAT-AP/releases/3.0.1/) (SEMIC) | catalogues, decks and deck releases, distributions, agents |
+| `skos` | SkoHub `skos.shacl.ttl` + `skos.bestPractice.shacl.ttl`, for [SKOS](https://www.w3.org/TR/skos-reference/) | the concept schemes in `ns/vocab/` |
 
 - [profiles.ts](../packages/shacl/src/profiles.ts) names each
   profile's files. Their shapes pick their own targets

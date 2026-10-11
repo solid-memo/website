@@ -1,7 +1,7 @@
 # Shapes
 
 What a valid Solid Memo subject looks like, version by version, as
-SHACL; and how those shapes drive the code. One shape file per class
+[SHACL](https://www.w3.org/TR/shacl/); and how those shapes drive the code. One shape file per class
 per format version under [`ns/shapes/`](../ns/shapes/), published with
 the site at `https://solid-memo.com/ns/shapes/`
 ([ns.ts](../packages/vocab/src/ns.ts), [deployment.md](deployment.md)).

@@ -59,7 +59,7 @@ flowchart TD
 Decisions fixed in code (and tests):
 
 - The **updated** ease factor drives interval growth (computed before the
-  interval, per Wozniak's original description).
+  interval, per Woźniak's original description).
 - Lapses (`q < 3`) keep the ease factor; only repetitions and interval reset.
   The card returns the next study day (interval 1).
 - A grade of 0 or 1 additionally sends the card round again **within the

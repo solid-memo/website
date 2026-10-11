@@ -46,7 +46,7 @@ they hold before any pod is reached and stay out of your pod:
 | `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages you picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
 | `solid-memo:collapsedGroups.<instance URL>` | which deck groups you folded | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
 | `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/browser/src/localStorageUpdateJournal.ts) |
-| `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout, what you opened last, and your saved views and pins, by instance URL | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts) |
+| `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; the commands you used last in its palette; and, by instance URL, your saved views, your pins and the decks and drafts you opened last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts) |
 
 During a login, `sessionStorage` holds the page you were on
 (`solid-memo:login-hash`), to bring you back to it
@@ -70,7 +70,7 @@ the app speaks to your pod directly.
 
 A copy of Solid Memo run by someone else is served by their host, and
 may read its deck library from another address
-(`VITE_LIBRARY_INDEX_URL`, [deployment.md](deployment.md)).
+(`VITE_LIBRARY_INDEX_URL`, [deck-library.md](deck-library.md#reading-it)).
 
 ## Other servers your browser contacts
 
@@ -99,7 +99,7 @@ any link does.
 
 The app runs no analytics or tracking script, and sets no cookies of
 its own. Its Content Security Policy lets the page run scripts from
-the site alone ([`apps/web/index.html`](../apps/web/index.html), checked
+the site alone, and one inline script it names by its hash ([`apps/web/index.html`](../apps/web/index.html), checked
 by [`build.test.ts`](../apps/web/src/build.test.ts)). The project
 learns nothing about who uses the app.
 

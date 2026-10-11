@@ -77,8 +77,8 @@ read, and live in this repository beside the code that applies them.
 
 Every published version of a shape or of a deck is frozen: a change is
 a new version beside it ([shapes.md](shapes.md), [deck-library.md](deck-library.md)).
-So a rule that published data does not meet, such as a license the
-library deck shapes do not ask for, is added as a library rule, not by
+So a rule the published shapes do not state, such as that a library
+deck version names its license, is added as a library rule, not by
 editing a shape.
 
 No policy outside the project is based on this code. If one is, the

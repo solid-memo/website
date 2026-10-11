@@ -56,7 +56,7 @@ publisher still in the index:
   are IRIs typed `dcterms:LicenseDocument`, and a version states at
   least one ([Checks](#checks)); the **sources** it was
   compiled from are `prov:wasDerivedFrom` IRIs, each a subject of its
-  own with its title, creator and licence.
+  own with its title, creator and license.
 - **The release**: `dcat:version "N"`, `dcterms:issued`, one
   `adms:versionNotes` (a plain string: the shape allows one, untagged),
   `dcat:inSeries` and `dcat:isVersionOf` `<…/decks/index.ttl#<name>>`,

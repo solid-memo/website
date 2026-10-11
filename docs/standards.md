@@ -88,9 +88,9 @@ way of others working with Solid Memo's code or data.
   [Linked Web Storage Working Group](https://www.w3.org/groups/wg/lws/)
   is now taking them toward a Recommendation. They are what every
   Solid server and app implements, and Solid Memo is tested against
-  several servers ([testing.md](testing.md)). The Inrupt client
-  libraries keep the code that speaks them in one package,
-  `@solid-memo/solid` ([vendor-code.md](vendor-code.md)), so a change in
+  several servers ([testing.md](testing.md)). Solid Memo speaks
+  them through the Inrupt client libraries, and keeps that code in one
+  package, `@solid-memo/solid` ([vendor-code.md](vendor-code.md)), so a change in
   the specifications is a change there.
 - **The type indexes** are an editor's draft. They are how Solid apps
   find each other's data today. Solid Memo uses them to find its
