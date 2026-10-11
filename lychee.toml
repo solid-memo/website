@@ -17,3 +17,16 @@ exclude_all_private = true
 exclude_path = ["(^|/)node_modules/"]
 
 no_progress = true
+
+# Addresses that answer only once the maintainer turns something on, each
+# to remove from this list then.
+exclude = [
+  # Remove once Discussions are on (Settings › General › Features).
+  '^https://github\.com/solid-memo/website/discussions$',
+  # Remove once private vulnerability reporting is on (Settings › Code
+  # security › Private vulnerability reporting).
+  '^https://github\.com/solid-memo/website/security/advisories/new$',
+  # Remove both once v0.1.0 is tagged (docs/releasing.md).
+  '^https://github\.com/solid-memo/website/releases/tag/v0\.1\.0$',
+  '^https://github\.com/solid-memo/website/compare/v0\.1\.0\.\.\.HEAD$',
+]

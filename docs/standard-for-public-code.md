@@ -397,12 +397,13 @@ Whatever is decided later:
 Only an admin of the repository can change these:
 
 - [ ] **Private vulnerability reporting.** Settings, Code security:
-  enable it. SECURITY.md's link depends on it. *(5)*
+  enable it. SECURITY.md's link depends on it; then remove its exclusion
+  from `lychee.toml`. *(5)*
 - [ ] **Secret scanning and push protection.** Settings, Code security:
   turn both on. *(1)*
 - [ ] **Discussions.** Settings, General, Features: turn them on. The
   README, CONTRIBUTING.md, GOVERNANCE.md and the issue forms link to
-  them. *(5)*
+  them; then remove their exclusion from `lychee.toml`. *(5)*
 - [ ] **Topics and description.** Keep the description and homepage, and
   add topics such as `solid`, `spaced-repetition`, `flashcards`,
   `linked-data`, `rdf` and `shacl`. *(14)*
@@ -420,7 +421,8 @@ Only an admin of the repository can change these:
 - [ ] **Tag v0.1.0** as [releasing.md](releasing.md#tagging-a-version)
   says: date the `[0.1.0]` heading in CHANGELOG.md, set the version and
   date in `publiccode.yml` and `CITATION.cff`, then tag the merged
-  release commit and make a GitHub release. *(6, 16)*
+  release commit and make a GitHub release; then remove the exclusions
+  of CHANGELOG.md's links from `lychee.toml`. *(6, 16)*
 - [ ] **A DOI and an archive.** Connect Zenodo to the repository before
   the tag, so that the release gets a DOI, and add the DOI to
   `CITATION.cff` and the README. Save the repository in Software
