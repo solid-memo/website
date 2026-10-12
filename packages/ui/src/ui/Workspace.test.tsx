@@ -787,7 +787,7 @@ describe("Workspace", () => {
     fireEvent.click(await screen.findByRole("link", { name: "Statistics" }));
     expect(await screen.findByRole("heading", { name: "Statistics" })).toBeInTheDocument();
     expect(
-      screen.getByText("No answers yet: the statistics begin with your next study session."),
+      await screen.findByText("No answers yet: the statistics begin with your next study session."),
     ).toBeInTheDocument();
   });
 
@@ -795,6 +795,90 @@ describe("Workspace", () => {
     window.history.replaceState(null, "", statisticsHref(instanceA.url));
     renderWorkspace(makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }));
     expect(await screen.findByRole("heading", { name: "Statistics" })).toBeInTheDocument();
+  });
+
+  it("keeps the statistics' range and tab in the URL, a change of either replacing the entry, and drops what it does not know", async () => {
+    window.history.replaceState(null, "", `${statisticsHref(instanceA.url)}&range=7y&view=charts`);
+    const useCases = makeUseCases({ listInstances: vi.fn(async () => [instanceA]) });
+    renderWorkspace(useCases);
+    await waitFor(() => expect(window.location.hash).toBe(statisticsHref(instanceA.url)));
+    expect(
+      await screen.findByRole("tab", { name: "Overview", selected: true }),
+    ).toBeInTheDocument();
+    const length = window.history.length;
+    fireEvent.input(screen.getByRole("combobox", { name: "Range" }), { target: { value: "all" } });
+    fireEvent.click(screen.getByRole("tab", { name: "Cards" }));
+    await waitFor(() =>
+      expect(window.location.hash).toBe(
+        routeToHash({
+          screen: "statistics",
+          instanceUrl: instanceA.url,
+          range: "all",
+          view: "cards",
+        }),
+      ),
+    );
+    expect(window.history.length).toBe(length);
+    expect(await screen.findByRole("tab", { name: "Cards", selected: true })).toBeInTheDocument();
+    expect(useCases.getStatistics).toHaveBeenCalledWith(instanceA.url, expect.any(Date), {
+      range: "all",
+    });
+  });
+
+  it("opens a deck's statistics under the deck, and falls back to the deck list for a deck it does not have", async () => {
+    const deck: Deck = {
+      id: "deck-1",
+      url: `${instanceA.url}catalog.ttl#deck-1`,
+      title: { en: "Kana" },
+      cardsDocumentUrl: `${instanceA.url}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${instanceA.url}reviews/deck-1.ttl`,
+      direction: "front-to-back" as const,
+      createdAt: "2026-09-21T10:00:00.000Z",
+      formatVersion: 1,
+      authors: [],
+    };
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({
+        screen: "deckStatistics",
+        instanceUrl: instanceA.url,
+        deckUrl: deck.url,
+        view: "activity",
+      }),
+    );
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA]),
+      listDecks: vi.fn(async () => [deck]),
+    });
+    const view = renderWorkspace(useCases);
+    expect(
+      await screen.findByRole("tab", { name: "Activity", selected: true }),
+    ).toBeInTheDocument();
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(
+      within(trail)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Decks", "Kana", "Statistics"]);
+    await waitFor(() => expect(document.title).toBe("Statistics – Kana – Solid Memo"));
+    expect(useCases.getStatistics).toHaveBeenCalledWith(instanceA.url, expect.any(Date), {
+      range: 90,
+      deckUrl: deck.url,
+    });
+    view.unmount();
+
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({ screen: "deckStatistics", instanceUrl: instanceA.url, deckUrl: "gone" }),
+    );
+    renderWorkspace(useCases);
+    await waitFor(() =>
+      expect(window.location.hash).toBe(
+        routeToHash({ screen: "home", instanceUrl: instanceA.url }),
+      ),
+    );
   });
 
   it("creates a deck in the deck creator and returns to the deck list", async () => {

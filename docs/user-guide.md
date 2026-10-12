@@ -108,8 +108,8 @@ many are new, with a **Study** button. It also shows:
   progress ([migrations.md](migrations.md#catching-up-with-the-library));
 - "Reset today's study", once you have studied the deck today, to undo
   today's answers for this deck ([srs.md](srs.md#resetting-the-day));
-- the deck's own statistics, where its cards stand, and what is hard
-  in it: the cards you forget most, and in a course's deck the wrong
+- the deck's own statistics in short, with "More statistics" for all
+  of them, where its cards stand, and what is hard in it: the cards you forget most, and in a course's deck the wrong
   options you choose most.
 
 Its buttons lead to **Preferences** (the deck's name, its own daily
@@ -203,27 +203,41 @@ other.
 ## Statistics
 
 **Statistics**, in the instance bar, shows your study over the last
-year: how many answers and study days, your current and longest streak
-and how many of the last 30 days you studied, a calendar of your
-activity, what each recent day held and which weekdays you study, this
-week and month beside the last, how many cards you have started and
-how many you knew the first time, the new cards you take on beside the
-reviews you do each week, how well you remembered them in reviews
-(each card's first review of the day, always with how many reviews that
-is) and which answer buttons you pressed, how you answered course
-questions, counted apart, and each deck's figures. Under that,
-where your cards stand: how many are new, relearning (forgotten last
-time), young (reviewed at intervals under 21 days) and mature, how many
-reviews are overdue and when your daily review limit lets you catch up,
-how many reviews are coming in the next 30 days beside those your limit
-lets through, how long until your cards come back and how easy they
-feel, and when each deck's new cards run out. Last, your leeches: the
-cards you forgot 4 times or more in their reviews, each a link to the
-card, whose page shows every answer you gave it. With a course, how
-far along each course you are, chapter by chapter, and how you
-answered each chapter's questions. Above the deck list,
-today's strip also says how many cards are left to study today. Every chart can also be read as a table
-([statistics.md](statistics.md)). A guest has statistics too.
+three months; pick another range above the figures: the last 30 days,
+the last 12 months, or all time. Its tabs, each a link of its own:
+
+- **Overview**: how many answers and study days, how many cards you
+  know now (mature), your current and longest streak and how many of
+  the last 30 days you studied, a calendar of your activity and each
+  deck's figures. The streaks and the calendar look back a year
+  whatever the range, as do this week and month on the Activity tab. Over all time, also how many cards you have started
+  and how many have grown mature. "Download my answers (CSV)" saves the
+  range's answers on your device, as a file a spreadsheet opens;
+  nothing is sent anywhere.
+- **Activity**: what each recent day held and which weekdays you
+  study, this week and month beside the last, how many cards you have
+  started and how many you knew the first time, and the new cards you
+  take on beside the reviews you do each week.
+- **Memory**: how well you remembered your cards in reviews (each
+  card's first review of the day, always with how many reviews that
+  is), which answer buttons you pressed, how you answered course
+  questions, counted apart, and your leeches: the cards you forgot 4
+  times or more in their reviews, each a link to the card, whose page
+  shows every answer you gave it.
+- **Cards**: where your cards stand: how many are new, relearning
+  (forgotten last time), young (reviewed at intervals under 21 days)
+  and mature, how many reviews are overdue and when your daily review
+  limit lets you catch up, how many reviews are coming in the next 30
+  days beside those your limit lets through, how long until your cards
+  come back and how easy they feel, and when each deck's new cards run
+  out. With a course, how far along each course you are, chapter by
+  chapter, and how you answered each chapter's questions.
+
+A deck's page sums up its own figures, with "More statistics" for the
+same tabs of that deck alone. Above the deck list, today's strip also
+says how many cards are left to study today. Every chart can also be
+read as a table ([statistics.md](statistics.md)). A guest has
+statistics too.
 
 ## Preferences
 

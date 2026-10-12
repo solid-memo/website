@@ -5,7 +5,7 @@
 import { useState } from "preact/hooks";
 import { shiftStudyDay } from "@solid-memo/domain/answer";
 import type { DayActivity } from "@solid-memo/domain/statistics";
-import { weekdayOf } from "@solid-memo/domain/studyPatterns";
+import { CALENDAR_WEEKS, weekdayOf } from "@solid-memo/domain/studyPatterns";
 import { useI18n } from "../i18n";
 import { DayTable, useDayText } from "./DayTable";
 import { Inspector } from "./Inspector";
@@ -23,7 +23,7 @@ export function levelOf(answers: number, most: number): number {
 export function ActivityCalendar({
   days,
   today,
-  weeks = 52,
+  weeks = CALENDAR_WEEKS,
 }: {
   days: readonly DayActivity[];
   today: string;
@@ -69,7 +69,7 @@ export function ActivityCalendar({
         text={pointed === null ? null : dayText(pointed, byDay.get(pointed))}
         prompt={t("statistics.pointAtDay")}
       />
-      <DayTable days={days} />
+      <DayTable days={days.filter((day) => day.studyDay >= first)} />
     </figure>
   );
 }

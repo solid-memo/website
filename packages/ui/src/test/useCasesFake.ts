@@ -16,13 +16,18 @@ import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { statisticsOf } from "@solid-memo/domain/statistics";
 import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 
-/** The statistics of the answers given up to `today`, as getStatistics reports them: by default of a log that covers its range. */
+/**
+ * The statistics of the answers given up to `today`, as getStatistics
+ * reports them: by default of a log that covers its range and begins
+ * with the answers' first month (none without answers).
+ */
 export function statisticsReportOf(
   answers: readonly Answer[],
   today: string,
   coverage: string | null = null,
+  logBegins = answers.map((answer) => answer.studyDay.slice(0, 7)).sort()[0] ?? null,
 ): StatisticsReport {
-  return { ...statisticsOf(answers, today), coverage };
+  return { ...statisticsOf(answers, today), coverage, logBegins };
 }
 
 /** A complete UseCases fake; override the methods a test cares about. */
@@ -147,6 +152,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     planLibraryUpgrade: vi.fn(async () => null),
     listLibraryUpdates: vi.fn(async () => []),
     getStatistics: vi.fn(async () => statisticsReportOf([], "2026-09-21")),
+    saveAnswers: vi.fn(async () => undefined),
     loadAnswerLog: vi.fn(async () => []),
     cardAnswers: vi.fn(async () => []),
     deckInsight: vi.fn(async () => ({

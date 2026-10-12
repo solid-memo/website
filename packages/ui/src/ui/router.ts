@@ -74,8 +74,18 @@ export type RouteRef =
   /** A chapter's final review, which completes it. */
   | { screen: "courseReview"; instanceUrl: string; deckUrl: string; chapterUrl: string }
   | { screen: "preferences"; instanceUrl: string }
-  /** The instance's study statistics. */
-  | { screen: "statistics"; instanceUrl: string }
+  /** The instance's study statistics: `range` the answers they are of,
+      `view` the tab shown; absent, the defaults (DEFAULT_STATISTICS_RANGE,
+      "overview"). */
+  | { screen: "statistics"; instanceUrl: string; range?: StatisticsRange; view?: StatisticsView }
+  /** One deck's study statistics, as the instance's are. */
+  | {
+      screen: "deckStatistics";
+      instanceUrl: string;
+      deckUrl: string;
+      range?: StatisticsRange;
+      view?: StatisticsView;
+    }
   /** Developer tool: the instance's documents checked against the shapes. */
   | { screen: "validation"; instanceUrl: string };
 
@@ -88,6 +98,63 @@ export type BrowserLanguageFilter = "unstated";
 const BROWSER_LANGUAGE_FILTERS: BrowserLanguageFilter[] = ["unstated"];
 
 const STORAGE_SOURCES: StorageSource[] = ["profile", "linkHeader", "manual"];
+
+/**
+ * The answers the statistics are of: the last 30 or 90 study days, the
+ * last 12 study months (as the today strip reads them) or the whole log.
+ */
+export type StatisticsRange = "30d" | "90d" | "12m" | "all";
+
+export const STATISTICS_RANGES: readonly StatisticsRange[] = ["30d", "90d", "12m", "all"];
+
+/** The range the statistics open on, and any range the URL does not know falls back to. */
+export const DEFAULT_STATISTICS_RANGE: StatisticsRange = "90d";
+
+/** The statistics' tabs. */
+export type StatisticsView = "overview" | "activity" | "memory" | "cards";
+
+export const STATISTICS_VIEWS: readonly StatisticsView[] = [
+  "overview",
+  "activity",
+  "memory",
+  "cards",
+];
+
+/** A statistics route's range and tab as query parameters, each left out at its default. */
+function statisticsParams(ref: { range?: StatisticsRange; view?: StatisticsView }) {
+  return {
+    ...(ref.range === undefined || ref.range === DEFAULT_STATISTICS_RANGE
+      ? {}
+      : { range: ref.range }),
+    ...(ref.view === undefined || ref.view === "overview" ? {} : { view: ref.view }),
+  };
+}
+
+/** A statistics route's range and tab from its query, each only when known and not the default. */
+function parseStatisticsParams(query: URLSearchParams): {
+  range?: StatisticsRange;
+  view?: StatisticsView;
+} {
+  const range = query.get("range") as StatisticsRange | null;
+  const view = query.get("view") as StatisticsView | null;
+  return {
+    ...(range !== null && range !== DEFAULT_STATISTICS_RANGE && STATISTICS_RANGES.includes(range)
+      ? { range }
+      : {}),
+    ...(view !== null && view !== "overview" && STATISTICS_VIEWS.includes(view) ? { view } : {}),
+  };
+}
+
+/**
+ * Whether a statistics route's hash says its range and tab as routeToHash
+ * would: not so when it names one the app does not know (or the default),
+ * which the route then drops, its hash replaced to say so.
+ */
+export function isCanonicalStatisticsHash(hash: string): boolean {
+  const query = new URLSearchParams(hash.split("?")[1]);
+  const said = parseStatisticsParams(query);
+  return query.get("range") === (said.range ?? null) && query.get("view") === (said.view ?? null);
+}
 
 export function routeToHash(ref: RouteRef): string {
   switch (ref.screen) {
@@ -178,7 +245,13 @@ export function routeToHash(ref: RouteRef): string {
     case "preferences":
       return `#/preferences${params({ instance: ref.instanceUrl })}`;
     case "statistics":
-      return `#/statistics${params({ instance: ref.instanceUrl })}`;
+      return `#/statistics${params({ instance: ref.instanceUrl, ...statisticsParams(ref) })}`;
+    case "deckStatistics":
+      return `#/deck-statistics${params({
+        instance: ref.instanceUrl,
+        deck: ref.deckUrl,
+        ...statisticsParams(ref),
+      })}`;
     case "validation":
       return `#/validate${params({ instance: ref.instanceUrl })}`;
   }
@@ -200,6 +273,11 @@ export function decksHref(instanceUrl: string): string {
 /** Hash URL of an instance's study statistics. */
 export function statisticsHref(instanceUrl: string): string {
   return routeToHash({ screen: "statistics", instanceUrl });
+}
+
+/** Hash URL of a deck's own statistics: what the deck page's "More statistics" links to. */
+export function deckStatisticsHref(instanceUrl: string, deckUrl: string): string {
+  return routeToHash({ screen: "deckStatistics", instanceUrl, deckUrl });
 }
 
 /** Hash URL of the deck library, where ready-made decks are imported. */
@@ -369,7 +447,13 @@ export function parseHash(hash: string): RouteRef | null {
     case "/preferences":
       return instanceUrl === null ? null : { screen: "preferences", instanceUrl };
     case "/statistics":
-      return instanceUrl === null ? null : { screen: "statistics", instanceUrl };
+      return instanceUrl === null
+        ? null
+        : { screen: "statistics", instanceUrl, ...parseStatisticsParams(query) };
+    case "/deck-statistics":
+      return instanceUrl === null || deckUrl === null
+        ? null
+        : { screen: "deckStatistics", instanceUrl, deckUrl, ...parseStatisticsParams(query) };
     case "/validate":
       return instanceUrl === null ? null : { screen: "validation", instanceUrl };
     default:

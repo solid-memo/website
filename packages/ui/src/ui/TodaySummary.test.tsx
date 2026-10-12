@@ -167,7 +167,7 @@ describe("TodaySummaryContainer", () => {
       "href",
       statisticsHref(INSTANCE.url),
     );
-    expect(getStatistics).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date));
+    expect(getStatistics).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date), {});
   });
 
   it("adds up the cards left today in every deck from their rows' counts, once all are known", async () => {

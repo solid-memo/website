@@ -190,6 +190,15 @@ describe("breadcrumbsFor", () => {
     ]);
   });
 
+  it("ends a deck's statistics' trail with Statistics, under the deck", () => {
+    const statistics: RouteRef = { screen: "deckStatistics", instanceUrl, deckUrl, view: "cards" };
+    expect(breadcrumbsFor(statistics, { deck: "Kanji N5", card: "", libraryDeck: "" })).toEqual([
+      { label: "Decks", route: home },
+      { label: "Kanji N5", route: deckDetail },
+      { label: "Statistics", route: statistics },
+    ]);
+  });
+
   it("puts a course under its deck, a chapter under the course, and a final review under its chapter", () => {
     const chapterUrl = "https://solid-memo.com/decks/solid/v1.ttl#ch-1";
     const course: RouteRef = { screen: "course", instanceUrl, deckUrl };

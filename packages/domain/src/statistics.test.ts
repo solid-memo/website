@@ -10,6 +10,7 @@ import {
   dailyActivity,
   introducedOverTime,
   monthlyRetention,
+  promptGrowthOf,
   quizAccuracyOf,
   retentionOf,
   statisticsOf,
@@ -188,6 +189,25 @@ describe("introducedOverTime", () => {
   });
 });
 
+describe("promptGrowthOf", () => {
+  it("counts each prompt introduced and each grown mature once, however it was answered", () => {
+    const answers = [
+      // Introduced, forgotten in the Studio and introduced again: one prompt.
+      answer("2026-10-01", 4),
+      answer("2026-10-02", 4, undefined),
+      // Introduced and matured, twice over.
+      answer("2026-10-01", 4, undefined, "1", "no", { nextIntervalDays: 21 }),
+      answer("2026-10-22", 5, 21, "1", "no", { nextIntervalDays: 50 }),
+      // Moved with its progress (no introduction among these), matured in a course.
+      answer("2026-10-03", 3, 15, "2", "fi", { mode: "multiple-choice", nextIntervalDays: 37 }),
+      // Neither: reviewed young.
+      answer("2026-10-03", 4, 6, "2", "dk"),
+    ];
+    expect(promptGrowthOf(chainIndexOf(answers))).toEqual({ introduced: 2, matured: 2 });
+    expect(promptGrowthOf(chainIndexOf([]))).toEqual({ introduced: 0, matured: 0 });
+  });
+});
+
 describe("monthlyRetention", () => {
   it("counts each month's reviews and first answers apart, oldest first, a month of first answers only with no review", () => {
     expect(
@@ -216,6 +236,29 @@ describe("monthlyRetention", () => {
 });
 
 describe("statisticsOf", () => {
+  it("counts the range's answers from `since`, and the figures up to today of every answer given", () => {
+    const answers = [
+      answer("2026-09-01", 4),
+      answer("2026-09-29", 4, 1),
+      answer("2026-09-30", 4, 1),
+      answer("2026-10-01", 4, 1),
+      answer("2026-10-02", 4, 1),
+    ];
+    const statistics = statisticsOf(answers, "2026-10-02", "2026-10-01");
+    expect(statistics.totals).toEqual({ answers: 2, studyDays: 2, cards: 1 });
+    expect(statistics.days.map((day) => day.studyDay)).toEqual(["2026-10-01", "2026-10-02"]);
+    expect(statistics.recentDays).toHaveLength(5);
+    // The streak runs on before the range, and last month's first days count.
+    expect(statistics.streaks).toEqual({ current: 4, longest: 4 });
+    expect(statistics.month.previous.answers).toBe(1);
+    expect(statistics.recentStudyDays).toBe(4);
+    expect(statistics.intake.at(-1)).toMatchObject({ reviews: 4 });
+    // Without `since`, or with all of them in range, both are the same days.
+    const whole = statisticsOf(answers, "2026-10-02");
+    expect(whole.recentDays).toBe(whole.days);
+    expect(statisticsOf(answers, "2026-09-01").totals.answers).toBe(5);
+  });
+
   it("counts a card once, though an upgrade of its deck moved it into a new document", () => {
     const before = answer("2026-10-01", 4, undefined, "1", "se");
     const after = {
@@ -235,6 +278,7 @@ describe("statisticsOf", () => {
     const statistics = statisticsOf(answers, "2026-10-02");
     expect(statistics.today).toBe("2026-10-02");
     expect(statistics.totals).toEqual({ answers: 4, studyDays: 2, cards: 3 });
+    expect(statistics.prompts).toEqual({ introduced: 3, matured: 0 });
     expect(statistics.streaks).toEqual({ current: 2, longest: 2 });
     expect(statistics.days.map((day) => day.studyDay)).toEqual(["2026-10-01", "2026-10-02"]);
     expect(statistics.retention.young).toEqual({ reviews: 1, recalled: 1 });

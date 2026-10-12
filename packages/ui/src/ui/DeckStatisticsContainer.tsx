@@ -7,22 +7,23 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { CardProgressContainer } from "./CardProgressContainer";
-import { DayHeldBars } from "./charts/DayHeldBars";
-import { GradeBars } from "./charts/GradeBars";
 import { FirstTryTile, onlyCourseAnswers, QuizTile, RecallTile } from "./charts/StatTiles";
 import { HardestCardsContainer } from "./HardestCardsContainer";
 import { useI18n } from "./i18n";
-import { STATISTICS_STALE_MS } from "./studyFigures";
+import { DEFAULT_STATISTICS_RANGE, deckStatisticsHref } from "./router";
+import { statisticsQuery } from "./studyFigures";
 
 /**
- * A deck's own statistics on its page: what each of its last 30 days
- * held; how well its reviews were remembered (each way apart, when it
- * has reviews both ways), how many cards the first time, and the answer
- * buttons pressed; and how its course questions were answered (only
- * these for a deck studied only in a course's chapters). Nothing of them
- * while there are no answers yet, or when they cannot be read (the deck
- * works without them); then where its cards stand, all new before the
- * first answer, and its hardest cards and most-confused options.
+ * A deck's own statistics on its page, in short, of the range its
+ * statistics page opens on (one read for both): how well its reviews
+ * were remembered (each way apart, when it has reviews both ways) and
+ * how many cards the first time, and how its course questions were
+ * answered (only these for a deck studied only in a course's chapters).
+ * Nothing of them while the range has no answers, or when they cannot
+ * be read (the deck works without them). Then, always, a link to the
+ * rest ("More statistics"), whose longer ranges reach older answers;
+ * then where its cards stand, all new before the first answer, and its
+ * hardest cards and most-confused options.
  */
 export function DeckStatisticsContainer({
   useCases,
@@ -34,12 +35,9 @@ export function DeckStatisticsContainer({
   deck: Deck;
 }) {
   const { t, directionLabel } = useI18n();
-  const statisticsQuery = useQuery({
-    queryKey: ["statistics", instance.url, deck.url],
-    queryFn: () => useCases.getStatistics(instance.url, new Date(), { deckUrl: deck.url }),
-    staleTime: STATISTICS_STALE_MS,
-  });
-  const statistics = statisticsQuery.data;
+  const statistics = useQuery(
+    statisticsQuery(useCases, instance.url, DEFAULT_STATISTICS_RANGE, deck.url),
+  ).data;
   return (
     <>
       {statistics !== undefined && statistics.totals.answers > 0 && (
@@ -48,7 +46,6 @@ export function DeckStatisticsContainer({
           aria-labelledby="deck-statistics-heading"
         >
           <h3 id="deck-statistics-heading">{t("statistics.heading")}</h3>
-          <DayHeldBars days={statistics.days} today={statistics.today} />
           <div class="stat-tiles">
             {!onlyCourseAnswers(statistics) && (
               <>
@@ -63,9 +60,11 @@ export function DeckStatisticsContainer({
             )}
             {statistics.quiz.answers > 0 && <QuizTile quiz={statistics.quiz} />}
           </div>
-          {!onlyCourseAnswers(statistics) && <GradeBars buttons={statistics.buttons} />}
         </section>
       )}
+      <p>
+        <a href={deckStatisticsHref(instance.url, deck.url)}>{t("statistics.moreStatistics")}</a>
+      </p>
       <CardProgressContainer useCases={useCases} instance={instance} deck={deck} />
       <HardestCardsContainer useCases={useCases} instance={instance} deck={deck} />
     </>

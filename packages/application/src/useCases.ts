@@ -173,7 +173,9 @@ import {
   type CourseProgress,
   type CourseResults,
 } from "@solid-memo/domain/course";
+import { answersCsv } from "@solid-memo/domain/answerCsv";
 import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
+import { calendarStartOf } from "@solid-memo/domain/studyPatterns";
 import {
   cardAnswers,
   confusionsOf,
@@ -803,8 +805,16 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   getStatistics(
     instanceUrl: string,
     now: Date,
-    options?: { months?: number; range?: number | "all"; deckUrl?: string },
+    options?: StatisticsRange,
   ): Promise<StatisticsReport>;
+  /**
+   * Save the answers of the range getStatistics would read with the same
+   * `options` (every column the log has, answersCsv) as a CSV file on the
+   * learner's device, "solid-memo-answers-<study day>.csv": they are
+   * handed to the browser to save and sent nowhere. Reads the months as
+   * getStatistics does, sharing what is kept.
+   */
+  saveAnswers(instanceUrl: string, now: Date, options?: StatisticsRange): Promise<void>;
   /**
    * Every answer of the instance's log, of every month, answers still
    * waiting to be added to it added first. Each month's document is read
@@ -954,6 +964,18 @@ export interface Course {
   progress: CourseProgress;
 }
 
+/**
+ * Which answers of the log the statistics are of (UseCases.getStatistics):
+ * those of the last `months` study months (12 by default), or, when
+ * `range` is given, of its last `range` study days or the whole log
+ * ("all"); of every deck, or of the one `deckUrl` names.
+ */
+export interface StatisticsRange {
+  months?: number;
+  range?: number | "all";
+  deckUrl?: string;
+}
+
 /** The study statistics of a range of the answer log (UseCases.getStatistics). */
 export interface StatisticsReport extends Statistics {
   /**
@@ -963,6 +985,8 @@ export interface StatisticsReport extends Statistics {
    * or has no month.
    */
   coverage: string | null;
+  /** The study month ("YYYY-MM") the log begins with; null for a log with no month. */
+  logBegins: string | null;
 }
 
 /** How one course has gone (UseCases.getCourseStatistics). */
@@ -2097,6 +2121,58 @@ export function createUseCases({
     return answers.flat();
   }
 
+  /**
+   * The answers of a range of the log up to `at` (StatisticsRange), of
+   * every deck or of one, answers still waiting to be added to it added
+   * first; with the study day it ends on, the months the log lists, the
+   * range's first study day and the first month it takes in (null for
+   * the whole log). With `recent`, the answers of the activity
+   * calendar's weeks come too, where the range begins after them
+   * (statisticsOf's figures up to today).
+   */
+  async function rangeAnswers(
+    instanceUrl: string,
+    at: Date,
+    { months = 12, range, deckUrl }: StatisticsRange,
+    recent = false,
+  ): Promise<{
+    answers: Answer[];
+    today: string;
+    logged: readonly string[];
+    first: string | null;
+    firstMonth: string | null;
+  }> {
+    await logAnswers();
+    const [prefs, logged] = await Promise.all([
+      getPreferences(instanceUrl),
+      answerLog.months(instanceUrl),
+    ]);
+    const today = studyDayOf(at, prefs.dayBoundaryHour);
+    // The range's first study day: of `range` days up to today, or the first
+    // of this month and the `months - 1` before it; none for the whole log.
+    const first =
+      range === "all"
+        ? null
+        : range === undefined
+          ? firstDayOfMonths(today, months)
+          : shiftStudyDay(today, 1 - range);
+    const firstMonth = first === null ? null : monthOfStudyDay(first);
+    const calendarStart = calendarStartOf(today);
+    const from = first === null || !recent || first <= calendarStart ? first : calendarStart;
+    const fromMonth = from === null ? null : monthOfStudyDay(from);
+    const read = await readLogMonths(
+      instanceUrl,
+      logged,
+      (logMonth) => fromMonth === null || logMonth >= fromMonth,
+    );
+    const answers = read.filter(
+      (answer) =>
+        (from === null || answer.studyDay >= from) &&
+        (deckUrl === undefined || answer.deckUrl === deckUrl),
+    );
+    return { answers, today, logged, first, firstMonth };
+  }
+
   async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
     await logAnswers();
     return readLogMonths(instanceUrl, await answerLog.months(instanceUrl), () => true);
@@ -3205,38 +3281,24 @@ export function createUseCases({
       }
       return count;
     },
-    async getStatistics(instanceUrl, at, { months = 12, range, deckUrl } = {}) {
-      await logAnswers();
-      const [prefs, logged] = await Promise.all([
-        getPreferences(instanceUrl),
-        answerLog.months(instanceUrl),
-      ]);
-      const today = studyDayOf(at, prefs.dayBoundaryHour);
-      // The range's first study day: of `range` days up to today, or the first
-      // of this month and the `months - 1` before it; none for the whole log.
-      const first =
-        range === "all"
-          ? null
-          : range === undefined
-            ? firstDayOfMonths(today, months)
-            : shiftStudyDay(today, 1 - range);
-      const firstMonth = first === null ? null : monthOfStudyDay(first);
-      const read = await readLogMonths(
+    async getStatistics(instanceUrl, at, options = {}) {
+      const { answers, today, logged, first, firstMonth } = await rangeAnswers(
         instanceUrl,
-        logged,
-        (logMonth) => firstMonth === null || logMonth >= firstMonth,
-      );
-      const answers = read.filter(
-        (answer) =>
-          (first === null || answer.studyDay >= first) &&
-          (deckUrl === undefined || answer.deckUrl === deckUrl),
+        at,
+        options,
+        true,
       );
       const begins = logged[0];
       return {
-        ...statisticsOf(answers, today),
+        ...statisticsOf(answers, today, first ?? undefined),
         coverage:
           begins !== undefined && (firstMonth === null || begins > firstMonth) ? begins : null,
+        logBegins: begins ?? null,
       };
+    },
+    async saveAnswers(instanceUrl, at, options = {}) {
+      const { answers, today } = await rangeAnswers(instanceUrl, at, options);
+      fileExchange.save(`solid-memo-answers-${today}.csv`, "text/csv", answersCsv(answers));
     },
     loadAnswerLog,
     async deckInsight(instanceUrl, deck, at, prefs) {

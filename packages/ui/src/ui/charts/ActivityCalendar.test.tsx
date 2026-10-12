@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
-import { days } from "../../test/dayActivity";
+import { day, days } from "../../test/dayActivity";
 import { ActivityCalendar, levelOf } from "./ActivityCalendar";
 
 describe("levelOf", () => {
@@ -38,6 +38,17 @@ describe("ActivityCalendar", () => {
     expect(container.querySelector('[data-day="2026-09-14"]')).toHaveClass("pointed");
     fireEvent.click(container.querySelector('[data-day="2026-09-15"]')!);
     expect(screen.getByText("September 15, 2026: nothing studied.")).toBeInTheDocument();
+    expect(screen.getAllByRole("row")).toHaveLength(1 + days.length);
+  });
+
+  it("leaves a day before its weeks out of its table", () => {
+    render(
+      <ActivityCalendar
+        days={[day("2026-09-13", 5, 5, 0), ...days]}
+        today="2026-09-21"
+        weeks={2}
+      />,
+    );
     expect(screen.getAllByRole("row")).toHaveLength(1 + days.length);
   });
 
