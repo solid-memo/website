@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
-import { useState } from "preact/hooks";
 import { Inspector } from "./Inspector";
+import { usePoint } from "./usePoint";
 
 /** One bar of a BarChart: its key, its figures (one a series), and what it holds, in words. */
 export interface Bar {
@@ -26,7 +26,7 @@ export interface BarSeries {
  * table, for whoever cannot see the chart. A bar of several series
  * stacks them, the first at the bottom, or (`grouped`) stands them side
  * by side; a legend then names them. `ticks`, when given, name the bars
- * under them.
+ * under them. The bars are one tab stop; Left and Right step along them.
  */
 export function BarChart({
   caption,
@@ -48,7 +48,7 @@ export function BarChart({
   prompt: string;
   children: ComponentChildren;
 }) {
-  const [pointed, setPointed] = useState<string | null>(null);
+  const { pointed, keyed, point, keyDown, hintId } = usePoint<string>();
   const sum = (values: readonly number[]) => values.reduce((total, value) => total + value, 0);
   const most = Math.max(
     1,
@@ -98,7 +98,10 @@ export function BarChart({
         viewBox={`0 0 ${count * (width + gap)} ${height}`}
         preserveAspectRatio="none"
         role="img"
+        aria-describedby={hintId}
         aria-label={label}
+        tabindex={0}
+        onKeyDown={keyDown(bars.map(({ key }) => key))}
       >
         <line
           class="baseline"
@@ -108,12 +111,7 @@ export function BarChart({
           y2={height - 0.5}
         />
         {bars.map(({ key, values }, i) => (
-          <g
-            key={key}
-            data-bar={key}
-            onPointerEnter={() => setPointed(key)}
-            onClick={() => setPointed(key)}
-          >
+          <g key={key} data-bar={key} onPointerEnter={() => point(key)} onClick={() => point(key)}>
             <rect class="bar-hit" x={i * (width + gap)} y="0" width={width + gap} height={height} />
             {partsOf(values, i * (width + gap)).map(
               (part, j) =>
@@ -139,7 +137,12 @@ export function BarChart({
           ))}
         </span>
       )}
-      <Inspector text={bars.find((bar) => bar.key === pointed)?.text ?? null} prompt={prompt} />
+      <Inspector
+        id={hintId}
+        text={bars.find((bar) => bar.key === pointed)?.text ?? null}
+        prompt={prompt}
+        keyed={keyed}
+      />
       {children}
     </figure>
   );

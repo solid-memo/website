@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { day, days } from "../../test/dayActivity";
+import { statusTexts } from "../../test/liveRegions";
 import { ActivityCalendar, levelOf } from "./ActivityCalendar";
 
 describe("levelOf", () => {
@@ -26,7 +27,7 @@ describe("ActivityCalendar", () => {
     expect(container.querySelector('[data-day="2026-09-20"]')).toHaveClass("level-1");
     expect(container.querySelector('[data-day="2026-09-15"]')).toHaveClass("level-0");
     const inspector = screen.getByText(
-      "Point at a day to see what it held, or open the table below.",
+      "Point at a day (or use the arrow keys) to see what it held, or open the table below.",
     );
     expect(inspector).not.toHaveAttribute("aria-live");
     fireEvent.pointerEnter(container.querySelector('[data-day="2026-09-14"]')!);
@@ -39,6 +40,27 @@ describe("ActivityCalendar", () => {
     fireEvent.click(container.querySelector('[data-day="2026-09-15"]')!);
     expect(screen.getByText("September 15, 2026: nothing studied.")).toBeInTheDocument();
     expect(screen.getAllByRole("row")).toHaveLength(1 + days.length);
+  });
+
+  it("steps a week with Left and Right and a day with Up and Down, and reads each day out", () => {
+    const { container } = render(<ActivityCalendar days={days} today="2026-09-21" weeks={2} />);
+    const grid = screen.getByRole("img", { name: /^Answers by day/ });
+    expect(grid).toHaveAttribute("tabindex", "0");
+    expect(grid).toHaveAccessibleDescription(/^Point at a day \(or use the arrow keys\)/);
+    fireEvent.keyDown(grid, { key: "ArrowLeft" });
+    expect(container.querySelector('[data-day="2026-09-21"]')).toHaveClass("pointed");
+    fireEvent.keyDown(grid, { key: "ArrowLeft" });
+    fireEvent.keyDown(grid, { key: "ArrowDown" });
+    expect(container.querySelector('[data-day="2026-09-15"]')).toHaveClass("pointed");
+    fireEvent.keyDown(grid, { key: "ArrowUp" });
+    expect(container.querySelector(".chart-inspector")).toHaveTextContent(
+      "September 14, 2026: 40 answers (10 new, 26 remembered, 4 lapses, 0 repeats).",
+    );
+    expect(statusTexts()).toEqual([
+      "September 14, 2026: 40 answers (10 new, 26 remembered, 4 lapses, 0 repeats).",
+    ]);
+    fireEvent.pointerEnter(container.querySelector('[data-day="2026-09-15"]')!);
+    expect(statusTexts()).toEqual([]);
   });
 
   it("leaves a day before its weeks out of its table", () => {

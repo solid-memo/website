@@ -230,6 +230,8 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
       // Every card is young: none is known yet.
       cardsYouKnow: 0,
     });
+    // The calendar's days can be read from the keyboard too.
+    await app.statistics.expectCalendarByKeyboard(answers);
     // All time is the whole log, today's: its four cards met, none grown mature.
     await app.statistics.selectRange("all");
     await app.statistics.expectAllTime({ answers, introduced: cards, matured: 0 });

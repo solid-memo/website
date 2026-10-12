@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import type { MonthRetention } from "@solid-memo/domain/statistics";
+import { statusTexts } from "../../test/liveRegions";
 import { RecallChart } from "./RecallChart";
 
 describe("RecallChart", () => {
@@ -39,7 +40,7 @@ describe("RecallChart", () => {
     expect(container.querySelectorAll("path.line-mature.lone")).toHaveLength(2);
     expect(
       screen.getByText(
-        "Point at a month to see how well it was remembered, or open the table below.",
+        "Point at a month (or use the arrow keys) to see how well it was remembered, or open the table below.",
       ),
     ).toBeInTheDocument();
     fireEvent.pointerEnter(container.querySelector('[data-point="2026-07"]')!);
@@ -58,6 +59,32 @@ describe("RecallChart", () => {
       "July 202690% of 10 reviews100% of 1 review100% of 1 new card",
       "June 202675% of 4 reviewsno reviews75% of 8 new cards",
     ]);
+  });
+
+  it("steps along the months with the arrow keys, guide and dots following, each read out", () => {
+    const { container } = render(<RecallChart months={months} />);
+    const plot = screen.getByRole("img", { name: /^The share of reviews remembered/ });
+    expect(plot).toHaveAttribute("tabindex", "0");
+    expect(plot).toHaveAccessibleDescription(/^Point at a month \(or use the arrow keys\)/);
+    fireEvent.keyDown(plot, { key: "Home" });
+    fireEvent.keyDown(plot, { key: "ArrowRight" });
+    expect(container.querySelector(".crosshair")).toBeInTheDocument();
+    expect(container.querySelectorAll("path.line-point")).toHaveLength(2);
+    expect(statusTexts()).toEqual([
+      "July 2026: young cards 90% of 10 reviews, mature cards 100% of 1 review.",
+    ]);
+  });
+
+  it("says nothing of a month pointed at that a shorter range no longer holds", () => {
+    const { container, rerender } = render(<RecallChart months={months} />);
+    const plot = screen.getByRole("img", { name: /^The share of reviews remembered/ });
+    fireEvent.keyDown(plot, { key: "End" });
+    expect(statusTexts()).toHaveLength(1);
+    rerender(<RecallChart months={months.slice(0, 2)} />);
+    expect(container.querySelector(".crosshair")).not.toBeInTheDocument();
+    expect(container.querySelector("path.line-point")).not.toBeInTheDocument();
+    expect(container.querySelector(".chart-inspector")).toHaveTextContent(/^Point at a month/);
+    expect(statusTexts()).toEqual([]);
   });
 
   it("names a single month once under the plot", () => {

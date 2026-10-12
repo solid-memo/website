@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
-import { useState } from "preact/hooks";
 import { Inspector } from "./Inspector";
+import { usePoint } from "./usePoint";
 
 /** One line of a LineChart: a value a point, null where it has none (a gap in the line). */
 export interface LineSeries {
@@ -19,7 +19,8 @@ export interface LineSeries {
  * `max`. Pointing at a point puts a guide through
  * it and a dot on each line there, and says what it holds; a point of a
  * line with no neighbor is drawn as a dot of its own. With two lines a
- * legend names them, each by its own stroke.
+ * legend names them, each by its own stroke. The plot is one tab stop;
+ * Left and Right step along the points.
  */
 export function LineChart({
   name,
@@ -49,7 +50,9 @@ export function LineChart({
   prompt: string;
   table: ComponentChildren;
 }) {
-  const [pointed, setPointed] = useState<number | null>(null);
+  const { pointed, keyed, point, keyDown, hintId } = usePoint<string>();
+  // Kept by key, so a change of the points (a shorter range) cannot leave it past their end.
+  const pointedAt = pointed === null ? -1 : keys.indexOf(pointed);
   const width = 300;
   const height = 100;
   const step = keys.length === 1 ? width : width / (keys.length - 1);
@@ -95,12 +98,15 @@ export function LineChart({
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="none"
           role="img"
+          aria-describedby={hintId}
           aria-label={label}
+          tabindex={0}
+          onKeyDown={keyDown(keys)}
         >
           <line class="gridline" x1="0" x2={width} y1={yOf(max)} y2={yOf(max)} />
           <line class="baseline" x1="0" x2={width} y1={yOf(0)} y2={yOf(0)} />
-          {pointed !== null && (
-            <line class="crosshair" x1={xOf(pointed)} x2={xOf(pointed)} y1="0" y2={height} />
+          {pointedAt !== -1 && (
+            <line class="crosshair" x1={xOf(pointedAt)} x2={xOf(pointedAt)} y1="0" y2={height} />
           )}
           {series.map((line) =>
             runsOf(line.values).map((d) => (
@@ -111,14 +117,14 @@ export function LineChart({
               />
             )),
           )}
-          {pointed !== null &&
+          {pointedAt !== -1 &&
             series.map((line) => {
-              const value = line.values[pointed]!;
+              const value = line.values[pointedAt]!;
               return value === null ? null : (
                 <path
                   key={line.name}
                   class={`line-point line-${line.name}`}
-                  d={`M${at(pointed, value)}h0`}
+                  d={`M${at(pointedAt, value)}h0`}
                 />
               );
             })}
@@ -131,8 +137,8 @@ export function LineChart({
               y="0"
               width={step}
               height={height}
-              onPointerEnter={() => setPointed(i)}
-              onClick={() => setPointed(i)}
+              onPointerEnter={() => point(key)}
+              onClick={() => point(key)}
             />
           ))}
         </svg>
@@ -141,7 +147,12 @@ export function LineChart({
           {keys.length > 1 && <span>{formatKey(keys.at(-1)!)}</span>}
         </span>
       </div>
-      <Inspector text={pointed === null ? null : textAt(pointed)} prompt={prompt} />
+      <Inspector
+        id={hintId}
+        text={pointedAt === -1 ? null : textAt(pointedAt)}
+        prompt={prompt}
+        keyed={keyed}
+      />
       {table}
     </figure>
   );

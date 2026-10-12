@@ -25,7 +25,9 @@ describe("ForecastBars", () => {
     expect(container.querySelectorAll('g[data-bar="2026-09-22"] rect.bar')).toHaveLength(1);
     expect(container.querySelectorAll("rect.bar")).toHaveLength(5);
     expect(
-      screen.getByText("Point at a day to see what falls due, or open the table below."),
+      screen.getByText(
+        "Point at a day (or use the arrow keys) to see what falls due, or open the table below.",
+      ),
     ).toBeInTheDocument();
     fireEvent.pointerEnter(container.querySelector('g[data-bar="2026-09-21"]')!);
     expect(
