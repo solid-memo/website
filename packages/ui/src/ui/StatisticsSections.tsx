@@ -14,6 +14,7 @@ import {
 import { ActivityCalendar } from "./charts/ActivityCalendar";
 import { DayHeldBars } from "./charts/DayHeldBars";
 import { GradeBars } from "./charts/GradeBars";
+import { HourChart } from "./charts/HourChart";
 import { IntakeChart } from "./charts/IntakeChart";
 import { IntervalRecallChart } from "./charts/IntervalRecallChart";
 import { IntroducedChart } from "./charts/IntroducedChart";
@@ -31,6 +32,7 @@ import {
   StatTile,
   TimeToMatureTile,
 } from "./charts/StatTiles";
+import { StudyTimeChart, StudyTimeTiles } from "./charts/StudyTimeChart";
 import { WeekdayChart } from "./charts/WeekdayChart";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
@@ -216,7 +218,10 @@ const RECALL_BY_WEEK_DAYS = 14 * 7;
 /**
  * When and how much: what each recent day held, how the weekdays are
  * studied, this week and month beside the last (these whatever the
- * range), then progress: the cards introduced over the range, where the
+ * range), then about how long the range's recalled answers took, with
+ * the minutes of each recent day (none while there are only course
+ * answers, which are not timed), and, folded away, the answers by hour
+ * of the day; then progress: the cards introduced over the range, where the
  * cards stood and their median interval week by week, how many were
  * remembered the first time (not for course answers alone) and how long
  * cards took to grow mature, and the new cards beside the reviews by
@@ -233,6 +238,17 @@ export function ActivitySection({ statistics }: { statistics: StatisticsReport }
       <PeriodTiles period="week" figures={statistics.week} />
       <h3>{t("statistics.thisMonth")}</h3>
       <PeriodTiles period="month" figures={statistics.month} />
+      <h3>{t("statistics.studyTime")}</h3>
+      <p class="hint">{t("statistics.studyTimeHint")}</p>
+      {statistics.studyTime.answers > 0 && (
+        <>
+          <StudyTimeTiles time={statistics.studyTime} />
+          {statistics.studyTime.medianAnswerMs !== null && (
+            <StudyTimeChart time={statistics.studyTime} today={statistics.today} />
+          )}
+        </>
+      )}
+      <HourChart hours={statistics.hours} dayBoundaryHour={statistics.dayBoundaryHour} />
       <h3>{t("statistics.progress")}</h3>
       <IntroducedChart days={statistics.days} today={statistics.today} />
       <MaturityOverTimeChart weeks={statistics.memory} />

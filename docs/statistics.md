@@ -34,7 +34,9 @@ study session usually ends) says what the day came to:
   leaves the share out. While cards are left to study today, due and
   new, the numbers say how many in every deck ("7 left to study
   today"), from the counts the deck list's rows read, once every
-  deck's is known.
+  deck's is known, and about how long they will take ("about 6
+  minutes to go", [below](#time-spent-and-the-hours-of-the-day)), once
+  how long an answer takes is known.
 
 Before the day's first answer there is no strip. When the answers
 cannot be read there is none either: the deck list works without it.
@@ -92,6 +94,8 @@ cannot reach further back. Each tab, from the top:
 | Overview | Download my answers (CSV) | Saves the range's answers, of every deck or of the deck, as a CSV file on the learner's device (`UseCases.saveAnswers`, `answersCsv` in [answerCsv.ts](../packages/domain/src/answerCsv.ts)): a row an answer, oldest first, with every column the log has (`answered_at`, `study_day`, `deck`, `card`, `direction`, `grade`, `mode`, `prior_interval_days`, `next_interval_days`, `chosen_distractor`), named in English whatever the page's language. It is handed to the browser to save as any download; nothing is sent anywhere. |
 | Activity | What each day held | The last 30 days as stacked bars: reviews remembered, cards new that day, lapses and repeats, a step of the green each, named in a legend. A course answer to a card seen before is none of these, so it counts only among the day's answers, in the table. |
 | Activity | Answers by weekday | A bar a weekday, Monday first: its answers divided by how many of that weekday there have been since the first study day read, and in the table how many of them were studied ("3 of 4"). |
+| Activity | Time spent studying | About how long the range's recalled answers took, and on a study day on average; how many sessions, and a study day's on average; the median time an answer took. Then the last 30 days as bars of minutes, each day's sessions in its words and the table. Always "about": the time is estimated ([below](#time-spent-and-the-hours-of-the-day)), and course answers are left out. Dashes while no session has had two answers. |
+| Activity | Answers by hour of the day | Folded away until opened: a bar an hour, from the hour the study day begins (the preferences' day boundary) round to the one before, so one study day reads as one run, with every sixth hour named under the bars and a table with the total. In the viewer's current time zone, which the note says. |
 | Activity | This week so far, This month so far | Answers, study days, cards introduced and recall from Monday (as the calendar's weeks) or the month's first up to today, each with the same days of the week or month before under it: last week's Monday up to today's weekday, last month's first up to today's date (or its last day, when it was shorter). |
 | Activity | Progress | "Cards introduced over time": a running total of the cards seen for the first time, over the range. "Young and mature cards over time": at the end of each week of the range, how many cards were young (dashed) and how many mature (solid), as their last answers by then left them; relearning ones are in the table. "Memory span": at the end of each week, the median of the intervals those answers gave, in days. Both are approximate ([below](#growth-and-depth-of-memory)). "First try": the share of cards remembered the first time they were seen. "Time to mature (median)": the median study days, and the median reviews, from a card's introduction to the answer that first gave it an interval of 21 days or more, of the cards that grew mature in the range, with how many they are. "New cards and reviews, by week": the cards introduced beside the scored reviews done, a pair of bars a week for the last 12 weeks: when the new cards keep outpacing the reviews, the reviews due further down show what they bring. |
 | Memory | Remembered in reviews | Two tiles, young and mature cards: the share of reviews remembered, with how many reviews it is of. Then "Answer buttons": for first answers and for young and mature reviews, a bar of the buttons pressed, Again, Hard, Good and Easy, with every count in the table. Then "Recall by week", the same split week by week, young as a dashed line and mature as a solid one, while the reviews fall in the last 14 weeks (so a range of 90 days always does); over a longer stretch "Recall by month" instead, whose table adds each month's first tries. Then "Recall by interval": for each span of intervals the histogram of intervals uses (1 day, 2–3, 4–7 and so on), the share of the reviews after it remembered, as a bar on a scale of 0 to 100%, with how many reviews it is of; its note names the SM-2 steps, so a span with few reviews reads as such. Then "What a late review costs": the share remembered of the reviews done on time, 1–2, 3–6, 7–29 and 30 days or more late, early (or moved to an earlier day in the Studio) and of unknown lateness, approximate, as its note says; under it, once there are reviews both on time and late, "Reviews done on time: 90% of 10 reviews remembered. Done late: 25% of 4 reviews." Both charts show before any review too, every span "no reviews". Left out (first try and the answer buttons too) when there is no review but there are course answers, as for a learner who has only taken a course. |
@@ -298,6 +302,20 @@ whole log), so a review early in the range still has the answer before
 it. Course answers change a card's schedule, so they count in where
 the cards stood, but never in recall.
 
+### Time spent and the hours of the day
+
+The log records when each answer was given, not how long it took, so
+[studyTime.ts](../packages/domain/src/studyTime.ts) estimates the time
+from the pauses between answers, and every figure of it says "about".
+
+| Term | Definition |
+|---|---|
+| Session | Recalled answers in the order they were given; a pause of 5 minutes or more (`SESSION_GAP_MS`) begins a new one. A session counts on the study day of its first answer; a day that only carries one on from the day before says so, rather than "0 sessions". |
+| Time an answer took | The pause before it within its session, up to a minute (`ANSWER_CAP_MS`): a longer one was mostly spent elsewhere. A session's first answer has no pause before it, so it takes the median of its session's others, or, alone in its session, the median of every session's. While no session has had two answers there is no median, and no time is counted: `estimateStudyTime`. |
+| Course answers | Left out: what a chapter shows before its questions takes time no answer tells, so time in courses is not counted, as the page says. They do count by the hour. |
+| Time left today | (Reviews left + new cards left + the reviews expected back) × the median time an answer took, where the reviews expected back are the reviews left times the share of young reviews forgotten over the strip's 12 months (none before any): `expectedTimeToday`. Shown in whole minutes, one at least. |
+| Hour of the day | Each answer by the hour it was in the viewer's current time zone when the page is read (`answersByHour`), not where it was given, so a learner who traveled sees those answers shifted. |
+
 ### Why the figures changed
 
 Before this, recall and "remembered" counted every answer with a prior
@@ -326,7 +344,7 @@ Nothing in the pod changed: the same answer log is read differently.
 
 | Layer | Files |
 |---|---|
-| Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [memoryCurve.ts](../packages/domain/src/memoryCurve.ts): recall by interval, by lateness and by week, where the cards stood and their median interval week by week, and the time to mature. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, the prompts introduced and grown mature (`promptGrowthOf`), and `todayOf`. [answerCsv.ts](../packages/domain/src/answerCsv.ts): the answers as CSV. [studyPatterns.ts](../packages/domain/src/studyPatterns.ts): the answer buttons, first try, this week and month beside the last, the days studied of the last 30, the weekdays, recall each way, and the new cards beside the reviews by week. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, relearning, young and mature, and when new cards run out. [cardHistory.ts](../packages/domain/src/cardHistory.ts): a deck's answers as its cards are named now, a card's answers, lapses, the hardest cards and the wrong options chosen most. [course.ts](../packages/domain/src/course.ts): `courseProgressOf`, a course's chapters done and its graded answers chapter by chapter. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, the interval and ease histograms, shared with the Studio, what is overdue and the days the daily limit takes to catch up. |
+| Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [memoryCurve.ts](../packages/domain/src/memoryCurve.ts): recall by interval, by lateness and by week, where the cards stood and their median interval week by week, and the time to mature. [studyTime.ts](../packages/domain/src/studyTime.ts): the estimated time, sessions and time left today, and the answers by hour. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, the prompts introduced and grown mature (`promptGrowthOf`), and `todayOf`. [answerCsv.ts](../packages/domain/src/answerCsv.ts): the answers as CSV. [studyPatterns.ts](../packages/domain/src/studyPatterns.ts): the answer buttons, first try, this week and month beside the last, the days studied of the last 30, the weekdays, recall each way, and the new cards beside the reviews by week. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, relearning, young and mature, and when new cards run out. [cardHistory.ts](../packages/domain/src/cardHistory.ts): a deck's answers as its cards are named now, a card's answers, lapses, the hardest cards and the wrong options chosen most. [course.ts](../packages/domain/src/course.ts): `courseProgressOf`, a course's chapters done and its graded answers chapter by chapter. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, the interval and ease histograms, shared with the Studio, what is overdue and the days the daily limit takes to catch up. |
 | Application | `getStatistics`, `saveAnswers`, `getCardProgress` and `getCourseStatistics` in [useCases.ts](../packages/application/src/useCases.ts): which months and documents to read; `readLogMonths` keeps the months read, for `loadAnswerLog` too, and reads a month asked for twice at once only once. `cardAnswers` for a card's history. |
 | UI | [StatisticsContainer.tsx](../packages/ui/src/ui/StatisticsContainer.tsx) (the page, of the instance or of a deck), [StatisticsScreen.tsx](../packages/ui/src/ui/StatisticsScreen.tsx) (its range and tabs) and [StatisticsSections.tsx](../packages/ui/src/ui/StatisticsSections.tsx) (the overview, activity and memory tabs), the `statistics` and `deckStatistics` routes in [router.ts](../packages/ui/src/ui/router.ts), [CardProgressContainer.tsx](../packages/ui/src/ui/CardProgressContainer.tsx) (where the cards stand), [HardestCardsContainer.tsx](../packages/ui/src/ui/HardestCardsContainer.tsx) and [HardestCards.tsx](../packages/ui/src/ui/HardestCards.tsx) (what is hard, from the same read), [CourseStatistics.tsx](../packages/ui/src/ui/CourseStatistics.tsx) (your courses), [CardHistoryContainer.tsx](../packages/ui/src/ui/CardHistoryContainer.tsx) and [CardHistory.tsx](../packages/ui/src/ui/CardHistory.tsx) (a card's history), [charts/](../packages/ui/src/ui/charts/) (tiles, calendar, bar charts stacked or side by side, histograms, line charts, the answer buttons and maturity bars, a module each, gathered for the Studio in [StatisticsCharts.tsx](../packages/ui/src/ui/StatisticsCharts.tsx)), [DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx) and the today strip above. |
 
@@ -339,12 +357,12 @@ rest of their study when they log in.
 - **Unit tests** at 100% coverage, as everywhere
   ([testing.md](testing.md)): `answerChain.test.ts`,
   `statistics.test.ts`, `memoryCurve.test.ts` (a forget, a move with
-  its progress, a reschedule, introductions before the answers read), `answerCsv.test.ts`, `studyPatterns.test.ts`, `cardProgress.test.ts`,
+  its progress, a reschedule, introductions before the answers read), `studyTime.test.ts`, `answerCsv.test.ts`, `studyPatterns.test.ts`, `cardProgress.test.ts`,
   `cardHistory.test.ts`, `scheduleInsight.test.ts` and
   `course.test.ts` in the domain,
   the passes over the whole log (`chainIndexOf`, `statisticsOf` and the
-  answer buttons, first try, recall each way, where the cards stood and
-  the hardest cards) held to linear growth,
+  answer buttons, first try, recall each way, where the cards stood,
+  the estimated time and the hardest cards) held to linear growth,
   the use cases in `useCases.test.ts`, and `StatisticsScreen.test.tsx`,
   `StatisticsSections.test.tsx`, `router.test.ts`, `Workspace.test.tsx`
   (the range and tab in the URL, the deck's statistics route),
@@ -369,7 +387,9 @@ rest of their study when they log in.
   the answer buttons (the Again among the first answers, the repeat
   left out), recall by interval (every span with no review yet), this
   week's young and mature cards, what the day held (one repeat), the
-  weekdays, the table by
+  weekdays, the time spent (its sessions a count, never its minutes,
+  which hang on how fast the journey runs) and the answers by hour of
+  the day (their total), the table by
   deck, every maturity bar (relearning among them), the overdue tile,
   the interval chart and that no leech is listed before any review,
   then reads today in the calendar from the keyboard; step 15b reads

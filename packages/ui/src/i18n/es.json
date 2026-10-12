@@ -527,6 +527,11 @@
       "many": "{count} por estudiar hoy",
       "other": "{count} por estudiar hoy"
     },
+    "timeLeft": {
+      "one": "queda {count} minuto aproximadamente",
+      "many": "quedan unos {count} de minutos",
+      "other": "quedan unos {count} minutos"
+    },
     "allStatistics": "Todas las estadísticas",
     "week": {
       "one": "{count} esta semana",
@@ -1747,7 +1752,53 @@
       "many": "y {reviews}, de {count} de tarjetas",
       "other": "y {reviews}, de {count} tarjetas"
     },
-    "noneMatured": "Ninguna tarjeta maduró en este periodo"
+    "noneMatured": "Ninguna tarjeta maduró en este periodo",
+    "studyTime": "Tiempo dedicado a estudiar",
+    "studyTimeHint": "Aproximado, estimado a partir de cuándo diste tus respuestas: una pausa de 5 minutos o más empieza una nueva sesión, y una pausa dentro de una cuenta como 1 minuto como mucho. Las respuestas de los cursos no se cuentan, así que el tiempo en los cursos no se incluye.",
+    "timeStudied": "Tiempo estudiado",
+    "perStudyDay": "{time} por día de estudio de media",
+    "noTimeYet": "Aún hay muy pocas respuestas seguidas para saberlo",
+    "sessions": "Sesiones",
+    "sessionsPerDay": {
+      "one": "{count} por día de estudio de media",
+      "many": "{count} por día de estudio de media",
+      "other": "{count} por día de estudio de media"
+    },
+    "timePerAnswer": "Tiempo por respuesta (mediana)",
+    "aboutSeconds": {
+      "one": "{count} segundo aproximadamente",
+      "many": "unos {count} de segundos",
+      "other": "unos {count} segundos"
+    },
+    "aboutMinutes": {
+      "one": "{count} minuto aproximadamente",
+      "many": "unos {count} de minutos",
+      "other": "unos {count} minutos"
+    },
+    "aboutHours": {
+      "one": "{count} hora aproximadamente",
+      "many": "unas {count} de horas",
+      "other": "unas {count} horas"
+    },
+    "timeByDay": "Tiempo estudiado cada día, los últimos {count} días",
+    "timeByDayLabel": "Barras con los minutos aproximados de estudio de cada uno de los últimos {count} días.",
+    "timeDayDetail": "{date}: {time} en {sessions}.",
+    "timeDayNone": "{date}: no se contó tiempo.",
+    "timeDayContinued": "{date}: {time}, en una sesión que empezó el día anterior.",
+    "sessionCount": {
+      "one": "{count} sesión",
+      "many": "{count} de sesiones",
+      "other": "{count} sesiones"
+    },
+    "timeColumn": "Tiempo",
+    "showHours": "Ver en qué momento del día estudias",
+    "hours": "Respuestas por hora del día",
+    "hoursLabel": "Barras con las respuestas dadas en cada hora del día, desde la hora en que empieza tu día de estudio.",
+    "hoursNote": "En tu zona horaria actual: una respuesta dada en otra zona horaria cuenta por la hora que era aquí. Las horas empiezan cuando empieza tu día de estudio, así que un día de estudio se lee de un tirón.",
+    "hourDetail": "{hour}: {answers}.",
+    "pointAtHour": "Señala una hora (o usa las flechas del teclado) para ver sus respuestas, o abre la tabla de abajo.",
+    "hour": "Hora",
+    "total": "Total"
   },
   "zoomableImage": {
     "enlarge": "Ampliar imagen",

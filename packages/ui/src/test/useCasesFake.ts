@@ -19,7 +19,8 @@ import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleIns
 /**
  * The statistics of the answers given up to `today`, as getStatistics
  * reports them: by default of a log that covers its range and begins
- * with the answers' first month (none without answers).
+ * with the answers' first month (none without answers), its days
+ * beginning at the default hour.
  */
 export function statisticsReportOf(
   answers: readonly Answer[],
@@ -27,7 +28,12 @@ export function statisticsReportOf(
   coverage: string | null = null,
   logBegins = answers.map((answer) => answer.studyDay.slice(0, 7)).sort()[0] ?? null,
 ): StatisticsReport {
-  return { ...statisticsOf(answers, today), coverage, logBegins };
+  return {
+    ...statisticsOf(answers, today),
+    coverage,
+    logBegins,
+    dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
+  };
 }
 
 /** A complete UseCases fake; override the methods a test cares about. */

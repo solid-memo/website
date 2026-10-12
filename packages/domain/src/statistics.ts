@@ -44,16 +44,18 @@ import {
   type TimeToMature,
   type WeekRetention,
 } from "./memoryCurve";
+import { answersByHour, estimateStudyTime, type StudyTime } from "./studyTime";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
  * Study statistics, computed from the answer log (domain/answer.ts):
  * activity by study day, streaks, totals, how well reviewed cards were
  * remembered, and how course questions were answered, with how the
- * learner answers and studies (studyPatterns.ts). Recall counts
- * scored reviews only (answerChain.ts): not first answers, repeats the
- * same day, or course answers, which are counted apart. Pure; the use
- * case reads the months it needs.
+ * learner answers and studies (studyPatterns.ts), and when and about
+ * how long (studyTime.ts). Recall counts scored reviews only
+ * (answerChain.ts): not first answers, repeats the same day, or course
+ * answers, which are counted apart. Pure; the use case reads the months
+ * it needs.
  */
 
 /** What happened on one study day. */
@@ -191,6 +193,10 @@ export interface Statistics {
   weekdays: WeekdayRhythm[];
   /** The new cards and the reviews of each of the last INTAKE_WEEKS weeks. */
   intake: WeekLoad[];
+  /** About how long the recalled answers took (approximate; estimateStudyTime). */
+  studyTime: StudyTime;
+  /** The answers given in each hour of the day, midnight's first, in this device's time zone. */
+  hours: number[];
 }
 
 /** Every study day with answers, oldest first; `index` holds the answers' chains. */
@@ -401,6 +407,8 @@ export function statisticsOf(
     month: periodToDateOf(recentDays, today, "month"),
     weekdays: weekdayRhythmOf(days, today),
     intake: intakeVsLoadOf(recentDays, today),
+    studyTime: estimateStudyTime(answers),
+    hours: answersByHour(answers),
   };
 }
 

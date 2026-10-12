@@ -3514,6 +3514,8 @@ describe("the answer log", () => {
     // How the answers were given comes with them: the card's second introduction is no first try.
     expect(all.firstTry).toEqual({ introduced: 2, recalled: 2 });
     expect(all.week.current.answers).toBe(1);
+    // The hours of the day start where the learner's study day does.
+    expect(all.dayBoundaryHour).toBe(DEFAULT_PREFERENCES.dayBoundaryHour);
     const one = await useCases.getStatistics(instance.url, noon, { months: 1, deckUrl: deck.url });
     expect(one.days.map((day) => day.studyDay)).toEqual(["2026-09-20"]);
     expect(one.decks).toEqual([

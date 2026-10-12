@@ -7,6 +7,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { todayOf } from "@solid-memo/domain/statistics";
+import { expectedTimeToday } from "@solid-memo/domain/studyTime";
 import { studyCountsQuery } from "./DeckStudyAction";
 import { statisticsHref } from "./router";
 import { statisticsQuery } from "./studyFigures";
@@ -20,7 +21,10 @@ import { TodaySummary } from "./TodaySummary";
  * a minute old, and at once after any change made, an answer in a
  * session or a course among them, which clears it. With it, the cards
  * left to study today in the `decks` listed, from the counts their rows
- * read (studyCountsQuery, one cache), once every deck's is known.
+ * read (studyCountsQuery, one cache), once every deck's is known, and
+ * about how many minutes they will take, from how long an answer has
+ * taken and how often young cards were forgotten over those months
+ * (expectedTimeToday), a minute at least.
  * Nothing before the day's first answer, or when the answers cannot be
  * read: the deck list works without them.
  */
@@ -38,10 +42,22 @@ export function TodaySummaryContainer({
     queries: decks.map((deck) => studyCountsQuery(useCases, instance.url, deck)),
   });
   const known = counts.every((one) => one.data !== undefined);
-  const left = known
-    ? counts.reduce((sum, { data }) => sum + data!.dueCount + data!.newCount, 0)
-    : undefined;
+  const reviews = counts.reduce((sum, { data }) => sum + (data?.dueCount ?? 0), 0);
+  const newCards = counts.reduce((sum, { data }) => sum + (data?.newCount ?? 0), 0);
   const today = statistics.data === undefined ? null : todayOf(statistics.data);
   if (today === null) return null;
-  return <TodaySummary today={today} left={left} statisticsHref={statisticsHref(instance.url)} />;
+  const ms = expectedTimeToday({
+    reviews,
+    newCards,
+    young: statistics.data!.retention.young,
+    medianAnswerMs: statistics.data!.studyTime.medianAnswerMs,
+  });
+  return (
+    <TodaySummary
+      today={today}
+      left={known ? reviews + newCards : undefined}
+      minutesLeft={ms === null ? undefined : Math.max(1, Math.round(ms / 60_000))}
+      statisticsHref={statisticsHref(instance.url)}
+    />
+  );
 }

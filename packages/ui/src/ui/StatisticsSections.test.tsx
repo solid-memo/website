@@ -175,9 +175,20 @@ describe("OverviewSection", () => {
 });
 
 describe("ActivitySection", () => {
-  it("shows what each day held, the weekdays, this week and month, and the cards introduced", () => {
+  it("shows what each day held, the weekdays, this week and month, the time studied, and the cards introduced", () => {
     render(<ActivitySection statistics={statistics} />);
-    expect(headings()).toEqual(["This week so far", "This month so far", "Progress"]);
+    expect(headings()).toEqual([
+      "This week so far",
+      "This month so far",
+      "Time spent studying",
+      "Progress",
+    ]);
+    // A day apart, so two sessions; the two answers given at once took no time.
+    expect(screen.getByRole("group", { name: "Sessions" })).toHaveTextContent(
+      "21 a study day on average",
+    );
+    expect(screen.getByText("Time studied each day, the last 30 days")).toBeInTheDocument();
+    expect(screen.getByText("Show when in the day you study")).toBeInTheDocument();
     expect(screen.getByText("What each day held, the last 30 days")).toBeInTheDocument();
     expect(screen.getByText("Answers by weekday")).toBeInTheDocument();
     // September 21 was a Monday: this week holds that day alone.
@@ -200,6 +211,9 @@ describe("ActivitySection", () => {
   it("gives no first try for course answers alone, and how long cards took to grow mature all the same", () => {
     render(<ActivitySection statistics={courseOnly} />);
     expect(screen.queryByRole("group", { name: "First try" })).toBeNull();
+    // Course answers are not timed, though they count by the hour.
+    expect(screen.queryByRole("group", { name: "Sessions" })).toBeNull();
+    expect(screen.getByText("Show when in the day you study")).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Time to mature (median)" })).toHaveTextContent(
       "–No card grew mature in this range",
     );
@@ -212,6 +226,11 @@ describe("ActivitySection", () => {
       />,
     );
     expect(screen.getByText("Since March 2026, your first month of study.")).toBeInTheDocument();
+    // One answer alone tells no time.
+    expect(screen.getByRole("group", { name: "Time studied" })).toHaveTextContent(
+      "–Too few answers in a row to tell yet",
+    );
+    expect(screen.queryByText("Time studied each day, the last 30 days")).toBeNull();
   });
 });
 
