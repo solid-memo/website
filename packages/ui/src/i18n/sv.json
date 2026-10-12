@@ -509,6 +509,10 @@
       "one": "{count} kvar att studera i dag",
       "other": "{count} kvar att studera i dag"
     },
+    "timeLeft": {
+      "one": "ungefär {count} minut kvar",
+      "other": "ungefär {count} minuter kvar"
+    },
     "allStatistics": "All statistik",
     "week": {
       "one": "{count} den här veckan",
@@ -1655,7 +1659,48 @@
       "one": "och {reviews}, av {count} kort",
       "other": "och {reviews}, av {count} kort"
     },
-    "noneMatured": "Inget kort blev moget under den här perioden"
+    "noneMatured": "Inget kort blev moget under den här perioden",
+    "studyTime": "Tid du studerat",
+    "studyTimeHint": "Ungefärligt, uppskattat från när dina svar gavs: en paus på 5 minuter eller mer inleder ett nytt pass, och en paus inom ett pass räknas som högst 1 minut. Svar i kurser räknas inte med, så tid i kurser ingår inte.",
+    "timeStudied": "Studerad tid",
+    "perStudyDay": "{time} per studiedag i genomsnitt",
+    "noTimeYet": "För få svar i följd för att säga än",
+    "sessions": "Pass",
+    "sessionsPerDay": {
+      "one": "{count} per studiedag i genomsnitt",
+      "other": "{count} per studiedag i genomsnitt"
+    },
+    "timePerAnswer": "Tid per svar (median)",
+    "aboutSeconds": {
+      "one": "ungefär {count} sekund",
+      "other": "ungefär {count} sekunder"
+    },
+    "aboutMinutes": {
+      "one": "ungefär {count} minut",
+      "other": "ungefär {count} minuter"
+    },
+    "aboutHours": {
+      "one": "ungefär {count} timme",
+      "other": "ungefär {count} timmar"
+    },
+    "timeByDay": "Studerad tid varje dag, de senaste {count} dagarna",
+    "timeByDayLabel": "Staplar för ungefär hur många minuter som studerades var och en av de senaste {count} dagarna.",
+    "timeDayDetail": "{date}: {time} på {sessions}.",
+    "timeDayNone": "{date}: ingen tid räknad.",
+    "timeDayContinued": "{date}: {time}, i ett pass som började dagen innan.",
+    "sessionCount": {
+      "one": "{count} pass",
+      "other": "{count} pass"
+    },
+    "timeColumn": "Tid",
+    "showHours": "Visa när på dygnet du studerar",
+    "hours": "Svar per timme på dygnet",
+    "hoursLabel": "Staplar för svaren som gavs varje timme på dygnet, från timmen då din studiedag börjar.",
+    "hoursNote": "I din nuvarande tidszon: ett svar som gavs i en annan tidszon räknas efter vad klockan var här. Timmarna börjar när din studiedag börjar, så en studiedag läses i ett svep.",
+    "hourDetail": "{hour}: {answers}.",
+    "pointAtHour": "Peka på en timme (eller använd piltangenterna) för att se dess svar, eller öppna tabellen nedan.",
+    "hour": "Timme",
+    "total": "Totalt"
   },
   "zoomableImage": {
     "enlarge": "Förstora bilden",

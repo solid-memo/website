@@ -116,6 +116,12 @@ export interface ExpectedStatistics {
    */
   weekday?: { average: number; studied: number; of: number };
   /**
+   * The total of "Answers by hour of the day", opened from its fold, with
+   * the time spent studying above it: never its minutes, which hang on
+   * how fast the journey runs.
+   */
+  hours?: number;
+  /**
    * "Recall by interval", every span of intervals in order: the reviews
    * remembered of its reviews, null for "no reviews".
    */
@@ -143,8 +149,9 @@ export interface ExpectedStatistics {
 /**
  * "Statistics", of the instance or of one deck: the range the figures
  * are of and four tabs. The overview's tiles, calendar and table by
- * deck; the activity's charts of each day, the weekdays, the cards
- * introduced and where they stood week by week; the memory's recall,
+ * deck; the activity's charts of each day, the weekdays, the time spent
+ * and the hours of the day, the cards introduced and where they stood
+ * week by week; the memory's recall,
  * answer buttons, recall by interval and what is hard; and
  * the cards' tab, where the cards stand, read apart, and the courses.
  * It opens on the overview of the last 3 months.
@@ -329,6 +336,7 @@ export class Statistics extends Screen {
       if (expected.answers !== undefined) await this.expectIntroduced();
       if (expected.today !== undefined) await this.expectToday(expected.today);
       if (expected.weekday !== undefined) await this.expectWeekday(expected.weekday);
+      if (expected.hours !== undefined) await this.expectHours(expected.hours);
       if (expected.thisWeek !== undefined) await this.expectThisWeek(expected.thisWeek);
 
       await this.openTab("memory");
@@ -510,6 +518,34 @@ export class Statistics extends Screen {
       await cellOf(table, row, this.t("statistics.studied")),
       this.t("statistics.studied"),
     ).toHaveText(this.t("statistics.studiedOf", { studied: expected.studied, count: expected.of }));
+  }
+
+  /**
+   * The time spent studying, its sessions a count, and "Answers by hour
+   * of the day", opened from its fold: an hour a row, and their total.
+   */
+  private async expectHours(total: number): Promise<void> {
+    await expect(
+      this.main.getByRole("heading", { name: this.t("statistics.studyTime"), exact: true }),
+    ).toBeVisible();
+    await expect(
+      this.main
+        .getByRole("group", { name: this.t("statistics.sessions"), exact: true })
+        .getByRole("strong"),
+      this.t("statistics.sessions"),
+    ).toHaveText(/^\d+$/);
+    await this.main.getByText(this.t("statistics.showHours"), { exact: true }).click();
+    const table = await this.tableOf(this.t("statistics.hours"));
+    const rows = table.getByRole("row").filter({ has: this.page.getByRole("cell") });
+    // 24 hours and the total.
+    await expect(rows, this.t("statistics.hours")).toHaveCount(25);
+    const row = table.getByRole("row").filter({
+      has: this.page.getByRole("rowheader", { name: this.t("statistics.total"), exact: true }),
+    });
+    await expect(
+      await cellOf(table, row, this.t("statistics.answers")),
+      `${this.t("statistics.hours")}: ${this.t("statistics.total")}`,
+    ).toHaveText(String(total));
   }
 
   /** What a maturity bar's picture says of its counts: "0 new, 0 relearning, 4 young and 0 mature." */

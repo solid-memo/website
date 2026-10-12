@@ -527,6 +527,11 @@
       "many": "{count} à étudier encore aujourd’hui",
       "other": "{count} à étudier encore aujourd’hui"
     },
+    "timeLeft": {
+      "one": "encore environ {count} minute",
+      "many": "encore environ {count} de minutes",
+      "other": "encore environ {count} minutes"
+    },
     "allStatistics": "Toutes les statistiques",
     "week": {
       "one": "{count} cette semaine",
@@ -1747,7 +1752,53 @@
       "many": "et {reviews}, sur {count} de cartes",
       "other": "et {reviews}, sur {count} cartes"
     },
-    "noneMatured": "Aucune carte n’est devenue mature sur cette période"
+    "noneMatured": "Aucune carte n’est devenue mature sur cette période",
+    "studyTime": "Temps passé à étudier",
+    "studyTimeHint": "Approximatif, estimé d’après l’heure de vos réponses : une pause de 5 minutes ou plus commence une nouvelle séance, et une pause au sein d’une séance compte pour 1 minute au plus. Les réponses aux cours sont laissées de côté : le temps passé dans les cours n’est pas compté.",
+    "timeStudied": "Temps d’étude",
+    "perStudyDay": "{time} par jour d’étude en moyenne",
+    "noTimeYet": "Trop peu de réponses à la suite pour le dire encore",
+    "sessions": "Séances",
+    "sessionsPerDay": {
+      "one": "{count} par jour d’étude en moyenne",
+      "many": "{count} par jour d’étude en moyenne",
+      "other": "{count} par jour d’étude en moyenne"
+    },
+    "timePerAnswer": "Temps par réponse (médiane)",
+    "aboutSeconds": {
+      "one": "environ {count} seconde",
+      "many": "environ {count} de secondes",
+      "other": "environ {count} secondes"
+    },
+    "aboutMinutes": {
+      "one": "environ {count} minute",
+      "many": "environ {count} de minutes",
+      "other": "environ {count} minutes"
+    },
+    "aboutHours": {
+      "one": "environ {count} heure",
+      "many": "environ {count} d’heures",
+      "other": "environ {count} heures"
+    },
+    "timeByDay": "Temps d’étude chaque jour, les {count} derniers jours",
+    "timeByDayLabel": "Barres du nombre approximatif de minutes d’étude de chacun des {count} derniers jours.",
+    "timeDayDetail": "{date} : {time} en {sessions}.",
+    "timeDayNone": "{date} : aucun temps compté.",
+    "timeDayContinued": "{date} : {time}, dans une séance commencée la veille.",
+    "sessionCount": {
+      "one": "{count} séance",
+      "many": "{count} de séances",
+      "other": "{count} séances"
+    },
+    "timeColumn": "Temps",
+    "showHours": "Voir à quel moment de la journée vous étudiez",
+    "hours": "Réponses par heure de la journée",
+    "hoursLabel": "Barres des réponses données à chaque heure de la journée, à partir de l’heure où commence votre journée d’étude.",
+    "hoursNote": "Dans votre fuseau horaire actuel : une réponse donnée dans un autre fuseau compte selon l’heure qu’il était ici. Les heures commencent quand votre journée d’étude commence, si bien qu’une journée d’étude se lit d’un seul tenant.",
+    "hourDetail": "{hour} : {answers}.",
+    "pointAtHour": "Pointez sur une heure (ou utilisez les flèches du clavier) pour en voir les réponses, ou ouvrez le tableau ci-dessous.",
+    "hour": "Heure",
+    "total": "Total"
   },
   "zoomableImage": {
     "enlarge": "Agrandir l’image",

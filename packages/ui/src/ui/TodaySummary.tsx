@@ -35,17 +35,21 @@ function useStreakNote() {
  * reviews remembered comes with how many there were, and only once there
  * is one (a first answer, a card back in the session or a course answer
  * is no review); how many cards are left to study today, once every
- * deck's count is known (`left`); then the week's answers so far, and
+ * deck's count is known (`left`), and about how many minutes they will
+ * take, once that is known too (`minutesLeft`); then the week's answers so far, and
  * how they compare with the same days of last week, when it had any.
  */
 export function TodaySummary({
   today,
   left,
+  minutesLeft,
   statisticsHref,
 }: {
   today: Today;
   /** The cards still to study today in every deck, due and new; none while unknown. */
   left?: number;
+  /** About how many minutes the cards left will take (expectedTimeToday); none while unknown. */
+  minutesLeft?: number;
   statisticsHref: string;
 }) {
   const { t, formatPercent, formatChange } = useI18n();
@@ -75,6 +79,9 @@ export function TodaySummary({
                   }),
                 ]),
             ...(left === undefined || left === 0 ? [] : [t("today.stillDue", { count: left })]),
+            ...(left === undefined || left === 0 || minutesLeft === undefined
+              ? []
+              : [t("today.timeLeft", { count: minutesLeft })]),
             previous === 0
               ? t("today.week", { count: thisWeek })
               : t("today.weekChange", {

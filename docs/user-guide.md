@@ -215,7 +215,10 @@ the last 12 months, or all time. Its tabs, each a link of its own:
   range's answers on your device, as a file a spreadsheet opens;
   nothing is sent anywhere.
 - **Activity**: what each recent day held and which weekdays you
-  study, this week and month beside the last, how many cards you have
+  study, this week and month beside the last, about how much time you
+  spend studying (an estimate from when you answered, course time not
+  counted) and, folded away, the hours of the day you study in, in your
+  current time zone, how many cards you have
   started, how many were young and mature week by week and how long
   their intervals were, how many you knew the first time and how long
   cards took to grow mature, and the new cards you take on beside the
@@ -241,7 +244,8 @@ the last 12 months, or all time. Its tabs, each a link of its own:
 
 A deck's page sums up its own figures, with "More statistics" for the
 same tabs of that deck alone. Above the deck list, today's strip also
-says how many cards are left to study today. Point at a bar or a day
+says how many cards are left to study today, and about how many
+minutes they will take. Point at a bar or a day
 to see what it holds, or reach a chart with Tab and step along it with
 the arrow keys. Every chart can also be read as a table
 ([statistics.md](statistics.md)). A guest has statistics too.

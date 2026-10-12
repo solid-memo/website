@@ -264,6 +264,9 @@ describe("statisticsOf", () => {
       { week: "2026-09-28", relearning: 0, young: 1, mature: 0, medianInterval: 1 },
     ]);
     expect(statistics.timeToMature).toEqual({ prompts: 0, days: null, reviews: null });
+    // When and how long: of the range's answers only, a day apart, so a session each.
+    expect(statistics.studyTime).toMatchObject({ answers: 2, sessions: 2 });
+    expect(statistics.hours.reduce((sum, count) => sum + count, 0)).toBe(2);
     // Without `since`, or with all of them in range, both are the same days.
     const whole = statisticsOf(answers, "2026-10-02");
     expect(whole.recentDays).toBe(whole.days);

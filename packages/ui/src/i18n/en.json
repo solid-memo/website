@@ -509,6 +509,10 @@
       "one": "{count} left to study today",
       "other": "{count} left to study today"
     },
+    "timeLeft": {
+      "one": "about {count} minute to go",
+      "other": "about {count} minutes to go"
+    },
     "allStatistics": "All statistics",
     "week": {
       "one": "{count} this week",
@@ -1655,7 +1659,48 @@
       "one": "and {reviews}, of {count} card",
       "other": "and {reviews}, of {count} cards"
     },
-    "noneMatured": "No card grew mature in this range"
+    "noneMatured": "No card grew mature in this range",
+    "studyTime": "Time spent studying",
+    "studyTimeHint": "Approximate, estimated from the times your answers were given: a pause of 5 minutes or more begins a new session, and a pause within one counts for 1 minute at most. Course answers are left out, so time spent in courses is not counted.",
+    "timeStudied": "Time studied",
+    "perStudyDay": "{time} a study day on average",
+    "noTimeYet": "Too few answers in a row to tell yet",
+    "sessions": "Sessions",
+    "sessionsPerDay": {
+      "one": "{count} a study day on average",
+      "other": "{count} a study day on average"
+    },
+    "timePerAnswer": "Time per answer (median)",
+    "aboutSeconds": {
+      "one": "about {count} second",
+      "other": "about {count} seconds"
+    },
+    "aboutMinutes": {
+      "one": "about {count} minute",
+      "other": "about {count} minutes"
+    },
+    "aboutHours": {
+      "one": "about {count} hour",
+      "other": "about {count} hours"
+    },
+    "timeByDay": "Time studied each day, the last {count} days",
+    "timeByDayLabel": "Bars for about how many minutes were studied on each of the last {count} days.",
+    "timeDayDetail": "{date}: {time} in {sessions}.",
+    "timeDayNone": "{date}: no time counted.",
+    "timeDayContinued": "{date}: {time}, carrying on a session from the day before.",
+    "sessionCount": {
+      "one": "{count} session",
+      "other": "{count} sessions"
+    },
+    "timeColumn": "Time",
+    "showHours": "Show when in the day you study",
+    "hours": "Answers by hour of the day",
+    "hoursLabel": "Bars for the answers given in each hour of the day, from the hour your study day begins.",
+    "hoursNote": "In your current time zone: an answer given in another time zone counts by the hour it was here. The hours start when your study day begins, so one study day reads as one run.",
+    "hourDetail": "{hour}: {answers}.",
+    "pointAtHour": "Point at an hour (or use the arrow keys) to see its answers, or open the table below.",
+    "hour": "Hour",
+    "total": "Total"
   },
   "zoomableImage": {
     "enlarge": "Enlarge picture",

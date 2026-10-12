@@ -99,6 +99,21 @@ describe("TodaySummary", () => {
     expect(screen.queryByText(/left to study today/)).toBeNull();
   });
 
+  it("says about how long the cards left will take, once known and while there are any", () => {
+    const { rerender } = render(
+      <TodaySummary today={today()} left={7} minutesLeft={3} statisticsHref="#/statistics" />,
+    );
+    expect(
+      screen.getByText(/· 7 left to study today · about 3 minutes to go · 4 this week ·/),
+    ).toBeInTheDocument();
+    rerender(
+      <TodaySummary today={today()} left={0} minutesLeft={1} statisticsHref="#/statistics" />,
+    );
+    expect(screen.queryByText(/to go/)).toBeNull();
+    rerender(<TodaySummary today={today()} minutesLeft={1} statisticsHref="#/statistics" />);
+    expect(screen.queryByText(/to go/)).toBeNull();
+  });
+
   it("cheers louder the more was studied", () => {
     const { rerender } = render(
       <TodaySummary today={today({ answers: 10 })} statisticsHref="#/statistics" />,
@@ -188,6 +203,35 @@ describe("TodaySummaryContainer", () => {
     finish({ dueCount: 1, newCount: 0 });
     expect(await screen.findByText(/· 6 left to study today ·/)).toBeInTheDocument();
     expect(getStudyCounts).toHaveBeenCalledTimes(2);
+  });
+
+  it("says about how long the cards left will take, from how long an answer has taken", async () => {
+    // Twenty seconds apart: an answer takes about 20 s.
+    const getStatistics = vi.fn(async () =>
+      statisticsReportOf(
+        [
+          answer("2026-10-03"),
+          { ...answer("2026-10-03"), id: "answer-2", answeredAt: "2026-10-03T10:00:20.000Z" },
+        ],
+        "2026-10-03",
+      ),
+    );
+    const getStudyCounts = vi.fn(async () => ({ dueCount: 4, newCount: 2 }));
+    renderContainer(getStatistics, { decks: [deckOf("deck-1")], getStudyCounts });
+    // Six cards at 20 s, and no young review yet to expect any back: 2 minutes.
+    expect(
+      await screen.findByText(/· 6 left to study today · about 2 minutes to go ·/),
+    ).toBeInTheDocument();
+  });
+
+  it("says no time while how long an answer takes is unknown", async () => {
+    const getStatistics = vi.fn(async () =>
+      statisticsReportOf([answer("2026-10-03")], "2026-10-03"),
+    );
+    const getStudyCounts = vi.fn(async () => ({ dueCount: 1, newCount: 0 }));
+    renderContainer(getStatistics, { decks: [deckOf("deck-1")], getStudyCounts });
+    expect(await screen.findByText(/· 1 left to study today ·/)).toBeInTheDocument();
+    expect(screen.queryByText(/to go/)).toBeNull();
   });
 
   it("shows nothing before the day's first answer, even with a streak to keep", async () => {

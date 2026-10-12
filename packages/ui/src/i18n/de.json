@@ -509,6 +509,10 @@
       "one": "heute noch {count} zu lernen",
       "other": "heute noch {count} zu lernen"
     },
+    "timeLeft": {
+      "one": "noch etwa {count} Minute",
+      "other": "noch etwa {count} Minuten"
+    },
     "allStatistics": "Gesamte Statistik",
     "week": {
       "one": "{count} diese Woche",
@@ -1655,7 +1659,48 @@
       "one": "und {reviews}, von {count} Karte",
       "other": "und {reviews}, von {count} Karten"
     },
-    "noneMatured": "Keine Karte ist in diesem Zeitraum ausgereift"
+    "noneMatured": "Keine Karte ist in diesem Zeitraum ausgereift",
+    "studyTime": "Zeit beim Lernen",
+    "studyTimeHint": "Ungefähr, geschätzt aus den Zeitpunkten deiner Antworten: Eine Pause von 5 Minuten oder mehr beginnt eine neue Lerneinheit, und eine Pause innerhalb einer zählt höchstens 1 Minute. Antworten in Kursen bleiben außen vor, die Zeit in Kursen wird also nicht gezählt.",
+    "timeStudied": "Gelernte Zeit",
+    "perStudyDay": "im Schnitt {time} pro Lerntag",
+    "noTimeYet": "Noch zu wenige Antworten am Stück, um es zu sagen",
+    "sessions": "Lerneinheiten",
+    "sessionsPerDay": {
+      "one": "im Schnitt {count} pro Lerntag",
+      "other": "im Schnitt {count} pro Lerntag"
+    },
+    "timePerAnswer": "Zeit pro Antwort (Median)",
+    "aboutSeconds": {
+      "one": "etwa {count} Sekunde",
+      "other": "etwa {count} Sekunden"
+    },
+    "aboutMinutes": {
+      "one": "etwa {count} Minute",
+      "other": "etwa {count} Minuten"
+    },
+    "aboutHours": {
+      "one": "etwa {count} Stunde",
+      "other": "etwa {count} Stunden"
+    },
+    "timeByDay": "Gelernte Zeit an jedem Tag, die letzten {count} Tage",
+    "timeByDayLabel": "Balken dafür, wie viele Minuten an jedem der letzten {count} Tage etwa gelernt wurde.",
+    "timeDayDetail": "{date}: {time} in {sessions}.",
+    "timeDayNone": "{date}: keine Zeit gezählt.",
+    "timeDayContinued": "{date}: {time}, in einer Lerneinheit, die am Vortag begann.",
+    "sessionCount": {
+      "one": "{count} Lerneinheit",
+      "other": "{count} Lerneinheiten"
+    },
+    "timeColumn": "Zeit",
+    "showHours": "Zeigen, wann am Tag du lernst",
+    "hours": "Antworten nach Tageszeit",
+    "hoursLabel": "Balken für die Antworten in jeder Stunde des Tages, ab der Stunde, in der dein Lerntag beginnt.",
+    "hoursNote": "In deiner aktuellen Zeitzone: Eine Antwort aus einer anderen Zeitzone zählt nach der Uhrzeit hier. Die Stunden beginnen, wenn dein Lerntag beginnt, sodass sich ein Lerntag am Stück liest.",
+    "hourDetail": "{hour}: {answers}.",
+    "pointAtHour": "Zeige auf eine Stunde (oder nutze die Pfeiltasten), um ihre Antworten zu sehen, oder öffne die Tabelle unten.",
+    "hour": "Stunde",
+    "total": "Gesamt"
   },
   "zoomableImage": {
     "enlarge": "Bild vergrößern",

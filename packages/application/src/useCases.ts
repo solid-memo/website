@@ -987,6 +987,8 @@ export interface StatisticsReport extends Statistics {
   coverage: string | null;
   /** The study month ("YYYY-MM") the log begins with; null for a log with no month. */
   logBegins: string | null;
+  /** The hour the learner's study day begins (Preferences.dayBoundaryHour), where the hours of the day start. */
+  dayBoundaryHour: number;
 }
 
 /** How one course has gone (UseCases.getCourseStatistics). */
@@ -2141,6 +2143,7 @@ export function createUseCases({
     logged: readonly string[];
     first: string | null;
     firstMonth: string | null;
+    dayBoundaryHour: number;
   }> {
     await logAnswers();
     const [prefs, logged] = await Promise.all([
@@ -2170,7 +2173,7 @@ export function createUseCases({
         (from === null || answer.studyDay >= from) &&
         (deckUrl === undefined || answer.deckUrl === deckUrl),
     );
-    return { answers, today, logged, first, firstMonth };
+    return { answers, today, logged, first, firstMonth, dayBoundaryHour: prefs.dayBoundaryHour };
   }
 
   async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
@@ -3282,7 +3285,7 @@ export function createUseCases({
       return count;
     },
     async getStatistics(instanceUrl, at, options = {}) {
-      const { answers, today, logged, first, firstMonth } = await rangeAnswers(
+      const { answers, today, logged, first, firstMonth, dayBoundaryHour } = await rangeAnswers(
         instanceUrl,
         at,
         options,
@@ -3294,6 +3297,7 @@ export function createUseCases({
         coverage:
           begins !== undefined && (firstMonth === null || begins > firstMonth) ? begins : null,
         logBegins: begins ?? null,
+        dayBoundaryHour,
       };
     },
     async saveAnswers(instanceUrl, at, options = {}) {
