@@ -31,7 +31,10 @@ study session usually ends) says what the day came to:
   compare with the same days of last week when it had any ("+20% on
   last week"), then a link, "All statistics", to the statistics page.
   A day without a review (only new cards, repeats or course answers)
-  leaves the share out.
+  leaves the share out. While cards are left to study today, due and
+  new, the numbers say how many in every deck ("7 left to study
+  today"), from the counts the deck list's rows read, once every
+  deck's is known.
 
 Before the day's first answer there is no strip. When the answers
 cannot be read there is none either: the deck list works without it.
@@ -69,10 +72,16 @@ study.", when the answer log begins after the 12 months read):
 | Remembered in reviews | Two tiles, young and mature cards: the share of reviews remembered, with how many reviews it is of. Then "Answer buttons": for first answers and for young and mature reviews, a bar of the buttons pressed, Again, Hard, Good and Easy, with every count in the table. Then "Recall by month", the same split month by month, young as a dashed line and mature as a solid one; its table adds each month's first tries. Left out (first try and the answer buttons too) when there is no review but there are course answers, as for a learner who has only taken a course. |
 | In courses | Only with course answers: the share of graded course answers that were right, with how many there were. |
 | By deck | A table of each deck's answers, cards introduced, young and mature recall, recall each way (for a deck with reviews both ways), first try, lapses, graded course answers and the day it was last studied. It scrolls sideways on a narrow screen, the deck's name kept in view. A deck since removed is "A removed deck". |
-| Where your cards stand | How many cards are new, young and mature, as one bar; the reviews due on each of the next 30 days; then each deck's own bar. |
+| Where your cards stand | How many cards are new, relearning, young and mature, as one bar. Two tiles: how many reviews are overdue (due before today), and the day the daily review limits let through every review they hold back, studying each day ("Today" when they hold none back; past the 30 days, "Not within 30 days" with how many still wait then). Each deck's limit is its own, so the day is worked out deck by deck and the latest taken. Then, for each of the next 30 days, the reviews falling due (today's with every overdue one) beside those the limits let through; how the studied cards' intervals are spread (days until they come back), and, folded away, how easy they feel (their ease). Then each deck's own bar, with the day its new cards run out at its own new-card limit, studying each day, today with only what is left of the limit after the new cards already met today, as the study queue has it ("never" at a limit of 0); a course's deck is left out of that, as its cards join it when their questions are answered. |
 
 A card is *young* while it is reviewed at an interval under 21 days and
-*mature* from 21 days on. A card studied both ways counts once each
+*mature* from 21 days on. A card forgotten last time and not remembered
+since is *relearning*, whatever its interval: SM-2 leaves it no
+repetition in a row ([srs.md](srs.md)), as the Studio's "learning"
+state does; it is no beginner's stage, as a card passed once is not
+back in it until it is forgotten. SM-2 spaces a card's reviews 1 day,
+6 days, then about 15 and about 38, growing from there, so some bins
+of the interval chart stay nearly empty; its caption says so. A card studied both ways counts once each
 way, and the page says so. A share is always shown with the count it is
 of, however small, so that "100%" of one review reads as what it is.
 
@@ -82,7 +91,8 @@ it held in words under the chart, and "Show as a table" lists the same
 figures. Only shades of one green are used; where two lines meet, a
 dash or a legend tells them apart, and where bars hold several series,
 a legend names each step of the green. In forced-colors mode the steps
-keep apart as empty, hatched and filled.
+keep apart as empty, hatched and filled. The histograms are the
+Studio's own, shared from the UI package.
 
 The page reads two things on their own, so neither waits for the
 other: the answers of the last 12 study months
@@ -144,7 +154,8 @@ stacked bars, the young and mature recall tiles, recall each way when
 it has reviews both ways, first try and the answer buttons and, with
 course answers, the graded course answers tile (alone for a deck
 studied only in a course's chapters). Then where its cards stand, all new before the
-first answer
+first answer, with a tile for the day its new cards run out (none for a
+course's deck, or once none is new)
 ([DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx)).
 
 ## What the figures count
@@ -195,9 +206,9 @@ Nothing in the pod changed: the same answer log is read differently.
 
 | Layer | Files |
 |---|---|
-| Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, and `todayOf`. [studyPatterns.ts](../packages/domain/src/studyPatterns.ts): the answer buttons, first try, this week and month beside the last, the days studied of the last 30, the weekdays, recall each way, and the new cards beside the reviews by week. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, young and mature. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, shared with the Studio. |
+| Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, and `todayOf`. [studyPatterns.ts](../packages/domain/src/studyPatterns.ts): the answer buttons, first try, this week and month beside the last, the days studied of the last 30, the weekdays, recall each way, and the new cards beside the reviews by week. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, relearning, young and mature, and when new cards run out. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, the interval and ease histograms, shared with the Studio, what is overdue and the days the daily limit takes to catch up. |
 | Application | `getStatistics` and `getCardProgress` in [useCases.ts](../packages/application/src/useCases.ts): which months and documents to read; `readLogMonths` keeps the months read, for `loadAnswerLog` too. |
-| UI | [StatisticsContainer.tsx](../packages/ui/src/ui/StatisticsContainer.tsx) and [StatisticsScreen.tsx](../packages/ui/src/ui/StatisticsScreen.tsx) (the page), [CardProgressContainer.tsx](../packages/ui/src/ui/CardProgressContainer.tsx) (where the cards stand), [StatisticsCharts.tsx](../packages/ui/src/ui/StatisticsCharts.tsx) (tiles, calendar, bar charts stacked or side by side, line charts, the answer buttons and maturity bars), [DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx) and the today strip above. |
+| UI | [StatisticsContainer.tsx](../packages/ui/src/ui/StatisticsContainer.tsx) and [StatisticsScreen.tsx](../packages/ui/src/ui/StatisticsScreen.tsx) (the page), [CardProgressContainer.tsx](../packages/ui/src/ui/CardProgressContainer.tsx) (where the cards stand), [StatisticsCharts.tsx](../packages/ui/src/ui/StatisticsCharts.tsx) (tiles, calendar, bar charts stacked or side by side, histograms, line charts, the answer buttons and maturity bars), [DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx) and the today strip above. |
 
 The statistics are the same for a guest ([guest-mode.md](guest-mode.md)),
 whose answers are kept in the pod in their browser and move with the
@@ -228,7 +239,8 @@ rest of their study when they log in.
   tiles (the repeat is no review), the note on where the log begins,
   the answer buttons (the Again among the first answers, the repeat
   left out), what the day held (one repeat), the weekdays, the table by
-  deck and every maturity bar. In
+  deck, every maturity bar (relearning among them), the overdue tile
+  and the interval chart. In
   [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts),
   step 09 checks that a course's answers show as graded course answers
   and not as recall. In

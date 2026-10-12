@@ -3233,14 +3233,39 @@ describe("the instance digest", () => {
       url: `${instance.url}catalog.ttl#deck-2`,
       direction: "bidirectional",
       maxReviewsPerDay: 0,
+      newCardsPerDay: 3,
     };
     vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, other]);
     const report = await useCases.getCardProgress(instance.url, now);
     expect(report.today).toBe("2026-09-28");
     expect(report.decks.map((one) => ({ deck: one.deck, progress: one.progress }))).toEqual([
-      { deck, progress: { new: 1, young: 1, mature: 0 } },
-      { deck: other, progress: { new: 3, young: 1, mature: 0 } },
+      { deck, progress: { new: 1, relearning: 0, young: 1, mature: 0 } },
+      { deck: other, progress: { new: 3, relearning: 0, young: 1, mature: 0 } },
     ]);
+    // The one prompt each deck has studied fell due before today. Each deck
+    // at its own caps: the second lets no review through, so it never catches up.
+    expect(
+      report.decks.map(({ overdue, daysToClear, newCardsPerDay, introducedToday }) => ({
+        overdue,
+        daysToClear,
+        newCardsPerDay,
+        introducedToday,
+      })),
+    ).toEqual([
+      {
+        overdue: 1,
+        daysToClear: 0,
+        newCardsPerDay: DEFAULT_PREFERENCES.newCardsPerDay,
+        introducedToday: 0,
+      },
+      { overdue: 1, daysToClear: null, newCardsPerDay: 3, introducedToday: 0 },
+    ]);
+    // That prompt, at an interval of a day.
+    for (const one of report.decks) {
+      expect(one.intervals[0]).toEqual({ from: 1, to: 2, count: 1 });
+      expect(one.intervals.reduce((sum, bin) => sum + bin.count, 0)).toBe(1);
+      expect(one.eases.reduce((sum, bin) => sum + bin.count, 0)).toBe(1);
+    }
     const [own, paced] = report.decks.map((one) => one.forecast);
     expect(own).toHaveLength(30);
     expect(own![0]).toEqual({ studyDay: "2026-09-28", due: 1, reviews: 1 });
@@ -3256,7 +3281,7 @@ describe("the instance digest", () => {
     const { deps, useCases } = setup();
     const report = await useCases.getCardProgress(instance.url, now, { deck });
     expect(report.decks.map((one) => ({ deck: one.deck, progress: one.progress }))).toEqual([
-      { deck, progress: { new: 1, young: 1, mature: 0 } },
+      { deck, progress: { new: 1, relearning: 0, young: 1, mature: 0 } },
     ]);
     expect(deps.deckRepository.listDecks).not.toHaveBeenCalled();
   });
@@ -3265,11 +3290,11 @@ describe("the instance digest", () => {
     const schedule = {
       direction: deck.direction,
       dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
-      dueByDay: { "2026-09-30": 7 },
+      dueByDay: { "2026-09-25": 2, "2026-09-30": 7 },
       unreviewed: 0,
       studyDay: "2026-09-28",
       reviewedOnDay: 0,
-      introducedOnDay: 0,
+      introducedOnDay: 2,
     };
     const { useCases, digestRepository } = setup({
       receipts: {},
@@ -3279,7 +3304,32 @@ describe("the instance digest", () => {
     });
     const report = await useCases.getCardProgress(instance.url, now, { deck });
     expect(report.decks[0]!.forecast[2]).toEqual({ studyDay: "2026-09-30", due: 7, reviews: 7 });
+    // Two fell due before today: overdue now, and counted in today's forecast.
+    expect(report.decks[0]!.overdue).toBe(2);
+    expect(report.decks[0]!.forecast[0]).toEqual({ studyDay: "2026-09-28", due: 2, reviews: 2 });
+    // The two prompts it says were first reviewed today count against today's new-card cap.
+    expect(report.decks[0]!.introducedToday).toBe(2);
     expect(digestRepository.updateDigest).not.toHaveBeenCalled();
+  });
+
+  it("counts no prompt as met today from a digest's schedule of an earlier day", async () => {
+    const schedule = {
+      direction: deck.direction,
+      dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
+      dueByDay: { "2026-09-30": 7 },
+      unreviewed: 3,
+      studyDay: "2026-09-27",
+      reviewedOnDay: 4,
+      introducedOnDay: 4,
+    };
+    const { useCases } = setup({
+      receipts: {},
+      schedules: {
+        [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule },
+      },
+    });
+    const report = await useCases.getCardProgress(instance.url, now, { deck });
+    expect(report.decks[0]!.introducedToday).toBe(0);
   });
 
   it("refuses a read without a version that says unchanged, for the progress too", async () => {

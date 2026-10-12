@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ComponentChildren } from "preact";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Answer } from "@solid-memo/domain/answer";
+import type { Deck } from "@solid-memo/domain/deck";
 import type { TodaySummary as Today } from "@solid-memo/domain/statistics";
 import { makeUseCasesFake, statisticsReportOf } from "../test/useCasesFake";
 import { statisticsHref } from "./router";
@@ -87,6 +88,17 @@ describe("TodaySummary", () => {
     expect(screen.getByText("Record: 9 days")).toBeInTheDocument();
   });
 
+  it("says how many cards are left to study today, once known and while there are any", () => {
+    const { rerender } = render(
+      <TodaySummary today={today()} left={7} statisticsHref="#/statistics" />,
+    );
+    expect(
+      screen.getByText(/· 50% remembered of 2 reviews · 7 left to study today · 4 this week ·/),
+    ).toBeInTheDocument();
+    rerender(<TodaySummary today={today()} left={0} statisticsHref="#/statistics" />);
+    expect(screen.queryByText(/left to study today/)).toBeNull();
+  });
+
   it("cheers louder the more was studied", () => {
     const { rerender } = render(
       <TodaySummary today={today({ answers: 10 })} statisticsHref="#/statistics" />,
@@ -100,7 +112,13 @@ describe("TodaySummary", () => {
 });
 
 describe("TodaySummaryContainer", () => {
-  function renderContainer(getStatistics: UseCases["getStatistics"]) {
+  function renderContainer(
+    getStatistics: UseCases["getStatistics"],
+    {
+      decks = [],
+      getStudyCounts,
+    }: { decks?: Deck[]; getStudyCounts?: UseCases["getStudyCounts"] } = {},
+  ) {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrap = (node: ComponentChildren) => (
       <QueryClientProvider client={queryClient}>{node}</QueryClientProvider>
@@ -108,12 +126,27 @@ describe("TodaySummaryContainer", () => {
     return render(
       wrap(
         <TodaySummaryContainer
-          useCases={makeUseCasesFake({ getStatistics })}
+          useCases={makeUseCasesFake({
+            getStatistics,
+            ...(getStudyCounts === undefined ? {} : { getStudyCounts }),
+          })}
           instance={INSTANCE}
+          decks={decks}
         />,
       ),
     );
   }
+  const deckOf = (id: string): Deck => ({
+    id,
+    url: `${INSTANCE.url}catalog.ttl#${id}`,
+    title: { en: id },
+    cardsDocumentUrl: `${INSTANCE.url}decks/${id}.ttl`,
+    reviewsDocumentUrl: `${INSTANCE.url}reviews/${id}.ttl`,
+    createdAt: "",
+    formatVersion: 4,
+    direction: "front-to-back",
+    authors: [],
+  });
   const answer = (studyDay: string): Answer => ({
     id: `answer-${studyDay}`,
     deckUrl: `${INSTANCE.url}catalog.ttl#deck-1`,
@@ -135,6 +168,26 @@ describe("TodaySummaryContainer", () => {
       statisticsHref(INSTANCE.url),
     );
     expect(getStatistics).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date));
+  });
+
+  it("adds up the cards left today in every deck from their rows' counts, once all are known", async () => {
+    const getStatistics = vi.fn(async () =>
+      statisticsReportOf([answer("2026-10-03")], "2026-10-03"),
+    );
+    let finish: (counts: { dueCount: number; newCount: number }) => void = () => undefined;
+    const getStudyCounts = vi.fn(async (_instanceUrl: string, deck: Deck) =>
+      deck.id === "deck-1"
+        ? { dueCount: 3, newCount: 2 }
+        : new Promise<{ dueCount: number; newCount: number }>((resolve) => {
+            finish = resolve;
+          }),
+    );
+    renderContainer(getStatistics, { decks: [deckOf("deck-1"), deckOf("deck-2")], getStudyCounts });
+    await screen.findByRole("link", { name: "All statistics" });
+    expect(screen.queryByText(/left to study today/)).toBeNull();
+    finish({ dueCount: 1, newCount: 0 });
+    expect(await screen.findByText(/· 6 left to study today ·/)).toBeInTheDocument();
+    expect(getStudyCounts).toHaveBeenCalledTimes(2);
   });
 
   it("shows nothing before the day's first answer, even with a streak to keep", async () => {

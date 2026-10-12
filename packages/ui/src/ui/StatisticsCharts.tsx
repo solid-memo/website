@@ -5,7 +5,7 @@
 import type { ComponentChildren } from "preact";
 import { useId, useState } from "preact/hooks";
 import type { CardProgress } from "@solid-memo/domain/cardProgress";
-import type { ForecastDay } from "@solid-memo/domain/scheduleInsight";
+import type { Bin, ForecastDay } from "@solid-memo/domain/scheduleInsight";
 import { shiftStudyDay } from "@solid-memo/domain/answer";
 import {
   introducedOverTime,
@@ -29,8 +29,9 @@ import { useI18n } from "./i18n";
  * The pieces the statistics are shown with: a number in a tile, an
  * activity calendar, bar charts (of what recent days held, of the
  * weekdays, of new cards beside reviews by week, of coming days, or of
- * any figures), line charts of cards introduced and of recall by month,
- * bars of the answer buttons pressed and of how mature the cards are,
+ * any figures), histograms of intervals and eases, line charts of cards
+ * introduced and of recall by month, bars of the answer buttons pressed
+ * and of how mature the cards are,
  * and a line under each chart that says what a day held when it is
  * pointed at (or tapped), with the same days as a table for whoever cannot
  * see the chart. All in one hue: more, a stronger green; where two series
@@ -445,6 +446,117 @@ export function BarChart({
   );
 }
 
+/** The words a histogram's bins (scheduleInsight.ts) take: intervals in days, eases to a tenth. */
+export function useBinRanges() {
+  const { t } = useI18n();
+  return {
+    interval: (bin: Bin) =>
+      bin.to === undefined
+        ? t("statistics.intervalFrom", { from: bin.from })
+        : bin.to - bin.from === 1
+          ? t("statistics.dayCount", { count: bin.from })
+          : t("statistics.intervalRange", { from: bin.from, to: bin.to - 1 }),
+    ease: (bin: Bin) =>
+      bin.to === undefined
+        ? t("statistics.easeFrom", { from: bin.from.toFixed(1) })
+        : t("statistics.easeRange", { from: bin.from.toFixed(1), to: bin.to.toFixed(1) }),
+  };
+}
+
+/**
+ * A histogram's bins as bars, each named by `range`, a note under them
+ * when given, then the same as a table.
+ */
+export function Histogram({
+  caption,
+  label,
+  heading,
+  bins,
+  range,
+  note,
+}: {
+  caption: string;
+  label: string;
+  /** The table's first column: what the bins spread. */
+  heading: string;
+  bins: readonly Bin[];
+  range: (bin: Bin) => string;
+  note?: string;
+}) {
+  const { t } = useI18n();
+  return (
+    <BarChart
+      caption={caption}
+      label={label}
+      bars={bins.map((bin) => ({
+        key: String(bin.from),
+        values: [bin.count],
+        text: t("statistics.binText", { range: range(bin), count: bin.count }),
+      }))}
+      prompt={t("statistics.pointAtBar")}
+    >
+      {note !== undefined && <p class="chart-note hint">{note}</p>}
+      <details class="chart-table">
+        <summary>{t("statistics.showTable")}</summary>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{heading}</th>
+              <th scope="col">{t("statistics.prompts")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bins.map((bin) => (
+              <tr key={bin.from}>
+                <td>{range(bin)}</td>
+                <td>{bin.count}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    </BarChart>
+  );
+}
+
+/**
+ * How the studied prompts' intervals are spread, with why some bins stay
+ * nearly empty, and, folded away until opened, how their eases are.
+ */
+export function SpreadCharts({
+  intervals,
+  eases,
+}: {
+  intervals: readonly Bin[];
+  eases: readonly Bin[];
+}) {
+  const { t } = useI18n();
+  const ranges = useBinRanges();
+  return (
+    <>
+      <Histogram
+        caption={t("statistics.intervals")}
+        label={t("statistics.intervalsLabel")}
+        heading={t("statistics.interval")}
+        bins={intervals}
+        range={ranges.interval}
+        note={t("statistics.intervalsNote")}
+      />
+      <details class="chart-fold">
+        <summary>{t("statistics.showEases")}</summary>
+        <Histogram
+          caption={t("statistics.eases")}
+          label={t("statistics.easesLabel")}
+          heading={t("statistics.ease")}
+          bins={eases}
+          range={ranges.ease}
+          note={t("statistics.easesNote")}
+        />
+      </details>
+    </>
+  );
+}
+
 /** The parts of a day DayHeldBars stacks, bottom first, with their words and steps of the green. */
 const DAY_PARTS = [
   ["remembered", "statistics.rememberedColumn", 4],
@@ -612,19 +724,20 @@ export function IntakeChart({ weeks }: { weeks: readonly WeekLoad[] }) {
 
 /**
  * The prompts falling due on each day of a forecast (forecastOf,
- * scheduleInsight.ts), today first with every overdue one, as bars: what
- * falls due, not what the daily cap lets through. The table lists the
- * days with any.
+ * scheduleInsight.ts), today first with every overdue one, as pairs of
+ * bars: what falls due, beside what the daily cap lets through. The
+ * table lists the days with any.
  */
 export function ForecastBars({ forecast }: { forecast: readonly ForecastDay[] }) {
   const { t, formatDate } = useI18n();
   const count = forecast.length;
-  // The table lists only the days with reviews due, or says there are none.
-  const dueDays = forecast.filter((day) => day.due > 0);
+  // The table lists only the days with reviews due or let through, or says there are none.
+  const dueDays = forecast.filter((day) => day.due > 0 || day.reviews > 0);
   const textOf = (day: ForecastDay, i: number) =>
     t(i === 0 ? "statistics.dueTodayDetail" : "statistics.dueDetail", {
       date: formatDate(day.studyDay),
       reviews: t("statistics.reviewCount", { count: day.due }),
+      capped: day.reviews,
     });
   return (
     <BarChart
@@ -632,9 +745,14 @@ export function ForecastBars({ forecast }: { forecast: readonly ForecastDay[] })
       label={t("statistics.forecastLabel", { count })}
       bars={forecast.map((day, i) => ({
         key: day.studyDay,
-        values: [day.due],
+        values: [day.due, day.reviews],
         text: textOf(day, i),
       }))}
+      series={[
+        { label: t("statistics.due"), step: 2 },
+        { label: t("statistics.withinLimit"), step: 4 },
+      ]}
+      grouped
       prompt={t("statistics.pointAtDayAhead")}
     >
       <p class="chart-note hint">{t("statistics.forecastNote")}</p>
@@ -645,6 +763,7 @@ export function ForecastBars({ forecast }: { forecast: readonly ForecastDay[] })
             <tr>
               <th scope="col">{t("statistics.day")}</th>
               <th scope="col">{t("statistics.due")}</th>
+              <th scope="col">{t("statistics.withinLimit")}</th>
             </tr>
           </thead>
           <tbody>
@@ -652,11 +771,12 @@ export function ForecastBars({ forecast }: { forecast: readonly ForecastDay[] })
               <tr key={day.studyDay}>
                 <td>{formatDate(day.studyDay)}</td>
                 <td>{day.due}</td>
+                <td>{day.reviews}</td>
               </tr>
             ))}
             {dueDays.length === 0 && (
               <tr>
-                <td colSpan={2}>{t("statistics.nothingDue", { count })}</td>
+                <td colSpan={3}>{t("statistics.nothingDue", { count })}</td>
               </tr>
             )}
           </tbody>
@@ -1084,13 +1204,14 @@ export function GradeBars({ buttons }: { buttons: AnswerButtons }) {
 /** The stages a prompt goes through, in order, with the words their counts take. */
 const STAGES = [
   ["new", "statistics.maturityNew"],
+  ["relearning", "statistics.maturityRelearning"],
   ["young", "statistics.maturityYoung"],
   ["mature", "statistics.maturityMature"],
 ] as const;
 
 /**
- * How many prompts are new, young and mature, as one bar of three steps
- * of the green, each as wide as its share; an empty stage takes no room.
+ * How many prompts are new, relearning, young and mature, as one bar of
+ * four steps of the green, each as wide as its share; an empty stage takes no room.
  * The legend under it gives every count, so no table is needed.
  */
 export function MaturityBar({
@@ -1109,6 +1230,7 @@ export function MaturityBar({
         role="img"
         aria-label={t("statistics.maturityLabel", {
           new: t("statistics.maturityNew", { count: progress.new }),
+          relearning: t("statistics.maturityRelearning", { count: progress.relearning }),
           young: t("statistics.maturityYoung", { count: progress.young }),
           mature: t("statistics.maturityMature", { count: progress.mature }),
         })}

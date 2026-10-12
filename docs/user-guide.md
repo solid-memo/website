@@ -208,9 +208,13 @@ reviews you do each week, how well you remembered them in reviews
 (each card's first review of the day, always with how many reviews that
 is) and which answer buttons you pressed, how you answered course
 questions, counted apart, and each deck's figures. Under that,
-where your cards stand: how many are new, young (reviewed at intervals
-under 21 days) and mature, and how many reviews are coming in the next
-30 days. Every chart can also be read as a table
+where your cards stand: how many are new, relearning (forgotten last
+time), young (reviewed at intervals under 21 days) and mature, how many
+reviews are overdue and when your daily review limit lets you catch up,
+how many reviews are coming in the next 30 days beside those your limit
+lets through, how long until your cards come back and how easy they
+feel, and when each deck's new cards run out. Above the deck list,
+today's strip also says how many cards are left to study today. Every chart can also be read as a table
 ([statistics.md](statistics.md)). A guest has statistics too.
 
 ## Preferences

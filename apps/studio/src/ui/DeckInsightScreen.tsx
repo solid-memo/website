@@ -5,11 +5,10 @@
 import type { DeckInsight } from "@solid-memo/application/useCases";
 import { LEECH_LAPSES } from "@solid-memo/domain/cardHistory";
 import type { Card, Deck } from "@solid-memo/domain/deck";
-import type { Bin } from "@solid-memo/domain/scheduleInsight";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
-import { BarChart, StatTile } from "@solid-memo/ui/StatisticsCharts";
+import { BarChart, Histogram, StatTile, useBinRanges } from "@solid-memo/ui/StatisticsCharts";
 
 /** How many days the tile of the reviews to come counts, today's included. */
 const WEEK = 7;
@@ -40,16 +39,7 @@ export function DeckInsightScreen({
   const { t, tx, readerText, formatDate, formatMonth } = useI18n();
   const { forecast, lapses, leeches } = insight;
   const week = forecast.slice(0, WEEK).reduce((sum, day) => sum + day.reviews, 0);
-  const intervalRange = (bin: Bin) =>
-    bin.to === undefined
-      ? t("studio.insight.intervalFrom", { from: bin.from })
-      : bin.to - bin.from === 1
-        ? t("studio.cards.days", { count: bin.from })
-        : t("studio.insight.intervalRange", { from: bin.from, to: bin.to - 1 });
-  const easeRange = (bin: Bin) =>
-    bin.to === undefined
-      ? t("studio.insight.easeFrom", { from: bin.from.toFixed(1) })
-      : t("studio.insight.easeRange", { from: bin.from.toFixed(1), to: bin.to.toFixed(1) });
+  const ranges = useBinRanges();
   return (
     <section class="studio-insight">
       <h2>{tx("studio.insight.heading", { deck: <ReaderText text={deck.title} /> })}</h2>
@@ -113,14 +103,14 @@ export function DeckInsightScreen({
             label={t("studio.insight.intervalsLabel")}
             heading={t("studio.insight.interval")}
             bins={insight.intervals}
-            range={intervalRange}
+            range={ranges.interval}
           />
           <Histogram
             caption={t("studio.insight.eases")}
             label={t("studio.insight.easesLabel")}
             heading={t("studio.insight.ease")}
             bins={insight.eases}
-            range={easeRange}
+            range={ranges.ease}
           />
         </>
       )}
@@ -150,55 +140,5 @@ export function DeckInsightScreen({
         </>
       )}
     </section>
-  );
-}
-
-/** A histogram's bins as bars, each named by `range`, with the same as a table. */
-function Histogram({
-  caption,
-  label,
-  heading,
-  bins,
-  range,
-}: {
-  caption: string;
-  label: string;
-  /** The table's first column: what the bins spread. */
-  heading: string;
-  bins: readonly Bin[];
-  range: (bin: Bin) => string;
-}) {
-  const { t } = useI18n();
-  return (
-    <BarChart
-      caption={caption}
-      label={label}
-      bars={bins.map((bin) => ({
-        key: String(bin.from),
-        values: [bin.count],
-        text: t("studio.insight.binText", { range: range(bin), count: bin.count }),
-      }))}
-      prompt={t("studio.insight.pointAtBar")}
-    >
-      <details class="chart-table">
-        <summary>{t("statistics.showTable")}</summary>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">{heading}</th>
-              <th scope="col">{t("studio.insight.prompts")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bins.map((bin) => (
-              <tr key={bin.from}>
-                <td>{range(bin)}</td>
-                <td>{bin.count}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </details>
-    </BarChart>
   );
 }

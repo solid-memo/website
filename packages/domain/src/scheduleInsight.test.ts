@@ -6,11 +6,14 @@ import { describe, expect, it } from "vitest";
 import type { Card } from "./deck";
 import type { ReviewState } from "./review";
 import {
+  daysToClearOf,
   easeHistogram,
   forecastOf,
   freshSchedule,
   intervalHistogram,
   leechesOf,
+  mergeBins,
+  overdueOf,
   scheduledStates,
 } from "./scheduleInsight";
 import type { DeckSchedule, StoredSchedule } from "./studyDigest";
@@ -118,6 +121,35 @@ describe("forecastOf", () => {
   });
 });
 
+describe("overdueOf", () => {
+  it("counts the prompts due before today, not today's", () => {
+    const due = { "2026-10-01": 2, "2026-10-08": 3, "2026-10-09": 1, "2026-10-12": 4 };
+    expect(overdueOf(due, "2026-10-09")).toBe(5);
+    expect(overdueOf(due, "2026-10-01")).toBe(0);
+    expect(overdueOf({}, "2026-10-09")).toBe(0);
+  });
+});
+
+describe("daysToClearOf", () => {
+  const day = (due: number, reviews: number) => ({ studyDay: "2026-10-09", due, reviews });
+
+  it("is 0 when the cap holds nothing back, or there are no days", () => {
+    expect(daysToClearOf([day(3, 3), day(0, 0), day(2, 2)])).toBe(0);
+    expect(daysToClearOf([])).toBe(0);
+  });
+
+  it("is the day after the last that ends with reviews waiting", () => {
+    // 5 due, 2 let through: 3 wait; then 1 more, 4 through: clear the day after today.
+    expect(daysToClearOf([day(5, 2), day(1, 4), day(0, 0)])).toBe(1);
+    // Clear the day after, held back again the day after that, clear the next.
+    expect(daysToClearOf([day(3, 2), day(0, 1), day(6, 4), day(0, 2), day(0, 0)])).toBe(3);
+  });
+
+  it("is null when reviews still wait at the forecast's end", () => {
+    expect(daysToClearOf([day(9, 2), day(0, 2)])).toBeNull();
+  });
+});
+
 describe("scheduledStates", () => {
   it("keeps the states of the cards in use, in the directions the deck studies", () => {
     const cards = [card("a"), card("b"), card("retired", true)];
@@ -150,6 +182,23 @@ describe("the histograms", () => {
     expect(bins[0]).toEqual({ from: 1.3, to: 1.5, count: 2 });
     expect(bins.find((bin) => bin.from === 2.5)).toEqual({ from: 2.5, to: 2.7, count: 3 });
     expect(bins.at(-1)).toEqual({ from: 2.7, count: 1 });
+  });
+});
+
+describe("mergeBins", () => {
+  it("adds histograms of the same bounds bin by bin, and is none of none", () => {
+    const one = intervalHistogram([
+      state("a", { intervalDays: 1 }),
+      state("b", { intervalDays: 40 }),
+    ]);
+    const two = intervalHistogram([state("c", { intervalDays: 1 })]);
+    const merged = mergeBins([one, two]);
+    expect(merged).toHaveLength(one.length);
+    expect(merged[0]).toEqual({ from: 1, to: 2, count: 2 });
+    expect(merged[5]).toEqual({ from: 31, to: 91, count: 1 });
+    expect(merged.at(-1)).toEqual({ from: 366, count: 0 });
+    expect(mergeBins([one])).toEqual(one);
+    expect(mergeBins([])).toEqual([]);
   });
 });
 

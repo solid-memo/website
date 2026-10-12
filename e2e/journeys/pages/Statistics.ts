@@ -15,11 +15,14 @@ export type StatisticsTile =
   | "longestStreak"
   | "young"
   | "mature"
-  | "quizAccuracy";
+  | "quizAccuracy"
+  | "overdue";
 
-/** How many prompts are new, young and mature: a bidirectional deck counts each card twice. */
+/** How many prompts are new, relearning, young and mature: a bidirectional deck counts each card twice. */
 export interface Maturity {
   new: number;
+  /** Forgotten last time and not remembered since. */
+  relearning: number;
   young: number;
   mature: number;
 }
@@ -88,8 +91,14 @@ export interface ExpectedStatistics {
    * how many of that weekday were studied of those there were.
    */
   weekday?: { average: number; studied: number; of: number };
-  /** The instance's prompts taken together, under "Where your cards stand", with the forecast beside them. */
+  /**
+   * The instance's prompts taken together, under "Where your cards stand",
+   * with the forecast beside them, and how their intervals are spread once
+   * any is studied.
+   */
   maturity?: Maturity;
+  /** The prompts due before today, in the tile under the maturity bar. */
+  overdue?: number;
   /** Every deck under "Maturity by deck", in any order. */
   maturityByDeck?: ({ name: string } & Maturity)[];
 }
@@ -191,6 +200,8 @@ export class Statistics extends Screen {
       if (expected.weekday !== undefined) await this.expectWeekday(expected.weekday);
       if (expected.decks !== undefined) await this.expectByDeck(expected.decks);
       if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
+      if (expected.overdue !== undefined)
+        await this.expectValue("overdue", String(expected.overdue));
       if (expected.maturityByDeck !== undefined)
         await this.expectMaturityByDeck(expected.maturityByDeck);
     });
@@ -288,10 +299,11 @@ export class Statistics extends Screen {
     ).toHaveText(this.t("statistics.studiedOf", { studied: expected.studied, count: expected.of }));
   }
 
-  /** What a maturity bar's picture says of its counts: "0 new, 4 young and 0 mature." */
+  /** What a maturity bar's picture says of its counts: "0 new, 0 relearning, 4 young and 0 mature." */
   private maturityLabel(maturity: Maturity): string {
     return this.t("statistics.maturityLabel", {
       new: this.t("statistics.maturityNew", { count: maturity.new }),
+      relearning: this.t("statistics.maturityRelearning", { count: maturity.relearning }),
       young: this.t("statistics.maturityYoung", { count: maturity.young }),
       mature: this.t("statistics.maturityMature", { count: maturity.mature }),
     });
@@ -306,7 +318,8 @@ export class Statistics extends Screen {
 
   /**
    * The overall maturity bar and the forecast of the next 30 days, which
-   * show before any answer too.
+   * show before any answer too; then, once a prompt is studied, how the
+   * intervals are spread, with the eases folded away under them.
    */
   private async expectMaturity(maturity: Maturity): Promise<void> {
     const bar = this.figure(this.t("statistics.maturity")).getByRole("img");
@@ -319,6 +332,13 @@ export class Statistics extends Screen {
         exact: true,
       }),
     ).toBeVisible();
+    const studied = maturity.relearning + maturity.young + maturity.mature > 0;
+    await expect(
+      this.main.getByRole("img", { name: this.t("statistics.intervalsLabel"), exact: true }),
+    ).toHaveCount(studied ? 1 : 0);
+    await expect(this.main.getByText(this.t("statistics.showEases"), { exact: true })).toHaveCount(
+      studied ? 1 : 0,
+    );
   }
 
   private async expectMaturityByDeck(decks: ({ name: string } & Maturity)[]): Promise<void> {

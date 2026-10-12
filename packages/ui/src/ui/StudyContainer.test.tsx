@@ -549,7 +549,7 @@ describe("StudyContainer leaving for the deck list", () => {
             onExit={() => undefined}
           />
         ) : (
-          <TodaySummaryContainer useCases={useCases} instance={instance} />
+          <TodaySummaryContainer useCases={useCases} instance={instance} decks={[]} />
         )}
       </QueryClientProvider>
     );

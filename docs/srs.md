@@ -271,8 +271,12 @@ along the cards are now and what falls due next
 from the decks' cards and review states, read afresh each time they are
 shown (`getCardProgress`, two GETs a deck), not from the answer log.
 
-- **New, young and mature.** A prompt with no review state is *new*;
-  one whose `intervalDays` is under 21 (`MATURE_INTERVAL_DAYS`) is
+- **New, relearning, young and mature.** A prompt with no review state
+  is *new*. A reviewed one with `repetitions` 0 is *relearning*: it was
+  forgotten last time and not remembered since, as SM-2 resets the
+  repetitions on a lapse and any pass sets them to at least 1 (the
+  Studio's "learning" state). Of the others, with `repetitions` above
+  0, one whose `intervalDays` is under 21 (`MATURE_INTERVAL_DAYS`) is
   *young*, and one at 21 days or more is *mature*. The recall tiles and
   the recall-by-month chart draw the same line, but on the interval
   *before* each review (the answer's prior interval), so the review
@@ -290,10 +294,15 @@ shown (`getCardProgress`, two GETs a deck), not from the answer log.
   digest), then added up
   day by day across the decks (`mergeForecasts`): the reviews due on
   each of the next 30 study days, today first. Today's bar also holds
-  every prompt already overdue. The bars show what falls due, not what
-  the deck's `maxReviewsPerDay` lets through, so a day over the limit
-  is shown in full, though study would move the rest to a later day, as
-  a note with the chart says.
+  every prompt already overdue. Each day pairs what falls due with what
+  the deck's `maxReviewsPerDay` lets through (the rest carried over to
+  the next day), so the reviews held back show.
+- **Overdue and caught up.** *Overdue* counts the prompts due before
+  today (`overdueOf`), apart from those due today. The day the decks
+  are *caught up* is worked out per deck from its own forecast
+  (`daysToClearOf`): the study days its cap takes to let through every
+  review it holds back, or more than the 30 days. Across decks the
+  latest is taken, as each deck's cap is its own.
 - **Introduced is not learned.** "Cards introduced over time" is a
   running total of first answers in the
   [answer log](data-model.md#the-answer-log), over the months it reads
