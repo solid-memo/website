@@ -5,12 +5,13 @@
 import { expect, type Locator } from "@playwright/test";
 import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
+import { cellOf } from "./tables.ts";
 
 /**
  * A card's own screen ("Card"), opened from the deck's Browser by its
  * front's link, and the card editor's fields it shares with the card
  * creator: "Format with Markdown", the sides, the preview of a card in
- * Markdown and "Save".
+ * Markdown and "Save"; under them, the card's history.
  */
 export class CardEditor extends Screen {
   /** From the deck's Browser: opens the card whose front's link starts with `front`. */
@@ -59,6 +60,32 @@ export class CardEditor extends Screen {
       await expect(this.front).toHaveValue(front);
       await expect(this.preview).toHaveAttribute("open", "");
       await expect(this.previewCode).toHaveText(code);
+    });
+  }
+
+  /**
+   * The card's history: each answer to it, newest first, as its kind
+   * ("First answer", "Again the same day", …) and the answer given
+   * ("Good", …), as the table under "History" says them.
+   */
+  async history(): Promise<{ kind: string; answer: string }[]> {
+    return this.intent("Read the card's history", async () => {
+      const table = this.page
+        .getByRole("main")
+        .getByRole("table", { name: this.t("card.historyAnswers"), exact: true });
+      await expect(table).toBeVisible();
+      const rows = [];
+      for (const row of await table
+        .getByRole("row")
+        .filter({ has: this.page.getByRole("cell") })
+        .all())
+        rows.push({
+          kind: (await (await cellOf(table, row, this.t("card.historyKind"))).innerText()).trim(),
+          answer: (
+            await (await cellOf(table, row, this.t("card.historyAnswer"))).innerText()
+          ).trim(),
+        });
+      return rows;
     });
   }
 

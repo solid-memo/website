@@ -157,7 +157,27 @@
     "removeConfirm": "Karte „{card}“ entfernen? Das lässt sich nicht rückgängig machen.",
     "removeHeading": "Karte entfernen",
     "removeAction": "Entfernen",
-    "saved": "Gespeichert."
+    "saved": "Gespeichert.",
+    "historyHeading": "Verlauf",
+    "historyLoading": "Der Verlauf der Karte wird geladen…",
+    "historyUnavailable": "Der Verlauf der Karte lässt sich gerade nicht lesen.",
+    "historyNone": "Noch nicht gelernt.",
+    "historyInterval": "Intervall",
+    "historyDue": "Nächste Wiederholung",
+    "historyFirstStudied": "Zuerst gelernt",
+    "historyHint": "Jede Antwort zu dieser Karte, neueste zuerst. Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und Antworten in Kursen sind keine Wiederholungen.",
+    "historyAnswers": "Antworten zu dieser Karte",
+    "historyDirection": "Richtung",
+    "historyKind": "Art",
+    "historyAnswer": "Antwort",
+    "historyNext": "Nächstes Intervall",
+    "historyFirst": "Erste Antwort",
+    "historyReview": "Wiederholung",
+    "historyRepeat": "Erneut am selben Tag",
+    "historyCourse": "Kursfrage",
+    "historyRight": "Richtig",
+    "historyWrong": "Falsch",
+    "historyWrongOption": "Falsch: {option}"
   },
   "cardContentFields": {
     "front": "Vorderseite",
@@ -1547,7 +1567,33 @@
     "reviews": "Wiederholungen",
     "pointAtWeek": "Zeige auf eine Woche, um zu sehen, was sie brachte, oder öffne die Tabelle unten.",
     "directionsColumn": "Nach Richtung",
-    "directionShare": "{direction}: {share}"
+    "directionShare": "{direction}: {share}",
+    "whatIsHard": "Was schwerfällt",
+    "hardest": "Schwierigste Karten",
+    "hardestHint": {
+      "one": "Die Karten, die du in den letzten 12 Monaten in ihren Wiederholungen am häufigsten vergessen hast, in beiden Richtungen. Eine Karte, die {count}-mal oder öfter vergessen wurde, ist eine Problemkarte: Sie kostet immer wieder Wiederholungen. Öffne sie, um sie klarer zu formulieren oder eine Notiz hinzuzufügen.",
+      "other": "Die Karten, die du in den letzten 12 Monaten in ihren Wiederholungen am häufigsten vergessen hast, in beiden Richtungen. Eine Karte, die {count}-mal oder öfter vergessen wurde, ist eine Problemkarte: Sie kostet immer wieder Wiederholungen. Öffne sie, um sie klarer zu formulieren oder eine Notiz hinzuzufügen."
+    },
+    "noHardest": "In den letzten 12 Monaten wurde keine Karte in einer Wiederholung vergessen.",
+    "forgottenTimes": {
+      "one": "{count}-mal vergessen: {share}",
+      "other": "{count}-mal vergessen: {share}"
+    },
+    "leechMark": "{text} · eine Problemkarte",
+    "confusions": "Am häufigsten verwechselte Antwortmöglichkeiten",
+    "confusionsHint": "Die falschen Antwortmöglichkeiten, die in den letzten 12 Monaten in den Kursfragen dieses Stapels am häufigsten gewählt wurden.",
+    "noConfusions": "In den letzten 12 Monaten wurde keine falsche Antwortmöglichkeit gewählt.",
+    "confusedWith": {
+      "one": "{count}-mal mit {option} verwechselt",
+      "other": "{count}-mal mit {option} verwechselt"
+    },
+    "leeches": "Problemkarten in all deinen Stapeln",
+    "leechesHint": {
+      "one": "Karten, die in den letzten 12 Monaten {count}-mal oder öfter in ihren Wiederholungen vergessen wurden, in jedem Stapel. Sie kosten immer wieder Wiederholungen: Öffne eine, um sie klarer zu formulieren oder eine Notiz hinzuzufügen.",
+      "other": "Karten, die in den letzten 12 Monaten {count}-mal oder öfter in ihren Wiederholungen vergessen wurden, in jedem Stapel. Sie kosten immer wieder Wiederholungen: Öffne eine, um sie klarer zu formulieren oder eine Notiz hinzuzufügen."
+    },
+    "noLeeches": "Keine Problemkarten: Keine Karte wurde so oft vergessen.",
+    "leechIn": "{forgotten}, in {deck}"
   },
   "zoomableImage": {
     "enlarge": "Bild vergrößern",

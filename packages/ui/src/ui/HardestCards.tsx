@@ -1,0 +1,170 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import type { DeckProgress } from "@solid-memo/application/useCases";
+import { LEECH_LAPSES, type HardCard } from "@solid-memo/domain/cardHistory";
+import { isMarkdown, type Card, type Deck } from "@solid-memo/domain/deck";
+import { cardName, cardNameText, DataLine } from "./DataText";
+import { useI18n } from "./i18n";
+import { ReaderText } from "./ReaderText";
+import { routeToHash } from "./router";
+
+/** How many of a deck's hardest cards its page lists. */
+export const HARDEST_SHOWN = 10;
+
+/** A card's name, as a link to its page in the app, marked with the language it is in. */
+function CardLink({ instanceUrl, deck, card }: { instanceUrl: string; deck: Deck; card: Card }) {
+  const { readerText, readerLang } = useI18n();
+  return (
+    <a
+      href={routeToHash({ screen: "card", instanceUrl, deckUrl: deck.url, cardUrl: card.url })}
+      lang={readerLang(cardNameText(card, readerText))}
+    >
+      {cardName(card, readerText)}
+    </a>
+  );
+}
+
+/** How a card's lapses are told: how often it was forgotten, of how many reviews, and whether that makes it a leech. */
+function useForgottenText(): (hard: HardCard<Card>) => string {
+  const { t, formatPercent } = useI18n();
+  return (hard) => {
+    const share = t("statistics.recallShare", {
+      percent: formatPercent(hard.lapses / hard.reviews),
+      count: hard.reviews,
+    });
+    const text = t("statistics.forgottenTimes", { count: hard.lapses, share });
+    return hard.lapses >= LEECH_LAPSES ? t("statistics.leechMark", { text }) : text;
+  };
+}
+
+/**
+ * A deck's hardest cards (hardestCardsOf): the HARDEST_SHOWN forgotten
+ * most often in their reviews of the last twelve months, each a link to
+ * its page, with how often of how many reviews, a leech marked as one.
+ * Nothing for a deck without such reviews (one studied only in a
+ * course's chapters, or not yet reviewed).
+ */
+export function HardestCards({
+  instanceUrl,
+  progress,
+}: {
+  instanceUrl: string;
+  progress: DeckProgress;
+}) {
+  const { t } = useI18n();
+  const forgotten = useForgottenText();
+  const { deck, hardest } = progress;
+  if (hardest.reviews === 0) return null;
+  return (
+    <>
+      <h4>{t("statistics.hardest")}</h4>
+      <p class="hint">{t("statistics.hardestHint", { count: LEECH_LAPSES })}</p>
+      {hardest.cards.length === 0 ? (
+        <p>{t("statistics.noHardest")}</p>
+      ) : (
+        <ol class="hardest-cards" aria-label={t("statistics.hardest")}>
+          {hardest.cards.slice(0, HARDEST_SHOWN).map((hard) => (
+            <li key={hard.card.url}>
+              <CardLink instanceUrl={instanceUrl} deck={deck} card={hard.card} />{" "}
+              <span class="hint">{forgotten(hard)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </>
+  );
+}
+
+/**
+ * The wrong options chosen most often in a deck's course questions of
+ * the last twelve months (confusionsOf), each with its card, a link to
+ * its page, and how often. Nothing for a deck without multiple-choice
+ * answers.
+ */
+export function ConfusedOptions({
+  instanceUrl,
+  progress,
+}: {
+  instanceUrl: string;
+  progress: DeckProgress;
+}) {
+  const { t, tx } = useI18n();
+  const { deck, confusions } = progress;
+  if (progress.courseAnswers === 0) return null;
+  return (
+    <>
+      <h4>{t("statistics.confusions")}</h4>
+      <p class="hint">{t("statistics.confusionsHint")}</p>
+      {confusions.length === 0 ? (
+        <p>{t("statistics.noConfusions")}</p>
+      ) : (
+        <ol class="hardest-cards" aria-label={t("statistics.confusions")}>
+          {confusions.slice(0, HARDEST_SHOWN).map(({ card, distractor, picks }) => (
+            <li key={`${card.url} ${distractor.id}`}>
+              <CardLink instanceUrl={instanceUrl} deck={deck} card={card} />{" "}
+              <span class="hint">
+                {tx("statistics.confusedWith", {
+                  option: (
+                    <DataLine text={distractor.text} markdown={isMarkdown(card.textFormat)} />
+                  ),
+                  count: picks,
+                })}
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </>
+  );
+}
+
+/**
+ * The leeches of every deck (cards forgotten LEECH_LAPSES times or more
+ * in their reviews of the last twelve months), the most forgotten first,
+ * each a link to its page, with its deck and how often of how many
+ * reviews. A deck since removed has no cards to name, so none of its.
+ */
+export function Leeches({
+  instanceUrl,
+  decks,
+}: {
+  instanceUrl: string;
+  decks: readonly DeckProgress[];
+}) {
+  const { t, tx } = useI18n();
+  const forgotten = useForgottenText();
+  const leeches = decks
+    .flatMap(({ deck, hardest }) =>
+      hardest.cards.filter((hard) => hard.lapses >= LEECH_LAPSES).map((hard) => ({ deck, hard })),
+    )
+    .sort(
+      (a, b) =>
+        b.hard.lapses - a.hard.lapses ||
+        b.hard.lapses / b.hard.reviews - a.hard.lapses / a.hard.reviews,
+    );
+  return (
+    <>
+      <h4>{t("statistics.leeches")}</h4>
+      <p class="hint">{t("statistics.leechesHint", { count: LEECH_LAPSES })}</p>
+      {leeches.length === 0 ? (
+        <p>{t("statistics.noLeeches")}</p>
+      ) : (
+        <ol class="hardest-cards" aria-label={t("statistics.leeches")}>
+          {leeches.map(({ deck, hard }) => (
+            <li key={hard.card.url}>
+              <CardLink instanceUrl={instanceUrl} deck={deck} card={hard.card} />{" "}
+              <span class="hint">
+                {tx("statistics.leechIn", {
+                  deck: <ReaderText text={deck.title} />,
+                  forgotten: forgotten(hard),
+                })}
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </>
+  );
+}

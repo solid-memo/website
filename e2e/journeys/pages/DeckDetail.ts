@@ -55,6 +55,21 @@ export class DeckDetail extends Screen {
     );
   }
 
+  /**
+   * "Most-confused options", under what is hard in the deck: the wrong
+   * options chosen in its course questions, each a link to its card.
+   */
+  async expectConfusedOptions(): Promise<void> {
+    await this.intent("Check the deck's most-confused options", async () => {
+      const list = this.page
+        .getByRole("main")
+        .getByRole("list", { name: this.t("statistics.confusions"), exact: true });
+      await expect(list.getByRole("listitem").first()).toBeVisible();
+      for (const item of await list.getByRole("listitem").all())
+        await expect(item.getByRole("link")).toHaveCount(1);
+    });
+  }
+
   /** The description reads `text`, exactly. */
   async expectDescription(text: string): Promise<void> {
     await this.intent("Check the deck's description", () =>

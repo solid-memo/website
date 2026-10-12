@@ -7,6 +7,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { CardProgressContainer } from "./CardProgressContainer";
+import { HardestCardsContainer } from "./HardestCardsContainer";
 import { useI18n } from "./i18n";
 import {
   DayHeldBars,
@@ -26,7 +27,7 @@ import { STATISTICS_STALE_MS } from "./studyFigures";
  * these for a deck studied only in a course's chapters). Nothing of them
  * while there are no answers yet, or when they cannot be read (the deck
  * works without them); then where its cards stand, all new before the
- * first answer.
+ * first answer, and its hardest cards and most-confused options.
  */
 export function DeckStatisticsContainer({
   useCases,
@@ -71,6 +72,7 @@ export function DeckStatisticsContainer({
         </section>
       )}
       <CardProgressContainer useCases={useCases} instance={instance} deck={deck} />
+      <HardestCardsContainer useCases={useCases} instance={instance} deck={deck} />
     </>
   );
 }

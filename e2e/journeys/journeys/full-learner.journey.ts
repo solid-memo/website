@@ -11,7 +11,8 @@ import type { StudyResult } from "../pages/Study.ts";
  * A learner's whole first day, as the journey's spec numbers it: log in,
  * keep new cards to one a day, make two decks of two cards and study,
  * group the decks, reorder and ungroup them, allow two new cards a day on
- * four answer buttons and study again, read the statistics, preview,
+ * four answer buttons and study again, read the statistics and a card's
+ * history, preview,
  * import and describe a library deck in English and Swedish, validate
  * the instance and log out. How journeys are run, read when they fail
  * and written: docs/testing.md#user-journeys.
@@ -224,7 +225,29 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
         { name: deckA, new: 0, relearning: 0, young: 2, mature: 0 },
         { name: deckB, new: 0, relearning: 0, young: 2, mature: 0 },
       ],
+      // No review yet, so nothing is hard to tell: no leeches listed.
+      leeches: null,
     });
+  });
+
+  await app.step("15b · Read the history of deck B's cards", async () => {
+    const histories = [];
+    for (const front of [`Star ${runId}`, `Sky ${runId}`]) {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.deckBrowser.openFor(deckB);
+      await app.cardEditor.open(front);
+      histories.push(await app.cardEditor.history());
+    }
+    // One card was answered Good once; the other Again, then Good once
+    // more the same day, newest first, the repeat told apart.
+    const good = app.t("study.minimal.good");
+    expect(histories.sort((a, b) => a.length - b.length)).toEqual([
+      [{ kind: app.t("card.historyFirst"), answer: good }],
+      [
+        { kind: app.t("card.historyRepeat"), answer: good },
+        { kind: app.t("card.historyFirst"), answer: app.t("study.minimal.again") },
+      ],
+    ]);
   });
 
   await app.step(

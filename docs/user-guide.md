@@ -108,7 +108,9 @@ many are new, with a **Study** button. It also shows:
   progress ([migrations.md](migrations.md#catching-up-with-the-library));
 - "Reset today's study", once you have studied the deck today, to undo
   today's answers for this deck ([srs.md](srs.md#resetting-the-day));
-- the deck's own statistics, and where its cards stand.
+- the deck's own statistics, where its cards stand, and what is hard
+  in it: the cards you forget most, and in a course's deck the wrong
+  options you choose most.
 
 Its buttons lead to **Preferences** (the deck's name, its own daily
 limits, and the languages of its text), the **Browser** (its cards),
@@ -147,7 +149,9 @@ front, each on its own schedule.
 - The **Browser**, from a deck's page, lists every card ten to a page.
   There you describe the deck, choose which way it is studied (front to
   back, back to front, or both), add cards, open a card to edit it, and
-  remove one.
+  remove one. Under the editor, a card's history shows when it comes
+  back, how long until then, when you first studied it, and every
+  answer you gave it.
 - **Add card** opens a form for the front and the back: text, a
   picture, or both, and optional notes. It stays open after each card,
   so you can add many in a row. Check "Format with Markdown" for code,
@@ -213,7 +217,9 @@ time), young (reviewed at intervals under 21 days) and mature, how many
 reviews are overdue and when your daily review limit lets you catch up,
 how many reviews are coming in the next 30 days beside those your limit
 lets through, how long until your cards come back and how easy they
-feel, and when each deck's new cards run out. Above the deck list,
+feel, and when each deck's new cards run out. Last, your leeches: the
+cards you forgot 4 times or more in their reviews, each a link to the
+card, whose page shows every answer you gave it. Above the deck list,
 today's strip also says how many cards are left to study today. Every chart can also be read as a table
 ([statistics.md](statistics.md)). A guest has statistics too.
 
@@ -285,13 +291,14 @@ screenshot of each.
 | Creating decks and adding cards | full-learner | 04–05, 07–08 |
 | Studying | full-learner | 06, 13 |
 | Grouping decks | full-learner | 09–11 |
-| Statistics | full-learner | 15 |
+| Statistics, and a card's history | full-learner | 15–15b |
 | Previewing and importing a library deck | full-learner | 16–17 |
 | Describing a deck in two languages, and switching language | full-learner | 18–20b |
 | Checking the instance (developer mode) | full-learner | 21 |
 | A card in Markdown | [markdown-card.journey.ts](../e2e/journeys/journeys/markdown-card.journey.ts) | 04–07 |
 | The course for newcomers, from an empty deck list | [newcomer-course.journey.ts](../e2e/journeys/journeys/newcomer-course.journey.ts) | 03–05 |
 | A course's first chapter and its final review | [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts) | 03–08 |
+| A course's answers in the statistics, and its most-confused options | course-chapter | 09–10 |
 | Adding a course from a link and playing it | [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts), second journey | 03–05 |
 | Solid Memo Studio | studio.journey.ts, first journey | 06–36 |
 

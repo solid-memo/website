@@ -174,8 +174,12 @@ import {
 import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
 import {
   cardAnswers,
+  confusionsOf,
   deckAnswers,
+  hardestCardsOf,
   lapseIndex,
+  type Confusion,
+  type HardestCards,
   type LapseIndex,
 } from "@solid-memo/domain/cardHistory";
 import {
@@ -830,9 +834,13 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * their intervals and eases are spread, and the reviews of its next
    * FORECAST_DAYS study days (forecastOf, capped by the deck's pace, else
    * the preferences'), with what is overdue and how long the cap takes to
-   * let through what it holds back: of every deck of the instance, or of
-   * the one given. Reads each deck's cards and review states, and keeps
-   * its schedule in the digest while at it.
+   * let through what it holds back; and, from the answers of the last
+   * twelve study months, which of its cards in use were forgotten most
+   * (hardestCardsOf) and which wrong options were chosen most
+   * (confusionsOf): of every deck of the instance, or of the one given.
+   * Reads each deck's cards and review states once, and keeps its
+   * schedule in the digest while at it; the log's months as
+   * getStatistics reads them, sharing what is kept.
    */
   getCardProgress(
     instanceUrl: string,
@@ -966,6 +974,12 @@ export interface DeckProgress {
   newCardsPerDay: number;
   /** Its prompts first reviewed today, which that cap counts (newCardsRunOutOf). */
   introducedToday: number;
+  /** Its cards in use forgotten in reviews of the last twelve study months, the hardest first, and the reviews of those months. */
+  hardest: HardestCards<Card>;
+  /** Its multiple-choice answers of those months. */
+  courseAnswers: number;
+  /** The wrong options chosen in them, with their cards in use, the most chosen first. */
+  confusions: Confusion<Card>[];
 }
 
 /** The option a learner chose: right or wrong, and which wrong one (a distractor's id). */
@@ -1180,6 +1194,12 @@ const NO_GUEST_POD: GuestPod = {
   },
   discard: nothing,
 };
+
+/** The first study day of the month of `today` and of the `months - 1` before it. */
+function firstDayOfMonths(today: string, months: number): string {
+  const [year, month] = today.split("-").map(Number);
+  return new Date(Date.UTC(year!, month! - months, 1)).toISOString().slice(0, 10);
+}
 
 /**
  * A deck's name as entered (see tidiedStated). The app requires a name
@@ -1998,6 +2018,7 @@ export function createUseCases({
         } catch {
           return;
         }
+        logWrites += 1;
         unlogged.shift();
       }
     });
@@ -2006,13 +2027,22 @@ export function createUseCases({
 
   /** Each instance's answer log as last read, by month: its answers, and the version they were read at. */
   const answerMonths = new Map<string, Map<string, { version: string; answers: Answer[] }>>();
+  /**
+   * The reads of a month under way, by instance, month and the writes to
+   * the logs made before they began (logWrites): a read begun before a
+   * write may miss it, so only one begun since is shared.
+   */
+  const monthReads = new Map<string, Promise<Answer[]>>();
+  let logWrites = 0;
 
   /**
    * The answers of the log's months that `wanted` keeps, of `listed` (every
    * month the log has): each month read only when it changed since last
    * read, and kept with its version. What is kept is added to, never
    * replaced, so a read of some months and one of all do not undo each
-   * other; a month no longer listed is dropped.
+   * other; a month no longer listed is dropped. A month already being
+   * read since the last write to the logs is not read twice: the
+   * statistics and the cards' progress ask at once.
    */
   async function readLogMonths(
     instanceUrl: string,
@@ -2025,13 +2055,20 @@ export function createUseCases({
     const still = new Set(listed);
     for (const month of known.keys()) if (!still.has(month)) known.delete(month);
     const answers = await Promise.all(
-      listed.filter(wanted).map(async (month) => {
-        const kept = known.get(month);
-        const since = await answerLog.readMonthSince(instanceUrl, month, kept?.version);
-        if (since.unchanged) return kept!.answers;
-        if (since.version === null) known.delete(month);
-        else known.set(month, { version: since.version, answers: since.value });
-        return since.value;
+      listed.filter(wanted).map((month) => {
+        const key = `${instanceUrl}\n${month}\n${logWrites}`;
+        const under = monthReads.get(key);
+        if (under !== undefined) return under;
+        const read = (async () => {
+          const kept = known.get(month);
+          const since = await answerLog.readMonthSince(instanceUrl, month, kept?.version);
+          if (since.unchanged) return kept!.answers;
+          if (since.version === null) known.delete(month);
+          else known.set(month, { version: since.version, answers: since.value });
+          return since.value;
+        })().finally(() => monthReads.delete(key));
+        monthReads.set(key, read);
+        return read;
       }),
     );
     return answers.flat();
@@ -2500,6 +2537,7 @@ export function createUseCases({
               .filter((answer) => answer.deckUrl === deck.url)
               .map((answer) => mergedAnswer(answer, merged)),
           );
+          logWrites += 1;
           progress.stepped();
         }
 
@@ -3140,6 +3178,7 @@ export function createUseCases({
         // The day never happened: its answers leave the log too, those still on their way first.
         await logAnswers();
         await answerLog.removeDay(instanceUrl, deck.url, studyDayOf(now, prefs.dayBoundaryHour));
+        logWrites += 1;
       }
       return count;
     },
@@ -3152,12 +3191,11 @@ export function createUseCases({
       const today = studyDayOf(at, prefs.dayBoundaryHour);
       // The range's first study day: of `range` days up to today, or the first
       // of this month and the `months - 1` before it; none for the whole log.
-      const [year, month] = today.split("-").map(Number);
       const first =
         range === "all"
           ? null
           : range === undefined
-            ? new Date(Date.UTC(year!, month! - months, 1)).toISOString().slice(0, 10)
+            ? firstDayOfMonths(today, months)
             : shiftStudyDay(today, 1 - range);
       const firstMonth = first === null ? null : monthOfStudyDay(first);
       const read = await readLogMonths(
@@ -3208,17 +3246,35 @@ export function createUseCases({
         deck === undefined ? deckRepository.listDecks(instanceUrl) : [deck],
       ]);
       const today = studyDayOf(at, prefs.dayBoundaryHour);
+      // The answers of the statistics' twelve study months, by deck: whole
+      // months, read beside the decks' cards. Only what is hard needs them,
+      // so a log that cannot be read leaves that empty, not the cards' progress.
+      const firstMonth = monthOfStudyDay(firstDayOfMonths(today, 12));
+      const logged = (async () => {
+        await logAnswers();
+        const byDeck = new Map<string, Answer[]>();
+        for (const answer of await readLogMonths(
+          instanceUrl,
+          await answerLog.months(instanceUrl),
+          (month) => month >= firstMonth,
+        )) {
+          const answers = byDeck.get(answer.deckUrl);
+          if (answers === undefined) byDeck.set(answer.deckUrl, [answer]);
+          else answers.push(answer);
+        }
+        return byDeck;
+      })().catch(() => new Map<string, Answer[]>());
       const progress = await Promise.all(
         decks.map(async (one) => {
-          const { cards, reviews, schedule } = await scheduleNow(
-            instanceUrl,
-            one,
-            at,
-            prefs.dayBoundaryHour,
-          );
+          const [{ cards, reviews, schedule }, byDeck] = await Promise.all([
+            scheduleNow(instanceUrl, one, at, prefs.dayBoundaryHour),
+            logged,
+          ]);
           const { maxReviewsPerDay, newCardsPerDay } = deckPreferences(prefs, one);
           const states = scheduledStates(cards.value, one.direction, reviews.value);
           const forecast = forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay });
+          const answers = deckAnswers(byDeck.get(one.url) ?? [], one);
+          const live = activeCards(cards.value);
           return {
             deck: one,
             progress: cardProgressOf({
@@ -3233,6 +3289,9 @@ export function createUseCases({
             daysToClear: daysToClearOf(forecast),
             newCardsPerDay,
             introducedToday: schedule.studyDay === today ? schedule.introducedOnDay : 0,
+            hardest: hardestCardsOf(answers, live),
+            courseAnswers: answers.filter((answer) => answer.mode === "multiple-choice").length,
+            confusions: confusionsOf(answers, live),
           };
         }),
       );

@@ -44,12 +44,7 @@ export function CardProgressContainer({
 }) {
   const { t } = useI18n();
   const headingId = useId();
-  const progressQuery = useQuery({
-    queryKey: ["cardProgress", instance.url, deck?.url],
-    queryFn: () =>
-      useCases.getCardProgress(instance.url, new Date(), deck === undefined ? {} : { deck }),
-    staleTime: STATISTICS_STALE_MS,
-  });
+  const progressQuery = useCardProgress(useCases, instance, deck);
   const report = progressQuery.data;
   return (
     <section class="statistics card-progress" aria-labelledby={headingId}>
@@ -63,6 +58,20 @@ export function CardProgressContainer({
       )}
     </section>
   );
+}
+
+/**
+ * The cards' progress of every deck of the instance, or of the one deck
+ * given, as one query: CardProgressContainer and HardestCardsContainer
+ * share what it reads.
+ */
+export function useCardProgress(useCases: UseCases, instance: Instance, deck?: Deck) {
+  return useQuery({
+    queryKey: ["cardProgress", instance.url, deck?.url],
+    queryFn: () =>
+      useCases.getCardProgress(instance.url, new Date(), deck === undefined ? {} : { deck }),
+    staleTime: STATISTICS_STALE_MS,
+  });
 }
 
 /**
