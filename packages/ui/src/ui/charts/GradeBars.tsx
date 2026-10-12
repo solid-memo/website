@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
 import type { AnswerButtons, GradeGroup } from "@solid-memo/domain/studyPatterns";
 import { useI18n } from "../i18n";
 import { Inspector } from "./Inspector";
+import { usePoint } from "./usePoint";
 
 /** The answer buttons, in order, with the words the study screen gives them. */
 export const GRADE_GROUPS = [
@@ -20,11 +20,11 @@ export const GRADE_GROUPS = [
  * young and mature reviews: a bar each, its four steps of the green as
  * wide as their shares, Again the lightest; a kind with no answers has
  * an empty bar. Pointing at a step says its share; the table gives every
- * count.
+ * count. Each bar is a tab stop, its steps a Left or Right apart.
  */
 export function GradeBars({ buttons }: { buttons: AnswerButtons }) {
   const { t, formatPercent } = useI18n();
-  const [pointed, setPointed] = useState<string | null>(null);
+  const { pointed, keyed, point, keyDown, hintId } = usePoint<string>();
   const kinds = [
     ["introductions", t("statistics.buttonsFirst")],
     ["young", t("statistics.youngShort")],
@@ -69,12 +69,19 @@ export function GradeBars({ buttons }: { buttons: AnswerButtons }) {
             <div
               class="grade-bar"
               role="img"
+              aria-describedby={hintId}
               aria-label={t("statistics.buttonsLabel", {
                 kind: name,
                 counts: GRADE_GROUPS.map(([group, key]) =>
                   t("statistics.buttonCount", { button: t(key), count: buttons[kind][group] }),
                 ).join(", "),
               })}
+              tabIndex={totalOf(kind) > 0 ? 0 : undefined}
+              onKeyDown={keyDown(
+                GRADE_GROUPS.filter(([group]) => buttons[kind][group] > 0).map(
+                  ([group]) => `${kind} ${group}`,
+                ),
+              )}
             >
               {GRADE_GROUPS.filter(([group]) => buttons[kind][group] > 0).map(([group]) => (
                 <span
@@ -82,8 +89,8 @@ export function GradeBars({ buttons }: { buttons: AnswerButtons }) {
                   class={`grade-segment grade-${group}${pointed === `${kind} ${group}` ? " pointed" : ""}`}
                   style={{ flexGrow: buttons[kind][group] }}
                   data-part={`${kind} ${group}`}
-                  onPointerEnter={() => setPointed(`${kind} ${group}`)}
-                  onClick={() => setPointed(`${kind} ${group}`)}
+                  onPointerEnter={() => point(`${kind} ${group}`)}
+                  onClick={() => point(`${kind} ${group}`)}
                 />
               ))}
             </div>
@@ -91,8 +98,10 @@ export function GradeBars({ buttons }: { buttons: AnswerButtons }) {
         ))}
       </div>
       <Inspector
+        id={hintId}
         text={pointed === null ? null : textOf(pointed)}
         prompt={t("statistics.pointAtButton")}
+        keyed={keyed}
       />
       <details class="chart-table">
         <summary>{t("statistics.showTable")}</summary>

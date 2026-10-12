@@ -4,6 +4,7 @@
 
 import { expect, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
+import { escapeRegExp } from "../harness/strings.ts";
 import { cellOf } from "./tables.ts";
 
 /** The statistics' tabs, as the URL names them. */
@@ -267,6 +268,31 @@ export class Statistics extends Screen {
         await cellOf(table, row, this.t("statistics.quizAccuracy")),
         this.t("statistics.quizAccuracy"),
       ).toHaveText(/\d/);
+    });
+  }
+
+  /**
+   * The overview's calendar from the keyboard alone: focused, End points
+   * at today, which the line under it and its status line both say,
+   * `answers` answers of it, and Escape lets go.
+   */
+  async expectCalendarByKeyboard(answers: number): Promise<void> {
+    await this.intent("Read today in the calendar with the keyboard", async () => {
+      await this.openTab("overview");
+      const figure = this.figure(this.t("statistics.activity", { weeks: 52 }));
+      const grid = figure.getByRole("img", {
+        name: this.t("statistics.activityLabel", { weeks: 52 }),
+        exact: true,
+      });
+      await grid.focus();
+      await this.page.keyboard.press("End");
+      const said = new RegExp(
+        `^${escapeRegExp(`${await this.today()}: ${this.t("statistics.answerCount", { count: answers })}`)} `,
+      );
+      await expect(figure.getByRole("status")).toHaveText(said);
+      await expect(figure.getByText(said)).toHaveCount(2);
+      await this.page.keyboard.press("Escape");
+      await expect(figure.getByRole("status")).toHaveText("");
     });
   }
 

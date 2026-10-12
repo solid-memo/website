@@ -109,14 +109,25 @@ of the interval chart stay nearly empty; its caption says so. A card studied bot
 way, and the page says so. A share is always shown with the count it is
 of, however small, so that "100%" of one review reads as what it is.
 
-Every chart can be read without seeing it. Pointing at a day, a
-weekday, a week, a month or a part of a bar (or tapping it) puts what
-it held in words under the chart, and "Show as a table" lists the same
-figures. Only shades of one green are used; where two lines meet, a
-dash or a legend tells them apart, and where bars hold several series,
-a legend names each step of the green. In forced-colors mode the steps
-keep apart as empty, hatched and filled. The histograms are the
-Studio's own, shared from the UI package.
+Every chart can be read without seeing it. Pointing at a day, a weekday,
+a week, a month or a part of a bar (or tapping it) puts what it held in
+words under the chart, and "Show as a table" lists the same figures. The
+keyboard reaches the same words: each chart is one tab stop (each bar of
+the answer buttons with answers is one), Left and Right step along its
+points, Home and End go to the first and the last, and Escape lets go;
+in the calendar, Left and Right step a week and Up and Down a day
+(`usePoint`). The line under the chart is the chart's description, so a
+screen reader that reaches the chart says how to step through it; keys
+pressed with Alt, Control or Meta are left to the browser. A point
+reached by the keyboard is said once more in a status line, so a screen
+reader reads each step out, while sweeping the pointer stays quiet. A
+screen reader that reads the page in browse mode keeps the arrow keys
+for itself: its focus mode passes them on, and the tables say the same.
+Only shades of one green are used; where two lines meet, a dash or a
+legend tells them apart, and where bars hold several series, a legend
+names each step of the green. In forced-colors mode the steps keep apart
+as empty, hatched and filled. The histograms are the Studio's own,
+shared from the UI package.
 
 The page reads three things on their own, so none waits for another:
 the answers of the range (`UseCases.getStatistics`);
@@ -331,9 +342,9 @@ rest of their study when they log in.
   the answer buttons (the Again among the first answers, the repeat
   left out), what the day held (one repeat), the weekdays, the table by
   deck, every maturity bar (relearning among them), the overdue tile,
-  the interval chart and that no leech is listed before any review;
-  step 15b reads the history of that deck's two cards, the repeat told
-  apart. In
+  the interval chart and that no leech is listed before any review,
+  then reads today in the calendar from the keyboard; step 15b reads
+  the history of that deck's two cards, the repeat told apart. In
   [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts),
   step 09 checks that a course's answers show as graded course answers
   and not as recall, and the chapter just completed under "Your

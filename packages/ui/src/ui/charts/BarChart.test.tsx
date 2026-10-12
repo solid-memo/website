@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { render } from "@testing-library/preact";
+import { fireEvent, render, screen } from "@testing-library/preact";
+import { statusTexts } from "../../test/liveRegions";
 import { BarChart } from "./BarChart";
 
 describe("BarChart", () => {
@@ -32,5 +33,32 @@ describe("BarChart", () => {
     expect(Number(second!.getAttribute("height"))).toBe(60);
     expect(container.querySelectorAll('g[data-bar="b"] rect.bar')).toHaveLength(1);
     expect(container.querySelector(".bar-ticks")).toHaveTextContent("MoTu");
+  });
+
+  it("is one tab stop whose bars the arrow keys step along, each read out", () => {
+    const { container } = render(
+      <BarChart
+        caption="Bars"
+        label="Bars"
+        bars={[
+          { key: "a", values: [2], text: "A holds 2" },
+          { key: "b", values: [1], text: "B holds 1" },
+        ]}
+        prompt="Point"
+      >
+        {null}
+      </BarChart>,
+    );
+    const chart = screen.getByRole("img", { name: "Bars" });
+    expect(chart).toHaveAttribute("tabindex", "0");
+    expect(chart).toHaveAccessibleDescription("Point");
+    fireEvent.keyDown(chart, { key: "ArrowRight" });
+    fireEvent.keyDown(chart, { key: "ArrowRight" });
+    expect(container.querySelector('g[data-bar="b"] rect.bar')).toHaveClass("pointed");
+    expect(container.querySelector(".chart-inspector")).toHaveTextContent("B holds 1");
+    expect(statusTexts()).toEqual(["B holds 1"]);
+    fireEvent.keyDown(chart, { key: "Escape" });
+    expect(container.querySelector(".chart-inspector")).toHaveTextContent("Point");
+    expect(statusTexts()).toEqual([]);
   });
 });

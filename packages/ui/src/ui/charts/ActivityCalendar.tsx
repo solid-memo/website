@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
 import { shiftStudyDay } from "@solid-memo/domain/answer";
 import type { DayActivity } from "@solid-memo/domain/statistics";
 import { CALENDAR_WEEKS, weekdayOf } from "@solid-memo/domain/studyPatterns";
 import { useI18n } from "../i18n";
 import { DayTable, useDayText } from "./DayTable";
 import { Inspector } from "./Inspector";
+import { usePoint } from "./usePoint";
 
 /** The step of the green a day's answers get: 0 for none, then 1 to 4 by share of the busiest day. */
 export function levelOf(answers: number, most: number): number {
@@ -19,6 +19,7 @@ export function levelOf(answers: number, most: number): number {
  * The last `weeks` weeks, a column a week from Monday down to Sunday, a
  * cell a day in the step of green its answers give it; days after today
  * are left out. The columns share the figure's width, so a year fills it.
+ * From the keyboard, Left and Right step a week and Up and Down a day.
  */
 export function ActivityCalendar({
   days,
@@ -31,7 +32,7 @@ export function ActivityCalendar({
 }) {
   const { t } = useI18n();
   const dayText = useDayText();
-  const [pointed, setPointed] = useState<string | null>(null);
+  const { pointed, keyed, point, keyDown, hintId } = usePoint<string>();
   const byDay = new Map(days.map((day) => [day.studyDay, day]));
   const first = shiftStudyDay(today, -weekdayOf(today) - (weeks - 1) * 7);
   const shown = Array.from({ length: weeks * 7 }, (_, i) => shiftStudyDay(first, i)).filter(
@@ -44,7 +45,10 @@ export function ActivityCalendar({
       <div
         class="calendar-grid"
         role="img"
+        aria-describedby={hintId}
         aria-label={t("statistics.activityLabel", { weeks })}
+        tabIndex={0}
+        onKeyDown={keyDown(shown, 7)}
         style={{ "--weeks": weeks }}
       >
         {shown.map((day, i) => (
@@ -53,8 +57,8 @@ export function ActivityCalendar({
             class={`calendar-day level-${levelOf(byDay.get(day)?.answers ?? 0, most)}${day === pointed ? " pointed" : ""}`}
             style={{ gridRow: weekdayOf(day) + 1, gridColumn: Math.floor(i / 7) + 1 }}
             data-day={day}
-            onPointerEnter={() => setPointed(day)}
-            onClick={() => setPointed(day)}
+            onPointerEnter={() => point(day)}
+            onClick={() => point(day)}
           />
         ))}
       </div>
@@ -66,8 +70,10 @@ export function ActivityCalendar({
         {t("statistics.more")}
       </div>
       <Inspector
+        id={hintId}
         text={pointed === null ? null : dayText(pointed, byDay.get(pointed))}
         prompt={t("statistics.pointAtDay")}
+        keyed={keyed}
       />
       <DayTable days={days.filter((day) => day.studyDay >= first)} />
     </figure>

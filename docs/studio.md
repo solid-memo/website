@@ -1141,8 +1141,8 @@ case `deckInsight` reads what it needs. It writes nothing to the deck.
   A test keeps `lapseIndex` linear over five years of answers: timed at two sizes on the same machine, four times the answers take less than ten times as long.
 
 The charts are the statistics' own (`BarChart` and `StatTile` in `ui`):
-a bar pointed at, or tapped, says what it holds, and each chart has its
-figures as a table.
+a bar pointed at, tapped or reached with the arrow keys says what it
+holds, and each chart has its figures as a table.
 
 ## A deck's about screen
 

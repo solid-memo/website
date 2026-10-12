@@ -235,9 +235,10 @@ the last 12 months, or all time. Its tabs, each a link of its own:
 
 A deck's page sums up its own figures, with "More statistics" for the
 same tabs of that deck alone. Above the deck list, today's strip also
-says how many cards are left to study today. Every chart can also be
-read as a table ([statistics.md](statistics.md)). A guest has
-statistics too.
+says how many cards are left to study today. Point at a bar or a day
+to see what it holds, or reach a chart with Tab and step along it with
+the arrow keys. Every chart can also be read as a table
+([statistics.md](statistics.md)). A guest has statistics too.
 
 ## Preferences
 

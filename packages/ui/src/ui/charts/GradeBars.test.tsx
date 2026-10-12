@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
+import { statusTexts } from "../../test/liveRegions";
 import { GradeBars } from "./GradeBars";
 
 describe("GradeBars", () => {
@@ -34,5 +35,17 @@ describe("GradeBars", () => {
       "Young01 (25%)2 (50%)1 (25%)",
       "Mature0000",
     ]);
+  });
+
+  it("makes each bar with answers a tab stop whose steps the arrow keys move along", () => {
+    const { container } = render(<GradeBars buttons={buttons} />);
+    const young = screen.getByRole("img", { name: /^Young:/ });
+    expect(young).toHaveAttribute("tabindex", "0");
+    expect(young).toHaveAccessibleDescription(/arrow keys/);
+    expect(screen.getByRole("img", { name: /^Mature:/ })).not.toHaveAttribute("tabindex");
+    fireEvent.keyDown(young, { key: "End" });
+    expect(container.querySelector('[data-part="young easy"]')).toHaveClass("pointed");
+    fireEvent.keyDown(young, { key: "ArrowLeft" });
+    expect(statusTexts()).toEqual(["Young: Good on 2 answers, 50%."]);
   });
 });
