@@ -23,6 +23,10 @@ export const ANSWER_CSV_COLUMNS = [
   "prior_interval_days",
   "next_interval_days",
   "chosen_distractor",
+  "recall_millis",
+  "grade_millis",
+  "prior_due",
+  "utc_offset_minutes",
 ] as const;
 
 /** A field as CSV writes it: quoted when it holds a comma, a quote or a line break. */
@@ -47,6 +51,10 @@ export function answersCsv(answers: readonly Answer[]): string {
         answer.priorIntervalDays,
         answer.nextIntervalDays,
         answer.chosenDistractor,
+        answer.recallMillis,
+        answer.gradeMillis,
+        answer.priorDue,
+        answer.utcOffsetMinutes,
       ]
         .map(field)
         .join(","),

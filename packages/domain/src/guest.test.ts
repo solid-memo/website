@@ -129,6 +129,32 @@ describe("adding a guest's study to an instance", () => {
     expect(mergedAnswer(answer, to)).toEqual(mergedAnswer(answer, to));
   });
 
+  it("keeps an answer's response times, prior due day and offset from UTC as they were", () => {
+    const from = deck("deck-g1");
+    const to = deck("deck-n", TARGET);
+    const timed: Answer = {
+      id: "answer-1",
+      deckUrl: from.url,
+      cardUrl: `${from.cardsDocumentUrl}#q-1`,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: "2026-10-01T10:00:00.000Z",
+      studyDay: "2026-10-01",
+      priorIntervalDays: 1,
+      nextIntervalDays: 6,
+      recallMillis: 3_100,
+      gradeMillis: 700,
+      priorDue: "2026-09-30",
+      utcOffsetMinutes: 120,
+    };
+    expect(mergedAnswer(timed, to)).toMatchObject({
+      recallMillis: 3_100,
+      gradeMillis: 700,
+      priorDue: "2026-09-30",
+      utcOffsetMinutes: 120,
+    });
+  });
+
   it("stamps a guest's deck with its entry and its documents' versions, its chapters in any order", () => {
     const versionOf = (url: string) => (url.includes("/decks/") ? '"c1"' : "");
     const course = deck("deck-g1", GUEST_INSTANCE_URL, {

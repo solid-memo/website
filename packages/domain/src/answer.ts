@@ -44,6 +44,22 @@ export interface Answer {
    * distractor's subject in the deck's cards document. Absent otherwise.
    */
   chosenDistractor?: string;
+  /**
+   * Milliseconds from the prompt shown to the answer revealed, or to the
+   * option chosen, the time the app was hidden left out (vocabulary 1.19).
+   * Absent when not measured, as before 1.19, or above ten minutes, when
+   * the learner was away.
+   */
+  recallMillis?: number;
+  /** Milliseconds from the answer revealed to the grade, as recallMillis is measured; absent on a multiple-choice answer. */
+  gradeMillis?: number;
+  /** The study day the prompt was due before the answer (vocabulary 1.19); absent on its first answer, and before 1.19. */
+  priorDue?: string;
+  /**
+   * The device's offset from UTC when the answer was given, in minutes,
+   * positive east of Greenwich (vocabulary 1.19); absent before 1.19.
+   */
+  utcOffsetMinutes?: number;
 }
 
 /** How an answer was given; the notations of the AnswerModes scheme's concepts. */

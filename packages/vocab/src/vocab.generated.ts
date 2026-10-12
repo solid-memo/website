@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.18 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.19 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -178,6 +178,14 @@ export const SM = {
   answerMode: `${SM_NS}answerMode`,
   /** The wrong option chosen, when a multiple-choice answer was wrong. Absent when the right option was chosen. (Added in 1.14. Outside the answer format's version: an older reader ignores it.) */
   chosenDistractor: `${SM_NS}chosenDistractor`,
+  /** How long the learner took to recall: from the prompt shown to the answer revealed, or to the option chosen in a multiple-choice question, not counting the time the app was hidden. Absent when it was not measured, or took longer than the app records. (Added in 1.19. Outside the answer format's version: an older reader ignores it.) */
+  recallMillis: `${SM_NS}recallMillis`,
+  /** How long the learner took to grade: from the answer revealed to the grade given, not counting the time the app was hidden. Absent when it was not measured, took longer than the app records, or the answer was not graded by the learner, as a multiple-choice one is not. (Added in 1.19. Outside the answer format's version: an older reader ignores it.) */
+  gradeMillis: `${SM_NS}gradeMillis`,
+  /** The study day the prompt was due before the answer, as a plain "YYYY-MM-DD" string, as solid-memo:due is; absent on a prompt's first answer, which introduced it. (Added in 1.19. Outside the answer format's version: an older reader ignores it.) */
+  priorDue: `${SM_NS}priorDue`,
+  /** The answering device's offset from UTC when the answer was given, in minutes, positive east of Greenwich (120 in Central European Summer Time), so that the local hour of solid-memo:answeredAt can be told. (Added in 1.19. Outside the answer format's version: an older reader ignores it.) */
+  utcOffsetMinutes: `${SM_NS}utcOffsetMinutes`,
   /** The ways a deck can be studied. (Added in 1.6.) */
   StudyDirections: `${SM_NS}StudyDirections`,
   /** Each card is shown by its front and answered with its back. (Added in 1.6.) */

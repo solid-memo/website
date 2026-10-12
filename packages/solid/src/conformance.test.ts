@@ -316,6 +316,10 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       nextIntervalDays: 15,
       mode: `${SM_NS}multipleChoice`,
       chosenDistractor: "https://pod.example/d.ttl#q-d1",
+      recallMillis: 2400,
+      gradeMillis: 900,
+      priorDue: "2026-10-01",
+      utcOffsetMinutes: 120,
     },
   },
   card: {

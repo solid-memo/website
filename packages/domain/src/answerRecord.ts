@@ -32,6 +32,10 @@ export function answerToRecord(answer: Answer): AnswerV1 {
     nextIntervalDays: answer.nextIntervalDays,
     ...(answer.mode === undefined ? {} : { mode: conceptOfAnswerMode(answer.mode) }),
     ...(answer.chosenDistractor === undefined ? {} : { chosenDistractor: answer.chosenDistractor }),
+    ...(answer.recallMillis === undefined ? {} : { recallMillis: answer.recallMillis }),
+    ...(answer.gradeMillis === undefined ? {} : { gradeMillis: answer.gradeMillis }),
+    ...(answer.priorDue === undefined ? {} : { priorDue: answer.priorDue }),
+    ...(answer.utcOffsetMinutes === undefined ? {} : { utcOffsetMinutes: answer.utcOffsetMinutes }),
   };
 }
 
@@ -48,5 +52,9 @@ export function answerFromRecord(id: string, data: AnswerV1): Answer {
     nextIntervalDays: data.nextIntervalDays,
     ...(data.mode === undefined ? {} : { mode: answerModeOfConcept(data.mode)! }),
     ...(data.chosenDistractor === undefined ? {} : { chosenDistractor: data.chosenDistractor }),
+    ...(data.recallMillis === undefined ? {} : { recallMillis: data.recallMillis }),
+    ...(data.gradeMillis === undefined ? {} : { gradeMillis: data.gradeMillis }),
+    ...(data.priorDue === undefined ? {} : { priorDue: data.priorDue }),
+    ...(data.utcOffsetMinutes === undefined ? {} : { utcOffsetMinutes: data.utcOffsetMinutes }),
   };
 }

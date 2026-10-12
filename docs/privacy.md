@@ -28,6 +28,15 @@ makes public is a release you publish from the
 [Studio](studio.md): it is meant to be read by others, and it carries
 the authors' names, and their email addresses when you give them.
 
+Each answer in the log says which card you answered, when, and how
+well. Since vocabulary 1.19 the format also has room for how long you
+took to recall the answer and to grade it, the day the card was due,
+and your device's offset from UTC when you answered, which hints at the
+time zone you were in ([data-model.md](data-model.md#the-answer-log)).
+These say how fast you remember and at what hour you study, so they
+are as personal as the rest of the log, and stay in the same private
+documents.
+
 ## In the browser
 
 Before you log in, you study as a guest, in a pod kept in the browser's

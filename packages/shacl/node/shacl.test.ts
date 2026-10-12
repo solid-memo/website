@@ -40,6 +40,18 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
     path: `${SM}answerMode`,
     message: "An answer states how it was given, at most once",
   },
+  "answer/v1/invalid/negative-recall-time.ttl": {
+    path: `${SM}recallMillis`,
+    message: "A recall time is one whole number of milliseconds, 0 or more.",
+  },
+  "answer/v1/invalid/prior-due-as-date.ttl": {
+    path: `${SM}priorDue`,
+    message: "The day a prompt was due before an answer",
+  },
+  "answer/v1/invalid/offset-out-of-range.ttl": {
+    path: `${SM}utcOffsetMinutes`,
+    message: "An offset from UTC is one whole number of minutes, -840 to 840.",
+  },
   "card/v5/invalid/distractor-as-literal.ttl": {
     path: `${SM}distractor`,
     message: "A card's distractors, its wrong options, are IRIs",

@@ -133,7 +133,8 @@ It runs these steps:
      states, has no such document yet, as any deck;
    - then its answers: each answer of the guest's log given to that
      deck, its deck, card and wrong option chosen named in the new
-     deck's documents by the same fragment ids, and its own id the
+     deck's documents by the same fragment ids, the rest of it (grade,
+     intervals, response times) as it was given, and its own id the
      guest's followed by the new deck's (`answer-<time>-<random>-deck-<uuid>`),
      is added to the instance's log for its month, insert-only, unread
      (`appendAll`, one PATCH per month, more where one would pass 64
