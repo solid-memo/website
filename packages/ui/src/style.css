@@ -4176,6 +4176,32 @@ table.deck-statistics td {
   border-bottom: 1px solid var(--border);
 }
 
+/* The table by deck is wider than a phone: it scrolls sideways in its
+   own region, the deck's name kept in view on the panel's surface, and
+   read as a cell, not as a column's heading. */
+.statistics .table-scroll {
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+}
+
+table.deck-statistics th[scope="row"] {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 8rem;
+  max-width: 14rem;
+  font-size: inherit;
+  font-weight: normal;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
+  background: var(--surface);
+}
+
+table.deck-statistics td {
+  white-space: nowrap;
+}
+
 /* Trying the app as a guest (docs/guest-mode.md). */
 .masthead-actions {
   display: flex;

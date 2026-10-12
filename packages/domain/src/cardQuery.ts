@@ -34,8 +34,8 @@ export const CARD_FIELDS: readonly CardField[] = [
  * is learning; one at an interval below MATURE_INTERVAL_DAYS is young,
  * and at it or above mature; one whose due day has come is due. A card
  * studied both ways is in a state when either of its prompts is. A
- * leech was forgotten LEECH_LAPSES times or more, as the answer log
- * tells (domain/cardHistory.ts).
+ * leech lapsed LEECH_LAPSES times or more in its reviews, as the
+ * answer log tells (lapseIndex in domain/cardHistory.ts).
  */
 export type CardState =
   | "live"
@@ -300,7 +300,7 @@ function least<T>(values: readonly T[], compare: (a: T, b: T) => number): T | un
  * text: case and accents aside, as the search sets them aside, but a
  * letter the language counts as one of its own as that letter (Swedish
  * puts "ä" after "z"); and numbers by value. `lapses`, by card IRI, says
- * how often each card was forgotten (lapseIndex; a card it leaves out
+ * how often each card lapsed in its reviews (lapseIndex; a card it leaves out
  * never was): without it, no card is a leech, and sorting by lapses
  * keeps the deck's order.
  */

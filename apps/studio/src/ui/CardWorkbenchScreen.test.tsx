@@ -100,14 +100,14 @@ describe("CardWorkbenchScreen", () => {
     const { rerender } = render(<Harness />);
     expect(
       screen.getByText(
-        "Lapses count the card's wrong answers since March 2025, the month of the deck's first answer in the log.",
+        "Lapses count the card's forgotten reviews since March 2025, the month of the deck's first answer in the log. A first answer, a card back in the session the same day or a course answer is not a lapse.",
       ),
     ).toBeInTheDocument();
     rerender(<Harness lapses={undefined} />);
     expect(screen.getByText("Reading the answer log for the lapses…")).toBeInTheDocument();
     rerender(<Harness lapses={{ lapses: new Map(), since: null }} />);
     expect(
-      screen.getByText("Lapses count the card's wrong answers: none are logged yet."),
+      screen.getByText("Lapses count the card's forgotten reviews: none are logged yet."),
     ).toBeInTheDocument();
     rerender(<Harness lapsesFailed={true} />);
     expect(

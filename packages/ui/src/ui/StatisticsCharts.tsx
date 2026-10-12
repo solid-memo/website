@@ -11,6 +11,7 @@ import {
   shiftStudyDay,
   type DayActivity,
   type MonthRetention,
+  type Quiz,
   type Recall,
 } from "@solid-memo/domain/statistics";
 import { useI18n } from "./i18n";
@@ -47,19 +48,48 @@ export function StatTile({
   );
 }
 
-/** How well reviews were remembered, as a share; a dash while there are none. */
+/**
+ * How well reviews were remembered, as a share, with the count of reviews
+ * it is of, however few; a dash while there are none.
+ */
 export function RecallTile({ label, recall }: { label: string; recall: Recall }) {
-  const { t, locale } = useI18n();
-  const percent = new Intl.NumberFormat(locale, { style: "percent" });
+  const { t, formatPercent } = useI18n();
   return recall.reviews === 0 ? (
     <StatTile label={label} value="–" detail={t("statistics.noReviews")} />
   ) : (
     <StatTile
       label={label}
-      value={percent.format(recall.recalled / recall.reviews)}
+      value={formatPercent(recall.recalled / recall.reviews)}
       detail={t("statistics.ofReviews", { count: recall.reviews })}
     />
   );
+}
+
+/** The share of graded course answers that were right, with the count it is of; the answers must not be none. */
+export function QuizTile({ quiz }: { quiz: Quiz }) {
+  const { t, formatPercent } = useI18n();
+  return (
+    <StatTile
+      label={t("statistics.quizAccuracy")}
+      value={formatPercent(quiz.right / quiz.answers)}
+      detail={t("statistics.rightOfAnswers", { count: quiz.answers })}
+    />
+  );
+}
+
+/**
+ * Whether there is nothing to say of recall but course answers to show:
+ * no scored review yet, and graded course answers (a course's deck
+ * studied only in its chapters). Recall then gives way to them.
+ */
+export function onlyCourseAnswers({
+  retention,
+  quiz,
+}: {
+  retention: { young: Recall; mature: Recall };
+  quiz: Quiz;
+}): boolean {
+  return retention.young.reviews + retention.mature.reviews === 0 && quiz.answers > 0;
 }
 
 /** The step of the green a day's answers get: 0 for none, then 1 to 4 by share of the busiest day. */
@@ -567,8 +597,7 @@ function nextMonth(month: string): string {
  * that line, not a 0. The months must not be empty.
  */
 export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
-  const { t, locale } = useI18n();
-  const percent = new Intl.NumberFormat(locale, { style: "percent" });
+  const { t, locale, formatPercent } = useI18n();
   const formatMonth = (month: string) =>
     new Date(`${month}-01T00:00:00Z`).toLocaleDateString(locale, {
       year: "numeric",
@@ -584,7 +613,7 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
     recall.reviews === 0
       ? t("statistics.noReviewsThen")
       : t("statistics.recallShare", {
-          percent: percent.format(recall.recalled / recall.reviews),
+          percent: formatPercent(recall.recalled / recall.reviews),
           count: recall.reviews,
         });
   const line = (kind: "young" | "mature") =>
@@ -610,7 +639,7 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
         { name: "mature", label: t("statistics.matureShort"), values: line("mature") },
       ]}
       max={100}
-      formatValue={(value) => percent.format(value / 100)}
+      formatValue={(value) => formatPercent(value / 100)}
       formatKey={formatMonth}
       textAt={(i) => detail(keys[i]!)}
       prompt={t("statistics.pointAtMonth")}

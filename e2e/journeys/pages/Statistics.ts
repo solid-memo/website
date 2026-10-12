@@ -13,13 +13,29 @@ export type StatisticsTile =
   | "currentStreak"
   | "longestStreak"
   | "young"
-  | "mature";
+  | "mature"
+  | "quizAccuracy";
 
 /** How many prompts are new, young and mature: a bidirectional deck counts each card twice. */
 export interface Maturity {
   new: number;
   young: number;
   mature: number;
+}
+
+/** A row of "By deck"; a figure left out is not checked, `null` is a dash (none to count). */
+export interface DeckRow {
+  name: string;
+  answers: number;
+  introduced?: number;
+  /** Young and mature recall: reviews remembered of reviews. */
+  young?: { recalled: number; reviews: number } | null;
+  mature?: { recalled: number; reviews: number } | null;
+  lapses?: number;
+  /** Graded course answers: right of answers. */
+  quiz?: { right: number; answers: number } | null;
+  /** "today" is today's study day. */
+  lastStudied?: "today";
 }
 
 /** What the statistics should say; left out, a tile, a chart or the table is not checked. */
@@ -33,8 +49,8 @@ export interface ExpectedStatistics {
   /** Reviews remembered, young and mature apart; null for "No reviews yet". */
   young?: { recalled: number; reviews: number } | null;
   mature?: { recalled: number; reviews: number } | null;
-  /** Every row of "By deck", in any order; `lastStudied` "today" is today's study day. */
-  decks?: { name: string; answers: number; lastStudied?: "today" }[];
+  /** Every row of "By deck", in any order. */
+  decks?: DeckRow[];
   /** The instance's prompts taken together, under "Where your cards stand", with the forecast beside them. */
   maturity?: Maturity;
   /** Every deck under "Maturity by deck", in any order. */
@@ -75,6 +91,18 @@ export class Statistics extends Screen {
       await expect(
         this.main.getByText(this.t("statistics.empty"), { exact: true }).or(this.tile("answers")),
       ).toBeVisible();
+    });
+  }
+
+  /**
+   * Graded course answers, apart from recall: their tile, and no recall
+   * tiles while there is no review to count (course answers are none).
+   */
+  async expectCourseAnswersOnly(): Promise<void> {
+    await this.intent("Check that course answers are counted apart from recall", async () => {
+      await expect(this.tile("quizAccuracy").getByRole("strong")).toHaveText(/\d/);
+      await expect(this.tile("young")).toHaveCount(0);
+      await expect(this.tile("mature")).toHaveCount(0);
     });
   }
 
@@ -189,31 +217,54 @@ export class Statistics extends Screen {
       await expect(this.tile(key)).toContainText(this.t("statistics.noReviews"));
       return;
     }
-    const percent = new Intl.NumberFormat(this.app.locale, { style: "percent" }).format(
-      recall.recalled / recall.reviews,
-    );
-    await this.expectValue(key, percent);
+    await this.expectValue(key, this.percent(recall.recalled, recall.reviews));
     await expect(this.tile(key)).toContainText(
       this.t("statistics.ofReviews", { count: recall.reviews }),
     );
   }
 
-  private async expectByDeck(
-    decks: { name: string; answers: number; lastStudied?: "today" }[],
-  ): Promise<void> {
+  /** A share as the app writes it, of a count above 0. */
+  private percent(part: number, whole: number): string {
+    return new Intl.NumberFormat(this.app.locale, { style: "percent" }).format(part / whole);
+  }
+
+  private async expectByDeck(decks: DeckRow[]): Promise<void> {
     // Data rows only: the header row has column headers, not cells.
     await expect(
       this.byDeck.getByRole("row").filter({ has: this.page.getByRole("cell") }),
     ).toHaveCount(decks.length);
     const today = await this.today();
+    const any = /.+/;
+    const recall = (shown?: { recalled: number; reviews: number } | null) =>
+      shown === undefined
+        ? any
+        : shown === null
+          ? "–"
+          : this.t("statistics.recallShare", {
+              percent: this.percent(shown.recalled, shown.reviews),
+              count: shown.reviews,
+            });
+    const quiz = (shown?: { right: number; answers: number } | null) =>
+      shown === undefined
+        ? any
+        : shown === null
+          ? "–"
+          : this.t("statistics.quizShare", {
+              percent: this.percent(shown.right, shown.answers),
+              count: shown.answers,
+            });
     for (const deck of decks) {
       const row = this.byDeck
         .getByRole("row")
-        .filter({ has: this.page.getByRole("cell", { name: deck.name, exact: true }) });
+        .filter({ has: this.page.getByRole("rowheader", { name: deck.name, exact: true }) });
       const cells = [
-        deck.name,
         String(deck.answers),
-        ...(deck.lastStudied === "today" ? [today] : [/.+/]),
+        deck.introduced === undefined ? any : String(deck.introduced),
+        recall(deck.young),
+        recall(deck.mature),
+        deck.lapses === undefined ? any : String(deck.lapses),
+        quiz(deck.quiz),
+        deck.lastStudied === "today" ? today : any,
       ];
       await expect(row.getByRole("cell"), `By deck: ${deck.name}`).toHaveText(cells);
     }

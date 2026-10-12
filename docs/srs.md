@@ -78,6 +78,15 @@ Decisions fixed in code (and tests):
   so a lapse graded 2 (reset, but not repeated) and a hard but correct
   answer (3) end the card's day.
 - Intervals are rounded to whole days.
+- Every grade below 3 resets the card, but the statistics and the
+  Studio count a **lapse** only where it says something about memory: a
+  *scored review* graded below 3, that is an answer to a prompt already
+  introduced, its first that study day, recalled and graded rather than
+  chosen among a course's options (`isLapse` in
+  [answerChain.ts](../packages/domain/src/answerChain.ts)). A failed
+  first answer, the answer to a card back in the session the same day
+  and a course answer are not counted
+  ([statistics.md](statistics.md#what-the-figures-count)).
 
 ### Worked examples
 

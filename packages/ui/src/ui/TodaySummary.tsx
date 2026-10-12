@@ -31,13 +31,16 @@ function useStreakNote() {
 /**
  * What today's study came to, in a slim strip above the deck list a
  * session ends on. The streak leads, as what keeps a learner coming back;
- * then a word of praise and the day's numbers.
+ * then a word of praise and the day's numbers: the share of today's
+ * reviews remembered comes with how many there were, and only once there
+ * is one (a first answer, a card back in the session or a course answer
+ * is no review).
  */
 export function TodaySummary({ today, statisticsHref }: { today: Today; statisticsHref: string }) {
-  const { t, locale } = useI18n();
+  const { t, formatPercent } = useI18n();
   const cheer = useCheer();
   const streakNote = useStreakNote();
-  const percent = new Intl.NumberFormat(locale, { style: "percent" });
+  const { reviews, recalled } = today.recall;
   return (
     <aside class="today-strip" aria-label={t("today.heading")}>
       <FlameIcon />
@@ -51,7 +54,14 @@ export function TodaySummary({ today, statisticsHref }: { today: Today; statisti
           {[
             t("today.answers", { count: today.answers }),
             t("today.introduced", { count: today.introduced }),
-            t("today.remembered", { percent: percent.format(today.recalled / today.answers) }),
+            ...(reviews === 0
+              ? []
+              : [
+                  t("today.remembered", {
+                    percent: formatPercent(recalled / reviews),
+                    count: reviews,
+                  }),
+                ]),
           ].join(" · ")}
           {" · "}
           <a href={statisticsHref}>{t("today.allStatistics")}</a>

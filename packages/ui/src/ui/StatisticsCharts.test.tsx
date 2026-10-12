@@ -13,15 +13,25 @@ import {
   IntroducedChart,
   levelOf,
   MaturityBar,
+  QuizTile,
   RecallChart,
   RecallTile,
   StatTile,
 } from "./StatisticsCharts";
 
+const day = (studyDay: string, answers: number, introduced: number, forgotten: number) => ({
+  studyDay,
+  answers,
+  introduced,
+  forgotten,
+  reviews: answers - introduced,
+  lapses: forgotten,
+  repeats: 0,
+});
 const days: DayActivity[] = [
-  { studyDay: "2026-09-14", answers: 40, introduced: 10, forgotten: 4 },
-  { studyDay: "2026-09-20", answers: 10, introduced: 0, forgotten: 1 },
-  { studyDay: "2026-09-21", answers: 1, introduced: 1, forgotten: 0 },
+  day("2026-09-14", 40, 10, 4),
+  day("2026-09-20", 10, 0, 1),
+  day("2026-09-21", 1, 1, 0),
 ];
 
 describe("levelOf", () => {
@@ -48,6 +58,18 @@ describe("tiles", () => {
     expect(screen.getByText("75 %")).toBeInTheDocument();
     expect(screen.getByText("av 8 repetitioner")).toBeInTheDocument();
     expect(screen.getByText("Inga repetitioner än")).toBeInTheDocument();
+  });
+
+  it("give a share of a single review, with its count beside it", () => {
+    render(<RecallTile label="Young cards" recall={{ reviews: 1, recalled: 0 }} />);
+    expect(screen.getByRole("group", { name: "Young cards" })).toHaveTextContent("0%of 1 review");
+  });
+
+  it("give the share of graded course answers right, with their count", () => {
+    render(<QuizTile quiz={{ answers: 4, right: 3 }} />);
+    expect(screen.getByRole("group", { name: "Graded course answers" })).toHaveTextContent(
+      "75%right, of 4 answers",
+    );
   });
 });
 

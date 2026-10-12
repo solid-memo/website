@@ -201,11 +201,13 @@ other.
 **Statistics**, in the instance bar, shows your study over the last
 year: how many answers and study days, your current and longest streak,
 a calendar of your activity, how many cards you have started, how well
-you remembered them in reviews, and each deck's share. Under that,
+you remembered them in reviews (each card's first review of the day,
+always with how many reviews that is), how you answered course
+questions, counted apart, and each deck's figures. Under that,
 where your cards stand: how many are new, young (reviewed at intervals
 under 21 days) and mature, and how many reviews are coming in the next
 30 days. Every chart can also be read as a table
-([statistics.md](statistics.md)).
+([statistics.md](statistics.md)). A guest has statistics too.
 
 ## Preferences
 

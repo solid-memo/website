@@ -91,8 +91,10 @@ describe("CardWorkbenchContainer", () => {
       cardUrl: `${instanceA.url}decks/deck-1-old.ttl#${cardId}`,
       direction: "front-to-back",
       grade: 1,
-      answeredAt: "2026-09-21T10:00:00.000Z",
-      studyDay: "2026-09-21",
+      // A review a day: a lapse each, where repeats the same day would not be.
+      answeredAt: `2026-09-2${n}T10:00:00.000Z`,
+      studyDay: `2026-09-2${n}`,
+      priorIntervalDays: 1,
       nextIntervalDays: 1,
     });
     const useCases = makeUseCasesFake({

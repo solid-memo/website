@@ -3461,6 +3461,9 @@ describe("the answer log", () => {
     expect(all.streaks).toEqual({ current: 2, longest: 2 });
     const one = await useCases.getStatistics(instance.url, noon, { months: 1, deckUrl: deck.url });
     expect(one.days.map((day) => day.studyDay)).toEqual(["2026-09-20"]);
+    expect(one.decks).toEqual([
+      expect.objectContaining({ introduced: 1, lapses: 0, quiz: { answers: 0, right: 0 } }),
+    ]);
   });
 
   it("is checked in the full check, one document a month, and is empty without a log", async () => {
@@ -3524,23 +3527,32 @@ describe("the Studio's answer history and schedule insight", () => {
     ...extra,
   });
 
+  /** An answer to a prompt already introduced. */
+  const reviewed = { priorIntervalDays: 1 };
+
   /** An answer log of two months, at versions "s1" and "o1"; cards at "c1", reviews at "r1"; a digest kept in memory. */
   function setup(digest: InstanceDigest | null = null) {
     const deps = makeDeps();
     const months: Record<string, Answer[]> = {
-      "2026-09": [answer("card-1", 1, "2026-09-12"), answer("card-1", 2, "2026-09-13")],
+      // card-1 lapses four times in its reviews; its course answer is no lapse.
+      "2026-09": [
+        answer("card-1", 1, "2026-09-12", reviewed),
+        answer("card-1", 2, "2026-09-13", reviewed),
+        answer("card-1", 1, "2026-09-14", reviewed),
+      ],
       "2026-10": [
-        answer("card-1", 0),
+        answer("card-1", 0, "2026-10-01", reviewed),
         answer("card-1", 2, "2026-10-02", {
+          ...reviewed,
           mode: "multiple-choice",
           chosenDistractor: `${instance.url}decks/deck-1-old.ttl#card-1-d1`,
         }),
-        answer("card-1", 4, "2026-10-03"),
-        answer("card-2", 1),
-        answer("card-3", 0),
-        answer("card-3", 0),
-        answer("card-3", 0),
-        answer("card-3", 0),
+        answer("card-1", 4, "2026-10-03", reviewed),
+        answer("card-2", 1, "2026-10-01", reviewed),
+        answer("card-3", 0, "2026-10-01", reviewed),
+        answer("card-3", 0, "2026-10-02", reviewed),
+        answer("card-3", 0, "2026-10-03", reviewed),
+        answer("card-3", 0, "2026-10-04", reviewed),
         answer("card-1", 0, "2026-10-04", { deckUrl: `${instance.url}catalog.ttl#deck-2` }),
       ],
     };
@@ -3581,16 +3593,16 @@ describe("the Studio's answer history and schedule insight", () => {
 
   it("loads every month of the answer log, and reads one again only once it changed", async () => {
     const { useCases, answerLog, months, versions } = setup();
-    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(11);
+    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(12);
     expect(answerLog.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-09", undefined);
     months["2026-10"] = [...months["2026-10"]!, answer("card-2", 5, "2026-10-08")];
     versions["2026-10"] = "o2";
     vi.mocked(answerLog.readMonthSince).mockClear();
-    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(12);
+    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(13);
     expect(answerLog.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-09", "s1");
     expect(answerLog.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-10", "o1");
     // Unchanged months come from what was read before.
-    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(12);
+    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(13);
   });
 
   it("keeps no month the log gave no version of, and reads it again each time", async () => {
@@ -3613,6 +3625,7 @@ describe("the Studio's answer history and schedule insight", () => {
       ["2026-10-03", 4],
       ["2026-10-02", 2],
       ["2026-10-01", 0],
+      ["2026-09-14", 1],
       ["2026-09-13", 2],
       ["2026-09-12", 1],
     ]);

@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { Answer } from "@solid-memo/domain/answer";
 import type { Card } from "@solid-memo/domain/deck";
+import type { ReviewQuality } from "@solid-memo/domain/review";
 import { CardHistoryScreen } from "./CardHistoryScreen";
 import { makeCard, makeDeck } from "../test/fixtures";
 import { WithKeys } from "../test/keys";
@@ -50,7 +51,7 @@ describe("CardHistoryScreen", () => {
         ]}
       />,
     );
-    expect(screen.getByText("3 answers, 2 forgotten.")).toBeInTheDocument();
+    expect(screen.getByText("3 answers. Lapses: 0.")).toBeInTheDocument();
     const table = screen.getByRole("table", { name: "The card's answers, newest first" });
     const rows = within(table).getAllByRole("row").slice(1);
     expect(within(rows[0]!).getByRole("rowheader")).toHaveTextContent("October 3, 2026");
@@ -68,6 +69,38 @@ describe("CardHistoryScreen", () => {
         .slice(1),
     ).toEqual(["4 — Good", "Recalled", ""]);
     expect(rows[2]).not.toHaveClass("forgotten");
+  });
+
+  it("counts the card's lapses as the cards' table does, though every answer below grade 3 is marked forgotten", () => {
+    const at = (n: number, time: string, grade: ReviewQuality, priorIntervalDays?: number) =>
+      answer(n, {
+        grade,
+        answeredAt: `2026-10-0${n < 4 ? 1 : 5}T${time}:00.000Z`,
+        studyDay: n < 4 ? "2026-10-01" : "2026-10-05",
+        ...(priorIntervalDays === undefined ? {} : { priorIntervalDays }),
+      });
+    render(
+      <CardHistoryScreen
+        card={card}
+        answers={[
+          // A review forgotten (a lapse) and its repeat the same day.
+          at(5, "10:05", 4, 1),
+          at(4, "10:00", 1, 4),
+          // Introduced, failed twice the same day: no lapse.
+          at(3, "10:10", 4, 1),
+          at(2, "10:05", 1, 1),
+          at(1, "10:00", 0),
+        ]}
+      />,
+    );
+    expect(screen.getByText("5 answers. Lapses: 1.")).toBeInTheDocument();
+    const table = screen.getByRole("table", { name: "The card's answers, newest first" });
+    expect(
+      within(table)
+        .getAllByRole("row")
+        .slice(1)
+        .filter((row) => row.classList.contains("forgotten")),
+    ).toHaveLength(3);
   });
 
   it("sorts the answers by a column's header, but the wrong option's, then the other way, then newest first", () => {

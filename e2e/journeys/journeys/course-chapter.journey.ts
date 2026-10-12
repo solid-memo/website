@@ -13,7 +13,8 @@ import type { Answers } from "../pages/CourseQuestion.ts";
  * questions without it, each answer adding its card to the deck; the
  * word before the final review; the review, where a question answered
  * wrongly comes back until it is answered right; and back on the
- * course's page, the chapter cheered, done, and the next one open. It is
+ * course's page, the chapter cheered, done, and the next one open; and
+ * the statistics, which count its answers apart from recall. It is
  * the course the library offers newcomers, whichever that is: the
  * journey learns each right answer as the app shows it.
  */
@@ -72,6 +73,14 @@ test("work through a course's first chapter and its final review @course", async
     async () => {
       await app.course.expectShown(course);
       await app.course.expectCheered(chapter);
+    },
+  );
+
+  await app.step(
+    "09 · The statistics count the course's answers as graded course answers, not as recall",
+    async () => {
+      await app.statistics.open();
+      await app.statistics.expectCourseAnswersOnly();
     },
   );
 });

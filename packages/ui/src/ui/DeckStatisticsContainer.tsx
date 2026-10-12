@@ -8,11 +8,13 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { CardProgressContainer } from "./CardProgressContainer";
 import { useI18n } from "./i18n";
-import { DayBars, RecallTile } from "./StatisticsCharts";
+import { DayBars, onlyCourseAnswers, QuizTile, RecallTile } from "./StatisticsCharts";
 
 /**
- * A deck's own statistics on its page: its answers of the last 30 days
- * and how well its reviews were remembered, nothing of them while there
+ * A deck's own statistics on its page: its answers of the last 30 days,
+ * how well its reviews were remembered and how its course questions were
+ * answered (only the latter for a deck studied only in a course's
+ * chapters), nothing of them while there
  * are no answers yet, or when they cannot be read (the deck works without
  * them); then where its cards stand, all new before the first answer.
  */
@@ -41,8 +43,13 @@ export function DeckStatisticsContainer({
           <h3 id="deck-statistics-heading">{t("statistics.heading")}</h3>
           <DayBars days={statistics.days} today={statistics.today} />
           <div class="stat-tiles">
-            <RecallTile label={t("statistics.young")} recall={statistics.retention.young} />
-            <RecallTile label={t("statistics.mature")} recall={statistics.retention.mature} />
+            {!onlyCourseAnswers(statistics) && (
+              <>
+                <RecallTile label={t("statistics.young")} recall={statistics.retention.young} />
+                <RecallTile label={t("statistics.mature")} recall={statistics.retention.mature} />
+              </>
+            )}
+            {statistics.quiz.answers > 0 && <QuizTile quiz={statistics.quiz} />}
           </div>
         </section>
       )}

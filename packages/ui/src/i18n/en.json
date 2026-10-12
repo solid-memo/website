@@ -481,7 +481,10 @@
       "one": "{count} new",
       "other": "{count} new"
     },
-    "remembered": "{percent} remembered",
+    "remembered": {
+      "one": "{percent} remembered of {count} review",
+      "other": "{percent} remembered of {count} reviews"
+    },
     "allStatistics": "All statistics"
   },
   "newcomerCourse": {
@@ -1324,6 +1327,14 @@
       "other": "of {count} reviews"
     },
     "noReviews": "No reviews yet",
+    "rememberedHint": "Each card's first review of the day in each direction, recalled and graded by you. A card's first answer, a card back in the session the same day and course answers are not reviews.",
+    "inCourses": "In courses",
+    "quizAccuracy": "Graded course answers",
+    "quizHint": "The share right of each course question's first answer of the day. Practice answers, and right answers to a card already graded that day, are not logged, so they are not counted.",
+    "rightOfAnswers": {
+      "one": "right, of {count} answer",
+      "other": "right, of {count} answers"
+    },
     "activity": "Activity, the last {weeks} weeks",
     "activityLabel": "Answers by day over the last {weeks} weeks: the stronger the green, the more answers.",
     "lastDays": "Answers, the last {count} days",
@@ -1340,10 +1351,18 @@
     "showTable": "Show as a table",
     "day": "Day",
     "introduced": "New",
+    "introducedColumn": "Introduced",
     "forgotten": "Forgotten",
     "byDeck": "By deck",
     "deck": "Deck",
     "lastStudied": "Last studied",
+    "youngRecall": "Young recall",
+    "matureRecall": "Mature recall",
+    "lapses": "Lapses",
+    "quizShare": {
+      "one": "{percent} of {count} answer",
+      "other": "{percent} of {count} answers"
+    },
     "removedDeck": "A removed deck",
     "pointAtMonth": "Point at a month to see how well it was remembered, or open the table below.",
     "pointAtDayAhead": "Point at a day to see what falls due, or open the table below.",
@@ -1744,8 +1763,8 @@
         "other": "{count} days"
       },
       "notStudied": "Not studied yet",
-      "lapsesSince": "Lapses count the card's wrong answers since {month}, the month of the deck's first answer in the log.",
-      "lapsesNone": "Lapses count the card's wrong answers: none are logged yet.",
+      "lapsesSince": "Lapses count the card's forgotten reviews since {month}, the month of the deck's first answer in the log. A first answer, a card back in the session the same day or a course answer is not a lapse.",
+      "lapsesNone": "Lapses count the card's forgotten reviews: none are logged yet.",
       "lapsesLoading": "Reading the answer log for the lapses…",
       "lapsesFailed": "The answer log could not be read, so the lapses are not known."
     },
@@ -1818,8 +1837,8 @@
       "loading": "Loading the card's answers…",
       "empty": "No answers to this card in this deck yet.",
       "summary": {
-        "one": "{count} answer, {forgotten} forgotten.",
-        "other": "{count} answers, {forgotten} forgotten."
+        "one": "{count} answer. Lapses: {lapses}.",
+        "other": "{count} answers. Lapses: {lapses}."
       },
       "caption": "The card's answers, newest first",
       "column": {
@@ -1834,7 +1853,7 @@
         "multiple-choice": "Multiple choice"
       },
       "unknownOption": "{id} (no longer on the card)",
-      "hint": "Only the answers given in this deck are listed: a card moved here from another deck starts its history again. Forgetting the card's progress keeps its answers."
+      "hint": "Only the answers given in this deck are listed: a card moved here from another deck starts its history again. Forgetting the card's progress keeps its answers. A lapse is a review forgotten: a first answer, a card back in the session the same day or a course answer is not a lapse."
     },
     "insight": {
       "crumb": "Schedule",
@@ -1868,7 +1887,7 @@
       "binText": "{range}: {count}.",
       "pointAtBar": "Point at a bar to see its count, or open the table below.",
       "lapsesHeading": "Lapses and leeches",
-      "lapsesSince": "Lapses count the wrong answers since {month}, the month of the deck's first answer in the log.",
+      "lapsesSince": "Lapses count the forgotten reviews since {month}, the month of the deck's first answer in the log. A first answer, a card back in the session the same day or a course answer is not a lapse.",
       "noAnswers": "No answers are logged yet.",
       "leechHint": "A leech is a card forgotten {count} times or more. It keeps costing reviews: rewrite it, split it or retire it.",
       "noLeeches": "No leeches.",

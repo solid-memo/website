@@ -3,12 +3,16 @@
 // SPDX-License-Identifier: MIT
 
 import { isRecalled, monthOfStudyDay, type Answer } from "./answer";
+import { chainIndexOf, isLapse, isRepeat, isScoredReview, type ChainIndex } from "./answerChain";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
  * Study statistics, computed from the answer log (domain/answer.ts):
- * activity by study day, streaks, totals, and how well reviewed cards
- * were remembered. Pure; the use case reads the months it needs.
+ * activity by study day, streaks, totals, how well reviewed cards were
+ * remembered, and how course questions were answered. Recall counts
+ * scored reviews only (answerChain.ts): not first answers, repeats the
+ * same day, or course answers, which are counted apart. Pure; the use
+ * case reads the months it needs.
  */
 
 /** A prompt reviewed at an interval of this many days or more is mature; below, young. */
@@ -23,9 +27,15 @@ export interface DayActivity {
   introduced: number;
   /** Answers below grade 3: the card was forgotten. */
   forgotten: number;
+  /** Scored reviews (answerChain.ts isScoredReview). */
+  reviews: number;
+  /** Scored reviews below grade 3 (answerChain.ts isLapse). */
+  lapses: number;
+  /** Answers that repeat one to the same prompt that day. */
+  repeats: number;
 }
 
-/** Reviews of prompts already introduced, and how many of them were remembered. */
+/** Scored reviews (answerChain.ts isScoredReview), and how many of them were remembered. */
 export interface Recall {
   reviews: number;
   recalled: number;
@@ -52,6 +62,17 @@ export interface IntroducedTotal {
   introduced: number;
 }
 
+/**
+ * Course questions answered, and how many of them right: the first answer
+ * to a prompt each day, chosen among options. Practice answers, and right
+ * ones to a card already graded that day, are not logged, so this is not
+ * every answer given in a course.
+ */
+export interface Quiz {
+  answers: number;
+  right: number;
+}
+
 export interface Streaks {
   /** Study days in a row up to today, or up to yesterday while today is not studied yet. */
   current: number;
@@ -63,6 +84,11 @@ export interface DeckStatistics {
   answers: number;
   lastStudyDay: string;
   retention: Retention;
+  /** Prompts introduced: first answers. */
+  introduced: number;
+  /** Scored reviews below grade 3. */
+  lapses: number;
+  quiz: Quiz;
 }
 
 export interface Statistics {
@@ -73,14 +99,15 @@ export interface Statistics {
   days: DayActivity[];
   streaks: Streaks;
   retention: Retention;
+  quiz: Quiz;
   /** Every study month with answers, oldest first, with how well its reviews were remembered. */
   months: MonthRetention[];
   /** Every deck answered in, most answers first. */
   decks: DeckStatistics[];
 }
 
-/** Every study day with answers, oldest first. */
-export function dailyActivity(answers: readonly Answer[]): DayActivity[] {
+/** Every study day with answers, oldest first; `index` holds the answers' chains. */
+export function dailyActivity(answers: readonly Answer[], index: ChainIndex): DayActivity[] {
   const byDay = new Map<string, DayActivity>();
   for (const answer of answers) {
     const day = byDay.get(answer.studyDay) ?? {
@@ -88,10 +115,16 @@ export function dailyActivity(answers: readonly Answer[]): DayActivity[] {
       answers: 0,
       introduced: 0,
       forgotten: 0,
+      reviews: 0,
+      lapses: 0,
+      repeats: 0,
     };
     day.answers += 1;
     if (answer.priorIntervalDays === undefined) day.introduced += 1;
     if (!isRecalled(answer)) day.forgotten += 1;
+    if (isScoredReview(answer, index)) day.reviews += 1;
+    if (isLapse(answer, index)) day.lapses += 1;
+    if (isRepeat(answer, index)) day.repeats += 1;
     byDay.set(answer.studyDay, day);
   }
   return [...byDay.values()].sort((a, b) => a.studyDay.localeCompare(b.studyDay));
@@ -122,16 +155,20 @@ export function streaksOf(studyDays: readonly string[], today: string): Streaks 
   return { current, longest };
 }
 
-/** How well reviewed prompts were remembered, young and mature apart; first answers are not reviews. */
-export function retentionOf(answers: readonly Answer[]): Retention {
+/**
+ * How well reviewed prompts were remembered, young and mature apart, by
+ * prior interval: scored reviews only, of the answers given, whose chains
+ * `index` holds.
+ */
+export function retentionOf(answers: readonly Answer[], index: ChainIndex): Retention {
   const retention: Retention = {
     young: { reviews: 0, recalled: 0 },
     mature: { reviews: 0, recalled: 0 },
   };
   for (const answer of answers) {
-    if (answer.priorIntervalDays === undefined) continue;
+    if (!isScoredReview(answer, index)) continue;
     const group =
-      answer.priorIntervalDays >= MATURE_INTERVAL_DAYS ? retention.mature : retention.young;
+      answer.priorIntervalDays! >= MATURE_INTERVAL_DAYS ? retention.mature : retention.young;
     group.reviews += 1;
     if (isRecalled(answer)) group.recalled += 1;
   }
@@ -151,24 +188,45 @@ export function introducedOverTime(days: readonly DayActivity[]): IntroducedTota
   });
 }
 
-/** How well reviews were remembered, month by month, oldest first; every month with answers has an entry. */
-export function monthlyRetention(answers: readonly Answer[]): MonthRetention[] {
-  const byMonth = new Map<string, Answer[]>();
+/** Course questions answered and answered right, of the answers given, whose chains `index` holds. */
+export function quizAccuracyOf(answers: readonly Answer[], index: ChainIndex): Quiz {
+  const quiz: Quiz = { answers: 0, right: 0 };
   for (const answer of answers) {
-    const month = monthOfStudyDay(answer.studyDay);
-    byMonth.set(month, [...(byMonth.get(month) ?? []), answer]);
+    if (answer.mode !== "multiple-choice" || isRepeat(answer, index)) continue;
+    quiz.answers += 1;
+    if (isRecalled(answer)) quiz.right += 1;
   }
-  return [...byMonth]
-    .map(([month, monthAnswers]) => ({ month, retention: retentionOf(monthAnswers) }))
+  return quiz;
+}
+
+/** The answers given, grouped by `key`, each group filled in place. */
+function groupBy(
+  answers: readonly Answer[],
+  key: (answer: Answer) => string,
+): Map<string, Answer[]> {
+  const groups = new Map<string, Answer[]>();
+  for (const answer of answers) {
+    const group = groups.get(key(answer));
+    if (group === undefined) groups.set(key(answer), [answer]);
+    else group.push(answer);
+  }
+  return groups;
+}
+
+/**
+ * How well reviews were remembered, month by month, oldest first; every
+ * month with answers has an entry. `index` holds the answers' chains.
+ */
+export function monthlyRetention(answers: readonly Answer[], index: ChainIndex): MonthRetention[] {
+  return [...groupBy(answers, (answer) => monthOfStudyDay(answer.studyDay))]
+    .map(([month, monthAnswers]) => ({ month, retention: retentionOf(monthAnswers, index) }))
     .sort((a, b) => a.month.localeCompare(b.month));
 }
 
 /** Everything the statistics screens show, of the answers given (in any order) up to `today`. */
 export function statisticsOf(answers: readonly Answer[], today: string): Statistics {
-  const days = dailyActivity(answers);
-  const byDeck = new Map<string, Answer[]>();
-  for (const answer of answers)
-    byDeck.set(answer.deckUrl, [...(byDeck.get(answer.deckUrl) ?? []), answer]);
+  const index = chainIndexOf(answers);
+  const days = dailyActivity(answers, index);
   return {
     today,
     totals: {
@@ -183,18 +241,29 @@ export function statisticsOf(answers: readonly Answer[], today: string): Statist
       days.map((day) => day.studyDay),
       today,
     ),
-    retention: retentionOf(answers),
-    months: monthlyRetention(answers),
-    decks: [...byDeck]
-      .map(([deckUrl, deckAnswers]) => ({
-        deckUrl,
-        answers: deckAnswers.length,
-        lastStudyDay: deckAnswers
-          .map((answer) => answer.studyDay)
-          .sort()
-          .at(-1)!,
-        retention: retentionOf(deckAnswers),
-      }))
+    retention: retentionOf(answers, index),
+    quiz: quizAccuracyOf(answers, index),
+    months: monthlyRetention(answers, index),
+    decks: [...groupBy(answers, (answer) => answer.deckUrl)]
+      .map(([deckUrl, deckAnswers]) => {
+        const retention = retentionOf(deckAnswers, index);
+        return {
+          deckUrl,
+          answers: deckAnswers.length,
+          lastStudyDay: deckAnswers.reduce(
+            (last, answer) => (answer.studyDay > last ? answer.studyDay : last),
+            deckAnswers[0]!.studyDay,
+          ),
+          retention,
+          introduced: deckAnswers.filter((answer) => answer.priorIntervalDays === undefined).length,
+          lapses:
+            retention.young.reviews -
+            retention.young.recalled +
+            retention.mature.reviews -
+            retention.mature.recalled,
+          quiz: quizAccuracyOf(deckAnswers, index),
+        };
+      })
       .sort((a, b) => b.answers - a.answers || a.deckUrl.localeCompare(b.deckUrl)),
   };
 }
@@ -204,8 +273,8 @@ export interface TodaySummary {
   answers: number;
   /** Cards met for the first time today. */
   introduced: number;
-  /** Answers today that remembered the card. */
-  recalled: number;
+  /** Today's scored reviews, and how many were remembered: not first answers, repeats or course answers. */
+  recall: Recall;
   /** Study days in a row, today included. */
   streak: number;
   /** The longest run of study days there has been, today's included. */
@@ -219,7 +288,7 @@ export function todayOf(statistics: Statistics): TodaySummary | null {
   return {
     answers: day.answers,
     introduced: day.introduced,
-    recalled: day.answers - day.forgotten,
+    recall: { reviews: day.reviews, recalled: day.reviews - day.lapses },
     streak: statistics.streaks.current,
     longestStreak: statistics.streaks.longest,
   };

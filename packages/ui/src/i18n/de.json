@@ -481,7 +481,10 @@
       "one": "{count} neue",
       "other": "{count} neue"
     },
-    "remembered": "{percent} gewusst",
+    "remembered": {
+      "one": "{percent} gewusst von {count} Wiederholung",
+      "other": "{percent} gewusst von {count} Wiederholungen"
+    },
     "allStatistics": "Gesamte Statistik"
   },
   "newcomerCourse": {
@@ -1324,6 +1327,14 @@
       "other": "von {count} Wiederholungen"
     },
     "noReviews": "Noch keine Wiederholungen",
+    "rememberedHint": "Die erste Wiederholung jeder Karte am Tag in jeder Richtung, aus dem Gedächtnis abgerufen und von dir bewertet. Die erste Antwort zu einer Karte, eine Karte, die am selben Tag erneut in die Sitzung kommt, und Antworten in Kursen sind keine Wiederholungen.",
+    "inCourses": "In Kursen",
+    "quizAccuracy": "Bewertete Kursantworten",
+    "quizHint": "Der Anteil richtiger Antworten unter der ersten Antwort des Tages auf jede Kursfrage. Übungsantworten und richtige Antworten zu einer Karte, die an dem Tag schon bewertet wurde, werden nicht protokolliert und daher nicht gezählt.",
+    "rightOfAnswers": {
+      "one": "richtig, von {count} Antwort",
+      "other": "richtig, von {count} Antworten"
+    },
     "activity": "Aktivität der letzten {weeks} Wochen",
     "activityLabel": "Antworten pro Tag in den letzten {weeks} Wochen: Je kräftiger das Grün, desto mehr Antworten.",
     "lastDays": "Antworten der letzten {count} Tage",
@@ -1340,10 +1351,18 @@
     "showTable": "Als Tabelle anzeigen",
     "day": "Tag",
     "introduced": "Neu",
+    "introducedColumn": "Eingeführt",
     "forgotten": "Vergessen",
     "byDeck": "Nach Stapel",
     "deck": "Stapel",
     "lastStudied": "Zuletzt gelernt",
+    "youngRecall": "Junge Karten gewusst",
+    "matureRecall": "Ausgereifte Karten gewusst",
+    "lapses": "Aussetzer",
+    "quizShare": {
+      "one": "{percent} von {count} Antwort",
+      "other": "{percent} von {count} Antworten"
+    },
     "removedDeck": "Ein entfernter Stapel",
     "pointAtMonth": "Zeige auf einen Monat, um zu sehen, wie viel du gewusst hast, oder öffne die Tabelle darunter.",
     "pointAtDayAhead": "Zeige auf einen Tag, um zu sehen, was fällig wird, oder öffne die Tabelle darunter.",
@@ -1744,8 +1763,8 @@
         "other": "{count} Tage"
       },
       "notStudied": "Noch nicht gelernt",
-      "lapsesSince": "Als Aussetzer zählen die falschen Antworten zur Karte seit {month}, dem Monat der ersten Antwort des Stapels im Protokoll.",
-      "lapsesNone": "Als Aussetzer zählen die falschen Antworten zur Karte: Bisher ist keine protokolliert.",
+      "lapsesSince": "Als Aussetzer zählen die vergessenen Wiederholungen der Karte seit {month}, dem Monat der ersten Antwort des Stapels im Protokoll. Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und eine Kursantwort sind kein Aussetzer.",
+      "lapsesNone": "Als Aussetzer zählen die vergessenen Wiederholungen der Karte: Es sind noch keine protokolliert.",
       "lapsesLoading": "Das Antwortprotokoll wird für die Aussetzer gelesen…",
       "lapsesFailed": "Das Antwortprotokoll konnte nicht gelesen werden, daher sind die Aussetzer nicht bekannt."
     },
@@ -1818,8 +1837,8 @@
       "loading": "Die Antworten zu dieser Karte werden geladen…",
       "empty": "Noch keine Antworten zu dieser Karte in diesem Stapel.",
       "summary": {
-        "one": "{count} Antwort, {forgotten} vergessen.",
-        "other": "{count} Antworten, {forgotten} vergessen."
+        "one": "{count} Antwort. Aussetzer: {lapses}.",
+        "other": "{count} Antworten. Aussetzer: {lapses}."
       },
       "caption": "Die Antworten zu dieser Karte, neueste zuerst",
       "column": {
@@ -1834,7 +1853,7 @@
         "multiple-choice": "Multiple Choice"
       },
       "unknownOption": "{id} (nicht mehr auf der Karte)",
-      "hint": "Hier stehen nur die Antworten, die in diesem Stapel gegeben wurden: Wird eine Karte aus einem anderen Stapel hierher verschoben, beginnt ihr Verlauf neu. Wenn du den Fortschritt der Karte zurücksetzt, bleiben ihre Antworten erhalten."
+      "hint": "Hier stehen nur die Antworten, die in diesem Stapel gegeben wurden: Wird eine Karte aus einem anderen Stapel hierher verschoben, beginnt ihr Verlauf neu. Wenn du den Fortschritt der Karte zurücksetzt, bleiben ihre Antworten erhalten. Ein Aussetzer ist eine vergessene Wiederholung: Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und eine Kursantwort sind kein Aussetzer."
     },
     "insight": {
       "crumb": "Zeitplan",
@@ -1868,7 +1887,7 @@
       "binText": "{range}: {count}.",
       "pointAtBar": "Zeige auf einen Balken, um seine Anzahl zu sehen, oder öffne die Tabelle darunter.",
       "lapsesHeading": "Aussetzer und Problemkarten",
-      "lapsesSince": "Aussetzer zählen die falschen Antworten seit {month}, dem Monat der ersten Antwort zu diesem Stapel im Antwortprotokoll.",
+      "lapsesSince": "Aussetzer zählen die vergessenen Wiederholungen seit {month}, dem Monat der ersten Antwort zu diesem Stapel im Antwortprotokoll. Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und eine Kursantwort sind kein Aussetzer.",
       "noAnswers": "Noch keine Antworten protokolliert.",
       "leechHint": "Eine Problemkarte ist eine Karte, die {count}-mal oder öfter vergessen wurde. Sie kostet immer wieder Wiederholungen: Formuliere sie neu, teile sie auf oder mustere sie aus.",
       "noLeeches": "Keine Problemkarten.",

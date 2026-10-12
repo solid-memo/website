@@ -95,7 +95,7 @@ describe("DeckInsightScreen", () => {
     renderScreen();
     expect(
       screen.getByText(
-        "Lapses count the wrong answers since March 2025, the month of the deck's first answer in the log.",
+        "Lapses count the forgotten reviews since March 2025, the month of the deck's first answer in the log. A first answer, a card back in the session the same day or a course answer is not a lapse.",
       ),
     ).toBeInTheDocument();
     const leeches = screen.getByRole("list", { name: "Leeches" });
