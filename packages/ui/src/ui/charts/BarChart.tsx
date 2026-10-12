@@ -26,7 +26,8 @@ export interface BarSeries {
  * table, for whoever cannot see the chart. A bar of several series
  * stacks them, the first at the bottom, or (`grouped`) stands them side
  * by side; a legend then names them. `ticks`, when given, name the bars
- * under them. The bars are one tab stop; Left and Right step along them.
+ * under them. `max`, when given, is the top of the scale (100 for
+ * shares in percent), else the largest bar is. The bars are one tab stop; Left and Right step along them.
  */
 export function BarChart({
   caption,
@@ -35,6 +36,7 @@ export function BarChart({
   series = [],
   grouped = false,
   ticks,
+  max,
   prompt,
   children,
 }: {
@@ -45,15 +47,14 @@ export function BarChart({
   series?: readonly BarSeries[];
   grouped?: boolean;
   ticks?: readonly string[];
+  max?: number;
   prompt: string;
   children: ComponentChildren;
 }) {
   const { pointed, keyed, point, keyDown, hintId } = usePoint<string>();
   const sum = (values: readonly number[]) => values.reduce((total, value) => total + value, 0);
-  const most = Math.max(
-    1,
-    ...bars.map(({ values }) => (grouped ? Math.max(...values) : sum(values))),
-  );
+  const most =
+    max ?? Math.max(1, ...bars.map(({ values }) => (grouped ? Math.max(...values) : sum(values))));
   const width = 8;
   const gap = 2;
   const height = 64;

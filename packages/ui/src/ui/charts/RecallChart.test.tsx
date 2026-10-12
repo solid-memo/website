@@ -95,4 +95,31 @@ describe("RecallChart", () => {
       screen.getByText("June 2026: young cards 75% of 4 reviews, mature cards no reviews."),
     ).toBeInTheDocument();
   });
+
+  it("draws recall week by week when given weeks, without first tries", () => {
+    const { container } = render(
+      <RecallChart
+        weeks={[
+          { week: "2026-09-07", retention: { young: recall(4, 3), mature: recall(0, 0) } },
+          { week: "2026-09-21", retention: { young: recall(1, 1), mature: recall(2, 2) } },
+        ]}
+      />,
+    );
+    expect(screen.getByText("Recall by week")).toBeInTheDocument();
+    expect(container.querySelectorAll("[data-point]")).toHaveLength(3);
+    expect(container.querySelector(".line-keys")).toHaveTextContent(
+      "September 7, 2026September 21, 2026",
+    );
+    fireEvent.pointerEnter(container.querySelector('[data-point="2026-09-14"]')!);
+    expect(
+      screen.getByText(
+        "Week of September 14, 2026: young cards no reviews, mature cards no reviews.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("row").map((row) => row.textContent)).toEqual([
+      "Week ofYoungMature",
+      "September 21, 2026100% of 1 review100% of 2 reviews",
+      "September 7, 202675% of 4 reviewsno reviews",
+    ]);
+  });
 });

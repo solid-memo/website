@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { MonthRetention, Recall } from "@solid-memo/domain/statistics";
+import { shiftStudyDay } from "@solid-memo/domain/answer";
+import type { WeekRetention } from "@solid-memo/domain/memoryCurve";
+import type { MonthRetention, Recall, Retention } from "@solid-memo/domain/statistics";
 import type { FirstTry } from "@solid-memo/domain/studyPatterns";
 import { useI18n } from "../i18n";
 import { LineChart } from "./LineChart";
@@ -15,25 +17,35 @@ function nextMonth(month: string): string {
 }
 
 /**
- * How well reviews were remembered, month by month (monthlyRetention), on
- * a fixed scale of 0 to 100%: young cards dashed, mature cards solid. A
- * month without reviews of a kind, or without answers at all, is a gap in
- * that line, not a 0. The table adds each month's first tries. The
- * months must not be empty.
+ * How well reviews were remembered, month by month (monthlyRetention) or,
+ * given `weeks` instead, week by week (weeklyRetention), on a fixed
+ * scale of 0 to 100%: young cards dashed, mature cards solid. A month or
+ * week without reviews of a kind, or without any, is a gap in that line,
+ * not a 0. The months' table adds each month's first tries. The months
+ * or weeks must not be empty.
  */
-export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
-  const { t, locale, formatPercent } = useI18n();
+export function RecallChart(
+  props: { months: readonly MonthRetention[] } | { weeks: readonly WeekRetention[] },
+) {
+  const { t, locale, formatDate, formatPercent } = useI18n();
+  const monthly = "months" in props;
+  const periods: readonly { key: string; retention: Retention; firstTry?: FirstTry }[] =
+    "months" in props
+      ? props.months.map(({ month, retention, firstTry }) => ({ key: month, retention, firstTry }))
+      : props.weeks.map(({ week, retention }) => ({ key: week, retention }));
   const formatMonth = (month: string) =>
     new Date(`${month}-01T00:00:00Z`).toLocaleDateString(locale, {
       year: "numeric",
       month: "long",
       timeZone: "UTC",
     });
-  const byMonth = new Map(months.map((entry) => [entry.month, entry.retention]));
-  const keys = [months[0]!.month];
-  while (keys.at(-1)! < months.at(-1)!.month) keys.push(nextMonth(keys.at(-1)!));
+  const formatKey = monthly ? formatMonth : formatDate;
+  const byKey = new Map(periods.map((period) => [period.key, period.retention]));
+  const keys = [periods[0]!.key];
+  while (keys.at(-1)! < periods.at(-1)!.key)
+    keys.push(monthly ? nextMonth(keys.at(-1)!) : shiftStudyDay(keys.at(-1)!, 7));
   const none: Recall = { reviews: 0, recalled: 0 };
-  const retentionAt = (month: string) => byMonth.get(month) ?? { young: none, mature: none };
+  const retentionAt = (key: string) => byKey.get(key) ?? { young: none, mature: none };
   const share = (recall: Recall) =>
     recall.reviews === 0
       ? t("statistics.noReviewsThen")
@@ -49,22 +61,22 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
           count: introduced,
         });
   const line = (kind: "young" | "mature") =>
-    keys.map((month) => {
-      const recall = retentionAt(month)[kind];
+    keys.map((key) => {
+      const recall = retentionAt(key)[kind];
       return recall.reviews === 0 ? null : (recall.recalled / recall.reviews) * 100;
     });
-  const detail = (month: string) =>
-    t("statistics.recallDetail", {
-      month: formatMonth(month),
-      young: share(retentionAt(month).young),
-      mature: share(retentionAt(month).mature),
-    });
+  const detail = (key: string) => {
+    const shares = { young: share(retentionAt(key).young), mature: share(retentionAt(key).mature) };
+    return monthly
+      ? t("statistics.recallDetail", { month: formatMonth(key), ...shares })
+      : t("statistics.recallWeekDetail", { date: formatDate(key), ...shares });
+  };
   return (
     <LineChart
       name="recall-chart"
-      caption={t("statistics.recallByMonth")}
-      label={t("statistics.recallLabel")}
-      note={t("statistics.recallNote")}
+      caption={monthly ? t("statistics.recallByMonth") : t("statistics.recallByWeek")}
+      label={monthly ? t("statistics.recallLabel") : t("statistics.recallWeekLabel")}
+      note={monthly ? t("statistics.recallNote") : t("statistics.recallWeekNote")}
       keys={keys}
       series={[
         { name: "young", label: t("statistics.youngShort"), values: line("young") },
@@ -72,28 +84,28 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
       ]}
       max={100}
       formatValue={(value) => formatPercent(value / 100)}
-      formatKey={formatMonth}
+      formatKey={formatKey}
       textAt={(i) => detail(keys[i]!)}
-      prompt={t("statistics.pointAtMonth")}
+      prompt={monthly ? t("statistics.pointAtMonth") : t("statistics.pointAtWeek")}
       table={
         <details class="chart-table">
           <summary>{t("statistics.showTable")}</summary>
           <table>
             <thead>
               <tr>
-                <th scope="col">{t("statistics.month")}</th>
+                <th scope="col">{monthly ? t("statistics.month") : t("statistics.weekOf")}</th>
                 <th scope="col">{t("statistics.youngShort")}</th>
                 <th scope="col">{t("statistics.matureShort")}</th>
-                <th scope="col">{t("statistics.firstTry")}</th>
+                {monthly && <th scope="col">{t("statistics.firstTry")}</th>}
               </tr>
             </thead>
             <tbody>
-              {[...months].reverse().map((entry) => (
-                <tr key={entry.month}>
-                  <td>{formatMonth(entry.month)}</td>
-                  <td>{share(entry.retention.young)}</td>
-                  <td>{share(entry.retention.mature)}</td>
-                  <td>{firstTryShare(entry.firstTry)}</td>
+              {[...periods].reverse().map((period) => (
+                <tr key={period.key}>
+                  <td>{formatKey(period.key)}</td>
+                  <td>{share(period.retention.young)}</td>
+                  <td>{share(period.retention.mature)}</td>
+                  {period.firstTry !== undefined && <td>{firstTryShare(period.firstTry)}</td>}
                 </tr>
               ))}
             </tbody>
