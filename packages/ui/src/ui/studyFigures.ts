@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import type { QueryClient } from "@tanstack/react-query";
+import type { StatisticsRange as RangeRead, UseCases } from "@solid-memo/application/useCases";
+import type { StatisticsRange } from "./router";
 
 /**
  * How long the statistics and card progress read are shown again without
@@ -30,4 +32,48 @@ export function keepStudyFiguresFresh(queryClient: QueryClient): () => void {
     void queryClient.invalidateQueries({ queryKey: ["cardProgress"] });
     void queryClient.invalidateQueries({ queryKey: ["cardAnswers"] });
   });
+}
+
+/** What getStatistics reads for a range of the statistics' routes: "12m" is its default, the today strip's. */
+export function rangeRead(range: StatisticsRange): RangeRead {
+  switch (range) {
+    case "30d":
+      return { range: 30 };
+    case "90d":
+      return { range: 90 };
+    case "12m":
+      return {};
+    case "all":
+      return { range: "all" };
+  }
+}
+
+/**
+ * The statistics of a range, of every deck of the instance or of one
+ * (by its URL), as one query: of every deck over the last 12 months it
+ * is the today strip's (TodaySummaryContainer), so neither reads them
+ * for the other.
+ */
+export function statisticsQuery(
+  useCases: UseCases,
+  instanceUrl: string,
+  range: StatisticsRange,
+  deckUrl?: string,
+) {
+  const read = rangeRead(range);
+  return {
+    queryKey:
+      deckUrl !== undefined
+        ? ["statistics", instanceUrl, deckUrl, range]
+        : range === "12m"
+          ? ["statistics", instanceUrl]
+          : ["statistics", instanceUrl, "range", range],
+    queryFn: () =>
+      useCases.getStatistics(
+        instanceUrl,
+        new Date(),
+        deckUrl === undefined ? read : { ...read, deckUrl },
+      ),
+    staleTime: STATISTICS_STALE_MS,
+  };
 }

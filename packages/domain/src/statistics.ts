@@ -122,12 +122,28 @@ export interface DeckStatistics {
   directions: DirectionRecall[];
 }
 
+/** How many prompts were met and grew mature, of the answers given (promptGrowthOf). */
+export interface PromptGrowth {
+  /** Prompts introduced: with a first answer among those given. */
+  introduced: number;
+  /** Prompts that reached an interval of MATURE_INTERVAL_DAYS or more. */
+  matured: number;
+}
+
 export interface Statistics {
   /** The study day the statistics run up to. */
   today: string;
   totals: { answers: number; studyDays: number; cards: number };
-  /** Every study day with answers, oldest first. */
+  /** The prompts met and grown mature. */
+  prompts: PromptGrowth;
+  /** Every study day of the range with answers, oldest first. */
   days: DayActivity[];
+  /**
+   * Every study day with answers of all the answers given, oldest first:
+   * the range's and the weeks before it that the calendar and the
+   * figures up to today look back over (statisticsOf).
+   */
+  recentDays: DayActivity[];
   streaks: Streaks;
   retention: Retention;
   quiz: Quiz;
@@ -226,6 +242,22 @@ export function introducedOverTime(days: readonly DayActivity[]): IntroducedTota
   });
 }
 
+/**
+ * How many distinct prompts of the index were introduced (a first answer
+ * among them, a Studio "forget" not counting twice) and how many grew
+ * mature (an answer that gave them an interval of MATURE_INTERVAL_DAYS
+ * or more, however they were answered), each once, whatever came after.
+ */
+export function promptGrowthOf(index: ChainIndex): PromptGrowth {
+  const growth: PromptGrowth = { introduced: 0, matured: 0 };
+  for (const chain of index.chains.values()) {
+    if (chain.some((answer) => answer.priorIntervalDays === undefined)) growth.introduced += 1;
+    if (chain.some((answer) => answer.nextIntervalDays >= MATURE_INTERVAL_DAYS))
+      growth.matured += 1;
+  }
+  return growth;
+}
+
 /** Course questions answered and answered right, of the answers given, whose chains `index` holds. */
 export function quizAccuracyOf(answers: readonly Answer[], index: ChainIndex): Quiz {
   const quiz: Quiz = { answers: 0, right: 0 };
@@ -265,10 +297,28 @@ export function monthlyRetention(answers: readonly Answer[], index: ChainIndex):
     .sort((a, b) => a.month.localeCompare(b.month));
 }
 
-/** Everything the statistics screens show, of the answers given (in any order) up to `today`. */
-export function statisticsOf(answers: readonly Answer[], today: string): Statistics {
+/**
+ * Everything the statistics screens show, of the answers given (in any
+ * order) up to `today`. Those from `since` on, when given, are the
+ * range's: the totals, recall and the rest. The figures of the days up
+ * to today are of every answer given, so a range shorter than they look
+ * back over does not cut them short: the streaks, the days studied of
+ * late, this week and month beside the last, the new cards beside the
+ * reviews by week, and the days of `recentDays`.
+ */
+export function statisticsOf(
+  allAnswers: readonly Answer[],
+  today: string,
+  since?: string,
+): Statistics {
+  const answers =
+    since === undefined ? allAnswers : allAnswers.filter((answer) => answer.studyDay >= since);
   const index = chainIndexOf(answers);
   const days = dailyActivity(answers, index);
+  const recentDays =
+    answers.length === allAnswers.length
+      ? days
+      : dailyActivity(allAnswers, chainIndexOf(allAnswers));
   return {
     today,
     totals: {
@@ -278,9 +328,11 @@ export function statisticsOf(answers: readonly Answer[], today: string): Statist
       cards: new Set(answers.map((answer) => `${answer.deckUrl}\n${fragmentIdOf(answer.cardUrl)}`))
         .size,
     },
+    prompts: promptGrowthOf(index),
     days,
+    recentDays,
     streaks: streaksOf(
-      days.map((day) => day.studyDay),
+      recentDays.map((day) => day.studyDay),
       today,
     ),
     retention: retentionOf(answers, index),
@@ -312,11 +364,11 @@ export function statisticsOf(answers: readonly Answer[], today: string): Statist
     buttons: gradeGroupsOf(answers, index),
     firstTry: firstTrySuccessOf(answers, index),
     directions: retentionByDirection(answers, index),
-    recentStudyDays: daysStudiedOf(days, today),
-    week: periodToDateOf(days, today, "week"),
-    month: periodToDateOf(days, today, "month"),
+    recentStudyDays: daysStudiedOf(recentDays, today),
+    week: periodToDateOf(recentDays, today, "week"),
+    month: periodToDateOf(recentDays, today, "month"),
     weekdays: weekdayRhythmOf(days, today),
-    intake: intakeVsLoadOf(days, today),
+    intake: intakeVsLoadOf(recentDays, today),
   };
 }
 

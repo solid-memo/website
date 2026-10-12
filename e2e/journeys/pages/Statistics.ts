@@ -6,11 +6,32 @@ import { expect, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
 import { cellOf } from "./tables.ts";
 
+/** The statistics' tabs, as the URL names them. */
+export type StatisticsTab = "overview" | "activity" | "memory" | "cards";
+
+/** The ranges the statistics can be of, as the URL names them. */
+export type StatisticsRange = "30d" | "90d" | "12m" | "all";
+
+const TAB_NAMES = {
+  overview: "statistics.tabOverview",
+  activity: "statistics.tabActivity",
+  memory: "statistics.tabMemory",
+  cards: "statistics.tabCards",
+} as const;
+
+const RANGE_NAMES = {
+  "30d": "statistics.range30d",
+  "90d": "statistics.range90d",
+  "12m": "statistics.range12m",
+  all: "statistics.rangeAll",
+} as const;
+
 /** A tile's key under statistics.* in the i18n files: what it counts. */
 export type StatisticsTile =
   | "answers"
   | "studyDays"
   | "cards"
+  | "cardsYouKnow"
   | "currentStreak"
   | "longestStreak"
   | "young"
@@ -69,6 +90,8 @@ export interface ExpectedStatistics {
   answers?: number;
   studyDays?: number;
   cards?: number;
+  /** Prompts mature now, from where the cards stand. */
+  cardsYouKnow?: number;
   /** In days: shown as "1 day", "2 days". */
   currentStreak?: number;
   longestStreak?: number;
@@ -110,8 +133,12 @@ export interface ExpectedStatistics {
 }
 
 /**
- * "Statistics": the instance's answers in tiles, a calendar, charts of
- * progress and a table by deck; then where the cards stand, read apart.
+ * "Statistics", of the instance or of one deck: the range the figures
+ * are of and four tabs. The overview's tiles, calendar and table by
+ * deck; the activity's charts of each day, the weekdays and the cards
+ * introduced; the memory's recall, answer buttons and what is hard; and
+ * the cards' tab, where the cards stand, read apart, and the courses.
+ * It opens on the overview of the last 3 months.
  */
 export class Statistics extends Screen {
   private get main(): Locator {
@@ -136,17 +163,64 @@ export class Statistics extends Screen {
   async open(): Promise<void> {
     await this.intent("Open Statistics", async () => {
       await this.app.chrome.openStatistics();
+      await this.expectRead();
+    });
+  }
+
+  /**
+   * Opens a deck's own statistics from its page ("More statistics"),
+   * under the deck in the breadcrumbs, and waits for them to be read.
+   */
+  async openForDeck(name: string): Promise<void> {
+    await this.intent(`Open the statistics of ${name}`, async () => {
+      await this.app.chrome.breadcrumb("breadcrumbs.decks");
+      await this.app.decks.openDeck(name);
+      await this.main
+        .getByRole("link", { name: this.t("statistics.moreStatistics"), exact: true })
+        .click();
       await expect(
-        this.page.getByRole("heading", {
-          name: this.t("statistics.heading"),
-          exact: true,
-          level: 2,
-        }),
-      ).toBeVisible();
+        this.page.getByRole("navigation", { name: this.t("breadcrumbs.label") }).getByRole("link"),
+      ).toHaveText([this.t("breadcrumbs.decks"), name, this.t("breadcrumbs.statistics")]);
+      await this.expectRead();
+    });
+  }
+
+  /** Shows a tab, by its name, and waits for it to be the one shown. */
+  async openTab(tab: StatisticsTab): Promise<void> {
+    await this.intent(`Open the statistics' ${tab} tab`, async () => {
+      const link = this.main.getByRole("tab", { name: this.t(TAB_NAMES[tab]), exact: true });
+      await link.click();
+      await expect(link).toHaveAttribute("aria-selected", "true");
       await expect(
-        this.main.getByText(this.t("statistics.empty"), { exact: true }).or(this.tile("answers")),
+        this.main.getByRole("tabpanel", { name: this.t(TAB_NAMES[tab]), exact: true }),
       ).toBeVisible();
     });
+  }
+
+  /** Picks the range the figures are of, by its name, and waits for the overview to be read again. */
+  async selectRange(range: StatisticsRange): Promise<void> {
+    await this.intent(`Show the statistics of ${range}`, async () => {
+      await this.main
+        .getByRole("combobox", { name: this.t("statistics.range"), exact: true })
+        .selectOption({ label: this.t(RANGE_NAMES[range]) });
+      await expect(this.page).toHaveURL(
+        range === "90d" ? /#\/(deck-)?statistics\?(?!.*range=)/ : new RegExp(`range=${range}`),
+      );
+    });
+  }
+
+  /** The heading, then on the overview its first tile or the word that there is none yet. */
+  private async expectRead(): Promise<void> {
+    await expect(
+      this.page.getByRole("heading", {
+        name: this.t("statistics.heading"),
+        exact: true,
+        level: 2,
+      }),
+    ).toBeVisible();
+    await expect(
+      this.main.getByText(this.t("statistics.empty"), { exact: true }).or(this.tile("answers")),
+    ).toBeVisible();
   }
 
   /**
@@ -155,6 +229,7 @@ export class Statistics extends Screen {
    */
   async expectCourseAnswersOnly(): Promise<void> {
     await this.intent("Check that course answers are counted apart from recall", async () => {
+      await this.openTab("memory");
       await expect(this.tile("quizAccuracy").getByRole("strong")).toHaveText(/\d/);
       await expect(this.tile("young")).toHaveCount(0);
       await expect(this.tile("mature")).toHaveCount(0);
@@ -168,6 +243,7 @@ export class Statistics extends Screen {
    */
   async expectCourseChapter(course: string, chapter: string): Promise<void> {
     await this.intent("Check the course's chapter done and its graded answers", async () => {
+      await this.openTab("cards");
       const section = this.main.getByRole("region", {
         name: this.t("statistics.courses"),
         exact: true,
@@ -207,17 +283,45 @@ export class Statistics extends Screen {
     });
   }
 
+  /**
+   * Checks what is expected, tab by tab (each opened in turn, so the
+   * overview's last), on the figures' range as it is.
+   */
   async expectStatistics(expected: ExpectedStatistics): Promise<void> {
     await this.intent("Check the statistics", async () => {
+      await this.openTab("activity");
+      if (expected.answers !== undefined) await this.expectIntroduced();
+      if (expected.today !== undefined) await this.expectToday(expected.today);
+      if (expected.weekday !== undefined) await this.expectWeekday(expected.weekday);
+
+      await this.openTab("memory");
+      for (const key of ["young", "mature"] as const) {
+        const recall = expected[key];
+        if (recall !== undefined) await this.expectRecall(key, recall);
+      }
+      if (expected.buttons !== undefined) await this.expectButtons(expected.buttons);
+
+      await this.openTab("cards");
+      if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
+      if (expected.overdue !== undefined)
+        await this.expectValue("overdue", String(expected.overdue));
+      if (expected.maturityByDeck !== undefined)
+        await this.expectMaturityByDeck(expected.maturityByDeck);
+
+      // What is hard is read with where the cards stand, so after it is shown.
+      await this.openTab("memory");
+      if (expected.leeches !== undefined) await this.expectLeeches(expected.leeches);
+
+      await this.openTab("overview");
       const counts = {
         answers: expected.answers,
         studyDays: expected.studyDays,
         cards: expected.cards,
+        cardsYouKnow: expected.cardsYouKnow,
       } as const;
       for (const [key, count] of Object.entries(counts)) {
         if (count !== undefined) await this.expectValue(key as StatisticsTile, String(count));
       }
-      if (expected.answers !== undefined) await this.expectIntroduced();
       const streaks = {
         currentStreak: expected.currentStreak,
         longestStreak: expected.longestStreak,
@@ -229,21 +333,51 @@ export class Statistics extends Screen {
             this.t("statistics.dayCount", { count: days }),
           );
       }
-      for (const key of ["young", "mature"] as const) {
-        const recall = expected[key];
-        if (recall !== undefined) await this.expectRecall(key, recall);
-      }
       if (expected.coverage !== undefined) await this.expectCoverage();
-      if (expected.today !== undefined) await this.expectToday(expected.today);
-      if (expected.buttons !== undefined) await this.expectButtons(expected.buttons);
-      if (expected.weekday !== undefined) await this.expectWeekday(expected.weekday);
       if (expected.decks !== undefined) await this.expectByDeck(expected.decks);
-      if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
-      if (expected.overdue !== undefined)
-        await this.expectValue("overdue", String(expected.overdue));
-      if (expected.maturityByDeck !== undefined)
-        await this.expectMaturityByDeck(expected.maturityByDeck);
-      if (expected.leeches !== undefined) await this.expectLeeches(expected.leeches);
+    });
+  }
+
+  /**
+   * Over all time, the overview's cards introduced and grown mature, each
+   * prompt once, and the answers of the whole log.
+   */
+  async expectAllTime(expected: { answers: number; introduced: number; matured: number }) {
+    await this.intent("Check the statistics of all time", async () => {
+      await this.openTab("overview");
+      await this.expectValue("answers", String(expected.answers));
+      await expect(
+        this.main.getByRole("heading", { name: this.t("statistics.allTime"), exact: true }),
+      ).toBeVisible();
+      for (const [key, count] of [
+        ["statistics.promptsIntroduced", expected.introduced],
+        ["statistics.promptsMatured", expected.matured],
+      ] as const) {
+        await expect(
+          this.main.getByRole("group", { name: this.t(key), exact: true }).getByRole("strong"),
+          this.t(key),
+        ).toHaveText(String(count));
+      }
+    });
+  }
+
+  /**
+   * On a deck's own statistics: the overview without a table by deck,
+   * and the activity of the deck's answers alone, `answers` of them today.
+   */
+  async expectDeckStatistics(answers: number): Promise<void> {
+    await this.intent("Check a deck's own statistics", async () => {
+      await this.openTab("overview");
+      await this.expectValue("answers", String(answers));
+      await expect(this.byDeck).toHaveCount(0);
+      await this.openTab("activity");
+      const table = await this.tableOf(this.t("statistics.dayHeld", { count: 30 }));
+      const row = table.getByRole("row").filter({
+        has: this.page.getByRole("cell", { name: await this.today(), exact: true }),
+      });
+      await expect(await cellOf(table, row, this.t("statistics.answers"))).toHaveText(
+        String(answers),
+      );
     });
   }
 

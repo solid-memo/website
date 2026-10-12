@@ -4414,6 +4414,49 @@ table.deck-statistics td {
   border-bottom: 1px solid var(--border);
 }
 
+/* The statistics' range and tabs, in one row above the figures. The
+   tabs are links; on a phone their strip scrolls sideways in its own
+   box, never the page, and the tab shown is underlined in the green
+   (and by its border in forced colors). */
+.statistics-range {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.statistics-tabs {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  margin: 0 0 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.statistics-tabs [role="tab"] {
+  flex: none;
+  padding: 0.5rem 0.9rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+}
+
+.statistics-tabs [role="tab"]:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.statistics-tabs [role="tab"][aria-selected="true"] {
+  color: var(--text);
+  font-weight: 600;
+  border-bottom-color: var(--primary);
+}
+
+.save-answers {
+  margin: 1.5rem 0 0;
+}
+
 /* The table by deck is wider than a phone: it scrolls sideways in its
    own region, the deck's name kept in view on the panel's surface, and
    read as a cell, not as a column's heading. */

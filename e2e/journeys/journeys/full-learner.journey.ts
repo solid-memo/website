@@ -166,7 +166,7 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
     await expect(app.chrome.developerTools).toBeVisible();
   });
 
-  await app.step("15 · Check the statistics", async () => {
+  await app.step("15 · Check the statistics, tab by tab, of all time and of one deck", async () => {
     // Each card was answered once, Good, but deck B's first, answered
     // Again and then Good: still no reviews (a card's first answer is not
     // one, nor is the answer to a card back in the session that day), so
@@ -227,7 +227,15 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
       ],
       // No review yet, so nothing is hard to tell: no leeches listed.
       leeches: null,
+      // Every card is young: none is known yet.
+      cardsYouKnow: 0,
     });
+    // All time is the whole log, today's: its four cards met, none grown mature.
+    await app.statistics.selectRange("all");
+    await app.statistics.expectAllTime({ answers, introduced: cards, matured: 0 });
+    // Deck B's own statistics, from its page: its answers alone.
+    await app.statistics.openForDeck(deckB);
+    await app.statistics.expectDeckStatistics(answeredB);
   });
 
   await app.step("15b · Read the history of deck B's cards", async () => {

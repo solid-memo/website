@@ -38,10 +38,11 @@ study session usually ends) says what the day came to:
 
 Before the day's first answer there is no strip. When the answers
 cannot be read there is none either: the deck list works without it.
-It shares the statistics page's read of the last 12 study months, so
-the record is the year's. Every change made clears that read, an
-answer in a session or a course among them, so the strip is up to date
-after a session; otherwise it is
+It reads the last 12 study months, whatever range the statistics page
+opens on, so the record is the year's; that is the page's own read when
+its range is the last 12 months, so the two never read them twice.
+Every change made clears that read, an answer in a session or a course
+among them, so the strip is up to date after a session; otherwise it is
 read again when the list opens and what was read is over half a minute
 old ([below](#loading)).
 
@@ -52,29 +53,50 @@ picks the day out.
 
 ## The statistics page
 
-`#/statistics?instance=…` ([routing.md](routing.md)), linked as
-"Statistics" from the instance bar on every screen of an instance, and
-from the today strip. Before any answer it says that the statistics
-begin with the next study session; where the cards stand is shown
-anyway.
+`#/statistics?instance=…&range=…&view=…` ([routing.md](routing.md)),
+linked as "Statistics" from the instance bar on every screen of an
+instance, and from the today strip.
 
-From the top (a note first, "Since March 2026, your first month of
-study.", when the answer log begins after the 12 months read):
+Above the figures, the **range** they are of: the last 30 days, the
+last 3 months (the default), the last 12 months or all time. Under it,
+four **tabs**: Overview, Activity, Memory and Cards. Both are in the
+URL (`range`, `view`), so a tab can be bookmarked or opened in a new
+browser tab, and a change of either replaces the history entry: Back
+leaves the page rather than walking its tabs. The tabs are links, and
+a `tablist`: the arrow keys, Home and End move along them; on a phone
+their strip scrolls sideways in its own box. Before any answer the
+first three tabs say that the statistics begin with the next study
+session; the Cards tab shows where the cards stand anyway. A range
+with no answers, in a log that has some, says so instead, and that a
+longer range may show earlier ones.
 
-| Part | What it shows |
-|---|---|
-| Tiles | Answers, Study days, Cards studied, Current streak, Longest streak, and how many of the last 30 days were studied ("12 of 30 days", with its share). A streak is study days in a row; the current one still counts while today is not studied yet. |
-| Activity | A calendar of the last 52 weeks, a column a week, each day as green as its share of the busiest day's answers. |
-| What each day held | The last 30 days as stacked bars: reviews remembered, cards new that day, lapses and repeats, a step of the green each, named in a legend. A course answer to a card seen before is none of these, so it counts only among the day's answers, in the table. |
-| Answers by weekday | A bar a weekday, Monday first: its answers divided by how many of that weekday there have been since the first study day read, and in the table how many of them were studied ("3 of 4"). |
-| This week so far, This month so far | Answers, study days, cards introduced and recall from Monday (as the calendar's weeks) or the month's first up to today, each with the same days of the week or month before under it: last week's Monday up to today's weekday, last month's first up to today's date (or its last day, when it was shorter). |
-| Progress | "Cards introduced over time": a running total of the cards seen for the first time, over the last 12 months. "First try": the share of cards remembered the first time they were seen. "New cards and reviews, by week": the cards introduced beside the scored reviews done, a pair of bars a week for the last 12 weeks: when the new cards keep outpacing the reviews, the reviews due further down show what they bring. |
-| Remembered in reviews | Two tiles, young and mature cards: the share of reviews remembered, with how many reviews it is of. Then "Answer buttons": for first answers and for young and mature reviews, a bar of the buttons pressed, Again, Hard, Good and Easy, with every count in the table. Then "Recall by month", the same split month by month, young as a dashed line and mature as a solid one; its table adds each month's first tries. Left out (first try and the answer buttons too) when there is no review but there are course answers, as for a learner who has only taken a course. |
-| In courses | Only with course answers: the share of graded course answers that were right, with how many there were. |
-| By deck | A table of each deck's answers, cards introduced, young and mature recall, recall each way (for a deck with reviews both ways), first try, lapses, graded course answers and the day it was last studied. It scrolls sideways on a narrow screen, the deck's name kept in view. A deck since removed is "A removed deck". |
-| Where your cards stand | How many cards are new, relearning, young and mature, as one bar. Two tiles: how many reviews are overdue (due before today), and the day the daily review limits let through every review they hold back, studying each day ("Today" when they hold none back; past the 30 days, "Not within 30 days" with how many still wait then). Each deck's limit is its own, so the day is worked out deck by deck and the latest taken. Then, for each of the next 30 days, the reviews falling due (today's with every overdue one) beside those the limits let through; how the studied cards' intervals are spread (days until they come back), and, folded away, how easy they feel (their ease). Then each deck's own bar, with the day its new cards run out at its own new-card limit, studying each day, today with only what is left of the limit after the new cards already met today, as the study queue has it ("never" at a limit of 0); a course's deck is left out of that, as its cards join it when their questions are answered. |
-| What is hard | Once there are reviews: "Leeches across your decks", every card in use forgotten 4 times or more (lapses) in its reviews of the last 12 study months, the most forgotten first, then the largest share of its reviews forgotten. Each is a link to the card's page, with how often of how many reviews and its deck. A deck since removed has no cards left to name or open, so its leeches are not listed. |
-| Your courses | Only with a course among the decks: each course, a link to its page, with its chapters completed out of all ("1 of 3 chapters done", and as a bar), then a table of its chapters: where each stands (done, open or locked, as the course's page says) and its graded course answers of the last 12 study months, the share right with how many there were. A question counts toward the chapter whose step or final review asks it; nothing in it is particular to one course: the chapters are the course's release's, the chapters completed its deck's, the answers the log's. |
+The figures that run up to today look back as far as the activity
+calendar, its 52 weeks (or the whole log, for all time), whatever the
+range, so a short range does not cut them short: the streaks, the days
+studied of the last 30, the calendar, what each day held, this week and
+month beside the last, and the new cards beside the reviews by week.
+The rest are the range's.
+
+A note comes first, "Since March 2026, your first month of study.",
+when the answer log begins inside the range read (always so for all
+time). Each tab, from the top:
+
+| Tab | Part | What it shows |
+|---|---|---|
+| Overview | Tiles | Answers, Study days, Cards studied, Cards you know (the cards mature now, from where the cards stand), Current streak, Longest streak, and how many of the last 30 days were studied ("12 of 30 days", with its share). A streak is study days in a row; the current one still counts while today is not studied yet. |
+| Overview | All time | Only for all time: how many cards were introduced, and how many have grown mature (reached an interval of 21 days), over the whole log, each card once, whatever came after. With the tiles above and the cards introduced over time, all of them the whole log's then, the longest streak among them, that is how far the learner has come. |
+| Overview | Activity calendar | A calendar of the last 52 weeks, whatever the range, a column a week, each day as green as its share of the busiest day's answers. |
+| Overview | By deck | A table of each deck's answers, cards introduced, young and mature recall, recall each way (for a deck with reviews both ways), first try, lapses, graded course answers and the day it was last studied. It scrolls sideways on a narrow screen, the deck's name kept in view. A deck since removed is "A removed deck". |
+| Overview | Download my answers (CSV) | Saves the range's answers, of every deck or of the deck, as a CSV file on the learner's device (`UseCases.saveAnswers`, `answersCsv` in [answerCsv.ts](../packages/domain/src/answerCsv.ts)): a row an answer, oldest first, with every column the log has (`answered_at`, `study_day`, `deck`, `card`, `direction`, `grade`, `mode`, `prior_interval_days`, `next_interval_days`, `chosen_distractor`), named in English whatever the page's language. It is handed to the browser to save as any download; nothing is sent anywhere. |
+| Activity | What each day held | The last 30 days as stacked bars: reviews remembered, cards new that day, lapses and repeats, a step of the green each, named in a legend. A course answer to a card seen before is none of these, so it counts only among the day's answers, in the table. |
+| Activity | Answers by weekday | A bar a weekday, Monday first: its answers divided by how many of that weekday there have been since the first study day read, and in the table how many of them were studied ("3 of 4"). |
+| Activity | This week so far, This month so far | Answers, study days, cards introduced and recall from Monday (as the calendar's weeks) or the month's first up to today, each with the same days of the week or month before under it: last week's Monday up to today's weekday, last month's first up to today's date (or its last day, when it was shorter). |
+| Activity | Progress | "Cards introduced over time": a running total of the cards seen for the first time, over the range. "First try": the share of cards remembered the first time they were seen. "New cards and reviews, by week": the cards introduced beside the scored reviews done, a pair of bars a week for the last 12 weeks: when the new cards keep outpacing the reviews, the reviews due further down show what they bring. |
+| Memory | Remembered in reviews | Two tiles, young and mature cards: the share of reviews remembered, with how many reviews it is of. Then "Answer buttons": for first answers and for young and mature reviews, a bar of the buttons pressed, Again, Hard, Good and Easy, with every count in the table. Then "Recall by month", the same split month by month, young as a dashed line and mature as a solid one; its table adds each month's first tries. Left out (first try and the answer buttons too) when there is no review but there are course answers, as for a learner who has only taken a course. |
+| Memory | In courses | Only with course answers: the share of graded course answers that were right, with how many there were. |
+| Memory | What is hard | Once there are reviews: "Leeches across your decks", every card in use forgotten 4 times or more (lapses) in its reviews of the last 12 study months, the most forgotten first, then the largest share of its reviews forgotten. Each is a link to the card's page, with how often of how many reviews and its deck. A deck since removed has no cards left to name or open, so its leeches are not listed. |
+| Cards | Where your cards stand | How many cards are new, relearning, young and mature, as one bar. Two tiles: how many reviews are overdue (due before today), and the day the daily review limits let through every review they hold back, studying each day ("Today" when they hold none back; past the 30 days, "Not within 30 days" with how many still wait then). Each deck's limit is its own, so the day is worked out deck by deck and the latest taken. Then, for each of the next 30 days, the reviews falling due (today's with every overdue one) beside those the limits let through; how the studied cards' intervals are spread (days until they come back), and, folded away, how easy they feel (their ease). Then each deck's own bar, with the day its new cards run out at its own new-card limit, studying each day, today with only what is left of the limit after the new cards already met today, as the study queue has it ("never" at a limit of 0); a course's deck is left out of that, as its cards join it when their questions are answered. |
+| Cards | Your courses | Only with a course among the decks: each course, a link to its page, with its chapters completed out of all ("1 of 3 chapters done", and as a bar), then a table of its chapters: where each stands (done, open or locked, as the course's page says) and its graded course answers of the last 12 study months, the share right with how many there were. A question counts toward the chapter whose step or final review asks it; nothing in it is particular to one course: the chapters are the course's release's, the chapters completed its deck's, the answers the log's. |
 
 A card is *young* while it is reviewed at an interval under 21 days and
 *mature* from 21 days on. A card forgotten last time and not remembered
@@ -97,11 +119,12 @@ keep apart as empty, hatched and filled. The histograms are the
 Studio's own, shared from the UI package.
 
 The page reads three things on their own, so none waits for another:
-the answers of the last 12 study months (`UseCases.getStatistics`);
+the answers of the range (`UseCases.getStatistics`);
 the cards and review states of every deck with, for what is hard, the
-same months of answers (`UseCases.getCardProgress`); and, with a course
-among the decks, how the courses have gone
-(`UseCases.getCourseStatistics`), from the same months and each
+last 12 study months of answers, whatever the range
+(`UseCases.getCardProgress`); and, with a course among the decks, how
+the courses have gone (`UseCases.getCourseStatistics`), from the same
+12 months and each
 course's outline, which the library reads once a page load. A course
 whose outline cannot be read is left out. All three ask for the months
 at once, and a month already being read is read once for all (unless
@@ -142,8 +165,22 @@ month, by server, for a learner who answers a hundred cards a day. So:
   completed are part of what they are kept by.
 - **The range read.** `getStatistics` reads the last 12 study months
   by default, or `range`: the last so many study days, or the whole
-  log (`"all"`). Its result's `coverage` is the log's first month when
-  the log begins inside the range.
+  log (`"all"`). It also reads the activity calendar's 52 weeks
+  (`calendarStartOf`) when the range begins after them, for the figures
+  up to today: `statisticsOf` counts the range's answers from its first
+  day (`since`), and those figures, with `recentDays`, from every answer
+  read. The months read are the same the today strip's read takes in,
+  so they come from the shared cache. Its result's `coverage` is the
+  log's first month when the log begins inside the range, and
+  `logBegins` the log's first month, for the empty range's message.
+  The page's ranges are 30 days, 90
+  days (its default), getStatistics' own 12 months and `"all"` (`rangeRead` and
+  `statisticsQuery` in
+  [studyFigures.ts](../packages/ui/src/ui/studyFigures.ts)), each
+  read once and kept apart; the last 12 months are kept under the
+  today strip's key, so the strip and the page share that read. All
+  time downloads the whole log once a page load, as the Studio's
+  `loadAnswerLog` does, and on a server without ETags at every visit.
 
 Measured against a real server (`history.integration.test.ts`, run
 with `MEASURE_ANSWER_LOG=1`; [testing.md](testing.md)), for 100
@@ -163,22 +200,33 @@ no parsing.
 
 ## A deck's own figures
 
-A deck's page (`#/deck`) ends with the same figures for that deck
-alone, once it has answers: what each of its last 30 days held, as
-stacked bars, the young and mature recall tiles, recall each way when
-it has reviews both ways, first try and the answer buttons and, with
-course answers, the graded course answers tile (alone for a deck
-studied only in a course's chapters). Then where its cards stand, all new before the
-first answer, with a tile for the day its new cards run out (none for a
-course's deck, or once none is new)
+A deck's page (`#/deck`) sums up its figures of the last 3 months,
+once it has answers in them: the young and mature recall tiles, recall
+each way when it has reviews both ways, first try and, with course
+answers, the graded course answers tile (alone for a deck studied only
+in a course's chapters). Under them, always, "More statistics", a link
+to the rest, whose longer ranges reach a deck's older answers
 ([DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx)).
-Then what is hard in it, from its answers of the last 12 study months
+That read is the deck's statistics page's at its default range, so
+following the link reads nothing again. Then where its cards stand,
+all new before the first answer, with a tile for the day its new cards
+run out (none for a course's deck, or once none is new). Then what is
+hard in it, from its answers of the last 12 study months
 ([HardestCardsContainer.tsx](../packages/ui/src/ui/HardestCardsContainer.tsx)):
 "Hardest cards", the ten cards in use forgotten most often in their
 reviews, ranked as the leeches are, a leech marked as one, each a link
 to its page (none for a deck without reviews); and, for a deck with
 course answers, "Most-confused options": the wrong options chosen most
 often, each with its card and how often (`confusionsOf`).
+
+The deck's statistics page, `#/deck-statistics?instance=…&deck=…`
+(under the deck in the breadcrumbs: Decks › *deck* › Statistics), has
+the range and the tabs of the statistics page, of the deck's answers
+alone: its own activity calendar on the overview, without the table
+by deck; recall each way on the memory tab when it has reviews both
+ways, with its hardest cards and most-confused options in place of the
+leeches across decks; its own cards and, for a course's deck, its
+course on the cards' tab. Its download holds the deck's answers only.
 
 ## A card's history
 
@@ -243,9 +291,9 @@ Nothing in the pod changed: the same answer log is read differently.
 
 | Layer | Files |
 |---|---|
-| Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, and `todayOf`. [studyPatterns.ts](../packages/domain/src/studyPatterns.ts): the answer buttons, first try, this week and month beside the last, the days studied of the last 30, the weekdays, recall each way, and the new cards beside the reviews by week. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, relearning, young and mature, and when new cards run out. [cardHistory.ts](../packages/domain/src/cardHistory.ts): a deck's answers as its cards are named now, a card's answers, lapses, the hardest cards and the wrong options chosen most. [course.ts](../packages/domain/src/course.ts): `courseProgressOf`, a course's chapters done and its graded answers chapter by chapter. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, the interval and ease histograms, shared with the Studio, what is overdue and the days the daily limit takes to catch up. |
-| Application | `getStatistics`, `getCardProgress` and `getCourseStatistics` in [useCases.ts](../packages/application/src/useCases.ts): which months and documents to read; `readLogMonths` keeps the months read, for `loadAnswerLog` too, and reads a month asked for twice at once only once. `cardAnswers` for a card's history. |
-| UI | [StatisticsContainer.tsx](../packages/ui/src/ui/StatisticsContainer.tsx) and [StatisticsScreen.tsx](../packages/ui/src/ui/StatisticsScreen.tsx) (the page), [CardProgressContainer.tsx](../packages/ui/src/ui/CardProgressContainer.tsx) (where the cards stand), [HardestCardsContainer.tsx](../packages/ui/src/ui/HardestCardsContainer.tsx) and [HardestCards.tsx](../packages/ui/src/ui/HardestCards.tsx) (what is hard, from the same read), [CourseStatistics.tsx](../packages/ui/src/ui/CourseStatistics.tsx) (your courses), [CardHistoryContainer.tsx](../packages/ui/src/ui/CardHistoryContainer.tsx) and [CardHistory.tsx](../packages/ui/src/ui/CardHistory.tsx) (a card's history), [charts/](../packages/ui/src/ui/charts/) (tiles, calendar, bar charts stacked or side by side, histograms, line charts, the answer buttons and maturity bars, a module each, gathered for the Studio in [StatisticsCharts.tsx](../packages/ui/src/ui/StatisticsCharts.tsx)), [DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx) and the today strip above. |
+| Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, the prompts introduced and grown mature (`promptGrowthOf`), and `todayOf`. [answerCsv.ts](../packages/domain/src/answerCsv.ts): the answers as CSV. [studyPatterns.ts](../packages/domain/src/studyPatterns.ts): the answer buttons, first try, this week and month beside the last, the days studied of the last 30, the weekdays, recall each way, and the new cards beside the reviews by week. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, relearning, young and mature, and when new cards run out. [cardHistory.ts](../packages/domain/src/cardHistory.ts): a deck's answers as its cards are named now, a card's answers, lapses, the hardest cards and the wrong options chosen most. [course.ts](../packages/domain/src/course.ts): `courseProgressOf`, a course's chapters done and its graded answers chapter by chapter. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, the interval and ease histograms, shared with the Studio, what is overdue and the days the daily limit takes to catch up. |
+| Application | `getStatistics`, `saveAnswers`, `getCardProgress` and `getCourseStatistics` in [useCases.ts](../packages/application/src/useCases.ts): which months and documents to read; `readLogMonths` keeps the months read, for `loadAnswerLog` too, and reads a month asked for twice at once only once. `cardAnswers` for a card's history. |
+| UI | [StatisticsContainer.tsx](../packages/ui/src/ui/StatisticsContainer.tsx) (the page, of the instance or of a deck), [StatisticsScreen.tsx](../packages/ui/src/ui/StatisticsScreen.tsx) (its range and tabs) and [StatisticsSections.tsx](../packages/ui/src/ui/StatisticsSections.tsx) (the overview, activity and memory tabs), the `statistics` and `deckStatistics` routes in [router.ts](../packages/ui/src/ui/router.ts), [CardProgressContainer.tsx](../packages/ui/src/ui/CardProgressContainer.tsx) (where the cards stand), [HardestCardsContainer.tsx](../packages/ui/src/ui/HardestCardsContainer.tsx) and [HardestCards.tsx](../packages/ui/src/ui/HardestCards.tsx) (what is hard, from the same read), [CourseStatistics.tsx](../packages/ui/src/ui/CourseStatistics.tsx) (your courses), [CardHistoryContainer.tsx](../packages/ui/src/ui/CardHistoryContainer.tsx) and [CardHistory.tsx](../packages/ui/src/ui/CardHistory.tsx) (a card's history), [charts/](../packages/ui/src/ui/charts/) (tiles, calendar, bar charts stacked or side by side, histograms, line charts, the answer buttons and maturity bars, a module each, gathered for the Studio in [StatisticsCharts.tsx](../packages/ui/src/ui/StatisticsCharts.tsx)), [DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx) and the today strip above. |
 
 The statistics are the same for a guest ([guest-mode.md](guest-mode.md)),
 whose answers are kept in the pod in their browser and move with the
@@ -255,13 +303,15 @@ rest of their study when they log in.
 
 - **Unit tests** at 100% coverage, as everywhere
   ([testing.md](testing.md)): `answerChain.test.ts`,
-  `statistics.test.ts`, `studyPatterns.test.ts`, `cardProgress.test.ts`,
+  `statistics.test.ts`, `answerCsv.test.ts`, `studyPatterns.test.ts`, `cardProgress.test.ts`,
   `cardHistory.test.ts`, `scheduleInsight.test.ts` and
   `course.test.ts` in the domain,
   the passes over the whole log (`chainIndexOf`, `statisticsOf` and the
   answer buttons, first try, recall each way and the hardest cards)
   held to linear growth,
   the use cases in `useCases.test.ts`, and `StatisticsScreen.test.tsx`,
+  `StatisticsSections.test.tsx`, `router.test.ts`, `Workspace.test.tsx`
+  (the range and tab in the URL, the deck's statistics route),
   the chart tests in `charts/`, `CardProgressContainer.test.tsx`,
   `HardestCardsContainer.test.tsx`, `CourseStatistics.test.tsx`,
   `CardHistoryContainer.test.tsx` and

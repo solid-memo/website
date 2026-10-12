@@ -83,6 +83,14 @@ export interface WeekLoad {
 /** The days that "studied N of the last days" looks back over, today included. */
 export const RECENT_DAYS = 30;
 
+/** The weeks the activity calendar shows, this one included: the farthest the figures up to today look back. */
+export const CALENDAR_WEEKS = 52;
+
+/** The first study day of the CALENDAR_WEEKS weeks (from Monday) up to `today`. */
+export function calendarStartOf(today: string): string {
+  return shiftStudyDay(today, -weekdayOf(today) - 7 * (CALENDAR_WEEKS - 1));
+}
+
 /** The weeks that the new cards beside the reviews are shown for, this one included. */
 export const INTAKE_WEEKS = 12;
 

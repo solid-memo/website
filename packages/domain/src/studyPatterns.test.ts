@@ -8,6 +8,7 @@ import type { Answer } from "./answer";
 import { chainIndexOf } from "./answerChain";
 import type { DayActivity } from "./statistics";
 import {
+  calendarStartOf,
   daysStudiedOf,
   firstTrySuccessOf,
   gradeGroupOf,
@@ -137,6 +138,13 @@ describe("weekdayOf", () => {
   it("counts from Monday", () => {
     expect(weekdayOf("2026-10-12")).toBe(0);
     expect(weekdayOf("2026-10-18")).toBe(6);
+  });
+});
+
+describe("calendarStartOf", () => {
+  it("is the Monday of the calendar's first week, 51 weeks before this one", () => {
+    expect(calendarStartOf("2026-10-12")).toBe("2025-10-20");
+    expect(calendarStartOf("2026-10-18")).toBe("2025-10-20");
   });
 });
 

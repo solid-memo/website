@@ -3521,7 +3521,7 @@ describe("the answer log", () => {
     ]);
   });
 
-  it("computes the statistics of the last days asked for, or of the whole log, and says where the log begins", async () => {
+  it("computes the statistics of the last days asked for, or of the whole log, those up to today of the calendar's weeks, and says where the log begins", async () => {
     const { byMonth, log, useCases } = setup();
     const answer = (studyDay: string): Answer => ({
       id: `answer-${studyDay}`,
@@ -3533,26 +3533,79 @@ describe("the answer log", () => {
       studyDay,
       nextIntervalDays: 1,
     });
+    byMonth.set("2025-08", [answer("2025-08-31")]);
     byMonth.set("2026-05", [answer("2026-05-31")]);
-    byMonth.set("2026-08", [answer("2026-08-22"), answer("2026-08-23")]);
+    byMonth.set("2026-08", [answer("2026-08-20"), answer("2026-08-23")]);
     byMonth.set("2026-09", [answer("2026-09-21")]);
-    // 30 days up to September 21st begin on August 23rd: August is read, May is not.
+    // 30 days up to September 21st begin on August 23rd; the figures up to
+    // today look back over the calendar's 52 weeks, from September 29th 2025:
+    // May is read for them, last August is not.
     const month = await useCases.getStatistics(instance.url, noon, { range: 30 });
     expect(month.days.map((day) => day.studyDay)).toEqual(["2026-08-23", "2026-09-21"]);
+    expect(month.totals.answers).toBe(2);
+    expect(month.recentDays.map((day) => day.studyDay)).toEqual([
+      "2026-05-31",
+      "2026-08-20",
+      "2026-08-23",
+      "2026-09-21",
+    ]);
+    // Last month's first 21 days lie before the range, and count all the same.
+    expect(month.month.previous.answers).toBe(1);
     expect(month.coverage).toBeNull();
-    expect(log.readMonthSince).not.toHaveBeenCalledWith(instance.url, "2026-05", undefined);
-    // A year reaches past May, where the log begins.
-    await expect(useCases.getStatistics(instance.url, noon, { range: 365 })).resolves.toMatchObject(
-      { totals: { answers: 4 }, coverage: "2026-05" },
+    expect(month.logBegins).toBe("2025-08");
+    expect(log.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-05", undefined);
+    expect(log.readMonthSince).not.toHaveBeenCalledWith(instance.url, "2025-08", undefined);
+    // 500 days reach past last August, where the log begins.
+    await expect(useCases.getStatistics(instance.url, noon, { range: 500 })).resolves.toMatchObject(
+      { totals: { answers: 5 }, coverage: "2025-08" },
     );
     const all = await useCases.getStatistics(instance.url, noon, { range: "all" });
-    expect(all.totals.answers).toBe(4);
-    expect(all.coverage).toBe("2026-05");
+    expect(all.totals.answers).toBe(5);
+    expect(all.coverage).toBe("2025-08");
     // An empty log covers nothing.
     byMonth.clear();
     await expect(
       useCases.getStatistics(instance.url, noon, { range: "all" }),
-    ).resolves.toMatchObject({ totals: { answers: 0 }, coverage: null });
+    ).resolves.toMatchObject({ totals: { answers: 0 }, coverage: null, logBegins: null });
+  });
+
+  it("saves the answers of the range asked for as a CSV file, of every deck or of one", async () => {
+    const deps = makeDeps();
+    const { log, byMonth } = memoryLog();
+    const fileExchange = { save: vi.fn(), open: vi.fn(async () => null) };
+    const useCases = createUseCases({ ...deps, answerLog: log, fileExchange });
+    const answer = (studyDay: string, deckUrl = deck.url): Answer => ({
+      id: `answer-${studyDay}`,
+      deckUrl,
+      cardUrl: card.url,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: `${studyDay}T10:00:00.000Z`,
+      studyDay,
+      nextIntervalDays: 1,
+    });
+    byMonth.set("2026-05", [answer("2026-05-31")]);
+    byMonth.set("2026-09", [answer("2026-09-21"), answer("2026-09-20", "https://pod.example/o#d")]);
+    const rows = () => (fileExchange.save.mock.lastCall![2] as string).trim().split("\r\n");
+    await useCases.saveAnswers(instance.url, noon, { range: 30 });
+    expect(fileExchange.save).toHaveBeenCalledWith(
+      "solid-memo-answers-2026-09-21.csv",
+      "text/csv",
+      expect.stringMatching(/^answered_at,study_day,/),
+    );
+    expect(rows().map((row) => row.split(",")[1])).toEqual([
+      "study_day",
+      "2026-09-20",
+      "2026-09-21",
+    ]);
+    await useCases.saveAnswers(instance.url, noon, { range: "all", deckUrl: deck.url });
+    expect(rows().map((row) => row.split(",")[1])).toEqual([
+      "study_day",
+      "2026-05-31",
+      "2026-09-21",
+    ]);
+    await useCases.saveAnswers(instance.url, noon);
+    expect(rows()).toHaveLength(4);
   });
 
   it("shares the months it read with loadAnswerLog, each read again only once it changed, and drops those the log no longer has", async () => {

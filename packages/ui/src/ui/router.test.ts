@@ -8,7 +8,9 @@ import {
   courseHref,
   deckHref,
   decksHref,
+  deckStatisticsHref,
   importUrlHref,
+  isCanonicalStatisticsHash,
   isStudioHash,
   libraryDeckHref,
   libraryHref,
@@ -139,6 +141,24 @@ const roundTrips: RouteRef[] = [
   },
   { screen: "preferences", instanceUrl: "https://pod.example/solid-memo/a/" },
   { screen: "statistics", instanceUrl: "https://pod.example/solid-memo/a/" },
+  {
+    screen: "statistics",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    range: "all",
+    view: "memory",
+  },
+  {
+    screen: "deckStatistics",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    deckUrl: "https://pod.example/solid-memo/a/decks.ttl#deck-1",
+  },
+  {
+    screen: "deckStatistics",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    deckUrl: "https://pod.example/solid-memo/a/decks.ttl#deck-1",
+    range: "30d",
+    view: "cards",
+  },
   { screen: "validation", instanceUrl: "https://pod.example/solid-memo/a/" },
 ];
 
@@ -242,6 +262,8 @@ describe("routeToHash / parseHash", () => {
     "#/course-review?deck=b&chapter=c",
     "#/preferences",
     "#/statistics",
+    "#/deck-statistics?instance=a",
+    "#/deck-statistics?deck=b",
     "#/validate",
   ])("rejects invalid hash %j", (hash) => {
     expect(parseHash(hash)).toBeNull();
@@ -406,6 +428,40 @@ describe("useHashRoute", () => {
     window.history.replaceState(null, "", "#/storages");
     window.dispatchEvent(new Event("hashchange"));
     expect(result.current.route).toBeNull();
+  });
+});
+
+describe("the statistics' range and tab", () => {
+  it("leave the defaults out of the URL, and drop what they do not know, the hash then no longer canonical", () => {
+    expect(
+      routeToHash({ screen: "statistics", instanceUrl: "a", range: "90d", view: "overview" }),
+    ).toBe("#/statistics?instance=a");
+    expect(parseHash("#/statistics?instance=a&range=90d&view=overview")).toEqual({
+      screen: "statistics",
+      instanceUrl: "a",
+    });
+    expect(parseHash("#/deck-statistics?instance=a&deck=b&range=7y&view=charts")).toEqual({
+      screen: "deckStatistics",
+      instanceUrl: "a",
+      deckUrl: "b",
+    });
+    expect(isCanonicalStatisticsHash("#/statistics?instance=a")).toBe(true);
+    expect(isCanonicalStatisticsHash("#/statistics?instance=a&range=12m&view=cards")).toBe(true);
+    expect(isCanonicalStatisticsHash("#/statistics?instance=a&range=7y")).toBe(false);
+    expect(isCanonicalStatisticsHash("#/statistics?instance=a&range=90d")).toBe(false);
+    expect(isCanonicalStatisticsHash("#/statistics?instance=a&view=charts")).toBe(false);
+  });
+});
+
+describe("deckStatisticsHref", () => {
+  it("is the hash URL of a deck's own statistics", () => {
+    expect(
+      parseHash(deckStatisticsHref("https://pod.example/a/", "https://pod.example/a/c#d")),
+    ).toEqual({
+      screen: "deckStatistics",
+      instanceUrl: "https://pod.example/a/",
+      deckUrl: "https://pod.example/a/c#d",
+    });
   });
 });
 

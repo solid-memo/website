@@ -46,7 +46,9 @@ import { PreferencesContainer } from "./PreferencesContainer";
 import { StatisticsContainer } from "./StatisticsContainer";
 import { StoragePicker } from "./StoragePicker";
 import {
+  DEFAULT_STATISTICS_RANGE,
   deckHref,
+  isCanonicalStatisticsHash,
   libraryDeckHref,
   routeToHash,
   useHashRoute,
@@ -130,6 +132,12 @@ export function Workspace({
       replace({ screen: "home", instanceUrl: instanceUrl! });
     }
   }, [needsDeck, decksQuery.data, deckUrl, instanceUrl]);
+
+  // A range or tab the statistics do not know falls back to the default, the URL with it.
+  useEffect(() => {
+    if (route?.screen !== "statistics" && route?.screen !== "deckStatistics") return;
+    if (!isCanonicalStatisticsHash(window.location.hash)) replace(route);
+  }, [route]);
 
   const cardUrl = route?.screen === "card" ? route.cardUrl : null;
   const needsCard = cardUrl !== null && activeDeck !== null;
@@ -769,11 +777,17 @@ export function Workspace({
           </>
         );
       case "statistics":
+      case "deckStatistics":
         return (
           <StatisticsContainer
             useCases={useCases}
             instance={activeInstance!}
-            decks={decksQuery.data ?? []}
+            decks={route.screen === "deckStatistics" ? [activeDeck!] : (decksQuery.data ?? [])}
+            deck={route.screen === "deckStatistics" ? activeDeck! : undefined}
+            range={route.range ?? DEFAULT_STATISTICS_RANGE}
+            view={route.view ?? "overview"}
+            hrefOf={(change) => routeToHash({ ...route, ...change })}
+            onChange={(change) => replace({ ...route, ...change })}
           />
         );
       case "validation":

@@ -4,7 +4,8 @@
 
 import { describe, expect, it } from "vitest";
 import { MutationObserver, QueryClient } from "@tanstack/react-query";
-import { keepStudyFiguresFresh } from "./studyFigures";
+import { makeUseCasesFake } from "../test/useCasesFake";
+import { keepStudyFiguresFresh, statisticsQuery } from "./studyFigures";
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const OTHER = "https://pod.example/solid-memo/b/";
@@ -67,5 +68,32 @@ describe("keepStudyFiguresFresh", () => {
     finish();
     await pending;
     expect(invalidated(queryClient, ["statistics", INSTANCE])).toBe(false);
+  });
+});
+
+describe("statisticsQuery", () => {
+  it("reads the range asked for, of the instance or of a deck, the last 12 months under the today strip's key", async () => {
+    const useCases = makeUseCasesFake();
+    const deckUrl = `${INSTANCE}catalog.ttl#deck-1`;
+    expect(statisticsQuery(useCases, INSTANCE, "12m").queryKey).toEqual(["statistics", INSTANCE]);
+    expect(statisticsQuery(useCases, INSTANCE, "all").queryKey).toEqual([
+      "statistics",
+      INSTANCE,
+      "range",
+      "all",
+    ]);
+    expect(statisticsQuery(useCases, INSTANCE, "30d", deckUrl).queryKey).toEqual([
+      "statistics",
+      INSTANCE,
+      deckUrl,
+      "30d",
+    ]);
+    await statisticsQuery(useCases, INSTANCE, "12m").queryFn();
+    expect(useCases.getStatistics).toHaveBeenLastCalledWith(INSTANCE, expect.any(Date), {});
+    await statisticsQuery(useCases, INSTANCE, "90d", deckUrl).queryFn();
+    expect(useCases.getStatistics).toHaveBeenLastCalledWith(INSTANCE, expect.any(Date), {
+      range: 90,
+      deckUrl,
+    });
   });
 });
