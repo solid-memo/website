@@ -502,6 +502,11 @@
       "many": "{percent} retenues sur {count} de révisions",
       "other": "{percent} retenues sur {count} révisions"
     },
+    "stillDue": {
+      "one": "{count} à étudier encore aujourd’hui",
+      "many": "{count} à étudier encore aujourd’hui",
+      "other": "{count} à étudier encore aujourd’hui"
+    },
     "allStatistics": "Toutes les statistiques",
     "week": {
       "one": "{count} cette semaine",
@@ -1485,12 +1490,17 @@
     "progressLoading": "Chargement de la progression de vos cartes…",
     "progressUnavailable": "Impossible de lire la progression de vos cartes pour le moment.",
     "maturity": "Maturité des cartes",
-    "maturityHint": "Nouvelles : pas encore révisées. Récentes : révisées à moins de 21 jours d’intervalle. Matures : 21 jours ou plus. Une carte étudiée dans les deux sens compte une fois par sens.",
-    "maturityLabel": "{new}, {young} et {mature}.",
+    "maturityHint": "Nouvelles : pas encore révisées. À réapprendre : oubliées la dernière fois et pas retenues depuis. Récentes : révisées à moins de 21 jours d’intervalle. Matures : 21 jours ou plus. Une carte étudiée dans les deux sens compte une fois par sens.",
+    "maturityLabel": "{new}, {relearning}, {young} et {mature}.",
     "maturityNew": {
       "one": "{count} nouvelle",
       "many": "{count} nouvelles",
       "other": "{count} nouvelles"
+    },
+    "maturityRelearning": {
+      "one": "{count} à réapprendre",
+      "many": "{count} à réapprendre",
+      "other": "{count} à réapprendre"
     },
     "maturityYoung": {
       "one": "{count} récente",
@@ -1503,11 +1513,58 @@
       "other": "{count} matures"
     },
     "maturityByDeck": "Maturité par paquet",
+    "withinLimit": "Dans votre limite",
+    "overdue": "En retard",
+    "overdueDetail": "à faire avant aujourd’hui",
+    "daysToClear": "À jour dans vos révisions",
+    "caughtUpToday": "Aujourd’hui",
+    "nothingHeldBack": "Votre limite quotidienne de révisions ne retient rien.",
+    "caughtUpIn": {
+      "one": "dans {count} jour, avec votre limite quotidienne de révisions",
+      "many": "dans {count} de jours, avec votre limite quotidienne de révisions",
+      "other": "dans {count} jours, avec votre limite quotidienne de révisions"
+    },
+    "notWithinDays": {
+      "one": "Pas d’ici {count} jour",
+      "many": "Pas d’ici {count} de jours",
+      "other": "Pas d’ici {count} jours"
+    },
+    "backlogLeft": {
+      "one": "{count} révision encore en attente après",
+      "many": "{count} de révisions encore en attente après",
+      "other": "{count} révisions encore en attente après"
+    },
+    "runOut": "Fin des nouvelles cartes",
+    "runOutDetail": {
+      "one": "à {count} nouvelle carte par jour, en étudiant chaque jour",
+      "many": "à {count} de nouvelles cartes par jour, en étudiant chaque jour",
+      "other": "à {count} nouvelles cartes par jour, en étudiant chaque jour"
+    },
+    "never": "Jamais",
+    "runOutNeverDetail": "Ce paquet ne prend aucune nouvelle carte par jour.",
+    "runOutOn": "Plus de nouvelles cartes le {date}, en étudiant chaque jour.",
+    "runOutNever": "Aucune nouvelle carte par jour : elles ne s’épuisent jamais.",
+    "intervals": "Jours avant le retour des cartes",
+    "intervalsLabel": "Barres du nombre de cartes, chaque sens compté, qui reviennent après chaque tranche de jours.",
+    "intervalsNote": "Les révisions d’une carte sont espacées d’un jour, puis de 6 jours, puis d’environ 15 et d’environ 38, et de plus en plus ensuite : certaines tranches comptent donc peu de cartes.",
+    "interval": "Intervalle",
+    "showEases": "Voir à quel point les cartes semblent faciles",
+    "eases": "À quel point les cartes semblent faciles",
+    "easesLabel": "Barres du nombre de cartes, chaque sens compté, pour chaque facilité : plus elle est haute, plus leurs intervalles grandissent vite.",
+    "easesNote": "Toute carte commence à 2,5. Facile l’augmente un peu, Correct la garde, Difficile la baisse, jusqu’à 1,3 ; oublier la carte la laisse telle quelle. Plus elle est haute, plus les intervalles de la carte grandissent vite.",
+    "ease": "Facilité",
+    "intervalRange": "{from} à {to} jours",
+    "intervalFrom": "{from} jours ou plus",
+    "easeRange": "{from} à moins de {to}",
+    "easeFrom": "{from} ou plus",
+    "prompts": "Cartes, chaque sens compté",
+    "binText": "{range} : {count}.",
+    "pointAtBar": "Survolez une barre pour voir son nombre, ou ouvrez le tableau ci-dessous.",
     "forecast": "Révisions des {count} prochains jours",
-    "forecastLabel": "Révisions à faire pour chacun des {count} prochains jours, celles d’aujourd’hui comprenant toutes celles en retard.",
-    "forecastNote": "Comptées sans votre limite quotidienne de révisions, qui peut en reporter certaines à un jour ultérieur.",
-    "dueDetail": "{date} : {reviews} à faire.",
-    "dueTodayDetail": "{date}, aujourd’hui : {reviews} à faire, y compris celles en retard.",
+    "forecastLabel": "Paires de barres pour chacun des {count} prochains jours : les révisions à faire, celles d’aujourd’hui comprenant toutes celles en retard, à côté de celles que votre limite quotidienne de révisions laisse passer.",
+    "forecastNote": "Ce que votre limite quotidienne de révisions retient attend le jour suivant : en étudiant chaque jour, vous feriez les révisions dans la limite.",
+    "dueDetail": "{date} : {reviews} à faire, {capped} dans votre limite.",
+    "dueTodayDetail": "{date}, aujourd’hui : {reviews} à faire, y compris celles en retard, {capped} dans votre limite.",
     "nothingDue": "Aucune révision à faire dans les {count} prochains jours.",
     "reviewCount": {
       "one": "{count} révision",
@@ -2052,16 +2109,9 @@
       "intervals": "Intervalles",
       "intervalsLabel": "Nombre de cartes par intervalle, chaque sens compté.",
       "interval": "Intervalle",
-      "intervalRange": "{from} à {to} jours",
-      "intervalFrom": "{from} jours ou plus",
       "eases": "Facilités",
       "easesLabel": "Nombre de cartes par facilité, chaque sens compté.",
       "ease": "Facilité",
-      "easeRange": "{from} à moins de {to}",
-      "easeFrom": "{from} ou plus",
-      "prompts": "Cartes, chaque sens compté",
-      "binText": "{range} : {count}.",
-      "pointAtBar": "Survolez une barre pour voir son nombre, ou ouvrez le tableau ci-dessous.",
       "lapsesHeading": "Oublis et sangsues",
       "lapsesSince": "Les oublis comptent les révisions oubliées depuis {month}, le mois de la première réponse du paquet dans le journal des réponses. Une première réponse, une carte qui revient dans la séance le même jour et une réponse de cours ne sont pas des oublis.",
       "noAnswers": "Le journal des réponses est encore vide.",

@@ -4191,7 +4191,7 @@ p[role="status"]:not(.loading) {
   height: 0.5rem;
 }
 
-/* How mature the cards are: one bar of three steps of the green, new
+/* How mature the cards are: one bar of four steps of the green, new
    the sunken surface with a border, a surface gap between the steps. */
 .maturity-bar {
   display: flex;
@@ -4213,8 +4213,12 @@ p[role="status"]:not(.loading) {
   box-shadow: inset 0 0 0 1px var(--border-strong);
 }
 
+.maturity-relearning {
+  background: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+}
+
 .maturity-young {
-  background: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  background: color-mix(in srgb, var(--primary) 55%, var(--surface-sunken));
 }
 
 .maturity-mature {
@@ -4259,6 +4263,21 @@ p[role="status"]:not(.loading) {
   overflow-wrap: anywhere;
 }
 
+.maturity-decks .run-out {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.85rem;
+}
+
+/* A chart folded away until asked for. */
+.chart-fold {
+  margin: 0 0 1rem;
+}
+
+.chart-fold > summary {
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
 /* Forced colors drop backgrounds and recolor strokes: the steps keep
    apart as empty, hatched and filled, and the marks take the text color. */
 @media (forced-colors: active) {
@@ -4275,6 +4294,10 @@ p[role="status"]:not(.loading) {
   .maturity-new {
     background: Canvas;
     box-shadow: inset 0 0 0 1px CanvasText;
+  }
+
+  .maturity-relearning {
+    background: repeating-linear-gradient(135deg, CanvasText 0 1px, Canvas 1px 5px);
   }
 
   .maturity-young {

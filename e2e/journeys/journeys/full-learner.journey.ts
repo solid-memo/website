@@ -215,11 +215,14 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
         lastStudied: "today" as const,
       })),
       // Two front→back decks of two cards make four prompts, every one
-      // answered, so young (an interval of a day) and none left new.
-      maturity: { new: 0, young: cards, mature: 0 },
+      // answered, so young (an interval of a day) and none left new; deck
+      // B's first, answered Again, was remembered once more, so it is not
+      // relearning. None falls due before tomorrow.
+      maturity: { new: 0, relearning: 0, young: cards, mature: 0 },
+      overdue: 0,
       maturityByDeck: [
-        { name: deckA, new: 0, young: 2, mature: 0 },
-        { name: deckB, new: 0, young: 2, mature: 0 },
+        { name: deckA, new: 0, relearning: 0, young: 2, mature: 0 },
+        { name: deckB, new: 0, relearning: 0, young: 2, mature: 0 },
       ],
     });
   });

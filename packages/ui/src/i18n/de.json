@@ -485,6 +485,10 @@
       "one": "{percent} gewusst von {count} Wiederholung",
       "other": "{percent} gewusst von {count} Wiederholungen"
     },
+    "stillDue": {
+      "one": "heute noch {count} zu lernen",
+      "other": "heute noch {count} zu lernen"
+    },
     "allStatistics": "Gesamte Statistik",
     "week": {
       "one": "{count} diese Woche",
@@ -1413,11 +1417,15 @@
     "progressLoading": "Der Fortschritt deiner Karten wird geladen…",
     "progressUnavailable": "Der Fortschritt deiner Karten lässt sich gerade nicht lesen.",
     "maturity": "Reifegrad der Karten",
-    "maturityHint": "Neu: noch nicht wiederholt. Jung: wiederholt mit einem Intervall unter 21 Tagen. Ausgereift: 21 Tage oder mehr. Eine Karte, die du in beide Richtungen lernst, zählt einmal je Richtung.",
-    "maturityLabel": "{new}, {young} und {mature}.",
+    "maturityHint": "Neu: noch nicht wiederholt. Erneut zu lernen: beim letzten Mal vergessen und seitdem nicht gewusst. Jung: wiederholt mit einem Intervall unter 21 Tagen. Ausgereift: 21 Tage oder mehr. Eine Karte, die du in beide Richtungen lernst, zählt einmal je Richtung.",
+    "maturityLabel": "{new}, {relearning}, {young} und {mature}.",
     "maturityNew": {
       "one": "{count} neu",
       "other": "{count} neu"
+    },
+    "maturityRelearning": {
+      "one": "{count} erneut zu lernen",
+      "other": "{count} erneut zu lernen"
     },
     "maturityYoung": {
       "one": "{count} jung",
@@ -1428,11 +1436,54 @@
       "other": "{count} ausgereift"
     },
     "maturityByDeck": "Reifegrad nach Stapel",
+    "withinLimit": "Innerhalb deines Limits",
+    "overdue": "Überfällig",
+    "overdueDetail": "vor heute fällig",
+    "daysToClear": "Wiederholungen aufgeholt",
+    "caughtUpToday": "Heute",
+    "nothingHeldBack": "Dein Tageslimit für Wiederholungen hält nichts zurück.",
+    "caughtUpIn": {
+      "one": "in {count} Tag, mit deinem Tageslimit für Wiederholungen",
+      "other": "in {count} Tagen, mit deinem Tageslimit für Wiederholungen"
+    },
+    "notWithinDays": {
+      "one": "Nicht innerhalb von {count} Tag",
+      "other": "Nicht innerhalb von {count} Tagen"
+    },
+    "backlogLeft": {
+      "one": "{count} Wiederholung wartet danach noch",
+      "other": "{count} Wiederholungen warten danach noch"
+    },
+    "runOut": "Neue Karten gehen aus",
+    "runOutDetail": {
+      "one": "bei {count} neuen Karte am Tag, wenn du jeden Tag lernst",
+      "other": "bei {count} neuen Karten am Tag, wenn du jeden Tag lernst"
+    },
+    "never": "Nie",
+    "runOutNeverDetail": "Dieses Deck nimmt keine neuen Karten am Tag.",
+    "runOutOn": "Neue Karten gehen am {date} aus, wenn du jeden Tag lernst.",
+    "runOutNever": "Keine neuen Karten am Tag: Sie gehen nie aus.",
+    "intervals": "Tage, bis Karten wiederkommen",
+    "intervalsLabel": "Balken dafür, wie viele Karten je Richtung nach welcher Spanne von Tagen wiederkommen.",
+    "intervalsNote": "Die Wiederholungen einer Karte liegen 1 Tag auseinander, dann 6 Tage, dann etwa 15 und etwa 38 und von da an immer mehr, daher enthalten manche Spannen nur wenige Karten.",
+    "interval": "Intervall",
+    "showEases": "Zeigen, wie leicht sich Karten anfühlen",
+    "eases": "Wie leicht sich Karten anfühlen",
+    "easesLabel": "Balken dafür, wie viele Karten je Richtung welchen Leichtigkeitsgrad haben: Je höher, desto schneller wachsen ihre Intervalle.",
+    "easesNote": "Jede Karte beginnt bei 2,5. Einfach hebt ihn ein wenig, Gut lässt ihn, Schwer senkt ihn, bis auf 1,3; eine vergessene Karte behält ihn. Je höher er ist, desto schneller wachsen die Intervalle der Karte.",
+    "ease": "Leichtigkeitsgrad",
+    "intervalRange": "{from}–{to} Tage",
+    "intervalFrom": "{from} Tage oder mehr",
+    "easeRange": "{from} bis unter {to}",
+    "easeFrom": "{from} oder mehr",
+    "prompts": "Karten, je Richtung",
+    "binText": "{range}: {count}.",
+    "pointAtBar": "Zeige auf einen Balken, um seine Anzahl zu sehen, oder öffne die Tabelle darunter.",
     "forecast": "Fällige Wiederholungen in den nächsten {count} Tagen",
-    "forecastLabel": "Fällige Wiederholungen an jedem der nächsten {count} Tage; heute mit allen überfälligen.",
-    "forecastNote": "Gezählt ohne dein Tageslimit für Wiederholungen, das manche auf einen späteren Tag verschieben kann.",
-    "dueDetail": "{date}: {reviews} fällig.",
-    "dueTodayDetail": "{date}, heute: {reviews} fällig, überfällige eingeschlossen.",
+    "forecastLabel": "Balkenpaare für jeden der nächsten {count} Tage: die fälligen Wiederholungen, heute mit allen überfälligen, neben denen, die dein Tageslimit für Wiederholungen durchlässt.",
+    "forecastNote": "Was dein Tageslimit für Wiederholungen zurückhält, wartet auf den nächsten Tag: Lernst du jeden Tag, machst du die Wiederholungen innerhalb des Limits.",
+    "dueDetail": "{date}: {reviews} fällig, {capped} innerhalb deines Limits.",
+    "dueTodayDetail": "{date}, heute: {reviews} fällig, überfällige eingeschlossen, {capped} innerhalb deines Limits.",
     "nothingDue": "In den nächsten {count} Tagen sind keine Wiederholungen fällig.",
     "reviewCount": {
       "one": "{count} Wiederholung",
@@ -1956,16 +2007,9 @@
       "intervals": "Intervalle",
       "intervalsLabel": "Wie viele Karten je Richtung welches Intervall haben.",
       "interval": "Intervall",
-      "intervalRange": "{from}–{to} Tage",
-      "intervalFrom": "{from} Tage oder mehr",
       "eases": "Leichtigkeitsgrade",
       "easesLabel": "Wie viele Karten je Richtung welchen Leichtigkeitsgrad haben.",
       "ease": "Leichtigkeitsgrad",
-      "easeRange": "{from} bis unter {to}",
-      "easeFrom": "{from} oder mehr",
-      "prompts": "Karten, je Richtung",
-      "binText": "{range}: {count}.",
-      "pointAtBar": "Zeige auf einen Balken, um seine Anzahl zu sehen, oder öffne die Tabelle darunter.",
       "lapsesHeading": "Aussetzer und Problemkarten",
       "lapsesSince": "Aussetzer zählen die vergessenen Wiederholungen seit {month}, dem Monat der ersten Antwort zu diesem Stapel im Antwortprotokoll. Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und eine Kursantwort sind kein Aussetzer.",
       "noAnswers": "Noch keine Antworten protokolliert.",

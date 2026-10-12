@@ -75,6 +75,34 @@ export function forecastOf(
   });
 }
 
+/**
+ * The prompts due before `today`, from the prompts' due days (the
+ * digest's sm:dueOnDay): overdue now. forecastOf's first day counts them
+ * with those due today.
+ */
+export function overdueOf(dueByDay: Readonly<Record<string, number>>, today: string): number {
+  return Object.entries(dueByDay)
+    .filter(([day]) => day < today)
+    .reduce((sum, [, count]) => sum + count, 0);
+}
+
+/**
+ * How many study days after today the daily cap takes to let through
+ * every review it holds back over a forecast (forecastOf): 0 when it holds
+ * none back, the day after the last that ends with reviews waiting
+ * otherwise; null when reviews still wait at the forecast's end. Of one
+ * deck, whose cap it is: decks taken together take the latest.
+ */
+export function daysToClearOf(forecast: readonly ForecastDay[]): number | null {
+  let waiting = 0;
+  let last = -1;
+  forecast.forEach((day, offset) => {
+    waiting += day.due - day.reviews;
+    if (waiting > 0) last = offset;
+  });
+  return last >= 0 && last === forecast.length - 1 ? null : last + 1;
+}
+
 /** The review states the deck schedules: of its cards in use, in the directions it studies. */
 export function scheduledStates(
   cards: readonly Card[],
@@ -108,6 +136,16 @@ function histogram(values: readonly number[], bounds: readonly number[]): Bin[] 
     bins[Math.max(0, above - 1)]!.count += 1;
   }
   return bins;
+}
+
+/** Histograms of the same bounds (each deck's) taken together, bin by bin; none of none. */
+export function mergeBins(list: readonly (readonly Bin[])[]): Bin[] {
+  const [first, ...rest] = list;
+  if (first === undefined) return [];
+  return first.map((bin, i) => ({
+    ...bin,
+    count: rest.reduce((sum, bins) => sum + bins[i]!.count, bin.count),
+  }));
 }
 
 /** Where the intervals' bins start, in days: one day, a few, a week, two, a month, a quarter, half a year, a year and more. */

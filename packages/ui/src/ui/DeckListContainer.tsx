@@ -70,7 +70,11 @@ export function DeckListContainer({
 
   return (
     <>
-      <TodaySummaryContainer useCases={useCases} instance={instance} />
+      <TodaySummaryContainer
+        useCases={useCases}
+        instance={instance}
+        decks={decks.filter((deck) => !isSetAside(deck))}
+      />
       <CourseStripContainer
         useCases={useCases}
         instance={instance}

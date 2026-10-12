@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
+import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 import type { DayActivity, MonthRetention } from "@solid-memo/domain/statistics";
 import { I18nProvider } from "./i18n";
 import {
@@ -13,6 +14,7 @@ import {
   FirstTryTile,
   ForecastBars,
   GradeBars,
+  Histogram,
   IntakeChart,
   IntroducedChart,
   levelOf,
@@ -21,7 +23,9 @@ import {
   QuizTile,
   RecallChart,
   RecallTile,
+  SpreadCharts,
   StatTile,
+  useBinRanges,
   WeekdayChart,
 } from "./StatisticsCharts";
 
@@ -222,32 +226,41 @@ describe("BarChart", () => {
 });
 
 describe("ForecastBars", () => {
-  it("draws the reviews due a day ahead, today's with the overdue, and lists the days with any", () => {
+  it("draws the reviews due a day ahead, today's with the overdue, beside those the cap lets through, and lists the days with any", () => {
     const forecast = [
       { studyDay: "2026-09-21", due: 5, reviews: 3 },
       { studyDay: "2026-09-22", due: 0, reviews: 2 },
       { studyDay: "2026-09-23", due: 1, reviews: 1 },
+      { studyDay: "2026-09-24", due: 0, reviews: 0 },
     ];
     const { container } = render(<ForecastBars forecast={forecast} />);
-    expect(screen.getByText("Reviews due, the next 3 days")).toBeInTheDocument();
+    expect(screen.getByText("Reviews due, the next 4 days")).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: /Reviews due on each of the next 3 days/ }),
+      screen.getByRole("img", { name: /Pairs of bars for each of the next 4 days/ }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/without your daily review limit/)).toBeInTheDocument();
-    expect(container.querySelectorAll("rect.bar")).toHaveLength(2);
+    expect(screen.getByText(/holds back waits for the next day/)).toBeInTheDocument();
+    expect(container.querySelector(".bar-legend")).toHaveTextContent("DueWithin your limit");
+    expect(container.querySelectorAll('g[data-bar="2026-09-21"] rect.bar')).toHaveLength(2);
+    expect(container.querySelectorAll('g[data-bar="2026-09-22"] rect.bar')).toHaveLength(1);
+    expect(container.querySelectorAll("rect.bar")).toHaveLength(5);
     expect(
       screen.getByText("Point at a day to see what falls due, or open the table below."),
     ).toBeInTheDocument();
     fireEvent.pointerEnter(container.querySelector('g[data-bar="2026-09-21"]')!);
     expect(
-      screen.getByText("September 21, 2026, today: 5 reviews due, overdue ones included."),
+      screen.getByText(
+        "September 21, 2026, today: 5 reviews due, overdue ones included, 3 within your limit.",
+      ),
     ).toBeInTheDocument();
     fireEvent.click(container.querySelector('g[data-bar="2026-09-23"]')!);
-    expect(screen.getByText("September 23, 2026: 1 review due.")).toBeInTheDocument();
+    expect(
+      screen.getByText("September 23, 2026: 1 review due, 1 within your limit."),
+    ).toBeInTheDocument();
     expect(screen.getAllByRole("row").map((row) => row.textContent)).toEqual([
-      "DayDue",
-      "September 21, 20265",
-      "September 23, 20261",
+      "DayDueWithin your limit",
+      "September 21, 202653",
+      "September 22, 202602",
+      "September 23, 202611",
     ]);
   });
 
@@ -261,9 +274,83 @@ describe("ForecastBars", () => {
       />,
     );
     expect(screen.getAllByRole("row").map((row) => row.textContent)).toEqual([
-      "DayDue",
+      "DayDueWithin your limit",
       "No reviews due in the next 2 days.",
     ]);
+  });
+});
+
+describe("Histogram", () => {
+  function Intervals() {
+    const ranges = useBinRanges();
+    return (
+      <Histogram
+        caption="Intervals"
+        label="Intervals as bars"
+        heading="Interval"
+        bins={intervalHistogram(
+          [1, 1, 3, 400].map((intervalDays) => ({
+            cardId: "a",
+            direction: "front-to-back" as const,
+            easeFactor: 2.5,
+            intervalDays,
+            repetitions: 1,
+            due: "2026-09-21",
+            firstReviewedAt: "2026-09-01T10:00:00.000Z",
+            lastReviewedAt: "2026-09-20T10:00:00.000Z",
+            formatVersion: 2,
+          })),
+        )}
+        range={ranges.interval}
+      />
+    );
+  }
+
+  it("names each bin's span, a day, days or days and more, with its count, and lists them all", () => {
+    const { container } = render(<Intervals />);
+    expect(container.querySelector(".chart-note")).toBeNull();
+    fireEvent.pointerEnter(container.querySelector('g[data-bar="1"]')!);
+    expect(screen.getByText("1 day: 2.")).toBeInTheDocument();
+    fireEvent.click(container.querySelector('g[data-bar="2"]')!);
+    expect(screen.getByText("2–3 days: 1.")).toBeInTheDocument();
+    fireEvent.click(container.querySelector('g[data-bar="366"]')!);
+    expect(screen.getByText("366 days or more: 1.")).toBeInTheDocument();
+    expect(screen.getAllByRole("row")[0]).toHaveTextContent("IntervalCards, each way");
+    expect(screen.getAllByRole("row")).toHaveLength(10);
+  });
+});
+
+describe("SpreadCharts", () => {
+  const state = (intervalDays: number, easeFactor: number) => ({
+    cardId: "a",
+    direction: "front-to-back" as const,
+    easeFactor,
+    intervalDays,
+    repetitions: 1,
+    due: "2026-09-21",
+    firstReviewedAt: "2026-09-01T10:00:00.000Z",
+    lastReviewedAt: "2026-09-20T10:00:00.000Z",
+    formatVersion: 2,
+  });
+  const states = [state(1, 2.5), state(6, 1.3), state(15, 2.7)];
+
+  it("shows the intervals with why some bins are nearly empty, and the eases folded away", () => {
+    const { container } = render(
+      <SpreadCharts intervals={intervalHistogram(states)} eases={easeHistogram(states)} />,
+    );
+    expect(screen.getByText("Days until cards come back")).toBeInTheDocument();
+    expect(
+      screen.getByText(/1 day apart, then 6 days, then about 15 and about 38/),
+    ).toBeInTheDocument();
+    const fold = container.querySelector<HTMLDetailsElement>("details.chart-fold")!;
+    expect(fold.open).toBe(false);
+    expect(fold.querySelector("summary")).toHaveTextContent("Show how easy cards feel");
+    expect(fold.querySelector("figcaption")).toHaveTextContent("How easy cards feel");
+    expect(screen.getByText(/Every card starts at 2.5/)).toBeInTheDocument();
+    fireEvent.click(fold.querySelector('g[data-bar="1.3"]')!);
+    expect(screen.getByText("1.3 to under 1.5: 1.")).toBeInTheDocument();
+    fireEvent.click(fold.querySelector('g[data-bar="2.7"]')!);
+    expect(screen.getByText("2.7 or more: 1.")).toBeInTheDocument();
   });
 });
 
@@ -370,25 +457,35 @@ describe("RecallChart", () => {
 describe("MaturityBar", () => {
   it("gives each stage with prompts a share of one bar, and every count, zeros too, in words", () => {
     const { container } = render(
-      <MaturityBar progress={{ new: 3, young: 0, mature: 1 }} caption="Card maturity" />,
+      <MaturityBar
+        progress={{ new: 3, relearning: 2, young: 0, mature: 1 }}
+        caption="Card maturity"
+      />,
     );
-    expect(screen.getByRole("img", { name: "3 new, 0 young and 1 mature." })).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "3 new, 2 relearning, 0 young and 1 mature." }),
+    ).toBeInTheDocument();
     const segments = container.querySelectorAll<HTMLElement>(".maturity-segment");
     expect([...segments].map((segment) => segment.className)).toEqual([
       "maturity-segment maturity-new",
+      "maturity-segment maturity-relearning",
       "maturity-segment maturity-mature",
     ]);
     expect(segments[0]!.style.flexGrow).toBe("3");
-    expect(container.querySelector(".maturity-legend")).toHaveTextContent("3 new0 young1 mature");
+    expect(container.querySelector(".maturity-legend")).toHaveTextContent(
+      "3 new2 relearning0 young1 mature",
+    );
   });
 
   it("speaks the counts in the chosen language", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
-        <MaturityBar progress={{ new: 1, young: 2, mature: 0 }} caption="Mognad" />
+        <MaturityBar progress={{ new: 1, relearning: 0, young: 2, mature: 0 }} caption="Mognad" />
       </I18nProvider>,
     );
-    expect(screen.getByRole("img", { name: "1 nytt, 2 unga och 0 mogna." })).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "1 nytt, 0 lärs om, 2 unga och 0 mogna." }),
+    ).toBeInTheDocument();
     expect(screen.getByText("1 nytt")).toBeInTheDocument();
   });
 });

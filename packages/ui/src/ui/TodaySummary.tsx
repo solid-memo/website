@@ -34,10 +34,20 @@ function useStreakNote() {
  * then a word of praise and the day's numbers: the share of today's
  * reviews remembered comes with how many there were, and only once there
  * is one (a first answer, a card back in the session or a course answer
- * is no review); then the week's answers so far, and how they compare
- * with the same days of last week, when it had any.
+ * is no review); how many cards are left to study today, once every
+ * deck's count is known (`left`); then the week's answers so far, and
+ * how they compare with the same days of last week, when it had any.
  */
-export function TodaySummary({ today, statisticsHref }: { today: Today; statisticsHref: string }) {
+export function TodaySummary({
+  today,
+  left,
+  statisticsHref,
+}: {
+  today: Today;
+  /** The cards still to study today in every deck, due and new; none while unknown. */
+  left?: number;
+  statisticsHref: string;
+}) {
   const { t, formatPercent, formatChange } = useI18n();
   const cheer = useCheer();
   const streakNote = useStreakNote();
@@ -64,6 +74,7 @@ export function TodaySummary({ today, statisticsHref }: { today: Today; statisti
                     count: reviews,
                   }),
                 ]),
+            ...(left === undefined || left === 0 ? [] : [t("today.stillDue", { count: left })]),
             previous === 0
               ? t("today.week", { count: thisWeek })
               : t("today.weekChange", {

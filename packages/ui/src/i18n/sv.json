@@ -485,6 +485,10 @@
       "one": "{percent} ihågkomna av {count} repetition",
       "other": "{percent} ihågkomna av {count} repetitioner"
     },
+    "stillDue": {
+      "one": "{count} kvar att studera i dag",
+      "other": "{count} kvar att studera i dag"
+    },
     "allStatistics": "All statistik",
     "week": {
       "one": "{count} den här veckan",
@@ -1413,11 +1417,15 @@
     "progressLoading": "Läser in hur dina kort ligger till…",
     "progressUnavailable": "Det går inte att läsa hur dina kort ligger till just nu.",
     "maturity": "Kortens mognad",
-    "maturityHint": "Nya: inte repeterade än. Unga: repeterade med ett intervall under 21 dagar. Mogna: 21 dagar eller mer. Ett kort som studeras åt båda hållen räknas en gång per håll.",
-    "maturityLabel": "{new}, {young} och {mature}.",
+    "maturityHint": "Nya: inte repeterade än. Lärs om: glömda förra gången och inte ihågkomna sedan dess. Unga: repeterade med ett intervall under 21 dagar. Mogna: 21 dagar eller mer. Ett kort som studeras åt båda hållen räknas en gång per håll.",
+    "maturityLabel": "{new}, {relearning}, {young} och {mature}.",
     "maturityNew": {
       "one": "{count} nytt",
       "other": "{count} nya"
+    },
+    "maturityRelearning": {
+      "one": "{count} lärs om",
+      "other": "{count} lärs om"
     },
     "maturityYoung": {
       "one": "{count} ungt",
@@ -1428,11 +1436,54 @@
       "other": "{count} mogna"
     },
     "maturityByDeck": "Mognad per kortlek",
+    "withinLimit": "Inom din gräns",
+    "overdue": "Försenade",
+    "overdueDetail": "skulle ha gjorts före i dag",
+    "daysToClear": "I fas med repetitionerna",
+    "caughtUpToday": "I dag",
+    "nothingHeldBack": "Din dagliga gräns för repetitioner håller inget tillbaka.",
+    "caughtUpIn": {
+      "one": "om {count} dag, med din dagliga gräns för repetitioner",
+      "other": "om {count} dagar, med din dagliga gräns för repetitioner"
+    },
+    "notWithinDays": {
+      "one": "Inte inom {count} dag",
+      "other": "Inte inom {count} dagar"
+    },
+    "backlogLeft": {
+      "one": "{count} repetition väntar fortfarande efter dem",
+      "other": "{count} repetitioner väntar fortfarande efter dem"
+    },
+    "runOut": "Nya kort tar slut",
+    "runOutDetail": {
+      "one": "med {count} nytt kort om dagen, om du studerar varje dag",
+      "other": "med {count} nya kort om dagen, om du studerar varje dag"
+    },
+    "never": "Aldrig",
+    "runOutNeverDetail": "Den här kortleken tar inga nya kort om dagen.",
+    "runOutOn": "Nya kort tar slut {date}, om du studerar varje dag.",
+    "runOutNever": "Inga nya kort om dagen: de tar aldrig slut.",
+    "intervals": "Dagar tills korten kommer tillbaka",
+    "intervalsLabel": "Staplar för hur många kort, åt varje håll, som kommer tillbaka efter varje antal dagar.",
+    "intervalsNote": "Ett korts repetitioner kommer med 1 dags mellanrum, sedan 6 dagar, sedan ungefär 15 och ungefär 38 och allt längre därifrån, så några spann har få kort.",
+    "interval": "Intervall",
+    "showEases": "Visa hur lätta korten känns",
+    "eases": "Hur lätta korten känns",
+    "easesLabel": "Staplar för hur många kort, åt varje håll, som har varje lätthet: ju högre, desto snabbare växer deras intervall.",
+    "easesNote": "Varje kort börjar på 2,5. Lätt höjer den lite, Bra behåller den, Svårt sänker den, ned till 1,3; att glömma kortet lämnar den som den är. Ju högre den är, desto snabbare växer kortets intervall.",
+    "ease": "Lätthet",
+    "intervalRange": "{from}–{to} dagar",
+    "intervalFrom": "{from} dagar eller fler",
+    "easeRange": "{from} till under {to}",
+    "easeFrom": "{from} eller mer",
+    "prompts": "Kort, åt varje håll",
+    "binText": "{range}: {count}.",
+    "pointAtBar": "Peka på en stapel för att se antalet, eller öppna tabellen nedan.",
     "forecast": "Repetitioner, de kommande {count} dagarna",
-    "forecastLabel": "Repetitioner att göra var och en av de kommande {count} dagarna, dagens med alla försenade.",
-    "forecastNote": "Räknade utan din dagliga gräns för repetitioner, som kan flytta några till en senare dag.",
-    "dueDetail": "{date}: {reviews} att göra.",
-    "dueTodayDetail": "{date}, i dag: {reviews} att göra, försenade medräknade.",
+    "forecastLabel": "Par av staplar för var och en av de kommande {count} dagarna: repetitionerna att göra, dagens med alla försenade, bredvid dem som din dagliga gräns för repetitioner släpper igenom.",
+    "forecastNote": "Det din dagliga gräns för repetitioner håller tillbaka väntar till nästa dag: om du studerar varje dag gör du repetitionerna inom den.",
+    "dueDetail": "{date}: {reviews} att göra, {capped} inom din gräns.",
+    "dueTodayDetail": "{date}, i dag: {reviews} att göra, försenade medräknade, {capped} inom din gräns.",
     "nothingDue": "Inga repetitioner att göra de kommande {count} dagarna.",
     "reviewCount": {
       "one": "{count} repetition",
@@ -1956,16 +2007,9 @@
       "intervals": "Intervall",
       "intervalsLabel": "Hur många kort, åt varje håll, som har varje intervall.",
       "interval": "Intervall",
-      "intervalRange": "{from}–{to} dagar",
-      "intervalFrom": "{from} dagar eller fler",
       "eases": "Lätthet",
       "easesLabel": "Hur många kort, åt varje håll, som har varje lätthet.",
       "ease": "Lätthet",
-      "easeRange": "{from} till under {to}",
-      "easeFrom": "{from} eller mer",
-      "prompts": "Kort, åt varje håll",
-      "binText": "{range}: {count}.",
-      "pointAtBar": "Peka på en stapel för att se antalet, eller öppna tabellen nedan.",
       "lapsesHeading": "Missar och blodiglar",
       "lapsesSince": "Missar räknar de glömda repetitionerna sedan {month}, månaden för kortlekens första svar i loggen. Ett första svar, ett kort som kommer tillbaka i passet samma dag och ett kurssvar är ingen miss.",
       "noAnswers": "Inga svar är loggade än.",

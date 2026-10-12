@@ -468,6 +468,9 @@
     "remembered": {
       "other": "복습 {count}회 중 {percent} 기억함"
     },
+    "stillDue": {
+      "other": "오늘 학습할 카드 {count}장 남음"
+    },
     "allStatistics": "전체 통계",
     "week": {
       "other": "이번 주 {count}장"
@@ -1341,10 +1344,13 @@
     "progressLoading": "카드 현황을 불러오는 중…",
     "progressUnavailable": "지금은 카드 현황을 읽을 수 없어요.",
     "maturity": "카드 숙련도",
-    "maturityHint": "새 카드: 아직 복습하지 않음. 익히는 중: 복습 간격 21일 미만. 익숙함: 21일 이상. 양방향으로 학습하는 카드는 방향마다 한 번씩 세요.",
-    "maturityLabel": "{new}, {young}, {mature}.",
+    "maturityHint": "새 카드: 아직 복습하지 않음. 다시 익히는 중: 지난번에 잊어버린 뒤 아직 기억해 내지 못함. 익히는 중: 복습 간격 21일 미만. 익숙함: 21일 이상. 양방향으로 학습하는 카드는 방향마다 한 번씩 세요.",
+    "maturityLabel": "{new}, {relearning}, {young}, {mature}.",
     "maturityNew": {
       "other": "새 카드 {count}장"
+    },
+    "maturityRelearning": {
+      "other": "다시 익히는 중 {count}장"
     },
     "maturityYoung": {
       "other": "익히는 중 {count}장"
@@ -1353,11 +1359,50 @@
       "other": "익숙함 {count}장"
     },
     "maturityByDeck": "덱별 숙련도",
+    "withinLimit": "한도 안",
+    "overdue": "밀린 복습",
+    "overdueDetail": "오늘 전에 예정됐던 복습",
+    "daysToClear": "복습을 따라잡는 날",
+    "caughtUpToday": "오늘",
+    "nothingHeldBack": "하루 복습 한도 때문에 미뤄지는 복습이 없어요.",
+    "caughtUpIn": {
+      "other": "{count}일 뒤, 하루 복습 한도 기준"
+    },
+    "notWithinDays": {
+      "other": "{count}일 안에는 어려워요"
+    },
+    "backlogLeft": {
+      "other": "그 뒤에도 복습 {count}회가 남아 있어요"
+    },
+    "runOut": "새 카드가 떨어지는 날",
+    "runOutDetail": {
+      "other": "하루 새 카드 {count}장씩, 매일 학습할 때"
+    },
+    "never": "없음",
+    "runOutNeverDetail": "이 덱은 하루에 새 카드를 받지 않아요.",
+    "runOutOn": "매일 학습하면 {date}에 새 카드가 떨어져요.",
+    "runOutNever": "하루 새 카드가 0장이라 새 카드가 떨어지지 않아요.",
+    "intervals": "카드가 다시 나올 때까지의 날짜",
+    "intervalsLabel": "일수 구간마다 다시 나오는 카드 수(방향별)를 나타낸 막대.",
+    "intervalsNote": "카드의 복습 간격은 1일, 6일, 약 15일, 약 38일로 늘어나고 그 뒤로도 계속 길어져요. 그래서 카드가 거의 없는 구간도 있어요.",
+    "interval": "복습 간격",
+    "showEases": "카드가 얼마나 쉽게 느껴지는지 보기",
+    "eases": "카드가 얼마나 쉽게 느껴지는지",
+    "easesLabel": "쉬움 정도마다 카드 수(방향별)를 나타낸 막대. 높을수록 복습 간격이 빨리 늘어나요.",
+    "easesNote": "모든 카드는 2.5에서 시작해요. 쉬움은 조금 올리고, 알맞음은 그대로 두고, 어려움은 1.3까지 내려요. 카드를 잊어버려도 그대로예요. 높을수록 카드의 복습 간격이 빨리 늘어나요.",
+    "ease": "쉬움 정도",
+    "intervalRange": "{from}–{to}일",
+    "intervalFrom": "{from}일 이상",
+    "easeRange": "{from} 이상 {to} 미만",
+    "easeFrom": "{from} 이상",
+    "prompts": "카드(방향별)",
+    "binText": "{range}: {count}.",
+    "pointAtBar": "막대를 가리키면 개수가 보여요. 아래 표를 열어 볼 수도 있어요.",
     "forecast": "앞으로 {count}일 동안 복습할 카드",
-    "forecastLabel": "앞으로 {count}일 동안 날짜별로 복습할 카드 수. 오늘에는 밀린 복습이 모두 포함돼요.",
-    "forecastNote": "하루 복습 한도 없이 센 수예요. 한도 때문에 일부는 다음 날로 넘어갈 수 있어요.",
-    "dueDetail": "{date}: {reviews} 예정.",
-    "dueTodayDetail": "{date}, 오늘: {reviews} 예정, 밀린 복습 포함.",
+    "forecastLabel": "앞으로 {count}일 동안 날짜마다 막대 두 개: 복습할 카드 수(오늘에는 밀린 복습 모두 포함)와 하루 복습 한도 안에서 할 수 있는 수.",
+    "forecastNote": "하루 복습 한도를 넘는 복습은 다음 날로 넘어가요. 매일 학습한다면 한도 안의 복습을 하게 돼요.",
+    "dueDetail": "{date}: {reviews} 예정, 한도 안에서 {capped}회.",
+    "dueTodayDetail": "{date}, 오늘: {reviews} 예정, 밀린 복습 포함, 한도 안에서 {capped}회.",
     "nothingDue": "앞으로 {count}일 동안 복습할 카드가 없어요.",
     "reviewCount": {
       "other": "복습 {count}회"
@@ -1860,16 +1905,9 @@
       "intervals": "복습 간격",
       "intervalsLabel": "복습 간격별 카드 수(방향별).",
       "interval": "복습 간격",
-      "intervalRange": "{from}–{to}일",
-      "intervalFrom": "{from}일 이상",
       "eases": "난이도 계수",
       "easesLabel": "난이도 계수별 카드 수(방향별).",
       "ease": "난이도 계수",
-      "easeRange": "{from} 이상 {to} 미만",
-      "easeFrom": "{from} 이상",
-      "prompts": "카드(방향별)",
-      "binText": "{range}: {count}.",
-      "pointAtBar": "막대를 가리키면 개수가 보여요. 아래 표를 열어 볼 수도 있어요.",
       "lapsesHeading": "잊은 횟수와 자주 잊는 카드",
       "lapsesSince": "잊은 횟수는 기록에 남은 이 덱의 첫 답변이 있는 달인 {month}부터 복습에서 잊은 횟수예요. 첫 답변, 같은 날 세션에 다시 나온 카드, 코스 답변은 세지 않아요.",
       "noAnswers": "아직 기록된 답변이 없어요.",

@@ -179,12 +179,14 @@ import {
   type LapseIndex,
 } from "@solid-memo/domain/cardHistory";
 import {
+  daysToClearOf,
   easeHistogram,
   FORECAST_DAYS,
   forecastOf,
   freshSchedule,
   intervalHistogram,
   leechesOf,
+  overdueOf,
   scheduledStates,
   type Bin,
   type ForecastDay,
@@ -824,11 +826,13 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   /** The answers of one card of the deck (by its id), newest first, from the answer log. */
   cardAnswers(instanceUrl: string, deck: Deck, cardId: string): Promise<Answer[]>;
   /**
-   * How far along each deck's prompts are now (cardProgressOf), and the
-   * reviews of its next FORECAST_DAYS study days (forecastOf, capped by
-   * the deck's pace, else the preferences'): of every deck of the
-   * instance, or of the one given. Reads each deck's cards and review
-   * states, and keeps its schedule in the digest while at it.
+   * How far along each deck's prompts are now (cardProgressOf), how
+   * their intervals and eases are spread, and the reviews of its next
+   * FORECAST_DAYS study days (forecastOf, capped by the deck's pace, else
+   * the preferences'), with what is overdue and how long the cap takes to
+   * let through what it holds back: of every deck of the instance, or of
+   * the one given. Reads each deck's cards and review states, and keeps
+   * its schedule in the digest while at it.
    */
   getCardProgress(
     instanceUrl: string,
@@ -940,8 +944,28 @@ export interface StatisticsReport extends Statistics {
 export interface CardProgressReport {
   /** The study day it is: the forecasts' first. */
   today: string;
-  /** Each deck's prompts by stage, and the reviews of its next FORECAST_DAYS study days (forecastOf). */
-  decks: { deck: Deck; progress: CardProgress; forecast: ForecastDay[] }[];
+  /** Each deck's figures, as its own caps make them. */
+  decks: DeckProgress[];
+}
+
+/** Where one deck's prompts stand, and its reviews to come (CardProgressReport). */
+export interface DeckProgress {
+  deck: Deck;
+  /** Its prompts by stage. */
+  progress: CardProgress;
+  /** The reviews of its next FORECAST_DAYS study days (forecastOf). */
+  forecast: ForecastDay[];
+  /** How its scheduled prompts' intervals and eases are spread (intervalHistogram, easeHistogram). */
+  intervals: Bin[];
+  eases: Bin[];
+  /** Its prompts due before today (overdueOf). */
+  overdue: number;
+  /** The study days after today its cap takes to let through the reviews it holds back (daysToClearOf); null: more than the forecast's. */
+  daysToClear: number | null;
+  /** The new prompts it introduces a day: its own cap, else the preferences'. */
+  newCardsPerDay: number;
+  /** Its prompts first reviewed today, which that cap counts (newCardsRunOutOf). */
+  introducedToday: number;
 }
 
 /** The option a learner chose: right or wrong, and which wrong one (a distractor's id). */
@@ -3192,7 +3216,9 @@ export function createUseCases({
             at,
             prefs.dayBoundaryHour,
           );
-          const { maxReviewsPerDay } = deckPreferences(prefs, one);
+          const { maxReviewsPerDay, newCardsPerDay } = deckPreferences(prefs, one);
+          const states = scheduledStates(cards.value, one.direction, reviews.value);
+          const forecast = forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay });
           return {
             deck: one,
             progress: cardProgressOf({
@@ -3200,7 +3226,13 @@ export function createUseCases({
               direction: one.direction,
               reviews: reviews.value,
             }),
-            forecast: forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay }),
+            forecast,
+            intervals: intervalHistogram(states),
+            eases: easeHistogram(states),
+            overdue: overdueOf(schedule.dueByDay, today),
+            daysToClear: daysToClearOf(forecast),
+            newCardsPerDay,
+            introducedToday: schedule.studyDay === today ? schedule.introducedOnDay : 0,
           };
         }),
       );
