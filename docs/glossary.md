@@ -141,10 +141,14 @@ it most. The specifications' versions and status are in
 - **Grade** (quality): how well you knew an answer, from 0 (blackout)
   to 5 (perfect). [srs.md](srs.md#the-sm-2-transition).
 - **Interval**: the number of days until a card is due again.
-- **Lapse**: an answer graded below 3, which starts the card's
-  repetitions over. [srs.md](srs.md#the-sm-2-transition).
-- **Leech**: a card forgotten four times or more, which the Studio
-  points out. [studio.md](studio.md#a-decks-schedule).
+- **Lapse**: a review forgotten: an answer graded below 3 to a card
+  already introduced, its first that study day, recalled and graded
+  (not a course answer). Every grade below 3 starts the card's
+  repetitions over, but only these are counted.
+  [srs.md](srs.md#the-sm-2-transition),
+  [statistics.md](statistics.md#what-the-figures-count).
+- **Leech**: a card with four lapses or more, in either direction,
+  which the Studio points out. [studio.md](studio.md#a-decks-schedule).
 - **Prompt**: one card seen from one side, front to back or back to
   front, scheduled on its own. [srs.md](srs.md#prompts-and-directions).
 - **Review state**: what Solid Memo knows of a prompt's schedule: its

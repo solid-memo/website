@@ -25,7 +25,12 @@ const deck: Deck = {
   direction: "front-to-back",
   authors: [],
 };
-const answer = (studyDay: string, deckUrl: string, prior?: number): Answer => ({
+const answer = (
+  studyDay: string,
+  deckUrl: string,
+  prior?: number,
+  extra: Partial<Answer> = {},
+): Answer => ({
   id: `answer-${studyDay}-${deckUrl}`,
   deckUrl,
   cardUrl: `${INSTANCE.url}decks/deck-1.ttl#se`,
@@ -35,7 +40,21 @@ const answer = (studyDay: string, deckUrl: string, prior?: number): Answer => ({
   studyDay,
   ...(prior === undefined ? {} : { priorIntervalDays: prior }),
   nextIntervalDays: 6,
+  ...extra,
 });
+/** A deck studied only in a course's chapters: one question right, one wrong. */
+const courseOnly = statisticsOf(
+  [
+    answer("2026-09-21", deck.url, undefined, { mode: "multiple-choice", grade: 3 }),
+    answer("2026-09-21", deck.url, undefined, {
+      id: "answer-wrong",
+      cardUrl: `${INSTANCE.url}decks/deck-1.ttl#no`,
+      mode: "multiple-choice",
+      grade: 1,
+    }),
+  ],
+  "2026-09-21",
+);
 const statistics = statisticsOf(
   [
     answer("2026-09-20", deck.url),
@@ -65,12 +84,38 @@ describe("StatisticsScreen", () => {
     expect(headings).toEqual(["Statistics", "Progress", "Remembered in reviews", "By deck"]);
     expect(screen.getByText("Cards introduced over time")).toBeInTheDocument();
     expect(screen.getByText("Recall by month")).toBeInTheDocument();
-    const rows = within(screen.getAllByRole("table").at(-1)!).getAllByRole("row");
-    expect(rows.map((row) => row.textContent)).toEqual([
-      "DeckAnswersLast studied",
-      "Capitals2September 21, 2026",
-      "A removed deck1September 21, 2026",
+    expect(screen.queryByText("In courses")).toBeNull();
+    const byDeck = screen.getByRole("region", { name: "By deck" });
+    const cells = (row: HTMLElement) =>
+      within(row)
+        .queryAllByRole(/columnheader|rowheader|cell/)
+        .map((cell) => cell.textContent);
+    expect(within(byDeck).getAllByRole("row").map(cells)).toEqual([
+      [
+        "Deck",
+        "Answers",
+        "Introduced",
+        "Young recall",
+        "Mature recall",
+        "Lapses",
+        "Graded course answers",
+        "Last studied",
+      ],
+      ["Capitals", "2", "1", "100% of 1 review", "–", "0", "–", "September 21, 2026"],
+      ["A removed deck", "1", "1", "–", "–", "0", "–", "September 21, 2026"],
     ]);
+  });
+
+  it("shows graded course answers apart, in place of recall when there is no review", () => {
+    render(<StatisticsScreen statistics={courseOnly} decks={[deck]} />);
+    const headings = screen.getAllByRole("heading").map((heading) => heading.textContent);
+    expect(headings).toEqual(["Statistics", "Progress", "In courses", "By deck"]);
+    expect(screen.getByRole("group", { name: "Graded course answers" })).toHaveTextContent(
+      "50%right, of 2 answers",
+    );
+    expect(screen.queryByRole("group", { name: /Young cards/ })).toBeNull();
+    const row = within(screen.getByRole("region", { name: "By deck" })).getAllByRole("row")[1]!;
+    expect(within(row).getAllByRole("cell")[5]).toHaveTextContent("50% of 2 answers");
   });
 
   it("leaves out recall by month while there are no reviews, only first answers", () => {
@@ -141,5 +186,14 @@ describe("DeckStatisticsContainer", () => {
     await vi.waitFor(() => expect(empty.getStatistics).toHaveBeenCalled());
     expect(await quiet.findByText("Card maturity")).toBeInTheDocument();
     expect(quiet.queryByText("Answers, the last 30 days")).toBeNull();
+  });
+
+  it("shows a deck studied only in a course's chapters by its graded course answers alone", async () => {
+    const useCases = makeUseCasesFake({ getStatistics: vi.fn(async () => courseOnly) });
+    withQueries(<DeckStatisticsContainer useCases={useCases} instance={INSTANCE} deck={deck} />);
+    expect(await screen.findByRole("group", { name: "Graded course answers" })).toHaveTextContent(
+      "50%",
+    );
+    expect(screen.queryByRole("group", { name: /Young cards/ })).toBeNull();
   });
 });

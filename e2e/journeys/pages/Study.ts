@@ -6,11 +6,11 @@ import { expect, type Locator } from "@playwright/test";
 import type { AnswerScale } from "./Preferences.ts";
 import { Screen } from "./Screen.ts";
 
-/** A grade the journeys give: none that puts the card back in the session ("Again", 0–2). */
+/** A grade the journeys give: none that puts the card back in the session ("Again", 0–2; see `again`). */
 export type Grade = "hard" | "good" | "easy";
 
 export interface StudyResult {
-  /** How many cards were answered. */
+  /** How many answers were given: a card answered Again and then once more counts twice. */
   studied: number;
   /** The session's size as its status line first said it ("Card 1 of {total}"); 0 when there was nothing to study. */
   total: number;
@@ -49,12 +49,14 @@ export class Study extends Screen {
     ).toBeVisible();
   }
 
-  /** The card shown and the session's size, read from "Card x of y". */
+  /** The card shown and the session's size, read from "Card x of y" (and what follows it after an Again). */
   async position(): Promise<{ position: number; total: number }> {
     await expect(this.statusLine).toBeVisible();
-    const said = this.tp("study.position").exec(
-      (await this.statusLine.textContent()) ?? "",
-    )?.groups;
+    const line = ((await this.statusLine.textContent()) ?? "").replace(
+      `. ${this.t("study.putBack")}`,
+      "",
+    );
+    const said = this.tp("study.position").exec(line)?.groups;
     if (said === undefined) throw new Error("The study status line says no position.");
     return { position: Number(said.position), total: Number(said.total) };
   }
@@ -109,6 +111,22 @@ export class Study extends Screen {
     });
   }
 
+  /**
+   * Answers the revealed card Again, on the four answer buttons: it goes
+   * back into the session, which grows by one.
+   */
+  async again(): Promise<void> {
+    await this.intent("Answer again", async () => {
+      const { position, total } = await this.position();
+      await this.gradeGroup
+        .getByRole("button", { name: this.t("study.minimal.again"), exact: true })
+        .click();
+      await expect(this.statusLine).toHaveText(
+        `${this.t("study.position", { position: position + 1, total: total + 1 })}. ${this.t("study.putBack")}`,
+      );
+    });
+  }
+
   /** Reveals the card shown, whichever it is, and answers it. */
   async answer(grade: Grade): Promise<void> {
     await this.reveal();
@@ -117,15 +135,19 @@ export class Study extends Screen {
 
   /**
    * Studies every card the session holds, answering each `grade` (and,
-   * given a `scale`, checking each card offers its buttons); returns how
-   * many and the size it said.
+   * given a `scale`, checking each card offers its buttons); with
+   * `againFirst`, the first card is answered Again (on the four answer
+   * buttons) and comes round once more. Returns how many answers and the
+   * size the session first said.
    */
   async studyAll({
     grade = "good",
     scale,
+    againFirst = false,
   }: {
     grade?: Grade;
     scale?: AnswerScale;
+    againFirst?: boolean;
   } = {}): Promise<StudyResult> {
     return this.intent(`Study every card, answering ${grade}`, async () => {
       await expect(this.statusLine.or(this.finishedMessage).or(this.nothingMessage)).toBeVisible();
@@ -136,9 +158,10 @@ export class Study extends Screen {
       while (!(await this.finishedMessage.isVisible())) {
         await this.reveal();
         if (scale !== undefined) await this.expectScale(scale);
-        await this.grade(grade);
+        if (againFirst && studied === 0) await this.again();
+        else await this.grade(grade);
         studied += 1;
-        if (studied > total)
+        if (studied > total + (againFirst ? 1 : 0))
           throw new Error(`The session said ${total} cards but went on past them.`);
       }
       return { studied, total };

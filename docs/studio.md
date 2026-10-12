@@ -709,8 +709,8 @@ The URL holds how the cards are looked at. The domain applies it
   answered wrong last time. `young` has an interval under 21 days and
   `mature` one of 21 or more (`MATURE_INTERVAL_DAYS`, as in the
   statistics). `due` is due by today's study day. A card studied both
-  ways is in a state when either direction is. `leech` was forgotten 4
-  times or more (`LEECH_LAPSES`, [below](#a-decks-schedule)).
+  ways is in a state when either direction is. `leech` has 4 lapses
+  or more (`LEECH_LAPSES`, [below](#a-decks-schedule)).
 - `has`: a `picture`, `distractors` (wrong options), `markdown` or
   `notes`.
 - `sort` and `order=desc`: by `id`, `created`, `front`, `back`, `due`,
@@ -776,8 +776,10 @@ or hides each column but the first ([Home](#home)).
 
 The selected cards can be edited at once ([below](#bulk-edits)).
 
-The lapses column counts each card's wrong answers (below grade 3) in
-the [answer log](data-model.md#the-answer-log). The log goes back only
+The lapses column counts each card's lapses, in either direction, in
+the [answer log](data-model.md#the-answer-log): its reviews graded below
+3, not its first answer, an answer the same day after another, or a
+course answer ([statistics.md](statistics.md#what-the-figures-count)). The log goes back only
 so far, so the row of filters ends with the month of the deck's first
 answer in it: "since March 2025", after how many cards the query keeps. The workbench reads the whole log once (`loadAnswerLog`). While
 it is read, the cards show without their lapses, and a query that needs
@@ -922,7 +924,10 @@ Its four tabs are links, the one shown marked
   name sorts the answers by it (but the wrong option's), then the
   other way, then newest first again; beside the deck's cards, **j**
   and **k** stay the cards' table's. A line says
-  how many answers there are, and how many forgot the card. The use
+  how many answers there are, and the card's lapses, counted as the
+  cards' table counts them ([statistics.md](statistics.md#what-the-figures-count)):
+  an answer below grade 3 is marked forgotten, but only a scored review
+  is a lapse. The use
   case `cardAnswers` reads them from the
   [answer log](data-model.md#the-answer-log) (`loadAnswerLog`). Only the
   deck's answers count: a card moved in from another deck starts its
@@ -1121,12 +1126,16 @@ case `deckInsight` reads what it needs. It writes nothing to the deck.
   way, have each interval (1 day, 2–3, 4–7, up to a year and more) and
   each ease (from 1.3, in steps of 0.2). Only cards in use count, in
   the directions the deck studies.
-- **Lapses and leeches.** A lapse is a wrong answer, below grade 3
-  (`lapseIndex`), in the deck's answers in the
-  [answer log](data-model.md#the-answer-log). The log goes back only
+- **Lapses and leeches.** A lapse is a review graded below 3, in the
+  deck's answers in the [answer log](data-model.md#the-answer-log)
+  (`lapseIndex`, by `isLapse`): not a card's first answer, an answer
+  the same day after another to the same prompt (a card back in the
+  session), or a course answer. These count toward a card's leech
+  state no longer, so a card is a leech later than it was when every
+  wrong answer counted ([statistics.md](statistics.md#why-the-figures-changed)). The log goes back only
   so far, so the screen names the month of the deck's first answer in
   it. A leech is a card in use
-  forgotten 4 times or more (`LEECH_LAPSES`, `leechesOf`), the most
+  with 4 lapses or more (`LEECH_LAPSES`, `leechesOf`), the most
   forgotten first. Each links to its card's history, and a link shows
   them all in the workbench (`state=leech&sort=lapses&order=desc`).
   A test keeps `lapseIndex` linear over five years of answers: timed at two sizes on the same machine, four times the answers take less than ten times as long.

@@ -18,7 +18,7 @@ const INSTANCE = { url: "https://pod.example/solid-memo/a/", name: "A" };
 const today = (summary: Partial<Today> = {}): Today => ({
   answers: 4,
   introduced: 2,
-  recalled: 3,
+  recall: { reviews: 2, recalled: 1 },
   streak: 1,
   longestStreak: 1,
   ...summary,
@@ -30,11 +30,30 @@ describe("TodaySummary", () => {
     const strip = screen.getByRole("complementary", { name: "Today" });
     expect(strip).toHaveTextContent(
       "1-day streak Day one! Come back tomorrow for two." +
-        "Nice work! 4 cards · 2 new · 75% remembered · All statistics",
+        "Nice work! 4 cards · 2 new · 50% remembered of 2 reviews · All statistics",
     );
     expect(screen.getByRole("link", { name: "All statistics" })).toHaveAttribute(
       "href",
       "#/statistics",
+    );
+  });
+
+  it("gives the share remembered with its count, however few, and none without a review", () => {
+    const { rerender } = render(
+      <TodaySummary
+        today={today({ recall: { reviews: 1, recalled: 1 } })}
+        statisticsHref="#/statistics"
+      />,
+    );
+    expect(screen.getByText(/· 100% remembered of 1 review ·/)).toBeInTheDocument();
+    rerender(
+      <TodaySummary
+        today={today({ recall: { reviews: 0, recalled: 0 } })}
+        statisticsHref="#/statistics"
+      />,
+    );
+    expect(screen.getByRole("complementary", { name: "Today" })).toHaveTextContent(
+      /Nice work! 4 cards · 2 new · All statistics$/,
     );
   });
 
@@ -52,14 +71,11 @@ describe("TodaySummary", () => {
 
   it("cheers louder the more was studied", () => {
     const { rerender } = render(
-      <TodaySummary today={today({ answers: 10, recalled: 1 })} statisticsHref="#/statistics" />,
+      <TodaySummary today={today({ answers: 10 })} statisticsHref="#/statistics" />,
     );
     expect(screen.getByText(/^Great session! 10 cards/)).toBeInTheDocument();
     rerender(
-      <TodaySummary
-        today={today({ answers: 50, introduced: 1, recalled: 1 })}
-        statisticsHref="#/statistics"
-      />,
+      <TodaySummary today={today({ answers: 50, introduced: 1 })} statisticsHref="#/statistics" />,
     );
     expect(screen.getByText(/^Impressive effort! 50 cards · 1 new/)).toBeInTheDocument();
   });

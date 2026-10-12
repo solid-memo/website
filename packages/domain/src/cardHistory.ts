@@ -2,7 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { isRecalled, monthOfStudyDay, type Answer } from "./answer";
+import { monthOfStudyDay, type Answer } from "./answer";
+import { chainIndexOf, isLapse } from "./answerChain";
 import type { Deck } from "./deck";
 import { fragmentIdOf } from "./subjectUrl";
 
@@ -12,12 +13,15 @@ import { fragmentIdOf } from "./subjectUrl";
  * forgotten (its lapses). Pure; the use cases read the log.
  */
 
-/** A card forgotten this many times or more is a leech: it keeps costing reviews and is worth a look. */
+/** A card whose reviews lapsed this many times or more is a leech: it keeps costing reviews and is worth a look. */
 export const LEECH_LAPSES = 4;
 
 /** How often each card was forgotten, since the first month the answers given cover. */
 export interface LapseIndex {
-  /** By card IRI: its answers below grade 3. A card never forgotten is left out. */
+  /**
+   * By card IRI: its lapses (answerChain.ts isLapse), scored reviews below
+   * grade 3, in either direction. A card never forgotten is left out.
+   */
   lapses: ReadonlyMap<string, number>;
   /** The first month answered in ("YYYY-MM"), which the lapses count from; null without answers. */
   since: string | null;
@@ -63,13 +67,19 @@ export function distractorPicksOf(answers: readonly Answer[]): Map<string, numbe
   return picks;
 }
 
-/** How often each card was forgotten (an answer below grade 3), in the answers given, and since which month. */
+/**
+ * How often each card was forgotten in its reviews (its lapses), in the
+ * answers given, and since which month. First answers, repeats the same
+ * day and course answers are not lapses. The answers are a deck's, as
+ * deckAnswers gives them.
+ */
 export function lapseIndex(answers: readonly Answer[]): LapseIndex {
+  const index = chainIndexOf(answers);
   const lapses = new Map<string, number>();
   let first: string | null = null;
   for (const answer of answers) {
     if (first === null || answer.studyDay < first) first = answer.studyDay;
-    if (!isRecalled(answer)) lapses.set(answer.cardUrl, (lapses.get(answer.cardUrl) ?? 0) + 1);
+    if (isLapse(answer, index)) lapses.set(answer.cardUrl, (lapses.get(answer.cardUrl) ?? 0) + 1);
   }
   return { lapses, since: first === null ? null : monthOfStudyDay(first) };
 }

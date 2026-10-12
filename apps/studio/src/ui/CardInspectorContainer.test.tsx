@@ -157,7 +157,7 @@ describe("CardInspectorContainer", () => {
     const useCases = makeUseCasesFake({ cardAnswers: vi.fn(async () => [answer]) });
     renderContainer(useCases, { tab: "history" });
     expect(screen.getByText("Loading the card's answers…")).toBeInTheDocument();
-    expect(await screen.findByText("1 answer, 1 forgotten.")).toBeInTheDocument();
+    expect(await screen.findByText("1 answer. Lapses: 0.")).toBeInTheDocument();
     expect(useCases.cardAnswers).toHaveBeenCalledWith(instanceA.url, deck, "water");
     cleanup();
     renderContainer(useCases);

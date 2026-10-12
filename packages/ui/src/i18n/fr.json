@@ -497,7 +497,11 @@
       "many": "{count} nouvelles",
       "other": "{count} nouvelles"
     },
-    "remembered": "{percent} retenues",
+    "remembered": {
+      "one": "{percent} retenues sur {count} révision",
+      "many": "{percent} retenues sur {count} de révisions",
+      "other": "{percent} retenues sur {count} révisions"
+    },
     "allStatistics": "Toutes les statistiques"
   },
   "newcomerCourse": {
@@ -1384,6 +1388,15 @@
       "other": "sur {count} révisions"
     },
     "noReviews": "Aucune révision pour l’instant",
+    "rememberedHint": "La première révision du jour de chaque carte dans chaque sens, rappelée de mémoire et notée par vous. La première réponse à une carte, une carte qui revient dans la séance le même jour et les réponses des cours ne sont pas des révisions.",
+    "inCourses": "Dans les cours",
+    "quizAccuracy": "Réponses de cours notées",
+    "quizHint": "La part de bonnes réponses parmi la première réponse du jour à chaque question de cours. Les réponses d’entraînement, et les bonnes réponses à une carte déjà notée ce jour-là, ne sont pas enregistrées, elles ne sont donc pas comptées.",
+    "rightOfAnswers": {
+      "one": "justes, sur {count} réponse",
+      "many": "justes, sur {count} de réponses",
+      "other": "justes, sur {count} réponses"
+    },
     "activity": "Activité des {weeks} dernières semaines",
     "activityLabel": "Réponses par jour au cours des {weeks} dernières semaines : plus le vert est foncé, plus il y a de réponses.",
     "lastDays": "Réponses des {count} derniers jours",
@@ -1401,10 +1414,19 @@
     "showTable": "Afficher sous forme de tableau",
     "day": "Jour",
     "introduced": "Nouvelles",
+    "introducedColumn": "Introduites",
     "forgotten": "Oubliées",
     "byDeck": "Par paquet",
     "deck": "Paquet",
     "lastStudied": "Dernière étude",
+    "youngRecall": "Récentes retenues",
+    "matureRecall": "Matures retenues",
+    "lapses": "Oublis",
+    "quizShare": {
+      "one": "{percent} sur {count} réponse",
+      "many": "{percent} sur {count} de réponses",
+      "other": "{percent} sur {count} réponses"
+    },
     "removedDeck": "Un paquet supprimé",
     "pointAtMonth": "Survolez un mois pour voir son taux de mémorisation, ou ouvrez le tableau ci-dessous.",
     "pointAtDayAhead": "Survolez un jour pour voir ce qui arrive à échéance, ou ouvrez le tableau ci-dessous.",
@@ -1825,8 +1847,8 @@
         "other": "{count} jours"
       },
       "notStudied": "Pas encore étudiée",
-      "lapsesSince": "Les oublis comptent les mauvaises réponses de la carte depuis {month}, le mois de la première réponse du paquet dans le journal.",
-      "lapsesNone": "Les oublis comptent les mauvaises réponses de la carte : le journal n’en contient encore aucune.",
+      "lapsesSince": "Les oublis comptent les révisions oubliées de la carte depuis {month}, le mois de la première réponse du paquet dans le journal. Une première réponse, une carte qui revient dans la séance le même jour et une réponse de cours ne sont pas des oublis.",
+      "lapsesNone": "Les oublis comptent les révisions oubliées de la carte : aucune n’est encore enregistrée.",
       "lapsesLoading": "Lecture du journal des réponses pour les oublis…",
       "lapsesFailed": "Impossible de lire le journal des réponses : les oublis ne sont donc pas connus."
     },
@@ -1899,9 +1921,9 @@
       "loading": "Chargement des réponses à la carte…",
       "empty": "Aucune réponse à cette carte dans ce paquet pour l’instant.",
       "summary": {
-        "one": "{count} réponse. Oubliées : {forgotten}.",
-        "many": "{count} de réponses. Oubliées : {forgotten}.",
-        "other": "{count} réponses. Oubliées : {forgotten}."
+        "one": "{count} réponse. Oublis : {lapses}.",
+        "many": "{count} de réponses. Oublis : {lapses}.",
+        "other": "{count} réponses. Oublis : {lapses}."
       },
       "caption": "Les réponses à la carte, de la plus récente à la plus ancienne",
       "column": {
@@ -1916,7 +1938,7 @@
         "multiple-choice": "Choix multiple"
       },
       "unknownOption": "{id} (n’est plus sur la carte)",
-      "hint": "Seules les réponses données dans ce paquet sont listées : une carte déplacée ici depuis un autre paquet recommence son historique. Oublier la progression de la carte conserve ses réponses."
+      "hint": "Seules les réponses données dans ce paquet sont listées : une carte déplacée ici depuis un autre paquet recommence son historique. Oublier la progression de la carte conserve ses réponses. Un oubli est une révision oubliée : une première réponse, une carte qui revient dans la séance le même jour et une réponse de cours ne sont pas des oublis."
     },
     "insight": {
       "crumb": "Calendrier",
@@ -1950,7 +1972,7 @@
       "binText": "{range} : {count}.",
       "pointAtBar": "Survolez une barre pour voir son nombre, ou ouvrez le tableau ci-dessous.",
       "lapsesHeading": "Oublis et sangsues",
-      "lapsesSince": "Les oublis comptent les mauvaises réponses depuis {month}, le mois de la première réponse du paquet dans le journal des réponses.",
+      "lapsesSince": "Les oublis comptent les révisions oubliées depuis {month}, le mois de la première réponse du paquet dans le journal des réponses. Une première réponse, une carte qui revient dans la séance le même jour et une réponse de cours ne sont pas des oublis.",
       "noAnswers": "Le journal des réponses est encore vide.",
       "leechHint": "Une sangsue est une carte oubliée {count} fois ou plus. Elle continue de coûter des révisions : réécrivez-la, scindez-la ou archivez-la.",
       "noLeeches": "Aucune sangsue.",

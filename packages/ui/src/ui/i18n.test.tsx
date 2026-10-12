@@ -246,6 +246,8 @@ describe("createI18n", () => {
     expect(createI18n("sv").formatDate("2026-09-22T00:00:00.000Z")).toBe("22 september 2026");
     expect(createI18n("en").formatMonth("2025-03")).toBe("March 2025");
     expect(createI18n("sv").formatMonth("2025-03")).toBe("mars 2025");
+    expect(createI18n("en").formatPercent(0.75)).toBe("75%");
+    expect(createI18n("sv").formatPercent(2 / 3)).toBe("67\u00a0%");
     expect(createI18n("ko").formatDate("2026-09-22T00:00:00.000Z")).toBe("2026년 9월 22일");
     expect(createI18n("de").formatDate("2026-09-22T00:00:00.000Z")).toBe("22. September 2026");
     expect(createI18n("es").formatDate("2026-09-22T00:00:00.000Z")).toBe(

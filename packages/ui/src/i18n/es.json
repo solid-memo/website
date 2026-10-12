@@ -497,7 +497,11 @@
       "many": "{count} nuevas",
       "other": "{count} nuevas"
     },
-    "remembered": "{percent} recordadas",
+    "remembered": {
+      "one": "{percent} recordadas de {count} repaso",
+      "many": "{percent} recordadas de {count} de repasos",
+      "other": "{percent} recordadas de {count} repasos"
+    },
     "allStatistics": "Todas las estadísticas"
   },
   "newcomerCourse": {
@@ -1384,6 +1388,15 @@
       "other": "de {count} repasos"
     },
     "noReviews": "Aún no hay repasos",
+    "rememberedHint": "El primer repaso del día de cada tarjeta en cada sentido, recordado y calificado por ti. La primera respuesta a una tarjeta, una tarjeta que vuelve a la sesión el mismo día y las respuestas de los cursos no son repasos.",
+    "inCourses": "En los cursos",
+    "quizAccuracy": "Respuestas de curso calificadas",
+    "quizHint": "La proporción de aciertos en la primera respuesta del día a cada pregunta de curso. Las respuestas de práctica, y las respuestas correctas a una tarjeta ya calificada ese día, no se registran, así que no se cuentan.",
+    "rightOfAnswers": {
+      "one": "correctas, de {count} respuesta",
+      "many": "correctas, de {count} de respuestas",
+      "other": "correctas, de {count} respuestas"
+    },
     "activity": "Actividad de las últimas {weeks} semanas",
     "activityLabel": "Respuestas por día en las últimas {weeks} semanas: cuanto más intenso el verde, más respuestas.",
     "lastDays": "Respuestas de los últimos {count} días",
@@ -1401,10 +1414,19 @@
     "showTable": "Mostrar como tabla",
     "day": "Día",
     "introduced": "Nuevas",
+    "introducedColumn": "Introducidas",
     "forgotten": "Olvidadas",
     "byDeck": "Por mazo",
     "deck": "Mazo",
     "lastStudied": "Último estudio",
+    "youngRecall": "Jóvenes recordadas",
+    "matureRecall": "Maduras recordadas",
+    "lapses": "Fallos",
+    "quizShare": {
+      "one": "{percent} de {count} respuesta",
+      "many": "{percent} de {count} de respuestas",
+      "other": "{percent} de {count} respuestas"
+    },
     "removedDeck": "Un mazo eliminado",
     "pointAtMonth": "Señala un mes para ver lo bien que se recordó, o abre la tabla de abajo.",
     "pointAtDayAhead": "Señala un día para ver qué toca repasar, o abre la tabla de abajo.",
@@ -1825,8 +1847,8 @@
         "other": "{count} días"
       },
       "notStudied": "Aún sin estudiar",
-      "lapsesSince": "Los fallos cuentan las respuestas incorrectas de la tarjeta desde {month}, el mes de la primera respuesta del mazo en el registro.",
-      "lapsesNone": "Los fallos cuentan las respuestas incorrectas de la tarjeta: aún no hay ninguna en el registro.",
+      "lapsesSince": "Los fallos cuentan los repasos olvidados de la tarjeta desde {month}, el mes de la primera respuesta del mazo en el registro. Una primera respuesta, una tarjeta que vuelve a la sesión el mismo día y una respuesta de curso no son fallos.",
+      "lapsesNone": "Los fallos cuentan los repasos olvidados de la tarjeta: aún no hay ninguno registrado.",
       "lapsesLoading": "Leyendo el registro de respuestas para los fallos…",
       "lapsesFailed": "No se pudo leer el registro de respuestas, así que no se conocen los fallos."
     },
@@ -1899,9 +1921,9 @@
       "loading": "Cargando las respuestas a la tarjeta…",
       "empty": "Todavía no hay respuestas a esta tarjeta en este mazo.",
       "summary": {
-        "one": "{count} respuesta; olvidadas: {forgotten}.",
-        "many": "{count} de respuestas; olvidadas: {forgotten}.",
-        "other": "{count} respuestas; olvidadas: {forgotten}."
+        "one": "{count} respuesta; fallos: {lapses}.",
+        "many": "{count} de respuestas; fallos: {lapses}.",
+        "other": "{count} respuestas; fallos: {lapses}."
       },
       "caption": "Respuestas a la tarjeta, de la más reciente a la más antigua",
       "column": {
@@ -1916,7 +1938,7 @@
         "multiple-choice": "Opción múltiple"
       },
       "unknownOption": "{id} (ya no está en la tarjeta)",
-      "hint": "Solo se muestran las respuestas dadas en este mazo: una tarjeta movida aquí desde otro mazo empieza su historial de nuevo. Olvidar el progreso de la tarjeta conserva sus respuestas."
+      "hint": "Solo se muestran las respuestas dadas en este mazo: una tarjeta movida aquí desde otro mazo empieza su historial de nuevo. Olvidar el progreso de la tarjeta conserva sus respuestas. Un fallo es un repaso olvidado: una primera respuesta, una tarjeta que vuelve a la sesión el mismo día y una respuesta de curso no son fallos."
     },
     "insight": {
       "crumb": "Programación",
@@ -1950,7 +1972,7 @@
       "binText": "{range}: {count}.",
       "pointAtBar": "Señala una barra para ver su recuento, o abre la tabla de abajo.",
       "lapsesHeading": "Fallos y sanguijuelas",
-      "lapsesSince": "Los fallos cuentan las respuestas incorrectas desde {month}, el mes de la primera respuesta del mazo en el registro.",
+      "lapsesSince": "Los fallos cuentan los repasos olvidados desde {month}, el mes de la primera respuesta del mazo en el registro. Una primera respuesta, una tarjeta que vuelve a la sesión el mismo día y una respuesta de curso no son fallos.",
       "noAnswers": "Aún no hay respuestas en el registro.",
       "leechHint": "Una sanguijuela es una tarjeta olvidada {count} veces o más. Sigue costando repasos: reescríbela, divídela o retírala.",
       "noLeeches": "Ninguna sanguijuela.",

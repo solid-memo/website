@@ -19,7 +19,8 @@ import type { StudyResult } from "../pages/Study.ts";
  * New cards per day count per deck, so with 1 the first session holds
  * one of deck A's two cards; with 2, deck A has its other card left and
  * deck B both of its own. Every answer is Good, which keeps a card out
- * of the session once answered.
+ * of the session once answered, but deck B's first in step 13: Again,
+ * which brings it round once more the same day.
  */
 test("a learner's full journey @library", async ({ app, account, runId }) => {
   const deckA = `Deck A ${runId}`;
@@ -136,9 +137,13 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
     expect(sessions.deckA, "deck A: the card left from step 06").toEqual({ studied: 1, total: 1 });
     await app.study.endSession();
     await app.decks.study(deckB);
-    sessions.deckB = await app.study.studyAll({ grade: "good", scale: "minimal" });
-    expect(sessions.deckB, "deck B: two new cards a day, both its cards").toEqual({
-      studied: 2,
+    sessions.deckB = await app.study.studyAll({
+      grade: "good",
+      scale: "minimal",
+      againFirst: true,
+    });
+    expect(sessions.deckB, "deck B: two new cards a day, the first answered twice").toEqual({
+      studied: 3,
       total: 2,
     });
     await app.study.endSession();
@@ -156,35 +161,44 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
   });
 
   await app.step("15 · Check the statistics", async () => {
-    // Each card was answered once, Good: as many cards as answers, and no
-    // reviews yet (a card's first answer is not one).
+    // Each card was answered once, Good, but deck B's first, answered
+    // Again and then Good: still no reviews (a card's first answer is not
+    // one, nor is the answer to a card back in the session that day), so
+    // no recall and no lapse.
     const answeredA = sessions.first.studied + sessions.deckA.studied;
     const answeredB = sessions.deckB.studied;
     const answers = answeredA + answeredB;
     expect({ answeredA, answeredB, answers }, "what steps 06 and 13 add up to").toEqual({
       answeredA: 2,
-      answeredB: 2,
-      answers: 4,
+      answeredB: 3,
+      answers: 5,
     });
+    const cards = 4;
     await app.statistics.open();
     await app.statistics.expectStatistics({
       answers,
       studyDays: 1,
-      cards: answers,
+      cards,
       currentStreak: 1,
       longestStreak: 1,
       young: null,
       mature: null,
-      decks: [
-        { name: deckA, answers: answeredA, lastStudied: "today" },
-        { name: deckB, answers: answeredB, lastStudied: "today" },
-      ],
+      decks: [deckA, deckB].map((name, i) => ({
+        name,
+        answers: i === 0 ? answeredA : answeredB,
+        introduced: 2,
+        young: null,
+        mature: null,
+        lapses: 0,
+        quiz: null,
+        lastStudied: "today" as const,
+      })),
       // Two front→back decks of two cards make four prompts, every one
-      // answered once, so young (an interval of a day) and none left new.
-      maturity: { new: 4 - answers, young: answers, mature: 0 },
+      // answered, so young (an interval of a day) and none left new.
+      maturity: { new: 0, young: cards, mature: 0 },
       maturityByDeck: [
-        { name: deckA, new: 2 - answeredA, young: answeredA, mature: 0 },
-        { name: deckB, new: 2 - answeredB, young: answeredB, mature: 0 },
+        { name: deckA, new: 0, young: 2, mature: 0 },
+        { name: deckB, new: 0, young: 2, mature: 0 },
       ],
     });
   });

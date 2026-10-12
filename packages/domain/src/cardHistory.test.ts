@@ -74,19 +74,34 @@ describe("distractorPicksOf", () => {
 });
 
 describe("lapseIndex", () => {
-  it("counts each card's answers below grade 3, from the first month answered in", () => {
+  it("counts each card's reviews below grade 3, in either direction, from the first month answered in", () => {
     const index = lapseIndex([
-      answer(5, { grade: 2 }),
-      answer(2, { grade: 0, studyDay: "2025-03-14" }),
-      answer(3, { grade: 3 }),
-      answer(4, { grade: 1, cardUrl: `${CARDS}#c-2` }),
-      answer(6, { grade: 5, cardUrl: `${CARDS}#c-3` }),
+      answer(5, { grade: 2, priorIntervalDays: 6 }),
+      answer(2, {
+        grade: 0,
+        priorIntervalDays: 1,
+        answeredAt: "2025-03-14T10:00:00.000Z",
+        studyDay: "2025-03-14",
+      }),
+      answer(3, { grade: 3, priorIntervalDays: 1 }),
+      answer(4, { grade: 1, priorIntervalDays: 6, direction: "back-to-front" }),
+      answer(4, { grade: 1, priorIntervalDays: 1, cardUrl: `${CARDS}#c-2` }),
+      answer(6, { grade: 5, priorIntervalDays: 1, cardUrl: `${CARDS}#c-3` }),
     ]);
     expect([...index.lapses]).toEqual([
-      [`${CARDS}#c-1`, 2],
+      [`${CARDS}#c-1`, 3],
       [`${CARDS}#c-2`, 1],
     ]);
     expect(index.since).toBe("2025-03");
+  });
+
+  it("counts no first answer, repeat the same day or course answer as a lapse", () => {
+    const index = lapseIndex([
+      answer(1, { id: "answer-1a", grade: 1 }),
+      answer(1, { id: "answer-1b", grade: 1, priorIntervalDays: 1 }),
+      answer(2, { grade: 1, priorIntervalDays: 1, mode: "multiple-choice" }),
+    ]);
+    expect(index.lapses.size).toBe(0);
   });
 
   it("knows no month without answers", () => {
@@ -103,7 +118,9 @@ describe("lapseIndex", () => {
           id: `answer-${n}`,
           cardUrl: `${CARDS}#c-${(day * 7 + n) % 2_000}`,
           grade: (n % 6) as Answer["grade"],
+          answeredAt: `${studyDay}T10:00:00.000Z`,
           studyDay,
+          priorIntervalDays: 1,
         });
       });
     const years = answers(5 * 365 * 200);
