@@ -7,16 +7,11 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { CardProgressContainer } from "./CardProgressContainer";
+import { DayHeldBars } from "./charts/DayHeldBars";
+import { GradeBars } from "./charts/GradeBars";
+import { FirstTryTile, onlyCourseAnswers, QuizTile, RecallTile } from "./charts/StatTiles";
 import { HardestCardsContainer } from "./HardestCardsContainer";
 import { useI18n } from "./i18n";
-import {
-  DayHeldBars,
-  FirstTryTile,
-  GradeBars,
-  onlyCourseAnswers,
-  QuizTile,
-  RecallTile,
-} from "./StatisticsCharts";
 import { STATISTICS_STALE_MS } from "./studyFigures";
 
 /**

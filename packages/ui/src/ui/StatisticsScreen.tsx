@@ -6,23 +6,23 @@ import type { StatisticsReport } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Quiz, Recall } from "@solid-memo/domain/statistics";
 import { RECENT_DAYS, type DirectionRecall, type FirstTry } from "@solid-memo/domain/studyPatterns";
-import { useI18n } from "./i18n";
+import { ActivityCalendar } from "./charts/ActivityCalendar";
+import { DayHeldBars } from "./charts/DayHeldBars";
+import { GradeBars } from "./charts/GradeBars";
+import { IntakeChart } from "./charts/IntakeChart";
+import { IntroducedChart } from "./charts/IntroducedChart";
+import { RecallChart } from "./charts/RecallChart";
 import {
-  ActivityCalendar,
   CoverageNote,
-  DayHeldBars,
   FirstTryTile,
-  GradeBars,
-  IntakeChart,
-  IntroducedChart,
   onlyCourseAnswers,
   PeriodTiles,
   QuizTile,
-  RecallChart,
   RecallTile,
   StatTile,
-  WeekdayChart,
-} from "./StatisticsCharts";
+} from "./charts/StatTiles";
+import { WeekdayChart } from "./charts/WeekdayChart";
+import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 
 /**
