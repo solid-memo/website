@@ -1684,7 +1684,11 @@
       "other": "Les cartes oubliées {count} fois ou plus lors de leurs révisions ces 12 derniers mois, dans n’importe quel paquet. Elles continuent de coûter des révisions : ouvrez-en une pour la rendre plus claire ou y ajouter une note."
     },
     "noLeeches": "Aucune sangsue : aucune carte n’a été oubliée aussi souvent.",
-    "leechIn": "{forgotten}, dans {deck}"
+    "leechIn": "{forgotten}, dans {deck}",
+    "courses": "Vos cours",
+    "coursesHint": "Les chapitres que vous avez terminés dans chaque cours, et vos réponses aux questions de chaque chapitre ces 12 derniers mois : la part de bonnes réponses parmi la première réponse du jour à chaque question.",
+    "chapter": "Chapitre",
+    "chapterState": "État"
   },
   "zoomableImage": {
     "enlarge": "Agrandir l’image",

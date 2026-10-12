@@ -1502,7 +1502,11 @@
       "other": "지난 12개월 동안 복습에서 {count}번 이상 잊은 카드예요. 덱은 상관없어요. 계속 복습을 잡아먹으니 카드를 열어 더 분명하게 고치거나 메모를 더해 보세요."
     },
     "noLeeches": "자주 잊는 카드가 없어요.",
-    "leechIn": "{deck}: {forgotten}"
+    "leechIn": "{deck}: {forgotten}",
+    "courses": "내 코스",
+    "coursesHint": "코스마다 완료한 챕터와, 지난 12개월 동안 챕터별 문제에 어떻게 답했는지예요. 문제마다 그날 처음 한 답변 중 맞힌 비율이에요.",
+    "chapter": "챕터",
+    "chapterState": "상태"
   },
   "zoomableImage": {
     "enlarge": "그림 확대",

@@ -1593,7 +1593,11 @@
       "other": "Karten, die in den letzten 12 Monaten {count}-mal oder öfter in ihren Wiederholungen vergessen wurden, in jedem Stapel. Sie kosten immer wieder Wiederholungen: Öffne eine, um sie klarer zu formulieren oder eine Notiz hinzuzufügen."
     },
     "noLeeches": "Keine Problemkarten: Keine Karte wurde so oft vergessen.",
-    "leechIn": "{forgotten}, in {deck}"
+    "leechIn": "{forgotten}, in {deck}",
+    "courses": "Deine Kurse",
+    "coursesHint": "Die Kapitel, die du in jedem Kurs abgeschlossen hast, und wie du die Fragen jedes Kapitels in den letzten 12 Monaten beantwortet hast: der Anteil richtiger Antworten unter der ersten Antwort des Tages auf jede Frage.",
+    "chapter": "Kapitel",
+    "chapterState": "Stand"
   },
   "zoomableImage": {
     "enlarge": "Bild vergrößern",

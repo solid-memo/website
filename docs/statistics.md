@@ -74,6 +74,7 @@ study.", when the answer log begins after the 12 months read):
 | By deck | A table of each deck's answers, cards introduced, young and mature recall, recall each way (for a deck with reviews both ways), first try, lapses, graded course answers and the day it was last studied. It scrolls sideways on a narrow screen, the deck's name kept in view. A deck since removed is "A removed deck". |
 | Where your cards stand | How many cards are new, relearning, young and mature, as one bar. Two tiles: how many reviews are overdue (due before today), and the day the daily review limits let through every review they hold back, studying each day ("Today" when they hold none back; past the 30 days, "Not within 30 days" with how many still wait then). Each deck's limit is its own, so the day is worked out deck by deck and the latest taken. Then, for each of the next 30 days, the reviews falling due (today's with every overdue one) beside those the limits let through; how the studied cards' intervals are spread (days until they come back), and, folded away, how easy they feel (their ease). Then each deck's own bar, with the day its new cards run out at its own new-card limit, studying each day, today with only what is left of the limit after the new cards already met today, as the study queue has it ("never" at a limit of 0); a course's deck is left out of that, as its cards join it when their questions are answered. |
 | What is hard | Once there are reviews: "Leeches across your decks", every card in use forgotten 4 times or more (lapses) in its reviews of the last 12 study months, the most forgotten first, then the largest share of its reviews forgotten. Each is a link to the card's page, with how often of how many reviews and its deck. A deck since removed has no cards left to name or open, so its leeches are not listed. |
+| Your courses | Only with a course among the decks: each course, a link to its page, with its chapters completed out of all ("1 of 3 chapters done", and as a bar), then a table of its chapters: where each stands (done, open or locked, as the course's page says) and its graded course answers of the last 12 study months, the share right with how many there were. A question counts toward the chapter whose step or final review asks it; nothing in it is particular to one course: the chapters are the course's release's, the chapters completed its deck's, the answers the log's. |
 
 A card is *young* while it is reviewed at an interval under 21 days and
 *mature* from 21 days on. A card forgotten last time and not remembered
@@ -95,17 +96,21 @@ a legend names each step of the green. In forced-colors mode the steps
 keep apart as empty, hatched and filled. The histograms are the
 Studio's own, shared from the UI package.
 
-The page reads two things on their own, so neither waits for the
-other: the answers of the last 12 study months
-(`UseCases.getStatistics`), and the cards and review states of every
-deck with, for what is hard, the same months of answers
-(`UseCases.getCardProgress`). Both ask for the months at once, and a
-month already being read is read once for both (unless an answer was
-written meanwhile, which that read may miss); after that, what is kept
-serves both. The months are read beside the decks' cards, and only
-what is hard needs them: when they cannot be read, what is hard is left
-out and where the cards stand still shows. When the second cannot be
-read, a quiet line says so and the rest of the page works on.
+The page reads three things on their own, so none waits for another:
+the answers of the last 12 study months (`UseCases.getStatistics`);
+the cards and review states of every deck with, for what is hard, the
+same months of answers (`UseCases.getCardProgress`); and, with a course
+among the decks, how the courses have gone
+(`UseCases.getCourseStatistics`), from the same months and each
+course's outline, which the library reads once a page load. A course
+whose outline cannot be read is left out. All three ask for the months
+at once, and a month already being read is read once for all (unless
+an answer was written meanwhile, which that read may miss); after that,
+what is kept serves each. The months are read beside the decks' cards,
+and only what is hard needs them: when they cannot be read, what is
+hard is left out and where the cards stand still shows. When the cards
+cannot be read, a quiet line says so and the rest of the page works on;
+when the courses cannot be, they are left out.
 
 ## Loading
 
@@ -123,15 +128,18 @@ month, by server, for a learner who answers a hundred cards a day. So:
   read whole every time.
 - **What was read is shown again for half a minute** (`staleTime`) on
   the statistics page, a deck's page and the today strip, so moving
-  between them reads nothing. Every change made clears the statistics
-  and where the cards stand at once, as it ends (whether it was written
-  or not): an answer, a card or deck added, edited or removed, a deck's
-  pace, the preferences, a guest's study brought over, a Studio edit.
+  between them reads nothing. Every change made clears the statistics,
+  the courses' figures among them, and where the cards stand at once,
+  as it ends (whether it was written or not): an answer, a card or deck
+  added, edited or removed, a deck's pace, the preferences, a guest's
+  study brought over, a Studio edit.
   Each is a mutation, and the app clears them after every mutation
   (`keepStudyFiguresFresh` in
   [studyFigures.ts](../packages/ui/src/ui/studyFigures.ts)), so a new
   kind of change cannot be left out. A change made on another device
-  shows once what was read is half a minute old.
+  shows once what was read is half a minute old. The courses' figures
+  are also read again when a chapter is completed, as the chapters
+  completed are part of what they are kept by.
 - **The range read.** `getStatistics` reads the last 12 study months
   by default, or `range`: the last so many study days, or the whole
   log (`"all"`). Its result's `coverage` is the log's first month when
@@ -235,9 +243,9 @@ Nothing in the pod changed: the same answer log is read differently.
 
 | Layer | Files |
 |---|---|
-| Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, and `todayOf`. [studyPatterns.ts](../packages/domain/src/studyPatterns.ts): the answer buttons, first try, this week and month beside the last, the days studied of the last 30, the weekdays, recall each way, and the new cards beside the reviews by week. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, relearning, young and mature, and when new cards run out. [cardHistory.ts](../packages/domain/src/cardHistory.ts): a deck's answers as its cards are named now, a card's answers, lapses, the hardest cards and the wrong options chosen most. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, the interval and ease histograms, shared with the Studio, what is overdue and the days the daily limit takes to catch up. |
-| Application | `getStatistics` and `getCardProgress` in [useCases.ts](../packages/application/src/useCases.ts): which months and documents to read; `readLogMonths` keeps the months read, for `loadAnswerLog` too, and reads a month asked for twice at once only once. `cardAnswers` for a card's history. |
-| UI | [StatisticsContainer.tsx](../packages/ui/src/ui/StatisticsContainer.tsx) and [StatisticsScreen.tsx](../packages/ui/src/ui/StatisticsScreen.tsx) (the page), [CardProgressContainer.tsx](../packages/ui/src/ui/CardProgressContainer.tsx) (where the cards stand), [HardestCardsContainer.tsx](../packages/ui/src/ui/HardestCardsContainer.tsx) and [HardestCards.tsx](../packages/ui/src/ui/HardestCards.tsx) (what is hard, from the same read), [CardHistoryContainer.tsx](../packages/ui/src/ui/CardHistoryContainer.tsx) and [CardHistory.tsx](../packages/ui/src/ui/CardHistory.tsx) (a card's history), [StatisticsCharts.tsx](../packages/ui/src/ui/StatisticsCharts.tsx) (tiles, calendar, bar charts stacked or side by side, histograms, line charts, the answer buttons and maturity bars), [DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx) and the today strip above. |
+| Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, and `todayOf`. [studyPatterns.ts](../packages/domain/src/studyPatterns.ts): the answer buttons, first try, this week and month beside the last, the days studied of the last 30, the weekdays, recall each way, and the new cards beside the reviews by week. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, relearning, young and mature, and when new cards run out. [cardHistory.ts](../packages/domain/src/cardHistory.ts): a deck's answers as its cards are named now, a card's answers, lapses, the hardest cards and the wrong options chosen most. [course.ts](../packages/domain/src/course.ts): `courseProgressOf`, a course's chapters done and its graded answers chapter by chapter. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, the interval and ease histograms, shared with the Studio, what is overdue and the days the daily limit takes to catch up. |
+| Application | `getStatistics`, `getCardProgress` and `getCourseStatistics` in [useCases.ts](../packages/application/src/useCases.ts): which months and documents to read; `readLogMonths` keeps the months read, for `loadAnswerLog` too, and reads a month asked for twice at once only once. `cardAnswers` for a card's history. |
+| UI | [StatisticsContainer.tsx](../packages/ui/src/ui/StatisticsContainer.tsx) and [StatisticsScreen.tsx](../packages/ui/src/ui/StatisticsScreen.tsx) (the page), [CardProgressContainer.tsx](../packages/ui/src/ui/CardProgressContainer.tsx) (where the cards stand), [HardestCardsContainer.tsx](../packages/ui/src/ui/HardestCardsContainer.tsx) and [HardestCards.tsx](../packages/ui/src/ui/HardestCards.tsx) (what is hard, from the same read), [CourseStatistics.tsx](../packages/ui/src/ui/CourseStatistics.tsx) (your courses), [CardHistoryContainer.tsx](../packages/ui/src/ui/CardHistoryContainer.tsx) and [CardHistory.tsx](../packages/ui/src/ui/CardHistory.tsx) (a card's history), [StatisticsCharts.tsx](../packages/ui/src/ui/StatisticsCharts.tsx) (tiles, calendar, bar charts stacked or side by side, histograms, line charts, the answer buttons and maturity bars), [DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx) and the today strip above. |
 
 The statistics are the same for a guest ([guest-mode.md](guest-mode.md)),
 whose answers are kept in the pod in their browser and move with the
@@ -248,13 +256,15 @@ rest of their study when they log in.
 - **Unit tests** at 100% coverage, as everywhere
   ([testing.md](testing.md)): `answerChain.test.ts`,
   `statistics.test.ts`, `studyPatterns.test.ts`, `cardProgress.test.ts`,
-  `cardHistory.test.ts` and `scheduleInsight.test.ts` in the domain,
+  `cardHistory.test.ts`, `scheduleInsight.test.ts` and
+  `course.test.ts` in the domain,
   the passes over the whole log (`chainIndexOf`, `statisticsOf` and the
   answer buttons, first try, recall each way and the hardest cards)
   held to linear growth,
   the use cases in `useCases.test.ts`, and `StatisticsScreen.test.tsx`,
   `StatisticsCharts.test.tsx`, `CardProgressContainer.test.tsx`,
-  `HardestCardsContainer.test.tsx`, `CardHistoryContainer.test.tsx` and
+  `HardestCardsContainer.test.tsx`, `CourseStatistics.test.tsx`,
+  `CardHistoryContainer.test.tsx` and
   `TodaySummary.test.tsx` in the UI; `StudyContainer.test.tsx` and
   `ChapterPlayerContainer.test.tsx` check that an answer clears the
   statistics.
@@ -276,8 +286,9 @@ rest of their study when they log in.
   apart. In
   [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts),
   step 09 checks that a course's answers show as graded course answers
-  and not as recall, and step 10 that the course's deck names the wrong
-  options chosen in its final review. In
+  and not as recall, and the chapter just completed under "Your
+  courses", done, with its graded answers; and step 10 that the
+  course's deck names the wrong options chosen in its final review. In
   [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts),
   steps 30 and 32 check that trying a course in the Studio's sandbox
   leaves the statistics as they were. The page object is

@@ -219,7 +219,9 @@ how many reviews are coming in the next 30 days beside those your limit
 lets through, how long until your cards come back and how easy they
 feel, and when each deck's new cards run out. Last, your leeches: the
 cards you forgot 4 times or more in their reviews, each a link to the
-card, whose page shows every answer you gave it. Above the deck list,
+card, whose page shows every answer you gave it. With a course, how
+far along each course you are, chapter by chapter, and how you
+answered each chapter's questions. Above the deck list,
 today's strip also says how many cards are left to study today. Every chart can also be read as a table
 ([statistics.md](statistics.md)). A guest has statistics too.
 
@@ -298,7 +300,7 @@ screenshot of each.
 | A card in Markdown | [markdown-card.journey.ts](../e2e/journeys/journeys/markdown-card.journey.ts) | 04–07 |
 | The course for newcomers, from an empty deck list | [newcomer-course.journey.ts](../e2e/journeys/journeys/newcomer-course.journey.ts) | 03–05 |
 | A course's first chapter and its final review | [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts) | 03–08 |
-| A course's answers in the statistics, and its most-confused options | course-chapter | 09–10 |
+| A course's answers and chapters in the statistics, and its most-confused options | course-chapter | 09–10 |
 | Adding a course from a link and playing it | [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts), second journey | 03–05 |
 | Solid Memo Studio | studio.journey.ts, first journey | 06–36 |
 

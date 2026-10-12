@@ -1593,7 +1593,11 @@
       "other": "Cards forgotten {count} times or more in their reviews over the last 12 months, in any deck. They keep costing reviews: open one to make it clearer or add a note."
     },
     "noLeeches": "No leeches: no card was forgotten that often.",
-    "leechIn": "{forgotten}, in {deck}"
+    "leechIn": "{forgotten}, in {deck}",
+    "courses": "Your courses",
+    "coursesHint": "The chapters you have completed in each course, and how you answered each chapter's questions over the last 12 months: the share right of each question's first answer of the day.",
+    "chapter": "Chapter",
+    "chapterState": "Status"
   },
   "zoomableImage": {
     "enlarge": "Enlarge picture",
