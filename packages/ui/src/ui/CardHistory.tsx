@@ -12,7 +12,7 @@ import { gradeGroupOf } from "@solid-memo/domain/studyPatterns";
 import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { DataLine } from "./DataText";
 import { useI18n } from "./i18n";
-import { GRADE_GROUPS } from "./StatisticsCharts";
+import { GRADE_GROUPS } from "./charts/GradeBars";
 
 const BOTH: readonly StudyDirection[] = ["front-to-back", "back-to-front"];
 

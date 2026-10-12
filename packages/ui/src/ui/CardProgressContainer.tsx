@@ -14,11 +14,14 @@ import {
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { mergeBins } from "@solid-memo/domain/scheduleInsight";
+import { ForecastBars } from "./charts/ForecastBars";
+import { SpreadCharts } from "./charts/Histogram";
+import { MaturityBar } from "./charts/MaturityBar";
+import { StatTile } from "./charts/StatTiles";
 import { useCopies } from "./deckTreeEditor";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { ReaderText } from "./ReaderText";
-import { ForecastBars, MaturityBar, SpreadCharts, StatTile } from "./StatisticsCharts";
 import { STATISTICS_STALE_MS } from "./studyFigures";
 
 /**
