@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { shiftStudyDay } from "@solid-memo/domain/answer";
-import type { StudyTime } from "@solid-memo/domain/studyTime";
+import { hasStudyTime, type StudyTime } from "@solid-memo/domain/studyTime";
 import { useI18n } from "../i18n";
 import { BarChart } from "./BarChart";
 import { StatTile } from "./StatTiles";
@@ -29,14 +29,15 @@ export function useAboutTime() {
 /**
  * About how long was studied over the range (estimateStudyTime), and on
  * a study day on average; how many sessions, and a study day's on
- * average; and the median time an answer took. Dashes while no session
- * has had two answers, which is what the time is told from.
+ * average; and the median time an answer took. Dashes while no time is
+ * known: none recorded, and no session of two answers to estimate it
+ * from.
  */
 export function StudyTimeTiles({ time }: { time: StudyTime }) {
   const { t } = useI18n();
   const about = useAboutTime();
   const studyDays = time.days.length;
-  const known = time.medianAnswerMs !== null;
+  const known = hasStudyTime(time);
   return (
     <div class="stat-tiles">
       <StatTile
@@ -57,9 +58,26 @@ export function StudyTimeTiles({ time }: { time: StudyTime }) {
       />
       <StatTile
         label={t("statistics.timePerAnswer")}
-        value={known ? about(time.medianAnswerMs!) : "–"}
+        value={time.medianAnswerMs === null ? "–" : about(time.medianAnswerMs)}
       />
     </div>
+  );
+}
+
+/**
+ * Since when the answers' own times are counted, before which the time
+ * is estimated (or how it is estimated, before any is recorded), and how
+ * many of the range's answers since have no time and are left out.
+ */
+export function StudyTimeHint({ time }: { time: StudyTime }) {
+  const { t, formatDate } = useI18n();
+  if (time.recorded === null) return <p class="hint">{t("statistics.studyTimeHint")}</p>;
+  return (
+    <p class="hint">
+      {t("statistics.studyTimeRecordedHint", { date: formatDate(time.recorded.since) })}
+      {time.recorded.unknown > 0 &&
+        ` ${t("statistics.timeUnknown", { count: time.recorded.unknown })}`}
+    </p>
   );
 }
 

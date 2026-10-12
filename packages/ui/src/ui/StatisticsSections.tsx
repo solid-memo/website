@@ -32,7 +32,13 @@ import {
   StatTile,
   TimeToMatureTile,
 } from "./charts/StatTiles";
-import { StudyTimeChart, StudyTimeTiles } from "./charts/StudyTimeChart";
+import { hasStudyTime } from "@solid-memo/domain/studyTime";
+import {
+  StudyTimeChart,
+  StudyTimeHint,
+  StudyTimeTiles,
+  useAboutTime,
+} from "./charts/StudyTimeChart";
 import { WeekdayChart } from "./charts/WeekdayChart";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
@@ -47,12 +53,12 @@ import { ReaderText } from "./ReaderText";
 /**
  * The overview: the headline tiles (answers, study days, cards, the
  * streaks, the days studied of late, and the cards known now, once
- * read), the whole log's growth when the range is the whole log, the
- * activity calendar, and, of every deck, each deck's figures. The
- * streaks, the days of late and the calendar run up to today whatever
- * the range (StatisticsReport.recentDays). A deck since removed is
- * named as such; where the log begins inside the range, a note says
- * since when.
+ * read), the whole log's growth and time studied when the range is the
+ * whole log, the activity calendar, and, of every deck, each deck's
+ * figures. The streaks, the days of late and the calendar run up to
+ * today whatever the range (StatisticsReport.recentDays). A deck since
+ * removed is named as such; where the log begins inside the range, a
+ * note says since when.
  */
 export function OverviewSection({
   statistics,
@@ -68,8 +74,9 @@ export function OverviewSection({
   /** The prompts mature now, once where the cards stand is read. */
   cardsYouKnow?: number;
 }) {
-  const { t, formatPercent } = useI18n();
-  const { totals, streaks, prompts } = statistics;
+  const { t, formatPercent, formatDate } = useI18n();
+  const about = useAboutTime();
+  const { totals, streaks, prompts, studyTime } = statistics;
   return (
     <>
       <CoverageNote coverage={statistics.coverage} />
@@ -115,6 +122,17 @@ export function OverviewSection({
               label={t("statistics.promptsMatured")}
               value={String(prompts.matured)}
               detail={t("statistics.promptsDetail")}
+            />
+            <StatTile
+              label={t("statistics.timeStudied")}
+              value={hasStudyTime(studyTime) ? about(studyTime.ms) : "–"}
+              detail={
+                studyTime.recorded === null
+                  ? t("statistics.timeEstimated")
+                  : t("statistics.timeRecordedSince", {
+                      date: formatDate(studyTime.recorded.since),
+                    })
+              }
             />
           </div>
         </>
@@ -218,11 +236,12 @@ const RECALL_BY_WEEK_DAYS = 14 * 7;
 /**
  * When and how much: what each recent day held, how the weekdays are
  * studied, this week and month beside the last (these whatever the
- * range), then about how long the range's recalled answers took, with
- * the minutes of each recent day (none while there are only course
- * answers, which are not timed), and, folded away, the answers by hour
- * of the day; then progress: the cards introduced over the range, where the
- * cards stood and their median interval week by week, how many were
+ * range), then about how long the range's answers took (recorded, or
+ * estimated before times were recorded), with the minutes of each
+ * recent day (none while no time is known; since when times are
+ * recorded, the note says), and, folded away, the answers by hour of
+ * the day; then progress: the cards introduced over the range, where
+ * the cards stood and their median interval week by week, how many were
  * remembered the first time (not for course answers alone) and how long
  * cards took to grow mature, and the new cards beside the reviews by
  * week. Where the log begins inside the range, a note says since when.
@@ -239,11 +258,11 @@ export function ActivitySection({ statistics }: { statistics: StatisticsReport }
       <h3>{t("statistics.thisMonth")}</h3>
       <PeriodTiles period="month" figures={statistics.month} />
       <h3>{t("statistics.studyTime")}</h3>
-      <p class="hint">{t("statistics.studyTimeHint")}</p>
+      <StudyTimeHint time={statistics.studyTime} />
       {statistics.studyTime.answers > 0 && (
         <>
           <StudyTimeTiles time={statistics.studyTime} />
-          {statistics.studyTime.medianAnswerMs !== null && (
+          {hasStudyTime(statistics.studyTime) && (
             <StudyTimeChart time={statistics.studyTime} today={statistics.today} />
           )}
         </>

@@ -44,7 +44,7 @@ import {
   type TimeToMature,
   type WeekRetention,
 } from "./memoryCurve";
-import { answersByHour, estimateStudyTime, type StudyTime } from "./studyTime";
+import { answersByHour, estimateStudyTime, firstTimedOf, type StudyTime } from "./studyTime";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -193,7 +193,10 @@ export interface Statistics {
   weekdays: WeekdayRhythm[];
   /** The new cards and the reviews of each of the last INTAKE_WEEKS weeks. */
   intake: WeekLoad[];
-  /** About how long the recalled answers took (approximate; estimateStudyTime). */
+  /**
+   * About how long the answers took: recorded since the first answer
+   * read with a time, estimated before (estimateStudyTime).
+   */
   studyTime: StudyTime;
   /** The answers given in each hour of the day, midnight's first, in this device's time zone. */
   hours: number[];
@@ -337,12 +340,16 @@ export function monthlyRetention(answers: readonly Answer[], index: ChainIndex):
  * late, this week and month beside the last, the new cards beside the
  * reviews by week, and the days of `recentDays`; the answers before the
  * range also tell how late its reviews were, where its prompts stood
- * and how long they took to grow mature.
+ * and how long they took to grow mature, and when times began to be
+ * recorded: `firstTimed`, the first answer read with a recorded time,
+ * which one deck's statistics take from every deck's answers (by
+ * default the first of `allAnswers`).
  */
 export function statisticsOf(
   allAnswers: readonly Answer[],
   today: string,
   since?: string,
+  firstTimed: Answer | undefined = firstTimedOf(allAnswers),
 ): Statistics {
   const answers =
     since === undefined ? allAnswers : allAnswers.filter((answer) => answer.studyDay >= since);
@@ -407,7 +414,7 @@ export function statisticsOf(
     month: periodToDateOf(recentDays, today, "month"),
     weekdays: weekdayRhythmOf(days, today),
     intake: intakeVsLoadOf(recentDays, today),
-    studyTime: estimateStudyTime(answers),
+    studyTime: estimateStudyTime(answers, firstTimed),
     hours: answersByHour(answers),
   };
 }

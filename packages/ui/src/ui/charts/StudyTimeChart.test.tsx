@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import type { StudyTime } from "@solid-memo/domain/studyTime";
-import { StudyTimeChart, StudyTimeTiles } from "./StudyTimeChart";
+import { StudyTimeChart, StudyTimeHint, StudyTimeTiles } from "./StudyTimeChart";
 
 const time: StudyTime = {
   answers: 30,
@@ -17,6 +17,7 @@ const time: StudyTime = {
     { studyDay: "2026-10-02", answers: 15, sessions: 1, ms: 45 * 60_000 },
     { studyDay: "2026-10-03", answers: 5, sessions: 1, ms: 30 * 60_000 },
   ],
+  recorded: null,
 };
 
 describe("StudyTimeTiles", () => {
@@ -62,6 +63,45 @@ describe("StudyTimeTiles", () => {
       "–Too few answers in a row to tell yet",
     );
     expect(screen.getByRole("group", { name: "Time per answer (median)" })).toHaveTextContent("–");
+  });
+});
+
+describe("StudyTimeTiles of recorded times", () => {
+  it("gives the time recorded, and a dash for the time per answer while no recalled answer has one", () => {
+    render(
+      <StudyTimeTiles
+        time={{
+          ...time,
+          ms: 6_000,
+          medianAnswerMs: null,
+          days: [{ studyDay: "2026-10-03", answers: 1, sessions: 1, ms: 6_000 }],
+          recorded: { since: "2026-10-03", answers: 1, ms: 6_000, unknown: 0 },
+        }}
+      />,
+    );
+    expect(screen.getByRole("group", { name: "Time studied" })).toHaveTextContent(
+      "about 6 secondsabout 6 seconds a study day on average",
+    );
+    expect(screen.getByRole("group", { name: "Time per answer (median)" })).toHaveTextContent("–");
+  });
+});
+
+describe("StudyTimeHint", () => {
+  it("says how the time is estimated before any is recorded", () => {
+    render(<StudyTimeHint time={time} />);
+    expect(screen.getByText(/^Approximate, estimated from the times/)).toBeInTheDocument();
+  });
+
+  it("says since when times are recorded, and how many of the range's answers since have none", () => {
+    const recorded = { since: "2026-10-02", answers: 20, ms: 60_000, unknown: 0 };
+    const { container, rerender } = render(<StudyTimeHint time={{ ...time, recorded }} />);
+    expect(container).toHaveTextContent(
+      /^Since October 2, 2026, the app records how long each answer takes.*course answers are left out\.$/,
+    );
+    rerender(<StudyTimeHint time={{ ...time, recorded: { ...recorded, unknown: 1 } }} />);
+    expect(container).toHaveTextContent(
+      /left out\. Of the answers in this range since then, 1 has no time recorded and is not counted\.$/,
+    );
   });
 });
 

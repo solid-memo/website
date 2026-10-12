@@ -210,15 +210,17 @@ the last 12 months, or all time. Its tabs, each a link of its own:
   know now (mature), your current and longest streak and how many of
   the last 30 days you studied, a calendar of your activity and each
   deck's figures. The streaks and the calendar look back a year
-  whatever the range, as do this week and month on the Activity tab. Over all time, also how many cards you have started
-  and how many have grown mature. "Download my answers (CSV)" saves the
-  range's answers on your device, as a file a spreadsheet opens;
-  nothing is sent anywhere.
+  whatever the range, as do this week and month on the Activity tab.
+  Over all time, also how many cards you have started, how many have
+  grown mature and about how long you have studied. "Download my
+  answers (CSV)" saves the range's answers on your device, as a file a
+  spreadsheet opens; nothing is sent anywhere.
 - **Activity**: what each recent day held and which weekdays you
   study, this week and month beside the last, about how much time you
-  spend studying (an estimate from when you answered, course time not
-  counted) and, folded away, the hours of the day you study in, in your
-  current time zone, how many cards you have
+  spend studying (as your answers recorded it, in courses too, since
+  the app began to record it; before, an estimate from when you
+  answered, course time not counted) and, folded away, the hours of the
+  day you study in, in your current time zone, how many cards you have
   started, how many were young and mature week by week and how long
   their intervals were, how many you knew the first time and how long
   cards took to grow mature, and the new cards you take on beside the
@@ -231,8 +233,9 @@ the last 12 months, or all time. Its tabs, each a link of its own:
   counted apart, and your leeches: the cards you forgot 4 times or more
   in their reviews, each a link to the card, whose page shows every
   answer you gave it. What is worked out from your answers alone, such
-  as how late a review was, is approximate, and says so: changes made
-  in the Studio are not in your answers.
+  as how late a review was before the app recorded the day it was due,
+  is approximate, and says so: changes made in the Studio are not in
+  your answers.
 - **Cards**: where your cards stand: how many are new, relearning
   (forgotten last time), young (reviewed at intervals under 21 days)
   and mature, how many reviews are overdue and when your daily review
