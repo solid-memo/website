@@ -4457,6 +4457,15 @@ table.deck-statistics caption {
   margin: 0.25rem 0;
 }
 
+/* A course's chapters done, as a bar under its title. */
+.course-statistics progress {
+  display: block;
+  width: 100%;
+  height: 0.4rem;
+  margin-bottom: 0.75rem;
+  accent-color: var(--primary);
+}
+
 /* Trying the app as a guest (docs/guest-mode.md). */
 .masthead-actions {
   display: flex;

@@ -3,10 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import type { ChapterV1, StepV1 } from "@solid-memo/vocab/types.generated";
+import type { Answer } from "./answer";
+import { chainIndexOf } from "./answerChain";
 import { activeCards, type CardContent } from "./deck";
 import { sameText, type LangText } from "./langText";
 import type { ReviewQuality, ReviewState } from "./review";
 import { shuffle, studyDayOf } from "./scheduling";
+import { quizAccuracyOf, type Quiz } from "./statistics";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -226,6 +229,64 @@ export function courseProgress(
     chapters,
     ...(current === undefined ? {} : { currentChapterUrl: current.url }),
     done: chapters.every((chapter) => chapter.state === "done"),
+  };
+}
+
+/** How a course has gone, as the statistics show it (courseProgressOf). */
+export interface CourseResults {
+  /** The chapters completed, of the outline's. */
+  done: number;
+  /** Each chapter's, in the outline's order. */
+  chapters: ChapterResults[];
+}
+
+export interface ChapterResults {
+  /** The chapter's subject. */
+  url: string;
+  title: LangText;
+  state: ChapterState;
+  /** The graded course answers to its questions (statistics.ts quizAccuracyOf). */
+  quiz: Quiz;
+}
+
+/**
+ * How a course has gone: where each chapter stands, from the chapters
+ * completed (as courseProgress says, by fragment id in any release), and
+ * the graded course answers to its questions, its steps' and its final
+ * review's, of the course deck's `answers` (any of the log's, recall ones
+ * too: they tell a course answer that repeats one the same day). A
+ * question is its first chapter's, by its card's fragment id; answers to
+ * a card no chapter in use asks are left out.
+ */
+export function courseProgressOf(
+  outline: CourseOutline,
+  completedChapterUrls: readonly string[],
+  answers: readonly Answer[],
+): CourseResults {
+  const chapterOf = new Map<string, number>();
+  outline.chapters.forEach((chapter, at) => {
+    for (const id of [
+      ...chapter.steps.flatMap((step) => step.questionIds),
+      ...chapter.reviewQuestionIds,
+    ])
+      if (!chapterOf.has(id)) chapterOf.set(id, at);
+  });
+  const byChapter = outline.chapters.map((): Answer[] => []);
+  for (const answer of answers) {
+    const at = chapterOf.get(fragmentIdOf(answer.cardUrl));
+    if (at !== undefined) byChapter[at]!.push(answer);
+  }
+  const index = chainIndexOf(answers);
+  // Where a chapter stands depends on the chapters completed alone, not on the cards answered.
+  const { chapters } = courseProgress(outline, [], completedChapterUrls);
+  return {
+    done: chapters.filter((chapter) => chapter.state === "done").length,
+    chapters: outline.chapters.map((chapter, at) => ({
+      url: chapter.url,
+      title: chapter.title,
+      state: chapters[at]!.state,
+      quiz: quizAccuracyOf(byChapter[at]!, index),
+    })),
   };
 }
 

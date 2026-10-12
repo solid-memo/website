@@ -14,7 +14,8 @@ import type { Answers } from "../pages/CourseQuestion.ts";
  * word before the final review; the review, where a question answered
  * wrongly comes back until it is answered right; and back on the
  * course's page, the chapter cheered, done, and the next one open; the
- * statistics, which count its answers apart from recall; and the
+ * statistics, which count its answers apart from recall and show the
+ * chapter done with its graded answers; and the
  * course's deck, which names the wrong options chosen. It is
  * the course the library offers newcomers, whichever that is: the
  * journey learns each right answer as the app shows it.
@@ -78,10 +79,11 @@ test("work through a course's first chapter and its final review @course", async
   );
 
   await app.step(
-    "09 · The statistics count the course's answers as graded course answers, not as recall",
+    "09 · The statistics count the course's answers as graded course answers, not as recall, and its chapter done",
     async () => {
       await app.statistics.open();
       await app.statistics.expectCourseAnswersOnly();
+      await app.statistics.expectCourseChapter(course, chapter);
     },
   );
 

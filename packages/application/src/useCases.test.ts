@@ -5881,8 +5881,80 @@ describe("courses", () => {
     };
     let id = 0;
     const useCases = createUseCases({ ...deps, answerLog, newId: () => `id${++id}-0000-0000` });
-    return { deps, useCases, appended };
+    return { deps, useCases, appended, answerLog };
   }
+
+  it("getCourseStatistics counts each course's chapters completed and its graded answers chapter by chapter, from the last twelve study months", async () => {
+    const { deps, useCases, answerLog } = setup();
+    const answer = (
+      id: string,
+      cardId: string,
+      grade: Answer["grade"],
+      deckUrl = deck.url,
+    ): Answer => ({
+      id,
+      deckUrl,
+      cardUrl: `${deck.cardsDocumentUrl}#${cardId}`,
+      direction: "front-to-back",
+      grade,
+      answeredAt: "2026-10-06T10:00:00.000Z",
+      studyDay: "2026-10-06",
+      nextIntervalDays: 1,
+      mode: "multiple-choice",
+    });
+    vi.mocked(answerLog.months).mockResolvedValue(["2025-10", "2026-10"]);
+    vi.mocked(answerLog.readMonthSince).mockResolvedValue({
+      unchanged: false,
+      value: [
+        answer("a1", "q-iri", 3),
+        answer("a2", "q-rdf", 1),
+        answer("a3", "q-rdf", 3, `${instance.url}catalog.ttl#deck-2`),
+      ],
+      version: "v1",
+    });
+    const completed: Deck = { ...courseDeck, completedChapters: [at("ch-1")] };
+    const unreadable: Deck = {
+      ...courseDeck,
+      url: `${instance.url}catalog.ttl#deck-3`,
+      sourceUrl: "https://solid-memo.com/decks/gone/v1.ttl",
+    };
+    vi.mocked(deps.deckLibrary.fetchCourseOutline).mockImplementation(async (url) => {
+      if (url === RELEASE) return outline;
+      throw new Error("offline");
+    });
+    await expect(
+      useCases.getCourseStatistics(instance.url, noon, [completed, unreadable]),
+    ).resolves.toEqual([
+      {
+        deck: completed,
+        done: 1,
+        chapters: [
+          {
+            url: at("ch-1"),
+            title: { en: "Linked data" },
+            state: "done",
+            quiz: { answers: 1, right: 1 },
+          },
+          { url: at("ch-2"), title: { en: "RDF" }, state: "open", quiz: { answers: 1, right: 0 } },
+        ],
+      },
+    ]);
+    // Twelve study months up to October 2026 begin with November 2025.
+    expect(answerLog.readMonthSince).toHaveBeenCalledOnce();
+    expect(answerLog.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-10", undefined);
+  });
+
+  it("getCourseStatistics reads nothing for no course, counts no chapter done of a course begun, and refuses a deck that is no library copy", async () => {
+    const { useCases, answerLog } = setup();
+    await expect(useCases.getCourseStatistics(instance.url, noon, [])).resolves.toEqual([]);
+    expect(answerLog.months).not.toHaveBeenCalled();
+    const [begun] = await useCases.getCourseStatistics(instance.url, noon, [courseDeck]);
+    expect(begun!.done).toBe(0);
+    expect(begun!.chapters.map((chapter) => chapter.state)).toEqual(["open", "locked"]);
+    await expect(useCases.getCourseStatistics(instance.url, noon, [deck])).rejects.toThrow(
+      "names the release",
+    );
+  });
 
   it("startCourse copies the release without its cards, or returns the copy the instance has", async () => {
     const { deps, useCases } = setup();

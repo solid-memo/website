@@ -1684,7 +1684,11 @@
       "other": "Tarjetas olvidadas {count} veces o más en sus repasos en los últimos 12 meses, en cualquier mazo. Siguen costando repasos: abre una para hacerla más clara o añadirle una nota."
     },
     "noLeeches": "Ninguna sanguijuela: ninguna tarjeta se olvidó tantas veces.",
-    "leechIn": "{forgotten}, en {deck}"
+    "leechIn": "{forgotten}, en {deck}",
+    "courses": "Tus cursos",
+    "coursesHint": "Los capítulos que has completado en cada curso y cómo respondiste a las preguntas de cada capítulo en los últimos 12 meses: la proporción de aciertos en la primera respuesta del día a cada pregunta.",
+    "chapter": "Capítulo",
+    "chapterState": "Estado"
   },
   "zoomableImage": {
     "enlarge": "Ampliar imagen",

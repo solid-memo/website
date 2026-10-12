@@ -161,6 +161,39 @@ export class Statistics extends Screen {
     });
   }
 
+  /**
+   * Under "Your courses", the course (its title, a link to its page) with
+   * one chapter done of all, and its row for `chapter`: done, with a share
+   * of its graded course answers right.
+   */
+  async expectCourseChapter(course: string, chapter: string): Promise<void> {
+    await this.intent("Check the course's chapter done and its graded answers", async () => {
+      const section = this.main.getByRole("region", {
+        name: this.t("statistics.courses"),
+        exact: true,
+      });
+      await expect(section.getByRole("link", { name: course, exact: true })).toBeVisible();
+      const bar = section.getByRole("progressbar", { name: course, exact: true });
+      await expect(bar).toHaveAttribute("value", "1");
+      const count = Number(await bar.getAttribute("max"));
+      await expect(
+        section.getByText(this.t("course.chaptersDone", { done: 1, count }), { exact: true }),
+      ).toBeVisible();
+      const table = section.getByRole("region", { name: course, exact: true }).getByRole("table");
+      const row = table
+        .getByRole("row")
+        .filter({ has: this.page.getByRole("rowheader", { name: chapter, exact: true }) });
+      await expect(
+        await cellOf(table, row, this.t("statistics.chapterState")),
+        this.t("statistics.chapterState"),
+      ).toHaveText(this.t("course.done"));
+      await expect(
+        await cellOf(table, row, this.t("statistics.quizAccuracy")),
+        this.t("statistics.quizAccuracy"),
+      ).toHaveText(/\d/);
+    });
+  }
+
   /** The value a tile shows ("4", "1 day", "75 %", "–"). */
   async value(key: StatisticsTile): Promise<string> {
     return (await this.tile(key).getByRole("strong").innerText()).trim();

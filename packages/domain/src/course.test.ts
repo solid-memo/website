@@ -9,12 +9,14 @@ import {
   courseAnswerEffect,
   courseOutlineFromRecords,
   courseProgress,
+  courseProgressOf,
   editCompletedChapters,
   finalReviewQueue,
   gradeOfChoice,
   sameOutline,
   type CourseOutline,
 } from "./course";
+import type { Answer } from "./answer";
 import type { CardContent } from "./deck";
 import type { ReviewState } from "./review";
 
@@ -281,6 +283,90 @@ describe("a learner's progress", () => {
       chapters: [{ state: "done" }],
       done: true,
     });
+  });
+});
+
+describe("courseProgressOf", () => {
+  const DECK = "https://pod.example/a/catalog.ttl#course";
+  const CARDS = "https://pod.example/a/decks/course.ttl";
+  const answer = (
+    n: number,
+    cardId: string,
+    grade: Answer["grade"],
+    extra: Partial<Answer> = {},
+  ): Answer => ({
+    id: `answer-${n}`,
+    deckUrl: DECK,
+    cardUrl: `${CARDS}#${cardId}`,
+    direction: "front-to-back",
+    grade,
+    answeredAt: `2026-10-0${n}T10:00:00.000Z`,
+    studyDay: `2026-10-0${n}`,
+    nextIntervalDays: 1,
+    mode: "multiple-choice",
+    ...extra,
+  });
+
+  it("says, of a course not begun, that no chapter is done and none has answers", () => {
+    expect(courseProgressOf(outline, [], [])).toEqual({
+      done: 0,
+      chapters: [
+        {
+          url: at("ch-a"),
+          title: { en: "Chapter 0" },
+          state: "open",
+          quiz: { answers: 0, right: 0 },
+        },
+        {
+          url: at("ch-b"),
+          title: { en: "Chapter 1" },
+          state: "locked",
+          quiz: { answers: 0, right: 0 },
+        },
+      ],
+    });
+  });
+
+  it("counts the chapters completed, and each chapter's graded answers to its steps' and its review's questions", () => {
+    const results = courseProgressOf(
+      outline,
+      [at("ch-a")],
+      [
+        answer(1, "q1", 3),
+        answer(1, "q2", 1, { id: "answer-1b" }),
+        answer(2, "q-review", 3),
+        answer(3, "q4", 1),
+        // A card no chapter asks, and a recall review: neither is a course answer of a chapter.
+        answer(4, "q-gone", 3),
+        answer(5, "q3", 4, { mode: "recall", priorIntervalDays: 1 }),
+      ],
+    );
+    expect(results.done).toBe(1);
+    expect(results.chapters.map(({ state, quiz }) => ({ state, quiz }))).toEqual([
+      { state: "done", quiz: { answers: 3, right: 2 } },
+      { state: "open", quiz: { answers: 1, right: 0 } },
+    ]);
+  });
+
+  it("counts a question two chapters ask toward the first of them", () => {
+    const [a, b] = outline.chapters;
+    const asked = { ...outline, chapters: [a!, { ...b!, reviewQuestionIds: ["q1"] }] };
+    const results = courseProgressOf(asked, [], [answer(1, "q1", 3)]);
+    expect(results.chapters.map(({ quiz }) => quiz.answers)).toEqual([1, 0]);
+  });
+
+  it("leaves out a course answer that repeats an answer to its card the same day", () => {
+    const results = courseProgressOf(
+      outline,
+      [],
+      [
+        answer(1, "q1", 4, { mode: "recall", priorIntervalDays: 1 }),
+        answer(1, "q1", 1, { id: "answer-1b", answeredAt: "2026-10-01T11:00:00.000Z" }),
+        answer(2, "q2", 1),
+        answer(2, "q2", 3, { id: "answer-2b", answeredAt: "2026-10-02T11:00:00.000Z" }),
+      ],
+    );
+    expect(results.chapters[0]!.quiz).toEqual({ answers: 1, right: 0 });
   });
 });
 

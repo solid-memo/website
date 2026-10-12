@@ -166,10 +166,12 @@ import {
 import {
   courseAnswerEffect,
   courseProgress,
+  courseProgressOf,
   type CompletedChaptersEdit,
   type CourseAnswerEffect,
   type CourseOutline,
   type CourseProgress,
+  type CourseResults,
 } from "@solid-memo/domain/course";
 import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
 import {
@@ -848,6 +850,21 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
     options?: { deck?: Deck },
   ): Promise<CardProgressReport>;
   /**
+   * How each course of `courses` (the instance's decks that are copies of
+   * a course, in the order given) has gone: its chapters completed, as
+   * its deck says, and its graded course answers chapter by chapter
+   * (courseProgressOf), from the answers of the last twelve study months,
+   * which the log's months are read for as getStatistics reads them,
+   * sharing what is kept. The outline is its release's, read once (the
+   * library keeps it); a course whose outline cannot be read is left out.
+   * Reads nothing for no course.
+   */
+  getCourseStatistics(
+    instanceUrl: string,
+    now: Date,
+    courses: readonly Deck[],
+  ): Promise<CourseStatistics[]>;
+  /**
    * Start a course (a library deck whose release is a course, see
    * docs/courses.md): the instance's deck of it, a copy of the current
    * release with its title, description, authors and the rest, but no
@@ -946,6 +963,12 @@ export interface StatisticsReport extends Statistics {
    * or has no month.
    */
   coverage: string | null;
+}
+
+/** How one course has gone (UseCases.getCourseStatistics). */
+export interface CourseStatistics extends CourseResults {
+  /** The course's deck in the instance. */
+  deck: Deck;
 }
 
 /** How far along decks' prompts are (UseCases.getCardProgress). */
@@ -3302,6 +3325,37 @@ export function createUseCases({
         deckAnswers(await loadAnswerLog(instanceUrl), deck),
         `${deck.cardsDocumentUrl}#${cardId}`,
       );
+    },
+    async getCourseStatistics(instanceUrl, at, courses) {
+      if (courses.length === 0) return [];
+      await logAnswers();
+      const [prefs, logged] = await Promise.all([
+        getPreferences(instanceUrl),
+        answerLog.months(instanceUrl),
+      ]);
+      const firstMonth = monthOfStudyDay(
+        firstDayOfMonths(studyDayOf(at, prefs.dayBoundaryHour), 12),
+      );
+      const answers = await readLogMonths(instanceUrl, logged, (month) => month >= firstMonth);
+      const results = await Promise.all(
+        courses.map(async (deck): Promise<CourseStatistics[]> => {
+          if (deck.sourceUrl === undefined)
+            throw new Error("A course's deck names the release it was copied from");
+          const outline = await deckLibrary.fetchCourseOutline(deck.sourceUrl).catch(() => null);
+          if (outline === null) return [];
+          return [
+            {
+              deck,
+              ...courseProgressOf(
+                outline,
+                deck.completedChapters ?? [],
+                deckAnswers(answers, deck),
+              ),
+            },
+          ];
+        }),
+      );
+      return results.flat();
     },
     startCourse,
     async getCourse(offered) {
