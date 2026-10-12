@@ -3461,6 +3461,9 @@ describe("the answer log", () => {
     expect(all.streaks).toEqual({ current: 2, longest: 2 });
     // The log reaches back past the year: it covers it all.
     expect(all.coverage).toBeNull();
+    // How the answers were given comes with them: the card's second introduction is no first try.
+    expect(all.firstTry).toEqual({ introduced: 2, recalled: 2 });
+    expect(all.week.current.answers).toBe(1);
     const one = await useCases.getStatistics(instance.url, noon, { months: 1, deckUrl: deck.url });
     expect(one.days.map((day) => day.studyDay)).toEqual(["2026-09-20"]);
     expect(one.decks).toEqual([

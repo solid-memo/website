@@ -4,6 +4,7 @@
 
 import { expect, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
+import { cellOf } from "./tables.ts";
 
 /** A tile's key under statistics.* in the i18n files: what it counts. */
 export type StatisticsTile =
@@ -31,11 +32,33 @@ export interface DeckRow {
   /** Young and mature recall: reviews remembered of reviews. */
   young?: { recalled: number; reviews: number } | null;
   mature?: { recalled: number; reviews: number } | null;
+  /** Recall each way, shown only with reviews both ways: `"–"` without. */
+  directions?: "–";
+  /** First try: new cards remembered of new cards. */
+  firstTry?: { recalled: number; introduced: number } | null;
   lapses?: number;
   /** Graded course answers: right of answers. */
   quiz?: { right: number; answers: number } | null;
   /** "today" is today's study day. */
   lastStudied?: "today";
+}
+
+/** A day's row of "What each day held". */
+export interface DayHeld {
+  answers: number;
+  introduced: number;
+  /** Reviews remembered. */
+  remembered: number;
+  lapses: number;
+  repeats: number;
+}
+
+/** How many answers each button got. */
+export interface Buttons {
+  again: number;
+  hard: number;
+  good: number;
+  easy: number;
 }
 
 /** What the statistics should say; left out, a tile, a chart or the table is not checked. */
@@ -56,6 +79,15 @@ export interface ExpectedStatistics {
   coverage?: "thisMonth";
   /** Every row of "By deck", in any order. */
   decks?: DeckRow[];
+  /** Today's row of "What each day held". */
+  today?: DayHeld;
+  /** The answer buttons pressed, for first answers and young and mature reviews. */
+  buttons?: { first: Buttons; young: Buttons; mature: Buttons };
+  /**
+   * Today's weekday in "Answers by weekday": its answers on average, and
+   * how many of that weekday were studied of those there were.
+   */
+  weekday?: { average: number; studied: number; of: number };
   /** The instance's prompts taken together, under "Where your cards stand", with the forecast beside them. */
   maturity?: Maturity;
   /** Every deck under "Maturity by deck", in any order. */
@@ -77,9 +109,12 @@ export class Statistics extends Screen {
     });
   }
 
-  /** A headline tile, named by its label. */
+  /**
+   * A headline tile, named by its label: the first so named, as this
+   * week's and this month's tiles, further down, share some labels.
+   */
   tile(key: StatisticsTile): Locator {
-    return this.main.getByRole("group", { name: this.t(`statistics.${key}`), exact: true });
+    return this.main.getByRole("group", { name: this.t(`statistics.${key}`), exact: true }).first();
   }
 
   /** Opens Statistics from the instance's links and waits for them to be read. */
@@ -151,6 +186,9 @@ export class Statistics extends Screen {
         if (recall !== undefined) await this.expectRecall(key, recall);
       }
       if (expected.coverage !== undefined) await this.expectCoverage();
+      if (expected.today !== undefined) await this.expectToday(expected.today);
+      if (expected.buttons !== undefined) await this.expectButtons(expected.buttons);
+      if (expected.weekday !== undefined) await this.expectWeekday(expected.weekday);
       if (expected.decks !== undefined) await this.expectByDeck(expected.decks);
       if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
       if (expected.maturityByDeck !== undefined)
@@ -161,6 +199,93 @@ export class Statistics extends Screen {
   /** A chart, named by its caption. */
   private figure(caption: string): Locator {
     return this.main.getByRole("figure", { name: caption, exact: true });
+  }
+
+  /** A chart's table, named by the chart's caption, opened ("Show as a table"). */
+  private async tableOf(caption: string): Promise<Locator> {
+    const figure = this.figure(caption);
+    const details = figure.locator("details");
+    if ((await details.getAttribute("open")) === null)
+      await details.getByText(this.t("statistics.showTable"), { exact: true }).click();
+    return figure.getByRole("table");
+  }
+
+  /** Today's row of "What each day held", found by today's date. */
+  private async expectToday(expected: DayHeld): Promise<void> {
+    const table = await this.tableOf(this.t("statistics.dayHeld", { count: 30 }));
+    const row = table.getByRole("row").filter({
+      has: this.page.getByRole("cell", { name: await this.today(), exact: true }),
+    });
+    const columns = {
+      answers: "statistics.answers",
+      introduced: "statistics.introduced",
+      remembered: "statistics.rememberedColumn",
+      lapses: "statistics.lapses",
+      repeats: "statistics.repeats",
+    } as const;
+    for (const [figure, key] of Object.entries(columns)) {
+      await expect(
+        await cellOf(table, row, this.t(key)),
+        `${this.t("statistics.dayHeld", { count: 30 })}: ${this.t(key)}`,
+      ).toHaveText(String(expected[figure as keyof DayHeld]));
+    }
+  }
+
+  /** The answer buttons' table: each count, with its share of its row when there is any. */
+  private async expectButtons(expected: {
+    first: Buttons;
+    young: Buttons;
+    mature: Buttons;
+  }): Promise<void> {
+    const table = await this.tableOf(this.t("statistics.buttons"));
+    const kinds = {
+      first: "statistics.buttonsFirst",
+      young: "statistics.youngShort",
+      mature: "statistics.matureShort",
+    } as const;
+    for (const [kind, key] of Object.entries(kinds)) {
+      const counts = expected[kind as keyof typeof kinds];
+      const total = counts.again + counts.hard + counts.good + counts.easy;
+      const row = table
+        .getByRole("row")
+        .filter({ has: this.page.getByRole("rowheader", { name: this.t(key), exact: true }) });
+      for (const button of ["again", "hard", "good", "easy"] as const) {
+        const count = counts[button];
+        await expect(
+          await cellOf(table, row, this.t(`study.minimal.${button}`)),
+          `${this.t("statistics.buttons")}: ${this.t(key)}, ${this.t(`study.minimal.${button}`)}`,
+        ).toHaveText(
+          count === 0
+            ? "0"
+            : this.t("statistics.buttonCell", { count, percent: this.percent(count, total) }),
+        );
+      }
+    }
+  }
+
+  /** Today's weekday's row of "Answers by weekday". */
+  private async expectWeekday(expected: {
+    average: number;
+    studied: number;
+    of: number;
+  }): Promise<void> {
+    const table = await this.tableOf(this.t("statistics.weekdays"));
+    const weekday = await this.page.evaluate(
+      (locale) => new Date().toLocaleDateString(locale, { weekday: "long" }),
+      this.app.locale,
+    );
+    const row = table.getByRole("row").filter({
+      has: this.page.getByRole("cell", { name: weekday, exact: true }),
+    });
+    const average = new Intl.NumberFormat(this.app.locale, { maximumFractionDigits: 1 });
+    await expect(
+      await cellOf(table, row, this.t("statistics.averageAnswers")),
+      this.t("statistics.averageAnswers"),
+    ).toHaveText(average.format(expected.average));
+    await expect(
+      await cellOf(table, row, this.t("statistics.studied")),
+      this.t("statistics.studied"),
+    ).toHaveText(this.t("statistics.studiedOf", { studied: expected.studied, count: expected.of }));
   }
 
   /** What a maturity bar's picture says of its counts: "0 new, 4 young and 0 mature." */
@@ -274,6 +399,15 @@ export class Statistics extends Screen {
               percent: this.percent(shown.right, shown.answers),
               count: shown.answers,
             });
+    const firstTry = (shown?: { recalled: number; introduced: number } | null) =>
+      shown === undefined
+        ? any
+        : shown === null
+          ? "–"
+          : this.t("statistics.firstTryShare", {
+              percent: this.percent(shown.recalled, shown.introduced),
+              count: shown.introduced,
+            });
     for (const deck of decks) {
       const row = this.byDeck
         .getByRole("row")
@@ -283,6 +417,8 @@ export class Statistics extends Screen {
         deck.introduced === undefined ? any : String(deck.introduced),
         recall(deck.young),
         recall(deck.mature),
+        deck.directions === undefined ? any : deck.directions,
+        firstTry(deck.firstTry),
         deck.lapses === undefined ? any : String(deck.lapses),
         quiz(deck.quiz),
         deck.lastStudied === "today" ? today : any,

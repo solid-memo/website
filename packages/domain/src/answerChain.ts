@@ -69,6 +69,16 @@ export function isRepeat(answer: Answer, index: ChainIndex): boolean {
 }
 
 /**
+ * Whether an answer of the index introduces its prompt that day: one
+ * without a prior interval that repeats none (a card forgotten in the
+ * Studio and studied again the same day is a repeat, not a second new
+ * card).
+ */
+export function isIntroduction(answer: Answer, index: ChainIndex): boolean {
+  return answer.priorIntervalDays === undefined && !isRepeat(answer, index);
+}
+
+/**
  * Whether an answer of the index is a review that counts toward recall:
  * of a prompt already introduced, the first to it that study day, and
  * recalled and graded by the learner, not chosen among a course's

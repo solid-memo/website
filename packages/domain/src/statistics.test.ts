@@ -12,7 +12,6 @@ import {
   monthlyRetention,
   quizAccuracyOf,
   retentionOf,
-  shiftStudyDay,
   statisticsOf,
   streaksOf,
   todayOf,
@@ -53,7 +52,7 @@ function indexed<T>(
 }
 
 describe("dailyActivity", () => {
-  it("counts each study day's answers, introductions, forgotten cards, reviews, lapses and repeats, oldest first", () => {
+  it("counts each study day's answers, introductions, reviews, lapses and repeats, oldest first", () => {
     expect(
       indexed(
         [answer("2026-10-03", 4), answer("2026-10-01", 1, 3), answer("2026-10-03", 2, 1)],
@@ -64,7 +63,6 @@ describe("dailyActivity", () => {
         studyDay: "2026-10-01",
         answers: 1,
         introduced: 0,
-        forgotten: 1,
         reviews: 1,
         lapses: 1,
         repeats: 0,
@@ -73,20 +71,23 @@ describe("dailyActivity", () => {
         studyDay: "2026-10-03",
         answers: 2,
         introduced: 1,
-        forgotten: 1,
         reviews: 0,
         lapses: 0,
         repeats: 1,
       },
     ]);
   });
-});
 
-describe("shiftStudyDay", () => {
-  it("counts calendar days across months and years", () => {
-    expect(shiftStudyDay("2026-10-31", 1)).toBe("2026-11-01");
-    expect(shiftStudyDay("2026-01-01", -1)).toBe("2025-12-31");
-    expect(shiftStudyDay("2026-03-29", 1)).toBe("2026-03-30");
+  it("counts a card forgotten in the Studio and studied again the same day once, then as a repeat", () => {
+    const [studied] = indexed(
+      [
+        answer("2026-10-01", 4),
+        answer("2026-10-01", 4),
+        answer("2026-10-01", 4, undefined, "1", "b"),
+      ],
+      dailyActivity,
+    );
+    expect(studied).toMatchObject({ answers: 3, introduced: 2, repeats: 1 });
   });
 });
 
@@ -172,9 +173,9 @@ describe("introducedOverTime", () => {
     const days = indexed(
       [
         answer("2026-10-01", 4),
-        answer("2026-10-01", 4),
+        answer("2026-10-01", 4, undefined, "1", "no"),
         answer("2026-10-02", 4, 1),
-        answer("2026-10-05", 3),
+        answer("2026-10-05", 3, undefined, "1", "dk"),
       ],
       dailyActivity,
     );
@@ -188,7 +189,7 @@ describe("introducedOverTime", () => {
 });
 
 describe("monthlyRetention", () => {
-  it("counts each month's reviews apart, oldest first, a month of first answers only with none", () => {
+  it("counts each month's reviews and first answers apart, oldest first, a month of first answers only with no review", () => {
     expect(
       indexed(
         [
@@ -203,10 +204,12 @@ describe("monthlyRetention", () => {
       {
         month: "2026-08",
         retention: { young: { reviews: 0, recalled: 0 }, mature: { reviews: 0, recalled: 0 } },
+        firstTry: { introduced: 1, recalled: 1 },
       },
       {
         month: "2026-10",
         retention: { young: { reviews: 2, recalled: 1 }, mature: { reviews: 1, recalled: 1 } },
+        firstTry: { introduced: 0, recalled: 0 },
       },
     ]);
   });
@@ -235,7 +238,19 @@ describe("statisticsOf", () => {
     expect(statistics.streaks).toEqual({ current: 2, longest: 2 });
     expect(statistics.days.map((day) => day.studyDay)).toEqual(["2026-10-01", "2026-10-02"]);
     expect(statistics.retention.young).toEqual({ reviews: 1, recalled: 1 });
-    expect(statistics.months).toEqual([{ month: "2026-10", retention: statistics.retention }]);
+    expect(statistics.months).toEqual([
+      { month: "2026-10", retention: statistics.retention, firstTry: statistics.firstTry },
+    ]);
+    expect(statistics.firstTry).toEqual({ introduced: 3, recalled: 3 });
+    expect(statistics.buttons.introductions).toEqual({ again: 0, hard: 2, good: 1, easy: 0 });
+    expect(statistics.directions).toEqual([
+      { direction: "front-to-back", recall: { reviews: 1, recalled: 1 } },
+    ]);
+    expect(statistics.recentStudyDays).toBe(2);
+    expect(statistics.week.current.answers).toBe(4);
+    expect(statistics.month.current.studyDays).toBe(2);
+    expect(statistics.weekdays.map((weekday) => weekday.answers)).toEqual([0, 0, 0, 1, 3, 0, 0]);
+    expect(statistics.intake.at(-1)).toEqual({ week: "2026-09-28", introduced: 3, reviews: 1 });
     expect(statistics.quiz).toEqual({ answers: 0, right: 0 });
     expect(statistics.decks.map((deck) => [deck.deckUrl, deck.answers, deck.lastStudyDay])).toEqual(
       [
@@ -246,7 +261,7 @@ describe("statisticsOf", () => {
     );
   });
 
-  it("gives each deck its recall, introductions, lapses and course answers", () => {
+  it("gives each deck its recall, introductions, lapses, course answers, first tries and directions", () => {
     const statistics = statisticsOf(
       [
         answer("2026-10-01", 4, undefined, "1", "a"),
@@ -268,6 +283,8 @@ describe("statisticsOf", () => {
         introduced: 2,
         lapses: 1,
         quiz: { answers: 0, right: 0 },
+        firstTry: { introduced: 2, recalled: 2 },
+        directions: [{ direction: "front-to-back", recall: { reviews: 2, recalled: 1 } }],
       },
       {
         deckUrl: `${DECK}2`,
@@ -277,6 +294,8 @@ describe("statisticsOf", () => {
         introduced: 2,
         lapses: 0,
         quiz: { answers: 2, right: 1 },
+        firstTry: { introduced: 0, recalled: 0 },
+        directions: [],
       },
     ]);
     expect(statistics.quiz).toEqual({ answers: 2, right: 1 });
@@ -338,6 +357,8 @@ describe("todayOf", () => {
       recall: { reviews: 2, recalled: 1 },
       streak: 2,
       longestStreak: 2,
+      // From Monday, September 28; last week's same days had none (the 20th was a Sunday).
+      week: { answers: 6, previous: 0 },
     });
   });
 

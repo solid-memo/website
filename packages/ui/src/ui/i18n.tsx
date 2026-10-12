@@ -112,6 +112,8 @@ export interface I18n {
   formatMonth(month: string): string;
   /** A share, 0 to 1, as a whole percentage the way this language writes one ("75%" / "75 %"). */
   formatPercent(share: number): string;
+  /** A change, as a share of what it changed from, a whole percentage with its sign ("+20%", "−5 %", "0%"). */
+  formatChange(change: number): string;
   /** How a study direction is named. */
   directionLabel(direction: DeckDirection): string;
   /**
@@ -170,6 +172,7 @@ export function createI18n(locale: Locale, appName?: string): I18n {
   const plurals = new Intl.PluralRules(locale);
   const numbers = new Intl.NumberFormat(locale);
   const percent = new Intl.NumberFormat(locale, { style: "percent" });
+  const change = new Intl.NumberFormat(locale, { style: "percent", signDisplay: "exceptZero" });
   const languageNames = new Intl.DisplayNames(locale, { type: "language" });
 
   /** A language's name in this language ("engelska"); a tag Intl cannot read, as itself. */
@@ -291,6 +294,9 @@ export function createI18n(locale: Locale, appName?: string): I18n {
     },
     formatPercent(share) {
       return percent.format(share);
+    },
+    formatChange(share) {
+      return change.format(share);
     },
     violationText(violation) {
       if (locale in violation.message) return violation.message[locale];

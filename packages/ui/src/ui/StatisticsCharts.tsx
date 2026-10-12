@@ -6,21 +6,32 @@ import type { ComponentChildren } from "preact";
 import { useId, useState } from "preact/hooks";
 import type { CardProgress } from "@solid-memo/domain/cardProgress";
 import type { ForecastDay } from "@solid-memo/domain/scheduleInsight";
+import { shiftStudyDay } from "@solid-memo/domain/answer";
 import {
   introducedOverTime,
-  shiftStudyDay,
   type DayActivity,
   type MonthRetention,
   type Quiz,
   type Recall,
 } from "@solid-memo/domain/statistics";
+import {
+  weekdayOf,
+  type AnswerButtons,
+  type FirstTry,
+  type GradeGroup,
+  type PeriodToDate,
+  type WeekdayRhythm,
+  type WeekLoad,
+} from "@solid-memo/domain/studyPatterns";
 import { useI18n } from "./i18n";
 
 /**
  * The pieces the statistics are shown with: a number in a tile, an
- * activity calendar, bar charts (of recent and coming days, or of any
- * figures), line charts of cards introduced and of recall by month, a bar
- * of how mature the cards are, and a line under each chart that says what a day held when it is
+ * activity calendar, bar charts (of what recent days held, of the
+ * weekdays, of new cards beside reviews by week, of coming days, or of
+ * any figures), line charts of cards introduced and of recall by month,
+ * bars of the answer buttons pressed and of how mature the cards are,
+ * and a line under each chart that says what a day held when it is
  * pointed at (or tapped), with the same days as a table for whoever cannot
  * see the chart. All in one hue: more, a stronger green; where two series
  * meet, a step of the green each, told apart by a dash or a legend too.
@@ -78,6 +89,74 @@ export function QuizTile({ quiz }: { quiz: Quiz }) {
 }
 
 /**
+ * The share of prompts remembered the first time they were seen, with
+ * the count it is of, however few; a dash while there are none.
+ */
+export function FirstTryTile({ firstTry }: { firstTry: FirstTry }) {
+  const { t, formatPercent } = useI18n();
+  return firstTry.introduced === 0 ? (
+    <StatTile label={t("statistics.firstTry")} value="–" detail={t("statistics.noNewCards")} />
+  ) : (
+    <StatTile
+      label={t("statistics.firstTry")}
+      value={formatPercent(firstTry.recalled / firstTry.introduced)}
+      detail={t("statistics.ofNewCards", { count: firstTry.introduced })}
+    />
+  );
+}
+
+/**
+ * This week or this month so far (periodToDateOf), a tile a figure, each
+ * with the same days of the one before under it.
+ */
+export function PeriodTiles({
+  period,
+  figures,
+}: {
+  period: "week" | "month";
+  figures: PeriodToDate;
+}) {
+  const { t, formatPercent } = useI18n();
+  const { current, previous } = figures;
+  const before = (value: string) =>
+    period === "week"
+      ? t("statistics.sameDaysLastWeek", { value })
+      : t("statistics.sameDaysLastMonth", { value });
+  const share = ({ reviews, recalled }: Recall) =>
+    reviews === 0
+      ? t("statistics.noReviewsThen")
+      : t("statistics.recallShare", { percent: formatPercent(recalled / reviews), count: reviews });
+  const { reviews, recalled } = current.recall;
+  return (
+    <div class="stat-tiles">
+      <StatTile
+        label={t("statistics.answers")}
+        value={String(current.answers)}
+        detail={before(String(previous.answers))}
+      />
+      <StatTile
+        label={t("statistics.studyDays")}
+        value={String(current.studyDays)}
+        detail={before(String(previous.studyDays))}
+      />
+      <StatTile
+        label={t("statistics.introducedColumn")}
+        value={String(current.introduced)}
+        detail={before(String(previous.introduced))}
+      />
+      <StatTile
+        label={t("statistics.recall")}
+        value={reviews === 0 ? "–" : formatPercent(recalled / reviews)}
+        detail={[
+          reviews === 0 ? t("statistics.noReviews") : t("statistics.ofReviews", { count: reviews }),
+          before(share(previous.recall)),
+        ].join(" · ")}
+      />
+    </div>
+  );
+}
+
+/**
  * Whether there is nothing to say of recall but course answers to show:
  * no scored review yet, and graded course answers (a course's deck
  * studied only in its chapters). Recall then gives way to them.
@@ -118,8 +197,10 @@ function useDayText() {
       : t("statistics.dayDetail", {
           date: formatDate(studyDay),
           answers: t("statistics.answerCount", { count: day.answers }),
-          introduced: day.introduced,
-          forgotten: day.forgotten,
+          introduced: t("statistics.newCount", { count: day.introduced }),
+          remembered: t("statistics.rememberedCount", { count: day.reviews - day.lapses }),
+          lapses: t("statistics.lapseCount", { count: day.lapses }),
+          repeats: t("statistics.repeatCount", { count: day.repeats }),
         });
 }
 
@@ -144,7 +225,9 @@ export function DayTable({ days }: { days: readonly DayActivity[] }) {
             <th scope="col">{t("statistics.day")}</th>
             <th scope="col">{t("statistics.answers")}</th>
             <th scope="col">{t("statistics.introduced")}</th>
-            <th scope="col">{t("statistics.forgotten")}</th>
+            <th scope="col">{t("statistics.rememberedColumn")}</th>
+            <th scope="col">{t("statistics.lapses")}</th>
+            <th scope="col">{t("statistics.repeats")}</th>
           </tr>
         </thead>
         <tbody>
@@ -153,18 +236,15 @@ export function DayTable({ days }: { days: readonly DayActivity[] }) {
               <td>{formatDate(day.studyDay)}</td>
               <td>{day.answers}</td>
               <td>{day.introduced}</td>
-              <td>{day.forgotten}</td>
+              <td>{day.reviews - day.lapses}</td>
+              <td>{day.lapses}</td>
+              <td>{day.repeats}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </details>
   );
-}
-
-/** Weekday of a study day, Monday 0 to Sunday 6. */
-function weekdayOf(studyDay: string): number {
-  return (new Date(`${studyDay}T00:00:00Z`).getUTCDay() + 6) % 7;
 }
 
 /**
@@ -226,23 +306,35 @@ export function ActivityCalendar({
   );
 }
 
-/** One bar of a BarChart: its key, its figure, and what it holds, in words. */
+/** One bar of a BarChart: its key, its figures (one a series), and what it holds, in words. */
 export interface Bar {
   key: string;
-  value: number;
+  values: readonly number[];
   text: string;
+}
+
+/** A series of a BarChart with more than one: its words in the legend, and its step of the green, 1 lightest to 4. */
+export interface BarSeries {
+  label: string;
+  step: 1 | 2 | 3 | 4;
 }
 
 /**
  * Figures as bars on one baseline, scaled to the largest, then the line
  * that says what a bar holds when it is pointed at (or tapped), or how
  * to point at one (`prompt`), then `children`: the same figures as a
- * table, for whoever cannot see the chart.
+ * table, for whoever cannot see the chart. A bar of several series
+ * stacks them, the first at the bottom, or (`grouped`) stands them side
+ * by side; a legend then names them. `ticks`, when given, name the bars
+ * under them.
  */
 export function BarChart({
   caption,
   label,
   bars,
+  series = [],
+  grouped = false,
+  ticks,
   prompt,
   children,
 }: {
@@ -250,18 +342,58 @@ export function BarChart({
   /** The chart's text alternative. */
   label: string;
   bars: readonly Bar[];
+  series?: readonly BarSeries[];
+  grouped?: boolean;
+  ticks?: readonly string[];
   prompt: string;
   children: ComponentChildren;
 }) {
   const [pointed, setPointed] = useState<string | null>(null);
-  const most = Math.max(1, ...bars.map((bar) => bar.value));
+  const sum = (values: readonly number[]) => values.reduce((total, value) => total + value, 0);
+  const most = Math.max(
+    1,
+    ...bars.map(({ values }) => (grouped ? Math.max(...values) : sum(values))),
+  );
   const width = 8;
   const gap = 2;
   const height = 64;
   const count = bars.length;
+  const scaled = (value: number) => (value === 0 ? 0 : Math.max(2, (value / most) * (height - 4)));
+  // Each figure's rectangle in a bar: side by side, or stacked, the bar as tall as its total.
+  const partsOf = (values: readonly number[], x: number) => {
+    if (grouped) {
+      const part = (width - (values.length - 1)) / values.length;
+      return values.map((value, j) => ({
+        x: x + j * (part + 1),
+        width: part,
+        y: height - scaled(value),
+        height: scaled(value),
+      }));
+    }
+    const total = sum(values);
+    const tall = scaled(total);
+    let top = height;
+    return values.map((value) => {
+      const part = total === 0 ? 0 : (value / total) * tall;
+      top -= part;
+      // A unit of the surface between a part and the one above it.
+      const gapAbove = top - (height - tall) > 0.01 ? 1 : 0;
+      return { x, width, y: top + gapAbove, height: Math.max(0, part - gapAbove) };
+    });
+  };
   return (
     <figure class="bar-chart">
       <figcaption>{caption}</figcaption>
+      {series.length > 1 && (
+        <ul class="bar-legend hint">
+          {series.map((one) => (
+            <li key={one.label}>
+              <span class={`bar-swatch bar-step-${one.step}`} />
+              {one.label}
+            </li>
+          ))}
+        </ul>
+      )}
       <svg
         viewBox={`0 0 ${count * (width + gap)} ${height}`}
         preserveAspectRatio="none"
@@ -275,44 +407,59 @@ export function BarChart({
           y1={height - 0.5}
           y2={height - 0.5}
         />
-        {bars.map(({ key, value }, i) => {
-          const bar = value === 0 ? 0 : Math.max(2, (value / most) * (height - 4));
-          return (
-            <g
-              key={key}
-              data-bar={key}
-              onPointerEnter={() => setPointed(key)}
-              onClick={() => setPointed(key)}
-            >
-              <rect
-                class="bar-hit"
-                x={i * (width + gap)}
-                y="0"
-                width={width + gap}
-                height={height}
-              />
-              {bar > 0 && (
-                <rect
-                  class={`bar${key === pointed ? " pointed" : ""}`}
-                  x={i * (width + gap)}
-                  y={height - bar}
-                  width={width}
-                  height={bar}
-                  rx="2"
-                />
-              )}
-            </g>
-          );
-        })}
+        {bars.map(({ key, values }, i) => (
+          <g
+            key={key}
+            data-bar={key}
+            onPointerEnter={() => setPointed(key)}
+            onClick={() => setPointed(key)}
+          >
+            <rect class="bar-hit" x={i * (width + gap)} y="0" width={width + gap} height={height} />
+            {partsOf(values, i * (width + gap)).map(
+              (part, j) =>
+                part.height > 0 && (
+                  <rect
+                    key={j}
+                    class={`bar${series.length > 1 ? ` bar-step-${series[j]!.step}` : ""}${key === pointed ? " pointed" : ""}`}
+                    x={part.x}
+                    y={part.y}
+                    width={part.width}
+                    height={part.height}
+                    rx={series.length > 1 && !grouped ? 0 : 2}
+                  />
+                ),
+            )}
+          </g>
+        ))}
       </svg>
+      {ticks !== undefined && (
+        <span class="bar-ticks hint" aria-hidden="true">
+          {ticks.map((tick, i) => (
+            <span key={i}>{tick}</span>
+          ))}
+        </span>
+      )}
       <Inspector text={bars.find((bar) => bar.key === pointed)?.text ?? null} prompt={prompt} />
       {children}
     </figure>
   );
 }
 
-/** Answers on each of the last `count` study days up to today, as bars on one baseline. */
-export function DayBars({
+/** The parts of a day DayHeldBars stacks, bottom first, with their words and steps of the green. */
+const DAY_PARTS = [
+  ["remembered", "statistics.rememberedColumn", 4],
+  ["introduced", "statistics.introduced", 3],
+  ["lapses", "statistics.lapses", 2],
+  ["repeats", "statistics.repeats", 1],
+] as const;
+
+/**
+ * What each of the last `count` study days up to today held, as stacked
+ * bars on one baseline: reviews remembered, new cards, lapses and
+ * repeats. A course answer to a card seen before is none of them, so a
+ * day's bar can fall short of its answers, which the table gives.
+ */
+export function DayHeldBars({
   days,
   today,
   count = 30,
@@ -325,18 +472,140 @@ export function DayBars({
   const dayText = useDayText();
   const byDay = new Map(days.map((day) => [day.studyDay, day]));
   const shown = Array.from({ length: count }, (_, i) => shiftStudyDay(today, i - count + 1));
+  const partsOf = (day: DayActivity | undefined) =>
+    day === undefined
+      ? [0, 0, 0, 0]
+      : [day.reviews - day.lapses, day.introduced, day.lapses, day.repeats];
   return (
     <BarChart
-      caption={t("statistics.lastDays", { count })}
-      label={t("statistics.lastDaysLabel", { count })}
+      caption={t("statistics.dayHeld", { count })}
+      label={t("statistics.dayHeldLabel", { count })}
       bars={shown.map((day) => ({
         key: day,
-        value: byDay.get(day)?.answers ?? 0,
+        values: partsOf(byDay.get(day)),
         text: dayText(day, byDay.get(day)),
       }))}
+      series={DAY_PARTS.map(([, key, step]) => ({ label: t(key), step }))}
       prompt={t("statistics.pointAtDay")}
     >
+      <p class="chart-note hint">{t("statistics.dayHeldNote")}</p>
       <DayTable days={days.filter((day) => day.studyDay >= shown[0]!)} />
+    </BarChart>
+  );
+}
+
+/**
+ * The answers on each weekday on average (weekdayRhythmOf), Monday to
+ * Sunday, each named under its bar in this language, with how many of
+ * that weekday were studied in the table.
+ */
+export function WeekdayChart({ weekdays }: { weekdays: readonly WeekdayRhythm[] }) {
+  const { t, locale } = useI18n();
+  const average = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  // 2024-01-01 was a Monday: weekday i is i days after it.
+  const nameOf = (weekday: number, form: "short" | "long") =>
+    new Date(Date.UTC(2024, 0, 1 + weekday)).toLocaleDateString(locale, {
+      weekday: form,
+      timeZone: "UTC",
+    });
+  const averageOf = ({ answers, days }: WeekdayRhythm) => (days === 0 ? 0 : answers / days);
+  return (
+    <BarChart
+      caption={t("statistics.weekdays")}
+      label={t("statistics.weekdaysLabel")}
+      bars={weekdays.map((weekday) => ({
+        key: String(weekday.weekday),
+        values: [averageOf(weekday)],
+        text: t("statistics.weekdayDetail", {
+          weekday: nameOf(weekday.weekday, "long"),
+          // To the tenth the table shows, which also picks the plural form.
+          average: t("statistics.averageAnswerCount", {
+            count: Math.round(averageOf(weekday) * 10) / 10,
+          }),
+          studied: weekday.studied,
+          count: weekday.days,
+        }),
+      }))}
+      ticks={weekdays.map((weekday) => nameOf(weekday.weekday, "short"))}
+      prompt={t("statistics.pointAtWeekday")}
+    >
+      <p class="chart-note hint">{t("statistics.weekdaysNote")}</p>
+      <details class="chart-table">
+        <summary>{t("statistics.showTable")}</summary>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{t("statistics.weekday")}</th>
+              <th scope="col">{t("statistics.averageAnswers")}</th>
+              <th scope="col">{t("statistics.studied")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {weekdays.map((weekday) => (
+              <tr key={weekday.weekday}>
+                <td>{nameOf(weekday.weekday, "long")}</td>
+                <td>{average.format(averageOf(weekday))}</td>
+                <td>
+                  {t("statistics.studiedOf", { studied: weekday.studied, count: weekday.days })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    </BarChart>
+  );
+}
+
+/**
+ * The new cards beside the reviews done, week by week (intakeVsLoadOf),
+ * as pairs of bars: whether new cards are taken on faster than their
+ * reviews can be kept up with.
+ */
+export function IntakeChart({ weeks }: { weeks: readonly WeekLoad[] }) {
+  const { t, formatDate } = useI18n();
+  return (
+    <BarChart
+      caption={t("statistics.intake")}
+      label={t("statistics.intakeLabel")}
+      bars={weeks.map((week) => ({
+        key: week.week,
+        values: [week.introduced, week.reviews],
+        text: t("statistics.intakeDetail", {
+          date: formatDate(week.week),
+          introduced: week.introduced,
+          reviews: t("statistics.reviewCount", { count: week.reviews }),
+        }),
+      }))}
+      series={[
+        { label: t("statistics.introduced"), step: 2 },
+        { label: t("statistics.reviews"), step: 4 },
+      ]}
+      grouped
+      prompt={t("statistics.pointAtWeek")}
+    >
+      <p class="chart-note hint">{t("statistics.intakeNote")}</p>
+      <details class="chart-table">
+        <summary>{t("statistics.showTable")}</summary>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{t("statistics.weekOf")}</th>
+              <th scope="col">{t("statistics.introduced")}</th>
+              <th scope="col">{t("statistics.reviews")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...weeks].reverse().map((week) => (
+              <tr key={week.week}>
+                <td>{formatDate(week.week)}</td>
+                <td>{week.introduced}</td>
+                <td>{week.reviews}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
     </BarChart>
   );
 }
@@ -361,7 +630,11 @@ export function ForecastBars({ forecast }: { forecast: readonly ForecastDay[] })
     <BarChart
       caption={t("statistics.forecast", { count })}
       label={t("statistics.forecastLabel", { count })}
-      bars={forecast.map((day, i) => ({ key: day.studyDay, value: day.due, text: textOf(day, i) }))}
+      bars={forecast.map((day, i) => ({
+        key: day.studyDay,
+        values: [day.due],
+        text: textOf(day, i),
+      }))}
       prompt={t("statistics.pointAtDayAhead")}
     >
       <p class="chart-note hint">{t("statistics.forecastNote")}</p>
@@ -606,7 +879,8 @@ function nextMonth(month: string): string {
  * How well reviews were remembered, month by month (monthlyRetention), on
  * a fixed scale of 0 to 100%: young cards dashed, mature cards solid. A
  * month without reviews of a kind, or without answers at all, is a gap in
- * that line, not a 0. The months must not be empty.
+ * that line, not a 0. The table adds each month's first tries. The
+ * months must not be empty.
  */
 export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
   const { t, locale, formatPercent } = useI18n();
@@ -627,6 +901,13 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
       : t("statistics.recallShare", {
           percent: formatPercent(recall.recalled / recall.reviews),
           count: recall.reviews,
+        });
+  const firstTryShare = ({ introduced, recalled }: FirstTry) =>
+    introduced === 0
+      ? "–"
+      : t("statistics.firstTryShare", {
+          percent: formatPercent(recalled / introduced),
+          count: introduced,
         });
   const line = (kind: "young" | "mature") =>
     keys.map((month) => {
@@ -664,6 +945,7 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
                 <th scope="col">{t("statistics.month")}</th>
                 <th scope="col">{t("statistics.youngShort")}</th>
                 <th scope="col">{t("statistics.matureShort")}</th>
+                <th scope="col">{t("statistics.firstTry")}</th>
               </tr>
             </thead>
             <tbody>
@@ -672,6 +954,7 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
                   <td>{formatMonth(entry.month)}</td>
                   <td>{share(entry.retention.young)}</td>
                   <td>{share(entry.retention.mature)}</td>
+                  <td>{firstTryShare(entry.firstTry)}</td>
                 </tr>
               ))}
             </tbody>
@@ -679,6 +962,122 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
         </details>
       }
     />
+  );
+}
+
+/** The answer buttons, in order, with the words the study screen gives them. */
+const GRADE_GROUPS = [
+  ["again", "study.minimal.again"],
+  ["hard", "study.minimal.hard"],
+  ["good", "study.minimal.good"],
+  ["easy", "study.minimal.easy"],
+] as const;
+
+/**
+ * The answer buttons pressed (gradeGroupsOf) for first answers and for
+ * young and mature reviews: a bar each, its four steps of the green as
+ * wide as their shares, Again the lightest; a kind with no answers has
+ * an empty bar. Pointing at a step says its share; the table gives every
+ * count.
+ */
+export function GradeBars({ buttons }: { buttons: AnswerButtons }) {
+  const { t, formatPercent } = useI18n();
+  const [pointed, setPointed] = useState<string | null>(null);
+  const kinds = [
+    ["introductions", t("statistics.buttonsFirst")],
+    ["young", t("statistics.youngShort")],
+    ["mature", t("statistics.matureShort")],
+  ] as const;
+  const totalOf = (kind: keyof AnswerButtons) =>
+    GRADE_GROUPS.reduce((total, [group]) => total + buttons[kind][group], 0);
+  const cell = (kind: keyof AnswerButtons, group: GradeGroup) => {
+    const count = buttons[kind][group];
+    return count === 0
+      ? "0"
+      : t("statistics.buttonCell", { count, percent: formatPercent(count / totalOf(kind)) });
+  };
+  const textOf = (key: string) => {
+    const [kind, group] = key.split(" ") as [keyof AnswerButtons, GradeGroup];
+    const count = buttons[kind][group];
+    return t("statistics.buttonDetail", {
+      kind: kinds.find(([name]) => name === kind)![1],
+      button: t(GRADE_GROUPS.find(([name]) => name === group)![1]),
+      percent: formatPercent(count / totalOf(kind)),
+      count,
+    });
+  };
+  return (
+    <figure class="grade-bars">
+      <figcaption>{t("statistics.buttons")}</figcaption>
+      <p class="chart-note hint">{t("statistics.buttonsNote")}</p>
+      <ul class="maturity-legend hint" aria-hidden="true">
+        {GRADE_GROUPS.map(([group, key]) => (
+          <li key={group}>
+            <span class={`maturity-swatch grade-${group}`} />
+            {t(key)}
+          </li>
+        ))}
+      </ul>
+      <div class="grade-rows">
+        {kinds.map(([kind, name]) => (
+          <div key={kind} class="grade-row">
+            <span class="grade-kind" aria-hidden="true">
+              {name}
+            </span>
+            <div
+              class="grade-bar"
+              role="img"
+              aria-label={t("statistics.buttonsLabel", {
+                kind: name,
+                counts: GRADE_GROUPS.map(([group, key]) =>
+                  t("statistics.buttonCount", { button: t(key), count: buttons[kind][group] }),
+                ).join(", "),
+              })}
+            >
+              {GRADE_GROUPS.filter(([group]) => buttons[kind][group] > 0).map(([group]) => (
+                <span
+                  key={group}
+                  class={`grade-segment grade-${group}${pointed === `${kind} ${group}` ? " pointed" : ""}`}
+                  style={{ flexGrow: buttons[kind][group] }}
+                  data-part={`${kind} ${group}`}
+                  onPointerEnter={() => setPointed(`${kind} ${group}`)}
+                  onClick={() => setPointed(`${kind} ${group}`)}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <Inspector
+        text={pointed === null ? null : textOf(pointed)}
+        prompt={t("statistics.pointAtButton")}
+      />
+      <details class="chart-table">
+        <summary>{t("statistics.showTable")}</summary>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{t("statistics.answers")}</th>
+              {GRADE_GROUPS.map(([group, key]) => (
+                <th key={group} scope="col">
+                  {t(key)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {kinds.map(([kind, name]) => (
+              <tr key={kind}>
+                <th scope="row">{name}</th>
+                {GRADE_GROUPS.map(([group]) => (
+                  <td key={group}>{cell(kind, group)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    </figure>
   );
 }
 

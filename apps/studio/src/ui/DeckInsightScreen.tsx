@@ -71,7 +71,7 @@ export function DeckInsightScreen({
         label={t("studio.insight.forecastLabel", { count: forecast.length })}
         bars={forecast.map((day) => ({
           key: day.studyDay,
-          value: day.reviews,
+          values: [day.reviews],
           text: t("studio.insight.forecastDay", {
             date: formatDate(day.studyDay),
             reviews: day.reviews,
@@ -175,7 +175,7 @@ function Histogram({
       label={label}
       bars={bins.map((bin) => ({
         key: String(bin.from),
-        value: bin.count,
+        values: [bin.count],
         text: t("studio.insight.binText", { range: range(bin), count: bin.count }),
       }))}
       prompt={t("studio.insight.pointAtBar")}

@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
 import {
   chainIndexOf,
+  isIntroduction,
   isLapse,
   isRepeat,
   isScoredReview,
@@ -81,6 +82,18 @@ describe("isRepeat, isScoredReview and isLapse", () => {
       true,
     ]);
     expect(all.map((a) => isLapse(a, index))).toEqual([false, false, true, false, false, false]);
+  });
+
+  it("introduce a prompt by an answer without a prior interval that repeats none", () => {
+    const introduced = answer("a", "2026-10-01T10:00:00.000Z", { priorIntervalDays: undefined });
+    // Forgotten in the Studio and studied again the same day: a repeat.
+    const again = answer("b", "2026-10-01T10:05:00.000Z", { priorIntervalDays: undefined });
+    const reviewed = answer("c", "2026-10-02T10:00:00.000Z");
+    // Forgotten in the Studio and studied again another day: introduced again.
+    const later = answer("d", "2026-10-03T10:00:00.000Z", { priorIntervalDays: undefined });
+    const all = [introduced, again, reviewed, later];
+    const index = chainIndexOf(all);
+    expect(all.map((a) => isIntroduction(a, index))).toEqual([true, false, false, true]);
   });
 
   it("tells a repeat by its prompt's chain alone, whatever else was answered that day", () => {

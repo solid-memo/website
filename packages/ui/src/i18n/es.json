@@ -502,7 +502,17 @@
       "many": "{percent} recordadas de {count} de repasos",
       "other": "{percent} recordadas de {count} repasos"
     },
-    "allStatistics": "Todas las estadísticas"
+    "allStatistics": "Todas las estadísticas",
+    "week": {
+      "one": "{count} esta semana",
+      "many": "{count} esta semana",
+      "other": "{count} esta semana"
+    },
+    "weekChange": {
+      "one": "{count} esta semana, {change} respecto a la anterior",
+      "many": "{count} esta semana, {change} respecto a la anterior",
+      "other": "{count} esta semana, {change} respecto a la anterior"
+    }
   },
   "newcomerCourse": {
     "eyebrow": "¿Primera vez aquí?",
@@ -1400,12 +1410,30 @@
     },
     "activity": "Actividad de las últimas {weeks} semanas",
     "activityLabel": "Respuestas por día en las últimas {weeks} semanas: cuanto más intenso el verde, más respuestas.",
-    "lastDays": "Respuestas de los últimos {count} días",
-    "lastDaysLabel": "Respuestas de cada uno de los últimos {count} días.",
     "less": "Menos",
     "more": "Más",
     "pointAtDay": "Señala un día para ver qué contiene, o abre la tabla de abajo.",
-    "dayDetail": "{date}: {answers}, nuevas: {introduced}, olvidadas: {forgotten}.",
+    "dayDetail": "{date}: {answers} ({introduced}, {remembered}, {lapses}, {repeats}).",
+    "newCount": {
+      "one": "{count} nueva",
+      "many": "{count} nuevas",
+      "other": "{count} nuevas"
+    },
+    "rememberedCount": {
+      "one": "{count} recordada",
+      "many": "{count} recordadas",
+      "other": "{count} recordadas"
+    },
+    "lapseCount": {
+      "one": "{count} fallo",
+      "many": "{count} de fallos",
+      "other": "{count} fallos"
+    },
+    "repeatCount": {
+      "one": "{count} repetición",
+      "many": "{count} de repeticiones",
+      "other": "{count} repeticiones"
+    },
     "dayNothing": "{date}: no se estudió nada.",
     "answerCount": {
       "one": "{count} respuesta",
@@ -1416,7 +1444,6 @@
     "day": "Día",
     "introduced": "Nuevas",
     "introducedColumn": "Introducidas",
-    "forgotten": "Olvidadas",
     "byDeck": "Por mazo",
     "deck": "Mazo",
     "lastStudied": "Último estudio",
@@ -1487,7 +1514,70 @@
       "many": "{count} de repasos",
       "other": "{count} repasos"
     },
-    "due": "Pendientes"
+    "due": "Pendientes",
+    "recentDays": "Últimos {count} días",
+    "recentDaysValue": {
+      "one": "{studied} de {count} día",
+      "many": "{studied} de {count} de días",
+      "other": "{studied} de {count} días"
+    },
+    "thisWeek": "Esta semana hasta ahora",
+    "thisMonth": "Este mes hasta ahora",
+    "sameDaysLastWeek": "Los mismos días de la semana pasada: {value}",
+    "sameDaysLastMonth": "Los mismos días del mes pasado: {value}",
+    "recall": "Recordadas",
+    "firstTry": "A la primera",
+    "firstTryShare": {
+      "one": "{percent} de {count} tarjeta nueva",
+      "many": "{percent} de {count} de tarjetas nuevas",
+      "other": "{percent} de {count} tarjetas nuevas"
+    },
+    "ofNewCards": {
+      "one": "recordadas, de {count} tarjeta nueva",
+      "many": "recordadas, de {count} de tarjetas nuevas",
+      "other": "recordadas, de {count} tarjetas nuevas"
+    },
+    "noNewCards": "Aún no hay tarjetas nuevas",
+    "dayHeld": "Qué contuvo cada día, los últimos {count} días",
+    "dayHeldLabel": "Barras apiladas para cada uno de los últimos {count} días: repasos recordados, tarjetas nuevas, fallos y repeticiones.",
+    "dayHeldNote": "Repeticiones: una tarjeta que vuelve a la sesión el mismo día. Una respuesta de curso a una tarjeta ya vista solo cuenta entre las respuestas del día.",
+    "rememberedColumn": "Recordadas",
+    "repeats": "Repeticiones",
+    "buttons": "Botones de respuesta",
+    "buttonsNote": "El botón pulsado en la primera respuesta a cada tarjeta y en cada repaso, recordado y calificado por ti; no se cuentan las respuestas de los cursos ni una tarjeta que vuelve a la sesión el mismo día. En la escala de 0 a 5, de 0 a 2 cuentan como «Otra vez».",
+    "buttonsFirst": "Primeras respuestas",
+    "buttonsLabel": "{kind}: {counts}.",
+    "buttonCount": "{button} {count}",
+    "buttonDetail": {
+      "one": "{kind}: {button} en {count} respuesta, {percent}.",
+      "many": "{kind}: {button} en {count} de respuestas, {percent}.",
+      "other": "{kind}: {button} en {count} respuestas, {percent}."
+    },
+    "buttonCell": "{count} ({percent})",
+    "pointAtButton": "Señala una parte de una barra para ver su proporción, o abre la tabla de abajo.",
+    "weekdays": "Respuestas por día de la semana",
+    "weekdaysLabel": "Barras con la media de respuestas de cada día de la semana, de lunes a domingo.",
+    "weekdaysNote": "Las respuestas de cada día de la semana divididas entre las veces que ha habido ese día desde tu primer día de estudio en estas cifras.",
+    "weekdayDetail": "{weekday}: {average}; estudiado {studied} de {count}.",
+    "averageAnswerCount": {
+      "one": "{count} respuesta de media",
+      "many": "{count} de respuestas de media",
+      "other": "{count} respuestas de media"
+    },
+    "weekday": "Día de la semana",
+    "averageAnswers": "Respuestas de media",
+    "studied": "Estudiados",
+    "studiedOf": "{studied} de {count}",
+    "pointAtWeekday": "Señala un día de la semana para ver qué contiene, o abre la tabla de abajo.",
+    "intake": "Tarjetas nuevas y repasos, por semana",
+    "intakeLabel": "Pares de barras, uno por semana: tarjetas nuevas junto a repasos.",
+    "intakeNote": "Cada tarjeta nueva trae repasos en las semanas siguientes. Si las tarjetas nuevas superan una y otra vez los repasos que llegas a hacer, toma menos; los repasos pendientes, más abajo, muestran lo que viene.",
+    "intakeDetail": "Semana del {date}: nuevas: {introduced}, {reviews}.",
+    "weekOf": "Semana del",
+    "reviews": "Repasos",
+    "pointAtWeek": "Señala una semana para ver qué contiene, o abre la tabla de abajo.",
+    "directionsColumn": "Por sentido",
+    "directionShare": "{direction}: {share}"
   },
   "zoomableImage": {
     "enlarge": "Ampliar imagen",

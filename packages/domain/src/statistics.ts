@@ -2,31 +2,55 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { isRecalled, monthOfStudyDay, type Answer } from "./answer";
-import { chainIndexOf, isLapse, isRepeat, isScoredReview, type ChainIndex } from "./answerChain";
+import {
+  isRecalled,
+  MATURE_INTERVAL_DAYS,
+  monthOfStudyDay,
+  shiftStudyDay,
+  type Answer,
+} from "./answer";
+import {
+  chainIndexOf,
+  isIntroduction,
+  isLapse,
+  isRepeat,
+  isScoredReview,
+  type ChainIndex,
+} from "./answerChain";
+import {
+  daysStudiedOf,
+  firstTrySuccessOf,
+  gradeGroupsOf,
+  intakeVsLoadOf,
+  periodToDateOf,
+  retentionByDirection,
+  weekdayRhythmOf,
+  type AnswerButtons,
+  type DirectionRecall,
+  type FirstTry,
+  type PeriodToDate,
+  type WeekdayRhythm,
+  type WeekLoad,
+} from "./studyPatterns";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
  * Study statistics, computed from the answer log (domain/answer.ts):
  * activity by study day, streaks, totals, how well reviewed cards were
- * remembered, and how course questions were answered. Recall counts
+ * remembered, and how course questions were answered, with how the
+ * learner answers and studies (studyPatterns.ts). Recall counts
  * scored reviews only (answerChain.ts): not first answers, repeats the
  * same day, or course answers, which are counted apart. Pure; the use
  * case reads the months it needs.
  */
-
-/** A prompt reviewed at an interval of this many days or more is mature; below, young. */
-export const MATURE_INTERVAL_DAYS = 21;
 
 /** What happened on one study day. */
 export interface DayActivity {
   /** "YYYY-MM-DD". */
   studyDay: string;
   answers: number;
-  /** Prompts answered for the first time: introduced that day. */
+  /** Prompts introduced that day (answerChain.ts isIntroduction). */
   introduced: number;
-  /** Answers below grade 3: the card was forgotten. */
-  forgotten: number;
   /** Scored reviews (answerChain.ts isScoredReview). */
   reviews: number;
   /** Scored reviews below grade 3 (answerChain.ts isLapse). */
@@ -48,11 +72,15 @@ export interface Retention {
   mature: Recall;
 }
 
-/** How well the reviews of one study month were remembered; a month of first answers only has none. */
+/**
+ * How well the reviews of one study month were remembered (a month of
+ * first answers only has none), and its first answers.
+ */
 export interface MonthRetention {
   /** "YYYY-MM". */
   month: string;
   retention: Retention;
+  firstTry: FirstTry;
 }
 
 /** The prompts introduced up to and including one study day. */
@@ -89,6 +117,9 @@ export interface DeckStatistics {
   /** Scored reviews below grade 3. */
   lapses: number;
   quiz: Quiz;
+  firstTry: FirstTry;
+  /** Recall in each direction with a review (studyPatterns.ts retentionByDirection). */
+  directions: DirectionRecall[];
 }
 
 export interface Statistics {
@@ -104,6 +135,21 @@ export interface Statistics {
   months: MonthRetention[];
   /** Every deck answered in, most answers first. */
   decks: DeckStatistics[];
+  /** The answer buttons pressed. */
+  buttons: AnswerButtons;
+  firstTry: FirstTry;
+  /** Recall in each direction with a review. */
+  directions: DirectionRecall[];
+  /** How many of the last RECENT_DAYS study days were studied. */
+  recentStudyDays: number;
+  /** This week so far, beside the same days of last week. */
+  week: PeriodToDate;
+  /** This month so far, beside the same days of last month. */
+  month: PeriodToDate;
+  /** Each weekday's study, Monday first. */
+  weekdays: WeekdayRhythm[];
+  /** The new cards and the reviews of each of the last INTAKE_WEEKS weeks. */
+  intake: WeekLoad[];
 }
 
 /** Every study day with answers, oldest first; `index` holds the answers' chains. */
@@ -114,26 +160,18 @@ export function dailyActivity(answers: readonly Answer[], index: ChainIndex): Da
       studyDay: answer.studyDay,
       answers: 0,
       introduced: 0,
-      forgotten: 0,
       reviews: 0,
       lapses: 0,
       repeats: 0,
     };
     day.answers += 1;
-    if (answer.priorIntervalDays === undefined) day.introduced += 1;
-    if (!isRecalled(answer)) day.forgotten += 1;
+    if (isIntroduction(answer, index)) day.introduced += 1;
     if (isScoredReview(answer, index)) day.reviews += 1;
     if (isLapse(answer, index)) day.lapses += 1;
     if (isRepeat(answer, index)) day.repeats += 1;
     byDay.set(answer.studyDay, day);
   }
   return [...byDay.values()].sort((a, b) => a.studyDay.localeCompare(b.studyDay));
-}
-
-/** The study day `days` after (or before, when negative) another, by the calendar. */
-export function shiftStudyDay(studyDay: string, days: number): string {
-  const [year, month, day] = studyDay.split("-").map(Number);
-  return new Date(Date.UTC(year!, month! - 1, day! + days)).toISOString().slice(0, 10);
 }
 
 /** Runs of consecutive study days: the one alive today, and the longest. */
@@ -219,7 +257,11 @@ function groupBy(
  */
 export function monthlyRetention(answers: readonly Answer[], index: ChainIndex): MonthRetention[] {
   return [...groupBy(answers, (answer) => monthOfStudyDay(answer.studyDay))]
-    .map(([month, monthAnswers]) => ({ month, retention: retentionOf(monthAnswers, index) }))
+    .map(([month, monthAnswers]) => ({
+      month,
+      retention: retentionOf(monthAnswers, index),
+      firstTry: firstTrySuccessOf(monthAnswers, index),
+    }))
     .sort((a, b) => a.month.localeCompare(b.month));
 }
 
@@ -255,16 +297,26 @@ export function statisticsOf(answers: readonly Answer[], today: string): Statist
             deckAnswers[0]!.studyDay,
           ),
           retention,
-          introduced: deckAnswers.filter((answer) => answer.priorIntervalDays === undefined).length,
+          introduced: deckAnswers.filter((answer) => isIntroduction(answer, index)).length,
           lapses:
             retention.young.reviews -
             retention.young.recalled +
             retention.mature.reviews -
             retention.mature.recalled,
           quiz: quizAccuracyOf(deckAnswers, index),
+          firstTry: firstTrySuccessOf(deckAnswers, index),
+          directions: retentionByDirection(deckAnswers, index),
         };
       })
       .sort((a, b) => b.answers - a.answers || a.deckUrl.localeCompare(b.deckUrl)),
+    buttons: gradeGroupsOf(answers, index),
+    firstTry: firstTrySuccessOf(answers, index),
+    directions: retentionByDirection(answers, index),
+    recentStudyDays: daysStudiedOf(days, today),
+    week: periodToDateOf(days, today, "week"),
+    month: periodToDateOf(days, today, "month"),
+    weekdays: weekdayRhythmOf(days, today),
+    intake: intakeVsLoadOf(days, today),
   };
 }
 
@@ -279,6 +331,8 @@ export interface TodaySummary {
   streak: number;
   /** The longest run of study days there has been, today's included. */
   longestStreak: number;
+  /** This week's answers so far, and those of the same days last week. */
+  week: { answers: number; previous: number };
 }
 
 /** Today's study, or null while nothing is studied today. */
@@ -291,5 +345,9 @@ export function todayOf(statistics: Statistics): TodaySummary | null {
     recall: { reviews: day.reviews, recalled: day.reviews - day.lapses },
     streak: statistics.streaks.current,
     longestStreak: statistics.streaks.longest,
+    week: {
+      answers: statistics.week.current.answers,
+      previous: statistics.week.previous.answers,
+    },
   };
 }

@@ -485,7 +485,15 @@
       "one": "{percent} ihågkomna av {count} repetition",
       "other": "{percent} ihågkomna av {count} repetitioner"
     },
-    "allStatistics": "All statistik"
+    "allStatistics": "All statistik",
+    "week": {
+      "one": "{count} den här veckan",
+      "other": "{count} den här veckan"
+    },
+    "weekChange": {
+      "one": "{count} den här veckan, {change} mot förra veckan",
+      "other": "{count} den här veckan, {change} mot förra veckan"
+    }
   },
   "newcomerCourse": {
     "eyebrow": "Ny här?",
@@ -1338,12 +1346,26 @@
     },
     "activity": "Aktivitet, de senaste {weeks} veckorna",
     "activityLabel": "Svar per dag under de senaste {weeks} veckorna: ju starkare grönt, desto fler svar.",
-    "lastDays": "Svar, de senaste {count} dagarna",
-    "lastDaysLabel": "Svar var och en av de senaste {count} dagarna.",
     "less": "Färre",
     "more": "Fler",
     "pointAtDay": "Peka på en dag för att se vad den innehöll, eller öppna tabellen nedan.",
-    "dayDetail": "{date}: {answers}, {introduced} nya, {forgotten} glömda.",
+    "dayDetail": "{date}: {answers} ({introduced}, {remembered}, {lapses}, {repeats}).",
+    "newCount": {
+      "one": "{count} nytt",
+      "other": "{count} nya"
+    },
+    "rememberedCount": {
+      "one": "{count} ihågkommet",
+      "other": "{count} ihågkomna"
+    },
+    "lapseCount": {
+      "one": "{count} miss",
+      "other": "{count} missar"
+    },
+    "repeatCount": {
+      "one": "{count} upprepning",
+      "other": "{count} upprepningar"
+    },
     "dayNothing": "{date}: inget studerat.",
     "answerCount": {
       "one": "{count} svar",
@@ -1353,7 +1375,6 @@
     "day": "Dag",
     "introduced": "Nya",
     "introducedColumn": "Introducerade",
-    "forgotten": "Glömda",
     "byDeck": "Per kortlek",
     "deck": "Kortlek",
     "lastStudied": "Senast studerad",
@@ -1417,7 +1438,65 @@
       "one": "{count} repetition",
       "other": "{count} repetitioner"
     },
-    "due": "Att göra"
+    "due": "Att göra",
+    "recentDays": "Senaste {count} dagarna",
+    "recentDaysValue": {
+      "one": "{studied} av {count} dag",
+      "other": "{studied} av {count} dagar"
+    },
+    "thisWeek": "Den här veckan hittills",
+    "thisMonth": "Den här månaden hittills",
+    "sameDaysLastWeek": "Samma dagar förra veckan: {value}",
+    "sameDaysLastMonth": "Samma dagar förra månaden: {value}",
+    "recall": "Ihågkomna",
+    "firstTry": "Första försöket",
+    "firstTryShare": {
+      "one": "{percent} av {count} nytt kort",
+      "other": "{percent} av {count} nya kort"
+    },
+    "ofNewCards": {
+      "one": "ihågkomna, av {count} nytt kort",
+      "other": "ihågkomna, av {count} nya kort"
+    },
+    "noNewCards": "Inga nya kort än",
+    "dayHeld": "Vad varje dag innehöll, de senaste {count} dagarna",
+    "dayHeldLabel": "Staplar i lager för var och en av de senaste {count} dagarna: ihågkomna repetitioner, nya kort, missar och upprepningar.",
+    "dayHeldNote": "Upprepningar: ett kort som kommer tillbaka i passet samma dag. Ett kurssvar på ett kort du sett förut räknas bara bland dagens svar.",
+    "rememberedColumn": "Ihågkomna",
+    "repeats": "Upprepningar",
+    "buttons": "Svarsknappar",
+    "buttonsNote": "Knappen du tryckte på vid varje korts första svar och vid varje repetition, som du minns och bedömer själv; kurssvar och ett kort som kommer tillbaka i passet samma dag räknas inte. På skalan 0 till 5 räknas 0 till 2 som Igen.",
+    "buttonsFirst": "Första svar",
+    "buttonsLabel": "{kind}: {counts}.",
+    "buttonCount": "{button} {count}",
+    "buttonDetail": {
+      "one": "{kind}: {button} vid {count} svar, {percent}.",
+      "other": "{kind}: {button} vid {count} svar, {percent}."
+    },
+    "buttonCell": "{count} ({percent})",
+    "pointAtButton": "Peka på en del av en stapel för att se dess andel, eller öppna tabellen nedan.",
+    "weekdays": "Svar per veckodag",
+    "weekdaysLabel": "Staplar för svaren varje veckodag i genomsnitt, måndag till söndag.",
+    "weekdaysNote": "Varje veckodags svar delat med hur många sådana veckodagar det har varit sedan din första studiedag i statistiken.",
+    "weekdayDetail": "{weekday}: {average}; studerade {studied} av {count}.",
+    "averageAnswerCount": {
+      "one": "{count} svar i genomsnitt",
+      "other": "{count} svar i genomsnitt"
+    },
+    "weekday": "Veckodag",
+    "averageAnswers": "Svar i genomsnitt",
+    "studied": "Studerade",
+    "studiedOf": "{studied} av {count}",
+    "pointAtWeekday": "Peka på en veckodag för att se vad den innehöll, eller öppna tabellen nedan.",
+    "intake": "Nya kort och repetitioner, per vecka",
+    "intakeLabel": "Par av staplar, ett för varje vecka: nya kort bredvid repetitioner.",
+    "intakeNote": "Varje nytt kort ger repetitioner veckorna efter. Om de nya korten hela tiden drar ifrån repetitionerna du hinner med, ta färre; repetitionerna som väntar, längre ned, visar vad som kommer.",
+    "intakeDetail": "Veckan från {date}: {introduced} nya, {reviews}.",
+    "weekOf": "Veckan från",
+    "reviews": "Repetitioner",
+    "pointAtWeek": "Peka på en vecka för att se vad den innehöll, eller öppna tabellen nedan.",
+    "directionsColumn": "Per håll",
+    "directionShare": "{direction}: {share}"
   },
   "zoomableImage": {
     "enlarge": "Förstora bilden",

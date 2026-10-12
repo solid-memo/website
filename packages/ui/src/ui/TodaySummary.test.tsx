@@ -21,6 +21,7 @@ const today = (summary: Partial<Today> = {}): Today => ({
   recall: { reviews: 2, recalled: 1 },
   streak: 1,
   longestStreak: 1,
+  week: { answers: 4, previous: 0 },
   ...summary,
 });
 
@@ -30,7 +31,7 @@ describe("TodaySummary", () => {
     const strip = screen.getByRole("complementary", { name: "Today" });
     expect(strip).toHaveTextContent(
       "1-day streak Day one! Come back tomorrow for two." +
-        "Nice work! 4 cards · 2 new · 50% remembered of 2 reviews · All statistics",
+        "Nice work! 4 cards · 2 new · 50% remembered of 2 reviews · 4 this week · All statistics",
     );
     expect(screen.getByRole("link", { name: "All statistics" })).toHaveAttribute(
       "href",
@@ -53,8 +54,25 @@ describe("TodaySummary", () => {
       />,
     );
     expect(screen.getByRole("complementary", { name: "Today" })).toHaveTextContent(
-      /Nice work! 4 cards · 2 new · All statistics$/,
+      /Nice work! 4 cards · 2 new · 4 this week · All statistics$/,
     );
+  });
+
+  it("compares the week so far with the same days of last week, when it had any", () => {
+    const { rerender } = render(
+      <TodaySummary
+        today={today({ week: { answers: 12, previous: 10 } })}
+        statisticsHref="#/statistics"
+      />,
+    );
+    expect(screen.getByText(/· 12 this week, \+20% on last week ·/)).toBeInTheDocument();
+    rerender(
+      <TodaySummary
+        today={today({ week: { answers: 5, previous: 10 } })}
+        statisticsHref="#/statistics"
+      />,
+    );
+    expect(screen.getByText(/· 5 this week, -50% on last week ·/)).toBeInTheDocument();
   });
 
   it("celebrates a record streak, and otherwise names the record to beat", () => {

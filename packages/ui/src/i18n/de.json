@@ -485,7 +485,15 @@
       "one": "{percent} gewusst von {count} Wiederholung",
       "other": "{percent} gewusst von {count} Wiederholungen"
     },
-    "allStatistics": "Gesamte Statistik"
+    "allStatistics": "Gesamte Statistik",
+    "week": {
+      "one": "{count} diese Woche",
+      "other": "{count} diese Woche"
+    },
+    "weekChange": {
+      "one": "{count} diese Woche, {change} gegenüber letzter Woche",
+      "other": "{count} diese Woche, {change} gegenüber letzter Woche"
+    }
   },
   "newcomerCourse": {
     "eyebrow": "Neu hier?",
@@ -1338,12 +1346,26 @@
     },
     "activity": "Aktivität der letzten {weeks} Wochen",
     "activityLabel": "Antworten pro Tag in den letzten {weeks} Wochen: Je kräftiger das Grün, desto mehr Antworten.",
-    "lastDays": "Antworten der letzten {count} Tage",
-    "lastDaysLabel": "Antworten an jedem der letzten {count} Tage.",
     "less": "Weniger",
     "more": "Mehr",
     "pointAtDay": "Zeige auf einen Tag, um zu sehen, was du gelernt hast, oder öffne die Tabelle unten.",
-    "dayDetail": "{date}: {answers}, {introduced} neu, {forgotten} vergessen.",
+    "dayDetail": "{date}: {answers} ({introduced}, {remembered}, {lapses}, {repeats}).",
+    "newCount": {
+      "one": "{count} neu",
+      "other": "{count} neu"
+    },
+    "rememberedCount": {
+      "one": "{count} gewusst",
+      "other": "{count} gewusst"
+    },
+    "lapseCount": {
+      "one": "{count} Aussetzer",
+      "other": "{count} Aussetzer"
+    },
+    "repeatCount": {
+      "one": "{count} erneut abgefragt",
+      "other": "{count} erneut abgefragt"
+    },
     "dayNothing": "{date}: nichts gelernt.",
     "answerCount": {
       "one": "{count} Antwort",
@@ -1353,7 +1375,6 @@
     "day": "Tag",
     "introduced": "Neu",
     "introducedColumn": "Eingeführt",
-    "forgotten": "Vergessen",
     "byDeck": "Nach Stapel",
     "deck": "Stapel",
     "lastStudied": "Zuletzt gelernt",
@@ -1417,7 +1438,65 @@
       "one": "{count} Wiederholung",
       "other": "{count} Wiederholungen"
     },
-    "due": "Fällig"
+    "due": "Fällig",
+    "recentDays": "Letzte {count} Tage",
+    "recentDaysValue": {
+      "one": "{studied} von {count} Tag",
+      "other": "{studied} von {count} Tagen"
+    },
+    "thisWeek": "Diese Woche bisher",
+    "thisMonth": "Dieser Monat bisher",
+    "sameDaysLastWeek": "Dieselben Tage letzte Woche: {value}",
+    "sameDaysLastMonth": "Dieselben Tage letzten Monat: {value}",
+    "recall": "Gewusst",
+    "firstTry": "Beim ersten Mal",
+    "firstTryShare": {
+      "one": "{percent} von {count} neuen Karte",
+      "other": "{percent} von {count} neuen Karten"
+    },
+    "ofNewCards": {
+      "one": "gewusst, von {count} neuen Karte",
+      "other": "gewusst, von {count} neuen Karten"
+    },
+    "noNewCards": "Noch keine neuen Karten",
+    "dayHeld": "Was jeder Tag brachte, die letzten {count} Tage",
+    "dayHeldLabel": "Gestapelte Balken für jeden der letzten {count} Tage: gewusste Wiederholungen, neue Karten, Aussetzer und erneute Abfragen.",
+    "dayHeldNote": "Erneut abgefragt: eine Karte, die am selben Tag noch einmal in die Sitzung kommt. Eine Kursantwort zu einer schon gesehenen Karte zählt nur zu den Antworten des Tages.",
+    "rememberedColumn": "Gewusst",
+    "repeats": "Erneut abgefragt",
+    "buttons": "Antwortschaltflächen",
+    "buttonsNote": "Die Schaltfläche, die du bei der ersten Antwort zu jeder Karte und bei jeder Wiederholung gedrückt hast, aus dem Gedächtnis abgerufen und von dir bewertet; Kursantworten und eine Karte, die am selben Tag noch einmal in die Sitzung kommt, zählen nicht. Auf der Skala von 0 bis 5 zählen 0 bis 2 als „Nochmal“.",
+    "buttonsFirst": "Erste Antworten",
+    "buttonsLabel": "{kind}: {counts}.",
+    "buttonCount": "{button} {count}",
+    "buttonDetail": {
+      "one": "{kind}: {button} bei {count} Antwort, {percent}.",
+      "other": "{kind}: {button} bei {count} Antworten, {percent}."
+    },
+    "buttonCell": "{count} ({percent})",
+    "pointAtButton": "Zeige auf einen Teil eines Balkens, um seinen Anteil zu sehen, oder öffne die Tabelle unten.",
+    "weekdays": "Antworten nach Wochentag",
+    "weekdaysLabel": "Balken für die Antworten an jedem Wochentag im Schnitt, Montag bis Sonntag.",
+    "weekdaysNote": "Die Antworten jedes Wochentags geteilt durch die Zahl dieser Wochentage seit deinem ersten Lerntag in dieser Statistik.",
+    "weekdayDetail": "{weekday}: {average}; gelernt an {studied} von {count}.",
+    "averageAnswerCount": {
+      "one": "im Schnitt {count} Antwort",
+      "other": "im Schnitt {count} Antworten"
+    },
+    "weekday": "Wochentag",
+    "averageAnswers": "Antworten im Schnitt",
+    "studied": "Gelernt",
+    "studiedOf": "{studied} von {count}",
+    "pointAtWeekday": "Zeige auf einen Wochentag, um zu sehen, was du gelernt hast, oder öffne die Tabelle unten.",
+    "intake": "Neue Karten und Wiederholungen nach Woche",
+    "intakeLabel": "Balkenpaare, eins für jede Woche: neue Karten neben Wiederholungen.",
+    "intakeNote": "Jede neue Karte bringt in den Wochen danach Wiederholungen mit sich. Wenn die neuen Karten den Wiederholungen, die du schaffst, immer weiter davonlaufen, nimm weniger; die fälligen Wiederholungen weiter unten zeigen, was kommt.",
+    "intakeDetail": "Woche ab {date}: {introduced} neu, {reviews}.",
+    "weekOf": "Woche ab",
+    "reviews": "Wiederholungen",
+    "pointAtWeek": "Zeige auf eine Woche, um zu sehen, was sie brachte, oder öffne die Tabelle unten.",
+    "directionsColumn": "Nach Richtung",
+    "directionShare": "{direction}: {share}"
   },
   "zoomableImage": {
     "enlarge": "Bild vergrößern",

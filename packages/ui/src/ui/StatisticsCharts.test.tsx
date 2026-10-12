@@ -8,25 +8,36 @@ import type { DayActivity, MonthRetention } from "@solid-memo/domain/statistics"
 import { I18nProvider } from "./i18n";
 import {
   ActivityCalendar,
-  DayBars,
+  BarChart,
+  DayHeldBars,
+  FirstTryTile,
   ForecastBars,
+  GradeBars,
+  IntakeChart,
   IntroducedChart,
   levelOf,
   MaturityBar,
+  PeriodTiles,
   QuizTile,
   RecallChart,
   RecallTile,
   StatTile,
+  WeekdayChart,
 } from "./StatisticsCharts";
 
-const day = (studyDay: string, answers: number, introduced: number, forgotten: number) => ({
+const day = (
+  studyDay: string,
+  answers: number,
+  introduced: number,
+  lapses: number,
+  repeats = 0,
+) => ({
   studyDay,
   answers,
   introduced,
-  forgotten,
-  reviews: answers - introduced,
-  lapses: forgotten,
-  repeats: 0,
+  reviews: answers - introduced - repeats,
+  lapses,
+  repeats,
 });
 const days: DayActivity[] = [
   day("2026-09-14", 40, 10, 4),
@@ -65,6 +76,44 @@ describe("tiles", () => {
     expect(screen.getByRole("group", { name: "Young cards" })).toHaveTextContent("0%of 1 review");
   });
 
+  it("give the share of new cards remembered the first time, with their count, and a dash before any", () => {
+    const { rerender } = render(<FirstTryTile firstTry={{ introduced: 4, recalled: 3 }} />);
+    expect(screen.getByRole("group", { name: "First try" })).toHaveTextContent(
+      "75%remembered, of 4 new cards",
+    );
+    rerender(<FirstTryTile firstTry={{ introduced: 0, recalled: 0 }} />);
+    expect(screen.getByRole("group", { name: "First try" })).toHaveTextContent("–No new cards yet");
+  });
+
+  it("give this week so far beside the same days of last week, and this month beside last month's", () => {
+    const figures = {
+      current: { answers: 12, studyDays: 2, introduced: 3, recall: { reviews: 4, recalled: 3 } },
+      previous: { answers: 8, studyDays: 1, introduced: 5, recall: { reviews: 0, recalled: 0 } },
+    };
+    const { rerender } = render(<PeriodTiles period="week" figures={figures} />);
+    expect(screen.getByRole("group", { name: "Answers" })).toHaveTextContent(
+      "12Same days last week: 8",
+    );
+    expect(screen.getByRole("group", { name: "Study days" })).toHaveTextContent(
+      "2Same days last week: 1",
+    );
+    expect(screen.getByRole("group", { name: "Introduced" })).toHaveTextContent(
+      "3Same days last week: 5",
+    );
+    expect(screen.getByRole("group", { name: "Recall" })).toHaveTextContent(
+      "75%of 4 reviews · Same days last week: no reviews",
+    );
+    rerender(
+      <PeriodTiles
+        period="month"
+        figures={{ current: figures.previous, previous: figures.current }}
+      />,
+    );
+    expect(screen.getByRole("group", { name: "Recall" })).toHaveTextContent(
+      "–No reviews yet · Same days last month: 75% of 4 reviews",
+    );
+  });
+
   it("give the share of graded course answers right, with their count", () => {
     render(<QuizTile quiz={{ answers: 4, right: 3 }} />);
     expect(screen.getByRole("group", { name: "Graded course answers" })).toHaveTextContent(
@@ -87,7 +136,9 @@ describe("ActivityCalendar", () => {
     expect(inspector).not.toHaveAttribute("aria-live");
     fireEvent.pointerEnter(container.querySelector('[data-day="2026-09-14"]')!);
     expect(
-      screen.getByText("September 14, 2026: 40 answers, 10 new, 4 forgotten."),
+      screen.getByText(
+        "September 14, 2026: 40 answers (10 new, 26 remembered, 4 lapses, 0 repeats).",
+      ),
     ).toBeInTheDocument();
     expect(container.querySelector('[data-day="2026-09-14"]')).toHaveClass("pointed");
     fireEvent.click(container.querySelector('[data-day="2026-09-15"]')!);
@@ -110,19 +161,63 @@ describe("ActivityCalendar", () => {
   });
 });
 
-describe("DayBars", () => {
-  it("draws a bar for each day with answers on one baseline, and says what a pointed day held", () => {
-    const { container } = render(<DayBars days={days} today="2026-09-21" count={7} />);
+describe("DayHeldBars", () => {
+  it("stacks what each day held on one baseline, says what a pointed day held, and lists the days", () => {
+    const { container } = render(
+      <DayHeldBars
+        days={[...days.slice(0, 2), day("2026-09-21", 3, 1, 1, 1)]}
+        today="2026-09-21"
+        count={7}
+      />,
+    );
+    expect(screen.getByText("What each day held, the last 7 days")).toBeInTheDocument();
+    expect(container.querySelector(".bar-legend")).toHaveTextContent("RememberedNewLapsesRepeats");
     expect(container.querySelectorAll("g[data-bar]")).toHaveLength(7);
-    expect(container.querySelectorAll("rect.bar")).toHaveLength(2);
+    // The 21st: one new, one lapse and one repeat; the 20th: nine remembered and a lapse.
+    expect(container.querySelectorAll('g[data-bar="2026-09-21"] rect.bar')).toHaveLength(3);
+    expect(container.querySelectorAll('g[data-bar="2026-09-20"] rect.bar')).toHaveLength(2);
+    expect(container.querySelectorAll('g[data-bar="2026-09-20"] rect.bar-step-4')).toHaveLength(1);
     fireEvent.pointerEnter(container.querySelector('g[data-bar="2026-09-21"]')!);
     expect(
-      screen.getByText("September 21, 2026: 1 answer, 1 new, 0 forgotten."),
+      screen.getByText("September 21, 2026: 3 answers (1 new, 0 remembered, 1 lapse, 1 repeat)."),
     ).toBeInTheDocument();
     expect(container.querySelector('g[data-bar="2026-09-21"] rect.bar')).toHaveClass("pointed");
     fireEvent.click(container.querySelector('g[data-bar="2026-09-19"]')!);
     expect(screen.getByText("September 19, 2026: nothing studied.")).toBeInTheDocument();
-    expect(screen.getAllByRole("row")).toHaveLength(1 + 2);
+    expect(screen.getAllByRole("row").map((row) => row.textContent)).toEqual([
+      "DayAnswersNewRememberedLapsesRepeats",
+      "September 21, 2026" + "3" + "1" + "0" + "1" + "1",
+      "September 20, 2026" + "10" + "0" + "9" + "1" + "0",
+    ]);
+  });
+});
+
+describe("BarChart", () => {
+  it("stands a bar's figures side by side when grouped, and names the bars under them", () => {
+    const { container } = render(
+      <BarChart
+        caption="Pairs"
+        label="Pairs of bars"
+        bars={[
+          { key: "a", values: [2, 4], text: "A" },
+          { key: "b", values: [0, 1], text: "B" },
+        ]}
+        series={[
+          { label: "One", step: 2 },
+          { label: "Two", step: 4 },
+        ]}
+        grouped
+        ticks={["Mo", "Tu"]}
+        prompt="Point"
+      >
+        {null}
+      </BarChart>,
+    );
+    const [first, second] = container.querySelectorAll('g[data-bar="a"] rect.bar');
+    expect(Number(second!.getAttribute("x"))).toBeGreaterThan(Number(first!.getAttribute("x")));
+    expect(Number(second!.getAttribute("height"))).toBe(60);
+    expect(container.querySelectorAll('g[data-bar="b"] rect.bar')).toHaveLength(1);
+    expect(container.querySelector(".bar-ticks")).toHaveTextContent("MoTu");
   });
 });
 
@@ -212,9 +307,21 @@ describe("IntroducedChart", () => {
 describe("RecallChart", () => {
   const recall = (reviews: number, recalled: number) => ({ reviews, recalled });
   const months: MonthRetention[] = [
-    { month: "2026-06", retention: { young: recall(4, 3), mature: recall(0, 0) } },
-    { month: "2026-07", retention: { young: recall(10, 9), mature: recall(1, 1) } },
-    { month: "2026-09", retention: { young: recall(0, 0), mature: recall(2, 1) } },
+    {
+      month: "2026-06",
+      retention: { young: recall(4, 3), mature: recall(0, 0) },
+      firstTry: { introduced: 8, recalled: 6 },
+    },
+    {
+      month: "2026-07",
+      retention: { young: recall(10, 9), mature: recall(1, 1) },
+      firstTry: { introduced: 1, recalled: 1 },
+    },
+    {
+      month: "2026-09",
+      retention: { young: recall(0, 0), mature: recall(2, 1) },
+      firstTry: { introduced: 0, recalled: 0 },
+    },
   ];
 
   it("draws young and mature recall a month on a scale to 100%, a month without reviews a gap", () => {
@@ -243,10 +350,10 @@ describe("RecallChart", () => {
     ).toBeInTheDocument();
     expect(container.querySelectorAll("path.line-point")).toHaveLength(0);
     expect(screen.getAllByRole("row").map((row) => row.textContent)).toEqual([
-      "MonthYoungMature",
-      "September 2026no reviews50% of 2 reviews",
-      "July 202690% of 10 reviews100% of 1 review",
-      "June 202675% of 4 reviewsno reviews",
+      "MonthYoungMatureFirst try",
+      "September 2026no reviews50% of 2 reviews–",
+      "July 202690% of 10 reviews100% of 1 review100% of 1 new card",
+      "June 202675% of 4 reviewsno reviews75% of 8 new cards",
     ]);
   });
 
@@ -283,5 +390,114 @@ describe("MaturityBar", () => {
     );
     expect(screen.getByRole("img", { name: "1 nytt, 2 unga och 0 mogna." })).toBeInTheDocument();
     expect(screen.getByText("1 nytt")).toBeInTheDocument();
+  });
+});
+
+describe("WeekdayChart", () => {
+  const weekdays = Array.from({ length: 7 }, (_, weekday) => ({
+    weekday,
+    answers: weekday === 0 ? 5 : 0,
+    days: weekday < 2 ? 2 : 1,
+    studied: weekday === 0 ? 2 : 0,
+  }));
+
+  it("draws the answers on each weekday on average, Monday first, named under the bars", () => {
+    const { container } = render(<WeekdayChart weekdays={weekdays} />);
+    expect(screen.getByText("Answers by weekday")).toBeInTheDocument();
+    expect(container.querySelectorAll("g[data-bar]")).toHaveLength(7);
+    expect(container.querySelectorAll("rect.bar")).toHaveLength(1);
+    expect(container.querySelector(".bar-ticks")).toHaveTextContent("MonTueWedThuFriSatSun");
+    fireEvent.pointerEnter(container.querySelector('g[data-bar="0"]')!);
+    expect(screen.getByText("Monday: 2.5 answers on average; studied 2 of 2.")).toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole("row")
+        .map((row) => row.textContent)
+        .slice(0, 3),
+    ).toEqual(["WeekdayAnswers on averageStudied", "Monday2.52 of 2", "Tuesday00 of 2"]);
+  });
+
+  it("says an average to the tenth, in its plural form", () => {
+    const { container } = render(
+      <WeekdayChart
+        weekdays={weekdays.map((weekday) =>
+          weekday.weekday === 1
+            ? { ...weekday, answers: 2, studied: 1 }
+            : weekday.weekday === 2
+              ? { ...weekday, answers: 4, days: 3, studied: 3 }
+              : weekday,
+        )}
+      />,
+    );
+    fireEvent.click(container.querySelector('g[data-bar="1"]')!);
+    expect(screen.getByText("Tuesday: 1 answer on average; studied 1 of 2.")).toBeInTheDocument();
+    fireEvent.click(container.querySelector('g[data-bar="2"]')!);
+    expect(
+      screen.getByText("Wednesday: 1.3 answers on average; studied 3 of 3."),
+    ).toBeInTheDocument();
+  });
+
+  it("names the weekdays in the spoken language", () => {
+    const { container } = render(
+      <I18nProvider locale="de" onChoose={() => undefined}>
+        <WeekdayChart weekdays={weekdays.map((weekday) => ({ ...weekday, days: 0, studied: 0 }))} />
+      </I18nProvider>,
+    );
+    expect(container.querySelector(".bar-ticks")!.firstChild).toHaveTextContent("Mo");
+    expect(screen.getAllByRole("row")[1]).toHaveTextContent("Montag00 von 0");
+  });
+});
+
+describe("IntakeChart", () => {
+  it("draws the new cards beside the reviews of each week, and lists the weeks newest first", () => {
+    const { container } = render(
+      <IntakeChart
+        weeks={[
+          { week: "2026-09-07", introduced: 10, reviews: 0 },
+          { week: "2026-09-14", introduced: 4, reviews: 12 },
+        ]}
+      />,
+    );
+    expect(screen.getByText("New cards and reviews, by week")).toBeInTheDocument();
+    expect(container.querySelector(".bar-legend")).toHaveTextContent("NewReviews");
+    expect(container.querySelectorAll('g[data-bar="2026-09-14"] rect.bar')).toHaveLength(2);
+    fireEvent.click(container.querySelector('g[data-bar="2026-09-14"]')!);
+    expect(screen.getByText("Week of September 14, 2026: 4 new, 12 reviews.")).toBeInTheDocument();
+    expect(screen.getAllByRole("row").map((row) => row.textContent)).toEqual([
+      "Week ofNewReviews",
+      "September 14, 2026412",
+      "September 7, 2026100",
+    ]);
+  });
+});
+
+describe("GradeBars", () => {
+  const buttons = {
+    introductions: { again: 1, hard: 0, good: 3, easy: 0 },
+    young: { again: 0, hard: 1, good: 2, easy: 1 },
+    mature: { again: 0, hard: 0, good: 0, easy: 0 },
+  };
+
+  it("gives each kind of answer a bar of the buttons pressed, its share when pointed at, and every count in the table", () => {
+    const { container } = render(<GradeBars buttons={buttons} />);
+    expect(screen.getByText("Answer buttons")).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "First answers: Again 1, Hard 0, Good 3, Easy 0." }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "Mature: Again 0, Hard 0, Good 0, Easy 0." }),
+    ).toBeEmptyDOMElement();
+    expect(container.querySelectorAll(".grade-segment")).toHaveLength(2 + 3);
+    fireEvent.pointerEnter(container.querySelector('[data-part="introductions good"]')!);
+    expect(screen.getByText("First answers: Good on 3 answers, 75%.")).toBeInTheDocument();
+    expect(container.querySelector('[data-part="introductions good"]')).toHaveClass("pointed");
+    fireEvent.click(container.querySelector('[data-part="young easy"]')!);
+    expect(screen.getByText("Young: Easy on 1 answer, 25%.")).toBeInTheDocument();
+    expect(screen.getAllByRole("row").map((row) => row.textContent)).toEqual([
+      "AnswersAgainHardGoodEasy",
+      "First answers1 (25%)03 (75%)0",
+      "Young01 (25%)2 (50%)1 (25%)",
+      "Mature0000",
+    ]);
   });
 });

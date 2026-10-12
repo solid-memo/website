@@ -502,7 +502,17 @@
       "many": "{percent} retenues sur {count} de révisions",
       "other": "{percent} retenues sur {count} révisions"
     },
-    "allStatistics": "Toutes les statistiques"
+    "allStatistics": "Toutes les statistiques",
+    "week": {
+      "one": "{count} cette semaine",
+      "many": "{count} cette semaine",
+      "other": "{count} cette semaine"
+    },
+    "weekChange": {
+      "one": "{count} cette semaine, {change} par rapport à la précédente",
+      "many": "{count} cette semaine, {change} par rapport à la précédente",
+      "other": "{count} cette semaine, {change} par rapport à la précédente"
+    }
   },
   "newcomerCourse": {
     "eyebrow": "Vous débutez ?",
@@ -1400,12 +1410,30 @@
     },
     "activity": "Activité des {weeks} dernières semaines",
     "activityLabel": "Réponses par jour au cours des {weeks} dernières semaines : plus le vert est foncé, plus il y a de réponses.",
-    "lastDays": "Réponses des {count} derniers jours",
-    "lastDaysLabel": "Réponses de chacun des {count} derniers jours.",
     "less": "Moins",
     "more": "Plus",
     "pointAtDay": "Pointez sur un jour pour en voir le détail, ou ouvrez le tableau ci-dessous.",
-    "dayDetail": "{date} : {answers}, nouvelles : {introduced}, oubliées : {forgotten}.",
+    "dayDetail": "{date} : {answers} ({introduced}, {remembered}, {lapses}, {repeats}).",
+    "newCount": {
+      "one": "{count} nouvelle",
+      "many": "{count} nouvelles",
+      "other": "{count} nouvelles"
+    },
+    "rememberedCount": {
+      "one": "{count} retenue",
+      "many": "{count} retenues",
+      "other": "{count} retenues"
+    },
+    "lapseCount": {
+      "one": "{count} oubli",
+      "many": "{count} d’oublis",
+      "other": "{count} oublis"
+    },
+    "repeatCount": {
+      "one": "{count} répétition",
+      "many": "{count} de répétitions",
+      "other": "{count} répétitions"
+    },
     "dayNothing": "{date} : rien d’étudié.",
     "answerCount": {
       "one": "{count} réponse",
@@ -1416,7 +1444,6 @@
     "day": "Jour",
     "introduced": "Nouvelles",
     "introducedColumn": "Introduites",
-    "forgotten": "Oubliées",
     "byDeck": "Par paquet",
     "deck": "Paquet",
     "lastStudied": "Dernière étude",
@@ -1487,7 +1514,70 @@
       "many": "{count} de révisions",
       "other": "{count} révisions"
     },
-    "due": "À réviser"
+    "due": "À réviser",
+    "recentDays": "{count} derniers jours",
+    "recentDaysValue": {
+      "one": "{studied} sur {count} jour",
+      "many": "{studied} sur {count} de jours",
+      "other": "{studied} sur {count} jours"
+    },
+    "thisWeek": "Cette semaine jusqu’ici",
+    "thisMonth": "Ce mois-ci jusqu’ici",
+    "sameDaysLastWeek": "Mêmes jours la semaine dernière : {value}",
+    "sameDaysLastMonth": "Mêmes jours le mois dernier : {value}",
+    "recall": "Retenues",
+    "firstTry": "Du premier coup",
+    "firstTryShare": {
+      "one": "{percent} sur {count} nouvelle carte",
+      "many": "{percent} sur {count} de nouvelles cartes",
+      "other": "{percent} sur {count} nouvelles cartes"
+    },
+    "ofNewCards": {
+      "one": "retenues, sur {count} nouvelle carte",
+      "many": "retenues, sur {count} de nouvelles cartes",
+      "other": "retenues, sur {count} nouvelles cartes"
+    },
+    "noNewCards": "Aucune nouvelle carte pour l’instant",
+    "dayHeld": "Le détail de chaque jour, les {count} derniers jours",
+    "dayHeldLabel": "Barres empilées pour chacun des {count} derniers jours : révisions retenues, nouvelles cartes, oublis et répétitions.",
+    "dayHeldNote": "Répétitions : une carte qui revient dans la séance le même jour. Une réponse de cours à une carte déjà vue ne compte que parmi les réponses du jour.",
+    "rememberedColumn": "Retenues",
+    "repeats": "Répétitions",
+    "buttons": "Boutons de réponse",
+    "buttonsNote": "Le bouton choisi à la première réponse à chaque carte et à chaque révision, rappelée de mémoire et notée par vous ; les réponses des cours et une carte qui revient dans la séance le même jour ne sont pas comptées. Sur l’échelle de 0 à 5, 0 à 2 comptent comme « À revoir ».",
+    "buttonsFirst": "Premières réponses",
+    "buttonsLabel": "{kind} : {counts}.",
+    "buttonCount": "{button} {count}",
+    "buttonDetail": {
+      "one": "{kind} : {button} pour {count} réponse, {percent}.",
+      "many": "{kind} : {button} pour {count} de réponses, {percent}.",
+      "other": "{kind} : {button} pour {count} réponses, {percent}."
+    },
+    "buttonCell": "{count} ({percent})",
+    "pointAtButton": "Pointez sur une partie d’une barre pour voir sa part, ou ouvrez le tableau ci-dessous.",
+    "weekdays": "Réponses par jour de la semaine",
+    "weekdaysLabel": "Barres de la moyenne des réponses de chaque jour de la semaine, du lundi au dimanche.",
+    "weekdaysNote": "Les réponses de chaque jour de la semaine divisées par le nombre de ces jours depuis votre premier jour d’étude dans ces chiffres.",
+    "weekdayDetail": "{weekday} : {average} ; étudié {studied} sur {count}.",
+    "averageAnswerCount": {
+      "one": "{count} réponse en moyenne",
+      "many": "{count} de réponses en moyenne",
+      "other": "{count} réponses en moyenne"
+    },
+    "weekday": "Jour de la semaine",
+    "averageAnswers": "Réponses en moyenne",
+    "studied": "Étudiés",
+    "studiedOf": "{studied} sur {count}",
+    "pointAtWeekday": "Pointez sur un jour de la semaine pour en voir le détail, ou ouvrez le tableau ci-dessous.",
+    "intake": "Nouvelles cartes et révisions, par semaine",
+    "intakeLabel": "Paires de barres, une par semaine : nouvelles cartes à côté des révisions.",
+    "intakeNote": "Chaque nouvelle carte amène des révisions dans les semaines qui suivent. Si les nouvelles cartes dépassent sans cesse les révisions que vous arrivez à faire, prenez-en moins ; les révisions à venir, plus bas, montrent ce qui arrive.",
+    "intakeDetail": "Semaine du {date} : nouvelles : {introduced}, {reviews}.",
+    "weekOf": "Semaine du",
+    "reviews": "Révisions",
+    "pointAtWeek": "Pointez sur une semaine pour en voir le détail, ou ouvrez le tableau ci-dessous.",
+    "directionsColumn": "Par sens",
+    "directionShare": "{direction} : {share}"
   },
   "zoomableImage": {
     "enlarge": "Agrandir l’image",
