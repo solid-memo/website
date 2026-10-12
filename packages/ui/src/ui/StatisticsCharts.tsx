@@ -1086,7 +1086,7 @@ export function RecallChart({ months }: { months: readonly MonthRetention[] }) {
 }
 
 /** The answer buttons, in order, with the words the study screen gives them. */
-const GRADE_GROUPS = [
+export const GRADE_GROUPS = [
   ["again", "study.minimal.again"],
   ["hard", "study.minimal.hard"],
   ["good", "study.minimal.good"],

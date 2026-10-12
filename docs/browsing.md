@@ -96,6 +96,12 @@ is in, or is in one the back is not, and too few options for a course.
 Save writes the card and its wrong options at once; "Remove card" asks first, then returns to the
 Browser. An unknown card falls back to the Browser.
 
+Under the editor, the card's **history**: where it stands in each
+direction (its interval, its next review, the day it was first
+studied) and every answer to it, newest first
+([statistics.md](statistics.md#a-cards-history)). The leeches and
+hardest cards of the statistics link here.
+
 ## A library deck's cards
 
 Before importing a [library](deck-library.md#in-the-app) deck, a

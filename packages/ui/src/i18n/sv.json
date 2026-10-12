@@ -157,7 +157,27 @@
     "removeConfirm": "Ta bort kortet ”{card}”? Det går inte att ångra.",
     "removeHeading": "Ta bort kortet",
     "removeAction": "Ta bort",
-    "saved": "Sparat."
+    "saved": "Sparat.",
+    "historyHeading": "Historik",
+    "historyLoading": "Läser in kortets historik…",
+    "historyUnavailable": "Det går inte att läsa kortets historik just nu.",
+    "historyNone": "Inte studerat än.",
+    "historyInterval": "Intervall",
+    "historyDue": "Nästa repetition",
+    "historyFirstStudied": "Först studerat",
+    "historyHint": "Varje svar på det här kortet, nyaste först. Ett första svar, ett kort som kommer tillbaka i passet samma dag och svar i kurser är inga repetitioner.",
+    "historyAnswers": "Svar på det här kortet",
+    "historyDirection": "Riktning",
+    "historyKind": "Slag",
+    "historyAnswer": "Svar",
+    "historyNext": "Nästa intervall",
+    "historyFirst": "Första svaret",
+    "historyReview": "Repetition",
+    "historyRepeat": "Igen samma dag",
+    "historyCourse": "Kursfråga",
+    "historyRight": "Rätt",
+    "historyWrong": "Fel",
+    "historyWrongOption": "Fel: {option}"
   },
   "cardContentFields": {
     "front": "Framsida",
@@ -1547,7 +1567,33 @@
     "reviews": "Repetitioner",
     "pointAtWeek": "Peka på en vecka för att se vad den innehöll, eller öppna tabellen nedan.",
     "directionsColumn": "Per håll",
-    "directionShare": "{direction}: {share}"
+    "directionShare": "{direction}: {share}",
+    "whatIsHard": "Det som är svårt",
+    "hardest": "Svåraste korten",
+    "hardestHint": {
+      "one": "Korten du glömt oftast i sina repetitioner de senaste 12 månaderna, åt båda hållen. Ett kort som glömts {count} gång eller fler är en blodigel: det kostar repetition efter repetition, så öppna det och gör det tydligare eller lägg till en anteckning.",
+      "other": "Korten du glömt oftast i sina repetitioner de senaste 12 månaderna, åt båda hållen. Ett kort som glömts {count} gånger eller fler är en blodigel: det kostar repetition efter repetition, så öppna det och gör det tydligare eller lägg till en anteckning."
+    },
+    "noHardest": "Inget kort har glömts i en repetition de senaste 12 månaderna.",
+    "forgottenTimes": {
+      "one": "glömt {count} gång: {share}",
+      "other": "glömt {count} gånger: {share}"
+    },
+    "leechMark": "{text} · en blodigel",
+    "confusions": "Alternativ som förväxlas mest",
+    "confusionsHint": "De felaktiga alternativ som valts oftast i den här kortlekens kursfrågor de senaste 12 månaderna.",
+    "noConfusions": "Inget felaktigt alternativ har valts de senaste 12 månaderna.",
+    "confusedWith": {
+      "one": "förväxlat med {option} {count} gång",
+      "other": "förväxlat med {option} {count} gånger"
+    },
+    "leeches": "Blodiglar i alla dina kortlekar",
+    "leechesHint": {
+      "one": "Kort som glömts {count} gång eller fler i sina repetitioner de senaste 12 månaderna, i vilken kortlek som helst. De kostar repetition efter repetition: öppna ett och gör det tydligare eller lägg till en anteckning.",
+      "other": "Kort som glömts {count} gånger eller fler i sina repetitioner de senaste 12 månaderna, i vilken kortlek som helst. De kostar repetition efter repetition: öppna ett och gör det tydligare eller lägg till en anteckning."
+    },
+    "noLeeches": "Inga blodiglar: inget kort har glömts så ofta.",
+    "leechIn": "{forgotten}, i {deck}"
   },
   "zoomableImage": {
     "enlarge": "Förstora bilden",

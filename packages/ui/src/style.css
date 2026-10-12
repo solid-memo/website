@@ -4440,6 +4440,23 @@ table.deck-statistics td {
   white-space: nowrap;
 }
 
+/* A table's own name above it, as a chart's caption is. */
+table.deck-statistics caption {
+  font-weight: 600;
+  text-align: left;
+  padding-bottom: 0.5rem;
+}
+
+/* What is hard: a card a line, how often it was forgotten after it. */
+.hardest-cards {
+  margin: 0.5rem 0 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.hardest-cards li {
+  margin: 0.25rem 0;
+}
+
 /* Trying the app as a guest (docs/guest-mode.md). */
 .masthead-actions {
   display: flex;

@@ -7,6 +7,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { CardProgressContainer } from "./CardProgressContainer";
+import { HardestCardsContainer } from "./HardestCardsContainer";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
@@ -17,7 +18,8 @@ import { STATISTICS_STALE_MS } from "./studyFigures";
  * Reads the instance's statistics, of the last twelve study months, when
  * the page opens and what was read is over half a minute old (any change
  * made clears it at once); where its cards stand comes after them, read on
- * its own, so neither waits for the other and it shows before any answer.
+ * its own, so neither waits for the other and it shows before any answer,
+ * then the leeches of every deck, from the same read.
  */
 export function StatisticsContainer({
   useCases,
@@ -44,6 +46,7 @@ export function StatisticsContainer({
         <StatisticsScreen statistics={statisticsQuery.data} decks={decks} />
       )}
       <CardProgressContainer useCases={useCases} instance={instance} />
+      <HardestCardsContainer useCases={useCases} instance={instance} />
     </>
   );
 }

@@ -9,7 +9,7 @@ import { keepStudyFiguresFresh } from "./studyFigures";
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const OTHER = "https://pod.example/solid-memo/b/";
 
-/** A client holding fresh statistics, a deck's too, and card progress, of two instances. */
+/** A client holding fresh statistics, a deck's too, card progress, of two instances, and a card's answers. */
 function clientWithFigures(): QueryClient {
   const queryClient = new QueryClient();
   for (const key of [
@@ -17,6 +17,7 @@ function clientWithFigures(): QueryClient {
     ["statistics", INSTANCE, `${INSTANCE}deck/`],
     ["cardProgress", INSTANCE, undefined],
     ["cardProgress", OTHER, `${OTHER}deck/`],
+    ["cardAnswers", `${INSTANCE}deck/`, "card-1"],
     ["decks", INSTANCE],
   ]) {
     queryClient.setQueryData(key, {});
@@ -29,7 +30,7 @@ function invalidated(queryClient: QueryClient, key: readonly unknown[]): boolean
 }
 
 describe("keepStudyFiguresFresh", () => {
-  it("has the statistics and the cards' progress read again after any change, not other reads", async () => {
+  it("has the statistics, the cards' progress and their answers read again after any change, not other reads", async () => {
     const queryClient = clientWithFigures();
     keepStudyFiguresFresh(queryClient);
     // Adding a card, say: nothing about it names the statistics.
@@ -38,6 +39,7 @@ describe("keepStudyFiguresFresh", () => {
     expect(invalidated(queryClient, ["statistics", INSTANCE, `${INSTANCE}deck/`])).toBe(true);
     expect(invalidated(queryClient, ["cardProgress", INSTANCE, undefined])).toBe(true);
     expect(invalidated(queryClient, ["cardProgress", OTHER, `${OTHER}deck/`])).toBe(true);
+    expect(invalidated(queryClient, ["cardAnswers", `${INSTANCE}deck/`, "card-1"])).toBe(true);
     expect(invalidated(queryClient, ["decks", INSTANCE])).toBe(false);
   });
 

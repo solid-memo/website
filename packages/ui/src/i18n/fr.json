@@ -159,7 +159,27 @@
     "removeConfirm": "Supprimer la carte « {card} » ? Cette action est irréversible.",
     "removeHeading": "Supprimer la carte",
     "removeAction": "Supprimer",
-    "saved": "Enregistré."
+    "saved": "Enregistré.",
+    "historyHeading": "Historique",
+    "historyLoading": "Chargement de l’historique de la carte…",
+    "historyUnavailable": "Impossible de lire l’historique de la carte pour le moment.",
+    "historyNone": "Pas encore étudiée.",
+    "historyInterval": "Intervalle",
+    "historyDue": "Prochaine révision",
+    "historyFirstStudied": "Étudiée pour la première fois",
+    "historyHint": "Toutes les réponses à cette carte, de la plus récente à la plus ancienne. La première réponse, une carte qui revient dans la séance le même jour et les réponses des cours ne sont pas des révisions.",
+    "historyAnswers": "Réponses à cette carte",
+    "historyDirection": "Sens",
+    "historyKind": "Type",
+    "historyAnswer": "Réponse",
+    "historyNext": "Intervalle suivant",
+    "historyFirst": "Première réponse",
+    "historyReview": "Révision",
+    "historyRepeat": "De nouveau le même jour",
+    "historyCourse": "Question de cours",
+    "historyRight": "Juste",
+    "historyWrong": "Fausse",
+    "historyWrongOption": "Fausse : {option}"
   },
   "cardContentFields": {
     "front": "Recto",
@@ -1634,7 +1654,37 @@
     "reviews": "Révisions",
     "pointAtWeek": "Pointez sur une semaine pour en voir le détail, ou ouvrez le tableau ci-dessous.",
     "directionsColumn": "Par sens",
-    "directionShare": "{direction} : {share}"
+    "directionShare": "{direction} : {share}",
+    "whatIsHard": "Ce qui est difficile",
+    "hardest": "Cartes les plus difficiles",
+    "hardestHint": {
+      "one": "Les cartes que vous avez oubliées le plus souvent lors de leurs révisions ces 12 derniers mois, dans un sens ou dans l’autre. Une carte oubliée {count} fois ou plus est une sangsue : elle continue de coûter des révisions, alors ouvrez-la pour la rendre plus claire ou y ajouter une note.",
+      "many": "Les cartes que vous avez oubliées le plus souvent lors de leurs révisions ces 12 derniers mois, dans un sens ou dans l’autre. Une carte oubliée {count} de fois ou plus est une sangsue : elle continue de coûter des révisions, alors ouvrez-la pour la rendre plus claire ou y ajouter une note.",
+      "other": "Les cartes que vous avez oubliées le plus souvent lors de leurs révisions ces 12 derniers mois, dans un sens ou dans l’autre. Une carte oubliée {count} fois ou plus est une sangsue : elle continue de coûter des révisions, alors ouvrez-la pour la rendre plus claire ou y ajouter une note."
+    },
+    "noHardest": "Aucune carte n’a été oubliée lors d’une révision ces 12 derniers mois.",
+    "forgottenTimes": {
+      "one": "oubliée {count} fois : {share}",
+      "many": "oubliée {count} de fois : {share}",
+      "other": "oubliée {count} fois : {share}"
+    },
+    "leechMark": "{text} · une sangsue",
+    "confusions": "Options les plus confondues",
+    "confusionsHint": "Les mauvaises réponses choisies le plus souvent dans les questions de cours de ce paquet ces 12 derniers mois.",
+    "noConfusions": "Aucune mauvaise réponse n’a été choisie ces 12 derniers mois.",
+    "confusedWith": {
+      "one": "confondue avec {option} {count} fois",
+      "many": "confondue avec {option} {count} de fois",
+      "other": "confondue avec {option} {count} fois"
+    },
+    "leeches": "Sangsues de tous vos paquets",
+    "leechesHint": {
+      "one": "Les cartes oubliées {count} fois ou plus lors de leurs révisions ces 12 derniers mois, dans n’importe quel paquet. Elles continuent de coûter des révisions : ouvrez-en une pour la rendre plus claire ou y ajouter une note.",
+      "many": "Les cartes oubliées {count} de fois ou plus lors de leurs révisions ces 12 derniers mois, dans n’importe quel paquet. Elles continuent de coûter des révisions : ouvrez-en une pour la rendre plus claire ou y ajouter une note.",
+      "other": "Les cartes oubliées {count} fois ou plus lors de leurs révisions ces 12 derniers mois, dans n’importe quel paquet. Elles continuent de coûter des révisions : ouvrez-en une pour la rendre plus claire ou y ajouter une note."
+    },
+    "noLeeches": "Aucune sangsue : aucune carte n’a été oubliée aussi souvent.",
+    "leechIn": "{forgotten}, dans {deck}"
   },
   "zoomableImage": {
     "enlarge": "Agrandir l’image",

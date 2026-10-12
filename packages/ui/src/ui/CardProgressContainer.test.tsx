@@ -49,6 +49,9 @@ const progressOf = (deck: Deck, extra: Partial<DeckProgress> = {}): DeckProgress
   daysToClear: 0,
   newCardsPerDay: 5,
   introducedToday: 0,
+  hardest: { reviews: 0, cards: [] },
+  courseAnswers: 0,
+  confusions: [],
   ...extra,
 });
 const report: CardProgressReport = {

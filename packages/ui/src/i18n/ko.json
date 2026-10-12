@@ -155,7 +155,27 @@
     "removeConfirm": "‘{card}’ 카드를 삭제할까요? 되돌릴 수 없어요.",
     "removeHeading": "카드 삭제",
     "removeAction": "삭제",
-    "saved": "저장했어요."
+    "saved": "저장했어요.",
+    "historyHeading": "기록",
+    "historyLoading": "카드 기록을 불러오는 중…",
+    "historyUnavailable": "지금은 카드 기록을 읽을 수 없어요.",
+    "historyNone": "아직 학습하지 않았어요.",
+    "historyInterval": "복습 간격",
+    "historyDue": "다음 복습일",
+    "historyFirstStudied": "처음 학습한 날",
+    "historyHint": "이 카드에 대한 모든 답변이에요(최신순). 첫 답변, 같은 날 세션에 다시 나온 카드, 코스 답변은 복습이 아니에요.",
+    "historyAnswers": "이 카드에 대한 답변",
+    "historyDirection": "방향",
+    "historyKind": "종류",
+    "historyAnswer": "답변",
+    "historyNext": "다음 간격",
+    "historyFirst": "첫 답변",
+    "historyReview": "복습",
+    "historyRepeat": "같은 날 다시",
+    "historyCourse": "코스 문제",
+    "historyRight": "정답",
+    "historyWrong": "오답",
+    "historyWrongOption": "오답: {option}"
   },
   "cardContentFields": {
     "front": "앞면",
@@ -1460,7 +1480,29 @@
     "reviews": "복습",
     "pointAtWeek": "주를 가리키면 그 주의 기록을 볼 수 있어요. 아래 표를 열어도 돼요.",
     "directionsColumn": "방향별",
-    "directionShare": "{direction}: {share}"
+    "directionShare": "{direction}: {share}",
+    "whatIsHard": "어려운 것",
+    "hardest": "가장 어려운 카드",
+    "hardestHint": {
+      "other": "지난 12개월 동안 복습에서 가장 자주 잊은 카드예요. 방향은 상관없어요. {count}번 이상 잊은 카드는 자주 잊는 카드로, 계속 복습을 잡아먹으니 카드를 열어 더 분명하게 고치거나 메모를 더해 보세요."
+    },
+    "noHardest": "지난 12개월 동안 복습에서 잊은 카드가 없어요.",
+    "forgottenTimes": {
+      "other": "{count}번 잊음: {share}"
+    },
+    "leechMark": "{text} · 자주 잊는 카드",
+    "confusions": "가장 많이 헷갈린 보기",
+    "confusionsHint": "지난 12개월 동안 이 덱의 코스 문제에서 가장 자주 고른 오답이에요.",
+    "noConfusions": "지난 12개월 동안 고른 오답이 없어요.",
+    "confusedWith": {
+      "other": "{option}와(과) {count}번 헷갈림"
+    },
+    "leeches": "모든 덱의 자주 잊는 카드",
+    "leechesHint": {
+      "other": "지난 12개월 동안 복습에서 {count}번 이상 잊은 카드예요. 덱은 상관없어요. 계속 복습을 잡아먹으니 카드를 열어 더 분명하게 고치거나 메모를 더해 보세요."
+    },
+    "noLeeches": "자주 잊는 카드가 없어요.",
+    "leechIn": "{deck}: {forgotten}"
   },
   "zoomableImage": {
     "enlarge": "그림 확대",

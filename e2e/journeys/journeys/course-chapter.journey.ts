@@ -13,8 +13,9 @@ import type { Answers } from "../pages/CourseQuestion.ts";
  * questions without it, each answer adding its card to the deck; the
  * word before the final review; the review, where a question answered
  * wrongly comes back until it is answered right; and back on the
- * course's page, the chapter cheered, done, and the next one open; and
- * the statistics, which count its answers apart from recall. It is
+ * course's page, the chapter cheered, done, and the next one open; the
+ * statistics, which count its answers apart from recall; and the
+ * course's deck, which names the wrong options chosen. It is
  * the course the library offers newcomers, whichever that is: the
  * journey learns each right answer as the app shows it.
  */
@@ -83,4 +84,10 @@ test("work through a course's first chapter and its final review @course", async
       await app.statistics.expectCourseAnswersOnly();
     },
   );
+
+  await app.step("10 · The course's deck names the wrong options chosen most", async () => {
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+    await app.decks.openDeck(course);
+    await app.deckDetail.expectConfusedOptions();
+  });
 });

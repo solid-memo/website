@@ -3600,6 +3600,35 @@ describe("the answer log", () => {
     expect(log.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-08", undefined);
   });
 
+  it("reads a month once for reads asked at once, but again for one asked after an answer was added", async () => {
+    const { byMonth, log, useCases } = setup();
+    await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
+    await useCases.getStatistics(instance.url, noon);
+    // Each read waits until let through.
+    let letThrough = () => {};
+    const gate = new Promise<void>((resolve) => (letThrough = resolve));
+    const read = log.readMonthSince.getMockImplementation()!;
+    log.readMonthSince.mockImplementation(async (...args) => {
+      await gate;
+      return read(...args);
+    });
+    log.readMonthSince.mockClear();
+    const together = [
+      useCases.getStatistics(instance.url, noon),
+      useCases.getCardProgress(instance.url, noon, { deck }),
+    ];
+    await vi.waitFor(() => expect(log.readMonthSince).toHaveBeenCalledTimes(1));
+    // An answer added meanwhile: the read under way may miss it, so a read asked after it does not share it.
+    await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 5, noon);
+    const after = useCases.getStatistics(instance.url, noon);
+    await vi.waitFor(() => expect(log.readMonthSince).toHaveBeenCalledTimes(2));
+    letThrough();
+    await Promise.all(together);
+    await expect(after).resolves.toMatchObject({ totals: { answers: 2 } });
+    expect(byMonth.get("2026-09")).toHaveLength(2);
+    expect(log.readMonthSince).toHaveBeenCalledTimes(2);
+  });
+
   it("is checked in the full check, one document a month, and is empty without a log", async () => {
     const { deps, byMonth, useCases } = setup();
     byMonth.set("2026-09", []);
@@ -3766,6 +3795,50 @@ describe("the Studio's answer history and schedule insight", () => {
     expect(answers[1]).toMatchObject({
       cardUrl: live.url,
       chosenDistractor: `${deck.cardsDocumentUrl}#card-1-d1`,
+    });
+  });
+
+  it("finds the deck's hardest cards in use and the wrong options chosen most, in the last twelve months", async () => {
+    const { deps, useCases, answerLog, months, versions } = setup();
+    const asked: Card = { ...live, distractors: [{ id: "card-1-d1", text: { en: "wrong" } }] };
+    vi.mocked(deps.deckRepository.readCardsSince).mockResolvedValue({
+      unchanged: false,
+      value: [asked, other, retired],
+      version: "c1",
+    });
+    // Before the twelve months, which begin on November 1st, 2025: not read.
+    months["2025-10"] = [answer("card-2", 0, "2025-10-31", reviewed)];
+    versions["2025-10"] = "p1";
+    const report = await useCases.getCardProgress(instance.url, at, { deck });
+    const [progress] = report.decks;
+    // card-1 lapses four times in five reviews (its course answer is none);
+    // card-2 once in one; card-3 is retired; the other deck's answer is not this deck's.
+    expect(progress!.hardest).toEqual({
+      reviews: 10,
+      cards: [
+        { card: asked, lapses: 4, reviews: 5 },
+        { card: other, lapses: 1, reviews: 1 },
+      ],
+    });
+    expect(progress!.courseAnswers).toBe(1);
+    expect(progress!.confusions).toEqual([
+      { card: asked, distractor: asked.distractors![0], picks: 1 },
+    ]);
+    expect(answerLog.readMonthSince).not.toHaveBeenCalledWith(instance.url, "2025-10", undefined);
+    expect(deps.deckRepository.readCardsSince).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the cards' progress without what is hard when the answer log cannot be read", async () => {
+    const { useCases, answerLog } = setup();
+    vi.mocked(answerLog.readMonthSince).mockRejectedValue(new Error("403"));
+    const [progress] = (await useCases.getCardProgress(instance.url, at, { deck })).decks;
+    expect(progress!.progress).not.toBeUndefined();
+    expect(progress!.hardest).toEqual({ reviews: 0, cards: [] });
+    expect(progress!.courseAnswers).toBe(0);
+    expect(progress!.confusions).toEqual([]);
+    vi.mocked(answerLog.months).mockRejectedValue(new Error("unreachable"));
+    await expect(useCases.getCardProgress(instance.url, at, { deck })).resolves.toMatchObject({
+      decks: [{ hardest: { reviews: 0, cards: [] } }],
     });
   });
 

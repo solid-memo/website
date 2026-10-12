@@ -159,7 +159,27 @@
     "removeConfirm": "¿Eliminar la tarjeta «{card}»? No se puede deshacer.",
     "removeHeading": "Eliminar la tarjeta",
     "removeAction": "Eliminar",
-    "saved": "Guardado."
+    "saved": "Guardado.",
+    "historyHeading": "Historial",
+    "historyLoading": "Cargando el historial de la tarjeta…",
+    "historyUnavailable": "Ahora mismo no se puede leer el historial de la tarjeta.",
+    "historyNone": "Todavía no se ha estudiado.",
+    "historyInterval": "Intervalo",
+    "historyDue": "Próximo repaso",
+    "historyFirstStudied": "Estudiada por primera vez",
+    "historyHint": "Todas las respuestas a esta tarjeta, de la más reciente a la más antigua. La primera respuesta, una tarjeta que vuelve a la sesión el mismo día y las respuestas de los cursos no son repasos.",
+    "historyAnswers": "Respuestas a esta tarjeta",
+    "historyDirection": "Sentido",
+    "historyKind": "Tipo",
+    "historyAnswer": "Respuesta",
+    "historyNext": "Siguiente intervalo",
+    "historyFirst": "Primera respuesta",
+    "historyReview": "Repaso",
+    "historyRepeat": "Otra vez el mismo día",
+    "historyCourse": "Pregunta de curso",
+    "historyRight": "Correcta",
+    "historyWrong": "Incorrecta",
+    "historyWrongOption": "Incorrecta: {option}"
   },
   "cardContentFields": {
     "front": "Anverso",
@@ -1634,7 +1654,37 @@
     "reviews": "Repasos",
     "pointAtWeek": "Señala una semana para ver qué contiene, o abre la tabla de abajo.",
     "directionsColumn": "Por sentido",
-    "directionShare": "{direction}: {share}"
+    "directionShare": "{direction}: {share}",
+    "whatIsHard": "Lo que cuesta",
+    "hardest": "Tarjetas más difíciles",
+    "hardestHint": {
+      "one": "Las tarjetas que más veces olvidaste en sus repasos en los últimos 12 meses, en cualquier sentido. Una tarjeta olvidada {count} vez o más es una sanguijuela: sigue costando repasos, así que ábrela para hacerla más clara o añadirle una nota.",
+      "many": "Las tarjetas que más veces olvidaste en sus repasos en los últimos 12 meses, en cualquier sentido. Una tarjeta olvidada {count} de veces o más es una sanguijuela: sigue costando repasos, así que ábrela para hacerla más clara o añadirle una nota.",
+      "other": "Las tarjetas que más veces olvidaste en sus repasos en los últimos 12 meses, en cualquier sentido. Una tarjeta olvidada {count} veces o más es una sanguijuela: sigue costando repasos, así que ábrela para hacerla más clara o añadirle una nota."
+    },
+    "noHardest": "Ninguna tarjeta se olvidó en un repaso en los últimos 12 meses.",
+    "forgottenTimes": {
+      "one": "olvidada {count} vez: {share}",
+      "many": "olvidada {count} de veces: {share}",
+      "other": "olvidada {count} veces: {share}"
+    },
+    "leechMark": "{text} · una sanguijuela",
+    "confusions": "Opciones que más se confunden",
+    "confusionsHint": "Las opciones incorrectas elegidas más a menudo en las preguntas de curso de este mazo en los últimos 12 meses.",
+    "noConfusions": "No se eligió ninguna opción incorrecta en los últimos 12 meses.",
+    "confusedWith": {
+      "one": "confundida con {option} {count} vez",
+      "many": "confundida con {option} {count} de veces",
+      "other": "confundida con {option} {count} veces"
+    },
+    "leeches": "Sanguijuelas en todos tus mazos",
+    "leechesHint": {
+      "one": "Tarjetas olvidadas {count} vez o más en sus repasos en los últimos 12 meses, en cualquier mazo. Siguen costando repasos: abre una para hacerla más clara o añadirle una nota.",
+      "many": "Tarjetas olvidadas {count} de veces o más en sus repasos en los últimos 12 meses, en cualquier mazo. Siguen costando repasos: abre una para hacerla más clara o añadirle una nota.",
+      "other": "Tarjetas olvidadas {count} veces o más en sus repasos en los últimos 12 meses, en cualquier mazo. Siguen costando repasos: abre una para hacerla más clara o añadirle una nota."
+    },
+    "noLeeches": "Ninguna sanguijuela: ninguna tarjeta se olvidó tantas veces.",
+    "leechIn": "{forgotten}, en {deck}"
   },
   "zoomableImage": {
     "enlarge": "Ampliar imagen",

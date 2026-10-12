@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ComponentChildren } from "preact";
+import { Fragment, type ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -14,6 +14,7 @@ import type { Session } from "@solid-memo/domain/session";
 import { Breadcrumbs, breadcrumbsFor } from "./Breadcrumbs";
 import { BrowserContainer } from "./BrowserContainer";
 import { CardContainer } from "./CardContainer";
+import { CardHistoryContainer } from "./CardHistoryContainer";
 import { CardCreatorContainer } from "./CardCreatorContainer";
 import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
@@ -694,13 +695,20 @@ export function Workspace({
           deckUrl: deckUrl!,
         } as const;
         return (
-          <CardContainer
-            key={activeCard!.url}
-            useCases={useCases}
-            deck={activeDeck!}
-            card={activeCard!}
-            onRemoved={() => replace(browser)}
-          />
+          <Fragment key={activeCard!.url}>
+            <CardContainer
+              useCases={useCases}
+              deck={activeDeck!}
+              card={activeCard!}
+              onRemoved={() => replace(browser)}
+            />
+            <CardHistoryContainer
+              useCases={useCases}
+              instanceUrl={instanceUrl!}
+              deck={activeDeck!}
+              card={activeCard!}
+            />
+          </Fragment>
         );
       }
       case "study":

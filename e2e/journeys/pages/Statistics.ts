@@ -101,6 +101,12 @@ export interface ExpectedStatistics {
   overdue?: number;
   /** Every deck under "Maturity by deck", in any order. */
   maturityByDeck?: ({ name: string } & Maturity)[];
+  /**
+   * The fronts listed under "Leeches across your decks", in order; null
+   * when there is no review yet, so nothing is hard to tell and no list
+   * is shown.
+   */
+  leeches?: string[] | null;
 }
 
 /**
@@ -204,6 +210,7 @@ export class Statistics extends Screen {
         await this.expectValue("overdue", String(expected.overdue));
       if (expected.maturityByDeck !== undefined)
         await this.expectMaturityByDeck(expected.maturityByDeck);
+      if (expected.leeches !== undefined) await this.expectLeeches(expected.leeches);
     });
   }
 
@@ -353,6 +360,16 @@ export class Statistics extends Screen {
         `${this.t("statistics.maturityByDeck")}: ${deck.name}`,
       ).toHaveAccessibleName(this.maturityLabel(deck));
     }
+  }
+
+  /** The leeches' list, read with where the cards stand (so after it is shown). */
+  private async expectLeeches(fronts: string[] | null): Promise<void> {
+    const list = this.main.getByRole("list", { name: this.t("statistics.leeches"), exact: true });
+    if (fronts === null) {
+      await expect(list, this.t("statistics.leeches")).toHaveCount(0);
+      return;
+    }
+    await expect(list.getByRole("listitem").getByRole("link")).toHaveText(fronts);
   }
 
   /** The note that the figures begin with this month, the log's first. */

@@ -157,7 +157,27 @@
     "removeConfirm": "Remove the card \"{card}\"? This cannot be undone.",
     "removeHeading": "Remove the card",
     "removeAction": "Remove",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "historyHeading": "History",
+    "historyLoading": "Loading the card's history…",
+    "historyUnavailable": "The card's history cannot be read just now.",
+    "historyNone": "Not studied yet.",
+    "historyInterval": "Interval",
+    "historyDue": "Next review",
+    "historyFirstStudied": "First studied",
+    "historyHint": "Every answer to this card, newest first. A first answer, a card back in the session the same day and course answers are not reviews.",
+    "historyAnswers": "Answers to this card",
+    "historyDirection": "Direction",
+    "historyKind": "Kind",
+    "historyAnswer": "Answer",
+    "historyNext": "Next interval",
+    "historyFirst": "First answer",
+    "historyReview": "Review",
+    "historyRepeat": "Again the same day",
+    "historyCourse": "Course question",
+    "historyRight": "Right",
+    "historyWrong": "Wrong",
+    "historyWrongOption": "Wrong: {option}"
   },
   "cardContentFields": {
     "front": "Front",
@@ -1547,7 +1567,33 @@
     "reviews": "Reviews",
     "pointAtWeek": "Point at a week to see what it held, or open the table below.",
     "directionsColumn": "By direction",
-    "directionShare": "{direction}: {share}"
+    "directionShare": "{direction}: {share}",
+    "whatIsHard": "What is hard",
+    "hardest": "Hardest cards",
+    "hardestHint": {
+      "one": "The cards you forgot most often in their reviews over the last 12 months, either way. A card forgotten {count} time or more is a leech: it keeps costing reviews, so open it to make it clearer or add a note.",
+      "other": "The cards you forgot most often in their reviews over the last 12 months, either way. A card forgotten {count} times or more is a leech: it keeps costing reviews, so open it to make it clearer or add a note."
+    },
+    "noHardest": "No card was forgotten in a review over the last 12 months.",
+    "forgottenTimes": {
+      "one": "forgotten {count} time: {share}",
+      "other": "forgotten {count} times: {share}"
+    },
+    "leechMark": "{text} · a leech",
+    "confusions": "Most-confused options",
+    "confusionsHint": "The wrong options chosen most often in this deck's course questions over the last 12 months.",
+    "noConfusions": "No wrong option was chosen over the last 12 months.",
+    "confusedWith": {
+      "one": "confused with {option} {count} time",
+      "other": "confused with {option} {count} times"
+    },
+    "leeches": "Leeches across your decks",
+    "leechesHint": {
+      "one": "Cards forgotten {count} time or more in their reviews over the last 12 months, in any deck. They keep costing reviews: open one to make it clearer or add a note.",
+      "other": "Cards forgotten {count} times or more in their reviews over the last 12 months, in any deck. They keep costing reviews: open one to make it clearer or add a note."
+    },
+    "noLeeches": "No leeches: no card was forgotten that often.",
+    "leechIn": "{forgotten}, in {deck}"
   },
   "zoomableImage": {
     "enlarge": "Enlarge picture",

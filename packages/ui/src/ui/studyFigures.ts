@@ -13,14 +13,14 @@ import type { QueryClient } from "@tanstack/react-query";
 export const STATISTICS_STALE_MS = 30_000;
 
 /**
- * Marks the statistics (the today strip's among them) and the cards'
- * progress stale, of every instance, whenever a change made in the app
- * ends, whether it was written or not: an answer, a card or deck added,
- * edited or removed, a deck's pace, the preferences, a guest's study
- * brought over, a Studio edit. Any of them can change what they show,
- * and every one is a mutation, so none is left out. Those shown are
- * read again at once, the others when next shown. Returns the
- * unsubscribe.
+ * Marks the statistics (the today strip's among them), the cards'
+ * progress and the cards' answers (their history) stale, of every
+ * instance, whenever a change made in the app ends, whether it was
+ * written or not: an answer, a card or deck added, edited or removed, a
+ * deck's pace, the preferences, a guest's study brought over, a Studio
+ * edit. Any of them can change what they show, and every one is a
+ * mutation, so none is left out. Those shown are read again at once, the
+ * others when next shown. Returns the unsubscribe.
  */
 export function keepStudyFiguresFresh(queryClient: QueryClient): () => void {
   return queryClient.getMutationCache().subscribe((event) => {
@@ -28,5 +28,6 @@ export function keepStudyFiguresFresh(queryClient: QueryClient): () => void {
     if (event.action.type !== "success" && event.action.type !== "error") return;
     void queryClient.invalidateQueries({ queryKey: ["statistics"] });
     void queryClient.invalidateQueries({ queryKey: ["cardProgress"] });
+    void queryClient.invalidateQueries({ queryKey: ["cardAnswers"] });
   });
 }
