@@ -111,7 +111,9 @@ export function ChapterReviewContainer({
       error={errorText(answerMutation.error)}
       completion={completion}
       onStart={() => setStarted(true)}
-      onCheck={(choice) => answerMutation.mutate({ card: card!, choice })}
+      onCheck={(choice, recallMillis) =>
+        answerMutation.mutate({ card: card!, choice, recallMillis })
+      }
       onNext={next}
       onRetry={complete}
     />

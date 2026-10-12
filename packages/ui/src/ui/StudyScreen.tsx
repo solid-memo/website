@@ -10,12 +10,14 @@ import {
   type AnswerScale,
   type MinimalAnswer,
 } from "@solid-memo/domain/answerScale";
+import type { ResponseTimes } from "@solid-memo/domain/answer";
 import { promptSides, type Prompt } from "@solid-memo/domain/deck";
 import type { ReviewQuality } from "@solid-memo/domain/review";
 import { CardFace } from "./CardFace";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
 import { inDataRegion } from "./Markdown";
+import { useStopwatch } from "./stopwatch";
 
 function qualityLabel(quality: ReviewQuality, t: I18n["t"]): string {
   switch (quality) {
@@ -99,7 +101,8 @@ export function StudyScreen({
   answerScale: AnswerScale;
   busy: boolean;
   error: ErrorText | null;
-  onAnswer: (quality: ReviewQuality) => void;
+  /** A grade given, with how long recalling and grading took (StudyCard). */
+  onAnswer: (quality: ReviewQuality, times: ResponseTimes) => void;
   onExit: () => void;
 }) {
   const { t, tx } = useI18n();
@@ -176,6 +179,10 @@ export function StudyScreen({
  * A grade button is never focused itself, so a repeated key press cannot
  * grade by accident. While an answer saves, the buttons are only
  * aria-disabled, so the one pressed keeps the focus if saving fails.
+ *
+ * A grade comes with how long the learner took (useStopwatch): to
+ * recall, from the card shown to Reveal, and to grade, from Reveal to
+ * the grade (to the last grade pressed, when saving failed before).
  */
 function StudyCard({
   prompt,
@@ -186,15 +193,27 @@ function StudyCard({
   prompt: Prompt;
   answerScale: AnswerScale;
   busy: boolean;
-  onAnswer: (quality: ReviewQuality) => void;
+  onAnswer: (quality: ReviewQuality, times: ResponseTimes) => void;
 }) {
   const { t } = useI18n();
   const [revealed, setRevealed] = useState(false);
+  const stopwatch = useStopwatch();
+  const recallMillis = useRef(0);
   const { question, answer } = promptSides(prompt);
   const questionRef = useRef<HTMLDivElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
   const gradePromptId = useId();
   const buttons = answerButtons(answerScale, t);
+
+  function reveal() {
+    recallMillis.current = stopwatch.read();
+    stopwatch.restart();
+    setRevealed(true);
+  }
+
+  function grade(quality: ReviewQuality) {
+    onAnswer(quality, { recallMillis: recallMillis.current, gradeMillis: stopwatch.read() });
+  }
 
   function onKeyDown(event: KeyboardEvent) {
     if (
@@ -209,13 +228,13 @@ function StudyCard({
       // Space on Reveal itself already presses it.
       if (event.key !== " " || (event.target as Element).closest("button")) return;
       event.preventDefault();
-      setRevealed(true);
+      reveal();
       return;
     }
-    const grade = buttons.find((button) => button.key === event.key);
-    if (grade === undefined) return;
+    const pressed = buttons.find((button) => button.key === event.key);
+    if (pressed === undefined) return;
     event.preventDefault();
-    onAnswer(grade.quality);
+    grade(pressed.quality);
   }
 
   useLayoutEffect(() => {
@@ -249,7 +268,7 @@ function StudyCard({
                 data-grade={quality}
                 aria-keyshortcuts={key}
                 onClick={() => {
-                  if (!busy) onAnswer(quality);
+                  if (!busy) grade(quality);
                 }}
                 aria-disabled={busy}
               >
@@ -268,7 +287,7 @@ function StudyCard({
         <>
           <button
             onClick={() => {
-              if (!busy) setRevealed(true);
+              if (!busy) reveal();
             }}
             aria-disabled={busy}
             aria-keyshortcuts="Space"

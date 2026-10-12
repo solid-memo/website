@@ -159,9 +159,12 @@ import {
 import {
   answerIdOf,
   monthOfStudyDay,
+  recordedResponseTimes,
   shiftStudyDay,
+  utcOffsetMinutesAt,
   type Answer,
   type AnswerMode,
+  type ResponseTimes,
 } from "@solid-memo/domain/answer";
 import {
   courseAnswerEffect,
@@ -779,7 +782,9 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void>;
   /**
    * Apply one SM-2 review: load the prompt's state (or start fresh),
-   * transition it, persist it, and return the new state.
+   * transition it, persist it, and return the new state. The answer
+   * logged keeps how long it took (`times`, as the screen measured it;
+   * recordedResponseTimes says which are kept).
    */
   recordReview(
     instanceUrl: string,
@@ -787,6 +792,7 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
     prompt: Prompt,
     quality: ReviewQuality,
     now: Date,
+    times?: ResponseTimes,
   ): Promise<ReviewState>;
   /**
    * Undo the current study day for a deck: cards reviewed today go back
@@ -899,7 +905,9 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * graded; a review is graded as in study; either way the answer is
    * logged as a multiple-choice one, naming the wrong option chosen. No
    * daily limit applies: the learner reached the card. Writes nothing
-   * when the answer is practice ("none").
+   * when the answer is practice ("none"). The answer logged keeps how
+   * long choosing took (`times`; a multiple-choice answer is not graded,
+   * so it has no grading time).
    */
   answerCourseQuestion(
     instanceUrl: string,
@@ -907,6 +915,7 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
     card: LibraryCard,
     choice: CourseChoice,
     now: Date,
+    times?: Pick<ResponseTimes, "recallMillis">,
   ): Promise<CourseAnswer>;
   /**
    * Note a chapter of the deck's course completed (its final review
@@ -2184,9 +2193,10 @@ export function createUseCases({
   /**
    * Apply one grade to a prompt of the deck: transition its state (or the
    * initial one) by SM-2, persist it, and queue its answer for the log,
-   * saying how it was given (`how`; a study session says nothing: recall).
-   * The instance's preferences and the prompt's current state are read
-   * unless `known` brings them.
+   * saying how it was given (`how`; a study session says nothing: recall)
+   * and how long it took (`times`), the day it was due and the device's
+   * offset from UTC. The instance's preferences and the prompt's current
+   * state are read unless `known` brings them.
    */
   async function applyGrade(
     instanceUrl: string,
@@ -2194,7 +2204,7 @@ export function createUseCases({
     prompt: { cardId: string; cardUrl: string; direction: StudyDirection },
     quality: ReviewQuality,
     now: Date,
-    how: { mode?: AnswerMode; chosenDistractor?: string } = {},
+    how: { mode?: AnswerMode; chosenDistractor?: string; times: ResponseTimes },
     known?: { prefs: StudyPreferences; current: ReviewState | null },
   ): Promise<ReviewState> {
     const key = { cardId: prompt.cardId, direction: prompt.direction };
@@ -2231,6 +2241,9 @@ export function createUseCases({
         nextIntervalDays: next.intervalDays,
         ...(how.mode === undefined ? {} : { mode: how.mode }),
         ...(how.chosenDistractor === undefined ? {} : { chosenDistractor: how.chosenDistractor }),
+        ...recordedResponseTimes(how.times),
+        ...(current === null ? {} : { priorDue: current.due }),
+        utcOffsetMinutes: utcOffsetMinutesAt(now),
       },
     });
     void logAnswers();
@@ -3256,13 +3269,14 @@ export function createUseCases({
       return studyCountsAndSchedule(instanceUrl, deck, now);
     },
     refreshStudyDigest,
-    recordReview(instanceUrl, deck, prompt, quality, now) {
+    recordReview(instanceUrl, deck, prompt, quality, now, times = {}) {
       return applyGrade(
         instanceUrl,
         deck,
         { cardId: prompt.card.id, cardUrl: prompt.card.url, direction: prompt.direction },
         quality,
         now,
+        { times },
       );
     },
     async resetStudyDay(instanceUrl, deck, now) {
@@ -3447,7 +3461,7 @@ export function createUseCases({
         progress: courseProgress(outline, answeredCardIds, deck.completedChapters ?? []),
       };
     },
-    async answerCourseQuestion(instanceUrl, deck, card, choice, now) {
+    async answerCourseQuestion(instanceUrl, deck, card, choice, now, times = {}) {
       const prompt = {
         cardId: card.id,
         cardUrl: `${deck.cardsDocumentUrl}#${card.id}`,
@@ -3475,7 +3489,11 @@ export function createUseCases({
         prompt,
         effect.grade,
         now,
-        { mode: "multiple-choice", ...(chosen === undefined ? {} : { chosenDistractor: chosen }) },
+        {
+          mode: "multiple-choice",
+          ...(chosen === undefined ? {} : { chosenDistractor: chosen }),
+          times,
+        },
         { prefs, current },
       );
       return { effect: effect.kind, state };

@@ -272,7 +272,7 @@ else offers nothing.
 | `startCourse(instanceUrl, course)` | The instance's deck of the course: the copy it has (`isCopyOf`), else a new, empty copy of the current release. |
 | `importReleaseFromUrl(instanceUrl, release)` | A course added from a link is started so too (`readReleaseFromLink` reads and checks it first, [deck-library.md](deck-library.md#from-a-link)). |
 | `getCourse(deck)` | The course as the learner has it: the deck as its entry is now, the release, its outline, its cards by id, the cards answered and the progress. Writes nothing. A deck that is gone throws `deckGone`. |
-| `answerCourseQuestion(instanceUrl, deck, card, choice, now)` | Grades one answer as `courseAnswerEffect` says. A card introduced is written first (`applyCardChanges`), then graded, so a review state never exists without its card. Returns the effect and the card's state. |
+| `answerCourseQuestion(instanceUrl, deck, card, choice, now, times?)` | Grades one answer as `courseAnswerEffect` says, logging how long choosing took (`times.recallMillis`). A card introduced is written first (`applyCardChanges`), then graded, so a review state never exists without its card. Returns the effect and the card's state. |
 | `completeChapter(deck, chapterUrl)` | Adds `sm:completedChapter` to the deck's entry. |
 | `setCompletedChapters(deck, edit)` | The Studio's change of the chapters completed: one marked not done (in any release, by its fragment id), or the course restarted, none completed. Answers and review states stay. |
 

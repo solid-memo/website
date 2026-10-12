@@ -66,7 +66,8 @@ export function ChapterReviewScreen({
   /** Set once every question is answered right. */
   completion: Completion | null;
   onStart: () => void;
-  onCheck: (choice: Choice) => void;
+  /** An option checked, and the milliseconds it took to choose it (CourseQuestion). */
+  onCheck: (choice: Choice, recallMillis: number) => void;
   onNext: () => void;
   /** Tries completing the chapter again, after it failed. */
   onRetry: () => void;

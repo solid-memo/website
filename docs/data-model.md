@@ -891,7 +891,9 @@ data, since nothing could rebuild it.
   changes nothing, and adding it to another deck (the guest's deck
   added anew) makes an entry of its own, never one naming two decks.
 - **After the review, not in its way**: `recordReview` saves the review
-  state, then queues the answer; it is added in the background, and one
+  state, then queues the answer, with how long it took as the study
+  screen measured it
+  ([statistics.md](statistics.md#response-times)); it is added in the background, and one
   that fails waits, with those after it, for the next answer, the end of
   the session or the statistics page. An answer still queued when the
   tab closes is lost; the review it belongs to is not.

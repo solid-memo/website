@@ -49,7 +49,18 @@ describe("CourseQuestion", () => {
     expect(statusTexts()).toEqual([]);
     fireEvent.click(screen.getByRole("radio", { name: "Not An IRI" }));
     fireEvent.click(screen.getByRole("button", { name: "Check" }));
-    expect(onCheck).toHaveBeenCalledWith(explained);
+    expect(onCheck).toHaveBeenCalledWith(explained, expect.any(Number));
+  });
+
+  it("says how long choosing took, from the question shown to the option checked", () => {
+    let clock = 0;
+    const now = vi.spyOn(performance, "now").mockImplementation(() => clock);
+    const { onCheck } = renderQuestion();
+    clock += 4_200;
+    fireEvent.click(screen.getByRole("radio", { name: "Not An IRI" }));
+    fireEvent.click(screen.getByRole("button", { name: "Check" }));
+    expect(onCheck).toHaveBeenCalledWith(explained, 4_200);
+    now.mockRestore();
   });
 
   it("takes the focus to the question only when asked to", () => {

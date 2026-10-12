@@ -2,7 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { expect, type Locator } from "@playwright/test";
+import { readFile } from "node:fs/promises";
+import { expect, test, type Locator } from "@playwright/test";
 import { Screen } from "./Screen.ts";
 import { escapeRegExp } from "../harness/strings.ts";
 import { cellOf } from "./tables.ts";
@@ -424,6 +425,43 @@ export class Statistics extends Screen {
       });
       await expect(await cellOf(table, row, this.t("statistics.answers"))).toHaveText(
         String(answers),
+      );
+    });
+  }
+
+  /**
+   * Downloads the range's answers from the overview (a CSV file) and
+   * checks that each of the `answers`, every one given in study, kept how
+   * long recalling and grading took, in whole milliseconds, and the
+   * device's offset from UTC; and that `reviewed` of them, given to a
+   * card met before, kept the day it was due.
+   */
+  async expectAnswersTimed(expected: { answers: number; reviewed: number }): Promise<void> {
+    await this.intent("Check that each answer kept how long it took", async () => {
+      await this.openTab("overview");
+      const downloaded = this.page.waitForEvent("download");
+      await this.main
+        .getByRole("button", { name: this.t("statistics.downloadAnswers"), exact: true })
+        .click();
+      const download = await downloaded;
+      const path = test.info().outputPath(download.suggestedFilename());
+      await download.saveAs(path);
+      // No field of these answers holds a comma or a quote, so a line splits at each comma.
+      const [header, ...rows] = (await readFile(path, "utf8"))
+        .trimEnd()
+        .split("\r\n")
+        .map((line) => line.split(","));
+      const column = (name: string) => rows.map((row) => row[header!.indexOf(name)]);
+      expect(rows).toHaveLength(expected.answers);
+      for (const name of ["recall_millis", "grade_millis"])
+        expect(column(name), name).toEqual(rows.map(() => expect.stringMatching(/^\d+$/)));
+      expect(column("utc_offset_minutes")).toEqual(
+        rows.map(() => expect.stringMatching(/^-?\d+$/)),
+      );
+      expect(column("prior_due").filter((day) => day !== "")).toEqual(
+        Array.from({ length: expected.reviewed }, () =>
+          expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+        ),
       );
     });
   }

@@ -77,6 +77,7 @@ describe("ChapterPlayerContainer", () => {
       courseCards[0],
       { correct: true },
       expect.any(Date),
+      { recallMillis: expect.any(Number) },
     );
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", course.deck.url] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cards", course.deck.cardsDocumentUrl] });
@@ -101,6 +102,7 @@ describe("ChapterPlayerContainer", () => {
       courseCards[1],
       { correct: false, distractorId: "q-2-d1" },
       expect.any(Date),
+      { recallMillis: expect.any(Number) },
     );
 
     // A second question of the step follows, still without the theory.
@@ -120,7 +122,9 @@ describe("ChapterPlayerContainer", () => {
     expect(useCases.refreshStudyDigest).toHaveBeenCalledWith(courseInstance.url, course.deck);
   });
 
-  it("answers at the screen's time", async () => {
+  it("answers at the screen's time, saying how long choosing took", async () => {
+    let clock = 0;
+    const now = vi.spyOn(performance, "now").mockImplementation(() => clock);
     const useCases = makeUseCasesFake();
     vi.mocked(useCases.answerCourseQuestion).mockResolvedValue({
       effect: "introduce",
@@ -129,6 +133,7 @@ describe("ChapterPlayerContainer", () => {
     const later = new Date("2026-12-24T10:00:00.000Z");
     renderPlayer(useCases, makeCourse(), () => later);
     toQuestions();
+    clock += 2_750;
     answer("An IRI");
     await waitFor(() =>
       expect(useCases.answerCourseQuestion).toHaveBeenCalledWith(
@@ -137,8 +142,10 @@ describe("ChapterPlayerContainer", () => {
         courseCards[0],
         { correct: true },
         later,
+        { recallMillis: 2_750 },
       ),
     );
+    now.mockRestore();
   });
 
   it("opens at the step to resume at, on its theory", () => {

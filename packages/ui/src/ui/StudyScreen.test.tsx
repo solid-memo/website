@@ -18,6 +18,9 @@ const card: Card = {
   formatVersion: 1,
 };
 
+/** Response times, whatever they are. */
+const timed = { recallMillis: expect.any(Number), gradeMillis: expect.any(Number) };
+
 function renderScreen(overrides: Partial<Parameters<typeof StudyScreen>[0]> = {}) {
   const props = {
     deckName: "Kanji N5",
@@ -110,13 +113,29 @@ describe("StudyScreen", () => {
     expect(front).toHaveClass("card-answer");
   });
 
+  it("says how long recalling and grading took: from the card shown to Reveal, and on to the grade", () => {
+    let clock = 0;
+    const now = vi.spyOn(performance, "now").mockImplementation(() => clock);
+    const { props } = renderScreen();
+    clock += 3_200;
+    fireEvent.keyDown(document.activeElement!, { key: " " });
+    clock += 900;
+    fireEvent.click(screen.getByRole("button", { name: "4 — Good" }));
+    expect(props.onAnswer).toHaveBeenLastCalledWith(4, { recallMillis: 3_200, gradeMillis: 900 });
+    // Pressed again, as after saving failed: to the last grade pressed.
+    clock += 600;
+    fireEvent.keyDown(document.activeElement!, { key: "5" });
+    expect(props.onAnswer).toHaveBeenLastCalledWith(5, { recallMillis: 3_200, gradeMillis: 1_500 });
+    now.mockRestore();
+  });
+
   it("reveals the back and offers quality grades", () => {
     const { props } = renderScreen();
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
     expect(screen.getByText("water")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "4 — Good" }));
-    expect(props.onAnswer).toHaveBeenCalledWith(4);
+    expect(props.onAnswer).toHaveBeenCalledWith(4, timed);
   });
 
   it("offers Again / Hard / Good / Easy on the minimal scale", () => {
@@ -130,13 +149,13 @@ describe("StudyScreen", () => {
     expect(buttons.map((b) => b.dataset.grade)).toEqual(["1", "3", "4", "5"]);
 
     fireEvent.click(screen.getByRole("button", { name: "Again" }));
-    expect(props.onAnswer).toHaveBeenLastCalledWith(1);
+    expect(props.onAnswer).toHaveBeenLastCalledWith(1, timed);
     fireEvent.click(screen.getByRole("button", { name: "Hard" }));
-    expect(props.onAnswer).toHaveBeenLastCalledWith(3);
+    expect(props.onAnswer).toHaveBeenLastCalledWith(3, timed);
     fireEvent.click(screen.getByRole("button", { name: "Good" }));
-    expect(props.onAnswer).toHaveBeenLastCalledWith(4);
+    expect(props.onAnswer).toHaveBeenLastCalledWith(4, timed);
     fireEvent.click(screen.getByRole("button", { name: "Easy" }));
-    expect(props.onAnswer).toHaveBeenLastCalledWith(5);
+    expect(props.onAnswer).toHaveBeenLastCalledWith(5, timed);
   });
 
   it("hides the answer again when the same card comes round a second time", () => {
@@ -339,7 +358,7 @@ describe("StudyScreen", () => {
     fireEvent.keyDown(document.activeElement!, { key: " " });
     expect(props.onAnswer).not.toHaveBeenCalled();
     fireEvent.keyDown(document.activeElement!, { key: "0" });
-    expect(props.onAnswer).toHaveBeenCalledWith(0);
+    expect(props.onAnswer).toHaveBeenCalledWith(0, timed);
   });
 
   it("answers the minimal scale with 1 to 4", () => {
@@ -347,9 +366,9 @@ describe("StudyScreen", () => {
     fireEvent.keyDown(document.activeElement!, { key: " " });
     expect(screen.getByText("Press 1 to 4 to answer.")).toBeInTheDocument();
     fireEvent.keyDown(document.activeElement!, { key: "1" });
-    expect(props.onAnswer).toHaveBeenLastCalledWith(1);
+    expect(props.onAnswer).toHaveBeenLastCalledWith(1, timed);
     fireEvent.keyDown(document.activeElement!, { key: "4" });
-    expect(props.onAnswer).toHaveBeenLastCalledWith(5);
+    expect(props.onAnswer).toHaveBeenLastCalledWith(5, timed);
   });
 
   it("ignores the keys while an answer saves", () => {
