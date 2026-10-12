@@ -116,6 +116,13 @@ export interface ExpectedStatistics {
    */
   weekday?: { average: number; studied: number; of: number };
   /**
+   * "Recall by interval", every span of intervals in order: the reviews
+   * remembered of its reviews, null for "no reviews".
+   */
+  recallByInterval?: ({ recalled: number; reviews: number } | null)[];
+  /** The newest week of "Young and mature cards over time": its prompts young, mature and relearning. */
+  thisWeek?: { young: number; mature: number; relearning: number };
+  /**
    * The instance's prompts taken together, under "Where your cards stand",
    * with the forecast beside them, and how their intervals are spread once
    * any is studied.
@@ -136,8 +143,9 @@ export interface ExpectedStatistics {
 /**
  * "Statistics", of the instance or of one deck: the range the figures
  * are of and four tabs. The overview's tiles, calendar and table by
- * deck; the activity's charts of each day, the weekdays and the cards
- * introduced; the memory's recall, answer buttons and what is hard; and
+ * deck; the activity's charts of each day, the weekdays, the cards
+ * introduced and where they stood week by week; the memory's recall,
+ * answer buttons, recall by interval and what is hard; and
  * the cards' tab, where the cards stand, read apart, and the courses.
  * It opens on the overview of the last 3 months.
  */
@@ -284,6 +292,8 @@ export class Statistics extends Screen {
         name: this.t("statistics.activityLabel", { weeks: 52 }),
         exact: true,
       });
+      // The pointer, left where the last click was, could rest on a day and speak over the keys.
+      await this.page.mouse.move(0, 0);
       await grid.focus();
       await this.page.keyboard.press("End");
       const said = new RegExp(
@@ -319,6 +329,7 @@ export class Statistics extends Screen {
       if (expected.answers !== undefined) await this.expectIntroduced();
       if (expected.today !== undefined) await this.expectToday(expected.today);
       if (expected.weekday !== undefined) await this.expectWeekday(expected.weekday);
+      if (expected.thisWeek !== undefined) await this.expectThisWeek(expected.thisWeek);
 
       await this.openTab("memory");
       for (const key of ["young", "mature"] as const) {
@@ -326,6 +337,8 @@ export class Statistics extends Screen {
         if (recall !== undefined) await this.expectRecall(key, recall);
       }
       if (expected.buttons !== undefined) await this.expectButtons(expected.buttons);
+      if (expected.recallByInterval !== undefined)
+        await this.expectRecallByInterval(expected.recallByInterval);
 
       await this.openTab("cards");
       if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
@@ -507,6 +520,50 @@ export class Statistics extends Screen {
       young: this.t("statistics.maturityYoung", { count: maturity.young }),
       mature: this.t("statistics.maturityMature", { count: maturity.mature }),
     });
+  }
+
+  /** Each row of "Recall by interval": its share of reviews remembered with their count, however few. */
+  private async expectRecallByInterval(
+    spans: ({ recalled: number; reviews: number } | null)[],
+  ): Promise<void> {
+    const table = await this.tableOf(this.t("statistics.recallByInterval"));
+    const rows = table.getByRole("row").filter({ has: this.page.getByRole("cell") });
+    await expect(rows, this.t("statistics.recallByInterval")).toHaveCount(spans.length);
+    for (const [i, span] of spans.entries())
+      await expect(
+        await cellOf(table, rows.nth(i), this.t("statistics.recall")),
+        `${this.t("statistics.recallByInterval")}: row ${i + 1}`,
+      ).toHaveText(
+        span === null
+          ? this.t("statistics.noReviewsThen")
+          : this.t("statistics.recallShare", {
+              percent: this.percent(span.recalled, span.reviews),
+              count: span.reviews,
+            }),
+      );
+  }
+
+  /** The newest row of "Young and mature cards over time": this week's. */
+  private async expectThisWeek(week: {
+    young: number;
+    mature: number;
+    relearning: number;
+  }): Promise<void> {
+    const table = await this.tableOf(this.t("statistics.maturityOverTime"));
+    const row = table
+      .getByRole("row")
+      .filter({ has: this.page.getByRole("cell") })
+      .first();
+    const columns = {
+      young: "statistics.youngShort",
+      mature: "statistics.matureShort",
+      relearning: "statistics.relearningShort",
+    } as const;
+    for (const [kind, key] of Object.entries(columns))
+      await expect(
+        await cellOf(table, row, this.t(key)),
+        `${this.t("statistics.maturityOverTime")}: ${this.t(key)}`,
+      ).toHaveText(String(week[kind as keyof typeof columns]));
   }
 
   /** The chart of cards introduced over time, which comes with answers. */

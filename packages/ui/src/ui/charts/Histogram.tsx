@@ -10,7 +10,7 @@ import { BarChart } from "./BarChart";
 export function useBinRanges() {
   const { t } = useI18n();
   return {
-    interval: (bin: Bin) =>
+    interval: (bin: Pick<Bin, "from" | "to">) =>
       bin.to === undefined
         ? t("statistics.intervalFrom", { from: bin.from })
         : bin.to - bin.from === 1

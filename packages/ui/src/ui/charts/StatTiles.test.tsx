@@ -5,7 +5,14 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { I18nProvider } from "../i18n";
-import { FirstTryTile, PeriodTiles, QuizTile, RecallTile, StatTile } from "./StatTiles";
+import {
+  FirstTryTile,
+  PeriodTiles,
+  QuizTile,
+  RecallTile,
+  StatTile,
+  TimeToMatureTile,
+} from "./StatTiles";
 
 describe("tiles", () => {
   it("show a number with what it counts, and a share of reviews in the spoken language", () => {
@@ -70,6 +77,17 @@ describe("tiles", () => {
     render(<QuizTile quiz={{ answers: 4, right: 3 }} />);
     expect(screen.getByRole("group", { name: "Graded course answers" })).toHaveTextContent(
       "75%right, of 4 answers",
+    );
+  });
+
+  it("give the median time cards took to grow mature, with how many it is of, and a dash before any", () => {
+    const { rerender } = render(<TimeToMatureTile time={{ prompts: 1, days: 22.5, reviews: 3 }} />);
+    expect(screen.getByRole("group", { name: "Time to mature (median)" })).toHaveTextContent(
+      "23 daysand 3 reviews, of 1 card",
+    );
+    rerender(<TimeToMatureTile time={{ prompts: 0, days: null, reviews: null }} />);
+    expect(screen.getByRole("group", { name: "Time to mature (median)" })).toHaveTextContent(
+      "–No card grew mature in this range",
     );
   });
 });

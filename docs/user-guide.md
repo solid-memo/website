@@ -216,14 +216,20 @@ the last 12 months, or all time. Its tabs, each a link of its own:
   nothing is sent anywhere.
 - **Activity**: what each recent day held and which weekdays you
   study, this week and month beside the last, how many cards you have
-  started and how many you knew the first time, and the new cards you
-  take on beside the reviews you do each week.
+  started, how many were young and mature week by week and how long
+  their intervals were, how many you knew the first time and how long
+  cards took to grow mature, and the new cards you take on beside the
+  reviews you do each week.
 - **Memory**: how well you remembered your cards in reviews (each
   card's first review of the day, always with how many reviews that
-  is), which answer buttons you pressed, how you answered course
-  questions, counted apart, and your leeches: the cards you forgot 4
-  times or more in their reviews, each a link to the card, whose page
-  shows every answer you gave it.
+  is), which answer buttons you pressed, your recall week by week (month
+  by month over a longer stretch), by how long a card had been away and
+  by how late you reviewed it, how you answered course questions,
+  counted apart, and your leeches: the cards you forgot 4 times or more
+  in their reviews, each a link to the card, whose page shows every
+  answer you gave it. What is worked out from your answers alone, such
+  as how late a review was, is approximate, and says so: changes made
+  in the Studio are not in your answers.
 - **Cards**: where your cards stand: how many are new, relearning
   (forgotten last time), young (reviewed at intervals under 21 days)
   and mature, how many reviews are overdue and when your daily review

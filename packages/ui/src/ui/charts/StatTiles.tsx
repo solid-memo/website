@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useId } from "preact/hooks";
+import type { TimeToMature } from "@solid-memo/domain/memoryCurve";
 import type { Quiz, Recall } from "@solid-memo/domain/statistics";
 import type { FirstTry, PeriodToDate } from "@solid-memo/domain/studyPatterns";
 import { useI18n } from "../i18n";
@@ -71,6 +72,27 @@ export function FirstTryTile({ firstTry }: { firstTry: FirstTry }) {
       label={t("statistics.firstTry")}
       value={formatPercent(firstTry.recalled / firstTry.introduced)}
       detail={t("statistics.ofNewCards", { count: firstTry.introduced })}
+    />
+  );
+}
+
+/**
+ * How long the cards that grew mature took (timeToMatureOf): the median
+ * days, with the median reviews and how many cards it is of, however
+ * few; a dash while none has.
+ */
+export function TimeToMatureTile({ time }: { time: TimeToMature }) {
+  const { t } = useI18n();
+  return time.prompts === 0 ? (
+    <StatTile label={t("statistics.timeToMature")} value="–" detail={t("statistics.noneMatured")} />
+  ) : (
+    <StatTile
+      label={t("statistics.timeToMature")}
+      value={t("statistics.dayCount", { count: Math.round(time.days!) })}
+      detail={t("statistics.timeToMatureDetail", {
+        reviews: t("statistics.reviewCount", { count: Math.round(time.reviews!) }),
+        count: time.prompts,
+      })}
     />
   );
 }

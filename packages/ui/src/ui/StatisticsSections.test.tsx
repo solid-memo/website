@@ -189,21 +189,78 @@ describe("ActivitySection", () => {
       "100%remembered, of 2 new cards",
     );
     expect(screen.getByText("New cards and reviews, by week")).toBeInTheDocument();
+    expect(screen.getByText("Young and mature cards over time")).toBeInTheDocument();
+    expect(screen.getByText("Memory span")).toBeInTheDocument();
+    // The card reviewed reached 21 days a day after its first answer.
+    expect(screen.getByRole("group", { name: "Time to mature (median)" })).toHaveTextContent(
+      "1 dayand 1 review, of 1 card",
+    );
   });
 
-  it("gives no first try for course answers alone", () => {
+  it("gives no first try for course answers alone, and how long cards took to grow mature all the same", () => {
     render(<ActivitySection statistics={courseOnly} />);
     expect(screen.queryByRole("group", { name: "First try" })).toBeNull();
+    expect(screen.getByRole("group", { name: "Time to mature (median)" })).toHaveTextContent(
+      "–No card grew mature in this range",
+    );
+  });
+
+  it("says since when, when the log begins after the range read", () => {
+    render(
+      <ActivitySection
+        statistics={statisticsReportOf([answer("2026-09-21", deck.url)], "2026-09-21", "2026-03")}
+      />,
+    );
+    expect(screen.getByText("Since March 2026, your first month of study.")).toBeInTheDocument();
   });
 });
 
 describe("MemorySection", () => {
-  it("shows recall, the answer buttons and recall by month, and nothing of courses without course answers", () => {
+  it("shows recall, the answer buttons, recall by week, by interval and by lateness, and nothing of courses without course answers", () => {
     render(<MemorySection statistics={statistics} byDirection={false} />);
     expect(headings()).toEqual(["Remembered in reviews"]);
     expect(screen.getAllByText("100%")).not.toHaveLength(0);
     expect(screen.getByText("Answer buttons")).toBeInTheDocument();
+    expect(screen.getByText("Recall by week")).toBeInTheDocument();
+    expect(screen.queryByText("Recall by month")).toBeNull();
+    expect(screen.getByText("Recall by interval")).toBeInTheDocument();
+    expect(screen.getByText("What a late review costs")).toBeInTheDocument();
+  });
+
+  it("shows recall by week over a range of 90 days that starts on a Wednesday", () => {
+    render(
+      <MemorySection
+        statistics={statisticsReportOf(
+          [
+            answer("2026-06-24", deck.url, undefined, { nextIntervalDays: 1 }),
+            answer("2026-06-25", deck.url, 1),
+          ],
+          "2026-09-21",
+        )}
+        byDirection={false}
+      />,
+    );
+    expect(screen.getByText("Recall by week")).toBeInTheDocument();
+    expect(screen.queryByText("Recall by month")).toBeNull();
+  });
+
+  it("shows recall by month once the reviews span more than 14 weeks, and since when the log begins", () => {
+    render(
+      <MemorySection
+        statistics={statisticsReportOf(
+          [
+            answer("2026-05-01", deck.url, undefined, { nextIntervalDays: 1 }),
+            answer("2026-06-01", deck.url, 1),
+          ],
+          "2026-09-21",
+          "2026-05",
+        )}
+        byDirection={false}
+      />,
+    );
     expect(screen.getByText("Recall by month")).toBeInTheDocument();
+    expect(screen.queryByText("Recall by week")).toBeNull();
+    expect(screen.getByText("Since May 2026, your first month of study.")).toBeInTheDocument();
   });
 
   it("shows graded course answers apart, in place of recall when there is no review", () => {
@@ -216,14 +273,16 @@ describe("MemorySection", () => {
     expect(screen.queryByRole("group", { name: /Young cards/ })).toBeNull();
   });
 
-  it("leaves out recall by month while there are no reviews, only first answers", () => {
+  it("leaves out recall over time while there are no reviews, only first answers, and gives no reviews by interval and lateness", () => {
     render(
       <MemorySection
         statistics={statisticsReportOf([answer("2026-09-21", deck.url)], "2026-09-21")}
         byDirection={false}
       />,
     );
-    expect(screen.queryByText("Recall by month")).toBeNull();
+    expect(screen.queryByText("Recall by week")).toBeNull();
+    expect(screen.getByText("Recall by interval")).toBeInTheDocument();
+    expect(screen.getAllByText("no reviews")).toHaveLength(9 + 7);
     expect(screen.getAllByText("No reviews yet")).toHaveLength(2);
   });
 

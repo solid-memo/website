@@ -5,12 +5,21 @@
 import type { StatisticsReport } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Quiz, Recall } from "@solid-memo/domain/statistics";
-import { RECENT_DAYS, type DirectionRecall, type FirstTry } from "@solid-memo/domain/studyPatterns";
+import {
+  daysBetween,
+  RECENT_DAYS,
+  type DirectionRecall,
+  type FirstTry,
+} from "@solid-memo/domain/studyPatterns";
 import { ActivityCalendar } from "./charts/ActivityCalendar";
 import { DayHeldBars } from "./charts/DayHeldBars";
 import { GradeBars } from "./charts/GradeBars";
 import { IntakeChart } from "./charts/IntakeChart";
+import { IntervalRecallChart } from "./charts/IntervalRecallChart";
 import { IntroducedChart } from "./charts/IntroducedChart";
+import { LatenessChart } from "./charts/LatenessChart";
+import { MaturityOverTimeChart } from "./charts/MaturityOverTimeChart";
+import { MemorySpanChart } from "./charts/MemorySpanChart";
 import { RecallChart } from "./charts/RecallChart";
 import {
   CoverageNote,
@@ -20,6 +29,7 @@ import {
   QuizTile,
   RecallTile,
   StatTile,
+  TimeToMatureTile,
 } from "./charts/StatTiles";
 import { WeekdayChart } from "./charts/WeekdayChart";
 import { useI18n } from "./i18n";
@@ -197,15 +207,26 @@ function ByDeckTable({
 }
 
 /**
+ * Recall is shown by week, rather than by month, while its first week
+ * (from Monday) began fewer than this many days ago: 14 weeks, so that
+ * a range of 90 days is shown by week whatever weekday it starts on.
+ */
+const RECALL_BY_WEEK_DAYS = 14 * 7;
+
+/**
  * When and how much: what each recent day held, how the weekdays are
  * studied, this week and month beside the last (these whatever the
- * range), the cards introduced over the range, how many were remembered the first time (not for
- * course answers alone), and the new cards beside the reviews by week.
+ * range), then progress: the cards introduced over the range, where the
+ * cards stood and their median interval week by week, how many were
+ * remembered the first time (not for course answers alone) and how long
+ * cards took to grow mature, and the new cards beside the reviews by
+ * week. Where the log begins inside the range, a note says since when.
  */
 export function ActivitySection({ statistics }: { statistics: StatisticsReport }) {
   const { t } = useI18n();
   return (
     <>
+      <CoverageNote coverage={statistics.coverage} />
       <DayHeldBars days={statistics.recentDays} today={statistics.today} />
       <WeekdayChart weekdays={statistics.weekdays} />
       <h3>{t("statistics.thisWeek")}</h3>
@@ -214,11 +235,12 @@ export function ActivitySection({ statistics }: { statistics: StatisticsReport }
       <PeriodTiles period="month" figures={statistics.month} />
       <h3>{t("statistics.progress")}</h3>
       <IntroducedChart days={statistics.days} today={statistics.today} />
-      {!onlyCourseAnswers(statistics) && (
-        <div class="stat-tiles">
-          <FirstTryTile firstTry={statistics.firstTry} />
-        </div>
-      )}
+      <MaturityOverTimeChart weeks={statistics.memory} />
+      <MemorySpanChart weeks={statistics.memory} />
+      <div class="stat-tiles">
+        {!onlyCourseAnswers(statistics) && <FirstTryTile firstTry={statistics.firstTry} />}
+        <TimeToMatureTile time={statistics.timeToMature} />
+      </div>
       <IntakeChart weeks={statistics.intake} />
     </>
   );
@@ -226,9 +248,13 @@ export function ActivitySection({ statistics }: { statistics: StatisticsReport }
 
 /**
  * How well reviews were remembered, young and mature apart (and, of one
- * deck with reviews both ways, each way), the answer buttons pressed and
- * recall month by month; left out when there are only course answers.
- * Then how course questions were answered, when there are any.
+ * deck with reviews both ways, each way), the answer buttons pressed,
+ * once there are reviews recall week by week while they fall in the
+ * last RECALL_BY_WEEK_DAYS (month by month beyond), and recall by interval
+ * and by how late reviews were, every span and lateness with its count
+ * (none before any review); left out when there are only course answers. Then how course
+ * questions were answered, when there are any. Where the log begins
+ * inside the range, a note says since when.
  */
 export function MemorySection({
   statistics,
@@ -239,9 +265,10 @@ export function MemorySection({
   byDirection: boolean;
 }) {
   const { t, directionLabel } = useI18n();
-  const { retention, quiz } = statistics;
+  const { retention, quiz, weeks } = statistics;
   return (
     <>
+      <CoverageNote coverage={statistics.coverage} />
       {!onlyCourseAnswers(statistics) && (
         <>
           <h3>{t("statistics.remembered")}</h3>
@@ -256,9 +283,14 @@ export function MemorySection({
               ))}
           </div>
           <GradeBars buttons={statistics.buttons} />
-          {retention.young.reviews + retention.mature.reviews > 0 && (
-            <RecallChart months={statistics.months} />
-          )}
+          {retention.young.reviews + retention.mature.reviews > 0 &&
+            (daysBetween(weeks[0]!.week, statistics.today) < RECALL_BY_WEEK_DAYS ? (
+              <RecallChart weeks={weeks} />
+            ) : (
+              <RecallChart months={statistics.months} />
+            ))}
+          <IntervalRecallChart bins={statistics.intervals} />
+          <LatenessChart lateness={statistics.lateness} />
         </>
       )}
       {quiz.answers > 0 && (

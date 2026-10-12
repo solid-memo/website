@@ -32,6 +32,18 @@ import {
   type WeekdayRhythm,
   type WeekLoad,
 } from "./studyPatterns";
+import {
+  memoryOverTime,
+  recallByInterval,
+  recallByLateness,
+  timeToMatureOf,
+  weeklyRetention,
+  type IntervalRecall,
+  type LatenessRecall,
+  type MemoryWeek,
+  type TimeToMature,
+  type WeekRetention,
+} from "./memoryCurve";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -149,6 +161,19 @@ export interface Statistics {
   quiz: Quiz;
   /** Every study month with answers, oldest first, with how well its reviews were remembered. */
   months: MonthRetention[];
+  /** Every week with a scored review, oldest first, with how well its reviews were remembered. */
+  weeks: WeekRetention[];
+  /** Recall by the interval before the review, a bin each of INTERVAL_BOUNDS. */
+  intervals: IntervalRecall[];
+  /** Recall by how late the review was (approximate), a lateness each of LATENESSES. */
+  lateness: LatenessRecall[];
+  /**
+   * Where the prompts stood at the end of each week of the range, from
+   * every answer given up to then (approximate; memoryOverTime).
+   */
+  memory: MemoryWeek[];
+  /** How long the prompts that grew mature in the range took, of those introduced in the answers given. */
+  timeToMature: TimeToMature;
   /** Every deck answered in, most answers first. */
   decks: DeckStatistics[];
   /** The answer buttons pressed. */
@@ -304,7 +329,9 @@ export function monthlyRetention(answers: readonly Answer[], index: ChainIndex):
  * to today are of every answer given, so a range shorter than they look
  * back over does not cut them short: the streaks, the days studied of
  * late, this week and month beside the last, the new cards beside the
- * reviews by week, and the days of `recentDays`.
+ * reviews by week, and the days of `recentDays`; the answers before the
+ * range also tell how late its reviews were, where its prompts stood
+ * and how long they took to grow mature.
  */
 export function statisticsOf(
   allAnswers: readonly Answer[],
@@ -315,10 +342,10 @@ export function statisticsOf(
     since === undefined ? allAnswers : allAnswers.filter((answer) => answer.studyDay >= since);
   const index = chainIndexOf(answers);
   const days = dailyActivity(answers, index);
-  const recentDays =
-    answers.length === allAnswers.length
-      ? days
-      : dailyActivity(allAnswers, chainIndexOf(allAnswers));
+  // Every answer given: the figures up to today, and what came before the range for the ones of memory.
+  const all = answers.length === allAnswers.length;
+  const allIndex = all ? index : chainIndexOf(allAnswers);
+  const recentDays = all ? days : dailyActivity(allAnswers, allIndex);
   return {
     today,
     totals: {
@@ -338,6 +365,11 @@ export function statisticsOf(
     retention: retentionOf(answers, index),
     quiz: quizAccuracyOf(answers, index),
     months: monthlyRetention(answers, index),
+    weeks: weeklyRetention(answers, index),
+    intervals: recallByInterval(answers, index),
+    lateness: recallByLateness(answers, allIndex),
+    memory: memoryOverTime(allAnswers, allIndex, today, since),
+    timeToMature: timeToMatureOf(allIndex, since),
     decks: [...groupBy(answers, (answer) => answer.deckUrl)]
       .map(([deckUrl, deckAnswers]) => {
         const retention = retentionOf(deckAnswers, index);

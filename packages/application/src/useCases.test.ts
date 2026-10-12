@@ -3551,6 +3551,8 @@ describe("the answer log", () => {
     ]);
     // Last month's first 21 days lie before the range, and count all the same.
     expect(month.month.previous.answers).toBe(1);
+    // Where the cards stood is told week by week from the range's first week, the answers before it read.
+    expect(month.memory[0]).toMatchObject({ week: "2026-08-17", young: 1 });
     expect(month.coverage).toBeNull();
     expect(month.logBegins).toBe("2025-08");
     expect(log.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-05", undefined);

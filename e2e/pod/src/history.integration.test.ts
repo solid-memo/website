@@ -10,7 +10,8 @@
  * unread and unconditional, which every server tested creates when it is
  * missing and keeps however many tabs add at once; resetting a study day
  * removes that deck's answers of the day; the statistics and the Studio
- * read a month again only once it changed, sharing what they read. Runs
+ * read a month again only once it changed, sharing what they read, and
+ * the figures of memory follow a card across months. Runs
  * against each server globalSetup.ts starts. With MEASURE_ANSWER_LOG set,
  * it also measures reading a large log (docs/statistics.md, "Loading").
  */
@@ -208,6 +209,43 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
       totals: { answers: 3 },
     });
     expect([statusOf("2026-08"), statusOf("2026-09")]).toEqual([[304], [200]]);
+  });
+
+  it("tells how late a review was and how its card grew, from answers months apart", async () => {
+    const instanceUrl = new URL(`run-${crypto.randomUUID()}/solid-memo/main/`, server).href;
+    const log = answerLog();
+    const at = new Date("2026-09-21T12:00:00.000Z");
+    // One card's reviews from July on: on time until it grows mature, then 2 days late.
+    const steps: [string, number | undefined, number][] = [
+      ["2026-07-01", undefined, 1],
+      ["2026-07-02", 1, 6],
+      ["2026-07-08", 6, 15],
+      ["2026-07-23", 15, 38],
+      ["2026-09-01", 38, 90],
+    ];
+    for (const [studyDay, prior, next] of steps) {
+      const { priorIntervalDays: _, ...answer } = answerOf(instanceUrl, studyDay, "deck-1", 2);
+      await log.append(instanceUrl, {
+        ...answer,
+        grade: 4,
+        ...(prior === undefined ? {} : { priorIntervalDays: prior }),
+        nextIntervalDays: next,
+      });
+    }
+    const { useCases } = page();
+    // The last 30 days hold one review; July, read for the figures up to today, says how late.
+    const month = await useCases.getStatistics(instanceUrl, at, { range: 30 });
+    expect(month.lateness.find((one) => one.lateness === "late1")!.recall).toEqual({
+      reviews: 1,
+      recalled: 1,
+    });
+    expect(month.intervals.find((bin) => bin.from === 31)!.recall.reviews).toBe(1);
+    expect(month.memory.at(-1)).toMatchObject({ mature: 1, young: 0, medianInterval: 90 });
+    // It grew mature before the range; over the whole log, in 22 days and 3 reviews.
+    expect(month.timeToMature.prompts).toBe(0);
+    const all = await useCases.getStatistics(instanceUrl, at, { range: "all" });
+    expect(all.timeToMature).toEqual({ prompts: 1, days: 22, reviews: 3 });
+    expect(all.lateness[0]!.recall).toEqual({ reviews: 3, recalled: 3 });
   });
 
   it.runIf(process.env.MEASURE_ANSWER_LOG)(

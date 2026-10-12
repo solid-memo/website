@@ -253,6 +253,17 @@ describe("statisticsOf", () => {
     expect(statistics.month.previous.answers).toBe(1);
     expect(statistics.recentStudyDays).toBe(4);
     expect(statistics.intake.at(-1)).toMatchObject({ reviews: 4 });
+    // The range's reviews, how late by the answers before it, where the prompts stood from its week.
+    expect(statistics.intervals[0]!.recall).toEqual({ reviews: 2, recalled: 2 });
+    expect(statistics.weeks.map((week) => week.week)).toEqual(["2026-09-28"]);
+    expect(statistics.lateness[0]).toEqual({
+      lateness: "onTime",
+      recall: { reviews: 2, recalled: 2 },
+    });
+    expect(statistics.memory).toEqual([
+      { week: "2026-09-28", relearning: 0, young: 1, mature: 0, medianInterval: 1 },
+    ]);
+    expect(statistics.timeToMature).toEqual({ prompts: 0, days: null, reviews: null });
     // Without `since`, or with all of them in range, both are the same days.
     const whole = statisticsOf(answers, "2026-10-02");
     expect(whole.recentDays).toBe(whole.days);

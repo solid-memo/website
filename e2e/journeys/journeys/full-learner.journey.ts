@@ -202,6 +202,10 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
       },
       // The first study day is today: one of its weekday, studied.
       weekday: { average: answers, studied: 1, of: 1 },
+      // No review yet: every span of intervals says so, with no share.
+      recallByInterval: Array.from({ length: 9 }, () => null),
+      // This week ends with every card young, none forgotten last time.
+      thisWeek: { young: cards, mature: 0, relearning: 0 },
       decks: [deckA, deckB].map((name, i) => ({
         name,
         answers: i === 0 ? answeredA : answeredB,

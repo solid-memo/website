@@ -61,4 +61,19 @@ describe("BarChart", () => {
     expect(container.querySelector(".chart-inspector")).toHaveTextContent("Point");
     expect(statusTexts()).toEqual([]);
   });
+
+  it("scales the bars to a top given, not to the largest", () => {
+    const { container } = render(
+      <BarChart
+        caption="Shares"
+        label="Shares"
+        bars={[{ key: "a", values: [50], text: "A" }]}
+        max={100}
+        prompt="Point"
+      >
+        {null}
+      </BarChart>,
+    );
+    expect(Number(container.querySelector("rect.bar")!.getAttribute("height"))).toBe(30);
+  });
 });
