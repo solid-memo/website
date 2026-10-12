@@ -9,6 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { CardProgressContainer } from "./CardProgressContainer";
 import { useI18n } from "./i18n";
 import { DayBars, onlyCourseAnswers, QuizTile, RecallTile } from "./StatisticsCharts";
+import { STATISTICS_STALE_MS } from "./studyFigures";
 
 /**
  * A deck's own statistics on its page: its answers of the last 30 days,
@@ -31,6 +32,7 @@ export function DeckStatisticsContainer({
   const statisticsQuery = useQuery({
     queryKey: ["statistics", instance.url, deck.url],
     queryFn: () => useCases.getStatistics(instance.url, new Date(), { deckUrl: deck.url }),
+    staleTime: STATISTICS_STALE_MS,
   });
   const statistics = statisticsQuery.data;
   return (

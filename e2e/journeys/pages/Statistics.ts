@@ -49,6 +49,11 @@ export interface ExpectedStatistics {
   /** Reviews remembered, young and mature apart; null for "No reviews yet". */
   young?: { recalled: number; reviews: number } | null;
   mature?: { recalled: number; reviews: number } | null;
+  /**
+   * Where the answer log begins, said in a note when it begins inside the
+   * months read: "thisMonth" for a log begun in the current month.
+   */
+  coverage?: "thisMonth";
   /** Every row of "By deck", in any order. */
   decks?: DeckRow[];
   /** The instance's prompts taken together, under "Where your cards stand", with the forecast beside them. */
@@ -145,6 +150,7 @@ export class Statistics extends Screen {
         const recall = expected[key];
         if (recall !== undefined) await this.expectRecall(key, recall);
       }
+      if (expected.coverage !== undefined) await this.expectCoverage();
       if (expected.decks !== undefined) await this.expectByDeck(expected.decks);
       if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
       if (expected.maturityByDeck !== undefined)
@@ -202,6 +208,21 @@ export class Statistics extends Screen {
         `${this.t("statistics.maturityByDeck")}: ${deck.name}`,
       ).toHaveAccessibleName(this.maturityLabel(deck));
     }
+  }
+
+  /** The note that the figures begin with this month, the log's first. */
+  private async expectCoverage(): Promise<void> {
+    const month = await this.page.evaluate((locale) => {
+      const now = new Date();
+      return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toLocaleDateString(locale, {
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      });
+    }, this.app.locale);
+    await expect(
+      this.main.getByText(this.t("statistics.coverage", { month }), { exact: true }),
+    ).toBeVisible();
   }
 
   private async expectValue(key: StatisticsTile, value: string): Promise<void> {

@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { vi } from "vitest";
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { StatisticsReport, UseCases } from "@solid-memo/application/useCases";
+import type { Answer } from "@solid-memo/domain/answer";
 import type { Deck } from "@solid-memo/domain/deck";
 import { withAbout } from "@solid-memo/domain/deckAbout";
 import { withProvenance } from "@solid-memo/domain/deckProvenance";
@@ -14,6 +15,15 @@ import { applyDeckTreeEdit } from "@solid-memo/domain/deckTree";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { statisticsOf } from "@solid-memo/domain/statistics";
 import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
+
+/** The statistics of the answers given up to `today`, as getStatistics reports them: by default of a log that covers its range. */
+export function statisticsReportOf(
+  answers: readonly Answer[],
+  today: string,
+  coverage: string | null = null,
+): StatisticsReport {
+  return { ...statisticsOf(answers, today), coverage };
+}
 
 /** A complete UseCases fake; override the methods a test cares about. */
 export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
@@ -136,7 +146,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     }),
     planLibraryUpgrade: vi.fn(async () => null),
     listLibraryUpdates: vi.fn(async () => []),
-    getStatistics: vi.fn(async () => statisticsOf([], "2026-09-21")),
+    getStatistics: vi.fn(async () => statisticsReportOf([], "2026-09-21")),
     loadAnswerLog: vi.fn(async () => []),
     cardAnswers: vi.fn(async () => []),
     deckInsight: vi.fn(async () => ({

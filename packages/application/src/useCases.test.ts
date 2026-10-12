@@ -3459,11 +3459,92 @@ describe("the answer log", () => {
     const all = await useCases.getStatistics(instance.url, noon);
     expect(all.days.map((day) => day.studyDay)).toEqual(["2025-10-01", "2026-09-20", "2026-09-21"]);
     expect(all.streaks).toEqual({ current: 2, longest: 2 });
+    // The log reaches back past the year: it covers it all.
+    expect(all.coverage).toBeNull();
     const one = await useCases.getStatistics(instance.url, noon, { months: 1, deckUrl: deck.url });
     expect(one.days.map((day) => day.studyDay)).toEqual(["2026-09-20"]);
     expect(one.decks).toEqual([
       expect.objectContaining({ introduced: 1, lapses: 0, quiz: { answers: 0, right: 0 } }),
     ]);
+  });
+
+  it("computes the statistics of the last days asked for, or of the whole log, and says where the log begins", async () => {
+    const { byMonth, log, useCases } = setup();
+    const answer = (studyDay: string): Answer => ({
+      id: `answer-${studyDay}`,
+      deckUrl: deck.url,
+      cardUrl: card.url,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: `${studyDay}T10:00:00.000Z`,
+      studyDay,
+      nextIntervalDays: 1,
+    });
+    byMonth.set("2026-05", [answer("2026-05-31")]);
+    byMonth.set("2026-08", [answer("2026-08-22"), answer("2026-08-23")]);
+    byMonth.set("2026-09", [answer("2026-09-21")]);
+    // 30 days up to September 21st begin on August 23rd: August is read, May is not.
+    const month = await useCases.getStatistics(instance.url, noon, { range: 30 });
+    expect(month.days.map((day) => day.studyDay)).toEqual(["2026-08-23", "2026-09-21"]);
+    expect(month.coverage).toBeNull();
+    expect(log.readMonthSince).not.toHaveBeenCalledWith(instance.url, "2026-05", undefined);
+    // A year reaches past May, where the log begins.
+    await expect(useCases.getStatistics(instance.url, noon, { range: 365 })).resolves.toMatchObject(
+      { totals: { answers: 4 }, coverage: "2026-05" },
+    );
+    const all = await useCases.getStatistics(instance.url, noon, { range: "all" });
+    expect(all.totals.answers).toBe(4);
+    expect(all.coverage).toBe("2026-05");
+    // An empty log covers nothing.
+    byMonth.clear();
+    await expect(
+      useCases.getStatistics(instance.url, noon, { range: "all" }),
+    ).resolves.toMatchObject({ totals: { answers: 0 }, coverage: null });
+  });
+
+  it("shares the months it read with loadAnswerLog, each read again only once it changed, and drops those the log no longer has", async () => {
+    const { byMonth, log, useCases } = setup();
+    const answer = (studyDay: string): Answer => ({
+      id: `answer-${studyDay}`,
+      deckUrl: deck.url,
+      cardUrl: card.url,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: `${studyDay}T10:00:00.000Z`,
+      studyDay,
+      nextIntervalDays: 1,
+    });
+    byMonth.set("2025-01", [answer("2025-01-10")]);
+    byMonth.set("2026-08", [answer("2026-08-10")]);
+    byMonth.set("2026-09", [answer("2026-09-10")]);
+    await useCases.getStatistics(instance.url, noon);
+    expect(log.readMonthSince).toHaveBeenCalledTimes(2);
+    expect(log.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-08", undefined);
+    log.readMonthSince.mockClear();
+    // The whole log keeps the year's months read, and reads them only to see they are unchanged.
+    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(3);
+    expect(log.readMonthSince.mock.calls).toEqual([
+      [instance.url, "2025-01", undefined],
+      [instance.url, "2026-08", "v0"],
+      [instance.url, "2026-09", "v0"],
+    ]);
+    log.readMonthSince.mockClear();
+    // And the year again keeps what the whole log read.
+    await expect(useCases.getStatistics(instance.url, noon)).resolves.toMatchObject({
+      totals: { answers: 2 },
+    });
+    expect(log.readMonthSince.mock.calls).toEqual([
+      [instance.url, "2026-08", "v0"],
+      [instance.url, "2026-09", "v0"],
+    ]);
+    // A month the log no longer has is forgotten: when it comes back, it is read whole.
+    const august = byMonth.get("2026-08")!;
+    byMonth.delete("2026-08");
+    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(2);
+    byMonth.set("2026-08", august);
+    log.readMonthSince.mockClear();
+    await useCases.loadAnswerLog(instance.url);
+    expect(log.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-08", undefined);
   });
 
   it("is checked in the full check, one document a month, and is empty without a log", async () => {

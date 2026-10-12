@@ -2,11 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { StatisticsReport } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
-import type { Quiz, Recall, Statistics } from "@solid-memo/domain/statistics";
+import type { Quiz, Recall } from "@solid-memo/domain/statistics";
 import { useI18n } from "./i18n";
 import {
   ActivityCalendar,
+  CoverageNote,
   IntroducedChart,
   onlyCourseAnswers,
   QuizTile,
@@ -21,13 +23,14 @@ import { ReaderText } from "./ReaderText";
  * the last year, the cards introduced over it, how well reviews were
  * remembered, in all and month by month, how course questions were
  * answered, and each deck's figures. A deck that has since been removed
- * is named as such.
+ * is named as such; where the log begins inside the range read, a note
+ * says since when.
  */
 export function StatisticsScreen({
   statistics,
   decks,
 }: {
-  statistics: Statistics;
+  statistics: StatisticsReport;
   decks: readonly Deck[];
 }) {
   const { t, formatDate, formatPercent } = useI18n();
@@ -52,6 +55,7 @@ export function StatisticsScreen({
         <p class="hint">{t("statistics.empty")}</p>
       ) : (
         <>
+          <CoverageNote coverage={statistics.coverage} />
           <div class="stat-tiles">
             <StatTile label={t("statistics.answers")} value={String(totals.answers)} />
             <StatTile label={t("statistics.studyDays")} value={String(totals.studyDays)} />

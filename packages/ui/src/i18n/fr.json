@@ -1369,6 +1369,7 @@
     "heading": "Statistiques",
     "loading": "Chargement des statistiques…",
     "empty": "Aucune réponse pour l’instant : les statistiques commenceront avec votre prochaine séance d’étude.",
+    "coverage": "Depuis {month}, votre premier mois d’étude.",
     "answers": "Réponses",
     "studyDays": "Jours d’étude",
     "cards": "Cartes étudiées",

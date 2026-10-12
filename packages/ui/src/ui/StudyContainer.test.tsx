@@ -6,14 +6,16 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StudyContainer } from "./StudyContainer";
+import { keepStudyFiguresFresh } from "./studyFigures";
 import { Clock } from "./courseLinks";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
+import { TodaySummaryContainer } from "./TodaySummaryContainer";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { StudyQueue } from "@solid-memo/domain/scheduling";
-import { makeUseCasesFake } from "../test/useCasesFake";
+import { makeUseCasesFake, statisticsReportOf } from "../test/useCasesFake";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -252,7 +254,11 @@ describe("StudyContainer", () => {
     renderContainer(
       makeUseCasesFake({
         getStudyQueue: vi.fn(
-          async (): Promise<StudyQueue> => ({ due: [], newPrompts: [], studiedToday: 0 }),
+          async (): Promise<StudyQueue> => ({
+            due: [],
+            newPrompts: [],
+            studiedToday: 0,
+          }),
         ),
       }),
     );
@@ -502,5 +508,56 @@ describe("StudyContainer leaving for the deck list", () => {
     expect(screen.queryByText("1 to review")).toBeNull();
     expect(await screen.findByText("Done for today")).toBeInTheDocument();
     expect(useCases.getStudyCounts).toHaveBeenCalled();
+  });
+
+  it("lets the today strip count the session's answers, not show the day from before it", async () => {
+    const studied = statisticsReportOf(
+      [
+        {
+          id: "answer-1",
+          deckUrl: deck.url,
+          cardUrl: `${deck.cardsDocumentUrl}#card-a`,
+          direction: "front-to-back",
+          grade: 4,
+          answeredAt: "2026-09-21T10:00:00.000Z",
+          studyDay: "2026-09-21",
+          nextIntervalDays: 1,
+        },
+      ],
+      "2026-09-21",
+    );
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a")],
+        newPrompts: [],
+        studiedToday: 0,
+      })),
+      getStatistics: vi.fn(async () => studied),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    // As the app does (AppShell): every change made has the statistics read again.
+    keepStudyFiguresFresh(queryClient);
+    // The strip read the day before the session: nothing studied yet, fresh for a while.
+    queryClient.setQueryData(["statistics", instance.url], statisticsReportOf([], "2026-09-21"));
+    const screenFor = (studying: boolean) => (
+      <QueryClientProvider client={queryClient}>
+        {studying ? (
+          <StudyContainer
+            useCases={useCases}
+            instance={instance}
+            deck={deck}
+            onExit={() => undefined}
+          />
+        ) : (
+          <TodaySummaryContainer useCases={useCases} instance={instance} />
+        )}
+      </QueryClientProvider>
+    );
+    const view = render(screenFor(true));
+    await answer("4 — Good");
+    await waitFor(() => expect(useCases.recordReview).toHaveBeenCalledOnce());
+    view.rerender(screenFor(false));
+    expect(await screen.findByRole("link", { name: "All statistics" })).toBeInTheDocument();
+    expect(useCases.getStatistics).toHaveBeenCalledOnce();
   });
 });

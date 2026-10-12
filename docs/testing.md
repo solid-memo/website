@@ -109,7 +109,11 @@ your own signed it). CI runs one job per blocking server, side by side, none
 stopping the others ([migrations.md](migrations.md#proof-on-a-real-server));
 Renovate keeps each server on its major (`renovate.json5`), and which
 servers each workflow runs is the table's in servers.ts (`npm test`
-checks).
+checks). `MEASURE_ANSWER_LOG=1` adds a measurement of reading a large
+answer log to `history.integration.test.ts`: two years of answers,
+seeded in about a minute and a half a server, its timings printed
+(shown with `--silent=false`; [statistics.md](statistics.md#loading)).
+CI does not run it.
 
 **In CI the images come from GitHub's cache**, not Docker Hub, whose
 limit on pulls without an account the runners share: each job restores

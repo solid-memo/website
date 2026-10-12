@@ -136,6 +136,8 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
     sessions.deckA = await app.study.studyAll({ grade: "good", scale: "minimal" });
     expect(sessions.deckA, "deck A: the card left from step 06").toEqual({ studied: 1, total: 1 });
     await app.study.endSession();
+    // The strip counts each session's answers as soon as it ends.
+    await app.decks.expectAnsweredToday(sessions.first.studied + sessions.deckA.studied);
     await app.decks.study(deckB);
     sessions.deckB = await app.study.studyAll({
       grade: "good",
@@ -147,6 +149,9 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
       total: 2,
     });
     await app.study.endSession();
+    await app.decks.expectAnsweredToday(
+      sessions.first.studied + sessions.deckA.studied + sessions.deckB.studied,
+    );
     await app.decks.expectDoneForToday(deckA);
     await app.decks.expectDoneForToday(deckB);
   });
@@ -183,6 +188,8 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
       longestStreak: 1,
       young: null,
       mature: null,
+      // The log begins today, inside the 12 months read: the page says since when.
+      coverage: "thisMonth",
       decks: [deckA, deckB].map((name, i) => ({
         name,
         answers: i === 0 ? answeredA : answeredB,

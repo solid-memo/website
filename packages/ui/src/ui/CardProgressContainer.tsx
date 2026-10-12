@@ -12,13 +12,16 @@ import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { ReaderText } from "./ReaderText";
 import { ForecastBars, MaturityBar } from "./StatisticsCharts";
+import { STATISTICS_STALE_MS } from "./studyFigures";
 
 /**
  * Where the cards stand now, read from the decks' cards and review states
- * each time it is shown: how many prompts are new, young and mature, and
- * the reviews due over the next 30 days; of every deck of the instance,
- * then each deck's maturity on its own, or of the one deck given. When it
- * cannot be read a quiet line says so, and the rest of the page works on.
+ * when shown and what was read is over half a minute old, or a change
+ * made cleared it (keepStudyFiguresFresh): how many prompts are new,
+ * young and mature, and the reviews due over the next 30 days; of every
+ * deck of the instance, then each deck's maturity on its own, or of the
+ * one deck given. When it cannot be read a quiet line says so, and the
+ * rest of the page works on.
  */
 export function CardProgressContainer({
   useCases,
@@ -35,6 +38,7 @@ export function CardProgressContainer({
     queryKey: ["cardProgress", instance.url, deck?.url],
     queryFn: () =>
       useCases.getCardProgress(instance.url, new Date(), deck === undefined ? {} : { deck }),
+    staleTime: STATISTICS_STALE_MS,
   });
   const report = progressQuery.data;
   return (

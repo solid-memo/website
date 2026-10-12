@@ -156,7 +156,12 @@ import {
   studyDayOf,
   type StudyQueue,
 } from "@solid-memo/domain/scheduling";
-import { answerIdOf, type Answer, type AnswerMode } from "@solid-memo/domain/answer";
+import {
+  answerIdOf,
+  monthOfStudyDay,
+  type Answer,
+  type AnswerMode,
+} from "@solid-memo/domain/answer";
 import {
   courseAnswerEffect,
   courseProgress,
@@ -165,7 +170,7 @@ import {
   type CourseOutline,
   type CourseProgress,
 } from "@solid-memo/domain/course";
-import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
+import { shiftStudyDay, statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
 import {
   cardAnswers,
   deckAnswers,
@@ -780,19 +785,23 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   resetStudyDay(instanceUrl: string, deck: Deck, now: Date): Promise<number>;
   /**
    * The study statistics of the answers given in the last `months` study
-   * months (12 by default), up to now: of every deck, or of one. Answers
-   * still waiting to be added to the log are added first.
+   * months (12 by default), or, when `range` is given, in its last `range`
+   * study days or the whole log ("all"), up to now: of every deck, or of
+   * one. Answers still waiting to be added to the log are added first; a
+   * month's document is read only when it changed since last read, as
+   * loadAnswerLog reads it, which shares what is kept.
    */
   getStatistics(
     instanceUrl: string,
     now: Date,
-    options?: { months?: number; deckUrl?: string },
-  ): Promise<Statistics>;
+    options?: { months?: number; range?: number | "all"; deckUrl?: string },
+  ): Promise<StatisticsReport>;
   /**
    * Every answer of the instance's log, of every month, answers still
    * waiting to be added to it added first. Each month's document is read
-   * once a call, and only when it changed since the last call (by its
-   * version, kept in this page with the month's answers).
+   * once a call, and only when it changed since it was last read (by its
+   * version, kept in this page with the month's answers, for
+   * getStatistics too).
    */
   loadAnswerLog(instanceUrl: string): Promise<Answer[]>;
   /**
@@ -913,6 +922,17 @@ export interface Course {
   /** The cards the learner has answered: those with review state in the deck. */
   answeredCardIds: string[];
   progress: CourseProgress;
+}
+
+/** The study statistics of a range of the answer log (UseCases.getStatistics). */
+export interface StatisticsReport extends Statistics {
+  /**
+   * The study month ("YYYY-MM") the log begins with, when the range asked
+   * for begins before it (always so for the whole log): the figures cover
+   * only the months since. null when the log reaches back past the range,
+   * or has no month.
+   */
+  coverage: string | null;
 }
 
 /** How far along decks' prompts are (UseCases.getCardProgress). */
@@ -1962,27 +1982,39 @@ export function createUseCases({
   /** Each instance's answer log as last read, by month: its answers, and the version they were read at. */
   const answerMonths = new Map<string, Map<string, { version: string; answers: Answer[] }>>();
 
-  async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
-    await logAnswers();
-    const months = await answerLog.months(instanceUrl);
+  /**
+   * The answers of the log's months that `wanted` keeps, of `listed` (every
+   * month the log has): each month read only when it changed since last
+   * read, and kept with its version. What is kept is added to, never
+   * replaced, so a read of some months and one of all do not undo each
+   * other; a month no longer listed is dropped.
+   */
+  async function readLogMonths(
+    instanceUrl: string,
+    listed: readonly string[],
+    wanted: (month: string) => boolean,
+  ): Promise<Answer[]> {
     const known =
       answerMonths.get(instanceUrl) ?? new Map<string, { version: string; answers: Answer[] }>();
-    const read = new Map<string, { version: string; answers: Answer[] }>();
+    answerMonths.set(instanceUrl, known);
+    const still = new Set(listed);
+    for (const month of known.keys()) if (!still.has(month)) known.delete(month);
     const answers = await Promise.all(
-      months.map(async (month) => {
+      listed.filter(wanted).map(async (month) => {
         const kept = known.get(month);
         const since = await answerLog.readMonthSince(instanceUrl, month, kept?.version);
-        if (since.unchanged) {
-          read.set(month, kept!);
-          return kept!.answers;
-        }
-        if (since.version !== null)
-          read.set(month, { version: since.version, answers: since.value });
+        if (since.unchanged) return kept!.answers;
+        if (since.version === null) known.delete(month);
+        else known.set(month, { version: since.version, answers: since.value });
         return since.value;
       }),
     );
-    answerMonths.set(instanceUrl, read);
     return answers.flat();
+  }
+
+  async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
+    await logAnswers();
+    return readLogMonths(instanceUrl, await answerLog.months(instanceUrl), () => true);
   }
 
   /**
@@ -3086,25 +3118,39 @@ export function createUseCases({
       }
       return count;
     },
-    async getStatistics(instanceUrl, at, { months = 12, deckUrl } = {}) {
+    async getStatistics(instanceUrl, at, { months = 12, range, deckUrl } = {}) {
       await logAnswers();
       const [prefs, logged] = await Promise.all([
         getPreferences(instanceUrl),
         answerLog.months(instanceUrl),
       ]);
       const today = studyDayOf(at, prefs.dayBoundaryHour);
-      // The first of the months asked for: this one and the `months - 1` before it.
+      // The range's first study day: of `range` days up to today, or the first
+      // of this month and the `months - 1` before it; none for the whole log.
       const [year, month] = today.split("-").map(Number);
-      const first = new Date(Date.UTC(year!, month! - months, 1)).toISOString().slice(0, 7);
-      const read = await Promise.all(
-        logged
-          .filter((logMonth) => logMonth >= first)
-          .map((logMonth) => answerLog.readMonth(instanceUrl, logMonth)),
+      const first =
+        range === "all"
+          ? null
+          : range === undefined
+            ? new Date(Date.UTC(year!, month! - months, 1)).toISOString().slice(0, 10)
+            : shiftStudyDay(today, 1 - range);
+      const firstMonth = first === null ? null : monthOfStudyDay(first);
+      const read = await readLogMonths(
+        instanceUrl,
+        logged,
+        (logMonth) => firstMonth === null || logMonth >= firstMonth,
       );
-      const answers = read
-        .flat()
-        .filter((answer) => deckUrl === undefined || answer.deckUrl === deckUrl);
-      return statisticsOf(answers, today);
+      const answers = read.filter(
+        (answer) =>
+          (first === null || answer.studyDay >= first) &&
+          (deckUrl === undefined || answer.deckUrl === deckUrl),
+      );
+      const begins = logged[0];
+      return {
+        ...statisticsOf(answers, today),
+        coverage:
+          begins !== undefined && (firstMonth === null || begins > firstMonth) ? begins : null,
+      };
     },
     loadAnswerLog,
     async deckInsight(instanceUrl, deck, at, prefs) {

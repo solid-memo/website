@@ -25,6 +25,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { AppName, useDocumentTitle } from "./documentTitle";
 import { MAIN_ID, SkipLink } from "./SkipLink";
 import { STUDIO_PATH } from "./router";
+import { keepStudyFiguresFresh } from "./studyFigures";
 
 /** What an app built on AppShell calls itself, as messages in the user's language. */
 export interface AppIdentity {
@@ -111,6 +112,9 @@ export function AppShell({
   }
 
   const queryClient = useQueryClient();
+  // Every change made, in the app or the Studio, has the statistics read again.
+  useEffect(() => keepStudyFiguresFresh(queryClient), [queryClient]);
+
   const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() => useCases.themeChoice());
   const [preferredTheme, setPreferredTheme] = useState<Theme>(browserTheme);
   const theme = resolveTheme(themeChoice, preferredTheme);
