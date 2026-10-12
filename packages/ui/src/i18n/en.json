@@ -485,7 +485,15 @@
       "one": "{percent} remembered of {count} review",
       "other": "{percent} remembered of {count} reviews"
     },
-    "allStatistics": "All statistics"
+    "allStatistics": "All statistics",
+    "week": {
+      "one": "{count} this week",
+      "other": "{count} this week"
+    },
+    "weekChange": {
+      "one": "{count} this week, {change} on last week",
+      "other": "{count} this week, {change} on last week"
+    }
   },
   "newcomerCourse": {
     "eyebrow": "New here?",
@@ -1338,12 +1346,26 @@
     },
     "activity": "Activity, the last {weeks} weeks",
     "activityLabel": "Answers by day over the last {weeks} weeks: the stronger the green, the more answers.",
-    "lastDays": "Answers, the last {count} days",
-    "lastDaysLabel": "Answers on each of the last {count} days.",
     "less": "Less",
     "more": "More",
     "pointAtDay": "Point at a day to see what it held, or open the table below.",
-    "dayDetail": "{date}: {answers}, {introduced} new, {forgotten} forgotten.",
+    "dayDetail": "{date}: {answers} ({introduced}, {remembered}, {lapses}, {repeats}).",
+    "newCount": {
+      "one": "{count} new",
+      "other": "{count} new"
+    },
+    "rememberedCount": {
+      "one": "{count} remembered",
+      "other": "{count} remembered"
+    },
+    "lapseCount": {
+      "one": "{count} lapse",
+      "other": "{count} lapses"
+    },
+    "repeatCount": {
+      "one": "{count} repeat",
+      "other": "{count} repeats"
+    },
     "dayNothing": "{date}: nothing studied.",
     "answerCount": {
       "one": "{count} answer",
@@ -1353,7 +1375,6 @@
     "day": "Day",
     "introduced": "New",
     "introducedColumn": "Introduced",
-    "forgotten": "Forgotten",
     "byDeck": "By deck",
     "deck": "Deck",
     "lastStudied": "Last studied",
@@ -1417,7 +1438,65 @@
       "one": "{count} review",
       "other": "{count} reviews"
     },
-    "due": "Due"
+    "due": "Due",
+    "recentDays": "Last {count} days",
+    "recentDaysValue": {
+      "one": "{studied} of {count} day",
+      "other": "{studied} of {count} days"
+    },
+    "thisWeek": "This week so far",
+    "thisMonth": "This month so far",
+    "sameDaysLastWeek": "Same days last week: {value}",
+    "sameDaysLastMonth": "Same days last month: {value}",
+    "recall": "Recall",
+    "firstTry": "First try",
+    "firstTryShare": {
+      "one": "{percent} of {count} new card",
+      "other": "{percent} of {count} new cards"
+    },
+    "ofNewCards": {
+      "one": "remembered, of {count} new card",
+      "other": "remembered, of {count} new cards"
+    },
+    "noNewCards": "No new cards yet",
+    "dayHeld": "What each day held, the last {count} days",
+    "dayHeldLabel": "Stacked bars for each of the last {count} days: reviews remembered, new cards, lapses and repeats.",
+    "dayHeldNote": "Repeats: a card back in the session the same day. A course answer to a card seen before counts only among the day's answers.",
+    "rememberedColumn": "Remembered",
+    "repeats": "Repeats",
+    "buttons": "Answer buttons",
+    "buttonsNote": "The button pressed for each card's first answer and for each review, recalled and graded by you; course answers and a card back in the session the same day are left out. On the 0 to 5 scale, 0 to 2 count as Again.",
+    "buttonsFirst": "First answers",
+    "buttonsLabel": "{kind}: {counts}.",
+    "buttonCount": "{button} {count}",
+    "buttonDetail": {
+      "one": "{kind}: {button} on {count} answer, {percent}.",
+      "other": "{kind}: {button} on {count} answers, {percent}."
+    },
+    "buttonCell": "{count} ({percent})",
+    "pointAtButton": "Point at part of a bar to see its share, or open the table below.",
+    "weekdays": "Answers by weekday",
+    "weekdaysLabel": "Bars for the answers on each weekday on average, Monday to Sunday.",
+    "weekdaysNote": "Each weekday's answers divided by how many of that weekday there have been since your first study day in these figures.",
+    "weekdayDetail": "{weekday}: {average}; studied {studied} of {count}.",
+    "averageAnswerCount": {
+      "one": "{count} answer on average",
+      "other": "{count} answers on average"
+    },
+    "weekday": "Weekday",
+    "averageAnswers": "Answers on average",
+    "studied": "Studied",
+    "studiedOf": "{studied} of {count}",
+    "pointAtWeekday": "Point at a weekday to see what it held, or open the table below.",
+    "intake": "New cards and reviews, by week",
+    "intakeLabel": "Pairs of bars, one for each week: new cards beside reviews.",
+    "intakeNote": "Every new card brings reviews in the weeks after it. If new cards keep outpacing the reviews you keep up with, take on fewer; the reviews due, further down, show what is coming.",
+    "intakeDetail": "Week of {date}: {introduced} new, {reviews}.",
+    "weekOf": "Week of",
+    "reviews": "Reviews",
+    "pointAtWeek": "Point at a week to see what it held, or open the table below.",
+    "directionsColumn": "By direction",
+    "directionShare": "{direction}: {share}"
   },
   "zoomableImage": {
     "enlarge": "Enlarge picture",

@@ -159,6 +159,7 @@ import {
 import {
   answerIdOf,
   monthOfStudyDay,
+  shiftStudyDay,
   type Answer,
   type AnswerMode,
 } from "@solid-memo/domain/answer";
@@ -170,7 +171,7 @@ import {
   type CourseOutline,
   type CourseProgress,
 } from "@solid-memo/domain/course";
-import { shiftStudyDay, statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
+import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
 import {
   cardAnswers,
   deckAnswers,

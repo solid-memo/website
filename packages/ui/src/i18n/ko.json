@@ -468,7 +468,13 @@
     "remembered": {
       "other": "복습 {count}회 중 {percent} 기억함"
     },
-    "allStatistics": "전체 통계"
+    "allStatistics": "전체 통계",
+    "week": {
+      "other": "이번 주 {count}장"
+    },
+    "weekChange": {
+      "other": "이번 주 {count}장, 지난주보다 {change}"
+    }
   },
   "newcomerCourse": {
     "eyebrow": "처음이신가요?",
@@ -1276,12 +1282,22 @@
     },
     "activity": "최근 {weeks}주 활동",
     "activityLabel": "최근 {weeks}주 동안의 날짜별 답변: 초록색이 진할수록 답변이 많아요.",
-    "lastDays": "최근 {count}일 답변",
-    "lastDaysLabel": "최근 {count}일 동안의 날짜별 답변.",
     "less": "적음",
     "more": "많음",
     "pointAtDay": "날짜를 가리키면 그날의 기록을 볼 수 있어요. 아래 표를 열어도 돼요.",
-    "dayDetail": "{date}: {answers}, 새 카드 {introduced}장, 잊은 카드 {forgotten}장.",
+    "dayDetail": "{date}: {answers}({introduced}, {remembered}, {lapses}, {repeats}).",
+    "newCount": {
+      "other": "새 카드 {count}장"
+    },
+    "rememberedCount": {
+      "other": "기억 {count}회"
+    },
+    "lapseCount": {
+      "other": "잊음 {count}회"
+    },
+    "repeatCount": {
+      "other": "반복 {count}회"
+    },
     "dayNothing": "{date}: 학습 기록 없음.",
     "answerCount": {
       "other": "답변 {count}개"
@@ -1290,7 +1306,6 @@
     "day": "날짜",
     "introduced": "새 카드",
     "introducedColumn": "도입한 카드",
-    "forgotten": "잊음",
     "byDeck": "덱별",
     "deck": "덱",
     "lastStudied": "마지막 학습",
@@ -1347,7 +1362,60 @@
     "reviewCount": {
       "other": "복습 {count}회"
     },
-    "due": "예정"
+    "due": "예정",
+    "recentDays": "최근 {count}일",
+    "recentDaysValue": {
+      "other": "{count}일 중 {studied}일"
+    },
+    "thisWeek": "이번 주 지금까지",
+    "thisMonth": "이번 달 지금까지",
+    "sameDaysLastWeek": "지난주 같은 기간: {value}",
+    "sameDaysLastMonth": "지난달 같은 기간: {value}",
+    "recall": "기억한 비율",
+    "firstTry": "첫 시도",
+    "firstTryShare": {
+      "other": "새 카드 {count}장 중 {percent}"
+    },
+    "ofNewCards": {
+      "other": "새 카드 {count}장 중 기억함"
+    },
+    "noNewCards": "아직 새 카드 없음",
+    "dayHeld": "최근 {count}일, 날마다 한 학습",
+    "dayHeldLabel": "최근 {count}일의 날짜별 누적 막대: 기억한 복습, 새 카드, 잊은 횟수, 반복.",
+    "dayHeldNote": "반복: 같은 날 세션에 다시 나온 카드예요. 이미 본 카드에 대한 코스 답변은 그날의 답변 수에만 들어가요.",
+    "rememberedColumn": "기억함",
+    "repeats": "반복",
+    "buttons": "답변 버튼",
+    "buttonsNote": "카드의 첫 답변과 복습마다 누른 버튼으로, 직접 떠올리고 스스로 평가한 것이에요. 코스 답변과 같은 날 세션에 다시 나온 카드는 빼요. 0~5 척도에서는 0~2를 ‘다시’로 세요.",
+    "buttonsFirst": "첫 답변",
+    "buttonsLabel": "{kind}: {counts}.",
+    "buttonCount": "{button} {count}",
+    "buttonDetail": {
+      "other": "{kind}: {button} {count}회, {percent}."
+    },
+    "buttonCell": "{count}({percent})",
+    "pointAtButton": "막대의 한 부분을 가리키면 비율을 볼 수 있어요. 아래 표를 열어도 돼요.",
+    "weekdays": "요일별 답변",
+    "weekdaysLabel": "월요일부터 일요일까지 요일별 평균 답변 수 막대.",
+    "weekdaysNote": "요일마다 답변 수를, 이 통계의 첫 학습일 이후 그 요일이 있었던 횟수로 나눈 값이에요.",
+    "weekdayDetail": "{weekday}: {average}, {count}번 중 {studied}번 학습.",
+    "averageAnswerCount": {
+      "other": "평균 답변 {count}개"
+    },
+    "weekday": "요일",
+    "averageAnswers": "평균 답변",
+    "studied": "학습함",
+    "studiedOf": "{count}번 중 {studied}번",
+    "pointAtWeekday": "요일을 가리키면 그 요일의 기록을 볼 수 있어요. 아래 표를 열어도 돼요.",
+    "intake": "주별 새 카드와 복습",
+    "intakeLabel": "주마다 한 쌍의 막대: 새 카드와 복습.",
+    "intakeNote": "새 카드는 그 뒤 몇 주 동안 복습을 불러와요. 새 카드가 해낼 수 있는 복습보다 계속 빨리 늘어난다면 새 카드를 줄여 보세요. 아래쪽의 예정된 복습에서 앞으로 올 복습을 볼 수 있어요.",
+    "intakeDetail": "{date}부터 한 주: 새 카드 {introduced}장, {reviews}.",
+    "weekOf": "주 시작일",
+    "reviews": "복습",
+    "pointAtWeek": "주를 가리키면 그 주의 기록을 볼 수 있어요. 아래 표를 열어도 돼요.",
+    "directionsColumn": "방향별",
+    "directionShare": "{direction}: {share}"
   },
   "zoomableImage": {
     "enlarge": "그림 확대",

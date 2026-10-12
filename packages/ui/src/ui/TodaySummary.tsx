@@ -34,13 +34,15 @@ function useStreakNote() {
  * then a word of praise and the day's numbers: the share of today's
  * reviews remembered comes with how many there were, and only once there
  * is one (a first answer, a card back in the session or a course answer
- * is no review).
+ * is no review); then the week's answers so far, and how they compare
+ * with the same days of last week, when it had any.
  */
 export function TodaySummary({ today, statisticsHref }: { today: Today; statisticsHref: string }) {
-  const { t, formatPercent } = useI18n();
+  const { t, formatPercent, formatChange } = useI18n();
   const cheer = useCheer();
   const streakNote = useStreakNote();
   const { reviews, recalled } = today.recall;
+  const { answers: thisWeek, previous } = today.week;
   return (
     <aside class="today-strip" aria-label={t("today.heading")}>
       <FlameIcon />
@@ -62,6 +64,12 @@ export function TodaySummary({ today, statisticsHref }: { today: Today; statisti
                     count: reviews,
                   }),
                 ]),
+            previous === 0
+              ? t("today.week", { count: thisWeek })
+              : t("today.weekChange", {
+                  count: thisWeek,
+                  change: formatChange((thisWeek - previous) / previous),
+                }),
           ].join(" · ")}
           {" · "}
           <a href={statisticsHref}>{t("today.allStatistics")}</a>

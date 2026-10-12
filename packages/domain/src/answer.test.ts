@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { answerIdOf, isRecalled, monthOfStudyDay } from "./answer";
+import { answerIdOf, isRecalled, monthOfStudyDay, shiftStudyDay } from "./answer";
 
 describe("answers", () => {
   it("are named by their time and a random part", () => {
@@ -14,6 +14,12 @@ describe("answers", () => {
 
   it("belong to the month of their study day", () => {
     expect(monthOfStudyDay("2026-10-31")).toBe("2026-10");
+  });
+
+  it("shift their study day by calendar days, across months and years", () => {
+    expect(shiftStudyDay("2026-10-31", 1)).toBe("2026-11-01");
+    expect(shiftStudyDay("2026-01-01", -1)).toBe("2025-12-31");
+    expect(shiftStudyDay("2026-03-29", 1)).toBe("2026-03-30");
   });
 
   it("remember the card from grade 3 up", () => {

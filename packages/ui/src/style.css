@@ -72,10 +72,20 @@
     sans-serif;
 
   font-family:
-    "Fredoka Variable", ui-rounded, "Hiragino Maru Gothic ProN",
-    "Arial Rounded MT Bold", system-ui, -apple-system, "Segoe UI", Roboto,
-    "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans JP", "Yu Gothic",
-    "Noto Sans KR", sans-serif;
+    "Fredoka Variable",
+    ui-rounded,
+    "Hiragino Maru Gothic ProN",
+    "Arial Rounded MT Bold",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Hiragino Sans",
+    "Noto Sans CJK JP",
+    "Noto Sans JP",
+    "Yu Gothic",
+    "Noto Sans KR",
+    sans-serif;
   font-size: 100%;
   line-height: 1.55;
   color: var(--text);
@@ -138,18 +148,30 @@
  */
 :where(:lang(ko)) {
   --font-display:
-    "Bangers", "Fredoka Variable", "Apple SD Gothic Neo", "Malgun Gothic",
-    "Noto Sans KR", "Noto Sans CJK KR", "Source Han Sans K", ui-rounded,
-    "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui,
-    "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans JP", "Yu Gothic",
-    sans-serif;
+    "Bangers", "Fredoka Variable", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR",
+    "Noto Sans CJK KR", "Source Han Sans K", ui-rounded, "Hiragino Maru Gothic ProN",
+    "Arial Rounded MT Bold", system-ui, "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans JP",
+    "Yu Gothic", sans-serif;
 
   font-family:
-    "Fredoka Variable", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR",
-    "Noto Sans CJK KR", "Source Han Sans K", ui-rounded,
-    "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui,
-    -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans CJK JP",
-    "Noto Sans JP", "Yu Gothic", sans-serif;
+    "Fredoka Variable",
+    "Apple SD Gothic Neo",
+    "Malgun Gothic",
+    "Noto Sans KR",
+    "Noto Sans CJK KR",
+    "Source Han Sans K",
+    ui-rounded,
+    "Hiragino Maru Gothic ProN",
+    "Arial Rounded MT Bold",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Hiragino Sans",
+    "Noto Sans CJK JP",
+    "Noto Sans JP",
+    "Yu Gothic",
+    sans-serif;
   word-break: keep-all;
 }
 
@@ -3952,6 +3974,127 @@ p[role="status"]:not(.loading) {
   fill: transparent;
 }
 
+/* A bar of several series: a step of the green each, 1 the lightest,
+   named in a legend above the bars; a pointed bar is outlined, so each
+   step keeps its tint. */
+.bar-step-1 {
+  --series: color-mix(in srgb, var(--primary) 25%, var(--surface-sunken));
+}
+.bar-step-2 {
+  --series: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+}
+.bar-step-3 {
+  --series: color-mix(in srgb, var(--primary) 75%, var(--surface-sunken));
+}
+.bar-step-4 {
+  --series: var(--primary);
+}
+
+.bar-chart .bar[class*="bar-step-"] {
+  fill: var(--series);
+}
+
+.bar-chart .bar[class*="bar-step-"].pointed {
+  stroke: var(--text);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.bar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.bar-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.bar-swatch {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 2px;
+  background: var(--series);
+}
+
+/* Names under the bars, each under its own. */
+.bar-ticks {
+  display: flex;
+  max-width: 32rem;
+  font-size: 0.75rem;
+}
+
+.bar-ticks span {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The answer buttons pressed: a bar a kind of answer, its name beside
+   it, Again the sunken surface with a border and Easy the full green,
+   a surface gap between the steps. */
+.grade-rows {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+  max-width: 32rem;
+}
+
+.grade-row {
+  display: contents;
+}
+
+.grade-kind {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.grade-bar {
+  display: flex;
+  gap: 2px;
+  height: 1rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-sunken);
+}
+
+.grade-segment {
+  flex-basis: 0;
+  min-width: 2px;
+}
+
+.grade-segment.pointed {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+
+.grade-again {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.grade-hard {
+  background: color-mix(in srgb, var(--primary) 35%, var(--surface-sunken));
+}
+
+.grade-good {
+  background: color-mix(in srgb, var(--primary) 65%, var(--surface-sunken));
+}
+
+.grade-easy {
+  background: var(--primary);
+}
+
 .chart-note {
   margin: -0.25rem 0 0.5rem;
   font-size: 0.85rem;
@@ -4147,6 +4290,72 @@ p[role="status"]:not(.loading) {
     fill: CanvasText;
   }
 
+  /* Several series: the steps by how much of the mark is filled. */
+  .bar-chart .bar[class*="bar-step-"] {
+    fill: CanvasText;
+    stroke: CanvasText;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+  .bar-chart .bar.bar-step-1 {
+    fill-opacity: 0;
+  }
+  .bar-chart .bar.bar-step-2 {
+    fill-opacity: 0.35;
+  }
+  .bar-chart .bar.bar-step-3 {
+    fill-opacity: 0.65;
+  }
+
+  .bar-swatch,
+  .grade-bar,
+  .maturity-swatch.grade-again,
+  .maturity-swatch.grade-hard,
+  .maturity-swatch.grade-good,
+  .maturity-swatch.grade-easy {
+    forced-color-adjust: none;
+  }
+
+  .bar-swatch {
+    background: CanvasText;
+    box-shadow: inset 0 0 0 1px CanvasText;
+  }
+  .bar-swatch.bar-step-1 {
+    background: Canvas;
+  }
+  .bar-swatch.bar-step-2 {
+    background: repeating-linear-gradient(45deg, CanvasText 0 1px, Canvas 1px 4px);
+  }
+  .bar-swatch.bar-step-3 {
+    background: repeating-linear-gradient(45deg, CanvasText 0 2px, Canvas 2px 4px);
+  }
+
+  .grade-bar {
+    background: Canvas;
+    box-shadow: inset 0 0 0 1px CanvasText;
+  }
+
+  .grade-again {
+    background: Canvas;
+    box-shadow: inset 0 0 0 1px CanvasText;
+  }
+
+  .grade-hard {
+    background: repeating-linear-gradient(45deg, CanvasText 0 1px, Canvas 1px 5px);
+  }
+
+  .grade-good {
+    background: repeating-linear-gradient(135deg, CanvasText 0 2px, Canvas 2px 4px);
+  }
+
+  .grade-easy {
+    background: CanvasText;
+  }
+
+  .grade-segment.pointed {
+    outline-color: Highlight;
+  }
+
   .line-chart .line,
   .line-key .line,
   .line-chart .line-point,
@@ -4159,6 +4368,12 @@ p[role="status"]:not(.loading) {
 .chart-inspector {
   min-height: 1.4em;
   margin: 0.4rem 0;
+}
+
+/* A chart's table can be wider than a phone: it scrolls sideways. */
+.chart-table {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .chart-table table,

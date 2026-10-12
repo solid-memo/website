@@ -199,10 +199,14 @@ other.
 ## Statistics
 
 **Statistics**, in the instance bar, shows your study over the last
-year: how many answers and study days, your current and longest streak,
-a calendar of your activity, how many cards you have started, how well
-you remembered them in reviews (each card's first review of the day,
-always with how many reviews that is), how you answered course
+year: how many answers and study days, your current and longest streak
+and how many of the last 30 days you studied, a calendar of your
+activity, what each recent day held and which weekdays you study, this
+week and month beside the last, how many cards you have started and
+how many you knew the first time, the new cards you take on beside the
+reviews you do each week, how well you remembered them in reviews
+(each card's first review of the day, always with how many reviews that
+is) and which answer buttons you pressed, how you answered course
 questions, counted apart, and each deck's figures. Under that,
 where your cards stand: how many are new, young (reviewed at intervals
 under 21 days) and mature, and how many reviews are coming in the next

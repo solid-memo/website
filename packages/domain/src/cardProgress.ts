@@ -5,7 +5,7 @@
 import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
 import type { ReviewState } from "./review";
 import { FORECAST_DAYS, scheduledStates, type ForecastDay } from "./scheduleInsight";
-import { MATURE_INTERVAL_DAYS, shiftStudyDay } from "./statistics";
+import { MATURE_INTERVAL_DAYS, shiftStudyDay } from "./answer";
 
 /**
  * How far along a deck's prompts are, computed from its cards and review

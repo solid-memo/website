@@ -59,6 +59,15 @@ export function monthOfStudyDay(studyDay: string): string {
   return studyDay.slice(0, 7);
 }
 
+/** The study day `days` after (or before, when negative) another, by the calendar. */
+export function shiftStudyDay(studyDay: string, days: number): string {
+  const [year, month, day] = studyDay.split("-").map(Number);
+  return new Date(Date.UTC(year!, month! - 1, day! + days)).toISOString().slice(0, 10);
+}
+
+/** A prompt reviewed at an interval of this many days or more is mature; below, young. */
+export const MATURE_INTERVAL_DAYS = 21;
+
 /** Whether an answer remembered the card: SM-2 grades 3 and up. */
 export function isRecalled(answer: Pick<Answer, "grade">): boolean {
   return answer.grade >= 3;

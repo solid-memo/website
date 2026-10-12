@@ -190,12 +190,26 @@ test("a learner's full journey @library", async ({ app, account, runId }) => {
       mature: null,
       // The log begins today, inside the 12 months read: the page says since when.
       coverage: "thisMonth",
+      // Four new cards, one of them deck B's first, answered Again; once
+      // more the same day, it is a repeat, which no figure but the day's
+      // answers counts.
+      today: { answers, introduced: cards, remembered: 0, lapses: 0, repeats: 1 },
+      buttons: {
+        first: { again: 1, hard: 0, good: cards - 1, easy: 0 },
+        young: { again: 0, hard: 0, good: 0, easy: 0 },
+        mature: { again: 0, hard: 0, good: 0, easy: 0 },
+      },
+      // The first study day is today: one of its weekday, studied.
+      weekday: { average: answers, studied: 1, of: 1 },
       decks: [deckA, deckB].map((name, i) => ({
         name,
         answers: i === 0 ? answeredA : answeredB,
         introduced: 2,
         young: null,
         mature: null,
+        directions: "–" as const,
+        // Deck B's first card was answered Again when it was new.
+        firstTry: { recalled: i === 0 ? 2 : 1, introduced: 2 },
         lapses: 0,
         quiz: null,
         lastStudied: "today" as const,

@@ -80,8 +80,27 @@ describe("StatisticsScreen", () => {
     expect(screen.getAllByText("2 days")).toHaveLength(2);
     expect(screen.getAllByText("100%")).not.toHaveLength(0);
     const headings = screen.getAllByRole("heading").map((heading) => heading.textContent);
-    expect(headings).toEqual(["Statistics", "Progress", "Remembered in reviews", "By deck"]);
+    expect(headings).toEqual([
+      "Statistics",
+      "This week so far",
+      "This month so far",
+      "Progress",
+      "Remembered in reviews",
+      "By deck",
+    ]);
+    expect(screen.getByRole("group", { name: "Last 30 days" })).toHaveTextContent("2 of 30 days7%");
+    expect(screen.getByText("What each day held, the last 30 days")).toBeInTheDocument();
+    expect(screen.getByText("Answers by weekday")).toBeInTheDocument();
+    // September 21 was a Monday: this week holds that day alone.
+    expect(screen.getAllByRole("group", { name: "Answers" })[1]).toHaveTextContent(
+      "2Same days last week: 0",
+    );
     expect(screen.getByText("Cards introduced over time")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "First try" })).toHaveTextContent(
+      "100%remembered, of 2 new cards",
+    );
+    expect(screen.getByText("New cards and reviews, by week")).toBeInTheDocument();
+    expect(screen.getByText("Answer buttons")).toBeInTheDocument();
     expect(screen.getByText("Recall by month")).toBeInTheDocument();
     expect(screen.queryByText("In courses")).toBeNull();
     const byDeck = screen.getByRole("region", { name: "By deck" });
@@ -96,25 +115,58 @@ describe("StatisticsScreen", () => {
         "Introduced",
         "Young recall",
         "Mature recall",
+        "By direction",
+        "First try",
         "Lapses",
         "Graded course answers",
         "Last studied",
       ],
-      ["Capitals", "2", "1", "100% of 1 review", "–", "0", "–", "September 21, 2026"],
-      ["A removed deck", "1", "1", "–", "–", "0", "–", "September 21, 2026"],
+      [
+        "Capitals",
+        "2",
+        "1",
+        "100% of 1 review",
+        "–",
+        "–",
+        "100% of 1 new card",
+        "0",
+        "–",
+        "September 21, 2026",
+      ],
+      [
+        "A removed deck",
+        "1",
+        "1",
+        "–",
+        "–",
+        "–",
+        "100% of 1 new card",
+        "0",
+        "–",
+        "September 21, 2026",
+      ],
     ]);
   });
 
   it("shows graded course answers apart, in place of recall when there is no review", () => {
     render(<StatisticsScreen statistics={courseOnly} decks={[deck]} />);
     const headings = screen.getAllByRole("heading").map((heading) => heading.textContent);
-    expect(headings).toEqual(["Statistics", "Progress", "In courses", "By deck"]);
+    expect(headings).toEqual([
+      "Statistics",
+      "This week so far",
+      "This month so far",
+      "Progress",
+      "In courses",
+      "By deck",
+    ]);
+    expect(screen.queryByRole("group", { name: "First try" })).toBeNull();
+    expect(screen.queryByText("Answer buttons")).toBeNull();
     expect(screen.getByRole("group", { name: "Graded course answers" })).toHaveTextContent(
       "50%right, of 2 answers",
     );
     expect(screen.queryByRole("group", { name: /Young cards/ })).toBeNull();
     const row = within(screen.getByRole("region", { name: "By deck" })).getAllByRole("row")[1]!;
-    expect(within(row).getAllByRole("cell")[5]).toHaveTextContent("50% of 2 answers");
+    expect(within(row).getAllByRole("cell")[7]).toHaveTextContent("50% of 2 answers");
   });
 
   it("leaves out recall by month while there are no reviews, only first answers", () => {
@@ -127,6 +179,25 @@ describe("StatisticsScreen", () => {
     expect(screen.getByText("Cards introduced over time")).toBeInTheDocument();
     expect(screen.queryByText("Recall by month")).toBeNull();
     expect(screen.getAllByText("No reviews yet")).toHaveLength(2);
+  });
+
+  it("gives a deck's recall each way only when it has reviews both ways", () => {
+    const both = statisticsReportOf(
+      [
+        answer("2026-09-21", deck.url, 1),
+        answer("2026-09-21", deck.url, 1, {
+          id: "answer-back",
+          direction: "back-to-front",
+          grade: 1,
+        }),
+      ],
+      "2026-09-21",
+    );
+    render(<StatisticsScreen statistics={both} decks={[deck]} />);
+    const row = within(screen.getByRole("region", { name: "By deck" })).getAllByRole("row")[1]!;
+    expect(within(row).getAllByRole("cell")[4]).toHaveTextContent(
+      "Front → back: 100% of 1 review · Back → front: 0% of 1 review",
+    );
   });
 
   it("says since when, when the log begins after the range read, and nothing of it otherwise", () => {
@@ -181,11 +252,14 @@ describe("DeckStatisticsContainer", () => {
     const { container } = withQueries(
       <DeckStatisticsContainer useCases={useCases} instance={INSTANCE} deck={deck} />,
     );
-    expect(await screen.findByText("Answers, the last 30 days")).toBeInTheDocument();
+    expect(await screen.findByText("What each day held, the last 30 days")).toBeInTheDocument();
     expect(useCases.getStatistics).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date), {
       deckUrl: deck.url,
     });
-    expect(container.querySelectorAll("rect.bar")).toHaveLength(2);
+    expect(container.querySelectorAll("rect.bar")).toHaveLength(3);
+    expect(screen.getByRole("group", { name: "First try" })).toBeInTheDocument();
+    expect(screen.getByText("Answer buttons")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Front → back" })).toBeNull();
 
     expect(useCases.getCardProgress).toHaveBeenCalledWith(INSTANCE.url, expect.any(Date), { deck });
 
@@ -196,7 +270,25 @@ describe("DeckStatisticsContainer", () => {
     );
     await vi.waitFor(() => expect(empty.getStatistics).toHaveBeenCalled());
     expect(await quiet.findByText("Card maturity")).toBeInTheDocument();
-    expect(quiet.queryByText("Answers, the last 30 days")).toBeNull();
+    expect(quiet.queryByText("What each day held, the last 30 days")).toBeNull();
+  });
+
+  it("shows a deck's recall each way when it has reviews both ways", async () => {
+    const both = statisticsReportOf(
+      [
+        answer("2026-09-21", deck.url, 1),
+        answer("2026-09-21", deck.url, 1, { id: "answer-back", direction: "back-to-front" }),
+      ],
+      "2026-09-21",
+    );
+    const useCases = makeUseCasesFake({ getStatistics: vi.fn(async () => both) });
+    withQueries(<DeckStatisticsContainer useCases={useCases} instance={INSTANCE} deck={deck} />);
+    expect(await screen.findByRole("group", { name: "Front → back" })).toHaveTextContent(
+      "100%of 1 review",
+    );
+    expect(screen.getByRole("group", { name: "Back → front" })).toHaveTextContent(
+      "100%of 1 review",
+    );
   });
 
   it("shows a deck studied only in a course's chapters by its graded course answers alone", async () => {
@@ -206,5 +298,7 @@ describe("DeckStatisticsContainer", () => {
       "50%",
     );
     expect(screen.queryByRole("group", { name: /Young cards/ })).toBeNull();
+    expect(screen.queryByRole("group", { name: "First try" })).toBeNull();
+    expect(screen.queryByText("Answer buttons")).toBeNull();
   });
 });

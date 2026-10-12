@@ -5,7 +5,7 @@
 import { LEECH_LAPSES, type LapseIndex } from "./cardHistory";
 import { activeCards, studyDirections, type Card, type DeckDirection } from "./deck";
 import { reviewKeyOf, type ReviewState } from "./review";
-import { shiftStudyDay } from "./statistics";
+import { shiftStudyDay } from "./answer";
 import type { DeckSchedule, StoredSchedule } from "./studyDigest";
 
 /**

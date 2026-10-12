@@ -7,7 +7,7 @@ import { canonicalTag } from "./languageTag";
 import { folded, shown, type LangText } from "./langText";
 import { LEECH_LAPSES } from "./cardHistory";
 import { reviewKeyOf, type ReviewState } from "./review";
-import { MATURE_INTERVAL_DAYS } from "./statistics";
+import { MATURE_INTERVAL_DAYS } from "./answer";
 
 /**
  * The Studio's card workbench (docs/studio.md): a deck's cards searched,

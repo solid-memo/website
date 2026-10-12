@@ -5,26 +5,36 @@
 import type { StatisticsReport } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Quiz, Recall } from "@solid-memo/domain/statistics";
+import { RECENT_DAYS, type DirectionRecall, type FirstTry } from "@solid-memo/domain/studyPatterns";
 import { useI18n } from "./i18n";
 import {
   ActivityCalendar,
   CoverageNote,
+  DayHeldBars,
+  FirstTryTile,
+  GradeBars,
+  IntakeChart,
   IntroducedChart,
   onlyCourseAnswers,
+  PeriodTiles,
   QuizTile,
   RecallChart,
   RecallTile,
   StatTile,
+  WeekdayChart,
 } from "./StatisticsCharts";
 import { ReaderText } from "./ReaderText";
 
 /**
- * The instance's study statistics: totals and streaks, the activity of
- * the last year, the cards introduced over it, how well reviews were
- * remembered, in all and month by month, how course questions were
- * answered, and each deck's figures. A deck that has since been removed
- * is named as such; where the log begins inside the range read, a note
- * says since when.
+ * The instance's study statistics: totals, streaks and the days studied
+ * of late, the activity of the last year, what each recent day held and
+ * how the weekdays are studied, this week and month beside the last; the
+ * cards introduced, how many were remembered the first time and the new
+ * cards beside the reviews by week; how well reviews were remembered, in
+ * all and month by month, with the answer buttons pressed; how course
+ * questions were answered, and each deck's figures. A deck that has
+ * since been removed is named as such; where the log begins inside the
+ * range read, a note says since when.
  */
 export function StatisticsScreen({
   statistics,
@@ -33,7 +43,7 @@ export function StatisticsScreen({
   statistics: StatisticsReport;
   decks: readonly Deck[];
 }) {
-  const { t, formatDate, formatPercent } = useI18n();
+  const { t, formatDate, formatPercent, directionLabel } = useI18n();
   const { totals, streaks, retention, quiz } = statistics;
   const nameOf = (deckUrl: string) => {
     const deck = decks.find((d) => d.url === deckUrl);
@@ -48,6 +58,25 @@ export function StatisticsScreen({
     answers === 0
       ? "–"
       : t("statistics.quizShare", { percent: formatPercent(right / answers), count: answers });
+  const firstTryCell = ({ introduced, recalled }: FirstTry) =>
+    introduced === 0
+      ? "–"
+      : t("statistics.firstTryShare", {
+          percent: formatPercent(recalled / introduced),
+          count: introduced,
+        });
+  // Recall each way, only where a deck has reviews both ways.
+  const directionsCell = (directions: readonly DirectionRecall[]) =>
+    directions.length < 2
+      ? "–"
+      : directions
+          .map(({ direction, recall }) =>
+            t("statistics.directionShare", {
+              direction: directionLabel(direction),
+              share: recallCell(recall),
+            }),
+          )
+          .join(" · ");
   return (
     <section class="statistics" aria-labelledby="statistics-heading">
       <h2 id="statistics-heading">{t("statistics.heading")}</h2>
@@ -68,10 +97,30 @@ export function StatisticsScreen({
               label={t("statistics.longestStreak")}
               value={t("statistics.dayCount", { count: streaks.longest })}
             />
+            <StatTile
+              label={t("statistics.recentDays", { count: RECENT_DAYS })}
+              value={t("statistics.recentDaysValue", {
+                studied: statistics.recentStudyDays,
+                count: RECENT_DAYS,
+              })}
+              detail={formatPercent(statistics.recentStudyDays / RECENT_DAYS)}
+            />
           </div>
           <ActivityCalendar days={statistics.days} today={statistics.today} />
+          <DayHeldBars days={statistics.days} today={statistics.today} />
+          <WeekdayChart weekdays={statistics.weekdays} />
+          <h3>{t("statistics.thisWeek")}</h3>
+          <PeriodTiles period="week" figures={statistics.week} />
+          <h3>{t("statistics.thisMonth")}</h3>
+          <PeriodTiles period="month" figures={statistics.month} />
           <h3>{t("statistics.progress")}</h3>
           <IntroducedChart days={statistics.days} today={statistics.today} />
+          {!onlyCourseAnswers(statistics) && (
+            <div class="stat-tiles">
+              <FirstTryTile firstTry={statistics.firstTry} />
+            </div>
+          )}
+          <IntakeChart weeks={statistics.intake} />
           {!onlyCourseAnswers(statistics) && (
             <>
               <h3>{t("statistics.remembered")}</h3>
@@ -80,6 +129,7 @@ export function StatisticsScreen({
                 <RecallTile label={t("statistics.young")} recall={retention.young} />
                 <RecallTile label={t("statistics.mature")} recall={retention.mature} />
               </div>
+              <GradeBars buttons={statistics.buttons} />
               {retention.young.reviews + retention.mature.reviews > 0 && (
                 <RecallChart months={statistics.months} />
               )}
@@ -95,7 +145,7 @@ export function StatisticsScreen({
             </>
           )}
           <h3 id="by-deck-heading">{t("statistics.byDeck")}</h3>
-          {/* Eight columns are wider than a phone: the table scrolls, its deck column stays. */}
+          {/* Ten columns are wider than a phone: the table scrolls, its deck column stays. */}
           <div class="table-scroll" role="region" aria-labelledby="by-deck-heading" tabIndex={0}>
             <table class="deck-statistics">
               <thead>
@@ -105,6 +155,8 @@ export function StatisticsScreen({
                   <th scope="col">{t("statistics.introducedColumn")}</th>
                   <th scope="col">{t("statistics.youngRecall")}</th>
                   <th scope="col">{t("statistics.matureRecall")}</th>
+                  <th scope="col">{t("statistics.directionsColumn")}</th>
+                  <th scope="col">{t("statistics.firstTry")}</th>
                   <th scope="col">{t("statistics.lapses")}</th>
                   <th scope="col">{t("statistics.quizAccuracy")}</th>
                   <th scope="col">{t("statistics.lastStudied")}</th>
@@ -118,6 +170,8 @@ export function StatisticsScreen({
                     <td>{deck.introduced}</td>
                     <td>{recallCell(deck.retention.young)}</td>
                     <td>{recallCell(deck.retention.mature)}</td>
+                    <td>{directionsCell(deck.directions)}</td>
+                    <td>{firstTryCell(deck.firstTry)}</td>
                     <td>{deck.lapses}</td>
                     <td>{quizCell(deck.quiz)}</td>
                     <td>{formatDate(deck.lastStudyDay)}</td>
