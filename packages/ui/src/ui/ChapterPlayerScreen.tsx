@@ -76,7 +76,8 @@ export function ChapterPlayerScreen({
   onAnswerPhase: () => void;
   /** Shows another chunk of the step's theory, 0-based. */
   onChunk: (index: number) => void;
-  onCheck: (choice: Choice) => void;
+  /** An option checked, and the milliseconds it took to choose it (CourseQuestion). */
+  onCheck: (choice: Choice, recallMillis: number) => void;
   onNext: () => void;
 }) {
   const { t } = useI18n();

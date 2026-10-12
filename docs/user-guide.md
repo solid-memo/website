@@ -250,6 +250,12 @@ to see what it holds, or reach a chart with Tab and step along it with
 the arrow keys. Every chart can also be read as a table
 ([statistics.md](statistics.md)). A guest has statistics too.
 
+Each answer you give, in study or in a course, also keeps how long you
+took to recall it, and in study to grade it (not the time the app was
+hidden), the day the card was due, and your device's offset from UTC. They stay in your Pod with the rest
+of your answers, and nothing turns them off
+([privacy.md](privacy.md)).
+
 ## Preferences
 
 **Preferences**, in the instance bar:

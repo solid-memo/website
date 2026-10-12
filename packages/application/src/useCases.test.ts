@@ -3405,9 +3405,13 @@ describe("the answer log", () => {
     return { deps, log, byMonth, useCases };
   };
 
-  it("keeps every answer with what the statistics need, the prior interval from the second on", async () => {
+  it("keeps every answer with what the statistics need, the prior interval and due day from the second on", async () => {
     const { deps, byMonth, useCases } = setup();
-    await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
+    const offset = 0 - noon.getTimezoneOffset();
+    await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon, {
+      recallMillis: 2400.4,
+      gradeMillis: 800,
+    });
     vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({
       cardId: card.id,
       direction: "back-to-front",
@@ -3419,7 +3423,12 @@ describe("the answer log", () => {
       lastReviewedAt: "2026-09-15T10:00:00.000Z",
       formatVersion: 2,
     });
-    await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 1, noon);
+    // Eleven minutes to recall: the learner was away, so it is not kept.
+    await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 1, noon, {
+      recallMillis: 11 * 60_000,
+      gradeMillis: 500,
+    });
+    await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 4, noon);
     await useCases.getStatistics(instance.url, noon);
     expect(byMonth.get("2026-09")).toEqual([
       {
@@ -3431,6 +3440,9 @@ describe("the answer log", () => {
         answeredAt: noon.toISOString(),
         studyDay: "2026-09-21",
         nextIntervalDays: 1,
+        recallMillis: 2400,
+        gradeMillis: 800,
+        utcOffsetMinutes: offset,
       },
       {
         id: `answer-${noon.toISOString().replace(/[-:.]/g, "")}-id2-0000`,
@@ -3442,8 +3454,14 @@ describe("the answer log", () => {
         studyDay: "2026-09-21",
         priorIntervalDays: 6,
         nextIntervalDays: 1,
+        gradeMillis: 500,
+        priorDue: "2026-09-21",
+        utcOffsetMinutes: offset,
       },
+      // A review timed by no screen, as the Studio's trial gives it: no times.
+      expect.not.objectContaining({ recallMillis: expect.anything() }),
     ]);
+    expect(byMonth.get("2026-09")![2]).not.toHaveProperty("gradeMillis");
   });
 
   it("keeps an answer it could not add for later, in order, and does not fail the review", async () => {
@@ -6085,6 +6103,7 @@ describe("courses", () => {
       question,
       { correct: true },
       noon,
+      { recallMillis: 3100 },
     );
     expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(courseDeck, {
       save: [question],
@@ -6117,9 +6136,14 @@ describe("courses", () => {
         grade: 3,
         mode: "multiple-choice",
         nextIntervalDays: 1,
+        recallMillis: 3100,
+        utcOffsetMinutes: 0 - noon.getTimezoneOffset(),
       }),
     ]);
     expect(appended[0]).not.toHaveProperty("chosenDistractor");
+    // A first answer was due on no day, and a choice is not graded by the learner.
+    expect(appended[0]).not.toHaveProperty("priorDue");
+    expect(appended[0]).not.toHaveProperty("gradeMillis");
   });
 
   it("answerCourseQuestion grades a wrong first answer 1 and names the wrong option chosen, in the deck's copy", async () => {
@@ -6146,7 +6170,7 @@ describe("courses", () => {
   });
 
   it("answerCourseQuestion writes nothing for a right answer on a card graded today, and lapses it on a wrong one, without writing the card again", async () => {
-    const { deps, useCases } = setup();
+    const { deps, useCases, appended } = setup();
     const morning = stateOf(new Date(2026, 9, 7, 9, 0), "2026-10-08");
     vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(morning);
     await expect(
@@ -6164,6 +6188,8 @@ describe("courses", () => {
       state: { repetitions: 0, firstReviewedAt: morning.firstReviewedAt },
     });
     expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    await useCases.refreshStudyDigest(instance.url, courseDeck);
+    expect(appended).toEqual([expect.objectContaining({ grade: 1, priorDue: "2026-10-08" })]);
   });
 
   it("completeChapter notes the chapter completed on the deck", async () => {

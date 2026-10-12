@@ -34,6 +34,9 @@ const deck: Deck = {
   authors: [],
 };
 
+/** Response times, whatever they are. */
+const timed = { recallMillis: expect.any(Number), gradeMillis: expect.any(Number) };
+
 /** A front→back prompt of a card with the given front. */
 function makePrompt(id: string, front: string): Prompt {
   return {
@@ -118,6 +121,7 @@ describe("StudyContainer", () => {
         reverse,
         4,
         expect.any(Date),
+        timed,
       ),
     );
   });
@@ -177,6 +181,7 @@ describe("StudyContainer", () => {
       expect.objectContaining({ card: expect.objectContaining({ id: "card-a" }) }),
       5,
       expect.any(Date),
+      timed,
     );
 
     const secondReveal = await screen.findByRole("button", {
@@ -246,6 +251,7 @@ describe("StudyContainer", () => {
         expect.anything(),
         5,
         later,
+        timed,
       ),
     );
   });
@@ -363,6 +369,7 @@ describe("StudyContainer", () => {
       expect.objectContaining({ card: expect.objectContaining({ id: "card-a" }) }),
       1,
       expect.any(Date),
+      timed,
     );
     expect(screen.getByRole("status")).toHaveTextContent(
       "Card 2 of 3. You'll see the last card again later in this session.",
@@ -440,6 +447,50 @@ describe("StudyContainer keeping the deck's schedule", () => {
     await waitFor(() =>
       expect(useCases.refreshStudyDigest).toHaveBeenCalledExactlyOnceWith(instance.url, deck),
     );
+  });
+
+  it("records how long each answer took, the time the page was hidden left out", async () => {
+    let clock = 0;
+    const now = vi.spyOn(performance, "now").mockImplementation(() => clock);
+    const useCases = twoCards();
+    renderContainer(useCases);
+    const reveal = await screen.findByRole("button", { name: "Reveal" });
+    clock += 2_000;
+    hidePage("hidden");
+    clock += 120_000;
+    hidePage("visible");
+    clock += 1_000;
+    fireEvent.click(reveal);
+    clock += 1_500;
+    fireEvent.click(screen.getByRole("button", { name: "4 — Good" }));
+    await waitFor(() =>
+      expect(useCases.recordReview).toHaveBeenCalledWith(
+        instance.url,
+        deck,
+        expect.anything(),
+        4,
+        expect.any(Date),
+        { recallMillis: 3_000, gradeMillis: 1_500 },
+      ),
+    );
+    // The next card is timed from when it comes up.
+    await screen.findByText("Card 2 of 2");
+    const next = screen.getByRole("button", { name: "Reveal" });
+    await waitFor(() => expect(next).toHaveAttribute("aria-disabled", "false"));
+    clock += 800;
+    fireEvent.click(next);
+    fireEvent.click(screen.getByRole("button", { name: "5 — Easy" }));
+    await waitFor(() =>
+      expect(useCases.recordReview).toHaveBeenLastCalledWith(
+        instance.url,
+        deck,
+        expect.anything(),
+        5,
+        expect.any(Date),
+        { recallMillis: 800, gradeMillis: 0 },
+      ),
+    );
+    now.mockRestore();
   });
 
   it("keeps nothing for a session without answers", async () => {

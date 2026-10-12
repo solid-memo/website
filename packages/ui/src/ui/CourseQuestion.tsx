@@ -15,6 +15,7 @@ import { inDataRegion } from "./Markdown";
 import { markdownBlocks } from "./markdownCache";
 import { MultipleChoice } from "./MultipleChoice";
 import { ReaderText } from "./ReaderText";
+import { useStopwatch } from "./stopwatch";
 
 /** A question checked: the option chosen, and what the answer did to its card. */
 export interface CheckedAnswer {
@@ -40,6 +41,9 @@ export interface CheckedAnswer {
  * hold a code block or a table, too much for a name, so its options are
  * named by its picture, as CardFace names it, and its plain label, and
  * described by the whole question when it is more than one paragraph.
+ *
+ * An option checked comes with how long choosing took (useStopwatch):
+ * from the question shown to the option checked.
  */
 export function CourseQuestion({
   card,
@@ -62,7 +66,8 @@ export function CourseQuestion({
   error: ErrorText | null;
   /** What Next says: "Next", "Final review", "Finish". */
   nextLabel: string;
-  onCheck: (choice: Choice) => void;
+  /** An option checked, and the milliseconds it took to choose it. */
+  onCheck: (choice: Choice, recallMillis: number) => void;
   onNext: () => void;
 }) {
   const { t, readerText } = useI18n();
@@ -71,6 +76,7 @@ export function CourseQuestion({
   const markdown = isMarkdown(card.textFormat);
   const questionRef = useRef<HTMLDivElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
+  const stopwatch = useStopwatch();
   const { question, answer: rightAnswer } = promptSides({ card, direction: "front-to-back" });
   const correct = choices.find((choice) => choice.correct)!;
   const checked = answer !== null;
@@ -136,7 +142,7 @@ export function CourseQuestion({
         choices={choices}
         answered={answer === null ? undefined : { chosen: answer.choice.key, correct: correct.key }}
         busy={busy}
-        onCheck={(key) => onCheck(choices.find((choice) => choice.key === key)!)}
+        onCheck={(key) => onCheck(choices.find((choice) => choice.key === key)!, stopwatch.read())}
       />
       {/* Mounted for the whole question, so its verdict is heard as it comes. */}
       <p

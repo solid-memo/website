@@ -5,6 +5,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { ResponseTimes } from "@solid-memo/domain/answer";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
@@ -23,7 +24,8 @@ import { useI18n } from "./i18n";
  * into the remainder (never as the very next card unless it is the only
  * one left). The session covers today's due prompts and the new ones
  * within the daily budget, the new spread among the due, today and each
- * answer by the screen's time (useClock). The deck's cached queue is
+ * answer by the screen's time (useClock), keeping how long it took
+ * (StudyScreen). The deck's cached queue is
  * dropped when the session ends, however it is left. Its deck links to
  * the deck's page, or to `deckLink` when given.
  */
@@ -100,8 +102,8 @@ export function StudyContainer({
   }, [instance.url, deck.url]);
 
   const answerMutation = useMutation({
-    mutationFn: (args: { prompt: Prompt; quality: ReviewQuality }) =>
-      useCases.recordReview(instance.url, deck, args.prompt, args.quality, now()),
+    mutationFn: (args: { prompt: Prompt; quality: ReviewQuality; times: ResponseTimes }) =>
+      useCases.recordReview(instance.url, deck, args.prompt, args.quality, now(), args.times),
     onSuccess: (state, { prompt, quality }) => {
       answered.current++;
       queryClient.setQueryData(
@@ -160,7 +162,7 @@ export function StudyContainer({
       answerScale={answerScale}
       busy={answerMutation.isPending}
       error={errorText(answerMutation.error)}
-      onAnswer={(quality) => answerMutation.mutate({ prompt: prompt!, quality })}
+      onAnswer={(quality, times) => answerMutation.mutate({ prompt: prompt!, quality, times })}
       onExit={() => void handleExit()}
     />
   );

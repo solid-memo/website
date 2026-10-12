@@ -3,7 +3,15 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { answerIdOf, isRecalled, monthOfStudyDay, shiftStudyDay } from "./answer";
+import {
+  answerIdOf,
+  isRecalled,
+  MAX_RESPONSE_MILLIS,
+  monthOfStudyDay,
+  recordedResponseTimes,
+  shiftStudyDay,
+  utcOffsetMinutesAt,
+} from "./answer";
 
 describe("answers", () => {
   it("are named by their time and a random part", () => {
@@ -25,5 +33,25 @@ describe("answers", () => {
   it("remember the card from grade 3 up", () => {
     expect(isRecalled({ grade: 3 })).toBe(true);
     expect(isRecalled({ grade: 2 })).toBe(false);
+  });
+
+  it("record their response times in whole milliseconds, up to ten minutes", () => {
+    expect(recordedResponseTimes({ recallMillis: 1234.6, gradeMillis: 0 })).toEqual({
+      recallMillis: 1235,
+      gradeMillis: 0,
+    });
+    expect(recordedResponseTimes({ recallMillis: MAX_RESPONSE_MILLIS })).toEqual({
+      recallMillis: MAX_RESPONSE_MILLIS,
+    });
+    expect(
+      recordedResponseTimes({ recallMillis: MAX_RESPONSE_MILLIS + 1, gradeMillis: 900 }),
+    ).toEqual({ gradeMillis: 900 });
+    expect(recordedResponseTimes({ recallMillis: -1, gradeMillis: Number.NaN })).toEqual({});
+    expect(recordedResponseTimes({})).toEqual({});
+  });
+
+  it("record the device's offset from UTC, east positive, never -0", () => {
+    expect(Object.is(utcOffsetMinutesAt({ getTimezoneOffset: () => 0 } as Date), 0)).toBe(true);
+    expect(utcOffsetMinutesAt({ getTimezoneOffset: () => -120 } as Date)).toBe(120);
   });
 });

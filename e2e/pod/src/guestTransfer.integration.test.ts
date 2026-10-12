@@ -282,7 +282,10 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
     await useCases.addCard(capitals, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
     const now = new Date();
     const queue = await useCases.getStudyQueue(guestInstance!.url, capitals, now);
-    await useCases.recordReview(guestInstance!.url, capitals, queue.newPrompts[0]!, 4, now);
+    await useCases.recordReview(guestInstance!.url, capitals, queue.newPrompts[0]!, 4, now, {
+      recallMillis: 2_100,
+      gradeMillis: 700,
+    });
     const started = await useCases.startCourse(guestInstance!.url, course);
     await useCases.answerCourseQuestion(
       guestInstance!.url,
@@ -290,6 +293,7 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
       question,
       { correct: false, distractorId: "q-iri-d1" },
       now,
+      { recallMillis: 3_400 },
     );
     const guestCourse = await useCases.completeChapter(started, CHAPTER);
     await useCases.savePreferences(guestInstance!.url, {
@@ -347,6 +351,22 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
     expect((await useCases.getCourse(addedCourse)).answeredCardIds).toEqual(["q-iri"]);
     const statistics = await useCases.getStatistics(target.url, now);
     expect(statistics.totals.answers).toBe(2);
+    // How long each answer took, and where, came along.
+    const offset = 0 - now.getTimezoneOffset();
+    expect(
+      (await useCases.loadAnswerLog(target.url)).map(
+        ({ recallMillis, gradeMillis, utcOffsetMinutes }) => [
+          recallMillis,
+          gradeMillis,
+          utcOffsetMinutes,
+        ],
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        [2_100, 700, offset],
+        [3_400, undefined, offset],
+      ]),
+    );
     expect(
       (await useCases.getStatistics(target.url, now, { deckUrl: addedCourse.url })).totals.answers,
     ).toBe(1);

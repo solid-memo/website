@@ -304,13 +304,13 @@ the cards stood, but never in recall.
 
 ### Time spent and the hours of the day
 
-The log records when each answer was given, not how long it took, so
+An answer before vocabulary 1.19 records when it was given, not how
+long it took. Since then an answer records its own response times and
+the device's offset from UTC
+([data-model.md](data-model.md#the-answer-log), [below](#response-times)),
+but the figures below do not read them yet, so
 [studyTime.ts](../packages/domain/src/studyTime.ts) estimates the time
 from the pauses between answers, and every figure of it says "about".
-Since vocabulary 1.19 an answer may record its own response times and
-the device's offset from UTC
-([data-model.md](data-model.md#the-answer-log)); the figures below do
-not read them yet, so they stay estimates.
 
 | Term | Definition |
 |---|---|
@@ -319,6 +319,22 @@ not read them yet, so they stay estimates.
 | Course answers | Left out: what a chapter shows before its questions takes time no answer tells, so time in courses is not counted, as the page says. They do count by the hour. |
 | Time left today | (Reviews left + new cards left + the reviews expected back) × the median time an answer took, where the reviews expected back are the reviews left times the share of young reviews forgotten over the strip's 12 months (none before any): `expectedTimeToday`. Shown in whole minutes, one at least. |
 | Hour of the day | Each answer by the hour it was in the viewer's current time zone when the page is read (`answersByHour`), not where it was given, so a learner who traveled sees those answers shifted. |
+
+### Response times
+
+Since vocabulary 1.19 each answer says how long it took and where it
+was given, measured by the screen that asked it and kept in the answer
+log ([data-model.md](data-model.md#the-answer-log)). Nothing is asked
+of the learner and nothing turns it off; [privacy.md](privacy.md) says
+so.
+
+| Field | How it is measured |
+|---|---|
+| `recallMillis` | In study, from the card shown to Reveal; in a course, from the question shown to the option checked (`useStopwatch` in [stopwatch.ts](../packages/ui/src/ui/stopwatch.ts), on `performance.now()`). The time the page is hidden is left out. |
+| `gradeMillis` | In study, from Reveal to the grade, measured the same way; when saving failed and the learner grades again, to the last grade pressed. A course answer has none. |
+| Either | In whole milliseconds, and left out above ten minutes (`MAX_RESPONSE_MILLIS`, `recordedResponseTimes` in [answer.ts](../packages/domain/src/answer.ts)): by then the learner was away, not thinking. An answer given without a screen timing it, as the Studio's trial plays the days to come, has neither. |
+| `priorDue` | The prompt's due day before the answer, from its review state (`applyGrade`); none on a first answer. |
+| `utcOffsetMinutes` | The device's offset from UTC as the answer is given (`utcOffsetMinutesAt`). |
 
 ### Why the figures changed
 

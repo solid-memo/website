@@ -99,6 +99,15 @@ describe("ChapterReviewContainer", () => {
     expect(document.querySelector(".course-theory")).toBeNull();
     expect(screen.queryByText("Things are named by IRIs.")).toBeNull();
     await answer("Hardly An IRI");
+    // Each answer keeps how long choosing took.
+    expect(useCases.answerCourseQuestion).toHaveBeenCalledWith(
+      courseInstance.url,
+      course.deck,
+      expect.anything(),
+      expect.anything(),
+      expect.any(Date),
+      { recallMillis: expect.any(Number) },
+    );
     expect(screen.getByText("Question 2 of 5")).toBeInTheDocument();
     expect(screen.getByText("What is a triple?").closest(".study-face")).toHaveFocus();
     await answer("Three terms");

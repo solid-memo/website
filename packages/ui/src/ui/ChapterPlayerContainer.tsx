@@ -19,7 +19,8 @@ import { useKeepSchedule } from "./keepSchedule";
  * Answers a course question of `card`, then refreshes what the answer
  * changed: the course's progress, and, once a card is graded, the deck's
  * cards and counts. Shared by a chapter's steps and its final review.
- * The answer is given at the screen's time (useClock).
+ * The answer is given at the screen's time (useClock), and keeps how
+ * long choosing took (`recallMillis`).
  */
 export function useCourseAnswer(
   useCases: UseCases,
@@ -32,7 +33,15 @@ export function useCourseAnswer(
   const noteGraded = useKeepSchedule(useCases, instance.url, deck);
   const now = useClock();
   return useMutation({
-    mutationFn: ({ card, choice }: { card: LibraryCard; choice: Choice }) =>
+    mutationFn: ({
+      card,
+      choice,
+      recallMillis,
+    }: {
+      card: LibraryCard;
+      choice: Choice;
+      recallMillis: number;
+    }) =>
       useCases.answerCourseQuestion(
         instance.url,
         deck,
@@ -42,6 +51,7 @@ export function useCourseAnswer(
           ...(choice.distractorId === undefined ? {} : { distractorId: choice.distractorId }),
         },
         now(),
+        { recallMillis },
       ),
     onSuccess: ({ effect }, { choice }) => {
       onAnswered({ choice, effect });
@@ -130,7 +140,7 @@ export function ChapterPlayerContainer({
       error={errorText(answerMutation.error)}
       onAnswerPhase={() => setAt({ ...at, phase: "answer" })}
       onChunk={(chunk) => setAt({ ...at, chunk })}
-      onCheck={(choice) => answerMutation.mutate({ card, choice })}
+      onCheck={(choice, recallMillis) => answerMutation.mutate({ card, choice, recallMillis })}
       onNext={next}
     />
   );

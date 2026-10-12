@@ -88,3 +88,40 @@ export const MATURE_INTERVAL_DAYS = 21;
 export function isRecalled(answer: Pick<Answer, "grade">): boolean {
   return answer.grade >= 3;
 }
+
+/**
+ * How long an answer took, as the screen measured it, in milliseconds,
+ * the time the app was hidden left out: from the prompt shown to the
+ * answer revealed or the option chosen (recall), and from the answer
+ * revealed to the grade (grade). Either is absent when not measured.
+ */
+export interface ResponseTimes {
+  recallMillis?: number;
+  gradeMillis?: number;
+}
+
+/** A response time longer than this is not recorded: the learner was away, not thinking. */
+export const MAX_RESPONSE_MILLIS = 10 * 60_000;
+
+/**
+ * The response times an answer records: each in whole milliseconds,
+ * those longer than MAX_RESPONSE_MILLIS (or not a time at all) left out.
+ */
+export function recordedResponseTimes(times: ResponseTimes): ResponseTimes {
+  const kept = (millis: number | undefined) =>
+    millis !== undefined && millis >= 0 && millis <= MAX_RESPONSE_MILLIS
+      ? Math.round(millis)
+      : undefined;
+  const recallMillis = kept(times.recallMillis);
+  const gradeMillis = kept(times.gradeMillis);
+  return {
+    ...(recallMillis === undefined ? {} : { recallMillis }),
+    ...(gradeMillis === undefined ? {} : { gradeMillis }),
+  };
+}
+
+/** The device's offset from UTC at an instant, in minutes, positive east of Greenwich (Answer.utcOffsetMinutes). */
+export function utcOffsetMinutesAt(instant: Date): number {
+  // 0 - x, not -x: an offset of 0 is never -0.
+  return 0 - instant.getTimezoneOffset();
+}
