@@ -44,6 +44,15 @@ function answerOf(instanceUrl: string, studyDay: string, deck: string, n: number
     studyDay,
     ...(n % 3 === 0 ? {} : { priorIntervalDays: n }),
     nextIntervalDays: n + 1,
+    // Every other answer timed, as answers given since vocabulary 1.19 are.
+    ...(n % 2 === 0
+      ? {}
+      : {
+          recallMillis: 1000 + n,
+          gradeMillis: 500 + n,
+          ...(n % 3 === 0 ? {} : { priorDue: studyDay }),
+          utcOffsetMinutes: n % 4 === 1 ? 120 : -300,
+        }),
   };
 }
 
@@ -168,6 +177,10 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
     } as unknown as Answer;
     await expect(log.append(instanceUrl, odd)).rejects.toThrow(
       "An answer's grade is one whole number, 0 to 5.",
+    );
+    const backwards = { ...answerOf(instanceUrl, "2026-09-21", "deck-1", 1), recallMillis: -1 };
+    await expect(log.append(instanceUrl, backwards)).rejects.toThrow(
+      "A recall time is one whole number of milliseconds, 0 or more.",
     );
     await expect(log.months(instanceUrl)).resolves.toEqual([]);
   });

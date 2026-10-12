@@ -58,4 +58,27 @@ describe("answer records", () => {
     expect(answerToRecord(recalled)).toMatchObject({ mode: `${SM}recall` });
     expect(answerFromRecord("answer-1", answerToRecord(recalled))).toEqual(recalled);
   });
+
+  it("carry the response times, the day the prompt was due and the device's offset from UTC, each read back", () => {
+    const timed: Answer = {
+      ...first,
+      priorIntervalDays: 6,
+      nextIntervalDays: 15,
+      recallMillis: 2_400,
+      gradeMillis: 900,
+      priorDue: "2026-10-01",
+      utcOffsetMinutes: -300,
+    };
+    expect(answerToRecord(timed)).toMatchObject({
+      recallMillis: 2_400,
+      gradeMillis: 900,
+      priorDue: "2026-10-01",
+      utcOffsetMinutes: -300,
+    });
+    expect(answerFromRecord("answer-1", answerToRecord(timed))).toEqual(timed);
+    // Each is optional: a course answer is timed but not graded by the learner.
+    const { gradeMillis: _grade, priorDue: _due, ...chosen } = timed;
+    expect(answerToRecord(chosen)).not.toHaveProperty("gradeMillis");
+    expect(answerFromRecord("answer-1", answerToRecord(chosen))).toEqual(chosen);
+  });
 });

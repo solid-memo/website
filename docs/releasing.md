@@ -62,7 +62,7 @@ follows the app's number:
 
 | What | Its version | Rules |
 |---|---|---|
-| The vocabulary | `v1` in its IRI, and `owl:versionInfo` (1.18) in [`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) | Terms are only added ([vocab.md](vocab.md#versioning-policy)) |
+| The vocabulary | `v1` in its IRI, and `owl:versionInfo` (1.19) in [`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) | Terms are only added ([vocab.md](vocab.md#versioning-policy)) |
 | The shapes | `ns/shapes/<class>/v<N>.ttl`, one file per format version | A published version is never edited ([shapes.md](shapes.md)) |
 | Format versions | `sm:formatVersion` on every subject the app writes | [migrations.md](migrations.md) |
 | The library's decks | `decks/<name>/v<N>.ttl` | A published version is never edited ([deck-library.md](deck-library.md#publishing-a-new-version)) |

@@ -131,7 +131,10 @@ string, so other applications can look up what it means:
   ([The library index](#the-library-index)). 1.18's `sm:releaseDraft`
   and `sm:publishedRelease` are written on a pod's catalog the same
   way, and its `sm:releasedAs` joined a new shape, draft deck format 1
-  ([Drafts and releases](#drafts-and-releases)).
+  ([Drafts and releases](#drafts-and-releases)). 1.19's
+  `sm:recallMillis`, `sm:gradeMillis`, `sm:priorDue` and
+  `sm:utcOffsetMinutes` joined answer format 1 the first way
+  ([The answer log](#the-answer-log)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
   says only "at most one IRI", so a reader that meets a concept it does
@@ -290,6 +293,19 @@ does: `CatalogV1` does not own them, so the catalog format did not
 move, and every writer of the catalog keeps them. `sm:releasedAs`
 belongs to draft deck format 1 ([shapes.md](shapes.md#version-by-version)).
 A link to the release, rather than a flag, says where the draft went.
+
+## The answer log
+
+Four terms of 1.19 say how an answer in the
+[answer log](data-model.md#the-answer-log) was given, each optional on
+answer format 1:
+
+| Term | Kind | Domain → range | Alignment |
+|---|---|---|---|
+| `sm:recallMillis` | datatype property | Answer → `xsd:integer` (milliseconds) | |
+| `sm:gradeMillis` | datatype property | Answer → `xsd:integer` (milliseconds) | |
+| `sm:priorDue` | datatype property | Answer → `xsd:string` (`YYYY-MM-DD`, as `sm:due`) | |
+| `sm:utcOffsetMinutes` | datatype property | Answer → `xsd:integer` (minutes east of UTC) | |
 
 ## The language of text
 

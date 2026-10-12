@@ -869,7 +869,16 @@ data, since nothing could rebuild it.
   (`sm:answerMode sm:multipleChoice`) and, when it was wrong, which
   wrong option was chosen (`sm:chosenDistractor`, the distractor in the
   deck's cards document). An answer given in study says neither, which
-  means recalled, so study writes its answers as before.
+  means recalled, so study writes its answers as before. Since
+  vocabulary 1.19 an answer may also say how long it took, in
+  milliseconds the app was shown: from the prompt to the answer
+  revealed, or to the option chosen (`sm:recallMillis`), and from there
+  to the grade (`sm:gradeMillis`), each left out above ten minutes; the
+  day the prompt was due before it (`sm:priorDue`, absent on a first
+  answer); and the device's offset from UTC then, in minutes east of
+  Greenwich (`sm:utcOffsetMinutes`). Each is optional, so an answer
+  without them is read as before, and an older app ignores them
+  ([migrations.md](migrations.md)).
 - **Added without reading** (`appendToDocument`): one insert-only PATCH,
   without a precondition, since an answer names a subject no other writer
   does. Every server tested creates the document and its container when

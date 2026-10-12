@@ -18,8 +18,8 @@
     a owl:Ontology ;
     dcterms:title "Solid Memo vocabulary, v1" ;
     dcterms:description "Terms for spaced-repetition flashcards stored in a Solid pod: instances, decks, cards, SM-2 review state and study preferences." ;
-    owl:versionInfo "1.18" ;
-    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump). 1.15: the TextFormats concept scheme and textFormat, how the texts of a card, a course step or a chapter are written, plain or Markdown (on each without a format bump). 1.16: reviewOf and reviewDirection, the card and direction a review state is of, and scheduler with the Schedulers concept scheme (review-state format 2, without a format bump). 1.17: newcomerCourse, the course the deck library's index offers to newcomers (on the catalogue, outside every shape). 1.18: releaseDraft and publishedRelease, a catalogue's drafts of releases and the releases it published (on the catalogue, outside every shape), and releasedAs, the release a draft was published as (draft deck format 1)." .
+    owl:versionInfo "1.19" ;
+    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump). 1.15: the TextFormats concept scheme and textFormat, how the texts of a card, a course step or a chapter are written, plain or Markdown (on each without a format bump). 1.16: reviewOf and reviewDirection, the card and direction a review state is of, and scheduler with the Schedulers concept scheme (review-state format 2, without a format bump). 1.17: newcomerCourse, the course the deck library's index offers to newcomers (on the catalogue, outside every shape). 1.18: releaseDraft and publishedRelease, a catalogue's drafts of releases and the releases it published (on the catalogue, outside every shape), and releasedAs, the release a draft was published as (draft deck format 1). 1.19: recallMillis, gradeMillis, priorDue and utcOffsetMinutes, how long an answer took, when its prompt was due and the device's offset from UTC (on an answer, without an answer format bump)." .
 
 #################### Classes ####################
 
@@ -806,6 +806,42 @@ solid-memo:chosenDistractor
     rdfs:range solid-memo:Distractor ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.14. Outside the answer format's version: an older reader ignores it." .
+
+solid-memo:recallMillis
+    a owl:DatatypeProperty ;
+    rdfs:label "recall time (milliseconds)" ;
+    rdfs:comment "How long the learner took to recall: from the prompt shown to the answer revealed, or to the option chosen in a multiple-choice question, not counting the time the app was hidden. Absent when it was not measured, or took longer than the app records." ;
+    rdfs:domain solid-memo:Answer ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.19. Outside the answer format's version: an older reader ignores it." .
+
+solid-memo:gradeMillis
+    a owl:DatatypeProperty ;
+    rdfs:label "grading time (milliseconds)" ;
+    rdfs:comment "How long the learner took to grade: from the answer revealed to the grade given, not counting the time the app was hidden. Absent when it was not measured, took longer than the app records, or the answer was not graded by the learner, as a multiple-choice one is not." ;
+    rdfs:domain solid-memo:Answer ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.19. Outside the answer format's version: an older reader ignores it." .
+
+solid-memo:priorDue
+    a owl:DatatypeProperty ;
+    rdfs:label "prior due" ;
+    rdfs:comment "The study day the prompt was due before the answer, as a plain \"YYYY-MM-DD\" string, as solid-memo:due is; absent on a prompt's first answer, which introduced it." ;
+    rdfs:domain solid-memo:Answer ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.19. Outside the answer format's version: an older reader ignores it." .
+
+solid-memo:utcOffsetMinutes
+    a owl:DatatypeProperty ;
+    rdfs:label "UTC offset (minutes)" ;
+    rdfs:comment "The answering device's offset from UTC when the answer was given, in minutes, positive east of Greenwich (120 in Central European Summer Time), so that the local hour of solid-memo:answeredAt can be told." ;
+    rdfs:domain solid-memo:Answer ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.19. Outside the answer format's version: an older reader ignores it." .
 
 #################### Concept schemes ####################
 

@@ -91,7 +91,7 @@ cannot reach further back. Each tab, from the top:
 | Overview | All time | Only for all time: how many cards were introduced, and how many have grown mature (reached an interval of 21 days), over the whole log, each card once, whatever came after. With the tiles above and the cards introduced over time, all of them the whole log's then, the longest streak among them, that is how far the learner has come. |
 | Overview | Activity calendar | A calendar of the last 52 weeks, whatever the range, a column a week, each day as green as its share of the busiest day's answers. |
 | Overview | By deck | A table of each deck's answers, cards introduced, young and mature recall, recall each way (for a deck with reviews both ways), first try, lapses, graded course answers and the day it was last studied. It scrolls sideways on a narrow screen, the deck's name kept in view. A deck since removed is "A removed deck". |
-| Overview | Download my answers (CSV) | Saves the range's answers, of every deck or of the deck, as a CSV file on the learner's device (`UseCases.saveAnswers`, `answersCsv` in [answerCsv.ts](../packages/domain/src/answerCsv.ts)): a row an answer, oldest first, with every column the log has (`answered_at`, `study_day`, `deck`, `card`, `direction`, `grade`, `mode`, `prior_interval_days`, `next_interval_days`, `chosen_distractor`), named in English whatever the page's language. It is handed to the browser to save as any download; nothing is sent anywhere. |
+| Overview | Download my answers (CSV) | Saves the range's answers, of every deck or of the deck, as a CSV file on the learner's device (`UseCases.saveAnswers`, `answersCsv` in [answerCsv.ts](../packages/domain/src/answerCsv.ts)): a row an answer, oldest first, with every column the log has (`answered_at`, `study_day`, `deck`, `card`, `direction`, `grade`, `mode`, `prior_interval_days`, `next_interval_days`, `chosen_distractor`, `recall_millis`, `grade_millis`, `prior_due`, `utc_offset_minutes`), named in English whatever the page's language. It is handed to the browser to save as any download; nothing is sent anywhere. |
 | Activity | What each day held | The last 30 days as stacked bars: reviews remembered, cards new that day, lapses and repeats, a step of the green each, named in a legend. A course answer to a card seen before is none of these, so it counts only among the day's answers, in the table. |
 | Activity | Answers by weekday | A bar a weekday, Monday first: its answers divided by how many of that weekday there have been since the first study day read, and in the table how many of them were studied ("3 of 4"). |
 | Activity | Time spent studying | About how long the range's recalled answers took, and on a study day on average; how many sessions, and a study day's on average; the median time an answer took. Then the last 30 days as bars of minutes, each day's sessions in its words and the table. Always "about": the time is estimated ([below](#time-spent-and-the-hours-of-the-day)), and course answers are left out. Dashes while no session has had two answers. |
@@ -307,6 +307,10 @@ the cards stood, but never in recall.
 The log records when each answer was given, not how long it took, so
 [studyTime.ts](../packages/domain/src/studyTime.ts) estimates the time
 from the pauses between answers, and every figure of it says "about".
+Since vocabulary 1.19 an answer may record its own response times and
+the device's offset from UTC
+([data-model.md](data-model.md#the-answer-log)); the figures below do
+not read them yet, so they stay estimates.
 
 | Term | Definition |
 |---|---|

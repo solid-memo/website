@@ -10,7 +10,7 @@
 <#shape>
     a sh:NodeShape ;
     sh:name "AnswerV1" ;
-    rdfs:comment "Answer format 1: the deck and card answered, the way it was asked, the SM-2 grade, when it was given and the study day it counts towards, and the prompt's interval before (absent on its first answer) and after; since vocabulary 1.14, without a format bump, how it was answered (absent: recalled) and, for a wrong multiple-choice answer, the wrong option chosen." ;
+    rdfs:comment "Answer format 1: the deck and card answered, the way it was asked, the SM-2 grade, when it was given and the study day it counts towards, and the prompt's interval before (absent on its first answer) and after; since vocabulary 1.14, without a format bump, how it was answered (absent: recalled) and, for a wrong multiple-choice answer, the wrong option chosen; since vocabulary 1.19, also without a format bump, how long recalling and grading took, the day the prompt was due before the answer and the device's offset from UTC, each optional." ;
     sh:nodeKind sh:IRI ;
     sh:class solid-memo:Answer ;
     sh:property <#formatVersion> ,
@@ -23,7 +23,11 @@
                 <#priorIntervalDays> ,
                 <#nextIntervalDays> ,
                 <#mode> ,
-                <#chosenDistractor> .
+                <#chosenDistractor> ,
+                <#recallMillis> ,
+                <#gradeMillis> ,
+                <#priorDue> ,
+                <#utcOffsetMinutes> .
 
 <#formatVersion>
     a sh:PropertyShape ;
@@ -130,3 +134,40 @@
     sh:maxCount 1 ;
     sh:message "A wrong multiple-choice answer names the one wrong option chosen, an IRI."@en ,
                "Ett felaktigt flervalssvar anger det felaktiga alternativ som valdes, en IRI."@sv .
+
+<#recallMillis>
+    a sh:PropertyShape ;
+    sh:path solid-memo:recallMillis ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:maxCount 1 ;
+    sh:message "A recall time is one whole number of milliseconds, 0 or more."@en ,
+               "En tid för att minnas är ett heltal millisekunder, 0 eller fler."@sv .
+
+<#gradeMillis>
+    a sh:PropertyShape ;
+    sh:path solid-memo:gradeMillis ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:maxCount 1 ;
+    sh:message "A grading time is one whole number of milliseconds, 0 or more."@en ,
+               "En tid för att betygsätta är ett heltal millisekunder, 0 eller fler."@sv .
+
+<#priorDue>
+    a sh:PropertyShape ;
+    sh:path solid-memo:priorDue ;
+    sh:datatype xsd:string ;
+    sh:pattern "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" ;
+    sh:maxCount 1 ;
+    sh:message "The day a prompt was due before an answer is at most one plain \"YYYY-MM-DD\" string."@en ,
+               "Förfallodagen före ett svar är högst en vanlig sträng \"YYYY-MM-DD\"."@sv .
+
+<#utcOffsetMinutes>
+    a sh:PropertyShape ;
+    sh:path solid-memo:utcOffsetMinutes ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive -840 ;
+    sh:maxInclusive 840 ;
+    sh:maxCount 1 ;
+    sh:message "An offset from UTC is one whole number of minutes, -840 to 840."@en ,
+               "En förskjutning från UTC är ett heltal minuter, -840 till 840."@sv .

@@ -227,6 +227,24 @@ a pod is whole without an index
   opening, and its documents get new receipts. No subject in a pod is
   checked against the new shapes, so the check finds nothing new.
 
+What an answer says of how it was given in vocabulary 1.19 (response
+times, the day the prompt was due and the device's offset from UTC)
+needs no migration and moved no format version:
+
+- **`sm:recallMillis`, `sm:gradeMillis`, `sm:priorDue` and
+  `sm:utcOffsetMinutes` joined answer format 1**, each optional, as
+  `sm:answerMode` did in 1.14. A reader that ignores them loses
+  nothing it had: an answer without them is what every answer before
+  was, and the statistics count it as they always did.
+- **Answers are never rewritten**, so no older writer can drop them
+  from an answer in the log. An older tab that adds a guest's study to
+  an instance writes the guest's answers through its own record, and
+  leaves them out there.
+- **One full re-check.** The property shapes changed the shape files,
+  so the rules' hash changed: every instance is checked in full once on
+  its next opening. Every answer written before meets the new
+  constraints, which only bound the new terms.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape

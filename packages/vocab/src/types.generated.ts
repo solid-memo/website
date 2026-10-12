@@ -49,7 +49,7 @@ export interface AgentV1 {
   readonly mbox?: string;
 }
 
-/** Answer format 1: the deck and card answered, the way it was asked, the SM-2 grade, when it was given and the study day it counts towards, and the prompt's interval before (absent on its first answer) and after; since vocabulary 1.14, without a format bump, how it was answered (absent: recalled) and, for a wrong multiple-choice answer, the wrong option chosen. */
+/** Answer format 1: the deck and card answered, the way it was asked, the SM-2 grade, when it was given and the study day it counts towards, and the prompt's interval before (absent on its first answer) and after; since vocabulary 1.14, without a format bump, how it was answered (absent: recalled) and, for a wrong multiple-choice answer, the wrong option chosen; since vocabulary 1.19, also without a format bump, how long recalling and grading took, the day the prompt was due before the answer and the device's offset from UTC, each optional. */
 export interface AnswerV1 {
   readonly deck: string;
   readonly card: string;
@@ -61,6 +61,10 @@ export interface AnswerV1 {
   readonly nextIntervalDays: number;
   readonly mode?: "https://solid-memo.com/ns/vocab/v1.ttl#recall" | "https://solid-memo.com/ns/vocab/v1.ttl#multipleChoice";
   readonly chosenDistractor?: string;
+  readonly recallMillis?: number;
+  readonly gradeMillis?: number;
+  readonly priorDue?: string;
+  readonly utcOffsetMinutes?: number;
 }
 
 /** Card format 1: front and back text, both required. */

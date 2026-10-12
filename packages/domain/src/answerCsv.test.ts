@@ -18,7 +18,7 @@ const first: Answer = {
 };
 
 describe("answersCsv", () => {
-  it("writes a header and a row an answer, oldest first, an answer without a mode a recalled one", () => {
+  it("writes a header and a row an answer, oldest first, an answer without a mode a recalled one, and blank where it was not measured", () => {
     const review: Answer = {
       ...first,
       id: "answer-c",
@@ -26,6 +26,10 @@ describe("answersCsv", () => {
       studyDay: "2026-10-02",
       priorIntervalDays: 1,
       nextIntervalDays: 6,
+      recallMillis: 2400,
+      gradeMillis: 800,
+      priorDue: "2026-10-02",
+      utcOffsetMinutes: -330,
     };
     const wrong: Answer = {
       ...first,
@@ -37,10 +41,10 @@ describe("answersCsv", () => {
     };
     expect(answersCsv([review, first, wrong])).toBe(
       [
-        "answered_at,study_day,deck,card,direction,grade,mode,prior_interval_days,next_interval_days,chosen_distractor",
-        "2026-10-01T10:00:00.000Z,2026-10-01,https://pod.example/i/catalog.ttl#deck-1,https://pod.example/i/decks/deck-1.ttl#se,back-to-front,1,multiple-choice,,1,https://pod.example/i/decks/deck-1.ttl#se-oslo",
-        "2026-10-01T10:00:00.000Z,2026-10-01,https://pod.example/i/catalog.ttl#deck-1,https://pod.example/i/decks/deck-1.ttl#se,front-to-back,4,recall,,1,",
-        "2026-10-02T09:00:00.000Z,2026-10-02,https://pod.example/i/catalog.ttl#deck-1,https://pod.example/i/decks/deck-1.ttl#se,front-to-back,4,recall,1,6,",
+        "answered_at,study_day,deck,card,direction,grade,mode,prior_interval_days,next_interval_days,chosen_distractor,recall_millis,grade_millis,prior_due,utc_offset_minutes",
+        "2026-10-01T10:00:00.000Z,2026-10-01,https://pod.example/i/catalog.ttl#deck-1,https://pod.example/i/decks/deck-1.ttl#se,back-to-front,1,multiple-choice,,1,https://pod.example/i/decks/deck-1.ttl#se-oslo,,,,",
+        "2026-10-01T10:00:00.000Z,2026-10-01,https://pod.example/i/catalog.ttl#deck-1,https://pod.example/i/decks/deck-1.ttl#se,front-to-back,4,recall,,1,,,,,",
+        "2026-10-02T09:00:00.000Z,2026-10-02,https://pod.example/i/catalog.ttl#deck-1,https://pod.example/i/decks/deck-1.ttl#se,front-to-back,4,recall,1,6,,2400,800,2026-10-02,-330",
         "",
       ].join("\r\n"),
     );
@@ -52,7 +56,7 @@ describe("answersCsv", () => {
       ',"https://pod.example/i/a,""b"".ttl#se",',
     );
     expect(answersCsv([])).toBe(
-      "answered_at,study_day,deck,card,direction,grade,mode,prior_interval_days,next_interval_days,chosen_distractor\r\n",
+      "answered_at,study_day,deck,card,direction,grade,mode,prior_interval_days,next_interval_days,chosen_distractor,recall_millis,grade_millis,prior_due,utc_offset_minutes\r\n",
     );
   });
 });

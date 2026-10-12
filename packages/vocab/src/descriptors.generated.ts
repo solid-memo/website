@@ -80,6 +80,10 @@ export const ANSWER_V1: ShapeDescriptor<AnswerV1> = {
     { name: "nextIntervalDays", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#nextIntervalDays", kind: "integer", cardinality: "one" },
     { name: "mode", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#answerMode", kind: "iriEnum", cardinality: "optional", values: ["https://solid-memo.com/ns/vocab/v1.ttl#recall","https://solid-memo.com/ns/vocab/v1.ttl#multipleChoice"] },
     { name: "chosenDistractor", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#chosenDistractor", kind: "iri", cardinality: "optional" },
+    { name: "recallMillis", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#recallMillis", kind: "integer", cardinality: "optional" },
+    { name: "gradeMillis", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#gradeMillis", kind: "integer", cardinality: "optional" },
+    { name: "priorDue", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#priorDue", kind: "string", cardinality: "optional" },
+    { name: "utcOffsetMinutes", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#utcOffsetMinutes", kind: "integer", cardinality: "optional" },
   ],
 };
 

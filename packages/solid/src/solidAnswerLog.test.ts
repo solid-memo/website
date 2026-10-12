@@ -140,6 +140,28 @@ describe("createSolidAnswerLog", () => {
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([chosen]);
   });
 
+  it("adds an answer with its response times, prior due day and offset from UTC, and reads them back", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const timed: Answer = {
+      ...answer("2026-09-21"),
+      recallMillis: 2_400,
+      gradeMillis: 900,
+      priorDue: "2026-09-20",
+      utcOffsetMinutes: -330,
+    };
+    await log.append(INSTANCE, timed);
+    for (const triple of [
+      `<https://solid-memo.com/ns/vocab/v1.ttl#recallMillis> "2400"`,
+      `<https://solid-memo.com/ns/vocab/v1.ttl#gradeMillis> "900"`,
+      `<https://solid-memo.com/ns/vocab/v1.ttl#priorDue> "2026-09-20"`,
+      `<https://solid-memo.com/ns/vocab/v1.ttl#utcOffsetMinutes> "-330"`,
+    ]) {
+      expect(fake.requests[0]!.body).toContain(triple);
+    }
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([timed]);
+  });
+
   it("checks an answer before adding it, and adds nothing the check refuses", async () => {
     const fake = pod();
     const checkWrite = vi.fn<WriteCheck>(async () => {
