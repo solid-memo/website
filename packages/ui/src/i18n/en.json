@@ -1310,6 +1310,7 @@
     "heading": "Statistics",
     "loading": "Loading statistics…",
     "empty": "No answers yet: the statistics begin with your next study session.",
+    "coverage": "Since {month}, your first month of study.",
     "answers": "Answers",
     "studyDays": "Study days",
     "cards": "Cards studied",

@@ -854,7 +854,8 @@ data, since nothing could rebuild it.
 - **One document per study month** for the whole instance,
   `history/<YYYY-MM>.ttl` (`historyUrlOf`, by the month of the study day,
   so a day is never split): reading a year of statistics is twelve GETs
-  whatever the number of decks.
+  whatever the number of decks, and reading it again a `304` for each
+  month that did not change.
 - **One subject per answer**, `#answer-<time>-<random>` (one added
   from a guest's study followed by the id of the deck it was added to)
   ([answer.ts](../packages/domain/src/answer.ts)): the deck's catalog
@@ -896,9 +897,14 @@ data, since nothing could rebuild it.
   the original keeps its own.
 - **Read whole by the Studio** (`loadAnswerLog`): every month, for a
   card's history, its lapses and the deck's leeches
-  ([studio.md](studio.md#a-decks-schedule)). Each month's answers are
-  kept in the page with the version they were read at, and a month is
-  read again only once it changed (`readMonthSince`, a conditional GET).
+  ([studio.md](studio.md#a-decks-schedule)); the statistics
+  (`getStatistics`) read the months of their range. Both go through one
+  cache (`readLogMonths`): each month's answers are kept in the page
+  with the version they were read at, and a month is read again only
+  once it changed (`readMonthSince`, a conditional GET). A read adds to
+  the cache and never replaces it, so the statistics' months and the
+  Studio's whole log do not undo each other; a month the log no longer
+  lists is dropped ([statistics.md](statistics.md#loading)).
   A library upgrade moves a deck's cards into a new document, so the
   Studio names a deck's past answers by their card's id in its cards
   document as it is now (`deckAnswers`).

@@ -8,8 +8,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ComponentChildren } from "preact";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Answer } from "@solid-memo/domain/answer";
-import { statisticsOf, type TodaySummary as Today } from "@solid-memo/domain/statistics";
-import { makeUseCasesFake } from "../test/useCasesFake";
+import type { TodaySummary as Today } from "@solid-memo/domain/statistics";
+import { makeUseCasesFake, statisticsReportOf } from "../test/useCasesFake";
 import { statisticsHref } from "./router";
 import { TodaySummary } from "./TodaySummary";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
@@ -108,7 +108,9 @@ describe("TodaySummaryContainer", () => {
   });
 
   it("shows today's study, linking to the statistics", async () => {
-    const getStatistics = vi.fn(async () => statisticsOf([answer("2026-10-03")], "2026-10-03"));
+    const getStatistics = vi.fn(async () =>
+      statisticsReportOf([answer("2026-10-03")], "2026-10-03"),
+    );
     renderContainer(getStatistics);
     expect(await screen.findByRole("link", { name: "All statistics" })).toHaveAttribute(
       "href",
@@ -119,7 +121,7 @@ describe("TodaySummaryContainer", () => {
 
   it("shows nothing before the day's first answer, even with a streak to keep", async () => {
     const getStatistics = vi.fn(async () =>
-      statisticsOf([answer("2026-10-01"), answer("2026-10-02")], "2026-10-03"),
+      statisticsReportOf([answer("2026-10-01"), answer("2026-10-02")], "2026-10-03"),
     );
     const { container } = renderContainer(getStatistics);
     await vi.waitFor(() => expect(getStatistics).toHaveBeenCalled());

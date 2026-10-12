@@ -33,8 +33,12 @@ study session usually ends) says what the day came to:
 
 Before the day's first answer there is no strip. When the answers
 cannot be read there is none either: the deck list works without it.
-It is read afresh each time the list opens, so it is up to date after
-a session.
+It shares the statistics page's read of the last 12 study months, so
+the record is the year's. Every change made clears that read, an
+answer in a session or a course among them, so the strip is up to date
+after a session; otherwise it is
+read again when the list opens and what was read is over half a minute
+old ([below](#loading)).
 
 Code: [TodaySummaryContainer.tsx](../packages/ui/src/ui/TodaySummaryContainer.tsx)
 reads the statistics and [TodaySummary.tsx](../packages/ui/src/ui/TodaySummary.tsx)
@@ -49,7 +53,8 @@ from the today strip. Before any answer it says that the statistics
 begin with the next study session; where the cards stand is shown
 anyway.
 
-From the top:
+From the top (a note first, "Since March 2026, your first month of
+study.", when the answer log begins after the 12 months read):
 
 | Part | What it shows |
 |---|---|
@@ -76,6 +81,52 @@ other: the answers of the last 12 study months
 (`UseCases.getStatistics`), and the cards and review states of every
 deck (`UseCases.getCardProgress`). When the second cannot be read, a
 quiet line says so and the rest of the page works on.
+
+## Loading
+
+The answer log is the large part: one to three megabytes of Turtle a
+month, by server, for a learner who answers a hundred cards a day. So:
+
+- **Each month is read once a page load, then only when it changed.**
+  `getStatistics` and the Studio's `loadAnswerLog` share one cache of
+  the months read, by their ETag: a month already read costs a `304`.
+  A read of some months adds to it, never replaces it, so the 12 months
+  read for the statistics and the whole log read by the Studio do not
+  undo each other; a month the log no longer lists is dropped. The
+  month being studied changes with every answer, so it is read again
+  after studying. A server that sends no ETag (Node Solid Server) is
+  read whole every time.
+- **What was read is shown again for half a minute** (`staleTime`) on
+  the statistics page, a deck's page and the today strip, so moving
+  between them reads nothing. Every change made clears the statistics
+  and where the cards stand at once, as it ends (whether it was written
+  or not): an answer, a card or deck added, edited or removed, a deck's
+  pace, the preferences, a guest's study brought over, a Studio edit.
+  Each is a mutation, and the app clears them after every mutation
+  (`keepStudyFiguresFresh` in
+  [studyFigures.ts](../packages/ui/src/ui/studyFigures.ts)), so a new
+  kind of change cannot be left out. A change made on another device
+  shows once what was read is half a minute old.
+- **The range read.** `getStatistics` reads the last 12 study months
+  by default, or `range`: the last so many study days, or the whole
+  log (`"all"`). Its result's `coverage` is the log's first month when
+  the log begins inside the range.
+
+Measured against a real server (`history.integration.test.ts`, run
+with `MEASURE_ANSWER_LOG=1`; [testing.md](testing.md)), for 100
+answers a day, on a development machine with the server on it:
+
+| Server | Read | Answers | Downloaded | First read | Turtle parsed | Figures | Read again |
+|---|---|---|---|---|---|---|---|
+| Community Solid Server 7 | 12 months | 36,500 | 36.8 MB | 2.4 s | 1.0 s | 0.07 s | 0.2 s (12 × 304) |
+| Community Solid Server 7 | All, 24 months | 73,000 | 73.6 MB | 4.5 s | 2.0 s | 0.14 s | 0.4 s (24 × 304) |
+| Node Solid Server 6 | 12 months | 36,500 | 13.4 MB | 1.1 s | 1.0 s | 0.07 s | 1.1 s (no ETag) |
+| Node Solid Server 6 | All, 24 months | 73,000 | 26.7 MB | 2.2 s | 2.0 s | 0.14 s | 2.1 s (no ETag) |
+
+Parsing costs about 27 µs an answer whatever the server writes;
+Community Solid Server writes every IRI in full, so it sends almost
+three times the bytes. Read again, the log costs a request a month and
+no parsing.
 
 ## A deck's own figures
 
@@ -134,7 +185,7 @@ Nothing in the pod changed: the same answer log is read differently.
 | Layer | Files |
 |---|---|
 | Domain | [answerChain.ts](../packages/domain/src/answerChain.ts): the chains, repeats, scored reviews and lapses. [statistics.ts](../packages/domain/src/statistics.ts): activity by study day, totals, streaks, recall, recall by month, graded course answers, each deck's figures, the running total of cards introduced, and `todayOf`. [cardProgress.ts](../packages/domain/src/cardProgress.ts): new, young and mature. [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts): the forecast, shared with the Studio. |
-| Application | `getStatistics` and `getCardProgress` in [useCases.ts](../packages/application/src/useCases.ts): which months and documents to read. |
+| Application | `getStatistics` and `getCardProgress` in [useCases.ts](../packages/application/src/useCases.ts): which months and documents to read; `readLogMonths` keeps the months read, for `loadAnswerLog` too. |
 | UI | [StatisticsContainer.tsx](../packages/ui/src/ui/StatisticsContainer.tsx) and [StatisticsScreen.tsx](../packages/ui/src/ui/StatisticsScreen.tsx) (the page), [CardProgressContainer.tsx](../packages/ui/src/ui/CardProgressContainer.tsx) (where the cards stand), [StatisticsCharts.tsx](../packages/ui/src/ui/StatisticsCharts.tsx) (tiles, calendar, bar and line charts, the maturity bar), [DeckStatisticsContainer.tsx](../packages/ui/src/ui/DeckStatisticsContainer.tsx) and the today strip above. |
 
 The statistics are the same for a guest ([guest-mode.md](guest-mode.md)),
@@ -150,12 +201,20 @@ rest of their study when they log in.
   log (`chainIndexOf`, `statisticsOf`) held to linear growth,
   the use cases in `useCases.test.ts`, and `StatisticsScreen.test.tsx`,
   `StatisticsCharts.test.tsx`, `CardProgressContainer.test.tsx` and
-  `TodaySummary.test.tsx` in the UI.
+  `TodaySummary.test.tsx` in the UI; `StudyContainer.test.tsx` and
+  `ChapterPlayerContainer.test.tsx` check that an answer clears the
+  statistics.
+- **Against real servers**: `history.integration.test.ts` checks that
+  the statistics and the whole log share the months read, a month read
+  again only once it changed, and measures a large log when asked
+  ([above](#loading)).
 - **User journeys**: in
   [full-learner.journey.ts](../e2e/journeys/journeys/full-learner.journey.ts),
-  step 15 opens the page after two decks were studied, one card
-  answered Again and then once more, and checks the tiles (the repeat
-  is no review), the table by deck and every maturity bar. In
+  step 13 checks that the today strip counts each session's answers as
+  soon as it ends, and step 15 opens the page after two decks were
+  studied, one card answered Again and then once more, and checks the
+  tiles (the repeat is no review), the note on where the log begins,
+  the table by deck and every maturity bar. In
   [course-chapter.journey.ts](../e2e/journeys/journeys/course-chapter.journey.ts),
   step 09 checks that a course's answers show as graded course answers
   and not as recall. In

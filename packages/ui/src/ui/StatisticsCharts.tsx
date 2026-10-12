@@ -92,6 +92,18 @@ export function onlyCourseAnswers({
   return retention.young.reviews + retention.mature.reviews === 0 && quiz.answers > 0;
 }
 
+/**
+ * Where the figures begin when the log begins after the range asked for
+ * (StatisticsReport.coverage): its first month, written out; nothing when
+ * the log covers the whole range.
+ */
+export function CoverageNote({ coverage }: { coverage: string | null }) {
+  const { t, formatMonth } = useI18n();
+  return coverage === null ? null : (
+    <p class="hint">{t("statistics.coverage", { month: formatMonth(coverage) })}</p>
+  );
+}
+
 /** The step of the green a day's answers get: 0 for none, then 1 to 4 by share of the busiest day. */
 export function levelOf(answers: number, most: number): number {
   return answers === 0 ? 0 : Math.max(1, Math.ceil((answers / most) * 4));

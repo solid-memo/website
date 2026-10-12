@@ -11,10 +11,12 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { StatisticsScreen } from "./StatisticsScreen";
+import { STATISTICS_STALE_MS } from "./studyFigures";
 
 /**
- * Reads the instance's statistics, of the last twelve study months, each
- * time the page opens; where its cards stand comes after them, read on
+ * Reads the instance's statistics, of the last twelve study months, when
+ * the page opens and what was read is over half a minute old (any change
+ * made clears it at once); where its cards stand comes after them, read on
  * its own, so neither waits for the other and it shows before any answer.
  */
 export function StatisticsContainer({
@@ -30,6 +32,7 @@ export function StatisticsContainer({
   const statisticsQuery = useQuery({
     queryKey: ["statistics", instance.url],
     queryFn: () => useCases.getStatistics(instance.url, new Date()),
+    staleTime: STATISTICS_STALE_MS,
   });
   return (
     <>

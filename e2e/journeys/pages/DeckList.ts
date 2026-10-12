@@ -131,6 +131,16 @@ export class DeckList extends Screen {
     await expect(this.studyButton(name)).toBeHidden();
   }
 
+  /**
+   * The today strip above the list counts the day's answers so far, as
+   * many as `answers`, those of the session just ended included.
+   */
+  async expectAnsweredToday(answers: number): Promise<void> {
+    await expect(
+      this.page.getByRole("complementary", { name: this.t("today.heading"), exact: true }),
+    ).toContainText(this.t("today.answers", { count: answers }));
+  }
+
   /** The row offers `count` to study ("{count} to review"). */
   async expectToReview(name: string, count: number): Promise<void> {
     await expect(this.row(name)).toContainText(this.t("common.toReview", { count }));

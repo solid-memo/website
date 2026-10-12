@@ -7,8 +7,7 @@ import { render, screen, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Answer } from "@solid-memo/domain/answer";
-import { statisticsOf } from "@solid-memo/domain/statistics";
-import { makeUseCasesFake } from "../test/useCasesFake";
+import { makeUseCasesFake, statisticsReportOf } from "../test/useCasesFake";
 import { DeckStatisticsContainer } from "./DeckStatisticsContainer";
 import { StatisticsContainer } from "./StatisticsContainer";
 import { StatisticsScreen } from "./StatisticsScreen";
@@ -43,7 +42,7 @@ const answer = (
   ...extra,
 });
 /** A deck studied only in a course's chapters: one question right, one wrong. */
-const courseOnly = statisticsOf(
+const courseOnly = statisticsReportOf(
   [
     answer("2026-09-21", deck.url, undefined, { mode: "multiple-choice", grade: 3 }),
     answer("2026-09-21", deck.url, undefined, {
@@ -55,7 +54,7 @@ const courseOnly = statisticsOf(
   ],
   "2026-09-21",
 );
-const statistics = statisticsOf(
+const statistics = statisticsReportOf(
   [
     answer("2026-09-20", deck.url),
     answer("2026-09-21", deck.url, 1),
@@ -121,7 +120,7 @@ describe("StatisticsScreen", () => {
   it("leaves out recall by month while there are no reviews, only first answers", () => {
     render(
       <StatisticsScreen
-        statistics={statisticsOf([answer("2026-09-21", deck.url)], "2026-09-21")}
+        statistics={statisticsReportOf([answer("2026-09-21", deck.url)], "2026-09-21")}
         decks={[deck]}
       />,
     );
@@ -130,8 +129,20 @@ describe("StatisticsScreen", () => {
     expect(screen.getAllByText("No reviews yet")).toHaveLength(2);
   });
 
+  it("says since when, when the log begins after the range read, and nothing of it otherwise", () => {
+    const { rerender } = render(
+      <StatisticsScreen
+        statistics={statisticsReportOf([answer("2026-09-21", deck.url)], "2026-09-21", "2026-03")}
+        decks={[deck]}
+      />,
+    );
+    expect(screen.getByText("Since March 2026, your first month of study.")).toBeInTheDocument();
+    rerender(<StatisticsScreen statistics={statistics} decks={[deck]} />);
+    expect(screen.queryByText(/your first month of study/)).toBeNull();
+  });
+
   it("says when there is nothing to show yet", () => {
-    render(<StatisticsScreen statistics={statisticsOf([], "2026-09-21")} decks={[]} />);
+    render(<StatisticsScreen statistics={statisticsReportOf([], "2026-09-21")} decks={[]} />);
     expect(
       screen.getByText("No answers yet: the statistics begin with your next study session."),
     ).toBeInTheDocument();

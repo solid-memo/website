@@ -1310,6 +1310,7 @@
     "heading": "Statistik",
     "loading": "Läser in statistik…",
     "empty": "Inga svar än: statistiken börjar med ditt nästa studiepass.",
+    "coverage": "Sedan {month}, din första studiemånad.",
     "answers": "Svar",
     "studyDays": "Studiedagar",
     "cards": "Studerade kort",

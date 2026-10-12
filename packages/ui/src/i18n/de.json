@@ -1310,6 +1310,7 @@
     "heading": "Statistik",
     "loading": "Statistik wird geladen…",
     "empty": "Noch keine Antworten: Die Statistik beginnt mit deiner nächsten Lerneinheit.",
+    "coverage": "Seit {month}, deinem ersten Lernmonat.",
     "answers": "Antworten",
     "studyDays": "Lerntage",
     "cards": "Gelernte Karten",
