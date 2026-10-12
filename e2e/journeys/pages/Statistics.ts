@@ -388,7 +388,9 @@ export class Statistics extends Screen {
 
   /**
    * Over all time, the overview's cards introduced and grown mature, each
-   * prompt once, and the answers of the whole log.
+   * prompt once, the answers of the whole log, and its time studied, a
+   * time recorded since today: never how long, which hangs on how fast
+   * the journey runs.
    */
   async expectAllTime(expected: { answers: number; introduced: number; matured: number }) {
     await this.intent("Check the statistics of all time", async () => {
@@ -406,6 +408,14 @@ export class Statistics extends Screen {
           this.t(key),
         ).toHaveText(String(count));
       }
+      const time = this.main.getByRole("group", {
+        name: this.t("statistics.timeStudied"),
+        exact: true,
+      });
+      await expect(time.getByRole("strong"), this.t("statistics.timeStudied")).not.toHaveText("–");
+      await expect(time).toContainText(
+        this.t("statistics.timeRecordedSince", { date: await this.today() }),
+      );
     });
   }
 

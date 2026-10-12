@@ -94,6 +94,19 @@ describe("latenessOf and latenessBucketOf", () => {
     const review = answer("2026-10-02", 4, 1, 6);
     expect(latenessOf(review, chainIndexOf([review]))).toBeNull();
   });
+
+  it("takes the day a review was due from the review, where it recorded it", () => {
+    // Its answer before was not read, yet the review says when it was due.
+    const alone = answer("2026-10-05", 4, 1, 6, { priorDue: "2026-10-02" });
+    expect(latenessOf(alone, chainIndexOf([alone]))).toBe(3);
+    // Moved to the 20th in the Studio and done on the 11th: 9 days early, not 9 late.
+    const first = answer("2026-10-01", 4, undefined, 1);
+    const rescheduled = answer("2026-10-11", 4, 1, 6, { priorDue: "2026-10-20" });
+    const index = chainIndexOf([first, rescheduled]);
+    expect(latenessOf(rescheduled, index)).toBe(-9);
+    const moved = answer("2026-10-20", 4, 1, 6, { priorDue: "2026-10-20", card: "d" });
+    expect(latenessOf(moved, chainIndexOf([moved]))).toBe(0);
+  });
 });
 
 describe("recallByLateness", () => {

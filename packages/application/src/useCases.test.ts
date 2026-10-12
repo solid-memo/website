@@ -3541,6 +3541,34 @@ describe("the answer log", () => {
     ]);
   });
 
+  it("says since when times are recorded by every deck's answers, though one deck's statistics are asked for", async () => {
+    const { byMonth, useCases } = setup();
+    const answer = (studyDay: string, deckUrl: string, timed: boolean): Answer => ({
+      id: `answer-${studyDay}`,
+      deckUrl,
+      cardUrl: card.url,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: `${studyDay}T10:00:00.000Z`,
+      studyDay,
+      nextIntervalDays: 1,
+      ...(timed ? { recallMillis: 3_000, gradeMillis: 1_000 } : {}),
+    });
+    byMonth.set("2026-09", [
+      answer("2026-09-01", "https://pod.example/other#deck", true),
+      // From a tab that recorded no times, after the app began to: unknown, not estimated.
+      answer("2026-09-05", deck.url, false),
+      answer("2026-09-20", deck.url, true),
+    ]);
+    const one = await useCases.getStatistics(instance.url, noon, { deckUrl: deck.url });
+    expect(one.studyTime.recorded).toEqual({
+      since: "2026-09-01",
+      answers: 1,
+      ms: 4_000,
+      unknown: 1,
+    });
+  });
+
   it("computes the statistics of the last days asked for, or of the whole log, those up to today of the calendar's weeks, and says where the log begins", async () => {
     const { byMonth, log, useCases } = setup();
     const answer = (studyDay: string): Answer => ({

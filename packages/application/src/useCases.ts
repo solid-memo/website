@@ -178,6 +178,7 @@ import {
 } from "@solid-memo/domain/course";
 import { answersCsv } from "@solid-memo/domain/answerCsv";
 import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
+import { firstTimedOf } from "@solid-memo/domain/studyTime";
 import { calendarStartOf } from "@solid-memo/domain/studyPatterns";
 import {
   cardAnswers,
@@ -2139,7 +2140,9 @@ export function createUseCases({
    * range's first study day and the first month it takes in (null for
    * the whole log). With `recent`, the answers of the activity
    * calendar's weeks come too, where the range begins after them
-   * (statisticsOf's figures up to today).
+   * (statisticsOf's figures up to today), and the first answer read
+   * with a recorded time, of every deck: since when the app records
+   * times, though one deck's were recorded later.
    */
   async function rangeAnswers(
     instanceUrl: string,
@@ -2152,6 +2155,7 @@ export function createUseCases({
     logged: readonly string[];
     first: string | null;
     firstMonth: string | null;
+    firstTimed: Answer | undefined;
     dayBoundaryHour: number;
   }> {
     await logAnswers();
@@ -2182,7 +2186,15 @@ export function createUseCases({
         (from === null || answer.studyDay >= from) &&
         (deckUrl === undefined || answer.deckUrl === deckUrl),
     );
-    return { answers, today, logged, first, firstMonth, dayBoundaryHour: prefs.dayBoundaryHour };
+    return {
+      answers,
+      today,
+      logged,
+      first,
+      firstMonth,
+      firstTimed: firstTimedOf(read),
+      dayBoundaryHour: prefs.dayBoundaryHour,
+    };
   }
 
   async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
@@ -3299,15 +3311,11 @@ export function createUseCases({
       return count;
     },
     async getStatistics(instanceUrl, at, options = {}) {
-      const { answers, today, logged, first, firstMonth, dayBoundaryHour } = await rangeAnswers(
-        instanceUrl,
-        at,
-        options,
-        true,
-      );
+      const { answers, today, logged, first, firstMonth, firstTimed, dayBoundaryHour } =
+        await rangeAnswers(instanceUrl, at, options, true);
       const begins = logged[0];
       return {
-        ...statisticsOf(answers, today, first ?? undefined),
+        ...statisticsOf(answers, today, first ?? undefined, firstTimed),
         coverage:
           begins !== undefined && (firstMonth === null || begins > firstMonth) ? begins : null,
         logBegins: begins ?? null,

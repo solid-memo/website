@@ -273,6 +273,21 @@ describe("statisticsOf", () => {
     expect(statisticsOf(answers, "2026-09-01").totals.answers).toBe(5);
   });
 
+  it("counts the range's times as recorded since the first answer read with one, before the range too", () => {
+    const timed = { recallMillis: 3_000, gradeMillis: 1_000 };
+    const answers = [
+      answer("2026-09-29", 4, undefined, "1", "a", timed),
+      answer("2026-10-01", 4, 1, "1", "a", timed),
+      // Recorded from before the range on, so one without a time is unknown, not estimated.
+      answer("2026-10-02", 4, 1, "1", "a"),
+    ];
+    expect(statisticsOf(answers, "2026-10-02", "2026-10-01").studyTime).toMatchObject({
+      answers: 1,
+      ms: 4_000,
+      recorded: { since: "2026-09-29", answers: 1, ms: 4_000, unknown: 1 },
+    });
+  });
+
   it("counts a card once, though an upgrade of its deck moved it into a new document", () => {
     const before = answer("2026-10-01", 4, undefined, "1", "se");
     const after = {

@@ -128,6 +128,41 @@ describe("OverviewSection", () => {
       /^Cards grown mature1Each/,
     );
     expect(screen.queryByRole("group", { name: "Cards you know" })).toBeNull();
+    // No time recorded: estimated, the two answers given at once taking no time, said as at least a second.
+    expect(screen.getByRole("group", { name: "Time studied" })).toHaveTextContent(
+      "Time studiedabout 1 secondEstimated from when your answers were given",
+    );
+  });
+
+  it("gives the whole log's time studied, since when it is recorded", () => {
+    const timed = { recallMillis: 4_000, gradeMillis: 1_000 };
+    render(
+      <OverviewSection
+        statistics={statisticsReportOf(
+          [
+            answer("2026-09-20", deck.url, undefined, timed),
+            answer("2026-09-21", deck.url, 1, timed),
+          ],
+          "2026-09-21",
+        )}
+        allTime={true}
+      />,
+    );
+    expect(screen.getByRole("group", { name: "Time studied" })).toHaveTextContent(
+      "Time studiedabout 10 secondsRecorded since September 20, 2026, estimated before",
+    );
+  });
+
+  it("gives a dash for the whole log's time studied while none is known", () => {
+    render(
+      <OverviewSection
+        statistics={statisticsReportOf([answer("2026-09-21", deck.url)], "2026-09-21")}
+        allTime={true}
+      />,
+    );
+    expect(screen.getByRole("group", { name: "Time studied" })).toHaveTextContent(
+      "Time studied–Estimated from when your answers were given",
+    );
   });
 
   it("has no table by deck for one deck's statistics", () => {

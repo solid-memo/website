@@ -15,7 +15,8 @@ import { fragmentIdOf } from "./subjectUrl";
  * reviewed, recall week by week, where the prompts stood week by week
  * and how long they took to grow mature. The log holds no Studio edit,
  * so what is replayed from it is approximate, and an answer whose
- * predecessor was not read tells nothing of its lateness. Pure;
+ * predecessor was not read tells nothing of its lateness, unless it
+ * recorded the day it was due. Pure;
  * statisticsOf puts them with the rest (docs/statistics.md).
  */
 
@@ -114,14 +115,17 @@ export function recallByInterval(answers: readonly Answer[], index: ChainIndex):
 
 /**
  * How many days after it fell due a scored review of the index was
- * done: its study day less the day its predecessor's interval ran out
- * (negative when early). Null when that cannot be told: the review
- * starts its chain (its predecessor was not read, or the card was
- * moved), or its prior interval is not the one its predecessor gave
- * (an edit in the Studio). A review the Studio moved to a later day
- * shows as late, as does one the daily review limit held back.
+ * done (negative when early): its study day less the day it was due,
+ * as the answer recorded it (Answer.priorDue, since vocabulary 1.19),
+ * else the day its predecessor's interval ran out. Without priorDue it
+ * is null when that cannot be told: the review starts its chain (its
+ * predecessor was not read, or the card was moved), or its prior
+ * interval is not the one its predecessor gave (an edit in the
+ * Studio); and a review the Studio moved to a later day shows as late.
+ * Either way one the daily review limit held back shows as late.
  */
 export function latenessOf(answer: Answer, index: ChainIndex): number | null {
+  if (answer.priorDue !== undefined) return daysBetween(answer.priorDue, answer.studyDay);
   const { chain, at } = index.places.get(answer)!;
   if (at === 0) return null;
   const before = chain[at - 1]!;
