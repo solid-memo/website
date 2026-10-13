@@ -75,10 +75,12 @@ a maintainer publishes a version of any of them by merging it into
 - **The decks** gain versions; a published `decks/*/vN.ttl` is never
   edited or removed, and a card that should go is retired
   ([docs/deck-library.md](docs/deck-library.md#publishing-a-new-version)).
-- **The app** is versioned with [Semantic Versioning](https://semver.org/)
-  0.x, while it is in beta. The maintainer tags versions by hand and
-  records their changes in a changelog, in the
-  [Keep a Changelog](https://keepachangelog.com/) format.
+- **The app** is versioned with [Semantic Versioning](https://semver.org/),
+  from 1.0.0. semantic-release releases each version from the commits'
+  [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+  types, and writes its changes into the changelog
+  ([docs/releasing.md](docs/releasing.md)). A breaking change, and so a
+  major version, is agreed in an issue first.
 
 ## Becoming a co-maintainer
 

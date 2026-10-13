@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: MIT
 
 # What Solid Memo is, for software catalogs, in the publiccode.yml
-# standard (https://yml.publiccode.tools/). Kept in step with README.md;
-# the version and its date are set when a version is tagged
-# (docs/releasing.md).
+# standard (https://yml.publiccode.tools/). Kept in step with README.md.
+# softwareVersion and releaseDate are written by each release, after
+# landingURL (docs/releasing.md#what-a-release-does), and are absent
+# until the first.
 publiccodeYmlVersion: "0"
 
 name: Solid Memo

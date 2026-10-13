@@ -1,32 +1,50 @@
 # Releasing
 
-How Solid Memo's versions are numbered, what a version promises, and
-how the maintainer tags one. Every push to `main` that passes CI is
-deployed ([deployment.md](deployment.md)), so a version does not ship
-anything new: it names a commit that is already live, and says in
+How Solid Memo's versions are chosen, what a version promises, and what
+a release does. Versions are released by
+[semantic-release](https://semantic-release.gitbook.io/), not by hand:
+after CI passes on a push to `main`, it reads the commits since the last
+version and, when one of them is releasable, releases the next version.
+Every push to `main` that passes CI is deployed
+([deployment.md](deployment.md)), so a version does not ship anything
+new: it names a commit that is already live, and says in
 [CHANGELOG.md](../CHANGELOG.md) what changed since the last one.
 
 ## The scheme
 
 The app follows [Semantic Versioning 2.0.0](https://semver.org/):
-`MAJOR.MINOR.PATCH`, tagged `vMAJOR.MINOR.PATCH` (`v0.1.0`). It is in
-beta, so the major version is 0, and SemVer's rule for 0.x applies:
-anything may change. Within 0.x the project still keeps a promise:
+`MAJOR.MINOR.PATCH`, tagged `vMAJOR.MINOR.PATCH` (`v1.0.0`). The first
+version is 1.0.0, and it is stable: the app and its data formats can be
+relied on, and a change that breaks them bumps the major version. No
+0.x version was released.
 
-| Bump | When | Example |
-|---|---|---|
-| Minor (0.1.0 → 0.2.0) | Anything breaking ([below](#what-counts-as-breaking)), or a new feature | A deck format 7; a new screen; a new configuration variable |
-| Patch (0.1.0 → 0.1.1) | Fixes, and changes nobody has to act on | A bug fixed; a translation corrected; a dependency updated |
+Each commit says what kind of change it is, in its
+[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+type ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and the
+release takes the largest bump among the commits since the last
+version:
 
-Version 1.0.0 will say that the app and its data formats are stable
-enough to be relied on; the maintainer decides when. From then on a
-breaking change bumps the major version.
+| Bump | When | Commits | Example |
+|---|---|---|---|
+| Major (1.4.2 → 2.0.0) | Anything breaking ([below](#what-counts-as-breaking)) | `!` after the type, or a `BREAKING CHANGE:` footer | A deck format 8 the app writes; a configuration variable renamed |
+| Minor (1.4.2 → 1.5.0) | A new feature | `feat` | A new screen; a new deck in the library; a new configuration variable |
+| Patch (1.4.2 → 1.4.3) | Fixes, and changes nobody has to act on | `fix`, `perf`, `revert` (or GitHub's `Revert "…"`) | A bug fixed; a translation corrected; a dependency the app ships updated |
+| None | Nothing users see | `docs`, `test`, `refactor`, `style`, `build`, `ci`, `chore` | A page of the docs; a test; a development tool updated |
 
-The version is the root [`package.json`](../package.json)'s `version`.
-The workspace packages are private, not published to npm, and stay at
-`0.0.0`: they are parts of one app, not libraries with versions of their
-own ([architecture.md](architecture.md)). The footer shows the commit a
-build was made from ([Footer.tsx](../packages/ui/src/ui/Footer.tsx)).
+A push with only commits of the last kind releases nothing; their
+changes go out with the next version that does. The commits made before
+Conventional Commits were adopted almost never have a type, and none
+has one that releases, so they count for nothing.
+
+The version is the root [`package.json`](../package.json)'s `version`,
+which the footer shows beside the commit a build was made from
+([Footer.tsx](../packages/ui/src/ui/Footer.tsx),
+[configuration.md](configuration.md)). The workspace packages are
+private, not published to npm, and stay at `0.0.0`: they are parts of
+one app, not libraries with versions of their own
+([architecture.md](architecture.md)). Until the first release writes
+1.0.0 into it, the root's version is `0.0.0` too, which names no
+version: 0.1.0 was never released, so no build shows it.
 
 ## What counts as breaking
 
@@ -52,7 +70,10 @@ loses something:
 
 Adding an optional term that older readers ignore and lose nothing by
 is not breaking ([vocab.md](vocab.md#versioning-policy)); neither is a
-new deck in the library, nor a new version of a deck.
+new deck in the library, nor a new version of a deck. A change that is
+breaking says so in its commit, with `!` and a `BREAKING CHANGE:` footer
+that tells users what to do, and it is agreed in an issue first
+([CONTRIBUTING.md](../CONTRIBUTING.md#open-an-issue-first)).
 
 ## What has versions of its own
 
@@ -67,53 +88,138 @@ follows the app's number:
 | Format versions | `sm:formatVersion` on every subject the app writes | [migrations.md](migrations.md) |
 | The library's decks | `decks/<name>/v<N>.ttl` | A published version is never edited ([deck-library.md](deck-library.md#publishing-a-new-version)) |
 
-An app version's changelog says which of these it added: "Writes deck
-format 7", "Vocabulary 1.19".
+A new format version the app writes is a breaking change of the app,
+and so a major version; a new vocabulary term or a new deck version is
+not. The commit's subject names what it adds, so the changelog does
+too: "write deck format 8", "add a term to vocabulary 1.20".
 
 ## The changelog
 
-[CHANGELOG.md](../CHANGELOG.md) follows
-[Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/). A pull
-request that changes what users, other apps or people who run their own
-copy see adds a line under `## [Unreleased]`, in one of the groups
-`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed` and `Security`. A
-line says what changed for them, in plain words, and links the docs
-page or the issue. A breaking change starts with **Breaking:**.
-Dependency updates, refactors and test changes are left out, unless
-users notice them.
+[CHANGELOG.md](../CHANGELOG.md) is written by the release: each
+version's entry goes under the file's header, newest first, with the
+`feat` commits under "Features", the `fix` commits under "Bug Fixes",
+and so on, each line a commit's subject with its scope and a link to the
+commit. A breaking change is listed first, under "BREAKING CHANGES",
+with its footer's text. The commits of the other types are left out.
 
-## Tagging a version
+So the changelog is as good as the commits' subjects. A subject says
+what changed for users, other apps or people who run their own copy,
+in plain words. Nobody edits an entry by hand: a mistake in one stays,
+and the next version's entry can say what it should have said. The
+header is release.config.mjs's `changelogTitle`, and the two must stay
+the same ([releaseConfig.test.ts](../scripts/releaseConfig.test.ts)
+checks it). At the end of the file, a section written by hand sums up
+what the first version, 1.0.0, contains, which its generated entry
+lists only in part.
 
-The maintainer tags versions by hand; nothing tags them automatically.
+## What a release does
 
-1. Check that CI passed on the commit of `main` to release.
-2. In CHANGELOG.md, rename `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`,
-   add an empty `## [Unreleased]` above it, and update the links at the
-   bottom of the file. For 0.1.0, whose section is already written, set
-   its date in place of `Unreleased` and move into it anything listed
-   under `## [Unreleased]` since.
-3. Set the version in the root `package.json` (and the root entry of
-   `package-lock.json`, with `npm install --package-lock-only`), and the
-   version and date in [`CITATION.cff`](../CITATION.cff) (`version`,
-   `date-released`) and [`publiccode.yml`](../publiccode.yml)
-   (`softwareVersion`, `releaseDate`).
-4. Commit that as `Release X.Y.Z`, through a pull request like any other
-   change, and let CI pass.
-5. Tag the merged release commit, not whatever `main` has moved on to
-   since, and push the tag:
+[release.yml](../.github/workflows/release.yml) runs when CI has passed
+on a push to `main` in this repository, as the deploy does, and runs
+semantic-release ([release.config.mjs](../release.config.mjs)) on
+`main`'s tip. When `main` has moved on since the commit CI passed on,
+it releases the tip if CI has passed on it too, and otherwise leaves it
+to the tip's own run, once CI passes there. When there is something to
+release, semantic-release:
+
+1. chooses the version from the commits since the last tag
+   ([The scheme](#the-scheme)), and writes its notes;
+2. writes the notes into CHANGELOG.md;
+3. sets the version in the root `package.json` and `package-lock.json`,
+   and the version and today's date in [`publiccode.yml`](../publiccode.yml)
+   (`softwareVersion`, `releaseDate`) and [`CITATION.cff`](../CITATION.cff)
+   (`version`, `date-released`), with `npm run release:version`
+   ([releaseVersion.ts](../scripts/releaseVersion.ts));
+4. commits those five files to `main` as `chore(release): X.Y.Z`, with
+   the notes as the body, and pushes the commit with the deploy key
+   ([below](#the-deploy-key));
+5. tags that commit `vX.Y.Z` and pushes the tag;
+6. makes a GitHub release of the tag, "Solid Memo X.Y.Z", with the
+   notes. Zenodo, connected to the repository, archives each GitHub
+   release and gives it a DOI.
+
+The release commit is not marked to skip CI. CI runs on it, the deploy
+that follows puts the new version in the footer, and the release
+workflow runs again and finds no commit since the tag, so it releases
+nothing. Releases go one at a time (concurrency group `release`), and
+a running one is never canceled. GitHub keeps only one run waiting in
+the group, so a newer one replaces a run already waiting; whichever goes
+ahead releases the tip, as above. A fork, or a copy without the deploy key, runs the workflow
+and releases nothing.
+
+A release made by mistake is not taken back: a tag is never moved or
+deleted once pushed. A mistake is fixed in the next version.
+
+## The deploy key
+
+The ruleset on `main` requires a pull request for every change, so
+semantic-release needs a way past it to push the release commit. The
+workflow's own token could be let past it too, but a push made with
+that token starts no workflow, so CI and the deploy would never run on
+the release commit, and the footer would never show its version. The release pushes with a deploy key instead: an SSH
+key with write access to this repository alone, which GitHub lets a
+ruleset's bypass list name, and whose pushes start workflows as anyone's
+do. Only the release workflow can use it.
+
+The maintainer sets it up once, before the workflow first runs on
+`main`, so that the merge that adds it releases 1.0.0 straight away:
+
+1. Make a key pair with no passphrase, outside the repository:
 
    ```sh
-   git switch main && git pull
-   git tag -a vX.Y.Z <release-commit> -m "Solid Memo X.Y.Z"
-   git push origin vX.Y.Z
+   ssh-keygen -t ed25519 -N "" -C "solid-memo release" -f release-key
    ```
 
-6. Make a GitHub release from the tag, with the version's changelog
-   section as its notes:
+2. Add `release-key.pub` as a deploy key of the repository, with write
+   access (Settings › Deploy keys › Add deploy key, "Allow write
+   access").
+3. Add the private key, `release-key`, as the repository secret
+   `SEMANTIC_RELEASE_KEY` (Settings › Secrets and variables › Actions).
+   Then delete both files.
+4. Add "Deploy keys" to the bypass list of the ruleset on `main`
+   (Settings › Rules), so that the release commit needs no pull request.
+   If a ruleset protects tags, add them to its bypass list too.
 
-   ```sh
-   gh release create vX.Y.Z --title "Solid Memo X.Y.Z" --notes "…"
-   ```
+Without the secret, the workflow says so and releases nothing; once
+it is set, run the workflow by hand ([below](#when-a-release-fails)) to
+release what is waiting. To
+change the key, add the new one as a deploy key, replace the secret,
+then delete the old deploy key.
 
-A tag is never moved or deleted once pushed. A mistake is fixed in the
-next patch version.
+## When a release fails
+
+The workflow's run says which step failed and why, and nothing opens
+an issue or comments on one. Fix the cause, then run the workflow by
+hand (Actions › Release › Run workflow, from `main`): it releases
+`main`'s tip once CI has passed on it, and refuses before that. The
+next push to `main` that passes CI also tries again.
+
+- **Before the push** (a wrong configuration, a file the release could
+  not write): nothing was pushed, and the next run releases as if
+  nothing had happened.
+- **The push was refused**: `main` moved on while the release ran, or
+  the deploy key or the bypass is missing. Nothing was tagged; the next
+  run releases from the new tip.
+- **The release commit is on `main`, but not its tag** (the tag's push
+  failed): semantic-release, finding no tag, would release the same
+  version again on top of it, so every run of the workflow stops before
+  it, with an error that names the commit, until the commit is tagged.
+  Tag it by hand, then make its GitHub release as below:
+
+  ```sh
+  git switch main && git pull
+  git tag vX.Y.Z <release-commit>
+  git push origin vX.Y.Z
+  ```
+
+- **After the tag** (the GitHub release could not be made): the release
+  commit and the tag are on `main`, so a new run finds nothing to
+  release. Make the GitHub release from the tag by hand, with the
+  version's entry in CHANGELOG.md as its notes:
+
+  ```sh
+  gh release create vX.Y.Z --title "Solid Memo X.Y.Z" --notes-file notes.md
+  ```
+
+A tag is never moved or deleted, even one whose release went wrong:
+Zenodo and anyone who fetched it may already hold it.

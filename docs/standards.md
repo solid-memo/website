@@ -87,9 +87,8 @@ Licenses in deck metadata are named by their own IRIs, such as
 | [REUSE](https://reuse.software/spec-3.3/) | 3.3 | Specification by the Free Software Foundation Europe | Every file's copyright and license, in its SPDX header or in [`REUSE.toml`](../REUSE.toml), checked by `reuse lint` in CI ([style.md](style.md#licenses), [testing.md](testing.md)) | Yes |
 | [SPDX License List](https://spdx.org/licenses/) | current release, unpinned | Linux Foundation reference data | License identifiers in the files' `SPDX-License-Identifier` headers and in [`LICENSES/`](../LICENSES/); `dcterms:license <https://spdx.org/licenses/MIT>` on the topics scheme ([vocab.md](vocab.md#license)) | Yes |
 | [publiccode.yml](https://yml.publiccode.tools/) | `publiccodeYmlVersion: "0"` | Specification by Developers Italia, de facto | [`publiccode.yml`](../publiccode.yml), checked by the publiccode.yml parser in CI ([testing.md](testing.md)) | Yes (de facto) |
-| [Citation File Format](https://citation-file-format.github.io/) | 1.2.0 | Specification by its authors, de facto | [`CITATION.cff`](../CITATION.cff) ([releasing.md](releasing.md#tagging-a-version)) | Yes (de facto) |
-| [Semantic Versioning](https://semver.org/spec/v2.0.0.html) | 2.0.0 | Specification by its authors, de facto | The app's versions, at 0.x ([releasing.md](releasing.md#the-scheme)) | Yes (de facto) |
-| [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) | 1.1.0 | Convention by its authors, de facto | [`CHANGELOG.md`](../CHANGELOG.md) ([releasing.md](releasing.md#the-changelog)) | Yes (de facto) |
+| [Citation File Format](https://citation-file-format.github.io/) | 1.2.0 | Specification by its authors, de facto | [`CITATION.cff`](../CITATION.cff), its version and date set by each release ([releasing.md](releasing.md#what-a-release-does)) | Yes (de facto) |
+| [Semantic Versioning](https://semver.org/spec/v2.0.0.html) | 2.0.0 | Specification by its authors, de facto | The app's versions, from 1.0.0, each chosen by semantic-release from the commits' types ([releasing.md](releasing.md#the-scheme)) | Yes (de facto) |
 | [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) | 1.0.0 | Specification by its authors, de facto | Every commit message from version 1.0.0 on, checked by commitlint in CI ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)) | Yes (de facto) |
 | [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html) | 2.1 | Code of conduct by its authors, de facto | [`CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md) | Yes (de facto) |
 | [EditorConfig](https://editorconfig.org/) | — | De facto, by its authors | The whitespace the repository is written in: [`.editorconfig`](../.editorconfig) ([style.md](style.md#formatting)) | Yes (de facto) |
@@ -137,9 +136,9 @@ way of others working with Solid Memo's code or data.
   so another scheduler can be added beside it.
 - **Open Graph** and **Sitemaps** are de facto web conventions for link
   previews and search engines. Nothing in the app depends on them.
-- **publiccode.yml, the Citation File Format, Semantic Versioning, Keep
-  a Changelog, Conventional Commits, the Contributor Covenant and
-  EditorConfig** are de facto
+- **publiccode.yml, the Citation File Format, Semantic Versioning,
+  Conventional Commits, the Contributor Covenant and EditorConfig** are
+  de facto
   conventions for the repository and its metadata, each published by its
   authors for anyone to use. They describe the project to people and
   tools; nothing in the app or its data depends on them.

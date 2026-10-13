@@ -1,0 +1,136 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Release
+
+# A version, from main only (docs/releasing.md): when CI has passed on a
+# push to main, semantic-release (release.config.mjs) reads the commits
+# since the last tag and, when one is releasable (feat:, fix:, perf: or a
+# breaking change), commits the new version to main, tags it and makes a
+# GitHub release of it. Run by hand from main, it releases main's tip
+# once CI has passed on it, as after a release that failed. A fork's
+# branch may be named main too, so the job checks, as deploy.yml does,
+# that CI ran for a push, in this repository.
+#
+# The release commit is pushed with a deploy key (the SEMANTIC_RELEASE_KEY
+# secret), which the ruleset on main lets bypass its pull request: the
+# run's own token could not, and a push made with it would start no
+# workflow. A push with the key does, so CI runs on the release commit,
+# the deploy after it shows the new version, and this workflow runs again
+# and finds nothing to release since the tag.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  # To make the GitHub release (the commit and the tag are pushed with the key).
+  contents: write
+  # To look up CI's runs on main's tip.
+  actions: read
+
+# One release at a time, and a running one never canceled: a release
+# canceled halfway could leave its commit pushed and its tag or GitHub
+# release missing. GitHub keeps one pending run in the group, so a run
+# queued behind it replaces one already waiting; whichever runs releases
+# main's tip once CI has passed on it.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # A copy without the key, such as a fork, releases nothing, and says so.
+      - name: The deploy key is set
+        id: key
+        env:
+          KEY: ${{ secrets.SEMANTIC_RELEASE_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::notice::No SEMANTIC_RELEASE_KEY secret, so nothing is released (docs/releasing.md#the-deploy-key)."
+            echo "set=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "set=true" >> "$GITHUB_OUTPUT"
+          fi
+      # main's tip, not the commit CI checked: semantic-release releases
+      # the branch, and pushes onto it. The whole history and every tag,
+      # to find the last release and the commits since. The key stays
+      # configured for semantic-release's push.
+      - if: steps.key.outputs.set == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+          ssh-key: ${{ secrets.SEMANTIC_RELEASE_KEY }}
+          persist-credentials: true
+      # Only a tip that CI passed on is released. When main has moved on
+      # since the commit CI checked, the tip is released if CI has passed
+      # on it too: a newer run may have been replaced while it waited for
+      # this group, as GitHub keeps one pending run per group. If CI has
+      # not passed on the tip yet, its own run releases it.
+      #
+      # A release commit with no tag (its tag's push failed) stops every
+      # run: semantic-release, finding no tag, would release the same
+      # version again on top of it.
+      - name: CI passed on main's tip
+        id: tip
+        if: steps.key.outputs.set == 'true'
+        env:
+          EVENT: ${{ github.event_name }}
+          CHECKED: ${{ github.event.workflow_run.head_sha }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          last="$(git log --format='%H %s' | awk '$2 == "chore(release):" { print $1; exit }')"
+          if [ -n "$last" ] && [ -z "$(git tag --points-at "$last")" ]; then
+            echo "::error::The release commit $last has no tag: tag it by hand before anything else is released (docs/releasing.md#when-a-release-fails)."
+            exit 1
+          fi
+          tip="$(git rev-parse HEAD)"
+          if [ "$EVENT" = workflow_run ] && [ "$tip" = "$CHECKED" ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -z "$(gh run list --workflow ci.yml --commit "$tip" --event push --status success --limit 1 --json databaseId --jq '.[].databaseId')" ]; then
+            if [ "$EVENT" = workflow_run ]; then
+              echo "::notice::main has moved on from $CHECKED to $tip, and CI has not passed on $tip yet: its run releases it."
+              echo "release=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::error::CI has not passed on a push of main's tip, $tip: run this again once it has."
+            exit 1
+          fi
+          echo "release=true" >> "$GITHUB_OUTPUT"
+      - if: steps.tip.outputs.release == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - if: steps.tip.outputs.release == 'true'
+        run: npm ci
+      # Pushes the release commit and the tag over SSH, with the key, and
+      # makes the GitHub release with the run's token.
+      - if: steps.tip.outputs.release == 'true'
+        name: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPOSITORY_URL: git@github.com:${{ github.repository }}.git
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: npx semantic-release --repository-url "$REPOSITORY_URL"

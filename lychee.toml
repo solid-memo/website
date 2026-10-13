@@ -19,9 +19,7 @@ exclude_path = ["(^|/)node_modules/"]
 no_progress = true
 
 # Addresses that answer only once the maintainer does something, each to
-# remove from this list then.
-exclude = [
-  # Remove both once v0.1.0 is tagged (docs/releasing.md).
-  '^https://github\.com/solid-memo/website/releases/tag/v0\.1\.0$',
-  '^https://github\.com/solid-memo/website/compare/v0\.1\.0\.\.\.HEAD$',
-]
+# remove from this list then. None now: the changelog's links to tags and
+# comparisons are written by semantic-release with the tag they name
+# (docs/releasing.md), so each answers once the release is pushed.
+exclude = []
