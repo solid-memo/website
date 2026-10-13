@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## 1.0.0 (2026-10-13)
+
+### Features
+
+* declare Solid Memo stable, from its first version, 1.0.0 ([282574d](https://github.com/solid-memo/website/commit/282574d234cccc8221bd648c5e4c9eb7f94c5c28))
+
 <!-- markdownlint-enable -->
 <!-- cspell:enable -->
 
