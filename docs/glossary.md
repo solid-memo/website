@@ -165,6 +165,83 @@ it most. The specifications' versions and status are in
   the morning by default, not at midnight.
   [srs.md](srs.md#study-days-and-the-queue).
 
+## Code and tools
+
+- **Adapter**: code that connects the app to something outside it,
+  such as a pod or the browser's storage, behind a port.
+  [architecture.md](architecture.md#key-objects).
+- **Biome**: the tool that formats and lints the TypeScript, JSON and
+  CSS. [biomejs.dev](https://biomejs.dev/);
+  [style.md](style.md#formatting).
+- **CI** (continuous integration): the checks GitHub Actions runs on
+  every pull request and every push to `main`. A change is merged only
+  when they pass. [testing.md](testing.md#continuous-integration).
+- **`ci-ok`**: the one CI check a merge to `main` waits for, which
+  passes only when every other job passed.
+  [testing.md](testing.md#continuous-integration).
+- **Composition root**: the one place where the layers meet, the
+  `composition` package. It puts each adapter behind its port and gives
+  the app its use cases. [architecture.md](architecture.md).
+- **Docker**: runs a program in a container of its own, apart from the
+  rest of the computer. The end-to-end tests and the user journeys start
+  their Solid servers in it. [docker.com](https://www.docker.com/);
+  [testing.md](testing.md).
+- **End-to-end test** (e2e): a test of the app's use cases and Solid
+  adapters against real Solid servers, in `e2e/pod/`.
+  [testing.md](testing.md).
+- **ETag**: a server's tag for one version of a document, which changes
+  whenever the document does. The app sends it back, so that it does
+  not write over a newer version or read again what it already has.
+  [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#name-etag);
+  [migrations.md](migrations.md).
+- **Hexagonal architecture** (ports and adapters): a layout in which the
+  core of the app knows only ports, and adapters connect them to the
+  world outside, so each part can be replaced or tested alone.
+  [architecture.md](architecture.md).
+- **Node.js**: runs JavaScript outside the browser. The site is built
+  and tested with version 24, as `.nvmrc` says.
+  [nodejs.org](https://nodejs.org/);
+  [README](../README.md#develop).
+- **npm**: the package manager that comes with Node.js. It installs the
+  dependencies and runs the scripts in `package.json`, such as
+  `npm run check`. [npm Docs](https://docs.npmjs.com/);
+  [testing.md](testing.md#commands).
+- **Port**: an interface the core of the app defines for something it
+  needs from outside, such as storing a deck. An adapter implements
+  it. [architecture.md](architecture.md#key-objects).
+- **pySHACL**: a SHACL engine written in Python. CI uses it to check
+  what Solid Memo publishes a second time, apart from the engine the
+  browser runs. [pySHACL](https://github.com/RDFLib/pySHACL);
+  [validation.md](validation.md#the-ci-cross-check).
+- **REUSE**: rules from the Free Software Foundation Europe for stating
+  every file's copyright and license so that a program can read them.
+  [reuse.software](https://reuse.software/);
+  [style.md](style.md#licenses).
+- **SemVer** (Semantic Versioning): version numbers of the form
+  MAJOR.MINOR.PATCH, where the part that goes up says what kind of
+  change it is. [semver.org](https://semver.org/);
+  [releasing.md](releasing.md).
+- **SPDX**: a standard list of short license names, such as `MIT`, and
+  the header that names a file's license with one
+  (`SPDX-License-Identifier: MIT`).
+  [SPDX License List](https://spdx.org/licenses/);
+  [style.md](style.md#licenses).
+- **Turborepo**: the tool that runs each workspace package's tasks in
+  the right order, and remembers results it can reuse.
+  [turborepo.com](https://turborepo.com/);
+  [architecture.md](architecture.md#tasks).
+- **Use case**: one thing the app does for its user, such as recording
+  an answer. The UI reaches the rest of the app only through them.
+  [architecture.md](architecture.md#key-objects).
+- **User journey**: a test that uses the built app in a browser as a
+  person would, step by step. [testing.md](testing.md#user-journeys).
+- **Vite**: the tool that builds the site, and serves it while you work
+  on it (`npm run dev`). [vite.dev](https://vite.dev/);
+  [configuration.md](configuration.md).
+- **Workspace package**: one of the npm packages the repository is made
+  of, each a layer with its own `package.json`, such as `packages/ui/`.
+  [architecture.md](architecture.md#packages).
+
 ## Solid Memo's own terms
 
 - **Catalog** (`catalog.ttl`): the document that lists an instance's

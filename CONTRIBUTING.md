@@ -34,7 +34,8 @@ planned is in [ROADMAP.md](ROADMAP.md).
   report" form. The servers the tests already run against are listed in
   [docs/testing.md](docs/testing.md).
 - **Change the code.** Start with [docs/architecture.md](docs/architecture.md)
-  and the index of the docs, [docs/README.md](docs/README.md).
+  and the index of the docs, [docs/README.md](docs/README.md). A term
+  you don't know is in [docs/glossary.md](docs/glossary.md).
 
 ## Open an issue first
 
@@ -101,6 +102,24 @@ Solid Memo is run by volunteers, with no funding: reviewing is done in
 their own time, at their own cost. A reviewer reads the code, the
 tests, the docs and any change of policy (the external rules the code
 follows), and runs the app when the change shows in it.
+
+A reviewer checks that:
+
+- the change keeps to the layers of
+  [docs/architecture.md](docs/architecture.md) and the import rules of
+  [docs/boundaries.md](docs/boundaries.md);
+- it is written as [docs/style.md](docs/style.md) says, and follows the
+  standards in [docs/standards.md](docs/standards.md) and the rules in
+  [docs/policy.md](docs/policy.md);
+- it agrees with what was decided before, in issues, in Discussions and
+  in commit messages ([GOVERNANCE.md](GOVERNANCE.md#how-decisions-are-made));
+- the source, any change of policy, the tests and the docs are all
+  reviewed, not the code alone, and the docs say what the code now
+  does;
+- for a change users see, the tests pass when the reviewer runs them,
+  and the change works when the reviewer tries it in the app.
+
+What a contributor can expect:
 
 - We aim to respond to an issue or a pull request within two business
   days. That is a target, not a promise.
