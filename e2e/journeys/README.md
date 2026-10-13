@@ -38,7 +38,7 @@ npx turbo run typecheck test --filter=@solid-memo/e2e-journeys   # the harness's
 
 ## Status
 
-Beta, as is Solid Memo (0.x). A private workspace package, version
+Stable, as is Solid Memo from version 1.0.0. A private workspace package, version
 `0.0.0`, never published to npm.
 
 See [testing.md](../../docs/testing.md#user-journeys).

@@ -51,13 +51,15 @@ deploy by CI ([docs/testing.md](docs/testing.md#user-journeys)).
 
 ## Status
 
-Solid Memo is in **beta**. It works, but it still changes, and a new
-version may change how things work. Its versions follow
-[Semantic Versioning](https://semver.org/) at 0.x, tagged by hand, and
-the first is 0.1.0. [CHANGELOG.md](CHANGELOG.md) says which versions
-are released and what changed in each: a version dated "Unreleased"
-there is not tagged yet. How versions are numbered and tagged is in
-[docs/releasing.md](docs/releasing.md).
+Solid Memo is **stable** from version 1.0.0, its first release: the
+app and its data formats can be relied on, and a change that breaks
+them comes with a new major version. Its versions follow
+[Semantic Versioning](https://semver.org/), and each is released by
+semantic-release, from the commits' types, once CI passes on `main`.
+Each is tagged, with notes, on the
+[releases page](https://github.com/solid-memo/website/releases), and
+[CHANGELOG.md](CHANGELOG.md) says what changed in each. How versions
+are chosen and released is in [docs/releasing.md](docs/releasing.md).
 
 Your data is safe across versions: every data format is versioned, and
 the app brings older data in your Pod up to date in place
