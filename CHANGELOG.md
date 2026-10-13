@@ -48,8 +48,20 @@ tag. The date is set when the maintainer tags it.
   to go on with above it ([docs/courses.md](docs/courses.md)).
 - **Markdown** in cards and courses, shown safely whatever the data
   holds ([docs/markdown.md](docs/markdown.md)).
-- **Organizing decks** into named groups that nest, and statistics of the
-  study from the answer log.
+- **Organizing decks** into named groups that nest.
+- **Statistics** of the study, read from the answer log, over the last
+  30 days, 3 months, 12 months or all time, in tabs: how the answers
+  went and what each day held; recall week by week, by interval and by
+  how late a review was, counting only real reviews; how long was
+  studied and at what hours; where the cards stand and what is coming;
+  each course's chapters done; the hardest cards and the leeches; and
+  every answer a card was given. The charts can be stepped through
+  with the keyboard, and the answers saved as a CSV file
+  ([docs/statistics.md](docs/statistics.md)).
+- **Answer times.** Each answer records how long recalling and grading
+  took, the day it was due and the device's offset from UTC, kept with
+  the answer log in the pod (vocabulary 1.19,
+  [docs/privacy.md](docs/privacy.md#in-your-pod)).
 - **Files.** Saving a deck as a Turtle or JSON-LD file and opening one,
   and importing a deck or course from the URL of its release.
 - **Solid Memo Studio**, a second app at `#/studio` for managing decks
@@ -79,6 +91,10 @@ tag. The date is set when the maintainer tags it.
   ([docs/configuration.md](docs/configuration.md),
   [docs/reuse.md](docs/reuse.md)), and every screen links to the source
   code, the commit and the issue tracker.
+- **An About page** at `/about/`, in plain HTML that search engines and
+  browsers without script can read, saying what Solid Memo is for
+  learners, deck authors, technologists and decision makers
+  ([docs/deployment.md](docs/deployment.md)).
 - **Guides for learners**: studying, statistics and the library
   ([docs/user-guide.md](docs/user-guide.md),
   [docs/statistics.md](docs/statistics.md),

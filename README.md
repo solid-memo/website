@@ -53,9 +53,10 @@ deploy by CI ([docs/testing.md](docs/testing.md#user-journeys)).
 
 Solid Memo is in **beta**. It works, but it still changes, and a new
 version may change how things work. Its versions follow
-[Semantic Versioning](https://semver.org/) at 0.x, tagged by hand; the
-first is 0.1.0. What changed in each version is in
-[CHANGELOG.md](CHANGELOG.md), and how versions are numbered is in
+[Semantic Versioning](https://semver.org/) at 0.x, tagged by hand, and
+the first is 0.1.0. [CHANGELOG.md](CHANGELOG.md) says which versions
+are released and what changed in each: a version dated "Unreleased"
+there is not tagged yet. How versions are numbered and tagged is in
 [docs/releasing.md](docs/releasing.md).
 
 Your data is safe across versions: every data format is versioned, and
@@ -100,7 +101,8 @@ npm run test:pod  # the end-to-end tests, against Solid servers started in Docke
 How the code is laid out: [docs/architecture.md](docs/architecture.md);
 each package's own `README.md` says what it exports and may import;
 how it is tested: [docs/testing.md](docs/testing.md); how it is written:
-[docs/style.md](docs/style.md); everything else:
+[docs/style.md](docs/style.md); the terms the docs use:
+[docs/glossary.md](docs/glossary.md); everything else:
 [docs/](docs/README.md).
 
 ## Contributing
