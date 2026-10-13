@@ -204,8 +204,10 @@ next. To change a deck `<name>` whose latest version is `N`:
 4. Look at it: `npm run dev` serves the working tree's `decks/`, so the
    library screen lists the new version and offers it to copies of the
    old one ([migrations.md](migrations.md#catching-up-with-the-library)).
-5. Commit the new version and the index together. The deploy publishes
-   them.
+5. Commit the new version and the index together, as a `feat(decks)`
+   commit ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)). The
+   release it makes publishes them, once deployed
+   ([deployment.md](deployment.md)).
 
 A new deck is the same with `decks/<name>/v1.ttl`, without `dcat:prev`
 and `dcat:previousVersion`, its notes "First release.". It is also

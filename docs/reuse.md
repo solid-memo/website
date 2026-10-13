@@ -60,7 +60,9 @@ no rewrite rules and no per-host settings
 but it must be served over HTTPS for login to work.
 
 On GitHub Pages, a fork deploys with the same workflow as this site
-([deployment.md](deployment.md#github-pages-automatic)), to
+([deployment.md](deployment.md#github-pages-automatic)), which deploys
+only released versions, so the fork releases its own with a deploy key
+of its own ([releasing.md](releasing.md#the-deploy-key)). It deploys to
 `https://<user>.github.io/<repository>/`, or to a domain of its own
 ([deployment.md](deployment.md#custom-domain-optional)).
 

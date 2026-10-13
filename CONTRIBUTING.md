@@ -129,7 +129,9 @@ Refs: #42
   | `chore` | Anything else, such as a development tool updated (`chore(deps)`) | Nothing |
 
   A new deck, or a new version of one, is a `feat(decks)`: learners see
-  it in the library.
+  it in the library. The site runs only released versions, so a change
+  whose type releases nothing reaches it with the next version
+  ([docs/deployment.md](docs/deployment.md)).
 - **Body:** after a blank line, why the change was made, and what was
   weighed, wrapped near 72 columns. A commit with no body is fine only
   when the subject says it all.

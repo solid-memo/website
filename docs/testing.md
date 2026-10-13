@@ -301,15 +301,17 @@ error. The job's `journeys-<attempt>` artifact holds everything else:
 - `logs/css.log`: the server's whole log.
 
 **The latest report is online** at https://solid-memo.com/journeys/,
-published with each deploy (`main`, CI green). It shows every journey's
-steps and screenshots, and its **Trace** link opens the step-by-step
-timeline in the browser (the trace viewer is part of the report and
+published with each deploy: the report of the CI run on the release
+commit the site runs (none after a deploy by hand). It shows every
+journey's steps and screenshots, and its **Trace** link opens the
+step-by-step timeline in the browser (the trace viewer is part of the report and
 needs it served, as it is there, not opened as a file). On `main` the
 journeys always keep their traces for this. The report is public and
 holds the throwaway accounts' passwords and tokens, which die with the
 run's server, and it is kept out of search engines (`robots.txt`).
-Since only a green run deploys, a failure on `main` is read from the
-run's artifact.
+Since only a green run on a release commit deploys, a failure on
+`main` is read from the run's artifact, as is the report of a commit
+between two versions.
 
 A run by hand (Actions › CI › Run workflow) with *trace* checked keeps
 traces for passing journeys on any branch. Locally, `JOURNEY_TRACE=on
@@ -400,19 +402,24 @@ through a pull request once it passes (`automergeType: 'pr'` in
 before it failed, and fails unless every one passed. A matrix job's
 checks are named per server, and jobs come and go, so the ruleset names
 this job alone. (Another workflow's job named `build`, deploy.yml's,
-would also answer to a required check of that name.) Deploys follow a green run on `main`
+would also answer to a required check of that name.) Deploys follow a
+green run on a release commit on `main`
 ([deployment.md](deployment.md#github-pages-automatic)). Every check of
 `ns/` and `decks/` runs here, the comparison with the base included, so
 `ci-ok` gates them all and nothing is checked twice.
 
 A newer run for the same pull request or branch cancels the one still
 going, so a pull request pushed to again is checked once, at its latest
-commit. Runs on `main` are never canceled, since only a push run on
-`main` that passed deploys
-([deployment.md](deployment.md#github-pages-automatic)): each event has
-its own concurrency group, so a run by hand does not cancel a push run,
-and push runs on `main` go one at a time, in order (a push waiting its
-turn is replaced by a newer one, whose commit includes it).
+commit. Runs on `main` are never canceled: a release follows a push
+run on `main` that passed ([releasing.md](releasing.md#what-a-release-does)),
+and the deploy follows one on the release commit
+([deployment.md](deployment.md#github-pages-automatic)), so a canceled
+run would hold either back. Each event has its own concurrency group,
+so a run by hand does not cancel a push run, and push runs on `main`
+go one at a time, in order. A push waiting its turn is replaced by a
+newer one, which the next release includes; a release commit's run has
+a group of its own, since only it can deploy its version, so no newer
+push replaces it.
 
 A fork's pull request runs the same jobs, and its results are public.
 That is safe because the jobs only read: the workflow's token can read

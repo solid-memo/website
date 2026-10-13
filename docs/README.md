@@ -17,7 +17,7 @@ you don't know is in [glossary.md](glossary.md).
 - [boundaries.md](boundaries.md) — the import rules between packages, and the vendor libraries each may use, as `npm run check:boundaries` enforces them.
 - [vendor-code.md](vendor-code.md) — which third-party technology the app depends on, where each is confined, and what replacing one would cost.
 - [testing.md](testing.md) — unit tests at 100% coverage per package, the end-to-end tests against Solid servers in Docker, the user journeys in a browser (and how to debug and add one), the checks on the docs (style, spelling, links), and the commands.
-- [deployment.md](deployment.md) — the static build, deployed to GitHub Pages by CI, or published by hand to any web space.
+- [deployment.md](deployment.md) — the static build, deployed to GitHub Pages by CI for each released version, or published by hand to any web space.
 - [configuration.md](configuration.md) — the VITE_ settings a build reads (the app's name, the repository the footer and the page link to, the Pod providers, the deck library), their defaults, how to set them, and what they do not reach.
 - [reuse.md](reuse.md) — running your own instance: fork, configure, build, host anywhere, make the deck library your own, the files to edit by hand, and the names that must stay because they are part of the data.
 - [style.md](style.md) — how the code, Turtle, docs and commit messages are written: formatting and linting with Biome, TypeScript, naming, the Turtle house style, comments, plain English with American spelling, and English as the authoritative language.

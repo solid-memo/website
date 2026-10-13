@@ -56,16 +56,19 @@ maintainer approves each update, and Renovate merges it after that.
 
 ## Deploying
 
-The site at https://solid-memo.com/ is built from `main` and nothing
-else. A push to `main` deploys once CI has passed on it
-([docs/deployment.md](docs/deployment.md)). A deploy by hand is run only
-from `main`, and only by a maintainer.
+The site at https://solid-memo.com/ runs the latest version, built from
+its release commit on `main`, and nothing else. A version deploys once
+CI has passed on its release commit; any other push to `main` waits
+for the next version ([docs/deployment.md](docs/deployment.md)). A
+deploy by hand is run only from `main`, and only by a maintainer, and
+deploys the latest version again.
 
 ## Publishing versions
 
 The vocabulary, the shapes and the decks are published with the site, so
 a maintainer publishes a version of any of them by merging it into
-`main`. Anyone may propose one in a pull request.
+`main`, and it goes live with the next release. Anyone may propose one
+in a pull request.
 
 - **The vocabulary** grows by adding terms. A term that should no
   longer be written is deprecated, never removed, and a breaking change

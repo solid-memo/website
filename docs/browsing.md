@@ -146,5 +146,6 @@ added from a link has none of them: it is read only to be added
 
   Their page objects are `DeckCreator.ts`, `DeckBrowser.ts`,
   `CardCreator.ts`, `CardEditor.ts` and `LibraryPreview.ts` in
-  [e2e/journeys/pages/](../e2e/journeys/pages/). The latest run's
-  steps and screenshots are online at https://solid-memo.com/journeys/.
+  [e2e/journeys/pages/](../e2e/journeys/pages/). The steps and
+  screenshots of CI's run on the version the site runs are online at
+  https://solid-memo.com/journeys/.

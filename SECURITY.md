@@ -2,9 +2,9 @@
 
 ## Supported versions
 
-Only `main`, as deployed at https://solid-memo.com/, is supported. A fix
-is made on `main` and deployed from there; older commits and forks get no
-fixes.
+Only the latest version, as deployed at https://solid-memo.com/, is
+supported. A fix is made on `main` and released as a new version, which
+is then deployed; older versions and forks get no fixes.
 
 ## Reporting a vulnerability
 
@@ -25,8 +25,8 @@ Solid Memo is maintained by one volunteer, in his own time
 
 - We acknowledge the report within a week.
 - We say whether we accept it, and why, once we have looked into it.
-- We fix an accepted vulnerability as soon as we can, and deploy the fix
-  from `main`.
+- We fix an accepted vulnerability as soon as we can, on `main`, and
+  release and deploy the fix as a new version.
 - We disclose it in a
   [GitHub security advisory](https://github.com/solid-memo/website/security/advisories)
   once the fix is deployed, crediting you unless you would rather not be
