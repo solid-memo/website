@@ -15,7 +15,7 @@ a new major version ([docs/releasing.md](docs/releasing.md)).
 - **Meeting the Standard for Public Code.** The repository's settings
   are done: Discussions and private vulnerability reporting are on, and
   `main` requires the `ci-ok` check before a merge. What is left is the
-  first release with its DOI, findability, and a second reviewer.
+  first release, findability, and a second reviewer.
   The assessment and what remains are in
   [docs/standard-for-public-code.md](docs/standard-for-public-code.md).
 - **The first release**, 1.0.0, made by semantic-release once the
@@ -57,8 +57,7 @@ These were on the roadmap and are done. They are part of 1.0.0
   8.0.0 is out, in place of 6 ([docs/testing.md](docs/testing.md)).
 - **More decks and courses** in the library
   ([docs/deck-library.md](docs/deck-library.md)), proposed by anyone.
-- **A persistent identifier** for each release, and an archive of the
-  code in Software Heritage.
+- **An archive of the code** in Software Heritage.
 - **Listing Solid Memo** in the Solid project's catalog of apps.
 
 ## Out of scope

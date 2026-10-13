@@ -18,6 +18,8 @@ abstract: >-
 authors:
   - given-names: Anton
     family-names: Wiklund
+# The concept DOI, which always resolves to the latest version on Zenodo.
+doi: 10.5281/zenodo.23351087
 repository-code: https://github.com/solid-memo/website
 url: https://solid-memo.com/
 version: "1.0.0"

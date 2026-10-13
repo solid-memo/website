@@ -136,7 +136,10 @@ release, semantic-release:
 5. tags that commit `vX.Y.Z` and pushes the tag;
 6. makes a GitHub release of the tag, "Solid Memo X.Y.Z", with the
    notes. Zenodo, connected to the repository, archives each GitHub
-   release and gives it a DOI.
+   release and gives it a DOI. The concept DOI,
+   [10.5281/zenodo.23351087](https://doi.org/10.5281/zenodo.23351087),
+   always resolves to the latest release, and is the one in
+   `CITATION.cff` and the README.
 
 The release commit is not marked to skip CI. CI runs on it, the deploy
 that follows puts the new version in the footer, and the release
