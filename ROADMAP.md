@@ -11,10 +11,11 @@ can still change in ways a user notices.
 
 ## Now
 
-- **Meeting the Standard for Public Code.** What is left is mostly in
-  the repository's settings: Discussions, private vulnerability
-  reporting, and requiring every CI check before a merge. The assessment
-  and what remains are in
+- **Meeting the Standard for Public Code.** The repository's settings
+  are done: Discussions and private vulnerability reporting are on, and
+  `main` requires the `ci-ok` check before a merge. What is left is the
+  first tagged release with its DOI, findability, and a second reviewer.
+  The assessment and what remains are in
   [docs/standard-for-public-code.md](docs/standard-for-public-code.md).
 - **The first tagged release**, v0.1.0, with its
   [changelog](CHANGELOG.md) ([docs/releasing.md](docs/releasing.md)).
