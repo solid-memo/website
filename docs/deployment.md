@@ -2,44 +2,65 @@
 
 Solid Memo builds to plain static files — no server-side code — so it
 publishes to any static host. The primary path is GitHub Pages,
-deployed automatically by CI.
+deployed automatically by CI, one released version at a time.
 
 ## GitHub Pages (automatic)
 
-This deployment is live at **https://solid-memo.com/**. `.github/workflows/deploy.yml`
-runs when the CI workflow has finished on `main`
-(`workflow_run`), and deploys only if CI passed:
+This deployment is live at **https://solid-memo.com/**, and it runs a
+released version, never a commit between two versions
+([releasing.md](releasing.md)). `.github/workflows/deploy.yml` runs when
+the CI workflow has finished on `main` (`workflow_run`), and deploys
+only if CI passed on a release commit, the one a version tag
+(`vX.Y.Z`) names:
 
 ```mermaid
 flowchart LR
-    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods,<br/>journeys, docs"] -->|success| build["deploy.yml:<br/>npm run build"] --> guard["ns/ and decks/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
-    hand["run by hand<br/>from main"] --> check["deploy.yml:<br/>npm run check"] --> build
+    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods,<br/>journeys, docs"] -->|success| tag{"deploy.yml:<br/>a version tag<br/>names the commit?"}
+    tag -->|no| skip["not deployed"]
+    tag -->|yes| build["deploy.yml:<br/>npm run build"] --> guard["ns/ and decks/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
+    hand["run by hand<br/>from main"] --> newest["deploy.yml:<br/>the newest version"] --> check["npm run check"] --> build
 ```
 
-A red CI run never deploys. Only `main` deploys, and only from this
+A red CI run never deploys, and neither does a green one on a commit
+that is not a release. Only `main` deploys, and only from this
 repository:
 
-- **After CI.** CI also runs on pull requests, a fork's included
-  ([testing.md](testing.md#continuous-integration)), and a fork's branch
-  may be named `main` too. So the deploy checks that the CI run it
-  follows was for a push to `main` in this repository
+- **After CI on a release.** A release ([releasing.md](releasing.md))
+  follows a green CI run on `main`, in a workflow of its own. It pushes
+  a commit to `main` that sets the new version,
+  `chore(release): X.Y.Z`, and tags it `vX.Y.Z`. CI runs on that commit
+  as on any push, and once it passes, the deploy builds it, so the
+  site's footer shows the new version. The deploy looks for a version
+  tag that names the commit CI checked, and deploys nothing when there
+  is none: any other push to `main`, a merged pull request or a
+  Renovate update, goes live with the next version, which includes it.
+  Only a plain version tag counts (`vX.Y.Z`, no `-rc.1`). The tag is
+  pushed just after the release commit and is there long before CI on
+  it has finished; for a release commit, the deploy still looks again
+  for about two minutes before it gives up.
+- **Only this repository's pushes.** CI also runs on pull requests, a
+  fork's included ([testing.md](testing.md#continuous-integration)),
+  and a fork's branch may be named `main` too. So the deploy checks that
+  the CI run it follows was for a push to `main` in this repository
   (`workflow_run.event`, `head_branch` and `head_repository`), and
-  skips any other. It builds the commit CI checked. CI never cancels a
-  run on `main`, and a run of CI by hand has a concurrency group of its
-  own, so it cannot cancel the push run a deploy waits for; push runs
-  on `main` go one at a time, and a push waiting its turn is replaced
-  by a newer one, which deploys it too
-  ([testing.md](testing.md#continuous-integration)). Deploys go one at
-  a time as well (concurrency group `pages`), none canceled.
+  skips any other. CI never cancels a run on `main`, and a run of CI by
+  hand has a concurrency group of its own, so it cannot cancel the push
+  run a deploy waits for. Push runs on `main` go one at a time, and a
+  newer push replaces one waiting, except a release commit's, which has
+  a group of its own, so a newer push cannot hold back its deploy
+  ([testing.md](testing.md#continuous-integration)). Deploys that may
+  deploy, by hand or after CI on a release commit, go one at a time
+  (concurrency group `pages`), none canceled; a newer one replaces one
+  waiting, and deploys the same version or a newer one. Any other run
+  has a group of its own, so it cannot replace a release's deploy.
 - **By hand** (Actions › Deploy to GitHub Pages › Run workflow, from
-  `main`; from any other branch the job is skipped). No CI run is behind
-  it, so it runs `npm run check` before it builds `main` as it is. It
-  has no Turbo cache, so it takes about as long as CI's build job.
-
-A release ([releasing.md](releasing.md)) also follows a green CI run
-on `main`, in a workflow of its own, and pushes a commit to `main` that
-sets the new version. CI and the deploy run on that commit as on any
-push, so the site's footer shows the version once it is deployed.
+  `main`; from any other branch the job is skipped). It deploys the
+  newest version, the highest `vX.Y.Z` tag on `main`, not `main` as it
+  is, so it puts the site back on that version, after a deploy that
+  failed, say.
+  No CI run is behind it, so it runs `npm run check` on that version
+  before it builds it. It has no Turbo cache, so it takes about as long
+  as CI's build job.
 
 The workflow enables Pages for the repository on its first run, and
 stops before deploying if the vocabulary or the deck library is missing
@@ -49,7 +70,11 @@ the deck library with its base included
 waits for. The `github-pages`
 environment should also be limited to `main` in the repository's
 settings (Settings › Environments), so nothing but this workflow's runs
-on `main` can deploy.
+on `main` can deploy. The workflow runs from `main` even when it deploys
+a tag, so that limit holds. Since a tag picks what is deployed, version
+tags must be protected too: a ruleset on `refs/tags/v*` lets only the
+release's deploy key and an admin create them
+([releasing.md](releasing.md#the-deploy-key)).
 
 ### What the artifact contains
 
@@ -64,7 +89,7 @@ data it reads:
 | `/ns/vocab/*.ttl`, `/ns/shapes/<class>/v<N>.ttl` | [`ns/`](../ns/) | The vocabulary and the shapes ([vocab.md](vocab.md), [shapes.md](shapes.md)). |
 | `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
 | `/vendor/…` | [`packages/vocab/vendor/`](../packages/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
-| `/journeys/` | the CI run's `journeys-report` artifact | The user journeys' report ([testing.md](testing.md#user-journeys)), with each journey's trace. Not there after a deploy by hand. |
+| `/journeys/` | the CI run's `journeys-report` artifact | The user journeys' report ([testing.md](testing.md#user-journeys)), with each journey's trace. The report of the CI run on the release commit; not there after a deploy by hand. |
 
 Vite copies `ns/`, `decks/` and `vendor/` as they are
 (`turtleDirectoryPlugin` in
@@ -84,8 +109,11 @@ gh auth login
 gh repo create <user>/solid-memo --public --source . --push
 ```
 
-(GitHub Pages on the free plan requires a public repository.) A fork
-deploys to `https://<user>.github.io/<repository>/`; its app works there,
+(GitHub Pages on the free plan requires a public repository.) The
+deploy workflow deploys only a commit a version tag names, so a fork
+deploys its own changes once it releases versions of its own, with a
+deploy key of its own ([releasing.md](releasing.md#the-deploy-key)).
+It deploys to `https://<user>.github.io/<repository>/`; its app works there,
 but the IRIs it reads still name `https://solid-memo.com/`, which
 `siteFetch` ([appUseCases.ts](../packages/composition/src/appUseCases.ts)) maps to wherever the
 site is served. A fork gives its build its own name, repository link and

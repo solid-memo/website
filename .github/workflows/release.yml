@@ -17,8 +17,9 @@ name: Release
 # secret), which the ruleset on main lets bypass its pull request: the
 # run's own token could not, and a push made with it would start no
 # workflow. A push with the key does, so CI runs on the release commit,
-# the deploy after it shows the new version, and this workflow runs again
-# and finds nothing to release since the tag.
+# the deploy after it puts the new version on the site (deploy.yml deploys
+# only a commit a version tag names), and this workflow runs again and
+# finds nothing to release since the tag.
 
 on:
   workflow_run:

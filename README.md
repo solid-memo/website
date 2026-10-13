@@ -13,7 +13,8 @@ Spaced-repetition flashcards that live in your own Solid Pod.
 
 The app, its vocabulary and shapes ([`ns/`](ns/)) and the ready-made
 decks ([`decks/`](decks/)) are published together at
-<https://solid-memo.com/> ([docs/deployment.md](docs/deployment.md)).
+<https://solid-memo.com/>, one released version at a time
+([docs/deployment.md](docs/deployment.md)).
 
 ## About
 
@@ -47,8 +48,9 @@ same, for learners, authors, technologists and decision makers:
 
 To see what the app does without signing in, open the report of its
 [user journeys](https://solid-memo.com/journeys/): tests that use the
-app in a browser as a person would, step by step, from the latest
-deploy by CI ([docs/testing.md](docs/testing.md#user-journeys)).
+app in a browser as a person would, step by step, from CI's run on the
+version the site runs (none after a deploy by hand)
+([docs/testing.md](docs/testing.md#user-journeys)).
 
 ## Status
 
@@ -59,8 +61,9 @@ them comes with a new major version. Its versions follow
 semantic-release, from the commits' types, once CI passes on `main`.
 Each is tagged, with notes, on the
 [releases page](https://github.com/solid-memo/website/releases), and
-[CHANGELOG.md](CHANGELOG.md) says what changed in each. How versions
-are chosen and released is in [docs/releasing.md](docs/releasing.md).
+[CHANGELOG.md](CHANGELOG.md) says what changed in each. The site runs
+the latest version, and nothing between two versions. How versions are
+chosen and released is in [docs/releasing.md](docs/releasing.md).
 
 Your data is safe across versions: every data format is versioned, and
 the app brings older data in your Pod up to date in place

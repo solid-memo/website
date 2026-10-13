@@ -4,9 +4,12 @@
 
 name: Deploy to GitHub Pages
 
-# The site, from main only (docs/deployment.md): when CI has passed on a
-# push to main, the commit it checked; or, run by hand from main, main
-# as it is, after npm run check. CI also runs on pull requests, a fork's
+# The site, released versions only (docs/deployment.md): when CI has
+# passed on a push to main, the commit it checked, if a version tag
+# (vX.Y.Z, which release.yml pushes with the release commit) names it;
+# or, run by hand from main, the newest version, after npm run check.
+# Other commits on main are not deployed: the site always runs a version
+# the releases page lists. CI also runs on pull requests, a fork's
 # included, and a fork's branch may be named main too: workflow_run's
 # branch filter matches that name, so the job checks that CI ran for a
 # push, in this repository.
@@ -25,12 +28,22 @@ permissions:
   pages: write
   id-token: write
 
+# A deploy waiting its turn is replaced by a newer one in its group. Only
+# a run that may deploy (one by hand, or one after CI on a release
+# commit) shares the group pages, so a newer run that deploys nothing
+# cannot replace a release's; any other run has a group of its own.
 concurrency:
-  group: pages
+  group: >-
+    ${{ (github.event_name == 'workflow_dispatch' ||
+    (github.event.workflow_run.event == 'push' &&
+    github.event.workflow_run.head_repository.full_name == github.repository &&
+    startsWith(github.event.workflow_run.head_commit.message, 'chore(release): ')))
+    && 'pages' || format('pages-{0}', github.run_id) }}
   cancel-in-progress: false
 
 jobs:
-  build:
+  # The commit to deploy: a released version's, or none.
+  version:
     if: >-
       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'workflow_run' &&
@@ -39,12 +52,58 @@ jobs:
        github.event.workflow_run.head_branch == 'main' &&
        github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.tag.outputs.sha }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # release.yml pushes the tag just after the release commit, and CI on
+      # that commit takes minutes, so the tag is there by now; for a release
+      # commit, the fetch is tried a few times in case it is not yet. Only
+      # a plain version tag (vX.Y.Z) counts, and by hand only one on main.
+      - name: A version tag names the commit
+        id: tag
+        env:
+          EVENT: ${{ github.event_name }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          RELEASE: "${{ startsWith(github.event.workflow_run.head_commit.message, 'chore(release): ') }}"
+        run: |
+          for _ in 1 2 3 4 5 6; do
+            git fetch --force --tags --quiet origin
+            if [ "$EVENT" = workflow_dispatch ]; then
+              tag=$(git tag --merged HEAD --list 'v[0-9]*' --sort=-v:refname |
+                grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
+            else
+              tag=$(git tag --points-at "$SHA" --list 'v[0-9]*' |
+                grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
+            fi
+            [ -n "$tag" ] && break
+            [ "$EVENT" = workflow_dispatch ] && break
+            [ "$RELEASE" = true ] || break
+            sleep 20
+          done
+          if [ -z "$tag" ]; then
+            echo "::notice::No version tag names this commit, so the site is not deployed (docs/deployment.md)."
+            exit 0
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-list -n 1 "$tag")" >> "$GITHUB_OUTPUT"
+          echo "Deploying $tag."
+
+  build:
+    needs: version
+    if: needs.version.outputs.sha != ''
+    runs-on: ubuntu-latest
     # A run by hand checks first, with no Turbo cache: as long as CI's build.
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ needs.version.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
@@ -52,7 +111,7 @@ jobs:
           cache: npm
       - run: npm ci
       # CI checked the commit a workflow_run deploys; a run by hand has no
-      # CI run behind it, so it checks main itself.
+      # CI run behind it, so it checks the version itself.
       - if: github.event_name == 'workflow_dispatch'
         run: npm run check
       - run: npm run build

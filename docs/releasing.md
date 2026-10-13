@@ -5,10 +5,11 @@ a release does. Versions are released by
 [semantic-release](https://semantic-release.gitbook.io/), not by hand:
 after CI passes on a push to `main`, it reads the commits since the last
 version and, when one of them is releasable, releases the next version.
-Every push to `main` that passes CI is deployed
-([deployment.md](deployment.md)), so a version does not ship anything
-new: it names a commit that is already live, and says in
-[CHANGELOG.md](../CHANGELOG.md) what changed since the last one.
+Only a version is deployed ([deployment.md](deployment.md)): once CI
+passes on the release commit, the site runs it, and a push to `main`
+that releases nothing waits for the next version. So the site always
+runs a version the releases page lists, and
+[CHANGELOG.md](../CHANGELOG.md) says what changed since the last one.
 
 ## The scheme
 
@@ -42,8 +43,8 @@ which the footer shows beside the commit a build was made from
 [configuration.md](configuration.md)). The workspace packages are
 private, not published to npm, and stay at `0.0.0`: they are parts of
 one app, not libraries with versions of their own
-([architecture.md](architecture.md)). Until the first release writes
-1.0.0 into it, the root's version is `0.0.0` too, which names no
+([architecture.md](architecture.md)). Before the first release wrote
+1.0.0 into it, the root's version was `0.0.0` too, which names no
 version: 0.1.0 was never released, so no build shows it.
 
 ## What counts as breaking
@@ -141,14 +142,20 @@ release, semantic-release:
    always resolves to the latest release, and is the one in
    `CITATION.cff` and the README.
 
-The release commit is not marked to skip CI. CI runs on it, the deploy
-that follows puts the new version in the footer, and the release
-workflow runs again and finds no commit since the tag, so it releases
-nothing. Releases go one at a time (concurrency group `release`), and
-a running one is never canceled. GitHub keeps only one run waiting in
-the group, so a newer one replaces a run already waiting; whichever goes
-ahead releases the tip, as above. A fork, or a copy without the deploy key, runs the workflow
-and releases nothing.
+The release commit is not marked to skip CI. CI runs on it, and once
+it passes, the deploy builds that commit, the one the tag names, and
+puts the new version on the site, its footer included; it deploys no
+other commit ([deployment.md](deployment.md)). The release workflow
+runs again too, finds no commit since the tag, and releases nothing.
+CI's run on a release commit has a concurrency group of its own, so a
+newer push to `main` cannot replace it while it waits, and hold back
+the deploy ([testing.md](testing.md#continuous-integration)).
+
+Releases go one at a time (concurrency group `release`), and a running
+one is never canceled. GitHub keeps only one run waiting in the group,
+so a newer one replaces a run already waiting; whichever goes ahead
+releases the tip, as above. A fork, or a copy without the deploy key,
+runs the workflow and releases nothing.
 
 A release made by mistake is not taken back: a tag is never moved or
 deleted once pushed. A mistake is fixed in the next version.
@@ -159,10 +166,11 @@ The ruleset on `main` requires a pull request for every change, so
 semantic-release needs a way past it to push the release commit. The
 workflow's own token could be let past it too, but a push made with
 that token starts no workflow, so CI and the deploy would never run on
-the release commit, and the footer would never show its version. The release pushes with a deploy key instead: an SSH
-key with write access to this repository alone, which GitHub lets a
-ruleset's bypass list name, and whose pushes start workflows as anyone's
-do. Only the release workflow can use it.
+the release commit, and since only a release commit is deployed, the
+site would never get a new version. The release pushes with a deploy
+key instead: an SSH key with write access to this repository alone,
+which GitHub lets a ruleset's bypass list name, and whose pushes start
+workflows as anyone's do. Only the release workflow can use it.
 
 The maintainer sets it up once, before the workflow first runs on
 `main`, so that the merge that adds it releases 1.0.0 straight away:
@@ -181,7 +189,13 @@ The maintainer sets it up once, before the workflow first runs on
    Then delete both files.
 4. Add "Deploy keys" to the bypass list of the ruleset on `main`
    (Settings › Rules), so that the release commit needs no pull request.
-   If a ruleset protects tags, add them to its bypass list too.
+5. Add a ruleset for tags matching `refs/tags/v*` that restricts their
+   creation, update and deletion (Settings › Rules › Rulesets › New
+   ruleset › New tag ruleset: enforcement Active, target `v*`), with "Deploy keys" and the Repository
+   admin role on its bypass list. The deploy deploys the commit a
+   version tag names, so without it anyone with write access could tag
+   a commit and have it deployed; the admin's bypass is for tagging by
+   hand ([below](#when-a-release-fails)).
 
 Without the secret, the workflow says so and releases nothing; once
 it is set, run the workflow by hand ([below](#when-a-release-fails)) to
@@ -214,6 +228,16 @@ next push to `main` that passes CI also tries again.
   git tag vX.Y.Z <release-commit>
   git push origin vX.Y.Z
   ```
+
+  The deploy after CI on the release commit found no tag, so it
+  deployed nothing: run it by hand (Actions › Deploy to GitHub Pages ›
+  Run workflow, from `main`), and it deploys the version just tagged
+  ([deployment.md](deployment.md)).
+
+- **CI failed on the release commit** (a flaky test, say): the version
+  is released but not deployed. Re-run CI's failed jobs on that commit;
+  once it passes, the deploy follows as usual. Or run the deploy by
+  hand, which checks the version itself.
 
 - **After the tag** (the GitHub release could not be made): the release
   commit and the tag are on `main`, so a new run finds nothing to

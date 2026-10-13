@@ -8,7 +8,9 @@ SHOULD or OPTIONAL.
 This is an assessment of `main` at `90652c08` with the branch
 `public-code-followup`, made on 2026-10-13, and updated the same day for
 the branch `semantic-release` (based on `main` at `f7574c9d`), which
-changes how versions are released. It replaces the assessment of
+changes how versions are released, and again after it was merged and
+released 1.0.0 (`d5d13c84`), for deploying only released versions. It
+replaces the assessment of
 2026-10-11 (the branch `standard-for-public-code`, based on `main` at
 `cae0a9f`) and the first one, of `main` at `18eace6` on 2026-10-10. It
 is not a promise. Check items off as they land, and re-assess when they
@@ -51,10 +53,7 @@ never tagged ([releasing.md](releasing.md)).
 
 What is left falls into two groups:
 
-1. Actions for the maintainer: the deploy key and the ruleset's bypass
-   that the release pushes with, after which semantic-release releases
-   1.0.0 and Zenodo gives it a DOI; and making the project findable.
-   The release closes one MUST.
+1. Actions for the maintainer: making the project findable.
 2. Gaps that stay open for now. The largest is criterion 7, review by
    someone other than the author, which cannot be met honestly while the
    project has one maintainer, and is a decided gap until then.
@@ -76,7 +75,7 @@ nothing to apply it to counts as met, and the text says so.
 | 3 | [Make the codebase reusable and portable](https://www.standardforpubliccode.org/criteria/make-the-codebase-reusable-and-portable.html) | 2/2 | 4/8 | Compliant |
 | 4 | [Welcome contributors](https://www.standardforpubliccode.org/criteria/welcome-contributors.html) | 3/3 | 4/4 | Compliant |
 | 5 | [Make contributing easy](https://www.standardforpubliccode.org/criteria/make-contributing-easy.html) | 5/5 | – | Compliant |
-| 6 | [Maintain version control](https://www.standardforpubliccode.org/criteria/maintain-version-control.html) | 1/3 | 3/4 | Non-compliant |
+| 6 | [Maintain version control](https://www.standardforpubliccode.org/criteria/maintain-version-control.html) | 1/3 | 4/4 | Non-compliant |
 | 7 | [Require review of contributions](https://www.standardforpubliccode.org/criteria/require-review-of-contributions.html) | 1/3 | 1/5 | Non-compliant |
 | 8 | [Document codebase objectives](https://www.standardforpubliccode.org/criteria/document-codebase-objectives.html) | 1/1 | 1/1 | Compliant |
 | 9 | [Document the code](https://www.standardforpubliccode.org/criteria/document-the-code.html) | 3/3 | 4/5 | Compliant |
@@ -86,8 +85,8 @@ nothing to apply it to counts as met, and the text says so.
 | 13 | [Publish with an open license](https://www.standardforpubliccode.org/criteria/publish-with-an-open-license.html) | 4/4 | 1/1 | Compliant |
 | 14 | [Make the codebase findable](https://www.standardforpubliccode.org/criteria/make-the-codebase-findable.html) | – | 4/8 | No MUSTs |
 | 15 | [Use a coherent style](https://www.standardforpubliccode.org/criteria/use-a-coherent-style.html) | 1/1 | 2/2 | Compliant |
-| 16 | [Document codebase maturity](https://www.standardforpubliccode.org/criteria/document-codebase-maturity.html) | 1/3 | 2/2 | Non-compliant |
-| | **Total** | **40/46** | **35/51** | |
+| 16 | [Document codebase maturity](https://www.standardforpubliccode.org/criteria/document-codebase-maturity.html) | 2/3 | 2/2 | Partial |
+| | **Total** | **41/46** | **36/51** | |
 
 A criterion is compliant when all its MUSTs are met. It is non-compliant
 when more than half of them are not met, and partial otherwise.
@@ -97,6 +96,8 @@ branch `public-code-followup` added 4.3, 7.4, 10.3, 10.6, 11.3, 12.1,
 16.2 and the changelog's SHOULD in criterion 16. The branch
 `semantic-release` turns 16.3 from met to partial: it declares 1.0.0
 ready to use, and 1.0.0 ships four dependencies before their own 1.0.0.
+Its first release, 1.0.0, met 16.1 and the SHOULD to mark released
+versions in criterion 6.
 
 The assessment of 2026-10-11 scored 39/46 and 37/51, and the first one
 17/44 and 8/50. The re-review was stricter than the one on 2026-10-11: it
@@ -106,8 +107,8 @@ feature (9.6) and a check of the docs' coverage (12.7). The first
 assessment counted too few requirements in criteria 1, 10 and 11; the
 counts above are the Standard's own.
 
-With the first release, 1.0.0, the MUSTs reach 41/46, and criterion 16
-is partial; until it runs, 16.1 stays not met. The five left are in
+The first release, 1.0.0, brought the MUSTs to 41/46, and criterion 16
+to partial. The five left are in
 criterion 6, the commits on `main` that record no reason, which the
 history keeps, and the links to issues, which need a change of practice;
 in criterion 7, a second reviewer, whose reviews would also cover the
@@ -130,8 +131,12 @@ cannot be read without signing in:
   `ci-ok` passes.
 - The ruleset on `main` (24560297) requires a pull request with no
   approvals and the `ci-ok` check, with the branch up to date. It allows
-  rebase merges and merge commits. Its bypass list is empty; for the
-  release, "Deploy keys" is to be added to it (below).
+  rebase merges and merge commits. Its bypass list names "Deploy keys",
+  for the release, which pushed 1.0.0 through it.
+- The ruleset "version tags" (25032384) protects `refs/tags/v*`: it
+  restricts their creation, update and deletion. Its bypass list, which
+  the maintainer set to "Deploy keys" and the Repository admin role,
+  cannot be read without signing in.
 - Zenodo is connected to the repository, so each GitHub release gets a
   DOI.
 - The `github-pages` environment allows deployments from `main` only.
@@ -144,9 +149,12 @@ What holds today, and what does not, criterion by criterion.
 
 ### 1. Code in the open
 
-- MUST, met — the source code in use is public. Production is built only
-  from `main`, after CI passes ([deployment.md](deployment.md)). A deploy
-  by hand runs only from `main`, and runs `npm run check` first.
+- MUST, met — the source code in use is public. Production runs only a
+  released version, built from its release commit on `main`, the one its
+  tag names, after CI passes on that commit
+  ([deployment.md](deployment.md)). A deploy by hand runs only from
+  `main`, deploys the newest version, and runs `npm run check` on it
+  first.
 - MUST, met — the source of the policy in use is public. The SM-2
   scheduler and the library's rules are in the repository
   ([policy.md](policy.md)).
@@ -155,10 +163,10 @@ What holds today, and what does not, criterion by criterion.
   address is in the published deck versions, by his choice
   ([privacy.md](privacy.md#what-the-project-has-published)).
 - SHOULD, partial — publish code not in use. The history, the pull
-  requests and the old deck and shape versions are public, but no version
-  is tagged until the first release runs. The leftover `pc/*` and `*-backup` branches exist only on
-  the maintainer's machine; they are most likely copies of work already
-  merged.
+  requests, the old deck and shape versions and each released version,
+  tagged, are public. The leftover `pc/*` and `*-backup` branches exist
+  only on the maintainer's machine; they are most likely copies of work
+  already merged.
 - OPTIONAL, met — the footer on every screen links to the source code,
   the commit and the issue tracker
   ([`Footer.tsx`](../packages/ui/src/ui/Footer.tsx),
@@ -269,9 +277,8 @@ What holds today, and what does not, criterion by criterion.
   too applies from 1.x (decision 12).
 - SHOULD, met — a distributed version control system: Git.
 - SHOULD, met — guidelines ask for one logical change per commit.
-- SHOULD, not met — released versions marked. semantic-release tags
-  each version `vX.Y.Z` and makes a GitHub release of it, but no tag
-  exists until the first release runs.
+- SHOULD, met — released versions marked. semantic-release tags each
+  version `vX.Y.Z` and makes a GitHub release of it, from `v1.0.0` on.
 - SHOULD, met — diff-friendly formats. CONTRIBUTING.md asks for text
   formats, and `.gitattributes` fixes the line endings.
 - OPTIONAL, partial — signed commits and an email address. Every commit
@@ -456,16 +463,14 @@ What holds today, and what does not, criterion by criterion.
 
 ### 16. Document codebase maturity
 
-- MUST, not met yet — versioned. semantic-release releases a version
-  after CI passes on `main`, and the footer shows it, but none is
-  released until the maintainer has set up the deploy key and the
-  bypass (below); the first will be 1.0.0. Met once it is.
+- MUST, met — versioned. semantic-release releases a version after CI
+  passes on `main`, the first being 1.0.0; the site runs only released
+  versions, and the footer shows which.
 - MUST, met — maturity stated. The README, the about page and
   `publiccode.yml` (`developmentStatus: stable`) say the app is stable
   from 1.0.0, its first version, and the releases page lists each
-  version once it is released. This holds before 1.0.0 is released
-  too: no other version was, and the root `package.json` names none
-  (`0.0.0`), so the footer shows no version the docs disown.
+  version once it is released. No version before 1.0.0 was released,
+  so the footer shows no version the docs disown.
 - MUST, partial — a version ready to use depends only on versions ready
   to use. 1.0.0 is declared ready, and `npm run check` refuses a
   prerelease or 0.x dependency of the app, but four are allowed, each
@@ -516,7 +521,9 @@ The maintainer made these choices. Each is recorded where it applies.
    pull request, tags the commit and makes a GitHub release, from which
    Zenodo mints a DOI. The first version is 1.0.0, and stable; 0.1.0 is
    never tagged ([releasing.md](releasing.md),
-   [CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)).
+   [CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)). Only a
+   released version is deployed: deploy.yml deploys the commit a version
+   tag names ([deployment.md](deployment.md)).
 8. **Renovate.** Updates are merged automatically through pull requests
    (`automergeType: 'pr'`), once CI passes. Renovate cannot approve its
    own pull requests, so once `main` requires an approval, a maintainer
@@ -563,7 +570,8 @@ Only an admin of the repository can change these. All are done:
 - [x] **Allow auto-merge.** On, so Renovate can merge its pull requests
   once `ci-ok` passes.
 - [x] **The `github-pages` environment.** `main` is its only deployment
-  branch. *(1, 12)*
+  branch. The deploy runs from `main` even when it deploys a version's
+  tag, so this still holds. *(1, 12)*
 
 ### Actions for the maintainer
 
@@ -574,18 +582,21 @@ Only an admin of the repository can change these. All are done:
   *(15)*
 - [x] **Zenodo.** Connected to the repository, so each GitHub release
   gets a DOI. *(14)*
-- [ ] **The release's deploy key**, before the branch
+- [x] **The release's deploy key**, before the branch
   `semantic-release` is merged. Make an SSH key pair, add its public
   key as a deploy key with write access, its private key as the secret
   `SEMANTIC_RELEASE_KEY`, and "Deploy keys" to the bypass list of the
   ruleset on `main`, as [releasing.md](releasing.md#the-deploy-key)
   says. *(1, 6, 16)*
-- [ ] **The first release.** With the key set, the merge of the branch
-  `semantic-release` releases 1.0.0 once CI passes on it. Had it been
-  merged without the key, run the Release workflow by hand from `main`.
-  Check that `v1.0.0`, its GitHub release and the release commit are
-  there, that the footer shows 1.0.0 after the deploy, and that Zenodo
-  minted a DOI. *(1, 6, 16)*
+- [x] **The first release.** The merge of the branch `semantic-release`
+  released 1.0.0: the release commit and `v1.0.0` are on `main`.
+  *(1, 6, 16)*
+- [x] **A ruleset for version tags**, on `refs/tags/v*`, that restricts
+  their creation, update and deletion, with "Deploy keys" and the
+  Repository admin role on its bypass list, as
+  [releasing.md](releasing.md#the-deploy-key) says. The deploy deploys
+  the commit a version tag names, so without it anyone with write
+  access could pick what is deployed. *(1)*
 - [x] **The DOI.** Add it to `CITATION.cff` and the README, in a pull
   request. *(14)*
 - [ ] **Software Heritage.** Save the repository there. *(14)*
@@ -693,8 +704,9 @@ of it on the branch `standard-for-public-code`.
 - [x] **The deck library's base.** Compared in `ci.yml`'s `library`
   job, which `ci-ok` waits for; `ns.yml`, whose checks were all in
   `ci.yml` but that one, is gone.
-- [x] **`deploy.yml`.** A deploy by hand runs only from `main`, after
-  `npm run check`.
+- [x] **`deploy.yml`.** It deploys only a released version: after CI
+  passes on a commit a version tag names, or, run by hand, only from
+  `main`, the newest version, after `npm run check`.
 - [x] **`renovate.json5`.** `automergeType: 'pr'`, and a `commitBody`
   that records each update and why.
 - [x] **Checks in `npm run check`.** The docs index
@@ -725,9 +737,10 @@ of it on the branch `standard-for-public-code`.
 - [x] **REUSE.** `REUSE.toml`, `LICENSES/`, SPDX headers, the license on
   the `ns/` graphs ([vocab.md](vocab.md#license)), `reuse lint` in CI,
   and `npm run check:reuse` for the decks' licenses.
-- [ ] **Releases.** The version shows in the footer, and semantic-release
-  releases each version from the commits. The deploy key, the first
-  release and the archive remain (above).
+- [ ] **Releases.** The version shows in the footer, semantic-release
+  releases each version from the commits, and only released versions
+  are deployed, from tags a ruleset protects. The archive remains
+  (above).
 - [ ] **Findability.** The about page is done and in the sitemap. Search
   engines and the Solid community remain (above).
 - [x] **Deck contact.** New deck versions name the project's contact.
@@ -743,6 +756,9 @@ of it on the branch `standard-for-public-code`.
   template appears.
 - A pull request that edits a published deck version fails.
 - A deploy by hand from a branch other than `main` is skipped.
+- A push to `main` that releases nothing is not deployed; a release
+  commit is, once CI passes on it, and a deploy by hand deploys the
+  newest version.
 - The footer's links open the source code, the commit and the issues on
   `solid-memo/website`.
 - GitHub's blame of a reformatted file on `main` shows the change that

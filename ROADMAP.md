@@ -13,15 +13,12 @@ a new major version ([docs/releasing.md](docs/releasing.md)).
 ## Now
 
 - **Meeting the Standard for Public Code.** The repository's settings
-  are done: Discussions and private vulnerability reporting are on, and
-  `main` requires the `ci-ok` check before a merge. What is left is the
-  first release, findability, and a second reviewer.
+  are done: Discussions and private vulnerability reporting are on,
+  `main` requires the `ci-ok` check before a merge, and 1.0.0 is
+  released, with its DOI. What is left is findability, and a second
+  reviewer.
   The assessment and what remains are in
   [docs/standard-for-public-code.md](docs/standard-for-public-code.md).
-- **The first release**, 1.0.0, made by semantic-release once the
-  maintainer has set up its deploy key, with its
-  [changelog](CHANGELOG.md) and a DOI from Zenodo
-  ([docs/releasing.md](docs/releasing.md#the-deploy-key)).
 
 ## Next
 
@@ -36,6 +33,9 @@ a new major version ([docs/releasing.md](docs/releasing.md)).
 These were on the roadmap and are done. They are part of 1.0.0
 ([CHANGELOG.md](CHANGELOG.md)):
 
+- The first release, 1.0.0, made by semantic-release from the commits,
+  with its [changelog](CHANGELOG.md)
+  ([docs/releasing.md](docs/releasing.md)).
 - Links from every screen to the source code and the issue tracker.
 - Running your own copy, with its pod providers and its name set by
   configuration ([docs/configuration.md](docs/configuration.md),

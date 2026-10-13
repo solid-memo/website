@@ -10,8 +10,9 @@ This page walks through the app as a learner uses it, screen by
 screen, at https://solid-memo.com/. Each section links the page that
 explains how that part works. The [user journeys](testing.md#user-journeys)
 are the same walk-through as automated tests: they click through the
-real app in a browser on every change. Their latest run, with a
-screenshot of every step, is online at https://solid-memo.com/journeys/.
+real app in a browser on every change. The report of CI's run on the
+version the site runs, with a screenshot of every step, is online at
+https://solid-memo.com/journeys/ (none after a deploy by hand).
 The table at the [end](#the-journeys) says which journey shows which
 part.
 
