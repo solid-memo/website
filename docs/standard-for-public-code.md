@@ -6,8 +6,10 @@ criterion is a list of requirements, and each requirement is a MUST, a
 SHOULD or OPTIONAL.
 
 This is an assessment of `main` at `90652c08` with the branch
-`public-code-followup`, made on 2026-10-13. It replaces the assessment
-of 2026-10-11 (the branch `standard-for-public-code`, based on `main` at
+`public-code-followup`, made on 2026-10-13, and updated the same day for
+the branch `semantic-release` (based on `main` at `f7574c9d`), which
+changes how versions are released. It replaces the assessment of
+2026-10-11 (the branch `standard-for-public-code`, based on `main` at
 `cae0a9f`) and the first one, of `main` at `18eace6` on 2026-10-10. It
 is not a promise. Check items off as they land, and re-assess when they
 do.
@@ -28,27 +30,38 @@ asked for:
   and the licenses.
 - Discussions, private vulnerability reporting, secret scanning and push
   protection, all on.
-- A version (0.1.0, in beta), a changelog, `publiccode.yml` and
-  `CITATION.cff`.
+- A changelog, `publiccode.yml` and `CITATION.cff`, and, with the
+  branch `semantic-release`, versions released from the commits.
 - Settings for running your own copy, and links from the app to its
   source code and its issue tracker.
 
-This branch fixes what the re-review found: tests for the two scripts
-that had none, the standards missing from [standards.md](standards.md),
-the tool terms missing from the [glossary](glossary.md), a checklist for
-reviewers, a plain statement that 0.1.0 is not tagged yet, the
-maintainer's GitHub account in GOVERNANCE.md, CODEOWNERS and
-CODE_OF_CONDUCT.md, and this page.
+The branch `public-code-followup` fixed what the re-review found: tests
+for the two scripts that had none, the standards missing from
+[standards.md](standards.md), the tool terms missing from the
+[glossary](glossary.md), a checklist for reviewers, a plain statement
+that 0.1.0 was not tagged yet (which the branch `semantic-release`
+replaces, below), the maintainer's GitHub account in GOVERNANCE.md,
+CODEOWNERS and CODE_OF_CONDUCT.md, and this page.
+
+The branch `semantic-release` replaces the plan to tag 0.1.0 by hand
+(decision 7): every commit follows Conventional Commits, checked by
+commitlint in CI, and semantic-release releases a version after CI
+passes on `main`. The first version is 1.0.0, and stable, and 0.1.0 is
+never tagged ([releasing.md](releasing.md)).
 
 What is left falls into two groups:
 
-1. Actions for the maintainer: tagging v0.1.0, with a DOI from Zenodo,
-   and making the project findable. The tag closes one MUST.
+1. Actions for the maintainer: the deploy key and the ruleset's bypass
+   that the release pushes with, after which semantic-release releases
+   1.0.0 and Zenodo gives it a DOI; and making the project findable.
+   The release closes one MUST.
 2. Gaps that stay open for now. The largest is criterion 7, review by
    someone other than the author, which cannot be met honestly while the
-   project has one maintainer. Criterion 6 is non-compliant: older
-   commits on `main` record no reason, and commits do not link to
-   issues.
+   project has one maintainer, and is a decided gap until then.
+   Criterion 6 is non-compliant: older commits on `main` record no
+   reason, and commits do not link to issues; both apply from 1.0.0 on.
+   Declaring 1.0.0 stable makes the 0.x dependencies it ships a partial
+   in criterion 16.
 
 ## Scorecard
 
@@ -73,15 +86,17 @@ nothing to apply it to counts as met, and the text says so.
 | 13 | [Publish with an open license](https://www.standardforpubliccode.org/criteria/publish-with-an-open-license.html) | 4/4 | 1/1 | Compliant |
 | 14 | [Make the codebase findable](https://www.standardforpubliccode.org/criteria/make-the-codebase-findable.html) | – | 3/8 | No MUSTs |
 | 15 | [Use a coherent style](https://www.standardforpubliccode.org/criteria/use-a-coherent-style.html) | 1/1 | 2/2 | Compliant |
-| 16 | [Document codebase maturity](https://www.standardforpubliccode.org/criteria/document-codebase-maturity.html) | 2/3 | 2/2 | Partial |
-| | **Total** | **41/46** | **34/51** | |
+| 16 | [Document codebase maturity](https://www.standardforpubliccode.org/criteria/document-codebase-maturity.html) | 1/3 | 2/2 | Non-compliant |
+| | **Total** | **40/46** | **34/51** | |
 
 A criterion is compliant when all its MUSTs are met. It is non-compliant
 when more than half of them are not met, and partial otherwise.
 
-`main` at `90652c08` alone scores 36/46 MUSTs and 31/51 SHOULDs. This
-branch adds 4.3, 7.4, 10.3, 10.6, 11.3, 12.1, 16.2 and the changelog's
-SHOULD in criterion 16.
+`main` at `90652c08` alone scores 36/46 MUSTs and 31/51 SHOULDs. The
+branch `public-code-followup` added 4.3, 7.4, 10.3, 10.6, 11.3, 12.1,
+16.2 and the changelog's SHOULD in criterion 16. The branch
+`semantic-release` turns 16.3 from met to partial: it declares 1.0.0
+ready to use, and 1.0.0 ships four dependencies before their own 1.0.0.
 
 The assessment of 2026-10-11 scored 39/46 and 37/51, and the first one
 17/44 and 8/50. The re-review was stricter than the one on 2026-10-11: it
@@ -91,11 +106,13 @@ feature (9.6) and a check of the docs' coverage (12.7). The first
 assessment counted too few requirements in criteria 1, 10 and 11; the
 counts above are the Standard's own.
 
-With the v0.1.0 tag, the MUSTs reach 42/46. The four left are in
+With the first release, 1.0.0, the MUSTs reach 41/46, and criterion 16
+is partial; until it runs, 16.1 stays not met. The five left are in
 criterion 6, the commits on `main` that record no reason, which the
 history keeps, and the links to issues, which need a change of practice;
-and in criterion 7, a second reviewer, whose reviews would also cover
-the source, the policy, the tests and the docs.
+in criterion 7, a second reviewer, whose reviews would also cover the
+source, the policy, the tests and the docs; and in criterion 16, the
+dependencies before 1.0.0 that the stable app ships.
 
 ## GitHub settings
 
@@ -113,7 +130,10 @@ cannot be read without signing in:
   `ci-ok` passes.
 - The ruleset on `main` (24560297) requires a pull request with no
   approvals and the `ci-ok` check, with the branch up to date. It allows
-  rebase merges and merge commits. Its bypass list is empty.
+  rebase merges and merge commits. Its bypass list is empty; for the
+  release, "Deploy keys" is to be added to it (below).
+- Zenodo is connected to the repository, so each GitHub release gets a
+  DOI.
 - The `github-pages` environment allows deployments from `main` only.
 
 Check them again before relying on them.
@@ -136,7 +156,7 @@ What holds today, and what does not, criterion by criterion.
   ([privacy.md](privacy.md#what-the-project-has-published)).
 - SHOULD, partial — publish code not in use. The history, the pull
   requests and the old deck and shape versions are public, but no version
-  is tagged yet. The leftover `pc/*` and `*-backup` branches exist only on
+  is tagged until the first release runs. The leftover `pc/*` and `*-backup` branches exist only on
   the maintainer's machine; they are most likely copies of work already
   merged.
 - OPTIONAL, met — the footer on every screen links to the source code,
@@ -236,16 +256,22 @@ What holds today, and what does not, criterion by criterion.
   so they record no reason; the other 301 say why. New commits comply:
   CONTRIBUTING.md asks for a body that says why, and Renovate's commits
   carry one (`commitBody` in `renovate.json5`): each update, from what
-  version to what, where, its source and release notes, and why. Nothing
-  checks a body automatically, and the history cannot change, so this
-  stays partial.
+  version to what, where, its source and release notes, and why. From
+  1.0.0 on, every commit follows Conventional Commits, so its type
+  records what kind of decision it was, and commitlint checks that in
+  CI; it does not check that a body is there. The history cannot
+  change, so this stays partial; the maintainer decided that it applies
+  from 1.x (decision 12).
 - MUST, not met — commit messages link to issues and discussions.
-  CONTRIBUTING.md asks for a `Refs: #NN` trailer, but no commit on
+  CONTRIBUTING.md asks for a `Refs: #NN` footer, but no commit on
   `main` has one, and the maintainer's own changes start from no issue.
-  `main` now allows merge commits, which name their pull request.
+  `main` now allows merge commits, which name their pull request. This
+  too applies from 1.x (decision 12).
 - SHOULD, met — a distributed version control system: Git.
 - SHOULD, met — guidelines ask for one logical change per commit.
-- SHOULD, not met — released versions marked. No tag exists yet.
+- SHOULD, not met — released versions marked. semantic-release tags
+  each version `vX.Y.Z` and makes a GitHub release of it, but no tag
+  exists until the first release runs.
 - SHOULD, met — diff-friendly formats. CONTRIBUTING.md asks for text
   formats, and `.gitattributes` fixes the line endings.
 - OPTIONAL, partial — signed commits and an email address. Every commit
@@ -257,11 +283,15 @@ What holds today, and what does not, criterion by criterion.
 - MUST, not met — every contribution reviewed by someone other than its
   author. The maintainer merges his own pull requests without review, a
   temporary exception that GOVERNANCE.md states, and Renovate merges its
-  own once CI passes, with no person reviewing them.
+  own once CI passes, with no person reviewing them. The release commit
+  is pushed to `main` with no pull request, but it holds only what
+  semantic-release writes from commits already reviewed, or not, in
+  their own pull requests. A decided gap while there is one maintainer
+  (decision 12).
 - MUST, partial — reviews cover the source, the policy, the tests and
   the docs. CONTRIBUTING.md and the pull request template say so, but no
   one other than the author has reviewed a change yet, so there is no
-  review to check.
+  review to check. A decided gap, as above.
 - MUST, met — a written reason for every declined contribution.
 - SHOULD, met — review checks the standards, the architecture and the
   decisions. The template's checklist covers them for the author,
@@ -407,7 +437,9 @@ What holds today, and what does not, criterion by criterion.
 - SHOULD, not met — findable by name in a search engine. Not checked,
   and the site is not registered with any search engine.
 - SHOULD, not met — findable by the problem it solves. Not checked.
-- SHOULD, not met — a persistent identifier. There is no DOI yet.
+- SHOULD, not met — a persistent identifier. Zenodo is connected, and
+  mints a DOI with each GitHub release, so the first release brings
+  one.
 - SHOULD, met — machine-readable metadata: `publiccode.yml`, checked in
   CI, and `CITATION.cff`.
 - OPTIONAL, met — a domain of its own, solid-memo.com.
@@ -423,18 +455,30 @@ What holds today, and what does not, criterion by criterion.
 
 ### 16. Document codebase maturity
 
-- MUST, not met — versioned. The app is numbered 0.1.0 and shows its
-  version in the footer, but no version is tagged or released yet.
-- MUST, met — maturity stated. The README says the app is in beta, and
-  that a version CHANGELOG.md dates "Unreleased" is not tagged yet.
-- MUST, met — no version is declared ready, and `npm run check` refuses
-  a prerelease dependency unless
-  [vendor-code.md](vendor-code.md#maturity) explains it.
-- SHOULD, met — a summary of changes, in [CHANGELOG.md](../CHANGELOG.md).
-  Its 0.1.0 section now covers the statistics, the answer times and the
-  about page, which were merged after it was written.
-- SHOULD, met — the version scheme, in [releasing.md](releasing.md).
-- OPTIONAL, met — Semantic Versioning, at 0.x.
+- MUST, not met yet — versioned. semantic-release releases a version
+  after CI passes on `main`, and the footer shows it, but none is
+  released until the maintainer has set up the deploy key and the
+  bypass (below); the first will be 1.0.0. Met once it is.
+- MUST, met — maturity stated. The README, the about page and
+  `publiccode.yml` (`developmentStatus: stable`) say the app is stable
+  from 1.0.0, its first version, and the releases page lists each
+  version once it is released. This holds before 1.0.0 is released
+  too: no other version was, and the root `package.json` names none
+  (`0.0.0`), so the footer shows no version the docs disown.
+- MUST, partial — a version ready to use depends only on versions ready
+  to use. 1.0.0 is declared ready, and `npm run check` refuses a
+  prerelease or 0.x dependency of the app, but four are allowed, each
+  with its reason in [vendor-code.md](vendor-code.md#maturity):
+  `rdf-validate-shacl` 0.6 and `rdf-validate-datatype` 0.2, the only
+  SHACL engine for RDF/JS, `@inrupt/solid-client-errors` 0.0, released
+  with `@inrupt/solid-client` 4, and `process` 0.11. While the app was
+  in beta, no version was declared ready, and this held.
+- SHOULD, met — a summary of changes, in [CHANGELOG.md](../CHANGELOG.md):
+  semantic-release writes each version's entry from the commits, and a
+  section written by hand sums up what 1.0.0 contains.
+- SHOULD, met — the version scheme, in [releasing.md](releasing.md),
+  with what counts as breaking for data in pods.
+- OPTIONAL, met — Semantic Versioning, from 1.0.0.
 
 ## Decisions made
 
@@ -461,9 +505,17 @@ The maintainer made these choices. Each is recorded where it applies.
    metadata name the project.
 6. **License of `docs/` and `ns/`.** MIT, as for the code, stated in the
    README and set up with REUSE.
-7. **Maturity and versions.** Beta. Semantic Versioning at 0.x, tagged by
-   hand, with a changelog in the Keep a Changelog format
-   ([releasing.md](releasing.md)).
+7. **Maturity and versions** (2026-10-13, replacing "beta, Semantic
+   Versioning at 0.x, tagged by hand, with a changelog in the Keep a
+   Changelog format"). Every commit follows Conventional Commits 1.0.0,
+   Renovate's included, checked by commitlint in CI. semantic-release
+   releases a version on every push to `main` that has a releasable
+   commit, once CI has passed: it commits the version and the changelog
+   back to `main` with a deploy key that the ruleset lets bypass its
+   pull request, tags the commit and makes a GitHub release, from which
+   Zenodo mints a DOI. The first version is 1.0.0, and stable; 0.1.0 is
+   never tagged ([releasing.md](releasing.md),
+   [CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)).
 8. **Renovate.** Updates are merged automatically through pull requests
    (`automergeType: 'pr'`), once CI passes. Renovate cannot approve its
    own pull requests, so once `main` requires an approval, a maintainer
@@ -475,6 +527,12 @@ The maintainer made these choices. Each is recorded where it applies.
 10. **Spelling.** American English everywhere, checked by cspell.
 11. **Code of conduct.** The Contributor Covenant 2.1. Reports go to the
     maintainer's email, which is published for that purpose.
+12. **Criteria 6 and 7 with one maintainer** (2026-10-13). Decisions in
+    commit messages (6.2) and links to issues (6.3) apply from 1.x: the
+    commits before 1.0.0 stay as they are. Review by another contributor
+    (7.1), and reviews that cover the source, the policy, the tests and
+    the docs (7.2), are recorded as gaps while the project has one
+    maintainer.
 
 Whatever is decided later:
 
@@ -513,14 +571,22 @@ Only an admin of the repository can change these. All are done:
   SHA in `.git-blame-ignore-revs` (`7646413`, "Reformat the code with
   Biome") names a commit on `main` ([style.md](style.md#formatting)).
   *(15)*
-- [ ] **A DOI.** Connect Zenodo to the repository before the tag, so
-  that the release gets a DOI, and add the DOI to `CITATION.cff` and the
-  README. *(14)*
-- [ ] **Tag v0.1.0** as [releasing.md](releasing.md#tagging-a-version)
-  says: date the `[0.1.0]` heading in CHANGELOG.md, set the version and
-  date in `publiccode.yml` and `CITATION.cff`, then tag the merged
-  release commit and make a GitHub release; then remove the exclusions
-  of CHANGELOG.md's links from `lychee.toml`. *(1, 6, 16)*
+- [x] **Zenodo.** Connected to the repository, so each GitHub release
+  gets a DOI. *(14)*
+- [ ] **The release's deploy key**, before the branch
+  `semantic-release` is merged. Make an SSH key pair, add its public
+  key as a deploy key with write access, its private key as the secret
+  `SEMANTIC_RELEASE_KEY`, and "Deploy keys" to the bypass list of the
+  ruleset on `main`, as [releasing.md](releasing.md#the-deploy-key)
+  says. *(1, 6, 16)*
+- [ ] **The first release.** With the key set, the merge of the branch
+  `semantic-release` releases 1.0.0 once CI passes on it. Had it been
+  merged without the key, run the Release workflow by hand from `main`.
+  Check that `v1.0.0`, its GitHub release and the release commit are
+  there, that the footer shows 1.0.0 after the deploy, and that Zenodo
+  minted a DOI. *(1, 6, 16)*
+- [ ] **The DOI.** Add it to `CITATION.cff` and the README, in a pull
+  request. *(14)*
 - [ ] **Software Heritage.** Save the repository there. *(14)*
 - [ ] **Search engines.** Verify solid-memo.com in Google Search Console
   and Bing Webmaster Tools, and submit `sitemap.xml`. *(14)*
@@ -539,7 +605,8 @@ Only an admin of the repository can change these. All are done:
 These are not met, and the settings and actions above do not close
 them:
 
-- **Criterion 7, review by another person.** With one maintainer, his own
+- **Criterion 7, review by another person.** A decided gap (decision
+  12). With one maintainer, his own
   changes have no second reviewer, and Renovate's updates are merged with
   no reviewer at all. A second reviewer, with one approval required on
   `main` for every pull request, Renovate's included, closes the MUST on
@@ -561,17 +628,24 @@ them:
   the history keeps them.
 - **Criterion 6, decisions in commit messages.** 91 of the 392 commits
   on `main` record no reason, and rewriting `main` to add them is not an
-  option. New commits have a body, so the share without one only
-  shrinks.
+  option. The requirement applies from 1.x (decision 12): new commits
+  have a body and a Conventional Commits type, so the share without a
+  reason only shrinks.
 - **Criterion 6, links to issues.** No commit on `main` has a `Refs:`
-  trailer, and most changes start from no issue. Opening an issue for
-  each change, adding `Refs:` with the pull request, or merging with a
-  merge commit, which names the pull request, would close it.
+  footer, and most changes start from no issue. It applies from 1.x
+  (decision 12). Opening an issue for each change, adding `Refs:` with
+  the pull request, or merging with a merge commit, which names the pull
+  request, would close it.
 - **Criterion 9, examples for all functionality.** Guest mode, the theme,
   switching instances and deck files need a journey or a worked example
   in the user guide.
 - **Criterion 12, the docs' coverage.** Nothing checks that every package
   has a README, or that every export has a comment.
+- **Criterion 16, dependencies ready to use.** The stable app ships
+  four dependencies before their own 1.0.0
+  ([vendor-code.md](vendor-code.md#maturity)). Replacing them, or their
+  maintainers releasing a 1.0.0, would close it; the SHACL engine has no
+  replacement for RDF/JS.
 - **Criterion 14, findability.** The repository name is kept by choice.
   Catalogs, search engines and a DOI wait for the actions above.
 
@@ -649,8 +723,9 @@ of it on the branch `standard-for-public-code`.
 - [x] **REUSE.** `REUSE.toml`, `LICENSES/`, SPDX headers, the license on
   the `ns/` graphs ([vocab.md](vocab.md#license)), `reuse lint` in CI,
   and `npm run check:reuse` for the decks' licenses.
-- [ ] **Releases.** The version shows in the footer. The tag, the DOI and
-  the archive remain (above).
+- [ ] **Releases.** The version shows in the footer, and semantic-release
+  releases each version from the commits. The deploy key, the first
+  release, its DOI and the archive remain (above).
 - [ ] **Findability.** The about page is done and in the sitemap. Search
   engines and the Solid community remain (above).
 - [x] **Deck contact.** New deck versions name the project's contact.
