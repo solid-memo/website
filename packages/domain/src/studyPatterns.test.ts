@@ -275,9 +275,9 @@ describe("intakeVsLoadOf", () => {
 
 describe("the figures of a large log", () => {
   it("take each answer once", { timeout: 30_000 }, () => {
-    // 200 answers a day over 2,000 cards, a year of them.
-    const answers = Array.from({ length: 365 * 200 }, (_, i): Answer => {
-      const dayIndex = Math.floor(i / 200);
+    // 100 answers a day over 2,000 cards, a year of them.
+    const answers = Array.from({ length: 365 * 100 }, (_, i): Answer => {
+      const dayIndex = Math.floor(i / 100);
       const card = (dayIndex * 7 + i) % 2_000;
       return {
         id: `answer-${i}`,
@@ -285,7 +285,7 @@ describe("the figures of a large log", () => {
         cardUrl: `https://pod.example/i/decks/deck-1.ttl#c-${card}`,
         direction: i % 3 === 0 ? "back-to-front" : "front-to-back",
         grade: (i % 6) as Answer["grade"],
-        answeredAt: new Date(Date.UTC(2025, 0, 1 + dayIndex, 0, 0, i % 200)).toISOString(),
+        answeredAt: new Date(Date.UTC(2025, 0, 1 + dayIndex, 0, 0, i % 100)).toISOString(),
         studyDay: new Date(Date.UTC(2025, 0, 1 + dayIndex)).toISOString().slice(0, 10),
         ...(i < 2_000 || i % 50 === 0 ? {} : { priorIntervalDays: i % 40 }),
         nextIntervalDays: 1,

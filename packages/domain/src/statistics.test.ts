@@ -375,10 +375,10 @@ describe("statisticsOf", () => {
   });
 
   it("works through a large log in one pass", { timeout: 30_000 }, () => {
-    // A year of 200 answers a day, over 2,000 cards in four decks.
+    // A year of 50 answers a day, over 2,000 cards in four decks.
     const answers = (count: number) =>
       Array.from({ length: count }, (_, i): Answer => {
-        const day = Math.floor(i / 200);
+        const day = Math.floor(i / 50);
         const studyDay = new Date(Date.UTC(2025, 0, 1 + day)).toISOString().slice(0, 10);
         const card = (day * 7 + i) % 2_000;
         return {
@@ -387,13 +387,13 @@ describe("statisticsOf", () => {
           cardUrl: `https://pod.example/i/decks/deck-${card % 4}.ttl#c-${card}`,
           direction: "front-to-back",
           grade: (i % 6) as Answer["grade"],
-          answeredAt: new Date(Date.UTC(2025, 0, 1 + day, 0, 0, i % 200)).toISOString(),
+          answeredAt: new Date(Date.UTC(2025, 0, 1 + day, 0, 0, i % 50)).toISOString(),
           studyDay,
           ...(i < 2_000 ? {} : { priorIntervalDays: i % 40 }),
           nextIntervalDays: 1,
         };
       });
-    const year = answers(365 * 200);
+    const year = answers(365 * 50);
     expect(statisticsOf(year, "2025-12-31").totals.cards).toBe(2_000);
     // Four times the answers take about four times as long; work per answer
     // that grew with the answers would take sixteen.

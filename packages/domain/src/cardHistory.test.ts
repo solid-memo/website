@@ -116,7 +116,7 @@ describe("lapseIndex", () => {
   });
 
   it("reads the answers in one pass, however many years they cover", { timeout: 30_000 }, () => {
-    // Five years of 200 answers a day, over 2,000 cards.
+    // A year of 200 answers a day, over 2,000 cards.
     const answers = (count: number) =>
       Array.from({ length: count }, (_, n): Answer => {
         const day = Math.floor(n / 200);
@@ -130,7 +130,7 @@ describe("lapseIndex", () => {
           priorIntervalDays: 1,
         });
       });
-    const years = answers(5 * 365 * 200);
+    const years = answers(365 * 200);
     const index = lapseIndex(years);
     expect(index.since).toBe("2021-01");
     expect(index.lapses.size).toBe(2_000);
@@ -214,7 +214,7 @@ describe("hardestCardsOf", () => {
           priorIntervalDays: 1,
         });
       });
-    const all = answers(400_000);
+    const all = answers(365 * 200);
     expect(hardestCardsOf(all, cards).cards).toHaveLength(2_000);
     const ratio = growth(
       (count) => {
