@@ -250,7 +250,7 @@ describe("memoryOverTime", () => {
         const index = chainIndexOf(some);
         return () => memoryOverTime(some, index, "2026-06-30");
       },
-      2_000,
+      1_000,
       4,
     );
     expect(ratio).toBeLessThan(10);

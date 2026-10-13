@@ -1138,7 +1138,7 @@ case `deckInsight` reads what it needs. It writes nothing to the deck.
   with 4 lapses or more (`LEECH_LAPSES`, `leechesOf`), the most
   forgotten first. Each links to its card's history, and a link shows
   them all in the workbench (`state=leech&sort=lapses&order=desc`).
-  A test keeps `lapseIndex` linear over five years of answers: timed at two sizes on the same machine, four times the answers take less than ten times as long.
+  A test keeps `lapseIndex` linear over a year of answers: timed at two sizes on the same machine, four times the answers take less than ten times as long.
 
 The charts are the statistics' own (`BarChart` and `StatTile` in `ui`):
 a bar pointed at, tapped or reached with the arrow keys says what it
