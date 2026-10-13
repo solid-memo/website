@@ -30,7 +30,7 @@ npm run test:unit -- packages/composition/src/appUseCases.test.ts   # one file, 
 
 ## Status
 
-Beta, as is Solid Memo (0.x). A private workspace package, version
+Stable, as is Solid Memo from version 1.0.0. A private workspace package, version
 `0.0.0`, never published to npm: the other packages use its TypeScript
 source, and its modules change with the app.
 

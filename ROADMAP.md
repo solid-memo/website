@@ -5,20 +5,23 @@ project with one maintainer ([GOVERNANCE.md](GOVERNANCE.md)), so this is
 a direction, not a schedule: items move as time allows, and nothing here
 has a date.
 
-Solid Memo is in beta. It works, and its data formats are versioned and
-migrated with care ([docs/migrations.md](docs/migrations.md)), but the app
-can still change in ways a user notices.
+Solid Memo is stable from version 1.0.0: its data formats are versioned
+and migrated with care ([docs/migrations.md](docs/migrations.md)), and a
+change that breaks what users, other apps or copies rely on comes with
+a new major version ([docs/releasing.md](docs/releasing.md)).
 
 ## Now
 
 - **Meeting the Standard for Public Code.** The repository's settings
   are done: Discussions and private vulnerability reporting are on, and
   `main` requires the `ci-ok` check before a merge. What is left is the
-  first tagged release with its DOI, findability, and a second reviewer.
+  first release with its DOI, findability, and a second reviewer.
   The assessment and what remains are in
   [docs/standard-for-public-code.md](docs/standard-for-public-code.md).
-- **The first tagged release**, v0.1.0, with its
-  [changelog](CHANGELOG.md) ([docs/releasing.md](docs/releasing.md)).
+- **The first release**, 1.0.0, made by semantic-release once the
+  maintainer has set up its deploy key, with its
+  [changelog](CHANGELOG.md) and a DOI from Zenodo
+  ([docs/releasing.md](docs/releasing.md#the-deploy-key)).
 
 ## Next
 
@@ -30,7 +33,7 @@ can still change in ways a user notices.
 
 ## Done recently
 
-These were on the roadmap and are done. They are part of 0.1.0
+These were on the roadmap and are done. They are part of 1.0.0
 ([CHANGELOG.md](CHANGELOG.md)):
 
 - Links from every screen to the source code and the issue tracker.
