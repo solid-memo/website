@@ -131,6 +131,7 @@ path = [
     "decks/us-constitution-amendments/*.ttl",
     "decks/us-presidents/*.ttl",
     "decks/us-states-and-capitals/*.ttl",
+    "decks/vim-commands/*.ttl",
     "decks/vitamins/*.ttl",
     "decks/world-currencies/*.ttl",
     "decks/world-flags/*.ttl",
