@@ -191,6 +191,9 @@ it most. The specifications' versions and status are in
   such as `feat` or `fix`, so that a program can read it.
   [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0.0/);
   [CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages).
+- **Deploy key**: an SSH key that gives access to one repository
+  alone. The release pushes its commit and tag to `main` with one.
+  [releasing.md](releasing.md#the-deploy-key).
 - **Docker**: runs a program in a container of its own, apart from the
   rest of the computer. The end-to-end tests and the user journeys start
   their Solid servers in it. [docker.com](https://www.docker.com/);
@@ -226,6 +229,11 @@ it most. The specifications' versions and status are in
   every file's copyright and license so that a program can read them.
   [reuse.software](https://reuse.software/);
   [style.md](style.md#licenses).
+- **semantic-release**: the tool that releases each version: it
+  chooses the number from the commits' Conventional Commits types,
+  writes the changelog, tags the commit and makes the GitHub release.
+  [semantic-release's docs](https://semantic-release.gitbook.io/);
+  [releasing.md](releasing.md).
 - **SemVer** (Semantic Versioning): version numbers of the form
   MAJOR.MINOR.PATCH, where the part that goes up says what kind of
   change it is. [semver.org](https://semver.org/);

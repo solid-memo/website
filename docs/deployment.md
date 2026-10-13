@@ -36,6 +36,11 @@ repository:
   it, so it runs `npm run check` before it builds `main` as it is. It
   has no Turbo cache, so it takes about as long as CI's build job.
 
+A release ([releasing.md](releasing.md)) also follows a green CI run
+on `main`, in a workflow of its own, and pushes a commit to `main` that
+sets the new version. CI and the deploy run on that commit as on any
+push, so the site's footer shows the version once it is deployed.
+
 The workflow enables Pages for the repository on its first run, and
 stops before deploying if the vocabulary or the deck library is missing
 from the build. CI's checks of `ns/` and `decks/`, the comparison of

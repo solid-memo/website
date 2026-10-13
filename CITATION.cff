@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: MIT
 
 # How to cite Solid Memo (https://citation-file-format.github.io/).
-# The version and its date are set when a version is tagged
-# (docs/releasing.md).
+# version and date-released are written by each release, after url
+# (docs/releasing.md#what-a-release-does), and are absent until the
+# first.
 cff-version: 1.2.0
 message: If you use or refer to Solid Memo, please cite it as below.
 type: software

@@ -139,6 +139,15 @@
             matchFileNames: ['e2e/**'],
             semanticCommitType: 'chore',
         },
+        // The release's preset keeps to 9: 10 needs conventional-changelog-writer
+        // 9, and the release notes generator semantic-release ships uses 8
+        // (scripts/releaseConfig.test.ts fails on a preset it cannot render).
+        // Lift this once it uses 9.
+        {
+            matchFileNames: ['package.json'],
+            matchDepNames: ['conventional-changelog-conventionalcommits'],
+            allowedVersions: '<10',
+        },
         // The images the end-to-end tests build themselves are in no registry.
         {
             matchDepNames: ['/^localhost\\//'],

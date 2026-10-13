@@ -1,10 +1,13 @@
 # Changelog
 
-What changed in Solid Memo from one version to the next. The format is
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
-versions follow [Semantic Versioning](https://semver.org/) as
+What changed in Solid Memo from one version to the next, newest first.
+Each version's entry is written by semantic-release when it releases
+the version, from the messages of the commits it contains, which follow
+[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+The versions follow [Semantic Versioning](https://semver.org/), as
 [docs/releasing.md](docs/releasing.md) applies it to an app that keeps
-its data in pods.
+its data in pods. The first version, 1.0.0, is summed up in full at the
+end of the file.
 
 This file covers the app. The vocabulary, the shapes and the library's
 decks are versioned on their own, each version published once and never
@@ -12,12 +15,22 @@ changed: see [docs/vocab.md](docs/vocab.md),
 [docs/shapes.md](docs/shapes.md) and
 [docs/deck-library.md](docs/deck-library.md).
 
-## [Unreleased]
+<!-- The entries from here to the first version's summary are written by semantic-release. -->
+<!-- Their lists start with "*"; the summary's, as everywhere else, with "-". -->
+<!-- markdownlint-configure-file { "MD004": { "style": "dash" } } -->
+<!-- markdownlint-disable -->
+<!-- cspell:disable -->
 
-## [0.1.0] - Unreleased
+<!-- markdownlint-enable -->
+<!-- cspell:enable -->
 
-The first version, which sums up the app as it stands before its first
-tag. The date is set when the maintainer tags it.
+## What the first version contains
+
+Version 1.0.0 is the first version released, and the first stable one.
+Its entry above, which semantic-release writes when it releases the
+version, lists only the changes whose commits follow Conventional
+Commits, a small part of it: most of the app was built before. This is
+all that it contains.
 
 ### Added
 
@@ -108,6 +121,3 @@ tag. The date is set when the maintainer tags it.
 - **Tests.** Unit tests at 100% coverage per package, end-to-end tests
   against several Solid servers, and user journeys in a browser
   ([docs/testing.md](docs/testing.md)).
-
-[Unreleased]: https://github.com/solid-memo/website/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/solid-memo/website/releases/tag/v0.1.0
