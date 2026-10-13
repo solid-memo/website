@@ -80,15 +80,67 @@ An image is committed only when the app shows it.
 
 ## Commit messages
 
-Each commit records a decision, so its message says what and why:
+Each commit records a decision, so its message says what and why. From
+version 1.0.0 on, every commit follows
+[Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/),
+Renovate's included: the release reads the messages to choose the next
+version and to write the changelog ([docs/releasing.md](docs/releasing.md)).
+CI's `commits` job lints a pull request's commits with commitlint
+([commitlint.config.mjs](commitlint.config.mjs)), and
+`npm run lint:commits` lints your branch's before you push. It lints
+the commits since `origin/main`, so from a fork, sync the fork's `main`
+with this repository's first, or run
+`npx commitlint --from upstream/main --to HEAD`, with `upstream` the
+remote that names this repository.
 
-- **Subject:** imperative, phrased as what the project or its user gains,
-  for example "Choose the language from a list, and write numbers as the
-  language does".
-- **Body:** why the change was made, and what was weighed. A commit with
-  no body is fine only when the subject says it all.
-- **Trailer:** `Refs: #NN` when an issue or a discussion exists for the
-  change.
+```text
+feat(studio): check a draft's links before it is published
+
+A release with a link that does not answer leaves the learner with a
+card that points nowhere, and a published release cannot be edited.
+The check runs when the author publishes, not on every save, so a
+draft can still hold a link that is not up yet.
+
+Refs: #42
+```
+
+- **Header:** `type(scope): subject`. The scope is optional, and names
+  the part of the project, such as `studio`, `i18n`, `decks`, `ns` or
+  `deps`. The subject is in the imperative, starts with a lowercase
+  word and has no period at the end. The whole header is at most 100
+  characters. It says what the project or its
+  user gains, not which files changed: "keep a deck's title in every
+  language, shown in the reader's", not "update deck.ts".
+- **Type:** one of these, by what the change is for users, and so for
+  the version:
+
+  | Type | For | Releases |
+  |---|---|---|
+  | `feat` | Something users, other apps or people who run their own copy can do that they could not | A minor version (1.1.0) |
+  | `fix` | Something that did not work as it should, a dependency the app ships updated included (`fix(deps)`) | A patch (1.0.1) |
+  | `perf` | The same, faster or lighter | A patch |
+  | `revert` | A commit taken back | A patch |
+  | `docs` | The docs alone | Nothing |
+  | `test` | The tests alone | Nothing |
+  | `refactor` | The code, with nothing changed for users | Nothing |
+  | `style` | Formatting alone | Nothing |
+  | `build` | The build, the scripts and the development tools | Nothing |
+  | `ci` | The workflows | Nothing |
+  | `chore` | Anything else, such as a development tool updated (`chore(deps)`) | Nothing |
+
+  A new deck, or a new version of one, is a `feat(decks)`: learners see
+  it in the library.
+- **Body:** after a blank line, why the change was made, and what was
+  weighed, wrapped near 72 columns. A commit with no body is fine only
+  when the subject says it all.
+- **Breaking change:** a change that someone has to act on, or loses
+  something by ([docs/releasing.md](docs/releasing.md#what-counts-as-breaking)),
+  adds `!` after the type or scope (`feat(ns)!:`), and a
+  `BREAKING CHANGE:` footer that says what breaks and what to do about
+  it. It releases a major version (2.0.0), so it needs an issue first.
+- **Footers:** after a blank line, `Refs: #NN` when an issue or a
+  discussion exists for the change, and `Co-Authored-By:` for each
+  co-author.
 - **One logical change per commit.** Generated files go in the same
   commit as the change that generated them, and a new deck version goes
   in the same commit as the library index.

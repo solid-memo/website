@@ -15,6 +15,14 @@
     // the pull request is where the update's commit links to.
     automerge: true,
     automergeType: 'pr',
+    // Its commits follow Conventional Commits, as everyone's do
+    // (CONTRIBUTING.md#commit-messages): config:recommended's
+    // :semanticPrefixFixDepsChoreOthers makes an update of what the app
+    // needs at run time (dependencies) fix(deps):, which semantic-release
+    // releases as a patch, and every other update (devDependencies, the
+    // workflows' actions, the end-to-end tests', below) chore(deps):,
+    // which releases nothing (docs/releasing.md).
+    semanticCommits: 'enabled',
     // Each commit says what it updates, from what to what, where, and why,
     // and where its source and release notes are: the commit is the record
     // of the decision (docs/standard-for-public-code.md, criterion 6), and
@@ -124,6 +132,12 @@
         {
             matchDepNames: ['@playwright/test'],
             rangeStrategy: 'pin',
+        },
+        // The end-to-end tests' packages and servers ship nothing to users,
+        // even what they list as dependencies: chore(deps):, no release.
+        {
+            matchFileNames: ['e2e/**'],
+            semanticCommitType: 'chore',
         },
         // The images the end-to-end tests build themselves are in no registry.
         {

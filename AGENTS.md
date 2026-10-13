@@ -34,6 +34,9 @@ This repository's docs are indexed in [docs/README.md](docs/README.md); start wi
 - **One test file**: `npm run test:unit -- <path>`, from the root.
 - **Imports** follow [docs/boundaries.md](docs/boundaries.md), which
   `npm run check:boundaries` enforces.
+- **Commits** follow Conventional Commits (`type(scope): subject`, a body
+  that says why), as [CONTRIBUTING.md](CONTRIBUTING.md#commit-messages)
+  says; `npm run lint:commits` checks them.
 - **Licenses**: a new file that can carry a comment starts with the SPDX
   header, which `npm run lint:reuse` checks; a new deck is listed in
   `REUSE.toml` under its license, which `npm run check:reuse` (in

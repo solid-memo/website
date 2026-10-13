@@ -389,6 +389,7 @@ twice. Its jobs, side by side:
 | `contract (<server>)` | that each advisory server starts and meets the contract |
 | `journeys` | the user journeys ([User journeys](#user-journeys)) |
 | `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
+| `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)); on a push to `main`, nothing |
 | `ci-ok` | that every job above passed |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset
