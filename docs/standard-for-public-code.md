@@ -84,10 +84,10 @@ nothing to apply it to counts as met, and the text says so.
 | 11 | [Use open standards](https://www.standardforpubliccode.org/criteria/use-open-standards.html) | 4/4 | 3/3 | Compliant |
 | 12 | [Use continuous integration](https://www.standardforpubliccode.org/criteria/use-continuous-integration.html) | 4/4 | 2/3 | Compliant |
 | 13 | [Publish with an open license](https://www.standardforpubliccode.org/criteria/publish-with-an-open-license.html) | 4/4 | 1/1 | Compliant |
-| 14 | [Make the codebase findable](https://www.standardforpubliccode.org/criteria/make-the-codebase-findable.html) | – | 3/8 | No MUSTs |
+| 14 | [Make the codebase findable](https://www.standardforpubliccode.org/criteria/make-the-codebase-findable.html) | – | 4/8 | No MUSTs |
 | 15 | [Use a coherent style](https://www.standardforpubliccode.org/criteria/use-a-coherent-style.html) | 1/1 | 2/2 | Compliant |
 | 16 | [Document codebase maturity](https://www.standardforpubliccode.org/criteria/document-codebase-maturity.html) | 1/3 | 2/2 | Non-compliant |
-| | **Total** | **40/46** | **34/51** | |
+| | **Total** | **40/46** | **35/51** | |
 
 A criterion is compliant when all its MUSTs are met. It is non-compliant
 when more than half of them are not met, and partial otherwise.
@@ -437,9 +437,10 @@ What holds today, and what does not, criterion by criterion.
 - SHOULD, not met — findable by name in a search engine. Not checked,
   and the site is not registered with any search engine.
 - SHOULD, not met — findable by the problem it solves. Not checked.
-- SHOULD, not met — a persistent identifier. Zenodo is connected, and
-  mints a DOI with each GitHub release, so the first release brings
-  one.
+- SHOULD, met — a persistent identifier. Zenodo archives each GitHub
+  release and gives it a DOI; the concept DOI,
+  [10.5281/zenodo.23351087](https://doi.org/10.5281/zenodo.23351087),
+  is in `CITATION.cff` and the README.
 - SHOULD, met — machine-readable metadata: `publiccode.yml`, checked in
   CI, and `CITATION.cff`.
 - OPTIONAL, met — a domain of its own, solid-memo.com.
@@ -585,7 +586,7 @@ Only an admin of the repository can change these. All are done:
   Check that `v1.0.0`, its GitHub release and the release commit are
   there, that the footer shows 1.0.0 after the deploy, and that Zenodo
   minted a DOI. *(1, 6, 16)*
-- [ ] **The DOI.** Add it to `CITATION.cff` and the README, in a pull
+- [x] **The DOI.** Add it to `CITATION.cff` and the README, in a pull
   request. *(14)*
 - [ ] **Software Heritage.** Save the repository there. *(14)*
 - [ ] **Search engines.** Verify solid-memo.com in Google Search Console
@@ -647,7 +648,8 @@ them:
   maintainers releasing a 1.0.0, would close it; the SHACL engine has no
   replacement for RDF/JS.
 - **Criterion 14, findability.** The repository name is kept by choice.
-  Catalogs, search engines and a DOI wait for the actions above.
+  Catalogs and search engines wait for the actions above. The DOI is
+  in `CITATION.cff` and the README.
 
 ## The plan, as it landed
 
@@ -725,7 +727,7 @@ of it on the branch `standard-for-public-code`.
   and `npm run check:reuse` for the decks' licenses.
 - [ ] **Releases.** The version shows in the footer, and semantic-release
   releases each version from the commits. The deploy key, the first
-  release, its DOI and the archive remain (above).
+  release and the archive remain (above).
 - [ ] **Findability.** The about page is done and in the sitemap. Search
   engines and the Solid community remain (above).
 - [x] **Deck contact.** New deck versions name the project's contact.

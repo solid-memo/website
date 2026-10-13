@@ -5,6 +5,7 @@
 [![Commit activity](https://img.shields.io/github/commit-activity/m/solid-memo/website)](https://github.com/solid-memo/website/pulse)
 [![Last commit](https://img.shields.io/github/last-commit/solid-memo/website)](https://github.com/solid-memo/website/commits/main)
 [![Contributors](https://img.shields.io/github/contributors/solid-memo/website)](https://github.com/solid-memo/website/graphs/contributors)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23351087.svg)](https://doi.org/10.5281/zenodo.23351087)
 
 [![Solid Memo](apps/web/public/social-preview.png)](https://solid-memo.com/)
 
