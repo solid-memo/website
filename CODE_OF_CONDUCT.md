@@ -60,7 +60,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement. In Solid Memo
-that is the maintainer, Anton Wiklund ([@antwika](https://github.com/antwika)),
+that is the maintainer, Anton Wiklund ([@ixuz](https://github.com/ixuz)),
 by email at [antonwiklund91@gmail.com](mailto:antonwiklund91@gmail.com).
 Only the maintainer reads that address. Don't report a code of conduct issue
 in a public issue or discussion.

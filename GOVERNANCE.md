@@ -9,7 +9,7 @@ contribute is in [CONTRIBUTING.md](CONTRIBUTING.md).
 Solid Memo is a volunteer project. It has no funding, and no
 organization is committed to it, as a sponsor, a user or an employer of
 its contributors. Its one maintainer is Anton Wiklund
-([@antwika](https://github.com/antwika)), who owns the
+([@ixuz](https://github.com/ixuz)), who owns the
 [solid-memo](https://github.com/solid-memo) GitHub organization.
 [.github/CODEOWNERS](.github/CODEOWNERS) names the maintainers.
 
