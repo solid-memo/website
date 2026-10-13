@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-12T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-13T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -113,6 +113,7 @@
                  <#us-constitution-amendments> ,
                  <#us-presidents> ,
                  <#us-states-and-capitals> ,
+                 <#vim-commands> ,
                  <#vitamins> ,
                  <#world-currencies> ,
                  <#world-flags> ,
@@ -17787,6 +17788,166 @@
     a dcat:Distribution ;
     dcat:accessURL <https://solid-memo.com/decks/us-states-and-capitals/v2.ttl> ;
     dcat:downloadURL <https://solid-memo.com/decks/us-states-and-capitals/v2.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#vim-commands>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Vim commands"@en ,
+                  "Vim-kommandon"@sv ,
+                  "Vim 명령어"@ko ,
+                  "Vim-Befehle"@de ,
+                  "Comandos de Vim"@es ,
+                  "Commandes Vim"@fr ;
+    dcterms:description "65 everyday Vim commands: the front describes a task in plain words, the back is what you type in Vim, written as Vim's own help writes keys (CTRL-R, <Esc>) with placeholders such as {char} or {file}. Every task starts in Normal mode. Covers the modes, saving and quitting, moving around, editing, searching and replacing, marks and macros, windows, buffers and tab pages, with synonyms and pitfalls in the notes. Every command was run in Vim 9.1, with and without its defaults.vim, and checked against Vim's built-in help."@en ,
+                        "65 vardagliga Vim-kommandon: på framsidan en uppgift beskriven med vanliga ord, på baksidan det du skriver i Vim, återgivet så som Vims egen hjälp skriver tangenter (CTRL-R, <Esc>) med platshållare som {char} eller {file}. Varje uppgift börjar i normalläge. Täcker lägena, att spara och avsluta, förflyttning, redigering, sökning och ersättning, markeringar och makron, fönster, buffertar och flikar, med synonymer och fallgropar i anteckningarna. Varje kommando har körts i Vim 9.1, med och utan dess defaults.vim, och kontrollerats mot Vims inbyggda hjälp."@sv ,
+                        "일상적으로 쓰는 Vim 명령어 65개입니다. 앞면에는 할 일이 쉬운 말로 적혀 있고, 뒷면에는 Vim에서 입력하는 키가 Vim 도움말이 키를 쓰는 방식(CTRL-R, <Esc>) 그대로 {char}나 {file} 같은 자리 표시자와 함께 적혀 있습니다. 모든 작업은 노멀 모드에서 시작합니다. 모드, 저장과 종료, 이동, 편집, 검색과 바꾸기, 마크와 매크로, 창, 버퍼, 탭 페이지를 다루며, 같은 일을 하는 다른 명령과 주의할 점은 메모에 있습니다. 모든 명령어는 Vim 9.1에서 defaults.vim을 쓸 때와 쓰지 않을 때 모두 실행해 보았고, Vim 내장 도움말로 확인했습니다."@ko ,
+                        "65 alltägliche Vim-Befehle: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten, die Rückseite ist das, was man in Vim tippt, so geschrieben, wie Vims eigene Hilfe Tasten schreibt (CTRL-R, <Esc>), mit Platzhaltern wie {char} oder {file}. Jede Aufgabe beginnt im Normalmodus. Behandelt die Modi, Speichern und Beenden, Bewegen im Text, Bearbeiten, Suchen und Ersetzen, Marken und Makros, Fenster, Puffer und Reiter, mit Synonymen und Stolperfallen in den Anmerkungen. Jeder Befehl wurde in Vim 9.1 ausgeführt, mit und ohne dessen defaults.vim, und mit Vims eingebauter Hilfe abgeglichen."@de ,
+                        "65 comandos de Vim de uso diario: el anverso describe una tarea con palabras sencillas y el reverso es lo que se escribe en Vim, con las teclas escritas como en la propia ayuda de Vim (CTRL-R, <Esc>) y marcadores de posición como {char} o {file}. Todas las tareas empiezan en modo Normal. Abarca los modos, guardar y salir, moverse por el texto, editar, buscar y sustituir, marcas y macros, ventanas, búferes y pestañas, con sinónimos y errores frecuentes en las notas. Cada comando se ejecutó en Vim 9.1, con y sin su defaults.vim, y se comprobó con la ayuda integrada de Vim."@es ,
+                        "65 commandes Vim du quotidien : le recto décrit une tâche avec des mots simples, le verso est ce que l’on tape dans Vim, noté à la manière de l’aide de Vim (CTRL-R, <Esc>), avec des espaces réservés comme {char} ou {file}. Chaque tâche part du mode Normal. Le paquet couvre les modes, l’enregistrement et la sortie, les déplacements, l’édition, la recherche et le remplacement, les marques et les macros, les fenêtres, les tampons et les onglets, avec des synonymes et des pièges dans les notes. Chaque commande a été exécutée dans Vim 9.1, avec et sans son defaults.vim, et vérifiée dans l’aide intégrée de Vim."@fr ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "Vim"@en ,
+                 "text editor"@en ,
+                 "keyboard shortcuts"@en ,
+                 "command line"@en ,
+                 "editing"@en ,
+                 "Vim"@sv ,
+                 "textredigerare"@sv ,
+                 "kortkommandon"@sv ,
+                 "kommandorad"@sv ,
+                 "redigering"@sv ,
+                 "Vim"@ko ,
+                 "텍스트 편집기"@ko ,
+                 "단축키"@ko ,
+                 "명령줄"@ko ,
+                 "편집"@ko ,
+                 "Vim"@de ,
+                 "Texteditor"@de ,
+                 "Tastenkürzel"@de ,
+                 "Kommandozeile"@de ,
+                 "Textbearbeitung"@de ,
+                 "Vim"@es ,
+                 "editor de texto"@es ,
+                 "atajos de teclado"@es ,
+                 "línea de comandos"@es ,
+                 "edición de texto"@es ,
+                 "Vim"@fr ,
+                 "éditeur de texte"@fr ,
+                 "raccourcis clavier"@fr ,
+                 "ligne de commande"@fr ,
+                 "édition"@fr ;
+    dcat:first <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/vim-commands/v1.ttl> .
+
+<https://solid-memo.com/decks/vim-commands/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Vim commands"@en ,
+                  "Vim-kommandon"@sv ,
+                  "Vim 명령어"@ko ,
+                  "Vim-Befehle"@de ,
+                  "Comandos de Vim"@es ,
+                  "Commandes Vim"@fr ;
+    dcterms:creator <https://solid-memo.com/decks/vim-commands/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "65 everyday Vim commands: the front describes a task in plain words, the back is what you type in Vim, written as Vim's own help writes keys (CTRL-R, <Esc>) with placeholders such as {char} or {file}. Every task starts in Normal mode. Covers the modes, saving and quitting, moving around, editing, searching and replacing, marks and macros, windows, buffers and tab pages, with synonyms and pitfalls in the notes. Every command was run in Vim 9.1, with and without its defaults.vim, and checked against Vim's built-in help."@en ,
+                        "65 vardagliga Vim-kommandon: på framsidan en uppgift beskriven med vanliga ord, på baksidan det du skriver i Vim, återgivet så som Vims egen hjälp skriver tangenter (CTRL-R, <Esc>) med platshållare som {char} eller {file}. Varje uppgift börjar i normalläge. Täcker lägena, att spara och avsluta, förflyttning, redigering, sökning och ersättning, markeringar och makron, fönster, buffertar och flikar, med synonymer och fallgropar i anteckningarna. Varje kommando har körts i Vim 9.1, med och utan dess defaults.vim, och kontrollerats mot Vims inbyggda hjälp."@sv ,
+                        "일상적으로 쓰는 Vim 명령어 65개입니다. 앞면에는 할 일이 쉬운 말로 적혀 있고, 뒷면에는 Vim에서 입력하는 키가 Vim 도움말이 키를 쓰는 방식(CTRL-R, <Esc>) 그대로 {char}나 {file} 같은 자리 표시자와 함께 적혀 있습니다. 모든 작업은 노멀 모드에서 시작합니다. 모드, 저장과 종료, 이동, 편집, 검색과 바꾸기, 마크와 매크로, 창, 버퍼, 탭 페이지를 다루며, 같은 일을 하는 다른 명령과 주의할 점은 메모에 있습니다. 모든 명령어는 Vim 9.1에서 defaults.vim을 쓸 때와 쓰지 않을 때 모두 실행해 보았고, Vim 내장 도움말로 확인했습니다."@ko ,
+                        "65 alltägliche Vim-Befehle: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten, die Rückseite ist das, was man in Vim tippt, so geschrieben, wie Vims eigene Hilfe Tasten schreibt (CTRL-R, <Esc>), mit Platzhaltern wie {char} oder {file}. Jede Aufgabe beginnt im Normalmodus. Behandelt die Modi, Speichern und Beenden, Bewegen im Text, Bearbeiten, Suchen und Ersetzen, Marken und Makros, Fenster, Puffer und Reiter, mit Synonymen und Stolperfallen in den Anmerkungen. Jeder Befehl wurde in Vim 9.1 ausgeführt, mit und ohne dessen defaults.vim, und mit Vims eingebauter Hilfe abgeglichen."@de ,
+                        "65 comandos de Vim de uso diario: el anverso describe una tarea con palabras sencillas y el reverso es lo que se escribe en Vim, con las teclas escritas como en la propia ayuda de Vim (CTRL-R, <Esc>) y marcadores de posición como {char} o {file}. Todas las tareas empiezan en modo Normal. Abarca los modos, guardar y salir, moverse por el texto, editar, buscar y sustituir, marcas y macros, ventanas, búferes y pestañas, con sinónimos y errores frecuentes en las notas. Cada comando se ejecutó en Vim 9.1, con y sin su defaults.vim, y se comprobó con la ayuda integrada de Vim."@es ,
+                        "65 commandes Vim du quotidien : le recto décrit une tâche avec des mots simples, le verso est ce que l’on tape dans Vim, noté à la manière de l’aide de Vim (CTRL-R, <Esc>), avec des espaces réservés comme {char} ou {file}. Chaque tâche part du mode Normal. Le paquet couvre les modes, l’enregistrement et la sortie, les déplacements, l’édition, la recherche et le remplacement, les marques et les macros, les fenêtres, les tampons et les onglets, avec des synonymes et des pièges dans les notes. Chaque commande a été exécutée dans Vim 9.1, avec et sans son defaults.vim, et vérifiée dans l’aide intégrée de Vim."@fr ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/vim-commands/v1.ttl#test-runs> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/vim-commands/v1.ttl#compilation> ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "Vim"@en ,
+                 "text editor"@en ,
+                 "keyboard shortcuts"@en ,
+                 "command line"@en ,
+                 "editing"@en ,
+                 "Vim"@sv ,
+                 "textredigerare"@sv ,
+                 "kortkommandon"@sv ,
+                 "kommandorad"@sv ,
+                 "redigering"@sv ,
+                 "Vim"@ko ,
+                 "텍스트 편집기"@ko ,
+                 "단축키"@ko ,
+                 "명령줄"@ko ,
+                 "편집"@ko ,
+                 "Vim"@de ,
+                 "Texteditor"@de ,
+                 "Tastenkürzel"@de ,
+                 "Kommandozeile"@de ,
+                 "Textbearbeitung"@de ,
+                 "Vim"@es ,
+                 "editor de texto"@es ,
+                 "atajos de teclado"@es ,
+                 "línea de comandos"@es ,
+                 "edición de texto"@es ,
+                 "Vim"@fr ,
+                 "éditeur de texte"@fr ,
+                 "raccourcis clavier"@fr ,
+                 "ligne de commande"@fr ,
+                 "édition"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#vim-commands> ;
+    dcat:isVersionOf <#vim-commands> ;
+    dcat:contactPoint <https://solid-memo.com/decks/vim-commands/v1.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/vim-commands/v1.ttl#turtle> ;
+    solid-memo:cardCount 65 .
+
+<https://solid-memo.com/decks/vim-commands/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/vim-commands/v1.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://github.com/vim/vim/blob/master/LICENSE>
+    a dcterms:LicenseDocument .
+
+<https://solid-memo.com/decks/vim-commands/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/vim-commands/v1.ttl#test-runs>
+    dcterms:title "Test run of every command in Vim 9.1, headless, with and without defaults.vim" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+
+<https://github.com/vim/vim/tree/master/runtime/doc>
+    dcterms:title "Vim reference manual (:help, runtime/doc of Vim 9.1)" ;
+    dcterms:creator "Bram Moolenaar and the Vim project" ;
+    dcterms:license <https://github.com/vim/vim/blob/master/LICENSE> .
+
+<https://github.com/vim/vim/tree/master/src/po>
+    dcterms:title "Vim's message translations (src/po in Vim's source repository)" ;
+    dcterms:creator "The Vim project and its translators" ;
+    dcterms:license <https://github.com/vim/vim/blob/master/LICENSE> .
+
+<https://solid-memo.com/decks/vim-commands/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/vim-commands/v1.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 

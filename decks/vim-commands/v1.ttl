@@ -1,0 +1,1321 @@
+@base <https://solid-memo.com/decks/vim-commands/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Vim commands"@en ,
+                  "Vim-kommandon"@sv ,
+                  "Vim 명령어"@ko ,
+                  "Vim-Befehle"@de ,
+                  "Comandos de Vim"@es ,
+                  "Commandes Vim"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "65 everyday Vim commands: the front describes a task in plain words, the back is what you type in Vim, written as Vim's own help writes keys (CTRL-R, <Esc>) with placeholders such as {char} or {file}. Every task starts in Normal mode. Covers the modes, saving and quitting, moving around, editing, searching and replacing, marks and macros, windows, buffers and tab pages, with synonyms and pitfalls in the notes. Every command was run in Vim 9.1, with and without its defaults.vim, and checked against Vim's built-in help."@en ,
+                        "65 vardagliga Vim-kommandon: på framsidan en uppgift beskriven med vanliga ord, på baksidan det du skriver i Vim, återgivet så som Vims egen hjälp skriver tangenter (CTRL-R, <Esc>) med platshållare som {char} eller {file}. Varje uppgift börjar i normalläge. Täcker lägena, att spara och avsluta, förflyttning, redigering, sökning och ersättning, markeringar och makron, fönster, buffertar och flikar, med synonymer och fallgropar i anteckningarna. Varje kommando har körts i Vim 9.1, med och utan dess defaults.vim, och kontrollerats mot Vims inbyggda hjälp."@sv ,
+                        "일상적으로 쓰는 Vim 명령어 65개입니다. 앞면에는 할 일이 쉬운 말로 적혀 있고, 뒷면에는 Vim에서 입력하는 키가 Vim 도움말이 키를 쓰는 방식(CTRL-R, <Esc>) 그대로 {char}나 {file} 같은 자리 표시자와 함께 적혀 있습니다. 모든 작업은 노멀 모드에서 시작합니다. 모드, 저장과 종료, 이동, 편집, 검색과 바꾸기, 마크와 매크로, 창, 버퍼, 탭 페이지를 다루며, 같은 일을 하는 다른 명령과 주의할 점은 메모에 있습니다. 모든 명령어는 Vim 9.1에서 defaults.vim을 쓸 때와 쓰지 않을 때 모두 실행해 보았고, Vim 내장 도움말로 확인했습니다."@ko ,
+                        "65 alltägliche Vim-Befehle: Die Vorderseite beschreibt eine Aufgabe in einfachen Worten, die Rückseite ist das, was man in Vim tippt, so geschrieben, wie Vims eigene Hilfe Tasten schreibt (CTRL-R, <Esc>), mit Platzhaltern wie {char} oder {file}. Jede Aufgabe beginnt im Normalmodus. Behandelt die Modi, Speichern und Beenden, Bewegen im Text, Bearbeiten, Suchen und Ersetzen, Marken und Makros, Fenster, Puffer und Reiter, mit Synonymen und Stolperfallen in den Anmerkungen. Jeder Befehl wurde in Vim 9.1 ausgeführt, mit und ohne dessen defaults.vim, und mit Vims eingebauter Hilfe abgeglichen."@de ,
+                        "65 comandos de Vim de uso diario: el anverso describe una tarea con palabras sencillas y el reverso es lo que se escribe en Vim, con las teclas escritas como en la propia ayuda de Vim (CTRL-R, <Esc>) y marcadores de posición como {char} o {file}. Todas las tareas empiezan en modo Normal. Abarca los modos, guardar y salir, moverse por el texto, editar, buscar y sustituir, marcas y macros, ventanas, búferes y pestañas, con sinónimos y errores frecuentes en las notas. Cada comando se ejecutó en Vim 9.1, con y sin su defaults.vim, y se comprobó con la ayuda integrada de Vim."@es ,
+                        "65 commandes Vim du quotidien : le recto décrit une tâche avec des mots simples, le verso est ce que l’on tape dans Vim, noté à la manière de l’aide de Vim (CTRL-R, <Esc>), avec des espaces réservés comme {char} ou {file}. Chaque tâche part du mode Normal. Le paquet couvre les modes, l’enregistrement et la sortie, les déplacements, l’édition, la recherche et le remplacement, les marques et les macros, les fenêtres, les tampons et les onglets, avec des synonymes et des pièges dans les notes. Chaque commande a été exécutée dans Vim 9.1, avec et sans son defaults.vim, et vérifiée dans l’aide intégrée de Vim."@fr ;
+    prov:wasDerivedFrom <#test-runs> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "Vim"@en ,
+                 "text editor"@en ,
+                 "keyboard shortcuts"@en ,
+                 "command line"@en ,
+                 "editing"@en ,
+                 "Vim"@sv ,
+                 "textredigerare"@sv ,
+                 "kortkommandon"@sv ,
+                 "kommandorad"@sv ,
+                 "redigering"@sv ,
+                 "Vim"@ko ,
+                 "텍스트 편집기"@ko ,
+                 "단축키"@ko ,
+                 "명령줄"@ko ,
+                 "편집"@ko ,
+                 "Vim"@de ,
+                 "Texteditor"@de ,
+                 "Tastenkürzel"@de ,
+                 "Kommandozeile"@de ,
+                 "Textbearbeitung"@de ,
+                 "Vim"@es ,
+                 "editor de texto"@es ,
+                 "atajos de teclado"@es ,
+                 "línea de comandos"@es ,
+                 "edición de texto"@es ,
+                 "Vim"@fr ,
+                 "éditeur de texte"@fr ,
+                 "raccourcis clavier"@fr ,
+                 "ligne de commande"@fr ,
+                 "édition"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#vim-commands> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#vim-commands> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://github.com/vim/vim/blob/master/LICENSE>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): every command run in Vim and checked against Vim's help,
+# then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <#test-runs> ,
+              <https://github.com/vim/vim/tree/master/runtime/doc> ,
+              <https://github.com/vim/vim/tree/master/src/po> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The deck was checked by machine (a test run of every command in Vim 9.1, the app's SHACL and DCAT-AP validators and a second SHACL validator) and by AI agents against Vim's help; it has had no human review."@en ,
+                 "Selection: 65 tasks a learner meets in everyday editing with Vim: the modes (Insert, Visual, Replace) and leaving them, saving and quitting, moving by words, lines, brackets, characters and screens, the jump list, deleting, copying, pasting, changing, undoing and repeating, joining and indenting, searching and substituting, marks, macros, windows, buffers, tab pages and the help. The list is the authoring agent's own, not taken from any published list or cheat sheet. Counterparts were put in the note of their partner card rather than given cards of their own (O on o, P on p, << on >>, CTRL-U on CTRL-D, N on n, ?{pattern} on /{pattern}, F, t and T on f, the comma on the semicolon, q to stop recording on q{a-z}, :s without % on :%s, :tabnew on gt); } and ~ were left out to keep the deck near 65 cards, and gv and :tabnew lost their cards in review to j and C."@en ,
+                 "Notation on the back: the keys exactly as typed, in the notation of Vim's own help: CTRL-R for a control key, <Esc> for a special key, Ex commands with their colon and without the Enter that runs them, and placeholders in braces ({char}, {n}, {a-z}, {file}, {pattern}, {old}, {new}, {subject}). Ex commands are given in their shortest common form (:w, :q, :e, :noh, :sp, :vs, :bn, :h), the long form in the note. Every front starts in Normal mode, as the description says."@en ,
+                 "One answer per front: each front was written so that one command answers it, and a review round looked for any other command that does exactly what a front says. Where Vim has an exact synonym, the back is the shorter or the more common form and the synonym is in the note (ZQ for :q!, :x and ZZ for :wq, which the front rules out by 'even if nothing has changed', _ for ^, 1G and :1 for gg, S for cc, d$ for D, c$ for C, CTRL-W s for :sp, CTRL-[ for <Esc>). Pairs that look alike were kept apart on purpose: ciw and cw, diw and dw, 0 and ^, f and t, :q and :q!, :w {file} and :sav {file}. Because the study direction is front to back only, every front is unique in every language."@en ,
+                 "Test run (the content source): the script run-vim-tests.sh types every card's keys into a fresh Vim 9.1 (Debian build, patches 1-948 and 950-2141) under a pseudo-terminal made by script(1), so that windows, scrolling and the screen behave as for a user, isolated from any user configuration (HOME in a scratch directory, -i NONE -n), and runs it twice: with -Nu NONE (no vimrc, no defaults.vim) and with --clean (defaults.vim loaded). The keys are fed with feedkeys(keys, 'xt'), so that they count as typed. Each card's section asserts what its front says (the buffer's lines, the cursor's line and column, the mode, the number of windows and tab pages, a register, a file's contents on disk, the error given) and prints PASS or FAIL; the notes' synonyms and claims are checked in extra sections (among them ZQ, :x, ZZ, :qa!, <Home>, <End>, <Del>, U, gJ, two backticks, 'hidden', 'autoindent', 'expandtab' and 'joinspaces'). On 2026-10-13 all 65 cards passed in both configurations, 0 checks failing. Where defaults.vim changes a result ('scrolloff' 5 moves the cursor after CTRL-D), the card says only what holds in both."@en ,
+                 "Cross-check (verification source): every card was looked up in Vim's help as installed with Vim 9.1 (runtime/doc), each by its help tag (*dd*, *iw*, *iquote*, *:quit*, *G* and so on), and every note's claim was read against the help at that tag. Vim's defaults that change a card's behaviour ('startofline', 'wrapscan', 'joinspaces', 'hlsearch' off, 'hidden' off, 'autoindent' off, 'shiftwidth' 8) are named in the notes where they matter."@en ,
+                 "Licensing: the deck is CC0 1.0. Its only content source is the test run, the authoring agent's own, dedicated to the public domain with the deck. Which keys perform a task is a fact about the program's behaviour, and observing it copies nothing of Vim's code or documentation. The fronts, notes and the selection of tasks are the authoring agent's own wording and choice. Vim's help and Vim's message translations are under the Vim license and were used to verify only: they confirmed what each command does and which terms each language's Vim uses for its modes, and no sentence, example or list was copied from them. The fronts were compared with the help text by searching the help files for their distinctive phrases, and the ones that came close (among them those for ^, $, e, ;, ., r{char}, /, *, :sp, :vs, gt, <Esc>, I and D, two of which matched the help word for word) were reworded. Command names, keys and option names are the program's interface, needed to state the fact at all. No source's licence therefore requires attribution, though every source is credited."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Test run and help tags"@en ;
+    rdfs:comment "Scope: All 65 cards and the synonyms and claims in their notes: every command typed into Vim 9.1 under a pseudo-terminal, with -Nu NONE and with --clean, and each card's help tag looked up in Vim's help."@en ,
+                 "Outcome: All 65 cards passed in both configurations, and every help tag exists in Vim 9.1's help. While the test was written, tests run in Vim's silent Ex mode were found to give wrong results for scrolling, windows and the confirm prompt (the screen has no height there), and a test inside a function to undo the effect of n, :noh and . (a function restores the last search and the . register), so the test types its keys under a pseudo-terminal through a command instead."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy (AI)"@en ;
+    rdfs:comment "Scope: All 65 backs and notes, checked by an AI agent against Vim 9.1's help and its own runs of Vim with -Nu NONE and --clean, and the notation across the deck; not a human review."@en ,
+                 "Outcome: No errors; 7 warnings and 6 suggestions, among them that J puts two spaces after . ? ! while 'joinspaces' is on, that <Home> is not quite 0, that :w {file} refuses an existing file (E13), that :q! closes only one window of several, and the wording of t and T and of ci\" between two quoted strings. All 7 warnings and 5 of the suggestions were verified in Vim and applied; the remaining one belongs to the deck's description, which says that every front starts in Normal mode."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "One answer per front, wording and selection (AI)"@en ;
+    rdfs:comment "Scope: All 65 fronts, checked by an AI agent for a second command that answers them, for unique and natural wording, for phrases taken from Vim's help, and for the selection; not a human review."@en ,
+                 "Outcome: No errors; 4 warnings and 14 suggestions. Applied: new fronts for :wq (even if nothing has changed), :q (only without unsaved changes), b, ciw and D; more synonyms in the notes (CTRL-C, _, |, 1G, :tabn, :set nohlsearch, caw, and Neovim's different Y); the cards for j and C added, those for gv and :tabnew dropped. Kept against a suggestion: the card for :w {file}, as saving a copy is more basic than gv."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Test evidence (AI)"@en ;
+    rdfs:comment "Scope: The test script and its output, re-run by an AI agent: whether each card's test shows what its front and note say, not only that Vim gave no error; not a human review."@en ,
+                 "Outcome: One error (:qa! was not tested on real changed files), 5 warnings and 12 suggestions. All but one suggestion, for a card later dropped, were applied: three matches or three buffers wherever forward and backward must differ, the cursor's column after gg, two separate undo steps, linewise P, % on braces, the E20 error for a mark in another file, :up writing only a changed buffer, ; after F, the same buffer in both windows after a split, and the cursor line after CTRL-D in both configurations. The whole script was re-run: 65 of 65 passed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Fronts, notes, title, description and keywords in Swedish, Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: Every front and note, the title, the description and the keywords: translated from the English by one AI agent per language, using the terms Vim's own translations use for its modes and features, then checked by a second AI agent that translated every text back into English without looking at the English first, compared the two, and corrected what had drifted, lost a qualifier that keeps a front to one command, changed a key or placeholder, or read unnaturally; a script then checked that every key, Ex command, option name, error number and placeholder came through unchanged; not a human review."@en ,
+                 "Outcome: 39 corrections (Swedish 2, Korean 5, German 18, Spanish 4, French 10), among them qualifiers restored that keep a front to one command (the Spanish and French fronts for r{char} had lost 'single', the French front for . read as 'redo', the French front for % had left out braces), German words that had meant two things (markieren, einfügen) kept to one, and the German for tab page made Reiter, as Vim's German translation has it."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-13T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks"@en ;
+    rdfs:comment "Scope: The whole release, with the library checker (npm run library), which validates it against Solid Memo's shapes (library deck format 6, card format 5), DCAT-AP and SKOS with the reference data, and with a second, independent SHACL validator (pySHACL, npm run crosscheck) over the same shapes."@en ,
+                 "Outcome: The release conforms: the library checker found the library valid with this deck in it, and pySHACL found all 222 documents it checks conform."@en .
+
+<#test-runs>
+    dcterms:title "Test run of every command in Vim 9.1, headless, with and without defaults.vim" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Written for this deck: the test script run-vim-tests.sh, its Vim helpers and its recorded output, kept with the deck's working notes, not in the library. They are dedicated to the public domain under CC0 1.0. The Vim messages quoted in the output (such as E13 and E37) are Vim's own, under the Vim license, and are reproduced only as a record of what the program printed; the deck names their numbers only. Running a program and recording which keys it accepts and what they do copies none of its code or documentation."@en .
+
+<https://github.com/vim/vim/tree/master/runtime/doc>
+    dcterms:title "Vim reference manual (:help, runtime/doc of Vim 9.1)" ;
+    dcterms:creator "Bram Moolenaar and the Vim project" ;
+    dcterms:license <https://github.com/vim/vim/blob/master/LICENSE> ;
+    rdfs:comment "Verification only: Vim's help as installed with Vim 9.1 (/usr/share/vim/vim91/doc), the same files as runtime/doc in Vim's source repository. Vim's LICENSE file (https://github.com/vim/vim/blob/master/LICENSE) covers the runtime files and documentation; :help license (uganda.txt) quotes Richard Stallman that the Vim license is GNU GPL compatible. No text was copied into the deck."@en .
+
+<https://github.com/vim/vim/tree/master/src/po>
+    dcterms:title "Vim's message translations (src/po in Vim's source repository)" ;
+    dcterms:creator "The Vim project and its translators" ;
+    dcterms:license <https://github.com/vim/vim/blob/master/LICENSE> ;
+    rdfs:comment "Verification only: single terms that Vim's Swedish, Korean, German, Spanish and French messages use for its modes and features (such as the names of Insert and Visual mode), so that the translated fronts and notes call them what Vim calls them; no sentence was copied. The files are part of Vim's source distribution, which Vim's LICENSE (https://github.com/vim/vim/blob/master/LICENSE) covers."@en .
+
+<#insert-before-cursor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start typing new text just before the cursor"@en ,
+                     "Börja skriva ny text precis före markören"@sv ,
+                     "커서 바로 앞에서 새 텍스트 입력 시작하기"@ko ,
+                     "Direkt vor dem Cursor mit dem Tippen von neuem Text beginnen"@de ,
+                     "Empezar a escribir texto nuevo justo antes del cursor"@es ,
+                     "Commencer à taper du texte juste avant le curseur"@fr ;
+    solid-memo:back "i" .
+
+<#append-after-cursor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start typing new text just after the cursor"@en ,
+                     "Börja skriva ny text precis efter markören"@sv ,
+                     "커서 바로 뒤에서 새 텍스트 입력 시작하기"@ko ,
+                     "Direkt nach dem Cursor mit dem Tippen von neuem Text beginnen"@de ,
+                     "Empezar a escribir texto nuevo justo después del cursor"@es ,
+                     "Commencer à taper du texte juste après le curseur"@fr ;
+    solid-memo:back "a" .
+
+<#insert-at-line-start>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start typing at the beginning of the line's text, after any indentation"@en ,
+                     "Börja skriva i början av radens text, efter eventuell indragning"@sv ,
+                     "들여쓰기 다음, 줄의 텍스트 맨 앞에서 입력 시작하기"@ko ,
+                     "Am Anfang des Zeilentexts, hinter einer etwaigen Einrückung, mit dem Tippen beginnen"@de ,
+                     "Empezar a escribir al principio del texto de la línea, después de la sangría"@es ,
+                     "Commencer à taper au début du texte de la ligne, après l’indentation éventuelle"@fr ;
+    solid-memo:back "I" ;
+    solid-memo:backNote "gI starts typing in column 1 instead, before any indent."@en ,
+                        "gI börjar i stället skriva i kolumn 1, före all indragning."@sv ,
+                        "gI는 대신 1열, 즉 들여쓰기 앞에서 입력을 시작해요."@ko ,
+                        "gI beginnt stattdessen in Spalte 1, vor einer etwaigen Einrückung."@de ,
+                        "gI empieza a escribir en la columna 1, antes de cualquier sangría."@es ,
+                        "gI commence plutôt à taper en colonne 1, avant toute indentation."@fr .
+
+<#append-at-line-end>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start typing new text at the end of the line"@en ,
+                     "Börja skriva ny text i slutet av raden"@sv ,
+                     "줄 끝에서 새 텍스트 입력 시작하기"@ko ,
+                     "Am Ende der Zeile mit dem Tippen von neuem Text beginnen"@de ,
+                     "Empezar a escribir texto nuevo al final de la línea"@es ,
+                     "Commencer à taper du texte à la fin de la ligne"@fr ;
+    solid-memo:back "A" .
+
+<#open-line-below>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Add a new line below the current one and start typing on it"@en ,
+                     "Lägg till en ny rad under den aktuella och börja skriva på den"@sv ,
+                     "현재 줄 아래에 새 줄을 추가하고 그 줄에서 입력 시작하기"@ko ,
+                     "Unter der aktuellen Zeile eine neue Zeile anlegen und darin mit dem Tippen beginnen"@de ,
+                     "Añadir una línea nueva debajo de la actual y empezar a escribir en ella"@es ,
+                     "Ajouter une nouvelle ligne sous la ligne courante et commencer à y taper"@fr ;
+    solid-memo:back "o" ;
+    solid-memo:backNote "O (capital) adds the new line above the current one instead."@en ,
+                        "O (versalt) lägger i stället till den nya raden ovanför den aktuella."@sv ,
+                        "O(대문자)는 대신 현재 줄 위에 새 줄을 추가해요."@ko ,
+                        "O (groß) legt die neue Zeile stattdessen über der aktuellen an."@de ,
+                        "O (mayúscula) añade la línea nueva encima de la actual."@es ,
+                        "O (majuscule) ajoute plutôt la nouvelle ligne au-dessus de la ligne courante."@fr .
+
+<#leave-insert-mode>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stop typing text and return to Normal mode"@en ,
+                     "Sluta skriva text och gå tillbaka till normalläge"@sv ,
+                     "텍스트 입력을 멈추고 노멀 모드로 돌아가기"@ko ,
+                     "Mit dem Tippen von Text aufhören und in den Normalmodus zurückkehren"@de ,
+                     "Dejar de escribir texto y volver al modo Normal"@es ,
+                     "Arrêter de taper du texte et revenir au mode Normal"@fr ;
+    solid-memo:back "<Esc>" ;
+    solid-memo:backNote "CTRL-[ is the same key code as <Esc> and works the same way. CTRL-C also leaves Insert mode, but skips abbreviations and the InsertLeave event."@en ,
+                        "CTRL-[ ger samma tangentkod som <Esc> och fungerar likadant. CTRL-C lämnar också infogningsläget, men hoppar över förkortningar och händelsen InsertLeave."@sv ,
+                        "CTRL-[는 <Esc>와 같은 키 코드라서 똑같이 동작해요. CTRL-C도 삽입 모드를 끝내지만 약어(abbreviation)와 InsertLeave 이벤트를 건너뛰어요."@ko ,
+                        "CTRL-[ erzeugt denselben Tastencode wie <Esc> und wirkt genauso. Auch CTRL-C verlässt den Einfügemodus, überspringt aber Abkürzungen und das Ereignis InsertLeave."@de ,
+                        "CTRL-[ es el mismo código de tecla que <Esc> y funciona igual. CTRL-C también sale del modo Insertar, pero se salta las abreviaturas y el evento InsertLeave."@es ,
+                        "CTRL-[ envoie le même code de touche que <Esc> et fonctionne de la même façon. CTRL-C quitte aussi le mode Insertion, mais sans appliquer les abréviations ni déclencher l’événement InsertLeave."@fr .
+
+<#visual-characterwise>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start selecting text one character at a time"@en ,
+                     "Börja markera text ett tecken i taget"@sv ,
+                     "한 글자씩 텍스트 선택 시작하기"@ko ,
+                     "Mit dem zeichenweisen Markieren von Text beginnen"@de ,
+                     "Empezar a seleccionar texto carácter a carácter"@es ,
+                     "Commencer à sélectionner du texte caractère par caractère"@fr ;
+    solid-memo:back "v" ;
+    solid-memo:backNote "Press v again or <Esc> to stop selecting."@en ,
+                        "Tryck v igen eller <Esc> för att sluta markera."@sv ,
+                        "선택을 멈추려면 v를 한 번 더 누르거나 <Esc>를 눌러요."@ko ,
+                        "Erneut v oder <Esc> drücken, um die Markierung zu beenden."@de ,
+                        "Pulsa v otra vez o <Esc> para dejar de seleccionar."@es ,
+                        "Appuyez de nouveau sur v ou sur <Esc> pour arrêter la sélection."@fr .
+
+<#visual-linewise>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start selecting whole lines"@en ,
+                     "Börja markera hela rader"@sv ,
+                     "줄 전체 단위로 선택 시작하기"@ko ,
+                     "Mit dem Markieren ganzer Zeilen beginnen"@de ,
+                     "Empezar a seleccionar líneas enteras"@es ,
+                     "Commencer à sélectionner des lignes entières"@fr ;
+    solid-memo:back "V" .
+
+<#visual-block>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start selecting a rectangular block of text"@en ,
+                     "Börja markera ett rektangulärt textblock"@sv ,
+                     "직사각형 블록으로 텍스트 선택 시작하기"@ko ,
+                     "Mit dem Markieren eines rechteckigen Textblocks beginnen"@de ,
+                     "Empezar a seleccionar un bloque rectangular de texto"@es ,
+                     "Commencer à sélectionner un bloc de texte rectangulaire"@fr ;
+    solid-memo:back "CTRL-V" ;
+    solid-memo:backNote "Where CTRL-V is set up to paste (for example in Vim on Windows), CTRL-Q starts block selection instead."@en ,
+                        "Där CTRL-V är inställt för att klistra in (till exempel i Vim på Windows) startar CTRL-Q blockmarkering i stället."@sv ,
+                        "CTRL-V가 붙여넣기로 설정된 곳(예를 들어 Windows의 Vim)에서는 대신 CTRL-Q로 블록 선택을 시작해요."@ko ,
+                        "Wo CTRL-V zum Einfügen belegt ist (zum Beispiel in Vim unter Windows), beginnt CTRL-Q stattdessen die Blockmarkierung."@de ,
+                        "Donde CTRL-V está configurado para pegar (por ejemplo, en Vim para Windows), CTRL-Q inicia la selección de bloque."@es ,
+                        "Là où CTRL-V sert à coller (par exemple dans Vim sous Windows), c’est CTRL-Q qui lance la sélection en bloc."@fr .
+
+<#replace-mode>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start typing over the existing text instead of inserting"@en ,
+                     "Börja skriva över den befintliga texten i stället för att infoga"@sv ,
+                     "삽입하지 않고 기존 텍스트를 덮어쓰며 입력 시작하기"@ko ,
+                     "Mit dem Tippen beginnen und dabei den vorhandenen Text überschreiben, statt einzufügen"@de ,
+                     "Empezar a escribir sobre el texto existente en lugar de insertar"@es ,
+                     "Commencer à taper par-dessus le texte existant au lieu de l’insérer"@fr ;
+    solid-memo:back "R" ;
+    solid-memo:backNote "Each typed character replaces one character; <Esc> ends it. To replace just one character, use r{char}."@en ,
+                        "Varje tecken du skriver ersätter ett tecken; <Esc> avslutar. För att ersätta bara ett tecken, använd r{char}."@sv ,
+                        "입력한 글자 하나가 기존 글자 하나를 바꾸고, <Esc>로 끝내요. 글자 하나만 바꾸려면 r{char}를 써요."@ko ,
+                        "Jedes getippte Zeichen ersetzt ein Zeichen; <Esc> beendet das. Um nur ein einzelnes Zeichen zu ersetzen, r{char} verwenden."@de ,
+                        "Cada carácter que escribes sustituye a uno; <Esc> termina. Para sustituir un solo carácter, usa r{char}."@es ,
+                        "Chaque caractère tapé en remplace un ; <Esc> y met fin. Pour remplacer un seul caractère, utilisez r{char}."@fr .
+
+<#save-file>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Save the current file"@en ,
+                     "Spara den aktuella filen"@sv ,
+                     "현재 파일 저장하기"@ko ,
+                     "Die aktuelle Datei speichern"@de ,
+                     "Guardar el archivo actual"@es ,
+                     "Enregistrer le fichier courant"@fr ;
+    solid-memo:back ":w" ;
+    solid-memo:backNote "Long form :write. :update (:up) saves only if the buffer has changed."@en ,
+                        "Lång form: :write. :update (:up) sparar bara om bufferten har ändrats."@sv ,
+                        "긴 형태는 :write예요. :update(:up)는 버퍼가 바뀌었을 때만 저장해요."@ko ,
+                        "Langform :write. :update (:up) speichert nur, wenn der Puffer geändert wurde."@de ,
+                        "Forma larga: :write. :update (:up) solo guarda si el búfer ha cambiado."@es ,
+                        "Forme longue :write. :update (:up) n’enregistre que si le tampon a été modifié."@fr .
+
+<#quit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Quit Vim, but only if there are no unsaved changes"@en ,
+                     "Avsluta Vim, men bara om det inte finns några osparade ändringar"@sv ,
+                     "저장하지 않은 변경 사항이 없을 때만 Vim 종료하기"@ko ,
+                     "Vim beenden, aber nur, wenn es keine ungespeicherten Änderungen gibt"@de ,
+                     "Salir de Vim, pero solo si no hay cambios sin guardar"@es ,
+                     "Quitter Vim, mais seulement s’il n’y a pas de modifications non enregistrées"@fr ;
+    solid-memo:back ":q" ;
+    solid-memo:backNote "Long form :quit. With several windows open, :q closes only the current window; :qa closes them all."@en ,
+                        "Lång form: :quit. Med flera fönster öppna stänger :q bara det aktuella fönstret; :qa stänger alla."@sv ,
+                        "긴 형태는 :quit이에요. 창이 여러 개 열려 있으면 :q는 현재 창만 닫고, :qa는 모두 닫아요."@ko ,
+                        "Langform :quit. Sind mehrere Fenster offen, schließt :q nur das aktuelle Fenster; :qa schließt alle."@de ,
+                        "Forma larga: :quit. Con varias ventanas abiertas, :q cierra solo la ventana actual; :qa las cierra todas."@es ,
+                        "Forme longue :quit. Avec plusieurs fenêtres ouvertes, :q ferme seulement la fenêtre courante ; :qa les ferme toutes."@fr .
+
+<#quit-discard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Quit Vim without saving the changes to the file you are editing"@en ,
+                     "Avsluta Vim utan att spara ändringarna i filen du redigerar"@sv ,
+                     "편집 중인 파일의 변경 사항을 저장하지 않고 Vim 종료하기"@ko ,
+                     "Vim beenden, ohne die Änderungen an der bearbeiteten Datei zu speichern"@de ,
+                     "Salir de Vim sin guardar los cambios del archivo que estás editando"@es ,
+                     "Quitter Vim sans enregistrer les modifications du fichier en cours d’édition"@fr ;
+    solid-memo:back ":q!" ;
+    solid-memo:backNote "ZQ does the same. With several windows open, :q! closes only the current one; :qa! quits them all and throws away every change."@en ,
+                        "ZQ gör samma sak. Med flera fönster öppna stänger :q! bara det aktuella; :qa! avslutar alla och kastar bort alla ändringar."@sv ,
+                        "ZQ도 같아요. 창이 여러 개 열려 있으면 :q!는 현재 창만 닫고, :qa!는 모두 종료하면서 모든 변경 사항을 버려요."@ko ,
+                        "ZQ tut dasselbe. Sind mehrere Fenster offen, schließt :q! nur das aktuelle; :qa! beendet alle und verwirft jede Änderung."@de ,
+                        "ZQ hace lo mismo. Con varias ventanas abiertas, :q! cierra solo la actual; :qa! sale de todas y descarta todos los cambios."@es ,
+                        "ZQ fait la même chose. Avec plusieurs fenêtres ouvertes, :q! ferme seulement la fenêtre courante ; :qa! les ferme toutes et abandonne toutes les modifications."@fr .
+
+<#save-and-quit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Save the file, even if nothing has changed, and quit Vim"@en ,
+                     "Spara filen, även om inget har ändrats, och avsluta Vim"@sv ,
+                     "바뀐 것이 없어도 파일을 저장하고 Vim 종료하기"@ko ,
+                     "Die Datei speichern, auch wenn sich nichts geändert hat, und Vim beenden"@de ,
+                     "Guardar el archivo, aunque no haya cambios, y salir de Vim"@es ,
+                     "Enregistrer le fichier, même si rien n’a changé, et quitter Vim"@fr ;
+    solid-memo:back ":wq" ;
+    solid-memo:backNote ":x and ZZ also save and quit, but they write the file only when there are changes."@en ,
+                        ":x och ZZ sparar och avslutar också, men skriver bara filen när det finns ändringar."@sv ,
+                        ":x와 ZZ도 저장하고 종료하지만, 변경 사항이 있을 때만 파일을 써요."@ko ,
+                        ":x und ZZ speichern und beenden ebenfalls, schreiben die Datei aber nur, wenn es Änderungen gibt."@de ,
+                        ":x y ZZ también guardan y salen, pero solo escriben el archivo si hay cambios."@es ,
+                        ":x et ZZ enregistrent et quittent aussi, mais n’écrivent le fichier que s’il y a des modifications."@fr .
+
+<#edit-file>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Open another file in the current window"@en ,
+                     "Öppna en annan fil i det aktuella fönstret"@sv ,
+                     "현재 창에서 다른 파일 열기"@ko ,
+                     "Eine andere Datei im aktuellen Fenster öffnen"@de ,
+                     "Abrir otro archivo en la ventana actual"@es ,
+                     "Ouvrir un autre fichier dans la fenêtre courante"@fr ;
+    solid-memo:back ":e {file}" ;
+    solid-memo:backNote "Long form :edit {file}. Vim refuses (E37) while the current buffer has unsaved changes (unless, for example, 'hidden' is set); :e! {file} throws the changes away."@en ,
+                        "Lång form: :edit {file}. Vim vägrar (E37) så länge den aktuella bufferten har osparade ändringar (om inte till exempel 'hidden' är satt); :e! {file} kastar bort ändringarna."@sv ,
+                        "긴 형태는 :edit {file}이에요. 현재 버퍼에 저장하지 않은 변경 사항이 있으면, 예를 들어 'hidden'이 설정되어 있지 않은 한 Vim이 거부해요(E37). :e! {file}은 변경 사항을 버려요."@ko ,
+                        "Langform :edit {file}. Vim verweigert das (E37), solange der aktuelle Puffer ungespeicherte Änderungen hat (es sei denn, zum Beispiel 'hidden' ist gesetzt); :e! {file} verwirft die Änderungen."@de ,
+                        "Forma larga: :edit {file}. Vim se niega (E37) mientras el búfer actual tenga cambios sin guardar (salvo que, por ejemplo, esté activada 'hidden'); :e! {file} descarta los cambios."@es ,
+                        "Forme longue :edit {file}. Vim refuse (E37) tant que le tampon courant a des modifications non enregistrées (sauf, par exemple, si 'hidden' est activée) ; :e! {file} abandonne les modifications."@fr .
+
+<#write-to-other-file>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Save a copy of the buffer to a different file but keep editing the current one"@en ,
+                     "Spara en kopia av bufferten i en annan fil men fortsätt redigera den aktuella"@sv ,
+                     "버퍼의 사본을 다른 파일로 저장하되 현재 파일은 계속 편집하기"@ko ,
+                     "Eine Kopie des Puffers in eine andere Datei speichern, aber die aktuelle weiter bearbeiten"@de ,
+                     "Guardar una copia del búfer en otro archivo pero seguir editando el actual"@es ,
+                     "Enregistrer une copie du tampon dans un autre fichier tout en continuant à éditer le fichier courant"@fr ;
+    solid-memo:back ":w {file}" ;
+    solid-memo:backNote "If {file} already exists, Vim refuses (E13); :w! {file} overwrites it. To save under the new name and continue editing that file instead, use :sav {file} (:saveas). If the buffer has no name yet, :w {file} gives it that name."@en ,
+                        "Om {file} redan finns vägrar Vim (E13); :w! {file} skriver över den. För att spara under det nya namnet och i stället fortsätta redigera den filen, använd :sav {file} (:saveas). Om bufferten ännu saknar namn ger :w {file} den det namnet."@sv ,
+                        "{file}이 이미 있으면 Vim이 거부해요(E13). :w! {file}은 그 파일을 덮어써요. 새 이름으로 저장하고 대신 그 파일을 계속 편집하려면 :sav {file}(:saveas)을 써요. 버퍼에 아직 이름이 없으면 :w {file}이 버퍼에 그 이름을 붙여요."@ko ,
+                        "Gibt es {file} schon, verweigert Vim das (E13); :w! {file} überschreibt sie. Um unter dem neuen Namen zu speichern und dann diese Datei weiter zu bearbeiten, :sav {file} (:saveas) verwenden. Hat der Puffer noch keinen Namen, gibt :w {file} ihm diesen Namen."@de ,
+                        "Si {file} ya existe, Vim se niega (E13); :w! {file} lo sobrescribe. Para guardar con el nombre nuevo y seguir editando ese archivo, usa :sav {file} (:saveas). Si el búfer aún no tiene nombre, :w {file} le da ese nombre."@es ,
+                        "Si {file} existe déjà, Vim refuse (E13) ; :w! {file} l’écrase. Pour enregistrer sous le nouveau nom et continuer plutôt à éditer ce fichier-là, utilisez :sav {file} (:saveas). Si le tampon n’a pas encore de nom, :w {file} lui donne ce nom."@fr .
+
+<#word-forward>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move forward to the start of the next word"@en ,
+                     "Gå framåt till början av nästa ord"@sv ,
+                     "다음 단어의 시작으로 이동하기"@ko ,
+                     "Vorwärts zum Anfang des nächsten Worts springen"@de ,
+                     "Avanzar al principio de la siguiente palabra"@es ,
+                     "Avancer jusqu’au début du mot suivant"@fr ;
+    solid-memo:back "w" ;
+    solid-memo:backNote "Punctuation counts as a word of its own. W moves by space-separated WORDs instead."@en ,
+                        "Skiljetecken räknas som ett eget ord. W går i stället fram med blankstegsavgränsade WORD."@sv ,
+                        "문장 부호는 그 자체로 한 단어로 쳐요. W는 대신 공백으로 구분된 WORD 단위로 이동해요."@ko ,
+                        "Satzzeichen zählen als eigenes Wort. W springt stattdessen von WORD zu WORD (durch Leerraum getrennte Wörter)."@de ,
+                        "Los signos de puntuación cuentan como una palabra propia. W avanza por PALABRAS separadas por espacios."@es ,
+                        "La ponctuation compte comme un mot à part entière. W avance plutôt par MOTS séparés par des espaces."@fr .
+
+<#word-backward>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move back to the start of the current word, or of the previous one"@en ,
+                     "Gå tillbaka till början av det aktuella ordet, eller av det föregående"@sv ,
+                     "현재 단어나 이전 단어의 시작으로 되돌아가기"@ko ,
+                     "Zurück zum Anfang des aktuellen oder des vorigen Worts springen"@de ,
+                     "Retroceder al principio de la palabra actual o de la anterior"@es ,
+                     "Reculer jusqu’au début du mot courant, ou du mot précédent"@fr ;
+    solid-memo:back "b" ;
+    solid-memo:backNote "B moves by space-separated WORDs instead."@en ,
+                        "B går i stället med blankstegsavgränsade WORD."@sv ,
+                        "B는 대신 공백으로 구분된 WORD 단위로 이동해요."@ko ,
+                        "B springt stattdessen von WORD zu WORD zurück (durch Leerraum getrennte Wörter)."@de ,
+                        "B retrocede por PALABRAS separadas por espacios."@es ,
+                        "B recule plutôt par MOTS séparés par des espaces."@fr .
+
+<#word-end>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move to the last character of the word, or of the next word"@en ,
+                     "Gå till ordets sista tecken, eller till nästa ords"@sv ,
+                     "단어의 마지막 글자, 또는 다음 단어의 마지막 글자로 이동하기"@ko ,
+                     "Zum letzten Zeichen des Worts oder des nächsten Worts springen"@de ,
+                     "Ir al último carácter de la palabra o de la siguiente"@es ,
+                     "Aller au dernier caractère du mot, ou du mot suivant"@fr ;
+    solid-memo:back "e" ;
+    solid-memo:backNote "From the last character of a word it goes to the end of the next one. E moves by space-separated WORDs."@en ,
+                        "Från ett ords sista tecken går det till slutet av nästa ord. E går med blankstegsavgränsade WORD."@sv ,
+                        "단어의 마지막 글자에서는 다음 단어의 끝으로 가요. E는 공백으로 구분된 WORD 단위로 이동해요."@ko ,
+                        "Vom letzten Zeichen eines Worts geht es zum Ende des nächsten. E springt von WORD-Ende zu WORD-Ende (durch Leerraum getrennte Wörter)."@de ,
+                        "Desde el último carácter de una palabra va al final de la siguiente. E se mueve por PALABRAS separadas por espacios."@es ,
+                        "Depuis le dernier caractère d’un mot, il va à la fin du mot suivant. E se déplace par MOTS séparés par des espaces."@fr .
+
+<#line-first-column>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move to the very first column of the line"@en ,
+                     "Gå till radens allra första kolumn"@sv ,
+                     "줄의 맨 첫 열로 이동하기"@ko ,
+                     "Zur allerersten Spalte der Zeile springen"@de ,
+                     "Ir a la primera columna de la línea"@es ,
+                     "Aller à la toute première colonne de la ligne"@fr ;
+    solid-memo:back "0" ;
+    solid-memo:backNote "<Home> and | (bar) do nearly the same."@en ,
+                        "<Home> och | (lodstreck) gör nästan samma sak."@sv ,
+                        "<Home>과 |(세로 막대)도 거의 같아요."@ko ,
+                        "<Home> und | (senkrechter Strich) tun fast dasselbe."@de ,
+                        "<Home> y | (barra vertical) hacen casi lo mismo."@es ,
+                        "<Home> et | (barre verticale) font presque la même chose."@fr .
+
+<#line-first-nonblank>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move to where the text of the line begins, past any indentation"@en ,
+                     "Gå dit radens text börjar, förbi eventuell indragning"@sv ,
+                     "들여쓰기를 지나 줄의 텍스트가 시작되는 곳으로 이동하기"@ko ,
+                     "Dorthin springen, wo der Text der Zeile beginnt, hinter einer etwaigen Einrückung"@de ,
+                     "Ir a donde empieza el texto de la línea, pasada la sangría"@es ,
+                     "Aller là où commence le texte de la ligne, après l’indentation éventuelle"@fr ;
+    solid-memo:back "^" ;
+    solid-memo:backNote "_ (underscore) does the same."@en ,
+                        "_ (understreck) gör samma sak."@sv ,
+                        "_(밑줄)도 같아요."@ko ,
+                        "_ (Unterstrich) tut dasselbe."@de ,
+                        "_ (guion bajo) hace lo mismo."@es ,
+                        "_ (tiret bas) fait la même chose."@fr .
+
+<#line-end>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move to the last character of the line"@en ,
+                     "Gå till radens sista tecken"@sv ,
+                     "줄의 마지막 글자로 이동하기"@ko ,
+                     "Zum letzten Zeichen der Zeile springen"@de ,
+                     "Ir al último carácter de la línea"@es ,
+                     "Aller au dernier caractère de la ligne"@fr ;
+    solid-memo:back "$" ;
+    solid-memo:backNote "<End> does the same. With a count, $ moves to the end of a later line (2$ is the end of the next line)."@en ,
+                        "<End> gör samma sak. Med ett antal går $ till slutet av en senare rad (2$ är slutet av nästa rad)."@sv ,
+                        "<End>도 같아요. 횟수를 붙이면 $는 더 아래 줄의 끝으로 이동해요(2$는 다음 줄의 끝이에요)."@ko ,
+                        "<End> tut dasselbe. Mit einer Anzahl springt $ zum Ende einer späteren Zeile (2$ ist das Ende der nächsten Zeile)."@de ,
+                        "<End> hace lo mismo. Con un contador, $ va al final de una línea posterior (2$ es el final de la línea siguiente)."@es ,
+                        "<End> fait la même chose. Avec un nombre, $ va à la fin d’une ligne plus bas (2$ est la fin de la ligne suivante)."@fr .
+
+<#line-down>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move the cursor down one line"@en ,
+                     "Flytta markören en rad nedåt"@sv ,
+                     "커서를 한 줄 아래로 이동하기"@ko ,
+                     "Den Cursor eine Zeile nach unten bewegen"@de ,
+                     "Bajar el cursor una línea"@es ,
+                     "Descendre le curseur d’une ligne"@fr ;
+    solid-memo:back "j" ;
+    solid-memo:backNote "k moves up one line; h and l move one character left and right. <Down> works like j."@en ,
+                        "k går en rad uppåt; h och l går ett tecken åt vänster respektive höger. <Down> fungerar som j."@sv ,
+                        "k는 한 줄 위로, h와 l은 한 글자 왼쪽과 오른쪽으로 이동해요. <Down>은 j처럼 동작해요."@ko ,
+                        "k bewegt eine Zeile nach oben; h und l bewegen ein Zeichen nach links und rechts. <Down> wirkt wie j."@de ,
+                        "k sube una línea; h y l mueven un carácter a la izquierda y a la derecha. <Down> funciona como j."@es ,
+                        "k monte d’une ligne ; h et l déplacent le curseur d’un caractère vers la gauche et vers la droite. <Down> fonctionne comme j."@fr .
+
+<#first-line>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Go to the first line of the file"@en ,
+                     "Gå till filens första rad"@sv ,
+                     "파일의 첫 줄로 가기"@ko ,
+                     "Zur ersten Zeile der Datei gehen"@de ,
+                     "Ir a la primera línea del archivo"@es ,
+                     "Aller à la première ligne du fichier"@fr ;
+    solid-memo:back "gg" ;
+    solid-memo:backNote ":1 and 1G do the same. With Vim's default 'startofline' the cursor lands on the first non-blank character."@en ,
+                        ":1 och 1G gör samma sak. Med Vims standardvärde för 'startofline' hamnar markören på första icke-blanka tecknet."@sv ,
+                        ":1과 1G도 같아요. Vim의 기본 'startofline' 설정에서는 커서가 공백이 아닌 첫 글자에 놓여요."@ko ,
+                        ":1 und 1G tun dasselbe. Mit Vims voreingestelltem 'startofline' landet der Cursor auf dem ersten Nicht-Leerzeichen."@de ,
+                        ":1 y 1G hacen lo mismo. Con el valor predeterminado de 'startofline' en Vim, el cursor queda en el primer carácter que no es un espacio en blanco."@es ,
+                        ":1 et 1G font la même chose. Avec la valeur par défaut de 'startofline' dans Vim, le curseur arrive sur le premier caractère non blanc."@fr .
+
+<#last-line>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Go to the last line of the file"@en ,
+                     "Gå till filens sista rad"@sv ,
+                     "파일의 마지막 줄로 가기"@ko ,
+                     "Zur letzten Zeile der Datei gehen"@de ,
+                     "Ir a la última línea del archivo"@es ,
+                     "Aller à la dernière ligne du fichier"@fr ;
+    solid-memo:back "G" .
+
+<#go-to-line>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Go to line {n}"@en ,
+                     "Gå till rad {n}"@sv ,
+                     "{n}번 줄로 가기"@ko ,
+                     "Zu Zeile {n} gehen"@de ,
+                     "Ir a la línea {n}"@es ,
+                     "Aller à la ligne {n}"@fr ;
+    solid-memo:back "{n}G" ;
+    solid-memo:backNote ":{n} and {n}gg do the same."@en ,
+                        ":{n} och {n}gg gör samma sak."@sv ,
+                        ":{n}과 {n}gg도 같아요."@ko ,
+                        ":{n} und {n}gg tun dasselbe."@de ,
+                        ":{n} y {n}gg hacen lo mismo."@es ,
+                        ":{n} et {n}gg font la même chose."@fr .
+
+<#matching-bracket>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jump to the bracket that pairs with the one under the cursor"@en ,
+                     "Hoppa till parentesen som hör ihop med den under markören"@sv ,
+                     "커서 아래 괄호와 짝을 이루는 괄호로 이동하기"@ko ,
+                     "Zu der Klammer springen, die zu der unter dem Cursor gehört"@de ,
+                     "Saltar al paréntesis, corchete o llave que forma pareja con el que está bajo el cursor"@es ,
+                     "Sauter au délimiteur (parenthèse, crochet ou accolade) qui fait la paire avec celui sous le curseur"@fr ;
+    solid-memo:back "%" ;
+    solid-memo:backNote "Works for (), [] and {}, and also for C comments /* */ and #if/#endif. If the cursor is not on a bracket, Vim uses the next bracket on the line."@en ,
+                        "Fungerar för (), [] och {}, och även för C-kommentarer /* */ och #if/#endif. Om markören inte står på en parentes använder Vim nästa parentes på raden."@sv ,
+                        "(), [], {}뿐 아니라 C 주석 /* */과 #if/#endif에도 써요. 커서가 괄호 위에 있지 않으면 Vim은 그 줄에서 다음에 나오는 괄호를 써요."@ko ,
+                        "Funktioniert für (), [] und {}, außerdem für C-Kommentare /* */ und #if/#endif. Steht der Cursor auf keiner Klammer, nimmt Vim die nächste Klammer in der Zeile."@de ,
+                        "Funciona con (), [] y {}, y también con los comentarios de C /* */ y con #if/#endif. Si el cursor no está sobre un paréntesis, corchete o llave, Vim usa el siguiente de la línea."@es ,
+                        "Fonctionne pour (), [] et {}, ainsi que pour les commentaires C /* */ et #if/#endif. Si le curseur n’est pas sur un délimiteur, Vim prend le suivant sur la ligne."@fr .
+
+<#find-char>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move to the next {char} on the current line"@en ,
+                     "Gå till nästa {char} på den aktuella raden"@sv ,
+                     "현재 줄에서 다음 {char}로 이동하기"@ko ,
+                     "Zum nächsten {char} in der aktuellen Zeile springen"@de ,
+                     "Ir al siguiente {char} de la línea actual"@es ,
+                     "Aller au prochain {char} sur la ligne courante"@fr ;
+    solid-memo:back "f{char}" ;
+    solid-memo:backNote "F{char} searches backwards. t{char} and T{char} stop just short of it (t forward, T backward). The cursor stays put if there is no {char}."@en ,
+                        "F{char} söker bakåt. t{char} och T{char} stannar precis före (t framåt, T bakåt). Markören står kvar om det inte finns något {char}."@sv ,
+                        "F{char}는 역방향으로 찾아요. t{char}와 T{char}는 그 바로 앞에서 멈춰요(t는 정방향, T는 역방향). {char}가 없으면 커서는 그대로 있어요."@ko ,
+                        "F{char} sucht rückwärts. t{char} und T{char} halten direkt davor an (t vorwärts, T rückwärts). Gibt es kein {char}, bleibt der Cursor stehen."@de ,
+                        "F{char} busca hacia atrás. t{char} y T{char} se detienen justo antes (t hacia delante, T hacia atrás). El cursor no se mueve si no hay ningún {char}."@es ,
+                        "F{char} cherche vers l’arrière. t{char} et T{char} s’arrêtent juste avant (t vers l’avant, T vers l’arrière). Le curseur ne bouge pas s’il n’y a pas de {char}."@fr .
+
+<#repeat-find>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jump again to the character found by the last f, t, F or T, in the same direction"@en ,
+                     "Hoppa igen till tecknet som hittades av senaste f, t, F eller T, i samma riktning"@sv ,
+                     "마지막 f, t, F, T로 찾은 글자를 같은 방향으로 다시 찾아 이동하기"@ko ,
+                     "Erneut zu dem Zeichen springen, das das letzte f, t, F oder T gefunden hat, in derselben Richtung"@de ,
+                     "Volver a saltar al carácter encontrado por el último f, t, F o T, en la misma dirección"@es ,
+                     "Sauter de nouveau au caractère trouvé par le dernier f, t, F ou T, dans le même sens"@fr ;
+    solid-memo:back ";" ;
+    solid-memo:backNote ", repeats it in the opposite direction."@en ,
+                        ", upprepar det i motsatt riktning."@sv ,
+                        ",는 반대 방향으로 반복해요."@ko ,
+                        ", wiederholt es in der Gegenrichtung."@de ,
+                        ", lo repite en la dirección contraria."@es ,
+                        ", le répète dans le sens opposé."@fr .
+
+<#half-page-down>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scroll down by half a screen"@en ,
+                     "Rulla ned en halv skärm"@sv ,
+                     "화면 절반만큼 아래로 스크롤하기"@ko ,
+                     "Um einen halben Bildschirm nach unten scrollen"@de ,
+                     "Desplazar hacia abajo media pantalla"@es ,
+                     "Faire défiler vers le bas d’une demi-fenêtre"@fr ;
+    solid-memo:back "CTRL-D" ;
+    solid-memo:backNote "CTRL-U scrolls up by half a screen. The amount is the 'scroll' option, half the window height by default."@en ,
+                        "CTRL-U rullar upp en halv skärm. Hur långt styrs av flaggan 'scroll', som standard halva fönsterhöjden."@sv ,
+                        "CTRL-U는 화면 절반만큼 위로 스크롤해요. 스크롤 양은 'scroll' 옵션이며 기본값은 창 높이의 절반이에요."@ko ,
+                        "CTRL-U scrollt einen halben Bildschirm nach oben. Wie weit, bestimmt die Option 'scroll', standardmäßig die halbe Fensterhöhe."@de ,
+                        "CTRL-U desplaza hacia arriba media pantalla. La cantidad es la opción 'scroll', por defecto la mitad de la altura de la ventana."@es ,
+                        "CTRL-U fait défiler vers le haut d’une demi-fenêtre. La distance est donnée par l’option 'scroll', la moitié de la hauteur de la fenêtre par défaut."@fr .
+
+<#center-cursor-line>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scroll so that the cursor line is in the middle of the window, without moving the cursor"@en ,
+                     "Rulla så att markörens rad hamnar mitt i fönstret, utan att flytta markören"@sv ,
+                     "커서는 움직이지 않고 커서 줄이 창 가운데에 오도록 스크롤하기"@ko ,
+                     "So scrollen, dass die Cursorzeile in der Mitte des Fensters steht, ohne den Cursor zu bewegen"@de ,
+                     "Desplazar la vista para que la línea del cursor quede en el centro de la ventana, sin mover el cursor"@es ,
+                     "Faire défiler pour que la ligne du curseur soit au milieu de la fenêtre, sans déplacer le curseur"@fr ;
+    solid-memo:back "zz" ;
+    solid-memo:backNote "z. also centres the line but moves the cursor to the first non-blank character."@en ,
+                        "z. centrerar också raden men flyttar markören till första icke-blanka tecknet."@sv ,
+                        "z.도 그 줄을 가운데로 오게 하지만 커서를 공백이 아닌 첫 글자로 옮겨요."@ko ,
+                        "z. zentriert die Zeile ebenfalls, setzt den Cursor aber auf das erste Nicht-Leerzeichen."@de ,
+                        "z. también centra la línea, pero lleva el cursor al primer carácter que no es un espacio en blanco."@es ,
+                        "z. centre aussi la ligne, mais déplace le curseur sur le premier caractère non blanc."@fr .
+
+<#jump-back>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Go back through the list of places you jumped from"@en ,
+                     "Gå bakåt genom listan över platser du har hoppat ifrån"@sv ,
+                     "점프하기 전에 있던 위치 목록을 따라 되돌아가기"@ko ,
+                     "Durch die Liste der Stellen zurückgehen, von denen aus man gesprungen ist"@de ,
+                     "Retroceder por la lista de lugares desde los que saltaste"@es ,
+                     "Revenir en arrière dans la liste des endroits d’où vous avez sauté"@fr ;
+    solid-memo:back "CTRL-O" ;
+    solid-memo:backNote "Each press goes one place further back; CTRL-I (or <Tab>) goes forward again. `` (two backticks) also returns to the place before the latest jump, but toggles between two places instead of walking back through the list."@en ,
+                        "Varje tryck går en plats längre bakåt; CTRL-I (eller <Tab>) går framåt igen. `` (två gravisaccenter) återvänder också till platsen före senaste hoppet, men växlar mellan två platser i stället för att gå bakåt genom listan."@sv ,
+                        "누를 때마다 한 곳씩 더 뒤로 가요. CTRL-I(또는 <Tab>)는 다시 앞으로 가요. ``(백틱 두 개)도 가장 최근 점프 이전 위치로 돌아가지만, 목록을 거슬러 가는 대신 두 위치 사이를 오가요."@ko ,
+                        "Jeder Druck geht eine Stelle weiter zurück; CTRL-I (oder <Tab>) geht wieder vorwärts. `` (zwei Backticks) kehrt ebenfalls zur Stelle vor dem letzten Sprung zurück, wechselt aber zwischen zwei Stellen hin und her, statt die Liste zurückzugehen."@de ,
+                        "Cada pulsación retrocede un lugar más; CTRL-I (o <Tab>) vuelve a avanzar. `` (dos acentos graves) también vuelve al lugar anterior al último salto, pero alterna entre dos lugares en vez de recorrer la lista hacia atrás."@es ,
+                        "Chaque appui recule d’un endroit de plus ; CTRL-I (ou <Tab>) avance de nouveau. `` (deux accents graves) revient aussi à l’endroit d’avant le dernier saut, mais alterne entre deux endroits au lieu de remonter la liste."@fr .
+
+<#delete-char>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete the character under the cursor"@en ,
+                     "Radera tecknet under markören"@sv ,
+                     "커서 아래 글자 지우기"@ko ,
+                     "Das Zeichen unter dem Cursor löschen"@de ,
+                     "Borrar el carácter que está bajo el cursor"@es ,
+                     "Supprimer le caractère sous le curseur"@fr ;
+    solid-memo:back "x" ;
+    solid-memo:backNote "<Del> does the same. With a count, 3x deletes three characters."@en ,
+                        "<Del> gör samma sak. Med ett antal raderar 3x tre tecken."@sv ,
+                        "<Del>도 같아요. 횟수를 붙이면 3x는 세 글자를 지워요."@ko ,
+                        "<Del> tut dasselbe. Mit einer Anzahl löscht 3x drei Zeichen."@de ,
+                        "<Del> hace lo mismo. Con un contador, 3x borra tres caracteres."@es ,
+                        "<Del> fait la même chose. Avec un nombre, 3x supprime trois caractères."@fr .
+
+<#delete-line>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete the whole current line"@en ,
+                     "Radera hela den aktuella raden"@sv ,
+                     "현재 줄 전체 지우기"@ko ,
+                     "Die ganze aktuelle Zeile löschen"@de ,
+                     "Borrar toda la línea actual"@es ,
+                     "Supprimer toute la ligne courante"@fr ;
+    solid-memo:back "dd" .
+
+<#delete-word>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete from the cursor to the start of the next word"@en ,
+                     "Radera från markören till början av nästa ord"@sv ,
+                     "커서부터 다음 단어의 시작까지 지우기"@ko ,
+                     "Vom Cursor bis zum Anfang des nächsten Worts löschen"@de ,
+                     "Borrar desde el cursor hasta el principio de la siguiente palabra"@es ,
+                     "Supprimer du curseur jusqu’au début du mot suivant"@fr ;
+    solid-memo:back "dw" ;
+    solid-memo:backNote "To delete the whole word wherever the cursor is in it, use diw or daw."@en ,
+                        "För att radera hela ordet var markören än står i det, använd diw eller daw."@sv ,
+                        "커서가 단어의 어디에 있든 단어 전체를 지우려면 diw나 daw를 써요."@ko ,
+                        "Um das ganze Wort zu löschen, egal wo darin der Cursor steht, diw oder daw verwenden."@de ,
+                        "Para borrar la palabra entera esté donde esté el cursor en ella, usa diw o daw."@es ,
+                        "Pour supprimer le mot entier, où que soit le curseur dans le mot, utilisez diw ou daw."@fr .
+
+<#delete-to-line-end>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete the rest of the line, starting at the cursor"@en ,
+                     "Radera resten av raden, från och med markören"@sv ,
+                     "커서부터 줄의 나머지 부분 지우기"@ko ,
+                     "Den Rest der Zeile ab dem Cursor löschen"@de ,
+                     "Borrar el resto de la línea a partir del cursor"@es ,
+                     "Supprimer le reste de la ligne, à partir du curseur"@fr ;
+    solid-memo:back "D" ;
+    solid-memo:backNote "d$ does the same."@en ,
+                        "d$ gör samma sak."@sv ,
+                        "d$도 같아요."@ko ,
+                        "d$ tut dasselbe."@de ,
+                        "d$ hace lo mismo."@es ,
+                        "d$ fait la même chose."@fr .
+
+<#copy-line>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Copy (yank) the whole current line"@en ,
+                     "Kopiera (”yank”) hela den aktuella raden"@sv ,
+                     "현재 줄 전체 복사(양크)하기"@ko ,
+                     "Die ganze aktuelle Zeile kopieren (yank)"@de ,
+                     "Copiar (yank) toda la línea actual"@es ,
+                     "Copier (yank) toute la ligne courante"@fr ;
+    solid-memo:back "yy" ;
+    solid-memo:backNote "Y does the same in Vim (Neovim maps Y to y$)."@en ,
+                        "Y gör samma sak i Vim (Neovim mappar Y till y$)."@sv ,
+                        "Vim에서는 Y도 같아요(Neovim은 Y를 y$에 매핑해요)."@ko ,
+                        "Y tut in Vim dasselbe (Neovim belegt Y mit y$)."@de ,
+                        "Y hace lo mismo en Vim (Neovim asigna Y a y$)."@es ,
+                        "Y fait la même chose dans Vim (Neovim associe Y à y$)."@fr .
+
+<#put-after>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Paste after the cursor, or below the current line when a whole line was copied"@en ,
+                     "Klistra in efter markören, eller under den aktuella raden när en hel rad kopierades"@sv ,
+                     "커서 뒤에, 또는 줄 전체를 복사했다면 현재 줄 아래에 붙여넣기"@ko ,
+                     "Hinter dem Cursor einfügen oder unter der aktuellen Zeile, wenn eine ganze Zeile kopiert wurde"@de ,
+                     "Pegar después del cursor, o debajo de la línea actual si se copió una línea entera"@es ,
+                     "Coller après le curseur, ou sous la ligne courante si c’est une ligne entière qui a été copiée"@fr ;
+    solid-memo:back "p" ;
+    solid-memo:backNote "P (capital) pastes before the cursor, or above the line."@en ,
+                        "P (versalt) klistrar in före markören, eller ovanför raden."@sv ,
+                        "P(대문자)는 커서 앞에, 또는 줄 위에 붙여넣어요."@ko ,
+                        "P (groß) fügt vor dem Cursor ein oder über der Zeile."@de ,
+                        "P (mayúscula) pega antes del cursor, o encima de la línea."@es ,
+                        "P (majuscule) colle avant le curseur, ou au-dessus de la ligne."@fr .
+
+<#undo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Undo the last change"@en ,
+                     "Ångra den senaste ändringen"@sv ,
+                     "마지막 변경 취소하기"@ko ,
+                     "Die letzte Änderung rückgängig machen"@de ,
+                     "Deshacer el último cambio"@es ,
+                     "Annuler la dernière modification"@fr ;
+    solid-memo:back "u" ;
+    solid-memo:backNote "Repeat it to undo older changes. U (capital) undoes all recent changes on the last changed line at once, and u undoes that U."@en ,
+                        "Upprepa för att ångra äldre ändringar. U (versalt) ångrar alla de senaste ändringarna på den senast ändrade raden på en gång, och ett u efteråt ångrar U."@sv ,
+                        "반복하면 더 이전 변경도 취소해요. U(대문자)는 마지막으로 바뀐 줄의 최근 변경을 한꺼번에 모두 취소하고, u는 그 U를 취소해요."@ko ,
+                        "Wiederholen, um ältere Änderungen rückgängig zu machen. U (groß) macht alle jüngsten Änderungen in der zuletzt geänderten Zeile auf einmal rückgängig, und u macht dieses U rückgängig."@de ,
+                        "Repítelo para deshacer cambios más antiguos. U (mayúscula) deshace de una vez todos los cambios recientes de la última línea modificada, y u deshace esa U."@es ,
+                        "Répétez-le pour annuler des modifications plus anciennes. U (majuscule) annule d’un coup toutes les modifications récentes de la dernière ligne modifiée, et u annule ce U."@fr .
+
+<#redo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Redo the change you just undid"@en ,
+                     "Gör om ändringen du just ångrade"@sv ,
+                     "방금 취소한 변경 다시 하기"@ko ,
+                     "Die gerade rückgängig gemachte Änderung wiederherstellen"@de ,
+                     "Rehacer el cambio que acabas de deshacer"@es ,
+                     "Rétablir la modification que vous venez d’annuler"@fr ;
+    solid-memo:back "CTRL-R" ;
+    solid-memo:backNote "Ex command: :red (:redo)."@en ,
+                        "Ex-kommando: :red (:redo)."@sv ,
+                        "Ex 명령은 :red (:redo)예요."@ko ,
+                        "Ex-Befehl: :red (:redo)."@de ,
+                        "Orden Ex: :red (:redo)."@es ,
+                        "Commande Ex : :red (:redo)."@fr .
+
+<#repeat-last-change>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Do the most recent change again at the cursor"@en ,
+                     "Gör den senaste ändringen igen vid markören"@sv ,
+                     "가장 최근의 변경을 커서 위치에서 다시 하기"@ko ,
+                     "Die jüngste Änderung an der Cursorposition noch einmal ausführen"@de ,
+                     "Volver a hacer el cambio más reciente en la posición del cursor"@es ,
+                     "Répéter la modification la plus récente à l’emplacement du curseur"@fr ;
+    solid-memo:back "." ;
+    solid-memo:backNote "Also repeats a whole insert, for example A;<Esc> on the next line."@en ,
+                        "Upprepar också en hel infogning, till exempel A;<Esc> på nästa rad."@sv ,
+                        "삽입 전체도 반복해요. 예를 들어 A;<Esc>를 다음 줄에서 다시 할 수 있어요."@ko ,
+                        "Wiederholt auch eine ganze Eingabe, zum Beispiel A;<Esc> in der nächsten Zeile."@de ,
+                        "También repite una inserción entera, por ejemplo A;<Esc> en la línea siguiente."@es ,
+                        "Répète aussi toute une insertion, par exemple A;<Esc> sur la ligne suivante."@fr .
+
+<#change-word>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Replace the whole word under the cursor with new text, wherever the cursor is in it, keeping the spaces around it"@en ,
+                     "Ersätt hela ordet under markören med ny text, var markören än står i det, och behåll blankstegen runt det"@sv ,
+                     "커서가 단어의 어디에 있든 커서 아래 단어 전체를 새 텍스트로 바꾸되 주변 공백은 남기기"@ko ,
+                     "Das ganze Wort unter dem Cursor durch neuen Text ersetzen, egal wo darin der Cursor steht, und den Leerraum um das Wort herum behalten"@de ,
+                     "Sustituir toda la palabra bajo el cursor por texto nuevo, esté donde esté el cursor en ella, conservando los espacios de alrededor"@es ,
+                     "Remplacer tout le mot sous le curseur par un nouveau texte, où que soit le curseur dans le mot, en gardant les espaces autour"@fr ;
+    solid-memo:back "ciw" ;
+    solid-memo:backNote "cw changes only from the cursor to the end of the word; caw also removes the space after the word."@en ,
+                        "cw ändrar bara från markören till slutet av ordet; caw tar även bort blanksteget efter ordet."@sv ,
+                        "cw는 커서부터 단어 끝까지만 바꾸고, caw는 단어 뒤의 공백도 지워요."@ko ,
+                        "cw ändert nur vom Cursor bis zum Ende des Worts; caw entfernt auch das Leerzeichen nach dem Wort."@de ,
+                        "cw cambia solo desde el cursor hasta el final de la palabra; caw también quita el espacio que sigue a la palabra."@es ,
+                        "cw ne remplace que la partie allant du curseur à la fin du mot ; caw supprime aussi l’espace après le mot."@fr .
+
+<#change-in-quotes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Replace the text between a pair of double quotes with new text"@en ,
+                     "Ersätt texten mellan ett par dubbla citattecken med ny text"@sv ,
+                     "큰따옴표 한 쌍 사이의 텍스트를 새 텍스트로 바꾸기"@ko ,
+                     "Den Text zwischen zwei doppelten Anführungszeichen durch neuen Text ersetzen"@de ,
+                     "Sustituir por texto nuevo el texto que hay entre un par de comillas dobles"@es ,
+                     "Remplacer le texte entre deux guillemets droits doubles par un nouveau texte"@fr ;
+    solid-memo:back "ci\"" ;
+    solid-memo:backNote "Works with the cursor inside the quotes, and also when it is before the first quote on the line."@en ,
+                        "Fungerar med markören innanför citattecknen, och även när den står före första citattecknet på raden."@sv ,
+                        "커서가 따옴표 안에 있을 때도, 그 줄의 첫 따옴표 앞에 있을 때도 동작해요."@ko ,
+                        "Funktioniert mit dem Cursor zwischen den Anführungszeichen und auch, wenn er vor dem ersten Anführungszeichen der Zeile steht."@de ,
+                        "Funciona con el cursor dentro de las comillas y también cuando está antes de la primera comilla de la línea."@es ,
+                        "Fonctionne avec le curseur entre les guillemets, et aussi quand il est avant le premier guillemet de la ligne."@fr .
+
+<#change-line>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Clear the current line and start typing a new one in its place"@en ,
+                     "Töm den aktuella raden och börja skriva en ny i dess ställe"@sv ,
+                     "현재 줄을 비우고 그 자리에 새 줄 입력 시작하기"@ko ,
+                     "Die aktuelle Zeile leeren und an ihrer Stelle eine neue tippen"@de ,
+                     "Vaciar la línea actual y empezar a escribir una nueva en su lugar"@es ,
+                     "Effacer la ligne courante et commencer à en taper une nouvelle à sa place"@fr ;
+    solid-memo:back "cc" ;
+    solid-memo:backNote "S does the same. With 'autoindent' set (off in Vim's defaults) the line's indent is kept."@en ,
+                        "S gör samma sak. Med 'autoindent' satt (av i Vims standardinställningar) behålls radens indragning."@sv ,
+                        "S도 같아요. 'autoindent'가 설정되어 있으면(Vim 기본값에서는 꺼짐) 줄의 들여쓰기가 유지돼요."@ko ,
+                        "S tut dasselbe. Ist 'autoindent' gesetzt (in Vims Voreinstellungen aus), bleibt die Einrückung der Zeile erhalten."@de ,
+                        "S hace lo mismo. Con 'autoindent' activada (desactivada en los valores predeterminados de Vim) se conserva la sangría de la línea."@es ,
+                        "S fait la même chose. Avec 'autoindent' activée (désactivée dans les réglages par défaut de Vim), l’indentation de la ligne est conservée."@fr .
+
+<#change-to-line-end>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Replace the rest of the line, from the cursor on, with new text"@en ,
+                     "Ersätt resten av raden, från markören och framåt, med ny text"@sv ,
+                     "커서부터 줄의 나머지를 새 텍스트로 바꾸기"@ko ,
+                     "Den Rest der Zeile ab dem Cursor durch neuen Text ersetzen"@de ,
+                     "Sustituir por texto nuevo el resto de la línea, desde el cursor"@es ,
+                     "Remplacer le reste de la ligne, à partir du curseur, par un nouveau texte"@fr ;
+    solid-memo:back "C" ;
+    solid-memo:backNote "c$ does the same."@en ,
+                        "c$ gör samma sak."@sv ,
+                        "c$도 같아요."@ko ,
+                        "c$ tut dasselbe."@de ,
+                        "c$ hace lo mismo."@es ,
+                        "c$ fait la même chose."@fr .
+
+<#replace-char>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Overwrite the single character under the cursor with {char}, staying in Normal mode"@en ,
+                     "Skriv över det enda tecknet under markören med {char} och stanna i normalläge"@sv ,
+                     "노멀 모드에 머문 채 커서 아래 글자 하나를 {char}로 덮어쓰기"@ko ,
+                     "Das einzelne Zeichen unter dem Cursor mit {char} überschreiben und im Normalmodus bleiben"@de ,
+                     "Sobrescribir solo el carácter que está bajo el cursor con {char}, sin salir del modo Normal"@es ,
+                     "Remplacer uniquement le caractère sous le curseur par {char}, en restant en mode Normal"@fr ;
+    solid-memo:back "r{char}" ;
+    solid-memo:backNote "To overwrite several characters, use R."@en ,
+                        "För att skriva över flera tecken, använd R."@sv ,
+                        "여러 글자를 덮어쓰려면 R을 써요."@ko ,
+                        "Um mehrere Zeichen zu überschreiben, R verwenden."@de ,
+                        "Para sobrescribir varios caracteres, usa R."@es ,
+                        "Pour remplacer plusieurs caractères, utilisez R."@fr .
+
+<#join-lines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Join the next line onto the end of the current one"@en ,
+                     "Foga ihop nästa rad med slutet av den aktuella"@sv ,
+                     "다음 줄을 현재 줄 끝에 이어 붙이기"@ko ,
+                     "Die nächste Zeile an das Ende der aktuellen anhängen"@de ,
+                     "Unir la línea siguiente al final de la actual"@es ,
+                     "Joindre la ligne suivante à la fin de la ligne courante"@fr ;
+    solid-memo:back "J" ;
+    solid-memo:backNote "J removes the next line's indent and usually puts one space between the lines (two after . ? ! while 'joinspaces' is on, which is Vim's default); gJ joins them exactly as they are."@en ,
+                        "J tar bort nästa rads indragning och sätter oftast ett blanksteg mellan raderna (två efter . ? ! när 'joinspaces' är på, vilket är Vims standard); gJ fogar ihop dem precis som de är."@sv ,
+                        "J는 다음 줄의 들여쓰기를 지우고 보통 두 줄 사이에 공백 하나를 넣어요(. ? ! 뒤에는 'joinspaces'가 켜져 있으면 두 개이고, 이것이 Vim의 기본값이에요). gJ는 줄을 있는 그대로 이어 붙여요."@ko ,
+                        "J entfernt die Einrückung der nächsten Zeile und setzt meist ein Leerzeichen zwischen die Zeilen (zwei nach . ? !, solange 'joinspaces' an ist, was Vims Voreinstellung ist); gJ fügt sie genau so zusammen, wie sie sind."@de ,
+                        "J quita la sangría de la línea siguiente y normalmente pone un espacio entre las líneas (dos después de . ? ! mientras 'joinspaces' esté activada, que es el valor predeterminado de Vim); gJ las une tal como están."@es ,
+                        "J supprime l’indentation de la ligne suivante et met en général une espace entre les lignes (deux après . ? ! tant que 'joinspaces' est activée, ce qui est le réglage par défaut de Vim) ; gJ les joint telles quelles."@fr .
+
+<#indent-line>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Indent the current line by one level"@en ,
+                     "Dra in den aktuella raden en nivå"@sv ,
+                     "현재 줄을 한 단계 들여쓰기"@ko ,
+                     "Die aktuelle Zeile um eine Stufe einrücken"@de ,
+                     "Aumentar un nivel la sangría de la línea actual"@es ,
+                     "Indenter la ligne courante d’un niveau"@fr ;
+    solid-memo:back ">>" ;
+    solid-memo:backNote "<< removes one level. One level is 'shiftwidth' (8 by default, written as a tab unless 'expandtab' is set). With a count, 2>> indents two lines."@en ,
+                        "<< tar bort en nivå. En nivå är 'shiftwidth' (8 som standard, skrivet som en tabb om inte 'expandtab' är satt). Med ett antal drar 2>> in två rader."@sv ,
+                        "<<는 한 단계 내어써요. 한 단계는 'shiftwidth'만큼이에요(기본값 8이며, 'expandtab'이 설정되어 있지 않으면 탭으로 들어가요). 횟수를 붙이면 2>>는 두 줄을 들여써요."@ko ,
+                        "<< entfernt eine Stufe. Eine Stufe ist 'shiftwidth' (standardmäßig 8, als Tabulator geschrieben, außer wenn 'expandtab' gesetzt ist). Mit einer Anzahl rückt 2>> zwei Zeilen ein."@de ,
+                        "<< quita un nivel. Un nivel es 'shiftwidth' (8 por defecto, escrito como tabulación salvo que esté activada 'expandtab'). Con un contador, 2>> aumenta la sangría de dos líneas."@es ,
+                        "<< retire un niveau. Un niveau vaut 'shiftwidth' (8 par défaut, écrit comme une tabulation sauf si 'expandtab' est activée). Avec un nombre, 2>> indente deux lignes."@fr .
+
+<#delete-inner-word>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete the word under the cursor, wherever the cursor is in it, but not the space around it"@en ,
+                     "Radera ordet under markören, var markören än står i det, men inte blankstegen runt det"@sv ,
+                     "커서가 단어의 어디에 있든 커서 아래 단어를 지우되 주변 공백은 남기기"@ko ,
+                     "Das Wort unter dem Cursor löschen, egal wo darin der Cursor steht, aber nicht den Leerraum um das Wort herum"@de ,
+                     "Borrar la palabra bajo el cursor, esté donde esté el cursor en ella, pero no el espacio de alrededor"@es ,
+                     "Supprimer le mot sous le curseur, où que soit le curseur dans le mot, mais pas les espaces autour"@fr ;
+    solid-memo:back "diw" ;
+    solid-memo:backNote "daw also deletes the space after (or before) the word."@en ,
+                        "daw raderar även blanksteget efter (eller före) ordet."@sv ,
+                        "daw는 단어 뒤(또는 앞)의 공백도 지워요."@ko ,
+                        "daw löscht auch das Leerzeichen danach (oder davor)."@de ,
+                        "daw también borra el espacio que va después (o antes) de la palabra."@es ,
+                        "daw supprime aussi l’espace après (ou avant) le mot."@fr .
+
+<#search-forward>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Search the file for {pattern}, going forward from the cursor"@en ,
+                     "Sök i filen efter {pattern}, framåt från markören"@sv ,
+                     "커서 위치부터 정방향으로 파일에서 {pattern} 검색하기"@ko ,
+                     "Die Datei vom Cursor aus vorwärts nach {pattern} durchsuchen"@de ,
+                     "Buscar {pattern} en el archivo, hacia delante desde el cursor"@es ,
+                     "Chercher {pattern} dans le fichier, vers l’avant à partir du curseur"@fr ;
+    solid-memo:back "/{pattern}" ;
+    solid-memo:backNote "Press Enter to run the search. ?{pattern} searches backward. At the end of the file the search wraps around to the top ('wrapscan', on by default)."@en ,
+                        "Tryck Enter för att utföra sökningen. ?{pattern} söker bakåt. Vid filens slut fortsätter sökningen från början ('wrapscan', på som standard)."@sv ,
+                        "Enter를 누르면 검색이 실행돼요. ?{pattern}은 역방향으로 검색해요. 파일 끝에 다다르면 검색이 맨 위로 돌아가요('wrapscan', 기본값은 켜짐)."@ko ,
+                        "Mit der Eingabetaste wird die Suche ausgeführt. ?{pattern} sucht rückwärts. Am Dateiende springt die Suche wieder zum Anfang ('wrapscan', standardmäßig an)."@de ,
+                        "Pulsa Intro para lanzar la búsqueda. ?{pattern} busca hacia atrás. Al llegar al final del archivo, la búsqueda vuelve al principio ('wrapscan', activada por defecto)."@es ,
+                        "Appuyez sur Entrée pour lancer la recherche. ?{pattern} cherche vers l’arrière. À la fin du fichier, la recherche reprend au début ('wrapscan', activée par défaut)."@fr .
+
+<#search-next>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Go to the next match of the last search"@en ,
+                     "Gå till nästa träff för den senaste sökningen"@sv ,
+                     "마지막 검색의 다음 일치 항목으로 가기"@ko ,
+                     "Zum nächsten Treffer der letzten Suche gehen"@de ,
+                     "Ir a la siguiente coincidencia de la última búsqueda"@es ,
+                     "Aller à la correspondance suivante de la dernière recherche"@fr ;
+    solid-memo:back "n" ;
+    solid-memo:backNote "n keeps the direction of the last search (backward after ?). N goes the other way."@en ,
+                        "n behåller den senaste sökningens riktning (bakåt efter ?). N går åt andra hållet."@sv ,
+                        "n은 마지막 검색의 방향을 따라요(? 다음에는 역방향). N은 반대 방향으로 가요."@ko ,
+                        "n behält die Richtung der letzten Suche bei (rückwärts nach ?). N geht in die Gegenrichtung."@de ,
+                        "n mantiene la dirección de la última búsqueda (hacia atrás después de ?). N va en sentido contrario."@es ,
+                        "n garde le sens de la dernière recherche (vers l’arrière après ?). N va dans l’autre sens."@fr .
+
+<#search-word-under-cursor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Find the next occurrence of the exact word under the cursor"@en ,
+                     "Hitta nästa förekomst av exakt det ord som står under markören"@sv ,
+                     "커서 아래 단어와 정확히 같은 단어가 다음에 나오는 곳 찾기"@ko ,
+                     "Das nächste Vorkommen genau des Worts unter dem Cursor finden"@de ,
+                     "Buscar la siguiente aparición exacta de la palabra que está bajo el cursor"@es ,
+                     "Trouver la prochaine occurrence du mot exact sous le curseur"@fr ;
+    solid-memo:back "*" ;
+    solid-memo:backNote "# searches backward. g* also finds the word inside longer words."@en ,
+                        "# söker bakåt. g* hittar också ordet inuti längre ord."@sv ,
+                        "#은 역방향으로 검색해요. g*는 더 긴 단어 안에 들어 있는 것도 찾아요."@ko ,
+                        "# sucht rückwärts. g* findet das Wort auch innerhalb längerer Wörter."@de ,
+                        "# busca hacia atrás. g* también encuentra la palabra dentro de palabras más largas."@es ,
+                        "# cherche vers l’arrière. g* trouve aussi le mot à l’intérieur de mots plus longs."@fr .
+
+<#substitute-all>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Replace every {old} with {new} throughout the file"@en ,
+                     "Ersätt varje {old} med {new} i hela filen"@sv ,
+                     "파일 전체에서 모든 {old}를 {new}로 바꾸기"@ko ,
+                     "Jedes {old} in der ganzen Datei durch {new} ersetzen"@de ,
+                     "Sustituir cada {old} por {new} en todo el archivo"@es ,
+                     "Remplacer chaque {old} par {new} dans tout le fichier"@fr ;
+    solid-memo:back ":%s/{old}/{new}/g" ;
+    solid-memo:backNote "{old} is a pattern. Without g only the first match on each line is replaced; without % only the current line is changed."@en ,
+                        "{old} är ett mönster. Utan g ersätts bara första träffen på varje rad; utan % ändras bara den aktuella raden."@sv ,
+                        "{old}는 패턴이에요. g가 없으면 각 줄의 첫 번째 일치 항목만 바뀌고, %가 없으면 현재 줄만 바뀌어요."@ko ,
+                        "{old} ist ein Suchmuster. Ohne g wird nur der erste Treffer jeder Zeile ersetzt; ohne % wird nur die aktuelle Zeile geändert."@de ,
+                        "{old} es un patrón. Sin g solo se sustituye la primera coincidencia de cada línea; sin % solo se cambia la línea actual."@es ,
+                        "{old} est un motif. Sans g, seule la première correspondance de chaque ligne est remplacée ; sans %, seule la ligne courante est modifiée."@fr .
+
+<#substitute-confirm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Replace every {old} with {new} throughout the file, asking before each one"@en ,
+                     "Ersätt varje {old} med {new} i hela filen och fråga före varje ersättning"@sv ,
+                     "파일 전체에서 모든 {old}를 {new}로 바꾸되 하나씩 바꾸기 전에 묻기"@ko ,
+                     "Jedes {old} in der ganzen Datei durch {new} ersetzen und vor jeder Ersetzung nachfragen"@de ,
+                     "Sustituir cada {old} por {new} en todo el archivo, preguntando antes de cada sustitución"@es ,
+                     "Remplacer chaque {old} par {new} dans tout le fichier, en demandant avant chaque remplacement"@fr ;
+    solid-memo:back ":%s/{old}/{new}/gc" ;
+    solid-memo:backNote "Answer y to replace, n to skip, a to replace all the rest, q to stop."@en ,
+                        "Svara y för att ersätta, n för att hoppa över, a för att ersätta alla återstående, q för att sluta."@sv ,
+                        "y는 바꾸기, n은 건너뛰기, a는 나머지 모두 바꾸기, q는 멈추기예요."@ko ,
+                        "Mit y ersetzen, mit n überspringen, mit a alle übrigen ersetzen, mit q aufhören."@de ,
+                        "Responde y para sustituir, n para saltar esa coincidencia, a para sustituir todas las restantes y q para parar."@es ,
+                        "Répondez y pour remplacer, n pour passer, a pour remplacer tout le reste, q pour arrêter."@fr .
+
+<#clear-search-highlight>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Remove the highlighting from the last search's matches"@en ,
+                     "Ta bort markeringen av den senaste sökningens träffar"@sv ,
+                     "마지막 검색의 일치 항목 강조 표시 지우기"@ko ,
+                     "Die Hervorhebung der Treffer der letzten Suche entfernen"@de ,
+                     "Quitar el resaltado de las coincidencias de la última búsqueda"@es ,
+                     "Retirer la surbrillance des correspondances de la dernière recherche"@fr ;
+    solid-memo:back ":noh" ;
+    solid-memo:backNote "Long form :nohlsearch. Only matters when 'hlsearch' is set (off in Vim's defaults); the highlighting returns with the next search or n. :set nohlsearch instead turns the option off for good."@en ,
+                        "Lång form: :nohlsearch. Spelar bara roll när 'hlsearch' är satt (av i Vims standardinställningar); markeringen kommer tillbaka vid nästa sökning eller n. :set nohlsearch stänger i stället av flaggan för gott."@sv ,
+                        "긴 형태는 :nohlsearch예요. 'hlsearch'가 설정되어 있을 때만(Vim 기본값에서는 꺼짐) 의미가 있고, 다음 검색이나 n을 하면 강조 표시가 다시 나타나요. :set nohlsearch는 대신 옵션 자체를 계속 꺼 둬요."@ko ,
+                        "Langform :nohlsearch. Wirkt nur, wenn 'hlsearch' gesetzt ist (in Vims Voreinstellungen aus); die Hervorhebung kehrt mit der nächsten Suche oder mit n zurück. :set nohlsearch schaltet die Option stattdessen dauerhaft aus."@de ,
+                        "Forma larga: :nohlsearch. Solo importa si 'hlsearch' está activada (desactivada en los valores predeterminados de Vim); el resaltado vuelve con la siguiente búsqueda o con n. :set nohlsearch, en cambio, desactiva la opción de forma permanente."@es ,
+                        "Forme longue :nohlsearch. N’a d’effet que si 'hlsearch' est activée (désactivée dans les réglages par défaut de Vim) ; la surbrillance revient à la recherche suivante ou avec n. :set nohlsearch désactive plutôt l’option pour de bon."@fr .
+
+<#set-mark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mark the cursor position with the letter {a-z}"@en ,
+                     "Markera markörens position med bokstaven {a-z}"@sv ,
+                     "커서 위치에 글자 {a-z}로 마크 설정하기"@ko ,
+                     "An der Cursorposition eine Marke mit dem Buchstaben {a-z} setzen"@de ,
+                     "Marcar la posición del cursor con la letra {a-z}"@es ,
+                     "Marquer la position du curseur avec la lettre {a-z}"@fr ;
+    solid-memo:back "m{a-z}" ;
+    solid-memo:backNote "Lowercase marks belong to the file; uppercase marks (A-Z) work across files."@en ,
+                        "Gemena markeringar hör till filen; versala markeringar (A-Z) fungerar mellan filer."@sv ,
+                        "소문자 마크는 파일에 속하고, 대문자 마크(A-Z)는 파일을 넘나들며 동작해요."@ko ,
+                        "Kleinbuchstaben-Marken gehören zur Datei; Großbuchstaben-Marken (A-Z) funktionieren dateiübergreifend."@de ,
+                        "Las marcas en minúscula pertenecen al archivo; las marcas en mayúscula (A-Z) funcionan entre archivos."@es ,
+                        "Les marques minuscules appartiennent au fichier ; les marques majuscules (A-Z) fonctionnent d’un fichier à l’autre."@fr .
+
+<#jump-to-mark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jump to the exact position of mark {a-z}"@en ,
+                     "Hoppa till den exakta positionen för markering {a-z}"@sv ,
+                     "마크 {a-z}의 정확한 위치로 이동하기"@ko ,
+                     "Genau zur Position der Marke {a-z} springen"@de ,
+                     "Saltar a la posición exacta de la marca {a-z}"@es ,
+                     "Sauter à la position exacte de la marque {a-z}"@fr ;
+    solid-memo:back "`{a-z}" ;
+    solid-memo:backNote "'{a-z} (apostrophe) jumps to the mark's line, at its first non-blank character."@en ,
+                        "'{a-z} (apostrof) hoppar till markeringens rad, vid dess första icke-blanka tecken."@sv ,
+                        "'{a-z}(작은따옴표)는 마크가 있는 줄의 공백이 아닌 첫 글자로 이동해요."@ko ,
+                        "'{a-z} (Apostroph) springt zur Zeile der Marke, auf ihr erstes Nicht-Leerzeichen."@de ,
+                        "'{a-z} (apóstrofo) salta a la línea de la marca, en su primer carácter que no es un espacio en blanco."@es ,
+                        "'{a-z} (apostrophe) saute à la ligne de la marque, sur son premier caractère non blanc."@fr .
+
+<#record-macro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Start recording your keystrokes into register {a-z}"@en ,
+                     "Börja spela in dina tangenttryckningar i register {a-z}"@sv ,
+                     "레지스터 {a-z}에 키 입력 기록 시작하기"@ko ,
+                     "Die Aufnahme der eigenen Tastenanschläge in Register {a-z} starten"@de ,
+                     "Empezar a grabar tus pulsaciones de teclas en el registro {a-z}"@es ,
+                     "Commencer à enregistrer vos frappes de touches dans le registre {a-z}"@fr ;
+    solid-memo:back "q{a-z}" ;
+    solid-memo:backNote "Press q again to stop recording."@en ,
+                        "Tryck q igen för att sluta spela in."@sv ,
+                        "기록을 멈추려면 q를 다시 눌러요."@ko ,
+                        "Erneut q drücken, um die Aufnahme zu beenden."@de ,
+                        "Pulsa q otra vez para dejar de grabar."@es ,
+                        "Appuyez de nouveau sur q pour arrêter l’enregistrement."@fr .
+
+<#play-macro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Play back the keystrokes recorded in register {a-z}"@en ,
+                     "Spela upp tangenttryckningarna som spelats in i register {a-z}"@sv ,
+                     "레지스터 {a-z}에 기록된 키 입력 재생하기"@ko ,
+                     "Die in Register {a-z} aufgenommenen Tastenanschläge abspielen"@de ,
+                     "Reproducir las pulsaciones de teclas grabadas en el registro {a-z}"@es ,
+                     "Rejouer les frappes de touches enregistrées dans le registre {a-z}"@fr ;
+    solid-memo:back "@{a-z}" ;
+    solid-memo:backNote "@@ plays the last used register again. A count repeats it: 3@a."@en ,
+                        "@@ spelar upp det senast använda registret igen. Ett antal upprepar det: 3@a."@sv ,
+                        "@@는 마지막으로 쓴 레지스터를 다시 재생해요. 횟수를 붙이면 반복해요(3@a)."@ko ,
+                        "@@ spielt das zuletzt verwendete Register erneut ab. Eine Anzahl wiederholt es: 3@a."@de ,
+                        "@@ vuelve a reproducir el último registro usado. Un contador lo repite: 3@a."@es ,
+                        "@@ rejoue le dernier registre utilisé. Un nombre répète la commande : 3@a."@fr .
+
+<#split-horizontal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Divide the window so the file shows in two windows, one above the other"@en ,
+                     "Dela fönstret så att filen visas i två fönster, det ena ovanför det andra"@sv ,
+                     "창을 나눠 파일을 위아래로 두 창에 보이기"@ko ,
+                     "Das Fenster teilen, sodass die Datei in zwei Fenstern übereinander zu sehen ist"@de ,
+                     "Dividir la ventana para que el archivo se vea en dos ventanas, una encima de la otra"@es ,
+                     "Diviser la fenêtre pour que le fichier s’affiche dans deux fenêtres, l’une au-dessus de l’autre"@fr ;
+    solid-memo:back ":sp" ;
+    solid-memo:backNote "Long form :split. CTRL-W s does the same."@en ,
+                        "Lång form: :split. CTRL-W s gör samma sak."@sv ,
+                        "긴 형태는 :split이에요. CTRL-W s도 같아요."@ko ,
+                        "Langform :split. CTRL-W s tut dasselbe."@de ,
+                        "Forma larga: :split. CTRL-W s hace lo mismo."@es ,
+                        "Forme longue :split. CTRL-W s fait la même chose."@fr .
+
+<#split-vertical>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Divide the window so the file shows in two windows, side by side"@en ,
+                     "Dela fönstret så att filen visas i två fönster, sida vid sida"@sv ,
+                     "창을 나눠 파일을 좌우로 나란히 두 창에 보이기"@ko ,
+                     "Das Fenster teilen, sodass die Datei in zwei Fenstern nebeneinander zu sehen ist"@de ,
+                     "Dividir la ventana para que el archivo se vea en dos ventanas, una al lado de la otra"@es ,
+                     "Diviser la fenêtre pour que le fichier s’affiche dans deux fenêtres, côte à côte"@fr ;
+    solid-memo:back ":vs" ;
+    solid-memo:backNote "Long form :vsplit; :vsp also works. CTRL-W v does the same."@en ,
+                        "Lång form: :vsplit; :vsp fungerar också. CTRL-W v gör samma sak."@sv ,
+                        "긴 형태는 :vsplit이고 :vsp도 돼요. CTRL-W v도 같아요."@ko ,
+                        "Langform :vsplit; :vsp geht auch. CTRL-W v tut dasselbe."@de ,
+                        "Forma larga: :vsplit; :vsp también funciona. CTRL-W v hace lo mismo."@es ,
+                        "Forme longue :vsplit ; :vsp fonctionne aussi. CTRL-W v fait la même chose."@fr .
+
+<#next-window>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move the cursor to the next window"@en ,
+                     "Flytta markören till nästa fönster"@sv ,
+                     "커서를 다음 창으로 옮기기"@ko ,
+                     "Den Cursor ins nächste Fenster bewegen"@de ,
+                     "Llevar el cursor a la ventana siguiente"@es ,
+                     "Déplacer le curseur dans la fenêtre suivante"@fr ;
+    solid-memo:back "CTRL-W w" ;
+    solid-memo:backNote "CTRL-W CTRL-W does the same. From the last window it goes back to the first."@en ,
+                        "CTRL-W CTRL-W gör samma sak. Från det sista fönstret går det tillbaka till det första."@sv ,
+                        "CTRL-W CTRL-W도 같아요. 마지막 창에서는 첫 창으로 돌아가요."@ko ,
+                        "CTRL-W CTRL-W tut dasselbe. Vom letzten Fenster geht es zurück zum ersten."@de ,
+                        "CTRL-W CTRL-W hace lo mismo. Desde la última ventana vuelve a la primera."@es ,
+                        "CTRL-W CTRL-W fait la même chose. Depuis la dernière fenêtre, il revient à la première."@fr .
+
+<#next-buffer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the next buffer from the buffer list in the current window"@en ,
+                     "Visa nästa buffert från buffertlistan i det aktuella fönstret"@sv ,
+                     "버퍼 목록의 다음 버퍼를 현재 창에 보이기"@ko ,
+                     "Den nächsten Puffer aus der Pufferliste im aktuellen Fenster anzeigen"@de ,
+                     "Mostrar en la ventana actual el siguiente búfer de la lista de búferes"@es ,
+                     "Afficher dans la fenêtre courante le tampon suivant de la liste des tampons"@fr ;
+    solid-memo:back ":bn" ;
+    solid-memo:backNote "Long form :bnext. :bp goes to the previous one. Vim refuses (E37) while the current buffer has unsaved changes (unless, for example, 'hidden' is set); :bn! switches anyway and keeps the changes in the hidden buffer."@en ,
+                        "Lång form: :bnext. :bp går till den föregående. Vim vägrar (E37) så länge den aktuella bufferten har osparade ändringar (om inte till exempel 'hidden' är satt); :bn! byter ändå och behåller ändringarna i den dolda bufferten."@sv ,
+                        "긴 형태는 :bnext예요. :bp는 이전 버퍼로 가요. 현재 버퍼에 저장하지 않은 변경 사항이 있으면, 예를 들어 'hidden'이 설정되어 있지 않은 한 Vim이 거부해요(E37). :bn!은 그래도 전환하고, 변경 사항은 숨겨진 버퍼에 남겨 둬요."@ko ,
+                        "Langform :bnext. :bp geht zum vorigen. Vim verweigert das (E37), solange der aktuelle Puffer ungespeicherte Änderungen hat (es sei denn, zum Beispiel 'hidden' ist gesetzt); :bn! wechselt trotzdem und behält die Änderungen im versteckten Puffer."@de ,
+                        "Forma larga: :bnext. :bp va al anterior. Vim se niega (E37) mientras el búfer actual tenga cambios sin guardar (salvo que, por ejemplo, esté activada 'hidden'); :bn! cambia de todos modos y conserva los cambios en el búfer oculto."@es ,
+                        "Forme longue :bnext. :bp va au précédent. Vim refuse (E37) tant que le tampon courant a des modifications non enregistrées (sauf, par exemple, si 'hidden' est activée) ; :bn! change quand même de tampon et garde les modifications dans le tampon caché."@fr .
+
+<#next-tab>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Switch to the tab page after the current one"@en ,
+                     "Byt till fliken efter den aktuella"@sv ,
+                     "현재 탭 페이지의 다음 탭 페이지로 전환하기"@ko ,
+                     "Zum Reiter nach dem aktuellen wechseln"@de ,
+                     "Pasar a la pestaña que sigue a la actual"@es ,
+                     "Passer à l’onglet qui suit l’onglet courant"@fr ;
+    solid-memo:back "gt" ;
+    solid-memo:backNote "gT goes to the previous one. With a count, {n}gt goes to tab page {n}. Ex command :tabn (:tabnext); :tabnew opens a new tab page."@en ,
+                        "gT går till den föregående. Med ett antal går {n}gt till flik {n}. Ex-kommando: :tabn (:tabnext); :tabnew öppnar en ny flik."@sv ,
+                        "gT는 이전 탭 페이지로 가요. 횟수를 붙이면 {n}gt는 {n}번 탭 페이지로 가요. Ex 명령은 :tabn (:tabnext)이고, :tabnew는 새 탭 페이지를 열어요."@ko ,
+                        "gT geht zum vorigen. Mit einer Anzahl geht {n}gt zum Reiter {n}. Ex-Befehl :tabn (:tabnext); :tabnew öffnet einen neuen Reiter."@de ,
+                        "gT va a la anterior. Con un contador, {n}gt va a la pestaña {n}. Orden Ex: :tabn (:tabnext); :tabnew abre una pestaña nueva."@es ,
+                        "gT va au précédent. Avec un nombre, {n}gt va à l’onglet {n}. Commande Ex :tabn (:tabnext) ; :tabnew ouvre un nouvel onglet."@fr .
+
+<#help>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-13T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Open Vim's built-in documentation on {subject}"@en ,
+                     "Öppna Vims inbyggda dokumentation om {subject}"@sv ,
+                     "{subject}에 대한 Vim 내장 문서 열기"@ko ,
+                     "Vims eingebaute Dokumentation zu {subject} öffnen"@de ,
+                     "Abrir la documentación integrada de Vim sobre {subject}"@es ,
+                     "Ouvrir la documentation intégrée de Vim sur {subject}"@fr ;
+    solid-memo:back ":h {subject}" ;
+    solid-memo:backNote "Long form :help {subject}. :h alone opens the start page."@en ,
+                        "Lång form: :help {subject}. Enbart :h öppnar startsidan."@sv ,
+                        "긴 형태는 :help {subject}예요. :h만 입력하면 시작 페이지가 열려요."@ko ,
+                        "Langform :help {subject}. :h allein öffnet die Startseite."@de ,
+                        "Forma larga: :help {subject}. :h a secas abre la página de inicio."@es ,
+                        "Forme longue :help {subject}. :h seul ouvre la page d’accueil."@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
