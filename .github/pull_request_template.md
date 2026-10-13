@@ -24,4 +24,4 @@ Refs: #
 - [ ] **Licenses.** New content is MIT, or a deck states its own license; a new file has its SPDX header (`npm run lint:reuse`), or a new deck its line in `REUSE.toml`; third-party content is credited.
 - [ ] **Architecture.** Imports follow [docs/boundaries.md](https://github.com/solid-memo/website/blob/main/docs/boundaries.md) and the layers of [docs/architecture.md](https://github.com/solid-memo/website/blob/main/docs/architecture.md).
 - [ ] **Run.** I ran the app (`npm run dev`) and tried the change, and considered the user journeys.
-- [ ] **Commits.** Each commit is one logical change, with an imperative subject and a body that explains why ([CONTRIBUTING.md](https://github.com/solid-memo/website/blob/main/CONTRIBUTING.md#commit-messages)).
+- [ ] **Commits.** Each commit is one logical change, in Conventional Commits form (`type(scope): subject`, `!` and a `BREAKING CHANGE:` footer if it breaks something), with an imperative subject and a body that explains why ([CONTRIBUTING.md](https://github.com/solid-memo/website/blob/main/CONTRIBUTING.md#commit-messages)).

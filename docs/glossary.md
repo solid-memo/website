@@ -179,9 +179,18 @@ it most. The specifications' versions and status are in
 - **`ci-ok`**: the one CI check a merge to `main` waits for, which
   passes only when every other job passed.
   [testing.md](testing.md#continuous-integration).
+- **commitlint**: the tool that checks that a commit message follows
+  Conventional Commits. CI runs it on a pull request's commits.
+  [commitlint.js.org](https://commitlint.js.org/);
+  [CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages).
 - **Composition root**: the one place where the layers meet, the
   `composition` package. It puts each adapter behind its port and gives
   the app its use cases. [architecture.md](architecture.md).
+- **Conventional Commits**: a format for commit messages,
+  `type(scope): subject`, whose type says what kind of change it is,
+  such as `feat` or `fix`, so that a program can read it.
+  [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0.0/);
+  [CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages).
 - **Docker**: runs a program in a container of its own, apart from the
   rest of the computer. The end-to-end tests and the user journeys start
   their Solid servers in it. [docker.com](https://www.docker.com/);

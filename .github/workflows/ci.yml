@@ -323,13 +323,46 @@ jobs:
         with:
           network: "false"
 
+  # A pull request's commits follow Conventional Commits
+  # (CONTRIBUTING.md#commit-messages), as commitlint.config.mjs has them:
+  # semantic-release chooses each version from them (docs/releasing.md),
+  # and a commit it cannot read is left out of the release. Only the
+  # commits the pull request adds are linted, from its base to its head,
+  # merge commits aside. A push to main is not linted: its commits were
+  # linted in their pull request, and the release commit is written by
+  # semantic-release.
+  commits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - if: github.event_name != 'pull_request'
+        run: echo "Only a pull request's commits are linted; this run is for a ${{ github.event_name }}."
+      - if: github.event_name == 'pull_request'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - if: github.event_name == 'pull_request'
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - if: github.event_name == 'pull_request'
+        run: npm ci
+      - if: github.event_name == 'pull_request'
+        name: npx commitlint --from <base> --to <head>
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: npx commitlint --from "$BASE" --to "$HEAD" --verbose
+
   # The one check a merge to main waits for (the ruleset on main is to
   # require it): it passes only when every job above passed. A matrix
   # job's checks are named per server, and jobs come and go; this name
   # stays.
   ci-ok:
     if: always()
-    needs: [build, library, crosscheck, pod, contract, journeys, docs]
+    needs: [build, library, crosscheck, pod, contract, journeys, docs, commits]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

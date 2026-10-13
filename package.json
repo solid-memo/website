@@ -52,6 +52,7 @@
     "lint:markdown": "markdownlint-cli2",
     "lint:spelling": "cspell --no-progress",
     "lint:reuse": "reuse lint",
+    "lint:commits": "commitlint --from origin/main --to HEAD",
     "crosscheck": "python3 scripts/shacl_crosscheck.py",
     "test:crosscheck": "python3 -m unittest discover -s scripts",
     "test:pod": "npm run test:pod -w @solid-memo/e2e-pod",
@@ -67,6 +68,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
     "@vitest/coverage-v8": "^5.0.1",
     "cspell": "^10.3.6",
     "markdownlint-cli2": "^0.23.3",

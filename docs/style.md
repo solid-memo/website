@@ -224,14 +224,19 @@ together, with `npm run check` passing. A file generated from another
 (`packages/vocab/src/*.generated.ts` from `ns/`) is committed with the
 change that generated it.
 
-A commit message has:
+A commit message follows Conventional Commits, as
+[CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages) says, and has:
 
-- a **subject** in the imperative, saying what the project or its users
-  gain, not which files changed: "Keep a deck's title in every language,
-  shown in the reader's", not "Update deck.ts";
+- a **header**, `type(scope): subject`, its subject in the imperative,
+  lowercase, saying what the project or its users gain, not which files
+  changed: "feat(i18n): keep a deck's title in every language, shown in
+  the reader's", not "Update deck.ts"; the whole header is at most 100
+  characters;
 - after a blank line, a **body** that says why: the problem, the choice
   made and what it rules out, wrapped at 72 characters;
 - a `Refs: #12` or `Fixes: #12` line when an issue or a discussion
-  exists.
+  exists, and a `BREAKING CHANGE:` line for a breaking change.
 
-`git log` shows many examples.
+`git log` shows many examples; the commits before version 1.0.0 have
+the same body, under a header in sentence case, almost always with no
+type.
