@@ -24,10 +24,8 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 
-const ROOT = resolve(import.meta.dirname, "..");
-
 /** Which workspace packages each may import. */
-const LAYERS: Record<string, string[]> = {
+export const LAYERS: Record<string, string[]> = {
   turtle: [],
   markdown: [],
   vocab: ["turtle"],
@@ -50,7 +48,7 @@ const LAYERS: Record<string, string[]> = {
 };
 
 /** Within a package, files that alone may use some of its allowed packages. */
-const ONLY_FROM: Record<string, Record<string, RegExp>> = {
+export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   // Only the app's entry point has the layers wired, and loads the Studio; the build test imports neither.
   web: { composition: /^src\/main\.tsx$/, studio: /^src\/main\.tsx$/ },
   // Data text is rendered by the components alone (docs/markdown.md).
@@ -70,7 +68,11 @@ const ONLY_FROM: Record<string, Record<string, RegExp>> = {
  * control of @inrupt/solid-client (universal access, ACP, the ACL
  * functions) is the release publisher's.
  */
-const VENDOR_ONLY_FROM: { specifier: RegExp; names: RegExp; files: Record<string, RegExp> }[] = [
+export const VENDOR_ONLY_FROM: {
+  specifier: RegExp;
+  names: RegExp;
+  files: Record<string, RegExp>;
+}[] = [
   {
     specifier: /^@inrupt\/solid-client(\/|$)/,
     names:
@@ -80,17 +82,17 @@ const VENDOR_ONLY_FROM: { specifier: RegExp; names: RegExp; files: Record<string
 ];
 
 /** A static import's specifier, and what it names: the names inside its braces, or "*" for a namespace import. */
-const NAMED_IMPORT =
+export const NAMED_IMPORT =
   /^import\s+(?:type\s+)?(?:[\w$]+\s*,\s*)?(?:\{([^}]*)\}|(\*)\s+as\s+[\w$]+)\s*from\s*["']([^"'\s]+)["']/gm;
 
 /** Packages a package may import only with a dynamic import(), so they stay out of its first chunk. */
-const LAZY_ONLY: Record<string, string[]> = {
+export const LAZY_ONLY: Record<string, string[]> = {
   // The Studio is a chunk of its own, which a learner never downloads (docs/studio.md).
   web: ["studio"],
 };
 
 /** Code that ends up in the browser bundle (tests aside). */
-const BROWSER: Record<string, RegExp> = {
+export const BROWSER: Record<string, RegExp> = {
   markdown: /^src\//,
   vocab: /^src\//,
   domain: /^src\//,
@@ -103,24 +105,146 @@ const BROWSER: Record<string, RegExp> = {
   web: /^src\//,
   studio: /^src\//,
 };
-const NODE_ONLY = [
+export const NODE_ONLY = [
   /^node:/,
   /^n3$/,
   /^@solid-memo\/turtle(\/|$)/,
   /^@solid-memo\/[a-z-]+\/(tooling|node)\//,
 ];
 
-const SHARED_TEST_TOOLING = new Set(
-  Object.keys(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).devDependencies),
-);
-const isTestFile = (path: string) =>
+/** A test file, test helper or config, which may also use the shared test tooling. */
+export const isTestFile = (path: string) =>
   /\.test\.tsx?$/.test(path) ||
   /(^|\/)(testing|test)\//.test(path) ||
   /^(vitest(\.\w+)?\.config|globalSetup)\.ts$/.test(path);
 
 const IMPORT = /(?:\bfrom\s*|\bimport\s*\(\s*|^import\s+|\bvi\.mock\(\s*)["']([^"'\s]+)["']/gm;
 
-function sourceFiles(dir: string, base = dir): string[] {
+/** The package a specifier imports from: its scope and name, or its name. */
+export function packageName(specifier: string): string {
+  const parts = specifier.split("/");
+  return specifier.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0]!;
+}
+
+/** What package.json says of a workspace package that this check reads. */
+export type Manifest = {
+  name: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+};
+
+/** A workspace package: its folder from the root, its manifest, and its source by path. */
+export type Workspace = { dir: string; manifest: Manifest; files: Record<string, string> };
+
+/** What one source file of a workspace package imports against its boundaries. */
+function fileProblems(
+  workspace: Workspace,
+  file: string,
+  text: string,
+  sharedTooling: ReadonlySet<string>,
+): string[] {
+  const { dir, manifest } = workspace;
+  const problems: string[] = [];
+  const short = manifest.name.replace("@solid-memo/", "");
+  const allowed = LAYERS[short]!;
+  const declared = new Set([
+    ...Object.keys(manifest.dependencies ?? {}),
+    ...Object.keys(manifest.devDependencies ?? {}),
+  ]);
+  const where = `${dir}/${file}`;
+  const test = isTestFile(file);
+  for (const [statement, specifier] of text.matchAll(IMPORT)) {
+    if (specifier!.startsWith(".")) {
+      const target = join(dirname(file), specifier!);
+      // Every package's vitest config (vitest.config.ts, and one of a task of its own) shares the root's setup.
+      const shared =
+        /^vitest(\.\w+)?\.config\.ts$/.test(file) && specifier === "../../vitest.shared.ts";
+      if (target.startsWith("..") && !shared)
+        problems.push(`${where}: "${specifier}" reaches outside the package.`);
+      continue;
+    }
+    if (specifier!.startsWith("node:")) {
+      // Builtins need no declaration; whether they may run here is checked below.
+    } else if (specifier!.startsWith("@solid-memo/")) {
+      const other = packageName(specifier!).replace("@solid-memo/", "");
+      if (other !== short && !allowed.includes(other)) {
+        problems.push(`${where}: ${manifest.name} may not import @solid-memo/${other}.`);
+      }
+      const only = ONLY_FROM[short]?.[other];
+      if (only !== undefined && !only.test(file)) {
+        problems.push(`${where}: only files matching ${only} may import @solid-memo/${other}.`);
+      }
+      if (LAZY_ONLY[short]?.includes(other) && !/^import\s*\(/.test(statement!)) {
+        problems.push(`${where}: may import @solid-memo/${other} only with a dynamic import().`);
+      }
+      if (other !== short && !declared.has(`@solid-memo/${other}`)) {
+        problems.push(
+          `${where}: imports @solid-memo/${other}, which package.json does not declare.`,
+        );
+      }
+    } else {
+      const name = packageName(specifier!);
+      const shared = (test || file === "vite.config.ts") && sharedTooling.has(name);
+      if (!declared.has(name) && !shared && !declared.has(`@types/${name}`)) {
+        problems.push(`${where}: imports ${name}, which package.json does not declare.`);
+      }
+    }
+    if (
+      BROWSER[short]?.test(file) &&
+      !test &&
+      NODE_ONLY.some((pattern) => pattern.test(specifier!))
+    ) {
+      problems.push(`${where}: runs in the browser, so may not import "${specifier}".`);
+    }
+  }
+  for (const [, braces, namespace, specifier] of test ? [] : text.matchAll(NAMED_IMPORT)) {
+    for (const rule of VENDOR_ONLY_FROM) {
+      if (!rule.specifier.test(specifier!) || rule.files[short]?.test(file)) continue;
+      const names =
+        namespace !== undefined
+          ? ["*"]
+          : braces!.split(",").map(
+              (one) =>
+                one
+                  .trim()
+                  .replace(/^type\s+/, "")
+                  .split(/\s+as\s+/)[0]!,
+            );
+      for (const name of names.filter((one) => one === "*" || rule.names.test(one))) {
+        const only = Object.entries(rule.files)
+          .map(([folder, pattern]) => `${folder} files matching ${pattern}`)
+          .join(", ");
+        problems.push(
+          `${where}: may not import ${name === "*" ? "everything" : name} from ${specifier}: only ${only} may.`,
+        );
+      }
+    }
+  }
+  return problems;
+}
+
+/**
+ * What is wrong with the workspace packages' imports; none when every one
+ * keeps to its boundaries. `sharedTooling` is the root package.json's
+ * devDependencies, which tests and configs may use undeclared.
+ */
+export function boundaryProblems(
+  workspaces: readonly Workspace[],
+  sharedTooling: ReadonlySet<string>,
+): string[] {
+  return workspaces.flatMap((workspace) => {
+    const short = workspace.manifest.name.replace("@solid-memo/", "");
+    if (LAYERS[short] === undefined) {
+      return [`${workspace.manifest.name}: not in the layer table of scripts/checkBoundaries.ts.`];
+    }
+    return Object.entries(workspace.files).flatMap(([file, text]) =>
+      fileProblems(workspace, file, text, sharedTooling),
+    );
+  });
+}
+
+/** A package's TypeScript sources, as paths from its folder, build output and installs aside. */
+export function sourceFiles(dir: string, base = dir): string[] {
   const out: string[] = [];
   for (const name of readdirSync(dir)) {
     if (["node_modules", "dist", "coverage", ".turbo"].includes(name)) continue;
@@ -131,107 +255,50 @@ function sourceFiles(dir: string, base = dir): string[] {
   return out;
 }
 
-function packageName(specifier: string): string {
-  const parts = specifier.split("/");
-  return specifier.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0]!;
+export type BoundariesIo = {
+  /** Every workspace package, in apps/, packages/ and e2e/. */
+  workspaces(): Workspace[];
+  /** The root package.json's devDependencies. */
+  sharedTooling(): Set<string>;
+  log(message: string): void;
+};
+
+export function defaultIo(root: string): BoundariesIo {
+  const json = (path: string) => JSON.parse(readFileSync(path, "utf8"));
+  return {
+    workspaces: () =>
+      ["apps", "packages", "e2e"].flatMap((group) =>
+        readdirSync(join(root, group)).map((folder) => {
+          const dir = join(root, group, folder);
+          const files = sourceFiles(dir).map((file) => [
+            file,
+            readFileSync(join(dir, file), "utf8"),
+          ]);
+          return {
+            dir: `${group}/${folder}`,
+            manifest: json(join(dir, "package.json")) as Manifest,
+            files: Object.fromEntries(files),
+          };
+        }),
+      ),
+    sharedTooling: () => new Set(Object.keys(json(join(root, "package.json")).devDependencies)),
+    log: (message) => console.log(message),
+  };
 }
 
-const problems: string[] = [];
-for (const group of ["apps", "packages", "e2e"]) {
-  for (const folder of readdirSync(join(ROOT, group))) {
-    const dir = join(ROOT, group, folder);
-    const manifest = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
-    const short = (manifest.name as string).replace("@solid-memo/", "");
-    const declared = new Set([
-      ...Object.keys(manifest.dependencies ?? {}),
-      ...Object.keys(manifest.devDependencies ?? {}),
-    ]);
-    const allowed = LAYERS[short];
-    if (allowed === undefined) {
-      problems.push(`${manifest.name}: not in the layer table of scripts/checkBoundaries.ts.`);
-      continue;
-    }
-    for (const file of sourceFiles(dir)) {
-      const text = readFileSync(join(dir, file), "utf8");
-      const where = `${group}/${folder}/${file}`;
-      const test = isTestFile(file);
-      for (const [statement, specifier] of text.matchAll(IMPORT)) {
-        if (specifier!.startsWith(".")) {
-          const target = relative(dir, resolve(dir, dirname(file), specifier!));
-          // Every package's vitest config (vitest.config.ts, and one of a task of its own) shares the root's setup.
-          const shared =
-            /^vitest(\.\w+)?\.config\.ts$/.test(file) && specifier === "../../vitest.shared.ts";
-          if (target.startsWith("..") && !shared)
-            problems.push(`${where}: "${specifier}" reaches outside the package.`);
-          continue;
-        }
-        if (specifier!.startsWith("node:")) {
-          // Builtins need no declaration; whether they may run here is checked below.
-        } else if (specifier!.startsWith("@solid-memo/")) {
-          const other = packageName(specifier!).replace("@solid-memo/", "");
-          if (other !== short && !allowed.includes(other)) {
-            problems.push(`${where}: ${manifest.name} may not import @solid-memo/${other}.`);
-          }
-          const only = ONLY_FROM[short]?.[other];
-          if (only !== undefined && !only.test(file)) {
-            problems.push(`${where}: only files matching ${only} may import @solid-memo/${other}.`);
-          }
-          if (LAZY_ONLY[short]?.includes(other) && !/^import\s*\(/.test(statement!)) {
-            problems.push(
-              `${where}: may import @solid-memo/${other} only with a dynamic import().`,
-            );
-          }
-          if (other !== short && !declared.has(`@solid-memo/${other}`)) {
-            problems.push(
-              `${where}: imports @solid-memo/${other}, which package.json does not declare.`,
-            );
-          }
-        } else {
-          const name = packageName(specifier!);
-          const shared = (test || file === "vite.config.ts") && SHARED_TEST_TOOLING.has(name);
-          if (!declared.has(name) && !shared && !declared.has(`@types/${name}`)) {
-            problems.push(`${where}: imports ${name}, which package.json does not declare.`);
-          }
-        }
-        if (
-          BROWSER[short]?.test(file) &&
-          !test &&
-          NODE_ONLY.some((pattern) => pattern.test(specifier!))
-        ) {
-          problems.push(`${where}: runs in the browser, so may not import "${specifier}".`);
-        }
-      }
-      for (const [, braces, namespace, specifier] of test ? [] : text.matchAll(NAMED_IMPORT)) {
-        for (const rule of VENDOR_ONLY_FROM) {
-          if (!rule.specifier.test(specifier!) || rule.files[short]?.test(file)) continue;
-          const names =
-            namespace !== undefined
-              ? ["*"]
-              : braces!.split(",").map(
-                  (one) =>
-                    one
-                      .trim()
-                      .replace(/^type\s+/, "")
-                      .split(/\s+as\s+/)[0]!,
-                );
-          for (const name of names.filter((one) => one === "*" || rule.names.test(one))) {
-            const only = Object.entries(rule.files)
-              .map(([folder, pattern]) => `${folder} files matching ${pattern}`)
-              .join(", ");
-            problems.push(
-              `${where}: may not import ${name === "*" ? "everything" : name} from ${specifier}: only ${only} may.`,
-            );
-          }
-        }
-      }
-    }
+/** Exit code: 0 when every package keeps to its boundaries. */
+export function main(io: BoundariesIo): number {
+  const problems = boundaryProblems(io.workspaces(), io.sharedTooling());
+  for (const problem of problems) io.log(problem);
+  if (problems.length > 0) {
+    io.log(`${problems.length} boundary problem(s).`);
+    return 1;
   }
+  io.log("Every package keeps to its boundaries.");
+  return 0;
 }
 
-for (const problem of problems) console.error(problem);
-console.log(
-  problems.length === 0
-    ? "Every package keeps to its boundaries."
-    : `${problems.length} boundary problem(s).`,
-);
-process.exitCode = problems.length === 0 ? 0 : 1;
+/** The script entry: `node -e "import('./scripts/checkBoundaries.ts').then((m) => m.run(process))"`. */
+export function run(process: { exitCode?: number | string | null | undefined }): void {
+  process.exitCode = main(defaultIo(resolve(import.meta.dirname, "..")));
+}
