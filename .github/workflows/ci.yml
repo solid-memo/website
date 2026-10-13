@@ -127,6 +127,9 @@ jobs:
           cache: pip
           cache-dependency-path: scripts/requirements-ci.txt
       - run: pip install -r scripts/requirements-ci.txt
+      # The script's own tests (scripts/test_shacl_crosscheck.py), on
+      # small documents of their own, before it checks the real ones.
+      - run: python -m unittest discover -s scripts
       - run: python scripts/shacl_crosscheck.py
 
   # The app's use cases and Solid adapters against real Solid servers,

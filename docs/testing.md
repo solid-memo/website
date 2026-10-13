@@ -29,6 +29,7 @@ npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
 npm run test:roundtrip -w @solid-memo/solid   # every library release through a draft and back (below)
 npm run crosscheck # the pySHACL cross-check, as CI runs it (needs scripts/requirements-ci.txt)
+npm run test:crosscheck   # the cross-check script's own tests, Python's unittest (needs scripts/requirements-ci.txt too)
 npm run test:pod  # the end-to-end tests, against the Solid servers they start in Docker
 npm run servers -w @solid-memo/e2e-pod   # pull or build those servers' images ahead (`-- css-6` for one)
 npm run pod       # a Community Solid Server at http://127.0.0.1:3999/, in memory, to poke at by hand
@@ -230,7 +231,17 @@ so its log runs to tens of megabytes.
 
 The vocabulary, the deck library and the pod catalog fixtures are also
 cross-checked by pySHACL in CI (`npm run crosscheck`;
-see [validation.md](validation.md#the-ci-cross-check)).
+see [validation.md](validation.md#the-ci-cross-check)). The script has
+tests of its own, with Python's standard `unittest`
+([scripts/test_shacl_crosscheck.py](../scripts/test_shacl_crosscheck.py),
+`npm run test:crosscheck`): each builds a small repository in a
+temporary folder, a few lines of Turtle in place of DCAT-AP, SkoHub's
+shapes, the deck library and the fixtures, and runs the script's checks
+on it, so they read none of the real documents and need no network.
+They cover how it picks and targets shapes, where it stops (a shape
+DCAT-AP adds, `rdfs:subClassOf`, a subject with no shape) and what it
+reports when a document fails. CI's `crosscheck` job runs them before
+the cross-check; `npm run check` does not, as it needs no Python.
 
 ## User journeys
 
@@ -373,7 +384,7 @@ twice. Its jobs, side by side:
 |---|---|
 | `build` | `npm run check`, then `npm run build`; the coverage of every package goes to the run's summary (`npm run coverage:summary`) |
 | `library` | the deck library against the base of the change: no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)) |
-| `crosscheck` | the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
+| `crosscheck` | the cross-check script's tests, then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | that each advisory server starts and meets the contract |
 | `journeys` | the user journeys ([User journeys](#user-journeys)) |
@@ -512,9 +523,6 @@ documented exclusions:
   packages' tests import (`@solid-memo/domain/testing/libraryDeck`,
   `@solid-memo/shacl/testing/turtle`, `@solid-memo/ui/test/useCasesFake`,
   `@solid-memo/browser/testing/fakeLocks`), not product code.
-- `scripts/checkBoundaries.ts` — older than the scripts' tests, and run
-  on the whole repository by every `npm run check`; the other scripts in
-  `scripts/` are at 100% ([scripts/vitest.config.ts](../scripts/vitest.config.ts)).
 - `e2e/pod/` and `e2e/journeys/` — they are tests. Their harnesses'
   logic is unit-tested (what they make of a server's answers, the
   journeys' time zone, seed, text and CI summary), but no threshold
