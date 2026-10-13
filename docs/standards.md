@@ -40,8 +40,10 @@ says which, and why each one does not stand in the way of reuse.
 | [ADMS](https://www.w3.org/TR/vocab-adms/) | 1.0 | W3C Working Group Note | `adms:versionNotes` on a release ([deck-library.md](deck-library.md#a-version)) | Yes |
 | [SKOS](https://www.w3.org/TR/skos-reference/) | 2009 | W3C Recommendation | The concept schemes in [`ns/vocab/`](../ns/vocab/) ([vocab.md](vocab.md#concept-schemes)), checked with the vendored SkoHub shapes | Yes |
 | [PROV-O](https://www.w3.org/TR/prov-o/) | 2013 | W3C Recommendation | How a release was made, and the sources it was derived from ([deck-library.md](deck-library.md#provenance), [`provenanceRules.ts`](../packages/domain/src/release/provenanceRules.ts)) | Yes |
+| [SPDX](https://spdx.github.io/spdx-spec/v2.3/) RDF terms | 2.3 | Linux Foundation specification (SPDX 2.2.1 is ISO/IEC 5962:2021) | `spdx:checksum` with SHA-256 for the script a deck was made by, in its provenance ([`decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl`](../decks/swedish-labour-market-taxonomy-occupation-names/v2.ttl)), checked by DCAT-AP's checksum shape; the `spdx:` prefix a release is written with ([`solidReleaseDraftRepository.ts`](../packages/solid/src/solidReleaseDraftRepository.ts)) | Yes |
 | [DCMI Metadata Terms](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/) | 2020 | DCMI Recommendation (ISO 15836-2) | Titles, descriptions, creators, licenses and dates (`dcterms:`) | Yes |
 | [FOAF](http://xmlns.com/foaf/spec/) | 0.99 | Specification by its authors, stable since 2014 | Agents: creators and the publisher ([`agentRecord.ts`](../packages/domain/src/agentRecord.ts)) | Yes |
+| [vCard Ontology](https://www.w3.org/TR/vcard-rdf/) | 2014 | W3C Interest Group Note | A deck version's contact, a `vcard:Kind` with the project's issue tracker as its `vcard:hasURL` ([deck-library.md](deck-library.md#contact)), checked by [`deckLibrary.ts`](../packages/shacl/node/deckLibrary.ts) | Yes |
 | [schema.org](https://schema.org/) | current release, unpinned ([releases](https://schema.org/docs/releases.html)) | W3C Community Group vocabulary, de facto | Courses, chapters, steps and wrong options ([courses.md](courses.md#why-schemaorg)); the site's description in [`apps/web/index.html`](../apps/web/index.html) | Yes (de facto) |
 | [EU Vocabularies authority tables](https://op.europa.eu/en/web/eu-vocabularies/authority-tables) | as referenced in [`ns/vocab/external.ttl`](../ns/vocab/external.ttl) | Publications Office of the European Union reference data | A deck's languages and its data theme `EDUC` ([deck-library.md](deck-library.md#a-version)) | Yes |
 | [IANA media types](https://www.iana.org/assignments/media-types/) | registry | IANA registry | `dcat:mediaType` of a deck's distribution | Yes |
@@ -57,6 +59,7 @@ says which, and why each one does not stand in the way of reuse.
 | [Unicode CLDR plural rules](https://cldr.unicode.org/index/cldr-spec/plural-rules) | the browser's CLDR | Unicode Consortium | Plural messages, through `Intl.PluralRules` ([i18n.md](i18n.md), [policy.md](policy.md#cldr-plural-rules)) | Yes |
 | [ECMAScript Internationalization API](https://tc39.es/ecma402/) | the browser's | Ecma International standard (ECMA-402) | Plural rules, number and date formats: [`i18n.tsx`](../packages/ui/src/ui/i18n.tsx) | Yes |
 | [Unicode Normalization Forms](https://unicode.org/reports/tr15/) | UAX #15 | Unicode Standard Annex | Text in normalization form C in the deck library and in search ([deck-library.md](deck-library.md#checks)) | Yes |
+| [CSV](https://www.rfc-editor.org/rfc/rfc4180) | RFC 4180 | IETF RFC (Informational) | The answers a learner downloads from the statistics: [`answerCsv.ts`](../packages/domain/src/answerCsv.ts) ([statistics.md](statistics.md)) | Yes |
 
 ## The web
 
@@ -71,10 +74,24 @@ says which, and why each one does not stand in the way of reuse.
 | [Open Graph](https://ogp.me/) | — | De facto, published by Meta | Link previews in [`apps/web/index.html`](../apps/web/index.html) | Yes (de facto) |
 | [Sitemaps](https://www.sitemaps.org/protocol.html) | 0.9 | De facto, by the major search engines | [`apps/web/public/sitemap.xml`](../apps/web/public/sitemap.xml) | Yes (de facto) |
 | [robots.txt](https://www.rfc-editor.org/rfc/rfc9309) | RFC 9309 | IETF RFC | [`apps/web/public/robots.txt`](../apps/web/public/robots.txt) | Yes |
+| [WCAG](https://www.w3.org/TR/WCAG22/) | 2.2 | W3C Recommendation | The Studio's minimum target size and single-key shortcuts that can be turned off ([studio.md](studio.md#layout)) | Yes |
 
 Licenses in deck metadata are named by their own IRIs, such as
 `https://creativecommons.org/licenses/by/4.0/`, typed
 `dcterms:LicenseDocument` ([deck-library.md](deck-library.md#a-version)).
+
+## The project
+
+| Standard | Version | Status | Where used | Open |
+|---|---|---|---|---|
+| [REUSE](https://reuse.software/spec-3.3/) | 3.3 | Specification by the Free Software Foundation Europe | Every file's copyright and license, in its SPDX header or in [`REUSE.toml`](../REUSE.toml), checked by `reuse lint` in CI ([style.md](style.md#licenses), [testing.md](testing.md)) | Yes |
+| [SPDX License List](https://spdx.org/licenses/) | current release, unpinned | Linux Foundation reference data | License identifiers in the files' `SPDX-License-Identifier` headers and in [`LICENSES/`](../LICENSES/); `dcterms:license <https://spdx.org/licenses/MIT>` on the topics scheme ([vocab.md](vocab.md#license)) | Yes |
+| [publiccode.yml](https://yml.publiccode.tools/) | `publiccodeYmlVersion: "0"` | Specification by Developers Italia, de facto | [`publiccode.yml`](../publiccode.yml), checked by the publiccode.yml parser in CI ([testing.md](testing.md)) | Yes (de facto) |
+| [Citation File Format](https://citation-file-format.github.io/) | 1.2.0 | Specification by its authors, de facto | [`CITATION.cff`](../CITATION.cff) ([releasing.md](releasing.md#tagging-a-version)) | Yes (de facto) |
+| [Semantic Versioning](https://semver.org/spec/v2.0.0.html) | 2.0.0 | Specification by its authors, de facto | The app's versions, at 0.x ([releasing.md](releasing.md#the-scheme)) | Yes (de facto) |
+| [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) | 1.1.0 | Convention by its authors, de facto | [`CHANGELOG.md`](../CHANGELOG.md) ([releasing.md](releasing.md#the-changelog)) | Yes (de facto) |
+| [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html) | 2.1 | Code of conduct by its authors, de facto | [`CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md) | Yes (de facto) |
+| [EditorConfig](https://editorconfig.org/) | — | De facto, by its authors | The whitespace the repository is written in: [`.editorconfig`](../.editorconfig) ([style.md](style.md#formatting)) | Yes (de facto) |
 
 ## Drafts and de facto specifications
 
@@ -119,3 +136,8 @@ way of others working with Solid Memo's code or data.
   so another scheduler can be added beside it.
 - **Open Graph** and **Sitemaps** are de facto web conventions for link
   previews and search engines. Nothing in the app depends on them.
+- **publiccode.yml, the Citation File Format, Semantic Versioning, Keep
+  a Changelog, the Contributor Covenant and EditorConfig** are de facto
+  conventions for the repository and its metadata, each published by its
+  authors for anyone to use. They describe the project to people and
+  tools; nothing in the app or its data depends on them.
