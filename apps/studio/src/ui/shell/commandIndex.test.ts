@@ -247,12 +247,18 @@ describe("ranking the entries", () => {
           run,
         }),
       );
-    /** The milliseconds that ranking takes for a few queries. */
-    const timed = (commands: readonly Command[]) => {
+    /** The milliseconds that ranking takes for a few queries, `times` over. */
+    const timed = (commands: readonly Command[], times = 1) => {
       const start = performance.now();
-      for (const query of ["k", "wa ri", "cap", "mtn 12", "zz"]) rankCommands(commands, query, []);
+      for (let time = 0; time < times; time++) {
+        for (const query of ["k", "wa ri", "cap", "mtn 12", "zz"])
+          rankCommands(commands, query, []);
+      }
       return performance.now() - start;
     };
+    // The small ranked eight times over, as many entries as the large once:
+    // the two take as long, so a busy machine pauses both alike, where a
+    // short run often slips between its pauses and a long one never does.
     // The fewest of a few runs each, taken in turns, so that a machine
     // busier for a while slows both sizes and not only the one timed then.
     const smallEntries = entriesOf(500);
@@ -260,12 +266,13 @@ describe("ranking the entries", () => {
     let small = Infinity;
     let large = Infinity;
     for (let round = 0; round < 8; round++) {
-      small = Math.min(small, timed(smallEntries));
+      small = Math.min(small, timed(smallEntries, 8));
       large = Math.min(large, timed(largeEntries));
     }
     // A keystroke's worth: well within a frame or two, even on a slow machine running tests side by side.
     expect(large / 5).toBeLessThan(50);
-    // Eight times the entries: not much more than eight times the time (the slack is the timer's).
-    expect(large).toBeLessThan(small * 8 * 3 + 10);
+    // Eight times the entries once: about as long as the small eight times
+    // (a pass per entry would take eight times as long; the slack is the sort's and the timer's).
+    expect(large).toBeLessThan(small * 4 + 10);
   });
 });
