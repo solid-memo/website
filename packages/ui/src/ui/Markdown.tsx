@@ -175,10 +175,12 @@ function MarkdownLink({ url, nodes }: { url: string; nodes: readonly MdInline[] 
   // look-alike letters hide.
   const ownAddress = shown === link.href || (shown === url && !PUNYCODE.test(link.host));
   // Both isolated (dir), so a bidi override in the text before them cannot
-  // reorder the address or the host they show.
+  // reorder the address or the host they show. An address shown as itself
+  // and the host run left to right; other link text in the direction of its
+  // own first letter, so a link in Arabic reads right to left.
   return (
     <>
-      <ExternalLink url={link.href} dir="ltr">
+      <ExternalLink url={link.href} dir={ownAddress ? "ltr" : "auto"}>
         {text}
       </ExternalLink>
       {!ownAddress && (

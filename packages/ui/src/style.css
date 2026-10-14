@@ -6,6 +6,7 @@
 
 @import "@fontsource-variable/fredoka";
 @import "@fontsource/bangers";
+@import "@fontsource-variable/noto-naskh-arabic";
 
 :root {
   color-scheme: light;
@@ -214,6 +215,78 @@ th:lang(ko),
  */
 :where(:lang(de)) {
   hyphens: auto;
+}
+
+/*
+ * Text in a language written right to left (Arabic, Persian, Urdu,
+ * Hebrew…), marked with its language: it runs right to left in a box of
+ * its own, isolated from the text around it, so its punctuation, numbers
+ * and any Latin words keep their places, and a block of it starts at the
+ * right (text-align: start). The page itself stays left to right: no such
+ * language is one the app speaks yet. No other rule sets a direction.
+ */
+:lang(ar),
+:lang(fa),
+:lang(ur),
+:lang(ps),
+:lang(sd),
+:lang(ug),
+:lang(ckb),
+:lang(dv),
+:lang(he),
+:lang(yi),
+:lang(syr) {
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+/*
+ * Arabic, in text marked lang="ar": Noto Naskh Arabic, the book hand that
+ * draws the vowel marks clearly, after Fredoka for the Latin letters (it
+ * has no Arabic), then the systems' own Arabic fonts. As in Korean,
+ * headings, which Bangers cannot draw in Arabic, are bold in the Arabic
+ * font, and code keeps the monospace font.
+ */
+:where(:lang(ar)) {
+  --font-display:
+    "Bangers", "Fredoka Variable", "Noto Naskh Arabic Variable", "Geeza Pro", "Segoe UI", Tahoma,
+    sans-serif;
+
+  font-family:
+    "Fredoka Variable", "Noto Naskh Arabic Variable", "Geeza Pro", "Noto Naskh Arabic",
+    "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+}
+
+:where(:lang(ar)):where(code, kbd, samp, pre) {
+  font-family: var(--font-mono);
+}
+
+/* Arabic text inside a heading on another language's page. */
+:where(h1, h2, .newcomer-course-title) :where(:lang(ar)) {
+  font-family: var(--font-display);
+}
+
+/*
+ * Arabic letters join, and tracking, which spaces letters apart, would
+ * part them: no Arabic text is tracked, the card's question (tightened for
+ * Latin letters) and the uppercase labels included.
+ */
+h1:lang(ar),
+h2:lang(ar),
+.newcomer-course-body .newcomer-course-title:lang(ar),
+:is(h1, h2, .newcomer-course-title) :lang(ar) {
+  font-weight: 700;
+  font-synthesis-weight: none;
+  letter-spacing: 0;
+}
+
+:is(dl.account, dl.facts) dt:lang(ar),
+legend:lang(ar),
+th:lang(ar),
+.card-question > p:lang(ar),
+.newcomer-course-body .newcomer-course-eyebrow:lang(ar),
+:is(dt, legend, th, .card-question, .newcomer-course-eyebrow) :lang(ar) {
+  letter-spacing: 0;
 }
 
 *,
@@ -2153,7 +2226,7 @@ th,
 td {
   border-bottom: 1px solid var(--border);
   padding: 0.6rem 0.8rem;
-  text-align: left;
+  text-align: start;
   vertical-align: middle;
 }
 
@@ -2917,7 +2990,7 @@ form.card-edit {
 .course-question .card-question > p {
   font-size: 1.3rem;
   font-weight: 600;
-  text-align: left;
+  text-align: start;
 }
 
 .course-question .card-face {
@@ -3067,7 +3140,7 @@ form.card-edit {
 
 .course-right-answer .card-answer > p {
   font-size: 1.15rem;
-  text-align: left;
+  text-align: start;
 }
 
 fieldset:where(:not(.studio-scope)) label.radio-option .hint {
@@ -3569,7 +3642,7 @@ p[role="status"]:not(.loading) {
 .validation td {
   border: 1px solid var(--border, #ccc);
   padding: 0.25rem 0.5rem;
-  text-align: left;
+  text-align: start;
   vertical-align: top;
 }
 
@@ -4410,7 +4483,7 @@ table.deck-statistics {
 table.deck-statistics th,
 table.deck-statistics td {
   padding: 0.3rem 0.75rem 0.3rem 0;
-  text-align: left;
+  text-align: start;
   border-bottom: 1px solid var(--border);
 }
 
@@ -4486,7 +4559,7 @@ table.deck-statistics td {
 /* A table's own name above it, as a chart's caption is. */
 table.deck-statistics caption {
   font-weight: 600;
-  text-align: left;
+  text-align: start;
   padding-bottom: 0.5rem;
 }
 
@@ -4553,13 +4626,14 @@ table.deck-statistics caption {
 }
 
 /* Text from data in Markdown (ui/Markdown.tsx, docs/markdown.md): blocks
-   left-aligned, at the size of the place they are in; on a card's face, at
-   a reading size however large the face's own text, and a note's blocks
-   as quiet as its paragraph, but left-aligned as all blocks are. */
+   aligned to where their lines start (the left, or the right in a language
+   written right to left), at the size of the place they are in; on a
+   card's face, at a reading size however large the face's own text, and a
+   note's blocks as quiet as its paragraph, but aligned as all blocks are. */
 .md {
   max-width: 40rem;
   line-height: 1.55;
-  text-align: left;
+  text-align: start;
 }
 
 .card-face > .md {
@@ -4569,7 +4643,7 @@ table.deck-statistics caption {
 
 .card-face > .card-note.md {
   font-size: 0.95rem;
-  text-align: left;
+  text-align: start;
 }
 
 .course-theory.md {

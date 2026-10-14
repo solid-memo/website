@@ -149,6 +149,14 @@ describe("createI18n", () => {
     expect(document.body).toHaveTextContent("3,010 cards");
   });
 
+  it("isolates text written right to left from the sentence it is set into", () => {
+    expect(createI18n("en").t("footer.version", { version: "كتاب (2)" })).toBe(
+      "Version \u2068كتاب (2)\u2069",
+    );
+    render(<>{createI18n("en").tx("footer.version", { version: "ספר" })}</>);
+    expect(document.body.textContent).toBe("Version \u2068ספר\u2069");
+  });
+
   it("speaks Swedish when asked", () => {
     expect(createI18n("sv").t("language.label")).toBe("Språk");
   });
