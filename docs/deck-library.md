@@ -78,6 +78,12 @@ publisher still in the index:
   keep it and its review history, but no longer study it; a later
   version can bring it back by leaving the flag out. `sm:cardCount` in
   the index counts the cards in use.
+- **Text in a language written right to left** is tagged with its
+  language like any other (`"كِتَاب"@ar`), with no bidi control
+  characters: the app lays it out right to left from its tag
+  ([i18n.md](i18n.md#text-in-the-users-languages)). The Arabic decks
+  write their Arabic fully voweled and in NFC, which puts a vowel mark
+  before a shadda on the same letter, whatever order it was typed in.
 
 [`decks/greek-alphabet/v1.ttl`](../decks/greek-alphabet/v1.ttl) is a
 small, complete example.
