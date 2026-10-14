@@ -14,6 +14,9 @@ files:
   - "**/*.md"
   - packages/ui/src/i18n/en.json
 useGitignore: true
+# Words in Arabic script are examples of Arabic, not English to check.
+ignoreRegExpList:
+  - "/[\\u0600-\\u06ff]+/gu"
 # .github/ holds Markdown too (the pull request template).
 enableGlobDot: true
 ignorePaths:

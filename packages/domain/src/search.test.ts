@@ -15,6 +15,11 @@ describe("searchForm", () => {
     expect(searchForm(SARAM_NFD)).toBe(SARAM_NFC);
     expect(searchForm(CAFE_NFD)).toBe("café");
   });
+
+  it("folds Arabic, and only Arabic", () => {
+    expect(searchForm("المَدِينَة")).toBe("المدينه");
+    expect(searchForm("Café")).toBe("café");
+  });
 });
 
 describe("matchesQuery", () => {
@@ -33,5 +38,11 @@ describe("matchesQuery", () => {
     expect(matchesQuery([SARAM_NFD], SARAM_NFC)).toBe(true);
     expect(matchesQuery(["Café words"], CAFE_NFD.toLowerCase())).toBe(true);
     expect(matchesQuery([CAFE_NFD], "café")).toBe(true);
+  });
+
+  it("finds Arabic written with or without its vowels", () => {
+    expect(matchesQuery(["كِتَاب"], "كتاب")).toBe(true);
+    expect(matchesQuery(["أكل"], "اكل")).toBe(true);
+    expect(matchesQuery(["كتاب"], "كِتَاب")).toBe(true);
   });
 });
