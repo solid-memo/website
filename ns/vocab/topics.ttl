@@ -17,7 +17,7 @@
 # history note when it arrived.
 <>
     a skos:ConceptScheme ;
-    owl:versionInfo "1.11" ;
+    owl:versionInfo "1.12" ;
     skos:changeNote "1.0: languages, swedish, geography, computing, science, chemistry." ,
                     "1.1: art." ,
                     "1.2: labour-market." ,
@@ -29,7 +29,8 @@
                     "1.8: korean; every topic named and defined in Korean as well." ,
                     "1.9: every topic named and defined in German, Spanish and French as well." ,
                     "1.10: japanese, english." ,
-                    "1.11: the scheme states its license, MIT." ;
+                    "1.11: the scheme states its license, MIT." ,
+                    "1.12: arabic." ;
     dcterms:title "Solid Memo topics"@en ,
                   "Solid Memo-ämnen"@sv ,
                   "Solid Memo 주제"@ko ,
@@ -85,7 +86,8 @@ topic:languages
                   topic:portuguese ,
                   topic:korean ,
                   topic:japanese ,
-                  topic:english ;
+                  topic:english ,
+                  topic:arabic ;
     skos:historyNote "Since 1.0." .
 
 topic:swedish
@@ -434,6 +436,24 @@ topic:english
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.10." .
+
+topic:arabic
+    a skos:Concept ;
+    skos:prefLabel "Arabic"@en ,
+                   "Arabiska"@sv ,
+                   "아랍어"@ko ,
+                   "Arabisch"@de ,
+                   "Árabe"@es ,
+                   "Arabe"@fr ;
+    skos:definition "The Arabic language."@en ,
+                    "Det arabiska språket."@sv ,
+                    "아랍어."@ko ,
+                    "Die arabische Sprache."@de ,
+                    "El idioma árabe."@es ,
+                    "La langue arabe."@fr ;
+    skos:inScheme <> ;
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.12." .
 
 topic:physics
     a skos:Concept ;
