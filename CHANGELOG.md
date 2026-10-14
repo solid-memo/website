@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [1.0.1](https://github.com/solid-memo/website/compare/v1.0.0...v1.0.1) (2026-10-14)
+
+### Bug Fixes
+
+* keep the last edit's deck arrangement over a read still in flight ([ec57855](https://github.com/solid-memo/website/commit/ec57855c47b278f33bd775a80cfb558137c37409))
+
 ## 1.0.0 (2026-10-13)
 
 ### Features
