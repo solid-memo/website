@@ -158,6 +158,7 @@ SPDX-License-Identifier = "CC-BY-4.0"
 
 [[annotations]]
 path = [
+    "decks/arabic-nouns/*.ttl",
     "decks/eurovision-winners/*.ttl",
     "decks/integrals/*.ttl",
     "decks/korean-adjectives/*.ttl",
