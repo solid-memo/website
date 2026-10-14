@@ -274,6 +274,12 @@ export const TOPICS = {
       broader: "https://solid-memo.com/ns/vocab/topics.ttl#languages",
     },
     {
+      iri: "https://solid-memo.com/ns/vocab/topics.ttl#arabic",
+      label: { en: "Arabic", de: "Arabisch", es: "Árabe", fr: "Arabe", ko: "아랍어", sv: "Arabiska" },
+      definition: { en: "The Arabic language.", de: "Die arabische Sprache.", es: "El idioma árabe.", fr: "La langue arabe.", ko: "아랍어.", sv: "Det arabiska språket." },
+      broader: "https://solid-memo.com/ns/vocab/topics.ttl#languages",
+    },
+    {
       iri: "https://solid-memo.com/ns/vocab/topics.ttl#physics",
       label: { en: "Physics", de: "Physik", es: "Física", fr: "Physique", ko: "물리학", sv: "Fysik" },
       definition: { en: "Matter, energy, forces and their units.", de: "Materie, Energie, Kräfte und ihre Einheiten.", es: "Materia, energía, fuerzas y sus unidades.", fr: "Matière, énergie, forces et leurs unités.", ko: "물질, 에너지, 힘과 그 단위.", sv: "Materia, energi, krafter och deras enheter." },
@@ -355,4 +361,5 @@ export const EU_LANGUAGES: readonly ReferenceConcept[] = [
   { iri: "http://publications.europa.eu/resource/authority/language/POR", code: "POR", label: "Portuguese" },
   { iri: "http://publications.europa.eu/resource/authority/language/JPN", code: "JPN", label: "Japanese" },
   { iri: "http://publications.europa.eu/resource/authority/language/KOR", code: "KOR", label: "Korean" },
+  { iri: "http://publications.europa.eu/resource/authority/language/ARA", code: "ARA", label: "Arabic" },
 ];

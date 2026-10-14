@@ -96,6 +96,12 @@
     skos:prefLabel "Korean"@en ;
     skos:inScheme <http://publications.europa.eu/resource/authority/language> .
 
+<http://publications.europa.eu/resource/authority/language/ARA>
+    a skos:Concept ,
+      dcterms:LinguisticSystem ;
+    skos:prefLabel "Arabic"@en ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
 <http://publications.europa.eu/resource/authority/file-type>
     a skos:ConceptScheme ;
     dcterms:title "File type"@en .
