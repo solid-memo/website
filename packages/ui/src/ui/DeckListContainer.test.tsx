@@ -680,6 +680,49 @@ describe("DeckListContainer, arranging decks", () => {
     });
   });
 
+  it("keeps the last edit's tree over a read the pod answered before it was written", async () => {
+    const { editDeckTree, writes } = deferredEdits();
+    const groupOf = (title: string): DeckTree => ({
+      readOnly: false,
+      children: [
+        {
+          kind: "group",
+          group: { url: `${instance.url}catalog.ttl#group-fake`, title: { en: title } },
+          children: [node(deck), node(second)],
+        },
+      ],
+    });
+    // The first read at once; the next, as the test answers it.
+    const later: ((tree: DeckTree) => void)[] = [];
+    const listDeckTree = vi
+      .fn<UseCases["listDeckTree"]>()
+      .mockResolvedValueOnce({ readOnly: false, children: [node(deck), node(second)] })
+      .mockImplementation(() => new Promise((resolve) => later.push(resolve)));
+    const { queryClient } = renderContainer(makeUseCasesFake({ listDeckTree, editDeckTree }));
+    await screen.findByRole("link", { name: "Kana" });
+    choose("Kana", "Group with the one above");
+    const field = await screen.findByRole("textbox", { name: "Group name" });
+    fireEvent.input(field, { target: { value: "Japanese" } });
+    fireEvent.submit(field.closest("form")!);
+    await screen.findByRole("button", { name: "Japanese 2 decks" });
+    writes[0]!.resolve(groupOf("New group"));
+    await waitFor(() => {
+      expect(editDeckTree).toHaveBeenCalledTimes(2);
+    });
+
+    // Another screen of the arrangement opens: the pod answers it before the rename is written.
+    const read = queryClient.refetchQueries({ queryKey: treeKey });
+    expect(later).toHaveLength(1);
+    writes[1]!.resolve(groupOf("Japanese"));
+    await waitFor(() => {
+      expect(queryClient.isMutating()).toBe(0);
+    });
+    later[0]!(groupOf("New group"));
+    await read;
+    expect(queryClient.getQueryData(treeKey)).toEqual(groupOf("Japanese"));
+    expect(screen.getByRole("button", { name: "Japanese 2 decks" })).toBeInTheDocument();
+  });
+
   it("folds groups as this device remembers, forgetting those gone", async () => {
     localStorage.setItem(
       `solid-memo:collapsedGroups.${instance.url}`,
