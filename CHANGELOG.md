@@ -21,6 +21,18 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [1.1.0](https://github.com/solid-memo/website/compare/v1.0.1...v1.1.0) (2026-10-14)
+
+### Features
+
+* **decks:** learn everyday Arabic phrases with Basic Arabic ([e04f2f8](https://github.com/solid-memo/website/commit/e04f2f82abf5a75fceff1cea249ede41d7cb314a))
+* **decks:** study the 1000 most common Arabic nouns ([95ae21e](https://github.com/solid-memo/website/commit/95ae21e319dee25ec3b3602fdc8ba624771d6e8b))
+* **decks:** study the 300 most common Arabic adjectives ([2fda847](https://github.com/solid-memo/website/commit/2fda847d2de339fce023c6d028f1b1a3eefcccdd))
+* **decks:** study the 500 most common Arabic verbs ([edd8d2c](https://github.com/solid-memo/website/commit/edd8d2c2007656e4f6d413429533a3a8aa11ec64))
+* describe Arabic as a language and a topic ([94c74e2](https://github.com/solid-memo/website/commit/94c74e21cfb82ac6fb6c1edf03e27f31a5b7ce6e))
+* find Arabic words with or without their vowel marks ([ed017e1](https://github.com/solid-memo/website/commit/ed017e10ada11d546a710feacdbb8ea3733527fa))
+* show Arabic and other right-to-left text in its own direction ([ab40317](https://github.com/solid-memo/website/commit/ab403171c45c4c5f259ee497ecd5a518a8092e0e))
+
 ## [1.0.1](https://github.com/solid-memo/website/compare/v1.0.0...v1.0.1) (2026-10-14)
 
 ### Bug Fixes
