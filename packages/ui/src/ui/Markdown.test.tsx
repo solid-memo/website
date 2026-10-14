@@ -165,7 +165,13 @@ describe("Markdown from data stays text", () => {
     );
     const [bare, named] = screen.getAllByRole("link");
     expect(bare).toHaveAttribute("dir", "ltr");
-    expect(named).toHaveAttribute("dir", "ltr");
+    expect(named).toHaveAttribute("dir", "auto");
+    expect(md.querySelector(".md-link-host")).toHaveAttribute("dir", "ltr");
+  });
+
+  it("runs link text in its own direction, and the host it leads to left to right", () => {
+    const md = rendered("[\u0627\u0644\u0645\u0635\u062F\u0631](https://example.org/)");
+    expect(screen.getByRole("link")).toHaveAttribute("dir", "auto");
     expect(md.querySelector(".md-link-host")).toHaveAttribute("dir", "ltr");
   });
 

@@ -7,7 +7,7 @@ import { useContext } from "preact/hooks";
 import type { DeckDirection } from "@solid-memo/domain/deck";
 import type { Violation } from "@solid-memo/domain/validation";
 import { AppError, type ErrorVars } from "@solid-memo/domain/appError";
-import { shown, shownTag, type LangText } from "@solid-memo/domain/langText";
+import { isolated, shown, shownTag, type LangText } from "@solid-memo/domain/langText";
 import { NO_LANGUAGE } from "@solid-memo/domain/languageTag";
 import { DEFAULT_LOCALE, type Locale } from "@solid-memo/domain/locale";
 import en from "../i18n/en.json";
@@ -192,9 +192,14 @@ export function createI18n(locale: Locale, appName?: string): I18n {
     return typeof count === "number" ? message[plurals.select(count)]! : message.other;
   }
 
-  /** A placeholder's value as the message shows it: a number as this language writes one ("1,000", "1 000"). */
+  /**
+   * A placeholder's value as the message shows it: a number as this
+   * language writes one ("1,000", "1 000"), and text written right to left
+   * (a card's name in Arabic) isolated from the sentence around it.
+   */
   function filled<T>(value: T): T | string {
-    return typeof value === "number" ? numbers.format(value) : value;
+    if (typeof value === "number") return numbers.format(value);
+    return typeof value === "string" ? isolated(value) : value;
   }
 
   const t: I18n["t"] = (key, vars = {}) =>

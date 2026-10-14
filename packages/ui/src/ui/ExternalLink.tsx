@@ -25,8 +25,8 @@ export function ExternalLink({
   url: string;
   class?: string;
   title?: string;
-  /** The link's own direction, isolating it from the text around it. */
-  dir?: "ltr";
+  /** The link's own direction, isolating it from the text around it: left to right, or that of its first letter ("auto"). */
+  dir?: "ltr" | "auto";
   /** Link text; defaults to the URL itself. */
   children?: ComponentChildren;
 }) {

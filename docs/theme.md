@@ -55,6 +55,20 @@ labels are tracked apart. Code, `kbd`, `samp` and `pre` keep the
 monospace font (`--font-mono`), which the Korean font rule would
 otherwise take from them.
 
+## Arabic text
+
+Arabic in card text marked `lang="ar"` has its own `:lang(ar)` rules in
+`style.css`: Noto Naskh Arabic, a book hand that draws the vowel marks
+clearly, bundled like Fredoka (only its Arabic files are fetched, and
+only for Arabic text), after Fredoka for the Latin letters and before
+the systems' Arabic fonts (Geeza Pro, Segoe UI, Tahoma). Arabic letters
+join, so no Arabic text is tracked apart: not headings, not the card's
+question (tightened for Latin letters), not the uppercase labels.
+Headings, which Bangers cannot draw in Arabic, are bold in the Arabic
+font, and code keeps the monospace font, as in Korean. Arabic, like any
+language written right to left, runs right to left in its own isolated
+box ([i18n.md](i18n.md#text-in-the-users-languages)).
+
 ## German text
 
 German, on a German page or in card text marked `lang="de"` on another,

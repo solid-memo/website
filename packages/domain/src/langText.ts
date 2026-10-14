@@ -90,6 +90,21 @@ export function folded(text: string): string {
   return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 }
 
+/** A letter of a script written right to left: Arabic, Hebrew, Syriac, Thaana, N'Ko, Adlam and the like. */
+const RIGHT_TO_LEFT =
+  /[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Syriac}\p{Script=Thaana}\p{Script=Nko}\p{Script=Adlam}\p{Script=Hanifi_Rohingya}\p{Script=Mandaic}\p{Script=Samaritan}]/u;
+
+/**
+ * Text set into a sentence in another language (a card's name in "Remove
+ * {card}?"), isolated between U+2068 and U+2069 when it holds a letter
+ * written right to left, so the sentence's own punctuation and numbers
+ * stay where its language puts them; other text as it is. Text in an
+ * element marked with its language is isolated by the style sheet instead.
+ */
+export function isolated(text: string): string {
+  return RIGHT_TO_LEFT.test(text) ? `\u2068${text}\u2069` : text;
+}
+
 /** Whether two texts say the same in the same languages. */
 export function sameText(a: LangText | undefined, b: LangText | undefined): boolean {
   if (a === undefined || b === undefined) return a === b;

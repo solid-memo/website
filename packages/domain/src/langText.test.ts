@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   english,
   inEnglish,
+  isolated,
   sameText,
   shown,
   shownTag,
@@ -136,5 +137,15 @@ describe("tidiedStated", () => {
     // An emptied one is no language at all, so it does not clash.
     expect(tidiedStated({ EN: " ", en: "Capitals" })).toEqual({ en: "Capitals" });
     expect(() => tidiedStated({ EN: "Capitals", en: "Capitals" })).toThrow("has en twice");
+  });
+});
+
+describe("isolated", () => {
+  it("isolates text holding a letter written right to left, and leaves other text as it is", () => {
+    expect(isolated("كِتَاب")).toBe("\u2068كِتَاب\u2069");
+    expect(isolated("the ספר")).toBe("\u2068the ספר\u2069");
+    expect(isolated("ܣܦܪܐ")).toBe("\u2068ܣܦܪܐ\u2069");
+    expect(isolated("Stockholm (2)")).toBe("Stockholm (2)");
+    expect(isolated("朋友")).toBe("朋友");
   });
 });

@@ -10,15 +10,14 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
  * The focus indicators in style.css, checked through the cascade itself,
  * since a later or more specific rule can silently take a ring away. The
  * font imports are left out: the test DOM has no packages to fetch. Nor
- * does it know :lang(), so it reads an element marked lang="ko" or
- * lang="de" itself (of the same specificity) for it.
+ * does it know :lang(), so it reads an element marked lang="ko",
+ * lang="ar" and so on itself (of the same specificity) for it.
  */
 beforeAll(() => {
   const style = document.createElement("style");
   style.textContent = readFileSync(join(import.meta.dirname, "style.css"), "utf8")
     .replace(/^@import .*$/gm, "")
-    .replaceAll(":lang(ko)", '[lang|="ko"]')
-    .replaceAll(":lang(de)", '[lang|="de"]');
+    .replace(/:lang\(([a-z]+)\)/g, '[lang|="$1"]');
   document.head.append(style);
 });
 
@@ -642,14 +641,14 @@ describe("Markdown from data", () => {
     expect(lastMatching(own!, "font-weight")).toBe("700");
     expect(lastMatching(inBlocks!, "font-weight")).toBeUndefined();
     expect(lastMatching(document.querySelector(".md")!, "font-size")).toBe("1.15rem");
-    expect(lastMatching(document.querySelector(".md")!, "text-align")).toBe("left");
+    expect(lastMatching(document.querySelector(".md")!, "text-align")).toBe("start");
   });
 
-  it("keeps a note's blocks as quiet as its paragraph, but left-aligned", () => {
+  it("keeps a note's blocks as quiet as its paragraph, aligned where its lines start", () => {
     document.body.innerHTML = `<div class="card-face card-back"><p class="card-note">one</p><div class="md card-note"><ul><li>two</li></ul></div></div>`;
     const [paragraph, blocks] = document.querySelectorAll(".card-note");
     expect(lastMatching(paragraph!, "text-align")).toBe("center");
-    expect(lastMatching(blocks!, "text-align")).toBe("left");
+    expect(lastMatching(blocks!, "text-align")).toBe("start");
     expect(lastMatching(blocks!, "font-size")).toBe("0.95rem");
   });
 
@@ -841,5 +840,98 @@ describe("German", () => {
     const [german, english] = document.querySelectorAll("p");
     expect(getComputedStyle(german).hyphens).toBe("auto");
     expect(getComputedStyle(english).hyphens).not.toBe("auto");
+  });
+});
+
+describe("text written right to left", () => {
+  /** Puts `html` in the page and returns the computed style of `selector`. */
+  function styled(html: string, selector: string): CSSStyleDeclaration {
+    document.body.innerHTML = html;
+    return getComputedStyle(document.querySelector(selector)!);
+  }
+
+  it.each(["ar", "fa", "ur", "he", "ar-eg"])(
+    "runs %s right to left, isolated from the text around it",
+    (tag) => {
+      const style = styled(`<p>x <span lang="${tag}">x</span></p>`, "span");
+      expect(style.direction).toBe("rtl");
+      expect(style.unicodeBidi).toBe("isolate");
+    },
+  );
+
+  it("keeps the page and other languages left to right", () => {
+    const style = styled(`<p lang="en">x</p>`, "p");
+    expect(style.direction).not.toBe("rtl");
+    expect(style.unicodeBidi).not.toBe("isolate");
+  });
+
+  it.each([
+    ["Markdown blocks", `<div class="md" lang="ar"><p>x</p></div>`, ".md"],
+    [
+      "a note's blocks",
+      `<div class="card-face"><div class="card-note md" lang="ar">x</div></div>`,
+      ".md",
+    ],
+    ["a table cell", `<table><tr><td lang="ar">x</td></tr></table>`, "td"],
+    [
+      "a course's question",
+      `<div class="course-question"><div class="card-question"><p lang="ar">x</p></div></div>`,
+      "p",
+    ],
+    [
+      "a course's right answer",
+      `<div class="course-right-answer"><div class="card-answer"><p lang="ar">x</p></div></div>`,
+      "p",
+    ],
+  ])("starts %s where their lines start, not at the left", (_, html, selector) => {
+    expect(styled(html, selector).textAlign).toBe("start");
+  });
+});
+
+describe("Arabic", () => {
+  /** Puts `html` in the page and returns the computed style of `selector`. */
+  function styled(html: string, selector: string): CSSStyleDeclaration {
+    document.body.innerHTML = html;
+    return getComputedStyle(document.querySelector(selector)!);
+  }
+
+  it("puts Noto Naskh Arabic after Fredoka, before the systems' Arabic fonts", () => {
+    expect(styled(`<p lang="ar">x</p>`, "p").fontFamily).toMatch(
+      /^"Fredoka Variable", "Noto Naskh Arabic Variable", "Geeza Pro"/,
+    );
+    expect(styled(`<p lang="fa">x</p>`, "p").fontFamily).not.toMatch(/Naskh/);
+  });
+
+  it.each([
+    ["an Arabic heading", `<h1 lang="ar">x</h1>`, "h1"],
+    ["Arabic text in a heading", `<h2><span lang="ar">x</span></h2>`, "span"],
+  ])("draws %s in Bangers, then the Arabic font, bold and untracked", (_, html, selector) => {
+    const style = styled(html, selector);
+    expect(style.fontFamily).toMatch(
+      /^"?Bangers"?, "Fredoka Variable", "Noto Naskh Arabic Variable"/,
+    );
+    expect(style.fontWeight).toBe("700");
+    expect(style.letterSpacing).toBe("0px");
+  });
+
+  it.each([
+    ["the card's question", `<div class="card-question"><p lang="ar">x</p></div>`, "p"],
+    [
+      "Arabic text in the card's question",
+      `<div class="card-question"><p><span lang="ar">x</span></p></div>`,
+      "span",
+    ],
+    ["a table header", `<table><tr><th lang="ar">x</th></tr></table>`, "th"],
+    ["a legend", `<fieldset><legend lang="ar">x</legend></fieldset>`, "legend"],
+  ])("does not track %s apart", (_, html, selector) => {
+    expect(styled(html, selector).letterSpacing).toBe("0px");
+  });
+
+  it("keeps code in a monospace font", () => {
+    expect(styled(`<p><code lang="ar">x</code></p>`, "code").fontFamily).toMatch(/^ui-monospace/);
+  });
+
+  it("still tightens the card's question in other languages", () => {
+    expect(styled(`<div class="card-question"><p>x</p></div>`, "p").letterSpacing).not.toBe("0px");
   });
 });
