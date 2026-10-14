@@ -547,8 +547,11 @@ flowchart LR
   in every language (`filterLibraryDecks` in [domain/library.ts](../packages/domain/src/library.ts)).
   The search ignores case and Unicode form: query and text are compared
   composed (NFC), so "사람" or "é" pasted decomposed (NFD), as macOS
-  file names and some PDFs hold text, still finds the deck
-  (`matchesQuery` in [domain/search.ts](../packages/domain/src/search.ts)).
+  file names and some PDFs hold text, still finds the deck; and Arabic
+  is compared without its vowel marks, so "كتاب" finds "كِتَاب"
+  (`matchesQuery` in [domain/search.ts](../packages/domain/src/search.ts), `arabicFolded` in [domain/langText.ts](../packages/domain/src/langText.ts)).
+  The Browser's card search ignores every diacritic (`folded`), Arabic's
+  the same way.
   Clicking a row opens the deck's page: description, topics, keywords
   in the reader's language,
   the release (version, date, notes), authors, license, dates and

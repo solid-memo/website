@@ -85,9 +85,38 @@ export function tidied(value: string, formatted = false): string {
   return formatted ? value.replace(/^(?:[ \t]*\r?\n)+/, "").trimEnd() : value.trim();
 }
 
-/** Text as it is searched: lower case, without diacritics ("Ö" is "o"). */
+/** Arabic's optional marks: the short vowels, tanwin, shadda, sukun and their kin, the dagger alef, and the tatweel. */
+const ARABIC_MARKS = /[\u064B-\u065F\u0670\u0640]/g;
+
+/** Arabic letters written for one another: an alef with a hamza or madda, or a wasla, and the Persian yeh. */
+const ARABIC_LETTERS: Readonly<Record<string, string>> = {
+  "\u0622": "\u0627",
+  "\u0623": "\u0627",
+  "\u0625": "\u0627",
+  "\u0671": "\u0627",
+  "\u0649": "\u064A",
+  "\u06CC": "\u064A",
+  "\u0629": "\u0647",
+};
+
+/**
+ * Arabic as a search compares it: without its optional marks — the
+ * vowels and the other marks above and below the letters (harakat), which
+ * most writing leaves out, and the tatweel that only stretches a line —
+ * and with the letters often written for one another taken as one: every
+ * alef as the bare alef (أ إ آ ٱ as ا), alef maqsura and the Persian yeh
+ * as yeh (ى ی as ي), ta marbuta as heh (ة as ه). Text in other scripts is
+ * left as it is. Composed text in, composed text out.
+ */
+export function arabicFolded(text: string): string {
+  return text
+    .replace(ARABIC_MARKS, "")
+    .replace(/[\u0622\u0623\u0625\u0671\u0649\u06CC\u0629]/g, (letter) => ARABIC_LETTERS[letter]!);
+}
+
+/** Text as it is searched: lower case, without diacritics ("Ö" is "o"), Arabic folded as arabicFolded does it ("كِتَاب" is "كتاب"). */
 export function folded(text: string): string {
-  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+  return arabicFolded(text.normalize("NFD").replace(/\p{M}/gu, "")).toLowerCase();
 }
 
 /** A letter of a script written right to left: Arabic, Hebrew, Syriac, Thaana, N'Ko, Adlam and the like. */

@@ -4,7 +4,9 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  arabicFolded,
   english,
+  folded,
   inEnglish,
   isolated,
   sameText,
@@ -147,5 +149,32 @@ describe("isolated", () => {
     expect(isolated("ܣܦܪܐ")).toBe("\u2068ܣܦܪܐ\u2069");
     expect(isolated("Stockholm (2)")).toBe("Stockholm (2)");
     expect(isolated("朋友")).toBe("朋友");
+  });
+});
+
+describe("folded", () => {
+  it("drops diacritics and case, and folds Arabic", () => {
+    expect(folded("Öl Café")).toBe("ol cafe");
+    expect(folded("الْمَدِينَة")).toBe("المدينه");
+    expect(folded("أؤئآ")).toBe("اويا");
+  });
+});
+
+describe("arabicFolded", () => {
+  it("drops the vowels and the other optional marks, and the tatweel", () => {
+    expect(arabicFolded("كِتَابٌ")).toBe("كتاب");
+    expect(arabicFolded("مُدَرِّس")).toBe("مدرس");
+    expect(arabicFolded("هٰذا")).toBe("هذا");
+    expect(arabicFolded("كــتاب")).toBe("كتاب");
+  });
+
+  it("takes the letters written for one another as one", () => {
+    expect(arabicFolded("أإآٱ")).toBe("اااا");
+    expect(arabicFolded("مصطفى ی")).toBe("مصطفي ي");
+    expect(arabicFolded("مدينة")).toBe("مدينه");
+  });
+
+  it("leaves other scripts as they are", () => {
+    expect(arabicFolded("Café साथ סֵפֶר")).toBe("Café साथ סֵפֶר");
   });
 });

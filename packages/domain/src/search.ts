@@ -2,17 +2,21 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { arabicFolded } from "./langText";
+
 /**
  * Text search as the app does it: case-insensitively, and whatever the
  * Unicode form the text is in. Both sides are compared composed (NFC),
  * so a query pasted decomposed (NFD), as macOS file names and some PDFs
  * hold text — "사람" as five jamo, "é" as "e" and a combining accent —
- * finds the same text written composed, and the other way round.
+ * finds the same text written composed, and the other way round. Arabic
+ * is compared without the marks its writers mostly leave out (arabicFolded),
+ * so "كتاب" finds "كِتَاب".
  */
 
-/** The form of `text` a search compares: composed (NFC), in lower case. */
+/** The form of `text` a search compares: composed (NFC), Arabic folded, in lower case. */
 export function searchForm(text: string): string {
-  return text.normalize("NFC").toLocaleLowerCase();
+  return arabicFolded(text.normalize("NFC")).toLocaleLowerCase();
 }
 
 /**
