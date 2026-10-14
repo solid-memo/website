@@ -159,6 +159,7 @@ SPDX-License-Identifier = "CC-BY-4.0"
 [[annotations]]
 path = [
     "decks/arabic-adjectives/*.ttl",
+    "decks/arabic-basics/*.ttl",
     "decks/arabic-nouns/*.ttl",
     "decks/arabic-verbs/*.ttl",
     "decks/eurovision-winners/*.ttl",

@@ -20,6 +20,7 @@
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
                  <#arabic-adjectives> ,
+                 <#arabic-basics> ,
                  <#arabic-nouns> ,
                  <#arabic-verbs> ,
                  <#brightest-stars> ,
@@ -438,6 +439,125 @@
     a dcat:Distribution ;
     dcat:accessURL <https://solid-memo.com/decks/arabic-adjectives/v1.ttl> ;
     dcat:downloadURL <https://solid-memo.com/decks/arabic-adjectives/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#arabic-basics>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Basic Arabic"@en ,
+                  "Grundläggande arabiska"@sv ,
+                  "기초 아랍어"@ko ,
+                  "Arabisch für Anfänger"@de ,
+                  "Árabe básico"@es ,
+                  "Arabe de base"@fr ;
+    dcterms:description "156 everyday phrases and words of Modern Standard Arabic for beginners: greetings and their replies, courtesy, introducing yourself, questions, simple needs and answers, numbers, the days of the week, time words and common set expressions. The Arabic on the front, fully voweled, the meaning on the back in English, Swedish, Korean, German, Spanish and French, with the transliteration (ALA-LC) and, where it helps, the usual reply, the form to a woman or how everyday speech differs in a note. Checked against English Wiktionary; written with the help of AI."@en ,
+                        "156 vardagliga fraser och ord på modern standardarabiska för nybörjare: hälsningar och svaren på dem, artighetsfraser, att presentera sig, frågor, enkla behov och svar, räkneord, veckodagarna, tidsord och vanliga fasta uttryck. Arabiskan på framsidan, fullt vokaliserad, betydelsen på baksidan på engelska, svenska, koreanska, tyska, spanska och franska, med translittereringen (ALA-LC) och, där det hjälper, det vanliga svaret, formen till en kvinna eller hur vardagsspråket skiljer sig i en anteckning. Kontrollerad mot engelska Wiktionary; skriven med hjälp av AI."@sv ,
+                        "초급 학습자를 위한 현대 표준 아랍어 일상 표현과 단어 156개입니다. 인사와 그 대답, 예의 표현, 자기소개, 질문, 간단한 요청과 대답, 수, 요일, 시간을 나타내는 말, 자주 쓰는 관용 표현을 담았습니다. 앞면에는 모음 부호를 모두 붙인 아랍어가, 뒷면에는 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 뜻이 있고, 메모에 로마자 표기(ALA-LC)와, 도움이 되는 경우 흔히 하는 대답, 여성에게 쓰는 형태, 일상 구어와 다른 점이 있습니다. 영어 위키낱말사전으로 확인했고, AI의 도움을 받아 썼습니다."@ko ,
+                        "156 alltägliche Wendungen und Wörter des modernen Hocharabisch für Anfänger: Grüße und ihre Antworten, Höflichkeitsformeln, sich vorstellen, Fragen, einfache Bitten und Antworten, Zahlen, die Wochentage, Zeitwörter und gängige feste Ausdrücke. Das Arabische auf der Vorderseite, voll vokalisiert, die Bedeutung auf der Rückseite auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch, mit der Umschrift (ALA-LC) und, wo es hilft, der üblichen Antwort, der Form für eine Frau oder dem Unterschied zur Alltagssprache in einer Anmerkung. Anhand des englischen Wiktionary geprüft; mithilfe von KI geschrieben."@de ,
+                        "156 frases y palabras cotidianas del árabe estándar moderno para principiantes: saludos y sus respuestas, cortesía, presentarse, preguntas, necesidades y respuestas sencillas, números, los días de la semana, palabras de tiempo y expresiones hechas frecuentes. El árabe en el anverso, totalmente vocalizado, el significado en el reverso en inglés, sueco, coreano, alemán, español y francés, con la transliteración (ALA-LC) y, cuando ayuda, la respuesta habitual, la forma para una mujer o en qué difiere el habla cotidiana en una nota. Comprobado con el Wiktionary en inglés; escrito con ayuda de IA."@es ,
+                        "156 expressions et mots courants de l’arabe standard moderne pour débutants : salutations et leurs réponses, politesse, se présenter, questions, besoins et réponses simples, nombres, jours de la semaine, mots du temps et expressions figées fréquentes. L’arabe au recto, entièrement vocalisé, le sens au verso en anglais, suédois, coréen, allemand, espagnol et français, avec la translittération (ALA-LC) et, quand c’est utile, la réponse habituelle, la forme pour une femme ou ce qui change dans la langue parlée, dans une note. Vérifié dans le Wiktionnaire anglais ; rédigé avec l’aide de l’IA."@fr ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:arabic ;
+    dcat:keyword "Arabic"@en ,
+                 "phrases"@en ,
+                 "beginners"@en ,
+                 "arabiska"@sv ,
+                 "fraser"@sv ,
+                 "nybörjare"@sv ,
+                 "아랍어"@ko ,
+                 "표현"@ko ,
+                 "초급"@ko ,
+                 "Arabisch"@de ,
+                 "Redewendungen"@de ,
+                 "Anfänger"@de ,
+                 "árabe"@es ,
+                 "frases"@es ,
+                 "principiantes"@es ,
+                 "arabe"@fr ,
+                 "expressions"@fr ,
+                 "débutants"@fr ;
+    dcat:first <https://solid-memo.com/decks/arabic-basics/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/arabic-basics/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/arabic-basics/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/arabic-basics/v1.ttl> .
+
+<https://solid-memo.com/decks/arabic-basics/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Basic Arabic"@en ,
+                  "Grundläggande arabiska"@sv ,
+                  "기초 아랍어"@ko ,
+                  "Arabisch für Anfänger"@de ,
+                  "Árabe básico"@es ,
+                  "Arabe de base"@fr ;
+    dcterms:creator <https://solid-memo.com/decks/arabic-basics/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:description "156 everyday phrases and words of Modern Standard Arabic for beginners: greetings and their replies, courtesy, introducing yourself, questions, simple needs and answers, numbers, the days of the week, time words and common set expressions. The Arabic on the front, fully voweled, the meaning on the back in English, Swedish, Korean, German, Spanish and French, with the transliteration (ALA-LC) and, where it helps, the usual reply, the form to a woman or how everyday speech differs in a note. Checked against English Wiktionary; written with the help of AI."@en ,
+                        "156 vardagliga fraser och ord på modern standardarabiska för nybörjare: hälsningar och svaren på dem, artighetsfraser, att presentera sig, frågor, enkla behov och svar, räkneord, veckodagarna, tidsord och vanliga fasta uttryck. Arabiskan på framsidan, fullt vokaliserad, betydelsen på baksidan på engelska, svenska, koreanska, tyska, spanska och franska, med translittereringen (ALA-LC) och, där det hjälper, det vanliga svaret, formen till en kvinna eller hur vardagsspråket skiljer sig i en anteckning. Kontrollerad mot engelska Wiktionary; skriven med hjälp av AI."@sv ,
+                        "초급 학습자를 위한 현대 표준 아랍어 일상 표현과 단어 156개입니다. 인사와 그 대답, 예의 표현, 자기소개, 질문, 간단한 요청과 대답, 수, 요일, 시간을 나타내는 말, 자주 쓰는 관용 표현을 담았습니다. 앞면에는 모음 부호를 모두 붙인 아랍어가, 뒷면에는 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 뜻이 있고, 메모에 로마자 표기(ALA-LC)와, 도움이 되는 경우 흔히 하는 대답, 여성에게 쓰는 형태, 일상 구어와 다른 점이 있습니다. 영어 위키낱말사전으로 확인했고, AI의 도움을 받아 썼습니다."@ko ,
+                        "156 alltägliche Wendungen und Wörter des modernen Hocharabisch für Anfänger: Grüße und ihre Antworten, Höflichkeitsformeln, sich vorstellen, Fragen, einfache Bitten und Antworten, Zahlen, die Wochentage, Zeitwörter und gängige feste Ausdrücke. Das Arabische auf der Vorderseite, voll vokalisiert, die Bedeutung auf der Rückseite auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch, mit der Umschrift (ALA-LC) und, wo es hilft, der üblichen Antwort, der Form für eine Frau oder dem Unterschied zur Alltagssprache in einer Anmerkung. Anhand des englischen Wiktionary geprüft; mithilfe von KI geschrieben."@de ,
+                        "156 frases y palabras cotidianas del árabe estándar moderno para principiantes: saludos y sus respuestas, cortesía, presentarse, preguntas, necesidades y respuestas sencillas, números, los días de la semana, palabras de tiempo y expresiones hechas frecuentes. El árabe en el anverso, totalmente vocalizado, el significado en el reverso en inglés, sueco, coreano, alemán, español y francés, con la transliteración (ALA-LC) y, cuando ayuda, la respuesta habitual, la forma para una mujer o en qué difiere el habla cotidiana en una nota. Comprobado con el Wiktionary en inglés; escrito con ayuda de IA."@es ,
+                        "156 expressions et mots courants de l’arabe standard moderne pour débutants : salutations et leurs réponses, politesse, se présenter, questions, besoins et réponses simples, nombres, jours de la semaine, mots du temps et expressions figées fréquentes. L’arabe au recto, entièrement vocalisé, le sens au verso en anglais, suédois, coréen, allemand, espagnol et français, avec la translittération (ALA-LC) et, quand c’est utile, la réponse habituelle, la forme pour une femme ou ce qui change dans la langue parlée, dans une note. Vérifié dans le Wiktionnaire anglais ; rédigé avec l’aide de l’IA."@fr ;
+    prov:wasDerivedFrom <https://en.wiktionary.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/arabic-basics/v1.ttl#compilation> ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:arabic ;
+    dcat:keyword "Arabic"@en ,
+                 "phrases"@en ,
+                 "beginners"@en ,
+                 "arabiska"@sv ,
+                 "fraser"@sv ,
+                 "nybörjare"@sv ,
+                 "아랍어"@ko ,
+                 "표현"@ko ,
+                 "초급"@ko ,
+                 "Arabisch"@de ,
+                 "Redewendungen"@de ,
+                 "Anfänger"@de ,
+                 "árabe"@es ,
+                 "frases"@es ,
+                 "principiantes"@es ,
+                 "arabe"@fr ,
+                 "expressions"@fr ,
+                 "débutants"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ,
+                     <http://publications.europa.eu/resource/authority/language/ARA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-14T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#arabic-basics> ;
+    dcat:isVersionOf <#arabic-basics> ;
+    dcat:contactPoint <https://solid-memo.com/decks/arabic-basics/v1.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/arabic-basics/v1.ttl#turtle> ;
+    solid-memo:cardCount 156 .
+
+<https://solid-memo.com/decks/arabic-basics/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/arabic-basics/v1.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/arabic-basics/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/arabic-basics/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/arabic-basics/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/arabic-basics/v1.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
