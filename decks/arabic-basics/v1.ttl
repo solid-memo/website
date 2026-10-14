@@ -1,0 +1,2940 @@
+@base <https://solid-memo.com/decks/arabic-basics/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Basic Arabic"@en ,
+                  "Grundläggande arabiska"@sv ,
+                  "기초 아랍어"@ko ,
+                  "Arabisch für Anfänger"@de ,
+                  "Árabe básico"@es ,
+                  "Arabe de base"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:description "156 everyday phrases and words of Modern Standard Arabic for beginners: greetings and their replies, courtesy, introducing yourself, questions, simple needs and answers, numbers, the days of the week, time words and common set expressions. The Arabic on the front, fully voweled, the meaning on the back in English, Swedish, Korean, German, Spanish and French, with the transliteration (ALA-LC) and, where it helps, the usual reply, the form to a woman or how everyday speech differs in a note. Checked against English Wiktionary; written with the help of AI."@en ,
+                        "156 vardagliga fraser och ord på modern standardarabiska för nybörjare: hälsningar och svaren på dem, artighetsfraser, att presentera sig, frågor, enkla behov och svar, räkneord, veckodagarna, tidsord och vanliga fasta uttryck. Arabiskan på framsidan, fullt vokaliserad, betydelsen på baksidan på engelska, svenska, koreanska, tyska, spanska och franska, med translittereringen (ALA-LC) och, där det hjälper, det vanliga svaret, formen till en kvinna eller hur vardagsspråket skiljer sig i en anteckning. Kontrollerad mot engelska Wiktionary; skriven med hjälp av AI."@sv ,
+                        "초급 학습자를 위한 현대 표준 아랍어 일상 표현과 단어 156개입니다. 인사와 그 대답, 예의 표현, 자기소개, 질문, 간단한 요청과 대답, 수, 요일, 시간을 나타내는 말, 자주 쓰는 관용 표현을 담았습니다. 앞면에는 모음 부호를 모두 붙인 아랍어가, 뒷면에는 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 뜻이 있고, 메모에 로마자 표기(ALA-LC)와, 도움이 되는 경우 흔히 하는 대답, 여성에게 쓰는 형태, 일상 구어와 다른 점이 있습니다. 영어 위키낱말사전으로 확인했고, AI의 도움을 받아 썼습니다."@ko ,
+                        "156 alltägliche Wendungen und Wörter des modernen Hocharabisch für Anfänger: Grüße und ihre Antworten, Höflichkeitsformeln, sich vorstellen, Fragen, einfache Bitten und Antworten, Zahlen, die Wochentage, Zeitwörter und gängige feste Ausdrücke. Das Arabische auf der Vorderseite, voll vokalisiert, die Bedeutung auf der Rückseite auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch, mit der Umschrift (ALA-LC) und, wo es hilft, der üblichen Antwort, der Form für eine Frau oder dem Unterschied zur Alltagssprache in einer Anmerkung. Anhand des englischen Wiktionary geprüft; mithilfe von KI geschrieben."@de ,
+                        "156 frases y palabras cotidianas del árabe estándar moderno para principiantes: saludos y sus respuestas, cortesía, presentarse, preguntas, necesidades y respuestas sencillas, números, los días de la semana, palabras de tiempo y expresiones hechas frecuentes. El árabe en el anverso, totalmente vocalizado, el significado en el reverso en inglés, sueco, coreano, alemán, español y francés, con la transliteración (ALA-LC) y, cuando ayuda, la respuesta habitual, la forma para una mujer o en qué difiere el habla cotidiana en una nota. Comprobado con el Wiktionary en inglés; escrito con ayuda de IA."@es ,
+                        "156 expressions et mots courants de l’arabe standard moderne pour débutants : salutations et leurs réponses, politesse, se présenter, questions, besoins et réponses simples, nombres, jours de la semaine, mots du temps et expressions figées fréquentes. L’arabe au recto, entièrement vocalisé, le sens au verso en anglais, suédois, coréen, allemand, espagnol et français, avec la translittération (ALA-LC) et, quand c’est utile, la réponse habituelle, la forme pour une femme ou ce qui change dans la langue parlée, dans une note. Vérifié dans le Wiktionnaire anglais ; rédigé avec l’aide de l’IA."@fr ;
+    prov:wasDerivedFrom <https://en.wiktionary.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:arabic ;
+    dcat:keyword "Arabic"@en ,
+                 "phrases"@en ,
+                 "beginners"@en ,
+                 "arabiska"@sv ,
+                 "fraser"@sv ,
+                 "nybörjare"@sv ,
+                 "아랍어"@ko ,
+                 "표현"@ko ,
+                 "초급"@ko ,
+                 "Arabisch"@de ,
+                 "Redewendungen"@de ,
+                 "Anfänger"@de ,
+                 "árabe"@es ,
+                 "frases"@es ,
+                 "principiantes"@es ,
+                 "arabe"@fr ,
+                 "expressions"@fr ,
+                 "débutants"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ,
+                     <http://publications.europa.eu/resource/authority/language/ARA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-14T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#arabic-basics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#arabic-basics> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): the activities and sources below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://en.wiktionary.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The deck was checked by machine (scripts checking the count, the ids, NFC and the uniqueness of every meaning in every language; the app's SHACL and DCAT-AP validators and a second SHACL validator) and by AI agents; it has had no human review."@en ,
+                 "Selection: 156 cards in ten groups: greetings and their standard replies, courtesy, answers (yes, no, maybe), introductions, questions, simple needs, the numbers 0 to 10 with 20, 100 and 1000, the days of the week, time words, and the set expressions every learner meets (إِنْ شَاءَ اللّٰه, الْحَمْدُ لِلّٰه, مَا شَاءَ اللّٰه, بِسْمِ اللّٰه), whose notes say how they are used, not what to believe. The list is the authoring agent's own, in Modern Standard Arabic throughout."@en ,
+                 "Writing the cards. The front is the phrase in Arabic, fully voweled, as said at a pause (a case vowel the pause drops is left off, a vowel that stays, as in شُكْرًا, is kept), in the form said to a man, the form to a woman or to several in the note where it differs. The back gives one natural equivalent in each of six languages, unique in each. The note starts with the transliteration in ALA-LC letters (ā ī ū, th kh dh sh gh, ʻ for ayn, ʼ for hamza, no initial hamza, ta marbuta at a pause -ah), the article written as it is said (as-salāmu, ṣabāḥu l-khayr), then, where it helps, the usual reply, the register or how everyday speech differs. Each phrase was confirmed against its English Wiktionary entry, or its words' entries, where Wiktionary has them."@en ,
+                 "Card ids are the transliteration in ASCII letters, without diacritics, ʻ or ʼ, its words joined by hyphens (as-salamu-alaykum, shukran, kayfa-haluka). They are addresses, not shown as text."@en ,
+                 "Licensing: the deck is CC BY-SA 4.0, as English Wiktionary (CC BY-SA 4.0), against which its phrases were checked, is; it is credited here."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-14T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Arabic and transliteration (AI)"@en ;
+    rdfs:comment "Scope: All 156 phrases and the Arabic quoted in their notes, checked by an AI agent letter by letter and mark by mark: correct, idiomatic Modern Standard Arabic, fully voweled, at a pause, the transliteration matching the Arabic; not a human review."@en ,
+                 "Outcome: No errors: the Arabic, its vowel marks and pause forms, the transliterations and the Arabic quoted in the notes were all found right."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-14T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Meanings and notes in six languages (AI)"@en ;
+    rdfs:comment "Scope: All 156 cards' meanings and notes in English, Swedish, Korean, German, Spanish and French, checked by an AI agent for natural everyday equivalents, uniqueness, and notes that say the same in every language; not a human review."@en ,
+                 "Outcome: 10 corrections: meanings that were word-for-word glosses rather than what speakers say (Korean and Swedish for مَا الْأَخْبَار, German wishes that were fragments), two literal glosses in the notes for مَعَ السَّلَامَة that read as 'certainly' in German and Spanish, notes for تَفَضَّل brought in line across the languages, and a Korean note that read 'girlfriend'."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-14T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks"@en ;
+    rdfs:comment "Scope: The whole release: the scripts' checks, the library checker (npm run library) with the app's shapes, DCAT-AP and SKOS, and a second SHACL validator (pySHACL, npm run crosscheck)."@en ,
+                 "Outcome: The release conforms: the scripts found every meaning unique in each language and every text in NFC; the library checker found the library valid with this deck in it, and pySHACL found all 228 documents it checks conform."@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (Arabic entries, as extracted by Wiktextract on kaikki.org)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Verification: the voweling and meaning of every phrase or of its words, where Wiktionary has an entry (phrases, interjections, numbers, days, question words); downloaded from kaikki.org on 2026-10-14. Text is available under CC BY-SA 4.0 (https://en.wiktionary.org/wiki/Wiktionary:Copyrights)."@en .
+
+<#as-salamu-alaykum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "السَّلَامُ عَلَيْكُمْ"@ar ;
+    solid-memo:back "hello (peace be upon you)"@en ,
+                    "hej (frid vare med dig)"@sv ,
+                    "안녕하세요 (평화가 함께하기를)"@ko ,
+                    "hallo (Friede sei mit dir)"@de ,
+                    "hola (la paz sea contigo)"@es ,
+                    "bonjour (que la paix soit sur toi)"@fr ;
+    solid-memo:backNote "as-salāmu ʻalaykum. The standard reply is وَعَلَيْكُمُ السَّلَام. Used at any time of day, to anyone."@en ,
+                        "as-salāmu ʻalaykum. Det vanliga svaret är وَعَلَيْكُمُ السَّلَام. Används när som helst på dagen, till vem som helst."@sv ,
+                        "as-salāmu ʻalaykum. 보통 وَعَلَيْكُمُ السَّلَام으로 답해요. 하루 중 언제든, 누구에게나 써요."@ko ,
+                        "as-salāmu ʻalaykum. Die übliche Antwort ist وَعَلَيْكُمُ السَّلَام. Zu jeder Tageszeit und gegenüber allen."@de ,
+                        "as-salāmu ʻalaykum. La respuesta habitual es وَعَلَيْكُمُ السَّلَام. Se usa a cualquier hora y con cualquiera."@es ,
+                        "as-salāmu ʻalaykum. La réponse habituelle est وَعَلَيْكُمُ السَّلَام. S’emploie à toute heure et avec tout le monde."@fr .
+
+<#wa-alaykumu-s-salam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "وَعَلَيْكُمُ السَّلَام"@ar ;
+    solid-memo:back "and peace be upon you (reply)"@en ,
+                    "och frid vare med dig (svar)"@sv ,
+                    "당신에게도 평화를 (답례)"@ko ,
+                    "und Friede sei mit dir (Antwort)"@de ,
+                    "y la paz sea contigo (respuesta)"@es ,
+                    "et que la paix soit sur toi (réponse)"@fr ;
+    solid-memo:backNote "wa-ʻalaykumu s-salām."@en ,
+                        "wa-ʻalaykumu s-salām."@sv ,
+                        "wa-ʻalaykumu s-salām."@ko ,
+                        "wa-ʻalaykumu s-salām."@de ,
+                        "wa-ʻalaykumu s-salām."@es ,
+                        "wa-ʻalaykumu s-salām."@fr .
+
+<#marhaban>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَرْحَبًا"@ar ;
+    solid-memo:back "hi"@en ,
+                    "hej"@sv ,
+                    "안녕"@ko ,
+                    "hallo"@de ,
+                    "hola"@es ,
+                    "salut"@fr ;
+    solid-memo:backNote "marḥaban. Answered with مَرْحَبًا or أَهْلًا. Very common in everyday speech."@en ,
+                        "marḥaban. Besvaras med مَرْحَبًا eller أَهْلًا. Mycket vanligt i vardagligt tal."@sv ,
+                        "marḥaban. مَرْحَبًا나 أَهْلًا로 답해요. 일상 대화에서 아주 흔해요."@ko ,
+                        "marḥaban. Man antwortet mit مَرْحَبًا oder أَهْلًا. Im Alltag sehr häufig."@de ,
+                        "marḥaban. Se responde con مَرْحَبًا o أَهْلًا. Muy común en el habla diaria."@es ,
+                        "marḥaban. On répond مَرْحَبًا ou أَهْلًا. Très courant à l’oral."@fr .
+
+<#ahlan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَهْلًا"@ar ;
+    solid-memo:back "hi (welcoming)"@en ,
+                    "hej (välkomnande)"@sv ,
+                    "반가워요"@ko ,
+                    "hallo (herzlich)"@de ,
+                    "hola (cordial)"@es ,
+                    "salut (chaleureux)"@fr ;
+    solid-memo:backNote "ahlan. Short for أَهْلًا وَسَهْلًا; often a reply to مَرْحَبًا."@en ,
+                        "ahlan. Kort för أَهْلًا وَسَهْلًا; ofta ett svar på مَرْحَبًا."@sv ,
+                        "ahlan. أَهْلًا وَسَهْلًا의 줄임말로, مَرْحَبًا에 대한 답으로 자주 써요."@ko ,
+                        "ahlan. Kurz für أَهْلًا وَسَهْلًا; oft die Antwort auf مَرْحَبًا."@de ,
+                        "ahlan. Forma corta de أَهْلًا وَسَهْلًا; a menudo responde a مَرْحَبًا."@es ,
+                        "ahlan. Forme courte de أَهْلًا وَسَهْلًا ; répond souvent à مَرْحَبًا."@fr .
+
+<#ahlan-wa-sahlan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَهْلًا وَسَهْلًا"@ar ;
+    solid-memo:back "welcome"@en ,
+                    "välkommen"@sv ,
+                    "환영합니다"@ko ,
+                    "willkommen"@de ,
+                    "bienvenido"@es ,
+                    "bienvenue"@fr ;
+    solid-memo:backNote "ahlan wa-sahlan. Said to greet a guest; the reply is أَهْلًا بِكَ (to a woman بِكِ)."@en ,
+                        "ahlan wa-sahlan. Sägs för att hälsa en gäst välkommen; svaret är أَهْلًا بِكَ (till en kvinna بِكِ)."@sv ,
+                        "ahlan wa-sahlan. 손님을 맞을 때 써요. 답은 أَهْلًا بِكَ (여성에게는 بِكِ)."@ko ,
+                        "ahlan wa-sahlan. Zur Begrüßung eines Gastes; die Antwort ist أَهْلًا بِكَ (zu einer Frau بِكِ)."@de ,
+                        "ahlan wa-sahlan. Para recibir a un invitado; se responde أَهْلًا بِكَ (a una mujer بِكِ)."@es ,
+                        "ahlan wa-sahlan. Pour accueillir un invité ; on répond أَهْلًا بِكَ (à une femme بِكِ)."@fr .
+
+<#ahlan-bika>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَهْلًا بِكَ"@ar ;
+    solid-memo:back "hello to you too (reply)"@en ,
+                    "hej på dig också (svar)"@sv ,
+                    "반갑습니다 (답례)"@ko ,
+                    "hallo zurück (Antwort)"@de ,
+                    "hola a ti también (respuesta)"@es ,
+                    "bonjour à toi aussi (réponse)"@fr ;
+    solid-memo:backNote "ahlan bika. To a woman: أَهْلًا بِكِ (ahlan biki)."@en ,
+                        "ahlan bika. Till en kvinna: أَهْلًا بِكِ (ahlan biki)."@sv ,
+                        "ahlan bika. 여성에게는 أَهْلًا بِكِ (ahlan biki)."@ko ,
+                        "ahlan bika. Zu einer Frau: أَهْلًا بِكِ (ahlan biki)."@de ,
+                        "ahlan bika. A una mujer: أَهْلًا بِكِ (ahlan biki)."@es ,
+                        "ahlan bika. À une femme : أَهْلًا بِكِ (ahlan biki)."@fr .
+
+<#sabahu-l-khayr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "صَبَاحُ الْخَيْر"@ar ;
+    solid-memo:back "good morning"@en ,
+                    "god morgon"@sv ,
+                    "좋은 아침이에요"@ko ,
+                    "guten Morgen"@de ,
+                    "buenos días"@es ,
+                    "bonjour (le matin)"@fr ;
+    solid-memo:backNote "ṣabāḥu l-khayr. The usual reply is صَبَاحُ النُّور."@en ,
+                        "ṣabāḥu l-khayr. Det vanliga svaret är صَبَاحُ النُّور."@sv ,
+                        "ṣabāḥu l-khayr. 보통 صَبَاحُ النُّور로 답해요."@ko ,
+                        "ṣabāḥu l-khayr. Die übliche Antwort ist صَبَاحُ النُّور."@de ,
+                        "ṣabāḥu l-khayr. La respuesta habitual es صَبَاحُ النُّور."@es ,
+                        "ṣabāḥu l-khayr. La réponse habituelle est صَبَاحُ النُّور."@fr .
+
+<#sabahu-n-nur>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "صَبَاحُ النُّور"@ar ;
+    solid-memo:back "good morning (reply)"@en ,
+                    "god morgon (svar)"@sv ,
+                    "좋은 아침이에요 (답례)"@ko ,
+                    "guten Morgen (Antwort)"@de ,
+                    "buenos días (respuesta)"@es ,
+                    "bonjour (réponse, le matin)"@fr ;
+    solid-memo:backNote "ṣabāḥu n-nūr. Literally “morning of light”."@en ,
+                        "ṣabāḥu n-nūr. Ordagrant ”ljusets morgon”."@sv ,
+                        "ṣabāḥu n-nūr. 글자 그대로는 ‘빛의 아침’이에요."@ko ,
+                        "ṣabāḥu n-nūr. Wörtlich „Morgen des Lichts“."@de ,
+                        "ṣabāḥu n-nūr. Literalmente «mañana de luz»."@es ,
+                        "ṣabāḥu n-nūr. Littéralement « matin de lumière »."@fr .
+
+<#masau-l-khayr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَسَاءُ الْخَيْر"@ar ;
+    solid-memo:back "good evening"@en ,
+                    "god kväll"@sv ,
+                    "좋은 저녁이에요"@ko ,
+                    "guten Abend"@de ,
+                    "buenas tardes"@es ,
+                    "bonsoir"@fr ;
+    solid-memo:backNote "masāʼu l-khayr. Used from the afternoon on; the usual reply is مَسَاءُ النُّور."@en ,
+                        "masāʼu l-khayr. Används från eftermiddagen och framåt; det vanliga svaret är مَسَاءُ النُّور."@sv ,
+                        "masāʼu l-khayr. 오후부터 써요. 보통 مَسَاءُ النُّور로 답해요."@ko ,
+                        "masāʼu l-khayr. Ab dem Nachmittag; die übliche Antwort ist مَسَاءُ النُّور."@de ,
+                        "masāʼu l-khayr. Se usa desde la tarde; la respuesta habitual es مَسَاءُ النُّور."@es ,
+                        "masāʼu l-khayr. S’emploie dès l’après-midi ; la réponse habituelle est مَسَاءُ النُّور."@fr .
+
+<#masau-n-nur>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَسَاءُ النُّور"@ar ;
+    solid-memo:back "good evening (reply)"@en ,
+                    "god kväll (svar)"@sv ,
+                    "좋은 저녁이에요 (답례)"@ko ,
+                    "guten Abend (Antwort)"@de ,
+                    "buenas tardes (respuesta)"@es ,
+                    "bonsoir (réponse)"@fr ;
+    solid-memo:backNote "masāʼu n-nūr."@en ,
+                        "masāʼu n-nūr."@sv ,
+                        "masāʼu n-nūr."@ko ,
+                        "masāʼu n-nūr."@de ,
+                        "masāʼu n-nūr."@es ,
+                        "masāʼu n-nūr."@fr .
+
+<#tusbihu-ala-khayr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "تُصْبِحُ عَلَى خَيْر"@ar ;
+    solid-memo:back "good night"@en ,
+                    "god natt"@sv ,
+                    "안녕히 주무세요"@ko ,
+                    "gute Nacht"@de ,
+                    "buenas noches"@es ,
+                    "bonne nuit"@fr ;
+    solid-memo:backNote "tuṣbiḥu ʻalā khayr. To a woman: تُصْبِحِينَ عَلَى خَيْر. The reply is وَأَنْتَ مِنْ أَهْلِه."@en ,
+                        "tuṣbiḥu ʻalā khayr. Till en kvinna: تُصْبِحِينَ عَلَى خَيْر. Svaret är وَأَنْتَ مِنْ أَهْلِه."@sv ,
+                        "tuṣbiḥu ʻalā khayr. 여성에게는 تُصْبِحِينَ عَلَى خَيْر. 답은 وَأَنْتَ مِنْ أَهْلِه."@ko ,
+                        "tuṣbiḥu ʻalā khayr. Zu einer Frau: تُصْبِحِينَ عَلَى خَيْر. Die Antwort ist وَأَنْتَ مِنْ أَهْلِه."@de ,
+                        "tuṣbiḥu ʻalā khayr. A una mujer: تُصْبِحِينَ عَلَى خَيْر. Se responde وَأَنْتَ مِنْ أَهْلِه."@es ,
+                        "tuṣbiḥu ʻalā khayr. À une femme : تُصْبِحِينَ عَلَى خَيْر. On répond وَأَنْتَ مِنْ أَهْلِه."@fr .
+
+<#wa-anta-min-ahlih>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "وَأَنْتَ مِنْ أَهْلِه"@ar ;
+    solid-memo:back "good night (reply)"@en ,
+                    "god natt (svar)"@sv ,
+                    "안녕히 주무세요 (답례)"@ko ,
+                    "gute Nacht (Antwort)"@de ,
+                    "buenas noches (respuesta)"@es ,
+                    "bonne nuit (réponse)"@fr ;
+    solid-memo:backNote "wa-anta min ahlih. To a woman: وَأَنْتِ مِنْ أَهْلِه (wa-anti min ahlih)."@en ,
+                        "wa-anta min ahlih. Till en kvinna: وَأَنْتِ مِنْ أَهْلِه (wa-anti min ahlih)."@sv ,
+                        "wa-anta min ahlih. 여성에게는 وَأَنْتِ مِنْ أَهْلِه (wa-anti min ahlih)."@ko ,
+                        "wa-anta min ahlih. Zu einer Frau: وَأَنْتِ مِنْ أَهْلِه (wa-anti min ahlih)."@de ,
+                        "wa-anta min ahlih. A una mujer: وَأَنْتِ مِنْ أَهْلِه (wa-anti min ahlih)."@es ,
+                        "wa-anta min ahlih. À une femme : وَأَنْتِ مِنْ أَهْلِه (wa-anti min ahlih)."@fr .
+
+<#laylatan-saidah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَيْلَةً سَعِيدَة"@ar ;
+    solid-memo:back "have a good night"@en ,
+                    "ha en skön natt"@sv ,
+                    "좋은 밤 보내세요"@ko ,
+                    "hab eine schöne Nacht"@de ,
+                    "que pases buena noche"@es ,
+                    "passe une bonne nuit"@fr ;
+    solid-memo:backNote "laylatan saʻīdah."@en ,
+                        "laylatan saʻīdah."@sv ,
+                        "laylatan saʻīdah."@ko ,
+                        "laylatan saʻīdah."@de ,
+                        "laylatan saʻīdah."@es ,
+                        "laylatan saʻīdah."@fr .
+
+<#yawman-saidan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "يَوْمًا سَعِيدًا"@ar ;
+    solid-memo:back "have a nice day"@en ,
+                    "ha en trevlig dag"@sv ,
+                    "좋은 하루 보내세요"@ko ,
+                    "schönen Tag noch"@de ,
+                    "que tengas un buen día"@es ,
+                    "bonne journée"@fr ;
+    solid-memo:backNote "yawman saʻīdan."@en ,
+                        "yawman saʻīdan."@sv ,
+                        "yawman saʻīdan."@ko ,
+                        "yawman saʻīdan."@de ,
+                        "yawman saʻīdan."@es ,
+                        "yawman saʻīdan."@fr .
+
+<#kayfa-haluka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "كَيْفَ حَالُكَ؟"@ar ;
+    solid-memo:back "how are you?"@en ,
+                    "hur mår du?"@sv ,
+                    "어떻게 지내요?"@ko ,
+                    "wie geht es dir?"@de ,
+                    "¿cómo estás?"@es ,
+                    "comment vas-tu ?"@fr ;
+    solid-memo:backNote "kayfa ḥāluka? To a woman: كَيْفَ حَالُكِ (kayfa ḥāluki). In speech the final vowel is often dropped."@en ,
+                        "kayfa ḥāluka? Till en kvinna: كَيْفَ حَالُكِ (kayfa ḥāluki). I tal faller slutvokalen ofta bort."@sv ,
+                        "kayfa ḥāluka? 여성에게는 كَيْفَ حَالُكِ (kayfa ḥāluki). 말할 때는 끝 모음을 자주 생략해요."@ko ,
+                        "kayfa ḥāluka? Zu einer Frau: كَيْفَ حَالُكِ (kayfa ḥāluki). Gesprochen fällt der Endvokal oft weg."@de ,
+                        "kayfa ḥāluka? A una mujer: كَيْفَ حَالُكِ (kayfa ḥāluki). Al hablar, la vocal final suele caer."@es ,
+                        "kayfa ḥāluka? À une femme : كَيْفَ حَالُكِ (kayfa ḥāluki). À l’oral, la voyelle finale tombe souvent."@fr .
+
+<#kayfa-l-hal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "كَيْفَ الْحَال؟"@ar ;
+    solid-memo:back "how’s it going?"@en ,
+                    "hur är läget?"@sv ,
+                    "요즘 어때요?"@ko ,
+                    "wie läuft’s?"@de ,
+                    "¿qué tal?"@es ,
+                    "ça va ?"@fr ;
+    solid-memo:backNote "kayfa l-ḥāl? The same to a man or a woman."@en ,
+                        "kayfa l-ḥāl? Samma till en man och en kvinna."@sv ,
+                        "kayfa l-ḥāl? 남성과 여성에게 똑같이 써요."@ko ,
+                        "kayfa l-ḥāl? Gleich für Mann und Frau."@de ,
+                        "kayfa l-ḥāl? Igual para un hombre o una mujer."@es ,
+                        "kayfa l-ḥāl? Identique pour un homme ou une femme."@fr .
+
+<#ana-bi-khayr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا بِخَيْر"@ar ;
+    solid-memo:back "I’m fine"@en ,
+                    "jag mår bra"@sv ,
+                    "잘 지내요"@ko ,
+                    "mir geht es gut"@de ,
+                    "estoy bien"@es ,
+                    "je vais bien"@fr ;
+    solid-memo:backNote "anā bi-khayr. Often followed by الْحَمْدُ لِلّٰه."@en ,
+                        "anā bi-khayr. Följs ofta av الْحَمْدُ لِلّٰه."@sv ,
+                        "anā bi-khayr. 흔히 뒤에 الْحَمْدُ لِلّٰه를 덧붙여요."@ko ,
+                        "anā bi-khayr. Oft gefolgt von الْحَمْدُ لِلّٰه."@de ,
+                        "anā bi-khayr. Suele ir seguido de الْحَمْدُ لِلّٰه."@es ,
+                        "anā bi-khayr. Souvent suivi de الْحَمْدُ لِلّٰه."@fr .
+
+<#bi-khayr-shukran>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "بِخَيْر، شُكْرًا"@ar ;
+    solid-memo:back "fine, thanks"@en ,
+                    "bra, tack"@sv ,
+                    "잘 지내요, 고마워요"@ko ,
+                    "gut, danke"@de ,
+                    "bien, gracias"@es ,
+                    "bien, merci"@fr ;
+    solid-memo:backNote "bi-khayr, shukran."@en ,
+                        "bi-khayr, shukran."@sv ,
+                        "bi-khayr, shukran."@ko ,
+                        "bi-khayr, shukran."@de ,
+                        "bi-khayr, shukran."@es ,
+                        "bi-khayr, shukran."@fr .
+
+<#wa-anta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "وَأَنْتَ؟"@ar ;
+    solid-memo:back "and you?"@en ,
+                    "och du?"@sv ,
+                    "당신은요?"@ko ,
+                    "und du?"@de ,
+                    "¿y tú?"@es ,
+                    "et toi ?"@fr ;
+    solid-memo:backNote "wa-anta? To a woman: وَأَنْتِ (wa-anti)."@en ,
+                        "wa-anta? Till en kvinna: وَأَنْتِ (wa-anti)."@sv ,
+                        "wa-anta? 여성에게는 وَأَنْتِ (wa-anti)."@ko ,
+                        "wa-anta? Zu einer Frau: وَأَنْتِ (wa-anti)."@de ,
+                        "wa-anta? A una mujer: وَأَنْتِ (wa-anti)."@es ,
+                        "wa-anta? À une femme : وَأَنْتِ (wa-anti)."@fr .
+
+<#ma-l-akhbar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَا الْأَخْبَار؟"@ar ;
+    solid-memo:back "what’s new?"@en ,
+                    "något nytt?"@sv ,
+                    "별일 없어요?"@ko ,
+                    "was gibt’s Neues?"@de ,
+                    "¿qué hay de nuevo?"@es ,
+                    "quoi de neuf ?"@fr ;
+    solid-memo:backNote "mā l-akhbār?"@en ,
+                        "mā l-akhbār?"@sv ,
+                        "mā l-akhbār?"@ko ,
+                        "mā l-akhbār?"@de ,
+                        "mā l-akhbār?"@es ,
+                        "mā l-akhbār?"@fr .
+
+<#tasharrafna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "تَشَرَّفْنَا"@ar ;
+    solid-memo:back "nice to meet you"@en ,
+                    "trevligt att träffas"@sv ,
+                    "만나서 반가워요"@ko ,
+                    "freut mich"@de ,
+                    "mucho gusto"@es ,
+                    "enchanté"@fr ;
+    solid-memo:backNote "tasharrafnā. Literally “we are honored”; the same to a man or a woman."@en ,
+                        "tasharrafnā. Ordagrant ”vi är hedrade”; samma till en man och en kvinna."@sv ,
+                        "tasharrafnā. 글자 그대로는 ‘영광입니다’이며, 남녀 모두에게 써요."@ko ,
+                        "tasharrafnā. Wörtlich „wir sind geehrt“; gleich für Mann und Frau."@de ,
+                        "tasharrafnā. Literalmente «nos sentimos honrados»; igual para hombre o mujer."@es ,
+                        "tasharrafnā. Littéralement « nous sommes honorés » ; identique pour un homme ou une femme."@fr .
+
+<#fursatun-saidah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "فُرْصَةٌ سَعِيدَة"@ar ;
+    solid-memo:back "pleased to meet you"@en ,
+                    "roligt att träffas"@sv ,
+                    "만나서 기뻐요"@ko ,
+                    "schön, dich kennenzulernen"@de ,
+                    "encantado de conocerte"@es ,
+                    "ravi de te rencontrer"@fr ;
+    solid-memo:backNote "furṣatun saʻīdah. Literally “a happy occasion”; said on meeting or parting after a first meeting."@en ,
+                        "furṣatun saʻīdah. Ordagrant ”ett lyckligt tillfälle”; sägs vid eller efter ett första möte."@sv ,
+                        "furṣatun saʻīdah. 글자 그대로는 ‘기쁜 기회’로, 처음 만났을 때나 헤어질 때 써요."@ko ,
+                        "furṣatun saʻīdah. Wörtlich „eine glückliche Gelegenheit“; beim ersten Treffen oder beim Abschied danach."@de ,
+                        "furṣatun saʻīdah. Literalmente «una ocasión feliz»; al conocerse o al despedirse tras conocerse."@es ,
+                        "furṣatun saʻīdah. Littéralement « une heureuse occasion » ; à la rencontre ou en se quittant après."@fr .
+
+<#maa-s-salamah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَعَ السَّلَامَة"@ar ;
+    solid-memo:back "goodbye"@en ,
+                    "hej då"@sv ,
+                    "안녕히 가세요"@ko ,
+                    "auf Wiedersehen"@de ,
+                    "adiós"@es ,
+                    "au revoir"@fr ;
+    solid-memo:backNote "maʻa s-salāmah. Literally “with safety”; the reply is often the same phrase."@en ,
+                        "maʻa s-salāmah. Ordagrant ”med trygghet”; svaret är ofta samma fras."@sv ,
+                        "maʻa s-salāmah. 글자 그대로는 ‘평안히’이며, 같은 말로 답하는 경우가 많아요."@ko ,
+                        "maʻa s-salāmah. Wörtlich „mit Unversehrtheit“; man antwortet oft mit demselben Satz."@de ,
+                        "maʻa s-salāmah. Literalmente «con la seguridad»; a menudo se responde lo mismo."@es ,
+                        "maʻa s-salāmah. Littéralement « avec la sécurité » ; on répond souvent la même chose."@fr .
+
+<#ila-l-liqa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "إِلَى اللِّقَاء"@ar ;
+    solid-memo:back "see you"@en ,
+                    "vi ses"@sv ,
+                    "또 만나요"@ko ,
+                    "bis bald"@de ,
+                    "hasta luego"@es ,
+                    "à bientôt"@fr ;
+    solid-memo:backNote "ilā l-liqāʼ. Literally “until the meeting”; a slightly formal goodbye."@en ,
+                        "ilā l-liqāʼ. Ordagrant ”tills vi möts”; ett lite formellt adjö."@sv ,
+                        "ilā l-liqāʼ. 글자 그대로는 ‘다시 만날 때까지’이며, 조금 격식 있는 작별 인사예요."@ko ,
+                        "ilā l-liqāʼ. Wörtlich „bis zum Treffen“; ein etwas förmlicher Abschied."@de ,
+                        "ilā l-liqāʼ. Literalmente «hasta el encuentro»; una despedida algo formal."@es ,
+                        "ilā l-liqāʼ. Littéralement « jusqu’à la rencontre » ; un au revoir un peu soutenu."@fr .
+
+<#wadaan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "وَدَاعًا"@ar ;
+    solid-memo:back "farewell"@en ,
+                    "farväl"@sv ,
+                    "안녕 (오랜 작별)"@ko ,
+                    "lebe wohl"@de ,
+                    "adiós (para mucho tiempo)"@es ,
+                    "adieu"@fr ;
+    solid-memo:backNote "wadāʻan. For a long or final parting, not for everyday goodbyes."@en ,
+                        "wadāʻan. För ett långt eller sista avsked, inte till vardags."@sv ,
+                        "wadāʻan. 오래 또는 영영 헤어질 때 쓰고, 일상적인 작별에는 쓰지 않아요."@ko ,
+                        "wadāʻan. Für einen langen oder endgültigen Abschied, nicht im Alltag."@de ,
+                        "wadāʻan. Para una separación larga o definitiva, no para el día a día."@es ,
+                        "wadāʻan. Pour une séparation longue ou définitive, pas au quotidien."@fr .
+
+<#araka-ghadan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَرَاكَ غَدًا"@ar ;
+    solid-memo:back "see you tomorrow"@en ,
+                    "vi ses i morgon"@sv ,
+                    "내일 봐요"@ko ,
+                    "bis morgen"@de ,
+                    "hasta mañana"@es ,
+                    "à demain"@fr ;
+    solid-memo:backNote "arāka ghadan. To a woman: أَرَاكِ غَدًا (arāki ghadan)."@en ,
+                        "arāka ghadan. Till en kvinna: أَرَاكِ غَدًا (arāki ghadan)."@sv ,
+                        "arāka ghadan. 여성에게는 أَرَاكِ غَدًا (arāki ghadan)."@ko ,
+                        "arāka ghadan. Zu einer Frau: أَرَاكِ غَدًا (arāki ghadan)."@de ,
+                        "arāka ghadan. A una mujer: أَرَاكِ غَدًا (arāki ghadan)."@es ,
+                        "arāka ghadan. À une femme : أَرَاكِ غَدًا (arāki ghadan)."@fr .
+
+<#araka-lahiqan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَرَاكَ لَاحِقًا"@ar ;
+    solid-memo:back "see you later"@en ,
+                    "vi ses senare"@sv ,
+                    "나중에 봐요"@ko ,
+                    "bis später"@de ,
+                    "nos vemos luego"@es ,
+                    "à plus tard"@fr ;
+    solid-memo:backNote "arāka lāḥiqan. To a woman: أَرَاكِ لَاحِقًا (arāki lāḥiqan)."@en ,
+                        "arāka lāḥiqan. Till en kvinna: أَرَاكِ لَاحِقًا (arāki lāḥiqan)."@sv ,
+                        "arāka lāḥiqan. 여성에게는 أَرَاكِ لَاحِقًا (arāki lāḥiqan)."@ko ,
+                        "arāka lāḥiqan. Zu einer Frau: أَرَاكِ لَاحِقًا (arāki lāḥiqan)."@de ,
+                        "arāka lāḥiqan. A una mujer: أَرَاكِ لَاحِقًا (arāki lāḥiqan)."@es ,
+                        "arāka lāḥiqan. À une femme : أَرَاكِ لَاحِقًا (arāki lāḥiqan)."@fr .
+
+<#min-fadlika>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مِنْ فَضْلِكَ"@ar ;
+    solid-memo:back "please"@en ,
+                    "snälla"@sv ,
+                    "부탁합니다"@ko ,
+                    "bitte"@de ,
+                    "por favor"@es ,
+                    "s’il te plaît"@fr ;
+    solid-memo:backNote "min faḍlika. To a woman: مِنْ فَضْلِكِ (min faḍliki); to several people: مِنْ فَضْلِكُمْ (min faḍlikum)."@en ,
+                        "min faḍlika. Till en kvinna: مِنْ فَضْلِكِ (min faḍliki); till flera: مِنْ فَضْلِكُمْ (min faḍlikum)."@sv ,
+                        "min faḍlika. 여성에게는 مِنْ فَضْلِكِ (min faḍliki), 여러 사람에게는 مِنْ فَضْلِكُمْ (min faḍlikum)."@ko ,
+                        "min faḍlika. Zu einer Frau: مِنْ فَضْلِكِ (min faḍliki); zu mehreren: مِنْ فَضْلِكُمْ (min faḍlikum)."@de ,
+                        "min faḍlika. A una mujer: مِنْ فَضْلِكِ (min faḍliki); a varias personas: مِنْ فَضْلِكُمْ (min faḍlikum)."@es ,
+                        "min faḍlika. À une femme : مِنْ فَضْلِكِ (min faḍliki) ; à plusieurs : مِنْ فَضْلِكُمْ (min faḍlikum)."@fr .
+
+<#law-samahta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَوْ سَمَحْتَ"@ar ;
+    solid-memo:back "excuse me (to get attention)"@en ,
+                    "ursäkta (för att få uppmärksamhet)"@sv ,
+                    "저기요"@ko ,
+                    "Entschuldigung (um Aufmerksamkeit zu bitten)"@de ,
+                    "disculpe"@es ,
+                    "excusez-moi (pour attirer l’attention)"@fr ;
+    solid-memo:backNote "law samaḥta. Also used for “please”. To a woman: لَوْ سَمَحْتِ (law samaḥti)."@en ,
+                        "law samaḥta. Används även för ”snälla”. Till en kvinna: لَوْ سَمَحْتِ (law samaḥti)."@sv ,
+                        "law samaḥta. ‘부탁합니다’의 뜻으로도 써요. 여성에게는 لَوْ سَمَحْتِ (law samaḥti)."@ko ,
+                        "law samaḥta. Auch für „bitte“. Zu einer Frau: لَوْ سَمَحْتِ (law samaḥti)."@de ,
+                        "law samaḥta. También significa «por favor». A una mujer: لَوْ سَمَحْتِ (law samaḥti)."@es ,
+                        "law samaḥta. Sert aussi de « s’il te plaît ». À une femme : لَوْ سَمَحْتِ (law samaḥti)."@fr .
+
+<#tafaddal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "تَفَضَّلْ"@ar ;
+    solid-memo:back "go ahead / here you are"@en ,
+                    "varsågod"@sv ,
+                    "여기요 / 어서 하세요"@ko ,
+                    "bitte schön (beim Anbieten)"@de ,
+                    "adelante / aquí tienes"@es ,
+                    "tiens / vas-y"@fr ;
+    solid-memo:backNote "tafaḍḍal. Used to offer something or to invite someone in or to sit. To a woman: تَفَضَّلِي (tafaḍḍalī)."@en ,
+                        "tafaḍḍal. Används när man erbjuder något eller ber någon komma in eller sätta sig. Till en kvinna: تَفَضَّلِي (tafaḍḍalī)."@sv ,
+                        "tafaḍḍal. 무언가를 건네거나 들어오라고, 앉으라고 권할 때 써요. 여성에게는 تَفَضَّلِي (tafaḍḍalī)."@ko ,
+                        "tafaḍḍal. Beim Anbieten oder wenn man jemanden hereinbittet oder Platz nehmen lässt. Zu einer Frau: تَفَضَّلِي (tafaḍḍalī)."@de ,
+                        "tafaḍḍal. Para ofrecer algo o invitar a pasar o sentarse. A una mujer: تَفَضَّلِي (tafaḍḍalī)."@es ,
+                        "tafaḍḍal. Pour offrir quelque chose ou inviter à entrer ou s’asseoir. À une femme : تَفَضَّلِي (tafaḍḍalī)."@fr .
+
+<#tafaddal-bi-l-julus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "تَفَضَّلْ بِالْجُلُوس"@ar ;
+    solid-memo:back "please sit down"@en ,
+                    "slå dig ner"@sv ,
+                    "앉으세요"@ko ,
+                    "setz dich bitte"@de ,
+                    "siéntate, por favor"@es ,
+                    "assieds-toi, je t’en prie"@fr ;
+    solid-memo:backNote "tafaḍḍal bi-l-julūs. To a woman: تَفَضَّلِي بِالْجُلُوس (tafaḍḍalī bi-l-julūs)."@en ,
+                        "tafaḍḍal bi-l-julūs. Till en kvinna: تَفَضَّلِي بِالْجُلُوس (tafaḍḍalī bi-l-julūs)."@sv ,
+                        "tafaḍḍal bi-l-julūs. 여성에게는 تَفَضَّلِي بِالْجُلُوس (tafaḍḍalī bi-l-julūs)."@ko ,
+                        "tafaḍḍal bi-l-julūs. Zu einer Frau: تَفَضَّلِي بِالْجُلُوس (tafaḍḍalī bi-l-julūs)."@de ,
+                        "tafaḍḍal bi-l-julūs. A una mujer: تَفَضَّلِي بِالْجُلُوس (tafaḍḍalī bi-l-julūs)."@es ,
+                        "tafaḍḍal bi-l-julūs. À une femme : تَفَضَّلِي بِالْجُلُوس (tafaḍḍalī bi-l-julūs)."@fr .
+
+<#shukran>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "شُكْرًا"@ar ;
+    solid-memo:back "thank you"@en ,
+                    "tack"@sv ,
+                    "감사합니다"@ko ,
+                    "danke"@de ,
+                    "gracias"@es ,
+                    "merci"@fr ;
+    solid-memo:backNote "shukran."@en ,
+                        "shukran."@sv ,
+                        "shukran."@ko ,
+                        "shukran."@de ,
+                        "shukran."@es ,
+                        "shukran."@fr .
+
+<#shukran-jazilan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "شُكْرًا جَزِيلًا"@ar ;
+    solid-memo:back "thank you very much"@en ,
+                    "tack så mycket"@sv ,
+                    "정말 감사합니다"@ko ,
+                    "vielen Dank"@de ,
+                    "muchas gracias"@es ,
+                    "merci beaucoup"@fr ;
+    solid-memo:backNote "shukran jazīlan."@en ,
+                        "shukran jazīlan."@sv ,
+                        "shukran jazīlan."@ko ,
+                        "shukran jazīlan."@de ,
+                        "shukran jazīlan."@es ,
+                        "shukran jazīlan."@fr .
+
+<#afwan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "عَفْوًا"@ar ;
+    solid-memo:back "you’re welcome"@en ,
+                    "varsågod (svar på tack)"@sv ,
+                    "천만에요"@ko ,
+                    "gern geschehen"@de ,
+                    "de nada"@es ,
+                    "de rien"@fr ;
+    solid-memo:backNote "ʻafwan. Also used for “pardon?” or “excuse me”."@en ,
+                        "ʻafwan. Används även för ”förlåt?” eller ”ursäkta”."@sv ,
+                        "ʻafwan. ‘네?’나 ‘실례합니다’의 뜻으로도 써요."@ko ,
+                        "ʻafwan. Auch für „wie bitte?“ oder „Entschuldigung“."@de ,
+                        "ʻafwan. También se usa como «¿perdón?» o «disculpa»."@es ,
+                        "ʻafwan. Sert aussi de « pardon ? » ou « excusez-moi »."@fr .
+
+<#la-shukra-ala-wajib>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَا شُكْرَ عَلَى وَاجِب"@ar ;
+    solid-memo:back "don’t mention it"@en ,
+                    "ingen orsak"@sv ,
+                    "별말씀을요"@ko ,
+                    "keine Ursache"@de ,
+                    "no hay de qué"@es ,
+                    "il n’y a pas de quoi"@fr ;
+    solid-memo:backNote "lā shukra ʻalā wājib. Literally “no thanks for a duty”."@en ,
+                        "lā shukra ʻalā wājib. Ordagrant ”inget tack för en plikt”."@sv ,
+                        "lā shukra ʻalā wājib. 글자 그대로는 ‘의무에는 감사가 필요 없다’예요."@ko ,
+                        "lā shukra ʻalā wājib. Wörtlich „kein Dank für eine Pflicht“."@de ,
+                        "lā shukra ʻalā wājib. Literalmente «no hay que agradecer un deber»."@es ,
+                        "lā shukra ʻalā wājib. Littéralement « pas de merci pour un devoir »."@fr .
+
+<#asif>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "آسِف"@ar ;
+    solid-memo:back "sorry"@en ,
+                    "förlåt"@sv ,
+                    "미안해요"@ko ,
+                    "tut mir leid"@de ,
+                    "lo siento"@es ,
+                    "désolé"@fr ;
+    solid-memo:backNote "āsif. A woman says آسِفَة (āsifah)."@en ,
+                        "āsif. En kvinna säger آسِفَة (āsifah)."@sv ,
+                        "āsif. 여성은 آسِفَة (āsifah)라고 말해요."@ko ,
+                        "āsif. Eine Frau sagt آسِفَة (āsifah)."@de ,
+                        "āsif. Una mujer dice آسِفَة (āsifah)."@es ,
+                        "āsif. Une femme dit آسِفَة (āsifah)."@fr .
+
+<#ana-asifun-jiddan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا آسِفٌ جِدًّا"@ar ;
+    solid-memo:back "I’m very sorry"@en ,
+                    "jag ber verkligen om ursäkt"@sv ,
+                    "정말 미안해요"@ko ,
+                    "es tut mir sehr leid"@de ,
+                    "lo siento mucho"@es ,
+                    "je suis vraiment désolé"@fr ;
+    solid-memo:backNote "anā āsifun jiddan. A woman says أَنَا آسِفَةٌ جِدًّا (anā āsifatun jiddan)."@en ,
+                        "anā āsifun jiddan. En kvinna säger أَنَا آسِفَةٌ جِدًّا (anā āsifatun jiddan)."@sv ,
+                        "anā āsifun jiddan. 여성은 أَنَا آسِفَةٌ جِدًّا (anā āsifatun jiddan)라고 말해요."@ko ,
+                        "anā āsifun jiddan. Eine Frau sagt أَنَا آسِفَةٌ جِدًّا (anā āsifatun jiddan)."@de ,
+                        "anā āsifun jiddan. Una mujer dice أَنَا آسِفَةٌ جِدًّا (anā āsifatun jiddan)."@es ,
+                        "anā āsifun jiddan. Une femme dit أَنَا آسِفَةٌ جِدًّا (anā āsifatun jiddan)."@fr .
+
+<#madhirah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَعْذِرَة"@ar ;
+    solid-memo:back "pardon me"@en ,
+                    "ursäkta mig"@sv ,
+                    "실례합니다"@ko ,
+                    "Verzeihung"@de ,
+                    "perdón"@es ,
+                    "pardon"@fr ;
+    solid-memo:backNote "maʻdhirah. A polite apology for a small mistake or an interruption."@en ,
+                        "maʻdhirah. En artig ursäkt för ett litet misstag eller ett avbrott."@sv ,
+                        "maʻdhirah. 작은 실수나 말을 끊을 때 하는 정중한 사과예요."@ko ,
+                        "maʻdhirah. Höfliche Entschuldigung für einen kleinen Fehler oder eine Unterbrechung."@de ,
+                        "maʻdhirah. Disculpa cortés por un pequeño error o una interrupción."@es ,
+                        "maʻdhirah. Excuse polie pour une petite erreur ou une interruption."@fr .
+
+<#an-idhnika>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "عَنْ إِذْنِكَ"@ar ;
+    solid-memo:back "excuse me (to pass or leave)"@en ,
+                    "ursäkta (för att gå förbi eller gå)"@sv ,
+                    "실례할게요 (지나가거나 떠날 때)"@ko ,
+                    "darf ich? (beim Vorbeigehen oder Gehen)"@de ,
+                    "con permiso"@es ,
+                    "excusez-moi (pour passer ou partir)"@fr ;
+    solid-memo:backNote "ʻan idhnika. To a woman: عَنْ إِذْنِكِ (ʻan idhniki)."@en ,
+                        "ʻan idhnika. Till en kvinna: عَنْ إِذْنِكِ (ʻan idhniki)."@sv ,
+                        "ʻan idhnika. 여성에게는 عَنْ إِذْنِكِ (ʻan idhniki)."@ko ,
+                        "ʻan idhnika. Zu einer Frau: عَنْ إِذْنِكِ (ʻan idhniki)."@de ,
+                        "ʻan idhnika. A una mujer: عَنْ إِذْنِكِ (ʻan idhniki)."@es ,
+                        "ʻan idhnika. À une femme : عَنْ إِذْنِكِ (ʻan idhniki)."@fr .
+
+<#la-bas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَا بَأْس"@ar ;
+    solid-memo:back "it’s okay"@en ,
+                    "det gör inget"@sv ,
+                    "괜찮아요"@ko ,
+                    "macht nichts"@de ,
+                    "no pasa nada"@es ,
+                    "ce n’est pas grave"@fr ;
+    solid-memo:backNote "lā baʼs. A reply to an apology; also “not bad” when asked how you are."@en ,
+                        "lā baʼs. Ett svar på en ursäkt; också ”inte illa” när någon frågar hur man mår."@sv ,
+                        "lā baʼs. 사과에 대한 답이며, 안부를 물으면 ‘나쁘지 않아요’라는 뜻도 돼요."@ko ,
+                        "lā baʼs. Antwort auf eine Entschuldigung; auf „wie geht’s?“ auch „nicht schlecht“."@de ,
+                        "lā baʼs. Respuesta a una disculpa; también «no está mal» si te preguntan cómo estás."@es ,
+                        "lā baʼs. Réponse à une excuse ; aussi « pas mal » quand on vous demande comment ça va."@fr .
+
+<#la-mushkilah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَا مُشْكِلَة"@ar ;
+    solid-memo:back "no problem"@en ,
+                    "inga problem"@sv ,
+                    "문제없어요"@ko ,
+                    "kein Problem"@de ,
+                    "no hay problema"@es ,
+                    "pas de problème"@fr ;
+    solid-memo:backNote "lā mushkilah."@en ,
+                        "lā mushkilah."@sv ,
+                        "lā mushkilah."@ko ,
+                        "lā mushkilah."@de ,
+                        "lā mushkilah."@es ,
+                        "lā mushkilah."@fr .
+
+<#naam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "نَعَم"@ar ;
+    solid-memo:back "yes"@en ,
+                    "ja"@sv ,
+                    "네"@ko ,
+                    "ja"@de ,
+                    "sí"@es ,
+                    "oui"@fr ;
+    solid-memo:backNote "naʻam. In everyday speech often أَيْوَه (aywah), depending on the region."@en ,
+                        "naʻam. I vardagligt tal ofta أَيْوَه (aywah), beroende på region."@sv ,
+                        "naʻam. 일상 대화에서는 지역에 따라 أَيْوَه (aywah)도 자주 써요."@ko ,
+                        "naʻam. Im Alltag je nach Region oft أَيْوَه (aywah)."@de ,
+                        "naʻam. En el habla diaria, según la región, a menudo أَيْوَه (aywah)."@es ,
+                        "naʻam. À l’oral, selon la région, souvent أَيْوَه (aywah)."@fr .
+
+<#la>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَا"@ar ;
+    solid-memo:back "no"@en ,
+                    "nej"@sv ,
+                    "아니요"@ko ,
+                    "nein"@de ,
+                    "no"@es ,
+                    "non"@fr ;
+    solid-memo:backNote "lā."@en ,
+                        "lā."@sv ,
+                        "lā."@ko ,
+                        "lā."@de ,
+                        "lā."@es ,
+                        "lā."@fr .
+
+<#rubbama>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "رُبَّمَا"@ar ;
+    solid-memo:back "maybe"@en ,
+                    "kanske"@sv ,
+                    "아마도"@ko ,
+                    "vielleicht"@de ,
+                    "quizás"@es ,
+                    "peut-être"@fr ;
+    solid-memo:backNote "rubbamā."@en ,
+                        "rubbamā."@sv ,
+                        "rubbamā."@ko ,
+                        "rubbamā."@de ,
+                        "rubbamā."@es ,
+                        "rubbamā."@fr .
+
+<#taban>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "طَبْعًا"@ar ;
+    solid-memo:back "of course"@en ,
+                    "självklart"@sv ,
+                    "물론이죠"@ko ,
+                    "natürlich"@de ,
+                    "por supuesto"@es ,
+                    "bien sûr"@fr ;
+    solid-memo:backNote "ṭabʻan."@en ,
+                        "ṭabʻan."@sv ,
+                        "ṭabʻan."@ko ,
+                        "ṭabʻan."@de ,
+                        "ṭabʻan."@es ,
+                        "ṭabʻan."@fr .
+
+<#hasanan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "حَسَنًا"@ar ;
+    solid-memo:back "okay"@en ,
+                    "okej"@sv ,
+                    "알겠어요"@ko ,
+                    "in Ordnung"@de ,
+                    "vale"@es ,
+                    "d’accord"@fr ;
+    solid-memo:backNote "ḥasanan."@en ,
+                        "ḥasanan."@sv ,
+                        "ḥasanan."@ko ,
+                        "ḥasanan."@de ,
+                        "ḥasanan."@es ,
+                        "ḥasanan."@fr .
+
+<#bi-t-takid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "بِالتَّأْكِيد"@ar ;
+    solid-memo:back "certainly"@en ,
+                    "absolut"@sv ,
+                    "확실히요"@ko ,
+                    "auf jeden Fall"@de ,
+                    "claro que sí"@es ,
+                    "certainement"@fr ;
+    solid-memo:backNote "bi-t-taʼkīd."@en ,
+                        "bi-t-taʼkīd."@sv ,
+                        "bi-t-taʼkīd."@ko ,
+                        "bi-t-taʼkīd."@de ,
+                        "bi-t-taʼkīd."@es ,
+                        "bi-t-taʼkīd."@fr .
+
+<#tayyib>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "طَيِّب"@ar ;
+    solid-memo:back "all right"@en ,
+                    "visst"@sv ,
+                    "좋아요"@ko ,
+                    "gut"@de ,
+                    "bueno"@es ,
+                    "bon"@fr ;
+    solid-memo:backNote "ṭayyib. Very common in speech for “okay” or “good”."@en ,
+                        "ṭayyib. Mycket vanligt i tal för ”okej” eller ”bra”."@sv ,
+                        "ṭayyib. 말할 때 ‘알겠어요’나 ‘좋아요’라는 뜻으로 아주 자주 써요."@ko ,
+                        "ṭayyib. Gesprochen sehr häufig für „okay“ oder „gut“."@de ,
+                        "ṭayyib. Muy común al hablar para decir «vale» o «bien»."@es ,
+                        "ṭayyib. Très courant à l’oral pour « d’accord » ou « bien »."@fr .
+
+<#jayyidun-jiddan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "جَيِّدٌ جِدًّا"@ar ;
+    solid-memo:back "very good"@en ,
+                    "mycket bra"@sv ,
+                    "아주 좋아요"@ko ,
+                    "sehr gut"@de ,
+                    "muy bien"@es ,
+                    "très bien"@fr ;
+    solid-memo:backNote "jayyidun jiddan."@en ,
+                        "jayyidun jiddan."@sv ,
+                        "jayyidun jiddan."@ko ,
+                        "jayyidun jiddan."@de ,
+                        "jayyidun jiddan."@es ,
+                        "jayyidun jiddan."@fr .
+
+<#sahih>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "صَحِيح"@ar ;
+    solid-memo:back "that’s right"@en ,
+                    "det stämmer"@sv ,
+                    "맞아요"@ko ,
+                    "richtig"@de ,
+                    "correcto"@es ,
+                    "c’est exact"@fr ;
+    solid-memo:backNote "ṣaḥīḥ."@en ,
+                        "ṣaḥīḥ."@sv ,
+                        "ṣaḥīḥ."@ko ,
+                        "ṣaḥīḥ."@de ,
+                        "ṣaḥīḥ."@es ,
+                        "ṣaḥīḥ."@fr .
+
+<#ana-aydan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا أَيْضًا"@ar ;
+    solid-memo:back "me too"@en ,
+                    "jag också"@sv ,
+                    "저도요"@ko ,
+                    "ich auch"@de ,
+                    "yo también"@es ,
+                    "moi aussi"@fr ;
+    solid-memo:backNote "anā ayḍan."@en ,
+                        "anā ayḍan."@sv ,
+                        "anā ayḍan."@ko ,
+                        "anā ayḍan."@de ,
+                        "anā ayḍan."@es ,
+                        "anā ayḍan."@fr .
+
+<#ana-muwafiq>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا مُوَافِق"@ar ;
+    solid-memo:back "I agree"@en ,
+                    "jag håller med"@sv ,
+                    "동의해요"@ko ,
+                    "einverstanden"@de ,
+                    "estoy de acuerdo"@es ,
+                    "je suis d’accord"@fr ;
+    solid-memo:backNote "anā muwāfiq. A woman says أَنَا مُوَافِقَة (anā muwāfiqah)."@en ,
+                        "anā muwāfiq. En kvinna säger أَنَا مُوَافِقَة (anā muwāfiqah)."@sv ,
+                        "anā muwāfiq. 여성은 أَنَا مُوَافِقَة (anā muwāfiqah)라고 말해요."@ko ,
+                        "anā muwāfiq. Eine Frau sagt أَنَا مُوَافِقَة (anā muwāfiqah)."@de ,
+                        "anā muwāfiq. Una mujer dice أَنَا مُوَافِقَة (anā muwāfiqah)."@es ,
+                        "anā muwāfiq. Une femme dit أَنَا مُوَافِقَة (anā muwāfiqah)."@fr .
+
+<#la-yahumm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَا يَهُمّ"@ar ;
+    solid-memo:back "it doesn’t matter"@en ,
+                    "det spelar ingen roll"@sv ,
+                    "상관없어요"@ko ,
+                    "egal"@de ,
+                    "da igual"@es ,
+                    "peu importe"@fr ;
+    solid-memo:backNote "lā yahumm."@en ,
+                        "lā yahumm."@sv ,
+                        "lā yahumm."@ko ,
+                        "lā yahumm."@de ,
+                        "lā yahumm."@es ,
+                        "lā yahumm."@fr .
+
+<#ma-ismuka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَا اسْمُكَ؟"@ar ;
+    solid-memo:back "what’s your name?"@en ,
+                    "vad heter du?"@sv ,
+                    "이름이 뭐예요?"@ko ,
+                    "wie heißt du?"@de ,
+                    "¿cómo te llamas?"@es ,
+                    "comment tu t’appelles ?"@fr ;
+    solid-memo:backNote "mā ismuka? To a woman: مَا اسْمُكِ (mā ismuki)."@en ,
+                        "mā ismuka? Till en kvinna: مَا اسْمُكِ (mā ismuki)."@sv ,
+                        "mā ismuka? 여성에게는 مَا اسْمُكِ (mā ismuki)."@ko ,
+                        "mā ismuka? Zu einer Frau: مَا اسْمُكِ (mā ismuki)."@de ,
+                        "mā ismuka? A una mujer: مَا اسْمُكِ (mā ismuki)."@es ,
+                        "mā ismuka? À une femme : مَا اسْمُكِ (mā ismuki)."@fr .
+
+<#ismi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "اِسْمِي ..."@ar ;
+    solid-memo:back "my name is ..."@en ,
+                    "jag heter ..."@sv ,
+                    "제 이름은 ...예요"@ko ,
+                    "ich heiße ..."@de ,
+                    "me llamo ..."@es ,
+                    "je m’appelle ..."@fr ;
+    solid-memo:backNote "ismī ..."@en ,
+                        "ismī ..."@sv ,
+                        "ismī ..."@ko ,
+                        "ismī ..."@de ,
+                        "ismī ..."@es ,
+                        "ismī ..."@fr .
+
+<#min-ayna-anta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مِنْ أَيْنَ أَنْتَ؟"@ar ;
+    solid-memo:back "where are you from?"@en ,
+                    "var kommer du ifrån?"@sv ,
+                    "어디에서 왔어요?"@ko ,
+                    "woher kommst du?"@de ,
+                    "¿de dónde eres?"@es ,
+                    "d’où viens-tu ?"@fr ;
+    solid-memo:backNote "min ayna anta? To a woman: مِنْ أَيْنَ أَنْتِ (min ayna anti)."@en ,
+                        "min ayna anta? Till en kvinna: مِنْ أَيْنَ أَنْتِ (min ayna anti)."@sv ,
+                        "min ayna anta? 여성에게는 مِنْ أَيْنَ أَنْتِ (min ayna anti)."@ko ,
+                        "min ayna anta? Zu einer Frau: مِنْ أَيْنَ أَنْتِ (min ayna anti)."@de ,
+                        "min ayna anta? A una mujer: مِنْ أَيْنَ أَنْتِ (min ayna anti)."@es ,
+                        "min ayna anta? À une femme : مِنْ أَيْنَ أَنْتِ (min ayna anti)."@fr .
+
+<#ana-min>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا مِنْ ..."@ar ;
+    solid-memo:back "I’m from ..."@en ,
+                    "jag kommer från ..."@sv ,
+                    "저는 ...에서 왔어요"@ko ,
+                    "ich komme aus ..."@de ,
+                    "soy de ..."@es ,
+                    "je viens de ..."@fr ;
+    solid-memo:backNote "anā min ..."@en ,
+                        "anā min ..."@sv ,
+                        "anā min ..."@ko ,
+                        "anā min ..."@de ,
+                        "anā min ..."@es ,
+                        "anā min ..."@fr .
+
+<#ayna-taskun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَيْنَ تَسْكُن؟"@ar ;
+    solid-memo:back "where do you live?"@en ,
+                    "var bor du?"@sv ,
+                    "어디에 살아요?"@ko ,
+                    "wo wohnst du?"@de ,
+                    "¿dónde vives?"@es ,
+                    "où habites-tu ?"@fr ;
+    solid-memo:backNote "ayna taskun? To a woman: أَيْنَ تَسْكُنِين (ayna taskunīn)."@en ,
+                        "ayna taskun? Till en kvinna: أَيْنَ تَسْكُنِين (ayna taskunīn)."@sv ,
+                        "ayna taskun? 여성에게는 أَيْنَ تَسْكُنِين (ayna taskunīn)."@ko ,
+                        "ayna taskun? Zu einer Frau: أَيْنَ تَسْكُنِين (ayna taskunīn)."@de ,
+                        "ayna taskun? A una mujer: أَيْنَ تَسْكُنِين (ayna taskunīn)."@es ,
+                        "ayna taskun? À une femme : أَيْنَ تَسْكُنِين (ayna taskunīn)."@fr .
+
+<#askunu-fi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَسْكُنُ فِي ..."@ar ;
+    solid-memo:back "I live in ..."@en ,
+                    "jag bor i ..."@sv ,
+                    "저는 ...에 살아요"@ko ,
+                    "ich wohne in ..."@de ,
+                    "vivo en ..."@es ,
+                    "j’habite à ..."@fr ;
+    solid-memo:backNote "askunu fī ..."@en ,
+                        "askunu fī ..."@sv ,
+                        "askunu fī ..."@ko ,
+                        "askunu fī ..."@de ,
+                        "askunu fī ..."@es ,
+                        "askunu fī ..."@fr .
+
+<#kam-umruka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "كَمْ عُمْرُكَ؟"@ar ;
+    solid-memo:back "how old are you?"@en ,
+                    "hur gammal är du?"@sv ,
+                    "몇 살이에요?"@ko ,
+                    "wie alt bist du?"@de ,
+                    "¿cuántos años tienes?"@es ,
+                    "quel âge as-tu ?"@fr ;
+    solid-memo:backNote "kam ʻumruka? To a woman: كَمْ عُمْرُكِ (kam ʻumruki)."@en ,
+                        "kam ʻumruka? Till en kvinna: كَمْ عُمْرُكِ (kam ʻumruki)."@sv ,
+                        "kam ʻumruka? 여성에게는 كَمْ عُمْرُكِ (kam ʻumruki)."@ko ,
+                        "kam ʻumruka? Zu einer Frau: كَمْ عُمْرُكِ (kam ʻumruki)."@de ,
+                        "kam ʻumruka? A una mujer: كَمْ عُمْرُكِ (kam ʻumruki)."@es ,
+                        "kam ʻumruka? À une femme : كَمْ عُمْرُكِ (kam ʻumruki)."@fr .
+
+<#ana-talib>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا طَالِب"@ar ;
+    solid-memo:back "I’m a student"@en ,
+                    "jag är student"@sv ,
+                    "저는 학생이에요"@ko ,
+                    "ich studiere"@de ,
+                    "soy estudiante"@es ,
+                    "je suis étudiant"@fr ;
+    solid-memo:backNote "anā ṭālib. A woman says أَنَا طَالِبَة (anā ṭālibah)."@en ,
+                        "anā ṭālib. En kvinna säger أَنَا طَالِبَة (anā ṭālibah)."@sv ,
+                        "anā ṭālib. 여성은 أَنَا طَالِبَة (anā ṭālibah)라고 말해요."@ko ,
+                        "anā ṭālib. Eine Frau sagt أَنَا طَالِبَة (anā ṭālibah)."@de ,
+                        "anā ṭālib. Una mujer dice أَنَا طَالِبَة (anā ṭālibah)."@es ,
+                        "anā ṭālib. Une femme dit أَنَا طَالِبَة (anā ṭālibah)."@fr .
+
+<#madha-tamal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَاذَا تَعْمَل؟"@ar ;
+    solid-memo:back "what do you do (for work)?"@en ,
+                    "vad jobbar du med?"@sv ,
+                    "무슨 일을 하세요?"@ko ,
+                    "was machst du beruflich?"@de ,
+                    "¿a qué te dedicas?"@es ,
+                    "que fais-tu dans la vie ?"@fr ;
+    solid-memo:backNote "mādhā taʻmal? To a woman: مَاذَا تَعْمَلِين (mādhā taʻmalīn)."@en ,
+                        "mādhā taʻmal? Till en kvinna: مَاذَا تَعْمَلِين (mādhā taʻmalīn)."@sv ,
+                        "mādhā taʻmal? 여성에게는 مَاذَا تَعْمَلِين (mādhā taʻmalīn)."@ko ,
+                        "mādhā taʻmal? Zu einer Frau: مَاذَا تَعْمَلِين (mādhā taʻmalīn)."@de ,
+                        "mādhā taʻmal? A una mujer: مَاذَا تَعْمَلِين (mādhā taʻmalīn)."@es ,
+                        "mādhā taʻmal? À une femme : مَاذَا تَعْمَلِين (mādhā taʻmalīn)."@fr .
+
+<#ana-ataallamu-l-arabiyyah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا أَتَعَلَّمُ الْعَرَبِيَّة"@ar ;
+    solid-memo:back "I’m learning Arabic"@en ,
+                    "jag lär mig arabiska"@sv ,
+                    "저는 아랍어를 배우고 있어요"@ko ,
+                    "ich lerne Arabisch"@de ,
+                    "estoy aprendiendo árabe"@es ,
+                    "j’apprends l’arabe"@fr ;
+    solid-memo:backNote "anā ataʻallamu l-ʻarabiyyah."@en ,
+                        "anā ataʻallamu l-ʻarabiyyah."@sv ,
+                        "anā ataʻallamu l-ʻarabiyyah."@ko ,
+                        "anā ataʻallamu l-ʻarabiyyah."@de ,
+                        "anā ataʻallamu l-ʻarabiyyah."@es ,
+                        "anā ataʻallamu l-ʻarabiyyah."@fr .
+
+<#hadha-sadiqi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "هٰذَا صَدِيقِي"@ar ;
+    solid-memo:back "this is my friend"@en ,
+                    "det här är min vän"@sv ,
+                    "이쪽은 제 친구예요"@ko ,
+                    "das ist mein Freund"@de ,
+                    "este es mi amigo"@es ,
+                    "voici mon ami"@fr ;
+    solid-memo:backNote "hādhā ṣadīqī. For a female friend: هٰذِهِ صَدِيقَتِي (hādhihi ṣadīqatī)."@en ,
+                        "hādhā ṣadīqī. Om en kvinnlig vän: هٰذِهِ صَدِيقَتِي (hādhihi ṣadīqatī)."@sv ,
+                        "hādhā ṣadīqī. 친구가 여성이면 هٰذِهِ صَدِيقَتِي (hādhihi ṣadīqatī)."@ko ,
+                        "hādhā ṣadīqī. Für eine Freundin: هٰذِهِ صَدِيقَتِي (hādhihi ṣadīqatī)."@de ,
+                        "hādhā ṣadīqī. Para una amiga: هٰذِهِ صَدِيقَتِي (hādhihi ṣadīqatī)."@es ,
+                        "hādhā ṣadīqī. Pour une amie : هٰذِهِ صَدِيقَتِي (hādhihi ṣadīqatī)."@fr .
+
+<#ana-mutazawwij>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا مُتَزَوِّج"@ar ;
+    solid-memo:back "I’m married"@en ,
+                    "jag är gift"@sv ,
+                    "저는 결혼했어요"@ko ,
+                    "ich bin verheiratet"@de ,
+                    "estoy casado"@es ,
+                    "je suis marié"@fr ;
+    solid-memo:backNote "anā mutazawwij. A woman says أَنَا مُتَزَوِّجَة (anā mutazawwijah)."@en ,
+                        "anā mutazawwij. En kvinna säger أَنَا مُتَزَوِّجَة (anā mutazawwijah)."@sv ,
+                        "anā mutazawwij. 여성은 أَنَا مُتَزَوِّجَة (anā mutazawwijah)라고 말해요."@ko ,
+                        "anā mutazawwij. Eine Frau sagt أَنَا مُتَزَوِّجَة (anā mutazawwijah)."@de ,
+                        "anā mutazawwij. Una mujer dice أَنَا مُتَزَوِّجَة (anā mutazawwijah)."@es ,
+                        "anā mutazawwij. Une femme dit أَنَا مُتَزَوِّجَة (anā mutazawwijah)."@fr .
+
+<#ma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَا"@ar ;
+    solid-memo:back "what (before a noun)"@en ,
+                    "vad (före ett substantiv)"@sv ,
+                    "무엇 (명사 앞)"@ko ,
+                    "was (vor einem Nomen)"@de ,
+                    "qué (antes de un sustantivo)"@es ,
+                    "quoi (devant un nom)"@fr ;
+    solid-memo:backNote "mā. مَا comes before a noun, مَاذَا before a verb: مَا اسْمُكَ؟ but مَاذَا تُرِيد؟"@en ,
+                        "mā. مَا står före ett substantiv, مَاذَا före ett verb: مَا اسْمُكَ؟ men مَاذَا تُرِيد؟"@sv ,
+                        "mā. مَا는 명사 앞에, مَاذَا는 동사 앞에 와요. 예: مَا اسْمُكَ؟, مَاذَا تُرِيد؟"@ko ,
+                        "mā. مَا steht vor einem Nomen, مَاذَا vor einem Verb: مَا اسْمُكَ؟, aber مَاذَا تُرِيد؟"@de ,
+                        "mā. مَا va antes de un sustantivo y مَاذَا antes de un verbo: مَا اسْمُكَ؟ pero مَاذَا تُرِيد؟"@es ,
+                        "mā. مَا se place devant un nom, مَاذَا devant un verbe : مَا اسْمُكَ؟ mais مَاذَا تُرِيد؟"@fr .
+
+<#madha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَاذَا"@ar ;
+    solid-memo:back "what (before a verb)"@en ,
+                    "vad (före ett verb)"@sv ,
+                    "무엇 (동사 앞)"@ko ,
+                    "was (vor einem Verb)"@de ,
+                    "qué (antes de un verbo)"@es ,
+                    "que (devant un verbe)"@fr ;
+    solid-memo:backNote "mādhā."@en ,
+                        "mādhā."@sv ,
+                        "mādhā."@ko ,
+                        "mādhā."@de ,
+                        "mādhā."@es ,
+                        "mādhā."@fr .
+
+<#man>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَنْ"@ar ;
+    solid-memo:back "who?"@en ,
+                    "vem?"@sv ,
+                    "누구?"@ko ,
+                    "wer?"@de ,
+                    "¿quién?"@es ,
+                    "qui ?"@fr ;
+    solid-memo:backNote "man."@en ,
+                        "man."@sv ,
+                        "man."@ko ,
+                        "man."@de ,
+                        "man."@es ,
+                        "man."@fr .
+
+<#ayna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَيْنَ"@ar ;
+    solid-memo:back "where?"@en ,
+                    "var?"@sv ,
+                    "어디?"@ko ,
+                    "wo?"@de ,
+                    "¿dónde?"@es ,
+                    "où ?"@fr ;
+    solid-memo:backNote "ayna."@en ,
+                        "ayna."@sv ,
+                        "ayna."@ko ,
+                        "ayna."@de ,
+                        "ayna."@es ,
+                        "ayna."@fr .
+
+<#mata>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَتَى"@ar ;
+    solid-memo:back "when?"@en ,
+                    "när?"@sv ,
+                    "언제?"@ko ,
+                    "wann?"@de ,
+                    "¿cuándo?"@es ,
+                    "quand ?"@fr ;
+    solid-memo:backNote "matā."@en ,
+                        "matā."@sv ,
+                        "matā."@ko ,
+                        "matā."@de ,
+                        "matā."@es ,
+                        "matā."@fr .
+
+<#limadha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لِمَاذَا"@ar ;
+    solid-memo:back "why?"@en ,
+                    "varför?"@sv ,
+                    "왜?"@ko ,
+                    "warum?"@de ,
+                    "¿por qué?"@es ,
+                    "pourquoi ?"@fr ;
+    solid-memo:backNote "limādhā."@en ,
+                        "limādhā."@sv ,
+                        "limādhā."@ko ,
+                        "limādhā."@de ,
+                        "limādhā."@es ,
+                        "limādhā."@fr .
+
+<#kayfa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "كَيْفَ"@ar ;
+    solid-memo:back "how?"@en ,
+                    "hur?"@sv ,
+                    "어떻게?"@ko ,
+                    "wie?"@de ,
+                    "¿cómo?"@es ,
+                    "comment ?"@fr ;
+    solid-memo:backNote "kayfa."@en ,
+                        "kayfa."@sv ,
+                        "kayfa."@ko ,
+                        "kayfa."@de ,
+                        "kayfa."@es ,
+                        "kayfa."@fr .
+
+<#kam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "كَمْ"@ar ;
+    solid-memo:back "how many?"@en ,
+                    "hur många?"@sv ,
+                    "몇 개?"@ko ,
+                    "wie viele?"@de ,
+                    "¿cuántos?"@es ,
+                    "combien ?"@fr ;
+    solid-memo:backNote "kam. Followed by a singular noun: كَمْ كِتَابًا؟ (how many books?)."@en ,
+                        "kam. Följs av ett substantiv i singular: كَمْ كِتَابًا؟ (hur många böcker?)."@sv ,
+                        "kam. 뒤에 단수 명사가 와요. 예: كَمْ كِتَابًا؟ (책이 몇 권이에요?)"@ko ,
+                        "kam. Gefolgt von einem Nomen im Singular: كَمْ كِتَابًا؟ (wie viele Bücher?)."@de ,
+                        "kam. Va seguido de un sustantivo en singular: كَمْ كِتَابًا؟ (¿cuántos libros?)."@es ,
+                        "kam. Suivi d’un nom au singulier : كَمْ كِتَابًا؟ (combien de livres ?)."@fr .
+
+<#bi-kam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "بِكَمْ"@ar ;
+    solid-memo:back "for how much? (price)"@en ,
+                    "för hur mycket? (pris)"@sv ,
+                    "가격이 얼마예요?"@ko ,
+                    "für wie viel? (Preis)"@de ,
+                    "¿por cuánto? (precio)"@es ,
+                    "pour combien ? (prix)"@fr ;
+    solid-memo:backNote "bi-kam."@en ,
+                        "bi-kam."@sv ,
+                        "bi-kam."@ko ,
+                        "bi-kam."@de ,
+                        "bi-kam."@es ,
+                        "bi-kam."@fr .
+
+<#ayy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَيّ"@ar ;
+    solid-memo:back "which?"@en ,
+                    "vilken?"@sv ,
+                    "어느?"@ko ,
+                    "welcher?"@de ,
+                    "¿cuál?"@es ,
+                    "quel ?"@fr ;
+    solid-memo:backNote "ayy. Comes before a noun: أَيُّ يَوْم؟ (which day?)."@en ,
+                        "ayy. Står före ett substantiv: أَيُّ يَوْم؟ (vilken dag?)."@sv ,
+                        "ayy. 명사 앞에 와요. 예: أَيُّ يَوْم؟ (어느 날이에요?)"@ko ,
+                        "ayy. Steht vor einem Nomen: أَيُّ يَوْم؟ (welcher Tag?)."@de ,
+                        "ayy. Va antes de un sustantivo: أَيُّ يَوْم؟ (¿qué día?)."@es ,
+                        "ayy. Se place devant un nom : أَيُّ يَوْم؟ (quel jour ?)."@fr .
+
+<#hal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "هَلْ"@ar ;
+    solid-memo:back "(question word for yes/no questions)"@en ,
+                    "(frågeord för ja/nej-frågor)"@sv ,
+                    "(예/아니요 질문을 만드는 말)"@ko ,
+                    "(Fragewort für Ja/Nein-Fragen)"@de ,
+                    "(partícula de pregunta de sí o no)"@es ,
+                    "(mot interrogatif pour les questions fermées)"@fr ;
+    solid-memo:backNote "hal. Put at the start of a sentence to make it a yes/no question: هَلْ أَنْتَ بِخَيْر؟"@en ,
+                        "hal. Sätts först i en mening för att göra den till en ja/nej-fråga: هَلْ أَنْتَ بِخَيْر؟"@sv ,
+                        "hal. 문장 맨 앞에 붙여 예/아니요 질문을 만들어요. 예: هَلْ أَنْتَ بِخَيْر؟"@ko ,
+                        "hal. Steht am Satzanfang und macht daraus eine Ja/Nein-Frage: هَلْ أَنْتَ بِخَيْر؟"@de ,
+                        "hal. Se pone al principio de la frase para hacer una pregunta de sí o no: هَلْ أَنْتَ بِخَيْر؟"@es ,
+                        "hal. Se place en début de phrase pour poser une question fermée : هَلْ أَنْتَ بِخَيْر؟"@fr .
+
+<#ma-hadha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَا هٰذَا؟"@ar ;
+    solid-memo:back "what is this?"@en ,
+                    "vad är det här?"@sv ,
+                    "이게 뭐예요?"@ko ,
+                    "was ist das?"@de ,
+                    "¿qué es esto?"@es ,
+                    "qu’est-ce que c’est ?"@fr ;
+    solid-memo:backNote "mā hādhā? For a feminine noun: مَا هٰذِهِ؟ (mā hādhihi?)."@en ,
+                        "mā hādhā? Om ett feminint substantiv: مَا هٰذِهِ؟ (mā hādhihi?)."@sv ,
+                        "mā hādhā? 여성 명사일 때는 مَا هٰذِهِ؟ (mā hādhihi?)"@ko ,
+                        "mā hādhā? Bei einem femininen Nomen: مَا هٰذِهِ؟ (mā hādhihi?)."@de ,
+                        "mā hādhā? Con un sustantivo femenino: مَا هٰذِهِ؟ (mā hādhihi?)."@es ,
+                        "mā hādhā? Pour un nom féminin : مَا هٰذِهِ؟ (mā hādhihi?)."@fr .
+
+<#bi-kam-hadha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "بِكَمْ هٰذَا؟"@ar ;
+    solid-memo:back "how much is this?"@en ,
+                    "vad kostar den här?"@sv ,
+                    "이거 얼마예요?"@ko ,
+                    "was kostet das?"@de ,
+                    "¿cuánto cuesta esto?"@es ,
+                    "combien ça coûte ?"@fr ;
+    solid-memo:backNote "bi-kam hādhā?"@en ,
+                        "bi-kam hādhā?"@sv ,
+                        "bi-kam hādhā?"@ko ,
+                        "bi-kam hādhā?"@de ,
+                        "bi-kam hādhā?"@es ,
+                        "bi-kam hādhā?"@fr .
+
+<#kami-s-saah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "كَمِ السَّاعَة؟"@ar ;
+    solid-memo:back "what time is it?"@en ,
+                    "vad är klockan?"@sv ,
+                    "몇 시예요?"@ko ,
+                    "wie spät ist es?"@de ,
+                    "¿qué hora es?"@es ,
+                    "quelle heure est-il ?"@fr ;
+    solid-memo:backNote "kami s-sāʻah?"@en ,
+                        "kami s-sāʻah?"@sv ,
+                        "kami s-sāʻah?"@ko ,
+                        "kami s-sāʻah?"@de ,
+                        "kami s-sāʻah?"@es ,
+                        "kami s-sāʻah?"@fr .
+
+<#ayna-l-hammam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَيْنَ الْحَمَّام؟"@ar ;
+    solid-memo:back "where is the bathroom?"@en ,
+                    "var är toaletten?"@sv ,
+                    "화장실이 어디예요?"@ko ,
+                    "wo ist die Toilette?"@de ,
+                    "¿dónde está el baño?"@es ,
+                    "où sont les toilettes ?"@fr ;
+    solid-memo:backNote "ayna l-ḥammām?"@en ,
+                        "ayna l-ḥammām?"@sv ,
+                        "ayna l-ḥammām?"@ko ,
+                        "ayna l-ḥammām?"@de ,
+                        "ayna l-ḥammām?"@es ,
+                        "ayna l-ḥammām?"@fr .
+
+<#ayna-l-funduq>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَيْنَ الْفُنْدُق؟"@ar ;
+    solid-memo:back "where is the hotel?"@en ,
+                    "var ligger hotellet?"@sv ,
+                    "호텔이 어디예요?"@ko ,
+                    "wo ist das Hotel?"@de ,
+                    "¿dónde está el hotel?"@es ,
+                    "où est l’hôtel ?"@fr ;
+    solid-memo:backNote "ayna l-funduq?"@en ,
+                        "ayna l-funduq?"@sv ,
+                        "ayna l-funduq?"@ko ,
+                        "ayna l-funduq?"@de ,
+                        "ayna l-funduq?"@es ,
+                        "ayna l-funduq?"@fr .
+
+<#madha-turid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَاذَا تُرِيد؟"@ar ;
+    solid-memo:back "what do you want?"@en ,
+                    "vad vill du ha?"@sv ,
+                    "뭘 원해요?"@ko ,
+                    "was möchtest du?"@de ,
+                    "¿qué quieres?"@es ,
+                    "que veux-tu ?"@fr ;
+    solid-memo:backNote "mādhā turīd? To a woman: مَاذَا تُرِيدِين (mādhā turīdīn)."@en ,
+                        "mādhā turīd? Till en kvinna: مَاذَا تُرِيدِين (mādhā turīdīn)."@sv ,
+                        "mādhā turīd? 여성에게는 مَاذَا تُرِيدِين (mādhā turīdīn)."@ko ,
+                        "mādhā turīd? Zu einer Frau: مَاذَا تُرِيدِين (mādhā turīdīn)."@de ,
+                        "mādhā turīd? A una mujer: مَاذَا تُرِيدِين (mādhā turīdīn)."@es ,
+                        "mādhā turīd? À une femme : مَاذَا تُرِيدِين (mādhā turīdīn)."@fr .
+
+<#ma-mana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَا مَعْنَى ...؟"@ar ;
+    solid-memo:back "what does ... mean?"@en ,
+                    "vad betyder ...?"@sv ,
+                    "...은/는 무슨 뜻이에요?"@ko ,
+                    "was bedeutet ...?"@de ,
+                    "¿qué significa ...?"@es ,
+                    "que veut dire ... ?"@fr ;
+    solid-memo:backNote "mā maʻnā ...?"@en ,
+                        "mā maʻnā ...?"@sv ,
+                        "mā maʻnā ...?"@ko ,
+                        "mā maʻnā ...?"@de ,
+                        "mā maʻnā ...?"@es ,
+                        "mā maʻnā ...?"@fr .
+
+<#kayfa-taqulu-bi-l-arabiyyah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "كَيْفَ تَقُولُ ... بِالْعَرَبِيَّة؟"@ar ;
+    solid-memo:back "how do you say ... in Arabic?"@en ,
+                    "hur säger man ... på arabiska?"@sv ,
+                    "...을/를 아랍어로 어떻게 말해요?"@ko ,
+                    "wie sagt man ... auf Arabisch?"@de ,
+                    "¿cómo se dice ... en árabe?"@es ,
+                    "comment dit-on ... en arabe ?"@fr ;
+    solid-memo:backNote "kayfa taqūlu ... bi-l-ʻarabiyyah? To a woman: كَيْفَ تَقُولِينَ ... بِالْعَرَبِيَّة (kayfa taqūlīna ... bi-l-ʻarabiyyah)."@en ,
+                        "kayfa taqūlu ... bi-l-ʻarabiyyah? Till en kvinna: كَيْفَ تَقُولِينَ ... بِالْعَرَبِيَّة (kayfa taqūlīna ... bi-l-ʻarabiyyah)."@sv ,
+                        "kayfa taqūlu ... bi-l-ʻarabiyyah? 여성에게는 كَيْفَ تَقُولِينَ ... بِالْعَرَبِيَّة (kayfa taqūlīna ... bi-l-ʻarabiyyah)."@ko ,
+                        "kayfa taqūlu ... bi-l-ʻarabiyyah? Zu einer Frau: كَيْفَ تَقُولِينَ ... بِالْعَرَبِيَّة (kayfa taqūlīna ... bi-l-ʻarabiyyah)."@de ,
+                        "kayfa taqūlu ... bi-l-ʻarabiyyah? A una mujer: كَيْفَ تَقُولِينَ ... بِالْعَرَبِيَّة (kayfa taqūlīna ... bi-l-ʻarabiyyah)."@es ,
+                        "kayfa taqūlu ... bi-l-ʻarabiyyah? À une femme : كَيْفَ تَقُولِينَ ... بِالْعَرَبِيَّة (kayfa taqūlīna ... bi-l-ʻarabiyyah)."@fr .
+
+<#hal-anta-bi-khayr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "هَلْ أَنْتَ بِخَيْر؟"@ar ;
+    solid-memo:back "are you okay?"@en ,
+                    "är du okej?"@sv ,
+                    "괜찮으세요?"@ko ,
+                    "geht es dir gut?"@de ,
+                    "¿estás bien?"@es ,
+                    "tu vas bien ?"@fr ;
+    solid-memo:backNote "hal anta bi-khayr? To a woman: هَلْ أَنْتِ بِخَيْر (hal anti bi-khayr)."@en ,
+                        "hal anta bi-khayr? Till en kvinna: هَلْ أَنْتِ بِخَيْر (hal anti bi-khayr)."@sv ,
+                        "hal anta bi-khayr? 여성에게는 هَلْ أَنْتِ بِخَيْر (hal anti bi-khayr)."@ko ,
+                        "hal anta bi-khayr? Zu einer Frau: هَلْ أَنْتِ بِخَيْر (hal anti bi-khayr)."@de ,
+                        "hal anta bi-khayr? A una mujer: هَلْ أَنْتِ بِخَيْر (hal anti bi-khayr)."@es ,
+                        "hal anta bi-khayr? À une femme : هَلْ أَنْتِ بِخَيْر (hal anti bi-khayr)."@fr .
+
+<#uridu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أُرِيدُ ..."@ar ;
+    solid-memo:back "I want ..."@en ,
+                    "jag vill ha ..."@sv ,
+                    "...을/를 원해요"@ko ,
+                    "ich möchte ..."@de ,
+                    "quiero ..."@es ,
+                    "je voudrais ..."@fr ;
+    solid-memo:backNote "urīdu ..."@en ,
+                        "urīdu ..."@sv ,
+                        "urīdu ..."@ko ,
+                        "urīdu ..."@de ,
+                        "urīdu ..."@es ,
+                        "urīdu ..."@fr .
+
+<#la-afham>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَا أَفْهَم"@ar ;
+    solid-memo:back "I don’t understand"@en ,
+                    "jag förstår inte"@sv ,
+                    "이해가 안 돼요"@ko ,
+                    "ich verstehe nicht"@de ,
+                    "no entiendo"@es ,
+                    "je ne comprends pas"@fr ;
+    solid-memo:backNote "lā afham."@en ,
+                        "lā afham."@sv ,
+                        "lā afham."@ko ,
+                        "lā afham."@de ,
+                        "lā afham."@es ,
+                        "lā afham."@fr .
+
+<#afham>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَفْهَم"@ar ;
+    solid-memo:back "I understand"@en ,
+                    "jag förstår"@sv ,
+                    "이해해요"@ko ,
+                    "ich verstehe"@de ,
+                    "entiendo"@es ,
+                    "je comprends"@fr ;
+    solid-memo:backNote "afham."@en ,
+                        "afham."@sv ,
+                        "afham."@ko ,
+                        "afham."@de ,
+                        "afham."@es ,
+                        "afham."@fr .
+
+<#la-arif>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَا أَعْرِف"@ar ;
+    solid-memo:back "I don’t know"@en ,
+                    "jag vet inte"@sv ,
+                    "몰라요"@ko ,
+                    "ich weiß nicht"@de ,
+                    "no sé"@es ,
+                    "je ne sais pas"@fr ;
+    solid-memo:backNote "lā aʻrif."@en ,
+                        "lā aʻrif."@sv ,
+                        "lā aʻrif."@ko ,
+                        "lā aʻrif."@de ,
+                        "lā aʻrif."@es ,
+                        "lā aʻrif."@fr .
+
+<#arif>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَعْرِف"@ar ;
+    solid-memo:back "I know"@en ,
+                    "jag vet"@sv ,
+                    "알아요"@ko ,
+                    "ich weiß"@de ,
+                    "lo sé"@es ,
+                    "je sais"@fr ;
+    solid-memo:backNote "aʻrif."@en ,
+                        "aʻrif."@sv ,
+                        "aʻrif."@ko ,
+                        "aʻrif."@de ,
+                        "aʻrif."@es ,
+                        "aʻrif."@fr .
+
+<#hal-tatakallamu-l-injiliziyyah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "هَلْ تَتَكَلَّمُ الْإِنْجِلِيزِيَّة؟"@ar ;
+    solid-memo:back "do you speak English?"@en ,
+                    "talar du engelska?"@sv ,
+                    "영어 할 줄 아세요?"@ko ,
+                    "sprichst du Englisch?"@de ,
+                    "¿hablas inglés?"@es ,
+                    "parles-tu anglais ?"@fr ;
+    solid-memo:backNote "hal tatakallamu l-injilīziyyah? To a woman: هَلْ تَتَكَلَّمِينَ الْإِنْجِلِيزِيَّة (hal tatakallamīna l-injilīziyyah)."@en ,
+                        "hal tatakallamu l-injilīziyyah? Till en kvinna: هَلْ تَتَكَلَّمِينَ الْإِنْجِلِيزِيَّة (hal tatakallamīna l-injilīziyyah)."@sv ,
+                        "hal tatakallamu l-injilīziyyah? 여성에게는 هَلْ تَتَكَلَّمِينَ الْإِنْجِلِيزِيَّة (hal tatakallamīna l-injilīziyyah)."@ko ,
+                        "hal tatakallamu l-injilīziyyah? Zu einer Frau: هَلْ تَتَكَلَّمِينَ الْإِنْجِلِيزِيَّة (hal tatakallamīna l-injilīziyyah)."@de ,
+                        "hal tatakallamu l-injilīziyyah? A una mujer: هَلْ تَتَكَلَّمِينَ الْإِنْجِلِيزِيَّة (hal tatakallamīna l-injilīziyyah)."@es ,
+                        "hal tatakallamu l-injilīziyyah? À une femme : هَلْ تَتَكَلَّمِينَ الْإِنْجِلِيزِيَّة (hal tatakallamīna l-injilīziyyah)."@fr .
+
+<#atakallamu-l-arabiyyata-qalilan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَتَكَلَّمُ الْعَرَبِيَّةَ قَلِيلًا"@ar ;
+    solid-memo:back "I speak a little Arabic"@en ,
+                    "jag talar lite arabiska"@sv ,
+                    "아랍어를 조금 해요"@ko ,
+                    "ich spreche ein bisschen Arabisch"@de ,
+                    "hablo un poco de árabe"@es ,
+                    "je parle un peu arabe"@fr ;
+    solid-memo:backNote "atakallamu l-ʻarabiyyata qalīlan."@en ,
+                        "atakallamu l-ʻarabiyyata qalīlan."@sv ,
+                        "atakallamu l-ʻarabiyyata qalīlan."@ko ,
+                        "atakallamu l-ʻarabiyyata qalīlan."@de ,
+                        "atakallamu l-ʻarabiyyata qalīlan."@es ,
+                        "atakallamu l-ʻarabiyyata qalīlan."@fr .
+
+<#takallam-bi-butin-min-fadlika>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "تَكَلَّمْ بِبُطْءٍ مِنْ فَضْلِكَ"@ar ;
+    solid-memo:back "speak slowly, please"@en ,
+                    "tala långsamt, tack"@sv ,
+                    "천천히 말해 주세요"@ko ,
+                    "sprich bitte langsam"@de ,
+                    "habla despacio, por favor"@es ,
+                    "parle lentement, s’il te plaît"@fr ;
+    solid-memo:backNote "takallam bi-buṭʼin min faḍlika. To a woman: تَكَلَّمِي بِبُطْءٍ مِنْ فَضْلِكِ (takallamī bi-buṭʼin min faḍliki)."@en ,
+                        "takallam bi-buṭʼin min faḍlika. Till en kvinna: تَكَلَّمِي بِبُطْءٍ مِنْ فَضْلِكِ (takallamī bi-buṭʼin min faḍliki)."@sv ,
+                        "takallam bi-buṭʼin min faḍlika. 여성에게는 تَكَلَّمِي بِبُطْءٍ مِنْ فَضْلِكِ (takallamī bi-buṭʼin min faḍliki)."@ko ,
+                        "takallam bi-buṭʼin min faḍlika. Zu einer Frau: تَكَلَّمِي بِبُطْءٍ مِنْ فَضْلِكِ (takallamī bi-buṭʼin min faḍliki)."@de ,
+                        "takallam bi-buṭʼin min faḍlika. A una mujer: تَكَلَّمِي بِبُطْءٍ مِنْ فَضْلِكِ (takallamī bi-buṭʼin min faḍliki)."@es ,
+                        "takallam bi-buṭʼin min faḍlika. À une femme : تَكَلَّمِي بِبُطْءٍ مِنْ فَضْلِكِ (takallamī bi-buṭʼin min faḍliki)."@fr .
+
+<#aid-min-fadlika>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَعِدْ مِنْ فَضْلِكَ"@ar ;
+    solid-memo:back "say that again, please"@en ,
+                    "säg det igen, tack"@sv ,
+                    "다시 말해 주세요"@ko ,
+                    "sag das bitte noch einmal"@de ,
+                    "repite, por favor"@es ,
+                    "répète, s’il te plaît"@fr ;
+    solid-memo:backNote "aʻid min faḍlika. To a woman: أَعِيدِي مِنْ فَضْلِكِ (aʻīdī min faḍliki)."@en ,
+                        "aʻid min faḍlika. Till en kvinna: أَعِيدِي مِنْ فَضْلِكِ (aʻīdī min faḍliki)."@sv ,
+                        "aʻid min faḍlika. 여성에게는 أَعِيدِي مِنْ فَضْلِكِ (aʻīdī min faḍliki)."@ko ,
+                        "aʻid min faḍlika. Zu einer Frau: أَعِيدِي مِنْ فَضْلِكِ (aʻīdī min faḍliki)."@de ,
+                        "aʻid min faḍlika. A una mujer: أَعِيدِي مِنْ فَضْلِكِ (aʻīdī min faḍliki)."@es ,
+                        "aʻid min faḍlika. À une femme : أَعِيدِي مِنْ فَضْلِكِ (aʻīdī min faḍliki)."@fr .
+
+<#indi-sual>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "عِنْدِي سُؤَال"@ar ;
+    solid-memo:back "I have a question"@en ,
+                    "jag har en fråga"@sv ,
+                    "질문이 있어요"@ko ,
+                    "ich habe eine Frage"@de ,
+                    "tengo una pregunta"@es ,
+                    "j’ai une question"@fr ;
+    solid-memo:backNote "ʻindī suʼāl."@en ,
+                        "ʻindī suʼāl."@sv ,
+                        "ʻindī suʼāl."@ko ,
+                        "ʻindī suʼāl."@de ,
+                        "ʻindī suʼāl."@es ,
+                        "ʻindī suʼāl."@fr .
+
+<#lahzatan-min-fadlika>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَحْظَةً مِنْ فَضْلِكَ"@ar ;
+    solid-memo:back "one moment, please"@en ,
+                    "ett ögonblick, tack"@sv ,
+                    "잠시만요"@ko ,
+                    "einen Moment bitte"@de ,
+                    "un momento, por favor"@es ,
+                    "un instant, s’il te plaît"@fr ;
+    solid-memo:backNote "laḥẓatan min faḍlika. To a woman: لَحْظَةً مِنْ فَضْلِكِ (laḥẓatan min faḍliki)."@en ,
+                        "laḥẓatan min faḍlika. Till en kvinna: لَحْظَةً مِنْ فَضْلِكِ (laḥẓatan min faḍliki)."@sv ,
+                        "laḥẓatan min faḍlika. 여성에게는 لَحْظَةً مِنْ فَضْلِكِ (laḥẓatan min faḍliki)."@ko ,
+                        "laḥẓatan min faḍlika. Zu einer Frau: لَحْظَةً مِنْ فَضْلِكِ (laḥẓatan min faḍliki)."@de ,
+                        "laḥẓatan min faḍlika. A una mujer: لَحْظَةً مِنْ فَضْلِكِ (laḥẓatan min faḍliki)."@es ,
+                        "laḥẓatan min faḍlika. À une femme : لَحْظَةً مِنْ فَضْلِكِ (laḥẓatan min faḍliki)."@fr .
+
+<#intazir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "اِنْتَظِرْ"@ar ;
+    solid-memo:back "wait!"@en ,
+                    "vänta!"@sv ,
+                    "기다려요!"@ko ,
+                    "warte!"@de ,
+                    "¡espera!"@es ,
+                    "attends !"@fr ;
+    solid-memo:backNote "intaẓir. To a woman: اِنْتَظِرِي (intaẓirī)."@en ,
+                        "intaẓir. Till en kvinna: اِنْتَظِرِي (intaẓirī)."@sv ,
+                        "intaẓir. 여성에게는 اِنْتَظِرِي (intaẓirī)."@ko ,
+                        "intaẓir. Zu einer Frau: اِنْتَظِرِي (intaẓirī)."@de ,
+                        "intaẓir. A una mujer: اِنْتَظِرِي (intaẓirī)."@es ,
+                        "intaẓir. À une femme : اِنْتَظِرِي (intaẓirī)."@fr .
+
+<#saidni>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "سَاعِدْنِي"@ar ;
+    solid-memo:back "help me!"@en ,
+                    "hjälp mig!"@sv ,
+                    "도와주세요!"@ko ,
+                    "hilf mir!"@de ,
+                    "¡ayúdame!"@es ,
+                    "aide-moi !"@fr ;
+    solid-memo:backNote "sāʻidnī. To a woman: سَاعِدِينِي (sāʻidīnī)."@en ,
+                        "sāʻidnī. Till en kvinna: سَاعِدِينِي (sāʻidīnī)."@sv ,
+                        "sāʻidnī. 여성에게는 سَاعِدِينِي (sāʻidīnī)."@ko ,
+                        "sāʻidnī. Zu einer Frau: سَاعِدِينِي (sāʻidīnī)."@de ,
+                        "sāʻidnī. A una mujer: سَاعِدِينِي (sāʻidīnī)."@es ,
+                        "sāʻidnī. À une femme : سَاعِدِينِي (sāʻidīnī)."@fr .
+
+<#an-najdah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "النَّجْدَة"@ar ;
+    solid-memo:back "help! (emergency)"@en ,
+                    "hjälp! (nödläge)"@sv ,
+                    "살려 주세요!"@ko ,
+                    "Hilfe!"@de ,
+                    "¡socorro!"@es ,
+                    "au secours !"@fr ;
+    solid-memo:backNote "an-najdah. A cry for help in an emergency."@en ,
+                        "an-najdah. Ett rop på hjälp i ett nödläge."@sv ,
+                        "an-najdah. 위급할 때 도움을 청하는 외침이에요."@ko ,
+                        "an-najdah. Ein Hilferuf im Notfall."@de ,
+                        "an-najdah. Un grito de auxilio en una emergencia."@es ,
+                        "an-najdah. Un appel à l’aide en cas d’urgence."@fr .
+
+<#hal-yumkinuka-musaadati>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "هَلْ يُمْكِنُكَ مُسَاعَدَتِي؟"@ar ;
+    solid-memo:back "can you help me?"@en ,
+                    "kan du hjälpa mig?"@sv ,
+                    "도와줄 수 있어요?"@ko ,
+                    "kannst du mir helfen?"@de ,
+                    "¿puedes ayudarme?"@es ,
+                    "peux-tu m’aider ?"@fr ;
+    solid-memo:backNote "hal yumkinuka musāʻadatī? To a woman: هَلْ يُمْكِنُكِ مُسَاعَدَتِي (hal yumkinuki musāʻadatī)."@en ,
+                        "hal yumkinuka musāʻadatī? Till en kvinna: هَلْ يُمْكِنُكِ مُسَاعَدَتِي (hal yumkinuki musāʻadatī)."@sv ,
+                        "hal yumkinuka musāʻadatī? 여성에게는 هَلْ يُمْكِنُكِ مُسَاعَدَتِي (hal yumkinuki musāʻadatī)."@ko ,
+                        "hal yumkinuka musāʻadatī? Zu einer Frau: هَلْ يُمْكِنُكِ مُسَاعَدَتِي (hal yumkinuki musāʻadatī)."@de ,
+                        "hal yumkinuka musāʻadatī? A una mujer: هَلْ يُمْكِنُكِ مُسَاعَدَتِي (hal yumkinuki musāʻadatī)."@es ,
+                        "hal yumkinuka musāʻadatī? À une femme : هَلْ يُمْكِنُكِ مُسَاعَدَتِي (hal yumkinuki musāʻadatī)."@fr .
+
+<#ana-dai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا ضَائِع"@ar ;
+    solid-memo:back "I’m lost"@en ,
+                    "jag har gått vilse"@sv ,
+                    "길을 잃었어요"@ko ,
+                    "ich habe mich verlaufen"@de ,
+                    "estoy perdido"@es ,
+                    "je suis perdu"@fr ;
+    solid-memo:backNote "anā ḍāʼiʻ. A woman says أَنَا ضَائِعَة (anā ḍāʼiʻah)."@en ,
+                        "anā ḍāʼiʻ. En kvinna säger أَنَا ضَائِعَة (anā ḍāʼiʻah)."@sv ,
+                        "anā ḍāʼiʻ. 여성은 أَنَا ضَائِعَة (anā ḍāʼiʻah)라고 말해요."@ko ,
+                        "anā ḍāʼiʻ. Eine Frau sagt أَنَا ضَائِعَة (anā ḍāʼiʻah)."@de ,
+                        "anā ḍāʼiʻ. Una mujer dice أَنَا ضَائِعَة (anā ḍāʼiʻah)."@es ,
+                        "anā ḍāʼiʻ. Une femme dit أَنَا ضَائِعَة (anā ḍāʼiʻah)."@fr .
+
+<#ana-jai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا جَائِع"@ar ;
+    solid-memo:back "I’m hungry"@en ,
+                    "jag är hungrig"@sv ,
+                    "배고파요"@ko ,
+                    "ich habe Hunger"@de ,
+                    "tengo hambre"@es ,
+                    "j’ai faim"@fr ;
+    solid-memo:backNote "anā jāʼiʻ. A woman says أَنَا جَائِعَة (anā jāʼiʻah)."@en ,
+                        "anā jāʼiʻ. En kvinna säger أَنَا جَائِعَة (anā jāʼiʻah)."@sv ,
+                        "anā jāʼiʻ. 여성은 أَنَا جَائِعَة (anā jāʼiʻah)라고 말해요."@ko ,
+                        "anā jāʼiʻ. Eine Frau sagt أَنَا جَائِعَة (anā jāʼiʻah)."@de ,
+                        "anā jāʼiʻ. Una mujer dice أَنَا جَائِعَة (anā jāʼiʻah)."@es ,
+                        "anā jāʼiʻ. Une femme dit أَنَا جَائِعَة (anā jāʼiʻah)."@fr .
+
+<#ana-atshan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا عَطْشَان"@ar ;
+    solid-memo:back "I’m thirsty"@en ,
+                    "jag är törstig"@sv ,
+                    "목말라요"@ko ,
+                    "ich habe Durst"@de ,
+                    "tengo sed"@es ,
+                    "j’ai soif"@fr ;
+    solid-memo:backNote "anā ʻaṭshān. A woman says أَنَا عَطْشَى (anā ʻaṭshā)."@en ,
+                        "anā ʻaṭshān. En kvinna säger أَنَا عَطْشَى (anā ʻaṭshā)."@sv ,
+                        "anā ʻaṭshān. 여성은 أَنَا عَطْشَى (anā ʻaṭshā)라고 말해요."@ko ,
+                        "anā ʻaṭshān. Eine Frau sagt أَنَا عَطْشَى (anā ʻaṭshā)."@de ,
+                        "anā ʻaṭshān. Una mujer dice أَنَا عَطْشَى (anā ʻaṭshā)."@es ,
+                        "anā ʻaṭshān. Une femme dit أَنَا عَطْشَى (anā ʻaṭshā)."@fr .
+
+<#ana-mutab>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَنَا مُتْعَب"@ar ;
+    solid-memo:back "I’m tired"@en ,
+                    "jag är trött"@sv ,
+                    "피곤해요"@ko ,
+                    "ich bin müde"@de ,
+                    "estoy cansado"@es ,
+                    "je suis fatigué"@fr ;
+    solid-memo:backNote "anā mutʻab. A woman says أَنَا مُتْعَبَة (anā mutʻabah)."@en ,
+                        "anā mutʻab. En kvinna säger أَنَا مُتْعَبَة (anā mutʻabah)."@sv ,
+                        "anā mutʻab. 여성은 أَنَا مُتْعَبَة (anā mutʻabah)라고 말해요."@ko ,
+                        "anā mutʻab. Eine Frau sagt أَنَا مُتْعَبَة (anā mutʻabah)."@de ,
+                        "anā mutʻab. Una mujer dice أَنَا مُتْعَبَة (anā mutʻabah)."@es ,
+                        "anā mutʻab. Une femme dit أَنَا مُتْعَبَة (anā mutʻabah)."@fr .
+
+<#ahtaju-ila-tabib>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَحْتَاجُ إِلَى طَبِيب"@ar ;
+    solid-memo:back "I need a doctor"@en ,
+                    "jag behöver en läkare"@sv ,
+                    "의사가 필요해요"@ko ,
+                    "ich brauche einen Arzt"@de ,
+                    "necesito un médico"@es ,
+                    "j’ai besoin d’un médecin"@fr ;
+    solid-memo:backNote "aḥtāju ilā ṭabīb."@en ,
+                        "aḥtāju ilā ṭabīb."@sv ,
+                        "aḥtāju ilā ṭabīb."@ko ,
+                        "aḥtāju ilā ṭabīb."@de ,
+                        "aḥtāju ilā ṭabīb."@es ,
+                        "aḥtāju ilā ṭabīb."@fr .
+
+<#al-hisabu-min-fadlika>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْحِسَابُ مِنْ فَضْلِكَ"@ar ;
+    solid-memo:back "the bill, please"@en ,
+                    "notan, tack"@sv ,
+                    "계산서 주세요"@ko ,
+                    "die Rechnung bitte"@de ,
+                    "la cuenta, por favor"@es ,
+                    "l’addition, s’il te plaît"@fr ;
+    solid-memo:backNote "al-ḥisābu min faḍlika. To a woman: الْحِسَابُ مِنْ فَضْلِكِ (al-ḥisābu min faḍliki)."@en ,
+                        "al-ḥisābu min faḍlika. Till en kvinna: الْحِسَابُ مِنْ فَضْلِكِ (al-ḥisābu min faḍliki)."@sv ,
+                        "al-ḥisābu min faḍlika. 여성에게는 الْحِسَابُ مِنْ فَضْلِكِ (al-ḥisābu min faḍliki)."@ko ,
+                        "al-ḥisābu min faḍlika. Zu einer Frau: الْحِسَابُ مِنْ فَضْلِكِ (al-ḥisābu min faḍliki)."@de ,
+                        "al-ḥisābu min faḍlika. A una mujer: الْحِسَابُ مِنْ فَضْلِكِ (al-ḥisābu min faḍliki)."@es ,
+                        "al-ḥisābu min faḍlika. À une femme : الْحِسَابُ مِنْ فَضْلِكِ (al-ḥisābu min faḍliki)."@fr .
+
+<#uhibbuka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أُحِبُّكَ"@ar ;
+    solid-memo:back "I love you"@en ,
+                    "jag älskar dig"@sv ,
+                    "사랑해요"@ko ,
+                    "ich liebe dich"@de ,
+                    "te quiero"@es ,
+                    "je t’aime"@fr ;
+    solid-memo:backNote "uḥibbuka. To a woman: أُحِبُّكِ (uḥibbuki)."@en ,
+                        "uḥibbuka. Till en kvinna: أُحِبُّكِ (uḥibbuki)."@sv ,
+                        "uḥibbuka. 여성에게는 أُحِبُّكِ (uḥibbuki)."@ko ,
+                        "uḥibbuka. Zu einer Frau: أُحِبُّكِ (uḥibbuki)."@de ,
+                        "uḥibbuka. A una mujer: أُحِبُّكِ (uḥibbuki)."@es ,
+                        "uḥibbuka. À une femme : أُحِبُّكِ (uḥibbuki)."@fr .
+
+<#huna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "هُنَا"@ar ;
+    solid-memo:back "here"@en ,
+                    "här"@sv ,
+                    "여기"@ko ,
+                    "hier"@de ,
+                    "aquí"@es ,
+                    "ici"@fr ;
+    solid-memo:backNote "hunā."@en ,
+                        "hunā."@sv ,
+                        "hunā."@ko ,
+                        "hunā."@de ,
+                        "hunā."@es ,
+                        "hunā."@fr .
+
+<#hunak>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "هُنَاك"@ar ;
+    solid-memo:back "there"@en ,
+                    "där"@sv ,
+                    "저기"@ko ,
+                    "dort"@de ,
+                    "allí"@es ,
+                    "là-bas"@fr ;
+    solid-memo:backNote "hunāk."@en ,
+                        "hunāk."@sv ,
+                        "hunāk."@ko ,
+                        "hunāk."@de ,
+                        "hunāk."@es ,
+                        "hunāk."@fr .
+
+<#sifr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "صِفْر"@ar ;
+    solid-memo:back "zero"@en ,
+                    "noll"@sv ,
+                    "영 (0)"@ko ,
+                    "null"@de ,
+                    "cero"@es ,
+                    "zéro"@fr ;
+    solid-memo:backNote "ṣifr. Written ٠."@en ,
+                        "ṣifr. Skrivs ٠."@sv ,
+                        "ṣifr. 숫자로 ٠."@ko ,
+                        "ṣifr. Ziffer: ٠."@de ,
+                        "ṣifr. Se escribe ٠."@es ,
+                        "ṣifr. S’écrit ٠."@fr .
+
+<#wahid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "وَاحِد"@ar ;
+    solid-memo:back "one"@en ,
+                    "ett"@sv ,
+                    "하나 (1)"@ko ,
+                    "eins"@de ,
+                    "uno"@es ,
+                    "un"@fr ;
+    solid-memo:backNote "wāḥid. Written ١. With a feminine noun: وَاحِدَة (wāḥidah)."@en ,
+                        "wāḥid. Skrivs ١. Med ett feminint substantiv: وَاحِدَة (wāḥidah)."@sv ,
+                        "wāḥid. 숫자로 ١. 여성 명사와 쓰면 وَاحِدَة (wāḥidah)."@ko ,
+                        "wāḥid. Ziffer: ١. Bei einem femininen Nomen: وَاحِدَة (wāḥidah)."@de ,
+                        "wāḥid. Se escribe ١. Con un sustantivo femenino: وَاحِدَة (wāḥidah)."@es ,
+                        "wāḥid. S’écrit ١. Avec un nom féminin : وَاحِدَة (wāḥidah)."@fr .
+
+<#ithnan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "اِثْنَان"@ar ;
+    solid-memo:back "two"@en ,
+                    "två"@sv ,
+                    "둘 (2)"@ko ,
+                    "zwei"@de ,
+                    "dos"@es ,
+                    "deux"@fr ;
+    solid-memo:backNote "ithnān. Written ٢. With a feminine noun: اِثْنَتَان (ithnatān)."@en ,
+                        "ithnān. Skrivs ٢. Med ett feminint substantiv: اِثْنَتَان (ithnatān)."@sv ,
+                        "ithnān. 숫자로 ٢. 여성 명사와 쓰면 اِثْنَتَان (ithnatān)."@ko ,
+                        "ithnān. Ziffer: ٢. Bei einem femininen Nomen: اِثْنَتَان (ithnatān)."@de ,
+                        "ithnān. Se escribe ٢. Con un sustantivo femenino: اِثْنَتَان (ithnatān)."@es ,
+                        "ithnān. S’écrit ٢. Avec un nom féminin : اِثْنَتَان (ithnatān)."@fr .
+
+<#thalathah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ثَلَاثَة"@ar ;
+    solid-memo:back "three"@en ,
+                    "tre"@sv ,
+                    "셋 (3)"@ko ,
+                    "drei"@de ,
+                    "tres"@es ,
+                    "trois"@fr ;
+    solid-memo:backNote "thalāthah. Written ٣. With a feminine noun: ثَلَاث (thalāth)."@en ,
+                        "thalāthah. Skrivs ٣. Med ett feminint substantiv: ثَلَاث (thalāth)."@sv ,
+                        "thalāthah. 숫자로 ٣. 여성 명사와 쓰면 ثَلَاث (thalāth)."@ko ,
+                        "thalāthah. Ziffer: ٣. Bei einem femininen Nomen: ثَلَاث (thalāth)."@de ,
+                        "thalāthah. Se escribe ٣. Con un sustantivo femenino: ثَلَاث (thalāth)."@es ,
+                        "thalāthah. S’écrit ٣. Avec un nom féminin : ثَلَاث (thalāth)."@fr .
+
+<#arbaah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَرْبَعَة"@ar ;
+    solid-memo:back "four"@en ,
+                    "fyra"@sv ,
+                    "넷 (4)"@ko ,
+                    "vier"@de ,
+                    "cuatro"@es ,
+                    "quatre"@fr ;
+    solid-memo:backNote "arbaʻah. Written ٤. With a feminine noun: أَرْبَع (arbaʻ)."@en ,
+                        "arbaʻah. Skrivs ٤. Med ett feminint substantiv: أَرْبَع (arbaʻ)."@sv ,
+                        "arbaʻah. 숫자로 ٤. 여성 명사와 쓰면 أَرْبَع (arbaʻ)."@ko ,
+                        "arbaʻah. Ziffer: ٤. Bei einem femininen Nomen: أَرْبَع (arbaʻ)."@de ,
+                        "arbaʻah. Se escribe ٤. Con un sustantivo femenino: أَرْبَع (arbaʻ)."@es ,
+                        "arbaʻah. S’écrit ٤. Avec un nom féminin : أَرْبَع (arbaʻ)."@fr .
+
+<#khamsah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "خَمْسَة"@ar ;
+    solid-memo:back "five"@en ,
+                    "fem"@sv ,
+                    "다섯 (5)"@ko ,
+                    "fünf"@de ,
+                    "cinco"@es ,
+                    "cinq"@fr ;
+    solid-memo:backNote "khamsah. Written ٥. With a feminine noun: خَمْس (khams)."@en ,
+                        "khamsah. Skrivs ٥. Med ett feminint substantiv: خَمْس (khams)."@sv ,
+                        "khamsah. 숫자로 ٥. 여성 명사와 쓰면 خَمْس (khams)."@ko ,
+                        "khamsah. Ziffer: ٥. Bei einem femininen Nomen: خَمْس (khams)."@de ,
+                        "khamsah. Se escribe ٥. Con un sustantivo femenino: خَمْس (khams)."@es ,
+                        "khamsah. S’écrit ٥. Avec un nom féminin : خَمْس (khams)."@fr .
+
+<#sittah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "سِتَّة"@ar ;
+    solid-memo:back "six"@en ,
+                    "sex"@sv ,
+                    "여섯 (6)"@ko ,
+                    "sechs"@de ,
+                    "seis"@es ,
+                    "six"@fr ;
+    solid-memo:backNote "sittah. Written ٦. With a feminine noun: سِتّ (sitt)."@en ,
+                        "sittah. Skrivs ٦. Med ett feminint substantiv: سِتّ (sitt)."@sv ,
+                        "sittah. 숫자로 ٦. 여성 명사와 쓰면 سِتّ (sitt)."@ko ,
+                        "sittah. Ziffer: ٦. Bei einem femininen Nomen: سِتّ (sitt)."@de ,
+                        "sittah. Se escribe ٦. Con un sustantivo femenino: سِتّ (sitt)."@es ,
+                        "sittah. S’écrit ٦. Avec un nom féminin : سِتّ (sitt)."@fr .
+
+<#sabah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "سَبْعَة"@ar ;
+    solid-memo:back "seven"@en ,
+                    "sju"@sv ,
+                    "일곱 (7)"@ko ,
+                    "sieben"@de ,
+                    "siete"@es ,
+                    "sept"@fr ;
+    solid-memo:backNote "sabʻah. Written ٧. With a feminine noun: سَبْع (sabʻ)."@en ,
+                        "sabʻah. Skrivs ٧. Med ett feminint substantiv: سَبْع (sabʻ)."@sv ,
+                        "sabʻah. 숫자로 ٧. 여성 명사와 쓰면 سَبْع (sabʻ)."@ko ,
+                        "sabʻah. Ziffer: ٧. Bei einem femininen Nomen: سَبْع (sabʻ)."@de ,
+                        "sabʻah. Se escribe ٧. Con un sustantivo femenino: سَبْع (sabʻ)."@es ,
+                        "sabʻah. S’écrit ٧. Avec un nom féminin : سَبْع (sabʻ)."@fr .
+
+<#thamaniyah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ثَمَانِيَة"@ar ;
+    solid-memo:back "eight"@en ,
+                    "åtta"@sv ,
+                    "여덟 (8)"@ko ,
+                    "acht"@de ,
+                    "ocho"@es ,
+                    "huit"@fr ;
+    solid-memo:backNote "thamāniyah. Written ٨. With a feminine noun: ثَمَانٍ (thamānin)."@en ,
+                        "thamāniyah. Skrivs ٨. Med ett feminint substantiv: ثَمَانٍ (thamānin)."@sv ,
+                        "thamāniyah. 숫자로 ٨. 여성 명사와 쓰면 ثَمَانٍ (thamānin)."@ko ,
+                        "thamāniyah. Ziffer: ٨. Bei einem femininen Nomen: ثَمَانٍ (thamānin)."@de ,
+                        "thamāniyah. Se escribe ٨. Con un sustantivo femenino: ثَمَانٍ (thamānin)."@es ,
+                        "thamāniyah. S’écrit ٨. Avec un nom féminin : ثَمَانٍ (thamānin)."@fr .
+
+<#tisah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "تِسْعَة"@ar ;
+    solid-memo:back "nine"@en ,
+                    "nio"@sv ,
+                    "아홉 (9)"@ko ,
+                    "neun"@de ,
+                    "nueve"@es ,
+                    "neuf"@fr ;
+    solid-memo:backNote "tisʻah. Written ٩. With a feminine noun: تِسْع (tisʻ)."@en ,
+                        "tisʻah. Skrivs ٩. Med ett feminint substantiv: تِسْع (tisʻ)."@sv ,
+                        "tisʻah. 숫자로 ٩. 여성 명사와 쓰면 تِسْع (tisʻ)."@ko ,
+                        "tisʻah. Ziffer: ٩. Bei einem femininen Nomen: تِسْع (tisʻ)."@de ,
+                        "tisʻah. Se escribe ٩. Con un sustantivo femenino: تِسْع (tisʻ)."@es ,
+                        "tisʻah. S’écrit ٩. Avec un nom féminin : تِسْع (tisʻ)."@fr .
+
+<#asharah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "عَشَرَة"@ar ;
+    solid-memo:back "ten"@en ,
+                    "tio"@sv ,
+                    "열 (10)"@ko ,
+                    "zehn"@de ,
+                    "diez"@es ,
+                    "dix"@fr ;
+    solid-memo:backNote "ʻasharah. Written ١٠. With a feminine noun: عَشْر (ʻashr)."@en ,
+                        "ʻasharah. Skrivs ١٠. Med ett feminint substantiv: عَشْر (ʻashr)."@sv ,
+                        "ʻasharah. 숫자로 ١٠. 여성 명사와 쓰면 عَشْر (ʻashr)."@ko ,
+                        "ʻasharah. Ziffer: ١٠. Bei einem femininen Nomen: عَشْر (ʻashr)."@de ,
+                        "ʻasharah. Se escribe ١٠. Con un sustantivo femenino: عَشْر (ʻashr)."@es ,
+                        "ʻasharah. S’écrit ١٠. Avec un nom féminin : عَشْر (ʻashr)."@fr .
+
+<#ishrun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "عِشْرُون"@ar ;
+    solid-memo:back "twenty"@en ,
+                    "tjugo"@sv ,
+                    "스물 (20)"@ko ,
+                    "zwanzig"@de ,
+                    "veinte"@es ,
+                    "vingt"@fr ;
+    solid-memo:backNote "ʻishrūn. Written ٢٠."@en ,
+                        "ʻishrūn. Skrivs ٢٠."@sv ,
+                        "ʻishrūn. 숫자로 ٢٠."@ko ,
+                        "ʻishrūn. Ziffer: ٢٠."@de ,
+                        "ʻishrūn. Se escribe ٢٠."@es ,
+                        "ʻishrūn. S’écrit ٢٠."@fr .
+
+<#miah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مِئَة"@ar ;
+    solid-memo:back "one hundred"@en ,
+                    "hundra"@sv ,
+                    "백 (100)"@ko ,
+                    "hundert"@de ,
+                    "cien"@es ,
+                    "cent"@fr ;
+    solid-memo:backNote "miʼah. Written ١٠٠. Also spelled مِائَة, pronounced the same."@en ,
+                        "miʼah. Skrivs ١٠٠. Stavas även مِائَة, med samma uttal."@sv ,
+                        "miʼah. 숫자로 ١٠٠. مِائَة로도 쓰며 발음은 같아요."@ko ,
+                        "miʼah. Ziffer: ١٠٠. Auch مِائَة geschrieben, gleich ausgesprochen."@de ,
+                        "miʼah. Se escribe ١٠٠. También se escribe مِائَة, con la misma pronunciación."@es ,
+                        "miʼah. S’écrit ١٠٠. Aussi orthographié مِائَة, même prononciation."@fr .
+
+<#alf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَلْف"@ar ;
+    solid-memo:back "one thousand"@en ,
+                    "tusen"@sv ,
+                    "천 (1000)"@ko ,
+                    "tausend"@de ,
+                    "mil"@es ,
+                    "mille"@fr ;
+    solid-memo:backNote "alf. Written ١٠٠٠."@en ,
+                        "alf. Skrivs ١٠٠٠."@sv ,
+                        "alf. 숫자로 ١٠٠٠."@ko ,
+                        "alf. Ziffer: ١٠٠٠."@de ,
+                        "alf. Se escribe ١٠٠٠."@es ,
+                        "alf. S’écrit ١٠٠٠."@fr .
+
+<#al-ahad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْأَحَد"@ar ;
+    solid-memo:back "Sunday"@en ,
+                    "söndag"@sv ,
+                    "일요일"@ko ,
+                    "Sonntag"@de ,
+                    "domingo"@es ,
+                    "dimanche"@fr ;
+    solid-memo:backNote "al-aḥad. The week starts on Sunday in most Arab countries."@en ,
+                        "al-aḥad. Veckan börjar på söndag i de flesta arabiska länder."@sv ,
+                        "al-aḥad. 대부분의 아랍 국가에서는 한 주가 일요일에 시작해요."@ko ,
+                        "al-aḥad. In den meisten arabischen Ländern beginnt die Woche am Sonntag."@de ,
+                        "al-aḥad. En la mayoría de los países árabes, la semana empieza el domingo."@es ,
+                        "al-aḥad. Dans la plupart des pays arabes, la semaine commence le dimanche."@fr .
+
+<#al-ithnayn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الِاثْنَيْن"@ar ;
+    solid-memo:back "Monday"@en ,
+                    "måndag"@sv ,
+                    "월요일"@ko ,
+                    "Montag"@de ,
+                    "lunes"@es ,
+                    "lundi"@fr ;
+    solid-memo:backNote "al-ithnayn."@en ,
+                        "al-ithnayn."@sv ,
+                        "al-ithnayn."@ko ,
+                        "al-ithnayn."@de ,
+                        "al-ithnayn."@es ,
+                        "al-ithnayn."@fr .
+
+<#ath-thulatha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الثُّلَاثَاء"@ar ;
+    solid-memo:back "Tuesday"@en ,
+                    "tisdag"@sv ,
+                    "화요일"@ko ,
+                    "Dienstag"@de ,
+                    "martes"@es ,
+                    "mardi"@fr ;
+    solid-memo:backNote "ath-thulāthāʼ."@en ,
+                        "ath-thulāthāʼ."@sv ,
+                        "ath-thulāthāʼ."@ko ,
+                        "ath-thulāthāʼ."@de ,
+                        "ath-thulāthāʼ."@es ,
+                        "ath-thulāthāʼ."@fr .
+
+<#al-arbia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْأَرْبِعَاء"@ar ;
+    solid-memo:back "Wednesday"@en ,
+                    "onsdag"@sv ,
+                    "수요일"@ko ,
+                    "Mittwoch"@de ,
+                    "miércoles"@es ,
+                    "mercredi"@fr ;
+    solid-memo:backNote "al-arbiʻāʼ."@en ,
+                        "al-arbiʻāʼ."@sv ,
+                        "al-arbiʻāʼ."@ko ,
+                        "al-arbiʻāʼ."@de ,
+                        "al-arbiʻāʼ."@es ,
+                        "al-arbiʻāʼ."@fr .
+
+<#al-khamis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْخَمِيس"@ar ;
+    solid-memo:back "Thursday"@en ,
+                    "torsdag"@sv ,
+                    "목요일"@ko ,
+                    "Donnerstag"@de ,
+                    "jueves"@es ,
+                    "jeudi"@fr ;
+    solid-memo:backNote "al-khamīs."@en ,
+                        "al-khamīs."@sv ,
+                        "al-khamīs."@ko ,
+                        "al-khamīs."@de ,
+                        "al-khamīs."@es ,
+                        "al-khamīs."@fr .
+
+<#al-jumuah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْجُمُعَة"@ar ;
+    solid-memo:back "Friday"@en ,
+                    "fredag"@sv ,
+                    "금요일"@ko ,
+                    "Freitag"@de ,
+                    "viernes"@es ,
+                    "vendredi"@fr ;
+    solid-memo:backNote "al-jumuʻah. The weekly day off in many Arab countries."@en ,
+                        "al-jumuʻah. Den veckovisa lediga dagen i många arabiska länder."@sv ,
+                        "al-jumuʻah. 많은 아랍 국가에서 주간 휴일이에요."@ko ,
+                        "al-jumuʻah. In vielen arabischen Ländern der wöchentliche freie Tag."@de ,
+                        "al-jumuʻah. El día de descanso semanal en muchos países árabes."@es ,
+                        "al-jumuʻah. Le jour de repos hebdomadaire dans de nombreux pays arabes."@fr .
+
+<#as-sabt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "السَّبْت"@ar ;
+    solid-memo:back "Saturday"@en ,
+                    "lördag"@sv ,
+                    "토요일"@ko ,
+                    "Samstag"@de ,
+                    "sábado"@es ,
+                    "samedi"@fr ;
+    solid-memo:backNote "as-sabt."@en ,
+                        "as-sabt."@sv ,
+                        "as-sabt."@ko ,
+                        "as-sabt."@de ,
+                        "as-sabt."@es ,
+                        "as-sabt."@fr .
+
+<#al-yawm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْيَوْم"@ar ;
+    solid-memo:back "today"@en ,
+                    "i dag"@sv ,
+                    "오늘"@ko ,
+                    "heute"@de ,
+                    "hoy"@es ,
+                    "aujourd’hui"@fr ;
+    solid-memo:backNote "al-yawm. Also means “the day”."@en ,
+                        "al-yawm. Betyder också ”dagen”."@sv ,
+                        "al-yawm. ‘그날’이라는 뜻도 있어요."@ko ,
+                        "al-yawm. Bedeutet auch „der Tag“."@de ,
+                        "al-yawm. También significa «el día»."@es ,
+                        "al-yawm. Signifie aussi « le jour »."@fr .
+
+<#ghadan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "غَدًا"@ar ;
+    solid-memo:back "tomorrow"@en ,
+                    "i morgon"@sv ,
+                    "내일"@ko ,
+                    "morgen"@de ,
+                    "mañana"@es ,
+                    "demain"@fr ;
+    solid-memo:backNote "ghadan."@en ,
+                        "ghadan."@sv ,
+                        "ghadan."@ko ,
+                        "ghadan."@de ,
+                        "ghadan."@es ,
+                        "ghadan."@fr .
+
+<#ams>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَمْس"@ar ;
+    solid-memo:back "yesterday"@en ,
+                    "i går"@sv ,
+                    "어제"@ko ,
+                    "gestern"@de ,
+                    "ayer"@es ,
+                    "hier"@fr ;
+    solid-memo:backNote "ams."@en ,
+                        "ams."@sv ,
+                        "ams."@ko ,
+                        "ams."@de ,
+                        "ams."@es ,
+                        "ams."@fr .
+
+<#al-an>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْآن"@ar ;
+    solid-memo:back "now"@en ,
+                    "nu"@sv ,
+                    "지금"@ko ,
+                    "jetzt"@de ,
+                    "ahora"@es ,
+                    "maintenant"@fr ;
+    solid-memo:backNote "al-ān."@en ,
+                        "al-ān."@sv ,
+                        "al-ān."@ko ,
+                        "al-ān."@de ,
+                        "al-ān."@es ,
+                        "al-ān."@fr .
+
+<#lahiqan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "لَاحِقًا"@ar ;
+    solid-memo:back "later"@en ,
+                    "senare"@sv ,
+                    "나중에"@ko ,
+                    "später"@de ,
+                    "más tarde"@es ,
+                    "plus tard"@fr ;
+    solid-memo:backNote "lāḥiqan."@en ,
+                        "lāḥiqan."@sv ,
+                        "lāḥiqan."@ko ,
+                        "lāḥiqan."@de ,
+                        "lāḥiqan."@es ,
+                        "lāḥiqan."@fr .
+
+<#bada-qalil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "بَعْدَ قَلِيل"@ar ;
+    solid-memo:back "in a little while"@en ,
+                    "om en liten stund"@sv ,
+                    "조금 있다가"@ko ,
+                    "gleich"@de ,
+                    "dentro de un rato"@es ,
+                    "dans un instant"@fr ;
+    solid-memo:backNote "baʻda qalīl."@en ,
+                        "baʻda qalīl."@sv ,
+                        "baʻda qalīl."@ko ,
+                        "baʻda qalīl."@de ,
+                        "baʻda qalīl."@es ,
+                        "baʻda qalīl."@fr .
+
+<#al-laylah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "اللَّيْلَة"@ar ;
+    solid-memo:back "tonight"@en ,
+                    "i kväll"@sv ,
+                    "오늘 밤"@ko ,
+                    "heute Abend"@de ,
+                    "esta noche"@es ,
+                    "ce soir"@fr ;
+    solid-memo:backNote "al-laylah."@en ,
+                        "al-laylah."@sv ,
+                        "al-laylah."@ko ,
+                        "al-laylah."@de ,
+                        "al-laylah."@es ,
+                        "al-laylah."@fr .
+
+<#sabahan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "صَبَاحًا"@ar ;
+    solid-memo:back "in the morning"@en ,
+                    "på morgonen"@sv ,
+                    "아침에"@ko ,
+                    "morgens"@de ,
+                    "por la mañana"@es ,
+                    "le matin"@fr ;
+    solid-memo:backNote "ṣabāḥan."@en ,
+                        "ṣabāḥan."@sv ,
+                        "ṣabāḥan."@ko ,
+                        "ṣabāḥan."@de ,
+                        "ṣabāḥan."@es ,
+                        "ṣabāḥan."@fr .
+
+<#daiman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "دَائِمًا"@ar ;
+    solid-memo:back "always"@en ,
+                    "alltid"@sv ,
+                    "항상"@ko ,
+                    "immer"@de ,
+                    "siempre"@es ,
+                    "toujours"@fr ;
+    solid-memo:backNote "dāʼiman."@en ,
+                        "dāʼiman."@sv ,
+                        "dāʼiman."@ko ,
+                        "dāʼiman."@de ,
+                        "dāʼiman."@es ,
+                        "dāʼiman."@fr .
+
+<#abadan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "أَبَدًا"@ar ;
+    solid-memo:back "never"@en ,
+                    "aldrig"@sv ,
+                    "결코"@ko ,
+                    "nie"@de ,
+                    "nunca"@es ,
+                    "jamais"@fr ;
+    solid-memo:backNote "abadan. Used with a negative verb: لَا أَنْسَى أَبَدًا (I never forget). Alone it means “not at all!”."@en ,
+                        "abadan. Används med ett nekat verb: لَا أَنْسَى أَبَدًا (jag glömmer aldrig). Ensamt betyder det ”inte alls!”."@sv ,
+                        "abadan. 부정 동사와 함께 써요: لَا أَنْسَى أَبَدًا (절대 잊지 않아요). 단독으로는 ‘전혀요!’라는 뜻이에요."@ko ,
+                        "abadan. Mit einem verneinten Verb: لَا أَنْسَى أَبَدًا (ich vergesse nie). Allein heißt es „überhaupt nicht!“."@de ,
+                        "abadan. Con un verbo negado: لَا أَنْسَى أَبَدًا (nunca olvido). Solo, significa «¡en absoluto!»."@es ,
+                        "abadan. Avec un verbe nié : لَا أَنْسَى أَبَدًا (je n’oublie jamais). Seul, il signifie « pas du tout ! »."@fr .
+
+<#al-usbua-l-qadim>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْأُسْبُوعَ الْقَادِم"@ar ;
+    solid-memo:back "next week"@en ,
+                    "nästa vecka"@sv ,
+                    "다음 주"@ko ,
+                    "nächste Woche"@de ,
+                    "la semana que viene"@es ,
+                    "la semaine prochaine"@fr ;
+    solid-memo:backNote "al-usbūʻa l-qādim."@en ,
+                        "al-usbūʻa l-qādim."@sv ,
+                        "al-usbūʻa l-qādim."@ko ,
+                        "al-usbūʻa l-qādim."@de ,
+                        "al-usbūʻa l-qādim."@es ,
+                        "al-usbūʻa l-qādim."@fr .
+
+<#in-shaa-llah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "إِنْ شَاءَ اللّٰه"@ar ;
+    solid-memo:back "God willing"@en ,
+                    "om Gud vill"@sv ,
+                    "신의 뜻이라면 (인샬라)"@ko ,
+                    "so Gott will"@de ,
+                    "si Dios quiere"@es ,
+                    "si Dieu le veut"@fr ;
+    solid-memo:backNote "in shāʼa llāh. Said by speakers of any faith about plans and hopes, much like “hopefully”; context shows whether it is a yes or a polite maybe."@en ,
+                        "in shāʼa llāh. Sägs av talare oavsett tro om planer och förhoppningar, ungefär som ”förhoppningsvis”; sammanhanget visar om det är ett ja eller ett artigt kanske."@sv ,
+                        "in shāʼa llāh. 종교와 상관없이 계획이나 바람에 대해 ‘그러길 바라요’처럼 써요. 긍정인지 정중한 ‘글쎄요’인지는 맥락으로 알 수 있어요."@ko ,
+                        "in shāʼa llāh. Von Sprechern jeden Glaubens über Pläne und Hoffnungen gesagt, etwa wie „hoffentlich“; der Zusammenhang zeigt, ob es ein Ja oder ein höfliches Vielleicht ist."@de ,
+                        "in shāʼa llāh. Lo dicen hablantes de cualquier fe sobre planes y deseos, como «ojalá»; el contexto indica si es un sí o un «quizás» cortés."@es ,
+                        "in shāʼa llāh. Employé par des locuteurs de toutes confessions pour des projets ou des espoirs, comme « j’espère » ; le contexte dit si c’est un oui ou un peut-être poli."@fr .
+
+<#al-hamdu-lillah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْحَمْدُ لِلّٰه"@ar ;
+    solid-memo:back "thank God"@en ,
+                    "gudskelov"@sv ,
+                    "다행이에요 (신께 감사)"@ko ,
+                    "Gott sei Dank"@de ,
+                    "gracias a Dios"@es ,
+                    "Dieu merci"@fr ;
+    solid-memo:backNote "al-ḥamdu lillāh. A very common answer to كَيْفَ حَالُكَ؟, meaning “fine”, and an expression of relief."@en ,
+                        "al-ḥamdu lillāh. Ett mycket vanligt svar på كَيْفَ حَالُكَ؟ med betydelsen ”bra”, och ett uttryck för lättnad."@sv ,
+                        "al-ḥamdu lillāh. كَيْفَ حَالُكَ؟에 ‘잘 지내요’라는 뜻으로 아주 흔히 하는 대답이며, 안도의 표현이기도 해요."@ko ,
+                        "al-ḥamdu lillāh. Sehr häufige Antwort auf كَيْفَ حَالُكَ؟ im Sinne von „gut“, und ein Ausdruck der Erleichterung."@de ,
+                        "al-ḥamdu lillāh. Respuesta muy común a كَيْفَ حَالُكَ؟ con el sentido de «bien», y expresión de alivio."@es ,
+                        "al-ḥamdu lillāh. Réponse très courante à كَيْفَ حَالُكَ؟ au sens de « bien », et expression de soulagement."@fr .
+
+<#ma-shaa-llah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَا شَاءَ اللّٰه"@ar ;
+    solid-memo:back "how wonderful"@en ,
+                    "så fint"@sv ,
+                    "정말 멋져요"@ko ,
+                    "wie schön"@de ,
+                    "qué maravilla"@es ,
+                    "quelle merveille"@fr ;
+    solid-memo:backNote "mā shāʼa llāh. Literally “what God has willed”; said to admire or praise something, such as a child or a success."@en ,
+                        "mā shāʼa llāh. Ordagrant ”det Gud har velat”; sägs för att beundra eller berömma något, som ett barn eller en framgång."@sv ,
+                        "mā shāʼa llāh. 글자 그대로는 ‘신이 원하신 것’이며, 아이나 성공 등을 칭찬하거나 감탄할 때 써요."@ko ,
+                        "mā shāʼa llāh. Wörtlich „was Gott gewollt hat“; drückt Bewunderung oder Lob aus, etwa für ein Kind oder einen Erfolg."@de ,
+                        "mā shāʼa llāh. Literalmente «lo que Dios ha querido»; se dice para admirar o elogiar algo, como un niño o un éxito."@es ,
+                        "mā shāʼa llāh. Littéralement « ce que Dieu a voulu » ; pour admirer ou féliciter, par exemple un enfant ou une réussite."@fr .
+
+<#bismi-llah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "بِسْمِ اللّٰه"@ar ;
+    solid-memo:back "in the name of God"@en ,
+                    "i Guds namn"@sv ,
+                    "신의 이름으로"@ko ,
+                    "im Namen Gottes"@de ,
+                    "en el nombre de Dios"@es ,
+                    "au nom de Dieu"@fr ;
+    solid-memo:backNote "bismi llāh. Said when starting something, such as a meal, a trip or a task."@en ,
+                        "bismi llāh. Sägs när man börjar något, som en måltid, en resa eller en uppgift."@sv ,
+                        "bismi llāh. 식사, 여행, 일 등 무언가를 시작할 때 말해요."@ko ,
+                        "bismi llāh. Wird gesagt, wenn man etwas beginnt, etwa eine Mahlzeit, eine Reise oder eine Arbeit."@de ,
+                        "bismi llāh. Se dice al empezar algo, como una comida, un viaje o una tarea."@es ,
+                        "bismi llāh. Se dit en commençant quelque chose, comme un repas, un voyage ou une tâche."@fr .
+
+<#mabruk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَبْرُوك"@ar ;
+    solid-memo:back "congratulations"@en ,
+                    "grattis"@sv ,
+                    "축하해요"@ko ,
+                    "herzlichen Glückwunsch"@de ,
+                    "felicidades"@es ,
+                    "félicitations"@fr ;
+    solid-memo:backNote "mabrūk. The reply is اللّٰهُ يُبَارِكُ فِيكَ (to a woman فِيكِ)."@en ,
+                        "mabrūk. Svaret är اللّٰهُ يُبَارِكُ فِيكَ (till en kvinna فِيكِ)."@sv ,
+                        "mabrūk. 답은 اللّٰهُ يُبَارِكُ فِيكَ (여성에게는 فِيكِ)."@ko ,
+                        "mabrūk. Die Antwort ist اللّٰهُ يُبَارِكُ فِيكَ (zu einer Frau فِيكِ)."@de ,
+                        "mabrūk. Se responde اللّٰهُ يُبَارِكُ فِيكَ (a una mujer فِيكِ)."@es ,
+                        "mabrūk. On répond اللّٰهُ يُبَارِكُ فِيكَ (à une femme فِيكِ)."@fr .
+
+<#bi-t-tawfiq>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "بِالتَّوْفِيق"@ar ;
+    solid-memo:back "good luck"@en ,
+                    "lycka till"@sv ,
+                    "행운을 빌어요"@ko ,
+                    "viel Glück"@de ,
+                    "buena suerte"@es ,
+                    "bonne chance"@fr ;
+    solid-memo:backNote "bi-t-tawfīq."@en ,
+                        "bi-t-tawfīq."@sv ,
+                        "bi-t-tawfīq."@ko ,
+                        "bi-t-tawfīq."@de ,
+                        "bi-t-tawfīq."@es ,
+                        "bi-t-tawfīq."@fr .
+
+<#idun-said>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "عِيدٌ سَعِيد"@ar ;
+    solid-memo:back "happy holiday"@en ,
+                    "glad helg"@sv ,
+                    "즐거운 명절 보내세요"@ko ,
+                    "frohes Fest"@de ,
+                    "felices fiestas"@es ,
+                    "bonnes fêtes"@fr ;
+    solid-memo:backNote "ʻīdun saʻīd. Said on religious and national holidays alike."@en ,
+                        "ʻīdun saʻīd. Sägs på både religiösa och nationella högtider."@sv ,
+                        "ʻīdun saʻīd. 종교 명절과 국경일 모두에 써요."@ko ,
+                        "ʻīdun saʻīd. An religiösen wie an nationalen Feiertagen."@de ,
+                        "ʻīdun saʻīd. Se dice tanto en fiestas religiosas como nacionales."@es ,
+                        "ʻīdun saʻīd. Se dit aux fêtes religieuses comme nationales."@fr .
+
+<#kullu-amin-wa-anta-bi-khayr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "كُلُّ عَامٍ وَأَنْتَ بِخَيْر"@ar ;
+    solid-memo:back "many happy returns"@en ,
+                    "många lyckliga år"@sv ,
+                    "늘 건강하고 행복하세요"@ko ,
+                    "alles Gute (für jedes Jahr)"@de ,
+                    "que sea por muchos años"@es ,
+                    "tous mes vœux (pour chaque année)"@fr ;
+    solid-memo:backNote "kullu ʻāmin wa-anta bi-khayr. Said on birthdays and holidays. To a woman: وَأَنْتِ; to several people: وَأَنْتُمْ."@en ,
+                        "kullu ʻāmin wa-anta bi-khayr. Sägs på födelsedagar och högtider. Till en kvinna: وَأَنْتِ; till flera: وَأَنْتُمْ."@sv ,
+                        "kullu ʻāmin wa-anta bi-khayr. 생일과 명절에 써요. 여성에게는 وَأَنْتِ, 여러 사람에게는 وَأَنْتُمْ."@ko ,
+                        "kullu ʻāmin wa-anta bi-khayr. An Geburtstagen und Feiertagen. Zu einer Frau: وَأَنْتِ; zu mehreren: وَأَنْتُمْ."@de ,
+                        "kullu ʻāmin wa-anta bi-khayr. Se dice en cumpleaños y fiestas. A una mujer: وَأَنْتِ; a varias personas: وَأَنْتُمْ."@es ,
+                        "kullu ʻāmin wa-anta bi-khayr. Se dit aux anniversaires et aux fêtes. À une femme : وَأَنْتِ ; à plusieurs : وَأَنْتُمْ."@fr .
+
+<#bi-l-hanai-wa-sh-shifa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "بِالْهَنَاءِ وَالشِّفَاء"@ar ;
+    solid-memo:back "enjoy your meal"@en ,
+                    "smaklig måltid"@sv ,
+                    "맛있게 드세요"@ko ,
+                    "guten Appetit"@de ,
+                    "buen provecho"@es ,
+                    "bon appétit"@fr ;
+    solid-memo:backNote "bi-l-hanāʼi wa-sh-shifāʼ."@en ,
+                        "bi-l-hanāʼi wa-sh-shifāʼ."@sv ,
+                        "bi-l-hanāʼi wa-sh-shifāʼ."@ko ,
+                        "bi-l-hanāʼi wa-sh-shifāʼ."@de ,
+                        "bi-l-hanāʼi wa-sh-shifāʼ."@es ,
+                        "bi-l-hanāʼi wa-sh-shifāʼ."@fr .
+
+<#salamatuka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "سَلَامَتُكَ"@ar ;
+    solid-memo:back "get well soon"@en ,
+                    "krya på dig"@sv ,
+                    "빨리 나으세요"@ko ,
+                    "gute Besserung"@de ,
+                    "que te mejores"@es ,
+                    "bon rétablissement"@fr ;
+    solid-memo:backNote "salāmatuka. To a woman: سَلَامَتُكِ (salāmatuki)."@en ,
+                        "salāmatuka. Till en kvinna: سَلَامَتُكِ (salāmatuki)."@sv ,
+                        "salāmatuka. 여성에게는 سَلَامَتُكِ (salāmatuki)."@ko ,
+                        "salāmatuka. Zu einer Frau: سَلَامَتُكِ (salāmatuki)."@de ,
+                        "salāmatuka. A una mujer: سَلَامَتُكِ (salāmatuki)."@es ,
+                        "salāmatuka. À une femme : سَلَامَتُكِ (salāmatuki)."@fr .
+
+<#al-hamdu-lillahi-ala-s-salamah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "الْحَمْدُ لِلّٰهِ عَلَى السَّلَامَة"@ar ;
+    solid-memo:back "welcome back (safe and sound)"@en ,
+                    "välkommen tillbaka"@sv ,
+                    "무사히 돌아와서 다행이에요"@ko ,
+                    "schön, dass du heil zurück bist"@de ,
+                    "qué bueno que llegaste bien"@es ,
+                    "content que tu sois bien arrivé"@fr ;
+    solid-memo:backNote "al-ḥamdu lillāhi ʻalā s-salāmah. Said to someone back from a trip or recovered from an illness; the reply is اللّٰهُ يُسَلِّمُكَ."@en ,
+                        "al-ḥamdu lillāhi ʻalā s-salāmah. Sägs till någon som kommit hem från en resa eller blivit frisk; svaret är اللّٰهُ يُسَلِّمُكَ."@sv ,
+                        "al-ḥamdu lillāhi ʻalā s-salāmah. 여행에서 돌아왔거나 병이 나은 사람에게 해요. 답은 اللّٰهُ يُسَلِّمُكَ."@ko ,
+                        "al-ḥamdu lillāhi ʻalā s-salāmah. Zu jemandem, der von einer Reise zurück oder genesen ist; die Antwort ist اللّٰهُ يُسَلِّمُكَ."@de ,
+                        "al-ḥamdu lillāhi ʻalā s-salāmah. Se dice a quien vuelve de un viaje o se ha recuperado; se responde اللّٰهُ يُسَلِّمُكَ."@es ,
+                        "al-ḥamdu lillāhi ʻalā s-salāmah. Se dit à quelqu’un de retour de voyage ou guéri ; on répond اللّٰهُ يُسَلِّمُكَ."@fr .
+
+<#ya-salam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "يَا سَلَام"@ar ;
+    solid-memo:back "wow"@en ,
+                    "oj"@sv ,
+                    "와!"@ko ,
+                    "wow"@de ,
+                    "¡vaya!"@es ,
+                    "waouh"@fr ;
+    solid-memo:backNote "yā salām. An exclamation of surprise or admiration."@en ,
+                        "yā salām. Ett utrop av förvåning eller beundran."@sv ,
+                        "yā salām. 놀라움이나 감탄을 나타내는 말이에요."@ko ,
+                        "yā salām. Ein Ausruf des Staunens oder der Bewunderung."@de ,
+                        "yā salām. Una exclamación de sorpresa o admiración."@es ,
+                        "yā salām. Une exclamation de surprise ou d’admiration."@fr .
+
+<#maa-l-asaf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "مَعَ الْأَسَف"@ar ;
+    solid-memo:back "unfortunately"@en ,
+                    "tyvärr"@sv ,
+                    "유감스럽게도"@ko ,
+                    "leider"@de ,
+                    "lamentablemente"@es ,
+                    "malheureusement"@fr ;
+    solid-memo:backNote "maʻa l-asaf."@en ,
+                        "maʻa l-asaf."@sv ,
+                        "maʻa l-asaf."@ko ,
+                        "maʻa l-asaf."@de ,
+                        "maʻa l-asaf."@es ,
+                        "maʻa l-asaf."@fr .
+
+<#ala-fikrah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "عَلَى فِكْرَة"@ar ;
+    solid-memo:back "by the way"@en ,
+                    "förresten"@sv ,
+                    "그런데"@ko ,
+                    "übrigens"@de ,
+                    "por cierto"@es ,
+                    "au fait"@fr ;
+    solid-memo:backNote "ʻalā fikrah."@en ,
+                        "ʻalā fikrah."@sv ,
+                        "ʻalā fikrah."@ko ,
+                        "ʻalā fikrah."@de ,
+                        "ʻalā fikrah."@es ,
+                        "ʻalā fikrah."@fr .
+
+<#yani>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-14T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "يَعْنِي"@ar ;
+    solid-memo:back "I mean / that is"@en ,
+                    "alltså"@sv ,
+                    "그러니까"@ko ,
+                    "das heißt"@de ,
+                    "es decir"@es ,
+                    "c’est-à-dire"@fr ;
+    solid-memo:backNote "yaʻnī. Literally “it means”; also a very common filler word in speech."@en ,
+                        "yaʻnī. Ordagrant ”det betyder”; också ett mycket vanligt utfyllnadsord i tal."@sv ,
+                        "yaʻnī. 글자 그대로는 ‘그것은 뜻한다’이며, 말할 때 아주 흔한 군말이기도 해요."@ko ,
+                        "yaʻnī. Wörtlich „es bedeutet“; auch ein sehr häufiges Füllwort."@de ,
+                        "yaʻnī. Literalmente «significa»; también una muletilla muy común al hablar."@es ,
+                        "yaʻnī. Littéralement « cela signifie » ; aussi un mot de remplissage très courant à l’oral."@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
