@@ -84,7 +84,9 @@ export interface DeckTreeEditor {
  * says why; when none is waiting behind it, it is taken back from the
  * screen and the list is read afresh. While edits are waiting, a
  * finished one leaves the screen to show theirs, and the last of them
- * brings the list as the pod has it.
+ * brings the list as the pod has it, over any read of it still on its
+ * way (one begun as another screen of the arrangement opened, which the
+ * pod may have answered before the write).
  *
  * A deck is renamed and removed here as on its preferences screen
  * (DeckPreferencesContainer), in turn with the edits, since all of them
@@ -132,8 +134,11 @@ export function useDeckTreeEditor(
       }
       return { previous };
     },
-    onSuccess: (tree) => {
-      if (pending() === 1) queryClient.setQueryData(treeKey, tree);
+    onSuccess: async (tree) => {
+      if (pending() > 1) return;
+      // A read begun meanwhile, as another screen opened, may have been answered before this write.
+      await queryClient.cancelQueries({ queryKey: treeKey });
+      queryClient.setQueryData(treeKey, tree);
     },
     onError: (error, _edit, context) => {
       setFailure(error);
