@@ -619,11 +619,12 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
       [`${SM}ReviewState`, "instanceContainer", `${pod.source}reviews/`],
       [`${SM}Answer`, "instanceContainer", `${pod.source}history/`],
     ]) {
-      const registration = new RegExp(
-        `^(<[^>]+>) <http://www.w3.org/ns/solid/terms#forClass> <${forClass}> \\.$`,
-        "m",
-      );
-      const subject = registration.exec(indexAfter)?.[1];
+      // Found as text, not as a pattern, whose dots would take any character for those of the IRIs.
+      const registration = ` <http://www.w3.org/ns/solid/terms#forClass> <${forClass}> .`;
+      const subject = indexAfter
+        .split("\n")
+        .find((line) => line.startsWith("<") && line.endsWith(registration))
+        ?.slice(0, -registration.length);
       expect(subject, forClass).toBeDefined();
       expect(indexAfter).toContain(
         `${subject} <http://www.w3.org/ns/solid/terms#${predicate}> <${target}> .`,
