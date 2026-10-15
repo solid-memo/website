@@ -11,14 +11,18 @@ released version, never a commit between two versions
 ([releasing.md](releasing.md)). `.github/workflows/deploy.yml` runs when
 the CI workflow has finished on `main` (`workflow_run`), and deploys
 only if CI passed on a release commit, the one a version tag
-(`vX.Y.Z`) names:
+(`vX.Y.Z`) names, and only the newest version, once its GitHub release
+is made:
 
 ```mermaid
 flowchart LR
     push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods,<br/>journeys, docs"] -->|success| tag{"deploy.yml:<br/>a version tag<br/>names the commit?"}
     tag -->|no| skip["not deployed"]
-    tag -->|yes| build["deploy.yml:<br/>npm run build"] --> guard["ns/ and decks/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
-    hand["run by hand<br/>from main"] --> newest["deploy.yml:<br/>the newest version"] --> check["npm run check"] --> build
+    tag -->|yes| release{"the newest version,<br/>its release commit,<br/>its GitHub release?"}
+    release -->|no| skip
+    release -->|yes| build["deploy.yml:<br/>npm run build"] --> guard["ns/ and decks/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
+    hand["run by hand<br/>from main"] --> newest["deploy.yml:<br/>the newest version"] --> release
+    release -->|"yes, by hand"| check["npm run check"] --> build
 ```
 
 A red CI run never deploys, and neither does a green one on a commit
@@ -38,6 +42,21 @@ repository:
   pushed just after the release commit and is there long before CI on
   it has finished; for a release commit, the deploy still looks again
   for about two minutes before it gives up.
+- **Only the newest release.** A tag is not enough. The deploy also
+  checks that the tag is the newest version on `main` (the highest
+  `vX.Y.Z` tag), that the commit it names is that version's release
+  commit (`chore(release): X.Y.Z`), and that the version has a GitHub
+  release, which semantic-release makes seconds after the tag, so it
+  looks again for about a minute. A re-run of CI, or of the deploy, on
+  an older release commit then deploys nothing, and says so in a
+  notice: the site never goes back to an older version. When the
+  newest version's tag names another commit, or the version has no
+  GitHub release, the run fails and deploys nothing
+  ([releasing.md](releasing.md#when-a-release-fails)), so the site never
+  runs a version the releases page does not list. The deploy job looks
+  for the newest version again just before it deploys, so re-running
+  only the failed jobs of an older run cannot put that version back
+  either.
 - **Only this repository's pushes.** CI also runs on pull requests, a
   fork's included ([testing.md](testing.md#continuous-integration)),
   and a fork's branch may be named `main` too. So the deploy checks that
@@ -52,12 +71,17 @@ repository:
   deploy, by hand or after CI on a release commit, go one at a time
   (concurrency group `pages`), none canceled; a newer one replaces one
   waiting, and deploys the same version or a newer one. Any other run
-  has a group of its own, so it cannot replace a release's deploy.
+  has a group of its own, so it cannot replace a release's deploy. A
+  re-run of CI on an older release commit is the exception: nothing
+  tells it apart before it runs, so it may replace a newer release's
+  deploy waiting its turn, and then deploys nothing. If it did, run the
+  deploy by hand.
 - **By hand** (Actions › Deploy to GitHub Pages › Run workflow, from
   `main`; from any other branch the job is skipped). It deploys the
   newest version, the highest `vX.Y.Z` tag on `main`, not `main` as it
   is, so it puts the site back on that version, after a deploy that
-  failed, say.
+  failed, say. It checks that version as above: its release commit and
+  its GitHub release.
   No CI run is behind it, so it runs `npm run check` on that version
   before it builds it. It has no Turbo cache, so it takes about as long
   as CI's build job.
