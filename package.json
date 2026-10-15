@@ -41,6 +41,7 @@
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "check": "npm run lint && npm run lint:markdown && npm run lint:spelling && turbo run typecheck test test:roundtrip generate:check format:turtle:check library:check && npm run check:boundaries && npm run check:scripts && npm run check:docs && npm run check:dependencies && npm run check:reuse",
+    "check:breaking": "node -e \"import('./scripts/checkBreaking.ts').then((m) => m.run(process))\" --",
     "check:boundaries": "node -e \"import('./scripts/checkBoundaries.ts').then((m) => m.run(process))\"",
     "check:scripts": "tsc --noEmit -p scripts && vitest run --coverage --root scripts",
     "check:docs": "node -e \"import('./scripts/checkDocs.ts').then((m) => m.run(process))\"",

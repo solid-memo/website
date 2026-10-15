@@ -404,8 +404,8 @@ What holds today, and what does not, criterion by criterion.
   cross-check ([testing.md](testing.md)).
 - MUST, met — contributions pass all tests before they are merged.
   CI runs on every pull request, and `ci-ok` passes only when all its
-  jobs did: `build`, `library` (the deck library compared with the
-  change's base), `crosscheck`, `pod`, `contract`, `journeys` and `docs`.
+  jobs did: `build`, `library` (the deck library and the public API
+  compared with the change's base), `crosscheck`, `pod`, `contract`, `journeys` and `docs`.
   The ruleset requires `ci-ok`, on the pull request and again in the
   merge queue, on top of `main`, and no one can bypass it. The interop
   workflow's advisory servers report and do not gate, by design

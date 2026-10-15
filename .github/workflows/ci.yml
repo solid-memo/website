@@ -79,11 +79,14 @@ jobs:
         run: npm run coverage:summary
       - run: npm run build
 
-  # The deck library compared with the base of the change
+  # The change compared with its base. The deck library
   # (docs/deck-library.md#checks): no published version
   # (decks/<name>/v<N>.ttl) edited or removed, and every version new
-  # since then naming the library's contact and no email. It needs the
-  # whole history, which build does not, so it is a job of its own.
+  # since then naming the library's contact and no email. The public
+  # API (docs/releasing.md#how-ci-holds-to-it): no line of api/ gone
+  # unless a commit says the change breaks, and none of api/frozen/ at
+  # all. It needs the whole history, which build does not, so it is a
+  # job of its own.
   library:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -106,7 +109,8 @@ jobs:
       # push that created the default branch (all zeros), or one whose
       # earlier commit a force push left unfetched, compares with the
       # default branch.
-      - name: npm run library:check -- --base <base>
+      - name: Find the base
+        id: base
         env:
           EVENT: ${{ github.event_name }}
           REF: ${{ github.ref }}
@@ -122,8 +126,18 @@ jobs:
             git fetch --no-tags origin "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
             base="$(git merge-base HEAD "origin/$DEFAULT_BRANCH")"
           fi
-          echo "Comparing the library with $base"
-          npm run library:check -- --base "$base"
+          echo "Comparing with $base"
+          echo "sha=$base" >> "$GITHUB_OUTPUT"
+      - name: npm run library:check -- --base <base>
+        env:
+          BASE: ${{ steps.base.outputs.sha }}
+        run: npm run library:check -- --base "$BASE"
+      # After the library's check, whatever it found: the two are apart.
+      - name: npm run check:breaking -- --base <base>
+        if: success() || failure()
+        env:
+          BASE: ${{ steps.base.outputs.sha }}
+        run: npm run check:breaking -- --base "$BASE"
 
   # The vocabulary, the deck library and pod catalog documents, checked
   # again by an independent SHACL engine (pySHACL), SPARQL constraints

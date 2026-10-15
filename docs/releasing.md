@@ -115,6 +115,38 @@ breaking says so in its commit, with `!` and a `BREAKING CHANGE:` footer
 that tells users what to do, and it is agreed in an issue first
 ([CONTRIBUTING.md](../CONTRIBUTING.md#open-an-issue-first)).
 
+## How CI holds to it
+
+The public API is written down in [`api/`](../api/README.md), one
+promise a line: the formats the app writes and reads, where the data
+lives in a pod, the hashes, what the app keeps in the browser, what a
+copy of one's own relies on, and, in `api/frozen/`, the published
+documents and the vocabulary's terms. Each file is written by a test in
+the package whose code it reads, so a change to the code that changes a
+promise fails that test until the file is written again
+(`npm run test:unit -- <the test> -u`), in the same commit.
+
+`npm run check:breaking -- --base <git ref>`
+([checkBreaking.ts](../scripts/checkBreaking.ts)) compares these files
+with the ones at the change's base, where it left `<git ref>`. CI's
+`library` job runs it on every pull request, in the merge queue and on
+every push to `main`, so before any release ([testing.md](testing.md#continuous-integration)):
+
+- **A line gone** fails the check unless a commit since the base says
+  the change breaks (`!` and its footer), or says why it does not, in a
+  trailer: `Contract-Change: not-breaking <reason>`. Such a reason is
+  that the old line still holds: an old hash that still opens its
+  screen, a key whose old value is still read.
+- **A line of `api/frozen/` gone** fails the check, whatever the
+  commits say: a published address keeps answering, a published shape
+  is never edited, a term is never taken back.
+- **A commit that says it breaks** while no line went is noted, and
+  passes: removing a feature changes no file.
+
+A line added is a promise added, and needs nothing. What no file can
+hold is left to review: a feature removed, or a reader that keeps its
+format but reads less of it.
+
 ## What has versions of its own
 
 The app's version is one of several. The data that other apps and
