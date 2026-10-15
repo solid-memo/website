@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [1.2.0](https://github.com/solid-memo/website/compare/v1.1.0...v1.2.0) (2026-10-15)
+
+### Features
+
+* **studio:** edit a release's themes on the release screen ([f95c429](https://github.com/solid-memo/website/commit/f95c429d8076c25a0b3194f51ec0eb3906bcf489)), closes [#69](https://github.com/solid-memo/website/issues/69)
+* **studio:** group a release's themes, and nest narrower topics ([fb9501f](https://github.com/solid-memo/website/commit/fb9501fd36359e14589f0e43870daa98c9243229)), closes [#69](https://github.com/solid-memo/website/issues/69)
+
+### Bug Fixes
+
+* **domain:** start every new draft about education (EDUC) ([19617f4](https://github.com/solid-memo/website/commit/19617f428c5254792837f84385366137db2c331d)), closes [#69](https://github.com/solid-memo/website/issues/69)
+
 ## [1.1.0](https://github.com/solid-memo/website/compare/v1.0.1...v1.1.0) (2026-10-14)
 
 ### Features
