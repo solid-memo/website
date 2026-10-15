@@ -8,6 +8,13 @@ Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md).
 How decisions are made is in [GOVERNANCE.md](GOVERNANCE.md); what is
 planned is in [ROADMAP.md](ROADMAP.md).
 
+**Talk in writing, in public.** The project talks only in issues,
+Discussions, pull requests and their reviews, and commit messages. It
+has no chat and no calls, and something said elsewhere decides nothing
+until it is written up in one of them. Security and code of conduct
+reports are the only private exceptions
+([GOVERNANCE.md](GOVERNANCE.md#where-the-project-talks)).
+
 **Found a security issue?** Do not open an issue. Report it privately, as
 [SECURITY.md](SECURITY.md) says.
 

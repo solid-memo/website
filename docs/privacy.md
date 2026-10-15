@@ -129,4 +129,7 @@ personal email address.
 
 The maintainer's email address is also published, on purpose, in
 [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md#enforcement), as the private
-contact for code of conduct reports.
+contact for code of conduct reports. Mail to that address about
+anything else, such as a deck published with it, is answered with a
+pointer to the public channels
+([GOVERNANCE.md](../GOVERNANCE.md#where-the-project-talks)).

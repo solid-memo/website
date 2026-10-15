@@ -18,6 +18,15 @@ Say what is affected, how to reproduce it, and what an attacker could do
 with it. A proof of concept against your own pod is welcome; do not test
 against other people's pods or accounts.
 
+This private channel is one of the two exceptions to the project's rule
+that it talks only in public
+([GOVERNANCE.md](GOVERNANCE.md#where-the-project-talks)). The report is
+still handled in writing, in the private advisory, and is disclosed as
+[What happens next](#what-happens-next) says. A report that is not a
+vulnerability in scope is closed with its reason, and anything in a
+report that is not about a vulnerability, such as a feature idea, goes
+to the public channels.
+
 ## What happens next
 
 Solid Memo is maintained by one volunteer, in his own time
