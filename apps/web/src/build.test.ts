@@ -6,6 +6,7 @@
 
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
+import { type Document, Window } from "happy-dom";
 import { build, loadEnv, type Rolldown } from "vite";
 import { beforeAll, describe, expect, it } from "vitest";
 import { siteConfig, siteHtml, type SiteConfig } from "./config";
@@ -28,6 +29,9 @@ function builtConfig(): SiteConfig {
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
 let html: string;
+/** The page as a browser reads it, so no regex has to find its tags. */
+let dom: Document;
+const browser = new Window();
 
 beforeAll(async () => {
   // As `vite build` has it, not as the tests do: the production builds of
@@ -52,6 +56,7 @@ beforeAll(async () => {
     (item): item is Rolldown.OutputAsset => item.fileName === "index.html",
   )!;
   html = page.source as string;
+  dom = new browser.DOMParser().parseFromString(html, "text/html");
 }, 120_000);
 
 describe("the bundle", () => {
@@ -116,17 +121,25 @@ describe("the Studio", () => {
 
 describe("the page's Content Security Policy", () => {
   const policy = () => {
-    const meta = /<meta http-equiv="Content-Security-Policy"\s+content="([^"]*)"/.exec(html);
+    const meta = dom.querySelector('meta[http-equiv="Content-Security-Policy"]')!;
     return new Map(
-      meta![1]!.split(";").map((part) => {
-        const [name, ...values] = part.trim().split(/\s+/);
-        return [name!, values];
-      }),
+      meta
+        .getAttribute("content")!
+        .split(";")
+        .map((part) => {
+          const [name, ...values] = part.trim().split(/\s+/);
+          return [name!, values];
+        }),
     );
   };
 
   it("comes before any script, so it covers them all", () => {
-    expect(html.indexOf("Content-Security-Policy")).toBeLessThan(html.indexOf("<script"));
+    const meta = dom.querySelector('meta[http-equiv="Content-Security-Policy"]')!;
+    expect(dom.scripts.length).toBeGreaterThan(0);
+    for (const script of dom.scripts)
+      expect(
+        meta.compareDocumentPosition(script) & browser.Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
   });
 
   it("lets the site's own scripts run, and each inline one by its hash", () => {
@@ -134,16 +147,14 @@ describe("the page's Content Security Policy", () => {
     expect(allowed).toContain("'self'");
     // Every script without a src runs inline, whatever its attributes, but data
     // (a JSON-LD block) is never run.
-    const inline = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)]
-      .filter(
-        ([, attributes]) =>
-          !/\bsrc=/.test(attributes!) && !/\btype="application\/ld\+json"/.test(attributes!),
-      )
-      .map(([, , code]) => `'sha256-${createHash("sha256").update(code!).digest("base64")}'`);
+    const scripts = [...dom.scripts];
+    const inline = scripts
+      .filter((script) => !script.hasAttribute("src") && script.type !== "application/ld+json")
+      .map((script) => `'sha256-${createHash("sha256").update(script.text).digest("base64")}'`);
     expect(inline).toHaveLength(1);
     expect(allowed.filter((source) => source.startsWith("'sha256-"))).toEqual(inline);
-    for (const [, src] of html.matchAll(/<script\b[^>]*\bsrc="([^"]*)"/g))
-      expect(src).toMatch(/^\.\/assets\//);
+    for (const script of scripts.filter((script) => script.hasAttribute("src")))
+      expect(script.getAttribute("src")).toMatch(/^\.\/assets\//);
   });
 
   it("allows no plugins, no base element and no form posts", () => {
@@ -156,9 +167,9 @@ describe("the page's Content Security Policy", () => {
 describe("the page's structured data", () => {
   type Node = Record<string, unknown>;
   const graph = () => {
-    const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+    const blocks = dom.querySelectorAll('script[type="application/ld+json"]');
     expect(blocks).toHaveLength(1);
-    return (JSON.parse(blocks[0]![1]!) as { "@graph": Node[] })["@graph"];
+    return (JSON.parse(blocks[0]!.textContent) as { "@graph": Node[] })["@graph"];
   };
   const nodeOfType = (type: string) => graph().find((node) => node["@type"] === type)!;
 
@@ -189,7 +200,7 @@ describe("the page's name", () => {
     );
     expect(html).toContain(`<meta property="og:site_name" content="${inHtml}" />`);
     expect(html).toContain(`<meta property="og:title" content="${inHtml}" />`);
-    const jsonLd = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)![1]!;
+    const jsonLd = dom.querySelector('script[type="application/ld+json"]')!.textContent;
     const graph = (JSON.parse(jsonLd) as { "@graph": Record<string, unknown>[] })["@graph"];
     expect(graph.map((node) => node.name)).toEqual([appName, appName]);
   });
