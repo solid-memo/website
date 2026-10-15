@@ -30,13 +30,20 @@ function urlOf(value: string, protocols: string[]): URL | null {
     : null;
 }
 
-/** The VITE_ variables the site reads, as Vite gives them: unset, or a string. */
-export interface SiteEnv {
-  readonly VITE_APP_NAME?: string;
-  readonly VITE_REPO_URL?: string;
-  readonly VITE_POD_PROVIDERS?: string;
-  readonly VITE_LIBRARY_INDEX_URL?: string;
-}
+/**
+ * The VITE_ variables the site reads (docs/configuration.md), named at
+ * run time too, so that a test can hold them to the public API
+ * (scripts/selfHosting.api.test.ts).
+ */
+export const SITE_ENV = [
+  "VITE_APP_NAME",
+  "VITE_REPO_URL",
+  "VITE_POD_PROVIDERS",
+  "VITE_LIBRARY_INDEX_URL",
+] as const;
+
+/** Those variables as Vite gives them: unset, or a string. */
+export type SiteEnv = { readonly [name in (typeof SITE_ENV)[number]]?: string };
 
 /** The site's settings, read from its SiteEnv. */
 export interface SiteConfig {

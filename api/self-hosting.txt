@@ -1,0 +1,8 @@
+VITE_APP_NAME: a setting the build reads
+VITE_LIBRARY_INDEX_URL: a setting the build reads
+VITE_POD_PROVIDERS: a setting the build reads
+VITE_REPO_URL: a setting the build reads
+build: asset URLs are relative, so any folder can serve it
+build: the site is built into apps/web/dist/
+npm run build: builds the site
+npm start: builds the site and serves it
