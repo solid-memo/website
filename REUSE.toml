@@ -38,6 +38,9 @@ path = [
     # Written by tools (.gitattributes).
     "packages/vocab/src/*.generated.ts",
     "packages/shacl/node/deckLibrary.golden.txt",
+    # The public API, one promise a line, each file written by a test
+    # (api/README.md).
+    "api/**/*.txt",
     # The deck library's index, written by `npm run library`.
     "decks/index.ttl",
 ]

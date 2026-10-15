@@ -22,7 +22,8 @@
       ],
       "inputs": [
         "$TURBO_DEFAULT$",
-        "$TURBO_ROOT$/vitest.shared.ts"
+        "$TURBO_ROOT$/vitest.shared.ts",
+        "$TURBO_ROOT$/api/**"
       ],
       "dependsOn": [
         "transit"
