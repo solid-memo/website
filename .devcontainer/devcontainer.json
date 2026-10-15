@@ -1,9 +1,10 @@
 {
   "name": "Solid Memo",
-  // Node 24, as CI runs (.nvmrc) and engines asks for; Renovate keeps the
-  // image up to date within that major (renovate.json5). Turbo is the root devDependency, run through npm's
-  // scripts or npx.
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:24-bookworm",
+  // The image's own version, then Node's: Node 24, as CI runs (.nvmrc) and
+  // engines asks for. The digest fixes the image; Renovate keeps it up to
+  // date on Node 24 (renovate.json5). Turbo is the root devDependency, run
+  // through npm's scripts or npx.
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:5.2.3-24-bookworm@sha256:970eebf5b82d3800bdd9f46680e1c4c664d365d18603148540788356700ce301",
 
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},

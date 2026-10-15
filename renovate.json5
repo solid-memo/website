@@ -95,10 +95,13 @@
             allowedVersions: '<25',
         },
         // The dev container's image keeps to Node 24, as .nvmrc and CI do.
+        // Its tags put the image's own version first and Node's after it
+        // (5.2.3-24-bookworm), so the rule matches the tag's end: a range
+        // such as '<25' matches none of them.
         {
             matchFileNames: ['.devcontainer/devcontainer.json'],
             matchDepNames: ['mcr.microsoft.com/devcontainers/typescript-node'],
-            allowedVersions: '<25',
+            allowedVersions: '/-24-bookworm$/',
         },
         // Pivot's image keeps to Node 22, which Pivot's own CI runs.
         {
@@ -113,7 +116,9 @@
             matchDepNames: ['nextcloud'],
             allowedVersions: '<33',
         },
-        // The JavaScript Solid Server's image keeps to Node 24.
+        // The JavaScript Solid Server's image keeps to Node 24. Its tag names
+        // the Alpine release too (alpine3.24), and Renovate keeps to it: the
+        // move to the next Alpine release is a person's change.
         {
             matchFileNames: ['e2e/pod/servers/jss/Dockerfile'],
             matchDepNames: ['node'],
