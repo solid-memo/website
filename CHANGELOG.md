@@ -21,6 +21,18 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [2.0.0](https://github.com/solid-memo/website/compare/v1.2.0...v2.0.0) (2026-10-15)
+
+### ⚠ BREAKING CHANGES
+
+* **releasing:** of the app. One rule, with no judgment of what an older
+reader loses, can be checked, and every shape edited in place so far was
+edited before 1.0.0.
+
+### Documentation
+
+* **releasing:** declare the public API that the version promises ([4e18c22](https://github.com/solid-memo/website/commit/4e18c227f36dc4f33d37c8b3a29d0e38b21d5af7)), closes [#72](https://github.com/solid-memo/website/issues/72)
+
 ## [1.2.0](https://github.com/solid-memo/website/compare/v1.1.0...v1.2.0) (2026-10-15)
 
 ### Features
