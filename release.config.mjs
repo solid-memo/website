@@ -59,6 +59,21 @@ export const assets = [
   "CITATION.cff",
 ];
 
+/**
+ * How the commit analyzer and the release-notes generator find a
+ * breaking change's footer: `BREAKING CHANGE:` or `BREAKING-CHANGE:` at
+ * the start of a line, in capitals and with its colon, as commitlint
+ * asks for it and `npm run check:breaking` reads it (saysBreaking in
+ * scripts/checkBreaking.ts). The parser's own pattern ignores case and
+ * needs no colon, so a line of a body that began "breaking change of the
+ * app" released 2.0.0, which breaks nothing (#84). `!` after the type
+ * is read by the preset, as before.
+ */
+export const parserOpts = {
+  noteKeywords: ["BREAKING CHANGE", "BREAKING-CHANGE"],
+  notesPattern: (keywords) => new RegExp(`^(${keywords}):\\s*(.*)`),
+};
+
 export default {
   branches: ["main"],
   tagFormat: "v${version}",
@@ -70,9 +85,13 @@ export default {
     // rule makes a revert: commit without it release too.
     [
       "@semantic-release/commit-analyzer",
-      { preset: "conventionalcommits", releaseRules: [{ type: "revert", release: "patch" }] },
+      {
+        preset: "conventionalcommits",
+        parserOpts,
+        releaseRules: [{ type: "revert", release: "patch" }],
+      },
     ],
-    ["@semantic-release/release-notes-generator", { preset: "conventionalcommits" }],
+    ["@semantic-release/release-notes-generator", { preset: "conventionalcommits", parserOpts }],
     ["@semantic-release/changelog", { changelogFile: "CHANGELOG.md", changelogTitle }],
     // The root package.json's version, and package-lock.json's: the
     // footer reads it (packages/vocab/tooling/siteBuild.ts). The
