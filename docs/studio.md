@@ -1430,19 +1430,19 @@ A new draft starts from
 
 - **a blank deck or a blank course**, by its name in a language the
   user states: version 1 of a series of its own, with its Turtle
-  distribution, a course studied front to back and about education
-  (the data theme EDUC, which the release check asks of a course);
+  distribution, about education (the data theme EDUC, which the
+  release check asks of every release), a course studied front to back;
 - **a deck of the instance** (`deckToDraft` in
-  [deckToDraft.ts](../packages/domain/src/release/deckToDraft.ts)): what
-  a release says and the deck does too, every card under its id, its
-  retired ones and wrong options with it, its authors the release's
-  agents, the first its publisher. What is the learner's own is left
-  behind: where its documents are, its study caps, its place among the
-  groups, a course's progress. A deck copied from a release names it
-  (`prov:wasDerivedFrom`), which is no source of the new release: the
-  screen says the deck is based on it, and offers to start the next
-  version of that release instead, which keeps what its learners
-  studied;
+  [deckToDraft.ts](../packages/domain/src/release/deckToDraft.ts)):
+  what a release says and the deck does too, every card under its id,
+  its retired ones and wrong options with it, its authors the
+  release's agents, the first its publisher, its themes and EDUC. What
+  is the learner's own is left behind: where its documents are, its
+  study caps, its place among the groups, a course's progress. A deck
+  copied from a release names it (`prov:wasDerivedFrom`), which is no
+  source of the new release: the screen says the deck is based on it,
+  and offers to start the next version of that release instead, which
+  keeps what its learners studied;
 - **the next version of a release**, by its address, in the library or
   in a pod (`nextVersionDraft` in
   [releaseVersion.ts](../packages/domain/src/release/releaseVersion.ts)):
@@ -1781,11 +1781,13 @@ problems under its question.
 Not every problem can be fixed in the Studio yet:
 
 - No screen has a field yet for the version, the series (`inSeries`,
-  `isVersionOf`), the distribution or the theme EDUC. A problem about
-  one of them links to the overview. A problem about the release's
-  license, publisher, languages, version notes or authors, a source, an
-  agent or an activity links to the
-  [release screen](#the-releases-metadata-and-provenance), at its part.
+  `isVersionOf`), the distribution or the theme EDUC. A blank draft
+  and a deck's have them all, so only a draft of a release that lacks
+  one does. A problem about one of them links to the overview. A
+  problem about the release's license, publisher, languages, version
+  notes or authors, a source, an agent or an activity links to the
+  [release screen](#the-releases-metadata-and-provenance), at its
+  part.
 - The library policy places the draft at `decks/<draft name>/v<N>.ttl`
   and reports each link that differs from that place. A draft that
   follows a release in a pod links to that release, its series and its

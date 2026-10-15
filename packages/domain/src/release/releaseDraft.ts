@@ -110,9 +110,9 @@ export const SERIES_ID = "series";
 /**
  * A blank draft at `url`: a deck, or a course (studied front to back),
  * titled as given, version 1 of a series of its own (`#series`), with
- * its Turtle distribution (`#turtle`); nothing published before it. A
- * course is about education (the EU's data theme EDUC), as every
- * course release says it is (courseRules.ts). Ids
+ * its Turtle distribution (`#turtle`); nothing published before it,
+ * and about education (the EU's data theme EDUC), as every release,
+ * a deck's or a course's, says it is (courseRules.ts). Ids
  * the draft will give other subjects (`taken`) are left to them: the
  * series and distribution are then `#series-2`, `#turtle-2`, …
  */
@@ -146,7 +146,7 @@ export function blankDraft({
       created: now,
       creator: [],
       studyDirection: SM.frontToBack as DraftDeckV1["studyDirection"],
-      theme: course ? [EDUCATION_THEME] : [],
+      theme: [EDUCATION_THEME],
       keyword: {},
       language: [],
       version: "1",
