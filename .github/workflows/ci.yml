@@ -73,11 +73,11 @@ jobs:
       # Biome's formatting and lint rules (docs/style.md), markdownlint's
       # and cspell's (docs/testing.md#documentation); then every
       # package: typecheck, tests at 100% coverage, generated code and
-      # Turtle formatting in step with their sources, and the deck library
-      # (the library job also compares it with the base); then the
+      # Turtle formatting in step with their sources; then the
       # boundaries, the docs' index and the shipped dependencies' maturity
-      # (docs/testing.md).
-      - run: npm run check
+      # (docs/testing.md). npm run check without the deck library, which
+      # the library job checks, and compares with the base.
+      - run: npm run check:ci
         env:
           TURBO_CACHE_MAX_AGE: 14d
       # Each package's coverage, in the run's summary; the thresholds that
