@@ -8,8 +8,9 @@ import { useI18n } from "./i18n";
 /** Which code the site runs, and where it is: what the footer names and links to. */
 export interface SiteSource {
   /**
-   * The repository's web page, without a trailing slash. Its commits and
-   * its issue forms are found under it, at the paths GitHub gives them.
+   * The repository's web page, without a trailing slash. Its commits, its
+   * changelog and its issue forms are found under it, at the paths GitHub
+   * gives them.
    */
   repoUrl: string;
   /** The site's version (the root package.json's). */
@@ -20,7 +21,7 @@ export interface SiteSource {
 
 /**
  * Site-wide attribution, the build's version, and the way to the source
- * code and the issue tracker, shown under every screen.
+ * code, the changelog and the issue tracker, shown under every screen.
  */
 export function Footer({ source: { repoUrl, version, commitSha } }: { source: SiteSource }) {
   const { t, tx } = useI18n();
@@ -45,6 +46,9 @@ export function Footer({ source: { repoUrl, version, commitSha } }: { source: Si
       </p>
       <p class="footer-links">
         <ExternalLink url={repoUrl}>{t("footer.sourceCode")}</ExternalLink>
+        <ExternalLink url={`${repoUrl}/blob/main/CHANGELOG.md`}>
+          {t("footer.changelog")}
+        </ExternalLink>
         <ExternalLink url={`${repoUrl}/issues/new/choose`}>{t("footer.reportIssue")}</ExternalLink>
       </p>
     </footer>

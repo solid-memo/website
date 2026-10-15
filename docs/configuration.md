@@ -125,11 +125,12 @@ The footer links:
 |---|---|
 | Source code | `<url>` |
 | The build's commit, beside the version | `<url>/commit/<sha>` |
+| Changelog | `<url>/blob/main/CHANGELOG.md` |
 | Report an issue | `<url>/issues/new/choose` |
 
 These are GitHub's paths, which Gitea and Forgejo (Codeberg) share.
-On GitLab, whose paths start with `/-/`, the commit and issue links do
-not resolve.
+On GitLab, whose paths start with `/-/`, the commit, changelog and
+issue links do not resolve.
 
 The page links to the repository too, as vite.config.ts fills in
 [index.html](../apps/web/index.html): the JSON-LD's `sameAs` and
