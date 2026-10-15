@@ -351,9 +351,43 @@
   margin: 0.15rem 0 0.5rem;
 }
 
-/* A release's themes (ReleaseMetadataScreen.tsx), laid out as the library's topics: its hint on a line of its own. */
-:where(:root[data-surface="studio"]) .library-topics > .hint {
-  width: 100%;
+/*
+ * A release's themes (ReleaseMetadataScreen.tsx): its groups, unframed
+ * in its frame; the topics wrap as the library's do, each narrower one
+ * on a line under its broader one, indented.
+ */
+:where(:root[data-surface="studio"]) .release-themes fieldset {
+  border: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+:where(:root[data-surface="studio"]) .release-themes ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(:root[data-surface="studio"]) .release-themes li:has(> ul) {
+  flex-basis: 100%;
+}
+
+:where(:root[data-surface="studio"]) .release-themes li > ul {
+  padding-inline-start: 1.5rem;
+}
+
+:where(:root[data-surface="studio"]) .release-themes label.checkbox-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* A checkbox keeps its size when its label wraps. */
+:where(:root[data-surface="studio"]) .release-themes label.checkbox-option input {
+  flex-shrink: 0;
 }
 
 /* A course draft's outline (DraftOutline.tsx): the deck list's

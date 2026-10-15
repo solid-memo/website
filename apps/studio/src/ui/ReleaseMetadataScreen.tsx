@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { EU_LANGUAGES, TOPICS, type ReferenceConcept } from "@solid-memo/vocab/concepts.generated";
 import { EDUCATION_THEME } from "@solid-memo/domain/dcat";
@@ -222,10 +223,11 @@ function Languages({
 }
 
 /**
- * What the release is about (dcat:theme): the EU's data theme EDUC,
- * which the release check asks of every release, Solid Memo's topics,
- * each named in the reader's language, and any other theme the release
- * states, by its IRI, to keep or leave out.
+ * What the release is about (dcat:theme), in groups: the EU's data
+ * theme EDUC, which the release check asks of every release; Solid
+ * Memo's topics, optional, each named in the reader's language and
+ * each narrower one under its broader one; and any other theme the
+ * release states, by its IRI, to keep or leave out.
  */
 function Themes({
   draft,
@@ -239,16 +241,7 @@ function Themes({
   const { t } = useI18n();
   const chosen = draft.root.theme;
   const known = new Set([EDUCATION_THEME, ...TOPICS.concepts.map((concept) => concept.iri)]);
-  const options = [
-    { iri: EDUCATION_THEME, name: t("studio.release.themeEducation") },
-    ...TOPICS.concepts.map((concept) => ({
-      iri: concept.iri,
-      name: <ReaderText text={concept.label} />,
-    })),
-    ...chosen
-      .filter((iri) => !known.has(iri))
-      .map((iri) => ({ iri, name: t("studio.release.themeOther", { iri }) })),
-  ];
+  const others = chosen.filter((iri) => !known.has(iri));
   const toggle = (iri: string, on: boolean) =>
     onEdit([
       {
@@ -256,20 +249,49 @@ function Themes({
         meta: { theme: on ? [...chosen, iri] : chosen.filter((one) => one !== iri) },
       },
     ]);
+  const option = (iri: string, name: ComponentChildren) => (
+    <label class="checkbox-option">
+      <input
+        type="checkbox"
+        checked={chosen.includes(iri)}
+        onChange={(event) => toggle(iri, event.currentTarget.checked)}
+      />{" "}
+      {name}
+    </label>
+  );
+  const topics = (broader: string | undefined): ComponentChildren => (
+    <ul>
+      {TOPICS.concepts
+        .filter((concept) => ("broader" in concept ? concept.broader : undefined) === broader)
+        .map((concept) => (
+          <li key={concept.iri}>
+            {option(concept.iri, <ReaderText text={concept.label} />)}
+            {TOPICS.concepts.some((one) => "broader" in one && one.broader === concept.iri) &&
+              topics(concept.iri)}
+          </li>
+        ))}
+    </ul>
+  );
   return (
-    <fieldset class="library-topics" data-arrival={arrival || undefined} tabIndex={-1}>
+    <fieldset class="release-themes" data-arrival={arrival || undefined} tabIndex={-1}>
       <legend>{t("studio.release.themes")}</legend>
       <p class="hint">{t("studio.release.themesHint")}</p>
-      {options.map((option) => (
-        <label key={option.iri} class="checkbox-option">
-          <input
-            type="checkbox"
-            checked={chosen.includes(option.iri)}
-            onChange={(event) => toggle(option.iri, event.currentTarget.checked)}
-          />{" "}
-          {option.name}
-        </label>
-      ))}
+      <fieldset>
+        <legend>{t("studio.release.themesRequired")}</legend>
+        {option(EDUCATION_THEME, t("studio.release.themeEducation"))}
+      </fieldset>
+      <fieldset>
+        <legend>{t("studio.release.themesTopics")}</legend>
+        {topics(undefined)}
+      </fieldset>
+      {others.length > 0 && (
+        <fieldset>
+          <legend>{t("studio.release.themesOther")}</legend>
+          {others.map((iri) => (
+            <div key={iri}>{option(iri, iri)}</div>
+          ))}
+        </fieldset>
+      )}
     </fieldset>
   );
 }

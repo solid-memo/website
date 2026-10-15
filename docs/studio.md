@@ -1950,19 +1950,20 @@ library's releases are written
   (`dcat:theme`), the license and the publisher. The languages are
   those of the EU's table that the reference data describes
   (`EU_LANGUAGES`, generated from
-  [external.ttl](../ns/vocab/external.ttl): [vocab.md](vocab.md)), each
-  named in the reader's language. One the release states outside the
-  table is shown by its IRI, to keep or leave out. The themes are the
-  EU's data theme EDUC, which the release check asks of every release,
-  and Solid Memo's topics (`TOPICS`, from
-  [topics.ttl](../ns/vocab/topics.ttl)), each named in the reader's
-  language; one the release states outside them is shown by its IRI,
-  to keep or leave out. The license is one of
-  `KNOWN_LICENSES` ([license.ts](../packages/domain/src/license.ts)), or
-  the one it has. `setLicense` types it `dcterms:LicenseDocument`, as
-  DCAT-AP asks; the license it replaces loses that type, unless a source
-  still names it. The publisher is one of the release's agents, or the
-  one it names elsewhere.
+  [external.ttl](../ns/vocab/external.ttl): [vocab.md](vocab.md)),
+  each named in the reader's language. One the release states outside
+  the table is shown by its IRI, to keep or leave out. The themes are
+  in groups: the EU's data theme EDUC, which the release check asks of
+  every release; Solid Memo's topics (`TOPICS`, from
+  [topics.ttl](../ns/vocab/topics.ttl)), optional, each named in the
+  reader's language and each narrower one under its broader one; and
+  any other the release states, by its IRI, to keep or leave out. The
+  license is one of `KNOWN_LICENSES`
+  ([license.ts](../packages/domain/src/license.ts)), or the one it
+  has. `setLicense` types it `dcterms:LicenseDocument`, as DCAT-AP
+  asks; the license it replaces loses that type, unless a source still
+  names it. The publisher is one of the release's agents, or the one
+  it names elsewhere.
 - **Authors**: the release's own agents (`foaf:Agent`, `#<name>`), its
   `dcterms:creator`s, each with a name and an optional email
   ([releaseMetadata.ts](../packages/domain/src/release/releaseMetadata.ts)).
