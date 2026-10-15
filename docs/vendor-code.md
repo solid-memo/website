@@ -25,14 +25,17 @@ walks `package-lock.json` from `apps/web`). Development tools, which
 are not shipped, are not checked.
 
 The walk counts every run-time dependency, whether or not the bundle
-keeps it. These versions before 1.0.0 are allowed, each for a reason:
+keeps it. These versions before 1.0.0 are allowed, each for a reason.
+Shipping a stable app on them is a decided gap
+([decision 14](standard-for-public-code.md#decisions-made)): Solid Memo
+is stable within an ecosystem that is not yet at 1.0.
 
 | Package | Version | Why it is allowed |
 |---|---|---|
-| `rdf-validate-shacl` | 0.6 | The SHACL engine for RDF/JS, maintained by Zazuko, released as 0.x for years. It is loaded lazily, and only `packages/shacl/src/engine.ts` and `packages/shacl/node/shacl.ts` touch it, behind the `ShapeEngine` interface, so a change in it costs those two files (below). |
-| `rdf-validate-datatype` | 0.2 | `rdf-validate-shacl`'s check of literals against their datatypes, by the same maintainers, and replaced with it. |
+| `rdf-validate-shacl` | 0.6 | The SHACL engine the app uses, maintained by Zazuko. Its 0.x minor is its major: 0.2 to 0.6 each broke something, which the `^` range keeps out. The risk is slow upkeep, one maintainer and releases far apart ([zazuko/rdf-validate-shacl#171](https://github.com/zazuko/rdf-validate-shacl/issues/171)), and the `ShapeEngine` interface and the shacl tests contain it: it is loaded lazily, and only `packages/shacl/src/engine.ts` and `packages/shacl/node/shacl.ts` touch it, so a change in it costs those two files (below). [`shacl-engine`](https://www.npmjs.com/package/shacl-engine) 1.x exists, but brings in packages before 1.0.0 of its own (`rdf-validation` 0.1, `process` 0.11) and a SPARQL engine the app does not need. |
+| `rdf-validate-datatype` | 0.2 | `rdf-validate-shacl`'s check of literals against their datatypes, by the same maintainers, and replaced with it. Like it, it breaks only in a 0.x minor (0.2.0, to ESM), which `^` keeps out; its exports have not changed since 2020, and the risk is slow upkeep ([zazuko/rdf-validate-datatype#30](https://github.com/zazuko/rdf-validate-datatype/issues/30)). |
 | `@inrupt/solid-client-errors` | 0.0 | Inrupt's error classes, a part of `@inrupt/solid-client` 4 that Inrupt releases with it. The app never imports it. |
-| `process` | 0.11 | A browser stand-in for Node's `process`, which `readable-stream` asks for (through `n3` and the JSON-LD parser). Finished and unchanged for years. |
+| `process` | 0.11 | A browser stand-in for Node's `process`, which `readable-stream` asks for (through `n3` and the JSON-LD parser). Final at 0.11 by its maintainer's choice, who turned down a 1.0.0 ([defunctzombie/node-process#82](https://github.com/defunctzombie/node-process/issues/82)); unchanged since 2017. |
 
 One shipped dependency is released but follows no published standard:
 `micromark-extension-cjk-friendly` (2.x) reads emphasis next to Chinese,

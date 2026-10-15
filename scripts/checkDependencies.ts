@@ -41,10 +41,11 @@ export const SHIPPED = ["apps/web"];
 /** The unready versions the app may ship, and why (docs/vendor-code.md#maturity). */
 export const ALLOWED: Record<string, string> = {
   "rdf-validate-shacl":
-    "The only SHACL engine for RDF/JS; maintained by Zazuko, behind the ShapeEngine interface.",
+    "The SHACL engine the app uses, maintained by Zazuko, behind the ShapeEngine interface; shacl-engine 1.x brings in 0.x packages of its own.",
   "rdf-validate-datatype": "rdf-validate-shacl's check of literals, by the same maintainers.",
   "@inrupt/solid-client-errors": "Part of @inrupt/solid-client 4, released with it by Inrupt.",
-  process: "The browser's stand-in for Node's process, which readable-stream asks for.",
+  process:
+    "The browser's stand-in for Node's process, which readable-stream asks for; final at 0.11.",
 };
 
 /** A version before 1.0.0, or one with a prerelease tag. */
