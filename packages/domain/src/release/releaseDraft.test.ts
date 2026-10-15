@@ -69,7 +69,7 @@ describe("a blank draft", () => {
       isVersionOf: of("series"),
       distribution: [of("turtle")],
       studyDirection: SM.frontToBack,
-      // A course is about education, as a course release says.
+      // About education, as every release says.
       theme: ["http://publications.europa.eu/resource/authority/data-theme/EDUC"],
     });
     expect(draft.distributions).toEqual([{ id: "turtle", data: turtleDistribution(DRAFT) }]);
@@ -86,7 +86,10 @@ describe("a blank draft", () => {
       taken: ["turtle", "series", "series-2"],
     });
     expect(draft.root.title).toBeUndefined();
-    expect(draft.root.theme).toEqual([]);
+    // A deck is about education too: the release check asks it of every release.
+    expect(draft.root.theme).toEqual([
+      "http://publications.europa.eu/resource/authority/data-theme/EDUC",
+    ]);
     expect(draft.root.inSeries).toBe(of("series-3"));
     expect(draft.distributions[0]!.id).toBe("turtle-2");
   });

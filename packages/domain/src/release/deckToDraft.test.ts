@@ -63,7 +63,10 @@ describe("deckToDraft", () => {
       publisher: `${DRAFT}#agent-alice-alice-example-org`,
       license: "https://creativecommons.org/publicdomain/zero/1.0/",
       studyDirection: SM.bidirectional,
-      theme: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"],
+      theme: [
+        "https://solid-memo.com/ns/vocab/topics.ttl#geography",
+        "http://publications.europa.eu/resource/authority/data-theme/EDUC",
+      ],
       keyword: { en: ["capitals"] },
       language: [],
       version: "1",
@@ -118,6 +121,12 @@ describe("deckToDraft", () => {
     ]);
   });
 
+  it("states EDUC once for a deck that states it already", () => {
+    const educ = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
+    const { draft } = deckToDraft({ ...deck, themes: [educ] }, [], DRAFT, NOW);
+    expect(draft.root.theme).toEqual([educ]);
+  });
+
   it("names no publisher, nothing a deck does not state, and nothing it is based on, for a deck of the user's own", () => {
     const own: Deck = {
       ...deck,
@@ -135,7 +144,7 @@ describe("deckToDraft", () => {
     expect(result.draft.root).not.toHaveProperty("description");
     expect(result.draft.root).toMatchObject({
       creator: [],
-      theme: [],
+      theme: ["http://publications.europa.eu/resource/authority/data-theme/EDUC"],
       keyword: {},
       studyDirection: SM.frontToBack,
     });

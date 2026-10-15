@@ -2,8 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
-import { EU_LANGUAGES, type ReferenceConcept } from "@solid-memo/vocab/concepts.generated";
+import { EU_LANGUAGES, TOPICS, type ReferenceConcept } from "@solid-memo/vocab/concepts.generated";
+import { EDUCATION_THEME } from "@solid-memo/domain/dcat";
 import type { ReleaseField } from "@solid-memo/domain/release/releaseCheck";
 import {
   attributionOf,
@@ -13,6 +15,7 @@ import {
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
 import { useI18n, type I18n } from "@solid-memo/ui/i18n";
+import { ReaderText } from "@solid-memo/ui/ReaderText";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import { DraftScope, DraftStatus, DraftTextField } from "./DraftParts";
 import { LicenseSelect } from "./LicenseSelect";
@@ -29,10 +32,10 @@ export interface ReleaseLinks {
 /**
  * What a draft's release says of itself beyond its listing, how it was
  * made and from what (docs/studio.md, The release's metadata and
- * provenance): its version notes, languages, license and publisher, its
- * authors, the attribution of its making ("Compiled by …", with or
- * without "with the help of AI") and the notes on it, its sources, and
- * the checks it had, by machine or AI. Nothing here records that anyone
+ * provenance): its version notes, languages, themes, license and
+ * publisher, its authors, the attribution of its making ("Compiled by
+ * …", with or without "with the help of AI") and the notes on it, its
+ * sources, and the checks it had, by machine or AI. Nothing here records that anyone
  * reviewed the release. A draft released is shown, frozen. Opened at a
  * part (`field`, from the release check), that part is where the user
  * arrives.
@@ -71,6 +74,7 @@ export function ReleaseMetadataScreen({
           <h3 id="release-about-heading">{t("studio.release.about")}</h3>
           <VersionNotes draft={draft} arrival={field === "versionNotes"} onEdit={onEdit} />
           <Languages draft={draft} arrival={field === "languages"} onEdit={onEdit} />
+          <Themes draft={draft} arrival={field === "themes"} onEdit={onEdit} />
           <div data-arrival={field === "license" || undefined} tabIndex={-1}>
             <LicenseSelect
               id="release-license"
@@ -214,6 +218,80 @@ function Languages({
           {option.name}
         </label>
       ))}
+    </fieldset>
+  );
+}
+
+/**
+ * What the release is about (dcat:theme), in groups: the EU's data
+ * theme EDUC, which the release check asks of every release; Solid
+ * Memo's topics, optional, each named in the reader's language and
+ * each narrower one under its broader one; and any other theme the
+ * release states, by its IRI, to keep or leave out.
+ */
+function Themes({
+  draft,
+  arrival,
+  onEdit,
+}: {
+  draft: ReleaseDraft;
+  arrival: boolean;
+  onEdit: DraftEditor["edit"];
+}) {
+  const { t } = useI18n();
+  const chosen = draft.root.theme;
+  const known = new Set([EDUCATION_THEME, ...TOPICS.concepts.map((concept) => concept.iri)]);
+  const others = chosen.filter((iri) => !known.has(iri));
+  const toggle = (iri: string, on: boolean) =>
+    onEdit([
+      {
+        kind: "setMeta",
+        meta: { theme: on ? [...chosen, iri] : chosen.filter((one) => one !== iri) },
+      },
+    ]);
+  const option = (iri: string, name: ComponentChildren) => (
+    <label class="checkbox-option">
+      <input
+        type="checkbox"
+        checked={chosen.includes(iri)}
+        onChange={(event) => toggle(iri, event.currentTarget.checked)}
+      />{" "}
+      {name}
+    </label>
+  );
+  const topics = (broader: string | undefined): ComponentChildren => (
+    <ul>
+      {TOPICS.concepts
+        .filter((concept) => ("broader" in concept ? concept.broader : undefined) === broader)
+        .map((concept) => (
+          <li key={concept.iri}>
+            {option(concept.iri, <ReaderText text={concept.label} />)}
+            {TOPICS.concepts.some((one) => "broader" in one && one.broader === concept.iri) &&
+              topics(concept.iri)}
+          </li>
+        ))}
+    </ul>
+  );
+  return (
+    <fieldset class="release-themes" data-arrival={arrival || undefined} tabIndex={-1}>
+      <legend>{t("studio.release.themes")}</legend>
+      <p class="hint">{t("studio.release.themesHint")}</p>
+      <fieldset>
+        <legend>{t("studio.release.themesRequired")}</legend>
+        {option(EDUCATION_THEME, t("studio.release.themeEducation"))}
+      </fieldset>
+      <fieldset>
+        <legend>{t("studio.release.themesTopics")}</legend>
+        {topics(undefined)}
+      </fieldset>
+      {others.length > 0 && (
+        <fieldset>
+          <legend>{t("studio.release.themesOther")}</legend>
+          {others.map((iri) => (
+            <div key={iri}>{option(iri, iri)}</div>
+          ))}
+        </fieldset>
+      )}
     </fieldset>
   );
 }

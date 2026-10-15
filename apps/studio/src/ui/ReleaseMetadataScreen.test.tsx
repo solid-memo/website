@@ -21,6 +21,8 @@ const links = { draftsHref: "#/drafts", healthHref: "#/health" };
 const ENG = "http://publications.europa.eu/resource/authority/language/ENG";
 const SWE = "http://publications.europa.eu/resource/authority/language/SWE";
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
+const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
+const GEOGRAPHY = "https://solid-memo.com/ns/vocab/topics.ttl#geography";
 const PROV = "http://www.w3.org/ns/prov#";
 const at = (id: string) => `${DRAFT_URL}#${id}`;
 const plain = (value: string) => ({
@@ -116,6 +118,49 @@ describe("ReleaseMetadataScreen", () => {
       }),
     );
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setMeta", meta: { language: [SWE] } }]);
+  });
+
+  it("states the release's themes: EDUC, Solid Memo's topics, and one outside them to leave out", () => {
+    const draft = with_(authoredDraft(), {
+      kind: "setMeta",
+      meta: { theme: ["https://other.example/theme"] },
+    });
+    const onEdit = renderScreen(draft);
+    const themes = screen.getByRole("group", { name: "Themes" });
+    const required = within(themes).getByRole("group", { name: "The EU's data theme (required)" });
+    const education = within(required).getByRole("checkbox", {
+      name: "Education, culture and sport (EDUC)",
+    });
+    expect(education).not.toBeChecked();
+    fireEvent.click(education);
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "setMeta", meta: { theme: ["https://other.example/theme", EDUC] } },
+    ]);
+    const topics = within(themes).getByRole("group", { name: "Solid Memo's topics (optional)" });
+    fireEvent.click(within(topics).getByRole("checkbox", { name: "Geography" }));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "setMeta", meta: { theme: ["https://other.example/theme", GEOGRAPHY] } },
+    ]);
+    const others = within(themes).getByRole("group", { name: "Other themes the release states" });
+    const other = within(others).getByRole("checkbox", { name: "https://other.example/theme" });
+    expect(other).toBeChecked();
+    fireEvent.click(other);
+    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setMeta", meta: { theme: [] } }]);
+  });
+
+  it("lists a narrower topic under its broader one, and no other themes when there are none", () => {
+    renderScreen(authoredDraft());
+    const themes = screen.getByRole("group", { name: "Themes" });
+    expect(
+      within(themes).getByRole("checkbox", { name: "Education, culture and sport (EDUC)" }),
+    ).toBeChecked();
+    const languages = within(themes).getByRole("checkbox", { name: "Languages" }).closest("li")!;
+    expect(within(languages).getByRole("checkbox", { name: "Swedish" })).toBeInTheDocument();
+    const geography = within(themes).getByRole("checkbox", { name: "Geography" }).closest("li")!;
+    expect(within(geography).getAllByRole("checkbox")).toHaveLength(1);
+    expect(
+      within(themes).queryByRole("group", { name: "Other themes the release states" }),
+    ).toBeNull();
   });
 
   it("names an EU language in the reader's language, else by the table's label", () => {
@@ -718,6 +763,9 @@ describe("ReleaseMetadataScreen, held", () => {
       "data-arrival",
       "true",
     );
+    cleanup();
+    renderScreen(authoredDraft(), { field: "themes" });
+    expect(screen.getByRole("group", { name: "Themes" })).toHaveAttribute("data-arrival", "true");
     cleanup();
     renderScreen(authoredDraft(), { field: "license" });
     expect(screen.getByRole("combobox", { name: "License" }).parentElement).toHaveAttribute(

@@ -21,7 +21,7 @@ import {
   PROV,
   type ReleaseDraft,
 } from "./releaseDraft.ts";
-import { DCTERMS_NS, type ReleaseModel } from "./releaseModel.ts";
+import { DCAT_NS, DCTERMS_NS, type ReleaseModel } from "./releaseModel.ts";
 import { moved } from "./releaseToDraft.ts";
 
 /**
@@ -232,6 +232,7 @@ export type StepField = "theory" | "questions";
 export type ReleaseField =
   | "versionNotes"
   | "languages"
+  | "themes"
   | "license"
   | "publisher"
   | "authors"
@@ -242,6 +243,7 @@ export type ReleaseField =
 export const RELEASE_FIELDS: readonly ReleaseField[] = [
   "versionNotes",
   "languages",
+  "themes",
   "license",
   "publisher",
   "authors",
@@ -266,6 +268,7 @@ const CARD_FIELDS: Readonly<Record<string, CardTextPart>> = {
 const RELEASE_SCREEN_FIELDS: Readonly<Record<string, ReleaseField>> = {
   "http://www.w3.org/ns/adms#versionNotes": "versionNotes",
   [`${DCTERMS_NS}language`]: "languages",
+  [`${DCAT_NS}theme`]: "themes",
   [`${DCTERMS_NS}license`]: "license",
   [`${DCTERMS_NS}publisher`]: "publisher",
   [`${DCTERMS_NS}creator`]: "authors",

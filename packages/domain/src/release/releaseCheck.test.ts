@@ -310,7 +310,8 @@ describe("problemTarget", () => {
       screen: "draft",
       field: "outline",
     });
-    expect(target(DRAFT, { field: `${DCAT}theme`, code: "missingTheme" })).toEqual({
+    // The version has no field of its own yet.
+    expect(target(DRAFT, { field: `${DCAT}version`, code: "required" })).toEqual({
       screen: "draft",
     });
     expect(target(of("series"))).toEqual({ screen: "draft" });
@@ -337,6 +338,10 @@ describe("problemTarget", () => {
     expect(target(DRAFT, { field: `${DCTERMS}language` })).toEqual({
       screen: "release",
       field: "languages",
+    });
+    expect(target(DRAFT, { field: `${DCAT}theme`, code: "missingTheme" })).toEqual({
+      screen: "release",
+      field: "themes",
     });
     expect(target(DRAFT, { field: "http://www.w3.org/ns/adms#versionNotes" })).toEqual({
       screen: "release",

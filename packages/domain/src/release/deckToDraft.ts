@@ -36,7 +36,7 @@ const DIRECTIONS: Record<DeckDirection, DraftDeckV1["studyDirection"]> = {
  *   creators; the first of them its publisher.
  * - **Like a new release** it is version 1 of a series of its own, with
  *   its Turtle distribution (blankDraft), made `now`, nothing published
- *   before it.
+ *   before it, and about education (EDUC) besides its own themes.
  */
 export function deckToDraft(
   deck: Deck,
@@ -67,7 +67,7 @@ export function deckToDraft(
       ...(creators.length === 0 ? {} : { publisher: creators[0] }),
       creator: creators,
       studyDirection: DIRECTIONS[deck.direction],
-      theme: deck.themes ?? [],
+      theme: [...new Set([...(deck.themes ?? []), ...blank.root.theme])],
       keyword: stated(deck.keywords ?? {}),
     },
     agents: [...agents].map(([iri, data]) => ({ id: fragment(iri), data })),
