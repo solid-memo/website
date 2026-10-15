@@ -439,11 +439,13 @@ published one, so that rule does not run. `npm run check` runs
 reads (`ns/`, `decks/`, its packages' code) changes. CI's `library`
 job ([ci.yml](../.github/workflows/ci.yml),
 [testing.md](testing.md#continuous-integration)) passes a base, on pull
-requests and on pushes to the default branch, not on other branches'
-pushes, so a pull request's commits are checked once; `ci-ok` waits for
-it like every other job. On a push to the default branch it passes the commit
-the push moved it from; on a pull request, the commit where the change
-left the default branch, so an edit to a published version is caught
+requests, in the merge queue and on pushes to the default branch, not on
+other branches' pushes, so a pull request's commits are checked once per
+push; `ci-ok` waits for it like every other job. On a push to the default
+branch it passes the commit the push moved it from; in the merge queue,
+the commit of the default branch the queue built on
+([testing.md](testing.md#the-merge-queue)); on a pull request, the
+commit where the change left the default branch, so an edit to a published version is caught
 before it is merged, while a version not merged yet can still be fixed.
 A branch with no pull request is not compared; open one, or check it
 locally before pushing:

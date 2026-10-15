@@ -162,7 +162,8 @@ deleted once pushed. A mistake is fixed in the next version.
 
 ## The deploy key
 
-The ruleset on `main` requires a pull request for every change, so
+The ruleset on `main` requires a pull request for every change, merged
+through the merge queue ([testing.md](testing.md#the-merge-queue)), so
 semantic-release needs a way past it to push the release commit. The
 workflow's own token could be let past it too, but a push made with
 that token starts no workflow, so CI and the deploy would never run on

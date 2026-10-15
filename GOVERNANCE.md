@@ -83,7 +83,9 @@ public channels, and the maintainer decides when they cannot agree.
 
 ## Merging
 
-- Every change reaches `main` through a pull request that passes CI.
+- Every change reaches `main` through a pull request that passes CI,
+  on its own and again in the merge queue, on top of `main`
+  ([docs/testing.md](docs/testing.md#the-merge-queue)).
 - A pull request is reviewed by a maintainer who did not write it
   ([CONTRIBUTING.md](CONTRIBUTING.md#review)).
 - A contribution that is declined or closed always gets a written
@@ -103,7 +105,8 @@ pull requests too ([Dependency updates](#dependency-updates)).
 
 [Renovate](https://docs.renovatebot.com/) proposes dependency updates
 ([renovate.json5](renovate.json5)). Each update is a pull request, and
-Renovate merges it on its own only when CI passes, with no person
+Renovate adds it to the merge queue on its own, which merges it only
+when CI passes, with no person
 reviewing it, so its updates are unreviewed changes too. A few updates
 wait for a person, as `renovate.json5` says why. Renovate cannot approve
 its own pull requests: once `main` requires an approving review, a
