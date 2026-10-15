@@ -1,0 +1,143 @@
+sm:Answer: class
+sm:AnswerModes: scheme
+sm:Card: class
+sm:Chapter: class
+sm:Deck: class
+sm:DeckGroup: class
+sm:DeckSchedule: class
+sm:Distractor: class
+sm:DocumentReceipt: class
+sm:Instance: class
+sm:InvalidDataPolicies: scheme
+sm:Preferences: class
+sm:ReviewState: class
+sm:Schedulers: scheme
+sm:Step: class
+sm:StudyDirections: scheme
+sm:TextFormats: scheme
+sm:Themes: scheme
+sm:answerMode: property, range skos:Concept, domain sm:Answer
+sm:answerScale: property, range xsd:string, domain sm:Preferences
+sm:answeredAt: property, range xsd:dateTime, domain sm:Answer
+sm:answeredCard: property, range sm:Card, domain sm:Answer
+sm:answeredDeck: property, range sm:Deck, domain sm:Answer
+sm:answeredDirection: property, range skos:Concept, domain sm:Answer
+sm:answeredOn: property, range xsd:string, domain sm:Answer
+sm:back: property, range xsd:string, domain sm:Card
+sm:backImage: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:Card
+sm:backImageDescription: property, range xsd:string, domain sm:Card
+sm:backLabel: property, range xsd:string, domain sm:Card
+sm:backNote: property, range xsd:string, domain sm:Card
+sm:backToFront: concept
+sm:bidirectional: concept
+sm:blockInstance: concept
+sm:blockSubject: concept
+sm:cardCount: property, range xsd:integer, domain sm:Deck
+sm:cardsDocument: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:Deck
+sm:cardsVersion: property, range xsd:string, domain sm:DeckSchedule
+sm:checkedBy: property, range sm:Card, domain sm:Step
+sm:chosenDistractor: property, range sm:Distractor, domain sm:Answer
+sm:completedChapter: property, range sm:Chapter, domain sm:Deck
+sm:conformedTo: property, range xsd:string, domain sm:DocumentReceipt
+sm:darkTheme: concept
+sm:dayBoundaryHour: property, range xsd:integer, domain sm:Preferences
+sm:deckMaxReviewsPerDay: property, range xsd:integer, domain sm:Deck
+sm:deckNewCardsPerDay: property, range xsd:integer, domain sm:Deck
+sm:developerMode: property, range xsd:boolean, domain sm:Preferences
+sm:direction: property, range xsd:string, domain sm:Deck
+sm:distractor: property, range sm:Distractor, domain sm:Card
+sm:distractorNote: property, range xsd:string, domain sm:Distractor
+sm:distractorText: property, range xsd:string, domain sm:Distractor
+sm:documentVersion: property, range xsd:string, domain sm:DocumentReceipt
+sm:due: property, range xsd:string, domain sm:ReviewState
+sm:dueOnDay: property, range xsd:string, domain sm:DeckSchedule
+sm:easeFactor: property, range xsd:decimal, domain sm:ReviewState
+sm:firstReviewedAt: property, range xsd:dateTime, domain sm:ReviewState
+sm:formatVersion: property, range xsd:integer
+sm:front: property, range xsd:string, domain sm:Card
+sm:frontImage: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:Card
+sm:frontImageDescription: property, range xsd:string, domain sm:Card
+sm:frontNote: property, range xsd:string, domain sm:Card
+sm:frontToBack: concept
+sm:grade: property, range xsd:integer, domain sm:Answer
+sm:gradeMillis: property, range xsd:integer, domain sm:Answer
+sm:intervalDays: property, range xsd:integer, domain sm:ReviewState
+sm:introducedOnDayCount: property, range xsd:integer, domain sm:DeckSchedule
+sm:invalidDataPolicy: property, range skos:Concept, domain sm:Preferences
+sm:lastReviewedAt: property, range xsd:dateTime, domain sm:ReviewState
+sm:latestFormat: property, range xsd:boolean, domain sm:DocumentReceipt
+sm:lightTheme: concept
+sm:markdown: concept
+sm:maxReviewsPerDay: property, range xsd:integer, domain sm:Preferences
+sm:multipleChoice: concept
+sm:newCardsPerDay: property, range xsd:integer, domain sm:Preferences
+sm:newcomerCourse: property, range http://www.w3.org/ns/dcat#DatasetSeries, domain http://www.w3.org/ns/dcat#Catalog
+sm:nextIntervalDays: property, range xsd:integer, domain sm:Answer
+sm:plainText: concept
+sm:position: property, range xsd:integer
+sm:previousDue: property, range xsd:string, domain sm:ReviewState
+sm:previousEaseFactor: property, range xsd:decimal, domain sm:ReviewState
+sm:previousIntervalDays: property, range xsd:integer, domain sm:ReviewState
+sm:previousLastReviewedAt: property, range xsd:dateTime, domain sm:ReviewState
+sm:previousRepetitions: property, range xsd:integer, domain sm:ReviewState
+sm:priorDue: property, range xsd:string, domain sm:Answer
+sm:priorIntervalDays: property, range xsd:integer, domain sm:Answer
+sm:publishedRelease: property, range http://www.w3.org/ns/dcat#Dataset, domain http://www.w3.org/ns/dcat#Catalog
+sm:recall: concept
+sm:recallMillis: property, range xsd:integer, domain sm:Answer
+sm:receiptOf: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:DocumentReceipt
+sm:releaseDraft: property, range sm:Deck, domain http://www.w3.org/ns/dcat#Catalog
+sm:releasedAs: property, range http://www.w3.org/ns/dcat#Dataset, domain sm:Deck
+sm:repetitions: property, range xsd:integer, domain sm:ReviewState
+sm:reviewDirection: property, range skos:Concept, domain sm:ReviewState
+sm:reviewOf: property, range sm:Card, domain sm:ReviewState
+sm:reviewQuestion: property, range sm:Card, domain sm:Chapter
+sm:reviewedOnDayCount: property, range xsd:integer, domain sm:DeckSchedule
+sm:reviewsDocument: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:Deck
+sm:reviewsVersion: property, range xsd:string, domain sm:DeckSchedule
+sm:scheduleOf: property, range sm:Deck, domain sm:DeckSchedule
+sm:scheduledDayBoundaryHour: property, range xsd:integer, domain sm:DeckSchedule
+sm:scheduledDirection: property, range skos:Concept, domain sm:DeckSchedule
+sm:scheduledOn: property, range xsd:string, domain sm:DeckSchedule
+sm:scheduler: property, range skos:Concept, domain sm:ReviewState
+sm:sm2: concept
+sm:studyDirection: property, range skos:Concept, domain sm:Deck
+sm:systemTheme: concept
+sm:textFormat: property, range skos:Concept
+sm:theme: property, range skos:Concept, domain sm:Preferences
+sm:theory: property, range xsd:string, domain sm:Step
+sm:unreviewedCount: property, range xsd:integer, domain sm:DeckSchedule
+sm:utcOffsetMinutes: property, range xsd:integer, domain sm:Answer
+sm:warnOnly: concept
+topics:arabic: topic
+topics:art: topic
+topics:astronomy: topic
+topics:biology: topic
+topics:chemistry: topic
+topics:computing: topic
+topics:economics: topic
+topics:english: topic
+topics:film: topic
+topics:finnish: topic
+topics:french: topic
+topics:geography: topic
+topics:german: topic
+topics:greek: topic
+topics:history: topic
+topics:italian: topic
+topics:japanese: topic
+topics:korean: topic
+topics:labour-market: topic
+topics:languages: topic
+topics:latin: topic
+topics:linked-data: topic
+topics:literature: topic
+topics:mathematics: topic
+topics:music: topic
+topics:mythology: topic
+topics:physics: topic
+topics:portuguese: topic
+topics:science: topic
+topics:spanish: topic
+topics:sports: topic
+topics:swedish: topic
