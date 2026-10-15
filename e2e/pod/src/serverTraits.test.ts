@@ -103,6 +103,30 @@ describe("storageOf", () => {
     await expect(storageOf(`${SERVER}pod/run/doc.ttl`)).resolves.toBe(`${SERVER}pod/`);
   });
 
+  it("reads pim:Storage among the container's other types", async () => {
+    serve((_, url) =>
+      ok(
+        url === `${SERVER}pod/`
+          ? {
+              link: `<http://www.w3.org/ns/ldp#Container>; rel="type", <http://www.w3.org/ns/pim/space#Storage>; rel="type"`,
+            }
+          : {},
+      ),
+    );
+    await expect(storageOf(`${SERVER}pod/run/doc.ttl`)).resolves.toBe(`${SERVER}pod/`);
+  });
+
+  it("takes no type that only looks like pim:Storage", async () => {
+    serve((_, url) =>
+      ok(
+        url === `${SERVER}pod/`
+          ? { link: `<http://wwwXw3.org/ns/pim/space#Storage>; rel="type"` }
+          : {},
+      ),
+    );
+    await expect(storageOf(`${SERVER}pod/run/doc.ttl`)).resolves.toBe(SERVER);
+  });
+
   it("is the origin's root when none says so", async () => {
     serve(() => ok());
     await expect(storageOf(`${SERVER}pod/run/doc.ttl`)).resolves.toBe(SERVER);

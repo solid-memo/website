@@ -164,8 +164,8 @@ export async function aclOf(url: string): Promise<string> {
 export async function storageOf(url: string): Promise<string> {
   for (let container = new URL("./", url); ; container = new URL("../", container)) {
     const link = (await fetch(container, { method: "HEAD" })).headers.get("link") ?? "";
-    if (new RegExp(`<${PIM_STORAGE}>;\\s*rel="type"`).test(link) || container.pathname === "/")
-      return container.href;
+    const types = [...link.matchAll(/<([^>]+)>;\s*rel="type"/g)].map(([, type]) => type);
+    if (types.includes(PIM_STORAGE) || container.pathname === "/") return container.href;
   }
 }
 
