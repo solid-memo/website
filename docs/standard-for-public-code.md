@@ -285,7 +285,8 @@ What holds today, and what does not, criterion by criterion.
 - MUST, partial — commit messages link to issues and discussions.
   CONTRIBUTING.md asks for a `Closes: #NN` footer, and CI's `commits` job
   checks with commitlint that every commit of a pull request names an
-  issue, a pull request or a discussion by its number. Renovate's
+  issue, a pull request or a discussion by its number, and that the
+  pull request closes its issue (`npm run check:closes`). Renovate's
   updates, which cannot name their pull request, carry the `Why:` line
   of their `commitBody` instead, and their merge commit names the pull
   request. The merge queue merges every pull request with a merge

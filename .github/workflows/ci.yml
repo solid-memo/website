@@ -370,9 +370,20 @@ jobs:
   # merge queue nor a push to main is linted: their commits were linted
   # in their pull request, and the release commit is written by
   # semantic-release.
+  #
+  # The pull request closes its issue (CONTRIBUTING.md#commit-messages):
+  # its body or a commit has `Closes: #NN` (or Fixes, Resolves), or the
+  # body has `Refs: #NN` and the template's "One step" box checked.
+  # GitHub closes an issue on merge for nothing else. The body is read
+  # from the API when the step runs, not from the event, so editing it
+  # and running the job again is enough. Renovate's pull requests have
+  # no issue, and are left out, as commitlint leaves out their commits.
   commits:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - if: github.event_name != 'pull_request'
         run: echo "Only a pull request's commits are linted; this run is for a ${{ github.event_name }}."
@@ -405,6 +416,18 @@ jobs:
             echo "::error::These merge commits are not linted: $merges. Update the branch by rebasing it on main instead (git rebase origin/main)."
             exit 1
           fi
+      - if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'renovate[bot]' && (success() || failure())
+        name: npm run check:closes -- --base <base> --head <head> --body-file <body>
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          body="$RUNNER_TEMP/body.md"
+          gh api "repos/$REPO/pulls/$NUMBER" --jq '.body // ""' > "$body"
+          npm run check:closes -- --base "$BASE" --head "$HEAD" --body-file "$body"
 
   # The one check a merge to main waits for (the ruleset on main is to
   # require it): it passes only when every job above passed. A matrix
