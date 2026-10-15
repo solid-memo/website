@@ -45,7 +45,7 @@ export type RecentLanguageKind = "deck" | "own";
 /** How many recent languages are kept of each kind. */
 export const RECENT_LANGUAGES = 5;
 
-const recentKey = (kind: RecentLanguageKind) => `solid-memo:recentLanguages.${kind}`;
+export const recentKey = (kind: RecentLanguageKind) => `solid-memo:recentLanguages.${kind}`;
 
 /**
  * The languages last chosen for text of `kind` on this device, the
@@ -84,7 +84,7 @@ export function rememberLanguage(
   }
 }
 
-const collapsedKey = (instanceUrl: string) => `solid-memo:collapsedGroups.${instanceUrl}`;
+export const collapsedKey = (instanceUrl: string) => `solid-memo:collapsedGroups.${instanceUrl}`;
 
 /**
  * The deck groups of an instance the user folded shut on this device,

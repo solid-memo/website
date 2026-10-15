@@ -1,0 +1,13 @@
+localStorage: solid-memo:studioInstances.v1, by instance URL, field pinned
+localStorage: solid-memo:studioInstances.v1, by instance URL, field recent
+localStorage: solid-memo:studioInstances.v1, by instance URL, field views
+localStorage: solid-memo:studioLayout.v1, field aside
+localStorage: solid-memo:studioLayout.v1, field asideWidth
+localStorage: solid-memo:studioLayout.v1, field characterKeys
+localStorage: solid-memo:studioLayout.v1, field density
+localStorage: solid-memo:studioLayout.v1, field detailWidth
+localStorage: solid-memo:studioLayout.v1, field dock
+localStorage: solid-memo:studioLayout.v1, field dockHeight
+localStorage: solid-memo:studioLayout.v1, field hiddenColumns
+localStorage: solid-memo:studioLayout.v1, field sidebar
+localStorage: solid-memo:studioRecent.v1

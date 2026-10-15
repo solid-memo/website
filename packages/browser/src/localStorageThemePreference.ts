@@ -6,7 +6,7 @@ import type { ThemePreference } from "@solid-memo/application/ports";
 import { isThemeChoice } from "@solid-memo/domain/theme";
 
 /** Also read by the script in index.html that sets the theme before the first paint. */
-const KEY = "solid-memo:theme";
+export const KEY = "solid-memo:theme";
 
 /**
  * The ThemePreference in the browser's localStorage. Browser storage may

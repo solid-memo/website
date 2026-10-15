@@ -1,0 +1,1 @@
+sessionStorage: solid-memo:login-hash

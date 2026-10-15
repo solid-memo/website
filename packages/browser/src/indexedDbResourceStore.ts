@@ -5,9 +5,11 @@
 import type { ResourceStore, StoredResource } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 
-const DATABASE = "solid-memo-guest-pod";
-const RESOURCES = "resources";
-const LOCK = "solid-memo-guest-pod";
+export const DATABASE = "solid-memo-guest-pod";
+/** Raised only with an upgrade that carries the guest's pod over to the new version. */
+export const DATABASE_VERSION = 1;
+export const RESOURCES = "resources";
+export const LOCK = "solid-memo-guest-pod";
 
 /** Runs work holding a lock of that name: the Web Locks API's request, or what stands in for it. */
 export type Lock = <T>(name: string, work: () => Promise<T>) => Promise<T>;
@@ -30,7 +32,7 @@ export function createIndexedDbResourceStore({
 
   function database(): Promise<IDBDatabase> {
     opened ??= new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(DATABASE, 1);
+      const request = indexedDB.open(DATABASE, DATABASE_VERSION);
       request.onupgradeneeded = () => request.result.createObjectStore(RESOURCES);
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
