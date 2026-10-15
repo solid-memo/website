@@ -19,7 +19,9 @@ name: Release
 # workflow. A push with the key does, so CI runs on the release commit,
 # the deploy after it puts the new version on the site (deploy.yml deploys
 # only a commit a version tag names), and this workflow runs again and
-# finds nothing to release since the tag.
+# finds nothing to release since the tag. The key is a secret of the
+# release environment, which allows only main, so a workflow pushed on
+# any other branch cannot read it, as it could a repository secret.
 
 on:
   workflow_run:
@@ -54,15 +56,21 @@ jobs:
        github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Its secret is the key. Each run is recorded as a deployment to it:
+    # GitHub's docs do not say that its limit to main holds with
+    # deployment: false.
+    environment: release
     steps:
-      # A copy without the key, such as a fork, releases nothing, and says so.
+      # A copy without the key, such as a fork, releases nothing, and says
+      # so. GitHub makes the environment, with no secrets, the first time
+      # a run names it.
       - name: The deploy key is set
         id: key
         env:
           KEY: ${{ secrets.SEMANTIC_RELEASE_KEY }}
         run: |
           if [ -z "$KEY" ]; then
-            echo "::notice::No SEMANTIC_RELEASE_KEY secret, so nothing is released (docs/releasing.md#the-deploy-key)."
+            echo "::notice::No SEMANTIC_RELEASE_KEY secret (in the release environment), so nothing is released (docs/releasing.md#the-deploy-key)."
             echo "set=false" >> "$GITHUB_OUTPUT"
           else
             echo "set=true" >> "$GITHUB_OUTPUT"
