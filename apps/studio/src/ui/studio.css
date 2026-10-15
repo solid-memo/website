@@ -351,6 +351,11 @@
   margin: 0.15rem 0 0.5rem;
 }
 
+/* A release's themes (ReleaseMetadataScreen.tsx), laid out as the library's topics: its hint on a line of its own. */
+:where(:root[data-surface="studio"]) .library-topics > .hint {
+  width: 100%;
+}
+
 /* A course draft's outline (DraftOutline.tsx): the deck list's
    rows, a step's name with the first words of its theory and its
    questions under it, none with an icon to indent past. */

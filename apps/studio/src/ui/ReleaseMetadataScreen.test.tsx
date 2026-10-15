@@ -21,6 +21,8 @@ const links = { draftsHref: "#/drafts", healthHref: "#/health" };
 const ENG = "http://publications.europa.eu/resource/authority/language/ENG";
 const SWE = "http://publications.europa.eu/resource/authority/language/SWE";
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
+const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
+const GEOGRAPHY = "https://solid-memo.com/ns/vocab/topics.ttl#geography";
 const PROV = "http://www.w3.org/ns/prov#";
 const at = (id: string) => `${DRAFT_URL}#${id}`;
 const plain = (value: string) => ({
@@ -116,6 +118,33 @@ describe("ReleaseMetadataScreen", () => {
       }),
     );
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setMeta", meta: { language: [SWE] } }]);
+  });
+
+  it("states the release's themes: EDUC, Solid Memo's topics, and one outside them to leave out", () => {
+    const draft = with_(authoredDraft(), {
+      kind: "setMeta",
+      meta: { theme: ["https://other.example/theme"] },
+    });
+    const onEdit = renderScreen(draft);
+    const themes = screen.getByRole("group", { name: "Themes" });
+    const education = within(themes).getByRole("checkbox", {
+      name: "Education, culture and sport (the EU's data theme EDUC)",
+    });
+    expect(education).not.toBeChecked();
+    fireEvent.click(education);
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "setMeta", meta: { theme: ["https://other.example/theme", EDUC] } },
+    ]);
+    fireEvent.click(within(themes).getByRole("checkbox", { name: "Geography" }));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "setMeta", meta: { theme: ["https://other.example/theme", GEOGRAPHY] } },
+    ]);
+    fireEvent.click(
+      within(themes).getByRole("checkbox", {
+        name: "https://other.example/theme (not in the list)",
+      }),
+    );
+    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setMeta", meta: { theme: [] } }]);
   });
 
   it("names an EU language in the reader's language, else by the table's label", () => {
@@ -718,6 +747,9 @@ describe("ReleaseMetadataScreen, held", () => {
       "data-arrival",
       "true",
     );
+    cleanup();
+    renderScreen(authoredDraft(), { field: "themes" });
+    expect(screen.getByRole("group", { name: "Themes" })).toHaveAttribute("data-arrival", "true");
     cleanup();
     renderScreen(authoredDraft(), { field: "license" });
     expect(screen.getByRole("combobox", { name: "License" }).parentElement).toHaveAttribute(

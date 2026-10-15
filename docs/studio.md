@@ -526,8 +526,8 @@ check links: the overview's `title`, `description` or `outline`; a
 chapter's `title`, `description`, `steps` or `review`; a step's
 `theory` or `questions`; a question's text (`front`, `backNote`…), its
 wrong options (`distractors`) or one of them (`distractor:<id>`); the
-release screen's `versionNotes`, `languages`, `license`, `publisher`,
-`authors`, `making`, `sources` or `checks`. A field the screen does
+release screen's `versionNotes`, `languages`, `themes`, `license`,
+`publisher`, `authors`, `making`, `sources` or `checks`. A field the screen does
 not have is left out.
 Like Solid Memo's fallbacks, these replace the history entry.
 
@@ -1781,11 +1781,11 @@ problems under its question.
 Not every problem can be fixed in the Studio yet:
 
 - No screen has a field yet for the version, the series (`inSeries`,
-  `isVersionOf`), the distribution or the theme EDUC. A blank draft
-  and a deck's have them all, so only a draft of a release that lacks
-  one does. A problem about one of them links to the overview. A
-  problem about the release's license, publisher, languages, version
-  notes or authors, a source, an agent or an activity links to the
+  `isVersionOf`) or the distribution. A blank draft and a deck's have
+  them all, so only a draft of a release that lacks one does. A
+  problem about one of them links to the overview. A problem about the
+  release's license, publisher, languages, themes, version notes or
+  authors, a source, an agent or an activity links to the
   [release screen](#the-releases-metadata-and-provenance), at its
   part.
 - The library policy places the draft at `decks/<draft name>/v<N>.ttl`
@@ -1946,12 +1946,18 @@ library's releases are written
 ([above](#how-edits-are-saved)). Its parts:
 
 - **About this version**: the version notes (`adms:versionNotes`, one
-  text), the languages (`dcterms:language`), the license and the
-  publisher. The languages are those of the EU's table that the
-  reference data describes (`EU_LANGUAGES`, generated from
+  text), the languages (`dcterms:language`), the themes
+  (`dcat:theme`), the license and the publisher. The languages are
+  those of the EU's table that the reference data describes
+  (`EU_LANGUAGES`, generated from
   [external.ttl](../ns/vocab/external.ttl): [vocab.md](vocab.md)), each
   named in the reader's language. One the release states outside the
-  table is shown by its IRI, to keep or leave out. The license is one of
+  table is shown by its IRI, to keep or leave out. The themes are the
+  EU's data theme EDUC, which the release check asks of every release,
+  and Solid Memo's topics (`TOPICS`, from
+  [topics.ttl](../ns/vocab/topics.ttl)), each named in the reader's
+  language; one the release states outside them is shown by its IRI,
+  to keep or leave out. The license is one of
   `KNOWN_LICENSES` ([license.ts](../packages/domain/src/license.ts)), or
   the one it has. `setLicense` types it `dcterms:LicenseDocument`, as
   DCAT-AP asks; the license it replaces loses that type, unless a source
