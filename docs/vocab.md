@@ -108,12 +108,17 @@ string, so other applications can look up what it means:
   `dcterms:isReplacedBy`), not removed: `sm:direction` gave way to
   `sm:studyDirection` in 1.6. The generated constant carries
   `@deprecated`.
-- **An optional term may join a shape's current format without a format
-  bump** when a reader that ignores it loses nothing: the deck's own
+- **A published shape is never edited.** A term that a shape gains,
+  even an optional one, goes into the shape's next version, which the
+  app then writes: a new format version, and so a breaking change of the
+  app ([releasing.md](releasing.md#what-counts-as-breaking)). This
+  holds from the app's first version, 1.0.0. Before it, an optional term joined a shape's current
+  format without a format bump when a reader that ignored it lost
+  nothing, and the shapes were edited in place: the deck's own
   study caps (`sm:deckNewCardsPerDay`, `sm:deckMaxReviewsPerDay`, 1.7)
   and the description of a card's pictures (`sm:frontImageDescription`,
-  `sm:backImageDescription`, 1.12) are such terms. The vocabulary still
-  moves to the next 1.x. A term may also be written on a subject outside
+  `sm:backImageDescription`, 1.12) are such terms, and the vocabulary
+  moved to the next 1.x all the same. A term may also be written on a subject outside
   its shape, which neither owns nor checks it: `sm:position` (1.13), a
   deck's place on the [arranged deck list](data-model.md#deck-groups),
   is kept by every writer of a deck because `DeckV6` does not own it, so
@@ -328,8 +333,8 @@ business.
 There is no term for a deck's languages: the app works out which
 languages to offer from the tags the deck's text already uses (see
 [i18n.md](i18n.md#text-in-the-users-languages)). Optional
-`sm:frontLanguage` / `sm:backLanguage` defaults could join without a
-format bump, as above, should that prove too weak. `dcterms:language`
+`sm:frontLanguage` / `sm:backLanguage` defaults could join the deck's
+next format, should that prove too weak. `dcterms:language`
 is used only on library releases, for DCAT-AP: it names EU
 authority-table languages and cannot tell a card's front from its back.
 
@@ -368,4 +373,6 @@ emits them into the build and serves them in dev.
    drift; the drift test in `packages/vocab/tooling/generate.test.ts`
    does too).
 3. Use it in a [shape](shapes.md) — the fixture test checks that every
-   `sm:` predicate a shape uses is declared here.
+   `sm:` predicate a shape uses is declared here. A published shape is
+   never edited, so the term goes into the shape's next version
+   ([Versioning policy](#versioning-policy)).

@@ -47,13 +47,45 @@ one app, not libraries with versions of their own
 1.0.0 into it, the root's version was `0.0.0` too, which names no
 version: 0.1.0 was never released, so no build shows it.
 
+## The public API
+
+Semantic Versioning asks a project to say what its versions promise:
+its public API. Solid Memo's is what its users, other apps that read
+the same pods and the people who run their own copy rely on:
+
+- **The data in pods**: where it lives (the folders, the document names
+  and the type index registrations) and the format versions the app
+  writes and reads ([data-model.md](data-model.md),
+  [migrations.md](migrations.md)).
+- **Deck files**, as the app exports and imports them
+  ([data-model.md](data-model.md#decks-as-files)).
+- **The published addresses**: the vocabulary and the shapes under
+  `/ns/`, the vendored shapes under `/vendor/`, and the library under
+  `/decks/` ([deployment.md](deployment.md)). A published shape or deck
+  version is versioned on its own as well
+  ([below](#what-has-versions-of-its-own)).
+- **The app's and the Studio's addresses**: the hashes that open a
+  screen (`#/decks?instance=…`, `#/studio/…`), which people bookmark
+  and share.
+- **What the app keeps in the browser**: its storage keys, and the
+  IndexedDB database that holds a guest's pod.
+- **What those who run their own copy set and run**: the `VITE_*`
+  variables ([configuration.md](configuration.md)), the build command
+  and the folder it writes ([deployment.md](deployment.md)).
+- **The features users rely on.**
+
+Everything else may change in any version: the workspace packages'
+exports, which nothing outside the repository imports
+([architecture.md](architecture.md)), the screens' layout, wording and
+styles, and whatever these docs do not name.
+
 ## What counts as breaking
 
 Solid Memo keeps its data in its users' pods, not on a server of its
 own, so the data is what has to stay readable: by this app's older and
 newer versions, by other apps that read the same pod, and by people who
-run their own copy. A change is breaking when one of them has to act or
-loses something:
+run their own copy. A change to [the public API](#the-public-api) is
+breaking when one of them has to act or loses something:
 
 - **A new format version the app writes** ([migrations.md](migrations.md)).
   The app brings older data up to it, but an older version of the app
@@ -67,11 +99,18 @@ loses something:
 - **A change for those who run their own copy**: a configuration variable
   renamed or removed, a changed build command or output folder
   ([deployment.md](deployment.md)).
+- **An address that stops working**: a published file removed or
+  moved, or a hash the app or the Studio no longer opens.
+- **What the browser kept, lost**: a storage key or the guest pod's
+  database renamed, or what they hold no longer read.
 - **A feature removed** that users rely on.
 
-Adding an optional term that older readers ignore and lose nothing by
-is not breaking ([vocab.md](vocab.md#versioning-policy)); neither is a
-new deck in the library, nor a new version of a deck. A change that is
+A new vocabulary term that no shape names is not breaking
+([vocab.md](vocab.md#versioning-policy)); neither is a new deck in the
+library, nor a new version of a deck. A published shape is never
+edited, so a term that a shape gains, even an optional one, is in the
+shape's next version: a new format version the app writes, and so
+breaking. A change that is
 breaking says so in its commit, with `!` and a `BREAKING CHANGE:` footer
 that tells users what to do, and it is agreed in an issue first
 ([CONTRIBUTING.md](../CONTRIBUTING.md#open-an-issue-first)).
