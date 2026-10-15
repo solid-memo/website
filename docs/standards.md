@@ -31,6 +31,7 @@ says which, and why each one does not stand in the way of reuse.
 | [RDF](https://www.w3.org/TR/rdf11-concepts/) | 1.1 | W3C Recommendation | All data in the pod, the vocabulary, the shapes and the deck library | Yes |
 | [Turtle](https://www.w3.org/TR/turtle/) | 1.1 | W3C Recommendation | Every document Solid Memo writes, read and written with N3.js: [`packages/turtle/`](../packages/turtle/) ([architecture.md](architecture.md)) | Yes |
 | [JSON-LD](https://www.w3.org/TR/json-ld11/) | 1.1 | W3C Recommendation | A deck saved as a file ([data-model.md](data-model.md#decks-as-files), [`deckFile.ts`](../packages/domain/src/deckFile.ts)); the site's description in [`apps/web/index.html`](../apps/web/index.html) | Yes |
+| [SPARQL 1.1 Update](https://www.w3.org/TR/sparql11-update/) | 1.1 | W3C Recommendation | An edit to a document in the pod, sent as a `PATCH` of `DELETE DATA` and `INSERT DATA` blocks ([`datasets.ts`](../packages/solid/src/datasets.ts)), and accepted by the guest's pod ([`localPod.ts`](../packages/solid/src/localPod.ts)). The Solid Protocol's own patch format, N3 Patch, is not used | Yes |
 | [RDF Schema](https://www.w3.org/TR/rdf11-schema/) | 1.1 | W3C Recommendation | Solid Memo's vocabulary, [`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) ([vocab.md](vocab.md)) | Yes |
 | [OWL 2](https://www.w3.org/TR/owl2-overview/) | 2 | W3C Recommendation | The vocabulary's classes and properties, and `owl:deprecated` on a retired card ([vocab.md](vocab.md)) | Yes |
 | [XML Schema datatypes](https://www.w3.org/TR/xmlschema11-2/) | 1.1 | W3C Recommendation | Typed literals (`xsd:dateTime`, `xsd:integer`, …) | Yes |
@@ -59,6 +60,10 @@ says which, and why each one does not stand in the way of reuse.
 | [Unicode CLDR plural rules](https://cldr.unicode.org/index/cldr-spec/plural-rules) | the browser's CLDR | Unicode Consortium | Plural messages, through `Intl.PluralRules` ([i18n.md](i18n.md), [policy.md](policy.md#cldr-plural-rules)) | Yes |
 | [ECMAScript Internationalization API](https://tc39.es/ecma402/) | the browser's | Ecma International standard (ECMA-402) | Plural rules, number and date formats: [`i18n.tsx`](../packages/ui/src/ui/i18n.tsx) | Yes |
 | [Unicode Normalization Forms](https://unicode.org/reports/tr15/) | UAX #15 | Unicode Standard Annex | Text in normalization form C in the deck library and in search ([deck-library.md](deck-library.md#checks)) | Yes |
+| [Unicode Bidirectional Algorithm](https://www.unicode.org/reports/tr9/) | UAX #9 | Unicode Standard Annex | Text written right to left keeps its own direction: isolated between U+2068 and U+2069 in a message ([`langText.ts`](../packages/domain/src/langText.ts)), and by the style sheet ([i18n.md](i18n.md)) | Yes |
+| [Unicode Text Segmentation](https://www.unicode.org/reports/tr29/) | UAX #29, the runtime's | Unicode Standard Annex | Characters counted as grapheme clusters, through `Intl.Segmenter`, in the deck library's checks ([`deckLibrary.ts`](../packages/shacl/node/deckLibrary.ts)) | Yes |
+| [Unicode Collation Algorithm](https://www.unicode.org/reports/tr10/) | UTS #10, the browser's | Unicode Technical Standard | Sorting and comparing cards and decks, through `Intl.Collator` ([`cardQuery.ts`](../packages/domain/src/cardQuery.ts), [`deckTable.ts`](../packages/domain/src/deckTable.ts)) | Yes |
+| [CSS Writing Modes](https://www.w3.org/TR/css-writing-modes-4/) | Level 4 | W3C Candidate Recommendation | `direction` and `unicode-bidi: isolate` for the right-to-left languages, under `:lang()` in [`style.css`](../packages/ui/src/style.css) ([i18n.md](i18n.md)) | Yes |
 | [CSV](https://www.rfc-editor.org/rfc/rfc4180) | RFC 4180 | IETF RFC (Informational) | The answers a learner downloads from the statistics: [`answerCsv.ts`](../packages/domain/src/answerCsv.ts) ([statistics.md](statistics.md)) | Yes |
 
 ## The web
@@ -67,7 +72,11 @@ says which, and why each one does not stand in the way of reuse.
 |---|---|---|---|---|
 | [OpenID Connect Core](https://openid.net/specs/openid-connect-core-1_0.html) and [OAuth 2.0](https://www.rfc-editor.org/rfc/rfc6749) | 1.0; RFC 6749 | OpenID Foundation final specification; IETF RFC | Under Solid-OIDC ([authentication.md](authentication.md)) | Yes |
 | [DPoP](https://www.rfc-editor.org/rfc/rfc9449) | RFC 9449 | IETF RFC | Under Solid-OIDC: tokens bound to the browser's key | Yes |
+| [HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110) | RFC 9110 | IETF Internet Standard | Conditional writes to the pod and the guest's pod: `If-Match` the ETag read, `If-None-Match: *` to create ([`solidDeckRepository.ts`](../packages/solid/src/solidDeckRepository.ts), [`localPod.ts`](../packages/solid/src/localPod.ts), [migrations.md](migrations.md)) | Yes |
+| [Web Linking](https://www.rfc-editor.org/rfc/rfc8288) | RFC 8288 | IETF RFC (Proposed Standard) | The `Link` header with `rel="type"` that finds the storage, walking up from the WebID ([`solidStorageGateway.ts`](../packages/solid/src/solidStorageGateway.ts), [data-model.md](data-model.md#discovery-chain)) | Yes |
+| [UUID](https://www.rfc-editor.org/rfc/rfc9562) | RFC 9562, version 4 | IETF RFC (Proposed Standard) | The names of new decks and cards, `deck-<uuid>` and `card-<uuid>`, which end up in IRIs in the pod, and the guest's pod's ETags, through `crypto.randomUUID()` ([`solidDeckRepository.ts`](../packages/solid/src/solidDeckRepository.ts), [`appUseCases.ts`](../packages/composition/src/appUseCases.ts)) | Yes |
 | [Content Security Policy](https://www.w3.org/TR/CSP3/) | Level 3 | W3C Working Draft | The policy meta tag in [`apps/web/index.html`](../apps/web/index.html), checked by [`build.test.ts`](../apps/web/src/build.test.ts) ([markdown.md](markdown.md)) | Yes |
+| [Media Queries](https://www.w3.org/TR/mediaqueries-5/) | Level 5 | W3C Working Draft | `prefers-color-scheme` for the theme and `prefers-reduced-motion` for motion ([`theme.tsx`](../packages/ui/src/ui/theme.tsx), [`motion.ts`](../packages/ui/src/ui/motion.ts), [`style.css`](../packages/ui/src/style.css)) | Yes |
 | [IndexedDB](https://www.w3.org/TR/IndexedDB/) | 3.0 | W3C specification | The guest's pod: [`indexedDbResourceStore.ts`](../packages/browser/src/indexedDbResourceStore.ts) ([guest-mode.md](guest-mode.md)) | Yes |
 | [Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html) | HTML Living Standard | WHATWG standard | Choices kept on the device ([privacy.md](privacy.md#in-the-browser)) | Yes |
 | [Web Locks](https://www.w3.org/TR/web-locks/) | W3C Working Draft | W3C Working Draft | Keeping tabs apart while the guest's pod is written or moved ([guest-mode.md](guest-mode.md)) | Yes |
@@ -75,6 +84,10 @@ says which, and why each one does not stand in the way of reuse.
 | [Sitemaps](https://www.sitemaps.org/protocol.html) | 0.9 | De facto, by the major search engines | [`apps/web/public/sitemap.xml`](../apps/web/public/sitemap.xml) | Yes (de facto) |
 | [robots.txt](https://www.rfc-editor.org/rfc/rfc9309) | RFC 9309 | IETF RFC | [`apps/web/public/robots.txt`](../apps/web/public/robots.txt) | Yes |
 | [WCAG](https://www.w3.org/TR/WCAG22/) | 2.2 | W3C Recommendation | The Studio's minimum target size and single-key shortcuts that can be turned off ([studio.md](studio.md#layout)) | Yes |
+
+The app is built on the web platform as a whole: HTML, CSS, the DOM,
+Fetch and ECMAScript. The table lists a part of it only when the app's
+data or what the reader sees depends on it.
 
 Licenses in deck metadata are named by their own IRIs, such as
 `https://creativecommons.org/licenses/by/4.0/`, typed
