@@ -59,11 +59,15 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      # Turbo's cache, so a task whose inputs have not changed is not run
+      # again. The key is this job's alone: a key is saved once, by the
+      # first job to finish, and another job's cache would not hold the
+      # check's results.
       - uses: actions/cache@v6
         with:
           path: .turbo/cache
-          key: turbo-${{ github.sha }}
-          restore-keys: turbo-
+          key: turbo-check-${{ github.sha }}
+          restore-keys: turbo-check-
       - run: npm ci
       # Biome's formatting and lint rules (docs/style.md), markdownlint's
       # and cspell's (docs/testing.md#documentation); then every
@@ -275,11 +279,6 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - uses: actions/cache@v6
-        with:
-          path: .turbo/cache
-          key: turbo-${{ github.sha }}
-          restore-keys: turbo-
       - run: npm ci
       - id: playwright
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
