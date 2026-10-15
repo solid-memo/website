@@ -1,0 +1,38 @@
+WebID: its private type index found by solid:privateTypeIndex in a document the WebID names by foaf:isPrimaryTopicOf
+WebID: its private type index found by solid:privateTypeIndex in a document the WebID names by rdfs:seeAlso
+WebID: its private type index found by solid:privateTypeIndex in the WebID document
+WebID: its private type index found by solid:privateTypeIndex in the document the WebID names by pim:preferencesFile
+WebID: its public type index found by solid:publicTypeIndex in a document the WebID names by foaf:isPrimaryTopicOf
+WebID: its public type index found by solid:publicTypeIndex in a document the WebID names by rdfs:seeAlso
+WebID: its public type index found by solid:publicTypeIndex in the WebID document
+WebID: its storage found by a Link rel=type pim:Storage header, walking up from the WebID
+WebID: its storage found by pim:storage in a document the WebID names by foaf:isPrimaryTopicOf
+WebID: its storage found by pim:storage in a document the WebID names by rdfs:seeAlso
+WebID: its storage found by pim:storage in the WebID document
+answer log: the answers of a study day in October 2026 in <instance>history/2026-10.ttl
+catalog: the decks, the deck groups and the links to drafts and releases in <instance>catalog.ttl, the catalog subject <instance>catalog.ttl#catalog
+digest: kept in <instance>digest.ttl
+draft: its chapter "intro" in <instance>drafts/solid/v2/chapter-intro.ttl
+draft: the cards no chapter asks in <instance>drafts/solid/v2/cards.ttl
+draft: version 2 of the draft "solid" in <instance>drafts/solid/v2/release.ttl
+instance registered in the private index: the private type index registers dcat:Catalog at solid:instance <instance>catalog.ttl#catalog, titled with the instance's name
+instance registered in the private index: the private type index registers sm:Answer at solid:instanceContainer <instance>history/, titled with the instance's name
+instance registered in the private index: the private type index registers sm:Card at solid:instanceContainer <instance>decks/, titled with the instance's name
+instance registered in the private index: the private type index registers sm:Deck at solid:instance <instance>catalog.ttl, titled with the instance's name
+instance registered in the private index: the private type index registers sm:Deck at solid:instanceContainer <instance>drafts/, titled with the instance's name
+instance registered in the private index: the private type index registers sm:Instance at solid:instanceContainer <instance>, titled with the instance's name
+instance registered in the private index: the private type index registers sm:ReviewState at solid:instanceContainer <instance>reviews/, titled with the instance's name
+instance registered in the public index: the private type index registers sm:Answer at solid:instanceContainer <instance>history/, titled with the instance's name
+instance registered in the public index: the private type index registers sm:Deck at solid:instanceContainer <instance>drafts/, titled with the instance's name
+instance registered in the public index: the private type index registers sm:ReviewState at solid:instanceContainer <instance>reviews/, titled with the instance's name
+instance registered in the public index: the public type index registers dcat:Catalog at solid:instance <instance>catalog.ttl#catalog, titled with the instance's name
+instance registered in the public index: the public type index registers sm:Card at solid:instanceContainer <instance>decks/, titled with the instance's name
+instance registered in the public index: the public type index registers sm:Deck at solid:instance <instance>catalog.ttl, titled with the instance's name
+instance registered in the public index: the public type index registers sm:Instance at solid:instanceContainer <instance>, titled with the instance's name
+instance: described by <instance>meta.ttl#it, a sm:Instance
+instances: found by a sm:Instance registration at solid:instance in the private type index
+instances: found by a sm:Instance registration at solid:instance in the public type index
+instances: found by a sm:Instance registration at solid:instanceContainer in the private type index
+instances: found by a sm:Instance registration at solid:instanceContainer in the public type index
+preferences: kept in <instance>preferences.ttl#it, a sm:Preferences
+release: version 2 of the release "solid" published from an instance in <instance>releases/solid/v2.ttl

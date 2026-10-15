@@ -30,6 +30,7 @@ npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (te
 npm run test:roundtrip -w @solid-memo/solid   # every library release through a draft and back (below)
 npm run crosscheck # the pySHACL cross-check, as CI runs it (needs scripts/requirements-ci.txt)
 npm run test:crosscheck   # the cross-check script's own tests, Python's unittest (needs scripts/requirements-ci.txt too)
+npm run check:breaking -- --base origin/main   # the public API against where the branch left main, as CI's library job checks it (docs/releasing.md)
 npm run test:pod  # the end-to-end tests, against the Solid servers they start in Docker
 npm run servers -w @solid-memo/e2e-pod   # pull or build those servers' images ahead (`-- css-6` for one)
 npm run pod       # a Community Solid Server at http://127.0.0.1:3999/, in memory, to poke at by hand
@@ -386,7 +387,7 @@ jobs, side by side:
 | Job | What it checks |
 |---|---|
 | `build` | `npm run check`, then `npm run build`; the coverage of every package goes to the run's summary (`npm run coverage:summary`) |
-| `library` | the deck library against the base of the change: no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)) |
+| `library` | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
 | `crosscheck` | the cross-check script's tests, then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | that each advisory server starts and meets the contract |

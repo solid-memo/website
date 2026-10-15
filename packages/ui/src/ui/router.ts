@@ -95,9 +95,10 @@ export type RouteRef =
  */
 export type BrowserLanguageFilter = "unstated";
 
-const BROWSER_LANGUAGE_FILTERS: BrowserLanguageFilter[] = ["unstated"];
+export const BROWSER_LANGUAGE_FILTERS: readonly BrowserLanguageFilter[] = ["unstated"];
 
-const STORAGE_SOURCES: StorageSource[] = ["profile", "linkHeader", "manual"];
+/** How a storage was found, as a new instance's route names it. */
+export const STORAGE_SOURCES: readonly StorageSource[] = ["profile", "linkHeader", "manual"];
 
 /**
  * The answers the statistics are of: the last 30 or 90 study days, the

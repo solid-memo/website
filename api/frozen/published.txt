@@ -1,0 +1,43 @@
+https://solid-memo.com/ns/shapes/agent/v1.ttl sha256:955987be6ae460703c5b935dc71ef9f3b3c6fb69b8fcd7973eb5ea67b911681a
+https://solid-memo.com/ns/shapes/answer/v1.ttl sha256:ab1f3855509f8667b9fd95c79f1c3cebbef398633e63a5194ea59aa96b3cfef5
+https://solid-memo.com/ns/shapes/card/v1.ttl sha256:3bc3e71005b3aa226219df8fc94d564a59035a42c4167dc4e1d316b2d9bb72f9
+https://solid-memo.com/ns/shapes/card/v2.ttl sha256:578cf912186250b2c7eece5b39b377f38c2611d59b726c8cfd85ef32ba5c4ec6
+https://solid-memo.com/ns/shapes/card/v3.ttl sha256:a967eea561b9f1a7a80a760ee904f22730074005b325667592b850274b7d4dd4
+https://solid-memo.com/ns/shapes/card/v4.ttl sha256:d222b8079f3ba7b6b13bb16103ac11bb7ba6667e06e4d399506a13edf4258d93
+https://solid-memo.com/ns/shapes/card/v5.ttl sha256:75cd51abbcc63d96328ad988cda09d6f7a46167d65912636a3d545332d12320e
+https://solid-memo.com/ns/shapes/catalog/v1.ttl sha256:0f855d7d4692a2afdd7e71ad1639b6827615afc4e537cbe5263b7dc506578559
+https://solid-memo.com/ns/shapes/chapter/v1.ttl sha256:48fed90d7c75a90e9877c4b9b009a3bf4f4728dbdb10f5df441f270387a55379
+https://solid-memo.com/ns/shapes/deck-group/v1.ttl sha256:2082cf66a5e337c3ec9935f6a9e8e0d9ed7b075b8d5cf61d71dbcda10e9ba31f
+https://solid-memo.com/ns/shapes/deck-schedule/v1.ttl sha256:ca33218b0569cc0e61330022f433c3162a67c19c60f3626cdc7360e4bfba3a73
+https://solid-memo.com/ns/shapes/deck-series/v1.ttl sha256:345f848cb404aec63dd7bcdeb730705abb8b319e70f047649ca12f26ed4c09b3
+https://solid-memo.com/ns/shapes/deck-series/v2.ttl sha256:628572b852a0cfdc780e85abdd174f542be20fbf09f00177820fe373b2b2839f
+https://solid-memo.com/ns/shapes/deck-series/v3.ttl sha256:8cb2342c3db2587ee8537279e40a912284358bb925b960639960569b04089a28
+https://solid-memo.com/ns/shapes/deck/v1.ttl sha256:e08a5b270f545505b39d2cdadfa537d8fe7fb3c3c344bda93380b366f8d6fb3a
+https://solid-memo.com/ns/shapes/deck/v2.ttl sha256:fe751475c7439efd0b21c6837758490555382fc5f08ad211f1271ca0e2fc6d4f
+https://solid-memo.com/ns/shapes/deck/v3.ttl sha256:945dd9b1ea6006541f1e693835d23b5fe2d8241154664758a259c2d669b1a814
+https://solid-memo.com/ns/shapes/deck/v4.ttl sha256:f8b2cf6a42f88f80a8042b4cb011dfb71b79c074185cbb75cb60e3a097ccc1cc
+https://solid-memo.com/ns/shapes/deck/v5.ttl sha256:1d3cbd8819467112dd5a152fd34258520aa5dbabb61673b784ffe9e375c6b3ff
+https://solid-memo.com/ns/shapes/deck/v6.ttl sha256:c2325814581442fb74ef13057745230877b63f54b63b402f1e6cb90260d66b3b
+https://solid-memo.com/ns/shapes/distractor/v1.ttl sha256:4b8bfe2ae84f7679b9b84938db4258a83b52eab6e45a0598eed96341d1980eb2
+https://solid-memo.com/ns/shapes/distribution/v1.ttl sha256:c92fbf9bb284ccdba5db500e6bd2e666d8afc5c8751552276c29a0723c8ed14e
+https://solid-memo.com/ns/shapes/document-receipt/v1.ttl sha256:5542a394a3612f1283f84ec0d2a1a6c004142db69cbc4f894ed766bac3e69c74
+https://solid-memo.com/ns/shapes/draft-chapter/v1.ttl sha256:b26f780a926e367ca549aadf4e2718fd19113833e417bf0991b67cd28e0b80dd
+https://solid-memo.com/ns/shapes/draft-deck/v1.ttl sha256:1105ee350aaca10ec7b1e3a94630c9d789775aec85a0d5e0cda5a9ca9ac2edbb
+https://solid-memo.com/ns/shapes/draft-step/v1.ttl sha256:e441780c4a7b2db989cd41af4c0b6c2abbd689882bcc71500d6c0240856809e9
+https://solid-memo.com/ns/shapes/instance/v1.ttl sha256:4f309ebef78308120ffe29fa65034d6e8552bf9107b301eaf1d29057ad45d1cb
+https://solid-memo.com/ns/shapes/instance/v2.ttl sha256:951c00a62ddf687d4325f88cbb223a209a2079f11c4c31cd7f75b76824d02245
+https://solid-memo.com/ns/shapes/library-deck/v5.ttl sha256:98a23a9de197b8c0a4a93b1216deca93e408ba31db3cc5b9bb045dd703b76cc5
+https://solid-memo.com/ns/shapes/library-deck/v6.ttl sha256:e498d1dd4a1498e18a099415b74799f837d283971de72363ad7b5b1030fc9ea2
+https://solid-memo.com/ns/shapes/preferences/v1.ttl sha256:2b2d7e093f5b98083f3cc1469b4dfa40ce8dd056ec4aa20da9e7553b3049268e
+https://solid-memo.com/ns/shapes/preferences/v2.ttl sha256:d7089233c185697fa3de86318b44115add50600084fb3d0e425d2bf4cf76a64b
+https://solid-memo.com/ns/shapes/preferences/v3.ttl sha256:2f8baf87eaf0925b760f403acc2d457449a8fff748953c7986f42f8fd63f0a17
+https://solid-memo.com/ns/shapes/preferences/v4.ttl sha256:f5f9c6f1a87c0c2efe7f9c3c1f4c48eb8d3b099af636e2873c3b719b662850ea
+https://solid-memo.com/ns/shapes/review-state/v1.ttl sha256:8e55abf1325dd457a71be5b4107ef5c667bc295357b93d39dcb2ff6de587cd95
+https://solid-memo.com/ns/shapes/review-state/v2.ttl sha256:ef73bebe0c5f20fb709598a8fdbd3789ae8eb2fd22308f543dd731fc9f716c87
+https://solid-memo.com/ns/shapes/step/v1.ttl sha256:39b2565294fc4bb428ddda6b4dd7a35e7324daecc4271c2ac21ee27ee2d819de
+https://solid-memo.com/ns/vocab/external.ttl
+https://solid-memo.com/ns/vocab/topics.ttl
+https://solid-memo.com/ns/vocab/v1.ttl
+https://solid-memo.com/vendor/dcat-ap/3.0.1/dcat-ap-SHACL.ttl
+https://solid-memo.com/vendor/skohub/skos.bestPractice.shacl.ttl
+https://solid-memo.com/vendor/skohub/skos.shacl.ttl

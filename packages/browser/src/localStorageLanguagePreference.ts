@@ -5,7 +5,7 @@
 import type { LanguagePreference } from "@solid-memo/application/ports";
 import { localeOf } from "@solid-memo/domain/locale";
 
-const KEY = "solid-memo:language";
+export const KEY = "solid-memo:language";
 
 /**
  * The LanguagePreference in the browser's localStorage. Browser storage

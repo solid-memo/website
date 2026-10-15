@@ -19,6 +19,7 @@ Refs: #
 - [ ] **Docs.** The docs say what changed, and a new page in `docs/` is listed in [docs/README.md](https://github.com/solid-memo/website/blob/main/docs/README.md).
 - [ ] **Languages.** A new or changed message is in every locale: en, sv, ko, de, es and fr (`packages/ui/src/i18n/`).
 - [ ] **Vocabulary and shapes.** Any change to `ns/` was agreed in an issue first; no published `ns/shapes/*/vN.ttl` or `decks/*/vN.ttl` was edited; generated files were regenerated, not edited.
+- [ ] **Breaking?** Nothing in [the public API](https://github.com/solid-memo/website/blob/main/docs/releasing.md#the-public-api) breaks, or a commit says so (`!` and a `BREAKING CHANGE:` footer). `npm run check:breaking` sees a line of `api/` that goes, but not a feature removed, nor a reader that reads less than before.
 - [ ] **Pod data.** Any change to what the app writes to a pod comes with its migration ([docs/migrations.md](https://github.com/solid-memo/website/blob/main/docs/migrations.md)).
 - [ ] **Policy.** Any change to an external rule the code follows (SM-2, the plural rules, a specification) is cited.
 - [ ] **Licenses.** New content is MIT, or a deck states its own license; a new file has its SPDX header (`npm run lint:reuse`), or a new deck its line in `REUSE.toml`; third-party content is credited.

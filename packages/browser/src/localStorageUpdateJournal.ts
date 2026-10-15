@@ -4,7 +4,7 @@
 
 import type { UpdateJournal } from "@solid-memo/application/ports";
 
-const PREFIX = "solid-memo:update:";
+export const PREFIX = "solid-memo:update:";
 
 /** The part of the browser's Web Locks the journal uses. */
 export type Locks = Pick<LockManager, "request">;

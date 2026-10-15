@@ -44,7 +44,7 @@ export const DEFAULT_PREFS: StudioPrefs = {
 };
 
 /** Versioned: a later shape of the preferences gets a key of its own, and starts from the defaults. */
-const PREFS_KEY = "solid-memo:studioLayout.v1";
+export const PREFS_KEY = "solid-memo:studioLayout.v1";
 
 /**
  * The Studio's layout as the user left it on this device. Kept in the
@@ -115,7 +115,7 @@ export function rememberPrefs(
 /** How many of the palette's entries the device remembers as used last. */
 export const RECENT_LIMIT = 8;
 
-const RECENT_KEY = "solid-memo:studioRecent.v1";
+export const RECENT_KEY = "solid-memo:studioRecent.v1";
 
 /**
  * The palette's entries used last on this device, the last first, by
@@ -177,7 +177,7 @@ export const NO_INSTANCE_PREFS: InstancePrefs = {
 /** How many of the decks and drafts opened last the device keeps for an instance. */
 export const RECENT_ITEMS = 5;
 
-const INSTANCE_KEY = "solid-memo:studioInstances.v1";
+export const INSTANCE_KEY = "solid-memo:studioInstances.v1";
 
 /** Every instance's, as stored: by the instance's URL; none when the storage holds something else. */
 function storedInstances(storage: () => Storage): Record<string, unknown> {

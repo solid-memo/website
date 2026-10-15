@@ -15,11 +15,16 @@
  * renovate.json5), one update a line with its release notes' address,
  * runs as long as it needs. The subject's first word is lowercase
  * ("add", "keep"), the default; a name may follow it in its own case.
+ *
+ * A breaking change says so twice (docs/releasing.md#what-counts-as-breaking):
+ * `!` after its type or scope, and a `BREAKING CHANGE:` footer that
+ * tells users what to do. Either one without the other is refused.
  */
 export default {
   extends: ["@commitlint/config-conventional"],
   rules: {
     "body-max-line-length": [0],
     "footer-max-line-length": [0],
+    "breaking-change-exclamation-mark": [2, "always"],
   },
 };

@@ -46,7 +46,7 @@ async function discoverOidcIssuer(webId: string): Promise<string> {
  * sends the user back to the page without it (a redirect URL may have
  * no hash), so it is kept here, in this tab, until the login completes.
  */
-const LOGIN_HASH_KEY = "solid-memo:login-hash";
+export const LOGIN_HASH_KEY = "solid-memo:login-hash";
 
 /**
  * Takes the page back to a route the redirect dropped: the Studio's, say,

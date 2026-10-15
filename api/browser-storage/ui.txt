@@ -1,0 +1,3 @@
+localStorage: solid-memo:collapsedGroups.<instance URL>
+localStorage: solid-memo:recentLanguages.deck
+localStorage: solid-memo:recentLanguages.own
