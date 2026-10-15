@@ -1,5 +1,3 @@
-// @vitest-environment node
-
 // SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
 //
 // SPDX-License-Identifier: MIT
@@ -17,7 +15,8 @@ import { describe, expect, it } from "vitest";
  */
 
 const html = readFileSync(resolve(import.meta.dirname, "../public/studio/index.html"), "utf8");
-const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(([, code]) => code!);
+const page = new DOMParser().parseFromString(html, "text/html");
+const scripts = [...page.scripts].map((script) => script.text);
 
 /** Where the page sends a visitor who came with `hash`. */
 function redirect(hash: string): string {
@@ -39,13 +38,18 @@ describe("the Studio's old address", () => {
   });
 
   it("lets its one script run by its hash, and nothing else", () => {
-    const meta = /<meta http-equiv="Content-Security-Policy"\s+content="([^"]*)"/.exec(html)!;
-    expect(html.indexOf("Content-Security-Policy")).toBeLessThan(html.indexOf("<script"));
+    const meta = page.querySelector('meta[http-equiv="Content-Security-Policy"]')!;
+    expect(
+      meta.compareDocumentPosition(page.scripts[0]!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     const policy = new Map(
-      meta[1]!.split(";").map((part) => {
-        const [name, ...values] = part.trim().split(/\s+/);
-        return [name!, values];
-      }),
+      meta
+        .getAttribute("content")!
+        .split(";")
+        .map((part) => {
+          const [name, ...values] = part.trim().split(/\s+/);
+          return [name!, values];
+        }),
     );
     expect(scripts).toHaveLength(1);
     expect(policy.get("script-src")).toEqual([
