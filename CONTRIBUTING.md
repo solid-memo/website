@@ -146,7 +146,8 @@ Refs: #42
   something by ([docs/releasing.md](docs/releasing.md#what-counts-as-breaking)),
   adds `!` after the type or scope (`feat(ns)!:`), and a
   `BREAKING CHANGE:` footer that says what breaks and what to do about
-  it. It releases a major version (2.0.0), so it needs an issue first.
+  it; commitlint refuses one without the other. It releases a major
+  version (2.0.0), so it needs an issue first.
 - **Footers:** after a blank line, `Refs: #NN` when an issue or a
   discussion exists for the change, and `Co-Authored-By:` for each
   co-author.
