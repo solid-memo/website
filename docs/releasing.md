@@ -115,6 +115,12 @@ breaking says so in its commit, with `!` and a `BREAKING CHANGE:` footer
 that tells users what to do, and it is agreed in an issue first
 ([CONTRIBUTING.md](../CONTRIBUTING.md#open-an-issue-first)).
 
+The release reads the footer only as it is written: `BREAKING CHANGE:`
+or `BREAKING-CHANGE:` at the start of a line, in capitals and with its
+colon, as commitlint and `npm run check:breaking` read it
+([release.config.mjs](../release.config.mjs)'s `parserOpts`). A line of
+a body that begins "breaking change" in a sentence is not a footer.
+
 ## How CI holds to it
 
 The public API is written down in [`api/`](../api/README.md), one
@@ -230,6 +236,15 @@ runs the workflow and releases nothing.
 
 A release made by mistake is not taken back: a tag is never moved or
 deleted once pushed. A mistake is fixed in the next version.
+
+2.0.0 is one. No commit in it breaks anything, but semantic-release
+then read a line of a commit's body that began "breaking change", in
+lowercase and with no colon, as a breaking footer, and its changelog
+entry lists the rest of that line under "BREAKING CHANGES". Nothing
+needs to be done to move from 1.2.0 to 2.0.0. The release now reads
+the footer only as written
+([what counts as breaking](#what-counts-as-breaking)), and the version
+after 2.0.0 says so (#84).
 
 ## The deploy key
 

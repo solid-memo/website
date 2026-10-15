@@ -5,6 +5,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { saysBreaking } from "./checkBreaking.ts";
 
 /**
  * release.config.mjs agrees with the files it releases
@@ -17,6 +18,7 @@ const ROOT = join(import.meta.dirname, "..");
 type Plugin = [string, Record<string, unknown>];
 type Config = {
   changelogTitle: string;
+  parserOpts: Record<string, unknown>;
   assets: string[];
   default: { branches: string[]; plugins: Plugin[] };
 };
@@ -107,29 +109,86 @@ describe("the commits, as the release reads them", () => {
     ).toBe("major");
   });
 
-  it("writes notes with a section per kind, linking each commit", async () => {
+  async function notes(...commits: { hash: string; message: string }[]): Promise<string> {
     const { generateNotes } = (await import(notesGenerator)) as {
       generateNotes(config: unknown, context: unknown): Promise<string>;
     };
-    const hash = "a".repeat(40);
-    const notes = await generateNotes(options(notesGenerator), {
-      commits: [
-        { hash, message: "feat(studio): check a draft's links\n\nWhy.\n\nRefs: #42" },
-        { hash: "b".repeat(40), message: "docs: say why" },
-      ],
+    return generateNotes(options(notesGenerator), {
+      commits,
       lastRelease: { gitTag: "v1.0.0" },
       nextRelease: { gitTag: "v1.1.0", version: "1.1.0" },
       options: { repositoryUrl: "git@github.com:solid-memo/website.git" },
       cwd: ROOT,
       logger,
     });
-    expect(notes).toContain(
+  }
+
+  // The body of 4e18c227, which released 2.0.0 though it breaks nothing
+  // (#84): a line of it begins "breaking change", in lowercase, with no
+  // colon.
+  const declareTheApi = [
+    "docs(releasing): declare the public API that the version promises",
+    "",
+    "A published shape is now never edited, with no exception for an optional",
+    "term. A term that a shape gains goes into its next version, which is a",
+    "breaking change of the app. One rule, with no judgment of what an older",
+    "reader loses, can be checked.",
+    "",
+    "Refs: #72",
+  ].join("\n");
+
+  it("tells a breaking change only by `!` or its footer as written", async () => {
+    expect(await bump(declareTheApi)).toBeNull();
+    expect(await bump("fix: a bug\n\nBreaking change: an older app refuses it.")).toBe("patch");
+    expect(await bump("fix: a bug\n\nBREAKING CHANGE an older app refuses it.")).toBe("patch");
+    expect(await bump("fix: a bug\n\nBREAKING-CHANGE: an older app refuses it.")).toBe("major");
+    expect(await bump("feat(ns)!: write deck format 8")).toBe("major");
+  });
+
+  it("agrees with npm run check:breaking on what breaks", async () => {
+    const messages = [
+      declareTheApi,
+      "fix: a bug\n\nBreaking change: an older app refuses it.",
+      "fix: a bug\n\nBREAKING CHANGE an older app refuses it.",
+      "feat: write deck format 8\n\nBREAKING CHANGE: an older app refuses it.",
+      "fix: a bug\n\nBREAKING-CHANGE: an older app refuses it.",
+      "feat(ns)!: write deck format 8",
+    ];
+    for (const message of messages) {
+      expect((await bump(message)) === "major", message).toBe(saysBreaking(message));
+    }
+  });
+
+  it("gives both plugins the same way to find the footer", () => {
+    expect(options(analyzer).parserOpts).toBe(config.parserOpts);
+    expect(options(notesGenerator).parserOpts).toBe(config.parserOpts);
+  });
+
+  it("lists under BREAKING CHANGES only a footer as written", async () => {
+    expect(await notes({ hash: "c".repeat(40), message: declareTheApi })).not.toContain(
+      "BREAKING CHANGES",
+    );
+    const breaking = await notes({
+      hash: "d".repeat(40),
+      message: "feat(ns)!: write deck format 8\n\nBREAKING CHANGE: an older app refuses it.",
+    });
+    expect(breaking).toContain("BREAKING CHANGES");
+    expect(breaking).toContain("an older app refuses it.");
+  });
+
+  it("writes notes with a section per kind, linking each commit", async () => {
+    const hash = "a".repeat(40);
+    const written = await notes(
+      { hash, message: "feat(studio): check a draft's links\n\nWhy.\n\nRefs: #42" },
+      { hash: "b".repeat(40), message: "docs: say why" },
+    );
+    expect(written).toContain(
       "## [1.1.0](https://github.com/solid-memo/website/compare/v1.0.0...v1.1.0)",
     );
-    expect(notes).toContain("### Features");
-    expect(notes).toContain(
+    expect(written).toContain("### Features");
+    expect(written).toContain(
       `* **studio:** check a draft's links ([aaaaaaa](https://github.com/solid-memo/website/commit/${hash}))`,
     );
-    expect(notes).not.toContain("say why");
+    expect(written).not.toContain("say why");
   });
 });
