@@ -63,7 +63,7 @@ What is left falls into two groups:
    reason and link no issue; both apply from 1.0.0 on, and CI now
    refuses a new commit without a reason or a link.
    Declaring 1.0.0 stable makes the 0.x dependencies it ships a partial
-   in criterion 16.
+   in criterion 16, a decided gap (decision 14).
 
 ## Scorecard
 
@@ -492,9 +492,10 @@ What holds today, and what does not, criterion by criterion.
   to use. 1.0.0 is declared ready, and `npm run check` refuses a
   prerelease or 0.x dependency of the app, but four are allowed, each
   with its reason in [vendor-code.md](vendor-code.md#maturity):
-  `rdf-validate-shacl` 0.6 and `rdf-validate-datatype` 0.2, the only
-  SHACL engine for RDF/JS, `@inrupt/solid-client-errors` 0.0, released
-  with `@inrupt/solid-client` 4, and `process` 0.11. While the app was
+  `rdf-validate-shacl` 0.6 and `rdf-validate-datatype` 0.2, the SHACL
+  engine the app uses, `@inrupt/solid-client-errors` 0.0, released with
+  `@inrupt/solid-client` 4, and `process` 0.11, final at 0.11 by its
+  maintainer's choice. A decided gap (decision 14). While the app was
   in beta, no version was declared ready, and this held.
 - SHOULD, met — a summary of changes, in [CHANGELOG.md](../CHANGELOG.md):
   semantic-release writes each version's entry from the commits, and a
@@ -571,6 +572,15 @@ The maintainer made these choices. Each is recorded where it applies.
     made public once the fix is deployed, and code of conduct reports,
     by email or through GitHub's Report abuse
     ([GOVERNANCE.md](../GOVERNANCE.md#where-the-project-talks)).
+14. **Dependencies before 1.0.0** (2026-10-15). Solid Memo is stable
+    within an ecosystem that is not yet at 1.0: the Solid Protocol and
+    Solid-OIDC are drafts, and the libraries around them are 0.x. The
+    dependencies before 1.0.0 that
+    [vendor-code.md](vendor-code.md#maturity) allows stay, each with its
+    reason, and criterion 16's MUST on dependencies ready to use is a
+    recorded gap until they reach 1.0.0 or a ready replacement exists. A
+    new dependency before 1.0.0 is still refused unless it is added there
+    with its reason.
 
 Whatever is decided later:
 
@@ -693,11 +703,13 @@ them:
   in the user guide.
 - **Criterion 12, the docs' coverage.** Nothing checks that every package
   has a README, or that every export has a comment.
-- **Criterion 16, dependencies ready to use.** The stable app ships
-  four dependencies before their own 1.0.0
-  ([vendor-code.md](vendor-code.md#maturity)). Replacing them, or their
-  maintainers releasing a 1.0.0, would close it; the SHACL engine has no
-  replacement for RDF/JS.
+- **Criterion 16, dependencies ready to use.** A decided gap (decision
+  14). The stable app ships four dependencies before their own 1.0.0
+  ([vendor-code.md](vendor-code.md#maturity)). Each reaching 1.0.0, or a
+  replacement ready to use, would close it. `process` is final at 0.11 by
+  its maintainer's choice. [`shacl-engine`](https://www.npmjs.com/package/shacl-engine)
+  1.x exists, but brings in packages before 1.0.0 of its own and a
+  SPARQL engine the app does not need.
 - **Criterion 14, findability.** The repository name is kept by choice.
   Catalogs and search engines wait for the actions above. The DOI is
   in `CITATION.cff` and the README.
