@@ -63,7 +63,11 @@ reported to the community leaders responsible for enforcement. In Solid Memo
 that is the maintainer, Anton Wiklund ([@ixuz](https://github.com/ixuz)),
 by email at [antonwiklund91@gmail.com](mailto:antonwiklund91@gmail.com).
 Only the maintainer reads that address. Don't report a code of conduct issue
-in a public issue or discussion.
+in a public issue or discussion. Reports are private, to protect the people
+involved, as one of the two exceptions to the project's rule that it talks
+only in public ([GOVERNANCE.md](GOVERNANCE.md#where-the-project-talks)). They are
+handled in writing, and only as much is made public as is safe for the
+people involved.
 
 If the report is about the maintainer, or you would rather not email,
 report the content or the account to GitHub instead, through

@@ -1,8 +1,8 @@
 # Governance
 
-How Solid Memo is run: who decides, how changes are merged and
-published, and what happens if the maintainer steps away. How to
-contribute is in [CONTRIBUTING.md](CONTRIBUTING.md).
+How Solid Memo is run: where it talks, who decides, how changes are
+merged and published, and what happens if the maintainer steps away.
+How to contribute is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Who maintains it
 
@@ -13,18 +13,73 @@ its contributors. Its one maintainer is Anton Wiklund
 [solid-memo](https://github.com/solid-memo) GitHub organization.
 [.github/CODEOWNERS](.github/CODEOWNERS) names the maintainers.
 
+## Where the project talks
+
+All collaboration, maintenance, decisions and discussion about Solid
+Memo happen openly and in writing, in the project's public,
+asynchronous channels. That way every decision and its reasons can be
+found and linked later, by anyone. It also lets anyone take part, in any
+time zone and at their own pace, and leaves no one out of a
+conversation they could not attend.
+
+The project's channels are:
+
+- [issues](https://github.com/solid-memo/website/issues), for bugs,
+  features, decks and other work to be done;
+- [Discussions](https://github.com/solid-memo/website/discussions), for
+  questions and ideas that are still open;
+- [pull requests](https://github.com/solid-memo/website/pulls) and their
+  reviews, for changes;
+- commit messages, for the decision each commit records
+  ([CONTRIBUTING.md](CONTRIBUTING.md#commit-messages)).
+
+Apart from the two exceptions below, there is no other channel. The
+project runs no ephemeral or instant chat, such as Discord, Slack,
+Matrix, IRC or direct messages, and no voice or video calls or
+meetings. It endorses none that others run. People are free to talk
+about Solid Memo anywhere; such talk is simply not part of the project.
+
+Something said elsewhere, such as a private message sent anyway, a
+conversation at an event, or an email that is not one of the two
+exceptions below, decides nothing and counts for nothing until it is
+written up in a public issue, discussion or pull request. A
+maintainer or co-maintainer who receives such a message answers it by
+pointing to the public channel, or by opening the thread there, and
+does not carry on the conversation in private. This binds the
+maintainers between themselves too.
+
+There are exactly two exceptions. Both are confidential, and both are
+still in writing:
+
+- **Security vulnerabilities** are reported and handled privately
+  through GitHub's private vulnerability reporting, in writing in the
+  security advisory. The advisory is made public once the fix is
+  deployed, at a time agreed with the reporter. A report that is not a
+  vulnerability in scope is closed with its reason
+  ([SECURITY.md](SECURITY.md)).
+- **Code of conduct reports** are sent privately by email to the
+  maintainer or, when the report is about him, to GitHub through Report
+  abuse, to protect the people involved. Only as much is made public as
+  is safe for them ([CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md#enforcement)).
+
+Anything in such a private thread that is not about a vulnerability or
+the incident, such as a feature idea, moves to the public channels.
+
 ## How decisions are made
 
 The maintainer decides. Anyone can propose a change in an
 [issue](https://github.com/solid-memo/website/issues) or in
 [Discussions](https://github.com/solid-memo/website/discussions), and the
 maintainer gives the decision and its reasons there, in public. A
-decision that changes the code is recorded in the message of the commit
-that makes it ([CONTRIBUTING.md](CONTRIBUTING.md#commit-messages)).
-What is planned is in [ROADMAP.md](ROADMAP.md).
+decision exists only once it is written in an issue, a discussion or a
+pull request, including the messages of its commits
+([Where the project talks](#where-the-project-talks)). A decision
+that changes the code is recorded in the message of the commit that
+makes it ([CONTRIBUTING.md](CONTRIBUTING.md#commit-messages)). What is
+planned is in [ROADMAP.md](ROADMAP.md).
 
-When there are co-maintainers, they decide by agreement, and the
-maintainer decides when they cannot agree.
+When there are co-maintainers, they decide by agreement, in the same
+public channels, and the maintainer decides when they cannot agree.
 
 ## Merging
 
@@ -88,16 +143,17 @@ in a pull request.
 ## Becoming a co-maintainer
 
 Anyone who contributes regularly and reviews others' work can be invited
-by the maintainer to become a co-maintainer. A co-maintainer can review
-and merge pull requests, and is added to
+by the maintainer, in an issue, to become a co-maintainer. A
+co-maintainer can review and merge pull requests, and is added to
 [.github/CODEOWNERS](.github/CODEOWNERS). A co-maintainer who wants to
-step down only needs to say so.
+step down only needs to say so in an issue.
 
 ## If the maintainer steps away
 
 If the maintainer can no longer look after the project, he hands the
-solid-memo GitHub organization to an active co-maintainer. If there is
-none, the repository is archived, with a notice in the README saying so.
+solid-memo GitHub organization to an active co-maintainer, and says so
+in an issue. If there is none, the repository is archived, with a notice
+in the README saying so.
 The code, the vocabulary and the decks stay available under their
 licenses, and anyone may fork them.
 

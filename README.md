@@ -125,6 +125,12 @@ Everyone is welcome to suggest a change, report a problem or send one.
 - Report a security problem privately, never in a public issue:
   [SECURITY.md](SECURITY.md).
 
+Apart from security reports and
+[code of conduct reports](CODE_OF_CONDUCT.md#enforcement), the project
+talks only in public and in writing, in issues, Discussions, pull
+requests and commit messages, with no chat and no calls
+([GOVERNANCE.md](GOVERNANCE.md#where-the-project-talks)).
+
 How active the project is: its
 [pulse](https://github.com/solid-memo/website/pulse), its
 [commits](https://github.com/solid-memo/website/graphs/commit-activity) and its

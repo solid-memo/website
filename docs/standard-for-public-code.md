@@ -9,8 +9,10 @@ This is an assessment of `main` at `90652c08` with the branch
 `public-code-followup`, made on 2026-10-13, and updated the same day for
 the branch `semantic-release` (based on `main` at `f7574c9d`), which
 changes how versions are released, and again after it was merged and
-released 1.0.0 (`d5d13c84`), for deploying only released versions. It
-replaces the assessment of
+released 1.0.0 (`d5d13c84`), for deploying only released versions.
+It was updated again on 2026-10-15 for the branch `open-communication`,
+which writes down that the project talks only in public and in writing
+(decision 13). It replaces the assessment of
 2026-10-11 (the branch `standard-for-public-code`, based on `main` at
 `cae0a9f`) and the first one, of `main` at `18eace6` on 2026-10-10. It
 is not a promise. Check items off as they land, and re-assess when they
@@ -231,7 +233,9 @@ What holds today, and what does not, criterion by criterion.
 - MUST, met — governance in [GOVERNANCE.md](../GOVERNANCE.md). It,
   `.github/CODEOWNERS` and CODE_OF_CONDUCT.md now name the maintainer's
   own account, `@ixuz`; before, they named `@antwika`, an organization,
-  which CODEOWNERS cannot use.
+  which CODEOWNERS cannot use. A decision exists only once it is
+  written in an issue, a discussion or a pull request, including the
+  messages of its commits (decision 13).
 - SHOULD, met — who pays for reviews. Volunteers, in their own time,
   with no funding ([CONTRIBUTING.md](../CONTRIBUTING.md#review)).
 - SHOULD, met — the engagement of organizations. GOVERNANCE.md says no
@@ -249,7 +253,11 @@ What holds today, and what does not, criterion by criterion.
   decks, translations and interop reports.
 - MUST, met — the README links to the issues and the pull requests.
 - MUST, met — communication channels. The README, CONTRIBUTING.md
-  and the issue forms send questions to Discussions, which are on.
+  and the issue forms send questions to Discussions, which are on. The
+  project talks only in public and in writing: issues, Discussions,
+  pull requests and commit messages, with no chat and no calls, and
+  only security and code of conduct reports are private (decision 13,
+  [GOVERNANCE.md](../GOVERNANCE.md#where-the-project-talks)).
 - MUST, met — a closed channel for vulnerability reports.
   [SECURITY.md](../SECURITY.md) points to GitHub's private vulnerability
   reporting, which is on. A reporter needs a GitHub account.
@@ -541,6 +549,19 @@ The maintainer made these choices. Each is recorded where it applies.
     (7.1), and reviews that cover the source, the policy, the tests and
     the docs (7.2), are recorded as gaps while the project has one
     maintainer.
+13. **Open, written communication** (2026-10-15). All collaboration,
+    maintenance, decisions and discussion happen openly and in writing,
+    in issues, Discussions, pull requests and their reviews, and commit
+    messages, so every decision and its reasons can be found and linked
+    later. The project runs and endorses no chat, direct messages, or
+    voice or video calls or meetings. Something said elsewhere counts
+    for nothing until it is written up in public, and a maintainer
+    points such a message to the public channel. This binds the
+    maintainers between themselves too. The two exceptions are private
+    but still written: security vulnerabilities, in a private advisory
+    made public once the fix is deployed, and code of conduct reports,
+    by email or through GitHub's Report abuse
+    ([GOVERNANCE.md](../GOVERNANCE.md#where-the-project-talks)).
 
 Whatever is decided later:
 
