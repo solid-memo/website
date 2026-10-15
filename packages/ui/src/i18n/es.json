@@ -79,6 +79,7 @@
     "version": "Versión {version}",
     "versionAtCommit": "Versión {version} ({commit})",
     "sourceCode": "Código fuente",
+    "changelog": "Registro de cambios",
     "reportIssue": "Informar de un problema"
   },
   "addCardForm": {

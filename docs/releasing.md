@@ -179,6 +179,8 @@ version's entry goes under the file's header, newest first, with the
 and so on, each line a commit's subject with its scope and a link to the
 commit. A breaking change is listed first, under "BREAKING CHANGES",
 with its footer's text. The commits of the other types are left out.
+The site's footer links to it, on `main`
+([Footer.tsx](../packages/ui/src/ui/Footer.tsx)).
 
 So the changelog is as good as the commits' subjects. A subject says
 what changed for users, other apps or people who run their own copy,
