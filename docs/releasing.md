@@ -302,23 +302,33 @@ next push to `main` that passes CI also tries again.
   ```
 
   The deploy after CI on the release commit found no tag, so it
-  deployed nothing: run it by hand (Actions › Deploy to GitHub Pages ›
-  Run workflow, from `main`), and it deploys the version just tagged
-  ([deployment.md](deployment.md)).
+  deployed nothing. Once the GitHub release is made, run it by hand
+  (Actions › Deploy to GitHub Pages › Run workflow, from `main`), and
+  it deploys the version just tagged ([deployment.md](deployment.md)).
+  It deploys nothing, and fails, if the tag names any commit but
+  `chore(release): X.Y.Z`, or if the GitHub release is missing.
 
 - **CI failed on the release commit** (a flaky test, say): the version
   is released but not deployed. Re-run CI's failed jobs on that commit;
   once it passes, the deploy follows as usual. Or run the deploy by
-  hand, which checks the version itself.
+  hand, which checks the version itself. Either deploys the version
+  only while it is the newest: once a newer one is released, the deploy
+  after a re-run deploys nothing, and says so, and the site stays on
+  the newer version.
 
 - **After the tag** (the GitHub release could not be made): the release
   commit and the tag are on `main`, so a new run finds nothing to
-  release. Make the GitHub release from the tag by hand, with the
-  version's entry in CHANGELOG.md as its notes:
+  release. The deploy after CI on the release commit fails, as the
+  version has no GitHub release, and deploys nothing. Make the GitHub
+  release from the tag by hand, with the version's entry in
+  CHANGELOG.md as its notes:
 
   ```sh
   gh release create vX.Y.Z --title "Solid Memo X.Y.Z" --notes-file notes.md
   ```
+
+  Then run the deploy by hand (Actions › Deploy to GitHub Pages › Run
+  workflow, from `main`), and it deploys the version.
 
 A tag is never moved or deleted, even one whose release went wrong:
 Zenodo and anyone who fetched it may already hold it.

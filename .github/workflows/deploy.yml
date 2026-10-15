@@ -4,12 +4,14 @@
 
 name: Deploy to GitHub Pages
 
-# The site, released versions only (docs/deployment.md): when CI has
-# passed on a push to main, the commit it checked, if a version tag
-# (vX.Y.Z, which release.yml pushes with the release commit) names it;
-# or, run by hand from main, the newest version, after npm run check.
-# Other commits on main are not deployed: the site always runs a version
-# the releases page lists. CI also runs on pull requests, a fork's
+# The site, the newest released version only (docs/deployment.md): when
+# CI has passed on a push to main, the commit it checked, if a version
+# tag (vX.Y.Z, which release.yml pushes with the release commit) names
+# it; or, run by hand from main, the newest version, after npm run
+# check. Either way, only if the tag is the newest version on main, names
+# that version's release commit, and has its GitHub release. Other
+# commits on main are not deployed, and neither is an older version: the
+# site always runs the newest version the releases page lists. CI also runs on pull requests, a fork's
 # included, and a fork's branch may be named main too: workflow_run's
 # branch filter matches that name, so the job checks that CI ran for a
 # push, in this repository.
@@ -31,7 +33,10 @@ permissions:
 # A deploy waiting its turn is replaced by a newer one in its group. Only
 # a run that may deploy (one by hand, or one after CI on a release
 # commit) shares the group pages, so a newer run that deploys nothing
-# cannot replace a release's; any other run has a group of its own.
+# cannot replace a release's; any other run has a group of its own. A
+# re-run after CI on an older release commit shares it too, as nothing
+# tells it apart before it runs: it deploys nothing, so if it replaced
+# a newer release's deploy waiting its turn, run the deploy by hand.
 concurrency:
   group: >-
     ${{ (github.event_name == 'workflow_dispatch' ||
@@ -54,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      sha: ${{ steps.tag.outputs.sha }}
+      sha: ${{ steps.release.outputs.sha }}
       tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v7
@@ -91,8 +96,48 @@ jobs:
             exit 0
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "sha=$(git rev-list -n 1 "$tag")" >> "$GITHUB_OUTPUT"
-          echo "Deploying $tag."
+      # The tag alone does not make a release: it must be the newest
+      # version on main, so a re-run of CI or of this workflow on an older
+      # release commit cannot put that version back; its commit must be
+      # the release commit of that version, so a tag put on another commit
+      # by hand is not deployed; and its GitHub release must be made, so
+      # the site never runs a version the releases page does not list.
+      # semantic-release makes the release seconds after it pushes the
+      # tag, so it is looked for a few times. A version that is not the
+      # newest is a notice; anything else fails the run, as it should not
+      # happen (docs/deployment.md).
+      - name: The tag is the newest release
+        id: release
+        if: steps.tag.outputs.tag != ''
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          git fetch --force --quiet origin main
+          newest=$(git tag --merged FETCH_HEAD --list 'v[0-9]*' --sort=-v:refname |
+            grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
+          if [ "$TAG" != "$newest" ]; then
+            echo "::notice::$TAG is not the newest version on main (${newest:-none} is), so the site is not deployed (docs/deployment.md)."
+            exit 0
+          fi
+          sha=$(git rev-list -n 1 "$TAG")
+          subject=$(git log -1 --format=%s "$sha")
+          if [ "$subject" != "chore(release): ${TAG#v}" ]; then
+            echo "::error::$TAG names $sha, which is not its release commit (chore(release): ${TAG#v}), so the site is not deployed (docs/releasing.md#when-a-release-fails)."
+            exit 1
+          fi
+          for _ in 1 2 3 4 5 6; do
+            draft=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null || true)
+            [ "$draft" = false ] && break
+            sleep 10
+          done
+          if [ "$draft" != false ]; then
+            echo "::error::$TAG has no GitHub release, so the site is not deployed: make it, then deploy by hand (docs/releasing.md#when-a-release-fails)."
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Deploying $TAG."
 
   build:
     needs: version
@@ -137,12 +182,31 @@ jobs:
           path: apps/web/dist
 
   deploy:
-    needs: build
+    needs: [version, build]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # Re-running only this job, or build and this job, of an older run
+      # skips the version job, so the version is looked up again here: a
+      # newer one released since stops the deploy.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout: .github
+          persist-credentials: false
+      - name: The tag is still the newest version
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          newest=$(git tag --merged origin/main --list 'v[0-9]*' --sort=-v:refname |
+            grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
+          if [ "$TAG" != "$newest" ]; then
+            echo "::error::$TAG is no longer the newest version on main ($newest is), so the site is not deployed (docs/deployment.md)."
+            exit 1
+          fi
       - id: deployment
         uses: actions/deploy-pages@v5

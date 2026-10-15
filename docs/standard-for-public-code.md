@@ -156,9 +156,9 @@ What holds today, and what does not, criterion by criterion.
 - MUST, met — the source code in use is public. Production runs only a
   released version, built from its release commit on `main`, the one its
   tag names, after CI passes on that commit
-  ([deployment.md](deployment.md)). A deploy by hand runs only from
-  `main`, deploys the newest version, and runs `npm run check` on it
-  first.
+  ([deployment.md](deployment.md)), and only the newest version, once
+  its GitHub release is made. A deploy by hand runs only from `main`,
+  deploys the newest version, and runs `npm run check` on it first.
 - MUST, met — the source of the policy in use is public. The SM-2
   scheduler and the library's rules are in the repository
   ([policy.md](policy.md)).
@@ -733,7 +733,9 @@ of it on the branch `standard-for-public-code`.
   `ci.yml` but that one, is gone.
 - [x] **`deploy.yml`.** It deploys only a released version: after CI
   passes on a commit a version tag names, or, run by hand, only from
-  `main`, the newest version, after `npm run check`.
+  `main`, the newest version, after `npm run check`. Either way, only
+  the newest version, from its release commit, once its GitHub release
+  is made.
 - [x] **`renovate.json5`.** `automergeType: 'pr'`, and a `commitBody`
   that records each update and why.
 - [x] **Checks in `npm run check`.** The docs index
