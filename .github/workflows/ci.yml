@@ -6,13 +6,18 @@ name: CI
 
 # Every change is checked before it is merged (docs/testing.md#continuous-integration):
 # a pull request, from this repository or a fork, runs every job here,
-# and so does each push to main. A branch's pushes alone run nothing,
-# so a pull request's commits are not checked twice. The jobs read the
-# repository and nothing else: the token can only read, and no secret is
-# used, so a fork's pull request runs them as safely as ours.
+# and so does each push to main. A pull request is merged through the
+# merge queue (merge_group), which runs them again on the pull request
+# on top of main and of those ahead of it in the queue, and merges
+# exactly the commit that passed. A branch's pushes alone run nothing,
+# so a pull request's commits are not checked twice for one push. The
+# jobs read the repository and nothing else: the token can only read,
+# and no secret is used, so a fork's pull request runs them as safely as
+# ours.
 
 on:
   pull_request:
+  merge_group:
   push:
     branches: [main]
   workflow_dispatch:
@@ -93,20 +98,25 @@ jobs:
           cache: npm
       - run: npm ci
       # On a push to the default branch, compare with the commit the push
-      # moved it from; on a pull request (its merge with the default
-      # branch) or a run by hand, with where it left the default branch,
-      # so a version not merged yet can still be fixed there. A push that
-      # created the default branch (all zeros), or one whose earlier
-      # commit a force push left unfetched, compares with the default
-      # branch.
+      # moved it from; in the merge queue, with the commit of the
+      # default branch the queue built on, so the pull requests ahead
+      # are part of the change; on a pull request (its merge with the
+      # default branch) or a run by hand, with where it left the default
+      # branch, so a version not merged yet can still be fixed there. A
+      # push that created the default branch (all zeros), or one whose
+      # earlier commit a force push left unfetched, compares with the
+      # default branch.
       - name: npm run library:check -- --base <base>
         env:
           EVENT: ${{ github.event_name }}
           REF: ${{ github.ref }}
           BEFORE: ${{ github.event.before }}
+          QUEUE_BASE: ${{ github.event.merge_group.base_sha }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          if [ "$EVENT" = push ] && [ "$REF" = "refs/heads/$DEFAULT_BRANCH" ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+          if [ "$EVENT" = merge_group ]; then
+            base="$QUEUE_BASE"
+          elif [ "$EVENT" = push ] && [ "$REF" = "refs/heads/$DEFAULT_BRANCH" ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
             base="$BEFORE"
           else
             git fetch --no-tags origin "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
@@ -334,9 +344,9 @@ jobs:
   # semantic-release chooses each version from them (docs/releasing.md),
   # and a commit it cannot read is left out of the release. Only the
   # commits the pull request adds are linted, from its base to its head,
-  # merge commits aside. A push to main is not linted: its commits were
-  # linted in their pull request, and the release commit is written by
-  # semantic-release.
+  # merge commits aside. Neither the merge queue nor a push to main is
+  # linted: their commits were linted in their pull request, and the
+  # release commit is written by semantic-release.
   commits:
     runs-on: ubuntu-latest
     timeout-minutes: 10

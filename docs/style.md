@@ -46,11 +46,10 @@ The code was reformatted with Biome in one commit, which changed nothing
 else. [`.git-blame-ignore-revs`](../.git-blame-ignore-revs) lists it, so
 GitHub's blame looks past it; locally, run
 `git config blame.ignoreRevsFile .git-blame-ignore-revs` once. The file
-names a commit by its SHA, and GitHub's rebase merge, the only one `main`
-allows, writes each commit anew with a new SHA. So when a pull request
-that adds a formatting commit is merged, replace its SHA in the file
-with the one it got on `main`, or merge that pull request with a merge
-commit, which keeps it.
+names a commit by its SHA, and the merge queue merges every pull request
+with a merge commit, which keeps its commits' SHAs
+([testing.md](testing.md#the-merge-queue)). So a pull request that adds
+a formatting commit can list its SHA in the file before it is merged.
 
 ## TypeScript
 

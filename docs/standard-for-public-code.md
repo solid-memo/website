@@ -129,12 +129,14 @@ cannot be read without signing in:
 - The labels `deck`, `interop` and `i18n`, which the issue forms set,
   exist.
 - Secret scanning and push protection are on.
-- "Allow auto-merge" is on, so Renovate can merge its pull requests once
-  `ci-ok` passes.
+- "Allow auto-merge" is on, so Renovate can add its pull requests to the
+  merge queue, which merges them once `ci-ok` passes there too.
 - The ruleset on `main` (24560297) requires a pull request with no
-  approvals and the `ci-ok` check, with the branch up to date. It allows
-  rebase merges and merge commits. Its bypass list names "Deploy keys",
-  for the release, which pushed 1.0.0 through it.
+  approvals, the `ci-ok` check, and the merge queue, which merges with
+  merge commits and builds each pull request on top of `main` and those
+  ahead of it, so the branch need not be up to date
+  ([testing.md](testing.md#the-merge-queue)). Its bypass list names
+  "Deploy keys", for the release, which pushed 1.0.0 through it.
 - The ruleset "version tags" (25032384) protects `refs/tags/v*`: it
   restricts their creation, update and deletion. Its bypass list, which
   the maintainer set to "Deploy keys" and the Repository admin role,
@@ -281,8 +283,8 @@ What holds today, and what does not, criterion by criterion.
 - MUST, not met — commit messages link to issues and discussions.
   CONTRIBUTING.md asks for a `Refs: #NN` footer, but no commit on
   `main` has one, and the maintainer's own changes start from no issue.
-  `main` now allows merge commits, which name their pull request. This
-  too applies from 1.x (decision 12).
+  The merge queue merges every pull request with a merge commit, which
+  names it. This too applies from 1.x (decision 12).
 - SHOULD, met — a distributed version control system: Git.
 - SHOULD, met — guidelines ask for one logical change per commit.
 - SHOULD, met — released versions marked. semantic-release tags each
@@ -404,9 +406,10 @@ What holds today, and what does not, criterion by criterion.
   CI runs on every pull request, and `ci-ok` passes only when all its
   jobs did: `build`, `library` (the deck library compared with the
   change's base), `crosscheck`, `pod`, `contract`, `journeys` and `docs`.
-  The ruleset requires `ci-ok`, with the branch up to date, and no one
-  can bypass it. The interop workflow's advisory servers report and do
-  not gate, by design ([testing.md](testing.md)).
+  The ruleset requires `ci-ok`, on the pull request and again in the
+  merge queue, on top of `main`, and no one can bypass it. The interop
+  workflow's advisory servers report and do not gate, by design
+  ([testing.md](testing.md)).
 - MUST, met — guidelines for structuring contributions in
   CONTRIBUTING.md.
 - MUST, met — an active contributor who reviews contributions: the
@@ -588,8 +591,11 @@ Only an admin of the repository can change these. All are done:
   interop and translation forms.
 - [x] **The ruleset on `main`** (24560297). It requires `ci-ok`, and its
   bypass list is empty, so Renovate has no bypass. *(7, 12)*
-- [x] **Allow auto-merge.** On, so Renovate can merge its pull requests
-  once `ci-ok` passes.
+- [x] **Allow auto-merge.** On, so Renovate can add its pull requests to
+  the merge queue once `ci-ok` passes.
+- [ ] **The merge queue on `main`.** The ruleset on `main` requires the
+  merge queue, merging with merge commits, and no longer requires
+  branches to be up to date (#76). *(7, 12)*
 - [x] **The `github-pages` environment.** `main` is its only deployment
   branch. The deploy runs from `main` even when it deploys a version's
   tag, so this still holds. *(1, 12)*
@@ -666,9 +672,9 @@ them:
   reason only shrinks.
 - **Criterion 6, links to issues.** No commit on `main` has a `Refs:`
   footer, and most changes start from no issue. It applies from 1.x
-  (decision 12). Opening an issue for each change, adding `Refs:` with
-  the pull request, or merging with a merge commit, which names the pull
-  request, would close it.
+  (decision 12). Every merge commit now names its pull request, since
+  the merge queue merges with one; opening an issue for each change, or
+  adding `Refs:` with the pull request, would close the rest.
 - **Criterion 9, examples for all functionality.** Guest mode, the theme,
   switching instances and deck files need a journey or a worked example
   in the user guide.

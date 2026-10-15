@@ -378,9 +378,10 @@ run check`). The page objects and journeys are themselves tests, run by
 ## Continuous integration
 
 [ci.yml](../.github/workflows/ci.yml) runs on every pull request, a
-fork's included, on every push to `main`, and by hand. A branch's
-pushes alone run nothing, so a pull request's commits are not checked
-twice. Its jobs, side by side:
+fork's included, in the merge queue ([below](#the-merge-queue)), on
+every push to `main`, and by hand. A branch's pushes alone run nothing,
+so a pull request's commits are not checked twice for one push. Its
+jobs, side by side:
 
 | Job | What it checks |
 |---|---|
@@ -391,7 +392,7 @@ twice. Its jobs, side by side:
 | `contract (<server>)` | that each advisory server starts and meets the contract |
 | `journeys` | the user journeys ([User journeys](#user-journeys)) |
 | `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
-| `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)); on a push to `main`, nothing |
+| `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)); in the merge queue or on a push to `main`, nothing |
 | `ci-ok` | that every job above passed |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset
@@ -407,6 +408,32 @@ green run on a release commit on `main`
 ([deployment.md](deployment.md#github-pages-automatic)). Every check of
 `ns/` and `decks/` runs here, the comparison with the base included, so
 `ci-ok` gates them all and nothing is checked twice.
+
+### The merge queue
+
+A pull request is merged through GitHub's merge queue, never straight
+to `main`: the ruleset on `main` requires it, in place of a branch up
+to date with `main`. Once the pull request's own `ci-ok` passes, "Merge
+when ready" (or Renovate's automerge, which turns on GitHub's
+auto-merge) adds it to the queue. GitHub then builds a branch,
+`gh-readonly-queue/main/…`, of `main`, the pull requests ahead of it
+and this one, and runs ci.yml on it (`merge_group`). When `ci-ok`
+passes there, `main` moves to exactly that commit; when it fails, the
+pull request leaves the queue, its timeline saying why, and the ones
+behind it are built again without it. So `main` only ever gets a commit
+CI passed as it lands, and no one has to bring a branch up to date with
+`main`: each pull request had to be, and CI run on it again, before it
+could merge, and again whenever another merged first. The queue merges
+with a merge commit, so a pull request's commits keep their SHAs on
+`main`, and the merge commit names the pull request.
+
+A queue run checks what a pull request run checks, with two
+differences: `commits` lints nothing, the commits having been linted in
+their pull request, and the base `library` compares with is the commit
+of `main` the queue built on, so the pull requests ahead are part of
+the change. Each queue branch is its own
+concurrency group, and release.yml and deploy.yml follow push runs on
+`main` alone, so a queue run releases and deploys nothing.
 
 A newer run for the same pull request or branch cancels the one still
 going, so a pull request pushed to again is checked once, at its latest
