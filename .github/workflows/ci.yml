@@ -62,7 +62,8 @@ jobs:
       # Turbo's cache, so a task whose inputs have not changed is not run
       # again. The key is this job's alone: a key is saved once, by the
       # first job to finish, and another job's cache would not hold the
-      # check's results.
+      # check's results. Each run restores the last one and adds to it, so
+      # entries older than two weeks are evicted (TURBO_CACHE_MAX_AGE).
       - uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -77,11 +78,15 @@ jobs:
       # boundaries, the docs' index and the shipped dependencies' maturity
       # (docs/testing.md).
       - run: npm run check
+        env:
+          TURBO_CACHE_MAX_AGE: 14d
       # Each package's coverage, in the run's summary; the thresholds that
       # gate are each package's own, in npm run check.
       - if: success() || failure()
         run: npm run coverage:summary
-      - run: npm run build
+      # The app's build states the commit (GITHUB_SHA), so it is never
+      # found in the cache: it reads the cache but adds nothing to it.
+      - run: npm run build -- --cache=local:r
 
   # The change compared with its base. The deck library
   # (docs/deck-library.md#checks): no published version
