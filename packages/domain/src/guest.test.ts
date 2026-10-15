@@ -232,6 +232,28 @@ describe("adding a guest's study to an instance", () => {
     expect(mentionsGuest({ a: 1, b: [null, true, "https://pod.example/"] })).toBe(false);
   });
 
+  it("finds the guest's pod however its URL is spelled, by the origin it parses to", () => {
+    for (const text of [
+      `See <${GUEST_ORIGIN}decks/x.ttl>.`,
+      "[card](HTTPS://Guest.Solid-Memo.Invalid/x)",
+      "https://guest.solid-memo.invalid",
+      "https://guest.solid-memo.invalid:443/x",
+      "https://someone@guest.solid-memo.invalid/",
+      "https://guest%2Esolid-memo.invalid/",
+      `https://${GUEST_ORIGIN}`,
+    ])
+      expect(mentionsGuest(text)).toBe(true);
+    for (const text of [
+      "https://evil.example/?next=guest.solid-memo.invalid/",
+      "https://guest.solid-memo.invalid.example/",
+      "https://guest.solid-memo.invalid:8443/",
+      "http://guest.solid-memo.invalid/",
+      "https://[",
+      "guest.solid-memo.invalid",
+    ])
+      expect(mentionsGuest(text)).toBe(false);
+  });
+
   it("keeps a note of a deck or group added, per guest's and instance, and reads back only a note it wrote", () => {
     expect(guestMergeKey(`${GUEST_INSTANCE_URL}catalog.ttl#deck-1`, TARGET.slice(0, -1))).toBe(
       `${GUEST_INSTANCE_URL}catalog.ttl#deck-1 added to ${TARGET}`,

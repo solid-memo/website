@@ -251,9 +251,30 @@ export function graftOfGuestTree(
   return tree.children.some((node) => node.kind === "group") ? graftOf(tree.children) : [];
 }
 
+/**
+ * Each `https://` in a text, through the end of its host (and port): every
+ * one, also one that starts inside another.
+ */
+const HTTPS_AUTHORITY = /(?=(https:\/\/[^\s/\\?#<>"'()]*))/gi;
+
+/** The guest's pod's origin, as a parsed URL reports it. */
+const GUEST_POD_ORIGIN = new URL(GUEST_ORIGIN).origin;
+
+/**
+ * Whether a text names the guest's pod: a URL in it whose origin, once
+ * parsed, is the guest's, however its host is spelled (in capitals, with
+ * the port, without the slash after it). Every text holding `GUEST_ORIGIN`
+ * is one.
+ */
+function namesGuestPod(text: string): boolean {
+  return Array.from(text.matchAll(HTTPS_AUTHORITY), ([, authority]) => authority!).some(
+    (authority) => URL.canParse(authority) && new URL(authority).origin === GUEST_POD_ORIGIN,
+  );
+}
+
 /** Whether a value names the guest's pod anywhere: in any text it holds, at any depth. */
 export function mentionsGuest(value: unknown): boolean {
-  if (typeof value === "string") return value.includes(GUEST_ORIGIN);
+  if (typeof value === "string") return namesGuestPod(value);
   if (typeof value !== "object" || value === null) return false;
   return Object.values(value).some(mentionsGuest);
 }
