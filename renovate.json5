@@ -15,6 +15,11 @@
     // the pull request is where the update's commit links to.
     automerge: true,
     automergeType: 'pr',
+    // Its pull requests and its Dependency Dashboard carry the dependencies
+    // label, so that dependency updates can be filtered in, or out, of the
+    // issue and pull request lists.
+    labels: ['dependencies'],
+    dependencyDashboardLabels: ['dependencies'],
     // Its commits follow Conventional Commits, as everyone's do
     // (CONTRIBUTING.md#commit-messages): config:recommended's
     // :semanticPrefixFixDepsChoreOthers makes an update of what the app
