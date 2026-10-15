@@ -242,7 +242,16 @@ the release commit, and since only a release commit is deployed, the
 site would never get a new version. The release pushes with a deploy
 key instead: an SSH key with write access to this repository alone,
 which GitHub lets a ruleset's bypass list name, and whose pushes start
-workflows as anyone's do. Only the release workflow can use it.
+workflows as anyone's do. Only the release workflow can use it: its
+private key is a secret of the `release` environment, which allows only
+`main`. A repository secret can be read by any workflow that runs in the
+repository, one pushed on any other branch included, so anyone with
+write access could have pushed past the ruleset with it and tagged a
+version to be deployed. An environment's secret is read only by a job
+that names the environment, in a run on a branch it allows, and
+release.yml is the only workflow on `main` that names `release`. That
+holds only once no repository secret of the same name is left: a job
+whose environment lacks a secret reads the repository's.
 
 The maintainer sets it up once, before the workflow first runs on
 `main`, so that the merge that adds it releases 1.0.0 straight away:
@@ -256,9 +265,14 @@ The maintainer sets it up once, before the workflow first runs on
 2. Add `release-key.pub` as a deploy key of the repository, with write
    access (Settings › Deploy keys › Add deploy key, "Allow write
    access").
-3. Add the private key, `release-key`, as the repository secret
-   `SEMANTIC_RELEASE_KEY` (Settings › Secrets and variables › Actions).
-   Then delete both files.
+3. Make the environment `release` (Settings › Environments › New
+   environment), or open it if a run has made it already: GitHub makes
+   one, open to every branch, the first time a run names it. Under
+   "Deployment branches and tags", choose "Selected branches and tags"
+   and add the branch `main`, and nothing else. Add the private key,
+   `release-key`, as its environment secret `SEMANTIC_RELEASE_KEY`.
+   Then delete both files, and any repository secret of that name
+   (Settings › Secrets and variables › Actions).
 4. Add "Deploy keys" to the bypass list of the ruleset on `main`
    (Settings › Rules), so that the release commit needs no pull request.
 5. Add a ruleset for tags matching `refs/tags/v*` that restricts their
@@ -269,11 +283,16 @@ The maintainer sets it up once, before the workflow first runs on
    a commit and have it deployed; the admin's bypass is for tagging by
    hand ([below](#when-a-release-fails)).
 
+Both bypass lists name "Deploy keys", which lets every deploy key with
+write access past them, not only this one. So this key stays the
+repository's only deploy key with write access: any other is added
+without "Allow write access".
+
 Without the secret, the workflow says so and releases nothing; once
 it is set, run the workflow by hand ([below](#when-a-release-fails)) to
 release what is waiting. To
-change the key, add the new one as a deploy key, replace the secret,
-then delete the old deploy key.
+change the key, add the new one as a deploy key, replace the
+environment's secret, then delete the old deploy key.
 
 ## When a release fails
 
@@ -287,8 +306,9 @@ next push to `main` that passes CI also tries again.
   not write): nothing was pushed, and the next run releases as if
   nothing had happened.
 - **The push was refused**: `main` moved on while the release ran, or
-  the deploy key or the bypass is missing. Nothing was tagged; the next
-  run releases from the new tip.
+  the deploy key, its secret in the `release` environment or the bypass
+  is missing. Nothing was tagged; the next run releases from the new
+  tip.
 - **The release commit is on `main`, but not its tag** (the tag's push
   failed): semantic-release, finding no tag, would release the same
   version again on top of it, so every run of the workflow stops before

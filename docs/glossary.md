@@ -201,6 +201,10 @@ it most. The specifications' versions and status are in
 - **End-to-end test** (e2e): a test of the app's use cases and Solid
   adapters against real Solid servers, in `e2e/pod/`.
   [testing.md](testing.md).
+- **Environment**: a GitHub setting that a job of a workflow names, and
+  that lets it run only on the branches it allows: `github-pages`, to
+  deploy the site, and `release`, whose secret is the release's deploy
+  key, both for `main` alone. [releasing.md](releasing.md#the-deploy-key).
 - **ETag**: a server's tag for one version of a document, which changes
   whenever the document does. The app sends it back, so that it does
   not write over a newer version or read again what it already has.

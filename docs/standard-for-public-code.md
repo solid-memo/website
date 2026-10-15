@@ -611,10 +611,11 @@ Only an admin of the repository can change these. All are done:
   gets a DOI. *(14)*
 - [x] **The release's deploy key**, before the branch
   `semantic-release` is merged. Make an SSH key pair, add its public
-  key as a deploy key with write access, its private key as the secret
-  `SEMANTIC_RELEASE_KEY`, and "Deploy keys" to the bypass list of the
-  ruleset on `main`, as [releasing.md](releasing.md#the-deploy-key)
-  says. *(1, 6, 16)*
+  key as a deploy key with write access, its private key as the
+  repository secret `SEMANTIC_RELEASE_KEY` (to be moved into the
+  `release` environment, below), and "Deploy keys" to the bypass list
+  of the ruleset on `main`, as
+  [releasing.md](releasing.md#the-deploy-key) says. *(1, 6, 16)*
 - [x] **The first release.** The merge of the branch `semantic-release`
   released 1.0.0: the release commit and `v1.0.0` are on `main`.
   *(1, 6, 16)*
@@ -624,6 +625,14 @@ Only an admin of the repository can change these. All are done:
   [releasing.md](releasing.md#the-deploy-key) says. The deploy deploys
   the commit a version tag names, so without it anyone with write
   access could pick what is deployed. *(1)*
+- [ ] **The `release` environment** (#80). Make it, or open it if a run
+  has made it already, with `main` as its only deployment branch, move
+  the key into it as the environment secret `SEMANTIC_RELEASE_KEY`, and
+  delete the repository secret, as
+  [releasing.md](releasing.md#the-deploy-key) says: a repository secret
+  can be read by a workflow on any branch. Keep the release key the
+  only deploy key with write access, as both rulesets' bypass lets every
+  such key past. *(1)*
 - [x] **The DOI.** Add it to `CITATION.cff` and the README, in a pull
   request. *(14)*
 - [ ] **Software Heritage.** Save the repository there. *(14)*
