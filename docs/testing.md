@@ -18,6 +18,7 @@ package's own tests cover its own code — `npm test` fails below that.
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
 npm run check     # Biome's lint, markdownlint and cspell, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
+npm run check:ci  # npm run check without the deck library, as CI's build job runs it (its library job checks the library)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
@@ -386,7 +387,7 @@ jobs, side by side:
 
 | Job | What it checks |
 |---|---|
-| `build` | `npm run check`, then `npm run build`; the coverage of every package goes to the run's summary (`npm run coverage:summary`) |
+| `build` | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), then `npm run build`; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again |
 | `library` | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
 | `crosscheck` | the cross-check script's tests, then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |

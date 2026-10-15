@@ -434,9 +434,11 @@ fails, and so does a version not published there that states
 `foaf:mbox` or lacks the library's [contact](#contact)
 (`contactProblems`). Without a base nothing tells a new version from a
 published one, so that rule does not run. `npm run check` runs
-`library:check` without a base, and so does CI, as a Turbo task of the shacl package
+`library:check` without a base, as a Turbo task of the shacl package
 ([turbo.json](../packages/shacl/turbo.json)), cached until a file it
-reads (`ns/`, `decks/`, its packages' code) changes. CI's `library`
+reads (`ns/`, `decks/`, its packages' code) changes. CI's `build` job
+runs `npm run check:ci`, which leaves it out, since the `library` job
+checks the same and more. CI's `library`
 job ([ci.yml](../.github/workflows/ci.yml),
 [testing.md](testing.md#continuous-integration)) passes a base, on pull
 requests, in the merge queue and on pushes to the default branch, not on
