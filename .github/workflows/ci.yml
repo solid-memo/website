@@ -356,11 +356,16 @@ jobs:
   # A pull request's commits follow Conventional Commits
   # (CONTRIBUTING.md#commit-messages), as commitlint.config.mjs has them:
   # semantic-release chooses each version from them (docs/releasing.md),
-  # and a commit it cannot read is left out of the release. Only the
-  # commits the pull request adds are linted, from its base to its head,
-  # merge commits aside. Neither the merge queue nor a push to main is
-  # linted: their commits were linted in their pull request, and the
-  # release commit is written by semantic-release.
+  # and a commit it cannot read is left out of the release. Each one has
+  # a body that says why, and names its issue, pull request or
+  # discussion, as criterion 6 of the Standard for Public Code asks
+  # (docs/standard-for-public-code.md). Only the commits the pull request
+  # adds are linted, from its base to its head. commitlint skips a merge
+  # commit, so a pull request with one fails: its branch is updated by
+  # rebasing, and the merge queue builds on main anyway. Neither the
+  # merge queue nor a push to main is linted: their commits were linted
+  # in their pull request, and the release commit is written by
+  # semantic-release.
   commits:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -385,6 +390,17 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: npx commitlint --from "$BASE" --to "$HEAD" --verbose
+      - if: github.event_name == 'pull_request'
+        name: No merge commits
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          merges=$(git rev-list --merges "$BASE..$HEAD")
+          if [ -n "$merges" ]; then
+            echo "::error::These merge commits are not linted: $merges. Update the branch by rebasing it on main instead (git rebase origin/main)."
+            exit 1
+          fi
 
   # The one check a merge to main waits for (the ruleset on main is to
   # require it): it passes only when every job above passed. A matrix

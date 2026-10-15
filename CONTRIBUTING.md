@@ -94,9 +94,12 @@ Renovate's included: the release reads the messages to choose the next
 version and to write the changelog ([docs/releasing.md](docs/releasing.md)).
 CI's `commits` job lints a pull request's commits with commitlint
 ([commitlint.config.mjs](commitlint.config.mjs)), and
-`npm run lint:commits` lints your branch's before you push. It lints
-the commits since `origin/main`, so from a fork, sync the fork's `main`
-with this repository's first, or run
+`npm run lint:commits` lints your branch's before you push. Both check
+that every commit has a body and names its issue, and both refuse a
+merge commit, which commitlint does not lint: update your branch by
+rebasing it on `main`. `npm run lint:commits` lints the commits since
+`origin/main`, so from a fork, sync the fork's `main` with this
+repository's first, or run
 `npx commitlint --from upstream/main --to HEAD`, with `upstream` the
 remote that names this repository.
 
@@ -140,17 +143,25 @@ Refs: #42
   whose type releases nothing reaches it with the next version
   ([docs/deployment.md](docs/deployment.md)).
 - **Body:** after a blank line, why the change was made, and what was
-  weighed, wrapped near 72 columns. A commit with no body is fine only
-  when the subject says it all.
+  weighed, wrapped near 72 columns. Every commit has one, and
+  commitlint refuses a commit without it.
 - **Breaking change:** a change that someone has to act on, or loses
   something by ([docs/releasing.md](docs/releasing.md#what-counts-as-breaking)),
   adds `!` after the type or scope (`feat(ns)!:`), and a
   `BREAKING CHANGE:` footer that says what breaks and what to do about
   it; commitlint refuses one without the other. It releases a major
   version (2.0.0), so it needs an issue first.
-- **Footers:** after a blank line, `Refs: #NN` when an issue or a
-  discussion exists for the change, and `Co-Authored-By:` for each
-  co-author.
+- **Footers:** after a blank line, `Refs: #NN`, naming the issue or
+  discussion the change comes from, `Closes: #NN` on the commit that
+  finishes the issue, and `Co-Authored-By:` for each co-author.
+  commitlint refuses a commit that names no issue, pull request or
+  discussion by its number (`#NN`) anywhere in its message. If your
+  change has no issue, open one first, or open the pull request and
+  then amend the commit to name it (`Refs: #NN`) and push again.
+  Renovate's updates are the one exception: a commit cannot name a pull
+  request that has no number yet, so its body ends with the `Why:` line
+  of `commitBody` in [renovate.json5](renovate.json5), and its merge
+  commit names the pull request.
 - **One logical change per commit.** Generated files go in the same
   commit as the change that generated them, and a new deck version goes
   in the same commit as the library index.

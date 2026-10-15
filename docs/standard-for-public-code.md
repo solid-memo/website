@@ -60,7 +60,8 @@ What is left falls into two groups:
    someone other than the author, which cannot be met honestly while the
    project has one maintainer, and is a decided gap until then.
    Criterion 6 is non-compliant: older commits on `main` record no
-   reason, and commits do not link to issues; both apply from 1.0.0 on.
+   reason and link no issue; both apply from 1.0.0 on, and CI now
+   refuses a new commit without a reason or a link.
    Declaring 1.0.0 stable makes the 0.x dependencies it ships a partial
    in criterion 16.
 
@@ -111,8 +112,8 @@ counts above are the Standard's own.
 
 The first release, 1.0.0, brought the MUSTs to 41/46, and criterion 16
 to partial. The five left are in
-criterion 6, the commits on `main` that record no reason, which the
-history keeps, and the links to issues, which need a change of practice;
+criterion 6, the commits on `main` that record no reason or link no
+issue, which the history keeps, though CI now refuses new ones;
 in criterion 7, a second reviewer, whose reviews would also cover the
 source, the policy, the tests and the docs; and in criterion 16, the
 dependencies before 1.0.0 that the stable app ships.
@@ -276,15 +277,20 @@ What holds today, and what does not, criterion by criterion.
   carry one (`commitBody` in `renovate.json5`): each update, from what
   version to what, where, its source and release notes, and why. From
   1.0.0 on, every commit follows Conventional Commits, so its type
-  records what kind of decision it was, and commitlint checks that in
-  CI; it does not check that a body is there. The history cannot
-  change, so this stays partial; the maintainer decided that it applies
-  from 1.x (decision 12).
-- MUST, not met — commit messages link to issues and discussions.
-  CONTRIBUTING.md asks for a `Refs: #NN` footer, but no commit on
-  `main` has one, and the maintainer's own changes start from no issue.
-  The merge queue merges every pull request with a merge commit, which
-  names it. This too applies from 1.x (decision 12).
+  records what kind of decision it was. CI's `commits` job checks with
+  commitlint that every commit of a pull request has a body, and refuses
+  a pull request with a merge commit, which commitlint skips. The
+  history cannot change, so this stays partial; the maintainer decided
+  that it applies from 1.x (decision 12).
+- MUST, partial — commit messages link to issues and discussions.
+  CONTRIBUTING.md asks for a `Refs: #NN` footer, and CI's `commits` job
+  checks with commitlint that every commit of a pull request names an
+  issue, a pull request or a discussion by its number. Renovate's
+  updates, which cannot name their pull request, carry the `Why:` line
+  of their `commitBody` instead, and their merge commit names the pull
+  request. The merge queue merges every pull request with a merge
+  commit, which names it. Older commits on `main` link nothing, and the
+  history cannot change; this too applies from 1.x (decision 12).
 - SHOULD, met — a distributed version control system: Git.
 - SHOULD, met — guidelines ask for one logical change per commit.
 - SHOULD, met — released versions marked. semantic-release tags each
@@ -676,14 +682,12 @@ them:
   the history keeps them.
 - **Criterion 6, decisions in commit messages.** 91 of the 392 commits
   on `main` record no reason, and rewriting `main` to add them is not an
-  option. The requirement applies from 1.x (decision 12): new commits
-  have a body and a Conventional Commits type, so the share without a
-  reason only shrinks.
-- **Criterion 6, links to issues.** No commit on `main` has a `Refs:`
-  footer, and most changes start from no issue. It applies from 1.x
-  (decision 12). Every merge commit now names its pull request, since
-  the merge queue merges with one; opening an issue for each change, or
-  adding `Refs:` with the pull request, would close the rest.
+  option. The requirement applies from 1.x (decision 12): CI refuses a
+  new commit with no body, so the share without a reason only shrinks.
+- **Criterion 6, links to issues.** Older commits on `main` link no
+  issue, and the history keeps them. It applies from 1.x (decision 12):
+  CI refuses a new commit that names no issue, pull request or
+  discussion, and every merge commit names its pull request.
 - **Criterion 9, examples for all functionality.** Guest mode, the theme,
   switching instances and deck files need a journey or a worked example
   in the user guide.
