@@ -23,8 +23,8 @@
  * Every commit records its decision and links its discussion (criterion
  * 6 of the Standard for Public Code, docs/standard-for-public-code.md):
  * it has a body that says why, and names an issue, a pull request or a
- * discussion by its number anywhere in the message (`Refs: #72`,
- * `Closes #68`, `Fixes #69`). A Renovate update cannot name its pull
+ * discussion by its number anywhere in the message (`Closes: #72`,
+ * `Fixes #69`, `Refs: #68`). A Renovate update cannot name its pull
  * request, which has no number when the commit is written; its body
  * ends with the line that RENOVATE_WHY starts (commitBody in renovate.json5)
  * instead, and its merge commit names the pull request. Every other rule
@@ -44,7 +44,7 @@ function referencesOrRenovate({ references, raw }) {
   const renovate = raw.split("\n").some((line) => line.startsWith(RENOVATE_WHY));
   return [
     references.length > 0 || renovate,
-    "the message must name its issue, pull request or discussion, such as `Refs: #42` (CONTRIBUTING.md#commit-messages)",
+    "the message must name its issue, pull request or discussion, such as `Closes: #42` (CONTRIBUTING.md#commit-messages)",
   ];
 }
 

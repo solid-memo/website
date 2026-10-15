@@ -283,7 +283,7 @@ What holds today, and what does not, criterion by criterion.
   history cannot change, so this stays partial; the maintainer decided
   that it applies from 1.x (decision 12).
 - MUST, partial — commit messages link to issues and discussions.
-  CONTRIBUTING.md asks for a `Refs: #NN` footer, and CI's `commits` job
+  CONTRIBUTING.md asks for a `Closes: #NN` footer, and CI's `commits` job
   checks with commitlint that every commit of a pull request names an
   issue, a pull request or a discussion by its number. Renovate's
   updates, which cannot name their pull request, carry the `Why:` line
