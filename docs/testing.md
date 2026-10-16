@@ -31,6 +31,7 @@ npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (te
 npm run test:roundtrip -w @solid-memo/solid   # every library release through a draft and back (below)
 npm run crosscheck # the pySHACL cross-check, as CI runs it (needs scripts/requirements-ci.txt)
 npm run test:crosscheck   # the cross-check script's own tests, Python's unittest (needs scripts/requirements-ci.txt too)
+npm run check:closes -- --base origin/main   # a commit since the branch left main closes an issue (add --body-file <file> for the pull request's body), as CI's commits job checks it (CONTRIBUTING.md)
 npm run check:breaking -- --base origin/main   # the public API against where the branch left main, as CI's library job checks it (docs/releasing.md)
 npm run test:pod  # the end-to-end tests, against the Solid servers they start in Docker
 npm run servers -w @solid-memo/e2e-pod   # pull or build those servers' images ahead (`-- css-6` for one)
@@ -394,7 +395,7 @@ jobs, side by side:
 | `contract (<server>)` | that each advisory server starts and meets the contract |
 | `journeys` | the user journeys ([User journeys](#user-journeys)) |
 | `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
-| `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)); in the merge queue or on a push to `main`, nothing |
+| `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
 | `ci-ok` | that every job above passed |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset

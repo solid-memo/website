@@ -111,7 +111,7 @@ card that points nowhere, and a published release cannot be edited.
 The check runs when the author publishes, not on every save, so a
 draft can still hold a link that is not up yet.
 
-Refs: #42
+Closes: #42
 ```
 
 - **Header:** `type(scope): subject`. The scope is optional, and names
@@ -151,13 +151,16 @@ Refs: #42
   `BREAKING CHANGE:` footer that says what breaks and what to do about
   it; commitlint refuses one without the other. It releases a major
   version (2.0.0), so it needs an issue first.
-- **Footers:** after a blank line, `Refs: #NN`, naming the issue or
-  discussion the change comes from, `Closes: #NN` on the commit that
-  finishes the issue, and `Co-Authored-By:` for each co-author.
-  commitlint refuses a commit that names no issue, pull request or
-  discussion by its number (`#NN`) anywhere in its message. If your
-  change has no issue, open one first, or open the pull request and
-  then amend the commit to name it (`Refs: #NN`) and push again.
+- **Footers:** after a blank line, `Closes: #NN` (or `Fixes: #NN`,
+  `Resolves: #NN`), naming the issue the change finishes; only these
+  keywords make GitHub close the issue when the change reaches `main`.
+  `Refs: #NN` names an issue or discussion without closing it: one the
+  change relates to, or one that a series of pull requests finishes
+  over time. `Co-Authored-By:` follows for each co-author. commitlint
+  refuses a commit that names no issue, pull request or discussion by
+  its number (`#NN`) anywhere in its message. If your change has no
+  issue, open one first, or open the pull request and then amend the
+  commit to name it (`Closes: #NN`) and push again.
   Renovate's updates are the one exception: a commit cannot name a pull
   request that has no number yet, so its body ends with the `Why:` line
   of `commitBody` in [renovate.json5](renovate.json5), and its merge
@@ -167,7 +170,14 @@ Refs: #42
   in the same commit as the library index.
 
 A pull request addresses one issue. Two unrelated fixes are two pull
-requests.
+requests. It closes the issue: its body, or one of its commits, says
+`Closes: #NN` (or `Fixes:`, `Resolves:`), and CI's `commits` job fails
+a pull request where neither does (`npm run check:closes`). A pull
+request that is one step of its issue, and leaves it open, says
+`Refs: #NN` in its body instead and checks the template's "One step"
+box. Renovate's pull requests, which have no issue, are left out. The
+job reads the body when it runs, so after you edit the body, run the
+job again.
 
 ## Review
 

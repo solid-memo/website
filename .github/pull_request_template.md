@@ -9,11 +9,18 @@ first (SECURITY.md).
 
 <!-- What this changes, and why. -->
 
-Refs: #
+Closes: #
+
+<!--
+Closes:, Fixes: or Resolves: closes the issue when the pull request is
+merged; Refs: does not. If this pull request is one step of its issue
+and does not finish it, write Refs: instead, and check "One step" below.
+-->
 
 ## Checklist
 
 - [ ] **One issue.** This pull request addresses one issue, linked above.
+- [ ] **One step.** This pull request does not finish its issue, so it says `Refs:`, not `Closes:`. Leave this unchecked otherwise.
 - [ ] **Done**, as [AGENTS.md](https://github.com/solid-memo/website/blob/main/AGENTS.md) defines it: `npm run check` passes (lint, Markdown and spelling included), `npm run lint:reuse` too if a file was added, and `npm run crosscheck` too if `ns/` or `decks/` changed.
 - [ ] **Tests.** New and changed code has its tests, and every package stays at 100% coverage ([docs/testing.md](https://github.com/solid-memo/website/blob/main/docs/testing.md)).
 - [ ] **Docs.** The docs say what changed, and a new page in `docs/` is listed in [docs/README.md](https://github.com/solid-memo/website/blob/main/docs/README.md).

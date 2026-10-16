@@ -233,8 +233,9 @@ A commit message follows Conventional Commits, as
   characters;
 - after a blank line, a **body** that says why: the problem, the choice
   made and what it rules out, wrapped at 72 characters;
-- a `Refs: #12` or `Fixes: #12` line when an issue or a discussion
-  exists, and a `BREAKING CHANGE:` line for a breaking change.
+- a `Closes: #12` line naming the issue the change finishes, or a
+  `Refs: #12` line for one it only relates to, and a `BREAKING CHANGE:`
+  line for a breaking change.
 
 `git log` shows many examples; the commits before version 1.0.0 have
 the same body, under a header in sentence case, almost always with no
