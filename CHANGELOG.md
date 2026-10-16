@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.3.0](https://github.com/solid-memo/website/compare/v3.2.0...v3.3.0) (2026-10-16)
+
+### Features
+
+* **ui:** link the docs from the footer ([939fc6f](https://github.com/solid-memo/website/commit/939fc6fae0ca39e2933905cda2237f065afb0568)), closes [#112](https://github.com/solid-memo/website/issues/112)
+* **web:** generate the sitemap and robots.txt from CNAME ([9e09627](https://github.com/solid-memo/website/commit/9e0962763f8ccf3a8a8f43782669f1e92dfc6515)), closes [#112](https://github.com/solid-memo/website/issues/112)
+* **web:** link the docs from the About page, the page without script and publiccode.yml ([d9c3a6e](https://github.com/solid-memo/website/commit/d9c3a6edcb3d2171ce1a1de8979dee03b49d5f40)), closes [#112](https://github.com/solid-memo/website/issues/112)
+* **web:** publish the docs at /docs/ with every release, drawn in Chromium ([81259e1](https://github.com/solid-memo/website/commit/81259e13f3f85768c8b27b446fe82700e23c3635)), closes [#112](https://github.com/solid-memo/website/issues/112)
+
 ## [3.2.0](https://github.com/solid-memo/website/compare/v3.1.0...v3.2.0) (2026-10-16)
 
 ### Features
