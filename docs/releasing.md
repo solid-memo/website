@@ -81,7 +81,8 @@ styles, and whatever these docs do not name. These docs as the site
 serves them, at `/docs/` and below it, are not part of it either: a
 page may be renamed, split or merged in any version
 ([deployment.md](deployment.md#what-the-artifact-contains)), as may
-`robots.txt` and `sitemap.xml`.
+`robots.txt`, `sitemap.xml` and the archive of a release's docs
+([deployment.md](deployment.md#a-releases-docs-as-an-archive)).
 
 ## What counts as breaking
 

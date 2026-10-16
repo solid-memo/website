@@ -224,3 +224,25 @@ the last build. Both builds need Chromium; without it, a build fails
 with a message that names `npm run browsers`, unless
 `DOCS_DIAGRAMS=skip` is set, which builds the docs with each diagram's
 source in place of its drawing ([configuration.md](configuration.md#docs_diagrams)).
+
+## A release's docs as an archive
+
+`npm run docs:archive -- X.Y.Z` renders the docs as release X.Y.Z
+serves them under its version, at `/docs/X.Y.Z/`
+([markdown.md](markdown.md#the-docs-as-a-site)): the same pages one
+folder deeper, their links into the repository at the tag `vX.Y.Z`,
+never indexed, and each with a note that links the latest docs. It
+packs them into `release-assets/docs-X.Y.Z.tar.gz`, which git ignores:
+the pages, `docs.css`, every diagram's light and dark drawing and the
+font's license, `OFL-Fredoka.txt`, all under `docs/`
+([docsArchive.ts](../scripts/docsArchive.ts)). The repository's
+address is the one the site's build takes (`VITE_REPO_URL`,
+[configuration.md](configuration.md#vite_repo_url)).
+
+An archive is rendered once, by that release's own code, and never
+again, so it is never written without its drawings: it draws every
+diagram in Chromium whatever `DOCS_DIAGRAMS` says, fails without it,
+and checks each drawing as the build does (`checkSvg`, and the font's
+notice in it) before it packs them, with the system's `tar`. The
+archive's address and contents are not part of the public API
+([releasing.md](releasing.md#the-public-api)).

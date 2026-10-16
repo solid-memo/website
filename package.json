@@ -52,6 +52,7 @@
     "check:reuse": "node -e \"import('./scripts/checkReuse.ts').then((m) => m.run(process))\"",
     "coverage:summary": "node -e \"import('./scripts/coverageSummary.ts').then((m) => m.run(process))\"",
     "release:version": "node -e \"import('./scripts/releaseVersion.ts').then((m) => m.run(process))\" --",
+    "docs:archive": "node -e \"import('./scripts/docsArchive.ts').then((m) => m.run(process))\" --",
     "lint": "biome check .",
     "format": "biome check --write .",
     "lint:markdown": "markdownlint-cli2",

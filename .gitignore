@@ -5,6 +5,8 @@
 node_modules/
 dist/
 coverage/
+# A release's docs, packed for its GitHub release (scripts/docsArchive.ts).
+release-assets/
 __pycache__/
 .turbo/
 e2e/pod/logs/
