@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-14T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-16T17:30:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -6375,12 +6375,12 @@
                   "HTTP-Statuscodes"@de ,
                   "Códigos de estado HTTP"@es ,
                   "Codes de statut HTTP"@fr ;
-    dcterms:description "Every HTTP status code and its reason phrase. The list follows MDN's HTTP response status codes reference; the codes and names themselves are defined by the IETF and recorded in the IANA HTTP Status Code Registry."@en ,
-                        "Varje HTTP-statuskod och dess statusfras. Listan följer MDN:s referens över HTTP-statuskoder; koderna och fraserna definieras av IETF och förs in i IANA:s register över HTTP-statuskoder. Statusfraserna står på engelska, så som de skrivs i HTTP."@sv ,
-                        "모든 HTTP 상태 코드와 그 사유 구문. 목록은 MDN의 HTTP 응답 상태 코드 문서를 따르며, 코드와 이름 자체는 IETF가 정의하고 IANA HTTP Status Code Registry에 기록되어 있다."@ko ,
-                        "Jeder HTTP-Statuscode und sein Statustext. Die Liste folgt der MDN-Referenz zu den HTTP-Antwortstatuscodes; die Codes und Bezeichnungen selbst legt die IETF fest, und sie sind in der IANA HTTP Status Code Registry verzeichnet."@de ,
-                        "Cada código de estado HTTP y su frase de estado. La lista sigue la referencia de códigos de estado de respuesta HTTP de MDN; los códigos y sus nombres los define el IETF y se recogen en el IANA HTTP Status Code Registry."@es ,
-                        "Chaque code de statut HTTP et son intitulé. La liste suit la référence des codes de statut de réponse HTTP de MDN ; les codes et leurs intitulés sont définis par l’IETF et consignés dans l’IANA HTTP Status Code Registry."@fr ;
+    dcterms:description "Every HTTP status code and its reason phrase. The list follows MDN's HTTP response status codes reference; the codes and names themselves are defined by the IETF and recorded in the IANA HTTP Status Code Registry. Each card has a short note on how the status is used in practice."@en ,
+                        "Varje HTTP-statuskod och dess statusfras. Listan följer MDN:s referens över HTTP-statuskoder; koderna och fraserna definieras av IETF och förs in i IANA:s register över HTTP-statuskoder. Statusfraserna står på engelska, så som de skrivs i HTTP. Varje kort har en kort anteckning på engelska om hur statusen används i praktiken."@sv ,
+                        "모든 HTTP 상태 코드와 그 사유 구문. 목록은 MDN의 HTTP 응답 상태 코드 문서를 따르며, 코드와 이름 자체는 IETF가 정의하고 IANA HTTP Status Code Registry에 기록되어 있다. 각 카드에는 그 상태 코드가 실제로 어떻게 쓰이는지에 대한 짧은 영어 메모가 있다."@ko ,
+                        "Jeder HTTP-Statuscode und sein Statustext. Die Liste folgt der MDN-Referenz zu den HTTP-Antwortstatuscodes; die Codes und Bezeichnungen selbst legt die IETF fest, und sie sind in der IANA HTTP Status Code Registry verzeichnet. Jede Karte hat eine kurze englische Notiz dazu, wie der Status in der Praxis verwendet wird."@de ,
+                        "Cada código de estado HTTP y su frase de estado. La lista sigue la referencia de códigos de estado de respuesta HTTP de MDN; los códigos y sus nombres los define el IETF y se recogen en el IANA HTTP Status Code Registry. Cada tarjeta lleva una breve nota en inglés sobre cómo se usa el estado en la práctica."@es ,
+                        "Chaque code de statut HTTP et son intitulé. La liste suit la référence des codes de statut de réponse HTTP de MDN ; les codes et leurs intitulés sont définis par l’IETF et consignés dans l’IANA HTTP Status Code Registry. Chaque carte porte une courte note en anglais sur l’usage du statut en pratique."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
@@ -6407,10 +6407,11 @@
                  "codes HTTP"@fr ,
                  "web"@fr ;
     dcat:first <https://solid-memo.com/decks/http-status-codes/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/http-status-codes/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/http-status-codes/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/http-status-codes/v1.ttl> ,
-                    <https://solid-memo.com/decks/http-status-codes/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/http-status-codes/v2.ttl> .
+                    <https://solid-memo.com/decks/http-status-codes/v2.ttl> ,
+                    <https://solid-memo.com/decks/http-status-codes/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/http-status-codes/v3.ttl> .
 
 <https://solid-memo.com/decks/http-status-codes/v1.ttl>
     a dcat:Dataset ;
@@ -6423,6 +6424,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/http-status-codes/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "HTTP status codes"@en ,
+                  "HTTP-statuskoder"@sv ,
+                  "HTTP 상태 코드"@ko ,
+                  "HTTP-Statuscodes"@de ,
+                  "Códigos de estado HTTP"@es ,
+                  "Codes de statut HTTP"@fr ;
+    dcterms:description "Every HTTP status code and its reason phrase. The list follows MDN's HTTP response status codes reference; the codes and names themselves are defined by the IETF and recorded in the IANA HTTP Status Code Registry."@en ,
+                        "Varje HTTP-statuskod och dess statusfras. Listan följer MDN:s referens över HTTP-statuskoder; koderna och fraserna definieras av IETF och förs in i IANA:s register över HTTP-statuskoder. Statusfraserna står på engelska, så som de skrivs i HTTP."@sv ,
+                        "모든 HTTP 상태 코드와 그 사유 구문. 목록은 MDN의 HTTP 응답 상태 코드 문서를 따르며, 코드와 이름 자체는 IETF가 정의하고 IANA HTTP Status Code Registry에 기록되어 있다."@ko ,
+                        "Jeder HTTP-Statuscode und sein Statustext. Die Liste folgt der MDN-Referenz zu den HTTP-Antwortstatuscodes; die Codes und Bezeichnungen selbst legt die IETF fest, und sie sind in der IANA HTTP Status Code Registry verzeichnet."@de ,
+                        "Cada código de estado HTTP y su frase de estado. La lista sigue la referencia de códigos de estado de respuesta HTTP de MDN; los códigos y sus nombres los define el IETF y se recogen en el IANA HTTP Status Code Registry."@es ,
+                        "Chaque code de statut HTTP et son intitulé. La liste suit la référence des codes de statut de réponse HTTP de MDN ; les codes et leurs intitulés sont définis par l’IETF et consignés dans l’IANA HTTP Status Code Registry."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/http-status-codes/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "HTTP status codes"@en ,
@@ -6431,18 +6450,19 @@
                   "HTTP-Statuscodes"@de ,
                   "Códigos de estado HTTP"@es ,
                   "Codes de statut HTTP"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/http-status-codes/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/http-status-codes/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "Every HTTP status code and its reason phrase. The list follows MDN's HTTP response status codes reference; the codes and names themselves are defined by the IETF and recorded in the IANA HTTP Status Code Registry."@en ,
-                        "Varje HTTP-statuskod och dess statusfras. Listan följer MDN:s referens över HTTP-statuskoder; koderna och fraserna definieras av IETF och förs in i IANA:s register över HTTP-statuskoder. Statusfraserna står på engelska, så som de skrivs i HTTP."@sv ,
-                        "모든 HTTP 상태 코드와 그 사유 구문. 목록은 MDN의 HTTP 응답 상태 코드 문서를 따르며, 코드와 이름 자체는 IETF가 정의하고 IANA HTTP Status Code Registry에 기록되어 있다."@ko ,
-                        "Jeder HTTP-Statuscode und sein Statustext. Die Liste folgt der MDN-Referenz zu den HTTP-Antwortstatuscodes; die Codes und Bezeichnungen selbst legt die IETF fest, und sie sind in der IANA HTTP Status Code Registry verzeichnet."@de ,
-                        "Cada código de estado HTTP y su frase de estado. La lista sigue la referencia de códigos de estado de respuesta HTTP de MDN; los códigos y sus nombres los define el IETF y se recogen en el IANA HTTP Status Code Registry."@es ,
-                        "Chaque code de statut HTTP et son intitulé. La liste suit la référence des codes de statut de réponse HTTP de MDN ; les codes et leurs intitulés sont définis par l’IETF et consignés dans l’IANA HTTP Status Code Registry."@fr ;
+    dcterms:description "Every HTTP status code and its reason phrase. The list follows MDN's HTTP response status codes reference; the codes and names themselves are defined by the IETF and recorded in the IANA HTTP Status Code Registry. Each card has a short note on how the status is used in practice."@en ,
+                        "Varje HTTP-statuskod och dess statusfras. Listan följer MDN:s referens över HTTP-statuskoder; koderna och fraserna definieras av IETF och förs in i IANA:s register över HTTP-statuskoder. Statusfraserna står på engelska, så som de skrivs i HTTP. Varje kort har en kort anteckning på engelska om hur statusen används i praktiken."@sv ,
+                        "모든 HTTP 상태 코드와 그 사유 구문. 목록은 MDN의 HTTP 응답 상태 코드 문서를 따르며, 코드와 이름 자체는 IETF가 정의하고 IANA HTTP Status Code Registry에 기록되어 있다. 각 카드에는 그 상태 코드가 실제로 어떻게 쓰이는지에 대한 짧은 영어 메모가 있다."@ko ,
+                        "Jeder HTTP-Statuscode und sein Statustext. Die Liste folgt der MDN-Referenz zu den HTTP-Antwortstatuscodes; die Codes und Bezeichnungen selbst legt die IETF fest, und sie sind in der IANA HTTP Status Code Registry verzeichnet. Jede Karte hat eine kurze englische Notiz dazu, wie der Status in der Praxis verwendet wird."@de ,
+                        "Cada código de estado HTTP y su frase de estado. La lista sigue la referencia de códigos de estado de respuesta HTTP de MDN; los códigos y sus nombres los define el IETF y se recogen en el IANA HTTP Status Code Registry. Cada tarjeta lleva una breve nota en inglés sobre cómo se usa el estado en la práctica."@es ,
+                        "Chaque code de statut HTTP et son intitulé. La liste suit la référence des codes de statut de réponse HTTP de MDN ; les codes et leurs intitulés sont définis par l’IETF et consignés dans l’IANA HTTP Status Code Registry. Chaque carte porte une courte note en anglais sur l’usage du statut en pratique."@fr ;
     prov:wasDerivedFrom <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status> ,
                         <https://www.iana.org/assignments/http-status-codes> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/http-status-codes/v3.ttl#compilation> ;
     dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
-    dcterms:modified "2026-10-04T04:34:28.000Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-16T17:30:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ;
     dcat:keyword "HTTP"@en ,
@@ -6470,20 +6490,78 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
     solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/http-status-codes/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/http-status-codes/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/http-status-codes/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/http-status-codes/v2.ttl> ;
+    dcterms:issued "2026-10-16T17:30:00Z"^^xsd:dateTime ;
+    adms:versionNotes "A short note on every card about how the status is used in practice; no card's code or reason phrase was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#http-status-codes> ;
     dcat:isVersionOf <#http-status-codes> ;
-    dcat:distribution <https://solid-memo.com/decks/http-status-codes/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/http-status-codes/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/http-status-codes/v3.ttl#turtle> ;
     solid-memo:cardCount 63 .
 
-<https://solid-memo.com/decks/http-status-codes/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/http-status-codes/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/http-status-codes/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/http-status-codes/v3.ttl#compilation>
+    a prov:Activity .
+
+<https://www.rfc-editor.org/rfc/rfc9110>
+    dcterms:title "RFC 9110: HTTP Semantics" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    dcterms:title "RFC 9110: HTTP Semantics (§8.8 validators, §13.1 conditional requests)" ;
+    dcterms:creator "IETF" .
+
+<https://www.rfc-editor.org/rfc/rfc6585>
+    dcterms:title "RFC 6585: Additional HTTP Status Codes" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc4918>
+    dcterms:title "RFC 4918: HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV)" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc5842>
+    dcterms:title "RFC 5842: Binding Extensions to Web Distributed Authoring and Versioning (WebDAV)" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc2518>
+    dcterms:title "RFC 2518: HTTP Extensions for Distributed Authoring -- WEBDAV" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc8297>
+    dcterms:title "RFC 8297: An HTTP Status Code for Indicating Hints" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc8470>
+    dcterms:title "RFC 8470: Using Early Data in HTTP" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc7725>
+    dcterms:title "RFC 7725: An HTTP Status Code to Report Legal Obstacles" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc3229>
+    dcterms:title "RFC 3229: Delta encoding in HTTP" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc2295>
+    dcterms:title "RFC 2295: Transparent Content Negotiation in HTTP" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc2774>
+    dcterms:title "RFC 2774: An HTTP Extension Framework" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
+
+<https://www.rfc-editor.org/rfc/rfc2324>
+    dcterms:title "RFC 2324: Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0)" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" .
 
 <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status>
     dcterms:title "HTTP response status codes" ;
@@ -6494,10 +6572,10 @@
     dcterms:title "Hypertext Transfer Protocol (HTTP) Status Code Registry" ;
     dcterms:creator "Internet Assigned Numbers Authority" .
 
-<https://solid-memo.com/decks/http-status-codes/v2.ttl#turtle>
+<https://solid-memo.com/decks/http-status-codes/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/http-status-codes/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/http-status-codes/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/http-status-codes/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/http-status-codes/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -14031,10 +14109,6 @@
 <https://www.rfc-editor.org/rfc/rfc8288>
     dcterms:title "RFC 8288: Web Linking" ;
     dcterms:creator "IETF, Proposed Standard" .
-
-<https://www.rfc-editor.org/rfc/rfc9110>
-    dcterms:title "RFC 9110: HTTP Semantics (§8.8 validators, §13.1 conditional requests)" ;
-    dcterms:creator "IETF" .
 
 <https://www.rfc-editor.org/rfc/rfc9112>
     dcterms:title "RFC 9112: HTTP/1.1" ;
