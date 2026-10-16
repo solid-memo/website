@@ -161,11 +161,10 @@ function fakeApi(releases: readonly Release[], base = API, repo = REPO) {
   const requests: { url: string; headers: Record<string, string> }[] = [];
   const fetch = async (url: string, init: { headers: Record<string, string> }) => {
     requests.push({ url, headers: init.headers });
-    const page = new RegExp(
-      `^${base.replace(/[.]/g, "\\.")}/repos/${repo}/releases\\?per_page=100&page=(\\d+)$`,
-    ).exec(url);
-    if (page !== null) {
-      const from = (Number(page[1]) - 1) * 100;
+    const pages = `${base}/repos/${repo}/releases?per_page=100&page=`;
+    const page = url.startsWith(pages) ? url.slice(pages.length) : "";
+    if (/^\d+$/.test(page)) {
+      const from = (Number(page) - 1) * 100;
       return Response.json(
         releases.slice(from, from + 100).map((release) => ({
           tag_name: release.tag,
