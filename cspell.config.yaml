@@ -87,6 +87,8 @@ words:
   - adms
   - bidi
   - CLDR
+  # A font's table from characters to glyphs
+  - cmap
   - commonmark
   - datatypes
   - DCAT
@@ -113,8 +115,10 @@ words:
   - clownface
   - cmark
   - Codeberg
+  - dagre
   - datapod
   - defunctzombie
+  - elkjs
   - flagcdn
   - Forgejo
   - Fredoka
@@ -124,6 +128,7 @@ words:
   - igrant
   - Inrupt
   - ixuz
+  - katex
   - Malgun
   - Naskh
   - micr
@@ -135,6 +140,8 @@ words:
   - publiccode
   - rdfjs
   - rdflib
+  - roughjs
+  - sankey
   - Segoe
   - skohub
   - solidcommunity
@@ -151,6 +158,8 @@ words:
   - beforeunload
   - bookmarkable
   - crawlable
+  # Mermaid's accDescr, a diagram's description for screen readers
+  - Descr
   - distractor
   - distractors
   - hashchange

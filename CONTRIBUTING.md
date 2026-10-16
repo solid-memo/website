@@ -65,7 +65,10 @@ bug, needs no issue.
 2. Set up as the [README](README.md#develop) says: Node 24 and npm, with
    Docker for the end-to-end tests. The
    [dev container](.devcontainer/devcontainer.json) has everything.
-   Run `npm ci`.
+   Run `npm ci`, and `npm run browsers` once: `npm run check` and
+   `npm run build` draw the docs' diagrams in Chromium, which it
+   installs (on Linux, a machine that lacks the system libraries it
+   needs gets them with `sudo npx playwright install-deps chromium`).
 3. Make the change, with its tests and its docs. Run the app with
    `npm run dev` and try it.
 4. Check that the change is done, as **Done** in [AGENTS.md](AGENTS.md)

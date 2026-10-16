@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, matchesGlob } from "node:path";
 import { describe, expect, it } from "vitest";
 import { saysBreaking } from "./checkBreaking.ts";
+import { ASSETS_DIR, archivePath } from "./docsArchive.ts";
 
 /**
  * release.config.mjs agrees with the files it releases
@@ -20,6 +21,7 @@ type Config = {
   changelogTitle: string;
   parserOpts: Record<string, unknown>;
   assets: string[];
+  docsArchive: { path: string; label: string };
   default: { branches: string[]; plugins: Plugin[] };
 };
 
@@ -55,16 +57,35 @@ describe("release.config.mjs", () => {
     expect(options("@semantic-release/git").message).not.toMatch(/skip ci|ci skip/i);
   });
 
-  it("runs an npm script that is there", () => {
+  it("writes the version, then the docs' archive, with npm scripts that are there", () => {
     const command = options("@semantic-release/exec").prepareCmd as string;
-    const script = /^npm run (\S+) -- /.exec(command)?.[1];
     const scripts = (
       JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
         scripts: Record<string, string>;
       }
     ).scripts;
-    expect(script).toBe("release:version");
-    expect(scripts[script!]).toContain("scripts/releaseVersion.ts");
+    // Each step only when the one before it passed, and each given the
+    // version.
+    const steps = command.split(" && ").map((step) => {
+      const match = /^npm run (\S+) -- \$\{nextRelease\.version\}$/.exec(step);
+      expect(match, step).not.toBeNull();
+      return match![1]!;
+    });
+    expect(steps).toEqual(["release:version", "docs:archive"]);
+    expect(scripts["release:version"]).toContain("scripts/releaseVersion.ts");
+    expect(scripts["docs:archive"]).toContain("scripts/docsArchive.ts");
+  });
+
+  it("attaches the archive that npm run docs:archive writes, and nothing else", () => {
+    const github = options("@semantic-release/github");
+    expect(github.assets).toEqual([config.docsArchive]);
+    const { path, label } = config.docsArchive;
+    expect(matchesGlob(archivePath("2.2.0"), path)).toBe(true);
+    expect(matchesGlob(archivePath("10.0.12"), path)).toBe(true);
+    expect(matchesGlob(`${ASSETS_DIR}/notes-2.2.0.tar.gz`, path)).toBe(false);
+    expect(matchesGlob(`${ASSETS_DIR}/docs-2.2.0.zip`, path)).toBe(false);
+    // The plugin fills in the label, but not the path.
+    expect(label.replaceAll("${nextRelease.version}", "2.2.0")).toBe("Documentation 2.2.0 (HTML)");
   });
 
   it("publishes nothing to npm", () => {

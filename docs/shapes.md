@@ -152,11 +152,13 @@ Why each version moved is in [migrations.md](migrations.md).
 
 ```mermaid
 flowchart LR
+    accTitle: What the shapes generate
+    accDescr: npm run generate turns the shapes into types and descriptors, which the migrations, the records, the mappers and the shape registry use.
     shapes["ns/shapes/*/v*.ttl"] -->|npm run generate| types["src/types.generated.ts<br/>CardV2, DeckRecord, LATEST_VERSION…"]
     shapes -->|npm run generate| desc["src/descriptors.generated.ts<br/>CARD_V2, SHAPES, ALL_SHAPES"]
-    types --> migrations["domain: shapes/migrations<br/>record → next record"]
-    types --> records["domain: *Record.ts<br/>record ↔ model"]
-    desc --> rw["solid: records.ts<br/>Thing ↔ record"]
+    types --> migrations["domain: shapes/migrations<br/>record to the next record"]
+    types --> records["domain: *Record.ts<br/>record to model and back"]
+    desc --> rw["solid: records.ts<br/>Thing to record and back"]
     desc --> pick["shacl: registry.ts<br/>pickShape"]
     shapes -->|build, tests, browser| shacl["rdf-validate-shacl"]
 ```

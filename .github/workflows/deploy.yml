@@ -11,10 +11,12 @@ name: Deploy to GitHub Pages
 # check. Either way, only if the tag is the newest version on main, names
 # that version's release commit, and has its GitHub release. Other
 # commits on main are not deployed, and neither is an older version: the
-# site always runs the newest version the releases page lists. CI also runs on pull requests, a fork's
-# included, and a fork's branch may be named main too: workflow_run's
-# branch filter matches that name, so the job checks that CI ran for a
-# push, in this repository.
+# site always runs the newest version the releases page lists. Beside it,
+# the site serves each release's docs under /docs/X.Y.Z/, from the
+# archive its GitHub release carries (docs/deployment.md#each-releases-docs).
+# CI also runs on pull requests, a fork's included, and a fork's branch
+# may be named main too: workflow_run's branch filter matches that name,
+# so the job checks that CI ran for a push, in this repository.
 
 on:
   workflow_run:
@@ -29,6 +31,8 @@ permissions:
   actions: read
   pages: write
   id-token: write
+  # To check that the release workflow made each release's docs archive.
+  attestations: read
 
 # A deploy waiting its turn is replaced by a newer one in its group. Only
 # a run that may deploy (one by hand, or one after CI on a release
@@ -61,6 +65,9 @@ jobs:
     outputs:
       sha: ${{ steps.release.outputs.sha }}
       tag: ${{ steps.tag.outputs.tag }}
+      # Every version tag up to the one deployed, newest first, one a line,
+      # for the docs' list of versions: the build's checkout has no tags.
+      tags: ${{ steps.release.outputs.tags }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -137,6 +144,12 @@ jobs:
             exit 1
           fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          {
+            echo "tags<<TAGS"
+            git tag --merged "$TAG" --list 'v[0-9]*' --sort=-v:refname |
+              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$'
+            echo "TAGS"
+          } >> "$GITHUB_OUTPUT"
           echo "Deploying $TAG."
 
   build:
@@ -155,13 +168,34 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Chromium, which npm run check and npm run build draw the docs' Mermaid
+      # diagrams in (docs/markdown.md). The action is the checked-out
+      # version's: one from before the drawings has none, and needs none.
+      - if: hashFiles('.github/actions/chromium/action.yml') != ''
+        uses: ./.github/actions/chromium
       # CI checked the commit a workflow_run deploys; a run by hand has no
       # CI run behind it, so it checks the version itself.
       - if: github.event_name == 'workflow_dispatch'
         run: npm run check
       - run: npm run build
-      # The artifact is the whole site: the app, and beside it what Vite
-      # copies from ns/, decks/ and the vendored shapes (docs/deployment.md).
+      # Each release's docs, from the archive its GitHub release carries,
+      # under /docs/X.Y.Z/, and the list of every version over the build's
+      # (docs/deployment.md#each-releases-docs). A version whose archive is
+      # refused is left out with an error, one without an archive with a
+      # notice; the list links both to their docs in the repository. A
+      # version from before the archives has no such script, and serves
+      # only its own docs.
+      - name: Each release's docs, under /docs/X.Y.Z/
+        if: hashFiles('scripts/docsVersions.ts') != ''
+        env:
+          DOCS_TAGS: ${{ needs.version.outputs.tags }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: npm run docs:versions -- apps/web/dist
+      # The artifact is the whole site: the app, and beside it what the
+      # build writes: ns/, decks/, the vendored shapes, robots.txt, the
+      # sitemap and the docs; then every release's docs under docs/X.Y.Z/
+      # (docs/deployment.md).
       # The user journeys' report of the CI run deployed from, its traces
       # viewable step by step, at /journeys/ (docs/deployment.md). A run by
       # hand has no CI run, so no report.
@@ -172,8 +206,22 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: apps/web/dist/journeys
-      - name: The vocabulary and the deck library are in the artifact
-        run: test -f apps/web/dist/ns/vocab/v1.ttl && test -f apps/web/dist/decks/index.ttl
+      # robots.txt always, and the sitemap whenever CNAME names a domain
+      # (docs/deployment.md#custom-domain-optional); the docs, with their
+      # diagrams drawn and the font's license beside them (docs/markdown.md),
+      # so a build under DOCS_DIAGRAMS=skip is not deployed. Each only when
+      # the checked-out version's build writes it: a version from before
+      # (no siteMap.ts, no publishDocs.ts) can still be deployed.
+      - name: The vocabulary, the deck library, robots.txt, the sitemap and the docs are in the artifact
+        run: >-
+          test -f apps/web/dist/ns/vocab/v1.ttl && test -f apps/web/dist/decks/index.ttl
+          && { [ ! -f packages/vocab/tooling/siteMap.ts ] || {
+          test -f apps/web/dist/robots.txt
+          && { [ ! -s CNAME ] || test -f apps/web/dist/sitemap.xml; }; }; }
+          && { [ ! -f packages/markdown/tooling/publishDocs.ts ] || {
+          test -f apps/web/dist/docs/index.html
+          && test -f apps/web/dist/docs/diagrams/OFL-Fredoka.txt
+          && compgen -G 'apps/web/dist/docs/diagrams/*.svg' > /dev/null; }; }
       - uses: actions/configure-pages@v6
         with:
           enablement: true

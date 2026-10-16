@@ -137,10 +137,18 @@
             automerge: false,
         },
         // Playwright and the browser it downloads move together: one pinned
-        // version (e2e/journeys/package.json), which CI keys its browser
-        // cache by.
+        // version, @playwright/test's in e2e/journeys/package.json and
+        // playwright's in packages/markdown/package.json (one group, as a
+        // monorepo's packages), which CI keys its browser caches by.
         {
-            matchDepNames: ['@playwright/test'],
+            matchDepNames: ['@playwright/test', 'playwright'],
+            rangeStrategy: 'pin',
+        },
+        // Mermaid draws the docs' diagrams (docs/markdown.md): pinned, and
+        // bumped apart from Playwright, so a change in the drawings comes
+        // from one of them at a time.
+        {
+            matchDepNames: ['mermaid'],
             rangeStrategy: 'pin',
         },
         // The end-to-end tests' packages and servers ship nothing to users,

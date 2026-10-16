@@ -37,6 +37,8 @@ has one class, `rdfs:range`, `rdfs:isDefinedBy` and a
 
 ```mermaid
 flowchart LR
+    accTitle: Where the vocabulary goes
+    accDescr: The vocabulary's Turtle file generates the TypeScript constants and is published with the site, where it is read as reference data.
     ttl["ns/vocab/v1.ttl"] -->|npm run generate| ts["src/vocab.generated.ts<br/>SM constants"]
     ttl -->|npm run build| dist["dist/ns/vocab/v1.ttl"]
     ts --> app["mappers, tooling"]

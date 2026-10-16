@@ -13,8 +13,10 @@ import {
   MAX_TABLE_CELLS,
   MAX_TABLE_COLUMNS,
   MAX_UNDERLINES,
+  DocumentError,
   hiddenControls,
   inspectMarkdown,
+  parseDocument,
   parseMarkdown,
   visibleControls,
   type MdBlock,
@@ -341,6 +343,122 @@ describe("parseMarkdown", () => {
     const deepest = JSON.stringify(parseMarkdown(`${open}x${close}`));
     expect(deepest.match(/"emphasis"/g)).toHaveLength(MAX_DEPTH - 1);
     expect(deepest).toContain('{"type":"text","value":"*w _w *w x w* w_ w*"}');
+  });
+});
+
+describe("parseDocument", () => {
+  /** The DocumentError parseDocument throws on a text. */
+  const refusal = (source: string): DocumentError => {
+    try {
+      parseDocument(source);
+    } catch (error) {
+      expect(error).toBeInstanceOf(DocumentError);
+      return error as DocumentError;
+    }
+    throw new Error(`parseDocument read ${JSON.stringify(source.slice(0, 40))}`);
+  };
+
+  it("keeps headings at their level and line, and reads every other block as parseMarkdown does", () => {
+    const page = "# Title\n\nSome *text*.\n\n## Part\n\n- a\n- b\n\n### Detail\n\n> `code`";
+    expect(parseDocument(page)).toEqual([
+      { type: "heading", depth: 1, line: 1, children: [text("Title")] },
+      paragraph(text("Some "), { type: "emphasis", children: [text("text")] }, text(".")),
+      { type: "heading", depth: 2, line: 5, children: [text("Part")] },
+      parseMarkdown("- a\n- b")![0],
+      { type: "heading", depth: 3, line: 10, children: [text("Detail")] },
+      { type: "quote", children: [paragraph({ type: "inlineCode", value: "code" })] },
+    ]);
+    expect(parseDocument("Setext\n===\n\n- ## In a list")).toEqual([
+      { type: "heading", depth: 1, line: 1, children: [text("Setext")] },
+      {
+        type: "list",
+        ordered: false,
+        start: 1,
+        tight: true,
+        items: [[{ type: "heading", depth: 2, line: 4, children: [text("In a list")] }]],
+      },
+    ]);
+  });
+
+  it("reads a text past MAX_CHARS, which parseMarkdown shows as plain text", () => {
+    const page = "A line of a long page, [linked](https://example.org/).\n\n".repeat(2_500);
+    expect(page.length).toBeGreaterThan(130_000);
+    expect(parseMarkdown(page)).toBeNull();
+    const blocks = parseDocument(page);
+    expect(blocks).toHaveLength(2_500);
+    expect(blocks[2_499]).toEqual(parseMarkdown(page.slice(0, MAX_CHARS))![0]);
+  });
+
+  it("refuses raw HTML, block or inline, with its line", () => {
+    expect(refusal("# Title\n\n<div>\nx\n</div>")).toMatchObject({ what: "raw HTML", line: 3 });
+    const inline = refusal("a\nb <b>c</b>");
+    expect(inline).toMatchObject({ what: "raw HTML", line: 2 });
+    expect(inline.message).toBe("line 2: raw HTML");
+    expect(inline.name).toBe("DocumentError");
+  });
+
+  it("refuses a picture, inline or by reference, and a link reference definition", () => {
+    expect(refusal("![a cat](https://example.org/cat.png)")).toMatchObject({
+      what: "a picture",
+      line: 1,
+    });
+    expect(refusal("a\n\n![a cat][c]\n\n[c]: https://example.org/cat.png")).toMatchObject({
+      what: "a picture",
+      line: 3,
+    });
+    expect(refusal("[a][d]\n\n[d]: https://example.org/")).toMatchObject({
+      what: "a link reference definition",
+      line: 3,
+    });
+  });
+
+  it("refuses what nests past MAX_DEPTH, block or inline", () => {
+    expect(refusal(`${"> ".repeat(MAX_DEPTH + 2)}deep`)).toMatchObject({
+      what: `nested deeper than MAX_DEPTH (${MAX_DEPTH})`,
+      line: 1,
+    });
+    let open = "";
+    let close = "";
+    for (let level = 0; level < MAX_DEPTH + 2; level++) {
+      const mark = level % 2 === 0 ? "_" : "*";
+      open += `${mark}w `;
+      close = ` w${mark}${close}`;
+    }
+    expect(refusal(`${open}x${close}`).what).toBe(`nested deeper than MAX_DEPTH (${MAX_DEPTH})`);
+  });
+
+  it("refuses a table past MAX_TABLE_COLUMNS or MAX_TABLE_CELLS", () => {
+    const what = `a table past MAX_TABLE_COLUMNS (${MAX_TABLE_COLUMNS}) or MAX_TABLE_CELLS (${MAX_TABLE_CELLS})`;
+    const wide = `|${" a |".repeat(MAX_TABLE_COLUMNS + 1)}\n|${"-|".repeat(MAX_TABLE_COLUMNS + 1)}`;
+    expect(refusal(`# T\n\n${wide}`)).toMatchObject({ what, line: 3 });
+    const tall = `| a | b |\n|-|-|\n${"| 1 | 2 |\n".repeat(MAX_TABLE_CELLS / 2)}`;
+    expect(refusal(tall)).toMatchObject({ what, line: 1 });
+    expect(parseDocument(tall.slice(0, -"| 1 | 2 |\n".length))[0]!.type).toBe("table");
+  });
+
+  it("refuses a text past the parser's other limits, naming the line where one says it", () => {
+    expect(refusal(`${"*_".repeat(MAX_DELIMITERS / 2)}*`)).toMatchObject({
+      what: `more than MAX_DELIMITERS (${MAX_DELIMITERS}) * and _`,
+      line: null,
+    });
+    const underlines = refusal("a\n=\n".repeat(MAX_UNDERLINES + 1));
+    expect(underlines).toMatchObject({
+      what: `more than MAX_UNDERLINES (${MAX_UNDERLINES}) lines that could underline a heading`,
+      line: null,
+    });
+    expect(underlines.message).toBe(underlines.what);
+    expect(refusal(`ok\n${"- ".repeat(MAX_LINE_NESTING + 1)}a`)).toMatchObject({
+      what: `more than MAX_LINE_NESTING (${MAX_LINE_NESTING}) quotes and list items opened on one line`,
+      line: 2,
+    });
+    expect(refusal("- - a\n".repeat(MAX_NESTED_LINES + 1))).toMatchObject({
+      what: `more than MAX_NESTED_LINES (${MAX_NESTED_LINES}) quotes and list items opened inside a list item`,
+      line: MAX_NESTED_LINES + 1,
+    });
+    expect(refusal(`- a\n${"b\n".repeat(MAX_LAZY_LINES + 1)}`)).toMatchObject({
+      what: `more than MAX_LAZY_LINES (${MAX_LAZY_LINES}) lazy continuation lines in a row`,
+      line: MAX_LAZY_LINES + 2,
+    });
   });
 });
 

@@ -10,6 +10,8 @@ is what the app does.
 
 ```mermaid
 flowchart LR
+  accTitle: Where the theme is kept
+  accDescr: A theme choice is kept on this device, and in the instance's preferences when one is open, which set the device's choice when the instance is opened.
   choose["A choice"] --> device["This device<br/>localStorage solid-memo:theme"]
   choose -->|"an instance is open<br/>and has preferences"| pod["preferences.ttl<br/>sm:theme"]
   pod -->|"the instance is opened"| device

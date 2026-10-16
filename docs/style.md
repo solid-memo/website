@@ -191,6 +191,44 @@ run it without installing it.
   commit.
 - Examples are real: a command that runs, a path that exists, Turtle
   from the repository.
+- The docs are written in the app's own Markdown dialect
+  ([markdown.md](markdown.md#the-dialect)), so they read the same
+  wherever that dialect is rendered. It has no autolink literals: a URL
+  is a link, or is written in `<…>` (markdownlint's MD034 checks it),
+  and a local address that is not meant to be followed, such as
+  `http://localhost:4173`, is a code span. It has no task lists either:
+  a checklist item starts with its state in bold, **Done.** or
+  **Open.** The docs use no images and no raw HTML.
+- A diagram is a Mermaid `flowchart`, `graph`, `sequenceDiagram` or
+  `stateDiagram-v2` block. It starts with an `accTitle:` (a short name)
+  and an `accDescr:` (one sentence that says what it shows), for
+  readers who cannot see it, and has no `%%{…}%%` directive: every
+  diagram is drawn with the same settings
+  ([markdown.md](markdown.md#diagrams)).
+- A diagram's text uses only printable ASCII, Latin-1 without the soft
+  hyphen, and `– — ‘ ’ “ ” … −`. That rules out arrows, which the app's
+  font, Fredoka, lacks, so a word says it (`to`, `and back`). A label
+  never holds a `;` outside quotes, since Mermaid ends the statement
+  there: a state diagram's transition label, which cannot be quoted, is
+  cut short and stray states are drawn, without an error. A label with
+  other punctuation Mermaid reads, such as a `.` in a dotted edge or
+  parentheses in a node, is quoted (`-. "main.tsx only" .->`,
+  `D["round(x)"]`), and `>=` is written in words, since Mermaid can
+  drop the `>`. A word in an edge label is at most about 25 characters
+  wide, since Mermaid wraps an edge label at 200 pixels and splits a
+  longer word: a long address is shortened to its host
+  (`guest.solid-memo.invalid`). `npm run check` names any other
+  character, with its file and line.
+- The docs are also rendered as pages
+  ([markdown.md](markdown.md#the-docs-as-a-site)), and `npm run check`
+  renders them: a page opens with one heading of level 1, then a
+  paragraph that says what it is about; no two headings of a page have
+  the same text; every page is linked from the README; and every link
+  leads to a page, heading, file or folder that is there.
+- After a diagram is changed, check on GitHub that it still draws as
+  meant: GitHub's Mermaid version and label mode differ from other
+  renderers', and a diagram one of them accepts another can reject or
+  draw differently.
 
 ## Language
 

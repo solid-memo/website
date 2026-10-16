@@ -6,6 +6,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { siteOrigin } from "@solid-memo/vocab/tooling/siteMap";
 import { describe, expect, it } from "vitest";
 
 /*
@@ -22,10 +23,17 @@ const html = read("public/about/index.html");
 
 const hrefs = [...html.matchAll(/<(?:a|link)\b[^>]*\bhref="([^"]*)"/g)].map(([, href]) => href!);
 
-/** Where a link relative to /about/ is served from: the site's page, public/, or the folders the build publishes. */
+/**
+ * Where a link relative to /about/ is served from: the site's page, a
+ * page of the docs (`/docs/` from docs/README.md, `/docs/<page>/` from
+ * docs/<page>.md), public/, or the folders the build publishes.
+ */
 function served(href: string): string {
   const path = new URL(href, "https://site.example/about/").pathname;
   if (path === "/") return resolve(app, "index.html");
+  if (path === "/docs/") return resolve(repository, "docs/README.md");
+  const page = /^\/docs\/([a-z0-9-]+)\/$/.exec(path);
+  if (page) return resolve(repository, "docs", `${page[1]}.md`);
   for (const folder of ["ns", "decks"])
     if (path.startsWith(`/${folder}/`)) return resolve(repository, path.slice(1));
   return resolve(app, "public", path.slice(1));
@@ -52,7 +60,7 @@ describe("the About page", () => {
     expect(html).not.toMatch(/\son[a-z]+=/);
   });
 
-  it("is a page of its own for search engines, with the address the sitemap lists", () => {
+  it("is a page of its own for search engines, at its address on the domain in CNAME, which the sitemap lists", () => {
     expect(html.startsWith('<!doctype html>\n<html lang="en">')).toBe(true);
     expect(html.match(/<h1>/g)).toHaveLength(1);
     expect(html).toMatch(/<title>About Solid Memo[^<]*<\/title>/);
@@ -61,8 +69,10 @@ describe("the About page", () => {
       '<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
     );
     expect(html).not.toContain("noindex");
-    const canonical = /<link rel="canonical" href="([^"]*)"/.exec(html)![1]!;
-    expect(read("public/sitemap.xml")).toContain(`<loc>${canonical}</loc>`);
+    // Without a domain there is no sitemap, and no address to name.
+    const origin = siteOrigin(resolve(repository, "CNAME"));
+    const canonical = /<link rel="canonical" href="([^"]*)"/.exec(html)?.[1] ?? null;
+    expect(canonical).toBe(origin === null ? null : `${origin}/about/`);
   });
 
   it("speaks to learners, deck authors, technologists and decision makers", () => {
@@ -75,11 +85,11 @@ describe("the About page", () => {
   it("links to the app, its source code, its docs and its issue tracker", () => {
     expect(hrefs).toContain("../");
     expect(hrefs).toContain("https://github.com/solid-memo/website");
-    expect(hrefs).toContain("https://github.com/solid-memo/website/blob/main/docs/README.md");
+    expect(hrefs).toContain("../docs/");
     expect(hrefs).toContain("https://github.com/solid-memo/website/issues");
   });
 
-  it("links only to what is there, its icons included: its own sections, the site's files, the repository's documents and https pages", () => {
+  it("links only to what is there, its icons included: its own sections, the site's files, the docs' pages, the repository's documents and https pages", () => {
     const ids = [...html.matchAll(/\bid="([^"]*)"/g)].map(([, id]) => id!);
     expect(new Set(ids).size).toBe(ids.length);
     for (const href of hrefs) {
@@ -98,7 +108,9 @@ describe("the About page", () => {
     }
   });
 
-  it("is linked from the site's page, for a browser that runs no script", () => {
-    expect(read("index.html")).toMatch(/<noscript>[\s\S]*<a href="about\/">[\s\S]*<\/noscript>/);
+  it("is linked from the site's page, for a browser that runs no script, as the docs are", () => {
+    const noscript = /<noscript>([\s\S]*)<\/noscript>/.exec(read("index.html"))![1]!;
+    expect(noscript).toContain('<a href="about/">');
+    expect(noscript).toContain('<a href="docs/">');
   });
 });

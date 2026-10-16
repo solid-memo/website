@@ -14,7 +14,7 @@ Server, the JavaScript Solid Server, Nextcloud and others, each in
 - `globalSetup.ts`, `servers.ts`, `contract.ts`: starting the servers
   and checking that each does what the tests need.
 - `pod.ts`: `npm run pod`, a Community Solid Server at
-  http://127.0.0.1:3999/ to poke at by hand.
+  `http://127.0.0.1:3999/` to poke at by hand.
 
 It exports nothing; no package may import it.
 

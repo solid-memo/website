@@ -114,7 +114,7 @@ maintainer approves each update, and Renovate merges it after that.
 
 ## Deploying
 
-The site at https://solid-memo.com/ runs the latest version, built from
+The site at <https://solid-memo.com/> runs the latest version, built from
 its release commit on `main`, and nothing else. A version deploys once
 CI has passed on its release commit; any other push to `main` waits
 for the next version ([docs/deployment.md](docs/deployment.md)). A

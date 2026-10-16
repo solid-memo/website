@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { Footer, type SiteSource } from "./Footer";
+import { I18nProvider } from "./i18n";
 
 const sha = "8faa7e1bd2e6de2b6570d692fd2865bb4b3217ad";
 const source: SiteSource = {
@@ -40,7 +41,7 @@ describe("Footer", () => {
     render(<Footer source={{ ...source, commitSha: null }} />);
     expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 0.1.0");
     expect(screen.getByRole("contentinfo")).not.toHaveTextContent("Version 0.1.0 (");
-    expect(screen.getAllByRole("link")).toHaveLength(5);
+    expect(screen.getAllByRole("link")).toHaveLength(6);
   });
 
   it("links to the source code and to a new issue in the repository", () => {
@@ -66,5 +67,28 @@ describe("Footer", () => {
       "href",
       "https://git.example/memo/discussions",
     );
+  });
+
+  it("links first to the docs, this site's own pages in English, in the same tab", () => {
+    render(<Footer source={source} />);
+    // Named "Docs" alone: no "(opens in a new tab)".
+    const docs = screen.getByRole("link", { name: "Docs" });
+    expect(docs.parentElement?.firstElementChild).toBe(docs);
+    expect(docs.parentElement).toContainElement(externalLink("Source code"));
+    expect(docs).toHaveAttribute("href", "docs/");
+    expect(docs).toHaveAttribute("hreflang", "en");
+    expect(docs).not.toHaveAttribute("target");
+    expect(docs).not.toHaveAttribute("rel");
+  });
+
+  it("says in another language that the docs are in English", () => {
+    render(
+      <I18nProvider locale="sv" onChoose={() => undefined}>
+        <Footer source={source} />
+      </I18nProvider>,
+    );
+    const docs = screen.getByRole("link", { name: "Dokumentation (på engelska)" });
+    expect(docs).toHaveAttribute("href", "docs/");
+    expect(docs).toHaveAttribute("hreflang", "en");
   });
 });

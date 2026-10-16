@@ -54,13 +54,15 @@ The user grades each answer with a quality `q` from 0 (blackout) to 5
 
 ```mermaid
 flowchart TD
-    A[answer graded q] --> B{q >= 3?}
+    accTitle: One SM-2 step
+    accDescr: A grade below 3 resets the repetitions and sets a one-day interval, and a grade of 3 or more updates the ease factor and sets the interval by the repetition count.
+    A[answer graded q] --> B{q at least 3?}
     B -- no (lapse) --> C[repetitions = 0<br/>interval = 1 day<br/>ease factor kept]
-    B -- yes --> D[update ease factor<br/>EF' = EF + 0.1 − (5−q)(0.08 + (5−q)·0.02)<br/>floor 1.3]
+    B -- yes --> D["update ease factor<br/>EF' = EF + 0.1 − (5−q)(0.08 + (5−q)·0.02)<br/>floor 1.3"]
     D --> E{repetition #}
     E -- 1st --> F[interval = 1 day]
     E -- 2nd --> G[interval = 6 days]
-    E -- 3rd+ --> H[interval = round(previous × EF')]
+    E -- 3rd+ --> H["interval = round(previous × EF')"]
 ```
 
 Decisions fixed in code (and tests):
@@ -335,10 +337,12 @@ decides, per card reviewed today:
 
 ```mermaid
 flowchart LR
+    accTitle: Resetting today's study
+    accDescr: The first review of the day keeps a snapshot, and a reset removes a card introduced today, restores a snapshot, or leaves the card due today.
     R[review today] -->|first of the day| S[snapshot previous state]
     R -->|again today| K[keep the morning's snapshot]
     X[Reset today's study] --> Q{card reviewed today?}
-    Q -->|introduced today| N[remove state → new again]
+    Q -->|introduced today| N[remove the state: new again]
     Q -->|has snapshot| B[restore snapshot]
     Q -->|no snapshot| D[due today]
 ```

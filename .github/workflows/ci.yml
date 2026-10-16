@@ -76,6 +76,9 @@ jobs:
           key: turbo-check-${{ github.sha }}
           restore-keys: turbo-check-
       - run: npm ci
+      # Chromium, which markdown's tests draw the docs' Mermaid diagrams in
+      # (docs/markdown.md).
+      - uses: ./.github/actions/chromium
       # Biome's formatting and lint rules (docs/style.md), markdownlint's
       # and cspell's (docs/testing.md#documentation); then every
       # package: typecheck, tests at 100% coverage, generated code and

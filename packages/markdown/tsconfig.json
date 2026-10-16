@@ -5,6 +5,7 @@
   },
   "include": [
     "src",
+    "tooling",
     "vitest.config.ts"
   ]
 }

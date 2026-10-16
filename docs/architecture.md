@@ -11,7 +11,7 @@ where the layers meet.
 
 | Package | Folder | Responsibility |
 |---|---|---|
-| `@solid-memo/web` | `apps/web/` | The site's one page: its entry point (`src/main.tsx`), which renders the app over the use cases `composition` wires, the page (`src/App.tsx`) that shows Solid Memo, or the Studio at its routes, loaded lazily, and the Vite build that also publishes `ns/` (the vocabulary and shapes) and `decks/` (the [deck library](deck-library.md)) with the app ([deployment.md](deployment.md)). |
+| `@solid-memo/web` | `apps/web/` | The site's one page: its entry point (`src/main.tsx`), which renders the app over the use cases `composition` wires, the page (`src/App.tsx`) that shows Solid Memo, or the Studio at its routes, loaded lazily, and the Vite build that also publishes `ns/` (the vocabulary and shapes), `decks/` (the [deck library](deck-library.md)) and these docs, rendered by `markdown`'s tooling, with the app ([deployment.md](deployment.md)). |
 | `@solid-memo/studio` | `apps/studio/` | Solid Memo Studio ([studio.md](studio.md)): its screens and router (`src/ui/`), and its entry point, `StudioWorkspace`, which the site's page loads as a chunk of its own at the hashes under `#/studio`. |
 | `@solid-memo/composition` | `packages/composition/` | The composition root (`createAppUseCases` in `src/appUseCases.ts`): every adapter behind its port, the guest's pod, the write fence, the site's documents read from where it is served, and the use cases over them, a Studio trial's sandbox among them (`createTrialUseCases` in `src/trialUseCases.ts`, [studio.md](studio.md#the-trial)). An app passes what is its own: its name, where it is served, the build's values. |
 | `@solid-memo/ui` | `packages/ui/` | The Preact UI: the components and the router (`src/ui/`), the messages in each language (`src/i18n/`), the theme and the styles (`src/style.css`). It receives `UseCases` and knows no adapter. |
@@ -22,7 +22,7 @@ where the layers meet.
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); node-side validation of Turtle files and the deck library's index and checks, its Markdown rules among them (`node/`, `npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Adapters for the browser: the update journal, the language, the guest's pod's store (IndexedDB), and files saved as downloads and opened from the user's disk (`FileExchange`). |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
-| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release ([markdown.md](markdown.md)). Imports nothing of the app's. |
+| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release; and the repository's own docs, read in the same dialect with their headings kept and rendered by its node tooling (`tooling/`) to static pages, their links checked and their Mermaid diagrams drawn to SVG in Chromium, with the Vite plugin that publishes them ([markdown.md](markdown.md#the-docs-as-a-site)). Imports nothing of the app's. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against real Solid servers, started in Docker ([testing.md](testing.md)). |
 | `@solid-memo/e2e-journeys` | `e2e/journeys/` | The user journeys: whole flows a user takes through the built app, driven in Chromium with Playwright against a Community Solid Server in Docker ([testing.md](testing.md#user-journeys)). It imports nothing of the app's but its messages, to find text on screen by. |
 
@@ -38,13 +38,16 @@ owns the interfaces, adapters conform to them.
 
 ```mermaid
 graph TD
+    accTitle: Package dependencies
+    accDescr: Which packages import which, with a dotted arrow where an import is allowed only from certain files.
     web["apps/web<br/>the page"] --> ui["ui<br/>the components"]
-    web -. main.tsx only, lazily .-> studio["apps/studio<br/>its screens"]
+    web -. "main.tsx only, lazily" .-> studio["apps/studio<br/>its screens"]
     studio --> ui
     ui --> application
-    web -. main.tsx only .-> composition["composition<br/>the composition root"]
+    web -. "main.tsx only" .-> composition["composition<br/>the composition root"]
     composition --> application & solid & browser
     ui -. src/ui/ only .-> markdown
+    web -. "vite.config.ts and its test only" .-> markdown
     application --> domain --> vocab["vocab<br/>the data contract"]
     solid -. implements ports .-> application
     solid --> domain & vocab & shacl
@@ -53,7 +56,7 @@ graph TD
     shacl -. node/ only .-> turtle & markdown
     vocab -. tooling/ only .-> turtle
     e2e["e2e/pod"] --> application & solid
-    journeys["e2e/journeys"] -. harness/strings.ts only .-> ui
+    journeys["e2e/journeys"] -. "harness/strings.ts only" .-> ui
 ```
 
 Packages are consumed as TypeScript source (`exports` maps
@@ -77,7 +80,8 @@ bundles it ([studio.md](studio.md)).
 
 ```sh
 npm run check     # Biome's lint, markdownlint, cspell; then every package: typecheck, tests (100% coverage), the round trip, drift, Turtle formatting, the deck library; then boundaries
-npm run build     # the site, the Studio included, into apps/web/dist/
+npm run build     # the site, the Studio and the docs included, into apps/web/dist/
+npm run browsers  # once: Chromium, which npm run check and npm run build draw the docs' diagrams in (markdown.md)
 npm run dev       # the site, from source; the Studio at #/studio
 npm start         # the site as deployed: built, then served at http://localhost:4173
 npm run test:unit # every package's tests in one run, without coverage (a file or two: `-- <path>`)

@@ -13,7 +13,8 @@
  * - any other package is declared too (npm hoists everything, so an
  *   undeclared import would still resolve — this is what catches it);
  * - code that runs in the browser imports nothing node-only (node:*, n3,
- *   the Turtle tooling, a package's tooling/ or node/ entry points).
+ *   Mermaid and Playwright, the Turtle tooling, a package's tooling/ or
+ *   node/ entry points).
  * - some exports of a vendor package may be imported only from certain
  *   files: `@inrupt/solid-client`'s access control, by the release
  *   publisher alone (docs/boundaries.md, Access control).
@@ -38,8 +39,8 @@ export const LAYERS: Record<string, string[]> = {
   ui: ["application", "domain", "vocab", "markdown"],
   // The composition root: every adapter behind its port, and the use cases over them.
   composition: ["application", "domain", "vocab", "solid", "browser"],
-  // The site's page, which shows the Studio at its routes.
-  web: ["application", "domain", "vocab", "ui", "composition", "studio"],
+  // The site's page, which shows the Studio at its routes; its build publishes the docs.
+  web: ["application", "domain", "vocab", "ui", "composition", "studio", "markdown"],
   // The Studio, a second app on the same layers as Solid Memo's, which the site's page loads.
   studio: ["application", "domain", "vocab", "ui"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
@@ -50,7 +51,12 @@ export const LAYERS: Record<string, string[]> = {
 /** Within a package, files that alone may use some of its allowed packages. */
 export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   // Only the app's entry point has the layers wired, and loads the Studio; the build test imports neither.
-  web: { composition: /^src\/main\.tsx$/, studio: /^src\/main\.tsx$/ },
+  // The docs are rendered by the build, and checked by its test, never in the page.
+  web: {
+    composition: /^src\/main\.tsx$/,
+    studio: /^src\/main\.tsx$/,
+    markdown: /^(vite\.config\.ts|src\/build\.test\.ts)$/,
+  },
   // Data text is rendered by the components alone (docs/markdown.md).
   ui: { markdown: /^src\/ui\// },
   // The generators read Turtle; the vocabulary the browser loads never does.
@@ -108,6 +114,9 @@ export const BROWSER: Record<string, RegExp> = {
 export const NODE_ONLY = [
   /^node:/,
   /^n3$/,
+  // The docs' diagrams are drawn at build time, in Chromium (docs/markdown.md).
+  /^mermaid(\/|$)/,
+  /^playwright(\/|$)/,
   /^@solid-memo\/turtle(\/|$)/,
   /^@solid-memo\/[a-z-]+\/(tooling|node)\//,
 ];

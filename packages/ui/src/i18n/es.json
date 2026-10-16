@@ -83,6 +83,7 @@
     "versionAtCommit": "Versión {version} ({commit})",
     "sourceCode": "Código fuente",
     "changelog": "Registro de cambios",
+    "docs": "Documentación (en inglés)",
     "reportIssue": "Informar de un problema",
     "discussions": "Debates"
   },

@@ -49,6 +49,7 @@ description:
       can run their own copy on any static web host. Its vocabulary and
       SHACL shapes are published with it, every data format is
       versioned, and older data is brought up to date in place.
+    documentation: https://solid-memo.com/docs/
     features:
       - Flashcards scheduled by spaced repetition (SM-2)
       - Decks, cards and study history stored in the user's own Solid pod

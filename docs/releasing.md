@@ -77,7 +77,12 @@ the same pods and the people who run their own copy rely on:
 Everything else may change in any version: the workspace packages'
 exports, which nothing outside the repository imports
 ([architecture.md](architecture.md)), the screens' layout, wording and
-styles, and whatever these docs do not name.
+styles, and whatever these docs do not name. These docs as the site
+serves them, at `/docs/` and below it, are not part of it either: a
+page may be renamed, split or merged in any version
+([deployment.md](deployment.md#what-the-artifact-contains)), as may
+`robots.txt`, `sitemap.xml` and the archive of a release's docs
+([deployment.md](deployment.md#a-releases-docs-as-an-archive)).
 
 ## What counts as breaking
 
@@ -99,11 +104,20 @@ breaking when one of them has to act or loses something:
 - **A change for those who run their own copy**: a configuration variable
   renamed or removed, a changed build command or output folder
   ([deployment.md](deployment.md)).
-- **An address that stops working**: a published file removed or
-  moved, or a hash the app or the Studio no longer opens.
+- **An address that stops working**: a file published under `/ns/`,
+  `/vendor/` or `/decks/` removed or moved, or a hash the app or the
+  Studio no longer opens.
 - **What the browser kept, lost**: a storage key or the guest pod's
   database renamed, or what they hold no longer read.
 - **A feature removed** that users rely on.
+
+A new prerequisite for building a copy is not breaking when the build
+names it and a setting builds without it: `npm run build` draws the
+docs' diagrams in Chromium, and `DOCS_DIAGRAMS=skip` builds without
+them, on any machine and in any CI
+([configuration.md](configuration.md#docs_diagrams)). The commit that
+brings one in names it in its subject, so the release notes say what
+a copy now needs.
 
 A new vocabulary term that no shape names is not breaking
 ([vocab.md](vocab.md#versioning-policy)); neither is a new deck in the
@@ -210,13 +224,25 @@ release, semantic-release:
    (`softwareVersion`, `releaseDate`) and [`CITATION.cff`](../CITATION.cff)
    (`version`, `date-released`), with `npm run release:version`
    ([releaseVersion.ts](../scripts/releaseVersion.ts));
-4. commits those five files to `main` as `chore(release): X.Y.Z`, with
-   the notes as the body, and pushes the commit with the deploy key
-   ([below](#the-deploy-key));
-5. tags that commit `vX.Y.Z` and pushes the tag;
-6. makes a GitHub release of the tag, "Solid Memo X.Y.Z", with the
-   notes. Zenodo, connected to the repository, archives each GitHub
-   release and gives it a DOI. The concept DOI,
+4. renders the version's docs as they are served under the version,
+   every diagram drawn in Chromium, into
+   `release-assets/docs-X.Y.Z.tar.gz`, with `npm run docs:archive`
+   ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). git
+   ignores the archive, so the release commit leaves it out;
+5. commits the five files of steps 2 and 3 to `main` as
+   `chore(release): X.Y.Z`, with the notes as the body, and pushes the
+   commit with the deploy key ([below](#the-deploy-key));
+6. tags that commit `vX.Y.Z` and pushes the tag;
+7. makes a GitHub release of the tag, "Solid Memo X.Y.Z", with the
+   notes and the archive of its docs, "Documentation X.Y.Z (HTML)": it
+   makes the release as a draft, uploads the archive to it, and only
+   then publishes it, so a release is never published without its
+   docs, and the deploy refuses a draft. Then the workflow attests the
+   archive as made by the release workflow on `main` (`actions/attest`),
+   which the deploy checks before it serves it
+   ([deployment.md](deployment.md#each-releases-docs)). Zenodo,
+   connected to the repository, archives each GitHub release and gives
+   it a DOI. The concept DOI,
    [10.5281/zenodo.23351087](https://doi.org/10.5281/zenodo.23351087),
    always resolves to the latest release, and is the one in
    `CITATION.cff` and the README.
@@ -305,6 +331,18 @@ write access past them, not only this one. So this key stays the
 repository's only deploy key with write access: any other is added
 without "Allow write access".
 
+The job that holds the key also draws the docs' diagrams for the
+release's archive: it runs Chromium, through Playwright, and Mermaid on
+the repository's own docs, with the key configured for the push. That
+is accepted. Both are pinned development dependencies whose updates
+Renovate proposes and CI checks like any other change
+([vendor-code.md](vendor-code.md)), and they read only what is
+committed on `main`, where every change was reviewed. The other way
+was to build the archive in a job of its own, without the key, and
+attach it with the run's token; it was not taken, because
+semantic-release would then publish the release before its archive
+existed, and the deploy would serve the version without its docs.
+
 Without the secret, the workflow says so and releases nothing; once
 it is set, run the workflow by hand ([below](#when-a-release-fails)) to
 release what is waiting. To
@@ -320,7 +358,8 @@ hand (Actions › Release › Run workflow, from `main`): it releases
 next push to `main` that passes CI also tries again.
 
 - **Before the push** (a wrong configuration, a file the release could
-  not write): nothing was pushed, and the next run releases as if
+  not write, docs that could not be rendered or drawn, Chromium that
+  would not start): nothing was pushed, and the next run releases as if
   nothing had happened.
 - **The push was refused**: `main` moved on while the release ran, or
   the deploy key, its secret in the `release` environment or the bypass
@@ -357,15 +396,34 @@ next push to `main` that passes CI also tries again.
   commit and the tag are on `main`, so a new run finds nothing to
   release. The deploy after CI on the release commit fails, as the
   version has no GitHub release, and deploys nothing. Make the GitHub
-  release from the tag by hand, with the version's entry in
-  CHANGELOG.md as its notes:
+  release from the tag by hand, as a draft, with the version's entry
+  in CHANGELOG.md as its notes:
 
   ```sh
-  gh release create vX.Y.Z --title "Solid Memo X.Y.Z" --notes-file notes.md
+  gh release create vX.Y.Z --draft --title "Solid Memo X.Y.Z" --notes-file notes.md
   ```
 
-  Then run the deploy by hand (Actions › Deploy to GitHub Pages › Run
-  workflow, from `main`), and it deploys the version.
+  Then attach its docs and publish it, as for a failed upload, below.
+- **The release is a draft without its docs** (the archive's upload
+  failed), **or its docs are not attested** (the attestation step
+  failed): the release commit and the tag are on `main`, so a new run
+  finds nothing to release, and the deploy, which refuses a draft,
+  deploys nothing, or serves the version without its archive. Run the workflow by hand from `main` with the
+  version's tag (Actions › Release › Run workflow, "tag" `vX.Y.Z`),
+  while no Release run is running or waiting: the `docs` job has a
+  concurrency group of its own, so it does not wait for one, and it
+  marks the version latest when it is the newest tag, which a release
+  made while it runs would leave wrong. The job renders the docs from
+  the tag, draws them, attests the archive as the release does, attaches
+  it with the run's token, and publishes the release; it does not use
+  the deploy key. A release that already carries an archive keeps it
+  when it is attested, and the job then only publishes it if it is
+  still a draft; one that is not attested is rendered again and
+  replaced. Then run the deploy by hand (Actions › Deploy to GitHub
+  Pages › Run workflow, from `main`), and it deploys the version. Do
+  not upload the archive by hand: the deploy serves only one that this
+  workflow attested as made on `main`, as the release and the `docs`
+  job do ([deployment.md](deployment.md#each-releases-docs)).
 
 A tag is never moved or deleted, even one whose release went wrong:
 Zenodo and anyone who fetched it may already hold it.

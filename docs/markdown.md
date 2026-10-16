@@ -90,6 +90,7 @@ folded to what the app shows:
 | Function | Module | What it gives |
 |---|---|---|
 | `parseMarkdown(text)` | `parse` | the blocks: paragraph, code, list, quote, rule, table |
+| `parseDocument(text)` | `parse` | the repository's own Markdown as blocks, its headings kept at their level, or a `DocumentError` ([repository Markdown](#repository-markdown)) |
 | `parseInlineMarkdown(text)` | `inline` | one line of phrasing: text, code spans, emphasis, strong |
 | `plainText(text)` | `plainText` | the text as plain text |
 | `labelText(text, max?)` | `plainText` | a short name: the plain text of its first block that shows any |
@@ -102,7 +103,9 @@ folded to what the app shows:
 
 ### Limits
 
-Every entry point is bounded, for a pod or library may hold anything:
+Every entry point for data is bounded, for a pod or library may hold
+anything ([repository Markdown](#repository-markdown) lifts only
+`MAX_CHARS`):
 
 - **`MAX_CHARS`, 20,000 characters.** A longer text is plain. The
   longest course text is about 2,600.
@@ -254,6 +257,220 @@ backticks to show it as code.") and one for the link ("No links here,
 where they would be in the way of studying: … Put a link in a note.").
 In a note, where links are followed, only the two about HTML remain.
 
+## Repository Markdown
+
+The repository's own Markdown, its docs, is read by the same package in
+the same dialect, so a page of the docs reads as the app reads a card.
+`parseDocument(text)` is its profile, for trusted input read at build
+time only, never for data:
+
+- **Headings keep their level** (`{ type: "heading", depth, line }`),
+  for a page's outline, and the line they are on, for a message about
+  one. Every other block is as `parseMarkdown` gives it.
+- **`MAX_CHARS` is lifted, and only it.** A page is longer than data
+  may be: `studio.md` is about 130 KB, `data-model.md` about 70 KB. The
+  other [limits](#limits) stay; the docs come nowhere near them.
+- **What data would fold, it refuses.** Raw HTML, a picture, a link
+  reference definition, what nests past `MAX_DEPTH`, a table past its
+  caps, and a text past `MAX_LINE_NESTING`, `MAX_NESTED_LINES`,
+  `MAX_LAZY_LINES`, `MAX_DELIMITERS` or `MAX_UNDERLINES` each throw a
+  `DocumentError`, with the line it starts on when one says it. So a page
+  shows as it is written, or its build fails and says where.
+
+## Diagrams
+
+The docs' Mermaid blocks are drawn to SVG at build time by the package's
+node tooling, [diagrams.ts](../packages/markdown/tooling/diagrams.ts)
+and [drawDiagrams.ts](../packages/markdown/tooling/drawDiagrams.ts):
+the official Mermaid, in Chromium through Playwright, so a drawing comes
+from the same parser family and layout engine as GitHub's. GitHub runs
+its own Mermaid version, with HTML labels, so a diagram is still checked
+on GitHub after an edit ([style.md](style.md#docs)).
+
+- **What a block must have.** `diagramsOf(file, text, inputs)` finds a
+  page's fenced `mermaid` blocks and checks each: a `flowchart`,
+  `graph`, `sequenceDiagram` or `stateDiagram-v2`; an `accTitle` (the
+  drawing's alternative text) and an `accDescr` (a sentence that says
+  what it shows); no `%%{…}%%` directive, which would change how it is
+  drawn; and, wherever it draws text, only characters the font has
+  (`FONT_CHARS`, [below](#the-diagrams-font)). It throws one
+  `DiagramError` that lists every problem of the page, each with its
+  file and line.
+- **How it is drawn.** Light (Mermaid's `default` theme) and dark, with
+  labels as SVG text rather than HTML (`htmlLabels: false`, so a
+  drawing has no `<foreignObject>`), ids that do not change from build
+  to build, and a node label wrapped at 400 pixels, so no word of the
+  docs' labels is split. Mermaid wraps an edge label at 200 pixels
+  whatever it is told, so an edge label has no longer word than that.
+  `drawDiagrams` launches one browser and draws in a page per theme. A
+  block Mermaid refuses fails the drawing with Mermaid's message, its
+  context lines kept, at the page's line: "Parse error on line 4" in a
+  block whose fence is at `srs.md:55` is `docs/srs.md:59`.
+- **The cache.** Each drawing is kept in
+  `node_modules/.cache/solid-memo-docs-diagrams/` under a key that
+  hashes all it depends on: Mermaid's version, `playwright`'s (which
+  fixes the Chromium build), the theme's settings, the font, its
+  license, the drawing code itself (both modules' sources) and the
+  block. When every drawing is there, no browser is launched. A drawing
+  is written under a temporary name and then renamed, so a build that
+  draws at the same time never reads half a file; one read from the
+  cache passes the same check as a new one
+  ([below](#a-drawing-is-safe-to-serve)), or is drawn again. A
+  drawing's file name is the page's name and the first 8 digits of its
+  hash (such as `srs-1f0e9a3c.svg` and `srs-1f0e9a3c.dark.svg`): a
+  changed diagram gets a new name, so no browser shows a stale drawing.
+- **Chromium.** `npm run browsers` installs it once: the headless
+  shell, without `sudo`. On Linux, a machine that lacks the system
+  libraries it needs gets them with `sudo npx playwright install-deps
+  chromium` (the [dev container](../.devcontainer/devcontainer.json)
+  has them).
+  Without it, drawing fails with a message that names that command.
+  With `DOCS_DIAGRAMS=skip` (`diagramMode`), drawing warns and returns
+  no drawings instead, without starting a browser or reading the cache,
+  so what a build makes depends on the setting alone, in CI too. It is
+  for `npm run build` and `npm start` on a machine without Chromium
+  ([configuration.md](configuration.md#docs_diagrams)); `npm run dev`
+  needs none of it ([below](#the-docs-as-a-site)). `npm run check`
+  fails under it, by design: the test that draws in the real browser is
+  skipped, and the package's coverage drops below 100%.
+
+### A drawing is safe to serve
+
+A drawing is only ever shown through `<img>`, where nothing in it runs,
+but its address can be opened on its own, on the app's origin, and
+GitHub Pages lets the site set no Content Security Policy header.
+`checkSvg` does not read a drawing as leniently as a browser would: it
+takes only what Mermaid writes, and refuses the rest. Every `<` opens a
+plain tag of an element Mermaid draws the docs' diagram types with, with
+no namespace prefix, each attribute one Mermaid writes (or `data-…`,
+`aria-…`, and the SVG and XLink namespaces at their own addresses),
+each value in quotes with no `<` inside, and the tags closed in order.
+So there is no `<script>`, no event handler, no HTML
+(`<foreignObject>`), no animation (which could set a link), no document
+type, no comment, and no CDATA. A character reference is one of XML's
+five (`&amp;` and the like), so the text checked is the text the
+browser reads. No style or attribute value can load anything
+(`cssProblem`): no `@import`, no `image-set(`, no backslash (which
+could spell any of them), no string with `:` or `/`, and an `href` or
+`url(` only to `#…` in the drawing itself. An SVG in `<img>` loads
+nothing from elsewhere, so the font is inside it: the one exception is
+a single `@font-face` from a `data:` WOFF2, the embedded font, and only
+with its notice, the one comment, right after the opening tag.
+
+### The diagrams' font
+
+The diagrams are set in Fredoka, the app's own font
+([vendor-code.md](vendor-code.md)), from `@fontsource-variable/fredoka`'s
+Latin file. Each drawing embeds it, as one `data:` `@font-face`, so it
+looks the same on every machine and its text fits its boxes: a font of
+the viewer's own would be measured otherwise. Its glyphs are printable
+ASCII, Latin-1 but the soft hyphen, and `– — ‘ ’ “ ” … −`. That is
+`FONT_CHARS`, written out and held to the file's own table by a test;
+the package's `unicode-range` declares more than the file has, `↑` and
+`↓` among them. A character outside it would be drawn and measured in
+another font, so a block that draws one fails, naming it.
+
+Fredoka is under the SIL Open Font License 1.1 (OFL), which lets the
+font be bundled and embedded in software on these conditions: it is not
+sold by itself; each copy carries its copyright notice and the license,
+as a file of its own, a human-readable header, or metadata the user can
+easily see; a modified version does not use a Reserved Font Name; and
+the font stays under the OFL, though a document made with it need not.
+Fredoka names no Reserved Font Name, and the file is embedded unchanged.
+The file holds its copyright but not the license's text, so each
+drawing starts with a comment (`fontNotice`) that quotes the copyright
+line, the first of the package's `LICENSE` read at build time; names
+the license; says the font stays under it and the drawing does not; and
+points to `OFL-Fredoka.txt`, the package's `LICENSE` byte for byte,
+which goes beside the drawings wherever they are published. `checkSvg`
+refuses the font without that comment. Nothing under the OFL is in the
+repository, so `REUSE.toml` and `LICENSES/` do not name it.
+
+## The docs as a site
+
+The docs are also rendered to static pages, by the package's node
+tooling: `renderDocsSite` in
+[docsSite.ts](../packages/markdown/tooling/docsSite.ts) reads each page
+of `docs/` with `parseDocument`, so a page shows as the app would show
+it, and writes it out as HTML with an emitter of its own, which escapes
+every text and has no way to write raw HTML.
+[publishDocs.ts](../packages/markdown/tooling/publishDocs.ts) is the
+Vite plugin that emits the pages under `docs/` with a build, and in dev
+renders a page anew on each request, so an edit shows on reload. The
+site's build ([vite.config.ts](../apps/web/vite.config.ts)) uses it, so
+every build, every release among them, publishes its own docs at
+`/docs/` ([deployment.md](deployment.md#what-the-artifact-contains)).
+It hands the plugin the repository's address from the site's checked
+settings (`VITE_REPO_URL`), the commit built, which the links name (or
+`main`, with a warning, when it is not known), the version, and the
+site's origin from `CNAME`, for each page's canonical address.
+
+- **Addresses.** The README is `docs/`, every other page
+  `docs/<page>/`, so `configuration.md` is `docs/configuration/`.
+  Every address a page names is relative, so the pages work from any
+  folder. A page may not be named like a version (`2.2.0.md`),
+  `versions.md` or `diagrams.md`, which are folders of the site.
+- **Links.** A link to another page leads to its address, and a link
+  to a heading to the heading's id, which is GitHub's (`slug.ts`), so
+  `configuration.md#vite_repo_url` leads to the same heading on both.
+  A link out of `docs/` leads to the file on the repository's host at
+  the built commit (`blob/` for a file, `tree/` for a folder), or at
+  the release's tag in an archive. An address on the web stays as it
+  is.
+- **A page** has the About page's Content Security Policy, but with
+  styles from its one stylesheet, `docs.css`, alone (`style-src
+  'self'`), and runs no script. Its title and description are its
+  heading of level 1 and the paragraph after it. Its header names the
+  version and links the list of versions (`docs/versions/`), which a
+  build writes with its own version and the releases page, and the
+  deploy writes again with every release
+  ([deployment.md](deployment.md#each-releases-docs)); its
+  sections are listed under "On this page"; the previous and next pages
+  are in the README's order; and its footer links its source, the
+  issues, the license and the commit. `checkPage` holds a page to what
+  it is written as: after the doctype, only plain tags of the elements
+  and attributes the pages have, with no script, style, event handler
+  or comment; the policy in the head before any address, with only
+  `<html>`, `<head>` and `<meta>` tags and whitespace before it, so no
+  text or element can open the body first and the browser drop it; and
+  no address from the site's root or of a scheme other than http(s).
+  Every page the package writes passes it, and the deploy checks an
+  archived page with it, and a stylesheet with `checkStylesheet` (no
+  `@import`, `url(`, `image-set(`, backslash or address in a string),
+  before it serves them.
+- **A diagram** is a figure: its light and dark drawings through
+  `<img>` in a `<picture>`, sized from the drawing so the page does not
+  move as it loads, its `accTitle` as their alternative text, its
+  `accDescr` as the caption, and its source under it. The drawings go
+  to `docs/diagrams/`, with the font's license beside them
+  ([above](#the-diagrams-font)), and a page with a figure says in its
+  footer which font they are set in. When the diagrams were not drawn
+  (`DOCS_DIAGRAMS=skip`), a figure shows its caption and its source,
+  open, and says so. In dev, the browser is started on the first
+  drawing and kept until the server closes; without Chromium, the
+  pages show the source and the server says why, once.
+- **An archive** (a release's docs, served under its version) is the
+  same pages one folder deeper, at the release's tag, never indexed
+  (`noindex`, no canonical address), each with a note that links the
+  latest docs. `npm run docs:archive -- X.Y.Z` packs one, every
+  diagram drawn, and every GitHub release carries its own
+  ([deployment.md](deployment.md#a-releases-docs-as-an-archive)), which
+  the deploy serves at `/docs/X.Y.Z/` once it has checked it
+  ([deployment.md](deployment.md#each-releases-docs)).
+
+What a page holds that would not show as written, or would lead
+nowhere, fails: `renderDocsSite` throws one `DocsSiteError` that lists
+every problem with its file and line. That is what `parseDocument`
+refuses ([Repository Markdown](#repository-markdown)); a page that does
+not open with its one heading of level 1 and a paragraph; a heading
+whose id the page already has; a task list item (`[ ]`, `[x]`); a page
+the README does not link to; a link to a page, heading, file or folder
+that is not there, out of the repository, from the site's root, or to
+a scheme other than `http:` and `https:`; a diagram's problems
+([above](#diagrams)); and a Mermaid block in a list or quote, which is
+not drawn. The package's tests render the repository's own docs, so
+`npm run check` fails on any of these.
+
 ## Safety
 
 Pods and libraries are untrusted: anyone's data may be opened, and most
@@ -269,7 +486,11 @@ text is rendered, and none relies on a check of the data.
 | Link spoofing | A followed link opens in a new tab, says so, and when its text is not its own URL, or its host is an international one, the host it leads to follows it in sight: "the spec (solidproject.org)", punycode kept, so `<https://bаnk.example>` with a Cyrillic "а" shows "(xn--bnk-6cd.example)". The link and its host are each isolated, so a bidi override in the text before them cannot reorder them: the host, and an address shown as itself, run left to right (`dir="ltr"`), other link text in the direction of its first letter (`dir="auto"`), so a link in Arabic reads right to left. |
 | Tracking pictures | Never loaded: alt text only. Pictures belong in `sm:frontImage`/`sm:backImage`, with a description. |
 | Trojan Source | Bidi controls, zero-width and other hidden characters in code and link text shown as markers; links isolated from the text around them. |
-| Denial of service | The limits above, at every entry point, and each text parsed once (`markdownCache.ts` keeps the last 500, and a theory's chunks are split from its cached blocks, the plain text of every card of the deck the Studio's workbench searches, and the problems of the last 500 texts of each field rule the Studio's release check reads). |
+| Denial of service | The limits above, at every entry point for data, and each text parsed once (`markdownCache.ts` keeps the last 500, and a theory's chunks are split from its cached blocks, the plain text of every card of the deck the Studio's workbench searches, and the problems of the last 500 texts of each field rule the Studio's release check reads). |
+
+[`parseDocument`](#repository-markdown) lifts `MAX_CHARS`, so it is
+never given data: it reads the repository's own files at build time,
+and no code that reads a pod or library calls it.
 
 Two checks of the built site hold this (`apps/web/src/build.test.ts`,
 over every chunk, the [Studio](studio.md)'s included):
