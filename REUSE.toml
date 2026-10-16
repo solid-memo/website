@@ -89,6 +89,7 @@ path = [
     "decks/italian-basics/*.ttl",
     "decks/japanese-basics/*.ttl",
     "decks/korean-basics/*.ttl",
+    "decks/korean-phrases/*.ttl",
     "decks/latin-phrases/*.ttl",
     "decks/mathematical-symbols/*.ttl",
     "decks/media-types/*.ttl",
