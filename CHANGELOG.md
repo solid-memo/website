@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.2.0](https://github.com/solid-memo/website/compare/v3.1.0...v3.2.0) (2026-10-16)
+
+### Features
+
+* **decks:** learn everyday Korean phrases ([8ed97d8](https://github.com/solid-memo/website/commit/8ed97d82c241799545f6bc1e0139c2a5c276b755)), closes [#122](https://github.com/solid-memo/website/issues/122)
+
 ## [3.1.0](https://github.com/solid-memo/website/compare/v3.0.0...v3.1.0) (2026-10-16)
 
 ### Features
