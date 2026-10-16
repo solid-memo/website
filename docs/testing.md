@@ -123,7 +123,13 @@ CI does not run it.
 limit on pulls without an account the runners share: each job restores
 its server's images ([e2e-images](../.github/actions/e2e-images/action.yml)),
 and only when the cache has none under the job's key does it pull or
-build them, then save them ([e2e/pod/images.ts](../e2e/pod/images.ts)).
+build them, then, on `main`, save them ([e2e/pod/images.ts](../e2e/pod/images.ts)).
+A pull request and the merge queue read `main`'s images but save none:
+GitHub keeps what a run saves under its ref, so their copies would never
+be read again, and they would count toward the repository's 10 GB of
+caches, past which GitHub evicts the least recently used. A pull request
+that changes an image (a Renovate digest update, say) pulls it, until
+`main` has saved it.
 The key is what names the images (`node e2e/pod/servers.ts key <id>`):
 the compose file, which pins a pulled image by digest, or, for an image
 built here, a hash of its compose file and of every file of its build
@@ -388,7 +394,7 @@ jobs, side by side:
 
 | Job | What it checks |
 |---|---|
-| `build` | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), then `npm run build`; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again |
+| `build` | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), then `npm run build`; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s |
 | `library` | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
 | `crosscheck` | the cross-check script's tests, then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
@@ -396,7 +402,8 @@ jobs, side by side:
 | `journeys` | the user journeys ([User journeys](#user-journeys)) |
 | `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
 | `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
-| `ci-ok` | that every job above passed |
+| `caches` | nothing: on `main`, after `build`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
+| `ci-ok` | that every job above passed, `caches` aside |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset
 on `main` (a setting of the repository, Settings › Rules) is to require
@@ -452,11 +459,13 @@ a group of its own, since only it can deploy its version, so no newer
 push replaces it.
 
 A fork's pull request runs the same jobs, and its results are public.
-That is safe because the jobs only read: the workflow's token can read
-the repository and nothing more, no job uses a secret, and no checkout
-keeps the token (`persist-credentials: false`). A fork's run may
-restore the caches `main`'s runs saved; what it saves is kept for its
-own pull request only.
+That is safe because the jobs only read: the token of every job it runs
+can read the repository and nothing more (`caches`, the one job whose
+token can delete caches, runs on `main` alone), no job uses a secret,
+and no checkout keeps the token (`persist-credentials: false`). A fork's
+run may restore the caches `main`'s runs saved; what it saves (npm's,
+pip's and Playwright's, not Turbo's or the images') is kept for its own
+pull request only.
 
 The job ids `pod` and `contract`, and their `matrix.server` lists, are
 read by [servers.test.ts](../e2e/pod/servers.test.ts), which checks that

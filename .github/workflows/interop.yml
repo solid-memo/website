@@ -61,9 +61,9 @@ jobs:
           name: pod-${{ matrix.server }}
           key: ${{ steps.key.outputs.key }}
       - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}
-      - if: steps.images.outputs.hit != 'true'
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
-      - if: steps.images.outputs.hit != 'true'
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         uses: actions/cache/save@v6
         continue-on-error: true
         with:
