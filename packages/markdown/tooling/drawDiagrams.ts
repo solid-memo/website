@@ -101,7 +101,8 @@ export type DrawingBrowser = { newPage(): Promise<DrawingPage>; close(): Promise
 /** Starts the browser: Playwright's headless Chromium, or a fake in tests. */
 export type Launch = () => Promise<DrawingBrowser>;
 
-const launchChromium: Launch = () => chromium.launch();
+/** Playwright's headless Chromium, as drawing starts it by default. */
+export const launchChromium: Launch = () => chromium.launch();
 
 /** A diagram's two drawings. */
 export type Drawing = Record<Theme, string>;

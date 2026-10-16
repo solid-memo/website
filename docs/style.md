@@ -217,7 +217,14 @@ run it without installing it.
   drop the `>`. A word in an edge label is at most about 25 characters
   wide, since Mermaid wraps an edge label at 200 pixels and splits a
   longer word: a long address is shortened to its host
-  (`guest.solid-memo.invalid`).
+  (`guest.solid-memo.invalid`). `npm run check` names any other
+  character, with its file and line.
+- The docs are also rendered as pages
+  ([markdown.md](markdown.md#the-docs-as-a-site)), and `npm run check`
+  renders them: a page opens with one heading of level 1, then a
+  paragraph that says what it is about; no two headings of a page have
+  the same text; every page is linked from the README; and every link
+  leads to a page, heading, file or folder that is there.
 - After a diagram is changed, check on GitHub that it still draws as
   meant: GitHub's Mermaid version and label mode differ from other
   renderers', and a diagram one of them accepts another can reject or

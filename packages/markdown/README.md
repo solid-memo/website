@@ -5,9 +5,9 @@ deck's description; and the repository's own docs, in the same dialect.
 It reads the text into a tree of its own, folds it
 to what the app shows, bounds it at every entry point, derives plain
 text from it, and checks it by the rules for a release
-([markdown.md](../../docs/markdown.md)). Its node tooling draws the
-docs' Mermaid diagrams to SVG, in Chromium
-([markdown.md](../../docs/markdown.md#diagrams)).
+([markdown.md](../../docs/markdown.md)). Its node tooling renders the
+docs to static pages and draws their Mermaid diagrams to SVG, in
+Chromium ([markdown.md](../../docs/markdown.md#the-docs-as-a-site)).
 
 ## Exports
 
@@ -36,6 +36,12 @@ node only, at build time:
   notice, and `checkSvg`, the check every drawing passes.
 - `drawDiagrams`: drawing them, light and dark, with the official
   Mermaid in Chromium through Playwright, cached between builds.
+- `slug`: a heading's id, as GitHub makes it.
+- `docsSite`: the docs folder as static pages, `renderDocsSite`, its
+  links made to work where the pages are served and every problem
+  listed with its file and line; `docs.css` is their stylesheet.
+- `publishDocs`: the Vite plugin that emits the pages with a build and
+  serves them in dev.
 
 ## Boundaries
 
@@ -45,7 +51,8 @@ only, and `shacl` from `node/` only. Its parser libraries
 `src/parse.ts` alone ([boundaries.md](../../docs/boundaries.md)).
 `tooling/` is node-only. Its development dependencies, `mermaid`,
 `playwright` and `@fontsource-variable/fredoka`, are used in
-`tooling/drawDiagrams.ts` alone.
+`tooling/drawDiagrams.ts` alone, and `vite`'s types in
+`tooling/publishDocs.ts`.
 
 ## Tests
 
@@ -55,7 +62,9 @@ npm run test:unit -- packages/markdown/src/parse.test.ts      # one file, from t
 ```
 
 One test draws in the real Chromium, which `npm run browsers` installs
-once ([testing.md](../../docs/testing.md#strategy-per-layer)).
+once, and one renders the repository's own docs, so a docs edit can
+fail the package's tests
+([testing.md](../../docs/testing.md#strategy-per-layer)).
 
 ## Status
 

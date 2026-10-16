@@ -61,8 +61,16 @@ type Blocks<Extra> =
 /** Block content, as data shows it: its headings folded to bold paragraphs. */
 export type MdBlock = Blocks<never>;
 
-/** A heading of the repository's own Markdown, with its level, for a page's outline. */
-export type DocHeading = { type: "heading"; depth: 1 | 2 | 3 | 4 | 5 | 6; children: MdInline[] };
+/**
+ * A heading of the repository's own Markdown, with its level, for a
+ * page's outline, and the line it is on (from 1), for a message about it.
+ */
+export type DocHeading = {
+  type: "heading";
+  depth: 1 | 2 | 3 | 4 | 5 | 6;
+  line: number;
+  children: MdInline[];
+};
 
 /** Block content of the repository's own Markdown (parseDocument): MdBlock and headings. */
 export type DocBlock = Blocks<DocHeading>;
@@ -350,6 +358,7 @@ class Fold {
             {
               type: "heading",
               depth: node.depth,
+              line: node.position!.start.line,
               children: this.inlines(node.children, depth + 1, false),
             },
           ];

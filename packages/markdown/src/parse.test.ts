@@ -358,24 +358,24 @@ describe("parseDocument", () => {
     throw new Error(`parseDocument read ${JSON.stringify(source.slice(0, 40))}`);
   };
 
-  it("keeps headings at their level, and reads every other block as parseMarkdown does", () => {
+  it("keeps headings at their level and line, and reads every other block as parseMarkdown does", () => {
     const page = "# Title\n\nSome *text*.\n\n## Part\n\n- a\n- b\n\n### Detail\n\n> `code`";
     expect(parseDocument(page)).toEqual([
-      { type: "heading", depth: 1, children: [text("Title")] },
+      { type: "heading", depth: 1, line: 1, children: [text("Title")] },
       paragraph(text("Some "), { type: "emphasis", children: [text("text")] }, text(".")),
-      { type: "heading", depth: 2, children: [text("Part")] },
+      { type: "heading", depth: 2, line: 5, children: [text("Part")] },
       parseMarkdown("- a\n- b")![0],
-      { type: "heading", depth: 3, children: [text("Detail")] },
+      { type: "heading", depth: 3, line: 10, children: [text("Detail")] },
       { type: "quote", children: [paragraph({ type: "inlineCode", value: "code" })] },
     ]);
     expect(parseDocument("Setext\n===\n\n- ## In a list")).toEqual([
-      { type: "heading", depth: 1, children: [text("Setext")] },
+      { type: "heading", depth: 1, line: 1, children: [text("Setext")] },
       {
         type: "list",
         ordered: false,
         start: 1,
         tight: true,
-        items: [[{ type: "heading", depth: 2, children: [text("In a list")] }]],
+        items: [[{ type: "heading", depth: 2, line: 4, children: [text("In a list")] }]],
       },
     ]);
   });

@@ -5,6 +5,11 @@
   ],
   "tasks": {
     "test": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/docs/**",
+        "$TURBO_ROOT$/*.md"
+      ],
       "env": [
         "DOCS_DIAGRAMS"
       ],

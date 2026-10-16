@@ -264,8 +264,9 @@ the same dialect, so a page of the docs reads as the app reads a card.
 `parseDocument(text)` is its profile, for trusted input read at build
 time only, never for data:
 
-- **Headings keep their level** (`{ type: "heading", depth }`), for a
-  page's outline. Every other block is as `parseMarkdown` gives it.
+- **Headings keep their level** (`{ type: "heading", depth, line }`),
+  for a page's outline, and the line they are on, for a message about
+  one. Every other block is as `parseMarkdown` gives it.
 - **`MAX_CHARS` is lifted, and only it.** A page is longer than data
   may be: `studio.md` is about 130 KB, `data-model.md` about 70 KB. The
   other [limits](#limits) stay; the docs come nowhere near them.
@@ -380,6 +381,67 @@ points to `OFL-Fredoka.txt`, the package's `LICENSE` byte for byte,
 which goes beside the drawings wherever they are published. `checkSvg`
 refuses the font without that comment. Nothing under the OFL is in the
 repository, so `REUSE.toml` and `LICENSES/` do not name it.
+
+## The docs as a site
+
+The docs are also rendered to static pages, by the package's node
+tooling: `renderDocsSite` in
+[docsSite.ts](../packages/markdown/tooling/docsSite.ts) reads each page
+of `docs/` with `parseDocument`, so a page shows as the app would show
+it, and writes it out as HTML with an emitter of its own, which escapes
+every text and has no way to write raw HTML.
+[publishDocs.ts](../packages/markdown/tooling/publishDocs.ts) is the
+Vite plugin that emits the pages under `docs/` with a build, and in dev
+renders a page anew on each request, so an edit shows on reload.
+
+- **Addresses.** The README is `docs/`, every other page
+  `docs/<page>/`, so `configuration.md` is `docs/configuration/`.
+  Every address a page names is relative, so the pages work from any
+  folder. A page may not be named like a version (`2.2.0.md`),
+  `versions.md` or `diagrams.md`, which are folders of the site.
+- **Links.** A link to another page leads to its address, and a link
+  to a heading to the heading's id, which is GitHub's (`slug.ts`), so
+  `configuration.md#vite_repo_url` leads to the same heading on both.
+  A link out of `docs/` leads to the file on the repository's host at
+  the built commit (`blob/` for a file, `tree/` for a folder), or at
+  the release's tag in an archive. An address on the web stays as it
+  is.
+- **A page** has the About page's Content Security Policy, but with
+  styles from its one stylesheet, `docs.css`, alone (`style-src
+  'self'`), and runs no script. Its title and description are its
+  heading of level 1 and the paragraph after it. Its header names the
+  version and links the list of versions (`docs/versions/`); its
+  sections are listed under "On this page"; the previous and next pages
+  are in the README's order; and its footer links its source, the
+  issues, the license and the commit.
+- **A diagram** is a figure: its light and dark drawings through
+  `<img>` in a `<picture>`, sized from the drawing so the page does not
+  move as it loads, its `accTitle` as their alternative text, its
+  `accDescr` as the caption, and its source under it. The drawings go
+  to `docs/diagrams/`, with the font's license beside them
+  ([above](#the-diagrams-font)), and a page with a figure says in its
+  footer which font they are set in. When the diagrams were not drawn
+  (`DOCS_DIAGRAMS=skip`), a figure shows its caption and its source,
+  open, and says so. In dev, the browser is started on the first
+  drawing and kept until the server closes; without Chromium, the
+  pages show the source and the server says why, once.
+- **An archive** (a release's docs, served under its version) is the
+  same pages one folder deeper, at the release's tag, never indexed
+  (`noindex`, no canonical address), each with a note that links the
+  latest docs.
+
+What a page holds that would not show as written, or would lead
+nowhere, fails: `renderDocsSite` throws one `DocsSiteError` that lists
+every problem with its file and line. That is what `parseDocument`
+refuses ([Repository Markdown](#repository-markdown)); a page that does
+not open with its one heading of level 1 and a paragraph; a heading
+whose id the page already has; a task list item (`[ ]`, `[x]`); a page
+the README does not link to; a link to a page, heading, file or folder
+that is not there, out of the repository, from the site's root, or to
+a scheme other than `http:` and `https:`; a diagram's problems
+([above](#diagrams)); and a Mermaid block in a list or quote, which is
+not drawn. The package's tests render the repository's own docs, so
+`npm run check` fails on any of these.
 
 ## Safety
 
