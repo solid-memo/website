@@ -250,6 +250,7 @@ describe("cardMarkdownProblems", () => {
       textFormat: SM.markdown,
       front: { en: "[a](https://x)", sv: "fine" },
       back: { en: "[b]" },
+      frontLabel: { en: "[f]" },
       backLabel: { en: "[l]" },
       frontNote: { en: "[n]" },
       backNote: { en: "  " },
@@ -267,6 +268,7 @@ describe("cardMarkdownProblems", () => {
     ).toEqual([
       ["m", { tab: "content", part: "front" }, "en", "side"],
       ["m", { tab: "content", part: "back" }, "en", "option"],
+      ["m", { tab: "content", part: "frontLabel" }, "en", "side"],
       ["m", { tab: "content", part: "backLabel" }, "en", "side"],
       ["m", { tab: "content", part: "frontNote" }, "en", "prose"],
       ["m", { tab: "distractors", distractor: "m-d1", part: "text" }, "en", "option"],

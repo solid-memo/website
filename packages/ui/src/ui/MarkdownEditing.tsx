@@ -155,6 +155,7 @@ function startsOpen(): boolean {
 export function CardPreview({
   front,
   back,
+  frontLabel,
   frontNote,
   backLabel,
   backNote,
@@ -163,6 +164,7 @@ export function CardPreview({
 }: {
   front: LangTextDraft;
   back: LangTextDraft;
+  frontLabel: LangTextDraft;
   frontNote: LangTextDraft;
   backLabel: LangTextDraft;
   backNote: LangTextDraft;
@@ -183,6 +185,7 @@ export function CardPreview({
         <CardFace
           side="front"
           text={previewText(front) ?? {}}
+          label={previewText(frontLabel)}
           note={previewText(frontNote)}
           textFormat={textFormat}
         />

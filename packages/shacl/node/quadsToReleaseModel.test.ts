@@ -40,6 +40,7 @@ const TURTLE = `@base <${URL}> .
 
 <#q-1> a solid-memo:Card ;
     solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:frontLabel "Kind"@en ;
     solid-memo:front "Question"@en ;
     solid-memo:back "Answer"@en , <https://example.com/not-text> ;
     solid-memo:distractor <#q-1-a> , <#named> , "loose" .
@@ -108,6 +109,7 @@ describe("quadsToReleaseModel", () => {
         retired: false,
         front: [en("Question")],
         back: [en("Answer")],
+        frontLabel: [en("Kind")],
         backLabel: [],
         frontNote: [],
         backNote: [],

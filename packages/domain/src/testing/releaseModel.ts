@@ -39,6 +39,7 @@ export function card(id: string, extra: Partial<ReleaseCard> = {}): ReleaseCard 
     retired: false,
     front: [],
     back: [text(`Answer ${id}`)],
+    frontLabel: [],
     backLabel: [],
     frontNote: [],
     backNote: [],

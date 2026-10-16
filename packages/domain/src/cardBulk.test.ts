@@ -55,7 +55,7 @@ const retired = card("retired", { retired: true });
 describe("planCardEdit", () => {
   it("retires the live cards, saved in this app's format with their review state left alone, the retired ones skipped", () => {
     const plan = planCardEdit([live, retired], ["live", "retired", "gone"], { kind: "retire" });
-    expect(plan.save).toEqual([{ ...live, formatVersion: 5, retired: true }]);
+    expect(plan.save).toEqual([{ ...live, formatVersion: 6, retired: true }]);
     expect(plan.remove).toEqual([]);
     expect(plan.reviewRemovals).toEqual([]);
     expect(plan.skipped).toEqual([
@@ -67,7 +67,7 @@ describe("planCardEdit", () => {
 
   it("restores the retired cards, the live ones skipped", () => {
     const plan = planCardEdit([live, retired], ["live", "retired"], { kind: "restore" });
-    expect(plan.save).toEqual([{ ...card("retired"), formatVersion: 5 }]);
+    expect(plan.save).toEqual([{ ...card("retired"), formatVersion: 6 }]);
     expect(plan.save[0]).not.toHaveProperty("retired");
     expect(plan.skipped).toEqual([{ id: "live", reason: "unchanged" }]);
     expect(plan.inverse.save).toEqual([retired]);
@@ -110,15 +110,15 @@ describe("planCardEdit", () => {
       markdown: true,
     });
     expect(on.save).toEqual([
-      { ...live, formatVersion: 5, textFormat: SM.markdown },
-      { ...retired, formatVersion: 5, textFormat: SM.markdown },
+      { ...live, formatVersion: 6, textFormat: SM.markdown },
+      { ...retired, formatVersion: 6, textFormat: SM.markdown },
     ]);
     expect(on.skipped).toEqual([{ id: "md", reason: "unchanged" }]);
     const off = planCardEdit([live, markdown], ["live", "md"], {
       kind: "setTextFormat",
       markdown: false,
     });
-    expect(off.save).toEqual([{ ...markdown, formatVersion: 5, textFormat: SM.plainText }]);
+    expect(off.save).toEqual([{ ...markdown, formatVersion: 6, textFormat: SM.plainText }]);
     expect(off.skipped).toEqual([{ id: "live", reason: "unchanged" }]);
   });
 
@@ -129,7 +129,7 @@ describe("planCardEdit", () => {
       tag: "JA",
     });
     expect(both.save).toEqual([
-      { ...untagged, formatVersion: 5, front: { ja: "水" }, back: { ja: "water" } },
+      { ...untagged, formatVersion: 6, front: { ja: "水" }, back: { ja: "water" } },
     ]);
     expect(both.skipped).toEqual([{ id: "live", reason: "unchanged" }]);
     const front = planCardEdit([untagged], ["u"], {
@@ -138,11 +138,11 @@ describe("planCardEdit", () => {
       side: "front",
     });
     // The back keeps its untagged text, as it was saved.
-    expect(front.save).toEqual([{ ...untagged, formatVersion: 5, front: { ja: "水" } }]);
+    expect(front.save).toEqual([{ ...untagged, formatVersion: 6, front: { ja: "水" } }]);
     const old = card("old", { retired: true, back: { "": "eld" } });
     expect(
       planCardEdit([old], ["old"], { kind: "stateLanguage", tag: "sv", side: "back" }).save,
-    ).toEqual([{ ...old, formatVersion: 5, back: { sv: "eld" } }]);
+    ).toEqual([{ ...old, formatVersion: 6, back: { sv: "eld" } }]);
   });
 
   it("refuses a stated language that is no language code", () => {
@@ -176,6 +176,7 @@ describe("planCardEdit, replacing text", () => {
     back: { sv: "Katt" },
     frontNote: { en: "a cat" },
     backNote: { en: "cats" },
+    frontLabel: { en: "Cat word" },
     backLabel: { en: "Cat noun" },
     frontImageUrl: "https://pod.example/cat.png",
     frontImageDescription: { en: "A cat" },
@@ -190,10 +191,11 @@ describe("planCardEdit, replacing text", () => {
     expect(plan.save).toEqual([
       {
         ...word,
-        formatVersion: 5,
+        formatVersion: 6,
         front: { en: "The dog sat", sv: "Katten satt" },
         frontNote: { en: "a dog" },
         backNote: { en: "dogs" },
+        frontLabel: { en: "dog word" },
         backLabel: { en: "dog noun" },
         distractors: [
           { id: "d1", text: { sv: "Hund" }, note: { en: "Not a dog" } },
@@ -312,7 +314,7 @@ describe("planCardEdit, writing a side's text anew", () => {
   it("writes the side's text in one language, trimmed, its other languages and the card retired or not as they were", () => {
     const both = card("both", { front: { en: "cat", sv: "katt" }, retired: true });
     const plan = planCardEdit([both], ["both"], setText("front", "en", "  dog "));
-    expect(plan.save).toEqual([{ ...both, front: { en: "dog", sv: "katt" }, formatVersion: 5 }]);
+    expect(plan.save).toEqual([{ ...both, front: { en: "dog", sv: "katt" }, formatVersion: 6 }]);
     expect(plan.inverse.save).toEqual([both]);
     expect(planCardEdit([live], ["live"], setText("back", "sv", "hund")).save[0]?.back).toEqual({
       sv: "hund",
@@ -417,11 +419,13 @@ describe("changedTexts", () => {
     });
     const after = card("c", {
       front: { en: "dog", sv: "katt" },
+      frontLabel: { en: "animal" },
       backLabel: { en: "dog" },
       distractors: [{ id: "d", text: { sv: "Hund?" } }],
     });
     expect(changedTexts(before, after)).toEqual([
       { part: "front", tag: "en", before: "cat", after: "dog" },
+      { part: "frontLabel", tag: "en", after: "animal" },
       { part: "backLabel", tag: "en", after: "dog" },
       { part: "backNote", tag: "en", before: "a cat" },
       { part: "distractor", tag: "sv", before: "Katt?", after: "Hund?" },

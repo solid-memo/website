@@ -4,7 +4,7 @@
 
 import type {
   AgentV1,
-  CardV5,
+  CardV6,
   DistractorV1,
   DistributionV1,
   DraftChapterV1,
@@ -72,7 +72,7 @@ export interface ReleaseDraft {
   readonly distributions: readonly DraftNode<DistributionV1>[];
   readonly chapters: readonly DraftNode<DraftChapterV1>[];
   readonly steps: readonly DraftNode<DraftStepV1>[];
-  readonly cards: readonly DraftNode<CardV5>[];
+  readonly cards: readonly DraftNode<CardV6>[];
   readonly distractors: readonly DraftNode<DistractorV1>[];
   /** Every other statement of the release, in order. */
   readonly triples: readonly DraftTriple[];
@@ -236,7 +236,7 @@ export type ChapterText = Pick<DraftChapterV1, "title" | "description" | "textFo
 export type StepText = Pick<DraftStepV1, "theory" | "textFormat">;
 
 /** A card's content, without its distractors and whether it is retired, which their own changes make. */
-export type CardText = Omit<CardV5, "distractor" | "deprecated">;
+export type CardText = Omit<CardV6, "distractor" | "deprecated">;
 
 /** A wrong option's text and note. */
 export type DistractorText = Omit<DistractorV1, "deprecated">;
@@ -509,7 +509,7 @@ type NodeLists = {
   distributions: DistributionV1;
   chapters: DraftChapterV1;
   steps: DraftStepV1;
-  cards: CardV5;
+  cards: CardV6;
   distractors: DistractorV1;
 };
 

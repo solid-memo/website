@@ -55,6 +55,11 @@ import { isHttpUrl } from "./webId";
  * formats are kept as they are, their language unknown. A format-5
  * reader reads only untagged keywords and would drop the tagged ones as
  * it saves the deck.
+ *
+ * Card format 6 adds a label above the front (`sm:frontLabel`), as format
+ * 3 added one above the back, so a card studied both ways says what is
+ * asked. Format 5 was published without it, and a published shape is
+ * never edited; a format-5 card has none, so nothing else changes.
  */
 export const DECK_FORMAT_VERSION: number = LATEST_VERSION.deck;
 export const CARD_FORMAT_VERSION: number = LATEST_VERSION.card;
@@ -107,7 +112,11 @@ export interface CardSide {
   imageUrl?: string;
   /** What the picture shows, in words: its text alternative, when stated. */
   imageDescription?: LangText;
-  /** The back's label, on the back whichever way it is studied: how the answer relates to the front. */
+  /**
+   * The side's label, above its text whichever way the card is studied:
+   * what kind of thing the side is ("Country"); on the back, how the
+   * answer relates to the front ("Capital").
+   */
   label?: LangText;
   /** The side's note, under its text: shown once the answer is revealed, never while asking. */
   note?: LangText;
@@ -132,6 +141,7 @@ export function promptSides(prompt: { card: CardContent; direction: StudyDirecti
     ...(card.frontImageDescription === undefined
       ? {}
       : { imageDescription: card.frontImageDescription }),
+    ...(card.frontLabel === undefined ? {} : { label: card.frontLabel }),
     ...(card.frontNote === undefined ? {} : { note: card.frontNote }),
     ...format,
   };
@@ -233,6 +243,13 @@ export interface CardContent {
    */
   frontImageDescription?: LangText;
   /**
+   * A short label above the front's text that says what kind of thing it
+   * is ("Country"), shown with the front, smaller, whichever way the card
+   * is studied: the front's text stays the prompt itself. In every
+   * language it is stated in. Card format 6.
+   */
+  frontLabel?: LangText;
+  /**
    * A short note under the front's text ("Out of use"), shown once the
    * answer is revealed, so it never gives it away. In every language it
    * is stated in, English or not (card format 5). Card format 3.
@@ -268,7 +285,7 @@ export interface CardContent {
    * card format 5 without a bump): the IRI of a concept of the
    * TextFormats scheme, `sm:markdown` or `sm:plainText`, or one this app
    * does not know, which reads as plain text. It covers the sides, the
-   * notes and the label, and the card's distractors, never the pictures'
+   * notes and the labels, and the card's distractors, never the pictures'
    * descriptions. Absent means plain text, shown as written.
    */
   textFormat?: string;
@@ -313,11 +330,12 @@ export function activeCards<T extends { retired?: true }>(cards: readonly T[]): 
   return cards.filter((card) => card.retired !== true);
 }
 
-/** A text of a card: a side's, a note, the label or a picture's description. */
+/** A text of a card: a side's, a note, a label or a picture's description. */
 export type CardTextPart =
   | "front"
   | "back"
   | "frontImageDescription"
+  | "frontLabel"
   | "frontNote"
   | "backImageDescription"
   | "backLabel"
@@ -328,9 +346,10 @@ const PART_NOUNS: Record<CardTextPart, string> = {
   front: "the front",
   back: "the back",
   frontImageDescription: "the front picture's description",
+  frontLabel: "the label above the front",
   frontNote: "the note under the front",
   backImageDescription: "the back picture's description",
-  backLabel: "the label",
+  backLabel: "the label above the back",
   backNote: "the note under the back",
 };
 
@@ -381,7 +400,7 @@ export function isFormatted(textFormat: string | undefined): boolean {
  * untagged text. A side saved before it did may keep its untagged text
  * ("") while it is as `saved` (the card edited, if any) has it; edited,
  * or given a translation (untagged and tagged text never mix), it needs
- * its language (textNeedsLanguage, textMixesUnstated). A note, the label
+ * its language (textNeedsLanguage, textMixesUnstated). A note, a label
  * and a picture's description are always in a stated language, English
  * or not. The card's distractors, when the input states them, are tidied
  * as their own editor does (tidiedDistractor), their ids and retirement
@@ -399,6 +418,7 @@ export function validateCardContent(
   const own = {
     frontImageDescription:
       frontImageUrl === undefined ? undefined : tidiedTagged(input.frontImageDescription),
+    frontLabel: tidiedTagged(input.frontLabel, formatted),
     frontNote: tidiedTagged(input.frontNote, formatted),
     backLabel: tidiedTagged(input.backLabel, formatted),
     backImageDescription:
@@ -416,6 +436,7 @@ export function validateCardContent(
   if (unstated !== undefined) return unstated;
   for (const part of [
     "frontImageDescription",
+    "frontLabel",
     "frontNote",
     "backLabel",
     "backImageDescription",
@@ -453,6 +474,7 @@ export function validateCardContent(
       ...(own.backImageDescription === undefined
         ? {}
         : { backImageDescription: own.backImageDescription }),
+      ...(own.frontLabel === undefined ? {} : { frontLabel: own.frontLabel }),
       ...(own.frontNote === undefined ? {} : { frontNote: own.frontNote }),
       ...(own.backLabel === undefined ? {} : { backLabel: own.backLabel }),
       ...(own.backNote === undefined ? {} : { backNote: own.backNote }),

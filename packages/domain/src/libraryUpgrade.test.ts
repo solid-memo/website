@@ -256,6 +256,15 @@ describe("planLibraryUpgrade", () => {
     expect(planLibraryUpgrade({ deck, cards, from, to: labeled, releases })?.change).toEqual([
       { ...libraryCard("dk", "Copenhagen"), backLabel: { en: "Capital" } },
     ]);
+    const frontLabeled = release(
+      2,
+      from.cards.map((card) =>
+        card.id === "dk" ? { ...card, frontLabel: { en: "Country" } } : card,
+      ),
+    );
+    expect(planLibraryUpgrade({ deck, cards, from, to: frontLabeled, releases })?.change).toEqual([
+      { ...libraryCard("dk", "Copenhagen"), frontLabel: { en: "Country" } },
+    ]);
     const frontNoted = release(
       2,
       from.cards.map((card) =>

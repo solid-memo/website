@@ -42,6 +42,7 @@ export interface CardDraft {
   back: LangTextDraft;
   frontImageUrl: string;
   frontImageDescription: LangTextDraft;
+  frontLabel: LangTextDraft;
   frontNote: LangTextDraft;
   backImageUrl: string;
   backImageDescription: LangTextDraft;
@@ -64,7 +65,7 @@ export interface SwitchedText {
 
 /**
  * Texts that take their language from the same evidence: the fronts, the
- * backs, and the user's own text (notes, the label, the pictures'
+ * backs, and the user's own text (notes, the labels, the pictures'
  * descriptions), which is in one language however many fields it fills.
  */
 export type LanguageGroup = "front" | "back" | "own";
@@ -80,6 +81,7 @@ export interface CardLanguageHints {
 
 /** The card's texts, as the form shows them. */
 const TEXT_PARTS: readonly CardTextPart[] = [
+  "frontLabel",
   "front",
   "frontImageDescription",
   "frontNote",
@@ -97,6 +99,7 @@ const FIELD_IDS: Record<CardTextPart, string> = {
   front: "card-front",
   back: "card-back",
   frontImageDescription: "card-front-image-description",
+  frontLabel: "card-front-label",
   frontNote: "card-front-note",
   backImageDescription: "card-back-image-description",
   backLabel: "card-back-label",
@@ -107,6 +110,7 @@ const ROLES: Record<CardTextPart, LanguageRole> = {
   front: "front",
   back: "back",
   frontImageDescription: "pictureDescription",
+  frontLabel: "frontLabel",
   frontNote: "frontNote",
   backImageDescription: "pictureDescription",
   backLabel: "backLabel",
@@ -118,6 +122,7 @@ const FIELD_NOUNS: Record<CardTextPart, MessageKey> = {
   front: "language.field.front",
   back: "language.field.back",
   frontImageDescription: "language.field.frontImageDescription",
+  frontLabel: "language.field.frontLabel",
   frontNote: "language.field.frontNote",
   backImageDescription: "language.field.backImageDescription",
   backLabel: "language.field.backLabel",
@@ -175,6 +180,7 @@ export function cardLanguageHints(languages: DeckLanguages, title: LangText): Ca
 
 /** The texts that are Markdown in a card in Markdown: all but the pictures' descriptions, which are a picture's alt text. */
 const MARKDOWN_PARTS: readonly CardTextPart[] = [
+  "frontLabel",
   "front",
   "frontNote",
   "backLabel",
@@ -347,7 +353,7 @@ export function stillReadOtherwise(draft: CardDraft): "main" | "translation" | u
  * asks rather than guess. A picture's description counts only with a
  * picture to describe. The sides and notes are tidied by
  * validateCardContent alone, which keeps the spaces a Markdown text
- * starts with; the label and the descriptions, single lines that never
+ * starts with; the labels and the descriptions, single lines that never
  * hold a block, are trimmed here.
  */
 export function checkDraft(draft: CardDraft, saved?: CardContent): CardDraftCheck {
@@ -435,7 +441,7 @@ export function CardFieldsErrorMessage({ invalid }: { invalid: CardFieldsError |
 
 /**
  * Text, picture, picture description and note fields for both sides of
- * a card and the back's label, shared by the card creator and the card
+ * a card and a label above each, shared by the card creator and the card
  * page, each text in the languages the user states (LangTextField).
  * Nothing is `required`: a side may be a picture only, so a hint ahead of
  * the fields says what a side needs, and it is checked on submit
@@ -444,12 +450,12 @@ export function CardFieldsErrorMessage({ invalid }: { invalid: CardFieldsError |
  * that text's picker, which takes the focus.
  *
  * Choosing the language of an empty text chooses it for the empty texts
- * of its group the user has not touched: a card's notes and label are
+ * of its group the user has not touched: a card's notes and labels are
  * mostly in one language.
  *
  * A text `saved` with a line break, in any language, is edited in a
  * textarea, so the break is kept: a single-line field would drop it.
- * That holds for every text, the label and the picture descriptions
+ * That holds for every text, the labels and the picture descriptions
  * included, so editing never drops a break. It is what was saved that
  * decides, not the draft, and a field once a textarea stays one, so it
  * stays what it is (focus and all) while the user types and saves.
@@ -462,7 +468,7 @@ export function CardFieldsErrorMessage({ invalid }: { invalid: CardFieldsError |
  * and a preview of the card as it will be studied under the fields
  * (CardPreview). Switched on over text that reads otherwise as Markdown,
  * a status under the toggle says so, while that text is unchanged
- * (switchMarkdown); not of Markdown typed afterward, which is meant. The label and the pictures' descriptions stay single
+ * (switchMarkdown); not of Markdown typed afterward, which is meant. The labels and the pictures' descriptions stay single
  * lines: a label is one line in study, and a description is plain text.
  */
 export function CardContentFields({
@@ -623,6 +629,10 @@ export function CardContentFields({
         </div>
         {draft.markdown && <MarkdownHelp />}
       </div>
+      {textField("frontLabel", t("cardContentFields.frontLabel"), [], {
+        id: "card-front-label-hint",
+        text: t("cardContentFields.frontLabelHint"),
+      })}
       {textField("front", t("cardContentFields.front"), ["card-sides-hint"])}
       <label for="card-front-image">{t("cardContentFields.frontImage")}</label>
       <input {...image("card-front-image", "frontImageUrl")} />
@@ -653,6 +663,7 @@ export function CardContentFields({
         <CardPreview
           front={draft.front}
           back={draft.back}
+          frontLabel={draft.frontLabel}
           frontNote={draft.frontNote}
           backLabel={draft.backLabel}
           backNote={draft.backNote}

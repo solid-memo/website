@@ -134,7 +134,7 @@ describe("QuestionEditorScreen", () => {
 
   it("asks for a language before it saves, and lets the user change it", () => {
     const { onEdit } = renderScreen("q-pods-1a");
-    const label = screen.getByRole("textbox", { name: "Label (optional)" });
+    const label = screen.getByRole("textbox", { name: "Back label (optional)" });
     fireEvent.input(label, { target: { value: "Where" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(onEdit).not.toHaveBeenCalled();

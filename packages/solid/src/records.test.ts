@@ -480,7 +480,7 @@ describe("readVersioned", () => {
     expect(readVersioned(card(7), "card")).toEqual({
       storedVersion: 7,
       record: {
-        version: 5,
+        version: 6,
         data: { front: { "": "Sweden" }, back: { "": "Stockholm" }, distractor: [] },
       },
     });

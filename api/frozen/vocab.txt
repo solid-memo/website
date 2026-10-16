@@ -57,6 +57,7 @@ sm:formatVersion: property, range xsd:integer
 sm:front: property, range xsd:string, domain sm:Card
 sm:frontImage: property, range http://www.w3.org/2000/01/rdf-schema#Resource, domain sm:Card
 sm:frontImageDescription: property, range xsd:string, domain sm:Card
+sm:frontLabel: property, range xsd:string, domain sm:Card
 sm:frontNote: property, range xsd:string, domain sm:Card
 sm:frontToBack: concept
 sm:grade: property, range xsd:integer, domain sm:Answer

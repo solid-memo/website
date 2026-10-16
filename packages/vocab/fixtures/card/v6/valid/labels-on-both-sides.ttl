@@ -1,0 +1,19 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+<#croatia>
+    a solid-memo:Card ;
+    solid-memo:frontLabel "Country"@en ,
+                          "Land"@sv ;
+    solid-memo:front "Croatia"@en ,
+                     "Kroatien"@sv ;
+    solid-memo:backLabel "Capital"@en ,
+                         "Huvudstad"@sv ;
+    solid-memo:back "Zagreb"@en ,
+                    "Zagreb"@sv ;
+    solid-memo:formatVersion 6 .
+
+<#se>
+    a solid-memo:Card ;
+    solid-memo:front "Sweden" ;
+    solid-memo:back "Stockholm" ;
+    solid-memo:formatVersion 6 .

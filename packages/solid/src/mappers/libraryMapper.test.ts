@@ -473,11 +473,11 @@ describe("toLibraryDeckContent", () => {
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.front, "Sweden")
           .addStringNoLocale(SM.back, "Stockholm")
-          .addInteger(SM.formatVersion, 6),
+          .addInteger(SM.formatVersion, 7),
       ),
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
-      `A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\ncard: ${DOC}#se\nurl: ${DOC}\nversion: 6\nlatest: 5`,
+      `A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\ncard: ${DOC}#se\nurl: ${DOC}\nversion: 7\nlatest: 6`,
     );
   });
 

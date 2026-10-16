@@ -696,7 +696,7 @@ The URL holds how the cards are looked at. The domain applies it
 
 - `q`: text to find, case and accents aside. A card in Markdown is
   searched as its plain text ([markdown.md](markdown.md)).
-- `field`: where to look: the front, the back, the notes, the label or
+- `field`: where to look: the front, the back, the notes, the labels or
   the wrong options. Without it, all of them and the pictures'
   descriptions.
 - `lang`: only text in this language (a regional form too: `sv` finds
@@ -817,7 +817,7 @@ be changed, the bar has Clear selection alone. The edits are:
 - **Find and replace**
   ([`FindReplaceDialog`](../apps/studio/src/ui/FindReplaceDialog.tsx)):
   text as written (Markdown as its source), never a pattern. It looks in
-  the fields checked (the front, the back, the notes, the label, the wrong
+  the fields checked (the front, the back, the notes, the labels, the wrong
   options and their notes), in one language or all, matching case and
   whole words when asked. A preview lists every text it changes, before
   and after, and every card it leaves as it is, and why. Nothing is
@@ -894,7 +894,7 @@ Its four tabs are links, the one shown marked
 
 - **Content**: Solid Memo's card editor (`CardContainer` in `ui`): the
   card as it is studied (small here, its faces side by side, so the
-  fields under it are in sight), its sides, pictures, notes, label and Markdown,
+  fields under it are in sight), its sides, pictures, notes, labels and Markdown,
   Save, and Remove, which goes back to the deck's cards. Its wrong
   options are left to their own tab. Each save is told to the
   [dock](#the-dock)'s activity, as each change of the wrong options is.

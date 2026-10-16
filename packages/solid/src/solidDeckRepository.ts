@@ -38,7 +38,7 @@ import {
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { isDeckOutdated, isOutdated, upgradeCard } from "@solid-memo/domain/migration";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
-import { CARD_V5 } from "@solid-memo/vocab/descriptors.generated";
+import { CARD_V6 } from "@solid-memo/vocab/descriptors.generated";
 import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
 import {
   deleteDataset,
@@ -657,7 +657,7 @@ export function createSolidDeckRepository({
   ): ThingPersisted {
     return recordThing(
       `${deck.cardsDocumentUrl}#${card.id}`,
-      CARD_V5,
+      CARD_V6,
       cardToRecord(card, card.createdAt ?? now().toISOString(), deck.cardsDocumentUrl),
       existing,
     );

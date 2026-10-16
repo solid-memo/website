@@ -23,7 +23,7 @@ export type ShapeName = "agent" | "answer" | "card" | "catalog" | "chapter" | "d
 export const LATEST_VERSION = {
   agent: 1,
   answer: 1,
-  card: 5,
+  card: 6,
   catalog: 1,
   chapter: 1,
   deck: 6,
@@ -120,6 +120,24 @@ export interface CardV5 {
   readonly frontImageDescription?: LangText;
   readonly backImageDescription?: LangText;
   readonly frontNote?: LangText;
+  readonly backLabel?: LangText;
+  readonly backNote?: LangText;
+  readonly created?: string;
+  readonly deprecated?: boolean;
+  readonly distractor: readonly string[];
+  readonly textFormat?: string;
+}
+
+/** Card format 6: each side has text, a picture or both (a picture is always an IRI); a side's text is untagged, its language unknown, or language-tagged, one text per language; a side's picture may have a description, its text alternative, language-tagged text, one per language; each side may have a note under it, shown once the answer is revealed, and a label above it that says what kind of thing that side is (on the back, how the answer relates to the front), all four language-tagged text in any language, one per language; a retired card, which is kept but no longer studied, states owl:deprecated true; a card asked as a multiple-choice question names its wrong options, distractors of the same document (since vocabulary 1.14, without a format bump); a card may say how its texts are written, solid-memo:textFormat, plain or Markdown (since vocabulary 1.15, without a format bump). */
+export interface CardV6 {
+  readonly front?: LangText;
+  readonly back?: LangText;
+  readonly frontImage?: string;
+  readonly backImage?: string;
+  readonly frontImageDescription?: LangText;
+  readonly backImageDescription?: LangText;
+  readonly frontNote?: LangText;
+  readonly frontLabel?: LangText;
   readonly backLabel?: LangText;
   readonly backNote?: LangText;
   readonly created?: string;
@@ -600,7 +618,7 @@ export interface StepV1 {
 
 export type AgentRecord = { version: 1; data: AgentV1 };
 export type AnswerRecord = { version: 1; data: AnswerV1 };
-export type CardRecord = { version: 1; data: CardV1 } | { version: 2; data: CardV2 } | { version: 3; data: CardV3 } | { version: 4; data: CardV4 } | { version: 5; data: CardV5 };
+export type CardRecord = { version: 1; data: CardV1 } | { version: 2; data: CardV2 } | { version: 3; data: CardV3 } | { version: 4; data: CardV4 } | { version: 5; data: CardV5 } | { version: 6; data: CardV6 };
 export type CatalogRecord = { version: 1; data: CatalogV1 };
 export type ChapterRecord = { version: 1; data: ChapterV1 };
 export type DeckRecord = { version: 1; data: DeckV1 } | { version: 2; data: DeckV2 } | { version: 3; data: DeckV3 } | { version: 4; data: DeckV4 } | { version: 5; data: DeckV5 } | { version: 6; data: DeckV6 };
@@ -647,7 +665,7 @@ export type VersionedRecord = {
 export type LatestRecord = {
   agent: AgentV1;
   answer: AnswerV1;
-  card: CardV5;
+  card: CardV6;
   catalog: CatalogV1;
   chapter: ChapterV1;
   deck: DeckV6;

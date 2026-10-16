@@ -139,7 +139,9 @@ string, so other applications can look up what it means:
   ([Drafts and releases](#drafts-and-releases)). 1.19's
   `sm:recallMillis`, `sm:gradeMillis`, `sm:priorDue` and
   `sm:utcOffsetMinutes` joined answer format 1 the first way
-  ([The answer log](#the-answer-log)).
+  ([The answer log](#the-answer-log)). 1.20's `sm:frontLabel` joined
+  card format 6, the next version of the card shape
+  ([Card labels](#card-labels)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
   says only "at most one IRI", so a reader that meets a concept it does
@@ -208,8 +210,9 @@ Version 1.15 added how a text is written: `sm:textFormat`, a concept of
 | `sm:markdown` | `markdown` | CommonMark 0.31.2, with GitHub Flavored Markdown pipe tables as its one extension (`skos:broadMatch` IANA `text/markdown`). |
 
 - **What it covers is fixed for 1.x**, by the subject's class: on an
-  `sm:Card` its `sm:front`, `sm:back`, `sm:frontNote`, `sm:backNote` and
-  `sm:backLabel`, and the `sm:distractorText` and `sm:distractorNote` of
+  `sm:Card` its `sm:front`, `sm:back`, `sm:frontNote`, `sm:frontLabel`,
+  `sm:backNote` and `sm:backLabel` (the front's label since 1.20, by
+  decision in [#115](https://github.com/solid-memo/website/issues/115)), and the `sm:distractorText` and `sm:distractorNote` of
   its distractors, which carry no format of their own (they are read
   and written only with their card); on an `sm:Step` its `sm:theory`;
   on an `sm:Chapter` its `dcterms:description`. A picture's description,
@@ -312,10 +315,26 @@ answer format 1:
 | `sm:priorDue` | datatype property | Answer → `xsd:string` (`YYYY-MM-DD`, as `sm:due`) | |
 | `sm:utcOffsetMinutes` | datatype property | Answer → `xsd:integer` (minutes east of UTC) | |
 
+## Card labels
+
+1.20 gave the front a label, as 1.8 gave the back:
+
+| Term | Kind | Domain → range | Alignment |
+|---|---|---|---|
+| `sm:frontLabel` | datatype property | Card → `xsd:string` (language-tagged) | |
+
+A label is a short caption above a side's text that says what kind of
+thing that side is ("Country" above "Croatia", "Capital" above
+"Zagreb"). It is shown whenever its side is, as the question or as the
+answer, so a card studied both ways says what is asked. The side's text
+stays the prompt or the answer itself. Card format 6 owns it
+([shapes.md](shapes.md#version-by-version)): card format 5 was
+published without it, and a published shape is never edited.
+
 ## The language of text
 
 Solid Memo's text properties (`sm:front`, `sm:back`, `sm:frontNote`,
-`sm:backLabel`, `sm:backNote`, `sm:frontImageDescription`,
+`sm:frontLabel`, `sm:backLabel`, `sm:backNote`, `sm:frontImageDescription`,
 `sm:backImageDescription`, a course's `sm:theory`,
 `sm:distractorText` and `sm:distractorNote`, and `dcterms:title` and
 `dcterms:description` on a deck or chapter) say their language with the literal's

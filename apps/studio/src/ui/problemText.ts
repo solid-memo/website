@@ -44,6 +44,7 @@ const FIELDS: Readonly<Record<string, string>> = {
   [SM.reviewQuestion]: "reviewQuestion",
   [SM.front]: "front",
   [SM.back]: "back",
+  [SM.frontLabel]: "frontLabel",
   [SM.backLabel]: "backLabel",
   [SM.frontNote]: "frontNote",
   [SM.backNote]: "backNote",

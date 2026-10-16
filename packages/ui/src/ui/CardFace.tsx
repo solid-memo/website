@@ -12,8 +12,8 @@ import { ZoomableImage } from "./ZoomableImage";
 
 /**
  * One side of a card as it looks in study: its picture (if any) above its
- * text (if any), with the back's label above its text and the side's
- * note under it, both smaller. A question's note is passed only once the
+ * text (if any), with the side's label above its text and its note
+ * under it, both smaller. A question's note is passed only once the
  * answer is revealed. A picture URL comes from pod data, so only http(s) URLs
  * are loaded; anything else is named rather than shown. A picture is never
  * marked decorative, even beside text: the text need not describe it (a
@@ -52,7 +52,7 @@ export function CardFace({
   imageUrl?: string;
   /** What the picture shows, its alt text, in the reader's language. */
   imageDescription?: LangText;
-  /** How the back relates to the front, e.g. "Replaced by", in the reader's language. */
+  /** What kind of thing the side is, e.g. "Country", or on the back how it relates to the front, e.g. "Replaced by", in the reader's language. */
   label?: LangText;
   /** What holds of this side, e.g. "Out of use", in the reader's language. */
   note?: LangText;

@@ -75,6 +75,7 @@ const PARTS: ReadonlyMap<string, CardTextPart> = new Map([
   [SM.front, "front"],
   [SM.back, "back"],
   [SM.frontImageDescription, "frontImageDescription"],
+  [SM.frontLabel, "frontLabel"],
   [SM.frontNote, "frontNote"],
   [SM.backImageDescription, "backImageDescription"],
   [SM.backLabel, "backLabel"],
@@ -88,6 +89,7 @@ const MARKDOWN_PARTS: readonly {
 }[] = [
   { part: "front", rule: () => "side" },
   { part: "back", rule: (card) => ((card.distractors?.length ?? 0) > 0 ? "option" : "side") },
+  { part: "frontLabel", rule: () => "side" },
   { part: "backLabel", rule: () => "side" },
   { part: "frontNote", rule: () => "prose" },
   { part: "backNote", rule: () => "prose" },
@@ -229,7 +231,7 @@ export function duplicateCardsOf(
 /**
  * What `check` finds in the text of the deck's cards in use written in
  * Markdown, each language's, in the order of the cards and of their
- * fields, as the card editor hints at it: the sides and the label held
+ * fields, as the card editor hints at it: the sides and the labels held
  * to the rule of a side (the back to an option's, when the card has
  * wrong options), the notes to prose's, and each wrong option's text to
  * an option's and its note to prose's. A text with no words is skipped.

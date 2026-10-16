@@ -40,6 +40,7 @@ export function LibraryCardScreen({
           text={card.front}
           imageUrl={card.frontImageUrl}
           imageDescription={card.frontImageDescription}
+          label={card.frontLabel}
           note={card.frontNote}
           textFormat={card.textFormat}
         />

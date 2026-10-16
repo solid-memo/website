@@ -354,6 +354,13 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       backNote: { en: "The page is gone.", sv: "The page is gone." },
       distractor: ["https://pod.example/d.ttl#q-d1"],
     },
+    6: {
+      frontLabel: { en: "Country", sv: "Land" },
+      front: { en: "Croatia", sv: "Kroatien" },
+      backLabel: { en: "Capital", sv: "Huvudstad" },
+      back: { en: "Zagreb" },
+      distractor: [],
+    },
   },
   chapter: {
     1: {

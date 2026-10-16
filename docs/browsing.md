@@ -64,8 +64,10 @@ last ([Pager.tsx](../packages/ui/src/ui/Pager.tsx)).
 [AddCardForm.tsx](../packages/ui/src/ui/AddCardForm.tsx)). Each side
 of a card needs text, a picture (a web address), or both. Optional
 fields add a description of each picture, read out to anyone who
-cannot see it, a label shown above the back, and a note under each
-side, shown once the answer is revealed
+cannot see it, a label above each side that says what kind of thing it
+is ("Country" above the front, "Capital" above the back), shown with its
+side whichever way the card is studied, and a note under each side,
+shown once the answer is revealed
 ([CardContentFields.tsx](../packages/ui/src/ui/CardContentFields.tsx)).
 
 - **Languages.** Each text is in the language the learner states. New

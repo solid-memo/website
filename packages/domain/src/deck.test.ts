@@ -134,7 +134,7 @@ describe("validateCardContent", () => {
     });
   });
 
-  it("asks the language of a note, the label or a picture's description, never keeping untagged text", () => {
+  it("asks the language of a note, a label or a picture's description, never keeping untagged text", () => {
     const card = { front: { en: "a" }, back: { en: "b" } };
     expect(
       validateCardContent(
@@ -145,6 +145,11 @@ describe("validateCardContent", () => {
       ok: false,
       error: new AppError("textNeedsLanguage", { field: "the note under the front" }),
       part: "frontNote",
+    });
+    expect(validateCardContent({ ...card, frontLabel: { "": "Country" } })).toEqual({
+      ok: false,
+      error: new AppError("textNeedsLanguage", { field: "the label above the front" }),
+      part: "frontLabel",
     });
     expect(validateCardContent({ ...card, backLabel: { "": "Capital" } })).toMatchObject({
       ok: false,
@@ -279,6 +284,26 @@ describe("validateCardContent", () => {
     });
     expect(
       validateCardContent({ front: { en: "a" }, back: { en: "b" }, frontNote: { en: " " } }),
+    ).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" } } });
+  });
+
+  it("keeps a label above the front, trimmed, and drops an empty one", () => {
+    expect(
+      validateCardContent({
+        front: { en: "Croatia", sv: "Kroatien" },
+        back: { en: "Zagreb" },
+        frontLabel: { en: " Country ", sv: "Land" },
+      }),
+    ).toEqual({
+      ok: true,
+      content: {
+        front: { en: "Croatia", sv: "Kroatien" },
+        back: { en: "Zagreb" },
+        frontLabel: { en: "Country", sv: "Land" },
+      },
+    });
+    expect(
+      validateCardContent({ front: { en: "a" }, back: { en: "b" }, frontLabel: { en: " " } }),
     ).toEqual({ ok: true, content: { front: { en: "a" }, back: { en: "b" } } });
   });
 
@@ -500,6 +525,16 @@ describe("deck directions", () => {
     expect(promptSides({ card: labeled, direction: "back-to-front" }).question).toMatchObject({
       side: "back",
       label: { en: "Capital" },
+    });
+    // The front's label shows with the front, as the question or the answer.
+    const both = { ...labeled, frontLabel: { en: "Country" } };
+    expect(promptSides({ card: both, direction: "front-to-back" }).question).toMatchObject({
+      side: "front",
+      label: { en: "Country" },
+    });
+    expect(promptSides({ card: both, direction: "back-to-front" })).toMatchObject({
+      question: { side: "back", label: { en: "Capital" } },
+      answer: { side: "front", label: { en: "Country" } },
     });
     const flagOnly = { ...sweden, frontImageUrl: FLAG, backImageUrl: undefined };
     expect(promptSides({ card: flagOnly, direction: "front-to-back" })).toEqual({

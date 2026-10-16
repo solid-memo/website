@@ -260,6 +260,7 @@ const DCTERMS_DESCRIPTION = `${DCTERMS_NS}description`;
 const CARD_FIELDS: Readonly<Record<string, CardTextPart>> = {
   [SM.front]: "front",
   [SM.back]: "back",
+  [SM.frontLabel]: "frontLabel",
   [SM.backLabel]: "backLabel",
   [SM.frontNote]: "frontNote",
   [SM.backNote]: "backNote",

@@ -135,7 +135,7 @@ async function app() {
 }
 
 describe("a deck imported from the library", () => {
-  it("is written at deck format 6 and card format 5 from a format-4 release, its text exactly the release's", {
+  it("is written at deck format 6 and card format 6 from a format-4 release, its text exactly the release's", {
     timeout: 30_000,
   }, async () => {
     // Releases are frozen: a format-4 release is read as it was published.
@@ -163,10 +163,10 @@ describe("a deck imported from the library", () => {
     });
     const cards = await useCases.listCards(listed!);
     expect(cards.map((card) => [card.id, card.formatVersion]).sort()).toEqual([
-      ["dk", 5],
-      ["no", 5],
-      ["q12418", 5],
-      ["se", 5],
+      ["dk", 6],
+      ["no", 6],
+      ["q12418", 6],
+      ["se", 6],
     ]);
     expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
     expect(await useCases.planMigration(instance.url)).toMatchObject({
@@ -207,7 +207,7 @@ describe("a deck imported from the library", () => {
     );
     for (const subject of ["se", "no", "q12418", "dk"].map(card)) {
       expect(triples, subject).toContain(
-        `${subject} <${SM_NS}formatVersion> "5"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+        `${subject} <${SM_NS}formatVersion> "6"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
       );
     }
     const texts = (subject: string, predicate: string) =>

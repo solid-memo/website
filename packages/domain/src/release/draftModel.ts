@@ -90,6 +90,7 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     ...subjectAt(node),
     front: texts(node.data.front),
     back: texts(node.data.back),
+    frontLabel: texts(node.data.frontLabel),
     backLabel: texts(node.data.backLabel),
     frontNote: texts(node.data.frontNote),
     backNote: texts(node.data.backNote),

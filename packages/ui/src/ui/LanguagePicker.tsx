@@ -18,6 +18,7 @@ export type LanguageRole =
   | "description"
   | "keywords"
   | "frontNote"
+  | "frontLabel"
   | "backLabel"
   | "backNote"
   | "pictureDescription"
@@ -33,6 +34,7 @@ const LEGENDS: Record<LanguageRole, MessageKey> = {
   description: "language.legend.description",
   keywords: "language.legend.keywords",
   frontNote: "language.legend.frontNote",
+  frontLabel: "language.legend.frontLabel",
   backLabel: "language.legend.backLabel",
   backNote: "language.legend.backNote",
   pictureDescription: "language.legend.pictureDescription",

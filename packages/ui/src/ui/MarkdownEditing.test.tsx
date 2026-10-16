@@ -114,6 +114,7 @@ describe("CardPreview", () => {
       <CardPreview
         front={draftOf("Which command shows **staged** changes?", "unused")}
         back={draftOf("`git diff --staged`")}
+        frontLabel={empty}
         frontNote={empty}
         backLabel={empty}
         backNote={draftOf("- a\n- b")}

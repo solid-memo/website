@@ -10,7 +10,7 @@ import type { LibraryCard, LibraryDeckContent } from "./library";
 import { copyKeywords, noKeywords } from "./keywords";
 import type {
   AgentV1,
-  CardV5,
+  CardV6,
   DeckV6,
   DistractorV1,
   DistributionV1,
@@ -100,7 +100,7 @@ export function deckDistribution(deck: Deck): { url: string; record: Distributio
  * of the card shape a record cannot carry.
  */
 export function cardContentFromRecord(
-  data: CardV5,
+  data: CardV6,
   distractors: readonly Distractor[] = [],
 ): CardContent | null {
   const front = data.front ?? {};
@@ -118,6 +118,7 @@ export function cardContentFromRecord(
     ...(data.backImageDescription === undefined
       ? {}
       : { backImageDescription: data.backImageDescription }),
+    ...(data.frontLabel === undefined ? {} : { frontLabel: data.frontLabel }),
     ...(data.frontNote === undefined ? {} : { frontNote: data.frontNote }),
     ...(data.backLabel === undefined ? {} : { backLabel: data.backLabel }),
     ...(data.backNote === undefined ? {} : { backNote: data.backNote }),
@@ -129,7 +130,7 @@ export function cardContentFromRecord(
 export function cardFromRecord(
   url: string,
   storedVersion: number,
-  data: CardV5,
+  data: CardV6,
   distractors: readonly Distractor[] = [],
 ): Card | null {
   const content = cardContentFromRecord(data, distractors);
@@ -148,7 +149,7 @@ export function cardFromRecord(
 export function libraryCardFromRecord(
   url: string,
   storedVersion: number,
-  data: CardV5,
+  data: CardV6,
   distractors: readonly Distractor[] = [],
 ): LibraryCard | null {
   const content = cardContentFromRecord(data, distractors);
@@ -156,7 +157,7 @@ export function libraryCardFromRecord(
   return { id: fragmentIdOf(url), ...content, formatVersion: storedVersion, ...retiredOf(data) };
 }
 
-function retiredOf(data: CardV5): { retired?: true } {
+function retiredOf(data: CardV6): { retired?: true } {
   return data.deprecated === true ? { retired: true } : {};
 }
 
@@ -170,7 +171,7 @@ export function cardToRecord(
   card: CardContent & { retired?: true },
   createdAt: string,
   documentUrl: string,
-): CardV5 {
+): CardV6 {
   return {
     ...(isEmptyText(card.front) ? {} : { front: card.front }),
     ...(isEmptyText(card.back) ? {} : { back: card.back }),
@@ -182,6 +183,7 @@ export function cardToRecord(
     ...(card.backImageDescription === undefined
       ? {}
       : { backImageDescription: card.backImageDescription }),
+    ...(card.frontLabel === undefined ? {} : { frontLabel: card.frontLabel }),
     ...(card.frontNote === undefined ? {} : { frontNote: card.frontNote }),
     ...(card.backLabel === undefined ? {} : { backLabel: card.backLabel }),
     ...(card.backNote === undefined ? {} : { backNote: card.backNote }),

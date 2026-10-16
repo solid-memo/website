@@ -125,7 +125,7 @@ describe("LanguagePicker", () => {
     ["description", "Language of the description"],
     ["keywords", "Language of the keywords"],
     ["frontNote", "Language of the note under the front"],
-    ["backLabel", "Language of the label"],
+    ["backLabel", "Language of the label above the back"],
     ["backNote", "Language of the note under the back"],
     ["pictureDescription", "Language of the picture's description"],
   ])("names the group for the %s", (role, legend) => {

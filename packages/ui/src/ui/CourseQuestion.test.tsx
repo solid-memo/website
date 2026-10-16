@@ -175,6 +175,16 @@ describe("CourseQuestion", () => {
       expect(group).not.toHaveAttribute("aria-describedby");
     });
 
+    it("names the options by the front's label too, as the question shows it above its text", () => {
+      const labeled = { ...marked, frontImageUrl: undefined, frontLabel: { en: "*HTTP* method" } };
+      renderQuestion({ card: labeled, choices: choicesOf(labeled, noShuffle) });
+      expect(
+        screen.getByRole("radiogroup", {
+          name: "Question: HTTP method What does it answer?",
+        }),
+      ).toBeInTheDocument();
+    });
+
     it("names an undescribed picture as the question shows it", () => {
       const undescribed = { ...marked, frontImageDescription: undefined };
       renderQuestion({ card: undescribed, choices: choicesOf(undescribed, noShuffle) });

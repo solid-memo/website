@@ -39,8 +39,9 @@ export interface CheckedAnswer {
  *
  * The options are named by the question. A question in Markdown may
  * hold a code block or a table, too much for a name, so its options are
- * named by its picture, as CardFace names it, and its plain label, and
- * described by the whole question when it is more than one paragraph.
+ * named by its picture, as CardFace names it, its label (the front's)
+ * and its plain text, and described by the whole question when it is
+ * more than one paragraph.
  *
  * An option checked comes with how long choosing took (useStopwatch):
  * from the question shown to the option checked.
@@ -131,6 +132,9 @@ export function CourseQuestion({
           {[
             `${t("cardFace.question")}:`,
             ...pictureName(),
+            ...(question.label === undefined
+              ? []
+              : [plainDataText(readerText(question.label), true)]),
             plainDataText(shownQuestion, true),
           ].join(" ")}
         </span>

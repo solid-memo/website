@@ -225,6 +225,7 @@ export function sameContent(a: CardContent, b: CardContent): boolean {
     a.backImageUrl === b.backImageUrl &&
     sameText(a.frontImageDescription, b.frontImageDescription) &&
     sameText(a.backImageDescription, b.backImageDescription) &&
+    sameText(a.frontLabel, b.frontLabel) &&
     sameText(a.frontNote, b.frontNote) &&
     sameText(a.backLabel, b.backLabel) &&
     sameText(a.backNote, b.backNote)

@@ -150,8 +150,8 @@ const RELEASE = "https://solid-memo.com/decks/capitals-of-the-world/v2.ttl";
 /**
  * A pod as a format-4 app left it (deck format 4, card format 4), or the
  * same pod as a format-5 app left it (deck and card format 5, which hold
- * it as it is): every record at the latest format but decks (and, at 4,
- * cards), one deck of the user's own and one copied from the library, with
+ * it as it is): every record at the latest format but decks and cards,
+ * one deck of the user's own and one copied from the library, with
  * the text that format left behind — a deck title and a note saved the
  * same in English and Swedish (the stand-ins a format-4 app wrote for
  * English), Swedish text tagged English, card sides and keywords that do
@@ -337,6 +337,7 @@ const TEXT = new Set(
       "front",
       "back",
       "frontNote",
+      "frontLabel",
       "backLabel",
       "backNote",
       "frontImageDescription",
@@ -661,11 +662,11 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
   }, 60_000);
 
   it.each([
-    // Format 4: decks and cards are outdated; at format 5 only the decks are.
+    // At either format, decks and cards are outdated: cards are at 6 since vocabulary 1.20.
     { format: 4 as const, cardCount: 4 },
-    { format: 5 as const, cardCount: 0 },
+    { format: 5 as const, cardCount: 4 },
   ])(
-    "moves format-$format decks to format 6 and cards to 5 with their text unchanged: stand-ins, English-tagged Swedish, unstated sides and untagged keywords kept",
+    "moves format-$format decks and cards to format 6 with their text unchanged: stand-ins, English-tagged Swedish, unstated sides and untagged keywords kept",
     async ({ format, cardCount }) => {
       const pod = await seedOldPod(server, format);
       const documents = ["catalog.ttl", "decks/deck-1.ttl", "decks/deck-2.ttl"].map(
@@ -686,7 +687,7 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
       const outcome = await useCases.updateInstance(session, pod.instance);
       expect(outcome, JSON.stringify(outcome)).toMatchObject({ failed: [] });
 
-      // Every deck is at format 6 and every card at 5 (the creator and
+      // Every deck and every card is at format 6 (the creator and
       // distributions, unstamped before, at their first), conforming, with
       // nothing left to update…
       expect(await statedFormats(pod.source, documents)).toEqual({
@@ -695,10 +696,10 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
         "<instance>/catalog.ttl#deck-1-cards": "1",
         "<instance>/catalog.ttl#deck-2": "6",
         "<instance>/catalog.ttl#deck-2-cards": "1",
-        "<instance>/decks/deck-1.ttl#sol": "5",
-        "<instance>/decks/deck-1.ttl#luna": "5",
-        "<instance>/decks/deck-2.ttl#se": "5",
-        "<instance>/decks/deck-2.ttl#no": "5",
+        "<instance>/decks/deck-1.ttl#sol": "6",
+        "<instance>/decks/deck-1.ttl#luna": "6",
+        "<instance>/decks/deck-2.ttl#se": "6",
+        "<instance>/decks/deck-2.ttl#no": "6",
       });
       expect((await useCases.validateInstance(pod.source)).conforms).toBe(true);
       expect(await useCases.planMigration(pod.source)).toMatchObject({

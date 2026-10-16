@@ -67,6 +67,7 @@ const cafe = card("c-cafe", {
   distractors: [{ id: "d1", text: { en: "Tea room" }, note: { en: "Not quite" } }],
 });
 const iron = card("c-iron", {
+  frontLabel: { en: "Symbol" },
   front: { zxx: "Fe" },
   back: { "en-gb": "Iron" },
   backImageUrl: "https://img.example/fe.png",
@@ -192,6 +193,8 @@ describe("queryCards", () => {
     expect(ids({ text: "ett hus", field: "note" })).toEqual(["c-house"]);
     expect(ids({ text: "retired", field: "note" })).toEqual(["c-old"]);
     expect(ids({ text: "noun", field: "label" })).toEqual(["c-house"]);
+    expect(ids({ text: "symbol", field: "label" })).toEqual(["c-iron"]);
+    expect(ids({ text: "symbol", field: "front" })).toEqual([]);
     expect(ids({ text: "quite", field: "distractor" })).toEqual(["c-cafe"]);
     expect(ids({ text: "house", field: "back" })).toEqual(["c-house"]);
     expect(ids({ text: "metal", field: "back" })).toEqual([]);
