@@ -2,17 +2,20 @@
 
 A build of the site reads a few settings from `VITE_` variables. Every
 one is optional: unset or blank, it is this deployment's own value. To
-run a copy of your own, see [reuse.md](reuse.md).
+run a copy of your own, see [reuse.md](reuse.md). One more variable,
+`DOCS_DIAGRAMS`, lets a build on a machine without Chromium go ahead
+without the docs' diagrams.
 
 | Variable | Default | What it sets |
 |---|---|---|
 | [`VITE_APP_NAME`](#vite_app_name) | `Solid Memo` | What the site calls itself. |
-| [`VITE_REPO_URL`](#vite_repo_url) | `https://github.com/solid-memo/website` | The repository the footer and the page link to. |
+| [`VITE_REPO_URL`](#vite_repo_url) | `https://github.com/solid-memo/website` | The repository the footer, the page and the docs link to. |
 | [`VITE_POD_PROVIDERS`](#vite_pod_providers) | the list in [podProvider.ts](../packages/domain/src/podProvider.ts) | The Pod providers suggested at login and for creating a Pod. |
 | [`VITE_LIBRARY_INDEX_URL`](#vite_library_index_url) | the site's own `decks/index.ttl` | The deck library the app lists. |
+| [`DOCS_DIAGRAMS`](#docs_diagrams) | unset: every diagram drawn | `skip`: the docs built without their diagrams. |
 
-[apps/web/.env.example](../apps/web/.env.example) lists them all, with
-an example of each.
+[apps/web/.env.example](../apps/web/.env.example) lists the `VITE_`
+ones, with an example of each.
 
 ## How a build reads them
 
@@ -112,7 +115,7 @@ A fork that renames the app further edits the message files
 
 ## VITE_REPO_URL
 
-The repository the footer and the page link to. An http(s) URL,
+The repository the footer, the page and the docs link to. An http(s) URL,
 without a user name or password; a trailing slash is dropped.
 
 ```sh
@@ -141,7 +144,16 @@ The page links to the repository too, as vite.config.ts fills in
 runs no script. The about page's links to the repository do not follow
 it ([reuse.md](reuse.md#6-what-you-edit-by-hand)).
 
-The footer's "Created by antwika" is not a setting: it credits who
+The docs at `/docs/` ([deployment.md](deployment.md#what-the-artifact-contains))
+link to it too: a link to a file or folder outside `docs/` leads to
+`<url>/blob/<sha>/<path>` or `<url>/tree/<sha>/<path>` at the commit
+built, and each page's footer links its source there, the issues and
+the commit. When the build does not know its commit (no git checkout
+and no `GITHUB_SHA`), they name `main` instead, and the build warns. On
+GitLab, these links, some six hundred in the docs' text and those in
+each footer, do not resolve either.
+
+The app footer's "Created by antwika" is not a setting: it credits who
 made the software, wherever it runs.
 
 ## VITE_POD_PROVIDERS
@@ -178,6 +190,33 @@ must allow it (`Access-Control-Allow-Origin`).
 VITE_LIBRARY_INDEX_URL=https://example.org/decks/index.ttl
 ```
 
+## DOCS_DIAGRAMS
+
+The build draws the docs' Mermaid diagrams in Chromium
+([markdown.md](markdown.md#diagrams)), which `npm run browsers` installs
+once. Without it, `npm run build`, `npm start` and the deploy fail,
+naming that command. On a machine where it cannot be installed, set
+`DOCS_DIAGRAMS=skip` in the environment of the build:
+
+```sh
+DOCS_DIAGRAMS=skip npm start
+```
+
+The build then warns, starts no browser, and each diagram's page shows
+its source and says it was not drawn, even where Chromium is installed.
+`skip` is the only value; any other fails the build. It works in CI
+too, such as a host that builds the site for you; this repository's
+deploy refuses a build without the drawings
+([deployment.md](deployment.md#github-pages-automatic)). It does not make `npm run check`
+pass: its test that draws in the real browser is skipped, and the
+coverage falls short.
+Vite's `.env` files do not reach it, being read for `VITE_` variables
+only. Turbo lists it under `env` in
+[apps/web/turbo.json](../apps/web/turbo.json), so a build without
+diagrams is never reused as one with them. `npm run dev` needs no
+setting: without Chromium, its docs pages show the source, and the
+server says why, once.
+
 ## What a build computes
 
 These are not settings: the build works them out
@@ -187,7 +226,7 @@ them to the page as constants.
 | Constant | From | Shown or used |
 |---|---|---|
 | `__APP_VERSION__` | the `version` in the root [package.json](../package.json) | The footer's version. |
-| `__COMMIT_SHA__` | `git rev-parse HEAD`, else `GITHUB_SHA`, else none | The footer's commit link; left out when unknown. |
+| `__COMMIT_SHA__` | `git rev-parse HEAD`, else `GITHUB_SHA`, else none | The footer's commit link; left out when unknown. The docs' links into the repository name the same commit, or `main` when it is unknown. |
 | `__SHAPES_RULESET__` | a hash of `ns/shapes/` and the vendored profiles | Which rules a pod's check receipts were made under ([validation.md](validation.md)). |
 
 ## What cannot be configured

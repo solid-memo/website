@@ -89,8 +89,9 @@ your own copy on any web host:
 
 ```sh
 npm ci
-npm run build   # the whole site, in apps/web/dist/
-npm start       # builds it, then serves it at http://localhost:4173
+npm run browsers  # once: Chromium, which the build draws the docs' diagrams in
+npm run build     # the whole site, the docs included, in apps/web/dist/
+npm start         # builds it, then serves it at http://localhost:4173
 ```
 
 Upload the contents of `apps/web/dist/` to any static web space
@@ -103,7 +104,7 @@ settings.
 ## Develop
 
 You need Node 24 (see [`.nvmrc`](.nvmrc)) and npm; Chromium for
-`npm run check`, which draws the docs' diagrams in it
+`npm run check` and `npm run build`, which draw the docs' diagrams in it
 ([docs/markdown.md](docs/markdown.md#diagrams)): `npm run browsers`
 installs it once (on Linux, a machine that lacks the system libraries
 it needs gets them with `sudo npx playwright install-deps chromium`);
@@ -115,7 +116,7 @@ of them.
 
 ```sh
 npm ci
-npm run browsers  # once: Chromium, which npm run check draws the docs' diagrams in
+npm run browsers  # once: Chromium, which npm run check and npm run build draw the docs' diagrams in
 npm run dev       # the site, from source
 npm run check     # lint and formatting (Biome, Turtle, Markdown), spelling, typecheck, tests (100% coverage), drift, the deck library, boundaries, the repository's own checks
 npm run test:pod  # the end-to-end tests, against Solid servers started in Docker

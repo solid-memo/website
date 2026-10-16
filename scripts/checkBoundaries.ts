@@ -39,8 +39,8 @@ export const LAYERS: Record<string, string[]> = {
   ui: ["application", "domain", "vocab", "markdown"],
   // The composition root: every adapter behind its port, and the use cases over them.
   composition: ["application", "domain", "vocab", "solid", "browser"],
-  // The site's page, which shows the Studio at its routes.
-  web: ["application", "domain", "vocab", "ui", "composition", "studio"],
+  // The site's page, which shows the Studio at its routes; its build publishes the docs.
+  web: ["application", "domain", "vocab", "ui", "composition", "studio", "markdown"],
   // The Studio, a second app on the same layers as Solid Memo's, which the site's page loads.
   studio: ["application", "domain", "vocab", "ui"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
@@ -51,7 +51,12 @@ export const LAYERS: Record<string, string[]> = {
 /** Within a package, files that alone may use some of its allowed packages. */
 export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   // Only the app's entry point has the layers wired, and loads the Studio; the build test imports neither.
-  web: { composition: /^src\/main\.tsx$/, studio: /^src\/main\.tsx$/ },
+  // The docs are rendered by the build, and checked by its test, never in the page.
+  web: {
+    composition: /^src\/main\.tsx$/,
+    studio: /^src\/main\.tsx$/,
+    markdown: /^(vite\.config\.ts|src\/build\.test\.ts)$/,
+  },
   // Data text is rendered by the components alone (docs/markdown.md).
   ui: { markdown: /^src\/ui\// },
   // The generators read Turtle; the vocabulary the browser loads never does.

@@ -1,7 +1,8 @@
 # The public API
 
 What Solid Memo's versions promise ([docs/releasing.md](../docs/releasing.md#the-public-api)),
-written down one promise a line. Each file is written by a test in the
+written down one promise a line. The docs the site serves at `/docs/`
+are not among them, so no file here lists their addresses. Each file is written by a test in the
 package whose code it reads, and that test fails when the code and the
 file disagree. To write a file again after a change you meant, run its
 test with `-u`, and commit the file with the change:

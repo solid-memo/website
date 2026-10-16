@@ -137,6 +137,25 @@ describe("boundaryProblems", () => {
     ]);
   });
 
+  it("lets the site's build and its test render the docs, and nothing in its page", () => {
+    const web = {
+      ...workspace(
+        "web",
+        {
+          "vite.config.ts":
+            'import { docsSitePlugin } from "@solid-memo/markdown/tooling/publishDocs";',
+          "src/build.test.ts": 'import { checkSvg } from "@solid-memo/markdown/tooling/diagrams";',
+          "src/App.tsx": 'import { parseMarkdown } from "@solid-memo/markdown/parse";',
+        },
+        { "@solid-memo/markdown": "*" },
+      ),
+      dir: "apps/web",
+    };
+    expect(problems(web)).toEqual([
+      "apps/web/src/App.tsx: only files matching /^(vite\\.config\\.ts|src\\/build\\.test\\.ts)$/ may import @solid-memo/markdown.",
+    ]);
+  });
+
   it("fails on a static import of a package that may be loaded only lazily", () => {
     const web = {
       ...workspace(

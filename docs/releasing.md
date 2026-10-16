@@ -77,7 +77,11 @@ the same pods and the people who run their own copy rely on:
 Everything else may change in any version: the workspace packages'
 exports, which nothing outside the repository imports
 ([architecture.md](architecture.md)), the screens' layout, wording and
-styles, and whatever these docs do not name.
+styles, and whatever these docs do not name. These docs as the site
+serves them, at `/docs/` and below it, are not part of it either: a
+page may be renamed, split or merged in any version
+([deployment.md](deployment.md#what-the-artifact-contains)), as may
+`robots.txt` and `sitemap.xml`.
 
 ## What counts as breaking
 
@@ -99,11 +103,20 @@ breaking when one of them has to act or loses something:
 - **A change for those who run their own copy**: a configuration variable
   renamed or removed, a changed build command or output folder
   ([deployment.md](deployment.md)).
-- **An address that stops working**: a published file removed or
-  moved, or a hash the app or the Studio no longer opens.
+- **An address that stops working**: a file published under `/ns/`,
+  `/vendor/` or `/decks/` removed or moved, or a hash the app or the
+  Studio no longer opens.
 - **What the browser kept, lost**: a storage key or the guest pod's
   database renamed, or what they hold no longer read.
 - **A feature removed** that users rely on.
+
+A new prerequisite for building a copy is not breaking when the build
+names it and a setting builds without it: `npm run build` draws the
+docs' diagrams in Chromium, and `DOCS_DIAGRAMS=skip` builds without
+them, on any machine and in any CI
+([configuration.md](configuration.md#docs_diagrams)). The commit that
+brings one in names it in its subject, so the release notes say what
+a copy now needs.
 
 A new vocabulary term that no shape names is not breaking
 ([vocab.md](vocab.md#versioning-policy)); neither is a new deck in the

@@ -20,9 +20,12 @@ npm ci
 ```
 
 It needs Node.js 24 or later (`engines` in the root
-[package.json](../package.json); CI uses the version in `.nvmrc`).
-`npm run check` runs the type checks and the unit tests
-([testing.md](testing.md)), and needs nothing but Node.
+[package.json](../package.json); CI uses the version in `.nvmrc`), and
+Chromium, which the build and the checks draw the docs' diagrams in:
+`npm run browsers` installs it once, without `sudo` (on Linux, a
+machine that lacks the system libraries it needs gets them with
+`sudo npx playwright install-deps chromium`). `npm run check` runs the type checks and
+the unit tests ([testing.md](testing.md)).
 
 ## 2. Configure
 
@@ -47,8 +50,10 @@ npm run build
 ```
 
 The site is `apps/web/dist/`: the app, the Studio, the vocabulary and
-the shapes (`ns/`), the deck library (`decks/`) and the vendored
-profiles (`vendor/`). `npm start` builds and serves it at
+the shapes (`ns/`), the deck library (`decks/`), the vendored
+profiles (`vendor/`) and these docs (`docs/`). Without Chromium, the
+build fails; `DOCS_DIAGRAMS=skip npm run build` builds the docs without
+their diagrams ([configuration.md](configuration.md#docs_diagrams)). `npm start` builds and serves it at
 `http://localhost:4173` to try it first.
 
 ## 4. Host it anywhere
@@ -100,6 +105,7 @@ in your copy:
 | [apps/web/public/social-preview.png](../apps/web/public/social-preview.png), the favicons | Solid Memo's wordmark and logo. |
 | [CNAME](../CNAME) | This site's domain on GitHub Pages ([deployment.md](deployment.md#custom-domain-optional)), which the build writes `sitemap.xml` and `robots.txt`'s `Sitemap:` line on. Write your own domain into it, or delete it: without it, the build writes no sitemap. |
 | [README.md](../README.md) | This project's own description and links. |
+| [docs/](README.md) | These docs, which the build publishes at `/docs/`: they describe this deployment, its domain, its repository and its releases. Their links into the repository follow `VITE_REPO_URL` ([configuration.md](configuration.md#vite_repo_url)); their words do not. Edit them, or leave them as the upstream project's. |
 
 ## What stays the same
 

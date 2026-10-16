@@ -30,11 +30,19 @@ const TYPES: Record<string, string> = {
   txt: "text/plain; charset=utf-8",
 };
 
+/** What a build says when it does not know its commit. */
+const UNKNOWN_REF =
+  "The commit being built is not known (no git checkout, no GITHUB_SHA), so the docs' links into the repository name main, which may have moved on since.";
+
 export type DocsSitePluginOptions = {
-  /** The repository's web address, which links out of docs/ lead into (VITE_REPO_URL). */
-  repoUrl: string;
-  /** The commit those links name. */
-  ref: string;
+  /**
+   * The repository's web address, which links out of docs/ lead into
+   * (VITE_REPO_URL): asked for when the pages are rendered, as the
+   * site's settings are checked once its config is resolved.
+   */
+  repoUrl: () => string;
+  /** The commit those links name; null when it is not known, and they name `main`, with a warning. */
+  ref: string | null;
   /** The app's version. */
   version: string;
   /** The site's origin, for the pages' canonical addresses; null for none. */
@@ -56,7 +64,13 @@ export function docsSitePlugin(options: DocsSitePluginOptions): Plugin {
     launch = launchChromium,
     cacheDir = CACHE_DIR,
   } = options;
-  const site = { ...options, io, mode: "live" as const };
+  const site = () => ({
+    ...options,
+    repoUrl: options.repoUrl(),
+    ref: options.ref ?? "main",
+    io,
+    mode: "live" as const,
+  });
   /** The dev server's browser, started on its first drawing and kept until it closes. */
   let browser: Promise<DrawingBrowser> | undefined;
 
@@ -64,6 +78,7 @@ export function docsSitePlugin(options: DocsSitePluginOptions): Plugin {
     name: "solid-memo:publish-docs",
 
     configureServer(server) {
+      if (options.ref === null) server.config.logger.warn(UNKNOWN_REF);
       let warned = false;
       // One browser for every request: drawDiagrams closes it after each
       // drawing, so it is handed a view of it that stays open.
@@ -75,7 +90,7 @@ export function docsSitePlugin(options: DocsSitePluginOptions): Plugin {
       const render = async () => {
         const inputs = await drawInputs();
         return renderDocsSite({
-          ...site,
+          ...site(),
           inputs,
           // Without Chromium, the pages show each diagram's source and say
           // it was not drawn, and the dev server says why, once.
@@ -129,10 +144,11 @@ export function docsSitePlugin(options: DocsSitePluginOptions): Plugin {
     },
 
     async generateBundle() {
+      if (options.ref === null) this.warn(UNKNOWN_REF);
       const inputs = await drawInputs();
       const mode = diagramMode(env);
       const files = await renderDocsSite({
-        ...site,
+        ...site(),
         inputs,
         draw: (diagrams) =>
           drawDiagrams(diagrams, {

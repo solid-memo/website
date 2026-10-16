@@ -6,21 +6,24 @@ import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { defineConfig, type Plugin } from "vite";
 import preact from "@preact/preset-vite";
+import { docsSitePlugin } from "@solid-memo/markdown/tooling/publishDocs";
 import { turtleDirectoryPlugin } from "@solid-memo/vocab/tooling/publishTurtle";
 import { DECKS_ROOT, NS_ROOT, REPOSITORY_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
-import { siteDefines } from "@solid-memo/vocab/tooling/siteBuild";
+import { appVersion, commitSha, siteDefines } from "@solid-memo/vocab/tooling/siteBuild";
 import { siteMapPlugin, siteOrigin } from "@solid-memo/vocab/tooling/siteMap";
 import { siteConfig, siteHtml, type SiteConfig } from "./src/config.ts";
 
 /**
  * The settings the page reads (docs/configuration.md), checked as the
  * build starts, so a wrong one fails the build rather than the page;
- * and the site's name, put in the page's HTML.
+ * and the site's name, put in the page's HTML. The docs' plugin reads
+ * them too, through `api`.
  */
-function siteSettings(): Plugin {
+function siteSettings(): Plugin<{ settings(): SiteConfig }> {
   let settings: SiteConfig;
   return {
     name: "solid-memo:site-settings",
+    api: { settings: () => settings },
     configResolved(config) {
       settings = siteConfig(config.env);
     },
@@ -30,11 +33,15 @@ function siteSettings(): Plugin {
   };
 }
 
+const settings = siteSettings();
+/** The site's origin, from the domain in CNAME (docs/deployment.md#custom-domain-optional); null without one. */
+const origin = siteOrigin(`${REPOSITORY_ROOT}CNAME`);
+
 export default defineConfig({
   define: siteDefines(),
   base: "./",
   plugins: [
-    siteSettings(),
+    settings,
     preact(),
     // Published with the site: the vocabulary and the shapes (ns/) and the deck
     // library (decks/), at their IRIs, and the vendored profiles. A checkout
@@ -44,9 +51,19 @@ export default defineConfig({
       ? [turtleDirectoryPlugin({ dir: DECKS_ROOT, publicPath: "decks" })]
       : []),
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vendor`, publicPath: "vendor" }),
-    // robots.txt, and the sitemap of every page, on the domain in CNAME
-    // (docs/deployment.md#custom-domain-optional): none without one.
-    siteMapPlugin({ origin: siteOrigin(`${REPOSITORY_ROOT}CNAME`) }),
+    // The docs (docs/), rendered to pages at docs/ with their diagrams drawn
+    // in Chromium (docs/markdown.md#the-docs-as-a-site): their links into
+    // the repository lead to VITE_REPO_URL at the commit being built.
+    docsSitePlugin({
+      repoUrl: () => settings.api!.settings().repoUrl,
+      ref: commitSha(),
+      version: appVersion(),
+      origin,
+    }),
+    // robots.txt, and the sitemap of every page, the docs' included, on the
+    // domain in CNAME (docs/deployment.md#custom-domain-optional): none
+    // without one.
+    siteMapPlugin({ origin }),
   ],
   resolve: {
     alias: {

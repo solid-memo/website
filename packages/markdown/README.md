@@ -46,7 +46,8 @@ node only, at build time:
 ## Boundaries
 
 It imports nothing of the app's. `ui` may import it from `src/ui/`
-only, and `shacl` from `node/` only. Its parser libraries
+only, `shacl` from `node/` only, and `web` from its build
+(`vite.config.ts`) and its build's test (`src/build.test.ts`) only. Its parser libraries
 (`mdast-util-from-markdown` and its extensions) are used in
 `src/parse.ts` alone ([boundaries.md](../../docs/boundaries.md)).
 `tooling/` is node-only. Its development dependencies, `mermaid`,

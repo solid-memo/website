@@ -22,7 +22,7 @@ flowchart LR
     tag -->|no| skip["not deployed"]
     tag -->|yes| release{"the newest version,<br/>its release commit,<br/>its GitHub release?"}
     release -->|no| skip
-    release -->|yes| build["deploy.yml:<br/>npm run build"] --> guard["ns/, decks/,<br/>robots.txt, sitemap.xml<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
+    release -->|yes| build["deploy.yml:<br/>npm run build"] --> guard["ns/, decks/,<br/>robots.txt, sitemap.xml,<br/>docs/ and its diagrams<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
     hand["run by hand<br/>from main"] --> newest["deploy.yml:<br/>the newest version"] --> release
     release -->|"yes, by hand"| check["npm run check"] --> build
 ```
@@ -89,8 +89,10 @@ repository:
   as CI's build job.
 
 The workflow enables Pages for the repository on its first run, and
-stops before deploying if the vocabulary or the deck library is missing
-from the build. CI's checks of `ns/` and `decks/`, the comparison of
+stops before deploying if the vocabulary, the deck library or the docs
+are missing from the build, or the docs' diagrams were not drawn. It
+installs Chromium for them first ([.github/actions/chromium](../.github/actions/chromium/action.yml)),
+as the build draws them ([markdown.md](markdown.md#diagrams)). CI's checks of `ns/` and `decks/`, the comparison of
 the deck library with its base included
 ([deck-library.md](deck-library.md#checks)), are among those a deploy
 waits for. The `github-pages`
@@ -112,6 +114,7 @@ data it reads:
 | `/` (`index.html`, `assets/`) | `apps/web/`, `apps/studio/` | The app, [Solid Memo Studio](studio.md) at `#/studio` included, in a chunk of its own under `assets/`. |
 | `/about/index.html` | `apps/web/public/about/` | What Solid Memo is, for learners, deck authors, technologists and decision makers: plain HTML, in English, that search engines and browsers without script can read. It runs no script, so it follows the browser's light or dark, not the theme chosen in the app; [aboutPage.test.ts](../apps/web/src/aboutPage.test.ts) checks its policy and its links. `sitemap.xml` lists it, and the site's page links to it in a `<noscript>`. |
 | `/robots.txt`, `/sitemap.xml` | written by the build, from [CNAME](../CNAME) | `robots.txt` keeps search engines out of `/journeys/` and names the sitemap. The sitemap lists every page the build emits or copies, `/` first, except a page whose `<meta name="robots">` says `noindex` (the Studio's old address), on the domain in `CNAME` ([below](#custom-domain-optional)). Without a `CNAME`, there is no sitemap, and `robots.txt` names none. |
+| `/docs/` (`index.html`, `<page>/index.html`, `versions/`, `diagrams/`, `docs.css`) | [`docs/`](README.md), rendered by the build | These docs as static pages, in English, at the version deployed: the README at `/docs/`, every other page at `/docs/<page>/`, and a list of versions at `/docs/versions/` ([markdown.md](markdown.md#the-docs-as-a-site)). Like the About page they run no script, so they follow the browser's light or dark. Their diagrams are drawn as the site is built, light and dark, as SVG files in `diagrams/` with the font's license, `OFL-Fredoka.txt`, beside them. Their links into the repository lead to `VITE_REPO_URL` at the commit built ([configuration.md](configuration.md#vite_repo_url)). These addresses may change in any version: they are not part of the public API ([releasing.md](releasing.md#the-public-api)). |
 | `/studio/index.html` | `apps/web/public/studio/` | The Studio's old address: a page that sends `/studio/#/x` on to `/#/studio/x` ([studio.md](studio.md#routes)). |
 | `/ns/vocab/*.ttl`, `/ns/shapes/<class>/v<N>.ttl` | [`ns/`](../ns/) | The vocabulary and the shapes ([vocab.md](vocab.md), [shapes.md](shapes.md)). |
 | `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
@@ -207,12 +210,17 @@ above resolve on the web because this domain serves this site.
 
 ## Manual publish (any static web space)
 
-`npm run build`, then upload the **contents** of `apps/web/dist/` to the web
-root (or any subfolder) via SFTP or a file manager, `ns/`, `decks/`,
-`vendor/` and `studio/` included. The sitemap and `robots.txt` name the
+`npm run browsers` once, as the build draws the docs' diagrams in
+Chromium ([markdown.md](markdown.md#diagrams)); `npm run build`, then
+upload the **contents** of `apps/web/dist/` to the web root (or any
+subfolder) via SFTP or a file manager, `ns/`, `decks/`, `vendor/`,
+`docs/` and `studio/` included. The sitemap and `robots.txt` name the
 root of the domain in [CNAME](../CNAME): for another domain, write
 yours there first, and for a subfolder, delete `CNAME`, since the
 sitemap's addresses would leave the subfolder out. Verify a build
 locally with `npm start` (builds, then serves `dist/` at
 `http://localhost:4173`), or `npm run preview -w @solid-memo/web` to serve
-the last build.
+the last build. Both builds need Chromium; without it, a build fails
+with a message that names `npm run browsers`, unless
+`DOCS_DIAGRAMS=skip` is set, which builds the docs with each diagram's
+source in place of its drawing ([configuration.md](configuration.md#docs_diagrams)).

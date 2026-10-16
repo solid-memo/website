@@ -5,18 +5,23 @@
 // SPDX-License-Identifier: MIT
 
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { type Document, Window } from "happy-dom";
 import { build, loadEnv, type Rolldown } from "vite";
 import { beforeAll, describe, expect, it } from "vitest";
+import { checkSvg, fontNotice } from "@solid-memo/markdown/tooling/diagrams";
+import { DOCS_CSP } from "@solid-memo/markdown/tooling/docsSite";
+import { diagramMode, FONT_LICENSE_FILE } from "@solid-memo/markdown/tooling/drawDiagrams";
+import { commitSha } from "@solid-memo/vocab/tooling/siteBuild";
 import { siteOrigin } from "@solid-memo/vocab/tooling/siteMap";
 import { siteConfig, siteHtml, type SiteConfig } from "./config";
 
 /*
  * The production build itself, as the site ships it (docs/markdown.md):
  * no way for data to become markup, the Studio in a chunk of its own,
- * and a Content Security Policy that lets the page's own scripts run.
+ * a Content Security Policy that lets the page's own scripts run, and
+ * the docs as pages that run none.
  */
 
 /** Ways script can turn a string into markup. */
@@ -28,11 +33,23 @@ function builtConfig(): SiteConfig {
   return siteConfig(loadEnv("production", resolve(import.meta.dirname, ".."), "VITE_"));
 }
 
+/** The repository's root folder. */
+const REPOSITORY = resolve(import.meta.dirname, "../../..");
 /** The site's origin, from the domain in CNAME; null without one. */
-const origin = siteOrigin(resolve(import.meta.dirname, "../../../CNAME"));
+const origin = siteOrigin(resolve(REPOSITORY, "CNAME"));
+/** The docs' sources, the `.md` files in docs/. */
+const DOCS_SOURCES = readdirSync(resolve(REPOSITORY, "docs")).filter((name) =>
+  name.endsWith(".md"),
+);
+/** The pages the build makes of them: `docs/index.html` of the README, `docs/<page>/index.html` of the rest. */
+const DOCS_PAGES = DOCS_SOURCES.map((name) =>
+  name === "README.md" ? "docs/index.html" : `docs/${name.slice(0, -3)}/index.html`,
+).sort();
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
+/** What the build emits, by file name. */
+let built: Map<string, string>;
 let html: string;
 /** The page as a browser reads it, so no regex has to find its tags. */
 let dom: Document;
@@ -57,6 +74,12 @@ beforeAll(async () => {
   }
   chunks = result.output.filter((item): item is Rolldown.OutputChunk => item.type === "chunk");
   assets = result.output.filter((item): item is Rolldown.OutputAsset => item.type === "asset");
+  built = new Map(
+    result.output.map((item) => [
+      item.fileName,
+      item.type === "asset" ? String(item.source) : item.code,
+    ]),
+  );
   const page = result.output.find(
     (item): item is Rolldown.OutputAsset => item.fileName === "index.html",
   )!;
@@ -238,9 +261,12 @@ describe("robots.txt and the sitemap", () => {
   });
 
   it.runIf(origin !== null)(
-    "lists the site's page, which the HTML plugin emits, first, and the About page",
+    "lists the site's page, which the HTML plugin emits, first, the About page and every page of the docs",
     () => {
-      expect(locs()).toEqual([`${origin}/`, `${origin}/about/`]);
+      const docs = DOCS_PAGES.map(
+        (fileName) => `${origin}/${fileName.slice(0, -"index.html".length)}`,
+      );
+      expect(locs()).toEqual([`${origin}/`, ...[`${origin}/about/`, ...docs].sort()]);
       expect(dom.querySelector('link[rel="canonical"]')!.getAttribute("href")).toBe(locs()[0]);
     },
   );
@@ -249,14 +275,204 @@ describe("robots.txt and the sitemap", () => {
     const app = resolve(import.meta.dirname, "..");
     for (const loc of locs()) {
       const path = new URL(loc).pathname;
-      const page =
-        path === "/"
-          ? html
-          : readFileSync(resolve(app, "public", `${path.slice(1)}index.html`), "utf8");
+      const fileName = `${path.slice(1)}index.html`;
+      const page = built.get(fileName) ?? readFileSync(resolve(app, "public", fileName), "utf8");
       const robots = new browser.DOMParser()
         .parseFromString(page, "text/html")
         .querySelector('meta[name="robots"]');
       expect(robots?.getAttribute("content") ?? "", loc).not.toContain("noindex");
     }
+  });
+});
+
+describe("the docs", () => {
+  const VERSIONS = "docs/versions/index.html";
+  /** A made-up origin the pages' relative addresses are resolved on. */
+  const SITE = "https://site.invalid/";
+  /** The commit the pages' links into the repository name, as the build has it. */
+  const ref = commitSha() ?? "main";
+  const parsed = new Map<string, Document>();
+  /** An built page as a browser reads it. */
+  const page = (fileName: string) => {
+    if (!parsed.has(fileName))
+      parsed.set(
+        fileName,
+        new browser.DOMParser().parseFromString(built.get(fileName)!, "text/html"),
+      );
+    return parsed.get(fileName)!;
+  };
+  const docsFiles = () => [...built.keys()].filter((fileName) => fileName.startsWith("docs/"));
+  /** Every address a page names, with the element that names it. */
+  const addresses = (fileName: string) =>
+    [...page(fileName).querySelectorAll("[href], [src], [srcset]")].flatMap((element) =>
+      ["href", "src", "srcset"]
+        .filter((name) => element.hasAttribute(name))
+        .map((name) => ({ element, address: element.getAttribute(name)! })),
+    );
+  /** Whether the site serves a file: one the build emits, or one Vite copies from public/. */
+  const served = (fileName: string) =>
+    built.has(fileName) || existsSync(resolve(import.meta.dirname, "../public", fileName));
+  /** The file an address on the site leads to, from its path. */
+  const fileOf = (url: URL) => {
+    const path = decodeURIComponent(url.pathname.slice(1));
+    return path === "" || path.endsWith("/") ? `${path}index.html` : path;
+  };
+  const SVG = /^docs\/diagrams\/[a-z0-9-]+-[0-9a-f]{8}(\.dark)?\.svg$/;
+  /** Whether the diagrams were drawn: always, but under DOCS_DIAGRAMS=skip, which draws none. */
+  const drawn = () => docsFiles().some((fileName) => fileName.endsWith(".svg"));
+  /** The Mermaid blocks of the docs' sources, each of which is a figure. */
+  const fences = () =>
+    DOCS_SOURCES.flatMap(
+      (name) =>
+        readFileSync(resolve(REPOSITORY, "docs", name), "utf8").match(
+          /^ {0,3}(`{3,}|~{3,})mermaid\s*$/gm,
+        ) ?? [],
+    ).length;
+
+  it("are a page for each of docs/*.md, the list of versions and one stylesheet", () => {
+    expect(
+      docsFiles()
+        .filter((fileName) => fileName.endsWith(".html"))
+        .sort(),
+    ).toEqual([...DOCS_PAGES, VERSIONS].sort());
+    expect(built.has("docs/docs.css")).toBe(true);
+    expect(page(VERSIONS).querySelector('meta[name="robots"]')!.getAttribute("content")).toBe(
+      "noindex",
+    );
+  });
+
+  it("each open with their policy, run no script and name themselves, with ids of their own", () => {
+    for (const fileName of DOCS_PAGES) {
+      const doc = page(fileName);
+      expect(built.get(fileName)!.startsWith("<!doctype html>\n"), fileName).toBe(true);
+      expect(doc.documentElement.getAttribute("lang"), fileName).toBe("en");
+      const policy = doc.querySelector('meta[http-equiv="Content-Security-Policy"]')!;
+      expect(policy.getAttribute("content"), fileName).toBe(DOCS_CSP);
+      for (const element of doc.querySelectorAll("link, style, img, source, script"))
+        expect(
+          policy.compareDocumentPosition(element) & browser.Node.DOCUMENT_POSITION_FOLLOWING,
+          fileName,
+        ).toBeTruthy();
+      expect(doc.querySelectorAll("script, style, [style]"), fileName).toHaveLength(0);
+      for (const element of doc.querySelectorAll("*"))
+        for (const name of element.getAttributeNames())
+          expect(name.startsWith("on"), `${fileName}: ${name}`).toBe(false);
+      expect(doc.querySelectorAll("h1"), fileName).toHaveLength(1);
+      expect(doc.title, fileName).toMatch(/\S - Solid Memo docs$/);
+      expect(
+        doc.querySelector('meta[name="description"]')!.getAttribute("content"),
+        fileName,
+      ).toMatch(/\S/);
+      const canonical = doc.querySelector('link[rel="canonical"]')?.getAttribute("href");
+      expect(canonical, fileName).toBe(
+        origin === null ? undefined : `${origin}/${fileName.slice(0, -"index.html".length)}`,
+      );
+      const ids = [...doc.querySelectorAll("[id]")].map((element) => element.id);
+      expect(new Set(ids).size, fileName).toBe(ids.length);
+    }
+  });
+
+  it("link docs.css as their one stylesheet", () => {
+    for (const fileName of [...DOCS_PAGES, VERSIONS]) {
+      const sheets = [...page(fileName).querySelectorAll('link[rel="stylesheet"]')];
+      expect(sheets, fileName).toHaveLength(1);
+      expect(fileOf(new URL(sheets[0]!.getAttribute("href")!, SITE + fileName))).toBe(
+        "docs/docs.css",
+      );
+    }
+  });
+
+  it("name every address on the site relatively, and no Markdown file", () => {
+    for (const fileName of [...DOCS_PAGES, VERSIONS])
+      for (const { address } of addresses(fileName)) {
+        if (/^[a-z][a-z0-9+.-]*:/i.test(address)) continue;
+        expect(address, fileName).not.toMatch(/^\//);
+        expect(address.split("#")[0], fileName).not.toMatch(/\.md$/);
+      }
+  });
+
+  it("lead every link somewhere: a heading, a page, a file of the site, the repository at the commit, or the web", () => {
+    const { repoUrl } = builtConfig();
+    /** A file or folder of the repository at the commit: its kind and its path. */
+    const inRepository = (address: string) => {
+      for (const kind of ["blob", "tree"] as const) {
+        const prefix = `${repoUrl}/${kind}/${ref}/`;
+        if (address.startsWith(prefix))
+          return { kind, path: decodeURIComponent(address.slice(prefix.length).split("#")[0]!) };
+      }
+      return null;
+    };
+    const counts = { site: 0, repository: 0, web: 0 };
+    for (const fileName of [...DOCS_PAGES, VERSIONS])
+      for (const { element, address } of addresses(fileName)) {
+        if (element.tagName !== "A" && element.tagName !== "LINK") continue;
+        const url = new URL(address, SITE + fileName);
+        const where = `${fileName}: ${address}`;
+        if (url.origin === new URL(SITE).origin) {
+          counts.site++;
+          const target = fileOf(url);
+          expect(served(target), where).toBe(true);
+          if (url.hash !== "")
+            expect(
+              page(target).getElementById(decodeURIComponent(url.hash.slice(1))),
+              where,
+            ).not.toBeNull();
+          continue;
+        }
+        const file = inRepository(address);
+        if (file !== null) {
+          counts.repository++;
+          const found = statSync(resolve(REPOSITORY, file.path), { throwIfNoEntry: false });
+          expect(file.kind === "tree" ? found?.isDirectory() : found?.isFile(), where).toBe(true);
+          continue;
+        }
+        counts.web++;
+        expect(url.protocol, where).toMatch(/^https?:$/);
+      }
+    // Each kind is there, so none is skipped by mistake.
+    expect(
+      Object.values(counts).every((count) => count > 0),
+      JSON.stringify(counts),
+    ).toBe(true);
+  });
+
+  it("show each diagram as a figure, drawn light and dark, the drawings safe to serve and carrying the font's notice", () => {
+    const figures = DOCS_PAGES.flatMap((fileName) =>
+      [...page(fileName).querySelectorAll("figure")].map((figure) => ({ fileName, figure })),
+    );
+    expect(figures).toHaveLength(fences());
+    expect(drawn()).toBe(diagramMode(process.env) === "required");
+    if (!drawn()) {
+      for (const { fileName, figure } of figures) {
+        expect(figure.className, fileName).toBe("undrawn");
+        expect(figure.querySelector("details[open] pre"), fileName).not.toBeNull();
+      }
+      expect(docsFiles().filter((fileName) => fileName.startsWith("docs/diagrams/"))).toEqual([]);
+      return;
+    }
+    const license = readFileSync(FONT_LICENSE_FILE, "utf8");
+    const notice = fontNotice(license);
+    for (const { fileName, figure } of figures) {
+      const dark = figure.querySelector('picture > source[media="(prefers-color-scheme: dark)"]');
+      const img = figure.querySelector("picture > img");
+      const light = fileOf(new URL(img!.getAttribute("src")!, SITE + fileName));
+      expect(fileOf(new URL(dark!.getAttribute("srcset")!, SITE + fileName)), fileName).toBe(
+        light.replace(/\.svg$/, ".dark.svg"),
+      );
+      expect(img!.getAttribute("alt"), fileName).toMatch(/\S/);
+      expect(Number(img!.getAttribute("width")), fileName).toBeGreaterThan(0);
+      expect(Number(img!.getAttribute("height")), fileName).toBeGreaterThan(0);
+      expect(figure.querySelector("figcaption")!.textContent, fileName).toMatch(/\S/);
+    }
+    for (const fileName of DOCS_PAGES)
+      for (const { element, address } of addresses(fileName)) {
+        if (element.tagName !== "IMG" && element.tagName !== "SOURCE") continue;
+        const svg = fileOf(new URL(address, SITE + fileName));
+        expect(svg, fileName).toMatch(SVG);
+        expect(checkSvg(built.get(svg)!), svg).toBeNull();
+        expect(built.get(svg)!, svg).toContain(notice);
+      }
+    // The font's license, beside the drawings, as the package has it (docs/markdown.md#the-diagrams-font).
+    expect(built.get("docs/diagrams/OFL-Fredoka.txt")).toBe(license);
   });
 });

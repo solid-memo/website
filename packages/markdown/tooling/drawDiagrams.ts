@@ -2,6 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
+// Mermaid's global on the drawing page, declared for every program that
+// type-checks this module, the site's build among them.
+/// <reference path="./mermaid.d.ts" />
+
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";

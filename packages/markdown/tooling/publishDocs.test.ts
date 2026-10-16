@@ -81,7 +81,7 @@ beforeEach(async () => {
 function plugin(more: Partial<DocsSitePluginOptions> & { files?: Record<string, string> } = {}) {
   const { files = memoryDocs(), ...rest } = more;
   return docsSitePlugin({
-    repoUrl: "https://example.org/team/memo",
+    repoUrl: () => "https://example.org/team/memo",
     ref: "main",
     version: "2.2.0",
     origin: null,
@@ -139,8 +139,36 @@ describe("docsSitePlugin, in a build", () => {
     await expect(build(plugin({ launch: missingChromium() }))).rejects.toThrow("npm run browsers");
   });
 
+  it("links into the repository at the commit, or at main, with a warning, when it is not known", async () => {
+    const commit = await build(plugin({ launch: fakeBrowser().launch, ref: "1a2b3c" }));
+    expect(commit.emitted.get("docs/index.html")).toContain(
+      'href="https://example.org/team/memo/blob/1a2b3c/docs/README.md"',
+    );
+    expect(commit.warn).not.toHaveBeenCalled();
+    const unknown = await build(plugin({ launch: fakeBrowser().launch, ref: null }));
+    expect(unknown.emitted.get("docs/index.html")).toContain(
+      'href="https://example.org/team/memo/blob/main/docs/README.md"',
+    );
+    expect(unknown.warn).toHaveBeenCalledOnce();
+    expect(unknown.warn).toHaveBeenCalledWith(expect.stringContaining("name main"));
+  });
+
+  it("asks for the repository's address only when it renders, once the site's settings are checked", async () => {
+    let repoUrl = "";
+    const docs = plugin({ launch: fakeBrowser().launch, repoUrl: () => repoUrl });
+    repoUrl = "https://example.org/later";
+    expect((await build(docs)).emitted.get("docs/index.html")).toContain(
+      'href="https://example.org/later/issues/new/choose"',
+    );
+  });
+
   it("reads the repository and draws in Chromium unless told otherwise", () => {
-    const docs = docsSitePlugin({ repoUrl: "x", ref: "main", version: "1.0.0", origin: null });
+    const docs = docsSitePlugin({
+      repoUrl: () => "x",
+      ref: "main",
+      version: "1.0.0",
+      origin: null,
+    });
     expect(docs.name).toBe("solid-memo:publish-docs");
   });
 });
@@ -275,6 +303,13 @@ describe("docsSitePlugin, in dev", () => {
     expect(fake.browser.closed).toBe(1);
     await closeBundle(docs);
     expect(fake.browser.closed).toBe(1);
+  });
+
+  it("says once, as it starts, when its links name main for want of the commit", async () => {
+    const { request, warn } = devServer(plugin({ launch: missingChromium(), ref: null }));
+    expect(warn).toHaveBeenCalledOnce();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("name main"));
+    expect((await request("/docs/")).body).toContain("/blob/main/docs/README.md");
   });
 
   it("shows the diagrams' source without Chromium, and says why once", async () => {

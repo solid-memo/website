@@ -11,7 +11,7 @@ where the layers meet.
 
 | Package | Folder | Responsibility |
 |---|---|---|
-| `@solid-memo/web` | `apps/web/` | The site's one page: its entry point (`src/main.tsx`), which renders the app over the use cases `composition` wires, the page (`src/App.tsx`) that shows Solid Memo, or the Studio at its routes, loaded lazily, and the Vite build that also publishes `ns/` (the vocabulary and shapes) and `decks/` (the [deck library](deck-library.md)) with the app ([deployment.md](deployment.md)). |
+| `@solid-memo/web` | `apps/web/` | The site's one page: its entry point (`src/main.tsx`), which renders the app over the use cases `composition` wires, the page (`src/App.tsx`) that shows Solid Memo, or the Studio at its routes, loaded lazily, and the Vite build that also publishes `ns/` (the vocabulary and shapes), `decks/` (the [deck library](deck-library.md)) and these docs, rendered by `markdown`'s tooling, with the app ([deployment.md](deployment.md)). |
 | `@solid-memo/studio` | `apps/studio/` | Solid Memo Studio ([studio.md](studio.md)): its screens and router (`src/ui/`), and its entry point, `StudioWorkspace`, which the site's page loads as a chunk of its own at the hashes under `#/studio`. |
 | `@solid-memo/composition` | `packages/composition/` | The composition root (`createAppUseCases` in `src/appUseCases.ts`): every adapter behind its port, the guest's pod, the write fence, the site's documents read from where it is served, and the use cases over them, a Studio trial's sandbox among them (`createTrialUseCases` in `src/trialUseCases.ts`, [studio.md](studio.md#the-trial)). An app passes what is its own: its name, where it is served, the build's values. |
 | `@solid-memo/ui` | `packages/ui/` | The Preact UI: the components and the router (`src/ui/`), the messages in each language (`src/i18n/`), the theme and the styles (`src/style.css`). It receives `UseCases` and knows no adapter. |
@@ -47,6 +47,7 @@ graph TD
     web -. "main.tsx only" .-> composition["composition<br/>the composition root"]
     composition --> application & solid & browser
     ui -. src/ui/ only .-> markdown
+    web -. "vite.config.ts and its test only" .-> markdown
     application --> domain --> vocab["vocab<br/>the data contract"]
     solid -. implements ports .-> application
     solid --> domain & vocab & shacl
@@ -79,8 +80,8 @@ bundles it ([studio.md](studio.md)).
 
 ```sh
 npm run check     # Biome's lint, markdownlint, cspell; then every package: typecheck, tests (100% coverage), the round trip, drift, Turtle formatting, the deck library; then boundaries
-npm run build     # the site, the Studio included, into apps/web/dist/
-npm run browsers  # once: Chromium, which npm run check draws the docs' diagrams in (markdown.md)
+npm run build     # the site, the Studio and the docs included, into apps/web/dist/
+npm run browsers  # once: Chromium, which npm run check and npm run build draw the docs' diagrams in (markdown.md)
 npm run dev       # the site, from source; the Studio at #/studio
 npm start         # the site as deployed: built, then served at http://localhost:4173
 npm run test:unit # every package's tests in one run, without coverage (a file or two: `-- <path>`)

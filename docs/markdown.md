@@ -326,7 +326,11 @@ on GitHub after an edit ([style.md](style.md#docs)).
   has them).
   Without it, drawing fails with a message that names that command.
   With `DOCS_DIAGRAMS=skip` (`diagramMode`), drawing warns and returns
-  no drawings instead; it is refused when `CI` is set. `npm run check`
+  no drawings instead, without starting a browser or reading the cache,
+  so what a build makes depends on the setting alone, in CI too. It is
+  for `npm run build` and `npm start` on a machine without Chromium
+  ([configuration.md](configuration.md#docs_diagrams)); `npm run dev`
+  needs none of it ([below](#the-docs-as-a-site)). `npm run check`
   fails under it, by design: the test that draws in the real browser is
   skipped, and the package's coverage drops below 100%.
 
@@ -392,7 +396,14 @@ it, and writes it out as HTML with an emitter of its own, which escapes
 every text and has no way to write raw HTML.
 [publishDocs.ts](../packages/markdown/tooling/publishDocs.ts) is the
 Vite plugin that emits the pages under `docs/` with a build, and in dev
-renders a page anew on each request, so an edit shows on reload.
+renders a page anew on each request, so an edit shows on reload. The
+site's build ([vite.config.ts](../apps/web/vite.config.ts)) uses it, so
+every build, every release among them, publishes its own docs at
+`/docs/` ([deployment.md](deployment.md#what-the-artifact-contains)).
+It hands the plugin the repository's address from the site's checked
+settings (`VITE_REPO_URL`), the commit built, which the links name (or
+`main`, with a warning, when it is not known), the version, and the
+site's origin from `CNAME`, for each page's canonical address.
 
 - **Addresses.** The README is `docs/`, every other page
   `docs/<page>/`, so `configuration.md` is `docs/configuration/`.

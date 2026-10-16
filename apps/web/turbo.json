@@ -8,12 +8,20 @@
       "inputs": [
         "$TURBO_EXTENDS$",
         ".env*",
+        "$TURBO_ROOT$/package.json",
         "$TURBO_ROOT$/CNAME",
-        "$TURBO_ROOT$/ns/shapes/**"
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**",
+        "$TURBO_ROOT$/docs/**"
       ],
       "env": [
         "$TURBO_EXTENDS$",
-        "VITE_*"
+        "VITE_*",
+        "DOCS_DIAGRAMS"
+      ],
+      "passThroughEnv": [
+        "PLAYWRIGHT_*",
+        "XDG_CACHE_HOME"
       ]
     },
     "build": {
@@ -23,11 +31,17 @@
         "$TURBO_ROOT$/package.json",
         "$TURBO_ROOT$/CNAME",
         "$TURBO_ROOT$/ns/**",
-        "$TURBO_ROOT$/decks/**"
+        "$TURBO_ROOT$/decks/**",
+        "$TURBO_ROOT$/docs/**"
       ],
       "env": [
         "$TURBO_EXTENDS$",
-        "VITE_*"
+        "VITE_*",
+        "DOCS_DIAGRAMS"
+      ],
+      "passThroughEnv": [
+        "PLAYWRIGHT_*",
+        "XDG_CACHE_HOME"
       ]
     }
   }
