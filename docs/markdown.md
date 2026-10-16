@@ -440,7 +440,7 @@ site's origin from `CNAME`, for each page's canonical address.
   same pages one folder deeper, at the release's tag, never indexed
   (`noindex`, no canonical address), each with a note that links the
   latest docs. `npm run docs:archive -- X.Y.Z` packs one, every
-  diagram drawn
+  diagram drawn, and every GitHub release carries its own
   ([deployment.md](deployment.md#a-releases-docs-as-an-archive)).
 
 What a page holds that would not show as written, or would lead

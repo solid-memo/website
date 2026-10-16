@@ -22,6 +22,14 @@ name: Release
 # finds nothing to release since the tag. The key is a secret of the
 # release environment, which allows only main, so a workflow pushed on
 # any other branch cannot read it, as it could a repository secret.
+#
+# The GitHub release carries the version's docs, rendered and drawn in
+# Chromium in the release's prepare step (npm run docs:archive). The job
+# that holds the key runs Chromium and Mermaid for it; docs/releasing.md
+# says why that is accepted. When the archive could not be attached, the
+# release is left a draft, which the deploy refuses: run this by hand
+# with the version's tag, and the docs job attaches it and publishes the
+# release, without the key (docs/releasing.md#when-a-release-fails).
 
 on:
   workflow_run:
@@ -29,6 +37,13 @@ on:
     types: [completed]
     branches: [main]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: >-
+          Leave empty to release main's tip. A version's tag (vX.Y.Z) instead
+          attaches that version's docs to its GitHub release and publishes it.
+        required: false
+        default: ""
 
 permissions:
   # To make the GitHub release (the commit and the tag are pushed with the key).
@@ -36,19 +51,11 @@ permissions:
   # To look up CI's runs on main's tip.
   actions: read
 
-# One release at a time, and a running one never canceled: a release
-# canceled halfway could leave its commit pushed and its tag or GitHub
-# release missing. GitHub keeps one pending run in the group, so a run
-# queued behind it replaces one already waiting; whichever runs releases
-# main's tip once CI has passed on it.
-concurrency:
-  group: release
-  cancel-in-progress: false
-
 jobs:
   release:
     if: >-
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
+       inputs.tag == '') ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push' &&
@@ -56,6 +63,16 @@ jobs:
        github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # One release at a time, and a running one never canceled: a release
+    # canceled halfway could leave its commit pushed and its tag or GitHub
+    # release missing. GitHub keeps one pending job in the group, so a run
+    # queued behind it replaces one already waiting; whichever runs
+    # releases main's tip once CI has passed on it. The group is this
+    # job's, not the workflow's, so a run of the docs job neither replaces
+    # a waiting release nor is replaced by one.
+    concurrency:
+      group: release
+      cancel-in-progress: false
     # Its secret is the key. Each run is recorded as a deployment to it:
     # GitHub's docs do not say that its limit to main holds with
     # deployment: false.
@@ -131,6 +148,11 @@ jobs:
           cache: npm
       - if: steps.tip.outputs.release == 'true'
         run: npm ci
+      # Chromium, which the release's prepare step draws the docs' Mermaid
+      # diagrams in, for the archive the GitHub release carries
+      # (npm run docs:archive).
+      - if: steps.tip.outputs.release == 'true'
+        uses: ./.github/actions/chromium
       # Pushes the release commit and the tag over SSH, with the key, and
       # makes the GitHub release with the run's token.
       - if: steps.tip.outputs.release == 'true'
@@ -143,3 +165,108 @@ jobs:
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: npx semantic-release --repository-url "$REPOSITORY_URL"
+
+  # A version's docs, attached to its GitHub release when the release job
+  # could not (docs/releasing.md#when-a-release-fails): the release was
+  # made as a draft, and the upload failed. Run by hand from main, with
+  # the version's tag. It renders the docs from the tag, as the release
+  # would have, and uploads them with the run's token, as the release
+  # does, so the deploy accepts them; it needs no deploy key, and has
+  # none. A release that already carries them keeps them: an archive is
+  # rendered once.
+  docs:
+    if: >-
+      github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
+      inputs.tag != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # To upload the asset and publish the release.
+      contents: write
+    # A group of its own for each tag, so it neither replaces a release
+    # run waiting its turn nor is replaced by one; run it only while no
+    # release is running or waiting, as it may mark its version latest
+    # (docs/releasing.md#when-a-release-fails).
+    concurrency:
+      group: release-docs-${{ inputs.tag }}
+      cancel-in-progress: false
+    steps:
+      - name: The tag is a version with a GitHub release
+        id: release
+        env:
+          TAG: ${{ inputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::$TAG is not a version's tag (vX.Y.Z)."
+            exit 1
+          fi
+          version="${TAG#v}"
+          if ! draft=$(gh release view "$TAG" --json isDraft --jq .isDraft); then
+            echo "::error::$TAG has no GitHub release: make it first, as a draft (docs/releasing.md#when-a-release-fails)."
+            exit 1
+          fi
+          attach=true
+          if gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fqx "docs-$version.tar.gz"; then
+            attach=false
+            if [ "$draft" = false ]; then
+              echo "::notice::The release of $TAG already carries its docs, and is published: nothing to do."
+            fi
+          fi
+          # Latest only when it is the newest version, as semantic-release
+          # makes it; publishing an older draft must not take that from a
+          # newer release.
+          newest=$(gh api --paginate "repos/$GH_REPO/tags" --jq '.[].name' |
+            grep -Ex 'v[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n 1)
+          {
+            echo "version=$version"
+            echo "draft=$draft"
+            echo "attach=$attach"
+            echo "latest=$([ "$TAG" = "$newest" ] && echo true || echo false)"
+          } >> "$GITHUB_OUTPUT"
+      - if: steps.release.outputs.attach == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - name: The version can archive its docs
+        if: steps.release.outputs.attach == 'true'
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [ ! -f scripts/docsArchive.ts ]; then
+            echo "::error::$TAG came before the docs were archived, so it has none to attach."
+            exit 1
+          fi
+      - if: steps.release.outputs.attach == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - if: steps.release.outputs.attach == 'true'
+        run: npm ci
+      - if: steps.release.outputs.attach == 'true'
+        uses: ./.github/actions/chromium
+      - if: steps.release.outputs.attach == 'true'
+        name: npm run docs:archive
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: npm run docs:archive -- "$VERSION"
+      # The label release.config.mjs gives it.
+      - if: steps.release.outputs.attach == 'true'
+        name: Attach the archive
+        env:
+          TAG: ${{ inputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload "$TAG" "release-assets/docs-$VERSION.tar.gz#Documentation $VERSION (HTML)"
+      - if: steps.release.outputs.draft == 'true'
+        name: Publish the release
+        env:
+          TAG: ${{ inputs.tag }}
+          LATEST: ${{ steps.release.outputs.latest }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release edit "$TAG" --draft=false --latest="$LATEST"

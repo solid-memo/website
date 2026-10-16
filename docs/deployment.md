@@ -246,3 +246,14 @@ and checks each drawing as the build does (`checkSvg`, and the font's
 notice in it) before it packs them, with the system's `tar`. The
 archive's address and contents are not part of the public API
 ([releasing.md](releasing.md#the-public-api)).
+
+Every release makes its archive and attaches it to its GitHub release,
+as "Documentation X.Y.Z (HTML)" ([release.config.mjs](../release.config.mjs)):
+semantic-release runs `npm run docs:archive` with the new version
+before it commits, so a release whose docs cannot be drawn is not
+made, and it publishes the GitHub release only once the archive is
+uploaded ([releasing.md](releasing.md#what-a-release-does)). When the
+upload fails, the release stays a draft, which the deploy refuses;
+the release workflow's `docs` job, run by hand with the tag, attaches
+the archive and publishes it
+([releasing.md](releasing.md#when-a-release-fails)).

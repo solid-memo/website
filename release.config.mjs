@@ -11,6 +11,10 @@
  * files that name it, commits them to main, tags the commit vX.Y.Z and
  * makes a GitHub release of it, from which Zenodo mints a DOI.
  *
+ * The GitHub release carries the version's docs, rendered as the site
+ * serves them under the version (scripts/docsArchive.ts), so that the
+ * deploy can serve every release's own docs.
+ *
  * The release commit is not marked [skip ci]: CI runs on it, and the
  * deploy that follows, which deploys only a commit a version tag names,
  * builds the site and the footer's version from it. Run again on
@@ -60,6 +64,17 @@ export const assets = [
 ];
 
 /**
+ * The archive of the version's docs, which prepareCmd writes with
+ * `npm run docs:archive` (scripts/docsArchive.ts's archivePath), and the
+ * GitHub release carries. A glob, as the plugin does not fill in the
+ * version in a path; the release job's checkout holds no other archive.
+ */
+export const docsArchive = {
+  path: "release-assets/docs-*.tar.gz",
+  label: "Documentation ${nextRelease.version} (HTML)",
+};
+
+/**
  * How the commit analyzer and the release-notes generator find a
  * breaking change's footer: `BREAKING CHANGE:` or `BREAKING-CHANGE:` at
  * the start of a line, in capitals and with its colon, as commitlint
@@ -97,8 +112,17 @@ export default {
     // footer reads it (packages/vocab/tooling/siteBuild.ts). The
     // workspace is private, and nothing is published to npm.
     ["@semantic-release/npm", { npmPublish: false }],
-    // publiccode.yml's and CITATION.cff's version and date.
-    ["@semantic-release/exec", { prepareCmd: "npm run release:version -- ${nextRelease.version}" }],
+    // publiccode.yml's and CITATION.cff's version and date; then the
+    // version's docs, drawn in Chromium, as an archive the GitHub release
+    // carries. A failure here stops the release before anything is
+    // pushed.
+    [
+      "@semantic-release/exec",
+      {
+        prepareCmd:
+          "npm run release:version -- ${nextRelease.version} && npm run docs:archive -- ${nextRelease.version}",
+      },
+    ],
     [
       "@semantic-release/git",
       {
@@ -109,9 +133,13 @@ export default {
     // No comments on the issues and pull requests a release includes, and
     // no issue opened when a release fails: the workflow's run says so,
     // and the token needs no more than to write the repository's contents.
+    // With an asset, the plugin makes the release as a draft, uploads the
+    // asset, and only then publishes it, so the deploy, which refuses a
+    // draft, never finds the release without its docs.
     [
       "@semantic-release/github",
       {
+        assets: [docsArchive],
         releaseNameTemplate: "Solid Memo ${nextRelease.version}",
         successCommentCondition: false,
         failCommentCondition: false,
