@@ -6,6 +6,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/solid-memo/website)](https://github.com/solid-memo/website/commits/main)
 [![Contributors](https://img.shields.io/github/contributors/solid-memo/website)](https://github.com/solid-memo/website/graphs/contributors)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23351087.svg)](https://doi.org/10.5281/zenodo.23351087)
+[![Standard for Public Code: commitment](https://raw.githubusercontent.com/publiccodenet/standard/9135425db444c1e18860a99963584da9c19a87f3/assets/standard-for-public-code-commitment.svg)](#the-standard-for-public-code)
 
 [![Solid Memo](apps/web/public/social-preview.png)](https://solid-memo.com/)
 
@@ -70,6 +71,16 @@ the app brings older data in your Pod up to date in place
 ([docs/migrations.md](docs/migrations.md)). The vocabulary, the shapes
 and the library's decks have versions of their own, and a published
 version is never changed.
+
+## The Standard for Public Code
+
+Solid Memo is committed to meeting the
+[Standard for Public Code](https://www.standardforpubliccode.org/), an
+open standard for code that others can reuse, trust and help build. The
+badge at the top of this page says so. It shows that the project aims to
+meet every criterion, not that it meets them all yet: an assessment
+lists which requirements are met, which are not, and why
+([docs/standard-for-public-code.md](docs/standard-for-public-code.md)).
 
 ## Run it on its own
 

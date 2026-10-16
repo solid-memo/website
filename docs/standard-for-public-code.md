@@ -4,6 +4,9 @@ How well Solid Memo meets the [Standard for Public Code](https://www.standardfor
 (version 0.8.1), what the maintainer decided, and what is left. Each
 criterion is a list of requirements, and each requirement is a MUST, a
 SHOULD or OPTIONAL.
+The project is committed to meeting the Standard, and says so with the
+commitment badge in its [README](../README.md#the-standard-for-public-code);
+this page shows how far it has come.
 
 This is an assessment of `main` at `2b780237` (version 2.1.1), made on
 2026-10-16 (#78). Every requirement of the 16 criteria, MUST, SHOULD
