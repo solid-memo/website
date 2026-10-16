@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [2.3.0](https://github.com/solid-memo/website/compare/v2.2.0...v2.3.0) (2026-10-16)
+
+### Features
+
+* **decks:** say how each HTTP status is used in practice ([dba89b1](https://github.com/solid-memo/website/commit/dba89b19d4687f3f53a6c4c895d956392ee2be95)), closes [#114](https://github.com/solid-memo/website/issues/114)
+
 ## [2.2.0](https://github.com/solid-memo/website/compare/v2.1.2...v2.2.0) (2026-10-16)
 
 ### Features
