@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.4.0](https://github.com/solid-memo/website/compare/v3.3.0...v3.4.0) (2026-10-16)
+
+### Features
+
+* **decks:** learn Korean from dialogues around food ([c2a179c](https://github.com/solid-memo/website/commit/c2a179cf201c3d1d1af0407de8b43580762a9442)), closes [#132](https://github.com/solid-memo/website/issues/132)
+
 ## [3.3.0](https://github.com/solid-memo/website/compare/v3.2.0...v3.3.0) (2026-10-16)
 
 ### Features
