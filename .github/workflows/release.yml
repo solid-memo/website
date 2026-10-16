@@ -24,12 +24,14 @@ name: Release
 # any other branch cannot read it, as it could a repository secret.
 #
 # The GitHub release carries the version's docs, rendered and drawn in
-# Chromium in the release's prepare step (npm run docs:archive). The job
-# that holds the key runs Chromium and Mermaid for it; docs/releasing.md
-# says why that is accepted. When the archive could not be attached, the
-# release is left a draft, which the deploy refuses: run this by hand
-# with the version's tag, and the docs job attaches it and publishes the
-# release, without the key (docs/releasing.md#when-a-release-fails).
+# Chromium in the release's prepare step (npm run docs:archive), and
+# attested as this workflow's on main, which the deploy checks before it
+# serves them. The job that holds the key runs Chromium and Mermaid for
+# it; docs/releasing.md says why that is accepted. When the archive could
+# not be attached or attested, run this by hand with the version's tag,
+# and the docs job renders, attests and attaches it, and publishes the
+# release if it is a draft, without the key
+# (docs/releasing.md#when-a-release-fails).
 
 on:
   workflow_run:
@@ -63,6 +65,13 @@ jobs:
        github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+      # To attest the docs' archive (actions/attest).
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     # One release at a time, and a running one never canceled: a release
     # canceled halfway could leave its commit pushed and its tag or GitHub
     # release missing. GitHub keeps one pending job in the group, so a run
@@ -165,15 +174,25 @@ jobs:
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: npx semantic-release --repository-url "$REPOSITORY_URL"
+      # The archive of the version's docs, attested as made by this
+      # workflow on main, which the deploy checks before it serves it
+      # (docs/deployment.md#each-releases-docs). semantic-release makes and
+      # uploads it in one run, so it is attested just after: if this step
+      # fails, run the docs job by hand with the tag, which renders and
+      # attests it again.
+      - if: steps.tip.outputs.release == 'true' && hashFiles('release-assets/docs-*.tar.gz') != ''
+        uses: actions/attest@v4
+        with:
+          subject-path: release-assets/docs-*.tar.gz
 
   # A version's docs, attached to its GitHub release when the release job
   # could not (docs/releasing.md#when-a-release-fails): the release was
-  # made as a draft, and the upload failed. Run by hand from main, with
-  # the version's tag. It renders the docs from the tag, as the release
-  # would have, and uploads them with the run's token, as the release
-  # does, so the deploy accepts them; it needs no deploy key, and has
-  # none. A release that already carries them keeps them: an archive is
-  # rendered once.
+  # made as a draft, and the upload failed, or the archive was not
+  # attested. Run by hand from main, with the version's tag. It renders
+  # the docs from the tag, as the release would have, attests them as
+  # this workflow's on main, and uploads them, so the deploy accepts
+  # them; it needs no deploy key, and has none. A release that already
+  # carries an attested archive keeps it: an archive is rendered once.
   docs:
     if: >-
       github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
@@ -183,6 +202,10 @@ jobs:
     permissions:
       # To upload the asset and publish the release.
       contents: write
+      # To check the archive's attestation, and to attest a new one.
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     # A group of its own for each tag, so it neither replaces a release
     # run waiting its turn nor is replaced by one; run it only while no
     # release is running or waiting, as it may mark its version latest
@@ -207,11 +230,21 @@ jobs:
             echo "::error::$TAG has no GitHub release: make it first, as a draft (docs/releasing.md#when-a-release-fails)."
             exit 1
           fi
+          # An archive it carries is kept when this workflow attested it
+          # on main, as the deploy checks; one that is not is replaced.
           attach=true
           if gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fqx "docs-$version.tar.gz"; then
-            attach=false
-            if [ "$draft" = false ]; then
-              echo "::notice::The release of $TAG already carries its docs, and is published: nothing to do."
+            carried="$(mktemp -d)"
+            gh release download "$TAG" --pattern "docs-$version.tar.gz" --dir "$carried"
+            if gh attestation verify "$carried/docs-$version.tar.gz" --repo "$GH_REPO" \
+              --signer-workflow "$GH_REPO/.github/workflows/release.yml" \
+              --source-ref refs/heads/main --deny-self-hosted-runners > /dev/null; then
+              attach=false
+              if [ "$draft" = false ]; then
+                echo "::notice::The release of $TAG already carries its attested docs, and is published: nothing to do."
+              fi
+            else
+              echo "::notice::The docs the release of $TAG carries are not attested: they are rendered again, and replace them."
             fi
           fi
           # Latest only when it is the newest version, as semantic-release
@@ -253,7 +286,14 @@ jobs:
         env:
           VERSION: ${{ steps.release.outputs.version }}
         run: npm run docs:archive -- "$VERSION"
-      # The label release.config.mjs gives it.
+      # Attested before it is uploaded, so the deploy never finds it
+      # without its attestation.
+      - if: steps.release.outputs.attach == 'true'
+        uses: actions/attest@v4
+        with:
+          subject-path: release-assets/docs-${{ steps.release.outputs.version }}.tar.gz
+      # The label release.config.mjs gives it; an archive without an
+      # attestation is replaced.
       - if: steps.release.outputs.attach == 'true'
         name: Attach the archive
         env:
@@ -261,7 +301,7 @@ jobs:
           VERSION: ${{ steps.release.outputs.version }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release upload "$TAG" "release-assets/docs-$VERSION.tar.gz#Documentation $VERSION (HTML)"
+        run: gh release upload --clobber "$TAG" "release-assets/docs-$VERSION.tar.gz#Documentation $VERSION (HTML)"
       - if: steps.release.outputs.draft == 'true'
         name: Publish the release
         env:

@@ -237,8 +237,12 @@ release, semantic-release:
    notes and the archive of its docs, "Documentation X.Y.Z (HTML)": it
    makes the release as a draft, uploads the archive to it, and only
    then publishes it, so a release is never published without its
-   docs, and the deploy refuses a draft. Zenodo, connected to the repository, archives each GitHub
-   release and gives it a DOI. The concept DOI,
+   docs, and the deploy refuses a draft. Then the workflow attests the
+   archive as made by the release workflow on `main` (`actions/attest`),
+   which the deploy checks before it serves it
+   ([deployment.md](deployment.md#each-releases-docs)). Zenodo,
+   connected to the repository, archives each GitHub release and gives
+   it a DOI. The concept DOI,
    [10.5281/zenodo.23351087](https://doi.org/10.5281/zenodo.23351087),
    always resolves to the latest release, and is the one in
    `CITATION.cff` and the README.
@@ -401,20 +405,25 @@ next push to `main` that passes CI also tries again.
 
   Then attach its docs and publish it, as for a failed upload, below.
 - **The release is a draft without its docs** (the archive's upload
+  failed), **or its docs are not attested** (the attestation step
   failed): the release commit and the tag are on `main`, so a new run
   finds nothing to release, and the deploy, which refuses a draft,
-  deploys nothing. Run the workflow by hand from `main` with the
+  deploys nothing, or serves the version without its archive. Run the workflow by hand from `main` with the
   version's tag (Actions › Release › Run workflow, "tag" `vX.Y.Z`),
   while no Release run is running or waiting: the `docs` job has a
   concurrency group of its own, so it does not wait for one, and it
   marks the version latest when it is the newest tag, which a release
   made while it runs would leave wrong. The job renders the docs from
-  the tag, draws them, attaches the archive with the run's token, as
-  the release does, and publishes the release; it does not use the
-  deploy key. A release that already
-  carries its archive keeps it, and the job only publishes it if it is
-  still a draft. Then run the deploy by hand (Actions › Deploy to
-  GitHub Pages › Run workflow, from `main`), and it deploys the version.
+  the tag, draws them, attests the archive as the release does, attaches
+  it with the run's token, and publishes the release; it does not use
+  the deploy key. A release that already carries an archive keeps it
+  when it is attested, and the job then only publishes it if it is
+  still a draft; one that is not attested is rendered again and
+  replaced. Then run the deploy by hand (Actions › Deploy to GitHub
+  Pages › Run workflow, from `main`), and it deploys the version. Do
+  not upload the archive by hand: the deploy serves only one that this
+  workflow attested as made on `main`, as the release and the `docs`
+  job do ([deployment.md](deployment.md#each-releases-docs)).
 
 A tag is never moved or deleted, even one whose release went wrong:
 Zenodo and anyone who fetched it may already hold it.
