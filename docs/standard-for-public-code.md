@@ -834,7 +834,13 @@ Only an admin of the repository can change these. All are done:
   such key past. *(1)*
 - **Done.** **The DOI.** Add it to `CITATION.cff` and the README, in a pull
   request. *(14)*
-- **Open.** **Software Heritage.** Save the repository there. *(14)*
+- **Done.** **Software Heritage.** A copy of the repository is
+  [preserved there](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/solid-memo/website),
+  first as snapshot
+  `swh:1:snp:dcf5c64c3cf402c99c0cf9ab72ebe36ba158d74b` (3.2.0), and
+  Software Heritage visits it again for new commits. The repository
+  stays where it is, and maintained; the copy only keeps the code
+  findable if GitHub ever is not. *(14)*
 - **Open.** **Search engines.** Verify solid-memo.com in Google Search Console
   and Bing Webmaster Tools, and submit `sitemap.xml`. *(14)*
 - **Open.** **The Solid community.** Ask for a listing on solidproject.org, and

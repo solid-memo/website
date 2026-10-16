@@ -6,6 +6,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/solid-memo/website)](https://github.com/solid-memo/website/commits/main)
 [![Contributors](https://img.shields.io/github/contributors/solid-memo/website)](https://github.com/solid-memo/website/graphs/contributors)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23351087.svg)](https://doi.org/10.5281/zenodo.23351087)
+[![Source code preserved in Software Heritage](https://img.shields.io/badge/source_code-preserved_in_Software_Heritage-blue)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/solid-memo/website)
 [![Standard for Public Code: commitment](https://raw.githubusercontent.com/publiccodenet/standard/9135425db444c1e18860a99963584da9c19a87f3/assets/standard-for-public-code-commitment.svg)](#the-standard-for-public-code)
 
 [![Solid Memo](apps/web/public/social-preview.png)](https://solid-memo.com/)

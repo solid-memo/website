@@ -30,9 +30,13 @@ a new major version ([docs/releasing.md](docs/releasing.md)).
 
 ## Done recently
 
-These were on the roadmap and are done. They are part of 1.0.0
+These were on the roadmap and are done. Most are part of 1.0.0
 ([CHANGELOG.md](CHANGELOG.md)):
 
+- A lasting copy of the code in
+  [Software Heritage](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/solid-memo/website),
+  which preserves public source code and keeps adding the project's
+  new commits. Development goes on here as before.
 - The first release, 1.0.0, made by semantic-release from the commits,
   with its [changelog](CHANGELOG.md)
   ([docs/releasing.md](docs/releasing.md)).
@@ -57,7 +61,6 @@ These were on the roadmap and are done. They are part of 1.0.0
   8.0.0 is out, in place of 6 ([docs/testing.md](docs/testing.md)).
 - **More decks and courses** in the library
   ([docs/deck-library.md](docs/deck-library.md)), proposed by anyone.
-- **An archive of the code** in Software Heritage.
 - **Listing Solid Memo** in the Solid project's catalog of apps.
 
 ## Out of scope
