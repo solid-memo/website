@@ -231,6 +231,58 @@ describe("DeckListContainer", () => {
     );
   });
 
+  it("marks a copy the library has a newer release of, its row leading to the deck's page", async () => {
+    const v2 = "https://solid-memo.com/decks/solid/v2.ttl";
+    const library = {
+      ...courseLibraryDeck,
+      url: v2,
+      version: "2",
+      releases: [...courseLibraryDeck.releases, { url: v2, version: "2" }],
+    };
+    const behind = {
+      ...deck,
+      id: "deck-2",
+      url: `${instance.url}catalog.ttl#deck-2`,
+      title: { en: "Pods" },
+      sourceUrl: courseLibraryDeck.url,
+    };
+    const current = {
+      ...behind,
+      id: "deck-3",
+      url: `${instance.url}catalog.ttl#deck-3`,
+      title: { en: "Pods again" },
+      sourceUrl: v2,
+    };
+    const linked = {
+      ...deck,
+      id: "deck-4",
+      url: `${instance.url}catalog.ttl#deck-4`,
+      title: { en: "Rivers" },
+      sourceUrl: "https://bob.example/releases/rivers/v1.ttl",
+    };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, behind, current, linked]),
+      listLibraryDecks: vi.fn(async () => [library]),
+      deckRelease: vi.fn(async (copy: Deck) => ({
+        ...courseLibraryDeck,
+        url: copy.sourceUrl!,
+        formatVersion: 6,
+        cards: [],
+      })),
+    });
+    renderContainer(useCases);
+    expect(await screen.findByRole("link", { name: "Pods New release" })).toHaveAttribute(
+      "href",
+      deckHref(instance.url, behind.url),
+    );
+    expect(screen.getByRole("link", { name: "Pods again" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Kanji N5" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", { name: "Rivers from bob.example" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("New release")).toHaveLength(1);
+  });
+
   it("reads no library when no deck is copied from it", async () => {
     const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) });
     renderContainer(useCases);

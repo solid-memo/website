@@ -544,6 +544,23 @@ of a release added from a link is upgraded the same way too, to the
 newest version its creator's catalog lists, when it can be read
 ([deck-library.md](deck-library.md#from-a-link)).
 
+The deck list marks each copy the library has a newer release of with
+"New release" after its name, its row leading to the deck page and its
+offer (`newerRelease` of `useCopies` in
+[deckTreeEditor.ts](../packages/ui/src/ui/deckTreeEditor.ts)). It tells
+this from the library's index alone, which the list reads anyway when a
+deck is a copy (`libraryCopiesOf`, `offersNewerRelease` in
+[library.ts](../packages/domain/src/library.ts), as the Studio's library
+copies screen does): it reads no release and plans no upgrade, which
+would read every copy's cards and two releases each time the list
+opens. So it says only what the index tells; a copy the deck page
+would offer nothing for is marked all the same: one whose newer release
+changes nothing in it or uses a card format this app does not know, and
+one of a release the index does not list, which may be no older than
+the newest. A
+copy of a release added from a link is not marked: only its creator's
+catalog would list a newer one.
+
 The plan compares three sets of cards by fragment id — the release the
 copy came from, the current release, and the copy — so the library's
 changes reach only what the user left as the library had it:

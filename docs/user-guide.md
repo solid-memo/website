@@ -87,7 +87,9 @@ The deck list is home. From the top:
   off ([courses.md](courses.md#the-learners-flow)).
 - **Decks**: each deck with a **Study** button when cards are waiting
   for you today, or "Done for today". Click a deck's name to open its
-  page. A newly created instance with no decks offers the library's
+  page. A deck copied from the library says "New release" after its
+  name when the library has a newer release of it; its page offers the
+  update. A newly created instance with no decks offers the library's
   course for newcomers here: "Start the course".
 - Each deck's **menu** (the button at the end of its row) offers its
   preferences, Rename, moves up, down and into groups, "Open in

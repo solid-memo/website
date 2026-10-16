@@ -493,6 +493,7 @@
     "dragCancelled": "Movimiento cancelado: el mazo o grupo sigue donde estaba.",
     "continueCourse": "Continuar el curso",
     "fromHost": "de {host}",
+    "newerRelease": "Nueva versión",
     "fromLink": "Añadir desde un enlace"
   },
   "studyPace": {
