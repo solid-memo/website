@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [2.1.2](https://github.com/solid-memo/website/compare/v2.1.1...v2.1.2) (2026-10-16)
+
+### Bug Fixes
+
+* **studio:** keep hidden text inside the panes that scroll ([485ba46](https://github.com/solid-memo/website/commit/485ba46443e52076b7c6fa7a4446293561d44c7f)), closes [#110](https://github.com/solid-memo/website/issues/110)
+
 ## [2.1.1](https://github.com/solid-memo/website/compare/v2.1.0...v2.1.1) (2026-10-16)
 
 ### Bug Fixes
