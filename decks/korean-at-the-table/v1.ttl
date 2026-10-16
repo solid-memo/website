@@ -1,0 +1,2409 @@
+@base <https://solid-memo.com/decks/korean-at-the-table/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix schema:     <https://schema.org/> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+
+# A course as well as a deck: its chapters and steps are subjects of this
+# document beside the cards, and every card is a multiple-choice question
+# whose back is the correct option and whose distractors are the wrong ones.
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      schema:Course ;
+    dcterms:title "Korean at the Table"@en ,
+                  "Koreanska vid bordet"@sv ,
+                  "밥 먹었어요?"@ko ,
+                  "Koreanisch bei Tisch"@de ,
+                  "Coreano en la mesa"@es ,
+                  "Le coréen à table"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Everyday Korean around food and eating together, told as one story. Alex has just moved to Seoul and meets Minji, a food lover, through a language exchange: they meet at a café, decide what to eat and share a meal at a small stew restaurant, and you learn to order, ask for more, say what you can't eat and understand what the staff say. For learners who can read Hangul and know some basic Korean; Basic Korean and Everyday Korean phrases are a good start. 3 chapters of short dialogue steps for now, each step a scene, a grammar point or another way the scene goes, followed by multiple-choice questions; later versions continue the story. Each chapter ends with a review, and every question you answer becomes a card in your deck. The steps are in English, with the Korean in Hangul and no romanization; the answers are in English, Swedish, German, Spanish and French. Written with the help of AI; checked against the US Foreign Service Institute's Korean Basic Course (public domain), Wikidata and English Wiktionary, as of October 2026."@en ,
+                        "Vardaglig koreanska kring mat och att äta tillsammans, berättad som en enda historia. Alex har just flyttat till Seoul och träffar Minji, som älskar mat, genom ett språkutbyte: de ses på ett kafé, bestämmer vad de ska äta och delar en måltid på en liten grytrestaurang, och du lär dig att beställa, be om mer, säga vad du inte kan äta och förstå vad personalen säger. För dig som kan läsa hangul och kan lite grundläggande koreanska; Grundläggande koreanska och Koreanska vardagsfraser är en bra början. Än så länge 3 kapitel med korta dialogsteg, vart och ett en scen, en grammatikpunkt eller ett annat sätt scenen kan gå till, följt av flervalsfrågor; senare versioner fortsätter historien. Varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Stegen är på engelska, med koreanskan i hangul utan latinsk transkription; svaren finns på engelska, svenska, tyska, spanska och franska. Skriven med hjälp av AI; kontrollerad mot amerikanska Foreign Service Institutes Korean Basic Course (fri från upphovsrätt), Wikidata och engelska Wiktionary, så som de var i oktober 2026."@sv ,
+                        "음식과 함께 먹는 일을 둘러싼 일상 한국어를 하나의 이야기로 배웁니다. 서울로 막 이사 온 알렉스가 언어 교환으로 음식을 좋아하는 민지를 만나, 카페에서 처음 만나고, 무엇을 먹을지 정하고, 작은 찌개집에서 함께 식사합니다. 주문하기, 더 달라고 하기, 못 먹는 음식 말하기, 직원의 말 알아듣기를 익힙니다. 한글을 읽을 줄 알고 기초 한국어를 조금 아는 학습자를 위한 코스이며, 기초 한국어와 한국어 일상 표현으로 먼저 시작하면 좋습니다. 지금은 짧은 대화 단계로 이루어진 챕터 3개가 있고, 각 단계는 장면, 문법, 또는 장면의 다른 전개와 그 뒤에 이어지는 객관식 문제입니다. 다음 버전에서 이야기가 이어집니다. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 됩니다. 단계는 영어로 되어 있고 한국어는 로마자 표기 없이 한글로 썼으며, 답은 영어, 스웨덴어, 독일어, 스페인어, 프랑스어로 되어 있습니다. AI의 도움을 받아 썼고, 2026년 10월 기준으로 미국 국무부 외교연수원(Foreign Service Institute)의 Korean Basic Course(퍼블릭 도메인), 위키데이터, 영어 위키낱말사전으로 확인했습니다."@ko ,
+                        "Koreanisch im Alltag rund ums Essen und gemeinsame Mahlzeiten, erzählt als eine Geschichte. Alex ist gerade nach Seoul gezogen und lernt über einen Sprachaustausch Minji kennen, die gern und gut isst: Sie treffen sich in einem Café, überlegen, was sie essen wollen, und essen zusammen in einem kleinen Eintopf-Restaurant. Dabei lernst du zu bestellen, um mehr zu bitten, zu sagen, was du nicht essen kannst, und zu verstehen, was das Personal sagt. Für Lernende, die Hangul lesen können und etwas Koreanisch kennen; „Koreanisch für Anfänger“ und „Koreanische Alltagswendungen“ sind ein guter Anfang. Vorerst 3 Kapitel mit kurzen Dialogschritten, jeder eine Szene, ein Grammatikpunkt oder eine andere Wendung der Szene, gefolgt von Multiple-Choice-Fragen; spätere Versionen setzen die Geschichte fort. Jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Die Schritte sind auf Englisch, das Koreanische in Hangul ohne Umschrift; die Antworten gibt es auf Englisch, Schwedisch, Deutsch, Spanisch und Französisch. Mithilfe von KI geschrieben; geprüft anhand des Korean Basic Course des US Foreign Service Institute (gemeinfrei), Wikidata und des englischen Wiktionary, Stand Oktober 2026."@de ,
+                        "Coreano cotidiano en torno a la comida y a comer juntos, contado como una sola historia. Alex acaba de mudarse a Seúl y conoce a Minji, a quien le encanta comer, en un intercambio de idiomas: quedan en una cafetería, deciden qué comer y comparten una comida en un pequeño restaurante de guisos, y aprendes a hacer un pedido, a pedir más, a decir lo que no puedes comer y a entender lo que dice el personal. Para quien sabe leer hangul y algo de coreano básico; Coreano básico y Frases coreanas cotidianas son un buen comienzo. Por ahora, 3 capítulos de pasos cortos de diálogo, cada uno una escena, un punto de gramática u otra forma en que puede ir la escena, seguidos de preguntas de opción múltiple; las próximas versiones continúan la historia. Cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. Los pasos están en inglés, con el coreano en hangul y sin romanización; las respuestas están en inglés, sueco, alemán, español y francés. Escrito con ayuda de IA; comprobado con el Korean Basic Course del Foreign Service Institute de EE. UU. (de dominio público), Wikidata y el Wikcionario en inglés, a octubre de 2026."@es ,
+                        "Le coréen du quotidien autour de la nourriture et des repas partagés, raconté comme une seule histoire. Alex vient de s'installer à Séoul et rencontre Minji, qui adore manger, lors d'un échange linguistique : un premier rendez-vous dans un café, le choix de ce qu'on va manger, puis un repas dans un petit restaurant de ragoûts. Vous apprenez à commander, à en redemander, à dire ce que vous ne pouvez pas manger et à comprendre ce que dit le personnel. Pour qui sait lire le hangeul et connaît un peu de coréen ; Coréen de base et Expressions coréennes du quotidien sont un bon point de départ. Pour l'instant, 3 chapitres de courtes étapes de dialogue, chacune une scène, un point de grammaire ou une autre façon dont la scène peut se passer, suivie de questions à choix multiple ; les prochaines versions poursuivent l'histoire. Chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Les étapes sont en anglais, avec le coréen en hangeul sans romanisation ; les réponses sont en anglais, en suédois, en allemand, en espagnol et en français. Rédigé avec l'aide de l'IA ; vérifié avec le Korean Basic Course du Foreign Service Institute des États-Unis (domaine public), Wikidata et le Wiktionnaire anglais, en octobre 2026."@fr ;
+    prov:wasDerivedFrom <https://archive.org/details/Fsi-KoreanBasicCourse-StudentText> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:korean ;
+    dcat:keyword "Korean"@en ,
+                 "dialogues"@en ,
+                 "food"@en ,
+                 "restaurant"@en ,
+                 "beginners"@en ,
+                 "koreanska"@sv ,
+                 "dialoger"@sv ,
+                 "mat"@sv ,
+                 "restaurang"@sv ,
+                 "nybörjare"@sv ,
+                 "한국어"@ko ,
+                 "대화"@ko ,
+                 "음식"@ko ,
+                 "식당"@ko ,
+                 "초보자"@ko ,
+                 "Koreanisch"@de ,
+                 "Dialoge"@de ,
+                 "Essen"@de ,
+                 "Restaurant"@de ,
+                 "Anfänger"@de ,
+                 "coreano"@es ,
+                 "diálogos"@es ,
+                 "comida"@es ,
+                 "restaurante"@es ,
+                 "principiantes"@es ,
+                 "coréen"@fr ,
+                 "dialogues"@fr ,
+                 "cuisine"@fr ,
+                 "restaurant"@fr ,
+                 "débutants"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#korean-at-the-table> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#korean-at-the-table> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+# How this course was made (W3C PROV-O): written by AI agents, then checked
+# in the rounds below, against the sources below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://archive.org/details/Fsi-KoreanBasicCourse-StudentText> ,
+              <https://www.wikidata.org/> ,
+              <https://en.wiktionary.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The course was planned and written by AI agents working for Anton Wiklund, from a concept for all ten chapters (issue #132), and checked by AI agents and by machines (the app's SHACL and DCAT-AP validators, its course and Markdown checks, and a second SHACL validator); no person has reviewed it."@en ,
+                 "Selection: one topic, food and eating together, told as one story with the same people, so that dishes, spice, portions and thanks come back from chapter to chapter. This first version has chapters 0 to 2 of the ten planned: a first meeting at a café, deciding what to eat, and a meal at a small 찌개 restaurant; later versions continue the story with paying, delivery, the market, cooking, a family dinner, a team dinner and a regular place. The people and places are invented. The level is after Hangul and roughly Basic Korean, about TOPIK I. No card front repeats one of Basic Korean or Everyday Korean phrases; the dialogues use some of their phrases, and the theory says where they were learned."@en ,
+                 "Structure: 3 chapters of 9 steps in all, three per chapter: the scene, a dialogue with its key phrases explained; how it works, the chapter's grammar point; and another way it goes, a variant dialogue and a note on culture. Each step is read in two chunks and checks two or three questions met in its theory, and each chapter has two review questions, asked only in its final review: 22 step questions and 6 review questions, 28 questions in all. Every question has one correct option (the card's back) and three wrong options (its distractors), each with a note on why it is wrong. The front is Korean in Hangul, in today's standard spelling and spacing and without romanization, in 해요체 for what the learner says, with the staff's honorific lines marked in the notes as lines the learner hears; the back, note and options are in English, Swedish, German, Spanish and French, with du, tu and tú between the two friends and Sie, usted and vous to and from staff. The theory is in English only."@en ,
+                 "Licensing: the course is CC0 1.0. Its dialogues, theory, questions, options and notes are the course's own text, written with the help of AI. The FSI course (a work of the United States Government) and Wikidata (CC0 1.0) allow any reuse, and English Wiktionary (CC BY-SA 4.0) was used to check meanings only; no text was taken from any of the three."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Concept: Korean (AI)"@en ;
+    rdfs:comment "Scope: The Korean of the course's concept, with two other concepts it was chosen from: cast, speech levels, the planned card fronts of all ten chapters and the sample step and cards, for correctness, naturalness, standard spelling, overlap with Basic Korean and Everyday Korean phrases, and the release's Markdown rules. Done by an AI agent working independently of the compiling agent; not a human review."@en ,
+                 "Outcome: Applied before the chapters were written: the learner's character is called 알렉스, which names no gender, instead of a name Koreans would hear as slang for teacher; the staff's line 따뜻한 걸로 드릴까요, 아이스로 드릴까요? is carded only as its first half; a guest speaks honorific 해요체 rather than 합쇼체 to a friend's parents, with 합쇼체 kept for set lines; and every dialogue line ends in a hard break before its gloss."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Chapters: Korean, answers and course rules (AI)"@en ;
+    rdfs:comment "Scope: Each chapter as written, reviewed by three AI agents working apart: one for the Korean (grammar, spelling and spacing, naturalness, the speech level each speaker would use, and the glosses and grammar in the theory), one for the backs, notes, wrong options and their notes in English, Swedish, German, Spanish and French (meaning, agreement between the languages, and wrong options that are plausible and do not give the answer away by their form), and one for the course's rules, its Markdown and its questions as flip cards studied later out of context; not a human review."@en ,
+                 "Outcome: 37 findings (18, 10 and 9 in the three chapters), all applied; where two findings proposed different wordings, one was chosen. Among them: the rule for -(으)ㄹ까요 after a stem in ㄹ, -시- explained as honoring the person who acts, 씨 limited to adults on an equal footing, a phrase checked by a step but not met in its theory, wrong options and backs reworded in Swedish, German and Spanish, and notes that now name the honorific 드시다."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Course as a whole (AI)"@en ;
+    rdfs:comment "Scope: The three chapters read together by an AI agent for the story's continuity, names and speech levels used the same way throughout, facts taught twice, correct options that stand out by their length or form, fronts repeated within the course or from Basic Korean and Everyday Korean phrases, glosses that disagree with the backs, and the counts in the description; not a human review."@en ,
+                 "Outcome: two jumps in the story's time were removed, a fact about where a restaurant keeps its spoons was corrected, seven backs or wrong options that stood out by their length were reworded, staff speaking to two customers now use the plural in Swedish and Spanish, and one note's quotation marks were made consistent; the 28 fronts are all different and none repeats one of the other Korean decks."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources (AI and machine)"@en ;
+    rdfs:comment "Scope: The course's key words against the three sources, searched by an AI agent with scripts: 38 words of the fronts in English Wiktionary's Korean entries, the same words and the dishes in Wikidata through the Wikibase API, and the grammar points (counters, -(으)ㄹ까요?, 못, the honorific -시-, the polite speech styles) in the OCR text of the FSI course. Not a human review."@en ,
+                 "Outcome: No source contradicts a card. Wiktionary has Korean entries for 32 of the 38 words, among them 연하다 (of a liquid: thin, dilute), 동갑 (age-mate), 맛집, 공깃밥 and 드시다 (honorific of 먹다); 년생, 진동벨, 아무거나, 셀프, 인분 and 앞접시 have none, though 생, 아무것 and 접시 do. Wikidata has lexemes for 6 of the words (고기, 못, 안, 끓다, 분, 씨) and items for 비빔밥, 김치찌개, 찌개, 반찬 and caffè americano. The FSI course has 잔 as the counter for cups and glasses, -(으)ㄹ까요?, 못, -(으)시- and its formal and informal polite speech, which are 합쇼체 and 해요체."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-16T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks"@en ;
+    rdfs:comment "Scope: The whole release, with the library checker (npm run library), which validates it against Solid Memo's shapes (library deck format 6, card format 5, chapter, step and distractor format 1), DCAT-AP and SKOS, with the reference data, checks the course's outline by its rules and its Markdown by the rules for a release, and with a second, independent SHACL validator (pySHACL, npm run crosscheck) over the same shapes."@en ,
+                 "Outcome: The release conforms: the library checker found the library valid with this course in it, and pySHACL found all 234 documents it checks conform."@en .
+
+<https://archive.org/details/Fsi-KoreanBasicCourse-StudentText>
+    dcterms:title "Korean Basic Course, Volume 1 (Foreign Service Institute, 1968), as scanned on the Internet Archive" ;
+    dcterms:creator "B. Nam Park; edited by Augustus A. Koski; Foreign Service Institute, U.S. Department of State" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "Checking: the Internet Archive's OCR text of Volume 1 (romanized Korean and English), and Volume 2 in the same item for its English, searched for the course's grammar points and words. Volume 1 explains 잔 as the counter for \"cups or glasses of liquid\" (\"a cup of coffee\"), -(으)ㄹ까요?, 못, the honorific suffix -(으)시- and its formal and informal polite speech, and has 고기 (meat), 맵다 and 김치. A work of the United States Government: the title page reads \"B. Nam Park … Foreign Service Institute, Washington, D.C. 1968\" and \"For sale by the Superintendent of Documents, U.S. Government Printing Office\". 17 U.S.C. § 105: \"Copyright protection under this title is not available for any work of the United States Government\". Section 105 applies in the United States; what the course takes from it is checking of grammar points and meanings, not its text."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata (Korean lexemes and items)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Checking: Korean lexemes and items queried for the course's key words and dishes on 16 October 2026. Wikidata has few Korean lexemes: 6 of the 38 words have one (고기, 못, 안, 끓다, 분, 씨), and the dishes have items (비빔밥 Q648352, 김치찌개 Q701756, 찌개 Q1062483, 반찬 Q716245, caffè americano Q1152551); 공깃밥 has none. https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (Korean entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Verification only; no text was taken from it. 38 key words of the fronts were looked up on 16 October 2026: 32 have a Korean entry, and the definitions read agree with the cards (방금 just now, 연하다 of a liquid thin or dilute, 진하다 strong, 동갑 age-mate, 맛집 delicious restaurant, 공깃밥 rice in a bowl, 반찬 side dishes, 드시다 honorific to eat or drink, 맵다 spicy, 끓다 to boil, 잔 a glass of a beverage). 년생, 진동벨, 아무거나, 셀프, 인분 and 앞접시 have no entry. Text is available under CC BY-SA 4.0 (https://en.wiktionary.org/wiki/Wiktionary:Copyrights)."@en .
+
+# Chapter 0: At the café.
+<#ch-cafe>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 0 ;
+    dcterms:title "At the café"@en ,
+                  "På kaféet"@sv ,
+                  "Im Café"@de ,
+                  "En la cafetería"@es ,
+                  "Au café"@fr ,
+                  "카페에서"@ko ;
+    dcterms:description "Alex meets Minji for the first time at a café: finding the person you are meeting, ordering a drink the way you want it, understanding the staff, and asking a peer's age politely. Ends with a review of the chapter."@en ,
+                        "Alex träffar Minji för första gången på ett kafé: hitta den man ska träffa, beställa en dryck som man vill ha den, förstå personalen och artigt fråga en jämnårig om åldern. Avslutas med en repetition av kapitlet."@sv ,
+                        "Alex trifft Minji zum ersten Mal in einem Café: die Person finden, mit der man verabredet ist, ein Getränk so bestellen, wie man es möchte, das Personal verstehen und höflich nach dem Alter fragen. Endet mit einer Wiederholung des Kapitels."@de ,
+                        "Alex conoce a Minji en una cafetería: encontrar a la persona con la que has quedado, pedir una bebida como la quieres, entender al personal y preguntar la edad con cortesía. Termina con un repaso del capítulo."@es ,
+                        "Alex rencontre Minji pour la première fois dans un café : trouver la personne qu'on doit retrouver, commander une boisson comme on la veut, comprendre le personnel et demander poliment l'âge. Se termine par une révision du chapitre."@fr ;
+    solid-memo:reviewQuestion <#q-cafe-r01> ,
+                              <#q-cafe-r02> .
+
+<#ch-cafe-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-cafe> ;
+    schema:position 0 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Meeting Minji
+
+*Saturday, two in the afternoon. A café near Hongik University station. Alex is meeting a language-exchange partner called Minji for the first time.*
+
+**알렉스:** 저기, 혹시 민지 씨예요?\\
+*Excuse me, are you Minji, by any chance?*
+
+**민지:** 네, 맞아요! 알렉스 씨죠? 반가워요.\\
+*Yes, that's right! You're Alex, aren't you? Nice to meet you.*
+
+**알렉스:** 반가워요. 많이 기다렸어요?\\
+*Nice to meet you too. Have you been waiting long?*
+
+**민지:** 아니요, 저도 방금 왔어요. 먼저 주문할까요?\\
+*No, I just got here too. Shall we order first?*
+
+**직원:** 어서 오세요. 주문하시겠어요?\\
+*Welcome. Are you ready to order?*
+
+**알렉스:** 아이스 아메리카노 한 잔 주세요. 연하게 해 주세요.\\
+*One iced americano, please. Make it weak, please.*
+
+**민지:** 저는 따뜻한 라테 한 잔이요.\\
+*A hot latte for me.*
+
+**직원:** 드시고 가세요?\\
+*For here?*
+
+**민지:** 네, 마시고 갈게요.\\
+*Yes, we'll have it here.*
+
+**직원:** 진동벨이 울리면 가지러 오세요.\\
+*Come and pick it up when the buzzer goes off.*
+
+---
+
+**저도 방금 왔어요**: "I just got here too." It is the usual answer to 많이 기다렸어요?, even when it is not quite true.
+
+**연하게 해 주세요**: "Make it weak, please." 연하다 means weak or mild; the opposite is 진하다 (strong), so 진하게 해 주세요. -게 해 주세요 asks for something to be made a certain way, like 안 맵게 해 주세요, which you know from Everyday Korean phrases.
+
+**혹시** means "by any chance" and makes a question to a stranger softer. **씨** after a name is polite between adults on an equal footing, but not for someone clearly older or senior, and never after your own name. 반가워요 you know from Everyday Korean phrases.
+
+**Speech level:** Alex and Minji use 해요체, the polite style for adults who have just met. The staff's lines sound different; the next step shows why."""@en ;
+    solid-memo:checkedBy <#q-cafe-1a> ,
+                         <#q-cafe-1b> .
+
+<#q-cafe-1a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "저도 방금 왔어요"@ko ;
+    solid-memo:back "I just got here too"@en ,
+                    "Jag har också precis kommit"@sv ,
+                    "Ich bin auch gerade gekommen"@de ,
+                    "Yo también acabo de llegar"@es ,
+                    "Moi aussi, je viens d'arriver"@fr ;
+    solid-memo:backNote "Said to someone you are meeting who asks 많이 기다렸어요?, in polite 해요체. It is the usual answer even when it is not quite true; 방금 means just now and 저도 means me too."@en ,
+                        "Sägs till någon man ska träffa som frågar 많이 기다렸어요?, i artig 해요체. Det är det vanliga svaret även när det inte riktigt stämmer; 방금 betyder nyss och 저도 betyder jag också."@sv ,
+                        "Sagt man zu jemandem, mit dem man verabredet ist und der 많이 기다렸어요? fragt, im höflichen 해요체. Es ist die übliche Antwort, auch wenn sie nicht ganz stimmt; 방금 heißt gerade eben, 저도 heißt ich auch."@de ,
+                        "Se le dice a la persona con la que has quedado cuando pregunta 많이 기다렸어요?, en el estilo cortés 해요체. Es la respuesta habitual aunque no sea del todo cierto; 방금 significa hace un momento y 저도, yo también."@es ,
+                        "Se dit à la personne qu'on retrouve quand elle demande 많이 기다렸어요?, au style poli 해요체. C'est la réponse habituelle même si ce n'est pas tout à fait vrai ; 방금 veut dire à l'instant et 저도, moi aussi."@fr ;
+    solid-memo:distractor <#q-cafe-1a-d1> ,
+                          <#q-cafe-1a-d2> ,
+                          <#q-cafe-1a-d3> .
+
+<#q-cafe-1a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I've been waiting a long time"@en ,
+                              "Jag har väntat länge"@sv ,
+                              "Ich warte schon lange"@de ,
+                              "Llevo mucho rato esperando"@es ,
+                              "J'attends depuis longtemps"@fr ;
+    solid-memo:distractorNote "That would be 많이 기다렸어요; 방금 왔어요 says you have only just arrived."@en ,
+                              "Det vore 많이 기다렸어요; 방금 왔어요 säger att man precis har kommit."@sv ,
+                              "Das wäre 많이 기다렸어요; 방금 왔어요 heißt, dass man gerade erst angekommen ist."@de ,
+                              "Eso sería 많이 기다렸어요; 방금 왔어요 dice que acabas de llegar."@es ,
+                              "Ce serait 많이 기다렸어요 ; 방금 왔어요 dit qu'on vient tout juste d'arriver."@fr .
+
+<#q-cafe-1a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I'm leaving now too"@en ,
+                              "Jag går också nu"@sv ,
+                              "Ich gehe jetzt auch"@de ,
+                              "Yo también me voy ya"@es ,
+                              "Moi aussi, je m'en vais"@fr ;
+    solid-memo:distractorNote "That would be 저도 이제 갈게요; 왔어요 is the past of 오다, to come."@en ,
+                              "Det vore 저도 이제 갈게요; 왔어요 är dåtid av 오다, komma."@sv ,
+                              "Das wäre 저도 이제 갈게요; 왔어요 ist die Vergangenheit von 오다, kommen."@de ,
+                              "Eso sería 저도 이제 갈게요; 왔어요 es el pasado de 오다, venir."@es ,
+                              "Ce serait 저도 이제 갈게요 ; 왔어요 est le passé de 오다, venir."@fr .
+
+<#q-cafe-1a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I'll be there in a minute"@en ,
+                              "Jag är där om en minut"@sv ,
+                              "Ich bin in einer Minute da"@de ,
+                              "Llego en un minuto"@es ,
+                              "J'arrive dans une minute"@fr ;
+    solid-memo:distractorNote "That would be 금방 갈게요; 방금 points back to a moment ago, and 왔어요 is past."@en ,
+                              "Det vore 금방 갈게요; 방금 syftar på ett ögonblick sedan, och 왔어요 är dåtid."@sv ,
+                              "Das wäre 금방 갈게요; 방금 verweist auf einen Moment zuvor, und 왔어요 ist Vergangenheit."@de ,
+                              "Eso sería 금방 갈게요; 방금 se refiere a hace un momento, y 왔어요 está en pasado."@es ,
+                              "Ce serait 금방 갈게요 ; 방금 renvoie à il y a un instant, et 왔어요 est au passé."@fr .
+
+<#q-cafe-1b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "연하게 해 주세요"@ko ;
+    solid-memo:back "Make it weak, please"@en ,
+                    "Lite svagare, tack"@sv ,
+                    "Bitte nicht so stark"@de ,
+                    "Poco cargado, por favor"@es ,
+                    "Pas trop fort, s'il vous plaît"@fr ;
+    solid-memo:backNote "Said by a customer to café staff when ordering coffee or tea, in polite 해요체. 연하다 means weak or mild; the opposite is 진하게 해 주세요. The staff answer 네, 알겠습니다."@en ,
+                        "Sägs av en kund till personalen på ett kafé när man beställer kaffe eller te, i artig 해요체. 연하다 betyder svag eller mild; motsatsen är 진하게 해 주세요. Personalen svarar 네, 알겠습니다."@sv ,
+                        "Sagt ein Gast beim Bestellen von Kaffee oder Tee zum Personal, im höflichen 해요체. 연하다 heißt schwach oder mild; das Gegenteil ist 진하게 해 주세요. Das Personal antwortet 네, 알겠습니다."@de ,
+                        "Lo dice un cliente al personal de una cafetería al pedir café o té, en el estilo cortés 해요체. 연하다 significa suave o poco cargado; lo contrario es 진하게 해 주세요. El personal responde 네, 알겠습니다."@es ,
+                        "Dit par un client au personnel d'un café en commandant un café ou un thé, au style poli 해요체. 연하다 veut dire léger ou doux ; le contraire est 진하게 해 주세요. Le personnel répond 네, 알겠습니다."@fr ;
+    solid-memo:distractor <#q-cafe-1b-d1> ,
+                          <#q-cafe-1b-d2> ,
+                          <#q-cafe-1b-d3> .
+
+<#q-cafe-1b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Make it strong, please"@en ,
+                              "Lite starkare, tack"@sv ,
+                              "Bitte etwas stärker"@de ,
+                              "Más cargado, por favor"@es ,
+                              "Plus fort, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 진하게 해 주세요: 진하다 is strong, the opposite of 연하다."@en ,
+                              "Det vore 진하게 해 주세요: 진하다 är stark, motsatsen till 연하다."@sv ,
+                              "Das wäre 진하게 해 주세요: 진하다 heißt stark, das Gegenteil von 연하다."@de ,
+                              "Eso sería 진하게 해 주세요: 진하다 es fuerte, lo contrario de 연하다."@es ,
+                              "Ce serait 진하게 해 주세요 : 진하다 veut dire fort, le contraire de 연하다."@fr .
+
+<#q-cafe-1b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Decaf, please"@en ,
+                              "Koffeinfritt, tack"@sv ,
+                              "Entkoffeiniert, bitte"@de ,
+                              "Descafeinado, por favor"@es ,
+                              "Un déca, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 디카페인으로 주세요; 연하게 makes it weaker, but it still has caffeine."@en ,
+                              "Det vore 디카페인으로 주세요; 연하게 gör det svagare, men koffeinet finns kvar."@sv ,
+                              "Das wäre 디카페인으로 주세요; 연하게 macht ihn schwächer, aber das Koffein bleibt."@de ,
+                              "Eso sería 디카페인으로 주세요; 연하게 lo hace más suave, pero sigue teniendo cafeína."@es ,
+                              "Ce serait 디카페인으로 주세요 ; 연하게 le rend plus léger, mais il garde sa caféine."@fr .
+
+<#q-cafe-1b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A large one, please"@en ,
+                              "En stor, tack"@sv ,
+                              "Einen großen, bitte"@de ,
+                              "Uno grande, por favor"@es ,
+                              "Un grand, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 큰 사이즈로 주세요; 연하게 says nothing about size."@en ,
+                              "Det vore 큰 사이즈로 주세요; 연하게 säger inget om storlek."@sv ,
+                              "Das wäre 큰 사이즈로 주세요; 연하게 sagt nichts über die Größe."@de ,
+                              "Eso sería 큰 사이즈로 주세요; 연하게 no dice nada del tamaño."@es ,
+                              "Ce serait 큰 사이즈로 주세요 ; 연하게 ne dit rien de la taille."@fr .
+
+<#ch-cafe-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-cafe> ;
+    schema:position 1 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Choosing and counting
+
+*The order could just as well have gone like this, with Alex ordering for both of them.*
+
+**알렉스:** 아메리카노 두 잔 주세요.\\
+*Two americanos, please.*
+
+**직원:** 따뜻한 걸로 드릴까요?\\
+*Would you like them hot?*
+
+**알렉스:** 아니요, 아이스로 주세요.\\
+*No, iced, please.*
+
+**(으)로 for choosing.** Put 로 after the option you pick, or 으로 after a consonant other than ㄹ: 아이스로 (iced), 작은 사이즈로 (in a small size), 두유로 (with soy milk). 따뜻한 걸로 is short for 따뜻한 것으로, "the hot one". 이걸로 할게요, which you know from Everyday Korean phrases, works the same way.
+
+**잔 with native numbers.** 잔 counts cups and glasses. It takes the native Korean numbers, and the first four get shorter before it: 한 잔, 두 잔, 세 잔, 네 잔, then 다섯 잔. The order is always drink, number, counter word, 주세요.
+
+---
+
+**Hearing -시-.** Staff speak to customers with -시-, which honors the person doing the action, here the customer: 주문하시겠어요? (are you ready to order?), 드시고 가세요? (for here?), 가지러 오세요 (please come and get it). 드시다 is the honorific word for eating and drinking, so 드시고 가세요? literally asks "will you have it and then go?"
+
+You never use -시- about yourself, so you answer with the plain verb: 네, 마시고 갈게요 (yes, we'll have it here) or 아니요, 가져갈게요 (no, I'll take it with me).
+
+**드릴까요?** works the other way round: 드리다 is the humble word for give, so the staff lower themselves instead of raising you. You answer with 주세요."""@en ;
+    solid-memo:checkedBy <#q-cafe-2a> ,
+                         <#q-cafe-2b> ,
+                         <#q-cafe-2c> .
+
+<#q-cafe-2a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "아이스로 주세요"@ko ;
+    solid-memo:back "Iced, please"@en ,
+                    "Med is, tack"@sv ,
+                    "Mit Eis, bitte"@de ,
+                    "Con hielo, por favor"@es ,
+                    "Glacé, s'il vous plaît"@fr ;
+    solid-memo:backNote "Said by a customer to café staff who ask whether it should be hot or iced, in polite 해요체. (으)로 marks the option you choose; for a hot drink you say 따뜻한 걸로 주세요."@en ,
+                        "Sägs av en kund till personalen på ett kafé som frågar om det ska vara varmt eller med is, i artig 해요체. (으)로 markerar det alternativ man väljer; för en varm dryck säger man 따뜻한 걸로 주세요."@sv ,
+                        "Sagt ein Gast zum Café-Personal, das fragt, ob es heiß oder mit Eis sein soll, im höflichen 해요체. (으)로 markiert die gewählte Möglichkeit; für ein heißes Getränk sagt man 따뜻한 걸로 주세요."@de ,
+                        "Lo dice un cliente al personal de una cafetería que pregunta si lo quiere caliente o con hielo, en el estilo cortés 해요체. (으)로 marca la opción que eliges; para una bebida caliente se dice 따뜻한 걸로 주세요."@es ,
+                        "Dit par un client au personnel d'un café qui demande s'il le veut chaud ou glacé, au style poli 해요체. (으)로 marque l'option choisie ; pour une boisson chaude, on dit 따뜻한 걸로 주세요."@fr ;
+    solid-memo:distractor <#q-cafe-2a-d1> ,
+                          <#q-cafe-2a-d2> ,
+                          <#q-cafe-2a-d3> .
+
+<#q-cafe-2a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Hot, please"@en ,
+                              "Varm, tack"@sv ,
+                              "Heiß, bitte"@de ,
+                              "Caliente, por favor"@es ,
+                              "Chaud, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 따뜻한 걸로 주세요; 아이스 means iced."@en ,
+                              "Det vore 따뜻한 걸로 주세요; 아이스 betyder med is."@sv ,
+                              "Das wäre 따뜻한 걸로 주세요; 아이스 heißt mit Eis."@de ,
+                              "Eso sería 따뜻한 걸로 주세요; 아이스 significa con hielo."@es ,
+                              "Ce serait 따뜻한 걸로 주세요 ; 아이스 veut dire glacé."@fr .
+
+<#q-cafe-2a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "No ice, please"@en ,
+                              "Utan is, tack"@sv ,
+                              "Ohne Eis, bitte"@de ,
+                              "Sin hielo, por favor"@es ,
+                              "Sans glaçons, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 얼음 빼 주세요; 아이스로 asks for the iced version."@en ,
+                              "Det vore 얼음 빼 주세요; 아이스로 ber om varianten med is."@sv ,
+                              "Das wäre 얼음 빼 주세요; 아이스로 verlangt die Variante mit Eis."@de ,
+                              "Eso sería 얼음 빼 주세요; 아이스로 pide la versión con hielo."@es ,
+                              "Ce serait 얼음 빼 주세요 ; 아이스로 demande la version glacée."@fr .
+
+<#q-cafe-2a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A small one, please"@en ,
+                              "En liten, tack"@sv ,
+                              "Einen kleinen, bitte"@de ,
+                              "Uno pequeño, por favor"@es ,
+                              "Un petit, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 작은 사이즈로 주세요; it uses (으)로 too, but 아이스 is about temperature."@en ,
+                              "Det vore 작은 사이즈로 주세요; där används också (으)로, men 아이스 handlar om temperatur."@sv ,
+                              "Das wäre 작은 사이즈로 주세요; auch dort steht (으)로, aber 아이스 betrifft die Temperatur."@de ,
+                              "Eso sería 작은 사이즈로 주세요; también lleva (으)로, pero 아이스 se refiere a la temperatura."@es ,
+                              "Ce serait 작은 사이즈로 주세요 ; on y trouve aussi (으)로, mais 아이스 porte sur la température."@fr .
+
+<#q-cafe-2b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "아메리카노 두 잔 주세요"@ko ;
+    solid-memo:back "Two americanos, please"@en ,
+                    "Två americano, tack"@sv ,
+                    "Zwei Americano, bitte"@de ,
+                    "Dos americanos, por favor"@es ,
+                    "Deux americanos, s'il vous plaît"@fr ;
+    solid-memo:backNote "Said by a customer ordering at a café counter, in polite 해요체. 잔 counts cups and glasses with the native Korean numbers, which get shorter before it: 한 잔, 두 잔, 세 잔, 네 잔. The order is drink, number, counter word, then 주세요."@en ,
+                        "Sägs av en kund som beställer vid disken på ett kafé, i artig 해요체. 잔 räknar koppar och glas med de inhemska koreanska talen, som blir kortare framför det: 한 잔, 두 잔, 세 잔, 네 잔. Ordningen är dryck, antal, klassificerare och sedan 주세요."@sv ,
+                        "Sagt ein Gast beim Bestellen an der Theke eines Cafés, im höflichen 해요체. 잔 zählt Tassen und Gläser mit den einheimisch-koreanischen Zahlen, die davor kürzer werden: 한 잔, 두 잔, 세 잔, 네 잔. Die Reihenfolge ist Getränk, Zahl, Zählwort, dann 주세요."@de ,
+                        "Lo dice un cliente que pide en la barra de una cafetería, en el estilo cortés 해요체. 잔 cuenta tazas y vasos con los números coreanos nativos, que se acortan delante de él: 한 잔, 두 잔, 세 잔, 네 잔. El orden es bebida, número, clasificador y luego 주세요."@es ,
+                        "Dit par un client qui commande au comptoir d'un café, au style poli 해요체. 잔 compte les tasses et les verres avec les nombres coréens natifs, qui raccourcissent devant lui : 한 잔, 두 잔, 세 잔, 네 잔. L'ordre est boisson, nombre, classificateur, puis 주세요."@fr ;
+    solid-memo:distractor <#q-cafe-2b-d1> ,
+                          <#q-cafe-2b-d2> ,
+                          <#q-cafe-2b-d3> .
+
+<#q-cafe-2b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "One americano, please"@en ,
+                              "En americano, tack"@sv ,
+                              "Einen Americano, bitte"@de ,
+                              "Un americano, por favor"@es ,
+                              "Un americano, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 아메리카노 한 잔 주세요; 두 is two."@en ,
+                              "Det vore 아메리카노 한 잔 주세요; 두 betyder två."@sv ,
+                              "Das wäre 아메리카노 한 잔 주세요; 두 heißt zwei."@de ,
+                              "Eso sería 아메리카노 한 잔 주세요; 두 significa dos."@es ,
+                              "Ce serait 아메리카노 한 잔 주세요 ; 두 veut dire deux."@fr .
+
+<#q-cafe-2b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Three americanos, please"@en ,
+                              "Tre americano, tack"@sv ,
+                              "Drei Americano, bitte"@de ,
+                              "Tres americanos, por favor"@es ,
+                              "Trois americanos, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 아메리카노 세 잔 주세요; 세 is three, 두 is two."@en ,
+                              "Det vore 아메리카노 세 잔 주세요; 세 är tre, 두 är två."@sv ,
+                              "Das wäre 아메리카노 세 잔 주세요; 세 ist drei, 두 ist zwei."@de ,
+                              "Eso sería 아메리카노 세 잔 주세요; 세 es tres, 두 es dos."@es ,
+                              "Ce serait 아메리카노 세 잔 주세요 ; 세 veut dire trois, 두 veut dire deux."@fr .
+
+<#q-cafe-2b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Two americanos to go, please"@en ,
+                              "Två americano att ta med, tack"@sv ,
+                              "Zwei Americano zum Mitnehmen, bitte"@de ,
+                              "Dos americanos para llevar, por favor"@es ,
+                              "Deux americanos à emporter, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 아메리카노 두 잔 포장해 주세요; the phrase says nothing about taking them away."@en ,
+                              "Det vore 아메리카노 두 잔 포장해 주세요; frasen säger inget om att ta med."@sv ,
+                              "Das wäre 아메리카노 두 잔 포장해 주세요; der Satz sagt nichts vom Mitnehmen."@de ,
+                              "Eso sería 아메리카노 두 잔 포장해 주세요; la frase no dice nada de llevar."@es ,
+                              "Ce serait 아메리카노 두 잔 포장해 주세요 ; la phrase ne dit rien d'emporter."@fr .
+
+<#q-cafe-2c>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "드시고 가세요?"@ko ;
+    solid-memo:back "Is that for here?"@en ,
+                    "Ska du sitta här?"@sv ,
+                    "Ist das für hier?"@de ,
+                    "¿Es para tomar aquí?"@es ,
+                    "C'est sur place ?"@fr ;
+    solid-memo:backNote "Said by café or fast-food staff to a customer who has just ordered; you answer 네, 마시고 갈게요 or 아니요, 가져갈게요. 드시다 is the honorific word for eating and drinking, and -시- honors the customer; literally \"will you have it and then go?\""@en ,
+                        "Sägs av personalen på ett kafé eller en snabbmatsrestaurang till en kund som just har beställt; man svarar 네, 마시고 갈게요 eller 아니요, 가져갈게요. 드시다 är det hedrande ordet för att äta och dricka, och -시- hedrar kunden; ordagrant ”tar du det här och går sedan?”"@sv ,
+                        "Sagt das Personal in Café oder Imbiss zu einem Gast, der gerade bestellt hat; man antwortet 네, 마시고 갈게요 oder 아니요, 가져갈게요. 드시다 ist das ehrende Wort für essen und trinken, und -시- ehrt den Gast; wörtlich „nehmen Sie es hier zu sich und gehen dann?“"@de ,
+                        "Lo dice el personal de una cafetería o un local de comida rápida a un cliente que acaba de pedir; se responde 네, 마시고 갈게요 o 아니요, 가져갈게요. 드시다 es la forma honorífica de comer y beber, y -시- honra al cliente; literalmente «¿lo toma y luego se va?»"@es ,
+                        "Dit par le personnel d'un café ou d'un fast-food à un client qui vient de commander ; on répond 네, 마시고 갈게요 ou 아니요, 가져갈게요. 드시다 est le mot honorifique pour manger et boire, et -시- honore le client ; littéralement « vous le prenez et vous partez ensuite ? »"@fr ;
+    solid-memo:distractor <#q-cafe-2c-d1> ,
+                          <#q-cafe-2c-d2> ,
+                          <#q-cafe-2c-d3> .
+
+<#q-cafe-2c-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Are you leaving already?"@en ,
+                              "Går du redan?"@sv ,
+                              "Gehen Sie schon?"@de ,
+                              "¿Ya se va?"@es ,
+                              "Vous partez déjà ?"@fr ;
+    solid-memo:distractorNote "That would be 벌써 가세요?; 드시고 가세요? asks whether you will have it here first."@en ,
+                              "Det vore 벌써 가세요?; 드시고 가세요? frågar om du tänker ta det här först."@sv ,
+                              "Das wäre 벌써 가세요?; 드시고 가세요? fragt, ob Sie es zuerst hier zu sich nehmen."@de ,
+                              "Eso sería 벌써 가세요?; 드시고 가세요? pregunta si lo va a tomar aquí primero."@es ,
+                              "Ce serait 벌써 가세요? ; 드시고 가세요? demande si vous le prenez d'abord sur place."@fr .
+
+<#q-cafe-2c-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Is that to take away?"@en ,
+                              "Ska du ta med det?"@sv ,
+                              "Ist das zum Mitnehmen?"@de ,
+                              "¿Es para llevar?"@es ,
+                              "C'est à emporter ?"@fr ;
+    solid-memo:distractorNote "That would be 가져가실 거예요? or 포장해 드릴까요?; 드시고 means having it here."@en ,
+                              "Det vore 가져가실 거예요? eller 포장해 드릴까요?; 드시고 betyder att man tar det här."@sv ,
+                              "Das wäre 가져가실 거예요? oder 포장해 드릴까요?; 드시고 heißt, es hier zu sich zu nehmen."@de ,
+                              "Eso sería 가져가실 거예요? o 포장해 드릴까요?; 드시고 significa tomarlo aquí."@es ,
+                              "Ce serait 가져가실 거예요? ou 포장해 드릴까요? ; 드시고 veut dire le consommer sur place."@fr .
+
+<#q-cafe-2c-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Did you enjoy it?"@en ,
+                              "Smakade det bra?"@sv ,
+                              "Hat es Ihnen geschmeckt?"@de ,
+                              "¿Le ha gustado?"@es ,
+                              "Ça vous a plu ?"@fr ;
+    solid-memo:distractorNote "That would be 맛있게 드셨어요?; 드시고 가세요? is asked before you eat or drink, not after."@en ,
+                              "Det vore 맛있게 드셨어요?; 드시고 가세요? frågas innan man äter eller dricker, inte efteråt."@sv ,
+                              "Das wäre 맛있게 드셨어요?; 드시고 가세요? fragt man vor dem Essen oder Trinken, nicht danach."@de ,
+                              "Eso sería 맛있게 드셨어요?; 드시고 가세요? se pregunta antes de comer o beber, no después."@es ,
+                              "Ce serait 맛있게 드셨어요? ; 드시고 가세요? se demande avant de manger ou de boire, pas après."@fr .
+
+<#ch-cafe-3>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-cafe> ;
+    schema:position 2 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Same age?
+
+*Another way it goes: drinks in hand, Alex and Minji sit down, and the talk soon turns to age.*
+
+**민지:** 알렉스 씨, 실례지만 몇 년생이에요?\\
+*Alex, if you don't mind me asking, what year were you born?*
+
+**알렉스:** 98년생이에요. 민지 씨는요?\\
+*1998. And you?*
+
+**민지:** 어, 저도 98년생이에요. 우리 동갑이네요.\\
+*Oh, me too. We're the same age.*
+
+**알렉스:** 정말요? 신기하네요.\\
+*Really? What a coincidence.*
+
+---
+
+**Why age comes up so early.** In Korean, age decides how people speak to each other: who uses which speech level, and who calls whom 언니, 오빠, 누나 or 형. So the question is not nosy; it tells both sides how to talk.
+
+**몇 년생이에요?**: "What year were you born?" It is more exact than 몇 살이에요?, which you know from Everyday Korean phrases. To someone who may be older, say 몇 년생이세요?, with -시-. Since 2023, laws and official papers use international age, but many people still count the traditional way, so a birth year avoids confusion. You answer with two digits: 98년생 is read 구팔년생. 실례지만 (excuse me, but) makes a personal question gentler.
+
+**우리 동갑이네요**: "We're the same age." 동갑 means born in the same year, and -네요 marks something you have just found out.
+
+**Same age, same style?** Not yet. Being 동갑 makes friendship easier, and friends of the same age often switch to 반말, the casual style. But one of them has to suggest it first, so Alex and Minji stay with 해요체 for now."""@en ;
+    solid-memo:checkedBy <#q-cafe-3a> ,
+                         <#q-cafe-3b> .
+
+<#q-cafe-3a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "몇 년생이에요?"@ko ;
+    solid-memo:back "What year were you born?"@en ,
+                    "Vilket år är du född?"@sv ,
+                    "In welchem Jahr bist du geboren?"@de ,
+                    "¿En qué año naciste?"@es ,
+                    "Tu es de quelle année ?"@fr ;
+    solid-memo:backNote "Asked between new acquaintances of about the same generation, in polite 해요체, to find out who is older. It is more exact than 몇 살이에요?, since people count age in different ways. You answer with the last two digits: 98년생이에요, read 구팔년생이에요. To someone who may be older, say 몇 년생이세요?, with -시-."@en ,
+                        "Frågas mellan nya bekanta i ungefär samma generation, i artig 해요체, för att ta reda på vem som är äldst. Det är exaktare än 몇 살이에요?, eftersom man räknar ålder på olika sätt. Man svarar med de två sista siffrorna: 98년생이에요, som läses 구팔년생이에요. Till någon som kan vara äldre säger man 몇 년생이세요?, med -시-."@sv ,
+                        "Fragen sich neue Bekannte etwa derselben Generation, im höflichen 해요체, um herauszufinden, wer älter ist. Es ist genauer als 몇 살이에요?, weil das Alter unterschiedlich gezählt wird. Man antwortet mit den letzten zwei Ziffern: 98년생이에요, gelesen 구팔년생이에요. Zu jemandem, der älter sein könnte, sagt man 몇 년생이세요?, mit -시-."@de ,
+                        "Lo preguntan nuevos conocidos de una generación parecida, en el estilo cortés 해요체, para saber quién es mayor. Es más exacto que 몇 살이에요?, porque la edad se cuenta de distintas maneras. Se responde con las dos últimas cifras: 98년생이에요, que se lee 구팔년생이에요. A alguien que puede ser mayor se le dice 몇 년생이세요?, con -시-."@es ,
+                        "Se demande entre nouvelles connaissances d'à peu près la même génération, au style poli 해요체, pour savoir qui est l'aîné. C'est plus précis que 몇 살이에요?, car l'âge se compte de plusieurs façons. On répond avec les deux derniers chiffres : 98년생이에요, qui se lit 구팔년생이에요. À quelqu'un qui pourrait être plus âgé, on dit 몇 년생이세요?, avec -시-."@fr ;
+    solid-memo:distractor <#q-cafe-3a-d1> ,
+                          <#q-cafe-3a-d2> ,
+                          <#q-cafe-3a-d3> .
+
+<#q-cafe-3a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "When is your birthday?"@en ,
+                              "När fyller du år?"@sv ,
+                              "Wann hast du Geburtstag?"@de ,
+                              "¿Cuándo es tu cumpleaños?"@es ,
+                              "C'est quand, ton anniversaire ?"@fr ;
+    solid-memo:distractorNote "That would be 생일이 언제예요?; 년생 asks only for the year."@en ,
+                              "Det vore 생일이 언제예요?; 년생 frågar bara efter året."@sv ,
+                              "Das wäre 생일이 언제예요?; 년생 fragt nur nach dem Jahr."@de ,
+                              "Eso sería 생일이 언제예요?; 년생 pregunta solo por el año."@es ,
+                              "Ce serait 생일이 언제예요? ; 년생 ne demande que l'année."@fr .
+
+<#q-cafe-3a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "How long have you lived here?"@en ,
+                              "Hur länge har du bott här?"@sv ,
+                              "Wie lange wohnst du schon hier?"@de ,
+                              "¿Cuánto tiempo llevas viviendo aquí?"@es ,
+                              "Tu habites ici depuis combien de temps ?"@fr ;
+    solid-memo:distractorNote "That would be 여기 산 지 얼마나 됐어요?; 년생 is about the year you were born."@en ,
+                              "Det vore 여기 산 지 얼마나 됐어요?; 년생 handlar om året man föddes."@sv ,
+                              "Das wäre 여기 산 지 얼마나 됐어요?; 년생 betrifft das Geburtsjahr."@de ,
+                              "Eso sería 여기 산 지 얼마나 됐어요?; 년생 se refiere al año de nacimiento."@es ,
+                              "Ce serait 여기 산 지 얼마나 됐어요? ; 년생 porte sur l'année de naissance."@fr .
+
+<#q-cafe-3a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "What year are you in at school?"@en ,
+                              "Vilken årskurs går du i?"@sv ,
+                              "In welcher Klasse bist du?"@de ,
+                              "¿En qué curso estás?"@es ,
+                              "Tu es en quelle année d'études ?"@fr ;
+    solid-memo:distractorNote "That would be 몇 학년이에요?; 학년 is a school year, 년생 a year of birth."@en ,
+                              "Det vore 몇 학년이에요?; 학년 är en årskurs, 년생 ett födelseår."@sv ,
+                              "Das wäre 몇 학년이에요?; 학년 ist eine Klassenstufe, 년생 ein Geburtsjahr."@de ,
+                              "Eso sería 몇 학년이에요?; 학년 es un curso escolar, 년생 un año de nacimiento."@es ,
+                              "Ce serait 몇 학년이에요? ; 학년 est une année d'études, 년생 une année de naissance."@fr .
+
+<#q-cafe-3b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "우리 동갑이네요"@ko ;
+    solid-memo:back "We're the same age"@en ,
+                    "Vi är lika gamla"@sv ,
+                    "Dann sind wir ja gleich alt"@de ,
+                    "Tenemos la misma edad"@es ,
+                    "Alors on a le même âge"@fr ;
+    solid-memo:backNote "Said in polite 해요체 when you find out that someone was born in the same year as you. 동갑 means born in the same year, and -네요 marks something you have just noticed. Same-age friends often switch to 반말 later, once one of them suggests it."@en ,
+                        "Sägs i artig 해요체 när man upptäcker att någon är född samma år som man själv. 동갑 betyder född samma år, och -네요 markerar något man just har märkt. Jämnåriga vänner går ofta över till 반말 senare, när en av dem föreslår det."@sv ,
+                        "Sagt man im höflichen 해요체, wenn man merkt, dass jemand im selben Jahr geboren ist. 동갑 heißt im selben Jahr geboren, und -네요 zeigt, dass man etwas gerade bemerkt hat. Gleichaltrige Freunde wechseln später oft zu 반말, sobald einer es vorschlägt."@de ,
+                        "Se dice en el estilo cortés 해요체 al descubrir que alguien nació el mismo año que tú. 동갑 significa nacido el mismo año, y -네요 marca algo que acabas de notar. Los amigos de la misma edad suelen pasar después al 반말, cuando uno de los dos lo propone."@es ,
+                        "Se dit au style poli 해요체 quand on découvre que quelqu'un est de la même année que soi. 동갑 veut dire de la même année, et -네요 marque une chose qu'on vient de remarquer. Les amis du même âge passent souvent ensuite au 반말, dès que l'un des deux le propose."@fr ;
+    solid-memo:distractor <#q-cafe-3b-d1> ,
+                          <#q-cafe-3b-d2> ,
+                          <#q-cafe-3b-d3> .
+
+<#q-cafe-3b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "We have the same birthday"@en ,
+                              "Vi fyller år samma dag"@sv ,
+                              "Wir haben am selben Tag Geburtstag"@de ,
+                              "Cumplimos años el mismo día"@es ,
+                              "On a le même anniversaire"@fr ;
+    solid-memo:distractorNote "That would be 우리 생일이 같네요; 동갑 means born in the same year, not on the same day."@en ,
+                              "Det vore 우리 생일이 같네요; 동갑 betyder född samma år, inte samma dag."@sv ,
+                              "Das wäre 우리 생일이 같네요; 동갑 heißt im selben Jahr geboren, nicht am selben Tag."@de ,
+                              "Eso sería 우리 생일이 같네요; 동갑 significa nacido el mismo año, no el mismo día."@es ,
+                              "Ce serait 우리 생일이 같네요 ; 동갑 veut dire de la même année, pas du même jour."@fr .
+
+<#q-cafe-3b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "You look younger than me"@en ,
+                              "Du ser yngre ut än jag"@sv ,
+                              "Du siehst jünger aus als ich"@de ,
+                              "Pareces más joven que yo"@es ,
+                              "Tu as l'air plus jeune que moi"@fr ;
+    solid-memo:distractorNote "That would be 저보다 어려 보이네요; 동갑 says you are the same age."@en ,
+                              "Det vore 저보다 어려 보이네요; 동갑 säger att ni är lika gamla."@sv ,
+                              "Das wäre 저보다 어려 보이네요; 동갑 sagt, dass ihr gleich alt seid."@de ,
+                              "Eso sería 저보다 어려 보이네요; 동갑 dice que tenéis la misma edad."@es ,
+                              "Ce serait 저보다 어려 보이네요 ; 동갑 dit que vous avez le même âge."@fr .
+
+<#q-cafe-3b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "We're from the same town"@en ,
+                              "Vi kommer från samma stad"@sv ,
+                              "Wir kommen aus derselben Stadt"@de ,
+                              "Somos de la misma ciudad"@es ,
+                              "On vient de la même ville"@fr ;
+    solid-memo:distractorNote "That would be 우리 고향이 같네요; 동갑 is about age, not place."@en ,
+                              "Det vore 우리 고향이 같네요; 동갑 handlar om ålder, inte plats."@sv ,
+                              "Das wäre 우리 고향이 같네요; 동갑 betrifft das Alter, nicht den Ort."@de ,
+                              "Eso sería 우리 고향이 같네요; 동갑 se refiere a la edad, no al lugar."@es ,
+                              "Ce serait 우리 고향이 같네요 ; 동갑 porte sur l'âge, pas sur le lieu."@fr .
+
+<#q-cafe-r01>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "따뜻한 걸로 드릴까요?"@ko ;
+    solid-memo:back "Would you like it hot?"@en ,
+                    "Vill du ha den varm?"@sv ,
+                    "Möchten Sie es heiß?"@de ,
+                    "¿Lo quiere caliente?"@es ,
+                    "Vous le voulez chaud ?"@fr ;
+    solid-memo:backNote "Said by café staff to a customer, in polite 해요체: 드리다 is the humble word for give, so the staff lower themselves. 걸로 is short for 것으로: 따뜻한 것 is \"the hot one\", and (으)로 marks the choice. You answer 네, 따뜻한 걸로 주세요 or 아니요, 아이스로 주세요."@en ,
+                        "Sägs av personalen på ett kafé till en kund, i artig 해요체: 드리다 är det ödmjuka ordet för ge, så personalen sänker sig själv. 걸로 är kort för 것으로: 따뜻한 것 är ”den varma”, och (으)로 markerar valet. Man svarar 네, 따뜻한 걸로 주세요 eller 아니요, 아이스로 주세요."@sv ,
+                        "Sagt das Café-Personal zu einem Gast, im höflichen 해요체: 드리다 ist das bescheidene Wort für geben, das Personal stellt sich also zurück. 걸로 ist kurz für 것으로: 따뜻한 것 ist „die heiße Variante“, und (으)로 markiert die Wahl. Man antwortet 네, 따뜻한 걸로 주세요 oder 아니요, 아이스로 주세요."@de ,
+                        "Lo dice el personal de una cafetería a un cliente, en el estilo cortés 해요체: 드리다 es la palabra humilde para dar, así que el personal se rebaja a sí mismo. 걸로 es la forma corta de 것으로: 따뜻한 것 es «el caliente», y (으)로 marca la elección. Se responde 네, 따뜻한 걸로 주세요 o 아니요, 아이스로 주세요."@es ,
+                        "Dit par le personnel d'un café à un client, au style poli 해요체 : 드리다 est le mot humble pour donner, le personnel s'abaisse donc lui-même. 걸로 est la forme courte de 것으로 : 따뜻한 것 veut dire « le chaud », et (으)로 marque le choix. On répond 네, 따뜻한 걸로 주세요 ou 아니요, 아이스로 주세요."@fr ;
+    solid-memo:distractor <#q-cafe-r01-d1> ,
+                          <#q-cafe-r01-d2> ,
+                          <#q-cafe-r01-d3> .
+
+<#q-cafe-r01-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Would you like it iced?"@en ,
+                              "Vill du ha den med is?"@sv ,
+                              "Möchten Sie es mit Eis?"@de ,
+                              "¿Lo quiere con hielo?"@es ,
+                              "Vous le voulez glacé ?"@fr ;
+    solid-memo:distractorNote "That would be 아이스로 드릴까요?; 따뜻한 means hot or warm."@en ,
+                              "Det vore 아이스로 드릴까요?; 따뜻한 betyder varm."@sv ,
+                              "Das wäre 아이스로 드릴까요?; 따뜻한 heißt warm oder heiß."@de ,
+                              "Eso sería 아이스로 드릴까요?; 따뜻한 significa caliente."@es ,
+                              "Ce serait 아이스로 드릴까요? ; 따뜻한 veut dire chaud."@fr .
+
+<#q-cafe-r01-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Shall I warm it up for you?"@en ,
+                              "Ska jag värma den åt dig?"@sv ,
+                              "Soll ich es Ihnen aufwärmen?"@de ,
+                              "¿Se lo caliento?"@es ,
+                              "Je vous le réchauffe ?"@fr ;
+    solid-memo:distractorNote "That would be 데워 드릴까요?; 따뜻한 걸로 asks which kind you want."@en ,
+                              "Det vore 데워 드릴까요?; 따뜻한 걸로 frågar vilken sort du vill ha."@sv ,
+                              "Das wäre 데워 드릴까요?; 따뜻한 걸로 fragt, welche Variante Sie möchten."@de ,
+                              "Eso sería 데워 드릴까요?; 따뜻한 걸로 pregunta qué versión quiere."@es ,
+                              "Ce serait 데워 드릴까요? ; 따뜻한 걸로 demande quelle version vous voulez."@fr .
+
+<#q-cafe-r01-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Would you like a large one?"@en ,
+                              "Vill du ha en stor?"@sv ,
+                              "Möchten Sie es groß?"@de ,
+                              "¿Lo quiere grande?"@es ,
+                              "Vous le voulez en grand ?"@fr ;
+    solid-memo:distractorNote "That would be 큰 사이즈로 드릴까요?; 따뜻한 is about temperature, not size."@en ,
+                              "Det vore 큰 사이즈로 드릴까요?; 따뜻한 handlar om temperatur, inte storlek."@sv ,
+                              "Das wäre 큰 사이즈로 드릴까요?; 따뜻한 betrifft die Temperatur, nicht die Größe."@de ,
+                              "Eso sería 큰 사이즈로 드릴까요?; 따뜻한 se refiere a la temperatura, no al tamaño."@es ,
+                              "Ce serait 큰 사이즈로 드릴까요? ; 따뜻한 porte sur la température, pas sur la taille."@fr .
+
+<#q-cafe-r02>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "진동벨이 울리면 가지러 오세요"@ko ;
+    solid-memo:back "Please come and get it when the buzzer goes off"@en ,
+                    "Kom och hämta den när summern surrar"@sv ,
+                    "Bitte holen Sie es ab, wenn der Pager vibriert"@de ,
+                    "Venga a recogerlo cuando suene el avisador"@es ,
+                    "Venez le chercher quand le bipeur sonne"@fr ;
+    solid-memo:backNote "Said by café staff to a customer who has just ordered and paid; you answer 네. 진동벨 is the vibrating pager the staff hand you, 가지러 오다 means to come and fetch something, and -(으)세요, which already contains -시-, makes it a polite instruction."@en ,
+                        "Sägs av personalen på ett kafé till en kund som just har beställt och betalat; man svarar 네. 진동벨 är den vibrerande summern man får av personalen, 가지러 오다 betyder att komma och hämta något, och -(으)세요, som redan innehåller -시-, gör det till en artig uppmaning."@sv ,
+                        "Sagt das Café-Personal zu einem Gast, der gerade bestellt und bezahlt hat; man antwortet 네. 진동벨 ist der vibrierende Pager, den man bekommt, 가지러 오다 heißt etwas abholen kommen, und -(으)세요, das schon -시- enthält, macht daraus eine höfliche Aufforderung."@de ,
+                        "Lo dice el personal de una cafetería a un cliente que acaba de pedir y pagar; se responde 네. 진동벨 es el avisador que vibra y que te da el personal, 가지러 오다 significa venir a recoger algo, y -(으)세요, que ya contiene -시-, lo convierte en una indicación cortés."@es ,
+                        "Dit par le personnel d'un café à un client qui vient de commander et de payer ; on répond 네. 진동벨 est le bipeur vibrant qu'on vous remet, 가지러 오다 veut dire venir chercher quelque chose, et -(으)세요, qui contient déjà -시-, en fait une consigne polie."@fr ;
+    solid-memo:distractor <#q-cafe-r02-d1> ,
+                          <#q-cafe-r02-d2> ,
+                          <#q-cafe-r02-d3> .
+
+<#q-cafe-r02-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Please take a seat and we'll bring it to you"@en ,
+                              "Sätt dig, så kommer vi med den"@sv ,
+                              "Bitte setzen Sie sich, wir bringen es Ihnen"@de ,
+                              "Siéntese y se lo llevamos"@es ,
+                              "Asseyez-vous, on vous l'apporte"@fr ;
+    solid-memo:distractorNote "That would be 앉아 계시면 가져다 드릴게요; 가지러 오세요 asks you to come and fetch it yourself."@en ,
+                              "Det vore 앉아 계시면 가져다 드릴게요; 가지러 오세요 ber dig komma och hämta den själv."@sv ,
+                              "Das wäre 앉아 계시면 가져다 드릴게요; 가지러 오세요 bittet Sie, es selbst abzuholen."@de ,
+                              "Eso sería 앉아 계시면 가져다 드릴게요; 가지러 오세요 le pide que venga a recogerlo."@es ,
+                              "Ce serait 앉아 계시면 가져다 드릴게요 ; 가지러 오세요 vous demande de venir le chercher vous-même."@fr .
+
+<#q-cafe-r02-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Please return the buzzer when you leave"@en ,
+                              "Lämna tillbaka summern när du går"@sv ,
+                              "Bitte geben Sie den Pager beim Gehen zurück"@de ,
+                              "Devuelva el avisador al salir"@es ,
+                              "Rendez le bipeur en partant"@fr ;
+    solid-memo:distractorNote "That would be 나가실 때 진동벨을 반납해 주세요; 울리면 means when it goes off."@en ,
+                              "Det vore 나가실 때 진동벨을 반납해 주세요; 울리면 betyder när den surrar."@sv ,
+                              "Das wäre 나가실 때 진동벨을 반납해 주세요; 울리면 heißt, wenn er vibriert."@de ,
+                              "Eso sería 나가실 때 진동벨을 반납해 주세요; 울리면 significa cuando suene."@es ,
+                              "Ce serait 나가실 때 진동벨을 반납해 주세요 ; 울리면 veut dire quand il sonne."@fr .
+
+<#q-cafe-r02-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Please come and pay when the buzzer goes off"@en ,
+                              "Kom och betala när summern surrar"@sv ,
+                              "Bitte kommen Sie zum Bezahlen, wenn der Pager vibriert"@de ,
+                              "Venga a pagar cuando suene el avisador"@es ,
+                              "Venez payer quand le bipeur sonne"@fr ;
+    solid-memo:distractorNote "That would be 진동벨이 울리면 계산하러 오세요; 가지러 means to fetch something."@en ,
+                              "Det vore 진동벨이 울리면 계산하러 오세요; 가지러 betyder för att hämta något."@sv ,
+                              "Das wäre 진동벨이 울리면 계산하러 오세요; 가지러 heißt, um etwas abzuholen."@de ,
+                              "Eso sería 진동벨이 울리면 계산하러 오세요; 가지러 significa a recoger algo."@es ,
+                              "Ce serait 진동벨이 울리면 계산하러 오세요 ; 가지러 veut dire pour venir chercher quelque chose."@fr .
+
+# Chapter 1: What shall we eat?
+<#ch-choose>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 1 ;
+    dcterms:title "What shall we eat?"@en ,
+                  "Vad ska vi äta?"@sv ,
+                  "Was essen wir?"@de ,
+                  "¿Qué comemos?"@es ,
+                  "On mange quoi ?"@fr ,
+                  "뭐 먹을까요?"@ko ;
+    dcterms:description "Alex and Minji decide where to have dinner: suggesting and inviting, asking about spicy food and good places nearby, and saying what you don't or can't eat. Ends with a review of the chapter."@en ,
+                        "Alex och Minji bestämmer var de ska äta middag: att föreslå och bjuda in, fråga om stark mat och bra ställen i närheten, och säga vad man inte äter eller inte kan äta. Avslutas med en repetition av kapitlet."@sv ,
+                        "Alex und Minji entscheiden, wo sie zu Abend essen: vorschlagen und einladen, nach scharfem Essen und guten Lokalen in der Nähe fragen und sagen, was man nicht isst oder nicht essen kann. Endet mit einer Wiederholung des Kapitels."@de ,
+                        "Alex y Minji deciden dónde cenar: proponer e invitar, preguntar por el picante y por buenos sitios cercanos, y decir lo que no comes o no puedes comer. Termina con un repaso del capítulo."@es ,
+                        "Alex et Minji choisissent où dîner : proposer et inviter, demander si l'autre supporte le piquant et connaît un bon restaurant près d'ici, et dire ce que l'on ne mange pas ou ne peut pas manger. Se termine par une révision du chapitre."@fr ;
+    solid-memo:reviewQuestion <#q-choose-r01> ,
+                              <#q-choose-r02> .
+
+<#ch-choose-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-choose> ;
+    schema:position 0 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Choosing dinner
+
+*Five o'clock, still at the café near Hongik University station. Alex and Minji have been talking for three hours.*
+
+**민지:** 벌써 다섯 시네요! 저녁 뭐 먹을까요?\\
+*Five o'clock already! What shall we have for dinner?*
+
+**알렉스:** 좋아요. 그런데 저는 이 동네를 잘 몰라요. 이 근처에 맛집 알아요?\\
+*Good idea. But I don't know this area well. Do you know a good place to eat around here?*
+
+**민지:** 그럼요, 많이 알아요. 그런데 매운 거 잘 먹어요?\\
+*Of course, lots. But can you handle spicy food?*
+
+**알렉스:** 조금요. 너무 매운 건 힘들어요.\\
+*A little. Really spicy food is hard for me.*
+
+**민지:** 그럼 떡볶이는 다음에 먹어요. 뭐 못 먹는 거 있어요?\\
+*Then let's save the spicy rice cakes for another day. Is there anything you can't eat?*
+
+**알렉스:** 아니요, 없어요.\\
+*No, nothing.*
+
+**민지:** 그럼 찌개 먹으러 갈까요? 근처에 김치찌개 맛집이 있어요.\\
+*Then shall we go and have stew? There's a great kimchi stew place nearby.*
+
+**알렉스:** 좋아요, 가요!\\
+*Great, let's go!*
+
+---
+
+**저녁 뭐 먹을까요?**: "What shall we have for dinner?" 저녁 is evening and also the evening meal; 뭐 is what. The ending -(으)ㄹ까요? asks the other person's opinion about something you would do together. The next step shows how it is built.
+
+**이 근처에 맛집 알아요?**: "Do you know a good place to eat around here?" 맛집, literally "taste house", is a place known for its food. 이 근처에 means around here, as in 이 근처에 편의점 있어요?, which you know from Everyday Korean phrases.
+
+**매운 거 잘 먹어요?**: "Can you handle spicy food?" Literally "do you eat spicy things well?": 잘 먹다 means to eat something happily and without trouble. Koreans ask it before choosing a place, together with 뭐 못 먹는 거 있어요? (is there anything you can't eat?). Alex and Minji still use 해요체."""@en ;
+    solid-memo:checkedBy <#q-choose-1a> ,
+                         <#q-choose-1b> ,
+                         <#q-choose-1c> .
+
+<#q-choose-1a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "저녁 뭐 먹을까요?"@ko ;
+    solid-memo:back "What shall we have for dinner?"@en ,
+                    "Vad ska vi äta till middag?"@sv ,
+                    "Was essen wir heute Abend?"@de ,
+                    "¿Qué cenamos?"@es ,
+                    "On mange quoi ce soir ?"@fr ;
+    solid-memo:backNote "Said to a friend or acquaintance when suggesting dinner together, in polite 해요체. 저녁 is evening and also dinner; -(으)ㄹ까요? asks the other person's opinion about something you would do together. The answer is usually a suggestion, such as 찌개 어때요?"@en ,
+                        "Sägs till en vän eller bekant när man föreslår att äta middag tillsammans, i artig 해요체. 저녁 är kväll och även middag; -(으)ㄹ까요? frågar vad den andra tycker om något ni skulle göra tillsammans. Svaret är oftast ett förslag, till exempel 찌개 어때요?"@sv ,
+                        "Sagt man zu Freunden oder Bekannten, wenn man vorschlägt, zusammen zu Abend zu essen, im höflichen 해요체. 저녁 heißt Abend und auch Abendessen; -(으)ㄹ까요? fragt nach der Meinung des anderen zu etwas, das man gemeinsam tun würde. Die Antwort ist meist ein Vorschlag, etwa 찌개 어때요?"@de ,
+                        "Se dice a un amigo o conocido al proponer cenar juntos, en el estilo cortés 해요체. 저녁 es la tarde-noche y también la cena; -(으)ㄹ까요? pide la opinión del otro sobre algo que haríais juntos. La respuesta suele ser una propuesta, como 찌개 어때요?"@es ,
+                        "Dit à un ami ou une connaissance pour proposer de dîner ensemble, au style poli 해요체. 저녁 veut dire le soir et aussi le dîner ; -(으)ㄹ까요? demande l'avis de l'autre sur une chose à faire ensemble. La réponse est souvent une proposition, comme 찌개 어때요?"@fr ;
+    solid-memo:distractor <#q-choose-1a-d1> ,
+                          <#q-choose-1a-d2> ,
+                          <#q-choose-1a-d3> .
+
+<#q-choose-1a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "What did you have for dinner?"@en ,
+                              "Vad åt du till middag?"@sv ,
+                              "Was hast du zu Abend gegessen?"@de ,
+                              "¿Qué cenaste?"@es ,
+                              "Tu as mangé quoi ce soir ?"@fr ;
+    solid-memo:distractorNote "That would be 저녁 뭐 먹었어요?: -었어요 is the past, while -(으)ㄹ까요? suggests something still to do."@en ,
+                              "Det vore 저녁 뭐 먹었어요?: -었어요 är dåtid, medan -(으)ㄹ까요? föreslår något som ännu inte är gjort."@sv ,
+                              "Das wäre 저녁 뭐 먹었어요?: -었어요 ist die Vergangenheit, -(으)ㄹ까요? schlägt dagegen etwas vor, das noch kommt."@de ,
+                              "Eso sería 저녁 뭐 먹었어요?: -었어요 es pasado, mientras que -(으)ㄹ까요? propone algo que aún está por hacer."@es ,
+                              "Ce serait 저녁 뭐 먹었어요? : -었어요 est le passé, alors que -(으)ㄹ까요? propose une chose encore à faire."@fr .
+
+<#q-choose-1a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Where shall we have dinner?"@en ,
+                              "Var ska vi äta middag?"@sv ,
+                              "Wo essen wir heute Abend?"@de ,
+                              "¿Dónde cenamos?"@es ,
+                              "On mange où ce soir ?"@fr ;
+    solid-memo:distractorNote "That would be 저녁 어디에서 먹을까요?: 뭐 asks what, 어디에서 asks where."@en ,
+                              "Det vore 저녁 어디에서 먹을까요?: 뭐 frågar vad, 어디에서 frågar var."@sv ,
+                              "Das wäre 저녁 어디에서 먹을까요?: 뭐 fragt nach dem Was, 어디에서 nach dem Wo."@de ,
+                              "Eso sería 저녁 어디에서 먹을까요?: 뭐 pregunta qué, 어디에서 pregunta dónde."@es ,
+                              "Ce serait 저녁 어디에서 먹을까요? : 뭐 demande quoi, 어디에서 demande où."@fr .
+
+<#q-choose-1a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "What shall we have for lunch?"@en ,
+                              "Vad ska vi äta till lunch?"@sv ,
+                              "Was essen wir zu Mittag?"@de ,
+                              "¿Qué almorzamos?"@es ,
+                              "On mange quoi ce midi ?"@fr ;
+    solid-memo:distractorNote "That would be 점심 뭐 먹을까요?: 점심 is lunch, 저녁 is dinner."@en ,
+                              "Det vore 점심 뭐 먹을까요?: 점심 är lunch, 저녁 är middag."@sv ,
+                              "Das wäre 점심 뭐 먹을까요?: 점심 ist das Mittagessen, 저녁 das Abendessen."@de ,
+                              "Eso sería 점심 뭐 먹을까요?: 점심 es el almuerzo, 저녁 la cena."@es ,
+                              "Ce serait 점심 뭐 먹을까요? : 점심 est le déjeuner, 저녁 le dîner."@fr .
+
+<#q-choose-1b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "이 근처에 맛집 알아요?"@ko ;
+    solid-memo:back "Do you know a good place to eat around here?"@en ,
+                    "Vet du något bra matställe här i närheten?"@sv ,
+                    "Kennst du hier in der Nähe ein gutes Lokal?"@de ,
+                    "¿Conoces algún buen sitio para comer por aquí?"@es ,
+                    "Tu connais un bon restaurant dans le coin ?"@fr ;
+    solid-memo:backNote "Asked when looking for somewhere to eat, in polite 해요체. 맛집, literally \"taste house\", is a place known for its good food; 이 근처에 means around here. The answer might be 네, 하나 알아요 or 글쎄요, 잘 모르겠어요."@en ,
+                        "Frågas när man letar efter ett ställe att äta på, i artig 해요체. 맛집, ordagrant ”smakhus”, är ett ställe känt för sin goda mat; 이 근처에 betyder här i närheten. Svaret kan vara 네, 하나 알아요 eller 글쎄요, 잘 모르겠어요."@sv ,
+                        "Fragt man, wenn man einen Ort zum Essen sucht, im höflichen 해요체. 맛집, wörtlich „Geschmackshaus“, ist ein Lokal, das für gutes Essen bekannt ist; 이 근처에 heißt hier in der Nähe. Die Antwort kann 네, 하나 알아요 oder 글쎄요, 잘 모르겠어요 sein."@de ,
+                        "Se pregunta al buscar un sitio para comer, en el estilo cortés 해요체. 맛집, literalmente «casa del sabor», es un local conocido por su buena comida; 이 근처에 significa por aquí cerca. La respuesta puede ser 네, 하나 알아요 o 글쎄요, 잘 모르겠어요."@es ,
+                        "Se demande quand on cherche où manger, au style poli 해요체. 맛집, littéralement « maison du goût », est une adresse connue pour sa bonne cuisine ; 이 근처에 veut dire près d'ici. La réponse peut être 네, 하나 알아요 ou 글쎄요, 잘 모르겠어요."@fr ;
+    solid-memo:distractor <#q-choose-1b-d1> ,
+                          <#q-choose-1b-d2> ,
+                          <#q-choose-1b-d3> .
+
+<#q-choose-1b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Is there a convenience store around here?"@en ,
+                              "Finns det en närbutik här i närheten?"@sv ,
+                              "Gibt es hier in der Nähe einen kleinen Supermarkt?"@de ,
+                              "¿Hay una tienda de conveniencia por aquí?"@es ,
+                              "Il y a une supérette dans le coin ?"@fr ;
+    solid-memo:distractorNote "That would be 이 근처에 편의점 있어요?, which you know from Everyday Korean phrases; 맛집 is a good place to eat."@en ,
+                              "Det vore 이 근처에 편의점 있어요?, som du känner från Koreanska vardagsfraser; 맛집 är ett bra matställe."@sv ,
+                              "Das wäre 이 근처에 편의점 있어요?, das du aus Koreanische Alltagswendungen kennst; 맛집 ist ein gutes Lokal."@de ,
+                              "Eso sería 이 근처에 편의점 있어요?, que conoces de Frases coreanas cotidianas; 맛집 es un buen sitio para comer."@es ,
+                              "Ce serait 이 근처에 편의점 있어요?, que tu connais grâce à Expressions coréennes du quotidien ; 맛집 est une bonne adresse pour manger."@fr .
+
+<#q-choose-1b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Do you live around here?"@en ,
+                              "Bor du här i närheten?"@sv ,
+                              "Wohnst du hier in der Nähe?"@de ,
+                              "¿Vives por aquí?"@es ,
+                              "Tu habites dans le coin ?"@fr ;
+    solid-memo:distractorNote "That would be 이 근처에 살아요?: 알다 is to know, 살다 is to live."@en ,
+                              "Det vore 이 근처에 살아요?: 알다 är att veta eller känna till, 살다 är att bo."@sv ,
+                              "Das wäre 이 근처에 살아요?: 알다 heißt kennen oder wissen, 살다 wohnen."@de ,
+                              "Eso sería 이 근처에 살아요?: 알다 es conocer o saber, 살다 es vivir."@es ,
+                              "Ce serait 이 근처에 살아요? : 알다 veut dire connaître ou savoir, 살다 habiter."@fr .
+
+<#q-choose-1b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Do you know the way to the restaurant?"@en ,
+                              "Hittar du till restaurangen?"@sv ,
+                              "Kennst du den Weg zum Restaurant?"@de ,
+                              "¿Sabes cómo llegar al restaurante?"@es ,
+                              "Tu sais comment aller au restaurant ?"@fr ;
+    solid-memo:distractorNote "That would be 식당에 가는 길 알아요?; 맛집 알아요? asks for a recommendation, not for directions."@en ,
+                              "Det vore 식당에 가는 길 알아요?; 맛집 알아요? ber om ett tips, inte om vägen."@sv ,
+                              "Das wäre 식당에 가는 길 알아요?; 맛집 알아요? fragt nach einer Empfehlung, nicht nach dem Weg."@de ,
+                              "Eso sería 식당에 가는 길 알아요?; 맛집 알아요? pide una recomendación, no el camino."@es ,
+                              "Ce serait 식당에 가는 길 알아요? ; 맛집 알아요? demande une recommandation, pas le chemin."@fr .
+
+<#q-choose-1c>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "매운 거 잘 먹어요?"@ko ;
+    solid-memo:back "Can you handle spicy food?"@en ,
+                    "Klarar du stark mat?"@sv ,
+                    "Verträgst du scharfes Essen?"@de ,
+                    "¿Llevas bien el picante?"@es ,
+                    "Tu supportes bien le piquant ?"@fr ;
+    solid-memo:backNote "Asked by a Korean friend or host before choosing where or what to eat, in polite 해요체. Literally \"do you eat spicy things well?\": 잘 먹다 means to eat something happily. Answer 네, 잘 먹어요 or 매운 건 잘 못 먹어요."@en ,
+                        "Frågas av en koreansk vän eller värd innan man väljer var eller vad man ska äta, i artig 해요체. Ordagrant ”äter du starka saker bra?”: 잘 먹다 betyder att äta något med god aptit. Svara 네, 잘 먹어요 eller 매운 건 잘 못 먹어요."@sv ,
+                        "Fragt ein koreanischer Freund oder Gastgeber, bevor man wählt, wo oder was man isst, im höflichen 해요체. Wörtlich „isst du scharfe Sachen gut?“: 잘 먹다 heißt, etwas gern und mit Appetit essen. Antwort: 네, 잘 먹어요 oder 매운 건 잘 못 먹어요."@de ,
+                        "Lo pregunta un amigo o anfitrión coreano antes de elegir dónde o qué comer, en el estilo cortés 해요체. Literalmente «¿comes bien cosas picantes?»: 잘 먹다 es comer algo con gusto. Se responde 네, 잘 먹어요 o 매운 건 잘 못 먹어요."@es ,
+                        "Demandé par un ami ou un hôte coréen avant de choisir où ou quoi manger, au style poli 해요체. Littéralement « tu manges bien les choses piquantes ? » : 잘 먹다 veut dire manger quelque chose avec plaisir. On répond 네, 잘 먹어요 ou 매운 건 잘 못 먹어요."@fr ;
+    solid-memo:distractor <#q-choose-1c-d1> ,
+                          <#q-choose-1c-d2> ,
+                          <#q-choose-1c-d3> .
+
+<#q-choose-1c-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Is this dish very spicy?"@en ,
+                              "Är den här rätten väldigt stark?"@sv ,
+                              "Ist dieses Gericht sehr scharf?"@de ,
+                              "¿Este plato pica mucho?"@es ,
+                              "Ce plat est très piquant ?"@fr ;
+    solid-memo:distractorNote "That would be 이 음식 많이 매워요? (매워요? you know from Everyday Korean phrases); 매운 거 잘 먹어요? asks about the person, not the dish."@en ,
+                              "Det vore 이 음식 많이 매워요? (매워요? känner du från Koreanska vardagsfraser); 매운 거 잘 먹어요? frågar om personen, inte om rätten."@sv ,
+                              "Das wäre 이 음식 많이 매워요? (매워요? kennst du aus Koreanische Alltagswendungen); 매운 거 잘 먹어요? fragt nach der Person, nicht nach dem Gericht."@de ,
+                              "Eso sería 이 음식 많이 매워요? (매워요? lo conoces de Frases coreanas cotidianas); 매운 거 잘 먹어요? pregunta por la persona, no por el plato."@es ,
+                              "Ce serait 이 음식 많이 매워요? (tu connais 매워요? grâce à Expressions coréennes du quotidien) ; 매운 거 잘 먹어요? porte sur la personne, pas sur le plat."@fr .
+
+<#q-choose-1c-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Do you eat a lot?"@en ,
+                              "Äter du mycket?"@sv ,
+                              "Isst du viel?"@de ,
+                              "¿Comes mucho?"@es ,
+                              "Tu manges beaucoup ?"@fr ;
+    solid-memo:distractorNote "That would be 많이 먹어요?; 잘 here means happily and without trouble, not a lot."@en ,
+                              "Det vore 많이 먹어요?; 잘 betyder här gärna och utan problem, inte mycket."@sv ,
+                              "Das wäre 많이 먹어요?; 잘 heißt hier gern und ohne Probleme, nicht viel."@de ,
+                              "Eso sería 많이 먹어요?; aquí 잘 significa con gusto y sin problema, no mucho."@es ,
+                              "Ce serait 많이 먹어요? ; ici 잘 veut dire volontiers et sans problème, pas beaucoup."@fr .
+
+<#q-choose-1c-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Do you like sweet things?"@en ,
+                              "Gillar du sött?"@sv ,
+                              "Magst du Süßes?"@de ,
+                              "¿Te gusta lo dulce?"@es ,
+                              "Tu aimes le sucré ?"@fr ;
+    solid-memo:distractorNote "That would be 단 거 좋아해요?: 맵다 is spicy, 달다 is sweet."@en ,
+                              "Det vore 단 거 좋아해요?: 맵다 är stark, 달다 är söt."@sv ,
+                              "Das wäre 단 거 좋아해요?: 맵다 heißt scharf, 달다 süß."@de ,
+                              "Eso sería 단 거 좋아해요?: 맵다 es picante, 달다 es dulce."@es ,
+                              "Ce serait 단 거 좋아해요? : 맵다 veut dire piquant, 달다 sucré."@fr .
+
+<#ch-choose-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-choose> ;
+    schema:position 1 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Shall we, or would you like to?
+
+**-(으)ㄹ까요?** puts an idea up for the other person to decide: "shall we?" or "shall I?". Add -ㄹ까요 to a stem that ends in a vowel or ㄹ, and -을까요 after any other consonant: 가다 becomes 갈까요?, 만들다 becomes 만들까요?, 먹다 becomes 먹을까요?
+
+**-(으)ㄹ래요?** asks what the other person wants: "do you want to?", "would you like to?". It is a warm invitation between peers. It is built the same way: 갈래요?, 만들래요?, 먹을래요? In an answer it says what you want: 저는 국수 먹을래요 (I'd like noodles).
+
+**-(으)러 가다** means going somewhere to do something. Add -러 after a vowel or ㄹ and -으러 after another consonant: 먹으러 가요 (go to eat), 커피 마시러 가요 (go for a coffee).
+
+**민지:** 비빔밥 먹으러 갈래요?\\
+*Do you want to go and have bibimbap?*
+
+**알렉스:** 좋아요. 지금 갈까요?\\
+*Sure. Shall we go now?*
+
+---
+
+**안 and 못.** Both make a verb negative and stand right before it. 안 says you don't, by choice or habit. 못 says you can't: something stops you.
+
+- **저는 고기를 안 먹어요**: "I don't eat meat." This is what a vegetarian says: a choice.
+- **매운 건 잘 못 먹어요**: "I'm not good with spicy food." Literally "I can't eat spicy things well". This is the honest answer to 매운 거 잘 먹어요?
+
+Say 고기를 못 먹어요 and you can't eat meat, perhaps for your health; say 매운 건 안 먹어요 and you choose not to.
+
+**매운 건** is short for 매운 것은: 은 sets spicy food apart from the rest, as in "spicy food, I'm not good with". In the question it is 매운 거, short for 매운 것.
+
+**잘 못** with a space means "not well". Written together, 잘못 means a mistake or wrongly: 잘못 먹었어요 is "I ate something that disagreed with me"."""@en ;
+    solid-memo:checkedBy <#q-choose-2a> ,
+                         <#q-choose-2b> ,
+                         <#q-choose-2c> .
+
+<#q-choose-2a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "비빔밥 먹으러 갈래요?"@ko ;
+    solid-memo:back "Do you want to go and have bibimbap?"@en ,
+                    "Vill du gå och äta bibimbap?"@sv ,
+                    "Hast du Lust, Bibimbap essen zu gehen?"@de ,
+                    "¿Quieres ir a comer bibimbap?"@es ,
+                    "Tu veux aller manger un bibimbap ?"@fr ;
+    solid-memo:backNote "An invitation to a friend or acquaintance, in polite 해요체. -(으)러 가다 means going somewhere to do something, and -(으)ㄹ래요? asks what the other person would like. Answer 좋아요, 같이 가요! or, to say no gently, 오늘은 좀 그래요."@en ,
+                        "En inbjudan till en vän eller bekant, i artig 해요체. -(으)러 가다 betyder att gå någonstans för att göra något, och -(으)ㄹ래요? frågar vad den andra vill. Svara 좋아요, 같이 가요! eller, för att säga nej vänligt, 오늘은 좀 그래요."@sv ,
+                        "Eine Einladung an Freunde oder Bekannte, im höflichen 해요체. -(으)러 가다 heißt, irgendwohin gehen, um etwas zu tun, und -(으)ㄹ래요? fragt, was der andere möchte. Antwort: 좋아요, 같이 가요! oder, als sanftes Nein, 오늘은 좀 그래요."@de ,
+                        "Una invitación a un amigo o conocido, en el estilo cortés 해요체. -(으)러 가다 es ir a algún sitio a hacer algo, y -(으)ㄹ래요? pregunta qué quiere el otro. Se responde 좋아요, 같이 가요! o, para decir que no con suavidad, 오늘은 좀 그래요."@es ,
+                        "Une invitation à un ami ou une connaissance, au style poli 해요체. -(으)러 가다 veut dire aller quelque part pour faire quelque chose, et -(으)ㄹ래요? demande ce que l'autre veut. On répond 좋아요, 같이 가요! ou, pour refuser gentiment, 오늘은 좀 그래요."@fr ;
+    solid-memo:distractor <#q-choose-2a-d1> ,
+                          <#q-choose-2a-d2> ,
+                          <#q-choose-2a-d3> .
+
+<#q-choose-2a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Have you ever had bibimbap?"@en ,
+                              "Har du ätit bibimbap förut?"@sv ,
+                              "Hast du schon mal Bibimbap gegessen?"@de ,
+                              "¿Has comido bibimbap alguna vez?"@es ,
+                              "Tu as déjà mangé un bibimbap ?"@fr ;
+    solid-memo:distractorNote "That would be 비빔밥 먹어 봤어요?; -(으)ㄹ래요? invites, it does not ask about the past."@en ,
+                              "Det vore 비빔밥 먹어 봤어요?; -(으)ㄹ래요? bjuder in, den frågar inte om det som har hänt."@sv ,
+                              "Das wäre 비빔밥 먹어 봤어요?; -(으)ㄹ래요? lädt ein und fragt nicht nach der Vergangenheit."@de ,
+                              "Eso sería 비빔밥 먹어 봤어요?; -(으)ㄹ래요? invita, no pregunta por el pasado."@es ,
+                              "Ce serait 비빔밥 먹어 봤어요? ; -(으)ㄹ래요? invite, il ne porte pas sur le passé."@fr .
+
+<#q-choose-2a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Do you want to make bibimbap?"@en ,
+                              "Vill du laga bibimbap?"@sv ,
+                              "Willst du Bibimbap kochen?"@de ,
+                              "¿Quieres preparar bibimbap?"@es ,
+                              "Tu veux préparer un bibimbap ?"@fr ;
+    solid-memo:distractorNote "That would be 비빔밥 만들래요?; 먹으러 가다 is going out to eat, not cooking."@en ,
+                              "Det vore 비빔밥 만들래요?; 먹으러 가다 är att gå ut och äta, inte att laga mat."@sv ,
+                              "Das wäre 비빔밥 만들래요?; 먹으러 가다 heißt essen gehen, nicht kochen."@de ,
+                              "Eso sería 비빔밥 만들래요?; 먹으러 가다 es salir a comer, no cocinar."@es ,
+                              "Ce serait 비빔밥 만들래요? ; 먹으러 가다 veut dire aller manger dehors, pas cuisiner."@fr .
+
+<#q-choose-2a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Do you want bibimbap to take away?"@en ,
+                              "Vill du ta med dig bibimbap?"@sv ,
+                              "Willst du Bibimbap zum Mitnehmen?"@de ,
+                              "¿Quieres bibimbap para llevar?"@es ,
+                              "Tu veux un bibimbap à emporter ?"@fr ;
+    solid-memo:distractorNote "That would be 비빔밥 포장할래요?; nothing in 먹으러 가다 says take away."@en ,
+                              "Det vore 비빔밥 포장할래요?; inget i 먹으러 가다 säger att ta med."@sv ,
+                              "Das wäre 비빔밥 포장할래요?; in 먹으러 가다 steckt nichts von Mitnehmen."@de ,
+                              "Eso sería 비빔밥 포장할래요?; nada en 먹으러 가다 habla de llevar."@es ,
+                              "Ce serait 비빔밥 포장할래요? ; rien dans 먹으러 가다 ne parle d'emporter."@fr .
+
+<#q-choose-2b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "매운 건 잘 못 먹어요"@ko ;
+    solid-memo:back "I'm not good with spicy food"@en ,
+                    "Jag tål inte stark mat så bra"@sv ,
+                    "Scharfes vertrage ich nicht so gut"@de ,
+                    "No llevo muy bien el picante"@es ,
+                    "Je ne supporte pas très bien le piquant"@fr ;
+    solid-memo:backNote "The usual answer to 매운 거 잘 먹어요? when spice is a problem, in polite 해요체. 못 says you can't rather than won't, and 잘 못 means not well; 매운 건 is short for 매운 것은. If you can handle it: 네, 잘 먹어요."@en ,
+                        "Det vanliga svaret på 매운 거 잘 먹어요? när stark mat är ett problem, i artig 해요체. 못 säger att man inte kan, inte att man inte vill, och 잘 못 betyder inte så bra; 매운 건 är kort för 매운 것은. Klarar man det: 네, 잘 먹어요."@sv ,
+                        "Die übliche Antwort auf 매운 거 잘 먹어요?, wenn Schärfe ein Problem ist, im höflichen 해요체. 못 sagt, dass man nicht kann, nicht dass man nicht will, und 잘 못 heißt nicht gut; 매운 건 ist kurz für 매운 것은. Wenn man es verträgt: 네, 잘 먹어요."@de ,
+                        "La respuesta habitual a 매운 거 잘 먹어요? cuando el picante es un problema, en el estilo cortés 해요체. 못 dice que no puedes, no que no quieres, y 잘 못 significa no muy bien; 매운 건 es la forma corta de 매운 것은. Si lo llevas bien: 네, 잘 먹어요."@es ,
+                        "La réponse habituelle à 매운 거 잘 먹어요? quand le piquant pose problème, au style poli 해요체. 못 dit qu'on ne peut pas, pas qu'on ne veut pas, et 잘 못 veut dire pas bien ; 매운 건 est la forme courte de 매운 것은. Si on le supporte : 네, 잘 먹어요."@fr ;
+    solid-memo:distractor <#q-choose-2b-d1> ,
+                          <#q-choose-2b-d2> ,
+                          <#q-choose-2b-d3> .
+
+<#q-choose-2b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I don't eat spicy food, on principle"@en ,
+                              "Jag äter inte stark mat, av princip"@sv ,
+                              "Scharfes esse ich aus Prinzip nicht"@de ,
+                              "No como picante, por principio"@es ,
+                              "Je ne mange pas de piquant, par principe"@fr ;
+    solid-memo:distractorNote "That would be 매운 건 안 먹어요: 안 is a choice, while 못 says you can't manage it."@en ,
+                              "Det vore 매운 건 안 먹어요: 안 är ett val, medan 못 säger att man inte klarar det."@sv ,
+                              "Das wäre 매운 건 안 먹어요: 안 ist eine Entscheidung, 못 sagt dagegen, dass man es nicht schafft."@de ,
+                              "Eso sería 매운 건 안 먹어요: 안 es una elección, mientras que 못 dice que no puedes con ello."@es ,
+                              "Ce serait 매운 건 안 먹어요 : 안 est un choix, alors que 못 dit qu'on n'y arrive pas."@fr .
+
+<#q-choose-2b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It isn't very spicy"@en ,
+                              "Det är inte särskilt starkt"@sv ,
+                              "Das ist nicht besonders scharf"@de ,
+                              "No pica mucho"@es ,
+                              "Ce n'est pas très piquant"@fr ;
+    solid-memo:distractorNote "That would be 별로 안 매워요; 매운 건 잘 못 먹어요 is about the speaker, not the dish."@en ,
+                              "Det vore 별로 안 매워요; 매운 건 잘 못 먹어요 handlar om den som talar, inte om rätten."@sv ,
+                              "Das wäre 별로 안 매워요; 매운 건 잘 못 먹어요 geht um die Person, nicht um das Gericht."@de ,
+                              "Eso sería 별로 안 매워요; 매운 건 잘 못 먹어요 habla de quien lo dice, no del plato."@es ,
+                              "Ce serait 별로 안 매워요 ; 매운 건 잘 못 먹어요 parle de la personne, pas du plat."@fr .
+
+<#q-choose-2b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I love spicy food"@en ,
+                              "Jag älskar stark mat"@sv ,
+                              "Ich liebe scharfes Essen"@de ,
+                              "Me encanta el picante"@es ,
+                              "J'adore le piquant"@fr ;
+    solid-memo:distractorNote "That would be 매운 거 정말 좋아해요; 잘 못 먹어요 says the opposite."@en ,
+                              "Det vore 매운 거 정말 좋아해요; 잘 못 먹어요 säger motsatsen."@sv ,
+                              "Das wäre 매운 거 정말 좋아해요; 잘 못 먹어요 sagt das Gegenteil."@de ,
+                              "Eso sería 매운 거 정말 좋아해요; 잘 못 먹어요 dice lo contrario."@es ,
+                              "Ce serait 매운 거 정말 좋아해요 ; 잘 못 먹어요 dit le contraire."@fr .
+
+<#q-choose-2c>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "저는 고기를 안 먹어요"@ko ;
+    solid-memo:back "I don't eat meat"@en ,
+                    "Jag äter inte kött"@sv ,
+                    "Ich esse kein Fleisch"@de ,
+                    "No como carne"@es ,
+                    "Je ne mange pas de viande"@fr ;
+    solid-memo:backNote "Said when choosing food or ordering, for example by a vegetarian, in polite 해요체. 안 says you don't, by choice; 고기를 못 먹어요 would say you can't. A friend may answer 그럼 다른 데 갈까요? (shall we go somewhere else, then?)."@en ,
+                        "Sägs när man väljer mat eller beställer, till exempel av en vegetarian, i artig 해요체. 안 säger att man inte gör det, av fri vilja; 고기를 못 먹어요 vore att man inte kan. En vän kan svara 그럼 다른 데 갈까요? (ska vi gå någon annanstans då?)."@sv ,
+                        "Sagt man beim Auswählen oder Bestellen, etwa wenn man vegetarisch lebt, im höflichen 해요체. 안 heißt, man tut es nicht, aus eigener Wahl; 고기를 못 먹어요 hieße, man kann es nicht. Freunde antworten vielleicht 그럼 다른 데 갈까요? (gehen wir dann woandershin?)."@de ,
+                        "Se dice al elegir comida o al pedir, por ejemplo una persona vegetariana, en el estilo cortés 해요체. 안 dice que no lo haces, por elección; 고기를 못 먹어요 diría que no puedes. Un amigo puede responder 그럼 다른 데 갈까요? (¿vamos a otro sitio, entonces?)."@es ,
+                        "Se dit en choisissant un plat ou en commandant, par exemple par une personne végétarienne, au style poli 해요체. 안 dit qu'on ne le fait pas, par choix ; 고기를 못 먹어요 dirait qu'on ne peut pas. Un ami peut répondre 그럼 다른 데 갈까요? (on va ailleurs, alors ?)."@fr ;
+    solid-memo:distractor <#q-choose-2c-d1> ,
+                          <#q-choose-2c-d2> ,
+                          <#q-choose-2c-d3> .
+
+<#q-choose-2c-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I can't eat meat"@en ,
+                              "Jag kan inte äta kött"@sv ,
+                              "Ich kann kein Fleisch essen"@de ,
+                              "No puedo comer carne"@es ,
+                              "Je ne peux pas manger de viande"@fr ;
+    solid-memo:distractorNote "That would be 저는 고기를 못 먹어요: 못 is can't, while 안 is don't, by choice."@en ,
+                              "Det vore 저는 고기를 못 먹어요: 못 är kan inte, medan 안 är gör inte, av fri vilja."@sv ,
+                              "Das wäre 저는 고기를 못 먹어요: 못 heißt nicht können, 안 dagegen nicht tun, aus eigener Wahl."@de ,
+                              "Eso sería 저는 고기를 못 먹어요: 못 es no poder, mientras que 안 es no hacerlo, por elección."@es ,
+                              "Ce serait 저는 고기를 못 먹어요 : 못 veut dire ne pas pouvoir, alors que 안 veut dire ne pas le faire, par choix."@fr .
+
+<#q-choose-2c-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I haven't eaten meat yet"@en ,
+                              "Jag har inte ätit kött än"@sv ,
+                              "Ich habe noch kein Fleisch gegessen"@de ,
+                              "Todavía no he comido carne"@es ,
+                              "Je n'ai pas encore mangé de viande"@fr ;
+    solid-memo:distractorNote "That would be 아직 고기를 안 먹었어요; 먹어요 is the present, here a habit."@en ,
+                              "Det vore 아직 고기를 안 먹었어요; 먹어요 är presens, här en vana."@sv ,
+                              "Das wäre 아직 고기를 안 먹었어요; 먹어요 ist Präsens, hier eine Gewohnheit."@de ,
+                              "Eso sería 아직 고기를 안 먹었어요; 먹어요 es presente, aquí una costumbre."@es ,
+                              "Ce serait 아직 고기를 안 먹었어요 ; 먹어요 est le présent, ici une habitude."@fr .
+
+<#q-choose-2c-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I don't eat fish"@en ,
+                              "Jag äter inte fisk"@sv ,
+                              "Ich esse keinen Fisch"@de ,
+                              "No como pescado"@es ,
+                              "Je ne mange pas de poisson"@fr ;
+    solid-memo:distractorNote "That would be 저는 생선을 안 먹어요: 고기 is meat, 생선 is fish."@en ,
+                              "Det vore 저는 생선을 안 먹어요: 고기 är kött, 생선 är fisk."@sv ,
+                              "Das wäre 저는 생선을 안 먹어요: 고기 ist Fleisch, 생선 Fisch."@de ,
+                              "Eso sería 저는 생선을 안 먹어요: 고기 es carne, 생선 es pescado."@es ,
+                              "Ce serait 저는 생선을 안 먹어요 : 고기 veut dire viande, 생선 poisson."@fr .
+
+<#ch-choose-3>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-choose> ;
+    schema:position 2 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Anything is fine
+
+*Another evening, another way it goes: this time Minji wants Alex to choose.*
+
+**민지:** 오늘은 알렉스 씨가 골라요. 뭐 먹을래요?\\
+*You choose today, Alex. What would you like?*
+
+**알렉스:** 저는 아무거나 잘 먹어요. 민지 씨가 정해요.\\
+*I'm happy to eat anything. You decide, Minji.*
+
+**민지:** 그럼 삼겹살 어때요?\\
+*How about grilled pork belly, then?*
+
+**알렉스:** 음, 고기는 좀 그래요. 어제 먹었어요.\\
+*Hmm, I'd rather not have meat. I had it yesterday.*
+
+**민지:** 하하, 알겠어요. 그럼 국수 어때요?\\
+*Ha, all right. How about noodles, then?*
+
+**알렉스:** 좋아요! 국수 먹으러 가요.\\
+*Great! Let's go and have noodles.*
+
+---
+
+**저는 아무거나 잘 먹어요**: "I'm happy to eat anything", literally "I eat anything well". It sounds easygoing, but it hands the decision back. Koreans joke about the friend who says 아무거나 and then turns ideas down, as Alex just did with 삼겹살. If you really don't mind, add a suggestion or say who should decide, like 민지 씨가 정해요 (you decide, Minji).
+
+**고기는 좀 그래요**: "I'd rather not have meat." 좀 그래요, roughly "it's a bit so-so", turns an idea down without a flat 싫어요 (I don't want to), which sounds blunt between people who are still polite with each other. A reason after it, like 어제 먹었어요 (I had it yesterday), makes it softer still.
+
+**Eating together:** a Korean meal is usually shared, with side dishes and often a stew in the middle of the table. So choosing is a joint decision, and 같이 (together) comes up all the time."""@en ;
+    solid-memo:checkedBy <#q-choose-3a> ,
+                         <#q-choose-3b> .
+
+<#q-choose-3a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "저는 아무거나 잘 먹어요"@ko ;
+    solid-memo:back "I'm happy to eat anything"@en ,
+                    "Jag äter vad som helst"@sv ,
+                    "Ich esse alles"@de ,
+                    "Yo como de todo"@es ,
+                    "Je mange de tout"@fr ;
+    solid-memo:backNote "Said when someone asks what you would like to eat, in polite 해요체. Literally \"I eat anything well\". It hands the choice back, so a suggestion or 정해 주세요 (please decide) often follows."@en ,
+                        "Sägs när någon frågar vad man vill äta, i artig 해요체. Ordagrant ”jag äter vad som helst bra”. Det lämnar tillbaka valet, så ofta följer ett förslag eller 정해 주세요 (bestäm du)."@sv ,
+                        "Sagt man, wenn jemand fragt, was man essen möchte, im höflichen 해요체. Wörtlich „ich esse alles gut“. Damit gibt man die Wahl zurück, deshalb folgt oft ein Vorschlag oder 정해 주세요 (entscheide du)."@de ,
+                        "Se dice cuando alguien pregunta qué quieres comer, en el estilo cortés 해요체. Literalmente «como bien cualquier cosa». Devuelve la decisión, así que a menudo sigue una propuesta o 정해 주세요 (decide tú)."@es ,
+                        "Se dit quand quelqu'un demande ce qu'on veut manger, au style poli 해요체. Littéralement « je mange bien n'importe quoi ». Cela renvoie le choix à l'autre, aussi suit souvent une proposition ou 정해 주세요 (décide, toi)."@fr ;
+    solid-memo:distractor <#q-choose-3a-d1> ,
+                          <#q-choose-3a-d2> ,
+                          <#q-choose-3a-d3> .
+
+<#q-choose-3a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I'm not very hungry"@en ,
+                              "Jag är inte så hungrig"@sv ,
+                              "Ich habe nicht so viel Hunger"@de ,
+                              "No tengo mucha hambre"@es ,
+                              "Je n'ai pas très faim"@fr ;
+    solid-memo:distractorNote "That would be 배가 별로 안 고파요; 아무거나 잘 먹어요 says any food is fine."@en ,
+                              "Det vore 배가 별로 안 고파요; 아무거나 잘 먹어요 säger att all mat går bra."@sv ,
+                              "Das wäre 배가 별로 안 고파요; 아무거나 잘 먹어요 sagt, dass jedes Essen recht ist."@de ,
+                              "Eso sería 배가 별로 안 고파요; 아무거나 잘 먹어요 dice que cualquier comida vale."@es ,
+                              "Ce serait 배가 별로 안 고파요 ; 아무거나 잘 먹어요 dit que tout plat convient."@fr .
+
+<#q-choose-3a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I'm quite a good cook"@en ,
+                              "Jag lagar god mat"@sv ,
+                              "Ich koche gut"@de ,
+                              "Cocino bien"@es ,
+                              "Je cuisine bien"@fr ;
+    solid-memo:distractorNote "That would be 저는 요리를 잘해요; 잘 먹다 is about eating happily, not cooking."@en ,
+                              "Det vore 저는 요리를 잘해요; 잘 먹다 handlar om att äta med god aptit, inte om att laga mat."@sv ,
+                              "Das wäre 저는 요리를 잘해요; 잘 먹다 heißt, gern essen, nicht kochen."@de ,
+                              "Eso sería 저는 요리를 잘해요; 잘 먹다 es comer con gusto, no cocinar."@es ,
+                              "Ce serait 저는 요리를 잘해요 ; 잘 먹다 veut dire manger avec plaisir, pas cuisiner."@fr .
+
+<#q-choose-3a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I'll have the same as you"@en ,
+                              "Jag tar samma"@sv ,
+                              "Ich nehme das Gleiche"@de ,
+                              "Yo tomo lo mismo"@es ,
+                              "Je prends la même chose"@fr ;
+    solid-memo:distractorNote "That would be 저도 같은 걸로 할게요; 아무거나 means anything at all."@en ,
+                              "Det vore 저도 같은 걸로 할게요; 아무거나 betyder vad som helst."@sv ,
+                              "Das wäre 저도 같은 걸로 할게요; 아무거나 heißt irgendetwas."@de ,
+                              "Eso sería 저도 같은 걸로 할게요; 아무거나 significa cualquier cosa."@es ,
+                              "Ce serait 저도 같은 걸로 할게요 ; 아무거나 veut dire n'importe quoi."@fr .
+
+<#q-choose-3b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "고기는 좀 그래요"@ko ;
+    solid-memo:back "I'd rather not have meat"@en ,
+                    "Helst inte kött"@sv ,
+                    "Fleisch lieber nicht"@de ,
+                    "Mejor sin carne"@es ,
+                    "Plutôt pas de viande"@fr ;
+    solid-memo:backNote "A gentle way to turn down someone's suggestion, in polite 해요체: 좀 그래요, roughly \"it's a bit so-so\", says no without a blunt 싫어요 (I don't want to). A reason often follows, such as 어제 먹었어요 (I had it yesterday)."@en ,
+                        "Ett vänligt sätt att tacka nej till någons förslag, i artig 해요체: 좀 그래요, ungefär ”det är lite si och så”, säger nej utan ett rakt 싫어요 (jag vill inte). Ofta följer ett skäl, till exempel 어제 먹었어요 (jag åt det i går)."@sv ,
+                        "Eine sanfte Art, einen Vorschlag abzulehnen, im höflichen 해요체: 좀 그래요, etwa „das ist so lala“, sagt Nein ohne ein schroffes 싫어요 (ich will nicht). Oft folgt ein Grund, etwa 어제 먹었어요 (das hatte ich gestern)."@de ,
+                        "Una forma suave de rechazar una propuesta, en el estilo cortés 해요체: 좀 그래요, más o menos «no me convence», dice que no sin un 싫어요 (no quiero) tajante. Suele seguir un motivo, como 어제 먹었어요 (lo comí ayer)."@es ,
+                        "Une façon douce de refuser une proposition, au style poli 해요체 : 좀 그래요, à peu près « bof », dit non sans un 싫어요 (je ne veux pas) trop sec. Une raison suit souvent, comme 어제 먹었어요 (j'en ai mangé hier)."@fr ;
+    solid-memo:distractor <#q-choose-3b-d1> ,
+                          <#q-choose-3b-d2> ,
+                          <#q-choose-3b-d3> .
+
+<#q-choose-3b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "I never eat meat"@en ,
+                              "Jag äter aldrig kött"@sv ,
+                              "Ich esse nie Fleisch"@de ,
+                              "Nunca como carne"@es ,
+                              "Je ne mange jamais de viande"@fr ;
+    solid-memo:distractorNote "That would be 저는 고기를 전혀 안 먹어요; 좀 그래요 is a soft \"rather not\", not a firm \"never\"."@en ,
+                              "Det vore 저는 고기를 전혀 안 먹어요; 좀 그래요 är ett mjukt ”helst inte”, inte ett bestämt ”aldrig”."@sv ,
+                              "Das wäre 저는 고기를 전혀 안 먹어요; 좀 그래요 ist ein sanftes „lieber nicht“, kein festes „nie“."@de ,
+                              "Eso sería 저는 고기를 전혀 안 먹어요; 좀 그래요 es un «mejor no» suave, no un «nunca» rotundo."@es ,
+                              "Ce serait 저는 고기를 전혀 안 먹어요 ; 좀 그래요 est un « plutôt pas » doux, pas un « jamais » ferme."@fr .
+
+<#q-choose-3b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The meat is a bit tough"@en ,
+                              "Köttet är lite segt"@sv ,
+                              "Das Fleisch ist etwas zäh"@de ,
+                              "La carne está un poco dura"@es ,
+                              "La viande est un peu dure"@fr ;
+    solid-memo:distractorNote "That would be 고기가 좀 질겨요; 좀 그래요 says nothing about how the meat is."@en ,
+                              "Det vore 고기가 좀 질겨요; 좀 그래요 säger inget om hur köttet är."@sv ,
+                              "Das wäre 고기가 좀 질겨요; 좀 그래요 sagt nichts darüber, wie das Fleisch ist."@de ,
+                              "Eso sería 고기가 좀 질겨요; 좀 그래요 no dice nada de cómo está la carne."@es ,
+                              "Ce serait 고기가 좀 질겨요 ; 좀 그래요 ne dit rien de la viande elle-même."@fr .
+
+<#q-choose-3b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Meat sounds good to me"@en ,
+                              "Kött låter bra"@sv ,
+                              "Fleisch klingt gut"@de ,
+                              "La carne me parece bien"@es ,
+                              "De la viande, ça me va"@fr ;
+    solid-memo:distractorNote "That would be 고기 좋아요; 좀 그래요 turns the idea down."@en ,
+                              "Det vore 고기 좋아요; 좀 그래요 tackar nej till förslaget."@sv ,
+                              "Das wäre 고기 좋아요; 좀 그래요 lehnt den Vorschlag ab."@de ,
+                              "Eso sería 고기 좋아요; 좀 그래요 rechaza la idea."@es ,
+                              "Ce serait 고기 좋아요 ; 좀 그래요 refuse l'idée."@fr .
+
+<#q-choose-r01>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "그럼 찌개 먹으러 갈까요?"@ko ;
+    solid-memo:back "Shall we go and have stew, then?"@en ,
+                    "Ska vi gå och äta gryta då?"@sv ,
+                    "Gehen wir dann Eintopf essen?"@de ,
+                    "¿Vamos a comer un guiso, entonces?"@es ,
+                    "On va manger un ragoût, alors ?"@fr ;
+    solid-memo:backNote "A suggestion to a friend or acquaintance, in polite 해요체: -(으)러 가다 is going somewhere to do something, and -(으)ㄹ까요? leaves the decision to the other person. 그럼 means then, in that case; 찌개 is a Korean stew. Agree with 좋아요, 가요!"@en ,
+                        "Ett förslag till en vän eller bekant, i artig 해요체: -(으)러 가다 är att gå någonstans för att göra något, och -(으)ㄹ까요? låter den andra bestämma. 그럼 betyder då, i så fall; 찌개 är en koreansk gryta. Håll med: 좋아요, 가요!"@sv ,
+                        "Ein Vorschlag an Freunde oder Bekannte, im höflichen 해요체: -(으)러 가다 heißt, irgendwohin gehen, um etwas zu tun, und -(으)ㄹ까요? überlässt dem anderen die Entscheidung. 그럼 heißt dann, in dem Fall; 찌개 ist ein koreanischer Eintopf. Zustimmen mit 좋아요, 가요!"@de ,
+                        "Una propuesta a un amigo o conocido, en el estilo cortés 해요체: -(으)러 가다 es ir a algún sitio a hacer algo, y -(으)ㄹ까요? deja la decisión al otro. 그럼 significa entonces, en ese caso; 찌개 es un guiso coreano. Se acepta con 좋아요, 가요!"@es ,
+                        "Une proposition à un ami ou une connaissance, au style poli 해요체 : -(으)러 가다 veut dire aller quelque part pour faire quelque chose, et -(으)ㄹ까요? laisse la décision à l'autre. 그럼 veut dire alors, dans ce cas ; 찌개 est un ragoût coréen. On accepte avec 좋아요, 가요!"@fr ;
+    solid-memo:distractor <#q-choose-r01-d1> ,
+                          <#q-choose-r01-d2> ,
+                          <#q-choose-r01-d3> .
+
+<#q-choose-r01-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Shall I make stew, then?"@en ,
+                              "Ska jag laga gryta då?"@sv ,
+                              "Soll ich dann einen Eintopf kochen?"@de ,
+                              "¿Hago un guiso, entonces?"@es ,
+                              "Je fais un ragoût, alors ?"@fr ;
+    solid-memo:distractorNote "That would be 그럼 찌개 끓일까요?; 먹으러 가다 is going out to eat, not cooking."@en ,
+                              "Det vore 그럼 찌개 끓일까요?; 먹으러 가다 är att gå ut och äta, inte att laga mat."@sv ,
+                              "Das wäre 그럼 찌개 끓일까요?; 먹으러 가다 heißt essen gehen, nicht kochen."@de ,
+                              "Eso sería 그럼 찌개 끓일까요?; 먹으러 가다 es salir a comer, no cocinar."@es ,
+                              "Ce serait 그럼 찌개 끓일까요? ; 먹으러 가다 veut dire aller manger dehors, pas cuisiner."@fr .
+
+<#q-choose-r01-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Shall we order stew in, then?"@en ,
+                              "Ska vi beställa hem gryta då?"@sv ,
+                              "Bestellen wir dann Eintopf nach Hause?"@de ,
+                              "¿Pedimos un guiso a domicilio, entonces?"@es ,
+                              "On se fait livrer un ragoût, alors ?"@fr ;
+    solid-memo:distractorNote "That would be 그럼 찌개 시켜 먹을까요?; 먹으러 가다 means going out to eat."@en ,
+                              "Det vore 그럼 찌개 시켜 먹을까요?; 먹으러 가다 betyder att gå ut och äta."@sv ,
+                              "Das wäre 그럼 찌개 시켜 먹을까요?; 먹으러 가다 heißt essen gehen."@de ,
+                              "Eso sería 그럼 찌개 시켜 먹을까요?; 먹으러 가다 significa salir a comer."@es ,
+                              "Ce serait 그럼 찌개 시켜 먹을까요? ; 먹으러 가다 veut dire aller manger dehors."@fr .
+
+<#q-choose-r01-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Shall we go and have noodles, then?"@en ,
+                              "Ska vi gå och äta nudlar då?"@sv ,
+                              "Gehen wir dann Nudeln essen?"@de ,
+                              "¿Vamos a comer fideos, entonces?"@es ,
+                              "On va manger des nouilles, alors ?"@fr ;
+    solid-memo:distractorNote "That would be 그럼 국수 먹으러 갈까요?: 국수 is noodles, 찌개 is stew."@en ,
+                              "Det vore 그럼 국수 먹으러 갈까요?: 국수 är nudlar, 찌개 är gryta."@sv ,
+                              "Das wäre 그럼 국수 먹으러 갈까요?: 국수 sind Nudeln, 찌개 ist Eintopf."@de ,
+                              "Eso sería 그럼 국수 먹으러 갈까요?: 국수 son fideos, 찌개 es guiso."@es ,
+                              "Ce serait 그럼 국수 먹으러 갈까요? : 국수 veut dire nouilles, 찌개 ragoût."@fr .
+
+<#q-choose-r02>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "뭐 못 먹는 거 있어요?"@ko ;
+    solid-memo:back "Is there anything you can't eat?"@en ,
+                    "Finns det något du inte kan äta?"@sv ,
+                    "Gibt es etwas, das du nicht essen kannst?"@de ,
+                    "¿Hay algo que no puedas comer?"@es ,
+                    "Il y a quelque chose que tu ne peux pas manger ?"@fr ;
+    solid-memo:backNote "Asked by a friend or host before choosing food, in polite 해요체: 못 means can't, because of allergies, health or taste. Answer 아니요, 없어요 or name it, for example 매운 건 잘 못 먹어요."@en ,
+                        "Frågas av en vän eller värd innan man väljer mat, i artig 해요체: 못 betyder kan inte, på grund av allergi, hälsa eller smak. Svara 아니요, 없어요 eller säg vad det är, till exempel 매운 건 잘 못 먹어요."@sv ,
+                        "Fragt ein Freund oder Gastgeber, bevor das Essen gewählt wird, im höflichen 해요체: 못 heißt nicht können, wegen Allergien, Gesundheit oder Geschmack. Antwort: 아니요, 없어요 oder man nennt es, etwa 매운 건 잘 못 먹어요."@de ,
+                        "Lo pregunta un amigo o anfitrión antes de elegir la comida, en el estilo cortés 해요체: 못 significa no poder, por alergias, salud o gusto. Se responde 아니요, 없어요 o se dice qué es, por ejemplo 매운 건 잘 못 먹어요."@es ,
+                        "Demandé par un ami ou un hôte avant de choisir le repas, au style poli 해요체 : 못 veut dire ne pas pouvoir, pour une allergie, la santé ou le goût. On répond 아니요, 없어요 ou on le nomme, par exemple 매운 건 잘 못 먹어요."@fr ;
+    solid-memo:distractor <#q-choose-r02-d1> ,
+                          <#q-choose-r02-d2> ,
+                          <#q-choose-r02-d3> .
+
+<#q-choose-r02-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Is there anything you'd like to eat?"@en ,
+                              "Finns det något du vill äta?"@sv ,
+                              "Gibt es etwas, das du essen möchtest?"@de ,
+                              "¿Hay algo que quieras comer?"@es ,
+                              "Il y a quelque chose que tu as envie de manger ?"@fr ;
+    solid-memo:distractorNote "That would be 뭐 먹고 싶은 거 있어요?; 못 makes it what you can't eat."@en ,
+                              "Det vore 뭐 먹고 싶은 거 있어요?; 못 gör det till det man inte kan äta."@sv ,
+                              "Das wäre 뭐 먹고 싶은 거 있어요?; 못 macht daraus, was man nicht essen kann."@de ,
+                              "Eso sería 뭐 먹고 싶은 거 있어요?; 못 lo convierte en lo que no puedes comer."@es ,
+                              "Ce serait 뭐 먹고 싶은 거 있어요? ; 못 en fait ce qu'on ne peut pas manger."@fr .
+
+<#q-choose-r02-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Is there anything you haven't tried yet?"@en ,
+                              "Finns det något du inte har smakat än?"@sv ,
+                              "Gibt es etwas, das du noch nicht probiert hast?"@de ,
+                              "¿Hay algo que todavía no hayas probado?"@es ,
+                              "Il y a quelque chose que tu n'as pas encore goûté ?"@fr ;
+    solid-memo:distractorNote "That would be 아직 안 먹어 본 거 있어요?; 못 먹는 is the present: what you can't eat."@en ,
+                              "Det vore 아직 안 먹어 본 거 있어요?; 못 먹는 är presens: det man inte kan äta."@sv ,
+                              "Das wäre 아직 안 먹어 본 거 있어요?; 못 먹는 ist Präsens: was man nicht essen kann."@de ,
+                              "Eso sería 아직 안 먹어 본 거 있어요?; 못 먹는 es presente: lo que no puedes comer."@es ,
+                              "Ce serait 아직 안 먹어 본 거 있어요? ; 못 먹는 est au présent : ce qu'on ne peut pas manger."@fr .
+
+<#q-choose-r02-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Is there anything to eat?"@en ,
+                              "Finns det något att äta?"@sv ,
+                              "Gibt es etwas zu essen?"@de ,
+                              "¿Hay algo de comer?"@es ,
+                              "Il y a quelque chose à manger ?"@fr ;
+    solid-memo:distractorNote "That would be 뭐 먹을 거 있어요?; 못 먹는 거 is something you can't eat."@en ,
+                              "Det vore 뭐 먹을 거 있어요?; 못 먹는 거 är något man inte kan äta."@sv ,
+                              "Das wäre 뭐 먹을 거 있어요?; 못 먹는 거 ist etwas, das man nicht essen kann."@de ,
+                              "Eso sería 뭐 먹을 거 있어요?; 못 먹는 거 es algo que no puedes comer."@es ,
+                              "Ce serait 뭐 먹을 거 있어요? ; 못 먹는 거 est quelque chose qu'on ne peut pas manger."@fr .
+
+# Chapter 2: A small 찌개 restaurant.
+<#ch-restaurant>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 2 ;
+    dcterms:title "A small 찌개 restaurant"@en ,
+                  "En liten 찌개-restaurang"@sv ,
+                  "Ein kleines 찌개-Restaurant"@de ,
+                  "Un pequeño restaurante de 찌개"@es ,
+                  "Un petit restaurant de 찌개"@fr ,
+                  "찌개집에서"@ko ;
+    dcterms:description "Alex and Minji have dinner at a small stew restaurant: getting a table, ordering by the portion, asking for more rice and side dishes, and finding out how to eat a pot that cooks at the table. Ends with a review of the chapter."@en ,
+                        "Alex och Minji äter middag på en liten grytrestaurang: de får ett bord, beställer per portion, ber om mer ris och fler sidorätter och tar reda på hur man äter en gryta som kokar på bordet. Avslutas med en repetition av kapitlet."@sv ,
+                        "Alex und Minji essen in einem kleinen Eintopfrestaurant zu Abend: einen Tisch bekommen, portionsweise bestellen, um mehr Reis und Beilagen bitten und herausfinden, wie man einen Topf isst, der am Tisch gart. Endet mit einer Wiederholung des Kapitels."@de ,
+                        "Alex y Minji cenan en un pequeño restaurante de estofados: conseguir mesa, pedir por raciones, pedir más arroz y acompañamientos y descubrir cómo se come una olla que se cocina en la mesa. Termina con un repaso del capítulo."@es ,
+                        "Alex et Minji dînent dans un petit restaurant de ragoûts : trouver une table, commander à la portion, demander plus de riz et d'accompagnements, et découvrir comment manger une marmite qui cuit à table. Se termine par une révision du chapitre."@fr ;
+    solid-memo:reviewQuestion <#q-restaurant-r01> ,
+                              <#q-restaurant-r02> .
+
+<#ch-restaurant-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-restaurant> ;
+    schema:position 0 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## A table for two
+
+*Twenty minutes later. The small 찌개 restaurant Minji knows is in a side street near Hongik University station, and it is already filling up.*
+
+**사장님:** 어서 오세요. 몇 분이세요?\\
+*Welcome. How many of you are there?*
+
+**민지:** 두 명이에요.\\
+*Two.*
+
+**사장님:** 편한 자리에 앉으세요.\\
+*Sit wherever you like.*
+
+**민지:** 여기는 김치찌개가 진짜 맛있어요.\\
+*The kimchi stew here is really good.*
+
+**알렉스:** 그럼 그걸로 해요. 사장님, 김치찌개 2인분 주세요.\\
+*Let's have that, then. Excuse me, kimchi stew for two, please.*
+
+**사장님:** 네. 물은 셀프예요.\\
+*Sure. Water is self-service.*
+
+**민지:** 제가 가져올게요.\\
+*I'll get it.*
+
+---
+
+**몇 분이세요?**: "How many of you are there?" 분 is the honorific counter for people, used by staff to honor the customer. You answer with the plain counter 명: 두 명이에요, which you know from Everyday Korean phrases.
+
+**편한 자리에 앉으세요**: "Sit wherever you like." Literally "sit in a comfortable seat": the table is your choice. 앉으세요 is 앉다 with -시-.
+
+**물은 셀프예요**: "Water is self-service." 셀프 comes from English and means you fetch it yourself, from a water dispenser or a fridge by the wall, with the cups next to it.
+
+**사장님** means owner or boss. In a small restaurant it is the usual way to call the person serving you. Nobody shows you to a table there: you sit down, and the order is taken at the table."""@en ;
+    solid-memo:checkedBy <#q-restaurant-1a> ,
+                         <#q-restaurant-1b> .
+
+<#q-restaurant-1a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "편한 자리에 앉으세요"@ko ;
+    solid-memo:back "Sit wherever you like"@en ,
+                    "Sätt er var ni vill"@sv ,
+                    "Setzen Sie sich, wo Sie möchten"@de ,
+                    "Siéntense donde quieran"@es ,
+                    "Installez-vous où vous voulez"@fr ;
+    solid-memo:backNote "Said by restaurant staff to customers who may pick any free table, in polite 해요체 with -시- honoring the customer. Literally \"sit in a comfortable seat\". You answer 네 and choose a table."@en ,
+                        "Sägs av restaurangpersonal till gäster som får välja vilket ledigt bord som helst, i artig 해요체 med -시- som hedrar gästen. Ordagrant ”sitt på en bekväm plats”. Du svarar 네 och väljer ett bord."@sv ,
+                        "Sagt das Restaurantpersonal zu Gästen, die sich einen freien Tisch aussuchen dürfen, im höflichen 해요체 mit -시-, das den Gast ehrt. Wörtlich „setzen Sie sich auf einen bequemen Platz“. Man antwortet 네 und sucht sich einen Tisch aus."@de ,
+                        "Lo dice el personal de un restaurante a clientes que pueden elegir cualquier mesa libre, en el estilo cortés 해요체 con -시-, que honra al cliente. Literalmente «siéntese en un sitio cómodo». Se responde 네 y se elige una mesa."@es ,
+                        "Dit par le personnel d'un restaurant à des clients qui peuvent choisir n'importe quelle table libre, au style poli 해요체 avec -시-, qui honore le client. Littéralement « asseyez-vous à une place confortable ». On répond 네 et on choisit une table."@fr ;
+    solid-memo:distractor <#q-restaurant-1a-d1> ,
+                          <#q-restaurant-1a-d2> ,
+                          <#q-restaurant-1a-d3> .
+
+<#q-restaurant-1a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Wait here a moment"@en ,
+                              "Vänta här en stund"@sv ,
+                              "Warten Sie hier einen Moment"@de ,
+                              "Esperen aquí un momento"@es ,
+                              "Attendez ici un instant"@fr ;
+    solid-memo:distractorNote "That would be 여기서 잠깐 기다려 주세요; 앉으세요 asks you to sit down."@en ,
+                              "Det vore 여기서 잠깐 기다려 주세요; 앉으세요 ber er sätta er."@sv ,
+                              "Das wäre 여기서 잠깐 기다려 주세요; 앉으세요 bittet Sie, sich zu setzen."@de ,
+                              "Eso sería 여기서 잠깐 기다려 주세요; 앉으세요 les pide que se sienten."@es ,
+                              "Ce serait 여기서 잠깐 기다려 주세요 ; 앉으세요 vous demande de vous asseoir."@fr .
+
+<#q-restaurant-1a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Sit by the window"@en ,
+                              "Sätt er vid fönstret"@sv ,
+                              "Setzen Sie sich ans Fenster"@de ,
+                              "Siéntense junto a la ventana"@es ,
+                              "Installez-vous près de la fenêtre"@fr ;
+    solid-memo:distractorNote "That would be 창가 자리에 앉으세요; 편한 means comfortable, so the seat is your choice."@en ,
+                              "Det vore 창가 자리에 앉으세요; 편한 betyder bekväm, så ni väljer platsen själva."@sv ,
+                              "Das wäre 창가 자리에 앉으세요; 편한 heißt bequem, den Platz wählen Sie also selbst."@de ,
+                              "Eso sería 창가 자리에 앉으세요; 편한 significa cómodo, así que el sitio lo eligen ustedes."@es ,
+                              "Ce serait 창가 자리에 앉으세요 ; 편한 veut dire confortable, c'est donc vous qui choisissez la place."@fr .
+
+<#q-restaurant-1a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Take off your shoes"@en ,
+                              "Ta av er skorna"@sv ,
+                              "Ziehen Sie die Schuhe aus"@de ,
+                              "Quítense los zapatos"@es ,
+                              "Enlevez vos chaussures"@fr ;
+    solid-memo:distractorNote "That would be 신발 벗고 올라오세요, heard where people sit on the floor; 자리 is a seat."@en ,
+                              "Det vore 신발 벗고 올라오세요, som man hör där man sitter på golvet; 자리 är en plats."@sv ,
+                              "Das wäre 신발 벗고 올라오세요, wie man es hört, wo man auf dem Boden sitzt; 자리 ist ein Platz."@de ,
+                              "Eso sería 신발 벗고 올라오세요, lo que se oye donde se come sentado en el suelo; 자리 es un asiento."@es ,
+                              "Ce serait 신발 벗고 올라오세요, qu'on entend là où l'on s'assoit par terre ; 자리 est une place."@fr .
+
+<#q-restaurant-1b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "물은 셀프예요"@ko ;
+    solid-memo:back "Water is self-service"@en ,
+                    "Vattnet tar du själv"@sv ,
+                    "Wasser ist Selbstbedienung"@de ,
+                    "El agua es de autoservicio"@es ,
+                    "L'eau, c'est en libre-service"@fr ;
+    solid-memo:backNote "Said by restaurant staff to customers, in polite 해요체: fetch your own water from the dispenser or the fridge. 셀프 comes from English \"self-service\". You answer 네."@en ,
+                        "Sägs av restaurangpersonal till gäster, i artig 해요체: hämta vattnet själv från automaten eller kylen. 셀프 kommer från engelskans ”self-service”. Du svarar 네."@sv ,
+                        "Sagt das Restaurantpersonal zu Gästen, im höflichen 해요체: Das Wasser holt man sich selbst am Spender oder aus dem Kühlschrank. 셀프 kommt vom englischen „self-service“. Man antwortet 네."@de ,
+                        "Lo dice el personal de un restaurante a los clientes, en el estilo cortés 해요체: el agua se la sirve uno mismo del dispensador o de la nevera. 셀프 viene del inglés «self-service». Se responde 네."@es ,
+                        "Dit par le personnel d'un restaurant aux clients, au style poli 해요체 : on va chercher soi-même l'eau à la fontaine ou au frigo. 셀프 vient de l'anglais « self-service ». On répond 네."@fr ;
+    solid-memo:distractor <#q-restaurant-1b-d1> ,
+                          <#q-restaurant-1b-d2> ,
+                          <#q-restaurant-1b-d3> .
+
+<#q-restaurant-1b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Water is free"@en ,
+                              "Vattnet är gratis"@sv ,
+                              "Wasser ist kostenlos"@de ,
+                              "El agua es gratis"@es ,
+                              "L'eau est gratuite"@fr ;
+    solid-memo:distractorNote "That would be 물은 무료예요; 셀프 says who fetches it, not what it costs."@en ,
+                              "Det vore 물은 무료예요; 셀프 säger vem som hämtar det, inte vad det kostar."@sv ,
+                              "Das wäre 물은 무료예요; 셀프 sagt, wer es holt, nicht, was es kostet."@de ,
+                              "Eso sería 물은 무료예요; 셀프 dice quién lo trae, no cuánto cuesta."@es ,
+                              "Ce serait 물은 무료예요 ; 셀프 dit qui va la chercher, pas combien elle coûte."@fr .
+
+<#q-restaurant-1b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Water costs extra"@en ,
+                              "Vatten kostar extra"@sv ,
+                              "Wasser kostet extra"@de ,
+                              "El agua se paga aparte"@es ,
+                              "L'eau est en supplément"@fr ;
+    solid-memo:distractorNote "That would be 물은 유료예요; 셀프 is about serving yourself."@en ,
+                              "Det vore 물은 유료예요; 셀프 handlar om att servera sig själv."@sv ,
+                              "Das wäre 물은 유료예요; 셀프 heißt, dass man sich selbst bedient."@de ,
+                              "Eso sería 물은 유료예요; 셀프 se refiere a servirse uno mismo."@es ,
+                              "Ce serait 물은 유료예요 ; 셀프 veut dire qu'on se sert soi-même."@fr .
+
+<#q-restaurant-1b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The water is cold"@en ,
+                              "Vattnet är kallt"@sv ,
+                              "Das Wasser ist kalt"@de ,
+                              "El agua está fría"@es ,
+                              "L'eau est froide"@fr ;
+    solid-memo:distractorNote "That would be 물이 차가워요; 셀프 says nothing about temperature."@en ,
+                              "Det vore 물이 차가워요; 셀프 säger inget om temperaturen."@sv ,
+                              "Das wäre 물이 차가워요; 셀프 sagt nichts über die Temperatur."@de ,
+                              "Eso sería 물이 차가워요; 셀프 no dice nada de la temperatura."@es ,
+                              "Ce serait 물이 차가워요 ; 셀프 ne dit rien de la température."@fr .
+
+<#ch-restaurant-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-restaurant> ;
+    schema:position 1 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Counting what you order
+
+Korean puts the number after the thing: the noun, then the number, then a counter.
+
+- **인분** (portion) takes Sino-Korean numbers, and menus write them as digits: 김치찌개 2인분 주세요 (kimchi stew for two, please), where 2인분 is read 이 인분. Stews and grilled meat are often sold by the portion, two at the least.
+- **그릇** (bowl) and **병** (bottle) take native numbers: 한 그릇, 두 그릇, 사이다 한 병. 하나, 둘, 셋 and 넷 shorten to 한, 두, 세 and 네 before a counter.
+- With no counter, the bare native number is enough: 공깃밥 하나.
+
+**알렉스:** 사장님, 공깃밥 하나 추가해 주세요.\\
+*Excuse me, one more bowl of rice, please.*
+
+**사장님:** 네, 공깃밥 하나요. 음료는요?\\
+*Sure, one rice. Anything to drink?*
+
+**민지:** 사이다 한 병 주세요.\\
+*A bottle of lemon-lime soda, please.*
+
+---
+
+**공깃밥 하나 추가해 주세요**: "One more bowl of rice, please." 공깃밥 is plain rice in a small steel bowl, and 추가하다 means to add something to the order. Staff often confirm by repeating the order with -요: 공깃밥 하나요.
+
+**좀** is short for 조금, "a little". In a request it works like "please": it makes the request softer. 더 means "more".
+
+**알렉스:** 사장님, 반찬 좀 더 주세요.\\
+*Excuse me, could we have some more side dishes?*
+
+**사장님:** 네, 금방 갖다 드릴게요.\\
+*Of course, I'll bring them right away.*
+
+**반찬 좀 더 주세요**: "Some more side dishes, please." 반찬 are the small side dishes that come with the meal."""@en ;
+    solid-memo:checkedBy <#q-restaurant-2a> ,
+                         <#q-restaurant-2b> ,
+                         <#q-restaurant-2c> .
+
+<#q-restaurant-2a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "김치찌개 2인분 주세요"@ko ;
+    solid-memo:back "Kimchi stew for two, please"@en ,
+                    "Kimchigryta för två, tack"@sv ,
+                    "Kimchi-Eintopf für zwei, bitte"@de ,
+                    "Estofado de kimchi para dos, por favor"@es ,
+                    "Un ragoût de kimchi pour deux, s'il vous plaît"@fr ;
+    solid-memo:backNote "Said by a customer ordering in a restaurant, in polite 해요체. 2인분 is read 이 인분: two portions, counted with the Sino-Korean number 이. The staff answer 네."@en ,
+                        "Sägs av en gäst som beställer på en restaurang, i artig 해요체. 2인분 läses 이 인분: två portioner, räknat med det sinokoreanska talet 이. Personalen svarar 네."@sv ,
+                        "Sagt ein Gast beim Bestellen im Restaurant, im höflichen 해요체. 2인분 liest man 이 인분: zwei Portionen, gezählt mit der sinokoreanischen Zahl 이. Das Personal antwortet 네."@de ,
+                        "Lo dice un cliente al pedir en un restaurante, en el estilo cortés 해요체. 2인분 se lee 이 인분: dos raciones, contadas con el número sinocoreano 이. El personal responde 네."@es ,
+                        "Dit par un client qui commande au restaurant, au style poli 해요체. 2인분 se lit 이 인분 : deux portions, comptées avec le nombre sino-coréen 이. Le personnel répond 네."@fr ;
+    solid-memo:distractor <#q-restaurant-2a-d1> ,
+                          <#q-restaurant-2a-d2> ,
+                          <#q-restaurant-2a-d3> .
+
+<#q-restaurant-2a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Two bowls of kimchi, please"@en ,
+                              "Två skålar kimchi, tack"@sv ,
+                              "Zwei Schalen Kimchi, bitte"@de ,
+                              "Dos cuencos de kimchi, por favor"@es ,
+                              "Deux bols de kimchi, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 김치 두 그릇 주세요; 찌개 is a stew, and 인분 counts portions."@en ,
+                              "Det vore 김치 두 그릇 주세요; 찌개 är en gryta, och 인분 räknar portioner."@sv ,
+                              "Das wäre 김치 두 그릇 주세요; 찌개 ist ein Eintopf, und 인분 zählt Portionen."@de ,
+                              "Eso sería 김치 두 그릇 주세요; 찌개 es un estofado, y 인분 cuenta raciones."@es ,
+                              "Ce serait 김치 두 그릇 주세요 ; 찌개 est un ragoût, et 인분 compte des portions."@fr .
+
+<#q-restaurant-2a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Kimchi fried rice for two, please"@en ,
+                              "Kimchistekt ris för två, tack"@sv ,
+                              "Kimchi-Bratreis für zwei, bitte"@de ,
+                              "Arroz frito con kimchi para dos, por favor"@es ,
+                              "Du riz sauté au kimchi pour deux, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 김치볶음밥 2인분 주세요; 찌개 is a stew."@en ,
+                              "Det vore 김치볶음밥 2인분 주세요; 찌개 är en gryta."@sv ,
+                              "Das wäre 김치볶음밥 2인분 주세요; 찌개 ist ein Eintopf."@de ,
+                              "Eso sería 김치볶음밥 2인분 주세요; 찌개 es un estofado."@es ,
+                              "Ce serait 김치볶음밥 2인분 주세요 ; 찌개 est un ragoût."@fr .
+
+<#q-restaurant-2a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Kimchi stew, not spicy, please"@en ,
+                              "Kimchigryta, inte stark, tack"@sv ,
+                              "Kimchi-Eintopf, nicht scharf, bitte"@de ,
+                              "Estofado de kimchi que no pique, por favor"@es ,
+                              "Un ragoût de kimchi pas épicé, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 김치찌개 안 맵게 해 주세요; 2인분 is the number of portions."@en ,
+                              "Det vore 김치찌개 안 맵게 해 주세요; 2인분 är antalet portioner."@sv ,
+                              "Das wäre 김치찌개 안 맵게 해 주세요; 2인분 ist die Zahl der Portionen."@de ,
+                              "Eso sería 김치찌개 안 맵게 해 주세요; 2인분 es el número de raciones."@es ,
+                              "Ce serait 김치찌개 안 맵게 해 주세요 ; 2인분 est le nombre de portions."@fr .
+
+<#q-restaurant-2b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "공깃밥 하나 추가해 주세요"@ko ;
+    solid-memo:back "One more bowl of rice, please"@en ,
+                    "En skål ris till, tack"@sv ,
+                    "Bitte noch eine Schale Reis dazu"@de ,
+                    "Un cuenco de arroz más, por favor"@es ,
+                    "Un bol de riz en plus, s'il vous plaît"@fr ;
+    solid-memo:backNote "Said by a customer to restaurant staff during the meal, in polite 해요체. 공깃밥 is plain rice in a small steel bowl, often charged extra, and 추가하다 means to add to the order. The staff answer 네, 공깃밥 하나요."@en ,
+                        "Sägs av en gäst till restaurangpersonalen under måltiden, i artig 해요체. 공깃밥 är vanligt ris i en liten stålskål som ofta kostar extra, och 추가하다 betyder att lägga till i beställningen. Personalen svarar 네, 공깃밥 하나요."@sv ,
+                        "Sagt ein Gast während des Essens zum Restaurantpersonal, im höflichen 해요체. 공깃밥 ist einfacher Reis in einer kleinen Stahlschale, oft gegen Aufpreis, und 추가하다 heißt, etwas zur Bestellung hinzuzufügen. Das Personal antwortet 네, 공깃밥 하나요."@de ,
+                        "Lo dice un cliente al personal del restaurante durante la comida, en el estilo cortés 해요체. 공깃밥 es arroz blanco en un cuenco pequeño de acero, que a menudo se cobra aparte, y 추가하다 significa añadir al pedido. El personal responde 네, 공깃밥 하나요."@es ,
+                        "Dit par un client au personnel du restaurant pendant le repas, au style poli 해요체. 공깃밥 est du riz nature dans un petit bol en inox, souvent facturé en plus, et 추가하다 veut dire ajouter à la commande. Le personnel répond 네, 공깃밥 하나요."@fr ;
+    solid-memo:distractor <#q-restaurant-2b-d1> ,
+                          <#q-restaurant-2b-d2> ,
+                          <#q-restaurant-2b-d3> .
+
+<#q-restaurant-2b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Two more bowls of rice, please"@en ,
+                              "Två skålar ris till, tack"@sv ,
+                              "Bitte noch zwei Schalen Reis dazu"@de ,
+                              "Dos cuencos de arroz más, por favor"@es ,
+                              "Deux bols de riz en plus, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 공깃밥 둘 추가해 주세요; 하나 is one."@en ,
+                              "Det vore 공깃밥 둘 추가해 주세요; 하나 är en."@sv ,
+                              "Das wäre 공깃밥 둘 추가해 주세요; 하나 heißt eins."@de ,
+                              "Eso sería 공깃밥 둘 추가해 주세요; 하나 es uno."@es ,
+                              "Ce serait 공깃밥 둘 추가해 주세요 ; 하나 veut dire un."@fr .
+
+<#q-restaurant-2b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "One more bowl of soup, please"@en ,
+                              "En skål soppa till, tack"@sv ,
+                              "Bitte noch eine Schale Suppe dazu"@de ,
+                              "Un cuenco de sopa más, por favor"@es ,
+                              "Un bol de soupe en plus, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 국 하나 추가해 주세요; 공깃밥 is rice."@en ,
+                              "Det vore 국 하나 추가해 주세요; 공깃밥 är ris."@sv ,
+                              "Das wäre 국 하나 추가해 주세요; 공깃밥 ist Reis."@de ,
+                              "Eso sería 국 하나 추가해 주세요; 공깃밥 es arroz."@es ,
+                              "Ce serait 국 하나 추가해 주세요 ; 공깃밥 est du riz."@fr .
+
+<#q-restaurant-2b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Less rice, please"@en ,
+                              "Mindre ris, tack"@sv ,
+                              "Bitte weniger Reis"@de ,
+                              "Menos arroz, por favor"@es ,
+                              "Moins de riz, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 밥 적게 주세요; 추가하다 means to add more."@en ,
+                              "Det vore 밥 적게 주세요; 추가하다 betyder att lägga till mer."@sv ,
+                              "Das wäre 밥 적게 주세요; 추가하다 heißt, etwas hinzuzufügen."@de ,
+                              "Eso sería 밥 적게 주세요; 추가하다 significa añadir más."@es ,
+                              "Ce serait 밥 적게 주세요 ; 추가하다 veut dire ajouter."@fr .
+
+<#q-restaurant-2c>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "반찬 좀 더 주세요"@ko ;
+    solid-memo:back "Some more side dishes, please"@en ,
+                    "Lite fler sidorätter, tack"@sv ,
+                    "Bitte noch ein paar Beilagen"@de ,
+                    "Un poco más de acompañamientos, por favor"@es ,
+                    "Encore quelques accompagnements, s'il vous plaît"@fr ;
+    solid-memo:backNote "Said by a customer to restaurant staff, in polite 해요체. 반찬 are the small side dishes served free with the meal and refilled on request; 좀 softens the request and 더 means more. The staff answer 네, 금방 갖다 드릴게요."@en ,
+                        "Sägs av en gäst till restaurangpersonalen, i artig 해요체. 반찬 är de små sidorätterna som ingår i måltiden och fylls på när man ber om det; 좀 mjukar upp begäran och 더 betyder mer. Personalen svarar 네, 금방 갖다 드릴게요."@sv ,
+                        "Sagt ein Gast zum Restaurantpersonal, im höflichen 해요체. 반찬 sind die kleinen Beilagen, die kostenlos zum Essen gehören und auf Wunsch nachgefüllt werden; 좀 macht die Bitte weicher, und 더 heißt mehr. Das Personal antwortet 네, 금방 갖다 드릴게요."@de ,
+                        "Lo dice un cliente al personal del restaurante, en el estilo cortés 해요체. 반찬 son los pequeños acompañamientos que vienen gratis con la comida y se rellenan si se piden; 좀 suaviza la petición y 더 significa más. El personal responde 네, 금방 갖다 드릴게요."@es ,
+                        "Dit par un client au personnel du restaurant, au style poli 해요체. 반찬 sont les petits accompagnements servis gratuitement avec le repas et resservis sur demande ; 좀 adoucit la demande et 더 veut dire plus. Le personnel répond 네, 금방 갖다 드릴게요."@fr ;
+    solid-memo:distractor <#q-restaurant-2c-d1> ,
+                          <#q-restaurant-2c-d2> ,
+                          <#q-restaurant-2c-d3> .
+
+<#q-restaurant-2c-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "No more side dishes, thank you"@en ,
+                              "Inga fler sidorätter, tack"@sv ,
+                              "Keine Beilagen mehr, danke"@de ,
+                              "No más acompañamientos, gracias"@es ,
+                              "Pas d'autres accompagnements, merci"@fr ;
+    solid-memo:distractorNote "That would be 반찬은 괜찮아요; 더 주세요 asks for more."@en ,
+                              "Det vore 반찬은 괜찮아요; 더 주세요 ber om mer."@sv ,
+                              "Das wäre 반찬은 괜찮아요; 더 주세요 bittet um mehr."@de ,
+                              "Eso sería 반찬은 괜찮아요; 더 주세요 pide más."@es ,
+                              "Ce serait 반찬은 괜찮아요 ; 더 주세요 demande plus."@fr .
+
+<#q-restaurant-2c-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Some more rice, please"@en ,
+                              "Lite mer ris, tack"@sv ,
+                              "Bitte noch etwas Reis"@de ,
+                              "Un poco más de arroz, por favor"@es ,
+                              "Encore un peu de riz, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 밥 좀 더 주세요; 반찬 are the side dishes."@en ,
+                              "Det vore 밥 좀 더 주세요; 반찬 är sidorätterna."@sv ,
+                              "Das wäre 밥 좀 더 주세요; 반찬 sind die Beilagen."@de ,
+                              "Eso sería 밥 좀 더 주세요; 반찬 son los acompañamientos."@es ,
+                              "Ce serait 밥 좀 더 주세요 ; 반찬 sont les accompagnements."@fr .
+
+<#q-restaurant-2c-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Please take the side dishes away"@en ,
+                              "Ta bort sidorätterna, tack"@sv ,
+                              "Bitte räumen Sie die Beilagen ab"@de ,
+                              "Retire los acompañamientos, por favor"@es ,
+                              "Débarrassez les accompagnements, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 반찬 좀 치워 주세요; 더 주세요 asks for more."@en ,
+                              "Det vore 반찬 좀 치워 주세요; 더 주세요 ber om mer."@sv ,
+                              "Das wäre 반찬 좀 치워 주세요; 더 주세요 bittet um mehr."@de ,
+                              "Eso sería 반찬 좀 치워 주세요; 더 주세요 pide más."@es ,
+                              "Ce serait 반찬 좀 치워 주세요 ; 더 주세요 demande plus."@fr .
+
+<#ch-restaurant-3>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-restaurant> ;
+    schema:position 2 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## A pot that cooks at the table
+
+*Some 찌개 places bring the pot raw and set it on a gas burner on your table. This is how the same evening could go at a 부대찌개 place.*
+
+**사장님:** 부대찌개 2인분 나왔습니다. 다 끓으면 드세요.\\
+*Here's your army stew for two. Start eating once it's boiling.*
+
+**알렉스:** 이거 어떻게 먹어요?\\
+*How do you eat this?*
+
+**민지:** 끓으면 국자로 덜어서 먹어요.\\
+*Once it boils, you serve yourself with the ladle.*
+
+**알렉스:** 사장님, 앞접시 좀 주세요.\\
+*Excuse me, could we have some small plates?*
+
+**사장님:** 네, 여기 있어요.\\
+*Sure, here you are.*
+
+---
+
+**이거 어떻게 먹어요?**: "How do you eat this?" Ask it about any dish you don't know; the answer often starts with 이렇게 (like this).
+
+**앞접시 좀 주세요**: "Some small plates, please." 앞접시 is the small plate in front of you (앞, front, and 접시, plate), for food from the shared pot.
+
+**다 끓으면 드세요**: "Start eating once it's boiling." 다 means fully, 끓다 is to boil, -(으)면 means once or when, and 드세요 is 드시다, the honorific of 먹다, in 해요체.
+
+**Culture note:** A 찌개 is shared: everyone eats from the same pot. 반찬 are free and refilled when you ask, while 공깃밥 may cost extra. Spoons and chopsticks are often in a drawer built into the side of the table or in a box on it. You call the staff with 저기요, which you know from Everyday Korean phrases, or with 사장님, and you usually pay at the counter on the way out."""@en ;
+    solid-memo:checkedBy <#q-restaurant-3a> ,
+                         <#q-restaurant-3b> .
+
+<#q-restaurant-3a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "이거 어떻게 먹어요?"@ko ;
+    solid-memo:back "How do you eat this?"@en ,
+                    "Hur äter man det här?"@sv ,
+                    "Wie isst man das?"@de ,
+                    "¿Cómo se come esto?"@es ,
+                    "Comment ça se mange ?"@fr ;
+    solid-memo:backNote "Asked about an unfamiliar dish, to a friend or the staff, in polite 해요체. The answer often starts with 이렇게 (like this), and staff may say 끓으면 드세요."@en ,
+                        "Frågas om en okänd rätt, till en vän eller personalen, i artig 해요체. Svaret börjar ofta med 이렇게 (så här), och personalen kan säga 끓으면 드세요."@sv ,
+                        "Gefragt bei einem unbekannten Gericht, an einen Freund oder das Personal, im höflichen 해요체. Die Antwort beginnt oft mit 이렇게 (so), und das Personal sagt vielleicht 끓으면 드세요."@de ,
+                        "Se pregunta ante un plato desconocido, a un amigo o al personal, en el estilo cortés 해요체. La respuesta suele empezar por 이렇게 (así), y el personal puede decir 끓으면 드세요."@es ,
+                        "Se demande devant un plat inconnu, à un ami ou au personnel, au style poli 해요체. La réponse commence souvent par 이렇게 (comme ça), et le personnel peut dire 끓으면 드세요."@fr ;
+    solid-memo:distractor <#q-restaurant-3a-d1> ,
+                          <#q-restaurant-3a-d2> ,
+                          <#q-restaurant-3a-d3> .
+
+<#q-restaurant-3a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "What is this called?"@en ,
+                              "Vad heter det här?"@sv ,
+                              "Wie heißt das?"@de ,
+                              "¿Cómo se llama esto?"@es ,
+                              "Comment ça s'appelle ?"@fr ;
+    solid-memo:distractorNote "That would be 이거 이름이 뭐예요?; 어떻게 먹어요 asks how to eat it."@en ,
+                              "Det vore 이거 이름이 뭐예요?; 어떻게 먹어요 frågar hur man äter det."@sv ,
+                              "Das wäre 이거 이름이 뭐예요?; 어떻게 먹어요 fragt, wie man es isst."@de ,
+                              "Eso sería 이거 이름이 뭐예요?; 어떻게 먹어요 pregunta cómo se come."@es ,
+                              "Ce serait 이거 이름이 뭐예요? ; 어떻게 먹어요 demande comment le manger."@fr .
+
+<#q-restaurant-3a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Can I eat this?"@en ,
+                              "Får jag äta det här?"@sv ,
+                              "Darf ich das essen?"@de ,
+                              "¿Puedo comer esto?"@es ,
+                              "Je peux manger ça ?"@fr ;
+    solid-memo:distractorNote "That would be 이거 먹어도 돼요?; 어떻게 asks how."@en ,
+                              "Det vore 이거 먹어도 돼요?; 어떻게 frågar hur."@sv ,
+                              "Das wäre 이거 먹어도 돼요?; 어떻게 fragt nach dem Wie."@de ,
+                              "Eso sería 이거 먹어도 돼요?; 어떻게 pregunta cómo."@es ,
+                              "Ce serait 이거 먹어도 돼요? ; 어떻게 demande comment."@fr .
+
+<#q-restaurant-3a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "How does it taste?"@en ,
+                              "Hur smakar det?"@sv ,
+                              "Wie schmeckt es?"@de ,
+                              "¿Qué tal sabe?"@es ,
+                              "Ça a quel goût ?"@fr ;
+    solid-memo:distractorNote "That would be 맛이 어때요?; 어떻게 먹어요 asks about the way to eat it."@en ,
+                              "Det vore 맛이 어때요?; 어떻게 먹어요 frågar hur man äter det."@sv ,
+                              "Das wäre 맛이 어때요?; 어떻게 먹어요 fragt, wie man es isst."@de ,
+                              "Eso sería 맛이 어때요?; 어떻게 먹어요 pregunta cómo se come."@es ,
+                              "Ce serait 맛이 어때요? ; 어떻게 먹어요 demande comment le manger."@fr .
+
+<#q-restaurant-3b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "앞접시 좀 주세요"@ko ;
+    solid-memo:back "Some small plates, please"@en ,
+                    "Några små tallrikar, tack"@sv ,
+                    "Bitte ein paar kleine Teller"@de ,
+                    "Unos platos pequeños, por favor"@es ,
+                    "Des petites assiettes, s'il vous plaît"@fr ;
+    solid-memo:backNote "Said by a customer to restaurant staff when a dish is shared, in polite 해요체. 앞접시 is the small plate in front of you (앞, front, and 접시, plate) for serving yourself from the shared pot; 좀 softens the request. The staff answer 네, 여기 있어요."@en ,
+                        "Sägs av en gäst till restaurangpersonalen när man delar en rätt, i artig 해요체. 앞접시 är den lilla tallriken framför dig (앞, framför, och 접시, tallrik) som du lägger upp mat på från den gemensamma grytan; 좀 mjukar upp begäran. Personalen svarar 네, 여기 있어요."@sv ,
+                        "Sagt ein Gast zum Restaurantpersonal, wenn man ein Gericht teilt, im höflichen 해요체. 앞접시 ist der kleine Teller vor einem (앞, vorne, und 접시, Teller), auf den man sich aus dem gemeinsamen Topf nimmt; 좀 macht die Bitte weicher. Das Personal antwortet 네, 여기 있어요."@de ,
+                        "Lo dice un cliente al personal del restaurante cuando se comparte un plato, en el estilo cortés 해요체. 앞접시 es el plato pequeño que uno tiene delante (앞, delante, y 접시, plato) para servirse de la olla común; 좀 suaviza la petición. El personal responde 네, 여기 있어요."@es ,
+                        "Dit par un client au personnel du restaurant quand on partage un plat, au style poli 해요체. 앞접시 est la petite assiette devant soi (앞, devant, et 접시, assiette) pour se servir dans la marmite commune ; 좀 adoucit la demande. Le personnel répond 네, 여기 있어요."@fr ;
+    solid-memo:distractor <#q-restaurant-3b-d1> ,
+                          <#q-restaurant-3b-d2> ,
+                          <#q-restaurant-3b-d3> .
+
+<#q-restaurant-3b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Some spoons and chopsticks, please"@en ,
+                              "Skedar och ätpinnar, tack"@sv ,
+                              "Bitte Löffel und Stäbchen"@de ,
+                              "Cucharas y palillos, por favor"@es ,
+                              "Des cuillères et des baguettes, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 수저 좀 주세요; 접시 is a plate."@en ,
+                              "Det vore 수저 좀 주세요; 접시 är en tallrik."@sv ,
+                              "Das wäre 수저 좀 주세요; 접시 ist ein Teller."@de ,
+                              "Eso sería 수저 좀 주세요; 접시 es un plato."@es ,
+                              "Ce serait 수저 좀 주세요 ; 접시 est une assiette."@fr .
+
+<#q-restaurant-3b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Some napkins, please"@en ,
+                              "Några servetter, tack"@sv ,
+                              "Bitte ein paar Servietten"@de ,
+                              "Unas servilletas, por favor"@es ,
+                              "Des serviettes, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 휴지 좀 주세요; 접시 is a plate."@en ,
+                              "Det vore 휴지 좀 주세요; 접시 är en tallrik."@sv ,
+                              "Das wäre 휴지 좀 주세요; 접시 ist ein Teller."@de ,
+                              "Eso sería 휴지 좀 주세요; 접시 es un plato."@es ,
+                              "Ce serait 휴지 좀 주세요 ; 접시 est une assiette."@fr .
+
+<#q-restaurant-3b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A ladle, please"@en ,
+                              "En slev, tack"@sv ,
+                              "Bitte eine Schöpfkelle"@de ,
+                              "Un cucharón, por favor"@es ,
+                              "Une louche, s'il vous plaît"@fr ;
+    solid-memo:distractorNote "That would be 국자 좀 주세요; 앞접시 is the plate you serve yourself onto."@en ,
+                              "Det vore 국자 좀 주세요; 앞접시 är tallriken du lägger upp på."@sv ,
+                              "Das wäre 국자 좀 주세요; 앞접시 ist der Teller, auf den man sich nimmt."@de ,
+                              "Eso sería 국자 좀 주세요; 앞접시 es el plato en el que uno se sirve."@es ,
+                              "Ce serait 국자 좀 주세요 ; 앞접시 est l'assiette où l'on se sert."@fr .
+
+<#q-restaurant-r01>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "몇 분이세요?"@ko ;
+    solid-memo:back "How many of you are there?"@en ,
+                    "Hur många är ni?"@sv ,
+                    "Wie viele Personen sind Sie?"@de ,
+                    "¿Cuántas personas son?"@es ,
+                    "Vous êtes combien ?"@fr ;
+    solid-memo:backNote "Said by restaurant staff to arriving customers, in polite 해요체 with -시- honoring them. 분 is the honorific counter for people; you answer with the plain counter 명: 두 명이에요."@en ,
+                        "Sägs av restaurangpersonal till gäster som kommer in, i artig 해요체 med -시- som hedrar dem. 분 är det artiga räkneordet för personer; du svarar med det vanliga räkneordet 명: 두 명이에요."@sv ,
+                        "Sagt das Restaurantpersonal zu ankommenden Gästen, im höflichen 해요체 mit -시-, das sie ehrt. 분 ist das ehrende Zählwort für Personen; man antwortet mit dem einfachen Zählwort 명: 두 명이에요."@de ,
+                        "Lo dice el personal de un restaurante a los clientes que llegan, en el estilo cortés 해요체 con -시-, que los honra. 분 es el clasificador honorífico para personas; se responde con el clasificador sencillo 명: 두 명이에요."@es ,
+                        "Dit par le personnel d'un restaurant aux clients qui arrivent, au style poli 해요체 avec -시-, qui les honore. 분 est le classificateur honorifique des personnes ; on répond avec le classificateur simple 명 : 두 명이에요."@fr ;
+    solid-memo:distractor <#q-restaurant-r01-d1> ,
+                          <#q-restaurant-r01-d2> ,
+                          <#q-restaurant-r01-d3> .
+
+<#q-restaurant-r01-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "How many portions would you like?"@en ,
+                              "Hur många portioner vill ni ha?"@sv ,
+                              "Wie viele Portionen möchten Sie?"@de ,
+                              "¿Cuántas raciones quieren?"@es ,
+                              "Combien de portions voulez-vous ?"@fr ;
+    solid-memo:distractorNote "That would be 몇 인분 드릴까요?; 분 alone counts people."@en ,
+                              "Det vore 몇 인분 드릴까요?; 분 ensamt räknar personer."@sv ,
+                              "Das wäre 몇 인분 드릴까요?; 분 allein zählt Personen."@de ,
+                              "Eso sería 몇 인분 드릴까요?; 분 solo cuenta personas."@es ,
+                              "Ce serait 몇 인분 드릴까요? ; 분 seul compte des personnes."@fr .
+
+<#q-restaurant-r01-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "How many minutes will it take?"@en ,
+                              "Hur många minuter tar det?"@sv ,
+                              "Wie viele Minuten dauert es?"@de ,
+                              "¿Cuántos minutos tarda?"@es ,
+                              "Ça prend combien de minutes ?"@fr ;
+    solid-memo:distractorNote "A literal reading: 분 also means minute, as in 몇 분 걸려요?, but 몇 분이세요? asks how many people."@en ,
+                              "En ordagrann läsning: 분 betyder också minut, som i 몇 분 걸려요?, men 몇 분이세요? frågar hur många personer."@sv ,
+                              "Eine wörtliche Lesart: 분 heißt auch Minute, wie in 몇 분 걸려요?, aber 몇 분이세요? fragt nach der Zahl der Personen."@de ,
+                              "Una lectura literal: 분 también significa minuto, como en 몇 분 걸려요?, pero 몇 분이세요? pregunta cuántas personas son."@es ,
+                              "Une lecture littérale : 분 veut aussi dire minute, comme dans 몇 분 걸려요?, mais 몇 분이세요? demande combien de personnes."@fr .
+
+<#q-restaurant-r01-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Do you have a reservation?"@en ,
+                              "Har ni bokat bord?"@sv ,
+                              "Haben Sie reserviert?"@de ,
+                              "¿Tienen reserva?"@es ,
+                              "Vous avez réservé ?"@fr ;
+    solid-memo:distractorNote "That would be 예약하셨어요?; 몇 asks how many."@en ,
+                              "Det vore 예약하셨어요?; 몇 frågar hur många."@sv ,
+                              "Das wäre 예약하셨어요?; 몇 fragt, wie viele."@de ,
+                              "Eso sería 예약하셨어요?; 몇 pregunta cuántos."@es ,
+                              "Ce serait 예약하셨어요? ; 몇 demande combien."@fr .
+
+<#q-restaurant-r02>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-16T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "다 끓으면 드세요"@ko ;
+    solid-memo:back "Start eating once it's boiling"@en ,
+                    "Ät när det har kokat upp"@sv ,
+                    "Essen Sie, sobald es kocht"@de ,
+                    "Coman cuando ya esté hirviendo"@es ,
+                    "Mangez dès que ça bout"@fr ;
+    solid-memo:backNote "Said by restaurant staff to customers when they set a pot on the burner at the table, in polite 해요체 with -시- honoring them: 드세요 is 드시다, the honorific of 먹다. 다 means fully, all the way, 끓다 means to boil and -(으)면 means once or when. You answer 네."@en ,
+                        "Sägs av restaurangpersonal till gäster när de ställer en gryta på plattan vid bordet, i artig 해요체 med -시- som hedrar dem: 드세요 är 드시다, den hedrande formen av 먹다. 다 betyder här helt, ordentligt, 끓다 betyder att koka och -(으)면 betyder när. Du svarar 네."@sv ,
+                        "Sagt das Restaurantpersonal zu Gästen, wenn es einen Topf auf den Brenner am Tisch stellt, im höflichen 해요체 mit -시-, das sie ehrt: 드세요 ist 드시다, die ehrende Form von 먹다. 다 heißt hier ganz, richtig, 끓다 heißt kochen, und -(으)면 heißt sobald oder wenn. Man antwortet 네."@de ,
+                        "Lo dice el personal de un restaurante a los clientes al poner una olla en el hornillo de la mesa, en el estilo cortés 해요체 con -시-, que los honra: 드세요 es 드시다, la forma honorífica de 먹다. 다 aquí significa del todo, 끓다 significa hervir y -(으)면 significa cuando. Se responde 네."@es ,
+                        "Dit par le personnel d'un restaurant aux clients en posant une marmite sur le réchaud de la table, au style poli 해요체 avec -시-, qui les honore : 드세요 est 드시다, la forme honorifique de 먹다. 다 veut dire ici complètement, 끓다 veut dire bouillir et -(으)면 veut dire dès que ou quand. On répond 네."@fr ;
+    solid-memo:distractor <#q-restaurant-r02-d1> ,
+                          <#q-restaurant-r02-d2> ,
+                          <#q-restaurant-r02-d3> .
+
+<#q-restaurant-r02-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Eat it before it gets cold"@en ,
+                              "Ät innan det kallnar"@sv ,
+                              "Essen Sie, bevor es kalt wird"@de ,
+                              "Coman antes de que se enfríe"@es ,
+                              "Mangez avant que ça refroidisse"@fr ;
+    solid-memo:distractorNote "That would be 식기 전에 드세요; 끓다 is to boil."@en ,
+                              "Det vore 식기 전에 드세요; 끓다 är att koka."@sv ,
+                              "Das wäre 식기 전에 드세요; 끓다 heißt kochen."@de ,
+                              "Eso sería 식기 전에 드세요; 끓다 es hervir."@es ,
+                              "Ce serait 식기 전에 드세요 ; 끓다 veut dire bouillir."@fr .
+
+<#q-restaurant-r02-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Turn the heat down once it's boiling"@en ,
+                              "Sänk värmen när det kokar"@sv ,
+                              "Drehen Sie die Hitze herunter, sobald es kocht"@de ,
+                              "Bajen el fuego cuando hierva"@es ,
+                              "Baissez le feu dès que ça bout"@fr ;
+    solid-memo:distractorNote "That would be 끓으면 불을 줄여 주세요; 드세요 means eat."@en ,
+                              "Det vore 끓으면 불을 줄여 주세요; 드세요 betyder ät."@sv ,
+                              "Das wäre 끓으면 불을 줄여 주세요; 드세요 heißt essen Sie."@de ,
+                              "Eso sería 끓으면 불을 줄여 주세요; 드세요 significa coman."@es ,
+                              "Ce serait 끓으면 불을 줄여 주세요 ; 드세요 veut dire mangez."@fr .
+
+<#q-restaurant-r02-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Don't eat it yet"@en ,
+                              "Ät inte än"@sv ,
+                              "Essen Sie noch nicht"@de ,
+                              "No coman todavía"@es ,
+                              "Ne mangez pas encore"@fr ;
+    solid-memo:distractorNote "That would be 아직 드시지 마세요; 다 끓으면 드세요 tells you when to start."@en ,
+                              "Det vore 아직 드시지 마세요; 다 끓으면 드세요 säger när du kan börja."@sv ,
+                              "Das wäre 아직 드시지 마세요; 다 끓으면 드세요 sagt, wann man anfangen kann."@de ,
+                              "Eso sería 아직 드시지 마세요; 다 끓으면 드세요 dice cuándo se puede empezar."@es ,
+                              "Ce serait 아직 드시지 마세요 ; 다 끓으면 드세요 dit quand on peut commencer."@fr .
