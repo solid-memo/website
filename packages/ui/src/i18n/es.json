@@ -80,7 +80,8 @@
     "versionAtCommit": "Versión {version} ({commit})",
     "sourceCode": "Código fuente",
     "changelog": "Registro de cambios",
-    "reportIssue": "Informar de un problema"
+    "reportIssue": "Informar de un problema",
+    "discussions": "Debates"
   },
   "addCardForm": {
     "submitButton": "Añadir tarjeta",

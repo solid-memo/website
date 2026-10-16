@@ -127,10 +127,13 @@ The footer links:
 | The build's commit, beside the version | `<url>/commit/<sha>` |
 | Changelog | `<url>/blob/main/CHANGELOG.md` |
 | Report an issue | `<url>/issues/new/choose` |
+| Discussions | `<url>/discussions` |
 
 These are GitHub's paths, which Gitea and Forgejo (Codeberg) share.
 On GitLab, whose paths start with `/-/`, the commit, changelog and
-issue links do not resolve.
+issue links do not resolve. Discussions is GitHub's alone: on a
+GitHub repository without Discussions turned on, and on other forges,
+that link leads to a 404.
 
 The page links to the repository too, as vite.config.ts fills in
 [index.html](../apps/web/index.html): the JSON-LD's `sameAs` and

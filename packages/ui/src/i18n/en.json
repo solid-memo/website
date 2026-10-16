@@ -78,7 +78,8 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Source code",
     "changelog": "Changelog",
-    "reportIssue": "Report an issue"
+    "reportIssue": "Report an issue",
+    "discussions": "Discussions"
   },
   "addCardForm": {
     "submitButton": "Add card",
