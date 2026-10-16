@@ -243,8 +243,9 @@ What holds today, and what does not, criterion by criterion.
   tagged, and branches with work not yet merged are public. The 17
   leftover `pc/*` and `*-backup` branches exist only on the maintainer's
   machine; they are most likely copies of work already merged.
-- OPTIONAL, met — the footer on every screen links to the source code,
-  the commit, the changelog and the issue tracker
+- OPTIONAL, met — the footer on every screen links to the docs, the
+  source code, the commit, the changelog, the issue tracker and
+  Discussions
   ([`Footer.tsx`](../packages/ui/src/ui/Footer.tsx),
   [configuration.md](configuration.md#vite_repo_url)).
 

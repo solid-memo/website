@@ -20,9 +20,14 @@ export interface SiteSource {
 }
 
 /**
- * Site-wide attribution, the build's version, and the way to the source
- * code, the changelog, the issue tracker and Discussions, shown under
- * every screen.
+ * Site-wide attribution, the build's version, and the way to the docs, the
+ * source code, the changelog, the issue tracker and Discussions, shown
+ * under every screen. The docs are this site's own pages at `docs/`
+ * (docs/deployment.md), so their link opens in the same tab. It is
+ * relative, and routing is by hash, so it leads to the docs whether the
+ * site runs at a domain's root or in a subfolder. The docs are in English
+ * only, which the link says with `hreflang`, and every other language's
+ * label says in words.
  */
 export function Footer({ source: { repoUrl, version, commitSha } }: { source: SiteSource }) {
   const { t, tx } = useI18n();
@@ -46,6 +51,9 @@ export function Footer({ source: { repoUrl, version, commitSha } }: { source: Si
             })}
       </p>
       <p class="footer-links">
+        <a href="docs/" hreflang="en">
+          {t("footer.docs")}
+        </a>
         <ExternalLink url={repoUrl}>{t("footer.sourceCode")}</ExternalLink>
         <ExternalLink url={`${repoUrl}/blob/main/CHANGELOG.md`}>
           {t("footer.changelog")}

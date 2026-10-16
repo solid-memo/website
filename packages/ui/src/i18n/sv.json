@@ -81,6 +81,7 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Källkod",
     "changelog": "Ändringslogg",
+    "docs": "Dokumentation (på engelska)",
     "reportIssue": "Rapportera ett problem",
     "discussions": "Diskussioner"
   },

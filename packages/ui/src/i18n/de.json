@@ -81,6 +81,7 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Quellcode",
     "changelog": "Änderungsprotokoll",
+    "docs": "Dokumentation (auf Englisch)",
     "reportIssue": "Problem melden",
     "discussions": "Diskussionen"
   },

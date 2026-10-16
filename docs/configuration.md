@@ -126,6 +126,7 @@ The footer links:
 
 | Link | Address |
 |---|---|
+| Docs | `docs/`, these docs on the same site; it does not follow this setting |
 | Source code | `<url>` |
 | The build's commit, beside the version | `<url>/commit/<sha>` |
 | Changelog | `<url>/blob/main/CHANGELOG.md` |

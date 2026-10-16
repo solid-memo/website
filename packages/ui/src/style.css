@@ -379,7 +379,7 @@ main.workspace {
   color: var(--link);
 }
 
-/* The source code and the issue tracker, side by side, wrapping on a narrow screen. */
+/* The docs, the source code, the changelog, the issue tracker and Discussions, side by side, wrapping on a narrow screen. */
 .site-footer .footer-links {
   display: flex;
   flex-wrap: wrap;
