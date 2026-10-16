@@ -1,0 +1,686 @@
+@base <https://solid-memo.com/decks/http-status-codes/v3.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "HTTP status codes"@en ,
+                  "HTTP-statuskoder"@sv ,
+                  "HTTP 상태 코드"@ko ,
+                  "HTTP-Statuscodes"@de ,
+                  "Códigos de estado HTTP"@es ,
+                  "Codes de statut HTTP"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Every HTTP status code and its reason phrase. The list follows MDN's HTTP response status codes reference; the codes and names themselves are defined by the IETF and recorded in the IANA HTTP Status Code Registry. Each card has a short note on how the status is used in practice."@en ,
+                        "Varje HTTP-statuskod och dess statusfras. Listan följer MDN:s referens över HTTP-statuskoder; koderna och fraserna definieras av IETF och förs in i IANA:s register över HTTP-statuskoder. Statusfraserna står på engelska, så som de skrivs i HTTP. Varje kort har en kort anteckning på engelska om hur statusen används i praktiken."@sv ,
+                        "모든 HTTP 상태 코드와 그 사유 구문. 목록은 MDN의 HTTP 응답 상태 코드 문서를 따르며, 코드와 이름 자체는 IETF가 정의하고 IANA HTTP Status Code Registry에 기록되어 있다. 각 카드에는 그 상태 코드가 실제로 어떻게 쓰이는지에 대한 짧은 영어 메모가 있다."@ko ,
+                        "Jeder HTTP-Statuscode und sein Statustext. Die Liste folgt der MDN-Referenz zu den HTTP-Antwortstatuscodes; die Codes und Bezeichnungen selbst legt die IETF fest, und sie sind in der IANA HTTP Status Code Registry verzeichnet. Jede Karte hat eine kurze englische Notiz dazu, wie der Status in der Praxis verwendet wird."@de ,
+                        "Cada código de estado HTTP y su frase de estado. La lista sigue la referencia de códigos de estado de respuesta HTTP de MDN; los códigos y sus nombres los define el IETF y se recogen en el IANA HTTP Status Code Registry. Cada tarjeta lleva una breve nota en inglés sobre cómo se usa el estado en la práctica."@es ,
+                        "Chaque code de statut HTTP et son intitulé. La liste suit la référence des codes de statut de réponse HTTP de MDN ; les codes et leurs intitulés sont définis par l’IETF et consignés dans l’IANA HTTP Status Code Registry. Chaque carte porte une courte note en anglais sur l’usage du statut en pratique."@fr ;
+    prov:wasDerivedFrom <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status> ,
+                        <https://www.iana.org/assignments/http-status-codes> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-16T17:30:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "HTTP"@en ,
+                 "status codes"@en ,
+                 "web"@en ,
+                 "HTTP"@sv ,
+                 "statuskoder"@sv ,
+                 "webb"@sv ,
+                 "HTTP"@ko ,
+                 "상태 코드"@ko ,
+                 "HTTP 상태 코드"@ko ,
+                 "웹"@ko ,
+                 "HTTP"@de ,
+                 "Statuscodes"@de ,
+                 "HTTP-Statuscodes"@de ,
+                 "Web"@de ,
+                 "HTTP"@es ,
+                 "códigos de estado"@es ,
+                 "códigos HTTP"@es ,
+                 "web"@es ,
+                 "HTTP"@fr ,
+                 "codes de statut"@fr ,
+                 "codes HTTP"@fr ,
+                 "web"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/http-status-codes/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/http-status-codes/v2.ttl> ;
+    dcterms:issued "2026-10-16T17:30:00Z"^^xsd:dateTime ;
+    adms:versionNotes "A short note on every card about how the status is used in practice; no card's code or reason phrase was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#http-status-codes> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#http-status-codes> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this version's notes were made (W3C PROV-O). The codes and reason phrases are those of v1 and v2.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-16T17:30:00Z"^^xsd:dateTime ;
+    prov:used <https://www.iana.org/assignments/http-status-codes> ,
+              <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status> ,
+              <https://www.rfc-editor.org/rfc/rfc9110> ,
+              <https://www.rfc-editor.org/rfc/rfc6585> ,
+              <https://www.rfc-editor.org/rfc/rfc4918> ,
+              <https://www.rfc-editor.org/rfc/rfc5842> ,
+              <https://www.rfc-editor.org/rfc/rfc2518> ,
+              <https://www.rfc-editor.org/rfc/rfc8297> ,
+              <https://www.rfc-editor.org/rfc/rfc8470> ,
+              <https://www.rfc-editor.org/rfc/rfc7725> ,
+              <https://www.rfc-editor.org/rfc/rfc3229> ,
+              <https://www.rfc-editor.org/rfc/rfc2295> ,
+              <https://www.rfc-editor.org/rfc/rfc2774> ,
+              <https://www.rfc-editor.org/rfc/rfc2324> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "Notes. Each card's back note, under 150 characters, says in plain words how the status is used in practice: when a server sends it, what a client does with it, and the headers that go with it. The notes were written in this deck's own words from the RFCs that define each code, as the IANA registry names them, and then checked against those RFCs and MDN's reference by a separate fact-checking pass, which corrected four of them (100, 204, 302, 403). No text was taken from MDN or the RFCs, so the deck stays CC0."@en .
+
+<https://www.rfc-editor.org/rfc/rfc9110>
+    dcterms:title "RFC 9110: HTTP Semantics" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc6585>
+    dcterms:title "RFC 6585: Additional HTTP Status Codes" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc4918>
+    dcterms:title "RFC 4918: HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV)" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc5842>
+    dcterms:title "RFC 5842: Binding Extensions to Web Distributed Authoring and Versioning (WebDAV)" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc2518>
+    dcterms:title "RFC 2518: HTTP Extensions for Distributed Authoring -- WEBDAV" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc8297>
+    dcterms:title "RFC 8297: An HTTP Status Code for Indicating Hints" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc8470>
+    dcterms:title "RFC 8470: Using Early Data in HTTP" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc7725>
+    dcterms:title "RFC 7725: An HTTP Status Code to Report Legal Obstacles" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc3229>
+    dcterms:title "RFC 3229: Delta encoding in HTTP" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc2295>
+    dcterms:title "RFC 2295: Transparent Content Negotiation in HTTP" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc2774>
+    dcterms:title "RFC 2774: An HTTP Extension Framework" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://www.rfc-editor.org/rfc/rfc2324>
+    dcterms:title "RFC 2324: Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0)" ;
+    dcterms:creator "Internet Engineering Task Force (IETF)" ;
+    rdfs:comment "Used to write and verify the notes only: no wording was taken from it."@en .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status>
+    dcterms:title "HTTP response status codes" ;
+    dcterms:creator "Mozilla Contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> .
+
+<https://www.iana.org/assignments/http-status-codes>
+    dcterms:title "Hypertext Transfer Protocol (HTTP) Status Code Registry" ;
+    dcterms:creator "Internet Assigned Numbers Authority" .
+
+<#100-continue>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Continue"@en ;
+    solid-memo:backNote "Answers Expect: 100-continue: the server checks the headers and tells the client to send its large body, so a refused upload wastes nothing."@en ;
+    solid-memo:front "100" .
+
+<#101-switching-protocols>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Switching Protocols"@en ;
+    solid-memo:backNote "The server's answer to an Upgrade header; in practice, how a WebSocket connection starts."@en ;
+    solid-memo:front "101" .
+
+<#102-processing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Processing"@en ;
+    solid-memo:backNote "WebDAV: told a client a long request was still being worked on. Deprecated, and rarely sent today."@en ;
+    solid-memo:front "102" .
+
+<#103-early-hints>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Early Hints"@en ;
+    solid-memo:backNote "Sent before the final response with Link headers, so the browser can start preloading CSS and fonts early."@en ;
+    solid-memo:front "103" .
+
+<#200-ok>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "OK"@en ;
+    solid-memo:backNote "The everyday success: a page loaded, an API call returned its data."@en ;
+    solid-memo:front "200" .
+
+<#201-created>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Created"@en ;
+    solid-memo:backNote "A POST or PUT made a new resource; the Location header usually gives its URL."@en ;
+    solid-memo:front "201" .
+
+<#202-accepted>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Accepted"@en ;
+    solid-memo:backNote "The request was queued for later, such as a batch job or an email to send; the work isn't done yet."@en ;
+    solid-memo:front "202" .
+
+<#203-non-authoritative-information>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Non-Authoritative Information"@en ;
+    solid-memo:backNote "A proxy changed the origin's 200 response on its way through. Seldom seen in practice."@en ;
+    solid-memo:front "203" .
+
+<#204-no-content>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "No Content"@en ;
+    solid-memo:backNote "Success with nothing to send back: common after a DELETE, or a PUT or PATCH that saves changes and needs no reply body."@en ;
+    solid-memo:front "204" .
+
+<#205-reset-content>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Reset Content"@en ;
+    solid-memo:backNote "Tells the client to clear the form or view that sent the request. Barely used by browsers."@en ;
+    solid-memo:front "205" .
+
+<#206-partial-content>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Partial Content"@en ;
+    solid-memo:backNote "Answers a Range request: how videos seek and downloads resume."@en ;
+    solid-memo:front "206" .
+
+<#207-multi-status>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Multi-Status"@en ;
+    solid-memo:backNote "WebDAV: one response carrying a separate status for each of several resources, in an XML body."@en ;
+    solid-memo:front "207" .
+
+<#208-already-reported>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Already Reported"@en ;
+    solid-memo:backNote "WebDAV: a member already listed earlier in the same 207 response isn't listed again."@en ;
+    solid-memo:front "208" .
+
+<#226-im-used>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "IM Used"@en ;
+    solid-memo:backNote "Delta encoding: the response is a diff against a version the client has. Almost never seen."@en ;
+    solid-memo:front "226" .
+
+<#300-multiple-choices>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Multiple Choices"@en ;
+    solid-memo:backNote "Several representations exist and the client should pick one. Rare, as servers usually choose themselves."@en ;
+    solid-memo:front "300" .
+
+<#301-moved-permanently>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Moved Permanently"@en ;
+    solid-memo:backNote "A URL changed for good: search engines move to the new one. Clients may turn a POST into a GET."@en ;
+    solid-memo:front "301" .
+
+<#302-found>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Found"@en ;
+    solid-memo:backNote "A temporary redirect, such as to a login page. Browsers turn a POST into a GET when following it; use 307 to keep the method."@en ;
+    solid-memo:front "302" .
+
+<#303-see-other>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "See Other"@en ;
+    solid-memo:backNote "Sent after a POST to point at a result page with a GET, so reloading doesn't resubmit the form."@en ;
+    solid-memo:front "303" .
+
+<#304-not-modified>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Modified"@en ;
+    solid-memo:backNote "The cached copy is still good (its ETag or date matched), so no body is sent again."@en ;
+    solid-memo:front "304" .
+
+<#305-use-proxy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Use Proxy"@en ;
+    solid-memo:backNote "Told a client to go through a given proxy. Deprecated for security reasons; browsers ignore it."@en ;
+    solid-memo:front "305" .
+
+<#306-unused>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unused"@en ;
+    solid-memo:backNote "Reserved: it was \"Switch Proxy\" in an early draft, and is no longer used."@en ;
+    solid-memo:front "306" .
+
+<#307-temporary-redirect>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Temporary Redirect"@en ;
+    solid-memo:backNote "Like 302, but the client must repeat the same method and body, so a POST stays a POST."@en ;
+    solid-memo:front "307" .
+
+<#308-permanent-redirect>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Permanent Redirect"@en ;
+    solid-memo:backNote "Like 301, but the method and body must not change; used for APIs and HTTP-to-HTTPS moves."@en ;
+    solid-memo:front "308" .
+
+<#400-bad-request>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Bad Request"@en ;
+    solid-memo:backNote "The request is malformed, such as invalid JSON or a missing field, and won't succeed unchanged."@en ;
+    solid-memo:front "400" .
+
+<#401-unauthorized>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unauthorized"@en ;
+    solid-memo:backNote "Really \"unauthenticated\": no credentials or bad ones. Sent with WWW-Authenticate; log in and retry."@en ;
+    solid-memo:front "401" .
+
+<#402-payment-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Payment Required"@en ;
+    solid-memo:backNote "Reserved for future use; some APIs send it when a plan or quota needs paying for."@en ;
+    solid-memo:front "402" .
+
+<#403-forbidden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Forbidden"@en ;
+    solid-memo:backNote "The server understood the request but refuses it, such as a user without the right role or a blocked IP. Same credentials won't help."@en ;
+    solid-memo:front "403" .
+
+<#404-not-found>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Found"@en ;
+    solid-memo:backNote "No resource at this URL; also sent in place of 403 to hide that something exists."@en ;
+    solid-memo:front "404" .
+
+<#405-method-not-allowed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Method Not Allowed"@en ;
+    solid-memo:backNote "The URL exists but not for this method, such as a DELETE on a read-only resource; Allow lists the ones that work."@en ;
+    solid-memo:front "405" .
+
+<#406-not-acceptable>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Acceptable"@en ;
+    solid-memo:backNote "No representation matches the Accept headers. Most servers send a default format instead."@en ;
+    solid-memo:front "406" .
+
+<#407-proxy-authentication-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Proxy Authentication Required"@en ;
+    solid-memo:backNote "Like 401, but it is a proxy in between, often a corporate one, that wants credentials."@en ;
+    solid-memo:front "407" .
+
+<#408-request-timeout>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Request Timeout"@en ;
+    solid-memo:backNote "The client was too slow to send its request; servers send it to close idle connections."@en ;
+    solid-memo:front "408" .
+
+<#409-conflict>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Conflict"@en ;
+    solid-memo:backNote "The request clashes with the resource's current state, such as a duplicate username or an edit conflict."@en ;
+    solid-memo:front "409" .
+
+<#410-gone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Gone"@en ;
+    solid-memo:backNote "Removed on purpose and for good, unlike 404; tells search engines to drop the URL."@en ;
+    solid-memo:front "410" .
+
+<#411-length-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Length Required"@en ;
+    solid-memo:backNote "The server refuses a body sent without a Content-Length header."@en ;
+    solid-memo:front "411" .
+
+<#412-precondition-failed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Precondition Failed"@en ;
+    solid-memo:backNote "An If-Match or If-Unmodified-Since check failed: someone else changed it first. Stops lost updates."@en ;
+    solid-memo:front "412" .
+
+<#413-content-too-large>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Content Too Large"@en ;
+    solid-memo:backNote "The body is over the server's limit; often seen when uploading a file too big. Once \"Payload Too Large\"."@en ;
+    solid-memo:front "413" .
+
+<#414-uri-too-long>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "URI Too Long"@en ;
+    solid-memo:backNote "The URL is longer than the server will take, often from a huge query string that belonged in a POST."@en ;
+    solid-memo:front "414" .
+
+<#415-unsupported-media-type>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unsupported Media Type"@en ;
+    solid-memo:backNote "The body's format isn't accepted, such as XML sent to a JSON API or a wrong Content-Type."@en ;
+    solid-memo:front "415" .
+
+<#416-range-not-satisfiable>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Range Not Satisfiable"@en ;
+    solid-memo:backNote "The Range asked for lies outside the file, such as resuming past its end."@en ;
+    solid-memo:front "416" .
+
+<#417-expectation-failed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Expectation Failed"@en ;
+    solid-memo:backNote "The server can't meet the request's Expect header, typically Expect: 100-continue."@en ;
+    solid-memo:front "417" .
+
+<#418-i-am-a-teapot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "I'm a teapot"@en ;
+    solid-memo:backNote "An April Fools' joke (RFC 2324) that stuck; some sites send it to requests they want to turn away."@en ;
+    solid-memo:front "418" .
+
+<#421-misdirected-request>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Misdirected Request"@en ;
+    solid-memo:backNote "A reused HTTP/2 or TLS connection reached a server that doesn't serve this host name."@en ;
+    solid-memo:front "421" .
+
+<#422-unprocessable-content>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unprocessable Content"@en ;
+    solid-memo:backNote "Well-formed but semantically wrong, such as a form that fails validation. Common in REST APIs."@en ;
+    solid-memo:front "422" .
+
+<#423-locked>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Locked"@en ;
+    solid-memo:backNote "WebDAV: the resource is locked, for example a document someone else has open for editing."@en ;
+    solid-memo:front "423" .
+
+<#424-failed-dependency>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Failed Dependency"@en ;
+    solid-memo:backNote "WebDAV: this action failed because another one it depended on failed."@en ;
+    solid-memo:front "424" .
+
+<#425-too-early>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Too Early"@en ;
+    solid-memo:backNote "The server won't risk processing a request sent in TLS early data, which could be replayed."@en ;
+    solid-memo:front "425" .
+
+<#426-upgrade-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Upgrade Required"@en ;
+    solid-memo:backNote "The server will only answer over another protocol, named in its Upgrade header."@en ;
+    solid-memo:front "426" .
+
+<#428-precondition-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Precondition Required"@en ;
+    solid-memo:backNote "The server demands a conditional request, such as If-Match, so blind overwrites can't happen."@en ;
+    solid-memo:front "428" .
+
+<#429-too-many-requests>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Too Many Requests"@en ;
+    solid-memo:backNote "Rate limiting: slow down. A Retry-After header often says how long to wait."@en ;
+    solid-memo:front "429" .
+
+<#431-request-header-fields-too-large>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Request Header Fields Too Large"@en ;
+    solid-memo:backNote "Headers too big; most often an oversized or piled-up cookie. Clearing cookies usually fixes it."@en ;
+    solid-memo:front "431" .
+
+<#451-unavailable-for-legal-reasons>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Unavailable For Legal Reasons"@en ;
+    solid-memo:backNote "Blocked by law or court order, such as censorship or a geo-block. Named after Fahrenheit 451."@en ;
+    solid-memo:front "451" .
+
+<#500-internal-server-error>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Internal Server Error"@en ;
+    solid-memo:backNote "The catch-all for a server crash or unhandled exception; the client's request may be fine."@en ;
+    solid-memo:front "500" .
+
+<#501-not-implemented>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Implemented"@en ;
+    solid-memo:backNote "The server doesn't support the method at all, such as a method it has never heard of."@en ;
+    solid-memo:front "501" .
+
+<#502-bad-gateway>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Bad Gateway"@en ;
+    solid-memo:backNote "A proxy or load balancer got an invalid answer from the server behind it, which may be down."@en ;
+    solid-memo:front "502" .
+
+<#503-service-unavailable>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Service Unavailable"@en ;
+    solid-memo:backNote "Overloaded or down for maintenance, for now; Retry-After may say when to come back."@en ;
+    solid-memo:front "503" .
+
+<#504-gateway-timeout>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Gateway Timeout"@en ;
+    solid-memo:backNote "A proxy or load balancer gave up waiting for the server behind it, which was too slow."@en ;
+    solid-memo:front "504" .
+
+<#505-http-version-not-supported>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "HTTP Version Not Supported"@en ;
+    solid-memo:backNote "The server won't speak the HTTP version the request used."@en ;
+    solid-memo:front "505" .
+
+<#506-variant-also-negotiates>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Variant Also Negotiates"@en ;
+    solid-memo:backNote "A content negotiation setup error: the chosen variant negotiates too, making a loop. Rare."@en ;
+    solid-memo:front "506" .
+
+<#507-insufficient-storage>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Insufficient Storage"@en ;
+    solid-memo:backNote "WebDAV: the server has no room left to store what the request needs, such as a full disk."@en ;
+    solid-memo:front "507" .
+
+<#508-loop-detected>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Loop Detected"@en ;
+    solid-memo:backNote "WebDAV: the server found an infinite loop while processing a request with Depth: infinity."@en ;
+    solid-memo:front "508" .
+
+<#510-not-extended>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Not Extended"@en ;
+    solid-memo:backNote "For an HTTP extension framework that never caught on; the IETF now marks it obsolete."@en ;
+    solid-memo:front "510" .
+
+<#511-network-authentication-required>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T16:29:47.000Z"^^xsd:dateTime ;
+    solid-memo:back "Network Authentication Required"@en ;
+    solid-memo:backNote "A captive portal, such as hotel or airport Wi-Fi, wants you to log in before you get online."@en ;
+    solid-memo:front "511" .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
