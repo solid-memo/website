@@ -8,7 +8,7 @@
 # branch (SOLID_NEXTCLOUD_SHA), its PHP dependencies from its lockfile.
 # On the first start, which with no volume is every start, the image
 # installs Nextcloud on SQLite, then runs open-pod.sh.
-FROM nextcloud:32.0.15-apache@sha256:f2434fcba67216f58a2ade2d7f549873a75c53e624a844d36fc3b630b379aaaf
+FROM nextcloud:32.0.15-apache@sha256:45afe3bebd1eef20b402cafcb87206e3d9f3a27dbc514a21ab8e124d97bbfe8c
 # v0.11.0, for Nextcloud 31 to 35, with the December 2025 authorization
 # fix (CLN-012); Renovate follows the branch (renovate.json5).
 # renovate: datasource=git-refs depName=https://github.com/pdsinterop/solid-nextcloud branch=main
