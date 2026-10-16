@@ -8,6 +8,7 @@
       "inputs": [
         "$TURBO_EXTENDS$",
         ".env*",
+        "$TURBO_ROOT$/CNAME",
         "$TURBO_ROOT$/ns/shapes/**"
       ],
       "env": [
@@ -20,6 +21,7 @@
         "$TURBO_EXTENDS$",
         ".env*",
         "$TURBO_ROOT$/package.json",
+        "$TURBO_ROOT$/CNAME",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**"
       ],

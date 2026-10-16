@@ -13,10 +13,11 @@ the Vite build that publishes them together with the vocabulary and shapes
   with what is the site's own (its name, where it is served, the
   build's values) and renders `src/App.tsx`, which shows Solid Memo, or
   the Studio at its routes, loaded lazily.
-- `public/`: files served as they are: the icons, `robots.txt`,
-  `sitemap.xml`, the About page (`about/`) and the Studio's old address
-  (`studio/`).
-- `vite.config.ts`: the build.
+- `public/`: files served as they are: the icons, the About page
+  (`about/`) and the Studio's old address (`studio/`).
+- `vite.config.ts`: the build. It also writes `robots.txt` and
+  `sitemap.xml`, on the domain in the repository's `CNAME`
+  (`siteMapPlugin`, in `@solid-memo/vocab/tooling/siteMap`).
 
 It exports nothing; no package may import it.
 

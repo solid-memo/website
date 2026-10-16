@@ -175,8 +175,13 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: apps/web/dist/journeys
-      - name: The vocabulary and the deck library are in the artifact
-        run: test -f apps/web/dist/ns/vocab/v1.ttl && test -f apps/web/dist/decks/index.ttl
+      # robots.txt always, and the sitemap whenever CNAME names a domain
+      # (docs/deployment.md#custom-domain-optional).
+      - name: The vocabulary, the deck library, robots.txt and the sitemap are in the artifact
+        run: >-
+          test -f apps/web/dist/ns/vocab/v1.ttl && test -f apps/web/dist/decks/index.ttl
+          && test -f apps/web/dist/robots.txt
+          && { [ ! -s CNAME ] || test -f apps/web/dist/sitemap.xml; }
       - uses: actions/configure-pages@v6
         with:
           enablement: true

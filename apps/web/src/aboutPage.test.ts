@@ -6,6 +6,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { siteOrigin } from "@solid-memo/vocab/tooling/siteMap";
 import { describe, expect, it } from "vitest";
 
 /*
@@ -52,7 +53,7 @@ describe("the About page", () => {
     expect(html).not.toMatch(/\son[a-z]+=/);
   });
 
-  it("is a page of its own for search engines, with the address the sitemap lists", () => {
+  it("is a page of its own for search engines, at its address on the domain in CNAME, which the sitemap lists", () => {
     expect(html.startsWith('<!doctype html>\n<html lang="en">')).toBe(true);
     expect(html.match(/<h1>/g)).toHaveLength(1);
     expect(html).toMatch(/<title>About Solid Memo[^<]*<\/title>/);
@@ -61,8 +62,10 @@ describe("the About page", () => {
       '<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
     );
     expect(html).not.toContain("noindex");
-    const canonical = /<link rel="canonical" href="([^"]*)"/.exec(html)![1]!;
-    expect(read("public/sitemap.xml")).toContain(`<loc>${canonical}</loc>`);
+    // Without a domain there is no sitemap, and no address to name.
+    const origin = siteOrigin(resolve(repository, "CNAME"));
+    const canonical = /<link rel="canonical" href="([^"]*)"/.exec(html)?.[1] ?? null;
+    expect(canonical).toBe(origin === null ? null : `${origin}/about/`);
   });
 
   it("speaks to learners, deck authors, technologists and decision makers", () => {

@@ -296,9 +296,10 @@ What holds today, and what does not, criterion by criterion.
   `noscript` source link) follow `VITE_REPO_URL`. What is still written
   for this deployment: `index.html`'s absolute URLs on solid-memo.com
   (the canonical link, `og:url`, `og:image`, and the JSON-LD `url`, `@id`
-  and `image`) and its description; `robots.txt` and `sitemap.xml`; the
-  about page, with its address and its links to this repository;
-  Solid Memo's wordmark and logo; `CNAME`; and the README.
+  and `image`) and its description; the about page, with its address
+  and its links to this repository; Solid Memo's wordmark and logo;
+  `CNAME`, the domain the build writes `sitemap.xml` and `robots.txt`
+  on; and the README.
   [reuse.md](reuse.md#6-what-you-edit-by-hand) lists them as files to
   edit by hand. The tree names no path on the maintainer's machine, but
   three old commits on `main` do, and the history keeps them.
@@ -886,9 +887,9 @@ them:
   several parties need other parties. The roadmap invites them, but
   none has joined.
 - **Criterion 3, situation-specific information.** `index.html`'s site
-  URLs, `CNAME`, the sitemap, `robots.txt` and the about page name
-  solid-memo.com, and the about page links to this repository. A
-  deployed site needs them, and
+  URLs, `CNAME` (which the build writes the sitemap and `robots.txt`
+  from) and the about page name solid-memo.com, and the about page
+  links to this repository. A deployed site needs them, and
   [reuse.md](reuse.md#6-what-you-edit-by-hand) lists them for a copy to
   change. Three old commits name paths on the maintainer's machine, and
   the history keeps them.
@@ -1000,8 +1001,9 @@ landed and **Open.** when it has not: most of it landed on the branch
   releases each version from the commits, and only released versions
   are deployed, from tags a ruleset protects. The archive remains
   (above).
-- **Open.** **Findability.** The about page is done and in the sitemap. Search
-  engines and the Solid community remain (above).
+- **Open.** **Findability.** The about page is done and in the sitemap,
+  which the build writes. Search engines and the Solid community remain
+  (above).
 - **Done.** **Deck contact.** New deck versions name the project's contact.
 - **Open.** **A second reviewer.**
 

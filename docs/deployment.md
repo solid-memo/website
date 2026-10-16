@@ -22,7 +22,7 @@ flowchart LR
     tag -->|no| skip["not deployed"]
     tag -->|yes| release{"the newest version,<br/>its release commit,<br/>its GitHub release?"}
     release -->|no| skip
-    release -->|yes| build["deploy.yml:<br/>npm run build"] --> guard["ns/ and decks/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
+    release -->|yes| build["deploy.yml:<br/>npm run build"] --> guard["ns/, decks/,<br/>robots.txt, sitemap.xml<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
     hand["run by hand<br/>from main"] --> newest["deploy.yml:<br/>the newest version"] --> release
     release -->|"yes, by hand"| check["npm run check"] --> build
 ```
@@ -111,6 +111,7 @@ data it reads:
 |---|---|---|
 | `/` (`index.html`, `assets/`) | `apps/web/`, `apps/studio/` | The app, [Solid Memo Studio](studio.md) at `#/studio` included, in a chunk of its own under `assets/`. |
 | `/about/index.html` | `apps/web/public/about/` | What Solid Memo is, for learners, deck authors, technologists and decision makers: plain HTML, in English, that search engines and browsers without script can read. It runs no script, so it follows the browser's light or dark, not the theme chosen in the app; [aboutPage.test.ts](../apps/web/src/aboutPage.test.ts) checks its policy and its links. `sitemap.xml` lists it, and the site's page links to it in a `<noscript>`. |
+| `/robots.txt`, `/sitemap.xml` | written by the build, from [CNAME](../CNAME) | `robots.txt` keeps search engines out of `/journeys/` and names the sitemap. The sitemap lists every page the build emits or copies, `/` first, except a page whose `<meta name="robots">` says `noindex` (the Studio's old address), on the domain in `CNAME` ([below](#custom-domain-optional)). Without a `CNAME`, there is no sitemap, and `robots.txt` names none. |
 | `/studio/index.html` | `apps/web/public/studio/` | The Studio's old address: a page that sends `/studio/#/x` on to `/#/studio/x` ([studio.md](studio.md#routes)). |
 | `/ns/vocab/*.ttl`, `/ns/shapes/<class>/v<N>.ttl` | [`ns/`](../ns/) | The vocabulary and the shapes ([vocab.md](vocab.md), [shapes.md](shapes.md)). |
 | `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
@@ -181,7 +182,17 @@ origin. To serve a GitHub Pages deployment from a domain of your own:
 
 The deploy workflow publishes through `actions/deploy-pages`, which
 takes the domain from that setting only: a `CNAME` file in the
-repository is not read. On another host, follow its own steps.
+repository is not read for that. On another host, follow its own steps.
+
+The build reads it, though: `siteMapPlugin` in
+[siteMap.ts](../packages/vocab/tooling/siteMap.ts) writes
+`sitemap.xml` and the `Sitemap:` line of `robots.txt` on the domain
+that `CNAME` names, since a sitemap's addresses are absolute. So write
+your domain into `CNAME` too, a bare hostname such as
+`memo.example.org`; the build fails on anything else, a scheme, a path
+or a port. Without a domain, delete `CNAME`: the build then writes
+`robots.txt` without a sitemap. The deploy's guard checks that there is
+a sitemap whenever `CNAME` is there.
 
 The vocabulary, shape and library IRIs name `https://solid-memo.com/`
 whatever domain serves the site; the app reads them from where it is
@@ -191,14 +202,17 @@ served ([reuse.md](reuse.md#what-stays-the-same)).
 
 One.com's DNS points `solid-memo.com` at GitHub Pages, and the custom
 domain is set in the repository's settings. [CNAME](../CNAME) records
-that setting; the deploy does not read it. The IRIs above resolve on
-the web because this domain serves this site.
+that setting, and the build writes the sitemap on that domain. The IRIs
+above resolve on the web because this domain serves this site.
 
 ## Manual publish (any static web space)
 
 `npm run build`, then upload the **contents** of `apps/web/dist/` to the web
 root (or any subfolder) via SFTP or a file manager, `ns/`, `decks/`,
-`vendor/` and `studio/` included. Verify a build
+`vendor/` and `studio/` included. The sitemap and `robots.txt` name the
+root of the domain in [CNAME](../CNAME): for another domain, write
+yours there first, and for a subfolder, delete `CNAME`, since the
+sitemap's addresses would leave the subfolder out. Verify a build
 locally with `npm start` (builds, then serves `dist/` at
 `http://localhost:4173`), or `npm run preview -w @solid-memo/web` to serve
 the last build.

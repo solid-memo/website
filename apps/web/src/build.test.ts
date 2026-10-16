@@ -5,10 +5,12 @@
 // SPDX-License-Identifier: MIT
 
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { type Document, Window } from "happy-dom";
 import { build, loadEnv, type Rolldown } from "vite";
 import { beforeAll, describe, expect, it } from "vitest";
+import { siteOrigin } from "@solid-memo/vocab/tooling/siteMap";
 import { siteConfig, siteHtml, type SiteConfig } from "./config";
 
 /*
@@ -25,6 +27,9 @@ const HTML_SINKS =
 function builtConfig(): SiteConfig {
   return siteConfig(loadEnv("production", resolve(import.meta.dirname, ".."), "VITE_"));
 }
+
+/** The site's origin, from the domain in CNAME; null without one. */
+const origin = siteOrigin(resolve(import.meta.dirname, "../../../CNAME"));
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
@@ -210,5 +215,48 @@ describe("the page's repository", () => {
   it("is the site's (VITE_REPO_URL, Solid Memo's when unset) in its noscript link", () => {
     expect(html).not.toContain("%REPO_URL");
     expect(html).toContain(`<a href="${siteHtml("%REPO_URL%", builtConfig())}">source code</a>`);
+  });
+});
+
+describe("robots.txt and the sitemap", () => {
+  const emitted = (fileName: string) =>
+    assets.find((asset) => asset.fileName === fileName)?.source as string | undefined;
+  const locs = () =>
+    [
+      ...new browser.DOMParser()
+        .parseFromString(emitted("sitemap.xml")!, "text/xml")
+        .querySelectorAll("loc"),
+    ].map((loc) => loc.textContent);
+
+  it("are written from CNAME, robots.txt naming the sitemap when there is a domain", () => {
+    const robots = emitted("robots.txt")!;
+    expect(robots).toContain("Disallow: /journeys/");
+    if (origin === null) {
+      expect(robots).not.toContain("Sitemap:");
+      expect(emitted("sitemap.xml")).toBeUndefined();
+    } else expect(robots).toContain(`\nSitemap: ${origin}/sitemap.xml\n`);
+  });
+
+  it.runIf(origin !== null)(
+    "lists the site's page, which the HTML plugin emits, first, and the About page",
+    () => {
+      expect(locs()).toEqual([`${origin}/`, `${origin}/about/`]);
+      expect(dom.querySelector('link[rel="canonical"]')!.getAttribute("href")).toBe(locs()[0]);
+    },
+  );
+
+  it.runIf(origin !== null)("lists no page that asks not to be indexed", () => {
+    const app = resolve(import.meta.dirname, "..");
+    for (const loc of locs()) {
+      const path = new URL(loc).pathname;
+      const page =
+        path === "/"
+          ? html
+          : readFileSync(resolve(app, "public", `${path.slice(1)}index.html`), "utf8");
+      const robots = new browser.DOMParser()
+        .parseFromString(page, "text/html")
+        .querySelector('meta[name="robots"]');
+      expect(robots?.getAttribute("content") ?? "", loc).not.toContain("noindex");
+    }
   });
 });

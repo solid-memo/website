@@ -7,8 +7,9 @@ import { createRequire } from "node:module";
 import { defineConfig, type Plugin } from "vite";
 import preact from "@preact/preset-vite";
 import { turtleDirectoryPlugin } from "@solid-memo/vocab/tooling/publishTurtle";
-import { DECKS_ROOT, NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { DECKS_ROOT, NS_ROOT, REPOSITORY_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { siteDefines } from "@solid-memo/vocab/tooling/siteBuild";
+import { siteMapPlugin, siteOrigin } from "@solid-memo/vocab/tooling/siteMap";
 import { siteConfig, siteHtml, type SiteConfig } from "./src/config.ts";
 
 /**
@@ -43,6 +44,9 @@ export default defineConfig({
       ? [turtleDirectoryPlugin({ dir: DECKS_ROOT, publicPath: "decks" })]
       : []),
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vendor`, publicPath: "vendor" }),
+    // robots.txt, and the sitemap of every page, on the domain in CNAME
+    // (docs/deployment.md#custom-domain-optional): none without one.
+    siteMapPlugin({ origin: siteOrigin(`${REPOSITORY_ROOT}CNAME`) }),
   ],
   resolve: {
     alias: {

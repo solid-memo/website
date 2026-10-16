@@ -83,8 +83,8 @@ says which, and why each one does not stand in the way of reuse.
 | [Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html) | HTML Living Standard | WHATWG standard | Choices kept on the device ([privacy.md](privacy.md#in-the-browser)) | Yes |
 | [Web Locks](https://www.w3.org/TR/web-locks/) | W3C Working Draft | W3C Working Draft | Keeping tabs apart while the guest's pod is written or moved ([guest-mode.md](guest-mode.md)) | Yes |
 | [Open Graph](https://ogp.me/) | — | De facto, published by Meta | Link previews in [`apps/web/index.html`](../apps/web/index.html) | Yes (de facto) |
-| [Sitemaps](https://www.sitemaps.org/protocol.html) | 0.9 | De facto, by the major search engines | [`apps/web/public/sitemap.xml`](../apps/web/public/sitemap.xml) | Yes (de facto) |
-| [robots.txt](https://www.rfc-editor.org/rfc/rfc9309) | RFC 9309 | IETF RFC | [`apps/web/public/robots.txt`](../apps/web/public/robots.txt) | Yes |
+| [Sitemaps](https://www.sitemaps.org/protocol.html) | 0.9 | De facto, by the major search engines | `sitemap.xml`, written by the build ([`siteMap.ts`](../packages/vocab/tooling/siteMap.ts)) | Yes (de facto) |
+| [robots.txt](https://www.rfc-editor.org/rfc/rfc9309) | RFC 9309 | IETF RFC | `robots.txt`, written by the build ([`siteMap.ts`](../packages/vocab/tooling/siteMap.ts)) | Yes |
 | [WCAG](https://www.w3.org/TR/WCAG22/) | 2.2 | W3C Recommendation | The Studio's minimum target size and single-key shortcuts that can be turned off ([studio.md](studio.md#layout)) | Yes |
 
 The app is built on the web platform as a whole: HTML, CSS, the DOM,

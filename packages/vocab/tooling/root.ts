@@ -11,8 +11,11 @@ import { join } from "node:path";
  */
 export const VOCAB_ROOT = join(import.meta.dirname, "../");
 
+/** The repository's root folder, ending in a slash: where CNAME is, which the site's sitemap is written from. */
+export const REPOSITORY_ROOT = join(VOCAB_ROOT, "../../");
+
 /** The repository's ns/ folder, ending in a slash: the vocabulary (vocab/) and the shapes (shapes/), as the site publishes them. */
-export const NS_ROOT = join(VOCAB_ROOT, "../../ns/");
+export const NS_ROOT = join(REPOSITORY_ROOT, "ns/");
 
 /** The repository's decks/ folder, ending in a slash: the deck library, as the site publishes it. */
-export const DECKS_ROOT = join(VOCAB_ROOT, "../../decks/");
+export const DECKS_ROOT = join(REPOSITORY_ROOT, "decks/");

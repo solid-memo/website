@@ -27,8 +27,6 @@ path = [
     "**/*.html",
     ".nvmrc",
     "CNAME",
-    "apps/web/public/robots.txt",
-    "apps/web/public/sitemap.xml",
     # The vocabulary and the shapes, served as RDF (docs/vocab.md#license).
     "ns/**",
     # Test data.
