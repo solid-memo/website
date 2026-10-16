@@ -20,7 +20,7 @@ graph LR
   accDescr: Requests to the guest pod's address go to the local pod in IndexedDB, and every other URL goes through the authenticated fetch.
   UI --> UseCases --> Adapters["Solid adapters"]
   Adapters --> Fence[writeFence] --> Router[routedFetch]
-  Router -- "https://guest.solid-memo.invalid/…" --> LocalPod[localPod] --> Store[(IndexedDB)]
+  Router -- "guest.solid-memo.invalid" --> LocalPod[localPod] --> Store[(IndexedDB)]
   Router -- every other URL --> authFetch --> Pod[(the user's pod)]
 ```
 

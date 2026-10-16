@@ -197,17 +197,21 @@ describe("boundaryProblems", () => {
               'import { readFileSync } from "node:fs";',
               'import { Parser } from "n3";',
               'import { load } from "@solid-memo/vocab/tooling/load";',
+              'import { chromium } from "playwright";',
+              'import mermaid from "mermaid/dist/mermaid.core.mjs";',
             ].join("\n"),
             "src/a.test.ts": 'import { readFileSync } from "node:fs";',
-            "node/b.ts": 'import { readFileSync } from "node:fs";',
+            "node/b.ts": 'import { chromium } from "playwright";',
           },
-          { n3: "*", "@solid-memo/vocab": "*" },
+          { n3: "*", "@solid-memo/vocab": "*", playwright: "*", mermaid: "*" },
         ),
       ),
     ).toEqual([
       'packages/shacl/src/a.ts: runs in the browser, so may not import "node:fs".',
       'packages/shacl/src/a.ts: runs in the browser, so may not import "n3".',
       'packages/shacl/src/a.ts: runs in the browser, so may not import "@solid-memo/vocab/tooling/load".',
+      'packages/shacl/src/a.ts: runs in the browser, so may not import "playwright".',
+      'packages/shacl/src/a.ts: runs in the browser, so may not import "mermaid/dist/mermaid.core.mjs".',
     ]);
   });
 

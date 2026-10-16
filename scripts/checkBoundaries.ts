@@ -13,7 +13,8 @@
  * - any other package is declared too (npm hoists everything, so an
  *   undeclared import would still resolve — this is what catches it);
  * - code that runs in the browser imports nothing node-only (node:*, n3,
- *   the Turtle tooling, a package's tooling/ or node/ entry points).
+ *   Mermaid and Playwright, the Turtle tooling, a package's tooling/ or
+ *   node/ entry points).
  * - some exports of a vendor package may be imported only from certain
  *   files: `@inrupt/solid-client`'s access control, by the release
  *   publisher alone (docs/boundaries.md, Access control).
@@ -108,6 +109,9 @@ export const BROWSER: Record<string, RegExp> = {
 export const NODE_ONLY = [
   /^node:/,
   /^n3$/,
+  // The docs' diagrams are drawn at build time, in Chromium (docs/markdown.md).
+  /^mermaid(\/|$)/,
+  /^playwright(\/|$)/,
   /^@solid-memo\/turtle(\/|$)/,
   /^@solid-memo\/[a-z-]+\/(tooling|node)\//,
 ];

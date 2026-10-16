@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# Chromium's headless shell, which the build draws the docs' Mermaid
+# diagrams in (docs/markdown.md), for a job that runs npm run check or
+# builds the site: from GitHub's cache, under the version of `playwright`
+# (packages/markdown/package.json), which fixes the browser's build. The
+# system libraries it needs come from apt on every run, the cache holding
+# only the browser. Run it after npm ci, which installs that version.
+#
+# The key is not the journeys job's (ci.yml): that job installs the full
+# Chromium, and neither may restore a cache that lacks its browser.
+name: Chromium
+description: Restores or installs the Chromium headless shell that draws the docs' diagrams.
+runs:
+  using: composite
+  steps:
+    - id: version
+      shell: bash
+      run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+    - id: cache
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-shell-${{ runner.os }}-${{ steps.version.outputs.version }}
+    - if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: npx playwright install --with-deps --only-shell chromium
+    - if: steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: npx playwright install-deps chromium

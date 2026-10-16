@@ -40,7 +40,9 @@
     5173
   ],
 
-  // Chromium for the user journeys (`npm run journeys`).
+  // Chromium for the user journeys (`npm run journeys`), and for the docs'
+  // diagrams that `npm run check` draws: the full browser it installs
+  // includes the headless shell `npm run browsers` would.
   "postCreateCommand": "npm ci && pip install -r scripts/requirements-ci.txt && npm run browsers -w @solid-memo/e2e-journeys",
 
   "remoteUser": "node"

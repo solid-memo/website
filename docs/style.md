@@ -202,7 +202,9 @@ run it without installing it.
 - A diagram is a Mermaid `flowchart`, `graph`, `sequenceDiagram` or
   `stateDiagram-v2` block. It starts with an `accTitle:` (a short name)
   and an `accDescr:` (one sentence that says what it shows), for
-  readers who cannot see it.
+  readers who cannot see it, and has no `%%{…}%%` directive: every
+  diagram is drawn with the same settings
+  ([markdown.md](markdown.md#diagrams)).
 - A diagram's text uses only printable ASCII, Latin-1 without the soft
   hyphen, and `– — ‘ ’ “ ” … −`. That rules out arrows, which the app's
   font, Fredoka, lacks, so a word says it (`to`, `and back`). A label
@@ -212,7 +214,10 @@ run it without installing it.
   other punctuation Mermaid reads, such as a `.` in a dotted edge or
   parentheses in a node, is quoted (`-. "main.tsx only" .->`,
   `D["round(x)"]`), and `>=` is written in words, since Mermaid can
-  drop the `>`.
+  drop the `>`. A word in an edge label is at most about 25 characters
+  wide, since Mermaid wraps an edge label at 200 pixels and splits a
+  longer word: a long address is shortened to its host
+  (`guest.solid-memo.invalid`).
 - After a diagram is changed, check on GitHub that it still draws as
   meant: GitHub's Mermaid version and label mode differ from other
   renderers', and a diagram one of them accepts another can reject or

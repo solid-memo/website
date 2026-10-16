@@ -18,7 +18,9 @@ This repository's docs are indexed in [docs/README.md](docs/README.md); start wi
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
 - **Done** means `npm run check` passes (Biome, markdownlint, cspell,
-  typecheck, tests and the repository's checks), `npm run lint:reuse` too
+  typecheck, tests and the repository's checks; it draws the docs'
+  diagrams in Chromium, which `npm run browsers` installs once, and it
+  fails under `DOCS_DIAGRAMS=skip`), `npm run lint:reuse` too
   when a file was added (it needs reuse: `pipx run reuse lint`, or
   `uv run --no-project --with reuse reuse lint`), and `npm run crosscheck`
   too when `ns/` or `decks/` changed (it needs

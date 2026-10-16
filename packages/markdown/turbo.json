@@ -1,0 +1,17 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": [
+    "//"
+  ],
+  "tasks": {
+    "test": {
+      "env": [
+        "DOCS_DIAGRAMS"
+      ],
+      "passThroughEnv": [
+        "PLAYWRIGHT_*",
+        "XDG_CACHE_HOME"
+      ]
+    }
+  }
+}

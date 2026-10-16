@@ -22,7 +22,7 @@ where the layers meet.
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); node-side validation of Turtle files and the deck library's index and checks, its Markdown rules among them (`node/`, `npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Adapters for the browser: the update journal, the language, the guest's pod's store (IndexedDB), and files saved as downloads and opened from the user's disk (`FileExchange`). |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
-| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release; and the repository's own docs, read in the same dialect with their headings kept ([markdown.md](markdown.md)). Imports nothing of the app's. |
+| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release; and the repository's own docs, read in the same dialect with their headings kept, their Mermaid diagrams drawn to SVG in Chromium by its node tooling (`tooling/`) ([markdown.md](markdown.md)). Imports nothing of the app's. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against real Solid servers, started in Docker ([testing.md](testing.md)). |
 | `@solid-memo/e2e-journeys` | `e2e/journeys/` | The user journeys: whole flows a user takes through the built app, driven in Chromium with Playwright against a Community Solid Server in Docker ([testing.md](testing.md#user-journeys)). It imports nothing of the app's but its messages, to find text on screen by. |
 
@@ -80,6 +80,7 @@ bundles it ([studio.md](studio.md)).
 ```sh
 npm run check     # Biome's lint, markdownlint, cspell; then every package: typecheck, tests (100% coverage), the round trip, drift, Turtle formatting, the deck library; then boundaries
 npm run build     # the site, the Studio included, into apps/web/dist/
+npm run browsers  # once: Chromium, which npm run check draws the docs' diagrams in (markdown.md)
 npm run dev       # the site, from source; the Studio at #/studio
 npm start         # the site as deployed: built, then served at http://localhost:4173
 npm run test:unit # every package's tests in one run, without coverage (a file or two: `-- <path>`)

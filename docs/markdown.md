@@ -276,6 +276,111 @@ time only, never for data:
   `DocumentError`, with the line it starts on when one says it. So a page
   shows as it is written, or its build fails and says where.
 
+## Diagrams
+
+The docs' Mermaid blocks are drawn to SVG at build time by the package's
+node tooling, [diagrams.ts](../packages/markdown/tooling/diagrams.ts)
+and [drawDiagrams.ts](../packages/markdown/tooling/drawDiagrams.ts):
+the official Mermaid, in Chromium through Playwright, so a drawing comes
+from the same parser family and layout engine as GitHub's. GitHub runs
+its own Mermaid version, with HTML labels, so a diagram is still checked
+on GitHub after an edit ([style.md](style.md#docs)).
+
+- **What a block must have.** `diagramsOf(file, text, inputs)` finds a
+  page's fenced `mermaid` blocks and checks each: a `flowchart`,
+  `graph`, `sequenceDiagram` or `stateDiagram-v2`; an `accTitle` (the
+  drawing's alternative text) and an `accDescr` (a sentence that says
+  what it shows); no `%%{…}%%` directive, which would change how it is
+  drawn; and, wherever it draws text, only characters the font has
+  (`FONT_CHARS`, [below](#the-diagrams-font)). It throws one
+  `DiagramError` that lists every problem of the page, each with its
+  file and line.
+- **How it is drawn.** Light (Mermaid's `default` theme) and dark, with
+  labels as SVG text rather than HTML (`htmlLabels: false`, so a
+  drawing has no `<foreignObject>`), ids that do not change from build
+  to build, and a node label wrapped at 400 pixels, so no word of the
+  docs' labels is split. Mermaid wraps an edge label at 200 pixels
+  whatever it is told, so an edge label has no longer word than that.
+  `drawDiagrams` launches one browser and draws in a page per theme. A
+  block Mermaid refuses fails the drawing with Mermaid's message, its
+  context lines kept, at the page's line: "Parse error on line 4" in a
+  block whose fence is at `srs.md:55` is `docs/srs.md:59`.
+- **The cache.** Each drawing is kept in
+  `node_modules/.cache/solid-memo-docs-diagrams/` under a key that
+  hashes all it depends on: Mermaid's version, `playwright`'s (which
+  fixes the Chromium build), the theme's settings, the font, its
+  license, the drawing code itself (both modules' sources) and the
+  block. When every drawing is there, no browser is launched. A drawing
+  is written under a temporary name and then renamed, so a build that
+  draws at the same time never reads half a file; one read from the
+  cache passes the same check as a new one
+  ([below](#a-drawing-is-safe-to-serve)), or is drawn again. A
+  drawing's file name is the page's name and the first 8 digits of its
+  hash (such as `srs-1f0e9a3c.svg` and `srs-1f0e9a3c.dark.svg`): a
+  changed diagram gets a new name, so no browser shows a stale drawing.
+- **Chromium.** `npm run browsers` installs it once: the headless
+  shell, without `sudo`. On Linux, a machine that lacks the system
+  libraries it needs gets them with `sudo npx playwright install-deps
+  chromium` (the [dev container](../.devcontainer/devcontainer.json)
+  has them).
+  Without it, drawing fails with a message that names that command.
+  With `DOCS_DIAGRAMS=skip` (`diagramMode`), drawing warns and returns
+  no drawings instead; it is refused when `CI` is set. `npm run check`
+  fails under it, by design: the test that draws in the real browser is
+  skipped, and the package's coverage drops below 100%.
+
+### A drawing is safe to serve
+
+A drawing is only ever shown through `<img>`, where nothing in it runs,
+but its address can be opened on its own, on the app's origin, and
+GitHub Pages lets the site set no Content Security Policy header.
+`checkSvg` does not read a drawing as leniently as a browser would: it
+takes only what Mermaid writes, and refuses the rest. Every `<` opens a
+plain tag of an element Mermaid draws the docs' diagram types with, with
+no namespace prefix, each attribute one Mermaid writes (or `data-…`,
+`aria-…`, and the SVG and XLink namespaces at their own addresses),
+each value in quotes with no `<` inside, and the tags closed in order.
+So there is no `<script>`, no event handler, no HTML
+(`<foreignObject>`), no animation (which could set a link), no document
+type, no comment, and no CDATA. A character reference is one of XML's
+five (`&amp;` and the like), so the text checked is the text the
+browser reads. No style or attribute value can load anything
+(`cssProblem`): no `@import`, no `image-set(`, no backslash (which
+could spell any of them), no string with `:` or `/`, and an `href` or
+`url(` only to `#…` in the drawing itself. An SVG in `<img>` loads
+nothing from elsewhere, so the font is inside it: the one exception is
+a single `@font-face` from a `data:` WOFF2, the embedded font, and only
+with its notice, the one comment, right after the opening tag.
+
+### The diagrams' font
+
+The diagrams are set in Fredoka, the app's own font
+([vendor-code.md](vendor-code.md)), from `@fontsource-variable/fredoka`'s
+Latin file. Each drawing embeds it, as one `data:` `@font-face`, so it
+looks the same on every machine and its text fits its boxes: a font of
+the viewer's own would be measured otherwise. Its glyphs are printable
+ASCII, Latin-1 but the soft hyphen, and `– — ‘ ’ “ ” … −`. That is
+`FONT_CHARS`, written out and held to the file's own table by a test;
+the package's `unicode-range` declares more than the file has, `↑` and
+`↓` among them. A character outside it would be drawn and measured in
+another font, so a block that draws one fails, naming it.
+
+Fredoka is under the SIL Open Font License 1.1 (OFL), which lets the
+font be bundled and embedded in software on these conditions: it is not
+sold by itself; each copy carries its copyright notice and the license,
+as a file of its own, a human-readable header, or metadata the user can
+easily see; a modified version does not use a Reserved Font Name; and
+the font stays under the OFL, though a document made with it need not.
+Fredoka names no Reserved Font Name, and the file is embedded unchanged.
+The file holds its copyright but not the license's text, so each
+drawing starts with a comment (`fontNotice`) that quotes the copyright
+line, the first of the package's `LICENSE` read at build time; names
+the license; says the font stays under it and the drawing does not; and
+points to `OFL-Fredoka.txt`, the package's `LICENSE` byte for byte,
+which goes beside the drawings wherever they are published. `checkSvg`
+refuses the font without that comment. Nothing under the OFL is in the
+repository, so `REUSE.toml` and `LICENSES/` do not name it.
+
 ## Safety
 
 Pods and libraries are untrusted: anyone's data may be opened, and most

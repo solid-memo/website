@@ -155,6 +155,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Chromium, which npm run check draws the docs' Mermaid diagrams in
+      # (docs/markdown.md).
+      - uses: ./.github/actions/chromium
       # CI checked the commit a workflow_run deploys; a run by hand has no
       # CI run behind it, so it checks the version itself.
       - if: github.event_name == 'workflow_dispatch'

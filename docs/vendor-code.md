@@ -10,9 +10,11 @@ replacing one would cost.
 | Inrupt Solid clients | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `packages/solid/src/`; its universal access API in `solidReleasePublisher.ts` alone | RDF datasets, pod I/O, Solid-OIDC auth, and the app's one access-control write: a published release made readable by everyone, on WAC or ACP ([boundaries.md](boundaries.md#access-control)) |
 | TanStack | `@tanstack/react-query` (via `preact/compat`) | `packages/ui/src/ui/`, `apps/studio/src/`, `apps/web/src/` | Async-state caching and invalidation |
 | Preact | `preact` | `packages/ui/src/ui/`, `apps/studio/src/`, `apps/web/src/` | Rendering |
-| Fontsource | `@fontsource-variable/fredoka`, `@fontsource/bangers`, `@fontsource-variable/noto-naskh-arabic` (all SIL OFL-1.1) | `packages/ui/src/style.css` (`@import`) | Typefaces — Fredoka for text, Bangers (comic lettering) for `h1`/`h2`, Noto Naskh Arabic for Arabic text — self-hosted: bundled into `dist/`, no third-party font requests |
+| Fontsource | `@fontsource-variable/fredoka`, `@fontsource/bangers`, `@fontsource-variable/noto-naskh-arabic` (all SIL OFL-1.1) | `packages/ui/src/style.css` (`@import`); Fredoka also `packages/markdown/tooling/drawDiagrams.ts` | Typefaces — Fredoka for text, Bangers (comic lettering) for `h1`/`h2`, Noto Naskh Arabic for Arabic text — self-hosted: bundled into `dist/`, no third-party font requests. Fredoka's Latin file is also embedded in each of the docs' diagrams, under the OFL-1.1, with its notice in each drawing and the license, `OFL-Fredoka.txt`, beside them ([markdown.md](markdown.md#the-diagrams-font)) |
 | Zazuko | `rdf-validate-shacl` (MIT; with `@rdfjs/*`, `clownface`) | `@solid-memo/shacl` (`src/engine.ts`, a lazily loaded chunk) | SHACL validation of pod and library documents against the shapes in `ns/shapes/` |
 | unified collective, tats-u | `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` (MIT; with `micromark`, `get-east-asian-width` and, through `decode-named-character-reference`, the `character-entities` table, aliased to its plain build in `apps/web/vite.config.ts`, `apps/web/vitest.config.ts`, `apps/studio/vitest.config.ts` and `packages/ui/vitest.config.ts`) | `@solid-memo/markdown` (`src/parse.ts`) | Parsing Markdown in data (CommonMark with pipe tables and CJK-friendly emphasis) into a tree the package folds into its own types ([markdown.md](markdown.md)) |
+| mermaid-js | `mermaid` (MIT; with `d3`, `dagre-d3-es`, `elkjs`, `katex`, `roughjs`, `dompurify` and more) | `packages/markdown/tooling/drawDiagrams.ts`, a development tool, never in the browser | Drawing the docs' Mermaid diagrams to SVG at build time, in Chromium ([markdown.md](markdown.md#diagrams)). Pinned, and bumped apart from Playwright (`renovate.json5`) |
+| Microsoft | `playwright` (Apache-2.0), `@playwright/test` | `packages/markdown/tooling/drawDiagrams.ts`; `e2e/journeys/` | Starting the Chromium the docs' diagrams are drawn in; driving the built app through the user journeys ([testing.md](testing.md#user-journeys)). One pinned version, which fixes the Chromium build |
 | RDF/JS community | `n3` | `@solid-memo/turtle`, the node tooling of `shacl`, and `e2e/pod/` (the server contract and tests) | Build-time Turtle parsing for the generators and validation; reading and writing pod documents in the end-to-end tests |
 
 ## Maturity
@@ -23,6 +25,14 @@ other version among what the app needs at run time, the workspace's own
 packages aside ([checkDependencies.ts](../scripts/checkDependencies.ts)
 walks `package-lock.json` from `apps/web`). Development tools, which
 are not shipped, are not checked.
+
+One development tool brings packages before 1.0.0 with it: Mermaid,
+which draws the docs' diagrams at build time, needs `elkjs` 0.9,
+`katex` 0.18, `d3-sankey` 0.12, `iconv-lite` 0.6 (through `d3-dsv`)
+and, through `roughjs`, `hachure-fill`, `path-data-parser`,
+`points-on-curve` and `points-on-path`. They run in the build's
+browser only; what the site serves is the drawings, so none of them is
+shipped, and the gap of decision 14 does not grow.
 
 The walk counts every run-time dependency, whether or not the bundle
 keeps it. These versions before 1.0.0 are allowed, each for a reason.

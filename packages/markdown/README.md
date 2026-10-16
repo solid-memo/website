@@ -5,7 +5,9 @@ deck's description; and the repository's own docs, in the same dialect.
 It reads the text into a tree of its own, folds it
 to what the app shows, bounds it at every entry point, derives plain
 text from it, and checks it by the rules for a release
-([markdown.md](../../docs/markdown.md)).
+([markdown.md](../../docs/markdown.md)). Its node tooling draws the
+docs' Mermaid diagrams to SVG, in Chromium
+([markdown.md](../../docs/markdown.md#diagrams)).
 
 ## Exports
 
@@ -26,12 +28,24 @@ text from it, and checks it by the rules for a release
 
 Its API is its own types, never `mdast`'s.
 
+`@solid-memo/markdown/tooling/<module>` is `tooling/<module>.ts`, for
+node only, at build time:
+
+- `diagrams`: the Mermaid blocks of a page and what each must have,
+  the settings they are drawn with, their cache keys, the font's
+  notice, and `checkSvg`, the check every drawing passes.
+- `drawDiagrams`: drawing them, light and dark, with the official
+  Mermaid in Chromium through Playwright, cached between builds.
+
 ## Boundaries
 
 It imports nothing of the app's. `ui` may import it from `src/ui/`
 only, and `shacl` from `node/` only. Its parser libraries
 (`mdast-util-from-markdown` and its extensions) are used in
 `src/parse.ts` alone ([boundaries.md](../../docs/boundaries.md)).
+`tooling/` is node-only. Its development dependencies, `mermaid`,
+`playwright` and `@fontsource-variable/fredoka`, are used in
+`tooling/drawDiagrams.ts` alone.
 
 ## Tests
 
@@ -39,6 +53,9 @@ only, and `shacl` from `node/` only. Its parser libraries
 npx turbo run typecheck test --filter=@solid-memo/markdown   # 100% coverage
 npm run test:unit -- packages/markdown/src/parse.test.ts      # one file, from the root
 ```
+
+One test draws in the real Chromium, which `npm run browsers` installs
+once ([testing.md](../../docs/testing.md#strategy-per-layer)).
 
 ## Status
 
