@@ -13,7 +13,9 @@ name: CI
 # so a pull request's commits are not checked twice for one push. The
 # jobs read the repository and nothing else: the token can only read,
 # and no secret is used, so a fork's pull request runs them as safely as
-# ours.
+# ours. The one exception, caches, runs on main alone and runs no code
+# of the repository's. Only runs on main save Turbo's cache and the
+# end-to-end images; a pull request and the merge queue read main's.
 
 on:
   pull_request:
@@ -64,7 +66,11 @@ jobs:
       # first job to finish, and another job's cache would not hold the
       # check's results. Each run restores the last one and adds to it, so
       # entries older than two weeks are evicted (TURBO_CACHE_MAX_AGE).
-      - uses: actions/cache@v6
+      # Only a run on main saves it, below: a pull request's or the merge
+      # queue's copy would be kept apart, under its own ref, and never
+      # read again, while it would count toward the repository's 10 GB.
+      - id: turbo
+        uses: actions/cache/restore@v6
         with:
           path: .turbo/cache
           key: turbo-check-${{ github.sha }}
@@ -87,6 +93,37 @@ jobs:
       # The app's build states the commit (GITHUB_SHA), so it is never
       # found in the cache: it reads the cache but adds nothing to it.
       - run: npm run build -- --cache=local:r
+      - if: github.ref == 'refs/heads/main' && steps.turbo.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: .turbo/cache
+          key: turbo-check-${{ github.sha }}
+
+  # Main's older Turbo caches (build's), deleted once build has saved its
+  # own, which was built on them, and they would count toward the
+  # repository's 10 GB until GitHub's 7 days are up. A job of its own, so
+  # the only token that can delete caches is in a job that runs none of
+  # the repository's code; and one that may fail without failing the run,
+  # which release.yml and deploy.yml wait for.
+  caches:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      actions: write
+    steps:
+      # shell: bash runs with pipefail, which the default does not, so a list
+      # that fails fails the step instead of deleting nothing.
+      - name: Keep only the newest Turbo cache
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh cache list --ref refs/heads/main --key turbo-check- --sort created_at --order desc --limit 100 \
+            --json id --jq '.[1:][].id' | xargs -r -n1 gh cache delete
 
   # The change compared with its base. The deck library
   # (docs/deck-library.md#checks): no published version
@@ -175,7 +212,8 @@ jobs:
   # one job per server (e2e/pod/servers.ts): each pulls or builds only its
   # server's image, or loads it from GitHub's cache (e2e-images), starts it
   # in Docker on this runner and runs the whole suite (docs/testing.md). One server failing does not stop the others;
-  # what the server printed is kept when its job fails.
+  # what the server printed is kept when its job fails. Only a run on main
+  # saves the images; elsewhere, new images are pulled through the mirror.
   pod:
     name: pod (${{ matrix.server }})
     runs-on: ubuntu-latest
@@ -201,9 +239,9 @@ jobs:
           name: pod-${{ matrix.server }}
           key: ${{ steps.key.outputs.key }}
       - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}
-      - if: steps.images.outputs.hit != 'true'
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
-      - if: steps.images.outputs.hit != 'true'
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         uses: actions/cache/save@v6
         continue-on-error: true
         with:
@@ -247,9 +285,9 @@ jobs:
           name: pod-${{ matrix.server }}
           key: ${{ steps.key.outputs.key }}
       - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}
-      - if: steps.images.outputs.hit != 'true'
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
-      - if: steps.images.outputs.hit != 'true'
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         uses: actions/cache/save@v6
         continue-on-error: true
         with:
@@ -303,9 +341,9 @@ jobs:
           name: journeys
           key: ${{ hashFiles('e2e/journeys/css/compose.yml') }}
       - run: npm run css:prepare -w @solid-memo/e2e-journeys
-      - if: steps.images.outputs.hit != 'true'
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/journeys/css/compose.yml
-      - if: steps.images.outputs.hit != 'true'
+      - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         uses: actions/cache/save@v6
         continue-on-error: true
         with:

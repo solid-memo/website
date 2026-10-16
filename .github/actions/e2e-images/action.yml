@@ -7,11 +7,12 @@
 # runners share (docs/testing.md); what the cache does not have yet comes
 # through Google's mirror of Docker Hub. This restores and loads them; the job
 # saves them after preparing its servers when the cache had none under
-# this key:
+# this key, on main only (a pull request's or the merge queue's copy
+# would be kept under its own ref, never read again):
 #
-#   - if: steps.images.outputs.hit != 'true'
+#   - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
 #     run: node e2e/pod/images.ts save ${{ steps.images.outputs.file }} <compose.yml>...
-#   - if: steps.images.outputs.hit != 'true'
+#   - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
 #     uses: actions/cache/save@v6
 #     with: { path: "${{ steps.images.outputs.file }}", key: "${{ steps.images.outputs.key }}" }
 #
