@@ -9,8 +9,8 @@ import { useI18n } from "./i18n";
 export interface SiteSource {
   /**
    * The repository's web page, without a trailing slash. Its commits, its
-   * changelog and its issue forms are found under it, at the paths GitHub
-   * gives them.
+   * changelog, its issue forms and its Discussions are found under it, at
+   * the paths GitHub gives them.
    */
   repoUrl: string;
   /** The site's version (the root package.json's). */
@@ -21,7 +21,8 @@ export interface SiteSource {
 
 /**
  * Site-wide attribution, the build's version, and the way to the source
- * code, the changelog and the issue tracker, shown under every screen.
+ * code, the changelog, the issue tracker and Discussions, shown under
+ * every screen.
  */
 export function Footer({ source: { repoUrl, version, commitSha } }: { source: SiteSource }) {
   const { t, tx } = useI18n();
@@ -50,6 +51,7 @@ export function Footer({ source: { repoUrl, version, commitSha } }: { source: Si
           {t("footer.changelog")}
         </ExternalLink>
         <ExternalLink url={`${repoUrl}/issues/new/choose`}>{t("footer.reportIssue")}</ExternalLink>
+        <ExternalLink url={`${repoUrl}/discussions`}>{t("footer.discussions")}</ExternalLink>
       </p>
     </footer>
   );

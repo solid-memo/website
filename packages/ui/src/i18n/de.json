@@ -78,7 +78,8 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Quellcode",
     "changelog": "Änderungsprotokoll",
-    "reportIssue": "Problem melden"
+    "reportIssue": "Problem melden",
+    "discussions": "Diskussionen"
   },
   "addCardForm": {
     "submitButton": "Karte hinzufügen",

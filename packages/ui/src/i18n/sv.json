@@ -78,7 +78,8 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Källkod",
     "changelog": "Ändringslogg",
-    "reportIssue": "Rapportera ett problem"
+    "reportIssue": "Rapportera ett problem",
+    "discussions": "Diskussioner"
   },
   "addCardForm": {
     "submitButton": "Lägg till kort",

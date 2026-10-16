@@ -40,7 +40,7 @@ describe("Footer", () => {
     render(<Footer source={{ ...source, commitSha: null }} />);
     expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 0.1.0");
     expect(screen.getByRole("contentinfo")).not.toHaveTextContent("Version 0.1.0 (");
-    expect(screen.getAllByRole("link")).toHaveLength(4);
+    expect(screen.getAllByRole("link")).toHaveLength(5);
   });
 
   it("links to the source code and to a new issue in the repository", () => {
@@ -57,6 +57,14 @@ describe("Footer", () => {
     expect(externalLink("Changelog")).toHaveAttribute(
       "href",
       "https://git.example/memo/blob/main/CHANGELOG.md",
+    );
+  });
+
+  it("links to the repository's Discussions, for questions and open ideas", () => {
+    render(<Footer source={source} />);
+    expect(externalLink("Discussions")).toHaveAttribute(
+      "href",
+      "https://git.example/memo/discussions",
     );
   });
 });
