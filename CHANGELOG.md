@@ -21,6 +21,23 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.0.0](https://github.com/solid-memo/website/compare/v2.3.0...v3.0.0) (2026-10-16)
+
+### ⚠ BREAKING CHANGES
+
+* **ns:** the app writes cards in card format 6. An older
+version of Solid Memo reads a format-6 card without its front label
+and refuses to save over it, so after this version updates a pod, a
+tab or device still on an older version cannot edit those cards until
+it is reloaded. A library release with front labels needs this version
+to be imported.
+
+### Features
+
+* **decks:** label what each capitals card asks ([b83227c](https://github.com/solid-memo/website/commit/b83227c14f1e524fb1b8ff4b2d8d8d57bed8db55)), closes [#115](https://github.com/solid-memo/website/issues/115)
+* **ns:** label a card's front, in card format 6 ([6e787f3](https://github.com/solid-memo/website/commit/6e787f3fd670d3f24438a09702f5d7175b74e093)), closes [#115](https://github.com/solid-memo/website/issues/115)
+* **ui:** mark decks with a newer library release on the deck list ([6c97668](https://github.com/solid-memo/website/commit/6c9766848f64abfcbe65b9fc8a0c94a11ebd78b9)), closes [#118](https://github.com/solid-memo/website/issues/118)
+
 ## [2.3.0](https://github.com/solid-memo/website/compare/v2.2.0...v2.3.0) (2026-10-16)
 
 ### Features
