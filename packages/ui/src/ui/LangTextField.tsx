@@ -120,11 +120,11 @@ export function useMissingLanguage(fieldId: string) {
 
 /**
  * A field for text whose languages the user states (a deck's name or
- * description): its main text, marked with its language and followed by
- * the picker that states it (retagging the text without retyping it),
- * then its translations behind a disclosure, open from the start when
- * `translationsOpen`, each with its own picker and a button to remove
- * it. A language can hold one text: choosing one another entry has is
+ * description): its main text, marked with its language and joined in
+ * one box by the picker that states it (retagging the text without
+ * retyping it), then its translations behind a disclosure, open from the
+ * start when `translationsOpen`, each with its own picker and a button to
+ * remove it. A language can hold one text: choosing one another entry has is
  * refused (textLanguageTaken).
  *
  * `missing`, with `errorId` (the form's message), is an entry whose text
@@ -134,8 +134,9 @@ export function useMissingLanguage(fieldId: string) {
  * Text saved with no language (untagged, "", as a card's side may be)
  * keeps none until the user chooses one: its picker says it is not
  * stated, and asks for it. `hint`, a field's hint, goes right under the
- * main text, which it is about; the picker sits in a row with the
- * Translations button (or a translation's remove button) under that.
+ * main text's box, which it is about; the Translations button (or a
+ * translation's remove button) under that, outside the box: it adds or
+ * removes a text, rather than saying something of this one.
  *
  * A `multiline` text is a textarea, where Enter starts a new line, so
  * Ctrl+Enter (⌘+Enter) submits its form, as Enter does a single line.
@@ -249,7 +250,7 @@ export function LangTextField({
   }
 
   /**
-   * An entry's text and its picker in a row with `control`;
+   * An entry's text in one box with its picker, then `control`;
    * the main one labeled by the field's label, and followed by the hint.
    */
   function entryFields(entry: DraftEntry, entryLabel: string, control: ComponentChildren) {
@@ -277,20 +278,38 @@ export function LangTextField({
     return (
       <>
         <label for={textId}>{entryLabel}</label>
-        {multiline ? (
-          <textarea
-            ref={entry === main ? (inputRef as { current: HTMLTextAreaElement | null }) : undefined}
-            {...props}
-            aria-keyshortcuts="Control+Enter Meta+Enter"
-            onKeyDown={submitOnCtrlEnter}
-          />
-        ) : (
-          <input
-            ref={entry === main ? (inputRef as { current: HTMLInputElement | null }) : undefined}
-            type="text"
-            {...props}
-          />
-        )}
+        <LanguagePicker
+          id={pickerId}
+          value={entry.tag === "" ? null : entry.tag}
+          role={role}
+          suggestions={suggestions}
+          unstated={entry.tag === ""}
+          errorId={
+            entry.id === missing?.id ? errorId : entry.id === taken?.entry ? takenId : undefined
+          }
+          disabled={disabled}
+          field={
+            multiline ? (
+              <textarea
+                ref={
+                  entry === main ? (inputRef as { current: HTMLTextAreaElement | null }) : undefined
+                }
+                {...props}
+                aria-keyshortcuts="Control+Enter Meta+Enter"
+                onKeyDown={submitOnCtrlEnter}
+              />
+            ) : (
+              <input
+                ref={
+                  entry === main ? (inputRef as { current: HTMLInputElement | null }) : undefined
+                }
+                type="text"
+                {...props}
+              />
+            )
+          }
+          onChange={(tag) => retag(entry, tag)}
+        />
         {entry === main && hint}
         {hints.length > 0 && (
           <ul id={hintsId} class="hint field-hint entry-hints">
@@ -299,21 +318,7 @@ export function LangTextField({
             ))}
           </ul>
         )}
-        <div class="language-controls">
-          <LanguagePicker
-            id={pickerId}
-            value={entry.tag === "" ? null : entry.tag}
-            role={role}
-            suggestions={suggestions}
-            unstated={entry.tag === ""}
-            errorId={
-              entry.id === missing?.id ? errorId : entry.id === taken?.entry ? takenId : undefined
-            }
-            disabled={disabled}
-            onChange={(tag) => retag(entry, tag)}
-          />
-          {control}
-        </div>
+        <div class="entry-actions">{control}</div>
       </>
     );
   }

@@ -3,6 +3,7 @@
     "label": "Language",
     "button": "Language: {language}",
     "notStated": "Language: not stated",
+    "notStatedShort": "Language?",
     "unstatedHint": "State which language this text is in.",
     "legend": {
       "front": "Language of the front",
