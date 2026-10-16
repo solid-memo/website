@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [2.1.1](https://github.com/solid-memo/website/compare/v2.1.0...v2.1.1) (2026-10-16)
+
+### Bug Fixes
+
+* **domain:** find the guest's pod in a text by the origin its URLs parse to ([01e9fb6](https://github.com/solid-memo/website/commit/01e9fb6e82e3413fdb61c57791deb6e2d7ddf6e8)), closes [#102](https://github.com/solid-memo/website/issues/102)
+
 ## [2.1.0](https://github.com/solid-memo/website/compare/v2.0.1...v2.1.0) (2026-10-15)
 
 ### Features
