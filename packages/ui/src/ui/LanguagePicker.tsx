@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { ComponentChildren } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import { canonicalTag, NO_LANGUAGE } from "@solid-memo/domain/languageTag";
@@ -98,6 +99,12 @@ function choices(tags: Iterable<string>, value: string | null = null): string[] 
  * While `disabled` (the form saving) nothing can be chosen: the button
  * keeps the focus (aria-disabled), and an open group's radios are
  * disabled.
+ *
+ * `field`, the text box whose language this is, joins the button in one
+ * border, the button at its end (under a textarea, in a bar of its own):
+ * the button then shows the language's name alone ("Swedish", or
+ * "Language?" while none is chosen), its name read out as before
+ * ("Language: Swedish"). The hint and the group open under the box.
  */
 export function LanguagePicker({
   id,
@@ -107,6 +114,7 @@ export function LanguagePicker({
   unstated = false,
   errorId,
   disabled = false,
+  field,
   onChange,
 }: {
   id: string;
@@ -116,6 +124,7 @@ export function LanguagePicker({
   unstated?: boolean;
   errorId?: string;
   disabled?: boolean;
+  field?: ComponentChildren;
   onChange: (tag: string) => void;
 }) {
   const { t, locale, languageParts } = useI18n();
@@ -131,27 +140,49 @@ export function LanguagePicker({
   const describedBy = [unstated && value === null ? hintId : undefined, errorId]
     .filter(Boolean)
     .join(" ");
+  const said =
+    value === null
+      ? t("language.notStated")
+      : t("language.button", { language: languageParts(value).name });
+  const button = (
+    <button
+      ref={buttonRef}
+      id={id}
+      type="button"
+      class={value === null ? "language-unchosen" : undefined}
+      aria-expanded={open}
+      aria-controls={`${id}-panel`}
+      aria-describedby={describedBy === "" ? undefined : describedBy}
+      aria-invalid={errorId === undefined ? undefined : true}
+      aria-disabled={disabled || undefined}
+      onClick={() => {
+        if (!disabled) setOpen(!open);
+      }}
+    >
+      {field === undefined ? (
+        <span id={languageTextId(id)}>{said}</span>
+      ) : (
+        <>
+          <span id={languageTextId(id)} class="visually-hidden">
+            {said}
+          </span>
+          <span class="language-name" aria-hidden="true">
+            {value === null ? t("language.notStatedShort") : languageParts(value).name}
+          </span>
+        </>
+      )}
+    </button>
+  );
   return (
     <div class="language-picker">
-      <button
-        ref={buttonRef}
-        id={id}
-        type="button"
-        aria-expanded={open}
-        aria-controls={`${id}-panel`}
-        aria-describedby={describedBy === "" ? undefined : describedBy}
-        aria-invalid={errorId === undefined ? undefined : true}
-        aria-disabled={disabled || undefined}
-        onClick={() => {
-          if (!disabled) setOpen(!open);
-        }}
-      >
-        <span id={languageTextId(id)}>
-          {value === null
-            ? t("language.notStated")
-            : t("language.button", { language: languageParts(value).name })}
-        </span>
-      </button>
+      {field === undefined ? (
+        button
+      ) : (
+        <div class="text-with-language">
+          {field}
+          {button}
+        </div>
+      )}
       {unstated && value === null && (
         <p id={hintId} class="hint">
           {t("language.unstatedHint")}

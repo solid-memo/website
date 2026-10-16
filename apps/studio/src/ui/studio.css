@@ -773,6 +773,32 @@
   border-radius: var(--radius-sm);
 }
 
+/* A text and its language in one box (LangTextField): as tall as the
+   density says, the box rounded as the other controls; inside it the
+   text square, and the button rounded only where the box is. The rule
+   above would round them all: these weigh as much or more (the button
+   matched as it does, `:is(button, a.button)`) and come after it. */
+:root[data-surface="studio"] main .text-with-language {
+  --joined-radius: var(--radius-sm);
+}
+
+:root[data-surface="studio"]
+  main
+  .text-with-language
+  > :is(button, input:not([type="radio"], [type="checkbox"])) {
+  border-radius: 0;
+}
+
+:root[data-surface="studio"] main .text-with-language > input + :is(button, a.button) {
+  border-start-end-radius: calc(var(--joined-radius) - 1px);
+  border-end-end-radius: calc(var(--joined-radius) - 1px);
+}
+
+:root[data-surface="studio"] main .text-with-language > textarea + :is(button, a.button) {
+  border-end-start-radius: calc(var(--joined-radius) - 1px);
+  border-end-end-radius: calc(var(--joined-radius) - 1px);
+}
+
 :root[data-surface="studio"] main .row-menu {
   min-width: var(--s-control-h);
 }

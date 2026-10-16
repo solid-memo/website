@@ -3162,6 +3162,145 @@ fieldset:where(:not(.studio-scope)) label.radio-option .hint {
   border-width: 2px;
 }
 
+/* A text and its language as one control (LangTextField): the box draws
+   the border, the text and the button inside it borderless, the button at
+   the text's end behind a divider (on the left in right-to-left text),
+   or under a textarea as a bar of its own. The box shows focus with one
+   ring, the button its own outline inside it, so which of the two has
+   focus still shows. A language name too long for half the row wraps in
+   its button rather than squeezing the text at 320px. Positioned, so the
+   button's hidden full text ("Language: Swedish") stays inside it. */
+.text-with-language {
+  --joined-radius: var(--radius);
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--control-border);
+  border-radius: var(--joined-radius);
+  background: var(--surface);
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.text-with-language:hover {
+  border-color: var(--text-muted);
+}
+
+.text-with-language:focus-within {
+  outline: 2px solid transparent;
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+
+.text-with-language:has(> textarea) {
+  flex-direction: column;
+}
+
+.text-with-language > :is(input, textarea) {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.text-with-language > :is(input, textarea):focus {
+  box-shadow: none;
+}
+
+.text-with-language > button {
+  flex: none;
+  max-width: 50%;
+  margin: 0;
+  padding-block: 0.25rem;
+  border: none;
+  border-inline-start: 1px solid var(--border-strong);
+  border-radius: 0;
+  border-start-end-radius: calc(var(--joined-radius) - 1px);
+  border-end-end-radius: calc(var(--joined-radius) - 1px);
+  background: var(--surface-sunken);
+  box-shadow: none;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.text-with-language > textarea + button {
+  max-width: none;
+  min-height: 2rem;
+  justify-content: flex-start;
+  border-inline-start: none;
+  border-block-start: 1px solid var(--border-strong);
+  border-start-end-radius: 0;
+  border-end-start-radius: calc(var(--joined-radius) - 1px);
+}
+
+.text-with-language > button:hover {
+  transform: none;
+}
+
+/* Under the pointer a chosen language darkens; one still to choose, or
+   refused, keeps its warning or danger color. */
+.text-with-language
+> button:hover:not([aria-disabled="true"], .language-unchosen, [aria-invalid="true"]) {
+  color: var(--text);
+}
+
+.text-with-language > button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -3px;
+}
+
+/* The caret keeps to the name's last word (a no-break space), and
+   points up while the radios are open. */
+.text-with-language .language-name::after {
+  content: "\A0\25BE";
+}
+
+.text-with-language > button[aria-expanded="true"] .language-name::after {
+  content: "\A0\25B4";
+}
+
+/* No language chosen yet: the button asks, in the warning's colors. */
+.text-with-language > button.language-unchosen {
+  background: var(--warning-soft);
+  color: var(--warning-text);
+  font-weight: 600;
+}
+
+/* Its text refused (empty, say): the box's border says so; a language
+   still to choose marks the button itself, its own fill and border, so
+   the two never look the same. */
+.text-with-language:has(> [aria-invalid="true"]:is(input, textarea)) {
+  border-color: var(--danger);
+}
+
+.text-with-language:has(> [aria-invalid="true"]:is(input, textarea)):not(:focus-within) {
+  box-shadow: 0 0 0 1px var(--danger);
+}
+
+.text-with-language > button[aria-invalid="true"] {
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 2px var(--danger);
+}
+
+/* Forced colors drop the fill and the inset ring: this outline, dashed
+   and transparent, is what they draw instead, so a language still to
+   choose shows there too. Not while focused, where the focus outline is. */
+.text-with-language > button[aria-invalid="true"]:not(:focus-visible) {
+  outline: 2px dashed transparent;
+  outline-offset: -3px;
+}
+
+.text-with-language:has(> :disabled) {
+  background: var(--surface-sunken);
+}
+
 .language-picker > .hint {
   margin: 0.25rem 0 0;
 }
@@ -3190,11 +3329,10 @@ fieldset:where(:not(.studio-scope)) label.radio-option .hint {
 }
 
 /* Text in the languages the user states: a column as a form's, its
-   label over its text at any width; under the text its hint, then its
-   picker in a row with the Translations button (a translation's, with
-   its remove button), wrapping at 320px; an open picker, or one asking
-   for the language with its hint, takes the row's full width. Its
-   translations sit under a disclosure, each with its own. */
+   label over its text and picker (one box) at any width; under the box
+   an open picker's radios, then the text's hint, then the Translations
+   button (a translation's remove button). Its translations sit under a
+   disclosure, each with its own. */
 .lang-text-field,
 .lang-text-field .translations:not([hidden]),
 .lang-text-field .translation {
@@ -3218,19 +3356,15 @@ fieldset:where(:not(.studio-scope)) label.radio-option .hint {
   margin-top: 0;
 }
 
-.language-controls {
+.lang-text-field .language-picker {
+  margin: 0;
+}
+
+.entry-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 0.5rem;
-}
-
-.language-controls > .language-picker {
-  margin: 0;
-}
-
-.language-controls > .language-picker:has(> .language-choices, > .hint) {
-  flex-basis: 100%;
 }
 
 /* The deck preferences' Languages section: a side's picker under its

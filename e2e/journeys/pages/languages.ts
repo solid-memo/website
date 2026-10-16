@@ -13,19 +13,23 @@ export function languageName(app: App, tag: string): string {
 
 /**
  * Says which language a text is in with its language picker (the button
- * "Language: …" beside the text): left as it is when it already says
- * `tag` (the app pre-fills the last language used), else opened, the
- * language chosen and closed with Done.
+ * named "Language: …" at the text's end): left as it is when it already
+ * says `tag` (the app pre-fills the last language used), else opened, the
+ * language chosen and closed with Done. What it says is read from its
+ * text that names it whole, the one fields are described by: beside a
+ * text the button shows the language's name alone.
  */
 export async function chooseLanguage(app: App, picker: Locator, tag: string): Promise<void> {
   const name = languageName(app, tag);
   const chosen = app.t("language.button", { language: name });
-  if ((await picker.textContent())?.trim() === chosen) return;
+  const id = await picker.getAttribute("id");
+  const said = picker.locator(`[id="${id}-text"]`);
+  if ((await said.textContent())?.trim() === chosen) return;
   await picker.click();
-  const panel = app.page.locator(`#${await picker.getAttribute("id")}-panel`);
+  const panel = app.page.locator(`#${id}-panel`);
   await panel.getByRole("radio", { name: new RegExp(`^${escapeRegExp(name)}\\b`) }).check();
   await panel.getByRole("button", { name: app.t("language.done"), exact: true }).click();
-  await expect(picker).toHaveText(chosen);
+  await expect(said).toHaveText(chosen);
 }
 
 /**

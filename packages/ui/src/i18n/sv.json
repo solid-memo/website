@@ -3,6 +3,7 @@
     "label": "Språk",
     "button": "Språk: {language}",
     "notStated": "Språk: inte angivet",
+    "notStatedShort": "Språk?",
     "unstatedHint": "Ange vilket språk texten är på.",
     "legend": {
       "front": "Språk för framsidan",

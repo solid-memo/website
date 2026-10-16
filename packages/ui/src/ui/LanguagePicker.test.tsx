@@ -4,6 +4,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
+import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { I18nProvider } from "./i18n";
 import { LanguagePicker, languageTextId, type LanguageRole } from "./LanguagePicker";
@@ -21,6 +22,7 @@ function Picker({
   unstated?: boolean;
   errorId?: string;
   disabled?: boolean;
+  field?: ComponentChildren;
   onChange?: (tag: string) => void;
 }) {
   const [value, setValue] = useState<string | null>(initial);
@@ -33,6 +35,7 @@ function Picker({
       unstated={props.unstated}
       errorId={props.errorId}
       disabled={props.disabled}
+      field={props.field}
       onChange={(tag) => {
         setValue(tag);
         onChange(tag);
@@ -359,5 +362,55 @@ describe("LanguagePicker", () => {
       screen.getByRole("radio", { name: "Inget språk (koder, siffror, symboler)" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Klar" })).toBeInTheDocument();
+  });
+
+  describe("joined to its text", () => {
+    function renderJoined(initial: string | null, errorId?: string) {
+      render(
+        <I18nProvider locale="en" onChoose={() => undefined}>
+          <Picker
+            initial={initial}
+            errorId={errorId}
+            field={<input type="text" aria-label="Front" />}
+          />
+        </I18nProvider>,
+      );
+      return screen.getByRole("button", { name: /^Language/ });
+    }
+
+    it("draws the text and the button in one box, the button at the text's end", () => {
+      const button = renderJoined("sv");
+      const text = screen.getByRole("textbox", { name: "Front" });
+      expect(text.parentElement).toHaveClass("text-with-language");
+      expect(text.nextElementSibling).toBe(button);
+    });
+
+    it("shows the language's name alone, its full text still naming the button", () => {
+      const button = renderJoined("sv");
+      expect(button).toHaveAccessibleName("Language: Swedish");
+      expect(document.getElementById(languageTextId("front-language"))).toHaveTextContent(
+        "Language: Swedish",
+      );
+      expect(button.querySelector(".language-name")).toHaveTextContent(/^Swedish$/);
+      expect(button).not.toHaveClass("language-unchosen");
+    });
+
+    it("asks for the language while none is chosen", () => {
+      const button = renderJoined(null, "front-error");
+      expect(button).toHaveAccessibleName("Language: not stated");
+      expect(button.querySelector(".language-name")).toHaveTextContent(/^Language\?$/);
+      expect(button).toHaveClass("language-unchosen");
+      expect(button).toHaveAttribute("aria-invalid", "true");
+    });
+
+    it("opens its radios under the box, and closes back onto the button", () => {
+      const button = renderJoined("sv");
+      open();
+      const group = screen.getByRole("group");
+      expect(button.parentElement!.nextElementSibling).toBe(group);
+      fireEvent.keyDown(group, { key: "Escape" });
+      expect(screen.queryByRole("group")).toBeNull();
+      expect(button).toHaveFocus();
+    });
   });
 });

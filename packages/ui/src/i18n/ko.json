@@ -3,6 +3,7 @@
     "label": "언어",
     "button": "언어: {language}",
     "notStated": "언어: 지정 안 됨",
+    "notStatedShort": "언어?",
     "unstatedHint": "이 텍스트가 어떤 언어인지 지정해 주세요.",
     "legend": {
       "front": "앞면의 언어",

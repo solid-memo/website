@@ -175,7 +175,7 @@ describe("LangTextField", () => {
     );
   });
 
-  it("shows its hint right under the main text, ahead of the main text's language", () => {
+  it("joins the main text and its language in one box, its hint right under the box", () => {
     render(
       <I18nProvider locale="en" onChoose={() => undefined}>
         <LangTextField
@@ -191,11 +191,11 @@ describe("LangTextField", () => {
       </I18nProvider>,
     );
     const note = screen.getByLabelText("Note");
+    const language = screen.getByRole("button", { name: "Language: English" });
     const hint = screen.getByText("Shown under the front");
-    expect(note.nextElementSibling).toBe(hint);
-    expect(
-      hint.compareDocumentPosition(screen.getByRole("button", { name: "Language: English" })),
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(note.nextElementSibling).toBe(language);
+    expect(note.parentElement).toHaveClass("text-with-language");
+    expect(note.parentElement!.closest(".language-picker")!.nextElementSibling).toBe(hint);
     expect(note).toHaveAccessibleDescription("Language: English Shown under the front");
   });
 

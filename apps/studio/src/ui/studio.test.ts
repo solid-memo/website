@@ -240,6 +240,19 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(page, ".studio-filters select").minHeight).toBe("28px");
   });
 
+  it("sizes a text and its language as the density says, the corners inside their box their own", () => {
+    const page = `
+      <main class="workspace">
+        <div class="text-with-language"><input type="text"><button type="button">Swedish</button></div>
+      </main>`;
+    root.setAttribute("data-surface", "studio");
+    expect(styleOf(page, ".text-with-language > input").minHeight).toBe("28px");
+    expect(styleOf(page, ".text-with-language > button").minHeight).toBe("28px");
+    expect(styleOf(page, ".text-with-language > input").borderRadius).toBe("0px");
+    // Not the density's 8px all round: square at the divider (jsdom computes no logical corners).
+    expect(styleOf(page, ".text-with-language > button").borderRadius).toBe("0px");
+  });
+
   it("makes the card inspector's card small, its faces side by side", () => {
     const page = `
       <main class="workspace">

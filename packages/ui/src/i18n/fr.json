@@ -3,6 +3,7 @@
     "label": "Langue",
     "button": "Langue : {language}",
     "notStated": "Langue : non indiquée",
+    "notStatedShort": "Langue ?",
     "unstatedHint": "Indiquez la langue de ce texte.",
     "legend": {
       "front": "Langue du recto",
