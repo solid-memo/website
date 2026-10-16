@@ -85,6 +85,33 @@ data in Turtle, docs in Markdown, configuration in JSON or YAML. Do not
 commit binary documents, such as word-processor files or spreadsheets.
 An image is committed only when the app shows it.
 
+## Using AI
+
+You may use AI tools, such as coding assistants and agents, to write
+code, tests, docs or anything else you contribute.
+[AGENTS.md](AGENTS.md) and the docs it points to are written for people
+and agents alike.
+
+Whatever helped you write it, a contribution is yours, and you answer
+for it:
+
+- **Understand it.** Read every line before you open the pull request,
+  and be ready to explain any of it, and why it is there, in review.
+- **Check it.** It meets the same bar as any other change: **Done** in
+  [AGENTS.md](AGENTS.md), its tests and its docs. A reviewer reviews it
+  the same way, and does not review the output of your tools for you.
+- **Own the rights.** Only contribute what you have the right to, as
+  [Licensing](#licensing) says. That holds for what a tool suggested
+  too: you answer for its license as if you wrote it.
+- **Own what you post.** An issue, a comment, a review or a commit
+  message posted for you by a tool speaks for you. Read it before it is
+  posted.
+
+You do not have to say which tools you used. A pull request is not
+judged by how it was made, and is not declined for being written with
+AI; it can be declined for what it is, with a written reason, like any
+other.
+
 ## Commit messages
 
 Each commit records a decision, so its message says what and why. From
