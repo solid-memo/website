@@ -23,8 +23,10 @@ export const DRAG_CLASS: Record<RowDrag, string> = {
 /**
  * A deck in the deck list: its name, a link all over the row to its
  * page, the host a copy of a release added from a link came from
- * (`fromHost`), what it offers today (`action`), and last the menu of
- * what can be done with it (`menu`). While the deck is being renamed, an inline
+ * (`fromHost`), whether the library has a newer release of the deck it
+ * is a copy of (`newerRelease`, which its page offers to upgrade to),
+ * what it offers today (`action`), and last the menu of what can be
+ * done with it (`menu`). While the deck is being renamed, an inline
  * field stands in for the link. The whole row is a handle to drag it by
  * (deckTree/useDragReorder.ts), `drag` saying what part it takes in a
  * drag.
@@ -35,6 +37,7 @@ export function DeckRow({
   drag,
   href,
   fromHost = null,
+  newerRelease = false,
   action,
   naming,
   onNamed,
@@ -47,6 +50,8 @@ export function DeckRow({
   href: string;
   /** The host the release the deck is a copy of was added from, by a link; none for any other deck. */
   fromHost?: string | null;
+  /** The library has a newer release of the deck it is a copy of: the row says so, and its link leads to the offer. */
+  newerRelease?: boolean;
   action: ComponentChildren;
   /** Whether the name field is open. */
   naming: boolean;
@@ -75,6 +80,7 @@ export function DeckRow({
           {fromHost !== null && (
             <span class="hint deck-source">{t("deckList.fromHost", { host: fromHost })}</span>
           )}
+          {newerRelease && <span class="deck-release">{t("deckList.newerRelease")}</span>}
         </a>
       )}
       <span class="deck-meta">{action}</span>

@@ -597,7 +597,9 @@ flowchart LR
 - When the library publishes a newer release of an imported deck, the
   deck's page offers to update the copy card by card, keeping what the
   user changed and their review history
-  ([migrations.md](migrations.md#catching-up-with-the-library)).
+  ([migrations.md](migrations.md#catching-up-with-the-library)). The
+  deck list says "New release" after the copy's name, so the offer is
+  not missed by a learner who studies from the list.
 
 ### From a link
 

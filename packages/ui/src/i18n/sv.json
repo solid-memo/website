@@ -476,6 +476,7 @@
     "dragCancelled": "Flytten avbröts: kortleken eller gruppen ligger kvar där den låg.",
     "continueCourse": "Fortsätt kursen",
     "fromHost": "från {host}",
+    "newerRelease": "Ny utgåva",
     "fromLink": "Lägg till från en länk"
   },
   "studyPace": {

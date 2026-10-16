@@ -31,10 +31,12 @@ import {
  *
  * A deck copied from a course (docs/courses.md) is continued from the
  * strip of courses above the list, while it is unfinished, and from its
- * menu, and a copy of a release added from a link says the host it came
- * from (useCopies). An instance with no decks (groups aside) is
- * offered the library's course for newcomers under the list's heading
- * (NewcomerCourseContainer), which opens once started.
+ * menu. A copy of a release added from a link says the host it came
+ * from, and a copy the library has a newer release of says so, its row
+ * leading to the deck's page, which offers the upgrade (useCopies). An
+ * instance with no decks (groups aside) is offered the library's course
+ * for newcomers under the list's heading (NewcomerCourseContainer),
+ * which opens once started.
  */
 export function DeckListContainer({
   useCases,
@@ -59,7 +61,7 @@ export function DeckListContainer({
   const { t, errorText } = useI18n();
   const { treeQuery, editor } = useDeckTreeEditor(useCases, instance);
   const decks = decksOf(treeQuery.data?.children ?? []);
-  const { isCourse, linkedHost } = useCopies(useCases, decks);
+  const { isCourse, linkedHost, newerRelease } = useCopies(useCases, decks);
 
   if (treeQuery.error) {
     return <ErrorMessage error={errorText(treeQuery.error)} />;
@@ -88,6 +90,7 @@ export function DeckListContainer({
         deckHref={(deck) => deckHref(instance.url, deck.url)}
         courseHref={(deck) => (isCourse(deck) ? courseHref(instance.url, deck.url) : undefined)}
         fromHost={linkedHost}
+        newerRelease={newerRelease}
         importUrlHref={importUrlHref(instance.url)}
         preferencesHref={(deck) =>
           routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })

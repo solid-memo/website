@@ -489,6 +489,7 @@
     "dragCancelled": "Déplacement annulé : le paquet ou le groupe reste à sa place.",
     "continueCourse": "Continuer le cours",
     "fromHost": "de {host}",
+    "newerRelease": "Nouvelle version",
     "fromLink": "Ajouter depuis un lien"
   },
   "studyPace": {

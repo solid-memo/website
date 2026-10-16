@@ -98,6 +98,7 @@ export function DeckListScreen({
   heading,
   courseHref = () => undefined,
   fromHost = () => null,
+  newerRelease = () => false,
   importUrlHref,
   renderStudyAction,
   createDeckHref,
@@ -145,6 +146,8 @@ export function DeckListScreen({
   courseHref?: (deck: Deck) => string | undefined;
   /** The host a copy of a release added from a link came from; null for any other deck. */
   fromHost?: (deck: Deck) => string | null;
+  /** Whether the library has a newer release of the deck a deck is a copy of; false for any other deck. */
+  newerRelease?: (deck: Deck) => boolean;
   /** URL of the screen that adds a deck or course from a link to its release; none where it is not offered. */
   importUrlHref?: string;
   /**
@@ -516,6 +519,7 @@ export function DeckListScreen({
           drag={dragOf(node.deck.url)}
           href={deckHref(node.deck)}
           fromHost={fromHost(node.deck)}
+          newerRelease={newerRelease(node.deck)}
           action={renderStudyAction(node.deck)}
           naming={naming === node.deck.url}
           onNamed={(name, refocus) => renamedDeck(node.deck, name, refocus)}

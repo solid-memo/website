@@ -2024,6 +2024,21 @@ html.drag-active {
   text-decoration: none;
 }
 
+/* "New release": the library has a newer release of the copy, after its
+   name; a tag in the primary color, so it is not missed among the hints. */
+.deck-list .deck-release {
+  display: inline-block;
+  margin-inline-start: 0.5em;
+  padding: 0 0.45em;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--primary);
+  text-indent: 0;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

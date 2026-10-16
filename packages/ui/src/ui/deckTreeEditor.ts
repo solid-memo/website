@@ -22,7 +22,7 @@ import {
 } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
-import { isCopyOf, releaseHost } from "@solid-memo/domain/library";
+import { isCopyOf, libraryCopiesOf, releaseHost } from "@solid-memo/domain/library";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { useI18n, type ErrorText } from "./i18n";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
@@ -245,12 +245,21 @@ export function useDeckTreeEditor(
  * library does not list is of a release added from a link
  * (docs/deck-library.md, From a link): `linkedHost` names the host it
  * came from, and its own release, read once (["deckRelease"]), says
- * whether it is a course.
+ * whether it is a course. `newerRelease` tells a copy the library has a
+ * newer release of, as its index tells (libraryCopiesOf), reading no
+ * release: the deck's page says what upgrading would change
+ * (docs/migrations.md, Catching up with the library). A copy of a
+ * release added from a link has none, since only its creator's catalog
+ * would list one.
  */
 export function useCopies(
   useCases: UseCases,
   decks: readonly Deck[],
-): { isCourse: (deck: Deck) => boolean; linkedHost: (deck: Deck) => string | null } {
+): {
+  isCourse: (deck: Deck) => boolean;
+  linkedHost: (deck: Deck) => string | null;
+  newerRelease: (deck: Deck) => boolean;
+} {
   const isCopy = decks.some((deck) => deck.sourceUrl !== undefined);
   const libraryQuery = useQuery({
     queryKey: ["library"],
@@ -284,6 +293,11 @@ export function useCopies(
       .filter((_, at) => releaseQueries[at]!.data?.isCourse === true)
       .map((deck) => deck.sourceUrl!),
   );
+  const behind = new Set(
+    libraryCopiesOf(decks, library ?? [])
+      .filter((copy) => copy.newer === true)
+      .map((copy) => copy.deck.url),
+  );
   return {
     isCourse: (deck) =>
       deck.sourceUrl !== undefined &&
@@ -292,5 +306,6 @@ export function useCopies(
       deck.sourceUrl !== undefined && linkedSources.has(deck.sourceUrl)
         ? releaseHost(deck.sourceUrl)
         : null,
+    newerRelease: (deck) => behind.has(deck.url),
   };
 }

@@ -476,6 +476,7 @@
     "dragCancelled": "Verschieben abgebrochen: Der Stapel oder die Gruppe bleibt an der bisherigen Stelle.",
     "continueCourse": "Kurs fortsetzen",
     "fromHost": "von {host}",
+    "newerRelease": "Neue Ausgabe",
     "fromLink": "Über einen Link hinzufügen"
   },
   "studyPace": {

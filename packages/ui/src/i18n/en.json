@@ -476,6 +476,7 @@
     "dragCancelled": "Move canceled: the deck or group stays where it was.",
     "continueCourse": "Continue course",
     "fromHost": "from {host}",
+    "newerRelease": "New release",
     "fromLink": "Add from a link"
   },
   "studyPace": {
