@@ -1,7 +1,8 @@
 # @solid-memo/markdown
 
 Markdown in Solid Memo's data: a card's side, a step's theory, a
-deck's description. It reads the text into a tree of its own, folds it
+deck's description; and the repository's own docs, in the same dialect.
+It reads the text into a tree of its own, folds it
 to what the app shows, bounds it at every entry point, derives plain
 text from it, and checks it by the rules for a release
 ([markdown.md](../../docs/markdown.md)).
@@ -11,7 +12,10 @@ text from it, and checks it by the rules for a release
 `@solid-memo/markdown/<module>` is `src/<module>.ts`:
 
 - `parse`: Markdown as Solid Memo reads it (CommonMark with pipe tables
-  and CJK-friendly emphasis), into the package's own tree.
+  and CJK-friendly emphasis), into the package's own tree; and, with
+  `parseDocument`, the repository's own Markdown in the same dialect,
+  headings kept, longer than data may be, refused where data would be
+  folded.
 - `inline`: the profile for a place that holds one line, such as an
   option's label.
 - `plainText`: the profile for a place that takes only text, such as a

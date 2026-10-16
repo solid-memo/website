@@ -1,6 +1,6 @@
 {
   "name": "@solid-memo/markdown",
-  "description": "Markdown in Solid Memo's data: parsed into a tree of its own, bounded, shown safely and checked for a release.",
+  "description": "Markdown in Solid Memo's data, and in the repository's own docs: parsed into a tree of its own, bounded, shown safely and checked for a release.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",

@@ -17,6 +17,10 @@ import { gfmTable } from "micromark-extension-gfm-table";
  * paragraphs, raw HTML as its source text, pictures as their alt text,
  * reference links resolved, definitions gone. Nothing here decides
  * whether a link is followed: that is the renderer's (liveLink).
+ *
+ * The repository's own Markdown, its docs, is read here too, in the
+ * same dialect (parseDocument): trusted, so longer than data may be,
+ * and refused where data would be folded.
  */
 
 /** Phrasing content as the inline profile keeps it: no links, no breaks. */
@@ -38,20 +42,30 @@ export type MdInline =
 /** A table cell's alignment, as its delimiter row says; null when it says none. */
 export type MdAlign = "left" | "right" | "center" | null;
 
-/** Block content. */
-export type MdBlock =
+/** Block content, with what a profile adds to it (`Extra`). */
+type Blocks<Extra> =
+  | Extra
   | { type: "paragraph"; children: MdInline[] }
   /** A fenced or indented code block; `lang` is the info string's first word, normalized, when it is one. */
   | { type: "code"; lang?: string; value: string }
   /** `tight` when no blank line separates its items: their paragraphs are shown as bare text. */
-  | { type: "list"; ordered: boolean; start: number; tight: boolean; items: MdBlock[][] }
-  | { type: "quote"; children: MdBlock[] }
+  | { type: "list"; ordered: boolean; start: number; tight: boolean; items: Blocks<Extra>[][] }
+  | { type: "quote"; children: Blocks<Extra>[] }
   | { type: "rule" }
   /**
    * The first row is the header, as wide as `align`. A body row's cells
    * past that width are dropped, as GFM has it; a short row is not padded.
    */
   | { type: "table"; align: MdAlign[]; rows: MdInline[][][] };
+
+/** Block content, as data shows it: its headings folded to bold paragraphs. */
+export type MdBlock = Blocks<never>;
+
+/** A heading of the repository's own Markdown, with its level, for a page's outline. */
+export type DocHeading = { type: "heading"; depth: 1 | 2 | 3 | 4 | 5 | 6; children: MdInline[] };
+
+/** Block content of the repository's own Markdown (parseDocument): MdBlock and headings. */
+export type DocBlock = Blocks<DocHeading>;
 
 /** The longest text read as Markdown; a longer one is shown as plain text. */
 export const MAX_CHARS = 20_000;
@@ -126,12 +140,54 @@ function marker(control: string): string {
  */
 export function parseMarkdown(text: string): MdBlock[] | null {
   const tree = read(text);
-  return tree === null ? null : new Fold(text, definitions(tree)).blocks(tree.children, 0);
+  // Without its outline, Fold makes no heading: the blocks are MdBlock's.
+  return tree === null
+    ? null
+    : (new Fold(text, definitions(tree), false).blocks(tree.children, 0) as MdBlock[]);
+}
+
+/**
+ * The repository's own Markdown, its docs, read as blocks in the same
+ * dialect, with headings kept at their level (docs/markdown.md). For
+ * trusted input read at build time only, never for data: MAX_CHARS is
+ * lifted, as a page of the docs is longer, and that alone. Every other
+ * limit stays, and what parseMarkdown would fold or show as its source
+ * throws a DocumentError instead: raw HTML, a picture, a link reference
+ * definition, what nests past MAX_DEPTH, a table past its caps, and a
+ * text past MAX_LINE_NESTING, MAX_NESTED_LINES, MAX_LAZY_LINES,
+ * MAX_DELIMITERS or MAX_UNDERLINES. So a page shows as it is written, or
+ * its build fails and says where.
+ */
+export function parseDocument(text: string): DocBlock[] {
+  const costly = tooCostly(text);
+  if (costly !== null) throw new DocumentError(costly.what, costly.line);
+  const tree = parse(text);
+  return new Fold(text, definitions(tree), true).blocks(tree.children, 0);
+}
+
+/**
+ * What parseDocument refuses in a text, and on which line it starts
+ * (from 1); null for a limit on the whole text.
+ */
+export class DocumentError extends Error {
+  readonly what: string;
+  readonly line: number | null;
+
+  constructor(what: string, line: number | null) {
+    super(line === null ? what : `line ${line}: ${what}`);
+    this.name = "DocumentError";
+    this.what = what;
+    this.line = line;
+  }
 }
 
 /** The parser's tree of a text, or null past the limits parseMarkdown names. */
 function read(text: string): Root | null {
-  if (text.length > MAX_CHARS || tooCostly(text)) return null;
+  if (text.length > MAX_CHARS || tooCostly(text) !== null) return null;
+  return parse(text);
+}
+
+function parse(text: string): Root {
   return fromMarkdown(text, {
     extensions: [gfmTable(), cjkFriendlyExtension()],
     mdastExtensions: [gfmTableFromMarkdown()],
@@ -188,15 +244,22 @@ const FENCE = /^ {0,3}(?:`{3,}|~{3,})/;
 const UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/gm;
 
 /**
- * Whether the parser would take too long on the text: see
- * MAX_LINE_NESTING, MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_DELIMITERS and MAX_UNDERLINES.
+ * Why the parser would take too long on the text, and on which line (from
+ * 1) when one says it; null when it would not: see MAX_LINE_NESTING,
+ * MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_DELIMITERS and MAX_UNDERLINES.
  */
-function tooCostly(text: string): boolean {
-  if ((text.match(/[*_]/g)?.length ?? 0) > MAX_DELIMITERS) return true;
-  if ((text.match(UNDERLINE)?.length ?? 0) > MAX_UNDERLINES) return true;
+function tooCostly(text: string): { what: string; line: number | null } | null {
+  if ((text.match(/[*_]/g)?.length ?? 0) > MAX_DELIMITERS)
+    return { what: `more than MAX_DELIMITERS (${MAX_DELIMITERS}) * and _`, line: null };
+  if ((text.match(UNDERLINE)?.length ?? 0) > MAX_UNDERLINES)
+    return {
+      what: `more than MAX_UNDERLINES (${MAX_UNDERLINES}) lines that could underline a heading`,
+      line: null,
+    };
   let nested = 0;
   let lazy = -1; // lines continuing the paragraph of a container opened above; -1: none open
-  for (const line of text.split("\n")) {
+  const lines = text.split("\n");
+  for (const [index, line] of lines.entries()) {
     if (line.trim() === "" || FENCE.test(line)) {
       lazy = -1;
       continue;
@@ -211,14 +274,26 @@ function tooCostly(text: string): boolean {
       opener !== null;
       opener = CONTAINER_OPENER.exec(line)
     ) {
-      if (++opened > MAX_LINE_NESTING) return true;
-      if (inItem && ++nested > MAX_NESTED_LINES) return true;
+      if (++opened > MAX_LINE_NESTING)
+        return {
+          what: `more than MAX_LINE_NESTING (${MAX_LINE_NESTING}) quotes and list items opened on one line`,
+          line: index + 1,
+        };
+      if (inItem && ++nested > MAX_NESTED_LINES)
+        return {
+          what: `more than MAX_NESTED_LINES (${MAX_NESTED_LINES}) quotes and list items opened inside a list item`,
+          line: index + 1,
+        };
       if (!opener[0].includes(">")) inItem = true;
     }
     if (opened > 0) lazy = 0;
-    else if (lazy >= 0 && !/^[ \t]/.test(line) && ++lazy > MAX_LAZY_LINES) return true;
+    else if (lazy >= 0 && !/^[ \t]/.test(line) && ++lazy > MAX_LAZY_LINES)
+      return {
+        what: `more than MAX_LAZY_LINES (${MAX_LAZY_LINES}) lazy continuation lines in a row`,
+        line: index + 1,
+      };
   }
-  return false;
+  return null;
 }
 
 /**
@@ -240,26 +315,45 @@ function definitions(tree: Root): Map<string, string> {
 }
 
 // Node runs this module as it is (npm run library:check), stripping its types: erasable syntax only (tsconfig.json).
+/**
+ * The walk from the parser's tree to the package's. With `outline`
+ * (parseDocument), headings keep their level and what would be folded
+ * throws a DocumentError, so nothing on a page shows other than written.
+ */
 class Fold {
   private readonly text: string;
   private readonly definitions: Map<string, string>;
+  private readonly outline: boolean;
 
-  constructor(text: string, definitions: Map<string, string>) {
+  constructor(text: string, definitions: Map<string, string>, outline: boolean) {
     this.text = text;
     this.definitions = definitions;
+    this.outline = outline;
   }
 
-  blocks(nodes: readonly RootContent[], depth: number): MdBlock[] {
+  blocks(nodes: readonly RootContent[], depth: number): DocBlock[] {
     return nodes.flatMap((node) => this.block(node, depth));
   }
 
   /** One block, or none for a definition, folded to what is shown. */
-  private block(node: RootContent, depth: number): MdBlock[] {
-    if (depth >= MAX_DEPTH) return [this.sourceParagraph(node)];
+  private block(node: RootContent, depth: number): DocBlock[] {
+    if (depth >= MAX_DEPTH) {
+      if (this.outline) this.refuse(node, `nested deeper than MAX_DEPTH (${MAX_DEPTH})`);
+      return [this.sourceParagraph(node)];
+    }
     switch (node.type) {
       case "paragraph":
         return [{ type: "paragraph", children: this.inlines(node.children, depth + 1, false) }];
       case "heading":
+        if (this.outline) {
+          return [
+            {
+              type: "heading",
+              depth: node.depth,
+              children: this.inlines(node.children, depth + 1, false),
+            },
+          ];
+        }
         // A heading in data must not add to the page's outline.
         return [
           {
@@ -292,10 +386,19 @@ class Fold {
         ];
       }
       case "definition":
+        if (this.outline) this.refuse(node, "a link reference definition");
         return [];
       case "table": {
         const rows = rowsOf(node);
-        if (rows === null) return [this.sourceParagraph(node)];
+        if (rows === null) {
+          if (this.outline) {
+            this.refuse(
+              node,
+              `a table past MAX_TABLE_COLUMNS (${MAX_TABLE_COLUMNS}) or MAX_TABLE_CELLS (${MAX_TABLE_CELLS})`,
+            );
+          }
+          return [this.sourceParagraph(node)];
+        }
         return [
           {
             type: "table",
@@ -308,6 +411,7 @@ class Fold {
       }
       // Raw HTML ("html"), and anything else the parser could make, is shown as its source.
       default:
+        if (this.outline) this.refuse(node, "raw HTML");
         return [this.sourceParagraph(node)];
     }
   }
@@ -317,7 +421,10 @@ class Fold {
   }
 
   private inline(node: PhrasingContent, depth: number, inLink: boolean): MdInline | MdInline[] {
-    if (depth >= MAX_DEPTH) return { type: "text", value: this.source(node) };
+    if (depth >= MAX_DEPTH) {
+      if (this.outline) this.refuse(node, `nested deeper than MAX_DEPTH (${MAX_DEPTH})`);
+      return { type: "text", value: this.source(node) };
+    }
     switch (node.type) {
       case "text":
         return { type: "text", value: inLink ? visibleControls(node.value) : node.value };
@@ -346,11 +453,18 @@ class Fold {
       // A picture is never loaded: its alt text stands in for it.
       case "image":
       case "imageReference":
+        if (this.outline) this.refuse(node, "a picture");
         return { type: "text", value: inLink ? visibleControls(node.alt!) : node.alt! };
       // Raw HTML ("html"), and anything else the parser could make, is shown as its source.
       default:
+        if (this.outline) this.refuse(node, "raw HTML");
         return { type: "text", value: this.source(node) };
     }
+  }
+
+  /** Throws parseDocument's refusal of a node, at the line it starts on. */
+  private refuse(node: Nodes, what: string): never {
+    throw new DocumentError(what, node.position!.start.line);
   }
 
   /** The Markdown a node was parsed from, as written. */
@@ -359,7 +473,7 @@ class Fold {
   }
 
   /** A block shown as its source, its lines kept apart. */
-  private sourceParagraph(node: Nodes): MdBlock {
+  private sourceParagraph(node: Nodes): DocBlock {
     const lines = this.source(node).split("\n");
     return {
       type: "paragraph",

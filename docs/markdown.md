@@ -90,6 +90,7 @@ folded to what the app shows:
 | Function | Module | What it gives |
 |---|---|---|
 | `parseMarkdown(text)` | `parse` | the blocks: paragraph, code, list, quote, rule, table |
+| `parseDocument(text)` | `parse` | the repository's own Markdown as blocks, its headings kept at their level, or a `DocumentError` ([repository Markdown](#repository-markdown)) |
 | `parseInlineMarkdown(text)` | `inline` | one line of phrasing: text, code spans, emphasis, strong |
 | `plainText(text)` | `plainText` | the text as plain text |
 | `labelText(text, max?)` | `plainText` | a short name: the plain text of its first block that shows any |
@@ -102,7 +103,9 @@ folded to what the app shows:
 
 ### Limits
 
-Every entry point is bounded, for a pod or library may hold anything:
+Every entry point for data is bounded, for a pod or library may hold
+anything ([repository Markdown](#repository-markdown) lifts only
+`MAX_CHARS`):
 
 - **`MAX_CHARS`, 20,000 characters.** A longer text is plain. The
   longest course text is about 2,600.
@@ -254,6 +257,25 @@ backticks to show it as code.") and one for the link ("No links here,
 where they would be in the way of studying: … Put a link in a note.").
 In a note, where links are followed, only the two about HTML remain.
 
+## Repository Markdown
+
+The repository's own Markdown, its docs, is read by the same package in
+the same dialect, so a page of the docs reads as the app reads a card.
+`parseDocument(text)` is its profile, for trusted input read at build
+time only, never for data:
+
+- **Headings keep their level** (`{ type: "heading", depth }`), for a
+  page's outline. Every other block is as `parseMarkdown` gives it.
+- **`MAX_CHARS` is lifted, and only it.** A page is longer than data
+  may be: `studio.md` is about 130 KB, `data-model.md` about 70 KB. The
+  other [limits](#limits) stay; the docs come nowhere near them.
+- **What data would fold, it refuses.** Raw HTML, a picture, a link
+  reference definition, what nests past `MAX_DEPTH`, a table past its
+  caps, and a text past `MAX_LINE_NESTING`, `MAX_NESTED_LINES`,
+  `MAX_LAZY_LINES`, `MAX_DELIMITERS` or `MAX_UNDERLINES` each throw a
+  `DocumentError`, with the line it starts on when one says it. So a page
+  shows as it is written, or its build fails and says where.
+
 ## Safety
 
 Pods and libraries are untrusted: anyone's data may be opened, and most
@@ -269,7 +291,11 @@ text is rendered, and none relies on a check of the data.
 | Link spoofing | A followed link opens in a new tab, says so, and when its text is not its own URL, or its host is an international one, the host it leads to follows it in sight: "the spec (solidproject.org)", punycode kept, so `<https://bаnk.example>` with a Cyrillic "а" shows "(xn--bnk-6cd.example)". The link and its host are each isolated, so a bidi override in the text before them cannot reorder them: the host, and an address shown as itself, run left to right (`dir="ltr"`), other link text in the direction of its first letter (`dir="auto"`), so a link in Arabic reads right to left. |
 | Tracking pictures | Never loaded: alt text only. Pictures belong in `sm:frontImage`/`sm:backImage`, with a description. |
 | Trojan Source | Bidi controls, zero-width and other hidden characters in code and link text shown as markers; links isolated from the text around them. |
-| Denial of service | The limits above, at every entry point, and each text parsed once (`markdownCache.ts` keeps the last 500, and a theory's chunks are split from its cached blocks, the plain text of every card of the deck the Studio's workbench searches, and the problems of the last 500 texts of each field rule the Studio's release check reads). |
+| Denial of service | The limits above, at every entry point for data, and each text parsed once (`markdownCache.ts` keeps the last 500, and a theory's chunks are split from its cached blocks, the plain text of every card of the deck the Studio's workbench searches, and the problems of the last 500 texts of each field rule the Studio's release check reads). |
+
+[`parseDocument`](#repository-markdown) lifts `MAX_CHARS`, so it is
+never given data: it reads the repository's own files at build time,
+and no code that reads a pod or library calls it.
 
 Two checks of the built site hold this (`apps/web/src/build.test.ts`,
 over every chunk, the [Studio](studio.md)'s included):
