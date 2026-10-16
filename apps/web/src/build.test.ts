@@ -436,6 +436,20 @@ describe("the docs", () => {
     ).toBe(true);
   });
 
+  it.runIf(origin !== null)(
+    "are where publiccode.yml's documentation points: every address it names on the site's domain is a page the build serves",
+    () => {
+      const metadata = readFileSync(resolve(REPOSITORY, "publiccode.yml"), "utf8");
+      const onSite = (metadata.match(/https:\/\/[^\s"'#]+/g) ?? []).filter((address) =>
+        address.startsWith(`${origin}/`),
+      );
+      for (const address of onSite) expect(served(fileOf(new URL(address))), address).toBe(true);
+      // Its documentation, on this domain, is a page of the docs.
+      const documentation = /^ +documentation: (\S+)$/m.exec(metadata)?.[1] ?? "";
+      if (onSite.includes(documentation)) expect(fileOf(new URL(documentation))).toMatch(/^docs\//);
+    },
+  );
+
   it("show each diagram as a figure, drawn light and dark, the drawings safe to serve and carrying the font's notice", () => {
     const figures = DOCS_PAGES.flatMap((fileName) =>
       [...page(fileName).querySelectorAll("figure")].map((figure) => ({ fileName, figure })),

@@ -461,6 +461,8 @@ What holds today, and what does not, criterion by criterion.
 
 - MUST, met — all functionality described, for learners in
   [user-guide.md](user-guide.md) and for developers in the topic pages.
+  The site serves these docs as pages at `/docs/`, which the about page,
+  the site's page without script and `publiccode.yml` link to.
 - MUST, met — how to install and run, in the README.
 - MUST, met — examples of the key functionality: the user guide and the
   [user journeys](https://solid-memo.com/journeys/) report.
@@ -634,7 +636,7 @@ What holds today, and what does not, criterion by criterion.
   `CITATION.cff`'s `url`. The re-review of 2026-10-13 counted the DOI
   alone.
 - SHOULD, met — machine-readable metadata: `publiccode.yml`, checked in
-  CI, and `CITATION.cff`.
+  CI, whose `documentation` is the docs on the site, and `CITATION.cff`.
 - OPTIONAL, met — a domain of its own, solid-memo.com.
 - OPTIONAL, not met — regular talks at conferences.
 

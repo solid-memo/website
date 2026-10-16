@@ -12,7 +12,8 @@
         "$TURBO_ROOT$/CNAME",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
-        "$TURBO_ROOT$/docs/**"
+        "$TURBO_ROOT$/docs/**",
+        "$TURBO_ROOT$/publiccode.yml"
       ],
       "env": [
         "$TURBO_EXTENDS$",
