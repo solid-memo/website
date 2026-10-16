@@ -101,6 +101,22 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(PAGE, "td").height).toBe("44px");
   });
 
+  it("makes the panes that scroll on their own the containing block of what is placed absolutely in them, so that never widens or lengthens the page", () => {
+    root.setAttribute("data-surface", "studio");
+    const page = `
+      <div id="app">
+        <nav class="studio-sidebar"></nav>
+        <main class="workspace"><span class="visually-hidden">Open</span><div class="error"></div></main>
+      </div>`;
+    expect(styleOf(page, "main").position).toBe("relative");
+    expect(styleOf(page, ".studio-sidebar").position).toBe("relative");
+    // As a drawer, on a narrow screen, the sidebar stays fixed over the page.
+    viewport(600);
+    expect(styleOf(page, ".studio-sidebar").position).toBe("fixed");
+    expect(styleOf(page, "main").position).toBe("relative");
+    viewport(1024);
+  });
+
   it("puts the sidebar beside the main content, scrolling on its own, the item shown marked, and hides it as asked", () => {
     root.setAttribute("data-surface", "studio");
     const page = (hidden: string) => `

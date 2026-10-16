@@ -456,6 +456,13 @@
 
 :root[data-surface="studio"] .studio-sidebar {
   grid-area: sidebar;
+  /*
+   * Beside the main content, the containing block of what is placed
+   * absolutely in it, so its own scrolling clips that, as main's does
+   * (below). As a drawer, on a narrow screen, it is fixed instead: this
+   * comes before that rule so as not to undo it.
+   */
+  position: relative;
 }
 
 :root[data-surface="studio"] main.workspace {
@@ -693,6 +700,15 @@
 }
 
 :root[data-surface="studio"] main.workspace {
+  /*
+   * The containing block of what is placed absolutely in it: the text
+   * kept for screen readers (.visually-hidden) and the empty error and
+   * status lines. Without it they are placed against the page, outside
+   * main's own scrolling, and make the page wider and taller than the
+   * window, which a phone then zooms out to fit, the grid filling only
+   * its top-left corner.
+   */
+  position: relative;
   padding: 0.5rem 1rem 1.5rem;
   overflow: auto;
   font-size: var(--s-font-size);
