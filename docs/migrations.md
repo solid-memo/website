@@ -90,6 +90,20 @@ deck has keywords in English and Swedish); older releases stay frozen
 with untagged keywords, and an import of one writes them untagged into
 the format-6 copy.
 
+Card format 6 (vocabulary 1.20) gives the front a label above it
+(`sm:frontLabel`), as format 3 gave the back one, so a card studied both
+ways says what kind of thing is asked ("Country" above "Croatia",
+"Capital" above "Zagreb"). The version moved because card format 5 was
+published without the term, and a published shape is never edited
+([vocab.md](vocab.md#versioning-policy)). A format-5 card has no front
+label, so the step to format 6 changes nothing but the version
+(`card/5-to-6`). Library releases stay at the card format they were
+published in; a release with front labels is written at card format 6,
+and an import writes every card at 6. An app from before format 6 reads
+a format-6 card with the format-5 shape, without its front label, and
+does not write over it ([Versions](#versions)), so updating stays the
+user's choice.
+
 [Deck groups](data-model.md#deck-groups) (deck group format 1) need no
 migration: groups are new subjects, and a deck's `sm:position` and the
 catalog's `dcat:catalog` belong to no shape, so the deck and catalog
@@ -280,6 +294,7 @@ flowchart LR
     v2 -->|card/2-to-3<br/>in use: nothing to change| v3["CardV3"]
     v3 -->|card/3-to-4<br/>text stays untagged| v4["CardV4"]
     v4 -->|card/4-to-5<br/>restamped: nothing guessed| v5["CardV5"]
+    v5 -->|card/5-to-6<br/>no front label yet: nothing to change| v6["CardV6"]
     d1["DeckV1"] -->|deck/1-to-2<br/>direction: front-to-back| d2["DeckV2"]
     d2 -->|deck/2-to-3<br/>DCAT dataset: direction concept,<br/>default description, creator agents| d3["DeckV3"]
     d3 -->|deck/3-to-4<br/>title and description tagged English| d4["DeckV4"]

@@ -44,6 +44,7 @@ export interface ReleaseSubject {
 export interface ReleaseCard extends ReleaseSubject {
   front: ReleaseText[];
   back: ReleaseText[];
+  frontLabel: ReleaseText[];
   backLabel: ReleaseText[];
   frontNote: ReleaseText[];
   backNote: ReleaseText[];

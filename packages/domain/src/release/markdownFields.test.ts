@@ -35,6 +35,7 @@ const release = model({
     card("q-1", {
       front: [text("Front")],
       back: [text("Back")],
+      frontLabel: [text("Kind", "")],
       backLabel: [text("Label", "")],
       frontNote: [text("Note")],
       backNote: [text("Back note")],
@@ -86,6 +87,7 @@ describe("markdownFields", () => {
     ).toEqual([
       [at("q-1"), SM.front, "Front", "side"],
       [at("q-1"), SM.back, "Back", "option"],
+      [at("q-1"), SM.frontLabel, "Kind", "side"],
       [at("q-1"), SM.backLabel, "Label", "side"],
       [at("q-1"), SM.frontNote, "Note", "prose"],
       [at("q-1"), SM.backNote, "Back note", "prose"],

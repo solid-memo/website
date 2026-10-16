@@ -20,7 +20,7 @@ in [useCases.ts](../packages/application/src/useCases.ts).
 
 - **A course is a library release.** It lives at `decks/<name>/vN.ttl`
   like any deck, and is also typed `schema:Course`.
-- **Questions are cards.** Each question is a card (card format 5):
+- **Questions are cards.** Each question is a card (card format 5 or 6):
   `sm:front` is the question and `sm:back` the right option, so ordinary
   flip-and-grade study works on it later.
 - **Wrong options are subjects of their own.** Each is an
@@ -330,9 +330,9 @@ same way, and suggests its ids so
    `schema:isPartOf` and a `schema:position` of its own among its
    siblings. A chapter's title and a step's theory are language-tagged
    text, one per language, one of them English.
-3. Write every question as a card (format 5) with text on its back. Ask
-   it from one place only: one step's `sm:checkedBy`, or one chapter's
-   `sm:reviewQuestion`.
+3. Write every question as a card (format 5, or 6 for one with a front
+   label) with text on its back. Ask it from one place only: one step's
+   `sm:checkedBy`, or one chapter's `sm:reviewQuestion`.
 4. Give each card at least two distractors (the first course gives
    three), each with `sm:formatVersion 1`, text in every language its
    back has and a note on why it is wrong. A back in no language (code,

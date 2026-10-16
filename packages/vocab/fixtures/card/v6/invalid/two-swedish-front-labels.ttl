@@ -1,0 +1,9 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+<#se>
+    a solid-memo:Card ;
+    solid-memo:frontLabel "Land"@sv ,
+                          "Landet"@sv ;
+    solid-memo:front "Sverige"@sv ;
+    solid-memo:back "Stockholm"@sv ;
+    solid-memo:formatVersion 6 .

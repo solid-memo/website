@@ -185,6 +185,7 @@ describe("provenanceProblems", () => {
         retired: n === 3,
         front: [],
         back: [],
+        frontLabel: [],
         backLabel: [],
         frontNote: [],
         backNote: [],

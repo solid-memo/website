@@ -202,7 +202,7 @@ function fieldTexts(card: Card, field: CardField): CardText[] {
     case "note":
       return [...textsOf(card.frontNote, markdown), ...textsOf(card.backNote, markdown)];
     case "label":
-      return textsOf(card.backLabel, markdown);
+      return [...textsOf(card.frontLabel, markdown), ...textsOf(card.backLabel, markdown)];
     case "distractor":
       return (card.distractors ?? []).flatMap((d) => [
         ...textsOf(d.text, markdown),

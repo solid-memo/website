@@ -253,6 +253,7 @@ function replacing(
       back: inside(card.back, "back")!,
       frontNote: inside(card.frontNote, "note"),
       backNote: inside(card.backNote, "note"),
+      frontLabel: inside(card.frontLabel, "label"),
       backLabel: inside(card.backLabel, "label"),
       ...(distractors === undefined ? {} : { distractors }),
     };
@@ -317,6 +318,7 @@ export type ChangedPart =
   | "back"
   | "frontNote"
   | "backNote"
+  | "frontLabel"
   | "backLabel"
   | "distractor"
   | "distractorNote";
@@ -348,6 +350,7 @@ export function changedTexts(before: CardContent, after: CardContent): TextChang
   };
   compare("front", before.front, after.front);
   compare("back", before.back, after.back);
+  compare("frontLabel", before.frontLabel, after.frontLabel);
   compare("frontNote", before.frontNote, after.frontNote);
   compare("backLabel", before.backLabel, after.backLabel);
   compare("backNote", before.backNote, after.backNote);

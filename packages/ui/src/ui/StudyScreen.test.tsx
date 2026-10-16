@@ -99,6 +99,20 @@ describe("StudyScreen", () => {
     expect(container.querySelector(".card-back .card-note")).toHaveTextContent("An element.");
   });
 
+  it("says what is asked with each side's label, shown whichever way the card is studied, before the answer is revealed", () => {
+    const labeled = { ...card, frontLabel: { en: "Kanji" }, backLabel: { en: "Meaning" } };
+    const { container, unmount } = renderScreen({
+      prompt: { card: labeled, direction: "front-to-back" },
+    });
+    expect(container.querySelector(".card-front .card-label")).toHaveTextContent("Kanji");
+    expect(container.querySelector(".card-back")).toBeNull();
+    unmount();
+    const reversed = renderScreen({ prompt: { card: labeled, direction: "back-to-front" } });
+    expect(reversed.container.querySelector(".card-back .card-label")).toHaveTextContent("Meaning");
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+    expect(reversed.container.querySelector(".card-front .card-label")).toHaveTextContent("Kanji");
+  });
+
   it("asks a back→front prompt from the back and answers with the front", () => {
     const { container } = renderScreen({
       prompt: { card, direction: "back-to-front" },

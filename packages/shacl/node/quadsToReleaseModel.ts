@@ -98,6 +98,7 @@ export function quadsToReleaseModel(quads: readonly Quad[], url: string): Releas
     retired: retired.has(iri),
     front: texts(iri, sm("front")),
     back: texts(iri, sm("back")),
+    frontLabel: texts(iri, sm("frontLabel")),
     backLabel: texts(iri, sm("backLabel")),
     frontNote: texts(iri, sm("frontNote")),
     backNote: texts(iri, sm("backNote")),

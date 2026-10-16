@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.19 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.20 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -32,7 +32,7 @@ export const SM = {
   formatVersion: `${SM_NS}formatVersion`,
   /** Where a deck or deck group stands among the members of the one catalogue or group it is in, 0 first; the decks and groups of one parent share one sequence. Absent means after every member that has one. (Added in 1.13. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
   position: `${SM_NS}position`,
-  /** How a subject's texts are written: a concept of solid-memo:TextFormats. On a card (solid-memo:Card) it covers exactly solid-memo:front, back, frontNote, backNote and backLabel, and the distractorText and distractorNote of the card's distractors, which carry no text format of their own; on a course step (solid-memo:Step), its solid-memo:theory; on a course chapter (solid-memo:Chapter), its dcterms:description, never its title. These lists are fixed for 1.x: a new text predicate needs its own decision. A picture's description and every other text are always plain. Absent means plain text, shown as written. Each language's value is its own document, and its language tag still says what language the prose is in. A concept this reader does not know is read as plain text. (Added in 1.15. On a card, step or chapter it is outside the format's version: an older reader ignores it and shows the text as written; an older writer keeps it through an edit, but drops it when it copies a card from the library, which the library upgrade repairs.) */
+  /** How a subject's texts are written: a concept of solid-memo:TextFormats. On a card (solid-memo:Card) it covers exactly solid-memo:front, back, frontNote, frontLabel, backNote and backLabel, and the distractorText and distractorNote of the card's distractors, which carry no text format of their own; on a course step (solid-memo:Step), its solid-memo:theory; on a course chapter (solid-memo:Chapter), its dcterms:description, never its title. These lists are fixed for 1.x: a new text predicate needs its own decision (1.20 added frontLabel to a card's, a caption like backLabel). A picture's description and every other text are always plain. Absent means plain text, shown as written. Each language's value is its own document, and its language tag still says what language the prose is in. A concept this reader does not know is read as plain text. (Added in 1.15. On a card, step or chapter it is outside the format's version: an older reader ignores it and shows the text as written; an older writer keeps it through an edit, but drops it when it copies a card from the library, which the library upgrade repairs.) */
   textFormat: `${SM_NS}textFormat`,
   /** The document holding the deck's cards, one sm:Card per hash fragment. (Since 1.0.) */
   cardsDocument: `${SM_NS}cardsDocument`,
@@ -64,6 +64,8 @@ export const SM = {
   backImageDescription: `${SM_NS}backImageDescription`,
   /** A short note under the front's text, smaller, shown once the answer is revealed, so it never gives the answer away: what holds of the front ("Out of use"). Language-tagged text in any language, one per language. (Added in 1.8 for card format 3.) */
   frontNote: `${SM_NS}frontNote`,
+  /** A short caption above the front's text that says what kind of thing it is ("Country", "Infinitive"), shown whenever the front is, smaller than it, so a card studied both ways says what is asked: its counterpart is solid-memo:backLabel. The front's text stays the prompt itself. Language-tagged text in any language, one per language. (Added in 1.20 for card format 6.) */
+  frontLabel: `${SM_NS}frontLabel`,
   /** A short caption above the back's text that says what kind of answer it is ("Out of use · replaced by", "Capital", "Past tense"), shown whenever the back is, smaller than it. The back's text stays the answer itself. Language-tagged text in any language, one per language. (Added in 1.8 for card format 3.) */
   backLabel: `${SM_NS}backLabel`,
   /** A short note under the back's text, smaller, shown once the answer is revealed: when or why something changed, where it comes from. The back's text stays the answer itself. Language-tagged text in any language, one per language. (Added in 1.8 for card format 3.) */

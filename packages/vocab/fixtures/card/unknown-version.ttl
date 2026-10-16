@@ -6,4 +6,4 @@
     a solid-memo:Card ;
     solid-memo:front "Sweden" ;
     solid-memo:back "Stockholm" ;
-    solid-memo:formatVersion 6 .
+    solid-memo:formatVersion 7 .

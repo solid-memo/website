@@ -3,7 +3,7 @@ agent: written in format 1
 answer: read from format 1
 answer: written in format 1
 card: read from format 1
-card: written in format 5
+card: written in format 6
 catalog: read from format 1
 catalog: written in format 1
 chapter: read from format 1

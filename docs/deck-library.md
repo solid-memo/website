@@ -44,7 +44,7 @@ A version is one `sm:Deck` (also a `dcat:Dataset`), the document
 itself (`<>`), in library deck format 5 (`LibraryDeckV5`,
 [shapes.md](shapes.md)) or, from vocabulary 1.18, format 6
 (`LibraryDeckV6`, the same properties), with its cards as hash-fragment
-subjects in card format 4 or 5. A version stays at the format it was
+subjects in card format 4, 5 or 6. A version stays at the format it was
 published in; a new one is written at format 6, its series and
 publisher still in the index:
 
@@ -241,7 +241,7 @@ a release that says nothing reads exactly as before.
 - **The marker.** State `solid-memo:textFormat solid-memo:markdown` on
   each card, step and chapter written in it, and on nothing else
   ([vocab.md](vocab.md#text-formats)). On a card it covers its sides,
-  notes and label, and its distractors' text and notes, which carry no
+  notes and labels, and its distractors' text and notes, which carry no
   marker of their own; on a step its theory; on a chapter its
   description, never its title. A picture's description, a deck's title,
   description and keywords, and the version notes are always plain.
@@ -393,7 +393,7 @@ chapter that states `sm:textFormat sm:markdown`, by the
 [rules for a release](markdown.md#rules-for-a-release). In short:
 
 - no raw HTML and no pictures;
-- no link in a card's `front`, `back` or `backLabel`, or in a
+- no link in a card's `front`, `back`, `frontLabel` or `backLabel`, or in a
   `distractorText`, an autolink (`<ex:title>`, `<http://…>`) included;
   elsewhere only links the app follows (`https:`, without a user name
   or password), whose text, when it reads as an address or a host
@@ -545,7 +545,7 @@ flowchart LR
   description and keeping the other languages, which an import copies
   as they are (every tag, nothing guessed or added), and names creators
   from the agents in the index. An import writes the user's copy at the
-  latest formats (deck format 6, card format 5), whatever format the
+  latest formats (deck format 6, card format 6), whatever format the
   release was frozen at: a release's keywords keep their tags, and a
   format-4 release's untagged keywords stay untagged, their language
   unknown. A series or release

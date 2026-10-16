@@ -70,6 +70,7 @@ export function markdownFields(model: ReleaseModel): MarkdownField[] {
     const options = card.distractors.map((o) => o.value);
     add(card.iri, SM.front, card.front, "side");
     add(card.iri, SM.back, card.back, options.length > 0 ? "option" : "side");
+    add(card.iri, SM.frontLabel, card.frontLabel, "side");
     add(card.iri, SM.backLabel, card.backLabel, "side");
     add(card.iri, SM.frontNote, card.frontNote, "prose");
     add(card.iri, SM.backNote, card.backNote, "prose");

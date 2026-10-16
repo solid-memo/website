@@ -50,7 +50,7 @@ describe("the migration chain", () => {
 describe("migrate", () => {
   it("returns a latest record untouched", () => {
     const data = { front: { en: "Sweden" }, back: { "": "Stockholm" }, distractor: [] };
-    expect(migrate("card", { version: 5, data }, CONTEXT)).toBe(data);
+    expect(migrate("card", { version: 6, data }, CONTEXT)).toBe(data);
   });
 
   it("restamps a format-4 deck and card, changing nothing but the deck's keywords' form: no language guessed, stand-ins and untagged sides kept", () => {

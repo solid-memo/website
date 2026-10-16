@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { CardV5, DraftChapterV1, DraftStepV1 } from "@solid-memo/vocab/types.generated";
+import type { CardV6, DraftChapterV1, DraftStepV1 } from "@solid-memo/vocab/types.generated";
 import type { CardContent, Distractor } from "../deck.ts";
 import { cardContentFromRecord, cardToRecord, distractorFromRecord } from "../deckRecord.ts";
 import { sameText, type LangText } from "../langText.ts";
@@ -178,7 +178,7 @@ export function distractorChanges(
 /** What the table of a draft's cards shows of each. */
 export interface DraftCardRow {
   id: string;
-  card: CardV5;
+  card: CardV6;
   /** Where it is asked; null when nowhere. */
   place: QuestionPlace | null;
   /** From how many places it is asked: more than one is a mistake a release cannot make. */

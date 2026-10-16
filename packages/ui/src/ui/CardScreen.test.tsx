@@ -132,7 +132,7 @@ describe("CardScreen", () => {
       "State which language this text is in. Choose the language of the front.",
     );
     fireEvent.input(screen.getByLabelText("Front"), { target: { value: "水" } });
-    fireEvent.click(screen.getAllByRole("button", { name: "Translations (0)" })[0]!);
+    fireEvent.click(screen.getAllByRole("button", { name: "Translations (0)" })[1]!);
     fireEvent.click(screen.getAllByRole("button", { name: "Add a translation" })[0]!);
     fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), {
       target: { value: "みず" },
@@ -259,7 +259,9 @@ describe("CardScreen", () => {
       languages: { own: "sv", unstatedCounts: { front: 0, back: 0 } },
     });
     expect(picker("card-back-label")).toHaveTextContent("Language: Swedish");
-    fireEvent.input(screen.getByLabelText("Label (optional)"), { target: { value: "Betydelse" } });
+    fireEvent.input(screen.getByLabelText("Back label (optional)"), {
+      target: { value: "Betydelse" },
+    });
     fireEvent.click(picker("card-front-note"));
     expect(
       screen
@@ -300,7 +302,7 @@ describe("CardScreen", () => {
     fireEvent.input(screen.getByLabelText("Back note (optional)"), {
       target: { value: "One of the five elements." },
     });
-    fireEvent.input(screen.getByLabelText("Label (optional)"), { target: { value: "" } });
+    fireEvent.input(screen.getByLabelText("Back label (optional)"), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(props.onSave).toHaveBeenCalledWith({
       front: { ja: "水" },
@@ -309,21 +311,30 @@ describe("CardScreen", () => {
     });
   });
 
-  it("shows each side's note and the back's label, prefills them and saves them", () => {
+  it("shows each side's note and label, prefills them and saves them", () => {
     const { props, container } = renderScreen({
       card: {
         ...card,
+        frontLabel: { en: "Kanji" },
         frontNote: { en: "Kanji" },
         backLabel: { en: "Meaning" },
         backNote: { en: "An element." },
       },
     });
+    expect(container.querySelector(".card-front .card-label")).toHaveTextContent("Kanji");
     expect(container.querySelector(".card-front .card-note")).toHaveTextContent("Kanji");
     expect(container.querySelector(".card-back .card-label")).toHaveTextContent("Meaning");
+    expect(screen.getByLabelText("Front label (optional)")).toHaveValue("Kanji");
+    expect(screen.getByLabelText("Front label (optional)")).toHaveAccessibleDescription(
+      expect.stringContaining("Shown above the front, e.g. what kind of thing it is."),
+    );
     expect(container.querySelector(".card-back .card-note")).toHaveTextContent("An element.");
     expect(screen.getByLabelText("Front note (optional)")).toHaveValue("Kanji");
-    expect(screen.getByLabelText("Label (optional)")).toHaveValue("Meaning");
+    expect(screen.getByLabelText("Back label (optional)")).toHaveValue("Meaning");
     expect(screen.getByLabelText("Back note (optional)")).toHaveValue("An element.");
+    fireEvent.input(screen.getByLabelText("Front label (optional)"), {
+      target: { value: " Character " },
+    });
     fireEvent.input(screen.getByLabelText("Front note (optional)"), { target: { value: " N5 " } });
     fireEvent.input(screen.getByLabelText("Back note (optional)"), {
       target: { value: " One of the five elements. " },
@@ -331,6 +342,7 @@ describe("CardScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(props.onSave).toHaveBeenCalledWith({
       front: { ja: "水" },
+      frontLabel: { en: "Character" },
       frontNote: { en: "N5" },
       backLabel: { en: "Meaning" },
       back: { en: "water" },
@@ -352,7 +364,7 @@ describe("CardScreen", () => {
     expect(screen.getByLabelText("Back note (optional)").tagName).toBe("TEXTAREA");
     expect(screen.getByLabelText("Front").tagName).toBe("INPUT");
     expect(screen.getByLabelText("Front note (optional)").tagName).toBe("INPUT");
-    expect(screen.getByLabelText("Label (optional)").tagName).toBe("INPUT");
+    expect(screen.getByLabelText("Back label (optional)").tagName).toBe("INPUT");
     // What was saved decides, so the field stays a textarea as its breaks are typed away.
     fireEvent.input(screen.getByLabelText("Back note (optional)"), {
       target: { value: "An element.\n\nOne of five." },
@@ -382,7 +394,7 @@ describe("CardScreen", () => {
       },
     });
     expect(screen.getByLabelText("Front").tagName).toBe("TEXTAREA");
-    expect(screen.getByLabelText("Label (optional)").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("Back label (optional)").tagName).toBe("TEXTAREA");
     expect(screen.getByLabelText("Front picture description (optional)").tagName).toBe("TEXTAREA");
     expect(screen.getByLabelText("Back picture description (optional)").tagName).toBe("INPUT");
   });

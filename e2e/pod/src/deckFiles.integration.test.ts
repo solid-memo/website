@@ -87,7 +87,7 @@ function page(fileExchange: FileExchange = files()) {
   });
 }
 
-const CREATED = `dcterms:created "2026-10-01T10:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ; sm:formatVersion 5`;
+const CREATED = `dcterms:created "2026-10-01T10:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ; sm:formatVersion 6`;
 
 /**
  * Two instances of one user; in the first, a deck of three cards: one

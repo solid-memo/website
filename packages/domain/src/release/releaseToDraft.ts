@@ -4,7 +4,7 @@
 
 import {
   AGENT_V1,
-  CARD_V5,
+  CARD_V6,
   DISTRACTOR_V1,
   DISTRIBUTION_V1,
   DRAFT_CHAPTER_V1,
@@ -79,7 +79,7 @@ const LINKS = new Set(
     DRAFT_DECK_V1,
     DRAFT_CHAPTER_V1,
     DRAFT_STEP_V1,
-    CARD_V5,
+    CARD_V6,
     DISTRACTOR_V1,
   ].flatMap((descriptor) =>
     descriptor.fields

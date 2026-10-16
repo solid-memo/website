@@ -25,9 +25,10 @@ export interface DeckLanguages {
 /** A card of the deck, with the id that ties a copy's card to its library release's. */
 type DeckCard = CardContent & { id: string };
 
-/** The parts of a card that hold the user's own text: notes, the label and the pictures' descriptions. */
+/** The parts of a card that hold the user's own text: notes, labels and the pictures' descriptions. */
 function ownTexts(card: CardContent): LangText[] {
   return [
+    card.frontLabel,
     card.frontNote,
     card.backLabel,
     card.backNote,

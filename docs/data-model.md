@@ -259,8 +259,8 @@ data.
 │                        IRIs, optional sm:frontImageDescription/
 │                        backImageDescription (a picture's alt text),
 │                        sm:frontNote/backNote under each
-│                        side and sm:backLabel above the back, each with
-│                        sm:formatVersion; a retired card
+│                        side and sm:frontLabel/backLabel above it, each
+│                        with sm:formatVersion; a retired card
 │                        (owl:deprecated true) is kept but not studied;
 │                        a card names its wrong options
 │                        (sm:distractor, and schema:suggestedAnswer),
@@ -368,8 +368,9 @@ graph LR
   (`zxx` for codes, numbers and symbols), or, as saved before card
   format 5, one untagged literal whose language is not known, never
   both; the app keeps untagged text only while it is untouched. A note
-  under a side (`sm:frontNote` / `sm:backNote`) and the label above the
-  back (`sm:backLabel`) are language-tagged text in any language. Pictures are shown only when their URL is http(s); pod data
+  under a side (`sm:frontNote` / `sm:backNote`) and the label above it
+  (`sm:frontLabel` / `sm:backLabel`, the front's since card format 6)
+  are language-tagged text in any language. Pictures are shown only when their URL is http(s); pod data
   is untrusted. A picture may have a description
   (`sm:frontImageDescription` / `sm:backImageDescription`,
   language-tagged), read to whoever cannot see it in its place; without
@@ -378,7 +379,7 @@ graph LR
   picture shows without giving the answer away. A card may say how its
   texts are written, `sm:textFormat` (`sm:markdown` or `sm:plainText`,
   [vocab.md](vocab.md#text-formats)): it covers the sides, the notes,
-  the label and the card's distractors, never the pictures'
+  the labels and the card's distractors, never the pictures'
   descriptions. Without it the text is plain. The app keeps the marker
   through every edit and copy, an import or a course question joining
   the deck included. An edit trims plain text; text in any other

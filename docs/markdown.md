@@ -58,7 +58,7 @@ shown exactly as before 1.15.
 
 | Subject | Markdown when marked | Always plain |
 |---|---|---|
-| `sm:Card` | `front`, `back`, `frontNote`, `backNote`, `backLabel`, and its distractors' `distractorText` and `distractorNote` | the pictures' descriptions (their `alt` text) |
+| `sm:Card` | `front`, `back`, `frontNote`, `backNote`, `frontLabel`, `backLabel`, and its distractors' `distractorText` and `distractorNote` | the pictures' descriptions (their `alt` text) |
 | `sm:Step` | `theory` | |
 | `sm:Chapter` | `dcterms:description` | `dcterms:title` (headings, links, the window title) |
 | deck, release, series, group, catalog | | every text: DCAT readers and library search read them |
@@ -188,7 +188,7 @@ the deck or course it comes from.
   theory split into paragraphs at its blank lines, Markdown as the
   blocks of the [chunk](#chunks) shown.
 - **Inline** is for a multiple-choice option (in a `<label>`) and a
-  card's label.
+  card's labels.
 - **Plain** (`labelText`) is for places that take only text: a Browser
   row (cut to 120 characters, after the marks are gone, so never inside
   them), the card's name in breadcrumbs, the window title and
@@ -307,7 +307,7 @@ shows the same problems as hints, never as a block
 |---|---|
 | Raw HTML (`html`), such as `git clone <url>` | It shows as its source. Write it as code, or escape its `<`. |
 | A picture (`image`) | It is never shown, only its alt text. A card shows a picture by `sm:frontImage`/`sm:backImage`, with a description. |
-| A link where none may be (`link`): a card's `front`, `back` and `backLabel` and a distractor's `distractorText` (fields `SIDE` and `OPTION`), an autolink `<ex:title>` or `<http://…>` included | A link there is in the way of the keys that reveal and grade, and of the `<label>` an option sits in; an autolink also loses its angle brackets. Write it as code. |
+| A link where none may be (`link`): a card's `front`, `back`, `frontLabel` and `backLabel` and a distractor's `distractorText` (fields `SIDE` and `OPTION`), an autolink `<ex:title>` or `<http://…>` included | A link there is in the way of the keys that reveal and grade, and of the `<label>` an option sits in; an autolink also loses its angle brackets. Write it as code. |
 | A link the app does not follow (`linkNotFollowed`), in a note, a step's theory or a chapter's description (field `PROSE`) | Only `https:` without a user name or password is followed; any other shows as text. |
 | Link text that reads as an address or a host name other than the link's (`linkHost`) | Misleading text. The named host must be the link's, give or take a `www.`: `[solidproject.org](https://www.solidproject.org/)` is fine, `[bank.example](https://evil.example/)` is not, and neither is `[github.io](https://evil.github.io/)`, for a domain the host is in says nothing of who runs it. The test is by shape, a dotted word ending in letters, so text that reads as a host name but is none counts too: "Node.js", and a file's name such as `package.json`, `v1.ttl` or `README.md`, even as code. Word it otherwise ("npm's documentation of package.json"). This is a check of the data only: the defense against a link that misleads is the host the app shows beside it ([safety](#safety)). |
 | A bidi control, zero-width or other hidden character in code or a link (`hiddenControl`) | Code that reads other than it runs ("Trojan Source"); the app shows them as markers. |
@@ -343,16 +343,16 @@ languages.
 - **Text as typed.** The editor leaves tidying the sides and notes to
   the domain (`validateCardContent`), which keeps the spaces a Markdown
   text starts with, an indented code block, and trims plain text as
-  always. The label and the pictures' descriptions, single lines that
+  always. The labels and the pictures' descriptions, single lines that
   never hold a block, it trims itself.
 - **Fields.** On, the sides and both notes are textareas, where Enter
   starts a line and Ctrl+Enter (⌘+Enter) saves; once a textarea, a field
-  stays one in that editor, so switching off loses no line. The label
+  stays one in that editor, so switching off loses no line. The labels
   and the pictures' descriptions stay single lines: a label is one line
   in study, and a description, the picture's `alt`, is always plain.
 - **Hints, never blocks.** Under each text in Markdown, each language's
   under its own entry (a translation's by the translation): what
-  `markdownProblems` names, with the card's sides and label held to
+  `markdownProblems` names, with the card's sides and labels held to
   `SIDE`, the notes to `PROSE`, and the back to `OPTION` when the card
   has wrong options (a course's question); and "This shows no text as
   Markdown" for a text of marks alone. Each list describes its own text

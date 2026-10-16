@@ -221,8 +221,9 @@ describe("card records", () => {
     });
   });
 
-  it("round-trip the notes under each side and the label above the back", () => {
+  it("round-trip the notes under each side and the label above each", () => {
     const content = {
+      frontLabel: { en: "Occupation" },
       front: { "": "Aktiemäklare" },
       frontNote: { en: "Out of use" },
       backLabel: { en: "Replaced by" },

@@ -79,7 +79,7 @@ describe("CardCreatorScreen", () => {
     renderScreen();
     for (const [label, hint] of [
       ["Front note (optional)", "Shown under the front once the answer is revealed."],
-      ["Label (optional)", "Shown above the back, e.g. what kind of answer it is."],
+      ["Back label (optional)", "Shown above the back, e.g. what kind of answer it is."],
       ["Back note (optional)", "Shown under the back once the answer is revealed."],
     ]) {
       const field = screen.getByLabelText(label);
@@ -259,9 +259,11 @@ describe("CardCreatorScreen", () => {
     expect(alertTexts()).toEqual(["Choose the language of the back."]);
     expect(picker("card-back")).toHaveFocus();
     chooseLanguage("card-back", "en");
-    fireEvent.input(screen.getByLabelText("Label (optional)"), { target: { value: "Element" } });
+    fireEvent.input(screen.getByLabelText("Back label (optional)"), {
+      target: { value: "Element" },
+    });
     fireEvent.submit(container.querySelector("form")!);
-    expect(alertTexts()).toEqual(["Choose the language of the label."]);
+    expect(alertTexts()).toEqual(["Choose the language of the label above the back."]);
     expect(picker("card-back-label")).toHaveFocus();
   });
 
@@ -306,7 +308,9 @@ describe("CardCreatorScreen", () => {
     fireEvent.input(screen.getByLabelText("Back note (optional)"), {
       target: { value: "Ett av fem element." },
     });
-    fireEvent.input(screen.getByLabelText("Label (optional)"), { target: { value: "Betydelse" } });
+    fireEvent.input(screen.getByLabelText("Back label (optional)"), {
+      target: { value: "Betydelse" },
+    });
     fireEvent.submit(container.querySelector("form")!);
     expect(props.onAdd).toHaveBeenLastCalledWith(
       {
@@ -339,7 +343,9 @@ describe("CardCreatorScreen", () => {
     expect(picker("card-front-note")).toHaveTextContent("Language: Finnish");
     expect(picker("card-back-label")).toHaveTextContent("Language: Swedish");
     // Text already written is not retagged by another field's choice either.
-    fireEvent.input(screen.getByLabelText("Label (optional)"), { target: { value: "Capital" } });
+    fireEvent.input(screen.getByLabelText("Back label (optional)"), {
+      target: { value: "Capital" },
+    });
     chooseLanguage("card-back-image-description", "en");
     expect(picker("card-back-label")).toHaveTextContent("Language: Swedish");
   });
@@ -431,7 +437,7 @@ describe("CardCreatorScreen", () => {
       for (const label of ["Front", "Back", "Front note (optional)", "Back note (optional)"]) {
         expect(screen.getByLabelText(label).tagName).toBe("TEXTAREA");
       }
-      expect(screen.getByLabelText("Label (optional)").tagName).toBe("INPUT");
+      expect(screen.getByLabelText("Back label (optional)").tagName).toBe("INPUT");
       expect(screen.getByLabelText("Front picture description (optional)").tagName).toBe("INPUT");
       expect(screen.getByText("Formatting help").tagName).toBe("SUMMARY");
 
@@ -494,7 +500,7 @@ describe("CardCreatorScreen", () => {
     it("says when only a translation reads differently, without pointing to the preview, which shows the main text", () => {
       renderScreen();
       fireEvent.input(screen.getByLabelText("Front"), { target: { value: "M87*" } });
-      fireEvent.click(screen.getAllByRole("button", { name: "Translations (0)" })[0]!);
+      fireEvent.click(screen.getAllByRole("button", { name: "Translations (0)" })[1]!);
       fireEvent.click(screen.getAllByRole("button", { name: "Add a translation" })[0]!);
       fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), {
         target: { value: "*M87*" },
@@ -509,7 +515,7 @@ describe("CardCreatorScreen", () => {
       const { container } = renderScreen();
       fireEvent.click(toggle());
       fireEvent.input(screen.getByLabelText("Front"), { target: { value: "Clone it" } });
-      fireEvent.click(screen.getAllByRole("button", { name: "Translations (0)" })[0]!);
+      fireEvent.click(screen.getAllByRole("button", { name: "Translations (0)" })[1]!);
       fireEvent.click(screen.getAllByRole("button", { name: "Add a translation" })[0]!);
       const translation = screen.getByLabelText("Translation, its language not chosen");
       fireEvent.input(translation, { target: { value: "git clone <url>" } });
@@ -527,15 +533,15 @@ describe("CardCreatorScreen", () => {
         languages: { front: "en", back: "en", own: "en", unstatedCounts: { front: 0, back: 0 } },
       });
       fireEvent.click(toggle());
-      fireEvent.input(screen.getByLabelText("Label (optional)"), {
+      fireEvent.input(screen.getByLabelText("Back label (optional)"), {
         target: { value: "<https://a.example>" },
       });
-      expect(screen.getByLabelText("Label (optional)")).toHaveAccessibleDescription(
+      expect(screen.getByLabelText("Back label (optional)")).toHaveAccessibleDescription(
         "Language: English Shown above the back, e.g. what kind of answer it is. <https://a.example> reads as a link, shown without its angle brackets. Put it in backticks to show it as typed.",
       );
       fireEvent.input(screen.getByLabelText("Front"), { target: { value: "a" } });
       fireEvent.input(screen.getByLabelText("Back"), { target: { value: "b" } });
-      fireEvent.input(screen.getByLabelText("Label (optional)"), {
+      fireEvent.input(screen.getByLabelText("Back label (optional)"), {
         target: { value: " Replaced by" },
       });
       fireEvent.click(screen.getByRole("button", { name: "Add card" }));
