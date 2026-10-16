@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.1.0](https://github.com/solid-memo/website/compare/v3.0.0...v3.1.0) (2026-10-16)
+
+### Features
+
+* **ui:** join a text field and its language picker in one box ([8900820](https://github.com/solid-memo/website/commit/8900820e8bd34f719877a0a8b1c86b1c53d8e21c)), closes [#117](https://github.com/solid-memo/website/issues/117)
+
 ## [3.0.0](https://github.com/solid-memo/website/compare/v2.3.0...v3.0.0) (2026-10-16)
 
 ### ⚠ BREAKING CHANGES
