@@ -36,6 +36,8 @@ its text shows, not whether it conforms.
 
 ```mermaid
 flowchart LR
+    accTitle: Validating an instance
+    accDescr: The validation screen lists the instance's documents and checks each against its published shape with the SHACL engine.
     ui["ValidationContainer<br/>#/validate"] --> uc["validateInstance"]
     uc --> docs["instanceDocumentUrls<br/>meta, preferences, catalog,<br/>every deck's cards + reviews,<br/>every draft's documents"]
     docs --> port["ShapeValidator.validateDocument"]

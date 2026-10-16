@@ -115,6 +115,8 @@ objects before rendering:
 
 ```mermaid
 flowchart LR
+    accTitle: From the hash to a screen
+    accDescr: The location hash is parsed into a route of URLs, whose instance and deck are queried before the screen renders.
     hash["location.hash"] -->|parseHash| ref["RouteRef (URLs)"]
     ref -->|instances query| instance["Instance"]
     ref -->|decks query| deck["Deck"]

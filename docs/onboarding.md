@@ -8,17 +8,19 @@ stays behind use cases (see [boundaries.md](boundaries.md)).
 
 ```mermaid
 stateDiagram-v2
+    accTitle: Onboarding
+    accDescr: Without a session, the learner tries the app as a guest, creates a Pod or logs in with a WebID or a provider, and the app then discovers their storage.
     [*] --> Choose: no session
     [*] --> App: session silently restored
     [*] --> Guest: a guest studied here before
     Choose --> Guest: Try it without logging in
     Guest --> WebID: Keep my study — log in
-    Choose --> ProviderSite: Create a Pod ↗ (new tab)
+    Choose --> ProviderSite: Create a Pod (new tab)
     ProviderSite --> Choose: user comes back
     Choose --> WebID: I already have a Pod
     WebID --> Choose: Back
-    WebID --> IdP: valid https WebID → Solid-OIDC redirect
-    WebID --> IdP: or pick a suggested provider → Solid-OIDC redirect
+    WebID --> IdP: valid https WebID: Solid-OIDC redirect
+    WebID --> IdP: a suggested provider: same redirect
     IdP --> Discovering: redirect back (origin "login")
     Discovering --> Connected: storage found
     Discovering --> NoPod: profile has no storage link

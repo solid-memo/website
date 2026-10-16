@@ -16,6 +16,8 @@ each request to the guest's pod or to the network, by URL.
 
 ```mermaid
 graph LR
+  accTitle: Routing a guest's requests
+  accDescr: Requests to the guest pod's address go to the local pod in IndexedDB, and every other URL goes through the authenticated fetch.
   UI --> UseCases --> Adapters["Solid adapters"]
   Adapters --> Fence[writeFence] --> Router[routedFetch]
   Router -- "https://guest.solid-memo.invalid/…" --> LocalPod[localPod] --> Store[(IndexedDB)]
@@ -51,6 +53,8 @@ guest pod exists in this browser.
 
 ```mermaid
 stateDiagram-v2
+    accTitle: Keeping a guest's study
+    accDescr: A guest logs in and is offered to move the study into their Pod, where it is added or moved, and a failure leaves the study untouched.
     [*] --> Guest: Try it without logging in
     Guest --> Login: Keep my study — log in
     Login --> Guest: Back to my study
@@ -59,7 +63,7 @@ stateDiagram-v2
     Offer --> Moving: Move it into my Pod (the user has none)
     Offer --> [*]: Discard it / Not now
     Adding --> Added: every deck in, the guest's study unchanged meanwhile
-    Adding --> Offer: failed — the decks added stay, whole; study untouched
+    Adding --> Offer: failed — the decks added stay, whole — study untouched
     Moving --> Moved: registered in the user's type index
     Moving --> Offer: failed — copy removed, study untouched
     Guest --> [*]: Discard

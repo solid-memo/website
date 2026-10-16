@@ -32,6 +32,8 @@ extension would be a 404. Each file states its own address as its
 
 ```mermaid
 flowchart LR
+    accTitle: Publishing a deck version
+    accDescr: A new version is copied from the frozen one, indexed with npm run library, checked with npm run library:check and deployed with the site.
     prev["decks/name/vN.ttl<br/>(published, frozen)"] -->|copy, edit| next["decks/name/vN+1.ttl"]
     next -->|npm run library| idx["decks/index.ttl<br/>dcat:Catalog"]
     next & idx -->|"npm run library:check<br/>-- --base ref"| ok["valid, index up to date,<br/>nothing published changed"]
@@ -526,6 +528,8 @@ was, apart from what publishing sets (a test of its own,
 
 ```mermaid
 flowchart LR
+    accTitle: The library in the app
+    accDescr: The library screens and the newcomer offer call use cases that read the library with plain fetches and write imported decks to the pod with authenticated requests.
     ui["LibraryContainer / LibraryScreen<br/>#/library?instance=…"] --> uc["listLibraryDecks<br/>importLibraryDeck"]
     page["LibraryDeckContainer / LibraryDeckScreen<br/>#/library-deck?instance=…&deck=&lt;series&gt;"] --> uc
     offer["NewcomerCourseContainer<br/>on an empty deck list"] --> start["listLibraryDecks<br/>startCourse"]
@@ -612,6 +616,8 @@ read is added the same way.
 
 ```mermaid
 flowchart LR
+    accTitle: Importing a release by URL
+    accDescr: The import screen reads a release from any host, validates it against the shapes, and imports it into the learner's instance.
     ui["ImportUrlContainer / ImportUrlScreen<br/>#/import-url?instance=…&url=…"] --> read["readReleaseFromLink"]
     read --> lib["DeckLibrary.readRelease<br/>(solidDeckLibrary.ts)"]
     read --> shapes["ShapeValidator.validateDocument<br/>(context library)"]

@@ -768,56 +768,59 @@ Whatever is decided later:
 
 ## What remains
 
+Each item below starts with its state: **Done.** when it has landed,
+**Open.** when it has not.
+
 ### GitHub settings (admin)
 
 Only an admin of the repository can change these. All are done:
 
-- [x] **Private vulnerability reporting.** On, and its exclusion is gone
+- **Done.** **Private vulnerability reporting.** On, and its exclusion is gone
   from `lychee.toml`. *(5)*
-- [x] **Secret scanning and push protection.** Both on. *(1)*
-- [x] **Discussions.** On, and their exclusion is gone from
+- **Done.** **Secret scanning and push protection.** Both on. *(1)*
+- **Done.** **Discussions.** On, and their exclusion is gone from
   `lychee.toml`. *(5)*
-- [x] **Topics and description.** The description and homepage are kept,
+- **Done.** **Topics and description.** The description and homepage are kept,
   and topics are added. *(14)*
-- [x] **Labels.** `deck`, `interop` and `i18n` exist, for the deck,
+- **Done.** **Labels.** `deck`, `interop` and `i18n` exist, for the deck,
   interop and translation forms.
-- [x] **The ruleset on `main`** (24560297). It requires `ci-ok`, and its
+- **Done.** **The ruleset on `main`** (24560297). It requires `ci-ok`, and its
   bypass list is empty, so Renovate has no bypass. *(7, 12)*
-- [x] **Allow auto-merge.** On, so Renovate can add its pull requests to
+- **Done.** **Allow auto-merge.** On, so Renovate can add its pull requests to
   the merge queue once `ci-ok` passes.
-- [x] **The merge queue on `main`.** The ruleset on `main` requires the
+- **Done.** **The merge queue on `main`.** The ruleset on `main` requires the
   merge queue, merging with merge commits, and no longer requires
   branches to be up to date (#76). *(7, 12)*
-- [x] **The `github-pages` environment.** `main` is its only deployment
+- **Done.** **The `github-pages` environment.** `main` is its only deployment
   branch. The deploy runs from `main` even when it deploys a version's
   tag, so this still holds. *(1, 12)*
 
 ### Actions for the maintainer
 
-- [x] **The blame-ignore list.** The branch `standard-for-public-code`
+- **Done.** **The blame-ignore list.** The branch `standard-for-public-code`
   was merged with a merge commit (pull request #37), so the reformat's
   SHA in `.git-blame-ignore-revs` (`7646413`, "Reformat the code with
   Biome") names a commit on `main` ([style.md](style.md#formatting)).
   *(15)*
-- [x] **Zenodo.** Connected to the repository, so each GitHub release
+- **Done.** **Zenodo.** Connected to the repository, so each GitHub release
   gets a DOI. *(14)*
-- [x] **The release's deploy key**, before the branch
+- **Done.** **The release's deploy key**, before the branch
   `semantic-release` is merged. Make an SSH key pair, add its public
   key as a deploy key with write access, its private key as the
   repository secret `SEMANTIC_RELEASE_KEY` (to be moved into the
   `release` environment, below), and "Deploy keys" to the bypass list
   of the ruleset on `main`, as
   [releasing.md](releasing.md#the-deploy-key) says. *(1, 6, 16)*
-- [x] **The first release.** The merge of the branch `semantic-release`
+- **Done.** **The first release.** The merge of the branch `semantic-release`
   released 1.0.0: the release commit and `v1.0.0` are on `main`.
   *(1, 6, 16)*
-- [x] **A ruleset for version tags**, on `refs/tags/v*`, that restricts
+- **Done.** **A ruleset for version tags**, on `refs/tags/v*`, that restricts
   their creation, update and deletion, with "Deploy keys" and the
   Repository admin role on its bypass list, as
   [releasing.md](releasing.md#the-deploy-key) says. The deploy deploys
   the commit a version tag names, so without it anyone with write
   access could pick what is deployed. *(1)*
-- [x] **The `release` environment** (#80). Make it, or open it if a run
+- **Done.** **The `release` environment** (#80). Make it, or open it if a run
   has made it already, with `main` as its only deployment branch, move
   the key into it as the environment secret `SEMANTIC_RELEASE_KEY`, and
   delete the repository secret, as
@@ -825,17 +828,17 @@ Only an admin of the repository can change these. All are done:
   can be read by a workflow on any branch. Keep the release key the
   only deploy key with write access, as both rulesets' bypass lets every
   such key past. *(1)*
-- [x] **The DOI.** Add it to `CITATION.cff` and the README, in a pull
+- **Done.** **The DOI.** Add it to `CITATION.cff` and the README, in a pull
   request. *(14)*
-- [ ] **Software Heritage.** Save the repository there. *(14)*
-- [ ] **Search engines.** Verify solid-memo.com in Google Search Console
+- **Open.** **Software Heritage.** Save the repository there. *(14)*
+- **Open.** **Search engines.** Verify solid-memo.com in Google Search Console
   and Bing Webmaster Tools, and submit `sitemap.xml`. *(14)*
-- [ ] **The Solid community.** Ask for a listing on solidproject.org, and
+- **Open.** **The Solid community.** Ask for a listing on solidproject.org, and
   post about the project on the Solid forum. *(3, 14)*
-- [ ] **Local branches.** Delete the 17 leftover `pc/*` and `*-backup`
+- **Open.** **Local branches.** Delete the 17 leftover `pc/*` and `*-backup`
   branches on the maintainer's machine, or publish any that holds work
   not on `main`. *(1)*
-- [ ] **A second reviewer.** Then require one approval and code-owner
+- **Open.** **A second reviewer.** Then require one approval and code-owner
   review on `main`. Renovate's pull requests then wait for a
   maintainer's approval too, and automerge merges them once it is given
   (decision 8). *(7, 12)*
@@ -845,21 +848,21 @@ Only an admin of the repository can change these. All are done:
 Found on 2026-10-16 and not made here, as #78 leaves fixing to later
 changes:
 
-- [ ] **Terms.** Explain DOI, ACR and WCAG in
+- **Open.** **Terms.** Explain DOI, ACR and WCAG in
   [glossary.md](glossary.md), or where they are first used, and link the
   EU data theme table where [deck-library.md](deck-library.md) names
   `EDUC`. *(10)*
-- [ ] **The DOI's entry.** Make Zenodo's entry name solid-memo.com, for
+- **Open.** **The DOI's entry.** Make Zenodo's entry name solid-memo.com, for
   example with a `.zenodo.json` that lists the website as a related
   identifier, since Zenodo does not take `CITATION.cff`'s `url`. *(14)*
-- [ ] **CodeQL in the docs.** CodeQL scans the code, but no page says
+- **Open.** **CodeQL in the docs.** CodeQL scans the code, but no page says
   so: [testing.md](testing.md) and SECURITY.md could say what it checks
   and that its alerts are fixed in pull requests like any other change.
   *(12)*
-- [ ] **ROADMAP.md.** "Done recently" stops at 1.0.0; add what 1.0.1 to
+- **Open.** **ROADMAP.md.** "Done recently" stops at 1.0.0; add what 1.0.1 to
   2.1.1 brought, such as the merge queue, the breaking-change gate and
   the Arabic decks. *(4)*
-- [ ] **The user guide.** Say that the library has Arabic decks and that
+- **Open.** **The user guide.** Say that the library has Arabic decks and that
   text written right to left keeps its direction, alongside the
   examples criterion 9 already lacks. *(9)*
 
@@ -917,89 +920,90 @@ them:
 
 ## The plan, as it landed
 
-The first assessment's plan, with what has landed since checked: most
-of it on the branch `standard-for-public-code`.
+The first assessment's plan, each item marked **Done.** when it has
+landed and **Open.** when it has not: most of it landed on the branch
+`standard-for-public-code`.
 
 ### Phase 1: files and small fixes
 
-- [x] **Footer.** The repository URL comes from `VITE_REPO_URL`. Every
+- **Done.** **Footer.** The repository URL comes from `VITE_REPO_URL`. Every
   screen links to the source code, the commit, the issue tracker and the
   version, in every language the app speaks
   ([`Footer.tsx`](../packages/ui/src/ui/Footer.tsx)).
-- [x] **`CONTRIBUTING.md`**, linked from the README.
-- [x] **`GOVERNANCE.md`** and `.github/CODEOWNERS`.
-- [x] **`SECURITY.md`.** No `security.txt`, as decided.
-- [x] **Templates.** Issue forms for bugs, features, decks, translations
+- **Done.** **`CONTRIBUTING.md`**, linked from the README.
+- **Done.** **`GOVERNANCE.md`** and `.github/CODEOWNERS`.
+- **Done.** **`SECURITY.md`.** No `security.txt`, as decided.
+- **Done.** **Templates.** Issue forms for bugs, features, decks, translations
   and interop reports, `config.yml` (which points conduct reports to
   their email contact), the pull
   request template, and `CODE_OF_CONDUCT.md`.
-- [x] **README.** About, Status, Run it on its own, Contributing, the
+- **Done.** **README.** About, Status, Run it on its own, Contributing, the
   language statement, the badges, the journeys report and the licenses.
-- [x] **New pages**: [objectives.md](objectives.md),
+- **Done.** **New pages**: [objectives.md](objectives.md),
   [policy.md](policy.md), [standards.md](standards.md),
   [privacy.md](privacy.md) and [glossary.md](glossary.md), the full SM-2
   citation, and links to the specifications.
-- [x] **`ROADMAP.md`.**
-- [x] **Metadata and style.** `publiccode.yml`, `CITATION.cff`,
+- **Done.** **`ROADMAP.md`.**
+- **Done.** **Metadata and style.** `publiccode.yml`, `CITATION.cff`,
   `CHANGELOG.md`, [releasing.md](releasing.md), `.gitattributes`,
   `.editorconfig`, [style.md](style.md), the root `package.json`'s
   metadata, and the JSON-LD in `apps/web/index.html`.
-- [x] **Package docs.** A README and a `description` for each package,
+- **Done.** **Package docs.** A README and a `description` for each package,
   `e2e/journeys` in [architecture.md](architecture.md), and the maturity
   of the 0.x dependencies in [vendor-code.md](vendor-code.md#maturity).
-- [ ] **Branches.** The leftover `pc/*` and `*-backup` branches remain
+- **Open.** **Branches.** The leftover `pc/*` and `*-backup` branches remain
   on the maintainer's machine (above).
 
 ### Phase 2: CI and GitHub settings
 
-- [x] **`ci.yml`.** Runs on every pull request and on pushes to `main`,
+- **Done.** **`ci.yml`.** Runs on every pull request and on pushes to `main`,
   with the `ci-ok` job, a read-only token and no secrets.
-- [x] **The deck library's base.** Compared in `ci.yml`'s `library`
+- **Done.** **The deck library's base.** Compared in `ci.yml`'s `library`
   job, which `ci-ok` waits for; `ns.yml`, whose checks were all in
   `ci.yml` but that one, is gone.
-- [x] **`deploy.yml`.** It deploys only a released version: after CI
+- **Done.** **`deploy.yml`.** It deploys only a released version: after CI
   passes on a commit a version tag names, or, run by hand, only from
   `main`, the newest version, after `npm run check`. Either way, only
   the newest version, from its release commit, once its GitHub release
   is made.
-- [x] **`renovate.json5`.** `automergeType: 'pr'`, and a `commitBody`
+- **Done.** **`renovate.json5`.** `automergeType: 'pr'`, and a `commitBody`
   that records each update and why.
-- [x] **Checks in `npm run check`.** The docs index
+- **Done.** **Checks in `npm run check`.** The docs index
   (`npm run check:docs`), prerelease dependencies
   (`npm run check:dependencies`), and each package's coverage in the
   run's summary.
-- [x] **A docs job.** lychee (offline on every change, online weekly),
+- **Done.** **A docs job.** lychee (offline on every change, online weekly),
   `reuse lint` and the publiccode.yml parser; markdownlint and cspell
   run in `npm run check`, so in the build job.
-- [x] **License required.** `npm run library:check` refuses a new deck
+- **Done.** **License required.** `npm run library:check` refuses a new deck
   version without `dcterms:license`, and `sm2.test.ts` checks the
   scheduler against the table it reads from
   [srs.md](srs.md#worked-examples).
-- [x] **GitHub settings.** Listed above, all done.
+- **Done.** **GitHub settings.** Listed above, all done.
 
 ### Phase 3: larger work
 
-- [x] **Configuration.** `VITE_APP_NAME`, `VITE_REPO_URL` and
+- **Done.** **Configuration.** `VITE_APP_NAME`, `VITE_REPO_URL` and
   `VITE_POD_PROVIDERS`, [configuration.md](configuration.md),
   [reuse.md](reuse.md), and a generic custom domain section in
   [deployment.md](deployment.md). No CI build under a subpath.
-- [x] **User documentation.** [user-guide.md](user-guide.md),
+- **Done.** **User documentation.** [user-guide.md](user-guide.md),
   [statistics.md](statistics.md), [browsing.md](browsing.md), examples in
   [markdown.md](markdown.md) and [boundaries.md](boundaries.md), and a
   plain summary at the top of long pages.
-- [x] **Formatter and linter.** Biome in `npm run check`, with the
+- **Done.** **Formatter and linter.** Biome in `npm run check`, with the
   reformat in `.git-blame-ignore-revs`.
-- [x] **REUSE.** `REUSE.toml`, `LICENSES/`, SPDX headers, the license on
+- **Done.** **REUSE.** `REUSE.toml`, `LICENSES/`, SPDX headers, the license on
   the `ns/` graphs ([vocab.md](vocab.md#license)), `reuse lint` in CI,
   and `npm run check:reuse` for the decks' licenses.
-- [ ] **Releases.** The version shows in the footer, semantic-release
+- **Open.** **Releases.** The version shows in the footer, semantic-release
   releases each version from the commits, and only released versions
   are deployed, from tags a ruleset protects. The archive remains
   (above).
-- [ ] **Findability.** The about page is done and in the sitemap. Search
+- **Open.** **Findability.** The about page is done and in the sitemap. Search
   engines and the Solid community remain (above).
-- [x] **Deck contact.** New deck versions name the project's contact.
-- [ ] **A second reviewer.**
+- **Done.** **Deck contact.** New deck versions name the project's contact.
+- **Open.** **A second reviewer.**
 
 ## Checking progress
 

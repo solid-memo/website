@@ -191,6 +191,32 @@ run it without installing it.
   commit.
 - Examples are real: a command that runs, a path that exists, Turtle
   from the repository.
+- The docs are written in the app's own Markdown dialect
+  ([markdown.md](markdown.md#the-dialect)), so they read the same
+  wherever that dialect is rendered. It has no autolink literals: a URL
+  is a link, or is written in `<…>` (markdownlint's MD034 checks it),
+  and a local address that is not meant to be followed, such as
+  `http://localhost:4173`, is a code span. It has no task lists either:
+  a checklist item starts with its state in bold, **Done.** or
+  **Open.** The docs use no images and no raw HTML.
+- A diagram is a Mermaid `flowchart`, `graph`, `sequenceDiagram` or
+  `stateDiagram-v2` block. It starts with an `accTitle:` (a short name)
+  and an `accDescr:` (one sentence that says what it shows), for
+  readers who cannot see it.
+- A diagram's text uses only printable ASCII, Latin-1 without the soft
+  hyphen, and `– — ‘ ’ “ ” … −`. That rules out arrows, which the app's
+  font, Fredoka, lacks, so a word says it (`to`, `and back`). A label
+  never holds a `;` outside quotes, since Mermaid ends the statement
+  there: a state diagram's transition label, which cannot be quoted, is
+  cut short and stray states are drawn, without an error. A label with
+  other punctuation Mermaid reads, such as a `.` in a dotted edge or
+  parentheses in a node, is quoted (`-. "main.tsx only" .->`,
+  `D["round(x)"]`), and `>=` is written in words, since Mermaid can
+  drop the `>`.
+- After a diagram is changed, check on GitHub that it still draws as
+  meant: GitHub's Mermaid version and label mode differ from other
+  renderers', and a diagram one of them accepts another can reject or
+  draw differently.
 
 ## Language
 

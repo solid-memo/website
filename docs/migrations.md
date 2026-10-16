@@ -290,6 +290,8 @@ Rules that hold across versions:
 
 ```mermaid
 flowchart LR
+    accTitle: The migration chain
+    accDescr: Each shape's record versions in order, with the migration that takes one version to the next.
     v1["CardV1"] -->|card/1-to-2| v2["CardV2"]
     v2 -->|card/2-to-3<br/>in use: nothing to change| v3["CardV3"]
     v3 -->|card/3-to-4<br/>text stays untagged| v4["CardV4"]
@@ -336,6 +338,8 @@ goes on with the others; run again, it updates what is still outdated
 
 ```mermaid
 flowchart TD
+    accTitle: Updating an instance
+    accDescr: Once the learner confirms, the update reads what is outdated, writes one document after another, and registers what the type index lacks once nothing failed.
     open["Instance opened"] --> plan["planMigration<br/>read meta, preferences,<br/>every deck's cards and reviews"]
     plan -->|nothing outdated| quiet["(nothing shown)"]
     plan -->|outdated| notice["Notice: what will change"]
@@ -672,6 +676,8 @@ by its document), and so does any link another app made.
 
 ```mermaid
 flowchart TD
+    accTitle: Upgrading a library deck
+    accDescr: The upgrade reads the deck, puts its cards, drops the removed cards' review states and moves the entry to the new release, and an error stops it where it is.
     offer["Notice: what the upgrade changes"] -->|Update to release n| read["1 read: the deck's entry and cards;<br/>the plan again must change the same cards;<br/>the review states, when cards go"]
     read --> cards["2 cards: one PUT of the whole document,<br/>If-Match the read the plan was made from<br/>(none when no card changes)"]
     cards --> reviews["3 reviews: the removed cards' states dropped,<br/>If-Match the read (none when there are none)"]

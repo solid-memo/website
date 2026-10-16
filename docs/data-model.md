@@ -34,6 +34,8 @@ scheduler; the data check only warns about them
 
 ```mermaid
 flowchart LR
+    accTitle: From pod data to the domain model
+    accDescr: A Thing is read as a versioned shape record, migrated to the latest record and mapped to the domain model, and a model is written back the same way in reverse.
     thing["Inrupt Thing"] -->|readVersioned| record["shape record<br/>e.g. CardV1"]
     record -->|migrate| latest["latest record<br/>CardV2"]
     latest -->|cardFromRecord| model["domain model<br/>Card"]
@@ -45,6 +47,8 @@ flowchart LR
 
 ```mermaid
 flowchart LR
+    accTitle: The discovery chain
+    accDescr: From the WebID, the app follows the storage and the private and public type indexes to the instance container, and to the registrations other apps read.
     W[WebID] -->|pim:storage| S[Storage root]
     W -->|solid:privateTypeIndex<br/>directly or via pim:preferencesFile| PTI[Private type index]
     W -->|solid:publicTypeIndex| PUB[Public type index]
@@ -310,6 +314,8 @@ never rewrites card content.
 
 ```mermaid
 graph LR
+    accTitle: An instance's documents
+    accDescr: A deck in the catalog links its creator, its distribution, its cards document and its reviews document, and each review state points to its card.
     C["catalog.ttl#deck-X<br/>a sm:Deck, dcat:Dataset<br/>dcterms:title, dcterms:description<br/>sm:formatVersion<br/>sm:studyDirection<br/>sm:cardsDocument<br/>sm:reviewsDocument"]
     A["catalog.ttl#agent-…<br/>a foaf:Agent<br/>foaf:name, foaf:mbox"]
     X["catalog.ttl#deck-X-cards<br/>a dcat:Distribution<br/>dcat:accessURL"]
@@ -943,6 +949,8 @@ stamped with the version (ETag) of the document it was learned from
 
 ```mermaid
 sequenceDiagram
+    accTitle: Counting a deck through the digest
+    accDescr: The app reads the digest, then asks for each deck's cards with the version the digest holds, and the pod answers 304 when nothing changed or 200 with the document when it did.
     participant App
     participant Pod
     App->>Pod: GET digest.ttl

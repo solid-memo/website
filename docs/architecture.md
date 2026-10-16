@@ -38,11 +38,13 @@ owns the interfaces, adapters conform to them.
 
 ```mermaid
 graph TD
+    accTitle: Package dependencies
+    accDescr: Which packages import which, with a dotted arrow where an import is allowed only from certain files.
     web["apps/web<br/>the page"] --> ui["ui<br/>the components"]
-    web -. main.tsx only, lazily .-> studio["apps/studio<br/>its screens"]
+    web -. "main.tsx only, lazily" .-> studio["apps/studio<br/>its screens"]
     studio --> ui
     ui --> application
-    web -. main.tsx only .-> composition["composition<br/>the composition root"]
+    web -. "main.tsx only" .-> composition["composition<br/>the composition root"]
     composition --> application & solid & browser
     ui -. src/ui/ only .-> markdown
     application --> domain --> vocab["vocab<br/>the data contract"]
@@ -53,7 +55,7 @@ graph TD
     shacl -. node/ only .-> turtle & markdown
     vocab -. tooling/ only .-> turtle
     e2e["e2e/pod"] --> application & solid
-    journeys["e2e/journeys"] -. harness/strings.ts only .-> ui
+    journeys["e2e/journeys"] -. "harness/strings.ts only" .-> ui
 ```
 
 Packages are consumed as TypeScript source (`exports` maps

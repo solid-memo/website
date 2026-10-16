@@ -6,7 +6,7 @@ deployed automatically by CI, one released version at a time.
 
 ## GitHub Pages (automatic)
 
-This deployment is live at **https://solid-memo.com/**, and it runs a
+This deployment is live at **<https://solid-memo.com/>**, and it runs a
 released version, never a commit between two versions
 ([releasing.md](releasing.md)). `.github/workflows/deploy.yml` runs when
 the CI workflow has finished on `main` (`workflow_run`), and deploys
@@ -16,6 +16,8 @@ is made:
 
 ```mermaid
 flowchart LR
+    accTitle: When a version is deployed
+    accDescr: A push to main, or a run by hand, deploys only the newest version, from its release commit and with its GitHub release, after the build and its guard.
     push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods,<br/>journeys, docs"] -->|success| tag{"deploy.yml:<br/>a version tag<br/>names the commit?"}
     tag -->|no| skip["not deployed"]
     tag -->|yes| release{"the newest version,<br/>its release commit,<br/>its GitHub release?"}
@@ -198,5 +200,5 @@ the web because this domain serves this site.
 root (or any subfolder) via SFTP or a file manager, `ns/`, `decks/`,
 `vendor/` and `studio/` included. Verify a build
 locally with `npm start` (builds, then serves `dist/` at
-http://localhost:4173), or `npm run preview -w @solid-memo/web` to serve
+`http://localhost:4173`), or `npm run preview -w @solid-memo/web` to serve
 the last build.

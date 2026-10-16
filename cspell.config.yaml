@@ -151,6 +151,8 @@ words:
   - beforeunload
   - bookmarkable
   - crawlable
+  # Mermaid's accDescr, a diagram's description for screen readers
+  - Descr
   - distractor
   - distractors
   - hashchange

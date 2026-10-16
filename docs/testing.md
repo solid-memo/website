@@ -255,7 +255,7 @@ the cross-check; `npm run check` does not, as it needs no Python.
 ## User journeys
 
 `e2e/journeys/` drives the built app (`npx turbo run build --filter=@solid-memo/web`,
-served by `vite preview` at http://127.0.0.1:4173/, the [Studio](studio.md)
+served by `vite preview` at `http://127.0.0.1:4173/`, the [Studio](studio.md)
 at `#/studio`) in Chromium with
 [Playwright](https://playwright.dev/), through whole journeys a user
 takes: logging in with a WebID at a real identity provider, setting
@@ -298,7 +298,7 @@ error. The job's `journeys-<attempt>` artifact holds everything else:
   by step. Each step shows the page before and after every action, the
   network (the login's redirects included) and the console. Open it with
   `npx playwright show-trace <trace.zip>` or at
-  https://trace.playwright.dev. Traces hold the throwaway account's
+  <https://trace.playwright.dev>. Traces hold the throwaway account's
   password and tokens, which is harmless.
 - `playwright-report/`: the steps as a tree, with a screenshot at the
   end of each journey step, a video, and these attachments:
@@ -309,7 +309,7 @@ error. The job's `journeys-<attempt>` artifact holds everything else:
   Open the report with `npx playwright show-report <dir>`.
 - `logs/css.log`: the server's whole log.
 
-**The latest report is online** at https://solid-memo.com/journeys/,
+**The latest report is online** at <https://solid-memo.com/journeys/>,
 published with each deploy: the report of the CI run on the release
 commit the site runs (none after a deploy by hand). It shows every
 journey's steps and screenshots, and its **Trace** link opens the
@@ -505,8 +505,8 @@ CI's `docs` job:
 
 - **Style**: [markdownlint](https://github.com/DavidAnson/markdownlint)'s
   rules, all of them but those [.markdownlint-cli2.jsonc](../.markdownlint-cli2.jsonc)
-  turns off, each with its reason (line length, the table delimiter
-  rows' spacing, bare URLs). `npm run lint:markdown` runs it alone. A
+  turns off, each with its reason (line length and the table delimiter
+  rows' spacing). `npm run lint:markdown` runs it alone. A
   placeholder such as `<title>` goes in backticks, or a renderer takes
   it for HTML and drops it.
 - **Spelling**: [cspell](https://cspell.org/) checks the Markdown and the
@@ -609,6 +609,8 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 
 ```mermaid
 graph LR
+    accTitle: How each layer is tested
+    accDescr: Pure functions are tested with plain calls, use cases with fake ports, components with fake use cases, mappers with in-memory datasets and I/O shells with mocked Inrupt libraries.
     D["domain<br/>pure fns"] -->|plain calls| T1[tests]
     A["application<br/>use cases"] -->|fake ports| T2[tests]
     U["ui<br/>components"] -->|fake UseCases| T3[tests]

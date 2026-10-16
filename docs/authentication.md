@@ -30,6 +30,8 @@ and runs the authorization-code + PKCE flow.
 
 ```mermaid
 sequenceDiagram
+    accTitle: Logging in with Solid-OIDC
+    accDescr: The user enters a WebID, the gateway finds its identity provider, the provider redirects back with a code, and the gateway exchanges the code for a session.
     actor User
     participant UI
     participant Gateway as SolidSessionGateway

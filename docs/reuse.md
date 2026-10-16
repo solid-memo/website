@@ -5,13 +5,13 @@ Anyone may run a copy of Solid Memo: the code is MIT-licensed
 means serving those files. A learner's data stays in their own Pod,
 never on your host, so a copy holds no user data and needs no database.
 
-A learner can use your copy and https://solid-memo.com/ on the same Pod:
+A learner can use your copy and <https://solid-memo.com/> on the same Pod:
 both read and write the same data ([data-model.md](data-model.md)). That
 is why a few names must stay as they are ([below](#what-stays-the-same)).
 
 ## 1. Fork or clone
 
-Fork https://github.com/solid-memo/website, or clone it anywhere:
+Fork <https://github.com/solid-memo/website>, or clone it anywhere:
 
 ```sh
 git clone https://github.com/solid-memo/website.git memo
@@ -49,7 +49,7 @@ npm run build
 The site is `apps/web/dist/`: the app, the Studio, the vocabulary and
 the shapes (`ns/`), the deck library (`decks/`) and the vendored
 profiles (`vendor/`). `npm start` builds and serves it at
-http://localhost:4173 to try it first.
+`http://localhost:4173` to try it first.
 
 ## 4. Host it anywhere
 
@@ -95,9 +95,9 @@ in your copy:
 
 | File | What it says |
 |---|---|
-| [apps/web/index.html](../apps/web/index.html) | The site's address, as absolute URLs on https://solid-memo.com/: the canonical link, `og:url`, `og:image` and the JSON-LD `url`, `@id` and `image`; and the description. Its links to the repository follow `VITE_REPO_URL` ([configuration.md](configuration.md#vite_repo_url)). |
+| [apps/web/index.html](../apps/web/index.html) | The site's address, as absolute URLs on <https://solid-memo.com/>: the canonical link, `og:url`, `og:image` and the JSON-LD `url`, `@id` and `image`; and the description. Its links to the repository follow `VITE_REPO_URL` ([configuration.md](configuration.md#vite_repo_url)). |
 | [apps/web/public/robots.txt](../apps/web/public/robots.txt), [sitemap.xml](../apps/web/public/sitemap.xml) | The site's address. Vite copies them as they are. |
-| [apps/web/public/about/index.html](../apps/web/public/about/index.html) | What Solid Memo is, under its name, with its address on https://solid-memo.com/ and links to this repository, which `VITE_REPO_URL` does not reach. Rewrite it for your copy. |
+| [apps/web/public/about/index.html](../apps/web/public/about/index.html) | What Solid Memo is, under its name, with its address on <https://solid-memo.com/> and links to this repository, which `VITE_REPO_URL` does not reach. Rewrite it for your copy. |
 | [apps/web/public/social-preview.png](../apps/web/public/social-preview.png), the favicons | Solid Memo's wordmark and logo. |
 | [CNAME](../CNAME) | This site's domain on GitHub Pages ([deployment.md](deployment.md#custom-domain-optional)). Delete it in a fork. |
 | [README.md](../README.md) | This project's own description and links. |

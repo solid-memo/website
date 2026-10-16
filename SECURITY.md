@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Only the latest version, as deployed at https://solid-memo.com/, is
+Only the latest version, as deployed at <https://solid-memo.com/>, is
 supported. A fix is made on `main` and released as a new version, which
 is then deployed; older versions and forks get no fixes.
 
