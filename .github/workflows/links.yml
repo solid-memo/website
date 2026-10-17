@@ -9,7 +9,9 @@ name: Links
 # within the repository on every change, offline; the web's addresses are
 # checked here, weekly and by hand, since a site that is down for an hour
 # should fail no one's change. A failure here is a link to fix, or to
-# exclude in lychee.toml with a reason.
+# exclude in lychee.toml with a reason. The Pod providers onboarding
+# suggests are checked here too, for the same reason: a failure there is
+# an entry of POD_PROVIDERS to fix, or to remove (docs/testing.md#pod-providers).
 
 on:
   schedule:
@@ -41,3 +43,19 @@ jobs:
         if: success() || failure()
         with:
           network: "true"
+
+  # Each suggested provider's issuer answers its discovery document with
+  # the issuer the entry names, and its sign-up page answers
+  # (scripts/checkProviders.ts). The script imports only the providers'
+  # list, so it needs no npm ci.
+  providers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - run: npm run check:providers

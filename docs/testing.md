@@ -45,6 +45,7 @@ npm run journeys -- -g smoke   # only the journeys whose title matches (or --rep
 npm run css -w @solid-memo/e2e-journeys   # keep such a server up; JOURNEY_SERVER_URL=<its url> npm run journeys reuses it
 npm run journeys:report -w @solid-memo/e2e-journeys   # open the last run's report
 npm run css:clean -w @solid-memo/e2e-journeys   # take down the servers an interrupted run left
+npm run check:providers   # the Pod providers onboarding suggests answer with their issuers (needs the network)
 ```
 
 `npm run test:pod` runs `e2e/pod/` once against each Solid server
@@ -632,10 +633,29 @@ CI's `docs` job:
 That every page is listed in the index is `npm run check`'s
 (`check:docs`, above).
 
+## Pod providers
+
+Onboarding suggests the providers in
+[podProvider.ts](../packages/domain/src/podProvider.ts)
+(`POD_PROVIDERS`), and logs a learner in at the issuer an entry names.
+The tests' Solid servers all run in Docker, so none of them is one of
+these. `npm run check:providers`
+([checkProviders.ts](../scripts/checkProviders.ts)) checks each
+provider instead. Its issuer must answer
+`<issuer>/.well-known/openid-configuration` with JSON whose `issuer` is
+the entry's `oidcIssuer`, character for character, as the login compares
+them. Its `signUpUrl`, where it has one, must answer too. A request that
+fails or answers 5xx is tried three times. The
+[Links workflow](../.github/workflows/links.yml) runs the check weekly,
+and by hand, in a job of its own. It is not a gate, so a provider that
+is down for an hour fails no one's change. A failure is an entry to fix,
+with the provider's new issuer, or to remove.
+
 ## Without the network
 
 Apart from the end-to-end tests' Docker images and the browsers,
-installed once for the journeys and the docs' diagrams, nothing needs the network: the vocabulary, the shapes and the deck library are read from
+installed once for the journeys and the docs' diagrams, and the Pod
+providers' check, nothing needs the network: the vocabulary, the shapes and the deck library are read from
 the repository's `ns/` and `decks/`, at the IRIs the site publishes
 them under.
 
