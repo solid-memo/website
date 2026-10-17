@@ -4,7 +4,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { GradeBasis, UseCases } from "@solid-memo/application/useCases";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -26,7 +26,9 @@ import { useI18n } from "./i18n";
  * one left). The session covers today's due prompts and the new ones
  * within the daily budget, the new spread among the due, today and each
  * answer by the screen's time (useClock), keeping how long it took
- * (StudyScreen). The deck's cached queue is
+ * (StudyScreen). Each answer is graded with the preferences the queue
+ * was built with (recordReview's `known`), so they are not read again
+ * for it. The deck's cached queue is
  * dropped when the session ends, however it is left. Its deck links to
  * the deck's page, or to `deckLink` when given. A deck copied from a
  * release says where a mistake in the cards it has of the release is
@@ -123,8 +125,21 @@ export function StudyContainer({
   }, [instance.url, deck.url]);
 
   const answerMutation = useMutation({
-    mutationFn: (args: { prompt: Prompt; quality: ReviewQuality; times: ResponseTimes }) =>
-      useCases.recordReview(instance.url, deck, args.prompt, args.quality, now(), args.times),
+    mutationFn: (args: {
+      prompt: Prompt;
+      quality: ReviewQuality;
+      times: ResponseTimes;
+      known: GradeBasis;
+    }) =>
+      useCases.recordReview(
+        instance.url,
+        deck,
+        args.prompt,
+        args.quality,
+        now(),
+        args.times,
+        args.known,
+      ),
     onSuccess: (state, { prompt, quality }) => {
       answered.current++;
       queryClient.setQueryData(
@@ -184,7 +199,14 @@ export function StudyContainer({
       answerScale={answerScale}
       busy={answerMutation.isPending}
       error={errorText(answerMutation.error)}
-      onAnswer={(quality, times) => answerMutation.mutate({ prompt: prompt!, quality, times })}
+      onAnswer={(quality, times) =>
+        answerMutation.mutate({
+          prompt: prompt!,
+          quality,
+          times,
+          known: { prefs: queueQuery.data!.prefs },
+        })
+      }
       onExit={() => void handleExit()}
     />
   );

@@ -546,7 +546,19 @@ export interface ReviewStateRepository {
   readReviewStatesSince(deck: Deck, version: string | undefined): Promise<Since<ReviewState[]>>;
   /** null when the card has never been reviewed in that direction. */
   getReviewState(deck: Deck, key: ReviewKey): Promise<ReviewState | null>;
-  saveReviewState(deck: Deck, state: ReviewState): Promise<void>;
+  /**
+   * Write the state of one prompt as `grade` makes it of the state stored
+   * now (null: none), the deck's others kept, in one edit of the reviews
+   * document made only if it is as last read or written; the document is
+   * read first only when its version is not known. Had it changed since
+   * (another device's grade), it is read and graded again, once. The
+   * state written, and the one it was made of.
+   */
+  gradeReviewState(
+    deck: Deck,
+    key: ReviewKey,
+    grade: (current: ReviewState | null) => ReviewState,
+  ): Promise<{ state: ReviewState; current: ReviewState | null }>;
   /**
    * Create the deck's reviews document with these states, in ONE write
    * made only if nothing is there yet (If-None-Match: *; else

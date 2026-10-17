@@ -118,7 +118,10 @@ checks). `MEASURE_ANSWER_LOG=1` adds a measurement of reading a large
 answer log to `history.integration.test.ts`: two years of answers,
 seeded in about a minute and a half a server, its timings printed
 (shown with `--silent=false`; [statistics.md](statistics.md#loading)).
-CI does not run it.
+`MEASURE_GRADES=1` adds one of grading to `grading.integration.test.ts`:
+a session's grades on a deck of 2,000 states, the requests, bytes and
+time of each printed ([srs.md](srs.md#what-a-grade-costs)). CI runs
+neither.
 
 **In CI the images come from GitHub's cache**, not Docker Hub, whose
 limit on pulls without an account the runners share: each job restores

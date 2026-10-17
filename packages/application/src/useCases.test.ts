@@ -230,7 +230,11 @@ function makeDeps() {
   const reviewStateRepository: ReviewStateRepository = {
     listReviewStates: vi.fn(async () => []),
     getReviewState: vi.fn(async () => null),
-    saveReviewState: vi.fn(async () => undefined),
+    // As the real one does: the grade applied to the state stored, which getReviewState gives.
+    gradeReviewState: vi.fn(async (deck, key, grade) => {
+      const current = await reviewStateRepository.getReviewState(deck, key);
+      return { state: grade(current), current };
+    }),
     createReviewStates: vi.fn(async () => undefined),
     applyReviewChanges: vi.fn(async () => undefined),
     upgradeReviewStates: vi.fn(async () => true),
@@ -2654,6 +2658,8 @@ describe("createUseCases", () => {
     const queue = await useCases.getStudyQueue(instance.url, deck, new Date(2026, 8, 21, 12, 0));
     expect(queue.due.map((p) => p.card.id)).toEqual(["card-due"]);
     expect(queue.newPrompts.map((p) => p.card.id)).toEqual(["card-new"]);
+    // What grading them takes besides: the instance's preferences.
+    expect(queue.prefs).toEqual(await useCases.getPreferences(instance.url));
 
     const capped = await useCases.getStudyQueue(
       instance.url,
@@ -2688,7 +2694,11 @@ describe("createUseCases", () => {
       lastReviewedAt: now.toISOString(),
       formatVersion: 2,
     });
-    expect(deps.reviewStateRepository.saveReviewState).toHaveBeenCalledWith(deck, state);
+    expect(deps.reviewStateRepository.gradeReviewState).toHaveBeenCalledWith(
+      deck,
+      { cardId: card.id, direction: "front-to-back" },
+      expect.any(Function),
+    );
   });
 
   it("recordReview transitions an existing state and keeps firstReviewedAt", async () => {
@@ -2728,6 +2738,47 @@ describe("createUseCases", () => {
       due: "2026-09-21",
       lastReviewedAt: "2026-09-15T10:00:00.000Z",
     });
+  });
+
+  it("recordReview grades the state the reviews document holds when written, with the preferences it is given (known)", async () => {
+    const deps = makeDeps();
+    const stored = {
+      cardId: card.id,
+      direction: "front-to-back" as const,
+      easeFactor: 2.5,
+      intervalDays: 6,
+      repetitions: 2,
+      due: "2026-09-21",
+      firstReviewedAt: "2026-09-10T10:00:00.000Z",
+      lastReviewedAt: "2026-09-15T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    vi.mocked(deps.reviewStateRepository.gradeReviewState).mockImplementation(
+      async (_deck, _key, grade) => ({ state: grade(stored), current: stored }),
+    );
+    const useCases = createUseCases(deps);
+    const now = new Date(2026, 8, 21, 12, 0);
+
+    const state = await useCases.recordReview(
+      instance.url,
+      deck,
+      { card, direction: "front-to-back" },
+      4,
+      now,
+      {},
+      // A boundary past noon: the grade counts for the 20th.
+      { prefs: { ...DEFAULT_PREFERENCES, dayBoundaryHour: 13 } },
+    );
+
+    expect(deps.preferencesRepository.getPreferences).not.toHaveBeenCalled();
+    expect(deps.reviewStateRepository.gradeReviewState).toHaveBeenCalledWith(
+      deck,
+      { cardId: card.id, direction: "front-to-back" },
+      expect.any(Function),
+    );
+    expect(state.repetitions).toBe(3);
+    expect(state.firstReviewedAt).toBe(stored.firstReviewedAt);
+    expect(state.due).toBe("2026-10-05");
   });
 
   it("recordReview stores no snapshot for a never-reviewed card", async () => {
@@ -6177,7 +6228,7 @@ describe("courses", () => {
     expect(
       vi.mocked(deps.deckRepository.applyCardChanges).mock.invocationCallOrder[0],
     ).toBeLessThan(
-      vi.mocked(deps.reviewStateRepository.saveReviewState).mock.invocationCallOrder[0]!,
+      vi.mocked(deps.reviewStateRepository.gradeReviewState).mock.invocationCallOrder[0]!,
     );
     expect(answered).toEqual({
       effect: "introduce",
@@ -6244,7 +6295,7 @@ describe("courses", () => {
       effect: "none",
       state: morning,
     });
-    expect(deps.reviewStateRepository.saveReviewState).not.toHaveBeenCalled();
+    expect(deps.reviewStateRepository.gradeReviewState).not.toHaveBeenCalled();
     // A wrong answer naming no option names none.
     await expect(
       useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: false }, noon),

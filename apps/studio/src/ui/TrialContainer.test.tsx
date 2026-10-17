@@ -10,7 +10,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Prompt } from "@solid-memo/domain/deck";
 import { problem } from "@solid-memo/domain/release/problems";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
-import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
+import { makeUseCasesFake, QUEUE_PREFERENCES } from "@solid-memo/ui/test/useCasesFake";
 import { CH1, courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/course";
 import { courseDraft, DRAFT_URL, instanceA } from "../test/fixtures";
 import { draftKey } from "./draftEditor";
@@ -225,7 +225,12 @@ describe("TrialContainer", () => {
       direction: "front-to-back",
     };
     const trial = makeUseCasesFake({
-      getStudyQueue: vi.fn(async () => ({ due: [prompt], newPrompts: [], studiedToday: 0 })),
+      getStudyQueue: vi.fn(async () => ({
+        due: [prompt],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_PREFERENCES,
+      })),
     });
     renderTrial({ draft, openTrial: async () => opened(trial) });
     expect(await screen.findByRole("link", { name: "Solid fundamentals" })).toHaveAttribute(

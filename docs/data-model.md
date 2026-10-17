@@ -1134,7 +1134,11 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   metadata (a deck's authors and license, the instance's name, the
   catalog, a course's chapters completed), likewise, and a bulk edit of cards,
   planned again on the cards as they are, three times in all, which
-  stops at once when that plan is not the one the user previewed. Weak ETags (`W/"…"`) are never sent in `If-Match`, whose
+  stops at once when that plan is not the one the user previewed. A
+  grade's edit of the reviews document is made from the document as last
+  read or written, at the version that left
+  ([srs.md](srs.md#what-a-grade-costs)), and on a 412 read and graded
+  again on the state it then holds, once. Weak ETags (`W/"…"`) are never sent in `If-Match`, whose
   comparison is strong; a document the pod gives no ETag is written
   without `If-Match`. A write the pod answers with a strong ETag, made on
   a precondition (`If-Match`, or `If-None-Match: *`), so the document

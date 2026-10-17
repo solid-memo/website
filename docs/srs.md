@@ -238,12 +238,35 @@ random position (`requeueCard`) — never as the very next card, unless it is
 the only card left, in which case it simply repeats until it passes. The
 "Card x of y" counter grows with each repeat. Each answer runs the
 `recordReview` use case
-([useCases.ts](../packages/application/src/useCases.ts)): load the card's stored
-state (or start from the initial SM-2 state), apply the transition, compute
-the next due day, persist to `reviews/<deckId>.ttl`, and return the new
-state. A failed save keeps the card in place with an error; the queue only
+([useCases.ts](../packages/application/src/useCases.ts)): take the card's
+state as `reviews/<deckId>.ttl` holds it when written (or start from the
+initial SM-2 state), apply the transition, compute the next due day,
+persist it there, and return the new state. The preferences are not read
+for it: the queue comes with the instance's (`StudySessionQueue`), which
+the session grades with (`GradeBasis`, recordReview's `known`). A failed save keeps the card in place with an error; the queue only
 advances on success. Ending the session invalidates the review caches so
 other screens see fresh state.
+
+### What a grade costs
+
+A grade writes one state: a PATCH of the reviews document, `If-Match`
+the version the document was last read or written at
+([data-model.md](data-model.md#write-discipline)), the grade applied to
+the card's state as that document holds it (`gradeReviewState`). The
+session's first grade edits the document as its queue read it, with no
+read first. A later one can do the same only when the pod answered the
+last write with the document's new ETag. None of the servers the tests
+measure does: Community Solid Server 6, 7 and 8, with ACP too, and Pivot
+answer a PATCH with 205 and no ETag, node-solid-server gives no ETag at
+all, and Nextcloud none on a write (JavaScript Solid Server could not be
+measured). There the document is read again, whole, before each later
+grade. When it changed elsewhere since (another device's grade: 412), it
+is read again and the grade applied to the state it holds then, once, so
+a grade of the same card made meanwhile is built on, not undone.
+
+`MEASURE_GRADES=1` measures the requests, bytes and time of a session's
+grades on a deck of 2,000 states against each server the tests run
+([testing.md](testing.md)).
 
 Storage note: `sm:due` is stored as a plain `"YYYY-MM-DD"` string literal,
 not `xsd:date` — a study day is a calendar label, and date round-trips

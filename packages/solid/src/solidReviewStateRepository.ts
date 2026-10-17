@@ -2,15 +2,21 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { createSolidDataset } from "@inrupt/solid-client";
+import { createSolidDataset, type SolidDataset } from "@inrupt/solid-client";
 import type { ReviewStateRepository } from "@solid-memo/application/ports";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
-import { getSolidDatasetOrNull, saveDataset } from "./datasets";
+import {
+  getSolidDatasetOrNull,
+  keptDataset,
+  PreconditionFailedError,
+  saveDataset,
+} from "./datasets";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { mapSince, readSince } from "./readSince";
 import {
   toReviewStates,
+  withGradedReviewState,
   withoutReadReviewStates,
   withoutReviewStates,
   withReviewStates,
@@ -51,12 +57,26 @@ export function createSolidReviewStateRepository({
       );
     },
 
-    async saveReviewState(deck, state): Promise<void> {
-      const dataset =
-        (await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch)) ?? createSolidDataset();
-      const written = withReviewStates(dataset, deck, [state], randomId);
-      await checkWrite(written.dataset, written.subjects, "pod");
-      await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+    // A grade: an edit of the document as last read or written, when its version is known, with no read
+    // first; read again only when it changed since (412), as another device's grade changes it.
+    async gradeReviewState(deck, key, grade) {
+      const save = async (dataset: SolidDataset) => {
+        const written = withGradedReviewState(dataset, deck, key, grade, randomId);
+        await checkWrite(written.dataset, written.subjects, "pod");
+        await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+        return { state: written.state, current: written.current };
+      };
+      const kept = keptDataset(deck.reviewsDocumentUrl, fetch);
+      if (kept !== undefined) {
+        try {
+          return await save(kept);
+        } catch (error) {
+          if (!(error instanceof PreconditionFailedError)) throw error;
+        }
+      }
+      return save(
+        (await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch)) ?? createSolidDataset(),
+      );
     },
 
     async createReviewStates(deck, states): Promise<void> {

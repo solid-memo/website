@@ -775,8 +775,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    */
   describeCatalog(instanceUrl: string, about: CatalogAbout): Promise<Catalog>;
   savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
-  /** Today's due and new cards for a deck, respecting the daily caps. */
-  getStudyQueue(instanceUrl: string, deck: Deck, now: Date): Promise<StudyQueue>;
+  /**
+   * Today's due and new cards for a deck, respecting the daily caps, with
+   * what grading them takes (StudySessionQueue).
+   */
+  getStudyQueue(instanceUrl: string, deck: Deck, now: Date): Promise<StudySessionQueue>;
   /**
    * How many prompts today's queue would hold, as getStudyQueue counts
    * them; from the deck's schedule in the instance's digest when neither
@@ -794,7 +797,8 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * Apply one SM-2 review: load the prompt's state (or start fresh),
    * transition it, persist it, and return the new state. The answer
    * logged keeps how long it took (`times`, as the screen measured it;
-   * recordedResponseTimes says which are kept).
+   * recordedResponseTimes says which are kept). With `known` (a study
+   * session's, of its queue), the preferences are not read again.
    */
   recordReview(
     instanceUrl: string,
@@ -803,6 +807,7 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
     quality: ReviewQuality,
     now: Date,
     times?: ResponseTimes,
+    known?: GradeBasis,
   ): Promise<ReviewState>;
   /**
    * Undo the current study day for a deck: cards reviewed today go back
@@ -948,6 +953,20 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * (trialProblems), with nothing made.
    */
   openTrial(draft: ReleaseDraft, instanceUrl: string): Promise<TrialOpening>;
+}
+
+/**
+ * Today's queue of a deck (UseCases.getStudyQueue), with the instance's
+ * preferences it was built with, which a session grades its prompts by
+ * (GradeBasis).
+ */
+export interface StudySessionQueue extends StudyQueue {
+  prefs: StudyPreferences;
+}
+
+/** What a grade is made with besides the prompt's state, which is the reviews document's: the instance's preferences. */
+export interface GradeBasis {
+  prefs: StudyPreferences;
 }
 
 /** What the Studio's schedule screen shows of a deck (UseCases.deckInsight). */
@@ -2216,8 +2235,10 @@ export function createUseCases({
    * initial one) by SM-2, persist it, and queue its answer for the log,
    * saying how it was given (`how`; a study session says nothing: recall)
    * and how long it took (`times`), the day it was due and the device's
-   * offset from UTC. The instance's preferences and the prompt's current
-   * state are read unless `known` brings them.
+   * offset from UTC. The grade is applied to the prompt's state as the
+   * reviews document holds it when written (gradeReviewState), so it
+   * builds on a grade made elsewhere meanwhile; the instance's preferences
+   * are read unless `known` brings them.
    */
   async function applyGrade(
     instanceUrl: string,
@@ -2226,28 +2247,27 @@ export function createUseCases({
     quality: ReviewQuality,
     now: Date,
     how: { mode?: AnswerMode; chosenDistractor?: string; times: ResponseTimes },
-    known?: { prefs: StudyPreferences; current: ReviewState | null },
+    known?: GradeBasis,
   ): Promise<ReviewState> {
     const key = { cardId: prompt.cardId, direction: prompt.direction };
-    const [prefs, current] =
-      known === undefined
-        ? await Promise.all([
-            getPreferences(instanceUrl),
-            reviewStateRepository.getReviewState(deck, key),
-          ])
-        : [known.prefs, known.current];
-    const next = applySm2(current ?? INITIAL_SM2_STATE, quality);
-    const previous = snapshotBeforeReview(current, now, prefs.dayBoundaryHour);
-    const state: ReviewState = {
-      ...key,
-      ...next,
-      due: nextDueDate(now, next.intervalDays, prefs.dayBoundaryHour),
-      firstReviewedAt: current?.firstReviewedAt ?? now.toISOString(),
-      lastReviewedAt: now.toISOString(),
-      formatVersion: REVIEW_STATE_FORMAT_VERSION,
-      ...(previous === undefined ? {} : { previous }),
-    };
-    await reviewStateRepository.saveReviewState(deck, state);
+    const prefs = known?.prefs ?? (await getPreferences(instanceUrl));
+    const { state, current } = await reviewStateRepository.gradeReviewState(
+      deck,
+      key,
+      (current) => {
+        const next = applySm2(current ?? INITIAL_SM2_STATE, quality);
+        const previous = snapshotBeforeReview(current, now, prefs.dayBoundaryHour);
+        return {
+          ...key,
+          ...next,
+          due: nextDueDate(now, next.intervalDays, prefs.dayBoundaryHour),
+          firstReviewedAt: current?.firstReviewedAt ?? now.toISOString(),
+          lastReviewedAt: now.toISOString(),
+          formatVersion: REVIEW_STATE_FORMAT_VERSION,
+          ...(previous === undefined ? {} : { previous }),
+        };
+      },
+    );
     unlogged.push({
       instanceUrl,
       answer: {
@@ -2259,7 +2279,7 @@ export function createUseCases({
         answeredAt: state.lastReviewedAt,
         studyDay: studyDayOf(now, prefs.dayBoundaryHour),
         ...(current === null ? {} : { priorIntervalDays: current.intervalDays }),
-        nextIntervalDays: next.intervalDays,
+        nextIntervalDays: state.intervalDays,
         ...(how.mode === undefined ? {} : { mode: how.mode }),
         ...(how.chosenDistractor === undefined ? {} : { chosenDistractor: how.chosenDistractor }),
         ...recordedResponseTimes(how.times),
@@ -3292,7 +3312,7 @@ export function createUseCases({
         reviewStateRepository.listReviewStates(deck),
         getPreferences(instanceUrl),
       ]);
-      return buildStudyQueue({
+      const queue = buildStudyQueue({
         cards,
         direction: deck.direction,
         reviews,
@@ -3300,12 +3320,13 @@ export function createUseCases({
         now,
         random,
       });
+      return { ...queue, prefs };
     },
     getStudyCounts(instanceUrl, deck, now) {
       return studyCountsAndSchedule(instanceUrl, deck, now);
     },
     refreshStudyDigest,
-    recordReview(instanceUrl, deck, prompt, quality, now, times = {}) {
+    recordReview(instanceUrl, deck, prompt, quality, now, times = {}, known) {
       return applyGrade(
         instanceUrl,
         deck,
@@ -3313,6 +3334,7 @@ export function createUseCases({
         quality,
         now,
         { times },
+        known,
       );
     },
     async resetStudyDay(instanceUrl, deck, now) {
@@ -3526,7 +3548,7 @@ export function createUseCases({
           ...(chosen === undefined ? {} : { chosenDistractor: chosen }),
           times,
         },
-        { prefs, current },
+        { prefs },
       );
       return { effect: effect.kind, state };
     },

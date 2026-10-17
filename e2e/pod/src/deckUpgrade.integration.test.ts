@@ -235,7 +235,7 @@ async function seedDeck(server: string): Promise<Deck> {
   const deck = await deckRepository.importDeck(instanceUrl, V1);
   await reviewStateRepository.applyReviewChanges(deck, { save: [], remove: [] });
   for (const state of [review("sweden", 6), review("latvia", 3)])
-    await reviewStateRepository.saveReviewState(deck, state);
+    await reviewStateRepository.applyReviewChanges(deck, { save: [state], remove: [] });
   const response = await fetch(await aclOf(deck.cardsDocumentUrl), {
     method: "PUT",
     headers: { "content-type": "text/turtle" },
@@ -421,7 +421,10 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
     const seeded: Deck[] = [];
     for (let made = 0; made < 2; made++) {
       const deck = await deckRepository.importDeck(instanceUrl, V1);
-      await reviewStateRepository.saveReviewState(deck, review("sweden", 6));
+      await reviewStateRepository.applyReviewChanges(deck, {
+        save: [review("sweden", 6)],
+        remove: [],
+      });
       seeded.push(deck);
     }
     // Release 2's title in ASCII: two upgrades patch it into one catalog, which the

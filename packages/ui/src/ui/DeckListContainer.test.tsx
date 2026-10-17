@@ -6,14 +6,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DeckListContainer } from "./DeckListContainer";
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { StudySessionQueue, UseCases } from "@solid-memo/application/useCases";
 import type { Card, Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
-import type { StudyQueue } from "@solid-memo/domain/scheduling";
 import type { DeckTree, DeckTreeEdit, TreeNode } from "@solid-memo/domain/deckTree";
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { AppError } from "@solid-memo/domain/appError";
-import { makeUseCasesFake } from "../test/useCasesFake";
+import { makeUseCasesFake, QUEUE_PREFERENCES } from "../test/useCasesFake";
 import { courseHref, deckHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, makeCourse } from "../test/course";
 
@@ -387,6 +386,7 @@ describe("DeckListContainer", () => {
         due: [prompt],
         newPrompts: [],
         studiedToday: 0,
+        ...QUEUE_PREFERENCES,
       })),
     });
     const { onStudyDeck } = renderContainer(useCases);
@@ -399,7 +399,7 @@ describe("DeckListContainer", () => {
   it("shows stale counts at once while fresh ones are fetched", async () => {
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck]),
-      getStudyQueue: vi.fn(() => new Promise<StudyQueue>(() => {})),
+      getStudyQueue: vi.fn(() => new Promise<StudySessionQueue>(() => {})),
     });
     renderContainer(useCases, (queryClient) =>
       queryClient.setQueryData(
@@ -418,10 +418,12 @@ describe("DeckListContainer", () => {
   });
 
   it("shows a loader in the action slot until the first queue arrives", async () => {
-    let resolveQueue: (queue: StudyQueue) => void = () => {};
+    let resolveQueue: (queue: StudySessionQueue) => void = () => {};
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck]),
-      getStudyQueue: vi.fn(() => new Promise<StudyQueue>((resolve) => (resolveQueue = resolve))),
+      getStudyQueue: vi.fn(
+        () => new Promise<StudySessionQueue>((resolve) => (resolveQueue = resolve)),
+      ),
     });
     renderContainer(useCases);
 
@@ -431,7 +433,7 @@ describe("DeckListContainer", () => {
     await waitFor(() => {
       expect(useCases.getStudyQueue).toHaveBeenCalledOnce();
     });
-    resolveQueue({ due: [], newPrompts: [], studiedToday: 0 });
+    resolveQueue({ due: [], newPrompts: [], studiedToday: 0, ...QUEUE_PREFERENCES });
     expect(await screen.findByText("Done for today")).toBeInTheDocument();
     expect(screen.queryByText("Checking what is due")).toBeNull();
   });
@@ -443,6 +445,7 @@ describe("DeckListContainer", () => {
         due: [],
         newPrompts: [prompt],
         studiedToday: 0,
+        ...QUEUE_PREFERENCES,
       })),
     });
     const { onStudyDeck } = renderContainer(useCases);
