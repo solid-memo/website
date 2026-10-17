@@ -295,6 +295,9 @@ Further journeys go through:
 - a second instance in another folder: switching between the two,
   reloading, and deleting one whose folder another app also writes to,
   which is kept, and the app says why;
+- logging out and back in, and in on a second device, onto the same
+  instance, after a WebID the form refuses and a consent refused, the
+  dark theme following through the pod;
 
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
@@ -362,7 +365,8 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
 - **Fixtures** ([fixtures.ts](../e2e/journeys/fixtures.ts)): `account`
   is a fresh account, pod and WebID; `runId` names what the run makes;
   `otherApp` writes to the pod as an app other than Solid Memo;
-  `app` is the app as page objects.
+  `app` is the app as page objects, and `newDevice` opens it again
+  in a browser context of its own, as on a second device.
 - **Page objects** ([pages/](../e2e/journeys/pages/)): one per screen,
   registered on [App.ts](../e2e/journeys/pages/App.ts). Their methods
   are what a user does, and each is a step of its own in the report.
