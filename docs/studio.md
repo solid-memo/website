@@ -352,7 +352,9 @@ then: a deck's pace saved from another cell of its row since is kept.
 Discarded there, its field closes, the edit gone from sight as from
 the question. Enter and Escape that an input method takes, to end or
 drop a syllable it composes (Korean, say), are the input method's.
-Nothing is saved unasked.
+A side's field is marked with the side's language, as the full form's
+is: an Arabic side reads right to left, in its font, and a screen
+reader and the spellcheck take it as Arabic. Nothing is saved unasked.
 
 **Saved views.** Beside a table's own views (Home's and the
 workbench's, [below](#home)), **+ Save view** saves the table's query

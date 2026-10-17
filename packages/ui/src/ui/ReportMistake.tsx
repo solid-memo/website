@@ -35,7 +35,7 @@ export function ReportMistake({
   const url = mistakeReportUrl(place, useContext(RepoUrl), releaseUrl, cardId);
   if (url === null) return null;
   return (
-    <p class="hint">
+    <p class="hint report-mistake">
       <ExternalLink url={url}>{t("common.reportMistake")}</ExternalLink>
     </p>
   );

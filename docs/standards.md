@@ -85,7 +85,7 @@ says which, and why each one does not stand in the way of reuse.
 | [Open Graph](https://ogp.me/) | — | De facto, published by Meta | Link previews in [`apps/web/index.html`](../apps/web/index.html) | Yes (de facto) |
 | [Sitemaps](https://www.sitemaps.org/protocol.html) | 0.9 | De facto, by the major search engines | `sitemap.xml`, written by the build ([`siteMap.ts`](../packages/vocab/tooling/siteMap.ts)) | Yes (de facto) |
 | [robots.txt](https://www.rfc-editor.org/rfc/rfc9309) | RFC 9309 | IETF RFC | `robots.txt`, written by the build ([`siteMap.ts`](../packages/vocab/tooling/siteMap.ts)) | Yes |
-| [WCAG](https://www.w3.org/TR/WCAG22/) | 2.2 | W3C Recommendation | The Studio's minimum target size and single-key shortcuts that can be turned off ([studio.md](studio.md#layout)) | Yes |
+| [WCAG](https://www.w3.org/TR/WCAG22/) | 2.2 | W3C Recommendation | The target, level AA, of the web app and the Studio, which the journeys check every screen they visit against with axe ([accessibility.md](accessibility.md)); among it, the Studio's minimum target size and single-key shortcuts that can be turned off ([studio.md](studio.md#layout)) | Yes |
 
 The app is built on the web platform as a whole: HTML, CSS, the DOM,
 Fetch and ECMAScript. The table lists a part of it only when the app's

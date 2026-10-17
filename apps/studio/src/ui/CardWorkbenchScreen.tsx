@@ -203,7 +203,7 @@ export function CardWorkbenchScreen({
   busy: boolean;
   error: ErrorText | null;
 }) {
-  const { t, tx, readerText, languageLabel, formatDate, formatMonth } = useI18n();
+  const { t, tx, readerText, partLang, languageLabel, formatDate, formatMonth } = useI18n();
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
   // Why the last side edited in its cell was not saved, until another is.
   const [refusal, setRefusal] = useState<SkipReason | null>(null);
@@ -267,9 +267,11 @@ export function CardWorkbenchScreen({
       : [...languages, query.lang];
   /**
    * How a side of a card is edited in its cell: only a plain text one's,
-   * in one language that is stated, while the deck may be changed; as an
-   * edit of that card alone, one that changes nothing saved at once, one
-   * that would leave the side empty refused, and why said.
+   * in one language that is stated, its field marked with that language
+   * (an Arabic side's reads right to left, in its font), while the deck
+   * may be changed; as an edit of that card alone, one that changes
+   * nothing saved at once, one that would leave the side empty refused,
+   * and why said.
    */
   const textEdit = (card: Card, side: "front" | "back"): CellEdit | null => {
     const tags = Object.keys(card[side]);
@@ -283,6 +285,7 @@ export function CardWorkbenchScreen({
       }),
       shown: card[side][tag]!,
       value: card[side][tag]!,
+      lang: partLang(tag),
       onSave: (text) => {
         const edit: CardEdit = { kind: "setText", side, tag, text };
         const planned = plan([card.id], edit);

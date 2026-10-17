@@ -48,6 +48,9 @@ How to use it: [docs/user-guide.md](docs/user-guide.md), which also says
 for, and what it is not: [docs/objectives.md](docs/objectives.md). The
 same, for learners, authors, technologists and decision makers:
 [solid-memo.com/about](https://solid-memo.com/about/).
+It aims to meet WCAG 2.2 at level AA, with a keyboard and a screen
+reader as well: what is checked, the gaps known and how to report a
+barrier are in [docs/accessibility.md](docs/accessibility.md).
 
 | Studying a card | The deck library |
 | --- | --- |

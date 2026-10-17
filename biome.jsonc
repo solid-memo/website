@@ -72,22 +72,14 @@
         "useButtonType": "off",
         // The ARIA roles (status, alert, group, region, ...) are deliberate, and tested by role.
         "useSemanticElements": "off",
-        // Fires on components' own `role` prop (CardFace's "question"/"answer"), not ARIA.
-        "useValidAriaRole": "off",
-        // A dialog focuses its first field when it opens, as the dialog pattern asks.
-        "noAutofocus": "off",
-        // The study card, the charts and the option rows take clicks their buttons also offer.
-        "noStaticElementInteractions": "off",
-        "useKeyWithClickEvents": "off",
-        // The command palette's options are reached by the arrow keys from its input (listbox).
-        "useFocusableInteractive": "off",
-        "noNoninteractiveElementToInteractiveRole": "off",
-        // A wide table or code block is a focusable region, so a keyboard can scroll it.
-        "noNoninteractiveTabindex": "off",
-        // A row's overlay link is a click target; the row's own link is the one read out.
-        "useAnchorContent": "off",
-        // Tests stand in for links with a plain anchor and a click handler.
-        "useValidAnchor": "off",
+        // On elements only: components have a `role` prop of their own (CardFace's "question",
+        // LangTextField's "title"), which is not ARIA.
+        "useValidAriaRole": {
+          "level": "error",
+          "options": {
+            "ignoreNonDom": true,
+          },
+        },
       },
       "complexity": {
         // A function too tangled to follow is split up. The limit starts at the most complex
@@ -141,6 +133,105 @@
         },
         "formatter": {
           "trailingCommas": "all",
+        },
+      },
+    },
+    // The a11y rules below are off only where their reason holds (docs/style.md#formatting).
+    {
+      // A dialog focuses its first field when it opens, as the dialog pattern asks.
+      "includes": [
+        "apps/studio/src/ui/DeckBulkActions.tsx",
+        "apps/studio/src/ui/TransferCardsDialog.tsx",
+        "apps/studio/src/ui/shell/ConfirmDialog.tsx",
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noAutofocus": "off",
+          },
+        },
+      },
+    },
+    {
+      // A container takes the keys of the controls inside it (the study card's shortcuts, the
+      // option rows' arrows), and a chart's points take pointer moves its keyboard also offers.
+      "includes": [
+        "packages/ui/src/ui/StudyScreen.tsx",
+        "packages/ui/src/ui/CourseQuestion.tsx",
+        "packages/ui/src/ui/MultipleChoice.tsx",
+        "packages/ui/src/ui/DistractorFields.tsx",
+        "packages/ui/src/ui/charts/**",
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noStaticElementInteractions": "off",
+            "useKeyWithClickEvents": "off",
+          },
+        },
+      },
+    },
+    {
+      // The command palette's options are reached by the arrow keys from its input (listbox).
+      "includes": [
+        "apps/studio/src/ui/shell/CommandPalette.tsx",
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useKeyWithClickEvents": "off",
+            "useFocusableInteractive": "off",
+            "noNoninteractiveElementToInteractiveRole": "off",
+          },
+        },
+      },
+    },
+    {
+      // A wide table, a code block, a chart or a tab panel is a focusable region, so a keyboard
+      // can scroll it, or move along it.
+      "includes": [
+        "apps/studio/src/ui/shell/BottomDock.tsx",
+        "packages/ui/src/ui/CardHistory.tsx",
+        "packages/ui/src/ui/CourseStatistics.tsx",
+        "packages/ui/src/ui/Markdown.tsx",
+        "packages/ui/src/ui/StatisticsSections.tsx",
+        "packages/ui/src/ui/charts/**",
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noNoninteractiveTabindex": "off",
+          },
+        },
+      },
+    },
+    {
+      // A row's overlay link is a click target; the row's own link is the one read out.
+      "includes": [
+        "packages/ui/src/ui/BrowserScreen.tsx",
+        "packages/ui/src/ui/LibraryBrowserScreen.tsx",
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useAnchorContent": "off",
+          },
+        },
+      },
+    },
+    {
+      // Tests stand in for the components they drive with plain elements and handlers.
+      "includes": [
+        "**/*.test.tsx",
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useValidAnchor": "off",
+            "noStaticElementInteractions": "off",
+            "useKeyWithClickEvents": "off",
+            "noNoninteractiveTabindex": "off",
+          },
         },
       },
     },

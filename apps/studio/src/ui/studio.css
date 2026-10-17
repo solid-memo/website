@@ -682,6 +682,23 @@
   color: var(--link);
 }
 
+/*
+ * With the account's link in it, the link is what is cut short, inside
+ * a box of its own: its box would otherwise run on under Log out, hidden
+ * but still covering the button's target (WCAG 2.5.8). The line keeps
+ * its spaces as its language writes them ("{name}(으)로 로그인됨").
+ */
+:root[data-surface="studio"] .session-line:has(a) {
+  display: flex;
+  white-space: pre;
+}
+
+:root[data-surface="studio"] .session-line a {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 :root[data-surface="studio"] .masthead button {
   color: var(--text);
   background: var(--surface);
@@ -1301,12 +1318,13 @@
   border-color: var(--primary);
 }
 
+/* Its rows, on a narrow screen, apart as the links' rows are (WCAG 2.5.8). */
 :root[data-surface="studio"] .site-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 0 1rem;
+  gap: 0.5rem 1rem;
   padding: 0.2rem 0.75rem;
   font-size: 0.75rem;
   background: var(--surface-sunken);
