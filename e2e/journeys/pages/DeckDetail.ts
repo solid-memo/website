@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, type Locator } from "@playwright/test";
+import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
 /**
@@ -106,6 +107,32 @@ export class DeckDetail extends Screen {
     await expect(this.page.getByRole("main")).toContainText(
       this.t("deckDetail.cardsInDeck", { cards: this.t("common.cardCount", { count }) }),
     );
+  }
+
+  /**
+   * "Hardest cards", under what is hard in the deck: one for each of
+   * `forgotten`, in order, the card's front a link to its page, then how
+   * often it was forgotten of its reviews, none of them a leech yet.
+   * Which card each is is not said: the queue that made them is shuffled.
+   */
+  async expectHardestCards(forgotten: { lapses: number; reviews: number }[]): Promise<void> {
+    await this.intent("Check the deck's hardest cards", async () => {
+      const list = this.page
+        .getByRole("main")
+        .getByRole("list", { name: this.t("statistics.hardest"), exact: true });
+      await expect(list.getByRole("listitem")).toHaveText(
+        forgotten.map(({ lapses, reviews }) => {
+          const share = this.t("statistics.recallShare", {
+            percent: this.percent(lapses, reviews),
+            count: reviews,
+          });
+          const text = this.t("statistics.forgottenTimes", { count: lapses, share });
+          return new RegExp(`^.+ ${escapeRegExp(text)}$`);
+        }),
+      );
+      for (const item of await list.getByRole("listitem").all())
+        await expect(item.getByRole("link")).toHaveCount(1);
+    });
   }
 
   /**

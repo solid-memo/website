@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { expect, test, type Page, type TestInfo } from "@playwright/test";
+import { expect, test, type CDPSession, type Page, type TestInfo } from "@playwright/test";
 import type { Diagnostics } from "../fixtures.ts";
 import { text, textPattern, type Locale } from "../harness/strings.ts";
 import { CardCreator } from "./CardCreator.ts";
@@ -41,6 +41,7 @@ export class App {
   /** The language the app shows; Chrome.switchLanguage changes it. */
   locale: Locale = "en";
   private readonly expectedDialogs: RegExp[] = [];
+  private devtools: CDPSession | undefined;
 
   readonly chrome = new Chrome(this);
   readonly onboarding = new Onboarding(this);
@@ -72,7 +73,7 @@ export class App {
   constructor(
     readonly page: Page,
     private readonly testInfo: TestInfo,
-    diagnostics: Diagnostics,
+    private readonly diagnostics: Diagnostics,
   ) {
     page.on("dialog", (dialog) => {
       const at = this.expectedDialogs.findIndex((pattern) => pattern.test(dialog.message()));
@@ -101,6 +102,23 @@ export class App {
    */
   expectDialog(message: RegExp): void {
     this.expectedDialogs.push(message);
+  }
+
+  /**
+   * Puts the browser in another time zone, which the app's study day is
+   * of: the local time moves on (or back) while the clock, which the
+   * Solid server checks each request's proof of possession against
+   * (within two minutes), stays right. Only in a journey that has turned
+   * the config's zone off (`test.use({ timezoneId: "" })`): Chromium takes
+   * one override at a time. The zone is in the report and diagnostics.json.
+   */
+  async setTimeZone(zone: string): Promise<void> {
+    await test.step(`Move to the time zone ${zone}`, async () => {
+      this.devtools ??= await this.page.context().newCDPSession(this.page);
+      await this.devtools.send("Emulation.setTimezoneOverride", { timezoneId: zone });
+      this.diagnostics.timezone = zone;
+      this.testInfo.annotations.push({ type: "time zone", description: zone });
+    });
   }
 
   /**

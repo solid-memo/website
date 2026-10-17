@@ -289,11 +289,16 @@ Further journeys go through:
   cards left and counts every answer once;
 - resetting today's study on a deck's page: its cards, today's budget
   of new cards and the statistics come back as before the session;
+- coming back on the next study day to review a deck, forgetting some
+  cards, and reading recall, lapses and the hardest cards in the
+  statistics;
 
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
 replays it). The browser's time zone is one where it is about noon, far
-from the day boundary. Requests to any host other than 127.0.0.1 fail
+from the day boundary; the later-day journey moves the zone past the
+boundary itself, since the Solid server refuses a DPoP proof more than
+two minutes off its clock, so the browser's clock cannot move instead. Requests to any host other than 127.0.0.1 fail
 the journey. A journey
 never asserts which card a shuffled queue shows, only how many there
 are.
