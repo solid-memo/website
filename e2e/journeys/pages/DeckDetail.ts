@@ -48,6 +48,59 @@ export class DeckDetail extends Screen {
     });
   }
 
+  /** No card is due today, and `count` new are left to introduce within today's budget. */
+  async expectNewToIntroduce(count: number): Promise<void> {
+    await expect(this.page.getByRole("main")).toContainText(
+      this.t("deckDetail.newOnly", { count }),
+    );
+  }
+
+  /** Nothing is left to study today, and `studied` cards were studied today. */
+  async expectAllStudied(studied: number): Promise<void> {
+    await expect(this.page.getByRole("main")).toContainText(this.t("deckDetail.allStudied"));
+    await expect(this.page.getByRole("main")).toContainText(
+      this.t("deckDetail.studiedToday", {
+        studied: this.t("common.cardCount", { count: studied }),
+      }),
+    );
+  }
+
+  /**
+   * No card was studied today: the page says of none that it was, and
+   * offers no reset. The text stays while a reset is under way (its
+   * button then reads "Resetting…"), so this waits for the reset to end.
+   */
+  async expectNothingStudiedToday(): Promise<void> {
+    await expect(
+      this.page.getByRole("main").getByText(this.tp("deckDetail.studiedToday")),
+    ).toHaveCount(0);
+    await expect(this.resetButton).toBeHidden();
+  }
+
+  private get resetButton(): Locator {
+    return this.page
+      .getByRole("main")
+      .getByRole("button", { name: this.t("deckDetail.resetButton"), exact: true });
+  }
+
+  /**
+   * "Reset today's study" of the deck named `name`, confirming that the
+   * `studied` cards studied today go back to how they were: then the
+   * page offers no reset, as nothing is studied today any more.
+   */
+  async resetDay(name: string, studied: number): Promise<void> {
+    await this.intent(`Reset today's study of ${name}`, async () => {
+      this.app.expectDialog(
+        this.tp("deckDetail.resetConfirm", {
+          title: name,
+          studied: this.t("common.cardCount", { count: studied }),
+        }),
+      );
+      await this.resetButton.click();
+      await this.expectNothingStudiedToday();
+    });
+  }
+
   /** "{n} cards in this deck." */
   async expectCardCount(count: number): Promise<void> {
     await expect(this.page.getByRole("main")).toContainText(

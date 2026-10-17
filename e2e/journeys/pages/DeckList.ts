@@ -141,6 +141,14 @@ export class DeckList extends Screen {
     ).toContainText(this.t("today.answers", { count: answers }));
   }
 
+  /** No answer today: the today strip above the list is not shown. */
+  async expectNothingAnsweredToday(): Promise<void> {
+    await expect(this.heading).toBeVisible();
+    await expect(
+      this.page.getByRole("complementary", { name: this.t("today.heading"), exact: true }),
+    ).toHaveCount(0);
+  }
+
   /** The row offers `count` to study ("{count} to review"). */
   async expectToReview(name: string, count: number): Promise<void> {
     await expect(this.row(name)).toContainText(this.t("common.toReview", { count }));

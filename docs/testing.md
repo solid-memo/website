@@ -287,6 +287,8 @@ Further journeys go through:
 
 - reloading in the middle of a study session, which goes on with the
   cards left and counts every answer once;
+- resetting today's study on a deck's page: its cards, today's budget
+  of new cards and the statistics come back as before the session;
 
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
