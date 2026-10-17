@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { StudyScreen } from "./StudyScreen";
 import { I18nProvider } from "./i18n";
+import { RepoUrl } from "./ReportMistake";
 import type { Card, Prompt } from "@solid-memo/domain/deck";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 
@@ -44,6 +45,33 @@ describe("StudyScreen", () => {
   it("links the deck's name to the deck's page", () => {
     renderScreen();
     expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", "#/deck?deck=d");
+  });
+
+  it("reports a mistake in the card to where its release says, and has no link for a deck from no release", () => {
+    const RELEASE = "https://solid-memo.com/decks/kanji/v1.ttl";
+    const { rerender, props } = renderScreen();
+    const link = () => screen.queryByRole("link", { name: /Report a mistake/ });
+    expect(link()).toBeNull();
+    const report = {
+      place: { library: true } as const,
+      releaseUrl: RELEASE,
+      cardIds: new Set(["card-1"]),
+    };
+    const withRepo = (screenProps: Parameters<typeof StudyScreen>[0]) => (
+      <RepoUrl.Provider value="https://github.com/solid-memo/website">
+        <StudyScreen {...screenProps} />
+      </RepoUrl.Provider>
+    );
+    rerender(withRepo({ ...props, report }));
+    expect(new URL(link()!.getAttribute("href")!).searchParams.get("details")).toContain(
+      `Card: ${RELEASE}#card-1`,
+    );
+    // A card the release does not have, the learner's own, is not the release's to fix.
+    rerender(withRepo({ ...props, report: { ...report, cardIds: new Set(["other"]) } }));
+    expect(link()).toBeNull();
+    // The session over, no card to report.
+    rerender(withRepo({ ...props, report, prompt: null }));
+    expect(link()).toBeNull();
   });
 
   it("marks the deck's name with its language when it is not the page's", () => {

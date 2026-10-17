@@ -76,7 +76,11 @@ export function createTrialUseCases(
     answerLog: createSolidAnswerLog({ fetch, checkWrite }),
     ruleset,
   });
-  return { useCases, pod: createLocalGuestPod({ fetch: local, store, origin: TRIAL_ORIGIN }) };
+  return {
+    // The draft is the author's own, unpublished: a mistake in it is reported nowhere, least of all to the library.
+    useCases: { ...useCases, reportPlace: async () => ({ library: false }) },
+    pod: createLocalGuestPod({ fetch: local, store, origin: TRIAL_ORIGIN }),
+  };
 }
 
 /**

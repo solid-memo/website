@@ -4,6 +4,7 @@
 
 import { useState } from "preact/hooks";
 import { releaseHost, type LibraryDeck } from "@solid-memo/domain/library";
+import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { LibraryDeckScreen } from "./LibraryDeckScreen";
@@ -27,6 +28,7 @@ export function ImportUrlScreen({
   error,
   onShow,
   onAdd,
+  reportPlace,
 }: {
   /** The link pasted, as the URL has it; none yet. */
   url?: string;
@@ -44,6 +46,8 @@ export function ImportUrlScreen({
   error: ErrorText | null;
   onShow: (url: string) => void;
   onAdd: () => void;
+  /** Where a mistake in the release is reported (UseCases.reportPlace); none while it is read. */
+  reportPlace?: ReportPlace;
 }) {
   const { t } = useI18n();
   const [typed, setTyped] = useState(url ?? "");
@@ -84,6 +88,7 @@ export function ImportUrlScreen({
             error={error}
             onImport={onAdd}
             onStartCourse={onAdd}
+            reportPlace={reportPlace}
           />
         </>
       )}

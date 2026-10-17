@@ -73,7 +73,8 @@
     "networkError": "Could not reach your Pod. Check your connection and try again.",
     "unexpectedError": "Something went wrong. Try again, or reload the page. Details: {detail}",
     "technicalDetails": "Technical details",
-    "opensInNewTab": "(opens in a new tab)"
+    "opensInNewTab": "(opens in a new tab)",
+    "reportMistake": "Report a mistake"
   },
   "footer": {
     "createdBy": "Created by {author}",

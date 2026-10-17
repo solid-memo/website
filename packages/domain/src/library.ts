@@ -107,6 +107,12 @@ export interface LibraryDeckContent {
   cards: LibraryCard[];
   /** Set when the release is a course (see LibraryDeck.isCourse); its outline is read with DeckLibrary.fetchCourseOutline. */
   isCourse?: true;
+  /**
+   * The web page the release's contact names (its dcat:contactPoint's
+   * vcard:hasURL), when it names one: where a mistake in it is reported
+   * (mistakeReport.ts), for a release from outside the library.
+   */
+  contact?: string;
 }
 
 export interface LibraryCard extends CardContent {

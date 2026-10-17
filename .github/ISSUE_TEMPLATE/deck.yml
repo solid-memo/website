@@ -24,7 +24,7 @@ body:
     id: deck
     attributes:
       label: Deck and version
-      description: For a correction, the release's address, as the library shows it.
+      description: For a correction, the release's address, which "Report a mistake", under a card in the app, fills in. Without it, the deck's name and the version its page in the library shows.
       placeholder: https://solid-memo.com/decks/capitals-of-the-world/v2.ttl
   - type: textarea
     id: details

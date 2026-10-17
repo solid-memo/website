@@ -5,6 +5,7 @@
 import { licenseLabel } from "@solid-memo/domain/license";
 import { keywordsIn } from "@solid-memo/domain/keywords";
 import { topicLabels, type LibraryDeck, type LibrarySource } from "@solid-memo/domain/library";
+import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import { AuthorNames } from "./AuthorName";
 import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
@@ -12,6 +13,7 @@ import { useI18n, type ErrorText } from "./i18n";
 import { LibraryIcon } from "./icons";
 import { linkify } from "./linkify";
 import { ReaderText, ReaderTexts } from "./ReaderText";
+import { ReportMistake } from "./ReportMistake";
 
 /**
  * One library deck in full — its blurb, what it is about (its keywords
@@ -24,7 +26,10 @@ import { ReaderText, ReaderTexts } from "./ReaderText";
  * shown comes from the library index, or from a release added from a
  * link (`host`, where it is published, then said, with what it is), so
  * any link in it goes through ExternalLink. A release from a link has no
- * card list or preview to link to.
+ * card list or preview to link to. A mistake in the release is reported
+ * where `reportPlace` says (ReportMistake): to the library for one the
+ * library's index lists, however it was reached, else to the contact the
+ * release names, if any.
  */
 export function LibraryDeckScreen({
   deck,
@@ -36,6 +41,7 @@ export function LibraryDeckScreen({
   error,
   onImport,
   onStartCourse,
+  reportPlace,
 }: {
   deck: LibraryDeck;
   /** The host a release added from a link is published on; none for the library's. */
@@ -55,6 +61,8 @@ export function LibraryDeckScreen({
   onImport: () => void;
   /** Starts the course, or goes on with it (a course only). */
   onStartCourse: () => void;
+  /** Where a mistake in the release is reported (UseCases.reportPlace); none while it is read. */
+  reportPlace?: ReportPlace;
 }) {
   const { t, locale, readerText, readerLang, formatDate, directionLabel } = useI18n();
   const topics = topicLabels(deck.themes);
@@ -195,6 +203,7 @@ export function LibraryDeckScreen({
         )}
       </div>
       <ErrorMessage error={error} />
+      {reportPlace !== undefined && <ReportMistake place={reportPlace} releaseUrl={deck.url} />}
     </section>
   );
 }

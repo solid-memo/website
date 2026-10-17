@@ -4,6 +4,7 @@
 
 import { expect, type Locator } from "@playwright/test";
 import type { AnswerScale } from "./Preferences.ts";
+import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
 /** A grade the journeys give: none that puts the card back in the session ("Again", 0–2; see `again`). */
@@ -64,6 +65,22 @@ export class Study extends Screen {
   /** "Card {position} of {total}" is what the status line says. */
   async expectPosition(position: number, total: number): Promise<void> {
     await expect(this.statusLine).toHaveText(this.t("study.position", { position, total }));
+  }
+
+  /**
+   * The card shown has "Report a mistake", which opens the library's deck
+   * form with `release` and the card filled in: the card's address in
+   * `release` (its fragment, whichever card it is).
+   */
+  async expectReportMistake(release: string): Promise<void> {
+    const link = this.page
+      .getByRole("main")
+      .getByRole("link", { name: this.t("common.reportMistake") });
+    await expect(link).toHaveAttribute("target", "_blank");
+    const fields = new URL((await link.getAttribute("href")) ?? "").searchParams;
+    expect(fields.get("template")).toBe("deck.yml");
+    expect(fields.get("deck")).toBe(release);
+    expect(fields.get("details")).toMatch(new RegExp(`^Card: ${escapeRegExp(release)}#\\S+\n`));
   }
 
   async reveal(): Promise<void> {

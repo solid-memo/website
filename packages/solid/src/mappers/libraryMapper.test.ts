@@ -414,6 +414,28 @@ describe("toLibraryDeckContent", () => {
       keywords: { en: ["capitals"], sv: ["huvudstäder"] },
     });
     expect(content.cards.map((card) => card.id)).toEqual(["se", "no"]);
+    expect(content).not.toHaveProperty("contact");
+  });
+
+  it("reads the web page a release's contact names, and none from a contact with only an email", async () => {
+    const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
+    const turtle = await readFile(
+      `${VOCAB_ROOT}fixtures/library-deck/v6/valid/library-standalone-release.ttl`,
+      "utf8",
+    );
+    const VCARD = "http://www.w3.org/2006/vcard/ns#";
+    const withContact = (point: string) =>
+      datasetOf(
+        `${turtle}\n<> dcat:contactPoint <#contact> .\n<#contact> a <${VCARD}Kind> ; ${point} .\n`,
+        url,
+      );
+    const page = "https://alice.example/issues";
+    expect(toLibraryDeckContent(url, await withContact(`<${VCARD}hasURL> <${page}>`)).contact).toBe(
+      page,
+    );
+    expect(
+      toLibraryDeckContent(url, await withContact(`<${VCARD}hasEmail> <mailto:a@example.org>`)),
+    ).not.toHaveProperty("contact");
   });
 
   it("refuses a deck in a newer format than it writes", () => {

@@ -75,7 +75,8 @@
     "networkError": "No se pudo conectar con tu Pod. Comprueba tu conexión e inténtalo de nuevo.",
     "unexpectedError": "Algo salió mal. Inténtalo de nuevo o vuelve a cargar la página. Detalles: {detail}",
     "technicalDetails": "Detalles técnicos",
-    "opensInNewTab": "(se abre en una pestaña nueva)"
+    "opensInNewTab": "(se abre en una pestaña nueva)",
+    "reportMistake": "Informar de un error"
   },
   "footer": {
     "createdBy": "Creado por {author}",

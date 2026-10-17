@@ -192,6 +192,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     openTrial: vi.fn(async () => ({ ok: false as const, problems: [] })),
     addReleaseLanguages: vi.fn(async () => null),
     deckRelease: vi.fn(async () => null),
+    reportPlace: vi.fn(async () => ({ library: false as const })),
     applyLibraryUpgrade: vi.fn(async (deck, plan) => ({
       ok: true as const,
       deck: { ...deck, sourceUrl: plan.releaseUrl },

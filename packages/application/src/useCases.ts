@@ -56,6 +56,7 @@ import {
   type RegistrationTarget,
 } from "@solid-memo/domain/instance";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
+import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import {
   applyLibraryUpgrade,
   planLibraryUpgrade,
@@ -557,6 +558,14 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * text that is still the release's as it is (see sameText). Writes nothing.
    */
   deckRelease(deck: Deck): Promise<LibraryDeckContent | null>;
+  /**
+   * Where a mistake in the release at `releaseUrl` is reported
+   * (domain/mistakeReport.ts): the library's tracker when the library's
+   * index lists the release, however it was reached (copied, or opened
+   * from a link), else the contact the release names, if any. Writes
+   * nothing.
+   */
+  reportPlace(releaseUrl: string): Promise<ReportPlace>;
   /**
    * Apply the upgrade the user agreed to (domain/deckUpgrade.ts,
    * docs/migrations.md "How an upgrade is applied"), planned again on the
@@ -2964,6 +2973,12 @@ export function createUseCases({
     },
     async deckRelease(deck) {
       return deck.sourceUrl === undefined ? null : deckLibrary.fetchLibraryDeck(deck.sourceUrl);
+    },
+    async reportPlace(releaseUrl) {
+      const index = await deckLibrary.readLibraryIndex();
+      if (index.releases.includes(releaseUrl)) return { library: true };
+      const { contact } = await deckLibrary.fetchLibraryDeck(releaseUrl);
+      return contact === undefined ? { library: false } : { library: false, contact };
     },
     async addReleaseLanguages(deck) {
       if (deck.sourceUrl === undefined) return null;

@@ -12,7 +12,9 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
  * its link, study it, see release 2 offered in Solid Memo and in the
  * Studio and read what it changes, update the copy, reload, and find the
  * progress kept, Solid Memo and the Studio agreeing that the copy is up
- * to date. It catches an offer that never appears, an update that loses
+ * to date. A card studied offers to report a mistake in it, the
+ * library's deck form filled in with the release and the card, though
+ * release 1 names no contact. It catches an offer that never appears, an update that loses
  * the day's study, and the Studio and Solid Memo disagreeing after the
  * update's many writes. How journeys are run, read when they fail and
  * written: docs/testing.md#user-journeys.
@@ -69,6 +71,7 @@ test("a learner updates a library copy @upgrade", async ({ app, account, runId }
     await app.deckDetail.expectCardCount(cards);
     await app.deckDetail.study();
     await app.study.expectStudying(deck);
+    await app.study.expectReportMistake(releaseOne);
     for (let card = 1; card <= newPerDay; card++) await app.study.answer("good");
     await app.study.expectFinished();
     await app.study.endSession();

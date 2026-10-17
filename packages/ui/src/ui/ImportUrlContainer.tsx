@@ -49,6 +49,14 @@ export function ImportUrlContainer({
   });
   const release = url === undefined ? undefined : releaseQuery.data;
 
+  // A library release reached by its link is still the library's to fix (UseCases.reportPlace).
+  const reportQuery = useQuery({
+    queryKey: ["reportPlace", release?.url],
+    queryFn: () => useCases.reportPlace(release!.url),
+    enabled: release !== undefined,
+    staleTime: Infinity,
+  });
+
   const decksQuery = useQuery({
     queryKey: ["decks", instance.url],
     queryFn: () => useCases.listDecks(instance.url),
@@ -84,6 +92,7 @@ export function ImportUrlContainer({
         else onShow(shown);
       }}
       onAdd={() => addMutation.mutate(release!)}
+      reportPlace={reportQuery.data}
     />
   );
 }

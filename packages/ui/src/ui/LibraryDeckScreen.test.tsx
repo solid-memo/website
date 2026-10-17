@@ -10,6 +10,7 @@ import { NEW_TAB, newTab } from "../test/links";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { I18nProvider } from "./i18n";
+import { RepoUrl } from "./ReportMistake";
 
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 const BY_SA = "https://creativecommons.org/licenses/by-sa/4.0/";
@@ -290,5 +291,45 @@ describe("LibraryDeckScreen", () => {
   it("shows an import error", () => {
     renderScreen({ error: "pod refused" });
     expect(screen.getByText("pod refused")).toHaveClass("error");
+  });
+
+  describe("reporting a mistake", () => {
+    const REPO = "https://github.com/solid-memo/website";
+    const reportLink = () => screen.queryByRole("link", { name: /Report a mistake/ });
+    function renderWithRepo(overrides: Partial<Parameters<typeof LibraryDeckScreen>[0]> = {}) {
+      render(
+        <RepoUrl.Provider value={REPO}>
+          <LibraryDeckScreen
+            deck={capitals}
+            imported={false}
+            busy={false}
+            error={null}
+            onImport={vi.fn()}
+            onStartCourse={vi.fn()}
+            {...overrides}
+          />
+        </RepoUrl.Provider>,
+      );
+    }
+
+    it("reports a mistake in a library release to the library, with the release filled in", () => {
+      renderWithRepo({ reportPlace: { library: true } });
+      const url = new URL(reportLink()!.getAttribute("href")!);
+      expect(`${url.origin}${url.pathname}`).toBe(`${REPO}/issues/new`);
+      expect(url.searchParams.get("template")).toBe("deck.yml");
+      expect(url.searchParams.get("deck")).toBe(capitals.url);
+    });
+
+    it("reports a mistake in another release to the contact it names, and nowhere when it names none or while its place is read", () => {
+      const contact = "https://bob.example/issues";
+      renderWithRepo({ host: "bob.example", reportPlace: { library: false, contact } });
+      expect(reportLink()).toHaveAttribute("href", contact);
+      cleanup();
+      renderWithRepo({ host: "bob.example", reportPlace: { library: false } });
+      expect(reportLink()).toBeNull();
+      cleanup();
+      renderWithRepo();
+      expect(reportLink()).toBeNull();
+    });
   });
 });

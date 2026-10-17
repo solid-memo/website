@@ -74,6 +74,8 @@ export function LibraryDeckContainer({
       error={errorText(importMutation.error ?? startMutation.error)}
       onImport={() => importMutation.mutate()}
       onStartCourse={() => startMutation.mutate()}
+      // The library's page shows a release its index lists.
+      reportPlace={{ library: true }}
     />
   );
 }

@@ -71,7 +71,8 @@
     "networkError": "Pod에 연결할 수 없어요. 연결을 확인하고 다시 시도해 주세요.",
     "unexpectedError": "문제가 발생했어요. 다시 시도하거나 페이지를 새로고침해 주세요. 자세한 내용(영어): {detail}",
     "technicalDetails": "기술 세부 정보",
-    "opensInNewTab": "(새 탭에서 열림)"
+    "opensInNewTab": "(새 탭에서 열림)",
+    "reportMistake": "오류 신고"
   },
   "footer": {
     "createdBy": "만든 사람: {author}",
