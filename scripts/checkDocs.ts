@@ -3,35 +3,21 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * `npm run check:docs`: docs/README.md, the docs' index, lists every page
- * in docs/, and every page it lists is there (docs/testing.md#documentation).
- * A page counts as listed when the index links to it.
+ * `npm run check:docs`: docs/docs.ttl, the docs' index, is as the docs'
+ * build reads it (readDocsIndex), lists every page in docs/, and every
+ * page it lists is there (docs/testing.md#documentation,
+ * docs/markdown.md#the-docs-index). For a page it does not list, it
+ * prints the block to add.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-
-/** The pages the index links to: relative links to a Markdown file beside it. */
-export function listedPages(index: string): Set<string> {
-  const pages = new Set<string>();
-  for (const [, target] of index.matchAll(/\]\(([^)\s#]+\.md)(?:#[^)\s]*)?\)/g)) {
-    if (!target.includes("/")) pages.add(target);
-  }
-  return pages;
-}
-
-/** What is wrong with the index; none when the check passes. */
-export function docsIndexProblems(pages: readonly string[], index: string): string[] {
-  const listed = listedPages(index);
-  const present = new Set(pages);
-  return [
-    ...pages
-      .filter((page) => page !== "README.md" && !listed.has(page))
-      .map((page) => `docs/${page}: not listed in docs/README.md; add a line for it there.`),
-    ...[...listed]
-      .filter((page) => !present.has(page))
-      .map((page) => `docs/README.md lists ${page}, which is not in docs/.`),
-  ];
-}
+import {
+  DOCS_INDEX,
+  type DocsProblem,
+  listingProblems,
+  pageBlock,
+  readDocsIndex,
+} from "@solid-memo/markdown/tooling/docsIndex";
 
 export type DocsIo = { pages(): string[]; index(): string; log(message: string): void };
 
@@ -39,9 +25,25 @@ export function defaultIo(root: string): DocsIo {
   const docs = join(root, "docs");
   return {
     pages: () => readdirSync(docs).filter((file) => file.endsWith(".md")),
-    index: () => readFileSync(join(docs, "README.md"), "utf8"),
+    index: () => readFileSync(join(root, DOCS_INDEX), "utf8"),
     log: (message) => console.log(message),
   };
+}
+
+/** What is wrong with the index, as lines to print; none when the check passes. */
+export function docsIndexProblems(pages: readonly string[], text: string): string[] {
+  const { index, problems } = readDocsIndex(text);
+  const where = ({ file, line, what }: DocsProblem) =>
+    `${file}${line === null ? "" : `:${line}`}: ${what}`;
+  if (index === null) return problems.map(where);
+  return [
+    ...problems.map(where),
+    ...listingProblems(index, pages).map((problem) =>
+      problem.file === DOCS_INDEX
+        ? where(problem)
+        : `${where(problem)}; add it to a group there, for example:\n\n${pageBlock(index, problem.file.slice("docs/".length))}\n`,
+    ),
+  ];
 }
 
 /** Exit code: 0 when the index and the pages agree. */
@@ -49,7 +51,7 @@ export function main(io: DocsIo): number {
   const problems = docsIndexProblems(io.pages(), io.index());
   for (const problem of problems) io.log(problem);
   if (problems.length > 0) return 1;
-  io.log("docs/README.md lists every page in docs/.");
+  io.log(`${DOCS_INDEX} lists every page in docs/.`);
   return 0;
 }
 

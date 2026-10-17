@@ -6,7 +6,8 @@
 # speaks for the rest: what cannot carry a comment (JSON, pictures), what
 # is served as RDF and kept free of headers (the Turtle in decks/ and ns/,
 # whose published versions are never edited) or is not ours (the vendored
-# shapes), what tools write (the generated vocabulary, the lock files),
+# shapes), the docs' index, Turtle the formatter keeps free of headers,
+# what tools write (the generated vocabulary, the lock files),
 # the Markdown, kept free of headers so that it reads cleanly, and the
 # HTML, whose first line is its doctype.
 # Where several annotations match a file, the last one wins.
@@ -29,6 +30,10 @@ path = [
     "CNAME",
     # The vocabulary and the shapes, served as RDF (docs/vocab.md#license).
     "ns/**",
+    # The docs' index, written by hand: Turtle, kept free of headers, as
+    # the formatter keeps a comment only before a subject
+    # (docs/markdown.md#the-docs-index).
+    "docs/docs.ttl",
     # Test data.
     "packages/vocab/fixtures/**",
     "e2e/pod/servers/nss/seed/**",

@@ -1,0 +1,244 @@
+@base <https://solid-memo.com/docs/> .
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema:  <https://schema.org/> .
+
+# The docs: their title is the README's, and the README's intro opens
+# the list of pages on the site (docs/markdown.md#the-docs-as-a-site).
+<>
+    a schema:Collection ;
+    dcterms:title "Docs"@en .
+
+<#using-the-app>
+    a schema:Collection ;
+    dcterms:title "Using the app"@en ;
+    schema:isPartOf <> ;
+    schema:position 10 .
+
+<user-guide.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#using-the-app> ;
+    schema:position 10 ;
+    dcterms:abstract "a walk through Solid Memo for a learner: signing in or trying it as a guest, adding a deck, studying, courses, statistics, and the settings."@en .
+
+<glossary.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#using-the-app> ;
+    schema:position 20 ;
+    dcterms:abstract "the terms and abbreviations the docs use, each explained in plain words with a link."@en .
+
+<privacy.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#using-the-app> ;
+    schema:position 30 ;
+    dcterms:abstract "where your data is stored, what stays in the browser, what the host and other servers see, no analytics, and the email address published in deck metadata."@en .
+
+<#the-code>
+    a schema:Collection ;
+    dcterms:title "The code"@en ;
+    schema:isPartOf <> ;
+    schema:position 20 .
+
+<architecture.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 10 ;
+    dcterms:abstract "the hexagonal layers, one npm workspace package each, and the Turbo tasks that check them."@en .
+
+<boundaries.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 20 ;
+    dcterms:abstract "the import rules between packages, and the vendor libraries each may use, as `npm run check:boundaries` enforces them."@en .
+
+<vendor-code.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 30 ;
+    dcterms:abstract "which third-party technology the app depends on, where each is confined, and what replacing one would cost."@en .
+
+<testing.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 40 ;
+    dcterms:abstract "unit tests at 100% coverage per package, the end-to-end tests against Solid servers in Docker, the user journeys in a browser (and how to debug and add one), the checks on the docs (style, spelling, links), and the commands."@en .
+
+<deployment.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 50 ;
+    dcterms:abstract "the static build, deployed to GitHub Pages by CI for each released version, or published by hand to any web space."@en .
+
+<configuration.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 60 ;
+    dcterms:abstract "the VITE_ settings a build reads (the app's name, the repository the footer and the page link to, the Pod providers, the deck library), their defaults, how to set them, and what they do not reach."@en .
+
+<reuse.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 70 ;
+    dcterms:abstract "running your own instance: fork, configure, build, host anywhere, make the deck library your own, the files to edit by hand, and the names that must stay because they are part of the data."@en .
+
+<style.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 80 ;
+    dcterms:abstract "how the code, Turtle, docs and commit messages are written: formatting and linting with Biome, TypeScript, naming, the Turtle house style, comments, plain English with American spelling, and English as the authoritative language."@en .
+
+<releasing.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 90 ;
+    dcterms:abstract "how the app's versions are chosen (SemVer, from 1.0.0, by semantic-release from the commits' Conventional Commits types), what counts as breaking for data in pods, what a release does and the deploy key it pushes with, what to do when one fails, and how the app's version differs from those of the vocabulary, shapes and decks."@en .
+
+<#the-data>
+    a schema:Collection ;
+    dcterms:title "The data"@en ;
+    schema:isPartOf <> ;
+    schema:position 30 .
+
+<data-model.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-data> ;
+    schema:position 10 ;
+    dcterms:abstract "where Solid Memo stores data in a user's pod and how it finds it again."@en .
+
+<vocab.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-data> ;
+    schema:position 20 ;
+    dcterms:abstract "Solid Memo's own RDF terms, how they are versioned, and the constants generated from them."@en .
+
+<shapes.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-data> ;
+    schema:position 30 ;
+    dcterms:abstract "the SHACL shapes of every subject, version by version, and how they drive the code."@en .
+
+<validation.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-data> ;
+    schema:position 40 ;
+    dcterms:abstract "checking data against the shapes and DCAT-AP in the browser, and the pySHACL cross-check in CI."@en .
+
+<migrations.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-data> ;
+    schema:position 50 ;
+    dcterms:abstract "format versions, and how the app brings a pod up to the format it writes."@en .
+
+<deck-library.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-data> ;
+    schema:position 60 ;
+    dcterms:abstract "the ready-made decks in `decks/`, described with DCAT, how to add a version, and their checks; a release outside the library, and adding one from a link."@en .
+
+<markdown.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-data> ;
+    schema:position 70 ;
+    dcterms:abstract "text written in Markdown: the dialect, which texts may be in it, how each place shows it, why showing it is safe whatever the data holds, and writing it in the card editor; and the docs themselves, read in the same dialect, their diagrams drawn and their pages rendered."@en .
+
+<courses.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-data> ;
+    schema:position 80 ;
+    dcterms:abstract "a library deck with chapters and steps, whose multiple-choice questions join the learner's deck as they are answered."@en .
+
+<#the-app>
+    a schema:Collection ;
+    dcterms:title "The app"@en ;
+    schema:isPartOf <> ;
+    schema:position 40 .
+
+<authentication.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 10 ;
+    dcterms:abstract "login, session restore and logout against a Solid identity provider with Solid-OIDC."@en .
+
+<onboarding.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 20 ;
+    dcterms:abstract "how a signed-out visitor ends up with a connected Pod."@en .
+
+<guest-mode.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 30 ;
+    dcterms:abstract "trying the app before logging in, in a pod kept in the browser."@en .
+
+<srs.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 40 ;
+    dcterms:abstract "how cards are scheduled (SM-2), as pure functions in the domain."@en .
+
+<routing.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 50 ;
+    dcterms:abstract "the URL as the view the user is looking at: bookmarkable, shareable, Back and Forward."@en .
+
+<i18n.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 60 ;
+    dcterms:abstract "English, Swedish, Korean, German, Spanish and French: how the language is picked, and text in the user's languages."@en .
+
+<statistics.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 70 ;
+    dcterms:abstract "the learner's own figures: the day's summary above the deck list, the statistics page and its charts, and a deck's figures, all worked out from the review log."@en .
+
+<browsing.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 80 ;
+    dcterms:abstract "making a deck, looking through and editing its cards in the Browser, the card creators, and previewing a library deck before importing it."@en .
+
+<theme.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 90 ;
+    dcterms:abstract "light, dark, or as the browser says, and where the choice is kept."@en .
+
+<studio.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-app> ;
+    schema:position 100 ;
+    dcterms:abstract "Solid Memo Studio, the second app, in Solid Memo's page at `#/studio`: managing an instance's decks and cards in bulk, and writing decks and courses as drafts, checking, trying, comparing and publishing them, and listing the releases published; what it shares with Solid Memo, its workspace (layout, keys, palette, what the device keeps), its routes, and how it is built and served."@en .
+
+<#the-project>
+    a schema:Collection ;
+    dcterms:title "The project"@en ;
+    schema:isPartOf <> ;
+    schema:position 50 .
+
+<objectives.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-project> ;
+    schema:position 10 ;
+    dcterms:abstract "what Solid Memo is for and who it is for, what it is not for, and each principle with the check that enforces it."@en .
+
+<policy.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-project> ;
+    schema:position 20 ;
+    dcterms:abstract "no public policy applies; the outside rules the code follows (SM-2, CLDR plural rules, BCP 47, NFC, DCAT-AP) and the project's own rules, with the tests that check each."@en .
+
+<standards.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-project> ;
+    schema:position 30 ;
+    dcterms:abstract "every standard and specification used, with version, status, link and where it is used, and why the drafts and de facto ones do not get in the way of reuse."@en .
+
+<standard-for-public-code.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-project> ;
+    schema:position 40 ;
+    dcterms:abstract "how well Solid Memo meets the Standard for Public Code, criterion by criterion: the scorecard, the decisions made, the GitHub settings and actions that remain, and the gaps still open."@en .

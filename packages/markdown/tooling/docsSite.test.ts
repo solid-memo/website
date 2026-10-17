@@ -7,6 +7,7 @@ import { createRequire } from "node:module";
 import { beforeAll, describe, expect, it } from "vitest";
 import { type DocBlock, parseDocument } from "../src/parse.ts";
 import { DiagramError, type DrawInputs } from "./diagrams.ts";
+import { DOCS_INDEX, readDocsIndex } from "./docsIndex.ts";
 import {
   checkPage,
   checkStylesheet,
@@ -74,12 +75,47 @@ const diagram = (title: string, ...lines: string[]) =>
     "```",
   ].join("\n");
 
-/** A small site: the README, which links both pages, and the two pages. */
+/**
+ * A docs.ttl: the docs' title "Docs" unless said, then each group, as its
+ * id, title and pages' names, in order. Its first group's line is 9, and
+ * each page's block, with the blank line before it, takes 6 lines.
+ */
+function docsTtl(groups: [string, string, string[]][], title = "Docs"): string {
+  return [
+    "@base <https://solid-memo.com/docs/> .",
+    "@prefix dcterms: <http://purl.org/dc/terms/> .",
+    "@prefix schema: <https://schema.org/> .",
+    "",
+    "<>",
+    "    a schema:Collection ;",
+    `    dcterms:title "${title}"@en .`,
+    ...groups.flatMap(([id, name, pages], place) => [
+      "",
+      `<#${id}>`,
+      "    a schema:Collection ;",
+      `    dcterms:title "${name}"@en ;`,
+      "    schema:isPartOf <> ;",
+      `    schema:position ${(place + 1) * 10} .`,
+      ...pages.flatMap((listed, at) => [
+        "",
+        `<${listed}>`,
+        "    a schema:TechArticle ;",
+        `    schema:isPartOf <#${id}> ;`,
+        `    schema:position ${(at + 1) * 10} ;`,
+        `    dcterms:abstract "what ${listed} *covers*."@en .`,
+      ]),
+    ]),
+    "",
+  ].join("\n");
+}
+
+/** A small site: the README, the two pages, and the index that lists them. */
 function siteFiles(extra: Record<string, string> = {}): Record<string, string> {
   return {
-    "docs/README.md": page("Docs", "- [One](one.md)", "- [Two](./two.md#part)"),
+    "docs/README.md": page("Docs"),
     "docs/one.md": page("One", "## Part", "", "Text."),
     "docs/two.md": page("Two", "## Part", "", "Text."),
+    [DOCS_INDEX]: docsTtl([["pages", "Pages", ["one.md", "two.md"]]]),
     ...extra,
   };
 }
@@ -175,8 +211,131 @@ describe("renderDocsSite", () => {
     expect(readme).toContain('<link rel="stylesheet" href="docs.css">');
     expect(readme).toContain('<a href="../">Solid Memo</a> <a href="./">Docs</a>');
     expect(readme).not.toContain('rel="prev"');
-    expect(readme).not.toContain('class="toc"');
+    expect(readme).toContain('<a rel="next" href="one/">Next: One</a>');
     expect(files.get("two/index.html")).not.toContain('rel="next"');
+  });
+
+  it("lists the index's groups on the README, each page's title linked with its summary, and orders the pages by them", async () => {
+    const files = await render({
+      ...siteFiles(),
+      "docs/README.md": page("Docs", "## Start", "", "Text."),
+      "docs/three.md": page("Three"),
+      [DOCS_INDEX]: docsTtl([
+        ["first", "First steps", ["two.md"]],
+        ["more", "More & more", ["one.md", "three.md"]],
+      ]),
+    });
+    const readme = files.get("index.html")!;
+    expect(readme).toContain(
+      [
+        '<h2 id="first">First steps</h2>',
+        "<ul>",
+        '<li><a href="two/">Two</a> — what two.md <em>covers</em>.</li>',
+        "</ul>",
+        '<h2 id="more">More &amp; more</h2>',
+        "<ul>",
+        '<li><a href="one/">One</a> — what one.md <em>covers</em>.</li>',
+        '<li><a href="three/">Three</a> — what three.md <em>covers</em>.</li>',
+        "</ul>",
+      ].join("\n"),
+    );
+    // The groups come after the README's own text, and its sections list them after its own.
+    expect(readme.indexOf('<h2 id="start">')).toBeLessThan(readme.indexOf('<h2 id="first">'));
+    expect(readme).toContain(
+      [
+        '<li><a href="#start">Start</a></li>',
+        '<li><a href="#first">First steps</a></li>',
+        '<li><a href="#more">More &amp; more</a></li>',
+        "</ul>",
+      ].join("\n"),
+    );
+    // Only the README lists the groups.
+    expect(files.get("one/index.html")).not.toContain('href="#first"');
+    expect(readme).toContain('<a rel="next" href="two/">Next: Two</a>');
+    const two = files.get("two/index.html")!;
+    expect(two).toContain('<a rel="prev" href="../">Previous: Docs</a>');
+    expect(two).toContain('<a rel="next" href="../one/">Next: One</a>');
+    const one = files.get("one/index.html")!;
+    expect(one).toContain('<a rel="prev" href="../two/">Previous: Two</a>');
+    expect(one).toContain('<a rel="next" href="../three/">Next: Three</a>');
+    expect(files.get("three/index.html")).not.toContain('rel="next"');
+  });
+
+  it("puts every page under All pages in each page's header, the page itself marked as the current one", async () => {
+    const files = await render(siteFiles());
+    const all = (up: string, current: string) =>
+      [
+        '<details class="pages">',
+        "<summary>All pages</summary>",
+        '<nav aria-label="All pages">',
+        "<ul>",
+        `<li><a href="${up || "./"}"${current === "Docs" ? ' aria-current="page"' : ""}>Docs</a></li>`,
+        "<li>Pages",
+        "<ul>",
+        `<li><a href="${up}one/"${current === "One" ? ' aria-current="page"' : ""}>One</a></li>`,
+        `<li><a href="${up}two/"${current === "Two" ? ' aria-current="page"' : ""}>Two</a></li>`,
+        "</ul>",
+        "</li>",
+        "</ul>",
+        "</nav>",
+        "</details>",
+        "</header>",
+      ].join("\n");
+    expect(files.get("index.html")).toContain(all("", "Docs"));
+    expect(files.get("one/index.html")).toContain(all("../", "One"));
+    expect(files.get("two/index.html")).toContain(all("../", "Two"));
+  });
+
+  it("links the index's source from the README's footer, at the ref", async () => {
+    const files = await render(siteFiles());
+    const source = `<li><a href="${REPO}/blob/${SHA}/docs/docs.ttl">The list of pages' source</a></li>`;
+    expect(files.get("index.html")).toContain(
+      `<a href="${REPO}/blob/${SHA}/docs/README.md">This page's source</a></li>\n${source}`,
+    );
+    expect(files.get("one/index.html")).not.toContain("docs.ttl");
+  });
+
+  it("lists what is wrong with the index: a page it does not list or lists without the file, another title, a group's id the README has", async () => {
+    expect(
+      await problemsOf({
+        ...siteFiles(),
+        "docs/README.md": page("Doc", "## Part", "", "Text."),
+        "docs/three.md": page("Three"),
+        [DOCS_INDEX]: docsTtl(
+          [
+            ["part", "Part", ["one.md", "gone.md"]],
+            ["main", "Main", ["two.md"]],
+          ],
+          "Docs",
+        ),
+      }),
+    ).toEqual([
+      "docs/three.md: docs/docs.ttl does not list the page",
+      "docs/docs.ttl:21: lists gone.md, which is not in docs/",
+      `docs/docs.ttl:5: the docs' title, "Docs", is not the README's, "Doc"`,
+      'docs/docs.ttl:9: <#part>: the README already has a heading with the id "part"',
+      'docs/docs.ttl:27: <#main>: the README already has a heading with the id "main"',
+    ]);
+    // A README that does not open with its title is a problem of its own, not the index's.
+    expect(
+      await problemsOf({ ...siteFiles(), "docs/README.md": "Text.\n\n# Docs\n\nText.\n" }),
+    ).toEqual([
+      "docs/README.md:1: the page does not open with its title, a heading of level 1 (`# …`)",
+    ]);
+  });
+
+  it("says when there is no index, and, when it is not Turtle, only that", async () => {
+    const { [DOCS_INDEX]: _index, ...unindexed } = siteFiles();
+    expect(await problemsOf(unindexed)).toEqual([
+      "docs/docs.ttl: there is no docs.ttl, the docs' index",
+    ]);
+    const problems = await problemsOf({
+      ...siteFiles(),
+      "docs/three.md": page("Three"),
+      [DOCS_INDEX]: "<> a .\n",
+    });
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatch(/^docs\/docs\.ttl(:1)?: not Turtle: /);
   });
 
   it("writes the list of versions: this one, and the releases", async () => {
@@ -199,8 +358,8 @@ describe("renderDocsSite", () => {
     expect(versions).toContain(
       [
         "<ul>",
-        `<li><a href="../2.2.0/">2.2.0</a> · <a href="${REPO}/blob/v2.2.0/docs/README.md">in the repository</a> · <a href="${REPO}/releases/tag/v2.2.0">release notes</a></li>`,
-        `<li>2.1.1 · <a href="${REPO}/blob/v2.1.1/docs/README.md">in the repository</a> · <a href="${REPO}/releases/tag/v2.1.1">release notes</a></li>`,
+        `<li><a href="../2.2.0/">2.2.0</a> · <a href="${REPO}/tree/v2.2.0/docs">in the repository</a> · <a href="${REPO}/releases/tag/v2.2.0">release notes</a></li>`,
+        `<li>2.1.1 · <a href="${REPO}/tree/v2.1.1/docs">in the repository</a> · <a href="${REPO}/releases/tag/v2.1.1">release notes</a></li>`,
         "</ul>",
       ].join("\n"),
     );
@@ -262,7 +421,7 @@ describe("renderDocsSite", () => {
     ].join("\n\n");
     const files = await render({
       ...siteFiles(),
-      "docs/README.md": page("Docs", "- [One](one.md)", "- [Two](two.md)", "## Part", "", links),
+      "docs/README.md": page("Docs", "## Part", "", links),
       "docs/one.md": page("One", "## Part", "", links),
       "packages/app/main.ts": "",
       "CONTRIBUTING.md":
@@ -288,7 +447,8 @@ describe("renderDocsSite", () => {
       `${up}one/`,
       `${up}two/`,
     ];
-    expect(articleLinks(files.get("index.html")!).slice(2)).toEqual(expected("", "./"));
+    // The README's article ends with the index's list of the pages.
+    expect(articleLinks(files.get("index.html")!)).toEqual([...expected("", "./"), "one/", "two/"]);
     expect(articleLinks(files.get("one/index.html")!)).toEqual(expected("../", "../"));
     for (const html of files.values()) {
       for (const address of addresses(html)) {
@@ -316,18 +476,22 @@ describe("renderDocsSite", () => {
       "[a](../CHANGELOG.md#features-1) [b](../CHANGELOG.md#features-2) [c](../CHANGELOG.md#after)";
     const files = await render({
       ...siteFiles(),
-      "docs/README.md": page("Docs", "- [One](one.md)", "- [Two](two.md)", "", links),
+      "docs/README.md": page("Docs", links),
       "CHANGELOG.md": changelog,
     });
     const blob = `${REPO}/blob/${SHA}/CHANGELOG.md`;
-    expect(articleLinks(files.get("index.html")!).slice(2)).toEqual([
+    expect(articleLinks(files.get("index.html")!).slice(0, -2)).toEqual([
       `${blob}#features-1`,
       `${blob}#features-2`,
       `${blob}#after`,
     ]);
     const refused = "[d](../CHANGELOG.md#features-3) [e](../CHANGELOG.md#not-a-heading)";
     expect(
-      await problemsOf({ "docs/README.md": page("Docs", refused), "CHANGELOG.md": changelog }),
+      await problemsOf({
+        "docs/README.md": page("Docs", refused),
+        [DOCS_INDEX]: docsTtl([]),
+        "CHANGELOG.md": changelog,
+      }),
     ).toEqual([
       'docs/README.md:5: a link to "../CHANGELOG.md#features-3": CHANGELOG.md has no such heading',
       'docs/README.md:5: a link to "../CHANGELOG.md#not-a-heading": CHANGELOG.md has no such heading',
@@ -374,6 +538,22 @@ describe("renderDocsSite", () => {
       "docs/versions.md": "",
       "docs/diagrams.md": "",
       "docs/Upper_Case.md": "",
+      [DOCS_INDEX]: docsTtl([
+        [
+          "pages",
+          "Pages",
+          [
+            "one.md",
+            "raw.md",
+            "2.2.0.md",
+            "2.2.md",
+            "versions.md",
+            "diagrams.md",
+            "Upper_Case.md",
+            "gone.md",
+          ],
+        ],
+      ]),
       "CONTRIBUTING.md": "# Contributing\n",
     });
     expect(problems).toEqual([
@@ -392,9 +572,10 @@ describe("renderDocsSite", () => {
       "docs/raw.md:5: raw HTML",
       "docs/two.md:1: the title is not followed by a paragraph, the page's description",
       "docs/versions.md: a page name the site keeps for a folder of its own",
-      "docs/drawn.md: README.md does not link to the page",
-      "docs/nested.md: README.md does not link to the page",
-      "docs/two.md: README.md does not link to the page",
+      "docs/drawn.md: docs/docs.ttl does not list the page",
+      "docs/nested.md: docs/docs.ttl does not list the page",
+      "docs/two.md: docs/docs.ttl does not list the page",
+      "docs/docs.ttl:57: lists gone.md, which is not in docs/",
       'docs/README.md:6: a link to "gone.md": no such page',
       'docs/README.md:7: a link to "#nowhere": no such heading',
       'docs/README.md:7: a link to "one.md#nowhere": one.md has no such heading',
@@ -415,8 +596,14 @@ describe("renderDocsSite", () => {
   it("says when there is no README, or a Mermaid block it cannot place", async () => {
     expect(await problemsOf({ "docs/one.md": page("One") })).toEqual([
       "docs/README.md: there is no README.md",
-      "docs/one.md: README.md does not link to the page",
+      "docs/docs.ttl: there is no docs.ttl, the docs' index",
     ]);
+    expect(
+      await problemsOf({
+        "docs/one.md": page("One"),
+        [DOCS_INDEX]: docsTtl([["pages", "Pages", ["one.md"]]]),
+      }),
+    ).toEqual(["docs/README.md: there is no README.md"]);
     expect(
       await problemsOf({
         ...siteFiles(),
@@ -445,9 +632,10 @@ describe("renderDocsSite", () => {
   });
 
   it("names each problem in its message", async () => {
-    const error = await render({ "docs/README.md": "# Docs\n\n## A\n\n## A\n" }).catch(
-      (thrown: DocsSiteError) => thrown,
-    );
+    const error = await render({
+      "docs/README.md": "# Docs\n\n## A\n\n## A\n",
+      [DOCS_INDEX]: docsTtl([]),
+    }).catch((thrown: DocsSiteError) => thrown);
     expect((error as Error).message).toBe(
       [
         "The docs cannot be built as pages (docs/markdown.md, The docs as a site):",
@@ -816,11 +1004,25 @@ describe("the repository's own docs", () => {
     const files = await renderDocsSite(options(io));
     const names = await io.pages();
     expect(names.length).toBeGreaterThan(30);
+    const { index } = readDocsIndex((await io.read(DOCS_INDEX))!);
+    const listed = index!.groups.flatMap((group) => group.pages.map((listed) => listed.name));
+    const htmlOf = (name: string) =>
+      files.get(name === "README.md" ? "index.html" : `${name.slice(0, -3)}/index.html`)!;
+    // The pages read in the index's order, the README first.
+    const order = ["README.md", ...listed];
+    order.forEach((name, place) => {
+      const next = order[place + 1];
+      if (next !== undefined)
+        expect(htmlOf(name), name).toContain(
+          `<a rel="next" href="${name === "README.md" ? "" : "../"}${next.slice(0, -3)}/">`,
+        );
+    });
+    expect(htmlOf(order.at(-1)!)).not.toContain('rel="next"');
     for (const name of names) {
-      const html = files.get(
-        name === "README.md" ? "index.html" : `${name.slice(0, -3)}/index.html`,
-      )!;
+      const html = htmlOf(name);
       const source = counted(parseDocument((await io.read(`docs/${name}`))!));
+      // The README's article lists every page the index lists, too.
+      if (name === "README.md") source.links += listed.length;
       expect(
         {
           links: articleLinks(html).filter((address) => !address.includes("diagrams/")).length,

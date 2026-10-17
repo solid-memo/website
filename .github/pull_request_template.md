@@ -23,7 +23,7 @@ and does not finish it, write Refs: instead, and check "One step" below.
 - [ ] **One step.** This pull request does not finish its issue, so it says `Refs:`, not `Closes:`. Leave this unchecked otherwise.
 - [ ] **Done**, as [AGENTS.md](https://github.com/solid-memo/website/blob/main/AGENTS.md) defines it: `npm run check` passes (lint, Markdown and spelling included), `npm run lint:reuse` too if a file was added, and `npm run crosscheck` too if `ns/` or `decks/` changed.
 - [ ] **Tests.** New and changed code has its tests, and every package stays at 100% coverage ([docs/testing.md](https://github.com/solid-memo/website/blob/main/docs/testing.md)).
-- [ ] **Docs.** The docs say what changed, and a new page in `docs/` is listed in [docs/README.md](https://github.com/solid-memo/website/blob/main/docs/README.md).
+- [ ] **Docs.** The docs say what changed, and a new page in `docs/` is listed in [docs/docs.ttl](https://github.com/solid-memo/website/blob/main/docs/docs.ttl).
 - [ ] **Languages.** A new or changed message is in every locale: en, sv, ko, de, es and fr (`packages/ui/src/i18n/`).
 - [ ] **Vocabulary and shapes.** Any change to `ns/` was agreed in an issue first; no published `ns/shapes/*/vN.ttl` or `decks/*/vN.ttl` was edited; generated files were regenerated, not edited.
 - [ ] **Breaking?** Nothing in [the public API](https://github.com/solid-memo/website/blob/main/docs/releasing.md#the-public-api) breaks, or a commit says so (`!` and a `BREAKING CHANGE:` footer). `npm run check:breaking` sees a line of `api/` that goes, but not a feature removed, nor a reader that reads less than before.

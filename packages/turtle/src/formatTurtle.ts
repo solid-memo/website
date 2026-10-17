@@ -8,10 +8,10 @@ import { Parser, type Quad, type Quad_Subject, type Term } from "n3";
 import { readTurtleTree, type TurtleFile } from "./rdf.ts";
 
 /**
- * The house style for the repository's hand-written Turtle (ns/, decks/
- * and the vocab package's fixtures/; a published version is formatted
- * once, before it is published, and never changes after, and vendor/ is
- * not ours, so it is never reformatted): `@base` first, prefixes aligned
+ * The house style for the repository's hand-written Turtle (ns/, decks/,
+ * the docs' index in docs/ and the vocab package's fixtures/; a
+ * published version is formatted once, before it is published, and never
+ * changes after, and vendor/ is not ours, so it is never reformatted): `@base` first, prefixes aligned
  * in one block, every subject on a line of its own, one predicate per line
  * indented four spaces, further objects aligned under the first, and a
  * blank line between subjects. Lists and blank nodes stay inline.
@@ -42,7 +42,9 @@ interface SubjectBlock {
  * The document reformatted. `fallbackBase` resolves relative IRIs when
  * the document declares no `@base`; it never appears in the output.
  * With `relativeTo`, IRIs under that folder are written relative to it
- * (the library index, which works wherever the site is hosted).
+ * (the library index, which works wherever the site is hosted); without
+ * it, a `@base` that is a folder (ending in `/`, as the docs' index has
+ * it) is that folder.
  */
 export function formatTurtle(
   source: string,
@@ -63,6 +65,7 @@ export function formatTurtle(
     if (prefixMatch !== null) prefixes.push([prefixMatch[1], prefixMatch[2]]);
   }
 
+  const folder = relativeTo ?? (declaresBase && base.endsWith("/") ? base : undefined);
   const comments = commentsBySubject(lines);
   const quads = new Parser({ baseIRI: base }).parse(source);
   const blocks = new Map<string, SubjectBlock>();
@@ -85,8 +88,8 @@ export function formatTurtle(
     }
     if (value === base) return "<>";
     if (value.startsWith(`${base}#`)) return `<#${value.slice(base.length + 1)}>`;
-    if (relativeTo !== undefined && value.startsWith(relativeTo)) {
-      return `<${value.slice(relativeTo.length)}>`;
+    if (folder !== undefined && value.startsWith(folder)) {
+      return `<${value.slice(folder.length)}>`;
     }
     return `<${value}>`;
   };

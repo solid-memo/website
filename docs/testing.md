@@ -486,8 +486,11 @@ ends with checks of the repository as a whole, plain Node scripts in
 - `check:boundaries` ([checkBoundaries.ts](../scripts/checkBoundaries.ts)):
   the imports between packages ([boundaries.md](boundaries.md)).
 - `check:docs` ([checkDocs.ts](../scripts/checkDocs.ts)): every page in
-  `docs/` is listed in [the docs' index](README.md), and every page the
-  index lists is there.
+  `docs/` is listed once in [the docs' index](docs.ttl), in one group,
+  and every page the index lists is there; no two positions in a group
+  are tied, and every page has a summary in English
+  ([markdown.md](markdown.md#the-docs-index)). For a page the index
+  does not list, it prints the block to add.
 - `check:dependencies` ([checkDependencies.ts](../scripts/checkDependencies.ts)):
   the app ships released versions of other code only, or the exceptions
   [vendor-code.md](vendor-code.md#maturity) explains.
@@ -510,9 +513,10 @@ CI's `docs` job:
   rows' spacing). `npm run lint:markdown` runs it alone. A
   placeholder such as `<title>` goes in backticks, or a renderer takes
   it for HTML and drops it.
-- **Spelling**: [cspell](https://cspell.org/) checks the Markdown and the
+- **Spelling**: [cspell](https://cspell.org/) checks the Markdown, the
   English messages (`packages/ui/src/i18n/en.json`, their text, not their
-  keys) in American English, the one standard
+  keys) and the docs' index (`docs/docs.ttl`, its text, not its prefixes
+  and addresses) in American English, the one standard
   ([style.md](style.md#language)). [cspell.config.yaml](../cspell.config.yaml)
   says what it reads and skips (`decks/`, `ns/`, the generated code, the
   other languages' catalogs), flags the British spellings its dictionary

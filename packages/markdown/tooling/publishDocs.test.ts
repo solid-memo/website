@@ -6,6 +6,7 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { DOCS_INDEX } from "./docsIndex.ts";
 import { DOCS_CSS, type DocsIo } from "./docsSite.ts";
 import type { DrawingBrowser, DrawingPage, Launch } from "./drawDiagrams.ts";
 import { type DocsSitePluginOptions, docsSitePlugin } from "./publishDocs.ts";
@@ -20,11 +21,34 @@ const diagram = (title: string) =>
     "```",
   ].join("\n");
 
-/** The docs in memory: a README, a page that links it and holds a diagram, and the stylesheet. */
+/** The docs' index, which lists the one page. */
+const INDEX = [
+  "@base <https://solid-memo.com/docs/> .",
+  "@prefix dcterms: <http://purl.org/dc/terms/> .",
+  "@prefix schema: <https://schema.org/> .",
+  "",
+  '<> a schema:Collection ; dcterms:title "Docs"@en .',
+  "",
+  "<#pages>",
+  "    a schema:Collection ;",
+  '    dcterms:title "Pages"@en ;',
+  "    schema:isPartOf <> ;",
+  "    schema:position 10 .",
+  "",
+  "<one.md>",
+  "    a schema:TechArticle ;",
+  "    schema:isPartOf <#pages> ;",
+  "    schema:position 10 ;",
+  '    dcterms:abstract "the first page."@en .',
+  "",
+].join("\n");
+
+/** The docs in memory: a README, a page that holds a diagram, the index that lists it, and the stylesheet. */
 function memoryDocs(files: Record<string, string> = {}): Record<string, string> {
   return {
     [DOCS_CSS]: "body{}",
-    "docs/README.md": "# Docs\n\nThe docs.\n\n- [One](one.md)\n",
+    [DOCS_INDEX]: INDEX,
+    "docs/README.md": "# Docs\n\nThe docs.\n",
     "docs/one.md": `# One\n\nThe first page.\n\n${diagram("Flow")}\n`,
     ...files,
   };
@@ -35,7 +59,7 @@ function memoryIo(files: Record<string, string>): DocsIo {
   return {
     pages: async () =>
       Object.keys(files)
-        .filter((path) => path.startsWith("docs/"))
+        .filter((path) => /^docs\/[^/]+\.md$/.test(path))
         .map((path) => path.slice("docs/".length)),
     read: async (path) => files[path] ?? null,
     kind: async (path) => (path in files ? "file" : null),
@@ -271,7 +295,7 @@ describe("docsSitePlugin, in dev", () => {
       "Content-Type",
       "text/plain; charset=utf-8",
     );
-    expect(problems.body).toContain("docs/two.md: README.md does not link to the page");
+    expect(problems.body).toContain("docs/two.md: docs/docs.ttl does not list the page");
 
     const io: DocsIo = {
       ...memoryIo(memoryDocs()),

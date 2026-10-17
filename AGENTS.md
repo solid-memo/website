@@ -12,7 +12,7 @@ This block is written and re-added by `turbo` before repository-scoped commands 
 
 # Solid Memo
 
-This repository's docs are indexed in [docs/README.md](docs/README.md); start with
+This repository's docs are indexed in [docs/docs.ttl](docs/docs.ttl); start with
 [docs/architecture.md](docs/architecture.md). How contributions are made
 (commit messages, one change per commit, pull requests) is in
 [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -29,6 +29,8 @@ This repository's docs are indexed in [docs/README.md](docs/README.md); start wi
   edited by hand: change `ns/` and run `npm run generate`.
 - **Turtle**: after editing a `.ttl` file, run `npm run format:turtle`; after
   changing `decks/`, `npm run library` ([docs/deck-library.md](docs/deck-library.md)).
+- **A new page** in `docs/` is listed in `docs/docs.ttl`, then
+  `npm run format:turtle` ([docs/markdown.md](docs/markdown.md#the-docs-index)).
 - **Coverage** is 100% per package; new code ships with its tests, and
   unreachable code is removed, not excluded ([docs/testing.md](docs/testing.md)).
 - **Formatting**: after editing TypeScript, JSON or CSS, run `npm run format`
@@ -44,4 +46,4 @@ This repository's docs are indexed in [docs/README.md](docs/README.md); start wi
   `REUSE.toml` under its license, which `npm run check:reuse` (in
   `npm run check`) checks ([docs/style.md](docs/style.md#licenses)).
 - **Spelling** is American English; `npm run lint:spelling`, part of
-  `npm run check`, checks Markdown and `en.json` ([docs/style.md](docs/style.md#language)).
+  `npm run check`, checks Markdown, `en.json` and `docs/docs.ttl` ([docs/style.md](docs/style.md#language)).

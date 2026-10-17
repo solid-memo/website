@@ -2,7 +2,8 @@
 
 Node-only Turtle tooling, over [n3](https://github.com/rdfjs/N3.js):
 parsing Turtle into quads, and the house-style formatter that
-`npm run format:turtle` runs over `ns/`, `decks/` and the fixtures.
+`npm run format:turtle` runs over `ns/`, `decks/`, `docs/` and the
+fixtures.
 
 ## Exports
 
@@ -13,9 +14,9 @@ parsing Turtle into quads, and the house-style formatter that
 
 ## Boundaries
 
-It imports no other package of the app. Only `vocab`'s `tooling/` and
-`shacl`'s `node/` may import it, and never code that runs in the
-browser ([boundaries.md](../../docs/boundaries.md)).
+It imports no other package of the app. Only `vocab`'s and
+`markdown`'s `tooling/` and `shacl`'s `node/` may import it, and never
+code that runs in the browser ([boundaries.md](../../docs/boundaries.md)).
 
 ## Tests
 

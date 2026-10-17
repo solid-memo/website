@@ -21,7 +21,8 @@
       "inputs": [
         "$TURBO_EXTENDS$",
         "$TURBO_ROOT$/ns/**",
-        "$TURBO_ROOT$/decks/**"
+        "$TURBO_ROOT$/decks/**",
+        "$TURBO_ROOT$/docs/**"
       ]
     }
   }

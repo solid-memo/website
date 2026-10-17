@@ -37,6 +37,11 @@ node only, at build time:
 - `drawDiagrams`: drawing them, light and dark, with the official
   Mermaid in Chromium through Playwright, cached between builds.
 - `slug`: a heading's id, as GitHub makes it.
+- `docsIndex`: the docs' index, `docs/docs.ttl`, read with
+  `readDocsIndex` into its groups and pages, every problem listed with
+  its line; what it lacks against the pages in `docs/`, and the block
+  to add for a page it does not list
+  ([markdown.md](../../docs/markdown.md#the-docs-index)).
 - `docsSite`: the docs folder as static pages, `renderDocsSite`, its
   links made to work where the pages are served and every problem
   listed with its file and line; `docs.css` is their stylesheet.
@@ -45,7 +50,8 @@ node only, at build time:
 
 ## Boundaries
 
-It imports nothing of the app's. `ui` may import it from `src/ui/`
+It imports nothing of the app's but `turtle`, from `tooling/` only, to
+read the docs' index. `ui` may import it from `src/ui/`
 only, `shacl` from `node/` only, and `web` from its build
 (`vite.config.ts`) and its build's test (`src/build.test.ts`) only. Its parser libraries
 (`mdast-util-from-markdown` and its extensions) are used in
