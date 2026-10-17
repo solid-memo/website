@@ -283,6 +283,11 @@ PATCH Swedish text (see above). The journeys need Docker and Chromium
 runs them on every pull request and every push to `main`. They block,
 as the blocking servers do.
 
+Further journeys go through:
+
+- reloading in the middle of a study session, which goes on with the
+  cards left and counts every answer once;
+
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
 replays it). The browser's time zone is one where it is about noon, far
