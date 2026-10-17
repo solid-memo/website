@@ -638,7 +638,13 @@ What holds today, and what does not, criterion by criterion.
   alone.
 - SHOULD, met — machine-readable metadata: `publiccode.yml`, checked in
   CI, whose `documentation` is the docs on the site, and `CITATION.cff`.
-- OPTIONAL, met — a domain of its own, solid-memo.com.
+- OPTIONAL, met — a domain of its own, solid-memo.com. The
+  vocabulary, the shapes and the decks live under it, so the data in
+  people's pods depends on it. Its risk is renewal: the maintainer
+  registers it and pays for it, one year at a time. GOVERNANCE.md says
+  who holds it, where its expiry is public, and that it stays renewed
+  for at least 3 years if the repository is archived
+  ([GOVERNANCE.md](../GOVERNANCE.md#the-domain)).
 - OPTIONAL, not met — regular talks at conferences.
 
 ### 15. Use a coherent style
@@ -690,8 +696,9 @@ The maintainer made these choices. Each is recorded where it applies.
 
 1. **Governance.** One maintainer decides, in public, and gives reasons.
    A regular contributor can be invited as a co-maintainer. If the
-   maintainer steps away, he hands the organization to a co-maintainer,
-   or the repository is archived ([GOVERNANCE.md](../GOVERNANCE.md)).
+   maintainer steps away, he hands the organization and the domain to
+   a co-maintainer, or the repository is archived and the domain stays
+   renewed for at least 3 years ([GOVERNANCE.md](../GOVERNANCE.md)).
 2. **Security contact.** GitHub's private vulnerability reporting only:
    no email address and no `/.well-known/security.txt`
    ([SECURITY.md](../SECURITY.md)).

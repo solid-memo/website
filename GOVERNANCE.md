@@ -1,7 +1,8 @@
 # Governance
 
-How Solid Memo is run: where it talks, who decides, how changes are
-merged and published, and what happens if the maintainer steps away.
+How Solid Memo is run: who holds its domain and pays for it, where it
+talks, who decides, how changes are merged and published, and what
+happens if the maintainer steps away.
 How to contribute is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Who maintains it
@@ -12,6 +13,31 @@ its contributors. Its one maintainer is Anton Wiklund
 ([@ixuz](https://github.com/ixuz)), who owns the
 [solid-memo](https://github.com/solid-memo) GitHub organization.
 [.github/CODEOWNERS](.github/CODEOWNERS) names the maintainers.
+
+## The domain
+
+The vocabulary, the shapes and the deck library live under
+<https://solid-memo.com/>, at `/ns/` and `/decks/`
+([docs/vocab.md](docs/vocab.md), [docs/deck-library.md](docs/deck-library.md)).
+Every pod that uses the app holds data that points at those addresses,
+so the domain has to stay with the project for as long as that data
+matters. If it lapsed, the addresses would stop resolving, and someone
+else could register the domain and serve different terms under them.
+
+The maintainer registered solid-memo.com in his own name, at One.com.
+It is renewed every year, automatically, and paid by him. Its expiry
+date is public, in the `.com` registry's
+[RDAP record](https://rdap.verisign.com/com/v1/domain/solid-memo.com)
+and in WHOIS. What happens to it if the maintainer steps away is
+[below](#if-the-maintainer-steps-away).
+
+## Costs
+
+The project pays for one thing: the domain. The code, its CI, the
+site's hosting on GitHub Pages and the archives cost nothing, as the
+repository is public. The maintainer pays for the domain himself, so
+Solid Memo is not yet self-sufficient: it depends on him for its one
+cost.
 
 ## Where the project talks
 
@@ -160,11 +186,16 @@ step down only needs to say so in an issue.
 ## If the maintainer steps away
 
 If the maintainer can no longer look after the project, he hands the
-solid-memo GitHub organization to an active co-maintainer, and says so
-in an issue. If there is none, the repository is archived, with a notice
-in the README saying so.
+solid-memo GitHub organization and the domain solid-memo.com to an
+active co-maintainer, and says so in an issue. If there is none, the
+repository is archived, with a notice in the README saying so. The
+maintainer then keeps the domain renewed, and the site at
+<https://solid-memo.com/> serving `/ns/` and `/decks/`, for at least 3
+years after the archiving, so that the data in people's pods keeps
+resolving while they move it or a fork takes over.
 The code, the vocabulary and the decks stay available under their
-licenses, and anyone may fork them.
+licenses, and anyone may fork them. A fork keeps the code, but not the
+addresses under solid-memo.com: those stay with the domain.
 
 ## Changing this document
 
