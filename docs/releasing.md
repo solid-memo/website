@@ -331,15 +331,32 @@ write access past them, not only this one. So this key stays the
 repository's only deploy key with write access: any other is added
 without "Allow write access".
 
-The job that holds the key also draws the docs' diagrams for the
-release's archive: it runs Chromium, through Playwright, and Mermaid on
-the repository's own docs, with the key configured for the push. That
-is accepted. Both are pinned development dependencies whose updates
-Renovate proposes and CI checks like any other change
-([vendor-code.md](vendor-code.md)), and they read only what is
-committed on `main`, where every change was reviewed. The other way
-was to build the archive in a job of its own, without the key, and
-attach it with the run's token; it was not taken, because
+The job holds the key for as little as it can. The checkout keeps no
+credentials, so the key is not in the git config while the job
+installs the dependencies and Chromium. `npm ci --ignore-scripts`
+runs no package's install script: the release needs none, and
+Chromium comes from the job's own step (`npx playwright install`), not
+from one. Only the step that runs semantic-release reads the secret.
+It writes the key to a file that git's `ssh` reads (`GIT_SSH_COMMAND`),
+with GitHub's host keys from its API, and removes the file when the
+step ends. semantic-release checks that it can push before anything
+else, and pushes in its prepare step, so the key stays there for the
+whole run.
+
+That run also draws the docs' diagrams for the release's archive: it
+runs Chromium, through Playwright, and Mermaid on the repository's own
+docs while the key is there. That is accepted. Both are pinned
+development dependencies whose updates Renovate proposes and CI checks
+like any other change ([vendor-code.md](vendor-code.md)), and they read
+only what is committed on `main`. Renovate merges its updates there
+with no person reviewing them
+([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)), so they reach
+`main` only once their version has been public for 3 days, which gives
+a bad version time to be found and pulled. Every action the workflows
+use is pinned to a commit, not to a tag, which could be moved
+(`npm run check:actions`, [testing.md](testing.md#the-repositorys-own-checks)).
+The other way was to build the archive in a job of its own, without the
+key, and attach it with the run's token. It was not taken, because
 semantic-release would then publish the release before its archive
 existed, and the deploy would serve the version without its docs.
 

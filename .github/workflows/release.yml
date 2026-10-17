@@ -103,15 +103,15 @@ jobs:
           fi
       # main's tip, not the commit CI checked: semantic-release releases
       # the branch, and pushes onto it. The whole history and every tag,
-      # to find the last release and the commits since. The key stays
-      # configured for semantic-release's push.
+      # to find the last release and the commits since. Without the key,
+      # and keeping no credentials: the key is given to semantic-release
+      # alone, below, not to the steps that install and download.
       - if: steps.key.outputs.set == 'true'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           fetch-depth: 0
-          ssh-key: ${{ secrets.SEMANTIC_RELEASE_KEY }}
-          persist-credentials: true
+          persist-credentials: false
       # Only a tip that CI passed on is released. When main has moved on
       # since the commit CI checked, the tip is released if CI has passed
       # on it too: a newer run may have been replaced while it waited for
@@ -151,29 +151,45 @@ jobs:
           fi
           echo "release=true" >> "$GITHUB_OUTPUT"
       - if: steps.tip.outputs.release == 'true'
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
+      # No package's install script runs here (docs/releasing.md#the-deploy-key):
+      # the release needs none, and Chromium comes from the action below.
       - if: steps.tip.outputs.release == 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
       # Chromium, which the release's prepare step draws the docs' Mermaid
       # diagrams in, for the archive the GitHub release carries
       # (npm run docs:archive).
       - if: steps.tip.outputs.release == 'true'
         uses: ./.github/actions/chromium
       # Pushes the release commit and the tag over SSH, with the key, and
-      # makes the GitHub release with the run's token.
+      # makes the GitHub release with the run's token. The key is written
+      # to a file for this step alone, which git's ssh reads
+      # (GIT_SSH_COMMAND), and removed when it ends; the git config never
+      # holds it. semantic-release checks it can push before anything
+      # else, and pushes in its prepare step, so the key is there for the
+      # whole run, the docs' archive included. GitHub's host keys come
+      # from its API, over HTTPS, as actions/checkout would have set them.
       - if: steps.tip.outputs.release == 'true'
         name: npx semantic-release
         env:
+          KEY: ${{ secrets.SEMANTIC_RELEASE_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY_URL: git@github.com:${{ github.repository }}.git
           GIT_AUTHOR_NAME: github-actions[bot]
           GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-        run: npx semantic-release --repository-url "$REPOSITORY_URL"
+        run: |
+          ssh="$(mktemp -d "$RUNNER_TEMP/release-ssh.XXXXXX")"
+          trap 'rm -rf "$ssh"' EXIT
+          (umask 077 && printf '%s\n' "$KEY" > "$ssh/key")
+          unset KEY
+          gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$ssh/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i $ssh/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh/known_hosts -o StrictHostKeyChecking=yes"
+          npx semantic-release --repository-url "$REPOSITORY_URL"
       # The archive of the version's docs, attested as made by this
       # workflow on main, which the deploy checks before it serves it
       # (docs/deployment.md#each-releases-docs). semantic-release makes and
@@ -181,7 +197,7 @@ jobs:
       # fails, run the docs job by hand with the tag, which renders and
       # attests it again.
       - if: steps.tip.outputs.release == 'true' && hashFiles('release-assets/docs-*.tar.gz') != ''
-        uses: actions/attest@v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: release-assets/docs-*.tar.gz
 
@@ -259,7 +275,7 @@ jobs:
             echo "latest=$([ "$TAG" = "$newest" ] && echo true || echo false)"
           } >> "$GITHUB_OUTPUT"
       - if: steps.release.outputs.attach == 'true'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag }}
           persist-credentials: false
@@ -273,12 +289,13 @@ jobs:
             exit 1
           fi
       - if: steps.release.outputs.attach == 'true'
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
+      # As in the release job, which this renders the docs as.
       - if: steps.release.outputs.attach == 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
       - if: steps.release.outputs.attach == 'true'
         uses: ./.github/actions/chromium
       - if: steps.release.outputs.attach == 'true'
@@ -289,7 +306,7 @@ jobs:
       # Attested before it is uploaded, so the deploy never finds it
       # without its attestation.
       - if: steps.release.outputs.attach == 'true'
-        uses: actions/attest@v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: release-assets/docs-${{ steps.release.outputs.version }}.tar.gz
       # The label release.config.mjs gives it; an archive without an

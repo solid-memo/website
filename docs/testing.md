@@ -522,6 +522,13 @@ ends with checks of the repository as a whole, plain Node scripts in
 - `check:reuse` ([checkReuse.ts](../scripts/checkReuse.ts)): every
   library deck version is licensed in [REUSE.toml](../REUSE.toml) as its
   own `dcterms:license` says ([style.md](style.md#licenses)).
+- `check:actions` ([checkActions.ts](../scripts/checkActions.ts)): every
+  action a workflow or a local action uses from outside the repository
+  is pinned to a full commit SHA, its version in a comment after it
+  (`uses: actions/checkout@<sha> # v7.0.1`), as Renovate keeps them
+  ([releasing.md](releasing.md#the-deploy-key)). A tag can be moved to
+  other code, a commit cannot. Local actions (`./.github/actions/`) are
+  the repository's own.
 - `check:scripts`: these scripts' own tests and types, at 100%
   coverage like a package's (`scripts/vitest.config.ts`).
 
