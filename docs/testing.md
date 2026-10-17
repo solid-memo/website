@@ -367,6 +367,15 @@ the journey. A journey
 never asserts which card a shuffled queue shows, only how many there
 are.
 
+**Accessibility.** Each step's end checks the screen it leaves the app
+on with [axe](https://github.com/dequelabs/axe-core), in the light and
+the dark theme, against WCAG 2.0, 2.1 and 2.2 at levels A and AA
+(`App.step`, [harness/accessibility.ts](../e2e/journeys/harness/accessibility.ts)).
+A violation fails the journey, which goes on to its end so that every
+screen is checked. A violation let pass is listed in that file's
+`KNOWN_EXCEPTIONS`, with its reason. The Solid server's own pages, its
+login, are not checked.
+
 **When a journey fails**, the CI job's summary names it, the step it
 failed in (the spec's numbered step › the page object's action) and the
 error, and the browser it failed in. The job's
@@ -383,7 +392,9 @@ error, and the browser it failed in. The job's
   - `diagnostics.json`: console, page errors, failed and refused
     requests, the seed, the time zone;
   - `css.log`: the server's log for the journey's time;
-  - `pod-dump.ttl`: every document in the journey's pod when it failed.
+  - `pod-dump.ttl`: every document in the journey's pod when it failed;
+  - `<step> · accessibility, <theme>.json`: what axe found on a step's
+    screen, when it found a violation.
   Open the report with `npx playwright show-report <dir>`.
 - `logs/css.log`: the server's whole log.
 

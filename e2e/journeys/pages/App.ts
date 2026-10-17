@@ -2,8 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type CDPSession, type Page, type TestInfo } from "@playwright/test";
 import type { Diagnostics } from "../fixtures.ts";
+import { SCHEMES, unexcused, violationLines, WCAG_TAGS } from "../harness/accessibility.ts";
 import { text, textPattern, type Locale } from "../harness/strings.ts";
 import { CardCreator } from "./CardCreator.ts";
 import { CardEditor } from "./CardEditor.ts";
@@ -130,7 +132,8 @@ export class App {
   /**
    * One step of a journey, as the journey's spec names it ("03 · Set new
    * cards per day to 1"): a group in the report and the trace, with a
-   * screenshot of where it left the app.
+   * screenshot of where it left the app, and that screen checked for
+   * accessibility.
    */
   async step(title: string, body: () => Promise<void>): Promise<void> {
     await test.step(title, async () => {
@@ -141,6 +144,41 @@ export class App {
         body: await this.page.screenshot(),
         contentType: "image/png",
       });
+      await this.checkAccessibility(title);
     });
+  }
+
+  /**
+   * Checks the screen a step left the app on with axe, in each theme
+   * (harness/accessibility.ts): a violation fails the journey once it
+   * ends, as a soft expect, and what axe said of it is attached. A screen
+   * of the Solid server's own (its login) is not the app's to check.
+   */
+  private async checkAccessibility(title: string): Promise<void> {
+    const app = new URL(String(this.testInfo.project.use.baseURL)).origin;
+    if (new URL(this.page.url()).origin !== app) return;
+    const root = this.page.locator("html");
+    const shown = await root.getAttribute("data-theme");
+    for (const scheme of SCHEMES) {
+      // The stylesheet's colors follow the root's data-theme alone (docs/theme.md).
+      await root.evaluate((html, theme) => html.setAttribute("data-theme", theme), scheme);
+      const { violations } = await new AxeBuilder({ page: this.page })
+        .withTags(WCAG_TAGS)
+        .analyze();
+      const left = unexcused(violations);
+      if (left.length === 0) continue;
+      const name = `${title} · accessibility, ${scheme}.json`;
+      await this.testInfo.attach(name, {
+        body: JSON.stringify(left, null, 2),
+        contentType: "application/json",
+      });
+      expect
+        .soft(violationLines(left), `accessibility violations, in the ${scheme} theme (${name})`)
+        .toEqual([]);
+    }
+    await root.evaluate((html, theme) => {
+      if (theme === null) html.removeAttribute("data-theme");
+      else html.setAttribute("data-theme", theme);
+    }, shown);
   }
 }

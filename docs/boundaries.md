@@ -102,6 +102,7 @@ used nowhere else):
 | `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | never in the browser; in `e2e-pod`, the server contract and the tests |
 | `fake-indexeddb` | `browser`, `composition` | tests only: IndexedDB in node, for the guest's pod's store |
 | `@playwright/test` | `e2e-journeys` | drives the built app in Chromium, Firefox and WebKit; the harness also talks to the Solid server with its request API |
+| `@axe-core/playwright` | `e2e-journeys` | `pages/App.ts` only: checks the screen each journey step ends on for accessibility ([testing.md](testing.md#user-journeys)) |
 | `mermaid`, `playwright` | `markdown` | `tooling/drawDiagrams.ts` only, never in the browser (the check holds both node-only): Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, so Mermaid's packages before 1.0.0 are not shipped ([vendor-code.md](vendor-code.md#maturity)) |
 
 ## Files without a vendor library

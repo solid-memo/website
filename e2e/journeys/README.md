@@ -11,8 +11,9 @@ takes, logging in to a Community Solid Server 7 started in Docker
 - `pages/`: one page object per screen, and `flows/`: steps several
   journeys share.
 - `harness/`: the server, its accounts, the pod's dump on a failure,
-  the seeded random, and the app's own text (`strings.ts`), so a
-  journey finds a button by what the user reads.
+  the seeded random, the app's own text (`strings.ts`), so a
+  journey finds a button by what the user reads, and the accessibility
+  check each step ends with (`accessibility.ts`).
 - `css/`: the Community Solid Server behind TLS (`compose.yml`).
 
 It exports nothing; no package may import it.
@@ -20,7 +21,7 @@ It exports nothing; no package may import it.
 ## Boundaries
 
 It may import `ui`, from `harness/strings.ts` only, for the app's
-messages, and `@playwright/test`
+messages, `@playwright/test` and `@axe-core/playwright`
 ([boundaries.md](../../docs/boundaries.md)).
 
 ## Run and test
