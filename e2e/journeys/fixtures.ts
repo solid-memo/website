@@ -7,6 +7,7 @@ import { readFile } from "node:fs/promises";
 import { test as base, expect, type Page, type TestInfo } from "@playwright/test";
 import { createAccount, type CssAccount } from "./harness/cssAccount.ts";
 import { CSS_LOG } from "./harness/cssServer.ts";
+import { otherApp, type OtherApp } from "./harness/otherApp.ts";
 import { dumpPod } from "./harness/podDump.ts";
 import { seedRandom } from "./harness/seededRandom.ts";
 import { App } from "./pages/App.ts";
@@ -18,6 +19,8 @@ import { App } from "./pages/App.ts";
  * - `runId`, eight hex digits naming what this run makes (decks, pods);
  * - `account`, a fresh account, pod and WebID on it; when the journey
  *   fails, its pod's content is attached (pod-dump.ttl);
+ * - `otherApp`, an app other than Solid Memo writing to that pod for the
+ *   WebID (harness/otherApp.ts);
  * - `app`, the page objects (pages/App.ts), journey steps among them.
  *
  * And, unasked: Math.random seeded (JOURNEY_SEED, else from the title and
@@ -31,6 +34,7 @@ interface Fixtures {
   server: string;
   runId: string;
   account: CssAccount;
+  otherApp: OtherApp;
   app: App;
   diagnostics: Diagnostics;
 }
@@ -84,6 +88,15 @@ export const test = base.extend<Fixtures>({
         );
         await testInfo.attach("pod-dump.ttl", { body: dump, contentType: "text/turtle" });
       }
+    } finally {
+      await api.dispose();
+    }
+  },
+
+  otherApp: async ({ server, account, playwright }, use) => {
+    const api = await playwright.request.newContext({ ignoreHTTPSErrors: true });
+    try {
+      await use(otherApp(api, server, account));
     } finally {
       await api.dispose();
     }

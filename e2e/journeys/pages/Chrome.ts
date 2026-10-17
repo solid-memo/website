@@ -117,6 +117,42 @@ export class Chrome extends Screen {
     await expect(this.breadcrumbs.locator('[aria-current="page"]')).toHaveText(this.t(key));
   }
 
+  /**
+   * The instance bar names the instance open, `name`; with `folder`, its
+   * "Open in your Pod" leads to that folder, the instance's own.
+   */
+  async expectInstance(name: string, folder?: string): Promise<void> {
+    await expect(this.instanceNav.getByText(name, { exact: true })).toBeVisible();
+    if (folder !== undefined)
+      await expect(
+        this.instanceNav.getByRole("link", { name: this.t("instanceBar.openInPod") }),
+      ).toHaveAttribute("href", folder);
+  }
+
+  /** Follows the instance bar's "Switch instance" to the instance picker. */
+  async switchInstance(): Promise<void> {
+    await this.intent("Switch instance", async () => {
+      await this.instanceNav
+        .getByRole("link", { name: this.t("instanceBar.switch"), exact: true })
+        .click();
+      await this.app.instancePicker.expectShown();
+    });
+  }
+
+  /**
+   * Opens Solid Memo at its own address, no screen named in it, as a
+   * bookmark does: the session is restored and the app chooses where to
+   * open by how many instances there are (one opens, more are offered).
+   */
+  async openAtItsAddress(): Promise<void> {
+    await this.intent("Open Solid Memo at its address", async () => {
+      await this.page.goto("./");
+      await expect(this.breadcrumbs.locator('[aria-current="page"]')).toBeVisible({
+        timeout: 30_000,
+      });
+    });
+  }
+
   async openStatistics(): Promise<void> {
     await this.intent("Open Statistics", () =>
       this.instanceNav.getByRole("link", { name: this.t("instanceBar.statistics") }).click(),

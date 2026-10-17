@@ -40,7 +40,7 @@ export function containedIn(jsonld: unknown, container: string): string[] {
 }
 
 /** A token for the account's WebID, by its client credentials. */
-async function bearer(
+export async function bearer(
   api: APIRequestContext,
   server: string,
   account: CssAccount,

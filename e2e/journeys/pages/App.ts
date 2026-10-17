@@ -21,6 +21,7 @@ import { DeckList } from "./DeckList.ts";
 import { DraftEditor } from "./DraftEditor.ts";
 import { ImportUrl } from "./ImportUrl.ts";
 import { InstanceCreator } from "./InstanceCreator.ts";
+import { InstancePicker } from "./InstancePicker.ts";
 import { Library } from "./Library.ts";
 import { LibraryDeck } from "./LibraryDeck.ts";
 import { LibraryPreview } from "./LibraryPreview.ts";
@@ -47,6 +48,7 @@ export class App {
   readonly onboarding = new Onboarding(this);
   readonly cssLogin = new CssLogin(this);
   readonly instanceCreator = new InstanceCreator(this);
+  readonly instancePicker = new InstancePicker(this);
   readonly decks = new DeckList(this);
   readonly groups = new DeckGroups(this);
   readonly deckCreator = new DeckCreator(this);
