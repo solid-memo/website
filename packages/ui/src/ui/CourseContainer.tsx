@@ -10,15 +10,6 @@ import { CourseScreen } from "./CourseScreen";
 import { LibraryUpgradeContainer } from "./LibraryUpgradeContainer";
 
 /**
- * The key a course as the learner has it (UseCases.getCourse) is queried
- * under: Workspace reads it to resolve the course routes, and the
- * course's screens refresh it after what they write.
- */
-export function courseKey(deckUrl: string): string[] {
-  return ["course", deckUrl];
-}
-
-/**
  * Where a chapter of the course is taken up: its steps, from the first
  * not done, or its final review once they all are and it is not yet
  * completed. A completed chapter opens at its steps again, for practice.

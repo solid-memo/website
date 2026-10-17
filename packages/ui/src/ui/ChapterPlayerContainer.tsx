@@ -9,7 +9,7 @@ import { choicesOf, type Choice, type CourseChapter } from "@solid-memo/domain/c
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryCard } from "@solid-memo/domain/library";
 import { ChapterPlayerScreen, type StepPhase } from "./ChapterPlayerScreen";
-import { courseKey } from "./CourseContainer";
+import { courseKey } from "./courseKey";
 import { useClock } from "./courseLinks";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useI18n } from "./i18n";

@@ -9,7 +9,7 @@ import { choicesOf, finalReviewQueue, type CourseChapter } from "@solid-memo/dom
 import type { Instance } from "@solid-memo/domain/instance";
 import { useCourseAnswer } from "./ChapterPlayerContainer";
 import { ChapterReviewScreen, type Completion } from "./ChapterReviewScreen";
-import { courseKey } from "./CourseContainer";
+import { courseKey } from "./courseKey";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useCourseLinks } from "./courseLinks";
 import { useI18n } from "./i18n";

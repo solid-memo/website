@@ -36,6 +36,19 @@ Biome's recommended lint rules are on. A rule that fires on code that is
 right as it is, is turned off in `biome.jsonc` with its reason beside it;
 a problem it finds is fixed.
 
+Rules beyond the recommended ones are on as well:
+
+- `noImportCycles` fails on modules that import each other in a circle,
+  where one may read an import before it is set: what both need moves to
+  a module of its own.
+- `noExcessiveCognitiveComplexity` fails on a function too tangled to
+  follow, as Biome scores its
+  [cognitive complexity](https://biomejs.dev/linter/rules/no-excessive-cognitive-complexity/).
+  Its limit, `maxAllowedComplexity`, started at the score of the most
+  complex function there was. A change that splits up the functions over
+  a lower limit lowers it too, so the code only gets simpler; a function
+  is split up, never excused with a `biome-ignore` comment.
+
 **In an editor**, install Biome's extension (`biomejs.biome` for VS Code,
 which [`.vscode/extensions.json`](../.vscode/extensions.json) and the dev
 container recommend; others are listed on [biomejs.dev](https://biomejs.dev/)),
