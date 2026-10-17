@@ -15,7 +15,7 @@ import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
-import { makeUseCasesFake, statisticsReportOf, QUEUE_PREFERENCES } from "../test/useCasesFake";
+import { makeUseCasesFake, statisticsReportOf, QUEUE_DEFAULTS } from "../test/useCasesFake";
 import { RepoUrl } from "./ReportMistake";
 
 const instance: Instance = {
@@ -72,12 +72,24 @@ function renderContainer(useCases: UseCases, random: () => number = () => 0) {
   return { onExit, queryClient, unmount: view.unmount };
 }
 
+/** Reveal the current card, once the last answer is saved. */
+async function reveal() {
+  const button = await screen.findByRole("button", { name: "Reveal" });
+  await waitFor(() => expect(button).toHaveAttribute("aria-disabled", "false"));
+  fireEvent.click(button);
+}
+
 /** Reveal the current card and grade it. */
 async function answer(grade: string) {
-  const reveal = await screen.findByRole("button", { name: "Reveal" });
-  await waitFor(() => expect(reveal).toHaveAttribute("aria-disabled", "false"));
-  fireEvent.click(reveal);
+  await reveal();
   fireEvent.click(screen.getByRole("button", { name: grade }));
+}
+
+/** The Undo button, once it can be pressed: when the answer it undoes is saved. */
+async function undoButton() {
+  const undo = await screen.findByRole("button", { name: "Undo last answer" });
+  await waitFor(() => expect(undo).toHaveAttribute("aria-disabled", "false"));
+  return undo;
 }
 
 describe("StudyContainer", () => {
@@ -88,7 +100,7 @@ describe("StudyContainer", () => {
           due: [makePrompt("card-a", "front-a")],
           newPrompts: [makePrompt("card-b", "front-b")],
           studiedToday: 0,
-          ...QUEUE_PREFERENCES,
+          ...QUEUE_DEFAULTS,
         })),
       }),
     );
@@ -104,7 +116,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("mizu", "水"), makePrompt("mine", "火")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       reportPlace: vi.fn(async () => ({ library: true as const })),
       deckRelease: vi.fn(async (studied: Deck) =>
@@ -160,7 +172,7 @@ describe("StudyContainer", () => {
         due: [reverse],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -194,7 +206,7 @@ describe("StudyContainer", () => {
           ],
           newPrompts: [makePrompt("card-x", "new-x"), makePrompt("card-y", "new-y")],
           studiedToday: 0,
-          ...QUEUE_PREFERENCES,
+          ...QUEUE_DEFAULTS,
         })),
       }),
     );
@@ -225,7 +237,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [makePrompt("card-b", "front-b")],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -260,7 +272,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       recordReview: vi.fn(async () => {
         throw new Error("review save failed");
@@ -282,7 +294,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     render(
@@ -327,7 +339,7 @@ describe("StudyContainer", () => {
             due: [],
             newPrompts: [],
             studiedToday: 0,
-            ...QUEUE_PREFERENCES,
+            ...QUEUE_DEFAULTS,
           }),
         ),
       }),
@@ -347,7 +359,7 @@ describe("StudyContainer", () => {
         ],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases, () => 0);
@@ -372,13 +384,132 @@ describe("StudyContainer", () => {
     expect(useCases.recordReview).toHaveBeenCalledTimes(4);
   });
 
+  it("undoes the last answer, one step: its card up again, the copy put back gone, the count as it was", async () => {
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [
+          makePrompt("card-a", "front-a"),
+          makePrompt("card-b", "front-b"),
+          makePrompt("card-c", "front-c"),
+        ],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+      })),
+    });
+    renderContainer(useCases, () => 0);
+
+    expect(await screen.findByText("front-a")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Undo last answer" })).toBeNull();
+    await answer("1 — Wrong");
+    expect(await screen.findByText("Card 2 of 4", { exact: false })).toBeInTheDocument();
+    const { undo } = await vi.mocked(useCases.recordReview).mock.results[0]!.value;
+    fireEvent.click(await undoButton());
+
+    expect(await screen.findByText("front-a")).toBeInTheDocument();
+    expect(useCases.undoReview).toHaveBeenCalledWith(instance.url, deck, undo);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Card 1 of 3. Your last answer was undone.",
+    );
+    expect(screen.queryByRole("button", { name: "Undo last answer" })).toBeNull();
+    await answer("4 — Good");
+    expect(await screen.findByText("front-b")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(/^Card 2 of 3$/);
+  });
+
+  it("undoes the answer that ended the session", async () => {
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a")],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+      })),
+    });
+    renderContainer(useCases);
+    await answer("4 — Good");
+    expect(await screen.findByText("Session finished — all cards reviewed.")).toBeInTheDocument();
+    await undoButton();
+    fireEvent.keyDown(document.activeElement!, { key: "u" });
+    expect(await screen.findByText("front-a")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Card 1 of 1");
+  });
+
+  it("stays where it is and shows the error when undoing fails", async () => {
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a"), makePrompt("card-b", "front-b")],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+      })),
+      undoReview: vi.fn(async () => {
+        throw new Error("Pod unreachable");
+      }),
+    });
+    renderContainer(useCases);
+    await answer("4 — Good");
+    expect(await screen.findByText("front-b")).toBeInTheDocument();
+    const undo = await undoButton();
+    undo.focus();
+    fireEvent.click(undo);
+    expect(await screen.findByText("Pod unreachable")).toBeInTheDocument();
+    expect(screen.getByText("front-b")).toBeInTheDocument();
+    // Pressed, it keeps the focus, and with it the screen's keys.
+    expect(document.activeElement).toBe(undo);
+  });
+
+  it("shows each grade's interval from the states its queue brings, then as the session's answers and undos leave them", async () => {
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a")],
+        newPrompts: [makePrompt("card-b", "front-b")],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+        states: [
+          {
+            cardId: "card-a",
+            direction: "front-to-back" as const,
+            easeFactor: 2.5,
+            intervalDays: 6,
+            repetitions: 2,
+            due: "2026-09-21",
+            firstReviewedAt: "2026-09-01T10:00:00.000Z",
+            lastReviewedAt: "2026-09-15T10:00:00.000Z",
+            formatVersion: 2,
+          },
+        ],
+      })),
+    });
+    renderContainer(useCases, () => 0);
+    const good = () => screen.getByRole("button", { name: "4 — Good" });
+
+    await screen.findByText("front-a");
+    await reveal();
+    expect(good()).toHaveAccessibleDescription("15 days");
+    fireEvent.click(screen.getByRole("button", { name: "1 — Wrong" }));
+    // A new prompt: its first good grade gives a day.
+    await screen.findByText("front-b");
+    await reveal();
+    expect(good()).toHaveAccessibleDescription("1 day");
+    fireEvent.click(good());
+    // The failed card again, as its answer left it (the fake's state: one repetition).
+    await screen.findByText("front-a");
+    await reveal();
+    expect(good()).toHaveAccessibleDescription("6 days");
+    fireEvent.click(await undoButton());
+    await screen.findByText("front-b");
+    await reveal();
+    expect(good()).toHaveAccessibleDescription("1 day");
+  });
+
   it("repeats the only remaining card immediately until it passes", async () => {
     const useCases = makeUseCasesFake({
       getStudyQueue: vi.fn(async () => ({
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -401,7 +532,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -417,6 +548,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [makePrompt("card-b", "front-b")],
         studiedToday: 0,
+        ...QUEUE_DEFAULTS,
         prefs,
       })),
     });
@@ -442,7 +574,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a"), makePrompt("card-b", "front-b")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       getPreferences: vi.fn(async () => ({
         ...DEFAULT_PREFERENCES,
@@ -480,7 +612,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -503,7 +635,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     const { queryClient, unmount } = renderContainer(useCases);
@@ -523,7 +655,7 @@ describe("StudyContainer keeping the deck's schedule", () => {
         due: [makePrompt("card-a", "front-a"), makePrompt("card-b", "front-b")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
 
@@ -627,7 +759,7 @@ describe("StudyContainer leaving for the deck list", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       getStudyCounts: vi.fn(async () => ({ dueCount: 0, newCount: 0 })),
     });
@@ -683,7 +815,7 @@ describe("StudyContainer leaving for the deck list", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       getStatistics: vi.fn(async () => studied),
     });

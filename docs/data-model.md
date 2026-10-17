@@ -905,12 +905,16 @@ data, since nothing could rebuild it.
   the session or the statistics page. An answer still queued when the
   tab closes is lost; the review it belongs to is not.
 - **Resetting the day removes that deck's answers of the day**
-  (`removeDay`: read, remove, save with If-Match, again on 412).
+  (`removeDay`: read, remove, save with If-Match, again on 412), and
+  **undoing an answer in a session removes that one answer** by its id
+  (`removeAnswer`, the same way), or drops it while it still waits to be
+  added ([srs.md](srs.md#undoing-the-last-answer)). Nothing else
+  removes answers.
 - **A card moved to another deck leaves its answers behind.** The
   [Studio](studio.md#moving-and-copying-cards) moves or copies cards
-  between decks of an instance. The log is never rewritten: past
-  answers keep naming the deck and the card they were given to, in the
-  source. In the target the card's history starts again, though its
+  between decks of an instance. The log is never rewritten by a move:
+  past answers keep naming the deck and the card they were given to, in
+  the source. In the target the card's history starts again, though its
   review state may come along. A copy's history starts in the target;
   the original keeps its own.
 - **Read whole by the Studio** (`loadAnswerLog`): every month, for a

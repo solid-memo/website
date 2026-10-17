@@ -1214,12 +1214,20 @@
     "finished": "Sesión terminada — has repasado todas las tarjetas.",
     "position": "Tarjeta {position} de {total}",
     "putBack": "Volverás a ver la última tarjeta más adelante en esta sesión.",
+    "undone": "Se ha deshecho tu última respuesta.",
     "reveal": "Mostrar respuesta",
     "gradePrompt": "¿Qué tal lo recordabas?",
+    "interval": {
+      "one": "{count} día",
+      "many": "{count} de días",
+      "other": "{count} días"
+    },
     "keys": {
       "reveal": "Pulsa la barra espaciadora para mostrar la respuesta.",
-      "grade": "Pulsa de {first} a {last} para responder."
+      "grade": "Pulsa de {first} a {last} para responder.",
+      "undo": "Pulsa U para deshacer la última respuesta."
     },
+    "undo": "Deshacer la última respuesta",
     "preparing": "Preparando tu sesión de estudio…",
     "quality": {
       "blackout": "0 — En blanco",

@@ -13,7 +13,7 @@ import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
-import { makeUseCasesFake, QUEUE_PREFERENCES } from "../test/useCasesFake";
+import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
 import { routeToHash, statisticsHref } from "./router";
 import { CARDS_PER_PAGE } from "./BrowserScreen";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
@@ -1960,7 +1960,7 @@ describe("Workspace", () => {
           ],
           newPrompts: [],
           studiedToday: 0,
-          ...QUEUE_PREFERENCES,
+          ...QUEUE_DEFAULTS,
         })),
       }),
     );
@@ -1991,7 +1991,7 @@ describe("Workspace", () => {
           due: [],
           newPrompts: [{ card: dueCard, direction: "front-to-back" as const }],
           studiedToday: 0,
-          ...QUEUE_PREFERENCES,
+          ...QUEUE_DEFAULTS,
         })),
       }),
     );
@@ -2010,7 +2010,7 @@ describe("Workspace", () => {
           due: [{ card: dueCard, direction: "front-to-back" as const }],
           newPrompts: [],
           studiedToday: 0,
-          ...QUEUE_PREFERENCES,
+          ...QUEUE_DEFAULTS,
         })),
       }),
     );

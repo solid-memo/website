@@ -12,7 +12,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { DeckTree, DeckTreeEdit, TreeNode } from "@solid-memo/domain/deckTree";
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { AppError } from "@solid-memo/domain/appError";
-import { makeUseCasesFake, QUEUE_PREFERENCES } from "../test/useCasesFake";
+import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
 import { courseHref, deckHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, makeCourse } from "../test/course";
 
@@ -415,7 +415,7 @@ describe("DeckListContainer", () => {
         due: [prompt],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     const { onStudyDeck } = renderContainer(useCases);
@@ -462,7 +462,7 @@ describe("DeckListContainer", () => {
     await waitFor(() => {
       expect(useCases.getStudyQueue).toHaveBeenCalledOnce();
     });
-    resolveQueue({ due: [], newPrompts: [], studiedToday: 0, ...QUEUE_PREFERENCES });
+    resolveQueue({ due: [], newPrompts: [], studiedToday: 0, ...QUEUE_DEFAULTS });
     expect(await screen.findByText("Done for today")).toBeInTheDocument();
     expect(screen.queryByText("Checking what is due")).toBeNull();
   });
@@ -474,7 +474,7 @@ describe("DeckListContainer", () => {
         due: [],
         newPrompts: [prompt],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     const { onStudyDeck } = renderContainer(useCases);

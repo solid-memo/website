@@ -40,8 +40,14 @@ export function statisticsReportOf(
   };
 }
 
-/** The preferences a study queue comes with, when a test has nothing to say of them: the defaults. */
-export const QUEUE_PREFERENCES: Pick<StudySessionQueue, "prefs"> = { prefs: DEFAULT_PREFERENCES };
+/**
+ * What a study queue comes with besides its prompts, when a test has
+ * nothing to say of it: the default preferences, and no states.
+ */
+export const QUEUE_DEFAULTS: Pick<StudySessionQueue, "prefs" | "states"> = {
+  prefs: DEFAULT_PREFERENCES,
+  states: [],
+};
 
 /** A complete UseCases fake; override the methods a test cares about. */
 export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
@@ -290,20 +296,27 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       due: [],
       newPrompts: [],
       studiedToday: 0,
-      ...QUEUE_PREFERENCES,
+      ...QUEUE_DEFAULTS,
     })),
     resetStudyDay: vi.fn(async () => 0),
-    recordReview: vi.fn(async () => ({
-      cardId: "card-1",
-      direction: "front-to-back" as const,
-      easeFactor: 2.6,
-      intervalDays: 1,
-      repetitions: 1,
-      due: "2026-09-22",
-      firstReviewedAt: "2026-09-21T10:00:00.000Z",
-      lastReviewedAt: "2026-09-21T10:00:00.000Z",
-      formatVersion: 2,
-    })),
+    // The state of the prompt answered, as a first answer leaves it.
+    recordReview: vi.fn(async (_instanceUrl, _deck, prompt) => {
+      const key = { cardId: prompt.card.id, direction: prompt.direction };
+      return {
+        state: {
+          ...key,
+          easeFactor: 2.6,
+          intervalDays: 1,
+          repetitions: 1,
+          due: "2026-09-22",
+          firstReviewedAt: "2026-09-21T10:00:00.000Z",
+          lastReviewedAt: "2026-09-21T10:00:00.000Z",
+          formatVersion: 2,
+        },
+        undo: { key, before: null, answer: { id: "answer-1", studyDay: "2026-09-21" } },
+      };
+    }),
+    undoReview: vi.fn(async (_instanceUrl, _deck, undo) => undo.before),
     // As the real ones relate to them: the counts of the queue, the check of the full check.
     getStudyCounts: vi.fn(async (instanceUrl, deck, now) => {
       const queue = await fake.getStudyQueue(instanceUrl, deck, now);

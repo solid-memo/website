@@ -247,6 +247,14 @@ the session grades with (`GradeBasis`, recordReview's `known`). A failed save ke
 advances on success. Ending the session invalidates the review caches so
 other screens see fresh state.
 
+Under each grade button is the interval that grade would give (`applySm2`
+from the prompt's state, or the initial state for a new prompt): "1 day",
+"6 days", "15 days". The grade's label stays the button's name; the
+interval is its description. The states come with the session's queue,
+as `getStudyQueue` read them to build it, with no read of their own; the
+session keeps each answer's new state, so a card put back shows the
+intervals its first answer left it with.
+
 ### What a grade costs
 
 A grade writes one state: a PATCH of the reviews document, `If-Match`
@@ -267,6 +275,35 @@ a grade of the same card made meanwhile is built on, not undone.
 `MEASURE_GRADES=1` measures the requests, bytes and time of a session's
 grades on a deck of 2,000 states against each server the tests run
 ([testing.md](testing.md)).
+
+### Undoing the last answer
+
+After an answer the screen offers **Undo last answer** (U, Ctrl+Z or
+Cmd+Z, the last two checked apart from the card's own keys, which skip
+any key pressed with Ctrl or Meta). It takes back the session's most
+recent answer and shows that card again, unrevealed:
+
+- **The state from before the answer** comes with the answer: the
+  state the grade was applied to (`gradeReviewState`'s `current`), which
+  `recordReview` returns with the answer's id as a `ReviewUndo`, kept in
+  memory while the session lasts. The stored snapshot
+  (`ReviewState.previous`) cannot serve: it is the state from before the
+  study day's *first* review, so it could not undo a second answer of
+  the day. `undoReview` writes the state back, or, for a prompt that was
+  new, removes its state, as a reset does for a card introduced today.
+  It writes that state as it is: a grade of the same card made on
+  another device between the answer and its undo goes with it.
+- **The answer leaves the log**: if it is still waiting to be added, it
+  is dropped from the queue; once added, it is removed by its id
+  (`AnswerLog.removeAnswer`).
+- **The session goes back one step**, to how it was before the answer:
+  its position, and without the copy of the card a low grade put back.
+  The count says "Card x of y" as before, and that the answer was undone.
+
+Undo goes back one step only, the last answer, and only while the
+session is open; after an undo there is nothing more to undo until the
+next answer. The answer that ends the session can be undone from the
+end of it.
 
 Storage note: `sm:due` is stored as a plain `"YYYY-MM-DD"` string literal,
 not `xsd:date` — a study day is a calendar label, and date round-trips
@@ -340,7 +377,8 @@ shown (`getCardProgress`, two GETs a deck), not from the answer log.
 
 The deck page offers **Reset today's study** once something has been
 studied today. It undoes the current study day for that deck, as if the
-day's sessions had not happened.
+day's sessions had not happened. (A single answer is undone in the
+session itself: [Undoing the last answer](#undoing-the-last-answer).)
 
 A review overwrites a card's state, so undoing needs a record of what was
 overwritten. `recordReview` therefore stores a snapshot (`ReviewState.previous`,

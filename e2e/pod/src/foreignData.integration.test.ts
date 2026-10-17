@@ -311,7 +311,7 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     });
     expect(patch.ok, `PATCH ${reviews}: ${patch.status}`).toBe(true);
 
-    const reviewed = await useCases.recordReview(
+    const { state: reviewed } = await useCases.recordReview(
       instance.url,
       capitals,
       { card: card!, direction: "back-to-front" },

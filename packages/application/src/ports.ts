@@ -659,6 +659,8 @@ export interface AnswerLog {
   ): Promise<Since<Answer[]>>;
   /** Remove a deck's answers of a study day: what resetting the day undoes. */
   removeDay(instanceUrl: string, deckUrl: string, studyDay: string): Promise<void>;
+  /** Remove one answer, by its id, from its study day's month: what undoing it undoes. */
+  removeAnswer(instanceUrl: string, studyDay: string, id: string): Promise<void>;
 }
 
 /**

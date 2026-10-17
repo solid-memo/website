@@ -4,12 +4,17 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { GradeBasis, UseCases } from "@solid-memo/application/useCases";
+import type { GradeBasis, ReviewUndo, UseCases } from "@solid-memo/application/useCases";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
-import type { ReviewQuality } from "@solid-memo/domain/review";
+import {
+  reviewKeyOf,
+  type ReviewKey,
+  type ReviewQuality,
+  type ReviewState,
+} from "@solid-memo/domain/review";
 import { interleave, repeatsInSession, requeueCard } from "@solid-memo/domain/scheduling";
 import { ErrorMessage } from "./ErrorMessage";
 import { Loading } from "./Loading";
@@ -18,6 +23,20 @@ import { useClock } from "./courseLinks";
 import { useDeckRelease } from "./deckRelease";
 import { deckHref } from "./router";
 import { useI18n } from "./i18n";
+
+/** A study session as it stands. */
+interface Session {
+  prompts: Prompt[];
+  position: number;
+  /** The last answer put its card back to come round again. */
+  putBack: boolean;
+  /** The last answer was just undone. */
+  undone: boolean;
+  /** The states the session's answers and undos left its prompts in, by review key (reviewKeyOf). */
+  states: ReadonlyMap<string, ReviewState | null>;
+  /** What undoing the last answer takes, and the session as it was before it; null: nothing to undo. */
+  last: { undo: ReviewUndo; before: Session } | null;
+}
 
 /**
  * Owns one study session. The queue is fetched once when the session
@@ -33,6 +52,13 @@ import { useI18n } from "./i18n";
  * the deck's page, or to `deckLink` when given. A deck copied from a
  * release says where a mistake in the cards it has of the release is
  * reported (UseCases.reportPlace).
+ *
+ * The last answer can be undone while the session lasts, one step back:
+ * its prompt's state and its answer in the log go (useCases.undoReview),
+ * and the session is as it was before it, its card up again and a copy
+ * a low grade put back gone. Each grade shows the interval it gives,
+ * from the prompt's state: as the queue brought the deck's states when
+ * the session began, then as its answers and undos left it.
  */
 export function StudyContainer({
   useCases,
@@ -86,12 +112,7 @@ export function StudyContainer({
           cardIds: new Set(release.cards.map((card) => card.id)),
         };
 
-  const [session, setSession] = useState<{
-    prompts: Prompt[];
-    position: number;
-    /** The last answer put its card back to come round again. */
-    putBack: boolean;
-  } | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   useEffect(() => {
     if (session !== null || queueQuery.data === undefined) return;
     const { due, newPrompts } = queueQuery.data;
@@ -99,6 +120,9 @@ export function StudyContainer({
       prompts: interleave(due, newPrompts),
       position: 0,
       putBack: false,
+      undone: false,
+      states: new Map(),
+      last: null,
     });
   }, [session, queueQuery.data]);
 
@@ -140,16 +164,17 @@ export function StudyContainer({
         args.times,
         args.known,
       ),
-    onSuccess: (state, { prompt, quality }) => {
+    onMutate: (): void => undoMutation.reset(),
+    onSuccess: ({ state, undo }, { prompt, quality }) => {
       answered.current++;
-      queryClient.setQueryData(
-        ["reviews", deck.reviewsDocumentUrl, state.cardId, state.direction],
-        state,
-      );
+      keepState(state, state);
       setSession((current) => {
+        const before = { ...current!, last: null };
         const next = current!.position + 1;
+        const states = new Map(current!.states).set(reviewKeyOf(state), state);
+        const last = { undo, before };
         if (!repeatsInSession(quality)) {
-          return { prompts: current!.prompts, position: next, putBack: false };
+          return { ...before, position: next, putBack: false, undone: false, states, last };
         }
         const done = current!.prompts.slice(0, next);
         const remaining = current!.prompts.slice(next);
@@ -157,10 +182,30 @@ export function StudyContainer({
           prompts: [...done, ...requeueCard(remaining, prompt, random)],
           position: next,
           putBack: true,
+          undone: false,
+          states,
+          last,
         };
       });
     },
   });
+
+  const undoMutation = useMutation({
+    mutationFn: (undo: ReviewUndo) => useCases.undoReview(instance.url, deck, undo),
+    onMutate: (): void => answerMutation.reset(),
+    onSuccess: (before, undo) => {
+      keepState(undo.key, before);
+      setSession((current) => ({ ...current!.last!.before, putBack: false, undone: true }));
+    },
+  });
+
+  /** A prompt's state as an answer or an undo left it, for the screens that show it. */
+  function keepState(key: ReviewKey, state: ReviewState | null) {
+    queryClient.setQueryData(
+      ["reviews", deck.reviewsDocumentUrl, key.cardId, key.direction],
+      state,
+    );
+  }
 
   useLayoutEffect(
     () => () => {
@@ -184,8 +229,11 @@ export function StudyContainer({
     return <Loading label={t("study.preparing")} />;
   }
 
-  const { prompts, position, putBack } = session;
+  const { prompts, position, putBack, undone, states, last } = session;
   const prompt = position < prompts.length ? prompts[position] : null;
+  const key =
+    prompt === null ? "" : reviewKeyOf({ cardId: prompt.card.id, direction: prompt.direction });
+  const busy = answerMutation.isPending || undoMutation.isPending;
   return (
     <StudyScreen
       deckName={readerText(deck.title)}
@@ -193,12 +241,18 @@ export function StudyContainer({
       deckHref={deckLink}
       report={report}
       prompt={prompt}
+      state={
+        states.has(key)
+          ? states.get(key)
+          : (queueQuery.data!.states.find((state) => reviewKeyOf(state) === key) ?? null)
+      }
       position={position + 1}
       total={prompts.length}
       putBack={putBack}
+      undone={undone}
       answerScale={answerScale}
-      busy={answerMutation.isPending}
-      error={errorText(answerMutation.error)}
+      busy={busy}
+      error={errorText(answerMutation.error ?? undoMutation.error)}
       onAnswer={(quality, times) =>
         answerMutation.mutate({
           prompt: prompt!,
@@ -207,6 +261,7 @@ export function StudyContainer({
           known: { prefs: queueQuery.data!.prefs },
         })
       }
+      onUndo={last === null ? undefined : () => undoMutation.mutate(last.undo)}
       onExit={() => void handleExit()}
     />
   );

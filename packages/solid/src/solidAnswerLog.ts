@@ -34,7 +34,7 @@ function answersIn(dataset: SolidDataset | null): Answer[] {
   return dataset === null ? [] : getThingAll(dataset).flatMap((thing) => toAnswer(thing) ?? []);
 }
 
-/** Tries at removing a day's answers while other writes keep adding to the document. */
+/** Tries at removing answers while other writes keep adding to the document. */
 const ATTEMPTS = 3;
 
 /**
@@ -51,6 +51,25 @@ export function createSolidAnswerLog({
   fetch: typeof globalThis.fetch;
   checkWrite?: WriteCheck;
 }): AnswerLog {
+  /** Remove the answers of a month's document that `which` picks, unless another write keeps getting in first. */
+  async function removeAnswers(url: string, which: (answer: Answer) => boolean): Promise<void> {
+    for (let attempt = 1; ; attempt++) {
+      const dataset = await getSolidDatasetOrNull(url, fetch);
+      if (dataset === null) return;
+      const picked = getThingAll(dataset).filter((thing) => {
+        const answer = toAnswer(thing);
+        return answer !== null && which(answer);
+      });
+      if (picked.length === 0) return;
+      try {
+        await saveDataset(url, picked.map(unlessNewer).reduce(removeThing, dataset), fetch);
+        return;
+      } catch (error) {
+        if (!(error instanceof PreconditionFailedError) || attempt === ATTEMPTS) throw error;
+      }
+    }
+  }
+
   return {
     async append(instanceUrl, answer) {
       const url = historyUrlOf(instanceUrl, monthOfStudyDay(answer.studyDay));
@@ -92,23 +111,18 @@ export function createSolidAnswerLog({
       return mapSince(await readSince(historyUrlOf(instanceUrl, month), version, fetch), answersIn);
     },
 
-    async removeDay(instanceUrl, deckUrl, studyDay) {
-      const url = historyUrlOf(instanceUrl, monthOfStudyDay(studyDay));
-      for (let attempt = 1; ; attempt++) {
-        const dataset = await getSolidDatasetOrNull(url, fetch);
-        if (dataset === null) return;
-        const day = getThingAll(dataset).filter((thing) => {
-          const answer = toAnswer(thing);
-          return answer !== null && answer.deckUrl === deckUrl && answer.studyDay === studyDay;
-        });
-        if (day.length === 0) return;
-        try {
-          await saveDataset(url, day.map(unlessNewer).reduce(removeThing, dataset), fetch);
-          return;
-        } catch (error) {
-          if (!(error instanceof PreconditionFailedError) || attempt === ATTEMPTS) throw error;
-        }
-      }
+    removeDay(instanceUrl, deckUrl, studyDay) {
+      return removeAnswers(
+        historyUrlOf(instanceUrl, monthOfStudyDay(studyDay)),
+        (answer) => answer.deckUrl === deckUrl && answer.studyDay === studyDay,
+      );
+    },
+
+    removeAnswer(instanceUrl, studyDay, id) {
+      return removeAnswers(
+        historyUrlOf(instanceUrl, monthOfStudyDay(studyDay)),
+        (answer) => answer.id === id,
+      );
     },
   };
 }

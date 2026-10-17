@@ -14,6 +14,7 @@ import type { ResponseTimes } from "@solid-memo/domain/answer";
 import { promptSides, type Prompt } from "@solid-memo/domain/deck";
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import type { ReviewQuality } from "@solid-memo/domain/review";
+import { applySm2, INITIAL_SM2_STATE, type Sm2State } from "@solid-memo/domain/sm2";
 import { CardFace } from "./CardFace";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
@@ -84,13 +85,16 @@ export function StudyScreen({
   deckHref,
   report,
   prompt,
+  state,
   position,
   total,
   putBack,
+  undone,
   answerScale,
   busy,
   error,
   onAnswer,
+  onUndo,
   onExit,
 }: {
   deckName: string;
@@ -106,17 +110,26 @@ export function StudyScreen({
   report?: { place: ReportPlace; releaseUrl: string; cardIds: ReadonlySet<string> };
   /** null when the session is finished. */
   prompt: Prompt | null;
+  /**
+   * The prompt's state, which each grade's interval is worked out from:
+   * null for a new prompt; undefined while unknown, when none is shown.
+   */
+  state?: Sm2State | null;
   /** 1-based position of the current prompt. */
   position: number;
   /** Prompts in the session, including repeats of failed ones. */
   total: number;
   /** The last answer put its card back to come round again this session. */
   putBack: boolean;
+  /** The last answer was just undone. */
+  undone?: boolean;
   answerScale: AnswerScale;
   busy: boolean;
   error: ErrorText | null;
   /** A grade given, with how long recalling and grading took (StudyCard). */
   onAnswer: (quality: ReviewQuality, times: ResponseTimes) => void;
+  /** Take back the session's last answer; absent when there is none to. */
+  onUndo?: () => void;
   onExit: () => void;
 }) {
   const { t, tx } = useI18n();
@@ -129,9 +142,24 @@ export function StudyScreen({
     if (finished) endRef.current!.focus();
   }, [finished]);
 
+  // U, Ctrl+Z or Cmd+Z undoes, wherever the focus is on the screen: the
+  // card's own keys skip any pressed with Ctrl or Meta. U is the key where
+  // U is, too, so it works with an input method on (a Korean one gives
+  // "ㅕ"); Z is the letter, where each layout has it.
+  function onKeyDown(event: KeyboardEvent) {
+    if (onUndo === undefined || busy || event.altKey || inDataRegion(event.target as Element))
+      return;
+    const key = event.key.toLowerCase();
+    const command = event.ctrlKey || event.metaKey;
+    if (command ? key !== "z" || event.shiftKey : key !== "u" && event.code !== "KeyU") return;
+    event.preventDefault();
+    onUndo();
+  }
+
   const progress = t("study.position", { position, total });
+  const said = putBack ? t("study.putBack") : undone ? t("study.undone") : null;
   return (
-    <section>
+    <section onKeyDown={onKeyDown}>
       <header>
         <h2>
           {tx("study.heading", {
@@ -147,10 +175,11 @@ export function StudyScreen({
         </button>
       </header>
       {/* One status line, mounted for the whole session so screen readers
-          hear each change: the position and a card put back. It is the only
+          hear each change: the position, a card put back and an answer
+          undone. It is the only
           place that says the position; the focused question does not. */}
       <p class="hint" role="status">
-        {finished ? null : putBack ? `${progress}. ${t("study.putBack")}` : progress}
+        {finished ? null : said === null ? progress : `${progress}. ${said}`}
       </p>
       {/* The end is said by taking the focus, outside the status line, so
           it is heard once. */}
@@ -163,6 +192,7 @@ export function StudyScreen({
         <StudyCard
           key={position}
           prompt={prompt}
+          state={state}
           answerScale={answerScale}
           busy={busy}
           onAnswer={onAnswer}
@@ -174,6 +204,22 @@ export function StudyScreen({
           releaseUrl={report.releaseUrl}
           cardId={prompt.card.id}
         />
+      )}
+      {onUndo !== undefined && (
+        <div class="study-undo">
+          {/* Only aria-disabled while busy, as the grades are: pressed, it
+              keeps the focus if undoing fails. */}
+          <button
+            onClick={() => {
+              if (!busy) onUndo();
+            }}
+            aria-disabled={busy}
+            aria-keyshortcuts="U Control+Z Meta+Z"
+          >
+            {t("study.undo")}
+          </button>
+          <p class="hint study-keys">{t("study.keys.undo")}</p>
+        </div>
       )}
       <ErrorMessage error={error} />
     </section>
@@ -201,17 +247,23 @@ export function StudyScreen({
  * grade by accident. While an answer saves, the buttons are only
  * aria-disabled, so the one pressed keeps the focus if saving fails.
  *
+ * Under each grade is the interval it gives, unless the prompt's state
+ * is unknown: extra text the grade's name leaves out, read as its
+ * description.
+ *
  * A grade comes with how long the learner took (useStopwatch): to
  * recall, from the card shown to Reveal, and to grade, from Reveal to
  * the grade (to the last grade pressed, when saving failed before).
  */
 function StudyCard({
   prompt,
+  state,
   answerScale,
   busy,
   onAnswer,
 }: {
   prompt: Prompt;
+  state: Sm2State | null | undefined;
   answerScale: AnswerScale;
   busy: boolean;
   onAnswer: (quality: ReviewQuality, times: ResponseTimes) => void;
@@ -224,6 +276,7 @@ function StudyCard({
   const questionRef = useRef<HTMLDivElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
   const gradePromptId = useId();
+  const intervalId = useId();
   const buttons = answerButtons(answerScale, t);
 
   function reveal() {
@@ -288,12 +341,21 @@ function StudyCard({
                 key={label}
                 data-grade={quality}
                 aria-keyshortcuts={key}
+                aria-label={state === undefined ? undefined : label}
+                aria-describedby={state === undefined ? undefined : `${intervalId}-${quality}`}
                 onClick={() => {
                   if (!busy) grade(quality);
                 }}
                 aria-disabled={busy}
               >
                 {label}
+                {state !== undefined && (
+                  <span id={`${intervalId}-${quality}`} class="grade-interval">
+                    {t("study.interval", {
+                      count: applySm2(state ?? INITIAL_SM2_STATE, quality).intervalDays,
+                    })}
+                  </span>
+                )}
               </button>
             ))}
           </div>
