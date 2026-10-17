@@ -109,6 +109,7 @@ words:
   - FSRS
   - iiif
   - PKCE
+  - RDAP
   - rdfs
   - SEMIC
   - setext
@@ -120,6 +121,7 @@ words:
   - subtag
   - vcard
   - WCAG
+  - WHOIS
   - xone
   # Products, projects, organizations and people
   - antwika
