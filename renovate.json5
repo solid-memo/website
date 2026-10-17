@@ -6,6 +6,11 @@
     $schema: 'https://docs.renovatebot.com/renovate-schema.json',
     extends: [
         'config:recommended',
+        // Every action from outside the repository is pinned to a commit,
+        // with its version after it (`@<sha> # vX.Y.Z`): a tag can be
+        // moved to other code, a commit cannot. Renovate updates both, and
+        // npm run check:actions refuses a `uses:` that is not pinned.
+        'helpers:pinGitHubActionDigests',
     ],
     baseBranchPatterns: [
         'main',

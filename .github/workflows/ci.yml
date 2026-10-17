@@ -54,10 +54,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -70,7 +70,7 @@ jobs:
       # queue's copy would be kept apart, under its own ref, and never
       # read again, while it would count toward the repository's 10 GB.
       - id: turbo
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .turbo/cache
           key: turbo-check-${{ github.sha }}
@@ -98,7 +98,7 @@ jobs:
       # found in the cache: it reads the cache but adds nothing to it.
       - run: npm run build -- --cache=local:r
       - if: github.ref == 'refs/heads/main' && steps.turbo.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .turbo/cache
           key: turbo-check-${{ github.sha }}
@@ -141,11 +141,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -198,10 +198,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.15"
           cache: pip
@@ -227,10 +227,10 @@ jobs:
       matrix:
         server: [css-7, css-6, nss-6, nss-5, css-acp]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -246,7 +246,7 @@ jobs:
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         continue-on-error: true
         with:
           path: ${{ steps.images.outputs.file }}
@@ -255,7 +255,7 @@ jobs:
         env:
           SOLID_SERVERS: ${{ matrix.server }}
       - if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pod-logs-${{ matrix.server }}
           path: e2e/pod/logs/
@@ -273,10 +273,10 @@ jobs:
       matrix:
         server: [css-8, pivot, nextcloud, jss]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -292,14 +292,14 @@ jobs:
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         continue-on-error: true
         with:
           path: ${{ steps.images.outputs.file }}
           key: ${{ steps.images.outputs.key }}
       - run: node e2e/pod/servers.ts contract ${{ matrix.server }}
       - if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: contract-logs-${{ matrix.server }}
           path: e2e/pod/logs/
@@ -319,17 +319,17 @@ jobs:
     env:
       JOURNEY_TRACE: ${{ (inputs.trace || github.ref == 'refs/heads/main') && 'on' || '' }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - id: playwright
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v6
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: browsers
         with:
           path: ~/.cache/ms-playwright
@@ -348,7 +348,7 @@ jobs:
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/journeys/css/compose.yml
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         continue-on-error: true
         with:
           path: ${{ steps.images.outputs.file }}
@@ -357,7 +357,7 @@ jobs:
       - if: always()
         run: node e2e/journeys/harness/summary.ts journeys-${{ github.run_attempt }}
       - if: failure() || env.JOURNEY_TRACE == 'on'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: journeys-${{ github.run_attempt }}
           path: |
@@ -366,7 +366,7 @@ jobs:
             e2e/journeys/logs/
           retention-days: 7
       - if: always() && github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: journeys-report
           path: e2e/journeys/playwright-report/
@@ -384,13 +384,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       # With nothing installed, only the repository's own files are there
       # to check, whether or not reuse reads .gitignore in its container.
-      - uses: fsfe/reuse-action@v6
-      - uses: lycheeverse/lychee-action@v2
+      - uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: --offline '**/*.md'
           output: ${{ runner.temp }}/lychee.md
@@ -430,12 +430,12 @@ jobs:
       - if: github.event_name != 'pull_request'
         run: echo "Only a pull request's commits are linted; this run is for a ${{ github.event_name }}."
       - if: github.event_name == 'pull_request'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       - if: github.event_name == 'pull_request'
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm

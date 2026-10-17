@@ -45,10 +45,10 @@ jobs:
       matrix:
         server: [css-8, pivot, nextcloud, jss]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -64,7 +64,7 @@ jobs:
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         continue-on-error: true
         with:
           path: ${{ steps.images.outputs.file }}
@@ -77,7 +77,7 @@ jobs:
           E2E_RESULT_JSON: logs/result.json
       - run: node e2e/pod/compare.ts ${{ matrix.server }} e2e/pod/logs/result.json
       - if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pod-logs-${{ matrix.server }}
           path: e2e/pod/logs/

@@ -111,9 +111,12 @@ reviewing it, so its updates are unreviewed changes too. A few updates
 wait for a person, as `renovate.json5` says why. Every update waits too:
 Renovate proposes a version only once it has been public for 3 days, so
 that a bad or malicious version can be found and pulled before it
-reaches `main`. A security update does not wait. Renovate cannot approve
-its own pull requests: once `main` requires an approving review, a
-maintainer approves each update, and Renovate merges it after that.
+reaches `main`. A security update does not wait. The workflows' actions
+are pinned to a commit, not a tag, which their owners could move, and
+Renovate updates them as it does every other dependency. Renovate
+cannot approve its own pull requests: once `main` requires an approving
+review, a maintainer approves each update, and Renovate merges it after
+that.
 
 ## Deploying
 
