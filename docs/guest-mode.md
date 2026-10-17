@@ -249,8 +249,10 @@ guest's study exactly as it was: Solid Memo created the target's
 container where nothing was, and nothing names it before **register**,
 so all it holds is Solid Memo's copies. The update journal of this
 browser notes the run, so a copy left behind by a closed tab is offered
-for removal on the next opening of the guest's instance
-(`InterruptedMoveContainer`), and removed whole. A copy another tab's
+for removal with the offer to keep the study, the next time the user is
+logged in (`InterruptedMoveContainer`), and removed whole. A move tried
+again first, at the place the copy takes, fails before it writes
+anything, and leaves the note. A copy another tab's
 move is still writing is not offered, nor removed. A guest's
 instance has no access control of its own, so the copy inherits the
 user's pod's defaults, the same as a newly created instance.
