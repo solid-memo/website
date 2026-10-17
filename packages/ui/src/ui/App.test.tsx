@@ -640,6 +640,59 @@ describe("AppShell", () => {
       expect(useCases.findGuestStudy).not.toHaveBeenCalled();
     });
 
+    describe("from a link to a library deck", () => {
+      const link = "#/try?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Findex.ttl%23capitals";
+      afterEach(() => {
+        window.history.replaceState(null, "", window.location.pathname);
+      });
+
+      it("starts a guest's study at once, without the landing page", async () => {
+        window.history.replaceState(null, "", link);
+        const useCases = makeUseCases();
+        renderApp(useCases);
+        expect(await screen.findByText(/You are trying Solid Memo as a guest/)).toBeInTheDocument();
+        expect(useCases.startGuest).toHaveBeenCalledWith("My study");
+      });
+
+      it("goes on with the session there is, a guest's or the user's", async () => {
+        window.history.replaceState(null, "", link);
+        const useCases = makeUseCases({ restoreSession: vi.fn(async () => restored) });
+        renderApp(useCases);
+        expect(await screen.findByRole("button", { name: "Log out" })).toBeInTheDocument();
+        expect(useCases.startGuest).not.toHaveBeenCalled();
+      });
+
+      it("starts a guest's study when the link is followed from the landing page", async () => {
+        const listening = vi.spyOn(window, "addEventListener");
+        const useCases = makeUseCases();
+        renderApp(useCases);
+        await screen.findByRole("button", { name: "Try it without logging in" });
+        // The landing page listens once its effects have run, after it is shown.
+        await waitFor(() =>
+          expect(listening.mock.calls.filter(([type]) => type === "hashchange")).not.toHaveLength(
+            0,
+          ),
+        );
+        listening.mockRestore();
+        window.history.replaceState(null, "", "#/instances");
+        fireEvent(window, new Event("hashchange"));
+        expect(useCases.startGuest).not.toHaveBeenCalled();
+        window.history.replaceState(null, "", link);
+        fireEvent(window, new Event("hashchange"));
+        expect(await screen.findByText(/You are trying Solid Memo as a guest/)).toBeInTheDocument();
+        expect(useCases.startGuest).toHaveBeenCalledOnce();
+      });
+
+      it("shows the landing page, with why, when a guest's study cannot start", async () => {
+        window.history.replaceState(null, "", link);
+        renderApp(
+          makeUseCases({ startGuest: vi.fn(async () => Promise.reject(new Error("no storage"))) }),
+        );
+        expect(await screen.findByText("no storage")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Try it without logging in" })).toBeEnabled();
+      });
+    });
+
     it("shows why a guest's study could not start", async () => {
       const useCases = makeUseCases({
         startGuest: vi.fn(async () => Promise.reject(new Error("no storage"))),

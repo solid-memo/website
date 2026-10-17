@@ -61,6 +61,7 @@ const ROUTES: RouteRef[] = [
   { screen: "courseReview", instanceUrl: INSTANCE, deckUrl: DECK, chapterUrl: CHAPTER },
   { screen: "preferences", instanceUrl: INSTANCE },
   { screen: "validation", instanceUrl: INSTANCE },
+  { screen: "try", libraryDeckUrl: LIBRARY_DECK },
   ...[
     { screen: "statistics", instanceUrl: INSTANCE } as const,
     { screen: "deckStatistics", instanceUrl: INSTANCE, deckUrl: DECK } as const,

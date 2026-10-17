@@ -1259,7 +1259,9 @@
     "checkFailed": "Det gick inte att kontrollera instansens data: {error}",
     "developerTools": "Utvecklarverktyg",
     "validateInstance": "Kontrollera den här instansen",
-    "loadingCourse": "Läser in kursen…"
+    "loadingCourse": "Läser in kursen…",
+    "tryChooseInstance": "Vilken instans ska {deck} öppnas i?",
+    "triedUnknown": "Kortleken som länken leder till finns inte i biblioteket. Här är vad biblioteket har."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "Bilden på framsidan måste vara en http(s)-adress.",

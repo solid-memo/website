@@ -1200,7 +1200,9 @@
     "checkFailed": "이 인스턴스의 데이터를 검사하지 못했어요: {error}",
     "developerTools": "개발자 도구",
     "validateInstance": "이 인스턴스 검증",
-    "loadingCourse": "코스를 불러오는 중…"
+    "loadingCourse": "코스를 불러오는 중…",
+    "tryChooseInstance": "{deck}을(를) 어느 인스턴스에서 열까요?",
+    "triedUnknown": "링크가 가리키는 덱이 라이브러리에 없어요. 라이브러리에 있는 덱은 다음과 같아요."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "앞면 그림은 http(s) URL이어야 해요.",

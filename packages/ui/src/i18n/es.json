@@ -1318,7 +1318,9 @@
     "checkFailed": "No se pudieron comprobar los datos de esta instancia: {error}",
     "developerTools": "Herramientas de desarrollador",
     "validateInstance": "Validar esta instancia",
-    "loadingCourse": "Cargando el curso…"
+    "loadingCourse": "Cargando el curso…",
+    "tryChooseInstance": "¿En qué instancia quieres abrir {deck}?",
+    "triedUnknown": "El mazo al que lleva el enlace no está en la biblioteca. Esto es lo que tiene la biblioteca."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "La imagen del anverso debe ser una URL http(s).",

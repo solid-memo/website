@@ -50,6 +50,9 @@ export function breadcrumbsFor(route: RouteRef, names: CrumbNames, t: I18n["t"])
       return [instances, { label: t("breadcrumbs.storagePicker"), route }];
     case "instanceCreator":
       return [instances, { label: t("breadcrumbs.instanceCreator"), route }];
+    // A link to a library deck shows the instances only to ask which to open it in.
+    case "try":
+      return [{ label: t("breadcrumbs.instances"), route }];
   }
 
   const decks: Crumb = {

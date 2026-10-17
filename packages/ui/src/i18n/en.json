@@ -1259,7 +1259,9 @@
     "checkFailed": "Could not check this instance's data: {error}",
     "developerTools": "Developer tools",
     "validateInstance": "Validate this instance",
-    "loadingCourse": "Loading the course…"
+    "loadingCourse": "Loading the course…",
+    "tryChooseInstance": "Which instance should {deck} open in?",
+    "triedUnknown": "The deck that link leads to is not in the library. Here is what the library has."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "The front image must be an http(s) URL.",

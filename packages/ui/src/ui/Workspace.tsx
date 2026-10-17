@@ -58,6 +58,7 @@ import {
 import { ValidationContainer } from "./ValidationContainer";
 import { WebIdDocumentContainer } from "./WebIdDocumentContainer";
 import { useI18n } from "./i18n";
+import { ReaderText } from "./ReaderText";
 import { useInstanceTheme } from "./theme";
 import { useDocumentTitle } from "./documentTitle";
 import { useScreenFocus } from "./screenFocus";
@@ -163,14 +164,15 @@ export function Workspace({
     route?.screen === "libraryDeck" ||
     route?.screen === "libraryBrowser" ||
     route?.screen === "libraryCard" ||
-    route?.screen === "libraryPreview"
+    route?.screen === "libraryPreview" ||
+    route?.screen === "try"
       ? route.libraryDeckUrl
       : null;
   const needsLibraryDeck = libraryDeckUrl !== null && activeInstance !== null;
   const libraryQuery = useQuery({
     queryKey: ["library"],
     queryFn: () => useCases.listLibraryDecks(),
-    enabled: needsLibraryDeck,
+    enabled: needsLibraryDeck || route?.screen === "try",
   });
   // A library deck's page is addressed by its series, which outlives
   // releases; an address of one of its releases still finds it.
@@ -186,6 +188,36 @@ export function Workspace({
       replace({ screen: "library", instanceUrl: instanceUrl! });
     }
   }, [needsLibraryDeck, libraryQuery.data, libraryDeckUrl, instanceUrl]);
+
+  // A link to a library deck (#/try) goes on to the deck's page in the
+  // learner's instance, once the library is read; with several, the one
+  // they choose. A deck the library does not have takes them to the
+  // library instead, which says so; that is kept in memory, as
+  // justCompleted is, and dropped as they leave the library. A library
+  // that cannot be read takes them there too, where its error says why.
+  // With no instance, they make one first.
+  const [triedUnknown, setTriedUnknown] = useState(false);
+  useEffect(() => {
+    if (route?.screen !== "try" && route?.screen !== "library") setTriedUnknown(false);
+  }, [route]);
+  const triedDeck =
+    route?.screen === "try" && libraryQuery.data !== undefined
+      ? (libraryQuery.data.find(isAddressed) ?? null)
+      : undefined;
+  const triedSettled = route?.screen === "try" && (triedDeck !== undefined || libraryQuery.isError);
+  const openTried = (instance: Instance) => {
+    if (triedDeck === null) setTriedUnknown(true);
+    replace(
+      triedDeck == null
+        ? { screen: "library", instanceUrl: instance.url }
+        : { screen: "libraryDeck", instanceUrl: instance.url, libraryDeckUrl: triedDeck.seriesUrl },
+    );
+  };
+  useEffect(() => {
+    if (!triedSettled || instances === undefined) return;
+    if (instances.length === 1) openTried(instances[0]!);
+    else if (instances.length === 0) replace({ screen: "storagePicker" });
+  }, [triedSettled, instances]);
 
   const libraryCardId = route?.screen === "libraryCard" ? route.cardId : null;
   const needsLibraryCard = libraryCardId !== null && activeLibraryDeck !== null;
@@ -465,6 +497,9 @@ export function Workspace({
         return <Loading label={t("workspace.loadingLibrary")} />;
       }
     }
+    if (route.screen === "try" && (!triedSettled || instances.length < 2)) {
+      return <Loading label={t("workspace.loadingLibrary")} />;
+    }
     if (needsLibraryCard) {
       if (libraryCardsQuery.error) {
         return <ErrorMessage error={errorText(libraryCardsQuery.error)} />;
@@ -511,6 +546,24 @@ export function Workspace({
             onOpen={(instance) => navigate({ screen: "home", instanceUrl: instance.url })}
           />
         );
+      case "try":
+        // Only reached with several instances: the learner chooses one.
+        return (
+          <InstancePickerContainer
+            useCases={useCases}
+            session={session}
+            instances={instances}
+            purpose={
+              triedDeck == null
+                ? undefined
+                : tx("workspace.tryChooseInstance", {
+                    deck: <ReaderText text={triedDeck.title} />,
+                  })
+            }
+            newInstanceHref={routeToHash({ screen: "storagePicker" })}
+            onOpen={openTried}
+          />
+        );
       case "instanceCreator":
         return (
           <InstanceCreator
@@ -552,11 +605,18 @@ export function Workspace({
         );
       case "library":
         return (
-          <LibraryContainer
-            useCases={useCases}
-            instance={activeInstance!}
-            onDone={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
-          />
+          <>
+            {triedUnknown && (
+              <p class="warning" role="status">
+                {t("workspace.triedUnknown")}
+              </p>
+            )}
+            <LibraryContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              onDone={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
+            />
+          </>
         );
       case "libraryDeck":
         return (

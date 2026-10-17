@@ -18,6 +18,7 @@ import {
   routeToHash,
   statisticsHref,
   studioHref,
+  tryHref,
   type RouteRef,
   useHashRoute,
 } from "./router";
@@ -160,6 +161,7 @@ const roundTrips: RouteRef[] = [
     view: "cards",
   },
   { screen: "validation", instanceUrl: "https://pod.example/solid-memo/a/" },
+  { screen: "try", libraryDeckUrl: "https://solid-memo.com/decks/index.ttl#capitals" },
 ];
 
 describe("routeToHash / parseHash", () => {
@@ -265,6 +267,8 @@ describe("routeToHash / parseHash", () => {
     "#/deck-statistics?instance=a",
     "#/deck-statistics?deck=b",
     "#/validate",
+    "#/try",
+    "#/try?instance=a",
   ])("rejects invalid hash %j", (hash) => {
     expect(parseHash(hash)).toBeNull();
   });
@@ -284,6 +288,14 @@ describe("libraryDeckHref", () => {
       libraryDeckHref("https://pod.example/a/", "https://solid-memo.com/decks/capitals/v1.ttl"),
     ).toBe(
       "#/library-deck?instance=https%3A%2F%2Fpod.example%2Fa%2F&deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals%2Fv1.ttl",
+    );
+  });
+});
+
+describe("tryHref", () => {
+  it("is the hash URL of a library deck that names no instance", () => {
+    expect(tryHref("https://solid-memo.com/decks/index.ttl#capitals")).toBe(
+      "#/try?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Findex.ttl%23capitals",
     );
   });
 });

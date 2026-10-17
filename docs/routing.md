@@ -107,6 +107,7 @@ full URLs, carried URL-encoded in hash query parameters.
 | `#/statistics?instance=…[&range=30d\|12m\|all][&view=activity\|memory\|cards]` | the instance's [statistics](statistics.md#the-statistics-page): `range` the answers they are of (the last 30 days, 12 months or all; absent, the last 90 days) and `view` the tab shown (absent, the overview). An unknown value of either falls back to its default (*replaces*), and a change of either *replaces* the history entry: it is the same page, looked at another way. Linked from the instance bar and from the today strip above the deck list |
 | `#/deck-statistics?instance=…&deck=…[&range=…][&view=…]` | one deck's [statistics](statistics.md#a-decks-own-figures), the same tabs of its answers alone, with its own activity calendar and no table by deck; its trail is Decks › *deck* › Statistics. Linked as "More statistics" from the deck's page; an unknown deck falls back to the deck list |
 | `#/validate?instance=…` | developer tool: the instance's documents checked against the shapes ([validation.md](validation.md)); shows how to turn developer mode on when it is off |
+| `#/try?deck=…` | a [link to a library deck](#a-link-to-a-library-deck) anyone can open: it names no instance, and goes on to the deck's page in one of the learner's (*replaces*), as a guest if need be. `deck` is the deck's series, or one of its releases, as for `#/library-deck`. What a library deck's page's "Copy link" copies |
 
 ## Resolution and fallbacks
 
@@ -143,6 +144,48 @@ flowchart LR
   deck's cards. All
   fallbacks use `history.replaceState`, so they are not Back stops;
   in-app navigation uses `pushState`, so Back walks the screens.
+
+## A link to a library deck
+
+Every other route names an instance, which only its owner can open: a
+guest's is an address under `guest.solid-memo.invalid` that exists in
+their browser alone. So a library deck's page copies a link that names
+none, `#/try?deck=…` (`tryHref`), for anyone to open:
+
+```mermaid
+flowchart TD
+    accTitle: Following a link to a library deck
+    accDescr: Without a session, the link starts a guest's study first; then, once the library is read, it goes on to the deck's page in the learner's instance, or the one they choose, or to the library when the deck is not in it or the library cannot be read.
+    link["#/try?deck=…"] --> session{"a session?"}
+    session -->|no| guest["a guest's study starts, or the one in this browser goes on"]
+    session -->|yes| count
+    guest --> count{"instances"}
+    count -->|none| storages["#/storages: make one"]
+    count -->|one| known
+    count -->|several| picker["the instance picker: which to open it in"] --> known
+    known{"in the library?"} -->|yes| deck["#/library-deck in that instance"]
+    known -->|no| library["#/library in that instance, saying so"]
+    known -->|the library unread| unread["#/library in that instance, with its error"]
+```
+
+- **Without a session**, `AppShell` starts a guest's study
+  ([guest-mode.md](guest-mode.md#from-a-link)) instead of showing the
+  landing page, when the page loads at the link or the link is followed
+  on the landing page. With one, a guest's restored or the user's, it
+  goes on with it.
+- **Then** `Workspace` reads the instances and the library. With one
+  instance, it opens the deck's page there; with several, it shows the
+  instance picker, which asks which to open the deck in, and opens it
+  in the one chosen. Each *replaces* the link, so Back does not return
+  to it. With none, it goes to the storage picker, to make one, and the
+  deck is not opened.
+- **A deck the library does not have** opens the library instead,
+  which says so above it. That is kept in memory, not in the URL, and
+  dropped as the learner leaves the library. A library that cannot be
+  read opens there too, where its error says why, and nothing is said
+  of the deck, which may well be in it.
+- **A course** opens at its page in the library, as any deck, where it
+  is started, or continued when the instance has it already.
 
 ## Breadcrumbs
 

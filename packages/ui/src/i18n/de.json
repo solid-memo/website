@@ -1259,7 +1259,9 @@
     "checkFailed": "Die Daten dieser Instanz konnten nicht geprüft werden: {error}",
     "developerTools": "Entwicklerwerkzeuge",
     "validateInstance": "Diese Instanz prüfen",
-    "loadingCourse": "Kurs wird geladen…"
+    "loadingCourse": "Kurs wird geladen…",
+    "tryChooseInstance": "In welcher Instanz soll „{deck}“ geöffnet werden?",
+    "triedUnknown": "Der Stapel, zu dem der Link führt, ist nicht in der Bibliothek. Das hier hat die Bibliothek."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "Das Bild auf der Vorderseite muss eine http(s)-URL sein.",

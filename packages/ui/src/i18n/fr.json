@@ -1318,7 +1318,9 @@
     "checkFailed": "Impossible de vérifier les données de cette instance : {error}",
     "developerTools": "Outils de développement",
     "validateInstance": "Valider cette instance",
-    "loadingCourse": "Chargement du cours…"
+    "loadingCourse": "Chargement du cours…",
+    "tryChooseInstance": "Dans quelle instance ouvrir {deck} ?",
+    "triedUnknown": "Le paquet vers lequel mène ce lien n’est pas dans la bibliothèque. Voici ce qu’elle contient."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "L’image du recto doit être une URL http(s).",
