@@ -30,7 +30,8 @@ import { rangeRead, statisticsQuery } from "./studyFigures";
  * how the courses have gone (on the cards' tab), so none waits for
  * another, and the cards' tab shows before any answer. A range without
  * answers says so, and that a longer one may have some, unless the log
- * has none at all. The overview
+ * has none at all or the range takes in the whole log (it begins within
+ * it: `coverage`), as when its only month's answers were reset. The overview
  * also gives the cards known now, from where the cards stand, and
  * saves the range's answers as a file on the learner's device.
  */
@@ -69,7 +70,9 @@ export function StatisticsContainer({
       <Loading label={t("statistics.loading")} />
     ) : statisticsRead.data.totals.answers === 0 ? (
       <p class="hint">
-        {range === "all" || statisticsRead.data.logBegins === null
+        {range === "all" ||
+        statisticsRead.data.logBegins === null ||
+        statisticsRead.data.coverage !== null
           ? t("statistics.empty")
           : t("statistics.emptyRange")}
       </p>
