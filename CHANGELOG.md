@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.8.0](https://github.com/solid-memo/website/compare/v3.7.1...v3.8.0) (2026-10-17)
+
+### Features
+
+* **ui:** copy a library deck's link from its page ([7361c48](https://github.com/solid-memo/website/commit/7361c48ccb37ee285572a9765c52adc30227331f)), closes [#142](https://github.com/solid-memo/website/issues/142)
+* **ui:** link the About page from the footer ([aaac736](https://github.com/solid-memo/website/commit/aaac736bb73da56dcedecb048b4ed16a876c00f3)), closes [#142](https://github.com/solid-memo/website/issues/142)
+* **ui:** open a library deck from a link that names no instance ([8795e94](https://github.com/solid-memo/website/commit/8795e94e28704f49fd0c4335f63949ed1fa4b970)), closes [#142](https://github.com/solid-memo/website/issues/142)
+* **web:** give the About page a link preview of its own ([7655e47](https://github.com/solid-memo/website/commit/7655e4766f9515c704a7f58755429fd091a71629)), closes [#142](https://github.com/solid-memo/website/issues/142)
+* **web:** show the app in screenshots, and invite a try in its preview ([350ee21](https://github.com/solid-memo/website/commit/350ee21a1b79b0ed4c74ae6e7abfbed2d216e5b4)), closes [#142](https://github.com/solid-memo/website/issues/142)
+
 ## [3.7.1](https://github.com/solid-memo/website/compare/v3.7.0...v3.7.1) (2026-10-17)
 
 ### Performance Improvements
