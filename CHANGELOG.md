@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.7.1](https://github.com/solid-memo/website/compare/v3.7.0...v3.7.1) (2026-10-17)
+
+### Performance Improvements
+
+* grade a card without reading its state and the preferences first ([7f148e5](https://github.com/solid-memo/website/commit/7f148e5f66edc3cd145a0b248f683331abf41f40)), closes [#146](https://github.com/solid-memo/website/issues/146)
+* **solid:** keep what a write leaves at the version the pod answers with ([6b625ec](https://github.com/solid-memo/website/commit/6b625ec5aa90a6f98f4a0c39a5adc75d6bb2ca1e)), closes [#146](https://github.com/solid-memo/website/issues/146)
+* **ui:** read the library's index once a page for the deck list ([d891c31](https://github.com/solid-memo/website/commit/d891c31490c06b4e8a9ca1619fd04d8ced04773c)), closes [#146](https://github.com/solid-memo/website/issues/146)
+
 ## [3.7.0](https://github.com/solid-memo/website/compare/v3.6.1...v3.7.0) (2026-10-17)
 
 ### Features
