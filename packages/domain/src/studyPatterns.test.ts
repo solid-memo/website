@@ -299,16 +299,17 @@ describe("the figures of a large log", () => {
         retentionByDirection(some, index),
       ];
     };
-    // Four times the answers take about four times as long; work per answer
-    // that grew with the answers would take sixteen.
+    // Eight times the answers take about as long as an eighth of them eight
+    // times over; work per answer that grew with the answers would take
+    // eight times as long.
     const ratio = growth(
       (count) => {
         const some = answers.slice(0, count);
         return () => figures(some);
       },
-      answers.length / 8,
-      4,
+      answers.length / 16,
+      8,
     );
-    expect(ratio).toBeLessThan(10);
+    expect(ratio).toBeLessThan(4);
   });
 });

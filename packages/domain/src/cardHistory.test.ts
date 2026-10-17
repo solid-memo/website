@@ -134,17 +134,18 @@ describe("lapseIndex", () => {
     const index = lapseIndex(years);
     expect(index.since).toBe("2021-01");
     expect(index.lapses.size).toBe(2_000);
-    // Four times the answers take about four times as long; work per answer
-    // that grew with the answers would take sixteen.
+    // Eight times the answers take about as long as an eighth of them eight
+    // times over; work per answer that grew with the answers would take
+    // eight times as long.
     const ratio = growth(
       (count) => {
         const some = years.slice(0, count);
         return () => lapseIndex(some);
       },
-      years.length / 8,
-      4,
+      years.length / 16,
+      8,
     );
-    expect(ratio).toBeLessThan(10);
+    expect(ratio).toBeLessThan(4);
   });
 });
 
@@ -221,10 +222,10 @@ describe("hardestCardsOf", () => {
         const some = all.slice(0, count);
         return () => hardestCardsOf(some, cards);
       },
-      all.length / 8,
-      4,
+      all.length / 16,
+      8,
     );
-    expect(ratio).toBeLessThan(10);
+    expect(ratio).toBeLessThan(4);
   });
 });
 

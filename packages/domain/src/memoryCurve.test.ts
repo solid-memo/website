@@ -238,7 +238,8 @@ describe("memoryOverTime", () => {
   });
 
   it("grows linearly with the answers", () => {
-    // Four times the cards over the same weeks take about four times as long.
+    // Eight times the cards over the same weeks take about as long as an
+    // eighth of them eight times over.
     const answers = (cards: number) =>
       Array.from({ length: cards * 10 }, (_, i) => {
         const day = `2026-0${1 + Math.floor((i % 10) / 2)}-1${i % 10}`;
@@ -250,10 +251,10 @@ describe("memoryOverTime", () => {
         const index = chainIndexOf(some);
         return () => memoryOverTime(some, index, "2026-06-30");
       },
-      1_000,
-      4,
+      500,
+      8,
     );
-    expect(ratio).toBeLessThan(10);
+    expect(ratio).toBeLessThan(4);
   });
 });
 
