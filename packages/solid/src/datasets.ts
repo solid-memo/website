@@ -50,9 +50,14 @@ type Dataset = Awaited<ReturnType<typeof getSolidDataset>>;
  *
  * A 412 becomes a PreconditionFailedError naming the document. Weak
  * ETags (`W/"…"`) are never sent in `If-Match`, where the comparison is
- * strong and would always fail; a document without an ETag, or one saved
- * since it was read (pods need not return the new ETag), is written
- * without `If-Match`.
+ * strong and would always fail; a document without an ETag is written
+ * without `If-Match`. A write the pod answers with a strong ETag, made
+ * on a precondition (so the document now holds just what was written),
+ * keeps the written dataset at that version, as a read keeps what it
+ * read: a later edit of it sends `If-Match: <that ETag>`, and the next
+ * read asks `If-None-Match` with it. Pods need not give the new ETag;
+ * without one, a dataset saved is written again without `If-Match`, and
+ * the next read downloads the document.
  */
 const ETAGS = new WeakMap<object, string>();
 
@@ -81,9 +86,11 @@ export class PreconditionFailedError extends AppError {
  *   so it is as good as a new one, without downloading the document again.
  *
  * A write to the URL forgets both, so no read after it gets what was
- * there before. Both are kept by document: a read by one of its subjects
- * (a WebID, `card#me`) is forgotten by a write to the document (`card`).
- * Every read asks the pod (`cache: "no-store"`): this is the only cache.
+ * there before, unless the write kept its own dataset (above): then that
+ * is what is known. Both are kept by document: a read by one of its
+ * subjects (a WebID, `card#me`) is forgotten by a write to the document
+ * (`card`). Every read asks the pod (`cache: "no-store"`): this is the
+ * only cache.
  */
 const READS = new WeakMap<
   typeof globalThis.fetch,
@@ -113,6 +120,19 @@ export function readDataset(url: string, fetch: typeof globalThis.fetch): Promis
   });
   inFlight.set(key, read);
   return read;
+}
+
+/**
+ * The dataset last read from a document, or written to it, at the strong
+ * version the pod then gave, without asking the pod; undefined when none
+ * is known, or only a weak one, which If-Match cannot name. An edit of it
+ * is written only if the document is still at that version (If-Match):
+ * one that changed since is refused (PreconditionFailedError), to be read
+ * again.
+ */
+export function keptDataset(url: string, fetch: typeof globalThis.fetch): Dataset | undefined {
+  const kept = READS.get(fetch)?.known.get(documentUrlOf(url));
+  return kept === undefined || strong(kept.etag) === undefined ? undefined : kept.dataset;
 }
 
 /** A write is about to change the document: reads from now on fetch it again. */
@@ -248,17 +268,44 @@ export async function saveDataset<T extends SolidDataset>(
   const isEdit = info !== undefined && info.sourceIri === url;
   const etag = isEdit ? strong(ETAGS.get(info)) : undefined;
   forgetRead(url, fetch);
+  let answered: string | undefined;
+  let saved: Dataset;
   try {
-    await saveSolidDatasetAt(url, dataset, {
-      fetch: ownPatches(withIfMatch(fetch, etag), dataset, whole),
+    saved = await saveSolidDatasetAt(url, dataset, {
+      fetch: ownPatches(
+        withIfMatch(
+          withWrittenETag(fetch, (sent) => (answered = sent)),
+          etag,
+        ),
+        dataset,
+        whole,
+      ),
     });
   } catch (error) {
     if (statusOf(error) === 412)
       throw new PreconditionFailedError(url, isEdit ? "unchanged" : "absent");
     throw error;
   }
-  // The pod need not say the new ETag; a later write reads again.
   if (info !== undefined) ETAGS.delete(info);
+  // Only where a precondition held does the document hold just what was written.
+  const version = strong(answered);
+  if (version === undefined || (isEdit && etag === undefined)) return;
+  const savedInfo = resourceInfoOf(saved);
+  if (savedInfo?.sourceIri !== url) return;
+  ETAGS.set(savedInfo, version);
+  readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: saved });
+}
+
+/** The fetch, telling `noted` the ETag the pod answered a write with (undefined when it gave none). */
+function withWrittenETag(
+  fetch: typeof globalThis.fetch,
+  noted: (etag: string | undefined) => void,
+): typeof globalThis.fetch {
+  return async (input, init) => {
+    const response = await fetch(input, init);
+    noted(response.headers.get("ETag") ?? undefined);
+    return response;
+  };
 }
 
 /** Delete a document read before, only if it is unchanged since (If-Match). */

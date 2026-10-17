@@ -3,10 +3,18 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { buildThing, createSolidDataset, createThing, setThing } from "@inrupt/solid-client";
+import {
+  buildThing,
+  createSolidDataset,
+  createThing,
+  setThing,
+  toRdfJsDataset,
+  type SolidDataset,
+} from "@inrupt/solid-client";
 import {
   deleteDataset,
   getSolidDatasetOrNull,
+  keptDataset,
   MAX_PATCH_BYTES,
   PreconditionFailedError,
   readDataset,
@@ -16,7 +24,11 @@ import {
 /**
  * The preconditions through the real @inrupt/solid-client, against a fake
  * pod that holds one document and answers as a Solid server does: 412
- * when If-Match names another version, or If-None-Match: * finds one.
+ * when If-Match names another version, or If-None-Match: * finds one, and
+ * 304 when a read's If-None-Match names the version there. With
+ * `written`, a write gives the document a new version and answers with
+ * it (`"w1"`, `"w2"`…; weak with `W/` before), from the URL written to
+ * unless `answeredFrom` is "nowhere", as a mocked fetch answers.
  */
 const DOC = "https://pod.example/doc.ttl";
 const NEW = "https://pod.example/new.ttl";
@@ -24,9 +36,13 @@ const NEW = "https://pod.example/new.ttl";
 function pod({
   etag = '"v1"',
   exists = new Set([DOC]),
+  written,
+  answeredFrom = "url",
 }: {
   etag?: string | null;
   exists?: Set<string>;
+  written?: "strong" | "weak";
+  answeredFrom?: "url" | "nowhere";
 } = {}) {
   const writes: {
     method: string;
@@ -35,13 +51,22 @@ function pod({
     ifNoneMatch: string | null;
   }[] = [];
   const bodies: { contentType: string | null; body: string }[] = [];
+  const reads: { ifNoneMatch: string | null; status: number }[] = [];
   let current = etag;
+  let versions = 0;
   const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     const method = init?.method ?? "GET";
     const headers = new Headers(init?.headers);
     if (method === "GET" || method === "HEAD") {
-      if (!exists.has(url)) return new Response("", { status: 404 });
+      const ifNoneMatch = headers.get("If-None-Match");
+      const status = !exists.has(url)
+        ? 404
+        : ifNoneMatch !== null && ifNoneMatch === current
+          ? 304
+          : 200;
+      reads.push({ ifNoneMatch, status });
+      if (status !== 200) return new Response(null, { status });
       const response = new Response(`<#it> <https://example.com/ns#n> "1" .`, {
         headers: { "Content-Type": "text/turtle", ...(current === null ? {} : { ETag: current }) },
       });
@@ -61,18 +86,27 @@ function pod({
     if (headers.get("If-None-Match") === "*" && exists.has(url))
       return new Response("", { status: 412 });
     exists.add(url);
-    return new Response("", { status: method === "DELETE" ? 204 : 205 });
+    if (written === undefined) return new Response("", { status: method === "DELETE" ? 204 : 205 });
+    current = `${written === "weak" ? "W/" : ""}"w${++versions}"`;
+    const response = new Response("", { status: 205, headers: { ETag: current } });
+    if (answeredFrom === "url") Object.defineProperty(response, "url", { value: url });
+    return response;
   }) as typeof globalThis.fetch;
   return {
     fetch,
     writes,
     bodies,
+    reads,
     /** Someone else writes the document: it gets a new version. */
     changeElsewhere(next: string) {
       current = next;
     },
   };
 }
+
+/** A dataset's objects, each a line, for a look at what it holds. */
+const objectsOf = (dataset: SolidDataset) =>
+  [...toRdfJsDataset(dataset)].map((quad) => `"${quad.object.value}"`);
 
 const edited = <T extends Parameters<typeof setThing>[0]>(dataset: T) =>
   setThing(
@@ -207,6 +241,69 @@ describe("saving with preconditions", () => {
     await expect(deleteDataset(NEW, createSolidDataset(), failing)).rejects.not.toBeInstanceOf(
       PreconditionFailedError,
     );
+  });
+});
+
+describe("keeping what was written", () => {
+  it("keeps an edit at the version the pod answers with: edited again with If-Match on it, and no read first", async () => {
+    const server = pod({ written: "strong" });
+    await saveDataset(DOC, edited(await readDataset(DOC, server.fetch)), server.fetch);
+    const kept = keptDataset(DOC, server.fetch)!;
+    expect(objectsOf(kept)).toContain('"2"');
+    await saveDataset(DOC, edited(kept), server.fetch);
+    expect(server.writes.map((w) => w.ifMatch)).toEqual(['"v1"', '"w1"']);
+    expect(server.reads).toHaveLength(1);
+  });
+
+  it("asks the next read If-None-Match with the written version, and gives what was written on 304", async () => {
+    const server = pod({ written: "strong" });
+    const dataset = edited(await readDataset(DOC, server.fetch));
+    await saveDataset(DOC, dataset, server.fetch);
+    const read = await readDataset(DOC, server.fetch);
+    expect(server.reads.at(-1)).toEqual({ ifNoneMatch: '"w1"', status: 304 });
+    expect(read).toBe(keptDataset(DOC, server.fetch));
+  });
+
+  it("keeps a creation, made only where nothing was (If-None-Match: *)", async () => {
+    const server = pod({ written: "strong" });
+    await saveDataset(NEW, edited(createSolidDataset()), server.fetch);
+    await saveDataset(NEW, edited(keptDataset(NEW, server.fetch)!), server.fetch);
+    expect(server.writes.map((w) => w.ifMatch)).toEqual([null, '"w1"']);
+  });
+
+  it("refuses an edit of what it kept once the document changed elsewhere", async () => {
+    const server = pod({ written: "strong" });
+    await saveDataset(DOC, edited(await readDataset(DOC, server.fetch)), server.fetch);
+    server.changeElsewhere('"v2"');
+    await expect(
+      saveDataset(DOC, edited(keptDataset(DOC, server.fetch)!), server.fetch),
+    ).rejects.toMatchObject({ url: DOC, expected: "unchanged" });
+    expect(keptDataset(DOC, server.fetch)).toBeUndefined();
+  });
+
+  it("keeps nothing when the pod gives no new ETag, a weak one, or the answer no address, nor for an edit made without If-Match", async () => {
+    for (const server of [
+      pod(),
+      pod({ written: "weak" }),
+      pod({ written: "strong", answeredFrom: "nowhere" }),
+      pod({ written: "strong", etag: null }),
+    ]) {
+      await saveDataset(DOC, edited(await readDataset(DOC, server.fetch)), server.fetch);
+      expect(keptDataset(DOC, server.fetch)).toBeUndefined();
+    }
+  });
+
+  it("knows nothing of a document nothing read or wrote", () => {
+    expect(keptDataset(DOC, pod().fetch)).toBeUndefined();
+  });
+
+  it("gives a read kept at a strong version, never one at a weak version, which If-Match cannot name", async () => {
+    const strong = pod();
+    const read = await readDataset(DOC, strong.fetch);
+    expect(keptDataset(DOC, strong.fetch)).toBe(read);
+    const weak = pod({ etag: 'W/"v1"' });
+    await readDataset(DOC, weak.fetch);
+    expect(keptDataset(DOC, weak.fetch)).toBeUndefined();
   });
 });
 

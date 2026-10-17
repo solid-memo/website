@@ -7,6 +7,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
+import { gzipSync } from "node:zlib";
 import { type Document, Window } from "happy-dom";
 import { build, loadEnv, type Rolldown } from "vite";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -45,6 +46,13 @@ const DOCS_SOURCES = readdirSync(resolve(REPOSITORY, "docs")).filter((name) =>
 const DOCS_PAGES = DOCS_SOURCES.map((name) =>
   name === "README.md" ? "docs/index.html" : `docs/${name.slice(0, -3)}/index.html`,
 ).sort();
+
+/**
+ * The most the page's up-front JavaScript may weigh, gzipped, in kB: what
+ * it weighs, with room for a little more. A change that passes it says
+ * why the page needs the weight, and raises this in the same commit.
+ */
+const UP_FRONT_BUDGET_KB = 600;
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
@@ -108,21 +116,23 @@ describe("the bundle", () => {
   });
 });
 
+const chunkNamed = (fileName: string) => chunks.find((chunk) => chunk.fileName === fileName)!;
+
+/** What the page loads up front: its entry, and what that imports, statically. */
+function upFront(): Set<string> {
+  const fileNames = new Set<string>();
+  const visit = (fileName: string) => {
+    if (fileNames.has(fileName)) return;
+    fileNames.add(fileName);
+    chunkNamed(fileName).imports.forEach(visit);
+  };
+  visit(chunks.find((chunk) => chunk.isEntry)!.fileName);
+  return fileNames;
+}
+
 describe("the Studio", () => {
   const isStudio = (id: string) => id.includes("/apps/studio/src/");
-  const chunkNamed = (fileName: string) => chunks.find((chunk) => chunk.fileName === fileName)!;
   const studioChunks = () => chunks.filter((chunk) => Object.keys(chunk.modules).some(isStudio));
-  /** What the page loads up front: its entry, and what that imports, statically. */
-  const upFront = () => {
-    const fileNames = new Set<string>();
-    const visit = (fileName: string) => {
-      if (fileNames.has(fileName)) return;
-      fileNames.add(fileName);
-      chunkNamed(fileName).imports.forEach(visit);
-    };
-    visit(chunks.find((chunk) => chunk.isEntry)!.fileName);
-    return fileNames;
-  };
 
   it("is a chunk of its own, which the page fetches only when a Studio route opens (docs/studio.md)", () => {
     const studio = studioChunks();
@@ -144,6 +154,25 @@ describe("the Studio", () => {
     for (const fileName of upFront())
       expect([...chunkNamed(fileName).viteMetadata!.importedCss]).not.toContain(stylesheet);
     expect(html).not.toContain(stylesheet);
+  });
+});
+
+describe("what the page loads up front", () => {
+  it(`is at most ${UP_FRONT_BUDGET_KB} kB of JavaScript gzipped, the largest modules named when it is more`, () => {
+    const upFrontChunks = [...upFront()].map(chunkNamed);
+    const gzipped = upFrontChunks.reduce((sum, chunk) => sum + gzipSync(chunk.code).length, 0);
+    const largest = upFrontChunks
+      .flatMap((chunk) => Object.entries(chunk.modules))
+      .sort(([, a], [, b]) => b.renderedLength - a.renderedLength)
+      .slice(0, 15)
+      .map(
+        ([id, module]) =>
+          `${(module.renderedLength / 1024).toFixed(1)} kB ${id.replace(/^.*\/node_modules\//, "").replace(REPOSITORY, "")}`,
+      );
+    expect(
+      gzipped / 1024,
+      `${(gzipped / 1024).toFixed(1)} kB gzipped up front; its largest modules, before minifying:\n${largest.join("\n")}`,
+    ).toBeLessThanOrEqual(UP_FRONT_BUDGET_KB);
   });
 });
 

@@ -14,7 +14,7 @@ import {
   type SolidDataset,
 } from "@inrupt/solid-client";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
-import { getSolidDatasetOrNull } from "./datasets";
+import { getSolidDatasetOrNull, keptDataset } from "./datasets";
 import { toReviewState, toReviewStateThing } from "./mappers/reviewStateMapper";
 import type { Deck } from "@solid-memo/domain/deck";
 import { namedReviewSubject } from "@solid-memo/domain/reviewRecord";
@@ -30,6 +30,7 @@ vi.mock("@inrupt/solid-client", async (importOriginal) => {
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
   getSolidDatasetOrNull: vi.fn(),
+  keptDataset: vi.fn(),
 }));
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
@@ -110,8 +111,18 @@ function savedDataset(): SolidDataset {
   return vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
 }
 
+/** Write `state` as a grade of its prompt that makes it whatever is stored. */
+function writeState(repository: ReturnType<typeof makeRepository>, of: Deck, written: ReviewState) {
+  return repository.gradeReviewState(
+    of,
+    { cardId: written.cardId, direction: written.direction },
+    () => written,
+  );
+}
+
 beforeEach(() => {
   vi.mocked(getSolidDatasetOrNull).mockReset();
+  vi.mocked(keptDataset).mockReset();
   vi.mocked(saveSolidDatasetAt).mockReset();
 });
 
@@ -162,11 +173,11 @@ describe("getReviewState", () => {
   });
 });
 
-describe("saveReviewState", () => {
+describe("gradeReviewState", () => {
   it("creates the document on first save", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
 
-    await makeRepository().saveReviewState(deck, state);
+    await writeState(makeRepository(), deck, state);
 
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(deck.reviewsDocumentUrl);
@@ -178,11 +189,95 @@ describe("saveReviewState", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(reviewsDataset());
     const updated: ReviewState = { ...state, repetitions: 3, due: "2026-10-10" };
 
-    await makeRepository().saveReviewState(deck, updated);
+    await writeState(makeRepository(), deck, updated);
 
     const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     const thing = getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-1`)!;
     expect(toReviewState(thing, deck)).toEqual(updated);
+  });
+
+  it("edits the document as last read or written, when its version is known, reading nothing", async () => {
+    vi.mocked(keptDataset).mockReturnValue(reviewsDataset());
+    const updated: ReviewState = { ...state, repetitions: 3, due: "2026-10-10" };
+
+    await writeState(makeRepository(), deck, updated);
+
+    expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
+    expect(keptDataset).toHaveBeenCalledWith(deck.reviewsDocumentUrl, expect.any(Function));
+    const thing = getThing(savedDataset(), `${deck.reviewsDocumentUrl}#card-1`)!;
+    expect(toReviewState(thing, deck)).toEqual(updated);
+  });
+
+  it("reads the document again and edits that once the version kept is out of date (412)", async () => {
+    const other: ReviewState = { ...state, cardId: "card-2" };
+    vi.mocked(keptDataset).mockReturnValue(reviewsDataset());
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(reviewsDataset(), named(other)));
+    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce({ statusCode: 412 });
+
+    await writeState(makeRepository(), deck, { ...state, repetitions: 3 });
+
+    expect(getSolidDatasetOrNull).toHaveBeenCalledOnce();
+    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(2);
+    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[1];
+    expect(getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-2`)).not.toBeNull();
+  });
+
+  it("passes on another failure of the edit of what is kept, reading nothing", async () => {
+    vi.mocked(keptDataset).mockReturnValue(reviewsDataset());
+    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce({ statusCode: 500 });
+
+    await expect(writeState(makeRepository(), deck, state)).rejects.toEqual({
+      statusCode: 500,
+    });
+    expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
+  });
+});
+
+describe("grading", () => {
+  it("grades the state the document holds of the prompt, or none, and says what it wrote and of what", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(reviewsDataset());
+    const grade = vi.fn((current: ReviewState | null) => ({
+      ...(current ?? state),
+      cardId: current === null ? "card-2" : current.cardId,
+      repetitions: (current?.repetitions ?? 0) + 1,
+    }));
+    const repository = makeRepository();
+
+    await expect(
+      repository.gradeReviewState(deck, { cardId: "card-1", direction: "front-to-back" }, grade),
+    ).resolves.toEqual({ state: { ...state, repetitions: 3 }, current: state });
+    await expect(
+      repository.gradeReviewState(deck, { cardId: "card-2", direction: "front-to-back" }, grade),
+    ).resolves.toMatchObject({ current: null, state: { cardId: "card-2", repetitions: 1 } });
+  });
+
+  it("grades again the state the document holds when read again after a 412: another device's grade is built on, not undone", async () => {
+    const theirs: ReviewState = {
+      ...state,
+      repetitions: 5,
+      lastReviewedAt: "2026-09-21T09:00:00.000Z",
+    };
+    vi.mocked(keptDataset).mockReturnValue(reviewsDataset());
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(mockSolidDatasetFrom(deck.reviewsDocumentUrl), named(theirs)),
+    );
+    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce({ statusCode: 412 });
+    const grade = vi.fn((current: ReviewState | null) => ({
+      ...current!,
+      repetitions: current!.repetitions + 1,
+    }));
+
+    const graded = await makeRepository().gradeReviewState(
+      deck,
+      { cardId: "card-1", direction: "front-to-back" },
+      grade,
+    );
+
+    expect(grade.mock.calls.map(([current]) => current)).toEqual([state, theirs]);
+    expect(graded).toEqual({ state: { ...theirs, repetitions: 6 }, current: theirs });
+    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[1];
+    const thing = getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-1`)!;
+    expect(toReviewState(thing, deck)).toEqual({ ...theirs, repetitions: 6 });
   });
 });
 
@@ -225,7 +320,7 @@ describe("applyReviewChanges", () => {
       [`${deck.reviewsDocumentUrl}#card-1`],
       "pod",
     );
-    await expect(makeRepository(checkWrite).saveReviewState(deck, state)).rejects.toThrow(
+    await expect(writeState(makeRepository(checkWrite), deck, state)).rejects.toThrow(
       "does not conform",
     );
     expect(checkWrite).toHaveBeenLastCalledWith(
@@ -307,7 +402,7 @@ describe("states that name their card", () => {
   it("write a review onto the subject read for it, adding no second state", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(stateAt("rs-7")));
     const updated: ReviewState = { ...state, repetitions: 3 };
-    await makeRepository().saveReviewState(deck, updated);
+    await writeState(makeRepository(), deck, updated);
     const saved = savedDataset();
     expect(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)).toBeNull();
     expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#rs-7`)!, deck)).toEqual(
@@ -317,7 +412,7 @@ describe("states that name their card", () => {
 
   it("write every state naming its card, direction and SM-2", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    await makeRepository().saveReviewState(deck, { ...state, direction: "back-to-front" });
+    await writeState(makeRepository(), deck, { ...state, direction: "back-to-front" });
     const thing = getThing(savedDataset(), `${deck.reviewsDocumentUrl}#card-1@back-to-front`)!;
     expect(getUrl(thing, SM.reviewOf)).toBe(`${deck.cardsDocumentUrl}#card-1`);
     expect(getUrl(thing, SM.reviewDirection)).toBe(SM.backToFront);
@@ -328,7 +423,7 @@ describe("states that name their card", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(otherSchedulerAt("card-1")));
     const repository = makeRepository();
     await expect(repository.listReviewStates(deck)).resolves.toEqual([]);
-    await repository.saveReviewState(deck, state);
+    await writeState(repository, deck, state);
     const saved = savedDataset();
     expect(getUrl(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, SM.scheduler)).toBe(FSRS);
     expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#review-r1`)!, deck)).toEqual(
@@ -352,7 +447,7 @@ describe("states that name their card", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(stateAt("card-1", card2)));
     const repository = makeRepository(undefined, null);
     await expect(repository.listReviewStates(deck)).resolves.toEqual([card2]);
-    await repository.saveReviewState(deck, state);
+    await writeState(repository, deck, state);
     const saved = savedDataset();
     expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
       card2,
@@ -367,7 +462,7 @@ describe("states that name their card", () => {
   it("write over a state named for it that cannot be read, as before", async () => {
     const broken = buildThing(stateAt("card-1")).removeAll(SM.easeFactor).build();
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(broken));
-    await makeRepository().saveReviewState(deck, state);
+    await writeState(makeRepository(), deck, state);
     expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
       `${deck.reviewsDocumentUrl}#card-1`,
     ]);
@@ -426,7 +521,7 @@ describe("states that name their card", () => {
     const repository = makeRepository();
     await expect(repository.listReviewStates(upgraded)).resolves.toEqual([state]);
     const updated: ReviewState = { ...state, repetitions: 3 };
-    await repository.saveReviewState(upgraded, updated);
+    await writeState(repository, upgraded, updated);
     const thing = getThing(savedDataset(), `${deck.reviewsDocumentUrl}#rs-7`)!;
     expect(getUrl(thing, SM.reviewOf)).toBe(`${upgraded.cardsDocumentUrl}#card-1`);
     expect(getThingAll(savedDataset())).toHaveLength(1);

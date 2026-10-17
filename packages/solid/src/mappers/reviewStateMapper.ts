@@ -150,9 +150,37 @@ export function withReviewStates(
   states: readonly ReviewState[],
   newId: () => string,
 ): { dataset: SolidDataset; subjects: string[] } {
-  const subjectOf = new Map(
-    readStates(dataset, documents).map(({ url, key }) => [reviewKeyOf(key), url]),
-  );
+  return writeStates(dataset, documents, readStates(dataset, documents), states, newId);
+}
+
+/**
+ * The reviews document with the state of `key` as `grade` makes it of
+ * the state the document holds of it (null: none), written as
+ * withReviewStates writes it; with the state written and the one it was
+ * made of. The document's states are read once.
+ */
+export function withGradedReviewState(
+  dataset: SolidDataset,
+  documents: ReviewDocuments,
+  key: ReviewKey,
+  grade: (current: ReviewState | null) => ReviewState,
+  newId: () => string,
+): { dataset: SolidDataset; subjects: string[]; current: ReviewState | null; state: ReviewState } {
+  const read = readStates(dataset, documents);
+  const current = read.find((stored) => sameKey(stored.key, key))?.state ?? null;
+  const state = grade(current);
+  return { ...writeStates(dataset, documents, read, [state], newId), current, state };
+}
+
+/** The document with `states` written, each at the subject `read` has it at, else a new one. */
+function writeStates(
+  dataset: SolidDataset,
+  documents: ReviewDocuments,
+  read: readonly { url: string; key: ReviewKey }[],
+  states: readonly ReviewState[],
+  newId: () => string,
+): { dataset: SolidDataset; subjects: string[] } {
+  const subjectOf = new Map(read.map(({ url, key }) => [reviewKeyOf(key), url]));
   let updated = dataset;
   const subjects: string[] = [];
   for (const state of states) {

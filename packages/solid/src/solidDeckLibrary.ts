@@ -37,8 +37,9 @@ export interface SolidDeckLibraryDeps {
  * seconds to read, each time. A release never changes, so each is read
  * once and what is made of it — its content, a course's outline — kept,
  * shared by every reader of it, concurrent or later; a failed read is not
- * kept, so the next one tries again. The index is read afresh each time,
- * as new releases come with the site.
+ * kept, so the next one tries again. The index is read afresh each time
+ * it is asked for, as new releases come with the site; the deck list asks
+ * once a page (useCopies), since the index changes only with a deploy.
  *
  * A release added from a link (readRelease) is read on its own, afresh
  * each time, with no index: its address may hold anything, now or later,

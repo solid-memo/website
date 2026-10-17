@@ -3,7 +3,11 @@
 // SPDX-License-Identifier: MIT
 
 import { vi } from "vitest";
-import type { StatisticsReport, UseCases } from "@solid-memo/application/useCases";
+import type {
+  StatisticsReport,
+  StudySessionQueue,
+  UseCases,
+} from "@solid-memo/application/useCases";
 import type { Answer } from "@solid-memo/domain/answer";
 import type { Deck } from "@solid-memo/domain/deck";
 import { withAbout } from "@solid-memo/domain/deckAbout";
@@ -35,6 +39,9 @@ export function statisticsReportOf(
     dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
   };
 }
+
+/** The preferences a study queue comes with, when a test has nothing to say of them: the defaults. */
+export const QUEUE_PREFERENCES: Pick<StudySessionQueue, "prefs"> = { prefs: DEFAULT_PREFERENCES };
 
 /** A complete UseCases fake; override the methods a test cares about. */
 export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
@@ -283,6 +290,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       due: [],
       newPrompts: [],
       studiedToday: 0,
+      ...QUEUE_PREFERENCES,
     })),
     resetStudyDay: vi.fn(async () => 0),
     recordReview: vi.fn(async () => ({

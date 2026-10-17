@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Trial } from "@solid-memo/application/trial";
 import type { Prompt } from "@solid-memo/domain/deck";
-import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
+import { makeUseCasesFake, QUEUE_PREFERENCES } from "@solid-memo/ui/test/useCasesFake";
 import {
   CH1,
   courseCards,
@@ -87,6 +87,7 @@ describe("answerQueue", () => {
       due: [prompt("a")],
       newPrompts: [prompt("b")],
       studiedToday: 0,
+      ...QUEUE_PREFERENCES,
     });
     await answerQueue(trial, true, NOW);
     await answerQueue(trial, false, NOW);

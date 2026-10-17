@@ -7,12 +7,11 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DeckDetailContainer } from "./DeckDetailContainer";
 import { routeToHash } from "./router";
-import type { UseCases } from "@solid-memo/application/useCases";
+import type { StudySessionQueue, UseCases } from "@solid-memo/application/useCases";
 import type { Card, Deck, Prompt } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import type { Instance } from "@solid-memo/domain/instance";
-import type { StudyQueue } from "@solid-memo/domain/scheduling";
-import { makeUseCasesFake } from "../test/useCasesFake";
+import { makeUseCasesFake, QUEUE_PREFERENCES } from "../test/useCasesFake";
 
 const deck: Deck = {
   id: "deck-1",
@@ -65,7 +64,7 @@ describe("DeckDetailContainer", () => {
     renderContainer(
       makeUseCasesFake({
         listCards: vi.fn(async () => [card]),
-        getStudyQueue: vi.fn(() => new Promise<StudyQueue>(() => {})),
+        getStudyQueue: vi.fn(() => new Promise<StudySessionQueue>(() => {})),
       }),
     );
     await waitFor(() => {
@@ -77,7 +76,12 @@ describe("DeckDetailContainer", () => {
   it("says all cards are studied when today's queue is empty", async () => {
     const useCases = makeUseCasesFake({
       listCards: vi.fn(async () => [card]),
-      getStudyQueue: vi.fn(async () => ({ due: [], newPrompts: [], studiedToday: 0 })),
+      getStudyQueue: vi.fn(async () => ({
+        due: [],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_PREFERENCES,
+      })),
     });
     renderContainer(useCases);
     expect(
@@ -96,8 +100,8 @@ describe("DeckDetailContainer", () => {
       listCards: vi.fn(async () => [card]),
       getStudyQueue: vi.fn(async () =>
         reset
-          ? { due: [prompt], newPrompts: [], studiedToday: 0 }
-          : { due: [], newPrompts: [], studiedToday: 1 },
+          ? { due: [prompt], newPrompts: [], studiedToday: 0, ...QUEUE_PREFERENCES }
+          : { due: [], newPrompts: [], studiedToday: 1, ...QUEUE_PREFERENCES },
       ),
       resetStudyDay: vi.fn(async () => {
         reset = true;
@@ -126,6 +130,7 @@ describe("DeckDetailContainer", () => {
           due: [],
           newPrompts: [],
           studiedToday: 2,
+          ...QUEUE_PREFERENCES,
         })),
         resetStudyDay: vi.fn(async () => {
           throw new Error("reset refused");
@@ -163,7 +168,12 @@ describe("DeckDetailContainer", () => {
     const { onStudy } = renderContainer(
       makeUseCasesFake({
         listCards: vi.fn(async () => [card]),
-        getStudyQueue: vi.fn(async () => ({ due: [prompt], newPrompts: [], studiedToday: 0 })),
+        getStudyQueue: vi.fn(async () => ({
+          due: [prompt],
+          newPrompts: [],
+          studiedToday: 0,
+          ...QUEUE_PREFERENCES,
+        })),
       }),
     );
     fireEvent.click(await screen.findByRole("button", { name: "Study" }));
