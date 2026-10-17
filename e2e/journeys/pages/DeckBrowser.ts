@@ -97,17 +97,6 @@ export class DeckBrowser extends Screen {
     });
   }
 
-  /** The cards listed, as [front, back] texts, in table order. */
-  async cards(): Promise<[string, string][]> {
-    const rows = await this.cardRows.all();
-    const cards: [string, string][] = [];
-    for (const row of rows) {
-      const cells = (await row.getByRole("cell").allTextContents()).map((cell) => cell.trim());
-      cards.push([cells[0] ?? "", cells[1] ?? ""]);
-    }
-    return cards;
-  }
-
   /** The table lists exactly these fronts (in any order). */
   async expectFronts(fronts: readonly string[]): Promise<void> {
     await expect(this.cardRows).toHaveCount(fronts.length);
