@@ -1135,9 +1135,15 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   catalog, a course's chapters completed), likewise, and a bulk edit of cards,
   planned again on the cards as they are, three times in all, which
   stops at once when that plan is not the one the user previewed. Weak ETags (`W/"…"`) are never sent in `If-Match`, whose
-  comparison is strong; a document the pod gives no ETag, or one saved
-  since it was read (pods need not return the new ETag), is written
-  without `If-Match`. node-solid-server gives no ETag on a read and
+  comparison is strong; a document the pod gives no ETag is written
+  without `If-Match`. A write the pod answers with a strong ETag, made on
+  a precondition (`If-Match`, or `If-None-Match: *`), so the document
+  holds just what was written, keeps the written dataset at that version,
+  as a read keeps what it read: the next edit sends `If-Match` with it,
+  and the next read asks `If-None-Match` with it. Pods need not give the
+  new ETag (Community Solid Server 7 answers a PATCH with none): without
+  it, a dataset saved is written again without `If-Match`, and the next
+  read downloads the document. node-solid-server gives no ETag on a read and
   ignores `If-Match` (5.7.4 also `If-None-Match: *`; 5.8.8 and 6.0.0
   enforce that), so there no edit is conditional: a PATCH still keeps a change
   made elsewhere, a large edit's PUT does not. Community Solid Server 6's
@@ -1155,7 +1161,8 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   queue, the format check and the data check): a read already under way
   is shared, and a document read before is asked for with
   `If-None-Match: <its ETag>`; on 304 the dataset read then is returned
-  (datasets are immutable). A write to the document forgets both. This
+  (datasets are immutable). A write to the document forgets both, unless
+  it kept what it wrote at the version the pod answered with (above). This
   is memory only, for the open page: nothing is
   stored in the browser. Logged in, the browser's own cache does not do
   this, so without it a login downloaded every deck three times; and it
