@@ -106,11 +106,19 @@ export class Studio extends Screen {
     });
   }
 
-  /** The deck's row in the instance's table. */
+  /**
+   * The deck's row in the instance's table, by the link its row header
+   * names it with: the badges after it (Library, a newer release) are no
+   * part of the name.
+   */
   row(instance: string, deck: string): Locator {
     return this.decks(instance)
       .getByRole("row")
-      .filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
+      .filter({
+        has: this.page
+          .getByRole("rowheader")
+          .filter({ has: this.page.getByRole("link", { name: deck, exact: true }) }),
+      });
   }
 
   /**
@@ -776,23 +784,128 @@ export class Studio extends Screen {
   async openLibraryCopies(instance: string, deck: string): Promise<void> {
     await this.intent("Open the instance's library copies", async () => {
       await this.app.chrome.studioSection("library");
-      await expect(
-        this.page.getByRole("heading", {
-          level: 2,
-          name: this.t("studio.library.heading", { instance }),
-        }),
-      ).toBeVisible();
-      await this.app.chrome.expectBreadcrumbHere("studio.library.crumb");
-      const table = this.page.getByRole("table", {
-        name: this.t("studio.library.caption", { instance }),
-      });
-      const row = table
-        .getByRole("row")
-        .filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
-      await expect(await cellOf(table, row, this.t("studio.library.update"))).toHaveText(
+      await this.expectLibraryCopies(instance);
+      await this.expectCopyUpToDate(instance, deck);
+    });
+  }
+
+  /** The library copies' heading and trail. */
+  private async expectLibraryCopies(instance: string): Promise<void> {
+    await expect(
+      this.page.getByRole("heading", {
+        level: 2,
+        name: this.t("studio.library.heading", { instance }),
+      }),
+    ).toBeVisible();
+    await this.app.chrome.expectBreadcrumbHere("studio.library.crumb");
+  }
+
+  /** The library copies' table ("The decks of {instance} copied from the library"). */
+  private copies(instance: string): Locator {
+    return this.page.getByRole("table", { name: this.t("studio.library.caption", { instance }) });
+  }
+
+  /** A copy's row among the library copies, by its deck's name. */
+  private copyRow(instance: string, deck: string): Locator {
+    return this.copies(instance)
+      .getByRole("row")
+      .filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
+  }
+
+  /** What a copy's row says under its column's header ("copied", "current", "update"). */
+  private copyCell(instance: string, deck: string, column: string): Promise<Locator> {
+    return cellOf(
+      this.copies(instance),
+      this.copyRow(instance, deck),
+      this.t(`studio.library.${column}`),
+    );
+  }
+
+  /** The copy is of the library's current release, `version`: up to date, so it cannot be selected to update. */
+  async expectCopyUpToDate(instance: string, deck: string, version?: number): Promise<void> {
+    await this.intent(`See ${deck} up to date among the library copies`, async () => {
+      if (version !== undefined) {
+        await expect(await this.copyCell(instance, deck, "copied")).toHaveText(
+          this.t("studio.library.release", { version }),
+        );
+        await expect(await this.copyCell(instance, deck, "current")).toHaveText(
+          this.t("studio.library.release", { version }),
+        );
+      }
+      await expect(await this.copyCell(instance, deck, "update")).toHaveText(
         this.t("studio.library.upToDate"),
       );
-      await expect(row.getByRole("checkbox")).toHaveCount(0);
+      await expect(this.copyRow(instance, deck).getByRole("checkbox")).toHaveCount(0);
+    });
+  }
+
+  /**
+   * Home's badge on the deck's row says the library has release `version`
+   * out, and follows it to the library copies.
+   */
+  async followUpdateBadge(instance: string, deck: string, version: number): Promise<void> {
+    await this.intent(`Follow ${deck}'s badge of release ${version}`, async () => {
+      await this.decks(instance)
+        .getByRole("link", {
+          name: `${this.t("studio.library.badge", { version })} ${this.t("studio.library.badgeOf", { deck })}`,
+          exact: true,
+        })
+        .click();
+      await this.expectLibraryCopies(instance);
+    });
+  }
+
+  /** Home has no badge of a newer release on the deck's row: the copy is up to date. */
+  async expectNoUpdateBadge(instance: string, deck: string): Promise<void> {
+    await this.intent(`See no badge of a newer release on ${deck}`, async () => {
+      await expect(this.row(instance, deck)).toBeVisible();
+      await expect(
+        this.row(instance, deck).getByRole("link", {
+          name: this.t("studio.library.badgeOf", { deck }),
+        }),
+      ).toHaveCount(0);
+    });
+  }
+
+  /**
+   * The copy is of release `from` and the library's current one is `to`:
+   * its row says what updating it changes, and it can be selected to
+   * update. Moved to with the keyboard (j), the copy is shown beside the
+   * table, with what updating keeps and the notes of each release after
+   * `from`.
+   */
+  async readCopyUpgrade(
+    instance: string,
+    deck: string,
+    upgrade: { from: number; to: number; changes: string; kept: string; notes: string[] },
+  ): Promise<void> {
+    await this.intent(`Read what updating ${deck} to release ${upgrade.to} changes`, async () => {
+      const said = this.t("studio.library.changes", {
+        version: upgrade.to,
+        changes: upgrade.changes,
+      });
+      await expect(await this.copyCell(instance, deck, "copied")).toHaveText(
+        this.t("studio.library.release", { version: upgrade.from }),
+      );
+      await expect(await this.copyCell(instance, deck, "current")).toHaveText(
+        this.t("studio.library.release", { version: upgrade.to }),
+      );
+      await expect(await this.copyCell(instance, deck, "update")).toHaveText(said);
+      await expect(
+        this.copyRow(instance, deck).getByRole("checkbox", {
+          name: this.t("studio.decks.selectDeck", { deck }),
+          exact: true,
+        }),
+      ).toBeEnabled();
+      await this.page.keyboard.press("j");
+      const aside = this.page.getByRole("region", { name: deck, exact: true });
+      await expect(aside).toContainText(said);
+      await expect(aside).toContainText(upgrade.kept);
+      await expect(aside.getByRole("listitem")).toHaveText(
+        upgrade.notes.map((notes, at) =>
+          this.t("libraryUpgradeNotice.releaseNote", { version: upgrade.from + 1 + at, notes }),
+        ),
+      );
     });
   }
 

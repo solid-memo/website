@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, type Locator } from "@playwright/test";
+import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
 /**
@@ -34,16 +35,26 @@ export class DeckList extends Screen {
     return this.tree.getByRole("link");
   }
 
-  /** The link that opens the deck named `name` (its row's name). */
+  /**
+   * The link that opens the deck named `name` (its row's name), "New
+   * release" after it or not (a copy whose release the library has a
+   * newer one of).
+   */
   deckLink(name: string): Locator {
-    return this.tree.getByRole("link", { name, exact: true });
+    return this.tree.getByRole("link", { name: this.named(name) });
+  }
+
+  /** The name `name`, "New release" after it or not (`newer` true: after it). */
+  private named(name: string, newer?: boolean): RegExp {
+    const release = `\\s*${escapeRegExp(this.t("deckList.newerRelease"))}`;
+    return new RegExp(`^${escapeRegExp(name)}(${release})${newer ? "" : "?"}$`);
   }
 
   /** The row of the deck named `name`: the innermost list item holding its link. */
   row(name: string): Locator {
     return this.tree
       .getByRole("listitem")
-      .filter({ has: this.page.getByRole("link", { name, exact: true }) })
+      .filter({ has: this.page.getByRole("link", { name: this.named(name) }) })
       .last();
   }
 
@@ -92,6 +103,19 @@ export class DeckList extends Screen {
 
   async expectDeck(name: string): Promise<void> {
     await expect(this.deckLink(name)).toBeVisible();
+  }
+
+  /** The deck's row says "New release" after its name: the library has a newer release of the copy, or not (`newer` false). */
+  async expectNewRelease(name: string, newer = true): Promise<void> {
+    await this.intent(
+      `Check ${name} ${newer ? "says" : "no longer says"} it has a new release`,
+      () =>
+        expect(
+          newer
+            ? this.tree.getByRole("link", { name: this.named(name, true) })
+            : this.tree.getByRole("link", { name, exact: true }),
+        ).toBeVisible(),
+    );
   }
 
   /** Follows "Create deck" to the deck creator. */

@@ -8,8 +8,10 @@ import { Screen } from "./Screen.ts";
 
 /**
  * A deck's own page (from its row in Decks): its name and description,
- * Preferences and Browser, what is due today and Study. The description
- * is shown in the app's language when the deck has one in it.
+ * Preferences and Browser, what is due today and Study, and, for a copy
+ * of a library release the library has a newer one of, the offer to
+ * update it. The description is shown in the app's language when the
+ * deck has one in it.
  */
 export class DeckDetail extends Screen {
   /** The deck's description, labeled "Description". */
@@ -155,5 +157,83 @@ export class DeckDetail extends Screen {
     await this.intent("Check the deck's description", () =>
       expect(this.description).toHaveText(text),
     );
+  }
+
+  /** The offer of a newer library release ("Newer library release"). */
+  private get upgradeOffer(): Locator {
+    return this.page
+      .getByRole("main")
+      .getByRole("region", { name: this.t("libraryUpgradeNotice.region"), exact: true });
+  }
+
+  /**
+   * The page offers the library's newer release of the copy: which
+   * release it came from and which is out, what updating changes
+   * (`changes`, as the offer words it) and keeps (`kept`), and the notes
+   * of each release after `from`, in order.
+   */
+  async expectUpgradeOffer(offer: {
+    deck: string;
+    from: number;
+    to: number;
+    changes: string;
+    kept: string;
+    notes: string[];
+  }): Promise<void> {
+    await this.intent(`Read the offer of release ${offer.to}`, async () => {
+      await expect(this.upgradeOffer).toContainText(
+        `${this.t("libraryUpgradeNotice.heading")} ${this.t("libraryUpgradeNotice.body", {
+          deck: offer.deck,
+          from: offer.from,
+          to: offer.to,
+          changes: offer.changes,
+        })} ${offer.kept}`,
+      );
+      await expect(this.upgradeOffer.getByRole("listitem")).toHaveText(
+        offer.notes.map((notes, at) =>
+          this.t("libraryUpgradeNotice.releaseNote", { version: offer.from + 1 + at, notes }),
+        ),
+      );
+    });
+  }
+
+  /** "Update to release {to}": the offer goes once the deck is updated, which the page says. */
+  async upgrade(to: number): Promise<void> {
+    await this.intent(`Update the deck to release ${to}`, async () => {
+      await this.upgradeOffer
+        .getByRole("button", { name: this.t("libraryUpgradeNotice.update", { version: to }) })
+        .click();
+      await expect(
+        this.page
+          .getByRole("main")
+          .getByRole("status")
+          .filter({
+            hasText: this.t("libraryUpgrade.updated", { version: to }),
+          }),
+      ).toBeVisible();
+      await expect(this.upgradeOffer).toBeHidden();
+    });
+  }
+
+  /** The page offers no newer release: the copy is of the library's newest. */
+  async expectNoUpgradeOffer(): Promise<void> {
+    await expect(this.upgradeOffer).toBeHidden();
+  }
+
+  /** Nothing left to study today, `studied` cards studied today, so no Study button. */
+  async expectDoneForToday(studied: number): Promise<void> {
+    const main = this.page.getByRole("main");
+    await expect(main.getByText(this.t("deckDetail.allStudied"), { exact: true })).toBeVisible();
+    await expect(
+      main.getByText(
+        this.t("deckDetail.studiedToday", {
+          studied: this.t("common.cardCount", { count: studied }),
+        }),
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(
+      main.getByRole("button", { name: this.t("deckDetail.studyButton"), exact: true }),
+    ).toBeHidden();
   }
 }

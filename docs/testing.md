@@ -298,6 +298,8 @@ Further journeys go through:
 - logging out and back in, and in on a second device, onto the same
   instance, after a WebID the form refuses and a consent refused, the
   dark theme following through the pod;
+- updating a copy of a library deck's first release to its second,
+  offered in Solid Memo and in the Studio, the day's study kept;
 
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
