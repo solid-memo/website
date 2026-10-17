@@ -33,6 +33,12 @@
     schema:position 30 ;
     dcterms:abstract "where your data is stored, what stays in the browser, what the host and other servers see, no analytics, and the email address published in deck metadata."@en .
 
+<accessibility.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#using-the-app> ;
+    schema:position 40 ;
+    dcterms:abstract "what the app aims for (WCAG 2.2 AA), what is checked automatically and by hand, the gaps known, and how to report a barrier."@en .
+
 <#the-code>
     a schema:Collection ;
     dcterms:title "The code"@en ;

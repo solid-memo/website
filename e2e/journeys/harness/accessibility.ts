@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * What the journeys check every screen for (docs/testing.md#user-journeys): axe's
+ * What the journeys check every screen for (docs/accessibility.md): axe's
  * rules for WCAG 2.0, 2.1 and 2.2 at levels A and AA, in the light and
  * the dark theme. A violation fails the journey, unless it is one of the
  * known exceptions below.

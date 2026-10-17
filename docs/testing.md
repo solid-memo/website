@@ -374,7 +374,8 @@ the dark theme, against WCAG 2.0, 2.1 and 2.2 at levels A and AA
 A violation fails the journey, which goes on to its end so that every
 screen is checked. A violation let pass is listed in that file's
 `KNOWN_EXCEPTIONS`, with its reason. The Solid server's own pages, its
-login, are not checked.
+login, are not checked. What the app aims for, and what else is
+checked, is in [accessibility.md](accessibility.md).
 
 **When a journey fails**, the CI job's summary names it, the step it
 failed in (the spec's numbered step › the page object's action) and the
