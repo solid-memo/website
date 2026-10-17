@@ -82,6 +82,7 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Source code",
     "changelog": "Changelog",
+    "about": "About",
     "docs": "Docs",
     "reportIssue": "Report an issue",
     "discussions": "Discussions"

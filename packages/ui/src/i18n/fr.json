@@ -84,6 +84,7 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Code source",
     "changelog": "Journal des modifications",
+    "about": "À propos de l’app (en anglais)",
     "docs": "Documentation (en anglais)",
     "reportIssue": "Signaler un problème",
     "discussions": "Discussions"

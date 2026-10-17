@@ -82,6 +82,7 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Källkod",
     "changelog": "Ändringslogg",
+    "about": "Om appen (på engelska)",
     "docs": "Dokumentation (på engelska)",
     "reportIssue": "Rapportera ett problem",
     "discussions": "Diskussioner"
