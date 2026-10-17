@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.9.0](https://github.com/solid-memo/website/compare/v3.8.0...v3.9.0) (2026-10-17)
+
+### Features
+
+* **ui:** show under each grade the interval it gives ([0693270](https://github.com/solid-memo/website/commit/0693270fea5c25048ffc5582244698d57c6f0c33)), closes [#145](https://github.com/solid-memo/website/issues/145)
+* **ui:** undo the last answer in a study session ([01b8a1d](https://github.com/solid-memo/website/commit/01b8a1d8f373fd96a4418e36e36a836760267ea0)), closes [#145](https://github.com/solid-memo/website/issues/145)
+
 ## [3.8.0](https://github.com/solid-memo/website/compare/v3.7.1...v3.8.0) (2026-10-17)
 
 ### Features
