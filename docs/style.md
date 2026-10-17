@@ -34,7 +34,10 @@ npm run lint     # check them, as npm run check does: formatting and lint rules
 
 Biome's recommended lint rules are on. A rule that fires on code that is
 right as it is, is turned off in `biome.jsonc` with its reason beside it;
-a problem it finds is fixed.
+a problem it finds is fixed. It is turned off only where its reason
+holds: for the files it names, in an `overrides` entry, and for the
+whole repository only when the reason applies everywhere. Otherwise a
+new mistake in any other file would pass the lint too.
 
 Rules beyond the recommended ones are on as well:
 
