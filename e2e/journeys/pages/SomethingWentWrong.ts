@@ -20,14 +20,19 @@ export class SomethingWentWrong extends Screen {
 
   /**
    * Has the browser get, for the Studio's code (its chunk of the build),
-   * a module whose workspace throws `message` whenever it renders.
+   * a module whose workspace throws `message` whenever it renders. The
+   * module is fixed code that reads the message from the page, so none
+   * of it is built from the message.
    */
   async breakStudio(message: string): Promise<void> {
     await this.intent("Break the Studio's code", async () => {
+      await this.page.evaluate((text) => {
+        (globalThis as { studioError?: string }).studioError = text;
+      }, message);
       await this.page.route("**/assets/StudioWorkspace-*.js", (route) =>
         route.fulfill({
           contentType: "text/javascript",
-          body: `export function StudioWorkspace() { throw new Error(${JSON.stringify(message)}); }`,
+          body: "export function StudioWorkspace() { throw new Error(globalThis.studioError); }",
         }),
       );
     });
