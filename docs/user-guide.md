@@ -359,3 +359,4 @@ screenshot of each.
 | Solid Memo Studio | studio.journey.ts, first journey | 06–36 |
 | Trying the app as a guest, and moving the study into a pod | [guest.journey.ts](../e2e/journeys/journeys/guest.journey.ts) | 02–11 |
 | Copying a library deck's link, and opening it in another browser as a guest | [try-link.journey.ts](../e2e/journeys/journeys/try-link.journey.ts) | 02–05 |
+| A screen that breaks: Something went wrong, its details and its report | [render-error.journey.ts](../e2e/journeys/journeys/render-error.journey.ts) | 02–06 |

@@ -305,7 +305,11 @@ Further journeys go through:
   offered in Solid Memo and in the Studio, the day's study kept;
 - trying Solid Memo as a guest and moving the guest's study into a new
   instance in the pod, the move first cut off and its partial copy
-  removed.
+  removed;
+- a screen that fails while it renders (the Studio's code, swapped for
+  code that throws): "Something went wrong" under the header that still
+  works, its details copied and its report link filled in, and the way
+  back to the start.
 
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`

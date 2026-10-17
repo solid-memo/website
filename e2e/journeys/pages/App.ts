@@ -28,6 +28,7 @@ import { LibraryDeck } from "./LibraryDeck.ts";
 import { LibraryPreview } from "./LibraryPreview.ts";
 import { Onboarding } from "./Onboarding.ts";
 import { Preferences } from "./Preferences.ts";
+import { SomethingWentWrong } from "./SomethingWentWrong.ts";
 import { Statistics } from "./Statistics.ts";
 import { Study } from "./Study.ts";
 import { Studio } from "./Studio.ts";
@@ -73,6 +74,7 @@ export class App {
   readonly chapter = new Chapter(this);
   readonly chapterReview = new ChapterReview(this);
   readonly question = new CourseQuestion(this);
+  readonly crash = new SomethingWentWrong(this);
 
   constructor(
     readonly page: Page,
