@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useEffect, useId, useRef, useState } from "preact/hooks";
 import { licenseLabel } from "@solid-memo/domain/license";
 import { keywordsIn } from "@solid-memo/domain/keywords";
 import { topicLabels, type LibraryDeck, type LibrarySource } from "@solid-memo/domain/library";
@@ -26,16 +27,17 @@ import { ReportMistake } from "./ReportMistake";
  * shown comes from the library index, or from a release added from a
  * link (`host`, where it is published, then said, with what it is), so
  * any link in it goes through ExternalLink. A release from a link has no
- * card list or preview to link to. A mistake in the release is reported
- * where `reportPlace` says (ReportMistake): to the library for one the
- * library's index lists, however it was reached, else to the contact the
- * release names, if any.
+ * card list or preview to link to, nor a link to the deck to copy. A
+ * mistake in the release is reported where `reportPlace` says
+ * (ReportMistake): to the library for one the library's index lists,
+ * however it was reached, else to the contact the release names, if any.
  */
 export function LibraryDeckScreen({
   deck,
   host,
   browseHref,
   previewHref,
+  shareUrl,
   imported,
   busy,
   error,
@@ -50,6 +52,8 @@ export function LibraryDeckScreen({
   browseHref?: string;
   /** URL of the deck's preview, which tries its cards before import; none for a release from a link. */
   previewHref?: string;
+  /** The address anyone can open the deck at (`#/try`), to copy; none for a release from a link. */
+  shareUrl?: string;
   /**
    * The instance already holds a copy; a second one is still allowed,
    * but a course is started once: it is continued.
@@ -198,6 +202,7 @@ export function LibraryDeckScreen({
             {t("libraryDeck.preview")}
           </a>
         )}
+        {shareUrl !== undefined && <ShareLink url={shareUrl} />}
         {imported && deck.isCourse !== true && (
           <span class="hint library-imported">{t("libraryDeck.alreadyImported")}</span>
         )}
@@ -205,6 +210,48 @@ export function LibraryDeckScreen({
       <ErrorMessage error={error} />
       {reportPlace !== undefined && <ReportMistake place={reportPlace} releaseUrl={deck.url} />}
     </section>
+  );
+}
+
+/**
+ * "Copy link": the deck's address for anyone, copied to the clipboard,
+ * and a status line that says so. A browser that will not copy it (no
+ * clipboard, or permission refused) shows the address instead, in a
+ * field that takes the focus with it selected, to copy by hand.
+ */
+function ShareLink({ url }: { url: string }) {
+  const { t } = useI18n();
+  const [copied, setCopied] = useState<boolean | null>(null);
+  const fieldId = useId();
+  const field = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (copied !== false) return;
+    field.current!.focus();
+    field.current!.select();
+  }, [copied]);
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+  return (
+    <>
+      <button type="button" onClick={() => void copy()}>
+        {t("libraryDeck.copyLink")}
+      </button>
+      <span role="status" class="hint">
+        {copied === true && t("libraryDeck.linkCopied")}
+      </span>
+      {copied === false && (
+        <span class="share-link">
+          <label for={fieldId}>{t("libraryDeck.copyFailed")}</label>
+          <input id={fieldId} ref={field} type="url" readOnly value={url} />
+        </span>
+      )}
+    </>
   );
 }
 

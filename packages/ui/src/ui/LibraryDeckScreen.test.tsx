@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { LibraryDeckScreen } from "./LibraryDeckScreen";
 import { licenseLabel } from "@solid-memo/domain/license";
 import { NEW_TAB, newTab } from "../test/links";
@@ -255,6 +255,43 @@ describe("LibraryDeckScreen", () => {
     expect(preview.previousElementSibling).toBe(
       screen.getByRole("button", { name: "Import this deck" }),
     );
+  });
+
+  describe("Copy link", () => {
+    const LINK = "https://solid-memo.com/#/try?deck=capitals";
+    /** The browser's clipboard, which jsdom has none of: absent, the browser will not copy. */
+    const clipboard = (value: Pick<Clipboard, "writeText"> | undefined) =>
+      Object.defineProperty(navigator, "clipboard", { value, configurable: true });
+    afterEach(() => clipboard(undefined));
+
+    it("is offered only with a link to copy", () => {
+      renderScreen();
+      expect(screen.queryByRole("button", { name: "Copy link" })).toBeNull();
+    });
+
+    it("copies the deck's link for anyone, and says so", async () => {
+      const writeText = vi.fn(async () => undefined);
+      clipboard({ writeText });
+      renderScreen({ shareUrl: LINK });
+      fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
+      expect(await screen.findByRole("status")).toHaveTextContent(
+        "Link copied. Anyone can open it, without an account.",
+      );
+      expect(writeText).toHaveBeenCalledWith(LINK);
+      expect(screen.queryByRole("textbox")).toBeNull();
+    });
+
+    it("shows the link, selected, when the browser will not copy it", async () => {
+      renderScreen({ shareUrl: LINK });
+      fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
+      const field = await screen.findByRole("textbox", {
+        name: "The link could not be copied. Copy it from here:",
+      });
+      expect(field).toHaveValue(LINK);
+      expect(field).toHaveAttribute("readonly");
+      await waitFor(() => expect(field).toHaveFocus());
+      expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    });
   });
 
   it("locks the button while importing", () => {

@@ -181,6 +181,9 @@ description or keyword, or narrow the list to topics.
   Nothing is recorded.
 - **Report a mistake**, on a deck's page and on each of its cards,
   reports a wrong card, its deck filled in.
+- **Copy link**, on a deck's page, copies a link to it that anyone can
+  open, without an account: someone not logged in tries it as a guest
+  ([guest-mode.md](guest-mode.md#from-a-link)).
 - Check several decks and press **Import**, or import one from its own
   page. The copy is yours: edit it as you like. A deck you have already
   imported is marked so.
