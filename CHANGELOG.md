@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.6.0](https://github.com/solid-memo/website/compare/v3.5.0...v3.6.0) (2026-10-17)
+
+### Features
+
+* **decks:** stop presenting foundation reviews as current ([7b1708e](https://github.com/solid-memo/website/commit/7b1708e1f8dd0b56cfbe9d572b38ffa502646a7b)), closes [#136](https://github.com/solid-memo/website/issues/136)
+
 ## [3.5.0](https://github.com/solid-memo/website/compare/v3.4.0...v3.5.0) (2026-10-17)
 
 ### Features
