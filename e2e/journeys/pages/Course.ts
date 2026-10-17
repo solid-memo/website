@@ -34,6 +34,13 @@ export class Course extends Screen {
     });
   }
 
+  /** The chapter's line in the course's list says `done` of its steps are done ("1 of 3 steps done"). */
+  async expectStepsDone(chapter: string, done: number): Promise<void> {
+    await expect(
+      this.chapter(chapter).getByText(this.tp("course.stepsDone", { done })),
+    ).toBeVisible();
+  }
+
   async expectShown(title: string): Promise<void> {
     await expect(this.heading(title)).toBeVisible();
     await this.app.chrome.expectBreadcrumbHere("breadcrumbs.course");

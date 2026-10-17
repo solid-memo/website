@@ -6,7 +6,10 @@ import { expect, type Locator } from "@playwright/test";
 import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
-/** The landing page and the WebID form, before anyone is logged in. */
+/**
+ * The landing page and the WebID form, before anyone is logged in, or
+ * while a guest logs in to keep their study (the form shown at once).
+ */
 export class Onboarding extends Screen {
   async visit(): Promise<void> {
     await this.intent("Visit Solid Memo", async () => {
@@ -60,9 +63,27 @@ export class Onboarding extends Screen {
     });
   }
 
-  private async submitWebId(webId: string): Promise<void> {
-    await this.webIdField.fill(webId);
-    await this.page.getByRole("button", { name: this.t("webIdForm.logIn") }).click();
+  /**
+   * The WebID form, already shown (to a guest logging in to keep their
+   * study, or after a WebID refused): the login starts, on to the
+   * identity provider.
+   */
+  async submitWebId(webId: string): Promise<void> {
+    await this.intent("Submit the WebID", async () => {
+      await this.webIdField.fill(webId);
+      await this.page.getByRole("button", { name: this.t("webIdForm.logIn") }).click();
+    });
+  }
+
+  /** "Try it without logging in": a guest's study starts, in this browser, at its decks. */
+  async tryAsGuest(): Promise<void> {
+    await this.intent("Try Solid Memo as a guest", async () => {
+      await this.page
+        .getByRole("button", { name: this.t("onboardingFlow.tryAsGuest"), exact: true })
+        .click();
+      await this.app.chrome.expectGuest();
+      await this.app.decks.expectShown();
+    });
   }
 
   /** Back from the identity provider: the pod it found, then on. */

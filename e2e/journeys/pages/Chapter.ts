@@ -76,30 +76,56 @@ export class Chapter extends Screen {
     });
   }
 
+  /** The button after the last step's last question: on to the final review. */
+  get toReview(): Locator {
+    return this.page.getByRole("button", { name: this.t("chapterPlayer.toReview"), exact: true });
+  }
+
+  /**
+   * Works through the step shown alone: its theory, then each of its
+   * questions, answered once, until the next step's theory (or the word
+   * before the final review, after the last step). How many questions
+   * it had.
+   */
+  async workThroughStep(known: Answers): Promise<number> {
+    return this.intent("Work through the step", async () => {
+      await this.readTheory();
+      return (await this.answerStep(known)).questions;
+    });
+  }
+
   /**
    * Works through every step from the one shown: its theory, then each of
    * its questions, each answered once, until on to the final review.
    * The steps worked through.
    */
   async workThrough(known: Answers): Promise<{ step: number; chunks: number }[]> {
-    const steps = [await this.readTheory()];
+    const steps: { step: number; chunks: number }[] = [];
     for (;;) {
-      await this.app.question.answer(known);
-      const toReview = this.page.getByRole("button", {
-        name: this.t("chapterPlayer.toReview"),
-        exact: true,
-      });
-      if (await toReview.isVisible()) {
-        await toReview.click();
+      steps.push(await this.readTheory());
+      if ((await this.answerStep(known)).last) {
+        await this.toReview.click();
         return steps;
       }
+    }
+  }
+
+  /**
+   * Answers the step's questions, each once, until the next step's
+   * theory, or, after the last step's, the button on to the final
+   * review: how many, and whether it was the last step.
+   */
+  private async answerStep(known: Answers): Promise<{ questions: number; last: boolean }> {
+    for (let questions = 1; ; questions++) {
+      await this.app.question.answer(known);
+      if (await this.toReview.isVisible()) return { questions, last: true };
       await this.page
         .getByRole("main")
         .getByRole("button", { name: this.t("chapterPlayer.next"), exact: true })
         .click();
       // The step's next question, or the next step's theory.
       await expect(this.app.question.check.or(this.continue).or(this.toQuestions)).toBeVisible();
-      if (!(await this.app.question.check.isVisible())) steps.push(await this.readTheory());
+      if (!(await this.app.question.check.isVisible())) return { questions, last: false };
     }
   }
 }

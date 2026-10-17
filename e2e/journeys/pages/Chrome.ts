@@ -123,6 +123,27 @@ export class Chrome extends Screen {
     });
   }
 
+  /** The masthead says a guest is studying, and offers to log in to keep it. */
+  async expectGuest(): Promise<void> {
+    await expect(this.page.getByRole("banner")).toContainText(this.t("app.guestLine"));
+    await expect(this.keepStudyButton).toBeVisible();
+  }
+
+  private get keepStudyButton(): Locator {
+    return this.page
+      .getByRole("banner")
+      .getByRole("button", { name: this.t("app.keepStudy"), exact: true });
+  }
+
+  /** A guest's "Keep my study: log in": the WebID form, the study left where it is meanwhile. */
+  async keepStudy(): Promise<void> {
+    await this.intent("Log in to keep the study", async () => {
+      await this.keepStudyButton.click();
+      await expect(this.page.getByText(this.t("app.loginToKeep"), { exact: true })).toBeVisible();
+      await expect(this.page.getByRole("textbox", { name: "WebID" })).toBeVisible();
+    });
+  }
+
   /** Follows the breadcrumb named, and waits until the app is there (it is the current one). */
   async breadcrumb(key: string): Promise<void> {
     await this.intent(`Follow the breadcrumb ${this.t(key)}`, async () => {

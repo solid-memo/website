@@ -92,6 +92,25 @@ export class DeckList extends Screen {
     });
   }
 
+  /** The strip of courses to go on with, above the list. */
+  get courseStrip(): Locator {
+    return this.page.getByRole("complementary", { name: this.t("deckList.courses"), exact: true });
+  }
+
+  /** The strip offers to continue the course, started and not finished; its title opens its page. */
+  async openStartedCourse(title: string): Promise<void> {
+    await this.intent(`Open the course ${title} from the strip`, async () => {
+      await expect(
+        this.courseStrip.getByRole("link", {
+          name: this.t("deckList.continueCourseNamed", { course: title }),
+          exact: true,
+        }),
+      ).toBeVisible();
+      await this.courseStrip.getByRole("link", { name: title, exact: true }).click();
+      await this.app.course.expectShown(title);
+    });
+  }
+
   async expectShown(): Promise<void> {
     await expect(this.heading).toBeVisible();
   }

@@ -300,6 +300,9 @@ Further journeys go through:
   dark theme following through the pod;
 - updating a copy of a library deck's first release to its second,
   offered in Solid Memo and in the Studio, the day's study kept;
+- trying Solid Memo as a guest and moving the guest's study into a new
+  instance in the pod, the move first cut off and its partial copy
+  removed.
 
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`

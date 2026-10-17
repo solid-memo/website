@@ -19,6 +19,7 @@ import { DeckDetail } from "./DeckDetail.ts";
 import { DeckGroups } from "./DeckGroups.ts";
 import { DeckList } from "./DeckList.ts";
 import { DraftEditor } from "./DraftEditor.ts";
+import { GuestOffer } from "./GuestOffer.ts";
 import { ImportUrl } from "./ImportUrl.ts";
 import { InstanceCreator } from "./InstanceCreator.ts";
 import { InstancePicker } from "./InstancePicker.ts";
@@ -47,6 +48,7 @@ export class App {
   readonly chrome = new Chrome(this);
   readonly onboarding = new Onboarding(this);
   readonly cssLogin = new CssLogin(this);
+  readonly guestOffer = new GuestOffer(this);
   readonly instanceCreator = new InstanceCreator(this);
   readonly instancePicker = new InstancePicker(this);
   readonly decks = new DeckList(this);
