@@ -7,7 +7,8 @@ import { noonTimeZone } from "./harness/timezone.ts";
 
 /**
  * The user journeys (docs/testing.md): the built app in Chromium, logging
- * in to a Community Solid Server 7 that globalSetup.ts starts. Every
+ * in to a Community Solid Server 7 that globalSetup.ts starts; a few of
+ * them also in Firefox, WebKit and on a phone (ENGINE_JOURNEYS). Every
  * failure keeps a trace (the journey step by step, replayable: `npx
  * playwright show-trace`), a video, and what fixtures.ts gathers.
  */
@@ -17,6 +18,14 @@ const TRACE_MODES = ["on", "off", "retain-on-failure"] as const;
 const trace = process.env.JOURNEY_TRACE || "retain-on-failure";
 if (!(TRACE_MODES as readonly string[]).includes(trace))
   throw new Error(`JOURNEY_TRACE is "${trace}"; it may be ${TRACE_MODES.join(", ")}.`);
+
+/**
+ * The journeys the other engines and the phone run: logging in, a guest's
+ * study kept in the browser through the login's redirects, and the silent
+ * restore of a session after a reload, which differ most between engines.
+ * The rest exercise the app's logic, which doesn't (docs/testing.md#browsers).
+ */
+const ENGINE_JOURNEYS = /@smoke|@guest|@reload/;
 
 export default defineConfig({
   testDir: "journeys",
@@ -52,7 +61,13 @@ export default defineConfig({
     video: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox", use: { ...devices["Desktop Firefox"] }, grep: ENGINE_JOURNEYS },
+    { name: "webkit", use: { ...devices["Desktop Safari"] }, grep: ENGINE_JOURNEYS },
+    // Safari on an iPhone: a phone's viewport, touch, and WebKit.
+    { name: "phone", use: { ...devices["iPhone 14"] }, grep: ENGINE_JOURNEYS },
+  ],
   // The built app (npm run build -w @solid-memo/web), the Studio, its deck
   // library and shapes included; 127.0.0.1 is a secure context, so http will do.
   webServer: {

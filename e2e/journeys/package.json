@@ -1,6 +1,6 @@
 {
   "name": "@solid-memo/e2e-journeys",
-  "description": "Solid Memo's user journeys: the built app in Chromium, driven by Playwright against a Solid server.",
+  "description": "Solid Memo's user journeys: the built app in Chromium, Firefox, WebKit and on a phone, driven by Playwright against a Solid server.",
   "private": true,
   "license": "MIT",
   "version": "0.0.0",
@@ -13,7 +13,7 @@
     "journeys:ui": "playwright test --ui",
     "journeys:headed": "playwright test --headed",
     "journeys:report": "playwright show-report",
-    "browsers": "playwright install --with-deps chromium",
+    "browsers": "playwright install --with-deps chromium firefox webkit",
     "css": "node harness/cssServer.ts",
     "css:prepare": "node harness/cssServer.ts prepare",
     "css:clean": "node harness/cssServer.ts clean"

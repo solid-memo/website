@@ -7,9 +7,10 @@ import { join } from "node:path";
 
 /**
  * The journeys' outcome in Markdown, for the CI job's summary page: each
- * journey that failed, the step it failed in (the spec's numbered step,
- * then the page object's intent), the error, what the run was made of
- * (WebID, seed), and how to replay it from the job's artifact.
+ * journey that failed and the browser it failed in, the step it failed in
+ * (the spec's numbered step, then the page object's intent), the error,
+ * what the run was made of (WebID, seed), and how to replay it from the
+ * job's artifact.
  */
 
 interface Step {
@@ -26,7 +27,11 @@ interface Result {
 interface Spec {
   title: string;
   file: string;
-  tests: { annotations?: { type: string; description?: string }[]; results: Result[] }[];
+  tests: {
+    projectName?: string;
+    annotations?: { type: string; description?: string }[];
+    results: Result[];
+  }[];
 }
 interface Suite {
   specs?: Spec[];
@@ -83,7 +88,9 @@ export function summarize(report: Report, artifact: string): string {
       .split("\n")
       .slice(0, 12)
       .join("\n");
-    lines.push(`### ✗ ${spec.title} (${spec.file})`, "");
+    // The browser it failed in, as the config's project names it.
+    const where = test.projectName === undefined ? spec.file : `${spec.file}, ${test.projectName}`;
+    lines.push(`### ✗ ${spec.title} (${where})`, "");
     lines.push(`**Failed in:** ${path.length > 0 ? path.join(" › ") : "(outside any step)"}`, "");
     const about = (test.annotations ?? [])
       .filter((note) => note.description !== undefined)

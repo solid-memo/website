@@ -27,18 +27,28 @@ export class LibraryDeck extends Screen {
   }
 
   /**
-   * "Copy link": the link to the deck that names no instance, read back
-   * from the clipboard, which the browser is let to use for it.
+   * "Copy link": the link to the deck that names no instance, as the app
+   * wrote it to the clipboard. Only Chromium lets a page read the
+   * clipboard back, or needs a permission to write it, so the link is
+   * taken from the app's call to write it, in every engine alike.
    */
   async copyLink(): Promise<string> {
     return this.intent("Copy the deck's link", async () => {
-      await this.page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+      if (this.page.context().browser()?.browserType().name() === "chromium")
+        await this.page.context().grantPermissions(["clipboard-write"]);
+      await this.page.evaluate(() => {
+        const write = navigator.clipboard.writeText.bind(navigator.clipboard);
+        navigator.clipboard.writeText = (text) => {
+          document.documentElement.dataset.copied = text;
+          return write(text);
+        };
+      });
       await this.page
         .getByRole("main")
         .getByRole("button", { name: this.t("libraryDeck.copyLink"), exact: true })
         .click();
       await expect(this.page.getByRole("main")).toContainText(this.t("libraryDeck.linkCopied"));
-      return this.page.evaluate(() => navigator.clipboard.readText());
+      return this.page.evaluate(() => document.documentElement.dataset.copied ?? "");
     });
   }
 
@@ -50,13 +60,16 @@ export class LibraryDeck extends Screen {
    */
   async followLink(link: string, title: string): Promise<void> {
     await this.intent(`Follow the link to ${title}`, async () => {
+      // The page the link was followed from; not the browser's blank
+      // first page, which Firefox drops from the history.
+      const from = new URL("robots.txt", link).href;
+      await this.page.goto(from);
       await this.page.goto(link);
       await this.expectOpen(title);
       await this.app.chrome.expectGuest();
       await expect(this.page).toHaveURL(/#\/library-deck\?/);
-      // The browser was opened for the link: before it, there is only the blank page.
       await this.page.goBack();
-      await expect(this.page).toHaveURL("about:blank");
+      await expect(this.page).toHaveURL(from);
       await this.page.goForward();
       await this.expectOpen(title);
     });

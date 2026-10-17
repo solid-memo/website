@@ -19,7 +19,7 @@
     a schema:TechArticle ;
     schema:isPartOf <#using-the-app> ;
     schema:position 10 ;
-    dcterms:abstract "a walk through Solid Memo for a learner: signing in or trying it as a guest, adding a deck, studying, courses, statistics, and the settings."@en .
+    dcterms:abstract "a walk through Solid Memo for a learner: the browsers it supports, signing in or trying it as a guest, adding a deck, studying, courses, statistics, and the settings."@en .
 
 <glossary.md>
     a schema:TechArticle ;

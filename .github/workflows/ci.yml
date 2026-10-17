@@ -308,14 +308,29 @@ jobs:
   # The user journeys (e2e/journeys, docs/testing.md): the built app in
   # Chromium, logging in to a Community Solid Server 7 behind TLS that the
   # harness starts in Docker, each journey with an account and pod of its
-  # own. When one fails, the job's summary names the step it failed in, and
-  # its artifact holds the trace to replay it step by step (`npx playwright
-  # show-trace`), the report, a video, and the server's log. On main the
-  # traces are kept always: the deploy publishes the report, trace viewer
-  # and all, at /journeys/ (docs/deployment.md).
+  # own. The other engines and the phone run a few of them, in a job of
+  # their own so neither job takes longer than one did
+  # (docs/testing.md#browsers). When one fails, the job's summary names the
+  # step it failed in, and its artifact holds the trace to replay it step
+  # by step (`npx playwright show-trace`), the report, a video, and the
+  # server's log. On main the traces are kept always: the deploy publishes
+  # Chromium's report, trace viewer and all, at /journeys/
+  # (docs/deployment.md).
   journeys:
+    name: journeys (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: chromium
+            projects: --project=chromium
+            browsers: chromium
+          # The build draws the docs' diagrams in Chromium's headless shell.
+          - name: engines
+            projects: --project=firefox --project=webkit --project=phone
+            browsers: chromium-headless-shell firefox webkit
     env:
       JOURNEY_TRACE: ${{ (inputs.trace || github.ref == 'refs/heads/main') && 'on' || '' }}
     steps:
@@ -333,11 +348,11 @@ jobs:
         id: browsers
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.name }}
       - if: steps.browsers.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps ${{ matrix.browsers }}
       - if: steps.browsers.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
+        run: npx playwright install-deps ${{ matrix.browsers }}
       - run: npx turbo run build --filter=@solid-memo/web
       - id: images
         uses: ./.github/actions/e2e-images
@@ -353,19 +368,19 @@ jobs:
         with:
           path: ${{ steps.images.outputs.file }}
           key: ${{ steps.images.outputs.key }}
-      - run: npm run journeys
+      - run: npm run journeys -- ${{ matrix.projects }}
       - if: always()
-        run: node e2e/journeys/harness/summary.ts journeys-${{ github.run_attempt }}
+        run: node e2e/journeys/harness/summary.ts journeys-${{ matrix.name }}-${{ github.run_attempt }}
       - if: failure() || env.JOURNEY_TRACE == 'on'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: journeys-${{ github.run_attempt }}
+          name: journeys-${{ matrix.name }}-${{ github.run_attempt }}
           path: |
             e2e/journeys/playwright-report/
             e2e/journeys/test-results/
             e2e/journeys/logs/
           retention-days: 7
-      - if: always() && github.ref == 'refs/heads/main'
+      - if: always() && github.ref == 'refs/heads/main' && matrix.name == 'chromium'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: journeys-report

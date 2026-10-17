@@ -38,12 +38,14 @@ npm run test:pod  # the end-to-end tests, against the Solid servers they start i
 npm run servers -w @solid-memo/e2e-pod   # pull or build those servers' images ahead (`-- css-6` for one)
 npm run pod       # a Community Solid Server at http://127.0.0.1:3999/, in memory, to poke at by hand
 npm run pod:clean # take down the servers an interrupted run left
-npm run journeys  # the user journeys: the built app in Chromium, against a Community Solid Server 7 started in Docker
+npm run journeys  # the user journeys: the built app in Chromium (a few also in Firefox, WebKit and on a phone), against a Community Solid Server 7 started in Docker
+npm run journeys -- --project=chromium   # one browser's journeys (chromium, firefox, webkit or phone)
 npm run journeys -- --ui  # the same in Playwright's UI mode: watch, pick, step through and time-travel a journey
 npm run journeys -- -g smoke   # only the journeys whose title matches (or --repeat-each=10, or any other Playwright option)
 npm run css -w @solid-memo/e2e-journeys   # keep such a server up; JOURNEY_SERVER_URL=<its url> npm run journeys reuses it
 npm run journeys:report -w @solid-memo/e2e-journeys   # open the last run's report
 npm run css:clean -w @solid-memo/e2e-journeys   # take down the servers an interrupted run left
+npm run check:providers   # the Pod providers onboarding suggests answer with their issuers (needs the network)
 ```
 
 `npm run test:pod` runs `e2e/pod/` once against each Solid server
@@ -260,7 +262,8 @@ the cross-check; `npm run check` does not, as it needs no Python.
 
 `e2e/journeys/` drives the built app (`npx turbo run build --filter=@solid-memo/web`,
 served by `vite preview` at `http://127.0.0.1:4173/`, the [Studio](studio.md)
-at `#/studio`) in Chromium with
+at `#/studio`) in Chromium, and a few of them in Firefox, WebKit and on
+a phone ([below](#browsers)), with
 [Playwright](https://playwright.dev/), through whole journeys a user
 takes: logging in with a WebID at a real identity provider, setting
 preferences, making and studying decks, grouping them, importing from
@@ -281,8 +284,9 @@ https WebIDs and issuers, so the server sits behind Caddy at
 browser is told to accept. The server shares Caddy's network, so it
 reaches its own https address too (to read the WebIDs it checks tokens
 for). It keeps its pods in files, not in memory, because the journeys
-PATCH Swedish text (see above). The journeys need Docker and Chromium
-(`npm run browsers -w @solid-memo/e2e-journeys` installs it), and CI
+PATCH Swedish text (see above). The journeys need Docker and the
+browsers (`npm run browsers -w @solid-memo/e2e-journeys` installs
+Chromium, Firefox and WebKit, with the system libraries they need), and CI
 runs them on every pull request and every push to `main`. They block,
 as the blocking servers do.
 
@@ -311,6 +315,48 @@ Further journeys go through:
   works, its details copied and its report link filled in, and the way
   back to the start.
 
+### Browsers
+
+Every journey runs in desktop Chromium, the `chromium` project in
+[playwright.config.ts](../e2e/journeys/playwright.config.ts). Three
+more projects run only the journeys tagged `@smoke`, `@guest` and
+`@reload`: `firefox` (desktop Firefox), `webkit` (desktop Safari's
+engine) and `phone` (an iPhone 14's screen and touch, on WebKit). Those
+journeys go through what differs most between engines: the login's
+redirects to the identity provider and back, a guest's study kept in the
+browser's storage through them, the silent restore of a session after a
+reload, and a page narrow enough to lay out for a phone. The other
+journeys test the app's logic, which is the same in every engine, so
+running them all in each would about triple the time for little gain. A
+journey tagged with one of the three runs in every browser; tag another
+only when what it tests differs between engines. CI runs Chromium's
+journeys in one job and the other three projects' in another
+(`journeys (chromium)`, `journeys (engines)`), so neither takes much
+longer than one job did. The [user guide](user-guide.md#supported-browsers)
+says which browsers Solid Memo supports.
+
+The engines differ in three ways the journeys allow for:
+
+- Only Chromium lets a page read the clipboard back, so "Copy link"
+  takes the link from the app's call to write it
+  ([LibraryDeck.ts](../e2e/journeys/pages/LibraryDeck.ts)).
+- Firefox keeps no blank first page in a new tab's history, so a
+  journey that goes Back to the page before the app opens one of its
+  own first.
+- WebKit logs a fetch to another origin that it cut off, such as one
+  still running when the page is left, as an error in the page's
+  script. Playwright reports that as a page error, though the app
+  caught the fetch's rejection. `diagnostics.json` lists it with the
+  console, where Chromium and Firefox log the same, so it fails no
+  journey ([pageErrors.ts](../e2e/journeys/harness/pageErrors.ts)).
+
+WebKit on Linux needs system libraries that `npm run browsers` installs
+with `sudo`. Without them, the `webkit` and `phone` projects run in
+Playwright's Docker image of the same version
+(`mcr.microsoft.com/playwright:v<version>-noble`), with `--network host`
+and `JOURNEY_SERVER_URL` pointing at a server that
+`npm run css -w @solid-memo/e2e-journeys` keeps up.
+
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
 replays it). The browser's time zone is one where it is about noon, far
@@ -323,7 +369,8 @@ are.
 
 **When a journey fails**, the CI job's summary names it, the step it
 failed in (the spec's numbered step › the page object's action) and the
-error. The job's `journeys-<attempt>` artifact holds everything else:
+error, and the browser it failed in. The job's
+`journeys-<chromium|engines>-<attempt>` artifact holds everything else:
 
 - `test-results/<journey>/trace.zip`: the whole journey, replayable step
   by step. Each step shows the page before and after every action, the
@@ -341,8 +388,8 @@ error. The job's `journeys-<attempt>` artifact holds everything else:
 - `logs/css.log`: the server's whole log.
 
 **The latest report is online** at <https://solid-memo.com/journeys/>,
-published with each deploy: the report of the CI run on the release
-commit the site runs (none after a deploy by hand). It shows every
+published with each deploy: the Chromium job's report of the CI run on
+the release commit the site runs (none after a deploy by hand). It shows every
 journey's steps and screenshots, and its **Trace** link opens the
 step-by-step timeline in the browser (the trace viewer is part of the report and
 needs it served, as it is there, not opened as a file). On `main` the
@@ -432,7 +479,7 @@ jobs, side by side:
 | `crosscheck` | the cross-check script's tests, then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | that each advisory server starts and meets the contract |
-| `journeys` | the user journeys ([User journeys](#user-journeys)) |
+| `journeys (<browsers>)` | the user journeys: every one in Chromium, and those that differ between engines in Firefox, WebKit and on a phone ([Browsers](#browsers)) |
 | `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
 | `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
 | `caches` | nothing: on `main`, after `build`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
@@ -590,10 +637,29 @@ CI's `docs` job:
 That every page is listed in the index is `npm run check`'s
 (`check:docs`, above).
 
+## Pod providers
+
+Onboarding suggests the providers in
+[podProvider.ts](../packages/domain/src/podProvider.ts)
+(`POD_PROVIDERS`), and logs a learner in at the issuer an entry names.
+The tests' Solid servers all run in Docker, so none of them is one of
+these. `npm run check:providers`
+([checkProviders.ts](../scripts/checkProviders.ts)) checks each
+provider instead. Its issuer must answer
+`<issuer>/.well-known/openid-configuration` with JSON whose `issuer` is
+the entry's `oidcIssuer`, character for character, as the login compares
+them. Its `signUpUrl`, where it has one, must answer too. A request that
+fails or answers 5xx is tried three times. The
+[Links workflow](../.github/workflows/links.yml) runs the check weekly,
+and by hand, in a job of its own. It is not a gate, so a provider that
+is down for an hour fails no one's change. A failure is an entry to fix,
+with the provider's new issuer, or to remove.
+
 ## Without the network
 
-Apart from the end-to-end tests' Docker images and Chromium, installed
-once for the journeys and the docs' diagrams, nothing needs the network: the vocabulary, the shapes and the deck library are read from
+Apart from the end-to-end tests' Docker images and the browsers,
+installed once for the journeys and the docs' diagrams, and the Pod
+providers' check, nothing needs the network: the vocabulary, the shapes and the deck library are read from
 the repository's `ns/` and `decks/`, at the IRIs the site publishes
 them under.
 

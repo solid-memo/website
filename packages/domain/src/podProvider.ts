@@ -22,8 +22,8 @@ export interface PodProvider {
 /**
  * Providers suggested during onboarding. Add an entry to suggest another.
  * Issuers are the exact values each provider advertises in its
- * /.well-known/openid-configuration (checked 2026-09-22; solidweb.me
- * 2026-10-01).
+ * /.well-known/openid-configuration, which `npm run check:providers`
+ * checks weekly, with each sign-up page (docs/testing.md#pod-providers).
  */
 export const POD_PROVIDERS: readonly PodProvider[] = [
   {

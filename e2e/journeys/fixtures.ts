@@ -14,6 +14,7 @@ import {
 import { createAccount, type CssAccount } from "./harness/cssAccount.ts";
 import { CSS_LOG } from "./harness/cssServer.ts";
 import { otherApp, type OtherApp } from "./harness/otherApp.ts";
+import { loggedByWebKit } from "./harness/pageErrors.ts";
 import { dumpPod } from "./harness/podDump.ts";
 import { seedRandom } from "./harness/seededRandom.ts";
 import { App } from "./pages/App.ts";
@@ -190,7 +191,11 @@ function watch(page: Page, found: Diagnostics): void {
       url: message.location().url || undefined,
     }),
   );
-  page.on("pageerror", (error) => found.pageErrors.push(error.stack ?? String(error)));
+  page.on("pageerror", (error) => {
+    const stack = error.stack ?? String(error);
+    if (loggedByWebKit(stack)) found.console.push({ type: "error", text: stack });
+    else found.pageErrors.push(stack);
+  });
   page.on("requestfailed", (request) =>
     found.failedRequests.push({
       method: request.method(),
