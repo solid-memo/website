@@ -24,6 +24,7 @@ const failing: Report = {
               file: "full-learner.journey.ts",
               tests: [
                 {
+                  projectName: "phone",
                   annotations: [
                     { type: "webId", description: "https://127.0.0.1:1/j/profile/card#me" },
                     { type: "note" },
@@ -75,10 +76,10 @@ describe("failingStepPath", () => {
 });
 
 describe("summarize", () => {
-  it("names each failed journey, the step it failed in, its error without colors, and how to replay it", () => {
+  it("names each failed journey and its browser, the step it failed in, its error without colors, and how to replay it", () => {
     const markdown = summarize(failing, "journeys-1");
     expect(markdown).toContain("1 passed, 1 failed, 0 flaky, 0 skipped in 62s.");
-    expect(markdown).toContain("### ✗ a learner's full journey (full-learner.journey.ts)");
+    expect(markdown).toContain("### ✗ a learner's full journey (full-learner.journey.ts, phone)");
     expect(markdown).toContain("**Failed in:** 15 · Check the statistics › Check the tiles");
     expect(markdown).toContain("webId: `https://127.0.0.1:1/j/profile/card#me`");
     expect(markdown).toContain("Error: expect(locator).toHaveText()\nExpected: 4");
