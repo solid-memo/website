@@ -11,6 +11,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { PodProvider } from "@solid-memo/domain/podProvider";
 import type { Session } from "@solid-memo/domain/session";
 import illustrationUrl from "../assets/illustration.svg";
+import { ErrorBoundary, SomethingWentWrong } from "./ErrorBoundary";
 import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { Footer, type SiteSource } from "./Footer";
@@ -81,7 +82,10 @@ export const STUDIO: AppIdentity = {
  * their browser's): restoring the session, the landing page and its
  * login, the connected Pod, then the app's own `workspace` under the
  * masthead. Every app on the site shares it (Solid Memo, the Studio), so
- * a session, the language and the theme are the same in each.
+ * a session, the language and the theme are the same in each. A workspace
+ * that fails while it renders gives way to "Something went wrong" under
+ * the same masthead and above the same footer (ErrorBoundary), so the way
+ * home, the language, the theme and the footer's links still work.
  */
 export function AppShell({
   useCases,
@@ -171,6 +175,7 @@ export function AppShell({
             <SkipLink />
             <AppContent
               useCases={useCases}
+              source={source}
               providers={providers}
               identity={identity}
               workspace={workspace}
@@ -197,11 +202,13 @@ const SESSION_EXPIRED = Symbol("session expired");
 
 function AppContent({
   useCases,
+  source,
   providers,
   identity,
   workspace: AppWorkspace,
 }: {
   useCases: UseCases;
+  source: SiteSource;
   providers: readonly PodProvider[];
   identity: AppIdentity;
   workspace: ComponentType<WorkspaceProps>;
@@ -421,27 +428,38 @@ function AppContent({
     </div>
   );
 
-  return (
-    <AppWorkspace
-      useCases={useCases}
-      session={session}
-      banner={
-        <>
-          <TopBar />
-          {masthead}
-        </>
-      }
+  const banner = (
+    <>
+      <TopBar />
+      {masthead}
+    </>
+  );
+  const discardConfirm = confirmingDiscard && (
+    <DiscardGuestConfirm
+      busy={busy}
+      onDiscard={() => void handleDiscardGuest()}
+      onCancel={() => setConfirmingDiscard(false)}
     >
-      {confirmingDiscard && (
-        <DiscardGuestConfirm
-          busy={busy}
-          onDiscard={() => void handleDiscardGuest()}
-          onCancel={() => setConfirmingDiscard(false)}
-        >
-          <ErrorMessage error={authText} />
-        </DiscardGuestConfirm>
+      <ErrorMessage error={authText} />
+    </DiscardGuestConfirm>
+  );
+
+  return (
+    <ErrorBoundary
+      fallback={(error, reset) => (
+        <>
+          <header class="site-header">{banner}</header>
+          <main id={MAIN_ID} tabIndex={-1} class="workspace">
+            {discardConfirm}
+            <SomethingWentWrong error={error} source={source} onTryAgain={reset} />
+          </main>
+        </>
       )}
-    </AppWorkspace>
+    >
+      <AppWorkspace useCases={useCases} session={session} banner={banner}>
+        {discardConfirm}
+      </AppWorkspace>
+    </ErrorBoundary>
   );
 }
 

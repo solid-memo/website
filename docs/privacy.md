@@ -115,6 +115,29 @@ the site alone, and one inline script it names by its hash ([`apps/web/index.htm
 by [`build.test.ts`](../apps/web/src/build.test.ts)). The project
 learns nothing about who uses the app.
 
+## When something goes wrong
+
+When a screen fails while it renders, the app shows "Something went
+wrong" in its place, under the same header and above the same footer,
+and an error nothing else caught (in a button's handler, say) gets a
+notice that can be closed ([`ErrorGuard.tsx`](../packages/ui/src/ui/ErrorGuard.tsx)).
+Neither sends anything: the error stays in your browser, logged to its
+console. It leaves the browser only if you take it out yourself:
+
+- **Copy details** copies the app's version and commit, the route
+  you were at without its values (`#/study?instance=&deck=`), and the
+  error's message and stack.
+- **Report it** opens the project's bug form on GitHub with the same
+  details filled in. Nothing is sent until you submit the form there.
+
+Every address is taken out of the details first, so they name no pod,
+WebID, deck or card, and carry no token
+([`errorReport.ts`](../packages/domain/src/errorReport.ts)). Only the
+paths of the site's own scripts are kept, which say where the code
+broke. An error's message can still quote other text, such as a card's;
+the details are shown under "Technical details" to read before you
+send them.
+
 ## What the project has published
 
 The library's deck versions name who compiled them. Each published

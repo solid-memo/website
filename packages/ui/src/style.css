@@ -1144,6 +1144,33 @@ details.add-cards summary {
   font-size: 0.9rem;
 }
 
+/* "Something went wrong": its two ways to report it side by side, a link as a button's neighbour. */
+.crash-report {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0.5rem 0 0.25rem;
+}
+
+/* An error nothing caught, over the page that still works, until it is closed. */
+.crash-notice {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 100;
+  max-width: 40rem;
+  max-height: calc(100vh - 2rem);
+  margin: 0 auto;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+
+.crash-notice p {
+  margin: 0 0 0.5rem;
+}
+
 .migration {
   margin-bottom: 1rem;
   padding: 0.85rem 1rem;

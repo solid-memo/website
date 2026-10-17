@@ -74,6 +74,11 @@ straight to your decks. "Log out", at the top, ends the session.
   ([routing.md](routing.md)).
 - **"Skip to content"** is the first thing the Tab key reaches, for
   keyboard users.
+- **"Something went wrong"** takes a screen's place if it breaks, with
+  the top and the footer still there. **Try again**, or **Go to the
+  start**; **Copy details** and **Report it** help you tell the
+  project, but nothing is sent unless you send the report
+  ([privacy.md](privacy.md#when-something-goes-wrong)).
 
 ## Your decks
 
@@ -358,3 +363,4 @@ screenshot of each.
 | Solid Memo Studio | studio.journey.ts, first journey | 06–36 |
 | Trying the app as a guest, and moving the study into a pod | [guest.journey.ts](../e2e/journeys/journeys/guest.journey.ts) | 02–11 |
 | Copying a library deck's link, and opening it in another browser as a guest | [try-link.journey.ts](../e2e/journeys/journeys/try-link.journey.ts) | 02–05 |
+| A screen that breaks: Something went wrong, its details and its report | [render-error.journey.ts](../e2e/journeys/journeys/render-error.journey.ts) | 02–06 |

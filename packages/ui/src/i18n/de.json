@@ -87,6 +87,20 @@
     "reportIssue": "Problem melden",
     "discussions": "Diskussionen"
   },
+  "crash": {
+    "title": "Etwas ist schiefgelaufen",
+    "explain": "Ein Fehler hat diese Ansicht angehalten. Versuche es erneut oder geh zum Anfang.",
+    "tryAgain": "Erneut versuchen",
+    "start": "Zum Anfang",
+    "copy": "Details kopieren",
+    "copied": "Die Details sind kopiert.",
+    "copyFailed": "Die Details konnten nicht kopiert werden. Markiere sie unter Technische Details und kopiere sie von Hand.",
+    "report": "Melden",
+    "private": "Die Details nennen keinen Pod, keine WebID und keine Karte, und nichts wird gesendet, außer du sendest die Meldung selbst.",
+    "notice": "Etwas ist schiefgelaufen. Die Seite funktioniert vielleicht nicht wie gewohnt; reagiert sie nicht mehr, lade sie neu.",
+    "noticeRegion": "Fehler",
+    "close": "Schließen"
+  },
   "addCardForm": {
     "submitButton": "Karte hinzufügen",
     "added": "Karte hinzugefügt."

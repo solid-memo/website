@@ -5,7 +5,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AppShell, SOLID_MEMO, STUDIO } from "./App";
+import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "./App";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
@@ -285,6 +285,83 @@ describe("AppShell", () => {
         "href",
         "#/studio",
       );
+    });
+  });
+
+  describe("when the workspace fails while it renders", () => {
+    const guestSession: Session = { webId: "https://guest.invalid/profile#me", guest: true };
+
+    /** A workspace that throws on any route but the start, as a screen with a bug would. */
+    function FragileWorkspace({ banner, children }: WorkspaceProps) {
+      if (window.location.hash !== "#/") throw new Error("screen failed");
+      return (
+        <>
+          <header class="site-header">{banner}</header>
+          <main id={MAIN_ID}>
+            {children}
+            <p>The deck list</p>
+          </main>
+        </>
+      );
+    }
+
+    function renderFragile() {
+      vi.spyOn(console, "error").mockImplementation(() => undefined);
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      return render(
+        <QueryClientProvider client={queryClient}>
+          <AppShell
+            useCases={makeUseCases({
+              restoreSession: vi.fn(async () => ({
+                session: guestSession,
+                origin: "restored" as const,
+              })),
+            })}
+            source={source}
+            providers={POD_PROVIDERS}
+            identity={SOLID_MEMO}
+            workspace={FragileWorkspace}
+          />
+        </QueryClientProvider>,
+      );
+    }
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      window.location.hash = "";
+    });
+
+    it("says so under the same masthead and above the same footer, which still work", async () => {
+      window.location.hash = "#/broken";
+      renderFragile();
+      const heading = await screen.findByRole("heading", {
+        level: 2,
+        name: "Something went wrong",
+      });
+      expect(within(screen.getByRole("main")).getByRole("heading", { level: 2 })).toBe(heading);
+      await waitFor(() => expect(heading).toHaveFocus());
+      const banner = screen.getByRole("banner");
+      expect(within(banner).getByRole("link", { name: "Solid Memo" })).toHaveAttribute(
+        "href",
+        "#/",
+      );
+      expect(within(banner).getByRole("button", { name: "Switch to dark mode" })).toBeVisible();
+      expect(screen.getByRole("contentinfo")).toHaveTextContent("Report an issue");
+      // The masthead's own questions still come up, above the error.
+      fireEvent.click(within(banner).getByRole("button", { name: "Discard" }));
+      expect(
+        within(screen.getByRole("main")).getByRole("region", {
+          name: "Discard your study as a guest",
+        }),
+      ).toBeInTheDocument();
+    });
+
+    it("renders the workspace afresh at the start", async () => {
+      window.location.hash = "#/broken";
+      renderFragile();
+      fireEvent.click(await screen.findByRole("button", { name: "Go to the start" }));
+      expect(await screen.findByText("The deck list")).toBeInTheDocument();
+      expect(screen.queryByText("Something went wrong")).toBeNull();
     });
   });
 

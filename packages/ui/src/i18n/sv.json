@@ -87,6 +87,20 @@
     "reportIssue": "Rapportera ett problem",
     "discussions": "Diskussioner"
   },
+  "crash": {
+    "title": "Något gick fel",
+    "explain": "Ett fel stoppade den här vyn. Försök igen, eller gå till början.",
+    "tryAgain": "Försök igen",
+    "start": "Gå till början",
+    "copy": "Kopiera detaljer",
+    "copied": "Detaljerna är kopierade.",
+    "copyFailed": "Detaljerna gick inte att kopiera. Markera dem under Tekniska detaljer och kopiera dem för hand.",
+    "report": "Rapportera det",
+    "private": "Detaljerna nämner ingen Pod, inget WebID och inget kort, och inget skickas om du inte skickar rapporten själv.",
+    "notice": "Något gick fel. Sidan kanske inte fungerar som den ska; om den slutar svara, ladda om den.",
+    "noticeRegion": "Fel",
+    "close": "Stäng"
+  },
   "addCardForm": {
     "submitButton": "Lägg till kort",
     "added": "Kortet har lagts till."
