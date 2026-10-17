@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.5.0](https://github.com/solid-memo/website/compare/v3.4.0...v3.5.0) (2026-10-17)
+
+### Features
+
+* **docs:** list every page of the docs on each page, from an index in Turtle ([9006825](https://github.com/solid-memo/website/commit/9006825a1095847a49bea72822dde067f44c46bb)), closes [#134](https://github.com/solid-memo/website/issues/134)
+
 ## [3.4.0](https://github.com/solid-memo/website/compare/v3.3.0...v3.4.0) (2026-10-16)
 
 ### Features
