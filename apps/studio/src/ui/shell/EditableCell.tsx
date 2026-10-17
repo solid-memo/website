@@ -19,6 +19,8 @@ export interface CellEdit {
   shown: string;
   /** What the field starts with. */
   value: string;
+  /** The language its text is in, when not the page's (I18n.partLang): an Arabic side's field reads right to left. */
+  lang?: string;
   /** A whole number of 0 or more; else text, or a choice among `options`. */
   number?: boolean;
   options?: readonly { value: string; label: string }[];
@@ -196,6 +198,7 @@ export function EditableCell({
         <input
           {...field}
           {...(edit.number ? { type: "number", min: 0, step: 1 } : { type: "text" })}
+          lang={edit.lang}
           onInput={(event) => typed(event.currentTarget.value)}
         />
       )}

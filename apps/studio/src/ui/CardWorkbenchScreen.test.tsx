@@ -623,4 +623,16 @@ describe("CardWorkbenchScreen", () => {
     await waitFor(() => expect(link("木")).toHaveFocus());
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
+
+  it("marks a side's field with the side's language, not the page's", () => {
+    const book = { ...makeCard(deck, "book"), front: { ar: "كتاب" }, back: { en: "Book" } };
+    render(<Harness rows={[{ card: book, states: [] }]} />);
+    link("كتاب").focus();
+    key(link("كتاب"), "F2");
+    // The card's name is isolated in the label, as right-to-left text in a left-to-right one.
+    expect(screen.getByRole("textbox", { name: /Front of/ })).toHaveAttribute("lang", "ar");
+    fireEvent.click(within(table()).getByRole("button", { name: /Back of .*: Book/ }));
+    // English, as the page is.
+    expect(screen.getByRole("textbox", { name: /Back of/ })).not.toHaveAttribute("lang");
+  });
 });
