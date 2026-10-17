@@ -104,6 +104,8 @@
         "useTemplate": "off",
       },
       "suspicious": {
+        // Modules that import each other in a circle may read an import before it is set.
+        "noImportCycles": "error",
         // The linear Turtle reader and the stream collectors assign as they read.
         "noAssignInExpressions": "off",
         // forEach with an arrow that returns, and switches the compiler checks for exhaustiveness.

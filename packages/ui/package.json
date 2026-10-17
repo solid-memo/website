@@ -26,6 +26,7 @@
     "./routerCore": "./src/ui/routerCore.ts",
     "./deckTreeEditor": "./src/ui/deckTreeEditor.ts",
     "./courseLinks": "./src/ui/courseLinks.ts",
+    "./courseKey": "./src/ui/courseKey.ts",
     "./composing": "./src/ui/composing.ts",
     "./askFirst": "./src/ui/askFirst.ts",
     "./test/setup": "./src/test/setup.ts",
