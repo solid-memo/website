@@ -103,6 +103,28 @@ describe("the About page", () => {
     expect(site).toContain(`<meta property="og:image:alt" content="${meta("og:image:alt")}" />`);
   });
 
+  it("shows the app in screenshots, each one of the site's files, described, at the size it says", () => {
+    const images = [...html.matchAll(/<img\b([^>]*)>/g)].map(([, attributes]) => {
+      const attribute = (name: string) =>
+        new RegExp(`\\b${name}="([^"]*)"`).exec(attributes!)?.[1] ?? null;
+      return {
+        src: attribute("src")!,
+        alt: attribute("alt"),
+        size: [Number(attribute("width")), Number(attribute("height"))],
+      };
+    });
+    expect(images.map(({ src }) => src)).toEqual(
+      ["study", "library", "course-chapter", "statistics", "studio"].map(
+        (name) => `../screenshots/${name}.png`,
+      ),
+    );
+    for (const { src, alt, size } of images) {
+      expect(alt).toMatch(/\S/);
+      const png = readFileSync(served(src));
+      expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual(size);
+    }
+  });
+
   it("speaks to learners, deck authors, technologists and decision makers", () => {
     for (const id of ["learners", "authors", "technologists", "decision-makers"]) {
       expect(html).toContain(`<section id="${id}"`);

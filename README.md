@@ -48,6 +48,14 @@ for, and what it is not: [docs/objectives.md](docs/objectives.md). The
 same, for learners, authors, technologists and decision makers:
 [solid-memo.com/about](https://solid-memo.com/about/).
 
+| Studying a card | The deck library |
+| --- | --- |
+| ![A study session of the deck Famous paintings: a painting on the card's front, its title, painter and date revealed below it, and buttons from 0 to 5 to grade the answer.](apps/web/public/screenshots/study.png) | ![The deck library: a search field over a list of ready-made decks, each with its number of cards and a Preview button.](apps/web/public/screenshots/library.png) |
+| **A course's chapter** | **Study statistics** |
+| ![The first chapter of the course Getting started with Solid Memo: step 1 of 3, a part of its theory, and a Continue button.](apps/web/public/screenshots/course-chapter.png) | ![The statistics: answers, study days, cards studied and streaks, over an activity calendar of the last 52 weeks.](apps/web/public/screenshots/statistics.png) |
+| **Solid Memo Studio, for deck authors** | |
+| ![Solid Memo Studio: a sidebar of sections, decks and drafts beside a table of the instance's decks.](apps/web/public/screenshots/studio.png) | |
+
 To see what the app does without signing in, open the report of its
 [user journeys](https://solid-memo.com/journeys/): tests that use the
 app in a browser as a person would, step by step, from CI's run on the

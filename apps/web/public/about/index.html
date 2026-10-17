@@ -32,7 +32,7 @@
   <meta property="og:image" content="https://solid-memo.com/social-preview.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="The Solid Memo wordmark beside &quot;Spaced-repetition flashcards in your own Solid pod.&quot;" />
+  <meta property="og:image:alt" content="The Solid Memo wordmark beside &quot;Spaced-repetition flashcards in your own Solid pod. Your decks, your progress, your data. Try it without an account.&quot;" />
   <meta property="og:locale" content="en" />
   <meta name="twitter:card" content="summary_large_image" />
   <!-- The colors are the app's own (packages/ui/src/style.css). With no
@@ -166,6 +166,33 @@
       margin: 0.25rem 0;
     }
 
+    .screenshots {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1rem;
+      margin: 0 0 1rem;
+      padding: 0;
+      list-style: none;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+
+    figcaption {
+      margin-top: 0.35rem;
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+    }
+
     footer {
       padding-top: 0.5rem;
       padding-bottom: 2.5rem;
@@ -204,6 +231,7 @@
       </ul>
       <nav aria-label="On this page">
         <ul>
+          <li><a href="#screenshots">Screenshots</a></li>
           <li><a href="#learners">For learners</a></li>
           <li><a href="#authors">For deck authors</a></li>
           <li><a href="#technologists">For technologists</a></li>
@@ -211,6 +239,48 @@
         </ul>
       </nav>
     </header>
+
+    <section id="screenshots" aria-labelledby="screenshots-title">
+      <h2 id="screenshots-title">Screenshots</h2>
+      <p>The app in English, as a guest tries it, with no account.</p>
+      <ul class="screenshots">
+        <li>
+          <figure>
+            <img src="../screenshots/study.png" width="1280" height="900"
+              alt="A study session of the deck Famous paintings: a painting on the card's front, its title, painter and date revealed below it, and buttons from 0 to 5 to grade the answer." />
+            <figcaption>Studying a card</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="../screenshots/library.png" width="1280" height="900"
+              alt="The deck library: a search field over a list of ready-made decks, each with its number of cards and a Preview button." />
+            <figcaption>The deck library</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="../screenshots/course-chapter.png" width="1280" height="900"
+              alt="The first chapter of the course Getting started with Solid Memo: step 1 of 3, a part of its theory, and a Continue button." />
+            <figcaption>A course's chapter</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="../screenshots/statistics.png" width="1280" height="900"
+              alt="The statistics: answers, study days, cards studied and streaks, over an activity calendar of the last 52 weeks." />
+            <figcaption>Study statistics</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="../screenshots/studio.png" width="1280" height="900"
+              alt="Solid Memo Studio: a sidebar of sections, decks and drafts beside a table of the instance's decks." />
+            <figcaption>Solid Memo Studio, for deck authors</figcaption>
+          </figure>
+        </li>
+      </ul>
+    </section>
 
     <section id="learners" aria-labelledby="learners-title">
       <h2 id="learners-title">For learners</h2>

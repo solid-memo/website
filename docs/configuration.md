@@ -107,7 +107,9 @@ The name does not reach:
   [appError.ts](../packages/domain/src/appError.ts);
 - the page's description, link preview image
   ([social-preview.png](../apps/web/public/social-preview.png)) and its
-  alt text, the favicons and the logo;
+  alt text, the screenshots
+  ([screenshots/](../apps/web/public/screenshots/)), the favicons and
+  the logo;
 - the docs and the deck library.
 
 A fork that renames the app further edits the message files
