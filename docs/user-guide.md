@@ -352,7 +352,5 @@ screenshot of each.
 | A course's answers and chapters in the statistics, and its most-confused options | course-chapter | 09–10 |
 | Adding a course from a link and playing it | [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts), second journey | 03–05 |
 | Solid Memo Studio | studio.journey.ts, first journey | 06–36 |
-
-Trying the app as a guest has no journey yet. It is tested in the
-unit tests and against real Solid servers in `e2e/pod`
-([guest-mode.md](guest-mode.md), [testing.md](testing.md)).
+| Trying the app as a guest, and moving the study into a pod | [guest.journey.ts](../e2e/journeys/journeys/guest.journey.ts) | 02–11 |
+| Copying a library deck's link, and opening it in another browser as a guest | [try-link.journey.ts](../e2e/journeys/journeys/try-link.journey.ts) | 02–05 |
