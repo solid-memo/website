@@ -6,17 +6,20 @@ import type { LibraryCard } from "@solid-memo/domain/library";
 import { CardFace } from "./CardFace";
 import { useI18n } from "./i18n";
 import { CardIcon } from "./icons";
+import { ReportMistake } from "./ReportMistake";
 import { RetiredNotice } from "./RetiredCards";
 
 /**
  * One card of a library deck, both sides as study shows them, read-only:
- * a library card is edited only once the deck is imported.
+ * a library card is edited only once the deck is imported. A mistake in
+ * it is reported to the library (ReportMistake).
  */
 export function LibraryCardScreen({
   card,
   deckName,
   deckLang,
   deckHref,
+  releaseUrl,
 }: {
   card: LibraryCard;
   deckName: string;
@@ -24,6 +27,8 @@ export function LibraryCardScreen({
   deckLang?: string;
   /** URL of the deck's page; its name links there. */
   deckHref: string;
+  /** The library release the card is read from. */
+  releaseUrl: string;
 }) {
   const { t, tx } = useI18n();
   return (
@@ -64,6 +69,7 @@ export function LibraryCardScreen({
           ),
         })}
       </p>
+      <ReportMistake place={{ library: true }} releaseUrl={releaseUrl} cardId={card.id} />
     </section>
   );
 }

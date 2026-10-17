@@ -608,6 +608,7 @@ export function Workspace({
             deckName={readerText(activeLibraryDeck!.title)}
             deckLang={readerLang(activeLibraryDeck!.title)}
             deckHref={libraryDeckHref(instanceUrl!, libraryDeckUrl!)}
+            releaseUrl={activeLibraryDeck!.url}
           />
         );
       case "libraryPreview":

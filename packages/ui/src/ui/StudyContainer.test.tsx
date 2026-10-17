@@ -13,9 +13,11 @@ import { TodaySummaryContainer } from "./TodaySummaryContainer";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
+import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { StudyQueue } from "@solid-memo/domain/scheduling";
 import { makeUseCasesFake, statisticsReportOf } from "../test/useCasesFake";
+import { RepoUrl } from "./ReportMistake";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -93,6 +95,58 @@ describe("StudyContainer", () => {
     expect(screen.getByText("Preparing your study session…")).toBeInTheDocument();
     expect(await screen.findByText("front-a")).toBeInTheDocument();
     expect(screen.getByText("Card 1 of 2")).toBeInTheDocument();
+  });
+
+  it("reports a mistake in a card of a copied deck's release where it says; none in a card the learner added, nor in a home-made deck", async () => {
+    const RELEASE = "https://solid-memo.com/decks/kanji/v1.ttl";
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("mizu", "水"), makePrompt("mine", "火")],
+        newPrompts: [],
+        studiedToday: 0,
+      })),
+      reportPlace: vi.fn(async () => ({ library: true as const })),
+      deckRelease: vi.fn(async (studied: Deck) =>
+        studied.sourceUrl === undefined
+          ? null
+          : ({
+              url: RELEASE,
+              cards: [{ id: "mizu", front: { "": "水" }, back: { "": "water" }, formatVersion: 1 }],
+            } as unknown as LibraryDeckContent),
+      ),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const view = (studied: Deck) => (
+      <QueryClientProvider client={queryClient}>
+        <RepoUrl.Provider value="https://github.com/solid-memo/website">
+          <StudyContainer
+            useCases={useCases}
+            instance={instance}
+            deck={studied}
+            onExit={vi.fn()}
+            random={() => 0}
+          />
+        </RepoUrl.Provider>
+      </QueryClientProvider>
+    );
+    const reportLink = () => screen.queryByRole("link", { name: /Report a mistake/ });
+    const { unmount } = render(view({ ...deck, sourceUrl: RELEASE }));
+    const link = await screen.findByRole("link", { name: /Report a mistake/ });
+    expect(screen.getByText("水")).toBeInTheDocument();
+    expect(new URL(link.getAttribute("href")!).searchParams.get("details")).toContain(
+      `Card: ${RELEASE}#mizu`,
+    );
+    expect(useCases.reportPlace).toHaveBeenCalledWith(RELEASE);
+    await answer("4 — Good");
+    // The learner's own card, which the release does not have.
+    expect(await screen.findByText("火")).toBeInTheDocument();
+    expect(reportLink()).toBeNull();
+    unmount();
+
+    render(view(deck));
+    expect(await screen.findByText("水")).toBeInTheDocument();
+    expect(reportLink()).toBeNull();
+    expect(useCases.reportPlace).toHaveBeenCalledOnce();
   });
 
   it("asks a back→front prompt from the back, and records it as such", async () => {

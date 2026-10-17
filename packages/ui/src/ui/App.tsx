@@ -14,6 +14,7 @@ import illustrationUrl from "../assets/illustration.svg";
 import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { Footer, type SiteSource } from "./Footer";
+import { RepoUrl } from "./ReportMistake";
 import { I18nProvider, useI18n, type MessageKey } from "./i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { Loading } from "./Loading";
@@ -166,14 +167,16 @@ export function AppShell({
         onAdopt={setThemeChoice}
       >
         <AppName.Provider value={identity.name}>
-          <SkipLink />
-          <AppContent
-            useCases={useCases}
-            providers={providers}
-            identity={identity}
-            workspace={workspace}
-          />
-          <Footer source={source} />
+          <RepoUrl.Provider value={source.repoUrl}>
+            <SkipLink />
+            <AppContent
+              useCases={useCases}
+              providers={providers}
+              identity={identity}
+              workspace={workspace}
+            />
+            <Footer source={source} />
+          </RepoUrl.Provider>
         </AppName.Provider>
       </ThemeProvider>
     </I18nProvider>

@@ -12,6 +12,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { ImportUrlContainer } from "./ImportUrlContainer";
 import { makeUseCasesFake } from "../test/useCasesFake";
+import { RepoUrl } from "./ReportMistake";
 
 const instance: Instance = { url: "https://pod.example/solid-memo/a/", name: "Geography" };
 const RIVERS = "https://bob.example/memo/releases/rivers/v1.ttl";
@@ -66,6 +67,32 @@ const showButton = () => screen.getByRole("button", { name: "Show" });
 const linkField = () => screen.getByRole("textbox", { name: "Link to the release" });
 
 describe("ImportUrlContainer", () => {
+  it("reports a mistake where the release's place says: the library's own form for a release the library lists", async () => {
+    const LIBRARY = "https://solid-memo.com/decks/rivers/v1.ttl";
+    const useCases = makeUseCasesFake({
+      readReleaseFromLink: vi.fn(async () => ({ ...rivers, url: LIBRARY })),
+      reportPlace: vi.fn(async () => ({ library: true as const })),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RepoUrl.Provider value="https://github.com/solid-memo/website">
+          <ImportUrlContainer
+            useCases={useCases}
+            instance={instance}
+            url={LIBRARY}
+            onShow={vi.fn()}
+            onDone={vi.fn()}
+            onCourseStarted={vi.fn()}
+          />
+        </RepoUrl.Provider>
+      </QueryClientProvider>,
+    );
+    const link = await screen.findByRole("link", { name: /Report a mistake/ });
+    expect(new URL(link.getAttribute("href")!).searchParams.get("deck")).toBe(LIBRARY);
+    expect(useCases.reportPlace).toHaveBeenCalledWith(LIBRARY);
+  });
+
   it("asks for a link, and shows the one typed, trimmed, by putting it in the URL", () => {
     const useCases = makeUseCasesFake();
     const { onShow } = renderContainer(useCases);

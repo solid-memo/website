@@ -75,6 +75,17 @@ describe("NO_LOGIN", () => {
 });
 
 describe("createTrialUseCases", () => {
+  it("reports a mistake in the draft nowhere, though its own library lists it", async () => {
+    const podFetch = vi.fn(async () => new Response("", { status: 404 }));
+    const draft = playableCourseDraft();
+    const { useCases } = createTrialUseCases(draft, {
+      podFetch,
+      shapeValidator: createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES }),
+      ruleset: "test",
+    });
+    await expect(useCases.reportPlace(draft.url)).resolves.toEqual({ library: false });
+  });
+
   it("throws on a trial's write to a real pod, which never sees it", {
     timeout: 30_000,
   }, async () => {

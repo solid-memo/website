@@ -29,7 +29,7 @@ import { LATEST_VERSION, type ChapterV1, type StepV1 } from "@solid-memo/vocab/t
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { readVersioned, storedVersionOf } from "../records";
 import { agentNamesOf, distractorsOf } from "./deckMapper";
-import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
+import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM, VCARD } from "../vocab";
 import { courseOutlineFromRecords, type CourseOutline } from "@solid-memo/domain/course";
 import { AppError } from "@solid-memo/domain/appError";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
@@ -124,6 +124,19 @@ function courseOf(release: Thing): { isCourse?: true } {
   return getUrlAll(release, RDF.type).includes(SCHEMA.Course) ? { isCourse: true } : {};
 }
 
+/**
+ * The web page a release's contact names (docs/deck-library.md,
+ * Contact): its dcat:contactPoint's vcard:hasURL, read from the
+ * release's own document. None when it names no contact, or a contact
+ * with no web page, such as the email the library's older versions name.
+ */
+function contactOf(release: Thing, dataset: SolidDataset): { contact?: string } {
+  const point = getUrl(release, DCAT.contactPoint);
+  const thing = point === null ? null : getThing(dataset, point);
+  const url = thing === null ? null : getUrl(thing, VCARD.hasURL);
+  return url === null ? {} : { contact: url };
+}
+
 /** A release by URL, with what the index says about it (maybe nothing). */
 function toLibraryRelease(index: SolidDataset, url: string): LibraryRelease {
   const thing = getThing(index, url);
@@ -189,6 +202,7 @@ export function toLibraryDeckContent(url: string, dataset: SolidDataset): Librar
       (agent) => names.get(agent) ?? agent,
     ),
     ...courseOf(deck!),
+    ...contactOf(deck!, dataset),
   };
 }
 
@@ -201,7 +215,13 @@ export function toLibraryDeckContent(url: string, dataset: SolidDataset): Librar
  * release alone, as the release says of itself.
  */
 export function toStandaloneLibraryDeck(url: string, dataset: SolidDataset): LibraryDeck {
-  const { cards, formatVersion: _formatVersion, ...content } = toLibraryDeckContent(url, dataset);
+  // Where a mistake in it is reported is read with its content when asked (UseCases.reportPlace).
+  const {
+    cards,
+    formatVersion: _formatVersion,
+    contact: _contact,
+    ...content
+  } = toLibraryDeckContent(url, dataset);
   const deck = getThingAll(dataset).find((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck))!;
   const subject = asUrl(deck);
   const release = migrate("libraryDeck", readVersioned(deck, "libraryDeck")!.record, { subject });

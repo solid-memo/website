@@ -152,7 +152,9 @@ command checks the rule on every version new since `--base`
 (`contactProblems`, [Checks](#checks)); `CONTACT_URL` in
 [deckLibrary.ts](../packages/shacl/node/deckLibrary.ts) names the
 tracker. A release in a pod ([studio.md](studio.md)) is the author's
-own and may name an email.
+own and may name an email. The app reads the contact's web page to
+say where a mistake in a release from a link is reported
+([Reporting a mistake](#reporting-a-mistake)).
 
 ## Provenance
 
@@ -680,3 +682,37 @@ flowchart LR
   planned, the newer release and each one in between are checked against
   the library's shapes, as the first was (`checkLinkedRelease`); one
   that breaks them refuses the upgrade (`releaseNotConforming`).
+
+### Reporting a mistake
+
+A learner who sees a wrong card reports it from where they see it:
+**Report a mistake** is under a library card's page, a library deck's
+page, a release's page from a link, and each card studied from a copy
+that its release has (`ReportMistake` in [ReportMistake.tsx](../packages/ui/src/ui/ReportMistake.tsx)).
+A card the learner added to their copy is theirs to fix, and has no
+link.
+The review of a version checks its form, not its facts
+([CONTRIBUTING.md](../CONTRIBUTING.md)), so these reports are how the
+library's mistakes are found. Where the link leads is
+`mistakeReportUrl` ([mistakeReport.ts](../packages/domain/src/mistakeReport.ts)),
+from the release, the card's fragment and where the release is
+reported (`ReportPlace`):
+
+- **A library release**, one the index lists (`reportPlace`), whatever
+  [contact](#contact) its version names and however it was reached,
+  from the library or from a link: the deck form
+  (`.github/ISSUE_TEMPLATE/deck.yml`) of the repository the site runs
+  (`VITE_REPO_URL`, [configuration.md](configuration.md)), at
+  `issues/new?template=deck.yml`, its fields filled in from the query:
+  `deck` the release's address, `details` the card's (`Card:
+  <release>#<id>`) and a line asking what is wrong. GitHub fills in
+  text fields from the query, not a dropdown, so "What is it" is left
+  to the learner.
+- **A release from a link**: the web page its contact names
+  (`dcat:contactPoint`'s `vcard:hasURL`, read with the release as
+  `LibraryDeckContent.contact`), as it is: no one knows its form to
+  fill in. With none, or only an email, there is no link: the library's
+  tracker is not the place to report someone else's deck.
+- **A deck the learner wrote**, with no release, has no link, nor has
+  a Studio [trial](studio.md#the-trial): the draft is the author's own
+  (`createTrialUseCases`).

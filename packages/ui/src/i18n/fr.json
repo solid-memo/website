@@ -75,7 +75,8 @@
     "networkError": "Impossible de joindre votre Pod. Vérifiez votre connexion et réessayez.",
     "unexpectedError": "Une erreur s’est produite. Réessayez, ou rechargez la page. Détails (en anglais) : {detail}",
     "technicalDetails": "Détails techniques",
-    "opensInNewTab": "(s’ouvre dans un nouvel onglet)"
+    "opensInNewTab": "(s’ouvre dans un nouvel onglet)",
+    "reportMistake": "Signaler une erreur"
   },
   "footer": {
     "createdBy": "Créé par {author}",

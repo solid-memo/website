@@ -5,6 +5,9 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { LibraryCardScreen } from "./LibraryCardScreen";
+import { RepoUrl } from "./ReportMistake";
+
+const RELEASE = "https://solid-memo.com/decks/capitals/v2.ttl";
 
 describe("LibraryCardScreen", () => {
   it("shows both sides, read-only, and links the deck", () => {
@@ -19,6 +22,7 @@ describe("LibraryCardScreen", () => {
         }}
         deckName="Capitals"
         deckHref="#/library-deck?deck=capitals"
+        releaseUrl={RELEASE}
       />,
     );
     expect(screen.getByRole("heading", { name: "Card" })).toBeInTheDocument();
@@ -37,6 +41,32 @@ describe("LibraryCardScreen", () => {
       "picture-zoom-button",
     ]);
     expect(screen.queryByRole("textbox")).toBeNull();
+    // No repository known, nowhere to report a mistake.
+    expect(screen.queryByRole("link", { name: /Report a mistake/ })).toBeNull();
+  });
+
+  it("reports a mistake in the card to the library, with the release and the card filled in", () => {
+    render(
+      <RepoUrl.Provider value="https://github.com/solid-memo/website">
+        <LibraryCardScreen
+          card={{
+            id: "sweden",
+            front: { "": "Sweden" },
+            back: { "": "Stockholm" },
+            formatVersion: 1,
+          }}
+          deckName="Capitals"
+          deckHref="#/library-deck?deck=capitals"
+          releaseUrl={RELEASE}
+        />
+      </RepoUrl.Provider>,
+    );
+    const link = screen.getByRole("link", { name: /Report a mistake/ });
+    const url = new URL(link.getAttribute("href")!);
+    expect(url.pathname).toBe("/solid-memo/website/issues/new");
+    expect(url.searchParams.get("deck")).toBe(RELEASE);
+    expect(url.searchParams.get("details")).toContain(`Card: ${RELEASE}#sweden`);
+    expect(link).toHaveAttribute("target", "_blank");
   });
 
   it("says a retired card is no longer studied", () => {
@@ -51,6 +81,7 @@ describe("LibraryCardScreen", () => {
         }}
         deckName="Capitals"
         deckHref="#/library-deck?deck=capitals"
+        releaseUrl={RELEASE}
       />,
     );
     expect(screen.getByRole("note")).toHaveTextContent("This card is retired");

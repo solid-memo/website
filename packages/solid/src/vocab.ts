@@ -84,6 +84,13 @@ export const DCAT = {
   catalog: "http://www.w3.org/ns/dcat#catalog",
   /** A release's version within its deck: "1", "2", … */
   version: "http://www.w3.org/ns/dcat#version",
+  /** A release's contact (a vcard:Kind): where a mistake in it is reported. */
+  contactPoint: "http://www.w3.org/ns/dcat#contactPoint",
+} as const;
+
+export const VCARD = {
+  /** A contact's web page: for the library's releases, its issue tracker. */
+  hasURL: "http://www.w3.org/2006/vcard/ns#hasURL",
 } as const;
 
 export const ADMS = {

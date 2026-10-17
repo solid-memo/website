@@ -145,6 +145,13 @@ lost.
 A deck you study both ways asks each card front to back and back to
 front, each on its own schedule.
 
+A wrong card in a deck from the library, such as a wrong capital or a
+bad translation? **Report a mistake**, under the card, opens a report
+on the project's issue tracker with the deck and the card already
+filled in: say what is wrong. A deck added from a link has the link
+when its creator names a page for reports
+([deck-library.md](deck-library.md#reporting-a-mistake)).
+
 ## Adding and editing cards
 
 - **Create deck**, under the deck list, asks for a name and the
@@ -172,6 +179,8 @@ description or keyword, or narrow the list to topics.
   license and sources. From there, **Browse cards** lists its cards.
 - **Preview** shows its cards at random, to try before you take it.
   Nothing is recorded.
+- **Report a mistake**, on a deck's page and on each of its cards,
+  reports a wrong card, its deck filled in.
 - Check several decks and press **Import**, or import one from its own
   page. The copy is yours: edit it as you like. A deck you have already
   imported is marked so.

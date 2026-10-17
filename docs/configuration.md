@@ -133,6 +133,13 @@ The footer links:
 | Report an issue | `<url>/issues/new/choose` |
 | Discussions | `<url>/discussions` |
 
+The same address is where a mistake in a library deck is reported:
+**Report a mistake** opens `<url>/issues/new?template=deck.yml`, the
+repository's deck form, with the deck and the card filled in
+([deck-library.md](deck-library.md#reporting-a-mistake)). The form and
+its filled-in fields are GitHub's: on another forge the link opens a
+new issue without them.
+
 These are GitHub's paths, which Gitea and Forgejo (Codeberg) share.
 On GitLab, whose paths start with `/-/`, the commit, changelog and
 issue links do not resolve. Discussions is GitHub's alone: on a

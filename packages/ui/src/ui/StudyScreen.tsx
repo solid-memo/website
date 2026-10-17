@@ -12,11 +12,13 @@ import {
 } from "@solid-memo/domain/answerScale";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
 import { promptSides, type Prompt } from "@solid-memo/domain/deck";
+import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import type { ReviewQuality } from "@solid-memo/domain/review";
 import { CardFace } from "./CardFace";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
 import { inDataRegion } from "./Markdown";
+import { ReportMistake } from "./ReportMistake";
 import { useStopwatch } from "./stopwatch";
 
 function qualityLabel(quality: ReviewQuality, t: I18n["t"]): string {
@@ -71,10 +73,16 @@ function answerButtons(
       }));
 }
 
+/**
+ * A study session, card by card (StudyCard). A card of a release, in a
+ * deck copied from it, says where a mistake in it is reported (`report`):
+ * a deck the learner wrote has none, and nor has a card they added.
+ */
 export function StudyScreen({
   deckName,
   deckLang,
   deckHref,
+  report,
   prompt,
   position,
   total,
@@ -90,6 +98,12 @@ export function StudyScreen({
   deckLang?: string;
   /** URL of the deck's page; its name links there. */
   deckHref: string;
+  /**
+   * Where a mistake in the deck's release is reported, the release, and
+   * the ids of its cards, the only ones reported; none for a deck from
+   * no release, or while it is read.
+   */
+  report?: { place: ReportPlace; releaseUrl: string; cardIds: ReadonlySet<string> };
   /** null when the session is finished. */
   prompt: Prompt | null;
   /** 1-based position of the current prompt. */
@@ -152,6 +166,13 @@ export function StudyScreen({
           answerScale={answerScale}
           busy={busy}
           onAnswer={onAnswer}
+        />
+      )}
+      {prompt !== null && report !== undefined && report.cardIds.has(prompt.card.id) && (
+        <ReportMistake
+          place={report.place}
+          releaseUrl={report.releaseUrl}
+          cardId={prompt.card.id}
         />
       )}
       <ErrorMessage error={error} />
