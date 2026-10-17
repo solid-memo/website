@@ -25,7 +25,7 @@ import { applyTheme, browserTheme, DARK_QUERY, instanceThemeKey, ThemeProvider }
 import { ThemeToggle } from "./ThemeToggle";
 import { AppName, useDocumentTitle } from "./documentTitle";
 import { MAIN_ID, SkipLink } from "./SkipLink";
-import { STUDIO_PATH } from "./router";
+import { parseHash, STUDIO_PATH } from "./router";
 import { keepStudyFiguresFresh } from "./studyFigures";
 
 /** What an app built on AppShell calls itself, as messages in the user's language. */
@@ -183,6 +183,15 @@ export function AppShell({
   );
 }
 
+/**
+ * Whether a hash is a link to a library deck (#/try), which anyone may
+ * follow: without a session, it starts a guest's study
+ * (docs/guest-mode.md), or opens the one this browser has.
+ */
+function opensAsGuest(hash: string): boolean {
+  return parseHash(hash)?.screen === "try";
+}
+
 /** The login screen's error once the session expired: not a failure to report, but why the user is back. */
 const SESSION_EXPIRED = Symbol("session expired");
 
@@ -218,6 +227,8 @@ function AppContent({
         if (established !== null) {
           setSession(established.session);
           setConnecting(established.origin === "login");
+        } else if (opensAsGuest(window.location.hash)) {
+          setSession(await useCases.startGuest(t("guest.instanceName")));
         }
       } catch (e) {
         setAuthError(e);
@@ -266,6 +277,17 @@ function AppContent({
       setBusy(false);
     }
   }
+
+  // A link to a library deck followed on the landing page, the page not
+  // loaded again, starts a guest's study as one that loads the page does.
+  useEffect(() => {
+    if (checkingSession || session !== null || busy) return;
+    const follow = () => {
+      if (opensAsGuest(window.location.hash)) void handleTryAsGuest();
+    };
+    window.addEventListener("hashchange", follow);
+    return () => window.removeEventListener("hashchange", follow);
+  }, [checkingSession, session, busy]);
 
   async function handleDiscardGuest() {
     setAuthError(null);

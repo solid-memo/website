@@ -49,6 +49,17 @@ graph LR
 guest's session (`{ webId: GUEST_WEBID, guest: true }`) whenever a
 guest pod exists in this browser.
 
+## From a link
+
+A link to a library deck, `#/try?deck=…`, is for anyone, so it does not
+wait for "Try it without logging in": without a session, the app starts
+a guest's study as that button does, and opens the deck there
+([routing.md](routing.md#a-link-to-a-library-deck)). A browser that
+has a guest pod already goes on with it, since `restoreSession` returns
+the guest's session, and the deck opens in the guest's instance. So does
+a logged-in user's session, in their own instance. A guest's study that
+cannot start leaves the landing page, with the reason.
+
 ## Keeping the study
 
 ```mermaid

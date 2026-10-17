@@ -82,6 +82,7 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Källkod",
     "changelog": "Ändringslogg",
+    "about": "Om appen (på engelska)",
     "docs": "Dokumentation (på engelska)",
     "reportIssue": "Rapportera ett problem",
     "discussions": "Diskussioner"
@@ -756,6 +757,9 @@
     "import": "Importera kortleken",
     "importing": "Importerar…",
     "preview": "Förhandsvisa",
+    "copyLink": "Kopiera länk",
+    "linkCopied": "Länken är kopierad. Vem som helst kan öppna den, utan konto.",
+    "copyFailed": "Länken kunde inte kopieras. Kopiera den härifrån:",
     "alreadyImported": "Redan importerad",
     "courseChapters": "En kurs: korta avsnitt teori, vart och ett följt av en fråga. Varje fråga du besvarar blir ett kort i din kortlek.",
     "startCourse": "Börja kursen",
@@ -1259,7 +1263,9 @@
     "checkFailed": "Det gick inte att kontrollera instansens data: {error}",
     "developerTools": "Utvecklarverktyg",
     "validateInstance": "Kontrollera den här instansen",
-    "loadingCourse": "Läser in kursen…"
+    "loadingCourse": "Läser in kursen…",
+    "tryChooseInstance": "Vilken instans ska {deck} öppnas i?",
+    "triedUnknown": "Kortleken som länken leder till finns inte i biblioteket. Här är vad biblioteket har."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "Bilden på framsidan måste vara en http(s)-adress.",

@@ -80,6 +80,7 @@
     "versionAtCommit": "버전 {version} ({commit})",
     "sourceCode": "소스 코드",
     "changelog": "변경 내역",
+    "about": "앱 소개 (영어)",
     "docs": "문서 (영어)",
     "reportIssue": "문제 신고",
     "discussions": "토론"
@@ -718,6 +719,9 @@
     "import": "이 덱 가져오기",
     "importing": "가져오는 중…",
     "preview": "미리보기",
+    "copyLink": "링크 복사",
+    "linkCopied": "링크를 복사했어요. 계정이 없어도 누구나 열 수 있어요.",
+    "copyFailed": "링크를 복사하지 못했어요. 여기에서 복사해 주세요:",
     "alreadyImported": "이미 가져옴",
     "courseChapters": "코스예요. 짧은 설명마다 질문으로 이해도를 확인해요. 답한 질문은 모두 덱의 카드가 돼요.",
     "startCourse": "코스 시작하기",
@@ -1200,7 +1204,9 @@
     "checkFailed": "이 인스턴스의 데이터를 검사하지 못했어요: {error}",
     "developerTools": "개발자 도구",
     "validateInstance": "이 인스턴스 검증",
-    "loadingCourse": "코스를 불러오는 중…"
+    "loadingCourse": "코스를 불러오는 중…",
+    "tryChooseInstance": "{deck}을(를) 어느 인스턴스에서 열까요?",
+    "triedUnknown": "링크가 가리키는 덱이 라이브러리에 없어요. 라이브러리에 있는 덱은 다음과 같아요."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "앞면 그림은 http(s) URL이어야 해요.",

@@ -41,4 +41,5 @@
 #/storages
 #/studio?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F
 #/study?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1
+#/try?deck=https%3A%2F%2Flibrary.example%2Fdecks%2Fcapitals%2Fv1.ttl
 #/validate?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F

@@ -50,6 +50,14 @@ export class Library extends Screen {
     await this.app.chrome.expectBreadcrumbHere("breadcrumbs.library");
   }
 
+  /** Reached from a link to a deck the library does not have: the library, saying so. */
+  async expectFromUnknownLink(): Promise<void> {
+    await this.intent("Check the library says the link's deck is not in it", async () => {
+      await this.expectOpen();
+      await expect(this.page.getByRole("main")).toContainText(this.t("workspace.triedUnknown"));
+    });
+  }
+
   async expectDeck(title: string): Promise<void> {
     await this.intent(`Check the library has ${title}`, async () => {
       await expect(this.deckLink(title)).toBeVisible();

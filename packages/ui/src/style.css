@@ -2046,6 +2046,15 @@ html.drag-active {
   gap: 0.6rem;
 }
 
+/* A library deck's link, shown when the browser would not copy it: a row
+   of its own under the deck's actions. */
+.share-link {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+  gap: 0.35rem;
+}
+
 /* The search and topics, outside the import form so Enter never imports;
    laid out as the form is. */
 .library-filters {

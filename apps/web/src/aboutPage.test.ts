@@ -75,6 +75,56 @@ describe("the About page", () => {
     expect(canonical).toBe(origin === null ? null : `${origin}/about/`);
   });
 
+  it("has a link preview of its own: what it is, at its address, with the site's picture", () => {
+    const meta = (key: string) =>
+      new RegExp(`<meta (?:property|name)="${key}"\\s+content="([^"]*)"`).exec(html)?.[1] ?? null;
+    expect(meta("og:type")).toBe("website");
+    expect(meta("og:site_name")).toBe("Solid Memo");
+    expect(meta("og:title")).toBe("About Solid Memo");
+    expect(meta("og:description")).toBe(meta("description"));
+    expect(meta("og:locale")).toBe("en");
+    expect(meta("twitter:card")).toBe("summary_large_image");
+    const canonical = /<link rel="canonical" href="([^"]*)"/.exec(html)?.[1] ?? null;
+    expect(meta("og:url")).toBe(canonical);
+    // The picture is one of the site's own files, at the site's address, at the size it says.
+    const image = meta("og:image")!;
+    expect(image.startsWith(new URL("/", canonical ?? "https://solid-memo.com/").href)).toBe(true);
+    const file = resolve(app, "public", new URL(image).pathname.slice(1));
+    expect(existsSync(file)).toBe(true);
+    const png = readFileSync(file);
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([
+      Number(meta("og:image:width")),
+      Number(meta("og:image:height")),
+    ]);
+    expect(meta("og:image:alt")).not.toBe("");
+    // The site's page says the same of the picture.
+    const site = read("index.html");
+    expect(site).toContain(`<meta property="og:image" content="${image}" />`);
+    expect(site).toContain(`<meta property="og:image:alt" content="${meta("og:image:alt")}" />`);
+  });
+
+  it("shows the app in screenshots, each one of the site's files, described, at the size it says", () => {
+    const images = [...html.matchAll(/<img\b([^>]*)>/g)].map(([, attributes]) => {
+      const attribute = (name: string) =>
+        new RegExp(`\\b${name}="([^"]*)"`).exec(attributes!)?.[1] ?? null;
+      return {
+        src: attribute("src")!,
+        alt: attribute("alt"),
+        size: [Number(attribute("width")), Number(attribute("height"))],
+      };
+    });
+    expect(images.map(({ src }) => src)).toEqual(
+      ["study", "library", "course-chapter", "statistics", "studio"].map(
+        (name) => `../screenshots/${name}.png`,
+      ),
+    );
+    for (const { src, alt, size } of images) {
+      expect(alt).toMatch(/\S/);
+      const png = readFileSync(served(src));
+      expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual(size);
+    }
+  });
+
   it("speaks to learners, deck authors, technologists and decision makers", () => {
     for (const id of ["learners", "authors", "technologists", "decision-makers"]) {
       expect(html).toContain(`<section id="${id}"`);

@@ -64,7 +64,11 @@ description:
       - Data checked against published SHACL shapes in the browser
       - English, Swedish, Korean, German, Spanish and French
     screenshots:
-      - apps/web/public/social-preview.png
+      - apps/web/public/screenshots/study.png
+      - apps/web/public/screenshots/library.png
+      - apps/web/public/screenshots/course-chapter.png
+      - apps/web/public/screenshots/statistics.png
+      - apps/web/public/screenshots/studio.png
 
 legal:
   license: MIT

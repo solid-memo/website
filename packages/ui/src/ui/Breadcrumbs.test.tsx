@@ -45,6 +45,14 @@ describe("breadcrumbsFor", () => {
     ]);
   });
 
+  it("names a link to a library deck, where it asks which instance to open it in, Instances", () => {
+    const tried: RouteRef = {
+      screen: "try",
+      libraryDeckUrl: "https://solid-memo.com/decks/index.ttl#capitals",
+    };
+    expect(breadcrumbsFor(tried, NO_NAMES)).toEqual([{ label: "Instances", route: tried }]);
+  });
+
   it("puts instance-level screens under Decks", () => {
     const deckCreator: RouteRef = { screen: "deckCreator", instanceUrl };
     expect(breadcrumbsFor(deckCreator, NO_NAMES)).toEqual([

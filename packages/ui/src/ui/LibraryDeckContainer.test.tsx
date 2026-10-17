@@ -76,6 +76,19 @@ describe("LibraryDeckContainer", () => {
     );
   });
 
+  it("copies the deck's link for anyone: this page's address, with the deck's #/try link", async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    renderContainer(makeUseCasesFake());
+    fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
+    await waitFor(() =>
+      expect(writeText).toHaveBeenCalledWith(
+        `${window.location.origin}${window.location.pathname}#/try?deck=${encodeURIComponent(capitals.seriesUrl)}`,
+      ),
+    );
+    Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
+  });
+
   it("marks the deck when the instance already holds a copy", async () => {
     renderContainer(
       makeUseCasesFake({

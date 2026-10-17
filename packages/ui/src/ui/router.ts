@@ -87,7 +87,11 @@ export type RouteRef =
       view?: StatisticsView;
     }
   /** Developer tool: the instance's documents checked against the shapes. */
-  | { screen: "validation"; instanceUrl: string };
+  | { screen: "validation"; instanceUrl: string }
+  /** A library deck from a link anyone can open (docs/routing.md, A link
+      to a library deck): it names no instance, and goes on to the deck's
+      page in one of the learner's, as a guest if need be. */
+  | { screen: "try"; libraryDeckUrl: string };
 
 /**
  * The cards the Browser narrows its list down to: those with a side that
@@ -255,6 +259,8 @@ export function routeToHash(ref: RouteRef): string {
       })}`;
     case "validation":
       return `#/validate${params({ instance: ref.instanceUrl })}`;
+    case "try":
+      return `#/try${params({ deck: ref.libraryDeckUrl })}`;
   }
 }
 
@@ -297,6 +303,14 @@ export function importUrlHref(instanceUrl: string): string {
  */
 export function libraryDeckHref(instanceUrl: string, libraryDeckUrl: string): string {
   return routeToHash({ screen: "libraryDeck", instanceUrl, libraryDeckUrl });
+}
+
+/**
+ * Hash URL of a library deck for anyone: what its page's "Copy link"
+ * copies. It names no instance, so it opens in any browser.
+ */
+export function tryHref(libraryDeckUrl: string): string {
+  return routeToHash({ screen: "try", libraryDeckUrl });
 }
 
 /** Hash URL of a library deck's preview: what its Preview button opens. */
@@ -457,6 +471,8 @@ export function parseHash(hash: string): RouteRef | null {
         : { screen: "deckStatistics", instanceUrl, deckUrl, ...parseStatisticsParams(query) };
     case "/validate":
       return instanceUrl === null ? null : { screen: "validation", instanceUrl };
+    case "/try":
+      return deckUrl === null ? null : { screen: "try", libraryDeckUrl: deckUrl };
     default:
       return null;
   }

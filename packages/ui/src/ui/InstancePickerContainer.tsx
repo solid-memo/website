@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { ComponentChildren } from "preact";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
@@ -19,12 +20,15 @@ export function InstancePickerContainer({
   useCases,
   session,
   instances,
+  purpose,
   newInstanceHref,
   onOpen,
 }: {
   useCases: UseCases;
   session: Session;
   instances: Instance[];
+  /** What the instance is picked for, when more than to open it. */
+  purpose?: ComponentChildren;
   /** URL of the storage picker, where a new instance starts. */
   newInstanceHref: string;
   onOpen: (instance: Instance) => void;
@@ -59,6 +63,7 @@ export function InstancePickerContainer({
   return (
     <InstancePicker
       instances={instances}
+      purpose={purpose}
       options={registrationOptionsQuery.data ?? null}
       busy={attachInstanceMutation.isPending || deleteInstanceMutation.isPending}
       error={errorText(attachInstanceMutation.error) ?? errorText(deleteInstanceMutation.error)}

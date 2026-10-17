@@ -41,7 +41,7 @@ describe("Footer", () => {
     render(<Footer source={{ ...source, commitSha: null }} />);
     expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 0.1.0");
     expect(screen.getByRole("contentinfo")).not.toHaveTextContent("Version 0.1.0 (");
-    expect(screen.getAllByRole("link")).toHaveLength(6);
+    expect(screen.getAllByRole("link")).toHaveLength(7);
   });
 
   it("links to the source code and to a new issue in the repository", () => {
@@ -69,11 +69,16 @@ describe("Footer", () => {
     );
   });
 
-  it("links first to the docs, this site's own pages in English, in the same tab", () => {
+  it("links first to the About page, then to the docs, this site's own pages in English, in the same tab", () => {
     render(<Footer source={source} />);
-    // Named "Docs" alone: no "(opens in a new tab)".
+    // Named "About" alone: no "(opens in a new tab)".
+    const about = screen.getByRole("link", { name: "About" });
+    expect(about.parentElement?.firstElementChild).toBe(about);
+    expect(about).toHaveAttribute("href", "about/");
+    expect(about).toHaveAttribute("hreflang", "en");
+    expect(about).not.toHaveAttribute("target");
     const docs = screen.getByRole("link", { name: "Docs" });
-    expect(docs.parentElement?.firstElementChild).toBe(docs);
+    expect(about.nextElementSibling).toBe(docs);
     expect(docs.parentElement).toContainElement(externalLink("Source code"));
     expect(docs).toHaveAttribute("href", "docs/");
     expect(docs).toHaveAttribute("hreflang", "en");
@@ -81,11 +86,15 @@ describe("Footer", () => {
     expect(docs).not.toHaveAttribute("rel");
   });
 
-  it("says in another language that the docs are in English", () => {
+  it("says in another language that the About page and the docs are in English", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <Footer source={source} />
       </I18nProvider>,
+    );
+    expect(screen.getByRole("link", { name: "Om appen (på engelska)" })).toHaveAttribute(
+      "hreflang",
+      "en",
     );
     const docs = screen.getByRole("link", { name: "Dokumentation (på engelska)" });
     expect(docs).toHaveAttribute("href", "docs/");

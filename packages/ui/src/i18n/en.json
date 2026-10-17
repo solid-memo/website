@@ -82,6 +82,7 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Source code",
     "changelog": "Changelog",
+    "about": "About",
     "docs": "Docs",
     "reportIssue": "Report an issue",
     "discussions": "Discussions"
@@ -756,6 +757,9 @@
     "import": "Import this deck",
     "importing": "Importing…",
     "preview": "Preview",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied. Anyone can open it, without an account.",
+    "copyFailed": "The link could not be copied. Copy it from here:",
     "alreadyImported": "Already imported",
     "courseChapters": "A course: short pieces of theory, each checked by a question. Every question you answer becomes a card in your deck.",
     "startCourse": "Start course",
@@ -1259,7 +1263,9 @@
     "checkFailed": "Could not check this instance's data: {error}",
     "developerTools": "Developer tools",
     "validateInstance": "Validate this instance",
-    "loadingCourse": "Loading the course…"
+    "loadingCourse": "Loading the course…",
+    "tryChooseInstance": "Which instance should {deck} open in?",
+    "triedUnknown": "The deck that link leads to is not in the library. Here is what the library has."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "The front image must be an http(s) URL.",

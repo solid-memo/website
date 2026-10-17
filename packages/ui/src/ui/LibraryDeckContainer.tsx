@@ -8,13 +8,15 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { isCopyOf, type LibraryDeck } from "@solid-memo/domain/library";
 import { LibraryDeckScreen } from "./LibraryDeckScreen";
-import { libraryPreviewHref, routeToHash } from "./router";
+import { libraryPreviewHref, routeToHash, tryHref } from "./router";
 import { useI18n } from "./i18n";
 
 /**
  * Owns one library deck's page and its import; returns to the deck list
  * once the deck is in. A course is started instead (UseCases.startCourse,
- * which finds the deck of it the instance has, if any), and opened. The
+ * which finds the deck of it the instance has, if any), and opened. Its
+ * link to copy is the page's own address with the deck's `#/try` link
+ * for a hash, so it works wherever the site is served from. The
  * deck itself is resolved by Workspace from the library index, like a pod
  * deck is from the catalog.
  */
@@ -69,6 +71,7 @@ export function LibraryDeckContainer({
         libraryDeckUrl: deck.seriesUrl,
       })}
       previewHref={libraryPreviewHref(instance.url, deck.seriesUrl)}
+      shareUrl={`${window.location.origin}${window.location.pathname}${tryHref(deck.seriesUrl)}`}
       imported={imported}
       busy={importMutation.isPending || startMutation.isPending}
       error={errorText(importMutation.error ?? startMutation.error)}

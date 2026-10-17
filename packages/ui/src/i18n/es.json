@@ -84,6 +84,7 @@
     "versionAtCommit": "Versión {version} ({commit})",
     "sourceCode": "Código fuente",
     "changelog": "Registro de cambios",
+    "about": "Acerca de la app (en inglés)",
     "docs": "Documentación (en inglés)",
     "reportIssue": "Informar de un problema",
     "discussions": "Debates"
@@ -794,6 +795,9 @@
     "import": "Importar este mazo",
     "importing": "Importando…",
     "preview": "Vista previa",
+    "copyLink": "Copiar enlace",
+    "linkCopied": "Enlace copiado. Cualquiera puede abrirlo, sin cuenta.",
+    "copyFailed": "No se pudo copiar el enlace. Cópialo desde aquí:",
     "alreadyImported": "Ya importado",
     "courseChapters": "Un curso: breves fragmentos de teoría, cada uno comprobado con una pregunta. Cada pregunta que respondes se convierte en una tarjeta de tu mazo.",
     "startCourse": "Empezar el curso",
@@ -1318,7 +1322,9 @@
     "checkFailed": "No se pudieron comprobar los datos de esta instancia: {error}",
     "developerTools": "Herramientas de desarrollador",
     "validateInstance": "Validar esta instancia",
-    "loadingCourse": "Cargando el curso…"
+    "loadingCourse": "Cargando el curso…",
+    "tryChooseInstance": "¿En qué instancia quieres abrir {deck}?",
+    "triedUnknown": "El mazo al que lleva el enlace no está en la biblioteca. Esto es lo que tiene la biblioteca."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "La imagen del anverso debe ser una URL http(s).",

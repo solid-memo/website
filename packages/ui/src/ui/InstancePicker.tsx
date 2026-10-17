@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { isGuestUrl } from "@solid-memo/domain/guest";
+import type { ComponentChildren } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import type {
   Instance,
@@ -26,6 +27,7 @@ import { useI18n, type ErrorText } from "./i18n";
  */
 export function InstancePicker({
   instances,
+  purpose,
   options,
   busy,
   error,
@@ -37,6 +39,8 @@ export function InstancePicker({
   keptReleases = false,
 }: {
   instances: Instance[];
+  /** What the instance is picked for, said under the heading; none when it is to open it. */
+  purpose?: ComponentChildren;
   options: RegistrationOptions | null;
   busy: boolean;
   error: ErrorText | null;
@@ -98,6 +102,7 @@ export function InstancePicker({
   return (
     <section>
       <h2>{t("instancePicker.heading")}</h2>
+      {purpose !== undefined && <p>{purpose}</p>}
       <p class="hint">{t("instancePicker.intro")}</p>
       {instances.length === 0 ? (
         <p>{t("instancePicker.empty")}</p>

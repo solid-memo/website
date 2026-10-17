@@ -571,8 +571,10 @@ flowchart LR
   Clicking a row opens the deck's page: description, topics, keywords
   in the reader's language,
   the release (version, date, notes), authors, license, dates and
-  sources, an import button and "Browse cards" (a read-only, paged list
-  fetched from the release document).
+  sources, an import button, "Browse cards" (a read-only, paged list
+  fetched from the release document) and "Copy link", which copies a
+  link to the deck that names no instance, for anyone to open
+  ([routing.md](routing.md#a-link-to-a-library-deck)).
 - A deck's page is addressed by its **series** (`&deck=…/index.ttl#name`),
   which outlives releases; an address of one of its releases still finds
   it. A deck the library does not have falls back to the library

@@ -1421,6 +1421,149 @@ describe("Workspace", () => {
     );
   });
 
+  describe("a link to a library deck (#/try)", () => {
+    const releaseUrl = "https://solid-memo.com/decks/capitals/v1.ttl";
+    const seriesUrl = librarySeriesUrlOf(releaseUrl);
+    const capitals = {
+      url: releaseUrl,
+      ...firstRelease(releaseUrl),
+      title: { en: "Capitals" },
+      cardCount: 3,
+      authors: [],
+      direction: "front-to-back" as const,
+      sources: [],
+    };
+    const follow = (libraryDeckUrl: string) =>
+      window.history.replaceState(null, "", routeToHash({ screen: "try", libraryDeckUrl }));
+
+    it("opens the deck's page in the learner's one instance, in place of the link", async () => {
+      follow(seriesUrl);
+      const length = window.history.length;
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listLibraryDecks: vi.fn(async () => [capitals]),
+        }),
+      );
+
+      expect(await screen.findByRole("heading", { name: "Capitals" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(
+        routeToHash({
+          screen: "libraryDeck",
+          instanceUrl: instanceA.url,
+          libraryDeckUrl: seriesUrl,
+        }),
+      );
+      expect(window.history.length).toBe(length);
+    });
+
+    it("finds the deck by one of its releases too", async () => {
+      follow(releaseUrl);
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listLibraryDecks: vi.fn(async () => [capitals]),
+        }),
+      );
+
+      expect(await screen.findByRole("heading", { name: "Capitals" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(
+        routeToHash({
+          screen: "libraryDeck",
+          instanceUrl: instanceA.url,
+          libraryDeckUrl: seriesUrl,
+        }),
+      );
+    });
+
+    it("asks which instance to open it in when the learner has several", async () => {
+      follow(seriesUrl);
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA, instanceB]),
+          listLibraryDecks: vi.fn(async () => [capitals]),
+        }),
+      );
+
+      expect(
+        await screen.findByText("Which instance should Capitals open in?"),
+      ).toBeInTheDocument();
+      const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
+      expect(within(nav).getByRole("link", { name: "Instances" })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Deck set B" }));
+      expect(await screen.findByRole("heading", { name: "Capitals" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(
+        routeToHash({
+          screen: "libraryDeck",
+          instanceUrl: instanceB.url,
+          libraryDeckUrl: seriesUrl,
+        }),
+      );
+    });
+
+    it("shows the library, saying so, for a deck it does not have, until the learner leaves it", async () => {
+      follow("https://solid-memo.com/decks/index.ttl#nope");
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA, instanceB]),
+          listLibraryDecks: vi.fn(async () => [capitals]),
+        }),
+      );
+
+      // Asked which instance to open it in, with no deck to name.
+      fireEvent.click(await screen.findByRole("button", { name: "Deck set A" }));
+      expect(await screen.findByRole("heading", { name: "Deck library" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(
+        routeToHash({ screen: "library", instanceUrl: instanceA.url }),
+      );
+      expect(screen.getByText(/The deck that link leads to is not in the library/)).toHaveAttribute(
+        "role",
+        "status",
+      );
+
+      const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
+      fireEvent.click(within(nav).getByRole("link", { name: "Decks" }));
+      expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
+      act(() => window.history.back());
+      expect(await screen.findByRole("heading", { name: "Deck library" })).toBeInTheDocument();
+      expect(screen.queryByText(/The deck that link leads to/)).toBeNull();
+    });
+
+    it("shows the library, with why it cannot be read, when it cannot", async () => {
+      follow(seriesUrl);
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listLibraryDecks: vi.fn(async () => Promise.reject(new Error("offline"))),
+        }),
+      );
+
+      expect(await screen.findByText("offline")).toBeInTheDocument();
+      expect(window.location.hash).toBe(
+        routeToHash({ screen: "library", instanceUrl: instanceA.url }),
+      );
+      // Not that the deck is missing: whether it is, is not known.
+      expect(screen.queryByText(/The deck that link leads to/)).toBeNull();
+    });
+
+    it("has a learner with no instance make one first", async () => {
+      follow(seriesUrl);
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => []),
+          listLibraryDecks: vi.fn(async () => [capitals]),
+        }),
+      );
+
+      await waitFor(() =>
+        expect(window.location.hash).toBe(routeToHash({ screen: "storagePicker" })),
+      );
+    });
+  });
+
   it("shows the error when the library cannot be read for a deck's page", async () => {
     window.history.replaceState(
       null,

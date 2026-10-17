@@ -82,6 +82,7 @@
     "versionAtCommit": "Version {version} ({commit})",
     "sourceCode": "Quellcode",
     "changelog": "Änderungsprotokoll",
+    "about": "Über die App (auf Englisch)",
     "docs": "Dokumentation (auf Englisch)",
     "reportIssue": "Problem melden",
     "discussions": "Diskussionen"
@@ -756,6 +757,9 @@
     "import": "Stapel importieren",
     "importing": "Wird importiert…",
     "preview": "Vorschau",
+    "copyLink": "Link kopieren",
+    "linkCopied": "Link kopiert. Alle können ihn öffnen, auch ohne Konto.",
+    "copyFailed": "Der Link konnte nicht kopiert werden. Kopiere ihn von hier:",
     "alreadyImported": "Bereits importiert",
     "courseChapters": "Ein Kurs: kurze Theorieabschnitte, jeder mit einer Frage zum Verständnis. Jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel.",
     "startCourse": "Kurs starten",
@@ -1259,7 +1263,9 @@
     "checkFailed": "Die Daten dieser Instanz konnten nicht geprüft werden: {error}",
     "developerTools": "Entwicklerwerkzeuge",
     "validateInstance": "Diese Instanz prüfen",
-    "loadingCourse": "Kurs wird geladen…"
+    "loadingCourse": "Kurs wird geladen…",
+    "tryChooseInstance": "In welcher Instanz soll „{deck}“ geöffnet werden?",
+    "triedUnknown": "Der Stapel, zu dem der Link führt, ist nicht in der Bibliothek. Das hier hat die Bibliothek."
   },
   "errors": {
     "cardFrontImageNotWebUrl": "Das Bild auf der Vorderseite muss eine http(s)-URL sein.",
