@@ -139,6 +139,19 @@ ${PREFIXES}<> a ex:Thing ; ex:name "A \\"quoted\\" name", "B"@en ; ex:count 2 ; 
 `);
   });
 
+  it("writes IRIs under a @base that is a folder relative to it", () => {
+    const turtle = `@base <https://example.com/docs/> .\n<> <https://example.com/ns#has> <a.md>, <#b>, <https://example.com/other> .`;
+    expect(
+      formatTurtle(turtle, "https://format.invalid/docs.ttl"),
+    ).toBe(`@base <https://example.com/docs/> .
+
+<>
+    <https://example.com/ns#has> <a.md> ,
+                                 <#b> ,
+                                 <https://example.com/other> .
+`);
+  });
+
   it("writes a literal with a line feed as a long string, its lines verbatim", () => {
     const source = String.raw`<#a> ex:text "Run:\n\n    npm test\n\n| a | b |"@en , "x\ny" , "1\n2"^^xsd:token ; ex:one "no\\nfeed" .`;
     const formatted = formatTurtle(`${PREFIXES}${source}`, BASE);
