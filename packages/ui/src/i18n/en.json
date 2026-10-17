@@ -87,6 +87,20 @@
     "reportIssue": "Report an issue",
     "discussions": "Discussions"
   },
+  "crash": {
+    "title": "Something went wrong",
+    "explain": "An error stopped this screen. Try again, or go to the start.",
+    "tryAgain": "Try again",
+    "start": "Go to the start",
+    "copy": "Copy details",
+    "copied": "The details are copied.",
+    "copyFailed": "The details could not be copied. Select them under Technical details and copy them by hand.",
+    "report": "Report it",
+    "private": "The details name no Pod, WebID or card, and nothing is sent unless you send the report yourself.",
+    "notice": "Something went wrong. The page may not work as it should; if it stops responding, reload it.",
+    "noticeRegion": "Error",
+    "close": "Close"
+  },
   "addCardForm": {
     "submitButton": "Add card",
     "added": "Card added."

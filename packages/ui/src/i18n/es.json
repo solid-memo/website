@@ -89,6 +89,20 @@
     "reportIssue": "Informar de un problema",
     "discussions": "Debates"
   },
+  "crash": {
+    "title": "Algo salió mal",
+    "explain": "Un error detuvo esta pantalla. Inténtalo de nuevo o ve al inicio.",
+    "tryAgain": "Intentar de nuevo",
+    "start": "Ir al inicio",
+    "copy": "Copiar detalles",
+    "copied": "Los detalles se han copiado.",
+    "copyFailed": "No se pudieron copiar los detalles. Selecciónalos en Detalles técnicos y cópialos a mano.",
+    "report": "Informar de ello",
+    "private": "Los detalles no mencionan ningún Pod, WebID ni tarjeta, y no se envía nada a menos que envíes el informe tú.",
+    "notice": "Algo salió mal. Puede que la página no funcione como debe; si deja de responder, vuelve a cargarla.",
+    "noticeRegion": "Error",
+    "close": "Cerrar"
+  },
   "addCardForm": {
     "submitButton": "Añadir tarjeta",
     "added": "Tarjeta añadida."

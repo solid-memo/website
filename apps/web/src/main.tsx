@@ -5,6 +5,7 @@
 import { render } from "preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppUseCases } from "@solid-memo/composition/appUseCases";
+import { ErrorGuard } from "@solid-memo/ui/ErrorGuard";
 import "@solid-memo/ui/style.css";
 import { App } from "./App";
 import { siteConfig } from "./config";
@@ -25,16 +26,25 @@ const useCases = createAppUseCases({
 
 const queryClient = new QueryClient();
 
+const source = { repoUrl: config.repoUrl, version: __APP_VERSION__, commitSha: __COMMIT_SHA__ };
+
 render(
-  <QueryClientProvider client={queryClient}>
-    <App
-      useCases={useCases}
-      source={{ repoUrl: config.repoUrl, version: __APP_VERSION__, commitSha: __COMMIT_SHA__ }}
-      appName={config.appName}
-      providers={config.podProviders}
-      // The Studio, a chunk of its own, fetched the first time a Studio route opens (docs/studio.md).
-      loadStudio={() => import("@solid-memo/studio")}
-    />
-  </QueryClientProvider>,
+  // An error nothing else caught gets a screen or a notice, never a blank page (docs/privacy.md).
+  <ErrorGuard
+    source={source}
+    appName={config.appName}
+    locale={() => useCases.language(navigator.languages)}
+  >
+    <QueryClientProvider client={queryClient}>
+      <App
+        useCases={useCases}
+        source={source}
+        appName={config.appName}
+        providers={config.podProviders}
+        // The Studio, a chunk of its own, fetched the first time a Studio route opens (docs/studio.md).
+        loadStudio={() => import("@solid-memo/studio")}
+      />
+    </QueryClientProvider>
+  </ErrorGuard>,
   document.getElementById("app")!,
 );

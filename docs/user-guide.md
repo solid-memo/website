@@ -74,6 +74,11 @@ straight to your decks. "Log out", at the top, ends the session.
   ([routing.md](routing.md)).
 - **"Skip to content"** is the first thing the Tab key reaches, for
   keyboard users.
+- **"Something went wrong"** takes a screen's place if it breaks, with
+  the top and the footer still there. **Try again**, or **Go to the
+  start**; **Copy details** and **Report it** help you tell the
+  project, but nothing is sent unless you send the report
+  ([privacy.md](privacy.md#when-something-goes-wrong)).
 
 ## Your decks
 

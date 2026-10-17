@@ -356,12 +356,15 @@ interface I18nState extends I18n {
   chooseLocale(locale: Locale): void;
 }
 
+/** Where no language can be chosen: outside a provider, or under one with no `onChoose`. */
+const keepLocale = () => undefined;
+
 const I18nContext = createContext<I18nState>({
   ...createI18n(DEFAULT_LOCALE),
-  chooseLocale: () => undefined,
+  chooseLocale: keepLocale,
 });
 
-/** The language the screens below speak, and how to choose another. */
+/** The language the screens below speak, and how to choose another (none, without `onChoose`). */
 export function I18nProvider({
   locale,
   appName,
@@ -371,11 +374,13 @@ export function I18nProvider({
   locale: Locale;
   /** The site's own name, in place of Solid Memo's (see createI18n). */
   appName?: string;
-  onChoose: (locale: Locale) => void;
+  onChoose?: (locale: Locale) => void;
   children: ComponentChildren;
 }) {
   return (
-    <I18nContext.Provider value={{ ...createI18n(locale, appName), chooseLocale: onChoose }}>
+    <I18nContext.Provider
+      value={{ ...createI18n(locale, appName), chooseLocale: onChoose ?? keepLocale }}
+    >
       {children}
     </I18nContext.Provider>
   );

@@ -89,6 +89,20 @@
     "reportIssue": "Signaler un problème",
     "discussions": "Discussions"
   },
+  "crash": {
+    "title": "Une erreur s’est produite",
+    "explain": "Une erreur a arrêté cet écran. Réessayez, ou revenez au début.",
+    "tryAgain": "Réessayer",
+    "start": "Revenir au début",
+    "copy": "Copier les détails",
+    "copied": "Les détails sont copiés.",
+    "copyFailed": "Impossible de copier les détails. Sélectionnez-les sous Détails techniques et copiez-les à la main.",
+    "report": "Le signaler",
+    "private": "Les détails ne mentionnent ni Pod, ni WebID, ni carte, et rien n’est envoyé à moins que vous n’envoyiez le signalement vous-même.",
+    "notice": "Une erreur s’est produite. La page peut ne pas fonctionner comme prévu ; si elle ne répond plus, rechargez-la.",
+    "noticeRegion": "Erreur",
+    "close": "Fermer"
+  },
   "addCardForm": {
     "submitButton": "Ajouter une carte",
     "added": "Carte ajoutée."
