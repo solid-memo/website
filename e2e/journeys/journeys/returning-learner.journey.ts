@@ -64,7 +64,7 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
   await device.step("09 · Log in with the WebID and refuse Solid Memo the Pod", async () => {
     await device.onboarding.logInWithWebId(account.webId);
     await device.cssLogin.logIn(account);
-    await device.cssLogin.refuse();
+    await device.cssLogin.refuse(account.webId);
     // Back where it started, nobody logged in.
     await device.onboarding.expectStart();
   });

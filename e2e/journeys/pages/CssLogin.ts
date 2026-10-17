@@ -25,26 +25,28 @@ export class CssLogin extends Screen {
 
   async authorize(webId: string): Promise<void> {
     await this.intent("Let Solid Memo use the Pod", async () => {
-      await this.expectConsent();
-      await expect(this.page.getByRole("radio", { name: webId })).toBeChecked();
+      await this.expectConsent(webId);
       await this.page.getByRole("button", { name: "Authorize" }).click();
     });
   }
 
   /**
    * The consent page is shown, which may come straight from the app when
-   * the server skips its login (its session cookie).
+   * the server skips its login (its session cookie), and is ready: its
+   * script lists the account's WebIDs, `webId` chosen, only after it has
+   * wired its buttons, so a click before that does nothing.
    */
-  private async expectConsent(): Promise<void> {
+  private async expectConsent(webId: string): Promise<void> {
     await expect(
       this.page.getByRole("heading", { name: "An application is requesting access" }),
     ).toBeVisible({ timeout: 30_000 });
+    await expect(this.page.getByRole("radio", { name: webId })).toBeChecked();
   }
 
   /** Refuses Solid Memo the Pod: Cancel, which sends the browser back to the app. */
-  async refuse(): Promise<void> {
+  async refuse(webId: string): Promise<void> {
     await this.intent("Refuse Solid Memo the Pod", async () => {
-      await this.expectConsent();
+      await this.expectConsent(webId);
       await this.page.getByRole("button", { name: "Cancel" }).click();
     });
   }
