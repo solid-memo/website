@@ -172,10 +172,6 @@ export class Study extends Screen {
     await expect(this.finishedMessage).toBeVisible();
   }
 
-  async expectNothingToStudy(): Promise<void> {
-    await expect(this.nothingMessage).toBeVisible();
-  }
-
   /** "End session": back to Decks. */
   async endSession(): Promise<void> {
     await this.intent("End the session", async () => {

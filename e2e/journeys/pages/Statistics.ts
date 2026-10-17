@@ -140,7 +140,8 @@ export interface ExpectedStatistics {
   /** Every deck under "Maturity by deck", in any order. */
   maturityByDeck?: ({ name: string } & Maturity)[];
   /**
-   * The fronts listed under "Leeches across your decks", in order; null
+   * The fronts listed under "Leeches across your decks", in order; none
+   * when no card was forgotten that often, which the page says; null
    * when there is no review yet, so nothing is hard to tell and no list
    * is shown.
    */
@@ -703,6 +704,14 @@ export class Statistics extends Screen {
       await expect(list, this.t("statistics.leeches")).toHaveCount(0);
       return;
     }
+    if (fronts.length === 0) {
+      await expect(list, this.t("statistics.leeches")).toHaveCount(0);
+      await expect(
+        this.main.getByText(this.t("statistics.noLeeches"), { exact: true }),
+        this.t("statistics.leeches"),
+      ).toBeVisible();
+      return;
+    }
     await expect(list.getByRole("listitem").getByRole("link")).toHaveText(fronts);
   }
 
@@ -738,11 +747,6 @@ export class Statistics extends Screen {
     await expect(this.tile(key)).toContainText(
       this.t("statistics.ofReviews", { count: recall.reviews }),
     );
-  }
-
-  /** A share as the app writes it, of a count above 0. */
-  private percent(part: number, whole: number): string {
-    return new Intl.NumberFormat(this.app.locale, { style: "percent" }).format(part / whole);
   }
 
   private async expectByDeck(decks: DeckRow[]): Promise<void> {

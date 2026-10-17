@@ -245,6 +245,58 @@ describe("LibraryUpgradeContainer", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Updated to release 2 from the library.");
   });
 
+  it("still says the deck was updated when the page is rebuilt while it reads the updated deck again", async () => {
+    let stored: Deck = imported;
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [stored]),
+      planLibraryUpgrade: vi.fn(async (deck: Deck) =>
+        deck.sourceUrl === imported.sourceUrl ? plan : null,
+      ),
+      applyLibraryUpgrade: vi.fn(
+        async (deck: Deck, applied: LibraryUpgradePlan): Promise<DeckUpgradeOutcome> => {
+          stored = { ...deck, sourceUrl: applied.releaseUrl };
+          return { ok: true, deck: stored };
+        },
+      ),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    // As the deck's page does: its loading in place of it while its study queue, which the upgrade drops, is read again.
+    function DeckPage() {
+      const decks = useQuery({
+        queryKey: ["decks"],
+        queryFn: () => useCases.listDecks(instance.url),
+      });
+      const deck = decks.data?.[0];
+      const queue = useQuery({
+        queryKey: ["studyQueue", imported.url],
+        queryFn: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 20));
+          return [];
+        },
+      });
+      return deck === undefined || queue.data === undefined ? (
+        <p>Loading</p>
+      ) : (
+        <LibraryUpgradeContainer useCases={useCases} instance={instance} deck={deck} />
+      );
+    }
+    render(
+      <QueryClientProvider client={queryClient}>
+        <DeckPage />
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Update to release 2" }));
+
+    await waitFor(() => expect(screen.queryByText("Loading")).toBeNull());
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Updated to release 2 from the library.",
+      ),
+    );
+    expect(screen.queryByRole("button", { name: "Update to release 2" })).toBeNull();
+  });
+
   it("says where a failed upgrade stopped and that the deck is as it was, and lets the user try again or close", async () => {
     const failed: DeckUpgradeOutcome = {
       ok: false,

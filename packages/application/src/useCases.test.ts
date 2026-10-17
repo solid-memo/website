@@ -4932,6 +4932,19 @@ describe("library deck upgrade", () => {
       },
     );
 
+    it("transferGuestStudy, at a target already taken, keeps the note of the interrupted move whose copy is there", async () => {
+      const { deps } = guestDeps();
+      vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("taken"));
+      const outcome = await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+        containerUrl: TARGET,
+        registrationTarget: "private",
+      });
+      expect(outcome).toMatchObject({ ok: false, step: "stage", cleanedUp: true });
+      expect(deps.updateJournal.begin).not.toHaveBeenCalled();
+      expect(deps.updateJournal.end).not.toHaveBeenCalled();
+      expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+    });
+
     it("transferGuestStudy refuses a copy that still names the guest's pod, or does not conform", async () => {
       const { deps } = guestDeps();
       vi.mocked(deps.instanceCopier.mentions).mockImplementation(async (url) =>

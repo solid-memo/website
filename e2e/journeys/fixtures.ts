@@ -4,9 +4,16 @@
 
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { test as base, expect, type Page, type TestInfo } from "@playwright/test";
+import {
+  test as base,
+  type BrowserContext,
+  expect,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
 import { createAccount, type CssAccount } from "./harness/cssAccount.ts";
 import { CSS_LOG } from "./harness/cssServer.ts";
+import { otherApp, type OtherApp } from "./harness/otherApp.ts";
 import { dumpPod } from "./harness/podDump.ts";
 import { seedRandom } from "./harness/seededRandom.ts";
 import { App } from "./pages/App.ts";
@@ -18,7 +25,12 @@ import { App } from "./pages/App.ts";
  * - `runId`, eight hex digits naming what this run makes (decks, pods);
  * - `account`, a fresh account, pod and WebID on it; when the journey
  *   fails, its pod's content is attached (pod-dump.ttl);
- * - `app`, the page objects (pages/App.ts), journey steps among them.
+ * - `otherApp`, an app other than Solid Memo writing to that pod for the
+ *   WebID (harness/otherApp.ts);
+ * - `app`, the page objects (pages/App.ts), journey steps among them;
+ * - `newDevice`, which opens the app again in a browser of its own (a
+ *   new context: no cookies, no storage), as on a second device, and
+ *   gives its page objects. It gets all the below, as `app` does.
  *
  * And, unasked: Math.random seeded (JOURNEY_SEED, else from the title and
  * the repeat),
@@ -31,7 +43,9 @@ interface Fixtures {
   server: string;
   runId: string;
   account: CssAccount;
+  otherApp: OtherApp;
   app: App;
+  newDevice: () => Promise<App>;
   diagnostics: Diagnostics;
 }
 
@@ -89,6 +103,15 @@ export const test = base.extend<Fixtures>({
     }
   },
 
+  otherApp: async ({ server, account, playwright }, use) => {
+    const api = await playwright.request.newContext({ ignoreHTTPSErrors: true });
+    try {
+      await use(otherApp(api, server, account));
+    } finally {
+      await api.dispose();
+    }
+  },
+
   diagnostics: [
     async ({ page, context }, use, testInfo) => {
       // A repeat (--repeat-each) shuffles otherwise; the seed in the report replays any of them.
@@ -104,37 +127,8 @@ export const test = base.extend<Fixtures>({
         unexpectedDialogs: [],
       };
       testInfo.annotations.push({ type: "seed", description: String(seed) });
-      await context.addInitScript(seedRandom, seed);
-      // Routing every request turns Chromium's HTTP cache off: the app loads everything afresh, as on a first visit.
-      await context.route("**/*", (route) => {
-        const url = new URL(route.request().url());
-        if (url.hostname === "127.0.0.1") return route.fallback();
-        found.blockedRequests.push(url.href);
-        return route.abort("blockedbyclient");
-      });
-      page.on("console", (message) =>
-        found.console.push({
-          type: message.type(),
-          text: message.text(),
-          url: message.location().url || undefined,
-        }),
-      );
-      page.on("pageerror", (error) => found.pageErrors.push(error.stack ?? String(error)));
-      page.on("requestfailed", (request) =>
-        found.failedRequests.push({
-          method: request.method(),
-          url: request.url(),
-          failure: request.failure()?.errorText ?? "",
-        }),
-      );
-      page.on("response", (response) => {
-        if (response.status() >= 400)
-          found.errorResponses.push({
-            method: response.request().method(),
-            url: response.url(),
-            status: response.status(),
-          });
-      });
+      await instrument(context, found);
+      watch(page, found);
       const started = new Date();
       await use(found);
       await testInfo.attach("diagnostics.json", {
@@ -154,9 +148,65 @@ export const test = base.extend<Fixtures>({
   app: async ({ page, diagnostics }, use, testInfo) => {
     await use(new App(page, testInfo, diagnostics));
   },
+
+  newDevice: async ({ browser, diagnostics }, use, testInfo) => {
+    const contexts: BrowserContext[] = [];
+    await use(async () => {
+      // A test's browser.newContext takes the project's options (use), as the fixture's own context does.
+      const context = await browser.newContext();
+      contexts.push(context);
+      await instrument(context, diagnostics);
+      const page = await context.newPage();
+      watch(page, diagnostics);
+      return new App(page, testInfo, diagnostics);
+    });
+    for (const context of contexts) await context.close();
+  },
 });
 
 export { expect };
+
+/**
+ * What every context gets: Math.random seeded, and requests to any host
+ * but 127.0.0.1 refused.
+ */
+async function instrument(context: BrowserContext, found: Diagnostics): Promise<void> {
+  await context.addInitScript(seedRandom, found.seed);
+  // Routing every request turns Chromium's HTTP cache off: the app loads everything afresh, as on a first visit.
+  await context.route("**/*", (route) => {
+    const url = new URL(route.request().url());
+    if (url.hostname === "127.0.0.1") return route.fallback();
+    found.blockedRequests.push(url.href);
+    return route.abort("blockedbyclient");
+  });
+}
+
+/** What every page reports to diagnostics.json: its console, its errors, its failed requests. */
+function watch(page: Page, found: Diagnostics): void {
+  page.on("console", (message) =>
+    found.console.push({
+      type: message.type(),
+      text: message.text(),
+      url: message.location().url || undefined,
+    }),
+  );
+  page.on("pageerror", (error) => found.pageErrors.push(error.stack ?? String(error)));
+  page.on("requestfailed", (request) =>
+    found.failedRequests.push({
+      method: request.method(),
+      url: request.url(),
+      failure: request.failure()?.errorText ?? "",
+    }),
+  );
+  page.on("response", (response) => {
+    if (response.status() >= 400)
+      found.errorResponses.push({
+        method: response.request().method(),
+        url: response.url(),
+        status: response.status(),
+      });
+  });
+}
 
 /** Whether the journey fails on what diagnostics found, though its steps passed. */
 const failsOn = (found: Diagnostics) =>

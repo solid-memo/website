@@ -6,11 +6,14 @@ import { expect, type Locator } from "@playwright/test";
 import { escapeRegExp, type Locale } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
+/** The themes the app shows (docs/theme.md). */
+export type Theme = "light" | "dark";
+
 /**
  * What is around every screen: the masthead (who is logged in, log out,
- * the language), the breadcrumbs, the instance's own links (statistics,
- * preferences) and, in developer mode, the developer tools; in the
- * Studio, its sidebar and the tabs of the deck or draft it shows.
+ * the language, the theme), the breadcrumbs, the instance's own links
+ * (statistics, preferences) and, in developer mode, the developer tools;
+ * in the Studio, its sidebar and the tabs of the deck or draft it shows.
  */
 export class Chrome extends Screen {
   get breadcrumbs(): Locator {
@@ -89,6 +92,58 @@ export class Chrome extends Screen {
     });
   }
 
+  /**
+   * The sun/moon button at the top, named for the theme it switches to
+   * (theme.toDark, theme.toLight): its name tells the theme shown.
+   */
+  private themeToggle(to: Theme): Locator {
+    return this.page.getByRole("button", {
+      name: this.t(to === "dark" ? "theme.toDark" : "theme.toLight"),
+      exact: true,
+    });
+  }
+
+  /** Switches the theme with the sun/moon button at the top. */
+  async switchTheme(to: Theme): Promise<void> {
+    await this.intent(`Switch to the ${to} theme`, async () => {
+      await this.themeToggle(to).click();
+      await this.expectTheme(to);
+    });
+  }
+
+  /**
+   * Expects the theme shown: the button offers the other one, and the
+   * page's colors are the theme's (data-theme on the document, which the
+   * stylesheet's dark colors hang off, docs/theme.md).
+   */
+  async expectTheme(theme: Theme): Promise<void> {
+    await this.intent(`Check that the theme is ${theme}`, async () => {
+      await expect(this.themeToggle(theme === "dark" ? "light" : "dark")).toBeVisible();
+      await expect(this.page.locator("html")).toHaveAttribute("data-theme", theme);
+    });
+  }
+
+  /** The masthead says a guest is studying, and offers to log in to keep it. */
+  async expectGuest(): Promise<void> {
+    await expect(this.page.getByRole("banner")).toContainText(this.t("app.guestLine"));
+    await expect(this.keepStudyButton).toBeVisible();
+  }
+
+  private get keepStudyButton(): Locator {
+    return this.page
+      .getByRole("banner")
+      .getByRole("button", { name: this.t("app.keepStudy"), exact: true });
+  }
+
+  /** A guest's "Keep my study: log in": the WebID form, the study left where it is meanwhile. */
+  async keepStudy(): Promise<void> {
+    await this.intent("Log in to keep the study", async () => {
+      await this.keepStudyButton.click();
+      await expect(this.page.getByText(this.t("app.loginToKeep"), { exact: true })).toBeVisible();
+      await expect(this.page.getByRole("textbox", { name: "WebID" })).toBeVisible();
+    });
+  }
+
   /** Follows the breadcrumb named, and waits until the app is there (it is the current one). */
   async breadcrumb(key: string): Promise<void> {
     await this.intent(`Follow the breadcrumb ${this.t(key)}`, async () => {
@@ -115,6 +170,44 @@ export class Chrome extends Screen {
 
   async expectBreadcrumbHere(key: string): Promise<void> {
     await expect(this.breadcrumbs.locator('[aria-current="page"]')).toHaveText(this.t(key));
+  }
+
+  /**
+   * The instance bar names the instance open, `name`; with `folder`, its
+   * "Open in your Pod" leads to that folder, the instance's own.
+   */
+  async expectInstance(name: string, folder?: string): Promise<void> {
+    await this.intent(`Check that the instance ${name} is open`, async () => {
+      await expect(this.instanceNav.getByText(name, { exact: true })).toBeVisible();
+      if (folder !== undefined)
+        await expect(
+          this.instanceNav.getByRole("link", { name: this.t("instanceBar.openInPod") }),
+        ).toHaveAttribute("href", folder);
+    });
+  }
+
+  /** Follows the instance bar's "Switch instance" to the instance picker. */
+  async switchInstance(): Promise<void> {
+    await this.intent("Switch instance", async () => {
+      await this.instanceNav
+        .getByRole("link", { name: this.t("instanceBar.switch"), exact: true })
+        .click();
+      await this.app.instancePicker.expectShown();
+    });
+  }
+
+  /**
+   * Opens Solid Memo at its own address, no screen named in it, as a
+   * bookmark does: the session is restored and the app chooses where to
+   * open by how many instances there are (one opens, more are offered).
+   */
+  async openAtItsAddress(): Promise<void> {
+    await this.intent("Open Solid Memo at its address", async () => {
+      await this.page.goto("./");
+      await expect(this.breadcrumbs.locator('[aria-current="page"]')).toBeVisible({
+        timeout: 30_000,
+      });
+    });
   }
 
   async openStatistics(): Promise<void> {

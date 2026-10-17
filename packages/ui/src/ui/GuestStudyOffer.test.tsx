@@ -58,6 +58,19 @@ describe("GuestStudyOffer", () => {
     expect(screen.queryByRole("region")).toBeNull();
   });
 
+  it("offers to remove the copy a cut-off move left, above the offer and its form", async () => {
+    const useCases = renderOffer({
+      findInterruptedGuestMove: vi.fn(async () => "https://alice.example/solid-memo/main/"),
+    });
+    const leftover = await screen.findByRole("region", { name: "Interrupted move" });
+    expect(leftover).toHaveTextContent(
+      /The partial copy remains at https:\/\/alice\.example\/solid-memo\/main\//,
+    );
+    expect(useCases.findInterruptedGuestMove).toHaveBeenCalledWith(guestInstance);
+    await openForm();
+    expect(screen.getByRole("region", { name: "Interrupted move" })).toBe(leftover);
+  });
+
   it("names the study and its decks, and can be put off", async () => {
     renderOffer();
     expect(

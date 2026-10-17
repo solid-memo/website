@@ -4,11 +4,17 @@
 
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useMutationState,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
-import type { StepPart } from "@solid-memo/domain/deckUpgrade";
+import type { DeckUpgradeOutcome, StepPart } from "@solid-memo/domain/deckUpgrade";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { courseKey } from "./courseKey";
 import { useI18n } from "./i18n";
@@ -64,6 +70,10 @@ export function refreshUpgradedDeck(
  * are shown in place of the offer; a failed one says where it failed and
  * whether the deck changed, and offers to try again with the deck as it
  * now is: an upgrade cut off half-way is offered again, and finishes.
+ * The page around it may be rebuilt while the updated deck is read again
+ * (the deck's page shows its loading meanwhile), this container with it,
+ * so the update that ended is looked up among the session's updates of
+ * the deck, and its end is still said.
  */
 export function LibraryUpgradeContainer({
   useCases,
@@ -102,7 +112,9 @@ export function LibraryUpgradeContainer({
     step: "read",
     done: 0,
   });
+  const mutationKey = ["libraryUpgrade", deck.url];
   const upgradeMutation = useMutation({
+    mutationKey,
     mutationFn: async (plan: LibraryUpgradePlan) => {
       setProgress({ step: "read", done: 0 });
       const outcome = await useCases.applyLibraryUpgrade(deck, plan, setProgress);
@@ -126,6 +138,15 @@ export function LibraryUpgradeContainer({
       return outcome;
     },
   });
+
+  // The release the session's last update of the deck brought it to: null when it failed, undefined when there was none.
+  const lastUpdated = useMutationState({
+    filters: { mutationKey, status: "success" },
+    select: (mutation) =>
+      (mutation.state.data as DeckUpgradeOutcome).ok
+        ? (mutation.state.variables as LibraryUpgradePlan).toVersion
+        : null,
+  }).at(-1);
 
   if (deck.sourceUrl === undefined) return null;
   const outcome = upgradeMutation.data;
@@ -157,16 +178,14 @@ export function LibraryUpgradeContainer({
       />
     );
   }
-  const updated = upgradeMutation.isSuccess && shown === null;
+  const updated = lastUpdated != null && shown === null;
   return (
     <>
       {shown}
       {/* Mounted throughout, so the update's end is heard: a live region
           inserted along with its text often goes unheard. */}
       <p class="hint" role="status">
-        {updated
-          ? t("libraryUpgrade.updated", { version: upgradeMutation.variables.toVersion })
-          : ""}
+        {updated ? t("libraryUpgrade.updated", { version: lastUpdated }) : ""}
       </p>
     </>
   );

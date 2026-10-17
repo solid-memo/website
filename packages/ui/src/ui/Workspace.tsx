@@ -40,7 +40,6 @@ import { ImportUrlContainer } from "./ImportUrlContainer";
 import { LibraryDeckContainer } from "./LibraryDeckContainer";
 import { LibraryPreviewContainer } from "./LibraryPreviewContainer";
 import { Loading } from "./Loading";
-import { InterruptedMoveContainer } from "./InterruptedMoveContainer";
 import { MigrationContainer } from "./MigrationContainer";
 import { StudyContainer } from "./StudyContainer";
 import { PreferencesContainer } from "./PreferencesContainer";
@@ -841,7 +840,6 @@ export function Workspace({
         {session.guest !== true && <GuestStudyOffer useCases={useCases} session={session} />}
         {waiting === null && activeInstance !== null && (
           <>
-            <InterruptedMoveContainer useCases={useCases} instance={activeInstance} />
             <MigrationContainer useCases={useCases} session={session} instance={activeInstance} />
             {check.error && (
               // A div: the error may bring its technical details, a block.

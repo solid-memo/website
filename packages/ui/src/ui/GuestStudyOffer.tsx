@@ -21,6 +21,7 @@ import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
+import { InterruptedMoveContainer } from "./InterruptedMoveContainer";
 import { usePanelFocus } from "./panelFocus";
 import { RegistrationTargetChooser } from "./RegistrationTargetChooser";
 import { routeToHash } from "./router";
@@ -218,75 +219,84 @@ function GuestStudyOfferStage({
 
   const first = studyQuery.data?.instances[0];
   if (stage === "dismissed" || first === undefined) return null;
+  // The copy a move cut off by a closed tab left, offered for removal here,
+  // to the user logged in to the Pod it is in, above the offer and its form.
+  const leftover = <InterruptedMoveContainer useCases={useCases} instance={first.instance} />;
 
   if (stage === "form") {
     return (
-      <GuestKeepForm
-        useCases={useCases}
-        session={session}
-        guestInstance={first.instance}
-        busy={move.isPending || merge.isPending}
-        error={errorText(move.error ?? merge.error)}
-        onMove={(target) => move.mutate({ instance: first.instance, target })}
-        onMerge={(target, skip) => merge.mutate({ instance: first.instance, target, skip })}
-        onBack={() => {
-          move.reset();
-          merge.reset();
-          setStage("offer");
-          setReturned(true);
-        }}
-      />
+      <>
+        {leftover}
+        <GuestKeepForm
+          useCases={useCases}
+          session={session}
+          guestInstance={first.instance}
+          busy={move.isPending || merge.isPending}
+          error={errorText(move.error ?? merge.error)}
+          onMove={(target) => move.mutate({ instance: first.instance, target })}
+          onMerge={(target, skip) => merge.mutate({ instance: first.instance, target, skip })}
+          onBack={() => {
+            move.reset();
+            merge.reset();
+            setStage("offer");
+            setReturned(true);
+          }}
+        />
+      </>
     );
   }
 
   return (
-    // Keyed by stage: the discard question is a panel of its own, taking the focus.
-    <GuestOfferRegion key={stage} focus={stage === "discard" || returned}>
-      {(bodyId) => (
-        <>
-          <p id={stage === "discard" ? undefined : bodyId}>
-            <strong>{t("guestOffer.heading")}</strong>{" "}
-            {t("guestOffer.body", { name: first.instance.name, count: first.deckCount })}
-          </p>
-          {stage === "discard" ? (
-            <>
-              <p id={bodyId}>{t("guestOffer.discardConfirm")}</p>
+    <>
+      {leftover}
+      {/* Keyed by stage: the discard question is a panel of its own, taking the focus. */}
+      <GuestOfferRegion key={stage} focus={stage === "discard" || returned}>
+        {(bodyId) => (
+          <>
+            <p id={stage === "discard" ? undefined : bodyId}>
+              <strong>{t("guestOffer.heading")}</strong>{" "}
+              {t("guestOffer.body", { name: first.instance.name, count: first.deckCount })}
+            </p>
+            {stage === "discard" ? (
+              <>
+                <p id={bodyId}>{t("guestOffer.discardConfirm")}</p>
+                <div class="edit-actions">
+                  <button
+                    class="danger"
+                    onClick={() => {
+                      if (!discard.isPending) discard.mutate();
+                    }}
+                    aria-disabled={discard.isPending}
+                  >
+                    {t("guestOffer.discardYes")}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (discard.isPending) return;
+                      discard.reset();
+                      setStage("offer");
+                      setReturned(true);
+                    }}
+                    aria-disabled={discard.isPending}
+                  >
+                    {t("guestOffer.cancel")}
+                  </button>
+                </div>
+                <ErrorMessage error={errorText(discard.error)} />
+              </>
+            ) : (
               <div class="edit-actions">
-                <button
-                  class="danger"
-                  onClick={() => {
-                    if (!discard.isPending) discard.mutate();
-                  }}
-                  aria-disabled={discard.isPending}
-                >
-                  {t("guestOffer.discardYes")}
+                <button class="primary" onClick={() => setStage("form")}>
+                  {t("guestOffer.move")}
                 </button>
-                <button
-                  onClick={() => {
-                    if (discard.isPending) return;
-                    discard.reset();
-                    setStage("offer");
-                    setReturned(true);
-                  }}
-                  aria-disabled={discard.isPending}
-                >
-                  {t("guestOffer.cancel")}
-                </button>
+                <button onClick={() => setStage("discard")}>{t("guestOffer.discard")}</button>
+                <button onClick={() => setStage("dismissed")}>{t("guestOffer.notNow")}</button>
               </div>
-              <ErrorMessage error={errorText(discard.error)} />
-            </>
-          ) : (
-            <div class="edit-actions">
-              <button class="primary" onClick={() => setStage("form")}>
-                {t("guestOffer.move")}
-              </button>
-              <button onClick={() => setStage("discard")}>{t("guestOffer.discard")}</button>
-              <button onClick={() => setStage("dismissed")}>{t("guestOffer.notNow")}</button>
-            </div>
-          )}
-        </>
-      )}
-    </GuestOfferRegion>
+            )}
+          </>
+        )}
+      </GuestOfferRegion>
+    </>
   );
 }
 

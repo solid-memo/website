@@ -13,7 +13,8 @@ import { usePanelFocus } from "./panelFocus";
 /**
  * The partial copy that moving the guest's study into the user's Pod
  * left when a closed tab cut it off (docs/guest-mode.md "As a new
- * instance"), shown on the guest's instance with the button that removes
+ * instance"), shown with the offer to keep the guest's study, to the
+ * user logged in to the Pod the copy is in, with the button that removes
  * it. Renders nothing when this browser noted no such move of the
  * instance. Once removed, the panel goes and the focus moves to the
  * screen; while it works, the button keeps the focus (aria-disabled).

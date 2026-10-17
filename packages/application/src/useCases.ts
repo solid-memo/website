@@ -2306,9 +2306,16 @@ export function createUseCases({
    * Delete a copy that failed half-way, when one was made; whether nothing
    * is left of it. Whole: the copy's container was free when this app
    * created it, and nothing names it yet, so all it holds is this app's
-   * copies, the originals left where they were.
+   * copies, the originals left where they were. The journal's note goes
+   * with it, but only one this run wrote (`begun`): a run that failed
+   * before, at a target already taken, leaves the note of an earlier,
+   * interrupted move, whose copy is still to remove.
    */
-  async function removeCopy(source: string, target: string, created: boolean): Promise<boolean> {
+  async function removeCopy(
+    source: string,
+    target: string,
+    { begun, created }: { begun: boolean; created: boolean },
+  ): Promise<boolean> {
     let cleanedUp = !created;
     if (created) {
       cleanedUp = await instanceCopier.deleteRecursively(target).then(
@@ -2316,7 +2323,7 @@ export function createUseCases({
         () => false,
       );
     }
-    if (cleanedUp) updateJournal.end(source);
+    if (cleanedUp && begun) updateJournal.end(source);
     return cleanedUp;
   }
 
@@ -2487,6 +2494,7 @@ export function createUseCases({
         (await instanceCopier.listResources(source)).filter((url) => url !== digest);
       // Answers still on their way to the guest's log go there first, to move with it.
       await logAnswers();
+      let begun = false;
       let created = false;
       let instance: Instance;
       const release = writeFence.hold(source);
@@ -2499,6 +2507,7 @@ export function createUseCases({
         await instanceCopier.ensureAbsent(target);
         progress.stepped();
         updateJournal.begin(source, target);
+        begun = true;
         await instanceCopier.createContainer(target);
         created = true;
         progress.finished("copy", resources.length);
@@ -2536,7 +2545,7 @@ export function createUseCases({
           registrationTarget,
         });
       } catch (error) {
-        const cleanedUp = await removeCopy(source, target, created);
+        const cleanedUp = await removeCopy(source, target, { begun, created });
         return {
           ok: false,
           step: progress.step(),

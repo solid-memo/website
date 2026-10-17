@@ -26,6 +26,11 @@ export abstract class Screen {
     return this.app.tp(key, vars);
   }
 
+  /** A share as the app writes it ("50 %", "100%"), of a count above 0. */
+  protected percent(part: number, whole: number): string {
+    return new Intl.NumberFormat(this.app.locale, { style: "percent" }).format(part / whole);
+  }
+
   protected intent<T>(title: string, body: () => Promise<T>): Promise<T> {
     return test.step(title, body, { box: true });
   }

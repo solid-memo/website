@@ -283,10 +283,33 @@ PATCH Swedish text (see above). The journeys need Docker and Chromium
 runs them on every pull request and every push to `main`. They block,
 as the blocking servers do.
 
+Further journeys go through:
+
+- reloading in the middle of a study session, which goes on with the
+  cards left and counts every answer once;
+- resetting today's study on a deck's page: its cards, today's budget
+  of new cards and the statistics come back as before the session;
+- coming back on the next study day to review a deck, forgetting some
+  cards, and reading recall, lapses and the hardest cards in the
+  statistics;
+- a second instance in another folder: switching between the two,
+  reloading, and deleting one whose folder another app also writes to,
+  which is kept, and the app says why;
+- logging out and back in, and in on a second device, onto the same
+  instance, after a WebID the form refuses and a consent refused, the
+  dark theme following through the pod;
+- updating a copy of a library deck's first release to its second,
+  offered in Solid Memo and in the Studio, the day's study kept;
+- trying Solid Memo as a guest and moving the guest's study into a new
+  instance in the pod, the move first cut off and its partial copy
+  removed.
+
 The journeys must run the same way every time. Each page's
 `Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
 replays it). The browser's time zone is one where it is about noon, far
-from the day boundary. Requests to any host other than 127.0.0.1 fail
+from the day boundary; the later-day journey moves the zone past the
+boundary itself, since the Solid server refuses a DPoP proof more than
+two minutes off its clock, so the browser's clock cannot move instead. Requests to any host other than 127.0.0.1 fail
 the journey. A journey
 never asserts which card a shuffled queue shows, only how many there
 are.
@@ -346,7 +369,9 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
 
 - **Fixtures** ([fixtures.ts](../e2e/journeys/fixtures.ts)): `account`
   is a fresh account, pod and WebID; `runId` names what the run makes;
-  `app` is the app as page objects.
+  `otherApp` writes to the pod as an app other than Solid Memo;
+  `app` is the app as page objects, and `newDevice` opens it again
+  in a browser context of its own, as on a second device.
 - **Page objects** ([pages/](../e2e/journeys/pages/)): one per screen,
   registered on [App.ts](../e2e/journeys/pages/App.ts). Their methods
   are what a user does, and each is a step of its own in the report.

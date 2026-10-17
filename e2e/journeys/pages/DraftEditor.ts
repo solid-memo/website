@@ -370,15 +370,6 @@ export class DraftEditor extends Screen {
     });
   }
 
-  /** Goes back to the draft's overview by the trail, and opens a step from its outline. */
-  async backToStep(draft: string, step: string): Promise<void> {
-    await this.intent(`Go back to ${step}`, async () => {
-      await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
-      await this.outline.getByRole("link", { name: step, exact: true }).click();
-      await expect(this.page.getByRole("heading", { level: 2 })).toBeVisible();
-    });
-  }
-
   /** The outline lists the chapter, its one step, and the step's questions in order. */
   async expectOutline(
     draft: string,

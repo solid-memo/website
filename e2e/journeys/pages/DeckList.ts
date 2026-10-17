@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, type Locator } from "@playwright/test";
+import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
 /**
@@ -34,16 +35,26 @@ export class DeckList extends Screen {
     return this.tree.getByRole("link");
   }
 
-  /** The link that opens the deck named `name` (its row's name). */
+  /**
+   * The link that opens the deck named `name` (its row's name), "New
+   * release" after it or not (a copy whose release the library has a
+   * newer one of).
+   */
   deckLink(name: string): Locator {
-    return this.tree.getByRole("link", { name, exact: true });
+    return this.tree.getByRole("link", { name: this.named(name) });
+  }
+
+  /** The name `name`, "New release" after it or not (`newer` true: after it). */
+  private named(name: string, newer?: boolean): RegExp {
+    const release = `\\s*${escapeRegExp(this.t("deckList.newerRelease"))}`;
+    return new RegExp(`^${escapeRegExp(name)}(${release})${newer ? "" : "?"}$`);
   }
 
   /** The row of the deck named `name`: the innermost list item holding its link. */
   row(name: string): Locator {
     return this.tree
       .getByRole("listitem")
-      .filter({ has: this.page.getByRole("link", { name, exact: true }) })
+      .filter({ has: this.page.getByRole("link", { name: this.named(name) }) })
       .last();
   }
 
@@ -81,6 +92,25 @@ export class DeckList extends Screen {
     });
   }
 
+  /** The strip of courses to go on with, above the list. */
+  get courseStrip(): Locator {
+    return this.page.getByRole("complementary", { name: this.t("deckList.courses"), exact: true });
+  }
+
+  /** The strip offers to continue the course, started and not finished; its title opens its page. */
+  async openStartedCourse(title: string): Promise<void> {
+    await this.intent(`Open the course ${title} from the strip`, async () => {
+      await expect(
+        this.courseStrip.getByRole("link", {
+          name: this.t("deckList.continueCourseNamed", { course: title }),
+          exact: true,
+        }),
+      ).toBeVisible();
+      await this.courseStrip.getByRole("link", { name: title, exact: true }).click();
+      await this.app.course.expectShown(title);
+    });
+  }
+
   async expectShown(): Promise<void> {
     await expect(this.heading).toBeVisible();
   }
@@ -92,6 +122,19 @@ export class DeckList extends Screen {
 
   async expectDeck(name: string): Promise<void> {
     await expect(this.deckLink(name)).toBeVisible();
+  }
+
+  /** The deck's row says "New release" after its name: the library has a newer release of the copy, or not (`newer` false). */
+  async expectNewRelease(name: string, newer = true): Promise<void> {
+    await this.intent(
+      `Check ${name} ${newer ? "says" : "no longer says"} it has a new release`,
+      () =>
+        expect(
+          newer
+            ? this.tree.getByRole("link", { name: this.named(name, true) })
+            : this.tree.getByRole("link", { name, exact: true }),
+        ).toBeVisible(),
+    );
   }
 
   /** Follows "Create deck" to the deck creator. */
@@ -139,6 +182,14 @@ export class DeckList extends Screen {
     await expect(
       this.page.getByRole("complementary", { name: this.t("today.heading"), exact: true }),
     ).toContainText(this.t("today.answers", { count: answers }));
+  }
+
+  /** No answer today: the today strip above the list is not shown. */
+  async expectNothingAnsweredToday(): Promise<void> {
+    await expect(this.heading).toBeVisible();
+    await expect(
+      this.page.getByRole("complementary", { name: this.t("today.heading"), exact: true }),
+    ).toHaveCount(0);
   }
 
   /** The row offers `count` to study ("{count} to review"). */

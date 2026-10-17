@@ -288,6 +288,16 @@ describe("StatisticsContainer", () => {
     ).toBeInTheDocument();
   });
 
+  it("says the statistics begin with the next session when the range takes in the whole log, its month's answers reset", async () => {
+    const useCases = makeUseCasesFake({
+      getStatistics: vi.fn(async () => statisticsReportOf([], "2026-09-21", "2026-09", "2026-09")),
+    });
+    open(useCases, { range: "30d" });
+    expect(
+      await screen.findByText("No answers yet: the statistics begin with your next study session."),
+    ).toBeInTheDocument();
+  });
+
   it("is of one deck's answers, with no table by deck, recall each way and its own progress", async () => {
     const useCases = makeUseCasesFake({ getStatistics: vi.fn(async () => statistics) });
     const overview = open(useCases, { one: deck });

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, type Locator } from "@playwright/test";
+import type { Theme } from "./Chrome.ts";
 import { Screen } from "./Screen.ts";
 
 /**
@@ -12,9 +13,10 @@ import { Screen } from "./Screen.ts";
 export type AnswerScale = "sm2" | "minimal";
 
 /**
- * "Study preferences": how many new cards a day, the answer buttons,
- * developer mode. Nothing is kept until save(), which goes back to Decks;
- * reopening (open()) reads what the pod has, for the expect* readbacks.
+ * "Study preferences": the appearance (the theme), how many new cards a
+ * day, the answer buttons, developer mode. Nothing is kept until save(),
+ * which goes back to Decks; reopening (open()) reads what the pod has,
+ * for the expect* readbacks.
  */
 export class Preferences extends Screen {
   private get form(): Locator {
@@ -91,6 +93,17 @@ export class Preferences extends Screen {
     await this.intent(
       `Check that the answer buttons are ${this.t(`preferences.answerScale.${scale}.label`)}`,
       () => expect(this.answerButtons(scale)).toBeChecked(),
+    );
+  }
+
+  /** Expects the choice under Appearance: theme.<choice> ("As my browser" is "system"). */
+  async expectTheme(choice: "system" | Theme): Promise<void> {
+    await this.intent(`Check that the appearance is ${this.t(`theme.${choice}`)}`, () =>
+      expect(
+        this.form
+          .getByRole("group", { name: this.t("preferences.theme.legend") })
+          .getByRole("radio", { name: this.t(`theme.${choice}`), exact: true }),
+      ).toBeChecked(),
     );
   }
 
