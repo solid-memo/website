@@ -777,7 +777,7 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
   /**
    * Today's due and new cards for a deck, respecting the daily caps, with
-   * what grading them takes (StudySessionQueue).
+   * what grading them takes and their states (StudySessionQueue).
    */
   getStudyQueue(instanceUrl: string, deck: Deck, now: Date): Promise<StudySessionQueue>;
   /**
@@ -958,10 +958,12 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
 /**
  * Today's queue of a deck (UseCases.getStudyQueue), with the instance's
  * preferences it was built with, which a session grades its prompts by
- * (GradeBasis).
+ * (GradeBasis), and the deck's review states it was built from, which a
+ * session shows each grade's interval from.
  */
 export interface StudySessionQueue extends StudyQueue {
   prefs: StudyPreferences;
+  states: ReviewState[];
 }
 
 /** What a grade is made with besides the prompt's state, which is the reviews document's: the instance's preferences. */
@@ -3320,7 +3322,7 @@ export function createUseCases({
         now,
         random,
       });
-      return { ...queue, prefs };
+      return { ...queue, prefs, states: reviews };
     },
     getStudyCounts(instanceUrl, deck, now) {
       return studyCountsAndSchedule(instanceUrl, deck, now);

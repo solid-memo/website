@@ -93,7 +93,11 @@ export class Study extends Screen {
     });
   }
 
-  /** The answer buttons shown are the `scale`'s (the answer must be revealed). */
+  /**
+   * The answer buttons shown are the `scale`'s, by name, each with the
+   * interval it gives under it as its description (the answer must be
+   * revealed).
+   */
   async expectScale(scale: AnswerScale): Promise<void> {
     const labels =
       scale === "minimal"
@@ -103,7 +107,13 @@ export class Study extends Screen {
         : (["blackout", "wrong", "almost", "hard", "good", "easy"] as const).map((quality) =>
             this.t(`study.quality.${quality}`),
           );
-    await expect(this.gradeGroup.getByRole("button")).toHaveText(labels);
+    const buttons = this.gradeGroup.getByRole("button");
+    await expect(buttons).toHaveCount(labels.length);
+    for (const [index, label] of labels.entries()) {
+      await expect(buttons.nth(index)).toHaveAccessibleName(label);
+      // "1 day", "15 days": some number of days, whichever the card's state gives.
+      await expect(buttons.nth(index)).toHaveAccessibleDescription(/\d/);
+    }
   }
 
   /** The grade's button on whichever scale is shown: "Good" or "4 — Good". */

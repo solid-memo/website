@@ -421,6 +421,28 @@ describe("StudyScreen", () => {
     expect(props.onAnswer).not.toHaveBeenCalled();
   });
 
+  it("shows under each grade the interval it gives, as the grade's description, its name unchanged", () => {
+    renderScreen({
+      answerScale: "minimal",
+      state: { easeFactor: 2.5, intervalDays: 6, repetitions: 2 },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+    expect(
+      ["Again", "Hard", "Good", "Easy"]
+        .map((name) => screen.getByRole("button", { name, description: /days?$/ }))
+        .map((button) => button.querySelector(".grade-interval")!.textContent),
+    ).toEqual(["1 day", "14 days", "15 days", "16 days"]);
+  });
+
+  it("shows a new prompt's intervals from the start, and none while its state is unknown", () => {
+    const { rerender, props } = renderScreen({ state: null });
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+    expect(screen.getByRole("button", { name: "5 — Easy" })).toHaveAccessibleDescription("1 day");
+    rerender(<StudyScreen {...props} state={undefined} />);
+    expect(screen.getByRole("button", { name: "5 — Easy" })).not.toHaveAccessibleDescription();
+    expect(document.querySelector(".grade-interval")).toBeNull();
+  });
+
   it("speaks Swedish", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>

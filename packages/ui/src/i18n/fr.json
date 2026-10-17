@@ -1216,6 +1216,11 @@
     "putBack": "Vous reverrez la dernière carte plus tard dans cette séance.",
     "reveal": "Afficher la réponse",
     "gradePrompt": "Dans quelle mesure vous en souveniez-vous ?",
+    "interval": {
+      "one": "{count} jour",
+      "many": "{count} de jours",
+      "other": "{count} jours"
+    },
     "keys": {
       "reveal": "Appuyez sur Espace pour afficher la réponse.",
       "grade": "Appuyez sur une touche de {first} à {last} pour répondre."

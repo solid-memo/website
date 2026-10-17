@@ -11,7 +11,7 @@ import type { StudySessionQueue, UseCases } from "@solid-memo/application/useCas
 import type { Card, Deck, Prompt } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import type { Instance } from "@solid-memo/domain/instance";
-import { makeUseCasesFake, QUEUE_PREFERENCES } from "../test/useCasesFake";
+import { makeUseCasesFake, QUEUE_DEFAULTS } from "../test/useCasesFake";
 
 const deck: Deck = {
   id: "deck-1",
@@ -80,7 +80,7 @@ describe("DeckDetailContainer", () => {
         due: [],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -100,8 +100,8 @@ describe("DeckDetailContainer", () => {
       listCards: vi.fn(async () => [card]),
       getStudyQueue: vi.fn(async () =>
         reset
-          ? { due: [prompt], newPrompts: [], studiedToday: 0, ...QUEUE_PREFERENCES }
-          : { due: [], newPrompts: [], studiedToday: 1, ...QUEUE_PREFERENCES },
+          ? { due: [prompt], newPrompts: [], studiedToday: 0, ...QUEUE_DEFAULTS }
+          : { due: [], newPrompts: [], studiedToday: 1, ...QUEUE_DEFAULTS },
       ),
       resetStudyDay: vi.fn(async () => {
         reset = true;
@@ -130,7 +130,7 @@ describe("DeckDetailContainer", () => {
           due: [],
           newPrompts: [],
           studiedToday: 2,
-          ...QUEUE_PREFERENCES,
+          ...QUEUE_DEFAULTS,
         })),
         resetStudyDay: vi.fn(async () => {
           throw new Error("reset refused");
@@ -172,7 +172,7 @@ describe("DeckDetailContainer", () => {
           due: [prompt],
           newPrompts: [],
           studiedToday: 0,
-          ...QUEUE_PREFERENCES,
+          ...QUEUE_DEFAULTS,
         })),
       }),
     );

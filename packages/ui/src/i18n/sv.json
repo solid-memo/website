@@ -1160,6 +1160,10 @@
     "putBack": "Du får se det förra kortet igen senare i studiepasset.",
     "reveal": "Visa svar",
     "gradePrompt": "Hur väl mindes du det?",
+    "interval": {
+      "one": "{count} dag",
+      "other": "{count} dagar"
+    },
     "keys": {
       "reveal": "Tryck på mellanslag för att visa svaret.",
       "grade": "Tryck {first} till {last} för att svara."

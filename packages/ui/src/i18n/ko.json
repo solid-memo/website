@@ -1104,6 +1104,9 @@
     "putBack": "마지막 카드는 이번 세션에서 나중에 다시 나와요.",
     "reveal": "정답 보기",
     "gradePrompt": "얼마나 잘 기억했나요?",
+    "interval": {
+      "other": "{count}일"
+    },
     "keys": {
       "reveal": "스페이스바를 누르면 정답을 볼 수 있어요.",
       "grade": "{first}~{last} 키를 눌러 답할 수 있어요."

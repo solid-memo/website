@@ -247,6 +247,14 @@ the session grades with (`GradeBasis`, recordReview's `known`). A failed save ke
 advances on success. Ending the session invalidates the review caches so
 other screens see fresh state.
 
+Under each grade button is the interval that grade would give (`applySm2`
+from the prompt's state, or the initial state for a new prompt): "1 day",
+"6 days", "15 days". The grade's label stays the button's name; the
+interval is its description. The states come with the session's queue,
+as `getStudyQueue` read them to build it, with no read of their own; the
+session keeps each answer's new state, so a card put back shows the
+intervals its first answer left it with.
+
 ### What a grade costs
 
 A grade writes one state: a PATCH of the reviews document, `If-Match`

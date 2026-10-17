@@ -1160,6 +1160,10 @@
     "putBack": "You'll see the last card again later in this session.",
     "reveal": "Reveal",
     "gradePrompt": "How well did you remember it?",
+    "interval": {
+      "one": "{count} day",
+      "other": "{count} days"
+    },
     "keys": {
       "reveal": "Press Space to reveal the answer.",
       "grade": "Press {first} to {last} to answer."

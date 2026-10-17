@@ -129,7 +129,8 @@ ones, mixed in among them ([srs.md](srs.md#study-sessions)).
 3. Say how well you remembered it, with the buttons or the number keys.
    The buttons are either a scale from 0 (no memory at all) to 5
    (easy), or Again · Hard · Good · Easy, as you choose in the
-   preferences.
+   preferences. Under each button is how long the card would wait
+   before it comes back if you choose it.
 
 A card you answer with **0 — Blackout** or **1 — Wrong**, or with
 **Again**, comes back later in the same session. A card you answer with

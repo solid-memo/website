@@ -1160,6 +1160,10 @@
     "putBack": "Die letzte Karte kommt später in dieser Lerneinheit noch einmal.",
     "reveal": "Antwort anzeigen",
     "gradePrompt": "Wie gut hast du es gewusst?",
+    "interval": {
+      "one": "{count} Tag",
+      "other": "{count} Tage"
+    },
     "keys": {
       "reveal": "Drücke die Leertaste, um die Antwort anzuzeigen.",
       "grade": "Drücke {first} bis {last}, um zu antworten."

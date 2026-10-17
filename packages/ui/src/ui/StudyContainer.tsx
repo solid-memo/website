@@ -9,7 +9,7 @@ import type { ResponseTimes } from "@solid-memo/domain/answer";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
-import type { ReviewQuality } from "@solid-memo/domain/review";
+import { reviewKeyOf, type ReviewQuality, type ReviewState } from "@solid-memo/domain/review";
 import { interleave, repeatsInSession, requeueCard } from "@solid-memo/domain/scheduling";
 import { ErrorMessage } from "./ErrorMessage";
 import { Loading } from "./Loading";
@@ -33,6 +33,10 @@ import { useI18n } from "./i18n";
  * the deck's page, or to `deckLink` when given. A deck copied from a
  * release says where a mistake in the cards it has of the release is
  * reported (UseCases.reportPlace).
+ *
+ * Each grade shows the interval it gives, from the prompt's state: as
+ * the queue brought the deck's states when the session began, then as
+ * its answers left it.
  */
 export function StudyContainer({
   useCases,
@@ -91,6 +95,8 @@ export function StudyContainer({
     position: number;
     /** The last answer put its card back to come round again. */
     putBack: boolean;
+    /** The states the session's answers left its prompts in, by review key (reviewKeyOf). */
+    states: ReadonlyMap<string, ReviewState>;
   } | null>(null);
   useEffect(() => {
     if (session !== null || queueQuery.data === undefined) return;
@@ -99,6 +105,7 @@ export function StudyContainer({
       prompts: interleave(due, newPrompts),
       position: 0,
       putBack: false,
+      states: new Map(),
     });
   }, [session, queueQuery.data]);
 
@@ -148,8 +155,9 @@ export function StudyContainer({
       );
       setSession((current) => {
         const next = current!.position + 1;
+        const states = new Map(current!.states).set(reviewKeyOf(state), state);
         if (!repeatsInSession(quality)) {
-          return { prompts: current!.prompts, position: next, putBack: false };
+          return { prompts: current!.prompts, position: next, putBack: false, states };
         }
         const done = current!.prompts.slice(0, next);
         const remaining = current!.prompts.slice(next);
@@ -157,6 +165,7 @@ export function StudyContainer({
           prompts: [...done, ...requeueCard(remaining, prompt, random)],
           position: next,
           putBack: true,
+          states,
         };
       });
     },
@@ -184,8 +193,10 @@ export function StudyContainer({
     return <Loading label={t("study.preparing")} />;
   }
 
-  const { prompts, position, putBack } = session;
+  const { prompts, position, putBack, states } = session;
   const prompt = position < prompts.length ? prompts[position] : null;
+  const key =
+    prompt === null ? "" : reviewKeyOf({ cardId: prompt.card.id, direction: prompt.direction });
   return (
     <StudyScreen
       deckName={readerText(deck.title)}
@@ -193,6 +204,11 @@ export function StudyContainer({
       deckHref={deckLink}
       report={report}
       prompt={prompt}
+      state={
+        states.has(key)
+          ? states.get(key)
+          : (queueQuery.data!.states.find((state) => reviewKeyOf(state) === key) ?? null)
+      }
       position={position + 1}
       total={prompts.length}
       putBack={putBack}

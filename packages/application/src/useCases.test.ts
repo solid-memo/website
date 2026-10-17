@@ -2640,7 +2640,7 @@ describe("createUseCases", () => {
     const dueCard = { ...card, id: "card-due", url: `${deck.cardsDocumentUrl}#card-due` };
     const newCard = { ...card, id: "card-new", url: `${deck.cardsDocumentUrl}#card-new` };
     vi.mocked(deps.deckRepository.listCards).mockResolvedValue([dueCard, newCard]);
-    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([
+    const states: ReviewState[] = [
       {
         cardId: "card-due",
         direction: "front-to-back",
@@ -2652,7 +2652,8 @@ describe("createUseCases", () => {
         lastReviewedAt: "2026-09-19T10:00:00.000Z",
         formatVersion: 2,
       },
-    ]);
+    ];
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(states);
     const useCases = createUseCases(deps);
 
     const queue = await useCases.getStudyQueue(instance.url, deck, new Date(2026, 8, 21, 12, 0));
@@ -2660,6 +2661,9 @@ describe("createUseCases", () => {
     expect(queue.newPrompts.map((p) => p.card.id)).toEqual(["card-new"]);
     // What grading them takes besides: the instance's preferences.
     expect(queue.prefs).toEqual(await useCases.getPreferences(instance.url));
+    // The states it was built from, which the grades' intervals are shown from: no read of their own.
+    expect(queue.states).toEqual(states);
+    expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledOnce();
 
     const capped = await useCases.getStudyQueue(
       instance.url,

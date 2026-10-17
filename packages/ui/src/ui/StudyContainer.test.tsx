@@ -15,7 +15,7 @@ import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
-import { makeUseCasesFake, statisticsReportOf, QUEUE_PREFERENCES } from "../test/useCasesFake";
+import { makeUseCasesFake, statisticsReportOf, QUEUE_DEFAULTS } from "../test/useCasesFake";
 import { RepoUrl } from "./ReportMistake";
 
 const instance: Instance = {
@@ -72,11 +72,16 @@ function renderContainer(useCases: UseCases, random: () => number = () => 0) {
   return { onExit, queryClient, unmount: view.unmount };
 }
 
+/** Reveal the current card, once the last answer is saved. */
+async function reveal() {
+  const button = await screen.findByRole("button", { name: "Reveal" });
+  await waitFor(() => expect(button).toHaveAttribute("aria-disabled", "false"));
+  fireEvent.click(button);
+}
+
 /** Reveal the current card and grade it. */
 async function answer(grade: string) {
-  const reveal = await screen.findByRole("button", { name: "Reveal" });
-  await waitFor(() => expect(reveal).toHaveAttribute("aria-disabled", "false"));
-  fireEvent.click(reveal);
+  await reveal();
   fireEvent.click(screen.getByRole("button", { name: grade }));
 }
 
@@ -88,7 +93,7 @@ describe("StudyContainer", () => {
           due: [makePrompt("card-a", "front-a")],
           newPrompts: [makePrompt("card-b", "front-b")],
           studiedToday: 0,
-          ...QUEUE_PREFERENCES,
+          ...QUEUE_DEFAULTS,
         })),
       }),
     );
@@ -104,7 +109,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("mizu", "水"), makePrompt("mine", "火")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       reportPlace: vi.fn(async () => ({ library: true as const })),
       deckRelease: vi.fn(async (studied: Deck) =>
@@ -160,7 +165,7 @@ describe("StudyContainer", () => {
         due: [reverse],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -194,7 +199,7 @@ describe("StudyContainer", () => {
           ],
           newPrompts: [makePrompt("card-x", "new-x"), makePrompt("card-y", "new-y")],
           studiedToday: 0,
-          ...QUEUE_PREFERENCES,
+          ...QUEUE_DEFAULTS,
         })),
       }),
     );
@@ -225,7 +230,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [makePrompt("card-b", "front-b")],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -260,7 +265,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       recordReview: vi.fn(async () => {
         throw new Error("review save failed");
@@ -282,7 +287,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     render(
@@ -327,7 +332,7 @@ describe("StudyContainer", () => {
             due: [],
             newPrompts: [],
             studiedToday: 0,
-            ...QUEUE_PREFERENCES,
+            ...QUEUE_DEFAULTS,
           }),
         ),
       }),
@@ -347,7 +352,7 @@ describe("StudyContainer", () => {
         ],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases, () => 0);
@@ -372,13 +377,53 @@ describe("StudyContainer", () => {
     expect(useCases.recordReview).toHaveBeenCalledTimes(4);
   });
 
+  it("shows each grade's interval from the states its queue brings, then as the session's answers leave them", async () => {
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a")],
+        newPrompts: [makePrompt("card-b", "front-b")],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+        states: [
+          {
+            cardId: "card-a",
+            direction: "front-to-back" as const,
+            easeFactor: 2.5,
+            intervalDays: 6,
+            repetitions: 2,
+            due: "2026-09-21",
+            firstReviewedAt: "2026-09-01T10:00:00.000Z",
+            lastReviewedAt: "2026-09-15T10:00:00.000Z",
+            formatVersion: 2,
+          },
+        ],
+      })),
+    });
+    renderContainer(useCases, () => 0);
+    const good = () => screen.getByRole("button", { name: "4 — Good" });
+
+    await screen.findByText("front-a");
+    await reveal();
+    expect(good()).toHaveAccessibleDescription("15 days");
+    fireEvent.click(screen.getByRole("button", { name: "1 — Wrong" }));
+    // A new prompt: its first good grade gives a day.
+    await screen.findByText("front-b");
+    await reveal();
+    expect(good()).toHaveAccessibleDescription("1 day");
+    fireEvent.click(good());
+    // The failed card again, as its answer left it (the fake's state: one repetition).
+    await screen.findByText("front-a");
+    await reveal();
+    expect(good()).toHaveAccessibleDescription("6 days");
+  });
+
   it("repeats the only remaining card immediately until it passes", async () => {
     const useCases = makeUseCasesFake({
       getStudyQueue: vi.fn(async () => ({
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -401,7 +446,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -417,6 +462,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [makePrompt("card-b", "front-b")],
         studiedToday: 0,
+        ...QUEUE_DEFAULTS,
         prefs,
       })),
     });
@@ -442,7 +488,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a"), makePrompt("card-b", "front-b")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       getPreferences: vi.fn(async () => ({
         ...DEFAULT_PREFERENCES,
@@ -480,7 +526,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     renderContainer(useCases);
@@ -503,7 +549,7 @@ describe("StudyContainer", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
     const { queryClient, unmount } = renderContainer(useCases);
@@ -523,7 +569,7 @@ describe("StudyContainer keeping the deck's schedule", () => {
         due: [makePrompt("card-a", "front-a"), makePrompt("card-b", "front-b")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
     });
 
@@ -627,7 +673,7 @@ describe("StudyContainer leaving for the deck list", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       getStudyCounts: vi.fn(async () => ({ dueCount: 0, newCount: 0 })),
     });
@@ -683,7 +729,7 @@ describe("StudyContainer leaving for the deck list", () => {
         due: [makePrompt("card-a", "front-a")],
         newPrompts: [],
         studiedToday: 0,
-        ...QUEUE_PREFERENCES,
+        ...QUEUE_DEFAULTS,
       })),
       getStatistics: vi.fn(async () => studied),
     });

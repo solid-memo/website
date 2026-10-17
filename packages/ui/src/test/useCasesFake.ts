@@ -40,8 +40,14 @@ export function statisticsReportOf(
   };
 }
 
-/** The preferences a study queue comes with, when a test has nothing to say of them: the defaults. */
-export const QUEUE_PREFERENCES: Pick<StudySessionQueue, "prefs"> = { prefs: DEFAULT_PREFERENCES };
+/**
+ * What a study queue comes with besides its prompts, when a test has
+ * nothing to say of it: the default preferences, and no states.
+ */
+export const QUEUE_DEFAULTS: Pick<StudySessionQueue, "prefs" | "states"> = {
+  prefs: DEFAULT_PREFERENCES,
+  states: [],
+};
 
 /** A complete UseCases fake; override the methods a test cares about. */
 export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
@@ -290,12 +296,13 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       due: [],
       newPrompts: [],
       studiedToday: 0,
-      ...QUEUE_PREFERENCES,
+      ...QUEUE_DEFAULTS,
     })),
     resetStudyDay: vi.fn(async () => 0),
-    recordReview: vi.fn(async () => ({
-      cardId: "card-1",
-      direction: "front-to-back" as const,
+    // The state of the prompt answered, as a first answer leaves it.
+    recordReview: vi.fn(async (_instanceUrl, _deck, prompt) => ({
+      cardId: prompt.card.id,
+      direction: prompt.direction,
       easeFactor: 2.6,
       intervalDays: 1,
       repetitions: 1,

@@ -14,6 +14,7 @@ import type { ResponseTimes } from "@solid-memo/domain/answer";
 import { promptSides, type Prompt } from "@solid-memo/domain/deck";
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import type { ReviewQuality } from "@solid-memo/domain/review";
+import { applySm2, INITIAL_SM2_STATE, type Sm2State } from "@solid-memo/domain/sm2";
 import { CardFace } from "./CardFace";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
@@ -84,6 +85,7 @@ export function StudyScreen({
   deckHref,
   report,
   prompt,
+  state,
   position,
   total,
   putBack,
@@ -106,6 +108,11 @@ export function StudyScreen({
   report?: { place: ReportPlace; releaseUrl: string; cardIds: ReadonlySet<string> };
   /** null when the session is finished. */
   prompt: Prompt | null;
+  /**
+   * The prompt's state, which each grade's interval is worked out from:
+   * null for a new prompt; undefined while unknown, when none is shown.
+   */
+  state?: Sm2State | null;
   /** 1-based position of the current prompt. */
   position: number;
   /** Prompts in the session, including repeats of failed ones. */
@@ -163,6 +170,7 @@ export function StudyScreen({
         <StudyCard
           key={position}
           prompt={prompt}
+          state={state}
           answerScale={answerScale}
           busy={busy}
           onAnswer={onAnswer}
@@ -201,17 +209,23 @@ export function StudyScreen({
  * grade by accident. While an answer saves, the buttons are only
  * aria-disabled, so the one pressed keeps the focus if saving fails.
  *
+ * Under each grade is the interval it gives, unless the prompt's state
+ * is unknown: extra text the grade's name leaves out, read as its
+ * description.
+ *
  * A grade comes with how long the learner took (useStopwatch): to
  * recall, from the card shown to Reveal, and to grade, from Reveal to
  * the grade (to the last grade pressed, when saving failed before).
  */
 function StudyCard({
   prompt,
+  state,
   answerScale,
   busy,
   onAnswer,
 }: {
   prompt: Prompt;
+  state: Sm2State | null | undefined;
   answerScale: AnswerScale;
   busy: boolean;
   onAnswer: (quality: ReviewQuality, times: ResponseTimes) => void;
@@ -224,6 +238,7 @@ function StudyCard({
   const questionRef = useRef<HTMLDivElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
   const gradePromptId = useId();
+  const intervalId = useId();
   const buttons = answerButtons(answerScale, t);
 
   function reveal() {
@@ -288,12 +303,21 @@ function StudyCard({
                 key={label}
                 data-grade={quality}
                 aria-keyshortcuts={key}
+                aria-label={state === undefined ? undefined : label}
+                aria-describedby={state === undefined ? undefined : `${intervalId}-${quality}`}
                 onClick={() => {
                   if (!busy) grade(quality);
                 }}
                 aria-disabled={busy}
               >
                 {label}
+                {state !== undefined && (
+                  <span id={`${intervalId}-${quality}`} class="grade-interval">
+                    {t("study.interval", {
+                      count: applySm2(state ?? INITIAL_SM2_STATE, quality).intervalDays,
+                    })}
+                  </span>
+                )}
               </button>
             ))}
           </div>

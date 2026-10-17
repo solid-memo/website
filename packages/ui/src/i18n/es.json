@@ -1216,6 +1216,11 @@
     "putBack": "Volverás a ver la última tarjeta más adelante en esta sesión.",
     "reveal": "Mostrar respuesta",
     "gradePrompt": "¿Qué tal lo recordabas?",
+    "interval": {
+      "one": "{count} día",
+      "many": "{count} de días",
+      "other": "{count} días"
+    },
     "keys": {
       "reveal": "Pulsa la barra espaciadora para mostrar la respuesta.",
       "grade": "Pulsa de {first} a {last} para responder."

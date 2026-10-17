@@ -2665,6 +2665,14 @@ form.card-edit {
   grid-template-columns: repeat(4, 1fr);
 }
 
+/* The interval a grade gives, under its name. */
+.grade-interval {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+
 @media (max-width: 480px) {
   .quality-buttons.minimal {
     grid-template-columns: repeat(2, 1fr);
