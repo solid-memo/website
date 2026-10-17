@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.7.0](https://github.com/solid-memo/website/compare/v3.6.1...v3.7.0) (2026-10-17)
+
+### Features
+
+* **ui:** report a mistake in a card from where it is seen ([0c14836](https://github.com/solid-memo/website/commit/0c148368965d56bd4f6ef1165b669d61352e9df6)), closes [#144](https://github.com/solid-memo/website/issues/144)
+
 ## [3.6.1](https://github.com/solid-memo/website/compare/v3.6.0...v3.6.1) (2026-10-17)
 
 ### Bug Fixes
