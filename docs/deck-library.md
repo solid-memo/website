@@ -605,7 +605,9 @@ flowchart LR
   user changed and their review history
   ([migrations.md](migrations.md#catching-up-with-the-library)). The
   deck list says "New release" after the copy's name, so the offer is
-  not missed by a learner who studies from the list.
+  not missed by a learner who studies from the list. The list reads the
+  index for it once a page, not each time it shows, since the index
+  changes only with a deploy.
 
 ### From a link
 

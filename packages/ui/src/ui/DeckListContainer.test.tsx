@@ -132,6 +132,35 @@ describe("DeckListContainer", () => {
     }
   });
 
+  it("reads the library's index once a page, not again each time the list shows", async () => {
+    const copy = {
+      ...deck,
+      id: "deck-2",
+      url: `${instance.url}catalog.ttl#deck-2`,
+      sourceUrl: courseLibraryDeck.url,
+    };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [copy]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+    });
+    const { queryClient, unmount } = renderContainer(useCases);
+    await waitFor(() => expect(useCases.listLibraryDecks).toHaveBeenCalledOnce());
+    unmount();
+    // Back from a study session: the list shows again, on the same page.
+    render(
+      <QueryClientProvider client={queryClient}>
+        <DeckListContainer
+          useCases={useCases}
+          instance={instance}
+          onStudyDeck={vi.fn()}
+          onCourseStarted={vi.fn()}
+        />
+      </QueryClientProvider>,
+    );
+    await screen.findByRole("link", { name: "Kanji N5" });
+    expect(useCases.listLibraryDecks).toHaveBeenCalledOnce();
+  });
+
   it("shows the courses to go on with above the list: neither one finished, set aside, nor unreadable", async () => {
     const copy = (n: number, title: string): Deck => ({
       ...deck,

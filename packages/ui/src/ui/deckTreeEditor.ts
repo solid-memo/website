@@ -241,7 +241,8 @@ export function useDeckTreeEditor(
  * What the decks that are copies are copies of: which are copies of a
  * course (docs/courses.md), and where those added from a link came from.
  * The library says which of its decks are courses, read once some deck
- * is a copy (only then, and once: ["library"]). A copy whose series the
+ * is a copy (only then, and once a page: ["library"], which never goes
+ * stale, since the index changes only with a deploy). A copy whose series the
  * library does not list is of a release added from a link
  * (docs/deck-library.md, From a link): `linkedHost` names the host it
  * came from, and its own release, read once (["deckRelease"]), says
@@ -265,6 +266,8 @@ export function useCopies(
     queryKey: ["library"],
     queryFn: () => useCases.listLibraryDecks(),
     enabled: isCopy,
+    // The index changes only with a deploy: read once a page, not each time the list shows.
+    staleTime: Infinity,
     refetchOnWindowFocus: false,
   });
   const library = libraryQuery.data;
