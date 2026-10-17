@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.6.1](https://github.com/solid-memo/website/compare/v3.6.0...v3.6.1) (2026-10-17)
+
+### Bug Fixes
+
+* **application:** keep the note of a cut-off guest move on a failed retry ([d2a1f68](https://github.com/solid-memo/website/commit/d2a1f685f1e8f41b887e3f94fab4e0386c2691b9)), closes [#140](https://github.com/solid-memo/website/issues/140)
+* **ui:** offer a cut-off guest move's copy for removal when logged in ([301301b](https://github.com/solid-memo/website/commit/301301bc443d6d929d264f4f1453656e01499dd2)), closes [#140](https://github.com/solid-memo/website/issues/140)
+* **ui:** say a library update finished after the deck page reloads it ([46cd821](https://github.com/solid-memo/website/commit/46cd821beb0f5e6dcbd783b466f410aec456de1c)), closes [#140](https://github.com/solid-memo/website/issues/140) [#140](https://github.com/solid-memo/website/issues/140)
+* **ui:** say the statistics begin anew once a reset empties the log ([7efaad0](https://github.com/solid-memo/website/commit/7efaad048a9263b82a2d4c8098d6c748d7456c81)), closes [#140](https://github.com/solid-memo/website/issues/140)
+
 ## [3.6.0](https://github.com/solid-memo/website/compare/v3.5.0...v3.6.0) (2026-10-17)
 
 ### Features
