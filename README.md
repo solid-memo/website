@@ -43,7 +43,8 @@ It is for:
   shapes and its decks ([docs/vocab.md](docs/vocab.md),
   [docs/shapes.md](docs/shapes.md)).
 
-How to use it: [docs/user-guide.md](docs/user-guide.md). What it is
+How to use it: [docs/user-guide.md](docs/user-guide.md), which also says
+[which browsers it supports](docs/user-guide.md#supported-browsers). What it is
 for, and what it is not: [docs/objectives.md](docs/objectives.md). The
 same, for learners, authors, technologists and decision makers:
 [solid-memo.com/about](https://solid-memo.com/about/).

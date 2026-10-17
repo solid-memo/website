@@ -327,7 +327,8 @@ journey tagged with one of the three runs in every browser; tag another
 only when what it tests differs between engines. CI runs Chromium's
 journeys in one job and the other three projects' in another
 (`journeys (chromium)`, `journeys (engines)`), so neither takes much
-longer than one job did.
+longer than one job did. The [user guide](user-guide.md#supported-browsers)
+says which browsers Solid Memo supports.
 
 The engines differ in three ways the journeys allow for:
 

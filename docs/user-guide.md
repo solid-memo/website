@@ -33,6 +33,27 @@ part.
 - **Library**: ready-made decks and courses, free to copy into your
   instance.
 
+## Supported browsers
+
+Solid Memo runs in the current version of:
+
+- Chrome and Edge, and other browsers built on Chromium;
+- Firefox;
+- Safari, on a Mac and on an iPhone or iPad.
+
+Something that does not work in one of these is a bug: please
+[report it](https://github.com/solid-memo/website/issues/new?template=bug.yml),
+with the browser and its version. An older version or another browser
+may work too, but it is not supported.
+
+Every change is tested in Chromium, in Firefox and in WebKit, the engine
+Safari is built on, and in WebKit on an iPhone's screen. Every
+[user journey](testing.md#user-journeys) runs in Chromium. Logging in,
+trying the app as a guest and reloading in the middle of a study session
+run in all four ([testing.md](testing.md#browsers)). These are
+Playwright's builds of each engine, not the browsers you install, so no
+test runs on a real iPhone.
+
 ## Getting in
 
 The first screen offers three ways in
