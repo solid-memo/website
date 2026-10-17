@@ -379,12 +379,14 @@ main.workspace {
   color: var(--link);
 }
 
-/* The docs, the source code, the changelog, the issue tracker and Discussions, side by side, wrapping on a narrow screen. */
+/* The docs, the source code, the changelog, the issue tracker and Discussions, side by side,
+   wrapping on a narrow screen: its rows apart enough that each link, under 24px high, has the
+   room around it a target needs (WCAG 2.5.8). */
 .site-footer .footer-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0 1rem;
+  gap: 0.5rem 1rem;
 }
 
 /* The theme and language choices above every screen: a sun or a moon, then the language list. */
@@ -1386,11 +1388,20 @@ dl.facts .sources {
   box-shadow: none;
 }
 
-/* An app's link out (the Studio's way back to Solid Memo), under its masthead. */
+/* An app's link out (the Studio's way back to Solid Memo), under its
+   masthead: far enough below the language list that each is a 24px
+   target with the room around it (WCAG 2.5.8). */
 .header-link {
-  margin: 0 0 1rem;
+  margin: 0.25rem 0 1rem;
   text-align: right;
   font-size: 0.9rem;
+}
+
+/* A link on its own, not in a sentence, above a card's buttons: a target
+   24px high at least (WCAG 2.5.8). */
+.report-mistake a {
+  display: inline-block;
+  padding: 0.25rem 0;
 }
 
 .breadcrumbs ol {
