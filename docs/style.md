@@ -96,12 +96,14 @@ release), not abbreviations: `description`, not `desc`.
 
 ## Turtle
 
-The hand-written Turtle in `ns/`, `decks/` and the vocab package's
-`fixtures/` has a house style, which
+The hand-written Turtle in `ns/`, `decks/`, `docs/` (the docs' index)
+and the vocab package's `fixtures/` has a house style, which
 [formatTurtle.ts](../packages/turtle/src/formatTurtle.ts) defines and
 writes. In short:
 
-- `@base` first, then the prefixes, aligned in one block;
+- `@base` first, then the prefixes, aligned in one block; under a
+  `@base` that is a folder (ending in `/`, as the docs' index's is), an
+  IRI in it is written relative to it, `<srs.md>`;
 - every subject on a line of its own, then one predicate per line,
   indented four spaces, and further objects aligned under the first;
 - a blank line between subjects;
@@ -183,8 +185,10 @@ run it without installing it.
 ## Docs
 
 - Each part of the app has a page in [docs/](README.md), listed in its
-  index with one sentence. A new page is added to the index in the same
-  commit.
+  index, [docs.ttl](docs.ttl), in a group and with one line on what it
+  covers ([markdown.md](markdown.md#the-docs-index)). A new page is added
+  to the index in the same commit, and `npm run format:turtle` lays the
+  index out.
 - A page starts with what it is about in a sentence or two, then links
   the code: a page says how and why, the code says what.
 - A change that changes what a page says updates the page in the same
@@ -223,8 +227,9 @@ run it without installing it.
   ([markdown.md](markdown.md#the-docs-as-a-site)), and `npm run check`
   renders them: a page opens with one heading of level 1, then a
   paragraph that says what it is about; no two headings of a page have
-  the same text; every page is linked from the README; and every link
-  leads to a page, heading, file or folder that is there.
+  the same text; every page is listed in the docs' index,
+  [docs.ttl](docs.ttl); and every link leads to a page, heading, file or
+  folder that is there.
 - After a diagram is changed, check on GitHub that it still draws as
   meant: GitHub's Mermaid version and label mode differ from other
   renderers', and a diagram one of them accepts another can reject or
@@ -245,7 +250,8 @@ their source.
   given a tick. It holds for the docs, the comments, the English
   messages and the test titles alike, and
   `npm run lint:spelling` ([cspell](https://cspell.org/), part of
-  `npm run check`) checks the Markdown and `en.json` for it
+  `npm run check`) checks the Markdown, `en.json` and the docs' index
+  (`docs/docs.ttl`, its text, not its addresses) for it
   ([testing.md](testing.md#documentation)). What is not ours to respell
   keeps the spelling it has: the published Turtle in `decks/` and `ns/`,
   which never changes; a term of a data format or an IRI; a message key

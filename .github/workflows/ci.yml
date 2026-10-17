@@ -83,9 +83,10 @@ jobs:
       # and cspell's (docs/testing.md#documentation); then every
       # package: typecheck, tests at 100% coverage, generated code and
       # Turtle formatting in step with their sources; then the
-      # boundaries, the docs' index and the shipped dependencies' maturity
-      # (docs/testing.md). npm run check without the deck library, which
-      # the library job checks, and compares with the base.
+      # boundaries, the docs' index (docs/docs.ttl) and the shipped
+      # dependencies' maturity (docs/testing.md). npm run check without
+      # the deck library, which the library job checks, and compares with
+      # the base.
       - run: npm run check:ci
         env:
           TURBO_CACHE_MAX_AGE: 14d

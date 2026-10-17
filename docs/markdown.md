@@ -405,7 +405,8 @@ settings (`VITE_REPO_URL`), the commit built, which the links name (or
 `main`, with a warning, when it is not known), the version, and the
 site's origin from `CNAME`, for each page's canonical address.
 
-- **Addresses.** The README is `docs/`, every other page
+- **Addresses.** The README is `docs/`, followed there by the list of
+  pages from [the docs' index](#the-docs-index); every other page
   `docs/<page>/`, so `configuration.md` is `docs/configuration/`.
   Every address a page names is relative, so the pages work from any
   folder. A page may not be named like a version (`2.2.0.md`),
@@ -421,12 +422,15 @@ site's origin from `CNAME`, for each page's canonical address.
   styles from its one stylesheet, `docs.css`, alone (`style-src
   'self'`), and runs no script. Its title and description are its
   heading of level 1 and the paragraph after it. Its header names the
-  version and links the list of versions (`docs/versions/`), which a
+  version, every page under "All pages" (a disclosure, in the index's
+  groups, with the page itself marked), and the list of versions
+  (`docs/versions/`), which a
   build writes with its own version and the releases page, and the
   deploy writes again with every release
   ([deployment.md](deployment.md#each-releases-docs)); its
   sections are listed under "On this page"; the previous and next pages
-  are in the README's order; and its footer links its source, the
+  are in the index's order, the README first; and its footer links its
+  source (the README's, the index's too), the
   issues, the license and the commit. `checkPage` holds a page to what
   it is written as: after the doctype, only plain tags of the elements
   and attributes the pages have, with no script, style, event handler
@@ -464,12 +468,75 @@ every problem with its file and line. That is what `parseDocument`
 refuses ([Repository Markdown](#repository-markdown)); a page that does
 not open with its one heading of level 1 and a paragraph; a heading
 whose id the page already has; a task list item (`[ ]`, `[x]`); a page
-the README does not link to; a link to a page, heading, file or folder
+the index does not list, and anything wrong with the index
+([below](#the-docs-index)); a link to a page, heading, file or folder
 that is not there, out of the repository, from the site's root, or to
 a scheme other than `http:` and `https:`; a diagram's problems
 ([above](#diagrams)); and a Mermaid block in a list or quote, which is
 not drawn. The package's tests render the repository's own docs, so
 `npm run check` fails on any of these.
+
+### The docs' index
+
+Which pages the docs have, in which group and order, and what each
+covers, is said in one place: [docs.ttl](docs.ttl), written by hand
+in Turtle. The README holds the title and the introduction and links
+to it, so GitHub, a tag or a clone shows the list as that file; the
+site shows it on `docs/`, under the README's text. Nothing made from it
+is committed: it exists in the build and in each release's archive.
+
+~~~turtle
+@base <https://solid-memo.com/docs/> .
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema:  <https://schema.org/> .
+
+<>
+    a schema:Collection ;
+    dcterms:title "Docs"@en .
+
+<#the-code>
+    a schema:Collection ;
+    dcterms:title "The code"@en ;
+    schema:isPartOf <> ;
+    schema:position 20 .
+
+<boundaries.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 20 ;
+    dcterms:abstract "the import rules between packages, as `npm run check:boundaries` enforces them."@en .
+~~~
+
+- **`<>`** is the docs themselves, a `schema:Collection` whose
+  `dcterms:title` is the README's heading of level 1.
+- **A group** is `<#id>`, a `schema:Collection` that is
+  `schema:isPartOf <>`, with a `dcterms:title` and a `schema:position`.
+  Its id is lowercase words and hyphens, and is its heading's id on
+  `docs/`, so it may not be one of the README's.
+- **A page** is its file's name, `<srs.md>`, a `schema:TechArticle`
+  that is `schema:isPartOf` one group, with a `schema:position` in it
+  and a `dcterms:abstract`, the line on what it covers. Its title is
+  its own heading, never written here, so the two cannot differ.
+- **Order** is a whole number from 0 on each group and page, the way
+  a course orders its chapters ([courses.md](courses.md#order)); no
+  `rdf:List`. Two in one group may not share one. The positions keep
+  gaps of 10, so a new page goes between two without moving the rest.
+- **Texts** are in English (`"…"@en`). A summary is Markdown, read
+  with `parseDocument`: one line of phrasing, with code, emphasis and
+  strong, but no link and no line break, as the link checks read only
+  Markdown files. The index is the build's input, not a published
+  format, so no vocabulary term marks it as Markdown, and it has no
+  shape: `readDocsIndex` in
+  [docsIndex.ts](../packages/markdown/tooling/docsIndex.ts) checks
+  everything it may say, and refuses any other subject or property.
+
+`npm run check:docs` reads the index too, and checks that it lists
+every page in `docs/`, and only those; for a page it does not list, it
+prints the block to add. The file is formatted with
+`npm run format:turtle`, like the Turtle in `ns/` and `decks/`, and its
+license is stated in `REUSE.toml`, as the formatter keeps a comment
+only before a subject.
 
 ## Safety
 

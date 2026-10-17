@@ -84,7 +84,17 @@ const fakeDraw: Draw = async (diagrams) =>
 async function releaseDocs(version: string): Promise<Map<string, string>> {
   const files: Record<string, string> = {
     [DOCS_CSS]: "body{}",
-    "docs/README.md": "# Docs\n\nThe docs.\n\n- [One](one.md)\n",
+    "docs/docs.ttl": [
+      "@base <https://solid-memo.com/docs/> .",
+      "@prefix dcterms: <http://purl.org/dc/terms/> .",
+      "@prefix schema: <https://schema.org/> .",
+      "",
+      '<> a schema:Collection ; dcterms:title "Docs"@en .',
+      '<#pages> a schema:Collection ; dcterms:title "Pages"@en ; schema:isPartOf <> ; schema:position 10 .',
+      '<one.md> a schema:TechArticle ; schema:isPartOf <#pages> ; schema:position 10 ; dcterms:abstract "the one page."@en .',
+      "",
+    ].join("\n"),
+    "docs/README.md": "# Docs\n\nThe docs.\n",
     "docs/one.md": [
       "# One",
       "",

@@ -8,11 +8,13 @@
 # (licence, catalogue, colour) fails like a typo.
 version: "0.2"
 language: en-US
-# What is checked: every Markdown file and the English messages. The
-# other languages' catalogs are their translators', not English.
+# What is checked: every Markdown file, the English messages and the
+# docs' index (docs/docs.ttl). The other languages' catalogs are their
+# translators', not English.
 files:
   - "**/*.md"
   - packages/ui/src/i18n/en.json
+  - docs/*.ttl
 useGitignore: true
 # Words in Arabic script are examples of Arabic, not English to check.
 ignoreRegExpList:
@@ -41,6 +43,15 @@ overrides:
   - filename: "**/i18n/en.json"
     ignoreRegExpList:
       - '/"[A-Za-z0-9_.]+"(?=\s*:)/g'
+  # In the docs' index, the prefixes and IRIs are identifiers; only the
+  # titles and summaries are prose.
+  # The summaries are Markdown, checked with the words Markdown is.
+  - filename: "docs/*.ttl"
+    languageId: markdown
+    ignoreRegExpList:
+      - "/^@(?:base|prefix)\\b.*$/gm"
+      - "/<[^<>\\s]*>/g"
+      - "/\\b[a-z]+:[A-Za-z]+\\b/g"
 # British spellings cspell's en-US dictionary lets through, each with
 # its American spelling.
 flagWords:

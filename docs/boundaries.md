@@ -69,7 +69,7 @@ keeps to its boundaries."
 | Package | May import | Only from |
 |---|---|---|
 | `turtle` | — | |
-| `markdown` | — | |
+| `markdown` | `turtle` | `turtle`: `tooling/` only, to read the docs' index ([markdown.md](markdown.md#the-docs-index)) |
 | `vocab` | `turtle` | `turtle`: `tooling/` only |
 | `domain` | `vocab` | |
 | `application` | `domain`, `vocab` | |

@@ -155,7 +155,7 @@ GitLab, these links, some six hundred in the docs' text and those in
 each footer, do not resolve either.
 
 The docs' list of versions, as the deploy writes it, links each
-version's docs at `<url>/blob/vX.Y.Z/docs/README.md` and its notes at
+version's docs at `<url>/tree/vX.Y.Z/docs` and its notes at
 `<url>/releases/tag/vX.Y.Z`. A fork has the upstream project's tags,
 but its own releases carry no archive of their docs, so the list links
 those versions in the repository only

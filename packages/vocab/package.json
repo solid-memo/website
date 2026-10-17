@@ -16,8 +16,8 @@
     "test:watch": "vitest",
     "generate": "node -e \"import('./tooling/generate.ts').then((m) => m.run(process))\"",
     "generate:check": "node -e \"import('./tooling/generate.ts').then((m) => m.run(process))\" -- --check",
-    "format:turtle": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- fixtures ../../ns ../../decks",
-    "format:turtle:check": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- --check fixtures ../../ns ../../decks"
+    "format:turtle": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- fixtures ../../ns ../../decks ../../docs",
+    "format:turtle:check": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- --check fixtures ../../ns ../../decks ../../docs"
   },
   "devDependencies": {
     "@types/n3": "^1.26.4",

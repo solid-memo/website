@@ -28,7 +28,7 @@ import { dirname, join, relative, resolve } from "node:path";
 /** Which workspace packages each may import. */
 export const LAYERS: Record<string, string[]> = {
   turtle: [],
-  markdown: [],
+  markdown: ["turtle"],
   vocab: ["turtle"],
   domain: ["vocab"],
   application: ["domain", "vocab"],
@@ -61,6 +61,8 @@ export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   ui: { markdown: /^src\/ui\// },
   // The generators read Turtle; the vocabulary the browser loads never does.
   vocab: { turtle: /^tooling\// },
+  // The docs' build reads their index (docs/docs.ttl); the Markdown the browser shows never does.
+  markdown: { turtle: /^tooling\// },
   // The browser-side engine never needs the node tooling, nor the library check's Markdown rules.
   shacl: { turtle: /^node\//, markdown: /^node\// },
   // The app's messages (packages/ui/src/i18n), which the page objects find text by.

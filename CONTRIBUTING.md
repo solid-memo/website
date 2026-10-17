@@ -41,7 +41,7 @@ reports are the only private exceptions
   report" form. The servers the tests already run against are listed in
   [docs/testing.md](docs/testing.md).
 - **Change the code.** Start with [docs/architecture.md](docs/architecture.md)
-  and the index of the docs, [docs/README.md](docs/README.md). A term
+  and the index of the docs, [docs/docs.ttl](docs/docs.ttl). A term
   you don't know is in [docs/glossary.md](docs/glossary.md).
 
 ## Open an issue first
@@ -69,7 +69,8 @@ bug, needs no issue.
    `npm run build` draw the docs' diagrams in Chromium, which it
    installs (on Linux, a machine that lacks the system libraries it
    needs gets them with `sudo npx playwright install-deps chromium`).
-3. Make the change, with its tests and its docs. Run the app with
+3. Make the change, with its tests and its docs; a new page in `docs/`
+   is listed in [docs/docs.ttl](docs/docs.ttl). Run the app with
    `npm run dev` and try it.
 4. Check that the change is done, as **Done** in [AGENTS.md](AGENTS.md)
    defines it. That list applies to people and agents alike: it says

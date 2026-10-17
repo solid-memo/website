@@ -14,6 +14,14 @@ import {
   FONT_FAMILY,
 } from "./diagrams.ts";
 import type { Drawing } from "./drawDiagrams.ts";
+import {
+  DOCS_INDEX,
+  type DocsGroup,
+  type DocsIndex,
+  type DocsProblem,
+  listingProblems,
+  readDocsIndex,
+} from "./docsIndex.ts";
 import { numberedIds, Slugger, slug } from "./slug.ts";
 
 /**
@@ -73,8 +81,7 @@ export type DocsSiteOptions = {
   draw: Draw;
 };
 
-/** A problem of the docs, at a file and, when one says it, a line (from 1). */
-export type DocsProblem = { file: string; line: number | null; what: string };
+export type { DocsProblem };
 
 /** Every problem the docs have, each with its file and line. */
 export class DocsSiteError extends Error {
@@ -179,7 +186,16 @@ export async function renderDocsSite(options: DocsSiteOptions): Promise<Map<stri
     pages.set(name, page);
     problems.push(...outline(page));
   }
-  const order = readingOrder(pages, problems);
+  const indexText = await io.read(DOCS_INDEX);
+  let index: DocsIndex | null = null;
+  if (indexText === null)
+    problems.push({ file: DOCS_INDEX, line: null, what: "there is no docs.ttl, the docs' index" });
+  else {
+    const read = readDocsIndex(indexText);
+    index = read.index;
+    problems.push(...read.problems);
+  }
+  const order = readingOrder(pages, names, index, problems);
   for (const page of pages.values()) problems.push(...(await resolveLinks(page, pages, options)));
 
   let drawings: Map<string, Drawing> | null = null;
@@ -196,18 +212,22 @@ export async function renderDocsSite(options: DocsSiteOptions): Promise<Map<stri
     // The title and the description, then the page's sections, then the rest.
     const top = writer.blocks(page.blocks.slice(0, 2), false);
     const rest = writer.blocks(page.blocks.slice(2), false);
-    return { page, top, rest, figures: writer.figures };
+    return { page, top, rest, writer };
   });
   if (problems.length > 0) throw new DocsSiteError(problems);
   // Checked by outline: each page opens with a heading of level 1, then a paragraph.
   const titles = new Map(
     [...pages.values()].map((page) => [page.name, plain(titleOf(page).children)]),
   );
-  for (const { page, top, rest, figures } of written) {
-    const body = [top, outlineNav(page), rest].filter((part) => part !== "").join("\n");
+  // Checked by readDocsIndex: there are no problems, so there is an index.
+  const groups = index!.groups;
+  for (const { page, top, rest, writer } of written) {
+    const own = page.name === README ? groups : [];
+    const list = own.map((group) => groupList(page, group, titles, writer)).join("\n");
+    const body = [top, outlineNav(page, own), rest, list].filter((part) => part !== "").join("\n");
     files.set(
       page.depth === 0 ? "index.html" : `${page.name.slice(0, -3)}/index.html`,
-      pageShell(options, page, { order, titles, body, figures }),
+      pageShell(options, page, { order, titles, groups, body, figures: writer.figures }),
     );
   }
   files.set("docs.css", (await io.read(DOCS_CSS))!);
@@ -317,24 +337,48 @@ function outline(page: Page): DocsProblem[] {
 }
 
 /**
- * The pages in the order the README links them, the README first, for
- * a page's previous and next; a page the README does not link is a
- * problem, as nothing would lead to it.
+ * The pages in the index's order, the README first, for a page's
+ * previous and next; what the index lists that is not in docs/, and
+ * what it does not list, are problems (listingProblems), as is a
+ * title other than the README's, and a group whose id the README's
+ * headings have. `names` are the names of every page in docs/; without
+ * an index (it does not parse, a problem already) the order is the
+ * README alone.
  */
-function readingOrder(pages: Map<string, Page>, problems: DocsProblem[]): string[] {
-  const order = [README];
+function readingOrder(
+  pages: Map<string, Page>,
+  names: readonly string[],
+  index: DocsIndex | null,
+  problems: DocsProblem[],
+): string[] {
+  if (index === null) return [README];
+  problems.push(...listingProblems(index, names));
   const readme = pages.get(README);
-  for (const [block] of everyBlock(readme?.blocks ?? [])) {
-    for (const url of everyLink(phrasing(block))) {
-      const name = url.split("#")[0]!.replace(/^\.\//, "");
-      if (pages.has(name) && !order.includes(name)) order.push(name);
-    }
+  const first = readme?.blocks[0];
+  if (first?.type === "heading" && first.depth === 1) {
+    const title = plain(first.children);
+    if (index.title !== title)
+      problems.push({
+        file: DOCS_INDEX,
+        line: index.line,
+        what: `the docs' title, "${index.title}", is not the README's, "${title}"`,
+      });
   }
-  for (const page of pages.values()) {
-    if (!order.includes(page.name))
-      problems.push({ file: page.file, line: null, what: "README.md does not link to the page" });
+  const taken = new Set(["main", ...(readme === undefined ? [] : readme.ids.values())]);
+  for (const group of index.groups) {
+    if (taken.has(group.id))
+      problems.push({
+        file: DOCS_INDEX,
+        line: group.line,
+        what: `<#${group.id}>: the README already has a heading with the id "${group.id}"`,
+      });
   }
-  return order;
+  return [
+    README,
+    ...index.groups.flatMap((group) =>
+      group.pages.map((page) => page.name).filter((name) => pages.has(name)),
+    ),
+  ];
 }
 
 /**
@@ -554,7 +598,7 @@ class Writer {
     }
   }
 
-  private inlines(inlines: readonly MdInline[]): string {
+  inlines(inlines: readonly MdInline[]): string {
     return inlines
       .map((node) => {
         switch (node.type) {
@@ -665,7 +709,7 @@ const PAGE_ELEMENTS = new Set(
 const PAGE_ATTRIBUTES = new Set(
   [
     "lang charset http-equiv content name rel href sizes type class id aria-label",
-    "start media srcset src alt width height open translate",
+    "start media srcset src alt width height open translate aria-current",
   ]
     .join(" ")
     .split(" "),
@@ -796,23 +840,73 @@ function titleOf(page: Page): DocBlock & { type: "heading" } {
   return page.blocks[0] as DocBlock & { type: "heading" };
 }
 
-/** A page's sections, its headings of level 2, as links; none for a page without any. */
-function outlineNav(page: Page): string {
-  const sections = page.blocks.filter(
-    (block): block is DocBlock & { type: "heading" } =>
-      block.type === "heading" && block.depth === 2,
-  );
+/**
+ * A page's sections, its headings of level 2, and on the README the
+ * index's groups after them, as links; none for a page without any.
+ */
+function outlineNav(page: Page, groups: readonly DocsGroup[]): string {
+  const sections = page.blocks
+    .filter(
+      (block): block is DocBlock & { type: "heading" } =>
+        block.type === "heading" && block.depth === 2,
+    )
+    .map((heading) => ({ id: page.ids.get(heading)!, title: plain(heading.children) }));
+  sections.push(...groups);
   if (sections.length === 0) return "";
   return [
     '<nav class="toc" aria-label="On this page">',
     "<p>On this page</p>",
     "<ul>",
     ...sections.map(
-      (heading) =>
-        `<li><a href="#${escapeHtml(page.ids.get(heading)!)}">${escapeHtml(plain(heading.children))}</a></li>`,
+      ({ id, title }) => `<li><a href="#${escapeHtml(id)}">${escapeHtml(title)}</a></li>`,
     ),
     "</ul>",
     "</nav>",
+  ].join("\n");
+}
+
+/** A group of the index on the README: its heading, then each page's title as a link, and its summary. */
+function groupList(
+  page: Page,
+  group: DocsGroup,
+  titles: Map<string, string>,
+  writer: Writer,
+): string {
+  return [
+    `<h2 id="${escapeHtml(group.id)}">${escapeHtml(group.title)}</h2>`,
+    "<ul>",
+    ...group.pages.map(
+      (listed) =>
+        `<li><a href="${pageHref(page, listed.name)}">${escapeHtml(titles.get(listed.name)!)}</a> — ${writer.inlines(listed.summary)}</li>`,
+    ),
+    "</ul>",
+  ].join("\n");
+}
+
+/**
+ * Every page, by the index's groups, under "All pages" in a page's
+ * header: a disclosure, as the pages run no script, with the page
+ * itself marked as the current one.
+ */
+function pagesNav(page: Page, groups: readonly DocsGroup[], titles: Map<string, string>): string {
+  const link = (name: string) =>
+    `<a href="${pageHref(page, name)}"${name === page.name ? ' aria-current="page"' : ""}>${escapeHtml(titles.get(name)!)}</a>`;
+  return [
+    '<details class="pages">',
+    "<summary>All pages</summary>",
+    '<nav aria-label="All pages">',
+    "<ul>",
+    `<li>${link(README)}</li>`,
+    ...groups.flatMap((group) => [
+      `<li>${escapeHtml(group.title)}`,
+      "<ul>",
+      ...group.pages.map((listed) => `<li>${link(listed.name)}</li>`),
+      "</ul>",
+      "</li>",
+    ]),
+    "</ul>",
+    "</nav>",
+    "</details>",
   ].join("\n");
 }
 
@@ -838,13 +932,15 @@ function pageShell(
     order: readonly string[];
     /** Each page's title, by its name. */
     titles: Map<string, string>;
+    /** The index's groups, for the list of every page. */
+    groups: readonly DocsGroup[];
     body: string;
     /** Whether the page shows a drawn diagram. */
     figures: boolean;
   },
 ): string {
   const { repoUrl, ref, version, mode, origin = null } = options;
-  const { order, titles, body, figures } = site;
+  const { order, titles, groups, body, figures } = site;
   const at = roots(options, page.depth);
   const lead = page.blocks[1] as DocBlock & { type: "paragraph" };
   const description = plain(lead.children).replace(/\s+/g, " ");
@@ -883,6 +979,7 @@ ${head.filter((line) => line !== "").join("\n")}
 <header class="site">
 <nav aria-label="Site"><a href="${at.site}">Solid Memo</a> <a href="${at.docs || "./"}">Docs</a></nav>
 <p class="version">Version ${escapeHtml(version)} · <a href="${at.versions}">All versions</a></p>
+${pagesNav(page, groups, titles)}
 </header>
 <main id="main">
 ${archived}
@@ -897,6 +994,7 @@ ${neighbor(order[place + 1], "next", "Next")}
 <footer>
 <ul>
 <li><a href="${escapeHtml(`${repoUrl}/blob/${ref}/${page.file}`)}">This page's source</a></li>
+${page.name === README ? `<li><a href="${escapeHtml(`${repoUrl}/blob/${ref}/${DOCS_INDEX}`)}">The list of pages' source</a></li>` : ""}
 <li><a href="${escapeHtml(`${repoUrl}/issues/new/choose`)}">Report a problem</a></li>
 <li><a href="${escapeHtml(`${repoUrl}/blob/${ref}/LICENSE`)}">MIT License</a></li>
 <li>Built from ${refLink(options)}</li>
@@ -931,7 +1029,7 @@ export function versionsPage(
           const tag = `v${release.version}`;
           return `<li>${[
             release.hosted ? `<a href="../${name}/">${name}</a>` : name,
-            link(`${repoUrl}/blob/${tag}/docs/README.md`, "in the repository"),
+            link(`${repoUrl}/tree/${tag}/docs`, "in the repository"),
             link(`${repoUrl}/releases/tag/${tag}`, "release notes"),
           ].join(" · ")}</li>`;
         });
