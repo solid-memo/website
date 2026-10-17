@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.10.0](https://github.com/solid-memo/website/compare/v3.9.0...v3.10.0) (2026-10-17)
+
+### Features
+
+* **domain:** write an error's details and report link without addresses ([3c259d1](https://github.com/solid-memo/website/commit/3c259d1e1a0406cfcf8a4b4a232340e3e7991873)), closes [#147](https://github.com/solid-memo/website/issues/147)
+* **ui:** show a screen to act on when a render error breaks the app ([bb970a6](https://github.com/solid-memo/website/commit/bb970a68034cc326e87a0c1117018188271ebde0)), closes [#147](https://github.com/solid-memo/website/issues/147)
+
 ## [3.9.0](https://github.com/solid-memo/website/compare/v3.8.0...v3.9.0) (2026-10-17)
 
 ### Features
