@@ -1102,6 +1102,7 @@
     "finished": "세션을 마쳤어요. 모든 카드를 복습했어요.",
     "position": "{total}장 중 {position}번째 카드",
     "putBack": "마지막 카드는 이번 세션에서 나중에 다시 나와요.",
+    "undone": "마지막 답을 되돌렸어요.",
     "reveal": "정답 보기",
     "gradePrompt": "얼마나 잘 기억했나요?",
     "interval": {
@@ -1109,8 +1110,10 @@
     },
     "keys": {
       "reveal": "스페이스바를 누르면 정답을 볼 수 있어요.",
-      "grade": "{first}~{last} 키를 눌러 답할 수 있어요."
+      "grade": "{first}~{last} 키를 눌러 답할 수 있어요.",
+      "undo": "U 키를 누르면 마지막 답을 되돌릴 수 있어요."
     },
+    "undo": "마지막 답 되돌리기",
     "preparing": "학습 세션을 준비하는 중…",
     "quality": {
       "blackout": "0 — 완전히 잊음",

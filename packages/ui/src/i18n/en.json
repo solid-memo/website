@@ -1158,6 +1158,7 @@
     "finished": "Session finished — all cards reviewed.",
     "position": "Card {position} of {total}",
     "putBack": "You'll see the last card again later in this session.",
+    "undone": "Your last answer was undone.",
     "reveal": "Reveal",
     "gradePrompt": "How well did you remember it?",
     "interval": {
@@ -1166,8 +1167,10 @@
     },
     "keys": {
       "reveal": "Press Space to reveal the answer.",
-      "grade": "Press {first} to {last} to answer."
+      "grade": "Press {first} to {last} to answer.",
+      "undo": "Press U to undo your last answer."
     },
+    "undo": "Undo last answer",
     "preparing": "Preparing your study session…",
     "quality": {
       "blackout": "0 — Blackout",

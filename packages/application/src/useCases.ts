@@ -795,10 +795,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void>;
   /**
    * Apply one SM-2 review: load the prompt's state (or start fresh),
-   * transition it, persist it, and return the new state. The answer
-   * logged keeps how long it took (`times`, as the screen measured it;
-   * recordedResponseTimes says which are kept). With `known` (a study
-   * session's, of its queue), the preferences are not read again.
+   * transition it, persist it, and return the new state, with what
+   * undoReview needs to take it back. The answer logged keeps how long
+   * it took (`times`, as the screen measured it; recordedResponseTimes
+   * says which are kept). With `known` (a study session's, of its
+   * queue), the preferences are not read again.
    */
   recordReview(
     instanceUrl: string,
@@ -808,7 +809,14 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
     now: Date,
     times?: ResponseTimes,
     known?: GradeBasis,
-  ): Promise<ReviewState>;
+  ): Promise<RecordedReview>;
+  /**
+   * Take back an answer recordReview gave: the prompt's state goes back
+   * to how it was before (a prompt that was new loses its state), and
+   * the answer leaves the log, or the answers still on their way to it.
+   * Resolves to the state written back, null for a prompt new again.
+   */
+  undoReview(instanceUrl: string, deck: Deck, undo: ReviewUndo): Promise<ReviewState | null>;
   /**
    * Undo the current study day for a deck: cards reviewed today go back
    * to how they were before, cards introduced today become new again.
@@ -1071,6 +1079,25 @@ export interface DeckProgress {
   confusions: Confusion<Card>[];
 }
 
+/** A review recorded (UseCases.recordReview): the prompt's new state, and how to undo it. */
+export interface RecordedReview {
+  state: ReviewState;
+  undo: ReviewUndo;
+}
+
+/**
+ * What undoing one answer takes (UseCases.undoReview), kept in memory
+ * while the session lasts: the stored snapshot (ReviewState.previous)
+ * is of before the study day's first review, so it cannot undo a second.
+ */
+export interface ReviewUndo {
+  key: ReviewKey;
+  /** The prompt's state before the answer; null for a prompt that was new. */
+  before: ReviewState | null;
+  /** The answer logged, and the study day it is in. */
+  answer: { id: string; studyDay: string };
+}
+
 /** The option a learner chose: right or wrong, and which wrong one (a distractor's id). */
 export interface CourseChoice {
   correct: boolean;
@@ -1241,6 +1268,7 @@ const NO_ANSWER_LOG: AnswerLog = {
   // Never asked: a log without months has none to read.
   readMonthSince: nothing as unknown as AnswerLog["readMonthSince"],
   removeDay: nothing,
+  removeAnswer: nothing,
 };
 const NO_DECK_ARCHIVE: DeckArchive = {
   exportDeck: async () => {
@@ -2240,7 +2268,8 @@ export function createUseCases({
    * offset from UTC. The grade is applied to the prompt's state as the
    * reviews document holds it when written (gradeReviewState), so it
    * builds on a grade made elsewhere meanwhile; the instance's preferences
-   * are read unless `known` brings them.
+   * are read unless `known` brings them. Resolves to the new state, with
+   * what undoing the answer takes: the state the grade was applied to.
    */
   async function applyGrade(
     instanceUrl: string,
@@ -2250,7 +2279,7 @@ export function createUseCases({
     now: Date,
     how: { mode?: AnswerMode; chosenDistractor?: string; times: ResponseTimes },
     known?: GradeBasis,
-  ): Promise<ReviewState> {
+  ): Promise<RecordedReview> {
     const key = { cardId: prompt.cardId, direction: prompt.direction };
     const prefs = known?.prefs ?? (await getPreferences(instanceUrl));
     const { state, current } = await reviewStateRepository.gradeReviewState(
@@ -2270,16 +2299,18 @@ export function createUseCases({
         };
       },
     );
+    const id = answerIdOf(state.lastReviewedAt, newId().slice(0, 8));
+    const studyDay = studyDayOf(now, prefs.dayBoundaryHour);
     unlogged.push({
       instanceUrl,
       answer: {
-        id: answerIdOf(state.lastReviewedAt, newId().slice(0, 8)),
+        id,
         deckUrl: deck.url,
         cardUrl: prompt.cardUrl,
         direction: prompt.direction,
         grade: quality,
         answeredAt: state.lastReviewedAt,
-        studyDay: studyDayOf(now, prefs.dayBoundaryHour),
+        studyDay,
         ...(current === null ? {} : { priorIntervalDays: current.intervalDays }),
         nextIntervalDays: state.intervalDays,
         ...(how.mode === undefined ? {} : { mode: how.mode }),
@@ -2290,7 +2321,7 @@ export function createUseCases({
       },
     });
     void logAnswers();
-    return state;
+    return { state, undo: { key, before: current, answer: { id, studyDay } } };
   }
 
   /**
@@ -3339,6 +3370,25 @@ export function createUseCases({
         known,
       );
     },
+    async undoReview(instanceUrl, deck, { key, before, answer }) {
+      await reviewStateRepository.applyReviewChanges(
+        deck,
+        before === null ? { save: [], remove: [key] } : { save: [before], remove: [] },
+      );
+      // The answer never happened: off the answers on their way to the log, else out of it.
+      // Answers being added are waited for; any added later start only after this goes on.
+      await logging;
+      const waiting = unlogged.findIndex(
+        (each) => each.instanceUrl === instanceUrl && each.answer.id === answer.id,
+      );
+      if (waiting === -1) {
+        await answerLog.removeAnswer(instanceUrl, answer.studyDay, answer.id);
+        logWrites += 1;
+      } else {
+        unlogged.splice(waiting, 1);
+      }
+      return before;
+    },
     async resetStudyDay(instanceUrl, deck, now) {
       const [prefs, reviews] = await Promise.all([
         getPreferences(instanceUrl),
@@ -3539,7 +3589,7 @@ export function createUseCases({
         choice.correct || choice.distractorId === undefined
           ? undefined
           : `${deck.cardsDocumentUrl}#${choice.distractorId}`;
-      const state = await applyGrade(
+      const { state } = await applyGrade(
         instanceUrl,
         deck,
         prompt,

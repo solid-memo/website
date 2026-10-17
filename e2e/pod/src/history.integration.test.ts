@@ -168,6 +168,21 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
     expect(left).toEqual(expect.arrayContaining(kept));
   });
 
+  it("removes one answer by its id, and only it", async () => {
+    const instanceUrl = new URL(`run-${crypto.randomUUID()}/solid-memo/main/`, server).href;
+    const log = answerLog();
+    const undone = answerOf(instanceUrl, "2026-09-21", "deck-1", 3);
+    const kept = [
+      answerOf(instanceUrl, "2026-09-21", "deck-1", 1),
+      answerOf(instanceUrl, "2026-09-20", "deck-1", 2),
+    ];
+    for (const answer of [...kept, undone]) await log.append(instanceUrl, answer);
+    await log.removeAnswer(instanceUrl, undone.studyDay, undone.id);
+    const left = await log.readMonth(instanceUrl, "2026-09");
+    expect(left).toHaveLength(2);
+    expect(left).toEqual(expect.arrayContaining(kept));
+  });
+
   it("adds nothing that does not fit the answer shape", async () => {
     const instanceUrl = new URL(`run-${crypto.randomUUID()}/solid-memo/main/`, server).href;
     const log = answerLog();

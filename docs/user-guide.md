@@ -132,6 +132,9 @@ ones, mixed in among them ([srs.md](srs.md#study-sessions)).
    preferences. Under each button is how long the card would wait
    before it comes back if you choose it.
 
+Pressed the wrong button? **Undo last answer** (or U) takes your last
+answer back and shows that card again, as long as the session is open.
+
 A card you answer with **0 — Blackout** or **1 — Wrong**, or with
 **Again**, comes back later in the same session. A card you answer with
 **2 — Almost** does not come back in that session, but it starts over:

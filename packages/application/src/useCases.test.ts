@@ -2679,7 +2679,7 @@ describe("createUseCases", () => {
     const useCases = createUseCases(deps);
     const now = new Date(2026, 8, 21, 12, 0);
 
-    const state = await useCases.recordReview(
+    const { state } = await useCases.recordReview(
       instance.url,
       deck,
       { card, direction: "front-to-back" },
@@ -2721,7 +2721,7 @@ describe("createUseCases", () => {
     const useCases = createUseCases(deps);
     const now = new Date(2026, 8, 21, 12, 0);
 
-    const state = await useCases.recordReview(
+    const { state } = await useCases.recordReview(
       instance.url,
       deck,
       { card, direction: "front-to-back" },
@@ -2763,7 +2763,7 @@ describe("createUseCases", () => {
     const useCases = createUseCases(deps);
     const now = new Date(2026, 8, 21, 12, 0);
 
-    const state = await useCases.recordReview(
+    const { state, undo } = await useCases.recordReview(
       instance.url,
       deck,
       { card, direction: "front-to-back" },
@@ -2783,12 +2783,14 @@ describe("createUseCases", () => {
     expect(state.repetitions).toBe(3);
     expect(state.firstReviewedAt).toBe(stored.firstReviewedAt);
     expect(state.due).toBe("2026-10-05");
+    // Undoing it writes back the state the grade was applied to, as the document held it.
+    expect(undo.before).toBe(stored);
   });
 
   it("recordReview stores no snapshot for a never-reviewed card", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
-    const state = await useCases.recordReview(
+    const { state } = await useCases.recordReview(
       instance.url,
       deck,
       { card, direction: "front-to-back" },
@@ -2922,7 +2924,7 @@ describe("createUseCases", () => {
     });
     const useCases = createUseCases(deps);
 
-    const state = await useCases.recordReview(
+    const { state } = await useCases.recordReview(
       instance.url,
       deck,
       { card, direction: "front-to-back" },
@@ -3468,6 +3470,14 @@ describe("the answer log", () => {
           changed(month);
         }
       }),
+      removeAnswer: vi.fn(async (_instanceUrl: string, studyDay: string, id: string) => {
+        const month = studyDay.slice(0, 7);
+        byMonth.set(
+          month,
+          (byMonth.get(month) ?? []).filter((a) => a.id !== id),
+        );
+        changed(month);
+      }),
     } satisfies AnswerLog;
     return { log, byMonth };
   }
@@ -3583,6 +3593,73 @@ describe("the answer log", () => {
       log.removeDay.mock.invocationCallOrder[0]!,
     );
     expect(byMonth.get("2026-09")).toEqual([]);
+  });
+
+  it("undoes a second answer of the day: the state just before it written back, not the morning's, the answer out of the log", async () => {
+    const { deps, log, byMonth, useCases } = setup();
+    const morning: ReviewState = {
+      cardId: card.id,
+      direction: "back-to-front",
+      easeFactor: 2.5,
+      intervalDays: 6,
+      repetitions: 2,
+      due: "2026-09-21",
+      firstReviewedAt: "2026-09-01T10:00:00.000Z",
+      lastReviewedAt: "2026-09-15T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    // The document holds the morning's state, then what the first answer left.
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValueOnce(morning);
+    const first = await useCases.recordReview(
+      instance.url,
+      deck,
+      { card, direction: "back-to-front" },
+      5,
+      noon,
+    );
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValueOnce(first.state);
+    const { undo } = await useCases.recordReview(
+      instance.url,
+      deck,
+      { card, direction: "back-to-front" },
+      1,
+      noon,
+    );
+    expect(undo.before).toBe(first.state);
+    await useCases.getStatistics(instance.url, noon);
+    expect(byMonth.get("2026-09")).toHaveLength(2);
+    await expect(useCases.undoReview(instance.url, deck, undo)).resolves.toBe(first.state);
+    expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
+      save: [first.state],
+      remove: [],
+    });
+    expect(log.removeAnswer).toHaveBeenCalledWith(instance.url, "2026-09-21", undo.answer.id);
+    expect(byMonth.get("2026-09")!.map((answer) => answer.grade)).toEqual([5]);
+  });
+
+  it("undoes a new prompt's answer still on its way to the log: its state goes, the answer never reaches the log", async () => {
+    const { deps, log, byMonth, useCases } = setup();
+    log.append.mockRejectedValueOnce(new Error("offline"));
+    const { undo } = await useCases.recordReview(
+      instance.url,
+      deck,
+      { card, direction: "front-to-back" },
+      0,
+      noon,
+    );
+    expect(undo).toEqual({
+      key: { cardId: card.id, direction: "front-to-back" },
+      before: null,
+      answer: { id: expect.stringMatching(/^answer-/), studyDay: "2026-09-21" },
+    });
+    await expect(useCases.undoReview(instance.url, deck, undo)).resolves.toBeNull();
+    expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
+      save: [],
+      remove: [undo.key],
+    });
+    expect(log.removeAnswer).not.toHaveBeenCalled();
+    await useCases.getStatistics(instance.url, noon);
+    expect(byMonth.size).toBe(0);
   });
 
   it("computes the statistics of the months asked for, of every deck or of one", async () => {
@@ -3914,6 +3991,7 @@ describe("the Studio's answer history and schedule insight", () => {
             : { unchanged: false as const, value: months[month]!, version: versions[month]! },
       ),
       removeDay: vi.fn(),
+      removeAnswer: vi.fn(),
     };
     let stored = digest;
     const digestRepository: DigestRepository = {
@@ -4899,6 +4977,7 @@ describe("library deck upgrade", () => {
         readMonth: vi.fn(async () => []),
         readMonthSince: vi.fn(),
         removeDay: vi.fn(async () => undefined),
+        removeAnswer: vi.fn(async () => undefined),
       };
       vi.mocked(answerLog.append).mockRejectedValueOnce(new Error("offline"));
       const useCases = createUseCases({ ...deps, answerLog });
@@ -5193,6 +5272,7 @@ describe("library deck upgrade", () => {
           readMonth: vi.fn(async () => answers),
           readMonthSince: vi.fn(),
           removeDay: vi.fn(async () => undefined),
+          removeAnswer: vi.fn(async () => undefined),
         };
         vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
           url === GUEST_INSTANCE_URL ? [course, own] : [targetDeck],
@@ -6073,6 +6153,7 @@ describe("courses", () => {
       readMonth: vi.fn(async () => []),
       readMonthSince: vi.fn(),
       removeDay: vi.fn(async () => undefined),
+      removeAnswer: vi.fn(async () => undefined),
     };
     let id = 0;
     const useCases = createUseCases({ ...deps, answerLog, newId: () => `id${++id}-0000-0000` });

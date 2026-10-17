@@ -50,13 +50,12 @@ export class Study extends Screen {
     ).toBeVisible();
   }
 
-  /** The card shown and the session's size, read from "Card x of y" (and what follows it after an Again). */
+  /** The card shown and the session's size, read from "Card x of y" (and what follows it after an Again or an undo). */
   async position(): Promise<{ position: number; total: number }> {
     await expect(this.statusLine).toBeVisible();
-    const line = ((await this.statusLine.textContent()) ?? "").replace(
-      `. ${this.t("study.putBack")}`,
-      "",
-    );
+    const line = ((await this.statusLine.textContent()) ?? "")
+      .replace(`. ${this.t("study.putBack")}`, "")
+      .replace(`. ${this.t("study.undone")}`, "");
     const said = this.tp("study.position").exec(line)?.groups;
     if (said === undefined) throw new Error("The study status line says no position.");
     return { position: Number(said.position), total: Number(said.total) };
@@ -81,6 +80,11 @@ export class Study extends Screen {
     expect(fields.get("template")).toBe("deck.yml");
     expect(fields.get("deck")).toBe(release);
     expect(fields.get("details")).toMatch(new RegExp(`^Card: ${escapeRegExp(release)}#\\S+\n`));
+  }
+
+  /** The side of the card shown that asks: its text, the side's hidden name before it. */
+  async question(): Promise<string> {
+    return (await this.page.getByRole("main").locator(".study-face").first().innerText()).trim();
   }
 
   async reveal(): Promise<void> {
@@ -192,6 +196,22 @@ export class Study extends Screen {
           throw new Error(`The session said ${total} cards but went on past them.`);
       }
       return { studied, total };
+    });
+  }
+
+  /**
+   * "Undo last answer": the answer just given is taken back, and the
+   * session is back at card `position` of `total`, which says so.
+   */
+  async undo(position: number, total: number): Promise<void> {
+    await this.intent("Undo the last answer", async () => {
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("study.undo"), exact: true })
+        .click();
+      await expect(this.statusLine).toHaveText(
+        `${this.t("study.position", { position, total })}. ${this.t("study.undone")}`,
+      );
     });
   }
 

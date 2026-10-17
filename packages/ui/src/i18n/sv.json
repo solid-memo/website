@@ -1158,6 +1158,7 @@
     "finished": "Studiepasset är klart — alla kort är repeterade.",
     "position": "Kort {position} av {total}",
     "putBack": "Du får se det förra kortet igen senare i studiepasset.",
+    "undone": "Ditt senaste svar har ångrats.",
     "reveal": "Visa svar",
     "gradePrompt": "Hur väl mindes du det?",
     "interval": {
@@ -1166,8 +1167,10 @@
     },
     "keys": {
       "reveal": "Tryck på mellanslag för att visa svaret.",
-      "grade": "Tryck {first} till {last} för att svara."
+      "grade": "Tryck {first} till {last} för att svara.",
+      "undo": "Tryck U för att ångra det senaste svaret."
     },
+    "undo": "Ångra senaste svaret",
     "preparing": "Förbereder ditt studiepass…",
     "quality": {
       "blackout": "0 — Helt borta",

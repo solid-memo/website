@@ -1158,6 +1158,7 @@
     "finished": "Lerneinheit beendet – alle Karten wiederholt.",
     "position": "Karte {position} von {total}",
     "putBack": "Die letzte Karte kommt später in dieser Lerneinheit noch einmal.",
+    "undone": "Deine letzte Antwort wurde zurückgenommen.",
     "reveal": "Antwort anzeigen",
     "gradePrompt": "Wie gut hast du es gewusst?",
     "interval": {
@@ -1166,8 +1167,10 @@
     },
     "keys": {
       "reveal": "Drücke die Leertaste, um die Antwort anzuzeigen.",
-      "grade": "Drücke {first} bis {last}, um zu antworten."
+      "grade": "Drücke {first} bis {last}, um zu antworten.",
+      "undo": "Drücke U, um die letzte Antwort zurückzunehmen."
     },
+    "undo": "Letzte Antwort zurücknehmen",
     "preparing": "Deine Lerneinheit wird vorbereitet…",
     "quality": {
       "blackout": "0 – Komplett vergessen",

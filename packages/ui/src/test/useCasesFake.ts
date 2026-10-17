@@ -300,17 +300,23 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     })),
     resetStudyDay: vi.fn(async () => 0),
     // The state of the prompt answered, as a first answer leaves it.
-    recordReview: vi.fn(async (_instanceUrl, _deck, prompt) => ({
-      cardId: prompt.card.id,
-      direction: prompt.direction,
-      easeFactor: 2.6,
-      intervalDays: 1,
-      repetitions: 1,
-      due: "2026-09-22",
-      firstReviewedAt: "2026-09-21T10:00:00.000Z",
-      lastReviewedAt: "2026-09-21T10:00:00.000Z",
-      formatVersion: 2,
-    })),
+    recordReview: vi.fn(async (_instanceUrl, _deck, prompt) => {
+      const key = { cardId: prompt.card.id, direction: prompt.direction };
+      return {
+        state: {
+          ...key,
+          easeFactor: 2.6,
+          intervalDays: 1,
+          repetitions: 1,
+          due: "2026-09-22",
+          firstReviewedAt: "2026-09-21T10:00:00.000Z",
+          lastReviewedAt: "2026-09-21T10:00:00.000Z",
+          formatVersion: 2,
+        },
+        undo: { key, before: null, answer: { id: "answer-1", studyDay: "2026-09-21" } },
+      };
+    }),
+    undoReview: vi.fn(async (_instanceUrl, _deck, undo) => undo.before),
     // As the real ones relate to them: the counts of the queue, the check of the full check.
     getStudyCounts: vi.fn(async (instanceUrl, deck, now) => {
       const queue = await fake.getStudyQueue(instanceUrl, deck, now);

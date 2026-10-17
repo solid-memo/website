@@ -443,6 +443,67 @@ describe("StudyScreen", () => {
     expect(document.querySelector(".grade-interval")).toBeNull();
   });
 
+  it("offers no undo until there is an answer to undo", () => {
+    renderScreen();
+    expect(screen.queryByRole("button", { name: "Undo last answer" })).toBeNull();
+    fireEvent.keyDown(document.activeElement!, { key: "u" });
+  });
+
+  it("undoes the last answer with its button, U, Ctrl+Z or Cmd+Z, and says it was", () => {
+    const onUndo = vi.fn();
+    const { rerender, props } = renderScreen({ onUndo });
+    expect(screen.getByText("Press U to undo your last answer.")).toBeInTheDocument();
+    const undo = screen.getByRole("button", { name: "Undo last answer" });
+    expect(undo).toHaveAttribute("aria-keyshortcuts", "U Control+Z Meta+Z");
+    fireEvent.click(undo);
+    fireEvent.keyDown(document.activeElement!, { key: "u" });
+    fireEvent.keyDown(document.activeElement!, { key: "U", shiftKey: true });
+    fireEvent.keyDown(document.activeElement!, { key: "z", ctrlKey: true });
+    fireEvent.keyDown(document.activeElement!, { key: "z", metaKey: true });
+    // U where U is, with a Korean input method on.
+    fireEvent.keyDown(document.activeElement!, { key: "ㅕ", code: "KeyU" });
+    expect(onUndo).toHaveBeenCalledTimes(6);
+    rerender(<StudyScreen {...props} undone />);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Card 1 of 3. Your last answer was undone.",
+    );
+  });
+
+  it("leaves other keys, redo, Alt and a busy screen alone", () => {
+    const onUndo = vi.fn();
+    const { rerender, props } = renderScreen({ onUndo });
+    fireEvent.keyDown(document.activeElement!, { key: "z" });
+    fireEvent.keyDown(document.activeElement!, { key: "u", ctrlKey: true });
+    fireEvent.keyDown(document.activeElement!, { key: "z", ctrlKey: true, shiftKey: true });
+    fireEvent.keyDown(document.activeElement!, { key: "u", altKey: true });
+    rerender(<StudyScreen {...props} busy />);
+    fireEvent.keyDown(document.activeElement!, { key: "u" });
+    const undo = screen.getByRole("button", { name: "Undo last answer" });
+    expect(undo).toHaveAttribute("aria-disabled", "true");
+    fireEvent.click(undo);
+    expect(onUndo).not.toHaveBeenCalled();
+  });
+
+  it("offers to undo the answer that ended the session", () => {
+    const onUndo = vi.fn();
+    renderScreen({ prompt: null, onUndo });
+    fireEvent.keyDown(document.activeElement!, { key: "u" });
+    expect(onUndo).toHaveBeenCalledOnce();
+  });
+
+  it("leaves U on a code block in a card to it", () => {
+    const onUndo = vi.fn();
+    renderScreen({
+      onUndo,
+      prompt: {
+        card: { ...card, textFormat: SM.markdown, front: { en: "```\nu\n```" } },
+        direction: "front-to-back",
+      },
+    });
+    fireEvent.keyDown(screen.getByRole("region", { name: "Code" }), { key: "u" });
+    expect(onUndo).not.toHaveBeenCalled();
+  });
+
   it("speaks Swedish", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>

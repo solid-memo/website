@@ -160,8 +160,9 @@ async function session(
   const known: GradeBasis = { prefs: queue.prefs };
   return {
     prompts: [...queue.due, ...queue.newPrompts],
-    grade: (prompt: Prompt, quality: ReviewQuality): Promise<ReviewState> =>
-      useCases.recordReview(instanceUrl, deck, prompt, quality, new Date(), {}, known),
+    grade: async (prompt: Prompt, quality: ReviewQuality): Promise<ReviewState> =>
+      (await useCases.recordReview(instanceUrl, deck, prompt, quality, new Date(), {}, known))
+        .state,
   };
 }
 

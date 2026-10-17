@@ -307,6 +307,22 @@ describe("createSolidAnswerLog", () => {
     expect(await log.readMonth(INSTANCE, "2026-09")).toHaveLength(2);
   });
 
+  it("removes one answer by its id, and only it, saving only when it is there", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    await log.removeAnswer(INSTANCE, "2026-09-21", "answer-none");
+    const undone = answer("2026-09-21");
+    const kept = [answer("2026-09-21"), answer("2026-09-20")];
+    for (const given of [undone, ...kept]) await log.append(INSTANCE, given);
+    const before = fake.writes().length;
+    await log.removeAnswer(INSTANCE, "2026-09-21", "answer-none");
+    expect(fake.writes().length).toBe(before);
+    await log.removeAnswer(INSTANCE, "2026-09-21", undone.id);
+    expect(fake.writes().length).toBe(before + 1);
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual(expect.arrayContaining(kept));
+    expect(await log.readMonth(INSTANCE, "2026-09")).toHaveLength(2);
+  });
+
   it("removes a day again when another write came first, and gives up after three tries", async () => {
     const fake = pod();
     const log = createSolidAnswerLog({ fetch: fake.fetch });

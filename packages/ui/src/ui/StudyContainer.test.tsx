@@ -85,6 +85,13 @@ async function answer(grade: string) {
   fireEvent.click(screen.getByRole("button", { name: grade }));
 }
 
+/** The Undo button, once it can be pressed: when the answer it undoes is saved. */
+async function undoButton() {
+  const undo = await screen.findByRole("button", { name: "Undo last answer" });
+  await waitFor(() => expect(undo).toHaveAttribute("aria-disabled", "false"));
+  return undo;
+}
+
 describe("StudyContainer", () => {
   it("shows a preparing state, then the first due card", async () => {
     renderContainer(
@@ -377,7 +384,82 @@ describe("StudyContainer", () => {
     expect(useCases.recordReview).toHaveBeenCalledTimes(4);
   });
 
-  it("shows each grade's interval from the states its queue brings, then as the session's answers leave them", async () => {
+  it("undoes the last answer, one step: its card up again, the copy put back gone, the count as it was", async () => {
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [
+          makePrompt("card-a", "front-a"),
+          makePrompt("card-b", "front-b"),
+          makePrompt("card-c", "front-c"),
+        ],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+      })),
+    });
+    renderContainer(useCases, () => 0);
+
+    expect(await screen.findByText("front-a")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Undo last answer" })).toBeNull();
+    await answer("1 — Wrong");
+    expect(await screen.findByText("Card 2 of 4", { exact: false })).toBeInTheDocument();
+    const { undo } = await vi.mocked(useCases.recordReview).mock.results[0]!.value;
+    fireEvent.click(await undoButton());
+
+    expect(await screen.findByText("front-a")).toBeInTheDocument();
+    expect(useCases.undoReview).toHaveBeenCalledWith(instance.url, deck, undo);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Card 1 of 3. Your last answer was undone.",
+    );
+    expect(screen.queryByRole("button", { name: "Undo last answer" })).toBeNull();
+    await answer("4 — Good");
+    expect(await screen.findByText("front-b")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(/^Card 2 of 3$/);
+  });
+
+  it("undoes the answer that ended the session", async () => {
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a")],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+      })),
+    });
+    renderContainer(useCases);
+    await answer("4 — Good");
+    expect(await screen.findByText("Session finished — all cards reviewed.")).toBeInTheDocument();
+    await undoButton();
+    fireEvent.keyDown(document.activeElement!, { key: "u" });
+    expect(await screen.findByText("front-a")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Card 1 of 1");
+  });
+
+  it("stays where it is and shows the error when undoing fails", async () => {
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a"), makePrompt("card-b", "front-b")],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+      })),
+      undoReview: vi.fn(async () => {
+        throw new Error("Pod unreachable");
+      }),
+    });
+    renderContainer(useCases);
+    await answer("4 — Good");
+    expect(await screen.findByText("front-b")).toBeInTheDocument();
+    const undo = await undoButton();
+    undo.focus();
+    fireEvent.click(undo);
+    expect(await screen.findByText("Pod unreachable")).toBeInTheDocument();
+    expect(screen.getByText("front-b")).toBeInTheDocument();
+    // Pressed, it keeps the focus, and with it the screen's keys.
+    expect(document.activeElement).toBe(undo);
+  });
+
+  it("shows each grade's interval from the states its queue brings, then as the session's answers and undos leave them", async () => {
     const useCases = makeUseCasesFake({
       getStudyQueue: vi.fn(async () => ({
         due: [makePrompt("card-a", "front-a")],
@@ -415,6 +497,10 @@ describe("StudyContainer", () => {
     await screen.findByText("front-a");
     await reveal();
     expect(good()).toHaveAccessibleDescription("6 days");
+    fireEvent.click(await undoButton());
+    await screen.findByText("front-b");
+    await reveal();
+    expect(good()).toHaveAccessibleDescription("1 day");
   });
 
   it("repeats the only remaining card immediately until it passes", async () => {

@@ -2673,6 +2673,19 @@ form.card-edit {
   font-weight: normal;
 }
 
+/* Undo the last answer: under the card, or the end of the session. */
+.study-undo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.study-undo .study-keys {
+  margin: 0;
+}
+
 @media (max-width: 480px) {
   .quality-buttons.minimal {
     grid-template-columns: repeat(2, 1fr);

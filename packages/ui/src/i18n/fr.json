@@ -1214,6 +1214,7 @@
     "finished": "Séance terminée : toutes les cartes ont été révisées.",
     "position": "Carte {position} sur {total}",
     "putBack": "Vous reverrez la dernière carte plus tard dans cette séance.",
+    "undone": "Votre dernière réponse a été annulée.",
     "reveal": "Afficher la réponse",
     "gradePrompt": "Dans quelle mesure vous en souveniez-vous ?",
     "interval": {
@@ -1223,8 +1224,10 @@
     },
     "keys": {
       "reveal": "Appuyez sur Espace pour afficher la réponse.",
-      "grade": "Appuyez sur une touche de {first} à {last} pour répondre."
+      "grade": "Appuyez sur une touche de {first} à {last} pour répondre.",
+      "undo": "Appuyez sur U pour annuler la dernière réponse."
     },
+    "undo": "Annuler la dernière réponse",
     "preparing": "Préparation de votre séance d’étude…",
     "quality": {
       "blackout": "0 — Trou de mémoire",
