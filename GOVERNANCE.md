@@ -108,7 +108,10 @@ pull requests too ([Dependency updates](#dependency-updates)).
 Renovate adds it to the merge queue on its own, which merges it only
 when CI passes, with no person
 reviewing it, so its updates are unreviewed changes too. A few updates
-wait for a person, as `renovate.json5` says why. Renovate cannot approve
+wait for a person, as `renovate.json5` says why. Every update waits too:
+Renovate proposes a version only once it has been public for 3 days, so
+that a bad or malicious version can be found and pulled before it
+reaches `main`. A security update does not wait. Renovate cannot approve
 its own pull requests: once `main` requires an approving review, a
 maintainer approves each update, and Renovate merges it after that.
 

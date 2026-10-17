@@ -15,6 +15,19 @@
     // the pull request is where the update's commit links to.
     automerge: true,
     automergeType: 'pr',
+    // An update is proposed only once its version has been public for 3
+    // days, so that the registry and the package's users have time to
+    // find a bad or malicious version and pull it before it reaches main
+    // unreviewed (GOVERNANCE.md#dependency-updates), where the release
+    // job holds the deploy key (docs/releasing.md#the-deploy-key).
+    // 'strict' makes no branch, and so no pull request, before then. A
+    // security update does not wait: Renovate's vulnerabilityAlerts lift
+    // the age by default, and say so here too, should that default change.
+    minimumReleaseAge: '3 days',
+    internalChecksFilter: 'strict',
+    vulnerabilityAlerts: {
+        minimumReleaseAge: null,
+    },
     // Its pull requests and its Dependency Dashboard carry the dependencies
     // label, so that dependency updates can be filtered in, or out, of the
     // issue and pull request lists.
