@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.10.1](https://github.com/solid-memo/website/compare/v3.10.0...v3.10.1) (2026-10-17)
+
+### Bug Fixes
+
+* **studio:** mark a card side's cell field with the side's language ([9a66983](https://github.com/solid-memo/website/commit/9a669832cf2d8aee90a53c237167482a23dcbd17)), closes [#149](https://github.com/solid-memo/website/issues/149)
+* **ui:** give the small targets axe finds 24px of room ([c674c53](https://github.com/solid-memo/website/commit/c674c53a0132eeeb4463c9e45f455cfe99d9e731)), closes [#149](https://github.com/solid-memo/website/issues/149)
+
 ## [3.10.0](https://github.com/solid-memo/website/compare/v3.9.0...v3.10.0) (2026-10-17)
 
 ### Features
