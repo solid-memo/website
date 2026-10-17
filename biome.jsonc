@@ -90,6 +90,14 @@
         "useValidAnchor": "off",
       },
       "complexity": {
+        // A function too tangled to follow is split up. The limit starts at the most complex
+        // function today and is lowered as the functions over it are split (docs/style.md).
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": {
+            "maxAllowedComplexity": 87,
+          },
+        },
         // A component returns an element, so a lone text is wrapped in a fragment.
         "noUselessFragments": "off",
         // The reduced-motion rule must win over every animation.
