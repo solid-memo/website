@@ -167,10 +167,10 @@ describe("estimateStudyTime", () => {
         const some = answers(count);
         return () => estimateStudyTime(some);
       },
-      5_000,
-      4,
+      2_500,
+      8,
     );
-    expect(ratio).toBeLessThan(10);
+    expect(ratio).toBeLessThan(4);
   });
 });
 

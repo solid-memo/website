@@ -793,7 +793,7 @@ wider than 64rem beside the workbench, which stays as it is, its query,
 selection and Undo with it. The
 workbench reads the cards and the review states with the same queries
 as Solid Memo, and the instance's preferences for today's study day.
-A test keeps a query over 5,000 cards linear: timed at two sizes on the same machine, four times the cards take less than ten times as long.
+A test keeps a query over 5,000 cards linear: timed on the same machine, eight times the cards take less than four times as long as an eighth of them eight times over.
 
 ## Bulk edits
 
@@ -1138,7 +1138,7 @@ case `deckInsight` reads what it needs. It writes nothing to the deck.
   with 4 lapses or more (`LEECH_LAPSES`, `leechesOf`), the most
   forgotten first. Each links to its card's history, and a link shows
   them all in the workbench (`state=leech&sort=lapses&order=desc`).
-  A test keeps `lapseIndex` linear over a year of answers: timed at two sizes on the same machine, four times the answers take less than ten times as long.
+  A test keeps `lapseIndex` linear over a year of answers: timed on the same machine, eight times the answers take less than four times as long as an eighth of them eight times over.
 
 The charts are the statistics' own (`BarChart` and `StatTile` in `ui`):
 a bar pointed at, tapped or reached with the arrow keys says what it

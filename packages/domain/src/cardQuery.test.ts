@@ -401,17 +401,18 @@ describe("queryCards", () => {
     expect(
       queryCards(many, reviewsOf(many), query, TODAY, plain, englishReader).length,
     ).toBeGreaterThan(0);
-    // Four times the cards take about four times as long (a little more,
-    // for the sort); work per card that grew with the cards would take sixteen.
+    // Eight times the cards take about as long as an eighth of them eight
+    // times over (a little more, for the sort); work per card that grew with
+    // the cards would take eight times as long.
     const ratio = growth(
       (count) => {
         const some = many.slice(0, count);
         const states = reviewsOf(some);
         return () => queryCards(some, states, query, TODAY, plain, englishReader);
       },
-      1_250,
-      4,
+      625,
+      8,
     );
-    expect(ratio).toBeLessThan(10);
+    expect(ratio).toBeLessThan(4);
   });
 });

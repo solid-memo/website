@@ -395,17 +395,18 @@ describe("statisticsOf", () => {
       });
     const year = answers(365 * 50);
     expect(statisticsOf(year, "2025-12-31").totals.cards).toBe(2_000);
-    // Four times the answers take about four times as long; work per answer
-    // that grew with the answers would take sixteen.
+    // Eight times the answers take about as long as an eighth of them eight
+    // times over; work per answer that grew with the answers would take
+    // eight times as long.
     const ratio = growth(
       (count) => {
         const some = year.slice(0, count);
         return () => statisticsOf(some, "2025-12-31");
       },
-      year.length / 8,
-      4,
+      year.length / 16,
+      8,
     );
-    expect(ratio).toBeLessThan(10);
+    expect(ratio).toBeLessThan(4);
   });
 });
 

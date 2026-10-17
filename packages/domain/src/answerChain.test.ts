@@ -116,9 +116,9 @@ describe("isRepeat, isScoredReview and isLapse", () => {
       });
     const year = answers(365 * 200);
     expect(chainIndexOf(year).chains.size).toBe(2_000);
-    // Four times the answers take about four times as long (a sort a
-    // prompt adds a little); work per answer that grew with the answers
-    // would take sixteen.
+    // Eight times the answers take about as long as an eighth of them eight
+    // times over (a sort a prompt adds a little); work per answer that grew
+    // with the answers would take eight times as long.
     const ratio = growth(
       (count) => {
         const some = year.slice(0, count);
@@ -127,10 +127,10 @@ describe("isRepeat, isScoredReview and isLapse", () => {
           return some.filter((a) => isLapse(a, index)).length;
         };
       },
-      year.length / 8,
-      4,
+      year.length / 16,
+      8,
     );
-    expect(ratio).toBeLessThan(10);
+    expect(ratio).toBeLessThan(4);
   });
 });
 
