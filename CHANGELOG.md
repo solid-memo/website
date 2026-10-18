@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.11.0](https://github.com/solid-memo/website/compare/v3.10.1...v3.11.0) (2026-10-18)
+
+### Features
+
+* **studio:** write a release's contact from the release screen ([711a5d1](https://github.com/solid-memo/website/commit/711a5d18e031f25ec53068d32577dd6bf6901481)), closes [#166](https://github.com/solid-memo/website/issues/166)
+
+### Bug Fixes
+
+* **studio:** flag a missing library contact and any email in the library check ([ca7e48e](https://github.com/solid-memo/website/commit/ca7e48e7bc4ffcf08f9c6d58c0fcb8b676b73b53)), closes [#166](https://github.com/solid-memo/website/issues/166)
+
 ## [3.10.1](https://github.com/solid-memo/website/compare/v3.10.0...v3.10.1) (2026-10-17)
 
 ### Bug Fixes
