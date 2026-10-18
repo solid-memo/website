@@ -34,7 +34,7 @@ name: Release
 # (docs/releasing.md#when-a-release-fails).
 
 on:
-  workflow_run:
+  workflow_run: # zizmor: ignore[dangerous-triggers] only the release job runs on it, for CI's push runs on main in this repository
     workflows: [CI]
     types: [completed]
     branches: [main]

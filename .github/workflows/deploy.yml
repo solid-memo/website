@@ -19,7 +19,7 @@ name: Deploy to GitHub Pages
 # so the job checks that CI ran for a push, in this repository.
 
 on:
-  workflow_run:
+  workflow_run: # zizmor: ignore[dangerous-triggers] the jobs act only on CI's push runs on main, in this repository
     workflows: [CI]
     types: [completed]
     branches: [main]

@@ -26,6 +26,7 @@ npm run coverage:summary   # the coverage the last tests measured, per package, 
 npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
 npm run lint:reuse         # reuse lint: every file states its copyright and license, as CI's docs job checks (needs reuse; not in npm run check)
+npm run lint:workflows     # actionlint and zizmor over .github/, as CI's workflows job runs them (needs them; not in npm run check)
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
 npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
@@ -493,6 +494,7 @@ jobs, side by side:
 | `contract (<server>)` | that each advisory server starts and meets the contract |
 | `journeys (<browsers>)` | the user journeys: every one in Chromium, and those that differ between engines in Firefox, WebKit and on a phone ([Browsers](#browsers)) |
 | `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
+| `workflows` | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
 | `caches` | nothing: on `main`, after `build`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
 | `ci-ok` | that every job above passed, `caches` aside |
@@ -565,6 +567,33 @@ each workflow runs the servers [servers.ts](../e2e/pod/servers.ts) says
 it should; keep them when changing the workflow. The workflows are
 among the test's inputs (`e2e/pod/turbo.json`), so a change to a matrix
 alone runs it again.
+
+### The workflows
+
+CI's `workflows` job runs `npm run lint:workflows` over the workflows
+and the local actions in [.github/](../.github/):
+
+- [actionlint](https://github.com/rhysd/actionlint) checks their syntax,
+  their expressions' contexts and types, and, with
+  [shellcheck](https://www.shellcheck.net/), the shell of every `run:`.
+- [zizmor](https://docs.zizmor.sh/), offline, checks their security: an
+  expression written into a script, where a value could run as code
+  (passed to the script as an environment variable instead), a job given
+  rights it does not use, a trigger that runs with more rights than the
+  change that set it off. A finding that is meant stays, with a
+  `# zizmor: ignore[<audit>]` comment on its line that says why (the
+  `workflow_run` triggers of [deploy.yml](../.github/workflows/deploy.yml)
+  and [release.yml](../.github/workflows/release.yml), whose jobs act
+  only on CI's push runs on `main`); an audit turned off is in
+  [.github/zizmor.yml](../.github/zizmor.yml), with its reason.
+
+Neither is an npm package, so neither is part of `npm run check`: both
+are pinned in [requirements-lint.txt](../scripts/requirements-lint.txt),
+which Renovate updates, and `pip install -r scripts/requirements-lint.txt`
+installs them, or `uv run --no-project --with-requirements
+scripts/requirements-lint.txt npm run lint:workflows` runs them without
+installing them. That every action is pinned is `check:actions`'s, in
+`npm run check` ([The repository's own checks](#the-repositorys-own-checks)).
 
 ### Code scanning
 

@@ -420,6 +420,27 @@ jobs:
         with:
           network: "false"
 
+  # The workflows and actions themselves (docs/testing.md#the-workflows):
+  # actionlint checks their syntax, expressions and shell (with
+  # shellcheck), zizmor their security, such as an expression written
+  # into a script or a job given more rights than it uses. Offline:
+  # zizmor's audits that ask GitHub's API are left out. Both are Python
+  # packages, pinned in scripts/requirements-lint.txt.
+  workflows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.15"
+          cache: pip
+          cache-dependency-path: scripts/requirements-lint.txt
+      - run: pip install -r scripts/requirements-lint.txt
+      - run: npm run lint:workflows
+
   # A pull request's commits follow Conventional Commits
   # (CONTRIBUTING.md#commit-messages), as commitlint.config.mjs has them:
   # semantic-release chooses each version from them (docs/releasing.md),
@@ -498,7 +519,7 @@ jobs:
   # stays.
   ci-ok:
     if: always()
-    needs: [build, library, crosscheck, pod, contract, journeys, docs, commits]
+    needs: [build, library, crosscheck, pod, contract, journeys, docs, workflows, commits]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

@@ -61,6 +61,7 @@
     "lint:markdown": "markdownlint-cli2",
     "lint:spelling": "cspell --no-progress",
     "lint:reuse": "reuse lint",
+    "lint:workflows": "actionlint && zizmor --offline --no-progress .github",
     "lint:commits": "commitlint --from origin/main --to HEAD && { test -z \"$(git rev-list --merges origin/main..HEAD)\" || { echo 'A merge commit is not linted: update the branch by rebasing it on main (git rebase origin/main).' >&2; exit 1; }; }",
     "crosscheck": "python3 scripts/shacl_crosscheck.py",
     "test:crosscheck": "python3 -m unittest discover -s scripts",
