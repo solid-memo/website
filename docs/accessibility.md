@@ -55,7 +55,10 @@ but the journeys:
   ([style.md](style.md#formatting)).
 - **Contrast**: unit tests check the contrast of muted text and of
   fields' edges on every surface, in both themes
-  ([`style.test.ts`](../packages/ui/src/style.test.ts)).
+  ([`style.test.ts`](../packages/ui/src/style.test.ts)), and of every
+  text color the Studio's stylesheet uses on every surface it uses, in
+  both themes, the surfaces that hold no text left out by name
+  ([`studio.test.ts`](../apps/studio/src/ui/studio.test.ts)).
 - **Names and roles**: the journeys and the component tests find
   elements by their role and accessible name, as assistive technology
   does, so a button that loses its name fails a test
@@ -78,9 +81,9 @@ What a tool can't judge is checked by hand as a change is reviewed:
 
 ## Known gaps
 
-- **Contrast tests**: they cover some token pairs only, not every text
-  and surface pair in both themes, and not the Studio's own stylesheet.
-  axe checks the contrast of the screens the journeys visit.
+- **Contrast tests**: for the site's stylesheet they cover some token
+  pairs only, not every text and surface pair in both themes. axe
+  checks the contrast of the screens the journeys visit.
 - **Focus under sticky parts**: in the Studio, the sticky header,
   sticky columns and bulk bar can hide the row that has the focus.
 - **Screen readers**: no pass with a screen reader is written down.

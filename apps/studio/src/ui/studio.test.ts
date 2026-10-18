@@ -286,3 +286,99 @@ describe("the Studio's stylesheet", () => {
     viewport(1024);
   });
 });
+
+/*
+ * The colors studio.css draws with, all the site's tokens (style.css),
+ * in each theme: every text color it uses on every surface it uses, as
+ * any of them may meet. The surfaces that hold no text are left out.
+ */
+describe("the Studio's contrast", () => {
+  const site = readFileSync(
+    createRequire(import.meta.url).resolve("@solid-memo/ui/style.css"),
+    "utf8",
+  );
+  const studio = readFileSync(join(import.meta.dirname, "studio.css"), "utf8");
+
+  /** The #rrggbb custom properties the block `selector` in style.css declares, by name. */
+  const tokens = (selector: string): Record<string, string> => {
+    const start = site.indexOf(`${selector} {`);
+    const block = site.slice(start, site.indexOf("}", start));
+    return Object.fromEntries(
+      [...block.matchAll(/(--[\w-]+):\s*(#[0-9a-f]{6});/g)].map((m) => [m[1]!, m[2]!]),
+    );
+  };
+  const light = tokens(":root");
+  const themes = { light, dark: { ...light, ...tokens(':root[data-theme="dark"]') } };
+
+  /** studio.css's rules, as each selector and the declarations it sets, the comments left out. */
+  const rules = [...studio.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(
+    (m) => ({ selector: m[1]!.replace(/\s+/g, " ").trim(), body: m[2]! }),
+  );
+  /** The tokens the rules give `property` (color, background), each once. */
+  const used = (property: string) => [
+    ...new Set(
+      rules.flatMap(({ body }) =>
+        [...body.matchAll(new RegExp(`(?:^|[;\\s])${property}:\\s*var\\((--[\\w-]+)\\)`, "g"))].map(
+          (m) => m[1]!,
+        ),
+      ),
+    ),
+  ];
+
+  /** The surfaces that hold no text: the splitter's bar as it is pointed at, and a dialog's backdrop. */
+  const TEXTLESS: Record<string, string> = {
+    "--primary": ".studio-splitter:is(:hover, :focus-visible)",
+    "--zoom-backdrop": ".studio-dialog::backdrop",
+  };
+
+  /** WCAG's contrast ratio of two #rrggbb colors. */
+  const contrast = (a: string, b: string): number => {
+    const luminance = (hex: string) => {
+      const [r, g, bl] = [1, 3, 5].map((i) => {
+        const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r! + 0.7152 * g! + 0.0722 * bl!;
+    };
+    const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (high! + 0.05) / (low! + 0.05);
+  };
+
+  it("draws only with the site's tokens", () => {
+    for (const { body } of rules) {
+      for (const [, value] of body.matchAll(
+        /(?:^|[;\s])(?:color|background(?:-color)?):\s*([^;]+);/g,
+      ))
+        expect(value).toMatch(/^(var\(--[\w-]+\)|inherit|none|transparent)$/);
+    }
+  });
+
+  it("puts no text on the surfaces that hold none", () => {
+    for (const [surface, selector] of Object.entries(TEXTLESS)) {
+      const on = rules.filter(({ body }) => body.includes(`background: var(${surface})`));
+      expect(on.map((rule) => rule.selector)).toEqual([`:root[data-surface="studio"] ${selector}`]);
+      expect(on[0]!.body).not.toMatch(/(?:^|[;\s])color:/);
+    }
+  });
+
+  it.each(Object.entries(themes))(
+    "keeps every text color at 4.5:1 or more on every surface in the %s theme",
+    (_, theme) => {
+      const texts = used("color");
+      const surfaces = used("background").filter((surface) => !(surface in TEXTLESS));
+      expect(texts).toContain("--text-muted");
+      expect(surfaces).toContain("--surface-sunken");
+      for (const text of texts) {
+        for (const surface of surfaces) {
+          expect({ text, surface, enough: contrast(theme[text]!, theme[surface]!) >= 4.5 }).toEqual(
+            {
+              text,
+              surface,
+              enough: true,
+            },
+          );
+        }
+      }
+    },
+  );
+});
