@@ -30,9 +30,37 @@ a new major version ([docs/releasing.md](docs/releasing.md)).
 
 ## Done recently
 
-These were on the roadmap and are done. Most are part of 1.0.0
-([CHANGELOG.md](CHANGELOG.md)):
+These are done. Those since 1.0.0 come first; the rest are part of
+1.0.0. Every version is in the [changelog](CHANGELOG.md).
 
+- Pull requests merged through GitHub's merge queue, so `main` only
+  gets a commit whose checks passed
+  ([docs/testing.md](docs/testing.md#the-merge-queue)).
+- The public API written down in [`api/`](api/README.md), and a check
+  that fails a change to it that no commit calls breaking
+  ([docs/releasing.md](docs/releasing.md#how-ci-holds-to-it)).
+- Commit checks: every commit says why and names its issue, and a pull
+  request names the issue it closes
+  ([CONTRIBUTING.md](CONTRIBUTING.md#commit-messages)).
+- Only the latest version is deployed, and only the release workflow on
+  `main` can read the key that releases it
+  ([docs/releasing.md](docs/releasing.md#the-deploy-key)).
+- These docs as a website, at `/docs/`, with each release's own
+  ([docs/deployment.md](docs/deployment.md#each-releases-docs)).
+- The journeys run in Firefox, WebKit and on a phone too, and check
+  each screen they visit with axe, against the target in
+  [docs/accessibility.md](docs/accessibility.md)
+  ([docs/testing.md](docs/testing.md#browsers)).
+- Four Arabic decks, and text written right to left, such as Arabic,
+  shown in its own direction
+  ([docs/i18n.md](docs/i18n.md#text-in-the-users-languages)).
+- Everyday Korean phrases, and Korean at the Table, a course in
+  dialogues around food ([docs/deck-library.md](docs/deck-library.md)).
+- In a study session, undo the last answer, see under each grade how
+  long the card would wait, and report a mistake in a card
+  ([docs/user-guide.md](docs/user-guide.md#studying)).
+- A link to a library deck that anyone can open, as a guest if need be
+  ([docs/guest-mode.md](docs/guest-mode.md#from-a-link)).
 - A lasting copy of the code in
   [Software Heritage](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/solid-memo/website),
   which preserves public source code and keeps adding the project's

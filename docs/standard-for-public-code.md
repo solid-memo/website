@@ -865,21 +865,21 @@ Only an admin of the repository can change these. All are done:
 Found on 2026-10-16 and not made here, as #78 leaves fixing to later
 changes:
 
-- **Open.** **Terms.** Explain DOI, ACR and WCAG in
+- **Done.** **Terms.** Explain DOI, ACR and WCAG in
   [glossary.md](glossary.md), or where they are first used, and link the
   EU data theme table where [deck-library.md](deck-library.md) names
   `EDUC`. *(10)*
-- **Open.** **The DOI's entry.** Make Zenodo's entry name solid-memo.com, for
+- **Done.** **The DOI's entry.** Make Zenodo's entry name solid-memo.com, for
   example with a `.zenodo.json` that lists the website as a related
   identifier, since Zenodo does not take `CITATION.cff`'s `url`. *(14)*
-- **Open.** **CodeQL in the docs.** CodeQL scans the code, but no page says
+- **Done.** **CodeQL in the docs.** CodeQL scans the code, but no page says
   so: [testing.md](testing.md) and SECURITY.md could say what it checks
   and that its alerts are fixed in pull requests like any other change.
   *(12)*
-- **Open.** **ROADMAP.md.** "Done recently" stops at 1.0.0; add what 1.0.1 to
+- **Done.** **ROADMAP.md.** "Done recently" stops at 1.0.0; add what 1.0.1 to
   2.1.1 brought, such as the merge queue, the breaking-change gate and
   the Arabic decks. *(4)*
-- **Open.** **The user guide.** Say that the library has Arabic decks and that
+- **Done.** **The user guide.** Say that the library has Arabic decks and that
   text written right to left keeps its direction, alongside the
   examples criterion 9 already lacks. *(9)*
 

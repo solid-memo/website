@@ -827,7 +827,8 @@ own pod, as a draft, before publishing it
   `dcterms:modified` aside: that is this release, written by a
   publishing cut short, and publishing goes on from there; not when
   another draft of the instance names it as its release). Then the release alone is made
-  readable by everyone: its own ACL, or its ACR, gets public read and
+  readable by everyone: its own ACL, or its ACR
+  ([glossary](glossary.md#solid-and-the-web)), gets public read and
   nothing else, and no folder's access control is changed (a server that
   names the folder's as the document's is left as it is, the release
   private). Then the catalog links it (`sm:publishedRelease`, If-Match,

@@ -7,10 +7,17 @@ it most. The specifications' versions and status are in
 
 ## Solid and the web
 
+- **ACL** (access control list): the document that says who may read or
+  write a resource on a pod that uses WAC.
+  [Specification](https://solidproject.org/TR/wac).
 - **ACP** (Access Control Policy): one of Solid's two ways for a pod to
   say who may read or write a resource; the other is WAC.
   [Specification](https://solidproject.org/TR/acp). Used when a
   release is made public ([standards.md](standards.md#solid)).
+- **ACR** (Access Control Resource): the document that says who may
+  read or write a resource on a pod that uses ACP; what an ACL is for
+  WAC. [Specification](https://solidproject.org/TR/acp#access-control-resource);
+  [data-model.md](data-model.md).
 - **CSP** (Content Security Policy): a list of what a page may load and
   run, which the browser enforces.
   [Specification](https://www.w3.org/TR/CSP3/);
@@ -46,6 +53,11 @@ it most. The specifications' versions and status are in
 - **WAC** (Web Access Control): one of Solid's two ways for a pod to say
   who may read or write a resource, with `.acl` documents.
   [Specification](https://solidproject.org/TR/wac).
+- **WCAG** (Web Content Accessibility Guidelines): W3C's rules for
+  making web pages usable by everyone, people with disabilities
+  included. Solid Memo aims at version 2.2, level AA.
+  [Specification](https://www.w3.org/TR/WCAG22/);
+  [accessibility.md](accessibility.md).
 - **WebID**: a web address that names you, such as
   `https://alice.example/profile/card#me`. Its document, your profile,
   says where your pod and your identity provider are.
@@ -54,6 +66,11 @@ it most. The specifications' versions and status are in
 
 ## Linked data
 
+- **Data theme**: one of the European Union's broad subjects for data
+  sets, from its data theme table, such as `EDUC` (Education, culture
+  and sport), which every library deck states.
+  [Table](https://op.europa.eu/en/web/eu-vocabularies/concept-scheme/-/resource?uri=http://publications.europa.eu/resource/authority/data-theme);
+  [deck-library.md](deck-library.md#a-version).
 - **DCAT** (Data Catalog Vocabulary): W3C's terms for describing data
   sets and catalogs. A deck is described with it.
   [Specification](https://www.w3.org/TR/vocab-dcat-3/);
@@ -198,6 +215,10 @@ it most. The specifications' versions and status are in
   rest of the computer. The end-to-end tests and the user journeys start
   their Solid servers in it. [docker.com](https://www.docker.com/);
   [testing.md](testing.md).
+- **DOI** (Digital Object Identifier): a lasting name for a published
+  work, such as `10.5281/zenodo.23351087`, which `https://doi.org/`
+  turns into a link to it. Zenodo gives each release one.
+  [doi.org](https://www.doi.org/); [releasing.md](releasing.md).
 - **End-to-end test** (e2e): a test of the app's use cases and Solid
   adapters against real Solid servers, in `e2e/pod/`.
   [testing.md](testing.md).

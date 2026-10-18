@@ -564,6 +564,31 @@ read by [servers.test.ts](../e2e/pod/servers.test.ts), which checks that
 each workflow runs the servers [servers.ts](../e2e/pod/servers.ts) says
 it should; keep them when changing the workflow.
 
+### Code scanning
+
+GitHub's [CodeQL](https://codeql.github.com/) also reads the code, for
+security flaws and coding errors such as a regular expression that
+filters HTML badly or checks only part of a hostname. It runs in
+GitHub's default setup, a setting of the repository, so no workflow
+file in `.github/workflows/` holds it. It analyzes each language CodeQL
+supports that it finds here, including TypeScript and JavaScript. It
+runs on each push to `main`, on pull requests to `main` from branches
+of this repository (not from forks), and once a week
+([GitHub's docs](https://docs.github.com/en/code-security/concepts/code-scanning/setup-types)).
+
+Its alerts are listed under the repository's Security tab, as code
+scanning alerts. CodeQL does not gate a merge: the ruleset requires
+`ci-ok` alone ([above](#continuous-integration)). An alert is fixed
+like any other change, in a pull request. The fix's commit says what
+CodeQL flagged and why the change fixes it, and names the alert by its
+number when the alert is already open on `main`. An alert that a pull
+request's own scan raises is fixed in that same pull request. An alert
+closes once the fix is on `main` and the next scan no longer finds it.
+The first five alerts were fixed this way, in #96 and #99 to #102: an
+HTML page is now read with a DOM parser instead of regular expressions,
+and text and URLs are compared as strings or by their parsed origin
+instead of with patterns.
+
 ### The repository's own checks
 
 `npm run check` starts with `npm run lint`: [Biome](https://biomejs.dev/)

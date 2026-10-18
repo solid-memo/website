@@ -58,8 +58,11 @@ publisher still in the index:
   French): when the app gains a language, every deck gets a version that
   adds it. The app shows only the reader's keywords
   ([i18n.md](i18n.md#which-language)). **Topics** are `dcat:theme`s from
-  [`ns/vocab/topics.ttl`](../ns/vocab/topics.ttl), next to the EU data
-  theme `EDUC`; **languages** are EU authority-table IRIs described in
+  [`ns/vocab/topics.ttl`](../ns/vocab/topics.ttl), next to `EDUC`
+  (Education, culture and sport) from the European Union's
+  [data theme table](https://op.europa.eu/en/web/eu-vocabularies/concept-scheme/-/resource?uri=http://publications.europa.eu/resource/authority/data-theme),
+  its broad subjects for data sets; **languages** are EU
+  authority-table IRIs described in
   [`ns/vocab/external.ttl`](../ns/vocab/external.ttl).
 - **Creators** are `foaf:Agent` nodes of the document, with a name and
   no email; **licenses**

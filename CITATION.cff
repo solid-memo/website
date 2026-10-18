@@ -5,7 +5,8 @@
 # How to cite Solid Memo (https://citation-file-format.github.io/).
 # version and date-released are written by each release, after url
 # (docs/releasing.md#what-a-release-does), and are absent until the
-# first.
+# first. Zenodo reads .zenodo.json instead of this file, so the two
+# are kept in step by hand (docs/releasing.md#what-a-release-does).
 cff-version: 1.2.0
 message: If you use or refer to Solid Memo, please cite it as below.
 type: software
