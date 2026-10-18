@@ -235,6 +235,7 @@ export type ReleaseField =
   | "languages"
   | "themes"
   | "license"
+  | "contact"
   | "publisher"
   | "authors"
   | "making"
@@ -246,6 +247,7 @@ export const RELEASE_FIELDS: readonly ReleaseField[] = [
   "languages",
   "themes",
   "license",
+  "contact",
   "publisher",
   "authors",
   "making",
@@ -272,6 +274,7 @@ const RELEASE_SCREEN_FIELDS: Readonly<Record<string, ReleaseField>> = {
   [`${DCTERMS_NS}language`]: "languages",
   [`${DCAT_NS}theme`]: "themes",
   [`${DCTERMS_NS}license`]: "license",
+  [`${DCAT_NS}contactPoint`]: "contact",
   [`${DCTERMS_NS}publisher`]: "publisher",
   [`${DCTERMS_NS}creator`]: "authors",
   [`${PROV}wasDerivedFrom`]: "sources",

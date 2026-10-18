@@ -106,6 +106,8 @@ export const DRAFT_ID = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 /** A new draft's own subjects: its distribution, `#turtle`, and its series, `#series`, until a release names them elsewhere. */
 export const DISTRIBUTION_ID = "turtle";
 export const SERIES_ID = "series";
+/** A contact's own subject, `#contact`, as the library's releases name theirs. */
+export const CONTACT_ID = "contact";
 
 /**
  * A blank draft at `url`: a deck, or a course (studied front to back),
@@ -311,6 +313,11 @@ export type DraftChange =
   /** The license (dcterms:license), typed dcterms:LicenseDocument; null for none. */
   | { kind: "setLicense"; license: string | null }
   /**
+   * Who to contact about the release: a web page, as its one
+   * dcat:contactPoint, a vcard:Kind with this vcard:hasURL; null for none.
+   */
+  | { kind: "setContact"; url: string | null }
+  /**
    * The attribution of how the release was made: "Compiled by <its
    * authors>", with or without "with the help of AI", in English and
    * Swedish; null for none. Never a claim that anyone reviewed it.
@@ -477,6 +484,8 @@ function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | 
       return setSource(draft, change.iri, change.source);
     case "setLicense":
       return setLicense(draft, change.license);
+    case "setContact":
+      return setContact(draft, change.url);
     case "setAttribution":
       return setAttribution(draft, change.attribution);
     case "setMakingNotes":
@@ -1326,6 +1335,62 @@ function setLicense(draft: ReleaseDraft, license: string | null): ReleaseDraft {
   }
   if (license !== null && !typed(triples, license)) triples.push(licenseType(license));
   return { ...draft, root: license === null ? root : { ...root, license }, triples };
+}
+
+// --- The contact
+
+const DCAT_CONTACT_POINT = "http://www.w3.org/ns/dcat#contactPoint";
+const VCARD = "http://www.w3.org/2006/vcard/ns#";
+
+/** The release's contact points (dcat:contactPoint), as the subjects of their statements. */
+function contactPointsOf(draft: ReleaseDraft): string[] {
+  return draft.triples
+    .filter((triple) => triple.subject === draft.url && triple.predicate === DCAT_CONTACT_POINT)
+    .map((triple) =>
+      triple.object.kind === "blank" ? `_:${triple.object.value}` : triple.object.value,
+    );
+}
+
+/** The web page the release's contact names (its first contact point's vcard:hasURL); null when it names none. */
+export function contactOf(draft: ReleaseDraft): string | null {
+  for (const point of contactPointsOf(draft)) {
+    const url = draft.triples.find(
+      (triple) =>
+        triple.subject === point &&
+        triple.predicate === `${VCARD}hasURL` &&
+        triple.object.kind === "iri",
+    );
+    if (url !== undefined) return url.object.value;
+  }
+  return null;
+}
+
+/**
+ * The draft with its contact set: what it said of a contact before goes,
+ * with what it stated of each contact point; the new one is `#contact`,
+ * or the first free id after it.
+ */
+function setContact(draft: ReleaseDraft, url: string | null): ReleaseDraft {
+  const points = new Set(contactPointsOf(draft));
+  const triples = draft.triples.filter(
+    (triple) =>
+      !(triple.subject === draft.url && triple.predicate === DCAT_CONTACT_POINT) &&
+      !points.has(triple.subject),
+  );
+  if (url === null) return { ...draft, triples };
+  const used = idsInUse({ ...draft, triples });
+  let id = CONTACT_ID;
+  for (let n = 2; used.has(id); n++) id = `${CONTACT_ID}-${n}`;
+  const point = iriIn(draft, id);
+  return {
+    ...draft,
+    triples: [
+      ...triples,
+      { subject: draft.url, predicate: DCAT_CONTACT_POINT, object: { kind: "iri", value: point } },
+      { subject: point, predicate: RDF_TYPE, object: { kind: "iri", value: `${VCARD}Kind` } },
+      { subject: point, predicate: `${VCARD}hasURL`, object: { kind: "iri", value: url } },
+    ],
+  };
 }
 
 // --- The attribution and the notes of the release's making
