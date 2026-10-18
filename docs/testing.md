@@ -46,6 +46,7 @@ npm run journeys -- -g smoke   # only the journeys whose title matches (or --rep
 npm run css -w @solid-memo/e2e-journeys   # keep such a server up; JOURNEY_SERVER_URL=<its url> npm run journeys reuses it
 npm run journeys:report -w @solid-memo/e2e-journeys   # open the last run's report
 npm run css:clean -w @solid-memo/e2e-journeys   # take down the servers an interrupted run left
+npm run screenshots   # retake the app's screenshots on a phone's screen (below), from the built app
 npm run check:providers   # the Pod providers onboarding suggests answer with their issuers (needs the network)
 ```
 
@@ -476,6 +477,28 @@ The harness's own code (`harness/`) has unit tests (`npm test`, so `npm
 run check`). The page objects and journeys are themselves tests, run by
 `npm run journeys`, and have no coverage of their own, as with
 `e2e/pod`.
+
+### Screenshots
+
+The app's screenshots
+([apps/web/public/screenshots/](../apps/web/public/screenshots/)),
+which the README, `publiccode.yml` and the About page show, are taken
+by [app.screenshots.ts](../e2e/journeys/screenshots/app.screenshots.ts)
+with its own config
+([screenshots.config.ts](../e2e/journeys/screenshots.config.ts)):
+`npm run screenshots`, after `npx turbo run build --filter=@solid-memo/web`,
+retakes them all in about ten minutes. It is no test, and neither
+`npm run check` nor CI runs it. It drives the built app in Chromium on a
+phone's screen, 390 by 844 pixels at twice the density, in English,
+as a guest, so with no Solid server. It studies three library decks
+day after day for eight weeks on a clock of its own (`page.clock`),
+from a fixed date and with a seeded shuffle, so that the statistics
+have a history to show and each run comes out much as the last. Then it takes
+each screen, scrolled to its breadcrumbs. The deck pictures come from
+Wikimedia, as the decks name them, so it needs the network. A screen
+that changes is retaken by running it again and committing the
+pictures; the README's and the About page's alt text describes what
+they show.
 
 ## Continuous integration
 

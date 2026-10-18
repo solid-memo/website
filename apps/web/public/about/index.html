@@ -168,11 +168,15 @@
 
     .screenshots {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
       gap: 1rem;
       margin: 0 0 1rem;
       padding: 0;
       list-style: none;
+    }
+
+    .screenshots .wide {
+      grid-column: 1 / -1;
     }
 
     figure {
@@ -242,40 +246,54 @@
 
     <section id="screenshots" aria-labelledby="screenshots-title">
       <h2 id="screenshots-title">Screenshots</h2>
-      <p>The app in English, as a guest tries it, with no account.</p>
+      <p>The app in English on a phone, as a guest tries it with no account, after some weeks of study; the Studio on a desktop's screen.</p>
       <ul class="screenshots">
         <li>
           <figure>
-            <img src="../screenshots/study.png" width="1280" height="900"
-              alt="A study session of the deck Famous paintings: a painting on the card's front, its title, painter and date revealed below it, and buttons from 0 to 5 to grade the answer." />
+            <img src="../screenshots/decks.png" width="780" height="1688"
+              alt="A guest's deck list on a phone: a banner saying the study is kept in this browser only, with buttons to log in and keep it or to discard it, the course Getting started with Solid Memo to continue, then the decks, each with how many cards are left to review and a Study button." />
+            <figcaption>Your decks</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="../screenshots/study.png" width="780" height="1688"
+              alt="A study session of the deck Famous paintings on a phone: Caspar David Friedrich's Wanderer above the Sea of Fog on the card's front, its title, painter and date revealed below it, and buttons from 0 to 5 to grade the answer." />
             <figcaption>Studying a card</figcaption>
           </figure>
         </li>
         <li>
           <figure>
-            <img src="../screenshots/library.png" width="1280" height="900"
-              alt="The deck library: a search field over a list of ready-made decks, each with its number of cards and a Preview button." />
-            <figcaption>The deck library</figcaption>
-          </figure>
-        </li>
-        <li>
-          <figure>
-            <img src="../screenshots/course-chapter.png" width="1280" height="900"
-              alt="The first chapter of the course Getting started with Solid Memo: step 1 of 3, a part of its theory, and a Continue button." />
+            <img src="../screenshots/course-chapter.png" width="780" height="1688"
+              alt="A question in the chapter How studying works on a phone, step 2 of 3: four answers to What does an ordinary Solid Memo study session hold?, the right one chosen and marked Right answer, and the card it adds to the deck, with its explanation, above a Next button." />
             <figcaption>A course's chapter</figcaption>
           </figure>
         </li>
         <li>
           <figure>
-            <img src="../screenshots/statistics.png" width="1280" height="900"
-              alt="The statistics: answers, study days, cards studied and streaks, over an activity calendar of the last 52 weeks." />
-            <figcaption>Study statistics</figcaption>
+            <img src="../screenshots/library.png" width="780" height="1688"
+              alt="The deck library on a phone, searched for famous: the decks found, each with its number of cards and a Preview button, one marked Already imported, two checked, and an Import 2 decks button." />
+            <figcaption>The deck library</figcaption>
           </figure>
         </li>
         <li>
           <figure>
-            <img src="../screenshots/studio.png" width="1280" height="900"
-              alt="Solid Memo Studio: a sidebar of sections, decks and drafts beside a table of the instance's decks." />
+            <img src="../screenshots/statistics.png" width="780" height="1688"
+              alt="The statistics' overview on a phone, of the last 3 months: answers, study days, cards studied, cards known, the current and longest streak, and how many of the last 30 days were study days." />
+            <figcaption>Your progress</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="../screenshots/activity.png" width="780" height="1688"
+              alt="The statistics' activity on a phone: a bar chart of what each of the last 30 days held, remembered, new, lapses and repeats, over a chart of answers by weekday." />
+            <figcaption>Study activity</figcaption>
+          </figure>
+        </li>
+        <li class="wide">
+          <figure>
+            <img src="../screenshots/studio.png" width="3200" height="1280"
+              alt="Solid Memo Studio on a desktop's screen: a sidebar of sections and decks, a table of the instance's decks with their settings and counts, and the deck picked in it described in a panel beside it." />
             <figcaption>Solid Memo Studio, for deck authors</figcaption>
           </figure>
         </li>

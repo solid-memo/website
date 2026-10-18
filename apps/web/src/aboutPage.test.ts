@@ -114,7 +114,7 @@ describe("the About page", () => {
       };
     });
     expect(images.map(({ src }) => src)).toEqual(
-      ["study", "library", "course-chapter", "statistics", "studio"].map(
+      ["decks", "study", "course-chapter", "library", "statistics", "activity", "studio"].map(
         (name) => `../screenshots/${name}.png`,
       ),
     );

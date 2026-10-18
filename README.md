@@ -53,13 +53,16 @@ accessibility guidelines, at level AA, with a keyboard and a screen
 reader as well: what is checked, the gaps known and how to report a
 barrier are in [docs/accessibility.md](docs/accessibility.md).
 
-| Studying a card | The deck library |
-| --- | --- |
-| ![A study session of the deck Famous paintings: a painting on the card's front, its title, painter and date revealed below it, and buttons from 0 to 5 to grade the answer.](apps/web/public/screenshots/study.png) | ![The deck library: a search field over a list of ready-made decks, each with its number of cards and a Preview button.](apps/web/public/screenshots/library.png) |
-| **A course's chapter** | **Study statistics** |
-| ![The first chapter of the course Getting started with Solid Memo: step 1 of 3, a part of its theory, and a Continue button.](apps/web/public/screenshots/course-chapter.png) | ![The statistics: answers, study days, cards studied and streaks, over an activity calendar of the last 52 weeks.](apps/web/public/screenshots/statistics.png) |
-| **Solid Memo Studio, for deck authors** | |
-| ![Solid Memo Studio: a sidebar of sections, decks and drafts beside a table of the instance's decks.](apps/web/public/screenshots/studio.png) | |
+| Your decks | Studying a card | A course's chapter |
+| --- | --- | --- |
+| ![A guest's deck list on a phone: a banner saying the study is kept in this browser only, with buttons to log in and keep it or to discard it, the course Getting started with Solid Memo to continue, then the decks, each with how many cards are left to review and a Study button.](apps/web/public/screenshots/decks.png) | ![A study session of the deck Famous paintings on a phone: Caspar David Friedrich's Wanderer above the Sea of Fog on the card's front, its title, painter and date revealed below it, and buttons from 0 to 5 to grade the answer.](apps/web/public/screenshots/study.png) | ![A question in the chapter How studying works on a phone, step 2 of 3: four answers to What does an ordinary Solid Memo study session hold?, the right one chosen and marked Right answer, and the card it adds to the deck, with its explanation, above a Next button.](apps/web/public/screenshots/course-chapter.png) |
+| **The deck library** | **Your progress** | **Study activity** |
+| ![The deck library on a phone, searched for famous: the decks found, each with its number of cards and a Preview button, one marked Already imported, two checked, and an Import 2 decks button.](apps/web/public/screenshots/library.png) | ![The statistics' overview on a phone, of the last 3 months: answers, study days, cards studied, cards known, the current and longest streak, and how many of the last 30 days were study days.](apps/web/public/screenshots/statistics.png) | ![The statistics' activity on a phone: a bar chart of what each of the last 30 days held, remembered, new, lapses and repeats, over a chart of answers by weekday.](apps/web/public/screenshots/activity.png) |
+
+And Solid Memo Studio, where deck authors write and publish decks and
+courses, on a desktop's screen:
+
+![Solid Memo Studio on a desktop's screen: a sidebar of sections and decks, a table of the instance's decks with their settings and counts, and the deck picked in it described in a panel beside it.](apps/web/public/screenshots/studio.png)
 
 To see what the app does without signing in, open the report of its
 [user journeys](https://solid-memo.com/journeys/): tests that use the
