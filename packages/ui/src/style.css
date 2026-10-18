@@ -440,60 +440,6 @@ main.workspace {
   margin: 0;
 }
 
-/* An on/off switch (ui/Switch.tsx): a track with a knob, on the left when off, on the right when on. */
-.switch {
-  position: relative;
-  width: 2.75rem;
-  min-height: 0;
-  height: 1.5rem;
-  padding: 0;
-  background: var(--border);
-  border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  box-shadow: none;
-}
-
-.switch:hover:not(:disabled) {
-  background: var(--border-strong);
-  transform: none;
-}
-
-.switch[aria-checked="true"] {
-  background: var(--masthead-bg);
-  border-color: var(--masthead-border);
-}
-
-.switch[aria-checked="true"]:hover:not(:disabled) {
-  background: var(--masthead-border);
-}
-
-.switch-knob {
-  position: absolute;
-  top: 50%;
-  left: 0.125rem;
-  display: grid;
-  place-items: center;
-  width: 1.15rem;
-  height: 1.15rem;
-  color: var(--accent-yellow);
-  background: var(--surface);
-  border-radius: 50%;
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-50%);
-  transition: left 0.15s ease;
-}
-
-.switch[aria-checked="true"] .switch-knob {
-  left: calc(100% - 1.275rem);
-  color: var(--masthead-blue);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .switch-knob {
-    transition: none;
-  }
-}
-
 /* The language list: a globe, then the language spoken now, named in itself. */
 .language-selector {
   display: flex;
