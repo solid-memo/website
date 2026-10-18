@@ -26,6 +26,7 @@ npm run coverage:summary   # the coverage the last tests measured, per package, 
 npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
 npm run lint:reuse         # reuse lint: every file states its copyright and license, as CI's docs job checks (needs reuse; not in npm run check)
+npm run lint:workflows     # actionlint and zizmor over .github/, as CI's workflows job runs them (needs them; not in npm run check)
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
 npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
@@ -493,6 +494,7 @@ jobs, side by side:
 | `contract (<server>)` | that each advisory server starts and meets the contract |
 | `journeys (<browsers>)` | the user journeys: every one in Chromium, and those that differ between engines in Firefox, WebKit and on a phone ([Browsers](#browsers)) |
 | `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
+| `workflows` | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
 | `caches` | nothing: on `main`, after `build`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
 | `ci-ok` | that every job above passed, `caches` aside |
@@ -562,7 +564,36 @@ pull request only.
 The job ids `pod` and `contract`, and their `matrix.server` lists, are
 read by [servers.test.ts](../e2e/pod/servers.test.ts), which checks that
 each workflow runs the servers [servers.ts](../e2e/pod/servers.ts) says
-it should; keep them when changing the workflow.
+it should; keep them when changing the workflow. The workflows are
+among the test's inputs (`e2e/pod/turbo.json`), so a change to a matrix
+alone runs it again.
+
+### The workflows
+
+CI's `workflows` job runs `npm run lint:workflows` over the workflows
+and the local actions in [.github/](../.github/):
+
+- [actionlint](https://github.com/rhysd/actionlint) checks their syntax,
+  their expressions' contexts and types, and, with
+  [shellcheck](https://www.shellcheck.net/), the shell of every `run:`.
+- [zizmor](https://docs.zizmor.sh/), offline, checks their security: an
+  expression written into a script, where a value could run as code
+  (passed to the script as an environment variable instead), a job given
+  rights it does not use, a trigger that runs with more rights than the
+  change that set it off. A finding that is meant stays, with a
+  `# zizmor: ignore[<audit>]` comment on its line that says why (the
+  `workflow_run` triggers of [deploy.yml](../.github/workflows/deploy.yml)
+  and [release.yml](../.github/workflows/release.yml), whose jobs act
+  only on CI's push runs on `main`); an audit turned off is in
+  [.github/zizmor.yml](../.github/zizmor.yml), with its reason.
+
+Neither is an npm package, so neither is part of `npm run check`: both
+are pinned in [requirements-lint.txt](../scripts/requirements-lint.txt),
+which Renovate updates, and `pip install -r scripts/requirements-lint.txt`
+installs them, or `uv run --no-project --with-requirements
+scripts/requirements-lint.txt npm run lint:workflows` runs them without
+installing them. That every action is pinned is `check:actions`'s, in
+`npm run check` ([The repository's own checks](#the-repositorys-own-checks)).
 
 ### Code scanning
 
@@ -662,16 +693,20 @@ CI's `docs` job:
   checks that those on the site's own domain, such as its
   `documentation`, are pages the build serves. Without one, the step
   says so and passes ([.github/actions/publiccode](../.github/actions/publiccode/action.yml)).
-- **Licenses**: [reuse](https://reuse.software/) (`fsfe/reuse-action`,
+- **Licenses**: [reuse](https://reuse.software/) (`npm run lint:reuse`,
   `reuse lint`) checks that every file in the repository states its
   copyright and license, in an SPDX header or in
   [REUSE.toml](../REUSE.toml), and that the text of every license used
   is in [LICENSES/](../LICENSES/) ([style.md](style.md#licenses)). The
-  job installs nothing, so only the repository's own files are there.
-  It is not part of `npm run check`, since reuse is a Python tool:
-  `npm run lint:reuse` runs it locally with reuse installed, or
-  `pipx run reuse lint` or `uv run --no-project --with reuse reuse lint`
-  without installing it.
+  job installs no npm packages, so only the repository's own files are
+  there. reuse is pinned in
+  [requirements-lint.txt](../scripts/requirements-lint.txt), from PyPI,
+  not as a Docker image, which Docker Hub's limit on pulls without an
+  account, shared by the runners, could refuse. It is not part of
+  `npm run check`, since reuse is a Python tool:
+  `pip install -r scripts/requirements-lint.txt` installs it, or
+  `uv run --no-project --with-requirements scripts/requirements-lint.txt reuse lint`
+  runs it without installing it.
 
 That every page is listed in the index is `npm run check`'s
 (`check:docs`, above).
@@ -757,7 +792,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 | The docs as a site (`packages/markdown/tooling/`) | an injected `Io` and `draw`, a fake browser | `docsSite.test.ts` renders docs held in memory: each kind of link from the README and from a page, and that no address starts with `/`; every problem, with its file and line; escaping; the page's frame, the figure and the figure without drawings; the font's license beside the drawings and in the footer of a page with a figure; and an archive; and that every page it writes passes `checkPage`, which refuses what a page is not written as. It also renders the repository's own `docs/` with a fake `draw` and checks that each page has as many links, tables and figures as its source, so a docs edit that breaks a link fails `npm run check` (the task's inputs hold `docs/` and the Markdown at the root). `publishDocs.test.ts` runs the Vite plugin's build hook and its dev server's middleware with a fake browser ([markdown.md](markdown.md#the-docs-as-a-site)). |
 | A release's docs as an archive (`scripts/docsArchive.ts`) | an injected `Io` and `draw` | `docsArchive.test.ts` packs the repository's own `docs/` with a `draw` that makes drawings as `drawDiagrams` does, with the system's `tar`, and lists and unpacks the archive: every entry under `docs/`, in order, the font's license among them and the list of versions not, every drawing safe to serve (`checkSvg`) and carrying the font's notice, and a page linking the release's tag and never indexed. Nothing is written when the diagrams were not drawn, a drawing is unsafe or lacks the notice, or the docs have problems. The script's own `draw` is held to drawing in Chromium under `DOCS_DIAGRAMS=skip` too, and its repository address to `apps/web`'s `.env` files, as the site's build reads them ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). |
 | Each release's docs, served by the deploy (`scripts/docsVersions.ts`) | an injected `Io`: the environment, GitHub's API in memory, and the attestation check | `docsVersions.test.ts` packs a release's docs as `renderDocsSite` writes an archive, with the system's `tar`, and serves it from a fake API, a hundred releases a page: it is unpacked under `docs/X.Y.Z/` of a built site, a draft's or a missing archive is a notice, and the list of versions is written over the build's, every tag newest first. An archive is left out, with an error, when someone else uploaded it, it has no digest or another one, its address is off the API, it cannot be downloaded, GitHub holds no attestation of it (asked of the bytes downloaded, before anything is unpacked; the default check runs `gh attestation verify` for the release workflow on `main`, tried with a fake `gh`), or it is not an archive, or it holds a link, a file outside `docs/` or of another kind, a file twice, no front page, drawings without the font's license, or a page, stylesheet or drawing that its check refuses; and when its folder is in the build already. An API that cannot be read leaves every version linked in the repository. The script asks for its folder, `DOCS_TAGS` and a repository on GitHub ([deployment.md](deployment.md#each-releases-docs)). |
-| The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the site as `vite build` does, without writing it, and checks the bundle has no HTML sink but Preact's own, the [Studio](studio.md) is a chunk the page loads only lazily, what the page loads up front (its entry and the chunks that imports) is at most `UP_FRONT_BUDGET_KB` of JavaScript gzipped (573 kB in October 2026, against 600; past it, the test names the largest modules, and a change that needs the weight raises the budget, saying why), and the page's Content Security Policy still lets its inline script run ([markdown.md](markdown.md#safety)). It also checks the docs the build publishes: a page for each `docs/*.md`, each with the docs' policy before anything it loads, no script, style or event handler, one heading of level 1, a title, a description, its canonical address and ids of its own, `docs.css` its one stylesheet; no address from the site's root or to a Markdown file; every link leading to a heading, a page or file of the site, a file or folder of the repository at the commit built, or an http(s) address; a figure for each Mermaid block, its light and dark drawings safe to serve (`checkSvg`) and carrying the font's notice; the font's license beside them, as the package has it; the sitemap listing every page; and every address `publiccode.yml` names on the site's domain, its `documentation` among them, a page the build serves. It draws in the real Chromium, as the build does; under `DOCS_DIAGRAMS=skip` it checks that every figure shows its source instead, and nothing is drawn. The task's inputs hold `docs/`, `ns/`, `decks/`, `CNAME` and the root's `package.json`, which the build reads, and `publiccode.yml`. |
+| The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the site as `vite build` does, without writing it, and checks the bundle has no HTML sink but Preact's own, the [Studio](studio.md) is a chunk the page loads only lazily, what the page loads up front (its entry and the chunks that imports) is at most `UP_FRONT_BUDGET_KB` of JavaScript gzipped (573 kB in October 2026, against 600; past it, the test names the largest modules, and a change that needs the weight raises the budget, saying why), and the page's Content Security Policy still lets its inline script run ([markdown.md](markdown.md#safety)). It also checks the docs the build publishes: a page for each `docs/*.md`, each with the docs' policy before anything it loads, no script, style or event handler, one heading of level 1, a title, a description, its canonical address and ids of its own, `docs.css` its one stylesheet; no address from the site's root or to a Markdown file; every link leading to a heading, a page or file of the site, a file or folder of the repository at the commit built, or an http(s) address; a figure for each Mermaid block, its light and dark drawings safe to serve (`checkSvg`) and carrying the font's notice; the font's license beside them, as the package has it; the sitemap listing every page; and every address `publiccode.yml` names on the site's domain, its `documentation` among them, a page the build serves. It draws in the real Chromium, as the build does; under `DOCS_DIAGRAMS=skip` it checks that every figure shows its source instead, and nothing is drawn. The task's inputs hold `docs/`, `ns/`, `decks/`, `CNAME` and the root's `package.json`, which the build reads, `publiccode.yml`, and the Markdown at the root, whose headings the docs' links lead to. |
 | Generated code | drift test | `packages/vocab/tooling/generate.test.ts` renders the generators' output and compares it with the committed files; generated modules are data only, so importing them covers them (`packages/vocab/src/generated.test.ts`). |
 | End to end | real Solid servers | `e2e/pod/` wires the real use cases and Solid adapters as `createAppUseCases` does, over a fetch that records every request, against Community Solid Server 7 and 6 and node-solid-server 6 and 5. |
 | User journeys | the built app in a browser | `e2e/journeys/` drives the app in Chromium (Playwright) through whole journeys, logging in at a real identity provider (Community Solid Server 7 behind TLS) ([User journeys](#user-journeys)). |

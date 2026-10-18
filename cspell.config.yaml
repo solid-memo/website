@@ -157,6 +157,7 @@ words:
   - roughjs
   - sankey
   - Segoe
+  - shellcheck
   - skohub
   - solidcommunity
   - solidproject
@@ -165,6 +166,7 @@ words:
   - Woźniak
   - Zazuko
   - Zenodo
+  - zizmor
   # Solid Memo's own words, and words of the trade
   - automerges
   - automerging

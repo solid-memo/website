@@ -19,18 +19,18 @@ name: Deploy to GitHub Pages
 # so the job checks that CI ran for a push, in this repository.
 
 on:
-  workflow_run:
+  workflow_run: # zizmor: ignore[dangerous-triggers] the jobs act only on CI's push runs on main, in this repository
     workflows: [CI]
     types: [completed]
     branches: [main]
   workflow_dispatch:
 
+# What every job may read. Only the jobs that publish to GitHub Pages
+# may write to it, each saying so: a job's permissions replace these.
 permissions:
   contents: read
   # To download the user journeys' report from the CI run.
   actions: read
-  pages: write
-  id-token: write
   # To check that the release workflow made each release's docs archive.
   attestations: read
 
@@ -156,6 +156,12 @@ jobs:
     needs: version
     if: needs.version.outputs.sha != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      attestations: read
+      # To set up GitHub Pages, before the artifact is uploaded.
+      pages: write
     # A run by hand checks first, with no Turbo cache: as long as CI's build.
     timeout-minutes: 30
     steps:
@@ -232,6 +238,12 @@ jobs:
   deploy:
     needs: [version, build]
     runs-on: ubuntu-latest
+    # To deploy the artifact to GitHub Pages, which proves the run is this
+    # workflow's with an OIDC token.
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     timeout-minutes: 10
     environment:
       name: github-pages

@@ -563,8 +563,9 @@ What holds today, and what does not, criterion by criterion.
   CI runs on every pull request, in the merge queue and on every push to
   `main`, and `ci-ok` passes only when all its jobs did: `build`,
   `library` (the deck library and the public API compared with the
-  change's base), `crosscheck`, `pod`, `contract`, `journeys`, `docs` and
-  `commits` (commitlint and the closing keyword, on a pull request's
+  change's base), `crosscheck`, `pod`, `contract`, `journeys`, `docs`,
+  `workflows` (actionlint and zizmor over the workflows) and `commits`
+  (commitlint and the closing keyword, on a pull request's
   commits). The ruleset requires `ci-ok`, on the pull request and again
   in the merge queue, on top of `main` and the pull requests ahead of
   it. Its bypass list names only "Deploy keys", for the release:

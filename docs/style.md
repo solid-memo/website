@@ -194,9 +194,10 @@ in [checkReuse.ts](../scripts/checkReuse.ts) and its text in
 `reuse lint` checks that every file in the repository has both, in CI's
 docs job ([testing.md](testing.md#documentation)), not in
 `npm run check`; `npm run lint:reuse` runs it locally with
-[reuse](https://reuse.software/) installed (`pipx install reuse`), and
-`pipx run reuse lint` or `uv run --no-project --with reuse reuse lint`
-run it without installing it.
+[reuse](https://reuse.software/) installed, at the version CI pins
+(`pip install -r scripts/requirements-lint.txt`), and
+`uv run --no-project --with-requirements scripts/requirements-lint.txt reuse lint`
+runs it without installing it.
 
 ## Docs
 

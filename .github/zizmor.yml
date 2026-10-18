@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# zizmor's audits of the workflows and actions (npm run lint:workflows,
+# docs/testing.md#the-workflows).
+rules:
+  # A local action is named `./.github/actions/<name>`, not by GitHub's
+  # self-repository syntax (`$/.github/actions/<name>`): actionlint does
+  # not read that syntax yet, and refuses it.
+  self-repository:
+    disable: true

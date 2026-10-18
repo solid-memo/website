@@ -244,7 +244,9 @@ jobs:
           key: ${{ steps.key.outputs.key }}
       - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
+        env:
+          FILE: ${{ steps.images.outputs.file }}
+        run: node e2e/pod/images.ts save "$FILE" e2e/pod/servers/${{ matrix.server }}/compose.yml
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         continue-on-error: true
@@ -290,7 +292,9 @@ jobs:
           key: ${{ steps.key.outputs.key }}
       - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
+        env:
+          FILE: ${{ steps.images.outputs.file }}
+        run: node e2e/pod/images.ts save "$FILE" e2e/pod/servers/${{ matrix.server }}/compose.yml
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         continue-on-error: true
@@ -361,7 +365,9 @@ jobs:
           key: ${{ hashFiles('e2e/journeys/css/compose.yml') }}
       - run: npm run css:prepare -w @solid-memo/e2e-journeys
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/journeys/css/compose.yml
+        env:
+          FILE: ${{ steps.images.outputs.file }}
+        run: node e2e/pod/images.ts save "$FILE" e2e/journeys/css/compose.yml
       - if: steps.images.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         continue-on-error: true
@@ -394,7 +400,10 @@ jobs:
   # file states its copyright and license, as REUSE has it (`reuse lint`,
   # docs/style.md#licenses). The Markdown's style and spelling are
   # npm run check's, in build. None of these tools is an npm package, so
-  # the job installs none.
+  # the job installs no npm packages: reuse comes from PyPI, pinned in
+  # scripts/requirements-lint.txt, not as fsfe/reuse-action's Docker
+  # image, which Docker Hub's limit on pulls without an account, shared
+  # by the runners, could refuse, and which names its image by a tag.
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -402,9 +411,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # With nothing installed, only the repository's own files are there
-      # to check, whether or not reuse reads .gitignore in its container.
-      - uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.15"
+          cache: pip
+          cache-dependency-path: scripts/requirements-lint.txt
+      # pip installs outside the checkout, so only the repository's own
+      # files are there to check.
+      - run: pip install -r scripts/requirements-lint.txt
+      - run: npm run lint:reuse
       - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: --offline '**/*.md'
@@ -413,6 +428,27 @@ jobs:
       - uses: ./.github/actions/publiccode
         with:
           network: "false"
+
+  # The workflows and actions themselves (docs/testing.md#the-workflows):
+  # actionlint checks their syntax, expressions and shell (with
+  # shellcheck), zizmor their security, such as an expression written
+  # into a script or a job given more rights than it uses. Offline:
+  # zizmor's audits that ask GitHub's API are left out. Both are Python
+  # packages, pinned in scripts/requirements-lint.txt.
+  workflows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.15"
+          cache: pip
+          cache-dependency-path: scripts/requirements-lint.txt
+      - run: pip install -r scripts/requirements-lint.txt
+      - run: npm run lint:workflows
 
   # A pull request's commits follow Conventional Commits
   # (CONTRIBUTING.md#commit-messages), as commitlint.config.mjs has them:
@@ -492,7 +528,7 @@ jobs:
   # stays.
   ci-ok:
     if: always()
-    needs: [build, library, crosscheck, pod, contract, journeys, docs, commits]
+    needs: [build, library, crosscheck, pod, contract, journeys, docs, workflows, commits]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

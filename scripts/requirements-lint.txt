@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# The linters CI's workflows and docs jobs run, none of them an npm
+# package: pinned here, so Renovate updates them like any other
+# dependency, and `pip install -r scripts/requirements-lint.txt` installs
+# them locally (docs/testing.md#the-workflows, docs/style.md#licenses).
+
+# npm run lint:workflows: the workflows' and actions' expressions and
+# shell (actionlint, with shellcheck), and their security (zizmor).
+actionlint-py==1.7.12.25
+shellcheck-py==0.11.0.1
+zizmor==1.30.1
+
+# npm run lint:reuse: every file states its copyright and license
+# (docs/style.md#licenses).
+reuse==6.2.0
