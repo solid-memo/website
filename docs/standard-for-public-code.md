@@ -879,7 +879,7 @@ changes:
 - **Done.** **ROADMAP.md.** "Done recently" stops at 1.0.0; add what 1.0.1 to
   2.1.1 brought, such as the merge queue, the breaking-change gate and
   the Arabic decks. *(4)*
-- **Open.** **The user guide.** Say that the library has Arabic decks and that
+- **Done.** **The user guide.** Say that the library has Arabic decks and that
   text written right to left keeps its direction, alongside the
   examples criterion 9 already lacks. *(9)*
 

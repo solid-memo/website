@@ -64,7 +64,10 @@ The first screen offers three ways in
   top says so, with "Keep my study: log in" and "Discard". When you log
   in later, Solid Memo offers to move your study into your Pod: added to
   an instance you have, or as a new one. You can also discard it, or
-  decide later ([guest-mode.md](guest-mode.md)).
+  decide later ([guest-mode.md](guest-mode.md)). For example: try it
+  as a guest, add a deck from the library and study a few cards. Then
+  log in, choose to move your study into a new instance, and the cards
+  you studied are in your Pod, each where you left it.
 - **Connect your Pod.** Type your WebID and press "Log in with Solid",
   or pick your provider from the list under it. You log in on the
   provider's page and come back to Solid Memo, which reads your profile
@@ -203,7 +206,11 @@ All of this is described in [browsing.md](browsing.md).
 
 **Deck library**, under the deck list, lists ready-made decks
 ([deck-library.md](deck-library.md#in-the-app)). Search by name,
-description or keyword, or narrow the list to topics.
+description or keyword, or narrow the list to topics. Many of the decks
+teach a language: Arabic, English, Finnish, French, German, Italian,
+Japanese, Korean, Portuguese, Spanish and Swedish. There are four
+Arabic decks: Basic Arabic and the most common nouns, verbs and
+adjectives.
 
 - Click a deck to read about it: what it covers, who made it, its
   license and sources. From there, **Browse cards** lists its cards.
@@ -340,23 +347,47 @@ name, its description and a card can have translations, and you see
 the one in your language when there is one. A deck's page says when
 some of its text does not say its language, with a link to settle it.
 
+Text in a language written right to left, such as Arabic, runs right to
+left: on a card, in a deck's name, and inside a sentence in English
+too, where it keeps its own direction and the sentence keeps its
+punctuation in place. A card's text in Arabic starts at the right. The
+screens themselves stay left to right, since none of the app's own
+languages is written right to left.
+
 ## Theme
 
 The sun and moon button at the top switches between light and dark.
 Under Appearance in the preferences, "As my browser" follows your
-device's setting ([theme.md](theme.md)).
+device's setting ([theme.md](theme.md)). For example: switch to dark,
+then press Save in the preferences. Log in on another device, and Solid
+Memo opens in dark there too, since the choice is kept in your Pod.
 
 ## More than one instance
 
 "Switch instance", in the instance bar, lists your instances: open
 one, create a new one, attach one by its address, or delete one.
 
+For example, to keep your language decks apart from your work decks:
+press "Switch instance", create a new instance in another folder of
+your Pod, and add decks to it. It starts empty, with its own decks and
+its own study. "Switch instance" takes you back to the first one, and
+with two instances, Solid Memo asks which to open when you come back.
+
 ## Solid Memo Studio
 
 "Open in Studio", in the instance bar, on a deck's page or in a deck's
 menu, opens Solid Memo Studio: a second app, for managing many decks and cards at once
 and for writing decks and courses to publish
-([studio.md](studio.md)).
+([studio.md](studio.md)). Its search finds an Arabic word with or
+without its vowel marks: كتاب finds كِتَاب.
+
+Its **Import and export** saves decks as files and makes decks of
+files ([studio.md](studio.md#import-and-export)). For example: check a
+deck, choose Turtle, check "Include my progress" and press "Export 1
+deck": your browser saves the deck as a file. Later, or in another
+instance, "Choose a file…" under Import reads that file and says what
+it holds. Leave "Import the progress too" checked and press "Import
+into", and the file becomes a new deck, with your progress.
 
 ## The journeys
 
@@ -385,3 +416,6 @@ screenshot of each.
 | Trying the app as a guest, and moving the study into a pod | [guest.journey.ts](../e2e/journeys/journeys/guest.journey.ts) | 02–11 |
 | Copying a library deck's link, and opening it in another browser as a guest | [try-link.journey.ts](../e2e/journeys/journeys/try-link.journey.ts) | 02–05 |
 | A screen that breaks: Something went wrong, its details and its report | [render-error.journey.ts](../e2e/journeys/journeys/render-error.journey.ts) | 02–06 |
+| The dark theme, kept in the Pod and found on a second device | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 03–04, 08–10 |
+| A second instance, and switching between the two | [second-instance.journey.ts](../e2e/journeys/journeys/second-instance.journey.ts) | 04–08 |
+| Exporting a deck as a file and importing it again, with its progress | studio.journey.ts, first journey | 21–23 |
