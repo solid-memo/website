@@ -140,15 +140,15 @@ send them.
 
 ## What the project has published
 
-The library's deck versions name who compiled them. Each published
-version so far names the maintainer, Anton Wiklund, as its creator,
-with his email address as `foaf:mbox`, and the library's index repeats
-it. A published version is never edited
-([deck-library.md](deck-library.md#a-version)), so those versions keep
-it. Future versions name a project contact instead: a
-`dcat:contactPoint` that points at the
+The library's deck versions name who compiled them. The first 205
+published versions name the maintainer, Anton Wiklund, as their
+creator, with his email address as `foaf:mbox`. A published version is
+never edited ([deck-library.md](deck-library.md#a-version)), so those
+versions keep it. Every version since names a project contact instead:
+a `dcat:contactPoint` that points at the
 [issue tracker](https://github.com/solid-memo/website/issues), with no
-personal email address.
+personal email address ([deck-library.md](deck-library.md#contact)).
+The library's index gives no email address.
 
 The maintainer's email address is also published, on purpose, in
 [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md#enforcement), as the private
