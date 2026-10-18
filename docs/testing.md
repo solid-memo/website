@@ -606,7 +606,9 @@ ends with checks of the repository as a whole, plain Node scripts in
   and every page the index lists is there; no two positions in a group
   are tied, and every page has a summary in English
   ([markdown.md](markdown.md#the-docs-index)). For a page the index
-  does not list, it prints the block to add.
+  does not list, it prints the block to add. And every `npm run <script>`
+  in the repository's Markdown, `CHANGELOG.md` aside, names a script of
+  the root `package.json`, or of the workspace it names with `-w`.
 - `check:dependencies` ([checkDependencies.ts](../scripts/checkDependencies.ts)):
   the app ships released versions of other code only, or the exceptions
   [vendor-code.md](vendor-code.md#maturity) explains.
@@ -782,4 +784,5 @@ graph LR
   and `fixtures/` (through `VOCAB_ROOT`): they are the fixtures.
 - Preact-compat note: `@tanstack/react-query` must be inlined in the vitest
   server deps so the `react → preact/compat` alias applies (see
-  `apps/web/vite.config.ts`).
+  `apps/web/vitest.config.ts`, `apps/studio/vitest.config.ts` and
+  `packages/ui/vitest.config.ts`).

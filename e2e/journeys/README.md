@@ -1,6 +1,7 @@
 # @solid-memo/e2e-journeys
 
-The user journeys: the built app in Chromium, driven by
+The user journeys: the built app in Chromium, and a few of them in
+Firefox, WebKit and on a phone (`playwright.config.ts`), driven by
 [Playwright](https://playwright.dev/) through whole journeys a user
 takes, logging in to a Community Solid Server 7 started in Docker
 ([testing.md](../../docs/testing.md#user-journeys)).

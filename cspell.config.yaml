@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 
 # cspell's settings for the project's prose (docs/style.md#language,
-# docs/testing.md#documentation): `npm run lint:spelling`, and CI's docs
-# job. American English is the one standard, so a British spelling
+# docs/testing.md#documentation): `npm run lint:spelling`, in npm run
+# check (CI's build job). American English is the one standard, so a British spelling
 # (licence, catalogue, colour) fails like a typo.
 version: "0.2"
 language: en-US
