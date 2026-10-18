@@ -1045,6 +1045,22 @@
   margin: 0;
 }
 
+/*
+ * What has the focus in a table is scrolled into sight clear of what
+ * sticks over it: the header row, the first column and the bar of the
+ * rows selected, as far in as the table measures they reach as the
+ * focus comes in (shell/stickyClearance.ts). The first column sticks to the left
+ * edge, whatever the direction of the text. On a narrow screen the
+ * table scrolls sideways in its own box.
+ */
+:root[data-surface="studio"] main.workspace {
+  scroll-padding: var(--s-sticky-top, 0) 0 var(--s-sticky-bottom, 0) var(--s-sticky-start, 0);
+}
+
+:root[data-surface="studio"] main .studio-table {
+  scroll-padding-left: var(--s-sticky-start, 0);
+}
+
 /* A dialog's form: a field a line, under its label. */
 :root[data-surface="studio"] .studio-dialog form label {
   display: block;

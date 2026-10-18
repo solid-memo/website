@@ -71,8 +71,11 @@ const COURSE = {
  * keeps the series' rules, lists the card retired, and a learner's copy
  * would retire it too, losing nothing. They say how the course was made,
  * then publish it to their pod, saying it will be public: someone with no
- * login reads it, and the releases list it. They go back to Solid Memo,
- * still logged in, which lists the deck they made that is left.
+ * login reads it, and the releases list it. They move down the library
+ * deck's cards with the keyboard and back, one selected: the row with
+ * the focus stays in sight between the header row and the bar of the
+ * rows selected, which stick. They go back to Solid Memo, still logged
+ * in, which lists the deck they made that is left.
  */
 test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({
   app,
@@ -468,7 +471,15 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     },
   );
 
-  await app.step("36 · Go back to Solid Memo, still logged in", async () => {
+  await app.step(
+    "36 · Move down the library deck's cards with the keyboard and back, one selected: each row in sight between the header row and the bar",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.moveThroughCardsInSight(renamed, BRIGHTEST_STARS.en, 30);
+    },
+  );
+
+  await app.step("37 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);

@@ -116,7 +116,10 @@ It takes the whole window, and the window does not scroll:
   tabs of the deck or draft shown, then the screen. A table's header
   row stays in sight as it scrolls, and a table too wide for it scrolls
   it sideways; on a narrow screen such a table scrolls sideways in its
-  own box.
+  own box. What has the focus in a table is scrolled clear of the parts
+  that stick over it, its header row, its first column and the bar of
+  the rows selected, so none of them hides it
+  ([`shell/stickyClearance.ts`](../apps/studio/src/ui/shell/stickyClearance.ts)).
 - **The aside**, right of the main content, a complementary region
   named for what it shows: on a course draft's screens, its
   [outline](#the-outline), but on the overview, which shows the outline
@@ -355,7 +358,11 @@ the question. Enter and Escape that an input method takes, to end or
 drop a syllable it composes (Korean, say), are the input method's.
 A side's field is marked with the side's language, as the full form's
 is: an Arabic side reads right to left, in its font, and a screen
-reader and the spellcheck take it as Arabic. Nothing is saved unasked.
+reader and the spellcheck take it as Arabic. The names of the button
+and the field are put together from the page's text with
+`aria-labelledby`, not given as one `aria-label` string, so the deck's
+or card's name and the cell's text in them are marked with their
+languages too ("Back of كتاب: Book"). Nothing is saved unasked.
 
 **Saved views.** Beside a table's own views (Home's and the
 workbench's, [below](#home)), **+ Save view** saves the table's query

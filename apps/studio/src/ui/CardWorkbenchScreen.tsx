@@ -19,7 +19,7 @@ import type { CardEdit, CardEditPlan, SkipReason } from "@solid-memo/domain/card
 import { isMarkdown, type Card, type Deck } from "@solid-memo/domain/deck";
 import { CardRowBack, CardRowFront } from "@solid-memo/ui/CardFace";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
-import { cardName } from "@solid-memo/ui/DataText";
+import { cardName, cardNameText } from "@solid-memo/ui/DataText";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText, type I18n } from "@solid-memo/ui/i18n";
 import { paginate, Pager } from "@solid-memo/ui/Pager";
@@ -203,7 +203,8 @@ export function CardWorkbenchScreen({
   busy: boolean;
   error: ErrorText | null;
 }) {
-  const { t, tx, readerText, partLang, languageLabel, formatDate, formatMonth } = useI18n();
+  const { t, tx, readerText, readerLang, partLang, languageLabel, formatDate, formatMonth } =
+    useI18n();
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
   // Why the last side edited in its cell was not saved, until another is.
   const [refusal, setRefusal] = useState<SkipReason | null>(null);
@@ -279,10 +280,11 @@ export function CardWorkbenchScreen({
       return null;
     const tag = tags[0]!;
     return {
-      label: t("studio.inline.field", {
+      field: {
         column: t(`studio.cards.column.${side}`),
         row: cardName(card, readerText),
-      }),
+        rowLang: readerLang(cardNameText(card, readerText)),
+      },
       shown: card[side][tag]!,
       value: card[side][tag]!,
       lang: partLang(tag),

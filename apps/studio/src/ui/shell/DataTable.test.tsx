@@ -111,6 +111,28 @@ describe("DataTable", () => {
     expect(table()).not.toHaveClass("selectable");
   });
 
+  it("keeps what has the focus clear of what sticks, while the focus is in the table", () => {
+    const { container } = render(
+      <main>
+        <Harness />
+        <button type="button">Clear</button>
+      </main>,
+    );
+    const main = container.querySelector("main")!;
+    const top = () => main.style.getPropertyValue("--s-sticky-top");
+    // The test DOM lays nothing out: no room, but given.
+    fireEvent.focusIn(screen.getByRole("link", { name: "Venus" }));
+    expect(top()).toBe("0px");
+    fireEvent.focusOut(screen.getByRole("link", { name: "Venus" }), {
+      relatedTarget: screen.getByRole("link", { name: "Mars" }),
+    });
+    expect(top()).toBe("0px");
+    fireEvent.focusOut(screen.getByRole("link", { name: "Mars" }), {
+      relatedTarget: screen.getByRole("button", { name: "Clear" }),
+    });
+    expect(top()).toBe("");
+  });
+
   it("hides the caption from sight, when asked, but not from a screen reader", () => {
     render(<Harness selectable={false} captionHidden />);
     expect(table().querySelector("caption")).toHaveClass("visually-hidden");

@@ -19,6 +19,7 @@ import {
   type TableSort,
 } from "./tableModel";
 import { useRowKeys, type RowSelection } from "./useRowKeys";
+import { clearSticky, unclearSticky } from "./stickyClearance";
 
 /** A column of a DataTable: its key, its header, and each row's cell. */
 export interface Column<R> {
@@ -74,7 +75,8 @@ export const HiddenColumns = createContext<HiddenColumns | null>(null);
  * `onCursor`, the cursor's row, as the cursor moves. A table of another
  * (`keys` false: a card's answers beside its deck's cards) leaves the
  * keys to it. Its header row, and its first column, stay in sight as
- * the page scrolls (studio.css).
+ * the page scrolls (studio.css), and what has the focus is scrolled
+ * clear of them, and of the bar of the rows selected (stickyClearance).
  */
 export function DataTable<R>({
   caption,
@@ -186,6 +188,12 @@ export function DataTable<R>({
       )}
       <div class="studio-table">
         <table
+          // What has the focus kept clear of what sticks over it (stickyClearance).
+          onFocusIn={(event) => clearSticky(event.currentTarget, event.target as Element)}
+          onFocusOut={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+              unclearSticky(event.currentTarget);
+          }}
           class={[
             "studio-list",
             "studio-data-table",

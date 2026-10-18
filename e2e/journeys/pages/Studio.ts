@@ -140,8 +140,11 @@ export class Studio extends Screen {
       await expect(await cell("group")).toHaveText(
         figures.group ?? this.t("studio.decks.topLevel"),
       );
+      // As seen: a cell edited in place holds its button's hidden name too.
       if (figures.newCardsPerDay !== undefined)
-        await expect(await cell("newCardsPerDay")).toHaveText(figures.newCardsPerDay);
+        await expect(await cell("newCardsPerDay")).toHaveText(figures.newCardsPerDay, {
+          useInnerText: true,
+        });
       await expect(await cell("due")).toHaveText(String(figures.due));
       await expect(await cell("cards")).toContainText(String(figures.cards));
     });
@@ -604,6 +607,57 @@ export class Studio extends Screen {
   }
 
   /**
+   * Moves the focus down the deck's cards with the keyboard, `moves` rows
+   * from the first, then back up: the first card selected, the bar of
+   * the rows selected shows at the foot of the main content, and the
+   * header row at its top, both sticking as the table, longer than the
+   * window, scrolls. After each move the row with the focus is in sight
+   * between them (WCAG 2.2's Focus Not Obscured). Escape then clears the
+   * selection.
+   */
+  async moveThroughCardsInSight(instance: string, deck: string, moves: number): Promise<void> {
+    await this.intent(
+      `Move down ${moves} of the cards of ${deck} and back, each in sight`,
+      async () => {
+        const name = new RegExp(escapeRegExp(this.t("studio.decks.cardsOf", { deck })));
+        await this.row(instance, deck).getByRole("link", { name }).click();
+        const table = this.cards(deck);
+        await expect(table.getByRole("rowheader").nth(moves)).toBeVisible();
+        await this.page.keyboard.press("j");
+        await expect(table.getByRole("rowheader").first().getByRole("link")).toBeFocused();
+        await this.page.keyboard.press("x");
+        await this.expectStatus(this.t("studio.cards.selected", { count: 1 }));
+        const bar = this.page.getByRole("group", { name: this.t("studio.cardBulk.label") });
+        const inSight = async (at: number) => {
+          const link = table.getByRole("rowheader").nth(at).getByRole("link");
+          await expect(link).toBeFocused();
+          const main = (await this.page.locator("main").boundingBox())!;
+          const header = (await table.locator("thead").boundingBox())!;
+          const foot = (await bar.boundingBox())!;
+          const row = (await link.boundingBox())!;
+          // Clear of the header row and the bar where they stick, and within the main content.
+          expect(row.y, `row ${at} under the header row`).toBeGreaterThanOrEqual(
+            Math.max(main.y, header.y + header.height) - 1,
+          );
+          expect(row.y + row.height, `row ${at} under the bar`).toBeLessThanOrEqual(
+            Math.min(main.y + main.height, foot.y) + 1,
+          );
+        };
+        for (let at = 1; at <= moves; at++) {
+          await this.page.keyboard.press("j");
+          await inSight(at);
+        }
+        for (let at = moves - 1; at >= 0; at--) {
+          await this.page.keyboard.press("k");
+          await inSight(at);
+        }
+        await this.page.keyboard.press("Escape");
+        await this.expectStatus(this.t("studio.cards.selected", { count: 0 }));
+      },
+    );
+  }
+
+  /**
    * Finds and replaces in the selected cards: the preview shows the text
    * before and after, and the status line says how many cards changed
    * once the user confirms.
@@ -639,9 +693,10 @@ export class Studio extends Screen {
       const row = this.cards(deck)
         .getByRole("row")
         .filter({ has: this.page.getByRole("rowheader", { name: front, exact: true }) });
+      // As seen: a cell edited in place holds its button's hidden name too.
       await expect(
         await cellOf(this.cards(deck), row, this.t("studio.cards.column.back")),
-      ).toHaveText(back);
+      ).toHaveText(back, { useInnerText: true });
     });
   }
 

@@ -13,6 +13,7 @@ import { choose } from "../test/choose";
 import { answer, dialog, pick } from "../test/dialogs";
 import { makeCard, makeDeck } from "../test/fixtures";
 import { WithKeys } from "../test/keys";
+import { named } from "../test/names";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const nouns = makeDeck("nouns", { en: "Nouns" });
@@ -592,7 +593,7 @@ describe("CardWorkbenchScreen", () => {
     render(<Harness onEdit={onEdit} />);
     // In Markdown: edited in the inspector.
     expect(within(table()).queryByRole("button", { name: /^Back of 水/ })).toBeNull();
-    fireEvent.click(within(table()).getByRole("button", { name: "Back of 木: Tree" }));
+    fireEvent.click(within(table()).getByRole("button", { name: named("Back of 木: Tree") }));
     const back = screen.getByRole("textbox", { name: "Back of 木" });
     expect(back).toHaveValue("Tree");
     // Left empty, the side is refused.

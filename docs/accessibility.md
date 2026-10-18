@@ -32,6 +32,11 @@ What the app does for it today:
   ([studio.md](studio.md#layout)).
 - **Shortcuts**: the Studio's single-key shortcuts can be turned off
   ([studio.md](studio.md#layout)).
+- **Focus in sight**: in the Studio, what has the focus in a table is
+  scrolled clear of the header row, the first column and the bar of the
+  rows selected, which stick over the table as it scrolls; the Studio
+  journey moves the focus down a long table and back and checks each
+  row is in sight ([studio.md](studio.md#layout)).
 
 ## Checked automatically
 
@@ -55,13 +60,17 @@ but the journeys:
   ([style.md](style.md#formatting)).
 - **Contrast**: unit tests check the contrast of muted text and of
   fields' edges on every surface, in both themes
-  ([`style.test.ts`](../packages/ui/src/style.test.ts)).
+  ([`style.test.ts`](../packages/ui/src/style.test.ts)), and of every
+  text color the Studio's stylesheet uses on every surface it uses, in
+  both themes, the surfaces that hold no text left out by name
+  ([`studio.test.ts`](../apps/studio/src/ui/studio.test.ts)).
 - **Names and roles**: the journeys and the component tests find
   elements by their role and accessible name, as assistive technology
   does, so a button that loses its name fails a test
   ([testing.md](testing.md#writing-a-journey)).
 - **Languages**: component tests check that a card's text, in its
-  fields too, is marked with its language.
+  fields too, is marked with its language, as are a deck's or card's
+  name and a cell's text in the names of the Studio's cells.
 
 ## Checked by hand
 
@@ -77,16 +86,17 @@ What a tool can't judge is checked by hand as a change is reviewed:
 
 ## Known gaps
 
-- **Language in accessible names**: a name built as one `aria-label`
-  string, such as the Studio's cell buttons ("Back of كتاب: Book"),
-  can't say the language of the deck's or card's text in it, so a
-  screen reader reads that text in the app's language.
-- **Contrast tests**: they cover some token pairs only, not every text
-  and surface pair in both themes, and not the Studio's own stylesheet.
-  axe checks the contrast of the screens the journeys visit.
-- **Focus under sticky parts**: in the Studio, the sticky header,
-  sticky columns and bulk bar can hide the row that has the focus.
-- **Screen readers**: no pass with a screen reader is written down.
+A gap that is planned links to its issue; the others have none yet,
+and an issue for one is welcome ([below](#report-a-barrier)).
+
+- **Contrast tests**: for the site's stylesheet they cover some token
+  pairs only, not every text and surface pair in both themes. axe
+  checks the contrast of the screens the journeys visit.
+- **Screen readers**: no pass with a screen reader, NVDA or VoiceOver,
+  through the main journeys is written down yet. It would find what
+  the checks above can't, such as whether a reader takes up the
+  languages marked inside the names of the Studio's cells
+  ([#169](https://github.com/solid-memo/website/issues/169)).
 - **Browsers**: every journey runs in Chromium, but only those that
   differ between engines run in Firefox, WebKit and on a phone
   ([testing.md](testing.md#browsers)), so axe sees the other screens

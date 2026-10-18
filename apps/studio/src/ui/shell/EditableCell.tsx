@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
+import { useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { composing } from "@solid-memo/ui/composing";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { UnsavedEdits } from "./unsavedEdits";
@@ -13,9 +13,13 @@ export const EDIT_CELL = "studio-edit-cell";
 
 /** How a table's cell is edited in place (EditableCell). */
 export interface CellEdit {
-  /** What the field is, its row's name with it ("New per day of Kanji N5"). */
-  label: string;
-  /** What the cell shows, as text, which its button says after the label. */
+  /**
+   * What the field is: its column, of its row ("New per day" of "Kanji
+   * N5"), the row's name marked with its language (`rowLang`) when not
+   * the page's, as the cell's text is with `lang`.
+   */
+  field: { column: string; row: string; rowLang?: string };
+  /** What the cell shows, as text, which its button says after the field. */
   shown: string;
   /** What the field starts with. */
   value: string;
@@ -28,6 +32,10 @@ export interface CellEdit {
   onSave: (value: string) => Promise<boolean>;
 }
 
+/** A text, in a span marked with its language when that is not the page's. */
+const marked = (text: string, lang: string | undefined) =>
+  lang === undefined ? text : <span lang={lang}>{text}</span>;
+
 /**
  * A cell of a Studio table edited in place (docs/studio.md, Editing in
  * a cell). Without `edit` it is what it shows (`children`). With it, a
@@ -35,6 +43,12 @@ export interface CellEdit {
  * number or its choice. A cell whose content is a link (`link`, a row's
  * name) has no button, and opens only from the keyboard: F2 on its row
  * opens the cell the focus is in, else the row's first (EDIT_CELL).
+ *
+ * The button and the field are named from the page's text (studio.inline),
+ * not by one aria-label string: the row's name and the cell's text in
+ * it are marked with their own languages, so that "Back of كتاب: Book"
+ * can be read with its Arabic in Arabic. The names are hidden, so they
+ * are neither seen, copied nor found on the page.
  *
  * Enter, or Save, saves (`onSave`), and the cell shows what it holds
  * again, the focus back on it; Escape, or Cancel, leaves the value as it
@@ -58,7 +72,8 @@ export function EditableCell({
   link?: boolean;
   children: ComponentChildren;
 }) {
-  const { t } = useI18n();
+  const { t, tx } = useI18n();
+  const nameId = useId();
   const report = useContext(UnsavedEdits);
   const cell = useRef<HTMLSpanElement>(null);
   const [editing, setEditing] = useState(false);
@@ -149,8 +164,12 @@ export function EditableCell({
     setValue(changed);
     setRefused(false);
   };
+  const fieldName = tx("studio.inline.field", {
+    column: edit.field.column,
+    row: marked(edit.field.row, edit.field.rowLang),
+  });
   const field = {
-    "aria-label": edit.label,
+    "aria-labelledby": nameId,
     "aria-invalid": refused || undefined,
     value,
     onKeyDown: keys,
@@ -162,15 +181,23 @@ export function EditableCell({
         {link ? (
           children
         ) : (
-          <button
-            type="button"
-            class="studio-cell-edit"
-            aria-label={t("studio.inline.cell", { field: edit.label, value: edit.shown })}
-            aria-keyshortcuts="F2"
-            onClick={start}
-          >
-            {children}
-          </button>
+          <>
+            <span id={nameId} hidden>
+              {tx("studio.inline.cell", {
+                field: fieldName,
+                value: marked(edit.shown, edit.lang),
+              })}
+            </span>
+            <button
+              type="button"
+              class="studio-cell-edit"
+              aria-labelledby={nameId}
+              aria-keyshortcuts="F2"
+              onClick={start}
+            >
+              {children}
+            </button>
+          </>
         )}
       </span>
     );
@@ -186,6 +213,9 @@ export function EditableCell({
           setEditing(false);
       }}
     >
+      <span id={nameId} hidden>
+        {fieldName}
+      </span>
       {edit.options !== undefined ? (
         <select {...field} onChange={(event) => typed(event.currentTarget.value)}>
           {edit.options.map((option) => (
