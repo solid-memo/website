@@ -1,0 +1,3056 @@
+@base <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix vcard:      <http://www.w3.org/2006/vcard/ns#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Famous movie quotes"@en ,
+                  "Kända filmcitat"@sv ,
+                  "유명한 영화 대사"@ko ,
+                  "Berühmte Filmzitate"@de ,
+                  "Frases célebres del cine"@es ,
+                  "Répliques célèbres du cinéma"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "95 well-known lines from films, one card per film, from Gone with the Wind and The Wizard of Oz (both 1939) to Mad Max: Fury Road (2015). Front: the line, in the language it is spoken in and not translated (94 in English, one in French); back: the film, under its title in each language, with a note naming who says the line, the actor and the year. Each line was checked against at least two written sources (for nearly all, Wikiquote and one of Wikipedia, a published screenplay or a transcript), not against the films themselves. A line that is usually misquoted is given as these sources record it, and a line that is also said in another film of the same story or franchise, such as a sequel or a remake, was left out. Titles and years are from Wikidata (some titles from the film's Wikipedia article), casts from Wikidata or from the film's Wikipedia or Wikiquote cast list. The deck’s own work is CC0; the lines are short quotations from the films, used to identify them, and are not covered by CC0."@en ,
+                        "95 välkända repliker ur filmer, ett kort per film, från Borta med vinden och Trollkarlen från Oz (båda 1939) till Mad Max: Fury Road (2015). Framsida: repliken på det språk den sägs på, oöversatt (94 på engelska, en på franska); baksida: filmen, under sin titel på varje språk, med en anteckning om vem som säger repliken, skådespelaren och året. Varje replik har kontrollerats mot minst två skriftliga källor (för nästan alla Wikiquote och en av Wikipedia, ett publicerat manus eller en transkription), inte mot filmerna själva. En replik som brukar felciteras återges som de här källorna har den, och en replik som också sägs i en annan film av samma berättelse eller serie, till exempel en uppföljare eller en nyinspelning, har utelämnats. Titlar och år kommer från Wikidata (vissa titlar från filmens artikel på Wikipedia), rollistor från Wikidata eller från filmens rollista på Wikipedia eller Wikiquote. Kortlekens eget arbete är CC0; replikerna är korta citat ur filmerna, som används för att identifiera dem, och omfattas inte av CC0."@sv ,
+                        "‘바람과 함께 사라지다’와 ‘오즈의 마법사’(둘 다 1939년)부터 ‘매드 맥스: 분노의 도로’(2015년)까지, 영화의 유명한 대사 95개를 영화마다 한 장씩 담았습니다. 앞면: 대사가 나오는 언어 그대로의 대사, 번역하지 않음(영어 94개, 프랑스어 1개); 뒷면: 각 언어의 제목으로 적은 영화와, 대사를 말하는 인물·배우·연도를 적은 메모. 모든 대사는 영화 자체가 아니라 문헌 두 개 이상과 대조했습니다(거의 모두 Wikiquote와 함께 위키백과, 출간된 각본, 대본 기록 중 하나). 흔히 잘못 인용되는 대사는 이 출처들에 기록된 대로 실었고, 속편이나 리메이크처럼 같은 이야기나 시리즈의 다른 영화에서도 나오는 대사는 뺐습니다. 제목과 연도는 Wikidata에서(일부 제목은 영화의 위키백과 문서에서), 출연진은 Wikidata나 영화의 위키백과·Wikiquote 출연진 목록에서 가져왔습니다. 이 덱의 자체 작업물은 CC0이며, 대사는 영화를 알아보게 하려고 쓴 짧은 인용으로 CC0에 포함되지 않습니다."@ko ,
+                        "95 bekannte Sätze aus Filmen, eine Karte pro Film, von Vom Winde verweht und Der Zauberer von Oz (beide 1939) bis Mad Max: Fury Road (2015). Vorderseite: der Satz in der Sprache, in der er gesprochen wird, unübersetzt (94 auf Englisch, einer auf Französisch); Rückseite: der Film unter seinem Titel in jeder Sprache, mit einer Notiz, wer den Satz sagt, wer ihn spielt und aus welchem Jahr der Film ist. Jeder Satz wurde mit mindestens zwei schriftlichen Quellen abgeglichen (fast immer Wikiquote und eine von Wikipedia, einem veröffentlichten Drehbuch oder einem Transkript), nicht mit den Filmen selbst. Ein Satz, der meist falsch zitiert wird, steht so da, wie diese Quellen ihn wiedergeben, und ein Satz, der auch in einem anderen Film derselben Geschichte oder Reihe fällt, etwa einer Fortsetzung oder einer Neuverfilmung, wurde weggelassen. Titel und Jahre stammen aus Wikidata (manche Titel aus dem Wikipedia-Artikel des Films), Besetzungen aus Wikidata oder aus der Besetzungsliste des Films in Wikipedia oder Wikiquote. Die eigene Arbeit des Stapels ist CC0; die Sätze sind kurze Zitate aus den Filmen, die sie kenntlich machen, und fallen nicht unter CC0."@de ,
+                        "95 frases conocidas del cine, una tarjeta por película, desde Lo que el viento se llevó y El mago de Oz (ambas de 1939) hasta Mad Max: Fury Road (2015). Anverso: la frase en el idioma en que se dice, sin traducir (94 en inglés, una en francés); reverso: la película, con su título en cada idioma, y una nota con quién dice la frase, el actor y el año. Cada frase se ha comprobado con al menos dos fuentes escritas (en casi todas, Wikiquote y una de Wikipedia, un guion publicado o una transcripción), no con las propias películas. Una frase que se suele citar mal aparece tal como la recogen estas fuentes, y se ha dejado fuera la que también se dice en otra película de la misma historia o saga, como una secuela o una nueva versión. Los títulos y los años proceden de Wikidata (algunos títulos, del artículo de la película en Wikipedia), y los repartos de Wikidata o de la lista de reparto de la película en Wikipedia o Wikiquote. El trabajo propio del mazo es CC0; las frases son citas breves de las películas, usadas para identificarlas, y no están cubiertas por CC0."@es ,
+                        "95 répliques célèbres de films, une carte par film, d’Autant en emporte le vent et Le Magicien d’Oz (tous deux de 1939) à Mad Max: Fury Road (2015). Recto : la réplique dans la langue où elle est dite, sans traduction (94 en anglais, une en français) ; verso : le film, sous son titre dans chaque langue, avec une note indiquant qui dit la réplique, l’acteur et l’année. Chaque réplique a été vérifiée sur au moins deux sources écrites (pour presque toutes, Wikiquote et l’une de Wikipédia, un scénario publié ou une transcription), non sur les films eux-mêmes. Une réplique souvent mal citée est donnée telle que ces sources la rapportent, et une réplique également dite dans un autre film de la même histoire ou saga, comme une suite ou un remake, a été écartée. Les titres et les années viennent de Wikidata (certains titres de l’article du film sur Wikipédia), les distributions de Wikidata ou de la liste de distribution du film sur Wikipédia ou Wikiquote. Le travail propre du paquet est sous CC0 ; les répliques sont de courtes citations des films, utilisées pour les identifier, et ne relèvent pas de CC0."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://www.wikipedia.org/> ,
+                        <https://en.wikiquote.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:film ;
+    dcat:keyword "movie quotes"@en ,
+                 "film quotes"@en ,
+                 "movies"@en ,
+                 "film history"@en ,
+                 "cinema"@en ,
+                 "filmcitat"@sv ,
+                 "repliker"@sv ,
+                 "film"@sv ,
+                 "filmhistoria"@sv ,
+                 "영화 대사"@ko ,
+                 "명대사"@ko ,
+                 "영화"@ko ,
+                 "영화 역사"@ko ,
+                 "Filmzitate"@de ,
+                 "Filme"@de ,
+                 "Filmgeschichte"@de ,
+                 "Kino"@de ,
+                 "frases de película"@es ,
+                 "películas"@es ,
+                 "historia del cine"@es ,
+                 "cine"@es ,
+                 "répliques de films"@fr ,
+                 "films"@fr ,
+                 "histoire du cinéma"@fr ,
+                 "cinéma"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#famous-movie-quotes> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#famous-movie-quotes> ;
+    dcat:contactPoint <#contact> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): each line researched against written sources and Wikidata,
+# re-checked independently, the titles taken from Wikidata by script, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://www.wikipedia.org/> ,
+              <https://en.wikiquote.org/> ,
+              <https://fr.wikiquote.org/wiki/La_Haine> ,
+              <https://imsdb.com/> ,
+              <https://www.springfieldspringfield.co.uk/> ,
+              <https://www.moviemistakes.com/> ,
+              <https://www.citation-celebre.com/citations/82615> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "Selection: the compiler's own choice of 119 candidate lines that are widely known on their own and each name one film, not a published ranking. The AFI's 100 Years…100 Movie Quotes list, through its English Wikipedia article, was used to check wording and speakers, not as the selection: 44 of the 95 lines are also on that list of 100, without its ranking, and the others are not, many from films it could not include (released from 2004 on, after its cutoff, or not American). A candidate was left out when its wording could not be confirmed in two written sources, or the form usually quoted is not what is said and the sources disagree on what is; when the line on the card is also said in another film of the same story (a sequel, a prequel, a remake, another film of the franchise or another film of the same play), or such a film could not be checked for it; a line that an unrelated film quotes in homage is kept (White Heat's in Ricochet, On the Waterfront's in Raging Bull); when the line is a song lyric or too common to name a film; or when the line as the sources record it differs by a word from the form usually quoted. One line per film: where a film had two candidates, the second was left out. 95 cards remain, 94 in English and one in French (La Haine)."@en ,
+                 "1. Wording: for each candidate the line was looked up on the film's English Wikiquote page through the MediaWiki API (the French Wikiquote for La Haine, with citation-celebre.com), and confirmed in at least one more written source: the film's English Wikipedia article or the Wikipedia article on the AFI list, a published screenplay on IMSDb, a subtitle transcript on Springfield! Springfield!, or Movie Mistakes. Three lines are not on their film's Wikiquote page and rest on two other written sources instead: Die Hard (the Springfield! Springfield! transcript and Movie Mistakes), The Wolf of Wall Street (the IMSDb screenplay and the transcript) and Se7en (the English Wikipedia article and the transcript). The lines were checked against these written sources, not against the films themselves. Where the sources differ in punctuation, the card follows the majority (\"Well, nobody's perfect!\", \"No. I am your father.\"); where the second source differs only by a filler word or a contraction, the card follows Wikiquote (\"life, uh... finds a way\", \"Why'd it have to be snakes?\"); where the famous form is a misquote, the card has what the sources record (\"Toto, I've a feeling we're not in Kansas anymore\", \"La-dee-da, la-dee-da\"). A line was shortened by leaving out whole sentences before or after it; two long passages are also cut at a clause and the cut marked with an ellipsis, to quote no more than names the film: Braveheart, from \"tell our enemies\", and La Haine, its first sentence and its last words. Straight quotation marks and apostrophes are used throughout. Pages consulted only for candidates that were left out are not listed among the sources, since nothing on the cards rests on them."@en ,
+                 "2. Speaker and film: the character and actor were taken from Wikidata's cast statements (P161 with the P453 character role qualifier), or from the film's Wikipedia or Wikiquote cast list, with the name the scene and the credits use (Maximus, not Wikidata's Maximus Decimus Meridius; Verbal Kint, who says the line, not his other identity Keyser Söze); a voiced character names its voice actor. The film's Wikidata item was checked to be a film (P31), and the year on the note is the year of its earliest publication date (P577)."@en ,
+                 "3. Titles: a script fetched each film's Wikidata labels in English, Swedish, Korean, German, Spanish and French (the multilingual label where a language has none), its Wikipedia sitelinks in those languages, P31 and P577, and compared the year with the research. The back is the Wikidata label in each language, with these departures: where the label differs from the title of the film's Wikipedia article in that language only in punctuation or capitalization, the article's title is used (Terminator 2 – Domedagen, Aliens – Återkomsten and År 2001 – ett rymdäventyr in Swedish, Harry el Sucio in Spanish, When Harry Met Sally... and Monty Python's Life of Brian in English); Titanic has no Spanish label, so the Spanish article's title is used; Star Wars and The Empire Strikes Back are given in every language under the titles of their first releases, as the Swedish, German and Korean labels have them, not the later episode titles (in English the titles of the English articles; in Spanish La guerra de las galaxias and El Imperio contraataca, and in French L'Empire contre-attaque, the first-release titles the Spanish and French articles give); and the article's title is used where the label is the original or an older title rather than the one readers know the film by (in Swedish Citizen Kane, not the 1940s release title En sensation, and Social Network; in Spanish El padrino II, the label being the English title, and Independence Day, the label lacking its accent, \"Dia de la independencia\"; in French Le Parrain, 2e partie, not Le Parrain 2; in Korean 몬티 파이튼과 성배, the standard spelling of the article, not 파이톤)."@en ,
+                 "4. Notes: \"<character> (<actor>), <year>\", in each language; the character's name as credited, in Latin script. Four notes are worded in each language: The Empire Strikes Back (Darth Vader, played by David Prowse and voiced by James Earl Jones), Field of Dreams (the voice is credited only as \"Himself\" and its actor is unconfirmed), Top Gun (said by two characters) and When Harry Met Sally... (the customer is credited as \"Older Woman Customer\"). The fronts' and backs' labels and the notes are the compiler's own wording."@en ,
+                 "Licensing: the deck's own work, the selection, the titles, years and casts, the labels and the notes, is released under CC0 1.0 like the rest of the library. Its content sources are Wikidata, whose structured data is CC0, and, for some titles and casts, facts from Wikipedia and Wikiquote: a film's title, used to name the film, and who plays whom are not anyone's protected expression. The lines on the fronts are short quotations from the films, which may be protected by their films' copyright, quoted to identify each film, which the back names; they are not covered by CC0, and REUSE.toml says so beside the deck's license. The lines are given as the sources record the films' dialogue; nothing of the sources' own, such as commentary, selection, transcription notes or layout, was copied. Wikiquote and Wikipedia (CC BY-SA), IMSDb, Springfield! Springfield!, Movie Mistakes and citation-celebre.com were used to verify wording, speakers and films."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-18T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Research: each candidate's wording, speaker, film and year, and whether the line is also said in another film"@en ;
+    rdfs:comment "Scope: all 119 candidates, in ten batches, each against Wikiquote, a second written source, Wikidata and the Wikiquote pages of sequels and remakes; six candidates whose pages could not be fetched at first (rate limits) were researched again in a second pass, and for five kept candidates (Dead Poets Society, The Shining, Citizen Kane, Some Like It Hot, Wall Street) the Wikidata item and year could not be fetched and were checked in round 1."@en ,
+                 "Outcome: 19 candidates were left out for the reasons under Selection (two more in round 1, one when the deck was built and one in round 3; White Heat, first left out, was brought back in round 4), besides two second lines for films that already had one; for the rest the wording was corrected to the sources where the proposal differed (for example \"No. I am your father.\", \"I'm simply saying that life, uh... finds a way.\", the whole sentence of the Braveheart speech, and the speaker of The Notebook's line, Noah, not Allie)."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-18T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Independent re-check: wording, other films, Wikidata item and year, speaker"@en ;
+    rdfs:comment "Scope: every line kept in round 0, re-checked from fresh fetches, with the research's sources shown but not relied on: the wording against Wikiquote and one other written source, a search for the line in other films, the Wikidata item and year, and the character and actor."@en ,
+                 "Outcome: two lines were left out (one is on neither its film's Wikiquote page nor its screenplay, the other is from a play filmed again later); some wordings were corrected (\"Well, nobody's perfect!\", the Truman Show line from \"In case\"), and the Field of Dreams voice was recorded as credited only as \"Himself\", its actor unconfirmed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-18T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks: titles, years and film items against Wikidata; the release against the library's shapes and DCAT-AP"@en ;
+    rdfs:comment "Scope: every card's Wikidata item (P31 film, earliest P577 year, labels and Wikipedia sitelinks in the six languages), and the built release with npm run library and npm run library:check (the app's SHACL and DCAT-AP validators)."@en ,
+                 "Outcome: every item is a film and every year agrees with the research; the departures from the Wikidata labels are listed under step 3. The release validates."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final review of the built release: language, cards, provenance"@en ;
+    rdfs:comment "Scope: the title, description, keywords, labels and worded notes in all six languages; every card's front, backs and note against the research record and the Wikidata labels and sitelinks, doubtful titles against each language's Wikipedia; every claim of the provenance against the research and re-check results and the sources' pages."@en ,
+                 "Outcome: fixed: one Swedish verb in the description; eight backs (the first-release titles of Star Wars and The Empire Strikes Back in Spanish and French, Citizen Kane and Social Network in Swedish, The Godfather Part II in Spanish and French, the Korean spelling of Monty Python); one card left out as too common; the description and steps 1 and 4 made exact (three lines not on Wikiquote, where casts come from, which other films count, the Field of Dreams credit); sources that decided wordings added to the record; and the scope of rounds 0 and 1 stated as it was."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing review: quotation, the sources' licenses and terms, copying, the record against what was done"@en ;
+    rdfs:comment "Scope: the deck's license and its exception for the quoted lines; quotation under US fair use, the EU quotation exception (Directive 2001/29/EC art. 5(3)(d)), Swedish and Korean copyright law; every source's license and terms of use; the deck's text against Wikiquote, Wikipedia and the AFI list for copying, and the overlap with the AFI list; every claim of the provenance against the research record."@en ,
+                 "Outcome: no source's license is breached: nothing of the sources' own expression is in the deck. Fixed: Braveheart's and La Haine's fronts cut to what names the film; REUSE.toml states that CC0 does not cover the quoted lines; the sources kept to those whose terms allow this use, each card resting on two of them (Springfield! Springfield!'s terms make its transcripts available for research including text and data mining; Movie Mistakes asks to be credited as a source); White Heat brought back, re-checked from Wikiquote, Wikipedia and the Springfield! Springfield! transcript, since the rule counts only films of the same story; and the record of casts, sources, the AFI overlap and the selection made exact."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata: the films' items, their labels in six languages, publication dates and cast" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\" Content source."@en .
+
+<https://www.wikipedia.org/>
+    dcterms:title "Wikipedia in English, Swedish, Korean, German, Spanish and French: the films' articles, and the English article on AFI's 100 Years...100 Movie Quotes" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the articles: \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\". Used to verify wording and speakers; some backs use an article's title, a film's title, and some casts are taken from its cast lists, which are facts; nothing of its own text copied."@en .
+
+<https://en.wikiquote.org/>
+    dcterms:title "English Wikiquote: the films' pages" ;
+    dcterms:creator "Wikiquote contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the pages: \"Text is available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.\" Used to verify wording and speakers; some casts are taken from its cast lists, which are facts; nothing of its own text copied."@en .
+
+<https://fr.wikiquote.org/wiki/La_Haine>
+    dcterms:title "French Wikiquote: La Haine" ;
+    dcterms:creator "Wikiquote contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the page: \"Les textes sont disponibles sous licence Creative Commons Attribution-partage dans les mêmes conditions ; d’autres conditions peuvent s’appliquer.\" Used to verify wording; nothing of its own copied."@en .
+
+<https://imsdb.com/>
+    dcterms:title "The Internet Movie Script Database (IMSDb): published screenplays" ;
+    dcterms:creator "IMSDb" ;
+    rdfs:comment "No license stated; the screenplays are the copyright of their owners. Used to verify wording; nothing of its own copied."@en .
+
+<https://www.springfieldspringfield.co.uk/>
+    dcterms:title "Springfield! Springfield!: subtitle transcripts of films" ;
+    dcterms:creator "Springfield! Springfield!" ;
+    rdfs:comment "No license stated; its terms (https://www.springfieldspringfield.co.uk/terms.php) make the transcripts available \"for research and educational purposes (including text mining, web mining, and data mining)\". Used to verify wording; nothing of its own copied."@en .
+
+<https://www.moviemistakes.com/>
+    dcterms:title "Movie Mistakes: film quotes" ;
+    dcterms:creator "Jon Sandys" ;
+    rdfs:comment "Footer of the pages: \"Design and text © 1996 - 2026 Jon Sandys. All rights reserved.\" Its terms ask that it be credited as a source of what is taken from it, as here. Used to verify wording; nothing of its own copied."@en .
+
+<https://www.citation-celebre.com/citations/82615>
+    dcterms:title "Citation Célèbre: Hubert's line in La Haine" ;
+    dcterms:creator "Fabien Branchut" ;
+    rdfs:comment "Footer of the page: \"2026 © - Auteur : Fabien Branchut\". Used to verify wording; nothing of its own copied."@en .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#casablanca>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Here's looking at you, kid."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Casablanca"@en ,
+                    "Casablanca"@sv ,
+                    "카사블랑카"@ko ,
+                    "Casablanca"@de ,
+                    "Casablanca"@es ,
+                    "Casablanca"@fr ;
+    solid-memo:backNote "Rick Blaine (Humphrey Bogart), 1942"@en ,
+                        "Rick Blaine (Humphrey Bogart), 1942"@sv ,
+                        "Rick Blaine (Humphrey Bogart), 1942"@ko ,
+                        "Rick Blaine (Humphrey Bogart), 1942"@de ,
+                        "Rick Blaine (Humphrey Bogart), 1942"@es ,
+                        "Rick Blaine (Humphrey Bogart), 1942"@fr .
+
+<#gone-with-the-wind>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Frankly, my dear, I don't give a damn."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Gone with the Wind"@en ,
+                    "Borta med vinden"@sv ,
+                    "바람과 함께 사라지다"@ko ,
+                    "Vom Winde verweht"@de ,
+                    "Lo que el viento se llevó"@es ,
+                    "Autant en emporte le vent"@fr ;
+    solid-memo:backNote "Rhett Butler (Clark Gable), 1939"@en ,
+                        "Rhett Butler (Clark Gable), 1939"@sv ,
+                        "Rhett Butler (Clark Gable), 1939"@ko ,
+                        "Rhett Butler (Clark Gable), 1939"@de ,
+                        "Rhett Butler (Clark Gable), 1939"@es ,
+                        "Rhett Butler (Clark Gable), 1939"@fr .
+
+<#the-godfather>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I'm gonna make him an offer he can't refuse."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Godfather"@en ,
+                    "Gudfadern"@sv ,
+                    "대부"@ko ,
+                    "Der Pate"@de ,
+                    "El padrino"@es ,
+                    "Le Parrain"@fr ;
+    solid-memo:backNote "Vito Corleone (Marlon Brando), 1972"@en ,
+                        "Vito Corleone (Marlon Brando), 1972"@sv ,
+                        "Vito Corleone (Marlon Brando), 1972"@ko ,
+                        "Vito Corleone (Marlon Brando), 1972"@de ,
+                        "Vito Corleone (Marlon Brando), 1972"@es ,
+                        "Vito Corleone (Marlon Brando), 1972"@fr .
+
+<#star-wars>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Help me, Obi-Wan Kenobi. You're my only hope."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Star Wars"@en ,
+                    "Stjärnornas krig"@sv ,
+                    "스타워즈"@ko ,
+                    "Krieg der Sterne"@de ,
+                    "La guerra de las galaxias"@es ,
+                    "La Guerre des étoiles"@fr ;
+    solid-memo:backNote "Princess Leia (Carrie Fisher), 1977"@en ,
+                        "Princess Leia (Carrie Fisher), 1977"@sv ,
+                        "Princess Leia (Carrie Fisher), 1977"@ko ,
+                        "Princess Leia (Carrie Fisher), 1977"@de ,
+                        "Princess Leia (Carrie Fisher), 1977"@es ,
+                        "Princess Leia (Carrie Fisher), 1977"@fr .
+
+<#the-empire-strikes-back>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "No. I am your father."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Empire Strikes Back"@en ,
+                    "Rymdimperiet slår tillbaka"@sv ,
+                    "제국의 역습"@ko ,
+                    "Das Imperium schlägt zurück"@de ,
+                    "El Imperio contraataca"@es ,
+                    "L'Empire contre-attaque"@fr ;
+    solid-memo:backNote "Darth Vader (David Prowse; voice: James Earl Jones), 1980"@en ,
+                        "Darth Vader (David Prowse; röst: James Earl Jones), 1980"@sv ,
+                        "Darth Vader (David Prowse, 목소리: James Earl Jones), 1980"@ko ,
+                        "Darth Vader (David Prowse; Stimme: James Earl Jones), 1980"@de ,
+                        "Darth Vader (David Prowse; voz: James Earl Jones), 1980"@es ,
+                        "Darth Vader (David Prowse ; voix : James Earl Jones), 1980"@fr .
+
+<#the-wizard-of-oz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Toto, I've a feeling we're not in Kansas anymore."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Wizard of Oz"@en ,
+                    "Trollkarlen från Oz"@sv ,
+                    "오즈의 마법사"@ko ,
+                    "Der Zauberer von Oz"@de ,
+                    "El mago de Oz"@es ,
+                    "Le Magicien d'Oz"@fr ;
+    solid-memo:backNote "Dorothy Gale (Judy Garland), 1939"@en ,
+                        "Dorothy Gale (Judy Garland), 1939"@sv ,
+                        "Dorothy Gale (Judy Garland), 1939"@ko ,
+                        "Dorothy Gale (Judy Garland), 1939"@de ,
+                        "Dorothy Gale (Judy Garland), 1939"@es ,
+                        "Dorothy Gale (Judy Garland), 1939"@fr .
+
+<#sunset-boulevard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "All right, Mr. DeMille, I'm ready for my close-up."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Sunset Boulevard"@en ,
+                    "Sunset Boulevard"@sv ,
+                    "선셋 대로"@ko ,
+                    "Boulevard der Dämmerung"@de ,
+                    "Sunset Boulevard"@es ,
+                    "Boulevard du crépuscule"@fr ;
+    solid-memo:backNote "Norma Desmond (Gloria Swanson), 1950"@en ,
+                        "Norma Desmond (Gloria Swanson), 1950"@sv ,
+                        "Norma Desmond (Gloria Swanson), 1950"@ko ,
+                        "Norma Desmond (Gloria Swanson), 1950"@de ,
+                        "Norma Desmond (Gloria Swanson), 1950"@es ,
+                        "Norma Desmond (Gloria Swanson), 1950"@fr .
+
+<#on-the-waterfront>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I coulda been a contender."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "On the Waterfront"@en ,
+                    "Storstadshamn"@sv ,
+                    "워터프론트"@ko ,
+                    "Die Faust im Nacken"@de ,
+                    "On the Waterfront"@es ,
+                    "Sur les quais"@fr ;
+    solid-memo:backNote "Terry Malloy (Marlon Brando), 1954"@en ,
+                        "Terry Malloy (Marlon Brando), 1954"@sv ,
+                        "Terry Malloy (Marlon Brando), 1954"@ko ,
+                        "Terry Malloy (Marlon Brando), 1954"@de ,
+                        "Terry Malloy (Marlon Brando), 1954"@es ,
+                        "Terry Malloy (Marlon Brando), 1954"@fr .
+
+<#taxi-driver>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "You talkin' to me?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Taxi Driver"@en ,
+                    "Taxi Driver"@sv ,
+                    "택시 드라이버"@ko ,
+                    "Taxi Driver"@de ,
+                    "Taxi Driver"@es ,
+                    "Taxi Driver"@fr ;
+    solid-memo:backNote "Travis Bickle (Robert De Niro), 1976"@en ,
+                        "Travis Bickle (Robert De Niro), 1976"@sv ,
+                        "Travis Bickle (Robert De Niro), 1976"@ko ,
+                        "Travis Bickle (Robert De Niro), 1976"@de ,
+                        "Travis Bickle (Robert De Niro), 1976"@es ,
+                        "Travis Bickle (Robert De Niro), 1976"@fr .
+
+<#apocalypse-now>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I love the smell of napalm in the morning."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Apocalypse Now"@en ,
+                    "Apocalypse"@sv ,
+                    "지옥의 묵시록"@ko ,
+                    "Apocalypse Now"@de ,
+                    "Apocalypse Now"@es ,
+                    "Apocalypse Now"@fr ;
+    solid-memo:backNote "Lt. Col. Bill Kilgore (Robert Duvall), 1979"@en ,
+                        "Lt. Col. Bill Kilgore (Robert Duvall), 1979"@sv ,
+                        "Lt. Col. Bill Kilgore (Robert Duvall), 1979"@ko ,
+                        "Lt. Col. Bill Kilgore (Robert Duvall), 1979"@de ,
+                        "Lt. Col. Bill Kilgore (Robert Duvall), 1979"@es ,
+                        "Lt. Col. Bill Kilgore (Robert Duvall), 1979"@fr .
+
+<#jaws>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "You're gonna need a bigger boat."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Jaws"@en ,
+                    "Hajen"@sv ,
+                    "죠스"@ko ,
+                    "Der weiße Hai"@de ,
+                    "Tiburón"@es ,
+                    "Les Dents de la mer"@fr ;
+    solid-memo:backNote "Martin Brody (Roy Scheider), 1975"@en ,
+                        "Martin Brody (Roy Scheider), 1975"@sv ,
+                        "Martin Brody (Roy Scheider), 1975"@ko ,
+                        "Martin Brody (Roy Scheider), 1975"@de ,
+                        "Martin Brody (Roy Scheider), 1975"@es ,
+                        "Martin Brody (Roy Scheider), 1975"@fr .
+
+<#terminator-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Hasta la vista, baby."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Terminator 2: Judgment Day"@en ,
+                    "Terminator 2 – Domedagen"@sv ,
+                    "터미네이터 2: 심판의 날"@ko ,
+                    "Terminator 2 – Tag der Abrechnung"@de ,
+                    "Terminator 2: el juicio final"@es ,
+                    "Terminator 2 : Le Jugement dernier"@fr ;
+    solid-memo:backNote "The Terminator (Arnold Schwarzenegger), 1991"@en ,
+                        "The Terminator (Arnold Schwarzenegger), 1991"@sv ,
+                        "The Terminator (Arnold Schwarzenegger), 1991"@ko ,
+                        "The Terminator (Arnold Schwarzenegger), 1991"@de ,
+                        "The Terminator (Arnold Schwarzenegger), 1991"@es ,
+                        "The Terminator (Arnold Schwarzenegger), 1991"@fr .
+
+<#dirty-harry>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "You've got to ask yourself one question: 'Do I feel lucky?' Well, do ya, punk?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Dirty Harry"@en ,
+                    "Dirty Harry"@sv ,
+                    "더티 해리"@ko ,
+                    "Dirty Harry"@de ,
+                    "Harry el Sucio"@es ,
+                    "L'Inspecteur Harry"@fr ;
+    solid-memo:backNote "Harry Callahan (Clint Eastwood), 1971"@en ,
+                        "Harry Callahan (Clint Eastwood), 1971"@sv ,
+                        "Harry Callahan (Clint Eastwood), 1971"@ko ,
+                        "Harry Callahan (Clint Eastwood), 1971"@de ,
+                        "Harry Callahan (Clint Eastwood), 1971"@es ,
+                        "Harry Callahan (Clint Eastwood), 1971"@fr .
+
+<#sudden-impact>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Go ahead, make my day."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Sudden Impact"@en ,
+                    "Sudden Impact"@sv ,
+                    "써든 임팩트"@ko ,
+                    "Dirty Harry kommt zurück"@de ,
+                    "Sudden Impact"@es ,
+                    "Le Retour de l'inspecteur Harry"@fr ;
+    solid-memo:backNote "Harry Callahan (Clint Eastwood), 1983"@en ,
+                        "Harry Callahan (Clint Eastwood), 1983"@sv ,
+                        "Harry Callahan (Clint Eastwood), 1983"@ko ,
+                        "Harry Callahan (Clint Eastwood), 1983"@de ,
+                        "Harry Callahan (Clint Eastwood), 1983"@es ,
+                        "Harry Callahan (Clint Eastwood), 1983"@fr .
+
+<#the-silence-of-the-lambs>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "A census taker once tried to test me. I ate his liver with some fava beans and a nice Chianti."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Silence of the Lambs"@en ,
+                    "När lammen tystnar"@sv ,
+                    "양들의 침묵"@ko ,
+                    "Das Schweigen der Lämmer"@de ,
+                    "The Silence of the Lambs"@es ,
+                    "Le Silence des agneaux"@fr ;
+    solid-memo:backNote "Hannibal Lecter (Anthony Hopkins), 1991"@en ,
+                        "Hannibal Lecter (Anthony Hopkins), 1991"@sv ,
+                        "Hannibal Lecter (Anthony Hopkins), 1991"@ko ,
+                        "Hannibal Lecter (Anthony Hopkins), 1991"@de ,
+                        "Hannibal Lecter (Anthony Hopkins), 1991"@es ,
+                        "Hannibal Lecter (Anthony Hopkins), 1991"@fr .
+
+<#jerry-maguire>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Show me the money!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Jerry Maguire"@en ,
+                    "Jerry Maguire"@sv ,
+                    "제리 맥과이어"@ko ,
+                    "Jerry Maguire – Spiel des Lebens"@de ,
+                    "Jerry Maguire"@es ,
+                    "Jerry Maguire"@fr ;
+    solid-memo:backNote "Rod Tidwell (Cuba Gooding Jr.), 1996"@en ,
+                        "Rod Tidwell (Cuba Gooding Jr.), 1996"@sv ,
+                        "Rod Tidwell (Cuba Gooding Jr.), 1996"@ko ,
+                        "Rod Tidwell (Cuba Gooding Jr.), 1996"@de ,
+                        "Rod Tidwell (Cuba Gooding Jr.), 1996"@es ,
+                        "Rod Tidwell (Cuba Gooding Jr.), 1996"@fr .
+
+<#a-few-good-men>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "You can't handle the truth!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "A Few Good Men"@en ,
+                    "På heder och samvete"@sv ,
+                    "어 퓨 굿 맨"@ko ,
+                    "Eine Frage der Ehre"@de ,
+                    "A Few Good Men"@es ,
+                    "Des hommes d'honneur"@fr ;
+    solid-memo:backNote "Col. Nathan R. Jessep (Jack Nicholson), 1992"@en ,
+                        "Col. Nathan R. Jessep (Jack Nicholson), 1992"@sv ,
+                        "Col. Nathan R. Jessep (Jack Nicholson), 1992"@ko ,
+                        "Col. Nathan R. Jessep (Jack Nicholson), 1992"@de ,
+                        "Col. Nathan R. Jessep (Jack Nicholson), 1992"@es ,
+                        "Col. Nathan R. Jessep (Jack Nicholson), 1992"@fr .
+
+<#titanic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I'm the king of the world!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Titanic"@en ,
+                    "Titanic"@sv ,
+                    "타이타닉"@ko ,
+                    "Titanic"@de ,
+                    "Titanic"@es ,
+                    "Titanic"@fr ;
+    solid-memo:backNote "Jack Dawson (Leonardo DiCaprio), 1997"@en ,
+                        "Jack Dawson (Leonardo DiCaprio), 1997"@sv ,
+                        "Jack Dawson (Leonardo DiCaprio), 1997"@ko ,
+                        "Jack Dawson (Leonardo DiCaprio), 1997"@de ,
+                        "Jack Dawson (Leonardo DiCaprio), 1997"@es ,
+                        "Jack Dawson (Leonardo DiCaprio), 1997"@fr .
+
+<#the-sixth-sense>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I see dead people."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Sixth Sense"@en ,
+                    "Sjätte sinnet"@sv ,
+                    "식스 센스"@ko ,
+                    "The Sixth Sense"@de ,
+                    "The Sixth Sense"@es ,
+                    "Sixième Sens"@fr ;
+    solid-memo:backNote "Cole Sear (Haley Joel Osment), 1999"@en ,
+                        "Cole Sear (Haley Joel Osment), 1999"@sv ,
+                        "Cole Sear (Haley Joel Osment), 1999"@ko ,
+                        "Cole Sear (Haley Joel Osment), 1999"@de ,
+                        "Cole Sear (Haley Joel Osment), 1999"@es ,
+                        "Cole Sear (Haley Joel Osment), 1999"@fr .
+
+<#forrest-gump>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "My mama always said life was like a box of chocolates. You never know what you're gonna get."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Forrest Gump"@en ,
+                    "Forrest Gump"@sv ,
+                    "포레스트 검프"@ko ,
+                    "Forrest Gump"@de ,
+                    "Forrest Gump"@es ,
+                    "Forrest Gump"@fr ;
+    solid-memo:backNote "Forrest Gump (Tom Hanks), 1994"@en ,
+                        "Forrest Gump (Tom Hanks), 1994"@sv ,
+                        "Forrest Gump (Tom Hanks), 1994"@ko ,
+                        "Forrest Gump (Tom Hanks), 1994"@de ,
+                        "Forrest Gump (Tom Hanks), 1994"@es ,
+                        "Forrest Gump (Tom Hanks), 1994"@fr .
+
+<#apollo-13>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Houston, we have a problem."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Apollo 13"@en ,
+                    "Apollo 13"@sv ,
+                    "아폴로 13"@ko ,
+                    "Apollo 13"@de ,
+                    "Apolo 13"@es ,
+                    "Apollo 13"@fr ;
+    solid-memo:backNote "Jim Lovell (Tom Hanks), 1995"@en ,
+                        "Jim Lovell (Tom Hanks), 1995"@sv ,
+                        "Jim Lovell (Tom Hanks), 1995"@ko ,
+                        "Jim Lovell (Tom Hanks), 1995"@de ,
+                        "Jim Lovell (Tom Hanks), 1995"@es ,
+                        "Jim Lovell (Tom Hanks), 1995"@fr .
+
+<#et>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "E.T. phone home."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "E.T. the Extra-Terrestrial"@en ,
+                    "E.T. the Extra-Terrestrial"@sv ,
+                    "E.T."@ko ,
+                    "E.T. – Der Außerirdische"@de ,
+                    "E.T., el extraterrestre"@es ,
+                    "E.T., l'extra-terrestre"@fr ;
+    solid-memo:backNote "E.T. (Pat Welsh), 1982"@en ,
+                        "E.T. (Pat Welsh), 1982"@sv ,
+                        "E.T. (Pat Welsh), 1982"@ko ,
+                        "E.T. (Pat Welsh), 1982"@de ,
+                        "E.T. (Pat Welsh), 1982"@es ,
+                        "E.T. (Pat Welsh), 1982"@fr .
+
+<#field-of-dreams>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "If you build it, he will come."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Field of Dreams"@en ,
+                    "Drömmarnas fält"@sv ,
+                    "꿈의 구장"@ko ,
+                    "Feld der Träume"@de ,
+                    "Field of Dreams"@es ,
+                    "Jusqu'au bout du rêve"@fr ;
+    solid-memo:backNote "A voice Ray Kinsella hears in his cornfield, 1989"@en ,
+                        "En röst som Ray Kinsella hör i sitt majsfält, 1989"@sv ,
+                        "Ray Kinsella가 옥수수밭에서 듣는 목소리, 1989"@ko ,
+                        "Eine Stimme, die Ray Kinsella in seinem Maisfeld hört, 1989"@de ,
+                        "Una voz que Ray Kinsella oye en su maizal, 1989"@es ,
+                        "Une voix que Ray Kinsella entend dans son champ de maïs, 1989"@fr .
+
+<#dead-poets-society>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Carpe diem. Seize the day, boys. Make your lives extraordinary."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Dead Poets Society"@en ,
+                    "Döda poeters sällskap"@sv ,
+                    "죽은 시인의 사회"@ko ,
+                    "Der Club der toten Dichter"@de ,
+                    "Dead Poets Society"@es ,
+                    "Le Cercle des poètes disparus"@fr ;
+    solid-memo:backNote "John Keating (Robin Williams), 1989"@en ,
+                        "John Keating (Robin Williams), 1989"@sv ,
+                        "John Keating (Robin Williams), 1989"@ko ,
+                        "John Keating (Robin Williams), 1989"@de ,
+                        "John Keating (Robin Williams), 1989"@es ,
+                        "John Keating (Robin Williams), 1989"@fr .
+
+<#the-shining>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Here's Johnny!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Shining"@en ,
+                    "The Shining"@sv ,
+                    "샤이닝"@ko ,
+                    "Shining"@de ,
+                    "El resplandor"@es ,
+                    "Shining"@fr ;
+    solid-memo:backNote "Jack Torrance (Jack Nicholson), 1980"@en ,
+                        "Jack Torrance (Jack Nicholson), 1980"@sv ,
+                        "Jack Torrance (Jack Nicholson), 1980"@ko ,
+                        "Jack Torrance (Jack Nicholson), 1980"@de ,
+                        "Jack Torrance (Jack Nicholson), 1980"@es ,
+                        "Jack Torrance (Jack Nicholson), 1980"@fr .
+
+<#citizen-kane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Rosebud."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Citizen Kane"@en ,
+                    "Citizen Kane"@sv ,
+                    "시민 케인"@ko ,
+                    "Citizen Kane"@de ,
+                    "Ciudadano Kane"@es ,
+                    "Citizen Kane"@fr ;
+    solid-memo:backNote "Charles Foster Kane (Orson Welles), 1941"@en ,
+                        "Charles Foster Kane (Orson Welles), 1941"@sv ,
+                        "Charles Foster Kane (Orson Welles), 1941"@ko ,
+                        "Charles Foster Kane (Orson Welles), 1941"@de ,
+                        "Charles Foster Kane (Orson Welles), 1941"@es ,
+                        "Charles Foster Kane (Orson Welles), 1941"@fr .
+
+<#some-like-it-hot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Well, nobody's perfect!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Some Like It Hot"@en ,
+                    "I hetaste laget"@sv ,
+                    "뜨거운 것이 좋아"@ko ,
+                    "Manche mögen’s heiß"@de ,
+                    "Some Like It Hot"@es ,
+                    "Certains l'aiment chaud"@fr ;
+    solid-memo:backNote "Osgood Fielding III (Joe E. Brown), 1959"@en ,
+                        "Osgood Fielding III (Joe E. Brown), 1959"@sv ,
+                        "Osgood Fielding III (Joe E. Brown), 1959"@ko ,
+                        "Osgood Fielding III (Joe E. Brown), 1959"@de ,
+                        "Osgood Fielding III (Joe E. Brown), 1959"@es ,
+                        "Osgood Fielding III (Joe E. Brown), 1959"@fr .
+
+<#wall-street>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Greed, for lack of a better word, is good."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Wall Street"@en ,
+                    "Wall Street"@sv ,
+                    "월 스트리트"@ko ,
+                    "Wall Street"@de ,
+                    "Wall Street"@es ,
+                    "Wall Street"@fr ;
+    solid-memo:backNote "Gordon Gekko (Michael Douglas), 1987"@en ,
+                        "Gordon Gekko (Michael Douglas), 1987"@sv ,
+                        "Gordon Gekko (Michael Douglas), 1987"@ko ,
+                        "Gordon Gekko (Michael Douglas), 1987"@de ,
+                        "Gordon Gekko (Michael Douglas), 1987"@es ,
+                        "Gordon Gekko (Michael Douglas), 1987"@fr .
+
+<#the-treasure-of-the-sierra-madre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Badges? We ain't got no badges! We don't need no badges! I don't have to show you any stinking badges!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Treasure of the Sierra Madre"@en ,
+                    "Sierra Madres skatt"@sv ,
+                    "시에라 마드레의 황금"@ko ,
+                    "Der Schatz der Sierra Madre"@de ,
+                    "El tesoro de Sierra Madre"@es ,
+                    "Le Trésor de la Sierra Madre"@fr ;
+    solid-memo:backNote "Gold Hat (Alfonso Bedoya), 1948"@en ,
+                        "Gold Hat (Alfonso Bedoya), 1948"@sv ,
+                        "Gold Hat (Alfonso Bedoya), 1948"@ko ,
+                        "Gold Hat (Alfonso Bedoya), 1948"@de ,
+                        "Gold Hat (Alfonso Bedoya), 1948"@es ,
+                        "Gold Hat (Alfonso Bedoya), 1948"@fr .
+
+<#dirty-dancing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Nobody puts Baby in a corner."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Dirty Dancing"@en ,
+                    "Dirty Dancing"@sv ,
+                    "더티 댄싱"@ko ,
+                    "Dirty Dancing"@de ,
+                    "Dirty Dancing"@es ,
+                    "Dirty Dancing"@fr ;
+    solid-memo:backNote "Johnny Castle (Patrick Swayze), 1987"@en ,
+                        "Johnny Castle (Patrick Swayze), 1987"@sv ,
+                        "Johnny Castle (Patrick Swayze), 1987"@ko ,
+                        "Johnny Castle (Patrick Swayze), 1987"@de ,
+                        "Johnny Castle (Patrick Swayze), 1987"@es ,
+                        "Johnny Castle (Patrick Swayze), 1987"@fr .
+
+<#when-harry-met-sally>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I'll have what she's having."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "When Harry Met Sally..."@en ,
+                    "När Harry träffade Sally..."@sv ,
+                    "해리가 샐리를 만났을 때"@ko ,
+                    "Harry und Sally"@de ,
+                    "When Harry Met Sally..."@es ,
+                    "Quand Harry rencontre Sally"@fr ;
+    solid-memo:backNote "A customer at a nearby table (Estelle Reiner), 1989"@en ,
+                        "En kund vid ett bord intill (Estelle Reiner), 1989"@sv ,
+                        "근처 테이블의 손님 (Estelle Reiner), 1989"@ko ,
+                        "Eine Kundin an einem Nebentisch (Estelle Reiner), 1989"@de ,
+                        "Una clienta de una mesa cercana (Estelle Reiner), 1989"@es ,
+                        "Une cliente à une table voisine (Estelle Reiner), 1989"@fr .
+
+<#the-princess-bride>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Hello. My name is Inigo Montoya. You killed my father. Prepare to die."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Princess Bride"@en ,
+                    "Bleka dödens minut"@sv ,
+                    "프린세스 브라이드"@ko ,
+                    "Die Braut des Prinzen"@de ,
+                    "The Princess Bride"@es ,
+                    "Princess Bride"@fr ;
+    solid-memo:backNote "Inigo Montoya (Mandy Patinkin), 1987"@en ,
+                        "Inigo Montoya (Mandy Patinkin), 1987"@sv ,
+                        "Inigo Montoya (Mandy Patinkin), 1987"@ko ,
+                        "Inigo Montoya (Mandy Patinkin), 1987"@de ,
+                        "Inigo Montoya (Mandy Patinkin), 1987"@es ,
+                        "Inigo Montoya (Mandy Patinkin), 1987"@fr .
+
+<#top-gun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I feel the need... the need for speed!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Top Gun"@en ,
+                    "Top Gun"@sv ,
+                    "탑건"@ko ,
+                    "Top Gun – Sie fürchten weder Tod noch Teufel"@de ,
+                    "Top Gun"@es ,
+                    "Top Gun"@fr ;
+    solid-memo:backNote "Maverick and Goose (Tom Cruise, Anthony Edwards), 1986"@en ,
+                        "Maverick och Goose (Tom Cruise, Anthony Edwards), 1986"@sv ,
+                        "Maverick과 Goose (Tom Cruise, Anthony Edwards), 1986"@ko ,
+                        "Maverick und Goose (Tom Cruise, Anthony Edwards), 1986"@de ,
+                        "Maverick y Goose (Tom Cruise, Anthony Edwards), 1986"@es ,
+                        "Maverick et Goose (Tom Cruise, Anthony Edwards), 1986"@fr .
+
+<#the-matrix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "There is no spoon."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Matrix"@en ,
+                    "Matrix"@sv ,
+                    "매트릭스"@ko ,
+                    "Matrix"@de ,
+                    "The Matrix"@es ,
+                    "Matrix"@fr ;
+    solid-memo:backNote "Spoon Boy (Rowan Witt), 1999"@en ,
+                        "Spoon Boy (Rowan Witt), 1999"@sv ,
+                        "Spoon Boy (Rowan Witt), 1999"@ko ,
+                        "Spoon Boy (Rowan Witt), 1999"@de ,
+                        "Spoon Boy (Rowan Witt), 1999"@es ,
+                        "Spoon Boy (Rowan Witt), 1999"@fr .
+
+<#fight-club>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "The first rule of Fight Club is: You do not talk about Fight Club."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Fight Club"@en ,
+                    "Fight Club"@sv ,
+                    "파이트 클럽"@ko ,
+                    "Fight Club"@de ,
+                    "Fight Club"@es ,
+                    "Fight Club"@fr ;
+    solid-memo:backNote "Tyler Durden (Brad Pitt), 1999"@en ,
+                        "Tyler Durden (Brad Pitt), 1999"@sv ,
+                        "Tyler Durden (Brad Pitt), 1999"@ko ,
+                        "Tyler Durden (Brad Pitt), 1999"@de ,
+                        "Tyler Durden (Brad Pitt), 1999"@es ,
+                        "Tyler Durden (Brad Pitt), 1999"@fr .
+
+<#pulp-fiction>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "They call it a Royale with Cheese."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Pulp Fiction"@en ,
+                    "Pulp Fiction"@sv ,
+                    "펄프 픽션"@ko ,
+                    "Pulp Fiction"@de ,
+                    "Pulp Fiction"@es ,
+                    "Pulp Fiction"@fr ;
+    solid-memo:backNote "Vincent Vega (John Travolta), 1994"@en ,
+                        "Vincent Vega (John Travolta), 1994"@sv ,
+                        "Vincent Vega (John Travolta), 1994"@ko ,
+                        "Vincent Vega (John Travolta), 1994"@de ,
+                        "Vincent Vega (John Travolta), 1994"@es ,
+                        "Vincent Vega (John Travolta), 1994"@fr .
+
+<#the-dark-knight>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Why so serious?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Dark Knight"@en ,
+                    "The Dark Knight"@sv ,
+                    "다크 나이트"@ko ,
+                    "The Dark Knight"@de ,
+                    "The Dark Knight"@es ,
+                    "The Dark Knight : Le Chevalier noir"@fr ;
+    solid-memo:backNote "The Joker (Heath Ledger), 2008"@en ,
+                        "The Joker (Heath Ledger), 2008"@sv ,
+                        "The Joker (Heath Ledger), 2008"@ko ,
+                        "The Joker (Heath Ledger), 2008"@de ,
+                        "The Joker (Heath Ledger), 2008"@es ,
+                        "The Joker (Heath Ledger), 2008"@fr .
+
+<#gladiator>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Are you not entertained?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Gladiator"@en ,
+                    "Gladiator"@sv ,
+                    "글래디에이터"@ko ,
+                    "Gladiator"@de ,
+                    "Gladiator"@es ,
+                    "Gladiator"@fr ;
+    solid-memo:backNote "Maximus (Russell Crowe), 2000"@en ,
+                        "Maximus (Russell Crowe), 2000"@sv ,
+                        "Maximus (Russell Crowe), 2000"@ko ,
+                        "Maximus (Russell Crowe), 2000"@de ,
+                        "Maximus (Russell Crowe), 2000"@es ,
+                        "Maximus (Russell Crowe), 2000"@fr .
+
+<#300>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Madness? This is Sparta!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "300"@en ,
+                    "300"@sv ,
+                    "300"@ko ,
+                    "300"@de ,
+                    "300"@es ,
+                    "300"@fr ;
+    solid-memo:backNote "Leonidas (Gerard Butler), 2006"@en ,
+                        "Leonidas (Gerard Butler), 2006"@sv ,
+                        "Leonidas (Gerard Butler), 2006"@ko ,
+                        "Leonidas (Gerard Butler), 2006"@de ,
+                        "Leonidas (Gerard Butler), 2006"@es ,
+                        "Leonidas (Gerard Butler), 2006"@fr .
+
+<#braveheart>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "... tell our enemies that they may take our lives, but they'll never take our freedom!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Braveheart"@en ,
+                    "Braveheart"@sv ,
+                    "브레이브하트"@ko ,
+                    "Braveheart"@de ,
+                    "Braveheart"@es ,
+                    "Braveheart"@fr ;
+    solid-memo:backNote "William Wallace (Mel Gibson), 1995"@en ,
+                        "William Wallace (Mel Gibson), 1995"@sv ,
+                        "William Wallace (Mel Gibson), 1995"@ko ,
+                        "William Wallace (Mel Gibson), 1995"@de ,
+                        "William Wallace (Mel Gibson), 1995"@es ,
+                        "William Wallace (Mel Gibson), 1995"@fr .
+
+<#the-fellowship-of-the-ring>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "One does not simply walk into Mordor."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Lord of the Rings: The Fellowship of the Ring"@en ,
+                    "Sagan om ringen"@sv ,
+                    "반지의 제왕: 반지 원정대"@ko ,
+                    "Der Herr der Ringe: Die Gefährten"@de ,
+                    "El Señor de los Anillos: la Comunidad del Anillo"@es ,
+                    "Le Seigneur des anneaux : La Communauté de l'anneau"@fr ;
+    solid-memo:backNote "Boromir (Sean Bean), 2001"@en ,
+                        "Boromir (Sean Bean), 2001"@sv ,
+                        "Boromir (Sean Bean), 2001"@ko ,
+                        "Boromir (Sean Bean), 2001"@de ,
+                        "Boromir (Sean Bean), 2001"@es ,
+                        "Boromir (Sean Bean), 2001"@fr .
+
+<#scarface>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Say hello to my little friend!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Scarface"@en ,
+                    "Scarface"@sv ,
+                    "스카페이스"@ko ,
+                    "Scarface"@de ,
+                    "Scarface"@es ,
+                    "Scarface"@fr ;
+    solid-memo:backNote "Tony Montana (Al Pacino), 1983"@en ,
+                        "Tony Montana (Al Pacino), 1983"@sv ,
+                        "Tony Montana (Al Pacino), 1983"@ko ,
+                        "Tony Montana (Al Pacino), 1983"@de ,
+                        "Tony Montana (Al Pacino), 1983"@es ,
+                        "Tony Montana (Al Pacino), 1983"@fr .
+
+<#goodfellas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "As far back as I can remember, I always wanted to be a gangster."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Goodfellas"@en ,
+                    "Maffiabröder"@sv ,
+                    "좋은 친구들"@ko ,
+                    "GoodFellas – Drei Jahrzehnte in der Mafia"@de ,
+                    "Uno de los nuestros"@es ,
+                    "Les Affranchis"@fr ;
+    solid-memo:backNote "Henry Hill (Ray Liotta), 1990"@en ,
+                        "Henry Hill (Ray Liotta), 1990"@sv ,
+                        "Henry Hill (Ray Liotta), 1990"@ko ,
+                        "Henry Hill (Ray Liotta), 1990"@de ,
+                        "Henry Hill (Ray Liotta), 1990"@es ,
+                        "Henry Hill (Ray Liotta), 1990"@fr .
+
+<#the-usual-suspects>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "The greatest trick the Devil ever pulled was convincing the world he didn't exist."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Usual Suspects"@en ,
+                    "De misstänkta"@sv ,
+                    "유주얼 서스펙트"@ko ,
+                    "Die üblichen Verdächtigen"@de ,
+                    "The Usual Suspects"@es ,
+                    "Usual Suspects"@fr ;
+    solid-memo:backNote "Verbal Kint (Kevin Spacey), 1995"@en ,
+                        "Verbal Kint (Kevin Spacey), 1995"@sv ,
+                        "Verbal Kint (Kevin Spacey), 1995"@ko ,
+                        "Verbal Kint (Kevin Spacey), 1995"@de ,
+                        "Verbal Kint (Kevin Spacey), 1995"@es ,
+                        "Verbal Kint (Kevin Spacey), 1995"@fr .
+
+<#jurassic-park>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I'm simply saying that life, uh... finds a way."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Jurassic Park"@en ,
+                    "Jurassic Park"@sv ,
+                    "쥬라기 공원"@ko ,
+                    "Jurassic Park"@de ,
+                    "Parque Jurásico"@es ,
+                    "Jurassic Park"@fr ;
+    solid-memo:backNote "Ian Malcolm (Jeff Goldblum), 1993"@en ,
+                        "Ian Malcolm (Jeff Goldblum), 1993"@sv ,
+                        "Ian Malcolm (Jeff Goldblum), 1993"@ko ,
+                        "Ian Malcolm (Jeff Goldblum), 1993"@de ,
+                        "Ian Malcolm (Jeff Goldblum), 1993"@es ,
+                        "Ian Malcolm (Jeff Goldblum), 1993"@fr .
+
+<#ghostbusters>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "We came, we saw, we kicked its ass!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Ghostbusters"@en ,
+                    "Ghostbusters – Spökligan"@sv ,
+                    "고스트버스터즈"@ko ,
+                    "Ghostbusters – Die Geisterjäger"@de ,
+                    "Los cazafantasmas"@es ,
+                    "SOS Fantômes"@fr ;
+    solid-memo:backNote "Peter Venkman (Bill Murray), 1984"@en ,
+                        "Peter Venkman (Bill Murray), 1984"@sv ,
+                        "Peter Venkman (Bill Murray), 1984"@ko ,
+                        "Peter Venkman (Bill Murray), 1984"@de ,
+                        "Peter Venkman (Bill Murray), 1984"@es ,
+                        "Peter Venkman (Bill Murray), 1984"@fr .
+
+<#the-shawshank-redemption>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Get busy living or get busy dying."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Shawshank Redemption"@en ,
+                    "Nyckeln till frihet"@sv ,
+                    "쇼생크 탈출"@ko ,
+                    "Die Verurteilten"@de ,
+                    "The Shawshank Redemption"@es ,
+                    "Les Évadés"@fr ;
+    solid-memo:backNote "Andy Dufresne (Tim Robbins), 1994"@en ,
+                        "Andy Dufresne (Tim Robbins), 1994"@sv ,
+                        "Andy Dufresne (Tim Robbins), 1994"@ko ,
+                        "Andy Dufresne (Tim Robbins), 1994"@de ,
+                        "Andy Dufresne (Tim Robbins), 1994"@es ,
+                        "Andy Dufresne (Tim Robbins), 1994"@fr .
+
+<#raiders-of-the-lost-ark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Snakes. Why'd it have to be snakes?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Raiders of the Lost Ark"@en ,
+                    "Jakten på den försvunna skatten"@sv ,
+                    "레이더스"@ko ,
+                    "Jäger des verlorenen Schatzes"@de ,
+                    "Raiders of the Lost Ark"@es ,
+                    "Les Aventuriers de l'arche perdue"@fr ;
+    solid-memo:backNote "Indiana Jones (Harrison Ford), 1981"@en ,
+                        "Indiana Jones (Harrison Ford), 1981"@sv ,
+                        "Indiana Jones (Harrison Ford), 1981"@ko ,
+                        "Indiana Jones (Harrison Ford), 1981"@de ,
+                        "Indiana Jones (Harrison Ford), 1981"@es ,
+                        "Indiana Jones (Harrison Ford), 1981"@fr .
+
+<#airplane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I am serious. And don't call me Shirley."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Airplane!"@en ,
+                    "Titta vi flyger"@sv ,
+                    "에어플레인"@ko ,
+                    "Die unglaubliche Reise in einem verrückten Flugzeug"@de ,
+                    "Airplane!"@es ,
+                    "Y a-t-il un pilote dans l'avion ?"@fr ;
+    solid-memo:backNote "Dr. Rumack (Leslie Nielsen), 1980"@en ,
+                        "Dr. Rumack (Leslie Nielsen), 1980"@sv ,
+                        "Dr. Rumack (Leslie Nielsen), 1980"@ko ,
+                        "Dr. Rumack (Leslie Nielsen), 1980"@de ,
+                        "Dr. Rumack (Leslie Nielsen), 1980"@es ,
+                        "Dr. Rumack (Leslie Nielsen), 1980"@fr .
+
+<#notting-hill>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "And don't forget I'm... I'm also just a girl, standing in front of a boy, asking him to love her."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Notting Hill"@en ,
+                    "Notting Hill"@sv ,
+                    "노팅힐"@ko ,
+                    "Notting Hill"@de ,
+                    "Notting Hill"@es ,
+                    "Coup de foudre à Notting Hill"@fr ;
+    solid-memo:backNote "Anna Scott (Julia Roberts), 1999"@en ,
+                        "Anna Scott (Julia Roberts), 1999"@sv ,
+                        "Anna Scott (Julia Roberts), 1999"@ko ,
+                        "Anna Scott (Julia Roberts), 1999"@de ,
+                        "Anna Scott (Julia Roberts), 1999"@es ,
+                        "Anna Scott (Julia Roberts), 1999"@fr .
+
+<#ferris-buellers-day-off>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Life moves pretty fast. If you don't stop and look around once in a while, you could miss it."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Ferris Bueller's Day Off"@en ,
+                    "Fira med Ferris"@sv ,
+                    "페리스의 해방"@ko ,
+                    "Ferris macht blau"@de ,
+                    "Ferris Bueller's Day Off"@es ,
+                    "La Folle Journée de Ferris Bueller"@fr ;
+    solid-memo:backNote "Ferris Bueller (Matthew Broderick), 1986"@en ,
+                        "Ferris Bueller (Matthew Broderick), 1986"@sv ,
+                        "Ferris Bueller (Matthew Broderick), 1986"@ko ,
+                        "Ferris Bueller (Matthew Broderick), 1986"@de ,
+                        "Ferris Bueller (Matthew Broderick), 1986"@es ,
+                        "Ferris Bueller (Matthew Broderick), 1986"@fr .
+
+<#taken>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "But if you don't, I will look for you, I will find you, and I will kill you."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Taken"@en ,
+                    "Taken"@sv ,
+                    "테이큰"@ko ,
+                    "96 Hours"@de ,
+                    "Taken"@es ,
+                    "Taken"@fr ;
+    solid-memo:backNote "Bryan Mills (Liam Neeson), 2008"@en ,
+                        "Bryan Mills (Liam Neeson), 2008"@sv ,
+                        "Bryan Mills (Liam Neeson), 2008"@ko ,
+                        "Bryan Mills (Liam Neeson), 2008"@de ,
+                        "Bryan Mills (Liam Neeson), 2008"@es ,
+                        "Bryan Mills (Liam Neeson), 2008"@fr .
+
+<#die-hard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Welcome to the party, pal!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Die Hard"@en ,
+                    "Die Hard"@sv ,
+                    "다이하드"@ko ,
+                    "Stirb langsam"@de ,
+                    "Die Hard"@es ,
+                    "Piège de cristal"@fr ;
+    solid-memo:backNote "John McClane (Bruce Willis), 1988"@en ,
+                        "John McClane (Bruce Willis), 1988"@sv ,
+                        "John McClane (Bruce Willis), 1988"@ko ,
+                        "John McClane (Bruce Willis), 1988"@de ,
+                        "John McClane (Bruce Willis), 1988"@es ,
+                        "John McClane (Bruce Willis), 1988"@fr .
+
+<#the-big-lebowski>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "The Dude abides."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Big Lebowski"@en ,
+                    "The Big Lebowski"@sv ,
+                    "위대한 레보스키"@ko ,
+                    "The Big Lebowski"@de ,
+                    "El gran Lebowski"@es ,
+                    "The Big Lebowski"@fr ;
+    solid-memo:backNote "The Dude (Jeff Bridges), 1998"@en ,
+                        "The Dude (Jeff Bridges), 1998"@sv ,
+                        "The Dude (Jeff Bridges), 1998"@ko ,
+                        "The Dude (Jeff Bridges), 1998"@de ,
+                        "The Dude (Jeff Bridges), 1998"@es ,
+                        "The Dude (Jeff Bridges), 1998"@fr .
+
+<#la-haine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "C'est l'histoire d'un homme qui tombe d'un immeuble de cinquante étages. [...] jusqu'ici tout va bien."@fr ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "La Haine"@en ,
+                    "Medan vi faller"@sv ,
+                    "증오"@ko ,
+                    "Hass"@de ,
+                    "El odio"@es ,
+                    "La Haine"@fr ;
+    solid-memo:backNote "Hubert (Hubert Koundé), 1995"@en ,
+                        "Hubert (Hubert Koundé), 1995"@sv ,
+                        "Hubert (Hubert Koundé), 1995"@ko ,
+                        "Hubert (Hubert Koundé), 1995"@de ,
+                        "Hubert (Hubert Koundé), 1995"@es ,
+                        "Hubert (Hubert Koundé), 1995"@fr .
+
+<#ratatouille>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Anyone can cook."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Ratatouille"@en ,
+                    "Råttatouille"@sv ,
+                    "라따뚜이"@ko ,
+                    "Ratatouille"@de ,
+                    "Ratatouille"@es ,
+                    "Ratatouille"@fr ;
+    solid-memo:backNote "Gusteau (Brad Garrett), 2007"@en ,
+                        "Gusteau (Brad Garrett), 2007"@sv ,
+                        "Gusteau (Brad Garrett), 2007"@ko ,
+                        "Gusteau (Brad Garrett), 2007"@de ,
+                        "Gusteau (Brad Garrett), 2007"@es ,
+                        "Gusteau (Brad Garrett), 2007"@fr .
+
+<#frozen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Some people are worth melting for."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Frozen"@en ,
+                    "Frost"@sv ,
+                    "겨울왕국"@ko ,
+                    "Die Eiskönigin – Völlig unverfroren"@de ,
+                    "Frozen"@es ,
+                    "La Reine des neiges"@fr ;
+    solid-memo:backNote "Olaf (Josh Gad), 2013"@en ,
+                        "Olaf (Josh Gad), 2013"@sv ,
+                        "Olaf (Josh Gad), 2013"@ko ,
+                        "Olaf (Josh Gad), 2013"@de ,
+                        "Olaf (Josh Gad), 2013"@es ,
+                        "Olaf (Josh Gad), 2013"@fr .
+
+<#the-incredibles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "No capes!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Incredibles"@en ,
+                    "Superhjältarna"@sv ,
+                    "인크레더블"@ko ,
+                    "Die Unglaublichen – The Incredibles"@de ,
+                    "Los Increíbles"@es ,
+                    "Les Indestructibles"@fr ;
+    solid-memo:backNote "Edna Mode (Brad Bird), 2004"@en ,
+                        "Edna Mode (Brad Bird), 2004"@sv ,
+                        "Edna Mode (Brad Bird), 2004"@ko ,
+                        "Edna Mode (Brad Bird), 2004"@de ,
+                        "Edna Mode (Brad Bird), 2004"@es ,
+                        "Edna Mode (Brad Bird), 2004"@fr .
+
+<#shrek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Ogres are like onions."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Shrek"@en ,
+                    "Shrek"@sv ,
+                    "슈렉"@ko ,
+                    "Shrek – Der tollkühne Held"@de ,
+                    "Shrek"@es ,
+                    "Shrek"@fr ;
+    solid-memo:backNote "Shrek (Mike Myers), 2001"@en ,
+                        "Shrek (Mike Myers), 2001"@sv ,
+                        "Shrek (Mike Myers), 2001"@ko ,
+                        "Shrek (Mike Myers), 2001"@de ,
+                        "Shrek (Mike Myers), 2001"@es ,
+                        "Shrek (Mike Myers), 2001"@fr .
+
+<#monty-python-and-the-holy-grail>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "'Tis but a scratch."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Monty Python and the Holy Grail"@en ,
+                    "Monty Pythons galna värld"@sv ,
+                    "몬티 파이튼과 성배"@ko ,
+                    "Die Ritter der Kokosnuß"@de ,
+                    "Monty Python and the Holy Grail"@es ,
+                    "Monty Python : Sacré Graal !"@fr ;
+    solid-memo:backNote "The Black Knight (John Cleese), 1975"@en ,
+                        "The Black Knight (John Cleese), 1975"@sv ,
+                        "The Black Knight (John Cleese), 1975"@ko ,
+                        "The Black Knight (John Cleese), 1975"@de ,
+                        "The Black Knight (John Cleese), 1975"@es ,
+                        "The Black Knight (John Cleese), 1975"@fr .
+
+<#life-of-brian>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "He's not the Messiah, he's a very naughty boy!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Monty Python's Life of Brian"@en ,
+                    "Ett herrans liv"@sv ,
+                    "라이프 오브 브라이언"@ko ,
+                    "Das Leben des Brian"@de ,
+                    "La vida de Brian"@es ,
+                    "Monty Python : La Vie de Brian"@fr ;
+    solid-memo:backNote "Mandy Cohen (Terry Jones), 1979"@en ,
+                        "Mandy Cohen (Terry Jones), 1979"@sv ,
+                        "Mandy Cohen (Terry Jones), 1979"@ko ,
+                        "Mandy Cohen (Terry Jones), 1979"@de ,
+                        "Mandy Cohen (Terry Jones), 1979"@es ,
+                        "Mandy Cohen (Terry Jones), 1979"@fr .
+
+<#inception>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "You mustn't be afraid to dream a little bigger, darling."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Inception"@en ,
+                    "Inception"@sv ,
+                    "인셉션"@ko ,
+                    "Inception"@de ,
+                    "Inception"@es ,
+                    "Inception"@fr ;
+    solid-memo:backNote "Eames (Tom Hardy), 2010"@en ,
+                        "Eames (Tom Hardy), 2010"@sv ,
+                        "Eames (Tom Hardy), 2010"@ko ,
+                        "Eames (Tom Hardy), 2010"@de ,
+                        "Eames (Tom Hardy), 2010"@es ,
+                        "Eames (Tom Hardy), 2010"@fr .
+
+<#mad-max-fury-road>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Oh, what a day! What a lovely day!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Mad Max: Fury Road"@en ,
+                    "Mad Max: Fury Road"@sv ,
+                    "매드 맥스: 분노의 도로"@ko ,
+                    "Mad Max: Fury Road"@de ,
+                    "Mad Max: Fury Road"@es ,
+                    "Mad Max: Fury Road"@fr ;
+    solid-memo:backNote "Nux (Nicholas Hoult), 2015"@en ,
+                        "Nux (Nicholas Hoult), 2015"@sv ,
+                        "Nux (Nicholas Hoult), 2015"@ko ,
+                        "Nux (Nicholas Hoult), 2015"@de ,
+                        "Nux (Nicholas Hoult), 2015"@es ,
+                        "Nux (Nicholas Hoult), 2015"@fr .
+
+<#the-social-network>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "A million dollars isn't cool. You know what's cool?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Social Network"@en ,
+                    "Social Network"@sv ,
+                    "소셜 네트워크"@ko ,
+                    "The Social Network"@de ,
+                    "The Social Network"@es ,
+                    "The Social Network"@fr ;
+    solid-memo:backNote "Sean Parker (Justin Timberlake), 2010"@en ,
+                        "Sean Parker (Justin Timberlake), 2010"@sv ,
+                        "Sean Parker (Justin Timberlake), 2010"@ko ,
+                        "Sean Parker (Justin Timberlake), 2010"@de ,
+                        "Sean Parker (Justin Timberlake), 2010"@es ,
+                        "Sean Parker (Justin Timberlake), 2010"@fr .
+
+<#the-wolf-of-wall-street>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Sell me this pen."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Wolf of Wall Street"@en ,
+                    "The Wolf of Wall Street"@sv ,
+                    "더 울프 오브 월 스트리트"@ko ,
+                    "The Wolf of Wall Street"@de ,
+                    "El lobo de Wall Street"@es ,
+                    "Le Loup de Wall Street"@fr ;
+    solid-memo:backNote "Jordan Belfort (Leonardo DiCaprio), 2013"@en ,
+                        "Jordan Belfort (Leonardo DiCaprio), 2013"@sv ,
+                        "Jordan Belfort (Leonardo DiCaprio), 2013"@ko ,
+                        "Jordan Belfort (Leonardo DiCaprio), 2013"@de ,
+                        "Jordan Belfort (Leonardo DiCaprio), 2013"@es ,
+                        "Jordan Belfort (Leonardo DiCaprio), 2013"@fr .
+
+<#se7en>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "What's in the box?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Seven"@en ,
+                    "Seven"@sv ,
+                    "세븐"@ko ,
+                    "Sieben"@de ,
+                    "Seven"@es ,
+                    "Seven"@fr ;
+    solid-memo:backNote "David Mills (Brad Pitt), 1995"@en ,
+                        "David Mills (Brad Pitt), 1995"@sv ,
+                        "David Mills (Brad Pitt), 1995"@ko ,
+                        "David Mills (Brad Pitt), 1995"@de ,
+                        "David Mills (Brad Pitt), 1995"@es ,
+                        "David Mills (Brad Pitt), 1995"@fr .
+
+<#the-truman-show>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "In case I don't see ya, good afternoon, good evening, and good night!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Truman Show"@en ,
+                    "Truman Show"@sv ,
+                    "트루먼 쇼"@ko ,
+                    "Die Truman Show"@de ,
+                    "The Truman Show"@es ,
+                    "The Truman Show"@fr ;
+    solid-memo:backNote "Truman Burbank (Jim Carrey), 1998"@en ,
+                        "Truman Burbank (Jim Carrey), 1998"@sv ,
+                        "Truman Burbank (Jim Carrey), 1998"@ko ,
+                        "Truman Burbank (Jim Carrey), 1998"@de ,
+                        "Truman Burbank (Jim Carrey), 1998"@es ,
+                        "Truman Burbank (Jim Carrey), 1998"@fr .
+
+<#independence-day>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Welcome to Earth."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Independence Day"@en ,
+                    "Independence Day"@sv ,
+                    "인디펜던스 데이"@ko ,
+                    "Independence Day"@de ,
+                    "Independence Day"@es ,
+                    "Independence Day"@fr ;
+    solid-memo:backNote "Steven Hiller (Will Smith), 1996"@en ,
+                        "Steven Hiller (Will Smith), 1996"@sv ,
+                        "Steven Hiller (Will Smith), 1996"@ko ,
+                        "Steven Hiller (Will Smith), 1996"@de ,
+                        "Steven Hiller (Will Smith), 1996"@es ,
+                        "Steven Hiller (Will Smith), 1996"@fr .
+
+<#aliens>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Get away from her, you bitch!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Aliens"@en ,
+                    "Aliens – Återkomsten"@sv ,
+                    "에이리언 2"@ko ,
+                    "Aliens – Die Rückkehr"@de ,
+                    "Aliens, el regreso"@es ,
+                    "Aliens, le retour"@fr ;
+    solid-memo:backNote "Ellen Ripley (Sigourney Weaver), 1986"@en ,
+                        "Ellen Ripley (Sigourney Weaver), 1986"@sv ,
+                        "Ellen Ripley (Sigourney Weaver), 1986"@ko ,
+                        "Ellen Ripley (Sigourney Weaver), 1986"@de ,
+                        "Ellen Ripley (Sigourney Weaver), 1986"@es ,
+                        "Ellen Ripley (Sigourney Weaver), 1986"@fr .
+
+<#predator>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Get to the chopper!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Predator"@en ,
+                    "Rovdjuret"@sv ,
+                    "프레데터"@ko ,
+                    "Predator"@de ,
+                    "Depredador"@es ,
+                    "Predator"@fr ;
+    solid-memo:backNote "Dutch (Arnold Schwarzenegger), 1987"@en ,
+                        "Dutch (Arnold Schwarzenegger), 1987"@sv ,
+                        "Dutch (Arnold Schwarzenegger), 1987"@ko ,
+                        "Dutch (Arnold Schwarzenegger), 1987"@de ,
+                        "Dutch (Arnold Schwarzenegger), 1987"@es ,
+                        "Dutch (Arnold Schwarzenegger), 1987"@fr .
+
+<#blade-runner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "All those moments will be lost in time, like tears in rain."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Blade Runner"@en ,
+                    "Blade Runner"@sv ,
+                    "블레이드 러너"@ko ,
+                    "Blade Runner"@de ,
+                    "Blade Runner"@es ,
+                    "Blade Runner"@fr ;
+    solid-memo:backNote "Roy Batty (Rutger Hauer), 1982"@en ,
+                        "Roy Batty (Rutger Hauer), 1982"@sv ,
+                        "Roy Batty (Rutger Hauer), 1982"@ko ,
+                        "Roy Batty (Rutger Hauer), 1982"@de ,
+                        "Roy Batty (Rutger Hauer), 1982"@es ,
+                        "Roy Batty (Rutger Hauer), 1982"@fr .
+
+<#anchorman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I don't know how to put this, but I'm kind of a big deal."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Anchorman: The Legend of Ron Burgundy"@en ,
+                    "Anchorman"@sv ,
+                    "앵커맨"@ko ,
+                    "Anchorman – Die Legende von Ron Burgundy"@de ,
+                    "Anchorman: The Legend of Ron Burgundy"@es ,
+                    "Présentateur vedette : La Légende de Ron Burgundy"@fr ;
+    solid-memo:backNote "Ron Burgundy (Will Ferrell), 2004"@en ,
+                        "Ron Burgundy (Will Ferrell), 2004"@sv ,
+                        "Ron Burgundy (Will Ferrell), 2004"@ko ,
+                        "Ron Burgundy (Will Ferrell), 2004"@de ,
+                        "Ron Burgundy (Will Ferrell), 2004"@es ,
+                        "Ron Burgundy (Will Ferrell), 2004"@fr .
+
+<#elf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Son of a nutcracker!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Elf"@en ,
+                    "Elf"@sv ,
+                    "엘프"@ko ,
+                    "Buddy – Der Weihnachtself"@de ,
+                    "Elf"@es ,
+                    "Elfe"@fr ;
+    solid-memo:backNote "Buddy (Will Ferrell), 2003"@en ,
+                        "Buddy (Will Ferrell), 2003"@sv ,
+                        "Buddy (Will Ferrell), 2003"@ko ,
+                        "Buddy (Will Ferrell), 2003"@de ,
+                        "Buddy (Will Ferrell), 2003"@es ,
+                        "Buddy (Will Ferrell), 2003"@fr .
+
+<#the-devil-wears-prada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "By all means, move at a glacial pace. You know how that thrills me."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Devil Wears Prada"@en ,
+                    "Djävulen bär Prada"@sv ,
+                    "악마는 프라다를 입는다"@ko ,
+                    "Der Teufel trägt Prada"@de ,
+                    "The Devil Wears Prada"@es ,
+                    "Le diable s'habille en Prada"@fr ;
+    solid-memo:backNote "Miranda Priestly (Meryl Streep), 2006"@en ,
+                        "Miranda Priestly (Meryl Streep), 2006"@sv ,
+                        "Miranda Priestly (Meryl Streep), 2006"@ko ,
+                        "Miranda Priestly (Meryl Streep), 2006"@de ,
+                        "Miranda Priestly (Meryl Streep), 2006"@es ,
+                        "Miranda Priestly (Meryl Streep), 2006"@fr .
+
+<#legally-blonde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "What, like it's hard?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Legally Blonde"@en ,
+                    "Legally Blonde"@sv ,
+                    "금발이 너무해"@ko ,
+                    "Natürlich blond"@de ,
+                    "Legally Blonde"@es ,
+                    "La Revanche d'une blonde"@fr ;
+    solid-memo:backNote "Elle Woods (Reese Witherspoon), 2001"@en ,
+                        "Elle Woods (Reese Witherspoon), 2001"@sv ,
+                        "Elle Woods (Reese Witherspoon), 2001"@ko ,
+                        "Elle Woods (Reese Witherspoon), 2001"@de ,
+                        "Elle Woods (Reese Witherspoon), 2001"@es ,
+                        "Elle Woods (Reese Witherspoon), 2001"@fr .
+
+<#annie-hall>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "La-dee-da, la-dee-da."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Annie Hall"@en ,
+                    "Annie Hall"@sv ,
+                    "애니 홀"@ko ,
+                    "Der Stadtneurotiker"@de ,
+                    "Annie Hall"@es ,
+                    "Annie Hall"@fr ;
+    solid-memo:backNote "Annie Hall (Diane Keaton), 1977"@en ,
+                        "Annie Hall (Diane Keaton), 1977"@sv ,
+                        "Annie Hall (Diane Keaton), 1977"@ko ,
+                        "Annie Hall (Diane Keaton), 1977"@de ,
+                        "Annie Hall (Diane Keaton), 1977"@es ,
+                        "Annie Hall (Diane Keaton), 1977"@fr .
+
+<#the-third-man>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "In Switzerland, they had brotherly love, they had five hundred years of democracy and peace—and what did that produce? The cuckoo clock."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Third Man"@en ,
+                    "Den tredje mannen"@sv ,
+                    "제3의 사나이"@ko ,
+                    "Der dritte Mann"@de ,
+                    "El tercer hombre"@es ,
+                    "Le Troisième Homme"@fr ;
+    solid-memo:backNote "Harry Lime (Orson Welles), 1949"@en ,
+                        "Harry Lime (Orson Welles), 1949"@sv ,
+                        "Harry Lime (Orson Welles), 1949"@ko ,
+                        "Harry Lime (Orson Welles), 1949"@de ,
+                        "Harry Lime (Orson Welles), 1949"@es ,
+                        "Harry Lime (Orson Welles), 1949"@fr .
+
+<#all-about-eve>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Fasten your seatbelts. It's going to be a bumpy night."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "All About Eve"@en ,
+                    "Allt om Eva"@sv ,
+                    "이브의 모든 것"@ko ,
+                    "Alles über Eva"@de ,
+                    "Eva al desnudo"@es ,
+                    "Ève"@fr ;
+    solid-memo:backNote "Margo Channing (Bette Davis), 1950"@en ,
+                        "Margo Channing (Bette Davis), 1950"@sv ,
+                        "Margo Channing (Bette Davis), 1950"@ko ,
+                        "Margo Channing (Bette Davis), 1950"@de ,
+                        "Margo Channing (Bette Davis), 1950"@es ,
+                        "Margo Channing (Bette Davis), 1950"@fr .
+
+<#the-maltese-falcon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "The, uh, stuff that dreams are made of."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Maltese Falcon"@en ,
+                    "Riddarfalken från Malta"@sv ,
+                    "말타의 매"@ko ,
+                    "Die Spur des Falken"@de ,
+                    "El halcón maltés"@es ,
+                    "Le Faucon maltais"@fr ;
+    solid-memo:backNote "Sam Spade (Humphrey Bogart), 1941"@en ,
+                        "Sam Spade (Humphrey Bogart), 1941"@sv ,
+                        "Sam Spade (Humphrey Bogart), 1941"@ko ,
+                        "Sam Spade (Humphrey Bogart), 1941"@de ,
+                        "Sam Spade (Humphrey Bogart), 1941"@es ,
+                        "Sam Spade (Humphrey Bogart), 1941"@fr .
+
+<#butch-cassidy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Who are those guys?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Butch Cassidy and the Sundance Kid"@en ,
+                    "Butch Cassidy och Sundance Kid"@sv ,
+                    "내일을 향해 쏴라"@ko ,
+                    "Zwei Banditen"@de ,
+                    "Butch Cassidy and the Sundance Kid"@es ,
+                    "Butch Cassidy et le Kid"@fr ;
+    solid-memo:backNote "Butch Cassidy (Paul Newman), 1969"@en ,
+                        "Butch Cassidy (Paul Newman), 1969"@sv ,
+                        "Butch Cassidy (Paul Newman), 1969"@ko ,
+                        "Butch Cassidy (Paul Newman), 1969"@de ,
+                        "Butch Cassidy (Paul Newman), 1969"@es ,
+                        "Butch Cassidy (Paul Newman), 1969"@fr .
+
+<#groundhog-day>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "What if there is no tomorrow? There wasn't one today."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Groundhog Day"@en ,
+                    "Måndag hela veckan"@sv ,
+                    "사랑의 블랙홀"@ko ,
+                    "Und täglich grüßt das Murmeltier"@de ,
+                    "Groundhog Day"@es ,
+                    "Un jour sans fin"@fr ;
+    solid-memo:backNote "Phil Connors (Bill Murray), 1993"@en ,
+                        "Phil Connors (Bill Murray), 1993"@sv ,
+                        "Phil Connors (Bill Murray), 1993"@ko ,
+                        "Phil Connors (Bill Murray), 1993"@de ,
+                        "Phil Connors (Bill Murray), 1993"@es ,
+                        "Phil Connors (Bill Murray), 1993"@fr .
+
+<#harry-potter-philosophers-stone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "You're a wizard, Harry."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Harry Potter and the Philosopher's Stone"@en ,
+                    "Harry Potter och de vises sten"@sv ,
+                    "해리 포터와 마법사의 돌"@ko ,
+                    "Harry Potter und der Stein der Weisen"@de ,
+                    "Harry Potter y la piedra filosofal"@es ,
+                    "Harry Potter à l'école des sorciers"@fr ;
+    solid-memo:backNote "Rubeus Hagrid (Robbie Coltrane), 2001"@en ,
+                        "Rubeus Hagrid (Robbie Coltrane), 2001"@sv ,
+                        "Rubeus Hagrid (Robbie Coltrane), 2001"@ko ,
+                        "Rubeus Hagrid (Robbie Coltrane), 2001"@de ,
+                        "Rubeus Hagrid (Robbie Coltrane), 2001"@es ,
+                        "Rubeus Hagrid (Robbie Coltrane), 2001"@fr .
+
+<#the-notebook>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "If you're a bird, I'm a bird."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Notebook"@en ,
+                    "Dagboken – Jag sökte dig och fann mitt hjärta"@sv ,
+                    "노트북"@ko ,
+                    "Wie ein einziger Tag"@de ,
+                    "The Notebook"@es ,
+                    "N'oublie jamais"@fr ;
+    solid-memo:backNote "Noah Calhoun (Ryan Gosling), 2004"@en ,
+                        "Noah Calhoun (Ryan Gosling), 2004"@sv ,
+                        "Noah Calhoun (Ryan Gosling), 2004"@ko ,
+                        "Noah Calhoun (Ryan Gosling), 2004"@de ,
+                        "Noah Calhoun (Ryan Gosling), 2004"@es ,
+                        "Noah Calhoun (Ryan Gosling), 2004"@fr .
+
+<#rain-man>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I'm an excellent driver."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Rain Man"@en ,
+                    "Rain Man"@sv ,
+                    "레인 맨"@ko ,
+                    "Rain Man"@de ,
+                    "Rain Man"@es ,
+                    "Rain Man"@fr ;
+    solid-memo:backNote "Raymond Babbitt (Dustin Hoffman), 1988"@en ,
+                        "Raymond Babbitt (Dustin Hoffman), 1988"@sv ,
+                        "Raymond Babbitt (Dustin Hoffman), 1988"@ko ,
+                        "Raymond Babbitt (Dustin Hoffman), 1988"@de ,
+                        "Raymond Babbitt (Dustin Hoffman), 1988"@es ,
+                        "Raymond Babbitt (Dustin Hoffman), 1988"@fr .
+
+<#the-godfather-part-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Keep your friends close, but your enemies closer."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Godfather Part II"@en ,
+                    "Gudfadern del II"@sv ,
+                    "대부 2"@ko ,
+                    "Der Pate – Teil II"@de ,
+                    "El padrino II"@es ,
+                    "Le Parrain, 2e partie"@fr ;
+    solid-memo:backNote "Michael Corleone (Al Pacino), 1974"@en ,
+                        "Michael Corleone (Al Pacino), 1974"@sv ,
+                        "Michael Corleone (Al Pacino), 1974"@ko ,
+                        "Michael Corleone (Al Pacino), 1974"@de ,
+                        "Michael Corleone (Al Pacino), 1974"@es ,
+                        "Michael Corleone (Al Pacino), 1974"@fr .
+
+<#chinatown>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Forget it, Jake. It's Chinatown."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Chinatown"@en ,
+                    "Chinatown"@sv ,
+                    "차이나타운"@ko ,
+                    "Chinatown"@de ,
+                    "Chinatown"@es ,
+                    "Chinatown"@fr ;
+    solid-memo:backNote "Lawrence Walsh (Joe Mantell), 1974"@en ,
+                        "Lawrence Walsh (Joe Mantell), 1974"@sv ,
+                        "Lawrence Walsh (Joe Mantell), 1974"@ko ,
+                        "Lawrence Walsh (Joe Mantell), 1974"@de ,
+                        "Lawrence Walsh (Joe Mantell), 1974"@es ,
+                        "Lawrence Walsh (Joe Mantell), 1974"@fr .
+
+<#a-league-of-their-own>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "There's no crying in baseball!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "A League of Their Own"@en ,
+                    "Tjejligan"@sv ,
+                    "그들만의 리그"@ko ,
+                    "Eine Klasse für sich"@de ,
+                    "A League of Their Own"@es ,
+                    "Une équipe hors du commun"@fr ;
+    solid-memo:backNote "Jimmy Dugan (Tom Hanks), 1992"@en ,
+                        "Jimmy Dugan (Tom Hanks), 1992"@sv ,
+                        "Jimmy Dugan (Tom Hanks), 1992"@ko ,
+                        "Jimmy Dugan (Tom Hanks), 1992"@de ,
+                        "Jimmy Dugan (Tom Hanks), 1992"@es ,
+                        "Jimmy Dugan (Tom Hanks), 1992"@fr .
+
+<#mommie-dearest>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "No wire hangers, ever!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Mommie Dearest"@en ,
+                    "Mommie Dearest"@sv ,
+                    "존경하는 어머니"@ko ,
+                    "Meine liebe Rabenmutter"@de ,
+                    "Queridísima mamá"@es ,
+                    "Maman très chère"@fr ;
+    solid-memo:backNote "Joan Crawford (Faye Dunaway), 1981"@en ,
+                        "Joan Crawford (Faye Dunaway), 1981"@sv ,
+                        "Joan Crawford (Faye Dunaway), 1981"@ko ,
+                        "Joan Crawford (Faye Dunaway), 1981"@de ,
+                        "Joan Crawford (Faye Dunaway), 1981"@es ,
+                        "Joan Crawford (Faye Dunaway), 1981"@fr .
+
+<#the-departed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I'm the guy who does his job. You must be the other guy."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Departed"@en ,
+                    "The Departed"@sv ,
+                    "디파티드"@ko ,
+                    "Departed – Unter Feinden"@de ,
+                    "Los infiltrados"@es ,
+                    "Les Infiltrés"@fr ;
+    solid-memo:backNote "Staff Sergeant Sean Dignam (Mark Wahlberg), 2006"@en ,
+                        "Staff Sergeant Sean Dignam (Mark Wahlberg), 2006"@sv ,
+                        "Staff Sergeant Sean Dignam (Mark Wahlberg), 2006"@ko ,
+                        "Staff Sergeant Sean Dignam (Mark Wahlberg), 2006"@de ,
+                        "Staff Sergeant Sean Dignam (Mark Wahlberg), 2006"@es ,
+                        "Staff Sergeant Sean Dignam (Mark Wahlberg), 2006"@fr .
+
+<#network>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I'm as mad as hell, and I'm not going to take this anymore!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Network"@en ,
+                    "Network"@sv ,
+                    "네트워크"@ko ,
+                    "Network"@de ,
+                    "Network"@es ,
+                    "Network"@fr ;
+    solid-memo:backNote "Howard Beale (Peter Finch), 1976"@en ,
+                        "Howard Beale (Peter Finch), 1976"@sv ,
+                        "Howard Beale (Peter Finch), 1976"@ko ,
+                        "Howard Beale (Peter Finch), 1976"@de ,
+                        "Howard Beale (Peter Finch), 1976"@es ,
+                        "Howard Beale (Peter Finch), 1976"@fr .
+
+<#the-graduate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Mrs. Robinson, you're trying to seduce me. Aren't you?"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "The Graduate"@en ,
+                    "Mandomsprovet"@sv ,
+                    "졸업"@ko ,
+                    "Die Reifeprüfung"@de ,
+                    "El graduado"@es ,
+                    "Le Lauréat"@fr ;
+    solid-memo:backNote "Benjamin Braddock (Dustin Hoffman), 1967"@en ,
+                        "Benjamin Braddock (Dustin Hoffman), 1967"@sv ,
+                        "Benjamin Braddock (Dustin Hoffman), 1967"@ko ,
+                        "Benjamin Braddock (Dustin Hoffman), 1967"@de ,
+                        "Benjamin Braddock (Dustin Hoffman), 1967"@es ,
+                        "Benjamin Braddock (Dustin Hoffman), 1967"@fr .
+
+<#cool-hand-luke>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "What we've got here is failure to communicate."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Cool Hand Luke"@en ,
+                    "Rebell i bojor"@sv ,
+                    "폭력 탈옥"@ko ,
+                    "Der Unbeugsame"@de ,
+                    "La leyenda del indomable"@es ,
+                    "Luke la main froide"@fr ;
+    solid-memo:backNote "The Captain (Strother Martin), 1967"@en ,
+                        "The Captain (Strother Martin), 1967"@sv ,
+                        "The Captain (Strother Martin), 1967"@ko ,
+                        "The Captain (Strother Martin), 1967"@de ,
+                        "The Captain (Strother Martin), 1967"@es ,
+                        "The Captain (Strother Martin), 1967"@fr .
+
+<#dr-strangelove>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Gentlemen, you can't fight in here! This is the War Room!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "Dr. Strangelove"@en ,
+                    "Dr. Strangelove eller: Hur jag slutade ängslas och lärde mig älska bomben"@sv ,
+                    "닥터 스트레인지러브"@ko ,
+                    "Dr. Seltsam oder: Wie ich lernte, die Bombe zu lieben"@de ,
+                    "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb"@es ,
+                    "Docteur Folamour"@fr ;
+    solid-memo:backNote "President Merkin Muffley (Peter Sellers), 1964"@en ,
+                        "President Merkin Muffley (Peter Sellers), 1964"@sv ,
+                        "President Merkin Muffley (Peter Sellers), 1964"@ko ,
+                        "President Merkin Muffley (Peter Sellers), 1964"@de ,
+                        "President Merkin Muffley (Peter Sellers), 1964"@es ,
+                        "President Merkin Muffley (Peter Sellers), 1964"@fr .
+
+<#2001-a-space-odyssey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "I'm sorry, Dave. I'm afraid I can't do that."@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "2001: A Space Odyssey"@en ,
+                    "År 2001 – ett rymdäventyr"@sv ,
+                    "2001: 스페이스 오디세이"@ko ,
+                    "2001: Odyssee im Weltraum"@de ,
+                    "2001: A Space Odyssey"@es ,
+                    "2001, l'Odyssée de l'espace"@fr ;
+    solid-memo:backNote "HAL 9000 (Douglas Rain), 1968"@en ,
+                        "HAL 9000 (Douglas Rain), 1968"@sv ,
+                        "HAL 9000 (Douglas Rain), 1968"@ko ,
+                        "HAL 9000 (Douglas Rain), 1968"@de ,
+                        "HAL 9000 (Douglas Rain), 1968"@es ,
+                        "HAL 9000 (Douglas Rain), 1968"@fr .
+
+<#white-heat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 6 ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontLabel "Movie quote"@en ,
+                          "Filmcitat"@sv ,
+                          "영화 대사"@ko ,
+                          "Filmzitat"@de ,
+                          "Frase de película"@es ,
+                          "Réplique de film"@fr ;
+    solid-memo:front "Made it, Ma! Top of the world!"@en ;
+    solid-memo:backLabel "Movie"@en ,
+                         "Film"@sv ,
+                         "영화"@ko ,
+                         "Film"@de ,
+                         "Película"@es ,
+                         "Film"@fr ;
+    solid-memo:back "White Heat"@en ,
+                    "Glödhett"@sv ,
+                    "화이트 히트"@ko ,
+                    "Sprung in den Tod"@de ,
+                    "Al rojo vivo"@es ,
+                    "L'enfer est à lui"@fr ;
+    solid-memo:backNote "Cody Jarrett (James Cagney), 1949"@en ,
+                        "Cody Jarrett (James Cagney), 1949"@sv ,
+                        "Cody Jarrett (James Cagney), 1949"@ko ,
+                        "Cody Jarrett (James Cagney), 1949"@de ,
+                        "Cody Jarrett (James Cagney), 1949"@es ,
+                        "Cody Jarrett (James Cagney), 1949"@fr .

@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-17T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-19T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -40,6 +40,7 @@
                  <#eu-member-states> ,
                  <#eurovision-winners> ,
                  <#famous-buildings> ,
+                 <#famous-movie-quotes> ,
                  <#famous-paintings> ,
                  <#famous-sculptures> ,
                  <#federal-states-and-capitals> ,
@@ -1292,6 +1293,7 @@
     dcterms:title "Wikidata: the items of the 43 ions (one per PubChem CID), with their chemical formula (P274), PubChem CID (P662) and English and Swedish labels and aliases" ;
     dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
     dcterms:title "Wikidata (English lexemes and items)" ,
+                  "Wikidata: the films' items, their labels in six languages, publication dates and cast" ,
                   "Wikidata (Finnish lexemes and items)" ,
                   "Wikidata (French lexemes and items)" ,
                   "Wikidata: items of the geometric figures and theorems, their English and Swedish labels and their defining formulas (P2534)" ,
@@ -3724,6 +3726,172 @@
     a dcat:Distribution ;
     dcat:accessURL <https://solid-memo.com/decks/famous-buildings/v2.ttl> ;
     dcat:downloadURL <https://solid-memo.com/decks/famous-buildings/v2.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#famous-movie-quotes>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Famous movie quotes"@en ,
+                  "Kända filmcitat"@sv ,
+                  "유명한 영화 대사"@ko ,
+                  "Berühmte Filmzitate"@de ,
+                  "Frases célebres del cine"@es ,
+                  "Répliques célèbres du cinéma"@fr ;
+    dcterms:description "95 well-known lines from films, one card per film, from Gone with the Wind and The Wizard of Oz (both 1939) to Mad Max: Fury Road (2015). Front: the line, in the language it is spoken in and not translated (94 in English, one in French); back: the film, under its title in each language, with a note naming who says the line, the actor and the year. Each line was checked against at least two written sources (for nearly all, Wikiquote and one of Wikipedia, a published screenplay or a transcript), not against the films themselves. A line that is usually misquoted is given as these sources record it, and a line that is also said in another film of the same story or franchise, such as a sequel or a remake, was left out. Titles and years are from Wikidata (some titles from the film's Wikipedia article), casts from Wikidata or from the film's Wikipedia or Wikiquote cast list. The deck’s own work is CC0; the lines are short quotations from the films, used to identify them, and are not covered by CC0."@en ,
+                        "95 välkända repliker ur filmer, ett kort per film, från Borta med vinden och Trollkarlen från Oz (båda 1939) till Mad Max: Fury Road (2015). Framsida: repliken på det språk den sägs på, oöversatt (94 på engelska, en på franska); baksida: filmen, under sin titel på varje språk, med en anteckning om vem som säger repliken, skådespelaren och året. Varje replik har kontrollerats mot minst två skriftliga källor (för nästan alla Wikiquote och en av Wikipedia, ett publicerat manus eller en transkription), inte mot filmerna själva. En replik som brukar felciteras återges som de här källorna har den, och en replik som också sägs i en annan film av samma berättelse eller serie, till exempel en uppföljare eller en nyinspelning, har utelämnats. Titlar och år kommer från Wikidata (vissa titlar från filmens artikel på Wikipedia), rollistor från Wikidata eller från filmens rollista på Wikipedia eller Wikiquote. Kortlekens eget arbete är CC0; replikerna är korta citat ur filmerna, som används för att identifiera dem, och omfattas inte av CC0."@sv ,
+                        "‘바람과 함께 사라지다’와 ‘오즈의 마법사’(둘 다 1939년)부터 ‘매드 맥스: 분노의 도로’(2015년)까지, 영화의 유명한 대사 95개를 영화마다 한 장씩 담았습니다. 앞면: 대사가 나오는 언어 그대로의 대사, 번역하지 않음(영어 94개, 프랑스어 1개); 뒷면: 각 언어의 제목으로 적은 영화와, 대사를 말하는 인물·배우·연도를 적은 메모. 모든 대사는 영화 자체가 아니라 문헌 두 개 이상과 대조했습니다(거의 모두 Wikiquote와 함께 위키백과, 출간된 각본, 대본 기록 중 하나). 흔히 잘못 인용되는 대사는 이 출처들에 기록된 대로 실었고, 속편이나 리메이크처럼 같은 이야기나 시리즈의 다른 영화에서도 나오는 대사는 뺐습니다. 제목과 연도는 Wikidata에서(일부 제목은 영화의 위키백과 문서에서), 출연진은 Wikidata나 영화의 위키백과·Wikiquote 출연진 목록에서 가져왔습니다. 이 덱의 자체 작업물은 CC0이며, 대사는 영화를 알아보게 하려고 쓴 짧은 인용으로 CC0에 포함되지 않습니다."@ko ,
+                        "95 bekannte Sätze aus Filmen, eine Karte pro Film, von Vom Winde verweht und Der Zauberer von Oz (beide 1939) bis Mad Max: Fury Road (2015). Vorderseite: der Satz in der Sprache, in der er gesprochen wird, unübersetzt (94 auf Englisch, einer auf Französisch); Rückseite: der Film unter seinem Titel in jeder Sprache, mit einer Notiz, wer den Satz sagt, wer ihn spielt und aus welchem Jahr der Film ist. Jeder Satz wurde mit mindestens zwei schriftlichen Quellen abgeglichen (fast immer Wikiquote und eine von Wikipedia, einem veröffentlichten Drehbuch oder einem Transkript), nicht mit den Filmen selbst. Ein Satz, der meist falsch zitiert wird, steht so da, wie diese Quellen ihn wiedergeben, und ein Satz, der auch in einem anderen Film derselben Geschichte oder Reihe fällt, etwa einer Fortsetzung oder einer Neuverfilmung, wurde weggelassen. Titel und Jahre stammen aus Wikidata (manche Titel aus dem Wikipedia-Artikel des Films), Besetzungen aus Wikidata oder aus der Besetzungsliste des Films in Wikipedia oder Wikiquote. Die eigene Arbeit des Stapels ist CC0; die Sätze sind kurze Zitate aus den Filmen, die sie kenntlich machen, und fallen nicht unter CC0."@de ,
+                        "95 frases conocidas del cine, una tarjeta por película, desde Lo que el viento se llevó y El mago de Oz (ambas de 1939) hasta Mad Max: Fury Road (2015). Anverso: la frase en el idioma en que se dice, sin traducir (94 en inglés, una en francés); reverso: la película, con su título en cada idioma, y una nota con quién dice la frase, el actor y el año. Cada frase se ha comprobado con al menos dos fuentes escritas (en casi todas, Wikiquote y una de Wikipedia, un guion publicado o una transcripción), no con las propias películas. Una frase que se suele citar mal aparece tal como la recogen estas fuentes, y se ha dejado fuera la que también se dice en otra película de la misma historia o saga, como una secuela o una nueva versión. Los títulos y los años proceden de Wikidata (algunos títulos, del artículo de la película en Wikipedia), y los repartos de Wikidata o de la lista de reparto de la película en Wikipedia o Wikiquote. El trabajo propio del mazo es CC0; las frases son citas breves de las películas, usadas para identificarlas, y no están cubiertas por CC0."@es ,
+                        "95 répliques célèbres de films, une carte par film, d’Autant en emporte le vent et Le Magicien d’Oz (tous deux de 1939) à Mad Max: Fury Road (2015). Recto : la réplique dans la langue où elle est dite, sans traduction (94 en anglais, une en français) ; verso : le film, sous son titre dans chaque langue, avec une note indiquant qui dit la réplique, l’acteur et l’année. Chaque réplique a été vérifiée sur au moins deux sources écrites (pour presque toutes, Wikiquote et l’une de Wikipédia, un scénario publié ou une transcription), non sur les films eux-mêmes. Une réplique souvent mal citée est donnée telle que ces sources la rapportent, et une réplique également dite dans un autre film de la même histoire ou saga, comme une suite ou un remake, a été écartée. Les titres et les années viennent de Wikidata (certains titres de l’article du film sur Wikipédia), les distributions de Wikidata ou de la liste de distribution du film sur Wikipédia ou Wikiquote. Le travail propre du paquet est sous CC0 ; les répliques sont de courtes citations des films, utilisées pour les identifier, et ne relèvent pas de CC0."@fr ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:film ;
+    dcat:keyword "movie quotes"@en ,
+                 "film quotes"@en ,
+                 "movies"@en ,
+                 "film history"@en ,
+                 "cinema"@en ,
+                 "filmcitat"@sv ,
+                 "repliker"@sv ,
+                 "film"@sv ,
+                 "filmhistoria"@sv ,
+                 "영화 대사"@ko ,
+                 "명대사"@ko ,
+                 "영화"@ko ,
+                 "영화 역사"@ko ,
+                 "Filmzitate"@de ,
+                 "Filme"@de ,
+                 "Filmgeschichte"@de ,
+                 "Kino"@de ,
+                 "frases de película"@es ,
+                 "películas"@es ,
+                 "historia del cine"@es ,
+                 "cine"@es ,
+                 "répliques de films"@fr ,
+                 "films"@fr ,
+                 "histoire du cinéma"@fr ,
+                 "cinéma"@fr ;
+    dcat:first <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl> .
+
+<https://solid-memo.com/decks/famous-movie-quotes/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Famous movie quotes"@en ,
+                  "Kända filmcitat"@sv ,
+                  "유명한 영화 대사"@ko ,
+                  "Berühmte Filmzitate"@de ,
+                  "Frases célebres del cine"@es ,
+                  "Répliques célèbres du cinéma"@fr ;
+    dcterms:creator <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "95 well-known lines from films, one card per film, from Gone with the Wind and The Wizard of Oz (both 1939) to Mad Max: Fury Road (2015). Front: the line, in the language it is spoken in and not translated (94 in English, one in French); back: the film, under its title in each language, with a note naming who says the line, the actor and the year. Each line was checked against at least two written sources (for nearly all, Wikiquote and one of Wikipedia, a published screenplay or a transcript), not against the films themselves. A line that is usually misquoted is given as these sources record it, and a line that is also said in another film of the same story or franchise, such as a sequel or a remake, was left out. Titles and years are from Wikidata (some titles from the film's Wikipedia article), casts from Wikidata or from the film's Wikipedia or Wikiquote cast list. The deck’s own work is CC0; the lines are short quotations from the films, used to identify them, and are not covered by CC0."@en ,
+                        "95 välkända repliker ur filmer, ett kort per film, från Borta med vinden och Trollkarlen från Oz (båda 1939) till Mad Max: Fury Road (2015). Framsida: repliken på det språk den sägs på, oöversatt (94 på engelska, en på franska); baksida: filmen, under sin titel på varje språk, med en anteckning om vem som säger repliken, skådespelaren och året. Varje replik har kontrollerats mot minst två skriftliga källor (för nästan alla Wikiquote och en av Wikipedia, ett publicerat manus eller en transkription), inte mot filmerna själva. En replik som brukar felciteras återges som de här källorna har den, och en replik som också sägs i en annan film av samma berättelse eller serie, till exempel en uppföljare eller en nyinspelning, har utelämnats. Titlar och år kommer från Wikidata (vissa titlar från filmens artikel på Wikipedia), rollistor från Wikidata eller från filmens rollista på Wikipedia eller Wikiquote. Kortlekens eget arbete är CC0; replikerna är korta citat ur filmerna, som används för att identifiera dem, och omfattas inte av CC0."@sv ,
+                        "‘바람과 함께 사라지다’와 ‘오즈의 마법사’(둘 다 1939년)부터 ‘매드 맥스: 분노의 도로’(2015년)까지, 영화의 유명한 대사 95개를 영화마다 한 장씩 담았습니다. 앞면: 대사가 나오는 언어 그대로의 대사, 번역하지 않음(영어 94개, 프랑스어 1개); 뒷면: 각 언어의 제목으로 적은 영화와, 대사를 말하는 인물·배우·연도를 적은 메모. 모든 대사는 영화 자체가 아니라 문헌 두 개 이상과 대조했습니다(거의 모두 Wikiquote와 함께 위키백과, 출간된 각본, 대본 기록 중 하나). 흔히 잘못 인용되는 대사는 이 출처들에 기록된 대로 실었고, 속편이나 리메이크처럼 같은 이야기나 시리즈의 다른 영화에서도 나오는 대사는 뺐습니다. 제목과 연도는 Wikidata에서(일부 제목은 영화의 위키백과 문서에서), 출연진은 Wikidata나 영화의 위키백과·Wikiquote 출연진 목록에서 가져왔습니다. 이 덱의 자체 작업물은 CC0이며, 대사는 영화를 알아보게 하려고 쓴 짧은 인용으로 CC0에 포함되지 않습니다."@ko ,
+                        "95 bekannte Sätze aus Filmen, eine Karte pro Film, von Vom Winde verweht und Der Zauberer von Oz (beide 1939) bis Mad Max: Fury Road (2015). Vorderseite: der Satz in der Sprache, in der er gesprochen wird, unübersetzt (94 auf Englisch, einer auf Französisch); Rückseite: der Film unter seinem Titel in jeder Sprache, mit einer Notiz, wer den Satz sagt, wer ihn spielt und aus welchem Jahr der Film ist. Jeder Satz wurde mit mindestens zwei schriftlichen Quellen abgeglichen (fast immer Wikiquote und eine von Wikipedia, einem veröffentlichten Drehbuch oder einem Transkript), nicht mit den Filmen selbst. Ein Satz, der meist falsch zitiert wird, steht so da, wie diese Quellen ihn wiedergeben, und ein Satz, der auch in einem anderen Film derselben Geschichte oder Reihe fällt, etwa einer Fortsetzung oder einer Neuverfilmung, wurde weggelassen. Titel und Jahre stammen aus Wikidata (manche Titel aus dem Wikipedia-Artikel des Films), Besetzungen aus Wikidata oder aus der Besetzungsliste des Films in Wikipedia oder Wikiquote. Die eigene Arbeit des Stapels ist CC0; die Sätze sind kurze Zitate aus den Filmen, die sie kenntlich machen, und fallen nicht unter CC0."@de ,
+                        "95 frases conocidas del cine, una tarjeta por película, desde Lo que el viento se llevó y El mago de Oz (ambas de 1939) hasta Mad Max: Fury Road (2015). Anverso: la frase en el idioma en que se dice, sin traducir (94 en inglés, una en francés); reverso: la película, con su título en cada idioma, y una nota con quién dice la frase, el actor y el año. Cada frase se ha comprobado con al menos dos fuentes escritas (en casi todas, Wikiquote y una de Wikipedia, un guion publicado o una transcripción), no con las propias películas. Una frase que se suele citar mal aparece tal como la recogen estas fuentes, y se ha dejado fuera la que también se dice en otra película de la misma historia o saga, como una secuela o una nueva versión. Los títulos y los años proceden de Wikidata (algunos títulos, del artículo de la película en Wikipedia), y los repartos de Wikidata o de la lista de reparto de la película en Wikipedia o Wikiquote. El trabajo propio del mazo es CC0; las frases son citas breves de las películas, usadas para identificarlas, y no están cubiertas por CC0."@es ,
+                        "95 répliques célèbres de films, une carte par film, d’Autant en emporte le vent et Le Magicien d’Oz (tous deux de 1939) à Mad Max: Fury Road (2015). Recto : la réplique dans la langue où elle est dite, sans traduction (94 en anglais, une en français) ; verso : le film, sous son titre dans chaque langue, avec une note indiquant qui dit la réplique, l’acteur et l’année. Chaque réplique a été vérifiée sur au moins deux sources écrites (pour presque toutes, Wikiquote et l’une de Wikipédia, un scénario publié ou une transcription), non sur les films eux-mêmes. Une réplique souvent mal citée est donnée telle que ces sources la rapportent, et une réplique également dite dans un autre film de la même histoire ou saga, comme une suite ou un remake, a été écartée. Les titres et les années viennent de Wikidata (certains titres de l’article du film sur Wikipédia), les distributions de Wikidata ou de la liste de distribution du film sur Wikipédia ou Wikiquote. Le travail propre du paquet est sous CC0 ; les répliques sont de courtes citations des films, utilisées pour les identifier, et ne relèvent pas de CC0."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://www.wikipedia.org/> ,
+                        <https://en.wikiquote.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl#compilation> ;
+    dcterms:created "2026-10-18T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:film ;
+    dcat:keyword "movie quotes"@en ,
+                 "film quotes"@en ,
+                 "movies"@en ,
+                 "film history"@en ,
+                 "cinema"@en ,
+                 "filmcitat"@sv ,
+                 "repliker"@sv ,
+                 "film"@sv ,
+                 "filmhistoria"@sv ,
+                 "영화 대사"@ko ,
+                 "명대사"@ko ,
+                 "영화"@ko ,
+                 "영화 역사"@ko ,
+                 "Filmzitate"@de ,
+                 "Filme"@de ,
+                 "Filmgeschichte"@de ,
+                 "Kino"@de ,
+                 "frases de película"@es ,
+                 "películas"@es ,
+                 "historia del cine"@es ,
+                 "cine"@es ,
+                 "répliques de films"@fr ,
+                 "films"@fr ,
+                 "histoire du cinéma"@fr ,
+                 "cinéma"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-19T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#famous-movie-quotes> ;
+    dcat:isVersionOf <#famous-movie-quotes> ;
+    dcat:contactPoint <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl#turtle> ;
+    solid-memo:cardCount 95 .
+
+<https://solid-memo.com/decks/famous-movie-quotes/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/famous-movie-quotes/v1.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/famous-movie-quotes/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://www.wikipedia.org/>
+    dcterms:title "Wikipedia in English, Swedish, Korean, German, Spanish and French: the films' articles, and the English article on AFI's 100 Years...100 Movie Quotes" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:title "Wikipedia (English, Swedish, Korean, German, Spanish and French)" .
+
+<https://en.wikiquote.org/>
+    dcterms:title "English Wikiquote: the films' pages" ;
+    dcterms:creator "Wikiquote contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+
+<https://fr.wikiquote.org/wiki/La_Haine>
+    dcterms:title "French Wikiquote: La Haine" ;
+    dcterms:creator "Wikiquote contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+
+<https://imsdb.com/>
+    dcterms:title "The Internet Movie Script Database (IMSDb): published screenplays" ;
+    dcterms:creator "IMSDb" .
+
+<https://www.springfieldspringfield.co.uk/>
+    dcterms:title "Springfield! Springfield!: subtitle transcripts of films" ;
+    dcterms:creator "Springfield! Springfield!" .
+
+<https://www.moviemistakes.com/>
+    dcterms:title "Movie Mistakes: film quotes" ;
+    dcterms:creator "Jon Sandys" .
+
+<https://www.citation-celebre.com/citations/82615>
+    dcterms:title "Citation Célèbre: Hubert's line in La Haine" ;
+    dcterms:creator "Fabien Branchut" .
+
+<https://solid-memo.com/decks/famous-movie-quotes/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/famous-movie-quotes/v1.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -12482,11 +12650,6 @@
     dcterms:title "Zelfportret Rijksmuseum SK-A-3262.jpeg (Wikimedia Commons)" ;
     dcterms:creator "Wikimedia Commons contributors" ;
     dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
-
-<https://www.wikipedia.org/>
-    dcterms:title "Wikipedia (English, Swedish, Korean, German, Spanish and French)" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
 <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#turtle>
     a dcat:Distribution ;

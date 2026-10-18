@@ -184,6 +184,15 @@ precedence = "override"
 SPDX-FileCopyrightText = "2026 Anton Wiklund and Solid Memo contributors"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
+# A deck that quotes third-party works: CC0 covers the deck's own work, and
+# the quoted lines stay their rights holders' (decks/famous-movie-quotes).
+[[annotations]]
+path = "decks/famous-movie-quotes/*.ttl"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Anton Wiklund and Solid Memo contributors"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "CC0-1.0 covers the deck's own work. The lines on the cards' fronts are short quotations from the films each card names, used to identify them; any rights in them stay with those films' rights holders, and CC0 does not cover them."
+
 # The vendored shapes, kept byte for byte as their authors publish them
 # (packages/vocab/vendor/README.md, whose manifest.json names each file's
 # license). Each folder's LICENSE is the upstream one.
