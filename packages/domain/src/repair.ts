@@ -133,23 +133,3 @@ export function planRepair(report: ValidationReport): RepairPlan {
   }
   return { repairs, unrepairable };
 }
-
-/** What a repair does, for the user: "Give the deck a description". */
-export function describeRepair(repair: Repair): string {
-  switch (repair.kind) {
-    case "describe-deck":
-      return "Give the deck the default description";
-    case "direct-deck":
-      return "Study the deck front to back";
-    case "drop-snapshot":
-      return "Drop the review's half-written undo snapshot";
-    case "recompute-due":
-      return "Recompute the review's due day";
-    case "name-agent":
-      return "Name the person or organization after their address";
-    case "drop-dangling-members":
-      return "Drop the links to decks and groups that are gone";
-    case "remove-subject":
-      return "Remove it";
-  }
-}

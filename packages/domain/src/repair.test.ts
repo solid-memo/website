@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { describeRepair, planRepair, type RepairKind } from "./repair";
+import { planRepair } from "./repair";
 import { summarize, type SubjectReport, type Violation } from "./validation";
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
@@ -148,30 +148,5 @@ describe("planRepair", () => {
         },
       ],
     });
-  });
-});
-
-describe("describeRepair", () => {
-  it("says what each repair does", () => {
-    const kinds: RepairKind[] = [
-      "describe-deck",
-      "direct-deck",
-      "drop-snapshot",
-      "recompute-due",
-      "name-agent",
-      "drop-dangling-members",
-      "remove-subject",
-    ];
-    expect(
-      kinds.map((kind) => describeRepair({ kind, documentUrl: "d", subjectUrl: "s", version: 1 })),
-    ).toEqual([
-      "Give the deck the default description",
-      "Study the deck front to back",
-      "Drop the review's half-written undo snapshot",
-      "Recompute the review's due day",
-      "Name the person or organization after their address",
-      "Drop the links to decks and groups that are gone",
-      "Remove it",
-    ]);
   });
 });
