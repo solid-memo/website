@@ -32,8 +32,6 @@ import { PREFERENCES_3_TO_4 } from "./preferences/3-to-4";
 import { REVIEW_STATE_1_TO_2 } from "./reviewState/1-to-2";
 import type { AnyMigrationStep, MigrationContext } from "./step";
 
-export type { MigrationContext };
-
 /**
  * Every migration step, one per consecutive pair of versions of each
  * kind (see docs/migrations.md). Reading upgrades a record in memory by

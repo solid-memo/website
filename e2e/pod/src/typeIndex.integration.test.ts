@@ -18,7 +18,7 @@
  */
 import { Parser, Writer } from "n3";
 import { describe, expect, inject, it } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { aclOf, ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, storageOf } from "./serverTraits";

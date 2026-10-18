@@ -22,7 +22,6 @@ import { SHAPES_BASE } from "../src/ns.ts";
  * for the conventions the parser relies on.
  */
 
-export { SHAPES_BASE };
 const SH = "http://www.w3.org/ns/shacl#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
 const RDF_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";

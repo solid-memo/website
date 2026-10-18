@@ -14,7 +14,7 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { ResourceStore } from "@solid-memo/application/ports";

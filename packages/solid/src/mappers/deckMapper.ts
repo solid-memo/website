@@ -47,8 +47,6 @@ import { foreignSubjects } from "../ownership";
 import { readVersioned, recordThing, removeUnlessNewer, unlessNewer } from "../records";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
 
-export { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
-
 /** Every agent of a document by URL, named "Name <email>". */
 export function agentNamesOf(dataset: SolidDataset): Map<string, string> {
   const names = new Map<string, string>();

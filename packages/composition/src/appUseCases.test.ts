@@ -4,7 +4,8 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
-import { SITE, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SITE } from "@solid-memo/vocab/tooling/sources";
+import { shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
 import { fakeLocks } from "@solid-memo/browser/testing/fakeLocks";

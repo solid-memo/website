@@ -20,7 +20,7 @@
  */
 import { describe, expect, inject, it } from "vitest";
 import { Parser, Writer } from "n3";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import { arrangementSetAside, setAsideDecks } from "@solid-memo/domain/validation";

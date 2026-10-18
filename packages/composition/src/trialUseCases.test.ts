@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SHAPE_SOURCES, SITE, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SITE } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { GUEST_SESSION } from "@solid-memo/domain/guest";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";

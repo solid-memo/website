@@ -15,7 +15,7 @@
  * states (docs/srs.md#what-a-grade-costs).
  */
 import { describe, expect, inject, it } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import {
   createUseCases,
   type GradeBasis,

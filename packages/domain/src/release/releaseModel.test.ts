@@ -13,13 +13,7 @@ import {
   step,
   text,
 } from "../testing/releaseModel";
-import {
-  emptyReleaseModel,
-  languagesOf,
-  publishedIds,
-  subjectsOf,
-  versionOf,
-} from "./releaseModel";
+import { languagesOf, publishedIds, subjectsOf, versionOf } from "./releaseModel";
 
 describe("subjectsOf and publishedIds", () => {
   const release = model({
@@ -69,11 +63,4 @@ it("gives the languages of texts once each, untagged as the empty tag", () => {
     "sv",
     "",
   ]);
-});
-
-it("starts an empty model at an address", () => {
-  const empty = emptyReleaseModel(RELEASE);
-  expect(empty.url).toBe(RELEASE);
-  expect(empty.cards).toEqual([]);
-  expect(empty.textFormats).toEqual([]);
 });

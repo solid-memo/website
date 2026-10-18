@@ -177,8 +177,6 @@ export type UnreadProblem =
   /** The library's index, so the draft's place in the library is not checked. */
   | { code: "libraryUnread"; params: Record<string, never> };
 
-export type ProblemCode = ProblemDetail["code"];
-
 /** A problem in `subject`: an error, as every rule here names, unless `severity` says it is a warning (a shape's). */
 export function problem(
   subject: string,

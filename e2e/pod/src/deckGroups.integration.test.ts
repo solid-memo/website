@@ -18,7 +18,7 @@
  * Server's in-memory store cuts short beyond ASCII (docs/testing.md).
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { TreeNode } from "@solid-memo/domain/deckTree";

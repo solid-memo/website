@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,

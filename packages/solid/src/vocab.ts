@@ -68,11 +68,6 @@ export const FOAF = {
   isPrimaryTopicOf: "http://xmlns.com/foaf/0.1/isPrimaryTopicOf",
 } as const;
 
-export const PROV = {
-  /** What a deck was drawn from: in a pod, the library release it was imported from. */
-  wasDerivedFrom: "http://www.w3.org/ns/prov#wasDerivedFrom",
-} as const;
-
 export const DCAT = {
   /** A catalog: an instance's catalog.ttl#catalog, the library index. */
   Catalog: "http://www.w3.org/ns/dcat#Catalog",
