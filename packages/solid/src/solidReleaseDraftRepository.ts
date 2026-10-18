@@ -248,13 +248,6 @@ export function createSolidReleaseDraftRepository({
       return readDraft(draftUrl);
     },
 
-    async readSince(draftUrl, version) {
-      const read = await readDraft(draftUrl);
-      return version !== undefined && read.version === version
-        ? { unchanged: true }
-        : { unchanged: false, value: read.draft, version: read.version };
-    },
-
     async applyChanges(before, after, version) {
       const read = reads.get(before.url);
       // Read since at another version (an edit made meanwhile), or never: `before` is not what the documents were.

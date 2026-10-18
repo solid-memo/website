@@ -153,7 +153,6 @@ function makeDeps() {
     createInstance: vi.fn(async () => instance),
     attachInstance: vi.fn(async () => instance),
     deleteInstance: vi.fn(async () => ({ keptFolder: null, keptReleases: false })),
-    deleteInstanceData: vi.fn(async () => ({ keptFolder: null, keptReleases: false })),
     readMeta: vi.fn(async () => null),
     saveMeta: vi.fn(async () => undefined),
     renameRegistrations: vi.fn(async () => undefined),

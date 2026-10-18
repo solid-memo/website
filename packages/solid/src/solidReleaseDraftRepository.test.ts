@@ -275,24 +275,6 @@ describe("read", () => {
     await expect(pod.repository.read(DRAFT)).rejects.toMatchObject({ code: "draftGone" });
   });
 
-  it("reads again only what changed since the version given", async () => {
-    const pod = await draftPod();
-    await pod.repository.create(INSTANCE, course());
-    const { draft, version } = await pod.repository.read(DRAFT);
-    await expect(pod.repository.readSince(DRAFT, version)).resolves.toEqual({ unchanged: true });
-    await expect(pod.repository.readSince(DRAFT, undefined)).resolves.toMatchObject({
-      unchanged: false,
-      version,
-    });
-    await pod.repository.applyChanges(
-      draft,
-      changed(draft, { kind: "retire", of: "card", id: "q-loose" }),
-      version,
-    );
-    const since = await pod.repository.readSince(DRAFT, version);
-    expect(since.unchanged).toBe(false);
-  });
-
   it("tells blank nodes of one document from another's", async () => {
     const pod = await draftPod();
     await pod.repository.create(INSTANCE, course());

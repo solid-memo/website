@@ -4,12 +4,8 @@
 
 import { describe, expect, it } from "vitest";
 import { provenanceOf, provenanceProblems, RDFS_COMMENT } from "./provenanceRules";
-import {
-  emptyReleaseModel,
-  type ReleaseModel,
-  type ReleaseTerm,
-  type ReleaseText,
-} from "./releaseModel";
+import { emptyReleaseModel } from "../testing/releaseModel";
+import type { ReleaseModel, ReleaseTerm, ReleaseText } from "./releaseModel";
 
 const URL = "https://pod.example/releases/solid/v1.ttl";
 const PROV = "http://www.w3.org/ns/prov#";

@@ -81,8 +81,6 @@ export type DocsSiteOptions = {
   draw: Draw;
 };
 
-export type { DocsProblem };
-
 /** Every problem the docs have, each with its file and line. */
 export class DocsSiteError extends Error {
   override name = "DocsSiteError";

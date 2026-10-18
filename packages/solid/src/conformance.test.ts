@@ -28,7 +28,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import { createShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { DCAT, RDF, SM, SM_NS } from "./vocab";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";

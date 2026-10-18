@@ -632,6 +632,9 @@ ends with checks of the repository as a whole, plain Node scripts in
 
 - `check:boundaries` ([checkBoundaries.ts](../scripts/checkBoundaries.ts)):
   the imports between packages ([boundaries.md](boundaries.md)).
+- `check:exports` ([checkExports.ts](../scripts/checkExports.ts)): code
+  that is not a test uses every export of the apps and packages, as
+  [Coverage policy](#coverage-policy) asks.
 - `check:docs` ([checkDocs.ts](../scripts/checkDocs.ts)): every page in
   `docs/` is listed once in [the docs' index](docs.ttl), in one group,
   and every page the index lists is there; no two positions in a group
@@ -764,6 +767,16 @@ documented exclusions:
 Code that cannot reach 100% is restructured until it can (e.g. an
 unreachable defensive branch is removed rather than excluded). New code
 ships with its tests in the same change; coverage never dips.
+
+Coverage cannot see code that only its own test runs: a function
+nothing else calls is covered all the same. `npm run check:exports`
+([checkExports.ts](../scripts/checkExports.ts), in `npm run check`)
+finds it, as an export that code other than tests neither imports
+(nor imports its module whole, nor calls from a `package.json` script)
+nor uses in its own file. Such an export is removed with its tests, or
+put to use; a helper only tests need goes to a `testing/` folder. It
+reads exports, not the members of a port's interface: a port method no
+use case calls is still found by reading.
 
 A test may take 30 seconds, not vitest's 5, also set in
 [vitest.shared.ts](../vitest.shared.ts). CI runs every package's tests

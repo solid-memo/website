@@ -5,7 +5,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/preact";
 import type { ComponentChildren } from "preact";
-import type { RouteChange, RouteRef } from "./router";
+import type { RouteRef } from "./router";
+import type { RouteChange } from "./routerCore";
 import { useScreenFocus } from "./screenFocus";
 
 const home: RouteRef = { screen: "instancePicker" };

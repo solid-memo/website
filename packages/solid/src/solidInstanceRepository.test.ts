@@ -517,19 +517,6 @@ describe("deleteInstance", () => {
 
     expect(removeInstanceRegistrations).not.toHaveBeenCalled();
   });
-
-  it("deletes an instance's data alone, its registrations left as they are", async () => {
-    vi.mocked(deleteInstanceData).mockResolvedValue({ keptFolder: null, keptReleases: false });
-
-    await expect(makeRepository().deleteInstanceData(CONTAINER)).resolves.toEqual({
-      keptFolder: null,
-      keptReleases: false,
-    });
-
-    expect(deleteInstanceData).toHaveBeenCalledWith(CONTAINER, expect.anything());
-    expect(locateTypeIndexes).not.toHaveBeenCalled();
-    expect(removeInstanceRegistrations).not.toHaveBeenCalled();
-  });
 });
 
 describe("readMeta and upgradeMeta", () => {

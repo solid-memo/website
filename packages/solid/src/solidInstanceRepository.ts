@@ -207,10 +207,6 @@ export function createSolidInstanceRepository({
       }
       return deletion;
     },
-
-    deleteInstanceData(instanceUrl) {
-      return deleteInstanceData(instanceUrl, fetch);
-    },
   };
 }
 

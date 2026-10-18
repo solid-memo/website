@@ -106,21 +106,16 @@ export interface InstanceRepository {
     registrationTarget: RegistrationTarget;
   }): Promise<Instance>;
   /**
-   * Delete the instance's data (deleteInstanceData), then drop its type
-   * index registrations. Data goes first: a failure part-way leaves the
+   * Delete what the instance's container holds of Solid Memo's (its
+   * meta, preferences, catalog and digest documents, every deck's cards
+   * and reviews documents, the answer log's months), its sub-containers
+   * and the container itself only once empty, then drop its type index
+   * registrations. Anything else, another app's, is kept, and so is the
+   * container holding it. Data goes first: a failure part-way leaves the
    * instance registered, so the user can retry rather than lose track of
    * a half-deleted pod container.
    */
   deleteInstance(args: { webId: string; instance: Instance }): Promise<InstanceDeletion>;
-  /**
-   * Delete what the instance's container holds of Solid Memo's (its
-   * meta, preferences, catalog and digest documents, every deck's cards
-   * and reviews documents, the answer log's months), its sub-containers
-   * and the container itself only once empty. Anything else, another
-   * app's, is kept, and so is the container holding it. Its
-   * registrations are left as they are.
-   */
-  deleteInstanceData(instanceUrl: string): Promise<InstanceDeletion>;
   /**
    * The registrations of the instance's data, one per class, that
    * belong in the type indexes there are, and whether each is there:
@@ -448,8 +443,6 @@ export interface ReleaseDraftRepository {
    * empty. Throws draftGone when it has no release document.
    */
   read(draftUrl: string): Promise<{ draft: ReleaseDraft; version: string }>;
-  /** The draft unless none of its documents changed since `version` (undefined: read it). */
-  readSince(draftUrl: string, version: string | undefined): Promise<Since<ReleaseDraft>>;
   /**
    * Write what changed from `before` to `after`, `before` as `read` read
    * it last, at `version`: one write per document that changed (a PUT of
@@ -741,7 +734,7 @@ export interface InstanceCopier {
    * free, before anything names it — a guest's study being moved — :
    * every resource in it is a copy whose original stays where it was. An
    * instance in use is deleted by what it holds of Solid Memo's
-   * (InstanceRepository.deleteInstanceData), never whole.
+   * (InstanceRepository.deleteInstance), never whole.
    */
   deleteRecursively(url: string): Promise<void>;
 }

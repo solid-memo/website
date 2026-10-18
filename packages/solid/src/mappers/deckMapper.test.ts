@@ -23,7 +23,6 @@ import {
   getStringNoLocale,
 } from "@inrupt/solid-client";
 import {
-  fragmentIdOf,
   toCard,
   toCards,
   toCatalog,
@@ -45,12 +44,6 @@ const CARDS_DOC = "https://pod.example/solid-memo/a/decks/deck-1.ttl";
 const REVIEWS_DOC = "https://pod.example/solid-memo/a/reviews/deck-1.ttl";
 const FLAG = "https://flagcdn.com/h80/af.png";
 const MAP = "https://img.example/af-map.png";
-
-describe("fragmentIdOf", () => {
-  it("returns the fragment of a subject URL", () => {
-    expect(fragmentIdOf(`${CATALOG}#deck-1`)).toBe("deck-1");
-  });
-});
 
 describe("toDeck", () => {
   function deckThing(build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>) {

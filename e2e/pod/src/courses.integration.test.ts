@@ -14,7 +14,7 @@
  * globalSetup.ts starts.
  */
 import { describe, expect, inject, it } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import type { CourseOutline } from "@solid-memo/domain/course";

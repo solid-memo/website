@@ -36,7 +36,7 @@ import {
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
-import { isDeckOutdated, isOutdated, upgradeCard } from "@solid-memo/domain/migration";
+import { isDeckOutdated, isOutdated, upgradeCard, upgradeDeck } from "@solid-memo/domain/migration";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { CARD_V6 } from "@solid-memo/vocab/descriptors.generated";
 import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
@@ -141,7 +141,7 @@ export function createSolidDeckRepository({
       const subjects: string[] = [];
       // Each entry stored in an older format, as read and brought up to date in memory, written in this app's.
       for (const deck of toDecks(dataset).filter(isDeckOutdated)) {
-        const written: Deck = { ...deck, formatVersion: DECK_FORMAT_VERSION };
+        const written = upgradeDeck(deck);
         dataset = withDeck(dataset, written);
         subjects.push(...deckSubjects(written));
       }

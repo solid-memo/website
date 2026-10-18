@@ -21,7 +21,7 @@
  */
 import { Parser, Writer } from "n3";
 import { beforeAll, describe, expect, inject, it } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";

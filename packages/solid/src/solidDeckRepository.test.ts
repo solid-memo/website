@@ -26,7 +26,7 @@ import {
 } from "@inrupt/solid-client";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { getSolidDatasetOrNull, versionOf } from "./datasets";
-import { DCTERMS, PROV, RDF, SCHEMA, SM } from "./vocab";
+import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 
@@ -48,6 +48,7 @@ vi.mock("./datasets", async (importOriginal) => {
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
 const DCAT_ACCESS_URL = "http://www.w3.org/ns/dcat#accessURL";
+const PROV_WAS_DERIVED_FROM = "http://www.w3.org/ns/prov#wasDerivedFrom";
 const CATALOG = `${INSTANCE}catalog.ttl`;
 const FLAG = "https://flagcdn.com/h80/af.png";
 
@@ -365,7 +366,7 @@ describe("addDeck", () => {
     expect(saveUrl).toBe(CATALOG);
     const thing = getThing(saved as SolidDataset, added.url)!;
     expect(getUrl(thing, SM.cardsDocument)).toBe(added.cardsDocumentUrl);
-    expect(getUrl(thing, PROV.wasDerivedFrom)).toBe(added.sourceUrl);
+    expect(getUrl(thing, PROV_WAS_DERIVED_FROM)).toBe(added.sourceUrl);
     expect(getUrlAll(thing, SM.completedChapter)).toEqual(added.completedChapters);
     expect(getDatetime(thing, DCTERMS.created)?.toISOString()).toBe("2026-01-02T03:04:05.000Z");
     expect(getThing(saved as SolidDataset, deck.url)).not.toBeNull();
@@ -643,7 +644,7 @@ describe("importDeck", () => {
     expect(getSolidDatasetOrNull).toHaveBeenCalledTimes(1);
     const entry = getThing(calls[1][1] as SolidDataset, imported.url)!;
     expect(getStringWithLocale(entry, DCTERMS.title, "en")).toBe("Capitals");
-    expect(getUrl(entry, PROV.wasDerivedFrom)).toBe(content.url);
+    expect(getUrl(entry, PROV_WAS_DERIVED_FROM)).toBe(content.url);
     expect(getUrl(entry, DCTERMS.source)).toBeNull();
     expect(getInteger(entry, SM.formatVersion)).toBe(6);
     expect(getUrl(entry, SM.studyDirection)).toBe(SM.bidirectional);
@@ -1619,7 +1620,7 @@ describe("library upgrade writes", () => {
     const thing = getThing(saved as SolidDataset, deck.url)!;
     expect(getUrl(thing, SM.cardsDocument)).toBe(deck.cardsDocumentUrl);
     expect(getUrl(thing, SM.reviewsDocument)).toBe(deck.reviewsDocumentUrl);
-    expect(getUrl(thing, PROV.wasDerivedFrom)).toBe(next.sourceUrl);
+    expect(getUrl(thing, PROV_WAS_DERIVED_FROM)).toBe(next.sourceUrl);
     expect(getUrl(thing, DCTERMS.license)).toBe(CC0);
   });
 

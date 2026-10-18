@@ -4,7 +4,8 @@
 
 import { describe, expect, it } from "vitest";
 import { parseTurtle } from "@solid-memo/turtle/rdf";
-import { readShapeTree, SHAPES_BASE } from "./sources.ts";
+import { SHAPES_BASE } from "./sources.ts";
+import { readShapeTree } from "./testing/shapeSources.ts";
 
 const SH_MESSAGE = "http://www.w3.org/ns/shacl#message";
 

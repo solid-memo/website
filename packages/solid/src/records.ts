@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 import {
-  addDatetime,
   buildThing,
   createThing,
   getBoolean,
@@ -321,6 +320,3 @@ export function removeUnlessNewer<D extends SolidDataset>(dataset: D, url: strin
   if (thing !== null) unlessNewer(thing);
   return removeThing(dataset, url);
 }
-
-// addDatetime is re-exported for mappers that stamp times outside a record.
-export { addDatetime };

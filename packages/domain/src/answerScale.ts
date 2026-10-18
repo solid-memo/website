@@ -10,12 +10,6 @@ import type { ReviewQuality } from "./review";
  */
 export type AnswerScale = "sm2" | "minimal";
 
-export const ANSWER_SCALES: readonly AnswerScale[] = ["sm2", "minimal"];
-
-export function isAnswerScale(value: unknown): value is AnswerScale {
-  return ANSWER_SCALES.includes(value as AnswerScale);
-}
-
 export type MinimalAnswer = "again" | "hard" | "good" | "easy";
 
 /**

@@ -17,7 +17,7 @@
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import { Parser } from "n3";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import { defaultCatalogDescription } from "@solid-memo/domain/catalog";

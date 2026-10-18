@@ -2,15 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  emptyReleaseModel,
-  type ReleaseCard,
-  type ReleaseChapter,
-  type ReleaseDistractor,
-  type ReleaseModel,
-  type ReleaseStep,
-  type ReleaseTerm,
-  type ReleaseText,
+import type {
+  ReleaseCard,
+  ReleaseChapter,
+  ReleaseDistractor,
+  ReleaseModel,
+  ReleaseStep,
+  ReleaseTerm,
+  ReleaseText,
 } from "../release/releaseModel.ts";
 
 /**
@@ -23,6 +22,44 @@ export const at = (id: string) => `${RELEASE}#${id}`;
 
 const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
 const STRING = "http://www.w3.org/2001/XMLSchema#string";
+
+/** A model with nothing in it but its address: what a test starts from. */
+export function emptyReleaseModel(url: string): ReleaseModel {
+  return {
+    url,
+    decks: [],
+    types: [],
+    version: [],
+    title: [],
+    description: [],
+    keywords: [],
+    themes: [],
+    languages: [],
+    issued: [],
+    modified: [],
+    versionNotes: [],
+    studyDirection: [],
+    inSeries: [],
+    isVersionOf: [],
+    publisher: [],
+    prev: [],
+    previousVersion: [],
+    distribution: [],
+    license: [],
+    contacts: [],
+    emails: [],
+    sources: [],
+    activities: [],
+    making: [],
+    sourceDetails: [],
+    cards: [],
+    chapters: [],
+    steps: [],
+    distractors: [],
+    distractorLinks: [],
+    textFormats: [],
+  };
+}
 
 /** A literal, language-tagged unless `language` is "". */
 export function text(value: string, language = "en"): ReleaseText {

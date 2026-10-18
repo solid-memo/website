@@ -3,9 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { StorageSource } from "@solid-memo/domain/storage";
-import { hashParams as params, parsePage, useHashRouter, type RouteChange } from "./routerCore";
-
-export type { RouteChange };
+import { hashParams as params, parsePage, useHashRouter } from "./routerCore";
 
 /**
  * Serializable description of a Workspace view. Unlike the resolved
