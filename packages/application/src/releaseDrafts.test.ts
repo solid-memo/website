@@ -71,7 +71,6 @@ function setUp({
     documents: vi.fn(async () => []),
     create: vi.fn(async (_instance: string, draft: ReleaseDraft) => draftSummaryOf(draft)!),
     read: vi.fn(async () => ({ draft: stored, version: "v1" })),
-    readSince: vi.fn(),
     applyChanges: vi.fn(async () => undefined),
     assemble: vi.fn(),
     readRelease: vi.fn(async () => v1),

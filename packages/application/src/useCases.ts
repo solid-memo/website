@@ -1287,7 +1287,6 @@ const NO_DRAFTS: ReleaseDraftRepository = {
   documents: none,
   create: noDrafts,
   read: noDrafts,
-  readSince: noDrafts,
   applyChanges: noDrafts,
   assemble: noDrafts,
   readRelease: noDrafts,
