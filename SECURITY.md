@@ -68,3 +68,17 @@ Out of scope:
 - GitHub Pages, which hosts the site, and the libraries the app depends
   on, unless Solid Memo uses them in an unsafe way. Report a library's
   own vulnerability to that library.
+
+## Code scanning
+
+GitHub's CodeQL scans the code on each push to `main`, on pull requests
+from branches of this repository (not from forks) and once a week, for
+security flaws and coding errors, such as a regular expression that
+filters HTML badly or checks only part of a hostname. Its alerts are
+listed under the repository's Security tab. They are found by a tool,
+not reported by a person, so they are not handled as private reports:
+each is fixed in a public pull request, like any other change, and its
+commit says what CodeQL flagged and why the change fixes it
+([docs/testing.md](docs/testing.md#code-scanning)). A vulnerability
+you find yourself still goes through
+[Reporting a vulnerability](#reporting-a-vulnerability).

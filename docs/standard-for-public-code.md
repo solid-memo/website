@@ -872,7 +872,7 @@ changes:
 - **Done.** **The DOI's entry.** Make Zenodo's entry name solid-memo.com, for
   example with a `.zenodo.json` that lists the website as a related
   identifier, since Zenodo does not take `CITATION.cff`'s `url`. *(14)*
-- **Open.** **CodeQL in the docs.** CodeQL scans the code, but no page says
+- **Done.** **CodeQL in the docs.** CodeQL scans the code, but no page says
   so: [testing.md](testing.md) and SECURITY.md could say what it checks
   and that its alerts are fixed in pull requests like any other change.
   *(12)*
