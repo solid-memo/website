@@ -876,7 +876,7 @@ changes:
   so: [testing.md](testing.md) and SECURITY.md could say what it checks
   and that its alerts are fixed in pull requests like any other change.
   *(12)*
-- **Open.** **ROADMAP.md.** "Done recently" stops at 1.0.0; add what 1.0.1 to
+- **Done.** **ROADMAP.md.** "Done recently" stops at 1.0.0; add what 1.0.1 to
   2.1.1 brought, such as the merge queue, the breaking-change gate and
   the Arabic decks. *(4)*
 - **Open.** **The user guide.** Say that the library has Arabic decks and that
