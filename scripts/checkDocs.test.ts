@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { defaultIo, docsIndexProblems, main, run } from "./checkDocs.ts";
+import { defaultIo, docsIndexProblems, main, run, scriptProblems } from "./checkDocs.ts";
 
 const INDEX = `@base <https://solid-memo.com/docs/> .
 
@@ -70,13 +70,54 @@ describe("docsIndexProblems", () => {
   });
 });
 
+const SCRIPTS = {
+  root: ["dev", "start", "check:docs"],
+  workspaces: { "@solid-memo/web": ["preview"] },
+};
+
+describe("scriptProblems", () => {
+  it("passes a script of the root package, and one of the workspace -w names", () => {
+    const markdown = new Map([
+      [
+        "docs/deployment.md",
+        "`npm run dev`, `npm run check:docs`,\n`npm run preview -w\n@solid-memo/web`, `npm run preview --workspace=@solid-memo/web -- --open`",
+      ],
+    ]);
+    expect(scriptProblems(markdown, SCRIPTS)).toEqual([]);
+  });
+
+  it("names a script the package does not have, and a workspace there is not, by line", () => {
+    const markdown = new Map([
+      [
+        "README.md",
+        "Run it:\n\n```sh\nnpm run preview\nnpm run dev -w @solid-memo/web\nnpm run dev -w @solid-memo/gone\n```\n",
+      ],
+    ]);
+    expect(scriptProblems(markdown, SCRIPTS)).toEqual([
+      "README.md:4: npm run preview: the root package.json has no such script",
+      "README.md:5: npm run dev -w @solid-memo/web: the workspace has no such script",
+      "README.md:6: npm run dev -w @solid-memo/gone: no such workspace",
+    ]);
+  });
+
+  it("reads a placeholder as no script, and leaves the changelog out", () => {
+    const markdown = new Map([
+      ["docs/testing.md", "`npm run <script>`"],
+      ["CHANGELOG.md", "* rename `npm run preview` to `npm start`"],
+    ]);
+    expect(scriptProblems(markdown, SCRIPTS)).toEqual([]);
+  });
+});
+
 describe("main", () => {
-  function fakeIo(pages: string[]) {
+  function fakeIo(pages: string[], markdown = "`npm run dev`") {
     const logs: string[] = [];
     return {
       logs,
       pages: () => pages,
       index: () => INDEX,
+      markdown: () => new Map([["README.md", markdown]]),
+      scripts: () => SCRIPTS,
       log: (message: string) => logs.push(message),
     };
   }
@@ -84,7 +125,9 @@ describe("main", () => {
   it("says so and returns 0 when the index is whole", () => {
     const io = fakeIo(["README.md", "architecture.md", "boundaries.md"]);
     expect(main(io)).toBe(0);
-    expect(io.logs).toEqual(["docs/docs.ttl lists every page in docs/."]);
+    expect(io.logs).toEqual([
+      "docs/docs.ttl lists every page in docs/, and every npm run in the Markdown names a script.",
+    ]);
   });
 
   it("logs each problem and returns 1", () => {
@@ -92,15 +135,25 @@ describe("main", () => {
     expect(main(io)).toBe(1);
     expect(io.logs).toEqual([PRIVACY]);
   });
+
+  it("logs a script that is not there and returns 1", () => {
+    const io = fakeIo(["README.md", "architecture.md", "boundaries.md"], "`npm run preview`");
+    expect(main(io)).toBe(1);
+    expect(io.logs).toEqual([
+      "README.md:1: npm run preview: the root package.json has no such script",
+    ]);
+  });
 });
 
 describe("the repository's docs", () => {
-  it("are all listed", () => {
+  it("are all listed, and name scripts that are there", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     const process = { exitCode: undefined as number | string | null | undefined };
     run(process);
     expect(process.exitCode).toBe(0);
-    expect(log).toHaveBeenCalledWith("docs/docs.ttl lists every page in docs/.");
+    expect(log).toHaveBeenCalledWith(
+      "docs/docs.ttl lists every page in docs/, and every npm run in the Markdown names a script.",
+    );
     log.mockRestore();
   });
 
@@ -108,5 +161,9 @@ describe("the repository's docs", () => {
     const io = defaultIo(`${import.meta.dirname}/..`);
     expect(io.pages()).toContain("README.md");
     expect(io.index()).toContain("<srs.md>");
+    expect(io.markdown().get("AGENTS.md")).toContain("npm run check");
+    const scripts = io.scripts();
+    expect(scripts.root).toContain("dev");
+    expect(scripts.workspaces["@solid-memo/web"]).toContain("preview");
   });
 });
