@@ -32,7 +32,8 @@ This repository's docs are indexed in [docs/docs.ttl](docs/docs.ttl); start with
 - **A new page** in `docs/` is listed in `docs/docs.ttl`, then
   `npm run format:turtle` ([docs/markdown.md](docs/markdown.md#the-docs-index)).
 - **Coverage** is 100% per package; new code ships with its tests, and
-  unreachable code is removed, not excluded ([docs/testing.md](docs/testing.md)).
+  unreachable code is removed, not excluded, as is code only tests use,
+  which `npm run check:exports` finds ([docs/testing.md](docs/testing.md#coverage-policy)).
 - **Formatting**: after editing TypeScript, JSON or CSS, run `npm run format`
   (Biome); `npm run lint` checks it ([docs/style.md](docs/style.md#formatting)).
 - **One test file**: `npm run test:unit -- <path>`, from the root.
