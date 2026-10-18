@@ -691,16 +691,20 @@ CI's `docs` job:
   checks that those on the site's own domain, such as its
   `documentation`, are pages the build serves. Without one, the step
   says so and passes ([.github/actions/publiccode](../.github/actions/publiccode/action.yml)).
-- **Licenses**: [reuse](https://reuse.software/) (`fsfe/reuse-action`,
+- **Licenses**: [reuse](https://reuse.software/) (`npm run lint:reuse`,
   `reuse lint`) checks that every file in the repository states its
   copyright and license, in an SPDX header or in
   [REUSE.toml](../REUSE.toml), and that the text of every license used
   is in [LICENSES/](../LICENSES/) ([style.md](style.md#licenses)). The
-  job installs nothing, so only the repository's own files are there.
-  It is not part of `npm run check`, since reuse is a Python tool:
-  `npm run lint:reuse` runs it locally with reuse installed, or
-  `pipx run reuse lint` or `uv run --no-project --with reuse reuse lint`
-  without installing it.
+  job installs no npm packages, so only the repository's own files are
+  there. reuse is pinned in
+  [requirements-lint.txt](../scripts/requirements-lint.txt), from PyPI,
+  not as a Docker image, which Docker Hub's limit on pulls without an
+  account, shared by the runners, could refuse. It is not part of
+  `npm run check`, since reuse is a Python tool:
+  `pip install -r scripts/requirements-lint.txt` installs it, or
+  `uv run --no-project --with-requirements scripts/requirements-lint.txt reuse lint`
+  runs it without installing it.
 
 That every page is listed in the index is `npm run check`'s
 (`check:docs`, above).

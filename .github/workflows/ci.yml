@@ -400,7 +400,10 @@ jobs:
   # file states its copyright and license, as REUSE has it (`reuse lint`,
   # docs/style.md#licenses). The Markdown's style and spelling are
   # npm run check's, in build. None of these tools is an npm package, so
-  # the job installs none.
+  # the job installs no npm packages: reuse comes from PyPI, pinned in
+  # scripts/requirements-lint.txt, not as fsfe/reuse-action's Docker
+  # image, which Docker Hub's limit on pulls without an account, shared
+  # by the runners, could refuse, and which names its image by a tag.
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -408,9 +411,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # With nothing installed, only the repository's own files are there
-      # to check, whether or not reuse reads .gitignore in its container.
-      - uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.15"
+          cache: pip
+          cache-dependency-path: scripts/requirements-lint.txt
+      # pip installs outside the checkout, so only the repository's own
+      # files are there to check.
+      - run: pip install -r scripts/requirements-lint.txt
+      - run: npm run lint:reuse
       - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: --offline '**/*.md'

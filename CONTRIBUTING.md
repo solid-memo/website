@@ -271,8 +271,10 @@ Every file says so in a machine-readable way, as
 the SPDX header, and a new deck is listed in [REUSE.toml](REUSE.toml)
 under the license it states. [docs/style.md](docs/style.md#licenses)
 says how. `npm run lint:reuse` checks it (it needs the
-[reuse](https://reuse.software/) tool: `pipx run reuse lint`, or
-`uv run --no-project --with reuse reuse lint`, without installing it),
+[reuse](https://reuse.software/) tool:
+`pip install -r scripts/requirements-lint.txt` installs it, or
+`uv run --no-project --with-requirements scripts/requirements-lint.txt reuse lint`
+runs it without installing it),
 and so does CI; `npm run check` checks only that each deck is listed
 under the license it states.
 

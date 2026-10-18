@@ -21,8 +21,8 @@ This repository's docs are indexed in [docs/docs.ttl](docs/docs.ttl); start with
   typecheck, tests and the repository's checks; it draws the docs'
   diagrams in Chromium, which `npm run browsers` installs once, and it
   fails under `DOCS_DIAGRAMS=skip`), `npm run lint:reuse` too
-  when a file was added (it needs reuse: `pipx run reuse lint`, or
-  `uv run --no-project --with reuse reuse lint`), and `npm run crosscheck`
+  when a file was added (it needs reuse:
+  `pip install -r scripts/requirements-lint.txt`), and `npm run crosscheck`
   too when `ns/` or `decks/` changed (it needs
   `pip install -r scripts/requirements-ci.txt`), and `npm run lint:workflows`
   too when `.github/` changed (it needs
