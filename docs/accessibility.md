@@ -86,10 +86,17 @@ What a tool can't judge is checked by hand as a change is reviewed:
 
 ## Known gaps
 
+A gap that is planned links to its issue; the others have none yet,
+and an issue for one is welcome ([below](#report-a-barrier)).
+
 - **Contrast tests**: for the site's stylesheet they cover some token
   pairs only, not every text and surface pair in both themes. axe
   checks the contrast of the screens the journeys visit.
-- **Screen readers**: no pass with a screen reader is written down.
+- **Screen readers**: no pass with a screen reader, NVDA or VoiceOver,
+  through the main journeys is written down yet. It would find what
+  the checks above can't, such as whether a reader takes up the
+  languages marked inside the names of the Studio's cells
+  ([#169](https://github.com/solid-memo/website/issues/169)).
 - **Browsers**: every journey runs in Chromium, but only those that
   differ between engines run in Firefox, WebKit and on a phone
   ([testing.md](testing.md#browsers)), so axe sees the other screens
