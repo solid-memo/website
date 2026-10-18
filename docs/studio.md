@@ -1767,7 +1767,10 @@ each part per draft. The release a draft follows is read once.
 
 The policy is a pod's by default: a release in a pod is held to its
 data's rules only. `policy=library` adds the Solid Memo library's
-curation (`repoPolicy`: English and Swedish keywords, the theme EDUC)
+curation (`repoPolicy`: English and Swedish keywords, the theme EDUC,
+and the library's contact in place of an email, as
+`npm run library:check` asks of a new version:
+[deck-library.md](deck-library.md#contact))
 and its place among the library's decks. Neither names a series,
 author or host: a library is its index, and a policy is data.
 
@@ -1970,6 +1973,7 @@ library's releases are written
 - **Authors**: the release's own agents (`foaf:Agent`, `#<name>`), its
   `dcterms:creator`s, each with a name and an optional email
   ([releaseMetadata.ts](../packages/domain/src/release/releaseMetadata.ts)).
+  A release in a pod may name an email; one for the library names none.
   Removing an author removes its agent too, unless it publishes the
   release or a statement names it (an earlier version's making may: that
   is never rewritten). Authors another document describes are named, and

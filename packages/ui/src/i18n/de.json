@@ -2960,6 +2960,8 @@
       },
       "missingLanguage": "{field}: kein Text auf {language}.",
       "missingTheme": "Themen: {theme} fehlt.",
+      "missingContact": "Kontakt: Der der Bibliothek, {contact}, ist nicht angegeben. Eine Veröffentlichung für die Bibliothek nennt ihn, keine E-Mail-Adresse.",
+      "emailNamed": "Nennt eine E-Mail-Adresse: Eine Veröffentlichung für die Bibliothek nennt keine E-Mail-Adresse, nur den Kontakt der Bibliothek.",
       "required": "{field}: noch nicht angegeben.",
       "previousUnread": "Die Ausgabe, auf die sie folgt, {previous}, konnte nicht gelesen werden, daher wird nichts mit ihr verglichen. Prüfe später noch einmal.",
       "libraryUnread": "Der Index der Bibliothek konnte nicht gelesen werden, daher wird der Platz des Entwurfs in der Bibliothek nicht geprüft. Prüfe später noch einmal.",

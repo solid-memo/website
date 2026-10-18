@@ -28,6 +28,7 @@ import {
   markdownProblems as releaseMarkdownProblems,
   type FieldRuleName,
 } from "@solid-memo/domain/release/markdownFields";
+import { LIBRARY_CONTACT } from "@solid-memo/domain/release/curationRules";
 import { libraryReleaseUrl, librarySeriesUrl } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import {
@@ -90,13 +91,6 @@ export const DECKS_BASE = `${SITE}decks/`;
 export const INDEX_FILE = "index.ttl";
 export const INDEX_URL = `${DECKS_BASE}${INDEX_FILE}`;
 export const PUBLISHER_URL = `${INDEX_URL}#solid-memo`;
-
-/**
- * The library's contact (docs/deck-library.md, Contact): the project's
- * issue tracker. A new release names it as its dcat:contactPoint, a
- * vcard:Kind with this vcard:hasURL, and names no one's email.
- */
-export const CONTACT_URL = "https://github.com/solid-memo/website/issues";
 
 /** The deck whose series the index names the course for newcomers (solid-memo:newcomerCourse); undefined names none. See docs/deck-library.md. */
 export const NEWCOMER_COURSE: string | undefined = "getting-started";
@@ -482,7 +476,7 @@ export function newcomerProblems(indexQuads: readonly Quad[]): string[] {
  * Contact), which main checks on the versions not published at `--base`:
  * no foaf:mbox on any subject, and as the release's dcat:contactPoint
  * the library's contact, a vcard:Kind of the release with vcard:hasURL
- * <CONTACT_URL>.
+ * <LIBRARY_CONTACT> (@solid-memo/domain/release/curationRules).
  */
 export function contactProblems(release: DeckRelease): string[] {
   const label = labelOf(release.deck, release.version);
@@ -498,11 +492,11 @@ export function contactProblems(release: DeckRelease): string[] {
   const isContact = (point: Quad_Object) =>
     objectsOf(release.quads, point.value, RDF_TYPE).some((o) => o.value === `${VCARD}Kind`) &&
     objectsOf(release.quads, point.value, `${VCARD}hasURL`).some(
-      (o) => o.termType === "NamedNode" && o.value === CONTACT_URL,
+      (o) => o.termType === "NamedNode" && o.value === LIBRARY_CONTACT,
     );
   if (!objectsOf(release.quads, url, `${DCAT}contactPoint`).some(isContact)) {
     problems.push(
-      `${label}: states no dcat:contactPoint that is the library's contact: a new version states \`<> dcat:contactPoint <#contact>\` and \`<#contact> a vcard:Kind ; vcard:hasURL <${CONTACT_URL}>\`.`,
+      `${label}: states no dcat:contactPoint that is the library's contact: a new version states \`<> dcat:contactPoint <#contact>\` and \`<#contact> a vcard:Kind ; vcard:hasURL <${LIBRARY_CONTACT}>\`.`,
     );
   }
   return problems;

@@ -122,6 +122,10 @@ export type CurationProblem =
   /** No text in a language the policy asks of the title, description or keywords (`field`). */
   | { code: "missingLanguage"; params: { language: string } }
   | { code: "missingTheme"; params: { theme: string } }
+  /** No contact point (dcat:contactPoint) that is a vcard:Kind naming the policy's `contact` (vcard:hasURL). */
+  | { code: "missingContact"; params: { contact: string } }
+  /** An email (foaf:mbox) of the subject, which the policy asks no release to name. */
+  | { code: "emailNamed"; params: Record<string, never> }
   /** A source that does not say what it is, whose it is, or on what terms it was used. */
   | { code: "sourceUndescribed"; params: { missing: SourceDetail[] } }
   /** A source the making used (`related`: the activities) that the release does not say it is derived from. */

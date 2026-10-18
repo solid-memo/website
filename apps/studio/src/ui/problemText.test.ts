@@ -189,6 +189,17 @@ describe("problemMessage", () => {
         params: { theme: "http://publications.europa.eu/resource/authority/data-theme/EDUC" },
       }),
     ).toBe("Themes: EDUC is missing.");
+    expect(
+      say({
+        code: "missingContact",
+        params: { contact: "https://github.com/solid-memo/website/issues" },
+      }),
+    ).toBe(
+      "Contact: the library's, https://github.com/solid-memo/website/issues, is not stated. A release for the library names it, not an email.",
+    );
+    expect(say({ code: "emailNamed", params: {} })).toBe(
+      "Names an email: a release for the library names no one's email, only the library's contact.",
+    );
     expect(say({ code: "required", params: {} }, `${DCTERMS}publisher`)).toBe(
       "Publisher: not stated yet.",
     );

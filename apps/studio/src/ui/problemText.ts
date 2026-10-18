@@ -219,6 +219,10 @@ export function problemMessage(
       return t(key, {
         theme: problem.params.theme.slice(problem.params.theme.lastIndexOf("/") + 1),
       });
+    case "missingContact":
+      return t(key, { contact: problem.params.contact });
+    case "emailNamed":
+      return t(key);
     case "required":
       return t(key, { field });
     case "sourceUndescribed":

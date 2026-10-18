@@ -3127,6 +3127,8 @@
       },
       "missingLanguage": "{field} : aucun texte en {language}.",
       "missingTheme": "Thèmes : {theme} est manquant.",
+      "missingContact": "Contact : celui de la bibliothèque, {contact}, n'est pas indiqué. Une publication pour la bibliothèque l'indique, pas une adresse e-mail.",
+      "emailNamed": "Indique une adresse e-mail : une publication pour la bibliothèque n'indique l'adresse e-mail de personne, seulement le contact de la bibliothèque.",
       "required": "{field} : à renseigner.",
       "previousUnread": "Impossible de lire la publication qu’elle suit, {previous} : rien n’est donc vérifié par rapport à elle. Vérifiez à nouveau plus tard.",
       "libraryUnread": "Impossible de lire l’index de la bibliothèque : la place du brouillon dans la bibliothèque n’est donc pas vérifiée. Vérifiez à nouveau plus tard.",

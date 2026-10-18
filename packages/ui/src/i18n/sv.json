@@ -2960,6 +2960,8 @@
       },
       "missingLanguage": "{field}: ingen text på {language}.",
       "missingTheme": "Teman: saknar {theme}.",
+      "missingContact": "Kontakt: bibliotekets, {contact}, anges inte. En utgåva för biblioteket anger den, inte en e-postadress.",
+      "emailNamed": "Anger en e-postadress: en utgåva för biblioteket anger ingens e-postadress, bara bibliotekets kontakt.",
       "required": "{field}: inte angivet än.",
       "previousUnread": "Utgåvan den följer, {previous}, kunde inte läsas, så inget kontrolleras mot den. Kontrollera igen senare.",
       "libraryUnread": "Bibliotekets index kunde inte läsas, så utkastets plats i biblioteket kontrolleras inte. Kontrollera igen senare.",

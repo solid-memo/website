@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { LIBRARY_CONTACT } from "@solid-memo/domain/release/curationRules";
 import { execFileSync } from "node:child_process";
 import { mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -10,7 +11,6 @@ import { describe, expect, it, vi } from "vitest";
 import {
   baseProblems,
   buildIndex,
-  CONTACT_URL,
   contactProblems,
   courseProblems,
   defaultIo,
@@ -1219,7 +1219,7 @@ describe("markdownProblems", () => {
 
 describe("contactProblems", () => {
   const L = "decks/capitals/v1.ttl";
-  const NONE = `${L}: states no dcat:contactPoint that is the library's contact: a new version states \`<> dcat:contactPoint <#contact>\` and \`<#contact> a vcard:Kind ; vcard:hasURL <${CONTACT_URL}>\`.`;
+  const NONE = `${L}: states no dcat:contactPoint that is the library's contact: a new version states \`<> dcat:contactPoint <#contact>\` and \`<#contact> a vcard:Kind ; vcard:hasURL <${LIBRARY_CONTACT}>\`.`;
 
   it("accepts a release that names the library's contact and no email", () => {
     expect(contactProblems(release("capitals", 1, CONTACT))).toEqual([]);
@@ -1251,9 +1251,9 @@ describe("contactProblems", () => {
         quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`),
       };
     };
-    expect(contactProblems(withPoint(`<#contact> <${VCARD}hasURL> <${CONTACT_URL}> .`))).toEqual([
-      NONE,
-    ]);
+    expect(
+      contactProblems(withPoint(`<#contact> <${VCARD}hasURL> <${LIBRARY_CONTACT}> .`)),
+    ).toEqual([NONE]);
     expect(
       contactProblems(
         withPoint(`<#contact> a <${VCARD}Kind> ; <${VCARD}hasURL> <https://example.org/issues> .`),
@@ -1261,7 +1261,7 @@ describe("contactProblems", () => {
     ).toEqual([NONE]);
     expect(
       contactProblems(
-        withPoint(`<#contact> a <${VCARD}Kind> ; <${VCARD}hasURL> "${CONTACT_URL}" .`),
+        withPoint(`<#contact> a <${VCARD}Kind> ; <${VCARD}hasURL> "${LIBRARY_CONTACT}" .`),
       ),
     ).toEqual([NONE]);
   });
