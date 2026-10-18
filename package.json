@@ -70,6 +70,7 @@
     "pod": "npm run pod -w @solid-memo/e2e-pod",
     "pod:clean": "npm run pod:clean -w @solid-memo/e2e-pod",
     "journeys": "npm run test:journeys -w @solid-memo/e2e-journeys --",
+    "screenshots": "npm run screenshots -w @solid-memo/e2e-journeys",
     "browsers": "npm run browsers -w @solid-memo/markdown",
     "generate": "npm run generate -w @solid-memo/vocab",
     "generate:check": "turbo run generate:check",

@@ -13,6 +13,7 @@
     "journeys:ui": "playwright test --ui",
     "journeys:headed": "playwright test --headed",
     "journeys:report": "playwright show-report",
+    "screenshots": "playwright test -c screenshots.config.ts",
     "browsers": "playwright install --with-deps chromium firefox webkit",
     "css": "node harness/cssServer.ts",
     "css:prepare": "node harness/cssServer.ts prepare",
