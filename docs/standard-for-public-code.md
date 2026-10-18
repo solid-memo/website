@@ -869,7 +869,7 @@ changes:
   [glossary.md](glossary.md), or where they are first used, and link the
   EU data theme table where [deck-library.md](deck-library.md) names
   `EDUC`. *(10)*
-- **Open.** **The DOI's entry.** Make Zenodo's entry name solid-memo.com, for
+- **Done.** **The DOI's entry.** Make Zenodo's entry name solid-memo.com, for
   example with a `.zenodo.json` that lists the website as a related
   identifier, since Zenodo does not take `CITATION.cff`'s `url`. *(14)*
 - **Open.** **CodeQL in the docs.** CodeQL scans the code, but no page says

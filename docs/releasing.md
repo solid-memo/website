@@ -247,6 +247,26 @@ release, semantic-release:
    always resolves to the latest release, and is the one in
    `CITATION.cff` and the README.
 
+Zenodo never took `CITATION.cff`'s `url`, so the entry did not name
+the website. [`.zenodo.json`](../.zenodo.json) does. It holds the
+metadata Zenodo gives each archived release: the title, the
+description, the author, the license, the keywords, and links to the
+repository and to solid-memo.com. When that file is there, Zenodo
+ignores `CITATION.cff`
+([Zenodo's help](https://help.zenodo.org/docs/github/describe-software/zenodo-json/)).
+
+Its links replace the one Zenodo makes itself to the release's tag. So
+a version's entry links the repository, not the tag; the version, which
+Zenodo takes from the tag, still names it.
+
+`CITATION.cff` and `.zenodo.json` say the same things in two formats.
+Nothing checks that they agree. A change to one, such as a new keyword
+or a new description, is made in the other in the same pull request,
+and in `publiccode.yml` where it says the same.
+
+`.zenodo.json` names no version. Zenodo takes it from the release's
+tag, so a release writes nothing into it.
+
 The release commit is not marked to skip CI. CI runs on it, and once
 it passes, the deploy builds that commit, the one the tag names, and
 puts the new version on the site, its footer included; it deploys no
