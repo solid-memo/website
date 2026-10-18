@@ -444,26 +444,47 @@ export function checkSvg(svg: string): string | null {
       if (lt !== 0) return "has more than one root";
       rootEnd = at;
     }
-    const seen = new Set<string>();
-    for (const [, attribute, double, single] of attributes!.matchAll(SVG_ATTRIBUTE)) {
-      if (/^on/i.test(attribute!)) return `has an event handler (${attribute})`;
-      if (seen.has(attribute!)) return `has the attribute ${attribute} twice on <${name}>`;
-      seen.add(attribute!);
-      const value = decodeXml(double ?? single!);
-      if (value === null) return "has a character reference other than XML's own five";
-      if (attribute! in SVG_NAMESPACES) {
-        if (value !== SVG_NAMESPACES[attribute!]) return `declares ${attribute}="${value}"`;
-        continue;
-      }
-      if (!SVG_ATTRIBUTES.has(attribute!) && !/^(?:data|aria)-[a-z-]+$/.test(attribute!))
-        return `has an attribute ${attribute} on <${name}>`;
-      if ((attribute === "href" || attribute === "xlink:href") && !value.startsWith("#"))
-        return `links to "${value}"`;
-      css.push(value);
-    }
+    const refused = attributesProblem(name!, attributes!, css);
+    if (refused !== null) return refused;
     if (empty !== "/") open.push(name!);
   }
   if (open.length > 0) return `leaves <${open.at(-1)}> open`;
+  return stylesProblem(css, notice);
+}
+
+/**
+ * Why a tag's attributes may not be served, or null when they may (checkSvg):
+ * no event handler, none twice, only SVG_ATTRIBUTES, `data-…`, `aria-…` and
+ * the namespaces at their own addresses, and links only to `#…`. Each value
+ * but a namespace's is added to `css`, to pass cssProblem.
+ */
+function attributesProblem(name: string, attributes: string, css: string[]): string | null {
+  const seen = new Set<string>();
+  for (const [, attribute, double, single] of attributes.matchAll(SVG_ATTRIBUTE)) {
+    if (/^on/i.test(attribute!)) return `has an event handler (${attribute})`;
+    if (seen.has(attribute!)) return `has the attribute ${attribute} twice on <${name}>`;
+    seen.add(attribute!);
+    const value = decodeXml(double ?? single!);
+    if (value === null) return "has a character reference other than XML's own five";
+    if (attribute! in SVG_NAMESPACES) {
+      if (value !== SVG_NAMESPACES[attribute!]) return `declares ${attribute}="${value}"`;
+      continue;
+    }
+    if (!SVG_ATTRIBUTES.has(attribute!) && !/^(?:data|aria)-[a-z-]+$/.test(attribute!))
+      return `has an attribute ${attribute} on <${name}>`;
+    if ((attribute === "href" || attribute === "xlink:href") && !value.startsWith("#"))
+      return `links to "${value}"`;
+    css.push(value);
+  }
+  return null;
+}
+
+/**
+ * Why a drawing's styles and attribute values may not be served, or null
+ * when they may (checkSvg): at most one `@font-face`, the embedded font's,
+ * and only with its notice; the rest passes cssProblem.
+ */
+function stylesProblem(css: readonly string[], notice: boolean): string | null {
   const styles: string[] = [];
   let fonts = 0;
   for (const each of css) {
