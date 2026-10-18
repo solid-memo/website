@@ -355,7 +355,11 @@ the question. Enter and Escape that an input method takes, to end or
 drop a syllable it composes (Korean, say), are the input method's.
 A side's field is marked with the side's language, as the full form's
 is: an Arabic side reads right to left, in its font, and a screen
-reader and the spellcheck take it as Arabic. Nothing is saved unasked.
+reader and the spellcheck take it as Arabic. The names of the button
+and the field are put together from the page's text with
+`aria-labelledby`, not given as one `aria-label` string, so the deck's
+or card's name and the cell's text in them are marked with their
+languages too ("Back of كتاب: Book"). Nothing is saved unasked.
 
 **Saved views.** Beside a table's own views (Home's and the
 workbench's, [below](#home)), **+ Save view** saves the table's query

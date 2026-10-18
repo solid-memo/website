@@ -16,6 +16,7 @@ import { DeckTableContainer } from "./DeckTableContainer";
 import { choose } from "../test/choose";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 import { answer, pick } from "../test/dialogs";
+import { shownText } from "../test/names";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -48,10 +49,7 @@ function renderContainer(useCases: UseCases) {
   );
 }
 
-const cells = (row: HTMLElement) =>
-  within(row)
-    .getAllByRole("cell")
-    .map((cell) => cell.textContent);
+const cells = (row: HTMLElement) => within(row).getAllByRole("cell").map(shownText);
 
 describe("DeckTableContainer", () => {
   it("reads the decks as arranged, then each one's cards in use and today's counts, with the instance's pace", async () => {

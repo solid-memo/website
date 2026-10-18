@@ -13,6 +13,7 @@ import type { HomeView } from "./shell/views";
 import { choose } from "../test/choose";
 import { answer, dialog, pick } from "../test/dialogs";
 import { WithKeys } from "../test/keys";
+import { shownText } from "../test/names";
 import { instanceA, makeDeck } from "../test/fixtures";
 
 const languages: DeckGroup = {
@@ -103,11 +104,7 @@ const select = (name: string) =>
 describe("DeckTableScreen", () => {
   it("has a row per deck, named by the deck, with its groups, settings and figures", () => {
     render(<Harness />);
-    expect(
-      within(table())
-        .getAllByRole("columnheader")
-        .map((cell) => cell.textContent),
-    ).toEqual([
+    expect(within(table()).getAllByRole("columnheader").map(shownText)).toEqual([
       "Select",
       "Deck",
       "Group",
@@ -125,11 +122,7 @@ describe("DeckTableScreen", () => {
       "href",
       "#/deck?deck=deck-1",
     );
-    expect(
-      within(row)
-        .getAllByRole("cell")
-        .map((cell) => cell.textContent),
-    ).toEqual([
+    expect(within(row).getAllByRole("cell").map(shownText)).toEqual([
       "",
       "Languages › Scripts",
       "Front → back",
@@ -146,11 +139,7 @@ describe("DeckTableScreen", () => {
     );
     // The deck's own pace, and figures not known yet, or not to be.
     const other = within(table()).getByRole("row", { name: /Verbs/ });
-    expect(
-      within(other)
-        .getAllByRole("cell")
-        .map((cell) => cell.textContent),
-    ).toEqual([
+    expect(within(other).getAllByRole("cell").map(shownText)).toEqual([
       "",
       "Top level",
       "Both ways",
@@ -559,6 +548,8 @@ describe("DeckTableScreen", () => {
     expect(screen.getByRole("heading", { name: "Kortlekar" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Verb" })).toBeInTheDocument();
     // An English-only deck is marked as English on a Swedish page.
-    expect(screen.getByText("Kanji N5")).toHaveAttribute("lang", "en");
+    expect(
+      within(screen.getByRole("link", { name: "Kanji N5" })).getByText("Kanji N5"),
+    ).toHaveAttribute("lang", "en");
   });
 });

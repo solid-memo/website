@@ -5,12 +5,13 @@
 import { describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { WithKeys } from "../../test/keys";
+import { named } from "../../test/names";
 import { DataTable } from "./DataTable";
 import { EditableCell, type CellEdit } from "./EditableCell";
 import { UnsavedEdits, type ReportUnsaved } from "./unsavedEdits";
 
 const moons = (more: Partial<CellEdit> = {}): CellEdit => ({
-  label: "Moons of Mars",
+  field: { column: "Moons", row: "Mars" },
   shown: "2",
   value: "2",
   onSave: vi.fn(async () => true),
@@ -39,11 +40,35 @@ describe("EditableCell", () => {
     expect(screen.queryByRole("button")).toBeNull();
   });
 
+  it("names its button and its field from parts marked with their languages, the parts unmarked in the page's", () => {
+    renderCell(
+      moons({
+        field: { column: "Back", row: "كتاب", rowLang: "ar" },
+        shown: "Book",
+        lang: "en-GB",
+      }),
+    );
+    const cellButton = screen.getByRole("button", { name: named("Back of كتاب: Book") });
+    expect(cellButton).not.toHaveAttribute("aria-label");
+    const name = document.getElementById(cellButton.getAttribute("aria-labelledby")!)!;
+    expect(name).not.toBeVisible();
+    expect(within(name).getByText("كتاب")).toHaveAttribute("lang", "ar");
+    expect(within(name).getByText("Book")).toHaveAttribute("lang", "en-GB");
+    fireEvent.click(cellButton);
+    const input = screen.getByRole("textbox", { name: "Back of كتاب" });
+    expect(input).not.toHaveAttribute("aria-label");
+    const fieldName = document.getElementById(input.getAttribute("aria-labelledby")!)!;
+    expect(within(fieldName).getByText("كتاب")).toHaveAttribute("lang", "ar");
+  });
+
   it("opens a field from its button, the value selected, and saves it with Enter, the focus back on the cell", async () => {
     const edit = moons();
     renderCell(edit);
     expect(button()).toHaveTextContent(/^2$/);
     expect(button()).toHaveAttribute("aria-keyshortcuts", "F2");
+    // In the page's language, no part is marked.
+    const name = document.getElementById(button().getAttribute("aria-labelledby")!)!;
+    expect(name.querySelector("[lang]")).toBeNull();
     fireEvent.click(button());
     expect(field()).toHaveFocus();
     expect(field()).toHaveValue("2");
@@ -184,8 +209,11 @@ describe("EditableCell", () => {
 
   it("opens with F2 on its row: the cell the focus is in, else the row's first, a link's too", () => {
     const save = vi.fn(async () => true);
-    const cell = (label: string, link = false) => (
-      <EditableCell edit={{ label, shown: "x", value: "x", onSave: save }} link={link}>
+    const cell = (column: string, link = false) => (
+      <EditableCell
+        edit={{ field: { column, row: "Mars" }, shown: "x", value: "x", onSave: save }}
+        link={link}
+      >
         {link ? <a href="#/mars">Mars</a> : "x"}
       </EditableCell>
     );
@@ -198,13 +226,13 @@ describe("EditableCell", () => {
           name={{
             key: "name",
             label: "Planet",
-            cell: (planet) => (planet === "Mars" ? cell("Name of Mars", true) : planet),
+            cell: (planet) => (planet === "Mars" ? cell("Name", true) : planet),
           }}
           columns={[
             {
               key: "moons",
               label: "Moons",
-              cell: (planet) => (planet === "Mars" ? cell("Moons of Mars") : "0"),
+              cell: (planet) => (planet === "Mars" ? cell("Moons") : "0"),
             },
           ]}
         />

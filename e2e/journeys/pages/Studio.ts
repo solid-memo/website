@@ -140,8 +140,11 @@ export class Studio extends Screen {
       await expect(await cell("group")).toHaveText(
         figures.group ?? this.t("studio.decks.topLevel"),
       );
+      // As seen: a cell edited in place holds its button's hidden name too.
       if (figures.newCardsPerDay !== undefined)
-        await expect(await cell("newCardsPerDay")).toHaveText(figures.newCardsPerDay);
+        await expect(await cell("newCardsPerDay")).toHaveText(figures.newCardsPerDay, {
+          useInnerText: true,
+        });
       await expect(await cell("due")).toHaveText(String(figures.due));
       await expect(await cell("cards")).toContainText(String(figures.cards));
     });
@@ -639,9 +642,10 @@ export class Studio extends Screen {
       const row = this.cards(deck)
         .getByRole("row")
         .filter({ has: this.page.getByRole("rowheader", { name: front, exact: true }) });
+      // As seen: a cell edited in place holds its button's hidden name too.
       await expect(
         await cellOf(this.cards(deck), row, this.t("studio.cards.column.back")),
-      ).toHaveText(back);
+      ).toHaveText(back, { useInnerText: true });
     });
   }
 

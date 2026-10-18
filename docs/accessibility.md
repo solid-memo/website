@@ -61,7 +61,8 @@ but the journeys:
   does, so a button that loses its name fails a test
   ([testing.md](testing.md#writing-a-journey)).
 - **Languages**: component tests check that a card's text, in its
-  fields too, is marked with its language.
+  fields too, is marked with its language, as are a deck's or card's
+  name and a cell's text in the names of the Studio's cells.
 
 ## Checked by hand
 
@@ -77,10 +78,6 @@ What a tool can't judge is checked by hand as a change is reviewed:
 
 ## Known gaps
 
-- **Language in accessible names**: a name built as one `aria-label`
-  string, such as the Studio's cell buttons ("Back of كتاب: Book"),
-  can't say the language of the deck's or card's text in it, so a
-  screen reader reads that text in the app's language.
 - **Contrast tests**: they cover some token pairs only, not every text
   and surface pair in both themes, and not the Studio's own stylesheet.
   axe checks the contrast of the screens the journeys visit.

@@ -182,7 +182,7 @@ export function DeckTableScreen({
   /** Why the last bulk action was not made. */
   error: ErrorText | null;
 }) {
-  const { t, tx, locale, readerText, directionLabel, formatDate } = useI18n();
+  const { t, tx, locale, readerText, readerLang, directionLabel, formatDate } = useI18n();
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
   const [busy, setBusy] = useState(false);
   const [announcement, setAnnouncement] = useState("");
@@ -230,9 +230,12 @@ export function DeckTableScreen({
     return ok;
   }
 
-  /** What a deck's cell is, for its field's name: "New per day of Kanji N5". */
-  const fieldOf = (column: DeckColumn, deck: Deck) =>
-    t("studio.inline.field", { column: t(`studio.decks.${column}`), row: readerText(deck.title) });
+  /** What a deck's cell is, for its field's name: "New per day" of "Kanji N5". */
+  const fieldOf = (column: DeckColumn, deck: Deck) => ({
+    column: t(`studio.decks.${column}`),
+    row: readerText(deck.title),
+    rowLang: readerLang(deck.title),
+  });
   const pace = ({ deck, ...row }: DeckTableRow, cap: "newCardsPerDay" | "maxReviewsPerDay") => {
     const follows = deck[cap] === undefined;
     return (
@@ -240,7 +243,7 @@ export function DeckTableScreen({
         edit={
           selectable(deck)
             ? {
-                label: fieldOf(cap, deck),
+                field: fieldOf(cap, deck),
                 shown: follows
                   ? `${row[cap]} ${t("studio.decks.followsInstance")}`
                   : String(row[cap]),
@@ -273,7 +276,7 @@ export function DeckTableScreen({
         edit={
           selectable(deck)
             ? {
-                label: fieldOf("direction", deck),
+                field: fieldOf("direction", deck),
                 shown: directionLabel(deck.direction),
                 value: deck.direction,
                 options: DECK_DIRECTIONS.map((direction) => ({
