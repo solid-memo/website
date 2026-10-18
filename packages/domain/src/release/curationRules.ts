@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { EDUCATION_THEME } from "../dcat.ts";
+import { LOCALES } from "../locale.ts";
 import { problem, type ReleaseProblem } from "./problems.ts";
 import {
   DCAT_NS,
@@ -17,9 +18,10 @@ import {
  * What a library asks of its releases beyond what the data needs
  * (docs/deck-library.md, A version): a value the caller passes in,
  * never a rule of a series, author or host. The repository's library
- * asks a title and a description in English, keywords in English and
- * Swedish, the EU data theme EDUC, and its contact, the project's issue
- * tracker, in place of anyone's email; a release in a pod asks nothing.
+ * asks a title, a description and keywords in every language the app
+ * speaks (LIBRARY_LANGUAGES), the EU data theme EDUC, and its contact,
+ * the project's issue tracker, in place of anyone's email; a release in
+ * a pod asks nothing.
  */
 export interface LibraryPolicy {
   /** Languages the title has text in, beside any others. */
@@ -40,11 +42,21 @@ export interface LibraryPolicy {
 /** This repository's library's contact (docs/deck-library.md, Contact): the project's issue tracker. */
 export const LIBRARY_CONTACT = "https://github.com/solid-memo/website/issues";
 
+/**
+ * The languages this repository's library asks of a deck's title,
+ * description and keywords: every language the app speaks (LOCALES), so
+ * a language the app gains is asked of every deck, which a new version
+ * then adds (docs/deck-library.md, A version).
+ */
+export const LIBRARY_LANGUAGES = {
+  titleLanguages: LOCALES,
+  descriptionLanguages: LOCALES,
+  keywordLanguages: LOCALES,
+} satisfies Partial<LibraryPolicy>;
+
 /** The policy of this repository's decks/. */
 export const repoPolicy: LibraryPolicy = {
-  titleLanguages: ["en"],
-  descriptionLanguages: ["en"],
-  keywordLanguages: ["en", "sv"],
+  ...LIBRARY_LANGUAGES,
   themes: [EDUCATION_THEME],
   contact: LIBRARY_CONTACT,
 };

@@ -3006,7 +3006,7 @@
       "policyPod": "Una publicación en tu Pod",
       "policyLibrary": "La biblioteca de Solid Memo",
       "policyHintPod": "Una publicación en un Pod debe cumplir las reglas de sus datos: su curso, lo que declara una publicación, su Markdown y la publicación a la que sigue.",
-      "policyHintLibrary": "Un mazo enviado a la biblioteca de Solid Memo debe cumplir también sus criterios de selección (palabras clave en inglés y sueco, el tema Education), y el índice de la biblioteca lo coloca entre sus mazos.",
+      "policyHintLibrary": "Un mazo enviado a la biblioteca de Solid Memo debe cumplir también sus criterios de selección (título, descripción y palabras clave en cada idioma de la app, el tema Education), y el índice de la biblioteca lo coloca entre sus mazos.",
       "checking": "Comprobando el borrador…",
       "clear": "No se encontraron problemas.",
       "summary": {

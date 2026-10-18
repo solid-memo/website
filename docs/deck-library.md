@@ -56,7 +56,11 @@ publisher still in the index:
   several per language. Title, description and keywords come in every
   language the app speaks (English, Swedish, Korean, German, Spanish and
   French): when the app gains a language, every deck gets a version that
-  adds it. The app shows only the reader's keywords
+  adds it. `LIBRARY_LANGUAGES` in
+  [`curationRules.ts`](../packages/domain/src/release/curationRules.ts)
+  takes them from `LOCALES` ([i18n.md](i18n.md)), and
+  `npm run library:check` asks them of each deck's newest version
+  ([Checks](#checks)). The app shows only the reader's keywords
   ([i18n.md](i18n.md#which-language)). **Topics** are `dcat:theme`s from
   [`ns/vocab/topics.ttl`](../ns/vocab/topics.ttl), next to `EDUC`
   (Education, culture and sport) from the European Union's
@@ -316,6 +320,15 @@ what the versions make. Both check:
 - that no version drops a card, chapter, step or distractor of the one
   before it, or gives one's id to another kind of subject (a step's id
   to a chapter);
+- that each deck's newest version has a title, a description and
+  keywords in every language the app speaks (`languageProblems`, by
+  `LIBRARY_LANGUAGES` in
+  [`curationRules.ts`](../packages/domain/src/release/curationRules.ts)).
+  The shapes ask only for English, and a published shape is never
+  edited, so this is a library rule. Only the newest version is held to
+  it: when the app gains a language, every deck fails until a new
+  version adds it, while the versions before stay frozen. The Studio's
+  check for the library asks the same of a draft (`repoPolicy`);
 - a course's outline, by the [course rules](#course-rules);
 - the index's course for newcomers (`newcomerProblems`): at most one, an
   IRI, a deck of the library (one of the catalog's `dcat:dataset`s),
@@ -346,7 +359,7 @@ the Studio can run them in the browser as the command does:
 | `continuityRules.ts` | A version against the one before it. |
 | `courseRules.ts` | The [course rules](#course-rules); and what a release needs that its draft may lack (`readinessProblems`), which the Studio's check adds. |
 | `markdownFields.ts` | Which fields are Markdown, and by which rule; the check itself is passed in, since the domain reads no Markdown. |
-| `curationRules.ts` | A `LibraryPolicy`: what a library asks beyond the data. `repoPolicy` asks a title and description in English, keywords in English and Swedish and the theme `EDUC`; `podPolicy` asks nothing. |
+| `curationRules.ts` | A `LibraryPolicy`: what a library asks beyond the data. `repoPolicy` asks a title, description and keywords in every language the app speaks (`LIBRARY_LANGUAGES`, from `LOCALES`) and the theme `EDUC`; `podPolicy` asks nothing. |
 | `seriesEntry.ts` | What the index says of a deck. |
 | `releaseCheck.ts` | The Studio's release check: the rules a policy runs, where a library publishes a release (`libraryReleaseUrl`, `librarySeriesUrl`, which this command uses too), and where each problem is fixed. |
 | `draftModel.ts` | A Studio draft as a release model, at its own address or another. |

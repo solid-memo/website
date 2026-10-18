@@ -49,7 +49,13 @@ describe("ruleProblems", () => {
     expect(library).toContain(`missingLanguage ${DCAT}keyword`);
     // EDUC is asked by both the release's readiness and the library's curation: once.
     expect(library.filter((p) => p === `missingTheme ${DCAT}theme`)).toHaveLength(1);
-    expect(library.filter((p) => p === `missingLanguage ${DCTERMS}description`)).toHaveLength(1);
+    // English is asked by both too, and every other language the app speaks by the curation.
+    const description = ruleProblems(model, "library").flatMap((p) =>
+      p.code === "missingLanguage" && p.field === `${DCTERMS}description`
+        ? [p.params.language]
+        : [],
+    );
+    expect(description).toEqual(["de", "en", "es", "fr", "sv", "ko"]);
   });
 });
 

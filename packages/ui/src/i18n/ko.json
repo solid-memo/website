@@ -2682,7 +2682,7 @@
       "policyPod": "내 Pod의 릴리스",
       "policyLibrary": "Solid Memo 덱 라이브러리",
       "policyHintPod": "Pod의 릴리스는 데이터 규칙을 따라야 해요. 코스, 릴리스가 밝히는 내용, Markdown, 이어받는 이전 릴리스가 대상이에요.",
-      "policyHintLibrary": "Solid Memo 덱 라이브러리에 보내는 덱은 큐레이션 규칙(영어와 스웨덴어 키워드, 주제 ‘Education’)도 따라야 하고, 라이브러리 색인에 따라 다른 덱들 사이에 자리가 정해져요.",
+      "policyHintLibrary": "Solid Memo 덱 라이브러리에 보내는 덱은 큐레이션 규칙(앱이 지원하는 모든 언어로 된 제목·설명·키워드, 주제 ‘Education’)도 따라야 하고, 라이브러리 색인에 따라 다른 덱들 사이에 자리가 정해져요.",
       "checking": "초안을 검사하는 중…",
       "clear": "문제가 없어요.",
       "summary": {

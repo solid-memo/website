@@ -2844,7 +2844,7 @@
       "policyPod": "A release in your pod",
       "policyLibrary": "The Solid Memo library",
       "policyHintPod": "A release in a pod is held to the rules of its data: its course, what a release states, its Markdown, and the release it follows.",
-      "policyHintLibrary": "A deck sent to the Solid Memo library is held to its curation too (English and Swedish keywords, the theme Education), and placed among its decks by the library's index.",
+      "policyHintLibrary": "A deck sent to the Solid Memo library is held to its curation too (a title, description and keywords in every language the app speaks, the theme Education), and placed among its decks by the library's index.",
       "checking": "Checking the draft…",
       "clear": "No problems found.",
       "summary": {

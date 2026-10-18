@@ -3006,7 +3006,7 @@
       "policyPod": "Une publication dans votre Pod",
       "policyLibrary": "La bibliothèque de Solid Memo",
       "policyHintPod": "Une publication dans un Pod est soumise aux règles de ses données : son cours, ce qu’une publication indique, son Markdown et la publication qui la précède.",
-      "policyHintLibrary": "Un paquet envoyé à la bibliothèque de Solid Memo est aussi soumis à sa sélection éditoriale (mots-clés en anglais et en suédois, thème Éducation), et placé parmi ses paquets par l’index de la bibliothèque.",
+      "policyHintLibrary": "Un paquet envoyé à la bibliothèque de Solid Memo est aussi soumis à sa sélection éditoriale (titre, description et mots-clés dans chaque langue de l’application, thème Éducation), et placé parmi ses paquets par l’index de la bibliothèque.",
       "checking": "Vérification du brouillon…",
       "clear": "Aucun problème trouvé.",
       "summary": {

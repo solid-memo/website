@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { LIBRARY_CONTACT } from "@solid-memo/domain/release/curationRules";
+import { LOCALES } from "@solid-memo/domain/locale";
 import { execFileSync } from "node:child_process";
 import { mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -15,6 +16,7 @@ import {
   courseProblems,
   defaultIo,
   INDEX_URL,
+  languageProblems,
   loadValidators,
   main,
   markdownProblems,
@@ -57,6 +59,8 @@ interface Fixture {
   contact?: boolean;
   /** The agent states an email, as the published versions do. */
   mbox?: boolean;
+  /** The languages of the title, description and keyword: every language the app speaks unless stated. */
+  languages?: readonly string[];
 }
 
 const CONTACT = { contact: true } as const;
@@ -69,7 +73,9 @@ function releaseText(deck: string, version: number, fixture: Fixture = {}): stri
     title = "Capitals",
     notes = version === 1 ? "First release." : "Changed.",
     issued = `2026-10-0${version}T10:00:00Z`,
+    languages = LOCALES,
   } = fixture;
+  const tagged = (text: string) => languages.map((language) => `"${text}"@${language}`).join(" , ");
   const previous = `<${DECKS}${deck}/v${version - 1}.ttl>`;
   const release =
     fixture.release ??
@@ -97,14 +103,14 @@ function releaseText(deck: string, version: number, fixture: Fixture = {}): stri
     a solid-memo:Deck ,
       dcat:Dataset${fixture.course === undefined ? "" : " ,\n      schema:Course"} ;
     solid-memo:formatVersion ${fixture.format ?? 5} ;
-    dcterms:title "${title}"@en ;
-    dcterms:description "${title} of the world."@en ;
+    dcterms:title ${tagged(title)} ;
+    dcterms:description ${tagged(`${title} of the world.`)} ;
     dcterms:creator <#anton> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
 ${issued === null ? "" : `    dcterms:issued "${issued}"^^xsd:dateTime ;\n`}    solid-memo:studyDirection solid-memo:frontToBack ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
-    dcat:keyword "capitals"@en ;
+    dcat:keyword ${tagged("capitals")} ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     adms:versionNotes "${notes}" ;
     dcat:distribution <#turtle> ;
@@ -290,9 +296,11 @@ describe("releasesOf", () => {
 describe("buildIndex", () => {
   const index = buildIndex(LIBRARY);
   const quads = parseTurtle(index, "https://elsewhere.example/");
+  // A literal in English or untagged: the fixture's text is the same in every language.
   const of = (s: string, p: string) =>
     quads
       .filter((q) => q.subject.value === s && q.predicate.value === p)
+      .filter((q) => q.object.termType !== "Literal" || ["", "en"].includes(q.object.language))
       .map((q) => q.object.value);
 
   it("states its own address as its @base, in the house style", () => {
@@ -420,7 +428,13 @@ describe("buildIndex", () => {
   it("states a node the decks share once", () => {
     const built = parseTurtle(index, INDEX);
     const keys = built.map((q) =>
-      JSON.stringify([q.subject.value, q.predicate.value, q.object.value, q.object.termType]),
+      JSON.stringify([
+        q.subject.value,
+        q.predicate.value,
+        q.object.value,
+        q.object.termType,
+        q.object.termType === "Literal" ? q.object.language : "",
+      ]),
     );
     expect(new Set(keys).size).toBe(keys.length);
     expect(
@@ -1214,6 +1228,35 @@ describe("markdownProblems", () => {
       `${L}: <#q-1-a> states solid-memo:textFormat, which only a card, a step or a chapter does: a distractor's text is written as its card's.`,
       `${L}: <https://solid-memo.com/decks/solid/v1.ttl> states solid-memo:textFormat, which only a card, a step or a chapter does: its text is plain text.`,
     ]);
+  });
+});
+
+describe("languageProblems", () => {
+  const L = "decks/capitals/v2.ttl";
+  const lacks = (field: string, language: string) =>
+    `${L}: has no ${field} in ${language}: a library deck's title, description and keywords come in every language the app speaks, so its next version adds them.`;
+
+  it("accepts a release whose title, description and keywords are in every language the app speaks", () => {
+    expect(languageProblems(release("capitals", 2, NORWAY))).toEqual([]);
+  });
+
+  it("names each language the title, description or keywords lack", () => {
+    const languages = LOCALES.filter((language) => language !== "fr");
+    expect(languageProblems(release("capitals", 2, { ...NORWAY, languages }))).toEqual([
+      lacks("dcterms:title", "fr"),
+      lacks("dcterms:description", "fr"),
+      lacks("dcat:keyword", "fr"),
+    ]);
+  });
+
+  it("is asked of each deck's newest version, not of the frozen ones before it", async () => {
+    const languages = ["en", "sv"];
+    const older = [release("capitals", 1, { languages }), release("capitals", 2, NORWAY)];
+    await expect(validateLibrary(older, buildIndex(older), validators)).resolves.toEqual([]);
+    const newest = [release("capitals", 1), release("capitals", 2, { ...NORWAY, languages })];
+    const problems = await validateLibrary(newest, buildIndex(newest), validators);
+    expect(problems).toContain(lacks("dcterms:title", "ko"));
+    expect(problems.every((problem) => problem.startsWith(`${L}: has no `))).toBe(true);
   });
 });
 

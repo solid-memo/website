@@ -2844,7 +2844,7 @@
       "policyPod": "Eine Ausgabe in deinem Pod",
       "policyLibrary": "Die Bibliothek von Solid Memo",
       "policyHintPod": "Eine Ausgabe in einem Pod muss die Regeln für ihre Daten einhalten: für ihren Kurs, für das, was eine Ausgabe angibt, für ihr Markdown und für die Ausgabe, auf die sie folgt.",
-      "policyHintLibrary": "Ein Stapel, der an die Bibliothek von Solid Memo geht, muss auch ihre Auswahlkriterien erfüllen (englische und schwedische Schlagwörter, das Thema Bildung) und wird über den Index der Bibliothek unter ihre Stapel eingeordnet.",
+      "policyHintLibrary": "Ein Stapel, der an die Bibliothek von Solid Memo geht, muss auch ihre Auswahlkriterien erfüllen (Titel, Beschreibung und Schlagwörter in jeder Sprache der App, das Thema Bildung) und wird über den Index der Bibliothek unter ihre Stapel eingeordnet.",
       "checking": "Der Entwurf wird geprüft…",
       "clear": "Keine Probleme gefunden.",
       "summary": {

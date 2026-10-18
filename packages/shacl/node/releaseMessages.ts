@@ -84,14 +84,19 @@ function markdownText(problem: MarkdownProblem): string {
 }
 
 /**
- * The problems worded here: all but curation, readiness and the shapes'
+ * The problems worded here: all but curation (save a language the
+ * library asks, which the command checks of each deck's newest version), readiness and the shapes'
  * results (the Studio's: the library's command words what the shapes
  * find as the shapes do), `versionNotNext`, and the Studio's own parts
  * not read (the command reads every release, or fails).
  */
 export type WordedProblem = Exclude<
   ReleaseProblem,
-  CurationProblem | ReadinessProblem | ShapeProblem | UnreadProblem | { code: "versionNotNext" }
+  | Exclude<CurationProblem, { code: "missingLanguage" }>
+  | ReadinessProblem
+  | ShapeProblem
+  | UnreadProblem
+  | { code: "versionNotNext" }
 >;
 
 /**
@@ -182,6 +187,8 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
       const { language } = problem.params;
       return `${at}${subject} solid-memo:theory${language === "" ? "" : `@${language}`} has a thematic break first, last or right after another, which makes an empty chunk the app drops: a step's theory is shown a chunk at a time, split at its top-level thematic breaks, with text between each two.`;
     }
+    case "missingLanguage":
+      return `${at}has no ${nameOf(problem.field!)} in ${problem.params.language}: a library deck's title, description and keywords come in every language the app speaks, so its next version adds them.`;
     case "theoryChunks": {
       const counts = problem.params.counts.map(
         ({ language, chunks }) =>

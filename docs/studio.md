@@ -1767,7 +1767,8 @@ each part per draft. The release a draft follows is read once.
 
 The policy is a pod's by default: a release in a pod is held to its
 data's rules only. `policy=library` adds the Solid Memo library's
-curation (`repoPolicy`: English and Swedish keywords, the theme EDUC,
+curation (`repoPolicy`: a title, description and keywords in every
+language the app speaks, the theme EDUC,
 and the library's contact in place of an email, as
 `npm run library:check` asks of a new version:
 [deck-library.md](deck-library.md#contact))
