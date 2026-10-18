@@ -218,8 +218,9 @@ colors are Solid Memo's, so the theme and an instance's colors carry
 over ([theme.md](theme.md)).
 
 **Density.** Rows and controls are compact, about 28px high, on every
-screen and on touch too: above WCAG 2.2's 24px minimum target. The
-status bar's Comfortable makes them 44px; Compact goes back. The choice
+screen and on touch too: above the 24px minimum target of WCAG 2.2, the
+W3C's accessibility guidelines ([glossary](glossary.md#solid-and-the-web)).
+The status bar's Comfortable makes them 44px; Compact goes back. The choice
 is kept on the device, never in the pod
 ([`shell/prefs.ts`](../apps/studio/src/ui/shell/prefs.ts), key
 `solid-memo:studioLayout.v1`; storage that is missing or refuses gives

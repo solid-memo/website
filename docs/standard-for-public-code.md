@@ -865,7 +865,7 @@ Only an admin of the repository can change these. All are done:
 Found on 2026-10-16 and not made here, as #78 leaves fixing to later
 changes:
 
-- **Open.** **Terms.** Explain DOI, ACR and WCAG in
+- **Done.** **Terms.** Explain DOI, ACR and WCAG in
   [glossary.md](glossary.md), or where they are first used, and link the
   EU data theme table where [deck-library.md](deck-library.md) names
   `EDUC`. *(10)*
