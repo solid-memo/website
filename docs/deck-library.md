@@ -473,7 +473,7 @@ reads every version as the app does, its cards and a course's outline
 
 It is public, so the app reads it with a plain `fetch`, without logging
 in. [appUseCases.ts](../packages/composition/src/appUseCases.ts) names
-the index; during `npm run dev` and `npm run preview` the site's own
+the index; during `npm run dev` and `npm start` the site's own
 addresses are read from the local server (`siteFetch`), so the working
 tree's library is what the app shows. `VITE_LIBRARY_INDEX_URL` names
 another index at build time ([configuration.md](configuration.md)):

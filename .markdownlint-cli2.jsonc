@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 // markdownlint's rules for the project's Markdown (docs/testing.md#documentation):
-// `npm run lint:markdown`, and CI's docs job. Every rule is on but these.
+// `npm run lint:markdown`, in npm run check (CI's build job). Every rule is on but these.
 {
   "config": {
     "default": true,

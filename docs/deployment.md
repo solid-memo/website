@@ -125,7 +125,7 @@ data it reads:
 Vite copies `ns/`, `decks/` and `vendor/` as they are
 (`turtleDirectoryPlugin` in
 [publishTurtle.ts](../packages/vocab/tooling/publishTurtle.ts)), and
-serves them the same way in `npm run dev` and `npm run preview`.
+serves them the same way in `npm run dev` and `npm start`.
 
 Pages serves a `.ttl` file as `text/turtle` with
 `Access-Control-Allow-Origin: *`, so any app or tool can read it, but

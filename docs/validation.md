@@ -94,7 +94,7 @@ flowchart LR
   are published with the site anyway, and the document the browser
   checks against is the one CI validated. `siteFetch` in
   [appUseCases.ts](../packages/composition/src/appUseCases.ts) reads them from wherever the
-  site is served, so `npm run dev` and `npm run preview` use the
+  site is served, so `npm run dev` and `npm start` use the
   repository's `ns/`. Each shape document is fetched once per session.
 - The [SHACL](https://www.w3.org/TR/shacl/) engine ([engine.ts](../packages/shacl/src/engine.ts),
   the only module that imports `rdf-validate-shacl`) is loaded with a

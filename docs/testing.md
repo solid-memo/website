@@ -782,4 +782,5 @@ graph LR
   and `fixtures/` (through `VOCAB_ROOT`): they are the fixtures.
 - Preact-compat note: `@tanstack/react-query` must be inlined in the vitest
   server deps so the `react → preact/compat` alias applies (see
-  `apps/web/vite.config.ts`).
+  `apps/web/vitest.config.ts`, `apps/studio/vitest.config.ts` and
+  `packages/ui/vitest.config.ts`).
