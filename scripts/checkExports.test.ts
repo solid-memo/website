@@ -108,7 +108,17 @@ describe("resolveImport", () => {
         exports: { "./shapes/migrations": "./src/shapes/migrations/index.ts", "./*": "./src/*.ts" },
       },
     ),
-    pkg("vocab", {}, { exports: { "./tooling/*": "./tooling/*.ts", "./*": "./src/*.ts" } }),
+    pkg(
+      "vocab",
+      {},
+      {
+        exports: {
+          "./tooling/*": "./tooling/*.ts",
+          "./locales/*": "./src/locales/*/*.ts",
+          "./*": "./src/*.ts",
+        },
+      },
+    ),
     pkg("ui", {}, { exports: { "./style.css": "./src/style.css" } }),
     { dir: ".", manifest: { name: "solid-memo" }, files: {} },
   ];
@@ -117,6 +127,7 @@ describe("resolveImport", () => {
     "packages/domain/src/shapes/migrations/index.ts",
     "packages/domain/src/release/index.ts",
     "packages/vocab/tooling/testing/shapeSources.ts",
+    "packages/vocab/src/locales/en/en.ts",
     "packages/ui/src/ui/App.tsx",
     "packages/ui/src/style.css",
   ]);
@@ -133,7 +144,7 @@ describe("resolveImport", () => {
     );
   });
 
-  it("finds a workspace package's file through its exports, a pattern's or an exact one", () => {
+  it("finds a workspace package's file through its exports, a pattern's (every * of its target) or an exact one", () => {
     expect(resolve("@solid-memo/domain/deck")).toBe("packages/domain/src/deck.ts");
     expect(resolve("@solid-memo/domain/shapes/migrations")).toBe(
       "packages/domain/src/shapes/migrations/index.ts",
@@ -141,6 +152,7 @@ describe("resolveImport", () => {
     expect(resolve("@solid-memo/vocab/tooling/testing/shapeSources")).toBe(
       "packages/vocab/tooling/testing/shapeSources.ts",
     );
+    expect(resolve("@solid-memo/vocab/locales/en")).toBe("packages/vocab/src/locales/en/en.ts");
     expect(resolve("@solid-memo/ui/style.css")).toBe("packages/ui/src/style.css");
   });
 

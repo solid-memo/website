@@ -155,7 +155,7 @@ function exportTarget(pkg: Package, subpath: string): string | null {
       subpath.endsWith(pattern.slice(star + 1))
     ) {
       const match = subpath.slice(star, subpath.length - (pattern.length - star - 1));
-      return join(pkg.dir, target.replace("*", match));
+      return join(pkg.dir, target.replaceAll("*", match));
     }
   }
   return null;
