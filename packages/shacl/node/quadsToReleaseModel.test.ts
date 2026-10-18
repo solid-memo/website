@@ -152,6 +152,38 @@ describe("quadsToReleaseModel", () => {
     expect(model.textFormats).toEqual([{ subject: `${URL}#q-1`, object: iri(`${SM}markdown`) }]);
   });
 
+  it("reads its contact points, with what each states, and every email, of any subject", () => {
+    const VCARD = "http://www.w3.org/2006/vcard/ns#";
+    const contacted = quadsToReleaseModel(
+      parseTurtle(
+        `@base <${URL}> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <${VCARD}> .
+<> dcat:contactPoint <#contact> , [ vcard:hasURL <https://other.example/> ] .
+<#contact> a vcard:Kind ; vcard:hasURL <https://tracker.example/> .
+<#ann> foaf:mbox <mailto:ann@example.com> .`,
+        URL,
+      ),
+      URL,
+    );
+    expect(contacted.contacts).toEqual([
+      {
+        point: iri(`${URL}#contact`),
+        types: [`${VCARD}Kind`],
+        urls: [iri("https://tracker.example/")],
+      },
+      {
+        point: { kind: "blank", value: expect.any(String) },
+        types: [],
+        urls: [iri("https://other.example/")],
+      },
+    ]);
+    expect(contacted.emails).toEqual([
+      { subject: `${URL}#ann`, object: iri("mailto:ann@example.com") },
+    ]);
+  });
+
   it("reads a release that states nothing", () => {
     const empty = quadsToReleaseModel([], URL);
     expect(empty.decks).toEqual([]);

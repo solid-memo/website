@@ -1767,7 +1767,10 @@ each part per draft. The release a draft follows is read once.
 
 The policy is a pod's by default: a release in a pod is held to its
 data's rules only. `policy=library` adds the Solid Memo library's
-curation (`repoPolicy`: English and Swedish keywords, the theme EDUC)
+curation (`repoPolicy`: English and Swedish keywords, the theme EDUC,
+and the library's contact in place of an email, as
+`npm run library:check` asks of a new version:
+[deck-library.md](deck-library.md#contact))
 and its place among the library's decks. Neither names a series,
 author or host: a library is its index, and a policy is data.
 
@@ -1787,8 +1790,8 @@ Not every problem can be fixed in the Studio yet:
   `isVersionOf`) or the distribution. A blank draft and a deck's have
   them all, so only a draft of a release that lacks one does. A
   problem about one of them links to the overview. A problem about the
-  release's license, publisher, languages, themes, version notes or
-  authors, a source, an agent or an activity links to the
+  release's license, contact, publisher, languages, themes, version
+  notes or authors, a source, an agent or an activity links to the
   [release screen](#the-releases-metadata-and-provenance), at its
   part.
 - The library policy places the draft at `decks/<draft name>/v<N>.ttl`
@@ -1950,8 +1953,8 @@ library's releases are written
 
 - **About this version**: the version notes (`adms:versionNotes`, one
   text), the languages (`dcterms:language`), the themes
-  (`dcat:theme`), the license and the publisher. The languages are
-  those of the EU's table that the reference data describes
+  (`dcat:theme`), the license, the contact and the publisher. The
+  languages are those of the EU's table that the reference data describes
   (`EU_LANGUAGES`, generated from
   [external.ttl](../ns/vocab/external.ttl): [vocab.md](vocab.md)),
   each named in the reader's language. One the release states outside
@@ -1965,11 +1968,23 @@ library's releases are written
   ([license.ts](../packages/domain/src/license.ts)), or the one it
   has. `setLicense` types it `dcterms:LicenseDocument`, as DCAT-AP
   asks; the license it replaces loses that type, unless a source still
-  names it. The publisher is one of the release's agents, or the one
-  it names elsewhere.
+  names it. The contact is a web page where readers ask about the
+  release or report a mistake in it, such as an issue tracker
+  (`setContact`): the release's one `dcat:contactPoint`, `#contact`, a
+  `vcard:Kind` with that `vcard:hasURL`, as the library's releases
+  state theirs ([deck-library.md](deck-library.md#contact)). It is
+  saved once it is an http(s) address, and the contact it replaces
+  goes with what it stated. **Use the library's contact** fills in the
+  library's (`LIBRARY_CONTACT` in
+  [curationRules.ts](../packages/domain/src/release/curationRules.ts)).
+  The app reads it to say where a mistake in the release is reported
+  ([deck-library.md](deck-library.md#reporting-a-mistake)). The
+  publisher is one of the release's agents, or the one it names
+  elsewhere.
 - **Authors**: the release's own agents (`foaf:Agent`, `#<name>`), its
   `dcterms:creator`s, each with a name and an optional email
   ([releaseMetadata.ts](../packages/domain/src/release/releaseMetadata.ts)).
+  A release in a pod may name an email; one for the library names none.
   Removing an author removes its agent too, unless it publishes the
   release or a statement names it (an earlier version's making may: that
   is never rewritten). Authors another document describes are named, and

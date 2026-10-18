@@ -18,6 +18,8 @@ import { fragmentIdOf } from "../subjectUrl.ts";
 export const DCAT_NS = "http://www.w3.org/ns/dcat#";
 export const DCTERMS_NS = "http://purl.org/dc/terms/";
 export const SCHEMA_NS = "https://schema.org/";
+export const VCARD_NS = "http://www.w3.org/2006/vcard/ns#";
+export const FOAF_MBOX = "http://xmlns.com/foaf/0.1/mbox";
 
 /** A value a release states: an IRI, a blank node, or a literal with its language ("" for none) and datatype. */
 export type ReleaseTerm =
@@ -107,6 +109,13 @@ export interface ReleaseSource {
   comments: ReleaseTerm[];
 }
 
+/** A contact point of the release (dcat:contactPoint): its types and the web pages it names (vcard:hasURL). */
+export interface ReleaseContact {
+  point: ReleaseTerm;
+  types: string[];
+  urls: ReleaseTerm[];
+}
+
 /** One statement of a subject's predicate, for what may be stated on any subject. */
 export interface ReleaseStatement {
   subject: string;
@@ -138,6 +147,10 @@ export interface ReleaseModel {
   distribution: ReleaseTerm[];
   /** The license (dcterms:license). */
   license: ReleaseTerm[];
+  /** Who to contact about it (dcat:contactPoint). */
+  contacts: ReleaseContact[];
+  /** Every foaf:mbox statement, of any subject: the emails it names. */
+  emails: ReleaseStatement[];
   /** What it was compiled from (prov:wasDerivedFrom). */
   sources: ReleaseTerm[];
   activities: ReleaseActivity[];
@@ -214,6 +227,8 @@ export function emptyReleaseModel(url: string): ReleaseModel {
     previousVersion: [],
     distribution: [],
     license: [],
+    contacts: [],
+    emails: [],
     sources: [],
     activities: [],
     making: [],

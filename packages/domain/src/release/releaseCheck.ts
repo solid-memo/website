@@ -31,7 +31,8 @@ import { moved } from "./releaseToDraft.ts";
  * release it will be. A policy says which library it is checked for:
  * a pod (the default), whose curation asks nothing beyond the data's
  * own rules, or this repository's library, whose curation asks English
- * and Swedish keywords and the theme EDUC, and whose index places it.
+ * and Swedish keywords, the theme EDUC and its contact in place of an
+ * email, and whose index places it.
  */
 
 /** Which library a draft is checked for: a release published in a pod, or one sent to the repository's decks/. */
@@ -234,6 +235,7 @@ export type ReleaseField =
   | "languages"
   | "themes"
   | "license"
+  | "contact"
   | "publisher"
   | "authors"
   | "making"
@@ -245,6 +247,7 @@ export const RELEASE_FIELDS: readonly ReleaseField[] = [
   "languages",
   "themes",
   "license",
+  "contact",
   "publisher",
   "authors",
   "making",
@@ -271,6 +274,7 @@ const RELEASE_SCREEN_FIELDS: Readonly<Record<string, ReleaseField>> = {
   [`${DCTERMS_NS}language`]: "languages",
   [`${DCAT_NS}theme`]: "themes",
   [`${DCTERMS_NS}license`]: "license",
+  [`${DCAT_NS}contactPoint`]: "contact",
   [`${DCTERMS_NS}publisher`]: "publisher",
   [`${DCTERMS_NS}creator`]: "authors",
   [`${PROV}wasDerivedFrom`]: "sources",

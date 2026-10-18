@@ -83,6 +83,7 @@
 #/studio/release?draft=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fdrafts%2Fsolid%2Fv1%2Frelease.ttl
 #/studio/release?draft=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fdrafts%2Fsolid%2Fv1%2Frelease.ttl&field=authors
 #/studio/release?draft=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fdrafts%2Fsolid%2Fv1%2Frelease.ttl&field=checks
+#/studio/release?draft=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fdrafts%2Fsolid%2Fv1%2Frelease.ttl&field=contact
 #/studio/release?draft=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fdrafts%2Fsolid%2Fv1%2Frelease.ttl&field=languages
 #/studio/release?draft=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fdrafts%2Fsolid%2Fv1%2Frelease.ttl&field=license
 #/studio/release?draft=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fdrafts%2Fsolid%2Fv1%2Frelease.ttl&field=making

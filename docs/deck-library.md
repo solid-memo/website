@@ -152,11 +152,13 @@ email, whichever version is current: `keptInIndex`
 ([seriesEntry.ts](../packages/domain/src/release/seriesEntry.ts)) leaves
 out every `foaf:mbox`, and keeps the current version's contact. The
 command checks the rule on every version new since `--base`
-(`contactProblems`, [Checks](#checks)); `CONTACT_URL` in
-[deckLibrary.ts](../packages/shacl/node/deckLibrary.ts) names the
-tracker. A release in a pod ([studio.md](studio.md)) is the author's
-own and may name an email. The app reads the contact's web page to
-say where a mistake in a release from a link is reported
+(`contactProblems`, [Checks](#checks)); `LIBRARY_CONTACT` in
+[curationRules.ts](../packages/domain/src/release/curationRules.ts)
+names the tracker. The Studio's release check for the library asks the
+same of a draft (`repoPolicy`, [studio.md](studio.md#the-release-check)),
+and its release screen writes the contact. A release in a pod
+([studio.md](studio.md)) is the author's own and may name an email. The
+app reads the contact's web page to say where a mistake in a release from a link is reported
 ([Reporting a mistake](#reporting-a-mistake)).
 
 ## Provenance

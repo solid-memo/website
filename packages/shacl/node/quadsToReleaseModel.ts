@@ -6,7 +6,9 @@ import type { Quad, Quad_Object } from "n3";
 import {
   DCAT_NS,
   DCTERMS_NS,
+  FOAF_MBOX,
   SCHEMA_NS,
+  VCARD_NS,
   type ReleaseDistractor,
   type ReleaseModel,
   type ReleaseStatement,
@@ -144,6 +146,12 @@ export function quadsToReleaseModel(quads: readonly Quad[], url: string): Releas
     previousVersion: objects(url, `${DCAT_NS}previousVersion`),
     distribution: objects(url, `${DCAT_NS}distribution`),
     license: objects(url, `${DCTERMS_NS}license`),
+    contacts: objectsOf(url, `${DCAT_NS}contactPoint`).map((point) => ({
+      point: termOf(point),
+      types: objectsOf(point.value, RDF_TYPE).map((type) => type.value),
+      urls: objects(point.value, `${VCARD_NS}hasURL`),
+    })),
+    emails: statements(FOAF_MBOX),
     sources,
     activities: typed(`${PROV}Activity`).map((iri) => ({ iri, generating: generating.has(iri) })),
     ...provenanceOf(objects, [...generating], sources),

@@ -6,14 +6,17 @@ import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { EU_LANGUAGES, TOPICS, type ReferenceConcept } from "@solid-memo/vocab/concepts.generated";
 import { EDUCATION_THEME } from "@solid-memo/domain/dcat";
+import { LIBRARY_CONTACT } from "@solid-memo/domain/release/curationRules";
 import type { ReleaseField } from "@solid-memo/domain/release/releaseCheck";
 import {
   attributionOf,
   attributionText,
   authorNames,
+  contactOf,
   makingNotesOf,
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
+import { sourceIri } from "@solid-memo/domain/release/releaseMetadata";
 import { useI18n, type I18n } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
@@ -32,8 +35,8 @@ export interface ReleaseLinks {
 /**
  * What a draft's release says of itself beyond its listing, how it was
  * made and from what (docs/studio.md, The release's metadata and
- * provenance): its version notes, languages, themes, license and
- * publisher, its authors, the attribution of its making ("Compiled by
+ * provenance): its version notes, languages, themes, license, contact
+ * and publisher, its authors, the attribution of its making ("Compiled by
  * …", with or without "with the help of AI") and the notes on it, its
  * sources, and the checks it had, by machine or AI. Nothing here records that anyone
  * reviewed the release. A draft released is shown, frozen. Opened at a
@@ -87,6 +90,7 @@ export function ReleaseMetadataScreen({
             />
             <p class="hint field-hint">{t("studio.release.licenseHint")}</p>
           </div>
+          <Contact draft={draft} arrival={field === "contact"} held={held} onEdit={onEdit} />
           <Publisher draft={draft} arrival={field === "publisher"} onEdit={onEdit} />
         </section>
         <section aria-labelledby="release-authors-heading">
@@ -293,6 +297,66 @@ function Themes({
         </fieldset>
       )}
     </fieldset>
+  );
+}
+
+/**
+ * Who to contact about the release (dcat:contactPoint): a web page,
+ * saved as it is typed once it is an http(s) address; cleared when
+ * empty. The library's contact is a button away, as the library asks
+ * for it (curationRules).
+ */
+function Contact({
+  draft,
+  arrival,
+  held,
+  onEdit,
+}: {
+  draft: ReleaseDraft;
+  arrival: boolean;
+  held: boolean;
+  onEdit: DraftEditor["edit"];
+}) {
+  const { t } = useI18n();
+  const [text, setText] = useState(contactOf(draft) ?? "");
+  const url = text.trim() === "" ? null : sourceIri(text);
+  const invalid = text.trim() !== "" && url === null;
+  const save = (typed: string, debounce: boolean) => {
+    setText(typed);
+    const next = typed.trim() === "" ? null : sourceIri(typed);
+    if (typed.trim() === "" || next !== null)
+      onEdit([{ kind: "setContact", url: next }], { debounce });
+  };
+  return (
+    <>
+      <label for="release-contact">{t("studio.release.contact")}</label>
+      <input
+        id="release-contact"
+        // Checked here, in words of the Studio's, not by the browser's own validation.
+        type="text"
+        inputMode="url"
+        value={text}
+        disabled={held}
+        autocomplete="off"
+        aria-invalid={invalid}
+        aria-describedby="release-contact-hint release-contact-error"
+        data-arrival={arrival || undefined}
+        onInput={(event) => save(event.currentTarget.value, true)}
+      />
+      <p id="release-contact-error" class="error" role="alert">
+        {invalid && t("studio.release.contactInvalid")}
+      </p>
+      <button
+        type="button"
+        disabled={held || url === LIBRARY_CONTACT}
+        onClick={() => save(LIBRARY_CONTACT, false)}
+      >
+        {t("studio.release.contactLibrary")}
+      </button>
+      <p id="release-contact-hint" class="hint field-hint">
+        {t("studio.release.contactHint")}
+      </p>
+    </>
   );
 }
 

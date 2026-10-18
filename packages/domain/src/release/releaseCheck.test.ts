@@ -335,6 +335,10 @@ describe("problemTarget", () => {
       screen: "release",
       field: "publisher",
     });
+    expect(target(DRAFT, { field: `${DCAT}contactPoint`, code: "missingContact" })).toEqual({
+      screen: "release",
+      field: "contact",
+    });
     expect(target(DRAFT, { field: `${DCTERMS}language` })).toEqual({
       screen: "release",
       field: "languages",

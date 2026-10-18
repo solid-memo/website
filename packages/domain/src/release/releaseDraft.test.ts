@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { card, courseDraft, deckDraft, DRAFT, link, NOW, of } from "../testing/releaseDraft.ts";
 import {
+  contactOf,
   activitiesOf,
   applyDraftChange,
   applyDraftChanges,
@@ -976,6 +977,56 @@ describe("applyDraftChange", () => {
       expect(generatingActivities(draft)).toEqual([]);
       expect(draft.triples).toEqual(checkActivityTriples(of("review-1"), check));
     });
+  });
+});
+
+describe("the contact", () => {
+  const VCARD = "http://www.w3.org/2006/vcard/ns#";
+  const POINT = "http://www.w3.org/ns/dcat#contactPoint";
+  const contact = (id: string, url: string) => [
+    link(DRAFT, POINT, of(id)),
+    link(of(id), RDF_TYPE, `${VCARD}Kind`),
+    link(of(id), `${VCARD}hasURL`, url),
+  ];
+
+  it("is set as one contact point, #contact, a vcard:Kind naming the page, which replaces any before it", () => {
+    const set = made(courseDraft(), { kind: "setContact", url: "https://a.example/" });
+    expect(contactOf(courseDraft())).toBeNull();
+    expect(contactOf(set)).toBe("https://a.example/");
+    expect(set.triples).toEqual([
+      ...courseDraft().triples,
+      ...contact("contact", "https://a.example/"),
+    ]);
+    const other = made(set, { kind: "setContact", url: "https://b.example/" });
+    expect(other.triples).toEqual([
+      ...courseDraft().triples,
+      ...contact("contact", "https://b.example/"),
+    ]);
+    expect(made(other, { kind: "setContact", url: null }).triples).toEqual(courseDraft().triples);
+  });
+
+  it("takes the first free id, and drops a blank contact point with what it states", () => {
+    const draft = courseDraft();
+    const taken = {
+      ...draft,
+      triples: [
+        ...draft.triples,
+        link(of("contact"), RDF_TYPE, "https://schema.org/Thing"),
+        { subject: DRAFT, predicate: POINT, object: { kind: "blank" as const, value: "b1" } },
+        {
+          subject: "_:b1",
+          predicate: RDF_TYPE,
+          object: { kind: "iri" as const, value: `${VCARD}Kind` },
+        },
+      ],
+    };
+    expect(contactOf(taken)).toBeNull();
+    const set = made(taken, { kind: "setContact", url: "https://a.example/" });
+    expect(set.triples).toEqual([
+      ...draft.triples,
+      link(of("contact"), RDF_TYPE, "https://schema.org/Thing"),
+      ...contact("contact-2", "https://a.example/"),
+    ]);
   });
 });
 

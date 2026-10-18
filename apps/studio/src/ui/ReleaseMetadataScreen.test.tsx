@@ -193,6 +193,44 @@ describe("ReleaseMetadataScreen", () => {
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setMeta", meta: { publisher: null } }]);
   });
 
+  it("saves the contact once it is a web address, clears it when emptied, and offers the library's", () => {
+    const TRACKER = "https://github.com/solid-memo/website/issues";
+    const onEdit = renderScreen();
+    const contact = screen.getByRole("textbox", { name: "Contact" });
+    const library = screen.getByRole("button", { name: "Use the library's contact" });
+    fireEvent.input(contact, { target: { value: "tracker.example" } });
+    expect(onEdit).not.toHaveBeenCalled();
+    expect(contact).toHaveAttribute("aria-invalid", "true");
+    expect(
+      screen.getByText("Give a web address, starting with https:// or http://."),
+    ).toBeInTheDocument();
+    fireEvent.input(contact, { target: { value: " https://tracker.example/ " } });
+    expect(onEdit).toHaveBeenLastCalledWith(
+      [{ kind: "setContact", url: "https://tracker.example/" }],
+      { debounce: true },
+    );
+    expect(contact).toHaveAttribute("aria-invalid", "false");
+    fireEvent.input(contact, { target: { value: "" } });
+    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setContact", url: null }], {
+      debounce: true,
+    });
+    fireEvent.click(library);
+    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setContact", url: TRACKER }], {
+      debounce: false,
+    });
+    expect(contact).toHaveValue(TRACKER);
+    expect(library).toBeDisabled();
+    cleanup();
+    renderScreen(with_(authoredDraft(), { kind: "setContact", url: TRACKER }), {
+      field: "contact",
+    });
+    expect(screen.getByRole("textbox", { name: "Contact" })).toHaveValue(TRACKER);
+    expect(screen.getByRole("textbox", { name: "Contact" })).toHaveAttribute(
+      "data-arrival",
+      "true",
+    );
+  });
+
   it("adds, renames and removes an author, writing the attribution again for those left", () => {
     const draft = with_(authoredDraft(), {
       kind: "setMeta",
@@ -784,5 +822,7 @@ describe("ReleaseMetadataScreen, held", () => {
     renderScreen(authoredDraft(), { readOnly: "released" });
     expect(screen.getByRole("textbox", { name: "Version notes" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Record the check" })).toBeDisabled();
+    expect(screen.getByRole("textbox", { name: "Contact" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Use the library's contact" })).toBeDisabled();
   });
 });

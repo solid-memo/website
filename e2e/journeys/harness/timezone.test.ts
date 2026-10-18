@@ -13,8 +13,8 @@ const localHour = (zone: string, at: Date) =>
   );
 
 describe("noonTimeZone", () => {
-  it("names UTC itself at noon UTC", () => {
-    expect(noonTimeZone(new Date("2026-10-07T12:30:00Z"))).toBe("Etc/GMT");
+  it("names UTC itself at noon UTC as UTC, the one name of it Firefox takes", () => {
+    expect(noonTimeZone(new Date("2026-10-07T12:30:00Z"))).toBe("UTC");
   });
 
   it("names the zone ahead of UTC, with the IANA's inverted sign, in the morning", () => {

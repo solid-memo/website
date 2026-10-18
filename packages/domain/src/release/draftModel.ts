@@ -13,6 +13,8 @@ import {
 } from "./releaseDraft.ts";
 import {
   DCAT_NS,
+  FOAF_MBOX,
+  VCARD_NS,
   type ReleaseDistractor,
   type ReleaseModel,
   type ReleaseStatement,
@@ -143,6 +145,22 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     previousVersion: one(root.previousVersion),
     distribution: iris(root.distribution),
     license: one(root.license),
+    contacts: said(url, `${DCAT_NS}contactPoint`).map((point) => {
+      const subject = point.kind === "blank" ? `_:${point.value}` : point.value;
+      return {
+        point,
+        types: said(subject, RDF_TYPE).map((type) => type.value),
+        urls: said(subject, `${VCARD_NS}hasURL`),
+      };
+    }),
+    emails: [
+      ...draft.agents.flatMap((node): ReleaseStatement[] =>
+        node.data.mbox === undefined
+          ? []
+          : [{ subject: at(`${draft.url}#${node.id}`), object: iri(node.data.mbox) }],
+      ),
+      ...statements(FOAF_MBOX),
+    ],
     sources,
     activities: typed(`${PROV}Activity`).map((activity) => ({
       iri: activity,

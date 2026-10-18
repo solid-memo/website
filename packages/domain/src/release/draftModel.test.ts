@@ -190,6 +190,51 @@ describe("draftReleaseModel", () => {
     expect(model.steps[0]).toMatchObject({ isPartOf: [], positions: [] });
   });
 
+  it("reads the release's contact points and every email it names, an agent's and a statement's", () => {
+    const deck = deckDraft();
+    const VCARD = "http://www.w3.org/2006/vcard/ns#";
+    const MBOX = "http://xmlns.com/foaf/0.1/mbox";
+    const url = "https://site.example/decks/solid/v1.ttl";
+    const model = draftReleaseModel(
+      {
+        ...deck,
+        agents: [
+          { id: "ann", data: { name: "Ann", mbox: "mailto:ann@example.com" } },
+          { id: "bo", data: { name: "Bo" } },
+        ],
+        triples: [
+          link(DRAFT, "http://www.w3.org/ns/dcat#contactPoint", of("contact")),
+          link(of("contact"), RDF_TYPE, `${VCARD}Kind`),
+          link(of("contact"), `${VCARD}hasURL`, "https://tracker.example/"),
+          {
+            subject: DRAFT,
+            predicate: "http://www.w3.org/ns/dcat#contactPoint",
+            object: { kind: "blank", value: "b1" },
+          },
+          link("_:b1", `${VCARD}hasURL`, "https://other.example/"),
+          link(of("team"), MBOX, "mailto:team@example.com"),
+        ],
+      },
+      url,
+    );
+    expect(model.contacts).toEqual([
+      {
+        point: { kind: "iri", value: `${url}#contact` },
+        types: [`${VCARD}Kind`],
+        urls: [{ kind: "iri", value: "https://tracker.example/" }],
+      },
+      {
+        point: { kind: "blank", value: "b1" },
+        types: [],
+        urls: [{ kind: "iri", value: "https://other.example/" }],
+      },
+    ]);
+    expect(model.emails).toEqual([
+      { subject: `${url}#ann`, object: { kind: "iri", value: "mailto:ann@example.com" } },
+      { subject: `${url}#team`, object: { kind: "iri", value: "mailto:team@example.com" } },
+    ]);
+  });
+
   it("names a distractor two cards share once", () => {
     const deck = deckDraft();
     const shared = { ...deck.cards[0]!.data, distractor: [of("x")] };
