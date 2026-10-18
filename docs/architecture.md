@@ -76,7 +76,15 @@ cached by input. A task's inputs are its package's files and those of the
 packages it depends on; the few that also read `ns/` or `decks/` add them
 in their package's own `turbo.json` (`vocab`, `shacl`, `solid`,
 `composition`, `apps/web` and `apps/studio`), so a deck edit reruns only the tasks that
-read the library. The Studio has no build of its own: Solid Memo's
+read the library. A test that reads any other file outside its package
+adds it the same way (`e2e/pod`'s the workflows, `vocab`'s the root's
+`package.json`, `apps/web`'s the `LICENSE` its About page links to): a
+file Turbo does not know of changes no input, so CI, which starts from
+`main`'s cache, would reuse `main`'s result and never run the test on
+the change it checks. The one exception is a test that checks only that
+a file the docs link to is there (`markdown`'s and `apps/web`'s), as
+that could be any file: lychee checks the same links in CI's `docs`
+job, on every run ([testing.md](testing.md#documentation)). The Studio has no build of its own: Solid Memo's
 bundles it ([studio.md](studio.md)).
 
 ```sh

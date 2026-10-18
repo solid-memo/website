@@ -13,7 +13,9 @@
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
         "$TURBO_ROOT$/docs/**",
-        "$TURBO_ROOT$/publiccode.yml"
+        "$TURBO_ROOT$/publiccode.yml",
+        "$TURBO_ROOT$/*.md",
+        "$TURBO_ROOT$/LICENSE"
       ],
       "env": [
         "$TURBO_EXTENDS$",

@@ -5,7 +5,11 @@
   ],
   "tasks": {
     "test": {
-      "outputs": []
+      "outputs": [],
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/.github/workflows/**"
+      ]
     }
   }
 }
