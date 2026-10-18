@@ -8,10 +8,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { cardName, cardNameText } from "./DataText";
 import { decksOf } from "@solid-memo/domain/deckTree";
+import type { CourseChapter } from "@solid-memo/domain/course";
+import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
-import type { LibraryDeck } from "@solid-memo/domain/library";
+import type { LibraryCard, LibraryDeck } from "@solid-memo/domain/library";
 import type { Session } from "@solid-memo/domain/session";
-import { Breadcrumbs, breadcrumbsFor } from "./Breadcrumbs";
+import { Breadcrumbs, breadcrumbsFor, type CrumbNames } from "./Breadcrumbs";
 import { BrowserContainer } from "./BrowserContainer";
 import { CardContainer } from "./CardContainer";
 import { CardHistoryContainer } from "./CardHistoryContainer";
@@ -57,12 +59,40 @@ import {
 } from "./router";
 import { ValidationContainer } from "./ValidationContainer";
 import { WebIdDocumentContainer } from "./WebIdDocumentContainer";
-import { useI18n } from "./i18n";
+import { useI18n, type I18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 import { useInstanceTheme } from "./theme";
 import { useDocumentTitle } from "./documentTitle";
 import { useScreenFocus } from "./screenFocus";
 import { MAIN_ID } from "./SkipLink";
+
+/** The breadcrumbs' names of what the route has open, each "" (or no language) when nothing is. */
+function crumbNamesOf(
+  open: {
+    deck: Deck | null;
+    card: Card | null;
+    libraryDeck: LibraryDeck | null;
+    libraryCard: LibraryCard | null;
+    chapter: CourseChapter | null;
+  },
+  readerText: I18n["readerText"],
+  readerLang: I18n["readerLang"],
+): CrumbNames {
+  const { deck, card, libraryDeck, libraryCard, chapter } = open;
+  return {
+    deck: deck === null ? "" : readerText(deck.title),
+    card: card === null ? "" : cardName(card, readerText),
+    libraryDeck: libraryDeck === null ? "" : readerText(libraryDeck.title),
+    libraryCard: libraryCard === null ? "" : cardName(libraryCard, readerText),
+    chapter: chapter === null ? "" : readerText(chapter.title),
+    deckLang: deck === null ? undefined : readerLang(deck.title),
+    cardLang: card === null ? undefined : readerLang(cardNameText(card, readerText)),
+    libraryDeckLang: libraryDeck === null ? undefined : readerLang(libraryDeck.title),
+    libraryCardLang:
+      libraryCard === null ? undefined : readerLang(cardNameText(libraryCard, readerText)),
+    chapterLang: chapter === null ? undefined : readerLang(chapter.title),
+  };
+}
 
 /**
  * The signed-in app: the site header, closed by the open instance's bar,
@@ -417,23 +447,17 @@ export function Workspace({
       ? []
       : breadcrumbsFor(
           route,
-          {
-            deck: activeDeck === null ? "" : readerText(activeDeck.title),
-            card: activeCard === null ? "" : cardName(activeCard, readerText),
-            libraryDeck: activeLibraryDeck === null ? "" : readerText(activeLibraryDeck.title),
-            libraryCard: activeLibraryCard === null ? "" : cardName(activeLibraryCard, readerText),
-            chapter: activeChapter === null ? "" : readerText(activeChapter.title),
-            deckLang: activeDeck === null ? undefined : readerLang(activeDeck.title),
-            cardLang:
-              activeCard === null ? undefined : readerLang(cardNameText(activeCard, readerText)),
-            libraryDeckLang:
-              activeLibraryDeck === null ? undefined : readerLang(activeLibraryDeck.title),
-            libraryCardLang:
-              activeLibraryCard === null
-                ? undefined
-                : readerLang(cardNameText(activeLibraryCard, readerText)),
-            chapterLang: activeChapter === null ? undefined : readerLang(activeChapter.title),
-          },
+          crumbNamesOf(
+            {
+              deck: activeDeck,
+              card: activeCard,
+              libraryDeck: activeLibraryDeck,
+              libraryCard: activeLibraryCard,
+              chapter: activeChapter,
+            },
+            readerText,
+            readerLang,
+          ),
           t,
         );
   // The page and what it is in, as the trail ends: "Study – Kanji N5 – Solid Memo".

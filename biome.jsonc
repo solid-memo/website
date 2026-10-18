@@ -87,7 +87,7 @@
         "noExcessiveCognitiveComplexity": {
           "level": "error",
           "options": {
-            "maxAllowedComplexity": 87,
+            "maxAllowedComplexity": 75,
           },
         },
         // A component returns an element, so a lone text is wrapped in a fragment.
