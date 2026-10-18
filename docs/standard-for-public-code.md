@@ -8,15 +8,19 @@ The project is committed to meeting the Standard, and says so with the
 commitment badge in its [README](../README.md#the-standard-for-public-code);
 this page shows how far it has come.
 
-This is an assessment of `main` at `2b780237` (version 2.1.1), made on
-2026-10-16 (#78). Every requirement of the 16 criteria, MUST, SHOULD
-and OPTIONAL, was checked again against the Standard's own list. It
-replaces the re-review of 2026-10-13 (`main` at `90652c08` with the
-branch `public-code-followup`, updated in pieces until 2026-10-16 as
-changes landed), the assessment of 2026-10-11 (the branch
-`standard-for-public-code`, based on `main` at `cae0a9f`) and the first
-one, of `main` at `18eace6` on 2026-10-10. It is not a promise. Check
-items off as they land, and re-assess when they do.
+This is an assessment of `main` at `befdae42`, made on 2026-10-18
+(#167). The latest release is 3.11.0; `main` adds only the docs fixes
+and the docs check of #177 to it. Every requirement of the 16
+criteria, MUST, SHOULD and OPTIONAL, was checked again against the
+Standard's own list, at `bc5a0a83` (3.10.1 and #165), and what changed
+up to `befdae42` was checked again the same day. #178 has since added
+the workflows' lint to CI, which criterion 12 names. It
+replaces the assessment of 2026-10-16 (`main` at `2b780237`, version
+2.1.1, #78), the re-review of 2026-10-13 (`main` at `90652c08` with
+the branch `public-code-followup`), the assessment of 2026-10-11 (the
+branch `standard-for-public-code`, based on `main` at `cae0a9f`) and
+the first one, of `main` at `18eace6` on 2026-10-10. It is not a
+promise. Check items off as they land, and re-assess when they do.
 
 ## Summary
 
@@ -53,30 +57,40 @@ commitlint in CI, and semantic-release releases a version after CI
 passes on `main`. The first version is 1.0.0, and stable, and 0.1.0 is
 never tagged ([releasing.md](releasing.md)).
 
-Since 2026-10-13, `main` has released eight versions, 1.0.0 to 2.1.1,
-each with a GitHub release, and the site runs only the newest. Every
-pull request goes through the merge queue, which merges it with a merge
-commit that names it. The release's key is in the `release`
-environment, which allows only `main`. CI fails a change to the public
-API that no commit calls breaking, and a commit that says no why or
-names no issue. CodeQL scans the code, and the five alerts it raised
-were fixed in pull requests (#96, #99 to #102).
-The project talks only in public and in writing (decision 13).
+Since 2026-10-13, `main` has released 26 versions, 1.0.0 to 3.11.0,
+each with a GitHub release, and the site runs only the newest. 3.0.0
+is the first major version that breaks something: the app writes cards
+in a new format (#119). Every pull request goes through the merge
+queue, which merges it with a merge commit that names it. The
+release's key is in the `release` environment, which allows only
+`main`, and since #151 the release job holds the key only while
+semantic-release runs, and every action is pinned to a commit. CI fails a change to the public API that no commit calls
+breaking, and a commit that says no why or names no issue. CodeQL scans
+the code: the five alerts it raised on `main` were fixed in pull
+requests (#96, #99 to #102), and one that a pull request's own scan
+raised was fixed in that pull request (#158). Since 2.1.1, the site serves each release's docs
+(#129), Software Heritage keeps a copy of the code (#131), some of the
+journeys run in Firefox, WebKit and on a phone too (#159) and check each screen
+for accessibility (#160), and GOVERNANCE.md says who holds the domain
+(#161). The project talks only in public and in writing (decision 13).
 
 What is left falls into three groups:
 
 1. Actions for the maintainer: making the project findable, and the
    leftover local branches.
-2. Small fixes the re-assessment found, which this page records and does
-   not make. Two of them would bring back SHOULDs met on 2026-10-13: terms
-   that are not explained (10), and a DOI whose entry does not name the
-   website (14).
+2. Small fixes. #165 made the five that the assessment of 2026-10-16
+   found, which brought back the SHOULD on explained terms (10). The
+   one on the DOI's entry (14) closed with 3.11.0, the first release
+   that carries `.zenodo.json`, whose entry names the website. This
+   assessment found four more: it fixes privacy.md, #177 fixed two
+   others, and it records the last.
 3. Gaps that stay open for now. The largest is criterion 7, review by
    someone other than the author, which cannot be met honestly while the
    project has one maintainer, and is a decided gap until then.
    Criterion 6 is non-compliant: older commits on `main` record no
-   reason and link no issue; both apply from 1.0.0 on, and CI now
-   refuses a new commit without a reason or a link.
+   reason, and 23 commits since 1.0.0, with most older ones, link no
+   issue. Both apply from 1.0.0 on, and CI now refuses a new commit
+   without a reason or a link.
    Declaring 1.0.0 stable makes the 0.x dependencies it ships a partial
    in criterion 16, a decided gap (decision 14).
 
@@ -97,58 +111,68 @@ nothing to apply it to counts as met, and the text says so.
 | 7 | [Require review of contributions](https://www.standardforpubliccode.org/criteria/require-review-of-contributions.html) | 1/3 | 1/5 | Non-compliant |
 | 8 | [Document codebase objectives](https://www.standardforpubliccode.org/criteria/document-codebase-objectives.html) | 1/1 | 1/1 | Compliant |
 | 9 | [Document the code](https://www.standardforpubliccode.org/criteria/document-the-code.html) | 3/3 | 4/5 | Compliant |
-| 10 | [Use plain English](https://www.standardforpubliccode.org/criteria/use-plain-english.html) | 5/5 | 1/2 | Compliant |
+| 10 | [Use plain English](https://www.standardforpubliccode.org/criteria/use-plain-english.html) | 5/5 | 2/2 | Compliant |
 | 11 | [Use open standards](https://www.standardforpubliccode.org/criteria/use-open-standards.html) | 4/4 | 3/3 | Compliant |
 | 12 | [Use continuous integration](https://www.standardforpubliccode.org/criteria/use-continuous-integration.html) | 4/4 | 2/3 | Compliant |
 | 13 | [Publish with an open license](https://www.standardforpubliccode.org/criteria/publish-with-an-open-license.html) | 4/4 | 1/1 | Compliant |
-| 14 | [Make the codebase findable](https://www.standardforpubliccode.org/criteria/make-the-codebase-findable.html) | – | 3/8 | No MUSTs |
+| 14 | [Make the codebase findable](https://www.standardforpubliccode.org/criteria/make-the-codebase-findable.html) | – | 4/8 | No MUSTs |
 | 15 | [Use a coherent style](https://www.standardforpubliccode.org/criteria/use-a-coherent-style.html) | 1/1 | 2/2 | Compliant |
 | 16 | [Document codebase maturity](https://www.standardforpubliccode.org/criteria/document-codebase-maturity.html) | 2/3 | 2/2 | Partial |
-| | **Total** | **41/46** | **34/51** | |
+| | **Total** | **41/46** | **36/51** | |
 
 A criterion is compliant when all its MUSTs are met. It is non-compliant
 when more than half of them are not met, and partial otherwise.
 
-### What changed since 2026-10-13
+### What changed since 2026-10-16
 
-The re-review of 2026-10-13 scored 41/46 MUSTs and 36/51 SHOULDs. Two
-SHOULDs went from met to partial, and no MUST changed:
+The assessment of 2026-10-16 scored 41/46 MUSTs and 34/51 SHOULDs. Two
+SHOULDs went from partial to met, and no MUST changed:
 
-- **Criterion 10, terms explained** (SHOULD): met to partial. DOI came
-  with the Zenodo archive on 2026-10-13 and is explained nowhere: the
-  README shows it as a badge, and [releasing.md](releasing.md) and
-  ROADMAP.md use it bare. The re-review also missed older terms that are
-  neither explained before they are used nor linked to an explanation:
-  ACR in [data-model.md](data-model.md), WCAG in
-  [studio.md](studio.md), and the EU data theme `EDUC` in
-  [deck-library.md](deck-library.md), which names it but does not link
-  the theme table.
-- **Criterion 14, a persistent identifier** (SHOULD): met to partial.
-  The Standard asks that the identifier's entry name the major
-  contributors, the repository and the website. Zenodo's entry names
-  the author and the repository but not solid-memo.com, although
-  `CITATION.cff` gives it as `url`. The re-review counted the DOI alone.
+- **Criterion 10, terms explained** (SHOULD): partial to met. #165
+  added DOI, ACR, WCAG and the EU data themes to the
+  [glossary](glossary.md), linked the first uses of ACR and WCAG to it,
+  and linked the theme table where [deck-library.md](deck-library.md)
+  names `EDUC`.
+- **Criterion 14, a persistent identifier** (SHOULD): partial to met.
+  `.zenodo.json`, which names the website, landed with #165, and 3.11.0
+  is the first release that carries it. Its entry on Zenodo names the
+  author, the repository and solid-memo.com.
 
-Two verdicts changed within a count:
+Three verdicts changed within a count, or not at all, with new evidence:
 
-- **Criterion 6, links to issues** (MUST): not met to partial. Since
-  1.0.0, 65 of the 85 commits link an issue or a pull request, against
-  none with a footer on 2026-10-13, and CI now refuses a commit that
-  names neither. Partial still counts as not met, so the MUSTs do not
-  change.
-- **Criterion 11, every standard listed** (MUST): still met. The Arabic
-  decks (1.1.0) brought text written right to left, which the app
-  isolates by the Unicode Bidirectional Algorithm; the branch
-  `standards-list` (#91) listed it in [standards.md](standards.md), with
-  CSS Writing Modes and the other Unicode annexes the app relies on.
+- **Criterion 9, examples for all functionality** (SHOULD): still
+  partial, with less missing. The [user guide](user-guide.md) now has
+  worked examples for guest mode, the theme, a second instance and deck
+  files, and names the Arabic decks (#165), seven new journeys came
+  with #141, and since #177 the guide's table names every journey. A
+  release's themes, attaching an instance by its address and "Findable
+  by other apps" still have neither.
+- **Criterion 14, findable by name and by the problem** (SHOULD): still
+  not met, now checked. A web search on 2026-10-18 found the project
+  neither way.
+- **Criterion 6, the commit counts.** Since 1.0.0, 204 of the 227
+  commits link an issue or a pull request, and since the commit checks
+  (#92), 163 of 167: the four that do not are Renovate's. Every commit
+  since 1.0.0 that records no reason is a merge commit.
 
-One OPTIONAL requirement was missing from the page and is added, met:
-courtesy translations (10). Everything else held. Where its text
-changed, it is to record what landed since: the releases, the merge
-queue, the `release` environment, the breaking-change gate, the
-commit checks, CodeQL, the changelog in the footer and the Arabic decks.
+Everything else held. Where its text changed, it is to record what
+landed since: the 18 releases, each release's docs at `/docs/`,
+Software Heritage, the docs index in [docs.ttl](docs.ttl), the release
+job's hardening, the browsers and the accessibility checks in the
+journeys, the domain in GOVERNANCE.md, #165's fixes, the release's
+contact in the Studio (#166) and #177's docs fixes and check. #165's
+fixes are in 3.11.0, so the docs the site serves have them; #177's are
+on `main` but in no release yet.
 
 ### Earlier scores
+
+The assessment of 2026-10-16, at 2.1.1, scored 41/46 MUSTs and 34/51
+SHOULDs. Against the re-review of 2026-10-13 (41/46 and 36/51), two
+SHOULDs had gone from met to partial: terms explained (10), as DOI had
+come with the Zenodo archive and ACR, WCAG and `EDUC` had been missed,
+and the persistent identifier (14), whose entry the re-review had not
+checked for the website. The links to issues (6) had gone from not met
+to partial, which did not change the count.
 
 `main` at `90652c08` alone scored 36/46 MUSTs and 31/51 SHOULDs. The
 branch `public-code-followup` added 4.3, 7.4, 10.3, 10.6, 11.3, 12.1,
@@ -174,11 +198,11 @@ criterion 16, the dependencies before 1.0.0 that the stable app ships.
 ## GitHub settings
 
 Some requirements depend on settings that are not in the repository.
-This is their state on 2026-10-16. These were read from GitHub's and
+This is their state on 2026-10-18. These were read from GitHub's and
 Zenodo's public APIs:
 
 - Discussions and issues are on. The repository has a description, a
-  homepage (solid-memo.com) and eight topics.
+  homepage (solid-memo.com) and twelve topics.
 - The labels `deck`, `interop` and `i18n`, which the issue forms set,
   exist.
 - The ruleset on `main` (24560297) is active. It blocks deletion and
@@ -192,13 +216,14 @@ Zenodo's public APIs:
   blocks force pushes.
 - The `github-pages` and `release` environments each allow deployments
   from `main` only.
-- CodeQL's default setup scans the code.
-- Every version from 1.0.0 to 2.1.1 has its tag and its GitHub release.
-  Zenodo, connected to the repository, has archived each of them up to
-  2.1.0 under the concept DOI; its entry names the author and the
-  repository's tag, but not the website.
+- CodeQL's workflow is active.
+- Every version from 1.0.0 to 3.11.0, 26 in all, has its tag and its
+  GitHub release. Zenodo, connected to the repository, has archived 24
+  of them, all but 1.0.1 and 2.1.1, under the concept DOI. Its newest
+  entry, 3.11.0, names the author, the repository and the website.
 
-The maintainer checked the ones that cannot be read without signing in:
+The maintainer checked the ones that cannot be read without signing in,
+on 2026-10-16:
 
 - Private vulnerability reporting is on.
 - Secret scanning and push protection are on.
@@ -210,7 +235,7 @@ The maintainer checked the ones that cannot be read without signing in:
 - The release's key is the environment secret `SEMANTIC_RELEASE_KEY` of
   the `release` environment, and is the only deploy key with write
   access; the repository secret of the same name, and the old deploy
-  key, are deleted (#80). Every release since 2.0.0 ran from that
+  key, are deleted (#80). Every release from 2.0.1 on ran from that
   environment.
 
 Check them again before relying on them.
@@ -232,20 +257,26 @@ What holds today, and what does not, criterion by criterion.
   ([policy.md](policy.md)).
 - MUST, met — no sensitive information about users or third parties, and
   no secrets in the tree or its history. The maintainer's own email
-  address is in the 205 published deck versions, by his choice, and in
-  the code of conduct, as its contact
-  ([privacy.md](privacy.md#what-the-project-has-published)). The decks
-  added since 2026-10-13, the four Arabic ones, give the issue tracker
-  as their contact and no email address. Secret scanning and push
-  protection are on.
+  address is in 205 of the 220 published deck versions, by his choice,
+  and in the code of conduct, as its contact
+  ([privacy.md](privacy.md#what-the-project-has-published)). The other
+  15 versions give the issue tracker as their contact and no email
+  address. They include every version added since 2.1.1: the Korean
+  phrases deck, the Korean at the Table course, new versions of the
+  capitals decks, of HTTP status codes and of the Standard for Public
+  Code course. Since 3.11.0, the Studio's release check for the library
+  flags an email address too, and its release screen writes the
+  contact (#166). Secret scanning and push protection are on.
 - SHOULD, partial — publish code not in use. The history, the pull
-  requests, the old deck and shape versions, each released version,
-  tagged, and branches with work not yet merged are public. The 17
-  leftover `pc/*` and `*-backup` branches exist only on the maintainer's
-  machine; they are most likely copies of work already merged.
-- OPTIONAL, met — the footer on every screen links to the docs, the
-  source code, the commit, the changelog, the issue tracker and
-  Discussions
+  requests, the old deck and shape versions, and every released version
+  are public. Each release is tagged, and its docs are served at
+  `/docs/X.Y.Z/` ([deployment.md](deployment.md#each-releases-docs)).
+  Branches with work not yet merged are public too. The 17 leftover
+  `pc/*` and `*-backup` branches are still only on the maintainer's
+  machine. They are most likely copies of work already merged.
+- OPTIONAL, met — the footer on every screen links to the About page,
+  the docs, the source code, the commit, the changelog, the issue
+  tracker and Discussions
   ([`Footer.tsx`](../packages/ui/src/ui/Footer.tsx),
   [configuration.md](configuration.md#vite_repo_url)).
 
@@ -258,12 +289,12 @@ What holds today, and what does not, criterion by criterion.
 - MUST, met — no policy is based on source code, so there is none to
   include.
 - SHOULD, met — policy in machine-readable formats. The project's own
-  rules are SHACL shapes and the library's checks; SM-2 is pure functions
-  in `packages/domain`.
+  rules are SHACL shapes and the library's checks. SM-2 is pure
+  functions in `packages/domain`.
 - SHOULD, met — CI checks the code against the policy. `sm2.test.ts`
   reads the table of [srs.md's worked examples](srs.md#worked-examples)
-  from the page and checks the scheduler against every row, so a change
-  to either that the other does not match fails; and
+  from the page and checks the scheduler against every row. So a change
+  to either one that the other does not match fails. And
   `npm run library:check` refuses a new deck version without a license.
 
 ### 3. Make the codebase reusable and portable
@@ -273,34 +304,51 @@ What holds today, and what does not, criterion by criterion.
   settings ([configuration.md](configuration.md)), and
   [reuse.md](reuse.md) explains how to run your own instance. Since
   releases began, the deploy on GitHub Pages deploys only released
-  versions, so a fork that uses it releases its own, with a deploy key
-  of its own ([releasing.md](releasing.md#the-deploy-key)).
+  versions. So a fork that uses it releases its own, with a deploy key
+  of its own ([releasing.md](releasing.md#the-deploy-key)), and serves
+  the docs of its own releases.
 - MUST, met — no dependency on secret or proprietary software or
   services. The site is static, and every Solid server and identity
-  provider it is tested with is open source. Their images are now
-  pinned by exact version and digest, so every run tests the same
-  servers. The release and the deploy run on GitHub Actions, for this
-  deployment only; a build needs neither.
+  provider it is tested with is open source. Their images are pinned by
+  exact version and digest, so every run tests the same servers. The
+  build draws the docs' diagrams in Chromium, which is open source, and
+  `DOCS_DIAGRAMS=skip` builds without it
+  ([configuration.md](configuration.md#docs_diagrams)). A weekly check
+  reads the discovery documents of the Pod providers that onboarding
+  suggests. It is not a gate, and the app needs none of these
+  providers ([testing.md](testing.md#pod-providers)). The release and
+  the deploy run on GitHub Actions, for this deployment only, and so
+  do the copies of older releases' docs. A build needs none of them.
 - SHOULD, not met — used by several parties.
 - SHOULD, not met — a roadmap shaped by several parties.
   [ROADMAP.md](../ROADMAP.md) is public and says how to propose an item,
   but no other party has.
 - SHOULD, not met — developed by several parties. Every commit on
-  `main` is the maintainer's, Renovate's or the release's.
+  `main` is the maintainer's, Renovate's or the release's: 552, 56 and
+  26 of the 634.
 - SHOULD, met — configuration rather than code.
 - SHOULD, met — localizable. The app speaks six languages, and card
   text in a language written right to left, such as the Arabic decks,
-  keeps its own direction ([i18n.md](i18n.md)).
+  keeps its own direction ([i18n.md](i18n.md)). The docs and the About
+  page are in English only, by choice, and say so.
 - SHOULD, partial — no situation-specific information. The app's name,
-  its pod providers and its repository links are settings: the footer's
+  its Pod providers and its repository links are settings: the footer's
   links and `index.html`'s links to the repository (its JSON-LD and its
-  `noscript` source link) follow `VITE_REPO_URL`. What is still written
-  for this deployment: `index.html`'s absolute URLs on solid-memo.com
-  (the canonical link, `og:url`, `og:image`, and the JSON-LD `url`, `@id`
-  and `image`) and its description; the about page, with its address
-  and its links to this repository; Solid Memo's wordmark and logo;
-  `CNAME`, the domain the build writes `sitemap.xml` and `robots.txt`
-  on; and the README.
+  `noscript` source link) follow `VITE_REPO_URL`. Some things are still
+  written for this deployment:
+  - `index.html`'s absolute URLs on solid-memo.com (the canonical link,
+    `og:url`, `og:image`, and the JSON-LD `url`, `@id` and `image`) and
+    its description;
+  - the About page, with its address and its links to this repository;
+  - Solid Memo's wordmark and logo;
+  - the screenshots of the app;
+  - `CNAME`, the domain the build writes `sitemap.xml` and `robots.txt`
+    on;
+  - `publiccode.yml`;
+  - the README;
+  - the docs, which the build publishes and which describe this
+    deployment.
+
   [reuse.md](reuse.md#6-what-you-edit-by-hand) lists them as files to
   edit by hand. The tree names no path on the maintainer's machine, but
   three old commits on `main` do, and the history keeps them.
@@ -308,7 +356,8 @@ What holds today, and what does not, criterion by criterion.
   that says what it exports and may import.
 - SHOULD, met — no single-vendor platform. Any static host serves the
   site ([deployment.md](deployment.md)), and any Solid provider holds the
-  data.
+  data. Only this deployment's copies of older releases' docs, at
+  `/docs/X.Y.Z/`, need GitHub. Without them, `/docs/` is still served.
 
 ### 4. Welcome contributors
 
@@ -318,18 +367,20 @@ What holds today, and what does not, criterion by criterion.
   through the merge queue in the same way (#76).
 - MUST, met — contribution guidelines in [CONTRIBUTING.md](../CONTRIBUTING.md).
 - MUST, met — governance in [GOVERNANCE.md](../GOVERNANCE.md). It,
-  `.github/CODEOWNERS` and CODE_OF_CONDUCT.md now name the maintainer's
-  own account, `@ixuz`; before, they named `@antwika`, an organization,
-  which CODEOWNERS cannot use. A decision exists only once it is
-  written in an issue, a discussion or a pull request, including the
-  messages of its commits (decision 13).
+  `.github/CODEOWNERS` and CODE_OF_CONDUCT.md name the maintainer's
+  own account, `@ixuz`. A decision exists only once it is written in an
+  issue, a discussion or a pull request, including the messages of its
+  commits (decision 13). It also says who holds the domain
+  solid-memo.com, and that the domain is the project's one cost, paid by
+  the maintainer (#161).
 - SHOULD, met — who pays for reviews. Volunteers, in their own time,
   with no funding ([CONTRIBUTING.md](../CONTRIBUTING.md#review)).
 - SHOULD, met — the engagement of organizations. GOVERNANCE.md says no
   organization is committed.
 - SHOULD, met — a public roadmap in [ROADMAP.md](../ROADMAP.md). Its
-  "Done recently" stops at 1.0.0, and does not list what 1.0.1 to 2.1.1
-  brought.
+  "Done recently" lists what came after 1.0.0, up to 3.10.1, such as the
+  merge queue, the breaking-change check, the docs at `/docs/` and the
+  Arabic and Korean decks (#165).
 - SHOULD, met — activity statistics. The README shows commit activity,
   the last commit and the contributors as badges, and links GitHub's
   pulse and activity graphs.
@@ -340,13 +391,16 @@ What holds today, and what does not, criterion by criterion.
 
 - MUST, met — a public issue tracker, with forms for bugs, features,
   decks, translations and interop reports. Blank issues are off, so
-  every issue starts from a form.
+  every issue starts from a form. The app's footer links to the forms,
+  and since 3.7.0 a card from a library deck links to the deck form to
+  report a mistake in it (#152).
 - MUST, met — the README links to the issues and the pull requests.
-- MUST, met — communication channels. The README, CONTRIBUTING.md
-  and the issue forms send questions to Discussions, which are on. The
-  project talks only in public and in writing: issues, Discussions,
-  pull requests and commit messages, with no chat and no calls, and
-  only security and code of conduct reports are private (decision 13,
+- MUST, met — communication channels. The README, CONTRIBUTING.md,
+  the issue forms and, since 2.2.0, the app's footer (#113) send
+  questions to Discussions, which are on. The project talks only in
+  public and in writing: issues, Discussions, pull requests and commit
+  messages, with no chat and no calls, and only security and code of
+  conduct reports are private (decision 13,
   [GOVERNANCE.md](../GOVERNANCE.md#where-the-project-talks)).
 - MUST, met — a closed channel for vulnerability reports.
   [SECURITY.md](../SECURITY.md) points to GitHub's private vulnerability
@@ -357,28 +411,30 @@ What holds today, and what does not, criterion by criterion.
 ### 6. Maintain version control
 
 - MUST, met — every file is in Git.
-- MUST, partial — decisions in commit messages. Of the 492 commits on
-  `main` at `2b780237`, 103 have no body once their trailers are left
+- MUST, partial — decisions in commit messages. Of the 634 commits on
+  `main` at `befdae42`, 113 have no body once their trailers are left
   out, so they record no reason. 91 of them are from before 1.0.0
-  (`d5d13c84`), the same 91 as on 2026-10-13. Since 1.0.0, 12 of the 85
-  commits have none, and all 12 are merge commits: 11 made by the merge
-  queue, whose message names the pull request whose description says
-  why, and one merge of `main` into a branch (`094e64be`), which CI now
-  refuses. Every other commit since 1.0.0 has a body: CONTRIBUTING.md
-  asks for one that says why, Renovate's commits carry one
-  (`commitBody` in `renovate.json5`): each update, from what version to
-  what, where, its source and release notes, and why; and each release
-  commit carries its changelog. From 1.0.0 on, every commit but the
-  merge commits follows Conventional Commits, so its type records what
-  kind of decision it was. Since 2026-10-15, CI's `commits` job checks
-  with commitlint that every commit of a pull request has a body, and
-  refuses a pull request with a merge commit, which commitlint skips.
-  The history cannot change, so this stays partial; the maintainer
-  decided that it applies from 1.x (decision 12).
+  (`d5d13c84`), the same 91 as on 2026-10-13. Since 1.0.0, 22 of the
+  227 commits have none, and all 22 are merge commits: 21 made by the
+  merge queue, whose message names the pull request whose description
+  says why, and one merge of `main` into a branch (`094e64be`), which CI
+  now refuses. Since 2.1.1, 10 of the 142 commits have none, all merge
+  queue merges. Every other commit since 1.0.0 has a body:
+  CONTRIBUTING.md asks for one that says why, Renovate's commits carry
+  one (`commitBody` in `renovate.json5`): each update, from what version
+  to what, where, its source and release notes, and why; and each
+  release commit carries its changelog. From 1.0.0 on, every commit but
+  the merge commits follows Conventional Commits, so its type records
+  what kind of decision it was. Since 2026-10-15, CI's `commits` job
+  checks with commitlint that every commit of a pull request has a body,
+  and refuses a pull request with a merge commit, which commitlint
+  skips. The history cannot change, so this stays partial; the
+  maintainer decided that it applies from 1.x (decision 12).
 - MUST, partial — commit messages link to issues and discussions. Of the
-  492 commits, 79 link an issue or a pull request; since 1.0.0, 65 of
-  85 do, and since the commit checks landed (#92), 24 of 25. Of the 20
-  since 1.0.0 that link nothing, nine are Renovate's, two are release
+  634 commits, 218 link an issue or a pull request; since 1.0.0, 204 of
+  227 do, and since the commit checks landed (#92), 163 of 167. The four
+  since the commit checks that link nothing are all Renovate's. Of the
+  23 since 1.0.0 that link nothing, 12 are Renovate's, two are release
   commits whose changelog names no issue, seven are the Arabic decks and
   one the fix released as 1.0.1, rebased onto `main` before every pull
   request was merged with a merge commit, and one is the merge of `main`
@@ -396,7 +452,7 @@ What holds today, and what does not, criterion by criterion.
 - SHOULD, met — guidelines ask for one logical change per commit.
 - SHOULD, met — released versions marked. semantic-release tags each
   version `vX.Y.Z` and makes a GitHub release of it: `v1.0.0` to
-  `v2.1.1`, eight so far. The ruleset "version tags" restricts their
+  `v3.11.0`, 26 so far. The ruleset "version tags" restricts their
   creation, update and deletion ([releasing.md](releasing.md)).
 - SHOULD, met — diff-friendly formats. CONTRIBUTING.md asks for text
   formats, and `.gitattributes` fixes the line endings.
@@ -409,16 +465,17 @@ What holds today, and what does not, criterion by criterion.
 - MUST, not met — every contribution reviewed by someone other than its
   author. The maintainer merges his own pull requests without review, a
   temporary exception that GOVERNANCE.md states, and Renovate merges its
-  own once CI passes, with no person reviewing them. Of the 37 pull
-  requests merged since `90652c08`, 26 are the maintainer's and none of
+  own once CI passes, with no person reviewing them. Of the 72 pull
+  requests merged since `90652c08`, 58 are the maintainer's and none of
   them has a review; one, #96, is CodeQL's suggested fix, which the
-  maintainer opened. The other 11 are Renovate's, and only #55 has an
-  approval, from the maintainer. The release commit reaches `main` with
-  no pull request: the release workflow pushes it from the `release`
-  environment, which allows only `main`, and it holds only what
-  semantic-release writes from commits already merged, reviewed or
-  not, in their own pull requests. A decided gap while there is one
-  maintainer (decision 12).
+  maintainer opened. The other 14 are Renovate's, and only #55 has an
+  approval, from the maintainer. The 35 merged since 2.1.1, #104 to
+  #177, are 32 of the maintainer's and 3 of Renovate's, and none has a
+  review. The release commit reaches `main` with no pull request: the
+  release workflow pushes it from the `release` environment, which
+  allows only `main`, and it holds only what semantic-release writes
+  from commits already merged, reviewed or not, in their own pull
+  requests. A decided gap while there is one maintainer (decision 12).
 - MUST, partial — reviews cover the source, the policy, the tests and
   the docs. CONTRIBUTING.md and the pull request template say so, but no
   one other than the author has reviewed a change yet, so there is no
@@ -443,9 +500,10 @@ What holds today, and what does not, criterion by criterion.
 - SHOULD, not met — a reviewer from a different context.
 - SHOULD, not met — no unreviewed changes on `main`. The ruleset
   requires a pull request, `ci-ok` and the merge queue, but no approval,
-  so the maintainer's own pull
-  requests and the ones Renovate merges on its own reach `main`
-  unreviewed.
+  so the maintainer's own pull requests and the ones Renovate merges on
+  its own reach `main` unreviewed. Renovate proposes a version only once
+  it has been public for 3 days, so a bad one can be pulled first, but
+  that wait is not a review.
 - SHOULD, not met — review within two business days. It is a stated
   target, but one volunteer cannot assure it, and nothing measures it.
 - OPTIONAL, not met — review by several reviewers.
@@ -457,13 +515,19 @@ What holds today, and what does not, criterion by criterion.
 - SHOULD, met — objectives.md links each principle to the check that
   enforces it, and [policy.md](policy.md) to the rules behind them.
 - OPTIONAL, met — the about page explains the project to the public.
+  The app's footer links it since 3.8.0, and it links the docs, which
+  the site publishes at `/docs/` since 3.3.0, objectives.md among
+  them (#129, #153).
 
 ### 9. Document the code
 
 - MUST, met — all functionality described, for learners in
   [user-guide.md](user-guide.md) and for developers in the topic pages.
-  The site serves these docs as pages at `/docs/`, which the about page,
-  the site's page without script and `publiccode.yml` link to.
+  What came since 2.1.1 came with it, such as undoing an answer,
+  reporting a mistake, a deck's link and the screen shown when a screen
+  breaks. The site serves these docs as pages at `/docs/`, which the
+  about page, the site's page without script and `publiccode.yml` link
+  to.
 - MUST, met — how to install and run, in the README.
 - MUST, met — examples of the key functionality: the user guide and the
   [user journeys](https://solid-memo.com/journeys/) report.
@@ -474,17 +538,26 @@ What holds today, and what does not, criterion by criterion.
   no Pod.
 - SHOULD, partial — examples for all functionality.
   [markdown.md](markdown.md), [boundaries.md](boundaries.md) and
-  [deck-library.md](deck-library.md) have them, and courses, statistics
-  and the Studio have journeys. But the [user guide](user-guide.md) has
-  no journey or worked example yet for guest mode, the theme, switching
-  instances, or exporting and importing a deck file. Nor does it cover
-  what came since 2026-10-13: it does not say that the library has
-  Arabic decks, or that text written right to left runs right to left,
-  and no journey edits a release's themes.
+  [deck-library.md](deck-library.md) have them. The
+  [user guide](user-guide.md) now has worked examples for guest mode,
+  the theme, a second instance, and exporting and importing a deck
+  file, and its table of journeys names the steps that show each. It
+  lists the four Arabic decks, says that text written right to left
+  keeps its direction, and shows the Studio's search finding an Arabic
+  word with or without its vowel marks. Undoing an answer, resetting
+  the day, reporting a mistake, updating a library copy, a deck's link
+  and the error screen each have a journey. But a release's themes,
+  attaching an instance by its address and "Findable by other apps"
+  have neither a journey nor a worked example, and no journey shows text
+  written right to left. The guide's new examples came with #165, and
+  3.11.0 is the first release whose docs have them. Since #177, the
+  guide's table also names the four journeys it had left out:
+  `later-day`, `reset-day`, `library-upgrade` and `study-reload`.
 - SHOULD, met — the components and their relations, in
   [architecture.md](architecture.md).
 - SHOULD, met — CI checks the docs: markdownlint, cspell, lychee and the
-  docs index ([testing.md](testing.md#documentation)).
+  docs' index, [docs.ttl](docs.ttl), which `check:docs` holds to every
+  page ([testing.md](testing.md#documentation)).
 
 ### 10. Use plain English
 
@@ -492,37 +565,45 @@ What holds today, and what does not, criterion by criterion.
   (the README, [style.md](style.md#language)).
 - MUST, met — English is one of them.
 - MUST, met — the docs are up to date in English, the one authoritative
-  language. The releases, the merge queue, the `release` environment,
-  the breaking-change gate, the commit checks and right-to-left text
-  came with their docs ([releasing.md](releasing.md),
-  [testing.md](testing.md#the-merge-queue), [i18n.md](i18n.md)). This
-  page was the one behind: it still listed the merge queue and the
-  `release` environment as open after they were done. This update fixes
-  that.
+  language. What landed since 2.1.1 came with its docs: the docs at
+  `/docs/` ([deployment.md](deployment.md#each-releases-docs)), the
+  accessibility target and its checks ([accessibility.md](accessibility.md)),
+  the browsers the journeys run in ([testing.md](testing.md#browsers)),
+  CodeQL ([testing.md](testing.md#code-scanning),
+  [SECURITY.md](../SECURITY.md)), the domain
+  ([GOVERNANCE.md](../GOVERNANCE.md#the-domain)) and what the app does
+  new ([user-guide.md](user-guide.md)). This page was the one behind
+  again: its criteria 9 and 10 still listed as missing what #165 had
+  added. This update fixes that, and [privacy.md](privacy.md), which
+  still said every deck version carries the maintainer's email address.
+  #177 fixed others that had fallen behind, such as the
+  [journeys' README](../e2e/journeys/README.md), which still said the
+  journeys run in Chromium only.
 - MUST, met — the source code is in English.
 - MUST, met — the bundled policy is in English.
-- SHOULD, partial — terms explained. [glossary.md](glossary.md) covers
-  the code's and the tools' terms, such as CI, SPDX, REUSE, npm, ports
-  and adapters, and, since 2026-10-13, Conventional Commits, commitlint,
-  semantic-release, SemVer, deploy keys and environments. The README and
-  CONTRIBUTING.md link it. Other terms are explained where they are
-  used, such as the merge queue ([testing.md](testing.md#the-merge-queue))
-  and Zenodo ([releasing.md](releasing.md)). But some are neither
-  explained nor linked. DOI is new since 2026-10-13 (the README,
-  [releasing.md](releasing.md), ROADMAP.md). Older ones the re-review of
-  2026-10-13 missed: ACR ([data-model.md](data-model.md)), WCAG
-  ([studio.md](studio.md)), and the EU data theme `EDUC`
-  ([deck-library.md](deck-library.md)), whose theme table is not linked.
+- SHOULD, met — terms explained. [glossary.md](glossary.md) covers the
+  code's and the tools' terms, such as CI, SPDX, REUSE, npm, ports and
+  adapters, Conventional Commits, commitlint, semantic-release, SemVer,
+  deploy keys and environments, and now DOI, ACR, WCAG and the EU data
+  themes, such as `EDUC`. [deck-library.md](deck-library.md) links the
+  data theme table where it names `EDUC`. The README and CONTRIBUTING.md
+  link the glossary. Other terms are explained or linked where they are
+  used, such as the merge queue ([testing.md](testing.md#the-merge-queue)),
+  Zenodo ([releasing.md](releasing.md)), axe
+  ([accessibility.md](accessibility.md)) and CodeQL
+  ([testing.md](testing.md#code-scanning)). Met again, as on 2026-10-13.
+  The fix came with #165, and 3.11.0 is the first release whose docs
+  have it.
 - SHOULD, met — a plain reading level. Long pages open with a plain
   summary, and style.md asks for short sentences and everyday words. The
   technical pages are above that level, for their own readers.
 - OPTIONAL, met — courtesy translations. The app's messages are in
   Swedish, Korean, German, Spanish and French too, and library decks
-  carry their titles, descriptions and keywords in all six. The README
-  says English is the authoritative language, and
-  [i18n.md](i18n.md#translations) says English is the source and how
-  each translation was made. The docs are in
-  English only.
+  carry their titles, descriptions and keywords in all six, the Korean
+  decks added since 2.1.1 included. The README says English is the
+  authoritative language, and [i18n.md](i18n.md#translations) says
+  English is the source and how each translation was made. The docs are
+  in English only.
 
 ### 11. Use open standards
 
@@ -540,7 +621,12 @@ What holds today, and what does not, criterion by criterion.
   `unicode-bidi: isolate` in the style sheet); the branch
   `standards-list` (#91) listed it, with CSS Writing Modes, Unicode
   Text Segmentation and the Collation Algorithm, which the app already
-  relied on.
+  relied on. The docs served at `/docs/` (#129, in 3.3.0) brought SVG,
+  for the diagrams the build draws, and listed it with WOFF, for the
+  font embedded in them and the app's own fonts. Since #160, WCAG 2.2
+  at level AA is the target of the app and the Studio, and the journeys
+  check each screen they visit with axe
+  ([accessibility.md](accessibility.md#the-target)).
 - MUST, met — the drafts and de facto ones do not hinder reuse, and
   standards.md says why.
 - SHOULD, met — where no standard existed, the project publishes its own
@@ -555,45 +641,57 @@ What holds today, and what does not, criterion by criterion.
 ### 12. Use continuous integration
 
 - MUST, met — all functionality has automated tests, at 100% coverage
-  in every package. The scripts are covered too (`npm run check:scripts`),
-  `checkBreaking.ts` and `checkClosesIssue.ts`, new since 2026-10-13,
-  included, and `shacl_crosscheck.py` has its own tests, which CI runs
-  before the cross-check ([testing.md](testing.md)).
+  in every package. The docs' build in `packages/markdown/tooling/`,
+  new since 2.1.1, is in its package's coverage. The scripts are covered
+  too (`npm run check:scripts`), the four new since 2.1.1
+  (`checkActions.ts`, `checkProviders.ts`, `docsArchive.ts` and
+  `docsVersions.ts`) included, and `shacl_crosscheck.py` has its own
+  tests, which CI runs before the cross-check ([testing.md](testing.md)).
 - MUST, met — contributions pass all tests before they are merged.
   CI runs on every pull request, in the merge queue and on every push to
   `main`, and `ci-ok` passes only when all its jobs did: `build`,
   `library` (the deck library and the public API compared with the
-  change's base), `crosscheck`, `pod`, `contract`, `journeys`, `docs`,
-  `workflows` (actionlint and zizmor over the workflows) and `commits`
-  (commitlint and the closing keyword, on a pull request's
-  commits). The ruleset requires `ci-ok`, on the pull request and again
-  in the merge queue, on top of `main` and the pull requests ahead of
-  it. Its bypass list names only "Deploy keys", for the release:
+  change's base), `crosscheck`, `pod`, `contract`, `journeys` (every
+  journey in Chromium, and a set of them in Firefox, WebKit and on a
+  phone, with axe's accessibility checks), `docs`, `workflows`
+  (actionlint and zizmor over the workflows) and `commits` (commitlint
+  and the closing keyword, on a pull request's commits). The ruleset
+  requires `ci-ok`, on the pull request and again in the merge queue, on
+  top of `main` and the pull requests ahead of it. Its bypass list names
+  only "Deploy keys", for the release:
   semantic-release pushes the release commit with its key once CI has
   passed on `main`, and CI checks that commit too before it is
   deployed. The interop workflow's advisory servers report and do not
-  gate, by design ([testing.md](testing.md)). CodeQL also scans every
-  pull request; it does not gate a merge.
+  gate, by design ([testing.md](testing.md)). CodeQL also scans pull
+  requests from the repository's own branches, not from forks
+  ([testing.md](testing.md#code-scanning)); it does not gate a merge.
 - MUST, met — guidelines for structuring contributions in
   CONTRIBUTING.md and the pull request template.
 - MUST, met — an active contributor who reviews contributions: the
-  maintainer, with eight releases from 1.0.0 to 2.1.1 since 2026-10-13.
-  One person is a thin margin, as criterion 7 shows.
+  maintainer, with 26 releases from 1.0.0 to 3.11.0 since 2026-10-13,
+  18 of them since 2.1.1. One person is a thin margin, as criterion 7
+  shows.
 - SHOULD, met — test results are public, for a fork's pull request too.
 - SHOULD, met — one issue per pull request, as CONTRIBUTING.md and the
   pull request template ask, and `npm run check:closes` checks that a
   pull request closes its issue.
 - SHOULD, partial — coverage monitored. Each package's test coverage is
-  in the CI run's summary, and `npm run check:docs` keeps every page in
-  the docs index. Nothing measures the docs' coverage: every package, app
-  and end-to-end suite has a README today, but no check holds it, and
-  nothing checks that every export has a comment.
+  in the CI run's summary, and `npm run check:docs` checks that every
+  page in `docs/` is in [the docs' index](docs.ttl). Nothing measures
+  the docs' coverage: every package, app and end-to-end suite has a
+  README today, but no check holds it, and nothing checks that every
+  export has a comment.
 - OPTIONAL, partial — the policy and the docs tested against the code.
   The generated vocabulary, the vendored packages' list, the SM-2 table
   and, since 2.0.0, the public API in `api/` are checked: a test writes
   each of its files from the code and fails when they disagree
-  ([api/README.md](../api/README.md)). standards.md, the answers CSV's
-  columns in statistics.md and testing.md's list of CI jobs are not.
+  ([api/README.md](../api/README.md)). Since 2.1.1, the built site's
+  test also checks that every address publiccode.yml names on the
+  site's domain is a page the build serves, and since #177,
+  `npm run check:docs` fails on an `npm run` in the Markdown that names
+  no script. standards.md, the answers
+  CSV's columns in statistics.md and testing.md's list of CI jobs are
+  not.
 - OPTIONAL, met — the docs tested for style and broken links:
   markdownlint, cspell and lychee.
 - OPTIONAL, partial — the software tested with the docs' examples.
@@ -611,9 +709,9 @@ What holds today, and what does not, criterion by criterion.
 - SHOULD, met — machine-readable notices in every file. The repository
   follows REUSE, and the `docs` job, which `ci-ok` needs, runs
   `reuse lint` ([style.md](style.md#licenses)); it passes at
-  `2b780237`, the public API's files in `api/` included.
-  `npm run check:reuse` checks that each deck is listed under the
-  license it states.
+  `befdae42`, for all 1,738 files, the public API's files in `api/`
+  included. `npm run check:reuse` checks that each deck is listed under
+  the license it states.
 - OPTIONAL, met — several licenses: MIT for the code and the docs, and
   each deck's own license.
 
@@ -625,20 +723,30 @@ What holds today, and what does not, criterion by criterion.
   `package.json` and in `publiccode.yml`.
 - SHOULD, not met — submitted to software catalogs.
 - SHOULD, met — a website that explains the problem for different
-  readers: [solid-memo.com/about](https://solid-memo.com/about/).
-- SHOULD, not met — findable by name in a search engine. Not checked,
-  and the site is not registered with any search engine.
-- SHOULD, not met — findable by the problem it solves. Not checked.
-- SHOULD, partial — a persistent identifier whose entry names the major
+  readers: [solid-memo.com/about](https://solid-memo.com/about/), with
+  sections for learners, deck authors, technologists and decision
+  makers.
+- SHOULD, not met — findable by name in a search engine. A web search
+  for "Solid Memo" on 2026-10-18 did not find the project, and the site
+  is not registered with any search engine.
+- SHOULD, not met — findable by the problem it solves. A web search for
+  spaced-repetition flashcards kept in a Solid pod, on 2026-10-18, did
+  not find it either.
+- SHOULD, met — a persistent identifier whose entry names the major
   contributors, the repository and the website. Zenodo archives each
   GitHub release and gives it a DOI; the concept DOI,
   [10.5281/zenodo.23351087](https://doi.org/10.5281/zenodo.23351087),
-  is in `CITATION.cff` and the README. Its entry names the author and
-  the repository, but not solid-memo.com: Zenodo does not take
-  `CITATION.cff`'s `url`. The re-review of 2026-10-13 counted the DOI
+  is in `CITATION.cff` and the README. Zenodo does not take
+  `CITATION.cff`'s `url`, so `.zenodo.json` lists the website (#165),
+  and 3.11.0 is the first release that carries it
+  ([releasing.md](releasing.md#what-a-release-does)). Its entry names
+  the author, the repository and solid-memo.com; the entries of
+  earlier versions name the website nowhere. Software Heritage also
+  keeps a copy of the code (#131), and its entry names the repository
   alone.
 - SHOULD, met — machine-readable metadata: `publiccode.yml`, checked in
-  CI, whose `documentation` is the docs on the site, and `CITATION.cff`.
+  CI, whose `documentation` is the docs on the site, `CITATION.cff`,
+  and `.zenodo.json`, which Zenodo reads from each release.
 - OPTIONAL, met — a domain of its own, solid-memo.com. The
   vocabulary, the shapes and the decks live under it, so the data in
   people's pods depends on it. Its risk is renewal: the maintainer
@@ -652,19 +760,29 @@ What holds today, and what does not, criterion by criterion.
 
 - MUST, met — a style guide, [style.md](style.md).
 - SHOULD, met — style checked automatically: Biome, the Turtle
-  formatter, markdownlint and cspell, in `npm run check` and CI.
+  formatter, markdownlint and cspell, in `npm run check` and CI, whose
+  `ci-ok` check `main` requires. Since #139, Biome's lint also fails on
+  modules that import each other in a circle, and on a function too
+  complex to follow. Since #160, a rule is turned off only for the files
+  its reason names ([style.md](style.md#formatting)).
 - SHOULD, met — rules for comments and docs, in style.md.
 - OPTIONAL, met — rules for understandable English, in style.md.
 
 ### 16. Document codebase maturity
 
 - MUST, met — versioned. semantic-release releases a version after CI
-  passes on `main`: eight so far, 1.0.0 to 2.1.1. The site runs only
-  the newest released version, and the footer shows which. 2.0.0 was a
+  passes on `main`: 26 so far, 1.0.0 to 3.11.0, each with its tag and
+  its GitHub release. The site runs only the newest released version,
+  and the footer shows which. Since 3.3.0 (#129), the docs of each
+  release whose GitHub release carries them stay at `/docs/X.Y.Z/`
+  ([deployment.md](deployment.md#each-releases-docs)). 2.0.0 was a
   major version by mistake: no commit in it breaks anything, but
   semantic-release read a line in a commit's body as a breaking change.
   [releasing.md](releasing.md) says so, and the release now counts only
-  a `BREAKING CHANGE:` footer as written (#84, in 2.0.1).
+  a `BREAKING CHANGE:` footer as written (#84, in 2.0.1). 3.0.0 is a
+  major version for a real break: the app writes cards in card format
+  6, which its commit marks with `!` and a `BREAKING CHANGE:` footer
+  (#119), and the changelog says what it breaks.
 - MUST, met — maturity stated. The README, the about page and
   `publiccode.yml` (`developmentStatus: stable`) say the app is stable
   from 1.0.0, its first version, and the releases page lists each
@@ -677,8 +795,10 @@ What holds today, and what does not, criterion by criterion.
   `rdf-validate-shacl` 0.6 and `rdf-validate-datatype` 0.2, the SHACL
   engine the app uses, `@inrupt/solid-client-errors` 0.0, released with
   `@inrupt/solid-client` 4, and `process` 0.11, final at 0.11 by its
-  maintainer's choice. A decided gap (decision 14). While the app was
-  in beta, no version was declared ready, and this held.
+  maintainer's choice. A decided gap (decision 14). Mermaid, which
+  draws the docs' diagrams at build time, brings packages before 1.0.0
+  too, but none of them is shipped, so the gap does not grow. While the
+  app was in beta, no version was declared ready, and this held.
 - SHOULD, met — a summary of changes, in [CHANGELOG.md](../CHANGELOG.md):
   semantic-release writes each version's entry from the commits, and a
   section written by hand sums up what 1.0.0 contains. Since 2.1.0, the
@@ -689,7 +809,7 @@ What holds today, and what does not, criterion by criterion.
 - OPTIONAL, met — Semantic Versioning, from 1.0.0. Since 2.0.0, CI
   fails a change to the public API that no commit calls breaking. 2.0.0
   itself raised the major version with nothing broken, which Semantic
-  Versioning allows.
+  Versioning allows; 3.0.0 raised it for card format 6, a real break.
 
 ## Decisions made
 
@@ -797,7 +917,8 @@ Only an admin of the repository can change these. All are done:
 - **Done.** **Labels.** `deck`, `interop` and `i18n` exist, for the deck,
   interop and translation forms.
 - **Done.** **The ruleset on `main`** (24560297). It requires `ci-ok`, and its
-  bypass list is empty, so Renovate has no bypass. *(7, 12)*
+  bypass list names only "Deploy keys", for the release, so Renovate
+  has no bypass. *(7, 12)*
 - **Done.** **Allow auto-merge.** On, so Renovate can add its pull requests to
   the merge queue once `ci-ok` passes.
 - **Done.** **The merge queue on `main`.** The ruleset on `main` requires the
@@ -861,28 +982,51 @@ Only an admin of the repository can change these. All are done:
   maintainer's approval too, and automerge merges them once it is given
   (decision 8). *(7, 12)*
 
-### Small fixes the re-assessment found
+### Small fixes the assessment of 2026-10-16 found
 
-Found on 2026-10-16 and not made here, as #78 leaves fixing to later
-changes:
+Made in #165, and released in 3.11.0, so the docs the site serves have
+them:
 
-- **Done.** **Terms.** Explain DOI, ACR and WCAG in
-  [glossary.md](glossary.md), or where they are first used, and link the
-  EU data theme table where [deck-library.md](deck-library.md) names
-  `EDUC`. *(10)*
-- **Done.** **The DOI's entry.** Make Zenodo's entry name solid-memo.com, for
-  example with a `.zenodo.json` that lists the website as a related
-  identifier, since Zenodo does not take `CITATION.cff`'s `url`. *(14)*
-- **Done.** **CodeQL in the docs.** CodeQL scans the code, but no page says
-  so: [testing.md](testing.md) and SECURITY.md could say what it checks
+- **Done.** **Terms.** DOI, ACR and WCAG are in
+  [glossary.md](glossary.md), their first uses link there, and
+  [deck-library.md](deck-library.md) links the EU data theme table
+  where it names `EDUC`. *(10)*
+- **Done.** **The DOI's entry.** `.zenodo.json` lists solid-memo.com as a
+  related identifier, since Zenodo does not take `CITATION.cff`'s
+  `url`. 3.11.0 is the first release that carries it, and its entry on
+  Zenodo names the website. *(14)*
+- **Done.** **CodeQL in the docs.** [testing.md](testing.md#code-scanning)
+  and SECURITY.md say what CodeQL checks, that it does not gate a merge,
   and that its alerts are fixed in pull requests like any other change.
   *(12)*
-- **Done.** **ROADMAP.md.** "Done recently" stops at 1.0.0; add what 1.0.1 to
-  2.1.1 brought, such as the merge queue, the breaking-change gate and
-  the Arabic decks. *(4)*
-- **Done.** **The user guide.** Say that the library has Arabic decks and that
-  text written right to left keeps its direction, alongside the
-  examples criterion 9 already lacks. *(9)*
+- **Done.** **ROADMAP.md.** "Done recently" lists what came after 1.0.0,
+  up to 3.10.1. *(4)*
+- **Done.** **The user guide.** It names the Arabic decks, says that
+  text written right to left keeps its direction, and has worked
+  examples for guest mode, the theme, a second instance and deck
+  files. *(9)*
+
+### Small fixes this assessment found
+
+Found on 2026-10-18. privacy.md is fixed here, #177 fixed two others,
+and the last is not made here:
+
+- **Done.** **privacy.md.** It said every published deck version names
+  the maintainer's email address, and that the library's index repeats
+  it. It now says the first 205 versions do, every version since names
+  the project's contact, and the index gives no email address. *(1, 10)*
+- **Done.** **The user guide's journeys.** Its table of journeys left
+  out `later-day`, `reset-day`, `library-upgrade` and `study-reload`;
+  #177 added them. *(9)*
+- **Done.** **The journeys' README.** [e2e/journeys](../e2e/journeys/README.md)
+  said the journeys run the built app in Chromium. Since #177, it says
+  that a few of them also run in Firefox, WebKit and on a phone. *(10)*
+- **Open.** **`.zenodo.json` in standards.md.** `CITATION.cff` and
+  `publiccode.yml` are listed in [standards.md](standards.md) as
+  metadata formats, but `.zenodo.json`, Zenodo's own deposit metadata,
+  is not. It is Zenodo's configuration, as `renovate.json5` is
+  Renovate's, so criterion 11 still holds, but a row beside
+  `CITATION.cff` would say where its fields come from. *(11)*
 
 ### Gaps that remain
 
@@ -905,8 +1049,9 @@ them:
   none has joined.
 - **Criterion 3, situation-specific information.** `index.html`'s site
   URLs, `CNAME` (which the build writes the sitemap and `robots.txt`
-  from) and the about page name solid-memo.com, and the about page
-  links to this repository. A deployed site needs them, and
+  from), the about page, the screenshots, `publiccode.yml` and the docs
+  name solid-memo.com, and the about page links to this repository. A
+  deployed site needs them, and
   [reuse.md](reuse.md#6-what-you-edit-by-hand) lists them for a copy to
   change. Three old commits name paths on the maintainer's machine, and
   the history keeps them.
@@ -915,13 +1060,16 @@ them:
   them is not an option. The requirement applies from 1.x (decision 12):
   CI refuses a new commit with no body, so the share without a reason
   only shrinks.
-- **Criterion 6, links to issues.** 20 commits since 1.0.0, and most
+- **Criterion 6, links to issues.** 23 commits since 1.0.0, and most
   older ones, link no issue, and the history keeps them. It applies from
   1.x (decision 12): CI refuses a new commit that names no issue, pull
   request or discussion, and every merge commit names its pull request.
-- **Criterion 9, examples for all functionality.** Guest mode, the theme,
-  switching instances and deck files need a journey or a worked example
-  in the user guide, and so do the Arabic decks and a release's themes.
+  Since the commit checks (#92), only four of Renovate's updates link
+  nothing, and they carry a `Why:` line instead.
+- **Criterion 9, examples for all functionality.** A release's themes,
+  attaching an instance by its address and "Findable by other apps"
+  need a journey or a worked example in the user guide, and no journey
+  shows text written right to left.
 - **Criterion 12, the docs' coverage.** Nothing checks that every package
   has a README, or that every export has a comment.
 - **Criterion 16, dependencies ready to use.** A decided gap (decision
@@ -932,9 +1080,10 @@ them:
   1.x exists, but brings in packages before 1.0.0 of its own and a
   SPARQL engine the app does not need.
 - **Criterion 14, findability.** The repository name is kept by choice.
-  Catalogs and search engines wait for the actions above. The DOI is
-  in `CITATION.cff` and the README; its entry waits for the small fix
-  above.
+  Catalogs and search engines wait for the actions above, and a web
+  search on 2026-10-18 found the project neither by name nor by the
+  problem it solves. The DOI is in `CITATION.cff` and the README, and
+  its entry names the website since 3.11.0.
 
 ## The plan, as it landed
 
@@ -1014,10 +1163,10 @@ landed and **Open.** when it has not: most of it landed on the branch
 - **Done.** **REUSE.** `REUSE.toml`, `LICENSES/`, SPDX headers, the license on
   the `ns/` graphs ([vocab.md](vocab.md#license)), `reuse lint` in CI,
   and `npm run check:reuse` for the decks' licenses.
-- **Open.** **Releases.** The version shows in the footer, semantic-release
+- **Done.** **Releases.** The version shows in the footer, semantic-release
   releases each version from the commits, and only released versions
-  are deployed, from tags a ruleset protects. The archive remains
-  (above).
+  are deployed, from tags a ruleset protects. Zenodo archives each
+  release, and Software Heritage keeps a copy of the code (above).
 - **Open.** **Findability.** The about page is done and in the sitemap,
   which the build writes. Search engines and the Solid community remain
   (above).
