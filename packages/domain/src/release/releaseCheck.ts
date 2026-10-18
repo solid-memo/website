@@ -30,9 +30,9 @@ import { moved } from "./releaseToDraft.ts";
  * releases of decks/ (`npm run library:check`), run on the draft as the
  * release it will be. A policy says which library it is checked for:
  * a pod (the default), whose curation asks nothing beyond the data's
- * own rules, or this repository's library, whose curation asks English
- * and Swedish keywords, the theme EDUC and its contact in place of an
- * email, and whose index places it.
+ * own rules, or this repository's library, whose curation asks a title,
+ * description and keywords in every language the app speaks, the theme
+ * EDUC and its contact in place of an email, and whose index places it.
  */
 
 /** Which library a draft is checked for: a release published in a pod, or one sent to the repository's decks/. */

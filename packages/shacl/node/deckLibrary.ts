@@ -28,7 +28,12 @@ import {
   markdownProblems as releaseMarkdownProblems,
   type FieldRuleName,
 } from "@solid-memo/domain/release/markdownFields";
-import { LIBRARY_CONTACT } from "@solid-memo/domain/release/curationRules";
+import {
+  curationProblems,
+  LIBRARY_CONTACT,
+  LIBRARY_LANGUAGES,
+  podPolicy,
+} from "@solid-memo/domain/release/curationRules";
 import { libraryReleaseUrl, librarySeriesUrl } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import {
@@ -62,7 +67,8 @@ import {
  * it is out of date. Both check the library: the layout (nothing but the
  * index and the releases, each deck's versions numbered 1, 2, …), each
  * release's metadata against its path, Solid Memo's shapes, DCAT-AP and
- * SKOS with the reference data, a course's outline (courseProblems), its
+ * SKOS with the reference data, each deck's newest version in every
+ * language the app speaks (languageProblems), a course's outline (courseProblems), its
  * text written in Markdown (markdownProblems), every literal in Unicode
  * NFC (normalizationProblems), and that no version drops
  * a card, chapter, step or distractor of the one before it. With
@@ -502,6 +508,20 @@ export function contactProblems(release: DeckRelease): string[] {
   return problems;
 }
 
+/**
+ * What a deck's newest version lacks of the languages the library asks
+ * (LIBRARY_LANGUAGES in @solid-memo/domain/release/curationRules): a
+ * title, a description and keywords in every language the app speaks.
+ * Only the newest version is held to it: a language the app gains is
+ * added by a new version, and the versions before it stay frozen.
+ */
+export function languageProblems(release: DeckRelease): string[] {
+  return messagesOf(
+    release,
+    curationProblems(modelOf(release), { ...podPolicy, ...LIBRARY_LANGUAGES }),
+  );
+}
+
 /** The problems a check that throws one Error per document reports, or none. */
 async function problemsOf(check: Promise<void>): Promise<string[]> {
   try {
@@ -518,7 +538,8 @@ async function problemsOf(check: Promise<void>): Promise<string[]> {
  * (continuityRules: a card, chapter, step or distractor the deck no
  * longer uses is retired, owl:deprecated true, never removed, so the
  * copies that have it keep it and its review history, and its id is
- * never another kind of subject's), its course outline (courseProblems),
+ * never another kind of subject's), the languages of a deck's newest
+ * version (languageProblems), its course outline (courseProblems),
  * its text written in Markdown (markdownProblems), its literals in
  * Unicode NFC (normalizationProblems), and Solid Memo's shapes, DCAT-AP
  * (a release with the index beside it, where its series and publisher
@@ -547,6 +568,10 @@ export async function validateLibrary(
       problems.push(...messagesOf(release, continuity));
     }
     problems.push(...courseProblems(release), ...markdownProblems(release));
+    const newest = !releases.some(
+      (r) => r.deck === release.deck && r.version === release.version + 1,
+    );
+    if (newest) problems.push(...languageProblems(release));
     problems.push(
       ...normalizationProblems(label, releaseUrlOf(release.deck, release.version), release.quads),
     );

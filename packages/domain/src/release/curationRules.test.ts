@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, it } from "vitest";
+import { LOCALES } from "../locale";
 import { at, iri, model, RELEASE, text } from "../testing/releaseModel";
 import { curationProblems, LIBRARY_CONTACT, podPolicy, repoPolicy } from "./curationRules";
 
@@ -13,10 +14,13 @@ const contact = (url: string, types = [KIND]) => ({
   types,
   urls: [iri(url)],
 });
+/** Text in every language the app speaks, English as "en-gb" and the rest as `language`. */
+const everyLanguage = (value: string) =>
+  LOCALES.map((language) => text(value, language === "en" ? "en-gb" : language));
 const curated = model({
-  title: [text("Solid"), text("Solid", "sv")],
-  description: [text("About Solid.", "en-gb")],
-  keywords: [text("pods"), text("poddar", "sv"), iri("https://example.com/keyword")],
+  title: [text("Solid"), ...everyLanguage("Solid")],
+  description: everyLanguage("About Solid."),
+  keywords: [...everyLanguage("pods"), iri("https://example.com/keyword")],
   themes: [iri(EDUC)],
   contacts: [contact("https://example.com/other"), contact(LIBRARY_CONTACT)],
 });
@@ -25,10 +29,19 @@ it("accepts a release the repository's policy asks nothing more of", () => {
   expect(curationProblems(curated, repoPolicy)).toEqual([]);
 });
 
+it("asks a title, a description and keywords in every language the app speaks", () => {
+  expect(repoPolicy.titleLanguages).toEqual(LOCALES);
+  expect(repoPolicy.descriptionLanguages).toEqual(LOCALES);
+  expect(repoPolicy.keywordLanguages).toEqual(LOCALES);
+});
+
 it("names each language and theme the repository's policy asks and a release lacks", () => {
+  const others = (value: string, lacking: string) =>
+    everyLanguage(value).filter((term) => !term.language.startsWith(lacking));
   const bare = model({
-    title: [text("Solid", "sv")],
-    keywords: [text("pods"), iri("https://example.com/sv")],
+    title: others("Solid", "en"),
+    description: others("About Solid.", "ko"),
+    keywords: [...others("pods", "sv"), iri("https://example.com/sv")],
     themes: [iri("https://example.com/theme")],
   });
   expect(
@@ -42,7 +55,7 @@ it("names each language and theme the repository's policy asks and a release lac
     {
       code: "missingLanguage",
       field: "http://purl.org/dc/terms/description",
-      params: { language: "en" },
+      params: { language: "ko" },
     },
     {
       code: "missingLanguage",

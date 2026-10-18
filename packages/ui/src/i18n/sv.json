@@ -2844,7 +2844,7 @@
       "policyPod": "En utgåva i din pod",
       "policyLibrary": "Solid Memos bibliotek",
       "policyHintPod": "En utgåva i en pod hålls till reglerna för sina data: sin kurs, vad en utgåva anger, sin Markdown och utgåvan den följer.",
-      "policyHintLibrary": "En kortlek som skickas till Solid Memos bibliotek hålls också till dess urval (nyckelord på engelska och svenska, temat Utbildning) och placeras bland dess kortlekar av bibliotekets index.",
+      "policyHintLibrary": "En kortlek som skickas till Solid Memos bibliotek hålls också till dess urval (titel, beskrivning och nyckelord på varje språk appen talar, temat Utbildning) och placeras bland dess kortlekar av bibliotekets index.",
       "checking": "Kontrollerar utkastet …",
       "clear": "Inga problem hittades.",
       "summary": {
