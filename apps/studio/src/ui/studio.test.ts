@@ -203,6 +203,19 @@ describe("the Studio's stylesheet", () => {
     );
   });
 
+  // Read from the file: the test DOM computes no scroll-padding.
+  it("scrolls what has the focus clear of the parts of a table that stick, by the room the table gives", () => {
+    const css = readFileSync(join(import.meta.dirname, "studio.css"), "utf8");
+    const rule = (selector: string) => {
+      const start = css.indexOf(`:root[data-surface="studio"] ${selector} {\n  scroll-padding`);
+      return css.slice(start, css.indexOf("}", start));
+    };
+    expect(rule("main.workspace")).toContain(
+      "scroll-padding: var(--s-sticky-top, 0) 0 var(--s-sticky-bottom, 0) var(--s-sticky-start, 0);",
+    );
+    expect(rule("main .studio-table")).toContain("scroll-padding-left: var(--s-sticky-start, 0);");
+  });
+
   it("packs a table's filters into one row, each label beside its field, and keeps the bar of the rows selected in sight", () => {
     root.setAttribute("data-surface", "studio");
     const page = `

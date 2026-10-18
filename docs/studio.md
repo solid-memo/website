@@ -116,7 +116,10 @@ It takes the whole window, and the window does not scroll:
   tabs of the deck or draft shown, then the screen. A table's header
   row stays in sight as it scrolls, and a table too wide for it scrolls
   it sideways; on a narrow screen such a table scrolls sideways in its
-  own box.
+  own box. What has the focus in a table is scrolled clear of the parts
+  that stick over it, its header row, its first column and the bar of
+  the rows selected, so none of them hides it
+  ([`shell/stickyClearance.ts`](../apps/studio/src/ui/shell/stickyClearance.ts)).
 - **The aside**, right of the main content, a complementary region
   named for what it shows: on a course draft's screens, its
   [outline](#the-outline), but on the overview, which shows the outline
