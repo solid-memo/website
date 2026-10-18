@@ -21,6 +21,19 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.12.0](https://github.com/solid-memo/website/compare/v3.11.0...v3.12.0) (2026-10-18)
+
+### Features
+
+* **library:** ask every app language of a library deck's title, description and keywords ([5054f6b](https://github.com/solid-memo/website/commit/5054f6bd03a97654b9fdbb3b93009bff737b5571)), closes [#172](https://github.com/solid-memo/website/issues/172)
+
+### Bug Fixes
+
+* **ci:** keep step outputs out of scripts and Pages rights in their jobs ([c443861](https://github.com/solid-memo/website/commit/c44386186575db49b7a40476ce860852b8d43837)), closes [#170](https://github.com/solid-memo/website/issues/170) [#170](https://github.com/solid-memo/website/issues/170)
+* **solid:** bring outdated deck entries up through upgradeDeck ([57d3960](https://github.com/solid-memo/website/commit/57d3960bd04cf681b706fa82506331ea7eef06ab)), closes [#168](https://github.com/solid-memo/website/issues/168)
+* **studio:** keep what has the focus in a table clear of what sticks ([3a96613](https://github.com/solid-memo/website/commit/3a96613bf75b6e894613f664ba1e853717efe5b8)), closes [#169](https://github.com/solid-memo/website/issues/169)
+* **studio:** mark the languages in the names of cells edited in place ([b10a4f7](https://github.com/solid-memo/website/commit/b10a4f76458b6ae0a04bcf694552abcfabf59d9f)), closes [#169](https://github.com/solid-memo/website/issues/169)
+
 ## [3.11.0](https://github.com/solid-memo/website/compare/v3.10.1...v3.11.0) (2026-10-18)
 
 ### Features
