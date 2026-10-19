@@ -21,6 +21,34 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [4.0.0](https://github.com/solid-memo/website/compare/v3.13.0...v4.0.0) (2026-10-19)
+
+### ⚠ BREAKING CHANGES
+
+* the app writes preferences in format 5 and deck
+schedules in format 2. An older version of Solid Memo reads format-5
+preferences without the scheduler and refuses to save over them, so
+after this version saves or updates an instance's preferences, a tab
+or device still on an older version cannot save its preferences or
+theme until it is reloaded. Such a tab also ignores the preferences'
+scheduler and keeps scheduling and grading by SM-2 alone, which leaves
+the FSRS-6 states it grades to be worked out again. It reads a
+format-2 deck schedule as format 1, so while that schedule is fresh it
+shows its counts (FSRS-6's due days when FSRS-6 is in use) as its own,
+and it cannot write over it: its digest writes that hold one fail and
+it reads that deck's documents again on each visit.
+
+### Features
+
+* **decks:** add a Swedish driving license B theory course ([503679d](https://github.com/solid-memo/website/commit/503679d482828e8bcda63de187d463a1976bbf50)), closes [#194](https://github.com/solid-memo/website/issues/194)
+* **domain:** schedule with FSRS-6 ([5e68e46](https://github.com/solid-memo/website/commit/5e68e46eac08fb03607421c27535cd7f2bae0550)), closes [#191](https://github.com/solid-memo/website/issues/191)
+* keep an FSRS-6 state beside each SM-2 state ([ed0b841](https://github.com/solid-memo/website/commit/ed0b84101969b3d38ce109b0f4afe4ece8b46cf8)), closes [#191](https://github.com/solid-memo/website/issues/191)
+* name the scheduler in preferences and deck schedules ([3e5d1ff](https://github.com/solid-memo/website/commit/3e5d1ffd5bc6f747c58892981ae37461b736de02)), closes [#191](https://github.com/solid-memo/website/issues/191)
+* **ns:** add FSRS-6 review states to vocabulary 1.21 ([75b6f17](https://github.com/solid-memo/website/commit/75b6f173ef544811bae87d3089c24c39707a2e82)), closes [#191](https://github.com/solid-memo/website/issues/191)
+* recommend FSRS-6 and invite SM-2 learners to switch ([2494072](https://github.com/solid-memo/website/commit/24940724bbc0dcd0758a722cc9997eb8502ad077)), closes [#191](https://github.com/solid-memo/website/issues/191)
+* **studio:** show a card's FSRS-6 memory in the inspector ([15b1ae4](https://github.com/solid-memo/website/commit/15b1ae49582d0caaad90bdc0e4a83e5bf979d3d6)), closes [#191](https://github.com/solid-memo/website/issues/191)
+* switch the scheduler to FSRS-6 in the preferences ([4f3be7c](https://github.com/solid-memo/website/commit/4f3be7cf8bde8d0db05a00ded44e15df2c64d1d6)), closes [#191](https://github.com/solid-memo/website/issues/191)
+
 ## [3.13.0](https://github.com/solid-memo/website/compare/v3.12.0...v3.13.0) (2026-10-19)
 
 ### Features
