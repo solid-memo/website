@@ -221,11 +221,15 @@ Solid Memo's subjects as its `dcterms:creator`, `dcterms:publisher` or
 distribution have no Solid Memo class, and they stay Solid Memo's when
 another app's rewrite has dropped their stamp
 ([ownership.ts](../packages/solid/src/ownership.ts)). A review state
-of another scheduler (any value of `sm:scheduler` but the `sm:sm2`
-IRI, a literal too) is
+of another scheduler (any value of `sm:scheduler` but the `sm:sm2` and
+`sm:fsrs6` IRIs, a literal too) is
 never Solid Memo's, whatever its class or stamp: its fields are another
 algorithm's, which need not fit the review-state shape, so it is only
-warned about ([data-model.md](data-model.md#decks-and-cards)). Any other subject
+warned about ([data-model.md](data-model.md#decks-and-cards)). An
+FSRS-6 state, naming `sm:fsrs6`, is Solid Memo's own: it is checked
+against FSRS review state 1, the shape that value picks, and a
+violation of it counts as any other, a half-written snapshot repaired
+by dropping it, as an SM-2 state's is. Any other subject
 is another app's, and
 [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
 marks it `foreign`: it is still checked, against the shape its class
@@ -310,7 +314,7 @@ the subject's own stored format:
 |---|---|
 | A deck without a description | The default description, `Flashcards: <title>.` |
 | A deck without a study direction, or an unknown one | Front to back, as format 1 studied every deck |
-| A review state with half an undo snapshot | The snapshot dropped (as the review-state 1 → 2 migration does) |
+| A review state with half an undo snapshot (an SM-2 or an FSRS-6 state's) | The snapshot dropped (as the review-state 1 → 2 migration does), the four terms of an FSRS-6 state's or the five of an SM-2 state's |
 | A malformed due day | Recomputed from the last review and the interval |
 | An agent without a name | Named after its IRI |
 | A catalog or [deck group](data-model.md#deck-groups) listing a deck or group the document does not describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept, and so is every link to another document) |

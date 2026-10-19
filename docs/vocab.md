@@ -275,7 +275,9 @@ schedules by another algorithm can keep its states beside Solid Memo's.
 - **What the app writes and how it reads them** is in
   [data-model.md](data-model.md#decks-and-cards): what a state says wins
   over its name, one state per card and direction counts, and a state of
-  another scheduler is never read, written over or removed.
+  another scheduler is never read, written over or removed; an FSRS-6
+  state (`sm:fsrs6`) is the app's own, kept beside the SM-2 state of the
+  same prompt.
 - **Other apps' terms, written beside Solid Memo's own**: a card names
   each of its distractors with `schema:suggestedAnswer` as well as
   `sm:distractor` (whose `rdfs:seeAlso` points at it), and a deck's

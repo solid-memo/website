@@ -833,8 +833,10 @@ be changed, the bar has Clear selection alone. The edits are:
   and after, and every card it leaves as it is, and why. Nothing is
   written until the user confirms.
 - **Delete**, with the cards' review states, once the user confirms:
-  every SM-2 state of each card, read or not; another scheduler's state
-  stays ([data-model.md](data-model.md#decks-and-cards)).
+  every SM-2 and FSRS-6 state of each card, read or not; another
+  scheduler's state stays ([data-model.md](data-model.md#decks-and-cards)).
+  Undone, the cards' SM-2 states come back, and FSRS-6 estimates its
+  own from them at the next review.
 - **Set due date** and **Forget progress**, of the cards' review states
   in every direction ([below](#review-state)). A card not studied yet
   stays new. These have no Undo, and a forget asks first.
@@ -1023,20 +1025,23 @@ The domain makes both changes
 
 - `resetStates` forgets cards: their states go, so the scheduler sees
   them as new. The inspector forgets one direction; the workbench
-  forgets every direction of the selected cards. Every SM-2 state of the
-  card that way goes, read or not, so no second one is read in its
-  place; another scheduler's state stays.
+  forgets every direction of the selected cards. Every state of the
+  card that way goes, SM-2's and FSRS-6's, read or not, so no second
+  one is read in its place; another scheduler's state stays.
 - `rescheduleState` sets a state's due day. Its interval, ease and
   repetitions stay. It drops the state's snapshot for resetting the
   study day (`previous`, [srs.md](srs.md#resetting-the-day)), so that
   reset can never bring back a state from before the new due day. A
-  day that is no date is refused.
+  day that is no date is refused. The card's FSRS-6 state, when it has
+  one, is set due that day too, its snapshot dropped, so the day holds
+  whichever scheduler sets the due days, now or after a switch.
 
 The states are those Solid Memo reads
 ([data-model.md](data-model.md#decks-and-cards)): joined to their card
 by `sm:reviewOf` and `sm:reviewDirection`, the fragment rule only where
 a state leaves them out, so a state another app named its own way is
-edited in place. Only `sm:sm2` states are touched.
+edited in place. Only the app's own states, `sm:sm2` and `sm:fsrs6`,
+are touched.
 
 Neither touches the answer log: the card's answers stay in its history
 and in the statistics. The use cases `resetCards` and
@@ -1078,12 +1083,15 @@ The domain plans the transfer
   called, and is written in the target naming the card there
   (`sm:reviewOf` into the target's cards document), at the subject the
   fragment rule names, or a new `#review-<uuid>` when another's is
-  there.
+  there. Its FSRS-6 state goes with its SM-2 state the same way; where
+  the card has none, a state the target held at that prompt goes, so
+  none is left of another card. An FSRS-6 state with no SM-2 state
+  beside it counts for nothing, so it is not carried, only removed.
 - A card written in the target names its wrong options with
   `sm:distractor` and `schema:suggestedAnswer` alike, each typed
   `sm:Distractor` and `schema:Answer`.
-- A move then removes the cards from the source, with every SM-2 state
-  they have, read or not. A copy leaves the source as it is. Another
+- A move then removes the cards from the source, with every SM-2 and
+  FSRS-6 state they have, read or not. A copy leaves the source as it is. Another
   scheduler's states are never moved, copied or removed: they stay in
   the source, naming the card there.
 - Past answers are not touched. They keep naming the source, so a

@@ -22,7 +22,7 @@ export type RepairKind =
   | "describe-deck"
   /** Study a deck without a (known) direction front to back, as format 1 did. */
   | "direct-deck"
-  /** Drop a review state's half-written undo snapshot. */
+  /** Drop a review state's half-written undo snapshot (an SM-2 or an FSRS-6 state's). */
   | "drop-snapshot"
   /** Recompute a malformed due day from the last review and the interval. */
   | "recompute-due"
@@ -68,7 +68,8 @@ function repairFor(shape: ShapeName | null, violation: Violation): RepairKind | 
   ) {
     return "direct-deck";
   }
-  if (shape === "reviewState" && constraint === "Xone") return "drop-snapshot";
+  if ((shape === "reviewState" || shape === "fsrsReviewState") && constraint === "Xone")
+    return "drop-snapshot";
   if (shape === "reviewState" && path === `${SM}due` && constraint === "Pattern")
     return "recompute-due";
   if (path === `${FOAF}name` && constraint === "MinCount") return "name-agent";

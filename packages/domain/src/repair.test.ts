@@ -26,7 +26,7 @@ const DCAT = "http://www.w3.org/ns/dcat#";
 
 const checked = (
   url: string,
-  shape: "deck" | "reviewState" | "agent" | "card" | "catalog" | "deckGroup",
+  shape: "deck" | "reviewState" | "fsrsReviewState" | "agent" | "card" | "catalog" | "deckGroup",
   violations: Violation[],
   version = 3,
 ): SubjectReport => ({
@@ -86,6 +86,7 @@ describe("planRepair", () => {
         subjects: [
           checked(`${REVIEWS}#a`, "reviewState", [v("Xone"), v("Pattern", `${SM}due`)], 2),
           checked(`${REVIEWS}#b`, "reviewState", [v("Pattern", `${SM}due`, "warning")], 2),
+          checked(`${REVIEWS}#a@fsrs6`, "fsrsReviewState", [v("Xone")], 1),
         ],
       },
     ]);
@@ -102,6 +103,7 @@ describe("planRepair", () => {
       ["group-1", "drop-dangling-members", 1],
       ["a", "drop-snapshot", 2],
       ["a", "recompute-due", 2],
+      ["a@fsrs6", "drop-snapshot", 1],
     ]);
     expect(plan.repairs[0].documentUrl).toBe(CATALOG);
     expect(plan.unrepairable).toEqual([]);

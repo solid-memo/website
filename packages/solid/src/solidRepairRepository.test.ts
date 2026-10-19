@@ -6,6 +6,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
   createThing,
+  getDecimal,
+  getInteger,
   getStringNoLocale,
   getStringWithLocale,
   getThing,
@@ -193,6 +195,27 @@ describe("applyRepairs", () => {
     expect(getStringNoLocale(a, SM.previousDue)).toBeNull();
     expect(getStringNoLocale(a, SM.due)).toBe("2026-09-27");
     expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#b`)!, SM.due)).toBe("soon");
+  });
+
+  it("drops an FSRS-6 state's half-written snapshot, its own four terms", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        REVIEWS,
+        buildThing(createThing({ url: `${REVIEWS}#a@fsrs6` }))
+          .addIri(RDF.type, SM.ReviewState)
+          .addIri(SM.scheduler, SM.fsrs6)
+          .addDecimal(SM.previousStability, 2.5)
+          .addStringNoLocale(SM.previousDue, "2026-09-20")
+          // Not an FSRS-6 term: another app's, it stays.
+          .addInteger(SM.previousRepetitions, 3)
+          .build(),
+      ),
+    );
+    await repository().applyRepairs([repair("drop-snapshot", `${REVIEWS}#a@fsrs6`, 1, REVIEWS)]);
+    const a = getThing(saved(), `${REVIEWS}#a@fsrs6`)!;
+    expect(getDecimal(a, SM.previousStability)).toBeNull();
+    expect(getStringNoLocale(a, SM.previousDue)).toBeNull();
+    expect(getInteger(a, SM.previousRepetitions)).toBe(3);
   });
 
   it("names an agent after its address, and removes a subject the user gave up on", async () => {

@@ -4,9 +4,16 @@
 
 import { describe, expect, it } from "vitest";
 import { buildThing, createSolidDataset, getThing, removeAll } from "@inrupt/solid-client";
-import { namedReviewSubject } from "@solid-memo/domain/reviewRecord";
-import { toReviewState, toReviewStateThing, withReviewStates } from "./reviewStateMapper";
-import type { ReviewState } from "@solid-memo/domain/review";
+import { namedFsrsSubject, namedReviewSubject } from "@solid-memo/domain/reviewRecord";
+import {
+  namesAnotherScheduler,
+  toFsrsState,
+  toFsrsStateThing,
+  toReviewState,
+  toReviewStateThing,
+  withReviewStates,
+} from "./reviewStateMapper";
+import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { SM } from "../vocab";
 
 const REVIEWS_DOC = "https://pod.example/solid-memo/a/reviews/deck-1.ttl";
@@ -39,7 +46,7 @@ describe("review state mapping", () => {
     const written = withReviewStates(
       createSolidDataset(),
       documents,
-      [state, reverse],
+      { sm2: [state, reverse] },
       () => "unused",
     );
     expect(written.subjects).toEqual([
@@ -202,5 +209,80 @@ describe("what a review state is of", () => {
       .addUrl(SM.reviewDirection, SM.bidirectional)
       .build();
     expect(toReviewState(both, documents)).toBeNull();
+  });
+});
+
+describe("FSRS-6 state mapping", () => {
+  const fsrs: FsrsState = {
+    cardId: "card-1",
+    direction: "back-to-front",
+    stability: 9.25,
+    difficulty: 4.5,
+    due: "2026-09-30",
+    firstReviewedAt: state.firstReviewedAt,
+    lastReviewedAt: state.lastReviewedAt,
+    formatVersion: 1,
+  };
+  const written = toFsrsStateThing(documents, fsrs, null, namedFsrsSubject(REVIEWS_DOC, fsrs));
+
+  it("round-trips an FSRS-6 state through a Thing, naming its card, direction and FSRS-6", () => {
+    expect(written.url).toBe(`${REVIEWS_DOC}#card-1@back-to-front@fsrs6`);
+    expect(toFsrsState(written, documents)).toEqual(fsrs);
+    const previous = {
+      stability: 3,
+      difficulty: 4.8,
+      due: "2026-09-21",
+      lastReviewedAt: "2026-09-18T08:00:00.000Z",
+    };
+    const snapshot = toFsrsStateThing(documents, { ...fsrs, previous }, null, written.url);
+    expect(toFsrsState(snapshot, documents)).toEqual({ ...fsrs, previous });
+  });
+
+  it("is this app's, and no SM-2 state", () => {
+    expect(namesAnotherScheduler(written)).toBe(false);
+    expect(toReviewState(written, documents)).toBeNull();
+    expect(toFsrsState(thingOf(state), documents)).toBeNull();
+  });
+
+  it("is another app's for a literal that spells sm:fsrs6, or FSRS-6 beside another scheduler", () => {
+    const literal = buildThing(removeAll(written, SM.scheduler))
+      .addStringNoLocale(SM.scheduler, SM.fsrs6)
+      .build();
+    expect(namesAnotherScheduler(literal)).toBe(true);
+    expect(toFsrsState(literal, documents)).toBeNull();
+    const both = buildThing(written).addUrl(SM.scheduler, SM.sm2).build();
+    expect(namesAnotherScheduler(both)).toBe(true);
+    expect(toFsrsState(both, documents)).toBeNull();
+    expect(toReviewState(both, documents)).toBeNull();
+  });
+
+  it("is read by its links alone: not without either, nor of a card elsewhere", () => {
+    expect(toFsrsState(removeAll(written, SM.reviewOf), documents)).toBeNull();
+    expect(toFsrsState(removeAll(written, SM.reviewDirection), documents)).toBeNull();
+    expect(
+      toFsrsState(written, {
+        ...documents,
+        id: "deck-2",
+        cardsDocumentUrl: "https://pod.example/solid-memo/a/decks/deck-2.ttl",
+      }),
+    ).toBeNull();
+  });
+
+  it("is not read without a field its shape requires", () => {
+    expect(toFsrsState(removeAll(written, SM.stability), documents)).toBeNull();
+  });
+
+  it("is written beside the SM-2 state of the same prompt", () => {
+    const sm2: ReviewState = { ...state, direction: "back-to-front" };
+    const both = withReviewStates(
+      createSolidDataset(),
+      documents,
+      { sm2: [sm2], fsrs: [fsrs] },
+      () => "unused",
+    );
+    expect(both.subjects).toEqual([
+      `${REVIEWS_DOC}#card-1@back-to-front`,
+      `${REVIEWS_DOC}#card-1@back-to-front@fsrs6`,
+    ]);
   });
 });

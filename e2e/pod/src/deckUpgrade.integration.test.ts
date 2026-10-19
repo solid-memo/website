@@ -386,7 +386,9 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
       ["norway", "Oslo"],
       ["sweden", "Stockholm"],
     ]);
-    expect(await reviewStateRepository.listReviewStates(upgraded)).toEqual([review("sweden", 6)]);
+    expect((await reviewStateRepository.listReviewStates(upgraded)).sm2).toEqual([
+      review("sweden", 6),
+    ]);
     // Who may open the cards is as it was: their access rules are untouched.
     expect(await fetch(acl).then((response) => response.text())).toBe(aclBefore);
     // The other app's triple and subject survive the cards' whole write.
@@ -456,7 +458,9 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
         seeded.map((deck) => [deck.url, "2", false]).sort(),
       );
       for (const { deck } of after)
-        expect(await reviewStateRepository.listReviewStates(deck)).toEqual([review("sweden", 6)]);
+        expect((await reviewStateRepository.listReviewStates(deck)).sm2).toEqual([
+          review("sweden", 6),
+        ]);
     } finally {
       reads.mockRestore();
     }
@@ -519,7 +523,9 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
       "sweden",
     ]);
     // The states written before the move name their cards in the first document, and are read all the same.
-    expect(await app().reviewStateRepository.listReviewStates(deck)).toEqual([review("sweden", 6)]);
+    expect((await app().reviewStateRepository.listReviewStates(deck)).sm2).toEqual([
+      review("sweden", 6),
+    ]);
   });
 
   /**
@@ -581,7 +587,7 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
         ["sweden", "Stockholm"],
       ]);
       expect(
-        (await app().reviewStateRepository.listReviewStates(seeded.deck)).map(
+        (await app().reviewStateRepository.listReviewStates(seeded.deck)).sm2.map(
           (state) => state.cardId,
         ),
       ).toEqual(["sweden"]);
@@ -744,7 +750,7 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
         `${instanceOf(seeded.deck)}catalog.ttl`,
       ]);
       expect(
-        (await app().reviewStateRepository.listReviewStates(seeded.deck)).map(
+        (await app().reviewStateRepository.listReviewStates(seeded.deck)).sm2.map(
           (state) => state.cardId,
         ),
       ).toEqual(["sweden"]);

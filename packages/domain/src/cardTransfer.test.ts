@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { planCardTransfer, type TransferOptions } from "./cardTransfer";
 import type { Card } from "./deck";
-import type { ReviewState } from "./review";
+import type { FsrsState, ReviewState } from "./review";
 
 const SOURCE = "https://pod.example/a/decks/source.ttl#deck";
 const TARGET = "https://pod.example/a/decks/target.ttl#deck";
@@ -78,6 +78,12 @@ describe("planCardTransfer", () => {
       save: [written(a), written(b)],
       reviewSaves: sourceStates,
       reviewRemovals: [],
+      fsrsSaves: [],
+      fsrsRemovals: [
+        { cardId: "a", direction: "front-to-back" },
+        { cardId: "a", direction: "back-to-front" },
+        { cardId: "b", direction: "back-to-front" },
+      ],
     });
     expect(plan.source).toEqual({
       remove: ["a", "b"],
@@ -87,6 +93,59 @@ describe("planCardTransfer", () => {
         { cardId: "b", direction: "back-to-front" },
       ],
     });
+  });
+
+  it("carries a card's FSRS-6 state with its SM-2 state, under its id in the target", () => {
+    const fsrs: FsrsState = {
+      cardId: "a",
+      direction: "front-to-back",
+      stability: 8,
+      difficulty: 5,
+      due: "2026-10-14",
+      firstReviewedAt: "2026-10-01T10:00:00.000Z",
+      lastReviewedAt: "2026-10-06T10:00:00.000Z",
+      formatVersion: 1,
+    };
+    const plan = planCardTransfer(
+      { url: SOURCE, cards: [a], states: sourceStates, fsrs: [fsrs] },
+      { url: TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
+      ["a"],
+      move,
+    );
+    expect(plan.target.fsrsSaves).toEqual([{ ...fsrs, cardId: "a-2" }]);
+    expect(plan.target.fsrsRemovals).toEqual([{ cardId: "a-2", direction: "back-to-front" }]);
+    const fresh = planCardTransfer(
+      { url: SOURCE, cards: [a], states: sourceStates, fsrs: [fsrs] },
+      { url: TARGET, cards: [], states: [] },
+      ["a"],
+      { mode: "copy", keepProgress: false },
+    );
+    expect(fresh.target.fsrsSaves).toEqual([]);
+  });
+
+  it("removes an FSRS-6 state without an SM-2 state beside it with its card, and does not carry it", () => {
+    const orphan: FsrsState = {
+      cardId: "b",
+      direction: "front-to-back",
+      stability: 8,
+      difficulty: 5,
+      due: "2026-10-14",
+      firstReviewedAt: "2026-10-01T10:00:00.000Z",
+      lastReviewedAt: "2026-10-06T10:00:00.000Z",
+      formatVersion: 1,
+    };
+    const plan = planCardTransfer(
+      { url: SOURCE, cards: [b], states: sourceStates, fsrs: [orphan] },
+      { url: TARGET, cards: [], states: [], fsrs: [orphan] },
+      ["b"],
+      move,
+    );
+    expect(plan.target.fsrsSaves).toEqual([]);
+    expect(plan.target.reviewRemovals).toEqual([{ cardId: "b", direction: "front-to-back" }]);
+    expect(plan.source.reviewRemovals).toEqual([
+      { cardId: "b", direction: "front-to-back" },
+      { cardId: "b", direction: "back-to-front" },
+    ]);
   });
 
   it("gives a card whose id the target uses the first free one, its distractors renumbered and states re-keyed", () => {
@@ -183,7 +242,13 @@ describe("planCardTransfer", () => {
       ["a", "a-2"],
       move,
     );
-    expect(again.target).toEqual({ save: [], reviewSaves: [], reviewRemovals: [] });
+    expect(again.target).toEqual({
+      save: [],
+      reviewSaves: [],
+      reviewRemovals: [],
+      fsrsSaves: [],
+      fsrsRemovals: [],
+    });
   });
 
   it("never finds two cards saying the same present at one id", () => {
@@ -244,7 +309,13 @@ describe("planCardTransfer", () => {
       { mode: "move", keepProgress: false },
     );
     expect(plan.cards).toEqual([{ from: "b", to: "b", present: true }]);
-    expect(plan.target).toEqual({ save: [], reviewSaves: [], reviewRemovals: [] });
+    expect(plan.target).toEqual({
+      save: [],
+      reviewSaves: [],
+      reviewRemovals: [],
+      fsrsSaves: [],
+      fsrsRemovals: [],
+    });
     expect(plan.source).toEqual({
       remove: ["b"],
       reviewRemovals: [{ cardId: "b", direction: "back-to-front" }],

@@ -250,8 +250,7 @@ ${deck(
  * Community Solid Server's in-memory store cuts a document with other
  * characters short when it is patched (docs/testing.md). What
  * node-solid-server cannot patch is left out: a document with SPARQL-style
- * `PREFIX` directives, and a value the update rewrites spelled otherwise
- * than Solid Memo spells it (`2.50`), which its PATCH cannot delete.
+ * `PREFIX` directives.
  */
 async function seedHandWritten(server: string): Promise<Pod> {
   const pod = await seedPod(server);

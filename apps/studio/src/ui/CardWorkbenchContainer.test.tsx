@@ -72,7 +72,7 @@ describe("CardWorkbenchContainer", () => {
   it("reads the deck's cards and review states, and lists those the query keeps", async () => {
     const useCases = makeUseCasesFake({
       listCards: vi.fn(async () => [water, fire]),
-      listDeckReviewStates: vi.fn(async () => [dueToday]),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [dueToday], fsrs: [] })),
     });
     renderContainer(useCases, { ...DEFAULT_CARD_QUERY, state: "due" });
     expect(screen.getByText("Loading cards…")).toBeInTheDocument();
@@ -81,6 +81,27 @@ describe("CardWorkbenchContainer", () => {
     expect(useCases.listCards).toHaveBeenCalledWith(deck);
     expect(useCases.listDeckReviewStates).toHaveBeenCalledWith(deck);
     expect(useCases.getPreferences).toHaveBeenCalledWith(instanceA.url);
+  });
+
+  it("lists the cards due by the scheduler that sets the due days", async () => {
+    // Due today by SM-2, but FSRS-6 sets the due days and has it due in 2099.
+    const fsrs = {
+      cardId: "fire",
+      direction: "front-to-back" as const,
+      stability: 20,
+      difficulty: 5,
+      due: "2099-01-01",
+      firstReviewedAt: dueToday.firstReviewedAt,
+      lastReviewedAt: dueToday.lastReviewedAt,
+      formatVersion: 1,
+    };
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [water, fire]),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [dueToday], fsrs: [fsrs] })),
+      getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, scheduler: "fsrs6" as const })),
+    });
+    renderContainer(useCases, { ...DEFAULT_CARD_QUERY, state: "due" });
+    expect(await screen.findByText("0 of 2 cards")).toBeInTheDocument();
   });
 
   it("finds the deck's leeches from the answer log, waiting for it, its answers named in the deck's cards now", async () => {
@@ -189,7 +210,7 @@ describe("CardWorkbenchContainer", () => {
     let cards = [water, fire];
     const useCases = makeUseCasesFake({
       listCards: vi.fn(async () => cards),
-      listDeckReviewStates: vi.fn(async () => [dueToday]),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [dueToday], fsrs: [] })),
     });
     vi.mocked(useCases.editCards).mockImplementation(
       async (_instance, _deck, _ids, _edit, plan) => {
@@ -269,7 +290,7 @@ describe("CardWorkbenchContainer", () => {
     let states = [dueToday];
     const useCases = makeUseCasesFake({
       listCards: vi.fn(async () => [water, fire]),
-      listDeckReviewStates: vi.fn(async () => states),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: states, fsrs: [] })),
       rescheduleCards: vi.fn(async () => {
         states = [{ ...dueToday, due: "2099-01-01" }];
         return 1;
@@ -330,7 +351,13 @@ describe("CardWorkbenchContainer", () => {
         return {
           cards: [{ from: "fire", to: "fire-2", present: false }],
           missing: ["gone"],
-          target: { save: [], reviewSaves: [], reviewRemovals: [] },
+          target: {
+            save: [],
+            reviewSaves: [],
+            reviewRemovals: [],
+            fsrsSaves: [],
+            fsrsRemovals: [],
+          },
           source: { remove: ["fire"], reviewRemovals: [] },
         };
       }),
@@ -390,7 +417,7 @@ describe("CardWorkbenchContainer", () => {
     vi.mocked(useCases.transferCards).mockResolvedValueOnce({
       cards: [{ from: "fire", to: "fire", present: true }],
       missing: [],
-      target: { save: [], reviewSaves: [], reviewRemovals: [] },
+      target: { save: [], reviewSaves: [], reviewRemovals: [], fsrsSaves: [], fsrsRemovals: [] },
       source: { remove: [], reviewRemovals: [] },
     });
     renderContainer(useCases);

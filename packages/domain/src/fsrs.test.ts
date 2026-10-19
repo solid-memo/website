@@ -414,6 +414,16 @@ describe("effectiveStates", () => {
       sm2[3],
     ]);
   });
+
+  it("give an interval of 0 when the due day was set before the last review", () => {
+    const [state] = effectiveStates(
+      [sm2State("c", tenDaysAgo)],
+      [fsrsState("c", tenDaysAgo, { due: "2026-09-05" })],
+      "fsrs6",
+      BOUNDARY,
+    );
+    expect(state).toMatchObject({ due: "2026-09-05", intervalDays: 0 });
+  });
 });
 
 describe("fsrsReview", () => {

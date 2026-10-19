@@ -19,7 +19,7 @@ import {
 import { getSolidDatasetOrNull } from "./datasets";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 import { withCatalog } from "./mappers/deckMapper";
-import { toReviewStateThing } from "./mappers/reviewStateMapper";
+import { toFsrsStateThing, toReviewStateThing } from "./mappers/reviewStateMapper";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { courseDraft, DRAFT, of } from "@solid-memo/domain/testing/releaseDraft";
@@ -472,6 +472,22 @@ describe("createShaclShapeValidator", () => {
         null,
         `${REVIEWS}#state-7f3a`,
       ),
+      // This app's FSRS-6 state of the card: checked against its own shape, and conforming.
+      toFsrsStateThing(
+        documents,
+        {
+          cardId: "card-1",
+          direction: "front-to-back",
+          stability: 2.3,
+          difficulty: 2.1,
+          due: "2026-09-23",
+          firstReviewedAt: state.firstReviewedAt,
+          lastReviewedAt: state.lastReviewedAt,
+          formatVersion: 1,
+        },
+        null,
+        `${REVIEWS}#card-1@fsrs6`,
+      ),
       // Another scheduler's state: none of SM-2's fields.
       buildThing(createThing({ url: `${REVIEWS}#fsrs-1` }))
         .addIri(RDF.type, SM.ReviewState)
@@ -509,6 +525,9 @@ describe("createShaclShapeValidator", () => {
     expect(
       reviewsReport.subjects.find((subject) => subject.url === `${REVIEWS}#fsrs-1`),
     ).toMatchObject({ foreign: true });
+    const own = reviewsReport.subjects.find((subject) => subject.url === `${REVIEWS}#card-1@fsrs6`);
+    expect(own).toMatchObject({ status: "checked", shape: "fsrsReviewState", violations: [] });
+    expect(own).not.toHaveProperty("foreign");
   }, 30_000);
 
   it("checks a write with the engine it has: pathless results named by subject, warnings and results about other subjects passed over", async () => {

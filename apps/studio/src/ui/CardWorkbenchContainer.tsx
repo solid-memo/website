@@ -9,6 +9,7 @@ import { planCardEdit, type CardEdit, type CardEditPlan } from "@solid-memo/doma
 import { deckAnswers, lapseIndex } from "@solid-memo/domain/cardHistory";
 import { cardLanguages, queryCards, type CardQuery } from "@solid-memo/domain/cardQuery";
 import type { Card, Deck } from "@solid-memo/domain/deck";
+import { effectiveStates } from "@solid-memo/domain/fsrs";
 import type { Instance } from "@solid-memo/domain/instance";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
@@ -128,30 +129,39 @@ export function CardWorkbenchContainer({
   const isCourse = useCopies(useCases, [deck]).isCourse;
   const cards = cardsQuery.data;
   const plain = useMemo(() => plainTexts(), [cards]);
-  const today =
-    preferencesQuery.data === undefined
-      ? undefined
-      : studyDayOf(new Date(), preferencesQuery.data.dayBoundaryHour);
-  const states = reviewsQuery.data;
+  const prefs = preferencesQuery.data;
+  const today = prefs === undefined ? undefined : studyDayOf(new Date(), prefs.dayBoundaryHour);
+  const reviews = reviewsQuery.data;
+  const states = reviews?.sm2;
   // As readerText reads them.
   const languages = useMemo(() => [locale, ...navigator.languages], [locale]);
   const rows = useMemo(
     () =>
       cards === undefined ||
-      states === undefined ||
-      today === undefined ||
+      reviews === undefined ||
+      prefs === undefined ||
       (needsLapses && lapses === undefined)
         ? undefined
         : queryCards(
             cards,
-            { direction: deck.direction, states },
+            {
+              direction: deck.direction,
+              states: reviews.sm2,
+              // The due days and intervals shown are those of the scheduler that sets them.
+              due: effectiveStates(
+                reviews.sm2,
+                reviews.fsrs,
+                prefs.scheduler,
+                prefs.dayBoundaryHour,
+              ),
+            },
             query,
-            today,
+            today!,
             plain,
             languages,
             lapses?.lapses,
           ),
-    [cards, states, today, query, deck.direction, plain, languages, lapses, needsLapses],
+    [cards, reviews, prefs, today, query, deck.direction, plain, languages, lapses, needsLapses],
   );
 
   useEffect(() => {

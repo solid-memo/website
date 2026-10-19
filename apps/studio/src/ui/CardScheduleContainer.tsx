@@ -88,7 +88,7 @@ export function CardScheduleContainer({
   if (reviewsQuery.data === undefined) return <Loading label={t("studio.schedule.loading")} />;
   return (
     <CardScheduleScreen
-      directions={directionSchedules(card, deck.direction, reviewsQuery.data)}
+      directions={directionSchedules(card, deck.direction, reviewsQuery.data.sm2)}
       busy={editMutation.isPending}
       done={done}
       error={errorText(editMutation.error)}

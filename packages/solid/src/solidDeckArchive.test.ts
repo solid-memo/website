@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_BASE, type DeckFileFormat } from "@solid-memo/domain/deckFile";
-import type { ReviewState } from "@solid-memo/domain/review";
+import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { createSolidDeckArchive } from "./solidDeckArchive";
 import { createSolidDeckRepository } from "./solidDeckRepository";
@@ -88,7 +88,21 @@ async function podWithDeck() {
       },
     },
   ];
-  await reviews.applyReviewChanges(deck, { save: states, remove: [] });
+  const fsrs: FsrsState = {
+    cardId: "card-se",
+    direction: "front-to-back",
+    stability: 8.5,
+    difficulty: 4.25,
+    due: "2026-10-09",
+    firstReviewedAt: "2026-09-20T10:00:00.000Z",
+    lastReviewedAt: "2026-10-01T10:00:00.000Z",
+    formatVersion: LATEST_VERSION.fsrsReviewState,
+  };
+  await reviews.applyReviewChanges(deck, {
+    save: states,
+    remove: [],
+    fsrs: { save: [fsrs], remove: [] },
+  });
   await repository.completeChapter(deck, CHAPTER);
   // What another app said of a card, and the deck's place among its groups.
   await pod.put(
@@ -119,7 +133,15 @@ describe("createSolidDeckArchive", () => {
       const text = await archive.exportDeck(deck, { format, withProgress: true });
       expect(text).toContain(FOREIGN);
       const read = await archive.readDeckFile(text, format, `${DECK_FILE_BASE}deck`);
-      expect(read).toEqual({ deck, cards, reviews: states, upgraded: [], dropped: [] });
+      expect(read).toEqual({
+        deck,
+        cards,
+        reviews: states.sm2,
+        fsrsReviews: states.fsrs,
+        upgraded: [],
+        dropped: [],
+      });
+      expect(read.fsrsReviews).toHaveLength(1);
       expect(read.deck.completedChapters).toEqual([CHAPTER]);
       expect(read.cards.find((card) => card.id === "card-se")!.distractors).toHaveLength(2);
     });
@@ -199,6 +221,10 @@ const OLD_DECK = `${PREFIXES}
 <reviews#gone> a sm:ReviewState ; sm:easeFactor 2.5 ; sm:intervalDays 1 ; sm:repetitions 1 ; sm:due "2026-01-02" ;
   sm:firstReviewedAt "2026-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
   sm:lastReviewedAt "2026-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<reviews#gone@fsrs6> a sm:ReviewState ; sm:scheduler sm:fsrs6 ; sm:formatVersion 1 ;
+  sm:reviewOf <cards#gone> ; sm:reviewDirection sm:frontToBack ; sm:stability 2.0 ; sm:difficulty 5.0 ;
+  sm:due "2026-01-03" ; sm:firstReviewedAt "2026-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+  sm:lastReviewedAt "2026-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
 <cards#broken> a sm:ReviewState .
 `;
 
@@ -232,6 +258,7 @@ describe("readDeckFile", () => {
         `${DECK_FILE_BASE}cards#c2`,
         `${DECK_FILE_BASE}elsewhere#c3`,
         `${DECK_FILE_BASE}reviews#gone`,
+        `${DECK_FILE_BASE}reviews#gone@fsrs6`,
         `${DECK_FILE_BASE}cards#broken`,
       ].sort(),
     );
@@ -244,6 +271,12 @@ describe("readDeckFile", () => {
         code: "deckFileTooNew",
       });
     }
+    // An FSRS-6 state in a format newer than FSRS-6's latest, if not than SM-2's.
+    const fsrs = `${OLD_DECK}<reviews#new> a sm:ReviewState ; sm:scheduler sm:fsrs6 ; sm:formatVersion 2 .`;
+    await expect(archive.readDeckFile(fsrs, "turtle", base)).rejects.toMatchObject({
+      code: "deckFileTooNew",
+      vars: { reads: LATEST_VERSION.fsrsReviewState },
+    });
   });
 
   it("refuses a file that holds no deck it can read, or more than one", async () => {

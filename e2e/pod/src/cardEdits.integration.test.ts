@@ -126,7 +126,7 @@ async function preview(useCases: UseCases, deck: Deck, ids: string[], edit: Card
     useCases.listCards(deck),
     useCases.listDeckReviewStates(deck),
   ]);
-  return planCardEdit(cards, ids, edit, states);
+  return planCardEdit(cards, ids, edit, states.sm2);
 }
 
 const byId = async (deck: Deck) =>
@@ -190,11 +190,13 @@ describe.each(SERVERS)("bulk edits of cards on $name", ({ url: server }) => {
     const previewed = await preview(useCases, deck, ["owl"], edit);
     const written = await useCases.editCards(instanceUrl, deck, ["owl"], edit, previewed);
     expect(await byId(deck)).not.toHaveProperty("owl");
-    expect(await page().listDeckReviewStates(deck)).toEqual([]);
+    expect((await page().listDeckReviewStates(deck)).sm2).toEqual([]);
 
     await useCases.undoCardEdit(instanceUrl, deck, written);
     expect((await byId(deck)).owl?.front).toEqual({ sv: "uggla" });
-    expect((await page().listDeckReviewStates(deck)).map((state) => state.cardId)).toEqual(["owl"]);
+    expect((await page().listDeckReviewStates(deck)).sm2.map((state) => state.cardId)).toEqual([
+      "owl",
+    ]);
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
   });
 

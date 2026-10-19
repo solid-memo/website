@@ -15,10 +15,16 @@ import {
 } from "@inrupt/solid-client";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { getSolidDatasetOrNull, keptDataset } from "./datasets";
-import { toReviewState, toReviewStateThing } from "./mappers/reviewStateMapper";
+import {
+  toFsrsState,
+  toFsrsStateThing,
+  toReviewState,
+  toReviewStateThing,
+} from "./mappers/reviewStateMapper";
 import type { Deck } from "@solid-memo/domain/deck";
-import { namedReviewSubject } from "@solid-memo/domain/reviewRecord";
-import type { ReviewState } from "@solid-memo/domain/review";
+import type { PromptStates } from "@solid-memo/domain/grading";
+import { namedFsrsSubject, namedReviewSubject } from "@solid-memo/domain/reviewRecord";
+import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { SM } from "./vocab";
 
 const FSRS = "https://fsrs.example/ns#fsrs";
@@ -59,6 +65,21 @@ const state: ReviewState = {
   formatVersion: 2,
 };
 
+/** The FSRS-6 state of the same prompt, fresh: of the same last review. */
+const fsrs: FsrsState = {
+  cardId: "card-1",
+  direction: "front-to-back",
+  stability: 9.25,
+  difficulty: 4.5,
+  due: "2026-09-30",
+  firstReviewedAt: state.firstReviewedAt,
+  lastReviewedAt: state.lastReviewedAt,
+  formatVersion: 1,
+};
+
+/** The deck's states, SM-2's alone. */
+const sm2s = (sm2: ReviewState[]) => ({ sm2, fsrs: [] });
+
 function reviewsDataset() {
   return setThing(mockSolidDatasetFrom(deck.reviewsDocumentUrl), named(state));
 }
@@ -83,6 +104,11 @@ function named(written: ReviewState) {
     null,
     namedReviewSubject(deck.reviewsDocumentUrl, written),
   );
+}
+
+/** An FSRS-6 state of the deck written at the subject this app names for it. */
+function namedFsrs(written: FsrsState) {
+  return toFsrsStateThing(deck, written, null, namedFsrsSubject(deck.reviewsDocumentUrl, written));
 }
 
 /** A state of the deck written at `subject`, which another app may have named any way. */
@@ -116,7 +142,7 @@ function writeState(repository: ReturnType<typeof makeRepository>, of: Deck, wri
   return repository.gradeReviewState(
     of,
     { cardId: written.cardId, direction: written.direction },
-    () => written,
+    () => ({ sm2: written }),
   );
 }
 
@@ -126,15 +152,26 @@ beforeEach(() => {
   vi.mocked(saveSolidDatasetAt).mockReset();
 });
 
+/** A prompt with no state of either kind. */
+const NONE: PromptStates = { sm2: null, fsrs: null };
+
 describe("listReviewStates", () => {
   it("returns an empty list when the document does not exist", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual([]);
+    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual(sm2s([]));
   });
 
   it("maps stored review states", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(reviewsDataset());
-    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual([state]);
+    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual(sm2s([state]));
+  });
+
+  it("maps the FSRS-6 states beside them, each kind on its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(reviewsDataset(), namedFsrs(fsrs)));
+    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual({
+      sm2: [state],
+      fsrs: [fsrs],
+    });
   });
 });
 
@@ -143,21 +180,25 @@ describe("getReviewState", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(
       makeRepository().getReviewState(deck, { cardId: "card-1", direction: "front-to-back" }),
-    ).resolves.toBeNull();
+    ).resolves.toEqual(NONE);
   });
 
   it("returns null when the card has no state", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(reviewsDataset());
     await expect(
       makeRepository().getReviewState(deck, { cardId: "card-unknown", direction: "front-to-back" }),
-    ).resolves.toBeNull();
+    ).resolves.toEqual(NONE);
   });
 
   it("returns the card's state", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(reviewsDataset());
     await expect(
       makeRepository().getReviewState(deck, { cardId: "card-1", direction: "front-to-back" }),
-    ).resolves.toEqual(state);
+    ).resolves.toEqual({ sm2: state, fsrs: null });
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(reviewsDataset(), namedFsrs(fsrs)));
+    await expect(
+      makeRepository().getReviewState(deck, { cardId: "card-1", direction: "front-to-back" }),
+    ).resolves.toEqual({ sm2: state, fsrs });
   });
 
   it("tells the card's two directions apart", async () => {
@@ -166,10 +207,10 @@ describe("getReviewState", () => {
     const repository = makeRepository();
     await expect(
       repository.getReviewState(deck, { cardId: "card-1", direction: "back-to-front" }),
-    ).resolves.toEqual(reverse);
+    ).resolves.toEqual({ sm2: reverse, fsrs: null });
     await expect(
       repository.getReviewState(deck, { cardId: "card-1", direction: "front-to-back" }),
-    ).resolves.toEqual(state);
+    ).resolves.toEqual({ sm2: state, fsrs: null });
   });
 });
 
@@ -236,19 +277,27 @@ describe("gradeReviewState", () => {
 describe("grading", () => {
   it("grades the state the document holds of the prompt, or none, and says what it wrote and of what", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(reviewsDataset());
-    const grade = vi.fn((current: ReviewState | null) => ({
-      ...(current ?? state),
-      cardId: current === null ? "card-2" : current.cardId,
-      repetitions: (current?.repetitions ?? 0) + 1,
+    const grade = vi.fn(({ sm2: current }: PromptStates) => ({
+      sm2: {
+        ...(current ?? state),
+        cardId: current === null ? "card-2" : current.cardId,
+        repetitions: (current?.repetitions ?? 0) + 1,
+      },
     }));
     const repository = makeRepository();
 
     await expect(
       repository.gradeReviewState(deck, { cardId: "card-1", direction: "front-to-back" }, grade),
-    ).resolves.toEqual({ state: { ...state, repetitions: 3 }, current: state });
+    ).resolves.toEqual({
+      state: { sm2: { ...state, repetitions: 3 } },
+      current: { sm2: state, fsrs: null },
+    });
     await expect(
       repository.gradeReviewState(deck, { cardId: "card-2", direction: "front-to-back" }, grade),
-    ).resolves.toMatchObject({ current: null, state: { cardId: "card-2", repetitions: 1 } });
+    ).resolves.toMatchObject({
+      current: NONE,
+      state: { sm2: { cardId: "card-2", repetitions: 1 } },
+    });
   });
 
   it("grades again the state the document holds when read again after a 412: another device's grade is built on, not undone", async () => {
@@ -262,9 +311,8 @@ describe("grading", () => {
       setThing(mockSolidDatasetFrom(deck.reviewsDocumentUrl), named(theirs)),
     );
     vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce({ statusCode: 412 });
-    const grade = vi.fn((current: ReviewState | null) => ({
-      ...current!,
-      repetitions: current!.repetitions + 1,
+    const grade = vi.fn(({ sm2: current }: PromptStates) => ({
+      sm2: { ...current!, repetitions: current!.repetitions + 1 },
     }));
 
     const graded = await makeRepository().gradeReviewState(
@@ -273,8 +321,11 @@ describe("grading", () => {
       grade,
     );
 
-    expect(grade.mock.calls.map(([current]) => current)).toEqual([state, theirs]);
-    expect(graded).toEqual({ state: { ...theirs, repetitions: 6 }, current: theirs });
+    expect(grade.mock.calls.map(([current]) => current.sm2)).toEqual([state, theirs]);
+    expect(graded).toEqual({
+      state: { sm2: { ...theirs, repetitions: 6 } },
+      current: { sm2: theirs, fsrs: null },
+    });
     const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[1];
     const thing = getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-1`)!;
     expect(toReviewState(thing, deck)).toEqual({ ...theirs, repetitions: 6 });
@@ -334,7 +385,7 @@ describe("applyReviewChanges", () => {
   it("creates a deck's reviews document with its states in one write, each naming its card, checked first, reading nothing", async () => {
     const checkWrite = vi.fn(async () => undefined);
     const back: ReviewState = { ...state, direction: "back-to-front" };
-    await makeRepository(checkWrite).createReviewStates(deck, [state, back]);
+    await makeRepository(checkWrite).createReviewStates(deck, sm2s([state, back]));
     expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
     expect(checkWrite).toHaveBeenCalledWith(
       expect.anything(),
@@ -379,7 +430,7 @@ describe("states that name their card", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(stateAt("rs-7", reverse)));
     await expect(
       makeRepository().getReviewState(deck, { cardId: "card-1", direction: "back-to-front" }),
-    ).resolves.toEqual(reverse);
+    ).resolves.toEqual({ sm2: reverse, fsrs: null });
   });
 
   it("read one state per card and direction: the one named for it, else the first by IRI", async () => {
@@ -392,11 +443,11 @@ describe("states that name their card", () => {
         stateAt("rs-1", first),
       ),
     );
-    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual([named]);
+    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual(sm2s([named]));
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(stateAt("rs-9", { ...state, due: "2026-10-03" }), stateAt("rs-1", first)),
     );
-    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual([first]);
+    await expect(makeRepository().listReviewStates(deck)).resolves.toEqual(sm2s([first]));
   });
 
   it("write a review onto the subject read for it, adding no second state", async () => {
@@ -422,7 +473,7 @@ describe("states that name their card", () => {
   it("never read, write over or remove another scheduler's state", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(otherSchedulerAt("card-1")));
     const repository = makeRepository();
-    await expect(repository.listReviewStates(deck)).resolves.toEqual([]);
+    await expect(repository.listReviewStates(deck)).resolves.toEqual(sm2s([]));
     await writeState(repository, deck, state);
     const saved = savedDataset();
     expect(getUrl(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, SM.scheduler)).toBe(FSRS);
@@ -446,7 +497,7 @@ describe("states that name their card", () => {
     // Named #card-1, but of card 2 by its sm:reviewOf, which wins.
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(stateAt("card-1", card2)));
     const repository = makeRepository(undefined, null);
-    await expect(repository.listReviewStates(deck)).resolves.toEqual([card2]);
+    await expect(repository.listReviewStates(deck)).resolves.toEqual(sm2s([card2]));
     await writeState(repository, deck, state);
     const saved = savedDataset();
     expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
@@ -519,7 +570,7 @@ describe("states that name their card", () => {
     // Written before the upgrade, its link to the card in deck-1.ttl.
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(stateAt("rs-7")));
     const repository = makeRepository();
-    await expect(repository.listReviewStates(upgraded)).resolves.toEqual([state]);
+    await expect(repository.listReviewStates(upgraded)).resolves.toEqual(sm2s([state]));
     const updated: ReviewState = { ...state, repetitions: 3 };
     await writeState(repository, upgraded, updated);
     const thing = getThing(savedDataset(), `${deck.reviewsDocumentUrl}#rs-7`)!;
@@ -548,6 +599,153 @@ describe("states that name their card", () => {
     expect(
       toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-200`)!, deck),
     ).toMatchObject({ repetitions: 3 });
+  });
+});
+
+describe("FSRS-6 states, this app's own", () => {
+  const key = { cardId: "card-1", direction: "front-to-back" } as const;
+  const graded: FsrsState = { ...fsrs, stability: 21.5, due: "2026-10-12" };
+
+  it("are graded with the SM-2 state in the same edit, each at its own subject, both checked", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(reviewsDataset(), namedFsrs(fsrs)));
+    const checkWrite = vi.fn(async () => undefined);
+    const next: ReviewState = { ...state, repetitions: 3 };
+    const grade = vi.fn((_current: PromptStates) => ({ sm2: next, fsrs: graded }));
+    await expect(makeRepository(checkWrite).gradeReviewState(deck, key, grade)).resolves.toEqual({
+      state: { sm2: next, fsrs: graded },
+      current: { sm2: state, fsrs },
+    });
+    expect(grade).toHaveBeenCalledWith({ sm2: state, fsrs });
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    const saved = savedDataset();
+    const at = getThing(saved, `${deck.reviewsDocumentUrl}#card-1@fsrs6`)!;
+    expect(toFsrsState(at, deck)).toEqual(graded);
+    expect(getUrl(at, SM.scheduler)).toBe(SM.fsrs6);
+    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(
+      next,
+    );
+    expect(checkWrite).toHaveBeenCalledWith(
+      saved,
+      [`${deck.reviewsDocumentUrl}#card-1`, `${deck.reviewsDocumentUrl}#card-1@fsrs6`],
+      "pod",
+    );
+  });
+
+  it("are left as they are by a grade that gives none", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(reviewsDataset(), namedFsrs(fsrs)));
+    await writeState(makeRepository(), deck, { ...state, repetitions: 3 });
+    expect(
+      toFsrsState(getThing(savedDataset(), `${deck.reviewsDocumentUrl}#card-1@fsrs6`)!, deck),
+    ).toEqual(fsrs);
+  });
+
+  it("are written at a new subject when the one named for them holds something else", async () => {
+    // Another app's subject where this app would name the FSRS-6 state.
+    const theirs = buildThing({ url: `${deck.reviewsDocumentUrl}#card-1@fsrs6` })
+      .addStringNoLocale("https://other.example/#note", "mine")
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state), theirs));
+    await makeRepository().applyReviewChanges(deck, {
+      save: [],
+      remove: [],
+      fsrs: { save: [graded], remove: [] },
+    });
+    const saved = savedDataset();
+    expect(toFsrsState(getThing(saved, `${deck.reviewsDocumentUrl}#review-r1`)!, deck)).toEqual(
+      graded,
+    );
+    expect(getThing(saved, `${deck.reviewsDocumentUrl}#card-1@fsrs6`)).toEqual(theirs);
+  });
+
+  it("are written over at the subject named for them when it holds one that cannot be read", async () => {
+    const broken = buildThing(namedFsrs(fsrs)).removeAll(SM.stability).build();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state), broken));
+    await makeRepository().applyReviewChanges(deck, {
+      save: [],
+      remove: [],
+      fsrs: { save: [graded], remove: [] },
+    });
+    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+      `${deck.reviewsDocumentUrl}#card-1`,
+      `${deck.reviewsDocumentUrl}#card-1@fsrs6`,
+    ]);
+  });
+
+  it("are restored or removed by a day reset beside SM-2's, only the one read", async () => {
+    const other: FsrsState = { ...fsrs, cardId: "card-2" };
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        named(state),
+        namedFsrs(fsrs),
+        // A second FSRS-6 state of card 1, never read: it stays.
+        toFsrsStateThing(
+          deck,
+          { ...fsrs, due: "2026-11-01" },
+          null,
+          `${deck.reviewsDocumentUrl}#x`,
+        ),
+        namedFsrs(other),
+      ),
+    );
+    await makeRepository().applyReviewChanges(deck, {
+      save: [],
+      remove: [],
+      fsrs: { save: [{ ...other, due: "2026-09-29" }], remove: [key] },
+    });
+    const saved = savedDataset();
+    expect(getThingAll(saved).map((thing) => thing.url)).toEqual([
+      `${deck.reviewsDocumentUrl}#card-1`,
+      `${deck.reviewsDocumentUrl}#x`,
+      `${deck.reviewsDocumentUrl}#card-2@fsrs6`,
+    ]);
+    expect(
+      toFsrsState(getThing(saved, `${deck.reviewsDocumentUrl}#card-2@fsrs6`)!, deck)!.due,
+    ).toBe("2026-09-29");
+  });
+
+  it("are created with SM-2's in a new document", async () => {
+    await makeRepository().createReviewStates(deck, { sm2: [state], fsrs: [fsrs] });
+    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+      `${deck.reviewsDocumentUrl}#card-1`,
+      `${deck.reviewsDocumentUrl}#card-1@fsrs6`,
+    ]);
+  });
+
+  it("create the reviews document when only FSRS-6 states are to be saved", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().applyReviewChanges(deck, {
+      save: [],
+      remove: [],
+      fsrs: { save: [fsrs], remove: [] },
+    });
+    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+      `${deck.reviewsDocumentUrl}#card-1@fsrs6`,
+    ]);
+  });
+
+  it("go with every state of their card, another scheduler's kept", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        named(state),
+        namedFsrs(fsrs),
+        toFsrsStateThing(deck, fsrs, null, `${deck.reviewsDocumentUrl}#rs-2`),
+        otherSchedulerAt("other-1"),
+        namedFsrs({ ...fsrs, cardId: "card-2" }),
+      ),
+    );
+    await makeRepository().applyReviewChanges(deck, { save: [], remove: [key], every: true });
+    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+      `${deck.reviewsDocumentUrl}#other-1`,
+      `${deck.reviewsDocumentUrl}#card-2@fsrs6`,
+    ]);
+  });
+
+  it("stay when only the SM-2 state read is removed, without every", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state), namedFsrs(fsrs)));
+    await makeRepository().applyReviewChanges(deck, { save: [], remove: [key] });
+    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+      `${deck.reviewsDocumentUrl}#card-1@fsrs6`,
+    ]);
   });
 });
 

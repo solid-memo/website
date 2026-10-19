@@ -5,6 +5,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, Deck } from "@solid-memo/domain/deck";
+import { effectiveStates } from "@solid-memo/domain/fsrs";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { CardHistory } from "./CardHistory";
 import { useI18n } from "./i18n";
@@ -18,7 +19,9 @@ import { STATISTICS_STALE_MS } from "./studyFigures";
  * read again after half a minute, or at once after a change
  * (keepStudyFiguresFresh). When either cannot be read a quiet line says
  * so; the card's page works on. The preferences give the hour a study
- * day begins (the default until they are read).
+ * day begins and the scheduler that sets the due days, whose due day and
+ * interval the card's standing shows (effectiveStates; the defaults
+ * until they are read).
  */
 export function CardHistoryContainer({
   useCases,
@@ -49,15 +52,15 @@ export function CardHistoryContainer({
     return <p class="hint">{t("card.historyUnavailable")}</p>;
   if (answersQuery.data === undefined || reviewsQuery.data === undefined)
     return <Loading label={t("card.historyLoading")} />;
+  const { scheduler, dayBoundaryHour } = preferencesQuery.data ?? DEFAULT_PREFERENCES;
+  const { sm2, fsrs } = reviewsQuery.data;
   return (
     <CardHistory
       deck={deck}
       card={card}
       answers={answersQuery.data}
-      states={reviewsQuery.data}
-      dayBoundaryHour={
-        preferencesQuery.data?.dayBoundaryHour ?? DEFAULT_PREFERENCES.dayBoundaryHour
-      }
+      states={effectiveStates(sm2, fsrs, scheduler, dayBoundaryHour)}
+      dayBoundaryHour={dayBoundaryHour}
     />
   );
 }

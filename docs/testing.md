@@ -174,11 +174,13 @@ than assume ([serverTraits.ts](../e2e/pod/src/serverTraits.ts)):
   the test of two pages learning at once is skipped, and the others
   check that every visit reads everything. (5.7.4 also ignored
   `If-None-Match: *` on a PUT; 5.8.8 and 6.0.0 enforce it.) Its parser
-  knows no SPARQL-style `PREFIX` directive, and its PATCH cannot delete a
-  value spelled otherwise than it spells it (`2.50`): no one can patch
-  such a document there, so the documents an update's tests write by
-  hand use `@prefix`, and spell what an update rewrites as Solid Memo
-  does ([migrations.md](migrations.md#the-pod-migration)).
+  knows no SPARQL-style `PREFIX` directive: no one can patch such a
+  document there, so the documents an update's tests write by hand use
+  `@prefix` ([migrations.md](migrations.md#the-pod-migration)). Its
+  PATCH finds a decimal only as JavaScript spells its number (`1`, not
+  the `1.0` it serves for a whole one), so the app sends a deletion it
+  refuses for that once more, so spelled
+  ([data-model.md](data-model.md#write-discipline)).
 - **Community Solid Server 6** builds its ETag from the modification time
   in whole seconds: an edit in the same second as a read keeps the ETag,
   so a changed document looks unchanged. The tests edit within the

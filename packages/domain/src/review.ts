@@ -125,3 +125,13 @@ export interface FsrsState extends ReviewKey {
    */
   previous?: FsrsSnapshot;
 }
+
+/**
+ * A reviews document's states as this app reads them: the SM-2 states,
+ * one per prompt, and the FSRS-6 states kept beside them, one per
+ * prompt too. Each kind is read from the same read of the document.
+ */
+export interface ReviewStates {
+  sm2: ReviewState[];
+  fsrs: FsrsState[];
+}

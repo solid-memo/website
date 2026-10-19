@@ -4,7 +4,8 @@
 
 import { createSolidDataset, type SolidDataset } from "@inrupt/solid-client";
 import type { ReviewStateRepository } from "@solid-memo/application/ports";
-import type { ReviewState } from "@solid-memo/domain/review";
+import type { PromptStates } from "@solid-memo/domain/grading";
+import type { ReviewKey, ReviewStates } from "@solid-memo/domain/review";
 import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
 import {
   getSolidDatasetOrNull,
@@ -30,31 +31,36 @@ export interface SolidReviewStateRepositoryDeps {
   randomId?: () => string;
 }
 
+/** The states of a deck without a reviews document: none. */
+const none = (): ReviewStates => ({ sm2: [], fsrs: [] });
+
+/** No FSRS-6 state to save or remove. */
+const NO_FSRS = { save: [], remove: [] };
+
 export function createSolidReviewStateRepository({
   fetch,
   checkWrite = noWriteCheck,
   randomId = () => crypto.randomUUID(),
 }: SolidReviewStateRepositoryDeps): ReviewStateRepository {
   return {
-    async listReviewStates(deck): Promise<ReviewState[]> {
+    async listReviewStates(deck): Promise<ReviewStates> {
       const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
-      return dataset === null ? [] : toReviewStates(dataset, deck);
+      return dataset === null ? none() : toReviewStates(dataset, deck);
     },
 
     async readReviewStatesSince(deck, version) {
       return mapSince(await readSince(deck.reviewsDocumentUrl, version, fetch), (dataset) =>
-        dataset === null ? [] : toReviewStates(dataset, deck),
+        dataset === null ? none() : toReviewStates(dataset, deck),
       );
     },
 
-    async getReviewState(deck, key): Promise<ReviewState | null> {
+    async getReviewState(deck, key): Promise<PromptStates> {
       const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
-      if (dataset === null) return null;
-      return (
-        toReviewStates(dataset, deck).find(
-          (state) => state.cardId === key.cardId && state.direction === key.direction,
-        ) ?? null
-      );
+      const states = dataset === null ? none() : toReviewStates(dataset, deck);
+      const of = <T extends ReviewKey>(list: readonly T[]) =>
+        list.find((state) => state.cardId === key.cardId && state.direction === key.direction) ??
+        null;
+      return { sm2: of(states.sm2), fsrs: of(states.fsrs) };
     },
 
     // A grade: an edit of the document as last read or written, when its version is known, with no read
@@ -86,13 +92,18 @@ export function createSolidReviewStateRepository({
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
     },
 
-    async applyReviewChanges(deck, { save, remove, every = false }): Promise<void> {
+    async applyReviewChanges(deck, { save, remove, fsrs = NO_FSRS, every = false }): Promise<void> {
       const read = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
       // No document, nothing to remove: one is made only for states to save (a card moved in, with them).
-      if (read === null && save.length === 0) return;
+      if (read === null && save.length + fsrs.save.length === 0) return;
       const dataset = read ?? createSolidDataset();
-      const without = every ? withoutReviewStates : withoutReadReviewStates;
-      const written = withReviewStates(without(dataset, deck, remove), deck, save, randomId);
+      // A card's every state goes with `every`; else, and for FSRS-6's removals, only the state read.
+      const without = withoutReadReviewStates(
+        every ? withoutReviewStates(dataset, deck, remove) : dataset,
+        deck,
+        every ? { fsrs: fsrs.remove } : { sm2: remove, fsrs: fsrs.remove },
+      );
+      const written = withReviewStates(without, deck, { sm2: save, fsrs: fsrs.save }, randomId);
       await checkWrite(written.dataset, written.subjects, "pod");
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
     },
@@ -101,9 +112,14 @@ export function createSolidReviewStateRepository({
       const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
       if (dataset === null) return false;
       // Each state stored in an older format, as read and brought up to date in memory, written back at its subject.
-      const outdated = toReviewStates(dataset, deck).filter(isReviewStateOutdated);
+      const outdated = toReviewStates(dataset, deck).sm2.filter(isReviewStateOutdated);
       if (outdated.length === 0) return false;
-      const written = withReviewStates(dataset, deck, outdated.map(upgradeReviewState), randomId);
+      const written = withReviewStates(
+        dataset,
+        deck,
+        { sm2: outdated.map(upgradeReviewState) },
+        randomId,
+      );
       await checkWrite(written.dataset, written.subjects, "pod");
       // If-Match the read above.
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);

@@ -211,7 +211,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       deck: { ...deck, sourceUrl: plan.releaseUrl },
     })),
     listCards: vi.fn(async () => []),
-    listDeckReviewStates: vi.fn(async () => []),
+    listDeckReviewStates: vi.fn(async () => ({ sm2: [], fsrs: [] })),
     addCard: vi.fn(async () => {
       throw new Error("addCard fake not configured");
     }),
@@ -263,7 +263,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     transferCards: vi.fn(async (_instanceUrl, _from, _to, ids) => ({
       cards: ids.map((id: string) => ({ from: id, to: id, present: false })),
       missing: [],
-      target: { save: [], reviewSaves: [], reviewRemovals: [] },
+      target: { save: [], reviewSaves: [], reviewRemovals: [], fsrsSaves: [], fsrsRemovals: [] },
       source: { remove: [], reviewRemovals: [] },
     })),
     planRepair: vi.fn(() => ({ repairs: [], unrepairable: [] })),

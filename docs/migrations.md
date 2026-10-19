@@ -196,7 +196,8 @@ format version:
   another app's to the [check](validation.md#data-another-app-wrote),
   so it sets no deck aside, and this app never reads, writes over or
   removes it. Any value of `sm:scheduler` but the `sm:sm2` IRI counts,
-  a literal too. An older app takes it for SM-2's: it cannot read it either
+  a literal too, and from vocabulary 1.21 but the `sm:fsrs6` IRI too:
+  an FSRS-6 state is this app's own (below). An older app takes it for SM-2's: it cannot read it either
   (no ease factor), and would write over it only at the subject the old
   rule names for a card.
 - **`schema:suggestedAnswer` on a card and `dcterms:isPartOf` on a cards
@@ -283,7 +284,18 @@ format did not move:
   with its card. So a state an older tab leaves behind may be stale,
   when that tab graded the card or reset the day by SM-2 alone, or
   orphaned, when it removed the card; a newer app tells both from the
-  SM-2 state of the same prompt.
+  SM-2 state of the same prompt. This app reads and writes FSRS-6
+  states as its own: one is fresh while the SM-2 state of its prompt
+  has the same last review, and only then sets a due day; a stale or
+  orphaned one is replaced at the next review under FSRS-6, estimated
+  from the SM-2 state, and removed with its card
+  ([data-model.md](data-model.md#decks-and-cards)).
+- **An older app's Set due date goes unseen under FSRS-6.** Freshness
+  compares only the last review, and the Studio's Set due date in an
+  older app changes the SM-2 state's due day and keeps its last review.
+  So while FSRS-6 is in use, the FSRS-6 state still counts as fresh and
+  its due day goes on setting the card's, as if the date had not been
+  set, until the card's next review.
 - **The other terms of 1.21**, `sm:studyScheduler`,
   `sm:desiredRetention` and `sm:scheduledWith`, are in preferences
   format 5 and deck schedule format 2 (below).
@@ -534,9 +546,10 @@ save there ([data-model.md](data-model.md#write-discipline)).
 
 What a server cannot apply leaves that document as it was, as any
 failure does: node-solid-server's parser knows no SPARQL-style `PREFIX`
-directive, so it cannot patch a document another app wrote with one, nor
-delete by a PATCH a value the update rewrites spelled otherwise than
-Solid Memo spells it (`2.50` for 2.5).
+directive, so it cannot patch a document another app wrote with one. A
+decimal it finds only as JavaScript spells its number (`2.5` for
+`2.50`): a deletion it refuses for that is sent once more so spelled
+([data-model.md](data-model.md#write-discipline)).
 
 ### Proof on a real server
 
@@ -733,7 +746,7 @@ Review history of every card but the removed ones is kept.
 An upgrade writes the deck's documents where they are, each in one
 write made only if it is still as it was read, in an order that leaves
 the deck readable after each: its cards, then the review states of the
-cards it removes, then its catalog entry, which says which release the
+cards it removes (SM-2's and FSRS-6's, in one write), then its catalog entry, which says which release the
 deck is. A failure stops it where it is, nothing put back; planned
 again, the upgrade is offered and finishes
 ([domain/deckUpgrade.ts](../packages/domain/src/deckUpgrade.ts),

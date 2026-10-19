@@ -205,8 +205,8 @@ export function isFresh(fsrs: FsrsState, sm2: ReviewState): boolean {
 /**
  * What sets each prompt's due day: under SM-2 the SM-2 states; under
  * FSRS-6, for each SM-2 state, its fresh FSRS-6 state's due day and
- * interval (the study days from the last review to it), else the SM-2
- * state's own. One per SM-2 state, in their order: an FSRS-6 state
+ * interval (the study days from the last review to it, 0 when the due
+ * day was set before the last review), else the SM-2 state's own. One per SM-2 state, in their order: an FSRS-6 state
  * without an SM-2 state counts for nothing.
  */
 export function effectiveStates(
@@ -225,7 +225,7 @@ export function effectiveStates(
       cardId: state.cardId,
       direction: state.direction,
       due: own.due,
-      intervalDays: daysBetween(lastDay, own.due),
+      intervalDays: Math.max(0, daysBetween(lastDay, own.due)),
       firstReviewedAt: state.firstReviewedAt,
       lastReviewedAt: state.lastReviewedAt,
     };

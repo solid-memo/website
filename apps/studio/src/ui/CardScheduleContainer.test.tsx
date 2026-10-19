@@ -59,7 +59,7 @@ describe("CardScheduleContainer", () => {
   it("reads the deck's review states and sets the card due in one direction, then reads them afresh", async () => {
     let states = [state, backwards];
     const useCases = makeUseCasesFake({
-      listDeckReviewStates: vi.fn(async () => states),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: states, fsrs: [] })),
       rescheduleCards: vi.fn(async () => {
         states = [{ ...state, due: "2026-10-12" }, backwards];
         return 1;
@@ -90,7 +90,7 @@ describe("CardScheduleContainer", () => {
   it("forgets the card in one direction once the user confirms", async () => {
     let states = [state];
     const useCases = makeUseCasesFake({
-      listDeckReviewStates: vi.fn(async () => states),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: states, fsrs: [] })),
       resetCards: vi.fn(async () => {
         states = [];
         return 1;
@@ -115,7 +115,7 @@ describe("CardScheduleContainer", () => {
 
   it("says why a change was not made", async () => {
     const useCases = makeUseCasesFake({
-      listDeckReviewStates: vi.fn(async () => [state]),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [state], fsrs: [] })),
       rescheduleCards: vi.fn(async () => {
         throw new Error("Pod unreachable");
       }),

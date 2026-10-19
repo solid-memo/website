@@ -468,7 +468,7 @@ describe("CardWorkbenchScreen", () => {
         { from: "fire", to: "fire", present: false },
       ],
       missing: [],
-      target: { save: [], reviewSaves: [], reviewRemovals: [] },
+      target: { save: [], reviewSaves: [], reviewRemovals: [], fsrsSaves: [], fsrsRemovals: [] },
       source: { remove: [], reviewRemovals: [] },
     };
     rerender(

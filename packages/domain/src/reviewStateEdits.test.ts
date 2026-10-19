@@ -56,6 +56,16 @@ describe("resetStates", () => {
     ]);
   });
 
+  it("names each prompt once, whatever states of it there are", () => {
+    expect(
+      resetStates([...states, ...states, { cardId: "z", direction: "front-to-back" }], ["a", "z"]),
+    ).toEqual([
+      { cardId: "a", direction: "front-to-back" },
+      { cardId: "a", direction: "back-to-front" },
+      { cardId: "z", direction: "front-to-back" },
+    ]);
+  });
+
   it("forgets one direction when asked", () => {
     expect(resetStates(states, ["a"], "back-to-front")).toEqual([
       { cardId: "a", direction: "back-to-front" },

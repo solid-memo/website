@@ -177,6 +177,18 @@ describe("queryCards", () => {
     expect(row!.states).toHaveLength(2);
   });
 
+  it("takes the due day and interval from what sets them, where it has the prompt", () => {
+    // Under FSRS-6 the house is due tomorrow at an interval of 3 days; the café keeps SM-2's.
+    const due = [{ ...reviews.states[0]!, due: "2026-10-10", intervalDays: 3 }];
+    const overlaid: DeckReviews = { ...reviews, due };
+    const [row] = queryCards(cards, overlaid, DEFAULT_CARD_QUERY, TODAY, plain, englishReader);
+    expect(row).toMatchObject({ due: "2026-10-10", intervalDays: 3, easeFactor: 2.6 });
+    expect(row!.states).toEqual([reviews.states[0]]);
+    expect(ids({ state: "mature" }, reviews)).toContain("c-house");
+    expect(ids({ state: "mature" }, overlaid)).not.toContain("c-house");
+    expect(ids({ state: "young" }, overlaid)).toContain("c-house");
+  });
+
   it("finds text in any field, case and diacritics aside, reading Markdown as plain text", () => {
     expect(ids({ text: "HUS" })).toEqual(["c-house"]);
     expect(ids({ text: "cafe" })).toEqual(["c-cafe"]);

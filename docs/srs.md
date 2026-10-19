@@ -238,6 +238,29 @@ D = clamp(11 − (ease − 1) / (e^w8 · S^(−w9) · (e^(0.1·w10) − 1)), 1, 
   SM-2 state's, so both schedulers count the prompt as introduced on
   the same day.
 
+#### Where the FSRS-6 states are kept
+
+Each prompt's FSRS-6 state is a subject of the deck's reviews document
+beside its SM-2 state ([data-model.md](data-model.md#decks-and-cards)),
+read in the same read of the document.
+
+- **One edit per grade.** A grade under FSRS-6 writes both states in
+  the one PATCH a grade makes under SM-2, built from the document as
+  written (`gradeReviewState`, [What a grade costs](#what-a-grade-costs)),
+  with no read of the preferences or the answer log: a missing or stale
+  FSRS-6 state is estimated from the SM-2 state inside that edit. Under
+  SM-2 the FSRS-6 state is left as it is.
+- **What sets the due day** (`effectiveStates`): under SM-2 the SM-2
+  states; under FSRS-6, for each SM-2 state, its fresh FSRS-6 state's
+  due day, with the study days from the last review to it as its
+  interval, else the SM-2 state's own. The queue, the digest's schedule,
+  a course's answer, where cards stand, the forecast, a card's history
+  and the Studio's due column all go by it; what is written is always
+  an SM-2 or an FSRS-6 state, never this view.
+- **The answer log** records the intervals and the due day of what set
+  the due day ([data-model.md](data-model.md#the-answer-log)); the
+  grade stays SM-2's.
+
 ### FSRS-6 worked examples
 
 Each row is one answer: the memory before it (a new prompt, a
@@ -303,14 +326,16 @@ the learner, and `gradeOfChoice` in
 
 That function is the only place a choice becomes a grade; FSRS-6
 rates the same answer with `ratingOfChoice`, Good when right and Again
-when wrong ([FSRS-6](#fsrs-6)). The grade then goes through the same
+when wrong ([FSRS-6](#fsrs-6)), so under FSRS-6 the "grade 3" below is
+SM-2's, and FSRS-6's rating of it Good. The grade then goes through the same
 transition as a study review (`gradePrompt` in
 [grading.ts](../packages/domain/src/grading.ts), which `applyGrade` in
 [useCases.ts](../packages/application/src/useCases.ts) applies, as
 `recordReview` does). Course answers are front→back.
 
 Whether an answer is graded at all depends on the card's state
-(`courseAnswerEffect`):
+(`courseAnswerEffect`), its due day the one the scheduler in use set
+(under FSRS-6, the fresh FSRS-6 state's):
 
 | The card | Right | Wrong |
 |---|---|---|
@@ -420,7 +445,8 @@ intervals its first answer left it with.
 
 ### What a grade costs
 
-A grade writes one state: a PATCH of the reviews document, `If-Match`
+A grade writes one state, or two under FSRS-6 (its SM-2 and its FSRS-6
+state, [FSRS-6](#where-the-fsrs-6-states-are-kept)), in one PATCH of the reviews document, `If-Match`
 the version the document was last read or written at
 ([data-model.md](data-model.md#write-discipline)), the grade applied to
 the card's state as that document holds it (`gradeReviewState`). The
@@ -455,7 +481,10 @@ recent answer and shows that card again, unrevealed:
   the day. `undoReview` writes the state back, or, for a prompt that was
   new, removes its state, as a reset does for a card introduced today.
   It writes that state as it is: a grade of the same card made on
-  another device between the answer and its undo goes with it.
+  another device between the answer and its undo goes with it. When
+  the answer wrote an FSRS-6 state, the FSRS-6 state from before it
+  comes too (`ReviewUndo.fsrs`), and goes back, or goes when there was
+  none, in the same save.
 - **The answer leaves the log**: if it is still waiting to be added, it
   is dropped from the queue; once added, it is removed by its id
   (`AnswerLog.removeAnswer`).
@@ -559,6 +588,13 @@ decides, per card reviewed today:
 | reviewed today, no snapshot (state written before snapshots existed, or given a due day in the Studio) | can't be restored: made due today, so it can at least be studied again |
 | not reviewed today | untouched |
 
+The FSRS-6 states go back in the same save (`resetFsrsStudyDay`): one
+reviewed today is restored to its snapshot (stability, difficulty, due
+day, last review); one introduced today goes, as its SM-2 state does,
+and so does one without a snapshot, first written today from an
+estimate, which the next review estimates again from the SM-2 state
+restored.
+
 ```mermaid
 flowchart LR
     accTitle: Resetting today's study
@@ -585,9 +621,10 @@ The [Studio](studio.md#card-inspector) changes a state outside a review.
 Setting a card's due day (`rescheduleState`, in
 [reviewStateEdits.ts](../packages/domain/src/reviewStateEdits.ts)) drops
 its snapshot. Otherwise a reset of the day would bring back a state from
-before the new due day, and the due day would be lost. Forgetting a card
-(`resetStates`) removes its state, so a reset of the day has nothing of
-it to restore. Neither touches the answer log.
+before the new due day, and the due day would be lost. It sets an
+FSRS-6 state's due day the same way. Forgetting a card
+(`resetStates`) removes its states, SM-2's and FSRS-6's, so a reset of
+the day has nothing of it to restore. Neither touches the answer log.
 
 In a [course](courses.md)'s deck, a reset treats the day's course
 answers like study answers:

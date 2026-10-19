@@ -52,7 +52,9 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
-import type { ReviewState } from "@solid-memo/domain/review";
+import { fsrsInterval, fsrsReview } from "@solid-memo/domain/fsrs";
+import type { PromptStates } from "@solid-memo/domain/grading";
+import type { FsrsState, ReviewState, ReviewStates } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
 import { defaultCatalogDescription, type Catalog } from "@solid-memo/domain/catalog";
 import type { Session } from "@solid-memo/domain/session";
@@ -81,6 +83,11 @@ const catalog: Catalog = {
   description: "My decks.",
   publisher: { webId: session.webId, name: "Alice" },
 };
+/** A deck's states, SM-2's alone: no FSRS-6 state beside them. */
+const sm2s = (sm2: ReviewState[]): ReviewStates => ({ sm2, fsrs: [] });
+/** A prompt's states, SM-2's alone. */
+const promptOf = (sm2: ReviewState | null): PromptStates => ({ sm2, fsrs: null });
+
 const instance: Instance = {
   url: "https://alice.example/solid-memo/main/",
   name: "Main",
@@ -227,8 +234,8 @@ function makeDeps() {
     upgradePreferences: vi.fn(async () => true),
   };
   const reviewStateRepository: ReviewStateRepository = {
-    listReviewStates: vi.fn(async () => []),
-    getReviewState: vi.fn(async () => null),
+    listReviewStates: vi.fn(async (): Promise<ReviewStates> => ({ sm2: [], fsrs: [] })),
+    getReviewState: vi.fn(async (): Promise<PromptStates> => ({ sm2: null, fsrs: null })),
     // As the real one does: the grade applied to the state stored, which getReviewState gives.
     gradeReviewState: vi.fn(async (deck, key, grade) => {
       const current = await reviewStateRepository.getReviewState(deck, key);
@@ -780,7 +787,7 @@ describe("createUseCases", () => {
         value: cards,
         version: `v${++version}`,
       }));
-      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([reviewed]);
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(sm2s([reviewed]));
       return { deps, useCases: createUseCases(deps) };
     }
 
@@ -1025,9 +1032,9 @@ describe("createUseCases", () => {
         formatVersion: 2,
       },
     ];
-    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(stored);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(sm2s(stored));
     const useCases = createUseCases(deps);
-    await expect(useCases.listDeckReviewStates(deck)).resolves.toBe(stored);
+    await expect(useCases.listDeckReviewStates(deck)).resolves.toEqual(sm2s(stored));
     expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledWith(deck);
   });
 
@@ -1297,31 +1304,65 @@ describe("createUseCases", () => {
       },
     });
 
+    /** Card one's FSRS-6 state, front to back, with its snapshot. */
+    const fsrsOne: FsrsState = {
+      cardId: "one",
+      direction: "front-to-back",
+      stability: 7.5,
+      difficulty: 5,
+      due: "2026-10-04",
+      firstReviewedAt: "2026-09-20T10:00:00.000Z",
+      lastReviewedAt: "2026-09-28T09:00:00.000Z",
+      formatVersion: 1,
+      previous: {
+        stability: 2,
+        difficulty: 5.2,
+        due: "2026-09-27",
+        lastReviewedAt: "2026-09-26T10:00:00.000Z",
+      },
+    };
+
     function setup() {
       const deps = makeDeps();
-      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([
-        studied("one"),
-        studied("one", "back-to-front"),
-        studied("two"),
-      ]);
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue({
+        sm2: [studied("one"), studied("one", "back-to-front"), studied("two")],
+        fsrs: [fsrsOne],
+      });
       return { deps, useCases: createUseCases(deps) };
     }
 
     it("forgets the cards' states in one write of the reviews document, then refreshes the digest", async () => {
       const { deps, useCases } = setup();
       await expect(useCases.resetCards(instance.url, deck, ["one", "new"])).resolves.toBe(1);
+      // With every, the keys take FSRS-6's states along.
       expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(deck, {
         save: [],
         remove: [
           { cardId: "one", direction: "front-to-back" },
           { cardId: "one", direction: "back-to-front" },
         ],
+        fsrs: { save: [], remove: [] },
         every: true,
       });
       expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
         deck,
         undefined,
       );
+    });
+
+    it("forgets an FSRS-6 state without an SM-2 state beside it", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue({
+        sm2: [],
+        fsrs: [{ ...fsrsOne, cardId: "three" }],
+      });
+      await expect(useCases.resetCards(instance.url, deck, ["three"])).resolves.toBe(1);
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(deck, {
+        save: [],
+        remove: [{ cardId: "three", direction: "front-to-back" }],
+        fsrs: { save: [], remove: [] },
+        every: true,
+      });
     });
 
     it("forgets one direction when asked", async () => {
@@ -1332,6 +1373,7 @@ describe("createUseCases", () => {
       expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
         save: [],
         remove: [{ cardId: "one", direction: "back-to-front" }],
+        fsrs: { save: [], remove: [] },
         every: true,
       });
     });
@@ -1353,12 +1395,14 @@ describe("createUseCases", () => {
       ).resolves.toBe(2);
       const { previous: _one, ...one } = studied("one");
       const { previous: _two, ...two } = studied("two");
+      const { previous: _fsrs, ...fsrsLeft } = fsrsOne;
       expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(deck, {
         save: [
           { ...one, due: "2026-10-12" },
           { ...two, due: "2026-10-12" },
         ],
         remove: [],
+        fsrs: { save: [{ ...fsrsLeft, due: "2026-10-12" }], remove: [] },
         every: true,
       });
     });
@@ -1413,6 +1457,16 @@ describe("createUseCases", () => {
       lastReviewedAt: "2026-09-28T09:00:00.000Z",
       formatVersion: 2,
     };
+    const studiedFsrs: FsrsState = {
+      cardId: "one",
+      direction: "front-to-back",
+      stability: 6.5,
+      difficulty: 5,
+      due: "2026-10-03",
+      firstReviewedAt: studied.firstReviewedAt,
+      lastReviewedAt: studied.lastReviewedAt,
+      formatVersion: 1,
+    };
     const changed = () => new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
     const { url: _url, formatVersion: _formatVersion, ...oneWritten } = one;
 
@@ -1426,7 +1480,7 @@ describe("createUseCases", () => {
         version: `v${++version}`,
       }));
       vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
-        d.url === deck.url ? [studied] : [],
+        d.url === deck.url ? { sm2: [studied], fsrs: [studiedFsrs] } : sm2s([]),
       );
       return { deps, useCases: createUseCases(deps) };
     }
@@ -1444,7 +1498,16 @@ describe("createUseCases", () => {
         [deck, { save: [], remove: ["one"] }, { whole: true, version: "v1" }],
       ]);
       expect(vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock.calls).toEqual([
-        [target, { save: [studied], remove: [], every: true }],
+        [
+          target,
+          {
+            save: [studied],
+            remove: [],
+            fsrs: { save: [studiedFsrs], remove: [] },
+            every: true,
+          },
+        ],
+        // The source's every state of the card goes: its FSRS-6 one too.
         [deck, { save: [], remove: [{ cardId: "one", direction: "front-to-back" }], every: true }],
       ]);
       expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
@@ -1519,7 +1582,7 @@ describe("createUseCases", () => {
       // The source keeps the card without progress; the target has both.
       const again = setup([{ ...one, url: `${target.cardsDocumentUrl}#one` }]);
       vi.mocked(again.deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
-        d.url === deck.url ? [] : [studied],
+        sm2s(d.url === deck.url ? [] : [studied]),
       );
       const plan = await again.useCases.transferCards(instance.url, deck, target, ["one"], {
         mode: "move",
@@ -1667,7 +1730,7 @@ describe("createUseCases", () => {
         d === deck ? [old("a"), current("b"), old("c")] : [current("d")],
       );
       vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
-        d === other ? [oldReview("d")] : [],
+        sm2s(d === other ? [oldReview("d")] : []),
       );
       const useCases = createUseCases(deps);
 
@@ -1723,9 +1786,11 @@ describe("createUseCases", () => {
         d.cardsDocumentUrl.endsWith("deck-2.ttl") ? [current("d")] : [old("a"), current("b")],
       );
       vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
-        d.reviewsDocumentUrl.endsWith("reviews/deck-1.ttl")
-          ? [oldReview("a"), { ...oldReview("b"), formatVersion: 2 }]
-          : [],
+        sm2s(
+          d.reviewsDocumentUrl.endsWith("reviews/deck-1.ttl")
+            ? [oldReview("a"), { ...oldReview("b"), formatVersion: 2 }]
+            : [],
+        ),
       );
       vi.mocked(deps.instanceRepository.upgradeMeta).mockImplementation(async (url) => {
         written.push(`${url}meta.ttl`);
@@ -1827,7 +1892,7 @@ describe("createUseCases", () => {
         deck,
         { ...oldEntry, formatVersion: DECK_FORMAT_VERSION },
       ]);
-      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([]);
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(sm2s([]));
       expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
         updated: [UPDATED[2]],
         failed: [],
@@ -1867,7 +1932,9 @@ describe("createUseCases", () => {
       const twin: Deck = { ...other, cardsDocumentUrl: CARDS, reviewsDocumentUrl: REVIEWS };
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, twin]);
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([old("a")]);
-      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([oldReview("a")]);
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(
+        sm2s([oldReview("a")]),
+      );
       // The first deck's part written, the second finds nothing left to write.
       vi.mocked(deps.deckRepository.upgradeCards)
         .mockResolvedValueOnce(true)
@@ -2633,7 +2700,7 @@ describe("createUseCases", () => {
       url: `${deck.cardsDocumentUrl}#${id}`,
     }));
     vi.mocked(deps.deckRepository.listCards).mockResolvedValue(newCards);
-    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([]);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(sm2s([]));
     const useCases = createUseCases({ ...deps, random: () => 0 });
 
     const queue = await useCases.getStudyQueue(instance.url, deck, new Date(2026, 8, 21, 12, 0));
@@ -2658,7 +2725,7 @@ describe("createUseCases", () => {
         formatVersion: 2,
       },
     ];
-    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(states);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(sm2s(states));
     const useCases = createUseCases(deps);
 
     const queue = await useCases.getStudyQueue(instance.url, deck, new Date(2026, 8, 21, 12, 0));
@@ -2677,6 +2744,47 @@ describe("createUseCases", () => {
     );
     expect(capped.due).toEqual([]);
     expect(capped.newPrompts).toEqual([]);
+  });
+
+  it("getStudyQueue goes by FSRS-6's due days when the preferences name it, else SM-2's", async () => {
+    const deps = makeDeps();
+    const dueCard = { ...card, id: "card-due", url: `${deck.cardsDocumentUrl}#card-due` };
+    vi.mocked(deps.deckRepository.listCards).mockResolvedValue([dueCard]);
+    const sm2: ReviewState = {
+      cardId: "card-due",
+      direction: "front-to-back",
+      easeFactor: 2.5,
+      intervalDays: 1,
+      repetitions: 1,
+      due: "2026-09-20",
+      firstReviewedAt: "2026-09-19T10:00:00.000Z",
+      lastReviewedAt: "2026-09-19T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    const fsrs: FsrsState = {
+      cardId: "card-due",
+      direction: "front-to-back",
+      stability: 12,
+      difficulty: 4,
+      due: "2026-10-01",
+      firstReviewedAt: sm2.firstReviewedAt,
+      lastReviewedAt: sm2.lastReviewedAt,
+      formatVersion: 1,
+    };
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue({
+      sm2: [sm2],
+      fsrs: [fsrs],
+    });
+    const at = new Date(2026, 8, 21, 12, 0);
+    const useCases = createUseCases(deps);
+    expect((await useCases.getStudyQueue(instance.url, deck, at)).due).toHaveLength(1);
+    vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+      preferences: { ...DEFAULT_PREFERENCES, scheduler: "fsrs6" },
+      formatVersion: 5,
+    });
+    const queue = await useCases.getStudyQueue(instance.url, deck, at);
+    expect(queue.due).toEqual([]);
+    expect(queue.states).toEqual([sm2]);
   });
 
   it("recordReview starts fresh for a never-reviewed card", async () => {
@@ -2712,17 +2820,19 @@ describe("createUseCases", () => {
 
   it("recordReview transitions an existing state and keeps firstReviewedAt", async () => {
     const deps = makeDeps();
-    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({
-      cardId: card.id,
-      direction: "front-to-back",
-      easeFactor: 2.5,
-      intervalDays: 6,
-      repetitions: 2,
-      due: "2026-09-21",
-      firstReviewedAt: "2026-09-10T10:00:00.000Z",
-      lastReviewedAt: "2026-09-15T10:00:00.000Z",
-      formatVersion: 2,
-    });
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(
+      promptOf({
+        cardId: card.id,
+        direction: "front-to-back",
+        easeFactor: 2.5,
+        intervalDays: 6,
+        repetitions: 2,
+        due: "2026-09-21",
+        firstReviewedAt: "2026-09-10T10:00:00.000Z",
+        lastReviewedAt: "2026-09-15T10:00:00.000Z",
+        formatVersion: 2,
+      }),
+    );
     const useCases = createUseCases(deps);
     const now = new Date(2026, 8, 21, 12, 0);
 
@@ -2763,7 +2873,10 @@ describe("createUseCases", () => {
       formatVersion: 2,
     };
     vi.mocked(deps.reviewStateRepository.gradeReviewState).mockImplementation(
-      async (_deck, _key, grade) => ({ state: grade(stored), current: stored }),
+      async (_deck, _key, grade) => ({
+        state: grade(promptOf(stored)),
+        current: promptOf(stored),
+      }),
     );
     const useCases = createUseCases(deps);
     const now = new Date(2026, 8, 21, 12, 0);
@@ -2818,42 +2931,66 @@ describe("createUseCases", () => {
 
     it("restores reviewed cards and forgets cards introduced today, in one write", async () => {
       const deps = makeDeps();
-      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([
-        {
-          cardId: "reviewed",
-          direction: "front-to-back",
-          easeFactor: 2.6,
-          intervalDays: 15,
-          repetitions: 3,
-          due: "2026-10-06",
-          firstReviewedAt: earlier,
-          lastReviewedAt: now.toISOString(),
-          formatVersion: 2,
-          previous: morning,
-        },
-        {
-          cardId: "introduced",
-          direction: "front-to-back",
-          easeFactor: 2.5,
-          intervalDays: 1,
-          repetitions: 1,
-          due: "2026-09-22",
-          firstReviewedAt: now.toISOString(),
-          lastReviewedAt: now.toISOString(),
-          formatVersion: 2,
-        },
-        {
-          cardId: "untouched",
-          direction: "front-to-back",
-          easeFactor: 2.5,
-          intervalDays: 6,
-          repetitions: 2,
-          due: "2026-09-30",
-          firstReviewedAt: earlier,
-          lastReviewedAt: earlier,
-          formatVersion: 2,
-        },
-      ]);
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(
+        sm2s([
+          {
+            cardId: "reviewed",
+            direction: "front-to-back",
+            easeFactor: 2.6,
+            intervalDays: 15,
+            repetitions: 3,
+            due: "2026-10-06",
+            firstReviewedAt: earlier,
+            lastReviewedAt: now.toISOString(),
+            formatVersion: 2,
+            previous: morning,
+          },
+          {
+            cardId: "introduced",
+            direction: "front-to-back",
+            easeFactor: 2.5,
+            intervalDays: 1,
+            repetitions: 1,
+            due: "2026-09-22",
+            firstReviewedAt: now.toISOString(),
+            lastReviewedAt: now.toISOString(),
+            formatVersion: 2,
+          },
+          {
+            cardId: "untouched",
+            direction: "front-to-back",
+            easeFactor: 2.5,
+            intervalDays: 6,
+            repetitions: 2,
+            due: "2026-09-30",
+            firstReviewedAt: earlier,
+            lastReviewedAt: earlier,
+            formatVersion: 2,
+          },
+        ]),
+      );
+      const fsrsMorning = {
+        stability: 6,
+        difficulty: 5,
+        due: "2026-09-21",
+        lastReviewedAt: earlier,
+      };
+      const fsrsOf = (cardId: string, firstReviewedAt: string, previous?: typeof fsrsMorning) => ({
+        cardId,
+        direction: "front-to-back" as const,
+        stability: 20,
+        difficulty: 4.8,
+        due: "2026-10-12",
+        firstReviewedAt,
+        lastReviewedAt: now.toISOString(),
+        formatVersion: 1,
+        ...(previous === undefined ? {} : { previous }),
+      });
+      const listed = await deps.reviewStateRepository.listReviewStates(deck);
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue({
+        ...listed,
+        fsrs: [fsrsOf("reviewed", earlier, fsrsMorning), fsrsOf("introduced", now.toISOString())],
+      });
       const useCases = createUseCases(deps);
 
       await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(2);
@@ -2869,6 +3006,18 @@ describe("createUseCases", () => {
           },
         ],
         remove: [{ cardId: "introduced", direction: "front-to-back" }],
+        fsrs: {
+          save: [
+            {
+              cardId: "reviewed",
+              direction: "front-to-back",
+              firstReviewedAt: earlier,
+              formatVersion: 1,
+              ...fsrsMorning,
+            },
+          ],
+          remove: [{ cardId: "introduced", direction: "front-to-back" }],
+        },
       });
     });
 
@@ -2882,19 +3031,21 @@ describe("createUseCases", () => {
     it("uses the instance's day boundary", async () => {
       const deps = makeDeps();
       const lateNight = new Date(2026, 8, 21, 3, 0).toISOString();
-      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([
-        {
-          cardId: "night-owl",
-          direction: "front-to-back",
-          easeFactor: 2.5,
-          intervalDays: 1,
-          repetitions: 1,
-          due: "2026-09-22",
-          firstReviewedAt: lateNight,
-          lastReviewedAt: lateNight,
-          formatVersion: 2,
-        },
-      ]);
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(
+        sm2s([
+          {
+            cardId: "night-owl",
+            direction: "front-to-back",
+            easeFactor: 2.5,
+            intervalDays: 1,
+            repetitions: 1,
+            due: "2026-09-22",
+            firstReviewedAt: lateNight,
+            lastReviewedAt: lateNight,
+            formatVersion: 2,
+          },
+        ]),
+      );
       const useCases = createUseCases(deps);
       await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(0);
 
@@ -2918,17 +3069,19 @@ describe("createUseCases", () => {
 
   it("recordReview resets on a lapse and reschedules for tomorrow", async () => {
     const deps = makeDeps();
-    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({
-      cardId: card.id,
-      direction: "front-to-back",
-      easeFactor: 2.2,
-      intervalDays: 30,
-      repetitions: 5,
-      due: "2026-09-21",
-      firstReviewedAt: "2026-08-01T10:00:00.000Z",
-      lastReviewedAt: "2026-09-15T10:00:00.000Z",
-      formatVersion: 2,
-    });
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(
+      promptOf({
+        cardId: card.id,
+        direction: "front-to-back",
+        easeFactor: 2.2,
+        intervalDays: 30,
+        repetitions: 5,
+        due: "2026-09-21",
+        firstReviewedAt: "2026-08-01T10:00:00.000Z",
+        lastReviewedAt: "2026-09-15T10:00:00.000Z",
+        formatVersion: 2,
+      }),
+    );
     const useCases = createUseCases(deps);
 
     const { state } = await useCases.recordReview(
@@ -2983,9 +3136,10 @@ describe("the instance digest", () => {
       current,
       card2,
     ]) as DeckRepository["readCardsSince"];
-    deps.reviewStateRepository.readReviewStatesSince = at("r1", [
-      review,
-    ]) as ReviewStateRepository["readReviewStatesSince"];
+    deps.reviewStateRepository.readReviewStatesSince = at(
+      "r1",
+      sm2s([review]),
+    ) as ReviewStateRepository["readReviewStatesSince"];
     deps.shapeValidator.validateDocumentSince = vi.fn(
       async (url: string, since: string | undefined) =>
         since === `v-${url}`
@@ -3089,6 +3243,44 @@ describe("the instance digest", () => {
     expect(switched.stored()!.schedules[deck.url]!.schedule.scheduler).toBe("fsrs6");
   });
 
+  it("counts, forecasts and spreads intervals by FSRS-6's due days under FSRS-6, eases by SM-2's", async () => {
+    const { deps, useCases } = setup();
+    vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+      preferences: { ...DEFAULT_PREFERENCES, scheduler: "fsrs6" },
+      formatVersion: 5,
+    });
+    const fsrs: FsrsState = {
+      cardId: review.cardId,
+      direction: review.direction,
+      stability: 40,
+      difficulty: 3,
+      due: "2026-10-26",
+      firstReviewedAt: review.firstReviewedAt,
+      lastReviewedAt: review.lastReviewedAt,
+      formatVersion: 1,
+    };
+    deps.reviewStateRepository.readReviewStatesSince = vi.fn(async () => ({
+      unchanged: false as const,
+      value: { sm2: [review], fsrs: [fsrs] },
+      version: "r1",
+    }));
+    await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
+      dueCount: 0,
+      newCount: 1,
+    });
+    const [progress] = (await useCases.getCardProgress(instance.url, now, { deck })).decks;
+    // Thirty days from its last review on the 26th: mature, and not overdue.
+    expect(progress!.progress).toEqual({ new: 1, relearning: 0, young: 0, mature: 1 });
+    expect(progress!.intervals.find((bin) => bin.count > 0)!.from).toBeGreaterThan(1);
+    expect(progress!.eases.reduce((sum, bin) => sum + bin.count, 0)).toBe(1);
+    expect(progress!.overdue).toBe(0);
+    const insight = await useCases.deckInsight(instance.url, deck, now, {
+      ...DEFAULT_PREFERENCES,
+      scheduler: "fsrs6",
+    });
+    expect(insight.intervals).toEqual(progress!.intervals);
+  });
+
   it("notes no format receipt for a document holding something outdated, and nothing of a document without a version", async () => {
     const outdated = setup();
     outdated.deps.deckRepository.readCardsSince = vi.fn(async () => ({
@@ -3098,7 +3290,7 @@ describe("the instance digest", () => {
     }));
     outdated.deps.reviewStateRepository.readReviewStatesSince = vi.fn(async () => ({
       unchanged: false as const,
-      value: [{ ...review, formatVersion: 1 }],
+      value: sm2s([{ ...review, formatVersion: 1 }]),
       version: "r1",
     }));
     await outdated.useCases.getStudyCounts(instance.url, deck, now);
@@ -3530,17 +3722,19 @@ describe("the answer log", () => {
       recallMillis: 2400.4,
       gradeMillis: 800,
     });
-    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({
-      cardId: card.id,
-      direction: "back-to-front",
-      easeFactor: 2.5,
-      intervalDays: 6,
-      repetitions: 2,
-      due: "2026-09-21",
-      firstReviewedAt: "2026-09-01T10:00:00.000Z",
-      lastReviewedAt: "2026-09-15T10:00:00.000Z",
-      formatVersion: 2,
-    });
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(
+      promptOf({
+        cardId: card.id,
+        direction: "back-to-front",
+        easeFactor: 2.5,
+        intervalDays: 6,
+        repetitions: 2,
+        due: "2026-09-21",
+        firstReviewedAt: "2026-09-01T10:00:00.000Z",
+        lastReviewedAt: "2026-09-15T10:00:00.000Z",
+        formatVersion: 2,
+      }),
+    );
     // Eleven minutes to recall: the learner was away, so it is not kept.
     await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 1, noon, {
       recallMillis: 11 * 60_000,
@@ -3603,19 +3797,21 @@ describe("the answer log", () => {
   it("forgets a reset day's answers of the deck, those still on their way too", async () => {
     const { deps, log, byMonth, useCases } = setup();
     await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
-    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([
-      {
-        cardId: card.id,
-        direction: "front-to-back",
-        easeFactor: 2.6,
-        intervalDays: 1,
-        repetitions: 1,
-        due: "2026-09-22",
-        firstReviewedAt: noon.toISOString(),
-        lastReviewedAt: noon.toISOString(),
-        formatVersion: 2,
-      },
-    ]);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(
+      sm2s([
+        {
+          cardId: card.id,
+          direction: "front-to-back",
+          easeFactor: 2.6,
+          intervalDays: 1,
+          repetitions: 1,
+          due: "2026-09-22",
+          firstReviewedAt: noon.toISOString(),
+          lastReviewedAt: noon.toISOString(),
+          formatVersion: 2,
+        },
+      ]),
+    );
     await expect(useCases.resetStudyDay(instance.url, deck, noon)).resolves.toBe(1);
     expect(log.removeDay).toHaveBeenCalledWith(instance.url, deck.url, "2026-09-21");
     expect(log.append.mock.invocationCallOrder[0]).toBeLessThan(
@@ -3638,7 +3834,7 @@ describe("the answer log", () => {
       formatVersion: 2,
     };
     // The document holds the morning's state, then what the first answer left.
-    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValueOnce(morning);
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValueOnce(promptOf(morning));
     const first = await useCases.recordReview(
       instance.url,
       deck,
@@ -3646,7 +3842,9 @@ describe("the answer log", () => {
       5,
       noon,
     );
-    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValueOnce(first.state);
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValueOnce(
+      promptOf(first.state),
+    );
     const { undo } = await useCases.recordReview(
       instance.url,
       deck,
@@ -3664,6 +3862,161 @@ describe("the answer log", () => {
     });
     expect(log.removeAnswer).toHaveBeenCalledWith(instance.url, "2026-09-21", undo.answer.id);
     expect(byMonth.get("2026-09")!.map((answer) => answer.grade)).toEqual([5]);
+  });
+
+  describe("under FSRS-6", () => {
+    const fsrsPrefs = { ...DEFAULT_PREFERENCES, scheduler: "fsrs6" as const };
+    const morning: ReviewState = {
+      cardId: card.id,
+      direction: "front-to-back",
+      easeFactor: 2.5,
+      intervalDays: 6,
+      repetitions: 2,
+      due: "2026-09-21",
+      firstReviewedAt: "2026-09-01T10:00:00.000Z",
+      lastReviewedAt: "2026-09-15T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    const fresh: FsrsState = {
+      cardId: card.id,
+      direction: "front-to-back",
+      stability: 10,
+      difficulty: 5,
+      due: "2026-09-25",
+      firstReviewedAt: morning.firstReviewedAt,
+      lastReviewedAt: morning.lastReviewedAt,
+      formatVersion: 1,
+    };
+
+    it("grades both states in one edit, logs what FSRS-6 set, and undoes both in one save", async () => {
+      const { deps, byMonth, useCases } = setup();
+      vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({
+        sm2: morning,
+        fsrs: fresh,
+      });
+      const recorded = await useCases.recordReview(
+        instance.url,
+        deck,
+        { card, direction: "front-to-back" },
+        4,
+        noon,
+        {},
+        { prefs: fsrsPrefs },
+      );
+      // One edit, with no read of the preferences or the log.
+      expect(deps.reviewStateRepository.gradeReviewState).toHaveBeenCalledOnce();
+      expect(deps.preferencesRepository.getPreferences).not.toHaveBeenCalled();
+      expect(recorded.state).toMatchObject({ repetitions: 3, intervalDays: 15 });
+      expect(recorded.fsrs).toMatchObject({
+        lastReviewedAt: noon.toISOString(),
+        firstReviewedAt: morning.firstReviewedAt,
+        previous: {
+          stability: 10,
+          difficulty: 5,
+          due: "2026-09-25",
+          lastReviewedAt: morning.lastReviewedAt,
+        },
+      });
+      expect(recorded.fsrs!.stability).toBeGreaterThan(10);
+      const nextInterval = fsrsInterval(recorded.fsrs!.stability, fsrsPrefs.desiredRetention);
+      await useCases.getStatistics(instance.url, noon);
+      expect(byMonth.get("2026-09")).toEqual([
+        expect.objectContaining({
+          grade: 4,
+          // From the FSRS-6 state's last review (the 15th) to its due day.
+          priorIntervalDays: 10,
+          priorDue: "2026-09-25",
+          nextIntervalDays: nextInterval,
+        }),
+      ]);
+      expect(recorded.undo.fsrs).toEqual({ before: fresh });
+      await useCases.undoReview(instance.url, deck, recorded.undo);
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(deck, {
+        save: [morning],
+        remove: [],
+        fsrs: { save: [fresh], remove: [] },
+      });
+    });
+
+    it("logs a prior interval of 0 when the due day was set before the last review", async () => {
+      const { deps, byMonth, useCases } = setup();
+      // As Set due date leaves it: due the 10th, last reviewed the 15th.
+      vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({
+        sm2: { ...morning, due: "2026-09-10" },
+        fsrs: { ...fresh, due: "2026-09-10" },
+      });
+      await useCases.recordReview(
+        instance.url,
+        deck,
+        { card, direction: "front-to-back" },
+        4,
+        noon,
+        {},
+        { prefs: fsrsPrefs },
+      );
+      await useCases.getStatistics(instance.url, noon);
+      expect(byMonth.get("2026-09")).toEqual([
+        expect.objectContaining({ priorIntervalDays: 0, priorDue: "2026-09-10" }),
+      ]);
+    });
+
+    it("logs SM-2's interval and due day as prior when the FSRS-6 state is stale, and removes both of a new prompt on undo", async () => {
+      const { deps, byMonth, useCases } = setup();
+      vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValueOnce({
+        sm2: morning,
+        fsrs: { ...fresh, lastReviewedAt: "2026-09-10T10:00:00.000Z" },
+      });
+      const stale = await useCases.recordReview(
+        instance.url,
+        deck,
+        { card, direction: "front-to-back" },
+        4,
+        noon,
+        {},
+        { prefs: fsrsPrefs },
+      );
+      // Estimated from SM-2: no snapshot of FSRS-6's to restore.
+      expect(stale.fsrs).not.toHaveProperty("previous");
+      const fresh2 = await useCases.recordReview(
+        instance.url,
+        deck,
+        { card, direction: "back-to-front" },
+        3,
+        noon,
+        {},
+        { prefs: fsrsPrefs },
+      );
+      await useCases.getStatistics(instance.url, noon);
+      expect(byMonth.get("2026-09")![0]).toMatchObject({
+        priorIntervalDays: 6,
+        priorDue: "2026-09-21",
+      });
+      expect(byMonth.get("2026-09")![1]).not.toHaveProperty("priorDue");
+      expect(fresh2.undo.fsrs).toEqual({ before: null });
+      await useCases.undoReview(instance.url, deck, fresh2.undo);
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
+        save: [],
+        remove: [fresh2.undo.key],
+        fsrs: { save: [], remove: [fresh2.undo.key] },
+      });
+    });
+
+    it("leaves FSRS-6's state alone under SM-2, and undoes SM-2's alone", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({
+        sm2: morning,
+        fsrs: fresh,
+      });
+      const recorded = await useCases.recordReview(
+        instance.url,
+        deck,
+        { card, direction: "front-to-back" },
+        4,
+        noon,
+      );
+      expect(recorded).not.toHaveProperty("fsrs");
+      expect(recorded.undo).not.toHaveProperty("fsrs");
+    });
   });
 
   it("undoes a new prompt's answer still on its way to the log: its state goes, the answer never reaches the log", async () => {
@@ -4036,7 +4389,7 @@ describe("the Studio's answer history and schedule insight", () => {
     });
     vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockResolvedValue({
       unchanged: false,
-      value: states,
+      value: sm2s(states),
       version: "r1",
     });
     const useCases = createUseCases({ ...deps, answerLog, digestRepository });
@@ -4331,8 +4684,8 @@ describe("library deck upgrade", () => {
       return pod.deck;
     });
     const reviewRepo = deps.reviewStateRepository;
-    vi.mocked(reviewRepo.listReviewStates).mockImplementation(
-      async (d) => pod.reviews.get(d.reviewsDocumentUrl) ?? [],
+    vi.mocked(reviewRepo.listReviewStates).mockImplementation(async (d) =>
+      sm2s(pod.reviews.get(d.reviewsDocumentUrl) ?? []),
     );
     vi.mocked(reviewRepo.applyReviewChanges).mockImplementation(async (d, { remove }) => {
       const url = d.reviewsDocumentUrl;
@@ -4398,6 +4751,31 @@ describe("library deck upgrade", () => {
       "entry 3/4",
       "entry 4/4",
     ]);
+  });
+
+  it("removes the removed cards' FSRS-6 states with their SM-2 states, in the same write", async () => {
+    const { deps, copy, plan, useCases } = await world({ reviews: [reviewOf("sweden")] });
+    const fsrsOf = (cardId: string): FsrsState => ({
+      cardId,
+      direction: "front-to-back",
+      stability: 2,
+      difficulty: 5,
+      due: "2026-09-30",
+      firstReviewedAt: "2026-09-28T08:00:00.000Z",
+      lastReviewedAt: "2026-09-28T08:00:00.000Z",
+      formatVersion: 1,
+    });
+    // Latvia has only an FSRS-6 state left (an orphan): it goes too.
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValueOnce({
+      sm2: [reviewOf("sweden")],
+      fsrs: [fsrsOf("sweden"), fsrsOf("latvia")],
+    });
+    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ ok: true });
+    expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(copy, {
+      save: [],
+      remove: [],
+      fsrs: { save: [], remove: [fsrsOf("latvia")] },
+    });
   });
 
   it("does not touch the reviews document when no card with review states is removed, nor read it when no card is", async () => {
@@ -4482,7 +4860,7 @@ describe("library deck upgrade", () => {
     // Another device edits the cards just after the upgrade read them.
     vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementationOnce(async (d) => {
       wrote(copy.cardsDocumentUrl);
-      return pod.reviews.get(d.reviewsDocumentUrl) ?? [];
+      return sm2s(pod.reviews.get(d.reviewsDocumentUrl) ?? []);
     });
     const outcome = await useCases.applyLibraryUpgrade(copy, plan);
     expect(outcome).toEqual({
@@ -5252,6 +5630,16 @@ describe("library deck upgrade", () => {
         lastReviewedAt: "2026-10-01T10:00:00.000Z",
         formatVersion: 2,
       };
+      const guestFsrs: FsrsState = {
+        cardId: "q-1",
+        direction: "front-to-back",
+        stability: 2.3,
+        difficulty: 2.1,
+        due: "2026-10-03",
+        firstReviewedAt: guestState.firstReviewedAt,
+        lastReviewedAt: guestState.lastReviewedAt,
+        formatVersion: 1,
+      };
       const answerTo = (of: Deck, id: string, extra: Partial<Answer> = {}): Answer => ({
         id,
         deckUrl: of.url,
@@ -5318,7 +5706,7 @@ describe("library deck upgrade", () => {
           of.url === course.url ? [guestCard] : [],
         );
         vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (of) =>
-          of.url === course.url ? [guestState] : [],
+          of.url === course.url ? { sm2: [guestState], fsrs: [guestFsrs] } : sm2s([]),
         );
         vi.mocked(deps.instanceCopier.listResources).mockResolvedValue(RESOURCES);
         vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(null);
@@ -5403,9 +5791,10 @@ describe("library deck upgrade", () => {
           { save: [content], remove: [] },
           { whole: true },
         );
+        // The guest's FSRS-6 states come along with SM-2's.
         expect(deps.reviewStateRepository.createReviewStates).toHaveBeenCalledExactlyOnceWith(
           first,
-          [guestState],
+          { sm2: [guestState], fsrs: [guestFsrs] },
         );
         expect(vi.mocked(deps.deckRepository.addDeck).mock.calls).toEqual([[first], [second]]);
         // Documents before the entry that names them.
@@ -6280,10 +6669,12 @@ describe("courses", () => {
     const { deps, useCases } = setup();
     const completed: Deck = { ...courseDeck, completedChapters: [at("ch-1")] };
     vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(completed);
-    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValueOnce([
-      stateOf(noon, "2026-10-08"),
-      { ...stateOf(noon, "2026-10-08"), cardId: "q-rdf", direction: "back-to-front" },
-    ]);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValueOnce(
+      sm2s([
+        stateOf(noon, "2026-10-08"),
+        { ...stateOf(noon, "2026-10-08"), cardId: "q-rdf", direction: "back-to-front" },
+      ]),
+    );
     const got = await useCases.getCourse(courseDeck);
     expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(courseDeck.url);
     expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(RELEASE);
@@ -6403,7 +6794,7 @@ describe("courses", () => {
   it("answerCourseQuestion writes nothing for a right answer on a card graded today, and lapses it on a wrong one, without writing the card again", async () => {
     const { deps, useCases, appended } = setup();
     const morning = stateOf(new Date(2026, 9, 7, 9, 0), "2026-10-08");
-    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(morning);
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(promptOf(morning));
     await expect(
       useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: true }, noon),
     ).resolves.toEqual({
@@ -6421,6 +6812,46 @@ describe("courses", () => {
     expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
     await useCases.refreshStudyDigest(instance.url, courseDeck);
     expect(appended).toEqual([expect.objectContaining({ grade: 1, priorDue: "2026-10-08" })]);
+  });
+
+  it("answerCourseQuestion goes by FSRS-6's due day under FSRS-6, and grades a right answer Good", async () => {
+    const { deps, useCases, appended } = setup();
+    vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
+      preferences: { ...DEFAULT_PREFERENCES, scheduler: "fsrs6" },
+      formatVersion: 5,
+    });
+    // SM-2 has it due on the 5th; FSRS-6, which sets the due days, on the 20th.
+    const sm2 = { ...stateOf(new Date(2026, 9, 1, 9, 0), "2026-10-05"), intervalDays: 4 };
+    const fsrs: FsrsState = {
+      cardId: question.id,
+      direction: "front-to-back",
+      stability: 19,
+      difficulty: 4,
+      due: "2026-10-20",
+      firstReviewedAt: sm2.firstReviewedAt,
+      lastReviewedAt: sm2.lastReviewedAt,
+      formatVersion: 1,
+    };
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({ sm2, fsrs });
+    await expect(
+      useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: true }, noon),
+    ).resolves.toEqual({ effect: "none", state: sm2 });
+    expect(deps.reviewStateRepository.gradeReviewState).not.toHaveBeenCalled();
+
+    // Due by FSRS-6 too: a review, graded Good.
+    const due = { ...fsrs, due: "2026-10-06" };
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue({ sm2, fsrs: due });
+    await expect(
+      useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: true }, noon),
+    ).resolves.toMatchObject({ effect: "review" });
+    const graded = await vi.mocked(deps.reviewStateRepository.gradeReviewState).mock.results[0]!
+      .value;
+    const key = { cardId: question.id, direction: "front-to-back" as const };
+    expect(graded.state.fsrs).toEqual(
+      fsrsReview(key, { sm2, fsrs: due }, 3, noon, 0.9, DEFAULT_PREFERENCES.dayBoundaryHour),
+    );
+    await useCases.refreshStudyDigest(instance.url, courseDeck);
+    expect(appended).toEqual([expect.objectContaining({ grade: 3, priorDue: "2026-10-06" })]);
   });
 
   it("completeChapter notes the chapter completed on the deck", async () => {
@@ -6699,6 +7130,16 @@ describe("metadata", () => {
       lastReviewedAt: "2026-09-28T10:00:00.000Z",
       formatVersion: 2,
     };
+    const fsrsState: FsrsState = {
+      cardId: "card-1",
+      direction: "front-to-back",
+      stability: 2.3,
+      difficulty: 2.1,
+      due: "2026-09-30",
+      firstReviewedAt: state.firstReviewedAt,
+      lastReviewedAt: state.lastReviewedAt,
+      formatVersion: 1,
+    };
     const file = {
       name: "kanji.ttl",
       format: "turtle" as const,
@@ -6706,6 +7147,7 @@ describe("metadata", () => {
         deck: fileDeck,
         cards: [{ ...card, url: `${fileDeck.cardsDocumentUrl}#card-1` }],
         reviews: [state],
+        fsrsReviews: [fsrsState],
         upgraded: [],
         dropped: [],
       },
@@ -6798,6 +7240,7 @@ describe("metadata", () => {
       expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(imported, {
         save: [state],
         remove: [],
+        fsrs: { save: [fsrsState], remove: [] },
       });
       expect(deps.deckRepository.registerDeck).toHaveBeenCalledWith(imported);
       const order = (mock: unknown) =>

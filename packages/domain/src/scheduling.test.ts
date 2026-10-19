@@ -9,6 +9,7 @@ import {
   nextDueDate,
   repeatsInSession,
   requeueCard,
+  resetFsrsStudyDay,
   resetStudyDay,
   snapshotBeforeReview,
   studyDayOf,
@@ -16,7 +17,7 @@ import {
 import type { ReviewQuality } from "./review";
 import type { Card, StudyDirection } from "./deck";
 import { DEFAULT_PREFERENCES, type StudyPreferences } from "./preferences";
-import type { ReviewState } from "./review";
+import type { FsrsState, ReviewState } from "./review";
 
 function card(id: string): Card {
   return {
@@ -447,5 +448,61 @@ describe("requeueCard", () => {
       positions.add(requeueCard(["a", "b", "c"], "x", () => r).indexOf("x"));
     }
     expect([...positions].sort()).toEqual([1, 2, 3]);
+  });
+});
+
+describe("resetFsrsStudyDay", () => {
+  const fsrs = (lastReviewedAt: Date, firstReviewedAt: Date, previous?: boolean): FsrsState => ({
+    cardId: "a",
+    direction: "front-to-back",
+    stability: 9.5,
+    difficulty: 5.1,
+    due: "2026-09-30",
+    firstReviewedAt: firstReviewedAt.toISOString(),
+    lastReviewedAt: lastReviewedAt.toISOString(),
+    formatVersion: 1,
+    ...(previous === true
+      ? {
+          previous: {
+            stability: 3.2,
+            difficulty: 5.4,
+            due: "2026-09-21",
+            lastReviewedAt: yesterday.toISOString(),
+          },
+        }
+      : {}),
+  });
+  const key = { cardId: "a", direction: "front-to-back" };
+
+  it("leaves a state not reviewed today alone", () => {
+    expect(resetFsrsStudyDay([fsrs(yesterday, yesterday, true)], now, 4)).toEqual({
+      restore: [],
+      remove: [],
+    });
+  });
+
+  it("restores a state reviewed today to its snapshot, without one", () => {
+    const { restore, remove } = resetFsrsStudyDay([fsrs(now, yesterday, true)], now, 4);
+    expect(remove).toEqual([]);
+    expect(restore).toEqual([
+      {
+        cardId: "a",
+        direction: "front-to-back",
+        stability: 3.2,
+        difficulty: 5.4,
+        due: "2026-09-21",
+        firstReviewedAt: yesterday.toISOString(),
+        lastReviewedAt: yesterday.toISOString(),
+        formatVersion: 1,
+      },
+    ]);
+  });
+
+  it("removes a state introduced today, or one without a snapshot to restore", () => {
+    expect(resetFsrsStudyDay([fsrs(now, now)], now, 4)).toEqual({ restore: [], remove: [key] });
+    expect(resetFsrsStudyDay([fsrs(now, yesterday)], now, 4)).toEqual({
+      restore: [],
+      remove: [key],
+    });
   });
 });

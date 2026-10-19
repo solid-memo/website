@@ -280,7 +280,12 @@ data.
 │                        (sm:reviewDirection) and sm:scheduler sm:sm2;
 │                        optional sm:previous* snapshot = state before
 │                        the day's first review (restored by "reset the
-│                        day"); sm:formatVersion 2
+│                        day"); sm:formatVersion 2. Beside it, once FSRS-6
+│                        has scheduled the prompt, its FSRS-6 state:
+│                        sm:scheduler sm:fsrs6, #<cardId>@fsrs6 or
+│                        #<cardId>@back-to-front@fsrs6, stability,
+│                        difficulty, due day, its own snapshot;
+│                        sm:formatVersion 1
 ├── history/<YYYY-MM>.ttl  the answer log (below): one sm:Answer per grade
 │                        given in study or a course that month,
 │                        appended, never edited; sm:formatVersion 1
@@ -457,11 +462,32 @@ graph LR
     outside the deck's cards documents (a card of another deck, or the
     document itself), one whose direction is neither way (say
     `sm:bidirectional`), and one of another scheduler (any value of
-    `sm:scheduler` but the `sm:sm2` IRI, a literal too; absent means
-    SM-2, as every state was before 1.16). Another scheduler's state is another app's data: it is
-    never read as SM-2, never written over and never removed, and the
+    `sm:scheduler` but the `sm:sm2` and `sm:fsrs6` IRIs, a literal too;
+    absent means SM-2, as every state was before 1.16). Another
+    scheduler's state is another app's data: it is never read, never
+    written over and never removed, and the
     [check](validation.md#data-another-app-wrote) only warns about it.
     It does not stop the app scheduling the card itself, beside it.
+  - **An FSRS-6 state is the app's own** (vocabulary 1.21): an
+    `sm:ReviewState` naming `sm:scheduler sm:fsrs6` and nothing else,
+    kept beside the SM-2 state of the same prompt, which the app keeps
+    up to date on every review whichever scheduler sets the due days
+    ([srs.md](srs.md#fsrs-6)). It is read by its `sm:reviewOf` and
+    `sm:reviewDirection` alone, which its shape requires, never by the
+    fragment rule; the app writes it at `#<cardId>@fsrs6` (front→back)
+    or `#<cardId>@back-to-front@fsrs6`, and the fragment rule reads no
+    card from such a subject. One per card and direction counts, by the
+    same rule as SM-2's, the one at the subject the app names for it
+    first. It counts only while it is fresh: while the SM-2 state of the
+    prompt has the same `sm:lastReviewedAt`. A stale one (an older app
+    graded SM-2 alone, the day was reset, the card forgotten) and an
+    orphan (no SM-2 state beside it) set no due day; the next review
+    under FSRS-6 replaces it, estimated from the SM-2 state. Only the
+    last review is compared, so a change to the SM-2 state that keeps
+    it goes unseen: an older app's Set due date in the Studio moves the
+    SM-2 due day alone, and under FSRS-6 the FSRS-6 due day still
+    counts until the card's next review
+    ([migrations.md](migrations.md)).
   - **One state per card and direction.** Where several are of the
     same, the one at the subject the fragment rule names counts, else
     the first by subject IRI (code-unit order); the others stay in the
@@ -473,23 +499,30 @@ graph LR
     any other app's subject): then to a new `#review-<uuid>`, which names
     its card. A subject the fragment rule names for the same card and
     direction that cannot be read (half a snapshot, say) is written over,
-    as before. A review of a state another app named its own way, beside
+    as before. An FSRS-6 state goes the same way, to the subject named
+    for it. A grade under FSRS-6 writes both states in the one edit
+    (one PATCH) it makes under SM-2; under SM-2 the FSRS-6 state is left
+    as it is, and goes stale. A review of a state another app named its own way, beside
     another scheduler's state, is held against real servers in
     [foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts).
 
   - **Resetting the day** removes only the state read for each card and
     direction it undoes. A second state of the same, which the app never
-    read, stays, and is the one read from then on.
+    read, stays, and is the one read from then on. FSRS-6's states of
+    the day go back in the same save: restored to their snapshot, or
+    removed when introduced that day or without one
+    ([srs.md](srs.md#resetting-the-day)).
 
   Card edits and review updates never touch each other's documents.
 - Cards/reviews documents are created lazily on first write; deck removal
   deletes both documents and the catalog subject; card removal also
   removes the card's review states, both ways: every `sm:ReviewState` of
-  the reviews document that is of it, by its `sm:reviewOf` or the
-  fragment rule, read or not, and no other subject (another scheduler's
-  state stays). The Studio's edits do the same
+  the reviews document that is of it, its SM-2 states by their
+  `sm:reviewOf` or the fragment rule and its FSRS-6 states by their
+  links, read or not, and no other subject (another scheduler's state
+  stays). The Studio's edits do the same
   ([studio.md](studio.md#review-state)): a card deleted, moved away or
-  forgotten loses every SM-2 state it has, read or not
+  forgotten loses every state it has, SM-2's and FSRS-6's, read or not
   (`applyReviewChanges` with `every`), where a day reset removes only
   the one it read.
 - **The cards document says whose it is.** Every write of a deck's cards
@@ -890,6 +923,14 @@ data, since nothing could rebuild it.
   Greenwich (`sm:utcOffsetMinutes`). Each is optional, so an answer
   without them is read as before, and an older app ignores them
   ([migrations.md](migrations.md)).
+- **The intervals and due day are those of the scheduler that set
+  them.** The grade is always the SM-2 quality, but the interval before
+  and after an answer and the day it was due come from what set the
+  prompt's due day then (`effectiveStates`): under FSRS-6 its FSRS-6
+  state, fresh, else the SM-2 state its first FSRS-6 review is
+  estimated from. So lateness, the card's history and the statistics
+  tell what the learner was scheduled, whichever scheduler did it. The
+  log's format does not change.
 - **Added without reading** (`appendToDocument`): one insert-only PATCH,
   without a precondition, since an answer names a subject no other writer
   does. Every server tested creates the document and its container when
@@ -1064,8 +1105,9 @@ there are in the file, but not imported. It is written as Solid Memo
 writes any deck: each card names its wrong options with `sm:distractor`
 and `schema:suggestedAnswer`, each typed `sm:Distractor` and
 `schema:Answer`, and each review state names its card in the new cards
-document (`sm:reviewOf`), its direction and `sm:sm2`; a state of
-another scheduler in the file is not imported. The deck needs no
+document (`sm:reviewOf`), its direction and `sm:sm2`; its FSRS-6
+states come too, as the app's own, written as it writes them; a state
+of another scheduler in the file is not imported. The deck needs no
 type-index registration of its own: the instance's registrations of its
 decks (`catalog.ttl`), cards (`decks/`) and review states (`reviews/`)
 cover it, as they cover a deck made in Solid Memo
@@ -1172,7 +1214,12 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   `@inrupt/solid-client`: one triple a line, a space before each `.`.
   node-solid-server's parser fails on a triple whose closing `.` touches
   the term before it (`<#a> <#b> 1.}`), which is how
-  `@inrupt/solid-client` writes every patch.
+  `@inrupt/solid-client` writes every patch. node-solid-server also
+  finds a decimal only as JavaScript spells its number (`1`, `2.5`),
+  though it serves a whole one as `1.0` and another app may have written
+  `2.50`: a PATCH it refuses (409) for a deletion spelled as read is
+  sent once more, its deleted decimals so spelled. A triple gone is
+  refused the second time too; one found then holds the same number.
 - **A document is downloaded once while it is unchanged.** A screen asks
   for the same document several times (a deck's cards for its study
   queue, the format check and the data check): a read already under way

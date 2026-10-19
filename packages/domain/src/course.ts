@@ -8,7 +8,7 @@ import { chainIndexOf } from "./answerChain";
 import type { FsrsRating } from "./fsrs";
 import { activeCards, type CardContent } from "./deck";
 import { sameText, type LangText } from "./langText";
-import type { ReviewQuality, ReviewState } from "./review";
+import type { DueState, ReviewQuality } from "./review";
 import { shuffle, studyDayOf } from "./scheduling";
 import { quizAccuracyOf, type Quiz } from "./statistics";
 import { fragmentIdOf } from "./subjectUrl";
@@ -390,8 +390,9 @@ export type CourseAnswerEffect =
   | { kind: "none" };
 
 /**
- * The effect of answering a card's question in a course, `now`, given its
- * front→back review state (null or undefined: none):
+ * The effect of answering a card's question in a course, `now`, given
+ * what sets its front→back due day (null or undefined: no state; under
+ * FSRS-6 the due day is the FSRS-6 state's, effectiveStates in fsrs.ts):
  * - no state: introduce it, graded gradeOfChoice(correct);
  * - graded earlier this study day (as in a final review the day its steps
  *   were taken): a right answer changes nothing (the day's grade stands,
@@ -404,7 +405,7 @@ export type CourseAnswerEffect =
  *   would cut its interval short.
  */
 export function courseAnswerEffect(
-  state: ReviewState | null | undefined,
+  state: DueState | null | undefined,
   correct: boolean,
   now: Date,
   dayBoundaryHour: number,

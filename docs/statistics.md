@@ -112,7 +112,16 @@ state does; it is no beginner's stage, as a card passed once is not
 back in it until it is forgotten. SM-2 spaces a card's reviews 1 day,
 6 days, then about 15 and about 38, growing from there, so some bins
 of the interval chart stay nearly empty; its caption says so. A card studied both ways counts once each
-way, and the page says so. A share is always shown with the count it is
+way, and the page says so.
+
+Under FSRS-6 ([srs.md](srs.md#fsrs-6)) the intervals are FSRS-6's:
+those in the answer log, which it records from the scheduler that set
+each due day ([data-model.md](data-model.md#the-answer-log)), and
+where the cards stand now, the interval of each prompt's fresh FSRS-6
+state (the study days from its last review to its due day), else its
+SM-2 state's. Relearning stays SM-2's to say, by its repetitions, which
+SM-2 keeps up to date on every review; so does the ease chart, folded
+away, which is SM-2's ease. A share is always shown with the count it is
 of, however small, so that "100%" of one review reads as what it is.
 
 Every chart can be read without seeing it. Pointing at a day, a weekday,
@@ -249,7 +258,9 @@ course on the cards' tab. Its download holds the deck's answers only.
 
 A card's own page (`#/card`) ends with its history
 ([CardHistory.tsx](../packages/ui/src/ui/CardHistory.tsx)): for each
-direction it has a review state, its interval, its next review and the
+direction it has a review state, its interval and its next review, as
+the scheduler that sets the due days has them (FSRS-6's while it does,
+`effectiveStates`), and the
 study day it was first studied on (by the day's boundary hour, as the
 answers' days are); then every answer to it in its deck, from
 the whole answer log (`UseCases.cardAnswers`, as the Studio's card

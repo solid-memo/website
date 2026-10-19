@@ -168,7 +168,7 @@ describe("cards, review states and checks since a version", () => {
 
     expect(await reviews.readReviewStatesSince(deck, undefined)).toEqual({
       unchanged: false,
-      value: [],
+      value: { sm2: [], fsrs: [] },
       version: ABSENT_VERSION,
     });
     expect(await reviews.readReviewStatesSince(deck, ABSENT_VERSION)).toEqual({ unchanged: true });
@@ -178,7 +178,7 @@ describe("cards, review states and checks since a version", () => {
         sm:firstReviewedAt "2026-09-21T10:00:00Z"^^xsd:dateTime ; sm:lastReviewedAt "2026-09-21T10:00:00Z"^^xsd:dateTime .`,
     );
     const states = await reviews.readReviewStatesSince(deck, ABSENT_VERSION);
-    expect(states.unchanged || states.value.map((s) => s.cardId)).toEqual(["a"]);
+    expect(states.unchanged || states.value.sm2.map((s) => s.cardId)).toEqual(["a"]);
   });
 
   it("checks a document unless it is unchanged", async () => {

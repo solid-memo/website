@@ -5,7 +5,7 @@
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "./deck";
 import { catalogUrlOf, documentsInUse, ensureTrailingSlash } from "./instanceLayout";
 import { shown } from "./langText";
-import type { ReviewState } from "./review";
+import type { FsrsState, ReviewState } from "./review";
 
 /**
  * A deck as a file (docs/studio.md#import-and-export): the deck's entry,
@@ -59,6 +59,8 @@ export interface DeckFileContent {
   cards: Card[];
   /** The review states of its reviews document, of the cards it holds; absent when the file holds none. */
   reviews?: ReviewState[];
+  /** The FSRS-6 states of its reviews document, of the cards it holds; absent when the file holds none. */
+  fsrsReviews?: FsrsState[];
   /** The subjects in an older format, brought up to date as they were read. */
   upgraded: FormatUpgrade[];
   /** The subjects of a deck's kinds this app could not read, or that belong to none of the deck's documents: left out. */
@@ -110,7 +112,7 @@ const DECK_ID = /^deck-[A-Za-z0-9_-]+$/;
 
 /**
  * The deck a file's deck becomes in the instance, with its cards and,
- * with `withProgress`, its review states and a course's completed
+ * with `withProgress`, its review states (SM-2's and FSRS-6's) and a course's completed
  * chapters (none without). It keeps the file's id, so a deck exported
  * and removed comes back at the same URLs, and the answers the log
  * keeps of it name it again; unless the instance has a deck by that id,
@@ -131,7 +133,7 @@ export function importedDeck(
     freshId,
     now,
   }: { withProgress: boolean; decks: readonly Deck[]; freshId: string; now: string },
-): { deck: Deck; cards: Card[]; reviews: ReviewState[] } {
+): { deck: Deck; cards: Card[]; reviews: ReviewState[]; fsrsReviews: FsrsState[] } {
   const base = ensureTrailingSlash(instanceUrl);
   const documentsOf = (id: string) => [`${base}decks/${id}.ttl`, `${base}reviews/${id}.ttl`];
   const used = documentsInUse(decks);
@@ -163,7 +165,12 @@ export function importedDeck(
       formatVersion: CARD_FORMAT_VERSION,
     }),
   );
-  return { deck, cards, reviews: withProgress ? (content.reviews ?? []) : [] };
+  return {
+    deck,
+    cards,
+    reviews: withProgress ? (content.reviews ?? []) : [],
+    fsrsReviews: withProgress ? (content.fsrsReviews ?? []) : [],
+  };
 }
 
 /** Whether the file holds progress the import can keep: review states, or a course's completed chapters. */
