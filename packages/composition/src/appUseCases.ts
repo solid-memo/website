@@ -13,6 +13,7 @@ import { createSolidDeckLibrary } from "@solid-memo/solid/solidDeckLibrary";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestRepository";
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
+import { createSolidInstanceGraphReader } from "@solid-memo/solid/solidInstanceGraphReader";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
@@ -145,6 +146,8 @@ export function createAppUseCases({
     releasePublisher: createSolidReleasePublisher({ fetch: podFetch, publicFetch: anonymousFetch }),
     // A Studio trial plays a draft in a pod of its own, reading the page's pods, never writing them.
     trialSandbox: (draft) => createTrialUseCases(draft, { podFetch, shapeValidator, ruleset }),
+    // Read as every pod read is: a guest's from this browser, a document read already with its version.
+    instanceGraphReader: createSolidInstanceGraphReader({ fetch: podFetch }),
   });
 }
 

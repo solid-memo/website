@@ -3528,6 +3528,14 @@ describe("the instance digest", () => {
     );
   });
 
+  it("reads no document of an instance as a graph without a reader of them", async () => {
+    const useCases = createUseCases(makeDeps());
+    const graph = await useCases.readInstanceGraph(instance.url, session.webId);
+    const documents = graph.nodes.filter((node) => node.kind === "document");
+    expect(documents.length).toBeGreaterThan(0);
+    expect(documents.every((node) => node.unreadable === true)).toBe(true);
+  });
+
   it("keeps no receipt of a document that does not conform or has no version", async () => {
     const { deps, useCases, digestRepository } = setup();
     deps.shapeValidator.validateDocumentSince = vi.fn(async (url: string) => ({

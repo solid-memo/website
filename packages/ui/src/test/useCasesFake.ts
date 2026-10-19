@@ -255,6 +255,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       url: "https://solid-memo.com/decks/release/v1.ttl",
     })),
     listPublishedReleases: vi.fn(async () => []),
+    readInstanceGraph: vi.fn(async () => ({ nodes: [], edges: [] })),
     exportDeckFile: vi.fn(async () => undefined),
     openDeckFile: vi.fn(async () => null),
     importDeckFile: vi.fn(async () => {

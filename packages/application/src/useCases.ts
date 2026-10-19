@@ -272,7 +272,9 @@ import type {
   FileExchange,
   ReleaseDraftRepository,
   ReleasePublisher,
+  InstanceGraphReader,
 } from "./ports";
+import { createInstanceGraphUseCases, type InstanceGraphUseCases } from "./instanceGraph";
 import { createReleaseDraftUseCases, type ReleaseDraftUseCases } from "./releaseDrafts";
 import {
   createReleasePublishingUseCases,
@@ -285,7 +287,10 @@ import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { trialProblems } from "@solid-memo/domain/release/trial";
 import { AppError } from "@solid-memo/domain/appError";
 
-export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCases {
+export interface UseCases
+  extends ReleaseDraftUseCases,
+    ReleasePublishingUseCases,
+    InstanceGraphUseCases {
   /** The session of a login or an earlier one; else a guest's, when a guest studied on this device; else null. */
   restoreSession(): Promise<EstablishedSession | null>;
   /**
@@ -1232,6 +1237,8 @@ export interface Dependencies {
   releasePublisher?: ReleasePublisher;
   /** A new sandbox to test-play a draft in, each one empty; by default there is none. */
   trialSandbox?: (draft: ReleaseDraft) => TrialSandbox;
+  /** Each instance's documents as statements, for its graph; by default none is read. */
+  instanceGraphReader?: InstanceGraphReader;
 }
 
 /**
@@ -1372,6 +1379,11 @@ const NO_RELEASES: ReleasePublisher = {
   makePublic: noDrafts,
   isPublic: noDrafts,
   listPublished: none,
+};
+const NO_INSTANCE_GRAPH: InstanceGraphReader = {
+  readDocument: async () => {
+    throw new Error("This app reads no instance as a graph.");
+  },
 };
 const noTrials = (): never => {
   throw new Error("This app plays no trials.");
@@ -1555,6 +1567,7 @@ export function createUseCases({
   releaseDraftRepository = NO_DRAFTS,
   releasePublisher = NO_RELEASES,
   trialSandbox = noTrials,
+  instanceGraphReader = NO_INSTANCE_GRAPH,
 }: Dependencies): UseCases {
   const runsElsewhere = fenceMovesElsewhere(updateJournal, writeFence);
 
@@ -2661,6 +2674,14 @@ export function createUseCases({
       deckLibrary,
       fileExchange,
       now,
+    }),
+    ...createInstanceGraphUseCases({
+      instanceGraphReader,
+      storageGateway,
+      deckRepository,
+      answerLog,
+      releaseDraftRepository,
+      releasePublisher,
     }),
     async restoreSession() {
       const established = await sessionGateway.restore();
