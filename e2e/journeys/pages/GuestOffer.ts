@@ -74,7 +74,9 @@ export class GuestOffer extends Screen {
    * opens Solid Memo again. To cut it off at the same point every time,
    * the Pod's answer to the move's write after `written` is held back,
    * and the page is left once the progress says the copy is under way;
-   * the copy is then a container and those writes.
+   * the copy is then a container and those writes. It returns once the
+   * app is back and shows the cut-off move, so the step's screenshot and
+   * accessibility check never meet the session's restore mid-navigation.
    */
   async interruptMove(location: string, written: number): Promise<void> {
     await this.intent(
@@ -97,6 +99,7 @@ export class GuestOffer extends Screen {
         await expect(this.progress).toContainText(this.t("guestOffer.step.copy"));
         await this.page.unrouteAll({ behavior: "ignoreErrors" });
         await this.page.goto("./");
+        await expect(this.leftover).toBeVisible({ timeout: 30_000 });
       },
     );
   }
