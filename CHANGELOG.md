@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [3.13.0](https://github.com/solid-memo/website/compare/v3.12.0...v3.13.0) (2026-10-19)
+
+### Features
+
+* **decks:** add a deck of famous movie quotes ([4600719](https://github.com/solid-memo/website/commit/4600719e491ecd5f8cfea2cb91fda549d16f2cb0)), closes [#186](https://github.com/solid-memo/website/issues/186)
+
 ## [3.12.0](https://github.com/solid-memo/website/compare/v3.11.0...v3.12.0) (2026-10-18)
 
 ### Features

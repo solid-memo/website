@@ -23,8 +23,8 @@ authors:
 doi: 10.5281/zenodo.23351087
 repository-code: https://github.com/solid-memo/website
 url: https://solid-memo.com/
-version: "3.12.0"
-date-released: "2026-10-18"
+version: "3.13.0"
+date-released: "2026-10-19"
 license: MIT
 keywords:
   - Solid
