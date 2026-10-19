@@ -402,8 +402,10 @@ error, and the browser it failed in. The job's
 - `logs/css.log`: the server's whole log.
 
 **The latest report is online** at <https://solid-memo.com/journeys/>,
-published with each deploy: the Chromium job's report of the CI run on
-the release commit the site runs (none after a deploy by hand). It shows every
+published with each deploy: the report of the CI run on the release
+commit the site runs (none after a deploy by hand), every browser's
+journeys in one, as the `journeys-report` job merges them from both
+journeys jobs (Playwright's blob reports). It shows every
 journey's steps and screenshots, and its **Trace** link opens the
 step-by-step timeline in the browser (the trace viewer is part of the report and
 needs it served, as it is there, not opened as a file). On `main` the
@@ -516,11 +518,12 @@ jobs, side by side:
 | `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | that each advisory server starts and meets the contract |
 | `journeys (<browsers>)` | the user journeys: every one in Chromium, and those that differ between engines in Firefox, WebKit and on a phone ([Browsers](#browsers)) |
+| `journeys-report` | nothing: on `main`, after both `journeys` jobs, even when one failed, it merges their runs into one report, the `journeys-report` artifact the deploy publishes at `/journeys/` ([User journeys](#user-journeys)). When both passed, it fails without both their reports; its failure fails the run, so it holds back the release and the deploy, but not `ci-ok` |
 | `docs` | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)); their style and spelling are `build`'s |
 | `workflows` | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
 | `commits` | on a pull request, that each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and that its body or a commit closes its issue, or the body says it is one step of it (`npm run check:closes`; not for Renovate's); in the merge queue or on a push to `main`, nothing |
 | `caches` | nothing: on `main`, after `build`, it deletes `main`'s older Turbo caches, the newest holding what they do. The one job whose token can write (`actions: write`, to delete caches); it runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
-| `ci-ok` | that every job above passed, `caches` aside |
+| `ci-ok` | that every job above passed, `journeys-report` and `caches` aside |
 
 **`ci-ok` is the one check a merge to `main` waits for**: the ruleset
 on `main` (a setting of the repository, Settings › Rules) is to require

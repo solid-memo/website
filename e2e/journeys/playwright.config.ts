@@ -46,7 +46,10 @@ export default defineConfig({
     ["junit", { outputFile: "test-results/junit.xml" }],
     // For the CI job's summary (harness/summary.ts).
     ["json", { outputFile: "test-results/results.json" }],
-    ...(CI ? ([["github"]] as const) : []),
+    // In CI, also each job's run as a blob, to merge into one report of
+    // every browser's journeys: the one published at /journeys/
+    // (docs/testing.md#user-journeys).
+    ...(CI ? ([["github"], ["blob"]] as const) : []),
   ],
   use: {
     baseURL: APP,
