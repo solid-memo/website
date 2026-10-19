@@ -11,7 +11,7 @@
 # shell (actionlint, with shellcheck), and their security (zizmor).
 actionlint-py==1.7.12.25
 shellcheck-py==0.11.0.1
-zizmor==1.31.0
+zizmor==1.31.1
 
 # npm run lint:reuse: every file states its copyright and license
 # (docs/style.md#licenses).
