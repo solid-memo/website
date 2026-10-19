@@ -1,0 +1,212 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Taxonomy
+
+# Once a week, bring the deck of new and changed occupation names up to the
+# newest version of Arbetsförmedlingen's labor market taxonomy
+# (docs/deck-library.md#the-taxonomy-deck). When the taxonomy has a version
+# the deck's newest version lacks, the workflow opens an issue for it, makes
+# the deck's next version with scripts/taxonomy_deck.py, checks it as CI's
+# library and crosscheck jobs do, and opens a pull request that closes the
+# issue, or updates the one already open. The pull request is opened with
+# the taxonomy app's token, so CI runs on it like on anyone's; merging it
+# through the merge queue publishes the version. A failure opens an issue.
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: taxonomy
+  cancel-in-progress: false
+
+env:
+  BRANCH: taxonomy-deck
+
+# bash with pipefail, so a step whose script fails in a pipe fails too.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # One small request: the taxonomy's versions, against the newest the deck
+  # records. A pull request already open for the newest version is left as
+  # it is, so the deck is not made again every week until it is merged.
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      update: ${{ steps.open.outputs.update }}
+      newest: ${{ steps.check.outputs.newest }}
+      next: ${{ steps.check.outputs.next }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.15"
+      - id: check
+        run: python3 scripts/taxonomy_deck.py --check | tee -a "$GITHUB_OUTPUT"
+      - id: open
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPDATE: ${{ steps.check.outputs.update }}
+          NEWEST: ${{ steps.check.outputs.newest }}
+        run: |
+          title="$(gh pr list --head "$BRANCH" --state open --json title --jq '.[0].title // ""')"
+          if [ "$UPDATE" = true ] && [[ "$title" == *"taxonomy version $NEWEST "* ]]; then
+            echo "::notice::The pull request for taxonomy version $NEWEST is open already: merge it, or close it to have it made again."
+            echo "update=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "update=$UPDATE" >> "$GITHUB_OUTPUT"
+          fi
+
+  update:
+    needs: check
+    if: needs.check.outputs.update == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # The taxonomy app's key lives here, and the environment admits only
+    # main (docs/deck-library.md#the-taxonomy-app).
+    environment: labour-market-deck
+    permissions:
+      contents: read
+    env:
+      NEWEST: ${{ needs.check.outputs.newest }}
+      NEXT: ${{ needs.check.outputs.next }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.15"
+      # A published taxonomy version never changes, so its snapshot is kept;
+      # the script still checks each against the checksum the deck records.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/taxonomy
+          key: taxonomy-${{ needs.check.outputs.newest }}
+          restore-keys: taxonomy-
+      # The deck's newest version first: its cards must come out the same
+      # from the taxonomy versions it records, or the script, the Python it
+      # runs on or a published taxonomy version has changed, and the next
+      # version would say what it should not.
+      - run: python3 scripts/taxonomy_deck.py --verify --cache-dir ~/.cache/taxonomy
+      - run: >-
+          python3 scripts/taxonomy_deck.py --to "$NEWEST" --cache-dir ~/.cache/taxonomy
+          --notes-file "$RUNNER_TEMP/notes.txt"
+
+      # The checks of CI's library and crosscheck jobs, before anything is
+      # pushed; the pull request then runs all of CI. Nothing installed here
+      # runs with a token that can write (docs/releasing.md#the-deploy-key).
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run format:turtle
+      - run: npm run library
+      - run: npm run library:check -- --base HEAD
+      - run: pip install -r "$GITHUB_WORKSPACE/scripts/requirements-ci.txt"
+        working-directory: ${{ runner.temp }}
+      - run: python scripts/shacl_crosscheck.py
+
+      # The token is made only now, for the steps that open the issue, push
+      # and open the pull request, and lasts an hour.
+      - id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.LABOUR_MARKET_DECK_CLIENT_ID }}
+          private-key: ${{ secrets.LABOUR_MARKET_DECK_PRIVATE_KEY }}
+          permission-contents: write
+          permission-issues: write
+          permission-pull-requests: write
+      # Every commit names its issue (CONTRIBUTING.md#commit-messages): the
+      # taxonomy version's own, opened here if it is not open yet. The pull
+      # request closes it, and those of earlier versions still open, since
+      # the new version of the deck covers them too. The open issues are
+      # listed, not searched: GitHub's search finds a new issue only later.
+      - id: issue
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          title="Taxonomy version $NEWEST is out"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues?state=open&per_page=100" \
+            --jq '.[] | select(.pull_request | not) | select(.title | test("^Taxonomy version [0-9]+ is out$")) | "\(.number) \(.title)"' \
+            > "$RUNNER_TEMP/issues.txt"
+          number="$(awk -v title="$title" '{ n = $1; $1 = ""; if (substr($0, 2) == title) { print n; exit } }' "$RUNNER_TEMP/issues.txt")"
+          if [ -z "$number" ]; then
+            url="$(gh issue create --title "$title" --label deck --body "Arbetsförmedlingen has published version $NEWEST of its labor market taxonomy. The [taxonomy workflow]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) makes version $NEXT of the deck of new and changed occupation names from it, in a pull request that closes this issue (docs/deck-library.md#the-taxonomy-deck).")"
+            number="${url##*/}"
+          fi
+          {
+            echo "closes<<EOF"
+            { echo "$number"; cut -d ' ' -f 1 "$RUNNER_TEMP/issues.txt"; } | sort -nu | sed 's/^/Closes: #/'
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP: ${{ steps.app.outputs.app-slug }}
+          CLOSES: ${{ steps.issue.outputs.closes }}
+        run: |
+          id="$(gh api "/users/$APP%5Bbot%5D" --jq .id)"
+          export GIT_AUTHOR_NAME="${APP}[bot]" GIT_AUTHOR_EMAIL="${id}+${APP}[bot]@users.noreply.github.com"
+          export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME" GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
+          title="feat(decks): add taxonomy version $NEWEST to the occupation names deck"
+          why="Arbetsförmedlingen has published version $NEWEST of its labor market taxonomy. This is version $NEXT of the deck of new and changed occupation names, made from it by the weekly taxonomy workflow, as the deck promises one version per taxonomy version (docs/deck-library.md#the-taxonomy-deck)."
+          git switch -c "$BRANCH"
+          git add decks
+          # The body wrapped at 72 columns (docs/style.md#commits); the pull
+          # request's, Markdown, is not.
+          git commit -m "$title" -m "$(fold -s -w 72 <<< "$why" | sed 's/ *$//')" \
+            -m "$(fold -s -w 72 "$RUNNER_TEMP/notes.txt" | sed 's/ *$//')" -m "$CLOSES"
+          git push --force "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" "HEAD:refs/heads/$BRANCH"
+          body="$(cat <<EOF
+          ## What and why
+
+          $why
+
+          $(cat "$RUNNER_TEMP/notes.txt")
+
+          Made by [the taxonomy workflow]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID), which first made the cards of the deck's newest version again from the taxonomy and found them unchanged, then checked the new version as CI's library and crosscheck jobs do. Merging it publishes the version.
+
+          $CLOSES
+          EOF
+          )"
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
+            gh pr create --head "$BRANCH" --title "$title" --body "$body" --label deck
+          else
+            gh pr edit "$BRANCH" --title "$title" --body "$body"
+          fi
+
+  failed:
+    needs: [check, update]
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          title="The weekly taxonomy deck update failed"
+          run="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          open="$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number // ""')"
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body "It failed again: $run"
+          else
+            gh issue create --title "$title" --body "See $run. The script stops when the deck's newest version does not come out the same from the taxonomy, when a published taxonomy version has changed, or when the taxonomy is not as it expects; the checks stop when the new version would not be valid (docs/deck-library.md#the-taxonomy-deck)."
+          fi

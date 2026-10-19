@@ -251,8 +251,10 @@ it most. The specifications' versions and status are in
   [testing.md](testing.md).
 - **Environment**: a GitHub setting that a job of a workflow names, and
   that lets it run only on the branches it allows: `github-pages`, to
-  deploy the site, and `release`, whose secret is the release's deploy
-  key, both for `main` alone. [releasing.md](releasing.md#the-deploy-key).
+  deploy the site, `release`, whose secret is the release's deploy key,
+  and `labour-market-deck`, whose secret is the taxonomy app's key, all
+  three for `main` alone. [releasing.md](releasing.md#the-deploy-key),
+  [deck-library.md](deck-library.md#the-taxonomy-app).
 - **ETag**: a server's tag for one version of a document, which changes
   whenever the document does. The app sends it back, so that it does
   not write over a newer version or read again what it already has.

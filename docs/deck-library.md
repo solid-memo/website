@@ -244,6 +244,121 @@ escaped (a carriage return as `\r`), and so is any quote that would end
 or run into a delimiter, so the text reads back the same. Every other
 literal stays on one line.
 
+## The taxonomy deck
+
+The deck of new and changed Swedish occupation names,
+[`swedish-labour-market-taxonomy-occupation-names`](../decks/swedish-labour-market-taxonomy-occupation-names/),
+is generated, not written: one version per version of the labor market
+taxonomy of Arbetsförmedlingen, the Swedish Public Employment Service,
+which its JobTech taxonomy API serves under CC0 1.0, as the deck is.
+[scripts/taxonomy_deck.py](../scripts/taxonomy_deck.py) makes it, with
+Python's standard library alone. Its docstring says which names become
+cards, and why, and how it handles the taxonomy's inconsistencies.
+
+The script reads the deck's newest version, `v<N>.ttl`, and writes
+`v<N+1>.ttl` beside it, covering every taxonomy version up to the newest
+(or `--to`). From `v<N>.ttl` it carries over, verbatim, what it cannot
+make itself: the title, description and keywords in every language of
+the app, the creator's name (never an email), and the review rounds
+that made those texts, by which the new version's `<#generation>` is
+`prov:wasInformedBy`. It keeps every card of `v<N>.ttl`, and retires one
+that no rule makes any longer. It writes the rest of what
+[a new version](#publishing-a-new-version) needs: `dcat:version`,
+`dcat:prev` and `dcat:previousVersion`, `dcterms:issued` (`--issued`,
+by default today in UTC), the version notes, the publisher, the series,
+the [contact](#contact) and the Turtle distribution.
+
+A version is reproducible. Its [provenance](#provenance) records the
+script at the commit it ran from, with its SHA-256 and the Python and
+Unicode versions, the command line, and every taxonomy version read,
+with the query that fetched it and a checksum of the answer. Running
+that command at that commit makes the version again, byte for byte. So
+the script refuses to run unless it is committed and unmodified
+(`--allow-uncommitted` writes a draft), and stops when a taxonomy
+version the deck records no longer matches its checksum.
+
+- `--check` writes nothing, and prints the newest taxonomy version, the
+  newest one the deck covers, whether there is a version to add, and
+  the deck version that would hold it, as `key=value` lines.
+- `--verify` writes nothing, makes the cards of the deck's newest
+  version again from the taxonomy versions it records, and fails unless
+  they come out byte for byte the same.
+
+To make a version by hand, from the repository root on an up-to-date
+`main`:
+
+```sh
+python3 scripts/taxonomy_deck.py --verify --cache-dir ~/.cache/taxonomy
+python3 scripts/taxonomy_deck.py --cache-dir ~/.cache/taxonomy
+npm run format:turtle
+npm run library
+npm run library:check -- --base origin/main
+```
+
+The script prints what it included, left out and adjusted, then the
+version notes. Commit the new version with the index as a
+`feat(decks)` commit that names its issue
+([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), as for
+[any new version](#publishing-a-new-version).
+
+The [Taxonomy workflow](../.github/workflows/taxonomy.yml) does this
+every Monday, and by hand (Actions › Taxonomy › Run workflow). Its
+`check` job runs `--check`. When the taxonomy has a version the deck
+lacks, its `update` job runs `--verify`, makes the next version, and
+checks it as CI's `library` and `crosscheck` jobs do. Only then does it
+open the issue "Taxonomy version N is out" (label `deck`), unless one is
+open already, and push a commit to the branch `taxonomy-deck` that
+closes it, and the issues of earlier taxonomy versions still open, with
+`Closes:` lines. It opens a pull request from that branch, or updates
+the one already open. A pull request already open for the newest
+taxonomy version is left alone: merge it, or close it to have it made
+again. Nothing merges it on its own. Once it is merged through the merge
+queue ([testing.md](testing.md#the-merge-queue)), the next release
+publishes the version, as it does any other. When a job fails, the
+`failed` job opens the issue "The weekly taxonomy deck update failed",
+or comments on the one open, with a link to the run.
+
+### The taxonomy app
+
+The `update` job pushes and opens the pull request with the token of a
+GitHub App, not the workflow's own. A pull request opened with the
+workflow's token starts no workflow, so CI would never run on it,
+`ci-ok` would never report, and it could not be merged. The App's token
+starts workflows as anyone's does. Only this workflow can use it: the
+App's private key is a secret of the `labour-market-deck` environment,
+which allows only `main`, as the [deploy key](releasing.md#the-deploy-key)'s
+environment does.
+
+A maintainer sets it up once:
+
+1. Make a GitHub App owned by the `solid-memo` organization
+   (Organization settings › Developer settings › GitHub Apps › New
+   GitHub App), named `solid-memo-labour-market-deck`, with no webhook ("Active" unchecked), and the
+   repository permissions Contents, Issues and Pull requests, each
+   "Read and write" (Metadata "Read" comes with them), and no other.
+2. Install it on `solid-memo/website` alone ("Only select
+   repositories").
+3. Generate a private key in the App's settings.
+4. Make the environment `labour-market-deck` (Settings › Environments
+   › New environment), or open it if a run has made it already: GitHub
+   makes it, with no rule, when a job first names it. Under "Deployment
+   branches and tags", choose "Selected branches and tags" and add the
+   branch `main`, and nothing else. Add the App's client ID as its
+   environment variable `LABOUR_MARKET_DECK_CLIENT_ID`, and the private
+   key as its environment secret `LABOUR_MARKET_DECK_PRIVATE_KEY`. Then
+   delete the key's file, and leave no repository variable or secret of
+   either name: a job whose environment lacks one reads the
+   repository's.
+
+The job makes the token only after the script and the checks have run,
+for the steps that open the issue, push and open the pull request, and
+the token lasts an hour. The App needs no bypass of the ruleset on
+`main`: it pushes only the branch `taxonomy-deck`. Until the App is set
+up, the `update` job fails at the step that makes the token, and the
+failure issue links that run. To change the key, generate a new one in
+the App's settings, replace the environment's secret, then delete the
+old key there.
+
 ## Authoring Markdown
 
 A card, a course step or a chapter may be written in Markdown

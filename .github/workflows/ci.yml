@@ -208,7 +208,8 @@ jobs:
           cache-dependency-path: scripts/requirements-ci.txt
       - run: pip install -r scripts/requirements-ci.txt
       # The script's own tests (scripts/test_shacl_crosscheck.py), on
-      # small documents of their own, before it checks the real ones.
+      # small documents of their own, before it checks the real ones, and
+      # the taxonomy deck generator's (scripts/test_taxonomy_deck.py).
       - run: python -m unittest discover -s scripts
       - run: python scripts/shacl_crosscheck.py
 

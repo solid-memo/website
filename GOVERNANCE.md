@@ -142,7 +142,10 @@ are pinned to a commit, not a tag, which their owners could move, and
 Renovate updates them as it does every other dependency. Renovate
 cannot approve its own pull requests: once `main` requires an approving
 review, a maintainer approves each update, and Renovate merges it after
-that.
+that. The weekly Taxonomy workflow likewise proposes each new version of
+the deck it generates as a pull request, which CI checks like any other
+and nothing merges on its own
+([docs/deck-library.md](docs/deck-library.md#the-taxonomy-deck)).
 
 ## Deploying
 
