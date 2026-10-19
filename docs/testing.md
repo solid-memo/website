@@ -32,7 +32,7 @@ npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
 npm run test:roundtrip -w @solid-memo/solid   # every library release through a draft and back (below)
 npm run crosscheck # the pySHACL cross-check, as CI runs it (needs scripts/requirements-ci.txt)
-npm run test:crosscheck   # the cross-check script's own tests, Python's unittest (needs scripts/requirements-ci.txt too)
+npm run test:crosscheck   # the Python scripts' own tests (the cross-check's, the taxonomy deck generator's), Python's unittest (needs scripts/requirements-ci.txt too)
 npm run check:closes -- --base origin/main   # a commit since the branch left main closes an issue (add --body-file <file> for the pull request's body), as CI's commits job checks it (CONTRIBUTING.md)
 npm run check:breaking -- --base origin/main   # the public API against where the branch left main, as CI's library job checks it (docs/releasing.md)
 npm run test:pod  # the end-to-end tests, against the Solid servers they start in Docker
@@ -257,8 +257,14 @@ shapes, the deck library and the fixtures, and runs the script's checks
 on it, so they read none of the real documents and need no network.
 They cover how it picks and targets shapes, where it stops (a shape
 DCAT-AP adds, `rdfs:subClassOf`, a subject with no shape) and what it
-reports when a document fails. CI's `crosscheck` job runs them before
-the cross-check; `npm run check` does not, as it needs no Python.
+reports when a document fails. The same command runs the tests of the
+taxonomy deck's generator
+([scripts/test_taxonomy_deck.py](../scripts/test_taxonomy_deck.py),
+[deck-library.md](deck-library.md#the-taxonomy-deck)). CI's
+`crosscheck` job runs them all before the cross-check; `npm run check`
+does not, as it needs no Python. The generator itself runs weekly, and
+by hand, in the [Taxonomy workflow](../.github/workflows/taxonomy.yml),
+which proposes each new version of its deck as a pull request.
 
 ## User journeys
 
@@ -512,7 +518,7 @@ jobs, side by side:
 |---|---|
 | `build` | `npm run check:ci`, which is `npm run check` without the deck library (the `library` job checks it), then `npm run build`, with Chromium's headless shell from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml)) for the docs' diagrams; the coverage of every package goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under a key of this job's own, so a task whose inputs have not changed is not run again; only a run on `main` saves it, and a pull request and the merge queue start from `main`'s |
 | `library` | the change against its base: the deck library, no published version edited or removed, and every new version naming the library's contact ([deck-library.md](deck-library.md#checks)); the public API, no line of `api/` gone unless a commit says the change breaks, and none of `api/frozen/` at all (`npm run check:breaking`, [releasing.md](releasing.md#how-ci-holds-to-it)) |
-| `crosscheck` | the cross-check script's tests, then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
+| `crosscheck` | the Python scripts' tests (the cross-check's and the taxonomy deck generator's), then the vocabulary, the deck library and the pod catalog documents, by pySHACL ([validation.md](validation.md#the-ci-cross-check)) |
 | `pod (<server>)` | the end-to-end tests, one job per blocking server (above) |
 | `contract (<server>)` | that each advisory server starts and meets the contract |
 | `journeys (<browsers>)` | the user journeys: every one in Chromium, and those that differ between engines in Firefox, WebKit and on a phone ([Browsers](#browsers)) |
