@@ -22,8 +22,8 @@ deck-series/v1.ttl … v3.ttl
 card/v1.ttl … v6.ttl
 review-state/v1.ttl, v2.ttl
 fsrs-review-state/v1.ttl      …/fsrs-review-state/v1.ttl#shape  (an FSRS-6 review state)
-preferences/v1.ttl … v4.ttl
-document-receipt/v1.ttl, deck-schedule/v1.ttl   (the digest)
+preferences/v1.ttl … v5.ttl
+document-receipt/v1.ttl, deck-schedule/v1.ttl, v2.ttl   (the digest)
 deck-group/v1.ttl             …/deck-group/v1.ttl#inPod  (the arranged deck list)
 chapter/v1.ttl, step/v1.ttl   …/chapter/v1.ttl#inLibrary  (a course's outline)
 distractor/v1.ttl             …/distractor/v1.ttl#shape  (a wrong option, in a pod or the library)
@@ -139,6 +139,7 @@ checked by the shapes every place shares (`<#shape>`).
 | Draft step 1 | In a draft (`DraftStepV1`): step 1, but `sm:theory` 0..n language-tagged text in any language, one per language, `sm:checkedBy` 0..n, and `schema:isPartOf` and `schema:position` 0..1 |
 | Preferences 3 | Preferences 2 + `sm:invalidDataPolicy` 1..1, a concept of `sm:InvalidDataPolicies` |
 | Preferences 4 | Preferences 3 + `sm:theme` 1..1, a concept of `sm:Themes` (see [theme.md](theme.md)) |
+| Preferences 5 | Preferences 4 + `sm:studyScheduler` 1..1, `sm:sm2` or `sm:fsrs6`, and `sm:desiredRetention` 1..1 decimal, 0.7 to 0.97 |
 | Library deck series 1 | The deck across its releases in the library index: a `dcat:DatasetSeries` and `dcat:Dataset`; title, description, publisher 1..1; `dcat:first`, `dcat:last`, `dcat:hasCurrentVersion` 1..1; `dcat:hasVersion` 1..n; themes and keywords 0..n |
 | Library deck series 2 | Library deck series 1 with the version stated (`sh:hasValue 2`) and the title and description as language-tagged text, as in deck format 4 |
 | Library deck series 3 | Library deck series 2, but the keywords, copied from the current release, are language-tagged text, several per language, or untagged as a library deck 4 release has them |
@@ -152,6 +153,7 @@ checked by the shapes every place shares (`<#shape>`).
 | Step 1 | In the library (`StepV1`, `<#inLibrary>`): a step of a course chapter, a `sm:Step` and a `schema:LearningResource`; `sm:theory` 1..n language-tagged text, one per language, exactly one of them English; `sm:checkedBy` 1..n IRIs (the cards that check it); `schema:isPartOf` (its chapter) and `schema:position` (an integer ≥ 0) 1..1; `owl:deprecated` 0..1 boolean. `sm:textFormat` 0..1 IRI, how its theory is written, added without a version bump in vocabulary 1.15, as on a card 5 |
 | Distractor 1 | In a pod or the library (`DistractorV1`, `<#shape>`): a wrong option of a card, a `sm:Distractor` and a `schema:Answer`, a subject of the card's document; `sm:distractorText` 1..n, one untagged literal or language-tagged text, one per language, never both, as a card 5 side's text; `sm:distractorNote` 0..n language-tagged text, one per language, why the option is wrong; `owl:deprecated` 0..1, true once retired, when the app no longer offers it |
 | Deck schedule 1 | In an instance's digest: `sm:scheduleOf` (the deck), `sm:cardsVersion`, `sm:reviewsVersion` (`"absent"` for none), `sm:scheduledDirection` (a concept of `sm:StudyDirections`), `sm:scheduledDayBoundaryHour` (0–23), `sm:scheduledOn` (`YYYY-MM-DD`), `sm:unreviewedCount`, `sm:reviewedOnDayCount`, `sm:introducedOnDayCount` 1..1; `sm:dueOnDay` 0..n, `"YYYY-MM-DD count"` |
+| Deck schedule 2 | Deck schedule 1 + `sm:scheduledWith` 1..1, `sm:sm2` or `sm:fsrs6` (the scheduler whose due days it counts), and the format version 1..1 |
 
 The DCAT and FOAF classes' values (an agent is a `foaf:Agent`, a theme a
 `skos:Concept`, a license a `dcterms:LicenseDocument`) are checked by the

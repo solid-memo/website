@@ -35,6 +35,7 @@ describe("the digest's records", () => {
       schedule: {
         direction: "back-to-front",
         dayBoundaryHour: 4,
+        scheduler: "fsrs6",
         dueByDay: { "2026-10-03": 1, "2026-09-30": 12, "2026-10-01": 0 },
         unreviewed: 5,
         studyDay: "2026-10-01",
@@ -45,6 +46,7 @@ describe("the digest's records", () => {
     const record = scheduleToRecord(stored);
     expect(record.dueOnDay).toEqual(["2026-09-30 12", "2026-10-03 1"]);
     expect(record.direction).toBe(`${SM}backToFront`);
+    expect(record.scheduler).toBe(`${SM}fsrs6`);
     const { "2026-10-01": _empty, ...dueByDay } = stored.schedule.dueByDay;
     expect(scheduleFromRecord(record)).toEqual({
       ...stored,

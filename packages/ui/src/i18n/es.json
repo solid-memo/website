@@ -945,7 +945,7 @@
     "countIn": "{what} en {decks}",
     "instanceFormat": "el formato de instancia {version}",
     "catalogueFormat": "un catálogo de los mazos de cada instancia, que otras aplicaciones leen como un catálogo DCAT",
-    "preferencesFormat": "el formato de preferencias {version}, que guarda la escala de respuestas, el modo de desarrollador, qué hacer con los datos no válidos y la apariencia",
+    "preferencesFormat": "el formato de preferencias {version}, que guarda la escala de respuestas, el modo de desarrollador, qué hacer con los datos no válidos, la apariencia y el algoritmo de programación",
     "deckFormat": "el formato de mazo {version}, que describe los mazos con los estándares DCAT y SKOS, da a cada mazo una descripción y permite que el título, la descripción y las palabras clave de un mazo estén en cualquier idioma que indiques",
     "cardFormat": "el formato de tarjeta {version}, que añade imágenes a las tarjetas, permite que un mazo de la biblioteca retire una tarjeta que ya no usa, que el texto de una tarjeta esté en cualquier idioma que indiques y añade una etiqueta sobre el anverso de una tarjeta",
     "reviewFormat": "el formato de estado de repaso {version}, que guarda el estado de cada sentido de estudio y la instantánea para deshacer del día",

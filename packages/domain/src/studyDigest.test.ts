@@ -97,7 +97,14 @@ describe("a deck schedule", () => {
   it.each(directions)(
     "counts what buildStudyQueue counts, on the day it was computed and later (%s)",
     (direction) => {
-      const schedule = scheduleOf({ cards, direction, reviews, dayBoundaryHour: 4, now });
+      const schedule = scheduleOf({
+        cards,
+        direction,
+        reviews,
+        scheduler: "sm2",
+        dayBoundaryHour: 4,
+        now,
+      });
       for (const prefs of caps) {
         for (const at of [now, tomorrow, later]) {
           // Later days: nothing was reviewed since (else the reviews document, and so the schedule, would be new).
@@ -111,10 +118,18 @@ describe("a deck schedule", () => {
 
   it("holds the prompts due by day, the new ones and the day's work", () => {
     expect(
-      scheduleOf({ cards, direction: "bidirectional", reviews, dayBoundaryHour: 4, now }),
+      scheduleOf({
+        cards,
+        direction: "bidirectional",
+        reviews,
+        scheduler: "fsrs6",
+        dayBoundaryHour: 4,
+        now,
+      }),
     ).toEqual<DeckSchedule>({
       direction: "bidirectional",
       dayBoundaryHour: 4,
+      scheduler: "fsrs6",
       dueByDay: { "2026-09-19": 1, "2026-09-21": 2, "2026-09-23": 1, "2026-09-22": 1 },
       unreviewed: 7,
       studyDay: "2026-09-21",
@@ -123,11 +138,12 @@ describe("a deck schedule", () => {
     });
   });
 
-  it("cannot say for another direction, another day boundary, or a day before it was computed", () => {
+  it("cannot say for another direction, day boundary or scheduler, or a day before it was computed", () => {
     const schedule = scheduleOf({
       cards,
       direction: "front-to-back",
       reviews,
+      scheduler: "sm2",
       dayBoundaryHour: 4,
       now,
     });
@@ -137,6 +153,14 @@ describe("a deck schedule", () => {
       studyCountsOf(schedule, {
         direction: "front-to-back",
         prefs: { ...prefs, dayBoundaryHour: 5 },
+        now,
+      }),
+    ).toBeNull();
+    // Switching back from FSRS-6 writes no review: the stored due days are its.
+    expect(
+      studyCountsOf(schedule, {
+        direction: "front-to-back",
+        prefs: { ...prefs, scheduler: "fsrs6" },
         now,
       }),
     ).toBeNull();
@@ -167,6 +191,7 @@ describe("an instance digest", () => {
       cards: [],
       direction: "front-to-back",
       reviews: [],
+      scheduler: "sm2",
       dayBoundaryHour: 4,
       now,
     });

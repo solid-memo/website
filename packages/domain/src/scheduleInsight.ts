@@ -4,6 +4,7 @@
 
 import { LEECH_LAPSES, type LapseIndex } from "./cardHistory";
 import { activeCards, studyDirections, type Card, type DeckDirection } from "./deck";
+import type { Scheduler } from "./fsrs";
 import { reviewKeyOf, type ReviewState } from "./review";
 import { shiftStudyDay } from "./answer";
 import type { DeckSchedule, StoredSchedule } from "./studyDigest";
@@ -30,13 +31,14 @@ export interface ForecastDay {
 /**
  * The deck's schedule as the digest keeps it, while it holds: computed
  * from the very versions of the deck's documents read now (`versions`, a
- * null one never matches), with the deck's direction and the day
- * boundary, on a study day no later than `today`. Null when it does not.
+ * null one never matches), with the deck's direction, the day boundary
+ * and the scheduler in use, on a study day no later than `today`. Null
+ * when it does not.
  */
 export function freshSchedule(
   stored: StoredSchedule | undefined,
   versions: { cards: string | null; reviews: string | null },
-  input: { direction: DeckDirection; dayBoundaryHour: number; today: string },
+  input: { direction: DeckDirection; dayBoundaryHour: number; scheduler: Scheduler; today: string },
 ): DeckSchedule | null {
   if (stored === undefined || versions.cards === null || versions.reviews === null) return null;
   const { schedule } = stored;
@@ -45,6 +47,7 @@ export function freshSchedule(
     stored.reviewsVersion === versions.reviews &&
     schedule.direction === input.direction &&
     schedule.dayBoundaryHour === input.dayBoundaryHour &&
+    schedule.scheduler === input.scheduler &&
     schedule.studyDay <= input.today;
   return holds ? schedule : null;
 }

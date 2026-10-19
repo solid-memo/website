@@ -11,9 +11,11 @@ import {
   conceptByNotation,
   conceptOfDirection,
   conceptOfPolicy,
+  conceptOfScheduler,
   conceptOfTheme,
   directionOfConcept,
   policyOfConcept,
+  schedulerOfConcept,
   themeOfConcept,
 } from "./concepts";
 import { INVALID_DATA_POLICIES } from "./invalidDataPolicy";
@@ -95,5 +97,15 @@ describe("answer modes as concepts", () => {
     expect(answerModeOfConcept(`${SM}multipleChoice`)).toBe("multiple-choice");
     expect(answerModeOfConcept(`${SM}recall`)).toBe("recall");
     expect(answerModeOfConcept(`${SM}frontToBack`)).toBeUndefined();
+  });
+});
+
+describe("schedulers as concepts", () => {
+  it("map each scheduler to its concept and back; another IRI names none", () => {
+    expect(conceptOfScheduler("sm2")).toBe(`${SM}sm2`);
+    expect(conceptOfScheduler("fsrs6")).toBe(`${SM}fsrs6`);
+    expect(schedulerOfConcept(`${SM}sm2`)).toBe("sm2");
+    expect(schedulerOfConcept(`${SM}fsrs6`)).toBe("fsrs6");
+    expect(schedulerOfConcept(`${SM}frontToBack`)).toBeUndefined();
   });
 });

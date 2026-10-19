@@ -121,8 +121,10 @@ the *desired retention*, 90% by default. It is implemented in the
 domain layer too, as pure functions:
 [fsrs.ts](../packages/domain/src/fsrs.ts) has the formulas, and
 `gradePrompt` in [grading.ts](../packages/domain/src/grading.ts)
-applies a grade to both schedulers. SM-2 sets the due days until the
-preferences name a scheduler.
+applies a grade to both schedulers. The preferences name the scheduler
+that sets the due days (`sm:studyScheduler`, preferences format 5);
+SM-2 is the default, and SM-2's state is updated on every review either
+way.
 
 **Reference.** FSRS is by Jarrett Ye and the Open Spaced Repetition
 project, described in

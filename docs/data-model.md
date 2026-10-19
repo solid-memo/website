@@ -242,7 +242,8 @@ data.
 ├── preferences.ttl #it: a sm:Preferences (created on first explicit save):
 │                        study caps, sm:answerScale, sm:developerMode,
 │                        sm:invalidDataPolicy, sm:theme,
-│                        sm:formatVersion 4
+│                        sm:studyScheduler (sm:sm2 or sm:fsrs6),
+│                        sm:desiredRetention, sm:formatVersion 5
 ├── catalog.ttl     one subject per deck (titles live ONLY here), a
 │                        sm:Deck and dcat:Dataset: sm:formatVersion 6,
 │                        dcterms:description, sm:studyDirection, optional
@@ -296,7 +297,8 @@ data.
 └── digest.ttl      derived data (below): a sm:DocumentReceipt per document
                          (#receipt-<path>) and a sm:DeckSchedule per deck
                          (#schedule-<path>), each stamped with the versions
-                         it was learned from; sm:formatVersion 1
+                         it was learned from; sm:formatVersion 1 (a
+                         receipt), 2 (a schedule)
 ```
 
 A deck's documents are found through its catalog entry
@@ -415,8 +417,9 @@ graph LR
 - **Format versions**: every subject the app writes carries
   `sm:formatVersion`, saying which version of its class's
   [shape](shapes.md) it conforms to: instance 1, decks 3 (DCAT),
-  cards 2 (pictures), review states 2, preferences 4; the catalog,
-  agent and distribution nodes 1. Readers treat a
+  cards 2 (pictures), review states 2, preferences 5 (the scheduler),
+  deck schedules 2 (the scheduler); the catalog, agent and distribution
+  nodes 1. Readers treat a
   missing version as 1 — data written before the field existed — read
   older versions as they are, and pass a newer stored version through
   unchanged. Bringing a pod up to the current versions is the user's
@@ -951,6 +954,11 @@ stamped with the version (ETag) of the document it was learned from
   prompts never reviewed, and the reviews and introductions of the day it
   was computed on. With today's preferences that gives the deck list the
   same counts as `buildStudyQueue` ([srs.md](srs.md#study-days-and-the-queue)).
+  It names the direction, the day boundary and the scheduler it was
+  computed with (`sm:scheduledWith`, the preferences' `sm:studyScheduler`),
+  and holds only while all three are the deck's and the preferences':
+  switching scheduler writes no review, so the documents' versions alone
+  could not tell SM-2's due days from FSRS-6's.
 
 ```mermaid
 sequenceDiagram

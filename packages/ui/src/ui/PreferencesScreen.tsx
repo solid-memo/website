@@ -99,6 +99,9 @@ export function PreferencesScreen({
       developerMode,
       invalidDataPolicy,
       theme: themeChoice,
+      // Not on this screen: kept as they are.
+      scheduler: preferences.scheduler,
+      desiredRetention: preferences.desiredRetention,
     });
   }
 

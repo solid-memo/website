@@ -73,6 +73,8 @@ describe("PreferencesContainer", () => {
       developerMode: false,
       invalidDataPolicy: "block-subject" as const,
       theme: "system",
+      scheduler: "sm2",
+      desiredRetention: 0.9,
     });
   });
 

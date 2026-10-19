@@ -5,6 +5,7 @@
 import {
   ANSWER_MODES,
   INVALID_DATA_POLICIES,
+  SCHEDULERS,
   STUDY_DIRECTIONS,
   THEMES as THEME_SCHEME,
   type Concept,
@@ -12,6 +13,7 @@ import {
 } from "@solid-memo/vocab/concepts.generated";
 import type { AnswerMode } from "./answer";
 import { isDeckDirection, type DeckDirection } from "./deck";
+import type { Scheduler } from "./fsrs";
 import { isInvalidDataPolicy, type InvalidDataPolicy } from "./invalidDataPolicy";
 import { isThemeChoice, type ThemeChoice } from "./theme";
 
@@ -26,6 +28,9 @@ export type AnswerModeConcept = (typeof ANSWER_MODES.concepts)[number]["iri"];
 
 /** The IRI of a concept of the Themes scheme. */
 export type ThemeConcept = (typeof THEME_SCHEME.concepts)[number]["iri"];
+
+/** The IRI of a concept of the Schedulers scheme. */
+export type SchedulerConcept = (typeof SCHEDULERS.concepts)[number]["iri"];
 
 /**
  * Lookups over Solid Memo's SKOS concept schemes (generated from
@@ -83,4 +88,14 @@ export function answerModeOfConcept(iri: string): AnswerMode | undefined {
 /** The concept of the AnswerModes scheme that names an answer mode. */
 export function conceptOfAnswerMode(mode: AnswerMode): AnswerModeConcept {
   return conceptByNotation(ANSWER_MODES, mode)!.iri as AnswerModeConcept;
+}
+
+/** The scheduler a concept of the Schedulers scheme names. */
+export function schedulerOfConcept(iri: string): Scheduler | undefined {
+  return conceptByIri(SCHEDULERS, iri)?.notation as Scheduler | undefined;
+}
+
+/** The concept of the Schedulers scheme that names a scheduler. */
+export function conceptOfScheduler(scheduler: Scheduler): SchedulerConcept {
+  return conceptByNotation(SCHEDULERS, scheduler)!.iri as SchedulerConcept;
 }

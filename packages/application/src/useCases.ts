@@ -150,7 +150,7 @@ import {
   studyDayOf,
   type StudyQueue,
 } from "@solid-memo/domain/scheduling";
-import { DEFAULT_DESIRED_RETENTION, effectiveStates } from "@solid-memo/domain/fsrs";
+import { effectiveStates } from "@solid-memo/domain/fsrs";
 import { gradePrompt, type Scheduling } from "@solid-memo/domain/grading";
 import {
   answerIdOf,
@@ -1402,14 +1402,13 @@ interface UpdateItem {
 }
 
 /**
- * What the instance grades and schedules with: SM-2, which sets the due
- * days until the preferences can name another scheduler, and its day
- * boundary.
+ * What the instance grades and schedules with: the scheduler its
+ * preferences name, the retention FSRS-6 aims at and the day boundary.
  */
 function schedulingOf(prefs: StudyPreferences): Scheduling {
   return {
-    scheduler: "sm2",
-    desiredRetention: DEFAULT_DESIRED_RETENTION,
+    scheduler: prefs.scheduler,
+    desiredRetention: prefs.desiredRetention,
     dayBoundaryHour: prefs.dayBoundaryHour,
   };
 }
@@ -1921,7 +1920,7 @@ export function createUseCases({
       reviewStateRepository.readReviewStatesSince(deck, undefined),
     ]);
     if (cards.unchanged || reviews.unchanged) return;
-    noteSchedule(instanceUrl, deck, cards, reviews, prefs.dayBoundaryHour, now());
+    noteSchedule(instanceUrl, deck, cards, reviews, prefs, now());
     // The session changed the reviews document: check it now (it is small), not at the next visit.
     const checked = await shapeValidator.validateDocumentSince(deck.reviewsDocumentUrl, undefined);
     if (
@@ -1961,7 +1960,7 @@ export function createUseCases({
     // A read without a version to compare is never "unchanged".
     if (cards.unchanged || reviews.unchanged)
       throw new Error("A read without a version to compare came back unchanged.");
-    noteSchedule(instanceUrl, deck, cards, reviews, prefs.dayBoundaryHour, now);
+    noteSchedule(instanceUrl, deck, cards, reviews, prefs, now);
     const queue = buildStudyQueue({
       cards: cards.value,
       direction: deck.direction,
@@ -1983,7 +1982,7 @@ export function createUseCases({
     deck: Deck,
     cards: { value: Card[]; version: string | null },
     reviews: { value: ReviewState[]; version: string | null },
-    dayBoundaryHour: number,
+    prefs: StudyPreferences,
     now: Date,
   ): void {
     recordSchedule(
@@ -1991,14 +1990,27 @@ export function createUseCases({
       deck,
       cards,
       reviews,
-      scheduleOf({
-        cards: cards.value,
-        direction: deck.direction,
-        reviews: reviews.value,
-        dayBoundaryHour,
-        now,
-      }),
+      scheduleFrom(cards, deck, reviews, prefs, now),
     );
+  }
+
+  /** The deck's schedule from its documents, by the due days of the scheduler in use. */
+  function scheduleFrom(
+    cards: { value: Card[] },
+    deck: Deck,
+    reviews: { value: ReviewState[] },
+    prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
+    now: Date,
+  ): DeckSchedule {
+    const { scheduler, dayBoundaryHour } = prefs;
+    return scheduleOf({
+      cards: cards.value,
+      direction: deck.direction,
+      reviews: effectiveStates(reviews.value, [], scheduler, dayBoundaryHour),
+      scheduler,
+      dayBoundaryHour,
+      now,
+    });
   }
 
   /** Keeps a schedule already worked out in the digest, with the receipts the documents earned. */
@@ -2028,27 +2040,27 @@ export function createUseCases({
    * the digest's while it is of these documents, else computed afresh and
    * kept.
    */
-  async function scheduleNow(instanceUrl: string, deck: Deck, at: Date, dayBoundaryHour: number) {
+  async function scheduleNow(
+    instanceUrl: string,
+    deck: Deck,
+    at: Date,
+    prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
+  ) {
     const [digest, cards, reviews] = await Promise.all([
       digestOf(instanceUrl),
       readNow(deckRepository.readCardsSince(deck, undefined)),
       readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
     ]);
     const versions = { cards: cards.version, reviews: reviews.version };
-    const today = studyDayOf(at, dayBoundaryHour);
+    const today = studyDayOf(at, prefs.dayBoundaryHour);
     let schedule = freshSchedule(digest.schedules[deck.url], versions, {
       direction: deck.direction,
-      dayBoundaryHour,
+      dayBoundaryHour: prefs.dayBoundaryHour,
+      scheduler: prefs.scheduler,
       today,
     });
     if (schedule === null) {
-      schedule = scheduleOf({
-        cards: cards.value,
-        direction: deck.direction,
-        reviews: reviews.value,
-        dayBoundaryHour,
-        now: at,
-      });
+      schedule = scheduleFrom(cards, deck, reviews, prefs, at);
       recordSchedule(instanceUrl, deck, cards, reviews, schedule);
     }
     return { cards, reviews, schedule };
@@ -3434,7 +3446,7 @@ export function createUseCases({
     async deckInsight(instanceUrl, deck, at, prefs) {
       const today = studyDayOf(at, prefs.dayBoundaryHour);
       const [{ cards, reviews, schedule }, answers] = await Promise.all([
-        scheduleNow(instanceUrl, deck, at, prefs.dayBoundaryHour),
+        scheduleNow(instanceUrl, deck, at, prefs),
         loadAnswerLog(instanceUrl),
       ]);
       const { maxReviewsPerDay } = deckPreferences(prefs, deck);
@@ -3482,7 +3494,7 @@ export function createUseCases({
       const progress = await Promise.all(
         decks.map(async (one) => {
           const [{ cards, reviews, schedule }, byDeck] = await Promise.all([
-            scheduleNow(instanceUrl, one, at, prefs.dayBoundaryHour),
+            scheduleNow(instanceUrl, one, at, prefs),
             logged,
           ]);
           const { maxReviewsPerDay, newCardsPerDay } = deckPreferences(prefs, one);

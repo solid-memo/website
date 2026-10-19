@@ -80,6 +80,8 @@ describe("getPreferences", () => {
         developerMode: true,
         invalidDataPolicy: "block-subject" as const,
         theme: "system" as const,
+        scheduler: "sm2" as const,
+        desiredRetention: 0.9,
       },
       formatVersion: 1,
     });
@@ -109,6 +111,8 @@ describe("savePreferences", () => {
     developerMode: true,
     invalidDataPolicy: "block-instance" as const,
     theme: "system" as const,
+    scheduler: "sm2" as const,
+    desiredRetention: 0.9,
   };
 
   it("creates the document on first save", async () => {
@@ -124,7 +128,7 @@ describe("savePreferences", () => {
     expect(getInteger(thing, SM.dayBoundaryHour)).toBe(3);
     expect(getStringNoLocale(thing, SM.answerScale)).toBe("minimal");
     expect(getBoolean(thing, SM.developerMode)).toBe(true);
-    expect(getInteger(thing, SM.formatVersion)).toBe(4);
+    expect(getInteger(thing, SM.formatVersion)).toBe(5);
   });
 
   it("rewrites the subject in place in an existing document, keeping foreign triples", async () => {
@@ -144,7 +148,7 @@ describe("savePreferences", () => {
     const thing = getThing(saved as SolidDataset, `${DOCUMENT}#it`)!;
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(5);
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
-    expect(getInteger(thing, SM.formatVersion)).toBe(4);
+    expect(getInteger(thing, SM.formatVersion)).toBe(5);
   });
 });
 
@@ -171,7 +175,7 @@ describe("upgradePreferences", () => {
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(7);
     expect(getInteger(thing, SM.maxReviewsPerDay)).toBe(DEFAULT_PREFERENCES.maxReviewsPerDay);
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
-    expect(getInteger(thing, SM.formatVersion)).toBe(4);
+    expect(getInteger(thing, SM.formatVersion)).toBe(5);
     expect(checkWrite).toHaveBeenCalledWith(saved, [`${DOCUMENT}#it`], "pod");
   });
 

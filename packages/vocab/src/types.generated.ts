@@ -28,7 +28,7 @@ export const LATEST_VERSION = {
   chapter: 1,
   deck: 6,
   deckGroup: 1,
-  deckSchedule: 1,
+  deckSchedule: 2,
   distractor: 1,
   distribution: 1,
   documentReceipt: 1,
@@ -39,7 +39,7 @@ export const LATEST_VERSION = {
   instance: 2,
   libraryDeck: 6,
   libraryDeckSeries: 3,
-  preferences: 4,
+  preferences: 5,
   reviewState: 2,
   step: 1,
 } as const;
@@ -288,6 +288,21 @@ export interface DeckScheduleV1 {
   readonly reviewsVersion: string;
   readonly direction: "https://solid-memo.com/ns/vocab/v1.ttl#frontToBack" | "https://solid-memo.com/ns/vocab/v1.ttl#backToFront" | "https://solid-memo.com/ns/vocab/v1.ttl#bidirectional";
   readonly dayBoundaryHour: number;
+  readonly studyDay: string;
+  readonly dueOnDay: readonly string[];
+  readonly unreviewed: number;
+  readonly reviewedOnDay: number;
+  readonly introducedOnDay: number;
+}
+
+/** Deck schedule format 2: the deck, the versions of its two documents it was computed from, the direction, day boundary and scheduler it was computed with, the study day it was computed on, the prompts due by day, the new ones, and that day's reviews and introductions. */
+export interface DeckScheduleV2 {
+  readonly deck: string;
+  readonly cardsVersion: string;
+  readonly reviewsVersion: string;
+  readonly direction: "https://solid-memo.com/ns/vocab/v1.ttl#frontToBack" | "https://solid-memo.com/ns/vocab/v1.ttl#backToFront" | "https://solid-memo.com/ns/vocab/v1.ttl#bidirectional";
+  readonly dayBoundaryHour: number;
+  readonly scheduler: "https://solid-memo.com/ns/vocab/v1.ttl#sm2" | "https://solid-memo.com/ns/vocab/v1.ttl#fsrs6";
   readonly studyDay: string;
   readonly dueOnDay: readonly string[];
   readonly unreviewed: number;
@@ -589,6 +604,19 @@ export interface PreferencesV4 {
   readonly theme: "https://solid-memo.com/ns/vocab/v1.ttl#systemTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#lightTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#darkTheme";
 }
 
+/** Preferences format 5: every field required, the scheduler and the desired retention among them. */
+export interface PreferencesV5 {
+  readonly newCardsPerDay: number;
+  readonly maxReviewsPerDay: number;
+  readonly dayBoundaryHour: number;
+  readonly answerScale: "sm2" | "minimal";
+  readonly developerMode: boolean;
+  readonly invalidDataPolicy: "https://solid-memo.com/ns/vocab/v1.ttl#blockInstance" | "https://solid-memo.com/ns/vocab/v1.ttl#blockSubject" | "https://solid-memo.com/ns/vocab/v1.ttl#warnOnly";
+  readonly theme: "https://solid-memo.com/ns/vocab/v1.ttl#systemTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#lightTheme" | "https://solid-memo.com/ns/vocab/v1.ttl#darkTheme";
+  readonly scheduler: "https://solid-memo.com/ns/vocab/v1.ttl#sm2" | "https://solid-memo.com/ns/vocab/v1.ttl#fsrs6";
+  readonly desiredRetention: number;
+}
+
 /** Review-state format 1: the SM-2 fields; the previous* snapshot is admitted. */
 export interface ReviewStateV1 {
   readonly easeFactor: number;
@@ -639,7 +667,7 @@ export type CatalogRecord = { version: 1; data: CatalogV1 };
 export type ChapterRecord = { version: 1; data: ChapterV1 };
 export type DeckRecord = { version: 1; data: DeckV1 } | { version: 2; data: DeckV2 } | { version: 3; data: DeckV3 } | { version: 4; data: DeckV4 } | { version: 5; data: DeckV5 } | { version: 6; data: DeckV6 };
 export type DeckGroupRecord = { version: 1; data: DeckGroupV1 };
-export type DeckScheduleRecord = { version: 1; data: DeckScheduleV1 };
+export type DeckScheduleRecord = { version: 1; data: DeckScheduleV1 } | { version: 2; data: DeckScheduleV2 };
 export type DistractorRecord = { version: 1; data: DistractorV1 };
 export type DistributionRecord = { version: 1; data: DistributionV1 };
 export type DocumentReceiptRecord = { version: 1; data: DocumentReceiptV1 };
@@ -650,7 +678,7 @@ export type FsrsReviewStateRecord = { version: 1; data: FsrsReviewStateV1 };
 export type InstanceRecord = { version: 1; data: InstanceV1 } | { version: 2; data: InstanceV2 };
 export type LibraryDeckRecord = { version: 1; data: LibraryDeckV1 } | { version: 2; data: LibraryDeckV2 } | { version: 3; data: LibraryDeckV3 } | { version: 4; data: LibraryDeckV4 } | { version: 5; data: LibraryDeckV5 } | { version: 6; data: LibraryDeckV6 };
 export type LibraryDeckSeriesRecord = { version: 1; data: LibraryDeckSeriesV1 } | { version: 2; data: LibraryDeckSeriesV2 } | { version: 3; data: LibraryDeckSeriesV3 };
-export type PreferencesRecord = { version: 1; data: PreferencesV1 } | { version: 2; data: PreferencesV2 } | { version: 3; data: PreferencesV3 } | { version: 4; data: PreferencesV4 };
+export type PreferencesRecord = { version: 1; data: PreferencesV1 } | { version: 2; data: PreferencesV2 } | { version: 3; data: PreferencesV3 } | { version: 4; data: PreferencesV4 } | { version: 5; data: PreferencesV5 };
 export type ReviewStateRecord = { version: 1; data: ReviewStateV1 } | { version: 2; data: ReviewStateV2 };
 export type StepRecord = { version: 1; data: StepV1 };
 
@@ -688,7 +716,7 @@ export type LatestRecord = {
   chapter: ChapterV1;
   deck: DeckV6;
   deckGroup: DeckGroupV1;
-  deckSchedule: DeckScheduleV1;
+  deckSchedule: DeckScheduleV2;
   distractor: DistractorV1;
   distribution: DistributionV1;
   documentReceipt: DocumentReceiptV1;
@@ -699,7 +727,7 @@ export type LatestRecord = {
   instance: InstanceV2;
   libraryDeck: LibraryDeckV6;
   libraryDeckSeries: LibraryDeckSeriesV3;
-  preferences: PreferencesV4;
+  preferences: PreferencesV5;
   reviewState: ReviewStateV2;
   step: StepV1;
 };

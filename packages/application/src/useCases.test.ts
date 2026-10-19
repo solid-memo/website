@@ -1821,7 +1821,7 @@ describe("createUseCases", () => {
       });
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
         preferences: DEFAULT_PREFERENCES,
-        formatVersion: 4,
+        formatVersion: 5,
       });
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([
         deck,
@@ -2548,6 +2548,8 @@ describe("createUseCases", () => {
       developerMode: false,
       invalidDataPolicy: "block-subject" as const,
       theme: "system" as const,
+      scheduler: "sm2" as const,
+      desiredRetention: 0.9,
     });
   });
 
@@ -2591,6 +2593,8 @@ describe("createUseCases", () => {
       developerMode: true,
       invalidDataPolicy: "block-instance" as const,
       theme: "system" as const,
+      scheduler: "sm2" as const,
+      desiredRetention: 0.9,
     };
     vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
       preferences: stored,
@@ -2611,6 +2615,8 @@ describe("createUseCases", () => {
       developerMode: true,
       invalidDataPolicy: "block-instance" as const,
       theme: "system" as const,
+      scheduler: "sm2" as const,
+      desiredRetention: 0.9,
     };
     await useCases.savePreferences(instance.url, preferences);
     expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
@@ -2901,6 +2907,8 @@ describe("createUseCases", () => {
           developerMode: false,
           invalidDataPolicy: "block-instance" as const,
           theme: "system" as const,
+          scheduler: "sm2" as const,
+          desiredRetention: 0.9,
         },
         formatVersion: 2,
       });
@@ -3059,6 +3067,26 @@ describe("the instance digest", () => {
       expect.anything(),
       undefined,
     );
+  });
+
+  it("counts from the documents again once the instance schedules with another scheduler, and keeps which", async () => {
+    const digest = await learned();
+    expect(digest.schedules[deck.url]!.schedule.scheduler).toBe("sm2");
+    const switched = setup(digest);
+    vi.mocked(switched.deps.preferencesRepository.getPreferences).mockResolvedValue({
+      preferences: { ...DEFAULT_PREFERENCES, scheduler: "fsrs6" },
+      formatVersion: 5,
+    });
+    await expect(switched.useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
+      dueCount: 1,
+      newCount: 1,
+    });
+    expect(switched.deps.deckRepository.readCardsSince).toHaveBeenLastCalledWith(
+      expect.anything(),
+      undefined,
+    );
+    await vi.waitFor(() => expect(switched.digestRepository.updateDigest).toHaveBeenCalled());
+    expect(switched.stored()!.schedules[deck.url]!.schedule.scheduler).toBe("fsrs6");
   });
 
   it("notes no format receipt for a document holding something outdated, and nothing of a document without a version", async () => {
@@ -3370,6 +3398,7 @@ describe("the instance digest", () => {
     const schedule = {
       direction: deck.direction,
       dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
+      scheduler: "sm2" as const,
       dueByDay: { "2026-09-25": 2, "2026-09-30": 7 },
       unreviewed: 0,
       studyDay: "2026-09-28",
@@ -3396,6 +3425,7 @@ describe("the instance digest", () => {
     const schedule = {
       direction: deck.direction,
       dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
+      scheduler: "sm2" as const,
       dueByDay: { "2026-09-30": 7 },
       unreviewed: 3,
       studyDay: "2026-09-27",
@@ -4137,6 +4167,7 @@ describe("the Studio's answer history and schedule insight", () => {
     const schedule = {
       direction: "front-to-back" as const,
       dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
+      scheduler: "sm2" as const,
       dueByDay: { "2026-10-11": 7 },
       unreviewed: 0,
       studyDay: "2026-10-09",
@@ -6859,14 +6890,16 @@ describe("openTrial", () => {
         answerScale: "minimal",
         dayBoundaryHour: 2,
         newCardsPerDay: 1,
+        scheduler: "fsrs6",
+        desiredRetention: 0.85,
       },
-      formatVersion: 4,
+      formatVersion: 5,
     });
     const trialSandbox = vi.fn(() => made);
     return { deps, made, trialSandbox, useCases: createUseCases({ ...deps, trialSandbox }) };
   }
 
-  it("starts a course draft in a sandbox of its own, as a learner with the user's answer scale and study day", async () => {
+  it("starts a course draft in a sandbox of its own, as a learner with the user's answer scale, study day and scheduler", async () => {
     const { made, trialSandbox, useCases } = withSandbox();
     const draft = playableCourseDraft();
     const opened = await useCases.openTrial(draft, instance.url);
@@ -6885,6 +6918,8 @@ describe("openTrial", () => {
       ...DEFAULT_PREFERENCES,
       answerScale: "minimal",
       dayBoundaryHour: 2,
+      scheduler: "fsrs6",
+      desiredRetention: 0.85,
     });
     expect(made.trialUseCases.startCourse).toHaveBeenCalledWith(
       TRIAL_INSTANCE_URL,

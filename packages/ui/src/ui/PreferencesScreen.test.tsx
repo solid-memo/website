@@ -102,6 +102,8 @@ describe("PreferencesScreen", () => {
         developerMode: true,
         invalidDataPolicy: "block-instance" as const,
         theme: "system",
+        scheduler: "sm2",
+        desiredRetention: 0.9,
       },
     });
     expect(screen.getByLabelText("New cards per day")).toHaveValue(10);
@@ -110,6 +112,17 @@ describe("PreferencesScreen", () => {
     expect(screen.getByLabelText("Developer mode")).toBeChecked();
     expect(screen.getByLabelText(/Again · Hard · Good · Easy/)).toBeChecked();
     expect(screen.getByLabelText(/Block the instance/)).toBeChecked();
+  });
+
+  it("keeps the scheduler and the desired retention, which it does not show", () => {
+    const preferences = {
+      ...DEFAULT_PREFERENCES,
+      scheduler: "fsrs6" as const,
+      desiredRetention: 0.85,
+    };
+    const { props, container } = renderScreen({ preferences });
+    fireEvent.submit(container.querySelector("form")!);
+    expect(props.onSave).toHaveBeenCalledWith(preferences);
   });
 
   it("keeps developer mode off by default", () => {
@@ -130,6 +143,8 @@ describe("PreferencesScreen", () => {
       developerMode: true,
       invalidDataPolicy: "block-subject" as const,
       theme: "system",
+      scheduler: "sm2",
+      desiredRetention: 0.9,
     });
   });
 
@@ -194,6 +209,8 @@ describe("PreferencesScreen", () => {
       developerMode: false,
       invalidDataPolicy: "block-subject" as const,
       theme: "system",
+      scheduler: "sm2",
+      desiredRetention: 0.9,
     });
   });
 

@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import type { AnswerScale } from "./answerScale";
+import { DEFAULT_DESIRED_RETENTION, type Scheduler } from "./fsrs";
 import { DEFAULT_INVALID_DATA_POLICY, type InvalidDataPolicy } from "./invalidDataPolicy";
 import { DEFAULT_THEME_CHOICE, type ThemeChoice } from "./theme";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 
 /**
  * Format version written on every preferences document this app saves.
- * Format 4 adds the theme; format 3 the invalid data policy; format 2 states every field;
+ * Format 5 adds the scheduler and the desired retention; format 4 the theme; format 3 the invalid data policy; format 2 states every field;
  * format 1 is whatever the unversioned era wrote, each missing field
  * meaning its default.
  */
@@ -39,6 +40,13 @@ export interface StudyPreferences {
    * before an instance has preferences (and before login).
    */
   theme: ThemeChoice;
+  /**
+   * The scheduler whose review states set the due days. SM-2's states
+   * are kept up to date whichever it is, so switching back loses nothing.
+   */
+  scheduler: Scheduler;
+  /** The chance of recall FSRS-6 aims at when a card falls due, as a share (0.9 is 90%). */
+  desiredRetention: number;
 }
 
 /** Preferences as a pod holds them, with the format they are stored in. */
@@ -59,4 +67,6 @@ export const DEFAULT_PREFERENCES: StudyPreferences = {
   developerMode: false,
   invalidDataPolicy: DEFAULT_INVALID_DATA_POLICY,
   theme: DEFAULT_THEME_CHOICE,
+  scheduler: "sm2",
+  desiredRetention: DEFAULT_DESIRED_RETENTION,
 };

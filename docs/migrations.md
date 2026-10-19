@@ -28,6 +28,7 @@ app writes today; `DECK_FORMAT_VERSION` and friends are aliases of it.
 | Review state | the SM-2 fields; a snapshot and per-direction subjects were added without a bump, so format 1 admits them | the same fields; the snapshot is all five triples or none; the subject naming (`#<cardId>`, `#<cardId>@back-to-front`) is part of the contract | Stamping begins: a format-1 reader meeting a format-2 state would silently ignore the snapshot and the other direction, which is what a version is meant to flag. |
 | FSRS review state | an FSRS-6 state (vocabulary 1.21): stability, difficulty, due day, first and last review, the card and direction it is of, and a snapshot all four or none; `sm:scheduler sm:fsrs6` fixed | | A new shape of `sm:ReviewState`, not a review-state version: see below. |
 | Preferences | whatever the unversioned era wrote: every field optional, a missing one meaning its default | every field stated | The document is rewritten on every save, so stamping costs nothing; format 2 is the complete record. |
+| Deck schedule | the digest's counts of a deck's due days, with the direction and day boundary they hold for | the scheduler whose due days they count (`sm:scheduledWith`, vocabulary 1.21), and the version stated | Switching scheduler writes no review, so the reviews document's version alone cannot tell an SM-2 schedule from an FSRS-6 one: see below. |
 
 Deck format 4 (and library deck series format 2, its summary in the
 library index) states a deck's title and description as language-tagged
@@ -284,14 +285,45 @@ format did not move:
   orphaned, when it removed the card; a newer app tells both from the
   SM-2 state of the same prompt.
 - **The other terms of 1.21**, `sm:studyScheduler`,
-  `sm:desiredRetention` and `sm:scheduledWith`, are declared for
-  preferences format 5 and deck schedule format 2, the next versions of
-  those shapes.
+  `sm:desiredRetention` and `sm:scheduledWith`, are in preferences
+  format 5 and deck schedule format 2 (below).
 - **One full re-check.** A new shape file joined the rules, so the
   rules' hash changed: every instance is checked in full once on its
   next opening, and its documents get new receipts. No pod holds an
   FSRS-6 state before the app writes one, so the check finds nothing
   new.
+
+Preferences format 5 and deck schedule format 2 (vocabulary 1.21) say
+which scheduler sets the due days:
+
+- **Preferences format 5** states `sm:studyScheduler`, `sm:sm2` or
+  `sm:fsrs6`, and `sm:desiredRetention`, the chance of recall FSRS-6
+  aims at, a share from 0.7 to 0.97. Both are stated whichever
+  scheduler is in use, so a switch back keeps the retention chosen.
+  The step from format 4 (`preferences/4-to-5`) fills in SM-2, the only
+  scheduler there was, and 0.9, FSRS-6's default. The format update
+  offers it, as it offered the theme.
+- **Deck schedule format 2** states `sm:scheduledWith`, the scheduler
+  whose due days the digest's counts are. A schedule holds only while
+  it names the scheduler in use (`freshSchedule`, `studyCountsOf`), as
+  it holds only for its day boundary: switching back from FSRS-6 to
+  SM-2 writes no review, so without it the deck list would count the
+  FSRS-6 days. The step from format 1 (`deckSchedule/1-to-2`) names
+  SM-2. The digest is derived data, so the format update never writes
+  it; a schedule is restamped when it is next computed.
+- **Why the versions moved.** Preferences and deck schedule shapes
+  state every field, and a published shape is never edited, so the
+  terms need new versions. Both are written from now on: this is a
+  breaking change. An older tab reads format-5 preferences with format
+  4's shape, without the scheduler, and refuses to save over them
+  (`writtenByNewerApp`), so it cannot save the preferences or the theme
+  until it is reloaded. It reads a format-2 schedule as format 1, so it
+  may count an FSRS-6 schedule's days as SM-2's, and it refuses to
+  write over one: its digest writes that hold a deck's schedule fail,
+  and it learns that deck's documents again on its next visit.
+- **One full re-check.** New shape files joined the rules, so the rules'
+  hash changed: every instance is checked in full once on its next
+  opening.
 
 Rules that hold across versions:
 
@@ -347,6 +379,8 @@ flowchart LR
     p1["PreferencesV1"] -->|preferences/1-to-2<br/>defaults filled| p2["PreferencesV2"]
     p2 -->|preferences/2-to-3<br/>the default invalid data policy:<br/>set invalid data aside| p3["PreferencesV3"]
     p3 -->|preferences/3-to-4<br/>theme as the browser prefers| p4["PreferencesV4"]
+    p4 -->|preferences/4-to-5<br/>SM-2, desired retention 0.9| p5["PreferencesV5"]
+    ds1["DeckScheduleV1"] -->|deckSchedule/1-to-2<br/>SM-2's due days| ds2["DeckScheduleV2"]
 ```
 
 One module per step (`<class>/<n>-to-<n+1>.ts`), each a pure, total

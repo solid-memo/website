@@ -10,8 +10,12 @@ import { MIGRATIONS, migrate, stepFor } from "./index";
 const CONTEXT = { subject: "https://pod.example/x.ttl#it" };
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
-/** The concept-valued fields of migrated preferences: the policy that blocks, the browser's theme. */
-const MIGRATED_CONCEPTS = { invalidDataPolicy: `${SM}blockSubject`, theme: `${SM}systemTheme` };
+/** The concept-valued fields of migrated preferences: the policy that blocks, the browser's theme, SM-2. */
+const MIGRATED_CONCEPTS = {
+  invalidDataPolicy: `${SM}blockSubject`,
+  theme: `${SM}systemTheme`,
+  scheduler: `${SM}sm2`,
+};
 
 const SHAPES = Object.keys(LATEST_VERSION) as ShapeName[];
 
@@ -326,6 +330,42 @@ describe("migrate", () => {
       newCardsPerDay: 20,
       answerScale: "minimal",
       developerMode: true,
+    });
+  });
+
+  it("schedules format-4 preferences with SM-2, keeping FSRS-6's default retention for a switch", () => {
+    const v4 = {
+      newCardsPerDay: 5,
+      maxReviewsPerDay: 50,
+      dayBoundaryHour: 4,
+      answerScale: "minimal" as const,
+      developerMode: false,
+      invalidDataPolicy: `${SM}warnOnly` as const,
+      theme: `${SM}darkTheme` as const,
+    };
+    expect(migrate("preferences", { version: 4, data: v4 }, CONTEXT)).toEqual({
+      ...v4,
+      scheduler: `${SM}sm2`,
+      desiredRetention: 0.9,
+    });
+  });
+
+  it("counts a format-1 deck schedule as SM-2's, the only scheduler there was", () => {
+    const v1 = {
+      deck: "https://pod.example/catalog.ttl#d",
+      cardsVersion: '"c"',
+      reviewsVersion: '"r"',
+      direction: `${SM}frontToBack` as const,
+      dayBoundaryHour: 4,
+      studyDay: "2026-10-09",
+      dueOnDay: ["2026-10-10 2"],
+      unreviewed: 3,
+      reviewedOnDay: 0,
+      introducedOnDay: 0,
+    };
+    expect(migrate("deckSchedule", { version: 1, data: v1 }, CONTEXT)).toEqual({
+      ...v1,
+      scheduler: `${SM}sm2`,
     });
   });
 });

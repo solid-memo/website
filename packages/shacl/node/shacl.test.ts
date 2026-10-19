@@ -311,6 +311,22 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
     path: `${SM}theme`,
     message: "Preferences state the theme",
   },
+  "preferences/v5/invalid/missing-scheduler.ttl": {
+    path: `${SM}studyScheduler`,
+    message: "Preferences state the scheduler that sets the due days",
+  },
+  "preferences/v5/invalid/unknown-scheduler.ttl": {
+    path: `${SM}studyScheduler`,
+    message: "Preferences state the scheduler that sets the due days",
+  },
+  "preferences/v5/invalid/missing-desired-retention.ttl": {
+    path: `${SM}desiredRetention`,
+    message: "The desired retention is one decimal share from 0.7 to 0.97.",
+  },
+  "preferences/v5/invalid/desired-retention-too-high.ttl": {
+    path: `${SM}desiredRetention`,
+    message: "The desired retention is one decimal share from 0.7 to 0.97.",
+  },
   "deck/v3/invalid/pod-with-old-direction.ttl": {
     path: `${SM}direction`,
     message: "Format 3 states the study direction with solid-memo:studyDirection",

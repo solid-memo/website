@@ -225,6 +225,7 @@ describe("the instance's digest in the pod", () => {
     schedule: {
       direction: "front-to-back",
       dayBoundaryHour: 4,
+      scheduler: "sm2" as const,
       dueByDay: { "2026-10-01": 2 },
       unreviewed: 3,
       studyDay: "2026-10-01",
@@ -343,6 +344,30 @@ describe("the instance's digest in the pod", () => {
     await expect(digests.updateDigest(INSTANCE, () => learned())).rejects.toThrow();
     await digests.updateDigest(INSTANCE, () => learned());
     expect(await digests.readDigest(INSTANCE)).toEqual(learned());
+  });
+
+  it("reads a schedule of format 1 as SM-2's, and writes it over in format 2", async () => {
+    const pod = fakePod();
+    const subject = `${DIGEST}#schedule-catalog.ttl-deck-1`;
+    await pod.put(
+      DIGEST,
+      `${PREFIXES}<#schedule-catalog.ttl-deck-1> a sm:DeckSchedule ; sm:formatVersion 1 ;
+        sm:scheduleOf <catalog.ttl#deck-1> ; sm:cardsVersion "\\"v1\\"" ; sm:reviewsVersion "${ABSENT_VERSION}" ;
+        sm:scheduledDirection sm:frontToBack ; sm:scheduledDayBoundaryHour 4 ; sm:scheduledOn "2026-10-01" ;
+        sm:dueOnDay "2026-10-01 2" ; sm:unreviewedCount 3 ; sm:reviewedOnDayCount 1 ; sm:introducedOnDayCount 0 .`,
+    );
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    const read = await digests.readDigest(INSTANCE);
+    expect(read!.schedules[deck.url]).toEqual(schedule);
+    await digests.updateDigest(INSTANCE, (stored) =>
+      withSchedule(stored!, { ...schedule, schedule: { ...schedule.schedule, unreviewed: 2 } }),
+    );
+    const triples = pod.triples(DIGEST)!.filter((t) => t.startsWith(`<${subject}>`));
+    expect(triples).toContain(
+      `<${subject}> <${SM}formatVersion> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+    );
+    expect(triples).toContain(`<${subject}> <${SM}scheduledWith> <${SM}sm2> .`);
+    expect(triples.filter((t) => t.includes("formatVersion"))).toHaveLength(1);
   });
 
   it("leaves out what does not fit its shape", async () => {
