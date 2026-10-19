@@ -86,7 +86,8 @@ export class SomethingWentWrong extends Screen {
   async goToStart(): Promise<void> {
     await this.intent("Go to the start", async () => {
       await this.page.getByRole("button", { name: this.t("crash.start"), exact: true }).click();
-      await expect(this.page).toHaveURL(/#\/$/);
+      // Not the URL: the start, #/, is replaced at once by where it leads.
+      await expect(this.heading).toBeHidden();
     });
   }
 }
