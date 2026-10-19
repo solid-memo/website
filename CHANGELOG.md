@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [4.1.0](https://github.com/solid-memo/website/compare/v4.0.0...v4.1.0) (2026-10-19)
+
+### Features
+
+* **application:** read an instance as a graph ([90ec00c](https://github.com/solid-memo/website/commit/90ec00c48900dd21a712d8a7bb8bd3eb525c2908)), closes [#198](https://github.com/solid-memo/website/issues/198)
+* **studio:** draw the instance's data as a graph ([ca238d3](https://github.com/solid-memo/website/commit/ca238d3388b556e56ecb40051e6c845355f76f9e)), closes [#198](https://github.com/solid-memo/website/issues/198)
+
 ## [4.0.0](https://github.com/solid-memo/website/compare/v3.13.0...v4.0.0) (2026-10-19)
 
 ### ⚠ BREAKING CHANGES
