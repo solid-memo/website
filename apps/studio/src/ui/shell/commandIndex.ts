@@ -108,8 +108,8 @@ export function buildCommands(
       (section): Command => ({
         ...at("sections", sectionHome(section, sources.instanceUrl!)),
         label: t(`studio.shell.section.${section}`),
-        // Name and catalog has no chord.
-        ...(section === "instance" ? {} : { keys: keysOf(`go.${section}`) }),
+        // Name and catalog, and the graph, have no chord.
+        ...(section === "instance" || section === "graph" ? {} : { keys: keysOf(`go.${section}`) }),
       }),
     ),
     {

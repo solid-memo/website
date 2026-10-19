@@ -65,6 +65,8 @@
 #/studio/draft?draft=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fdrafts%2Fsolid%2Fv1%2Frelease.ttl&field=outline
 #/studio/draft?draft=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fdrafts%2Fsolid%2Fv1%2Frelease.ttl&field=title
 #/studio/drafts?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F
+#/studio/graph?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F
+#/studio/graph?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&node=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1
 #/studio/groups?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F
 #/studio/health?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F
 #/studio/health?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fmain%2Fcatalog.ttl%23deck-1

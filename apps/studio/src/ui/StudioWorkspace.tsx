@@ -28,6 +28,7 @@ import { DeckInsightContainer } from "./DeckInsightContainer";
 import { DeckPeekContainer } from "./DeckPeekContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { DraftsContainer } from "./DraftsContainer";
+import { GraphContainer, GraphNodeContainer } from "./graph/GraphContainer";
 import { GroupsContainer } from "./GroupsContainer";
 import { HealthContainer } from "./HealthContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
@@ -403,6 +404,18 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             deckUrl={libraryDeck}
           />
         );
+      case "node": {
+        const graph = route as GraphRoute;
+        return (
+          <GraphNodeContainer
+            instance={activeInstance!}
+            webId={session.webId}
+            nodeId={graph.node ?? null}
+            // Like Home's deck beside the table, the node selected is no Back stop.
+            onSelect={(node) => replace({ ...graph, node })}
+          />
+        );
+      }
     }
   };
 
@@ -628,6 +641,18 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             onStarted={(created) => navigate({ screen: "draft", draftUrl: created.draft.url })}
           />
         );
+      case "graph":
+        return (
+          <GraphContainer
+            key={route.instanceUrl}
+            useCases={useCases}
+            instance={activeInstance!}
+            webId={session.webId}
+            selected={route.node ?? null}
+            // Nor here; letting go of it takes it out of the route.
+            onSelect={(node) => replace({ ...route, node: node ?? undefined })}
+          />
+        );
       case "groups":
         return (
           <GroupsContainer
@@ -840,9 +865,11 @@ const ASIDE_LABELS = {
   outline: "studio.draft.outline",
   peek: "studio.peek.label",
   plan: "studio.library.plan",
+  node: "studio.graph.node.label",
 } as const;
 
 type HomeRoute = Extract<StudioRoute, { screen: "home" }>;
+type GraphRoute = Extract<StudioRoute, { screen: "graph" }>;
 
 /** A card's route but the field it opens at, which another tab or card does not. */
 function withoutField({ field: _field, ...route }: CardRoute): CardRoute {

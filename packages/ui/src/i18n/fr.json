@@ -1940,6 +1940,7 @@
         "groups": "Groupes",
         "drafts": "Brouillons",
         "releases": "Publications",
+        "graph": "Graphe",
         "health": "Santé",
         "library": "Copies de la bibliothèque",
         "transfer": "Importation et exportation",
@@ -3480,6 +3481,111 @@
       "startNextOf": "Commencer la version suivante de {release}",
       "starting": "Démarrage de la version suivante…",
       "drafts": "Brouillons de publications"
+    },
+    "graph": {
+      "crumb": "Graphe",
+      "loading": "Lecture de l’instance…",
+      "reading": {
+        "one": "Lecture de l’instance : {read} sur {count} document…",
+        "many": "Lecture de l’instance : {read} sur {count} de documents…",
+        "other": "Lecture de l’instance : {read} sur {count} documents…"
+      },
+      "heading": "Graphe de {instance}",
+      "intro": "Tout ce que Solid Memo conserve dans cette instance, sous forme de graphe : chaque dossier, document et ressource est un nœud, et chaque lien entre eux une arête. Un lien vers autre chose aboutit à une feuille, qui n’est jamais lue.",
+      "search": "Trouver un nœud",
+      "group": {
+        "vocabulary": "Termes de vocabulaire",
+        "cards": "Cartes",
+        "distractors": "Mauvaises réponses",
+        "reviewStates": "États de révision",
+        "answers": "Réponses",
+        "leaves": "Feuilles"
+      },
+      "neighborsOnly": "Voisins seulement",
+      "neighborsHint": "Sélectionnez un nœud pour ne voir que lui et ses voisins.",
+      "table": "Afficher sous forme de tableau",
+      "found": {
+        "one": "{count} nœud trouvé",
+        "many": "{count} de nœuds trouvés",
+        "other": "{count} nœuds trouvés"
+      },
+      "moreFound": {
+        "one": "et {count} autre : saisissez davantage pour affiner",
+        "many": "et {count} autres : saisissez davantage pour affiner",
+        "other": "et {count} autres : saisissez davantage pour affiner"
+      },
+      "noMatch": "Aucun nœud affiché ne correspond à « {text} ».",
+      "counts": "{nodes} et {edges} affichés",
+      "nodesShown": {
+        "one": "{shown} sur {count} nœud",
+        "many": "{shown} sur {count} de nœuds",
+        "other": "{shown} sur {count} nœuds"
+      },
+      "edgesShown": {
+        "one": "{shown} sur {count} arête",
+        "many": "{shown} sur {count} d’arêtes",
+        "other": "{shown} sur {count} arêtes"
+      },
+      "vocabularyUndrawn": {
+        "one": "{count} arête vers un terme de vocabulaire n’est dessinée que pour le nœud sélectionné ou pointé.",
+        "many": "{count} d’arêtes vers des termes de vocabulaire ne sont dessinées que pour le nœud sélectionné ou pointé.",
+        "other": "{count} arêtes vers des termes de vocabulaire ne sont dessinées que pour le nœud sélectionné ou pointé."
+      },
+      "tooLarge": "Cela dessinerait {nodes} nœuds et {edges} arêtes, plus que la page ne dessine de façon fluide. Masquez-en avec les filtres, affichez-le sous forme de tableau ou dessinez-le quand même.",
+      "drawAnyway": "Dessiner quand même",
+      "placing": "Placement des nœuds",
+      "prompt": "Pointez un nœud, ou utilisez les flèches, pour voir ce qu’il est ; Entrée ou un clic l’ouvre, et un clic sur le fond le désélectionne. +, − et 0 agrandissent, réduisent et montrent tout le graphe, et le faire glisser le déplace.",
+      "zoomIn": "Agrandir",
+      "zoomOut": "Réduire",
+      "zoomFit": "Tout le graphe",
+      "describe": "{label}, {kind}",
+      "kind": {
+        "container": "dossier",
+        "document": "document",
+        "absent": "document absent",
+        "unreadable": "document qui n’a pas pu être lu",
+        "resource": "ressource",
+        "missing": "trouvé dans aucun document",
+        "podLeaf": "dans votre Pod, non lu",
+        "outsideLeaf": "hors de votre Pod, non lu",
+        "vocabularyLeaf": "terme de vocabulaire"
+      },
+      "defines": "définit",
+      "nodes": {
+        "caption": "Nœuds du graphe",
+        "label": "Nœud",
+        "kind": "Nature",
+        "document": "Défini dans",
+        "types": "Classes",
+        "pages": "Pages de nœuds"
+      },
+      "edges": {
+        "caption": "Arêtes du graphe",
+        "from": "De",
+        "predicate": "Lien",
+        "to": "Vers",
+        "pages": "Pages d’arêtes"
+      },
+      "node": {
+        "label": "Nœud",
+        "none": "Sélectionnez un nœud du graphe pour voir ce qu’il dit.",
+        "outside": "Non récupéré : hors de votre Pod.",
+        "inPod": "Non récupéré : dans votre Pod, mais pas des données de Solid Memo.",
+        "vocabulary": "Non récupéré : un terme de vocabulaire.",
+        "missing": "Nommé ici, mais trouvé dans aucun document.",
+        "absent": "Ce document n’existe pas.",
+        "unreadable": "Ce document n’a pas pu être lu.",
+        "values": "Valeurs",
+        "statedIn": "indiqué dans {document}",
+        "outgoing": "Liens depuis ce nœud",
+        "incoming": "Liens vers ce nœud",
+        "noLinks": "Aucun.",
+        "showAll": {
+          "one": "Afficher le {count} lien",
+          "many": "Afficher les {count} de liens",
+          "other": "Afficher les {count} liens"
+        }
+      }
     },
     "inline": {
       "field": "{column} de {row}",

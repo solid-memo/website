@@ -21,7 +21,9 @@ import { cellOf } from "./tables.ts";
  * authors and license), the instance's name and catalog, a deck
  * exported to a file and imported from it, the instance's drafts of
  * releases (made, the next version of a release among them, listed in
- * the sidebar and deleted), the releases it published, and its way back
+ * the sidebar and deleted), the releases it published, its graph (a
+ * node reached by keyboard, a leaf found and its neighbors as a table),
+ * and its way back
  * to Solid Memo. Its sections are reached from its sidebar, a deck's or
  * a draft's screens from their tabs.
  */
@@ -378,6 +380,127 @@ export class Studio extends Screen {
         }),
       ).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.releases.crumb");
+    });
+  }
+
+  /** The graph's drawing, named by its heading ("Graph of {instance}"). */
+  private graph(instance: string): Locator {
+    return this.page.getByRole("img", {
+      name: this.t("studio.graph.heading", { instance }),
+      exact: true,
+    });
+  }
+
+  /** The aside beside the graph: the node selected. */
+  private get graphNode(): Locator {
+    return this.page.getByRole("complementary", {
+      name: this.t("studio.graph.node.label"),
+      exact: true,
+    });
+  }
+
+  /** Opens the instance's graph from the sidebar, and waits for its nodes to be placed and drawn. */
+  async openGraph(instance: string): Promise<void> {
+    await this.intent("Open the instance's graph", async () => {
+      await this.app.chrome.studioSection("graph");
+      await expect(
+        this.page.getByRole("heading", {
+          level: 2,
+          name: this.t("studio.graph.heading", { instance }),
+        }),
+      ).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("studio.graph.crumb");
+      await expect(this.graph(instance)).toBeVisible();
+    });
+  }
+
+  /**
+   * Goes to a node of the drawing with an arrow key, its name and kind
+   * then said under it, and opens it with Enter: the aside shows it, by
+   * that name, and the URL names it.
+   */
+  async openGraphNodeByKeyboard(instance: string): Promise<void> {
+    await this.intent("Reach a node of the graph by keyboard and open it", async () => {
+      const graph = this.graph(instance);
+      await graph.focus();
+      await this.page.keyboard.press("ArrowRight");
+      const line = this.page.locator(`[id="${await graph.getAttribute("aria-describedby")}"]`);
+      await expect(line).not.toHaveText(this.t("studio.graph.prompt"));
+      const said = (await line.textContent())!;
+      const name = said.slice(0, said.lastIndexOf(", "));
+      await this.page.keyboard.press("Enter");
+      await expect(this.page).toHaveURL(/[?&]node=/);
+      await expect(
+        this.graphNode.getByRole("heading", { level: 3, name, exact: true }),
+      ).toBeVisible();
+    });
+  }
+
+  /**
+   * Finds a node by its address with the graph's search and selects it:
+   * the aside names it (`name`) and says why it was not read (`note`, a
+   * message's key), for a leaf.
+   */
+  async findGraphNode(address: string, name: string, note: string): Promise<void> {
+    await this.intent(`Find ${address} in the graph`, async () => {
+      await this.page.getByRole("searchbox", { name: this.t("studio.graph.search") }).fill(address);
+      await this.page
+        .getByRole("main")
+        .getByRole("listitem")
+        .filter({ hasText: address })
+        .getByRole("button", { name, exact: true })
+        .first()
+        .click();
+      await expect(
+        this.graphNode.getByRole("heading", { level: 3, name, exact: true }),
+      ).toBeVisible();
+      await expect(this.graphNode.getByText(this.t(note), { exact: true })).toBeVisible();
+    });
+  }
+
+  /**
+   * Clicks the drawing's background, in a corner where no node is: the
+   * node selected is let go of, the URL names none, and the aside says
+   * how to select one.
+   */
+  async letGoOfGraphNode(instance: string): Promise<void> {
+    await this.intent("Let go of the node selected with a click on the background", async () => {
+      await this.graph(instance).click({ position: { x: 4, y: 4 } });
+      await expect(this.page).not.toHaveURL(/[?&]node=/);
+      await expect(
+        this.graphNode.getByText(this.t("studio.graph.node.none"), { exact: true }),
+      ).toBeVisible();
+    });
+  }
+
+  /**
+   * Shows only the node selected and its neighbors, as a table: each of
+   * `nodes`, by its name, is listed as of its kind (a message's key).
+   * Then the graph is drawn whole again.
+   */
+  async expectNeighborsInTable(
+    instance: string,
+    nodes: Readonly<Record<string, string>>,
+  ): Promise<void> {
+    await this.intent("See the node selected and its neighbors as a table", async () => {
+      const neighborsOnly = this.page.getByRole("checkbox", {
+        name: this.t("studio.graph.neighborsOnly"),
+      });
+      const asTable = this.page.getByRole("checkbox", { name: this.t("studio.graph.table") });
+      await neighborsOnly.check();
+      await asTable.check();
+      const table = this.page.getByRole("table", { name: this.t("studio.graph.nodes.caption") });
+      for (const [name, kind] of Object.entries(nodes)) {
+        const row = table.getByRole("row").filter({
+          has: this.page.getByRole("rowheader").getByRole("button", { name, exact: true }),
+        });
+        await expect(await cellOf(table, row, this.t("studio.graph.nodes.kind"))).toHaveText(
+          this.t(kind),
+        );
+      }
+      await asTable.uncheck();
+      await neighborsOnly.uncheck();
+      await expect(this.graph(instance)).toBeVisible();
     });
   }
 

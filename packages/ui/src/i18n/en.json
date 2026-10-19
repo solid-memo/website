@@ -1835,6 +1835,7 @@
         "groups": "Groups",
         "drafts": "Drafts",
         "releases": "Releases",
+        "graph": "Graph",
         "health": "Health",
         "library": "Library copies",
         "transfer": "Import and export",
@@ -3302,6 +3303,104 @@
       "startNextOf": "Start the next version of {release}",
       "starting": "Starting the next version…",
       "drafts": "Drafts of releases"
+    },
+    "graph": {
+      "crumb": "Graph",
+      "loading": "Reading the instance…",
+      "reading": {
+        "one": "Reading the instance: {read} of {count} document…",
+        "other": "Reading the instance: {read} of {count} documents…"
+      },
+      "heading": "Graph of {instance}",
+      "intro": "Everything Solid Memo keeps in this instance, as a graph: each folder, document and resource is a node, and each link between them an edge. A link to anything else ends in a leaf, which is never read.",
+      "search": "Find a node",
+      "group": {
+        "vocabulary": "Vocabulary terms",
+        "cards": "Cards",
+        "distractors": "Wrong options",
+        "reviewStates": "Review states",
+        "answers": "Answers",
+        "leaves": "Leaves"
+      },
+      "neighborsOnly": "Neighbors only",
+      "neighborsHint": "Select a node to see only it and its neighbors.",
+      "table": "Show as a table",
+      "found": {
+        "one": "{count} node found",
+        "other": "{count} nodes found"
+      },
+      "moreFound": {
+        "one": "and {count} more: type more to narrow them down",
+        "other": "and {count} more: type more to narrow them down"
+      },
+      "noMatch": "No node shown matches “{text}”.",
+      "counts": "{nodes} and {edges} shown",
+      "nodesShown": {
+        "one": "{shown} of {count} node",
+        "other": "{shown} of {count} nodes"
+      },
+      "edgesShown": {
+        "one": "{shown} of {count} edge",
+        "other": "{shown} of {count} edges"
+      },
+      "vocabularyUndrawn": {
+        "one": "{count} edge to a vocabulary term is drawn only for the node selected or pointed at.",
+        "other": "{count} edges to vocabulary terms are drawn only for the node selected or pointed at."
+      },
+      "tooLarge": "This would draw {nodes} nodes and {edges} edges, more than the page draws smoothly. Hide some with the filters, show it as a table, or draw it anyway.",
+      "drawAnyway": "Draw anyway",
+      "placing": "Placing the nodes",
+      "prompt": "Point at a node, or use the arrow keys, to see what it is; Enter or a click opens it, and a click on the background lets go of it. +, − and 0 zoom in, out and to the whole graph, and dragging moves it.",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "zoomFit": "Whole graph",
+      "describe": "{label}, {kind}",
+      "kind": {
+        "container": "folder",
+        "document": "document",
+        "absent": "document not there",
+        "unreadable": "document that could not be read",
+        "resource": "resource",
+        "missing": "found in no document",
+        "podLeaf": "in your Pod, not read",
+        "outsideLeaf": "outside your Pod, not read",
+        "vocabularyLeaf": "vocabulary term"
+      },
+      "defines": "defines",
+      "nodes": {
+        "caption": "Nodes of the graph",
+        "label": "Node",
+        "kind": "Kind",
+        "document": "Defined in",
+        "types": "Types",
+        "pages": "Pages of nodes"
+      },
+      "edges": {
+        "caption": "Edges of the graph",
+        "from": "From",
+        "predicate": "Link",
+        "to": "To",
+        "pages": "Pages of edges"
+      },
+      "node": {
+        "label": "Node",
+        "none": "Select a node in the graph to see what it says.",
+        "outside": "Not fetched: outside your Pod.",
+        "inPod": "Not fetched: in your Pod, but not Solid Memo data.",
+        "vocabulary": "Not fetched: a vocabulary term.",
+        "missing": "Named here, but found in no document.",
+        "absent": "This document is not there.",
+        "unreadable": "This document could not be read.",
+        "values": "Values",
+        "statedIn": "stated in {document}",
+        "outgoing": "Links from it",
+        "incoming": "Links to it",
+        "noLinks": "None.",
+        "showAll": {
+          "one": "Show the {count} link",
+          "other": "Show all {count} links"
+        }
+      }
     },
     "inline": {
       "field": "{column} of {row}",

@@ -12,10 +12,12 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import { AppError } from "@solid-memo/domain/appError";
 import { AppName } from "@solid-memo/ui/documentTitle";
 import { shownPosition } from "@solid-memo/ui/routerCore";
+import { forget } from "@solid-memo/ui/remembered";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { parseStudioHash, studioRouteToHash } from "./router";
 import { StudioWorkspace } from "./StudioWorkspace";
 import { choose } from "../test/choose";
+import { DECK as GRAPH_DECK, smallGraph } from "../test/graph";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { problem } from "@solid-memo/domain/release/problems";
 import {
@@ -97,6 +99,59 @@ describe("StudioWorkspace", () => {
     // The site's header (Home's own heading row is one too, in the test DOM's eyes).
     expect(screen.getByText("The masthead").closest("header")).toHaveClass("site-header");
     expect(within(screen.getByRole("main")).getByText("A notice")).toBeInTheDocument();
+  });
+
+  it("draws the instance's graph from the sidebar, with its trail, the node selected in the aside until let go of", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    const readInstanceGraph = vi.fn(async () => smallGraph());
+    wideScreen();
+    renderWorkspace(
+      makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), readInstanceGraph }),
+    );
+    fireEvent.click(await (await sidebarFound()).findByRole("link", { name: "Graph" }));
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "Graph of Deck set A" }),
+    ).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({
+      screen: "graph",
+      instanceUrl: instanceA.url,
+    });
+    expect(
+      within(screen.getByRole("navigation", { name: "Breadcrumb" }))
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["Instances", "Decks", "Graph"]);
+    await waitFor(() => expect(document.title).toBe("Graph – Solid Memo Studio"));
+    expect(readInstanceGraph).toHaveBeenCalledWith(instanceA.url, session.webId, expect.anything());
+    const aside = within(screen.getByRole("complementary", { name: "Node" }));
+    expect(aside.getByText("Select a node in the graph to see what it says.")).toBeInTheDocument();
+    // A node selected is no Back stop.
+    const stops = window.history.length;
+    fireEvent.input(inMain().getByRole("searchbox", { name: "Find a node" }), {
+      target: { value: "catalog.ttl#deck" },
+    });
+    fireEvent.click(inMain().getByRole("button", { name: "deck-capitals" }));
+    expect(await aside.findByRole("heading", { name: "deck-capitals" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({
+      screen: "graph",
+      instanceUrl: instanceA.url,
+      node: GRAPH_DECK,
+    });
+    fireEvent.click(aside.getByRole("button", { name: "decks/capitals.ttl" }));
+    expect(await aside.findByRole("heading", { name: "decks/capitals.ttl" })).toBeInTheDocument();
+    expect(window.history.length).toBe(stops);
+    // A click on the drawing's background lets go of it, taking it out of the route, no Back stop either.
+    fireEvent.click(await inMain().findByRole("img", { name: "Graph of Deck set A" }));
+    expect(
+      await aside.findByText("Select a node in the graph to see what it says."),
+    ).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({
+      screen: "graph",
+      instanceUrl: instanceA.url,
+    });
+    expect(window.history.length).toBe(stops);
+    forget(`studio.graphFilters.${instanceA.url}`);
+    forget(`studio.graphLayout.${instanceA.url}`);
   });
 
   it("goes back to Solid Memo at the open instance's decks", async () => {

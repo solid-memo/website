@@ -83,6 +83,12 @@ describe("the Studio's routes", () => {
     },
     { screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" },
     { screen: "releases", instanceUrl: "https://pod.example/solid-memo/a/" },
+    { screen: "graph", instanceUrl: "https://pod.example/solid-memo/a/" },
+    {
+      screen: "graph",
+      instanceUrl: "https://pod.example/solid-memo/a/",
+      node: "https://pod.example/solid-memo/a/decks/kanji.ttl#card-1",
+    },
     { screen: "draft", draftUrl: DRAFT },
     { screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods" },
     { screen: "step", draftUrl: DRAFT, step: "ch-pods-1" },
@@ -317,6 +323,22 @@ describe("the Studio's routes", () => {
     });
   });
 
+  it("keep the graph's node selected in its query, an empty one none", () => {
+    const graph = "#/studio/graph?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F";
+    expect(
+      studioRouteToHash({ screen: "graph", instanceUrl: "https://pod.example/solid-memo/a/" }),
+    ).toBe(graph);
+    expect(parseStudioHash(`${graph}&node=`)).toEqual({
+      screen: "graph",
+      instanceUrl: "https://pod.example/solid-memo/a/",
+    });
+    expect(parseStudioHash(`${graph}&node=_%3Ab0%40x`)).toEqual({
+      screen: "graph",
+      instanceUrl: "https://pod.example/solid-memo/a/",
+      node: "_:b0@x",
+    });
+  });
+
   it("keep each deck to export as a deck of its own", () => {
     expect(studioRouteToHash(routes[16]!)).toBe(
       "#/studio/transfer?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-2",
@@ -326,7 +348,7 @@ describe("the Studio's routes", () => {
   it("name the instance a route is in, the deck's for the workbench", () => {
     expect(routes.map(instanceOfRoute)).toEqual([
       null,
-      ...Array(40).fill("https://pod.example/solid-memo/a/"),
+      ...Array(42).fill("https://pod.example/solid-memo/a/"),
     ]);
   });
 
@@ -434,6 +456,7 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash("#/studio/library")).toBeNull();
     expect(parseStudioHash("#/studio/drafts")).toBeNull();
     expect(parseStudioHash("#/studio/releases")).toBeNull();
+    expect(parseStudioHash("#/studio/graph?node=x")).toBeNull();
     expect(parseStudioHash("#/studio/transfer?deck=x")).toBeNull();
     expect(parseStudioHash("#/studio/decks?instance=x")).toBeNull();
   });

@@ -13,6 +13,7 @@ import { studioRouteToHash, type StudioRoute } from "../router";
 import type { ScreenCommand } from "./commandIndex";
 import { useActivityLog } from "./activity";
 import type { WorkspaceProblems } from "./BottomDock";
+import { RevealAside } from "./revealAside";
 import { StudioShell, type AsidePane } from "./StudioShell";
 import { useScreenCommands } from "./useScreenCommands";
 import { DataTable } from "./DataTable";
@@ -32,6 +33,16 @@ let logActivity: (text: string) => void;
 function Activity() {
   logActivity = useActivityLog();
   return null;
+}
+
+/** A screen that asks for the aside to be seen, as the graph does as a node is selected. */
+function Revealing() {
+  const reveal = useContext(RevealAside);
+  return (
+    <button type="button" onClick={reveal}>
+      Select a node
+    </button>
+  );
 }
 
 /** A screen with commands of its own in the palette. */
@@ -56,6 +67,7 @@ function renderShell(
     problems?: WorkspaceProblems;
     table?: true;
     status?: true;
+    revealing?: true;
   } = {},
 ) {
   const queryClient = props.queryClient ?? new QueryClient();
@@ -88,6 +100,7 @@ function renderShell(
         <Editor />
         <Activity />
         {props.commands && <Commands commands={props.commands} />}
+        {props.revealing && <Revealing />}
         {props.table && (
           <DataTable
             caption="Planets"
@@ -728,6 +741,22 @@ describe("StudioShell", () => {
       expect(pane()).not.toBeVisible();
       fireEvent.click(asideToggle());
       fireEvent.click(within(pane()).getByRole("button", { name: "Hide" }));
+      expect(pane()).not.toBeVisible();
+    });
+
+    it("opens as a drawer, with the focus in it, when the screen asks for it to be seen; beside the page, stays as the user chose", () => {
+      vi.restoreAllMocks();
+      const { widen } = narrowScreen(true);
+      renderShell({ aside, revealing: true });
+      expect(pane()).not.toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Select a node" }));
+      expect(pane()).toBeVisible();
+      expect(pane()).toHaveFocus();
+      fireEvent.click(within(pane()).getByRole("button", { name: "Hide" }));
+      widen();
+      fireEvent.click(asideToggle());
+      expect(pane()).not.toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Select a node" }));
       expect(pane()).not.toBeVisible();
     });
 

@@ -35,20 +35,23 @@ export function paginate<T>(list: T[], page: number, perPage: number): Page<T> {
  * Previous / "Page 2 of 3" / Next, for a paged list of cards. At either
  * end the button there is only aria-disabled, so one pressed onto the
  * last (or first) page keeps the focus; the page it is on is a status
- * line, read out as it changes.
+ * line, read out as it changes. `label` names what is paged, cards when
+ * absent.
  */
 export function Pager({
   page,
   pageCount,
   onPageChange,
+  label,
 }: {
   page: number;
   pageCount: number;
   onPageChange: (page: number) => void;
+  label?: string;
 }) {
   const { t } = useI18n();
   return (
-    <nav class="pager" aria-label={t("pager.label")}>
+    <nav class="pager" aria-label={label ?? t("pager.label")}>
       <button
         onClick={() => {
           if (page > 1) onPageChange(page - 1);

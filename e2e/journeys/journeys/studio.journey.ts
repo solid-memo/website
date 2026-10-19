@@ -75,8 +75,12 @@ const COURSE = {
  * login reads it, and the releases list it. They move down the library
  * deck's cards with the keyboard and back, one selected: the row with
  * the focus stays in sight between the header row and the bar of the
- * rows selected, which stick. They go back to Solid Memo, still logged
- * in, which lists the deck they made that is left.
+ * rows selected, which stick. They draw the instance as a graph, open
+ * a node reached with the keyboard, and find the library release their
+ * draft of the next version follows: a leaf outside the pod, never
+ * fetched, shown with the draft that links to it as a table, and let go
+ * of it with a click on the drawing's background. They go back to Solid Memo, still
+ * logged in, which lists the deck they made that is left.
  */
 test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({
   app,
@@ -481,7 +485,25 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     },
   );
 
-  await app.step("37 · Go back to Solid Memo, still logged in", async () => {
+  await app.step(
+    "37 · Draw the instance as a graph: open a node by keyboard, find the library release the next version follows, a leaf never fetched, see it and its draft in the table, and let go of it",
+    async () => {
+      await app.chrome.breadcrumb("breadcrumbs.decks");
+      await app.studio.openGraph(renamed);
+      await app.studio.openGraphNodeByKeyboard(renamed);
+      // Outside the pod: were it fetched, the journey would fail on the request.
+      const release = "https://solid-memo.com/decks/brightest-stars/v1.ttl";
+      await app.studio.findGraphNode(release, "v1.ttl", "studio.graph.node.outside");
+      // The draft of its next version links to it.
+      await app.studio.expectNeighborsInTable(renamed, {
+        "v1.ttl": "studio.graph.kind.outsideLeaf",
+        "drafts/brightest-stars/v2/release.ttl": "studio.graph.kind.document",
+      });
+      await app.studio.letGoOfGraphNode(renamed);
+    },
+  );
+
+  await app.step("38 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);

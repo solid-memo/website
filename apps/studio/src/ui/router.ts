@@ -85,6 +85,8 @@ export type StudioRoute =
   | { screen: "drafts"; instanceUrl: string }
   /** The releases the instance published, each to share or to start the next version of. */
   | { screen: "releases"; instanceUrl: string }
+  /** The instance's Solid Memo data as a graph, and in the aside the node selected (`node`, its id; none when absent). */
+  | { screen: "graph"; instanceUrl: string; node?: string }
   /**
    * A draft (by its release document): what it says of itself, and its
    * outline. A draft's editors open at one of their fields when `field`
@@ -247,6 +249,11 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#${STUDIO_PATH}/drafts${hashParams({ instance: route.instanceUrl })}`;
     case "releases":
       return `#${STUDIO_PATH}/releases${hashParams({ instance: route.instanceUrl })}`;
+    case "graph":
+      return `#${STUDIO_PATH}/graph${hashParams({
+        instance: route.instanceUrl,
+        ...(route.node === undefined ? {} : { node: route.node }),
+      })}`;
     case "draft":
       return `#${STUDIO_PATH}/draft${hashParams({ draft: route.draftUrl, ...fieldParam(route.field) })}`;
     case "chapter":
@@ -325,6 +332,13 @@ export function parseStudioHash(hash: string): StudioRoute | null {
       return instanceUrl === null ? null : { screen: "drafts", instanceUrl };
     case "/releases":
       return instanceUrl === null ? null : { screen: "releases", instanceUrl };
+    case "/graph": {
+      if (instanceUrl === null) return null;
+      const node = query.get("node");
+      return node === null || node === ""
+        ? { screen: "graph", instanceUrl }
+        : { screen: "graph", instanceUrl, node };
+    }
     case "/draft":
     case "/chapter":
     case "/step":

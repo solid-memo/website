@@ -1835,6 +1835,7 @@
         "groups": "Grupper",
         "drafts": "Utkast",
         "releases": "Utgåvor",
+        "graph": "Graf",
         "health": "Hälsa",
         "library": "Kopior från biblioteket",
         "transfer": "Importera och exportera",
@@ -3302,6 +3303,104 @@
       "startNextOf": "Börja på nästa version av {release}",
       "starting": "Börjar på nästa version…",
       "drafts": "Utkast till utgåvor"
+    },
+    "graph": {
+      "crumb": "Graf",
+      "loading": "Läser instansen…",
+      "reading": {
+        "one": "Läser instansen: {read} av {count} dokument…",
+        "other": "Läser instansen: {read} av {count} dokument…"
+      },
+      "heading": "Graf över {instance}",
+      "intro": "Allt Solid Memo sparar i den här instansen, som en graf: varje mapp, dokument och resurs är en nod, och varje länk mellan dem en kant. En länk till något annat slutar i ett löv, som aldrig läses.",
+      "search": "Hitta en nod",
+      "group": {
+        "vocabulary": "Vokabulärtermer",
+        "cards": "Kort",
+        "distractors": "Felaktiga alternativ",
+        "reviewStates": "Repetitionslägen",
+        "answers": "Svar",
+        "leaves": "Löv"
+      },
+      "neighborsOnly": "Bara grannar",
+      "neighborsHint": "Välj en nod för att bara se den och dess grannar.",
+      "table": "Visa som tabell",
+      "found": {
+        "one": "{count} nod hittades",
+        "other": "{count} noder hittades"
+      },
+      "moreFound": {
+        "one": "och {count} till: skriv mer för att begränsa",
+        "other": "och {count} till: skriv mer för att begränsa"
+      },
+      "noMatch": "Ingen nod som visas matchar ”{text}”.",
+      "counts": "{nodes} och {edges} visas",
+      "nodesShown": {
+        "one": "{shown} av {count} nod",
+        "other": "{shown} av {count} noder"
+      },
+      "edgesShown": {
+        "one": "{shown} av {count} kant",
+        "other": "{shown} av {count} kanter"
+      },
+      "vocabularyUndrawn": {
+        "one": "{count} kant till en vokabulärterm ritas bara för den valda noden eller den som pekas på.",
+        "other": "{count} kanter till vokabulärtermer ritas bara för den valda noden eller den som pekas på."
+      },
+      "tooLarge": "Det här skulle rita {nodes} noder och {edges} kanter, fler än sidan ritar smidigt. Dölj några med filtren, visa den som tabell eller rita den ändå.",
+      "drawAnyway": "Rita ändå",
+      "placing": "Placerar noderna",
+      "prompt": "Peka på en nod, eller använd piltangenterna, för att se vad den är; Enter eller ett klick öppnar den, och ett klick på bakgrunden avmarkerar den. +, − och 0 zoomar in, ut och till hela grafen, och att dra flyttar den.",
+      "zoomIn": "Zooma in",
+      "zoomOut": "Zooma ut",
+      "zoomFit": "Hela grafen",
+      "describe": "{label}, {kind}",
+      "kind": {
+        "container": "mapp",
+        "document": "dokument",
+        "absent": "dokument som saknas",
+        "unreadable": "dokument som inte gick att läsa",
+        "resource": "resurs",
+        "missing": "finns inte i något dokument",
+        "podLeaf": "i din Pod, inte läst",
+        "outsideLeaf": "utanför din Pod, inte läst",
+        "vocabularyLeaf": "vokabulärterm"
+      },
+      "defines": "definierar",
+      "nodes": {
+        "caption": "Grafens noder",
+        "label": "Nod",
+        "kind": "Typ av nod",
+        "document": "Definieras i",
+        "types": "Klasser",
+        "pages": "Sidor med noder"
+      },
+      "edges": {
+        "caption": "Grafens kanter",
+        "from": "Från",
+        "predicate": "Länk",
+        "to": "Till",
+        "pages": "Sidor med kanter"
+      },
+      "node": {
+        "label": "Nod",
+        "none": "Välj en nod i grafen för att se vad den säger.",
+        "outside": "Inte hämtad: utanför din Pod.",
+        "inPod": "Inte hämtad: i din Pod, men inte Solid Memos data.",
+        "vocabulary": "Inte hämtad: en vokabulärterm.",
+        "missing": "Nämns här, men finns inte i något dokument.",
+        "absent": "Det här dokumentet finns inte.",
+        "unreadable": "Det här dokumentet gick inte att läsa.",
+        "values": "Värden",
+        "statedIn": "anges i {document}",
+        "outgoing": "Länkar från den",
+        "incoming": "Länkar till den",
+        "noLinks": "Inga.",
+        "showAll": {
+          "one": "Visa {count} länk",
+          "other": "Visa alla {count} länkar"
+        }
+      }
     },
     "inline": {
       "field": "{column} för {row}",

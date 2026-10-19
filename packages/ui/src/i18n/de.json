@@ -1835,6 +1835,7 @@
         "groups": "Gruppen",
         "drafts": "Entwürfe",
         "releases": "Ausgaben",
+        "graph": "Graph",
         "health": "Zustand",
         "library": "Kopien aus der Bibliothek",
         "transfer": "Importieren und exportieren",
@@ -3302,6 +3303,104 @@
       "startNextOf": "Nächste Version von {release} beginnen",
       "starting": "Die nächste Version wird angelegt…",
       "drafts": "Entwürfe für Ausgaben"
+    },
+    "graph": {
+      "crumb": "Graph",
+      "loading": "Die Instanz wird gelesen…",
+      "reading": {
+        "one": "Die Instanz wird gelesen: {read} von {count} Dokument…",
+        "other": "Die Instanz wird gelesen: {read} von {count} Dokumenten…"
+      },
+      "heading": "Graph von „{instance}“",
+      "intro": "Alles, was Solid Memo in dieser Instanz speichert, als Graph: Jeder Ordner, jedes Dokument und jede Ressource ist ein Knoten, und jede Verbindung zwischen ihnen eine Kante. Eine Verbindung zu etwas anderem endet in einem Blatt, das nie gelesen wird.",
+      "search": "Knoten finden",
+      "group": {
+        "vocabulary": "Vokabularbegriffe",
+        "cards": "Karten",
+        "distractors": "Falsche Antwortmöglichkeiten",
+        "reviewStates": "Wiederholungsstände",
+        "answers": "Antworten",
+        "leaves": "Blätter"
+      },
+      "neighborsOnly": "Nur Nachbarn",
+      "neighborsHint": "Wähle einen Knoten, um nur ihn und seine Nachbarn zu sehen.",
+      "table": "Als Tabelle zeigen",
+      "found": {
+        "one": "{count} Knoten gefunden",
+        "other": "{count} Knoten gefunden"
+      },
+      "moreFound": {
+        "one": "und {count} weiterer: Tippe mehr, um sie einzugrenzen",
+        "other": "und {count} weitere: Tippe mehr, um sie einzugrenzen"
+      },
+      "noMatch": "Kein angezeigter Knoten passt zu „{text}“.",
+      "counts": "{nodes} und {edges} angezeigt",
+      "nodesShown": {
+        "one": "{shown} von {count} Knoten",
+        "other": "{shown} von {count} Knoten"
+      },
+      "edgesShown": {
+        "one": "{shown} von {count} Kante",
+        "other": "{shown} von {count} Kanten"
+      },
+      "vocabularyUndrawn": {
+        "one": "{count} Kante zu einem Vokabularbegriff wird nur für den ausgewählten Knoten oder den, auf den gezeigt wird, gezeichnet.",
+        "other": "{count} Kanten zu Vokabularbegriffen werden nur für den ausgewählten Knoten oder den, auf den gezeigt wird, gezeichnet."
+      },
+      "tooLarge": "Das würde {nodes} Knoten und {edges} Kanten zeichnen, mehr als die Seite flüssig zeichnet. Blende einige mit den Filtern aus, zeige ihn als Tabelle oder zeichne ihn trotzdem.",
+      "drawAnyway": "Trotzdem zeichnen",
+      "placing": "Die Knoten werden platziert",
+      "prompt": "Zeige auf einen Knoten oder nutze die Pfeiltasten, um zu sehen, was er ist; die Eingabetaste oder ein Klick öffnet ihn, ein Klick auf den Hintergrund hebt die Auswahl auf. +, − und 0 zoomen hinein, heraus und auf den ganzen Graphen, und Ziehen verschiebt ihn.",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "zoomFit": "Ganzer Graph",
+      "describe": "{label}, {kind}",
+      "kind": {
+        "container": "Ordner",
+        "document": "Dokument",
+        "absent": "Dokument, das fehlt",
+        "unreadable": "Dokument, das sich nicht lesen ließ",
+        "resource": "Ressource",
+        "missing": "in keinem Dokument gefunden",
+        "podLeaf": "in deinem Pod, nicht gelesen",
+        "outsideLeaf": "außerhalb deines Pods, nicht gelesen",
+        "vocabularyLeaf": "Vokabularbegriff"
+      },
+      "defines": "definiert",
+      "nodes": {
+        "caption": "Knoten des Graphen",
+        "label": "Knoten",
+        "kind": "Art",
+        "document": "Definiert in",
+        "types": "Klassen",
+        "pages": "Seiten der Knoten"
+      },
+      "edges": {
+        "caption": "Kanten des Graphen",
+        "from": "Von",
+        "predicate": "Verbindung",
+        "to": "Zu",
+        "pages": "Seiten der Kanten"
+      },
+      "node": {
+        "label": "Knoten",
+        "none": "Wähle einen Knoten im Graphen, um zu sehen, was er aussagt.",
+        "outside": "Nicht abgerufen: außerhalb deines Pods.",
+        "inPod": "Nicht abgerufen: in deinem Pod, aber keine Daten von Solid Memo.",
+        "vocabulary": "Nicht abgerufen: ein Vokabularbegriff.",
+        "missing": "Hier genannt, aber in keinem Dokument gefunden.",
+        "absent": "Dieses Dokument gibt es nicht.",
+        "unreadable": "Dieses Dokument ließ sich nicht lesen.",
+        "values": "Werte",
+        "statedIn": "angegeben in {document}",
+        "outgoing": "Verbindungen von ihm",
+        "incoming": "Verbindungen zu ihm",
+        "noLinks": "Keine.",
+        "showAll": {
+          "one": "Die {count} Verbindung zeigen",
+          "other": "Alle {count} Verbindungen zeigen"
+        }
+      }
     },
     "inline": {
       "field": "{column} von {row}",

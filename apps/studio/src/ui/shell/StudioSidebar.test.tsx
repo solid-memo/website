@@ -90,6 +90,7 @@ describe("StudioSidebar", () => {
       ["Groups", studioRouteToHash({ screen: "groups", instanceUrl })],
       ["Drafts", studioRouteToHash({ screen: "drafts", instanceUrl })],
       ["Releases", studioRouteToHash({ screen: "releases", instanceUrl })],
+      ["Graph", studioRouteToHash({ screen: "graph", instanceUrl })],
       ["Health", studioRouteToHash({ screen: "health", instanceUrl })],
       ["Library copies", studioRouteToHash({ screen: "library", instanceUrl })],
       ["Import and export", studioRouteToHash({ screen: "transfer", instanceUrl })],
