@@ -73,7 +73,9 @@ describe("SpreadCharts", () => {
     expect(fold.open).toBe(false);
     expect(fold.querySelector("summary")).toHaveTextContent("Show how easy cards feel");
     expect(fold.querySelector("figcaption")).toHaveTextContent("How easy cards feel");
-    expect(screen.getByText(/Every card starts at 2.5/)).toBeInTheDocument();
+    expect(screen.getByText(/Every card starts at 2.5/)).toHaveTextContent(
+      /^The ease is SM-2's, kept up to date on every review whichever scheduler sets the due days\./,
+    );
     fireEvent.click(fold.querySelector('g[data-bar="1.3"]')!);
     expect(screen.getByText("1.3 to under 1.5: 1.")).toBeInTheDocument();
     fireEvent.click(fold.querySelector('g[data-bar="2.7"]')!);

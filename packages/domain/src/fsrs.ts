@@ -232,6 +232,21 @@ export function effectiveStates(
   });
 }
 
+/**
+ * The chance of recalling a prompt `now`, by its FSRS-6 state: at the
+ * whole study days since its last review (0 the same study day, and
+ * when the last review is later than now).
+ */
+export function recallNow(
+  state: Pick<FsrsState, "stability" | "lastReviewedAt">,
+  now: Date,
+  dayBoundaryHour: number,
+): number {
+  const lastDay = studyDayOf(new Date(state.lastReviewedAt), dayBoundaryHour);
+  const elapsed = Math.max(0, daysBetween(lastDay, studyDayOf(now, dayBoundaryHour)));
+  return retrievability(elapsed, state.stability);
+}
+
 /** The fields a review of a state overwrites. */
 function snapshotOf(state: FsrsState): FsrsSnapshot {
   return {

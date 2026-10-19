@@ -111,7 +111,8 @@ repetition in a row ([srs.md](srs.md)), as the Studio's "learning"
 state does; it is no beginner's stage, as a card passed once is not
 back in it until it is forgotten. SM-2 spaces a card's reviews 1 day,
 6 days, then about 15 and about 38, growing from there, so some bins
-of the interval chart stay nearly empty; its caption says so. A card studied both ways counts once each
+of the interval chart stay nearly empty; its caption says so, and
+that FSRS-6 spaces them by each card's memory instead. A card studied both ways counts once each
 way, and the page says so.
 
 Under FSRS-6 ([srs.md](srs.md#fsrs-6)) the intervals are FSRS-6's:

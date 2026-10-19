@@ -17,7 +17,7 @@ const WEEK = 7;
  * A deck's schedule (docs/studio.md): tiles of headline figures; the
  * reviews of the days to come, as the daily cap lets them through
  * (the deck's own, `ownCap`, else the instance's); how the prompts'
- * intervals and eases are spread; and its lapses, counted since the
+ * intervals and eases (SM-2's) are spread; and its lapses, counted since the
  * month of its first answer in the log, with its leeches, each a link to the
  * card (`cardHref`), and a link to them all in the card workbench
  * (`leechesHref`). Each chart has its figures as a table too.
@@ -111,6 +111,7 @@ export function DeckInsightScreen({
             heading={t("studio.insight.ease")}
             bins={insight.eases}
             range={ranges.ease}
+            note={t("studio.insight.easesNote")}
           />
         </>
       )}

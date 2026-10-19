@@ -14,6 +14,7 @@ import {
   memoryFromSm2,
   nextMemory,
   ratingOfGrade,
+  recallNow,
   retrievability,
   type FsrsMemory,
   type FsrsRating,
@@ -162,6 +163,22 @@ describe("retrievability", () => {
 
   it("is 90% after as many days as the stability", () => {
     expect(retrievability(37, 37)).toBeCloseTo(0.9, 12);
+  });
+});
+
+describe("recallNow", () => {
+  // Instants in local time, as study days are.
+  const state = { stability: 4, lastReviewedAt: new Date(2026, 9, 5, 10).toISOString() };
+
+  it("counts the whole study days since the last review", () => {
+    expectNear(recallNow(state, new Date(2026, 9, 9, 9), 4), 0.9);
+    // Before the day boundary (04:00) it is still the 8th.
+    expectNear(recallNow(state, new Date(2026, 9, 9, 3), 4), retrievability(3, 4));
+  });
+
+  it("is certain the same study day, and when the last review is later than now", () => {
+    expect(recallNow(state, new Date(2026, 9, 5, 20), 4)).toBe(1);
+    expect(recallNow(state, new Date(2026, 9, 1, 12), 4)).toBe(1);
   });
 });
 

@@ -30,8 +30,9 @@ description:
     shortDescription: Spaced-repetition flashcards that live in your own Solid pod.
     longDescription: >
       Solid Memo is a flashcard app that schedules each card with
-      spaced repetition (SM-2): it shows a card again just before you
-      would forget it. Your decks, cards and study history are not kept
+      spaced repetition (SM-2, or FSRS-6 when the learner chooses it):
+      it shows a card again just before you would forget it. Your
+      decks, cards and study history are not kept
       on Solid Memo's servers but in your own Solid pod, an online data
       store you choose and control. Any app that speaks the same open
       vocabulary can read them, and you can move them to another pod
@@ -51,7 +52,7 @@ description:
       versioned, and older data is brought up to date in place.
     documentation: https://solid-memo.com/docs/
     features:
-      - Flashcards scheduled by spaced repetition (SM-2)
+      - Flashcards scheduled by spaced repetition (SM-2 or FSRS-6)
       - Decks, cards and study history stored in the user's own Solid pod
       - Sign-in with Solid-OIDC against any Solid identity provider
       - A guest mode to try the app before connecting a pod

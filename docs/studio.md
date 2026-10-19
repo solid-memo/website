@@ -924,10 +924,22 @@ Its four tabs are links, the one shown marked
 - **Schedule**: the card's review state in each direction the deck
   studies, and in one it no longer does while a state is kept there
   ([`CardScheduleContainer`](../apps/studio/src/ui/CardScheduleContainer.tsx)).
-  It shows when the card is due, its interval, ease and right answers in
-  a row, and when it was first and last reviewed. A direction never
-  studied says the card is new that way. Each state can be given a due
-  day, or forgotten, once the user confirms ([below](#review-state)).
+  It shows SM-2's state: when the card is due, its interval, ease and
+  right answers in a row, and when it was first and last reviewed. When
+  the instance's preferences name FSRS-6, or the card has an FSRS-6
+  state that way, an FSRS-6 part follows: its due day, its stability (in
+  days), its difficulty (1 to 10, to a tenth) and the chance of
+  recalling the card now (`recallNow` in
+  [`fsrs.ts`](../packages/domain/src/fsrs.ts), at the whole study days
+  since the last review), with a line saying which of the two sets the
+  due days. While FSRS-6 sets them but the state is missing or stale
+  ([srs.md](srs.md#fsrs-6)), it says instead that the state is
+  estimated from SM-2's at the next review, and SM-2's due day counts
+  until then. An FSRS-6 state with no SM-2 state beside it counts for
+  nothing and is not shown. A direction never studied says the card is
+  new that way. Each state can be given a due day, which starts at the
+  one that sets it, or forgotten, once the user confirms
+  ([below](#review-state)).
 - **History**: the card's answers in its deck, newest first
   ([`CardHistoryScreen`](../apps/studio/src/ui/CardHistoryScreen.tsx)):
   when each was given, which way, its grade, how (recalled, or chosen
@@ -1143,7 +1155,10 @@ case `deckInsight` reads what it needs. It writes nothing to the deck.
 - **Intervals and eases**, as bars, with tables: how many cards, each
   way, have each interval (1 day, 2–3, 4–7, up to a year and more) and
   each ease (from 1.3, in steps of 0.2). Only cards in use count, in
-  the directions the deck studies.
+  the directions the deck studies. The intervals are those of the
+  scheduler that sets the due days; the ease is SM-2's, kept up to date
+  on every review whichever scheduler sets them, and the chart's note
+  says so.
 - **Lapses and leeches.** A lapse is a review graded below 3, in the
   deck's answers in the [answer log](data-model.md#the-answer-log)
   (`lapseIndex`, by `isLapse`): not a card's first answer, an answer

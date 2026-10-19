@@ -23,8 +23,8 @@ const state: ReviewState = {
 function renderScreen(overrides: Partial<Parameters<typeof CardScheduleScreen>[0]> = {}) {
   const props = {
     directions: [
-      { direction: "front-to-back" as const, state, studied: true },
-      { direction: "back-to-front" as const, state: null, studied: true },
+      { direction: "front-to-back" as const, state, studied: true, fsrs: null },
+      { direction: "back-to-front" as const, state: null, studied: true, fsrs: null },
     ],
     busy: false,
     done: null,
@@ -67,6 +67,98 @@ describe("CardScheduleScreen", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("status").textContent).toBe("");
+    expect(screen.queryByRole("heading", { name: "FSRS-6" })).not.toBeInTheDocument();
+  });
+
+  it("shows FSRS-6's memory beside SM-2's state, and starts the due day at FSRS-6's when it sets it", () => {
+    const fsrs = {
+      kind: "memory" as const,
+      stability: 21.347,
+      difficulty: 5.04,
+      recall: 0.934,
+      due: "2026-10-30",
+      sets: true,
+    };
+    const { onReschedule } = renderScreen({
+      directions: [{ direction: "front-to-back", state, studied: true, fsrs }],
+    });
+    const forward = direction("Front → back");
+    expect(forward.getAllByRole("heading", { level: 4 }).map((each) => each.textContent)).toEqual([
+      "SM-2",
+      "FSRS-6",
+    ]);
+    expect(forward.getAllByRole("term").map((each) => each.textContent)).toEqual([
+      "Due",
+      "Interval",
+      "Ease",
+      "Right in a row",
+      "First reviewed",
+      "Last reviewed",
+      "Due",
+      "Stability",
+      "Difficulty",
+      "Recall chance now",
+    ]);
+    expect(
+      forward
+        .getAllByRole("definition")
+        .slice(6)
+        .map((each) => each.textContent),
+    ).toEqual(["October 30, 2026", "21.3 days", "5 of 10", "93%"]);
+    expect(
+      forward.getByText(
+        "FSRS-6 sets the due days, as the instance's preferences say; SM-2's state is kept up to date beside it.",
+      ),
+    ).toBeInTheDocument();
+    expect(forward.getByLabelText("Due on")).toHaveValue("2026-10-30");
+    fireEvent.click(forward.getByRole("button", { name: "Set due date" }));
+    expect(onReschedule).toHaveBeenCalledWith("front-to-back", "2026-10-30");
+  });
+
+  it("says FSRS-6's state is not kept up to date while SM-2 sets the due days", () => {
+    renderScreen({
+      directions: [
+        {
+          direction: "front-to-back",
+          state,
+          studied: true,
+          fsrs: {
+            kind: "memory",
+            stability: 1,
+            difficulty: 9.96,
+            recall: 0.5,
+            due: "2026-10-10",
+            sets: false,
+          },
+        },
+      ],
+    });
+    const forward = direction("Front → back");
+    expect(forward.getAllByRole("definition").at(-3)).toHaveTextContent("1 day");
+    expect(forward.getAllByRole("definition").at(-2)).toHaveTextContent("10 of 10");
+    expect(
+      forward.getByText(
+        "SM-2 sets the due days, as the instance's preferences say; FSRS-6's state is not updated meanwhile, and switching to FSRS-6 works it out anew.",
+      ),
+    ).toBeInTheDocument();
+    expect(forward.getByLabelText("Due on")).toHaveValue("2026-10-24");
+  });
+
+  it("says FSRS-6 estimates the card's state at its next review when it has none up to date", () => {
+    renderScreen({
+      directions: [
+        { direction: "front-to-back", state, studied: true, fsrs: { kind: "estimated" } },
+      ],
+    });
+    const forward = direction("Front → back");
+    expect(forward.getByRole("heading", { name: "FSRS-6" })).toBeInTheDocument();
+    expect(forward.getAllByRole("term")).toHaveLength(6);
+    expect(
+      forward.getByText(
+        "FSRS-6 sets the due days, as the instance's preferences say, but has no up-to-date state of the card this way: SM-2's due day counts until the next review, which estimates FSRS-6's state from SM-2's.",
+      ),
+    ).toBeInTheDocument();
+    expect(forward.getByLabelText("Due on")).toHaveValue("2026-10-24");
   });
 
   it("says when the deck no longer studies the card a way it keeps progress in", () => {
@@ -76,6 +168,7 @@ describe("CardScheduleScreen", () => {
           direction: "back-to-front",
           state: { ...state, direction: "back-to-front" },
           studied: false,
+          fsrs: null,
         },
       ],
     });
@@ -116,7 +209,7 @@ describe("CardScheduleScreen", () => {
     );
     rerender(
       <CardScheduleScreen
-        directions={[{ direction: "front-to-back", state, studied: true }]}
+        directions={[{ direction: "front-to-back", state, studied: true, fsrs: null }]}
         busy
         done={{ kind: "reschedule", direction: "front-to-back", due: "2026-10-12" }}
         error="Pod unreachable"
