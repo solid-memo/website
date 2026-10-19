@@ -5,7 +5,7 @@
 import { AppError } from "./appError";
 import type { Card, CardContent, StudyDirection } from "./deck";
 import { sameContent } from "./libraryUpgrade";
-import { reviewKeyOf, type ReviewKey, type ReviewState } from "./review";
+import { reviewKeyOf, type FsrsState, type ReviewKey, type ReviewState } from "./review";
 
 /**
  * The Studio's move and copy of cards from one deck to another of the
@@ -45,7 +45,15 @@ export interface CardTransferred {
 export interface CardTransferPlan {
   cards: CardTransferred[];
   missing: string[];
-  target: { save: TransferredCard[]; reviewSaves: ReviewState[]; reviewRemovals: ReviewKey[] };
+  target: {
+    save: TransferredCard[];
+    reviewSaves: ReviewState[];
+    reviewRemovals: ReviewKey[];
+    /** The FSRS-6 states that go with the SM-2 states saved, under the cards' ids in the target. */
+    fsrsSaves: FsrsState[];
+    /** The prompts saved without an FSRS-6 state, whose one in the target, if any, goes. */
+    fsrsRemovals: ReviewKey[];
+  };
   source: { remove: string[]; reviewRemovals: ReviewKey[] };
 }
 
@@ -72,9 +80,15 @@ const DIRECTIONS: readonly StudyDirection[] = ["front-to-back", "back-to-front"]
  * with it, under its id in the target, where they are written naming the
  * card there (sm:reviewOf); a card present in the target
  * keeps a state it has there. Without, a card new to the target starts
- * as new there, a state left at its id removed. A move then removes the
- * cards from the source, with their states (every SM-2 state of them,
- * read or not, when written: UseCases.transferCards); a copy leaves the
+ * as new there, a state left at its id removed. A card's FSRS-6 state
+ * (`fsrs`, this app's own) goes with its SM-2 state, under the same id;
+ * where the SM-2 state goes without one, the target's FSRS-6 state of
+ * that prompt goes, so none is left of another card. An FSRS-6 state
+ * without an SM-2 state beside it counts for nothing (effectiveStates),
+ * so it is not carried, but it is removed as a state left at its id is.
+ * A move then removes the cards from the source, with their states
+ * (every SM-2 and FSRS-6 state of them, read or not, when written:
+ * UseCases.transferCards); a copy leaves the
  * source as it is. The states are those read, joined to their cards by
  * sm:reviewOf (domain/reviewRecord.ts): another scheduler's are never
  * among them, and stay where they are. The answer log is not the plan's: past answers keep naming the
@@ -83,8 +97,18 @@ const DIRECTIONS: readonly StudyDirection[] = ["front-to-back", "back-to-front"]
  * Refuses a transfer to the source itself (cardTransferSameDeck).
  */
 export function planCardTransfer(
-  source: { url: string; cards: readonly Card[]; states: readonly ReviewState[] },
-  target: { url: string; cards: readonly Card[]; states: readonly ReviewState[] },
+  source: {
+    url: string;
+    cards: readonly Card[];
+    states: readonly ReviewState[];
+    fsrs?: readonly FsrsState[];
+  },
+  target: {
+    url: string;
+    cards: readonly Card[];
+    states: readonly ReviewState[];
+    fsrs?: readonly FsrsState[];
+  },
   ids: readonly string[],
   { mode, keepProgress }: TransferOptions,
 ): CardTransferPlan {
@@ -99,11 +123,13 @@ export function planCardTransfer(
   );
   const claimed = new Set<string>();
   const sourceStates = new Map(source.states.map((state) => [reviewKeyOf(state), state]));
+  const sourceFsrs = new Map((source.fsrs ?? []).map((state) => [reviewKeyOf(state), state]));
   const targetStates = new Set(target.states.map(reviewKeyOf));
+  const targetFsrs = new Set((target.fsrs ?? []).map(reviewKeyOf));
   const plan: CardTransferPlan = {
     cards: [],
     missing: [...chosen].filter((id) => !source.cards.some((card) => card.id === id)),
-    target: { save: [], reviewSaves: [], reviewRemovals: [] },
+    target: { save: [], reviewSaves: [], reviewRemovals: [], fsrsSaves: [], fsrsRemovals: [] },
     source: { remove: [], reviewRemovals: [] },
   };
   for (const card of source.cards) {
@@ -112,15 +138,19 @@ export function planCardTransfer(
     plan.cards.push({ from: card.id, to, present });
     if (!present) plan.target.save.push(written);
     for (const direction of DIRECTIONS) {
-      const state = sourceStates.get(reviewKeyOf({ cardId: card.id, direction }));
+      const from = reviewKeyOf({ cardId: card.id, direction });
+      const state = sourceStates.get(from);
+      const fsrs = sourceFsrs.get(from);
       const key: ReviewKey = { cardId: to, direction };
       const held = targetStates.has(reviewKeyOf(key));
       if (keepProgress && state !== undefined && !(present && held)) {
         plan.target.reviewSaves.push({ ...state, ...key });
-      } else if (!present && held) {
+        if (fsrs === undefined) plan.target.fsrsRemovals.push(key);
+        else plan.target.fsrsSaves.push({ ...fsrs, ...key });
+      } else if (!present && (held || targetFsrs.has(reviewKeyOf(key)))) {
         plan.target.reviewRemovals.push(key);
       }
-      if (mode === "move" && state !== undefined)
+      if (mode === "move" && (state !== undefined || fsrs !== undefined))
         plan.source.reviewRemovals.push({ cardId: card.id, direction });
     }
     if (mode === "move") plan.source.remove.push(card.id);

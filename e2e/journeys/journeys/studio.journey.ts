@@ -36,12 +36,13 @@ const COURSE = {
  * selected cards, checking the preview first, then retire both cards and
  * undo that. They inspect one card, give it two wrong options (saved as
  * each is added), retire one and delete the other, then forget its
- * progress on its schedule tab; its history still has its answer. They
+ * progress on its schedule tab, which shows FSRS-6's memory below SM-2's
+ * state, as a new instance studies by FSRS-6; its history still has its answer. They
  * write that card's back in Markdown with an HTML tag, which the deck's
  * health finds; its link opens the card at its back, where they fix it,
  * and the deck's health, then the instance's, find nothing wrong. They
  * quick open the deck with Ctrl+K: its schedule counts the other card's
- * review tomorrow, and no leech.
+ * review in the week to come, and no leech.
  * Back in the workbench they set the other
  * card due today, which Home then counts as due, and move it, with its
  * progress, to the other deck, where Home then counts it. From Home they open a
@@ -125,7 +126,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     );
     await app.cardCreator.back();
     await app.chrome.breadcrumb("breadcrumbs.decks");
-    // Five new cards a day: both are studied, and due again tomorrow.
+    // Five new cards a day: both are studied, and due again in a few days.
     await app.decks.study(alpha);
     await app.study.studyAll({ grade: "good" });
     await app.study.endSession();
@@ -176,7 +177,8 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   );
 
   await app.step("11 · Forget the card's progress on its schedule tab", async () => {
-    await app.studio.openSchedule();
+    // A new instance studies by FSRS-6: the tab shows its memory below SM-2's state.
+    await app.studio.openSchedule("fsrs6");
     await app.studio.forgetProgress();
     await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
@@ -210,7 +212,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   );
 
   await app.step(
-    "14 · Quick open the deck with Ctrl+K, and open its schedule: one review tomorrow, and no leech",
+    "14 · Quick open the deck with Ctrl+K, and open its schedule: one review this week, and no leech",
     async () => {
       await app.chrome.quickOpen(alpha, alpha);
       await expect(app.page).toHaveURL(/#\/studio\/cards\?deck=/);

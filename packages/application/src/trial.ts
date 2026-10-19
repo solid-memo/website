@@ -43,8 +43,8 @@ export type TrialOpening = { ok: true; trial: Trial } | { ok: false; problems: R
  * Start a trial of the draft in the sandbox, a draft that can be played
  * (trialProblems): its pod started, an instance made in it as a guest's
  * is (its meta document and its catalog), its preferences new ones but
- * for the answer scale and the hour the day rolls over, which are the
- * user's (`prefs`), then the draft started as a course, or imported as a
+ * for the answer scale, the hour the day rolls over, the scheduler and
+ * the retention it aims at, which are the user's (`prefs`), then the draft started as a course, or imported as a
  * deck, as the library's releases are.
  */
 export async function startTrial(
@@ -59,10 +59,13 @@ export async function startTrial(
     name: "Trial",
     registrationTarget: "private",
   });
-  await useCases.savePreferences(instance.url, {
+  // Through switchScheduler, as only it sets the scheduler: the sandbox has no deck to switch yet.
+  await useCases.switchScheduler(instance.url, {
     ...DEFAULT_PREFERENCES,
     answerScale: prefs.answerScale,
     dayBoundaryHour: prefs.dayBoundaryHour,
+    scheduler: prefs.scheduler,
+    desiredRetention: prefs.desiredRetention,
   });
   const offered = draftLibraryDeck(draft);
   const deck = draft.course

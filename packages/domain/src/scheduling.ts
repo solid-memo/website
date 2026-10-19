@@ -6,6 +6,8 @@ import { activeCards, promptsOf, type Card, type DeckDirection, type Prompt } fr
 import type { StudyPreferences } from "./preferences";
 import {
   reviewKeyOf,
+  type DueState,
+  type FsrsState,
   type ReviewKey,
   type ReviewQuality,
   type ReviewSnapshot,
@@ -54,7 +56,8 @@ export function buildStudyQueue(args: {
   cards: Card[];
   /** The deck's direction: which prompts its cards make. */
   direction: DeckDirection;
-  reviews: ReviewState[];
+  /** What sets each prompt's due day: its review states, or effectiveStates'. */
+  reviews: readonly DueState[];
   prefs: StudyPreferences;
   now: Date;
   /** Uniform [0, 1) source deciding which new prompts are introduced. */
@@ -200,6 +203,41 @@ export function resetStudyDay(
       reset.restore.push({ ...state, ...previous });
     } else {
       reset.restore.push({ ...review, due: today });
+    }
+  }
+  return reset;
+}
+
+/** The writes that undo one study day of FSRS-6 states. */
+export interface FsrsStudyDayReset {
+  /** States to write back, restored to before today's reviews. */
+  restore: FsrsState[];
+  /** Prompts whose state goes: introduced today, or with nothing to restore. */
+  remove: ReviewKey[];
+}
+
+/**
+ * Undo the current study day of the FSRS-6 states, beside resetStudyDay
+ * of the SM-2 ones: every state reviewed today goes back to its
+ * snapshot. One introduced today goes, as its SM-2 state does; so does
+ * one without a snapshot (first written today from an estimate), which
+ * the next review estimates again from the SM-2 state restored.
+ */
+export function resetFsrsStudyDay(
+  states: readonly FsrsState[],
+  now: Date,
+  dayBoundaryHour: number,
+): FsrsStudyDayReset {
+  const today = studyDayOf(now, dayBoundaryHour);
+  const isToday = (instant: string) => studyDayOf(new Date(instant), dayBoundaryHour) === today;
+  const reset: FsrsStudyDayReset = { restore: [], remove: [] };
+  for (const state of states) {
+    if (!isToday(state.lastReviewedAt)) continue;
+    if (isToday(state.firstReviewedAt) || state.previous === undefined) {
+      reset.remove.push({ cardId: state.cardId, direction: state.direction });
+    } else {
+      const { previous, ...rest } = state;
+      reset.restore.push({ ...rest, ...previous });
     }
   }
   return reset;

@@ -35,6 +35,14 @@ import { getSolidDatasetLinear } from "./linearDataset";
 import { datasetOf, draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { releaseQuadsOf } from "./solidReleaseDraftRepository";
 
+/** The IRIs a subject has as values of a predicate, among its own quads: what pickShape asks of a subject. */
+function iriValuesIn(own: readonly Quad[]): (predicate: string) => string[] {
+  return (predicate) =>
+    own
+      .filter((q) => q.predicate.value === predicate && q.object.termType === "NamedNode")
+      .map((q) => q.object.value);
+}
+
 export interface ShaclShapeValidatorDeps {
   /** Fetches pod documents (authenticated). */
   fetch: typeof globalThis.fetch;
@@ -231,7 +239,12 @@ export function createShaclShapeValidator({
     for (const subject of subjects) {
       const thing = getThing(dataset, subject);
       if (thing === null) continue;
-      const pick = pickShape(getUrlAll(thing, RDF.type), storedVersionOf(thing), context);
+      const pick = pickShape(
+        getUrlAll(thing, RDF.type),
+        storedVersionOf(thing),
+        context,
+        (predicate) => getUrlAll(thing, predicate),
+      );
       if (pick.kind !== "shape") continue;
       const engine = await engineFor(pick.descriptor);
       for (const v of await engine.validateNode(data, subject, pick.descriptor.shapeIri)) {
@@ -281,7 +294,9 @@ export function createShaclShapeValidator({
     for (const thing of getThingAll(dataset)) {
       const subject = asUrl(thing);
       const version = storedVersionOf(thing);
-      const pick = pickShape(getUrlAll(thing, RDF.type), version, context);
+      const pick = pickShape(getUrlAll(thing, RDF.type), version, context, (predicate) =>
+        getUrlAll(thing, predicate),
+      );
       if (pick.kind === "untyped") {
         subjects.push({ url: subject, status: "untyped" });
         continue;
@@ -401,7 +416,7 @@ export function createShaclShapeValidator({
         const version = Number(
           own.find((q) => q.predicate.value === SM_FORMAT_VERSION)?.object.value ?? "1",
         );
-        const pick = pickShape(types, version, "library");
+        const pick = pickShape(types, version, "library", iriValuesIn(own));
         if (pick.kind !== "shape") {
           problems.push(problem(back(subject), { code: "unshaped", params: {} }));
           continue;

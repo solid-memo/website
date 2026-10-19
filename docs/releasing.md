@@ -175,7 +175,7 @@ follows the app's number:
 
 | What | Its version | Rules |
 |---|---|---|
-| The vocabulary | `v1` in its IRI, and `owl:versionInfo` (1.20) in [`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) | Terms are only added ([vocab.md](vocab.md#versioning-policy)) |
+| The vocabulary | `v1` in its IRI, and `owl:versionInfo` (1.21) in [`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) | Terms are only added ([vocab.md](vocab.md#versioning-policy)) |
 | The shapes | `ns/shapes/<class>/v<N>.ttl`, one file per format version | A published version is never edited ([shapes.md](shapes.md)) |
 | Format versions | `sm:formatVersion` on every subject the app writes | [migrations.md](migrations.md) |
 | The library's decks | `decks/<name>/v<N>.ttl` | A published version is never edited ([deck-library.md](deck-library.md#publishing-a-new-version)) |
@@ -183,7 +183,7 @@ follows the app's number:
 A new format version the app writes is a breaking change of the app,
 and so a major version; a new vocabulary term or a new deck version is
 not. The commit's subject names what it adds, so the changelog does
-too: "write deck format 8", "add a term to vocabulary 1.20".
+too: "write deck format 8", "add a term to vocabulary 1.21".
 
 ## The changelog
 

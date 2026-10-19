@@ -415,6 +415,23 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       scheduler: `${SM_NS}sm2`,
     },
   },
+  // Written through its descriptor, the state is stamped with the
+  // scheduler the shape fixes, solid-memo:fsrs6.
+  fsrsReviewState: {
+    1: {
+      reviewOf: "https://pod.example/d.ttl#it",
+      direction: `${SM_NS}backToFront`,
+      stability: 6.2,
+      difficulty: 4.93,
+      due: "2026-09-27",
+      firstReviewedAt: "2026-09-20T10:00:00.000Z",
+      lastReviewedAt: "2026-09-21T10:00:00.000Z",
+      previousStability: 2.31,
+      previousDifficulty: 5.1,
+      previousDue: "2026-09-21",
+      previousLastReviewedAt: "2026-09-20T10:00:00.000Z",
+    },
+  },
   preferences: {
     1: { newCardsPerDay: 20 },
     2: {
@@ -441,6 +458,18 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       invalidDataPolicy: `${SM_NS}warnOnly`,
       theme: `${SM_NS}darkTheme`,
     },
+    5: {
+      newCardsPerDay: 20,
+      maxReviewsPerDay: 200,
+      dayBoundaryHour: 4,
+      answerScale: "sm2",
+      developerMode: false,
+      invalidDataPolicy: `${SM_NS}warnOnly`,
+      theme: `${SM_NS}darkTheme`,
+      scheduler: `${SM_NS}fsrs6`,
+      desiredRetention: 0.85,
+      schedulerInvitationDismissed: false,
+    },
   },
   documentReceipt: {
     1: {
@@ -457,6 +486,19 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
       reviewsVersion: "absent",
       direction: `${SM_NS}bidirectional`,
       dayBoundaryHour: 4,
+      studyDay: "2026-10-01",
+      dueOnDay: ["2026-10-01 12", "2026-10-03 1"],
+      unreviewed: 466,
+      reviewedOnDay: 3,
+      introducedOnDay: 1,
+    },
+    2: {
+      deck: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
+      cardsVersion: '"c1"',
+      reviewsVersion: "absent",
+      direction: `${SM_NS}bidirectional`,
+      dayBoundaryHour: 4,
+      scheduler: `${SM_NS}fsrs6`,
       studyDay: "2026-10-01",
       dueOnDay: ["2026-10-01 12", "2026-10-03 1"],
       unreviewed: 466,

@@ -6,7 +6,7 @@ import { activeCards, isMarkdown, studyDirections, type Card, type DeckDirection
 import { canonicalTag } from "./languageTag";
 import { folded, shown, type LangText } from "./langText";
 import { LEECH_LAPSES } from "./cardHistory";
-import { reviewKeyOf, type ReviewState } from "./review";
+import { reviewKeyOf, type DueState, type ReviewState } from "./review";
 import { MATURE_INTERVAL_DAYS } from "./answer";
 
 /**
@@ -110,18 +110,27 @@ export interface CardQuery {
 
 export const DEFAULT_CARD_QUERY: CardQuery = { text: "", field: "any", page: 1, size: 50 };
 
-/** A deck's review states, with the direction it is studied in: which prompts its cards make. */
+/**
+ * A deck's review states, with the direction it is studied in: which
+ * prompts its cards make. `due`, what sets each prompt's due day
+ * (effectiveStates in fsrs.ts), gives the due days and intervals where
+ * it has a prompt; else the SM-2 state's own count.
+ */
 export interface DeckReviews {
   direction: DeckDirection;
   states: readonly ReviewState[];
+  due?: readonly DueState[];
 }
+
+/** What a prompt's state is queried by: SM-2's repetitions, and the due day and interval in effect. */
+type PromptStanding = Pick<ReviewState, "repetitions" | "intervalDays" | "due" | "easeFactor">;
 
 /** A card as the workbench lists it. */
 export interface CardRow {
   card: Card;
   /** The card's review states, of the directions the deck is studied in. */
   states: readonly ReviewState[];
-  /** Of those, the earliest due day, the shortest interval and the lowest ease: the prompt that needs the most work. */
+  /** Of those, the earliest due day, the shortest interval (each as the scheduler in use sets it) and the lowest ease: the prompt that needs the most work. */
   due?: string;
   intervalDays?: number;
   easeFactor?: number;
@@ -254,7 +263,7 @@ function hasFeature(card: Card, feature: CardFeature): boolean {
 function inState(
   card: Card,
   state: CardState,
-  states: readonly (ReviewState | undefined)[],
+  states: readonly (PromptStanding | undefined)[],
   today: string,
   lapses: number | undefined,
 ): boolean {
@@ -315,15 +324,27 @@ export function queryCards(
 ): CardRow[] {
   const directions = studyDirections(reviews.direction);
   const stateOf = new Map(reviews.states.map((state) => [reviewKeyOf(state), state]));
+  const dueOf = new Map((reviews.due ?? []).map((state) => [reviewKeyOf(state), state]));
+  const standingOf = (state: ReviewState | undefined): PromptStanding | undefined => {
+    if (state === undefined) return undefined;
+    const due = dueOf.get(reviewKeyOf(state)) ?? state;
+    return {
+      repetitions: state.repetitions,
+      easeFactor: state.easeFactor,
+      due: due.due,
+      intervalDays: due.intervalDays,
+    };
+  };
   const wanted = folded(query.text.trim());
   const readable = (text: CardText) => (text.markdown ? plain(text.value) : text.value);
 
   const rows: CardRow[] = [];
   for (const card of cards) {
     if (query.has !== undefined && !hasFeature(card, query.has)) continue;
-    const prompts = directions.map((direction) =>
+    const held = directions.map((direction) =>
       stateOf.get(reviewKeyOf({ cardId: card.id, direction })),
     );
+    const prompts = held.map(standingOf);
     const forgotten = lapses === undefined ? undefined : (lapses.get(card.url) ?? 0);
     if (query.state !== undefined && !inState(card, query.state, prompts, today, forgotten))
       continue;
@@ -334,6 +355,7 @@ export function queryCards(
       if (!texts.some((text) => wanted === "" || folded(readable(text)).includes(wanted))) continue;
     }
     const states = prompts.filter((state) => state !== undefined);
+    const own = held.filter((state) => state !== undefined);
     const due = least(
       states.map((s) => s.due),
       (a, b) => a.localeCompare(b),
@@ -348,7 +370,7 @@ export function queryCards(
     );
     rows.push({
       card,
-      states,
+      states: own,
       ...(due === undefined ? {} : { due }),
       ...(intervalDays === undefined ? {} : { intervalDays }),
       ...(easeFactor === undefined ? {} : { easeFactor }),

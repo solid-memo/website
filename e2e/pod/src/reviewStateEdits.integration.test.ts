@@ -126,14 +126,14 @@ const today = () => studyDayOf(new Date(), DEFAULT_PREFERENCES.dayBoundaryHour);
 describe.each(SERVERS)("edits of review states on $name", ({ url: server }) => {
   it("sets a card due on a day, its snapshot dropped, so a reset of the day makes it due today", async () => {
     const { instanceUrl, deck, useCases } = await seed(server);
-    const [gull] = (await useCases.listDeckReviewStates(deck)).filter(
+    const [gull] = (await useCases.listDeckReviewStates(deck)).sm2.filter(
       (state) => state.previous !== undefined,
     );
     expect(gull).toBeDefined();
     await expect(
       useCases.rescheduleCards(instanceUrl, deck, [gull!.cardId], "2099-01-01"),
     ).resolves.toBe(1);
-    const moved = (await page().listDeckReviewStates(deck)).find(
+    const moved = (await page().listDeckReviewStates(deck)).sm2.find(
       (state) => state.cardId === gull!.cardId,
     )!;
     expect(moved.due).toBe("2099-01-01");
@@ -142,7 +142,7 @@ describe.each(SERVERS)("edits of review states on $name", ({ url: server }) => {
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
 
     await useCases.resetStudyDay(instanceUrl, deck, new Date());
-    const reset = (await page().listDeckReviewStates(deck)).find(
+    const reset = (await page().listDeckReviewStates(deck)).sm2.find(
       (state) => state.cardId === gull!.cardId,
     )!;
     // Not the snapshot's due day: the state from before the reschedule never comes back.
@@ -152,14 +152,14 @@ describe.each(SERVERS)("edits of review states on $name", ({ url: server }) => {
 
   it("forgets a card, its answers kept in the log", async () => {
     const { instanceUrl, deck, useCases } = await seed(server);
-    const states = await useCases.listDeckReviewStates(deck);
+    const states = (await useCases.listDeckReviewStates(deck)).sm2;
     // The seed's answers, all in the log once read.
     const before = await useCases.getStatistics(instanceUrl, new Date(), { deckUrl: deck.url });
     expect(before.totals.answers).toBe(4);
     await expect(
       useCases.resetCards(instanceUrl, deck, [states[0]!.cardId, "never-studied"]),
     ).resolves.toBe(1);
-    expect((await page().listDeckReviewStates(deck)).map((state) => state.cardId)).toEqual([
+    expect((await page().listDeckReviewStates(deck)).sm2.map((state) => state.cardId)).toEqual([
       states[1]!.cardId,
     ]);
     const after = await page().getStatistics(instanceUrl, new Date(), { deckUrl: deck.url });

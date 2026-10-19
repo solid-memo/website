@@ -12,7 +12,7 @@ import {
   importedDeck,
   type DeckFileContent,
 } from "./deckFile";
-import type { ReviewState } from "./review";
+import type { FsrsState, ReviewState } from "./review";
 
 const POD = "https://pod.example/solid-memo/";
 const INSTANCE = "https://other.example/memo/";
@@ -125,6 +125,25 @@ describe("importedDeck", () => {
       { ...card, url: `${INSTANCE}decks/deck-a.ttl#card-1`, formatVersion: CARD_FORMAT_VERSION },
     ]);
     expect(reviews).toEqual([state]);
+  });
+
+  it("keeps the FSRS-6 states with the progress", () => {
+    const fsrs: FsrsState = {
+      cardId: "card-1",
+      direction: "front-to-back",
+      stability: 4,
+      difficulty: 5,
+      due: "2025-02-02",
+      firstReviewedAt: state.firstReviewedAt,
+      lastReviewedAt: state.lastReviewedAt,
+      formatVersion: 1,
+    };
+    const file = content({ fsrsReviews: [fsrs] });
+    expect(importedDeck(INSTANCE, file, options).fsrsReviews).toEqual([fsrs]);
+    expect(importedDeck(INSTANCE, file, { ...options, withProgress: false }).fsrsReviews).toEqual(
+      [],
+    );
+    expect(importedDeck(INSTANCE, content(), options).fsrsReviews).toEqual([]);
   });
 
   it("leaves the progress out unless asked", () => {

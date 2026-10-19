@@ -4,7 +4,7 @@
 
 import { AppError } from "./appError";
 import type { StudyDirection } from "./deck";
-import type { ReviewKey, ReviewState } from "./review";
+import { type ReviewKey, reviewKeyOf } from "./review";
 
 /**
  * The Studio's edits of a card's review state (docs/studio.md): forget
@@ -19,12 +19,15 @@ export function isStudyDay(day: string): boolean {
   return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(day);
 }
 
+/** A state that sets a due day and snapshots what a day's first review overwrites: an SM-2 or FSRS-6 state. */
+type Rescheduled = ReviewKey & { due: string; previous?: unknown };
+
 /** The states of the cards of these ids, in one direction or (absent) in both. */
-function statesOf(
-  states: readonly ReviewState[],
+function statesOf<T extends ReviewKey>(
+  states: readonly T[],
   ids: readonly string[],
   direction: StudyDirection | undefined,
-): ReviewState[] {
+): T[] {
   const chosen = new Set(ids);
   return states.filter(
     (state) =>
@@ -34,15 +37,23 @@ function statesOf(
 
 /**
  * Forget the cards of these ids, in one direction or (absent) in both:
- * the keys of their states, to remove. The scheduler then sees them as
- * new; a card never studied has no state, so nothing to forget.
+ * the keys of their states, to remove, each once (the states may be of
+ * both schedulers, an SM-2 and an FSRS-6 state of one prompt). The
+ * scheduler then sees them as new; a card never studied has no state,
+ * so nothing to forget.
  */
 export function resetStates(
-  states: readonly ReviewState[],
+  states: readonly ReviewKey[],
   ids: readonly string[],
   direction?: StudyDirection,
 ): ReviewKey[] {
-  return statesOf(states, ids, direction).map(({ cardId, direction }) => ({ cardId, direction }));
+  const keys = new Map(
+    statesOf(states, ids, direction).map(({ cardId, direction }) => [
+      reviewKeyOf({ cardId, direction }),
+      { cardId, direction },
+    ]),
+  );
+  return [...keys.values()];
 }
 
 /**
@@ -55,23 +66,25 @@ export function resetStates(
  * before snapshots existed. Refuses a day that is no date
  * (dueDayInvalid).
  */
-export function rescheduleState(state: ReviewState, due: string): ReviewState {
+export function rescheduleState<T extends Rescheduled>(state: T, due: string): T {
   if (!isStudyDay(due)) throw new AppError("dueDayInvalid", { day: due });
   const { previous: _stale, ...kept } = state;
-  return { ...kept, due };
+  return { ...kept, due } as T;
 }
 
 /**
  * Set the cards of these ids due on `due`, in one direction or (absent)
  * in both, as rescheduleState does each state: the states to save. A
- * card never studied has no state, so it stays new.
+ * card never studied has no state, so it stays new. Both schedulers'
+ * states are set alike, each list on its own (UseCases.rescheduleCards),
+ * so the due day holds whichever sets it, now or after a switch.
  */
-export function rescheduleStates(
-  states: readonly ReviewState[],
+export function rescheduleStates<T extends Rescheduled>(
+  states: readonly T[],
   ids: readonly string[],
   due: string,
   direction?: StudyDirection,
-): ReviewState[] {
+): T[] {
   if (!isStudyDay(due)) throw new AppError("dueDayInvalid", { day: due });
   return statesOf(states, ids, direction).map((state) => rescheduleState(state, due));
 }

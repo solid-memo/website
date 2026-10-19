@@ -3,8 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
+import type { Scheduler } from "./fsrs";
 import type { StudyPreferences } from "./preferences";
-import { reviewKeyOf, type ReviewState } from "./review";
+import { reviewKeyOf, type DueState } from "./review";
 import { studyDayOf } from "./scheduling";
 
 /**
@@ -16,11 +17,14 @@ import { studyDayOf } from "./scheduling";
  * buildStudyQueue, without the cards or the reviews.
  *
  * It holds while neither document changes (the digest stamps their
- * versions), the deck's direction is the same and the day boundary too.
+ * versions), the deck's direction is the same, the day boundary too, and
+ * the scheduler whose due days it counts is still the one in use.
  */
 export interface DeckSchedule {
   direction: DeckDirection;
   dayBoundaryHour: number;
+  /** The scheduler whose due days it counts: switching sets other days without a write to the reviews. */
+  scheduler: Scheduler;
   /** Prompts with review state, by the study day they are due. */
   dueByDay: Record<string, number>;
   /** Prompts never reviewed. */
@@ -33,14 +37,16 @@ export interface DeckSchedule {
   introducedOnDay: number;
 }
 
+/** The deck's schedule from its prompts' due days, those of `scheduler` (effectiveStates). */
 export function scheduleOf(input: {
   cards: Card[];
   direction: DeckDirection;
-  reviews: ReviewState[];
+  reviews: readonly DueState[];
+  scheduler: Scheduler;
   dayBoundaryHour: number;
   now: Date;
 }): DeckSchedule {
-  const { cards, direction, reviews, dayBoundaryHour, now } = input;
+  const { cards, direction, reviews, scheduler, dayBoundaryHour, now } = input;
   const studyDay = studyDayOf(now, dayBoundaryHour);
   const reviewOf = new Map(reviews.map((r) => [reviewKeyOf(r), r]));
   const dueByDay: Record<string, number> = {};
@@ -56,6 +62,7 @@ export function scheduleOf(input: {
   return {
     direction,
     dayBoundaryHour,
+    scheduler,
     dueByDay,
     unreviewed,
     studyDay,
@@ -66,15 +73,19 @@ export function scheduleOf(input: {
 
 /**
  * Today's counts from a schedule, as buildStudyQueue would give them;
- * null when the schedule cannot say (another direction or day boundary,
- * or computed on a later day than today: the clock went back).
+ * null when the schedule cannot say (another direction, day boundary or
+ * scheduler, or computed on a later day than today: the clock went back).
  */
 export function studyCountsOf(
   schedule: DeckSchedule,
   input: { direction: DeckDirection; prefs: StudyPreferences; now: Date },
 ): { dueCount: number; newCount: number } | null {
   const { direction, prefs, now } = input;
-  if (schedule.direction !== direction || schedule.dayBoundaryHour !== prefs.dayBoundaryHour)
+  if (
+    schedule.direction !== direction ||
+    schedule.dayBoundaryHour !== prefs.dayBoundaryHour ||
+    schedule.scheduler !== prefs.scheduler
+  )
     return null;
   const today = studyDayOf(now, prefs.dayBoundaryHour);
   if (schedule.studyDay > today) return null;

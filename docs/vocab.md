@@ -70,7 +70,7 @@ string, so other applications can look up what it means:
 | `sm:Themes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:systemTheme` (default), `sm:lightTheme`, `sm:darkTheme` | `sm:theme` in preferences ([theme.md](theme.md)) |
 | `sm:AnswerModes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:recall` (absent means this), `sm:multipleChoice` | `sm:answerMode` on an answer in the [answer log](data-model.md#the-answer-log) |
 | `sm:TextFormats` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:plainText` (absent means this), `sm:markdown` | `sm:textFormat` on a card, a course step or a chapter ([Text formats](#text-formats)) |
-| `sm:Schedulers` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:sm2` (absent means this) | `sm:scheduler` on a review state ([Review states](#review-states)) |
+| `sm:Schedulers` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:sm2` (absent means this), `sm:fsrs6` | `sm:scheduler` on a review state ([Review states](#review-states)); `sm:studyScheduler` in preferences and `sm:scheduledWith` on a deck schedule ([FSRS-6](#fsrs-6)) |
 | Topics (`https://solid-memo.com/ns/vocab/topics.ttl`) | [`topics.ttl`](../ns/vocab/topics.ttl) | languages (swedish), geography, computing (linked-data), science (chemistry), art, labour-market | `dcat:theme` on a deck, next to the EU data theme `EDUC` |
 
 - Every scheme has a `dcterms:title` and a `skos:definition`; every
@@ -143,7 +143,12 @@ string, so other applications can look up what it means:
   `sm:utcOffsetMinutes` joined answer format 1 the first way
   ([The answer log](#the-answer-log)). 1.20's `sm:frontLabel` joined
   card format 6, the next version of the card shape
-  ([Card labels](#card-labels)).
+  ([Card labels](#card-labels)). 1.21's `sm:stability`, `sm:difficulty`,
+  `sm:previousStability` and `sm:previousDifficulty` joined a new
+  shape, FSRS review-state format 1, beside the concept `sm:fsrs6`; its
+  `sm:studyScheduler`, `sm:desiredRetention` and
+  `sm:schedulerInvitationDismissed` joined preferences format 5, and `sm:scheduledWith` deck schedule format 2, the next
+  versions of those shapes ([FSRS-6](#fsrs-6)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
   says only "at most one IRI", so a reader that meets a concept it does
@@ -270,7 +275,9 @@ schedules by another algorithm can keep its states beside Solid Memo's.
 - **What the app writes and how it reads them** is in
   [data-model.md](data-model.md#decks-and-cards): what a state says wins
   over its name, one state per card and direction counts, and a state of
-  another scheduler is never read, written over or removed.
+  another scheduler is never read, written over or removed; an FSRS-6
+  state (`sm:fsrs6`) is the app's own, kept beside the SM-2 state of the
+  same prompt.
 - **Other apps' terms, written beside Solid Memo's own**: a card names
   each of its distractors with `schema:suggestedAnswer` as well as
   `sm:distractor` (whose `rdfs:seeAlso` points at it), and a deck's
@@ -332,6 +339,46 @@ answer, so a card studied both ways says what is asked. The side's text
 stays the prompt or the answer itself. Card format 6 owns it
 ([shapes.md](shapes.md#version-by-version)): card format 5 was
 published without it, and a published shape is never edited.
+
+## FSRS-6
+
+1.21 added a second scheduler, FSRS-6, whose states are kept beside the
+SM-2 ones ([#191](https://github.com/solid-memo/website/issues/191)):
+
+| Term | Kind | Domain → range |
+|---|---|---|
+| `sm:fsrs6` | concept of `sm:Schedulers` (notation `fsrs6`) | |
+| `sm:stability` | datatype property | ReviewState → `xsd:decimal` (days, > 0) |
+| `sm:difficulty` | datatype property | ReviewState → `xsd:decimal` (1–10) |
+| `sm:previousStability` | datatype property | ReviewState → `xsd:decimal` |
+| `sm:previousDifficulty` | datatype property | ReviewState → `xsd:decimal` |
+| `sm:studyScheduler` | object property | Preferences → a concept of `sm:Schedulers` |
+| `sm:desiredRetention` | datatype property | Preferences → `xsd:decimal` (a share: 0.9 is 90%) |
+| `sm:schedulerInvitationDismissed` | datatype property | Preferences → `xsd:boolean` (the learner answered "Not now" to the invitation to switch to FSRS-6) |
+| `sm:scheduledWith` | object property | DeckSchedule → a concept of `sm:Schedulers` |
+
+- **An FSRS-6 state is a review state.** The frozen domains of
+  `sm:due`, `sm:lastReviewedAt`, `sm:reviewOf` and `sm:scheduler` are
+  `sm:ReviewState`, so FSRS-6 reuses them and the class, and the reviews
+  document's type index registration covers its states. What tells one
+  from an SM-2 state is `sm:scheduler sm:fsrs6`, which its shape fixes
+  ([shapes.md](shapes.md#conventions)). `sm:previousDue` and
+  `sm:previousLastReviewedAt` serve its snapshot too: their comments are
+  no scheduler's. `sm:easeFactor` and `sm:repetitions` are SM-2's and
+  are not reused.
+- **Stability is a number of days**: the time from the last review
+  until the chance of recalling the card has fallen to 90%, whatever
+  retention the user asks for. Difficulty runs from 1 to 10.
+- **`sm:scheduler` could not be reused** for the scheduler the user
+  studies by, as its domain is `sm:ReviewState`: `sm:studyScheduler`
+  says it in preferences, and `sm:scheduledWith` says which scheduler's
+  due days a deck schedule in the [digest](data-model.md#the-digest)
+  counts, as `sm:scheduledDirection` and `sm:scheduledDayBoundaryHour`
+  say what else it was computed with.
+- **Both preferences terms are always stated** (preferences format 5):
+  the retention is kept while SM-2 sets the due days, so a switch back
+  to FSRS-6 finds the one chosen. It is a share from 0.7 to 0.97; 0.9,
+  FSRS-6's default, is what preferences of format 4 are read with.
 
 ## The language of text
 

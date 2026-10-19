@@ -89,6 +89,11 @@ describe("DeckInsightScreen", () => {
       .map((row) => row.textContent);
     expect(easeRows[0]).toBe("1.3 to under 1.51");
     expect(easeRows.at(-1)).toBe("2.7 or more0");
+    expect(
+      screen.getByText(
+        "The ease is SM-2's, kept up to date on every review whichever scheduler sets the due days.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("lists the leeches, each a link to its card, and links to them all among the deck's cards", () => {

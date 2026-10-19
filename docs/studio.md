@@ -833,8 +833,10 @@ be changed, the bar has Clear selection alone. The edits are:
   and after, and every card it leaves as it is, and why. Nothing is
   written until the user confirms.
 - **Delete**, with the cards' review states, once the user confirms:
-  every SM-2 state of each card, read or not; another scheduler's state
-  stays ([data-model.md](data-model.md#decks-and-cards)).
+  every SM-2 and FSRS-6 state of each card, read or not; another
+  scheduler's state stays ([data-model.md](data-model.md#decks-and-cards)).
+  Undone, the cards' SM-2 states come back, and FSRS-6 estimates its
+  own from them at the next review.
 - **Set due date** and **Forget progress**, of the cards' review states
   in every direction ([below](#review-state)). A card not studied yet
   stays new. These have no Undo, and a forget asks first.
@@ -922,10 +924,22 @@ Its four tabs are links, the one shown marked
 - **Schedule**: the card's review state in each direction the deck
   studies, and in one it no longer does while a state is kept there
   ([`CardScheduleContainer`](../apps/studio/src/ui/CardScheduleContainer.tsx)).
-  It shows when the card is due, its interval, ease and right answers in
-  a row, and when it was first and last reviewed. A direction never
-  studied says the card is new that way. Each state can be given a due
-  day, or forgotten, once the user confirms ([below](#review-state)).
+  It shows SM-2's state: when the card is due, its interval, ease and
+  right answers in a row, and when it was first and last reviewed. When
+  the instance's preferences name FSRS-6, or the card has an FSRS-6
+  state that way, an FSRS-6 part follows: its due day, its stability (in
+  days), its difficulty (1 to 10, to a tenth) and the chance of
+  recalling the card now (`recallNow` in
+  [`fsrs.ts`](../packages/domain/src/fsrs.ts), at the whole study days
+  since the last review), with a line saying which of the two sets the
+  due days. While FSRS-6 sets them but the state is missing or stale
+  ([srs.md](srs.md#fsrs-6)), it says instead that the state is
+  estimated from SM-2's at the next review, and SM-2's due day counts
+  until then. An FSRS-6 state with no SM-2 state beside it counts for
+  nothing and is not shown. A direction never studied says the card is
+  new that way. Each state can be given a due day, which starts at the
+  one that sets it, or forgotten, once the user confirms
+  ([below](#review-state)).
 - **History**: the card's answers in its deck, newest first
   ([`CardHistoryScreen`](../apps/studio/src/ui/CardHistoryScreen.tsx)):
   when each was given, which way, its grade, how (recalled, or chosen
@@ -1023,20 +1037,23 @@ The domain makes both changes
 
 - `resetStates` forgets cards: their states go, so the scheduler sees
   them as new. The inspector forgets one direction; the workbench
-  forgets every direction of the selected cards. Every SM-2 state of the
-  card that way goes, read or not, so no second one is read in its
-  place; another scheduler's state stays.
+  forgets every direction of the selected cards. Every state of the
+  card that way goes, SM-2's and FSRS-6's, read or not, so no second
+  one is read in its place; another scheduler's state stays.
 - `rescheduleState` sets a state's due day. Its interval, ease and
   repetitions stay. It drops the state's snapshot for resetting the
   study day (`previous`, [srs.md](srs.md#resetting-the-day)), so that
   reset can never bring back a state from before the new due day. A
-  day that is no date is refused.
+  day that is no date is refused. The card's FSRS-6 state, when it has
+  one, is set due that day too, its snapshot dropped, so the day holds
+  whichever scheduler sets the due days, now or after a switch.
 
 The states are those Solid Memo reads
 ([data-model.md](data-model.md#decks-and-cards)): joined to their card
 by `sm:reviewOf` and `sm:reviewDirection`, the fragment rule only where
 a state leaves them out, so a state another app named its own way is
-edited in place. Only `sm:sm2` states are touched.
+edited in place. Only the app's own states, `sm:sm2` and `sm:fsrs6`,
+are touched.
 
 Neither touches the answer log: the card's answers stay in its history
 and in the statistics. The use cases `resetCards` and
@@ -1078,12 +1095,15 @@ The domain plans the transfer
   called, and is written in the target naming the card there
   (`sm:reviewOf` into the target's cards document), at the subject the
   fragment rule names, or a new `#review-<uuid>` when another's is
-  there.
+  there. Its FSRS-6 state goes with its SM-2 state the same way; where
+  the card has none, a state the target held at that prompt goes, so
+  none is left of another card. An FSRS-6 state with no SM-2 state
+  beside it counts for nothing, so it is not carried, only removed.
 - A card written in the target names its wrong options with
   `sm:distractor` and `schema:suggestedAnswer` alike, each typed
   `sm:Distractor` and `schema:Answer`.
-- A move then removes the cards from the source, with every SM-2 state
-  they have, read or not. A copy leaves the source as it is. Another
+- A move then removes the cards from the source, with every SM-2 and
+  FSRS-6 state they have, read or not. A copy leaves the source as it is. Another
   scheduler's states are never moved, copied or removed: they stay in
   the source, naming the card there.
 - Past answers are not touched. They keep naming the source, so a
@@ -1135,7 +1155,10 @@ case `deckInsight` reads what it needs. It writes nothing to the deck.
 - **Intervals and eases**, as bars, with tables: how many cards, each
   way, have each interval (1 day, 2–3, 4–7, up to a year and more) and
   each ease (from 1.3, in steps of 0.2). Only cards in use count, in
-  the directions the deck studies.
+  the directions the deck studies. The intervals are those of the
+  scheduler that sets the due days; the ease is SM-2's, kept up to date
+  on every review whichever scheduler sets them, and the chart's note
+  says so.
 - **Lapses and leeches.** A lapse is a review graded below 3, in the
   deck's answers in the [answer log](data-model.md#the-answer-log)
   (`lapseIndex`, by `isLapse`): not a card's first answer, an answer

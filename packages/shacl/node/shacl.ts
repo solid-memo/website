@@ -82,7 +82,9 @@ export async function validateTurtleDocument(
     const version = Number(
       data.getObjects(node, DataFactory.namedNode(`${SM_NS}formatVersion`), null)[0]?.value ?? "1",
     );
-    const pick = pickShape(types, version, context);
+    const pick = pickShape(types, version, context, (predicate) =>
+      data.getObjects(node, DataFactory.namedNode(predicate), null).map((o) => o.value),
+    );
     if (pick.kind === "untyped") {
       problems.push(`<${subject}> is typed with a Solid Memo term that names no class.`);
       continue;

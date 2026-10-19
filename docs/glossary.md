@@ -152,9 +152,22 @@ it most. The specifications' versions and status are in
   the statistics are drawn from. [data-model.md](data-model.md#the-answer-log).
 - **Answer scale**: the buttons you grade an answer with, the full 0 to
   5 or Again, Hard, Good and Easy. [srs.md](srs.md#answer-scales).
+- **Desired retention**: the chance of recalling a card when it comes
+  back that FSRS-6 schedules for, from 70% to 97%, 90% by default; set
+  in the preferences. [srs.md](srs.md#fsrs-6).
+- **Difficulty**: FSRS-6's measure of how hard a card is, from 1
+  (easiest) to 10 (hardest); the harder, the slower its stability
+  grows. [srs.md](srs.md#fsrs-6-state).
 - **Ease factor**: SM-2's measure of how easy a card is; the interval
   grows by it. It starts at 2.5 and never goes below 1.3.
   [srs.md](srs.md#the-sm-2-transition).
+- **FSRS-6** (Free Spaced Repetition Scheduler, version 6): the
+  scheduling algorithm Solid Memo recommends, and a new instance starts
+  on, by Jarrett Ye and the Open Spaced Repetition project; it
+  schedules each review for when the chance of recall falls to the
+  desired retention.
+  [The Algorithm](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm);
+  [srs.md](srs.md#fsrs-6), [policy.md](policy.md#fsrs-6).
 - **Grade** (quality): how well you knew an answer, from 0 (blackout)
   to 5 (perfect). [srs.md](srs.md#the-sm-2-transition).
 - **Interval**: the number of days until a card is due again.
@@ -168,13 +181,27 @@ it most. The specifications' versions and status are in
   which the Studio points out. [studio.md](studio.md#a-decks-schedule).
 - **Prompt**: one card seen from one side, front to back or back to
   front, scheduled on its own. [srs.md](srs.md#prompts-and-directions).
+- **Retrievability**: the chance, under FSRS-6, of recalling a card
+  now: 90% after as many days as its stability, falling as days go by.
+  [srs.md](srs.md#fsrs-6).
 - **Review state**: what Solid Memo knows of a prompt's schedule: its
-  ease factor, interval, repetitions and due day.
+  ease factor, interval, repetitions and due day; under FSRS-6, also
+  its stability and difficulty, in a state of its own.
   [srs.md](srs.md#review-state).
-- **SM-2** (SuperMemo 2): the scheduling algorithm Solid Memo uses,
-  published by Piotr Woźniak in 1990.
+- **Scheduler**: the algorithm that sets the due days, FSRS-6 or SM-2,
+  chosen in the preferences or from the deck list's invitation to
+  switch. [srs.md](srs.md#switching-the-scheduler).
+- **Scheduler invitation**: the deck list's offer, to a learner on SM-2,
+  to switch to FSRS-6; "Not now" is kept in the preferences.
+  [srs.md](srs.md#the-invitation-to-switch).
+- **SM-2** (SuperMemo 2): the scheduling algorithm Solid Memo used
+  alone before FSRS-6, and still uses for an instance made before then
+  until its learner switches, published by Piotr Woźniak in 1990.
   [Description](https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method);
   [srs.md](srs.md), [policy.md](policy.md#sm-2).
+- **Stability**: FSRS-6's measure of how long a card's memory lasts:
+  the days until the chance of recalling it falls to 90%.
+  [srs.md](srs.md#fsrs-6-state).
 - **SRS** (spaced repetition system): software that shows you a card
   just before you would forget it, at longer and longer intervals.
   [srs.md](srs.md).

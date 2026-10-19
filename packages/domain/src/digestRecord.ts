@@ -2,14 +2,20 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DeckScheduleV1, DocumentReceiptV1 } from "@solid-memo/vocab/types.generated";
-import { conceptOfDirection, directionOfConcept } from "./concepts";
+import type { DeckScheduleV2, DocumentReceiptV1 } from "@solid-memo/vocab/types.generated";
+import {
+  conceptOfDirection,
+  conceptOfScheduler,
+  directionOfConcept,
+  schedulerOfConcept,
+} from "./concepts";
 import type { DocumentReceipt, StoredSchedule } from "./studyDigest";
 
 /**
  * The digest's subjects between their shape records and the model. A
  * schedule's prompts due by day are "YYYY-MM-DD count" values in the
- * record, a map in the model.
+ * record, a map in the model; its direction and scheduler are concepts
+ * in the record, notations in the model.
  */
 export function receiptFromRecord(data: DocumentReceiptV1): DocumentReceipt {
   return {
@@ -29,7 +35,7 @@ export function receiptToRecord(receipt: DocumentReceipt): DocumentReceiptV1 {
   };
 }
 
-export function scheduleFromRecord(data: DeckScheduleV1): StoredSchedule {
+export function scheduleFromRecord(data: DeckScheduleV2): StoredSchedule {
   const dueByDay: Record<string, number> = {};
   for (const value of data.dueOnDay) {
     const [day, count] = value.split(" ");
@@ -42,6 +48,7 @@ export function scheduleFromRecord(data: DeckScheduleV1): StoredSchedule {
     schedule: {
       direction: directionOfConcept(data.direction)!,
       dayBoundaryHour: data.dayBoundaryHour,
+      scheduler: schedulerOfConcept(data.scheduler)!,
       dueByDay,
       unreviewed: data.unreviewed,
       studyDay: data.studyDay,
@@ -51,7 +58,7 @@ export function scheduleFromRecord(data: DeckScheduleV1): StoredSchedule {
   };
 }
 
-export function scheduleToRecord(stored: StoredSchedule): DeckScheduleV1 {
+export function scheduleToRecord(stored: StoredSchedule): DeckScheduleV2 {
   const { schedule } = stored;
   return {
     deck: stored.deck,
@@ -59,6 +66,7 @@ export function scheduleToRecord(stored: StoredSchedule): DeckScheduleV1 {
     reviewsVersion: stored.reviewsVersion,
     direction: conceptOfDirection(schedule.direction),
     dayBoundaryHour: schedule.dayBoundaryHour,
+    scheduler: conceptOfScheduler(schedule.scheduler),
     studyDay: schedule.studyDay,
     dueOnDay: Object.entries(schedule.dueByDay)
       .filter(([, count]) => count > 0)

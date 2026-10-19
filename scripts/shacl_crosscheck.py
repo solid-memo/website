@@ -32,10 +32,12 @@ browser's engine cannot run, fails CI (see docs/validation.md):
   reference data beside it: no index;
 - Solid Memo's own shapes over the valid fixtures of the formats the
   Studio writes (library deck format 6, a release in a pod, and the
-  draft deck, chapter and step formats, a draft of one). The shapes have
-  no targets (the app picks a subject's shape by its class, format
-  version and context): this script picks them the same way, and states
-  each pick as an sh:targetNode;
+  draft deck, chapter and step formats, a draft of one), and of the
+  review states a reviews document holds (review-state format 2 and
+  FSRS review-state format 1, told apart by their scheduler). The shapes
+  have no targets (the app picks a subject's shape by its class, format
+  version, context and the values some shapes fix): this script picks
+  them the same way, and states each pick as an sh:targetNode;
 - SkoHub's SKOS shapes, best practice included, over ns/vocab/v1.ttl
   and ns/vocab/topics.ttl, where warnings fail too.
 
@@ -90,8 +92,21 @@ SM = Namespace("https://solid-memo.com/ns/vocab/v1.ttl#")
 CONTEXTS = {"inPod": "pod", "inLibrary": "library", "inDraft": "draft"}
 
 
-def own_shapes() -> tuple[Graph, list[tuple[URIRef, URIRef, int, str]]]:
-    """Every Solid Memo shape in one graph, and each named node shape's (IRI, class, version, context)."""
+Pick = tuple[URIRef, URIRef, int, str, frozenset[tuple[URIRef, URIRef]]]
+
+
+def fixed_values(shapes: Graph, shape: URIRef) -> frozenset[tuple[URIRef, URIRef]]:
+    """The (predicate, value) pairs a node shape fixes: sh:hasValue with sh:maxCount 1 on a predicate other than rdf:type, as packages/vocab/tooling/shapes.ts reads them."""
+    fixed = set()
+    for prop in shapes.objects(shape, SH.property):
+        path, value = shapes.value(prop, SH.path), shapes.value(prop, SH.hasValue)
+        if path not in (None, RDF.type, SM.formatVersion) and value is not None and shapes.value(prop, SH.maxCount) == Literal(1):
+            fixed.add((path, value))
+    return frozenset(fixed)
+
+
+def own_shapes() -> tuple[Graph, list[Pick]]:
+    """Every Solid Memo shape in one graph, and each named node shape's (IRI, class, version, context, fixed values)."""
     shapes = graph(*(site(path.relative_to(ROOT).as_posix()) for path in sorted((ROOT / "ns" / "shapes").glob("*/v*.ttl"))))
     picks = []
     for shape, name in shapes.subject_objects(SH.name):
@@ -99,23 +114,29 @@ def own_shapes() -> tuple[Graph, list[tuple[URIRef, URIRef, int, str]]]:
             continue
         version = int(str(name).rsplit("V", 1)[1])
         context = CONTEXTS.get(str(shape).rsplit("#", 1)[1], "any")
-        picks.append((shape, shapes.value(shape, SH["class"]), version, context))
+        picks.append((shape, shapes.value(shape, SH["class"]), version, context, fixed_values(shapes, shape)))
     return shapes, picks
 
 
-def targeted(data: Graph, shapes: Graph, picks: list[tuple[URIRef, URIRef, int, str]], context: str) -> Graph:
-    """The shapes with each subject of `data` targeted at the shape the app picks for it (registry.ts, pickShape)."""
+def targeted(data: Graph, shapes: Graph, picks: list[Pick], context: str) -> Graph:
+    """The shapes with each subject of `data` targeted at the shape the app picks for it (registry.ts, pickShape).
+
+    A shape that fixes values fits only a subject that has them all, and is
+    then preferred to its class's shapes without (an FSRS-6 review state).
+    """
     chosen = Graph() + shapes
     for subject in set(data.subjects(RDF.type, None)):
         types = set(data.objects(subject, RDF.type))
-        matching = [p for p in picks if p[1] in types and p[3] in ("any", context)]
+        matching = [p for p in picks if p[1] in types and p[3] in ("any", context) and all((subject, predicate, value) in data for predicate, value in p[4])]
         own = [p for p in matching if str(p[1]).startswith(str(SM))]
+        classed = own or matching
+        fixed = [p for p in classed if p[4]]
         version = int(data.value(subject, SM.formatVersion, default=Literal(1)))
-        picked = [p for p in (own or matching) if p[2] == version]
+        picked = [p for p in (fixed or classed) if p[2] == version]
         if not picked and (matching or any(str(t).startswith(str(SM)) for t in types)):
             # The app reports such a subject (untyped or newer); here it must not slip by unchecked.
             raise ValueError(f"{subject} has no {context} shape at format {version}.")
-        for shape, _, _, _ in picked:
+        for shape, *_ in picked:
             chosen.add((shape, SH.targetNode, subject))
     return chosen
 
@@ -225,7 +246,10 @@ def main() -> int:
     studio = [(release, "library") for release in standalone] + [
         (draft, "draft") for kind in ("draft-deck", "draft-chapter", "draft-step") for draft in sorted((VOCAB / f"fixtures/{kind}/v1/valid").glob("*.ttl"))
     ]
-    for fixture, context in studio:
+    # The review states of a reviews document, SM-2's and FSRS-6's, each
+    # picked by its scheduler.
+    reviews = [(state, "pod") for kind in ("review-state/v2", "fsrs-review-state/v1") for state in sorted((VOCAB / f"fixtures/{kind}/valid").glob("*.ttl"))]
+    for fixture, context in studio + reviews:
         name = fixture.relative_to(VOCAB / "fixtures").as_posix()
         data = graph((fixture, "https://pod.example/solid-memo/main/drafts/d/v1/release.ttl"))
         jobs.append((f"{name} (Solid Memo's shapes, {context})", partial(conformance, data, targeted(data, shapes, picks, context), warnings_fail=False), 0))

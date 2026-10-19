@@ -41,7 +41,9 @@ export function createSolidPreferencesRepository({
         toPreferencesThing(url, preferences, getThing(dataset, url)),
       );
       await checkWrite(updated, [url], "pod");
-      await saveDataset(documentUrl, updated, fetch);
+      // One PUT of the whole document, If-Match the read above: node-solid-server stores a boolean a PATCH
+      // inserts as false, so "Not now" (schedulerInvitationDismissed) and the developer settings would not hold.
+      await saveDataset(documentUrl, updated, fetch, { whole: true });
     },
 
     async upgradePreferences(instanceUrl): Promise<boolean> {
@@ -54,8 +56,8 @@ export function createSolidPreferencesRepository({
       if (stored === null || !isPreferencesOutdated(stored)) return false;
       const updated = setThing(dataset!, toPreferencesThing(url, stored.preferences, existing));
       await checkWrite(updated, [url], "pod");
-      // If-Match the read above.
-      await saveDataset(documentUrl, updated, fetch);
+      // One PUT of the whole document, If-Match the read above, as savePreferences writes it.
+      await saveDataset(documentUrl, updated, fetch, { whole: true });
       return true;
     },
   };

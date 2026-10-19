@@ -167,7 +167,7 @@ async function triples(url: string): Promise<string> {
 const contentOf = (cards: readonly Card[]) =>
   cards.map(({ url: _, ...card }) => card).sort((a, b) => a.id.localeCompare(b.id));
 const statesOf = async (deck: Deck) =>
-  (await page().listDeckReviewStates(deck)).sort((a, b) => a.cardId.localeCompare(b.cardId));
+  (await page().listDeckReviewStates(deck)).sm2.sort((a, b) => a.cardId.localeCompare(b.cardId));
 
 describe.each(SERVERS)("decks as files on $name", ({ url: server }) => {
   for (const format of DECK_FILE_FORMATS) {

@@ -17,9 +17,9 @@
 <>
     a owl:Ontology ;
     dcterms:title "Solid Memo vocabulary, v1" ;
-    dcterms:description "Terms for spaced-repetition flashcards stored in a Solid pod: instances, decks, cards, SM-2 review state and study preferences." ;
-    owl:versionInfo "1.20" ;
-    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump). 1.15: the TextFormats concept scheme and textFormat, how the texts of a card, a course step or a chapter are written, plain or Markdown (on each without a format bump). 1.16: reviewOf and reviewDirection, the card and direction a review state is of, and scheduler with the Schedulers concept scheme (review-state format 2, without a format bump). 1.17: newcomerCourse, the course the deck library's index offers to newcomers (on the catalogue, outside every shape). 1.18: releaseDraft and publishedRelease, a catalogue's drafts of releases and the releases it published (on the catalogue, outside every shape), and releasedAs, the release a draft was published as (draft deck format 1). 1.19: recallMillis, gradeMillis, priorDue and utcOffsetMinutes, how long an answer took, when its prompt was due and the device's offset from UTC (on an answer, without an answer format bump). 1.20: frontLabel, a caption above the front (card format 6)." .
+    dcterms:description "Terms for spaced-repetition flashcards stored in a Solid pod: instances, decks, cards, review state (SM-2 or FSRS-6) and study preferences." ;
+    owl:versionInfo "1.21" ;
+    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump). 1.15: the TextFormats concept scheme and textFormat, how the texts of a card, a course step or a chapter are written, plain or Markdown (on each without a format bump). 1.16: reviewOf and reviewDirection, the card and direction a review state is of, and scheduler with the Schedulers concept scheme (review-state format 2, without a format bump). 1.17: newcomerCourse, the course the deck library's index offers to newcomers (on the catalogue, outside every shape). 1.18: releaseDraft and publishedRelease, a catalogue's drafts of releases and the releases it published (on the catalogue, outside every shape), and releasedAs, the release a draft was published as (draft deck format 1). 1.19: recallMillis, gradeMillis, priorDue and utcOffsetMinutes, how long an answer took, when its prompt was due and the device's offset from UTC (on an answer, without an answer format bump). 1.20: frontLabel, a caption above the front (card format 6). 1.21: fsrs6, the FSRS-6 scheduler, a concept of Schedulers, with stability, difficulty, previousStability and previousDifficulty (FSRS review-state format 1, a new shape of ReviewState told apart by its scheduler); studyScheduler and desiredRetention, which scheduler sets the due days and the retention FSRS-6 aims at, and schedulerInvitationDismissed, whether the learner declined the invitation to switch to FSRS-6 (preferences format 5); scheduledWith, the scheduler whose due days a deck schedule counts (deck schedule format 2)." .
 
 #################### Classes ####################
 
@@ -47,7 +47,7 @@ solid-memo:Card
 solid-memo:ReviewState
     a owl:Class ;
     rdfs:label "Review state" ;
-    rdfs:comment "SM-2 scheduling state of one card in one study direction. It names its card with reviewOf and the direction with reviewDirection (since 1.16); without them, its subject is named after the card: #<cardId> for front-to-back, #<cardId>@back-to-front for the other way." ;
+    rdfs:comment "Scheduling state of one card in one study direction, its fields those of the scheduler it names with scheduler: SM-2 where it names none, FSRS-6 since 1.21. It names its card with reviewOf and the direction with reviewDirection (since 1.16); without them, its subject is named after the card: #<cardId> for front-to-back, #<cardId>@back-to-front for the other way." ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Since 1.0." .
 
@@ -374,7 +374,7 @@ solid-memo:lastReviewedAt
 solid-memo:previousEaseFactor
     a owl:DatatypeProperty ;
     rdfs:label "previous ease factor" ;
-    rdfs:comment "Snapshot: the ease factor before the first review of the study day of lastReviewedAt. The five previous* terms are written all together or not at all; resetting the day restores them." ;
+    rdfs:comment "Snapshot: the ease factor before the first review of the study day of lastReviewedAt. An SM-2 state writes its five previous* terms (previousEaseFactor, previousIntervalDays, previousRepetitions, previousDue, previousLastReviewedAt) all together or not at all; resetting the day restores them." ;
     rdfs:domain solid-memo:ReviewState ;
     rdfs:range xsd:decimal ;
     rdfs:isDefinedBy <> ;
@@ -443,6 +443,42 @@ solid-memo:scheduler
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.16, in review-state format 2 without a version bump: an older reader takes every state for SM-2, as before." .
 
+solid-memo:stability
+    a owl:DatatypeProperty ;
+    rdfs:label "stability" ;
+    rdfs:comment "FSRS-6 memory stability: the days from the last review until the chance of recalling the card has fallen to 90%. Always greater than 0." ;
+    rdfs:domain solid-memo:ReviewState ;
+    rdfs:range xsd:decimal ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.21 for FSRS review-state format 1." .
+
+solid-memo:difficulty
+    a owl:DatatypeProperty ;
+    rdfs:label "difficulty" ;
+    rdfs:comment "FSRS-6 difficulty: how hard the card is to remember, from 1 (easiest) to 10 (hardest)." ;
+    rdfs:domain solid-memo:ReviewState ;
+    rdfs:range xsd:decimal ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.21 for FSRS review-state format 1." .
+
+solid-memo:previousStability
+    a owl:DatatypeProperty ;
+    rdfs:label "previous stability" ;
+    rdfs:comment "Snapshot: the stability before the first review of the study day of lastReviewedAt. An FSRS-6 state writes its four previous* terms (previousStability, previousDifficulty, previousDue, previousLastReviewedAt) all together or not at all; resetting the day restores them." ;
+    rdfs:domain solid-memo:ReviewState ;
+    rdfs:range xsd:decimal ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.21 for FSRS review-state format 1." .
+
+solid-memo:previousDifficulty
+    a owl:DatatypeProperty ;
+    rdfs:label "previous difficulty" ;
+    rdfs:comment "Snapshot: the difficulty before the first review of the study day." ;
+    rdfs:domain solid-memo:ReviewState ;
+    rdfs:range xsd:decimal ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.21 for FSRS review-state format 1." .
+
 #################### Preferences ####################
 
 solid-memo:newCardsPerDay
@@ -507,6 +543,33 @@ solid-memo:theme
     rdfs:range skos:Concept ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.11 for preferences format 4." .
+
+solid-memo:studyScheduler
+    a owl:ObjectProperty ;
+    rdfs:label "study scheduler" ;
+    rdfs:comment "The scheduler whose review states set the study days the instance's cards fall due on: a concept of solid-memo:Schedulers." ;
+    rdfs:domain solid-memo:Preferences ;
+    rdfs:range skos:Concept ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.21 for preferences format 5." .
+
+solid-memo:desiredRetention
+    a owl:DatatypeProperty ;
+    rdfs:label "desired retention" ;
+    rdfs:comment "The chance of recalling a card on the day it falls due that FSRS-6 schedules for, as a share: 0.9 is 90%." ;
+    rdfs:domain solid-memo:Preferences ;
+    rdfs:range xsd:decimal ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.21 for preferences format 5." .
+
+solid-memo:schedulerInvitationDismissed
+    a owl:DatatypeProperty ;
+    rdfs:label "scheduler invitation dismissed" ;
+    rdfs:comment "Whether the learner answered Not now to the deck list's invitation to switch from SM-2 to FSRS-6, so it is not shown again." ;
+    rdfs:domain solid-memo:Preferences ;
+    rdfs:range xsd:boolean ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.21 for preferences format 5." .
 
 #################### Digest ####################
 
@@ -590,6 +653,15 @@ solid-memo:scheduledDayBoundaryHour
     rdfs:range xsd:integer ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.9." .
+
+solid-memo:scheduledWith
+    a owl:ObjectProperty ;
+    rdfs:label "scheduled with" ;
+    rdfs:comment "The scheduler whose review states gave the due days the schedule counts: a concept of solid-memo:Schedulers." ;
+    rdfs:domain solid-memo:DeckSchedule ;
+    rdfs:range skos:Concept ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.21 for deck schedule format 2." .
 
 solid-memo:scheduledOn
     a owl:DatatypeProperty ;
@@ -1037,7 +1109,8 @@ solid-memo:Schedulers
     a skos:ConceptScheme ;
     dcterms:title "Schedulers"@en ;
     skos:definition "The spaced-repetition algorithms a review state's fields may belong to."@en ;
-    skos:hasTopConcept solid-memo:sm2 ;
+    skos:hasTopConcept solid-memo:sm2 ,
+                       solid-memo:fsrs6 ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.16." .
 
@@ -1050,3 +1123,13 @@ solid-memo:sm2
     skos:topConceptOf solid-memo:Schedulers ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.16." .
+
+solid-memo:fsrs6
+    a skos:Concept ;
+    skos:prefLabel "FSRS-6"@en ;
+    skos:definition "The Free Spaced Repetition Scheduler, version 6: a memory stability in days, a difficulty from 1 to 10 and a due day, chosen so that the chance of recalling the card on that day is the desired retention."@en ;
+    skos:notation "fsrs6" ;
+    skos:inScheme solid-memo:Schedulers ;
+    skos:topConceptOf solid-memo:Schedulers ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.21." .

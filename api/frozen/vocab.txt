@@ -43,7 +43,9 @@ sm:darkTheme: concept
 sm:dayBoundaryHour: property, range xsd:integer, domain sm:Preferences
 sm:deckMaxReviewsPerDay: property, range xsd:integer, domain sm:Deck
 sm:deckNewCardsPerDay: property, range xsd:integer, domain sm:Deck
+sm:desiredRetention: property, range xsd:decimal, domain sm:Preferences
 sm:developerMode: property, range xsd:boolean, domain sm:Preferences
+sm:difficulty: property, range xsd:decimal, domain sm:ReviewState
 sm:direction: property, range xsd:string, domain sm:Deck
 sm:distractor: property, range sm:Distractor, domain sm:Card
 sm:distractorNote: property, range xsd:string, domain sm:Distractor
@@ -60,6 +62,7 @@ sm:frontImageDescription: property, range xsd:string, domain sm:Card
 sm:frontLabel: property, range xsd:string, domain sm:Card
 sm:frontNote: property, range xsd:string, domain sm:Card
 sm:frontToBack: concept
+sm:fsrs6: concept
 sm:grade: property, range xsd:integer, domain sm:Answer
 sm:gradeMillis: property, range xsd:integer, domain sm:Answer
 sm:intervalDays: property, range xsd:integer, domain sm:ReviewState
@@ -76,11 +79,13 @@ sm:newcomerCourse: property, range http://www.w3.org/ns/dcat#DatasetSeries, doma
 sm:nextIntervalDays: property, range xsd:integer, domain sm:Answer
 sm:plainText: concept
 sm:position: property, range xsd:integer
+sm:previousDifficulty: property, range xsd:decimal, domain sm:ReviewState
 sm:previousDue: property, range xsd:string, domain sm:ReviewState
 sm:previousEaseFactor: property, range xsd:decimal, domain sm:ReviewState
 sm:previousIntervalDays: property, range xsd:integer, domain sm:ReviewState
 sm:previousLastReviewedAt: property, range xsd:dateTime, domain sm:ReviewState
 sm:previousRepetitions: property, range xsd:integer, domain sm:ReviewState
+sm:previousStability: property, range xsd:decimal, domain sm:ReviewState
 sm:priorDue: property, range xsd:string, domain sm:Answer
 sm:priorIntervalDays: property, range xsd:integer, domain sm:Answer
 sm:publishedRelease: property, range http://www.w3.org/ns/dcat#Dataset, domain http://www.w3.org/ns/dcat#Catalog
@@ -100,9 +105,13 @@ sm:scheduleOf: property, range sm:Deck, domain sm:DeckSchedule
 sm:scheduledDayBoundaryHour: property, range xsd:integer, domain sm:DeckSchedule
 sm:scheduledDirection: property, range skos:Concept, domain sm:DeckSchedule
 sm:scheduledOn: property, range xsd:string, domain sm:DeckSchedule
+sm:scheduledWith: property, range skos:Concept, domain sm:DeckSchedule
 sm:scheduler: property, range skos:Concept, domain sm:ReviewState
+sm:schedulerInvitationDismissed: property, range xsd:boolean, domain sm:Preferences
 sm:sm2: concept
+sm:stability: property, range xsd:decimal, domain sm:ReviewState
 sm:studyDirection: property, range skos:Concept, domain sm:Deck
+sm:studyScheduler: property, range skos:Concept, domain sm:Preferences
 sm:systemTheme: concept
 sm:textFormat: property, range skos:Concept
 sm:theme: property, range skos:Concept, domain sm:Preferences

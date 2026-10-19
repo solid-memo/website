@@ -3,8 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import type { ReviewState } from "./review";
+import type { FsrsState, ReviewState } from "./review";
 import {
+  FSRS6_SCHEDULER,
+  fsrsKeyOfLinks,
+  fsrsReviewStateFromRecord,
+  fsrsReviewStateToRecord,
+  namedFsrsSubject,
   namedReviewSubject,
   pickReviewStates,
   reviewFragmentOf,
@@ -167,6 +172,105 @@ describe("what a stored review state is of", () => {
       reviewKeyOfSubject(subject("card-1"), DECK, { direction: `${SM}bidirectional` }),
     ).toBeNull();
   });
+
+  it("reads no card from a subject named as an FSRS-6 state's, unless the state names both", () => {
+    expect(reviewKeyOfSubject(subject("card-1@fsrs6"), DECK, {})).toBeNull();
+    expect(
+      reviewKeyOfSubject(subject("card-1@back-to-front@fsrs6"), DECK, {
+        reviewOf: `${CARDS}#card-1`,
+      }),
+    ).toBeNull();
+    expect(
+      reviewKeyOfSubject(subject("card-1@fsrs6"), DECK, {
+        reviewOf: `${CARDS}#card-1`,
+        direction: `${SM}frontToBack`,
+      }),
+    ).toEqual(key);
+  });
+});
+
+describe("what a stored FSRS-6 state is of", () => {
+  const links = { reviewOf: `${CARDS}#card-2`, direction: `${SM}backToFront` };
+
+  it("goes by its links alone", () => {
+    expect(fsrsKeyOfLinks(DECK, links)).toEqual({ cardId: "card-2", direction: "back-to-front" });
+    expect(fsrsKeyOfLinks(DECK, { anotherScheduler: true, ...links })).toEqual({
+      cardId: "card-2",
+      direction: "back-to-front",
+    });
+  });
+
+  it("is nothing without both links, of a card elsewhere or of another direction", () => {
+    expect(fsrsKeyOfLinks(DECK, { reviewOf: links.reviewOf })).toBeNull();
+    expect(fsrsKeyOfLinks(DECK, { direction: links.direction })).toBeNull();
+    expect(
+      fsrsKeyOfLinks(DECK, { ...links, reviewOf: "https://pod.example/a/decks/deck-2.ttl#c" }),
+    ).toBeNull();
+    expect(fsrsKeyOfLinks(DECK, { ...links, direction: `${SM}bidirectional` })).toBeNull();
+  });
+});
+
+describe("FSRS-6 state records", () => {
+  const fsrs: FsrsState = {
+    ...key,
+    stability: 12.5,
+    difficulty: 4.25,
+    due: "2026-10-03",
+    firstReviewedAt: "2026-09-15T08:00:00.000Z",
+    lastReviewedAt: "2026-09-21T08:12:00.000Z",
+    formatVersion: 1,
+  };
+  const previous = {
+    stability: 3.2,
+    difficulty: 4.5,
+    due: "2026-09-21",
+    lastReviewedAt: "2026-09-18T08:00:00.000Z",
+  };
+
+  it("names the scheduler by its notation", () => {
+    expect(FSRS6_SCHEDULER).toBe(`${SM}fsrs6`);
+  });
+
+  it("are named after the SM-2 state of the same prompt", () => {
+    expect(namedFsrsSubject(REVIEWS, key)).toBe(`${REVIEWS}#card-1@fsrs6`);
+    expect(namedFsrsSubject(REVIEWS, { cardId: "card-1", direction: "back-to-front" })).toBe(
+      `${REVIEWS}#card-1@back-to-front@fsrs6`,
+    );
+  });
+
+  it("round-trip a state without a snapshot", () => {
+    const record = fsrsReviewStateToRecord(fsrs, CARDS);
+    expect(record).toEqual({
+      reviewOf: `${CARDS}#card-1`,
+      direction: `${SM}frontToBack`,
+      stability: 12.5,
+      difficulty: 4.25,
+      due: "2026-10-03",
+      firstReviewedAt: "2026-09-15T08:00:00.000Z",
+      lastReviewedAt: "2026-09-21T08:12:00.000Z",
+    });
+    expect(fsrsReviewStateFromRecord(key, 1, record)).toEqual(fsrs);
+  });
+
+  it("round-trip the snapshot, and read a partial one as none", () => {
+    const record = fsrsReviewStateToRecord({ ...fsrs, previous }, CARDS);
+    expect(record).toMatchObject({
+      previousStability: 3.2,
+      previousDifficulty: 4.5,
+      previousDue: "2026-09-21",
+      previousLastReviewedAt: "2026-09-18T08:00:00.000Z",
+    });
+    expect(fsrsReviewStateFromRecord(key, 1, record)).toEqual({ ...fsrs, previous });
+    for (const left of [
+      "previousStability",
+      "previousDifficulty",
+      "previousDue",
+      "previousLastReviewedAt",
+    ] as const) {
+      const { [left]: _gone, ...partial } = record;
+      expect(fsrsReviewStateFromRecord(key, 1, partial)).toEqual(fsrs);
+    }
+  });
 });
 
 describe("picking one state per card and direction", () => {
@@ -197,5 +301,10 @@ describe("picking one state per card and direction", () => {
     const first = at("rs-1");
     expect(pickReviewStates(REVIEWS, [at("rs-3"), first, at("rs-2")])).toEqual([first]);
     expect(pickReviewStates(REVIEWS, [named, at("rs-1")])).toEqual([named]);
+  });
+
+  it("keeps the FSRS-6 state at the subject it is named at, given how FSRS-6 states are named", () => {
+    const named = at("card-1@fsrs6");
+    expect(pickReviewStates(REVIEWS, [at("card-1"), named], namedFsrsSubject)).toEqual([named]);
   });
 });

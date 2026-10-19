@@ -161,11 +161,19 @@ export function storedVersionOf(thing: Thing): number {
   return getInteger(thing, SM.formatVersion) ?? 1;
 }
 
+/** Whether the subject has every value the shape fixes (an FSRS-6 state's scheduler). */
+function hasFixedValues(thing: Thing, descriptor: ShapeDescriptor): boolean {
+  return descriptor.fixedValues.every((fixed) =>
+    getUrlAll(thing, fixed.predicate).includes(fixed.value),
+  );
+}
+
 /**
  * A subject of the given kind, read with the shape of its stored version
  * — or, for a version newer than this app knows, with the latest shape
  * it has, the stored version passing through. Null when the subject is
- * not of the kind's class, or does not fit its shape.
+ * not of the kind's class, lacks a value the kind's shape fixes, or does
+ * not fit its shape.
  */
 export function readVersioned<S extends ShapeName>(
   thing: Thing,
@@ -175,6 +183,7 @@ export function readVersioned<S extends ShapeName>(
   const version = Math.min(Math.max(storedVersion, 1), LATEST_VERSION[shape]);
   const descriptor = (SHAPES[shape] as Record<number, ShapeDescriptor>)[version];
   if (!getUrlAll(thing, RDF.type).includes(descriptor.targetClass)) return null;
+  if (!hasFixedValues(thing, descriptor)) return null;
   const data = readRecord(thing, descriptor);
   if (data === null) return null;
   return { storedVersion, record: { version, data } as VersionedRecord[S] };
@@ -253,8 +262,8 @@ function addValue(
 /**
  * The subject as this app writes it: the existing subject (so unknown
  * triples survive) or a new one, typed once with its class and any
- * further types its shape names, with the record applied and the
- * shape's version stamped.
+ * further types its shape names, with the record applied, the values
+ * the shape fixes set and the shape's version stamped.
  *
  * A tab running an older version of the app is stopped here from
  * writing over what a newer one wrote: an existing subject stamped with a
@@ -284,30 +293,27 @@ export function recordThing<T>(
   for (const type of [descriptor.targetClass, ...descriptor.additionalTypes]) {
     if (!types.includes(type)) builder.addIri(RDF.type, type);
   }
-  return applyRecord(builder, descriptor, record)
-    .setInteger(SM.formatVersion, descriptor.version)
-    .build();
+  applyRecord(builder, descriptor, record);
+  for (const fixed of descriptor.fixedValues) builder.setIri(fixed.predicate, fixed.value);
+  return builder.setInteger(SM.formatVersion, descriptor.version).build();
 }
 
 /**
  * The subject, unless a newer version of the app wrote it: one stamped
  * with a version above the latest this app writes for its class is
  * refused (writtenByNewerApp), as recordThing refuses it, for the writes
- * that change or remove a subject without recording it. A subject of no
+ * that change or remove a subject without recording it. Where a kind's
+ * shape fixes values the subject has (an FSRS-6 review state), that
+ * kind's latest version counts, not its class's others'. A subject of no
  * class this app writes is not its to judge, and passes.
  */
 export function unlessNewer<T extends Thing>(thing: T): T {
   const types = getUrlAll(thing, RDF.type);
-  const writes = Math.max(
-    0,
-    ...(Object.keys(LATEST_VERSION) as ShapeName[])
-      .filter((shape) =>
-        types.includes(
-          (SHAPES[shape] as Record<number, ShapeDescriptor>)[LATEST_VERSION[shape]].targetClass,
-        ),
-      )
-      .map((shape) => LATEST_VERSION[shape]),
-  );
+  const latest = (Object.keys(LATEST_VERSION) as ShapeName[])
+    .map((shape) => (SHAPES[shape] as Record<number, ShapeDescriptor>)[LATEST_VERSION[shape]])
+    .filter((d) => types.includes(d.targetClass) && hasFixedValues(thing, d));
+  const fixed = latest.filter((d) => d.fixedValues.length > 0);
+  const writes = Math.max(0, ...(fixed.length > 0 ? fixed : latest).map((d) => d.version));
   const version = storedVersionOf(thing);
   if (writes > 0 && version > writes)
     throw new AppError("writtenByNewerApp", { url: thing.url, version, writes });

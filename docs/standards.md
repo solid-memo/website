@@ -3,7 +3,7 @@
 Every standard and specification Solid Memo uses, with its version, its
 status, a link to where it is published, and where the code uses it.
 A term you do not know is in the [glossary](glossary.md). The rules the
-code follows beyond these formats, such as SM-2, are in
+code follows beyond these formats, such as SM-2 and FSRS-6, are in
 [policy.md](policy.md).
 
 **Open** means the specification is published for anyone to read and
@@ -146,9 +146,14 @@ way of others working with Solid Memo's code or data.
   so text already written keeps its meaning.
 - **SM-2** is an algorithm published by SuperMemo, not a standard. Its
   description is public and anyone may implement it
-  ([srs.md](srs.md), [policy.md](policy.md#sm-2)). A review state says
-  which scheduler wrote it (`sm:scheduler`, [vocab.md](vocab.md#review-states)),
-  so another scheduler can be added beside it.
+  ([srs.md](srs.md), [policy.md](policy.md#sm-2)). **FSRS-6** is an
+  algorithm published by Open Spaced Repetition, not a standard either:
+  its formulas and default parameters are public, with a reference
+  implementation under BSD-3-Clause
+  ([srs.md](srs.md#fsrs-6), [policy.md](policy.md#fsrs-6)). A review
+  state says which scheduler wrote it (`sm:scheduler`,
+  [vocab.md](vocab.md#review-states)), so the two are kept side by side,
+  and another scheduler can be added beside them.
 - **Open Graph** and **Sitemaps** are de facto web conventions for link
   previews and search engines. Nothing in the app depends on them.
 - **publiccode.yml, the Citation File Format, Semantic Versioning,

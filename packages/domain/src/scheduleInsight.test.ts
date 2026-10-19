@@ -49,6 +49,7 @@ function schedule(extra: Partial<DeckSchedule> = {}): DeckSchedule {
   return {
     direction: "front-to-back",
     dayBoundaryHour: 4,
+    scheduler: "sm2",
     dueByDay: {},
     unreviewed: 0,
     studyDay: "2026-10-09",
@@ -66,7 +67,12 @@ describe("freshSchedule", () => {
     schedule: schedule(),
   };
   const versions = { cards: "c1", reviews: "r1" };
-  const input = { direction: "front-to-back" as const, dayBoundaryHour: 4, today: "2026-10-09" };
+  const input = {
+    direction: "front-to-back" as const,
+    dayBoundaryHour: 4,
+    scheduler: "sm2" as const,
+    today: "2026-10-09",
+  };
 
   it("is the digest's schedule while it was computed from the documents as they are now, as the deck is studied", () => {
     expect(freshSchedule(stored, versions, input)).toBe(stored.schedule);
@@ -83,6 +89,8 @@ describe("freshSchedule", () => {
     expect(freshSchedule(stored, { ...versions, reviews: "r2" }, input)).toBeNull();
     expect(freshSchedule(stored, versions, { ...input, direction: "bidirectional" })).toBeNull();
     expect(freshSchedule(stored, versions, { ...input, dayBoundaryHour: 0 })).toBeNull();
+    // Switching scheduler writes no review: the due days are another's.
+    expect(freshSchedule(stored, versions, { ...input, scheduler: "fsrs6" })).toBeNull();
     // Computed on a later day: the clock went back.
     expect(freshSchedule(stored, versions, { ...input, today: "2026-10-08" })).toBeNull();
   });

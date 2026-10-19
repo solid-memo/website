@@ -2358,6 +2358,20 @@ td.clickable a.cell-overlay {
   border-radius: 0.5rem;
 }
 
+/* The scheduler the preferences recommend, marked beside its name. */
+.recommended-tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 650;
+  vertical-align: 0.1em;
+}
+
 .retired-toggle label {
   display: inline-flex;
   align-items: center;
@@ -4109,6 +4123,31 @@ p[role="status"]:not(.loading) {
     justify-self: start;
     margin: 0.4rem 0 0 1.75rem;
   }
+}
+
+/* The invitation to switch to FSRS-6, above the deck list: a box like the
+   course strip's, marked along its start edge, its buttons wrapping under
+   its text. */
+.scheduler-invitation {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-inline-start: 0.3rem solid var(--primary);
+  border-radius: var(--radius);
+}
+
+.scheduler-invitation p {
+  margin: 0 0 0.5rem;
+}
+
+.scheduler-invitation .scheduler-invitation-title {
+  margin: 0 0 0.25rem;
+  font-weight: 650;
+}
+
+.scheduler-invitation .edit-actions {
+  margin: 0.5rem 0 0;
 }
 
 .statistics figure {

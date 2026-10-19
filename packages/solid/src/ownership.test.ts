@@ -98,4 +98,20 @@ describe("foreignSubjects", () => {
       new Set([`${DOC}#rs-1`, `${DOC}#rs-2`, `${DOC}#rs-3`, `${DOC}#rs-4`]),
     );
   });
+
+  it("counts this app's FSRS-6 state as its own, unless FSRS-6 is named by a literal", () => {
+    const dataset = documentOf(
+      subject("card-1@fsrs6")
+        .addIri(RDF.type, SM.ReviewState)
+        .addInteger(SM.formatVersion, 1)
+        .addIri(SM.scheduler, SM.fsrs6)
+        .build(),
+      subject("rs-5")
+        .addIri(RDF.type, SM.ReviewState)
+        .addInteger(SM.formatVersion, 1)
+        .addStringNoLocale(SM.scheduler, SM.fsrs6)
+        .build(),
+    );
+    expect(foreignSubjects(dataset)).toEqual(new Set([`${DOC}#rs-5`]));
+  });
 });

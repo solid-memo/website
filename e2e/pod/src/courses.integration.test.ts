@@ -197,7 +197,7 @@ describe.each(SERVERS)("a course on $name", ({ url: server }) => {
     });
     await expect(
       reviewStateRepository.getReviewState(deck, { cardId: "q-iri", direction: "front-to-back" }),
-    ).resolves.toEqual(answered.state);
+    ).resolves.toEqual({ sm2: answered.state, fsrs: null });
 
     // The answer reaches the log once the session's answers are flushed.
     await useCases.refreshStudyDigest(instanceUrl, deck);

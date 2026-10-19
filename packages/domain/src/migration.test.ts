@@ -122,6 +122,9 @@ describe("review states, preferences and the instance record", () => {
       true,
     );
     expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 4 })).toBe(
+      true,
+    );
+    expect(isPreferencesOutdated({ preferences: DEFAULT_PREFERENCES, formatVersion: 5 })).toBe(
       false,
     );
     expect(isInstanceOutdated({ name: "Main", createdAt: "", formatVersion: 0 })).toBe(true);
@@ -187,7 +190,7 @@ describe("planMigration", () => {
       isPlanEmpty(
         planMigration({
           instance: { name: "Main", createdAt: "", formatVersion: 2 },
-          preferences: { preferences: DEFAULT_PREFERENCES, formatVersion: 4 },
+          preferences: { preferences: DEFAULT_PREFERENCES, formatVersion: 5 },
           catalog,
           entries: [],
         }),

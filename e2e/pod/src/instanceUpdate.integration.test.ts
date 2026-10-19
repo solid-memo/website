@@ -191,9 +191,10 @@ async function seedOldPod(server: string, format: 4 | 5): Promise<Pod> {
   );
   await put(
     `${source}preferences.ttl`,
-    `${PREFIXES}<#it> a sm:Preferences ; sm:formatVersion 4 ; sm:newCardsPerDay 20 ; sm:maxReviewsPerDay 200 ;
+    `${PREFIXES}<#it> a sm:Preferences ; sm:formatVersion 5 ; sm:newCardsPerDay 20 ; sm:maxReviewsPerDay 200 ;
     sm:dayBoundaryHour 4 ; sm:answerScale "sm2" ; sm:developerMode false ;
-    sm:invalidDataPolicy sm:warnOnly ; sm:theme sm:darkTheme .`,
+    sm:invalidDataPolicy sm:warnOnly ; sm:theme sm:darkTheme ;
+    sm:studyScheduler sm:sm2 ; sm:desiredRetention 0.9 ; sm:schedulerInvitationDismissed false .`,
   );
   await put(
     `${source}catalog.ttl`,
@@ -249,8 +250,7 @@ ${deck(
  * Community Solid Server's in-memory store cuts a document with other
  * characters short when it is patched (docs/testing.md). What
  * node-solid-server cannot patch is left out: a document with SPARQL-style
- * `PREFIX` directives, and a value the update rewrites spelled otherwise
- * than Solid Memo spells it (`2.50`), which its PATCH cannot delete.
+ * `PREFIX` directives.
  */
 async function seedHandWritten(server: string): Promise<Pod> {
   const pod = await seedPod(server);
@@ -951,14 +951,10 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     let interfered = false;
     const { useCases } = app(pod, {
       onRequest: async (request) => {
-        if (
-          interfered ||
-          request.method !== "PATCH" ||
-          request.url !== `${pod.source}preferences.ttl`
-        )
+        if (interfered || !isWrite(request) || request.url !== `${pod.source}preferences.ttl`)
           return;
         interfered = true;
-        // Another tab saves the preferences first.
+        // Another tab saves the preferences first, just before the save's write (a PUT of the document).
         await changeElsewhere(
           `${pod.source}preferences.ttl`,
           `<#it> <https://solid-memo.com/ns/vocab/v1.ttl#note> "saved in another tab" .`,

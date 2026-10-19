@@ -4,7 +4,8 @@ Trying Solid Memo before logging in. A guest studies in a pod kept in
 their browser. Once they log in with a real WebID they can move what they
 studied into their own Pod. Everything else in the app works the same
 for a guest: the deck library, studying, statistics, preferences and the
-data check.
+data check. A guest's instance is made as any new one is, so it studies
+by FSRS-6 ([srs.md](srs.md#which-scheduler-an-instance-is-on)).
 
 ## A pod in the browser
 
@@ -135,7 +136,8 @@ It runs these steps:
      own, so no id can clash), their distractors and when they were
      made, written in this app's format, the document saying it is part
      of the deck; its review states keep their SM-2 fields and
-     snapshots, each naming its card, direction and scheduler;
+     snapshots, each naming its card, direction and scheduler, and its
+     FSRS-6 states come with them, as they are;
    - the cards document is created first (one PUT, only where nothing
      is), then the reviews document (likewise), and only then the
      deck's catalog entry, with `If-Match` (the catalog read and the

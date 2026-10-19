@@ -21,9 +21,11 @@ flowchart LR
   ([preferences format 4](shapes.md)): a concept of `sm:Themes`
   (`sm:systemTheme`, `sm:lightTheme`, `sm:darkTheme`). This is the
   choice that counts, and it follows the user to every device. It is
-  written once the instance has preferences, that is after the user's
-  first save of the study preferences (which saves the theme shown at
-  the time); before that, a choice is kept on the device alone.
+  written once the instance has preferences: a new instance is made
+  with them, the theme shown at the time among them; an instance made
+  before has them after the user's first save of the study preferences
+  (which saves the theme shown at the time), and until then a choice is
+  kept on the device alone.
 - **On the device**, by the `ThemePreference` port
   ([localStorageThemePreference.ts](../packages/browser/src/localStorageThemePreference.ts),
   key `solid-memo:theme`; "As my browser" is no key at all). It is what

@@ -357,7 +357,8 @@ function withIfMatch(
 
 /**
  * The fetch, with the PATCH @inrupt/solid-client sends given our body
- * (patchBody), or sent as a PUT of the whole dataset (its every triple,
+ * (patchBody, sent again with its deleted decimals spelled as numbers
+ * where a conflict (409) may come of their spelling), or sent as a PUT of the whole dataset (its every triple,
  * the edit applied) when that body is larger than MAX_PATCH_BYTES, or
  * always (`whole`); other headers kept. @inrupt/solid-client takes the
  * answer as its PATCH's.
@@ -374,7 +375,15 @@ function ownPatches(
       !whole &&
       (typeof body !== "string" || new TextEncoder().encode(body).length <= MAX_PATCH_BYTES)
     ) {
-      return fetch(input, { ...init, body });
+      const response = await fetch(input, { ...init, body });
+      // node-solid-server finds no decimal deleted as it served it (`1.0`, `2.50`), only as it reads it (`1`,
+      // `2.5`), and applies nothing (409): sent once more, decimals so spelled. A deletion of a triple that is
+      // gone fails again, as it should; one found the second time names the same number.
+      if (response.status !== 409) return response;
+      const respelled = patchBody(dataset, true);
+      return respelled === null || respelled === body
+        ? response
+        : fetch(input, { ...init, body: respelled });
     }
     const headers = new Headers(init.headers);
     headers.set("Content-Type", "text/turtle");
@@ -417,7 +426,9 @@ export async function appendAllToDocument(
   const batches: (string | null)[][] = [];
   let size = 0;
   for (const thing of things) {
-    const lines = [...toRdfJsDataset(setThing(createSolidDataset(), thing))].map(tripleLine);
+    const lines = [...toRdfJsDataset(setThing(createSolidDataset(), thing))].map((quad) =>
+      tripleLine(quad, false),
+    );
     const bytes = encoder.encode(lines.join("\n")).length + 1;
     if (batches.length === 0 || size + bytes > MAX_PATCH_BYTES) {
       batches.push(lines);
@@ -441,27 +452,34 @@ export async function appendAllToDocument(
 /** Where @inrupt/solid-client names a Thing that has no URL yet: `<#name>` in the document. */
 const LOCAL_NODE = "https://inrupt.com/.well-known/sdk-local-node/";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
+const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
 
 /**
  * The SPARQL Update of a dataset's changes, one triple a line in
  * N-Triples form, every triple closed by " .": what every Solid server
  * parses, node-solid-server's too. Null when a change has a blank node,
  * which DELETE DATA cannot name; then @inrupt/solid-client's body is sent.
+ *
+ * `decimalsAsNumbers` spells each decimal deleted as JavaScript spells
+ * its number (`1` for `1.0`, `2.5` for `2.50`): how node-solid-server
+ * reads a decimal in the document it patches, though it serves a whole
+ * one with `.0` (`1` written, `1.0` served), so a deletion spelled as
+ * read is not found there (ownPatches).
  */
-export function patchBody(dataset: SolidDataset): string | null {
+export function patchBody(dataset: SolidDataset, decimalsAsNumbers = false): string | null {
   const changes = (dataset as Partial<WithChangeLog>).internal_changeLog;
   if (changes === undefined) return null;
-  const block = (operation: string, quads: readonly Quad[]): string | null => {
-    const triples = quads.map(tripleLine);
+  const block = (operation: string, quads: readonly Quad[], asNumbers: boolean): string | null => {
+    const triples = quads.map((quad) => tripleLine(quad, asNumbers));
     if (triples.includes(null)) return null;
     return triples.length === 0 ? "" : `${operation} {\n${triples.join("\n")}\n};\n`;
   };
-  const deletions = block("DELETE DATA", changes.deletions);
-  const additions = block("INSERT DATA", changes.additions);
+  const deletions = block("DELETE DATA", changes.deletions, decimalsAsNumbers);
+  const additions = block("INSERT DATA", changes.additions, false);
   return deletions === null || additions === null ? null : deletions + additions;
 }
 
-function tripleLine(quad: Quad): string | null {
+function tripleLine(quad: Quad, decimalsAsNumbers: boolean): string | null {
   const { subject, predicate, object } = quad;
   if (
     subject.termType !== "NamedNode" ||
@@ -469,15 +487,19 @@ function tripleLine(quad: Quad): string | null {
   ) {
     return null;
   }
-  return `${iri(subject.value)} ${iri(predicate.value)} ${object.termType === "Literal" ? literal(object) : iri(object.value)} .`;
+  return `${iri(subject.value)} ${iri(predicate.value)} ${object.termType === "Literal" ? literal(object, decimalsAsNumbers) : iri(object.value)} .`;
 }
 
 function iri(value: string): string {
   return value.startsWith(LOCAL_NODE) ? `<#${value.slice(LOCAL_NODE.length)}>` : `<${value}>`;
 }
 
-function literal(term: Literal): string {
-  const text = `"${term.value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r")}"`;
+function literal(term: Literal, decimalsAsNumbers: boolean): string {
+  const value =
+    decimalsAsNumbers && term.datatype.value === XSD_DECIMAL
+      ? String(Number.parseFloat(term.value))
+      : term.value;
+  const text = `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r")}"`;
   if (term.language !== "") return `${text}@${term.language}`;
   return term.datatype.value === XSD_STRING ? text : `${text}^^<${term.datatype.value}>`;
 }

@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.20 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.21 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -10,7 +10,7 @@ export const SM = {
   Deck: `${SM_NS}Deck`,
   /** A flashcard: a front and a back, each text, a picture, or both. (Since 1.0.) */
   Card: `${SM_NS}Card`,
-  /** SM-2 scheduling state of one card in one study direction. It names its card with reviewOf and the direction with reviewDirection (since 1.16); without them, its subject is named after the card: #<cardId> for front-to-back, #<cardId>@back-to-front for the other way. (Since 1.0.) */
+  /** Scheduling state of one card in one study direction, its fields those of the scheduler it names with scheduler: SM-2 where it names none, FSRS-6 since 1.21. It names its card with reviewOf and the direction with reviewDirection (since 1.16); without them, its subject is named after the card: #<cardId> for front-to-back, #<cardId>@back-to-front for the other way. (Since 1.0.) */
   ReviewState: `${SM_NS}ReviewState`,
   /** Study preferences of one instance: daily caps, the day boundary, the answer scale and developer mode. (Since 1.0.) */
   Preferences: `${SM_NS}Preferences`,
@@ -84,7 +84,7 @@ export const SM = {
   firstReviewedAt: `${SM_NS}firstReviewedAt`,
   /** When the card was most recently reviewed in this direction. (Since 1.0.) */
   lastReviewedAt: `${SM_NS}lastReviewedAt`,
-  /** Snapshot: the ease factor before the first review of the study day of lastReviewedAt. The five previous* terms are written all together or not at all; resetting the day restores them. (Added in 1.2 for resetting the study day.) */
+  /** Snapshot: the ease factor before the first review of the study day of lastReviewedAt. An SM-2 state writes its five previous* terms (previousEaseFactor, previousIntervalDays, previousRepetitions, previousDue, previousLastReviewedAt) all together or not at all; resetting the day restores them. (Added in 1.2 for resetting the study day.) */
   previousEaseFactor: `${SM_NS}previousEaseFactor`,
   /** Snapshot: the interval before the first review of the study day. (Added in 1.2 for resetting the study day.) */
   previousIntervalDays: `${SM_NS}previousIntervalDays`,
@@ -100,6 +100,14 @@ export const SM = {
   reviewDirection: `${SM_NS}reviewDirection`,
   /** The scheduling algorithm the review state's fields belong to: a concept of solid-memo:Schedulers. Absent means solid-memo:sm2, as every state was before 1.16. (Added in 1.16, in review-state format 2 without a version bump: an older reader takes every state for SM-2, as before.) */
   scheduler: `${SM_NS}scheduler`,
+  /** FSRS-6 memory stability: the days from the last review until the chance of recalling the card has fallen to 90%. Always greater than 0. (Added in 1.21 for FSRS review-state format 1.) */
+  stability: `${SM_NS}stability`,
+  /** FSRS-6 difficulty: how hard the card is to remember, from 1 (easiest) to 10 (hardest). (Added in 1.21 for FSRS review-state format 1.) */
+  difficulty: `${SM_NS}difficulty`,
+  /** Snapshot: the stability before the first review of the study day of lastReviewedAt. An FSRS-6 state writes its four previous* terms (previousStability, previousDifficulty, previousDue, previousLastReviewedAt) all together or not at all; resetting the day restores them. (Added in 1.21 for FSRS review-state format 1.) */
+  previousStability: `${SM_NS}previousStability`,
+  /** Snapshot: the difficulty before the first review of the study day. (Added in 1.21 for FSRS review-state format 1.) */
+  previousDifficulty: `${SM_NS}previousDifficulty`,
   /** Maximum unseen cards introduced per study day. (Since 1.0.) */
   newCardsPerDay: `${SM_NS}newCardsPerDay`,
   /** Maximum due-card reviews per study day. (Since 1.0.) */
@@ -114,6 +122,12 @@ export const SM = {
   invalidDataPolicy: `${SM_NS}invalidDataPolicy`,
   /** Whether the app is shown light, dark, or as the browser prefers: a concept of solid-memo:Themes. (Added in 1.11 for preferences format 4.) */
   theme: `${SM_NS}theme`,
+  /** The scheduler whose review states set the study days the instance's cards fall due on: a concept of solid-memo:Schedulers. (Added in 1.21 for preferences format 5.) */
+  studyScheduler: `${SM_NS}studyScheduler`,
+  /** The chance of recalling a card on the day it falls due that FSRS-6 schedules for, as a share: 0.9 is 90%. (Added in 1.21 for preferences format 5.) */
+  desiredRetention: `${SM_NS}desiredRetention`,
+  /** Whether the learner answered Not now to the deck list's invitation to switch from SM-2 to FSRS-6, so it is not shown again. (Added in 1.21 for preferences format 5.) */
+  schedulerInvitationDismissed: `${SM_NS}schedulerInvitationDismissed`,
   /** The document a receipt is about. (Added in 1.9.) */
   receiptOf: `${SM_NS}receiptOf`,
   /** The version of the document a receipt is about: its ETag, as the pod gave it. (Added in 1.9.) */
@@ -132,6 +146,8 @@ export const SM = {
   scheduledDirection: `${SM_NS}scheduledDirection`,
   /** The day boundary hour the schedule's study days were counted with. (Added in 1.9.) */
   scheduledDayBoundaryHour: `${SM_NS}scheduledDayBoundaryHour`,
+  /** The scheduler whose review states gave the due days the schedule counts: a concept of solid-memo:Schedulers. (Added in 1.21 for deck schedule format 2.) */
+  scheduledWith: `${SM_NS}scheduledWith`,
   /** The study day ("YYYY-MM-DD") the schedule was computed on. (Added in 1.9.) */
   scheduledOn: `${SM_NS}scheduledOn`,
   /** How many reviewed prompts fall due on one study day, as "YYYY-MM-DD count"; one value per day. (Added in 1.9.) */
@@ -228,4 +244,6 @@ export const SM = {
   Schedulers: `${SM_NS}Schedulers`,
   /** The SuperMemo 2 algorithm: an ease factor, an interval in days, a count of successful repetitions in a row and a due day. The same as no scheduler. (Added in 1.16.) */
   sm2: `${SM_NS}sm2`,
+  /** The Free Spaced Repetition Scheduler, version 6: a memory stability in days, a difficulty from 1 to 10 and a due day, chosen so that the chance of recalling the card on that day is the desired retention. (Added in 1.21.) */
+  fsrs6: `${SM_NS}fsrs6`,
 } as const;

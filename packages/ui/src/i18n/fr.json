@@ -575,6 +575,12 @@
     "start": "Commencer le cours",
     "about": "À propos de ce cours"
   },
+  "schedulerInvitation": {
+    "title": "Essayez FSRS-6, le planificateur recommandé",
+    "pitch": "Avec FSRS-6, chaque réponse donne un intervalle nettement différent, et il s’adapte au retard de vos révisions. Au changement, chaque carte reste à réviser le jour prévu, et vous pouvez revenir à SM-2 à tout moment dans les préférences d’étude.",
+    "switch": "Passer à FSRS-6",
+    "notNow": "Pas maintenant"
+  },
   "deckPreferences": {
     "loading": "Chargement des préférences…",
     "heading": "Préférences : {deck}",
@@ -726,6 +732,51 @@
     "tryAgain": "Réessayer",
     "close": "Fermer",
     "done": "Vos données sont à jour."
+  },
+  "schedulerSwitch": {
+    "progressRegion": "Passage à FSRS-6",
+    "running": "{step}…",
+    "progressLabel": "Avancement du changement",
+    "keepOpen": "Gardez cette page ouverte jusqu’à la fin du changement. S’il est interrompu, SM-2 continue de planifier vos révisions, et vous pourrez recommencer.",
+    "step": {
+      "read": "Lecture de vos réponses et de vos paquets",
+      "decks": "Calcul du souvenir de chaque carte",
+      "preferences": "Enregistrement de vos préférences"
+    },
+    "count": {
+      "one": "Paquets : {done} sur {count}",
+      "many": "Paquets : {done} sur {count}",
+      "other": "Paquets : {done} sur {count}"
+    },
+    "doneRegion": "Passé à FSRS-6",
+    "done": "FSRS-6 planifie désormais vos révisions.",
+    "replayed": {
+      "one": "{count} carte a été calculée à partir de toutes vos réponses.",
+      "many": "{count} de cartes ont été calculées à partir de toutes vos réponses.",
+      "other": "{count} cartes ont été calculées à partir de toutes vos réponses."
+    },
+    "estimated": {
+      "one": "{count} carte, dont les réponses ne sont pas toutes dans votre historique, a été estimée à partir de SM-2.",
+      "many": "{count} de cartes, dont les réponses ne sont pas toutes dans votre historique, ont été estimées à partir de SM-2.",
+      "other": "{count} cartes, dont les réponses ne sont pas toutes dans votre historique, ont été estimées à partir de SM-2."
+    },
+    "decks": {
+      "one": "{count} paquet a été changé.",
+      "many": "{count} de paquets ont été changés.",
+      "other": "{count} paquets ont été changés."
+    },
+    "dueKept": "Chaque carte reste à réviser le jour prévu.",
+    "continue": "Terminé",
+    "failedRegion": "Changement inachevé",
+    "notFinished": {
+      "one": "{count} paquet n’a pas pu être changé pour l’instant :",
+      "many": "{count} de paquets n’ont pas pu être changés pour l’instant :",
+      "other": "{count} paquets n’ont pas pu être changés pour l’instant :"
+    },
+    "failedItem": "{deck} : {reason}",
+    "retryHint": "SM-2 planifie toujours vos révisions. Si vous réessayez, chaque paquet sera changé.",
+    "tryAgain": "Réessayer",
+    "close": "Fermer"
   },
   "library": {
     "heading": "Bibliothèque de paquets",
@@ -945,7 +996,7 @@
     "countIn": "{what} dans {decks}",
     "instanceFormat": "le format d’instance {version}",
     "catalogueFormat": "un catalogue des paquets de chaque instance, que d’autres applications lisent comme un catalogue DCAT",
-    "preferencesFormat": "le format de préférences {version}, qui enregistre l’échelle de réponse, le mode développeur, la conduite à tenir face aux données non valides et l’apparence",
+    "preferencesFormat": "le format de préférences {version}, qui enregistre l’échelle de réponse, le mode développeur, la conduite à tenir face aux données non valides, l’apparence et l’algorithme de planification",
     "deckFormat": "le format de paquet {version}, qui décrit les paquets avec les normes DCAT et SKOS, donne une description à chaque paquet et permet d’écrire le titre, la description et les mots-clés d’un paquet dans n’importe quelle langue que vous indiquez",
     "cardFormat": "le format de carte {version}, qui ajoute les images sur les cartes, permet à un paquet de la bibliothèque d’archiver une carte qu’il n’utilise plus, permet d’écrire le texte d’une carte dans n’importe quelle langue que vous indiquez et ajoute une étiquette au-dessus du recto d’une carte",
     "reviewFormat": "le format d’état de révision {version}, qui conserve l’état de chaque sens d’étude et l’instantané d’annulation du jour",
@@ -1109,16 +1160,32 @@
     "maxReviewsPerDay": "Révisions maximum par jour",
     "dayBoundaryHour": "Début de la journée (heure)",
     "dayBoundaryHint": "Une heure de 0 à 23, au format 24 heures : un nouveau jour d’étude, avec de nouvelles cartes et révisions, commence à cette heure-là.",
+    "scheduler": {
+      "legend": "Planificateur",
+      "hint": "La méthode qui décide quand chaque carte revient. SM-2 est tenu à jour à chaque révision : vous pouvez y revenir à tout moment ; repasser à FSRS-6 recalcule chaque carte.",
+      "sm2": {
+        "label": "SM-2",
+        "hint": "SuperMemo-2 : chaque bonne réponse multiplie l’intervalle de la carte par sa facilité."
+      },
+      "fsrs6": {
+        "label": "FSRS-6",
+        "hint": "Le Free Spaced Repetition Scheduler, version 6 : il suit la stabilité de chaque souvenir et ramène la carte quand votre probabilité de vous en souvenir tombe à la rétention choisie. Au changement, le souvenir de chaque carte est calculé à partir de vos réponses jusqu’ici. Recommandé : chaque réponse donne un intervalle nettement différent, et une révision en retard compte selon son retard."
+      },
+      "recommended": "Recommandé"
+    },
+    "desiredRetention": "Rétention souhaitée (%)",
+    "desiredRetentionHint": "Avec FSRS-6 : la probabilité de vous souvenir d’une carte quand elle revient, de 70 à 97. Plus elle est haute, plus les intervalles sont courts et les révisions nombreuses. Par défaut : 90.",
     "answerScale": {
       "legend": "Boutons de réponse",
       "sm2": {
         "label": "Échelle de 0 à 5",
-        "hint": "Toutes les notes de SuperMemo-2 (SM-2), la méthode qui planifie vos révisions : de 0 (trou de mémoire complet) à 5 (facile)."
+        "hint": "Toutes les notes de SuperMemo-2 (SM-2) : de 0 (trou de mémoire complet) à 5 (facile)."
       },
       "minimal": {
         "label": "À revoir · Difficile · Correct · Facile",
         "hint": "Quatre boutons. « À revoir » présente de nouveau la carte plus tard dans la séance."
-      }
+      },
+      "fsrs6Hint": "FSRS-6 utilise toujours les quatre boutons À revoir, Difficile, Correct et Facile. Votre choix ici est conservé pour le jour où vous reviendrez à SM-2."
     },
     "policy": {
       "legend": "Quand des données ne sont pas conformes",
@@ -1610,12 +1677,12 @@
     "runOutNever": "Aucune nouvelle carte par jour : elles ne s’épuisent jamais.",
     "intervals": "Jours avant le retour des cartes",
     "intervalsLabel": "Barres du nombre de cartes, chaque sens compté, qui reviennent après chaque tranche de jours.",
-    "intervalsNote": "Les révisions d’une carte sont espacées d’un jour, puis de 6 jours, puis d’environ 15 et d’environ 38, et de plus en plus ensuite : certaines tranches comptent donc peu de cartes.",
+    "intervalsNote": "SM-2 espace les révisions d’une carte d’un jour, puis de 6 jours, puis d’environ 15 et d’environ 38, et de plus en plus ensuite ; FSRS-6 les espace selon le souvenir de chaque carte. Dans les deux cas, certaines tranches comptent peu de cartes.",
     "interval": "Intervalle",
     "showEases": "Voir à quel point les cartes semblent faciles",
     "eases": "À quel point les cartes semblent faciles",
     "easesLabel": "Barres du nombre de cartes, chaque sens compté, pour chaque facilité : plus elle est haute, plus leurs intervalles grandissent vite.",
-    "easesNote": "Toute carte commence à 2,5. Facile l’augmente un peu, Correct la garde, Difficile la baisse, jusqu’à 1,3 ; oublier la carte la laisse telle quelle. Plus elle est haute, plus les intervalles de la carte grandissent vite.",
+    "easesNote": "La facilité est celle de SM-2, tenue à jour à chaque révision, quel que soit le planificateur qui fixe les jours de révision. Toute carte commence à 2,5. Facile l’augmente un peu, Correct la garde, Difficile la baisse, jusqu’à 1,3 ; oublier la carte la laisse telle quelle. Plus elle est haute, plus les intervalles de la carte grandissent vite.",
     "ease": "Facilité",
     "intervalRange": "{from} à {to} jours",
     "intervalFrom": "{from} jours ou plus",
@@ -2265,6 +2332,15 @@
       "repetitions": "Bonnes réponses d’affilée",
       "firstReviewed": "Première révision",
       "lastReviewed": "Dernière révision",
+      "sm2Heading": "SM-2",
+      "fsrsHeading": "FSRS-6",
+      "stability": "Stabilité",
+      "difficulty": "Difficulté",
+      "difficultyValue": "{value} sur 10",
+      "recall": "Probabilité de rappel maintenant",
+      "fsrsSets": "FSRS-6 fixe les jours de révision, comme le disent les préférences de l’instance ; l’état de SM-2 est tenu à jour à côté.",
+      "sm2Sets": "SM-2 fixe les jours de révision, comme le disent les préférences de l’instance ; l’état de FSRS-6 n’est pas mis à jour entre-temps, et repasser à FSRS-6 le recalcule.",
+      "fsrsEstimated": "FSRS-6 fixe les jours de révision, comme le disent les préférences de l’instance, mais n’a pas d’état à jour de la carte dans ce sens : jusqu’à la prochaine révision, c’est le jour de SM-2 qui compte, puis l’état de FSRS-6 est estimé à partir de celui de SM-2.",
       "dueLabel": "À réviser le",
       "reschedule": "Fixer la date de révision",
       "reset": "Oublier la progression",
@@ -2321,6 +2397,7 @@
       "interval": "Intervalle",
       "eases": "Facilités",
       "easesLabel": "Nombre de cartes par facilité, chaque sens compté.",
+      "easesNote": "La facilité est celle de SM-2, tenue à jour à chaque révision, quel que soit le planificateur qui fixe les jours de révision.",
       "ease": "Facilité",
       "lapsesHeading": "Oublis et sangsues",
       "lapsesSince": "Les oublis comptent les révisions oubliées depuis {month}, le mois de la première réponse du paquet dans le journal des réponses. Une première réponse, une carte qui revient dans la séance le même jour et une réponse de cours ne sont pas des oublis.",

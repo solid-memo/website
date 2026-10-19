@@ -1511,7 +1511,7 @@ describe("removeCard", () => {
     ).toBeNull();
   });
 
-  it("removes the card's states that name it, whatever their subject, and keeps another card's and another scheduler's", async () => {
+  it("removes the card's states that name it, whatever their subject, its FSRS-6 one too, and keeps another card's and another scheduler's", async () => {
     const reviewState = (id: string, cardId: string, scheduler?: string) => {
       const thing = buildThing(createThing({ url: `${deck.reviewsDocumentUrl}#${id}` }))
         .addIri(RDF.type, SM.ReviewState)
@@ -1522,6 +1522,10 @@ describe("removeCard", () => {
       reviewState("rs-1", "card-1"),
       reviewState("card-1", "card-2"),
       reviewState("rs-2", "card-1", "https://fsrs.example/ns#fsrs"),
+      // This app's FSRS-6 state of the card: it goes with it.
+      buildThing(reviewState("card-1@fsrs6", "card-1", SM.fsrs6))
+        .addIri(SM.reviewDirection, SM.frontToBack)
+        .build(),
     ].reduce(
       (dataset, thing) => setThing(dataset, thing),
       mockSolidDatasetFrom(deck.reviewsDocumentUrl),
@@ -1536,6 +1540,7 @@ describe("removeCard", () => {
     expect(getThing(saved, `${deck.reviewsDocumentUrl}#rs-1`)).toBeNull();
     expect(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)).not.toBeNull();
     expect(getThing(saved, `${deck.reviewsDocumentUrl}#rs-2`)).not.toBeNull();
+    expect(getThing(saved, `${deck.reviewsDocumentUrl}#card-1@fsrs6`)).toBeNull();
   });
 
   it("removes the distractors the card names with it, and leaves a document without the card as it was", async () => {

@@ -117,7 +117,7 @@ test("a learner updates a library copy @upgrade", async ({ app, account, runId }
     await app.decks.expectDoneForToday(deck);
     await app.decks.expectAnsweredToday(newPerDay);
     // The day's answers, from before the update, and where the cards
-    // stand: the ones studied young (an interval of a day), the rest new.
+    // stand: the ones studied young (an interval of a few days), the rest new.
     // Cards the update had started afresh would be new again.
     await app.statistics.open();
     await app.statistics.expectStatistics({

@@ -5,9 +5,10 @@
 import type { ChapterV1, StepV1 } from "@solid-memo/vocab/types.generated";
 import type { Answer } from "./answer";
 import { chainIndexOf } from "./answerChain";
+import type { FsrsRating } from "./fsrs";
 import { activeCards, type CardContent } from "./deck";
 import { sameText, type LangText } from "./langText";
-import type { ReviewQuality, ReviewState } from "./review";
+import type { DueState, ReviewQuality } from "./review";
 import { shuffle, studyDayOf } from "./scheduling";
 import { quizAccuracyOf, type Quiz } from "./statistics";
 import { fragmentIdOf } from "./subjectUrl";
@@ -359,11 +360,20 @@ export function finalReviewQueue(chapter: CourseChapter, random: () => number): 
 
 /**
  * The SM-2 grade of a multiple-choice answer: 3, the lowest passing
- * grade, when right; 1 when wrong. The one place answers chosen among
- * options become grades, so a scheduler other than SM-2 (FSRS) replaces
- * this map alone.
+ * grade, when right; 1 when wrong. With ratingOfChoice, the one place
+ * answers chosen among options become grades.
  */
 export function gradeOfChoice(correct: boolean): ReviewQuality {
+  return correct ? 3 : 1;
+}
+
+/**
+ * The FSRS-6 rating of a multiple-choice answer: Good when right, Again
+ * when wrong. Its SM-2 grade stays gradeOfChoice's, and the answer log
+ * records that grade, so a right one (3, which ratingOfGrade reads as
+ * Hard) is read back as Good by its mode.
+ */
+export function ratingOfChoice(correct: boolean): FsrsRating {
   return correct ? 3 : 1;
 }
 
@@ -380,8 +390,9 @@ export type CourseAnswerEffect =
   | { kind: "none" };
 
 /**
- * The effect of answering a card's question in a course, `now`, given its
- * front→back review state (null or undefined: none):
+ * The effect of answering a card's question in a course, `now`, given
+ * what sets its front→back due day (null or undefined: no state; under
+ * FSRS-6 the due day is the FSRS-6 state's, effectiveStates in fsrs.ts):
  * - no state: introduce it, graded gradeOfChoice(correct);
  * - graded earlier this study day (as in a final review the day its steps
  *   were taken): a right answer changes nothing (the day's grade stands,
@@ -394,7 +405,7 @@ export type CourseAnswerEffect =
  *   would cut its interval short.
  */
 export function courseAnswerEffect(
-  state: ReviewState | null | undefined,
+  state: DueState | null | undefined,
   correct: boolean,
   now: Date,
   dayBoundaryHour: number,

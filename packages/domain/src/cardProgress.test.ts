@@ -82,6 +82,24 @@ describe("cardProgressOf", () => {
       mature: 2,
     });
   });
+
+  it("goes by the interval of what sets the due day, relearning by SM-2's repetitions", () => {
+    // Under FSRS-6, b's interval is 30 days and c's 5; e is still relearning.
+    const due = [
+      { ...review("b", 30, "2026-10-20") },
+      { ...review("c", 5, "2026-09-25") },
+      { ...review("e", 25, "2026-10-15") },
+    ];
+    expect(cardProgressOf({ cards, direction: "front-to-back", reviews, due })).toEqual({
+      new: 1,
+      relearning: 1,
+      young: 2,
+      mature: 1,
+    });
+    expect(
+      cardProgressOf({ cards, direction: "front-to-back", reviews, due: due.slice(0, 1) }),
+    ).toEqual({ new: 1, relearning: 1, young: 1, mature: 2 });
+  });
 });
 
 describe("mergeCardProgress", () => {

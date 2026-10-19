@@ -124,14 +124,17 @@ import {
 } from "@solid-memo/domain/studyDigest";
 import {
   DEFAULT_PREFERENCES,
+  NEW_INSTANCE_PREFERENCES,
   type StoredPreferences,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
-import {
-  REVIEW_STATE_FORMAT_VERSION,
-  type ReviewKey,
-  type ReviewQuality,
-  type ReviewState,
+import type {
+  DueState,
+  FsrsState,
+  ReviewKey,
+  ReviewQuality,
+  ReviewState,
+  ReviewStates,
 } from "@solid-memo/domain/review";
 import { isStudyDay, rescheduleStates, resetStates } from "@solid-memo/domain/reviewStateEdits";
 import {
@@ -151,12 +154,20 @@ import {
 } from "@solid-memo/domain/deckFile";
 import {
   buildStudyQueue,
-  nextDueDate,
+  resetFsrsStudyDay,
   resetStudyDay,
-  snapshotBeforeReview,
   studyDayOf,
   type StudyQueue,
 } from "@solid-memo/domain/scheduling";
+import { effectiveStates } from "@solid-memo/domain/fsrs";
+import { gradePrompt, type Scheduling } from "@solid-memo/domain/grading";
+import {
+  SWITCH_STEPS,
+  switchedStates,
+  type SwitchOutcome,
+  type SwitchProgress,
+  type SwitchStep,
+} from "@solid-memo/domain/schedulerSwitch";
 import {
   answerIdOf,
   monthOfStudyDay,
@@ -206,7 +217,6 @@ import {
 } from "@solid-memo/domain/scheduleInsight";
 import { cardProgressOf, type CardProgress } from "@solid-memo/domain/cardProgress";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
-import { applySm2, INITIAL_SM2_STATE } from "@solid-memo/domain/sm2";
 import type { Storage } from "@solid-memo/domain/storage";
 import { isSecureUrl, validateWebId } from "@solid-memo/domain/webId";
 import {
@@ -398,6 +408,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   addManualStorage(url: string): Promise<Storage>;
   listInstances(session: Session): Promise<Instance[]>;
   getRegistrationOptions(session: Session): Promise<RegistrationOptions>;
+  /**
+   * Make an instance: its meta document and registrations, its catalog,
+   * and its preferences, new ones (NEW_INSTANCE_PREFERENCES) with the
+   * theme this device shows, so it studies by FSRS-6.
+   */
   createInstance(
     session: Session,
     args: {
@@ -585,8 +600,13 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
     onProgress?: (progress: DeckUpgradeProgress) => void,
   ): Promise<DeckUpgradeOutcome>;
   listCards(deck: Deck): Promise<Card[]>;
-  /** The deck's review states, every direction's, as stored: the Studio's card workbench lists them with the cards. */
-  listDeckReviewStates(deck: Deck): Promise<ReviewState[]>;
+  /**
+   * The deck's review states, every direction's, as stored: SM-2's, and
+   * the FSRS-6 states beside them. The Studio's card workbench lists them
+   * with the cards; what sets each prompt's due day is effectiveStates of
+   * the two, by the instance's scheduler.
+   */
+  listDeckReviewStates(deck: Deck): Promise<ReviewStates>;
   /**
    * Rejects, without any pod write, unless each side has text or an
    * http(s) image URL, and every text states its language
@@ -752,7 +772,11 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   findInterruptedGuestMove(instance: Instance): Promise<string | null>;
   /** Delete the partial copy an interrupted move left behind, and forget it. */
   removeInterruptedGuestMove(instance: Instance): Promise<void>;
-  /** Stored preferences overlaid on the defaults. */
+  /**
+   * The stored preferences; the defaults when none are stored, SM-2's
+   * among them (DEFAULT_PREFERENCES): an instance with none was made
+   * before a new one stated its own, and studies by SM-2.
+   */
   getPreferences(instanceUrl: string): Promise<StudyPreferences>;
   /**
    * Give an instance a new name (instanceName: trimmed, not empty)
@@ -774,7 +798,43 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * the instance has no catalog. The catalog as written.
    */
   describeCatalog(instanceUrl: string, about: CatalogAbout): Promise<Catalog>;
+  /**
+   * Save the preferences, but for the scheduler: the stored one stays
+   * (SM-2 when none is stored), as only switchScheduler can change it,
+   * with what changing it takes. A stored "Not now" to the invitation
+   * to switch to FSRS-6 stays too, though the preferences given were
+   * read before it.
+   */
   savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
+  /**
+   * Save the preferences with the scheduler they name (docs/srs.md,
+   * "Switching the scheduler"). To SM-2 the preferences are all there is
+   * to save: SM-2's states are kept up to date whichever scheduler sets
+   * the due days. To FSRS-6, first the answer log is read whole, once,
+   * and each deck's FSRS-6 states written (writeFsrsStates), one deck
+   * after another, each in ONE write made of its states as they are
+   * then: replayed from a prompt's answers when the log holds its whole
+   * history, else estimated from its SM-2 state (switchedStates), each
+   * due when SM-2 has it due. A deck that cannot be written now is left
+   * as it is, named with why, and the others go on. Only once every deck
+   * is written are the preferences saved (a stored "Not now" to the
+   * invitation kept, as savePreferences keeps it), so until then SM-2 sets the due
+   * days and the switch can be run again; then each deck's schedule in
+   * the digest is brought up to date (a failure there leaves the switch
+   * done).
+   */
+  switchScheduler(
+    instanceUrl: string,
+    preferences: StudyPreferences,
+    onProgress?: (progress: SwitchProgress) => void,
+  ): Promise<SwitchOutcome>;
+  /**
+   * Remember in the preferences that the learner answered "Not now" to
+   * the invitation to switch to FSRS-6, so the deck list does not show
+   * it again. The rest stays as stored; with none stored, the defaults
+   * with the theme this device shows are saved with it.
+   */
+  dismissSchedulerInvitation(instanceUrl: string): Promise<void>;
   /**
    * Today's due and new cards for a deck, respecting the daily caps, with
    * what grading them takes and their states (StudySessionQueue).
@@ -967,11 +1027,13 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
  * Today's queue of a deck (UseCases.getStudyQueue), with the instance's
  * preferences it was built with, which a session grades its prompts by
  * (GradeBasis), and the deck's review states it was built from, which a
- * session shows each grade's interval from.
+ * session shows each grade's interval from (previewIntervals): SM-2's,
+ * and the FSRS-6 states beside them.
  */
 export interface StudySessionQueue extends StudyQueue {
   prefs: StudyPreferences;
   states: ReviewState[];
+  fsrsStates: FsrsState[];
 }
 
 /** What a grade is made with besides the prompt's state, which is the reviews document's: the instance's preferences. */
@@ -1079,9 +1141,14 @@ export interface DeckProgress {
   confusions: Confusion<Card>[];
 }
 
-/** A review recorded (UseCases.recordReview): the prompt's new state, and how to undo it. */
+/**
+ * A review recorded (UseCases.recordReview): the prompt's new SM-2
+ * state, its new FSRS-6 state when FSRS-6 sets the due days, and how to
+ * undo it.
+ */
 export interface RecordedReview {
   state: ReviewState;
+  fsrs?: FsrsState;
   undo: ReviewUndo;
 }
 
@@ -1092,8 +1159,14 @@ export interface RecordedReview {
  */
 export interface ReviewUndo {
   key: ReviewKey;
-  /** The prompt's state before the answer; null for a prompt that was new. */
+  /** The prompt's SM-2 state before the answer; null for a prompt that was new. */
   before: ReviewState | null;
+  /**
+   * When the answer wrote an FSRS-6 state, the one before it (null: none,
+   * as for a new prompt or one estimated from SM-2), which undoing writes
+   * back or removes; absent when the answer left FSRS-6's state alone.
+   */
+  fsrs?: { before: FsrsState | null };
   /** The answer logged, and the study day it is in. */
   answer: { id: string; studyDay: string };
 }
@@ -1407,6 +1480,53 @@ interface UpdateItem {
   writes: (() => Promise<boolean>)[];
 }
 
+/** What sets each prompt's due day, by the scheduler the preferences name (effectiveStates). */
+function dueStatesOf(
+  states: ReviewStates,
+  prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
+) {
+  return effectiveStates(states.sm2, states.fsrs, prefs.scheduler, prefs.dayBoundaryHour);
+}
+
+/** What sets one prompt's due day, of its SM-2 state and its FSRS-6 state (null or absent: none). */
+function promptDueOf(
+  sm2: ReviewState,
+  fsrs: FsrsState | null | undefined,
+  prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
+): DueState {
+  return dueStatesOf({ sm2: [sm2], fsrs: fsrs == null ? [] : [fsrs] }, prefs)[0]!;
+}
+
+/**
+ * What the instance grades and schedules with: the scheduler its
+ * preferences name, the retention FSRS-6 aims at and the day boundary.
+ */
+/**
+ * The preferences to save, but for the answer to the invitation to
+ * switch to FSRS-6: "Not now", once stored, holds for good, though the
+ * screen that saves them read them before it was answered (in another
+ * tab, or on another device). No form asks it, so it is not a form's to
+ * take back.
+ */
+function withInvitationAnswer(
+  preferences: StudyPreferences,
+  stored: StudyPreferences,
+): StudyPreferences {
+  return {
+    ...preferences,
+    schedulerInvitationDismissed:
+      stored.schedulerInvitationDismissed || preferences.schedulerInvitationDismissed,
+  };
+}
+
+function schedulingOf(prefs: StudyPreferences): Scheduling {
+  return {
+    scheduler: prefs.scheduler,
+    desiredRetention: prefs.desiredRetention,
+    dayBoundaryHour: prefs.dayBoundaryHour,
+  };
+}
+
 export function createUseCases({
   sessionGateway,
   random = Math.random,
@@ -1660,7 +1780,7 @@ export function createUseCases({
         return {
           deck,
           cards: cards.unchanged ? [] : cards.value,
-          reviews: reviews.unchanged ? [] : reviews.value,
+          reviews: reviews.unchanged ? [] : reviews.value.sm2,
         };
       }),
     );
@@ -1802,7 +1922,7 @@ export function createUseCases({
         readNow(deckRepository.readCardsSince(deck, undefined)),
         reviewStateRepository.listReviewStates(deck),
       ]);
-      const changes = plan(read.value, reviews);
+      const changes = plan(read.value, reviews.sm2);
       if (changes.save.length === 0 && changes.remove.length === 0) return changes;
       try {
         await deckRepository.applyCardChanges(
@@ -1816,7 +1936,8 @@ export function createUseCases({
       }
       // A card joins before its state, and leaves before it: no state is ever without its card for long.
       if (changes.reviewSaves.length > 0 || changes.reviewRemovals.length > 0) {
-        // A card removed takes every state it has with it, as removing a card does; another scheduler's stays.
+        // A card removed takes every state it has with it, SM-2's and FSRS-6's, as removing a card does;
+        // another scheduler's stays. Undone, its SM-2 states come back, and FSRS-6 estimates from them.
         await reviewStateRepository.applyReviewChanges(deck, {
           save: changes.reviewSaves,
           remove: changes.reviewRemovals,
@@ -1838,12 +1959,18 @@ export function createUseCases({
   async function writeReviewEdit(
     instanceUrl: string,
     deck: Deck,
-    changes: { save: ReviewState[]; remove: ReviewKey[] },
+    changes: { save: ReviewState[]; remove: ReviewKey[]; fsrsSave?: FsrsState[] },
   ): Promise<number> {
-    const cards = new Set([...changes.save, ...changes.remove].map((key) => key.cardId));
+    const { save, remove, fsrsSave = [] } = changes;
+    const cards = new Set([...save, ...remove].map((key) => key.cardId));
     if (cards.size === 0) return 0;
-    // A card forgotten loses every SM-2 state it has that way, so none is read in its place.
-    await reviewStateRepository.applyReviewChanges(deck, { ...changes, every: true });
+    // A card forgotten loses every state it has that way, SM-2's and FSRS-6's, so none is read in its place.
+    await reviewStateRepository.applyReviewChanges(deck, {
+      save,
+      remove,
+      fsrs: { save: fsrsSave, remove: [] },
+      every: true,
+    });
     // The edit is made: a digest left behind is brought up to date by the next deck list.
     await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
     return cards.size;
@@ -1867,8 +1994,13 @@ export function createUseCases({
       reviewStateRepository.listReviewStates(to),
     ]);
     const plan = planCardTransfer(
-      { url: from.url, cards: sourceCards.value, states: sourceStates },
-      { url: to.url, cards: targetCards.value, states: targetStates },
+      {
+        url: from.url,
+        cards: sourceCards.value,
+        states: sourceStates.sm2,
+        fsrs: sourceStates.fsrs,
+      },
+      { url: to.url, cards: targetCards.value, states: targetStates.sm2, fsrs: targetStates.fsrs },
       ids,
       options,
     );
@@ -1884,6 +2016,7 @@ export function createUseCases({
       await reviewStateRepository.applyReviewChanges(to, {
         save: plan.target.reviewSaves,
         remove: plan.target.reviewRemovals,
+        fsrs: { save: plan.target.fsrsSaves, remove: plan.target.fsrsRemovals },
         every: true,
       });
     }
@@ -1914,7 +2047,7 @@ export function createUseCases({
       reviewStateRepository.readReviewStatesSince(deck, undefined),
     ]);
     if (cards.unchanged || reviews.unchanged) return;
-    noteSchedule(instanceUrl, deck, cards, reviews, prefs.dayBoundaryHour, now());
+    noteSchedule(instanceUrl, deck, cards, reviews, prefs, now());
     // The session changed the reviews document: check it now (it is small), not at the next visit.
     const checked = await shapeValidator.validateDocumentSince(deck.reviewsDocumentUrl, undefined);
     if (
@@ -1954,11 +2087,16 @@ export function createUseCases({
     // A read without a version to compare is never "unchanged".
     if (cards.unchanged || reviews.unchanged)
       throw new Error("A read without a version to compare came back unchanged.");
-    noteSchedule(instanceUrl, deck, cards, reviews, prefs.dayBoundaryHour, now);
+    noteSchedule(instanceUrl, deck, cards, reviews, prefs, now);
     const queue = buildStudyQueue({
       cards: cards.value,
       direction: deck.direction,
-      reviews: reviews.value,
+      reviews: effectiveStates(
+        reviews.value.sm2,
+        reviews.value.fsrs,
+        prefs.scheduler,
+        prefs.dayBoundaryHour,
+      ),
       prefs: studyPrefs,
       now,
       random,
@@ -1970,8 +2108,8 @@ export function createUseCases({
     instanceUrl: string,
     deck: Deck,
     cards: { value: Card[]; version: string | null },
-    reviews: { value: ReviewState[]; version: string | null },
-    dayBoundaryHour: number,
+    reviews: { value: ReviewStates; version: string | null },
+    prefs: StudyPreferences,
     now: Date,
   ): void {
     recordSchedule(
@@ -1979,14 +2117,27 @@ export function createUseCases({
       deck,
       cards,
       reviews,
-      scheduleOf({
-        cards: cards.value,
-        direction: deck.direction,
-        reviews: reviews.value,
-        dayBoundaryHour,
-        now,
-      }),
+      scheduleFrom(cards, deck, reviews, prefs, now),
     );
+  }
+
+  /** The deck's schedule from its documents, by the due days of the scheduler in use. */
+  function scheduleFrom(
+    cards: { value: Card[] },
+    deck: Deck,
+    reviews: { value: ReviewStates },
+    prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
+    now: Date,
+  ): DeckSchedule {
+    const { scheduler, dayBoundaryHour } = prefs;
+    return scheduleOf({
+      cards: cards.value,
+      direction: deck.direction,
+      reviews: effectiveStates(reviews.value.sm2, reviews.value.fsrs, scheduler, dayBoundaryHour),
+      scheduler,
+      dayBoundaryHour,
+      now,
+    });
   }
 
   /** Keeps a schedule already worked out in the digest, with the receipts the documents earned. */
@@ -1994,7 +2145,7 @@ export function createUseCases({
     instanceUrl: string,
     deck: Deck,
     cards: { value: Card[]; version: string | null },
-    reviews: { value: ReviewState[]; version: string | null },
+    reviews: { value: ReviewStates; version: string | null },
     schedule: DeckSchedule,
   ): void {
     const { version: cardsVersion } = cards;
@@ -2004,7 +2155,7 @@ export function createUseCases({
       let next = withSchedule(digest, { deck: deck.url, cardsVersion, reviewsVersion, schedule });
       if (!cards.value.some(isOutdated))
         next = withReceipt(next, deck.cardsDocumentUrl, cardsVersion, { latestFormat: true });
-      if (!reviews.value.some(isReviewStateOutdated)) {
+      if (!reviews.value.sm2.some(isReviewStateOutdated)) {
         next = withReceipt(next, deck.reviewsDocumentUrl, reviewsVersion, { latestFormat: true });
       }
       return next;
@@ -2016,27 +2167,27 @@ export function createUseCases({
    * the digest's while it is of these documents, else computed afresh and
    * kept.
    */
-  async function scheduleNow(instanceUrl: string, deck: Deck, at: Date, dayBoundaryHour: number) {
+  async function scheduleNow(
+    instanceUrl: string,
+    deck: Deck,
+    at: Date,
+    prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
+  ) {
     const [digest, cards, reviews] = await Promise.all([
       digestOf(instanceUrl),
       readNow(deckRepository.readCardsSince(deck, undefined)),
       readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
     ]);
     const versions = { cards: cards.version, reviews: reviews.version };
-    const today = studyDayOf(at, dayBoundaryHour);
+    const today = studyDayOf(at, prefs.dayBoundaryHour);
     let schedule = freshSchedule(digest.schedules[deck.url], versions, {
       direction: deck.direction,
-      dayBoundaryHour,
+      dayBoundaryHour: prefs.dayBoundaryHour,
+      scheduler: prefs.scheduler,
       today,
     });
     if (schedule === null) {
-      schedule = scheduleOf({
-        cards: cards.value,
-        direction: deck.direction,
-        reviews: reviews.value,
-        dayBoundaryHour,
-        now: at,
-      });
+      schedule = scheduleFrom(cards, deck, reviews, prefs, at);
       recordSchedule(instanceUrl, deck, cards, reviews, schedule);
     }
     return { cards, reviews, schedule };
@@ -2261,10 +2412,10 @@ export function createUseCases({
 
   /**
    * Apply one grade to a prompt of the deck: transition its state (or the
-   * initial one) by SM-2, persist it, and queue its answer for the log,
-   * saying how it was given (`how`; a study session says nothing: recall)
-   * and how long it took (`times`), the day it was due and the device's
-   * offset from UTC. The grade is applied to the prompt's state as the
+   * initial one) by SM-2 (gradePrompt), persist it, and queue its answer
+   * for the log, saying how it was given (`how`; a study session says
+   * nothing: recall) and how long it took (`times`), the day it was due
+   * and the device's offset from UTC. The grade is applied to the prompt's state as the
    * reviews document holds it when written (gradeReviewState), so it
    * builds on a grade made elsewhere meanwhile; the instance's preferences
    * are read unless `known` brings them. Resolves to the new state, with
@@ -2281,23 +2432,21 @@ export function createUseCases({
   ): Promise<RecordedReview> {
     const key = { cardId: prompt.cardId, direction: prompt.direction };
     const prefs = known?.prefs ?? (await getPreferences(instanceUrl));
-    const { state, current } = await reviewStateRepository.gradeReviewState(
-      deck,
-      key,
-      (current) => {
-        const next = applySm2(current ?? INITIAL_SM2_STATE, quality);
-        const previous = snapshotBeforeReview(current, now, prefs.dayBoundaryHour);
-        return {
-          ...key,
-          ...next,
-          due: nextDueDate(now, next.intervalDays, prefs.dayBoundaryHour),
-          firstReviewedAt: current?.firstReviewedAt ?? now.toISOString(),
-          lastReviewedAt: now.toISOString(),
-          formatVersion: REVIEW_STATE_FORMAT_VERSION,
-          ...(previous === undefined ? {} : { previous }),
-        };
-      },
+    const scheduling = schedulingOf(prefs);
+    const graded = await reviewStateRepository.gradeReviewState(deck, key, (current) =>
+      gradePrompt(
+        key,
+        current,
+        { grade: quality, ...(how.mode === undefined ? {} : { mode: how.mode }) },
+        now,
+        scheduling,
+      ),
     );
+    const { sm2: state, fsrs } = graded.state;
+    const { sm2: current } = graded.current;
+    // The log's intervals and due day are those of what set the due day: under FSRS-6, its state's.
+    const prior = current === null ? null : promptDueOf(current, graded.current.fsrs, prefs);
+    const next = promptDueOf(state, fsrs, prefs);
     const id = answerIdOf(state.lastReviewedAt, newId().slice(0, 8));
     const studyDay = studyDayOf(now, prefs.dayBoundaryHour);
     unlogged.push({
@@ -2310,17 +2459,26 @@ export function createUseCases({
         grade: quality,
         answeredAt: state.lastReviewedAt,
         studyDay,
-        ...(current === null ? {} : { priorIntervalDays: current.intervalDays }),
-        nextIntervalDays: state.intervalDays,
+        ...(prior === null ? {} : { priorIntervalDays: prior.intervalDays }),
+        nextIntervalDays: next.intervalDays,
         ...(how.mode === undefined ? {} : { mode: how.mode }),
         ...(how.chosenDistractor === undefined ? {} : { chosenDistractor: how.chosenDistractor }),
         ...recordedResponseTimes(how.times),
-        ...(current === null ? {} : { priorDue: current.due }),
+        ...(prior === null ? {} : { priorDue: prior.due }),
         utcOffsetMinutes: utcOffsetMinutesAt(now),
       },
     });
     void logAnswers();
-    return { state, undo: { key, before: current, answer: { id, studyDay } } };
+    return {
+      state,
+      ...(fsrs === undefined ? {} : { fsrs }),
+      undo: {
+        key,
+        before: current,
+        ...(fsrs === undefined ? {} : { fsrs: { before: graded.current.fsrs } }),
+        answer: { id, studyDay },
+      },
+    };
   }
 
   /**
@@ -2432,7 +2590,7 @@ export function createUseCases({
           deckRepository.applyCardChanges(deck, { save: content, remove: [] }, { whole: true }),
         );
       }
-      if (states.length > 0) {
+      if (states.sm2.length + states.fsrs.length > 0) {
         await create(deck.reviewsDocumentUrl, () =>
           reviewStateRepository.createReviewStates(deck, states),
         );
@@ -2463,6 +2621,11 @@ export function createUseCases({
       registrationTarget,
     });
     await deckRepository.saveCatalog(instance.url, await catalogOf(session, instance.name));
+    // Stated, so FSRS-6 is this instance's own choice, not a default: one with none stored studies by SM-2.
+    await preferencesRepository.savePreferences(instance.url, {
+      ...NEW_INSTANCE_PREFERENCES,
+      theme: themePreference.chosen(),
+    });
     return instance;
   }
 
@@ -3069,12 +3232,12 @@ export function createUseCases({
         releaseUrl = plan.releaseUrl;
         // The states of the cards the release removes go with them, and those left of any it removed already.
         const removed = new Set([...plan.remove.map((card) => card.id), ...plan.gone]);
-        const dropped =
-          removed.size === 0
-            ? []
-            : (await reviewStateRepository.listReviewStates(deck)).filter((state) =>
-                removed.has(state.cardId),
-              );
+        const states =
+          removed.size === 0 ? null : await reviewStateRepository.listReviewStates(deck);
+        const of = <T extends ReviewKey>(list: readonly T[] = []) =>
+          list.filter((state) => removed.has(state.cardId));
+        const dropped = of(states?.sm2);
+        const droppedFsrs = of(states?.fsrs);
 
         // The cards first, the deck readable with them, still naming the release it came from: written whole (a
         // PATCH of much text can be cut short, docs/testing.md), and only while the document is as the plan read it.
@@ -3091,9 +3254,13 @@ export function createUseCases({
         }
         // Then the review states of the cards removed, when there are any.
         progress.finished("reviews");
-        if (dropped.length > 0)
+        if (dropped.length + droppedFsrs.length > 0)
           await write(() =>
-            reviewStateRepository.applyReviewChanges(deck, { save: [], remove: dropped }),
+            reviewStateRepository.applyReviewChanges(deck, {
+              save: [],
+              remove: dropped,
+              fsrs: { save: [], remove: droppedFsrs },
+            }),
           );
         // Last the entry, which moves the deck to the new release, only while it says what was read.
         progress.finished("entry");
@@ -3166,22 +3333,20 @@ export function createUseCases({
       });
     },
     async resetCards(instanceUrl, deck, ids, direction) {
-      const remove = resetStates(
-        await reviewStateRepository.listReviewStates(deck),
-        ids,
-        direction,
-      );
+      const states = await reviewStateRepository.listReviewStates(deck);
+      // An FSRS-6 state without an SM-2 state beside it goes too: every removes both kinds.
+      const remove = resetStates([...states.sm2, ...states.fsrs], ids, direction);
       return writeReviewEdit(instanceUrl, deck, { save: [], remove });
     },
     async rescheduleCards(instanceUrl, deck, ids, due, direction) {
       if (!isStudyDay(due)) throw new AppError("dueDayInvalid", { day: due });
-      const save = rescheduleStates(
-        await reviewStateRepository.listReviewStates(deck),
-        ids,
-        due,
-        direction,
-      );
-      return writeReviewEdit(instanceUrl, deck, { save, remove: [] });
+      const states = await reviewStateRepository.listReviewStates(deck);
+      // Both schedulers' states fall due that day, so it holds whichever sets the due days.
+      return writeReviewEdit(instanceUrl, deck, {
+        save: rescheduleStates(states.sm2, ids, due, direction),
+        remove: [],
+        fsrsSave: rescheduleStates(states.fsrs, ids, due, direction),
+      });
     },
     async transferCards(instanceUrl, from, to, ids, options) {
       if (from.url === to.url) throw new AppError("cardTransferSameDeck");
@@ -3219,7 +3384,7 @@ export function createUseCases({
     async importDeckFile(instanceUrl, file, { withProgress }) {
       let decks = await deckRepository.listDecks(instanceUrl);
       for (let attempt = 1; ; attempt++) {
-        const { deck, cards, reviews } = importedDeck(instanceUrl, file.content, {
+        const { deck, cards, reviews, fsrsReviews } = importedDeck(instanceUrl, file.content, {
           withProgress,
           decks,
           freshId: `deck-${newId()}`,
@@ -3239,8 +3404,12 @@ export function createUseCases({
           decks = [...decks, deck];
           continue;
         }
-        if (reviews.length > 0)
-          await reviewStateRepository.applyReviewChanges(deck, { save: reviews, remove: [] });
+        if (reviews.length + fsrsReviews.length > 0)
+          await reviewStateRepository.applyReviewChanges(deck, {
+            save: reviews,
+            remove: [],
+            fsrs: { save: fsrsReviews, remove: [] },
+          });
         await deckRepository.registerDeck(deck);
         // The deck is in: a digest left behind is brought up to date by the next deck list.
         await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
@@ -3334,9 +3503,75 @@ export function createUseCases({
         return described;
       });
     },
-    savePreferences(instanceUrl, preferences) {
+    async savePreferences(instanceUrl, preferences) {
       themePreference.choose(preferences.theme);
-      return preferencesRepository.savePreferences(instanceUrl, preferences);
+      const stored = await getPreferences(instanceUrl);
+      await preferencesRepository.savePreferences(instanceUrl, {
+        ...withInvitationAnswer(preferences, stored),
+        scheduler: stored.scheduler,
+      });
+    },
+    async switchScheduler(instanceUrl, preferences, onProgress = () => undefined) {
+      const progress = stepReporter<SwitchStep>("read", SWITCH_STEPS.length, onProgress);
+      progress.start();
+      // Switching to SM-2 writes no deck: its states are up to date already.
+      const [answers, listed] =
+        preferences.scheduler === "fsrs6"
+          ? await Promise.all([loadAnswerLog(instanceUrl), deckRepository.listDecks(instanceUrl)])
+          : [[], []];
+      progress.finished("decks", listed.length > 0 ? listed.length : undefined);
+      const outcome: SwitchOutcome = {
+        switched: false,
+        decks: 0,
+        replayed: 0,
+        estimated: 0,
+        failed: [],
+      };
+      for (const deck of listed) {
+        // Each deck on its own: one that cannot be written now is left as it is, and the others go on.
+        try {
+          // Made of the states as written, again when the document changed meanwhile: the last one counts.
+          let made = { replayed: 0, estimated: 0 };
+          await reviewStateRepository.writeFsrsStates(deck, ({ sm2 }) => {
+            const switched = switchedStates(deck.url, sm2, answers);
+            made = switched;
+            return switched.fsrs;
+          });
+          outcome.decks += 1;
+          outcome.replayed += made.replayed;
+          outcome.estimated += made.estimated;
+        } catch (error) {
+          outcome.failed.push({ url: deck.url, title: deck.title, error });
+        }
+        progress.stepped();
+      }
+      progress.finished("preferences");
+      // Saved last, and only once every deck is written: until then SM-2 sets the due days.
+      if (outcome.failed.length === 0) {
+        themePreference.choose(preferences.theme);
+        await preferencesRepository.savePreferences(
+          instanceUrl,
+          withInvitationAnswer(preferences, await getPreferences(instanceUrl)),
+        );
+        outcome.switched = true;
+        await Promise.all(
+          listed.map((deck) => refreshStudyDigest(instanceUrl, deck).catch(() => undefined)),
+        );
+      }
+      progress.finished();
+      return outcome;
+    },
+    async dismissSchedulerInvitation(instanceUrl) {
+      const stored = await preferencesRepository.getPreferences(instanceUrl);
+      const preferences = stored?.preferences ?? {
+        ...DEFAULT_PREFERENCES,
+        theme: themePreference.chosen(),
+      };
+      if (preferences.schedulerInvitationDismissed) return;
+      await preferencesRepository.savePreferences(instanceUrl, {
+        ...preferences,
+        schedulerInvitationDismissed: true,
+      });
     },
     async getStudyQueue(instanceUrl, deck, now) {
       const [cards, reviews, prefs] = await Promise.all([
@@ -3347,12 +3582,12 @@ export function createUseCases({
       const queue = buildStudyQueue({
         cards,
         direction: deck.direction,
-        reviews,
+        reviews: effectiveStates(reviews.sm2, reviews.fsrs, prefs.scheduler, prefs.dayBoundaryHour),
         prefs: deckPreferences(prefs, deck),
         now,
         random,
       });
-      return { ...queue, prefs, states: reviews };
+      return { ...queue, prefs, states: reviews.sm2, fsrsStates: reviews.fsrs };
     },
     getStudyCounts(instanceUrl, deck, now) {
       return studyCountsAndSchedule(instanceUrl, deck, now);
@@ -3369,11 +3604,14 @@ export function createUseCases({
         known,
       );
     },
-    async undoReview(instanceUrl, deck, { key, before, answer }) {
-      await reviewStateRepository.applyReviewChanges(
-        deck,
-        before === null ? { save: [], remove: [key] } : { save: [before], remove: [] },
-      );
+    async undoReview(instanceUrl, deck, { key, before, fsrs, answer }) {
+      const back = <T>(state: T | null) =>
+        state === null ? { save: [], remove: [key] } : { save: [state], remove: [] };
+      // Both states as they were, in one save: FSRS-6's only when the answer wrote it.
+      await reviewStateRepository.applyReviewChanges(deck, {
+        ...back(before),
+        ...(fsrs === undefined ? {} : { fsrs: back(fsrs.before) }),
+      });
       // The answer never happened: off the answers on their way to the log, else out of it.
       // Answers being added are waited for; any added later start only after this goes on.
       await logging;
@@ -3393,12 +3631,15 @@ export function createUseCases({
         getPreferences(instanceUrl),
         reviewStateRepository.listReviewStates(deck),
       ]);
-      const reset = resetStudyDay(reviews, now, prefs.dayBoundaryHour);
+      const reset = resetStudyDay(reviews.sm2, now, prefs.dayBoundaryHour);
       const count = reset.restore.length + reset.remove.length;
       if (count > 0) {
+        // FSRS-6's states of the day go back with SM-2's, in the same save.
+        const fsrs = resetFsrsStudyDay(reviews.fsrs, now, prefs.dayBoundaryHour);
         await reviewStateRepository.applyReviewChanges(deck, {
           save: reset.restore,
           remove: reset.remove,
+          fsrs: { save: fsrs.restore, remove: fsrs.remove },
         });
         // The day never happened: its answers leave the log too, those still on their way first.
         await logAnswers();
@@ -3427,11 +3668,12 @@ export function createUseCases({
     async deckInsight(instanceUrl, deck, at, prefs) {
       const today = studyDayOf(at, prefs.dayBoundaryHour);
       const [{ cards, reviews, schedule }, answers] = await Promise.all([
-        scheduleNow(instanceUrl, deck, at, prefs.dayBoundaryHour),
+        scheduleNow(instanceUrl, deck, at, prefs),
         loadAnswerLog(instanceUrl),
       ]);
       const { maxReviewsPerDay } = deckPreferences(prefs, deck);
-      const states = scheduledStates(cards.value, deck.direction, reviews.value);
+      const states = scheduledStates(cards.value, deck.direction, reviews.value.sm2);
+      const due = scheduledStates(cards.value, deck.direction, dueStatesOf(reviews.value, prefs));
       const lapses = lapseIndex(deckAnswers(answers, deck));
       const live = new Map(activeCards(cards.value).map((card) => [card.url, card]));
       return {
@@ -3439,7 +3681,7 @@ export function createUseCases({
         maxReviewsPerDay,
         forecast: forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay }),
         scheduled: states.length,
-        intervals: intervalHistogram(states),
+        intervals: intervalHistogram(due),
         eases: easeHistogram(states),
         lapses,
         leeches: leechesOf(lapses).flatMap(({ cardUrl, lapses }) => {
@@ -3475,11 +3717,12 @@ export function createUseCases({
       const progress = await Promise.all(
         decks.map(async (one) => {
           const [{ cards, reviews, schedule }, byDeck] = await Promise.all([
-            scheduleNow(instanceUrl, one, at, prefs.dayBoundaryHour),
+            scheduleNow(instanceUrl, one, at, prefs),
             logged,
           ]);
           const { maxReviewsPerDay, newCardsPerDay } = deckPreferences(prefs, one);
-          const states = scheduledStates(cards.value, one.direction, reviews.value);
+          const states = scheduledStates(cards.value, one.direction, reviews.value.sm2);
+          const due = dueStatesOf(reviews.value, prefs);
           const forecast = forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay });
           const answers = deckAnswers(byDeck.get(one.url) ?? [], one);
           const live = activeCards(cards.value);
@@ -3488,10 +3731,11 @@ export function createUseCases({
             progress: cardProgressOf({
               cards: cards.value,
               direction: one.direction,
-              reviews: reviews.value,
+              reviews: reviews.value.sm2,
+              due,
             }),
             forecast,
-            intervals: intervalHistogram(states),
+            intervals: intervalHistogram(scheduledStates(cards.value, one.direction, due)),
             eases: easeHistogram(states),
             overdue: overdueOf(schedule.dueByDay, today),
             daysToClear: daysToClearOf(forecast),
@@ -3554,7 +3798,7 @@ export function createUseCases({
         reviewStateRepository.listReviewStates(deck),
       ]);
       // A course asks front to back: a card is answered once it has that state.
-      const answeredCardIds = reviews
+      const answeredCardIds = reviews.sm2
         .filter((state) => state.direction === "front-to-back")
         .map((state) => state.cardId);
       return {
@@ -3579,8 +3823,10 @@ export function createUseCases({
           direction: prompt.direction,
         }),
       ]);
-      const effect = courseAnswerEffect(current, choice.correct, now, prefs.dayBoundaryHour);
-      if (effect.kind === "none") return { effect: "none", state: current };
+      // Whether the card is due goes by what sets its due day: under FSRS-6, its state's.
+      const due = current.sm2 === null ? null : promptDueOf(current.sm2, current.fsrs, prefs);
+      const effect = courseAnswerEffect(due, choice.correct, now, prefs.dayBoundaryHour);
+      if (effect.kind === "none") return { effect: "none", state: current.sm2 };
       // The card joins the deck before its first state, so no state is ever without its card.
       if (effect.kind === "introduce")
         await deckRepository.applyCardChanges(deck, { save: [card], remove: [] });

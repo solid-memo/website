@@ -75,6 +75,17 @@ THING_V2 = """\
 RESOURCE_V1 = """\
 <#resource> a sh:NodeShape ; sh:name "ResourceV1" ; sh:class schema:LearningResource .
 """
+# A shape of the same class that fixes a value, as FSRS review-state
+# format 1 fixes its scheduler; the theme beside it repeats, so it is no
+# fixed value.
+SPECIAL_THING_V1 = """\
+<#special> a sh:NodeShape ;
+    sh:name "SpecialThingV1" ;
+    sh:class sm:Thing ;
+    sh:property <#kind> , <#theme> .
+<#kind> sh:path sm:kind ; sh:hasValue sm:special ; sh:maxCount 1 .
+<#theme> sh:path dcat:theme ; sh:hasValue ex:theme .
+"""
 
 
 def turtle(text: str) -> Graph:
@@ -134,6 +145,7 @@ class OwnShapes(Repository):
         self.write("ns/shapes/thing/v1.ttl", THING_V1)
         self.write("ns/shapes/thing/v2.ttl", THING_V2)
         self.write("ns/shapes/resource/v1.ttl", RESOURCE_V1)
+        self.write("ns/shapes/special-thing/v1.ttl", SPECIAL_THING_V1)
         self.shapes, self.picks = crosscheck.own_shapes()
 
     def shape(self, path: str, fragment: str) -> URIRef:
@@ -144,9 +156,10 @@ class OwnShapes(Repository):
         self.assertCountEqual(
             self.picks,
             [
-                (self.shape("thing/v1.ttl", "inDraft"), SM.Thing, 1, "draft"),
-                (self.shape("thing/v2.ttl", "thing"), SM.Thing, 2, "any"),
-                (self.shape("resource/v1.ttl", "resource"), schema, 1, "any"),
+                (self.shape("thing/v1.ttl", "inDraft"), SM.Thing, 1, "draft", frozenset()),
+                (self.shape("thing/v2.ttl", "thing"), SM.Thing, 2, "any", frozenset()),
+                (self.shape("resource/v1.ttl", "resource"), schema, 1, "any", frozenset()),
+                (self.shape("special-thing/v1.ttl", "special"), SM.Thing, 1, "any", frozenset({(SM.kind, SM.special)})),
             ],
         )
         # The property shape is named too, but is no node shape.
@@ -167,6 +180,16 @@ class OwnShapes(Repository):
         data = "ex:a a sm:Thing , schema:LearningResource ; sm:formatVersion 1 ."
         self.assertEqual(self.targets(data, "draft"), {(self.shape("thing/v1.ttl", "inDraft"), EX.a)})
         self.assertEqual(self.targets("ex:a a schema:LearningResource .", "draft"), {(self.shape("resource/v1.ttl", "resource"), EX.a)})
+
+    def test_prefers_the_shape_whose_fixed_values_the_subject_has_and_never_picks_it_without_them(self) -> None:
+        special = self.shape("special-thing/v1.ttl", "special")
+        self.assertEqual(self.targets("ex:a a sm:Thing ; sm:kind sm:special .", "draft"), {(special, EX.a)})
+        self.assertEqual(self.targets("ex:a a sm:Thing ; sm:kind sm:special .", "pod"), {(special, EX.a)})
+        self.assertEqual(self.targets("ex:a a sm:Thing ; sm:kind sm:other .", "draft"), {(self.shape("thing/v1.ttl", "inDraft"), EX.a)})
+        self.assertEqual(self.targets("ex:a a sm:Thing ; sm:formatVersion 2 .", "pod"), {(self.shape("thing/v2.ttl", "thing"), EX.a)})
+        # A version the fixed shape does not have is not checked as the class's other shapes.
+        with self.assertRaisesRegex(ValueError, "https://example.org/a has no pod shape at format 2"):
+            self.targets("ex:a a sm:Thing ; sm:kind sm:special ; sm:formatVersion 2 .", "pod")
 
     def test_leaves_a_subject_of_no_class_it_has_a_shape_for(self) -> None:
         self.assertEqual(self.targets("ex:a a dcat:Dataset .", "draft"), set())
@@ -299,6 +322,7 @@ class Main(Repository):
         self.write("packages/vocab/fixtures/deck/v4/valid/pod.ttl", '<#deck> a dcat:Dataset ; dct:title "A deck" .')
         self.write("packages/vocab/fixtures/library-deck/v6/valid/release.ttl", '<#deck> a dcat:Dataset ; dct:title "A release" .')
         self.write("packages/vocab/fixtures/draft-deck/v1/valid/draft.ttl", '<#thing> a sm:Thing ; rdfs:label "A thing" .')
+        self.write("packages/vocab/fixtures/fsrs-review-state/v1/valid/state.ttl", '<#state> a ex:State .')
 
     def run_main(self) -> tuple[int, str]:
         out = io.StringIO()
@@ -316,11 +340,12 @@ class Main(Repository):
             "a release in a pod, library-deck/v6/valid/release.ttl (DCAT-AP, no index)",
             "library-deck/v6/valid/release.ttl (Solid Memo's shapes, library)",
             "draft-deck/v1/valid/draft.ttl (Solid Memo's shapes, draft)",
+            "fsrs-review-state/v1/valid/state.ttl (Solid Memo's shapes, pod)",
             "ns/vocab/v1.ttl (SKOS, best practice)",
             "ns/vocab/topics.ttl (SKOS, best practice)",
         ):
             self.assertIn(f"ok   {label}\n", out)
-        self.assertTrue(out.endswith("8 of 8 documents conform.\n"))
+        self.assertTrue(out.endswith("9 of 9 documents conform.\n"))
 
     def test_fails_and_reports_each_document_that_does_not_conform(self) -> None:
         self.write("packages/vocab/fixtures/draft-deck/v1/valid/draft.ttl", "<#thing> a sm:Thing .")
@@ -330,7 +355,7 @@ class Main(Repository):
         self.assertIn("FAIL draft-deck/v1/valid/draft.ttl (Solid Memo's shapes, draft)\n", out)
         self.assertIn("FAIL ns/vocab/topics.ttl (SKOS, best practice)\n", out)
         self.assertIn("Validation Report", out)
-        self.assertTrue(out.endswith("6 of 8 documents conform.\n"))
+        self.assertTrue(out.endswith("7 of 9 documents conform.\n"))
 
 
 class Install(unittest.TestCase):

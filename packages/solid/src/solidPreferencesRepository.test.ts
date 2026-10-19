@@ -80,6 +80,9 @@ describe("getPreferences", () => {
         developerMode: true,
         invalidDataPolicy: "block-subject" as const,
         theme: "system" as const,
+        scheduler: "sm2" as const,
+        desiredRetention: 0.9,
+        schedulerInvitationDismissed: false,
       },
       formatVersion: 1,
     });
@@ -109,6 +112,9 @@ describe("savePreferences", () => {
     developerMode: true,
     invalidDataPolicy: "block-instance" as const,
     theme: "system" as const,
+    scheduler: "sm2" as const,
+    desiredRetention: 0.9,
+    schedulerInvitationDismissed: false,
   };
 
   it("creates the document on first save", async () => {
@@ -124,7 +130,7 @@ describe("savePreferences", () => {
     expect(getInteger(thing, SM.dayBoundaryHour)).toBe(3);
     expect(getStringNoLocale(thing, SM.answerScale)).toBe("minimal");
     expect(getBoolean(thing, SM.developerMode)).toBe(true);
-    expect(getInteger(thing, SM.formatVersion)).toBe(4);
+    expect(getInteger(thing, SM.formatVersion)).toBe(5);
   });
 
   it("rewrites the subject in place in an existing document, keeping foreign triples", async () => {
@@ -144,7 +150,23 @@ describe("savePreferences", () => {
     const thing = getThing(saved as SolidDataset, `${DOCUMENT}#it`)!;
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(5);
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
-    expect(getInteger(thing, SM.formatVersion)).toBe(4);
+    expect(getInteger(thing, SM.formatVersion)).toBe(5);
+  });
+
+  it("writes the whole document, not a PATCH, which node-solid-server stores a true in as false", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    const fetch = vi.fn(async () => new Response("", { status: 205 }));
+    await createSolidPreferencesRepository({
+      fetch: fetch as unknown as typeof globalThis.fetch,
+    }).savePreferences(INSTANCE, { ...preferences, schedulerInvitationDismissed: true });
+
+    // The PATCH @inrupt/solid-client would send for the edit goes out as a PUT of the document.
+    const [, , options] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    await options!.fetch!(DOCUMENT, { method: "PATCH", body: "INSERT DATA {};" });
+    const [url, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe(DOCUMENT);
+    expect(init.method).toBe("PUT");
+    expect(String(init.body)).toContain("schedulerInvitationDismissed> true");
   });
 });
 
@@ -171,7 +193,7 @@ describe("upgradePreferences", () => {
     expect(getInteger(thing, SM.newCardsPerDay)).toBe(7);
     expect(getInteger(thing, SM.maxReviewsPerDay)).toBe(DEFAULT_PREFERENCES.maxReviewsPerDay);
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
-    expect(getInteger(thing, SM.formatVersion)).toBe(4);
+    expect(getInteger(thing, SM.formatVersion)).toBe(5);
     expect(checkWrite).toHaveBeenCalledWith(saved, [`${DOCUMENT}#it`], "pod");
   });
 

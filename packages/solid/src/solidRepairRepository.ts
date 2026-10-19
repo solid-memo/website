@@ -31,6 +31,13 @@ const SNAPSHOT = [
   SM.previousDue,
   SM.previousLastReviewedAt,
 ];
+/** An FSRS-6 state's snapshot: the four previous* terms it writes. */
+const FSRS_SNAPSHOT = [
+  SM.previousStability,
+  SM.previousDifficulty,
+  SM.previousDue,
+  SM.previousLastReviewedAt,
+];
 
 /**
  * Repairs written to the pod (see docs/validation.md): each document is
@@ -162,8 +169,11 @@ function repairedThing(
       return repair.version < 3
         ? builder.setStringNoLocale(SM.direction, "front-to-back").build()
         : builder.removeAll(SM.direction).setIri(SM.studyDirection, SM.frontToBack).build();
-    case "drop-snapshot":
-      return SNAPSHOT.reduce((b, predicate) => b.removeAll(predicate), builder).build();
+    case "drop-snapshot": {
+      // An FSRS-6 state's own snapshot, else an SM-2 state's.
+      const snapshot = getUrlAll(thing, SM.scheduler).includes(SM.fsrs6) ? FSRS_SNAPSHOT : SNAPSHOT;
+      return snapshot.reduce((b, predicate) => b.removeAll(predicate), builder).build();
+    }
     case "recompute-due": {
       const last = getDatetime(thing, SM.lastReviewedAt);
       const interval = getInteger(thing, SM.intervalDays);

@@ -23,18 +23,21 @@ import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card } from "@solid-memo/domain/deck";
 import {
   DECK_FILE_TYPES,
-  type DeckFileContent,
   type DeckFileFormat,
   type FormatUpgrade,
 } from "@solid-memo/domain/deckFile";
-import { REVIEW_STATE_FORMAT_VERSION, type ReviewState } from "@solid-memo/domain/review";
+import {
+  REVIEW_STATE_FORMAT_VERSION,
+  type FsrsState,
+  type ReviewState,
+} from "@solid-memo/domain/review";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import { getSolidDatasetOrNull } from "./datasets";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
 import { graphsOf } from "./linearDataset";
 import { agentNamesOf, toCard, toDeck } from "./mappers/deckMapper";
-import { toReviewState } from "./mappers/reviewStateMapper";
+import { toFsrsState, toReviewState } from "./mappers/reviewStateMapper";
 import { storedVersionOf } from "./records";
 import { DCTERMS, RDF, SM, SM_NS } from "./vocab";
 
@@ -53,11 +56,15 @@ export const DECK_FILE_PREFIXES: Readonly<Record<string, string>> = {
   xsd: "http://www.w3.org/2001/XMLSchema#",
 };
 
-/** The kinds of subject a deck file holds, by class, with the shape their versions are of. */
-const KINDS: readonly { type: string; shape: ShapeName }[] = [
+/**
+ * The kinds of subject a deck file holds, by class (and, for an FSRS-6
+ * state, the scheduler it names), with the shape their versions are of.
+ */
+const KINDS: readonly { type: string; scheduler?: string; shape: ShapeName }[] = [
   { type: SM.Deck, shape: "deck" },
   { type: SM.Card, shape: "card" },
   { type: SM.ReviewState, shape: "reviewState" },
+  { type: SM.ReviewState, scheduler: SM.fsrs6, shape: "fsrsReviewState" },
 ];
 
 /**
@@ -124,20 +131,31 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
       }
       const ids = new Set(cards.map((card) => card.id));
       const reviews: ReviewState[] = [];
+      const fsrsReviews: FsrsState[] = [];
       for (const thing of typed(SM.ReviewState)) {
-        const state =
-          documentUrlOf(asUrl(thing)) === deck.reviewsDocumentUrl
-            ? toReviewState(thing, deck)
-            : null;
-        if (state === null || !ids.has(state.cardId)) {
+        const own = documentUrlOf(asUrl(thing)) === deck.reviewsDocumentUrl;
+        const state = own ? toReviewState(thing, deck) : null;
+        // An FSRS-6 state is this app's own too: it comes with the progress.
+        const fsrs = own && state === null ? toFsrsState(thing, deck) : null;
+        const of = state ?? fsrs;
+        if (of === null || !ids.has(of.cardId)) {
           dropped.push(asUrl(thing));
           continue;
         }
-        reviews.push(state);
-        upgrade("reviewState", asUrl(thing), state.formatVersion, REVIEW_STATE_FORMAT_VERSION);
+        if (state === null) fsrsReviews.push(fsrs!);
+        else {
+          reviews.push(state);
+          upgrade("reviewState", asUrl(thing), state.formatVersion, REVIEW_STATE_FORMAT_VERSION);
+        }
       }
-      const content: DeckFileContent = { deck, cards, upgraded, dropped };
-      return reviews.length === 0 ? content : { ...content, reviews };
+      return {
+        deck,
+        cards,
+        upgraded,
+        dropped,
+        ...(reviews.length === 0 ? {} : { reviews }),
+        ...(fsrsReviews.length === 0 ? {} : { fsrsReviews }),
+      };
     },
   };
 }
@@ -155,9 +173,12 @@ function datasetOf(quads: readonly Quad[]): SolidDataset {
 /** Refuse a subject of a deck's kinds in a newer format than this app reads, as the pod's own are read only by a newer app. */
 function refuseNewer(thing: Thing): void {
   const types = getUrlAll(thing, RDF.type);
-  for (const { type, shape } of KINDS) {
+  const schedulers = getUrlAll(thing, SM.scheduler);
+  for (const { type, scheduler, shape } of KINDS) {
     const version = storedVersionOf(thing);
-    if (types.includes(type) && version > LATEST_VERSION[shape]) {
+    const ofKind =
+      types.includes(type) && (scheduler === undefined || schedulers.includes(scheduler));
+    if (ofKind && version > LATEST_VERSION[shape]) {
       throw new AppError("deckFileTooNew", {
         subject: asUrl(thing),
         version,

@@ -252,8 +252,8 @@ What holds today, and what does not, criterion by criterion.
   ([deployment.md](deployment.md)), and only the newest version, once
   its GitHub release is made. A deploy by hand runs only from `main`,
   deploys the newest version, and runs `npm run check` on it first.
-- MUST, met — the source of the policy in use is public. The SM-2
-  scheduler and the library's rules are in the repository
+- MUST, met — the source of the policy in use is public. The SM-2 and
+  FSRS-6 schedulers and the library's rules are in the repository
   ([policy.md](policy.md)).
 - MUST, met — no sensitive information about users or third parties, and
   no secrets in the tree or its history. The maintainer's own email
@@ -284,16 +284,18 @@ What holds today, and what does not, criterion by criterion.
 
 - MUST, met — the policy is included. No public policy applies, and
   [policy.md](policy.md) says so. It lists the outside rules the code
-  follows (SM-2, the CLDR plural rules, BCP 47, NFC and DCAT-AP), with
+  follows (SM-2, FSRS-6, the CLDR plural rules, BCP 47, NFC and DCAT-AP), with
   versions and links, and the project's own rules.
 - MUST, met — no policy is based on source code, so there is none to
   include.
 - SHOULD, met — policy in machine-readable formats. The project's own
-  rules are SHACL shapes and the library's checks. SM-2 is pure
-  functions in `packages/domain`.
+  rules are SHACL shapes and the library's checks. SM-2 and FSRS-6 are
+  pure functions in `packages/domain`.
 - SHOULD, met — CI checks the code against the policy. `sm2.test.ts`
   reads the table of [srs.md's worked examples](srs.md#worked-examples)
-  from the page and checks the scheduler against every row. So a change
+  from the page and checks the scheduler against every row, and
+  `fsrs.test.ts` does the same with
+  [the FSRS-6 worked examples](srs.md#fsrs-6-worked-examples). So a change
   to either one that the other does not match fails. And
   `npm run library:check` refuses a new deck version without a license.
 
@@ -682,7 +684,8 @@ What holds today, and what does not, criterion by criterion.
   README today, but no check holds it, and nothing checks that every
   export has a comment.
 - OPTIONAL, partial — the policy and the docs tested against the code.
-  The generated vocabulary, the vendored packages' list, the SM-2 table
+  The generated vocabulary, the vendored packages' list, the SM-2 and
+  FSRS-6 tables
   and, since 2.0.0, the public API in `api/` are checked: a test writes
   each of its files from the code and fails when they disagree
   ([api/README.md](../api/README.md)). Since 2.1.1, the built site's

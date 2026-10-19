@@ -6,7 +6,7 @@ import { useId } from "preact/hooks";
 import { isRecalled, type Answer } from "@solid-memo/domain/answer";
 import { chainIndexOf, isRepeat } from "@solid-memo/domain/answerChain";
 import { isMarkdown, type Card, type Deck, type StudyDirection } from "@solid-memo/domain/deck";
-import type { ReviewState } from "@solid-memo/domain/review";
+import type { DueState } from "@solid-memo/domain/review";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { gradeGroupOf } from "@solid-memo/domain/studyPatterns";
 import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
@@ -37,8 +37,8 @@ export function CardHistory({
   deck: Deck;
   card: Card;
   answers: readonly Answer[];
-  /** The deck's review states: the card's are found among them. */
-  states: readonly ReviewState[];
+  /** What sets each of the deck's prompts' due day (effectiveStates): the card's are found among them. */
+  states: readonly DueState[];
   /** The hour a study day begins, as the answers' days were counted. */
   dayBoundaryHour: number;
 }) {

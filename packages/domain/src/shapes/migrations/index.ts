@@ -18,6 +18,7 @@ import { DECK_2_TO_3 } from "./deck/2-to-3";
 import { DECK_3_TO_4 } from "./deck/3-to-4";
 import { DECK_4_TO_5 } from "./deck/4-to-5";
 import { DECK_5_TO_6 } from "./deck/5-to-6";
+import { DECK_SCHEDULE_1_TO_2 } from "./deckSchedule/1-to-2";
 import { INSTANCE_1_TO_2 } from "./instance/1-to-2";
 import { LIBRARY_DECK_1_TO_2 } from "./libraryDeck/1-to-2";
 import { LIBRARY_DECK_2_TO_3 } from "./libraryDeck/2-to-3";
@@ -29,6 +30,7 @@ import { LIBRARY_DECK_SERIES_2_TO_3 } from "./libraryDeckSeries/2-to-3";
 import { PREFERENCES_1_TO_2 } from "./preferences/1-to-2";
 import { PREFERENCES_2_TO_3 } from "./preferences/2-to-3";
 import { PREFERENCES_3_TO_4 } from "./preferences/3-to-4";
+import { PREFERENCES_4_TO_5 } from "./preferences/4-to-5";
 import { REVIEW_STATE_1_TO_2 } from "./reviewState/1-to-2";
 import type { AnyMigrationStep, MigrationContext } from "./step";
 
@@ -48,6 +50,7 @@ export const MIGRATIONS: readonly AnyMigrationStep[] = [
   DECK_3_TO_4,
   DECK_4_TO_5,
   DECK_5_TO_6,
+  DECK_SCHEDULE_1_TO_2,
   INSTANCE_1_TO_2,
   LIBRARY_DECK_1_TO_2,
   LIBRARY_DECK_2_TO_3,
@@ -59,6 +62,7 @@ export const MIGRATIONS: readonly AnyMigrationStep[] = [
   PREFERENCES_1_TO_2,
   PREFERENCES_2_TO_3,
   PREFERENCES_3_TO_4,
+  PREFERENCES_4_TO_5,
   REVIEW_STATE_1_TO_2,
 ];
 

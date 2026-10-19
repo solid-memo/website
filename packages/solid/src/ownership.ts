@@ -30,8 +30,8 @@ const WRITTEN_BESIDE = [
  * creator, publisher or distribution — a catalog, an agent and a
  * distribution have no class of Solid Memo's own, and they stay Solid
  * Memo's when another app's rewrite has dropped their stamp. A subject
- * naming another scheduler (any sm:scheduler but the sm:sm2 IRI) is
- * never Solid Memo's. Every
+ * naming another scheduler (any sm:scheduler but the sm:sm2 and sm:fsrs6
+ * IRIs) is never Solid Memo's. Every
  * other subject of the document is another app's.
  */
 function solidMemoSubjects(dataset: SolidDataset): Set<string> {

@@ -26,7 +26,9 @@ app writes today; `DECK_FORMAT_VERSION` and friends are aliases of it.
 | Deck | title, document links, provenance | `sm:direction`, stated | A format-1 reader would study a bidirectional deck one way only and count the other way's review subjects against the day's budgets without matching them to any card. |
 | Card | `sm:front` and `sm:back`, both required | a side may be a picture (`sm:frontImage` / `sm:backImage`, an IRI), text, or both | A format-1 reader treats a card without `sm:front` as malformed and drops it, so picture-only cards must not be mistaken for format 1. |
 | Review state | the SM-2 fields; a snapshot and per-direction subjects were added without a bump, so format 1 admits them | the same fields; the snapshot is all five triples or none; the subject naming (`#<cardId>`, `#<cardId>@back-to-front`) is part of the contract | Stamping begins: a format-1 reader meeting a format-2 state would silently ignore the snapshot and the other direction, which is what a version is meant to flag. |
+| FSRS review state | an FSRS-6 state (vocabulary 1.21): stability, difficulty, due day, first and last review, the card and direction it is of, and a snapshot all four or none; `sm:scheduler sm:fsrs6` fixed | | A new shape of `sm:ReviewState`, not a review-state version: see below. |
 | Preferences | whatever the unversioned era wrote: every field optional, a missing one meaning its default | every field stated | The document is rewritten on every save, so stamping costs nothing; format 2 is the complete record. |
+| Deck schedule | the digest's counts of a deck's due days, with the direction and day boundary they hold for | the scheduler whose due days they count (`sm:scheduledWith`, vocabulary 1.21), and the version stated | Switching scheduler writes no review, so the reviews document's version alone cannot tell an SM-2 schedule from an FSRS-6 one: see below. |
 
 Deck format 4 (and library deck series format 2, its summary in the
 library index) states a deck's title and description as language-tagged
@@ -194,7 +196,8 @@ format version:
   another app's to the [check](validation.md#data-another-app-wrote),
   so it sets no deck aside, and this app never reads, writes over or
   removes it. Any value of `sm:scheduler` but the `sm:sm2` IRI counts,
-  a literal too. An older app takes it for SM-2's: it cannot read it either
+  a literal too, and from vocabulary 1.21 but the `sm:fsrs6` IRI too:
+  an FSRS-6 state is this app's own (below). An older app takes it for SM-2's: it cannot read it either
   (no ease factor), and would write over it only at the subject the old
   rule names for a card.
 - **`schema:suggestedAnswer` on a card and `dcterms:isPartOf` on a cards
@@ -259,6 +262,91 @@ needs no migration and moved no format version:
   its next opening. Every answer written before meets the new
   constraints, which only bound the new terms.
 
+FSRS-6 review states (vocabulary 1.21, see
+[vocab.md](vocab.md#fsrs-6)) need no migration, and the review-state
+format did not move:
+
+- **A new shape, not review-state format 3.** An FSRS-6 state is an
+  `sm:ReviewState` stamped with FSRS review-state format 1
+  (`fsrs-review-state/v1.ttl`) and told apart by `sm:scheduler
+  sm:fsrs6`, a value its shape fixes. `pickShape` checks a review state
+  against it only when the state names that scheduler, and then never
+  against review state 1 or 2, so every SM-2 state is checked as
+  before. A review-state format 3 would have moved every SM-2 state
+  with it: each pod would need the format update, and every tab opened
+  before the deploy would refuse to save a review.
+- **Nothing old is in its format**, as with any new kind, so it has no
+  step, and its chain starts at 1.
+- **An older app takes an FSRS-6 state for another scheduler's**: any
+  value of `sm:scheduler` but `sm:sm2` counts. Its check gives warnings
+  only (against review state 1, the version the state is stamped
+  with), and it never reads, writes over or removes the state, not even
+  with its card. So a state an older tab leaves behind may be stale,
+  when that tab graded the card or reset the day by SM-2 alone, or
+  orphaned, when it removed the card; a newer app tells both from the
+  SM-2 state of the same prompt. This app reads and writes FSRS-6
+  states as its own: one is fresh while the SM-2 state of its prompt
+  has the same last review, and only then sets a due day; a stale or
+  orphaned one is replaced at the next review under FSRS-6, estimated
+  from the SM-2 state, and removed with its card
+  ([data-model.md](data-model.md#decks-and-cards)).
+- **An older app's Set due date goes unseen under FSRS-6.** Freshness
+  compares only the last review, and the Studio's Set due date in an
+  older app changes the SM-2 state's due day and keeps its last review.
+  So while FSRS-6 is in use, the FSRS-6 state still counts as fresh and
+  its due day goes on setting the card's, as if the date had not been
+  set, until the card's next review.
+- **The other terms of 1.21**, `sm:studyScheduler`,
+  `sm:desiredRetention`, `sm:schedulerInvitationDismissed` and
+  `sm:scheduledWith`, are in preferences format 5 and deck schedule
+  format 2 (below).
+- **One full re-check.** A new shape file joined the rules, so the
+  rules' hash changed: every instance is checked in full once on its
+  next opening, and its documents get new receipts. No pod holds an
+  FSRS-6 state before the app writes one, so the check finds nothing
+  new.
+
+Preferences format 5 and deck schedule format 2 (vocabulary 1.21) say
+which scheduler sets the due days:
+
+- **Preferences format 5** states `sm:studyScheduler`, `sm:sm2` or
+  `sm:fsrs6`, `sm:desiredRetention`, the chance of recall FSRS-6
+  aims at, a share from 0.7 to 0.97, and
+  `sm:schedulerInvitationDismissed`, whether the learner answered "Not
+  now" to the deck list's invitation to switch to FSRS-6. All are
+  stated whichever scheduler is in use, so a switch back keeps the
+  retention chosen, as every field of preferences is since format 2.
+  The step from format 4 (`preferences/4-to-5`) fills in SM-2, the only
+  scheduler there was, 0.9, FSRS-6's default, and false: the invitation
+  is new. The format update offers it, as it offered the theme.
+- **Defaults never change a scheduler.** A new instance is made with
+  its preferences, FSRS-6 their scheduler; one with no preferences
+  document, made before, reads as SM-2, as it always did
+  ([srs.md](srs.md#which-scheduler-an-instance-is-on)). No step turns
+  FSRS-6 on: only `switchScheduler` does, once each deck's FSRS-6
+  states are written.
+- **Deck schedule format 2** states `sm:scheduledWith`, the scheduler
+  whose due days the digest's counts are. A schedule holds only while
+  it names the scheduler in use (`freshSchedule`, `studyCountsOf`), as
+  it holds only for its day boundary: switching back from FSRS-6 to
+  SM-2 writes no review, so without it the deck list would count the
+  FSRS-6 days. The step from format 1 (`deckSchedule/1-to-2`) names
+  SM-2. The digest is derived data, so the format update never writes
+  it; a schedule is restamped when it is next computed.
+- **Why the versions moved.** Preferences and deck schedule shapes
+  state every field, and a published shape is never edited, so the
+  terms need new versions. Both are written from now on: this is a
+  breaking change. An older tab reads format-5 preferences with format
+  4's shape, without the scheduler, and refuses to save over them
+  (`writtenByNewerApp`), so it cannot save the preferences or the theme
+  until it is reloaded. It reads a format-2 schedule as format 1, so it
+  may count an FSRS-6 schedule's days as SM-2's, and it refuses to
+  write over one: its digest writes that hold a deck's schedule fail,
+  and it learns that deck's documents again on its next visit.
+- **One full re-check.** New shape files joined the rules, so the rules'
+  hash changed: every instance is checked in full once on its next
+  opening.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape
@@ -281,7 +369,8 @@ Rules that hold across versions:
   position or completed chapter, a deck group's removal, the catalog's
   links, a repair, and the removal of a card, a distractor, a review
   state, a deck entry or a day's answers): a subject stamped above every
-  version this app writes for its class. This is what keeps a tab opened before a
+  version this app writes for its class, or, where a shape fixes values
+  the subject has (an FSRS-6 review state), for that shape's kind. This is what keeps a tab opened before a
   deploy from writing older formats over what the update wrote in
   place; a tab of a version from before this rule has no such guard.
   The library import refuses newer data too, with a clear message.
@@ -312,6 +401,8 @@ flowchart LR
     p1["PreferencesV1"] -->|preferences/1-to-2<br/>defaults filled| p2["PreferencesV2"]
     p2 -->|preferences/2-to-3<br/>the default invalid data policy:<br/>set invalid data aside| p3["PreferencesV3"]
     p3 -->|preferences/3-to-4<br/>theme as the browser prefers| p4["PreferencesV4"]
+    p4 -->|preferences/4-to-5<br/>SM-2, desired retention 0.9| p5["PreferencesV5"]
+    ds1["DeckScheduleV1"] -->|deckSchedule/1-to-2<br/>SM-2's due days| ds2["DeckScheduleV2"]
 ```
 
 One module per step (`<class>/<n>-to-<n+1>.ts`), each a pure, total
@@ -465,9 +556,10 @@ save there ([data-model.md](data-model.md#write-discipline)).
 
 What a server cannot apply leaves that document as it was, as any
 failure does: node-solid-server's parser knows no SPARQL-style `PREFIX`
-directive, so it cannot patch a document another app wrote with one, nor
-delete by a PATCH a value the update rewrites spelled otherwise than
-Solid Memo spells it (`2.50` for 2.5).
+directive, so it cannot patch a document another app wrote with one. A
+decimal it finds only as JavaScript spells its number (`2.5` for
+`2.50`): a deletion it refuses for that is sent once more so spelled
+([data-model.md](data-model.md#write-discipline)).
 
 ### Proof on a real server
 
@@ -664,7 +756,7 @@ Review history of every card but the removed ones is kept.
 An upgrade writes the deck's documents where they are, each in one
 write made only if it is still as it was read, in an order that leaves
 the deck readable after each: its cards, then the review states of the
-cards it removes, then its catalog entry, which says which release the
+cards it removes (SM-2's and FSRS-6's, in one write), then its catalog entry, which says which release the
 deck is. A failure stops it where it is, nothing put back; planned
 again, the upgrade is offered and finishes
 ([domain/deckUpgrade.ts](../packages/domain/src/deckUpgrade.ts),

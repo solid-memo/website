@@ -10,7 +10,7 @@ import { App } from "../pages/App.ts";
 /**
  * The app's screenshots (apps/web/public/screenshots/), which the README,
  * publiccode.yml and the About page show: a guest's study of a few weeks,
- * made here on a clock of its own (page.clock), then each screen as a
+ * made here on a clock of its own (page.clock), on SM-2, then each screen as a
  * phone shows it, scrolled to what it is a picture of; the Studio, made
  * for a large screen, on a desktop's. `npm run screenshots` retakes them (docs/testing.md#screenshots).
  */
@@ -46,6 +46,12 @@ test("the app's screenshots", async ({ page }, testInfo) => {
 
   await app.onboarding.visit();
   await app.onboarding.tryAsGuest();
+  // A guest starts on FSRS-6; the screenshots show SM-2's answers, 0 to 5
+  // (GRADES), and a deck list without the invitation to switch to FSRS-6.
+  await app.preferences.open();
+  await app.preferences.setScheduler("sm2");
+  await app.preferences.save();
+  await app.decks.declineSchedulerInvitation();
   // The course for newcomers is offered while there are no decks: started now, it goes on later.
   const course = await app.decks.newcomerCourseTitle();
   await app.decks.startNewcomerCourse(course);

@@ -1023,21 +1023,40 @@ export class Studio extends Screen {
     });
   }
 
-  /** Follows the inspector's tab of the card's schedule, which the URL holds: the card was studied front to back. */
-  async openSchedule(): Promise<void> {
+  /**
+   * Follows the inspector's tab of the card's schedule, which the URL
+   * holds: the card was studied front to back. SM-2's state is shown
+   * whichever `scheduler` sets the due days; under FSRS-6, its memory
+   * too, below it, saying FSRS-6 sets them.
+   */
+  async openSchedule(scheduler: "sm2" | "fsrs6"): Promise<void> {
     await this.intent("Open the card's schedule", async () => {
       await this.cardTabs
         .getByRole("link", { name: this.t("studio.card.tab.schedule"), exact: true })
         .click();
       await expect(this.page).toHaveURL(/[?&]tab=schedule/);
-      await expect(this.scheduleOf("frontToBack").getByRole("term")).toHaveText([
+      const schedule = this.scheduleOf("frontToBack");
+      const sm2 = [
         this.t("studio.schedule.due"),
         this.t("studio.schedule.interval"),
         this.t("studio.schedule.ease"),
         this.t("studio.schedule.repetitions"),
         this.t("studio.schedule.firstReviewed"),
         this.t("studio.schedule.lastReviewed"),
-      ]);
+      ];
+      const fsrs = [
+        this.t("studio.schedule.due"),
+        this.t("studio.schedule.stability"),
+        this.t("studio.schedule.difficulty"),
+        this.t("studio.schedule.recall"),
+      ];
+      await expect(schedule.getByRole("term")).toHaveText(
+        scheduler === "fsrs6" ? [...sm2, ...fsrs] : sm2,
+      );
+      if (scheduler === "fsrs6")
+        await expect(
+          schedule.getByText(this.t("studio.schedule.fsrsSets"), { exact: true }),
+        ).toBeVisible();
     });
   }
 

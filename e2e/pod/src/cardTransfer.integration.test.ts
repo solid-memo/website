@@ -160,7 +160,7 @@ async function triples(url: string): Promise<string> {
 const byId = async (deck: Deck) =>
   Object.fromEntries((await page().listCards(deck)).map((card) => [card.id, card]));
 const statesOf = async (deck: Deck) =>
-  (await page().listDeckReviewStates(deck)).map((state) => state.cardId).sort();
+  (await page().listDeckReviewStates(deck)).sm2.map((state) => state.cardId).sort();
 
 describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) => {
   /** Whether this server refuses an edit whose If-Match names another version. */

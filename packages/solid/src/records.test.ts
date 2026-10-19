@@ -27,6 +27,7 @@ import {
   DECK_V2,
   DECK_V4,
   DECK_V6,
+  FSRS_REVIEW_STATE_V1,
   LIBRARY_DECK_V5,
   PREFERENCES_V2,
   REVIEW_STATE_V2,
@@ -65,6 +66,7 @@ const THING: ShapeDescriptor<Thing> = {
   targetClass: `${EX}Thing`,
   additionalTypes: [`${EX}Extra`],
   absent: [`${EX}gone`],
+  fixedValues: [],
   shapeIri: `${EX}shape`,
   shapeDocument: "thing/v1.ttl",
   context: "any",
@@ -273,6 +275,7 @@ describe("readRecord", () => {
       targetClass: `${EX}Thing`,
       additionalTypes: [],
       absent: [],
+      fixedValues: [],
       shapeIri: `${EX}shape`,
       shapeDocument: "thing/v1.ttl",
       context: "any",
@@ -451,6 +454,49 @@ describe("applyRecord", () => {
     const builder = buildThing(createThing({ url: URL_ })).addInteger(`${EX}count`, 9);
     applyRecord(builder, THING, { name: "Ann", tags: [], links: [], concepts: [] });
     expect(getInteger(builder.build(), `${EX}count`)).toBeNull();
+  });
+});
+
+describe("a shape that fixes a value (an FSRS-6 review state's scheduler)", () => {
+  const STATE = "https://pod.example/reviews.ttl#card-1@fsrs6";
+  const RECORD = {
+    reviewOf: "https://pod.example/cards.ttl#card-1",
+    direction: SM.frontToBack,
+    stability: 6.2,
+    difficulty: 4.93,
+    due: "2026-09-27",
+    firstReviewedAt: "2026-09-20T10:00:00.000Z",
+    lastReviewedAt: "2026-09-21T10:00:00.000Z",
+  } as const;
+  const stamped = (version: number, scheduler: string) =>
+    buildThing(createThing({ url: STATE }))
+      .addIri(RDF.type, SM.ReviewState)
+      .addIri(SM.scheduler, scheduler)
+      .addInteger(SM.formatVersion, version)
+      .build();
+
+  it("is written with the value, in place of any other, and read only where it is stated", () => {
+    const written = recordThing(STATE, FSRS_REVIEW_STATE_V1, RECORD, stamped(1, SM.sm2));
+    expect(getUrlAll(written, SM.scheduler)).toEqual([SM.fsrs6]);
+    expect(readVersioned(written, "fsrsReviewState")).toEqual({
+      storedVersion: 1,
+      record: { version: 1, data: RECORD },
+    });
+    const sm2 = buildThing(written).setIri(SM.scheduler, SM.sm2).build();
+    expect(readVersioned(sm2, "fsrsReviewState")).toBeNull();
+  });
+
+  it("refuses a change to a subject newer than the kind it is of writes, not its class's other kinds", () => {
+    // Review-state format 2 is written, FSRS review-state format 1: an
+    // FSRS-6 state at format 2 is newer than this app writes.
+    expect(() => unlessNewer(stamped(2, SM.fsrs6))).toThrow(
+      expect.objectContaining({
+        code: "writtenByNewerApp",
+        message: expect.stringContaining(`url: ${STATE}\nversion: 2\nwrites: 1`),
+      }),
+    );
+    expect(unlessNewer(stamped(1, SM.fsrs6))).toEqual(stamped(1, SM.fsrs6));
+    expect(unlessNewer(stamped(2, SM.sm2))).toEqual(stamped(2, SM.sm2));
   });
 });
 

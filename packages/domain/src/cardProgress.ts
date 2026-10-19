@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
-import type { ReviewState } from "./review";
+import { reviewKeyOf, type DueState, type ReviewState } from "./review";
 import { FORECAST_DAYS, scheduledStates, type ForecastDay } from "./scheduleInsight";
 import { MATURE_INTERVAL_DAYS, shiftStudyDay } from "./answer";
 
@@ -33,16 +33,24 @@ export interface CardProgress {
  * The progress of a deck's active prompts in its direction: a review
  * state of a retired card, or of a direction the deck is not studied in,
  * counts for nothing (scheduledStates, as in scheduleOf, studyDigest.ts).
+ * Whether a prompt is relearning is SM-2's to say (its repetitions);
+ * how young or mature it is goes by the interval of `due`, what sets its
+ * due day (effectiveStates in fsrs.ts), the SM-2 state's own where
+ * `due` has none.
  */
 export function cardProgressOf(input: {
   cards: Card[];
   direction: DeckDirection;
   reviews: ReviewState[];
+  due?: readonly DueState[];
 }): CardProgress {
-  const { cards, direction, reviews } = input;
+  const { cards, direction, reviews, due = [] } = input;
   const states = scheduledStates(cards, direction, reviews);
+  const intervalOf = new Map(due.map((state) => [reviewKeyOf(state), state.intervalDays]));
   const passed = states.filter((state) => state.repetitions > 0);
-  const young = passed.filter((state) => state.intervalDays < MATURE_INTERVAL_DAYS).length;
+  const young = passed.filter(
+    (state) => (intervalOf.get(reviewKeyOf(state)) ?? state.intervalDays) < MATURE_INTERVAL_DAYS,
+  ).length;
   return {
     new: promptsOf(activeCards(cards), direction).length - states.length,
     relearning: states.length - passed.length,

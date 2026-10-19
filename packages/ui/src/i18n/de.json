@@ -554,6 +554,12 @@
     "start": "Kurs starten",
     "about": "Über diesen Kurs"
   },
+  "schedulerInvitation": {
+    "title": "Probier FSRS-6, das empfohlene Planungsverfahren",
+    "pitch": "Mit FSRS-6 führt jede Antwort zu einem deutlich anderen Intervall, und es berücksichtigt, wie spät du wiederholst. Beim Wechsel bleibt jede Karte an dem Tag fällig, an dem sie fällig war, und in den Lerneinstellungen kannst du jederzeit zu SM-2 zurückwechseln.",
+    "switch": "Zu FSRS-6 wechseln",
+    "notNow": "Nicht jetzt"
+  },
   "deckPreferences": {
     "loading": "Einstellungen werden geladen…",
     "heading": "Einstellungen: {deck}",
@@ -695,6 +701,46 @@
     "tryAgain": "Erneut versuchen",
     "close": "Schließen",
     "done": "Deine Daten sind auf dem neuesten Stand."
+  },
+  "schedulerSwitch": {
+    "progressRegion": "Wechsel zu FSRS-6",
+    "running": "{step}…",
+    "progressLabel": "Fortschritt des Wechsels",
+    "keepOpen": "Lass diese Seite geöffnet, bis der Wechsel fertig ist. Falls er abbricht, plant SM-2 deine Wiederholungen weiter, und du kannst erneut wechseln.",
+    "step": {
+      "read": "Deine Antworten und Stapel werden gelesen",
+      "decks": "Die Erinnerung jeder Karte wird berechnet",
+      "preferences": "Deine Einstellungen werden gespeichert"
+    },
+    "count": {
+      "one": "{done} von {count} Stapel",
+      "other": "{done} von {count} Stapeln"
+    },
+    "doneRegion": "Zu FSRS-6 gewechselt",
+    "done": "FSRS-6 plant jetzt deine Wiederholungen.",
+    "replayed": {
+      "one": "{count} Karte wurde aus all deinen Antworten darauf berechnet.",
+      "other": "{count} Karten wurden aus all deinen Antworten darauf berechnet."
+    },
+    "estimated": {
+      "one": "{count} Karte, deren Antworten nicht alle in deinem Verlauf sind, wurde aus SM-2 geschätzt.",
+      "other": "{count} Karten, deren Antworten nicht alle in deinem Verlauf sind, wurden aus SM-2 geschätzt."
+    },
+    "decks": {
+      "one": "{count} Stapel wurde gewechselt.",
+      "other": "{count} Stapel wurden gewechselt."
+    },
+    "dueKept": "Jede Karte bleibt an dem Tag fällig, an dem sie fällig war.",
+    "continue": "Fertig",
+    "failedRegion": "Wechsel nicht abgeschlossen",
+    "notFinished": {
+      "one": "{count} Stapel konnte jetzt nicht gewechselt werden:",
+      "other": "{count} Stapel konnten jetzt nicht gewechselt werden:"
+    },
+    "failedItem": "{deck}: {reason}",
+    "retryHint": "SM-2 plant weiterhin deine Wiederholungen. Ein erneuter Versuch wechselt jeden Stapel.",
+    "tryAgain": "Erneut versuchen",
+    "close": "Schließen"
   },
   "library": {
     "heading": "Stapelbibliothek",
@@ -896,7 +942,7 @@
     "countIn": "{what} in {decks}",
     "instanceFormat": "das Instanzformat {version}",
     "catalogueFormat": "einen Katalog der Stapel jeder Instanz, den andere Apps als DCAT-Katalog lesen",
-    "preferencesFormat": "das Einstellungsformat {version}, das die Antwortskala, den Entwicklermodus, den Umgang mit ungültigen Daten und das Erscheinungsbild speichert",
+    "preferencesFormat": "das Einstellungsformat {version}, das die Antwortskala, den Entwicklermodus, den Umgang mit ungültigen Daten, das Erscheinungsbild und den Planungsalgorithmus speichert",
     "deckFormat": "das Stapelformat {version}, das Stapel mit den Standards DCAT und SKOS beschreibt, jedem Stapel eine Beschreibung gibt und Titel, Beschreibung und Schlagwörter eines Stapels in jeder Sprache erlaubt, die du angibst",
     "cardFormat": "das Kartenformat {version}, das Bilder auf Karten ermöglicht, einem Bibliotheksstapel erlaubt, eine nicht mehr genutzte Karte auszumustern, den Text einer Karte in jeder Sprache erlaubt, die du angibst, und eine Beschriftung über der Vorderseite einer Karte hinzufügt",
     "reviewFormat": "das Format {version} für Wiederholungsstände, das den Stand jeder Lernrichtung und den Rückgängig-Schnappschuss des Tages speichert",
@@ -1055,16 +1101,32 @@
     "maxReviewsPerDay": "Max. Wiederholungen pro Tag",
     "dayBoundaryHour": "Der Tag beginnt um (Uhr)",
     "dayBoundaryHint": "Eine Stunde von 0 bis 23 im 24-Stunden-Format: Dann beginnt ein neuer Lerntag mit neuen Karten und Wiederholungen.",
+    "scheduler": {
+      "legend": "Planungsverfahren",
+      "hint": "Das Verfahren, das entscheidet, wann jede Karte wiederkommt. SM-2 wird bei jeder Wiederholung auf dem neuesten Stand gehalten, du kannst also jederzeit dorthin zurückwechseln; wechselst du erneut zu FSRS-6, wird jede Karte neu berechnet.",
+      "sm2": {
+        "label": "SM-2",
+        "hint": "SuperMemo-2: Jede richtige Antwort multipliziert das Intervall der Karte mit ihrer Leichtigkeit."
+      },
+      "fsrs6": {
+        "label": "FSRS-6",
+        "hint": "Der Free Spaced Repetition Scheduler, Version 6: Er verfolgt, wie stabil jede Erinnerung ist, und bringt die Karte wieder, wenn deine Chance, dich zu erinnern, auf die gewählte Behaltensquote sinkt. Beim Wechsel wird die Erinnerung jeder Karte aus deinen bisherigen Antworten berechnet. Empfohlen: Jede Antwort führt zu einem deutlich anderen Intervall, und eine verspätete Wiederholung wird mit ihrer Verspätung berücksichtigt."
+      },
+      "recommended": "Empfohlen"
+    },
+    "desiredRetention": "Gewünschte Behaltensquote (%)",
+    "desiredRetentionHint": "Mit FSRS-6: die Chance, dich an eine Karte zu erinnern, wenn sie wiederkommt, von 70 bis 97. Höher heißt kürzere Intervalle und mehr Wiederholungen. Voreingestellt ist 90.",
     "answerScale": {
       "legend": "Antwortschaltflächen",
       "sm2": {
         "label": "Skala von 0 bis 5",
-        "hint": "Alle Bewertungsstufen von SuperMemo-2 (SM-2), der Methode, die deine Wiederholungen plant: von 0 (komplett vergessen) bis 5 (einfach)."
+        "hint": "Alle Bewertungsstufen von SuperMemo-2 (SM-2): von 0 (komplett vergessen) bis 5 (einfach)."
       },
       "minimal": {
         "label": "Nochmal · Schwer · Gut · Einfach",
         "hint": "Vier Schaltflächen. Mit „Nochmal“ kommt die Karte später in der Lerneinheit noch einmal."
-      }
+      },
+      "fsrs6Hint": "FSRS-6 nutzt immer die vier Schaltflächen Nochmal, Schwer, Gut und Einfach. Deine Wahl hier bleibt erhalten, falls du zu SM-2 zurückwechselst."
     },
     "policy": {
       "legend": "Wenn Daten nicht den Formen entsprechen",
@@ -1527,12 +1589,12 @@
     "runOutNever": "Keine neuen Karten am Tag: Sie gehen nie aus.",
     "intervals": "Tage, bis Karten wiederkommen",
     "intervalsLabel": "Balken dafür, wie viele Karten je Richtung nach welcher Spanne von Tagen wiederkommen.",
-    "intervalsNote": "Die Wiederholungen einer Karte liegen 1 Tag auseinander, dann 6 Tage, dann etwa 15 und etwa 38 und von da an immer mehr, daher enthalten manche Spannen nur wenige Karten.",
+    "intervalsNote": "SM-2 legt die Wiederholungen einer Karte 1 Tag auseinander, dann 6 Tage, dann etwa 15 und etwa 38 und von da an immer mehr; FSRS-6 verteilt sie nach der Erinnerung an jede Karte. So oder so enthalten manche Spannen nur wenige Karten.",
     "interval": "Intervall",
     "showEases": "Zeigen, wie leicht sich Karten anfühlen",
     "eases": "Wie leicht sich Karten anfühlen",
     "easesLabel": "Balken dafür, wie viele Karten je Richtung welchen Leichtigkeitsgrad haben: Je höher, desto schneller wachsen ihre Intervalle.",
-    "easesNote": "Jede Karte beginnt bei 2,5. Einfach hebt ihn ein wenig, Gut lässt ihn, Schwer senkt ihn, bis auf 1,3; eine vergessene Karte behält ihn. Je höher er ist, desto schneller wachsen die Intervalle der Karte.",
+    "easesNote": "Der Leichtigkeitsgrad ist der von SM-2 und wird bei jeder Wiederholung aktuell gehalten, gleich welches Planungsverfahren die Fälligkeitstage festlegt. Jede Karte beginnt bei 2,5. Einfach hebt ihn ein wenig, Gut lässt ihn, Schwer senkt ihn, bis auf 1,3; eine vergessene Karte behält ihn. Je höher er ist, desto schneller wachsen die Intervalle der Karte.",
     "ease": "Leichtigkeitsgrad",
     "intervalRange": "{from}–{to} Tage",
     "intervalFrom": "{from} Tage oder mehr",
@@ -2151,6 +2213,15 @@
       "repetitions": "Richtig in Folge",
       "firstReviewed": "Erste Wiederholung",
       "lastReviewed": "Letzte Wiederholung",
+      "sm2Heading": "SM-2",
+      "fsrsHeading": "FSRS-6",
+      "stability": "Stabilität",
+      "difficulty": "Schwierigkeit",
+      "difficultyValue": "{value} von 10",
+      "recall": "Erinnerungschance jetzt",
+      "fsrsSets": "FSRS-6 legt die Fälligkeitstage fest, wie es die Einstellungen der Instanz sagen; der Stand von SM-2 wird daneben aktuell gehalten.",
+      "sm2Sets": "SM-2 legt die Fälligkeitstage fest, wie es die Einstellungen der Instanz sagen; der Stand von FSRS-6 wird solange nicht aktualisiert, und ein Wechsel zu FSRS-6 berechnet ihn neu.",
+      "fsrsEstimated": "FSRS-6 legt die Fälligkeitstage fest, wie es die Einstellungen der Instanz sagen, hat aber keinen aktuellen Stand der Karte in dieser Richtung: Bis zur nächsten Wiederholung gilt der Fälligkeitstag von SM-2, und dann wird der Stand von FSRS-6 aus dem von SM-2 geschätzt.",
       "dueLabel": "Fällig am",
       "reschedule": "Fälligkeitstag festlegen",
       "reset": "Fortschritt zurücksetzen",
@@ -2206,6 +2277,7 @@
       "interval": "Intervall",
       "eases": "Leichtigkeitsgrade",
       "easesLabel": "Wie viele Karten je Richtung welchen Leichtigkeitsgrad haben.",
+      "easesNote": "Der Leichtigkeitsgrad ist der von SM-2 und wird bei jeder Wiederholung aktuell gehalten, gleich welches Planungsverfahren die Fälligkeitstage festlegt.",
       "ease": "Leichtigkeitsgrad",
       "lapsesHeading": "Aussetzer und Problemkarten",
       "lapsesSince": "Aussetzer zählen die vergessenen Wiederholungen seit {month}, dem Monat der ersten Antwort zu diesem Stapel im Antwortprotokoll. Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und eine Kursantwort sind kein Aussetzer.",

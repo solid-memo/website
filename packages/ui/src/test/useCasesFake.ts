@@ -44,9 +44,10 @@ export function statisticsReportOf(
  * What a study queue comes with besides its prompts, when a test has
  * nothing to say of it: the default preferences, and no states.
  */
-export const QUEUE_DEFAULTS: Pick<StudySessionQueue, "prefs" | "states"> = {
+export const QUEUE_DEFAULTS: Pick<StudySessionQueue, "prefs" | "states" | "fsrsStates"> = {
   prefs: DEFAULT_PREFERENCES,
   states: [],
+  fsrsStates: [],
 };
 
 /** A complete UseCases fake; override the methods a test cares about. */
@@ -211,7 +212,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       deck: { ...deck, sourceUrl: plan.releaseUrl },
     })),
     listCards: vi.fn(async () => []),
-    listDeckReviewStates: vi.fn(async () => []),
+    listDeckReviewStates: vi.fn(async () => ({ sm2: [], fsrs: [] })),
     addCard: vi.fn(async () => {
       throw new Error("addCard fake not configured");
     }),
@@ -263,7 +264,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     transferCards: vi.fn(async (_instanceUrl, _from, _to, ids) => ({
       cards: ids.map((id: string) => ({ from: id, to: id, present: false })),
       missing: [],
-      target: { save: [], reviewSaves: [], reviewRemovals: [] },
+      target: { save: [], reviewSaves: [], reviewRemovals: [], fsrsSaves: [], fsrsRemovals: [] },
       source: { remove: [], reviewRemovals: [] },
     })),
     planRepair: vi.fn(() => ({ repairs: [], unrepairable: [] })),
@@ -282,6 +283,14 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     removeInterruptedGuestMove: vi.fn(async () => undefined),
     getPreferences: vi.fn(async () => DEFAULT_PREFERENCES),
     savePreferences: vi.fn(async () => undefined),
+    switchScheduler: vi.fn(async () => ({
+      switched: true,
+      decks: 0,
+      replayed: 0,
+      estimated: 0,
+      failed: [],
+    })),
+    dismissSchedulerInvitation: vi.fn(async () => undefined),
     renameInstance: vi.fn(async (_session, instance, name) => ({ ...instance, name: name.trim() })),
     readCatalog: vi.fn(async (instanceUrl) => ({
       title: "Main",

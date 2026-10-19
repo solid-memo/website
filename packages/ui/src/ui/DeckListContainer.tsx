@@ -14,6 +14,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { NewcomerCourseContainer } from "./NewcomerCourseContainer";
+import { SchedulerInvitationContainer } from "./SchedulerInvitation";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
 import {
   courseHref,
@@ -36,7 +37,9 @@ import {
  * leading to the deck's page, which offers the upgrade (useCopies). An
  * instance with no decks (groups aside) is offered the library's course
  * for newcomers under the list's heading (NewcomerCourseContainer),
- * which opens once started.
+ * which opens once started. A learner still on SM-2 is invited to switch
+ * to FSRS-6 above the list (SchedulerInvitationContainer), until they
+ * switch or answer "Not now".
  */
 export function DeckListContainer({
   useCases,
@@ -82,6 +85,7 @@ export function DeckListContainer({
         instance={instance}
         decks={decks.filter((deck) => isCourse(deck) && !isSetAside(deck))}
       />
+      <SchedulerInvitationContainer useCases={useCases} instance={instance} />
       <DeckListScreen
         {...editor}
         arrangementSetAside={arrangementSetAside}

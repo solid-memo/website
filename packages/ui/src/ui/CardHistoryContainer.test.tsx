@@ -91,10 +91,10 @@ describe("CardHistoryContainer", () => {
     const right = answer("2026-09-06", 3, { priorIntervalDays: 6, mode: "multiple-choice" });
     const useCases = makeUseCasesFake({
       cardAnswers: vi.fn(async () => [right, unnamed, gone, wrong, review, repeat, lapse, first]),
-      listDeckReviewStates: vi.fn(async () => [
-        state(),
-        state({ cardId: "c-2", intervalDays: 40 }),
-      ]),
+      listDeckReviewStates: vi.fn(async () => ({
+        sm2: [state(), state({ cardId: "c-2", intervalDays: 40 })],
+        fsrs: [],
+      })),
     });
     withQueries(
       <CardHistoryContainer
@@ -139,10 +139,10 @@ describe("CardHistoryContainer", () => {
         answer("2026-09-02", 4, { direction: "back-to-front" }),
         answer("2026-09-01", 4),
       ]),
-      listDeckReviewStates: vi.fn(async () => [
-        state({ direction: "back-to-front", intervalDays: 1 }),
-        state(),
-      ]),
+      listDeckReviewStates: vi.fn(async () => ({
+        sm2: [state({ direction: "back-to-front", intervalDays: 1 }), state()],
+        fsrs: [],
+      })),
     });
     withQueries(
       <CardHistoryContainer
@@ -169,7 +169,7 @@ describe("CardHistoryContainer", () => {
     const night = state({ firstReviewedAt: new Date(2026, 9, 12, 1, 30).toISOString() });
     const useCases = makeUseCasesFake({
       cardAnswers: vi.fn(async () => [answer("2026-10-11", 4)]),
-      listDeckReviewStates: vi.fn(async () => [night]),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [night], fsrs: [] })),
       getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, dayBoundaryHour: 4 })),
     });
     const first = withQueries(
@@ -188,7 +188,7 @@ describe("CardHistoryContainer", () => {
     first.unmount();
     // At midnight with the day beginning then; and by the default hour while the preferences cannot be read.
     const midnight = makeUseCasesFake({
-      listDeckReviewStates: vi.fn(async () => [night]),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [night], fsrs: [] })),
       getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, dayBoundaryHour: 0 })),
     });
     const { unmount } = withQueries(
@@ -206,7 +206,7 @@ describe("CardHistoryContainer", () => {
     );
     unmount();
     const unread = makeUseCasesFake({
-      listDeckReviewStates: vi.fn(async () => [night]),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [night], fsrs: [] })),
       getPreferences: vi.fn(async () => {
         throw new Error("offline");
       }),
@@ -223,7 +223,9 @@ describe("CardHistoryContainer", () => {
       <CardHistoryContainer useCases={fresh} instanceUrl={INSTANCE_URL} deck={deck} card={card} />,
     );
     expect(await screen.findByText("Not studied yet.")).toBeInTheDocument();
-    const forgotten = makeUseCasesFake({ listDeckReviewStates: vi.fn(async () => [state()]) });
+    const forgotten = makeUseCasesFake({
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [state()], fsrs: [] })),
+    });
     withQueries(
       <CardHistoryContainer
         useCases={forgotten}
@@ -234,6 +236,33 @@ describe("CardHistoryContainer", () => {
     );
     expect(await screen.findByText("6 days")).toBeInTheDocument();
     expect(screen.queryByRole("table")).toBeNull();
+  });
+
+  it("shows where the card stands by FSRS-6 when it sets the due days", async () => {
+    const fsrs = {
+      cardId: card.id,
+      direction: "front-to-back" as const,
+      stability: 30,
+      difficulty: 5,
+      due: "2026-10-21",
+      firstReviewedAt: state().firstReviewedAt,
+      lastReviewedAt: state().lastReviewedAt,
+      formatVersion: 1,
+    };
+    const useCases = makeUseCasesFake({
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [state()], fsrs: [fsrs] })),
+      getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, scheduler: "fsrs6" as const })),
+    });
+    withQueries(
+      <CardHistoryContainer
+        useCases={useCases}
+        instanceUrl={INSTANCE_URL}
+        deck={deck}
+        card={card}
+      />,
+    );
+    expect(await screen.findByText("30 days")).toBeInTheDocument();
+    expect(screen.getByText("October 21, 2026")).toBeInTheDocument();
   });
 
   it("says quietly when the history cannot be read", async () => {

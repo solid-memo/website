@@ -151,6 +151,12 @@ export const SCHEDULERS = {
       definition: { en: "The SuperMemo 2 algorithm: an ease factor, an interval in days, a count of successful repetitions in a row and a due day. The same as no scheduler." },
       notation: "sm2",
     },
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#fsrs6",
+      label: { en: "FSRS-6" },
+      definition: { en: "The Free Spaced Repetition Scheduler, version 6: a memory stability in days, a difficulty from 1 to 10 and a due day, chosen so that the chance of recalling the card on that day is the desired retention." },
+      notation: "fsrs6",
+    },
   ],
 } as const satisfies ConceptScheme;
 

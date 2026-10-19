@@ -202,7 +202,7 @@ describe.each(SERVERS)("grading on $name", ({ url: server }) => {
     // No preferences read for a grade: the queue's are used.
     expect(requests.filter((r) => r.url === preferencesUrlOf(instanceUrl))).toEqual([]);
 
-    const stored = await page().useCases.listDeckReviewStates(deck);
+    const stored = (await page().useCases.listDeckReviewStates(deck)).sm2;
     expect(stored.find((state) => state.cardId === b!.card.id)).toMatchObject({ repetitions: 1 });
     expect((await page().useCases.validateInstance(instanceUrl)).conforms).toBe(true);
   });
@@ -233,7 +233,7 @@ describe.each(SERVERS)("grading on $name", ({ url: server }) => {
       ]);
     // Three grades of it in all, each built on the one before.
     expect(graded.repetitions).toBe(3);
-    const stored = await page().useCases.listDeckReviewStates(deck);
+    const stored = (await page().useCases.listDeckReviewStates(deck)).sm2;
     expect(stored.map(reviewKeyOf).sort()).toEqual([a!, b!].map(keyOf).sort());
     expect(stored.find((state) => state.cardId === a!.card.id)).toEqual(graded);
   });
@@ -248,9 +248,8 @@ describe.each(SERVERS)("grading on $name", ({ url: server }) => {
       const yesterday = new Date(Date.now() - 86_400_000).toISOString();
       const today = new Date().toISOString().slice(0, 10);
       const cards = await seeding.useCases.listCards(deck);
-      await seeding.reviewStateRepository.createReviewStates(
-        deck,
-        cards.flatMap((card) =>
+      await seeding.reviewStateRepository.createReviewStates(deck, {
+        sm2: cards.flatMap((card) =>
           (["front-to-back", "back-to-front"] as const).map((direction) => ({
             cardId: card.id,
             direction,
@@ -263,7 +262,8 @@ describe.each(SERVERS)("grading on $name", ({ url: server }) => {
             formatVersion: 2,
           })),
         ),
-      );
+        fsrs: [],
+      });
       const { useCases, requests } = page();
       await useCases.savePreferences(instanceUrl, {
         ...(await useCases.getPreferences(instanceUrl)),

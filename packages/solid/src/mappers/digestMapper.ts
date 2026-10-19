@@ -2,25 +2,27 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getThingAll, type ThingPersisted, type SolidDataset } from "@inrupt/solid-client";
+import { asUrl, getThingAll, type ThingPersisted, type SolidDataset } from "@inrupt/solid-client";
 import {
   receiptFromRecord,
   receiptToRecord,
   scheduleFromRecord,
   scheduleToRecord,
 } from "@solid-memo/domain/digestRecord";
+import { migrate } from "@solid-memo/domain/shapes/migrations";
 import type {
   DocumentReceipt,
   InstanceDigest,
   StoredSchedule,
 } from "@solid-memo/domain/studyDigest";
-import { DECK_SCHEDULE_V1, DOCUMENT_RECEIPT_V1 } from "@solid-memo/vocab/descriptors.generated";
+import { DECK_SCHEDULE_V2, DOCUMENT_RECEIPT_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { readVersioned, recordThing } from "../records";
 
 /**
  * The digest a digest document holds. Read leniently, being derived
  * data: a subject that does not fit its shape is left out, and so
- * learned again.
+ * learned again. A schedule of an older format is brought up to the
+ * latest (one of format 1 counted SM-2's due days).
  */
 export function toDigest(dataset: SolidDataset): InstanceDigest {
   const digest: InstanceDigest = { receipts: {}, schedules: {} };
@@ -33,7 +35,9 @@ export function toDigest(dataset: SolidDataset): InstanceDigest {
     }
     const schedule = readVersioned(thing, "deckSchedule");
     if (schedule !== null) {
-      const read = scheduleFromRecord(schedule.record.data);
+      const read = scheduleFromRecord(
+        migrate("deckSchedule", schedule.record, { subject: asUrl(thing) }),
+      );
       digest.schedules[read.deck] = read;
     }
   }
@@ -53,5 +57,5 @@ export function toScheduleThing(
   schedule: StoredSchedule,
   existing: ThingPersisted | null,
 ): ThingPersisted {
-  return recordThing(url, DECK_SCHEDULE_V1, scheduleToRecord(schedule), existing);
+  return recordThing(url, DECK_SCHEDULE_V2, scheduleToRecord(schedule), existing);
 }

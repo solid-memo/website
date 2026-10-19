@@ -13,7 +13,7 @@ deck: written in format 6
 deckGroup: read from format 1
 deckGroup: written in format 1
 deckSchedule: read from format 1
-deckSchedule: written in format 1
+deckSchedule: written in format 2
 distractor: read from format 1
 distractor: written in format 1
 distribution: read from format 1
@@ -26,6 +26,8 @@ draftDeck: read from format 1
 draftDeck: written in format 1
 draftStep: read from format 1
 draftStep: written in format 1
+fsrsReviewState: read from format 1
+fsrsReviewState: written in format 1
 instance: read from format 1
 instance: written in format 2
 libraryDeck: read from format 1
@@ -33,7 +35,7 @@ libraryDeck: written in format 6
 libraryDeckSeries: read from format 1
 libraryDeckSeries: written in format 3
 preferences: read from format 1
-preferences: written in format 4
+preferences: written in format 5
 reviewState: read from format 1
 reviewState: written in format 2
 step: read from format 1

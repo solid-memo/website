@@ -22,7 +22,8 @@ import type {
 } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { StoredPreferences, StudyPreferences } from "@solid-memo/domain/preferences";
-import type { ReviewKey, ReviewState } from "@solid-memo/domain/review";
+import type { GradedPrompt, PromptStates } from "@solid-memo/domain/grading";
+import type { FsrsState, ReviewKey, ReviewState, ReviewStates } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
 import type { EstablishedSession } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
@@ -532,47 +533,70 @@ export interface FileExchange {
   open(accept: string): Promise<{ name: string; text: string } | null>;
 }
 
-/** Driven port: SM-2 review state, stored separately from card content. */
+/**
+ * Driven port: review state, stored separately from card content: each
+ * prompt's SM-2 state and, once FSRS-6 has scheduled it, its FSRS-6
+ * state beside it, both in the deck's reviews document.
+ */
 export interface ReviewStateRepository {
-  listReviewStates(deck: Deck): Promise<ReviewState[]>;
+  listReviewStates(deck: Deck): Promise<ReviewStates>;
   /** The deck's review states unless its reviews document is still at `version` (undefined: read them). */
-  readReviewStatesSince(deck: Deck, version: string | undefined): Promise<Since<ReviewState[]>>;
-  /** null when the card has never been reviewed in that direction. */
-  getReviewState(deck: Deck, key: ReviewKey): Promise<ReviewState | null>;
+  readReviewStatesSince(deck: Deck, version: string | undefined): Promise<Since<ReviewStates>>;
+  /** The prompt's states, each null when it has none (an SM-2 one: never reviewed that way). */
+  getReviewState(deck: Deck, key: ReviewKey): Promise<PromptStates>;
   /**
-   * Write the state of one prompt as `grade` makes it of the state stored
-   * now (null: none), the deck's others kept, in one edit of the reviews
-   * document made only if it is as last read or written; the document is
-   * read first only when its version is not known. Had it changed since
-   * (another device's grade), it is read and graded again, once. The
-   * state written, and the one it was made of.
+   * Write the states of one prompt as `grade` makes them of the states
+   * stored now (each null: none), the deck's others kept, in one edit of
+   * the reviews document made only if it is as last read or written; the
+   * document is read first only when its version is not known. Had it
+   * changed since (another device's grade), it is read and graded again,
+   * once. The SM-2 state is written, and the FSRS-6 one when the grade
+   * gives one, in that one edit. The states written, and those they were
+   * made of.
    */
   gradeReviewState(
     deck: Deck,
     key: ReviewKey,
-    grade: (current: ReviewState | null) => ReviewState,
-  ): Promise<{ state: ReviewState; current: ReviewState | null }>;
+    grade: (current: PromptStates) => GradedPrompt,
+  ): Promise<{ state: GradedPrompt; current: PromptStates }>;
   /**
    * Create the deck's reviews document with these states, in ONE write
    * made only if nothing is there yet (If-None-Match: *; else
    * createdElsewhere, writing nothing): for a deck written whole, as when
    * a guest's study is added to an instance.
    */
-  createReviewStates(deck: Deck, states: readonly ReviewState[]): Promise<void>;
+  createReviewStates(deck: Deck, states: ReviewStates): Promise<void>;
   /**
    * Write several states and drop others in ONE save of the reviews
    * document, so a day reset cannot be left half-applied. A deck without
    * one gets it when there are states to save; else nothing is written.
    * A removal drops only the state read for its card and direction (a
-   * second one, never read, stays, as a day reset wants); with `every`,
-   * every SM-2 state of it, read or not, as removing a card does (a card
-   * forgotten, removed or moved away). Another scheduler's state stays
-   * either way.
+   * second one, never read, stays, as a day reset wants), of its kind:
+   * `remove` SM-2's, `fsrs.remove` FSRS-6's. With `every`, a key of
+   * `remove` loses every state of it, SM-2's and this app's FSRS-6's,
+   * read or not, as removing a card does (a card forgotten, removed or
+   * moved away). Another scheduler's state stays either way.
    */
   applyReviewChanges(
     deck: Deck,
-    changes: { save: ReviewState[]; remove: ReviewKey[]; every?: boolean },
+    changes: {
+      save: ReviewState[];
+      remove: ReviewKey[];
+      fsrs?: { save: FsrsState[]; remove: ReviewKey[] };
+      every?: boolean;
+    },
   ): Promise<void>;
+  /**
+   * Write the FSRS-6 states `edit` makes of the deck's states as its
+   * reviews document holds them now, in ONE edit made only if it is
+   * still as read (If-Match); had it changed meanwhile (a grade on
+   * another device), it is read and the states made again, three times
+   * in all. Each is written over this app's FSRS-6 state of its prompt,
+   * else at the subject named for it. Nothing is written when there is
+   * no document or `edit` gives no state. For switching to FSRS-6, whose
+   * states are made of the SM-2 states as they are when written.
+   */
+  writeFsrsStates(deck: Deck, edit: (states: ReviewStates) => FsrsState[]): Promise<void>;
   /**
    * For the format update: bring every review state of the deck in its
    * reviews document stored in an older format up to this app's, in ONE

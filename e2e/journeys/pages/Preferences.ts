@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, type Locator } from "@playwright/test";
+import { escapeRegExp } from "../harness/strings.ts";
 import type { Theme } from "./Chrome.ts";
 import { Screen } from "./Screen.ts";
 
@@ -13,10 +14,18 @@ import { Screen } from "./Screen.ts";
 export type AnswerScale = "sm2" | "minimal";
 
 /**
+ * The schedulers on offer (preferences.scheduler.<scheduler> in the i18n
+ * files): FSRS-6, listed first and recommended, a new instance's, or SM-2.
+ */
+export type Scheduler = "sm2" | "fsrs6";
+
+/**
  * "Study preferences": the appearance (the theme), how many new cards a
- * day, the answer buttons, developer mode. Nothing is kept until save(),
- * which goes back to Decks; reopening (open()) reads what the pod has,
- * for the expect* readbacks.
+ * day, the scheduler and its desired retention, the answer buttons,
+ * developer mode. Nothing is kept until save(), which goes back to
+ * Decks (a switch to FSRS-6 is made from the deck list's invitation,
+ * DeckList.switchFromSchedulerInvitation); reopening (open()) reads what
+ * the pod has, for the expect* readbacks.
  */
 export class Preferences extends Screen {
   private get form(): Locator {
@@ -32,6 +41,16 @@ export class Preferences extends Screen {
     return this.form
       .getByRole("group", { name: this.t("preferences.answerScale.legend") })
       .getByRole("radio", { name: this.t(`preferences.answerScale.${scale}.label`) });
+  }
+
+  private scheduler(scheduler: Scheduler): Locator {
+    return this.form
+      .getByRole("group", { name: this.t("preferences.scheduler.legend") })
+      .getByRole("radio", { name: this.t(`preferences.scheduler.${scheduler}.label`) });
+  }
+
+  private get desiredRetention(): Locator {
+    return this.page.locator("#pref-retention");
   }
 
   private get developerMode(): Locator {
@@ -62,6 +81,46 @@ export class Preferences extends Screen {
       async () => {
         await this.answerButtons(scale).check();
       },
+    );
+  }
+
+  async setScheduler(scheduler: Scheduler): Promise<void> {
+    await this.intent(
+      `Choose the scheduler ${this.t(`preferences.scheduler.${scheduler}.label`)}`,
+      async () => {
+        await this.scheduler(scheduler).check();
+        // The retention is FSRS-6's alone, and the answer buttons SM-2's.
+        await expect(this.desiredRetention).toBeEnabled({ enabled: scheduler === "fsrs6" });
+        await expect(this.answerButtons("minimal")).toBeEnabled({ enabled: scheduler === "sm2" });
+      },
+    );
+  }
+
+  /** FSRS-6 is listed first and marked Recommended; SM-2 is not. */
+  async expectFsrsRecommended(): Promise<void> {
+    await this.intent("Check that FSRS-6 is listed first, recommended", async () => {
+      const group = this.form.getByRole("group", { name: this.t("preferences.scheduler.legend") });
+      await expect(group.getByRole("radio").first()).toHaveAccessibleName(
+        new RegExp(
+          `^${escapeRegExp(`${this.t("preferences.scheduler.fsrs6.label")} ${this.t("preferences.scheduler.recommended")}`)} `,
+        ),
+      );
+      await expect(
+        group.getByText(this.t("preferences.scheduler.recommended"), { exact: true }),
+      ).toHaveCount(1);
+    });
+  }
+
+  async expectScheduler(scheduler: Scheduler): Promise<void> {
+    await this.intent(
+      `Check that the scheduler is ${this.t(`preferences.scheduler.${scheduler}.label`)}`,
+      () => expect(this.scheduler(scheduler)).toBeChecked(),
+    );
+  }
+
+  async expectDesiredRetention(percent: number): Promise<void> {
+    await this.intent(`Check that the desired retention is ${percent}%`, () =>
+      expect(this.desiredRetention).toHaveValue(String(percent)),
     );
   }
 
